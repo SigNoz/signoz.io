@@ -442,20 +442,20 @@ export default function AgentNativeObservabilitySection() {
               <span>Work with</span>
               <AgentIntegrationIcons />
             </div>
-            <div className="absolute left-0 top-12 h-[calc(100%-48px)] w-[66%] rounded-[18px] border border-signoz_slate-400/20 bg-[#06090d] shadow-[0_34px_120px_rgba(0,0,0,0.42)]" />
-            <div className="opacity-82 absolute bottom-0 left-5 h-[360px] w-[62%] overflow-hidden rounded-[3px] ring-1 ring-white/[0.06]">
+            <div className="homepage-agent-terminal-enter absolute left-0 top-12 h-[calc(100%-48px)] w-[66%] rounded-[18px] border border-signoz_slate-400/20 bg-[#06090d] shadow-[0_34px_120px_rgba(0,0,0,0.42)]" />
+            <div className="homepage-agent-terminal-enter opacity-82 absolute bottom-0 left-5 h-[360px] w-[62%] overflow-hidden rounded-[3px] ring-1 ring-white/[0.06]">
               <LocalAgentSurface />
             </div>
-            <NozPanelCard className="absolute bottom-0 left-[62%] z-10 w-[300px]" />
+            <NozPanelCard className="homepage-agent-noz-enter absolute bottom-0 left-[62%] z-10 w-[300px]" />
           </div>
         </div>
 
         <div className="relative mt-20 hidden min-h-[650px] md:block lg:min-h-[700px]">
-          <div className="absolute left-0 top-[88px] h-[560px] w-[76%] lg:top-[108px] lg:h-[592px] lg:w-[78%]">
+          <div className="homepage-agent-terminal-enter absolute left-0 top-[88px] h-[560px] w-[76%] lg:top-[108px] lg:h-[592px] lg:w-[78%]">
             <LocalAgentSurface />
           </div>
 
-          <div className="absolute right-0 top-0 z-20 w-[388px] lg:w-[430px]">
+          <div className="homepage-agent-noz-enter absolute right-0 top-0 z-20 w-[388px] lg:w-[430px]">
             <NozPanelCard />
           </div>
         </div>

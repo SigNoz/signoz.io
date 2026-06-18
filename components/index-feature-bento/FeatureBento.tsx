@@ -726,7 +726,7 @@ function EnterpriseReadyStrip() {
               Enterprise ready
             </p>
             <h3 className="m-0 mt-3 max-w-[300px] text-[24px] font-medium leading-tight tracking-[-0.35px] text-signoz_vanilla-100 md:max-w-[280px] md:text-[28px] md:tracking-[-0.5px]">
-              Compliance posture for serious production teams.
+              Compliance answers, before they become blockers.
             </h3>
           </div>
         </div>

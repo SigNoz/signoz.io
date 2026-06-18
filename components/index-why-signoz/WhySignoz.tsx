@@ -116,8 +116,10 @@ function DesktopWhyPanel({
   return (
     <button
       aria-pressed={isActive}
-      className={`relative h-[576px] shrink-0 overflow-hidden border-y border-l border-dashed border-signoz_slate-400/35 text-left transition-colors ${
-        isActive ? 'bg-signoz_ink-400/72' : 'bg-signoz_ink-500/28 hover:bg-signoz_ink-400/42'
+      className={`group relative h-[576px] shrink-0 overflow-hidden border-y border-l border-dashed border-signoz_slate-400/35 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-signoz_ink-500 ${
+        isActive
+          ? 'bg-signoz_ink-400/72'
+          : 'bg-signoz_ink-500/28 hover:bg-signoz_ink-400/42 focus-visible:bg-signoz_ink-400/42'
       }`}
       onClick={() => onSelect(index)}
       style={widthStyle}
@@ -152,15 +154,15 @@ function DesktopWhyPanel({
       >
         <div className="absolute inset-0 bg-signoz_ink-500/20" />
         <div className="relative px-7 pt-8">
-          <h3 className="m-0 w-[300px] text-[26px] font-medium leading-tight tracking-[-0.45px] text-signoz_vanilla-300">
+          <h3 className="m-0 w-[300px] text-[26px] font-medium leading-tight tracking-[-0.45px] text-signoz_vanilla-300 transition-colors duration-300 group-hover:text-signoz_vanilla-100 group-focus-visible:text-signoz_vanilla-100">
             {item.title}
           </h3>
         </div>
 
-        <div className="absolute left-7 top-[190px] opacity-35 blur-[0.4px]">
+        <div className="absolute left-7 top-[190px] opacity-35 blur-[0.4px] transition-all duration-500 group-hover:translate-x-2 group-hover:opacity-55 group-hover:blur-0 group-focus-visible:translate-x-2 group-focus-visible:opacity-55 group-focus-visible:blur-0">
           <GraphicPlaceholder compact src={item.graphic} />
         </div>
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-signoz_ink-500" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-signoz_ink-500 transition-opacity duration-300 group-hover:opacity-75 group-focus-visible:opacity-75" />
       </motion.div>
     </button>
   )
