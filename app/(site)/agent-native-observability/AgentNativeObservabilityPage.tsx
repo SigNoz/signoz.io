@@ -1,7 +1,6 @@
 'use client'
 
-import { ArrowRight, Loader2, Check } from 'lucide-react'
-import DOMPurify from 'dompurify'
+import { ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
@@ -10,7 +9,6 @@ import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/Featur
 import { TRUSTED_BY_LOGOS, FEATURE_CARDS } from './AgentNativeObservabilityPage.constants'
 import TrackingLink from '@/components/TrackingLink'
 import Image from 'next/image'
-import { useHubspotCustomForm } from '@/components/hubspot-custom-form/useHubspotCustomForm'
 import DitherCanvas from '@/components/DitherCanvas/DitherCanvas'
 import agentNativeHeroImageUrl from '@/public/img/platform/AgentNativeObservabilityMeta.svg?url'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
@@ -137,77 +135,6 @@ const TrustedByTeams: React.FC = () => {
       </div>
       <Divider className="absolute bottom-0 left-0" />
     </div>
-  )
-}
-
-const EarlyAccessForm: React.FC = () => {
-  const {
-    definition,
-    values,
-    errors,
-    touched,
-    status,
-    submitError,
-    setFieldValue,
-    setFieldTouched,
-    handleSubmit,
-  } = useHubspotCustomForm({
-    portalId: '22308423',
-    formId: '3789c0c2-72d1-4adf-95d9-83587f8d9fda',
-    formName: 'Agent Native AI Assistant Early Access',
-  })
-
-  const isSubmitting = status === 'submitting'
-
-  if (status === 'success') {
-    const thankYouMessage = definition?.thankYouMessage
-    return (
-      <div className="flex items-center gap-2 py-1">
-        {thankYouMessage ? (
-          <div
-            className="text-sm text-signoz_vanilla-300 [&_p]:mb-1 [&_p]:last:mb-0"
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(thankYouMessage) }}
-          />
-        ) : (
-          <span className="text-sm text-signoz_vanilla-300">We&apos;ll be in touch soon.</span>
-        )}
-      </div>
-    )
-  }
-
-  return (
-    <form noValidate onSubmit={handleSubmit} className="relative flex flex-col gap-1.5 pb-5">
-      <div className="flex h-10 items-stretch gap-2">
-        <input
-          type="email"
-          aria-label="Email address for early access"
-          placeholder="you@company.com"
-          autoComplete="off"
-          value={typeof values.email === 'string' ? values.email : ''}
-          onChange={(e) => setFieldValue('email', e.target.value)}
-          onBlur={() => setFieldTouched('email')}
-          disabled={isSubmitting}
-          className="min-w-0 flex-1 rounded-full border border-signoz_slate-400 bg-signoz_ink-300 px-4 text-sm text-stone-300 placeholder-gray-500/50 focus:outline-none disabled:opacity-60"
-        />
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          isButton
-          variant="default"
-          className="gap-1 rounded-full"
-        >
-          {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-          Submit
-        </Button>
-      </div>
-      <div className="absolute -bottom-3 left-0">
-        {touched.email && errors.email ? (
-          <span className="text-xs text-signoz_cherry-500">{errors.email}</span>
-        ) : submitError ? (
-          <span className="text-xs text-signoz_cherry-500">{submitError}</span>
-        ) : null}
-      </div>
-    </form>
   )
 }
 
@@ -361,10 +288,23 @@ const InContextObservability: React.FC = () => {
                 what to do next. It can also create dashboards, alerts, and views for you.
               </p>
               <div className="mt-auto">
-                <p className="mb-2 text-sm font-semibold text-signoz_vanilla-100">
-                  Get early access
-                </p>
-                <EarlyAccessForm />
+                <Button
+                  asChild
+                  variant="default"
+                  rounded="full"
+                  className="!w-fit items-center gap-2"
+                >
+                  <TrackingLink
+                    href="/docs/ai/noz/"
+                    clickType="Primary CTA"
+                    clickName="Agent Native Page Noz Read Docs"
+                    clickLocation="Agent Native Observability Page In-Context Section"
+                    clickText="Read Docs"
+                  >
+                    Read Docs
+                    <ArrowRight size={14} />
+                  </TrackingLink>
+                </Button>
               </div>
             </div>
           </DitherCanvas>
