@@ -7,17 +7,6 @@ import { VideoModalPlayer } from './VideoModalPlayer'
 import { HeroSectionPill } from './HeroSectionPill'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 
-function ControlHeroCopy() {
-  return (
-    <>
-      <span className="md:hidden">Observability on Your Terms, Powered by Open Standards.</span>
-      <span className="hidden md:inline">Observability on Your Terms,</span>
-      <br className="hidden md:inline" />
-      <span className="hidden md:inline">Powered by Open Standards.</span>
-    </>
-  )
-}
-
 // Server component with single CTA
 export function Header({ variant = 'control' }: { variant?: 'control' | 'ai-agents' }) {
   const primaryCTA = 'Get Started - Free'
@@ -42,7 +31,9 @@ export function Header({ variant = 'control' }: { variant?: 'control' | 'ai-agen
           </Hero>
         ) : (
           <Hero>
-            <ControlHeroCopy />
+            Observability on Your Terms,
+            <br className="hidden md:block" />
+            Powered by Open Standards.
           </Hero>
         )}
         <div className="w-full border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 px-6 py-2">

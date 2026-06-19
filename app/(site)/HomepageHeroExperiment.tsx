@@ -1,13 +1,4 @@
-import { Header } from '@/components/index-header'
-import BuildForDevelopers from '@/components/build-for-developers'
-import { SigNozFeatures } from '@/components/index-features'
-import SigNozStats from '@/components/signoz-stats'
-import { Testimonials } from '@/components/testimonials'
-import { TrustedByTeams } from '@/components/trusted-by'
-import { AgentNativeObservability } from '@/components/agent-native-observability'
-import { WhyOpenTelemetry } from '@/components/why-opentelemetry'
-import WhySelectSignoz from '@/components/why-select-signoz'
-import { GetStarted } from '@/components/GetStarted'
+import type { ReactNode } from 'react'
 import { ExperimentTracker } from '@/components/ExperimentTracker'
 import { EXPERIMENTS } from '@/constants/experiments'
 import { getFeatureValue } from '@/utils/growthbookServer'
@@ -39,32 +30,18 @@ async function getHomepageHeroVariant(): Promise<HomepageHeroVariant> {
   return defaultVariant
 }
 
-function HomepageContent({ isVariant }: { isVariant: boolean }) {
-  const variant = isVariant ? 'ai-agents' : 'control'
-
-  return (
-    <>
-      <Header variant={variant} />
-      <TrustedByTeams page="homepage" className="max-w-8xl" />
-      <SigNozFeatures className="max-w-8xl" />
-      <AgentNativeObservability className="max-w-8xl" variant={variant} />
-      <BuildForDevelopers className="max-w-8xl" />
-      <WhyOpenTelemetry className="max-w-8xl" />
-      <WhySelectSignoz className="max-w-8xl" />
-      <SigNozStats className="max-w-8xl" />
-      <Testimonials page="homepage" className="max-w-8xl" />
-      <GetStarted page="homepage" className="max-w-8xl" />
-    </>
-  )
+type HomepageHeroExperimentProps = {
+  children: (variant: 'control' | 'ai-agents') => ReactNode
 }
 
-export default async function HomepageHeroExperiment() {
+export default async function HomepageHeroExperiment({ children }: HomepageHeroExperimentProps) {
   const variant = await getHomepageHeroVariant()
   const isVariant = variant === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
+  const homepageVariant = isVariant ? 'ai-agents' : 'control'
 
   return (
     <ExperimentTracker experimentId={EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.id} variantId={variant}>
-      <HomepageContent isVariant={isVariant} />
+      {children(homepageVariant)}
     </ExperimentTracker>
   )
 }

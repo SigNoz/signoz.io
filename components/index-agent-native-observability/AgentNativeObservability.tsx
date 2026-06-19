@@ -9,6 +9,7 @@ import TrackingLink from '@/components/TrackingLink'
 import { EXPERIMENTS } from '@/constants/experiments'
 import { useLogEvent } from '@/hooks/useLogEvent'
 import nozPanel from '@/public/img/graphics/homepage/noz-agent-native-panel.webp'
+import { cn } from '../../app/lib/utils'
 import { agentPromptTabs, signozMcpToolLine, thinkingVerbs } from './agentNativePrompts'
 
 const agentIntegrations = [
@@ -30,8 +31,7 @@ function AgentIntegrationIcons() {
           title={agent.label}
         >
           <Image
-            alt=""
-            aria-hidden="true"
+            alt={`${agent.label} logo`}
             className="size-full rounded-[2px] object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.45)]"
             height={28}
             src={agent.iconSrc}
@@ -117,7 +117,7 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
         role="tabpanel"
       >
         <div className="grid grid-cols-[16px_minmax(0,1fr)] gap-x-3 text-[13px] leading-[1.65] text-[#f1eee7] md:grid-cols-[20px_minmax(0,1fr)] md:gap-x-4 md:text-[15px] md:leading-[1.75]">
-          <span className="homepage-agent-prompt-marker text-[18px] font-semibold leading-[1.75] text-[#ff8a3d]">
+          <span className="homepage-agent-prompt-marker text-lg font-semibold leading-7 text-[#ff8a3d]">
             &gt;
           </span>
           <div className="min-w-0">
@@ -164,8 +164,7 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
                         Loaded tools, used{' '}
                         <span className="relative -top-px inline-flex items-baseline gap-1.5 align-baseline">
                           <Image
-                            alt=""
-                            aria-hidden="true"
+                            alt="SigNoz logo"
                             className="relative top-[2px] size-3.5 rounded-[3px]"
                             height={14}
                             src="/static/favicons/favicon-32x32.png"
@@ -240,7 +239,10 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
 function NozPanelCard({ className = '' }: { className?: string }) {
   return (
     <div
-      className={`rounded-[18px] bg-[linear-gradient(135deg,rgba(255,255,255,0.18),rgba(255,255,255,0.045)_42%,rgba(255,255,255,0.10))] p-px shadow-[0_34px_120px_rgba(0,0,0,0.58)] ${className}`}
+      className={cn(
+        'rounded-[18px] bg-[linear-gradient(135deg,rgba(255,255,255,0.18),rgba(255,255,255,0.045)_42%,rgba(255,255,255,0.10))] p-px shadow-[0_34px_120px_rgba(0,0,0,0.58)]',
+        className
+      )}
     >
       <div className="overflow-hidden rounded-[17px] bg-[#080b0f]">
         <Image
@@ -316,13 +318,13 @@ export default function AgentNativeObservabilitySection() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_58%_at_24%_42%,rgba(242,71,105,0.10),transparent_64%),radial-gradient(ellipse_72%_54%_at_82%_52%,rgba(229,72,77,0.065),transparent_66%),linear-gradient(180deg,rgba(22,25,34,0.08),rgba(11,12,14,0.42)_50%,rgba(11,12,14,0.1))] [mask-image:linear-gradient(180deg,transparent_0%,black_16%,black_82%,transparent_100%)]" />
       <div className="relative mx-auto max-w-[1200px]">
         <div className="mx-auto max-w-4xl text-center">
-          <h2 className="m-0 text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[40px] sm:leading-[1.04] sm:tracking-[-1.1px] md:text-[58px] md:tracking-[-1.65px]">
+          <h2 className="m-0 text-3xl font-semibold leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
             Agent-native observability,
             <br />
             inside your IDE and SigNoz.
           </h2>
 
-          <p className="text-signoz_vanilla-300/82 mx-auto mt-5 max-w-3xl text-[16px] leading-7 tracking-[-0.15px] sm:text-[19px] sm:leading-9 sm:tracking-[-0.28px]">
+          <p className="mx-auto mt-5 max-w-3xl text-[16px] leading-7 tracking-[-0.15px] text-signoz_vanilla-400 sm:text-[19px] sm:leading-9 sm:tracking-[-0.28px]">
             Use the SigNoz MCP server to bring telemetry into coding agents, or use Noz, your AI
             teammate inside SigNoz, to investigate incidents, tune alerts, and build dashboards with
             the same production context your team sees.
