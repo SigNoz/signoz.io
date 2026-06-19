@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react'
 import { useLogEvent } from '@/hooks/useLogEvent'
 
 type ExperimentTrackerProps = {
-  children: React.ReactNode
+  children?: React.ReactNode
   experimentId: string
   variantId: string
 }
@@ -34,5 +34,5 @@ export function ExperimentTracker({ children, experimentId, variantId }: Experim
   }, [experimentId, variantId, logEvent])
 
   // Just render children, this component only handles tracking experiment views
-  return <>{children}</>
+  return <>{children ?? null}</>
 }
