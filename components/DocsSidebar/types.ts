@@ -10,9 +10,7 @@ export type Doc = {
 export type Category = {
   type: string
   label: string
-  route?: string
-  className?: string
-  isExpanded?: boolean
+  route: string
   link?: {
     type?: string
     title?: string
@@ -20,7 +18,7 @@ export type Category = {
     slug?: string
     id?: string
   }
-  items: Array<Doc | Category | string>
+  items: Array<Doc | Category>
 }
 
-export type NavItem = Doc | Category | string
+export type NavItem = Doc | Category

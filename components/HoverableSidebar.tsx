@@ -3,9 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import DocsSidebar from '@/components/DocsSidebar/DocsSidebar'
 import { Menu, X } from 'lucide-react'
-import type { NavItem } from '@/components/DocsSidebar/types'
 
-const HoverableSidebar: React.FC<{ items: NavItem[] }> = ({ items }) => {
+const HoverableSidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
 
@@ -72,7 +71,7 @@ const HoverableSidebar: React.FC<{ items: NavItem[] }> = ({ items }) => {
         onMouseLeave={() => setIsHovering(false)}
       >
         <div className="box-border h-full w-80 min-w-[320px] max-w-[320px] self-stretch border-r border-signoz_slate-500 bg-black">
-          <DocsSidebar items={items} />
+          <DocsSidebar />
         </div>
       </div>
     </div>
