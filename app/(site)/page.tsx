@@ -13,13 +13,53 @@ import { AgentNativeObservability } from '@/components/agent-native-observabilit
 import { WhyOpenTelemetry } from '@/components/why-opentelemetry'
 import WhySelectSignoz from '@/components/why-select-signoz'
 import { GetStarted } from '@/components/GetStarted'
-import HomepageHeroExperiment from './HomepageHeroExperiment'
+import { ExperimentTracker } from '@/components/ExperimentTracker'
+import { EXPERIMENTS } from '@/constants/experiments'
+import { getFeatureValue } from '@/utils/growthbookServer'
 
 const siteUrl = siteMetadata.siteUrl
 const organizationId = `${siteUrl}/#organization`
 const websiteId = `${siteUrl}/#website`
 const softwareAppId = `${siteUrl}/#software`
 const webpageId = `${siteUrl}/#webpage`
+
+type HomepageVariant = 'control' | 'ai-agents'
+type HomepageHeroVariant =
+  (typeof EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants)[keyof typeof EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants]
+type HomepageHeroFeatureValue = HomepageHeroVariant | boolean
+
+async function getHomepageHeroExperiment(): Promise<{
+  homepageVariant: HomepageVariant
+  experimentVariant: HomepageHeroVariant
+}> {
+  const defaultVariant: HomepageHeroVariant =
+    process.env.NODE_ENV === 'development'
+      ? EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
+      : EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.defaultVariant
+
+  const featureValue = await getFeatureValue<HomepageHeroFeatureValue>(
+    EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.flagName,
+    defaultVariant
+  )
+
+  const experimentVariant =
+    featureValue === true
+      ? EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
+      : featureValue === false
+        ? EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.CONTROL
+        : featureValue === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT ||
+            featureValue === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.CONTROL
+          ? featureValue
+          : defaultVariant
+
+  return {
+    homepageVariant:
+      experimentVariant === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
+        ? 'ai-agents'
+        : 'control',
+    experimentVariant,
+  }
+}
 
 export const metadata: Metadata = {
   title: {
@@ -200,7 +240,9 @@ const homepageStructuredData = {
   ],
 }
 
-export default function Page() {
+export default async function Page() {
+  const { homepageVariant, experimentVariant } = await getHomepageHeroExperiment()
+
   return (
     <>
       <JsonLdScript data={homepageStructuredData} />
@@ -208,22 +250,20 @@ export default function Page() {
         <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
         <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
         <main className="relative z-[1] mx-auto max-w-8xl xl:max-[1728px]:max-w-[80vw]">
-          <HomepageHeroExperiment>
-            {(variant) => (
-              <>
-                <Header variant={variant} />
-                <TrustedByTeams page="homepage" className="max-w-8xl" />
-                <SigNozFeatures className="max-w-8xl" />
-                <AgentNativeObservability className="max-w-8xl" variant={variant} />
-                <BuildForDevelopers className="max-w-8xl" />
-                <WhyOpenTelemetry className="max-w-8xl" />
-                <WhySelectSignoz className="max-w-8xl" />
-                <SigNozStats className="max-w-8xl" />
-                <Testimonials page="homepage" className="max-w-8xl" />
-                <GetStarted page="homepage" className="max-w-8xl" />
-              </>
-            )}
-          </HomepageHeroExperiment>
+          <ExperimentTracker
+            experimentId={EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.id}
+            variantId={experimentVariant}
+          />
+          <Header variant={homepageVariant} />
+          <TrustedByTeams page="homepage" className="max-w-8xl" />
+          <SigNozFeatures className="max-w-8xl" />
+          <AgentNativeObservability className="max-w-8xl" variant={homepageVariant} />
+          <BuildForDevelopers className="max-w-8xl" />
+          <WhyOpenTelemetry className="max-w-8xl" />
+          <WhySelectSignoz className="max-w-8xl" />
+          <SigNozStats className="max-w-8xl" />
+          <Testimonials page="homepage" className="max-w-8xl" />
+          <GetStarted page="homepage" className="max-w-8xl" />
         </main>
         <ChatbaseClient />
       </div>
