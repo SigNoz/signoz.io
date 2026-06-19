@@ -32,7 +32,7 @@ function AgentIntegrationIcons() {
         >
           <Image
             alt={`${agent.label} logo`}
-            className="size-full rounded-[2px] object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.45)]"
+            className="size-full rounded-sm object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.45)]"
             height={28}
             src={agent.iconSrc}
             width={28}
@@ -53,18 +53,18 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
   const responseGridTemplate = `minmax(0, 1.9fr) repeat(${activePrompt.columns.length - 1}, minmax(72px, 0.82fr))`
 
   return (
-    <div className="relative h-full overflow-hidden rounded-[3px] px-4 pb-6 pt-11 font-mono md:overflow-visible md:pb-10 md:pl-8 md:pr-10 md:pt-14 lg:pl-10 lg:pr-12">
-      <div className="pointer-events-none absolute inset-y-0 left-0 right-0 rounded-[3px] bg-gradient-to-r from-signoz_ink-400 via-signoz_ink-400/95 to-signoz_ink-400/0 shadow-[0_28px_90px_rgba(0,0,0,0.58)]" />
+    <div className="relative h-full overflow-hidden rounded-sm px-4 pb-6 pt-11 font-mono md:overflow-visible md:pb-10 md:pl-8 md:pr-10 md:pt-14 lg:pl-10 lg:pr-12">
+      <div className="pointer-events-none absolute inset-y-0 left-0 right-0 rounded-sm bg-gradient-to-r from-signoz_ink-400 via-signoz_ink-400/95 to-signoz_ink-400/0 shadow-[0_28px_90px_rgba(0,0,0,0.58)]" />
       <div className="pointer-events-none absolute left-0 right-0 top-0 h-9 border-b border-white/[0.055] bg-gradient-to-r from-white/[0.025] via-white/[0.012] to-transparent" />
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 top-0 rounded-[3px] ring-1 ring-inset ring-white/[0.05]" />
-      <div className="absolute left-0 top-[-42px] z-[3] hidden h-8 items-center gap-3 text-[16px] tracking-[-0.01em] text-[#8f948f] md:flex">
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 top-0 rounded-sm ring-1 ring-inset ring-white/[0.05]" />
+      <div className="absolute left-0 top-[-42px] z-[3] hidden h-8 items-center gap-3 text-base tracking-[-0.01em] text-signoz_vanilla-400/75 md:flex">
         <span>Work with your agent</span>
         <AgentIntegrationIcons />
         <span>and more</span>
       </div>
       <div
         aria-label="Agent-native prompt examples"
-        className="absolute left-0 right-0 top-0 z-[2] flex h-9 items-center gap-1 overflow-x-auto overflow-y-hidden px-2 text-[11px] leading-none text-[#aaa79f] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="absolute left-0 right-0 top-0 z-[2] flex h-9 items-center gap-1 overflow-x-auto overflow-y-hidden px-2 text-xs leading-none text-signoz_vanilla-400/85 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="tablist"
       >
         {agentPromptTabs.map((tab, index) => {
@@ -75,10 +75,10 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
               key={tab.label}
               aria-controls="agent-native-prompt-panel"
               aria-selected={isTabActive}
-              className={`h-7 shrink-0 rounded-[5px] px-2.5 transition-colors ${
+              className={`h-7 shrink-0 rounded-md px-2.5 transition-colors ${
                 isTabActive
                   ? 'bg-white/[0.075] text-signoz_vanilla-100 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]'
-                  : 'text-[#8d918f] hover:bg-white/[0.04] hover:text-[#c4c0b8]'
+                  : 'text-signoz_vanilla-400/75 hover:bg-white/[0.04] hover:text-signoz_vanilla-400'
               }`}
               id={`agent-native-tab-${index}`}
               onClick={() => {
@@ -116,7 +116,7 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
         id="agent-native-prompt-panel"
         role="tabpanel"
       >
-        <div className="grid grid-cols-[16px_minmax(0,1fr)] gap-x-3 text-[13px] leading-[1.65] text-[#f1eee7] md:grid-cols-[20px_minmax(0,1fr)] md:gap-x-4 md:text-[15px] md:leading-[1.75]">
+        <div className="grid grid-cols-[16px_minmax(0,1fr)] gap-x-3 text-sm leading-6 text-signoz_vanilla-200 md:grid-cols-[20px_minmax(0,1fr)] md:gap-x-4 md:text-base md:leading-7">
           <span className="homepage-agent-prompt-marker text-lg font-semibold leading-7 text-[#ff8a3d]">
             &gt;
           </span>
@@ -137,7 +137,7 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
             {thinkingVerbs.map((verb, index) => (
               <div
                 key={verb}
-                className={`absolute inset-0 grid grid-cols-[16px_minmax(0,1fr)] gap-x-3 text-[13px] font-semibold leading-[1.65] text-[#ff8a3d] opacity-0 motion-reduce:animate-none md:grid-cols-[20px_minmax(0,1fr)] md:gap-x-4 md:text-[15px] md:leading-[1.75] ${
+                className={`absolute inset-0 grid grid-cols-[16px_minmax(0,1fr)] gap-x-3 text-sm font-semibold leading-6 text-[#ff8a3d] opacity-0 motion-reduce:animate-none md:grid-cols-[20px_minmax(0,1fr)] md:gap-x-4 md:text-base md:leading-7 ${
                   isActive ? 'animate-homepage-agent-thinking-cycle' : ''
                 }`}
                 style={{ animationDelay: `${1600 + index * 650}ms` }}
@@ -148,24 +148,24 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
             ))}
 
             <div
-              className={`absolute inset-0 max-h-[300px] overflow-y-auto overflow-x-hidden pr-1 text-[#aaa79f] opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 md:max-h-[350px] md:pr-3 ${
+              className={`absolute inset-0 max-h-[300px] overflow-y-auto overflow-x-hidden pr-1 text-signoz_vanilla-400/85 opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 md:max-h-[350px] md:pr-3 ${
                 isActive ? 'animate-homepage-agent-response-reveal' : ''
               }`}
             >
-              <div className="space-y-5 text-[13px] leading-[1.65] md:space-y-6 md:text-[15px] md:leading-[1.75]">
+              <div className="space-y-5 text-sm leading-6 md:space-y-6 md:text-base md:leading-7">
                 {toolCallLines.map((line) => (
                   <div
                     key={line}
                     className="grid grid-cols-[16px_minmax(0,1fr)] gap-x-3 md:grid-cols-[20px_minmax(0,1fr)] md:gap-x-4"
                   >
-                    <span className="homepage-agent-tool-marker mt-[0.55em] size-[9px] rounded-full bg-[#b8b5ad]" />
+                    <span className="homepage-agent-tool-marker mt-[0.55em] size-[9px] rounded-full bg-signoz_vanilla-400" />
                     {line === signozMcpToolLine ? (
                       <span>
                         Loaded tools, used{' '}
                         <span className="relative -top-px inline-flex items-baseline gap-1.5 align-baseline">
                           <Image
                             alt="SigNoz logo"
-                            className="relative top-[2px] size-3.5 rounded-[3px]"
+                            className="relative top-[2px] size-3.5 rounded-sm"
                             height={14}
                             src="/static/favicons/favicon-32x32.png"
                             width={14}
@@ -183,12 +183,12 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
 
               <div className="mt-7 grid grid-cols-[16px_minmax(0,1fr)] gap-x-3 md:mt-9 md:grid-cols-[20px_minmax(0,1fr)] md:gap-x-4">
                 <span aria-hidden="true" />
-                <div className="min-w-0 text-[13px] leading-[1.65] text-[#aaa79f] md:text-[15px] md:leading-[1.75]">
+                <div className="min-w-0 text-sm leading-6 text-signoz_vanilla-400/85 md:text-base md:leading-7">
                   <p className="m-0">{activePrompt.responseTitle}</p>
 
                   <div className="mt-5 hidden space-y-1 sm:block">
                     <div
-                      className="grid gap-x-3 border-b border-[#aaa79f]/25 pb-1 text-[#c4c0b8]"
+                      className="grid gap-x-3 border-b border-signoz_vanilla-400/25 pb-1 text-signoz_vanilla-400"
                       style={{ gridTemplateColumns: responseGridTemplate }}
                     >
                       {activePrompt.columns.map((column) => (
@@ -240,14 +240,14 @@ function NozPanelCard({ className = '' }: { className?: string }) {
   return (
     <div
       className={cn(
-        'rounded-[18px] bg-[linear-gradient(135deg,rgba(255,255,255,0.18),rgba(255,255,255,0.045)_42%,rgba(255,255,255,0.10))] p-px shadow-[0_34px_120px_rgba(0,0,0,0.58)]',
+        'rounded-2xl bg-[linear-gradient(135deg,rgba(255,255,255,0.18),rgba(255,255,255,0.045)_42%,rgba(255,255,255,0.10))] p-px shadow-[0_34px_120px_rgba(0,0,0,0.58)]',
         className
       )}
     >
-      <div className="overflow-hidden rounded-[17px] bg-[#080b0f]">
+      <div className="overflow-hidden rounded-2xl bg-signoz_ink-500">
         <Image
           alt="Noz assistant panel with suggested observability prompts"
-          className="h-auto w-full rounded-[17px]"
+          className="h-auto w-full rounded-2xl"
           placeholder="blur"
           sizes="(min-width: 1024px) 430px, (min-width: 768px) 388px, 270px"
           src={nozPanel}
@@ -324,7 +324,7 @@ export default function AgentNativeObservabilitySection() {
             inside your IDE and SigNoz.
           </h2>
 
-          <p className="mx-auto mt-5 max-w-3xl text-[16px] leading-7 tracking-[-0.15px] text-signoz_vanilla-400 sm:text-[19px] sm:leading-9 sm:tracking-[-0.28px]">
+          <p className="mx-auto mt-5 max-w-3xl text-base leading-7 tracking-[-0.15px] text-signoz_vanilla-400 sm:text-lg sm:leading-9 sm:tracking-[-0.28px]">
             Use the SigNoz MCP server to bring telemetry into coding agents, or use Noz, your AI
             teammate inside SigNoz, to investigate incidents, tune alerts, and build dashboards with
             the same production context your team sees.
@@ -334,17 +334,17 @@ export default function AgentNativeObservabilitySection() {
         <div ref={visualRef}>
           <div className="-mx-5 mt-14 min-h-[560px] overflow-x-auto overflow-y-visible px-5 pb-4 pt-6 [scrollbar-width:none] sm:-mx-6 sm:mt-20 sm:px-6 md:hidden [&::-webkit-scrollbar]:hidden">
             <div className="relative h-[520px] w-[132vw] min-w-[510px] max-w-[560px]">
-              <div className="absolute left-5 top-[118px] z-20 flex h-8 items-center gap-2 font-mono text-[15px] tracking-[-0.01em] text-[#8f948f]">
+              <div className="absolute left-5 top-[118px] z-20 flex h-8 items-center gap-2 font-mono text-base tracking-[-0.01em] text-signoz_vanilla-400/75">
                 <span>Work with</span>
                 <AgentIntegrationIcons />
               </div>
               <div
-                className={`absolute left-0 top-12 h-[calc(100%-48px)] w-[66%] rounded-[18px] border border-signoz_slate-400/20 bg-[#06090d] opacity-0 shadow-[0_34px_120px_rgba(0,0,0,0.42)] will-change-[opacity,transform] motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:will-change-auto ${
+                className={`absolute left-0 top-12 h-[calc(100%-48px)] w-[66%] rounded-2xl border border-signoz_slate-400/20 bg-signoz_ink-500 opacity-0 shadow-[0_34px_120px_rgba(0,0,0,0.42)] will-change-[opacity,transform] motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:will-change-auto ${
                   isActive ? 'animate-homepage-agent-terminal-enter' : ''
                 }`}
               />
               <div
-                className={`absolute bottom-0 left-5 h-[360px] w-[62%] overflow-hidden rounded-[3px] opacity-0 ring-1 ring-white/[0.06] will-change-[opacity,transform] motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:will-change-auto ${
+                className={`absolute bottom-0 left-5 h-[360px] w-[62%] overflow-hidden rounded-sm opacity-0 ring-1 ring-white/[0.06] will-change-[opacity,transform] motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:will-change-auto ${
                   isActive ? 'animate-homepage-agent-terminal-enter' : ''
                 }`}
               >
