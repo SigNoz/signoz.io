@@ -318,7 +318,7 @@ export default function AgentNativeObservabilitySection() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_58%_at_24%_42%,rgba(242,71,105,0.10),transparent_64%),radial-gradient(ellipse_72%_54%_at_82%_52%,rgba(229,72,77,0.065),transparent_66%),linear-gradient(180deg,rgba(22,25,34,0.08),rgba(11,12,14,0.42)_50%,rgba(11,12,14,0.1))] [mask-image:linear-gradient(180deg,transparent_0%,black_16%,black_82%,transparent_100%)]" />
       <div className="relative mx-auto max-w-[1200px]">
         <div className="mx-auto max-w-4xl text-center">
-          <h2 className="m-0 text-3xl font-semibold leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+          <h2 className="m-0 text-3xl font-semibold leading-[3.5rem] text-signoz_sakura-100 sm:text-4xl">
             Agent-native observability,
             <br />
             inside your IDE and SigNoz.

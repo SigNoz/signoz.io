@@ -25,7 +25,7 @@ export function Header({ variant = 'control' }: { variant?: 'control' | 'ai-agen
         {/* End of newsletter section */}
         {variant === 'ai-agents' ? (
           <Hero>
-            Observability for your team and AI Agents.
+            Observability for Your Team and AI Agents.
             <br />
             Powered by Open Standards.
           </Hero>
