@@ -7,8 +7,19 @@ import { VideoModalPlayer } from './VideoModalPlayer'
 import { HeroSectionPill } from './HeroSectionPill'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 
+function ControlHeroCopy() {
+  return (
+    <>
+      <span className="md:hidden">Observability on Your Terms, Powered by Open Standards.</span>
+      <span className="hidden md:inline">Observability on Your Terms,</span>
+      <br className="hidden md:inline" />
+      <span className="hidden md:inline">Powered by Open Standards.</span>
+    </>
+  )
+}
+
 // Server component with single CTA
-export function Header() {
+export function Header({ variant = 'control' }: { variant?: 'control' | 'ai-agents' }) {
   const primaryCTA = 'Get Started - Free'
 
   return (
@@ -23,12 +34,17 @@ export function Header() {
           text="Introducing Agent Native Observability →"
         />
         {/* End of newsletter section */}
-        <Hero>
-          <span className="md:hidden">Observability on Your Terms, Powered by Open Standards.</span>
-          <span className="hidden md:inline">Observability on Your Terms,</span>
-          <br className="hidden md:inline" />
-          <span className="hidden md:inline">Powered by Open Standards.</span>
-        </Hero>
+        {variant === 'ai-agents' ? (
+          <Hero>
+            Observability for your team and AI Agents.
+            <br />
+            Powered by Open Standards.
+          </Hero>
+        ) : (
+          <Hero>
+            <ControlHeroCopy />
+          </Hero>
+        )}
         <div className="w-full border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 px-6 py-2">
           <p className="m-0 p-3 text-base font-medium sm:p-0">
             Traces, metrics, and logs in a unified, OpenTelemetry-native platform. Simple
