@@ -2,13 +2,13 @@
 
 import { usePathname } from 'next/navigation'
 import React from 'react'
+import docsSideNav from '@/constants/docsSideNav'
 import { getPrevAndNextRoutes } from '../../utils/common'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 import Link from 'next/link'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
-import type { NavItem } from '@/components/DocsSidebar/types'
 
-export default function DocsPrevNext({ items }: { items: NavItem[] }) {
+export default function DocsPrevNext() {
   const pathname = usePathname()
   const isOnboarding = isDocsOnboardingPathname(pathname)
 
@@ -16,7 +16,7 @@ export default function DocsPrevNext({ items }: { items: NavItem[] }) {
     return null
   }
 
-  const { prev, next } = getPrevAndNextRoutes(items, pathname)
+  const { prev, next } = getPrevAndNextRoutes(docsSideNav, pathname)
   return (
     <div className="docs-prev-next-nav mt-16 flex items-center justify-between">
       {prev && prev?.route && (

@@ -30,19 +30,10 @@ let SYNC_FOLDERS
 try {
   SYNC_FOLDERS = JSON.parse(
     process.env.SYNC_FOLDERS ||
-      '["faqs","case-study","opentelemetry","comparisons","guides","blog","docs","docs-side-nav"]'
+      '["faqs","case-study","opentelemetry","comparisons","guides","blog","docs"]'
   )
 } catch {
-  SYNC_FOLDERS = [
-    'faqs',
-    'case-study',
-    'opentelemetry',
-    'comparisons',
-    'guides',
-    'blog',
-    'docs',
-    'docs-side-nav',
-  ]
+  SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog', 'docs']
 }
 
 const FOLDER_TO_URL_PREFIX = {
@@ -93,11 +84,6 @@ function uniqueStrings(arr) {
 
 function buildPayload() {
   const allContentFiles = [...CHANGED_FILES, ...DELETED_FILES]
-
-  if (allContentFiles.some((filePath) => getFolderName(filePath) === 'docs-side-nav')) {
-    console.log('📣 Docs side nav changed: using full revalidation.')
-    return { mode: 'all', reason: 'docs-side-nav' }
-  }
 
   const cmsUrls = uniqueStrings(allContentFiles.map(filePathToCmsUrl))
 

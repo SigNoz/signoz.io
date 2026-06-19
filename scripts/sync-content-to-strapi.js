@@ -289,13 +289,6 @@ const COLLECTION_SCHEMAS = {
       },
     },
   },
-  'docs-side-nav': {
-    apiPath: 'api::docs-side-nav.docs-side-nav',
-    endpoint: 'docs-side-nav',
-    fields: ['items'],
-    singleton: true,
-    format: 'json',
-  },
   authors: {
     apiPath: 'api::author.author',
     endpoint: 'authors',
@@ -344,16 +337,6 @@ function parseMDXFile(filePath) {
     return { frontmatter, content }
   } catch (error) {
     throw new Error(`Failed to parse file ${filePath}: ${error.message}`)
-  }
-}
-
-// Helper: Parse JSON singleton files
-function parseJSONFile(filePath) {
-  try {
-    const fileContent = fs.readFileSync(filePath, 'utf8')
-    return JSON.parse(fileContent)
-  } catch (error) {
-    throw new Error(`Failed to parse JSON file ${filePath}: ${error.message}`)
   }
 }
 
@@ -1002,36 +985,6 @@ async function updateEntry(folderName, documentId, data) {
   }
 }
 
-// Helper: Update Strapi single type
-async function updateSingletonEntry(folderName, data) {
-  const schema = COLLECTION_SCHEMAS[folderName]
-  try {
-    const response = await axios.put(
-      `${CMS_API_URL}/api/${schema.endpoint}`,
-      { data },
-      {
-        headers: {
-          Authorization: `Bearer ${CMS_API_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-
-    return response.data
-  } catch (error) {
-    const errorMsg = error.response?.data?.error?.message || error.message
-    const errorDetails = error.response?.data?.error?.details || {}
-    console.error(`  ❌ Singleton update failed: ${errorMsg}`)
-    if (Object.keys(errorDetails).length > 0) {
-      console.error(`  Error details:`, JSON.stringify(errorDetails, null, 2))
-    }
-    if (error.response) {
-      console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
-    }
-    throw error
-  }
-}
-
 // Helper: Delete entry in Strapi
 async function deleteEntry(folderName, documentId) {
   const schema = COLLECTION_SCHEMAS[folderName]
@@ -1113,7 +1066,7 @@ async function syncToStrapi() {
         continue
       }
 
-      const pathField = schema.singleton ? '/' : generatePathField(filePath, folderName)
+      const pathField = generatePathField(filePath, folderName)
 
       if (!pathField) {
         throw new Error('Could not generate path field')
@@ -1128,14 +1081,6 @@ async function syncToStrapi() {
           folderName,
           pathField,
           filePath,
-        })
-      } else if (schema.singleton) {
-        pendingOperations.push({
-          type: 'update',
-          folderName,
-          pathField,
-          filePath,
-          data: parseJSONFile(filePath),
         })
       } else {
         const { frontmatter, content } = parseMDXFile(filePath)
@@ -1226,24 +1171,9 @@ async function syncToStrapi() {
 
   for (const op of pendingOperations) {
     const { type, folderName, pathField, filePath } = op
-    const schema = COLLECTION_SCHEMAS[folderName]
     console.log(`\n📄 Syncing: ${filePath} (${type})`)
 
     try {
-      if (schema?.singleton) {
-        if (type === 'delete') {
-          console.log(`⚠️ Singleton ${folderName} was deleted locally; skipping CMS deletion`)
-          results.skipped.push(filePath)
-          continue
-        }
-
-        console.log(`🔄 Updating singleton in CMS: ${folderName}`)
-        await updateSingletonEntry(folderName, op.data)
-        console.log(`✅ Singleton updated successfully`)
-        results.updated.push({ file: filePath, path: pathField })
-        continue
-      }
-
       if (type === 'delete') {
         console.log(`🗑️ Deleting from CMS: ${pathField}`)
         const existingEntry = await findEntryByPath(folderName, pathField)
