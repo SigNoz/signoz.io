@@ -15,6 +15,7 @@ import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import { resolveLatestDate, formatDisplayDate } from '@/utils/dateUtils'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
 import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
+import type { NavItem } from '@/components/DocsSidebar/types'
 
 const DocContent: React.FC<{
   title: string
@@ -23,8 +24,9 @@ const DocContent: React.FC<{
   hideTableOfContents: boolean
   editLink?: string
   breadcrumbs?: BreadcrumbCrumb[]
+  sideNavItems: NavItem[]
   children: React.ReactNode
-}> = ({ title, post, toc, hideTableOfContents, editLink, breadcrumbs, children }) => {
+}> = ({ title, post, toc, hideTableOfContents, editLink, breadcrumbs, sideNavItems, children }) => {
   const pathname = usePathname()
   const lastUpdatedDate = post?.lastmod || resolveLatestDate(post)
   const formattedDate = formatDisplayDate(lastUpdatedDate)
@@ -97,7 +99,7 @@ const DocContent: React.FC<{
         <div className={feedbackWrapperClassName}>
           <PageFeedback />
         </div>
-        <DocsPrevNext />
+        <DocsPrevNext items={sideNavItems} />
       </div>
 
       {shouldRenderTOC ? (

@@ -9,6 +9,7 @@ import JsonLdScript from '@/components/JsonLdScript'
 import { buildBreadcrumbSchema, getDocsBreadcrumbs } from '@/utils/breadcrumbSchema'
 import { fetchDocBySlug } from '@/utils/cachedData'
 import { compileMdxSource } from '@/utils/compileMdx'
+import { getDocsSideNav } from '@/utils/docsSideNav'
 
 export const revalidate = 86400
 export const dynamicParams = true
@@ -52,7 +53,7 @@ export const generateStaticParams = async () => {
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
-  const post = await fetchDocBySlug(slug)
+  const [post, docsSideNavItems] = await Promise.all([fetchDocBySlug(slug), getDocsSideNav()])
 
   if (!post) {
     notFound()
@@ -70,7 +71,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const toc = post?.toc || []
   const { title, hide_table_of_contents } = post
   const jsonLd = post.structuredData
-  const breadcrumbs = getDocsBreadcrumbs(slug, title)
+  const breadcrumbs = getDocsBreadcrumbs(slug, title, docsSideNavItems)
   const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
   return (
@@ -85,6 +86,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
           hideTableOfContents={hide_table_of_contents || false}
           editLink={`https://github.com/SigNoz/signoz-web/edit/main/data/docs/${slug}.mdx`}
           breadcrumbs={breadcrumbs}
+          sideNavItems={docsSideNavItems}
         >
           {compiledContent}
         </DocContent>

@@ -1,4 +1,3 @@
-import docsSideNav from '@/constants/docsSideNav'
 import type { DocsSideNavItem } from '@/utils/docsSideNav'
 
 type NavItem =
@@ -97,14 +96,7 @@ const buildRouteLabelLookup = (items: NavItem[], lookup: Map<string, string>) =>
   })
 }
 
-const routeLabelLookup = (() => {
-  const lookup = new Map<string, string>()
-  buildRouteLabelLookup(docsSideNav as NavItem[], lookup)
-  lookup.set(DOCS_ROOT, 'Get Started')
-  return lookup
-})()
-
-const toTree = (items: NavItem[]): DocsRouteTreeItem[] => {
+const toTree = (items: NavItem[], routeLabelLookup: Map<string, string>): DocsRouteTreeItem[] => {
   return items
     .map((item): DocsRouteTreeItem | null => {
       if (typeof item === 'string') {
@@ -121,7 +113,9 @@ const toTree = (items: NavItem[]): DocsRouteTreeItem[] => {
       const label =
         item.label || (item.route ? fallbackLabelFromRoute(item.route) : 'Documentation')
       const route = normalizeDocsRoute(item.route)
-      const children = Array.isArray(item.items) ? toTree(item.items as NavItem[]) : []
+      const children = Array.isArray(item.items)
+        ? toTree(item.items as NavItem[], routeLabelLookup)
+        : []
 
       if (!route && children.length === 0) {
         return null
@@ -152,15 +146,19 @@ const flattenTree = (nodes: DocsRouteTreeItem[], depth: number, output: DocsRout
   })
 }
 
-export function getDocsRouteTree(
-  items: DocsSideNavItem[] = docsSideNav as DocsSideNavItem[]
-): DocsRouteTreeItem[] {
-  return toTree(items as NavItem[])
+function buildLookup(items: DocsSideNavItem[]): Map<string, string> {
+  const lookup = new Map<string, string>()
+  buildRouteLabelLookup(items as NavItem[], lookup)
+  lookup.set(DOCS_ROOT, 'Get Started')
+  return lookup
 }
 
-export function getDocsRouteList(
-  items: DocsSideNavItem[] = docsSideNav as DocsSideNavItem[]
-): DocsRouteListItem[] {
+export function getDocsRouteTree(items: DocsSideNavItem[]): DocsRouteTreeItem[] {
+  const lookup = buildLookup(items)
+  return toTree(items as NavItem[], lookup)
+}
+
+export function getDocsRouteList(items: DocsSideNavItem[]): DocsRouteListItem[] {
   const all: DocsRouteListItem[] = []
   flattenTree(getDocsRouteTree(items), 0, all)
 
@@ -174,7 +172,7 @@ export function getDocsRouteList(
 
 export function getLlmStarterLinks(
   limit = 24,
-  items: DocsSideNavItem[] = docsSideNav as DocsSideNavItem[]
+  items: DocsSideNavItem[]
 ): Array<Pick<DocsRouteListItem, 'label' | 'route'>> {
   const routes = getDocsRouteList(items)
   const starters: Array<Pick<DocsRouteListItem, 'label' | 'route'>> = []

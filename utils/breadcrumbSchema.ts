@@ -1,4 +1,4 @@
-import docsSideNav from '@/constants/docsSideNav'
+import type { DocsSideNavItem } from './docsSideNav'
 
 type NavItem =
   | {
@@ -118,10 +118,15 @@ const buildRouteAncestryMap = (
 
 let ancestryMap: Map<string, BreadcrumbCrumb[]> | null = null
 
-const getAncestryMap = (): Map<string, BreadcrumbCrumb[]> => {
+const getAncestryMap = (docsSideNav?: DocsSideNavItem[]): Map<string, BreadcrumbCrumb[]> => {
+  if (docsSideNav) {
+    const map = new Map<string, BreadcrumbCrumb[]>()
+    buildRouteAncestryMap(docsSideNav as NavItem[], [], map)
+    return map
+  }
+
   if (!ancestryMap) {
     ancestryMap = new Map()
-    buildRouteAncestryMap(docsSideNav as NavItem[], [], ancestryMap)
   }
   return ancestryMap
 }
@@ -153,9 +158,13 @@ export function buildBreadcrumbSchema(crumbs: BreadcrumbCrumb[]): BreadcrumbList
   }
 }
 
-export function getDocsBreadcrumbs(slug: string, pageTitle: string): BreadcrumbCrumb[] {
+export function getDocsBreadcrumbs(
+  slug: string,
+  pageTitle: string,
+  docsSideNav?: DocsSideNavItem[]
+): BreadcrumbCrumb[] {
   const targetRoute = normalizeDocsRoute(`/docs/${slug}`)
-  const map = getAncestryMap()
+  const map = getAncestryMap(docsSideNav)
 
   const crumbs: BreadcrumbCrumb[] = [HOME_CRUMB, SECTION_CONFIG.docs]
 
@@ -178,8 +187,12 @@ export function getDocsBreadcrumbs(slug: string, pageTitle: string): BreadcrumbC
   return crumbs
 }
 
-export function generateDocsBreadcrumb(slug: string, pageTitle: string): BreadcrumbListSchema {
-  return buildBreadcrumbSchema(getDocsBreadcrumbs(slug, pageTitle))
+export function generateDocsBreadcrumb(
+  slug: string,
+  pageTitle: string,
+  docsSideNav?: DocsSideNavItem[]
+): BreadcrumbListSchema {
+  return buildBreadcrumbSchema(getDocsBreadcrumbs(slug, pageTitle, docsSideNav))
 }
 
 export function getSectionArticleBreadcrumbs(

@@ -2,22 +2,47 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { ChevronDown, ChevronRight, File, FileText } from 'lucide-react'
+import { ChevronDown, ChevronRight, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { NavItem, Doc, Category } from './types'
-import docsSideNav from 'constants/docsSideNav'
 import { usePathname } from 'next/navigation'
 import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { useBrowserSearch } from '@/hooks/useBrowserSearch'
 
 interface DocsSidebarProps {
+  items: NavItem[]
   onNavItemClick?: () => void
 }
 
-const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
+function findParentsForRoute(items, route, parents = []) {
+  for (const item of items) {
+    if (item.route === route) {
+      return parents
+    }
+    if (item.items) {
+      const result = findParentsForRoute(item.items, route, [...parents, item.label])
+      if (result) {
+        return result
+      }
+    }
+  }
+  return null
+}
+
+function getParents(docsSideNav, route) {
+  for (const item of docsSideNav) {
+    const parents = findParentsForRoute([item], route)
+    if (parents) {
+      return parents
+    }
+  }
+  return []
+}
+
+const DocsSidebar: React.FC<DocsSidebarProps> = ({ items, onNavItemClick }) => {
   const pathname = usePathname()
   const search = useBrowserSearch()
-  const [sideNav, setSideNav] = useState(docsSideNav)
+  const [sideNav, setSideNav] = useState(items)
   const [isClient, setIsClient] = useState(false)
   const [activeRoute, setActiveRoute] = useState<string | null>(null)
   const sidebarRef = useRef<HTMLDivElement>(null)
@@ -30,6 +55,10 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  useEffect(() => {
+    setSideNav(items)
+  }, [items])
 
   const toggleIsExpandedByLabel = (label, isExpanded) => {
     const toggle = (items) => {
@@ -47,38 +76,13 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     setSideNav((prevState) => toggle(prevState))
   }
 
-  function findParentsForRoute(items, route, parents = []) {
-    for (const item of items) {
-      if (item.route === route) {
-        return parents
-      }
-      if (item.items) {
-        const result = findParentsForRoute(item.items, route, [...parents, item.label])
-        if (result) {
-          return result
-        }
-      }
-    }
-    return null
-  }
-
-  function getParents(docsSideNav, route) {
-    for (const item of docsSideNav) {
-      const parents = findParentsForRoute([item], route)
-      if (parents) {
-        return parents
-      }
-    }
-    return []
-  }
-
   useEffect(() => {
     setActiveRoute(pathname)
     const currentRoute = pathname
     // Normalize the currentRoute by stripping the trailing slash if it exists
     const normalizedRoute = currentRoute.endsWith('/') ? currentRoute.slice(0, -1) : currentRoute
 
-    const parents = getParents(docsSideNav, normalizedRoute)
+    const parents = getParents(items, normalizedRoute)
 
     for (const parent of parents) {
       toggleIsExpandedByLabel(parent, true)
@@ -116,7 +120,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
         }
       }
     })
-  }, [pathname])
+  }, [items, pathname])
 
   const constructHref = (route: string) => {
     let href = route
@@ -230,7 +234,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
 
   const renderItem = (item: NavItem | string) => {
     if (typeof item === 'string') {
-      const referencedItem = findItemById(item, docsSideNav)
+      const referencedItem = findItemById(item, sideNav)
       if (referencedItem) {
         return renderItem(referencedItem)
       }
