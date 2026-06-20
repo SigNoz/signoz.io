@@ -1,8 +1,8 @@
 // hooks/useLogEvent.ts
 
 import { useCallback, useEffect } from 'react'
-import { logEvent, LogEventPayload, detectBotClientSide } from '../utils/logEvent'
-import { getOrCreateAnonymousId, getUserId } from '../utils/userClient'
+import { logEvent, LogEventPayload, LogEventOptions, detectBotClientSide } from '../utils/logEvent'
+import { getOrCreateAnonymousId, getOrCreatePostHogSessionId, getUserId } from '../utils/userClient'
 import { extractGroupIdFromEmail } from '../utils/userShared'
 import {
   getOS,
@@ -52,14 +52,17 @@ export const useLogEvent = () => {
   }, [])
 
   return useCallback(
-    ({
-      eventName,
-      attributes,
-      eventType,
-      groupId,
-      userId: explicitUserId,
-      anonymousId: explicitAnonymousId,
-    }: LogEventPayload) => {
+    (
+      {
+        eventName,
+        attributes,
+        eventType,
+        groupId,
+        userId: explicitUserId,
+        anonymousId: explicitAnonymousId,
+      }: LogEventPayload,
+      options?: LogEventOptions
+    ) => {
       const userId = explicitUserId || getUserId()
       const anonymousId = explicitAnonymousId || getOrCreateAnonymousId()
       // Use provided groupId or extract it from userId if available
@@ -71,9 +74,21 @@ export const useLogEvent = () => {
       const utmParams = getStoredUtmParams()
       const userIp = Cookies.get('user_ip')
       const vercelIp = Cookies.get('vercel_ip')
+      const postHogSessionId = getOrCreatePostHogSessionId()
+      const providedAttributes = attributes || {}
 
       const enhancedAttributes = {
-        ...attributes,
+        ...providedAttributes,
+        pageUrl:
+          providedAttributes.pageUrl ||
+          (typeof window !== 'undefined' ? window.location.href : undefined),
+        pageTitle:
+          providedAttributes.pageTitle ||
+          (typeof document !== 'undefined' ? document.title : undefined),
+        pageReferrer:
+          providedAttributes.pageReferrer ||
+          (typeof document !== 'undefined' ? document.referrer : undefined),
+        $session_id: providedAttributes.$session_id || postHogSessionId,
         custom_ip: userIp || 'unknown',
         custom_vercel_ip: vercelIp || 'unknown',
         custom_os: getOS(),
@@ -111,6 +126,7 @@ export const useLogEvent = () => {
 
       logEvent(eventPayload, {
         queryParams: utmParams,
+        ...options,
       })
     },
     []

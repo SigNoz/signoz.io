@@ -810,6 +810,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/opentelemetry-ui/',
+          destination: '/blog/opentelemetry-visualization/',
+          permanent: true,
+        },
+        {
           source: '/blog/gathering-data-with-opentelemetry-collector/',
           destination: '/blog/opentelemetry-collector-complete-guide/',
           permanent: true,

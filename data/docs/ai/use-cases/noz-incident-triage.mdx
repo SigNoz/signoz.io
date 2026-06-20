@@ -1,0 +1,68 @@
+---
+date: 2026-06-14
+id: noz-incident-triage
+title: Investigate What Changed After a Deploy with Noz
+meta_title: Find What a Deploy Changed with Noz - SigNoz AI Teammate
+description: When errors or latency jump after a release, ask Noz what changed. It compares the windows before and after the deploy and points you at the regression.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+A deploy went out and your error rate climbed right after. Before you start bisecting commits, you ask Noz what changed between the window before the release and the window after.
+
+## Prerequisites
+
+- A [SigNoz Cloud](https://signoz.io/teams/) account with [Noz](https://signoz.io/docs/ai/noz/) available.
+- Services sending traces and logs to SigNoz.
+
+## Step 1: Ask what changed
+
+Open **Noz** from the top-right header and describe what you saw:
+
+```
+Errors on the checkout service jumped after the 2pm deploy. What changed?
+```
+
+Noz compares checkout's error rate and latency for the windows before and after 2pm and reports what moved: which operations started failing, whether latency shifted, and how the post-deploy window differs from the baseline. Follow up to cut the pre-existing noise:
+
+```
+Show me only the errors that appeared after the deploy and weren't there before.
+```
+
+## Step 2: Confirm the cause
+
+```
+Pull a failing trace from after the deploy and show me where it breaks.
+```
+
+Noz pulls a representative post-deploy trace, points to the span that fails or slows down, and offers **Suggested Actions** to keep going (for example, opening the related logs or the dependency the span calls).
+
+## Tips
+
+1. **Anchor on the deploy time.** Naming the release window lets Noz compare before and after instead of summarizing the whole window.
+2. **Verify before you roll back.** Treat the proposed cause as a hypothesis until a real failing trace confirms it.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+To answer, Noz works through several agentic steps, visible under **Worked through N steps**:
+
+| Step | What It Did |
+|------|-------------|
+| Ran builder query | Compared checkout's error rate for the windows before and after the deploy |
+| Searched traces / logs | Pulled the error signatures and failing traces from the post-deploy window |
+| Ran builder query | Checked whether latency or a downstream dependency also shifted |
+| Reasoned | Isolated what appeared after the release and ranked the likely cause |
+
+</details>
+
+## Next Steps
+
+- [Find Where Latency Is Going with Noz](https://signoz.io/docs/ai/use-cases/noz-latency-bottleneck/) - When the regression is latency, not errors.
+- [Post Deployment Monitoring](https://signoz.io/docs/ai/use-cases/post-deployment-monitoring/) - Compare metrics before and after a deploy from your coding agent.
+
+<GetHelp />
