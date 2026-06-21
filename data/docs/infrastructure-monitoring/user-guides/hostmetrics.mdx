@@ -1,5 +1,5 @@
 ---
-date: 2026-06-12
+date: 2026-06-21
 title: Setup Host Metrics with OpenTelemetry
 id: opentelemetry-hostmetrics
 description: Configure the OpenTelemetry hostmetrics receiver to collect CPU, memory, disk, network, paging, and process metrics from your hosts and send them to SigNoz.
@@ -115,6 +115,58 @@ processors:
 <Admonition type="info">
   The `resourcedetection` processor automatically attaches resource attributes — including `host.name`, `host.id`, and OS/cloud metadata — to every metric emitted by the receiver. Without it, hosts appear in SigNoz without a hostname and aren't clickable on the Hosts list.
 </Admonition>
+
+<details>
+<summary><strong>Set the Kubernetes cluster name (k8s.cluster.name)</strong></summary>
+
+If you run the collector inside Kubernetes, set `k8s.cluster.name` so SigNoz can group and disambiguate infrastructure entities — pods, nodes, namespaces, and workloads — especially when you monitor more than one cluster. Unlike namespace and workload names (which the `k8sattributes` processor reads from the Kubernetes API), a cluster has no canonical name of its own, so it must be set explicitly.
+
+**Recommended — set it via the `env` detector** (works on every platform, including self-managed and on-prem). Pass the name through `OTEL_RESOURCE_ATTRIBUTES` and keep `env` in your detector list:
+
+```yaml:config.yaml {3}
+processors:
+  resourcedetection:
+    detectors: [env, system]
+```
+
+```bash
+export OTEL_RESOURCE_ATTRIBUTES="k8s.cluster.name=<your-cluster-name>"
+```
+
+<Admonition type="info">
+  If you deploy the collector with the SigNoz `k8s-infra` Helm chart, set `global.clusterName` and this is configured for you automatically — see [Monitor multiple Kubernetes clusters](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster/).
+</Admonition>
+
+**On managed Kubernetes, the cloud detectors can populate it for you:**
+
+- **GKE** — detected automatically; include `gcp` in your detectors.
+- **Amazon EKS** — disabled by default; enable it explicitly (requires the `EC2:DescribeInstances` IAM permission):
+
+  ```yaml:config.yaml
+  processors:
+    resourcedetection:
+      detectors: [env, eks, system]
+      eks:
+        resource_attributes:
+          k8s.cluster.name:
+            enabled: true
+  ```
+
+- **Azure AKS** — disabled by default; enable it the same way:
+
+  ```yaml:config.yaml
+  processors:
+    resourcedetection:
+      detectors: [env, aks, system]
+      aks:
+        resource_attributes:
+          k8s.cluster.name:
+            enabled: true
+  ```
+
+For all detectors and options, see the OpenTelemetry <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">resourcedetection processor documentation</a> — specifically the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md#environment-variable" target="_blank" rel="noopener noreferrer nofollow">Environment Variable</a>, <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md#amazon-eks" target="_blank" rel="noopener noreferrer nofollow">Amazon EKS</a>, <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md#gcp-metadata" target="_blank" rel="noopener noreferrer nofollow">GCP Metadata</a>, and <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md#azure-aks" target="_blank" rel="noopener noreferrer nofollow">Azure AKS</a> detector sections.
+
+</details>
 
 ## Add the receiver and processor to the service pipeline
 
