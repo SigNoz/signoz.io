@@ -1,5 +1,6 @@
 import siteMetadata from '@/data/siteMetadata'
 import { MDXContent } from './strapi'
+import { resolvePublishedDate, resolveLatestDate } from './dateUtils'
 
 type Author = {
   '@type': 'Person' | 'Organization'
@@ -160,8 +161,8 @@ export const generateStructuredData = (
       '@id': fullUrl,
     },
     url: fullUrl,
-    datePublished: content.publishedAt || content.createdAt,
-    dateModified: content.updatedAt || content.publishedAt || content.createdAt,
+    datePublished: resolvePublishedDate(content) ?? '',
+    dateModified: resolveLatestDate(content) ?? '',
     inLanguage: siteMetadata.language,
     wordCount: getWordCount(content),
     author: collectionType === 'docs' ? getDefaultAuthor() : getAuthors(content),

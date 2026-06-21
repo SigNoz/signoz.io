@@ -1,5 +1,5 @@
 ---
-date: 2026-05-16
+date: 2026-06-11
 id: opentelemetry-aspnetcore
 title: Send Metrics from ASP.NET Core using OpenTelemetry
 description: Instrument your ASP.NET Core application with OpenTelemetry NuGet packages and send HTTP, Kestrel, and runtime metrics to SigNoz.
@@ -79,6 +79,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 export OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 ```
 
 </TabItem>
@@ -90,6 +91,7 @@ $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
 $env:OTEL_RESOURCE_ATTRIBUTES = "deployment.environment=production"
+$env:OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE = "delta"
 ```
 
 </TabItem>
@@ -102,6 +104,7 @@ docker run \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
   -e OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
   -e OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production" \
+  -e OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta" \
   your-image:latest
 ```
 
@@ -120,6 +123,8 @@ env:
     value: "http/protobuf"
   - name: OTEL_RESOURCE_ATTRIBUTES
     value: "deployment.environment=production"
+  - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+    value: "delta"
 ```
 
 </TabItem>
@@ -130,6 +135,13 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `OTEL_RESOURCE_ATTRIBUTES`: Sets `deployment.environment` on all telemetry — the [ASP.NET Core Metrics dashboard](https://signoz.io/docs/dashboards/dashboard-templates/aspnet-metrics/) uses this to filter by environment
+- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`: Set to `delta` to reduce metric costs. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
+
+<Admonition type="info" title="Why delta temporality?" defaultCollapsed="true">
+OpenTelemetry SDKs export metrics with **cumulative** temporality by default, which re-sends the running total of every active series on each export interval — even when nothing has changed. With `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` set to `delta`, synchronous instruments (like Counters and Histograms) that record nothing during an export interval send no data points for that interval, reducing the number of billable samples.
+
+Observable (asynchronous) instruments emit a data point on every collection cycle regardless of temporality. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for details.
+</Admonition>
 
 ### Step 4. Validate
 

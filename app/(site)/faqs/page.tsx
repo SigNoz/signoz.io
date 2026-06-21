@@ -2,6 +2,7 @@ import { getAllContent } from '@/utils/contentRepository'
 import { notFound } from 'next/navigation'
 import FAQsClient from './FAQsClient'
 import { getTagValues } from '@/utils/contentHelpers'
+import { resolveLatestDate } from '@/utils/dateUtils'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -23,7 +24,7 @@ export default async function FAQsPage() {
       title: faq.title,
       description: faq.description,
       path: faq.path,
-      date: faq.date,
+      date: resolveLatestDate(faq) ?? '',
       tags: getTagValues(faq),
       draft: faq.deployment_status === 'draft',
     }))

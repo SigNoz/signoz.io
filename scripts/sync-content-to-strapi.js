@@ -63,7 +63,16 @@ const COLLECTION_SCHEMAS = {
   faqs: {
     apiPath: 'api::faq.faq',
     endpoint: 'faqs',
-    fields: ['title', 'description', 'date', 'path', 'content', 'deployment_status'],
+    fields: [
+      'title',
+      'description',
+      'date',
+      'published_date',
+      'updated_date',
+      'path',
+      'content',
+      'deployment_status',
+    ],
     hasRelatedArticles: true,
     relations: {
       authors: {
@@ -83,7 +92,16 @@ const COLLECTION_SCHEMAS = {
   'case-study': {
     apiPath: 'api::case-study.case-study',
     endpoint: 'case-studies',
-    fields: ['title', 'description', 'image', 'path', 'content', 'deployment_status'],
+    fields: [
+      'title',
+      'description',
+      'image',
+      'published_date',
+      'updated_date',
+      'path',
+      'content',
+      'deployment_status',
+    ],
     hasRelatedArticles: true,
     relations: {
       authors: {
@@ -96,7 +114,16 @@ const COLLECTION_SCHEMAS = {
   comparisons: {
     apiPath: 'api::comparison.comparison',
     endpoint: 'comparisons',
-    fields: ['title', 'description', 'image', 'path', 'content', 'deployment_status'],
+    fields: [
+      'title',
+      'description',
+      'image',
+      'published_date',
+      'updated_date',
+      'path',
+      'content',
+      'deployment_status',
+    ],
     hasRelatedArticles: true,
     relations: {
       authors: {
@@ -123,7 +150,17 @@ const COLLECTION_SCHEMAS = {
   guides: {
     apiPath: 'api::guide.guide',
     endpoint: 'guides',
-    fields: ['title', 'description', 'image', 'path', 'content', 'deployment_status', 'date'],
+    fields: [
+      'title',
+      'description',
+      'image',
+      'path',
+      'content',
+      'deployment_status',
+      'date',
+      'published_date',
+      'updated_date',
+    ],
     hasRelatedArticles: true,
     relations: {
       authors: {
@@ -150,7 +187,17 @@ const COLLECTION_SCHEMAS = {
   opentelemetry: {
     apiPath: 'api::opentelemetry.opentelemetry',
     endpoint: 'opentelemetries',
-    fields: ['title', 'description', 'image', 'path', 'content', 'deployment_status', 'date'],
+    fields: [
+      'title',
+      'description',
+      'image',
+      'path',
+      'content',
+      'deployment_status',
+      'date',
+      'published_date',
+      'updated_date',
+    ],
     hasRelatedArticles: true,
     relations: {
       authors: {
@@ -185,6 +232,8 @@ const COLLECTION_SCHEMAS = {
       'content',
       'deployment_status',
       'date',
+      'published_date',
+      'updated_date',
       'is_newsroom',
       'hide_table_of_contents',
       'excludeFromSitemap',

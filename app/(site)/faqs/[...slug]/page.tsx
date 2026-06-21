@@ -14,6 +14,7 @@ import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
+import { resolveLatestDate } from '@/utils/dateUtils'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -50,7 +51,7 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
 
         return {
           title: doc.title,
-          publishedOn: doc.date || doc.updatedAt || doc.publishedAt,
+          publishedOn: resolveLatestDate(doc) ?? '',
           url: `/${routePrefix}${doc.path || ''}`,
         }
       })
@@ -60,7 +61,7 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
   if (Array.isArray(content.related_faqs)) {
     return content.related_faqs.map((faq: MDXContent) => ({
       title: faq.title,
-      publishedOn: faq.date,
+      publishedOn: resolveLatestDate(faq) ?? '',
       url: `/faqs${faq.path || ''}`,
     }))
   }
@@ -201,6 +202,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   // Prepare content for FAQLayout
   const mainContent = {
     title: content.title,
+    published_date: content.published_date,
+    updated_date: content.updated_date,
     date: content.date,
     lastmod: content.updatedAt,
     tags,

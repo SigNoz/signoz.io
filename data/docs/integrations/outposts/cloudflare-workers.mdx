@@ -1,0 +1,198 @@
+---
+date: 2026-06-15
+id: cloudflare-workers
+title: Monitor Cloudflare Workers Traces and Logs with SigNoz
+description: Ship traces and logs from Cloudflare Workers to SigNoz using native OTLP export. Configure destinations in Workers Observability. No code changes needed.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Cloudflare Workers ships traces and logs directly to SigNoz using built-in OTLP export. Configure destinations in the Workers Observability dashboard and enable them in your Wrangler config. No code changes required.
+
+<Admonition type="warning">
+  Requires **Workers Paid** plan or higher. OTLP export is in beta. Tracing is billed beyond the 10 million monthly inclusion. Check <a href="https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#limits-and-pricing" target="_blank" rel="noopener noreferrer nofollow">Cloudflare's current pricing</a>. Metrics export is not currently supported.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Two extra requirements apply because Cloudflare pushes to your endpoint from outside your network:
+
+  1. **Publicly reachable:** your collector must be accessible from the internet, not on a private network or VPN.
+  2. **HTTPS with a valid certificate:** Cloudflare's pre-flight check rejects plain HTTP. Put a reverse proxy (e.g. Caddy) in front of port 4318 to terminate TLS.
+
+  For endpoint and auth differences, see [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted). No ingestion key header is needed.
+</Admonition>
+
+## Prerequisites
+
+- Cloudflare account on **Workers Paid** plan or higher
+- <a href="https://developers.cloudflare.com/workers/wrangler/install-and-update/" target="_blank" rel="noopener noreferrer nofollow">Wrangler CLI</a> installed
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Configure OTLP Export
+
+### Create destinations
+
+1. Open <a href="https://dash.cloudflare.com/?to=/:account/workers-and-pages/observability/pipelines" target="_blank" rel="noopener noreferrer nofollow">Workers Observability</a> in your Cloudflare dashboard.
+
+2. Go to **Destinations** and click **Add destination**. Create a traces destination:
+
+  - **Name**: `signoz-traces`
+  - **Type**: `Traces`
+  - **OTLP Endpoint**: `https://ingest.<region>.signoz.cloud:443/v1/traces`
+  - **Headers**: `signoz-ingestion-key: <your-ingestion-key>`
+
+  Click **Save**.
+
+<Figure
+  src="/img/docs/integrations/outposts/cloudflare/create-traces-destination.webp"
+  alt="Creating a traces destination in Cloudflare Workers Observability"
+  caption="Traces destination configured for SigNoz"
+/>
+
+3. Click **Add destination** again. Create a logs destination:
+
+  - **Name**: `signoz-logs`
+  - **Type**: `Logs`
+  - **OTLP Endpoint**: `https://ingest.<region>.signoz.cloud:443/v1/logs`
+  - **Headers**: `signoz-ingestion-key: <your-ingestion-key>`
+
+  Click **Save**.
+
+<Figure
+  src="/img/docs/integrations/outposts/cloudflare/create-logs-destination.webp"
+  alt="Creating a logs destination in Cloudflare Workers Observability"
+  caption="Logs destination configured for SigNoz"
+/>
+
+Verify these values:
+
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: your [SigNoz ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Configure Wrangler
+
+Add an `observability` block to your Wrangler config. Use the destination names you created above:
+
+<Tabs entityName="config">
+<TabItem value="jsonc" label="wrangler.jsonc" default>
+
+```json
+{
+  "observability": {
+    "traces": {
+      "enabled": true,
+      "destinations": ["signoz-traces"],
+      "head_sampling_rate": 0.05,
+      "persist": false
+    },
+    "logs": {
+      "enabled": true,
+      "destinations": ["signoz-logs"],
+      "head_sampling_rate": 0.6,
+      "persist": false
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem value="toml" label="wrangler.toml">
+
+```toml
+[observability.traces]
+enabled = true
+destinations = ["signoz-traces"]
+head_sampling_rate = 0.05
+persist = false
+
+[observability.logs]
+enabled = true
+destinations = ["signoz-logs"]
+head_sampling_rate = 0.6
+persist = false
+```
+
+</TabItem>
+</Tabs>
+
+Destination names are case-sensitive and must match what you saved in the dashboard.
+
+Key options:
+
+- `head_sampling_rate`: fraction of requests to sample (0.0 to 1.0). The values above match Cloudflare's recommended defaults. Set to `1` temporarily to validate data is flowing, then reduce.
+- `persist`: `false` sends data only to SigNoz. Set to `true` to also store data in Cloudflare's dashboard (Cloudflare charges apply separately).
+
+<Admonition type="tip">
+  Skip the `logs` block if you only need traces, or skip `traces` if you only need logs.
+</Admonition>
+
+### Deploy
+
+```bash
+wrangler deploy
+```
+
+Send traffic to your Worker. Data appears in SigNoz within a few minutes.
+
+## Validate
+
+- **Traces**: Open **Traces** in SigNoz. Spans from your Worker carry attributes like `worker_name` and `script_name`.
+- **Logs**: Open **Logs** in SigNoz. Trigger `console.log()` in your Worker. Log entries appear with the same `worker_name` attribute.
+
+Check delivery status under **Workers Observability → Destinations** in your Cloudflare dashboard:
+
+| Status              | Meaning                                |
+| ------------------- | -------------------------------------- |
+| Last: n minutes ago | Delivering successfully                |
+| Never run           | No traffic yet, or sampling rate is 0  |
+| Error               | Endpoint URL or ingestion key is wrong |
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Destination shows Error
+
+Recheck:
+
+- OTLP endpoint region — see [SigNoz regions](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Signal path: traces use `/v1/traces`, logs use `/v1/logs`. Wrong path silently drops data.
+- `signoz-ingestion-key` header value — copy it fresh from [SigNoz settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Destination shows Never run
+
+Send traffic to your Worker. If it stays at Never run after requests arrive:
+
+- Confirm `enabled: true` in your Wrangler config (`wrangler.jsonc` or `wrangler.toml`)
+- Confirm the destination name in `destinations` matches the dashboard name exactly (case-sensitive)
+- Confirm `head_sampling_rate` is greater than 0
+
+### Traces appear but logs do not (or vice versa)
+
+Each signal needs its own destination. Verify you created separate destinations for `Traces` type and `Logs` type, and that each `wrangler.jsonc` block references the correct destination name.
+
+### Sampling rate too low
+
+Set `head_sampling_rate: 1` temporarily to confirm data flows end to end, then reduce to your target rate.
+
+</details>
+
+## Limitations
+
+- **No metrics:** OTLP export covers traces and logs only. Metrics are not supported.
+- **Workers Paid required:** the Workers free plan does not support OTLP export destinations.
+- **Beta billing:** OTLP export is in beta. Check <a href="https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#limits-and-pricing" target="_blank" rel="noopener noreferrer nofollow">Cloudflare's current pricing</a> for current rates.
+- **Logs scope:** only application logs (`console.log()` output and system-generated logs) are exported. See <a href="https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#supported-telemetry-types" target="_blank" rel="noopener noreferrer nofollow">supported telemetry types</a> for the full list.
+
+## Next Steps
+
+- [Add custom spans and attributes in code](https://signoz.io/docs/instrumentation/opentelemetry-cloudflare/) using the community SDK or Cloudflare's official instrumentation
+- [Set up trace-based alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) on Worker latency or error rates
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) to detect error patterns in Worker logs
+- [Build dashboards](https://signoz.io/docs/userguide/manage-dashboards/) combining Worker traces and logs
+
+## Get Help
+
+<GetHelp />

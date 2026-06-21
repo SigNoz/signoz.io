@@ -1,0 +1,67 @@
+---
+date: 2026-06-14
+id: noz-latency-bottleneck
+title: Find Where Latency Is Going with Noz
+meta_title: Find Latency Bottlenecks with Noz - SigNoz AI Teammate
+description: When an endpoint slows down, ask Noz where the time goes. It pulls the slowest traces and breaks them down by span to find the bottleneck.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+One endpoint got slow this afternoon and the rest of the service looks fine. Instead of opening the Traces view and sorting by duration yourself, you ask Noz to find where the time goes.
+
+## Prerequisites
+
+- A [SigNoz Cloud](https://signoz.io/teams/) account with [Noz](https://signoz.io/docs/ai/noz/) available.
+- A service sending traces to SigNoz.
+
+## Step 1: Ask where the time goes
+
+Open **Noz** from the top-right header and describe the slowdown:
+
+```
+The /checkout endpoint got slow this afternoon. Where is the time going?
+```
+
+Noz checks the endpoint's latency over the window, reports the p99 against its baseline, and tells you whether the time is spent in your own code or waiting on a downstream call.
+
+## Step 2: Break it down to the bottleneck span
+
+Use **Add Context → Services** to attach the service, then go to the span level:
+
+<Figure src="/img/docs/noz/noz-add-context.webp" alt="Noz Add Context picker open with Dashboards, Alerts, and Services tabs, letting you attach a specific entity to scope the investigation" caption="Use Add Context to attach a dashboard, alert, or service so Noz scopes its answer to just that entity." />
+
+```
+Find the slowest trace for this endpoint and tell me which span or downstream dependency owns most of the time.
+```
+
+Noz pulls a representative slow trace, decomposes it span by span, and attributes the latency to a specific operation or dependency, with **Suggested Actions** to keep going, such as pulling more traces for that operation or checking the dependency's own latency.
+
+## Tips
+
+1. **Ask for the tail, not the average.** Request p99 or p95 so a few slow requests don't hide behind a healthy median.
+2. **Follow the dependency.** If the time is in a downstream call, ask Noz to look at that service next.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+To answer, Noz works through several agentic steps, visible under **Worked through N steps**:
+
+| Step | What It Did |
+|------|-------------|
+| Ran builder query | Ranked the service's operations by p99 latency over the window |
+| Searched traces | Pulled the slowest traces for the endpoint |
+| Reasoned | Decomposed a trace by span and attributed the time to a span or dependency |
+
+</details>
+
+## Next Steps
+
+- [Investigate What Changed After a Deploy with Noz](https://signoz.io/docs/ai/use-cases/noz-incident-triage/) - When the slowdown started after a release.
+- [Latency Spike Explainer](https://signoz.io/docs/ai/use-cases/latency-spike-explainer/) - Run the same breakdown from your coding agent.
+
+<GetHelp />

@@ -127,6 +127,9 @@ This skill file defines the review rubric (the 13 categories below). Project-spe
 ### 10) Styling and CSS
 
 - Check Tailwind consistency and duplication.
+- Prefer existing Tailwind utilities and SigNoz design tokens over arbitrary values wherever the visual impact is negligible.
+- Flag avoidable arbitrary Tailwind values such as `text-[13px]`, `rounded-[17px]`, or hardcoded hex colors when a close built-in utility or existing token would preserve the design.
+- Allow arbitrary values when they are genuinely layout-specific, animation-specific, or intentionally brand/asset-matching, but ask the author to document or justify the exception in the PR when it is not obvious.
 - Treat avoidable `.module.css` additions/expansions as findings when equivalent Tailwind classes/utilities can be used.
 - Flag new CSS custom properties, font-family declarations, and visual tokens added in component CSS modules unless there is a clear technical need (for example: pseudo-elements, complex keyframes, or browser-specific behavior Tailwind cannot express cleanly).
 - For styling-only PRs, explicitly verify that new visual changes are primarily implemented via existing Tailwind tokens/utilities.

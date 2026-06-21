@@ -37,6 +37,7 @@ Set the following environment variables to configure the OpenTelemetry exporter:
 export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/metrics"
 export OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 ```
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
@@ -56,6 +57,8 @@ env:
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: OTEL_RESOURCE_ATTRIBUTES
   value: 'service.name=<service-name>'
+- name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+  value: 'delta'
 ```
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
@@ -69,6 +72,7 @@ Verify these values:
 $env:OTEL_EXPORTER_OTLP_METRICS_ENDPOINT = "https://ingest.<region>.signoz.cloud:443/v1/metrics"
 $env:OTEL_EXPORTER_OTLP_METRICS_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_RESOURCE_ATTRIBUTES = "service.name=<service-name>"
+$env:OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE = "delta"
 ```
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
@@ -86,6 +90,7 @@ Add environment variables to your Dockerfile:
 ENV OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/metrics"
 ENV OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+ENV OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 
 CMD ["./main"]
 ```
@@ -95,6 +100,7 @@ Or pass them at runtime using `docker run`:
 docker run -e OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/metrics" \
     -e OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
     -e OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>" \
+    -e OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta" \
     your-image:latest
 ```
 
@@ -104,6 +110,12 @@ Verify these values:
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`)
 </TabItem>
 </Tabs>
+
+<KeyPointCallout title="Why delta temporality?" defaultCollapsed="true">
+OpenTelemetry SDKs export metrics with **cumulative** temporality by default, which re-sends the running total of every active series on each export interval — even when nothing has changed. With `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` set to `delta`, synchronous instruments (like Counters and Histograms) that record nothing during an export interval send no data points for that interval, reducing the number of billable samples.
+
+Observable (asynchronous) instruments emit a data point on every collection cycle regardless of temporality. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for details.
+</KeyPointCallout>
 
 ### Step 2. Install OpenTelemetry packages
 
