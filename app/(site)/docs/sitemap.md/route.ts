@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getDocsRouteTree, type DocsRouteTreeItem } from '@/utils/docs/agentDiscovery'
 import siteMetadata from '@/data/siteMetadata'
-import { getDocsSideNav } from '@/utils/docsSideNav'
 
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
@@ -28,8 +27,7 @@ const renderTree = (items: DocsRouteTreeItem[], indent = ''): string => {
 }
 
 export async function GET() {
-  const sideNavItems = await getDocsSideNav()
-  const tree = getDocsRouteTree(sideNavItems)
+  const tree = getDocsRouteTree()
   const markdown = [
     '# SigNoz Docs Sitemap',
     '',

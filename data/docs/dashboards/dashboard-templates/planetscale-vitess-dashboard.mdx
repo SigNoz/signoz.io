@@ -1,0 +1,121 @@
+---
+date: 2026-06-20
+id: planetscale-vitess-dashboard
+title: PlanetScale Vitess (MySQL) Metrics Dashboard
+description: Monitor PlanetScale Vitess query rate, latency, pools, MySQL internals, replication lag, VTOrc, storage, and pod resources. Filter by branch, keyspace, and tablet type.
+doc_type: explanation
+---
+
+Use this dashboard to monitor your PlanetScale Vitess (MySQL) branches across vtgate query serving, vttablet performance, connection and transaction pools, MySQL internals, replication, VTOrc recovery, storage, and pod resources.
+
+<Admonition type="note">
+  Before you import this dashboard, send PlanetScale metrics to SigNoz. Follow the [Send PlanetScale Metrics](https://signoz.io/docs/metrics-management/opentelemetry-planetscale/) guide to configure the OpenTelemetry Collector to scrape PlanetScale's Prometheus endpoint.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/planetscale-vitess-dashboard.webp"
+  alt="PlanetScale Vitess (MySQL) Metrics Dashboard"
+  caption="PlanetScale Vitess (MySQL) Metrics Dashboard"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/planetscale/planetscale-vitess.json"
+    dashboardName="PlanetScale Vitess (MySQL)"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+- **Overview**: vtgate query rate and latency, buffer pool hit rate, replica lag, slow queries, and storage used at a glance
+- **vtgate - Query Serving**: Query rate by operation, latency percentiles, average latency, and rows returned or affected
+- **vttablet - Tablet Query Performance**: Tablet query rate by type, latency by keyspace, rows read or affected, and slow queries by keyspace
+- **Connection & Transaction Pools (vttablet)**: Connection, transaction, stream, and found-rows pool usage against capacity, pool waits, and MySQL threads running
+- **MySQL Internals**: InnoDB row operations and lock waits, network I/O, and buffer pool hit rate
+- **Replication & MySQL Connections**: Replica lag by shard, threads connected against max, connection attempts, temp tables, table locks, buffer pool I/O, and per-pod connection utilization
+- **Errors, Recovery & Serving**: VTOrc detected problems and recoveries, tablet serving status, and pod status phases
+- **Storage**: Volume used percentage, available capacity, and top tables by storage
+- **Pod Resources & Topology**: Per-pod CPU, memory, disk IOPS, and vtgate pod topology
+
+## Metrics Included
+
+### Overview
+
+- **vtgate Query Rate**: Query throughput across vtgate
+- **vtgate Latency p99**: 99th percentile vtgate query latency
+- **Buffer Pool Hit %**: InnoDB buffer pool hit rate
+- **Replica Lag**: Replication lag
+- **Slow Queries /s**: Slow query rate
+- **Storage Used**: Volume used percentage
+
+### vtgate - Query Serving
+
+- **vtgate Query Rate by Operation**: Query rate grouped by operation type
+- **vtgate Query Latency (p50 / p95 / p99)**: vtgate query latency percentiles
+- **vtgate Average Query Latency**: Mean vtgate query latency
+- **vtgate Rows Returned / Affected**: Rows returned and affected by vtgate queries
+
+### vttablet - Tablet Query Performance
+
+- **Tablet Query Rate by Tablet Type**: Tablet query rate split by tablet type
+- **Tablet Query Latency p99 by Keyspace**: 99th percentile tablet query latency per keyspace
+- **Tablet Rows Read / Returned / Affected**: Rows read, returned, and affected at the tablet
+- **Slow Queries by Keyspace**: Slow query rate per keyspace
+
+### Connection & Transaction Pools (vttablet)
+
+- **Connection Pool - In Use vs Capacity**: Connection pool usage against capacity
+- **Transaction Pool - In Use vs Capacity**: Transaction pool usage against capacity
+- **Pool Waits /s**: Rate of waits for an available pool slot
+- **Stream Connection Pool - In Use vs Capacity**: Stream connection pool usage against capacity
+- **Found Rows Pool - In Use vs Capacity**: Found-rows pool usage against capacity
+- **MySQL Threads Running**: Actively running MySQL threads
+
+### MySQL Internals
+
+- **InnoDB Row Operations /s**: InnoDB row read, insert, update, and delete rate
+- **InnoDB Row Lock Waits /s**: Rate of InnoDB row lock waits
+- **MySQL Network I/O**: MySQL bytes sent and received
+- **InnoDB Buffer Pool Hit %**: InnoDB buffer pool hit rate
+
+### Replication & MySQL Connections
+
+- **Replica Lag by Shard**: Replication lag per shard
+- **MySQL Threads Connected vs Max**: Connected threads against the max connection limit
+- **MySQL Connection Attempts /s**: Rate of connection attempts
+- **Temp Tables Created /s**: Rate of temporary tables created
+- **Table Locks /s**: Rate of table locks acquired
+- **InnoDB Buffer Pool I/O /s**: InnoDB buffer pool read and write rate
+- **Connection Utilization % by Pod**: Per-pod connection utilization percentage
+
+### Errors, Recovery & Serving
+
+- **VTOrc Detected Problems**: Problems detected by VTOrc
+- **VTOrc Recoveries /s**: Rate of VTOrc recovery actions
+- **Tablet Serving Status**: Serving status per tablet
+- **Pods by Status Phase**: Pod count grouped by status phase
+
+### Storage
+
+- **Volume Used %**: Volume used as a percentage of capacity
+- **Volume Available vs Capacity**: Available volume bytes against total capacity
+- **Top Tables by Storage**: Largest tables by storage consumed
+
+### Pod Resources & Topology
+
+- **CPU Utilization by Pod**: Per-pod CPU utilization
+- **Memory Utilization by Pod**: Per-pod memory utilization
+- **Disk IOPS by Pod**: Per-pod disk I/O operations per second
+- **vtgate Pods**: vtgate pod topology
+
+## Dashboard Variables
+
+- **branch**: Filter by PlanetScale database branch
+- **keyspace**: Filter by Vitess keyspace
+- **tablet_type**: Filter by tablet type
+
+## Related Dashboards
+
+- [PlanetScale PostgreSQL](https://signoz.io/docs/dashboards/dashboard-templates/planetscale-postgres-dashboard/)
+- [MySQL](https://signoz.io/docs/dashboards/dashboard-templates/mysql/)
+- [Kubernetes Dashboards](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-dashboards/)
