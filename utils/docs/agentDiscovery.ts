@@ -1,5 +1,5 @@
 import docsSideNav from '@/constants/docsSideNav'
-import type { DocsSideNavItem } from '@/utils/docsSideNav'
+import type { NavItem as DocsSideNavItem } from '@/components/DocsSidebar/types'
 
 type NavItem =
   | {
