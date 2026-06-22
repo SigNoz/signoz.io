@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { Sparkles } from 'lucide-react'
-import ChatModal from './ChatModal'
+import { openDecimalChat } from '@/utils/decimal'
 import useSearchShortcut from '@/hooks/useSearchShortcut'
 import { useLogEvent } from '@/hooks/useLogEvent'
 
@@ -18,7 +18,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   rotationInterval = 2000,
   clickLocation = 'page', // default fallback location
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0)
 
   // Convert placeholder to array for consistent handling
@@ -38,8 +37,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   // Enable / shortcut
   useSearchShortcut({
-    onOpen: () => setIsModalOpen(true),
-    isEnabled: !isModalOpen,
+    onOpen: () => openDecimalChat(),
+    isEnabled: true,
   })
 
   const logEvent = useLogEvent()
@@ -59,7 +58,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       },
     })
 
-    setIsModalOpen(true)
+    openDecimalChat()
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -90,8 +89,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
           /
         </kbd>
       </div>
-
-      <ChatModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
   )
 }

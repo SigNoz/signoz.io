@@ -11,7 +11,7 @@ import AdditionalResources from './AdditionalResources'
 import QuickStartCloud from '@/components/QuickStartCloud'
 import InstallLocallySection from './InstallLocallySection'
 import { Metadata } from 'next'
-import ChatbaseClient from '@/components/Chatbase/ChatbaseClient'
+import DecimalClient from '@/components/Decimal/DecimalClient'
 import HoverableSidebar from '@/components/HoverableSidebar'
 import { generateDocsBreadcrumb } from '@/utils/breadcrumbSchema'
 import JsonLdScript from '@/components/JsonLdScript'
@@ -40,7 +40,7 @@ export default function DocsIntroductionPage() {
       <AdditionalResources />
       <InstallLocallySection />
       <QuickStartCloud />
-      <ChatbaseClient disableFloatingMessages />
+      <DecimalClient />
     </>
   )
 }

@@ -95,15 +95,15 @@ export const EXPERIMENTS = {
     concluded: true,
     defaultVariant: 'without-self-host-tab',
   },
-  CHATBASE_BUBBLE: {
-    id: 'chatbase-bubble-experiment',
+  DECIMAL_BUBBLE: {
+    id: 'decimal-bubble-experiment',
     variants: {
-      CONTROL: 'no-chatbase-bubble',
-      VARIANT: 'with-chatbase-bubble',
+      CONTROL: 'no-decimal-bubble',
+      VARIANT: 'with-decimal-bubble',
     },
-    flagName: 'chatbase-bubble-experiment',
+    flagName: 'decimal-bubble-experiment',
     concluded: true,
-    defaultVariant: 'with-chatbase-bubble',
+    defaultVariant: 'with-decimal-bubble',
   },
   HOMEPAGE_EMAIL_SIGNUP: {
     id: 'homepage-email-signup',

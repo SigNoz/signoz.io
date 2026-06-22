@@ -31,6 +31,7 @@ import { AppTooltip } from '@/components/ui/AppTooltip'
 import { TooltipProvider } from '@radix-ui/react-tooltip'
 import { useLogEvent } from 'hooks/useLogEvent'
 import { usePathname } from 'next/navigation'
+import { openDecimalChat } from '@/utils/decimal'
 
 type SearchButtonProps = {
   disableShortcut?: boolean
@@ -271,14 +272,18 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
 
   useEffect(() => {
     if (mode === 'ask-ai') {
+      // Decimal has no inline embed, so opening "Ask AI" closes the search
+      // dialog and opens the Decimal chat panel instead.
       resultsRef.current?.clearActiveResult()
+      onClose()
+      openDecimalChat()
       return
     }
 
     if (mode === 'search') {
       focusSearchInput()
     }
-  }, [mode, focusSearchInput])
+  }, [mode, focusSearchInput, onClose])
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -322,9 +327,7 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
                       onClose={onClose}
                       onFocusInput={focusSearchInput}
                     />
-                  ) : (
-                    <AskAIContent />
-                  )}
+                  ) : null}
                 </InstantSearch>
               </Dialog.Panel>
             </Transition.Child>
@@ -735,25 +738,6 @@ const SearchModeToggle = ({
       <Sparkles className="h-3.5 w-3.5" />
       Ask AI
     </button>
-  </div>
-)
-
-const AskAIContent = () => (
-  <div className="max-h-[65vh] overflow-y-auto px-2 pb-2">
-    <div className="mt-2 overflow-hidden rounded-2xl bg-signoz_slate-500 shadow-[0_20px_45px] shadow-black/40">
-      <div className="w-full bg-signoz_slate-500">
-        <iframe
-          src="https://www.chatbase.co/chatbot-iframe/ZXMN63dnzm9r1LEY0He6U"
-          className="h-[420px] w-full border-0 sm:h-[520px]"
-          frameBorder="0"
-          title="SigNoz Chat Assistant"
-          allow="microphone"
-        />
-      </div>
-      <div className="border-t border-white/10 bg-black/20 px-6 py-4 text-xs text-white/60">
-        Responses are AI-generated from SigNoz docs. Double-check important details before acting.
-      </div>
-    </div>
   </div>
 )
 
