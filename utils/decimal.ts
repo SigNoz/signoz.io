@@ -2,9 +2,15 @@
 // These values come from the Decimal dashboard (Setup tab). The public-config
 // token is safe to expose in the client — it only encodes the widget id and a
 // timestamp, and the widget is rejected on domains not allow-listed in Decimal.
-export const DECIMAL_WIDGET_ID = 'wgt_mUjvpIptdhjk60ngaT59GyI2G7gM1qZJ'
+// Optional env overrides (e.g. for staging) fall back to the production values.
+export const DECIMAL_WIDGET_ID =
+  process.env.NEXT_PUBLIC_DECIMAL_WIDGET_ID || 'wgt_mUjvpIptdhjk60ngaT59GyI2G7gM1qZJ'
 export const DECIMAL_PUBLIC_CONFIG =
+  process.env.NEXT_PUBLIC_DECIMAL_PUBLIC_CONFIG ||
   'eyJhbGciOiJIUzI1NiJ9.eyJ3aWQiOiJ3Z3RfbVVqdnBJcHRkaGprNjBuZ2FUNTlHeUkyRzdnTTFxWkoiLCJkb21haW5zIjpbXSwiaWF0IjoxNzgyMTEzMzkzfQ.cRozMWLXlU4vsiXd_N21ZIcMCtp47c6pss_DN9MNaQE'
+
+// Brand accent color for the widget launcher and chat header (SigNoz orange).
+export const DECIMAL_PRIMARY_COLOR = '#ff5108'
 
 // Display mode controls how the chat opens:
 //   'floating'        -> corner popup (matches the previous Chatbase bubble)
@@ -29,6 +35,7 @@ export function ensureDecimalScript(): void {
   script.setAttribute('data-widget-id', DECIMAL_WIDGET_ID)
   script.setAttribute('data-public-config', DECIMAL_PUBLIC_CONFIG)
   script.setAttribute('data-display-mode', DECIMAL_DISPLAY_MODE)
+  script.setAttribute('data-primary-color', DECIMAL_PRIMARY_COLOR)
   script.async = true
   document.head.appendChild(script)
 }
@@ -47,7 +54,12 @@ export function openDecimalChat(): void {
       window.Decimal.show()
       return
     }
-    if (attempt >= 50) return // give up after ~5s
+    if (attempt >= 50) {
+      // Give up after ~5s — the script likely failed to load (network error,
+      // ad-blocker, etc.). Surface it so failures are diagnosable.
+      console.warn('[Decimal] chat widget did not become ready after ~5s; ignoring open request')
+      return
+    }
     window.setTimeout(() => tryShow(attempt + 1), 100)
   }
 

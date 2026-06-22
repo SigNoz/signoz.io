@@ -95,16 +95,6 @@ export const EXPERIMENTS = {
     concluded: true,
     defaultVariant: 'without-self-host-tab',
   },
-  DECIMAL_BUBBLE: {
-    id: 'decimal-bubble-experiment',
-    variants: {
-      CONTROL: 'no-decimal-bubble',
-      VARIANT: 'with-decimal-bubble',
-    },
-    flagName: 'decimal-bubble-experiment',
-    concluded: true,
-    defaultVariant: 'with-decimal-bubble',
-  },
   HOMEPAGE_EMAIL_SIGNUP: {
     id: 'homepage-email-signup',
     variants: {
