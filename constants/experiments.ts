@@ -115,5 +115,14 @@ export const EXPERIMENTS = {
     concluded: true,
     defaultVariant: 'existing-cta-buttons',
   },
+  HOMEPAGE_HERO_REDESIGN: {
+    id: 'homepage-hero-redesign',
+    variants: {
+      CONTROL: 'existing-homepage-hero',
+      VARIANT: 'new-homepage-hero',
+    },
+    flagName: 'homepage-hero-redesign',
+    defaultVariant: 'existing-homepage-hero',
+  },
   // Add more experiments here as needed
 } as const
