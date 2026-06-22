@@ -462,6 +462,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/manage/administrator-guide/iam/roles-api',
+                label: 'Role Management API',
+              },
+              {
+                type: 'doc',
                 route: '/docs/manage/administrator-guide/iam/invite-team-member',
                 label: 'Invite Team Member',
               },

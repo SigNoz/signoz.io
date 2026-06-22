@@ -1,0 +1,315 @@
+---
+date: 2026-06-22
+id: roles-api
+title: Role Management API Reference - Create & Update Roles
+description: Manage SigNoz roles with the Role Management API — create roles, update permissions via transaction groups, and migrate off deprecated endpoints.
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+doc_type: reference
+---
+
+<Admonition type="warning">
+Fine-grained access control is currently in private beta. Contact the SigNoz team for more information.
+</Admonition>
+
+## Overview
+
+The Role Management API lets you create, read, update, and delete custom roles programmatically. Use it to manage roles from CI/CD pipelines, automation scripts, and infrastructure-as-code tooling instead of the **Settings > Roles** UI.
+
+A role groups permissions together. When a principal is assigned a role, it receives every permission the role contains. For the concepts behind roles, permissions, and selectors, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
+
+<Admonition type="info">
+**Enterprise** — Assigning permissions through **transaction groups** (the `transactionGroups` field on create, update, and the single-role response) requires an active enterprise license. On non-enterprise installations, these operations return a `role_unsupported` error.
+</Admonition>
+
+## Prerequisites
+
+- An active SigNoz license.
+- A service account API key. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for how to create one.
+- A role with the required scope for each operation. See the [Permissions Reference](https://signoz.io/docs/manage/administrator-guide/iam/permissions/) for the permission each action needs.
+
+## Authentication
+
+Include your service account key in the `SIGNOZ-API-KEY` header on every request. Replace `<SIGNOZ_URL>` with your SigNoz instance URL and `<YOUR_SERVICE_ACCOUNT_KEY>` with your key.
+
+```bash
+curl -X GET https://<SIGNOZ_URL>/api/v1/roles \
+  -H "SIGNOZ-API-KEY: <YOUR_SERVICE_ACCOUNT_KEY>"
+```
+
+## Required scopes
+
+| Operation | Endpoint | Scope | Restriction |
+|-----------|----------|-------|-------------|
+| List roles | `GET /api/v1/roles` | `role:list` | — |
+| Get a role | `GET /api/v1/roles/{id}` | `role:read` | — |
+| Create a role | `POST /api/v1/roles` | `role:create` | Admin only |
+| Update a role | `PUT /api/v1/roles/{id}` | `role:update` | Admin only |
+| Delete a role | `DELETE /api/v1/roles/{id}` | `role:delete` | Admin only |
+
+## Transaction groups
+
+A **transaction group** is a pairing of a relation (a verb such as `read` or `update`) with an object group (a resource type plus the selectors it applies to). It assigns bulk permissions to a role in a single field, replacing the per-relation object calls used by the deprecated PATCH endpoints.
+
+A `transactionGroups` value is an array of transaction group objects:
+
+```json
+{
+  "relation": "read",
+  "objectGroup": {
+    "resource": {
+      "type": "role",
+      "kind": "role"
+    },
+    "selectors": ["my-custom-role", "platform-readonly"]
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `relation` | string | The action granted. One of `create`, `read`, `update`, `delete`, `list`, `attach`, `detach`. |
+| `objectGroup.resource.type` | string | The resource type the permission applies to, for example `role` or `serviceaccount`. |
+| `objectGroup.resource.kind` | string | The resource kind, for example `role` or `factor-api-key`. |
+| `objectGroup.selectors` | string[] | Which instances the permission applies to. Use `["*"]` for all instances, or specific names/IDs for selected instances. |
+
+For the valid resource types, kinds, relations, and selector formats, see the [Permissions Reference](https://signoz.io/docs/manage/administrator-guide/iam/permissions/) and [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
+
+<Admonition type="info">
+**Enterprise** — Sending a non-empty `transactionGroups` array requires an active enterprise license. To create or update a role without transaction groups on any installation, send an empty array `[]`.
+</Admonition>
+
+## Create a role
+
+`POST /api/v1/roles` — Scope: `role:create` (admin only)
+
+Both `description` and `transactionGroups` are **required** in the request body. To create a role with no permissions, send `transactionGroups` as an empty array. To create a role with no description, send an empty string.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Lowercase letters and hyphens only, up to 50 characters. Cannot start with `signoz-` (reserved for managed roles). |
+| `description` | string | Yes | Human-readable description of the role. Send `""` for none. |
+| `transactionGroups` | array | Yes | Permission assignments for the role. Send `[]` for none. |
+
+```bash
+curl -X POST https://<SIGNOZ_URL>/api/v1/roles \
+  -H "SIGNOZ-API-KEY: <YOUR_SERVICE_ACCOUNT_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "platform-readonly",
+    "description": "Read-only access for platform engineers",
+    "transactionGroups": [
+      {
+        "relation": "read",
+        "objectGroup": {
+          "resource": { "type": "role", "kind": "role" },
+          "selectors": ["*"]
+        }
+      }
+    ]
+  }'
+```
+
+A `201 Created` response returns the new role's ID:
+
+```json
+{
+  "status": "success",
+  "data": { "id": "0192f1c2-3b4a-7c8d-9e0f-1a2b3c4d5e6f" }
+}
+```
+
+<Admonition type="warning">
+**Breaking change** — `description` and `transactionGroups` are now required. Requests that omit either field return a `400` validation error. Existing integrations that called `POST /api/v1/roles` with only a `name` must be updated. See [Migrate existing integrations](#migrate-existing-integrations).
+</Admonition>
+
+Creating a role whose name already exists returns a `409 Conflict` with the `role_already_exists` error code instead of overwriting the existing role.
+
+## List roles
+
+`GET /api/v1/roles` — Scope: `role:list`
+
+Returns all managed and custom roles. The list response does not include `transactionGroups`; fetch a single role to see its permission assignments.
+
+```bash
+curl -X GET https://<SIGNOZ_URL>/api/v1/roles \
+  -H "SIGNOZ-API-KEY: <YOUR_SERVICE_ACCOUNT_KEY>"
+```
+
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "id": "0192f1c2-3b4a-7c8d-9e0f-1a2b3c4d5e6f",
+      "name": "platform-readonly",
+      "description": "Read-only access for platform engineers",
+      "type": "custom",
+      "orgId": "0192aaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "createdAt": "2026-06-22T10:00:00Z",
+      "updatedAt": "2026-06-22T10:00:00Z"
+    }
+  ]
+}
+```
+
+## Get a role
+
+`GET /api/v1/roles/{id}` — Scope: `role:read`
+
+Returns a single role including its `transactionGroups` array — the full list of permission assignments (relation plus object group) on the role.
+
+```bash
+curl -X GET https://<SIGNOZ_URL>/api/v1/roles/<ROLE_ID> \
+  -H "SIGNOZ-API-KEY: <YOUR_SERVICE_ACCOUNT_KEY>"
+```
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "0192f1c2-3b4a-7c8d-9e0f-1a2b3c4d5e6f",
+    "name": "platform-readonly",
+    "description": "Read-only access for platform engineers",
+    "type": "custom",
+    "orgId": "0192aaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "transactionGroups": [
+      {
+        "relation": "read",
+        "objectGroup": {
+          "resource": { "type": "role", "kind": "role" },
+          "selectors": ["*"]
+        }
+      }
+    ],
+    "createdAt": "2026-06-22T10:00:00Z",
+    "updatedAt": "2026-06-22T10:00:00Z"
+  }
+}
+```
+
+## Update a role
+
+`PUT /api/v1/roles/{id}` — Scope: `role:update` (admin only)
+
+The PUT endpoint is the unified replacement for the deprecated PATCH endpoints. It updates a role's `description` and reconciles its permission assignments atomically — additions and deletions are applied in a single call so the role's `transactionGroups` end up exactly matching the request body.
+
+Both `description` and `transactionGroups` are **required**. The request replaces the role's full state:
+
+- Send the complete set of `transactionGroups` you want the role to have. Omitted groups are removed.
+- Send an empty array `[]` to clear all permissions.
+- Send an empty string `""` for `description` to clear it.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `description` | string | Yes | New description. Send `""` to clear. |
+| `transactionGroups` | array | Yes | The complete desired set of permission assignments. Send `[]` to clear. |
+
+```bash
+curl -X PUT https://<SIGNOZ_URL>/api/v1/roles/<ROLE_ID> \
+  -H "SIGNOZ-API-KEY: <YOUR_SERVICE_ACCOUNT_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "description": "Read and update access for platform engineers",
+    "transactionGroups": [
+      {
+        "relation": "read",
+        "objectGroup": {
+          "resource": { "type": "role", "kind": "role" },
+          "selectors": ["*"]
+        }
+      },
+      {
+        "relation": "update",
+        "objectGroup": {
+          "resource": { "type": "role", "kind": "role" },
+          "selectors": ["platform-readonly"]
+        }
+      }
+    ]
+  }'
+```
+
+A successful update returns `204 No Content`.
+
+## Delete a role
+
+`DELETE /api/v1/roles/{id}` — Scope: `role:delete` (admin only)
+
+Deletes a custom role. The role must have no assigned principals, and managed roles cannot be deleted.
+
+```bash
+curl -X DELETE https://<SIGNOZ_URL>/api/v1/roles/<ROLE_ID> \
+  -H "SIGNOZ-API-KEY: <YOUR_SERVICE_ACCOUNT_KEY>"
+```
+
+A successful delete returns `204 No Content`.
+
+## Deprecated endpoints
+
+<Admonition type="warning">
+The following endpoints are deprecated. Migrate to `PUT /api/v1/roles/{id}` with a `transactionGroups` payload. They remain available for backward compatibility; new integrations should not use them.
+</Admonition>
+
+### PATCH /api/v1/roles/{id} (deprecated)
+
+Updated only a role's `description`. Use `PUT /api/v1/roles/{id}` instead, which updates the description and permissions in one call.
+
+### PATCH /api/v1/roles/{id}/relations/{relation}/objects (deprecated)
+
+Patched the objects connected to a role for a single relation using `additions` and `deletions` arrays. Use the `transactionGroups` field in `PUT /api/v1/roles/{id}` instead, which reconciles all relations atomically.
+
+## Migrate existing integrations
+
+The breaking change affects callers of `POST /api/v1/roles`: `description` and `transactionGroups` are now required.
+
+**Before** — a role created with only a name:
+
+```json
+{ "name": "platform-readonly" }
+```
+
+**After** — `description` and `transactionGroups` are required. Send empty values when you have nothing to set:
+
+```json
+{
+  "name": "platform-readonly",
+  "description": "",
+  "transactionGroups": []
+}
+```
+
+To migrate from the deprecated relation-objects PATCH to the unified PUT, move each relation's object groups into the `transactionGroups` array and send the complete desired set:
+
+```json
+{
+  "description": "Read-only access for platform engineers",
+  "transactionGroups": [
+    {
+      "relation": "read",
+      "objectGroup": {
+        "resource": { "type": "role", "kind": "role" },
+        "selectors": ["*"]
+      }
+    }
+  ]
+}
+```
+
+## Error reference
+
+| Status | Code | Cause |
+|--------|------|-------|
+| `400` | `role_invalid_input` | Missing required field (`description` or `transactionGroups`), or an invalid role name. |
+| `403` | — | The principal lacks the required scope, or is not an admin for create/update/delete. |
+| `404` | `role_not_found` | No role exists with the given ID. |
+| `409` | `role_already_exists` | A role with the same name already exists. |
+| `501` | `role_unsupported` | Transaction group operations attempted without an active enterprise license. |
+
+## Next Steps
+
+- [Roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/) — Manage roles from the SigNoz UI
+- [Permissions Reference](https://signoz.io/docs/manage/administrator-guide/iam/permissions/) — Look up permissions and selectors for each resource
+- [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/) — Understand how access control works
+- [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) — Create the API keys used to authenticate these requests
+</content>
+</invoke>
