@@ -4,6 +4,7 @@ import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLay
 import IconTitleDescriptionCardGrid from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 import { IconTitleDescriptionCardData } from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 import { cn } from '../../app/lib/utils'
+import AgentNativeObservabilitySection from '@/components/index-agent-native-observability/AgentNativeObservability'
 
 const AGENT_FEATURES: IconTitleDescriptionCardData[] = [
   {
@@ -35,7 +36,7 @@ const AGENT_FEATURES: IconTitleDescriptionCardData[] = [
   },
 ]
 
-export const AgentNativeObservability = ({ className }: { className?: string }) => {
+function AgentNativeObservabilityControl({ className }: { className?: string }) {
   return (
     <>
       <section
@@ -80,4 +81,18 @@ export const AgentNativeObservability = ({ className }: { className?: string }) 
       </SectionLayout>
     </>
   )
+}
+
+export const AgentNativeObservability = ({
+  className,
+  variant = 'control',
+}: {
+  className?: string
+  variant?: 'control' | 'ai-agents'
+}) => {
+  if (variant === 'ai-agents') {
+    return <AgentNativeObservabilitySection />
+  }
+
+  return <AgentNativeObservabilityControl className={className} />
 }

@@ -7,7 +7,6 @@ import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
 import GitHubStars from '../GithubStars/GithubStars'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
-import type { NavItem } from '../DocsSidebar/types'
 import Accordion from '../Accordion/Accordion'
 import {
   productDropdownItemsSorted,
@@ -22,7 +21,6 @@ interface MobileMenuProps {
   showMainMenu: boolean
   isDocsBasePath: boolean
   isSignupRoute: boolean
-  docsSideNavItems: NavItem[]
   onShowMainMenu: () => void
 }
 
@@ -32,7 +30,6 @@ export default function MobileMenu({
   showMainMenu,
   isDocsBasePath,
   isSignupRoute,
-  docsSideNavItems,
   onShowMainMenu,
 }: MobileMenuProps) {
   const router = useRouter()
@@ -78,7 +75,7 @@ export default function MobileMenu({
                   <ArrowBigLeft size={16} /> Back to main menu
                 </TrackingButton>
 
-                <DocsSidebar items={docsSideNavItems} onNavItemClick={closeMobileMenu} />
+                <DocsSidebar onNavItemClick={closeMobileMenu} />
               </div>
             )}
           </div>

@@ -15,7 +15,6 @@ import ChatbaseClient from '@/components/Chatbase/ChatbaseClient'
 import HoverableSidebar from '@/components/HoverableSidebar'
 import { generateDocsBreadcrumb } from '@/utils/breadcrumbSchema'
 import JsonLdScript from '@/components/JsonLdScript'
-import { getDocsSideNav } from '@/utils/docsSideNav'
 
 export const metadata: Metadata = {
   title: 'Introduction to SigNoz - Open Source Observability Platform',
@@ -23,14 +22,13 @@ export const metadata: Metadata = {
     'Learn about SigNoz, an open-source observability platform that helps you monitor your applications with distributed tracing, metrics, and logs.',
 }
 
-export default async function DocsIntroductionPage() {
-  const docsSideNavItems = await getDocsSideNav()
-  const breadcrumbJsonLd = generateDocsBreadcrumb('introduction', 'Introduction', docsSideNavItems)
+export default function DocsIntroductionPage() {
+  const breadcrumbJsonLd = generateDocsBreadcrumb('introduction', 'Introduction')
 
   return (
     <>
       <JsonLdScript data={breadcrumbJsonLd} />
-      <HoverableSidebar items={docsSideNavItems} />
+      <HoverableSidebar />
       <Header showSearchBar />
       <SendData />
       <Monitor />

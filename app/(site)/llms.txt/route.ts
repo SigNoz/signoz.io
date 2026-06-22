@@ -1,13 +1,11 @@
 import { NextResponse } from 'next/server'
 import siteMetadata from '@/data/siteMetadata'
 import { getLlmStarterLinks } from '@/utils/docs/agentDiscovery'
-import { getDocsSideNav } from '@/utils/docsSideNav'
 
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
 export async function GET() {
-  const sideNavItems = await getDocsSideNav()
-  const starters = getLlmStarterLinks(24, sideNavItems)
+  const starters = getLlmStarterLinks()
   const starterLines =
     starters.length > 0
       ? starters.map((item) => `- ${item.label}: ${siteMetadata.siteUrl}${item.route}/`).join('\n')
