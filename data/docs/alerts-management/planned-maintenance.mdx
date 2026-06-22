@@ -1,5 +1,5 @@
 ---
-date: 2026-05-20
+date: 2026-06-13
 id: planned-maintenance
 title: Planned Maintenance/Downtime
 description: Schedule maintenance windows in SigNoz to suppress alert notifications during planned downtime with one-time or recurring schedules.
@@ -25,7 +25,7 @@ To create a maintenance window, go to **Alerts > Configuration > Planned Downtim
 
 SigNoz supports two types of maintenance schedules:
 
-- **One-time**: A maintenance window that is scheduled at a specific time for a fixed duration.
+- **One-time**: A maintenance window that starts at a specific time and runs until a specified end time, or indefinitely if no end time is set.
 - **Recurring**: A maintenance window that is scheduled at a specific time and repeats at a regular interval. Optionally, you can specify an end date for the maintenance window.
 
 #### One-time Maintenance Window
@@ -42,23 +42,32 @@ The following fields are required to create a one-time maintenance window:
 
 - **Name**: A descriptive name for the maintenance window.
 - **Start Time**: The start time of the maintenance window in the selected timezone.
-- **End Time**: The end time of the maintenance window in the selected timezone.
 - **Timezone**: The timezone of the maintenance window. This is the timezone in which the maintenance window is scheduled.
-
-Example:
-
-```
-Start time: 2024-08-01 22:00:00
-End time: 2024-08-01 23:00:00
-Timezone: America/New_York
-```
-
-This means that the maintenance window is scheduled for 22:00:00 to 23:00:00 in the America/New_York timezone.
 
 The following fields are optional:
 
+- **End Time**: The end time of the maintenance window in the selected timezone. If not set, the maintenance window runs indefinitely until you explicitly update or delete it.
 - **Silence Alerts**: The alerts that are silenced during the maintenance window. If nothing is selected, all alerts are silenced.
 - **Scope**: A label expression that further filters which alert instances are suppressed. See [Scoping with Label Expressions](#scoping-with-label-expressions).
+
+Example (fixed duration):
+
+```
+Start time: 2026-07-01 22:00:00
+End time: 2026-07-01 23:00:00
+Timezone: America/New_York
+```
+
+This schedules the maintenance window from 22:00:00 to 23:00:00 in the America/New_York timezone.
+
+Example (indefinite):
+
+```
+Start time: 2026-07-01 22:00:00
+Timezone: America/New_York
+```
+
+This starts the maintenance window at 22:00:00 on 2026-07-01 and keeps it active until you manually update or delete it.
 
 #### Recurring Maintenance Window
 
@@ -95,7 +104,7 @@ Examples:
 1. Daily maintenance window that repeats every day for 1 hour starting from 22:00:00 in the America/New_York timezone.
 
 ```
-Start time: 2024-08-01 22:00:00
+Start time: 2026-07-01 22:00:00
 Repeats every: Daily
 Duration: 1 hour
 Timezone: America/New_York
@@ -104,9 +113,9 @@ Timezone: America/New_York
 2. Weekly maintenance window that repeats every week on Monday for 1 hour starting from 22:00:00 in the America/New_York timezone.
 
 ```
-Start time: 2024-08-01 22:00:00
+Start time: 2026-07-01 22:00:00
 Repeats every: Weekly
-Weekly Occurence: [Monday]
+Weekly Occurrence: [Monday]
 Duration: 1 hour
 Timezone: America/New_York
 ```
@@ -114,7 +123,7 @@ Timezone: America/New_York
 3. Monthly maintenance window that repeats every month on the 12th day of the month for 1 hour starting from 22:00:00 in the America/New_York timezone.
 
 ```
-Start time: 2024-08-12 22:00:00
+Start time: 2026-07-12 22:00:00
 Repeats every: Monthly
 Duration: 1 hour
 Timezone: America/New_York
