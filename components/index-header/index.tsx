@@ -15,25 +15,47 @@ export function HomepageHeroRedesign() {
   return (
     <header className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] -translate-x-1/2 overflow-hidden px-4 pt-24 sm:px-6 md:pt-[220px] lg:px-[78px]">
       <div className="relative mx-auto flex w-full max-w-[1200px] flex-col">
-        <HeroCopyMotion>
-          <h1 className="m-0 max-w-[900px] text-left text-[44px] font-medium leading-[1.04] tracking-[-1.408px] text-signoz_vanilla-100 sm:text-[56px] md:text-[64px] md:leading-[64px]">
-            Open observability for engineers
-            <br />
-            and their AI Agents
-          </h1>
+        <HeroCopyMotion delay={0.04}>
+          <TrackingLink
+            href="/agent-native-observability/"
+            clickType="Secondary CTA"
+            clickName="Agent Native Observability Link"
+            clickText="New Agent Native Observability"
+            clickLocation="Hero Section"
+            className="group mb-6 inline-flex items-center gap-2 text-sm font-normal leading-5 text-signoz_vanilla-400 transition-colors hover:text-signoz_vanilla-100"
+          >
+            <span className="rounded-full border border-signoz_slate-100 px-2 py-0.5 text-xs text-signoz_vanilla-100">
+              New
+            </span>
+            Agent Native Observability
+            <ArrowRight
+              size={14}
+              className="transition-transform duration-200 group-hover:translate-x-1"
+            />
+          </TrackingLink>
         </HeroCopyMotion>
 
-        <div className="mt-8 flex flex-col gap-8 md:flex-row md:items-stretch md:justify-between">
-          <div className="flex flex-col items-start">
+        <div className="grid gap-8 md:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.72fr)] md:items-start md:gap-16">
+          <HeroCopyMotion>
+            <h1 className="m-0 max-w-[760px] text-left text-[44px] font-medium leading-[1.04] tracking-[-1.408px] text-signoz_vanilla-100 sm:text-[56px] md:text-[64px] md:leading-[64px]">
+              Observability for your
+              <br />
+              team, and AI agents.
+              <br />
+              <span className="text-signoz_vanilla-400">Powered by open standards.</span>
+            </h1>
+          </HeroCopyMotion>
+
+          <div className="flex flex-col items-start md:pt-2">
             <HeroCopyMotion delay={0.12}>
-              <p className="m-0 max-w-[760px] text-left text-[15px] font-normal leading-6 tracking-[-0.165px] text-signoz_vanilla-400">
+              <p className="m-0 max-w-[520px] text-left text-[17px] font-normal leading-7 tracking-[-0.165px] text-signoz_vanilla-400">
                 SigNoz brings your traces, metrics, logs, and alerts into one OpenTelemetry-native
                 workspace so you don&apos;t have to stitch together five tools during an incident.
               </p>
             </HeroCopyMotion>
 
             <HeroCopyMotion className="w-full sm:w-auto" delay={0.2}>
-              <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-8">
+              <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-6">
                 <TrackingLink
                   href="/teams/"
                   clickType="Primary CTA"
@@ -68,26 +90,6 @@ export function HomepageHeroRedesign() {
                   </Button>
                 </TrackingLink>
               </div>
-            </HeroCopyMotion>
-          </div>
-
-          <div className="flex flex-col items-start gap-4 md:items-end md:justify-end">
-            <HeroCopyMotion delay={0.24}>
-              <TrackingLink
-                href="/agent-native-observability/"
-                clickType="Secondary CTA"
-                clickName="Agent Native Observability Link"
-                clickText="Introducing Agent Native Observability"
-                clickLocation="Hero Section"
-                className="group inline-flex items-center gap-2 text-base font-normal leading-6 text-signoz_vanilla-400 transition-colors hover:text-signoz_vanilla-100"
-              >
-                <span className="text-signoz_vanilla-100">New</span>
-                Agent Native Observability
-                <ArrowRight
-                  size={15}
-                  className="transition-transform duration-200 group-hover:translate-x-1"
-                />
-              </TrackingLink>
             </HeroCopyMotion>
           </div>
         </div>

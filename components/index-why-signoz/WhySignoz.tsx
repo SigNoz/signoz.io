@@ -1,15 +1,11 @@
 'use client'
 
-import { Activity, Bot, Cable, Layers3, SearchCode, ServerCog, type LucideIcon } from 'lucide-react'
+import { Activity, Bot, Cable, SearchCode, ServerCog, type LucideIcon } from 'lucide-react'
 import Image, { type StaticImageData } from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
-import featureGraphicAi from '@/public/img/graphics/homepage/agent-telemetry-context.png'
-import debugRootCauseCorrelation from '@/public/img/graphics/homepage/debug-root-cause-correlation.png'
-import featureGraphicDeployment from '@/public/img/graphics/homepage/feature-graphic-flexible-deployment.svg?url'
-import featureGraphicFlexibleQuerying from '@/public/img/graphics/homepage/feature-graphic-flexible-querying.svg?url'
-import featureGraphicOtel from '@/public/img/graphics/homepage/instrument-once-opentelemetry.png'
-import featureGraphicSingleContext from '@/public/img/graphics/homepage/feature-graphic-single-tool.svg?url'
+import whySignozPlaceholderAlt from '@/public/img/graphics/homepage/why-signoz-placeholder-alt.webp'
+import whySignozPlaceholder from '@/public/img/graphics/homepage/why-signoz-placeholder.webp'
 
 type WhySigNozItem = {
   alt: string
@@ -25,7 +21,7 @@ const items: WhySigNozItem[] = [
     description:
       'Move from a latency spike to the related logs, traces, metrics, and spans without stitching together separate tools.',
     icon: Activity,
-    image: debugRootCauseCorrelation,
+    image: whySignozPlaceholder,
     alt: 'SigNoz view showing correlated telemetry for root cause debugging',
   },
   {
@@ -33,39 +29,31 @@ const items: WhySigNozItem[] = [
     description:
       'Use open standards instead of vendor SDKs, so instrumentation stays portable as your stack changes.',
     icon: Cable,
-    image: featureGraphicOtel,
+    image: whySignozPlaceholderAlt,
     alt: 'OpenTelemetry instrumentation flowing into SigNoz',
   },
   {
-    title: 'Keep every investigation in the same context',
+    title: 'Query telemetry on a columnar store',
     description:
-      'Carry the same service, time window, environment, and attributes as you move across signals.',
-    icon: Layers3,
-    image: featureGraphicSingleContext,
-    alt: 'SigNoz workspace keeping telemetry context together across tools',
-  },
-  {
-    title: 'Query telemetry your way',
-    description:
-      'Use query builder, ClickHouse SQL, saved views, and custom dashboards across raw and structured telemetry.',
+      'Use query builder, PromQL, and ClickHouse SQL on a fast columnar datastore built for high-cardinality observability data.',
     icon: SearchCode,
-    image: featureGraphicFlexibleQuerying,
-    alt: 'Flexible query controls for exploring telemetry in SigNoz',
+    image: whySignozPlaceholder,
+    alt: 'Flexible query controls backed by a columnar datastore in SigNoz',
   },
   {
     title: 'Give AI agents telemetry they understand',
     description:
       'OpenTelemetry gives agents public concepts like trace IDs, spans, services, environments, and resource attributes.',
     icon: Bot,
-    image: featureGraphicAi,
+    image: whySignozPlaceholderAlt,
     alt: 'Agent telemetry context for AI-assisted observability workflows',
   },
   {
-    title: 'Run observability where your systems need it',
+    title: 'Flexible deployment options',
     description:
       'Use SigNoz Cloud, self-hosted, or managed deployments while keeping the same OpenTelemetry-native model.',
     icon: ServerCog,
-    image: featureGraphicDeployment,
+    image: whySignozPlaceholder,
     alt: 'Flexible deployment options for running SigNoz',
   },
 ]
@@ -80,14 +68,19 @@ function getItemClasses(index: number, activeIndex: number) {
 
 export default function WhySignoz() {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [itemOpacities, setItemOpacities] = useState(() =>
+    items.map((_, index) => (index === 0 ? 1 : 0.38))
+  )
   const itemRefs = useRef<Array<HTMLDivElement | null>>([])
   const frameRef = useRef<number | null>(null)
 
   useEffect(() => {
     const updateActiveItem = () => {
-      const focusLine = window.innerHeight * 0.46
+      const focusLine = window.innerHeight * 0.5
+      const focusBand = window.innerHeight * 0.3
       let nextIndex = 0
       let nearestDistance = Number.POSITIVE_INFINITY
+      const nextOpacities = items.map(() => 0.38)
 
       itemRefs.current.forEach((item, index) => {
         if (!item) return
@@ -95,6 +88,9 @@ export default function WhySignoz() {
         const rect = item.getBoundingClientRect()
         const itemFocusLine = rect.top + rect.height * 0.5
         const distance = Math.abs(itemFocusLine - focusLine)
+        const focusAmount = Math.max(0, 1 - distance / focusBand)
+
+        nextOpacities[index] = Math.max(0.38, 0.38 + focusAmount * 0.62)
 
         if (distance < nearestDistance) {
           nearestDistance = distance
@@ -102,7 +98,9 @@ export default function WhySignoz() {
         }
       })
 
+      nextOpacities[nextIndex] = 1
       setActiveIndex(nextIndex)
+      setItemOpacities(nextOpacities)
       frameRef.current = null
     }
 
@@ -153,7 +151,7 @@ export default function WhySignoz() {
             <div className="relative z-10 mt-9 h-px w-full bg-signoz_slate-100" />
           </div>
 
-          <div className="pb-16 pt-14 lg:pb-[42vh] lg:pt-20">
+          <div className="pb-16 pt-14 lg:pb-[18vh] lg:pt-20">
             {items.map((item, index) => {
               const Icon = item.icon
               const isActive = index === activeIndex
@@ -161,7 +159,7 @@ export default function WhySignoz() {
               return (
                 <div
                   aria-current={index === activeIndex ? 'step' : undefined}
-                  className={`grid min-h-[178px] grid-cols-[40px_minmax(0,1fr)] gap-6 border-b border-signoz_slate-100 py-8 transition-[filter] duration-500 ease-out lg:min-h-[206px] lg:py-10 ${getItemClasses(
+                  className={`grid min-h-[178px] grid-cols-[40px_minmax(0,1fr)] gap-6 border-b border-signoz_slate-100 py-8 transition-[filter,opacity] duration-500 ease-out lg:min-h-[206px] lg:py-10 ${getItemClasses(
                     index,
                     activeIndex
                   )}`}
@@ -169,7 +167,7 @@ export default function WhySignoz() {
                   ref={(node) => {
                     itemRefs.current[index] = node
                   }}
-                  style={{ opacity: isActive ? 1 : 0.25 }}
+                  style={{ opacity: itemOpacities[index] ?? (isActive ? 1 : 0.38) }}
                 >
                   <div className="pt-1 text-signoz_robin-300">
                     <Icon aria-hidden="true" className="h-6 w-6" strokeWidth={1.7} />
@@ -200,7 +198,12 @@ export default function WhySignoz() {
 
         <div className="relative z-30 hidden min-w-0 lg:block">
           <div className="sticky top-[92px] flex h-[calc(100vh-124px)] max-h-[760px] min-h-[560px] items-center">
-            <div className="relative aspect-[0.92] w-full overflow-hidden rounded-[18px] border border-signoz_slate-100 bg-signoz_ink-400 shadow-2xl">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-1/2 top-1/2 h-[70%] w-[84%] -translate-x-1/2 -translate-y-1/2 rounded-[28px] bg-[radial-gradient(ellipse_at_center,rgba(190,198,207,0.12)_0%,rgba(86,95,104,0.08)_42%,rgba(8,9,10,0)_72%)] blur-2xl"
+            />
+            <div className="relative aspect-[0.92] w-full overflow-hidden rounded-[18px] border border-signoz_slate-100 bg-signoz_ink-400 shadow-[0_32px_90px_rgba(0,0,0,0.52)]">
+              <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_18%_14%,rgba(255,255,255,0.045),transparent_30%),linear-gradient(180deg,rgba(11,12,14,0.05),rgba(11,12,14,0.42)_88%)]" />
               <div className="absolute left-[10%] top-[10%] h-[98%] w-[112%] overflow-hidden rounded-[10px] border border-signoz_slate-100 bg-signoz_ink-300 shadow-xl">
                 {items.map((item, index) => (
                   <div
@@ -211,7 +214,7 @@ export default function WhySignoz() {
                   >
                     <Image
                       alt=""
-                      className="object-cover"
+                      className="object-cover object-[60%_center]"
                       fill
                       priority={index === 0}
                       src={item.image}
