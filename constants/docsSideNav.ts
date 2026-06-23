@@ -1334,11 +1334,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/traces-management/long-term-storage',
-            label: 'Long Term Storage',
-          },
-          {
-            type: 'doc',
             route: '/docs/apm-and-distributed-tracing/traces-api',
             label: 'Using Traces API',
           },

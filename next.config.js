@@ -228,6 +228,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/traces-management/long-term-storage',
+          destination: '/docs/userguide/retention-period/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/long-term-storage/',
+          destination: '/docs/userguide/retention-period/',
+          permanent: true,
+        },
+        {
           source: '/docs/traces-management/guides/apm-metrics',
           destination: '/docs/userguide/custom-apm-dashboards-alerts/',
           permanent: true,
