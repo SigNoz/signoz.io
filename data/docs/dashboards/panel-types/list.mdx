@@ -2,14 +2,14 @@
 id: list-chart-viz
 
 title: List Chart Panel Type
-date: 2026-05-13
-description: Learn how to use the List Chart panel type in SigNoz dashboards to display ranked metrics data.
+date: 2026-06-23
+description: Learn how to use the List panel type in SigNoz dashboards to display raw log and trace rows in a scrollable, paginated table.
 doc_type: reference
 ---
 
 ## List Chart
 
-A List chart is a plot chart that shows a list of values. This is particularly useful when you want to show a list of values in a single panel. A typical use case is to show the error logs or the traces in a single panel. The panel supports infinite scrolling and search.
+A List panel renders raw log or trace rows as a scrollable, paginated table. A typical use case is to show error logs or recent spans alongside your charts in a single dashboard.
 
 ### Data Formats
 
@@ -18,7 +18,7 @@ A List chart is a plot chart that shows a list of values. This is particularly u
 - Logs
 - Traces
 
-This panel type supports showing the logs lines and spans in a list.
+This panel type shows log lines and spans in a list. Metrics are not supported as a datasource.
 
 #### Examples
 
@@ -31,9 +31,28 @@ The following graph shows the spans over a period of time in a list.
 />
 
 
+### Row interactions
+
+- **Logs** — Click a row to open the **LogDetail** drawer with the full log details. Navigate to the previous or next row, and add fields to your query directly from the drawer.
+- **Traces** — Click a row to open the trace detail page. Use Cmd/Ctrl+click to open the trace in a new tab.
+
+### Pagination
+
+List panels paginate server-side. A pagination bar below the table provides **Previous** and **Next** buttons, a current-page indicator, and a page-size picker.
+
 ### Configuration
 
-The columns displayed in the list are configurable. You can add, remove, and reorder columns to show the attributes most relevant to your investigation.
+#### Columns
+
+Configure the displayed columns in the **Columns** editor below the query builder in the [panel editor](https://signoz.io/docs/dashboards/panel-editor/). Chosen columns appear as draggable chips:
+
+- **Reorder** — Drag a chip to change column order.
+- **Remove** — Select the × on a chip.
+- **Add** — Use the searchable field-key dropdown, scoped to the panel's signal (logs or traces). You can also type a non-indexed field name verbatim.
+
+Switching the datasource between **Logs** and **Traces** automatically resets the column selection to that signal's default field set.
+
+Resize a column by dragging its header edge. Column widths persist across page reloads, keyed per panel.
 
 ### Get Help
 

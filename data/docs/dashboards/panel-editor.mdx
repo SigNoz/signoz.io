@@ -1,0 +1,95 @@
+---
+date: 2026-06-23
+id: panel-editor
+title: Panel Editor - Build & Configure Dashboard Panels
+description: Use the full-page SigNoz panel editor to build a panel with a live preview, query builder, and a config pane for axes, legend, formatting, and thresholds.
+doc_type: howto
+---
+
+The panel editor is a full-page workspace for building and configuring a dashboard panel. It replaces the side and top navigation with a single screen dedicated to the panel, so you can iterate on the query and see the result immediately.
+
+<Figure
+  src="/img/docs/dashboards/v2/panel-editor.webp"
+  alt="SigNoz full-page panel editor with live preview, query builder, and config pane"
+  caption="Panel editor — live preview (top), query builder (below), and the config pane on the right."
+/>
+
+## Open the panel editor
+
+- **Add a panel** — On a dashboard, select **New Panel**.
+- **Edit a panel** — Hover a panel, open its three-dot menu, and select **Edit**. Editing requires an Editor or Admin role.
+
+## Layout
+
+The editor has three areas:
+
+- **Live preview** (top) — Renders the panel with the current query and configuration. It refreshes whenever you run the query or change a config option.
+- **Query builder** (below the preview) — Define the data with the Query Builder, ClickHouse SQL, or PromQL. Select **Stage & Run Query** to update the preview. For query help, see [Query Builder](https://signoz.io/docs/userguide/query-builder-v5/).
+- **Config pane** (right) — Collapsible sections to title, format, and style the panel. The available sections depend on the panel type.
+
+## Save or discard changes
+
+- **Save Changes** — Commits the panel and returns to the dashboard.
+- **Discard** — Closing the editor (or navigating away) with unsaved edits prompts a **Discard changes?** confirmation so you don't lose work by accident.
+
+## Config pane sections
+
+The top of the config pane holds the **Name** and **Description** for the panel. Below that are collapsible sections:
+
+### Visualization
+
+- **Panel Type** — Switch between Time Series, Number, Table, Bar, Pie, and Histogram. (List is available for logs and traces.)
+- **Panel Time Preference** — Use the dashboard's global time range (*Global Time*) or override it with a relative preset for this panel only. When a panel overrides the global range, its header shows a compact time pill (for example, `6h` or `1d`) on the dashboard.
+- **Fill Gaps** _(Time Series)_ — Fill missing data points with `0` for continuity.
+- **Stack series** _(Bar)_ — Stack series on top of each other.
+
+### Formatting & Units
+
+- **Unit** — Format values in a human-readable unit (for example, `Bytes`, `Percent`, `Milliseconds`).
+- **Decimal Precision** — Number of decimal places to display (0–4, or full).
+- **Column Units** _(Table)_ — Set the unit per column.
+
+### Axes _(Time Series)_
+
+- **Soft Min / Soft Max** — Set soft lower and upper bounds for the y-axis instead of auto-scaling.
+- **Y Axis Scale** — Choose `Linear` or `Logarithmic`.
+
+### Chart Appearance _(Time Series, Bar)_
+
+- **Line style** — Solid or dashed.
+- **Line interpolation** — Linear, spline, step-before, or step-after.
+- **Fill mode** — None, solid, or gradient.
+- **Show points** — Toggle data-point markers.
+- **Connect gaps** — Threshold for connecting across gaps in the data.
+
+### Legend
+
+- **Position** — Bottom row or right column.
+- **Series colors** — Override the color of individual series. The searchable series list has a color-picker swatch per series.
+
+### Thresholds
+
+Thresholds highlight values that cross a configured limit. The options depend on the panel type:
+
+- **Time Series / Bar / Histogram** — value, unit, color, and label.
+- **Number** — adds a comparison operator and a display format.
+- **Table** — adds a column selector; colorize either the cell text or the cell background.
+
+A warning appears when the threshold unit category differs from the y-axis unit.
+
+### Context Links
+
+Add click-through links from the panel to other dashboards, external URLs, or filtered views. Each link has a label, a destination URL, and an open-in-new-tab toggle. See [Interactivity](https://signoz.io/docs/dashboards/interactivity/) for details.
+
+### Alerts
+
+Link existing alert rules to the panel or create a new alert from the panel's query.
+
+## Next Steps
+
+- [Panel Types](https://signoz.io/docs/dashboards/panel-types/) — Choose the best visualization for your query.
+- [Manage Dashboards](https://signoz.io/docs/userguide/manage-dashboards/) — Add, clone, and organize panels.
+
+## Get Help
+
+<GetHelp />

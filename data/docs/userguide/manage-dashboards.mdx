@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-06-23
 id: manage-dashboards
 description: Learn how to create, edit, delete, and manage dashboards and panels within SigNoz.
 title: Manage Dashboards in SigNoz
@@ -49,6 +49,38 @@ From the Dashboards page, you can:
 
 7. When you've finished, select the **Save Layout** button.
 
+## Dashboard detail view and toolbar
+
+Opening a dashboard shows the detail view. A breadcrumb bar at the top links back to **Dashboard**, and a toolbar holds the dashboard title, tags, time-range picker, and the main actions. The toolbar stays pinned to the top of the viewport as you scroll through long dashboards, so the time picker and actions are always reachable.
+
+<Figure
+  src="/img/docs/dashboards/v2/dashboard-detail.webp"
+  alt="SigNoz dashboard detail view with breadcrumb, sticky toolbar, variable bar, and panels"
+  caption="Dashboard detail view — breadcrumb, sticky toolbar with Configure and New Panel, the variable bar, and the panel grid."
+/>
+
+From the toolbar you can:
+
+- **Configure** — Open the settings drawer to edit the dashboard. The drawer has three tabs: **Overview** (name, description, tags, and [Cross-Panel Sync](#cross-panel-sync)), **Variables** (see [Manage Variables](https://signoz.io/docs/userguide/manage-variables/)), and **Publish** (see [Public Sharing](https://signoz.io/docs/dashboards/public-sharing/)).
+- **New Panel** — Open the [panel editor](https://signoz.io/docs/dashboards/panel-editor/) to add a panel.
+- **Time-range picker** — Set the global time range for every panel that uses *Global Time*.
+
+Dashboard tags appear next to the title as outlined badges.
+
+### Cross-Panel Sync
+
+In the settings drawer's **Overview** tab, **Cross-Panel Sync** controls how hovering one panel affects the others. Pick one of three modes:
+
+- **No Sync** — Panels are independent.
+- **Crosshair** — Hovering a panel shows a synchronized crosshair on every other time-series panel at the same timestamp.
+- **Tooltip** — Synchronizes both the crosshair and the value tooltip across panels.
+
+<Figure
+  src="/img/docs/dashboards/v2/settings-overview.webp"
+  alt="Dashboard settings drawer Overview tab with name, description, tags, and Cross-Panel Sync control"
+  caption="Settings drawer — Overview tab with the Cross-Panel Sync segmented control (No Sync, Crosshair, Tooltip)."
+/>
+
 ## Dashboard Options Menu
 
 Click the **...** (three-dot) menu at the top of any dashboard to access the following options:
@@ -88,8 +120,9 @@ To change the position of a panel:
 
 ## Remove a Custom Dashboard
 
-1. From the sidebar, choose **Dashboard**.
-2. Find the dashboard you wish to remove. In the **Action** column, select the **Delete** button.
+1. From the sidebar, choose **Dashboards**.
+2. Find the dashboard you wish to remove and select **Delete** from its options.
+3. Confirm the dialog — *"Are you sure you want to delete this dashboard — &lt;name&gt;? This action cannot be undone."* Deletion is permanent and cannot be undone.
 
 ## Add a Panel to a Dashboard
 
@@ -97,8 +130,8 @@ SigNoz supports seven panel types: Time Series, Number, Table, List, Bar, Pie, a
 
 1. From the sidebar, choose **Dashboards**.
 2. Find the dashboard to which you want to add a new panel.
-3. Select **Add Panel**.
-4. Choose a panel type from the dialog.
+3. Select **New Panel** to open the [panel editor](https://signoz.io/docs/dashboards/panel-editor/).
+4. Choose a panel type from the **Panel Type** dropdown in the config pane.
 
 <Figure
   src="/img/docs/userguide/manage-panels/new-panel-dialog.webp"
@@ -126,12 +159,28 @@ Note the following about panels:
 - You can hide or unhide a function or formula by selecting the eye icon at its left and then selecting the **Stage & Run Query** button.
 - When you install SigNoz, only the data provided by the Hostmetric receiver is available. To enable more metric receivers, see the [Send Metrics to SigNoz](https://signoz.io/docs/metrics-management/send-metrics/) section.
 
+## Panel actions menu
+
+Each panel has a three-dot menu in its header (hover the panel to reveal it). The menu provides:
+
+<Figure
+  src="/img/docs/dashboards/v2/panel-actions-menu.webp"
+  alt="Panel actions menu showing View, Edit, Clone, Delete, and Create Alerts"
+  caption="Panel actions menu — View, Edit, Clone, Delete, and Create Alerts."
+/>
+
+- **View** — Open the panel full screen.
+- **Edit** — Open the panel in the [panel editor](https://signoz.io/docs/dashboards/panel-editor/). Requires an Editor or Admin role.
+- **Clone** — Duplicate the panel and append the copy to the bottom of the same section. Requires an Editor or Admin role.
+- **Delete** — Remove the panel. You must confirm a dialog before the panel is removed.
+- **Create Alerts** — Start a new alert from the panel's query.
+
 ## Update a Panel
 
-1. From the sidebar, choose **Dashboard**.
-2. Find the dashboard in which you created the panel you wish to update, and then select the pencil icon located at the top right corner of your panel.
+1. From the sidebar, choose **Dashboards**, then open the dashboard that contains the panel.
+2. Hover the panel, open its three-dot menu, and select **Edit** to open the [panel editor](https://signoz.io/docs/dashboards/panel-editor/).
 3. Make the changes.
-4. When you've finished, select the **Save** button.
+4. Select **Save Changes** to commit the panel. Closing the editor with unsaved edits prompts a **Discard changes?** confirmation.
 
 ## Next Steps
 

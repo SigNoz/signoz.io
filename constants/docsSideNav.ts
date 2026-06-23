@@ -2171,7 +2171,9 @@ const docsSideNav = [
               { type: 'doc', route: '/docs/dashboards/panel-types/value', label: 'Number' },
             ],
           },
+          { type: 'doc', route: '/docs/dashboards/panel-editor', label: 'Panel Editor' },
           { type: 'doc', route: '/docs/userguide/manage-variables', label: 'Variables' },
+          { type: 'doc', route: '/docs/dashboards/public-sharing', label: 'Public Sharing' },
           { type: 'doc', route: '/docs/dashboards/interactivity', label: 'Interactivity' },
           {
             type: 'doc',

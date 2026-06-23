@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-06-23
 id: manage-variables
 title: Manage Variables in SigNoz
 description: Learn how to create and use dashboard variables in SigNoz to build dynamic, reusable dashboards across services and infrastructure.
@@ -21,26 +21,44 @@ Variables allow you to build dynamic dashboards where multiple panels can instan
 
 ## How to add a Variable to a Dashboard?
 
+Variables are managed from the **Variables** tab of the dashboard settings drawer.
+
 <Figure
-  src="/img/docs/dashboards/variables/variable-configuration.webp"
-  alt="Variable configuration panel in SigNoz"
-  caption="Variable configuration — set the name, type, default value, and select panels to apply the variable to."
+  src="/img/docs/dashboards/v2/variable-editor.webp"
+  alt="Variable editor in the SigNoz dashboard settings drawer"
+  caption="Variable editor — set the name, type, preview values, sort, multi-select, default value, and the panels to apply the variable to."
 />
 
 To add a variable to a dashboard, follow the steps below:
 
-1. Access Dashboards from the navigation menu
-2. Open the dashboard you want to modify
-3. Enter configuration mode by selecting Configure
-4. Switch to the Variables section and select Add Variable
-5. Complete the configuration:
-    1. **Name**: Define the variable identifier for use in queries
-    2. **Description**: Enter a brief and meaningful description of your variable
-    3. **Type**: Pick the appropriate variable type (UI updates based on selection)
-    4. _(Optional)_ **Sort**: Arrange values in ascending/descending order.
-    5. _(Optional)_ **Enable multiple values to be checked**: Make dropdown multi-select
-    6. _(Optional)_ **Include an option for ALL values**: Show the `ALL` option which includes all options from the multi-select dropdown
-6. When you've finished, select the **Save** button.
+1. Open the dashboard you want to modify.
+2. Select **Configure** to open the settings drawer, then open the **Variables** tab.
+3. Select **Add Variable**. (The button is visible only to users with edit permission.)
+4. Complete the configuration:
+    1. **Name**: Define the variable identifier used in queries. Names must be unique within the dashboard and cannot be empty.
+    2. **Description**: Enter a brief, meaningful description.
+    3. **Variable Type**: Pick a type — **Dynamic** (Beta), **Textbox**, **Custom**, or **Query** (marked *Not Recommended*). The form updates to match the selected type.
+    4. _(Dynamic, Query, Custom)_ **Preview of Values**: Resolved values appear as badge chips so you can confirm the variable returns what you expect before saving.
+    5. _(Optional)_ **Sort Values**: For list-type variables, sort resolved values — `Disabled`, `Ascending`, or `Descending`.
+    6. _(Optional)_ **Enable multiple values to be checked**: Allow more than one value to be selected at once (multi-select).
+    7. _(Optional)_ **Include an option for ALL values**: Available when multi-select is on for **Query** or **Custom** variables. Adds an `ALL` option that includes every value in the dropdown.
+    8. _(Optional)_ **Default Value**: Choose a value from the preview values, or add a custom one, to pre-select when the dashboard loads.
+    9. _(Optional)_ **Select Panels to apply this variable**: Limit the variable to specific panels.
+5. Select **Save Variable**.
+
+### Manage the variables list
+
+The **Variables** tab lists each variable with its name, type, and description. Per-row controls let you:
+
+- **Edit** (pencil) — Reopen the variable in the editor.
+- **Delete** (trash) — Remove the variable after an inline confirmation.
+- **Reorder** (up/down) — Change the order in which variables appear in the dashboard's variable bar.
+
+<Figure
+  src="/img/docs/dashboards/v2/variables-list.webp"
+  alt="Variables tab listing dashboard variables with name, description, and reorder handle"
+  caption="Variables tab — each row shows the variable name and description; edit and delete controls appear on hover, and the handle reorders variables."
+/>
 
 ## Supported Variable types:
 
@@ -48,7 +66,11 @@ SigNoz supports four ways of creating variables: dynamic, query, custom, and tex
 
 ### Dynamic variable
 
-Dynamic variables automatically retrieve attribute values without requiring manual queries. They are configured using two parameters.
+<Admonition type="info">
+Dynamic variables are currently in **Beta**. They are the recommended way to populate list variables.
+</Admonition>
+
+Dynamic variables automatically retrieve attribute values without requiring manual queries. Pick a **field** and the telemetry **signal** (Traces, Logs, or Metrics, or *All telemetry*) to resolve it from; the field input has live, searchable autocomplete. They are configured using two parameters.
 
 1. Field - either an OTEL telemetry intrinsic field (like span name or log severity_text) or a custom <a href="https://opentelemetry.io/docs/concepts/glossary/#attribute" target="_blank" rel="noopener noreferrer nofollow">attribute</a> from logs, traces, or metrics
 
@@ -81,7 +103,7 @@ Example: If k8s.pod.name = ALL, the query includes data from all pods, regardles
 
 ### Query variable
 
-Query - A ClickHouse SQL query that fetches data from ClickHouse
+Query - A ClickHouse SQL query that fetches data from ClickHouse. Use the **Test Run Query** button to execute the query; the resolved values appear as badge chips in the **Preview of Values** strip so you can verify the result before saving.
 
     Example: You want to query the list of host names from the metrics database and use them as a variable. Any ClickHouse SQL query that returns a column with desired values is valid. For instance, a query to fetch all host names that are reporting the CPU metric collection would be
 
@@ -98,7 +120,7 @@ Query - A ClickHouse SQL query that fetches data from ClickHouse
 
 ### Custom variable
 
-Custom - A comma-separated list of values as a Variable
+Custom - A comma-separated list of values as a Variable. Enter the values in the Options input; the **Preview of Values** strip updates in real time as you type.
 
     Example: It is common to have some attributes with a known and small number of unique values, such as the region or availability zone of the application deployment. The custom variable type allows you to achieve this with comma-delimited values. An example for reference
 
