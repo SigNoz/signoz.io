@@ -88,7 +88,38 @@ export default function HeroTracePreview() {
       className="relative mx-auto w-full max-w-[1296px] origin-center overflow-visible shadow-[0_32px_86px_rgba(0,0,0,0.72)]"
       style={{ scale: hasMounted ? scale : prefersReducedMotion ? 1 : 0.94 }}
     >
-      <div className="px-4 pt-5 sm:px-6 lg:px-8">
+      <div className="-mx-5 overflow-x-auto px-5 pb-3 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:hidden [&::-webkit-scrollbar]:hidden">
+        <div className="flex snap-x snap-mandatory gap-3">
+          {heroTabs.map((tab, index) => (
+            <article
+              className="w-[86vw] max-w-[680px] shrink-0 snap-start overflow-hidden rounded-[10px] border border-signoz_slate-400/25 bg-signoz_ink-400/60"
+              key={tab.label}
+            >
+              <div className="px-4 py-4">
+                <h3 className="m-0 text-base font-medium leading-5 text-signoz_vanilla-100">
+                  {tab.label}
+                </h3>
+                <p className="m-0 mt-1 text-sm font-medium leading-5 text-signoz_vanilla-400/60">
+                  {tab.description}
+                </p>
+              </div>
+              <div className="relative h-[310px] overflow-hidden sm:h-[390px]">
+                <Image
+                  src={tab.image}
+                  alt={tab.alt}
+                  priority={index === 0}
+                  unoptimized
+                  className="h-auto w-[720px] max-w-none sm:w-full"
+                  sizes="86vw"
+                />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[34%] bg-[linear-gradient(180deg,rgba(8,9,10,0)_0%,rgba(8,9,10,0.44)_62%,rgba(8,9,10,0.78)_100%)]" />
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <div className="hidden px-4 pt-5 sm:px-6 lg:block lg:px-8">
         <LayoutGroup id="homepage-hero-preview-tabs">
           <div
             className="grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-3 lg:grid-cols-6"
@@ -139,7 +170,7 @@ export default function HeroTracePreview() {
 
       <div
         aria-labelledby={`homepage-hero-preview-tab-${activeTab}`}
-        className="relative mt-6 h-[410px] overflow-hidden bg-transparent sm:h-[470px] md:h-[540px] lg:h-[600px]"
+        className="relative mt-6 hidden h-[410px] overflow-hidden bg-transparent sm:h-[470px] md:h-[540px] lg:block lg:h-[600px]"
         id="homepage-hero-preview-panel"
         role="tabpanel"
       >
