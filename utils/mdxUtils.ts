@@ -381,7 +381,7 @@ export const transformGuide = (guide: MDXContent) => {
 
 export const transformDoc = (doc: MDXContent) => {
   const slug = (doc.path || '').replace(/^\/+|\/+$/g, '')
-  const path = `docs/${slug}`
+  const docPath = `docs/${slug}`
 
   const { publishedDate, updatedDate, sortDate } = deriveDates(doc)
 
@@ -409,7 +409,7 @@ export const transformDoc = (doc: MDXContent) => {
   const contentForStructuredData = {
     ...doc,
     slug,
-    path,
+    path: docPath,
     tags: docTags,
     published_date: publishedDate,
     updated_date: updatedDate,
@@ -441,8 +441,8 @@ export const transformDoc = (doc: MDXContent) => {
     body: { raw: doc.content || '', code: '' },
     toc: generateTOC(doc.content || ''),
     readingTime: readingTimeStats,
-    path,
-    filePath: path.endsWith('.mdx') ? path : `${path}.mdx`,
+    path: docPath,
+    filePath: docPath.endsWith('.mdx') ? docPath : `${docPath}.mdx`,
     structuredData: generateStructuredData('docs', contentForStructuredData),
     relatedArticles: transformRelatedArticles(doc),
     hide_table_of_contents: doc.hide_table_of_contents ?? false,

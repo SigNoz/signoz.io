@@ -83,7 +83,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
           post={post}
           toc={toc}
           hideTableOfContents={hide_table_of_contents || false}
-          editLink={`https://github.com/SigNoz/signoz-web/edit/main/data/docs/${slug}.mdx`}
+          editLink={`https://github.com/SigNoz/signoz.io/edit/main/data/docs/${slug}.mdx`}
           breadcrumbs={breadcrumbs}
         >
           {compiledContent}

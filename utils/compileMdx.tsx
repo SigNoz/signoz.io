@@ -56,7 +56,16 @@ async function compileImportedSharedComponents(
 
   for (const imported of imports) {
     const normalizedSharedPath = imported.sharedPath.replace(/^\/+/, '')
-    const sharedFilePath = path.join(process.cwd(), 'components', 'shared', normalizedSharedPath)
+    const sharedFilePath = path.resolve(
+      path.join(process.cwd(), 'components', 'shared', normalizedSharedPath)
+    )
+    const sharedDir = path.join(process.cwd(), 'components', 'shared')
+    if (!sharedFilePath.startsWith(sharedDir + path.sep)) {
+      console.warn(
+        `Shared import "${imported.sharedPath}" resolves outside components/shared — skipped`
+      )
+      continue
+    }
 
     if (seen.has(sharedFilePath)) {
       continue

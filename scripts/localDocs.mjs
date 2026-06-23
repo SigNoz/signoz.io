@@ -53,6 +53,10 @@ function sanitizeDocTags(tags) {
   return sanitized.length > 0 ? sanitized : DEFAULT_DOC_TAGS
 }
 
+// NOTE: Date resolution order here (updated_date → published_date → date → lastmod) intentionally
+// differs from deriveDates() in utils/dateUtils.ts (which uses updated_date → date as fallback for
+// updatedDate, and updated_date → published_date → date for sortDate). This script runs outside the
+// Next.js TS pipeline for search index generation, so it uses a simplified single-date resolution.
 function resolveLatestDate(doc) {
   return doc.updated_date ?? doc.published_date ?? doc.date ?? doc.lastmod ?? undefined
 }
