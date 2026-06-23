@@ -146,7 +146,7 @@ export default function HeroTracePreview() {
         <AnimatePresence initial={false} mode="popLayout">
           <motion.div
             animate={prefersReducedMotion ? undefined : { opacity: 1, x: 0, filter: 'blur(0px)' }}
-            className="absolute inset-x-0 top-0 [mask-image:linear-gradient(180deg,#000_0%,#000_54%,rgba(0,0,0,0.8)_60%,rgba(0,0,0,0.22)_68%,rgba(0,0,0,0)_78%)]"
+            className="absolute inset-x-0 top-0 [mask-image:linear-gradient(180deg,#000_0%,#000_60%,rgba(0,0,0,0.86)_68%,rgba(0,0,0,0.42)_82%,rgba(0,0,0,0)_96%)]"
             exit={
               prefersReducedMotion
                 ? undefined
@@ -170,7 +170,7 @@ export default function HeroTracePreview() {
             />
           </motion.div>
         </AnimatePresence>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[52%] bg-[linear-gradient(180deg,rgba(8,9,10,0)_0%,rgba(8,9,10,0.88)_52%,#08090A_100%)]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%] bg-[linear-gradient(180deg,rgba(8,9,10,0)_0%,rgba(8,9,10,0.48)_58%,rgba(8,9,10,0.82)_100%)]" />
       </div>
     </motion.div>
   )
