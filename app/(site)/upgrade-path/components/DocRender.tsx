@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import { RegionProvider } from '@/components/Region/RegionContext'
 
 const DocRenderer = ({
   docUrl,
@@ -24,10 +25,12 @@ const DocRenderer = ({
   }
 
   return (
-    <article>
-      <h1>{meta?.title}</h1>
-      {content}
-    </article>
+    <RegionProvider>
+      <article>
+        <h1>{meta?.title}</h1>
+        {content}
+      </article>
+    </RegionProvider>
   )
 }
 
