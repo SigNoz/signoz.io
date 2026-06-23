@@ -1,0 +1,91 @@
+---
+date: 2026-06-23
+id: opentelemetry-collector-dashboard
+title: OpenTelemetry Collector Pipeline Health Dashboard
+description: Monitor OTel Collector receiver throughput, processor drops, exporter delivery, queue depth, and process resource usage.
+doc_type: explanation
+---
+
+Use this dashboard to monitor your OpenTelemetry Collector instances across receiver throughput, processor drop rates, exporter delivery, queue depth, and process resource usage.
+
+<Admonition type="note">
+  Before importing this dashboard, send OTel Collector internal metrics to SigNoz. Follow the [Send OTel Collector Metrics](https://signoz.io/docs/metrics-management/opentelemetry-collector-metrics/) guide to configure the built-in OTLP telemetry reader.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/opentelemetry-collector-dashboard.webp"
+  alt="OpenTelemetry Collector Pipeline Health Dashboard"
+  caption="OpenTelemetry Collector Pipeline Health Dashboard"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/opentelemetry-collector/opentelemetry-collector.json"
+    dashboardName="OpenTelemetry Collector"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+- **Overview**: Spans, metric points, and log records received and sent per second at a glance
+- **Receivers**: Accepted and refused/failed signals per second, broken down by receiver
+- **Processors**: Items entering and leaving each processor, batch send size percentiles, and timeout-triggered flushes
+- **Exporters**: Sent and failed signals by exporter, queue size vs. capacity, queue utilization percentage, and in-flight requests
+- **Process Resources**: Heap memory, RSS memory, CPU usage, and memory allocation rate per Collector instance
+
+## Metrics Included
+
+### Overview
+
+- **Spans Received /s**: Spans entering the pipeline per second across all receivers
+- **Metric Points Received /s**: Metric data points entering the pipeline per second
+- **Log Records Received /s**: Log records entering the pipeline per second
+- **Spans Sent /s**: Spans delivered to the backend per second across all exporters
+- **Metric Points Sent /s**: Metric data points delivered to the backend per second
+- **Log Records Sent /s**: Log records delivered to the backend per second
+
+### Receivers
+
+- **Accepted Spans /s by Receiver**: Spans entering the pipeline per second, by receiver
+- **Refused & Failed Spans /s by Receiver**: Refused spans from pipeline back-pressure and failed spans from receiver errors, grouped by receiver. Investigate any non-zero value.
+- **Accepted Metric Points /s by Receiver**: Metric points entering the pipeline per second, by receiver
+- **Refused & Failed Metric Points /s by Receiver**: Refused and failed metric points by receiver
+- **Accepted Log Records /s by Receiver**: Log records entering the pipeline per second, by receiver
+- **Refused & Failed Log Records /s by Receiver**: Refused and failed log records by receiver
+
+### Processors
+
+- **Items Incoming /s by Processor**: Signals entering each processor per second
+- **Items Outgoing /s by Processor**: Signals leaving each processor per second. A rate below incoming means the processor is dropping or filtering data.
+- **Batch Send Size (p50/p95/p99)**: Items per batch at three percentiles. A large gap between p50 and p99 points to bursty traffic.
+- **Batch Timeout Trigger Sends /s by Processor**: Batches flushed by timeout per second by processor. A high rate with small batch sizes means the configured batch size is too large for current traffic.
+
+### Exporters
+
+- **Spans Sent /s by Exporter**: Spans delivered to the backend per second, by exporter
+- **Span Send Failures /s by Exporter**: Spans the exporter failed to deliver per second. Investigate any non-zero value.
+- **Metric Points Sent /s by Exporter**: Metric points delivered per second, by exporter
+- **Metric Point Send Failures /s by Exporter**: Metric points the exporter failed to deliver per second
+- **Log Records Sent /s by Exporter**: Log records delivered per second, by exporter
+- **Log Record Send Failures /s by Exporter**: Log records the exporter failed to deliver per second
+- **Exporter Queue Size vs Capacity**: Queue depth vs. capacity per exporter. Size approaching capacity means the exporter cannot keep up with incoming data.
+- **Exporter Queue Utilization %**: Queue fill percentage per exporter. Above 80% the exporter risks dropping data under sustained load.
+- **Exporter In-Flight Requests by Exporter**: Active export requests including retries. High values alongside a slow-draining queue point to backend latency or connectivity issues.
+
+### Process Resources
+
+- **Heap Memory Allocated**: Heap bytes held by live objects per Collector instance. Sustained growth between GC cycles points to a memory leak.
+- **Process RSS Memory**: Physical memory per Collector instance, including Go runtime overhead
+- **CPU Usage (user + system)**: CPU seconds consumed per second per instance. Values near the available core count indicate CPU saturation.
+- **Memory Allocation Rate**: Heap allocation throughput in bytes per second per instance. High rates increase GC pressure and CPU overhead.
+
+## Dashboard Variables
+
+- **service_name**: Filter by Collector service name
+
+## Related Dashboards
+
+- [Host Metrics (VM)](https://signoz.io/docs/dashboards/dashboard-templates/hostmetrics-vm/)
+- [Kubernetes Node Metrics](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-node-metrics-overall/)
+- [FluxCD](https://signoz.io/docs/dashboards/dashboard-templates/fluxcd-dashboard/)
+- [KEDA](https://signoz.io/docs/dashboards/dashboard-templates/keda/)
