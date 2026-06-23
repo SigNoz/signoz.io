@@ -1,0 +1,105 @@
+---
+date: 2026-06-24
+id: cloudnative-pg-dashboard
+title: CloudNativePG Metrics Dashboard
+description: Monitor CloudNativePG cluster health in SigNoz including connections, throughput, cache, replication, WAL and archiving, checkpoints, and storage.
+doc_type: explanation
+---
+
+Use this dashboard to monitor your CloudNativePG clusters across cluster health, connections, throughput, cache and block I/O, replication, WAL and archiving, checkpoints, and storage.
+
+CloudNativePG exposes native `cnpg_*` metrics on each instance metrics endpoint, and the OpenTelemetry Collector scrapes them for this dashboard.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow the [Send CloudNativePG Metrics with OpenTelemetry](https://signoz.io/docs/metrics-management/opentelemetry-cloudnative-pg/) guide.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/cloudnative-pg-dashboard.webp"
+  alt="CloudNativePG Metrics Dashboard"
+  caption="CloudNativePG Metrics Dashboard"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/cloudnative-pg/cloudnative-pg-dashboard.json"
+    dashboardName="CloudNativePG"
+  />
+</div>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Confirm cluster health**: See whether instances are up, the PostgreSQL version, replica count, and whether a switchover or fencing is in effect.
+- **Track connections**: Monitor backends by state and database, and backends waiting on locks.
+- **Measure throughput**: Track transactions, tuple activity, deadlocks, conflicts, and temp file usage.
+- **Inspect cache efficiency**: Watch the buffer cache hit ratio and block I/O rates and timing.
+- **Watch replication**: Track standby lag, primary write/flush/replay lag, replication status, and slot lag.
+- **Follow WAL and archiving**: Monitor WAL directory size, segment count, archive status, and time since the last archive.
+- **Review checkpoints and storage**: Track checkpoint rate and timing, buffers written, database size, and transaction ID age.
+
+## Metrics Included
+
+### Cluster Health
+
+- **Cluster Up**: Whether each instance is up (`cnpg_collector_up`).
+- **PostgreSQL Version**: Reported PostgreSQL version (`cnpg_collector_postgres_version`).
+- **Streaming Replicas**: Number of streaming replicas.
+- **Nodes Used**, **Replica Mode**, **Fencing**, **Switchover Required**: Cluster topology and operational state.
+
+### Connections & Backends
+
+- **Total Backends** and **Backends by State**: Connection counts overall and by state.
+- **Backends by Database**: Connections grouped by database.
+- **Backends Waiting on Locks**: Backends blocked waiting on locks.
+- **Longest Transaction** and **Longest Transaction by Database**: Maximum transaction duration.
+
+### Throughput
+
+- **Transactions /s**: Commit and rollback rates.
+- **Tuple Activity /s**: Rows fetched, returned, inserted, updated, and deleted.
+- **Deadlocks & Conflicts /s**: Deadlock and recovery conflict rates.
+- **Temp Files /s** and **Temp File Bytes /s**: Temporary file activity.
+
+### Cache & Block I/O
+
+- **Buffer Cache Hit Ratio**: Share of block reads served from cache.
+- **Block I/O /s** and **Block I/O Time /s**: Block read and write rates and time spent.
+
+### Replication
+
+- **Replication Lag (standby)**: Lag on standby instances (`cnpg_pg_replication_lag`).
+- **Write / Flush / Replay Lag (primary view)**: Per-stage replication lag from the primary.
+- **Replication Status** and **Replication Slot Lag**: Receiver state and slot WAL lag.
+
+### WAL & Archiving
+
+- **WAL Directory Size** and **WAL Segment Count**: WAL volume on disk.
+- **WAL Archive Status** and **WAL Archiver Ops /s**: Archive state and archive/fail rates.
+- **Time Since Last Archive / Failure**: Age of the last successful and failed archive.
+
+### Checkpoints
+
+- **Checkpoints /s**: Timed and requested checkpoint rates.
+- **Checkpoint Write / Sync Time /s**: Time spent writing and syncing during checkpoints.
+- **Buffers Written /s**: Buffers written by the checkpointer and background writer.
+
+### Storage & Collector
+
+- **Database Size** and **Total DB Size**: Per-database and total size.
+- **Transaction ID Age** and **MultiXact ID Age**: Wraparound risk indicators.
+- **Metrics Collection Duration**, **Metrics Collections /s**, **Collection Errors**: Health of the CloudNativePG metrics collector itself.
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **pod**: Filter by CloudNativePG instance pod.
+- **datname**: Filter per-database panels by a specific database.
+
+## Related Dashboards
+
+- [PostgreSQL](https://signoz.io/docs/dashboards/dashboard-templates/postgresql/)
+- [PgBouncer](https://signoz.io/docs/dashboards/dashboard-templates/pgbouncer-dashboard/)
+- [APM Metrics](https://signoz.io/docs/dashboards/dashboard-templates/apm-metrics/)

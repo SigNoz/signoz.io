@@ -1951,6 +1951,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/opentelemetry-cloudnative-pg',
+                label: 'CloudNativePG',
+              },
+              {
+                type: 'doc',
                 route: '/docs/tutorial/mongodb-metrics',
                 label: 'MongoDB Metrics',
               },
@@ -2406,6 +2411,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/claude-agent-sdk-dashboard',
             label: 'Claude Agent SDK',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/cloudnative-pg-dashboard',
+            label: 'CloudNativePG',
           },
           {
             type: 'doc',
