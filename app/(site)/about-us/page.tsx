@@ -12,6 +12,7 @@ function aboutus() {
     <div title="About Us">
       <section>
         <div className="container" style={{ marginTop: '4rem', marginBottom: '4rem' }}>
+          <h1 className="mb-4 text-center text-4xl font-bold">About Us</h1>
           <p className="text--center margin-vert--lg">
             {' '}
             Some of you may wonder, what does SigNoz mean? As engineers we are obsessed with the
