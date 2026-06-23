@@ -105,7 +105,7 @@ const mapDocEntries = (docs: any[]) => {
 
   return docs.map((doc) => ({
     ...doc,
-    slug: buildDocSlug(doc.slug || doc.path),
+    slug: buildDocSlug(doc.slug),
     date: resolveLatestDate(doc),
   }))
 }

@@ -2,10 +2,8 @@ import React from 'react'
 import UpgradePathTool from './components/UpgradePathTool'
 import upgradeSchema from '@/constants/upgradeSchema.json'
 import { STANDARD_GUIDE_URL } from './utils/upgradeUtils'
-import { fetchAllDocsForPage } from '@/utils/cachedData'
+import { fetchDocBySlug } from '@/utils/cachedData'
 import { compileMdxSource } from '@/utils/compileMdx'
-
-type RawDoc = Awaited<ReturnType<typeof fetchAllDocsForPage>>[number]
 
 async function getUpgradeDocs(): Promise<{
   docMetaBySlug: Record<string, { title: string }>
@@ -20,7 +18,6 @@ async function getUpgradeDocs(): Promise<{
     ])
   )
 
-  const docs = await fetchAllDocsForPage()
   const docMetaBySlug: Record<string, { title: string }> = {}
   const compiledDocsBySlug: Record<string, React.ReactNode> = {}
 
@@ -29,7 +26,7 @@ async function getUpgradeDocs(): Promise<{
       const slug = decodeURI(
         `${guideUrl.replace('https://signoz.io/docs/', '').replace(/^\/+/, '')}`
       )
-      const doc = docs.find((candidate: RawDoc) => candidate.slug === slug)
+      const doc = await fetchDocBySlug(slug)
       if (!doc) return
 
       docMetaBySlug[slug] = { title: doc.title }

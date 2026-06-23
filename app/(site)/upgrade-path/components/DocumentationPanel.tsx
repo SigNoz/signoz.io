@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { UpgradePath } from '../types/upgrade'
 import DocRenderer from './DocRender'
 import { Card } from '@/components/ui/Card'
@@ -21,7 +21,8 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({
   docMetaBySlug,
   compiledDocsBySlug,
 }) => {
-  const [hasError, setHasError] = useState(false)
+  const slug = decodeURI(docUrl.replace('https://signoz.io/docs/', '').replace(/^\/+/, ''))
+  const hasError = !compiledDocsBySlug[slug]
 
   return (
     <Card className={`h-full ${className}`}>
@@ -71,7 +72,6 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({
                 docUrl={docUrl}
                 docMetaBySlug={docMetaBySlug}
                 compiledDocsBySlug={compiledDocsBySlug}
-                setHasError={setHasError}
               />
             )}
           </div>
