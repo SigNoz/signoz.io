@@ -1,0 +1,144 @@
+---
+date: 2026-06-23
+id: user-management-api
+title: User Management API - Invite Users via API
+description: Invite users to SigNoz programmatically with the v2 User Management API, assign custom roles by ID, and migrate from the deprecated v1 endpoints.
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+doc_type: reference
+---
+
+## Overview
+
+Use the User Management API to invite users to your organization programmatically and assign roles at invite time. The current API is `POST /api/v2/users`. It replaces the older v1 invite and user-management endpoints, which are now deprecated.
+
+The key difference from the v1 invite flow: the v2 endpoint accepts a `userRoles` array of role **IDs** (UUIDs), so you can assign managed or custom roles when you send an invite.
+
+<Admonition type="info">
+All endpoints on this page require **ADMIN** access. Authenticate with a [Service Account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) API key (or a session token for an admin user).
+</Admonition>
+
+## Authentication
+
+Generate an API key using a [Service Account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) and pass it in the request header:
+
+```bash
+SIGNOZ-API-KEY: <YOUR_API_KEY>
+```
+
+Replace `<YOUR_API_KEY>` with your Service Account key. The associated principal must have ADMIN access.
+
+## Invite a user
+
+```
+POST https://<URL>/api/v2/users
+```
+
+Replace `<URL>` with your SigNoz instance host (for example, `your-instance.signoz.cloud`). This endpoint creates a pending-invite user in the organization and returns the new user's ID.
+
+### Request body
+
+| Field             | Type                | Required | Description                                                                                          |
+| ----------------- | ------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `email`           | string              | Yes      | Email address of the user to invite.                                                                 |
+| `userRoles`       | array of objects    | Yes      | Roles to assign. Each object has an `id` field set to a role ID (UUID). See [Find role IDs](#find-role-ids). |
+| `displayName`     | string              | No       | Display name for the user.                                                                           |
+| `frontendBaseUrl` | string              | No       | Base URL used to build the invite link in the email. See [Invite email behavior](#invite-email-behavior). |
+
+```json
+{
+  "email": "teammate@example.com",
+  "displayName": "New Teammate",
+  "frontendBaseUrl": "https://your-instance.signoz.cloud",
+  "userRoles": [
+    { "id": "<ROLE_ID>" }
+  ]
+}
+```
+
+```bash
+curl -X POST "https://<URL>/api/v2/users" \
+  -H "SIGNOZ-API-KEY: <YOUR_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "teammate@example.com",
+    "displayName": "New Teammate",
+    "frontendBaseUrl": "https://your-instance.signoz.cloud",
+    "userRoles": [{ "id": "<ROLE_ID>" }]
+  }'
+```
+
+### Response
+
+On success the endpoint returns `201 Created` with the new user's ID:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "<NEW_USER_ID>"
+  }
+}
+```
+
+Other responses include `400` (invalid request), `401` (unauthenticated), `403` (caller is not an admin), and `409` (a user with that email already exists).
+
+### Invite email behavior
+
+`frontendBaseUrl` controls the invite email:
+
+- **Provided** — the user record is created and an invite email containing the invite link is sent.
+- **Omitted** — the user record is created but **no invite email is sent**. Use this when you provision users programmatically and share access another way.
+
+<Admonition type="info">
+On SigNoz Self-Host, invite emails are sent only after SMTP is configured. See [SMTP Email Invitations setup](https://signoz.io/docs/manage/administrator-guide/configuration/smtp-email-invitations/).
+</Admonition>
+
+## Find role IDs
+
+`userRoles` takes role IDs, not role name strings. To list the roles in your organization and their IDs, call the roles API:
+
+```
+GET https://<URL>/api/v1/roles
+```
+
+```bash
+curl "https://<URL>/api/v1/roles" \
+  -H "SIGNOZ-API-KEY: <YOUR_API_KEY>"
+```
+
+Each item in the response includes an `id` and a `name` (for example, the managed roles `SigNoz-Admin`, `SigNoz-Editor`, and `SigNoz-Viewer`, plus any custom roles). Use the `id` value in the `userRoles` array.
+
+To create or browse custom roles in the UI, see [Roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/).
+
+## Deprecated v1 endpoints
+
+The following v1 endpoints are deprecated. They still function, but you should migrate to the v2 User Management API. No removal date has been announced; this page will be updated when a sunset timeline is set.
+
+| Deprecated endpoint            | Replacement                                                  |
+| ------------------------------ | ------------------------------------------------------------ |
+| `POST /api/v1/invite`          | [`POST /api/v2/users`](#invite-a-user)                       |
+| `POST /api/v1/invite/bulk`     | [`POST /api/v2/users`](#invite-a-user) (call once per user)  |
+| `GET /api/v1/user`             | `GET /api/v2/users`                                          |
+| `GET /api/v1/user/{id}`        | `GET /api/v2/users/{id}`                                      |
+| `PUT /api/v1/user/{id}`        | `PUT /api/v2/users/{id}`                                      |
+| `GET /api/v1/user/me`          | `GET /api/v2/users/me`                                        |
+
+## Migrate from v1 invite
+
+To move automation from `POST /api/v1/invite` to `POST /api/v2/users`:
+
+1. **Change the endpoint path** from `/api/v1/invite` to `/api/v2/users`.
+2. **Replace the role name with role IDs.** v1 took a single `role` string (for example, `"VIEWER"`). v2 takes a `userRoles` array of objects, each with an `id` set to a role ID. Look up IDs with [`GET /api/v1/roles`](#find-role-ids).
+3. **Decide on the invite email.** Provide `frontendBaseUrl` to send an invite email, or omit it to create the user without sending an email. See [Invite email behavior](#invite-email-behavior).
+
+### Migrate bulk invites
+
+`POST /api/v1/invite/bulk` sent multiple invites in a single call. The v2 endpoint is **per user** — there is no bulk variant. To invite several users, call `POST /api/v2/users` once per user, looping or issuing the requests in parallel.
+
+## Next steps
+
+- [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) — Generate the API key used to authenticate these requests.
+- [Roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/) — Create custom roles and look up role IDs.
+- [Invite Team Member](https://signoz.io/docs/manage/administrator-guide/iam/invite-team-member/) — Invite teammates from the SigNoz UI.
+
+<GetHelp />
