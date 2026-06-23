@@ -73,6 +73,16 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const breadcrumbs = getDocsBreadcrumbs(slug, title)
   const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
+  const postForClient = {
+    slug: post.slug,
+    lastmod: post.lastmod,
+    updated_date: post.updated_date,
+    published_date: post.published_date,
+    date: post.date,
+    docTags: post.docTags,
+    body: post.body,
+  }
+
   return (
     <>
       <JsonLdScript data={jsonLd} />
@@ -80,7 +90,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
       <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4">
         <DocContent
           title={title}
-          post={post}
+          post={postForClient}
           toc={toc}
           hideTableOfContents={hide_table_of_contents || false}
           editLink={`https://github.com/SigNoz/signoz.io/edit/main/data/docs/${slug}.mdx`}
