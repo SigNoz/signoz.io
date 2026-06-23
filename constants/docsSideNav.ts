@@ -1648,17 +1648,17 @@ const docsSideNav = [
             label: 'Logs Quick Filters',
           },
           {
-            type: 'doc',
-            route: '/docs/logs-management/features/json-logs',
-            label: 'Native JSON Log Body',
-          },
-          {
             label: 'User Guides',
             type: 'category',
             isExpanded: false,
             route: '/docs/logs-management/features/logs-explorer-guides',
             items: [
               { type: 'doc', route: '/docs/userguide/logs_fields', label: 'Fields in Logs' },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/features/json-logs',
+                label: 'Native JSON Log Body',
+              },
               {
                 type: 'doc',
                 route: '/docs/logs-management/guides/pii-scrubbing',
