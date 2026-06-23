@@ -10,7 +10,6 @@ import WhySelectSignoz from '@/components/why-select-signoz'
 import { GetStarted } from '@/components/GetStarted'
 import ChatbaseClient from '@/components/Chatbase/ChatbaseClient'
 import HomepageFloatingCta from '@/components/homepage-floating-cta/HomepageFloatingCta'
-import CustomerStories from '@/components/index-customer-stories/CustomerStories'
 import Faq from '@/components/index-faq/Faq'
 import AgentNativeObservabilitySection from '@/components/index-agent-native-observability/AgentNativeObservability'
 import FeatureBento from '@/components/index-feature-bento/FeatureBento'
@@ -75,7 +74,6 @@ function HomepageRedesign() {
       <WhySignoz />
       <FeatureBento />
       <AgentNativeObservabilitySection />
-      <CustomerStories />
       <HomepageGetStarted />
       <Pricing />
       <Faq />
