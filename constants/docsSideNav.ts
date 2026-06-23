@@ -1966,6 +1966,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/opentelemetry-pgbouncer',
+                label: 'PgBouncer',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/opentelemetry-planetscale',
                 label: 'PlanetScale',
               },
@@ -2596,6 +2601,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
             label: 'OpenRouter',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/pgbouncer-dashboard',
+            label: 'PgBouncer',
           },
           {
             type: 'doc',

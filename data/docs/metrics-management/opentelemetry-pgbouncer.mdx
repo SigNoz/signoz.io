@@ -1,0 +1,226 @@
+---
+date: 2026-06-23
+id: opentelemetry-pgbouncer
+title: Send PgBouncer Metrics to SigNoz with OpenTelemetry
+description: Scrape PgBouncer connection-pool metrics with the OpenTelemetry Collector and send pool, throughput, and wait-time metrics to SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+Use this guide to send PgBouncer connection-pool metrics to SigNoz with the OpenTelemetry Collector. Monitor pool states, query and transaction throughput, client wait times, and per-database connections.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Use the same steps. Update the endpoint and remove the ingestion key header as shown in [Cloud -> Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- A running instance of PgBouncer
+- A PgBouncer user listed in **stats_users**, see <a href="https://www.pgbouncer.org/config.html" target="_blank" rel="noopener noreferrer nofollow">PgBouncer configuration reference</a> for more information
+- [OpenTelemetry Collector Contrib](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) installed
+- An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## How it works
+
+PgBouncer does not expose metrics the Collector can scrape on its own. The <a href="https://github.com/prometheus-community/pgbouncer_exporter" target="_blank" rel="noopener noreferrer nofollow">prometheus-community PgBouncer exporter</a> reads PgBouncer's admin console and exposes `pgbouncer_*` Prometheus metrics. The Collector scrapes the exporter and ships the metrics to SigNoz over OTLP.
+
+<Figure
+  src="/img/docs/metrics-management/pgbouncer/pgbouncer-flow.svg"
+  alt="PgBouncer admin console to pgbouncer_exporter to OpenTelemetry Collector to SigNoz"
+  caption="The exporter exposes PgBouncer's admin console as Prometheus metrics; the Collector scrapes and ships them to SigNoz."
+/>
+
+## Steps
+
+### Step 1: Run the PgBouncer exporter
+
+Run the exporter pointed at PgBouncer's virtual `pgbouncer` admin database:
+
+```bash
+pgbouncer_exporter \
+  --pgBouncer.connectionString="postgres://<user>:<password>@<pgbouncer-host>:6432/pgbouncer?sslmode=disable" \
+  --web.listen-address=":9127"
+```
+
+Replace the placeholders:
+
+- `<user>:<password>`: a PgBouncer user listed in **stats_users**
+- `<pgbouncer-host>:6432`: your PgBouncer host and port
+
+The database in the connection string must be `pgbouncer`. That is the built-in admin console, not an application database.
+
+Confirm the exporter exposes metrics:
+
+```bash
+curl -s localhost:9127/metrics | grep '^pgbouncer_' | head
+```
+
+Look for `pgbouncer_up 1` plus several `pgbouncer_pools_*` and `pgbouncer_stats_totals_*` series.
+
+### Step 2: Configure the Collector
+
+Add a PgBouncer scrape job, a **resource** processor that tags metrics with **service.name**, and a dedicated pipeline. The SigNoz dashboard filters on **service.name**, so keep that processor.
+
+```yaml:config.yaml
+receivers:
+  prometheus/pgbouncer:
+    config:
+      scrape_configs:
+        - job_name: pgbouncer
+          scrape_interval: 15s
+          static_configs:
+            - targets: ["<exporter-host>:9127"]
+
+processors:
+  resource/pgbouncer:
+    attributes:
+      - key: service.name
+        value: pgbouncer
+        action: upsert
+
+service:
+  pipelines:
+    metrics/pgbouncer:
+      receivers: [prometheus/pgbouncer]
+      processors: [resource/pgbouncer, batch]
+      exporters: [otlphttp]
+```
+
+Replace `<exporter-host>:9127` with where the Step 1 exporter listens, use `localhost:9127` if it runs on the same host. If you do not have an `otlphttp` exporter yet, add one for SigNoz Cloud:
+
+```yaml:config.yaml
+exporters:
+  otlphttp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      signoz-ingestion-key: "<your-ingestion-key>"
+```
+
+Verify these values:
+
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Then apply the config where your Collector runs:
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+The config lives at **/etc/otelcol-contrib/config.yaml**. Validate it, restart, and watch the logs:
+
+```bash
+sudo /usr/bin/otelcol-contrib validate --config /etc/otelcol-contrib/config.yaml
+sudo systemctl restart otelcol-contrib
+sudo journalctl -u otelcol-contrib -f
+```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on VM](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
+</Admonition>
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Add the config to the file you mount into the Collector container, then restart and watch the logs:
+
+```bash
+docker compose up -d
+docker compose logs -f
+```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on Docker](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
+</Admonition>
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+Nest the same `receivers`, `processors`, and `service.pipelines` blocks under `otelDeployment.config` in your `override-values.yaml` for the [SigNoz K8s Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), using the in-cluster exporter Service as the scrape target:
+
+```yaml:override-values.yaml
+otelDeployment:
+  config:
+    receivers:
+      prometheus/pgbouncer:
+        config:
+          scrape_configs:
+            - job_name: pgbouncer
+              scrape_interval: 15s
+              static_configs:
+                - targets: ["pgbouncer-exporter.default.svc.cluster.local:9127"]
+    processors:
+      resource/pgbouncer:
+        attributes:
+          - key: service.name
+            value: pgbouncer
+            action: upsert
+    service:
+      pipelines:
+        metrics/pgbouncer:
+          receivers: [prometheus/pgbouncer]
+          processors: [resource/pgbouncer, batch]
+          exporters: [otlphttp]
+```
+
+Apply it and watch the logs:
+
+```bash
+helm upgrade --install <release-name> signoz/k8s-infra -n signoz -f override-values.yaml
+kubectl logs -n signoz <collector-pod-name> -f
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+1. Open [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) in SigNoz
+2. Search for metrics that start with `pgbouncer_`.
+3. You should see metrics such as `pgbouncer_up`.
+
+<Figure
+  src="/img/docs/metrics-management/pgbouncer/sample-metrics.webp"
+  alt="PgBouncer metrics in the SigNoz Metrics Explorer"
+  caption="PgBouncer metrics in the SigNoz Metrics Explorer"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### `pgbouncer_up` is 0 or the exporter fails to start
+
+- Likely cause: the exporter cannot reach or authenticate against the PgBouncer admin console.
+- Fix: confirm the connection string targets the `pgbouncer` admin database, the user is listed in **stats_users**, and the user can authenticate against the admin console when **auth_type** is `scram-sha-256` or `md5`.
+- Verify: rerun `curl localhost:9127/metrics` and look for `pgbouncer_up 1`.
+
+### No `pgbouncer_` metrics in SigNoz
+
+- Likely cause: the Collector cannot reach the exporter, or the `metrics/pgbouncer` pipeline does not include the receiver.
+- Fix: confirm the exporter is reachable from the Collector host with `curl <exporter-host>:9127/metrics`, and confirm **prometheus/pgbouncer** is in the `metrics/pgbouncer` pipeline. Check the Collector logs for scrape errors.
+- Verify: search for `pgbouncer_up` in Metrics Explorer.
+
+### Metrics appear but the dashboard is empty
+
+- Likely cause: the `metrics/pgbouncer` pipeline does not include the **resource/pgbouncer** processor, so PgBouncer metrics do not have **service.name**.
+- Fix: add **resource/pgbouncer** to the `metrics/pgbouncer` **processors** list and restart the Collector.
+- Verify: filter Metrics Explorer by `service.name = pgbouncer`.
+
+### `pgbouncer_stats_*` series are flat
+
+- Likely cause: the `pgbouncer_stats_totals_*` counters only move when queries pass through PgBouncer.
+- Fix: generate client traffic through PgBouncer.
+- Verify: the counter values increment between scrapes.
+
+</details>
+
+## Next Steps
+
+- Import the prebuilt [PgBouncer dashboard](https://signoz.io/docs/dashboards/dashboard-templates/pgbouncer-dashboard/).
+- Read how to [Set up Alerts in SigNoz](https://signoz.io/docs/userguide/alerts-management/).
+
+## Get Help
+
+<GetHelp />
