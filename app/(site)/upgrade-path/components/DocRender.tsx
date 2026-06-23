@@ -1,43 +1,36 @@
 import React, { useEffect } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-
-type UpgradeDoc = {
-  title: string
-  slug: string
-  content: string
-  body?: {
-    raw?: string
-  }
-}
+import { RegionProvider } from '@/components/Region/RegionContext'
 
 const DocRenderer = ({
   docUrl,
-  docsBySlug,
+  docMetaBySlug,
+  compiledDocsBySlug,
   setHasError,
 }: {
   docUrl: string
-  docsBySlug: Record<string, UpgradeDoc>
+  docMetaBySlug: Record<string, { title: string }>
+  compiledDocsBySlug: Record<string, React.ReactNode>
   setHasError: (hasError: boolean) => void
 }) => {
   const slug = decodeURI(`${docUrl.replace('https://signoz.io/docs/', '').replace(/^\/+/, '')}`)
-  const post = docsBySlug[slug]
+  const meta = docMetaBySlug[slug]
+  const content = compiledDocsBySlug[slug]
 
   useEffect(() => {
-    setHasError(!post)
-  }, [post, setHasError])
+    setHasError(!content)
+  }, [content, setHasError])
 
-  if (!post) {
+  if (!content) {
     return null
   }
 
-  const markdown = post.body?.raw || post.content || ''
-
   return (
-    <article>
-      <h1>{post.title}</h1>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
-    </article>
+    <RegionProvider>
+      <article>
+        <h1>{meta?.title}</h1>
+        {content}
+      </article>
+    </RegionProvider>
   )
 }
 

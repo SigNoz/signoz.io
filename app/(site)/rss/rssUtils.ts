@@ -93,6 +93,23 @@ const mapBlogEntries = (blogs: MDXContentApiResponse | undefined) => {
   }))
 }
 
+const buildDocSlug = (path = '') => {
+  const cleanedPath = path.startsWith('/') ? path : `/${path}`
+  return normaliseSlug(`docs${cleanedPath}`)
+}
+
+const mapDocEntries = (docs: any[]) => {
+  if (!docs?.length) {
+    return []
+  }
+
+  return docs.map((doc) => ({
+    ...doc,
+    slug: buildDocSlug(doc.slug || doc.path),
+    date: resolveLatestDate(doc),
+  }))
+}
+
 export const loadPublishedPosts = async () => {
   const deploymentStatus = getDeploymentStatus()
   const { faqs, opentelemetries, comparisons, guides, blogs } =
@@ -103,7 +120,7 @@ export const loadPublishedPosts = async () => {
   const comparisonPosts = mapComparisonEntries(comparisons)
   const guidePosts = mapGuideEntries(guides)
   const blogPosts = mapBlogEntries(blogs)
-  const docPosts = await fetchAllDocsForPage()
+  const docPosts = mapDocEntries(await fetchAllDocsForPage())
 
   const combinedPosts = [
     ...faqPosts,
