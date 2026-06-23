@@ -50,6 +50,14 @@ import SigNozCloud from './shared/SigNozCloud'
 import UpgradeInfo from './shared/UpgradeInfo'
 import OtelOperatorOTLPEndpoint from './shared/OtelOperatorOTLPEndpoint'
 import OtelOperatorAutoInstrumentation from './shared/OtelOperatorAutoInstrumentation'
+import GetHelp from './shared/GetHelp'
+import K8sNextSteps from './shared/K8sNextSteps'
+import MultiNodePart1 from './shared/MultiNodePart1'
+import MultiNodePart2 from './shared/MultiNodePart2'
+import PrereqsInstrument from './shared/PrereqsInstrument'
+import TraefikMetrics from './shared/TraefikMetrics'
+import MetricsDefinition from './shared/MetricsDefinition'
+import CHClientWithOutput from './shared/CHClientWithOutput'
 
 import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
 import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
@@ -162,4 +170,12 @@ export const components = {
   DatabaseTable,
   InlineCTA,
   MCPInstallButton,
+  GetHelp,
+  K8sNextSteps,
+  MultiNodePart1,
+  MultiNodePart2,
+  PrereqsInstrument,
+  TraefikMetrics,
+  MetricsDefinition,
+  CHClientWithOutput,
 } as unknown as MDXComponents
