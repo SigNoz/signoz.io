@@ -43,7 +43,7 @@ const items: WhySigNozItem[] = [
   {
     title: 'Give AI agents telemetry they understand',
     description:
-      'OpenTelemetry gives agents public concepts like trace IDs, spans, services, environments, and resource attributes.',
+      'One OpenTelemetry-native source gives agents a known schema for traces, logs, metrics, and services, so they can debug with less translation.',
     icon: Bot,
     image: whySignozPlaceholderAlt,
     alt: 'Agent telemetry context for AI-assisted observability workflows',
@@ -68,7 +68,7 @@ function getItemClasses(index: number, activeIndex: number) {
 
 export default function WhySignoz() {
   const [activeIndex, setActiveIndex] = useState(0)
-  const [itemOpacities, setItemOpacities] = useState(() =>
+  const [itemOpacities, setItemOpacities] = useState<number[]>(() =>
     items.map((_, index) => (index === 0 ? 1 : 0.38))
   )
   const itemRefs = useRef<Array<HTMLDivElement | null>>([])
