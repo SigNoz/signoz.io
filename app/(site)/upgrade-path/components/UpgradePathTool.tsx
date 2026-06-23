@@ -24,18 +24,12 @@ import Link from 'next/link'
 
 const TYPED_UPGRADE_SCHEMA = upgradeSchema as unknown as UpgradeSchema
 
-type UpgradeDoc = {
-  title: string
-  slug: string
-  content: string
-  body?: {
-    raw?: string
-  }
-  toc?: unknown[]
-  [key: string]: unknown
+type UpgradePathToolProps = {
+  docMetaBySlug: Record<string, { title: string }>
+  compiledDocsBySlug: Record<string, React.ReactNode>
 }
 
-const UpgradePathTool: React.FC<{ docsBySlug: Record<string, UpgradeDoc> }> = ({ docsBySlug }) => {
+const UpgradePathTool: React.FC<UpgradePathToolProps> = ({ docMetaBySlug, compiledDocsBySlug }) => {
   const [state, setState] = useState<UpgradePathState>({
     currentVersion: '',
     targetVersion: '',
@@ -293,7 +287,8 @@ const UpgradePathTool: React.FC<{ docsBySlug: Record<string, UpgradeDoc> }> = ({
                   className="col-span-2 max-h-screen w-full"
                   currentStep={currentStepData}
                   docUrl={currentStepData?.releaseInfo?.guideUrl ?? ''}
-                  docsBySlug={docsBySlug}
+                  docMetaBySlug={docMetaBySlug}
+                  compiledDocsBySlug={compiledDocsBySlug}
                 />
               </div>
             )}

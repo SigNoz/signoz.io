@@ -5,29 +5,21 @@ import { Card } from '@/components/ui/Card'
 import Link from 'next/link'
 import { AlertTriangle } from 'lucide-react'
 
-type UpgradeDoc = {
-  title: string
-  slug: string
-  content: string
-  body?: {
-    raw?: string
-  }
-  [key: string]: unknown
-}
-
 interface DocumentationPanelProps {
   currentStep: UpgradePath
   className?: string
   docUrl: string
   version: string
-  docsBySlug: Record<string, UpgradeDoc>
+  docMetaBySlug: Record<string, { title: string }>
+  compiledDocsBySlug: Record<string, React.ReactNode>
 }
 
 const DocumentationPanel: React.FC<DocumentationPanelProps> = ({
   version,
   className,
   docUrl,
-  docsBySlug,
+  docMetaBySlug,
+  compiledDocsBySlug,
 }) => {
   const [hasError, setHasError] = useState(false)
 
@@ -75,7 +67,12 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({
                 </div>
               </div>
             ) : (
-              <DocRenderer docUrl={docUrl} docsBySlug={docsBySlug} setHasError={setHasError} />
+              <DocRenderer
+                docUrl={docUrl}
+                docMetaBySlug={docMetaBySlug}
+                compiledDocsBySlug={compiledDocsBySlug}
+                setHasError={setHasError}
+              />
             )}
           </div>
         </Card>
