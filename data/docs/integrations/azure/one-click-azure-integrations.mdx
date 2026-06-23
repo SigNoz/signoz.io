@@ -7,8 +7,6 @@ doc_type: howto
 tags: [SigNoz Cloud]
 ---
 
-import GetHelp from '@/components/shared/get-help.md'
-
 SigNoz One-Click Azure Integration monitors your Azure services without manual setup. Connect your Azure subscription from the SigNoz UI, and SigNoz deploys an agent that provisions Event Hubs, diagnostic settings, and an OpenTelemetry Collector via Azure Deployment Stacks. Each supported service ships with a pre-built dashboard, visible as soon as data starts flowing.
 
 ## Supported integrations
@@ -169,6 +167,19 @@ The agent updates the telemetry pipeline in the background, deploying or removin
 ### Adding multiple accounts
 
 To monitor multiple Azure subscriptions, click **Add New Account** and follow the same installation steps for each subscription.
+
+### Updating the agent
+
+The SigNoz agent container app does not update automatically. To update it to the latest version:
+
+1. Check each service's documentation page for its minimum required agent version (listed at the top).
+2. In the Azure Portal, go to **Subscriptions** and select your subscription.
+3. Navigate to **Resource Groups** and open **signoz-integration-rg**.
+4. Select the **signoz-integration-agent** container app.
+5. In the left menu, under **Application**, choose **Containers**.
+6. In the **Properties** section, click **Edit** on the container.
+7. Update only the version tag in the **Image and tag** field to the latest version shown in the SigNoz Azure Integration control panel, then save.
+8. Verify the container app restarts with the new version by checking the **Revisions** view for a new active revision.
 
 ### Uninstalling
 

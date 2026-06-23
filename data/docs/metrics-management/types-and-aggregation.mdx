@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-06-11
 title: Metric Types and Aggregation
 description: Learn about the different metric types (Counter, Gauge, Histogram, Exponential Histogram) supported by SigNoz and how temporal and spatial aggregation works for each type.
 id: types-and-aggregation
@@ -45,6 +45,10 @@ A table representing the different types of metrics and their temporality suppor
 | Exponential Histogram | No | Yes |
 
 The Gauge metric type does not have a temporality, as it represents a single value at a point in time.
+
+<Admonition type="tip">
+We recommend exporting metrics with **delta** temporality. It reduces ingestion costs because synchronous instruments that record nothing during an export interval send no data points for that interval (with cumulative, every active series is re-sent on each interval), and it is required for exponential histograms in SigNoz. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for how to configure it.
+</Admonition>
 
 ## Aggregation
 

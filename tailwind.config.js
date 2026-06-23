@@ -25,10 +25,40 @@ module.exports = {
           '0%': { opacity: '1', transform: 'translateY(0) scale(1)' },
           '100%': { opacity: '0', transform: 'translateY(-4px) scale(0.96)' },
         },
+        'homepage-agent-prompt-tail': {
+          '0%': { clipPath: 'inset(0 100% 0 0)' },
+          '100%': { clipPath: 'inset(0 0 0 0)' },
+        },
+        'homepage-agent-thinking-cycle': {
+          '0%': { opacity: '0', transform: 'translateY(7px)' },
+          '20%, 72%': { opacity: '1', transform: 'translateY(0)' },
+          '100%': { opacity: '0', transform: 'translateY(-7px)' },
+        },
+        'homepage-agent-terminal-enter': {
+          '0%': { opacity: '0', transform: 'translateX(-28px) translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateX(0) translateY(0)' },
+        },
+        'homepage-agent-noz-enter': {
+          '0%': { opacity: '0', transform: 'translateX(30px) translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateX(0) translateY(0)' },
+        },
+        'homepage-agent-response-reveal': {
+          '0%': { opacity: '0', transform: 'translateY(12px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
       },
       animation: {
         'nav-popover-in': 'nav-popover-in 150ms cubic-bezier(0.16, 1, 0.3, 1) both',
         'nav-popover-out': 'nav-popover-out 100ms cubic-bezier(0.4, 0, 1, 1) both',
+        'homepage-agent-prompt-tail':
+          'homepage-agent-prompt-tail 760ms steps(30, end) 320ms forwards',
+        'homepage-agent-thinking-cycle': 'homepage-agent-thinking-cycle 620ms ease forwards',
+        'homepage-agent-terminal-enter':
+          'homepage-agent-terminal-enter 820ms cubic-bezier(0.16, 1, 0.3, 1) 120ms forwards',
+        'homepage-agent-noz-enter':
+          'homepage-agent-noz-enter 860ms cubic-bezier(0.16, 1, 0.3, 1) 260ms forwards',
+        'homepage-agent-response-reveal':
+          'homepage-agent-response-reveal 760ms ease 3600ms forwards',
       },
       maxWidth: {
         '8xl': '1440px',

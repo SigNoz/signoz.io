@@ -1,0 +1,71 @@
+---
+date: 2026-06-14
+id: noz-correlate-infra-errors
+title: Connect Infrastructure Issues to App Errors with Noz
+meta_title: Correlate Infra and App Errors with Noz - SigNoz AI Teammate
+description: When an app error spike might be infrastructure, ask Noz to line up pod restarts and resource pressure against the errors on a shared timeline.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+Errors spiked on a service and you suspect the platform, not the code. Instead of flipping between the Services view and your Kubernetes dashboards, you ask Noz to put both on the same timeline.
+
+## Prerequisites
+
+- A [SigNoz Cloud](https://signoz.io/teams/) account with [Noz](https://signoz.io/docs/ai/noz/) available.
+- Application traces or logs and infrastructure metrics (for example, Kubernetes pod metrics) flowing to SigNoz.
+
+## Step 1: Line up the timelines
+
+Open **Noz** from the top-right header and ask the correlation directly:
+
+```
+Do the Kubernetes pod restarts line up with the error spike on the orders service today?
+```
+
+Noz pulls the service's error rate and the pod restart counts over the same window and tells you whether the two move together.
+
+## Step 2: Check resource pressure
+
+```
+Are any pods for this service crash-looping or hitting memory limits right now?
+```
+
+Noz queries the workload's restart reasons and CPU/memory metrics, so you can see whether OOM kills or saturation explain the restarts.
+
+## Step 3: Establish direction
+
+Use **Add Context → Services** to attach the service, then ask Noz to reason about cause:
+
+```
+Is the error spike caused by the restarts, or did the errors trigger the restarts?
+```
+
+Noz weighs which signal moved first and explains the likely direction, with **Suggested Actions** to dig into the failing pods or the application traces next.
+
+## Tips
+
+1. **Explain the restarts, don't just count them.** Restart counts alone are weak; ask for the OOM kills and resource limits behind them.
+2. **Settle which moved first.** Whether infra or the app led decides whether you scale the platform or fix the code.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+To answer, Noz works through several agentic steps, visible under **Worked through N steps**:
+
+| Step | What It Did |
+|------|-------------|
+| Ran builder query | Aggregated the service's error rate over the window |
+| Ran builder query | Pulled pod restart counts and CPU/memory for the workload |
+| Reasoned | Aligned the two timelines and judged which signal led the other |
+
+</details>
+
+## Next Steps
+
+- [Investigate What Changed After a Deploy with Noz](https://signoz.io/docs/ai/use-cases/noz-incident-triage/) - Rule out a release before blaming the platform.
+- [Get a Weekly Reliability Report with Noz](https://signoz.io/docs/ai/use-cases/noz-service-reliability-report/) - See whether this service is trending less reliable.
+
+<GetHelp />

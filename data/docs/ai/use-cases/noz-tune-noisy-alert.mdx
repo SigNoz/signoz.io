@@ -1,0 +1,70 @@
+---
+date: 2026-06-14
+id: noz-tune-noisy-alert
+title: Tune a Noisy Alert with Noz
+meta_title: Tune a Noisy Alert with Noz - SigNoz AI Teammate
+description: When an alert pages too often, ask Noz to read its firing history and recommend a threshold and evaluation window that cut the noise without missing real incidents.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+An alert keeps paging and most of the pages are not actionable. Before you mute it, you ask Noz how often it has fired and what a saner threshold would look like.
+
+## Prerequisites
+
+- A [SigNoz Cloud](https://signoz.io/teams/) account with [Noz](https://signoz.io/docs/ai/noz/) available.
+- An alert rule that has fired enough times to have a history.
+
+## Step 1: Hand Noz the alert
+
+Open **Noz** from the top-right header, use **Add Context → Alerts** to attach the noisy alert, then ask:
+
+```
+This alert is too noisy. Look at its firing history and tell me how to tune it.
+```
+
+Noz reads the alert's condition, threshold, and evaluation window, then pulls how often it has fired over the recent period.
+
+## Step 2: Separate real fires from noise
+
+```
+How many of these fires lined up with actual service degradation?
+```
+
+Noz compares each fire against the target's error rate and latency, so you can see what share of pages matched a real problem versus a transient blip.
+
+## Step 3: Get a recommendation
+
+```
+Suggest a threshold and evaluation window that would have skipped the noise but still caught the real incidents.
+```
+
+Noz proposes specific values and explains the trade-off, with **Suggested Actions** to refine the rule. Review the recommendation against your own tolerance before you apply it.
+
+## Tips
+
+1. **Judge against impact, not fire count.** Have Noz line fires up with real degradation so you tune on signal, not volume.
+2. **Confirm before changing.** Treat the suggested threshold as a starting point and sanity-check it against a known incident.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+To answer, Noz works through several agentic steps, visible under **Worked through N steps**:
+
+| Step | What It Did |
+|------|-------------|
+| Read alert rule | Loaded the alert's condition, threshold, and evaluation window |
+| Ran builder query | Pulled the alert's firing history over the recent period |
+| Ran builder query | Compared each fire against the target's error rate and latency |
+| Reasoned | Separated actionable fires from noise and recommended a threshold |
+
+</details>
+
+## Next Steps
+
+- [Connect Infrastructure Issues to App Errors with Noz](https://signoz.io/docs/ai/use-cases/noz-correlate-infra-errors/) - Check whether the fires trace back to the platform.
+- [Alert Fatigue Audit](https://signoz.io/docs/ai/use-cases/alert-fatigue-audit/) - Audit noisy and stale alerts across the workspace from your coding agent.
+
+<GetHelp />

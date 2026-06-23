@@ -569,6 +569,11 @@ const docsSideNav = [
                     route: '/docs/manage/administrator-guide/sso/user-guides/oidc-keycloak',
                     label: 'Keycloak - OIDC Authentication',
                   },
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/sso/user-guides/saml-google',
+                    label: 'Google Workspace - SAML Authentication',
+                  },
                 ],
               },
             ],
@@ -1961,6 +1966,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/opentelemetry-planetscale',
+                label: 'PlanetScale',
+              },
+              {
+                type: 'doc',
                 route: '/docs/integrations/opentelemetry-hasura',
                 label: 'Hasura',
               },
@@ -2523,59 +2533,6 @@ const docsSideNav = [
             label: 'KEDA',
           },
           {
-            label: 'Kubernetes',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/dashboards/dashboard-templates/kubernetes-dashboards',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics',
-                label: 'Kubernetes Cluster Metrics',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
-                label: 'Host Metrics',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-events',
-                label: 'Kubernetes Events',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-pvc',
-                label: 'Kubernetes PVC Metrics',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-overall',
-                label: 'Kubernetes Pod Metrics (Overall)',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed',
-                label: 'Kubernetes Pod Metrics (Detailed)',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-overall',
-                label: 'Kubernetes Node Metrics (Overall)',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed',
-                label: 'Kubernetes Node Metrics (Detailed)',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-cronjobs',
-                label: 'Kubernetes CronJobs',
-              },
-            ],
-          },
-          {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/key-operations',
             label: 'Key Operations',
@@ -2644,6 +2601,16 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
             label: 'Pipecat',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/planetscale-postgres-dashboard',
+            label: 'PlanetScale PostgreSQL',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/planetscale-vitess-dashboard',
+            label: 'PlanetScale Vitess (MySQL)',
           },
           {
             type: 'doc',
@@ -3254,9 +3221,14 @@ const docsSideNav = [
   {
     type: 'category',
     isExpanded: false,
-    label: 'AI Tools and Skills',
+    label: 'Noz & AI Tools',
     route: '/docs/ai/overview',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/ai/noz',
+        label: 'Noz (AI Teammate)',
+      },
       {
         type: 'doc',
         route: '/docs/ai/signoz-mcp-server',
@@ -3265,83 +3237,127 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/ai/agent-skills',
-        label: 'Agent Skills',
+        label: 'Agent Skills & Plugin',
       },
       {
         type: 'category',
         isExpanded: false,
         route: '/docs/ai/use-cases',
-        label: 'MCP Use Cases',
+        label: 'AI Use Cases',
         items: [
           {
-            type: 'doc',
-            route: '/docs/ai/use-cases/natural-language-log-exploration',
-            label: 'Log Exploration',
+            type: 'category',
+            isExpanded: false,
+            label: 'Noz',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/noz-incident-triage',
+                label: 'What Changed After a Deploy',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/noz-latency-bottleneck',
+                label: 'Find Where Latency Is Going',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/noz-tune-noisy-alert',
+                label: 'Tune a Noisy Alert',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/noz-correlate-infra-errors',
+                label: 'Infra Issues vs App Errors',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/noz-triage-customer-issue',
+                label: 'Triage a Customer Issue',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/noz-service-reliability-report',
+                label: 'Weekly Reliability Report',
+              },
+            ],
           },
           {
-            type: 'doc',
-            route: '/docs/ai/use-cases/latency-spike-explainer',
-            label: 'Latency Spike Explainer',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/reconstruct-bug-from-trace-id',
-            label: 'Report from Trace ID',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/error-rate-spike-explainer',
-            label: 'Error Rate Spike Explainer',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/alert-correlation-analysis',
-            label: 'Alert Correlation Analysis',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/post-deployment-monitoring',
-            label: 'Post Deployment Monitoring',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/oncall-handoff-brief',
-            label: 'On-Call Handoff Brief',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/alert-fatigue-audit',
-            label: 'Alert Fatigue Audit',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/optimize-performance-during-development',
-            label: 'Optimize Performance During Development',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/trace-failing-request-end-to-end',
-            label: 'Trace Failing Request',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/dashboard-creation-natural-language',
-            label: 'Dashboard Creation from Natural Language',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/incident-specific-dashboard',
-            label: 'Incident Specific Dashboard Spin-Up',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/alert-creation-natural-language',
-            label: 'Alert Creation from Natural Language',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/postmortem-evidence-pack',
-            label: 'Postmortem Evidence Pack',
+            type: 'category',
+            isExpanded: false,
+            label: 'MCP Server',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/natural-language-log-exploration',
+                label: 'Log Exploration',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/latency-spike-explainer',
+                label: 'Latency Spike Explainer',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/reconstruct-bug-from-trace-id',
+                label: 'Reconstruct from Trace ID',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/error-rate-spike-explainer',
+                label: 'Error Rate Spike Explainer',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/alert-correlation-analysis',
+                label: 'Alert Correlation Analysis',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/post-deployment-monitoring',
+                label: 'Post Deployment Monitoring',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/oncall-handoff-brief',
+                label: 'On-Call Handoff Brief',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/alert-fatigue-audit',
+                label: 'Alert Fatigue Audit',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/optimize-performance-during-development',
+                label: 'Optimize Performance During Development',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/trace-failing-request-end-to-end',
+                label: 'Trace Failing Request',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/dashboard-creation-natural-language',
+                label: 'Dashboard Creation from Natural Language',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/incident-specific-dashboard',
+                label: 'Incident Specific Dashboard Spin-Up',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/alert-creation-natural-language',
+                label: 'Alert Creation from Natural Language',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/postmortem-evidence-pack',
+                label: 'Postmortem Evidence Pack',
+              },
+            ],
           },
         ],
       },
