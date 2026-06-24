@@ -3785,6 +3785,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/outposts/baseten',
+        label: 'Baseten',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/aws-elasticache-redis',
         label: 'AWS Elasticache Redis',
       },

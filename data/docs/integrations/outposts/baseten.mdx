@@ -1,0 +1,102 @@
+---
+date: 2026-06-25
+title: Monitor Baseten Model Logs with SigNoz via OpenTelemetry
+description: Ship Baseten build, deploy, and serving logs to SigNoz Cloud over OTLP/HTTP. Search model logs, build alerts, and correlate with your other telemetry.
+doc_type: howto
+---
+
+<a href="https://www.baseten.co" target="_blank" rel="noopener noreferrer nofollow">Baseten</a> is a platform for deploying and serving machine learning models. Baseten ships its logs to SigNoz over OTLP/HTTP using a built-in OpenTelemetry connection.
+
+<Admonition type="warning">
+  Baseten exports logs only. It does not send traces or metrics. Each Baseten organization supports one OTLP destination at a time, so point Baseten at SigNoz and remove any other destination first.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Two extra requirements apply because Baseten pushes to your endpoint from outside your network:
+
+  1. **Publicly reachable:** your collector must be accessible from the internet, not on a private network or VPN.
+  2. **HTTPS with a valid certificate:** plain HTTP and self-signed certificates are rejected. Put a reverse proxy (e.g. Caddy) in front of port 4318 to terminate TLS.
+
+  Set the **Endpoint URL** to your collector's OTLP/HTTP logs path (for example `https://signoz.example.com/v1/logs`). Baseten requires both header fields, so an empty header blocks **Save** — enter a harmless header your collector ignores (for example **Header name** `x-source`, **Header value** `baseten`). For endpoint and auth differences, see [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- A Baseten organization, with permission to edit organization settings
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Configure the OTEL Connection
+
+### Add the connection in Baseten
+
+1. In the Baseten console, go to **Settings > General** and find the **OTEL connection** card.
+2. Click **Add connection**.
+3. Configure the fields:
+
+  - **Endpoint URL**: `https://ingest.<region>.signoz.cloud:443/v1/logs`
+  - **Header name**: `signoz-ingestion-key`
+  - **Header value**: `<your-ingestion-key>`
+
+4. Save the connection.
+
+<Figure
+  src="/img/docs/integrations/outposts/baseten/add-otel-connection.webp"
+  alt="Add OTEL configuration dialog in Baseten with SigNoz endpoint and signoz-ingestion-key header"
+  caption="OTEL connection configured for SigNoz in Baseten"
+/>
+
+Verify these values:
+
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: your [SigNoz ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Test the connection
+
+Click **Test** in the connection dialog (Baseten also fires this probe when you save). It posts a `Baseten OTLP connection test` log to your endpoint. Open **Logs** in SigNoz and search for the `baseten.telemetry_export_test` scope to confirm the endpoint and key work before any model traffic flows.
+
+Exports start once the connection is enabled. Baseten does not backfill older logs.
+
+## Validate
+
+1. Trigger activity in Baseten. For example, send a prediction to a deployed model, or redeploy one.
+2. Open **Logs** in SigNoz. Within a few minutes, your Baseten logs appear as log entries.
+3. Filter on `service.name = baseten` to see all Baseten logs. You can also narrow it down by `model_id` or `model_version_id` to scope to one model.
+
+<Figure
+  src="/img/docs/integrations/outposts/baseten/logs-in-signoz.webp"
+  alt="Baseten model logs in the SigNoz Logs explorer filtered by service.name baseten"
+  caption="Baseten logs in the SigNoz Logs explorer"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No data appearing
+
+- Confirm the **Endpoint URL** ends in `/v1/logs` and matches your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- Confirm the **Header name** is exactly `signoz-ingestion-key` and the **Header value** is a valid ingestion key. Copy it fresh from [SigNoz settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- Confirm the connection is enabled and that Baseten is generating logs. Exports start when you enable the connection and do not include older logs.
+- Search `service.name = baseten`. If the `baseten.telemetry_export_test` probe appears but model logs do not, the pipe works and you only need to generate activity (deploy a model, or send a prediction).
+
+### Replacing an existing destination
+
+A Baseten organization supports one OTLP destination at a time. If logs already go elsewhere, update or remove that connection before you point Baseten at SigNoz.
+
+</details>
+
+## Limitations
+
+- **Logs only:** Baseten exports logs. Traces and metrics are not supported.
+- **One destination:** each organization supports one OTLP destination at a time.
+- **No backfill:** exports cover logs generated after you enable the connection.
+
+## Next Steps
+
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) to detect error patterns from a specific model or version.
+- [Build dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize Baseten model logs in a single view.
+
+## Get Help
+
+<GetHelp />
