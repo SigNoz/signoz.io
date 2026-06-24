@@ -1,8 +1,8 @@
 ---
-date: 2026-06-11
-title: Docker Standalone
+date: 2026-06-24
+title: Install SigNoz on Docker with Foundry - Self-Host
 tags : [Self-Hosted Community]
-description: Learn how to install SigNoz on Docker. Step-by-step self-host guide for macOS and Linux, from setup to verifying the installation in the SigNoz UI.
+description: Install self-hosted SigNoz on Docker with Foundry. Step-by-step guide to deploy, verify, and migrate existing Docker Compose setups to Foundry.
 id: docker-standalone
 slug: /install/docker
 doc_type: howto
@@ -10,20 +10,20 @@ doc_type: howto
 
 <HostingDecision />
 
-This guide explains how to install SigNoz on Docker using Docker Compose. It runs all the components SigNoz requires on a single machine, making it the quickest way to get started with SigNoz.
+This guide explains how to install SigNoz on Docker using <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>. It runs all the components SigNoz requires on a single machine, making it the quickest way to get started with SigNoz.
+
+<Admonition type="info" title="Already running SigNoz with Docker Compose?">
+SigNoz no longer ships the legacy `install.sh` script or bundled Docker Compose files — Foundry is now the only supported way to install and run self-hosted SigNoz. If you already run SigNoz via Docker Compose, follow the [migration guide](https://signoz.io/docs/install/migrate-to-foundry/) to move to Foundry while preserving your existing telemetry data.
+</Admonition>
 
 ## Prerequisites
 
 - A Linux or macOS machine. Microsoft Windows is not officially supported.
 - <a href="https://docs.docker.com/engine/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Engine</a> 20.10+ (or Docker Desktop) with the <a href="https://docs.docker.com/compose/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Compose</a> v2 plugin.
 - At least 4GB of memory allocated to Docker.
-- <a href="https://git-scm.com/downloads" target="_blank" rel="noopener noreferrer nofollow">Git</a> (manual method only).
 - Open ports: `8080` (SigNoz UI), `4317` and `4318` (OTLP ingestion), and `8000` if you enable the MCP server.
 
 ## Install SigNoz
-
-<Tabs entityName="setup">
-<TabItem value="foundry" label="Foundry" default>
 
 <Admonition type="info" title="What is Foundry?" defaultCollapsed={true}>
 Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
@@ -184,76 +184,6 @@ docker compose -f pours/deployment/compose.yaml logs -f signoz-signoz-0
 Increase the memory allocated to Docker — SigNoz needs at least 4GB.
 
 </details>
-
-</TabItem>
-<TabItem value="manual" label="Manual">
-
-### Step 1: Clone the SigNoz repository
-
-<CloneRepo />
-
-### Step 2: Start the containers
-
-To install SigNoz, enter the `docker compose up` command, specifying the following:
-
-- `-d` to run containers in the background
-- `--remove-orphans` to remove orphaned containers
-
-```bash
-cd docker
-docker compose up -d --remove-orphans
-```
-
-### Step 3: Verify the installation
-
-Check that the containers are running:
-
-```bash
-docker ps
-```
-
-The output should look similar to the following:
-
-```output
-CONTAINER ID   IMAGE                                   COMMAND                  CREATED              STATUS                        PORTS                                                             NAMES
-e9baf4553644   signoz/signoz:v0.128.0                  "./signoz server"        About a minute ago   Up 36 seconds (healthy)       0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp                       signoz
-4f2ecd9efd3c   signoz/signoz-otel-collector:v0.144.5   "/bin/sh -c '/signoz…"   About a minute ago   Up 36 seconds                 0.0.0.0:4317-4318->4317-4318/tcp, [::]:4317-4318->4317-4318/tcp   signoz-otel-collector
-8743f2bfe97f   clickhouse/clickhouse-server:25.5.6     "/entrypoint.sh"         About a minute ago   Up About a minute (healthy)   8123/tcp, 9000/tcp, 9009/tcp                                      signoz-clickhouse
-a1055af51110   signoz/zookeeper:3.7.1                  "/opt/bitnami/script…"   About a minute ago   Up About a minute (healthy)   2181/tcp, 2888/tcp, 3888/tcp, 8080/tcp                            signoz-zookeeper-1
-```
-
-Once all containers are running, point your browser to `http://<IP-ADDRESS>:8080/` to access the SigNoz UI — `http://localhost:8080/` when SigNoz runs on your local machine.
-
-### Install a specific version of SigNoz
-
-To install a specific version, check out its release tag after cloning the repository (Step 1), then start the containers as in Step 2. For example, to install SigNoz version `v0.128.0`:
-
-```bash
-git checkout v0.128.0
-```
-
-<details>
-
-<ToggleHeading>
-## Troubleshooting
-</ToggleHeading>
-
-### A container is unhealthy or the UI does not load
-
-Check the component's logs from the `deploy/docker` directory:
-
-```bash
-docker compose logs -f signoz
-```
-
-### Containers keep restarting
-
-Increase the memory allocated to Docker — SigNoz needs at least 4GB.
-
-</details>
-
-</TabItem>
-</Tabs>
 
 <RetentionInfo />
 

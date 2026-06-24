@@ -91,6 +91,11 @@ const docsSideNav = [
                 route: '/docs/install/docker-selinux',
               },
               {
+                type: 'doc',
+                label: 'Migrate to Foundry',
+                route: '/docs/install/migrate-to-foundry',
+              },
+              {
                 type: 'category',
                 isExpanded: false,
                 label: 'Troubleshooting',
