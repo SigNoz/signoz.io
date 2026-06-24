@@ -23,6 +23,7 @@ const heroTabs = [
     label: 'Trace',
     description: 'every request',
     image: tracingPreview,
+    video: '/img/website/hero-tabs/signoz-trace-demo.mp4',
     alt: 'SigNoz tracing flame graph and waterfall view',
   },
   {
@@ -75,6 +76,40 @@ export default function HeroTracePreview() {
 
   const activePreview = heroTabs[activeTab]
 
+  const renderPreviewMedia = (
+    tab: (typeof heroTabs)[number],
+    className: string,
+    sizes: string,
+    priority = false
+  ) => {
+    if (tab.video && !prefersReducedMotion) {
+      return (
+        <video
+          aria-label={tab.alt}
+          autoPlay
+          className={className}
+          loop
+          muted
+          playsInline
+          poster={tab.image.src}
+        >
+          <source src={tab.video} type="video/mp4" />
+        </video>
+      )
+    }
+
+    return (
+      <Image
+        src={tab.image}
+        alt={tab.alt}
+        priority={priority}
+        unoptimized
+        className={className}
+        sizes={sizes}
+      />
+    )
+  }
+
   return (
     <motion.div
       ref={containerRef}
@@ -104,14 +139,12 @@ export default function HeroTracePreview() {
                 </p>
               </div>
               <div className="relative h-[310px] overflow-hidden sm:h-[390px]">
-                <Image
-                  src={tab.image}
-                  alt={tab.alt}
-                  priority={index === 0}
-                  unoptimized
-                  className="h-auto w-[720px] max-w-none sm:w-full"
-                  sizes="86vw"
-                />
+                {renderPreviewMedia(
+                  tab,
+                  'h-auto w-[720px] max-w-none sm:w-full',
+                  '86vw',
+                  index === 0
+                )}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[34%] bg-[linear-gradient(180deg,rgba(8,9,10,0)_0%,rgba(8,9,10,0.44)_62%,rgba(8,9,10,0.78)_100%)]" />
               </div>
             </article>
@@ -191,14 +224,12 @@ export default function HeroTracePreview() {
             key={activePreview.label}
             transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Image
-              src={activePreview.image}
-              alt={activePreview.alt}
-              priority={activeTab === 0}
-              unoptimized
-              className="h-auto w-full"
-              sizes="(max-width: 768px) 1180px, 1258px"
-            />
+            {renderPreviewMedia(
+              activePreview,
+              'h-auto w-full',
+              '(max-width: 768px) 1180px, 1258px',
+              activeTab === 0
+            )}
           </motion.div>
         </AnimatePresence>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%] bg-[linear-gradient(180deg,rgba(8,9,10,0)_0%,rgba(8,9,10,0.48)_58%,rgba(8,9,10,0.82)_100%)]" />
