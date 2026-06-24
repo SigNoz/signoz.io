@@ -1,7 +1,8 @@
 'use client'
 
-import { Database, LineChart, Server } from 'lucide-react'
+import { ArrowRight, Database, LineChart, Server } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import CustomLink from '@/components/Link'
 
@@ -44,6 +45,8 @@ const alternativeLinks = [
   },
 ]
 
+const migrationSources = ['Datadog', 'Grafana', 'New Relic', 'CloudWatch', 'ELK']
+
 function PricingValueColumn({
   description,
   Icon,
@@ -65,6 +68,35 @@ function PricingValueColumn({
         </p>
       </div>
     </article>
+  )
+}
+
+function MigrationCta() {
+  const [activeSourceIndex, setActiveSourceIndex] = useState(0)
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setActiveSourceIndex((currentIndex) => (currentIndex + 1) % migrationSources.length)
+    }, 1800)
+
+    return () => window.clearInterval(intervalId)
+  }, [])
+
+  return (
+    <CustomLink
+      className="homepage-button homepage-button--primary mt-6 inline-flex h-10 w-fit items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
+      href="/docs/migration/migrate-to-signoz/"
+    >
+      <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
+        Migrate from
+        <span className="inline-block min-w-[72px] text-left transition-opacity duration-200">
+          {migrationSources[activeSourceIndex]}
+        </span>
+      </span>
+      <span className="homepage-button__icon homepage-button__icon--primary hidden">
+        <ArrowRight size={14} />
+      </span>
+    </CustomLink>
   )
 }
 
@@ -106,11 +138,14 @@ export default function Pricing() {
         </div>
 
         <div className="mt-12 grid gap-8 border-t border-signoz_slate-400/25 pt-8 md:mt-16 md:grid-cols-[0.82fr_2fr]">
-          <p className="m-0 max-w-[310px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[38px] sm:tracking-[-0.95px] md:text-[44px] md:tracking-[-1.15px]">
-            What makes
-            <br />
-            SigNoz different
-          </p>
+          <div>
+            <p className="m-0 max-w-[310px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[38px] sm:tracking-[-0.95px] md:text-[44px] md:tracking-[-1.15px]">
+              What makes
+              <br />
+              SigNoz different
+            </p>
+            <MigrationCta />
+          </div>
           <div className="flex min-h-[220px] flex-col justify-between">
             {alternativeLinks.map((link) => (
               <CustomLink
