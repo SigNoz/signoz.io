@@ -30,8 +30,42 @@ export const COMPANIES = [
   { Logo: ShapedLogo, imageDesc: 'shaped logo' },
 ]
 
-export const TrustedByTeams = ({ page, className }: { page?: string; className?: string }) => {
+type TrustedByTeamsProps = {
+  page?: string
+  className?: string
+  variant?: 'default' | 'marquee'
+}
+
+export const TrustedByTeams = ({ page, className, variant = 'default' }: TrustedByTeamsProps) => {
   const customerStoriesId = `btn-customer-stories-${page}-hero`
+
+  if (variant === 'marquee') {
+    const marqueeCompanies = [...COMPANIES, ...COMPANIES]
+
+    return (
+      <section
+        className={cn('m-0 mx-auto w-full overflow-hidden border-0 py-0', className)}
+        aria-label="Trusted by platform teams"
+      >
+        <div className="mb-4 text-center text-xs font-semibold uppercase leading-5 tracking-[0.08em] text-signoz_vanilla-400 md:text-sm">
+          Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
+        </div>
+        <div className="homepage-logo-marquee relative overflow-hidden">
+          <div className="homepage-logo-marquee__track flex w-max items-center gap-10 md:gap-14">
+            {marqueeCompanies.map((company, idx) => (
+              <company.Logo
+                key={`${idx}-${company.imageDesc}`}
+                className="h-[30px] w-[104px] shrink-0 opacity-70 grayscale transition-opacity duration-200 hover:opacity-100 md:h-[34px] md:w-[120px]"
+                role="img"
+                aria-label={idx < COMPANIES.length ? company.imageDesc : undefined}
+                aria-hidden={idx >= COMPANIES.length ? 'true' : undefined}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section

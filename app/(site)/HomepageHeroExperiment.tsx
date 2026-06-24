@@ -70,7 +70,11 @@ function HomepageRedesign() {
   return (
     <div className="homepage-hero-redesign-variant">
       <HomepageHeroRedesign />
-      <TrustedByTeams page="homepage" className="homepage-redesign-logo-strip max-w-8xl" />
+      <TrustedByTeams
+        page="homepage"
+        variant="marquee"
+        className="homepage-redesign-logo-strip max-w-8xl"
+      />
       <WhySignoz />
       <FeatureBento />
       <AgentNativeObservabilitySection />
