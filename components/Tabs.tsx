@@ -68,7 +68,7 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
   const isPill = variant === 'pill'
 
   return (
-    <div className={className ?? 'w-full'} data-tabs-root>
+    <div className={className || 'w-full'} data-tabs-root>
       <div
         className={
           isPill
