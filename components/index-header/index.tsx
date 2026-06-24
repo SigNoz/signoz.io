@@ -7,6 +7,7 @@ import { VideoModalPlayer } from './VideoModalPlayer'
 import { HeroSectionPill } from './HeroSectionPill'
 import HeroCopyMotion from './HeroCopyMotion'
 import HeroTracePreview from './HeroTracePreview'
+import GradientBlinds from './GradientBlinds'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 
 export function HomepageHeroRedesign() {
@@ -14,7 +15,25 @@ export function HomepageHeroRedesign() {
 
   return (
     <header className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] -translate-x-1/2 overflow-hidden px-4 pt-24 sm:px-6 md:pt-[220px] lg:px-[78px]">
-      <div className="relative mx-auto flex w-full max-w-[1200px] flex-col">
+      <div className="pointer-events-none absolute left-1/2 top-0 h-[640px] w-full max-w-8xl -translate-x-1/2 [mask-image:linear-gradient(to_bottom,#000_0%,#000_58%,rgba(0,0,0,0.72)_72%,transparent_100%)]">
+        <GradientBlinds
+          angle={20}
+          blindCount={16}
+          blindMinWidth={60}
+          className="h-full w-full"
+          distortAmount={0}
+          dpr={1}
+          gradientColors={['#0B0C0E', '#121317', '#161922', '#2C3140', '#3F5ECC']}
+          mixBlendMode="lighten"
+          mouseDampening={0.15}
+          noise={0.4}
+          shineDirection="left"
+          spotlightOpacity={1}
+          spotlightRadius={0.5}
+          spotlightSoftness={1}
+        />
+      </div>
+      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col">
         <HeroCopyMotion delay={0.04}>
           <TrackingLink
             href="/agent-native-observability/"
