@@ -1,3 +1,5 @@
+'use client'
+
 export interface TabItemProps {
   value: string
   label: React.ReactNode
