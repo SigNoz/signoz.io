@@ -37,13 +37,6 @@ export interface ProductItem {
   order: number
 }
 
-export interface ComparisonItem {
-  key: string
-  url: string
-  name: string
-  description: string
-}
-
 export interface ResourceItem {
   key: string
   url: string
@@ -152,79 +145,6 @@ export const productDropdownItems: ProductItem[] = [
   },
 ]
 
-export const comparisonItems: ComparisonItem[] = [
-  {
-    key: 'signozvsdatadog',
-    url: '/datadog-alternative/',
-    name: 'SigNoz vs DataDog',
-    description: 'Save up to 80% on monitoring costs',
-  },
-  {
-    key: 'signozvsgrafana',
-    url: '/grafana-alternative/',
-    name: 'SigNoz vs Grafana',
-    description: 'One platform replaces the LGTM stack',
-  },
-  {
-    key: 'signozvsnewrelic',
-    url: '/newrelic-alternative/',
-    name: 'SigNoz vs New Relic',
-    description: 'No user-based pricing surprises',
-  },
-  {
-    key: 'cloudwatch-alternative',
-    url: '/cloudwatch-alternative/',
-    name: 'SigNoz vs CloudWatch',
-    description: 'Unified view, transparent billing',
-  },
-  {
-    key: 'clickstack-alternative',
-    url: '/clickstack-alternative/',
-    name: 'SigNoz vs ClickStack',
-    description: 'Ingest-based pricing, no per-query costs',
-  },
-]
-
-export interface MigrationItem {
-  key: string
-  url: string
-  name: string
-  description: string
-}
-
-export const migrationItems: MigrationItem[] = [
-  {
-    key: 'migrate-datadog',
-    url: '/docs/migration/migrate-from-datadog-to-signoz/',
-    name: 'Migrate from Datadog',
-    description: 'Metrics, traces, logs, dashboards & alerts',
-  },
-  {
-    key: 'migrate-grafana',
-    url: '/docs/migration/migrate-from-grafana-to-signoz/',
-    name: 'Migrate from Grafana',
-    description: 'Replace the LGTM stack end-to-end',
-  },
-  {
-    key: 'migrate-newrelic',
-    url: '/docs/migration/migrate-from-newrelic-to-signoz/',
-    name: 'Migrate from New Relic',
-    description: 'Move to open-source, keep full visibility',
-  },
-  {
-    key: 'migrate-elk',
-    url: '/docs/migration/migrate-from-elk-to-signoz/',
-    name: 'Migrate from ELK',
-    description: 'Simplify log management with ClickHouse',
-  },
-  {
-    key: 'migrate-honeycomb',
-    url: '/docs/migration/migrate-from-honeycomb-to-signoz/',
-    name: 'Migrate from Honeycomb',
-    description: 'Full observability with cost control',
-  },
-]
-
 export const productDropdownItemsSorted = [...productDropdownItems].sort(
   (a, b) => a.order - b.order
 )
@@ -283,7 +203,6 @@ export const NAV_BREAKPOINTS = {
   PRODUCT: 840,
   DOCS: 900,
   RESOURCES: 960,
-  COMPARE_SIGNOZ: 1040,
   PRICING: 1140,
   GITHUB_STARS: 1220,
   FULL_NAV: 1320,
