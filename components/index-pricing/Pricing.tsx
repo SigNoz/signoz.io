@@ -140,9 +140,9 @@ export default function Pricing() {
         <div className="mt-12 grid gap-8 border-t border-signoz_slate-400/25 pt-8 md:mt-16 md:grid-cols-[0.82fr_2fr]">
           <div>
             <p className="m-0 max-w-[310px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[38px] sm:tracking-[-0.95px] md:text-[44px] md:tracking-[-1.15px]">
-              What makes
+              Switch to
               <br />
-              SigNoz different
+              SigNoz
             </p>
             <MigrationCta />
           </div>
