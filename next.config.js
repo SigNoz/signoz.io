@@ -228,6 +228,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/traces-management/long-term-storage',
+          destination: '/docs/faqs/general/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/long-term-storage/',
+          destination: '/docs/faqs/general/',
+          permanent: true,
+        },
+        {
           source: '/docs/traces-management/guides/apm-metrics',
           destination: '/docs/userguide/custom-apm-dashboards-alerts/',
           permanent: true,
@@ -643,12 +653,12 @@ module.exports = () => {
         },
         {
           source: '/docs/tutorial/s3-integration-iam-role-eks/',
-          destination: '/docs/userguide/retention-period/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
           source: '/docs/tutorial/oci-bucket-cold-storage-integration/',
-          destination: '/docs/userguide/retention-period/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
@@ -2221,12 +2231,12 @@ module.exports = () => {
         },
         {
           source: '/docs/configuration/deep_storage',
-          destination: '/docs/userguide/retention-period/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
           source: '/docs/logs-management/long-term-storage/',
-          destination: '/docs/userguide/retention-period/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
