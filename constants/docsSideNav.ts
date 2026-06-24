@@ -3780,6 +3780,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/outposts/auth0',
+        label: 'Auth0',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/aws-elasticache-redis',
         label: 'AWS Elasticache Redis',
       },
