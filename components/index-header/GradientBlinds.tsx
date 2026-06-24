@@ -1,6 +1,7 @@
 'use client'
 
 import { Renderer, Program, Mesh, Triangle } from 'ogl'
+import type { CSSProperties } from 'react'
 import { useEffect, useRef } from 'react'
 
 const MAX_COLORS = 8
@@ -19,7 +20,7 @@ type GradientBlindsProps = {
     y: number
   }
   mirrorGradient?: boolean
-  mixBlendMode?: string
+  mixBlendMode?: CSSProperties['mixBlendMode']
   mouseDampening?: number
   noise?: number
   paused?: boolean
