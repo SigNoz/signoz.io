@@ -371,192 +371,196 @@ See [Framework instrumentation](#framework-instrumentation) below for framework-
 
 Choose your framework below to see the specific run command. The setup steps above are the same for all frameworks.
 
-<LibraryTabs
-    className="mb-8"
-    defaultCategory="all"
-    defaultLibrary="django"
-    categoryLabels={{
-        web: 'Web Frameworks',
-        worker: 'Background Workers',
-    }}
->
-    <LibraryTab value="django" label="Django" category="web">
+<Tabs variant="pill" className="mb-8">
+    <TabItem value="web-frameworks" label="Web Frameworks" default>
 
-        ### Prerequisites
+        <Tabs variant="pill" className="mb-8">
+            <TabItem value="django" label="Django" default>
 
-        Set the `DJANGO_SETTINGS_MODULE` environment variable:
+                ### Prerequisites
 
-        ```bash
-        export DJANGO_SETTINGS_MODULE=myproject.settings
-        ```
+                Set the `DJANGO_SETTINGS_MODULE` environment variable:
 
-        ### Run command
+                ```bash
+                export DJANGO_SETTINGS_MODULE=myproject.settings
+                ```
 
-        ```bash
-        opentelemetry-instrument python manage.py runserver --noreload
-        ```
+                ### Run command
 
-        <Admonition type="warning">
-        Always use `--noreload` with Django. The auto-reload mechanism spawns child processes that break OpenTelemetry instrumentation.
-        </Admonition>
+                ```bash
+                opentelemetry-instrument python manage.py runserver --noreload
+                ```
 
-        <KeyPointCallout title="For Docker users" defaultCollapsed="true">
-        ```dockerfile
-        CMD ["opentelemetry-instrument", "python", "manage.py", "runserver", "0.0.0.0:8000", "--noreload"]
-        ```
-        </KeyPointCallout>
+                <Admonition type="warning">
+                Always use `--noreload` with Django. The auto-reload mechanism spawns child processes that break OpenTelemetry instrumentation.
+                </Admonition>
 
-    </LibraryTab>
-    <LibraryTab value="flask" label="Flask" category="web">
+                <KeyPointCallout title="For Docker users" defaultCollapsed="true">
+                ```dockerfile
+                CMD ["opentelemetry-instrument", "python", "manage.py", "runserver", "0.0.0.0:8000", "--noreload"]
+                ```
+                </KeyPointCallout>
 
-        ### Run command
+            </TabItem>
+            <TabItem value="flask" label="Flask">
 
-        ```bash
-        opentelemetry-instrument flask run --no-reload
-        ```
+                ### Run command
 
-        Or if running directly:
+                ```bash
+                opentelemetry-instrument flask run --no-reload
+                ```
 
-        ```bash
-        opentelemetry-instrument python app.py
-        ```
+                Or if running directly:
 
-        <Admonition type="warning">
-        Always use `--no-reload` with Flask. The reloader spawns a child process that breaks OpenTelemetry instrumentation. Also avoid `FLASK_ENV=development` as it enables the reloader.
-        </Admonition>
+                ```bash
+                opentelemetry-instrument python app.py
+                ```
 
-        <KeyPointCallout title="For Docker users" defaultCollapsed="true">
-        ```dockerfile
-        CMD ["opentelemetry-instrument", "flask", "run", "--host=0.0.0.0", "--no-reload"]
-        ```
+                <Admonition type="warning">
+                Always use `--no-reload` with Flask. The reloader spawns a child process that breaks OpenTelemetry instrumentation. Also avoid `FLASK_ENV=development` as it enables the reloader.
+                </Admonition>
 
-        Or:
+                <KeyPointCallout title="For Docker users" defaultCollapsed="true">
+                ```dockerfile
+                CMD ["opentelemetry-instrument", "flask", "run", "--host=0.0.0.0", "--no-reload"]
+                ```
 
-        ```dockerfile
-        CMD ["opentelemetry-instrument", "python", "app.py"]
-        ```
-        </KeyPointCallout>
+                Or:
 
-    </LibraryTab>
-    <LibraryTab value="fastapi" label="FastAPI" category="web">
+                ```dockerfile
+                CMD ["opentelemetry-instrument", "python", "app.py"]
+                ```
+                </KeyPointCallout>
 
-        ### Run command
+            </TabItem>
+            <TabItem value="fastapi" label="FastAPI">
 
-        ```bash
-        opentelemetry-instrument uvicorn main:app --host 0.0.0.0 --port 8000
-        ```
+                ### Run command
 
-        <Admonition type="warning">
-        Do not use `--reload` with Uvicorn when instrumenting. The reload mode spawns new processes that break instrumentation.
-        </Admonition>
+                ```bash
+                opentelemetry-instrument uvicorn main:app --host 0.0.0.0 --port 8000
+                ```
 
-        <Admonition type="info">
-        Uvicorn's `--workers` flag is not supported with `opentelemetry-instrument`. Use Gunicorn with Uvicorn workers instead: `gunicorn -k uvicorn.workers.UvicornWorker main:app`
-        </Admonition>
+                <Admonition type="warning">
+                Do not use `--reload` with Uvicorn when instrumenting. The reload mode spawns new processes that break instrumentation.
+                </Admonition>
 
-        <KeyPointCallout title="For Docker users" defaultCollapsed="true">
-        ```dockerfile
-        CMD ["opentelemetry-instrument", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-        ```
-        </KeyPointCallout>
+                <Admonition type="info">
+                Uvicorn's `--workers` flag is not supported with `opentelemetry-instrument`. Use Gunicorn with Uvicorn workers instead: `gunicorn -k uvicorn.workers.UvicornWorker main:app`
+                </Admonition>
 
-    </LibraryTab>
-    <LibraryTab value="falcon" label="Falcon" category="web">
+                <KeyPointCallout title="For Docker users" defaultCollapsed="true">
+                ```dockerfile
+                CMD ["opentelemetry-instrument", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+                ```
+                </KeyPointCallout>
 
-        ### Run command (with Gunicorn)
+            </TabItem>
+            <TabItem value="falcon" label="Falcon">
 
-        ```bash
-        opentelemetry-instrument gunicorn app:api --bind 0.0.0.0:8000
-        ```
+                ### Run command (with Gunicorn)
 
-        Or with Waitress:
+                ```bash
+                opentelemetry-instrument gunicorn app:api --bind 0.0.0.0:8000
+                ```
 
-        ```bash
-        opentelemetry-instrument waitress-serve --port=8000 app:api
-        ```
+                Or with Waitress:
 
-        <KeyPointCallout title="For Docker users" defaultCollapsed="true">
-        ```dockerfile
-        CMD ["opentelemetry-instrument", "gunicorn", "app:api", "--bind", "0.0.0.0:8000"]
-        ```
-        </KeyPointCallout>
+                ```bash
+                opentelemetry-instrument waitress-serve --port=8000 app:api
+                ```
 
-    </LibraryTab>
-    <LibraryTab value="celery" label="Celery" category="worker">
+                <KeyPointCallout title="For Docker users" defaultCollapsed="true">
+                ```dockerfile
+                CMD ["opentelemetry-instrument", "gunicorn", "app:api", "--bind", "0.0.0.0:8000"]
+                ```
+                </KeyPointCallout>
 
-        ### Run command
+            </TabItem>
+            <TabItem value="hypercorn-unicorn" label="Hypercorn/Unicorn">
 
-        ```bash
-        opentelemetry-instrument celery -A tasks worker --loglevel=info
-        ```
+                <Admonition type="warning">
+                **Hypercorn** and **Unicorn** are **not supported** by OpenTelemetry auto-instrumentation due to fork-safety limitations.
+                </Admonition>
 
-        Replace `tasks` with your Celery app module name.
+                ### Why they don't work
 
-        <KeyPointCallout title="For Docker users" defaultCollapsed="true">
-        ```dockerfile
-        CMD ["opentelemetry-instrument", "celery", "-A", "tasks", "worker", "--loglevel=info"]
-        ```
-        </KeyPointCallout>
+                The OpenTelemetry SDK components (`BatchSpanProcessor`, `PeriodicExportingMetricReader`, `BatchLogProcessor`) spawn background threads and use locks, which are not fork-safe (see <a href="https://bugs.python.org/issue6721" target="_blank" rel="noopener noreferrer nofollow">Python issue #6721</a>).
 
-        <Admonition type="info">
-        Celery instrumentation captures task execution spans, including task name, arguments, and status. Both the worker and the code that enqueues tasks should be instrumented for full trace propagation.
-        </Admonition>
+                Most ASGI servers work around this using `register_at_fork` hooks to reinitialize after forking. However, Hypercorn and Unicorn use the `spawn` method to start worker processes, which doesn't invoke these hooks—making the workaround ineffective.
 
-        <KeyPointCallout title="Celery with prefork workers (advanced)" defaultCollapsed="true">
-        Celery uses the prefork worker model by default. The OpenTelemetry SDK is not fork-safe, so you must initialize it in each worker process using the `worker_process_init` signal. Add this to your Celery app file:
+                ### Recommended alternative
 
-        ```python
-        from celery.signals import worker_process_init
-        from opentelemetry.instrumentation.celery import CeleryInstrumentor
-        from opentelemetry import trace
-        from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-        from opentelemetry.sdk.resources import Resource
-        from opentelemetry.sdk.trace import TracerProvider
-        from opentelemetry.sdk.trace.export import BatchSpanProcessor
+                Use Gunicorn with Uvicorn workers instead:
 
-        @worker_process_init.connect(weak=False)
-        def init_celery_tracing(*args, **kwargs):
-            CeleryInstrumentor().instrument()
-            resource = Resource.create({})
-            trace.set_tracer_provider(TracerProvider(resource=resource))
-            span_processor = BatchSpanProcessor(OTLPSpanExporter())
-            trace.get_tracer_provider().add_span_processor(span_processor)
-        ```
+                ```bash
+                opentelemetry-instrument gunicorn -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8000
+                ```
 
-        This ensures each worker process creates its own tracer instance. Only required for workers, not for the code that enqueues tasks.
-        </KeyPointCallout>
+                <KeyPointCallout title="For Docker users" defaultCollapsed="true">
+                ```dockerfile
+                CMD ["opentelemetry-instrument", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:8000"]
+                ```
+                </KeyPointCallout>
 
-    </LibraryTab>
-    <LibraryTab value="hypercorn-unicorn" label="Hypercorn/Unicorn" category="web">
+                This gives you the same ASGI capabilities with proper OpenTelemetry support. See <a href="https://github.com/pgjones/hypercorn/issues/215" target="_blank" rel="noopener noreferrer nofollow">this issue</a> for updates on native Hypercorn support.
 
-        <Admonition type="warning">
-        **Hypercorn** and **Unicorn** are **not supported** by OpenTelemetry auto-instrumentation due to fork-safety limitations.
-        </Admonition>
+            </TabItem>
+        </Tabs>
 
-        ### Why they don't work
+    </TabItem>
+    <TabItem value="background-workers" label="Background Workers">
 
-        The OpenTelemetry SDK components (`BatchSpanProcessor`, `PeriodicExportingMetricReader`, `BatchLogProcessor`) spawn background threads and use locks, which are not fork-safe (see <a href="https://bugs.python.org/issue6721" target="_blank" rel="noopener noreferrer nofollow">Python issue #6721</a>).
+        <Tabs variant="pill" className="mb-8">
+            <TabItem value="celery" label="Celery" default>
 
-        Most ASGI servers work around this using `register_at_fork` hooks to reinitialize after forking. However, Hypercorn and Unicorn use the `spawn` method to start worker processes, which doesn't invoke these hooks—making the workaround ineffective.
+                ### Run command
 
-        ### Recommended alternative
+                ```bash
+                opentelemetry-instrument celery -A tasks worker --loglevel=info
+                ```
 
-        Use Gunicorn with Uvicorn workers instead:
+                Replace `tasks` with your Celery app module name.
 
-        ```bash
-        opentelemetry-instrument gunicorn -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8000
-        ```
+                <KeyPointCallout title="For Docker users" defaultCollapsed="true">
+                ```dockerfile
+                CMD ["opentelemetry-instrument", "celery", "-A", "tasks", "worker", "--loglevel=info"]
+                ```
+                </KeyPointCallout>
 
-        <KeyPointCallout title="For Docker users" defaultCollapsed="true">
-        ```dockerfile
-        CMD ["opentelemetry-instrument", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:8000"]
-        ```
-        </KeyPointCallout>
+                <Admonition type="info">
+                Celery instrumentation captures task execution spans, including task name, arguments, and status. Both the worker and the code that enqueues tasks should be instrumented for full trace propagation.
+                </Admonition>
 
-        This gives you the same ASGI capabilities with proper OpenTelemetry support. See <a href="https://github.com/pgjones/hypercorn/issues/215" target="_blank" rel="noopener noreferrer nofollow">this issue</a> for updates on native Hypercorn support.
+                <KeyPointCallout title="Celery with prefork workers (advanced)" defaultCollapsed="true">
+                Celery uses the prefork worker model by default. The OpenTelemetry SDK is not fork-safe, so you must initialize it in each worker process using the `worker_process_init` signal. Add this to your Celery app file:
 
-    </LibraryTab>
-</LibraryTabs>
+                ```python
+                from celery.signals import worker_process_init
+                from opentelemetry.instrumentation.celery import CeleryInstrumentor
+                from opentelemetry import trace
+                from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+                from opentelemetry.sdk.resources import Resource
+                from opentelemetry.sdk.trace import TracerProvider
+                from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+                @worker_process_init.connect(weak=False)
+                def init_celery_tracing(*args, **kwargs):
+                    CeleryInstrumentor().instrument()
+                    resource = Resource.create({})
+                    trace.set_tracer_provider(TracerProvider(resource=resource))
+                    span_processor = BatchSpanProcessor(OTLPSpanExporter())
+                    trace.get_tracer_provider().add_span_processor(span_processor)
+                ```
+
+                This ensures each worker process creates its own tracer instance. Only required for workers, not for the code that enqueues tasks.
+                </KeyPointCallout>
+
+            </TabItem>
+        </Tabs>
+
+    </TabItem>
+</Tabs>
 
 <details>
 <ToggleHeading>
