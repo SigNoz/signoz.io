@@ -1,4 +1,3 @@
-const { withContentlayer } = require('next-contentlayer2')
 const { getAllowedImageDomains } = require('./constants/allowedImageDomains')
 
 /**
@@ -81,7 +80,7 @@ const securityHeaders = [
  * @type {import('next/dist/next-server/server/config').NextConfig}
  **/
 module.exports = () => {
-  const plugins = [withContentlayer, withBundleAnalyzer]
+  const plugins = [withBundleAnalyzer]
   return plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
     productionBrowserSourceMaps: true, // Enable source maps for debugging
@@ -225,6 +224,16 @@ module.exports = () => {
         {
           source: '/oss-to-cloud/',
           destination: '/teams/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/long-term-storage',
+          destination: '/docs/faqs/general/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/long-term-storage/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
@@ -643,12 +652,12 @@ module.exports = () => {
         },
         {
           source: '/docs/tutorial/s3-integration-iam-role-eks/',
-          destination: '/docs/userguide/retention-period/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
           source: '/docs/tutorial/oci-bucket-cold-storage-integration/',
-          destination: '/docs/userguide/retention-period/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
@@ -2221,12 +2230,12 @@ module.exports = () => {
         },
         {
           source: '/docs/configuration/deep_storage',
-          destination: '/docs/userguide/retention-period/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
           source: '/docs/logs-management/long-term-storage/',
-          destination: '/docs/userguide/retention-period/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
@@ -2983,6 +2992,19 @@ module.exports = () => {
 
       // Exclude *.svg from the original rule since we handle it above
       fileLoaderRule.exclude = /\.svg$/i
+
+      // @stoplight/elements-core uses ReactDOM.render which was removed
+      // in React 19. No fix upstream — https://github.com/stoplightio/elements/issues/2793
+      // javascript/auto downgrades the missing export from a hard error to a warning.
+      // Remove this when stoplight ships React 19 support or we change to a different component library.
+      config.module.rules.push({
+        test: /\.mjs$/,
+        include: /node_modules[\\/]@stoplight/,
+        type: 'javascript/auto',
+        resolve: {
+          fullySpecified: false,
+        },
+      })
 
       // this is to avoid caching for webpack
       // reference https://nextjs.org/docs/app/building-your-application/optimizing/memory-usage#disable-webpack-cache

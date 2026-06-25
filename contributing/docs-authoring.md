@@ -15,7 +15,7 @@ Use this playbook for product documentation under `data/docs/**`.
 - Be explicit about caveats such as versions, environments, or beta gaps.
 - Prefer concrete examples over abstract descriptions.
 - Define acronyms on first use, then use the short form consistently.
-- Use angle-bracket placeholders only, such as `<region>` or `<your-ingestion-key>`, and explain them right below the snippet.
+- Use angle-bracket placeholders only, such as `<region>` or `<your-ingestion-key>`, and explain them right below the snippet. Never use `{region}`, `{REGION}`, or `<REGION>`. For SigNoz Cloud ingestion endpoints, the `<region>` token is also what makes a snippet region-aware — see [SigNoz Cloud Ingestion Endpoints](#signoz-cloud-ingestion-endpoints-region-aware).
 - Cross-link existing SigNoz docs instead of duplicating instructions.
 - AI-assisted drafting is fine, but every claim must be verified and rewritten clearly.
 
@@ -117,6 +117,24 @@ Prefer these H2 sections when they fit the doc:
 - Explain important fields and placeholders directly below snippets.
 - Main-path snippets should be safe defaults that work after placeholder replacement.
 - Move advanced or environment-specific options into callouts or collapsed sections.
+
+### SigNoz Cloud Ingestion Endpoints (region-aware)
+
+The docs region selector (top-right of the page) keeps SigNoz Cloud ingestion endpoints in sync by substituting the **literal `<region>` token** in every snippet on the page. A snippet is only region-aware if it uses that exact token, so anything else silently freezes on whatever the author typed — and on a page that mixes both, some snippets update with the selector while others do not.
+
+- **Always write ingestion endpoints with `<region>`**, exactly: `https://ingest.<region>.signoz.cloud:443/v1/traces`. This is the only form the selector substitutes.
+- **Never hardcode a real region** (`ingest.us.signoz.cloud`, `ingest.eu.signoz.cloud`, `ingest.in.signoz.cloud`) in a snippet. Pick `<region>` instead — it renders as `us` by default, so default readers see the same thing, but the selector can now update it.
+- **Never use a different placeholder spelling.** `{region}`, `{REGION}`, `<REGION>`, and `${region}` are not substituted and are off-convention — use `<region>`.
+- Keep this consistent across **every** endpoint on the page: code blocks, example output blocks, and inline `curl`/connectivity commands in troubleshooting all count.
+- **Exception — region reference tables.** A table that intentionally lists every region is correct as-is and should keep the hardcoded values:
+
+  ```md
+  | Region | Endpoint                     |
+  | ------ | ---------------------------- |
+  | US     | ingest.us.signoz.cloud:443   |
+  | IN     | ingest.in.signoz.cloud:443   |
+  | EU     | ingest.eu.signoz.cloud:443   |
+  ```
 
 ### Collector Config Safety
 
@@ -321,7 +339,8 @@ Use the PR snippet in [templates/pr-checklists.md#docs-changes](templates/pr-che
 - `## Validate` shows exactly where success appears in SigNoz.
 - `## Troubleshooting` maps symptom -> cause -> fix -> verification.
 - Commands and snippets explain what to do, where to do it, and the expected result.
-- Placeholders use `<...>` format and are documented.
+- Placeholders use `<...>` format and are documented — no `{region}`/`{REGION}`/`<REGION>`.
+- SigNoz Cloud ingestion endpoints use the literal `<region>` token (not a hardcoded `us`/`eu`/`in`) so the region selector keeps every snippet on the page in sync; region reference tables are the only exception.
 - Links are helpful and validated.
 - Images, if any, use the correct location, WebP format, and are at least 1200 px wide.
 - Redirect, sidebar, and discovery updates are handled when the doc URL changes or a new doc should appear in an existing surface.
