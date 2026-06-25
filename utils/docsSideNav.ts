@@ -19,8 +19,11 @@ async function fetchCmsSideNav(): Promise<NavItem[]> {
   }
 
   const res = await fetch(`${CMS_API_URL}/api/docs-side-nav`, {
+    cache: 'force-cache',
+    next: {
+      tags: ['docs-side-nav'],
+    },
     headers: { 'Content-Type': 'application/json' },
-    next: { revalidate: CMS_REVALIDATE_INTERVAL },
   })
 
   if (!res.ok) {
@@ -48,10 +51,20 @@ async function getCachedSideNav(): Promise<NavItem[]> {
     return resolveSideNav()
   }
 
-  const cachedFn = unstable_cache(resolveSideNav, ['docs-side-nav'], {
-    tags: ['docs-side-nav'],
-    revalidate: CMS_REVALIDATE_INTERVAL,
-  })
+  const cachedFn = unstable_cache(
+    async () => {
+      const result = await resolveSideNav()
+      if (!result || result.length === 0) {
+        throw new Error('Empty sidenav received, skipping cache')
+      }
+      return result
+    },
+    ['docs-side-nav'],
+    {
+      tags: ['docs-side-nav'],
+      revalidate: CMS_REVALIDATE_INTERVAL,
+    }
+  )
 
   return cachedFn()
 }
@@ -64,7 +77,7 @@ export async function getDocsSideNav(): Promise<NavItem[]> {
     try {
       return await resolveSideNav()
     } catch (directError) {
-      console.error('Direct sidenav fetch also failed, falling back to local JSON:', directError)
+      console.error('Direct sidenav fetch also failed:', directError)
       return []
     }
   }
