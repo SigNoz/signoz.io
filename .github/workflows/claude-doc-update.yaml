@@ -135,6 +135,7 @@ jobs:
             Allowed paths to modify:
             - ${{env.DOCS_ROOT}}/**
             - public/img/docs/**
+            - data-assets/img/docs/**
             - constants/docsSideNav.ts
             - scripts/check-doc-redirects.js
             - scripts/check-docs-metadata.js
@@ -167,7 +168,7 @@ jobs:
             exit 0
           fi
 
-          ALLOW_REGEX='^(data/docs/|public/img/docs/|constants/docsSideNav\.ts$|next\.config\.js$|scripts/check-doc-redirects\.js$|scripts/check-docs-metadata\.js$)'
+          ALLOW_REGEX='^(data/docs/|public/img/docs/|data-assets/img/docs/|constants/docsSideNav\.ts$|next\.config\.js$|scripts/check-doc-redirects\.js$|scripts/check-docs-metadata\.js$)'
           BAD="$(echo "$CHANGED" | tr -d ' ' | grep -vE "$ALLOW_REGEX" || true)"
           if [ -n "$BAD" ]; then
             echo "ERROR: Non-doc files modified:"

@@ -5,7 +5,7 @@
 - Stack: Next.js App Router, React, TypeScript, Tailwind CSS
 - Package manager: Yarn
 - App/UI: `app/`, `components/`, `layouts/`, `hooks/`, `utils/`, `constants/`
-- Docs/content: `data/docs/`, `data/blog/`, images in `public/img/docs/`
+- Docs/content: `data/docs/`, `data/blog/`, docs images in `data-assets/img/docs/`
 - Docs navigation and URLs:
   - sidebar: `constants/docsSideNav.ts`
   - redirects: `next.config.js`

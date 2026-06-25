@@ -24,7 +24,7 @@ This skill file defines the review rubric (the 13 categories below). Project-spe
 ## Review Process
 
 1. Get PR context and changed files.
-2. **Read `contributing/site-code.md` in full before starting the review.** It contains the project's icon policy, UI primitive expectations, componentItems data placement rules, async/DOM safety rules, MDX rendering constraints, dependency policy, and required verification commands. Reviewing without reading it first leads to missed project-specific findings.
+2. **Read `contributing/site-code.md` in full before starting the review.** It contains the project's icon policy, UI primitive expectations, listicle/discovery data placement rules, async/DOM safety rules, MDX rendering constraints, dependency policy, and required verification commands. Reviewing without reading it first leads to missed project-specific findings.
 3. Scan for high-impact issues first (duplication, architecture, performance).
 4. Evaluate against the categories below, including analytics tracking when events or tracked CTAs change.
 5. Leave inline comments for specific issues only.
@@ -147,7 +147,7 @@ This skill file defines the review rubric (the 13 categories below). Project-spe
 ### 12) Project-specific rules (`contributing/site-code.md`)
 
 - Apply the project-specific rules from `contributing/site-code.md`.
-- Pay extra attention to icon usage, existing UI primitives, `constants/componentItems*.ts` data placement, async handler safety, MDX rendering compatibility, and dependency justification.
+- Pay extra attention to icon usage, existing UI primitives, `constants/listicles/*.json` data placement, async handler safety, MDX rendering compatibility, and dependency justification.
 - Treat hardcoded `slice()` boundaries for logical sub-sections as a `High` finding.
 
 ### 13) Error handling and edge cases
