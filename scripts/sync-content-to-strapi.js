@@ -1535,6 +1535,7 @@ async function syncToStrapi() {
 // Helper: Transform a listicle item to Strapi schema
 function transformListicleItem(item, cdnUrl) {
   const transformed = {
+    __component: 'listicle.item',
     name: item.name,
     href: item.href,
     click_name: item.clickName,
@@ -1553,14 +1554,35 @@ function transformListicleItem(item, cdnUrl) {
   return transformed
 }
 
+// Helper: Transform a listicle subsection to Strapi schema
+function transformListicleSubsection(subsection, cdnUrl) {
+  const transformed = {
+    __component: 'listicle.subsection',
+    section_id: subsection.id,
+    title: subsection.title,
+    section_name: subsection.sectionName,
+  }
+
+  if (subsection.gridCols) transformed.grid_cols = subsection.gridCols
+
+  if (subsection.items) {
+    transformed.items = subsection.items.map((item) => transformListicleItem(item, cdnUrl))
+  }
+
+  return transformed
+}
+
 // Helper: Transform a listicle section to Strapi schema
 function transformListicleSection(section, cdnUrl) {
   const transformed = {
-    id: section.id,
+    __component: 'listicle.section',
+    section_id: section.id,
     label: section.label,
     title: section.title,
     section_name: section.sectionName,
   }
+
+  if (section.gridCols) transformed.grid_cols = section.gridCols
 
   if (section.items) {
     transformed.items = section.items.map((item) => transformListicleItem(item, cdnUrl))
@@ -1568,7 +1590,7 @@ function transformListicleSection(section, cdnUrl) {
 
   if (section.subsections) {
     transformed.subsections = section.subsections.map((sub) =>
-      transformListicleSection(sub, cdnUrl)
+      transformListicleSubsection(sub, cdnUrl)
     )
   }
 
@@ -1585,11 +1607,12 @@ function transformListicleToStrapi(jsonData, cdnUrl) {
     grid_cols: jsonData.gridCols,
   }
 
+  if (jsonData.title) transformed.title = jsonData.title
+  if (jsonData.description) transformed.description = jsonData.description
   if (jsonData.viewAllHref) transformed.view_all_href = jsonData.viewAllHref
   if (jsonData.viewAllText) transformed.view_all_text = jsonData.viewAllText
   if (jsonData.searchPlaceholder) transformed.search_placeholder = jsonData.searchPlaceholder
   if (jsonData.wrapperTitle) transformed.wrapper_title = jsonData.wrapperTitle
-  if (jsonData.clickName) transformed.click_name = jsonData.clickName
 
   if (jsonData.items) {
     transformed.items = jsonData.items.map((item) => transformListicleItem(item, cdnUrl))
@@ -1604,10 +1627,11 @@ function transformListicleToStrapi(jsonData, cdnUrl) {
   if (jsonData.staticSections) {
     transformed.static_sections = jsonData.staticSections.map((section) => {
       const s = {
+        __component: 'listicle.static-section',
         title: section.title,
         section_name: section.sectionName,
-        grid_cols: section.gridCols,
       }
+      if (section.gridCols) s.grid_cols = section.gridCols
       if (section.items) {
         s.items = section.items.map((item) => transformListicleItem(item, cdnUrl))
       }
