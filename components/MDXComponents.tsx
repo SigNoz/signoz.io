@@ -36,8 +36,6 @@ import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonito
 import ImageCTA from './ImageCTA/ImageCTA'
 import TrackingLink from './TrackingLink'
 import Listicle from './Listicle/Listicle'
-import LibraryTabs from './LibraryTabs/LibraryTabs'
-import LibraryTab from './LibraryTabs/LibraryTab'
 import MDXButton from './MDXButton/MDXButton'
 import IconCardGrid from './Card/IconCardGrid'
 import HostingDecision from './shared/HostingDecision'
@@ -141,8 +139,6 @@ export const components = {
   ImageCTA,
   TrackingLink,
   Listicle,
-  LibraryTabs,
-  LibraryTab,
   MDXButton,
   IconCardGrid,
   HostingDecision,
