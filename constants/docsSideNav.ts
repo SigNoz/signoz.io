@@ -91,16 +91,9 @@ const docsSideNav = [
                 route: '/docs/install/docker-selinux',
               },
               {
-                type: 'category',
-                isExpanded: false,
+                type: 'doc',
                 label: 'Troubleshooting',
-                items: [
-                  {
-                    type: 'doc',
-                    label: 'General FAQs',
-                    route: '/docs/setup/docker/troubleshooting/faq',
-                  },
-                ],
+                route: '/docs/setup/docker/troubleshooting/faq',
               },
             ],
           },
@@ -189,6 +182,23 @@ const docsSideNav = [
             type: 'doc',
             label: 'Deploying to Render',
             route: '/docs/setup/render',
+          },
+          {
+            type: 'category',
+            label: 'Foundry',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                label: 'FAQ',
+                route: '/docs/setup/foundry/troubleshooting/faq',
+              },
+              {
+                type: 'doc',
+                label: 'Troubleshooting',
+                route: '/docs/setup/foundry/troubleshooting/errors',
+              },
+            ],
           },
           {
             type: 'doc',

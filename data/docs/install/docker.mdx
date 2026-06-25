@@ -10,15 +10,15 @@ doc_type: howto
 
 This guide explains how to install SigNoz on Docker using Docker Compose. It runs all the components SigNoz requires on a single machine, making it the quickest way to get started with SigNoz.
 
-<Admonition type="warning" title="Migrating from the install script or bundled Docker Compose?">
-The legacy install script (`install.sh`) and the Docker Compose files bundled under `deploy/` in the SigNoz repository are deprecated as of <a href="https://github.com/SigNoz/signoz/releases/tag/v0.130.0" target="_blank" rel="noopener noreferrer nofollow">SigNoz v0.130.0</a> and are no longer maintained or distributed. Foundry — documented below — is now the supported way to install and manage SigNoz, Docker Compose included.
+<Admonition type="warning" title="Migrating from the install script or bundled Docker Compose?" defaultCollapsed="true">
+The legacy install script (`install.sh`) and the Docker Compose files bundled under `deploy/` in the SigNoz repository are deprecated as of <a href="https://github.com/SigNoz/signoz/releases/tag/v0.130.0" target="_blank" rel="noopener noreferrer nofollow">SigNoz v0.130.0</a> and are no longer maintained or distributed. Foundry, documented below, is now the supported way to install and manage SigNoz, Docker Compose included.
 
 If you have an existing install-script or Compose deployment, follow the <a href="https://github.com/SigNoz/signoz/blob/main/deploy/MIGRATION.md" target="_blank" rel="noopener noreferrer nofollow">migration guide</a> to move to Foundry without losing your data.
 </Admonition>
 
 ## Prerequisites
 
-- A Linux or macOS machine. Microsoft Windows is not officially supported.
+- A Linux or macOS machine. Microsoft `Windo`ws is not officially supported.
 - <a href="https://docs.docker.com/engine/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Engine</a> 20.10+ (or Docker Desktop) with the <a href="https://docs.docker.com/compose/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Compose</a> v2 plugin.
 - At least 4GB of memory allocated to Docker.
 - Open ports: `8080` (SigNoz UI), `4317` and `4318` (OTLP ingestion), and `8000` if you enable the MCP server.
@@ -97,7 +97,7 @@ e3b456480fe4   clickhouse/clickhouse-keeper:25.5.6   "/usr/bin/clickhouse…"   
 c7550a1412d4   signoz/signoz:latest                  "./signoz server"        About a minute ago   Up About a minute (healthy)   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp                       signoz-signoz-0
 ```
 
-Once all containers are running, point your browser to `http://<IP-ADDRESS>:8080/` to access the SigNoz UI — `http://localhost:8080/` when SigNoz runs on your local machine.
+Once all containers are running, point your browser to `http://<IP-ADDRESS>:8080/` to access the SigNoz UI (use `http://localhost:8080/` when SigNoz runs on your local machine).
 
 ### Step 5: Enable the SigNoz MCP server (optional)
 
@@ -159,7 +159,7 @@ Every change follows the same loop: update `casting.yaml`, then re-run `foundryc
         image: signoz/signoz:v0.128.0
   ```
 
-- **Anything Foundry does not model** (memory limits, networks, volumes): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches`. Do not edit the generated files in `pours/` by hand — forge overwrites them.
+- **Anything Foundry does not model** (memory limits, networks, volumes): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches`. Do not edit the generated files in `pours/` by hand, since forge overwrites them.
 
 <details>
 
@@ -181,7 +181,7 @@ docker compose -f pours/deployment/compose.yaml logs -f signoz-signoz-0
 
 ### Containers keep restarting
 
-Increase the memory allocated to Docker — SigNoz needs at least 4GB.
+Increase the memory allocated to Docker. SigNoz needs at least 4GB.
 
 </details>
 

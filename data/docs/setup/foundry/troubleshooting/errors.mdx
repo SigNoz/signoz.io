@@ -1,0 +1,97 @@
+---
+date: 2026-06-25
+tags: [Self-Host]
+title: Troubleshooting foundryctl and casting.yaml Errors
+description: Resolve foundryctl command and casting.yaml errors that apply to any self-host SigNoz install. Match the message, read the cause, apply the fix, and verify.
+doc_type: howto
+---
+
+These are `foundryctl` and `casting.yaml` errors that can occur on any self-host platform. Match the message you saw, read the cause, and apply the fix. For platform-specific failures (Docker tooling, Swarm, container runtime), see that platform's guide; for general questions about Foundry, see the [Foundry FAQ](https://signoz.io/docs/setup/foundry/troubleshooting/faq/).
+
+Re-run any failing command with `--debug --format text` first for a readable trace, and check the [exit code](https://signoz.io/docs/setup/foundry/troubleshooting/faq/#what-do-the-foundryctl-exit-codes-mean) to confirm the category.
+
+## `foundryctl: command not found`
+
+**Cause:** the binary is not on your `PATH`.
+
+**Resolution:** reinstall it, or call it by its full path. Confirm it is available:
+
+```bash
+foundryctl version
+```
+
+## `failed to read yaml file`
+
+**Cause:** Foundry could not find your config (exit code `3`). By default it looks for `casting.yaml` in the current directory.
+
+**Resolution:** check the path, or pass it explicitly:
+
+```bash
+foundryctl forge -f path/to/casting.yaml
+```
+
+## `failed to peek kind` / `failed to unmarshal ... casting`
+
+**Cause:** the YAML is syntactically invalid (exit code `2`), usually from indentation mistakes or **tabs** (YAML requires spaces).
+
+**Resolution:** fix the indentation. A valid minimal Docker casting looks like this:
+
+```yaml
+apiVersion: v1alpha1
+kind: Installation
+metadata:
+  name: signoz
+spec:
+  deployment:
+    mode: docker
+    flavor: compose   # or: swarm
+```
+
+**Verify:** re-run `foundryctl forge -f casting.yaml`; it should generate `pours/` without error.
+
+## `unknown casting kind "..."`
+
+**Cause:** the `kind` value is not recognized (exit code `4`). For installing SigNoz the kind is `Installation` (capital I). Omitting `kind` defaults to `Installation`, so this error means it is misspelled or set to something unsupported.
+
+**Resolution:** set `kind: Installation` or remove the field.
+
+## `invalid casting file casting.yaml: ...`
+
+**Cause:** the file parsed but failed schema validation (exit code `2`). The text after the colon names the offending field. Common cases:
+
+- A field name is misspelled or sits at the wrong indentation level.
+- A value has the wrong type (for example, a string where a number is expected).
+- A `mode` or `flavor` value is not one Foundry knows.
+
+**Resolution:** compare your file against a working [Docker example](https://signoz.io/docs/install/docker/) and fix the field the message names.
+
+## `deployment '{Mode:... Flavor:...}' is not supported`
+
+**Cause:** `mode` and `flavor` parsed individually but do not form a supported combination (exit code `4`). For Docker the supported combinations are:
+
+| `mode` | `flavor` | Result |
+| --- | --- | --- |
+| `docker` | `compose` | Docker Compose |
+| `docker` | `swarm` | Docker Swarm |
+
+A typo such as `mode: dokcer` or `flavor: composer` produces this error.
+
+**Resolution:** fix the values under `spec.deployment`.
+
+## Patch errors (`spec.patches`)
+
+If you added patches to your casting, these are the failures you may see:
+
+- **`unknown patch type "..."`** (exit `4`): the only supported `type` is `json`.
+- **`patch target "..." did not match any generated material`** (exit `3`): the `target` glob matched no generated file. Run `forge` and check the generated filenames under `pours/deployment/`, then target the exact name.
+- **`json patch on multi-doc yaml material ... is not supported`**: a known limitation. It does not affect Docker, whose `compose.yaml` is a single document.
+
+## A casting.yaml edit did not take effect
+
+**Cause:** `cast` deploys from `casting.yaml.lock`, the snapshot `forge` writes. Editing `casting.yaml` (or files under `pours/`) alone does not update it.
+
+**Resolution:** re-run `forge` (or `cast`, which forges first) so the lock and `pours/` are regenerated:
+
+```bash
+foundryctl cast -f casting.yaml
+```

@@ -1,7 +1,7 @@
 ---
 date: 2026-06-24
 title: Install SigNoz on Docker Swarm - Self-Hosted Setup
-tags : [Self-Host]
+tags : [Self-Hosted Community]
 description: Learn how to install SigNoz on Docker Swarm by deploying the stack across your swarm cluster, then verifying the services and replicas are running.
 doc_type: howto
 ---
@@ -56,14 +56,19 @@ Run this on a swarm manager node:
 foundryctl cast -f casting.yaml
 ```
 
-`cast` renders the stack Compose file into `pours/deployment/` and deploys it as the `signoz` stack with `docker stack deploy`.
+<Admonition type="tip" title="Skip cast and run docker compose directly" defaultCollapsed="true">
+`cast` chains Foundry's three stages:
 
-<Admonition type="tip" title="Skip cast and deploy the stack yourself" defaultCollapsed="true">
-If you prefer to review the stack file before deploying, render it with `forge` and run `docker stack deploy` yourself:
+- `gauge` checks your environment
+- `forge` renders the Compose files into `pours/` (with your SELinux labels applied) and writes `casting.yaml.lock`
+- `cast` starts the stack
+
+If you prefer to manage the containers yourself, render the files with `forge`, inspect them, and bring the stack up with Docker Compose:
 
 ```bash
-foundryctl forge -f casting.yaml                              # generate the stack compose file
-docker stack deploy -c pours/deployment/compose.yaml signoz   # deploy it as the "signoz" stack
+foundryctl gauge -f casting.yaml   # validate prerequisites
+foundryctl forge -f casting.yaml   # generate compose files (labels included)
+cd pours/deployment && docker stack deploy -c pours/deployment/compose.yaml signoz   # deploy it as the "signoz" stack
 ```
 </Admonition>
 
@@ -88,7 +93,7 @@ e65ymxjial3p   signoz_signoz-telemetrystore-clickhouse-user-scripts   global    
 pofn1bs2qzpj   signoz_signoz-telemetrystore-migrator                  replicated   0/1        signoz/signoz-otel-collector:latest
 ```
 
-Docker prefixes every service with the stack name (`signoz_`). The five long-running services should reach `1/1`. The two bootstrap jobs run once and then stop, which is expected: `…clickhouse-user-scripts` runs in `global` mode and shows `0/0` after finishing, and `…migrator` shows `0/1` after its run — confirm it finished without errors (see [Troubleshooting](#troubleshooting)).
+Docker prefixes every service with the stack name (`signoz_`). The five long-running services should reach `1/1`. The two bootstrap jobs run once and then stop, which is expected: `…clickhouse-user-scripts` runs in `global` mode and shows `0/0` after finishing, and `…migrator` shows `0/1` after its run. Confirm it finished without errors (see [Troubleshooting](#troubleshooting)).
 
 Confirm the SigNoz backend is healthy:
 
@@ -96,24 +101,28 @@ Confirm the SigNoz backend is healthy:
 curl http://localhost:8080/api/v1/health
 ```
 
-A healthy backend returns `{"status":"ok"}`. Because Swarm publishes the port through its routing mesh, the UI is reachable on port `8080` of any node in the swarm — open `http://<NODE-IP>:8080/` (use `http://localhost:8080/` on a single-node swarm).
+A healthy backend returns `{"status":"ok"}`. Because Swarm publishes the port through its routing mesh, the UI is reachable on port `8080` of any node in the swarm. Open `http://<NODE-IP>:8080/` (use `http://localhost:8080/` on a single-node swarm).
 
+<details>
+
+<ToggleHeading>
 ## Troubleshooting
+</ToggleHeading>
 
 ### `foundryctl cast` or `docker stack deploy` fails to deploy the stack
 
-Deploying a stack requires Docker to be running, Swarm mode to be active, and the command to run on a **manager** node — a non-manager node fails with `this node is not a swarm manager`. Check all three at once:
+Deploying a stack requires Docker to be running, Swarm mode to be active, and the command to run on a **manager** node; a non-manager node fails with `this node is not a swarm manager`. Check all three at once:
 
 ```bash
 docker info --format 'Swarm: {{.Swarm.LocalNodeState}} | Manager: {{.Swarm.ControlAvailable}}'
 ```
 
-- `Swarm: active` — Swarm mode is on. If it shows `inactive`, initialize it with `docker swarm init` (or join an existing swarm).
-- `Manager: true` — this node is a manager. If it shows `false`, run the deploy from a manager node instead.
+- `Swarm: active` means Swarm mode is on. If it reads `inactive`, initialize it with `docker swarm init` (or join an existing swarm).
+- `Manager: true` means this node is a manager. If it reads `false`, run the deploy from a manager node instead.
 
 ### A service keeps restarting right after deploy
 
-Docker Swarm starts every service in parallel — it does not honor `depends_on`. Until ClickHouse and Postgres are ready, dependent services such as `signoz_signoz-signoz-0` and `signoz_signoz-telemetrystore-migrator` may fail and restart a few times before they settle. Inspect any service that does not recover:
+Docker Swarm starts every service in parallel and does not honor `depends_on`. Until ClickHouse and Postgres are ready, dependent services such as `signoz_signoz-signoz-0` and `signoz_signoz-telemetrystore-migrator` may fail and restart a few times before they settle. Inspect any service that does not recover:
 
 ```bash
 docker stack ps signoz                                       # per-task state and last error
@@ -126,6 +135,8 @@ To redeploy from a clean slate, remove the stack and run `cast` again (this keep
 docker stack rm signoz
 foundryctl cast -f casting.yaml
 ```
+
+</details>
 
 <RetentionInfo />
 

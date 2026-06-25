@@ -1,7 +1,7 @@
 ---
 date: 2026-06-24
 title: Install SigNoz on Docker for SELinux-Enforcing Hosts
-tags : [Self-Host]
+tags : [Self-Hosted Community]
 description: Learn how to install SigNoz on Docker on SELinux-enforcing hosts by relabeling the config files Foundry mounts into the containers so they start cleanly.
 doc_type: howto
 ---
@@ -25,13 +25,13 @@ This guide explains how to install SigNoz on Docker on SELinux-enforcing hosts. 
 curl -fsSL https://signoz.io/foundry.sh | bash
 ```
 
-For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
+For manual install (air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
 
 ### Step 2: Create casting.yaml
 
 On SELinux-enforcing hosts, the configuration files Foundry mounts into the containers carry a host SELinux label that the container processes are not allowed to read, so the containers fail to start with permission-denied errors even though the file permissions look correct. The `patches` below relabel those mounts by appending `:z` for a shared <a href="https://docs.docker.com/storage/bind-mounts/#configure-the-selinux-label" target="_blank" rel="noopener noreferrer nofollow">SELinux label</a> (use `:Z` for a private, unshared one).
 
-Only the bind-mounted configuration files need a label — the `./…:…:ro` entries. Your telemetry data lives in Docker named volumes, which Docker already manages under the correct SELinux context. Because those config mounts are read-only, the label combines as `ro,z`:
+Only the bind-mounted configuration files need a label: the `./…:…:ro` entries. Your telemetry data lives in Docker named volumes, which Docker already manages under the correct SELinux context. Because those config mounts are read-only, the label combines as `ro,z`:
 
 ```yaml
 apiVersion: v1alpha1
@@ -62,7 +62,7 @@ spec:
           value: ./telemetrystore/clickhouse/functions.yaml:/etc/clickhouse-server/functions.yaml:ro,z
 ```
 
-<Admonition type="info">
+<Admonition type="info" title="Customized your casting? Verify the patch indices" defaultCollapsed="true">
 The volume indices above match a default Docker Compose casting. If you customize yours, run `foundryctl forge -f casting.yaml` first and confirm the position of each `./…` mount within its service's `volumes:` list in `pours/deployment/compose.yaml`. See <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">Foundry patches</a> for how patch targets work.
 </Admonition>
 
@@ -73,6 +73,22 @@ foundryctl cast -f casting.yaml
 ```
 
 `cast` validates Docker, generates the Compose files into `pours/deployment/`, and starts the containers.
+
+<Admonition type="tip" title="Skip cast and run docker compose directly" defaultCollapsed="true">
+`cast` chains Foundry's three stages:
+
+- `gauge` checks your environment
+- `forge` renders the Compose files into `pours/` (with your SELinux labels applied) and writes `casting.yaml.lock`
+- `cast` starts the stack
+
+If you prefer to manage the containers yourself, render the files with `forge`, inspect them, and bring the stack up with Docker Compose:
+
+```bash
+foundryctl gauge -f casting.yaml   # validate prerequisites
+foundryctl forge -f casting.yaml   # generate compose files (labels included)
+cd pours/deployment && docker compose up -d
+```
+</Admonition>
 
 ### Step 4: Verify the installation
 
@@ -93,11 +109,19 @@ e3b456480fe4   clickhouse/clickhouse-keeper:25.5.6   "/usr/bin/clickhouse…"   
 c7550a1412d4   signoz/signoz:latest                  "./signoz server"        About a minute ago   Up About a minute (healthy)   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp                       signoz-signoz-0
 ```
 
-Once all containers are running, point your browser to `http://<IP-ADDRESS>:8080/` to access the SigNoz UI — `http://localhost:8080/` when SigNoz runs on your local machine.
+Once all containers are running, point your browser to `http://<IP-ADDRESS>:8080/` to access the SigNoz UI (use `http://localhost:8080/` when SigNoz runs on your local machine).
 
+<details>
+
+<ToggleHeading>
 ## Troubleshooting
+</ToggleHeading>
 
-**A container fails with a permission-denied error.** SELinux is blocking the container from reading a mounted config file. Confirm every bind-mounted config file in `pours/deployment/compose.yaml` ends in `:ro,z` (or `:ro,Z`). If you customized your casting, the volume indices in the patches may have shifted — re-run `foundryctl forge -f casting.yaml` and recheck each `./…` mount's position.
+### A container fails with a permission-denied error
+
+SELinux is blocking the container from reading a mounted config file. Confirm every bind-mounted config file in `pours/deployment/compose.yaml` ends in `:ro,z` (or `:ro,Z`). If you customized your casting, the volume indices in the patches may have shifted; re-run `foundryctl forge -f casting.yaml` and recheck each `./…` mount's position.
+
+</details>
 
 ## Next Steps
 - [Collect Telemetry from your Docker Clusters](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/)
