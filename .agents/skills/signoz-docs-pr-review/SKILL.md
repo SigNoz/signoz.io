@@ -14,7 +14,7 @@ Use this skill for docs review on changes such as:
 - `data/docs/**`
 - `data-assets/img/docs/**`
 - `constants/docsSideNav.ts`
-- `constants/componentItems.ts` and `constants/componentItems/*.ts` when new docs should also appear in docs listicles, overview cards, or similar discovery surfaces
+- `constants/listicles/*.json` when new docs should also appear in docs listicles, overview cards, or similar discovery surfaces
 - `next.config.js` when docs URL paths change
 - `components/**/*.mdx` when changed together with docs work (see **Shared doc fragments** in `contributing/docs-review.md`)
 
@@ -32,7 +32,7 @@ Apply rules from those playbooks directly. Do not restate the entire guide in co
 ## Review Process
 
 1. Identify docs files changed in the PR.
-2. Identify related discoverability files that should change with the docs when relevant (`constants/docsSideNav.ts` for sidebar visibility, `constants/componentItems.ts` as the public entrypoint and `constants/componentItems/*.ts` as the source modules for listicle/overview visibility).
+2. Identify related discoverability files that should change with the docs when relevant (`constants/docsSideNav.ts` for sidebar visibility, `constants/listicles/*.json` as the JSON configs for listicle/overview visibility).
 3. **Read `contributing/docs-review.md` and `contributing/docs-authoring.md` in full before starting the review.** These playbooks contain the JTBD rubric, authoring standards, onboarding-label policy, and summary format that drive every review decision. Reviewing without reading them first leads to missed checks and inconsistent feedback.
 4. If the PR adds or rewrites `components/**/*.mdx` shared partials, follow **Shared doc fragments** in `contributing/docs-review.md`: flag new MDX partials so authors consider `.tsx` unless there is a clear reason to keep MDX.
 5. Identify intended user personas for each changed doc (for example: OTel beginner, platform engineer, app developer, SRE) from doc context.
