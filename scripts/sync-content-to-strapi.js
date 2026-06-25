@@ -39,6 +39,11 @@ const CHANGED_FILES = getAssetsListFromEnv('CHANGED_FILES', 'CHANGED_FILES_PATH'
 const DELETED_FILES = getAssetsListFromEnv('DELETED_FILES', 'DELETED_FILES_PATH')
 const CHANGED_ASSETS = getAssetsListFromEnv('CHANGED_ASSETS', 'CHANGED_ASSETS_PATH')
 
+const LISTICLES_CHANGED = process.env.LISTICLES_CHANGED === 'true'
+const CHANGED_LISTICLES = getAssetsListFromEnv('CHANGED_LISTICLES', 'CHANGED_LISTICLES_PATH')
+const DELETED_LISTICLES = getAssetsListFromEnv('DELETED_LISTICLES', 'DELETED_LISTICLES_PATH')
+const LISTICLES_DIR = path.resolve(__dirname, '..', 'constants', 'listicles')
+
 const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME
 const S3_REGION = process.env.S3_REGION
 const CDN_URL = process.env.CDN_URL
@@ -1527,6 +1532,294 @@ async function syncToStrapi() {
   return results
 }
 
+// Helper: Transform a listicle item to Strapi schema
+function transformListicleItem(item, cdnUrl) {
+  const transformed = {
+    name: item.name,
+    href: item.href,
+    click_name: item.clickName,
+  }
+
+  if (item.icon) {
+    if (typeof item.icon === 'string') {
+      const cleanPath = item.icon.startsWith('/') ? item.icon.slice(1) : item.icon
+      transformed.icon_path = `${cdnUrl}/${cleanPath}`
+    } else if (typeof item.icon === 'object') {
+      if (item.icon.badge) transformed.icon_badge = item.icon.badge
+      if (item.icon.color) transformed.icon_color = item.icon.color
+    }
+  }
+
+  return transformed
+}
+
+// Helper: Transform a listicle section to Strapi schema
+function transformListicleSection(section, cdnUrl) {
+  const transformed = {
+    id: section.id,
+    label: section.label,
+    title: section.title,
+    section_name: section.sectionName,
+  }
+
+  if (section.items) {
+    transformed.items = section.items.map((item) => transformListicleItem(item, cdnUrl))
+  }
+
+  if (section.subsections) {
+    transformed.subsections = section.subsections.map((sub) =>
+      transformListicleSection(sub, cdnUrl)
+    )
+  }
+
+  return transformed
+}
+
+// Helper: Transform local listicle JSON to Strapi schema
+function transformListicleToStrapi(jsonData, cdnUrl) {
+  const transformed = {
+    key: jsonData.id,
+    pattern: jsonData.pattern,
+    markdown_title: jsonData.markdownTitle,
+    section_name: jsonData.sectionName,
+    grid_cols: jsonData.gridCols,
+  }
+
+  if (jsonData.viewAllHref) transformed.view_all_href = jsonData.viewAllHref
+  if (jsonData.viewAllText) transformed.view_all_text = jsonData.viewAllText
+  if (jsonData.searchPlaceholder) transformed.search_placeholder = jsonData.searchPlaceholder
+  if (jsonData.wrapperTitle) transformed.wrapper_title = jsonData.wrapperTitle
+  if (jsonData.clickName) transformed.click_name = jsonData.clickName
+
+  if (jsonData.items) {
+    transformed.items = jsonData.items.map((item) => transformListicleItem(item, cdnUrl))
+  }
+
+  if (jsonData.sections) {
+    transformed.sections = jsonData.sections.map((section) =>
+      transformListicleSection(section, cdnUrl)
+    )
+  }
+
+  if (jsonData.staticSections) {
+    transformed.static_sections = jsonData.staticSections.map((section) => {
+      const s = {
+        title: section.title,
+        section_name: section.sectionName,
+        grid_cols: section.gridCols,
+      }
+      if (section.items) {
+        s.items = section.items.map((item) => transformListicleItem(item, cdnUrl))
+      }
+      return s
+    })
+  }
+
+  return transformed
+}
+
+// Helper: Extract all icon paths from a listicle JSON
+function extractIconPaths(jsonData) {
+  const paths = []
+
+  function collectFromItems(items) {
+    if (!items) return
+    for (const item of items) {
+      if (item.icon && typeof item.icon === 'string') {
+        paths.push(item.icon)
+      }
+    }
+  }
+
+  collectFromItems(jsonData.items)
+
+  if (jsonData.sections) {
+    for (const section of jsonData.sections) {
+      collectFromItems(section.items)
+      if (section.subsections) {
+        for (const sub of section.subsections) {
+          collectFromItems(sub.items)
+        }
+      }
+    }
+  }
+
+  if (jsonData.staticSections) {
+    for (const section of jsonData.staticSections) {
+      collectFromItems(section.items)
+    }
+  }
+
+  return paths
+}
+
+// Phase 4: Listicle Synchronization
+async function syncListiclesToStrapi() {
+  console.log('\n' + '='.repeat(80))
+  console.log('🔄 PHASE 4: Listicle Synchronization')
+  console.log('='.repeat(80))
+
+  const results = { created: 0, updated: 0, deleted: 0, errors: [] }
+
+  // Process changed listicles
+  for (const listicleFile of CHANGED_LISTICLES) {
+    const key = path.basename(listicleFile, '.json')
+    console.log(`\n📄 Processing listicle: ${key}`)
+
+    try {
+      const fullPath = path.resolve(LISTICLES_DIR, path.basename(listicleFile))
+      const raw = fs.readFileSync(fullPath, 'utf8')
+      const jsonData = JSON.parse(raw)
+
+      // Extract and sync icon assets
+      const iconPaths = extractIconPaths(jsonData)
+      console.log(`  🖼️ Found ${iconPaths.length} icon(s) to check`)
+
+      for (const iconPath of iconPaths) {
+        const cleanPath = iconPath.startsWith('/') ? iconPath.slice(1) : iconPath
+        const localPath = path.join('data-assets', cleanPath)
+        const localExists = fs.existsSync(localPath)
+        const onCDN = await checkCDN(cleanPath)
+
+        if (!onCDN && localExists) {
+          const s3Key = `web/${cleanPath}`
+          await uploadToS3(localPath, s3Key)
+          console.log(`    ✅ Uploaded icon: ${cleanPath}`)
+        } else if (!onCDN && !localExists) {
+          console.warn(`    ⚠️ Icon not found locally or on CDN: ${iconPath}`)
+        }
+      }
+
+      // Transform to Strapi schema
+      const strapiData = transformListicleToStrapi(jsonData, CDN_URL)
+
+      // Check if listicle already exists in CMS
+      const existingResponse = await withRetry(
+        () =>
+          axios.get(`${CMS_API_URL}/api/listicles`, {
+            params: {
+              'filters[key][$eq]': key,
+            },
+            headers: {
+              Authorization: `Bearer ${CMS_API_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+        `fetchListicle(${key})`
+      )
+
+      const existingEntries = existingResponse.data.data || []
+
+      if (existingEntries.length > 0) {
+        const documentId = existingEntries[0].documentId
+        await withRetry(
+          () =>
+            axios.put(
+              `${CMS_API_URL}/api/listicles/${documentId}`,
+              { data: strapiData },
+              {
+                headers: {
+                  Authorization: `Bearer ${CMS_API_TOKEN}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            ),
+          `updateListicle(${key})`
+        )
+        console.log(`  ✅ Updated listicle: ${key}`)
+        results.updated++
+      } else {
+        await withRetry(
+          () =>
+            axios.post(
+              `${CMS_API_URL}/api/listicles`,
+              { data: strapiData },
+              {
+                headers: {
+                  Authorization: `Bearer ${CMS_API_TOKEN}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            ),
+          `createListicle(${key})`
+        )
+        console.log(`  ✅ Created listicle: ${key}`)
+        results.created++
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.error?.message || error.message
+      console.error(`  ❌ Error syncing listicle ${key}: ${errorMsg}`)
+      if (error.response) {
+        console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
+      }
+      results.errors.push({ key, error: errorMsg })
+    }
+  }
+
+  // Process deleted listicles
+  for (const listicleFile of DELETED_LISTICLES) {
+    const key = path.basename(listicleFile, '.json')
+    console.log(`\n🗑️ Deleting listicle: ${key}`)
+
+    try {
+      const existingResponse = await withRetry(
+        () =>
+          axios.get(`${CMS_API_URL}/api/listicles`, {
+            params: {
+              'filters[key][$eq]': key,
+            },
+            headers: {
+              Authorization: `Bearer ${CMS_API_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+        `fetchListicleForDelete(${key})`
+      )
+
+      const existingEntries = existingResponse.data.data || []
+
+      if (existingEntries.length > 0) {
+        const documentId = existingEntries[0].documentId
+        await withRetry(
+          () =>
+            axios.delete(`${CMS_API_URL}/api/listicles/${documentId}`, {
+              headers: {
+                Authorization: `Bearer ${CMS_API_TOKEN}`,
+                'Content-Type': 'application/json',
+              },
+            }),
+          `deleteListicle(${key})`
+        )
+        console.log(`  ✅ Deleted listicle: ${key}`)
+        results.deleted++
+      } else {
+        console.log(`  ⚠️ Listicle not found in CMS, skipping deletion: ${key}`)
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.error?.message || error.message
+      console.error(`  ❌ Error deleting listicle ${key}: ${errorMsg}`)
+      results.errors.push({ key, error: errorMsg })
+    }
+  }
+
+  // Print summary
+  console.log('\n' + '-'.repeat(40))
+  console.log('📊 LISTICLE SYNC SUMMARY')
+  console.log('-'.repeat(40))
+  console.log(`  ✅ Created: ${results.created}`)
+  console.log(`  🔄 Updated: ${results.updated}`)
+  console.log(`  🗑️ Deleted: ${results.deleted}`)
+  console.log(`  ❌ Errors: ${results.errors.length}`)
+  console.log('-'.repeat(40))
+
+  if (results.errors.length > 0) {
+    console.error('\n❌ LISTICLE SYNC had errors:')
+    results.errors.forEach(({ key, error }) => {
+      console.error(`  • ${key}: ${error}`)
+    })
+  }
+}
+
 const SIDENAV_JSON_PATH = path.resolve(__dirname, '..', 'data', 'docs-side-nav', 'main.json')
 const SIDENAV_CHANGED = process.env.SIDENAV_CHANGED === 'true'
 
@@ -1571,6 +1864,10 @@ async function main() {
 
   if (SIDENAV_CHANGED) {
     await syncSidenavToStrapi()
+  }
+
+  if (LISTICLES_CHANGED) {
+    await syncListiclesToStrapi()
   }
 
   console.log('✅ Sync completed successfully!')

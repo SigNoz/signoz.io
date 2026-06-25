@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
       revalidateTag('blogs-list')
       revalidateTag('docs-list')
       revalidateTag('docs-side-nav')
+      revalidateTag('listicles')
 
       results.push({
         path: '/',
@@ -176,6 +177,7 @@ export async function GET(request: NextRequest) {
       revalidateTag('blogs-list')
       revalidateTag('docs-list')
       revalidateTag('docs-side-nav')
+      revalidateTag('listicles')
 
       results.push({
         path: '/',

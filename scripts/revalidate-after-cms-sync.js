@@ -83,6 +83,43 @@ function uniqueStrings(arr) {
 }
 
 const SIDENAV_CHANGED = process.env.SIDENAV_CHANGED === 'true'
+const LISTICLES_CHANGED = process.env.LISTICLES_CHANGED === 'true'
+const CHANGED_LISTICLES_RAW = getAssetsListFromEnv('CHANGED_LISTICLES', 'CHANGED_LISTICLES_PATH')
+
+const LISTICLE_TO_DOCS_PATHS = {
+  'apm-instrumentation': ['/docs/instrumentation', '/docs/cloud'],
+  'apm-dashboards': ['/docs/dashboards/dashboard-templates/apm-dashboards'],
+  'aws-monitoring': ['/docs/aws-monitoring/overview'],
+  'aws-one-click': ['/docs/integrations/aws/one-click-aws-integrations'],
+  'azure-one-click': ['/docs/integrations/azure/one-click-azure-integrations'],
+  'cicd-monitoring': ['/docs/cicd/overview'],
+  'collection-agents': [
+    '/docs/opentelemetry-collection-agents/get-started',
+    '/docs/opentelemetry-collection-agents/k8s/get-started',
+  ],
+  'dashboard-templates': ['/docs/dashboards/dashboard-templates/overview', '/docs/cloud'],
+  'host-metrics-dashboards': ['/docs/dashboards/dashboard-templates/hostmetrics-dashboards'],
+  integrations: ['/docs/integrations/integrations-list'],
+  'java-instrumentation': ['/docs/instrumentation/java/overview'],
+  'javascript-instrumentation': ['/docs/instrumentation/javascript/overview'],
+  'k8s-installation': ['/docs/install/kubernetes'],
+  'kubernetes-dashboards': ['/docs/dashboards/dashboard-templates/kubernetes-dashboards'],
+  'litellm-dashboards': ['/docs/dashboards/dashboard-templates/litellm-dashboards'],
+  'llm-monitoring': ['/docs/llm-observability'],
+  'logs-instrumentation': ['/docs/logs-management/send-logs-to-signoz', '/docs/cloud'],
+  'logs-quick-start': [],
+  'marketplace-installation': ['/docs/install/marketplaces'],
+  'metrics-quick-start': ['/docs/metrics-management/send-metrics', '/docs/cloud'],
+  'migrate-to-signoz': ['/docs/migration/migrate-to-signoz', '/docs/cloud'],
+  'self-host-installation': ['/docs/install/self-host'],
+  'web-vitals': ['/docs/frontend-monitoring/opentelemetry-web-vitals'],
+  'apm-quick-start': [],
+}
+
+function listicleFileToKey(filePath) {
+  const base = filePath.split('/').pop() || filePath
+  return base.replace(/\.json$/, '')
+}
 
 function buildPayload() {
   const allContentFiles = [...CHANGED_FILES, ...DELETED_FILES]
@@ -98,24 +135,43 @@ function buildPayload() {
     return { mode: 'all', reason: 'sidenav-changed' }
   }
 
-  if (cmsUrls.length > BULK_THRESHOLD) {
+  // Collect listicle-related paths and tags
+  const listiclePaths = []
+  const listicleTags = []
+  if (LISTICLES_CHANGED && CHANGED_LISTICLES_RAW.length > 0) {
+    for (const file of CHANGED_LISTICLES_RAW) {
+      const key = listicleFileToKey(file)
+      listicleTags.push(`listicle-${key}`)
+      const docsPaths = LISTICLE_TO_DOCS_PATHS[key]
+      if (docsPaths) {
+        listiclePaths.push(...docsPaths)
+      }
+    }
     console.log(
-      `📣 Selective revalidation skipped: ${cmsUrls.length} paths exceed BULK_THRESHOLD (${BULK_THRESHOLD})`
+      `📣 Listicle changes: ${CHANGED_LISTICLES_RAW.length} listicle(s) changed, ${listiclePaths.length} doc path(s) to revalidate.`
+    )
+  }
+
+  const allPaths = uniqueStrings([...cmsUrls, ...listiclePaths])
+
+  if (allPaths.length > BULK_THRESHOLD) {
+    console.log(
+      `📣 Selective revalidation skipped: ${allPaths.length} paths exceed BULK_THRESHOLD (${BULK_THRESHOLD})`
     )
     return { mode: 'all', reason: 'bulk' }
   }
 
-  if (!hasCmsPaths && hasAssetChanges) {
+  if (!hasCmsPaths && hasAssetChanges && listiclePaths.length === 0) {
     console.log('📣 Asset-only change: using full revalidation (cannot map to page paths).')
     return { mode: 'all', reason: 'assets-only' }
   }
 
-  if (!hasCmsPaths) {
+  if (!hasCmsPaths && listiclePaths.length === 0 && listicleTags.length === 0) {
     console.log('⏭️ No CMS-backed content paths in this sync; skipping revalidation.')
     return { mode: 'skip', reason: 'no-cms-paths' }
   }
 
-  const extraTags = []
+  const extraTags = [...listicleTags]
   if (cmsUrls.some((u) => u.startsWith('/comparisons/'))) {
     extraTags.push('comparisons-list')
   }
@@ -131,7 +187,7 @@ function buildPayload() {
 
   return {
     mode: 'selective',
-    paths: cmsUrls,
+    paths: allPaths,
     tags: uniqueStrings(extraTags),
   }
 }

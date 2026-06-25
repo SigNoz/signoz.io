@@ -3,7 +3,7 @@ import type { ComponentType, ReactNode } from 'react'
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkMdx from 'remark-mdx'
-import { getListicleConfig, getListicleItems } from '../../constants/listicles/utils'
+import { getListicleConfigLocal, getListicleItems } from '../../constants/listicles/utils'
 
 const HOSTING_DECISION_ITEMS = [
   {
@@ -322,13 +322,13 @@ const createKnownComponentStubs = (): Record<
   Listicle: createItemListStub(
     (props) => {
       const name = getStringProp(props, 'name')
-      const config = name ? getListicleConfig(name) : null
+      const config = name ? getListicleConfigLocal(name) : null
       if (!config) return []
       return getListicleItems(config, { sectionId: getStringProp(props, 'defaultSection') })
     },
     (props) => {
       const name = getStringProp(props, 'name')
-      const config = name ? getListicleConfig(name) : null
+      const config = name ? getListicleConfigLocal(name) : null
       return config?.markdownTitle || 'Listicle'
     }
   ),
