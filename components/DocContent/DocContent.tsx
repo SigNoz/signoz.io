@@ -3,8 +3,6 @@
 import React, { useCallback, useMemo, useRef } from 'react'
 import { Edit } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import { components } from '@/components/MDXComponents'
-import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import PageFeedback from '../PageFeedback/PageFeedback'
 import DocsPrevNext from '../DocsPrevNext/DocsPrevNext'
 import TableOfContents from '../DocsTOC/DocsTOC'
@@ -25,7 +23,8 @@ const DocContent: React.FC<{
   hideTableOfContents: boolean
   editLink?: string
   breadcrumbs?: BreadcrumbCrumb[]
-}> = ({ title, post, toc, hideTableOfContents, editLink, breadcrumbs }) => {
+  children: React.ReactNode
+}> = ({ title, post, toc, hideTableOfContents, editLink, breadcrumbs, children }) => {
   const pathname = usePathname()
   const lastUpdatedDate = post?.lastmod || resolveLatestDate(post)
   const formattedDate = formatDisplayDate(lastUpdatedDate)
@@ -82,7 +81,7 @@ const DocContent: React.FC<{
           <TagsWithTooltips tags={post.docTags} />
         )}
         <article ref={articleRef} className="prose prose-slate max-w-none py-6 dark:prose-invert">
-          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
+          {children}
         </article>
         <div className="mt-8 flex items-center justify-between text-sm">
           {formattedDate && (

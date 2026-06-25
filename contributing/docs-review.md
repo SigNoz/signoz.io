@@ -16,7 +16,7 @@ Pair it with [docs-authoring.md](docs-authoring.md) for the underlying content s
 Review these when relevant:
 
 - `data/docs/**`
-- `public/img/docs/**`
+- `data-assets/img/docs/**`
 - `constants/docsSideNav.ts`
 - `constants/listicles/*.json`
 - `next.config.js` when docs URLs change
@@ -205,7 +205,7 @@ cat contributing/docs-review.md
 rg -n "## Next steps|## Troubleshooting|KeyPointCallout|ToggleHeading|https?://|<[^>]+>" data/docs
 
 # image quality — flag images narrower than 1200 px
-identify -format '%w %f\n' public/img/docs/<topic>/*.webp 2>/dev/null | awk '$1 < 1200'
+identify -format '%w %f\n' data-assets/img/docs/<topic>/*.webp 2>/dev/null | awk '$1 < 1200'
 
 # link health
 curl -sI <URL>

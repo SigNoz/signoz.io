@@ -1334,11 +1334,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/traces-management/long-term-storage',
-            label: 'Long Term Storage',
-          },
-          {
-            type: 'doc',
             route: '/docs/apm-and-distributed-tracing/traces-api',
             label: 'Using Traces API',
           },
@@ -3792,6 +3787,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/opentelemetry-apache-druid',
         label: 'Apache Druid',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/outposts/auth0',
+        label: 'Auth0',
       },
       {
         type: 'doc',
