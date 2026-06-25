@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { ChevronDown, ChevronRight, File, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { NavItem, Doc, Category } from './types'
-import docsSideNav from 'constants/docsSideNav'
+import { useDocsSideNav } from './DocsSideNavContext'
 import { usePathname } from 'next/navigation'
 import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { useBrowserSearch } from '@/hooks/useBrowserSearch'
@@ -15,9 +15,10 @@ interface DocsSidebarProps {
 }
 
 const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
+  const originalSideNav = useDocsSideNav()
   const pathname = usePathname()
   const search = useBrowserSearch()
-  const [sideNav, setSideNav] = useState(docsSideNav)
+  const [sideNav, setSideNav] = useState(originalSideNav)
   const [isClient, setIsClient] = useState(false)
   const [activeRoute, setActiveRoute] = useState<string | null>(null)
   const sidebarRef = useRef<HTMLDivElement>(null)
@@ -78,7 +79,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     // Normalize the currentRoute by stripping the trailing slash if it exists
     const normalizedRoute = currentRoute.endsWith('/') ? currentRoute.slice(0, -1) : currentRoute
 
-    const parents = getParents(docsSideNav, normalizedRoute)
+    const parents = getParents(originalSideNav, normalizedRoute)
 
     for (const parent of parents) {
       toggleIsExpandedByLabel(parent, true)
@@ -230,7 +231,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
 
   const renderItem = (item: NavItem | string) => {
     if (typeof item === 'string') {
-      const referencedItem = findItemById(item, docsSideNav)
+      const referencedItem = findItemById(item, originalSideNav)
       if (referencedItem) {
         return renderItem(referencedItem)
       }
