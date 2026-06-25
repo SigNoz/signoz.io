@@ -21,6 +21,7 @@ const SKIP_IF_ONLY_CHANGES_IN = [
   'tests',
   'reports',
   'faq',
+  'contributing',
   'scripts/vercel-ignore-build.mjs',
   'scripts/sync-content-to-strapi.js',
   'scripts/update-pr-comment.js',
