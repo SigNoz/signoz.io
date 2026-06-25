@@ -1659,7 +1659,7 @@ async function syncListiclesToStrapi() {
   console.log('🔄 PHASE 4: Listicle Synchronization')
   console.log('='.repeat(80))
 
-  const results = { created: 0, updated: 0, deleted: 0, errors: [] }
+  const results = { created: [], updated: [], deleted: [], errors: [] }
 
   // Process changed listicles
   for (const listicleFile of CHANGED_LISTICLES) {
@@ -1727,7 +1727,7 @@ async function syncListiclesToStrapi() {
           `updateListicle(${key})`
         )
         console.log(`  ✅ Updated listicle: ${key}`)
-        results.updated++
+        results.updated.push({ key })
       } else {
         await withRetry(
           () =>
@@ -1744,7 +1744,7 @@ async function syncListiclesToStrapi() {
           `createListicle(${key})`
         )
         console.log(`  ✅ Created listicle: ${key}`)
-        results.created++
+        results.created.push({ key })
       }
     } catch (error) {
       const errorMsg = error.response?.data?.error?.message || error.message
@@ -1791,7 +1791,7 @@ async function syncListiclesToStrapi() {
           `deleteListicle(${key})`
         )
         console.log(`  ✅ Deleted listicle: ${key}`)
-        results.deleted++
+        results.deleted.push({ key })
       } else {
         console.log(`  ⚠️ Listicle not found in CMS, skipping deletion: ${key}`)
       }
@@ -1806,9 +1806,9 @@ async function syncListiclesToStrapi() {
   console.log('\n' + '-'.repeat(40))
   console.log('📊 LISTICLE SYNC SUMMARY')
   console.log('-'.repeat(40))
-  console.log(`  ✅ Created: ${results.created}`)
-  console.log(`  🔄 Updated: ${results.updated}`)
-  console.log(`  🗑️ Deleted: ${results.deleted}`)
+  console.log(`  ✅ Created: ${results.created.length}`)
+  console.log(`  🔄 Updated: ${results.updated.length}`)
+  console.log(`  🗑️ Deleted: ${results.deleted.length}`)
   console.log(`  ❌ Errors: ${results.errors.length}`)
   console.log('-'.repeat(40))
 
@@ -1817,6 +1817,14 @@ async function syncListiclesToStrapi() {
     results.errors.forEach(({ key, error }) => {
       console.error(`  • ${key}: ${error}`)
     })
+  }
+
+  // Save listicle results to file for PR comment script
+  try {
+    fs.writeFileSync('listicle-sync-results.json', JSON.stringify(results, null, 2))
+    console.log('📝 Listicle results saved to listicle-sync-results.json')
+  } catch (writeError) {
+    console.error('Failed to save listicle results:', writeError.message)
   }
 }
 
