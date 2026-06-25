@@ -67,7 +67,7 @@ service:
       exporters: [otlp/signoz]
 ```
 
-<KeyPointCallout title="Finding your SigNoz ingestion key" defaultCollapsed={true}>
+<KeyPointCallout title="Finding your SigNoz ingestion key" defaultCollapsed="true">
 To send telemetry to SigNoz Cloud, you need a valid ingestion key. You can find your region-specific endpoint and generate ingestion keys in your SigNoz Cloud Settings under the **Ingestion** tab. For full details, see the [SigNoz Ingestion Keys documentation](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 </KeyPointCallout>
 
@@ -143,7 +143,7 @@ processors:
     spike_limit_mib: 300
 ```
 
-<KeyPointCallout title="Warning: data can be permanently lost without correct retry behavior" defaultCollapsed={true} >
+<KeyPointCallout title="Warning: data can be permanently lost without correct retry behavior" defaultCollapsed="true" >
 When `memory_limiter` refuses data, it returns a non-permanent error expecting upstream components to retry. If a receiver or agent does not implement retry on this error, the refused data is gone. This is one reason `memory_limiter` should always be first: it gives receivers the maximum opportunity to handle backpressure correctly.
 </KeyPointCallout>
 
@@ -244,7 +244,7 @@ processors:
           - from: connection
 ```
 
-<KeyPointCallout title="Warning for Gateway deployments" defaultCollapsed={true}>
+<KeyPointCallout title="Warning for Gateway deployments" defaultCollapsed="true">
 <code>k8sattributes</code> matches telemetry to pods using the sender's IP. This works when the Collector runs as a DaemonSet or sidecar because the pod sends directly. In gateway mode, the gateway sees the agent's IP instead of the original pod's IP, so the lookup fails silently. Fix: have agents attach pod metadata as resource attributes before forwarding to the gateway.
 </KeyPointCallout>
 
@@ -471,7 +471,7 @@ service:
 
 With this config, the backend receives telemetry already enriched with Kubernetes and environment metadata, stripped of health-check noise and sensitive headers, and batched for efficient ingestion. When traces, metrics, and logs share consistent resource attributes such as `service.name`, `deployment.environment`, and Kubernetes metadata, backends such as SigNoz can correlate them more effectively.
 
-<KeyPointCallout title="Processor stability varies" defaultCollapsed={true}>
+<KeyPointCallout title="Processor stability varies" defaultCollapsed="true">
 OpenTelemetry Collector processors do not all carry the same maturity level. The <a href="https://opentelemetry.io/docs/collector/components/processor/" target="_blank" rel="noopener noreferrer nofollow">official processor registry</a> tracks stability per signal using levels such as <code>development</code>, <code>alpha</code>, <code>beta</code>, and <code>stable</code>.<br /><br />Processor stability varies by component and by signal. Check the processor registry and CHANGELOG for every processor your pipeline depends on before upgrading.
 </KeyPointCallout>
 

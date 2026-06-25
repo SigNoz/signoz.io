@@ -1,6 +1,5 @@
 ---
-date: 2026-06-11
-id: hermes-monitoring
+date: 2026-06-23
 title: Hermes Monitoring and Observability with OpenTelemetry
 description: Set up Hermes monitoring and observability with OpenTelemetry to send traces, logs, and metrics to SigNoz for full visibility into agent usage
 doc_type: howto
@@ -124,14 +123,14 @@ flush_interval_ms: 60000
 # traces + metrics + logs.
 backends:
   - type: signoz
-    endpoint: https://ingest.us.signoz.cloud:443/v1/traces
+    endpoint: https://ingest.<region>.signoz.cloud:443/v1/traces
     ingestion_key_env: OTEL_SIGNOZ_INGESTION_KEY
     traces: true
     metrics: true
     logs: true
 ```
 
-If your endpoint is not SigNoz Cloud US, replace the `endpoint:` value with your SigNoz OTLP HTTP traces endpoint.
+Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (for example, `us`, `eu`, or `in`). If you use self-hosted SigNoz, replace the entire `endpoint:` value with your SigNoz OTLP HTTP traces endpoint.
 
 <Admonition type="info">
 Using an explicit `backends:` entry makes the setup reproducible, enables all three signals (traces, metrics, and logs), and keeps secrets in `.env` via `ingestion_key_env` rather than hardcoding them in YAML.
@@ -172,7 +171,7 @@ grep -Ei 'hermes-otel|signoz|Logs' ~/.hermes/logs/*.log | tail -80
 Healthy output should include lines like:
 
 ```text
-[hermes-otel] ✓ SigNoz at https://ingest.us.signoz.cloud:443/v1/traces
+[hermes-otel] ✓ SigNoz at https://ingest.<region>.signoz.cloud:443/v1/traces
 [hermes-otel] ✓ Logs → 1 backend(s) (attached to root, level=INFO)
 [hermes-otel] Registered 8 hooks
 ```
@@ -200,7 +199,7 @@ Expected output:
 capture_logs: True
 backends_configured: 1
 backend=SigNoz type=signoz traces=True metrics=True logs=True
-endpoint: https://ingest.us.signoz.cloud:443/v1/traces
+endpoint: https://ingest.<region>.signoz.cloud:443/v1/traces
 ```
 
 ## View Hermes Traces, Logs, and Metrics in SigNoz

@@ -1,7 +1,7 @@
 import { sortPosts } from 'pliny/utils/contentlayer.js'
-import { allDocs } from 'contentlayer/generated'
 import { MDXContentApiResponse } from '@/utils/strapi'
 import { normaliseSlug } from '../../../scripts/rssFeed.mjs'
+import { fetchAllDocsForPage } from '@/utils/cachedData'
 import { fetchAllCMSContent } from '@/utils/cmsContent'
 import { mapRelationKeys, mapTaxonomyValues } from '@/utils/contentHelpers'
 import { resolveLatestDate } from '@/utils/dateUtils'
@@ -93,6 +93,23 @@ const mapBlogEntries = (blogs: MDXContentApiResponse | undefined) => {
   }))
 }
 
+const buildDocSlug = (path = '') => {
+  const cleanedPath = path.startsWith('/') ? path : `/${path}`
+  return normaliseSlug(`docs${cleanedPath}`)
+}
+
+const mapDocEntries = (docs: any[]) => {
+  if (!docs?.length) {
+    return []
+  }
+
+  return docs.map((doc) => ({
+    ...doc,
+    slug: buildDocSlug(doc.slug),
+    date: resolveLatestDate(doc),
+  }))
+}
+
 export const loadPublishedPosts = async () => {
   const deploymentStatus = getDeploymentStatus()
   const { faqs, opentelemetries, comparisons, guides, blogs } =
@@ -103,12 +120,13 @@ export const loadPublishedPosts = async () => {
   const comparisonPosts = mapComparisonEntries(comparisons)
   const guidePosts = mapGuideEntries(guides)
   const blogPosts = mapBlogEntries(blogs)
+  const docPosts = mapDocEntries(await fetchAllDocsForPage())
 
   const combinedPosts = [
     ...faqPosts,
     ...blogPosts,
     ...(opentelemetryPosts || []),
-    ...allDocs,
+    ...docPosts,
     ...guidePosts,
     ...(comparisonPosts || []),
   ]
