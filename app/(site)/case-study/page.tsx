@@ -160,10 +160,10 @@ function caseStudies() {
         >
           <div className="bg-blur-perlin-noise absolute left-0 right-0 top-0 z-[0] h-screen" />
           <div className="bg-blur-ellipse-388 absolute left-0 right-0 top-0 z-[0] h-screen" />
-          <div className="relative mb-3 pt-24 text-center font-mono text-sm font-medium uppercase text-signoz_sakura-400">
+          <h1 className="relative mb-3 pt-24 text-center font-mono text-sm font-medium uppercase text-signoz_sakura-400">
             {' '}
             Customer Stories{' '}
-          </div>
+          </h1>
           <div className="relative mb-4 text-center text-[28px] font-semibold text-signoz_robin-100">
             {' '}
             Observability for teams of all-sizes

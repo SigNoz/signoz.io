@@ -7,6 +7,11 @@ const mime = require('mime-types')
 
 const DEPLOYMENT_STATUS = process.env.DEPLOYMENT_STATUS
 
+const CMS_BATCH_SIZE = parseInt(process.env.CMS_BATCH_SIZE || '10', 10)
+const CMS_BATCH_DELAY_MS = parseInt(process.env.CMS_BATCH_DELAY_MS || '1000', 10)
+const CMS_MAX_RETRIES = parseInt(process.env.CMS_MAX_RETRIES || '5', 10)
+const CMS_INITIAL_RETRY_DELAY_MS = parseInt(process.env.CMS_INITIAL_RETRY_DELAY_MS || '1000', 10)
+
 const CMS_API_URL =
   DEPLOYMENT_STATUS === 'staging' ? process.env.CMS_STAGING_API_URL : process.env.CMS_API_URL
 const CMS_API_TOKEN =
@@ -48,8 +53,49 @@ const s3Client = new S3Client({
   },
 })
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function chunk(array, size) {
+  const chunks = []
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size))
+  }
+  return chunks
+}
+
+async function withRetry(fn, label) {
+  for (let attempt = 1; attempt <= CMS_MAX_RETRIES; attempt++) {
+    try {
+      return await fn()
+    } catch (error) {
+      if (attempt === CMS_MAX_RETRIES) {
+        throw error
+      }
+
+      const status = error.response?.status
+      const code = error.code
+
+      let delayMs
+      if (status === 429 && error.response?.headers?.['retry-after']) {
+        delayMs = parseInt(error.response.headers['retry-after'], 10) * 1000
+        if (isNaN(delayMs)) delayMs = CMS_INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt - 1)
+      } else {
+        delayMs = CMS_INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt - 1)
+      }
+
+      console.warn(
+        `  ⚠️ [${label}] Attempt ${attempt}/${CMS_MAX_RETRIES} failed (${status || code || error.message}). Retrying in ${delayMs}ms...`
+      )
+      await sleep(delayMs)
+    }
+  }
+}
+
 // URL prefix to Strapi endpoint/content_type mapping for related_articles component
 const RELATED_ARTICLE_TYPE_MAP = {
+  docs: { endpoint: 'docs', content_type: 'doc' },
   guides: { endpoint: 'guides', content_type: 'guide' },
   comparisons: { endpoint: 'comparisons', content_type: 'comparison' },
   blog: { endpoint: 'blogs', content_type: 'blog' },
@@ -238,6 +284,33 @@ const COLLECTION_SCHEMAS = {
       'hide_table_of_contents',
       'excludeFromSitemap',
     ],
+    hasRelatedArticles: true,
+    relations: {
+      authors: {
+        endpoint: 'authors',
+        matchField: 'key',
+        frontmatterField: 'authors',
+      },
+      tags: {
+        endpoint: 'tags',
+        matchField: 'key',
+        frontmatterField: 'tags',
+        filterKey: true,
+        matchValue: true,
+      },
+      keywords: {
+        endpoint: 'keywords',
+        matchField: 'key',
+        frontmatterField: 'keywords',
+        filterKey: true,
+        matchValue: true,
+      },
+    },
+  },
+  docs: {
+    apiPath: 'api::doc.doc',
+    endpoint: 'docs',
+    fields: ['title', 'path', 'content', 'deployment_status'],
     hasRelatedArticles: true,
     relations: {
       authors: {
@@ -491,18 +564,23 @@ async function fetchAllEntities(endpoint) {
     let pageCount = 1
 
     do {
-      const response = await axios.get(`${CMS_API_URL}/api/${endpoint}`, {
-        params: {
-          pagination: {
-            page,
-            pageSize,
-          },
-        },
-        headers: {
-          Authorization: `Bearer ${CMS_API_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-      })
+      const currentPage = page
+      const response = await withRetry(
+        () =>
+          axios.get(`${CMS_API_URL}/api/${endpoint}`, {
+            params: {
+              pagination: {
+                page: currentPage,
+                pageSize,
+              },
+            },
+            headers: {
+              Authorization: `Bearer ${CMS_API_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+        `fetchAllEntities(${endpoint}, page=${currentPage})`
+      )
 
       const data = response.data.data || []
       allEntities = allEntities.concat(data)
@@ -555,15 +633,19 @@ async function createTagOrKeyword(endpoint, value, folderName) {
       // description is optional, so we don't include it
     }
 
-    const response = await axios.post(
-      `${CMS_API_URL}/api/${endpoint}`,
-      { data },
-      {
-        headers: {
-          Authorization: `Bearer ${CMS_API_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-      }
+    const response = await withRetry(
+      () =>
+        axios.post(
+          `${CMS_API_URL}/api/${endpoint}`,
+          { data },
+          {
+            headers: {
+              Authorization: `Bearer ${CMS_API_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        ),
+      `createTagOrKeyword(${endpoint}, ${value})`
     )
 
     return response.data.data
@@ -590,6 +672,94 @@ function parseRelatedArticleUrl(url) {
 
 // Cache for entity lookups during related articles resolution
 const _relatedArticleEntityCache = {}
+const _relationEntityCache = {}
+const _existingEntriesCache = {}
+
+async function prefetchRelationEntities(pendingOperations) {
+  const endpointsNeeded = new Set()
+
+  for (const op of pendingOperations) {
+    if (op.type === 'delete') continue
+    const schema = COLLECTION_SCHEMAS[op.folderName]
+    if (schema?.relations) {
+      for (const relationConfig of Object.values(schema.relations)) {
+        endpointsNeeded.add(relationConfig.endpoint)
+      }
+    }
+  }
+
+  console.log(
+    `\n📦 Prefetching relation entities for ${endpointsNeeded.size} endpoint(s): ${[...endpointsNeeded].join(', ')}`
+  )
+
+  for (const endpoint of endpointsNeeded) {
+    try {
+      const entities = await fetchAllEntities(endpoint)
+      _relationEntityCache[endpoint] = filterEntitiesByDeploymentStatus(entities)
+      console.log(`  ✅ ${endpoint}: ${_relationEntityCache[endpoint].length} entities`)
+    } catch (err) {
+      console.warn(`  ⚠️ Failed to prefetch ${endpoint}: ${err.message}`)
+      _relationEntityCache[endpoint] = []
+    }
+  }
+
+  for (const [prefix, typeInfo] of Object.entries(RELATED_ARTICLE_TYPE_MAP)) {
+    if (!_relatedArticleEntityCache[prefix]) {
+      if (_relationEntityCache[typeInfo.endpoint]) {
+        _relatedArticleEntityCache[prefix] = _relationEntityCache[typeInfo.endpoint]
+      } else {
+        try {
+          let entities = await fetchAllEntities(typeInfo.endpoint)
+          entities = filterEntitiesByDeploymentStatus(entities)
+          _relatedArticleEntityCache[prefix] = entities
+          console.log(`  ✅ related_articles/${prefix}: ${entities.length} entities`)
+        } catch (err) {
+          console.warn(`  ⚠️ Failed to prefetch related_articles/${prefix}: ${err.message}`)
+          _relatedArticleEntityCache[prefix] = []
+        }
+      }
+    }
+  }
+}
+
+async function prefetchExistingEntries(pendingOperations) {
+  const folderNames = new Set()
+
+  for (const op of pendingOperations) {
+    folderNames.add(op.folderName)
+  }
+
+  console.log(
+    `\n📦 Prefetching existing entries for ${folderNames.size} content type(s): ${[...folderNames].join(', ')}`
+  )
+
+  for (const folderName of folderNames) {
+    const schema = COLLECTION_SCHEMAS[folderName]
+    if (!schema) continue
+
+    try {
+      const entities = await fetchAllEntities(schema.endpoint)
+      const filtered = filterEntitiesByDeploymentStatus(entities)
+      const entryMap = new Map()
+      for (const entity of filtered) {
+        if (entity.path) {
+          entryMap.set(entity.path, entity)
+        }
+      }
+      _existingEntriesCache[folderName] = entryMap
+      console.log(`  ✅ ${schema.endpoint}: ${entryMap.size} entries cached`)
+    } catch (err) {
+      console.warn(`  ⚠️ Failed to prefetch ${schema.endpoint}: ${err.message}`)
+      _existingEntriesCache[folderName] = new Map()
+    }
+  }
+}
+
+function findEntryByPathCached(folderName, pathField) {
+  const cache = _existingEntriesCache[folderName]
+  if (!cache) return null
+  return cache.get(pathField) || null
+}
 
 // Helper: Resolve related_articles frontmatter into component data with actual document relations.
 // Each component entry sets content_type + the matching relation field to the document ID.
@@ -673,7 +843,7 @@ async function resolveRelatedArticlesComponent(frontmatter) {
 }
 
 // Helper: Resolve relation IDs
-async function resolveRelations(folderName, frontmatter) {
+async function resolveRelations(folderName, frontmatter, entityCache) {
   const schema = COLLECTION_SCHEMAS[folderName]
   if (!schema.relations) return { relations: {}, warnings: [] }
 
@@ -691,9 +861,13 @@ async function resolveRelations(folderName, frontmatter) {
     // Check if this is tags or keywords relation
     const isTagsOrKeywords = relationName === 'tags' || relationName === 'keywords'
 
-    // Fetch all entities from the relation endpoint
-    let entities = await fetchAllEntities(relationConfig.endpoint)
-    entities = filterEntitiesByDeploymentStatus(entities)
+    let entities
+    if (entityCache && entityCache[relationConfig.endpoint]) {
+      entities = entityCache[relationConfig.endpoint]
+    } else {
+      entities = await fetchAllEntities(relationConfig.endpoint)
+      entities = filterEntitiesByDeploymentStatus(entities)
+    }
 
     if (entities.length === 0 && !isTagsOrKeywords) {
       console.warn(`  ⚠️ No entities found in ${relationConfig.endpoint}`)
@@ -785,7 +959,7 @@ async function resolveRelations(folderName, frontmatter) {
 }
 
 // Helper: Map MDX data to Strapi schema
-async function mapToStrapiSchema(folderName, frontmatter, content, pathField) {
+async function mapToStrapiSchema(folderName, frontmatter, content, pathField, entityCache) {
   const schema = COLLECTION_SCHEMAS[folderName]
   if (!schema) {
     throw new Error(`No schema defined for folder: ${folderName}`)
@@ -800,7 +974,7 @@ async function mapToStrapiSchema(folderName, frontmatter, content, pathField) {
   }
 
   // Resolve relations
-  const { relations, warnings } = await resolveRelations(folderName, frontmatter)
+  const { relations, warnings } = await resolveRelations(folderName, frontmatter, entityCache)
 
   // Remove raw frontmatter relation fields
   if (schema.relations) {
@@ -868,48 +1042,23 @@ async function mapToStrapiSchema(folderName, frontmatter, content, pathField) {
   return { data, warnings }
 }
 
-// Helper: Check if file exists in Strapi by path
-async function findEntryByPath(folderName, pathField) {
-  const schema = COLLECTION_SCHEMAS[folderName]
-  try {
-    const response = await axios.get(`${CMS_API_URL}/api/${schema.endpoint}`, {
-      params: {
-        filters: { path: { $eq: pathField }, deployment_status: { $eq: DEPLOYMENT_STATUS } },
-        pagination: { limit: 1 },
-      },
-      headers: {
-        Authorization: `Bearer ${CMS_API_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-    })
-
-    if (response.data.data && response.data.data.length > 0) {
-      return response.data.data[0]
-    }
-
-    return null
-  } catch (error) {
-    console.error(`  ❌ Error in findEntryByPath:`, error.message)
-    if (error.response) {
-      console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
-    }
-    throw new Error(`Failed to find entry by path: ${error.message}`)
-  }
-}
-
 // Helper: Create entry in Strapi
 async function createEntry(folderName, data) {
   const schema = COLLECTION_SCHEMAS[folderName]
   try {
-    const response = await axios.post(
-      `${CMS_API_URL}/api/${schema.endpoint}`,
-      { data },
-      {
-        headers: {
-          Authorization: `Bearer ${CMS_API_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-      }
+    const response = await withRetry(
+      () =>
+        axios.post(
+          `${CMS_API_URL}/api/${schema.endpoint}`,
+          { data },
+          {
+            headers: {
+              Authorization: `Bearer ${CMS_API_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        ),
+      `createEntry(${schema.endpoint})`
     )
 
     return response.data
@@ -931,15 +1080,19 @@ async function createEntry(folderName, data) {
 async function updateEntry(folderName, documentId, data) {
   const schema = COLLECTION_SCHEMAS[folderName]
   try {
-    const response = await axios.put(
-      `${CMS_API_URL}/api/${schema.endpoint}/${documentId}`,
-      { data },
-      {
-        headers: {
-          Authorization: `Bearer ${CMS_API_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-      }
+    const response = await withRetry(
+      () =>
+        axios.put(
+          `${CMS_API_URL}/api/${schema.endpoint}/${documentId}`,
+          { data },
+          {
+            headers: {
+              Authorization: `Bearer ${CMS_API_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        ),
+      `updateEntry(${schema.endpoint}, ${documentId})`
     )
 
     return response.data
@@ -961,12 +1114,16 @@ async function updateEntry(folderName, documentId, data) {
 async function deleteEntry(folderName, documentId) {
   const schema = COLLECTION_SCHEMAS[folderName]
   try {
-    const response = await axios.delete(`${CMS_API_URL}/api/${schema.endpoint}/${documentId}`, {
-      headers: {
-        Authorization: `Bearer ${CMS_API_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-    })
+    const response = await withRetry(
+      () =>
+        axios.delete(`${CMS_API_URL}/api/${schema.endpoint}/${documentId}`, {
+          headers: {
+            Authorization: `Bearer ${CMS_API_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+        }),
+      `deleteEntry(${schema.endpoint}, ${documentId})`
+    )
 
     return response.data
   } catch (error) {
@@ -1027,6 +1184,13 @@ async function syncToStrapi() {
 
       if (!folderName || !SYNC_FOLDERS.includes(folderName)) {
         console.log(`⏭️ Skipped: Folder '${folderName}' not in sync list`)
+        results.skipped.push(filePath)
+        continue
+      }
+
+      const schema = COLLECTION_SCHEMAS[folderName]
+      if (!schema) {
+        console.log(`⏭️ Skipped: No schema configured for '${folderName}'`)
         results.skipped.push(filePath)
         continue
       }
@@ -1134,21 +1298,27 @@ async function syncToStrapi() {
   console.log('🔄 PHASE 2: CMS Content Synchronization')
   console.log('='.repeat(80))
 
-  for (const op of pendingOperations) {
+  if (pendingOperations.length > 0) {
+    await prefetchRelationEntities(pendingOperations)
+    await prefetchExistingEntries(pendingOperations)
+  }
+
+  async function processOperation(op) {
     const { type, folderName, pathField, filePath } = op
-    console.log(`\n📄 Syncing: ${filePath} (${type})`)
 
     try {
       if (type === 'delete') {
         console.log(`🗑️ Deleting from CMS: ${pathField}`)
-        const existingEntry = await findEntryByPath(folderName, pathField)
+        const existingEntry = findEntryByPathCached(folderName, pathField)
 
         if (existingEntry) {
           await deleteEntry(folderName, existingEntry.documentId)
-          console.log(`✅ Deleted successfully`)
+          console.log(`✅ Deleted successfully: ${pathField}`)
           results.deleted.push({ file: filePath, path: pathField })
+          const cache = _existingEntriesCache[folderName]
+          if (cache) cache.delete(pathField)
         } else {
-          console.log(`⚠️ Entry not found in CMS, skipping deletion`)
+          console.log(`⚠️ Entry not found in CMS, skipping deletion: ${pathField}`)
           results.skipped.push(filePath)
         }
       } else {
@@ -1158,7 +1328,8 @@ async function syncToStrapi() {
           folderName,
           frontmatter,
           content,
-          pathField
+          pathField,
+          _relationEntityCache
         )
 
         // Track relation warnings
@@ -1170,30 +1341,54 @@ async function syncToStrapi() {
           })
         }
 
-        const existingEntry = await findEntryByPath(folderName, pathField)
+        const existingEntry = findEntryByPathCached(folderName, pathField)
 
         if (existingEntry) {
-          console.log(`🔄 Updating in CMS: ${pathField}`)
           if (!existingEntry.documentId) {
             throw new Error(`Entry found but has no documentId`)
           }
           await updateEntry(folderName, existingEntry.documentId, strapiData)
-          console.log(`✅ Updated successfully`)
+          console.log(`✅ Updated: ${pathField}`)
           results.updated.push({ file: filePath, path: pathField })
         } else {
-          console.log(`➕ Creating in CMS: ${pathField}`)
           await createEntry(folderName, strapiData)
-          console.log(`✅ Created successfully`)
+          console.log(`✅ Created: ${pathField}`)
           results.created.push({ file: filePath, path: pathField })
         }
       }
     } catch (error) {
       console.error(`❌ Error syncing ${filePath}: ${error.message}`)
-      // Detailed error logging...
       if (error.response) {
         console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
       }
       results.errors.push({ file: filePath, error: error.message })
+    }
+  }
+
+  // Batch when more than 50 operations, otherwise process sequentially
+  if (pendingOperations.length > 50) {
+    const batches = chunk(pendingOperations, CMS_BATCH_SIZE)
+    const totalBatches = batches.length
+
+    console.log(
+      `\n📦 Processing ${pendingOperations.length} operations in ${totalBatches} batch(es) (batch size: ${CMS_BATCH_SIZE}, delay: ${CMS_BATCH_DELAY_MS}ms)`
+    )
+
+    for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+      const batch = batches[batchIndex]
+      console.log(`\n── Batch ${batchIndex + 1}/${totalBatches} (${batch.length} items) ──`)
+
+      await Promise.all(batch.map(processOperation))
+
+      if (batchIndex < totalBatches - 1 && CMS_BATCH_DELAY_MS > 0) {
+        await sleep(CMS_BATCH_DELAY_MS)
+      }
+    }
+  } else {
+    console.log(`\n📦 Processing ${pendingOperations.length} operations sequentially`)
+
+    for (const op of pendingOperations) {
+      await processOperation(op)
     }
   }
 
