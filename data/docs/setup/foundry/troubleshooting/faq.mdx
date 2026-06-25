@@ -1,0 +1,57 @@
+---
+date: 2026-06-25
+tags: [Self-Hosted Community]
+title: Foundry FAQ - Self-Host SigNoz with foundryctl
+description: Common questions about Foundry and foundryctl for self-host SigNoz, from whether you need the CLI to reading errors, exit codes, and getting help.
+doc_type: reference
+---
+
+[Foundry](https://github.com/SigNoz/foundry) is the open-source CLI that installs and manages self-host SigNoz from a single `casting.yaml`. These questions apply to every self-host deployment, regardless of platform. For an error message you can fix, see [Troubleshooting foundryctl and casting.yaml](https://signoz.io/docs/setup/foundry/troubleshooting/errors/); for failures specific to a platform, see that platform's guide (for Docker, [Troubleshooting SigNoz on Docker](https://signoz.io/docs/setup/docker/troubleshooting/faq/)).
+
+### What does Foundry generate?
+
+Foundry turns your `casting.yaml` into standard deployment manifests under `pours/` (a Docker Compose file, systemd units, or Kubernetes manifests, depending on your `mode` and `flavor`), then deploys them. It does not invent a runtime of its own; the output is plain manifests you can read and version.
+
+### Do I need to install foundryctl?
+
+No. Because Foundry only generates standard manifests, SigNoz publishes the default generated manifests in the Foundry repo. For Docker you can deploy them with `docker compose` or `docker stack deploy` straight from the examples: <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/docker/compose/pours/deployment" target="_blank" rel="noopener noreferrer nofollow">Compose</a> and <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/docker/swarm/pours/deployment" target="_blank" rel="noopener noreferrer nofollow">Swarm</a>. Install `foundryctl` when you want it to generate, deploy, and update the stack for you.
+
+### How do I read Foundry errors?
+
+By default `foundryctl` prints errors as JSON. Add `--format text` for readable output, and `--debug` for the full step-by-step trace of what Foundry was doing when it failed. This is the first thing to reach for on any unexpected failure:
+
+```bash
+foundryctl cast -f casting.yaml --debug --format text
+```
+
+### What do the foundryctl exit codes mean?
+
+The exit code tells you the category of the problem:
+
+| Exit code | Category | Usually means |
+| --- | --- | --- |
+| `0` | Success | Nothing went wrong. |
+| `2` | Invalid input | Your `casting.yaml` is malformed or fails schema validation. |
+| `3` | Not found | A required file or tool is missing (config file, Docker, a generated file). |
+| `4` | Unsupported | An unknown `kind`, an unsupported `mode`/`flavor` combination, or an unknown patch type. |
+| `5` | Internal | An expected step failed unexpectedly. Re-run with `--debug` and report it. |
+| `6` | Fatal | A crash. Report it with the message and stacktrace. |
+
+Check it after a run with `echo $?`.
+
+### Why didn't my casting.yaml change take effect?
+
+`cast` deploys from `casting.yaml.lock`, the resolved snapshot that `forge` writes. Editing `casting.yaml` alone does not update it; re-run `forge` (or `cast`, which forges first) so the lock is regenerated. Editing files under `pours/` directly does not survive either, because every `forge` regenerates that directory. Make all changes in `casting.yaml`.
+
+### How do I report a Foundry problem?
+
+Share the command you ran with `--debug`, the exit code, and your `casting.yaml` (with any secrets redacted):
+
+```bash
+foundryctl cast -f casting.yaml --debug --format text
+echo "exit code: $?"
+cat casting.yaml
+```
+
+- [SigNoz Community Slack](https://signoz.io/slack/)
+- <a href="https://github.com/SigNoz/foundry/issues" target="_blank" rel="noopener noreferrer nofollow">Foundry issues on GitHub</a>

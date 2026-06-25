@@ -1,24 +1,82 @@
 ---
-date: 2025-11-04
-tags: [Self-Host]
-title: Troubleshooting Docker Installation
-description: Instructions that should resolve most SigNoz installation issues in Docker
+date: 2026-06-25
+tags: [Self-Hosted Community]
+title: Troubleshooting SigNoz on Docker and Docker Swarm
+description: Resolve Docker and Swarm-specific SigNoz issues like missing Compose tooling, inactive Swarm, unhealthy containers, stuck bootstrap jobs, and restart loops.
+doc_type: howto
 ---
 
-This troubleshooting guide includes step-by-step instructions that should resolve most SigNoz installation issues in Docker.
+These are issues specific to deploying SigNoz on Docker (Compose or Swarm). For `foundryctl` or `casting.yaml` errors that are not Docker-specific, see [Troubleshooting foundryctl and casting.yaml](https://signoz.io/docs/setup/foundry/troubleshooting/errors/); for general questions about Foundry, see the [Foundry FAQ](https://signoz.io/docs/setup/foundry/troubleshooting/faq/).
 
-## Container signoz-init-clickhouse Hangs Forever
+## Compose tooling not found
 
-After installation, you might sometimes see the `signoz-init-clickhouse` container getting stuck. The logs will show:
+**Cause:** `neither 'docker-compose' nor the 'docker compose' plugin is available` means you are deploying with `flavor: compose` but no Compose tooling was found.
+
+**Resolution:** install the Compose v2 plugin (it ships with Docker Desktop and modern Docker Engine). Foundry accepts either `docker compose` (the v2 plugin) or the legacy `docker-compose` binary, and prefers the plugin.
+
+## Swarm mode is not active
+
+**Cause:** `docker swarm is not active (state: inactive)` means you are deploying with `flavor: swarm` but Swarm mode is off.
+
+**Resolution:** initialize Swarm on the node you deploy from:
 
 ```bash
-docker logs signoz-init-clickhouse
-# Fetching histogram-binary for linux/amd64
-# Connecting to github.com (20.205.243.166:443)
+docker swarm init
 ```
 
-This indicates the helper binary wasn’t fetched from GitHub. For these issues, restart the SigNoz containers and allow time for the helper binary to download:
+## Deploying from a non-manager node
+
+**Cause:** `current node is a swarm worker, not a manager`. `docker stack deploy` only runs from a Swarm **manager**.
+
+**Resolution:** run `foundryctl` from a manager node. Check which nodes are managers:
 
 ```bash
-docker compose restart
+docker node ls   # MANAGER STATUS column shows Leader / Reachable
 ```
+
+## Compose file not found
+
+**Cause:** `compose file does not exist at path: ...` means you ran `cast` before generating the deployment. `cast` deploys what `forge` writes under `pours/`.
+
+**Resolution:** let `cast` do both, or generate first:
+
+```bash
+foundryctl cast -f casting.yaml          # runs gauge, forge, then deploys
+# or, step by step
+foundryctl forge -f casting.yaml
+```
+
+If your pours live in a non-default directory, point to it with `-p ./my-pours`.
+
+## A container is unhealthy or the UI does not load
+
+**Resolution:** inspect the workload and follow the logs of the component that is failing:
+
+```bash
+# Compose
+docker ps -a
+docker compose -f pours/deployment/compose.yaml logs -f signoz-signoz-0
+
+# Swarm (services are prefixed with the stack name)
+docker stack services signoz
+docker service logs signoz_signoz-signoz-0 -f
+```
+
+Docker Swarm starts services in parallel and does not honor `depends_on`, so dependent services may restart a few times until ClickHouse and Postgres are ready. That is expected; persistent failures are not.
+
+## A ClickHouse bootstrap container hangs fetching the histogram binary
+
+**Cause:** on first start, the `signoz-telemetrystore-clickhouse-user-scripts` job downloads a helper binary (histogram-quantile) from GitHub, and ClickHouse waits on it. A slow or blocked connection to GitHub stalls it.
+
+**Resolution:** check its logs, then give it time or restart the stack so it retries:
+
+```bash
+docker compose -f pours/deployment/compose.yaml logs signoz-telemetrystore-clickhouse-user-scripts
+docker compose -f pours/deployment/compose.yaml restart
+```
+
+On Docker Swarm the service is `signoz_signoz-telemetrystore-clickhouse-user-scripts`; re-run `foundryctl cast -f casting.yaml` to redeploy it.
+
+## Containers keep restarting
+
+**Resolution:** increase the memory allocated to Docker. SigNoz needs at least 4GB.
