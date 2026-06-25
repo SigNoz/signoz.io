@@ -10,9 +10,9 @@ These are `foundryctl` and `casting.yaml` errors that can occur on any self-host
 
 Re-run any failing command with `--debug --format text` first for a readable trace, and check the [exit code](https://signoz.io/docs/setup/foundry/troubleshooting/faq/#what-do-the-foundryctl-exit-codes-mean) to confirm the category.
 
-## `foundryctl: command not found`
+## foundryctl is not found
 
-**Cause:** the binary is not on your `PATH`.
+**Cause:** `foundryctl: command not found` means the binary is not on your `PATH`.
 
 **Resolution:** reinstall it, or call it by its full path. Confirm it is available:
 
@@ -20,9 +20,9 @@ Re-run any failing command with `--debug --format text` first for a readable tra
 foundryctl version
 ```
 
-## `failed to read yaml file`
+## Casting file not found
 
-**Cause:** Foundry could not find your config (exit code `3`). By default it looks for `casting.yaml` in the current directory.
+**Cause:** `failed to read yaml file` (exit code `3`) means Foundry could not find your config. By default it looks for `casting.yaml` in the current directory.
 
 **Resolution:** check the path, or pass it explicitly:
 
@@ -30,9 +30,9 @@ foundryctl version
 foundryctl forge -f path/to/casting.yaml
 ```
 
-## `failed to peek kind` / `failed to unmarshal ... casting`
+## Invalid casting.yaml syntax
 
-**Cause:** the YAML is syntactically invalid (exit code `2`), usually from indentation mistakes or **tabs** (YAML requires spaces).
+**Cause:** `failed to peek kind` or `failed to unmarshal ... casting` (exit code `2`) means the YAML is syntactically invalid, usually from indentation mistakes or **tabs** (YAML requires spaces).
 
 **Resolution:** fix the indentation. A valid minimal Docker casting looks like this:
 
@@ -49,15 +49,15 @@ spec:
 
 **Verify:** re-run `foundryctl forge -f casting.yaml`; it should generate `pours/` without error.
 
-## `unknown casting kind "..."`
+## Unknown casting kind
 
-**Cause:** the `kind` value is not recognized (exit code `4`). For installing SigNoz the kind is `Installation` (capital I). Omitting `kind` defaults to `Installation`, so this error means it is misspelled or set to something unsupported.
+**Cause:** `unknown casting kind "..."` (exit code `4`) means the `kind` value is not recognized. For installing SigNoz the kind is `Installation` (capital I). Omitting `kind` defaults to `Installation`, so this error means it is misspelled or set to something unsupported.
 
 **Resolution:** set `kind: Installation` or remove the field.
 
-## `invalid casting file casting.yaml: ...`
+## Casting fails schema validation
 
-**Cause:** the file parsed but failed schema validation (exit code `2`). The text after the colon names the offending field. Common cases:
+**Cause:** `invalid casting file casting.yaml: ...` (exit code `2`) means the file parsed but failed schema validation. The text after the colon names the offending field. Common cases:
 
 - A field name is misspelled or sits at the wrong indentation level.
 - A value has the wrong type (for example, a string where a number is expected).
@@ -65,9 +65,9 @@ spec:
 
 **Resolution:** compare your file against a working [Docker example](https://signoz.io/docs/install/docker/) and fix the field the message names.
 
-## `deployment '{Mode:... Flavor:...}' is not supported`
+## Unsupported mode/flavor combination
 
-**Cause:** `mode` and `flavor` parsed individually but do not form a supported combination (exit code `4`). For Docker the supported combinations are:
+**Cause:** `deployment '{Mode:... Flavor:...}' is not supported` (exit code `4`) means `mode` and `flavor` parsed individually but do not form a supported combination. For Docker the supported combinations are:
 
 | `mode` | `flavor` | Result |
 | --- | --- | --- |

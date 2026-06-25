@@ -8,15 +8,15 @@ doc_type: howto
 
 These are issues specific to deploying SigNoz on Docker (Compose or Swarm). For `foundryctl` or `casting.yaml` errors that are not Docker-specific, see [Troubleshooting foundryctl and casting.yaml](https://signoz.io/docs/setup/foundry/troubleshooting/errors/); for general questions about Foundry, see the [Foundry FAQ](https://signoz.io/docs/setup/foundry/troubleshooting/faq/).
 
-## `neither 'docker-compose' nor the 'docker compose' plugin is available`
+## Compose tooling not found
 
-**Cause:** you are deploying with `flavor: compose` but no Compose tooling was found.
+**Cause:** `neither 'docker-compose' nor the 'docker compose' plugin is available` means you are deploying with `flavor: compose` but no Compose tooling was found.
 
 **Resolution:** install the Compose v2 plugin (it ships with Docker Desktop and modern Docker Engine). Foundry accepts either `docker compose` (the v2 plugin) or the legacy `docker-compose` binary, and prefers the plugin.
 
-## `docker swarm is not active (state: inactive)`
+## Swarm mode is not active
 
-**Cause:** you are deploying with `flavor: swarm` but Swarm mode is off.
+**Cause:** `docker swarm is not active (state: inactive)` means you are deploying with `flavor: swarm` but Swarm mode is off.
 
 **Resolution:** initialize Swarm on the node you deploy from:
 
@@ -24,9 +24,9 @@ These are issues specific to deploying SigNoz on Docker (Compose or Swarm). For 
 docker swarm init
 ```
 
-## `current node is a swarm worker, not a manager`
+## Deploying from a non-manager node
 
-**Cause:** `docker stack deploy` only runs from a Swarm **manager**.
+**Cause:** `current node is a swarm worker, not a manager`. `docker stack deploy` only runs from a Swarm **manager**.
 
 **Resolution:** run `foundryctl` from a manager node. Check which nodes are managers:
 
@@ -34,9 +34,9 @@ docker swarm init
 docker node ls   # MANAGER STATUS column shows Leader / Reachable
 ```
 
-## `compose file does not exist at path: ...`
+## Compose file not found
 
-**Cause:** you ran `cast` before generating the deployment. `cast` deploys what `forge` writes under `pours/`.
+**Cause:** `compose file does not exist at path: ...` means you ran `cast` before generating the deployment. `cast` deploys what `forge` writes under `pours/`.
 
 **Resolution:** let `cast` do both, or generate first:
 
