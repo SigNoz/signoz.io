@@ -8,12 +8,7 @@ import TrackingButton from '@/components/TrackingButton'
 import GitHubStars from '../GithubStars/GithubStars'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import Accordion from '../Accordion/Accordion'
-import {
-  productDropdownItemsSorted,
-  resourcesDropdownItems,
-  comparisonItems,
-  migrationItems,
-} from './constants'
+import { productDropdownItemsSorted, resourcesDropdownItems } from './constants'
 
 interface MobileMenuProps {
   open: boolean
@@ -116,11 +111,6 @@ function MainMenuContent({
       <Accordion
         topic="Resources"
         subtopics={[...resourcesDropdownItems.learn, ...resourcesDropdownItems.explore]}
-        onLinkClick={onClose}
-      />
-      <Accordion
-        topic="Compare SigNoz"
-        subtopics={[...comparisonItems, ...migrationItems]}
         onLinkClick={onClose}
       />
       <TrackingLink
