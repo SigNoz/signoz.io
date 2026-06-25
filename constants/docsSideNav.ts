@@ -184,23 +184,6 @@ const docsSideNav = [
             route: '/docs/setup/render',
           },
           {
-            type: 'category',
-            label: 'Foundry',
-            isExpanded: false,
-            items: [
-              {
-                type: 'doc',
-                label: 'FAQ',
-                route: '/docs/setup/foundry/troubleshooting/faq',
-              },
-              {
-                type: 'doc',
-                label: 'Troubleshooting',
-                route: '/docs/setup/foundry/troubleshooting/errors',
-              },
-            ],
-          },
-          {
             type: 'doc',
             route: '/docs/install/uninstall',
             label: 'Uninstall',

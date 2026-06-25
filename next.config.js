@@ -888,7 +888,7 @@ module.exports = () => {
         },
         {
           source: '/docs/deployment/troubleshooting/',
-          destination: '/docs/setup/foundry/troubleshooting/errors',
+          destination: '/docs/setup/docker/troubleshooting/faq',
           permanent: true,
         },
         {
