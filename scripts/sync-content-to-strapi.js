@@ -1474,6 +1474,37 @@ async function syncToStrapi() {
   return results
 }
 
+const SIDENAV_JSON_PATH = path.resolve(__dirname, '..', 'data', 'docs-side-nav', 'main.json')
+const SIDENAV_CHANGED = process.env.SIDENAV_CHANGED === 'true'
+
+async function syncSidenavToStrapi() {
+  console.log('\n' + '='.repeat(80))
+  console.log('🔄 PHASE 3: Sidenav Synchronization')
+  console.log('='.repeat(80))
+
+  const raw = fs.readFileSync(SIDENAV_JSON_PATH, 'utf8')
+  const items = JSON.parse(raw)
+
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error('Parsed sidenav JSON is empty or not an array')
+  }
+
+  const url = `${CMS_API_URL}/api/docs-side-nav`
+  const body = { data: { items } }
+
+  await withRetry(async () => {
+    const response = await axios.put(url, body, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${CMS_API_TOKEN}`,
+      },
+    })
+    return response.data
+  }, 'sync-sidenav')
+
+  console.log('✅ Sidenav synced to CMS successfully')
+}
+
 // Validate environment variables
 if (!CMS_API_URL || !CMS_API_TOKEN) {
   console.error('❌ ERROR: Missing required environment variables')
@@ -1482,11 +1513,17 @@ if (!CMS_API_URL || !CMS_API_TOKEN) {
 }
 
 // Run sync
-syncToStrapi()
-  .then(() => {
-    console.log('✅ Sync completed successfully!')
-  })
-  .catch((error) => {
-    console.error('❌ SYNC FAILED:', error.message)
-    process.exit(1)
-  })
+async function main() {
+  await syncToStrapi()
+
+  if (SIDENAV_CHANGED) {
+    await syncSidenavToStrapi()
+  }
+
+  console.log('✅ Sync completed successfully!')
+}
+
+main().catch((error) => {
+  console.error('❌ SYNC FAILED:', error.message)
+  process.exit(1)
+})

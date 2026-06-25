@@ -245,17 +245,12 @@ jobs:
           DELETED_FILES_PATH: .github/outputs/content_deleted_files.json
           CHANGED_ASSETS_PATH: .github/outputs/assets_changed_files.json
           DEPLOYMENT_STATUS: ${{ needs.detect-changes.outputs.deployment_status }}
+          SIDENAV_CHANGED: ${{ needs.detect-changes.outputs.sidenav_changed }}
           CMS_BATCH_SIZE: '10'
           CMS_BATCH_DELAY_MS: '1000'
           CMS_MAX_RETRIES: '5'
           CMS_INITIAL_RETRY_DELAY_MS: '1000'
         run: node scripts/sync-content-to-strapi.js
-
-      - name: Sync Sidenav to CMS
-        if: success() && needs.detect-changes.outputs.sidenav_changed == 'true'
-        env:
-          DEPLOYMENT_STATUS: ${{ needs.detect-changes.outputs.deployment_status }}
-        run: node scripts/sync-sidenav-to-strapi.js
 
       - name: Trigger Revalidation
         if: success()
