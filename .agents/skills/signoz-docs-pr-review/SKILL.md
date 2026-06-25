@@ -12,7 +12,7 @@ Review documentation pull requests in `signoz.io` with a strict, actionable rubr
 Use this skill for docs review on changes such as:
 
 - `data/docs/**`
-- `public/img/docs/**`
+- `data-assets/img/docs/**`
 - `constants/docsSideNav.ts`
 - `constants/componentItems.ts` and `constants/componentItems/*.ts` when new docs should also appear in docs listicles, overview cards, or similar discovery surfaces
 - `next.config.js` when docs URL paths change

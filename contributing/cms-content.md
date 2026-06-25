@@ -8,6 +8,7 @@ The following content directories are managed through a CMS and synced to the re
 
 | Route | Data Directory |
 |---|---|
+| `/docs` | `data/docs` |
 | `/blog` | `data/blog` |
 | `/guides` | `data/guides` |
 | `/comparisons` | `data/comparisons` |
