@@ -91,16 +91,9 @@ const docsSideNav = [
                 route: '/docs/install/docker-selinux',
               },
               {
-                type: 'category',
-                isExpanded: false,
+                type: 'doc',
                 label: 'Troubleshooting',
-                items: [
-                  {
-                    type: 'doc',
-                    label: 'General FAQs',
-                    route: '/docs/setup/docker/troubleshooting/faq',
-                  },
-                ],
+                route: '/docs/setup/docker/troubleshooting/faq',
               },
             ],
           },
@@ -1961,6 +1954,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/opentelemetry-pgbouncer',
+                label: 'PgBouncer',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/opentelemetry-planetscale',
                 label: 'PlanetScale',
               },
@@ -2591,6 +2589,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
             label: 'OpenRouter',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/pgbouncer-dashboard',
+            label: 'PgBouncer',
           },
           {
             type: 'doc',
