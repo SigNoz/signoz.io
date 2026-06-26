@@ -1248,6 +1248,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/apm-and-distributed-tracing/querying-traces',
+            label: 'Querying Traces',
+          },
+          {
+            type: 'doc',
             route: '/docs/userguide/span-details',
             label: 'Trace Details',
           },
@@ -1315,11 +1320,6 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/apm-and-distributed-tracing/reference',
         items: [
-          {
-            type: 'doc',
-            route: '/docs/apm-and-distributed-tracing/querying-traces',
-            label: 'Querying Traces',
-          },
           {
             type: 'doc',
             route: '/docs/userguide/custom-apm-dashboards-alerts',
@@ -1637,6 +1637,11 @@ const docsSideNav = [
           { type: 'doc', route: '/docs/userguide/logs_query_builder', label: 'Logs Explorer' },
           {
             type: 'doc',
+            route: '/docs/logs-management/querying-logs',
+            label: 'Querying Logs',
+          },
+          {
+            type: 'doc',
             route: '/docs/logs-management/features/logs-quick-filters',
             label: 'Logs Quick Filters',
           },
@@ -1745,11 +1750,6 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/logs-management/reference',
         items: [
-          {
-            type: 'doc',
-            route: '/docs/logs-management/querying-logs',
-            label: 'Querying Logs',
-          },
           { type: 'doc', route: '/docs/logs-pipelines/processors', label: 'Log Processors' },
           {
             type: 'doc',
@@ -2001,6 +2001,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/metrics-management/querying-metrics',
+            label: 'Querying Metrics',
+          },
+          {
+            type: 'doc',
             route: '/docs/metrics-management/types-and-aggregation',
             label: 'Types and Aggregation',
           },
@@ -2031,11 +2036,6 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/metrics-management/reference',
         items: [
-          {
-            type: 'doc',
-            route: '/docs/metrics-management/querying-metrics',
-            label: 'Querying Metrics',
-          },
           { type: 'doc', route: '/docs/metrics-management/query-range-api', label: 'Metrics API' },
           {
             type: 'doc',
