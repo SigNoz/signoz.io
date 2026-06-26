@@ -341,6 +341,58 @@ jobs:
           echo "Please check the logs above for detailed error messages."
           exit 1
 
+      - name: Find merged PR info
+        id: pr-info
+        if: needs.sync-to-cms.result == 'failure' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_JSON=$(gh pr list --repo "${{ github.repository }}" --state merged --search "${{ github.sha }}" --json number,author --limit 1)
+          PR_NUMBER=$(echo "$PR_JSON" | jq -r '.[0].number // empty')
+          PR_AUTHOR=$(echo "$PR_JSON" | jq -r '.[0].author.login // empty')
+          echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "pr_author=${PR_AUTHOR}" >> $GITHUB_OUTPUT
+
+      - name: Notify Slack on failure
+        if: needs.sync-to-cms.result == 'failure' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SYNC_SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SYNC_SLACK_CHANNEL_ID }}
+          PR_NUMBER: ${{ steps.pr-info.outputs.pr_number }}
+          PR_AUTHOR: ${{ steps.pr-info.outputs.pr_author }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          SERVER_URL: ${{ github.server_url }}
+        run: |
+          PR_LINK="${SERVER_URL}/${REPO}/pull/${PR_NUMBER}"
+          RUN_LINK="${SERVER_URL}/${REPO}/actions/runs/${RUN_ID}"
+
+          MESSAGE="🚨 *Production CMS Sync Failed*\n\n"
+          MESSAGE+="• *Repository:* ${REPO}\n"
+          if [ -n "$PR_NUMBER" ]; then
+            MESSAGE+="• *PR:* <${PR_LINK}|#${PR_NUMBER}>\n"
+          fi
+          if [ -n "$PR_AUTHOR" ]; then
+            MESSAGE+="• *Author:* ${PR_AUTHOR}\n"
+          fi
+          MESSAGE+="• *Workflow Run:* <${RUN_LINK}|View logs>\n"
+
+          RESPONSE=$(curl -s -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer ${SLACK_BOT_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"channel\": \"${SLACK_CHANNEL_ID}\",
+              \"text\": \"${MESSAGE}\",
+              \"unfurl_links\": false
+            }")
+
+          if echo "$RESPONSE" | jq -e '.ok == true' > /dev/null 2>&1; then
+            echo "✅ Slack notification sent successfully"
+          else
+            echo "⚠️ Failed to send Slack notification"
+            echo "$RESPONSE" | jq .
+          fi
+
       - name: Report Skipped
         if: needs.detect-changes.outputs.should_sync != 'true' || (needs.detect-changes.outputs.any_changed != 'true' && needs.detect-changes.outputs.any_deleted != 'true' && needs.detect-changes.outputs.any_assets_changed != 'true' && needs.detect-changes.outputs.sidenav_changed != 'true' && needs.detect-changes.outputs.listicles_changed != 'true')
         run: |
