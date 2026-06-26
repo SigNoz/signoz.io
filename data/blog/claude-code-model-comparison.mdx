@@ -22,7 +22,15 @@ Every few months there’s a new model, new benchmark numbers, and a post tellin
 
 Those are different questions, and the gap between them is bigger than the leaderboards let on.
 
-A benchmark score tells you whether a model solved a task. It doesn’t tell you what the model spent getting there: how many tokens it burned, how many tools it called, how long it churned, how often it retried, where it got stuck. A model that solves slightly more tasks while spending three times as much, or taking twice as long, isn’t obviously the better choice. It depends on what you’re optimizing for.
+A benchmark score tells you whether a model solved a task. It doesn’t tell you what the model spent getting there:
+
+- how many tokens it burned
+- how many tools it called
+- how long it churned
+- how often it retried
+- where it got stuck
+
+A model that solves slightly more tasks while spending three times as much, or taking twice as long, isn’t obviously the better choice. It depends on what you’re optimizing for.
 
 So when the latest Claude models came out, I went after the practical version of “are they getting better.” Same agent, same tasks, three models, full instrumentation on every run, so I could see not just *whether* each one finished but *how*. I used OpenTelemetry and SigNoz to collect and read the data.
 
@@ -375,7 +383,13 @@ So which model is best? The uncomfortable answer is that it depends on your spec
 
 Yes, and I don’t want to hide that. Across three generations the newest model solved the most tasks, made the fewest errors, and got the most work done per dollar. If you came for a one-line answer, Opus 4.8 is the one I’d reach for.
 
-But “getting better” turned out to mean several things. Capability went up. Cost per solved task went down. Raw cost didn’t rise in a straight line: the middle model was the most expensive, which no capability score would have told me. Reliability improved. The work the model put into hard tasks went up, and it converted into solved tasks instead of being spent and lost like Sonnet’s timeouts. Token counts roughly doubled while cost barely moved, because the tokens that doubled were the cheap ones.
+But “getting better” turned out to mean several things:
+
+- **Capability went up.** The newest model solved the most tasks.
+- **Cost per solved task went down**, even though raw cost didn’t rise in a straight line: the middle model was the most expensive, which no capability score would have told me.
+- **Reliability improved.** Fewer failed tool calls.
+- **Effort on hard tasks went up, and converted** into solved tasks instead of being spent and lost like Sonnet’s timeouts.
+- **Token counts roughly doubled while cost barely moved**, because the tokens that doubled were the cheap ones.
 
 None of that is visible with a single number. It showed up because every run was instrumented and I could lay the metrics next to each other and watch them disagree.
 
@@ -383,16 +397,22 @@ The useful skill isn’t picking today’s best model. It’s being able to ask 
 
 The nice part is none of this required custom work. Claude Code already emits the telemetry. I pointed it at SigNoz, built one dashboard, and read it. To run the same comparison against your own tasks, you just have to turn on OpenTelemetry, and send that data to any OTel compatible platform to query and visualize. The models will keep changing and getting better, but how you can tell whether the new one is better for you doesn’t have to.
 
-## Caveats, and how to run it yourself
+## Caveats
 
-It’s one run per task. I didn’t average multiple trials, so there could be some variance I’m not capturing, especially on borderline tasks that could go either way. I wouldn’t treat any single task’s metrics as exactly precise. The rankings and trend are clear, but the exact figures have noise.
+- **One run per task.** I didn’t average multiple trials, so there could be some variance I’m not capturing, especially on borderline tasks that could go either way. I wouldn’t treat any single task’s metrics as exactly precise. The rankings and trend are clear, but the exact figures have noise.
+- **Auxiliary Haiku spend excluded.** The cost numbers leave out the cheap internal calls Claude Code makes, mentioned earlier. ~1% on average, but you can add it back if you want whole-agent cost.
+- **Public benchmark, so contamination is real** and absolute pass rates are probably generous. This affects all three models similarly, so the comparison holds.
+- **The harness reported `0` tokens for failed tasks.** The benchmark’s own per-task results file showed `0` input and output tokens for failed or incomplete tasks, which may be misleading. That confused me at first. The real data is in the OpenTelemetry data that fed the dashboards, just not in the harness summary. If you see `0`s there, don’t panic, the numbers are in the telemetry.
+- **Active time, not wall-clock.** The easiest thing to get wrong: the time panel measures work performed across tasks, excluding idle time. It’s not how long you’d wait for a single task. For human-facing latency you’d want a different measure.
 
-The cost numbers exclude the auxiliary Haiku spend mentioned earlier, the cheap internal calls Claude Code makes. ~1% on average, but you can add it back if you want whole-agent cost.
+## How to run it yourself
 
-The benchmark tasks are public, so contamination is real and absolute pass rates are probably generous. This affects all three models similarly, so the comparison holds.
+If you want your own version:
 
-One quirk if you reproduce this: the benchmark’s own per-task results file reported `0` input and output tokens for failed tasks, or tasks that didn’t fully complete, which may be misleading. That confused me at first. The real data is in the OpenTelemetry data, which fed the dashboards, so it was all there, just not in the harness summary. If you see `0`s there, don’t panic, the numbers are in the telemetry.
+1. Install the benchmark and its runner, and pick your tasks.
+2. Run Claude Code as the agent with the `--model` flag set to whatever you’re comparing, holding everything else constant.
+3. Turn on the OpenTelemetry export and point it to an OTLP endpoint. Check out the [Claude Code monitoring guide](https://signoz.io/docs/claude-code-monitoring/) for detailed instructions on setting up OpenTelemetry instrumentation.
+4. Build a dashboard with the signals that matter and a way to filter by model.
+5. Run each model and read across the rows.
 
-And the time caveat once more, because it’s the easiest thing to get wrong: the time panel is active time, not wall-clock. It measures work performed across tasks, excluding idle time. It’s not how long you’d wait for a single task. For human-facing latency you’d want a different measure.
-
-If you want your own version, install the benchmark and its runner, pick your tasks, run Claude Code as the agent with the model flag set to whatever you’re comparing, holding everything else constant. Turn on the OpenTelemetry export and point it to an OTLP endpoint. Check out the [Claude Code monitoring guide](https://signoz.io/docs/claude-code-monitoring/) for detailed instructions on setting up OpenTelemetry instrumentation. Build a dashboard with the signals that matter and a way to filter by model. Then run each model and read across the rows. At the end you’ll know, for your tasks rather than someone’s leaderboard, whether the new model is the one you should be using.
+At the end you’ll know, for your tasks rather than someone’s leaderboard, whether the new model is the one you should be using.
