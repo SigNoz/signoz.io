@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import GetStartedSigNoz from '@/components/GetStartedSigNoz/GetStartedSigNoz'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import { ArrowRight, BookOpen, Link as LinkIcon } from 'lucide-react'
 import {
   LineChart,
@@ -146,7 +146,10 @@ const SigNozVsNewRelicV2 = () => {
                   clickText="Get Started - Free"
                   clickLocation="Hero Section"
                 >
-                  <Button className="flex items-center justify-center gap-2 font-bold">
+                  <Button
+                    type={Button.TYPES.PRIMARY}
+                    className="flex items-center justify-center gap-2 font-bold"
+                  >
                     Get Started - Free <ArrowRight className="h-4 w-4" />
                   </Button>
                 </TrackingLink>
@@ -517,7 +520,10 @@ const SigNozVsNewRelicV2 = () => {
                               on 09 January 2025.
                             </p>
                             <Link href="/teams/">
-                              <Button className="flex items-center gap-2">
+                              <Button
+                                type={Button.TYPES.PRIMARY}
+                                className="flex items-center gap-2"
+                              >
                                 Get Started with OpenTelemetry
                                 <ArrowRight className="h-4 w-4" />
                               </Button>
@@ -559,7 +565,7 @@ const SigNozVsNewRelicV2 = () => {
 
                 <div className="mb-6 flex flex-wrap gap-4">
                   <Link href="/teams/" target="_blank" className="block">
-                    <Button className="flex items-center gap-2">
+                    <Button type={Button.TYPES.PRIMARY} className="flex items-center gap-2">
                       Start Monitoring Kafka
                       <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -1697,7 +1703,10 @@ const SigNozVsNewRelicV2 = () => {
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link href="/product-comparison/migrate-from-newrelic/" className="block max-w-md">
-                <Button className="flex w-full items-center justify-center gap-2 font-bold">
+                <Button
+                  type={Button.TYPES.PRIMARY}
+                  className="flex w-full items-center justify-center gap-2 font-bold"
+                >
                   Request migration support <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>

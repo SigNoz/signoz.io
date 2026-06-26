@@ -1,6 +1,6 @@
 import React from 'react'
 import TrackingLink from '../TrackingLink'
-import Button, { BUTTON_TYPES } from '../Button/Button'
+import Button, { BUTTON_TYPES } from '@/components/ui/Button'
 
 interface MDXButtonProps {
   href: string

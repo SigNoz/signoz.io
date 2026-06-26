@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { useState } from 'react'
 import type { Metadata } from 'next'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import CountdownTimer from '@/components/Timer'
@@ -416,7 +416,7 @@ const GetStarted = ({ page }) => {
                 Get started with <br /> SigNoz Cloud today
               </p>
               <div className="mb-10 flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                <Button id={getStartedId}>
+                <Button type={Button.TYPES.PRIMARY} id={getStartedId}>
                   <Link href="/teams/" className="flex-center">
                     Get Started - Free
                     <ArrowRight size={14} />

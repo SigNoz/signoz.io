@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { ArrowDownRight, ArrowRight, CheckCircle, Hash } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 
 interface SigNozCloudPricingOverviewProps {

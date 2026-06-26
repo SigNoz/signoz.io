@@ -1,7 +1,7 @@
 import React from 'react'
 import Image, { type StaticImageData } from 'next/image'
 import { ArrowRight } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { cn } from '../../app/lib/utils'
 

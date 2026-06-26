@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Button from '../Button/Button'
+import Button from '@/components/ui/Button'
 import { Scale } from 'lucide-react'
 
 export default function DatadogVsSigNoz() {
@@ -17,23 +17,12 @@ export default function DatadogVsSigNoz() {
             and up to <b>80% cost savings</b>.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">
-            <Button>
-              <a
-                href="/datadog-alternative/"
-                style={{ textDecoration: 'none', color: 'inherit' }}
-                className="flex items-center gap-2"
-              >
-                <Scale className="h-4 w-4" />
-                Compare SigNoz vs. Datadog
-              </a>
+            <Button href="/datadog-alternative/" className="flex items-center gap-2">
+              <Scale className="h-4 w-4" />
+              Compare SigNoz vs. Datadog
             </Button>
             <Button href="/datadog-migration-tool/" type={Button.TYPES.SECONDARY}>
-              <a
-                href="/datadog-migration-tool/"
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                Try our Datadog Migration Tool &rarr;
-              </a>
+              Try our Datadog Migration Tool &rarr;
             </Button>
           </div>
         </div>

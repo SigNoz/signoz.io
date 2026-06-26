@@ -1,6 +1,6 @@
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '../TrackingLink'
-import Button from '../Button/Button'
+import Button from '@/components/ui/Button'
 const HOSTING_DECISION_ITEMS = [
   {
     name: 'Compare Self Host vs Cloud',

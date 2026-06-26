@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { ArrowRight, Scale, X } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 
 const GrafanaVsSigNozFloatingCard: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false)
@@ -66,20 +65,23 @@ const GrafanaVsSigNozFloatingCard: React.FC = () => {
         traces in a single unified platform.
       </p>
       <div className="flex flex-col gap-2">
-        <Link id="grafana-vs-signoz-compare-button" href="/grafana-alternative/" className="w-full">
-          <Button className="flex w-full items-center justify-center gap-1 text-xs font-bold">
-            <Scale className="h-4 w-4" />
-            Compare SigNoz vs. Grafana
-          </Button>
-        </Link>
-        <Link id="grafana-vs-signoz-try-signoz-button" href="/teams/" className="w-full">
-          <Button
-            type={Button.TYPES.SECONDARY}
-            className="flex w-full items-center justify-center gap-1 text-xs font-bold"
-          >
-            Try SigNoz for Free <ArrowRight className="h-3 w-3" />
-          </Button>
-        </Link>
+        <Button
+          id="grafana-vs-signoz-compare-button"
+          href="/grafana-alternative/"
+          type={Button.TYPES.PRIMARY}
+          className="flex w-full items-center justify-center gap-1 text-xs font-bold"
+        >
+          <Scale className="h-4 w-4" />
+          Compare SigNoz vs. Grafana
+        </Button>
+        <Button
+          id="grafana-vs-signoz-try-signoz-button"
+          href="/teams/"
+          type={Button.TYPES.SECONDARY}
+          className="flex w-full items-center justify-center gap-1 text-xs font-bold"
+        >
+          Try SigNoz for Free <ArrowRight className="h-3 w-3" />
+        </Button>
       </div>
     </div>
   )

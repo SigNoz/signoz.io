@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import { ArrowRight, BookOpen, Calendar, Handshake, MapPin, Megaphone } from 'lucide-react'
 
@@ -722,7 +722,7 @@ const GetStarted = ({ page }) => {
                 <br /> Metrics and Traces in a single pane
               </p>
               <div className="mb-10 flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                <Button id={getStartedId}>
+                <Button type={Button.TYPES.PRIMARY} id={getStartedId}>
                   <Link href="/teams/" className="flex-center">
                     Get Started - Free
                     <ArrowRight size={14} />

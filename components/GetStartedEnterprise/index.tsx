@@ -1,6 +1,6 @@
 'use client'
 
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import { Cloud, CloudUpload, Server } from 'lucide-react'
 import Link from 'next/link'
 
@@ -19,7 +19,7 @@ export const GetStartedEnterprise = () => {
                 Sign up for <br /> SigNoz Enterprise
               </p>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                <Button id={getStartedId} className="gap-2">
+                <Button type={Button.TYPES.PRIMARY} id={getStartedId} className="gap-2">
                   <Cloud size={16} />
                   <Link
                     href="/contact-us/?source=get-started-enterprise-cloud"

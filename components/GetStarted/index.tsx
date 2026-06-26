@@ -1,12 +1,20 @@
 import React from 'react'
 import Image from 'next/image'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 import { cn } from '../../app/lib/utils'
 
-export const GetStarted = ({ page, className }: { page: string; className?: string }) => {
+export const GetStarted = ({
+  page,
+  className,
+  withIcon = false,
+}: {
+  page: string
+  className?: string
+  withIcon?: boolean
+}) => {
   const getStartedId = `btn-get-started-${page}-bottom`
   const readDocumentationId = `btn-read-documentation-${page}-bottom`
 
@@ -33,7 +41,13 @@ export const GetStarted = ({ page, className }: { page: string; className?: stri
                   clickText="Get Started - Free"
                   clickLocation="Get Started Section"
                 >
-                  <Button id={getStartedId} className="flex-center">
+                  <Button
+                    type={Button.TYPES.PRIMARY}
+                    as="span"
+                    id={getStartedId}
+                    className="flex-center"
+                    withIcon={withIcon}
+                  >
                     Get Started - Free
                     <ArrowRight size={14} />
                   </Button>
@@ -49,9 +63,11 @@ export const GetStarted = ({ page, className }: { page: string; className?: stri
                   prefetch={false}
                 >
                   <Button
+                    as="span"
                     type={Button.TYPES.SECONDARY}
                     id={readDocumentationId}
                     className="flex-center"
+                    withIcon={withIcon}
                   >
                     <BookOpen size={14} />
                     Read Documentation

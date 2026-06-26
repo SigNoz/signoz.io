@@ -5,7 +5,7 @@ import { TrustedByTeams } from '@/components/trusted-by'
 import { ArrowRight, CheckCircle, CircleArrowRight } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import Image from 'next/image'
 
 const EnterprisePricing = dynamic(() => import('@/components/EnterprisePricing'), {
@@ -53,7 +53,11 @@ export default function Enterprise() {
                     compliance and support requirements.
                   </div>
 
-                  <Button id="btn-get-started-homepage-hero" className="mt-4">
+                  <Button
+                    type={Button.TYPES.PRIMARY}
+                    id="btn-get-started-homepage-hero"
+                    className="mt-4"
+                  >
                     <a href="#enterprise-plans" className="flex-center">
                       Check Enterprise plans
                       <ArrowRight size={14} />

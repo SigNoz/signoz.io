@@ -1,6 +1,6 @@
 import React from 'react'
 import { CheckCircle, ArrowRight, Info } from 'lucide-react'
-import Button from 'components/Button/Button'
+import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { Card } from '@/components/ui/Card'
 

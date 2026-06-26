@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { ArrowRight, X } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 
 const NewrelicMigrationFloatingCard: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false)
@@ -66,19 +65,22 @@ const NewrelicMigrationFloatingCard: React.FC = () => {
         SigNoz quickly.
       </p>
       <div className="flex flex-col gap-2">
-        <Link id="newrelic-migration-card-try-signoz-button" href="/teams/" className="w-full">
-          <Button className="flex w-full items-center justify-center gap-1 text-xs font-bold">
-            Try SigNoz - Free <ArrowRight className="h-3 w-3" />
-          </Button>
-        </Link>
-        <Link id="newrelic-migration-card-request-migration-support-button" href="/product-comparison/migrate-from-newrelic/" className="w-full">
-          <Button
-            type={Button.TYPES.SECONDARY}
-            className="flex w-full items-center justify-center gap-1 text-xs font-bold"
-          >
-            Request Migration Support <ArrowRight className="h-3 w-3" />
-          </Button>
-        </Link>
+        <Button
+          id="newrelic-migration-card-try-signoz-button"
+          href="/teams/"
+          type={Button.TYPES.PRIMARY}
+          className="flex w-full items-center justify-center gap-1 text-xs font-bold"
+        >
+          Try SigNoz - Free <ArrowRight className="h-3 w-3" />
+        </Button>
+        <Button
+          id="newrelic-migration-card-request-migration-support-button"
+          href="/product-comparison/migrate-from-newrelic/"
+          type={Button.TYPES.SECONDARY}
+          className="flex w-full items-center justify-center gap-1 text-xs font-bold"
+        >
+          Request Migration Support <ArrowRight className="h-3 w-3" />
+        </Button>
       </div>
     </div>
   )

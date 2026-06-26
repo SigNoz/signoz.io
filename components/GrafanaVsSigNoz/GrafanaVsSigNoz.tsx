@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Button from '../Button/Button'
+import Button from '@/components/ui/Button'
 import { Scale } from 'lucide-react'
 import Link from 'next/link'
 export default function GrafanaVsSigNoz() {

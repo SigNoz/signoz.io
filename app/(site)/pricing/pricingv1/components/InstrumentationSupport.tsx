@@ -21,7 +21,7 @@ import {
   SiMongodb,
 } from 'react-icons/si'
 import TrackingLink from '@/components/TrackingLink'
-import Button, { BUTTON_TYPES } from '@/components/Button/Button'
+import Button, { BUTTON_TYPES } from '@/components/ui/Button'
 import { ArrowUpRight, LucideServer, Database, Workflow } from 'lucide-react'
 
 const InstrumentationSupport = () => {

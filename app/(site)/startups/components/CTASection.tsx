@@ -1,8 +1,8 @@
 import React from 'react'
 import CTAButton from './CTAButton'
 import Link from 'next/link'
-import Button from '@/components/Button/Button'
-import { BUTTON_TYPES } from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
+import { BUTTON_TYPES } from '@/components/ui/Button'
 
 export default function CTASection() {
   return (
