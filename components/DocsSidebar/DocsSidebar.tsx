@@ -197,6 +197,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
                 ? 'bg-blue-500/10 text-blue-400'
                 : 'text-gray-200 hover:bg-gray-800/50 hover:text-white'
             } ${category.className || ''}`}
+            prefetch={false}
           >
             <div className="flex-shrink-0 opacity-60 group-hover:opacity-100">
               {category.isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
