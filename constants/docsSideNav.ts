@@ -91,16 +91,9 @@ const docsSideNav = [
                 route: '/docs/install/docker-selinux',
               },
               {
-                type: 'category',
-                isExpanded: false,
+                type: 'doc',
                 label: 'Troubleshooting',
-                items: [
-                  {
-                    type: 'doc',
-                    label: 'General FAQs',
-                    route: '/docs/setup/docker/troubleshooting/faq',
-                  },
-                ],
+                route: '/docs/setup/docker/troubleshooting/faq',
               },
             ],
           },
@@ -1334,11 +1327,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/traces-management/long-term-storage',
-            label: 'Long Term Storage',
-          },
-          {
-            type: 'doc',
             route: '/docs/apm-and-distributed-tracing/traces-api',
             label: 'Using Traces API',
           },
@@ -1661,6 +1649,11 @@ const docsSideNav = [
               { type: 'doc', route: '/docs/userguide/logs_fields', label: 'Fields in Logs' },
               {
                 type: 'doc',
+                route: '/docs/logs-management/features/json-logs',
+                label: 'Native JSON Log Body',
+              },
+              {
+                type: 'doc',
                 route: '/docs/logs-management/guides/pii-scrubbing',
                 label: 'PII Scrubbing',
               },
@@ -1958,6 +1951,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/integrations/opentelemetry-neondb',
                 label: 'Neon',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/opentelemetry-pgbouncer',
+                label: 'PgBouncer',
               },
               {
                 type: 'doc',
@@ -2591,6 +2589,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/openrouter-dashboard',
             label: 'OpenRouter',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/pgbouncer-dashboard',
+            label: 'PgBouncer',
           },
           {
             type: 'doc',
@@ -3817,6 +3820,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/opentelemetry-apache-druid',
         label: 'Apache Druid',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/outposts/auth0',
+        label: 'Auth0',
       },
       {
         type: 'doc',

@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
 }
 
-const markdownContent = `**TERMS AND CONDITIONS**
+const markdownContent = `# TERMS AND CONDITIONS
 
 These Terms and Conditions (the **“Agreement”** or **“Terms”**) are a legally binding agreement between you (“**Customer**”**,** “**You**” **or** “**Your**”) and Signoz, Inc. (“**Signoz**”, “**Company**”, “**We**”, “**Us**”), a company duly incorporated under the laws of State of Delaware, with its office 2261 Market Street \#4496, San Francisco, CA, 94114 or its subsidiaries and affiliates. You acknowledge and agree that your use of the Signoz platform through the Signoz website at [https://signoz.io/](https://signoz.io/)  (“**Website**”) will be governed by the terms of this Agreement, our \[Privacy Policy\], other related terms updated from time to time. Any updates to these Terms or our Privacy Policy shall be updated to you via email and/or text message. 
 
@@ -220,7 +220,7 @@ The Company and Customer agree that these Terms shall constitute the entire agre
 
 export default function termsPage() {
   return (
-    <div className="terms-of-service container mx-auto my-16">
+    <div className="terms-of-service container mx-auto my-16 [&_h1]:mb-6 [&_h1]:text-2xl [&_h1]:font-bold">
       <MarkdownRenderer markdownContent={markdownContent} />
     </div>
   )
