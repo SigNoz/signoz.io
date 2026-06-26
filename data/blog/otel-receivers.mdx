@@ -48,7 +48,7 @@ Each pipeline handles one signal type: traces, metrics, or logs. Multiple receiv
 
 The same receiver can be shared across pipelines. If `otlp` is referenced in both the traces and metrics pipelines, the Collector starts one OTLP receiver and routes incoming traces to the traces pipeline and incoming metrics to the metrics pipeline.
 
-<KeyPointCallout title="Warning: Shared receivers fan out synchronously" defaultCollapsed={true}>
+<KeyPointCallout title="Warning: Shared receivers fan out synchronously" defaultCollapsed="true">
 If one downstream pipeline blocks (for example, due to a slow exporter or missing batch processor), it can back up the shared receiver and affect the other pipelines. Always configure batch processors and memory limiters for each pipeline.
 </KeyPointCallout>
 
@@ -99,7 +99,7 @@ The OTLP receiver supports both gRPC and HTTP. gRPC is the better choice for ser
 
 **Zipkin Receiver** serves a similar role for Zipkin users. It accepts Zipkin V1 and V2 spans over HTTP on port 9411. Like Jaeger, it handles traces only. One common point of confusion: the <a href="https://opentelemetry.io/blog/2025/deprecating-zipkin-exporters/" rel="noopener noreferrer nofollow" target="_blank">December 2025 deprecation</a> applies to the Zipkin *exporter* spec, not the receiver. The receiver is still available and maintained in the Collector.
 
-<KeyPointCallout title="Tip: Migrating from Jaeger or Zipkin" defaultCollapsed={false}>
+<KeyPointCallout title="Tip: Migrating from Jaeger or Zipkin" defaultCollapsed="false">
 If you have services still sending traces in Jaeger or Zipkin format, run the corresponding receiver alongside OTLP. Migrate services to OTLP one at a time, and remove the legacy receiver once no services depend on it.
 </KeyPointCallout>
 
@@ -139,7 +139,7 @@ Two important details when configuring the Prometheus receiver:
 
 The Prometheus receiver handles metrics only and maintains scrape state, so running multiple replicas with identical scrape configs produces duplicate metrics. Use the Target Allocator to distribute targets across replicas.
 
-<KeyPointCallout title="Prometheus vs. OTLP for metrics" defaultCollapsed={false}>
+<KeyPointCallout title="Prometheus vs. OTLP for metrics" defaultCollapsed="false">
 If the source already exposes a `/metrics` endpoint, use the Prometheus receiver. However, if you control the application and can instrument it yourself with OTel SDKs, OTLP is the better choice. It is simpler to scale and covers traces, metrics, and logs all on a single port. In most production environments, you will run both receivers side by side.
 </KeyPointCallout>
 
@@ -200,7 +200,7 @@ receivers:
 
 Notice the `storage: file_storage` line. This tells the receiver to save its place, so if the Collector restarts, it remembers exactly which logs it has already read. Without it, the Collector will either re-read old logs (creating duplicates) or skip logs that were written while it was offline.
 
-<KeyPointCallout title="Note: file_storage directory must exist" defaultCollapsed={false}>
+<KeyPointCallout title="Note: file_storage directory must exist" defaultCollapsed="false">
 The <code>file_storage</code> extension requires its <code>directory</code> to exist before the Collector starts. In containers, mount a persistent volume to that path. If you want the Collector to create the directory automatically, add <code>create_directory: true</code> to the extension config.
 </KeyPointCallout>
 
@@ -368,7 +368,7 @@ exporters:
       signoz-ingestion-key: "${env:SIGNOZ_INGESTION_KEY}"
 ```
 
-<KeyPointCallout title="Note" defaultCollapsed={true}>
+<KeyPointCallout title="Note" defaultCollapsed="true">
 Recent <a href="https://github.com/open-telemetry/opentelemetry-collector/releases" rel="noopener noreferrer nofollow" target="_blank">Collector releases</a> renamed the exporter to <code>otlp_grpc</code>. Older examples may show <code>otlp</code>, which remains a valid alias.
 </KeyPointCallout>
 

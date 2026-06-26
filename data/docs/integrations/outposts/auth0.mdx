@@ -1,0 +1,96 @@
+---
+date: 2026-06-24
+title: Monitor Auth0 Authentication Events and Logs with SigNoz
+description: Stream Auth0 tenant logs to SigNoz with a Custom Webhook log stream — search authentication events, build alerts, and correlate identity activity.
+doc_type: howto
+---
+
+## Overview
+
+<a href="https://auth0.com" target="_blank" rel="noopener noreferrer nofollow">Auth0</a> is an identity platform for authentication and authorization. SigNoz ingests Auth0 tenant logs using a <a href="https://auth0.com/docs/customize/log-streams/custom-log-streams" target="_blank" rel="noopener noreferrer nofollow">Custom Webhook</a> log stream.
+
+Auth0 batches log events and delivers them to a webhook as a JSON array. SigNoz ingests that array through its [HTTP JSON logs endpoint](https://signoz.io/docs/userguide/send-logs-http/), storing each event as a log record and mapping Auth0 fields (such as `type`, `client_name`, and `ip`) to log attributes.
+
+With your Auth0 logs in SigNoz, you can:
+
+- Search and analyze authentication events — logins, sign-ups, failed attempts, MFA challenges, and anomaly detection — in the [Logs explorer](https://signoz.io/docs/logs-management/overview/).
+- Build dashboards and alerts on Auth0 activity, such as spikes in failed logins or blocked sign-ups.
+- Correlate identity events with the application logs, traces, and metrics already in SigNoz.
+
+## Prerequisites
+
+- A `SigNoz Cloud` (or self-hosted) workspace
+- An Auth0 account and tenant with <a href="https://auth0.com/docs/customize/log-streams" target="_blank" rel="noopener noreferrer nofollow">log streaming</a> enabled (<a href="https://auth0.com/signup" target="_blank" rel="noopener noreferrer nofollow">sign up for free</a>)
+
+<Admonition type="info">
+Using self-hosted SigNoz? You'll expose the JSON logs receiver behind a public HTTPS endpoint and skip the ingestion key — see the **Self-Hosted SigNoz** tab below. For more on endpoint and auth differences, see [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Forward Logs
+
+### Step 1: Prepare your SigNoz endpoint
+
+<Tabs entityName="plans">
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+- [Create an ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) and copy its value — you'll add it to the Auth0 stream in Step 2.
+- Your **Payload URL** is `https://ingest.<region>.signoz.cloud:443/logs/json`, where `<region>` is your account [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/) (`us`, `eu`, or `in`).
+
+</TabItem>
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+
+- Enable the JSON logs endpoint on your OpenTelemetry Collector by adding the [`httplogreceiver/json`](https://signoz.io/docs/userguide/send-logs-http/) receiver.
+- Expose the receiver behind a public HTTPS URL with a valid certificate (for example, `https://signoz.example.com/logs/json`) — this is your **Payload URL**. Auth0 only delivers to public HTTPS endpoints; self-signed certificates are not supported.
+- No ingestion key is required.
+
+</TabItem>
+</Tabs>
+
+### Step 2: Create a Custom Webhook stream in Auth0
+
+1. In your Auth0 Dashboard, go to **Monitoring > Streams** and select **Create Stream**.
+2. From the **New Event Stream** listing, select **Custom Webhook**.
+3. Enter a **Name** and select **Create**.
+4. Configure the stream fields:
+   - **Payload URL** — the SigNoz endpoint from Step 1.
+   - **Authorization Token** — `Bearer <your-ingestion-key>` for SigNoz Cloud; leave empty for self-hosted SigNoz.
+   - **Content Type** — `application/json`.
+   - **Content Format** — `JSON Array`.
+5. Select **Save** to create the stream.
+
+### Step 3: Verify logs in SigNoz
+
+1. Trigger activity in your tenant so Auth0 emits events — for example, sign in to an application connected to your tenant.
+2. Open the [Logs explorer](https://signoz.io/docs/logs-management/overview/) in SigNoz.
+3. Within a minute or two, your Auth0 events appear as log entries. Filter or search on attributes such as `type`, `description`, `client_name`, `connection`, `ip`, and `user_id`, or run a full-text search on the log body.
+
+<Admonition type="info">
+It can take a few minutes for the first events to appear after you create the stream.
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No data appearing
+
+- Confirm the **Payload URL** matches your SigNoz Cloud region, or your public HTTPS endpoint for self-hosted SigNoz.
+- Confirm the **Content Type** is `application/json` and the **Content Format** is **JSON Array** — the `/logs/json` endpoint expects a JSON array of events.
+- Make sure the stream is enabled and that your tenant is generating events.
+
+### Authentication or delivery errors
+
+- Open your stream in Auth0 and review the **Health** tab. Auth0 records the HTTP response code returned by SigNoz; a `200` means SigNoz accepted the batch, and Auth0 automatically retries failed deliveries.
+- For SigNoz Cloud, ensure the **Authorization Token** is `Bearer <your-ingestion-key>` and that the ingestion key has not been revoked or regenerated.
+
+</details>
+
+## Next Steps
+
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) on Auth0 activity, such as spikes in failed logins or blocked sign-ups.
+- [Create a dashboard](https://signoz.io/docs/userguide/manage-dashboards/) to visualize Auth0 authentication events in a single view.
+
+## Get Help
+
+<GetHelp />

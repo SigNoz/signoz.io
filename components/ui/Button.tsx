@@ -112,7 +112,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       extraProps.href = href ?? to
       // open external links in new tab
       if (href) {
-        extraProps.rel = 'noopener noreferrer nofollow'
         extraProps.target = '_blank'
       }
     }

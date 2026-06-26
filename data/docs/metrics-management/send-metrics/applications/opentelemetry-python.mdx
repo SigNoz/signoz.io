@@ -1,6 +1,5 @@
 ---
 date: 2026-06-11
-id: opentelemetry-python
 title: Send Metrics from Python application
 description: Learn how to send metrics from Python applications (Flask, Django, FastAPI, Celery, Runtime) to SigNoz using OpenTelemetry
 
@@ -234,112 +233,112 @@ Want more metrics? See [Library Metrics](#library-metrics) to collect framework-
 
 Library instrumentation automatically collects metrics from supported frameworks like Flask, Django, and FastAPI. Choose your framework below to see the specific run command:
 
-<LibraryTabs
-    className="mb-8"
-    defaultCategory="all"
-    defaultLibrary="flask"
-    categoryLabels={{
-        web: 'Web Frameworks',
-        worker: 'Background Workers',
-    }}
->
-    <LibraryTab value="flask" label="Flask" category="web">
+<Tabs variant="pill" className="mb-8">
+    <TabItem value="web-frameworks" label="Web Frameworks" default>
+        <Tabs variant="pill" className="mb-8">
+            <TabItem value="flask" label="Flask" default>
 
-        ```bash
-        opentelemetry-instrument flask run --no-reload
-        ```
+                ```bash
+                opentelemetry-instrument flask run --no-reload
+                ```
 
-        Or if running directly:
+                Or if running directly:
 
-        ```bash
-        opentelemetry-instrument python app.py
-        ```
+                ```bash
+                opentelemetry-instrument python app.py
+                ```
 
-        <Admonition type="warning">
-        Always use `--no-reload` with Flask. The reloader spawns a child process that breaks OpenTelemetry instrumentation.
-        </Admonition>
+                <Admonition type="warning">
+                Always use `--no-reload` with Flask. The reloader spawns a child process that breaks OpenTelemetry instrumentation.
+                </Admonition>
 
-        <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
-        - `http.server.request.duration` - Duration of HTTP server requests (histogram, seconds)
-        - `http.server.active_requests` - Number of active HTTP server requests (up-down counter)
+                <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
+                - `http.server.request.duration` - Duration of HTTP server requests (histogram, seconds)
+                - `http.server.active_requests` - Number of active HTTP server requests (up-down counter)
 
-        <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/flask/flask.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
-        </KeyPointCallout>
+                <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/flask/flask.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
+                </KeyPointCallout>
 
-    </LibraryTab>
-    <LibraryTab value="django" label="Django" category="web">
+            </TabItem>
+            <TabItem value="django" label="Django">
 
-        Set the `DJANGO_SETTINGS_MODULE` environment variable first:
+                Set the `DJANGO_SETTINGS_MODULE` environment variable first:
 
-        ```bash
-        export DJANGO_SETTINGS_MODULE=myproject.settings
-        ```
+                ```bash
+                export DJANGO_SETTINGS_MODULE=myproject.settings
+                ```
 
-        Then run:
+                Then run:
 
-        ```bash
-        opentelemetry-instrument python manage.py runserver --noreload
-        ```
+                ```bash
+                opentelemetry-instrument python manage.py runserver --noreload
+                ```
 
-        <Admonition type="warning">
-        Always use `--noreload` with Django. The auto-reload mechanism spawns child processes that break OpenTelemetry instrumentation.
-        </Admonition>
+                <Admonition type="warning">
+                Always use `--noreload` with Django. The auto-reload mechanism spawns child processes that break OpenTelemetry instrumentation.
+                </Admonition>
 
-        <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
-        - `http.server.request.duration` - Duration of HTTP server requests (histogram, seconds)
-        - `http.server.active_requests` - Number of active HTTP server requests (up-down counter)
+                <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
+                - `http.server.request.duration` - Duration of HTTP server requests (histogram, seconds)
+                - `http.server.active_requests` - Number of active HTTP server requests (up-down counter)
 
-        <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/django/django.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
-        </KeyPointCallout>
+                <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/django/django.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
+                </KeyPointCallout>
 
-    </LibraryTab>
-    <LibraryTab value="fastapi" label="FastAPI" category="web">
+            </TabItem>
+            <TabItem value="fastapi" label="FastAPI">
 
-        ```bash
-        opentelemetry-instrument uvicorn main:app --host 0.0.0.0 --port 8000
-        ```
+                ```bash
+                opentelemetry-instrument uvicorn main:app --host 0.0.0.0 --port 8000
+                ```
 
-        <Admonition type="warning">
-        Do not use `--reload` with Uvicorn when instrumenting. The reload mode spawns new processes that break instrumentation.
-        </Admonition>
+                <Admonition type="warning">
+                Do not use `--reload` with Uvicorn when instrumenting. The reload mode spawns new processes that break instrumentation.
+                </Admonition>
 
-        <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
-        - `http.server.request.duration` - Duration of HTTP server requests (histogram, seconds)
-        - `http.server.active_requests` - Number of active HTTP server requests (up-down counter)
-        - `http.server.request.body.size` - Size of HTTP request body (histogram, bytes)
-        - `http.server.response.body.size` - Size of HTTP response body (histogram, bytes)
+                <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
+                - `http.server.request.duration` - Duration of HTTP server requests (histogram, seconds)
+                - `http.server.active_requests` - Number of active HTTP server requests (up-down counter)
+                - `http.server.request.body.size` - Size of HTTP request body (histogram, bytes)
+                - `http.server.response.body.size` - Size of HTTP response body (histogram, bytes)
 
-        <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/fastapi/fastapi.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
-        </KeyPointCallout>
+                <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/fastapi/fastapi.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
+                </KeyPointCallout>
 
-    </LibraryTab>
-    <LibraryTab value="celery" label="Celery" category="worker">
+            </TabItem>
+            <TabItem value="other" label="Other">
 
-        ```bash
-        opentelemetry-instrument celery -A tasks worker --loglevel=info
-        ```
+                For any Python script:
 
-        Replace `tasks` with your Celery app module name.
+                ```bash
+                opentelemetry-instrument python app.py
+                ```
 
-        <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
-        - `flower.task.runtime.seconds` - The time it took to run the task (histogram, seconds)
+                <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/" target="_blank" rel="noopener noreferrer nofollow">View all instrumentations →</a>
 
-        <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/celery/celery.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
-        </KeyPointCallout>
+            </TabItem>
+        </Tabs>
+    </TabItem>
+    <TabItem value="background-workers" label="Background Workers">
+        <Tabs variant="pill" className="mb-8">
+            <TabItem value="celery" label="Celery" default>
 
-    </LibraryTab>
-    <LibraryTab value="other" label="Other" category="web">
+                ```bash
+                opentelemetry-instrument celery -A tasks worker --loglevel=info
+                ```
 
-        For any Python script:
+                Replace `tasks` with your Celery app module name.
 
-        ```bash
-        opentelemetry-instrument python app.py
-        ```
+                <KeyPointCallout title="Exported metrics" defaultCollapsed="true">
+                - `flower.task.runtime.seconds` - The time it took to run the task (histogram, seconds)
 
-        <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/" target="_blank" rel="noopener noreferrer nofollow">View all instrumentations →</a>
+                <a href="https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/celery/celery.html" target="_blank" rel="noopener noreferrer nofollow">Instrumentation docs</a>
+                </KeyPointCallout>
 
-    </LibraryTab>
-</LibraryTabs>
+            </TabItem>
+        </Tabs>
+    </TabItem>
+</Tabs>
 
 </details>
 

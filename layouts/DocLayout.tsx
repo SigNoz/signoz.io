@@ -1,8 +1,6 @@
 'use client'
 
-import { ReactNode, useEffect, useRef } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Doc } from 'contentlayer/generated'
+import { ReactNode, useRef } from 'react'
 import SectionContainer from '@/components/SectionContainer'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import React from 'react'
@@ -22,7 +20,9 @@ export interface tocItemProps {
 }
 
 interface LayoutProps {
-  content: CoreContent<Doc>
+  content: {
+    title: string
+  }
   children: ReactNode
   toc: tocItemProps[]
 }

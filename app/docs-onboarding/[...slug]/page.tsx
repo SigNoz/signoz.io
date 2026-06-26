@@ -4,7 +4,8 @@ import siteMetadata from '@/data/siteMetadata'
 
 // Inlined as literal because Next 15's segment-config static analyzer doesn't
 // follow re-exports. Keep in sync with ../../(site)/docs/(main-docs)/[...slug]/page.tsx
-export const dynamicParams = false
+export const revalidate = 86400
+export const dynamicParams = true
 
 export { default, generateStaticParams } from '../../(site)/docs/(main-docs)/[...slug]/page'
 

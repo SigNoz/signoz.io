@@ -1,0 +1,60 @@
+---
+date: 2026-06-14
+title: Get a Weekly Reliability Report with Noz
+meta_title: Weekly Reliability Report with Noz - SigNoz AI Teammate
+description: Ask Noz for an error and latency summary across your top services, and see which ones are trending less reliable week over week.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+You want a read on how your team's services held up this week without building a report by hand. You ask Noz to summarize error and latency across your top services and flag what is slipping.
+
+## Prerequisites
+
+- A [SigNoz Cloud](https://signoz.io/teams/) account with [Noz](https://signoz.io/docs/ai/noz/) available.
+- Several services sending traces or metrics to SigNoz.
+
+## Step 1: Ask for the summary
+
+Open **Noz** from the top-right header and ask for the weekly read:
+
+```
+Give me an error and latency summary for our top services this week.
+```
+
+Noz aggregates error rate and p99 latency per service over the week and returns a ranked summary, so you see the health of the whole fleet in one answer.
+
+## Step 2: Find what is slipping
+
+```
+Which of these services has gotten less reliable compared to last week?
+```
+
+Noz compares this week against the previous week per service and flags the ones whose error rate or latency moved in the wrong direction. From there, ask Noz to drill into the worst regressor (`for the service that regressed most, what's driving it?`), with **Suggested Actions** to keep investigating.
+
+## Tips
+
+1. **Set the window.** Name "this week" or "the last 30 days" so the summary covers the period you report on.
+2. **Let the comparison route you.** Drill into the service Noz flags as regressing instead of reviewing all of them.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+To answer, Noz works through several agentic steps, visible under **Worked through N steps**:
+
+| Step | What It Did |
+|------|-------------|
+| Ran builder query | Aggregated error rate and p99 latency per service for the week |
+| Ran builder query | Compared this week against the previous week per service |
+| Reasoned | Ranked services by reliability change and flagged regressions |
+
+</details>
+
+## Next Steps
+
+- [Investigate What Changed After a Deploy with Noz](https://signoz.io/docs/ai/use-cases/noz-incident-triage/) - Trace a regression back to the release that caused it.
+- [Connect Infrastructure Issues to App Errors with Noz](https://signoz.io/docs/ai/use-cases/noz-correlate-infra-errors/) - Check whether a slipping service is hitting platform limits.
+
+<GetHelp />

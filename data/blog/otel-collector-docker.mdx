@@ -68,7 +68,7 @@ service:
 - **`exporters`**: Tells the Collector to blindly print everything it receives straight to your terminal screen (`stdout`) using the `debug` exporter so we can verify it's working.
 - **`service`**: Connects the receiver to the exporter, turning on the pipeline for traces, metrics, and logs.
 
-<KeyPointCallout title="Production Recommendation" defaultCollapsed={true}>
+<KeyPointCallout title="Production Recommendation" defaultCollapsed="true">
 While this minimal configuration is perfect for local testing, the <a href="https://opentelemetry.io/docs/collector/configuration/#processors" target="_blank" rel="noopener noreferrer nofollow">official OpenTelemetry documentation</a> highly recommends that production deployments always include the <code>memory_limiter</code> and <code>batch</code> processors to prevent memory leaks and optimize network usage.
 </KeyPointCallout>
 
@@ -161,7 +161,7 @@ If everything is working, you will see the Collector printing the raw span data 
 
 Look for the line `service.name: Str(telemetrygen)` in the output. This confirms that your OTLP receiver accepted the incoming traces, the pipeline processed them, and the debug exporter printed them. End to end, it works.
 
-<KeyPointCallout title="A quick note on the span names" defaultCollapsed={false}>
+<KeyPointCallout title="A quick note on the span names" defaultCollapsed="false">
 You will see span names like <code>okey-dokey</code> and <code>lets-go</code> in the debug output. These are just the hardcoded dummy names that <code>telemetrygen</code> generates. They have no real meaning—they are purely there to give you something to look at.
 </KeyPointCallout>
 
@@ -185,7 +185,7 @@ Replace `YOUR_REAL_KEY_HERE` with your actual SigNoz ingestion key. You can find
 
 Do not surround the key with quotes. Do not add spaces around the `=` sign. That is the only line this file needs.
 
-<KeyPointCallout title="Why a .env file?" defaultCollapsed={true}>
+<KeyPointCallout title="Why a .env file?" defaultCollapsed="true">
 This keeps your secret API key outside of your YAML config files. When Docker Compose starts, it automatically reads the .env file and injects the value into the container as an environment variable. Your YAML file never directly contains the secret.
 </KeyPointCallout>
 
@@ -298,11 +298,11 @@ This will open the Trace Explorer. By default, it opens in List View, but click 
 
 If you click on any of those blue `TraceID` links, you will be taken to the ultimate Trace Details page, where you can see a Gantt/waterfall chart showing exactly how long `lets-go` took versus `okey-dokey`.
 
-<KeyPointCallout title="My service disappeared!" defaultCollapsed={false}>
+<KeyPointCallout title="My service disappeared!" defaultCollapsed="false">
 This is normal. <code>telemetrygen</code> only sends a 5-second burst of data and then stops. The SigNoz dashboard defaults to showing only services active in the last 5 or 15 minutes. If your service disappeared, change the time picker in the top-right corner to <strong>Last 1 Hour</strong> and it will reappear.
 </KeyPointCallout>
 
-<KeyPointCallout title="Security Recommendation" defaultCollapsed={true}>
+<KeyPointCallout title="Security Recommendation" defaultCollapsed="true">
 Docker recommends using Docker Secrets instead of environment variables for things like API keys in production.
 </KeyPointCallout>
 
@@ -355,7 +355,7 @@ You should see a flat line plotted on the graph with a value that corresponds to
   caption="The gen metric from telemetrygen visualized as a Time Series panel in SigNoz Dashboards." 
 />
 
-<KeyPointCallout title="Why is the value &quot;3&quot; and not &quot;5&quot;?" defaultCollapsed={false}>
+<KeyPointCallout title="Why is the value &quot;3&quot; and not &quot;5&quot;?" defaultCollapsed="false">
 The <code>gen</code> metric reports the value of its gauge counter at each 1-second interval. The final recorded value depends on how many data points were flushed before the container stopped—it simply held at <code>3</code> (or whatever your last flush was) rather than reaching <code>5</code>. This is expected behavior from a Gauge metric type.
 </KeyPointCallout>
 

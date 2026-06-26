@@ -91,16 +91,9 @@ const docsSideNav = [
                 route: '/docs/install/docker-selinux',
               },
               {
-                type: 'category',
-                isExpanded: false,
+                type: 'doc',
                 label: 'Troubleshooting',
-                items: [
-                  {
-                    type: 'doc',
-                    label: 'General FAQs',
-                    route: '/docs/setup/docker/troubleshooting/faq',
-                  },
-                ],
+                route: '/docs/setup/docker/troubleshooting/faq',
               },
             ],
           },
@@ -568,6 +561,11 @@ const docsSideNav = [
                     type: 'doc',
                     route: '/docs/manage/administrator-guide/sso/user-guides/oidc-keycloak',
                     label: 'Keycloak - OIDC Authentication',
+                  },
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/sso/user-guides/saml-google',
+                    label: 'Google Workspace - SAML Authentication',
                   },
                 ],
               },
@@ -1250,6 +1248,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/apm-and-distributed-tracing/querying-traces',
+            label: 'Querying Traces',
+          },
+          {
+            type: 'doc',
             route: '/docs/userguide/span-details',
             label: 'Trace Details',
           },
@@ -1319,18 +1322,8 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: '/docs/apm-and-distributed-tracing/querying-traces',
-            label: 'Querying Traces',
-          },
-          {
-            type: 'doc',
             route: '/docs/userguide/custom-apm-dashboards-alerts',
             label: 'APM Metrics, Dashboards & Alerts',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/long-term-storage',
-            label: 'Long Term Storage',
           },
           {
             type: 'doc',
@@ -1644,6 +1637,11 @@ const docsSideNav = [
           { type: 'doc', route: '/docs/userguide/logs_query_builder', label: 'Logs Explorer' },
           {
             type: 'doc',
+            route: '/docs/logs-management/querying-logs',
+            label: 'Querying Logs',
+          },
+          {
+            type: 'doc',
             route: '/docs/logs-management/features/logs-quick-filters',
             label: 'Logs Quick Filters',
           },
@@ -1654,6 +1652,11 @@ const docsSideNav = [
             route: '/docs/logs-management/features/logs-explorer-guides',
             items: [
               { type: 'doc', route: '/docs/userguide/logs_fields', label: 'Fields in Logs' },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/features/json-logs',
+                label: 'Native JSON Log Body',
+              },
               {
                 type: 'doc',
                 route: '/docs/logs-management/guides/pii-scrubbing',
@@ -1747,11 +1750,6 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/logs-management/reference',
         items: [
-          {
-            type: 'doc',
-            route: '/docs/logs-management/querying-logs',
-            label: 'Querying Logs',
-          },
           { type: 'doc', route: '/docs/logs-pipelines/processors', label: 'Log Processors' },
           {
             type: 'doc',
@@ -1956,6 +1954,16 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/opentelemetry-pgbouncer',
+                label: 'PgBouncer',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/opentelemetry-planetscale',
+                label: 'PlanetScale',
+              },
+              {
+                type: 'doc',
                 route: '/docs/integrations/opentelemetry-hasura',
                 label: 'Hasura',
               },
@@ -1993,6 +2001,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/metrics-management/querying-metrics',
+            label: 'Querying Metrics',
+          },
+          {
+            type: 'doc',
             route: '/docs/metrics-management/types-and-aggregation',
             label: 'Types and Aggregation',
           },
@@ -2023,11 +2036,6 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/metrics-management/reference',
         items: [
-          {
-            type: 'doc',
-            route: '/docs/metrics-management/querying-metrics',
-            label: 'Querying Metrics',
-          },
           { type: 'doc', route: '/docs/metrics-management/query-range-api', label: 'Metrics API' },
           {
             type: 'doc',
@@ -2518,59 +2526,6 @@ const docsSideNav = [
             label: 'KEDA',
           },
           {
-            label: 'Kubernetes',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/dashboards/dashboard-templates/kubernetes-dashboards',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics',
-                label: 'Kubernetes Cluster Metrics',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
-                label: 'Host Metrics',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-events',
-                label: 'Kubernetes Events',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-pvc',
-                label: 'Kubernetes PVC Metrics',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-overall',
-                label: 'Kubernetes Pod Metrics (Overall)',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed',
-                label: 'Kubernetes Pod Metrics (Detailed)',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-overall',
-                label: 'Kubernetes Node Metrics (Overall)',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed',
-                label: 'Kubernetes Node Metrics (Detailed)',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/kubernetes-cronjobs',
-                label: 'Kubernetes CronJobs',
-              },
-            ],
-          },
-          {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/key-operations',
             label: 'Key Operations',
@@ -2637,8 +2592,23 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/pgbouncer-dashboard',
+            label: 'PgBouncer',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
             label: 'Pipecat',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/planetscale-postgres-dashboard',
+            label: 'PlanetScale PostgreSQL',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/planetscale-vitess-dashboard',
+            label: 'PlanetScale Vitess (MySQL)',
           },
           {
             type: 'doc',
@@ -3249,9 +3219,14 @@ const docsSideNav = [
   {
     type: 'category',
     isExpanded: false,
-    label: 'AI Tools and Skills',
+    label: 'Noz & AI Tools',
     route: '/docs/ai/overview',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/ai/noz',
+        label: 'Noz (AI Teammate)',
+      },
       {
         type: 'doc',
         route: '/docs/ai/signoz-mcp-server',
@@ -3260,83 +3235,127 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/ai/agent-skills',
-        label: 'Agent Skills',
+        label: 'Agent Skills & Plugin',
       },
       {
         type: 'category',
         isExpanded: false,
         route: '/docs/ai/use-cases',
-        label: 'MCP Use Cases',
+        label: 'AI Use Cases',
         items: [
           {
-            type: 'doc',
-            route: '/docs/ai/use-cases/natural-language-log-exploration',
-            label: 'Log Exploration',
+            type: 'category',
+            isExpanded: false,
+            label: 'Noz',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/noz-incident-triage',
+                label: 'What Changed After a Deploy',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/noz-latency-bottleneck',
+                label: 'Find Where Latency Is Going',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/noz-tune-noisy-alert',
+                label: 'Tune a Noisy Alert',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/noz-correlate-infra-errors',
+                label: 'Infra Issues vs App Errors',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/noz-triage-customer-issue',
+                label: 'Triage a Customer Issue',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/noz-service-reliability-report',
+                label: 'Weekly Reliability Report',
+              },
+            ],
           },
           {
-            type: 'doc',
-            route: '/docs/ai/use-cases/latency-spike-explainer',
-            label: 'Latency Spike Explainer',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/reconstruct-bug-from-trace-id',
-            label: 'Report from Trace ID',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/error-rate-spike-explainer',
-            label: 'Error Rate Spike Explainer',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/alert-correlation-analysis',
-            label: 'Alert Correlation Analysis',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/post-deployment-monitoring',
-            label: 'Post Deployment Monitoring',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/oncall-handoff-brief',
-            label: 'On-Call Handoff Brief',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/alert-fatigue-audit',
-            label: 'Alert Fatigue Audit',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/optimize-performance-during-development',
-            label: 'Optimize Performance During Development',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/trace-failing-request-end-to-end',
-            label: 'Trace Failing Request',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/dashboard-creation-natural-language',
-            label: 'Dashboard Creation from Natural Language',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/incident-specific-dashboard',
-            label: 'Incident Specific Dashboard Spin-Up',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/alert-creation-natural-language',
-            label: 'Alert Creation from Natural Language',
-          },
-          {
-            type: 'doc',
-            route: '/docs/ai/use-cases/postmortem-evidence-pack',
-            label: 'Postmortem Evidence Pack',
+            type: 'category',
+            isExpanded: false,
+            label: 'MCP Server',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/natural-language-log-exploration',
+                label: 'Log Exploration',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/latency-spike-explainer',
+                label: 'Latency Spike Explainer',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/reconstruct-bug-from-trace-id',
+                label: 'Reconstruct from Trace ID',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/error-rate-spike-explainer',
+                label: 'Error Rate Spike Explainer',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/alert-correlation-analysis',
+                label: 'Alert Correlation Analysis',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/post-deployment-monitoring',
+                label: 'Post Deployment Monitoring',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/oncall-handoff-brief',
+                label: 'On-Call Handoff Brief',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/alert-fatigue-audit',
+                label: 'Alert Fatigue Audit',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/optimize-performance-during-development',
+                label: 'Optimize Performance During Development',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/trace-failing-request-end-to-end',
+                label: 'Trace Failing Request',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/dashboard-creation-natural-language',
+                label: 'Dashboard Creation from Natural Language',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/incident-specific-dashboard',
+                label: 'Incident Specific Dashboard Spin-Up',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/alert-creation-natural-language',
+                label: 'Alert Creation from Natural Language',
+              },
+              {
+                type: 'doc',
+                route: '/docs/ai/use-cases/postmortem-evidence-pack',
+                label: 'Postmortem Evidence Pack',
+              },
+            ],
           },
         ],
       },
@@ -3714,6 +3733,46 @@ const docsSideNav = [
             route: '/docs/integrations/azure/aks',
             label: 'AKS',
           },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/sql-database',
+            label: 'SQL Database',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/sql-managed-instance',
+            label: 'SQL Managed Instance',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/mysql-flexible-server',
+            label: 'MySQL Flexible Server',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/postgresql-flexible-server',
+            label: 'PostgreSQL Flexible Server',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/mongodb',
+            label: 'MongoDB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/cosmos-db',
+            label: 'Cosmos DB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/cassandra-db',
+            label: 'Cassandra DB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/azure/redis',
+            label: 'Redis',
+          },
         ],
       },
       {
@@ -3761,6 +3820,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/opentelemetry-apache-druid',
         label: 'Apache Druid',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/outposts/auth0',
+        label: 'Auth0',
       },
       {
         type: 'doc',

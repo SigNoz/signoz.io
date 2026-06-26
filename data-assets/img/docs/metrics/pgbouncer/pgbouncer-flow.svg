@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 340" font-family="'Inter', 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0f1a"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="pgb" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4a90d9"/>
+      <stop offset="100%" stop-color="#2d6cb0"/>
+    </linearGradient>
+    <linearGradient id="exp" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e8923c"/>
+      <stop offset="100%" stop-color="#c2641f"/>
+    </linearGradient>
+    <linearGradient id="col" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8071f7"/>
+      <stop offset="100%" stop-color="#5a4bd6"/>
+    </linearGradient>
+    <linearGradient id="snz" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fb7a5b"/>
+      <stop offset="100%" stop-color="#e64a47"/>
+    </linearGradient>
+
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L6,3 L0,6 Z" fill="rgba(255,255,255,0.45)"/>
+    </marker>
+
+    <circle id="dot" r="4.5" fill="#ffffff"/>
+
+    <pattern id="grid" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="11" cy="11" r="0.6" fill="rgba(255,255,255,0.035)"/>
+    </pattern>
+  </defs>
+
+  <rect width="1180" height="340" fill="url(#bg)" rx="14"/>
+  <rect width="1180" height="340" fill="url(#grid)" rx="14"/>
+
+  <text x="590" y="42" text-anchor="middle" fill="#f5f6fa" font-size="17" font-weight="700" letter-spacing="0.4">How PgBouncer metrics reach SigNoz</text>
+
+  <!-- ===== CONNECTORS (drawn under cards) ===== -->
+  <!-- pgbouncer -> exporter -->
+  <path id="p1" d="M274,196 L322,196" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="2" marker-end="url(#arrow)"/>
+  <!-- exporter -> collector -->
+  <path id="p2" d="M564,196 L612,196" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="2" marker-end="url(#arrow)"/>
+  <!-- collector -> signoz -->
+  <path id="p3" d="M854,196 L902,196" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- connector labels -->
+  <text x="298" y="180" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9.5" font-style="italic">reads</text>
+  <text x="588" y="180" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9.5" font-style="italic">scrapes</text>
+  <text x="878" y="180" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9.5" font-style="italic">OTLP</text>
+
+  <!-- ===== STAGE 1: PgBouncer ===== -->
+  <g filter="url(#shadow)">
+    <rect x="44" y="136" width="230" height="120" rx="13" fill="url(#pgb)"/>
+    <text x="159" y="178" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">PgBouncer</text>
+    <line x1="72" y1="190" x2="246" y2="190" stroke="rgba(255,255,255,0.22)" stroke-width="1"/>
+    <text x="159" y="212" text-anchor="middle" fill="rgba(255,255,255,0.92)" font-size="11">admin console</text>
+    <text x="159" y="230" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-style="italic">SHOW STATS / POOLS</text>
+  </g>
+
+  <!-- ===== STAGE 2: Exporter ===== -->
+  <g filter="url(#shadow)">
+    <rect x="334" y="136" width="230" height="120" rx="13" fill="url(#exp)"/>
+    <text x="449" y="178" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">pgbouncer_exporter</text>
+    <line x1="362" y1="190" x2="536" y2="190" stroke="rgba(255,255,255,0.22)" stroke-width="1"/>
+    <text x="449" y="212" text-anchor="middle" fill="rgba(255,255,255,0.92)" font-size="11">:9127/metrics</text>
+    <text x="449" y="230" text-anchor="middle" fill="rgba(255,255,255,0.65)" font-size="10" font-style="italic">pgbouncer_* (Prometheus)</text>
+  </g>
+
+  <!-- ===== STAGE 3: Collector ===== -->
+  <g filter="url(#shadow)">
+    <rect x="624" y="136" width="230" height="120" rx="13" fill="url(#col)"/>
+    <text x="739" y="178" text-anchor="middle" fill="#fff" font-size="14.5" font-weight="700">OTel Collector</text>
+    <line x1="652" y1="190" x2="826" y2="190" stroke="rgba(255,255,255,0.22)" stroke-width="1"/>
+    <text x="739" y="212" text-anchor="middle" fill="rgba(255,255,255,0.92)" font-size="11">Prometheus receiver</text>
+    <text x="739" y="230" text-anchor="middle" fill="rgba(255,255,255,0.65)" font-size="10" font-style="italic">resource: service.name</text>
+  </g>
+
+  <!-- ===== STAGE 4: SigNoz ===== -->
+  <g filter="url(#shadow)">
+    <rect x="906" y="136" width="230" height="120" rx="13" fill="url(#snz)"/>
+    <text x="1021" y="178" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">SigNoz</text>
+    <line x1="934" y1="190" x2="1108" y2="190" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+    <text x="1021" y="212" text-anchor="middle" fill="rgba(255,255,255,0.95)" font-size="11">dashboard &amp; alerts</text>
+    <text x="1021" y="230" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-style="italic">metrics explorer</text>
+  </g>
+
+  <!-- ===== ANIMATED FLOW DOTS ===== -->
+  <use href="#dot" fill="#9ec8f0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="1.1s" repeatCount="indefinite"/>
+    <animateMotion dur="1.1s" repeatCount="indefinite"><mpath href="#p1"/></animateMotion>
+  </use>
+  <use href="#dot" fill="#f0b87a">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="1.1s" repeatCount="indefinite" begin="0.45s"/>
+    <animateMotion dur="1.1s" repeatCount="indefinite" begin="0.45s"><mpath href="#p2"/></animateMotion>
+  </use>
+  <use href="#dot" fill="#c4bbfb">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="1.1s" repeatCount="indefinite" begin="0.9s"/>
+    <animateMotion dur="1.1s" repeatCount="indefinite" begin="0.9s"><mpath href="#p3"/></animateMotion>
+  </use>
+
+  <!-- caption strip -->
+  <text x="590" y="300" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="10.5">The exporter turns PgBouncer's admin console into Prometheus metrics that the Collector scrapes and ships to SigNoz.</text>
+</svg>

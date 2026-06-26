@@ -65,8 +65,6 @@ export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'K8sInstall',
   'K8sNextSteps',
   'K8sOtelDemo',
-  'LibraryTab',
-  'LibraryTabs',
   'MDXButton',
   'MetricsDefinition',
   'MultiNodePart1',

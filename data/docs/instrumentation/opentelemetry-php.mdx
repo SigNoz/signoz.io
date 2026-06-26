@@ -1,6 +1,5 @@
 ---
-date: 2026-05-18
-id: php
+date: 2026-06-17
 title: PHP OpenTelemetry Instrumentation Guide
 description: Instrument your PHP application with OpenTelemetry and send traces to SigNoz. Works with Laravel, WordPress, Symfony, and Slim using auto-instrumentation.
 doc_type: howto
@@ -289,179 +288,184 @@ php -S localhost:8080 app.php
 
 OpenTelemetry PHP provides auto-instrumentation packages for popular frameworks and libraries. These packages automatically capture traces for HTTP requests, database queries, and other operations without requiring code changes.
 
-<LibraryTabs
-    className="mb-8"
-    defaultCategory="all"
-    defaultLibrary="laravel"
-    categoryLabels={{
-        frameworks: 'Frameworks',
-        cms: 'CMS',
-        runtime: 'Runtime',
-    }}
->
-    <LibraryTab value="laravel" label="Laravel" category="frameworks">
+For a framework-focused walkthrough, our [PHP OpenTelemetry tutorial](https://signoz.io/blog/opentelemetry-php/) covers Laravel and Symfony setup in more detail.
 
-        ### Additional package
+<Tabs variant="pill" className="mb-8">
+    <TabItem value="frameworks" label="Frameworks" default>
+        <Tabs variant="pill" className="mb-8">
+            <TabItem value="laravel" label="Laravel" default>
 
-        ```bash
-        composer require open-telemetry/opentelemetry-auto-laravel
-        ```
+                ### Additional package
 
-        ### Run command
+                ```bash
+                composer require open-telemetry/opentelemetry-auto-laravel
+                ```
 
-        ```bash
-        php artisan serve
-        ```
+                ### Run command
 
-        <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-laravel" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
+                ```bash
+                php artisan serve
+                ```
 
-    </LibraryTab>
-    <LibraryTab value="symfony" label="Symfony" category="frameworks">
+                <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-laravel" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
 
-        ### Additional package
+            </TabItem>
+            <TabItem value="symfony" label="Symfony">
 
-        ```bash
-        composer require open-telemetry/opentelemetry-auto-symfony
-        ```
+                ### Additional package
 
-        ### Run command
+                ```bash
+                composer require open-telemetry/opentelemetry-auto-symfony
+                ```
 
-        ```bash
-        symfony server:start
-        ```
+                ### Run command
 
-        Or with the built-in PHP server:
+                ```bash
+                symfony server:start
+                ```
 
-        ```bash
-        php -S localhost:8080 -t public
-        ```
+                Or with the built-in PHP server:
 
-        <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-symfony" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
+                ```bash
+                php -S localhost:8080 -t public
+                ```
 
-    </LibraryTab>
-    <LibraryTab value="php-fpm" label="PHP-FPM" category="runtime">
+                <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-symfony" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
 
-        ### Additional package
+            </TabItem>
+            <TabItem value="slim" label="Slim">
 
-        No additional Composer package is required specifically for PHP-FPM.
+                ### Additional package
 
-        You still need your framework-specific auto-instrumentation package. For example, Slim requires `open-telemetry/opentelemetry-auto-slim`.
+                Slim auto-instrumentation requires `open-telemetry/opentelemetry-auto-slim`.
 
-        ### Configuration
+                ```bash
+                composer require open-telemetry/opentelemetry-auto-slim
+                ```
 
-        `clear_env` controls whether PHP-FPM clears inherited environment variables before starting worker processes.
+                ### Run command
 
-        It defaults to `yes` for security, but this can strip `OTEL_*` variables before PHP request handlers run.
+                ```bash
+                php -S localhost:8080 public/index.php
+                ```
 
-        Update your PHP-FPM pool configuration file (common paths):
-        - Debian/Ubuntu: `/etc/php/<php-version>/fpm/pool.d/www.conf`
-        - RHEL/CentOS/Amazon Linux: `/etc/php-fpm.d/www.conf`
+                <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-slim" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
 
-        See [PHP-FPM pool directives](https://www.php.net/manual/en/install.fpm.configuration.php) for `clear_env` and `env[...]` details.
+            </TabItem>
+        </Tabs>
+    </TabItem>
+    <TabItem value="runtime" label="Runtime">
+        <Tabs variant="pill" className="mb-8">
+            <TabItem value="php-fpm" label="PHP-FPM" default>
 
-        Option 1 (simple, less restrictive): allow inherited environment variables for the pool:
+                ### Additional package
 
-        ```ini
-        clear_env = no
-        ```
+                No additional Composer package is required specifically for PHP-FPM.
 
-        Option 2 (recommended): keep `clear_env = yes` and pass only required OpenTelemetry variables:
+                You still need your framework-specific auto-instrumentation package. For example, Slim requires `open-telemetry/opentelemetry-auto-slim`.
 
-        ```ini
-        env[OTEL_PHP_AUTOLOAD_ENABLED] = true
-        env[OTEL_SERVICE_NAME] = <service-name>
-        env[OTEL_RESOURCE_ATTRIBUTES] = service.version=<service-version>
-        env[OTEL_TRACES_EXPORTER] = otlp
-        env[OTEL_METRICS_EXPORTER] = none
-        env[OTEL_LOGS_EXPORTER] = none
-        env[OTEL_EXPORTER_OTLP_PROTOCOL] = http/protobuf
-        env[OTEL_EXPORTER_OTLP_ENDPOINT] = https://ingest.<region>.signoz.cloud:443
-        env[OTEL_EXPORTER_OTLP_HEADERS] = signoz-ingestion-key=<your-ingestion-key>
-        env[OTEL_PROPAGATORS] = baggage,tracecontext
-        ```
+                ### Configuration
 
-        ### Run command
+                `clear_env` controls whether PHP-FPM clears inherited environment variables before starting worker processes.
 
-        Start PHP-FPM:
+                It defaults to `yes` for security, but this can strip `OTEL_*` variables before PHP request handlers run.
 
-        ```bash
-        # Debian/Ubuntu
-        sudo systemctl start php<php-version>-fpm
+                Update your PHP-FPM pool configuration file (common paths):
+                - Debian/Ubuntu: `/etc/php/<php-version>/fpm/pool.d/www.conf`
+                - RHEL/CentOS/Amazon Linux: `/etc/php-fpm.d/www.conf`
 
-        # RHEL/CentOS/Amazon Linux
-        sudo systemctl start php-fpm
-        ```
+                See [PHP-FPM pool directives](https://www.php.net/manual/en/install.fpm.configuration.php) for `clear_env` and `env[...]` details.
 
-        If PHP-FPM is already running and you updated the pool configuration, reload it:
+                Option 1 (simple, less restrictive): allow inherited environment variables for the pool:
 
-        ```bash
-        # Debian/Ubuntu
-        sudo systemctl reload php<php-version>-fpm
+                ```ini
+                clear_env = no
+                ```
 
-        # RHEL/CentOS/Amazon Linux
-        sudo systemctl reload php-fpm
-        ```
+                Option 2 (recommended): keep `clear_env = yes` and pass only required OpenTelemetry variables:
 
-        ### Validate
+                ```ini
+                env[OTEL_PHP_AUTOLOAD_ENABLED] = true
+                env[OTEL_SERVICE_NAME] = <service-name>
+                env[OTEL_RESOURCE_ATTRIBUTES] = service.version=<service-version>
+                env[OTEL_TRACES_EXPORTER] = otlp
+                env[OTEL_METRICS_EXPORTER] = none
+                env[OTEL_LOGS_EXPORTER] = none
+                env[OTEL_EXPORTER_OTLP_PROTOCOL] = http/protobuf
+                env[OTEL_EXPORTER_OTLP_ENDPOINT] = https://ingest.<region>.signoz.cloud:443
+                env[OTEL_EXPORTER_OTLP_HEADERS] = signoz-ingestion-key=<your-ingestion-key>
+                env[OTEL_PROPAGATORS] = baggage,tracecontext
+                ```
 
-        After starting or reloading PHP-FPM, send a request to your application and verify that traces appear in the **Services** tab in SigNoz.
+                ### Run command
 
-    </LibraryTab>
-    <LibraryTab value="wordpress" label="WordPress" category="cms">
+                Start PHP-FPM:
 
-        ### Additional package
+                ```bash
+                # Debian/Ubuntu
+                sudo systemctl start php<php-version>-fpm
 
-        ```bash
-        composer require open-telemetry/opentelemetry-auto-wordpress
-        ```
+                # RHEL/CentOS/Amazon Linux
+                sudo systemctl start php-fpm
+                ```
 
-        ### Configure autoloader (required)
+                If PHP-FPM is already running and you updated the pool configuration, reload it:
 
-        <Admonition type="warning">
-        This step is required. Without configuring `auto_prepend_file`, WordPress will not generate any traces.
-        </Admonition>
+                ```bash
+                # Debian/Ubuntu
+                sudo systemctl reload php<php-version>-fpm
 
-        For Apache, add to your WordPress `.htaccess` file:
+                # RHEL/CentOS/Amazon Linux
+                sudo systemctl reload php-fpm
+                ```
 
-        ```apache
-        php_value auto_prepend_file /var/www/html/vendor/autoload.php
-        ```
+                ### Validate
 
-        For Nginx with PHP-FPM, add to your PHP-FPM pool configuration:
+                After starting or reloading PHP-FPM, send a request to your application and verify that traces appear in the **Services** tab in SigNoz.
 
-        ```ini
-        php_admin_value[auto_prepend_file] = /var/www/html/vendor/autoload.php
-        ```
+            </TabItem>
+        </Tabs>
+    </TabItem>
+    <TabItem value="cms" label="CMS">
+        <Tabs variant="pill" className="mb-8">
+            <TabItem value="wordpress" label="WordPress" default>
 
-        Replace the path with your actual WordPress installation path where `vendor/autoload.php` is located.
+                ### Additional package
 
-        ### Run command
+                ```bash
+                composer require open-telemetry/opentelemetry-auto-wordpress
+                ```
 
-        Restart your web server or PHP-FPM to apply changes.
+                ### Configure autoloader (required)
 
-        <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-wordpress" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
+                <Admonition type="warning">
+                This step is required. Without configuring `auto_prepend_file`, WordPress will not generate any traces.
+                </Admonition>
 
-    </LibraryTab>
-    <LibraryTab value="slim" label="Slim" category="frameworks">
+                For Apache, add to your WordPress `.htaccess` file:
 
-        ### Additional package
+                ```apache
+                php_value auto_prepend_file /var/www/html/vendor/autoload.php
+                ```
 
-        Slim auto-instrumentation requires `open-telemetry/opentelemetry-auto-slim`.
+                For Nginx with PHP-FPM, add to your PHP-FPM pool configuration:
 
-        ```bash
-        composer require open-telemetry/opentelemetry-auto-slim
-        ```
+                ```ini
+                php_admin_value[auto_prepend_file] = /var/www/html/vendor/autoload.php
+                ```
 
-        ### Run command
+                Replace the path with your actual WordPress installation path where `vendor/autoload.php` is located.
 
-        ```bash
-        php -S localhost:8080 public/index.php
-        ```
+                ### Run command
 
-        <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-slim" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
+                Restart your web server or PHP-FPM to apply changes.
 
-    </LibraryTab>
-</LibraryTabs>
+                <a href="https://packagist.org/packages/open-telemetry/opentelemetry-auto-wordpress" target="_blank" rel="noopener noreferrer nofollow">View package on Packagist</a>
+
+            </TabItem>
+        </Tabs>
+    </TabItem>
+</Tabs>
 
 ## Validate
 

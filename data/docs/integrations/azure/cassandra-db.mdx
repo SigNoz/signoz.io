@@ -1,0 +1,105 @@
+---
+date: 2026-06-18
+id: cassandra-db
+title: Azure Managed Instance for Apache Cassandra with SigNoz
+description: Monitor Azure Managed Instance for Apache Cassandra with SigNoz. Collect CPU, memory, disk, IOPS, latency, and request metrics via One-Click Azure Integration.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The Azure Cassandra DB integration collects platform metrics and diagnostic logs from your Azure Managed Instance for Apache Cassandra clusters. Once enabled, the SigNoz agent discovers Cassandra cluster resources in your monitored resource groups and configures telemetry collection.
+
+<Admonition type="info">
+This integration requires SigNoz Azure agent version **v0.0.12** or later.
+</Admonition>
+
+This integration collects platform metrics for the `Microsoft.DocumentDB/cassandraClusters` resource type — **Azure Managed Instance for Apache Cassandra**.
+
+<Admonition type="warning">
+This integration is distinct from **Azure Cosmos DB for Apache Cassandra** (the Cassandra API offered within a Cosmos DB account). The Cosmos DB Cassandra API exposes a different set of metrics and is covered by the [Azure Cosmos DB integration](https://signoz.io/docs/integrations/azure/cosmos-db/). Metrics from the two integrations are separate and are not duplicated.
+</Admonition>
+
+## Getting started
+
+Connect your Azure subscription first. See [Azure One-Click Integrations](https://signoz.io/docs/integrations/azure/one-click-azure-integrations/) for setup instructions.
+
+Once connected:
+
+1. In SigNoz, navigate to **Integrations** > **Microsoft Azure**.
+2. Select **Cassandra DB** from the left panel.
+3. Toggle **Log Collection** and **Metric Collection** on.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-cassandradb-enable.webp"
+  alt="SigNoz Azure integration panel showing Cassandra DB with Log Collection and Metric Collection toggles enabled"
+  caption="Enable log and metric collection for Azure Cassandra DB in the SigNoz UI"
+  className="box-shadowed-image"
+/>
+
+The agent deploys the necessary Event Hubs and diagnostic settings in the background. Data starts flowing within a few minutes. Navigate to **Dashboards** and open the **Azure Cassandra DB Overview** dashboard to confirm metrics are appearing.
+
+## What's collected
+
+<details>
+<summary>Logs</summary>
+
+| Name | Path | Type |
+|------|------|------|
+| Resource ID | `resources.azure.resource.id` | string |
+
+</details>
+
+<details>
+<summary>Key metrics</summary>
+
+The table below lists representative metrics; see the **Data Collected** tab in the integration for the complete list.
+
+| Metric name | Unit | Type |
+|-------------|------|------|
+| `azure_cassandra_cache_hit_rate_average` | Percent | Gauge |
+| `azure_cassandra_client_connected_native_clients_average` | Count | Gauge |
+| `azure_cassandra_client_request_latency_p99_average` | Count | Gauge |
+| `azure_cassandra_client_request_failures3_count` | Count | Gauge |
+| `azure_cassandra_client_request_timeouts3_count` | Count | Gauge |
+| `azure_cassandra_cql_prepared_statements_executed_count` | Count | Gauge |
+| `azure_cassandra_cql_regular_statements_executed_count` | Count | Gauge |
+| `azure_cassandra_dropped_message_count_count` | Count | Gauge |
+| `azure_cassandra_jvm_gc_count_count` | Count | Gauge |
+| `azure_cassandra_jvm_gc_time_average` | Milliseconds | Gauge |
+
+</details>
+
+<Admonition type="info">
+Host-level metrics — CPU usage, memory utilization, disk utilization, and IOPS — are reported for each node in the cluster alongside the Cassandra-specific metrics above.
+</Admonition>
+
+## Dashboards
+
+The integration includes a pre-built Azure Cassandra DB dashboard. Pre-built dashboards are locked and cannot be edited. To customize, use **Export JSON** from the dashboard menu and import it as a new dashboard.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-cassandradb-dashboard.webp"
+  alt="SigNoz dashboard showing Azure Managed Instance for Apache Cassandra metrics including CPU usage, memory, IOPS, and request latency"
+  caption="Azure Cassandra DB dashboard in SigNoz"
+  className="box-shadowed-image"
+/>
+
+Key panels include:
+- CPU usage (active and average across CPUs)
+- Memory utilization and disk utilization
+- IOPS
+- Client request latency p99
+- Client request failures and timeouts
+- Connected native clients
+- Prepared and regular CQL statements executed
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) to get notified on high p99 latency, request failures, or timeouts
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate database metrics with application performance
+
+## Get Help
+
+<GetHelp />
