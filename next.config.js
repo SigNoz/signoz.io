@@ -111,7 +111,7 @@ module.exports = () => {
             ? [
                 {
                   // In dev, serve static assets from data-assets/ when not found in public/
-                  source: '/:path(.+\\.(?:avif|gif|ico|jpe?g|png|svg|webp))',
+                  source: '/:path((?!_next/).+\\.(?:avif|gif|ico|jpe?g|png|svg|webp))',
                   destination: '/api/dev-asset/:path',
                 },
               ]

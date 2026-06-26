@@ -137,7 +137,9 @@ export default function TopNav() {
                 {visibility.showSignInGetStarted && (
                   <>
                     <TrackingButton
-                      className="box-border flex h-8 items-center rounded-full bg-signoz_slate-500 px-3 text-sm font-normal text-signoz_vanilla-100 no-underline outline-none hover:bg-slate-700/50 hover:text-white"
+                      variant="secondary"
+                      rounded="default"
+                      className="box-border flex h-8 items-center rounded-md bg-signoz_slate-500 px-3 text-sm font-normal text-signoz_vanilla-100 no-underline outline-none hover:bg-slate-700/50 hover:text-white"
                       clickType="Secondary CTA"
                       clickName="Sign In Button"
                       clickText="Sign In"
@@ -155,12 +157,21 @@ export default function TopNav() {
                     >
                       <Button
                         asChild
+                        variant="default"
                         rounded="full"
-                        className="start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white"
+                        className="homepage-button homepage-button--primary start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white"
                       >
                         <span id="btn-get-started-website-navbar">
-                          Get Started - Free
-                          <ArrowRight size={14} />
+                          <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
+                            Get Started - Free
+                            <ArrowRight size={14} />
+                          </span>
+                          <span
+                            className="homepage-button__icon homepage-button__icon--primary hidden"
+                            aria-hidden="true"
+                          >
+                            <ArrowRight size={16} strokeWidth={2.5} />
+                          </span>
                         </span>
                       </Button>
                     </TrackingLink>
