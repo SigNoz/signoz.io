@@ -208,7 +208,7 @@ export default function HeroTracePreview() {
 
       <div
         aria-labelledby={`homepage-hero-preview-tab-${activeTab}`}
-        className="relative mt-6 hidden h-[410px] overflow-hidden bg-transparent sm:h-[470px] md:h-[540px] lg:block lg:h-[600px]"
+        className="relative mt-6 hidden h-[430px] overflow-hidden bg-transparent sm:h-[490px] md:h-[570px] lg:block lg:h-[640px]"
         id="homepage-hero-preview-panel"
         role="tabpanel"
       >
