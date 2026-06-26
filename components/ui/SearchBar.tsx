@@ -37,7 +37,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   // Enable / shortcut
   useSearchShortcut({
-    onOpen: () => openDecimalChat(),
+    onOpen: () => openDecimalChat({ presentation: 'modal' }),
     isEnabled: true,
   })
 
@@ -58,7 +58,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       },
     })
 
-    openDecimalChat()
+    openDecimalChat({ presentation: 'modal' })
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {

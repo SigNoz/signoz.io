@@ -9,8 +9,24 @@ export const DECIMAL_PUBLIC_CONFIG =
   process.env.NEXT_PUBLIC_DECIMAL_PUBLIC_CONFIG ||
   'eyJhbGciOiJIUzI1NiJ9.eyJ3aWQiOiJ3Z3RfbVVqdnBJcHRkaGprNjBuZ2FUNTlHeUkyRzdnTTFxWkoiLCJkb21haW5zIjpbXSwiaWF0IjoxNzgyMTEzMzkzfQ.cRozMWLXlU4vsiXd_N21ZIcMCtp47c6pss_DN9MNaQE'
 
-// Brand accent color for the widget launcher and chat header (SigNoz orange).
-export const DECIMAL_PRIMARY_COLOR = '#ff5108'
+// Theme applied once the widget script loads (values from the Decimal dashboard).
+const DECIMAL_THEME = {
+  colorScheme: 'dark',
+  primaryColor: 'rgb(255, 68, 32)',
+  backgroundColor: 'oklch(0.141 0.005 285.823)',
+  textColor: '#FAFAFA',
+  textColorSecondary: '#FFFFFF',
+  textColorMuted: '#A1A1AA',
+  borderColor: '#27272A',
+  headerTitle: 'SigNoz Support',
+  greeting: "👋 Hey! I'm SigNoz AI. Ask me about docs, pricing, or anything else!",
+  suggestedMessages: [
+    'How to start with SigNoz?',
+    'Why use OpenTelemetry?',
+    'How SigNoz pricing works?',
+    'Migrate from Grafana or Datadog',
+  ],
+}
 
 // Display mode controls how the chat opens:
 //   'floating'        -> corner popup (matches the previous Chatbase bubble)
@@ -35,23 +51,27 @@ export function ensureDecimalScript(): void {
   script.setAttribute('data-widget-id', DECIMAL_WIDGET_ID)
   script.setAttribute('data-public-config', DECIMAL_PUBLIC_CONFIG)
   script.setAttribute('data-display-mode', DECIMAL_DISPLAY_MODE)
-  script.setAttribute('data-primary-color', DECIMAL_PRIMARY_COLOR)
   script.async = true
+  script.onload = () => {
+    // Apply SigNoz branding once the widget API is available.
+    window.Decimal?.theme?.(DECIMAL_THEME)
+  }
   document.head.appendChild(script)
 }
 
 /**
  * Opens the Decimal chat panel. Ensures the widget is loaded first (so this
  * works even on pages where the bubble isn't already mounted), then waits for
- * the widget API to be ready before showing it.
+ * the widget API to be ready before showing it. Pass `{ presentation: 'modal' }`
+ * to open it as a centered modal (used by the search surfaces).
  */
-export function openDecimalChat(): void {
+export function openDecimalChat(options?: { presentation?: 'modal' | 'sidebar' }): void {
   if (typeof window === 'undefined') return
   ensureDecimalScript()
 
   const tryShow = (attempt: number): void => {
     if (window.Decimal?.show) {
-      window.Decimal.show()
+      window.Decimal.show(options)
       return
     }
     if (attempt >= 50) {
@@ -69,7 +89,7 @@ export function openDecimalChat(): void {
 declare global {
   interface Window {
     Decimal?: {
-      show: () => void
+      show: (options?: { presentation?: 'modal' | 'sidebar' }) => void
       hide: () => void
       shutdown?: () => void
       boot?: (opts: { user_token?: string }) => void

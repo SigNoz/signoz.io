@@ -276,7 +276,7 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
       // dialog and opens the Decimal chat panel instead.
       resultsRef.current?.clearActiveResult()
       onClose()
-      openDecimalChat()
+      openDecimalChat({ presentation: 'modal' })
       return
     }
 
