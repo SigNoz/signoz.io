@@ -167,6 +167,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
                     : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
                 }`
           } ${doc.className || ''}`}
+          prefetch={false}
         >
           {!isGetStarted && (
             <FileText className="flex-shrink-0 opacity-60 group-hover:opacity-100" size={14} />
