@@ -1,0 +1,102 @@
+---
+date: 2026-06-18
+id: redis
+title: Azure Cache for Redis Monitoring Integration with SigNoz
+description: Monitor Azure Cache for Redis with SigNoz. Collect platform metrics and diagnostic logs from your Redis instances using One-Click Azure Integration.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The Azure Redis integration collects platform metrics and diagnostic logs from your Azure Cache for Redis instances. Once enabled, the SigNoz agent discovers Redis resources in your monitored resource groups and configures telemetry collection.
+
+<Admonition type="info">
+This integration requires SigNoz Azure agent version **v0.0.12** or later.
+</Admonition>
+
+This integration collects platform metrics for the `Microsoft.Cache/redisEnterprise` resource type.
+
+## Getting started
+
+Connect your Azure subscription first. See [Azure One-Click Integrations](https://signoz.io/docs/integrations/azure/one-click-azure-integrations/) for setup instructions.
+
+Once connected:
+
+1. In SigNoz, navigate to **Integrations** > **Microsoft Azure**.
+2. Select **Redis** from the left panel.
+3. Toggle **Log Collection** and **Metric Collection** on.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-redis-enable.webp"
+  alt="SigNoz Azure integration panel showing Redis with Log Collection and Metric Collection toggles enabled"
+  caption="Enable log and metric collection for Azure Cache for Redis in the SigNoz UI"
+  className="box-shadowed-image"
+/>
+
+The agent deploys the necessary Event Hubs and diagnostic settings in the background. Data starts flowing within a few minutes. Navigate to **Dashboards** and open the **Azure Redis Overview** dashboard to confirm metrics are appearing.
+
+## What's collected
+
+<details>
+<summary>Logs</summary>
+
+| Name | Path | Type |
+|------|------|------|
+| Resource ID | `resources.azure.resource.id` | string |
+
+</details>
+
+<details>
+<summary>Metrics</summary>
+
+| Metric name | Unit | Type |
+|-------------|------|------|
+| `azure_cachehits_total` | Count | Sum |
+| `azure_cachemisses_total` | Count | Sum |
+| `azure_getcommands_total` | Count | Sum |
+| `azure_setcommands_total` | Count | Sum |
+| `azure_totalcommandsprocessed_total` | Count | Sum |
+| `azure_evictedkeys_total` | Count | Sum |
+| `azure_expiredkeys_total` | Count | Sum |
+| `azure_totalkeys_maximum` | Count | Gauge |
+| `azure_connectedclients_maximum` | Count | Gauge |
+| `azure_operationspersecond_maximum` | Count | Gauge |
+| `azure_cacheread_maximum` | BytesPerSecond | Gauge |
+| `azure_cachewrite_maximum` | BytesPerSecond | Gauge |
+| `azure_cachelatency_average` | Count | Gauge |
+| `azure_percentprocessortime_maximum` | Percent | Gauge |
+| `azure_serverload_maximum` | Percent | Gauge |
+| `azure_usedmemory_maximum` | Bytes | Gauge |
+| `azure_usedmemorypercentage_maximum` | Percent | Gauge |
+| `azure_georeplicationhealthy_maximum` | Count | Gauge |
+
+</details>
+
+## Dashboards
+
+The integration includes a pre-built Azure Redis dashboard. Pre-built dashboards are locked and cannot be edited. To customize, use **Export JSON** from the dashboard menu and import it as a new dashboard.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-redis-dashboard.webp"
+  alt="SigNoz dashboard showing Azure Cache for Redis metrics including CPU, cache hits, memory, operations, and connected clients"
+  caption="Azure Cache for Redis dashboard in SigNoz"
+  className="box-shadowed-image"
+/>
+
+Key panels include:
+- CPU and server load
+- Cache hits and misses
+- Operations per second and connected clients
+- Used memory and used memory percentage
+- Total keys, evicted keys, and expired keys
+- Geo replication healthy status
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) to get notified on high server load, evictions, or memory saturation
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate cache metrics with application performance
+
+## Get Help
+
+<GetHelp />

@@ -1,0 +1,104 @@
+---
+date: 2026-06-18
+id: mysql-flexible-server
+title: Azure MySQL Flexible Server Monitoring with SigNoz
+description: Monitor Azure Database for MySQL Flexible Server with SigNoz. Collect platform metrics and diagnostic logs using One-Click Azure Integration.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+The Azure Database for MySQL – Flexible Server integration collects platform metrics and diagnostic logs from your MySQL Flexible Server instances. Once enabled, the SigNoz agent discovers MySQL Flexible Server resources in your monitored resource groups and configures telemetry collection.
+
+<Admonition type="info">
+This integration requires SigNoz Azure agent version **v0.0.12** or later.
+</Admonition>
+
+This integration collects platform metrics for the `Microsoft.DBforMySQL/flexibleServers` resource type.
+
+## Getting started
+
+Connect your Azure subscription first. See [Azure One-Click Integrations](https://signoz.io/docs/integrations/azure/one-click-azure-integrations/) for setup instructions.
+
+Once connected:
+
+1. In SigNoz, navigate to **Integrations** > **Microsoft Azure**.
+2. Select **MySQL - Flexible Server** from the left panel.
+3. Toggle **Log Collection** and **Metric Collection** on.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-mysql-enable.webp"
+  alt="SigNoz Azure integration panel showing MySQL Flexible Server with Log Collection and Metric Collection toggles enabled"
+  caption="Enable log and metric collection for Azure MySQL Flexible Server in the SigNoz UI"
+  className="box-shadowed-image"
+/>
+
+The agent deploys the necessary Event Hubs and diagnostic settings in the background. Data starts flowing within a few minutes. Navigate to **Dashboards** and open the **Azure Database for MySQL - Flexible Server Overview** dashboard to confirm metrics are appearing.
+
+## What's collected
+
+<details>
+<summary>Logs</summary>
+
+| Name | Path | Type |
+|------|------|------|
+| Resource ID | `resources.azure.resource.id` | string |
+
+</details>
+
+<details>
+<summary>Key metrics</summary>
+
+The table below lists representative metrics; see the **Data Collected** tab in the integration for the complete list.
+
+| Metric name | Unit | Type |
+|-------------|------|------|
+| `azure_cpu_percent_average` | Percent | Gauge |
+| `azure_memory_percent_average` | Percent | Gauge |
+| `azure_storage_percent_average` | Percent | Gauge |
+| `azure_storage_used_average` | Bytes | Gauge |
+| `azure_storage_io_count_average` | Count | Gauge |
+| `azure_io_consumption_percent_average` | Percent | Gauge |
+| `azure_active_connections_average` | Count | Gauge |
+| `azure_total_connections_total` | Count | Sum |
+| `azure_aborted_connections_total` | Count | Sum |
+| `azure_queries_total` | Count | Sum |
+| `azure_slow_queries_total` | Count | Sum |
+| `azure_active_transactions_average` | Count | Gauge |
+| `azure_lock_deadlocks_total` | Count | Sum |
+| `azure_replication_lag_average` | Seconds | Gauge |
+| `azure_ha_replication_lag_average` | Seconds | Gauge |
+| `azure_backup_storage_used_average` | Bytes | Gauge |
+| `azure_network_bytes_ingress_total` | Bytes | Sum |
+| `azure_network_bytes_egress_total` | Bytes | Sum |
+
+</details>
+
+## Dashboards
+
+The integration includes a pre-built MySQL Flexible Server dashboard. Pre-built dashboards are locked and cannot be edited. To customize, use **Export JSON** from the dashboard menu and import it as a new dashboard.
+
+<Figure
+  src="/img/docs/integrations/azure/azure-mysql-dashboard.webp"
+  alt="SigNoz dashboard showing Azure Database for MySQL Flexible Server metrics including CPU, memory, storage, connections, and replication lag"
+  caption="Azure MySQL Flexible Server dashboard in SigNoz"
+  className="box-shadowed-image"
+/>
+
+Key panels include:
+- Host CPU and memory percentage
+- Storage percentage, storage used, storage IO count, and storage IO percentage
+- Active, total, and aborted connections
+- Queries, slow queries, and active transactions
+- Deadlocks and replication lag (including HA replication lag)
+- Host network in and out, and backup storage used
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) to get notified on connection spikes, slow queries, or replication lag
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate database metrics with application performance
+
+## Get Help
+
+<GetHelp />
