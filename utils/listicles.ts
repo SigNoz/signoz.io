@@ -11,10 +11,6 @@ import type {
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { hasCMSContentConfig, isLocalContentOverlayEnabled } from '@/utils/contentRepository'
 
-// ---------------------------------------------------------------------------
-// Local JSON reader
-// ---------------------------------------------------------------------------
-
 async function readLocalListicle(name: string): Promise<ListicleConfig | null> {
   const filePath = path.join(process.cwd(), 'constants/listicles', `${name}.json`)
   try {
@@ -24,10 +20,6 @@ async function readLocalListicle(name: string): Promise<ListicleConfig | null> {
     return null
   }
 }
-
-// ---------------------------------------------------------------------------
-// CMS response transformation helpers (snake_case -> camelCase)
-// ---------------------------------------------------------------------------
 
 function transformIcon(raw: Record<string, unknown>): IconSpec | undefined {
   if (raw.icon_badge && raw.icon_color) {
@@ -119,10 +111,6 @@ function transformCmsData(raw: Record<string, unknown>): ListicleConfig {
   return config
 }
 
-// ---------------------------------------------------------------------------
-// CMS fetcher
-// ---------------------------------------------------------------------------
-
 async function fetchCmsListicle(name: string): Promise<ListicleConfig | null> {
   const CMS_API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
   if (!CMS_API_URL) {
@@ -158,10 +146,6 @@ async function fetchCmsListicle(name: string): Promise<ListicleConfig | null> {
   return transformCmsData(entries[0] as Record<string, unknown>)
 }
 
-// ---------------------------------------------------------------------------
-// Resolution & caching (mirrors docsSideNav pattern)
-// ---------------------------------------------------------------------------
-
 async function resolveListicle(name: string): Promise<ListicleConfig | null> {
   if (hasCMSContentConfig()) {
     return fetchCmsListicle(name)
@@ -191,10 +175,6 @@ async function getCachedListicle(name: string): Promise<ListicleConfig | null> {
 
   return cachedFn()
 }
-
-// ---------------------------------------------------------------------------
-// Public entry point
-// ---------------------------------------------------------------------------
 
 export async function getListicleConfigFromCms(name: string): Promise<ListicleConfig | null> {
   try {
