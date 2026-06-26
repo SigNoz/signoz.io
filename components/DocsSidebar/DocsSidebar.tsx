@@ -188,7 +188,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
 
     return (
       <li key={category.label} className="group mx-2 my-1">
-        <Link href={category.route ? constructHref(category.route) : ''} prefetch={false}>
+        <Link href={category.route ? constructHref(category.route) : ''}>
           <div
             onClick={() => toggleIsExpandedByLabel(category.label)}
             className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
