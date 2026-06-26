@@ -27,7 +27,35 @@ type TrackedPage = {
   pageReferrer?: string
   sessionId?: string
   startedAt: number
+  maxContentPercentage?: number
   left: boolean
+}
+
+const clampPercentage = (value: number) => Math.max(0, Math.min(1, value))
+
+const roundPercentage = (value: number) => Math.round(value * 10000) / 10000
+
+const shouldTrackHomepageScrollDepth = (pathname?: string | null) => pathname === '/'
+
+const getCurrentContentPercentage = () => {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return undefined
+
+  const documentElement = document.documentElement
+  const body = document.body
+  const viewportHeight = window.innerHeight || documentElement.clientHeight
+  const scrollTop = window.scrollY || documentElement.scrollTop || body?.scrollTop || 0
+  const scrollHeight = Math.max(
+    documentElement.scrollHeight,
+    body?.scrollHeight || 0,
+    documentElement.offsetHeight,
+    body?.offsetHeight || 0,
+    documentElement.clientHeight
+  )
+
+  if (!viewportHeight || !scrollHeight) return undefined
+
+  const viewportBottom = Math.min(scrollHeight, scrollTop + viewportHeight)
+  return roundPercentage(clampPercentage(viewportBottom / scrollHeight))
 }
 
 export default function PageViewTracker() {
@@ -38,10 +66,20 @@ export default function PageViewTracker() {
   const previousPageUrl = useRef<string | null>(null)
   const currentPage = useRef<TrackedPage | null>(null)
 
+  const updateMaxContentPercentage = useCallback((page: TrackedPage) => {
+    if (!shouldTrackHomepageScrollDepth(page.pathname)) return
+
+    const currentContentPercentage = getCurrentContentPercentage()
+    if (currentContentPercentage === undefined) return
+
+    page.maxContentPercentage = Math.max(page.maxContentPercentage || 0, currentContentPercentage)
+  }, [])
+
   const sendPageLeave = useCallback(
     (page: TrackedPage) => {
       if (page.left) return
       page.left = true
+      updateMaxContentPercentage(page)
 
       const durationSeconds = Math.max(0, (Date.now() - page.startedAt) / 1000)
 
@@ -58,6 +96,7 @@ export default function PageViewTracker() {
             $session_id: page.sessionId,
             $prev_pageview_duration: durationSeconds,
             $prev_pageview_pathname: page.pathname,
+            $prev_pageview_max_content_percentage: page.maxContentPercentage,
           },
         },
         {
@@ -66,10 +105,32 @@ export default function PageViewTracker() {
         }
       )
     },
-    [logEvent]
+    [logEvent, updateMaxContentPercentage]
   )
 
   useEffect(() => {
+    let animationFrameId: number | null = null
+
+    const updateCurrentPageContentPercentage = () => {
+      animationFrameId = null
+
+      if (currentPage.current) {
+        updateMaxContentPercentage(currentPage.current)
+      }
+    }
+
+    const requestContentPercentageUpdate = () => {
+      if (
+        !currentPage.current ||
+        !shouldTrackHomepageScrollDepth(currentPage.current.pathname) ||
+        animationFrameId !== null
+      ) {
+        return
+      }
+
+      animationFrameId = window.requestAnimationFrame(updateCurrentPageContentPercentage)
+    }
+
     const handlePageHide = () => {
       if (currentPage.current) {
         sendPageLeave(currentPage.current)
@@ -84,12 +145,20 @@ export default function PageViewTracker() {
 
     window.addEventListener('pagehide', handlePageHide)
     document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('scroll', requestContentPercentageUpdate, { passive: true })
+    window.addEventListener('resize', requestContentPercentageUpdate)
 
     return () => {
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId)
+      }
+
       window.removeEventListener('pagehide', handlePageHide)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('scroll', requestContentPercentageUpdate)
+      window.removeEventListener('resize', requestContentPercentageUpdate)
     }
-  }, [sendPageLeave])
+  }, [sendPageLeave, updateMaxContentPercentage])
 
   useEffect(() => {
     // Combine pathname and searchParams for a complete URL identifier
@@ -183,6 +252,9 @@ export default function PageViewTracker() {
       pageReferrer,
       sessionId,
       startedAt: Date.now(),
+      maxContentPercentage: shouldTrackHomepageScrollDepth(pathname)
+        ? getCurrentContentPercentage()
+        : undefined,
       left: false,
     }
 

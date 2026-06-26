@@ -256,6 +256,11 @@ const buildTrackPayload = (
         ...(getString(attributes.$prev_pageview_pathname) && {
           $prev_pageview_pathname: getString(attributes.$prev_pageview_pathname),
         }),
+        ...(getNumber(attributes.$prev_pageview_max_content_percentage) !== undefined && {
+          $prev_pageview_max_content_percentage: getNumber(
+            attributes.$prev_pageview_max_content_percentage
+          ),
+        }),
       }),
     }
   }
