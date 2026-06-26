@@ -87,6 +87,7 @@ const SIDENAV_CHANGED = process.env.SIDENAV_CHANGED === 'true'
 
 const LISTICLES_CHANGED = process.env.LISTICLES_CHANGED === 'true'
 const CHANGED_LISTICLES_RAW = getAssetsListFromEnv('CHANGED_LISTICLES', 'CHANGED_LISTICLES_PATH')
+const DELETED_LISTICLES_RAW = getAssetsListFromEnv('DELETED_LISTICLES', 'DELETED_LISTICLES_PATH')
 
 const DOCS_DIR = path.resolve(__dirname, '..', 'data', 'docs')
 
@@ -97,7 +98,8 @@ function listicleFileToKey(filePath) {
 
 function findDocsPathsForListicle(listicleKey) {
   const results = []
-  const pattern = new RegExp(`<Listicle\\s[^>]*name=["']${listicleKey}["']`)
+  const escaped = listicleKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const pattern = new RegExp(`<Listicle\\s[^>]*name=["']${escaped}["']`)
 
   function walk(dir) {
     const entries = fs.readdirSync(dir, { withFileTypes: true })
@@ -137,15 +139,16 @@ function buildPayload() {
   // Collect listicle-related paths and tags
   const listiclePaths = []
   const listicleTags = []
-  if (LISTICLES_CHANGED && CHANGED_LISTICLES_RAW.length > 0) {
-    for (const file of CHANGED_LISTICLES_RAW) {
+  const allListicleChanges = [...CHANGED_LISTICLES_RAW, ...DELETED_LISTICLES_RAW]
+  if (LISTICLES_CHANGED && allListicleChanges.length > 0) {
+    for (const file of allListicleChanges) {
       const key = listicleFileToKey(file)
       listicleTags.push(`listicle-${key}`)
       const docsPaths = findDocsPathsForListicle(key)
       listiclePaths.push(...docsPaths)
     }
     console.log(
-      `📣 Listicle changes: ${CHANGED_LISTICLES_RAW.length} listicle(s) changed, ${listiclePaths.length} doc path(s) to revalidate.`
+      `📣 Listicle changes: ${allListicleChanges.length} listicle(s) changed/deleted, ${listiclePaths.length} doc path(s) to revalidate.`
     )
   }
 

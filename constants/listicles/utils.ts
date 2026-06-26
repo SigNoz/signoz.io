@@ -61,7 +61,8 @@ export const getListicleConfig = async (name: string): Promise<ListicleConfig | 
   try {
     const { getListicleConfigFromCms } = await import('@/utils/listicles')
     return await getListicleConfigFromCms(name)
-  } catch {
+  } catch (err) {
+    console.warn(`CMS listicle fetch failed for "${name}", using local fallback:`, err)
     return listicleConfigs[name] || null
   }
 }
