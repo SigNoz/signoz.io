@@ -189,7 +189,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
 
     return (
       <li key={category.label} className="group mx-2 my-1">
-        <Link href={category.route ? constructHref(category.route) : ''}>
+        <Link href={category.route ? constructHref(category.route) : ''} prefetch={false}>
           <div
             onClick={() => toggleIsExpandedByLabel(category.label)}
             className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
@@ -197,7 +197,6 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
                 ? 'bg-blue-500/10 text-blue-400'
                 : 'text-gray-200 hover:bg-gray-800/50 hover:text-white'
             } ${category.className || ''}`}
-            prefetch={false}
           >
             <div className="flex-shrink-0 opacity-60 group-hover:opacity-100">
               {category.isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
