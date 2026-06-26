@@ -38,6 +38,23 @@ You can’t see that with just a number. You need metrics and a dashboard.
 
 I used Claude Code on a fixed task suite with: Claude Sonnet 4.6, Claude Opus 4.7, Claude Opus 4.8. The only thing that changed between runs was the `--model` flag. (I left Fable out, following the recent access changes around it.)
 
+I followed the <a href="https://github.com/harbor-framework/terminal-bench/blob/main/README.md" target="_blank" rel="noopener noreferrer nofollow">Terminal-Bench README</a> to get set up. Each model was then driven with the same command, swapping only the `--model` value:
+
+```bash
+tb run --agent claude-code --model anthropic/claude-opus-4-8 \
+  --task-id countdown-game \
+  --task-id cpp-compatibility \
+  --task-id count-call-stack \
+  --task-id debug-long-program \
+  --task-id ode-solver-rk4 \
+  --task-id schemelike-metacircular-eval \
+  --task-id reverse-engineering \
+  --task-id polyglot-rust-c \
+  --task-id write-compressor \
+  --task-id cancel-async-tasks \
+  --dataset-path original-tasks
+```
+
 The reason to drive the actual agent, rather than hit the API in a loop, is that the agent is what people use. Its tool-calling, retries, context management, its little decisions about when to read a file versus just edit it: all of that is part of what you’re comparing when you compare models for coding work. Strip the agent out and you’re measuring something narrower than what you care about.
 
 Claude Code supports [monitoring with OpenTelemetry](https://signoz.io/docs/claude-code-monitoring/) natively, which made this trackable. Every run produces metrics and traces for tokens, cost, tool calls, model requests, and more. I sent all of it to SigNoz and built one dashboard with template variables for model and session, so the same panels re-render for whichever model I’m viewing.
