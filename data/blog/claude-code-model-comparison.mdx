@@ -36,11 +36,51 @@ So when the latest Claude models came out, I went after the practical version of
 
 The short answer is yes, they’re getting better. The longer answer is that “better” splits into many things once you can measure them, and those things don’t all point the same direction.
 
-You can’t see that with just a number. You need metrics and a dashboard.
+You can’t see that with just a number. You need two things: a task set worth trusting, and metrics on every run.
+
+## Which tasks, and why
+
+The first instinct is to write your own task. I tried that and threw it out. A homemade task has a credibility problem: you designed it, so any result can be criticized by saying: “well, you built the test to make your point.” It also means you decide what counts as correct, which is exactly the subjectivity that makes a benchmark arguable.
+
+So I used Terminal-Bench: <a href="https://github.com/harbor-framework/terminal-bench" target="_blank" rel="noopener noreferrer nofollow">https://github.com/harbor-framework/terminal-bench</a>. It’s a public benchmark for agents doing real work in a real terminal, with a few properties that matter. Every task ships with:
+
+- its own containerized environment
+- an instruction
+- a test script that decides pass or fail
+- a reference solution that proves it’s solvable
+
+The verdict is a script’s, not mine. And it supports running Claude Code as the agent directly, so I’m measuring the agent the way it’s meant to be driven.
+
+I didn’t run the whole test suite, since running that would have taken an absurd amount of tokens and time. Instead, I picked 10 tasks, chosen so they actually exercise code comprehension and generation, the two things I think “coding agent” really means. Tasks where the agent has to read existing code and understand it before it can write anything correct.
+
+The 10 lean that way, and I spread them across difficulty on purpose: some easy enough that I expected every model to pass (a floor), some hard enough that I expected none to (headroom), and a handful in the middle to separate the models.
+
+**Easy**
+
+- **countdown-game**: build an arithmetic expression from a fixed set of numbers that evaluates exactly to a target.
+- **cpp-compatibility**: downgrade a C++ template function so it compiles under C++11 while keeping the same interface.
+- **count-call-stack**: parse profiler stack traces and report the top `10` unique call sites by frequency.
+
+**Medium**
+
+- **debug-long-program**: find and fix every bug in a program you can’t see, using only two HTTP endpoints (`/checkpoint` and `/fix`).
+- **ode-solver-rk4**: write a numeric IVP solver (RK4 or similar) under strict step-size and accuracy limits, no SciPy allowed.
+- **schemelike-metacircular-eval**: read a Scheme-like interpreter and write an evaluator in that language that can interpret the test programs and itself.
+
+**Hard**
+
+- **reverse-engineering**: recover a binary’s password and run it.
+- **write-compressor**: given only a decompressor, produce a file under `2500` bytes that decompresses to an exact target text.
+- **cancel-async-tasks**: write an async runner with a concurrency cap that still runs each task’s cleanup when a run is cancelled.
+- **polyglot-rust-c**: write one source file that compiles and runs correctly as both Rust and C++, printing the kth Fibonacci number.
+
+None of them reward guessing. You read, or you fail. And three of them, all in the harder tiers, ended up doing most of the work of separating the models.
+
+I picked these 10 before running anything and before seeing a single result. If you choose tasks after seeing scores, even with the best intentions, you can nudge the set toward whatever flatters your story. Picking first and saying so takes that off the table.
 
 ## What I actually ran
 
-I used Claude Code on a fixed task suite with: Claude Sonnet 4.6, Claude Opus 4.7, Claude Opus 4.8. The only thing that changed between runs was the `--model` flag. (I left Fable out, following the recent access changes around it.)
+I ran those 10 tasks through Claude Code with three models: Claude Sonnet 4.6, Claude Opus 4.7, Claude Opus 4.8. The only thing that changed between runs was the `--model` flag. (I left Fable out, following the recent access changes around it.)
 
 I followed the <a href="https://github.com/harbor-framework/terminal-bench/blob/main/README.md" target="_blank" rel="noopener noreferrer nofollow">Terminal-Bench README</a> to get set up. Each model was then driven with the same command, swapping only the `--model` value:
 
@@ -132,46 +172,6 @@ caption="Error rate and error spans: how often tool executions failed"
 Claude Code’s telemetry attaches the model name to some signals but not others. Cost, token usage, cache utilization, LLM requests, and lines of code all carry the model as an attribute, so those panels are genuinely filtered to one model. The rest (tool calls, active time, error rate, error spans) don’t carry it at all. They’re emitted per run.
 
 The cost numbers also needed one correction. Claude Code uses a smaller model, Haiku 4.5, for cheap internal work, and that spend shows up in raw totals. It’s separable in the telemetry (a `query_source` attribute marks auxiliary calls) and came to about `1%` of cost on average so I decided to exclude them.
-
-## Why these tasks
-
-The first instinct is to write your own task. I tried that and threw it out. A homemade task has a credibility problem: you designed it, so any result can be criticized by saying: “well, you built the test to make your point.” It also means you decide what counts as correct, which is exactly the subjectivity that makes a benchmark arguable.
-
-So I used Terminal-Bench: <a href="https://github.com/harbor-framework/terminal-bench" target="_blank" rel="noopener noreferrer nofollow">https://github.com/harbor-framework/terminal-bench</a>. It’s a public benchmark for agents doing real work in a real terminal, with a few properties that matter. Every task ships with:
-
-- its own containerized environment
-- an instruction
-- a test script that decides pass or fail
-- a reference solution that proves it’s solvable
-
-The verdict is a script’s, not mine. And it supports running Claude Code as the agent directly, so I’m measuring the agent the way it’s meant to be driven.
-
-I didn’t run the whole test suite, since running that would have taken an absurd amount of tokens and time. Instead, I picked 10 tasks, chosen so they actually exercise code comprehension and generation, the two things I think “coding agent” really means. Tasks where the agent has to read existing code and understand it before it can write anything correct.
-
-The 10 lean that way, and I spread them across difficulty on purpose: some easy enough that I expected every model to pass (a floor), some hard enough that I expected none to (headroom), and a handful in the middle to separate the models.
-
-**Easy**
-
-- **countdown-game**: build an arithmetic expression from a fixed set of numbers that evaluates exactly to a target.
-- **cpp-compatibility**: downgrade a C++ template function so it compiles under C++11 while keeping the same interface.
-- **count-call-stack**: parse profiler stack traces and report the top `10` unique call sites by frequency.
-
-**Medium**
-
-- **debug-long-program**: find and fix every bug in a program you can’t see, using only two HTTP endpoints (`/checkpoint` and `/fix`).
-- **ode-solver-rk4**: write a numeric IVP solver (RK4 or similar) under strict step-size and accuracy limits, no SciPy allowed.
-- **schemelike-metacircular-eval**: read a Scheme-like interpreter and write an evaluator in that language that can interpret the test programs and itself.
-
-**Hard**
-
-- **reverse-engineering**: recover a binary’s password and run it.
-- **write-compressor**: given only a decompressor, produce a file under `2500` bytes that decompresses to an exact target text.
-- **cancel-async-tasks**: write an async runner with a concurrency cap that still runs each task’s cleanup when a run is cancelled.
-- **polyglot-rust-c**: write one source file that compiles and runs correctly as both Rust and C++, printing the kth Fibonacci number.
-
-None of them reward guessing. You read, or you fail. And three of them, all in the harder tiers, ended up doing most of the work of separating the models.
-
-I picked these 10 before running anything and before seeing a single result. If you choose tasks after seeing scores, even with the best intentions, you can nudge the set toward whatever flatters your story. Picking first and saying so takes that off the table.
 
 ## What the runs actually showed
 
