@@ -52,7 +52,7 @@ const compileMdxToMarkdown = async (doc: DocMarkdownSource): Promise<string> => 
   const { renderToStaticMarkup } = await import('react-dom/server')
   const { mdxOptions } = await import('../mdxUtils')
 
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
 
   // remarkImgToJsx injects <Image> at compile time for images in public/.
   if (!components.Image) {

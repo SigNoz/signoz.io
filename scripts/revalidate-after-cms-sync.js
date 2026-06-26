@@ -5,6 +5,7 @@
  */
 
 const fs = require('fs')
+const path = require('path')
 
 const BULK_THRESHOLD = Number(process.env.REVALIDATE_BULK_THRESHOLD || '25')
 
@@ -84,6 +85,43 @@ function uniqueStrings(arr) {
 
 const SIDENAV_CHANGED = process.env.SIDENAV_CHANGED === 'true'
 
+const LISTICLES_CHANGED = process.env.LISTICLES_CHANGED === 'true'
+const CHANGED_LISTICLES_RAW = getAssetsListFromEnv('CHANGED_LISTICLES', 'CHANGED_LISTICLES_PATH')
+const DELETED_LISTICLES_RAW = getAssetsListFromEnv('DELETED_LISTICLES', 'DELETED_LISTICLES_PATH')
+
+const DOCS_DIR = path.resolve(__dirname, '..', 'data', 'docs')
+
+function listicleFileToKey(filePath) {
+  const base = filePath.split('/').pop() || filePath
+  return base.replace(/\.json$/, '')
+}
+
+function findDocsPathsForListicle(listicleKey) {
+  const results = []
+  const escaped = listicleKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const pattern = new RegExp(`<Listicle\\s[^>]*name=["']${escaped}["']`)
+
+  function walk(dir) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true })
+    for (const entry of entries) {
+      const full = path.join(dir, entry.name)
+      if (entry.isDirectory()) {
+        walk(full)
+      } else if (entry.name.endsWith('.mdx') || entry.name.endsWith('.md')) {
+        const content = fs.readFileSync(full, 'utf8')
+        if (pattern.test(content)) {
+          const rel = path.relative(DOCS_DIR, full)
+          const urlPath = '/docs/' + rel.replace(/\.(mdx?|md)$/, '')
+          results.push(urlPath)
+        }
+      }
+    }
+  }
+
+  walk(DOCS_DIR)
+  return results
+}
+
 function buildPayload() {
   const allContentFiles = [...CHANGED_FILES, ...DELETED_FILES]
 
@@ -98,24 +136,42 @@ function buildPayload() {
     return { mode: 'all', reason: 'sidenav-changed' }
   }
 
-  if (cmsUrls.length > BULK_THRESHOLD) {
+  // Collect listicle-related paths and tags
+  const listiclePaths = []
+  const listicleTags = []
+  const allListicleChanges = [...CHANGED_LISTICLES_RAW, ...DELETED_LISTICLES_RAW]
+  if (LISTICLES_CHANGED && allListicleChanges.length > 0) {
+    for (const file of allListicleChanges) {
+      const key = listicleFileToKey(file)
+      listicleTags.push(`listicle-${key}`)
+      const docsPaths = findDocsPathsForListicle(key)
+      listiclePaths.push(...docsPaths)
+    }
     console.log(
-      `📣 Selective revalidation skipped: ${cmsUrls.length} paths exceed BULK_THRESHOLD (${BULK_THRESHOLD})`
+      `📣 Listicle changes: ${allListicleChanges.length} listicle(s) changed/deleted, ${listiclePaths.length} doc path(s) to revalidate.`
+    )
+  }
+
+  const allPaths = uniqueStrings([...cmsUrls, ...listiclePaths])
+
+  if (allPaths.length > BULK_THRESHOLD) {
+    console.log(
+      `📣 Selective revalidation skipped: ${allPaths.length} paths exceed BULK_THRESHOLD (${BULK_THRESHOLD})`
     )
     return { mode: 'all', reason: 'bulk' }
   }
 
-  if (!hasCmsPaths && hasAssetChanges) {
+  if (!hasCmsPaths && hasAssetChanges && listiclePaths.length === 0) {
     console.log('📣 Asset-only change: using full revalidation (cannot map to page paths).')
     return { mode: 'all', reason: 'assets-only' }
   }
 
-  if (!hasCmsPaths) {
+  if (!hasCmsPaths && listiclePaths.length === 0 && listicleTags.length === 0) {
     console.log('⏭️ No CMS-backed content paths in this sync; skipping revalidation.')
     return { mode: 'skip', reason: 'no-cms-paths' }
   }
 
-  const extraTags = []
+  const extraTags = [...listicleTags]
   if (cmsUrls.some((u) => u.startsWith('/comparisons/'))) {
     extraTags.push('comparisons-list')
   }
@@ -131,7 +187,7 @@ function buildPayload() {
 
   return {
     mode: 'selective',
-    paths: cmsUrls,
+    paths: allPaths,
     tags: uniqueStrings(extraTags),
   }
 }
