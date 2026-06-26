@@ -128,7 +128,7 @@ async function fetchCmsListicle(name: string): Promise<ListicleConfig | null> {
   const res = await fetch(`${CMS_API_URL}/api/listicles?${params.toString()}`, {
     cache: 'force-cache',
     next: {
-      tags: [`listicle-${name}`],
+      tags: ['listicles', `listicle-${name}`],
     },
     headers: { 'Content-Type': 'application/json' },
   })
@@ -168,7 +168,7 @@ async function getCachedListicle(name: string): Promise<ListicleConfig | null> {
     },
     [`listicle-${name}`],
     {
-      tags: [`listicle-${name}`],
+      tags: ['listicles', `listicle-${name}`],
       revalidate: CMS_REVALIDATE_INTERVAL,
     }
   )

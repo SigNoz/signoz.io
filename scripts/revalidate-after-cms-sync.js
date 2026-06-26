@@ -5,6 +5,7 @@
  */
 
 const fs = require('fs')
+const path = require('path')
 
 const BULK_THRESHOLD = Number(process.env.REVALIDATE_BULK_THRESHOLD || '25')
 
@@ -83,42 +84,42 @@ function uniqueStrings(arr) {
 }
 
 const SIDENAV_CHANGED = process.env.SIDENAV_CHANGED === 'true'
+
 const LISTICLES_CHANGED = process.env.LISTICLES_CHANGED === 'true'
 const CHANGED_LISTICLES_RAW = getAssetsListFromEnv('CHANGED_LISTICLES', 'CHANGED_LISTICLES_PATH')
+const DELETED_LISTICLES_RAW = getAssetsListFromEnv('DELETED_LISTICLES', 'DELETED_LISTICLES_PATH')
 
-const LISTICLE_TO_DOCS_PATHS = {
-  'apm-instrumentation': ['/docs/instrumentation', '/docs/cloud'],
-  'apm-dashboards': ['/docs/dashboards/dashboard-templates/apm-dashboards'],
-  'aws-monitoring': ['/docs/aws-monitoring/overview'],
-  'aws-one-click': ['/docs/integrations/aws/one-click-aws-integrations'],
-  'azure-one-click': ['/docs/integrations/azure/one-click-azure-integrations'],
-  'cicd-monitoring': ['/docs/cicd/overview'],
-  'collection-agents': [
-    '/docs/opentelemetry-collection-agents/get-started',
-    '/docs/opentelemetry-collection-agents/k8s/get-started',
-  ],
-  'dashboard-templates': ['/docs/dashboards/dashboard-templates/overview', '/docs/cloud'],
-  'host-metrics-dashboards': ['/docs/dashboards/dashboard-templates/hostmetrics-dashboards'],
-  integrations: ['/docs/integrations/integrations-list'],
-  'java-instrumentation': ['/docs/instrumentation/java/overview'],
-  'javascript-instrumentation': ['/docs/instrumentation/javascript/overview'],
-  'k8s-installation': ['/docs/install/kubernetes'],
-  'kubernetes-dashboards': ['/docs/dashboards/dashboard-templates/kubernetes-dashboards'],
-  'litellm-dashboards': ['/docs/dashboards/dashboard-templates/litellm-dashboards'],
-  'llm-monitoring': ['/docs/llm-observability'],
-  'logs-instrumentation': ['/docs/logs-management/send-logs-to-signoz', '/docs/cloud'],
-  'logs-quick-start': [],
-  'marketplace-installation': ['/docs/install/marketplaces'],
-  'metrics-quick-start': ['/docs/metrics-management/send-metrics', '/docs/cloud'],
-  'migrate-to-signoz': ['/docs/migration/migrate-to-signoz', '/docs/cloud'],
-  'self-host-installation': ['/docs/install/self-host'],
-  'web-vitals': ['/docs/frontend-monitoring/opentelemetry-web-vitals'],
-  'apm-quick-start': [],
-}
+const DOCS_DIR = path.resolve(__dirname, '..', 'data', 'docs')
 
 function listicleFileToKey(filePath) {
   const base = filePath.split('/').pop() || filePath
   return base.replace(/\.json$/, '')
+}
+
+function findDocsPathsForListicle(listicleKey) {
+  const results = []
+  const escaped = listicleKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const pattern = new RegExp(`<Listicle\\s[^>]*name=["']${escaped}["']`)
+
+  function walk(dir) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true })
+    for (const entry of entries) {
+      const full = path.join(dir, entry.name)
+      if (entry.isDirectory()) {
+        walk(full)
+      } else if (entry.name.endsWith('.mdx') || entry.name.endsWith('.md')) {
+        const content = fs.readFileSync(full, 'utf8')
+        if (pattern.test(content)) {
+          const rel = path.relative(DOCS_DIR, full)
+          const urlPath = '/docs/' + rel.replace(/\.(mdx?|md)$/, '')
+          results.push(urlPath)
+        }
+      }
+    }
+  }
+
+  walk(DOCS_DIR)
+  return results
 }
 
 function buildPayload() {
@@ -138,17 +139,16 @@ function buildPayload() {
   // Collect listicle-related paths and tags
   const listiclePaths = []
   const listicleTags = []
-  if (LISTICLES_CHANGED && CHANGED_LISTICLES_RAW.length > 0) {
-    for (const file of CHANGED_LISTICLES_RAW) {
+  const allListicleChanges = [...CHANGED_LISTICLES_RAW, ...DELETED_LISTICLES_RAW]
+  if (LISTICLES_CHANGED && allListicleChanges.length > 0) {
+    for (const file of allListicleChanges) {
       const key = listicleFileToKey(file)
       listicleTags.push(`listicle-${key}`)
-      const docsPaths = LISTICLE_TO_DOCS_PATHS[key]
-      if (docsPaths) {
-        listiclePaths.push(...docsPaths)
-      }
+      const docsPaths = findDocsPathsForListicle(key)
+      listiclePaths.push(...docsPaths)
     }
     console.log(
-      `📣 Listicle changes: ${CHANGED_LISTICLES_RAW.length} listicle(s) changed, ${listiclePaths.length} doc path(s) to revalidate.`
+      `📣 Listicle changes: ${allListicleChanges.length} listicle(s) changed/deleted, ${listiclePaths.length} doc path(s) to revalidate.`
     )
   }
 
