@@ -152,6 +152,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/manage/administrator-guide/iam/permissions',
+          destination: '/docs/manage/administrator-guide/iam/transactions/',
+          permanent: true,
+        },
+        {
+          source: '/docs/manage/administrator-guide/iam/permissions/',
+          destination: '/docs/manage/administrator-guide/iam/transactions/',
+          permanent: true,
+        },
+        {
           source: '/docs/product-features/keyboard-shortcuts',
           destination: '/docs/manage/keyboard-shortcuts/',
           permanent: true,
