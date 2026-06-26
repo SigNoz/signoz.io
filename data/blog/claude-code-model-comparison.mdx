@@ -154,9 +154,9 @@ I picked these `10` before running anything and before seeing a single result. I
 
 ## What the runs actually showed
 
-I’ll walk through this one metric at a time, because not all the metrics point to the same conclusion. Look at one number by itself and you’ll come away with a confident but partly wrong conclusion. The interesting part is what happens when you put them side by side.
+I’ll walk through this one metric at a time, because not all the metrics point to the same conclusion. Look at one number by itself and you’ll come away with a confident but partly wrong conclusion. The interesting part is what happens when you put them side by side. (If you’d rather see every number at once, the [consolidated table](#putting-it-side-by-side) is at the end.)
 
-Here are the `3` dashboards, one per model. The panels are identical; only the model filter changed between them — switch models to see the same panels re-render.
+Here are the `3` dashboards, one per model. The panels are identical; only the model filter changed between them. Switch models to see the same panels re-render.
 
 <Tabs variant="pill">
 
@@ -165,7 +165,7 @@ Here are the `3` dashboards, one per model. The panels are identical; only the m
 <Figure
 src="/img/blog/2026/06/claude-4-6-dashboard.webp"
 alt="Claude Sonnet 4.6 run dashboard in SigNoz"
-caption="Claude Sonnet 4.6 — full run dashboard"
+caption="Claude Sonnet 4.6: full run dashboard"
 />
 
 </TabItem>
@@ -175,7 +175,7 @@ caption="Claude Sonnet 4.6 — full run dashboard"
 <Figure
 src="/img/blog/2026/06/claude-4-7-dashboard.webp"
 alt="Claude Opus 4.7 run dashboard in SigNoz"
-caption="Claude Opus 4.7 — full run dashboard"
+caption="Claude Opus 4.7: full run dashboard"
 />
 
 </TabItem>
@@ -185,7 +185,7 @@ caption="Claude Opus 4.7 — full run dashboard"
 <Figure
 src="/img/blog/2026/06/claude-4-8-dashboard.webp"
 alt="Claude Opus 4.8 run dashboard in SigNoz"
-caption="Claude Opus 4.8 — full run dashboard"
+caption="Claude Opus 4.8: full run dashboard"
 />
 
 </TabItem>
@@ -201,7 +201,7 @@ caption="Claude Opus 4.8 — full run dashboard"
 <Figure
 src="/img/blog/2026/06/claude-4-6-results.webp"
 alt="Claude Sonnet 4.6 Terminal-Bench results"
-caption="Claude Sonnet 4.6 — Terminal-Bench results"
+caption="Claude Sonnet 4.6: Terminal-Bench results"
 />
 
 </TabItem>
@@ -211,7 +211,7 @@ caption="Claude Sonnet 4.6 — Terminal-Bench results"
 <Figure
 src="/img/blog/2026/06/claude-4-7-results.webp"
 alt="Claude Opus 4.7 Terminal-Bench results"
-caption="Claude Opus 4.7 — Terminal-Bench results"
+caption="Claude Opus 4.7: Terminal-Bench results"
 />
 
 </TabItem>
@@ -221,7 +221,7 @@ caption="Claude Opus 4.7 — Terminal-Bench results"
 <Figure
 src="/img/blog/2026/06/claude-4-8-results.webp"
 alt="Claude Opus 4.8 Terminal-Bench results"
-caption="Claude Opus 4.8 — Terminal-Bench results"
+caption="Claude Opus 4.8: Terminal-Bench results"
 />
 
 </TabItem>
@@ -236,13 +236,25 @@ One thing to note: the failures weren’t all the same kind, which matters. Two 
 
 ### Cost
 
-Here’s the first place the clean story breaks. Sonnet 4.6 cost `$6.30` across the `10` tasks. Opus 4.7 cost `$8.51`. Opus 4.8 cost `$8.06`.
+Here’s the first place the clean story breaks. Total spend across the `10` tasks:
+
+- Sonnet 4.6: `$6.30`
+- Opus 4.7: `$8.51`
+- Opus 4.8: `$8.06`
 
 Look at the ordering. Opus 4.7, the middle model, was the most expensive of the `3`, more than 4.8, which is newer and solved more. The tidy “more capable costs more” intuition is wrong. The newest model was better *and* cheaper than the one before it.
 
 And Sonnet, cheapest in raw dollars, is cheap partly because it did less: it failed `1/2` the tasks, two by timing out. Which raises the question raw cost can’t answer. Cheapest per what?
 
-The number I trust is cost per solved task: total spend divided by tasks completed. Sonnet lands around `$1.26`, Opus 4.7 around `$1.22`, Opus 4.8 around `$1.01`. The newest model is the cheapest way to get a task *actually done*, even though it’s not the cheapest to run. That gap between “cheapest to run” and “cheapest to get work done” is the whole reason cost-per-outcome beats cost-per-token. Sonnet looks like the budget option until you account for what it didn’t finish, at which point the advantage mostly evaporates.
+The number I trust is cost per solved task: total spend divided by tasks completed.
+
+- Sonnet 4.6: ~`$1.26`
+- Opus 4.7: ~`$1.22`
+- Opus 4.8: ~`$1.01`
+
+The newest model is the cheapest way to get a task *actually done*, even though it’s not the cheapest to run.
+
+That gap between “cheapest to run” and “cheapest to get work done” is the whole reason cost-per-outcome beats cost-per-token. Sonnet looks like the budget option until you account for what it didn’t finish, at which point the advantage mostly evaporates.
 
 ### Tokens versus cache
 
@@ -266,9 +278,23 @@ The simple token counter would have told you Sonnet was more than twice as effic
 
 ### Active time and iteration
 
-The numbers: `36.8 minutes` for Sonnet, `35.6` for Opus 4.7, `49.75` for Opus 4.8. The naive read is “4.8 is slowest, you’ll wait longest.” That’s wrong.
+The numbers:
 
-This panel tracks active time: time the agent spent working, idle excluded, summed across concurrently running tasks. It’s not wall-clock and not how long a human waits. So 4.8’s `49.75 minutes` doesn’t mean “slower to respond,” it means “did more work.” Line it up with the other effort signals and they agree: 4.8 made the most model requests, `119` against Sonnet’s `68`, the most tool calls, the most active time. The newest model worked harder on the hard tasks.
+- Sonnet 4.6: `36.8 minutes`
+- Opus 4.7: `35.6 minutes`
+- Opus 4.8: `49.75 minutes`
+
+The naive read is “4.8 is slowest, you’ll wait longest.” That’s wrong.
+
+This panel tracks active time: time the agent spent working, idle excluded, summed across concurrently running tasks. It’s not wall-clock and not how long a human waits. So 4.8’s `49.75 minutes` doesn’t mean “slower to respond,” it means “did more work.”
+
+Line it up with the other effort signals and they agree. On the hard tasks, 4.8 led on every measure of effort:
+
+- the most model requests (`119` against Sonnet’s `68`)
+- the most tool calls
+- the most active time
+
+The newest model worked harder on the hard tasks.
 
 The extra effort converted into the highest accuracy and the best cost-per-solved. It worked more, and the work paid off.
 
@@ -278,13 +304,25 @@ This is only visible because the telemetry records *how* a run ended, not just w
 
 ### Reliability
 
-This points the same way as everything else. Error rate, how often a tool execution failed during a run, went `1.72%` for Sonnet, `1.6%` for Opus 4.7, `0.85%` for Opus 4.8. Roughly halving from oldest to newest. The error-spans table backs it up with the actual failures, mostly tool executions that didn’t complete cleanly, durations attached.
+This points the same way as everything else. Error rate, how often a tool execution failed during a run:
+
+- Sonnet 4.6: `1.72%`
+- Opus 4.7: `1.6%`
+- Opus 4.8: `0.85%`
+
+Roughly halving from oldest to newest. The error-spans table backs it up with the actual failures, mostly tool executions that didn’t complete cleanly, durations attached.
 
 Every failed tool call is wasted time and spend: the agent has to notice, recover, and retry, burning tokens and minutes that produced nothing. So a lower error rate isn’t just more reliable. It’s part of why the more capable model gets more done per dollar. It wastes less of its budget on its own mistakes.
 
 ### Lines of code
 
-Lines written and kept: `317` for Sonnet, `929` for Opus 4.7, `979` for Opus 4.8. Lines of code is a crude measure and more code isn’t necessarily better code. But as a proxy for working output, it tracks the capability ordering cleanly, and the gap between Sonnet and the two Opus models is clear. The number is something to look at though I’d never rely on it alone.
+Lines written and kept:
+
+- Sonnet 4.6: `317`
+- Opus 4.7: `929`
+- Opus 4.8: `979`
+
+Lines of code is a crude measure and more code isn’t necessarily better code. But as a proxy for working output, it tracks the capability ordering cleanly, and the gap between Sonnet and the two Opus models is clear. The number is something to look at though I’d never rely on it alone.
 
 ### Per-task
 
