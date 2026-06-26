@@ -1,7 +1,9 @@
 ---
 
 title: OpenTelemetry - Understanding Traces vs. Spans
-date: 2024-11-07
+meta_title: "OpenTelemetry Trace vs Span Explained"
+published_date: 2024-11-07
+updated_date: 2026-06-26
 tags: [OpenTelemetry]
 authors: [soumya_gupta]
 description: Explore the differences between traces and spans in OpenTelemetry, their relationship, and how they enhance distributed system observability.
@@ -18,7 +20,7 @@ Distributed systems have become increasingly complex, making monitoring and trou
 
 ## What is OpenTelemetry?
 
-OpenTelemetry is an open-source observability framework designed to generate and collect telemetry data from cloud-native software. It provides a unified set of APIs, libraries, agents, and instrumentation to capture [distributed traces](https://signoz.io/blog/distributed-tracing/), metrics, and logs from your applications and infrastructure. The project emerged from the merger of OpenCensus and OpenTracing, two popular observability projects. This consolidation aimed to create a single, vendor-neutral standard for telemetry data collection and transmission.
+OpenTelemetry is an open-source observability framework designed to generate and collect telemetry data from cloud-native software. It provides a unified set of APIs, libraries, agents, and instrumentation to capture distributed traces, metrics, and logs from your applications and infrastructure. The project emerged from the merger of OpenCensus and OpenTracing, two popular observability projects. This consolidation aimed to create a single, vendor-neutral standard for telemetry data collection and transmission.
 
 OpenTelemetry consists of three key components:
 
@@ -116,7 +118,7 @@ A span is more appropriate for the first scenario, representing an operation wit
 
 ### SpanContext
 
-`SpanContext` is a data structure provided by tracing libraries like OpenTelemetry to carry key identifying details about a span across process boundaries. It usually holds the trace ID, span ID, and trace flags, allowing distributed tracing systems to connect spans across services. This structure includes all essential information to identify a span within a trace and must be propagated to child spans and across process boundaries, passing tracing identifiers and options from parent to child spans.
+`SpanContext` is a data structure provided by tracing libraries like OpenTelemetry to carry key identifying details about a span across process boundaries. It usually holds the trace ID, span ID, and trace flags, allowing [distributed tracing](https://signoz.io/blog/distributed-tracing/) systems to connect spans across services. This structure includes all essential information to identify a span within a trace and must be propagated to child spans and across process boundaries, passing tracing identifiers and options from parent to child spans.
 
 - `TraceId`: This is the identifier for a trace, generated as 16 randomly created bytes, making it globally unique with a high probability. The `TraceId` groups all spans associated with a specific trace across all processes.
 - `SpanId`: This identifies a span and is generated as 8 randomly created bytes, ensuring global uniqueness with a high probability. When passed to a child Span, this identifier serves as the parent `SpanId`.
@@ -290,7 +292,7 @@ Adhering to best practices in trace and span implementation is crucial for effec
 | Propagate Context Correctly: Ensure trace context flows across all services and asynchronous tasks to keep the trace intact. This provides a complete view of request dependencies and execution flow. | Events: Use events to mark significant occurrences within a span's lifetime. Events allow you to capture specific milestones or important actions, such as when a request was received or when a processing step was completed, providing valuable insights during debugging and analysis. |
 | Balance Performance Impact: Tracing can add overhead, so monitor and adjust data collection to avoid performance degradation. Focus tracing on essential transactions or error scenarios in high-performance environments. | Error Handling: Set the appropriate status on spans, especially when errors occur. This includes marking spans as `ERROR` when an exception is thrown, which helps in quickly identifying failure points and understanding the overall health of the system. |
 
-  
+To explore related OpenTelemetry concepts, see [Traces vs Metrics](https://signoz.io/comparisons/opentelemetry-traces-vs-metrics/), [API vs SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/), and [OpenTelemetry vs Prometheus](https://signoz.io/blog/opentelemetry-vs-prometheus/). If you are focused on tracing specifically, it is worth comparing [OpenTelemetry vs Jaeger](https://signoz.io/blog/opentelemetry-vs-jaeger/) and reviewing this guide to [distributed tracing tools](https://signoz.io/blog/distributed-tracing-tools/).
 
 ## Key Takeaways
 
