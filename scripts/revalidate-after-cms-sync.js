@@ -82,6 +82,8 @@ function uniqueStrings(arr) {
   return [...new Set(arr.filter(Boolean))]
 }
 
+const SIDENAV_CHANGED = process.env.SIDENAV_CHANGED === 'true'
+
 function buildPayload() {
   const allContentFiles = [...CHANGED_FILES, ...DELETED_FILES]
 
@@ -89,6 +91,12 @@ function buildPayload() {
 
   const hasAssetChanges = CHANGED_ASSETS.length > 0
   const hasCmsPaths = cmsUrls.length > 0
+
+  // Sidenav changes affect every docs page — use full revalidation
+  if (SIDENAV_CHANGED) {
+    console.log('📣 Sidenav changed: using full revalidation (sidebar appears on every docs page).')
+    return { mode: 'all', reason: 'sidenav-changed' }
+  }
 
   if (cmsUrls.length > BULK_THRESHOLD) {
     console.log(

@@ -14,7 +14,7 @@ import { buildCopyMarkdownFromRendered } from '@/utils/docs/buildCopyMarkdownFro
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import { resolveLatestDate, formatDisplayDate } from '@/utils/dateUtils'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
-import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
 
 const DocContent: React.FC<{
   title: string

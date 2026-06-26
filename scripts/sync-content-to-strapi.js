@@ -556,50 +556,6 @@ function replaceAssetPaths(content, frontmatter, assets) {
 }
 
 // Helper: Fetch all entities from Strapi endpoint
-async function fetchAllEntities(endpoint) {
-  try {
-    let allEntities = []
-    let page = 1
-    const pageSize = 100
-    let pageCount = 1
-
-    do {
-      const currentPage = page
-      const response = await withRetry(
-        () =>
-          axios.get(`${CMS_API_URL}/api/${endpoint}`, {
-            params: {
-              pagination: {
-                page: currentPage,
-                pageSize,
-              },
-            },
-            headers: {
-              Authorization: `Bearer ${CMS_API_TOKEN}`,
-              'Content-Type': 'application/json',
-            },
-          }),
-        `fetchAllEntities(${endpoint}, page=${currentPage})`
-      )
-
-      const data = response.data.data || []
-      allEntities = allEntities.concat(data)
-
-      // Update pagination info
-      const meta = response.data.meta || {}
-      const pagination = meta.pagination || {}
-      pageCount = pagination.pageCount || 1
-
-      page++
-    } while (page <= pageCount)
-
-    return allEntities
-  } catch (error) {
-    console.error(`Failed to fetch ${endpoint}: ${error.message}`)
-    return []
-  }
-}
-
 // Helper: Filter entities by deployment_status when available
 function filterEntitiesByDeploymentStatus(entities) {
   if (!Array.isArray(entities) || entities.length === 0) {
@@ -675,70 +631,160 @@ const _relatedArticleEntityCache = {}
 const _relationEntityCache = {}
 const _existingEntriesCache = {}
 
+async function fetchEntitiesByFilter(endpoint, filterField, values) {
+  if (!values || values.length === 0) return []
+
+  // Strapi $in filter: filters[field][$in][0]=val0&filters[field][$in][1]=val1...
+  // Batch into groups of 100 to avoid URL length limits
+  const batchSize = 100
+  const allEntities = []
+
+  for (let i = 0; i < values.length; i += batchSize) {
+    const batch = values.slice(i, i + batchSize)
+    const filterParams = {}
+    batch.forEach((val, idx) => {
+      filterParams[`filters[${filterField}][$in][${idx}]`] = val
+    })
+
+    let page = 1
+    let pageCount = 1
+
+    do {
+      const currentPage = page
+      const response = await withRetry(
+        () =>
+          axios.get(`${CMS_API_URL}/api/${endpoint}`, {
+            params: {
+              ...filterParams,
+              'pagination[page]': currentPage,
+              'pagination[pageSize]': 100,
+            },
+            headers: {
+              Authorization: `Bearer ${CMS_API_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+        `fetchFiltered(${endpoint}, ${filterField}, page=${currentPage})`
+      )
+
+      const data = response.data.data || []
+      allEntities.push(...data)
+
+      const meta = response.data.meta || {}
+      const pagination = meta.pagination || {}
+      pageCount = pagination.pageCount || 1
+      page++
+    } while (page <= pageCount)
+  }
+
+  return allEntities
+}
+
 async function prefetchRelationEntities(pendingOperations) {
-  const endpointsNeeded = new Set()
+  // Collect the actual values needed per relation endpoint from frontmatter
+  const endpointValues = {} // { endpoint: { matchField, values: Set } }
 
   for (const op of pendingOperations) {
     if (op.type === 'delete') continue
     const schema = COLLECTION_SCHEMAS[op.folderName]
-    if (schema?.relations) {
-      for (const relationConfig of Object.values(schema.relations)) {
-        endpointsNeeded.add(relationConfig.endpoint)
+    if (!schema?.relations) continue
+
+    for (const [, relationConfig] of Object.entries(schema.relations)) {
+      const { endpoint, matchField, frontmatterField, filterKey } = relationConfig
+      const fmValues = op.frontmatter?.[frontmatterField]
+      if (!fmValues || !Array.isArray(fmValues) || fmValues.length === 0) continue
+
+      if (!endpointValues[endpoint]) {
+        endpointValues[endpoint] = {
+          matchField: filterKey ? 'value' : matchField,
+          values: new Set(),
+        }
       }
+      for (const v of fmValues) endpointValues[endpoint].values.add(v)
     }
   }
 
+  const endpointNames = Object.keys(endpointValues)
   console.log(
-    `\n📦 Prefetching relation entities for ${endpointsNeeded.size} endpoint(s): ${[...endpointsNeeded].join(', ')}`
+    `\n📦 Prefetching relation entities for ${endpointNames.length} endpoint(s): ${endpointNames.join(', ')}`
   )
 
-  for (const endpoint of endpointsNeeded) {
+  for (const [endpoint, { matchField, values }] of Object.entries(endpointValues)) {
     try {
-      const entities = await fetchAllEntities(endpoint)
+      const entities = await fetchEntitiesByFilter(endpoint, matchField, [...values])
       _relationEntityCache[endpoint] = filterEntitiesByDeploymentStatus(entities)
-      console.log(`  ✅ ${endpoint}: ${_relationEntityCache[endpoint].length} entities`)
+      console.log(
+        `  ✅ ${endpoint}: ${_relationEntityCache[endpoint].length} entities (filtered from ${values.size} values)`
+      )
     } catch (err) {
       console.warn(`  ⚠️ Failed to prefetch ${endpoint}: ${err.message}`)
       _relationEntityCache[endpoint] = []
     }
   }
 
-  for (const [prefix, typeInfo] of Object.entries(RELATED_ARTICLE_TYPE_MAP)) {
-    if (!_relatedArticleEntityCache[prefix]) {
-      if (_relationEntityCache[typeInfo.endpoint]) {
-        _relatedArticleEntityCache[prefix] = _relationEntityCache[typeInfo.endpoint]
-      } else {
-        try {
-          let entities = await fetchAllEntities(typeInfo.endpoint)
-          entities = filterEntitiesByDeploymentStatus(entities)
-          _relatedArticleEntityCache[prefix] = entities
-          console.log(`  ✅ related_articles/${prefix}: ${entities.length} entities`)
-        } catch (err) {
-          console.warn(`  ⚠️ Failed to prefetch related_articles/${prefix}: ${err.message}`)
-          _relatedArticleEntityCache[prefix] = []
-        }
+  // Prefetch related_articles — collect paths referenced in frontmatter
+  const relatedPathsByPrefix = {} // { prefix: Set<path> }
+
+  for (const op of pendingOperations) {
+    if (op.type === 'delete') continue
+    const urls = op.frontmatter?.related_articles
+    if (!urls || !Array.isArray(urls)) continue
+
+    for (const url of urls) {
+      const parsed = parseRelatedArticleUrl(url)
+      if (!parsed) continue
+      const typeInfo = RELATED_ARTICLE_TYPE_MAP[parsed.prefix]
+      if (!typeInfo) continue
+
+      if (!relatedPathsByPrefix[parsed.prefix]) {
+        relatedPathsByPrefix[parsed.prefix] = new Set()
       }
+      relatedPathsByPrefix[parsed.prefix].add(parsed.path)
+    }
+  }
+
+  for (const [prefix, paths] of Object.entries(relatedPathsByPrefix)) {
+    if (_relatedArticleEntityCache[prefix]) continue
+
+    const typeInfo = RELATED_ARTICLE_TYPE_MAP[prefix]
+    try {
+      let entities = await fetchEntitiesByFilter(typeInfo.endpoint, 'path', [...paths])
+      entities = filterEntitiesByDeploymentStatus(entities)
+      _relatedArticleEntityCache[prefix] = entities
+      console.log(
+        `  ✅ related_articles/${prefix}: ${entities.length} entities (filtered from ${paths.size} paths)`
+      )
+    } catch (err) {
+      console.warn(`  ⚠️ Failed to prefetch related_articles/${prefix}: ${err.message}`)
+      _relatedArticleEntityCache[prefix] = []
     }
   }
 }
 
 async function prefetchExistingEntries(pendingOperations) {
-  const folderNames = new Set()
+  // Group paths by folder name so we only fetch the entries we need
+  const pathsByFolder = {}
 
   for (const op of pendingOperations) {
-    folderNames.add(op.folderName)
+    if (!pathsByFolder[op.folderName]) {
+      pathsByFolder[op.folderName] = []
+    }
+    pathsByFolder[op.folderName].push(op.pathField)
   }
 
+  const folderNames = Object.keys(pathsByFolder)
   console.log(
-    `\n📦 Prefetching existing entries for ${folderNames.size} content type(s): ${[...folderNames].join(', ')}`
+    `\n📦 Prefetching existing entries for ${folderNames.length} content type(s): ${folderNames.join(', ')}`
   )
 
   for (const folderName of folderNames) {
     const schema = COLLECTION_SCHEMAS[folderName]
     if (!schema) continue
 
+    const paths = pathsByFolder[folderName]
+
     try {
-      const entities = await fetchAllEntities(schema.endpoint)
+      const entities = await fetchEntitiesByFilter(schema.endpoint, 'path', paths)
       const filtered = filterEntitiesByDeploymentStatus(entities)
       const entryMap = new Map()
       for (const entity of filtered) {
@@ -747,7 +793,9 @@ async function prefetchExistingEntries(pendingOperations) {
         }
       }
       _existingEntriesCache[folderName] = entryMap
-      console.log(`  ✅ ${schema.endpoint}: ${entryMap.size} entries cached`)
+      console.log(
+        `  ✅ ${schema.endpoint}: ${entryMap.size} entries cached (queried ${paths.length} paths)`
+      )
     } catch (err) {
       console.warn(`  ⚠️ Failed to prefetch ${schema.endpoint}: ${err.message}`)
       _existingEntriesCache[folderName] = new Map()
@@ -800,8 +848,10 @@ async function resolveRelatedArticlesComponent(frontmatter) {
   for (const prefix of typesToFetch) {
     if (!_relatedArticleEntityCache[prefix]) {
       const typeInfo = RELATED_ARTICLE_TYPE_MAP[prefix]
+      // Collect only the paths we need for this prefix
+      const pathsNeeded = parsedUrls.filter((p) => p && p.prefix === prefix).map((p) => p.path)
       try {
-        let entities = await fetchAllEntities(typeInfo.endpoint)
+        let entities = await fetchEntitiesByFilter(typeInfo.endpoint, 'path', pathsNeeded)
         entities = filterEntitiesByDeploymentStatus(entities)
         _relatedArticleEntityCache[prefix] = entities
       } catch (err) {
@@ -865,7 +915,10 @@ async function resolveRelations(folderName, frontmatter, entityCache) {
     if (entityCache && entityCache[relationConfig.endpoint]) {
       entities = entityCache[relationConfig.endpoint]
     } else {
-      entities = await fetchAllEntities(relationConfig.endpoint)
+      // Fallback: fetch only the values we need instead of all entities
+      const valuesToFind = frontmatterValues
+      const filterField = relationConfig.filterKey ? 'value' : relationConfig.matchField
+      entities = await fetchEntitiesByFilter(relationConfig.endpoint, filterField, valuesToFind)
       entities = filterEntitiesByDeploymentStatus(entities)
     }
 
@@ -1474,6 +1527,37 @@ async function syncToStrapi() {
   return results
 }
 
+const SIDENAV_JSON_PATH = path.resolve(__dirname, '..', 'data', 'docs-side-nav', 'main.json')
+const SIDENAV_CHANGED = process.env.SIDENAV_CHANGED === 'true'
+
+async function syncSidenavToStrapi() {
+  console.log('\n' + '='.repeat(80))
+  console.log('🔄 PHASE 3: Sidenav Synchronization')
+  console.log('='.repeat(80))
+
+  const raw = fs.readFileSync(SIDENAV_JSON_PATH, 'utf8')
+  const items = JSON.parse(raw)
+
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error('Parsed sidenav JSON is empty or not an array')
+  }
+
+  const url = `${CMS_API_URL}/api/docs-side-nav`
+  const body = { data: { items } }
+
+  await withRetry(async () => {
+    const response = await axios.put(url, body, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${CMS_API_TOKEN}`,
+      },
+    })
+    return response.data
+  }, 'sync-sidenav')
+
+  console.log('✅ Sidenav synced to CMS successfully')
+}
+
 // Validate environment variables
 if (!CMS_API_URL || !CMS_API_TOKEN) {
   console.error('❌ ERROR: Missing required environment variables')
@@ -1482,11 +1566,17 @@ if (!CMS_API_URL || !CMS_API_TOKEN) {
 }
 
 // Run sync
-syncToStrapi()
-  .then(() => {
-    console.log('✅ Sync completed successfully!')
-  })
-  .catch((error) => {
-    console.error('❌ SYNC FAILED:', error.message)
-    process.exit(1)
-  })
+async function main() {
+  await syncToStrapi()
+
+  if (SIDENAV_CHANGED) {
+    await syncSidenavToStrapi()
+  }
+
+  console.log('✅ Sync completed successfully!')
+}
+
+main().catch((error) => {
+  console.error('❌ SYNC FAILED:', error.message)
+  process.exit(1)
+})
