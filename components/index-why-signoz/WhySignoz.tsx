@@ -4,14 +4,16 @@ import { Activity, Bot, Cable, SearchCode, ServerCog, type LucideIcon } from 'lu
 import Image, { type StaticImageData } from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
-import whySignozPlaceholderAlt from '@/public/img/graphics/homepage/why-signoz-placeholder-alt.webp'
-import whySignozPlaceholder from '@/public/img/graphics/homepage/why-signoz-placeholder.webp'
+import GrainientCardBackground from './GrainientCardBackground'
 
 type WhySigNozItem = {
   alt: string
   description: string
   icon: LucideIcon
   image: StaticImageData | string
+  imageClassName?: string
+  imageFit?: 'contain' | 'cover'
+  overlayImage?: string
   title: string
 }
 
@@ -21,7 +23,9 @@ const items: WhySigNozItem[] = [
     description:
       'Move from a latency spike to the related logs, traces, metrics, and spans without stitching together separate tools.',
     icon: Activity,
-    image: whySignozPlaceholder,
+    image: '/img/graphics/homepage/correlation.svg',
+    imageClassName: 'object-bottom',
+    imageFit: 'contain',
     alt: 'SigNoz view showing correlated telemetry for root cause debugging',
   },
   {
@@ -29,7 +33,8 @@ const items: WhySigNozItem[] = [
     description:
       'Use open standards instead of vendor SDKs, so instrumentation stays portable as your stack changes.',
     icon: Cable,
-    image: whySignozPlaceholderAlt,
+    image: '/img/graphics/homepage/opentelemetry.svg',
+    imageClassName: 'object-center',
     alt: 'OpenTelemetry instrumentation flowing into SigNoz',
   },
   {
@@ -37,7 +42,9 @@ const items: WhySigNozItem[] = [
     description:
       'Use query builder, PromQL, and ClickHouse SQL on a fast columnar datastore built for high-cardinality observability data.',
     icon: SearchCode,
-    image: whySignozPlaceholder,
+    image: '/img/graphics/homepage/columnar2.svg',
+    imageClassName: 'object-left',
+    imageFit: 'cover',
     alt: 'Flexible query controls backed by a columnar datastore in SigNoz',
   },
   {
@@ -45,7 +52,8 @@ const items: WhySigNozItem[] = [
     description:
       'One OpenTelemetry-native source gives agents a known schema for traces, logs, metrics, and services, so they can debug with less translation.',
     icon: Bot,
-    image: whySignozPlaceholderAlt,
+    image: '/img/graphics/homepage/agent-chat.svg',
+    imageClassName: 'object-center',
     alt: 'Agent telemetry context for AI-assisted observability workflows',
   },
   {
@@ -53,7 +61,9 @@ const items: WhySigNozItem[] = [
     description:
       'Use SigNoz Cloud, self-hosted, or managed deployments while keeping the same OpenTelemetry-native model.',
     icon: ServerCog,
-    image: whySignozPlaceholder,
+    image: '/img/graphics/homepage/flexible-deploy.svg',
+    imageClassName: 'object-center',
+    imageFit: 'contain',
     alt: 'Flexible deployment options for running SigNoz',
   },
 ]
@@ -64,6 +74,71 @@ function getItemClasses(index: number, activeIndex: number) {
   }
 
   return 'blur-[0.6px]'
+}
+
+function WhySignozImage({
+  className,
+  fill = false,
+  item,
+  loading,
+  priority,
+}: {
+  className?: string
+  fill?: boolean
+  item: WhySigNozItem
+  loading?: 'eager' | 'lazy'
+  priority?: boolean
+}) {
+  const imageClassName = className ?? item.imageClassName ?? 'object-[60%_center]'
+  const objectFitClassName = item.imageFit === 'contain' ? 'object-contain' : 'object-cover'
+
+  if (!item.overlayImage) {
+    if (fill) {
+      return (
+        <Image
+          alt=""
+          className={`${objectFitClassName} ${imageClassName}`}
+          fill
+          priority={priority}
+          src={item.image}
+        />
+      )
+    }
+
+    return (
+      <Image
+        alt={item.alt}
+        className="h-auto w-full"
+        height={430}
+        loading={loading}
+        src={item.image}
+        width={760}
+      />
+    )
+  }
+
+  return (
+    <div className={fill ? 'relative h-full w-full' : 'relative aspect-[760/640] w-full'}>
+      <Image
+        alt={fill ? '' : item.alt}
+        className="absolute left-0 top-0 h-auto w-[88%]"
+        height={302}
+        loading={fill ? undefined : loading}
+        priority={priority}
+        src={item.image}
+        width={528}
+      />
+      <Image
+        alt=""
+        aria-hidden="true"
+        className="absolute bottom-[2%] right-0 h-auto w-[74%]"
+        height={302}
+        priority={priority}
+        src={item.overlayImage}
+        width={528}
+      />
+    </div>
+  )
 }
 
 export default function WhySignoz() {
@@ -181,14 +256,7 @@ export default function WhySignoz() {
                     </p>
                   </div>
                   <div className="col-span-2 mt-5 overflow-hidden rounded-md border border-signoz_slate-100 bg-signoz_slate-400 shadow-xl lg:hidden">
-                    <Image
-                      alt={item.alt}
-                      className="h-auto w-full"
-                      height={430}
-                      loading={index === 0 ? 'eager' : 'lazy'}
-                      src={item.image}
-                      width={760}
-                    />
+                    <WhySignozImage item={item} loading={index === 0 ? 'eager' : 'lazy'} />
                   </div>
                 </div>
               )
@@ -202,9 +270,8 @@ export default function WhySignoz() {
               aria-hidden="true"
               className="pointer-events-none absolute left-1/2 top-1/2 h-[70%] w-[84%] -translate-x-1/2 -translate-y-1/2 rounded-[28px] bg-[radial-gradient(ellipse_at_center,rgba(190,198,207,0.12)_0%,rgba(86,95,104,0.08)_42%,rgba(8,9,10,0)_72%)] blur-2xl"
             />
-            <div className="relative aspect-[0.92] w-full overflow-hidden rounded-[18px] border border-signoz_slate-100 bg-signoz_ink-400 shadow-[0_32px_90px_rgba(0,0,0,0.52)]">
-              <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_18%_14%,rgba(255,255,255,0.045),transparent_30%),linear-gradient(180deg,rgba(11,12,14,0.05),rgba(11,12,14,0.42)_88%)]" />
-              <div className="absolute left-[10%] top-[10%] h-[98%] w-[112%] overflow-hidden rounded-[10px] border border-signoz_slate-100 bg-signoz_ink-300 shadow-xl">
+            <div className="relative aspect-[0.92] w-full overflow-hidden rounded-[18px] bg-[#010409] shadow-[0_32px_90px_rgba(0,0,0,0.52)]">
+              <div className="absolute inset-0 overflow-hidden">
                 {items.map((item, index) => (
                   <div
                     aria-hidden={index !== activeIndex}
@@ -212,22 +279,18 @@ export default function WhySignoz() {
                     key={item.title}
                     style={{ top: `${(index - activeIndex) * 100}%` }}
                   >
-                    <Image
-                      alt=""
-                      className="object-cover object-[60%_center]"
-                      fill
-                      priority={index === 0}
-                      src={item.image}
-                    />
+                    {index === 0 && activeIndex === 0 ? (
+                      <>
+                        <GrainientCardBackground className="absolute inset-0 opacity-70" />
+                        <div className="absolute inset-0 bg-signoz_ink-500/35" />
+                      </>
+                    ) : null}
+                    <div className="relative z-10 h-full">
+                      <WhySignozImage fill item={item} priority={index === 0} />
+                    </div>
                   </div>
                 ))}
-
-                <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-signoz_ink-300 to-transparent" />
               </div>
-
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-signoz_ink-400 to-transparent" />
-              <div className="pointer-events-none absolute inset-y-0 left-0 w-[18%] bg-gradient-to-r from-signoz_ink-400 to-transparent" />
-              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-signoz_ink-400 to-transparent" />
             </div>
           </div>
         </div>
