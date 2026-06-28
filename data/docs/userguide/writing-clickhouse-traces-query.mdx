@@ -1,8 +1,9 @@
 ---
-date: 2026-06-26
+date: 2026-06-27
 
 title: Traces Schema - Write ClickHouse Queries & Build Dashboard Panels
 description: Explore the OpenTelemetry traces schema in ClickHouse. Discover how to build custom dashboard panels, analyze span kinds, and calculate latency metrics with advanced queries.
+doc_type: reference
 ---
 
 SigNoz stores all trace data in ClickHouse. When the visual Query Builder does not cover your use case, you can write ClickHouse SQL directly to build custom dashboard panels.
@@ -601,7 +602,7 @@ FROM
 (
     SELECT
         interval,
-        traceID,
+        trace_id,
         if(startTime1 != 0, 
            if(startTime2 != 0, 
               (toUnixTimestamp64Nano(startTime2) - toUnixTimestamp64Nano(startTime1)) / 1000000, 
@@ -611,7 +612,7 @@ FROM
     (
         SELECT
             toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
-            traceID,
+            trace_id,
             minIf(timestamp, 
                 resource_string_service$$name = 'driver' 
                 AND name = '/driver.DriverService/FindNearest'
@@ -624,8 +625,8 @@ FROM
         WHERE timestamp BETWEEN $start_datetime AND $end_datetime
             AND ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
             AND resource_string_service$$name IN ('driver', 'route')
-        GROUP BY interval, traceID
-        ORDER BY interval, traceID ASC
+        GROUP BY interval, trace_id
+        ORDER BY interval, trace_id ASC
     )
 )
 WHERE isNaN(time_diff) = 0
