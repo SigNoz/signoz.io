@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import ChatbaseClient from '@/components/Chatbase/ChatbaseClient'
+import DecimalClient from '@/components/Decimal/DecimalClient'
 
 import siteMetadata from '@/data/siteMetadata'
 import JsonLdScript from '@/components/JsonLdScript'
@@ -265,7 +265,7 @@ export default async function Page() {
           <Testimonials page="homepage" className="max-w-8xl" />
           <GetStarted page="homepage" className="max-w-8xl" />
         </main>
-        <ChatbaseClient />
+        <DecimalClient />
       </div>
     </>
   )
