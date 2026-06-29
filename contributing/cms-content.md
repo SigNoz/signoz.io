@@ -8,6 +8,7 @@ The following content directories are managed through a CMS and synced to the re
 
 | Route | Data Directory |
 |---|---|
+| `/docs` | `data/docs` |
 | `/blog` | `data/blog` |
 | `/guides` | `data/guides` |
 | `/comparisons` | `data/comparisons` |
@@ -71,7 +72,7 @@ Assets for CMS-migrated content are synced to a CDN during the CMS sync process.
 
 ## Pre-Commit Hook
 
-When staged files include changes to CMS-migrated content (`data/(faqs|case-study|opentelemetry|comparisons|guides|blog)/**`), the pre-commit hook runs `node scripts/check-cms-assets.js`.
+When staged files include changes to CMS-migrated content (`data/(docs|faqs|case-study|opentelemetry|comparisons|guides|blog)/**`), the pre-commit hook runs `node scripts/check-cms-assets.js`.
 
 If the hook fails:
 

@@ -1,10 +1,12 @@
 ---
 
 title: Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry
-date: 2025-06-23
+meta_title: Track Web Vitals in Next.js with OpenTelemetry
+published_date: 2025-06-25
+updated_date: 2026-06-16
 tags: [OpenTelemetry, NextJS, Web Vitals, SigNoz, JavaScript]
 authors: [yuvraj]
-description: Learn how to instrument your Next.js frontend to track Web Vitals and third-party widget performance using OpenTelemetry and send the data to SigNoz for visualization and analysis.
+description: Instrument your Next.js frontend to track Web Vitals (LCP, INP, CLS) and third-party widget performance with OpenTelemetry, visualized in SigNoz.
 image: /img/blog/2024/12/opentelemetry-nextjs-cover.webp
 keywords: [web vitals, nextjs, frontend monitoring, opentelmetry browser, widget performance, sigznoz, LCP, INP, CLS, tracing, metrics]
 related_articles:
@@ -27,7 +29,7 @@ related_articles:
 
 Web vitals are critical to understanding real-world user experience. Metrics like loading time, layout stability, and interactivity directly impact how users perceive your app—and they influence SEO rankings too.
 
-By capturing these metrics with OpenTelemetry and visualizing them in a tool like SigNoz, you get a complete view of frontend performance, tightly correlated with backend traces.
+By capturing these metrics with [OpenTelemetry](https://signoz.io/opentelemetry/) and visualizing them in a tool like SigNoz, you get a complete view of frontend performance, tightly correlated with backend traces.
 
 | Metric | What It Measures | Good | Needs Improvement | Poor |
 | --- | --- | --- | --- | --- |
@@ -164,7 +166,7 @@ receivers:
 
 ### 6. Visualize in SigNoz
 
-- Navigate to Metrics
+- Navigate to [Metrics](https://signoz.io/blog/opentelemetry-metrics-with-examples/)
 - Look for metrics like `web_vitals_lcp`, `web_vitals_inp`, and `web_vitals_cls`
     
     <Figure src="/img/blog/2025/06/opentelemetry-nextjs-web-vitals-image.webp" alt="SigNoz metrics interface showing Web Vitals metrics like LCP, INP, and CLS with time-series data" caption="View Web Vitals metrics in SigNoz - track LCP, INP, and CLS performance over time with page-level breakdowns" />
@@ -191,7 +193,7 @@ You can’t instrument **inside** a third-party `<iframe>` or `<script>`, but yo
 
 ### The Strategy: Wrap and Measure
 
-Use OpenTelemetry’s manual instrumentation to wrap the widget with a custom span:
+Use OpenTelemetry’s manual instrumentation to wrap the widget with a [custom span](https://signoz.io/blog/opentelemetry-spans/):
 
 ```tsx
 // components/ThirdPartyWidget.tsx

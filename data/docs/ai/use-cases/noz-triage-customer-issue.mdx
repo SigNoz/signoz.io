@@ -1,0 +1,62 @@
+---
+date: 2026-06-26
+title: Triage a Customer-Reported Issue with Noz
+meta_title: Triage a Customer Issue with Noz - SigNoz AI Teammate
+description: When a customer reports an error, ask Noz to scope logs to that tenant or user and tell you whether the problem is isolated or widespread.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+A customer opened a ticket: they are seeing 500s on upload. Before you escalate, you ask Noz whether it is just them or a wider problem, and pull their errors.
+
+<YouTube id="PVnqieN3s80" />
+
+## Prerequisites
+
+- A [SigNoz Cloud](https://signoz.io/teams/) account with [Noz](https://signoz.io/docs/ai/noz/) available.
+- Logs that carry a tenant or user identifier (for example, `tenant` or `user_id`).
+
+## Step 1: Find the blast radius
+
+Open **Noz** from the top-right header and ask whether the issue is isolated:
+
+```
+Is tenant acme-corp seeing errors right now, or is everyone?
+```
+
+Noz counts errors for that tenant against the rest of the service and tells you whether the problem is scoped to one customer or hitting everyone, which decides how you escalate.
+
+## Step 2: Pull the customer's errors and find the pattern
+
+```
+Show me the error logs for user_id 48213 in the last hour, grouped by endpoint.
+```
+
+Noz filters logs to that identifier and summarizes what links them, for example a single failing endpoint or a common status code, so you have the exact failures the customer hit and the shared cause, with **Suggested Actions** to pull a failing trace or widen the search.
+
+## Tips
+
+1. **Match your attribute.** Use the field your logs actually carry (`tenant`, `customer_id`, `user_id`) so the filter resolves.
+2. **Bridge to a trace.** Once you have the failing logs, ask Noz to pull the trace for one of them to see the full request path.
+
+<details>
+<ToggleHeading>
+## Under the Hood
+</ToggleHeading>
+
+To answer, Noz works through several agentic steps, visible under **Worked through N steps**:
+
+| Step | What It Did |
+|------|-------------|
+| Ran builder query | Counted errors for the tenant against the whole service |
+| Searched logs | Filtered logs to the tenant or user attribute over the window |
+| Reasoned | Judged whether the issue was isolated and summarized the shared cause |
+
+</details>
+
+## Next Steps
+
+- [Investigate What Changed After a Deploy with Noz](https://signoz.io/docs/ai/use-cases/noz-incident-triage/) - When the issue turns out to be widespread.
+- [Natural Language Log Exploration](https://signoz.io/docs/ai/use-cases/natural-language-log-exploration/) - Run the same log search from your coding agent.
+
+<GetHelp />

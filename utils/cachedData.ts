@@ -1,5 +1,5 @@
 import { unstable_cache } from 'next/cache'
-import { transformBlog, transformComparison, transformGuide } from './mdxUtils'
+import { transformBlog, transformComparison, transformDoc, transformGuide } from './mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { getAllContent, getContentBySlug, isLocalContentOverlayEnabled } from './contentRepository'
 
@@ -280,6 +280,81 @@ export async function fetchBlogBySlug(slug: string) {
       return await fetchSingleBlog(slug, deploymentStatus)
     } catch (directError) {
       console.error(`Direct single blog fetch also failed for "${slug}":`, directError)
+      return undefined
+    }
+  }
+}
+
+// --- Docs ---
+
+async function fetchDocs(deploymentStatus: string) {
+  const docs = await getAllContent('docs', deploymentStatus)
+  return docs.map((doc) => transformDoc(doc))
+}
+
+export function getCachedDocs(deploymentStatus: string) {
+  return getCachedMDXContent('cached-docs-list', deploymentStatus, ['docs-list'], () =>
+    fetchDocs(deploymentStatus)
+  )
+}
+
+export async function fetchAllDocsForPage() {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  try {
+    return await getCachedDocs(deploymentStatus)
+  } catch (cacheError) {
+    console.warn('Cached docs fetch failed, retrying without cache:', cacheError)
+
+    try {
+      return await fetchDocs(deploymentStatus)
+    } catch (directError) {
+      console.error('Direct docs fetch also failed:', directError)
+      return []
+    }
+  }
+}
+
+async function fetchSingleDoc(slug: string, deploymentStatus: string) {
+  const content = await getContentBySlug('docs', slug, deploymentStatus)
+
+  if (content) {
+    const doc = transformDoc(content)
+    if (!doc || !doc.title || !doc.content) {
+      throw new Error(`Empty or invalid doc content for slug: ${slug}`)
+    }
+    return doc
+  }
+
+  throw new Error(`Doc content not found for slug: ${slug}`)
+}
+
+export function getCachedSingleDoc(slug: string, deploymentStatus: string) {
+  return getCachedSingleMDXContent(
+    `cached-doc-${slug}`,
+    deploymentStatus,
+    [`docs-${slug}`, `mdx-content-${slug}`],
+    () => fetchSingleDoc(slug, deploymentStatus)
+  )
+}
+
+export async function fetchDocBySlug(slug: string) {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  try {
+    return await getCachedSingleDoc(slug, deploymentStatus)
+  } catch (cacheError) {
+    console.warn(
+      `Cached single doc fetch failed for "${slug}", retrying without cache:`,
+      cacheError
+    )
+
+    try {
+      return await fetchSingleDoc(slug, deploymentStatus)
+    } catch (directError) {
+      console.error(`Direct single doc fetch also failed for "${slug}":`, directError)
       return undefined
     }
   }

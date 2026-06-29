@@ -1,9 +1,11 @@
 ---
-title: Monitoring Docker Containers Using OpenTelemetry [Full Tutorial]
-date: 2026-04-06
+title: Monitoring Docker Container Metrics with OpenTelemetry [Tutorial]
+meta_title: Monitor Docker Metrics with OpenTelemetry
+published_date: 2024-01-10
+updated_date: 2026-06-16
 tags: [OpenTelemetry, Docker]
 authors: [abhishek-kothari]
-description: Want to monitor your Docker container metrics with OpenTelemetry. Here’s the guide for you. Steps to monitor Docker container metrics with OpenTelemetry - 1. Setting up OpenTelemetry Collector 2. Configuring OpenTelemetry Collector to collect Docker Container metrics 3. Send collected metrics to SigNoz...
+description: Step-by-step guide to monitoring Docker container metrics with OpenTelemetry - set up the Collector, send data to SigNoz, and build dashboards and alerts.
 image: /img/blog/2024/01/opentelemetry-docker-cover.jpeg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,observability,docker]
@@ -15,8 +17,8 @@ related_articles:
   - '/blog/opentelemetry-ecs'
   - '/blog/opentelemetry-apache-server-metrics-monitoring'
 ---
-Monitoring Docker container metrics is essential for understanding the performance and health of your containers. OpenTelemetry collector can collect Docker container metrics and send it to a backend of your choice. In this tutorial, you will install an OpenTelemetry Collector to collect Docker container metrics and send it to SigNoz, an OpenTelemetry-native APM for monitoring and visualization.
 
+Monitoring Docker container metrics is essential for understanding the performance and health of your containers. The OpenTelemetry Collector can collect Docker container metrics and send them to a backend of your choice. In this tutorial, you will install an OpenTelemetry Collector to collect Docker container metrics and send them to SigNoz, an OpenTelemetry-native APM for monitoring and visualization.
 
 
 ![Cover Image](/img/blog/2024/01/opentelemetry-docker-cover.webp)
@@ -28,7 +30,7 @@ In this tutorial, we cover:
 - [How does OpenTelemetry Collector collect data?](#how-does-opentelemetry-collector-collect-data)
 - [Pre-requisites](#pre-requisites)
 - [Setting up OpenTelemetry Collector](#setting-up-opentelemetry-collector)
-- [Monitoring with Signoz Dashboard](#monitoring-with-signoz-dashboard)
+- [Monitoring Docker Metrics in the SigNoz Dashboard](#monitoring-docker-metrics-in-the-signoz-dashboard)
 - [Reference: Docker container metrics and labels collected by OpenTelemetry Collector](#reference-docker-container-metrics-and-labels-collected-by-opentelemetry-collector)
 - [Conclusion](#conclusion)
 
@@ -99,7 +101,7 @@ receivers:
           max_age: 7200
 ```
 
-You can find more details on advanced configurations <a href = "https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+You can find more details on <a href = "https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md" rel="noopener noreferrer nofollow" target="_blank" >advanced configurations for the OTLP receiver</a>.
 
 After configuring a receiver, **you must enable it**. Receivers are enabled via pipelines within the service section. A pipeline consists of a set of receivers, processors, and exporters.
 
@@ -139,7 +141,7 @@ The above commands will start 3 containers on your system to allow us to gather 
 
 ## Setting up OpenTelemetry Collector
 
-The OpenTelemetry Collector offers various deployment options to suit different environments and preferences. It can be deployed using Docker, Kubernetes, Nomad, or directly on Linux systems. You can find all the installation options <a href = "https://opentelemetry.io/docs/collector/installation" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+The OpenTelemetry Collector offers various deployment options to suit different environments and preferences. It can be deployed using Docker, Kubernetes, Nomad, or directly on Linux systems. You can find all the <a href = "https://opentelemetry.io/docs/collector/installation" rel="noopener noreferrer nofollow" target="_blank" >installation options</a>.
 
 We are going to discuss the manual installation here and resolve any hiccups that come in the way.
 
@@ -227,7 +229,7 @@ service:
       exporters: [otlp]
 ```
 
-You would need to replace `region` and `signoz-token` in the above file with the region of your choice (for Signoz Cloud) and token obtained from Signoz Cloud → Settings → Ingestion Settings.
+You would need to replace `region` and `signoz-token` in the above file with the region of your choice (for SigNoz Cloud) and token obtained from SigNoz Cloud → Settings → Ingestion Settings.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/ingestion-key-details.webp" alt="Find ingestion settings in SigNoz dashboard"/>
@@ -236,6 +238,8 @@ You would need to replace `region` and `signoz-token` in the above file with the
 
 
 The above configuration additionally contains a `resource detection` process that helps identify the host attributes better. The docker socket path remains the same for UNIX-based systems; however, for any other systems, you can refer to this <a href = "https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-socket-option" rel="noopener noreferrer nofollow" target="_blank" >documentation</a> to know more.
+
+This article focues on gathering Docker metrics via the OTel Collector. If you wish to understand how to run the Collector inside Docker in more detail, check out our [detailed guide](https://signoz.io/blog/otel-collector-docker/) on the topic.
 
 ### Step 4 - Running the collector service
 
@@ -269,11 +273,11 @@ You can stop the collector service with the following command:
 kill "$(< otel-pid)"
 ```
 
-You should start seeing the metrics on your Signoz Cloud UI in about 30 seconds. You can import this (link to be added) dashboard JSON into your Signoz environment quite easily to monitor your MongoDB database.
+You should start seeing the metrics on your SigNoz Cloud UI in about 30 seconds. You can now use these metrics to build custom dashboards to monitor your Docker containers.
 
-## Monitoring with Signoz Dashboard
+## Monitoring Docker Metrics in the SigNoz Dashboard
 
-Once the above setup is done, you will be able to access the metrics in the SigNoz dashboard. You can go to the Dashboards tab and try adding a new panel. You can learn how to create dashboards in SigNoz [here](https://signoz.io/docs/userguide/manage-dashboards/).
+Once the above setup is done, you will be able to access the metrics in the SigNoz dashboard. You can go to the Dashboards tab and try adding a new panel. You can learn how to [create dashboards in SigNoz](https://signoz.io/docs/userguide/manage-dashboards/).
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/01/opentelemetry-docker-metrics.webp" alt="Docker container metrics collected by OpenTelemetry collector"/>
@@ -289,7 +293,7 @@ You can easily create charts with [query builder](https://signoz.io/docs/usergu
 </figure>
 
 
-You can build a complete dashboard around various metrics emitted. Here’s a look at a sample dashboard we built out using the metrics collected. You can get started quickly with this dashboard by using the JSON <a href = "https://github.com/SigNoz/dashboards/blob/main/container-metrics/docker/container-metrics-by-host.json" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+You can build a complete dashboard around various metrics emitted. Here’s a look at a sample dashboard we built out using the metrics collected. You can get started quickly with this dashboard by using <a href = "https://github.com/SigNoz/dashboards/blob/main/container-metrics/docker/container-metrics-by-host.json" rel="noopener noreferrer nofollow" target="_blank" >this dashboard JSON</a>.
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/01/opentelemetry-docker-dashboard-panel.webp" alt="Dashboard for monitoring Docker Container Metrics in SigNoz"/>
@@ -297,7 +301,7 @@ You can build a complete dashboard around various metrics emitted. Here’s a lo
 </figure>
 
 
-You can also create alerts on any metric. Learn how to create alerts [here](https://signoz.io/docs/userguide/alerts-management/).
+You can also create alerts on any metric. Learn how to [create alerts in SigNoz](https://signoz.io/docs/userguide/alerts-management/).
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/01/opentelemetry-docker-alerts.webp" alt="Create alerts on any Docker container metrics"/>
@@ -413,6 +417,8 @@ In this tutorial, you installed an OpenTelemetry collector to collect Docker con
 Visit our complete guide on OpenTelemetry Collector to learn more about it. OpenTelemetry is quietly becoming the world standard for open-source observability, and by using it, you can have advantages like a single standard for all telemetry signals, no vendor lock-in, etc.
 
 SigNoz is an open-source [OpenTelemetry-native APM](https://signoz.io/blog/opentelemetry-apm/) that can be used as a single backend for all your observability needs.
+
+In case you are running containers on Kubernetes too, our guide on [Kubernetes monitoring with OpenTelemetry](https://signoz.io/blog/opentelemetry-kubernetes/) can help you better manage and understand your K8s workloads, their lifecycles and data patterns.
 
 ---
 
