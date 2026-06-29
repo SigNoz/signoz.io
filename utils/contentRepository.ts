@@ -199,6 +199,79 @@ function normalizeTaxonomy(value: unknown) {
   }))
 }
 
+const DEV_COLLECTION_CACHE_TTL_MS = 10_000 // 10 seconds
+
+type CachedCollectionEntry = { entries: MDXContent[]; timestamp: number }
+const _devCollectionCache = new Map<CanonicalCollection, CachedCollectionEntry>()
+
+async function readSingleLocalContent(
+  config: CollectionConfig,
+  slug: string
+): Promise<MDXContent | undefined> {
+  const rootDir = path.join(process.cwd(), 'data', config.dataDir)
+  const normalizedSlug = slug.replace(/^\/+|\/+$/g, '')
+
+  for (const ext of ['.mdx', '.md']) {
+    const filePath = path.join(rootDir, normalizedSlug + ext)
+    // Path traversal guard
+    if (!filePath.startsWith(rootDir + path.sep) && filePath !== rootDir) continue
+
+    let fileContent: string
+    let stats: Awaited<ReturnType<typeof fs.stat>>
+    try {
+      fileContent = await fs.readFile(filePath, 'utf8')
+      stats = await fs.stat(filePath)
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue
+      throw error
+    }
+
+    const { data, content } = matter(fileContent)
+    const frontmatter = normalizeFrontmatter(data)
+    const contentPath = normalizeContentPath(normalizedSlug)
+    const slugPart = normalizedSlug.split('/').filter(Boolean).pop() || ''
+    const id = deterministicLocalId(config.canonical, contentPath)
+    const frontmatterDate = dateToString(frontmatter.date)
+    const frontmatterPublishedDate = dateToString(frontmatter.published_date)
+    const publishedAt = frontmatterPublishedDate || frontmatterDate || stats.mtime.toISOString()
+    const title = typeof frontmatter.title === 'string' ? frontmatter.title : slugPart
+
+    const entry: MDXContent = {
+      ...frontmatter,
+      id: (() => {
+        const numericId = Number.parseInt(id.slice(0, 8), 16)
+        if (!Number.isFinite(numericId)) {
+          throw new Error(`Failed to generate numeric ID for ${config.canonical}:${contentPath}`)
+        }
+        return numericId
+      })(),
+      documentId: `local-${id}`,
+      title,
+      slug: slugPart,
+      path: contentPath,
+      content,
+      authors: normalizeStringArray(frontmatter.authors),
+      related_articles: [],
+      related_articles_raw: normalizeStringArray(frontmatter.related_articles),
+      publishedAt,
+      createdAt: publishedAt,
+      updatedAt: dateToString(frontmatter.lastmod) || publishedAt,
+      published_date: frontmatterPublishedDate,
+      updated_date: dateToString(frontmatter.updated_date),
+      date: frontmatterDate,
+      filePath: path.relative(path.join(process.cwd(), 'data'), filePath).replace(/\\/g, '/'),
+      __source: 'local',
+    }
+
+    if (frontmatter.tags !== undefined) entry.tags = normalizeTaxonomy(frontmatter.tags)
+    if (frontmatter.keywords !== undefined) entry.keywords = normalizeTaxonomy(frontmatter.keywords)
+
+    return entry
+  }
+
+  return undefined
+}
+
 async function collectMdxFiles(rootDir: string): Promise<string[]> {
   let entries: Awaited<ReturnType<typeof fs.readdir>>
 
@@ -416,11 +489,37 @@ async function getLocalContentBySlug(
   slug: string,
   deploymentStatus: string
 ) {
-  const entriesByCollection = await readAllLocalContent()
-  const maps = buildContentMaps(entriesByCollection)
-  const content = maps[config.canonical]?.get(normalizeContentPath(slug))
+  // Fast path: read single file directly — O(1) instead of reading all 1,623 files
+  const content = await readSingleLocalContent(config, slug)
+  if (!content) return undefined
 
-  return content ? resolveRelatedArticles(content, maps, deploymentStatus) : undefined
+  // Resolve related articles lazily — read only the referenced files
+  const rawUrls = normalizeStringArray(content.related_articles_raw || [])
+  if (rawUrls.length === 0) return content
+
+  const relatedArticles = (
+    await Promise.all(
+      rawUrls.map(async (url) => {
+        const parsed = parseRelatedArticleUrl(url)
+        if (!parsed) return null
+
+        const collection = RELATED_PREFIX_TO_COLLECTION[parsed.prefix]
+        if (!collection) return null
+
+        const relConfig = COLLECTION_CONFIGS[collection]
+        const relSlug = parsed.path.replace(/^\/+|\/+$/g, '')
+        const relatedDoc = await readSingleLocalContent(relConfig, relSlug)
+        if (!relatedDoc) return null
+
+        return {
+          content_type: relConfig.contentType,
+          [relConfig.contentType]: relatedDoc,
+        }
+      })
+    )
+  ).filter(Boolean)
+
+  return { ...content, related_articles: relatedArticles } as MDXContent
 }
 
 async function fetchCMSContentBySlug(
@@ -463,6 +562,23 @@ export async function getContentBySlug(
   }
 }
 
+async function readLocalContentCollectionCached(
+  config: CollectionConfig
+): Promise<MDXContent[]> {
+  if (process.env.NODE_ENV !== 'development') {
+    return readLocalContentCollection(config)
+  }
+
+  const cached = _devCollectionCache.get(config.canonical)
+  if (cached && Date.now() - cached.timestamp < DEV_COLLECTION_CACHE_TTL_MS) {
+    return cached.entries
+  }
+
+  const entries = await readLocalContentCollection(config)
+  _devCollectionCache.set(config.canonical, { entries, timestamp: Date.now() })
+  return entries
+}
+
 export async function getAllContent(
   collection: CollectionInput,
   deploymentStatus = getDeploymentStatus(),
@@ -471,14 +587,14 @@ export async function getAllContent(
   const config = getCollectionConfig(collection)
 
   if (!hasCMSContentConfig()) {
-    return readLocalContentCollection(config)
+    return readLocalContentCollectionCached(config)
   }
 
   if (!isLocalContentOverlayEnabled()) {
     return fetchAllCMSContentForCollection(config, deploymentStatus, fields)
   }
 
-  const localEntries = await readLocalContentCollection(config)
+  const localEntries = await readLocalContentCollectionCached(config)
   let cmsEntries: MDXContent[] = []
 
   if (hasCMSContentConfig()) {
