@@ -1,13 +1,15 @@
 // Decimal chat widget configuration and loader.
-// These values come from the Decimal dashboard (Setup tab). The public-config
-// token is safe to expose in the client — it only encodes the widget id and a
-// timestamp, and the widget is rejected on domains not allow-listed in Decimal.
-// Optional env overrides (e.g. for staging) fall back to the production values.
-export const DECIMAL_WIDGET_ID =
-  process.env.NEXT_PUBLIC_DECIMAL_WIDGET_ID || 'wgt_mUjvpIptdhjk60ngaT59GyI2G7gM1qZJ'
-export const DECIMAL_PUBLIC_CONFIG =
-  process.env.NEXT_PUBLIC_DECIMAL_PUBLIC_CONFIG ||
-  'eyJhbGciOiJIUzI1NiJ9.eyJ3aWQiOiJ3Z3RfbVVqdnBJcHRkaGprNjBuZ2FUNTlHeUkyRzdnTTFxWkoiLCJkb21haW5zIjpbXSwiaWF0IjoxNzgyMTEzMzkzfQ.cRozMWLXlU4vsiXd_N21ZIcMCtp47c6pss_DN9MNaQE'
+// Config comes from the Decimal dashboard (Setup tab) and is supplied via env
+// vars — no hardcoded fallbacks, so a missing/misconfigured value fails loudly
+// instead of silently using a baked-in default. Set these in Vercel for every
+// environment:
+//   NEXT_PUBLIC_DECIMAL_WIDGET_ID
+//   NEXT_PUBLIC_DECIMAL_PUBLIC_CONFIG
+// Both are NEXT_PUBLIC_ (exposed to the browser); the public-config token is
+// public by design — it only encodes the widget id + a timestamp, and the
+// widget is rejected on domains not allow-listed in Decimal.
+export const DECIMAL_WIDGET_ID = process.env.NEXT_PUBLIC_DECIMAL_WIDGET_ID
+export const DECIMAL_PUBLIC_CONFIG = process.env.NEXT_PUBLIC_DECIMAL_PUBLIC_CONFIG
 
 // Theme applied once the widget script loads (values from the Decimal dashboard).
 const DECIMAL_THEME = {
@@ -43,6 +45,12 @@ const DECIMAL_SCRIPT_ID = 'decimal-widget'
  */
 export function ensureDecimalScript(): void {
   if (typeof window === 'undefined') return
+  if (!DECIMAL_WIDGET_ID || !DECIMAL_PUBLIC_CONFIG) {
+    console.warn(
+      '[Decimal] NEXT_PUBLIC_DECIMAL_WIDGET_ID / NEXT_PUBLIC_DECIMAL_PUBLIC_CONFIG are not set; chat widget disabled'
+    )
+    return
+  }
   if (document.getElementById(DECIMAL_SCRIPT_ID)) return
 
   const script = document.createElement('script')
