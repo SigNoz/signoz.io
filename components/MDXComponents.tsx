@@ -36,8 +36,6 @@ import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonito
 import ImageCTA from './ImageCTA/ImageCTA'
 import TrackingLink from './TrackingLink'
 import Listicle from './Listicle/Listicle'
-import LibraryTabs from './LibraryTabs/LibraryTabs'
-import LibraryTab from './LibraryTabs/LibraryTab'
 import MDXButton from './MDXButton/MDXButton'
 import IconCardGrid from './Card/IconCardGrid'
 import HostingDecision from './shared/HostingDecision'
@@ -50,6 +48,14 @@ import SigNozCloud from './shared/SigNozCloud'
 import UpgradeInfo from './shared/UpgradeInfo'
 import OtelOperatorOTLPEndpoint from './shared/OtelOperatorOTLPEndpoint'
 import OtelOperatorAutoInstrumentation from './shared/OtelOperatorAutoInstrumentation'
+import GetHelp from './shared/GetHelp'
+import K8sNextSteps from './shared/K8sNextSteps'
+import MultiNodePart1 from './shared/MultiNodePart1'
+import MultiNodePart2 from './shared/MultiNodePart2'
+import PrereqsInstrument from './shared/PrereqsInstrument'
+import TraefikMetrics from './shared/TraefikMetrics'
+import MetricsDefinition from './shared/MetricsDefinition'
+import CHClientWithOutput from './shared/CHClientWithOutput'
 
 import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
 import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
@@ -133,8 +139,6 @@ export const components = {
   ImageCTA,
   TrackingLink,
   Listicle,
-  LibraryTabs,
-  LibraryTab,
   MDXButton,
   IconCardGrid,
   HostingDecision,
@@ -162,4 +166,12 @@ export const components = {
   DatabaseTable,
   InlineCTA,
   MCPInstallButton,
+  GetHelp,
+  K8sNextSteps,
+  MultiNodePart1,
+  MultiNodePart2,
+  PrereqsInstrument,
+  TraefikMetrics,
+  MetricsDefinition,
+  CHClientWithOutput,
 } as unknown as MDXComponents

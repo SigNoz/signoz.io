@@ -9,6 +9,7 @@ import { fetchMDXContentByPath, type MDXContent } from './strapi'
 export type { AuthorDirectory } from './cmsAuthors'
 
 type CanonicalCollection =
+  | 'docs'
   | 'blogs'
   | 'guides'
   | 'comparisons'
@@ -28,6 +29,12 @@ type LocalContentMaps = Record<CanonicalCollection, Map<string, MDXContent>>
 type CollectionInput = CanonicalCollection | string
 
 const COLLECTION_CONFIGS: Record<CanonicalCollection, CollectionConfig> = {
+  docs: {
+    canonical: 'docs',
+    dataDir: 'docs',
+    cmsCollection: 'docs',
+    contentType: 'doc',
+  },
   blogs: {
     canonical: 'blogs',
     dataDir: 'blog',
@@ -67,6 +74,8 @@ const COLLECTION_CONFIGS: Record<CanonicalCollection, CollectionConfig> = {
 }
 
 const COLLECTION_ALIASES: Record<string, CanonicalCollection> = {
+  doc: 'docs',
+  docs: 'docs',
   blog: 'blogs',
   blogs: 'blogs',
   guide: 'guides',
@@ -83,6 +92,7 @@ const COLLECTION_ALIASES: Record<string, CanonicalCollection> = {
 }
 
 const RELATED_PREFIX_TO_COLLECTION: Record<string, CanonicalCollection> = {
+  docs: 'docs',
   blog: 'blogs',
   guides: 'guides',
   comparisons: 'comparisons',
@@ -438,6 +448,10 @@ export async function getContentBySlug(
     if (localContent) return localContent
   }
 
+  if (!hasCMSContentConfig()) {
+    return getLocalContentBySlug(config, slug, deploymentStatus)
+  }
+
   try {
     return await fetchCMSContentBySlug(config, slug, deploymentStatus)
   } catch (error) {
@@ -455,6 +469,10 @@ export async function getAllContent(
   fields: string[] | null = DEFAULT_LIST_FIELDS
 ): Promise<MDXContent[]> {
   const config = getCollectionConfig(collection)
+
+  if (!hasCMSContentConfig()) {
+    return readLocalContentCollection(config)
+  }
 
   if (!isLocalContentOverlayEnabled()) {
     return fetchAllCMSContentForCollection(config, deploymentStatus, fields)

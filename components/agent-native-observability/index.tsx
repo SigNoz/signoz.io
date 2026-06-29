@@ -4,6 +4,7 @@ import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLay
 import IconTitleDescriptionCardGrid from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 import { IconTitleDescriptionCardData } from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 import { cn } from '../../app/lib/utils'
+import AgentNativeObservabilitySection from '@/components/index-agent-native-observability/AgentNativeObservability'
 
 const AGENT_FEATURES: IconTitleDescriptionCardData[] = [
   {
@@ -35,7 +36,7 @@ const AGENT_FEATURES: IconTitleDescriptionCardData[] = [
   },
 ]
 
-export const AgentNativeObservability = ({ className }: { className?: string }) => {
+function AgentNativeObservabilityControl({ className }: { className?: string }) {
   return (
     <>
       <section
@@ -52,7 +53,7 @@ export const AgentNativeObservability = ({ className }: { className?: string }) 
             <p className="max-w-3xl text-center text-xs font-medium text-signoz_vanilla-100 sm:text-base">
               Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
               issues without leaving your dev environment. Traces, logs, metrics, service topology,
-              and your actual codebase &mdash; all in one place. Or use Noz, our new AI Assistant
+              and your actual codebase - all in one place. Or use Noz, our new AI teammate
               out-of-the-box.
             </p>
             <TrackingLink
@@ -80,4 +81,18 @@ export const AgentNativeObservability = ({ className }: { className?: string }) 
       </SectionLayout>
     </>
   )
+}
+
+export const AgentNativeObservability = ({
+  className,
+  variant = 'control',
+}: {
+  className?: string
+  variant?: 'control' | 'ai-agents'
+}) => {
+  if (variant === 'ai-agents') {
+    return <AgentNativeObservabilitySection />
+  }
+
+  return <AgentNativeObservabilityControl className={className} />
 }

@@ -1,6 +1,5 @@
 ---
-date: 2026-05-11
-id: opentelemetry-nodejs
+date: 2026-06-11
 title: Send Metrics from Node.js application
 description: Learn how to send metrics from Node.js applications (Express, Fastify, Koa, NestJS, Runtime) to SigNoz using OpenTelemetry
 
@@ -43,6 +42,7 @@ export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_TRACES_EXPORTER="none"
 export OTEL_LOGS_EXPORTER="none"
 export OTEL_METRIC_EXPORT_INTERVAL="60000"
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 ```
 Verify these values:
@@ -50,6 +50,7 @@ Verify these values:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
+- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`: Set to `delta` to reduce metric costs. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
 
 </TabItem>
 
@@ -74,6 +75,8 @@ env:
   value: 'none'
 - name: OTEL_METRIC_EXPORT_INTERVAL
   value: '60000'
+- name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+  value: 'delta'
 - name: NODE_OPTIONS
   value: '--require @opentelemetry/auto-instrumentations-node/register'
 ```
@@ -82,6 +85,7 @@ Verify these values:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
+- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`: Set to `delta` to reduce metric costs. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
 
 </TabItem>
 
@@ -96,6 +100,7 @@ $env:OTEL_METRICS_EXPORTER = "otlp"
 $env:OTEL_TRACES_EXPORTER = "none"
 $env:OTEL_LOGS_EXPORTER = "none"
 $env:OTEL_METRIC_EXPORT_INTERVAL = "60000"
+$env:OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE = "delta"
 $env:NODE_OPTIONS = "--require @opentelemetry/auto-instrumentations-node/register"
 ```
 Verify these values:
@@ -103,6 +108,7 @@ Verify these values:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service.
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
+- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`: Set to `delta` to reduce metric costs. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
 
 </TabItem>
 
@@ -121,6 +127,7 @@ ENV OTEL_METRICS_EXPORTER="otlp"
 ENV OTEL_TRACES_EXPORTER="none"
 ENV OTEL_LOGS_EXPORTER="none"
 ENV OTEL_METRIC_EXPORT_INTERVAL="60000"
+ENV OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 ENV NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 
 CMD ["node", "app.js"]
@@ -136,6 +143,7 @@ docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:
     -e OTEL_TRACES_EXPORTER="none" \
     -e OTEL_LOGS_EXPORTER="none" \
     -e OTEL_METRIC_EXPORT_INTERVAL="60000" \
+    -e OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta" \
     -e NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register" \
     your-image:latest
 ```
@@ -145,6 +153,7 @@ Verify these values:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
+- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`: Set to `delta` to reduce metric costs. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
 
 </TabItem>
 </Tabs>
@@ -155,6 +164,12 @@ The auto-instrumentation package (`@opentelemetry/auto-instrumentations-node`) i
 Since OpenTelemetry Node.js enables traces and logs export by default, these would be sent to SigNoz even though this guide only covers metrics. For apps handling many requests, this can generate significant volume and costs.
 
 Setting `OTEL_TRACES_EXPORTER` and `OTEL_LOGS_EXPORTER` to `none` disables traces and logs while keeping metrics working as expected. If you want traces or logs later, you can change them to `otlp` or remove these variables altogether.
+</KeyPointCallout>
+
+<KeyPointCallout title="Why delta temporality?" defaultCollapsed="true">
+OpenTelemetry SDKs export metrics with **cumulative** temporality by default, which re-sends the running total of every active series on each export interval — even when nothing has changed. With `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` set to `delta`, synchronous instruments (like Counters and Histograms) that record nothing during an export interval send no data points for that interval, reducing the number of billable samples.
+
+Observable (asynchronous) instruments emit a data point on every collection cycle regardless of temporality. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for details.
 </KeyPointCallout>
 
 ### Step 2. Install OpenTelemetry packages

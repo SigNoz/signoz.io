@@ -1,9 +1,11 @@
 ---
-title: Maximizing Scalability - Apache Kafka and OpenTelemetry
-date: 2023-10-13
+title: "Apache Kafka and the OpenTelemetry Collector: Scaling with Multiple Collectors"
+meta_title: "Apache Kafka and the OpenTelemetry Collector"
+published_date: 2023-10-13
+updated_date: 2026-06-17
 tags: [OpenTelemetry]
 authors: [nicamellifera]
-description: The choice between OpenTelemetry Collector and Apache Kafka isn't a zero-sum game. Each has its unique strengths and can even complement each other in certain architectures. The OpenTelemetry Collector excels in data gathering, compression, and filtering, making it a strong candidate for reducing in-system latency and improving data quality before it reaches your backend.
+description: Learn how to use Apache Kafka as a buffer between OpenTelemetry Collectors for a scalable multi-collector pipeline, with YAML configuration examples.
 image: /img/blog/2023/10/c2c-cover.jpg
 hide_table_of_contents: false
 keywords: [Kafka,OpenTelemetry]
@@ -23,6 +25,12 @@ On a recent thread on the [CNCF Slack’s OTel Collector channel](https://slack.
 ## Why You May Want to Run More Than One OpenTelemetry Collector Inside Your Architecture
 
 This article will discuss both multi-collector architecture and how Apache Kafka can be useful here.
+
+<KeyPointCallout title="Looking for Kafka monitoring with OpenTelemetry?">
+
+One clarification worth making: this article is about using Kafka to scale a collector pipeline, not about monitoring Kafka itself. If you landed here looking to instrument a Kafka cluster, our guide on [Kafka monitoring with OpenTelemetry](https://signoz.io/blog/kafka-monitoring-opentelemetry/) is the better starting point.
+
+</KeyPointCallout>
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/10/c2c-1.webp" alt="A user asks: Does it make sense to think about using an intermediate transport service like Kafka to get event data from the apps to move it forward to the otel-collector? If so, is there a reference implementation/article to read about it? Martin responds: What would be the goal in that as opposed to Collector -> collector tiering?"/>
