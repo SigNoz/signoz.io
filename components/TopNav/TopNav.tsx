@@ -14,7 +14,6 @@ import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
 import ResourcesDropdown from './ResourcesDropdown'
-import CompareSignozDropdown from './CompareSignozDropdown'
 import { NavDropdownProvider } from './NavDropdownContext'
 import NavDropdownPanel from './NavDropdownPanel'
 import MobileMenu from './MobileMenu'
@@ -112,7 +111,6 @@ export default function TopNav() {
                     </TrackingLink>
                   )}
                   {visibility.showResources && <ResourcesDropdown />}
-                  {visibility.showCompareSignoz && <CompareSignozDropdown />}
                   {visibility.showPricing && (
                     <TrackingLink
                       href="/pricing/"
@@ -123,18 +121,6 @@ export default function TopNav() {
                       clickLocation="Top Navbar"
                     >
                       Pricing
-                    </TrackingLink>
-                  )}
-                  {visibility.showCustomerStories && (
-                    <TrackingLink
-                      href="/case-study/"
-                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
-                      clickType="Nav Click"
-                      clickName="Customer Stories Link"
-                      clickText="Customers"
-                      clickLocation="Top Navbar"
-                    >
-                      Customers
                     </TrackingLink>
                   )}
                 </div>

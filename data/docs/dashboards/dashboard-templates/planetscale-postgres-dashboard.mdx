@@ -1,0 +1,100 @@
+---
+date: 2026-06-20
+title: PlanetScale PostgreSQL Metrics Dashboard
+description: Monitor PlanetScale Postgres connections, session states, PgBouncer pools, commits, locks, WAL archiving, storage, and pod resources. Filter by branch and role.
+doc_type: explanation
+---
+
+Use this dashboard to monitor your PlanetScale Postgres branches across connections and session states, commit throughput, PgBouncer connection pools, locks, write-ahead log archiving, storage, and pod resources.
+
+<Admonition type="note">
+  Before you import this dashboard, send PlanetScale metrics to SigNoz. Follow the [Send PlanetScale Metrics](https://signoz.io/docs/metrics-management/opentelemetry-planetscale/) guide to configure the OpenTelemetry Collector to scrape PlanetScale's Prometheus endpoint.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/planetscale-postgres-dashboard.webp"
+  alt="PlanetScale PostgreSQL Metrics Dashboard"
+  caption="PlanetScale PostgreSQL Metrics Dashboard"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/planetscale/planetscale-postgres.json"
+    dashboardName="PlanetScale PostgreSQL"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+- **Overview**: Open connections, connection utilization, commit throughput, WAL archive lag, storage used, and CPU utilization at a glance
+- **Connections & Sessions**: Connections by state and role, open connections against `max_connections`, commit rate by database, and per-pod connection utilization
+- **PgBouncer Connection Pool**: Client and server pool states, PgBouncer to Postgres connections, max client wait, CPU per peer, and peers against the client connection limit
+- **Locks**: Lock counts by mode
+- **Write-Ahead Log (WAL)**: Pending archive size, archiver lag and outcomes, and age of the last successful archive
+- **Storage**: Volume used percentage and available capacity against total
+- **Pod Resources**: Per-pod CPU, memory, disk IOPS, and pod status phases
+
+## Metrics Included
+
+### Overview
+
+- **Open Connections**: Current open Postgres connections
+- **Connection Utilization**: Open connections as a percentage of `max_connections`
+- **Commit Throughput**: Transaction commit rate
+- **WAL Archive Lag**: Pending WAL bytes waiting to archive
+- **Storage Used**: Volume used percentage
+- **CPU Utilization**: Database pod CPU utilization
+
+### Connections & Sessions
+
+- **Connections by State**: Postgres connections split by session state
+- **Open Connections vs max_connections**: Open connections against the configured limit
+- **Connections by Role**: Connections grouped by database role
+- **Commit Rate by Database**: Transaction commit rate per database
+- **Connection Utilization % by Pod**: Per-pod connection utilization percentage
+
+### PgBouncer Connection Pool
+
+- **PgBouncer Client Connections**: Client connections into PgBouncer
+- **PgBouncer → Postgres Connections**: Server connections from PgBouncer to Postgres
+- **Client Pool by State**: PgBouncer client pool connections by state
+- **Server Pool by State**: PgBouncer server pool connections by state
+- **Max Client Wait**: Longest client wait time for a server connection
+- **PgBouncer CPU per Peer**: PgBouncer CPU usage per peer process
+- **PgBouncer Peers vs Max Client Conn**: Peer processes against the max client connection limit
+
+### Locks
+
+- **Locks by Mode**: Active locks grouped by lock mode
+
+### Write-Ahead Log (WAL)
+
+- **WAL Pending Archive Size**: Bytes pending WAL archive
+- **WAL Archiver Lag**: Time lag of the WAL archiver
+- **WAL Archiver Outcomes**: WAL archive success and failure counts
+- **Last Successful Archive Age**: Time since the last successful WAL archive
+- **Connection Utilization % over time**: Connection utilization trend over the selected range
+
+### Storage
+
+- **Volume Used %**: Volume used as a percentage of capacity
+- **Volume Available vs Capacity**: Available volume bytes against total capacity
+
+### Pod Resources
+
+- **CPU Utilization by Pod**: Per-pod CPU utilization
+- **Memory Utilization by Pod**: Per-pod memory utilization
+- **Memory RSS by Pod**: Per-pod resident set size
+- **Disk IOPS by Pod**: Per-pod disk I/O operations per second
+- **Pods by Status Phase**: Pod count grouped by status phase
+
+## Dashboard Variables
+
+- **branch**: Filter by PlanetScale database branch
+- **role**: Filter by Postgres database role
+
+## Related Dashboards
+
+- [PlanetScale Vitess (MySQL)](https://signoz.io/docs/dashboards/dashboard-templates/planetscale-vitess-dashboard/)
+- [PostgreSQL](https://signoz.io/docs/dashboards/dashboard-templates/postgresql/)
+- [Kubernetes Dashboards](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-dashboards/)

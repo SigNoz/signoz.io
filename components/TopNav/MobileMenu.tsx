@@ -8,12 +8,7 @@ import TrackingButton from '@/components/TrackingButton'
 import GitHubStars from '../GithubStars/GithubStars'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import Accordion from '../Accordion/Accordion'
-import {
-  productDropdownItemsSorted,
-  resourcesDropdownItems,
-  comparisonItems,
-  migrationItems,
-} from './constants'
+import { productDropdownItemsSorted, resourcesDropdownItems } from './constants'
 
 interface MobileMenuProps {
   open: boolean
@@ -118,11 +113,6 @@ function MainMenuContent({
         subtopics={[...resourcesDropdownItems.learn, ...resourcesDropdownItems.explore]}
         onLinkClick={onClose}
       />
-      <Accordion
-        topic="Compare SigNoz"
-        subtopics={[...comparisonItems, ...migrationItems]}
-        onLinkClick={onClose}
-      />
       <TrackingLink
         href="/pricing/"
         className={MOBILE_LINK_CLASS}
@@ -134,18 +124,6 @@ function MainMenuContent({
       >
         Pricing
       </TrackingLink>
-      <TrackingLink
-        href="/case-study/"
-        className={MOBILE_LINK_CLASS}
-        clickType="Nav Click"
-        clickName="Customer Stories Link"
-        clickText="Customer Stories"
-        clickLocation="Mobile Menu"
-        onClick={onClose}
-      >
-        Customer Stories
-      </TrackingLink>
-
       <div className="-mx-3 inline-block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200">
         <GitHubStars location="Mobile Menu" />
       </div>

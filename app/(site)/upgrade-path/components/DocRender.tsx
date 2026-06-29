@@ -1,37 +1,30 @@
-import { coreContent } from 'pliny/utils/contentlayer.js'
-import DocContent from '@/components/DocContent/DocContent'
+import React from 'react'
 import { RegionProvider } from '@/components/Region/RegionContext'
-import type { Doc } from 'contentlayer/generated'
 
 const DocRenderer = ({
   docUrl,
-  docsBySlug,
-  setHasError,
+  docMetaBySlug,
+  compiledDocsBySlug,
 }: {
   docUrl: string
-  docsBySlug: Record<string, Doc>
-  setHasError: (hasError: boolean) => void
+  docMetaBySlug: Record<string, { title: string }>
+  compiledDocsBySlug: Record<string, React.ReactNode>
 }) => {
   const slug = decodeURI(`${docUrl.replace('https://signoz.io/docs/', '').replace(/^\/+/, '')}`)
+  const meta = docMetaBySlug[slug]
+  const content = compiledDocsBySlug[slug]
 
-  const post = docsBySlug[slug]
-
-  if (!post) {
-    setHasError(true)
+  if (!content) {
+    return null
   }
 
-  const mainContent = coreContent(post)
-  const toc = post?.toc || []
-  const { title } = mainContent
-
   return (
-    <>
-      {post && (
-        <RegionProvider>
-          <DocContent title={title} post={post} toc={toc} hideTableOfContents={true} />
-        </RegionProvider>
-      )}
-    </>
+    <RegionProvider>
+      <article>
+        <h1>{meta?.title}</h1>
+        {content}
+      </article>
+    </RegionProvider>
   )
 }
 

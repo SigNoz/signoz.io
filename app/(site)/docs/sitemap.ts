@@ -1,10 +1,10 @@
 import { MetadataRoute } from 'next'
-import { allDocs } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
 import { toSitemapDateOnly } from 'utils/sitemapXml'
 import { resolveLatestDate } from '@/utils/dateUtils'
+import { fetchAllDocsForPage } from '@/utils/cachedData'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
 
   const introductionRoute: MetadataRoute.Sitemap[number] = {
@@ -14,7 +14,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.5,
   }
 
-  const docRoutes = allDocs
+  const docs = await fetchAllDocsForPage()
+  const docRoutes = docs
     .filter((post) => !post.draft && post.slug !== 'introduction')
     .map((post) => ({
       url: `${siteUrl}/${post.path}/`,

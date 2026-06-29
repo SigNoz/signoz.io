@@ -1,0 +1,175 @@
+---
+date: 2026-06-23
+title: Monitor OpenTelemetry Collector Pipeline Health with SigNoz
+description: Push OpenTelemetry Collector internal metrics to SigNoz using the built-in OTLP telemetry reader to monitor pipeline health.
+doc_type: howto
+---
+
+The OpenTelemetry Collector emits its own pipeline health metrics under the `otelcol_*` prefix. Configure the built-in OTLP telemetry reader to push those metrics to SigNoz.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Steps are the same. Update the exporter endpoint and remove the ingestion key header or `signozApiKey` value as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- OpenTelemetry Collector v0.92 or later
+- An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## How it works
+
+The Collector has a built-in telemetry pipeline that reports internal counters and gauges, including received spans, processor drops, exporter queue depth, and process memory. Add an OTLP periodic reader under **service.telemetry.metrics** to send those metrics to SigNoz at a configured interval.
+
+`level: normal` (the default) covers receiver throughput, exporter queues, batch processor stats, and process resources. `level: detailed` adds per-method HTTP/RPC dimensions on exporter calls.
+
+## Steps
+
+### Step 1: Add the telemetry reader
+
+Add a `service.telemetry` block to your Collector config with a periodic OTLP exporter pointing at SigNoz:
+
+```yaml:config.yaml
+service:
+  telemetry:
+    resource:
+      service.name: "<service-name>"
+    metrics:
+      level: normal
+      readers:
+        - periodic:
+            interval: 60000
+            exporter:
+              otlp:
+                protocol: "http/protobuf"
+                endpoint: "https://ingest.<region>.signoz.cloud:443"
+                headers:
+                  signoz-ingestion-key: "<your-ingestion-key>"
+```
+
+Verify these values:
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A unique name for this Collector instance. If you run multiple instances, use different names to distinguish them in the dashboard.
+
+<Admonition type="note">
+  This config block is independent of your pipeline. You do not need to add a receiver, processor, or pipeline.
+</Admonition>
+
+### Step 2: Apply and restart
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+Validate the config and restart the Collector service:
+
+```bash
+sudo /usr/bin/otelcol-contrib validate --config /etc/otelcol-contrib/config.yaml
+sudo systemctl restart otelcol-contrib
+```
+
+Tail the logs to confirm the telemetry reader started with no errors:
+
+```bash
+sudo journalctl -u otelcol-contrib -f
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Restart the Collector container:
+
+```bash
+docker compose up -d
+docker logs -f signoz-collection-agent
+```
+
+For `docker run`, stop and rerun the container with the updated config mount.
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+Enable self-telemetry metrics in your `override-values.yaml` for the [SigNoz k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/):
+
+```yaml:override-values.yaml
+presets:
+  selfTelemetry:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    insecure: false
+    insecureSkipVerify: false
+    signozApiKey: <your-ingestion-key>
+    metrics:
+      enabled: true
+```
+
+Use this preset for both the DaemonSet collector (`otelAgent`) and the deployment collector (`otelDeployment`).
+
+If you use the OpenTelemetry Helm chart instead of k8s-infra, add the `service.telemetry` block from Step 1 under `config.service.telemetry` in your chart values.
+
+Deploy the chart update:
+
+```bash
+helm upgrade --install <release-name> signoz/k8s-infra \
+  -n signoz \
+  -f override-values.yaml
+```
+
+Check the Collector pod logs:
+
+```bash
+kubectl get pods -n signoz
+kubectl logs -n signoz <daemonset-pod-name> -f
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+Open [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) in SigNoz and search for `otelcol_`. You should see metrics such as `otelcol_exporter_send_failed_spans`.
+
+<Figure
+  src="/img/docs/metrics/otel-collector/sample-metrics.webp"
+  alt="OTel Collector internal metrics in SigNoz Metrics Explorer"
+  caption="OTel Collector internal metrics in SigNoz Metrics Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### No `otelcol_` metrics in SigNoz
+
+Check the Collector logs for export errors:
+
+```bash
+sudo journalctl -u otelcol-contrib -f
+```
+
+For Docker, use `docker logs -f signoz-collection-agent`. For Kubernetes, use the Collector pod logs.
+
+If the logs show authentication errors, confirm the ingestion key and endpoint region are correct. If they show connection errors, confirm the Collector can reach `ingest.<region>.signoz.cloud:443`.
+
+Wait at least one full `interval` (60 seconds with the config above) after restarting before checking.
+
+### Some panels are empty
+
+Check `service.telemetry.metrics.level`. `basic` omits batch processor metrics. `none` disables telemetry. Use `normal` or `detailed`.
+
+### Duplicate metric points
+
+You can run multiple Collector instances with the same `service.name`. The dashboard groups them by `service.instance.id`, which the Collector assigns per process. All instances appear under the shared service name and can be filtered by instance.
+
+</details>
+
+## Next Steps
+
+- Import the prebuilt [OpenTelemetry Collector dashboard](https://signoz.io/docs/dashboards/dashboard-templates/opentelemetry-collector-dashboard/).
+- Set up [alerts](https://signoz.io/docs/userguide/alerts-management/).
+- Learn more about the [OpenTelemetry Collector configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+## Get Help
+
+<GetHelp />
