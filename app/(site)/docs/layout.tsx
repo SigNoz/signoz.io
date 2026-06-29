@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react'
 import { Metadata } from 'next'
 import { getDocsSideNav } from '@/utils/docsSideNav'
 import { DocsSideNavProvider } from '@/components/DocsSidebar/DocsSideNavContext'
+import MobileDocsSideNav from '@/components/DocsSidebar/MobileDocsSideNav'
 
 export const metadata: Metadata = {
   title: {
@@ -17,5 +18,10 @@ interface LayoutProps {
 export default async function DocsRootLayout({ children }: LayoutProps) {
   const sideNav = await getDocsSideNav()
 
-  return <DocsSideNavProvider sideNav={sideNav}>{children}</DocsSideNavProvider>
+  return (
+    <DocsSideNavProvider sideNav={sideNav}>
+      <MobileDocsSideNav />
+      {children}
+    </DocsSideNavProvider>
+  )
 }

@@ -1,20 +1,12 @@
 import { NextResponse } from 'next/server'
 import { renderDocMarkdownForAgents } from '@/utils/docs/renderDocMarkdownForAgents'
 import { resolveDocsMarkdownSlug } from '@/utils/docs/markdownRouting'
-import { fetchAllDocsForPage, fetchDocBySlug } from '@/utils/cachedData'
+import { fetchDocBySlug } from '@/utils/cachedData'
 
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
 export async function generateStaticParams() {
-  const docs = await fetchAllDocsForPage()
-
-  return [
-    { slug: [] },
-    ...docs
-      .filter((doc) => typeof doc.slug === 'string')
-      .filter((doc) => doc.slug !== 'introduction')
-      .map((doc) => ({ slug: doc.slug.split('/') })),
-  ]
+  return []
 }
 
 const notFoundResponse = () =>
