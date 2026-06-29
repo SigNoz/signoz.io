@@ -1,9 +1,11 @@
 ---
 title: Tomcat Performance Monitoring with OpenTelemetry - Key Metrics and Setup Guide
-date: 2026-03-02
+meta_title: "Tomcat Performance Monitoring Guide"
+published_date: 2026-03-06
+updated_date: 2026-06-29
 tags: [tomcat, monitoring]
 authors: [saurabh_patil]
-description: Instrument Apache Tomcat with the OpenTelemetry Java agent to collect traces, metrics, and logs. Visualize key performance metrics in dashboards and set up alerts.
+description: "Tomcat performance monitoring in 2026: instrument with the OpenTelemetry Java agent and track key metrics in SigNoz. Step-by-step guide."
 keywords: [tomcat performance monitoring, tomcat monitoring, tomcat metrics, tomcat JMX monitoring, opentelemetry tomcat, tomcat observability]
 related_articles:
   - '/guides/tomcat-logs'
@@ -23,7 +25,7 @@ Before starting, make sure you have the following ready:
 - Docker and Docker Compose are installed on your machine
 - A SigNoz account ([SigNoz Cloud](https://signoz.io/teams/))
 - Basic familiarity with Tomcat (you don't need a running Tomcat instance; we will set one up)
-- You will also need Ingestion Key and Ingestion URL from your SigNoz account. For a detailed walkthrough on getting these credentials, see [how to get the ingestion key and ingestion url from SigNoz Cloud](/docs/ingestion/signoz-cloud/keys/).
+- You will also need Ingestion Key and Ingestion URL from your SigNoz account. For a detailed walkthrough on getting these credentials, see [how to get the ingestion key and ingestion url from SigNoz Cloud](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 ## Implementation Roadmap
 
@@ -34,7 +36,7 @@ Setting up Tomcat monitoring with OpenTelemetry involves four steps:
 3. Start the stack with Docker Compose
 4. Verify data in SigNoz Cloud
 
-The architecture follows the [SigNoz Tomcat instrumentation docs](/docs/instrumentation/java/opentelemetry-tomcat/). The OpenTelemetry Java agent handles all three signals (traces, metrics, and logs) and exports them directly to SigNoz Cloud via OTLP. Let's walk through each step.
+The architecture follows the [SigNoz Tomcat instrumentation docs](https://signoz.io/docs/instrumentation/java/opentelemetry-tomcat/). Because Tomcat runs on the JVM, the cleanest way to instrument it is the OpenTelemetry Java agent attached with `-javaagent`: it auto-instruments servlets and common libraries with no code changes, which is why the steps below rely on it instead of a manual SDK setup. The agent handles all three signals (traces, metrics, and logs) and exports them directly to SigNoz Cloud via OTLP. Let's walk through each step.
 
 ## Step 1: Create the Project Structure
 
@@ -140,7 +142,7 @@ OTEL_RESOURCE_ATTRIBUTES=deployment.environment=demo,service.version=1.0.0
 OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 ```
 
-Replace `<region>` with your SigNoz Cloud region (`us`, `in`, or `eu`) and `<your-ingestion-key>` with your [SigNoz ingestion key](/docs/ingestion/signoz-cloud/keys/).
+Replace `<region>` with your SigNoz Cloud region (`us`, `in`, or `eu`) and `<your-ingestion-key>` with your [SigNoz ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 Now create the**`docker-compose.yml`**file that wires the environment variables to the Tomcat container:
 
@@ -300,7 +302,7 @@ Now that data is flowing, here are the metrics that matter most. The OpenTelemet
 
 SigNoz provides a built-in RED metrics dashboard (Rate, Errors, Duration) out of the box for any service instrumented with the OpenTelemetry Java agent. You can find this under the `Services` tab → click on `tomcat-monitoring-demo` to see request rate, error percentage, and latency percentiles without any manual configuration.
 
-If you want to create custom dashboards for JVM metrics or Tomcat-specific panels, follow the [SigNoz dashboard creation guide](/docs/userguide/manage-dashboards/).
+If you want to create custom dashboards for JVM metrics or Tomcat-specific panels, follow the [SigNoz dashboard creation guide](https://signoz.io/docs/userguide/manage-dashboards/).
 
 <Figure src="/img/guides/2026/03/tomcat-performance-monitoring-dashboard.webp" alt="Screenshot of an Apache Tomcat dashboard displaying JVM metrics including heap limit (2.06 GB), heap usage percentage (2.87%), heap used trend, old generation memory trend, no-heap memory usage, GC rate, and GC pause P95 over the last hour." caption="Apache Tomcat JVM metrics dashboard showing heap usage, GC activity, and memory trends in real time." />
 
@@ -314,7 +316,9 @@ SigNoz also supports threshold-based alerts on any metric. For Tomcat monitoring
 | Thread pool saturation | `busy_threads / max_threads > 0.85` for 5 min | Warning |
 | Active sessions growing | `delta(active_sessions[1h]) > 500` without traffic increase | Info |
 
-For instructions on configuring notification channels (Slack, email, PagerDuty), see the [SigNoz alerts documentation](/docs/alerts/).
+For instructions on configuring notification channels (Slack, email, PagerDuty), see the [SigNoz alerts documentation](https://signoz.io/docs/alerts/).
+
+Related reading: the same agent-based approach extends to broader [Java application monitoring](https://signoz.io/guides/monitoring-java-applications/), and the patterns here mirror [Node.js performance monitoring](https://signoz.io/blog/nodejs-performance-monitoring/) on the metrics side. If you're new to reading the trace data, this primer on [traces vs spans](https://signoz.io/comparisons/opentelemetry-trace-vs-span/) is a good starting point, and our roundup of [APM tools](https://signoz.io/blog/apm-tools/) covers how SigNoz compares to other options.
 
 ## Frequently Asked Questions
 
