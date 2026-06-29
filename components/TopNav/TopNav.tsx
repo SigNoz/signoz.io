@@ -18,12 +18,7 @@ import { NavDropdownProvider } from './NavDropdownContext'
 import NavDropdownPanel from './NavDropdownPanel'
 import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
-import {
-  useDocsMobileSidebarOpen,
-  toggleDocsMobileSidebar,
-  closeDocsMobileSidebar,
-} from '@/hooks/useDocsMobileSidebar'
-import { OPEN_MAIN_MENU_EVENT } from '@/components/DocsSidebar/MobileDocsSideNav'
+import { useMobileDocsSidebar } from '@/components/DocsSidebar/MobileDocsSidebarContext'
 
 export default function TopNav() {
   const pathname = usePathname()
@@ -33,15 +28,13 @@ export default function TopNav() {
   const [activeTab, setActiveTab] = useState(TABS.GUIDES)
   const [shouldShowTabs, setShouldShowTabs] = useState(false)
 
-  const docsSidebarOpen = useDocsMobileSidebarOpen()
+  const docsSidebar = useMobileDocsSidebar()
   const isDocsBasePath = pathname.startsWith('/docs')
   const visibility = useNavVisibility()
 
   useEffect(() => {
-    const handler = () => setMobileMenuOpen(true)
-    window.addEventListener(OPEN_MAIN_MENU_EVENT, handler)
-    return () => window.removeEventListener(OPEN_MAIN_MENU_EVENT, handler)
-  }, [])
+    return docsSidebar.onMainMenuRequest(() => setMobileMenuOpen(true))
+  }, [docsSidebar])
 
   const isLoginRoute = pathname === '/login/'
   const isSignupRoute = pathname === '/teams/'
@@ -91,7 +84,7 @@ export default function TopNav() {
               clickLocation="Top Navbar"
               onClick={() => {
                 setMobileMenuOpen(false)
-                closeDocsMobileSidebar()
+                docsSidebar.close()
               }}
             >
               <SigNozLogo
@@ -190,19 +183,19 @@ export default function TopNav() {
                   setMobileMenuOpen(false)
                   return
                 }
-                if (docsSidebarOpen) {
-                  closeDocsMobileSidebar()
+                if (docsSidebar.isOpen) {
+                  docsSidebar.close()
                   return
                 }
                 if (isDocsBasePath) {
-                  toggleDocsMobileSidebar()
+                  docsSidebar.toggle()
                 } else {
                   setMobileMenuOpen(true)
                 }
               }}
             >
               <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen || docsSidebarOpen ? (
+              {mobileMenuOpen || docsSidebar.isOpen ? (
                 <X strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
               ) : (
                 <Menu strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />

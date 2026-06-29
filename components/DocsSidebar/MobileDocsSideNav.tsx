@@ -4,30 +4,20 @@ import React, { useEffect } from 'react'
 import { ArrowBigLeft } from 'lucide-react'
 import DocsSidebar from './DocsSidebar'
 import TrackingButton from '@/components/TrackingButton'
-import { useDocsMobileSidebarOpen, closeDocsMobileSidebar } from '@/hooks/useDocsMobileSidebar'
-
-const OPEN_MAIN_MENU_EVENT = 'signoz:open-main-menu'
+import { useMobileDocsSidebar } from './MobileDocsSidebarContext'
 
 export default function MobileDocsSideNav() {
-  const isOpen = useDocsMobileSidebarOpen()
+  const { isOpen, close, openMainMenu } = useMobileDocsSidebar()
 
   useEffect(() => {
-    return () => closeDocsMobileSidebar()
-  }, [])
-
-  const handleBackToMainMenu = () => {
-    closeDocsMobileSidebar()
-    window.dispatchEvent(new Event(OPEN_MAIN_MENU_EVENT))
-  }
+    return () => close()
+  }, [close])
 
   if (!isOpen) return null
 
   return (
     <div className="md:hidden">
-      <div
-        className="fixed inset-0 top-[56px] z-40 bg-black/50"
-        onClick={() => closeDocsMobileSidebar()}
-      />
+      <div className="fixed inset-0 top-[56px] z-40 bg-black/50" onClick={() => close()} />
       <div className="fixed left-0 top-[56px] z-40 h-[calc(100vh-56px)] w-full overflow-y-auto border-r border-signoz_slate-500 bg-signoz_ink-500 sm:max-w-sm">
         <div className="px-4">
           <TrackingButton
@@ -36,15 +26,13 @@ export default function MobileDocsSideNav() {
             clickName="Back to Main Menu Button"
             clickText="Back to main menu"
             clickLocation="Mobile Menu"
-            onClick={handleBackToMainMenu}
+            onClick={openMainMenu}
           >
             <ArrowBigLeft size={16} /> Back to main menu
           </TrackingButton>
         </div>
-        <DocsSidebar onNavItemClick={() => closeDocsMobileSidebar()} />
+        <DocsSidebar onNavItemClick={() => close()} />
       </div>
     </div>
   )
 }
-
-export { OPEN_MAIN_MENU_EVENT }
