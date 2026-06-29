@@ -20,7 +20,7 @@ import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
 import type { NavItem } from '@/components/DocsSidebar/types'
 
-export default function TopNav({ sideNav }: { sideNav: NavItem[] }) {
+export default function TopNav({ sideNav = [] }: { sideNav?: NavItem[] }) {
   const pathname = usePathname()
   const router = useRouter()
 
