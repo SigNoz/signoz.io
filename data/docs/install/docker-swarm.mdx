@@ -1,130 +1,145 @@
 ---
-date: 2026-03-26
-title: Docker Swarm
-tags : [Self-Host]
-description: Learn how to install SigNoz on Docker Swarm
-id: docker-swarm
-slug: /install/docker-swarm
+date: 2026-06-24
+title: Install SigNoz on Docker Swarm - Self-Hosted Setup
+tags : [Self-Hosted Community]
+description: Learn how to install SigNoz on Docker Swarm by deploying the stack across your swarm cluster, then verifying the services and replicas are running.
+doc_type: howto
 ---
 
 <HostingDecision />
 
-This section provides information on installing SigNoz on Docker Swarm.
-
-<KeyPointCallout title="Deploy with Foundry" defaultCollapsed={false}>
-<a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> can deploy SigNoz on Docker Swarm for you using <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/docker/swarm" target="_blank" rel="noopener noreferrer nofollow">Docker Swarm casting</a> (a configuration file). You install the dependencies, and Foundry handles everything else, from generating the Compose file and configs to deploying the stack.
-</KeyPointCallout>
+This guide explains how to install SigNoz on a Docker Swarm cluster. Foundry generates a stack Compose file from your configuration and deploys it across the swarm with `docker stack deploy`.
 
 ## Prerequisites
 
-{/* <!-- Double-check if this list is comprehensive about memory, disk space, etc. --> */}
-{/* <!-- This section should focus on SigNoz, hence we could assume that Docker Swarm is already installed, similar to the Docker Standalone or Kubernetes sections. Not sure why we show to initialize a swarm or add more nodes here.  --> */}
+- A Docker Swarm cluster with Swarm mode initialized (`docker swarm init`) and at least one manager node.
+- <a href="https://docs.docker.com/engine/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Engine</a> 20.10+ on each node.
+- At least 4GB of memory available per node.
+- Open ports: `8080` (SigNoz UI), `4317` and `4318` (OTLP ingestion).
 
-- A Linux or macOS machine. Microsoft Windows is not officially supported.
-- [Docker Engine](https://docs.docker.com/get-docker/). A minimum of 4GB of memory
-must be allocated to each Docker node.
-- [Docker Compose](https://docs.docker.com/compose/install/)
-- [Git client](https://desktop.github.com/)
+## Install SigNoz
 
-## Install SigNoz on Docker Swarm
-
-<Admonition type="info">
-Please use non-root user (mainly for Git repository cloning), otherwise you may end up seeing file system permissions errors after the installation.
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
 </Admonition>
-    
-1. <CloneRepo />
 
-2. _(Optional)_ If you don't have a swarm cluster in place, you can create one by entering the following command:
-    ```bash
-    docker swarm init
-    ```
+### Step 1: Install foundryctl
 
-    The output should look similar as shown below:
-    ```output
-    Swarm initialized: current node (6muco3j7jjuo6k4rbiq8yr8fw) is now a manager.
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
 
-    To add a worker to this swarm, run the following command:
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
 
-    docker swarm join --token SWMTKN-1-6ak6diq1lbrwemx17up9c1ph039h64z0dxksjxv647qnqrd290-4tt6q22dd462p4lf2n6bqbnt4 192.168.65.3:2377
+### Step 2: Create casting.yaml
 
-    To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
-    ```
+Create a casting file that targets Docker Swarm with `flavor: swarm` and `mode: docker`:
 
-3. _(Optional)_ You can use the `docker swarm join` command to add more nodes to the swarm.
-    Note that the node you added in the previous step is the manager. For details, see the
-    [Docker Swarm Join](https://docs.docker.com/engine/reference/commandline/swarm_join/)
-    page of the Docker documentation.
+```yaml
+apiVersion: v1alpha1
+kind: Installation
+metadata:
+  name: signoz
+spec:
+  deployment:
+    flavor: swarm
+    mode: docker
+```
 
-4. Deploy SigNoz by entering the `docker stack deploy` command and specifying the following:
-    - `-d` to deploy the stack in detached mode
-    - `--prune` to remove services that are no longer referenced by the stack
-    - `-c` and the path to the Swarm Compose file (`docker-compose.yaml`)
-    - The name of the stack (`signoz`)
+For all configuration options, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting file reference</a> and the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/docker/swarm" target="_blank" rel="noopener noreferrer nofollow">Docker Swarm example</a>.
 
-    ```bash
-    cd deploy/docker-swarm
-    docker stack deploy -d --prune -c docker-compose.yaml signoz
-    ```
+### Step 3: Deploy
 
-    The output should look similar to the following:
+Run this on a swarm manager node:
 
-    ```output
-    Creating network signoz-net
-    Creating service signoz_query-service
-    Creating service signoz_frontend
-    Creating service signoz_otel-collector
-    Creating service signoz_signoz-telemetrystore-migrator
-    Creating service signoz_init-clickhouse
-    Creating service signoz_zookeeper-1
-    Creating service signoz_clickhouse
-    Creating service signoz_alertmanager
-    ```
+```bash
+foundryctl cast -f casting.yaml
+```
 
-## Verify the Installation
+<Admonition type="tip" title="Skip cast and run docker compose directly" defaultCollapsed="true">
+`cast` chains Foundry's three stages:
 
-1. Using the `docker stack services` command, monitor the SigNoz deployment process.
-    Wait until all SigNoz services and replicas are created:
+- `gauge` checks your environment
+- `forge` renders the Compose files into `pours/` (with your SELinux labels applied) and writes `casting.yaml.lock`
+- `cast` starts the stack
 
-    ```bash
-    docker stack services signoz
-    ```
+If you prefer to manage the containers yourself, render the files with `forge`, inspect them, and bring the stack up with Docker Compose:
 
-    You should see the following output:
+```bash
+foundryctl gauge -f casting.yaml   # validate prerequisites
+foundryctl forge -f casting.yaml   # generate compose files (labels included)
+cd pours/deployment && docker stack deploy -c pours/deployment/compose.yaml signoz   # deploy it as the "signoz" stack
+```
+</Admonition>
 
-    ```output
-    ID             NAME                     MODE         REPLICAS   IMAGE                                        PORTS                  
-    loqa6qbq7lk3   signoz_clickhouse        replicated   1/1        clickhouse/clickhouse-server:24.1.2-alpine
-    zqoee9ij9xh0   signoz_init-clickhouse   replicated   0/1        clickhouse/clickhouse-server:24.1.2-alpine   
-    9awvkhh1feov   signoz_otel-collector    replicated   3/3        signoz/signoz-otel-collector:0.111.24        *:4317-4318->4317-4318/tcp
-    eu5fbg0v1bps   signoz_signoz            replicated   1/1        signoz/signoz:0.113.0                         *:80->8080/tcp                  
-    fcp7uk67tkks   signoz_signoz-telemetrystore-migrator   replicated   0/1        signoz/signoz-otel-collector:0.144.1
-    nw6xukg1gkf7   signoz_zookeeper-1       replicated   1/1        signoz/zookeeper:3.7.1
-    ```
+### Step 4: Verify the installation
+
+Monitor the stack until the long-running services report their full replica count:
+
+```bash
+docker stack services signoz
+```
+
+The output should look similar to the following:
+
+```output
+ID             NAME                                                   MODE         REPLICAS   IMAGE                                 PORTS
+umo0h2zcccyl   signoz_ingester                                        replicated   1/1        signoz/signoz-otel-collector:latest   *:4317-4318->4317-4318/tcp
+9nrnfpyx7ioc   signoz_signoz-metastore-postgres-0                     replicated   1/1        postgres:16
+h6obimnoj110   signoz_signoz-signoz-0                                 replicated   1/1        signoz/signoz:latest                  *:8080->8080/tcp
+gyf7woac9m4p   signoz_signoz-telemetrykeeper-clickhousekeeper-0       replicated   1/1        clickhouse/clickhouse-keeper:25.5.6
+oxx2l13lvwdd   signoz_signoz-telemetrystore-clickhouse-0-0            replicated   1/1        clickhouse/clickhouse-server:25.5.6
+e65ymxjial3p   signoz_signoz-telemetrystore-clickhouse-user-scripts   global       0/0        clickhouse/clickhouse-server:25.5.6
+pofn1bs2qzpj   signoz_signoz-telemetrystore-migrator                  replicated   0/1        signoz/signoz-otel-collector:latest
+```
+
+Docker prefixes every service with the stack name (`signoz_`). The five long-running services should reach `1/1`. The two bootstrap jobs run once and then stop, which is expected: `…clickhouse-user-scripts` runs in `global` mode and shows `0/0` after finishing, and `…migrator` shows `0/1` after its run. Confirm it finished without errors (see [Troubleshooting](#troubleshooting)).
+
+Confirm the SigNoz backend is healthy:
+
+```bash
+curl http://localhost:8080/api/v1/health
+```
+
+A healthy backend returns `{"status":"ok"}`. Because Swarm publishes the port through its routing mesh, the UI is reachable on port `8080` of any node in the swarm. Open `http://<NODE-IP>:8080/` (use `http://localhost:8080/` on a single-node swarm).
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### `foundryctl cast` or `docker stack deploy` fails to deploy the stack
+
+Deploying a stack requires Docker to be running, Swarm mode to be active, and the command to run on a **manager** node; a non-manager node fails with `this node is not a swarm manager`. Check all three at once:
+
+```bash
+docker info --format 'Swarm: {{.Swarm.LocalNodeState}} | Manager: {{.Swarm.ControlAvailable}}'
+```
+
+- `Swarm: active` means Swarm mode is on. If it reads `inactive`, initialize it with `docker swarm init` (or join an existing swarm).
+- `Manager: true` means this node is a manager. If it reads `false`, run the deploy from a manager node instead.
+
+### A service keeps restarting right after deploy
+
+Docker Swarm starts every service in parallel and does not honor `depends_on`. Until ClickHouse and Postgres are ready, dependent services such as `signoz_signoz-signoz-0` and `signoz_signoz-telemetrystore-migrator` may fail and restart a few times before they settle. Inspect any service that does not recover:
+
+```bash
+docker stack ps signoz                                       # per-task state and last error
+docker service logs signoz_signoz-telemetrystore-migrator    # full logs for one service
+```
+
+To redeploy from a clean slate, remove the stack and run `cast` again (this keeps the named data volumes):
+
+```bash
+docker stack rm signoz
+foundryctl cast -f casting.yaml
+```
+
+</details>
 
 <RetentionInfo />
 
-
-
-## Scale Up SigNoz Cluster
-
-SigNoz uses the [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector) to ingest data.
-By default, the instructions in the [Install SigNoz on Docker Swarm](/docs/install/docker-swarm/) document create
-three replicas, and each replica can handle 50K spans per second. To handle an increased load, perform the following steps:
-
-1. Open the `deploy/docker-swarm/docker-compose.yaml` file in a plain-text editor.
-
-2. In the `services.otel-collector.deploy.replicas` field, enter the number of replicas you wish to create. The following example creates four replicas:
-
-  ![Open Telemetry Collector - Create four replicas](/img/scale-up-otel.webp)
-
-3. Update the `signoz` stack by entering the following command:
-
-  ```bash
-  docker stack deploy --prune -d -c docker-compose.yaml signoz
-  ```
-
-
 ## Next Steps
-- [Collect Telemetry from your Docker Clusters](/docs/opentelemetry-collection-agents/docker/install/)
-- [Instrument Your Application](/docs/instrumentation/overview/)
-- [Tutorials](/docs/install/)
+- [Collect Telemetry from your Docker Clusters](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/)
+- [Instrument Your Application](https://signoz.io/docs/instrumentation/overview/)

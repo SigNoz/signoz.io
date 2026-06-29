@@ -5,6 +5,7 @@ const URL_PREFIX_TO_COLLECTION: { prefix: string; collectionName: string }[] = [
   { prefix: '/case-study/', collectionName: 'case-studies' },
   { prefix: '/comparisons/', collectionName: 'comparisons' },
   { prefix: '/guides/', collectionName: 'guides' },
+  { prefix: '/docs/', collectionName: 'docs' },
 ]
 
 export type CmsPathInfo = {

@@ -1,20 +1,106 @@
 ---
-date: 2026-05-27
-id: agent-skills
-title: Agent Skills
-meta_title: SigNoz Agent Skills - AI Coding Assistant Setup
-description: Install SigNoz Agent Skills for AI assistants like Claude Code, Cursor, and Gemini to automatically explore docs and write ClickHouse queries.
+date: 2026-06-14
+title: Agent Skills & Plugin
+meta_title: SigNoz Agent Skills & Plugin - AI Coding Assistant Setup
+description: Install the SigNoz plugin and Agent Skills so AI assistants like Claude Code, Codex, Cursor, and Gemini can query data, build dashboards, manage alerts, and explore SigNoz docs.
 doc_type: howto
 ---
 
-<a href="https://agentskills.io" target="_blank" rel="noopener noreferrer nofollow">Agent Skills</a> are an open format for extending AI coding assistants with specialized knowledge and capabilities. 
-Once installed, your agent uses them whenever it detects a relevant task - no prompting required.
+<a href="https://agentskills.io" target="_blank" rel="noopener noreferrer nofollow">Agent Skills</a> are an open format for extending AI coding assistants with specialized knowledge and capabilities. Once installed, your agent uses them whenever it detects a relevant task - no prompting required.
 
-When you ask your AI assistant something like "export traces from my service to signoz" or "help me write a ClickHouse query," the agent automatically selects the appropriate skill and follows its instructions.
+When you ask your AI assistant something like "why did this alert fire," "create a dashboard for my Postgres database," or "write a ClickHouse query for these logs," the agent picks the matching skill and follows its instructions.
 
-## Installation
+SigNoz ships these skills two ways:
 
-### skills.sh
+- **The SigNoz plugin** - the recommended path. One install bundles every skill plus the MCP server registration, so your agent can both reason about SigNoz *and* act on your data. Available for Claude Code, Codex, Cursor, and Gemini CLI.
+- **Individual skills via skills.sh** - install one or more skill files on their own, for any skills.sh-compatible agent.
+
+## Install the plugin
+
+<Tabs entityName="agent-client">
+<TabItem value="claude-code" label="Claude Code" default>
+
+Add the marketplace and install the plugin:
+
+```bash
+/plugin marketplace add SigNoz/agent-skills
+/plugin install signoz@signoz-skills
+```
+
+On install, Claude Code prompts for your **SigNoz Cloud Region** (defaults to `us`; one of `us`, `us2`, `eu`, `eu2`, `in`, `in2`). Find your region under **Settings → Ingestion** in SigNoz, or see the [region reference](https://signoz.io/docs/ingestion/signoz-cloud/overview/#how-do-i-find-my-ingestion-url).
+
+Then run `/mcp`, select the `signoz` server, and complete authentication.
+
+<Admonition type="info" title="Using Self-hosted SigNoz?" defaultCollapsed="true">
+When the installer asks **Self-hosted SigNoz?**, answer `yes` to skip the region. 
+Then start a new session (`/clear` or restart Claude Code) and run `/signoz-mcp-setup <your-mcp-url>` (for example `/signoz-mcp-setup http://localhost:8000/mcp`) to point the MCP server at your instance.
+</Admonition>
+
+To update after new releases:
+
+```bash
+/plugin marketplace update
+/plugin update signoz@signoz-skills
+```
+
+</TabItem>
+<TabItem value="codex" label="Codex">
+
+Add the marketplace:
+
+```bash
+codex plugin marketplace add SigNoz/agent-skills
+```
+
+Then, in a Codex session started from your project:
+
+1. Run `/plugins`, open the **SigNoz** marketplace, and install `signoz`.
+2. Point the MCP server at your instance with your SigNoz Cloud region (`us`, `us2`, `eu`, `eu2`, `in`, `in2`) or a self-hosted HTTP MCP URL:
+
+   ```bash
+   signoz-mcp-setup <region>
+   ```
+
+3. Authenticate over OAuth and verify the connection:
+
+   ```bash
+   codex mcp login signoz
+   codex mcp list   # signoz -> enabled, Auth = logged in
+   ```
+
+</TabItem>
+<TabItem value="cursor" label="Cursor">
+
+The plugin is not yet on the public Cursor Marketplace, so install it through a Team Marketplace:
+
+1. Add `https://github.com/SigNoz/agent-skills` as a team marketplace under **Settings → Plugins**.
+2. Install the `signoz` plugin from the marketplace panel.
+3. In an agent chat, run `/signoz-mcp-setup` with your SigNoz Cloud region or self-hosted HTTP MCP URL.
+4. Reload Cursor, then open MCP settings and complete authentication for the `signoz` server if prompted.
+
+</TabItem>
+<TabItem value="gemini-cli" label="Gemini CLI">
+
+Install the extension:
+
+```bash
+gemini extensions install https://github.com/SigNoz/agent-skills
+```
+
+When prompted, enter your SigNoz Cloud region (`us`, `us2`, `eu`, `eu2`, `in`, or `in2`). Then authenticate:
+
+```bash
+/mcp auth signoz
+```
+
+Follow the prompts to enter your SigNoz instance URL and API key.
+
+</TabItem>
+</Tabs>
+
+## Install individual skills
+
+If you want only specific skills, or you use an agent without plugin support, install skill files directly with <a href="https://skills.sh" target="_blank" rel="noopener noreferrer nofollow">skills.sh</a>. This works for any compatible agent (Codex, Cursor, Gemini, OpenCode, and more).
 
 Install all SigNoz skills:
 
@@ -25,46 +111,48 @@ npx skills add SigNoz/agent-skills
 Install a specific skill:
 
 ```bash
-npx skills add SigNoz/agent-skills --skill signoz-docs
+npx skills add SigNoz/agent-skills --skill signoz-searching-docs
+npx skills add SigNoz/agent-skills --skill signoz-writing-clickhouse-queries
 ```
 
-```bash
-npx skills add SigNoz/agent-skills --skill signoz-clickhouse-query
-```
-
-### Claude Code
-
-Install through the Claude Code plugin marketplace:
-
-```bash
-/plugin marketplace add SigNoz/agent-skills
-/plugin install signoz@signoz-skills
-```
-
-To update after new releases:
-
-```bash
-/plugin marketplace update signoz-skills
-/reload-plugins
-```
-
-You can also enable auto-updates for the marketplace through the `/plugin` interface under the **Marketplaces** tab.
+<Admonition type="note">
+skills.sh installs the skill files only, not the bundled MCP registration. Skills that act on your data (queries, dashboards, alerts, views) need the [SigNoz MCP Server](https://signoz.io/docs/ai/signoz-mcp-server/) connected separately.
+</Admonition>
 
 ## Available Skills
 
-### signoz-searching-docs
+The plugin ships the skills below. Your agent selects the right one automatically when it detects a matching task. Click any name to read its source `SKILL.md`.
 
-Guides AI agents to fetch and explore SigNoz documentation. Use it when you need help with SigNoz setup, configuration, or feature usage.
+### Setup and docs
 
-<a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-searching-docs/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">View skill source →</a>
+- <a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-mcp-setup/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">signoz-mcp-setup</a> - Initialize or repair the SigNoz MCP server configuration for Claude Code, Codex, Cursor, VS Code/GitHub Copilot, Claude Desktop, Gemini CLI, Windsurf, Zed, Antigravity, OpenCode, or another MCP client.
+- <a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-searching-docs/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">signoz-searching-docs</a> - SigNoz docs guidance for instrumentation, setup, querying, alerts, and APIs.
 
-### signoz-writing-clickhouse-queries
+### Querying your data
 
-Helps AI agents write and debug ClickHouse queries for SigNoz data. Use it when building custom dashboards, alerts, or performing ad-hoc analysis on your observability data.
+- <a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-generating-queries/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">signoz-generating-queries</a> - Generate queries against SigNoz observability data (traces, logs, metrics).
+- <a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-writing-clickhouse-queries/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">signoz-writing-clickhouse-queries</a> - Optimized ClickHouse queries for SigNoz OpenTelemetry traces and logs.
 
-<a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-writing-clickhouse-queries/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">View skill source →</a>
+### Dashboards
+
+- <a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-creating-dashboards/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">signoz-creating-dashboards</a> - Create a new SigNoz dashboard from a natural-language intent - import a curated template (PostgreSQL, Redis, JVM, k8s, APM, LLM, etc.) when one fits, or build a custom dashboard with metric, trace, and log panels.
+- <a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-modifying-dashboards/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">signoz-modifying-dashboards</a> - Modify an existing SigNoz dashboard: add, remove, or edit panels, variables, queries, and layout.
+- <a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-explaining-dashboards/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">signoz-explaining-dashboards</a> - Explain panels, queries, and layout of an existing SigNoz dashboard.
+
+### Alerts
+
+- <a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-creating-alerts/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">signoz-creating-alerts</a> - Create SigNoz alert rules for threshold breaches, error rates, latency, anomaly detection, and absent-data conditions across metrics, logs, and traces.
+- <a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-explaining-alerts/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">signoz-explaining-alerts</a> - Explain and interpret an existing SigNoz alert rule's configuration, evaluation behavior, notification routing, and recent fire frequency.
+- <a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-investigating-alerts/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">signoz-investigating-alerts</a> - Diagnose why a SigNoz alert fired by correlating its signal with neighbor metrics, traces, and logs around the fire window, and ranking likely causes.
+
+### Views and workflows
+
+- <a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-managing-views/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">signoz-managing-views</a> - Create, list, inspect, update, or delete SigNoz saved Explorer views (logs, traces, metrics) via the SigNoz MCP server.
+- <a href="https://github.com/SigNoz/agent-skills/blob/main/plugins/signoz/skills/signoz-setting-up-observability/SKILL.md" target="_blank" rel="noopener noreferrer nofollow">signoz-setting-up-observability</a> - Orchestrate the full post-ingestion observability setup for a service - SLI/SLO capture, RED/USE exploration, focused dashboards, saved views, burn-rate and absent-data alerts, and a tuning loop - sequencing the single-artifact skills into one SLO-aware workflow.
 
 ## Learn more
 
-- [SigNoz Skills on skills.sh](https://skills.sh/signoz/agent-skills) - browse available skills and install instructions
-- [GitHub repository](https://github.com/signoz/agent-skills) - source code and skill structure
+- <a href="https://skills.sh/signoz/agent-skills" target="_blank" rel="noopener noreferrer nofollow">SigNoz skills on skills.sh</a> - browse available skills and install instructions.
+- <a href="https://github.com/SigNoz/agent-skills" target="_blank" rel="noopener noreferrer nofollow">GitHub repository</a> - plugin source, skill structure, and per-client setup recipes.
+- [SigNoz MCP Server](https://signoz.io/docs/ai/signoz-mcp-server/) - connect and authenticate the MCP server the skills act through.
+- [AI Use Cases](https://signoz.io/docs/ai/use-cases/) - real-world workflows you can run once everything is wired up.

@@ -9,7 +9,7 @@ import ArticleMetaDetailsCard, {
 import OpenTelemetryTocClient from './open-telemetry-hub/OpenTelemetryTocClient'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
-import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
 import { getFormattedDates } from '@/utils/dateUtils'
 
 const MOBILE_TRIGGER_ID = 'ot-hub-mobile-trigger'

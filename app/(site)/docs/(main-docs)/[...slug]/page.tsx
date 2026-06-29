@@ -1,8 +1,5 @@
 import 'css/prism.css'
 
-import { coreContent } from 'pliny/utils/contentlayer'
-import { allDocs } from 'contentlayer/generated'
-import type { Doc } from 'contentlayer/generated'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
@@ -10,15 +7,18 @@ import DocContent from '@/components/DocContent/DocContent'
 import Chatbase from '@/components/Chatbase'
 import JsonLdScript from '@/components/JsonLdScript'
 import { buildBreadcrumbSchema, getDocsBreadcrumbs } from '@/utils/breadcrumbSchema'
+import { fetchDocBySlug } from '@/utils/cachedData'
+import { compileMdxSource } from '@/utils/compileMdx'
 
-export const dynamicParams = false
+export const revalidate = 86400
+export const dynamicParams = true
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string[] }>
 }): Promise<Metadata | undefined> {
   const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
-  const post = allDocs.find((p) => p.slug === slug)
+  const post = await fetchDocBySlug(slug)
 
   if (!post) {
     notFound()
@@ -29,10 +29,10 @@ export async function generateMetadata(props: {
 
   return {
     title: seoTitle,
-    description: post?.description,
+    description: post.description,
     openGraph: {
       title: fullTitle,
-      description: post?.description,
+      description: post.description,
       siteName: siteMetadata.title,
       locale: 'en_US',
       type: 'article',
@@ -46,28 +46,42 @@ export async function generateMetadata(props: {
 }
 
 export const generateStaticParams = async () => {
-  const paths = allDocs
-    .filter((p) => p.slug !== 'introduction')
-    .map((p) => ({ slug: p.slug?.split('/') })) // Don't want to generate static params for introduction page
-
-  return paths
+  return []
 }
 
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params
   const slug = decodeURI(params.slug.join('/'))
-  const post = allDocs.find((p) => p.slug === slug) as Doc
+  const post = await fetchDocBySlug(slug)
 
   if (!post) {
     notFound()
   }
 
-  const mainContent = coreContent(post)
+  let compiledContent
+  try {
+    const { content } = await compileMdxSource(post.content || '')
+    compiledContent = content
+  } catch (error) {
+    console.error(`Error compiling MDX for doc "${slug}":`, error)
+    notFound()
+  }
+
   const toc = post?.toc || []
-  const { title, hide_table_of_contents } = mainContent
+  const { title, hide_table_of_contents } = post
   const jsonLd = post.structuredData
-  const breadcrumbs = getDocsBreadcrumbs(slug, title)
+  const breadcrumbs = await getDocsBreadcrumbs(slug, title)
   const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
+
+  const postForClient = {
+    slug: post.slug,
+    lastmod: post.lastmod,
+    updated_date: post.updated_date,
+    published_date: post.published_date,
+    date: post.date,
+    docTags: post.docTags,
+    body: post.body,
+  }
 
   return (
     <>
@@ -76,12 +90,14 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
       <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4">
         <DocContent
           title={title}
-          post={post}
+          post={postForClient}
           toc={toc}
           hideTableOfContents={hide_table_of_contents || false}
-          editLink={`https://github.com/SigNoz/signoz-web/edit/main/data/docs/${slug}.mdx`}
+          editLink={`https://github.com/SigNoz/signoz.io/edit/main/data/docs/${slug}.mdx`}
           breadcrumbs={breadcrumbs}
-        />
+        >
+          {compiledContent}
+        </DocContent>
       </div>
       <Chatbase disableFloatingMessages />
     </>
