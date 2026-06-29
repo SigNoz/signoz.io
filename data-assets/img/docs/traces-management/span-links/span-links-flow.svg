@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 440" font-family="'Inter', 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0f1a"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="batchGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6c5ce7"/>
+      <stop offset="100%" stop-color="#4834d4"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="135%">
+      <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <marker id="arrAmber" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#fdcb6e"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="440" fill="url(#bgGrad)" rx="14"/>
+
+  <!-- Title -->
+  <text x="500" y="42" text-anchor="middle" fill="#f5f6fa" font-size="19" font-weight="700">
+    One batch span links back to many source request traces
+  </text>
+
+  <!-- ===== async boundary divider ===== -->
+  <line x1="540" y1="74" x2="540" y2="392" stroke="#636e72" stroke-width="1.5" stroke-dasharray="4 5"/>
+
+  <!-- ===== LEFT: source request traces ===== -->
+  <text x="185" y="74" text-anchor="middle" fill="#8d95a5" font-size="12" font-weight="600" letter-spacing="0.5">SOURCE REQUESTS</text>
+
+  <!-- Request card template: dark panel + green accent -->
+  <g filter="url(#shadow)">
+    <rect x="70" y="92"  width="230" height="64" rx="9" fill="#20222e"/>
+    <rect x="70" y="92"  width="6"   height="64" rx="3" fill="#00b894"/>
+    <rect x="70" y="180" width="230" height="64" rx="9" fill="#20222e"/>
+    <rect x="70" y="180" width="6"   height="64" rx="3" fill="#00b894"/>
+    <rect x="70" y="268" width="230" height="64" rx="9" fill="#20222e"/>
+    <rect x="70" y="268" width="6"   height="64" rx="3" fill="#00b894"/>
+  </g>
+
+  <text x="92" y="120" fill="#f5f6fa" font-size="15" font-weight="600">receive-order</text>
+  <text x="92" y="140" fill="#9aa3b2" font-size="12">orders-api &#183; trace 1</text>
+  <text x="92" y="208" fill="#f5f6fa" font-size="15" font-weight="600">receive-order</text>
+  <text x="92" y="228" fill="#9aa3b2" font-size="12">orders-api &#183; trace 2</text>
+  <text x="92" y="296" fill="#f5f6fa" font-size="15" font-weight="600">receive-order</text>
+  <text x="92" y="316" fill="#9aa3b2" font-size="12">orders-api &#183; trace 3</text>
+
+  <text x="185" y="360" text-anchor="middle" fill="#636e72" font-size="12" font-style="italic">each request is its own trace</text>
+
+  <!-- ===== RIGHT: batch span ===== -->
+  <text x="770" y="74" text-anchor="middle" fill="#8d95a5" font-size="12" font-weight="600" letter-spacing="0.5">BATCH JOB</text>
+
+  <g filter="url(#shadow)">
+    <rect x="620" y="120" width="300" height="200" rx="12" fill="url(#batchGrad)"/>
+  </g>
+  <text x="642" y="158" fill="#ffffff" font-size="17" font-weight="700">process-batch</text>
+  <text x="642" y="180" fill="#dfe6e9" font-size="12">orders-batch</text>
+
+  <!-- Links badge -->
+  <rect x="838" y="138" width="62" height="24" rx="12" fill="#fdcb6e"/>
+  <text x="869" y="154" text-anchor="middle" fill="#2d2200" font-size="12" font-weight="700">Links 3</text>
+
+  <line x1="642" y1="196" x2="898" y2="196" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1"/>
+  <text x="642" y="218" fill="#dfe6e9" font-size="12" font-weight="600">3 &#215; reconcile-order</text>
+
+  <!-- child waterfall bars -->
+  <rect x="642" y="232" width="180" height="12" rx="6" fill="#ffffff" fill-opacity="0.55"/>
+  <rect x="642" y="254" width="120" height="12" rx="6" fill="#ffffff" fill-opacity="0.55"/>
+  <rect x="642" y="276" width="210" height="12" rx="6" fill="#ffffff" fill-opacity="0.55"/>
+
+  <!-- ===== span link arrows: batch -> each source request ===== -->
+  <g fill="none" stroke="#fdcb6e" stroke-width="2" stroke-dasharray="7 5">
+    <path d="M620,150 C470,124 450,124 304,124" marker-end="url(#arrAmber)"/>
+    <path d="M620,212 C470,212 450,212 304,212" marker-end="url(#arrAmber)"/>
+    <path d="M620,250 C470,300 450,300 304,300" marker-end="url(#arrAmber)"/>
+  </g>
+
+  <!-- async boundary label, drawn above the arrows so they don't cut through it -->
+  <g transform="rotate(-90 540 233)">
+    <rect x="408" y="222" width="264" height="20" rx="4" fill="#1a1a2e" fill-opacity="0.92"/>
+    <text x="540" y="236" text-anchor="middle" fill="#8d95a5" font-size="12">async boundary &#183; queued, processed later</text>
+  </g>
+
+  <!-- span link label -->
+  <rect x="398" y="150" width="92" height="24" rx="12" fill="#1a1a2e" stroke="#fdcb6e" stroke-opacity="0.5"/>
+  <text x="444" y="166" text-anchor="middle" fill="#fdcb6e" font-size="12" font-weight="700">span link</text>
+</svg>

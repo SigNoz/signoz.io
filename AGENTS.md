@@ -5,9 +5,9 @@
 - Stack: Next.js App Router, React, TypeScript, Tailwind CSS
 - Package manager: Yarn
 - App/UI: `app/`, `components/`, `layouts/`, `hooks/`, `utils/`, `constants/`
-- Docs/content: `data/docs/`, `data/blog/`, images in `public/img/docs/`
+- Docs/content: `data/docs/`, `data/blog/`, docs images in `data-assets/img/docs/`
 - Docs navigation and URLs:
-  - sidebar: `constants/docsSideNav.ts`
+  - sidebar: `data/docs-side-nav/main.json`
   - redirects: `next.config.js`
 - Scripts/tests: `scripts/`, `tests/`
 
@@ -19,6 +19,7 @@ Run before finishing. Setup commands (`yarn install`, `yarn dev`) are in `README
   - `yarn check:docs-metadata` + `yarn test:docs-metadata`
   - `yarn check:doc-redirects` + `yarn test:doc-redirects`
 - Site code changes (`app/**`, `components/**`, `hooks/**`, `utils/**`, etc.):
+  - `yarn check:stale-urls` + `yarn test:stale-urls`
   - `yarn lint` (auto-fixes)
   - `yarn build`
 - Mixed docs + code changes: run both sets.
@@ -35,7 +36,7 @@ Run before finishing. Setup commands (`yarn install`, `yarn dev`) are in `README
   - **External links must use the MDX anchor form** with the required `rel` attributes: `<a href="https://example.com" target="_blank" rel="noopener noreferrer nofollow">Example</a>`. Do not use plain markdown `[text](https://...)` for non-signoz.io URLs.
 - If a docs path/URL changes:
   - add a permanent redirect in `next.config.js`
-  - update links and `constants/docsSideNav.ts`
+  - update links and `data/docs-side-nav/main.json`
   - update discovery surfaces when relevant (see the redirects and discovery section in `contributing/docs-authoring.md`)
 - For OpenTelemetry technical claims, verify against official sources first:
   1. `https://opentelemetry.io/docs/*`

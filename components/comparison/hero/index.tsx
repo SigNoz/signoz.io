@@ -6,7 +6,7 @@ const Hero = (props) => {
   const { title, desc, billForComparison, trySigNozCloud, selfHost } = props
   return (
     <div className={styles.svsdHeaderContainer}>
-      <h2 className={styles.headerTitle}>{title}</h2>
+      <h1 className={styles.headerTitle}>{title}</h1>
       <p className={styles.headerDesc}>{desc}</p>
       <div className={styles.ctaContainer}>
         {billForComparison.isVisible && (
@@ -21,7 +21,7 @@ const Hero = (props) => {
         {trySigNozCloud.isVisible && (
           <Link
             className={`button primary-gradient bg-signoz_vanilla-300 text-signoz_ink-300`}
-            href="/teams"
+            href="/teams/"
             prefetch={false}
           >
             Get Started - Free

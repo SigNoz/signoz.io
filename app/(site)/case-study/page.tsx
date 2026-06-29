@@ -34,6 +34,14 @@ type CardProps = {
 
 const cardDetails = [
   {
+    logo: '/img/case_study/logos/kernel-logo.svg',
+    logoAlt: 'Kernel logo',
+    title: 'How Kernel Reduced Browser Acquisition Latency from 140ms to 30ms with SigNoz MCP',
+    name: 'Hiro Tamada',
+    position: 'Founding Engineer, Kernel',
+    href: '/case-study/kernel/',
+  },
+  {
     logo: '/img/case_study/logos/shaped-logo.svg',
     logoAlt: 'Shaped logo',
     title:
@@ -150,12 +158,12 @@ function caseStudies() {
           className="container mx-auto border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400"
           style={{ marginTop: '2rem', paddingBottom: '64px' }}
         >
-          <div className="absolute left-0 right-0 top-0 z-[0] h-screen bg-[url('/img/background_blur/Perlin_noise.webp')] bg-[length:55%]  bg-[center_top_-1rem] bg-no-repeat" />
-          <div className="absolute left-0 right-0 top-0 z-[0] h-screen bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-55rem] " />
-          <div className="relative mb-3 pt-24 text-center font-mono text-sm font-medium uppercase text-signoz_sakura-400">
+          <div className="bg-blur-perlin-noise absolute left-0 right-0 top-0 z-[0] h-screen" />
+          <div className="bg-blur-ellipse-388 absolute left-0 right-0 top-0 z-[0] h-screen" />
+          <h1 className="relative mb-3 pt-24 text-center font-mono text-sm font-medium uppercase text-signoz_sakura-400">
             {' '}
             Customer Stories{' '}
-          </div>
+          </h1>
           <div className="relative mb-4 text-center text-[28px] font-semibold text-signoz_robin-100">
             {' '}
             Observability for teams of all-sizes
@@ -223,7 +231,7 @@ const GetStarted = ({ page }) => {
   return (
     <div className="bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
       <section className="container mx-auto border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0">
-        <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[center_top_calc(-250px)] bg-no-repeat">
+        <div className="bg-blur-ellipse-206">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
               <p className="mb-0 mt-20 text-center text-4xl font-bold">

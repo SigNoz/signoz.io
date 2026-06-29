@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import TrackingLink from '@/components/TrackingLink'
 import Button from '@/components/ui/Button'
+import featureGraphicOtel from '@/public/img/graphics/homepage/feature-graphic-otel.svg?url'
 
 export const TRUSTED_BY_LOGOS = [
   { src: '/svgs/icons/eltropy.svg', alt: 'Eltropy' },
@@ -21,7 +22,7 @@ export const FEATURE_CARDS = [
         <p>
           Describe what you want in natural language and SigNoz builds it. Create dashboards from
           80+ templates or from scratch. Generate alerts with sensible defaults. Run queries and get
-          results directly in chat — no query language required.
+          results in chat, no query language required.
         </p>
         <p className="mt-3 italic text-signoz_vanilla-300">
           &ldquo;Create a latency dashboard for my payment service&rdquo; → Done. Fully interactive.
@@ -72,14 +73,13 @@ export const FEATURE_CARDS = [
     description: (
       <div>
         <p>
-          You can use SigNoz connected with your coding agent to do analysis and get the full
-          picture: traces, logs, metrics, service topology, and deployment history — in one query.
-          Your codebase is already loaded. Correlate production telemetry with actual code that
-          caused it.
+          Connect SigNoz to your coding agent and get the full picture in one query: traces, logs,
+          metrics, service topology, and deployment history. Your codebase is already loaded, so you
+          can correlate production telemetry with the code that caused it.
         </p>
         <p className="mt-3">
-          Connect to Kubernetes, Git, Jira via your cloud provider CLI in your dev environment.
-          Create issues, diagnose root cause, and code fix without leaving your env.
+          Connect to Kubernetes, Git, and Jira through your cloud provider CLI in your dev
+          environment. Create issues, diagnose root cause, and ship a fix without leaving your env.
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
@@ -101,11 +101,13 @@ export const FEATURE_CARDS = [
     description: (
       <div>
         <p>
-          AI SRE tools apply one-size-fits-all reasoning. SigNoz MCP with Claude Code, Cursor, and
-          other coding agents lets developers customize reasoning by codifying best practices in
-          your skills.md and sharing with your team in a GitHub repo. Show it your runbooks, your
-          service topology, your escalation paths and let the coding agents investigate and pinpoint
-          the issue.
+          Install the SigNoz plugin in your coding agent. Claude Code, Cursor, Codex, or Gemini can
+          then work in SigNoz from your editor: look up docs, query your data, build dashboards, and
+          create and triage alerts.
+        </p>
+        <p className="mt-3">
+          Then add your team's judgment. Put your runbooks, service topology, and escalation paths
+          in a skills.md, share it in a GitHub repo, and the agent debugs the way your team does.
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
@@ -153,8 +155,8 @@ export const FEATURE_CARDS = [
     description: (
       <div>
         <p>
-          Connect directly to the tools your team already uses — GitHub, Jira, Kubernetes — with no
-          routing through third-party connectors or external networks. Agents leverage your existing
+          Connect to the tools your team already uses, like GitHub, Jira, and Kubernetes, with no
+          routing through third-party connectors or external networks. Agents use your existing
           runbooks, docs, and best practices to pinpoint issues fast. Team knowledge stays in the
           systems your team already trusts.
         </p>
@@ -185,11 +187,11 @@ export const FEATURE_CARDS = [
     description: (
       <div>
         <p>
-          SigNoz is based on open standards and is a neutral data layer for AI-assisted debugging.
-          Built on OpenTelemetry, the CNCF standard — your instrumentation, your agents, and your
-          investigation data stay yours. Extend across vendors. Port across tools. Define your own
-          debugging workflows and share them as reusable skills. The open investigation format
-          SigNoz uses becomes a standard your entire team can build on.
+          SigNoz is a neutral data layer for AI-assisted debugging, built on open standards. It uses
+          OpenTelemetry - the CNCF standard, so your instrumentation, your agents, and your
+          investigation data stay yours. Extend across vendors, port across tools, and define your
+          own debugging workflows to share as reusable skills. The open investigation format SigNoz
+          uses becomes a standard your team can build on.
         </p>
       </div>
     ),
@@ -197,13 +199,15 @@ export const FEATURE_CARDS = [
   },
   {
     description: (
-      <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg bg-signoz_ink-500">
+      <div className="relative flex h-full min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg bg-signoz_ink-500">
         <Image
-          src="/img/graphics/homepage/feature-graphic-otel.webp"
-          alt="SigNoz built on top of OpenTelemetry — isometric layers showing the open-standards foundation"
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
           className="object-contain"
+          src={featureGraphicOtel}
+          alt="SigNoz built on top of OpenTelemetry — isometric layers showing the open-standards foundation"
+          width={449}
+          height={352}
+          loading="lazy"
+          decoding="async"
         />
       </div>
     ),

@@ -1,0 +1,307 @@
+---
+date: 2026-06-20
+title: Send PlanetScale Metrics to SigNoz with OpenTelemetry
+description: Scrape PlanetScale's Prometheus endpoint with the OpenTelemetry Collector and send branch-level database metrics to SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+Configure the OpenTelemetry Collector to scrape PlanetScale's Prometheus endpoint and send branch-level database metrics to SigNoz. Use this guide for Vitess (MySQL) and Postgres database branches.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Use the same setup steps. Update the exporter endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- A PlanetScale organization with Vitess or Postgres database branches
+- [OpenTelemetry Collector Contrib](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) installed
+- A SigNoz instance ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Steps
+
+### Step 1: Create a PlanetScale service token
+
+1. In PlanetScale, open **Organization Settings** > **Service Tokens**.
+2. Create a service token.
+3. Grant `read_metrics_endpoints` under **Organization access**.
+4. Copy the service token ID and token value before closing the dialog.
+
+Save both values in a local credentials file:
+
+```bash
+printf '%s' '<token-id>:<token>' > planetscale_token
+```
+
+Replace:
+
+- `<token-id>` with the PlanetScale service token ID
+- `<token>` with the PlanetScale service token value
+
+The file must contain the token ID and token value separated by one colon. Do not add quotes or spaces.
+
+For PlanetScale's token format and permissions, see the <a href="https://planetscale.com/docs/api/reference/service-tokens" target="_blank" rel="noopener noreferrer nofollow">PlanetScale service token documentation</a>.
+
+### Step 2: Configure your deployment
+
+Choose the deployment type that matches where your Collector runs.
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+1. Move the token file to the path used in the receiver config:
+
+```bash
+sudo mkdir -p /etc/otelcol-contrib/secrets
+sudo mv planetscale_token /etc/otelcol-contrib/secrets/planetscale_token
+sudo chmod 600 /etc/otelcol-contrib/secrets/planetscale_token
+```
+
+2. Add this receiver to **/etc/otelcol-contrib/config.yaml**:
+
+```yaml:config.yaml
+receivers:
+  prometheus/planetscale:
+    config:
+      scrape_configs:
+        - job_name: planetscale
+          scrape_interval: 30s
+          http_sd_configs:
+            - url: https://api.planetscale.com/v1/organizations/<your-org>/metrics
+              authorization:
+                type: token
+                credentials_file: /etc/otelcol-contrib/secrets/planetscale_token
+              refresh_interval: 10m
+```
+
+Replace `<your-org>` with your PlanetScale organization slug.
+
+3. Add `prometheus/planetscale` to the metrics pipeline receiver list. Keep your existing processors and exporters:
+
+```yaml:config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers:
+        - otlp
+        - hostmetrics
+        - prometheus/planetscale
+      processors: [batch]
+      exporters: [otlphttp]
+```
+
+Your existing receiver, processor, and exporter names may differ. Add **prometheus/planetscale** to the pipeline that sends metrics to SigNoz.
+
+If your Collector service runs as a non-root user, give that user read access to `/etc/otelcol-contrib/secrets/planetscale_token`.
+
+4. Check the config, then restart the Collector:
+
+```bash
+sudo /usr/bin/otelcol-contrib validate --config /etc/otelcol-contrib/config.yaml
+sudo systemctl restart otelcol-contrib
+```
+
+5. Tail the logs and check for scrape or export errors:
+
+```bash
+sudo journalctl -u otelcol-contrib -f
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+1. Add this receiver to the Collector config file you mount into the container, such as `config.yaml` in the same directory as your Docker Compose file or `docker run` command:
+
+```yaml:config.yaml
+receivers:
+  prometheus/planetscale:
+    config:
+      scrape_configs:
+        - job_name: planetscale
+          scrape_interval: 30s
+          http_sd_configs:
+            - url: https://api.planetscale.com/v1/organizations/<your-org>/metrics
+              authorization:
+                type: token
+                credentials_file: /etc/otelcol-contrib/secrets/planetscale_token
+              refresh_interval: 10m
+```
+
+Replace `<your-org>` with your PlanetScale organization slug.
+
+2. Add `prometheus/planetscale` to the metrics pipeline receiver list. Keep your existing processors and exporters:
+
+```yaml:config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers:
+        - otlp
+        - hostmetrics
+        - prometheus/planetscale
+      processors: [batch]
+      exporters: [otlphttp]
+```
+
+3. Mount the token file at the `credentials_file` path used in the receiver config.
+
+For Docker Compose, add this volume to the Collector service:
+
+```yaml:docker-compose.yaml
+services:
+  signoz-collection-agent:
+    volumes:
+      - ./planetscale_token:/etc/otelcol-contrib/secrets/planetscale_token:ro
+```
+
+4. Restart the Collector:
+
+```bash
+docker compose up -d
+docker logs -f signoz-collection-agent
+```
+
+For `docker run`, add this mount to your existing Collector command, then rerun the container:
+
+```bash
+-v "$(pwd)/planetscale_token":/etc/otelcol-contrib/secrets/planetscale_token:ro
+```
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+1. Create a Kubernetes Secret from the token file:
+
+```bash
+kubectl create secret generic planetscale-token \
+  --from-file=planetscale_token=./planetscale_token \
+  -n signoz
+```
+
+2. Add the receiver and secret mount to `otelDeployment` in your `override-values.yaml` for the [SigNoz K8s Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/). The deployment collector runs one scraper for the cluster and avoids duplicate PlanetScale scrapes on multi-node clusters.
+
+```yaml:override-values.yaml
+otelDeployment:
+  config:
+    receivers:
+      prometheus/planetscale:
+        config:
+          scrape_configs:
+            - job_name: planetscale
+              scrape_interval: 30s
+              http_sd_configs:
+                - url: https://api.planetscale.com/v1/organizations/<your-org>/metrics
+                  authorization:
+                    type: token
+                    credentials_file: /etc/otelcol-contrib/secrets/planetscale_token
+                  refresh_interval: 10m
+  extraVolumes:
+    - name: planetscale-token
+      secret:
+        secretName: planetscale-token
+  extraVolumeMounts:
+    - name: planetscale-token
+      mountPath: /etc/otelcol-contrib/secrets/planetscale_token
+      subPath: planetscale_token
+      readOnly: true
+```
+
+3. In the same values file, add `prometheus/planetscale` to `otelDeployment.config.service.pipelines.metrics.receivers`. Keep the receivers, processors, and exporters that your chart values use.
+
+4. Deploy the chart update:
+
+```bash
+helm upgrade --install <release-name> signoz/k8s-infra \
+  -n signoz \
+  -f override-values.yaml
+```
+
+5. Check the Collector logs:
+
+```bash
+kubectl get pods -n signoz
+kubectl logs -n signoz <collector-pod-name> -f
+```
+
+</TabItem>
+</Tabs>
+
+To learn more about PlanetScale setup, see the <a href="https://planetscale.com/docs/vitess/integrations/prometheus" target="_blank" rel="noopener noreferrer nofollow">PlanetScale Vitess Prometheus guide</a> and the <a href="https://planetscale.com/docs/postgres/monitoring/prometheus-postgres" target="_blank" rel="noopener noreferrer nofollow">PlanetScale Postgres Prometheus guide</a>.
+
+## Validate
+
+Open [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) in SigNoz and search for `planetscale_`.
+
+Metrics appear after the first successful scrape. New branches can take up to 10 minutes to appear because the service discovery refresh interval is **10m**.
+
+<Figure
+  src="/img/docs/metrics/planetscale/sample-metrics.webp"
+  alt="PlanetScale metrics in SigNoz Metrics Explorer"
+  caption="PlanetScale metrics in SigNoz Metrics Explorer"
+/>
+
+<Admonition type="info" title="Metric families differ by database type">
+  Vitess branches emit `planetscale_vtgate_*`, `planetscale_vttablet_*`, `planetscale_mysql_*`, and `planetscale_pods_*` metrics. Postgres branches emit `planetscale_postgres_*`, `planetscale_pgbouncer_*`, `planetscale_pods_*`, and `planetscale_volume_*` metrics.
+</Admonition>
+
+For complete metric lists, see the <a href="https://planetscale.com/docs/vitess/integrations/prometheus-metrics" target="_blank" rel="noopener noreferrer nofollow">PlanetScale Vitess metrics reference</a> and the <a href="https://planetscale.com/docs/postgres/monitoring/prometheus-metrics-postgres" target="_blank" rel="noopener noreferrer nofollow">PlanetScale Postgres metrics reference</a>.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### No `planetscale_` metrics in SigNoz
+
+Check the Collector logs for scrape errors:
+
+```bash
+sudo journalctl -u otelcol-contrib -f
+```
+
+For Docker, use `docker logs -f signoz-collection-agent`. For Kubernetes, use the Collector pod logs in the `signoz` namespace.
+
+If the logs show discovery or authentication errors:
+
+- Confirm the token file contains `<token-id>:<token>` with no spaces.
+- Confirm the service token has `read_metrics_endpoints` organization access.
+- Confirm `<your-org>` matches the PlanetScale organization slug.
+- Confirm the Collector can reach `https://api.planetscale.com`.
+
+You can test PlanetScale discovery from a shell that has the token file:
+
+```bash
+curl -sS \
+  -H "Authorization: token $(cat planetscale_token)" \
+  "https://api.planetscale.com/v1/organizations/<your-org>/metrics"
+```
+
+A successful response returns Prometheus scrape targets as JSON. An empty response points to a wrong organization slug, a token without permission, or an organization with no eligible branches.
+
+### Authentication errors (401 or 403)
+
+Regenerate the service token if you did not save the token value during creation. PlanetScale does not show the token value again.
+
+Then update the `planetscale_token` file, remount or recopy it for your environment, and restart the Collector.
+
+### Branches not appearing in SigNoz
+
+PlanetScale service discovery refreshes every 10 minutes in the config above. Wait one full refresh cycle after creating a branch, or restart the Collector to force a fresh discovery request.
+
+### Some metric groups are missing
+
+Check the database type first. Vitess metrics and Postgres metrics use different prefixes.
+
+</details>
+
+## Next Steps
+
+- Import the prebuilt [PlanetScale PostgreSQL](https://signoz.io/docs/dashboards/dashboard-templates/planetscale-postgres-dashboard/) and [PlanetScale Vitess (MySQL)](https://signoz.io/docs/dashboards/dashboard-templates/planetscale-vitess-dashboard/) dashboards.
+- Use the query builder to start [building dashboards](https://signoz.io/docs/userguide/manage-dashboards/) with your PlanetScale metrics.
+- Read how to [Set up Alerts in SigNoz](https://signoz.io/docs/userguide/alerts-management/).
+
+## Get Help
+
+<GetHelp />

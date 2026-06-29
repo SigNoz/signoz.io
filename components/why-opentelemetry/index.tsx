@@ -39,7 +39,7 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
     <>
       <section
         className={cn(
-          'mx-auto w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          'mx-auto w-full max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400',
           className
         )}
       >
@@ -73,7 +73,7 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
       </section>
       <div
         className={cn(
-          'mx-auto grid w-full grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:w-[80vw]',
+          'mx-auto grid w-full max-w-8xl grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2',
           className
         )}
       >
@@ -90,7 +90,7 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
       </div>
       <section
         className={cn(
-          'mx-auto w-full border border-dashed border-signoz_slate-400 md:w-[80vw]',
+          'mx-auto w-full max-w-8xl border border-dashed border-signoz_slate-400',
           className
         )}
       >
@@ -177,7 +177,7 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
       </section>
       <div
         className={cn(
-          'mx-auto h-12 w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          'mx-auto h-12 w-full max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400',
           className
         )}
       />

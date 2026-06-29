@@ -1,12 +1,9 @@
 ---
-date: 2026-05-07
-id: temporal-cloud-metrics
+date: 2026-06-11
 title: Getting Temporal Cloud Metrics into SigNoz
 description: Collect Temporal Cloud metrics in SigNoz by configuring an OpenTelemetry Collector to scrape the Temporal Cloud OpenMetrics endpoint.
 doc_type: howto
 ---
-
-import GetHelp from '@/components/shared/get-help.md'
 
 This guide shows how to collect Temporal Cloud metrics in SigNoz. You run an OpenTelemetry Collector in your infrastructure, configure it to scrape the <a href="https://docs.temporal.io/cloud/metrics/openmetrics/" target="_blank" rel="noopener noreferrer nofollow">Temporal Cloud OpenMetrics endpoint</a>, and forward the metrics to SigNoz via OTLP.
 
@@ -16,7 +13,7 @@ This guide shows how to collect Temporal Cloud metrics in SigNoz. You run an Ope
 - An [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) installed in your infrastructure
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -38,7 +35,7 @@ Replace `<TEMPORAL_API_KEY>` with the key you generated. A successful response r
 
 Choose the setup that matches your environment:
 
-<Tabs>
+<Tabs entityName="environment">
 <TabItem value="vm" label="VM / Binary" default>
 
 Add the `prometheus` receiver and SigNoz `otlp` exporter to your `otel-collector-config.yaml`. If your collector already has other receivers, append the `prometheus` block and add it to the pipeline — do not replace your existing config.
@@ -236,7 +233,7 @@ You can also filter by metric name: `?metrics=temporal_cloud_v1_workflow_success
 
 In SigNoz, go to **Dashboards → New Dashboard → Import JSON**.
 
-Download the dashboard JSON from [Temporal Cloud Metrics](https://raw.githubusercontent.com/SigNoz/dashboards/main/temporal.io/Temporal%20Cloud%20Metrics.json). The dashboard includes panels for workflow success rate, service request counts, latency percentiles, and worker poll metrics.
+Download the dashboard JSON from [Temporal Cloud Metrics](https://raw.githubusercontent.com/SigNoz/dashboards/main/temporal.io/temporal-cloud-metrics.json). The dashboard includes panels for workflow success rate, service request counts, latency percentiles, and worker poll metrics.
 
 ## Validate
 

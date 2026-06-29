@@ -1,6 +1,5 @@
 ---
-date: 2026-02-23
-id: opentelemetry-rust
+date: 2026-06-11
 title: Send Metrics from Rust Application Using OpenTelemetry
 description: Learn how to instrument your Rust application with OpenTelemetry to send metrics to SigNoz
 
@@ -9,7 +8,7 @@ doc_type: howto
 
 This guide shows you how to instrument your Rust application with OpenTelemetry to send metrics to SigNoz. You will learn how to create custom metrics using counters, histograms, gauges, and observable instruments.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
     Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -23,7 +22,7 @@ This guide shows you how to instrument your Rust application with OpenTelemetry 
 
 <Tabs entityName="environment">
 <TabItem value="vm" label="VM" default>
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
     A VM is a virtual computer that runs on physical hardware. This includes:
     - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
     - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
@@ -148,7 +147,7 @@ Create a helper function to configure the OpenTelemetry Meter Provider. This pro
 use opentelemetry::global;
 use opentelemetry::KeyValue;
 use opentelemetry_otlp::{MetricExporter, WithExportConfig, WithHttpConfig};
-use opentelemetry_sdk::metrics::{PeriodicReader, SdkMeterProvider};
+use opentelemetry_sdk::metrics::{PeriodicReader, SdkMeterProvider, Temporality};
 use opentelemetry_sdk::Resource;
 use std::time::Duration;
 
@@ -182,12 +181,13 @@ fn init_meter_provider() -> Result<SdkMeterProvider, Box<dyn std::error::Error +
         })
         .unwrap_or_default();
 
-    // Build the OTLP HTTP exporter
+    // Build the OTLP HTTP exporter with delta temporality
     let exporter = MetricExporter::builder()
         .with_http()
         .with_endpoint(&endpoint)
         .with_headers(headers.into_iter().collect())
         .with_timeout(Duration::from_secs(10))
+        .with_temporality(Temporality::Delta)
         .build()?;
 
     // Create resource with service name
@@ -211,6 +211,12 @@ fn init_meter_provider() -> Result<SdkMeterProvider, Box<dyn std::error::Error +
     Ok(meter_provider)
 }
 ```
+
+<KeyPointCallout title="Why delta temporality?" defaultCollapsed="true">
+OpenTelemetry SDKs export metrics with **cumulative** temporality by default, which re-sends the running total of every active series on each export interval — even when nothing has changed. With `.with_temporality(Temporality::Delta)`, synchronous instruments (like Counters and Histograms) that record nothing during an export interval send no data points for that interval, reducing the number of billable samples.
+
+The Rust SDK does not support the `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` environment variable, so temporality is set on the exporter builder as shown above. Observable (asynchronous) instruments emit a data point on every collection cycle regardless of temporality. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for details.
+</KeyPointCallout>
 
 ### Step 4. Instrument your application
 

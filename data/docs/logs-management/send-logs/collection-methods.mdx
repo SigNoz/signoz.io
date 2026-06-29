@@ -1,18 +1,16 @@
 ---
-date: 2026-05-19
-title: Choosing a Collection Method
-id: collection-methods
-description: Understand the different ways to export logs to SigNoz — SDK OTLP, HTTP API, file-based collection, OTel receivers, and log processors. Learn when to use each method.
+date: 2026-06-19
+title: Choosing a Log Collection Method for SigNoz
+meta_title: "Log Collection Methods: OTLP & Collector"
+description: "Compare log collection methods for SigNoz, including SDK OTLP, HTTP API, files, OTel receivers, and log processors."
 doc_type: explanation
 ---
-
-import GetHelp from '@/components/shared/get-help.md'
 
 SigNoz accepts logs via **OTLP** (OpenTelemetry Protocol) or **HTTP**. This doc explains the different paths your logs can take to reach SigNoz and helps you understand the trade-offs of each approach.
 
 For step-by-step setup guides, see [Send Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs-to-signoz/).
 
-## Quick Decision Guide
+## Quick Log Collection Decision Guide
 
 | Your Situation | Recommended Path | Why |
 |----------------|-----------------|-----|
@@ -24,7 +22,7 @@ For step-by-step setup guides, see [Send Logs to SigNoz](https://signoz.io/docs/
 
 ---
 
-## Path 1: SDK OTLP Export
+## Path 1: SDK OTLP Export for Application Logs
 
 Your application uses an OpenTelemetry SDK to send logs directly to SigNoz via OTLP.
 
@@ -50,12 +48,12 @@ Your application uses an OpenTelemetry SDK to send logs directly to SigNoz via O
 |----------|-------|
 | Python | [Python Logs](https://signoz.io/docs/logs-management/send-logs/python-logs/) |
 | Node.js | [Console](https://signoz.io/docs/logs-management/send-logs/nodejs-logs/), [Pino](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs/), [Winston](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs/), [Bunyan](https://signoz.io/docs/logs-management/send-logs/opentelemetry-nodejs-bunyan-logs/) |
-| Java | [Java Logs](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java/) |
+| Java | [Java Logs](https://signoz.io/docs/logs-management/send-logs/java-logs/) |
 | Go | [Zap](https://signoz.io/docs/logs-management/send-logs/zap-to-signoz/), [Zerolog](https://signoz.io/docs/logs-management/send-logs/zerolog-to-signoz/), [Logrus](https://signoz.io/docs/logs-management/send-logs/logrus-to-signoz/), [slog](https://signoz.io/docs/logs-management/send-logs/slog-to-signoz/) |
 
 ---
 
-## Path 2: HTTP API
+## Path 2: Send Logs with the HTTP API
 
 Send logs directly to SigNoz over HTTP using a simple JSON payload.
 
@@ -78,7 +76,7 @@ Send logs directly to SigNoz over HTTP using a simple JSON payload.
 
 ---
 
-## Path 3: Write to File + OTel Collector
+## Path 3: Collect File Logs with the OTel Collector
 
 Your application writes logs to stdout/file. The OpenTelemetry Collector reads these files and sends logs to SigNoz.
 
@@ -110,7 +108,7 @@ Your application writes logs to stdout/file. The OpenTelemetry Collector reads t
 
 ---
 
-## Path 4: OTel Collector Receivers
+## Path 4: Collect Logs with OTel Collector Receivers
 
 The OpenTelemetry Collector has native receivers for many log sources. These receivers connect directly to services and pull logs without needing file-based collection.
 
@@ -146,7 +144,7 @@ The OpenTelemetry Collector supports many more receivers. See the full list in t
 
 ---
 
-## Path 5: Log Processors
+## Path 5: Forward Logs with Log Processors
 
 If you already have FluentBit, Fluentd, Logstash, or Vector in your infrastructure, you can forward logs to SigNoz.
 
@@ -176,7 +174,7 @@ If you already have FluentBit, Fluentd, Logstash, or Vector in your infrastructu
 
 ---
 
-## Cloud & Platform Scenarios
+## Cloud and Platform Log Collection Scenarios
 
 Different cloud platforms and deployment models support multiple collection paths. This section helps you understand which paths apply to your specific scenario.
 
@@ -231,7 +229,7 @@ Different cloud platforms and deployment models support multiple collection path
 
 ---
 
-## Why Use the OTel Collector?
+## Why Use the OTel Collector for Log Collection?
 
 The OpenTelemetry Collector is a key component in Paths 3 and 4. It provides:
 
@@ -244,7 +242,7 @@ Learn more: [OTel Collector Configuration](https://signoz.io/docs/opentelemetry-
 
 ---
 
-## Combining Multiple Paths
+## Combining Multiple Log Collection Paths
 
 Many teams use multiple collection methods:
 
@@ -255,7 +253,7 @@ If you're on Kubernetes and use both approaches, [disable automatic log collecti
 
 ---
 
-## Comparison Summary
+## Log Collection Method Comparison Summary
 
 | Path | Trace Correlation | Reliability | Code Changes | Best For |
 |------|------------------|-------------|--------------|----------|
@@ -267,14 +265,14 @@ If you're on Kubernetes and use both approaches, [disable automatic log collecti
 
 ---
 
-## Next Steps
+## Next Steps for Sending Logs to SigNoz
 
 Once logs are flowing to SigNoz:
 
-1. [Explore logs in the Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/)
+1. [Explore logs in the Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/)
 2. [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/)
 3. [Use log pipelines for parsing and enrichment](https://signoz.io/docs/logs-pipelines/introduction/)
 
-## Get Help
+## Get Help with Log Collection
 
 <GetHelp />

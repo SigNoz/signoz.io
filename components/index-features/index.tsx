@@ -126,7 +126,7 @@ export const SigNozFeatures = ({ className }: { className?: string }) => {
     <>
       <section
         className={cn(
-          'bg-blur-ellipse-388 mx-auto w-full max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          'bg-blur-ellipse-388 mx-auto w-full max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400',
           className
         )}
       >
@@ -192,7 +192,7 @@ export const SigNozFeatures = ({ className }: { className?: string }) => {
       </section>
       <div
         className={cn(
-          'homepage-observability-container mx-auto grid w-full grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:w-[80vw]',
+          'homepage-observability-container mx-auto grid w-full max-w-8xl grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2',
           className
         )}
       >

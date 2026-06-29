@@ -13,9 +13,7 @@ import {
 } from '@/utils/docs/onboardingPath'
 
 export const SITE_BASE_URL =
-  process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' || !process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL
-    ? 'https://signoz.io'
-    : `https://${process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL}`
+  process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' ? 'https://signoz.io' : ''
 
 type CustomLinkProps = LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>
 

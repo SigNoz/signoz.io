@@ -4,4 +4,3 @@ export interface SectionLayoutProps {
   variant?: 'default' | 'full-width' | 'bordered' | 'no-border' | 'border-x'
   withBackground?: boolean
 }
-  

@@ -1,19 +1,16 @@
 ---
-date: 2026-05-06
-id: one-click-azure-integrations
+date: 2026-06-18
 title: Azure One-Click Integrations
-description: Monitor Azure CDN FrontDoor and Blob Storage with SigNoz One-Click Azure Integration. Connect your Azure subscription and SigNoz deploys the monitoring infrastructure for you.
+description: Monitor Azure compute, storage, networking, and database services with SigNoz One-Click Azure Integration. Connect your subscription and start monitoring.
 doc_type: howto
 tags: [SigNoz Cloud]
 ---
-
-import GetHelp from '@/components/shared/get-help.md'
 
 SigNoz One-Click Azure Integration monitors your Azure services without manual setup. Connect your Azure subscription from the SigNoz UI, and SigNoz deploys an agent that provisions Event Hubs, diagnostic settings, and an OpenTelemetry Collector via Azure Deployment Stacks. Each supported service ships with a pre-built dashboard, visible as soon as data starts flowing.
 
 ## Supported integrations
 
-<AzureOneClickListicle />
+<Listicle name="azure-one-click" />
 
 ## Key capabilities
 
@@ -170,6 +167,19 @@ The agent updates the telemetry pipeline in the background, deploying or removin
 
 To monitor multiple Azure subscriptions, click **Add New Account** and follow the same installation steps for each subscription.
 
+### Updating the agent
+
+The SigNoz agent container app does not update automatically. To update it to the latest version:
+
+1. Check each service's documentation page for its minimum required agent version (listed at the top).
+2. In the Azure Portal, go to **Subscriptions** and select your subscription.
+3. Navigate to **Resource Groups** and open **signoz-integration-rg**.
+4. Select the **signoz-integration-agent** container app.
+5. In the left menu, under **Application**, choose **Containers**.
+6. In the **Properties** section, click **Edit** on the container.
+7. Update only the version tag in the **Image and tag** field to the latest version shown in the SigNoz Azure Integration control panel, then save.
+8. Verify the container app restarts with the new version by checking the **Revisions** view for a new active revision.
+
 ### Uninstalling
 
 1. Click **Edit Account**, then click **Disconnect** at the bottom of the Account Settings panel.
@@ -202,7 +212,7 @@ Remove-AzSubscriptionDeploymentStack `
 
 ## Limitations
 
-- **Two Azure services are currently supported**: Azure CDN FrontDoor and Azure Blob Storage. More services will be added in future releases.
+- **Supported Azure services**: Azure CDN FrontDoor, Azure Blob Storage, Azure Virtual Machines, Azure Container Apps, Azure App Services, Azure Kubernetes Service (AKS), and the database services — Azure SQL Database, Azure SQL Managed Instance, Azure Database for MySQL Flexible Server, Azure Database for PostgreSQL Flexible Server, Azure MongoDB (vCore), Azure Cosmos DB, Azure Managed Instance for Apache Cassandra, and Azure Cache for Redis. More services will be added in future releases.
 - **Large deployments may hit ARM template size limits**: If you have a large number of resources across many regions and resource groups, the deployment may fail. Add only the resource groups you actively want to monitor. Support for larger deployments will be addressed in a future release.
 - **Deployment region is set at connection time and cannot be changed**: To change the region, disconnect and reconnect the account.
 

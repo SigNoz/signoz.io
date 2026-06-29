@@ -35,22 +35,10 @@ import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticle
 import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonitoring/GetStartedInfrastructureMonitoring'
 import ImageCTA from './ImageCTA/ImageCTA'
 import TrackingLink from './TrackingLink'
-import APMQuickStartOverview from './APM/APMQuickStartOverview'
-import APMInstrumentationListicle from './APM/APMInstrumentationListicle'
-import JavascriptInstrumentationListicle from './APM/JavascriptInstrumentationListicle'
-import JavaInstrumentationListicle from './APM/JavaInstrumentationListicle'
-import LibraryTabs from './LibraryTabs/LibraryTabs'
-import LibraryTab from './LibraryTabs/LibraryTab'
+import Listicle from './Listicle/Listicle'
 import MDXButton from './MDXButton/MDXButton'
 import IconCardGrid from './Card/IconCardGrid'
-import LogsQuickStartOverview from './Logs/LogsQuickStartOverview'
-import LogsInstrumentationListicle from './Logs/LogsInstrumentationListicle'
-import IntegrationsListicle from './Integrations/IntegrationsListicle'
 import HostingDecision from './shared/HostingDecision'
-import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
-import K8sInstallationListicle from './Setup/K8sInstallationListicle'
-import MarketplaceInstallationListicle from './Setup/MarketplaceInstallationListicle'
-import CollectionAgentsListicle from './Setup/CollectionAgentsListicle'
 import CloneRepo from './shared/CloneRepo'
 import CommonPrerequisites from './shared/CommonPrerequisites'
 import K8sInstall from './shared/K8sInstall'
@@ -60,28 +48,24 @@ import SigNozCloud from './shared/SigNozCloud'
 import UpgradeInfo from './shared/UpgradeInfo'
 import OtelOperatorOTLPEndpoint from './shared/OtelOperatorOTLPEndpoint'
 import OtelOperatorAutoInstrumentation from './shared/OtelOperatorAutoInstrumentation'
+import GetHelp from './shared/GetHelp'
+import K8sNextSteps from './shared/K8sNextSteps'
+import MultiNodePart1 from './shared/MultiNodePart1'
+import MultiNodePart2 from './shared/MultiNodePart2'
+import PrereqsInstrument from './shared/PrereqsInstrument'
+import TraefikMetrics from './shared/TraefikMetrics'
+import MetricsDefinition from './shared/MetricsDefinition'
+import CHClientWithOutput from './shared/CHClientWithOutput'
 
 import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
 import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
-import MigrateToSigNoz from './MigrateToSigNoz/MigrateToSigNozOverview'
-import DashboardTemplatesListicle from './Dashboards/DashboardTemplatesListicle'
 import DashboardActions from './Dashboards/DashboardActions'
-import KubernetesDashboardsListicle from './Dashboards/KubernetesDashboardsListicle'
-import APMDashboardsListicle from './Dashboards/APMDashboardsListicle'
-import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsListicle'
-import LiteLLMDashboardsListicle from './Dashboards/LiteLLMDashboardsListicle'
 import ProductFeatureShowcase from './ProductFeatureShowcase/ProductFeatureShowcase'
 
-import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
 import OtelCollectorFlow from './OtelCollectorFlow/OtelCollectorFlow'
 
 import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
-import MetricsQuickStartOverview from './Metrics/MetricsQuickStartOverview'
-import CICDMonitoringListicle from './CICD/CICDMonitoringListicle'
 import ToggleHeading from './Headings/ToggleHeading'
-import AWSMonitoringListicle from './AWS/AWSMonitoringListicle'
-import AWSOneClickListicle from './AWS/AWSOneClickListicle'
-import AzureOneClickListicle from './Azure/AzureOneClickListicle'
 import Region from './Region/Region'
 import RegionTable from './Region/RegionTable'
 import { RegionAwarePre, RegionAwareCode } from './Region/RegionAwareComponents'
@@ -154,33 +138,14 @@ export const components = {
   GetStartedInfrastructureMonitoring,
   ImageCTA,
   TrackingLink,
-  APMQuickStartOverview,
-  APMInstrumentationListicle,
-  JavascriptInstrumentationListicle,
-  JavaInstrumentationListicle,
-  LibraryTabs,
-  LibraryTab,
+  Listicle,
   MDXButton,
   IconCardGrid,
-  LogsQuickStartOverview,
-  LogsInstrumentationListicle,
-  IntegrationsListicle,
   HostingDecision,
-  SelfHostInstallationListicle,
-  K8sInstallationListicle,
   ArticleSeriesBottom,
   ArticleSeriesTop,
-  MigrateToSigNoz,
-  DashboardTemplatesListicle,
   DashboardActions,
-  KubernetesDashboardsListicle,
-  APMDashboardsListicle,
-  HostMetricsDashboardsListicle,
-  LiteLLMDashboardsListicle,
-  MarketplaceInstallationListicle,
-  LLMMonitoringListicle,
   OtelCollectorFlow,
-  CollectionAgentsListicle,
   K8sInstall,
   K8sOtelDemo,
   RetentionInfo,
@@ -190,13 +155,8 @@ export const components = {
   OtelOperatorAutoInstrumentation,
   ResponseTimeVisualizer,
   ProductFeatureShowcase,
-  MetricsQuickStartOverview,
-  CICDMonitoringListicle,
   CloneRepo,
   CommonPrerequisites,
-  AWSMonitoringListicle,
-  AWSOneClickListicle,
-  AzureOneClickListicle,
   CardinalityExplosion,
   MemoryGauge,
   QueryRace,
@@ -206,4 +166,12 @@ export const components = {
   DatabaseTable,
   InlineCTA,
   MCPInstallButton,
+  GetHelp,
+  K8sNextSteps,
+  MultiNodePart1,
+  MultiNodePart2,
+  PrereqsInstrument,
+  TraefikMetrics,
+  MetricsDefinition,
+  CHClientWithOutput,
 } as unknown as MDXComponents

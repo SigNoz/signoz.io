@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { UpgradePathState, UpgradeSchema, GitHubReleasesResponse } from '../types/upgrade'
-import type { Doc } from 'contentlayer/generated'
 import upgradeSchema from '@/constants/upgradeSchema.json'
 import {
   calculateUpgradePath,
@@ -25,7 +24,12 @@ import Link from 'next/link'
 
 const TYPED_UPGRADE_SCHEMA = upgradeSchema as unknown as UpgradeSchema
 
-const UpgradePathTool: React.FC<{ docsBySlug: Record<string, Doc> }> = ({ docsBySlug }) => {
+type UpgradePathToolProps = {
+  docMetaBySlug: Record<string, { title: string }>
+  compiledDocsBySlug: Record<string, React.ReactNode>
+}
+
+const UpgradePathTool: React.FC<UpgradePathToolProps> = ({ docMetaBySlug, compiledDocsBySlug }) => {
   const [state, setState] = useState<UpgradePathState>({
     currentVersion: '',
     targetVersion: '',
@@ -283,7 +287,8 @@ const UpgradePathTool: React.FC<{ docsBySlug: Record<string, Doc> }> = ({ docsBy
                   className="col-span-2 max-h-screen w-full"
                   currentStep={currentStepData}
                   docUrl={currentStepData?.releaseInfo?.guideUrl ?? ''}
-                  docsBySlug={docsBySlug}
+                  docMetaBySlug={docMetaBySlug}
+                  compiledDocsBySlug={compiledDocsBySlug}
                 />
               </div>
             )}

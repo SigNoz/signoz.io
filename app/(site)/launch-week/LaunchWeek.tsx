@@ -46,12 +46,12 @@ const MainSection: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="mt-8 max-w-full border-b-2 border-dashed border-signoz_slate-200/50 px-6 text-5xl font-medium uppercase text-signoz_vanilla-100 max-md:max-w-full max-md:text-4xl">
+              <h1 className="mt-8 max-w-full border-b-2 border-dashed border-signoz_slate-200/50 px-6 text-5xl font-medium uppercase text-signoz_vanilla-100 max-md:max-w-full max-md:text-4xl">
                 Launch Week{' '}
                 <span className="launch-week-counter rounded bg-signoz_cherry-500  text-signoz_vanilla-100">
                   5
                 </span>
-              </div>
+              </h1>
             </div>
             <div className="z-10 mt-11 self-stretch border-b-2 border-dashed border-signoz_slate-200/50 px-6 font-mono text-base font-medium leading-8 text-signoz_vanilla-400 max-md:mt-10 max-md:max-w-full">
               Join us for a week of new features and find new ways
@@ -103,7 +103,7 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href="/blog/interactive-dashboards"
+              href="/blog/interactive-dashboards/"
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
@@ -410,7 +410,7 @@ const GetStarted = ({ page }) => {
     <Card className="flex flex-col gap-16 bg-transparent px-20 font-medium max-md:max-w-full max-md:px-5">
       <div className="bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:45%] bg-[center_top_-12rem] sm:bg-no-repeat">
         <section className="container flex max-h-full max-w-full flex-col !px-0">
-          <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[length:110%] bg-[center_top_calc(-250px)] bg-no-repeat">
+          <div className="bg-blur-ellipse-206">
             <div className="flex flex-col gap-12">
               <p className="mb-0 mt-20 text-center text-4xl font-bold">
                 Get started with <br /> SigNoz Cloud today

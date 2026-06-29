@@ -14,16 +14,12 @@ import remarkMath from 'remark-math'
 import readingTime from 'reading-time'
 import { generateStructuredData } from './structuredData'
 import { MDXContent } from './strapi'
+import { deriveDates, resolveLatestDate } from './dateUtils'
 import siteMetadata from '@/data/siteMetadata'
 
 // Heroicon mini link for auto-linking headers
 const linkIcon = fromHtmlIsomorphic(
-  `<span class="content-header-link">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 linkicon">
-        <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
-        <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
-        </svg>
-    </span>`,
+  `<span class="content-header-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 linkicon"><path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" /><path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" /></svg></span>`,
   { fragment: true }
 )
 
@@ -81,6 +77,7 @@ export function generateTOC(content: string) {
 
 // Content type to route prefix mapping for related articles
 const contentTypeRoutePrefix: Record<string, string> = {
+  doc: 'docs',
   guide: 'guides',
   comparison: 'comparisons',
   blog: 'blog',
@@ -88,6 +85,8 @@ const contentTypeRoutePrefix: Record<string, string> = {
   opentelemetry: 'opentelemetry',
   case_study: 'case-study',
 }
+
+const DEFAULT_DOC_TAGS = ['SigNoz Cloud', 'Self-Host']
 
 // Extract the populated relation document from a related_articles component entry.
 // Each entry has content_type + one populated relation field matching that type.
@@ -120,8 +119,8 @@ function transformRelatedArticles(content: MDXContent): any[] {
 
       articles.push({
         title: doc.title,
-        date: doc.date || doc.updatedAt || doc.publishedAt,
-        publishedOn: doc.date || doc.updatedAt || doc.publishedAt,
+        date: resolveLatestDate(doc),
+        publishedOn: resolveLatestDate(doc),
         url: `${siteMetadata.siteUrl}/${routePrefix}${doc.path || ''}`,
         content_type: contentType,
       })
@@ -151,8 +150,8 @@ function transformRelatedArticles(content: MDXContent): any[] {
           url: `${siteMetadata.siteUrl}/${prefix}${item.path || ''}`,
           slug: (item.path || '').split('/').pop() || '',
           title: item.title,
-          date: item.date || item.updatedAt || item.publishedAt,
-          publishedOn: item.date || item.updatedAt || item.publishedAt,
+          date: resolveLatestDate(item),
+          publishedOn: resolveLatestDate(item),
           tags: item.tags?.map((tag: string | MDXContent) =>
             typeof tag === 'string' ? tag : tag.value
           ),
@@ -186,6 +185,8 @@ export const transformComparison = (comparison: MDXContent) => {
   const slug = comparison.path?.split('/').pop() || ''
   const path = `comparisons/${slug}`
 
+  const { publishedDate, updatedDate, sortDate } = deriveDates(comparison)
+
   const authors = Array.isArray(comparison.authors)
     ? comparison.authors.map((author: string | MDXContent) =>
         typeof author === 'string' ? author : author.key
@@ -209,7 +210,9 @@ export const transformComparison = (comparison: MDXContent) => {
     ...comparison,
     slug,
     path,
-    publishedAt: comparison.date || comparison.updatedAt || comparison.publishedAt,
+    published_date: publishedDate,
+    updated_date: updatedDate,
+    publishedAt: publishedDate || comparison.updatedAt || comparison.publishedAt,
   } as MDXContent
 
   return {
@@ -219,7 +222,9 @@ export const transformComparison = (comparison: MDXContent) => {
     type: 'Comparison',
     title: comparison.title,
     meta_title: comparison.meta_title,
-    date: comparison.date,
+    published_date: publishedDate,
+    updated_date: updatedDate,
+    date: sortDate,
     tags,
     description: comparison.description,
     authors,
@@ -240,6 +245,8 @@ export const transformComparison = (comparison: MDXContent) => {
 export const transformBlog = (blog: MDXContent) => {
   const slug = blog.path?.split('/').pop() || ''
   const path = `blog/${slug}`
+
+  const { publishedDate, updatedDate, sortDate } = deriveDates(blog)
 
   const authors = Array.isArray(blog.authors)
     ? blog.authors.map((author: string | MDXContent) =>
@@ -264,7 +271,9 @@ export const transformBlog = (blog: MDXContent) => {
     ...blog,
     slug,
     path,
-    publishedAt: blog.date || blog.updatedAt || blog.publishedAt,
+    published_date: publishedDate,
+    updated_date: updatedDate,
+    publishedAt: publishedDate || blog.updatedAt || blog.publishedAt,
   } as MDXContent
 
   return {
@@ -274,8 +283,10 @@ export const transformBlog = (blog: MDXContent) => {
     type: 'Blog',
     title: blog.title,
     meta_title: blog.meta_title,
-    date: blog.date,
-    lastmod: blog.lastmod || blog.date,
+    published_date: publishedDate,
+    updated_date: updatedDate,
+    date: sortDate,
+    lastmod: blog.lastmod || sortDate,
     draft: blog.draft ?? false,
     summary: blog.summary || blog.description,
     tags,
@@ -307,6 +318,8 @@ export const transformGuide = (guide: MDXContent) => {
   const slug = guide.path?.split('/').pop() || ''
   const path = `guides/${slug}`
 
+  const { publishedDate, updatedDate, sortDate } = deriveDates(guide)
+
   const authors = Array.isArray(guide.authors)
     ? guide.authors.map((author: string | MDXContent) =>
         typeof author === 'string' ? author : author.key
@@ -330,7 +343,9 @@ export const transformGuide = (guide: MDXContent) => {
     ...guide,
     slug,
     path,
-    publishedAt: guide.date || guide.updatedAt || guide.publishedAt,
+    published_date: publishedDate,
+    updated_date: updatedDate,
+    publishedAt: publishedDate || guide.updatedAt || guide.publishedAt,
   } as MDXContent
 
   return {
@@ -340,8 +355,10 @@ export const transformGuide = (guide: MDXContent) => {
     type: 'Guide',
     title: guide.title,
     meta_title: guide.meta_title,
-    date: guide.date,
-    lastmod: guide.lastmod || guide.date,
+    published_date: publishedDate,
+    updated_date: updatedDate,
+    date: sortDate,
+    lastmod: guide.lastmod || sortDate,
     draft: guide.draft ?? false,
     summary: guide.summary || guide.description,
     tags,
@@ -359,5 +376,78 @@ export const transformGuide = (guide: MDXContent) => {
     filePath: path.endsWith('.mdx') ? path : `${path}.mdx`,
     structuredData: generateStructuredData('guides', contentForStructuredData),
     relatedArticles: transformRelatedArticles(guide),
+  }
+}
+
+export const transformDoc = (doc: MDXContent) => {
+  const slug = (doc.path || '').replace(/^\/+|\/+$/g, '')
+  const docPath = `docs/${slug}`
+
+  const { publishedDate, updatedDate, sortDate } = deriveDates(doc)
+
+  const docTags =
+    Array.isArray(doc.tags) && doc.tags.length > 0
+      ? doc.tags
+          .map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
+          .filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0)
+      : DEFAULT_DOC_TAGS
+
+  const authors = Array.isArray(doc.authors)
+    ? doc.authors.map((author: string | MDXContent) =>
+        typeof author === 'string' ? author : author.key
+      )
+    : []
+
+  const keywords = Array.isArray(doc.keywords)
+    ? doc.keywords.map((keyword: string | MDXContent) =>
+        typeof keyword === 'string' ? keyword : keyword.value
+      )
+    : []
+
+  const readingTimeStats = readingTime(doc.content || '')
+
+  const contentForStructuredData = {
+    ...doc,
+    slug,
+    path: docPath,
+    tags: docTags,
+    published_date: publishedDate,
+    updated_date: updatedDate,
+    publishedAt: publishedDate || doc.updatedAt || doc.publishedAt,
+  } as MDXContent
+
+  return {
+    ...doc,
+    _id: doc.documentId || String(doc.id),
+    _raw: {},
+    type: 'Doc',
+    title: doc.title,
+    meta_title: doc.meta_title,
+    published_date: publishedDate,
+    updated_date: updatedDate,
+    date: sortDate,
+    lastmod: doc.lastmod || sortDate,
+    draft: doc.draft ?? false,
+    summary: doc.summary || doc.description,
+    tags: docTags,
+    docTags,
+    description: doc.description,
+    image: doc.image,
+    images: doc.images,
+    authors,
+    keywords,
+    slug,
+    content: doc.content,
+    body: { raw: doc.content || '', code: '' },
+    toc: generateTOC(doc.content || ''),
+    readingTime: readingTimeStats,
+    path: docPath,
+    filePath: docPath.endsWith('.mdx') ? docPath : `${docPath}.mdx`,
+    structuredData: generateStructuredData('docs', contentForStructuredData),
+    relatedArticles: transformRelatedArticles(doc),
+    hide_table_of_contents: doc.hide_table_of_contents ?? false,
+    canonicalUrl: doc.canonicalUrl,
+    sidebar_label: doc.sidebar_label,
+    doc_type: doc.doc_type,
   }
 }

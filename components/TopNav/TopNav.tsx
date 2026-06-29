@@ -14,7 +14,6 @@ import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
 import ResourcesDropdown from './ResourcesDropdown'
-import CompareSignozDropdown from './CompareSignozDropdown'
 import { NavDropdownProvider } from './NavDropdownContext'
 import NavDropdownPanel from './NavDropdownPanel'
 import MobileMenu from './MobileMenu'
@@ -71,7 +70,7 @@ export default function TopNav() {
     <div className="fixed left-0 right-0 z-[50]">
       <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
         <nav
-          className="mx-auto flex w-full max-w-8xl justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100 md:px-8"
+          className="mx-auto flex w-full max-w-8xl justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
           aria-label="Global"
         >
           <div className="flex justify-start gap-x-6">
@@ -100,7 +99,7 @@ export default function TopNav() {
                   {visibility.showProduct && <ProductDropdown />}
                   {visibility.showDocs && (
                     <TrackingLink
-                      href="/docs"
+                      href="/docs/introduction/"
                       className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
                       clickType="Nav Click"
                       clickName="Docs Link"
@@ -112,10 +111,9 @@ export default function TopNav() {
                     </TrackingLink>
                   )}
                   {visibility.showResources && <ResourcesDropdown />}
-                  {visibility.showCompareSignoz && <CompareSignozDropdown />}
                   {visibility.showPricing && (
                     <TrackingLink
-                      href="/pricing"
+                      href="/pricing/"
                       className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
                       clickType="Nav Click"
                       clickName="Pricing Link"
@@ -123,18 +121,6 @@ export default function TopNav() {
                       clickLocation="Top Navbar"
                     >
                       Pricing
-                    </TrackingLink>
-                  )}
-                  {visibility.showCustomerStories && (
-                    <TrackingLink
-                      href="/case-study"
-                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
-                      clickType="Nav Click"
-                      clickName="Customer Stories Link"
-                      clickText="Customers"
-                      clickLocation="Top Navbar"
-                    >
-                      Customers
                     </TrackingLink>
                   )}
                 </div>
@@ -161,7 +147,7 @@ export default function TopNav() {
                       Sign In
                     </TrackingButton>
                     <TrackingLink
-                      href="/teams"
+                      href="/teams/"
                       clickType="Primary CTA"
                       clickName="Sign Up Button"
                       clickText="Get Started - Free"

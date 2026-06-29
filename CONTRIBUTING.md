@@ -12,6 +12,7 @@ Use this file as the stable entrypoint for contributing to `signoz-web`.
 - [Review docs PRs](contributing/docs-review.md)
 - [Change site code](contributing/site-code.md)
 - [Publish or update a blog post](contributing/blog-workflow.md)
+- [Work with CMS-migrated content](contributing/cms-content.md) (blogs, guides, comparisons, FAQs, case studies, opentelemetry)
 - [Follow the shared repo workflow](contributing/repo-workflow.md)
 - [Use contributor templates](contributing/templates/)
 
@@ -42,6 +43,7 @@ See [contributing/repo-workflow.md](contributing/repo-workflow.md) for Git hooks
 - Do not bypass failing checks silently.
 - If a docs URL changes, also handle redirects, sidebar updates, and any discovery surfaces.
 - **Docs MDX filenames:** do not use `.` in the basename (except `.mdx`). Use hyphens instead (for example `upgrade-0-8-1.mdx`, not `upgrade-0.8.1.mdx`) so URLs stay consistent with `trailingSlash` and Next.js routing. See [contributing/docs-authoring.md](contributing/docs-authoring.md#docs-file-and-url-names).
+- **SigNoz Cloud ingestion endpoints:** always write the region as the literal `<region>` token (for example `https://ingest.<region>.signoz.cloud:443/v1/traces`) so the docs region selector keeps every snippet in sync. Never hardcode `us`/`eu`/`in` or use `{region}`/`{REGION}`/`<REGION>`. See [contributing/docs-authoring.md](contributing/docs-authoring.md#signoz-cloud-ingestion-endpoints-region-aware).
 - For OpenTelemetry technical claims, verify against official OpenTelemetry docs or repositories.
 
 ## Need More Detail?
@@ -50,4 +52,5 @@ See [contributing/repo-workflow.md](contributing/repo-workflow.md) for Git hooks
 - Docs review rubric and onboarding label policy: [contributing/docs-review.md](contributing/docs-review.md)
 - Frontend conventions and MDX rendering constraints: [contributing/site-code.md](contributing/site-code.md)
 - Blog-specific workflow: [contributing/blog-workflow.md](contributing/blog-workflow.md)
+- CMS-migrated content, local overlay, and assets: [contributing/cms-content.md](contributing/cms-content.md)
 - Reusable templates and checklist snippets: [contributing/templates/](contributing/templates/)

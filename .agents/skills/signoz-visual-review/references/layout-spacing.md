@@ -31,7 +31,7 @@ FeaturePageLayout
 ### SectionLayout Variants
 - `bordered`: `border border-dashed border-signoz_slate-400` with `md:!w-[80vw] max-w-8xl !mx-auto` — the standard for feature content sections
 - `full-width`: Same width constraints, no border
-- `no-border`: 90vw mobile / 80vw desktop, no visible border
+- `no-border`: Same as full-width, no visible border
 - `border-x`: Full dashed border including top and bottom
 
 ### Content Width

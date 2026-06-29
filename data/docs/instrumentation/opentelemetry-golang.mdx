@@ -1,8 +1,7 @@
 ---
-date: 2026-05-18
-id: opentelemetry-golang
+date: 2026-06-17
 title: Go OpenTelemetry Instrumentation Guide
-description: Learn how to instrument your Go application with the OpenTelemetry Go SDK. Send traces to SigNoz Cloud or self-hosted for distributed tracing and debugging.
+description: Learn how to instrument your Go application with the OpenTelemetry Go SDK and send traces to SigNoz Cloud or self-hosted for distributed tracing.
 doc_type: howto
 ---
 This guide shows you how to instrument your Go application with OpenTelemetry and send traces to SigNoz. Instrument your Go services with the OpenTelemetry Go SDK and send traces to SigNoz Cloud or a self-hosted collector.
@@ -267,16 +266,12 @@ func main() {
 Choose your Go framework or library to add automatic instrumentation without leaving this page.
 Use the categories below to pick a specific integration.
 
-<LibraryTabs
-    defaultCategory="all"
-    defaultLibrary="gorm"
-    categoryLabels={{
-        database: 'Databases & Caches',
-        web: 'Web Frameworks',
-        grpc: 'gRPC',
-    }}
->
-    <LibraryTab value="gorm" label="GORM" category="database">
+For framework-specific setups, our guides on [instrumenting a Gin application](https://signoz.io/blog/opentelemetry-gin/) and [gRPC services in Go](https://signoz.io/blog/opentelemetry-grpc-golang/) show the common patterns beyond the base SDK.
+
+<Tabs variant="pill">
+    <TabItem value="Databases & Caches" label="Databases & Caches" default>
+        <Tabs variant="pill">
+            <TabItem value="gorm" label="GORM" default>
 
         This guide shows you how to add OpenTelemetry instrumentation to GORM. Complete the core Go instrumentation setup first.
 
@@ -324,8 +319,8 @@ Use the categories below to pick a specific integration.
         - gorm.io/plugin/opentelemetry v0.1.16
         ```
 
-    </LibraryTab>
-    <LibraryTab value="database-sql" label="database/sql" category="database">
+            </TabItem>
+            <TabItem value="database-sql" label="database/sql">
 
         This guide shows you how to add OpenTelemetry instrumentation to database/sql. Complete the core Go instrumentation setup first.
 
@@ -376,8 +371,8 @@ Use the categories below to pick a specific integration.
         - go.opentelemetry.io/contrib/instrumentation/database/sql/otelsql v0.63.0
         ```
 
-    </LibraryTab>
-    <LibraryTab value="mongo" label="MongoDB" category="database">
+            </TabItem>
+            <TabItem value="mongo" label="MongoDB">
 
         This guide shows you how to add OpenTelemetry instrumentation to MongoDB driver. Complete the core Go instrumentation setup first.
 
@@ -420,8 +415,8 @@ Use the categories below to pick a specific integration.
         - go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo v0.63.0
         ```
 
-    </LibraryTab>
-    <LibraryTab value="redis" label="Redis" category="database">
+            </TabItem>
+            <TabItem value="redis" label="Redis">
 
         This guide shows you how to add OpenTelemetry instrumentation to Redis. Complete the core Go instrumentation setup first.
 
@@ -466,8 +461,12 @@ Use the categories below to pick a specific integration.
         - go.opentelemetry.io/contrib/instrumentation/github.com/redis/go-redis/v9/otelredis v0.63.0
         ```
 
-    </LibraryTab>
-    <LibraryTab value="net-http" label="net/http" category="web">
+            </TabItem>
+        </Tabs>
+    </TabItem>
+    <TabItem value="Web Frameworks" label="Web Frameworks">
+        <Tabs variant="pill">
+            <TabItem value="net-http" label="net/http">
 
         This guide shows you how to add OpenTelemetry instrumentation to net/http (standard library). Complete the core Go instrumentation setup first.
 
@@ -561,8 +560,8 @@ Use the categories below to pick a specific integration.
         - go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.63.0
         ```
 
-    </LibraryTab>
-    <LibraryTab value="gin" label="Gin" category="web">
+            </TabItem>
+            <TabItem value="gin" label="Gin">
 
         This guide shows you how to add OpenTelemetry instrumentation to a Gin application. Complete the core Go instrumentation setup first.
 
@@ -655,8 +654,8 @@ Use the categories below to pick a specific integration.
         - go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.63.0
         ```
 
-    </LibraryTab>
-    <LibraryTab value="echo" label="Echo" category="web">
+            </TabItem>
+            <TabItem value="echo" label="Echo">
 
         This guide shows you how to add OpenTelemetry instrumentation to an Echo application. Complete the core Go instrumentation setup first.
 
@@ -752,8 +751,8 @@ Use the categories below to pick a specific integration.
         - go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/v4/otelecho v0.63.0
         ```
 
-    </LibraryTab>
-    <LibraryTab value="fiber" label="Fiber" category="web">
+            </TabItem>
+            <TabItem value="fiber" label="Fiber">
 
         This guide shows you how to add OpenTelemetry instrumentation to a Fiber application. Complete the core Go instrumentation setup first.
 
@@ -846,8 +845,8 @@ Use the categories below to pick a specific integration.
         - github.com/gofiber/contrib/v3/otel v1.0.0
         ```
 
-    </LibraryTab>
-    <LibraryTab value="chi" label="Chi" category="web">
+            </TabItem>
+            <TabItem value="chi" label="Chi">
 
         This guide shows you how to add OpenTelemetry instrumentation to a Chi application. Complete the core Go instrumentation setup first.
 
@@ -946,8 +945,8 @@ Use the categories below to pick a specific integration.
         - github.com/riandyrn/otelchi v0.12.2
         ```
 
-    </LibraryTab>
-    <LibraryTab value="gorilla" label="Gorilla Mux" category="web">
+            </TabItem>
+            <TabItem value="gorilla" label="Gorilla Mux">
 
         This guide shows you how to add OpenTelemetry instrumentation to a Gorilla Mux application. Complete the core Go instrumentation setup first.
 
@@ -1042,8 +1041,12 @@ Use the categories below to pick a specific integration.
         ```
 
 
-    </LibraryTab>
-    <LibraryTab value="grpc-server" label="gRPC Server" category="grpc">
+            </TabItem>
+        </Tabs>
+    </TabItem>
+    <TabItem value="gRPC" label="gRPC">
+        <Tabs variant="pill">
+            <TabItem value="grpc-server" label="gRPC Server">
 
         This guide shows you how to add OpenTelemetry instrumentation to a gRPC server. Complete the core Go instrumentation setup first.
 
@@ -1088,8 +1091,8 @@ Use the categories below to pick a specific integration.
         - google.golang.org/grpc v1.77.0
         ```
 
-    </LibraryTab>
-    <LibraryTab value="grpc-client" label="gRPC Client" category="grpc">
+            </TabItem>
+            <TabItem value="grpc-client" label="gRPC Client">
 
         This guide shows you how to add OpenTelemetry instrumentation to a gRPC client. Complete the core Go instrumentation setup first.
 
@@ -1135,8 +1138,10 @@ Use the categories below to pick a specific integration.
         - google.golang.org/grpc v1.77.0
         ```
 
-    </LibraryTab>
-</LibraryTabs>
+            </TabItem>
+        </Tabs>
+    </TabItem>
+</Tabs>
 
 ## Validate
 
@@ -1220,4 +1225,4 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 - [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to accelerate triage across signals
 - [Set up alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your Go application
 - [Create dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize metrics
-- Need to create custom spans or add attributes yourself? Use the [Manual Instrumentation in Go guide](https://signoz.io/docs/instrumentation/manual-instrumentation/golang/manual-instrumentation) once the base setup is in place.
+- Need to create custom spans or add attributes yourself? Use the [Manual Instrumentation in Go guide](https://signoz.io/docs/instrumentation/manual-instrumentation/golang/manual-instrumentation/) once the base setup is in place.

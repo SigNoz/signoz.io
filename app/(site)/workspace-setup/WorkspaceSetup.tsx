@@ -95,7 +95,7 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
         <div className="text-md workspace-setup-delay-message-container mt-[28px] w-full rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px] text-sm">
           Looks like it's taking a bit longer. Need help? Reach out on{' '}
           <a
-            href="https://signoz.io/slack"
+            href="https://signoz.io/slack/"
             className="text-signoz_robin-500"
             onClick={handleSlackClick}
           >
@@ -124,7 +124,7 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
           <ArrowRight size={14} />
         </a>
 
-        <Link href="/docs" className="w-full" onClick={handleReadDocs}>
+        <Link href="/docs/introduction/" className="w-full" onClick={handleReadDocs}>
           <button className="flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px] text-sm font-medium">
             <span className="flex text-xs leading-5">Read the docs </span>
             <ArrowRight size={14} />

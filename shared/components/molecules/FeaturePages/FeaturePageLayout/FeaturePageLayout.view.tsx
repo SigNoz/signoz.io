@@ -1,12 +1,14 @@
 import ProductNav from '@/components/ProductNav/ProductNav'
+import { cn } from 'app/lib/utils'
 import { FeaturePageLayoutProps } from './FeaturePageLayout.types'
 
 const FeaturePageLayout: React.FC<FeaturePageLayoutProps> = ({
   children,
   showProductNav = true,
+  fullWidth = false,
 }) => {
   return (
-    <main className="!mt-[-10px] mb-auto">
+    <main className={cn('relative mx-auto !mt-[-10px] mb-auto', !fullWidth && 'max-w-8xl')}>
       {showProductNav && <ProductNav />}
 
       <div className="relative bg-signoz_ink-500">

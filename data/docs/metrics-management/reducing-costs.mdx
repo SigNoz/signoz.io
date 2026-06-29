@@ -1,7 +1,6 @@
 ---
-date: 2026-02-24
+date: 2026-06-11
 title: Understanding Metrics Billing and Reducing Costs
-id: reducing-metrics-costs
 description: Learn how metrics billing works based on cardinality and discover strategies to reduce costs effectively.
 doc_type: explanation
 ---
@@ -40,27 +39,47 @@ Use a templated approach:
 Histogram metrics are particularly costly because:
 
 1. **Bucket configuration** - Each bucket distribution creates a separate series. Optimize your bucket configuration based on your workload's latency patterns.
-2. **Cumulative nature** - With cumulative histogram metrics, values continue to be sent even when there's no recent activity, especially problematic when combined with high-cardinality attributes like method names containing IDs.
+2. **Cumulative nature** - With cumulative histogram metrics, values continue to be sent even when there's no recent activity, especially problematic when combined with high-cardinality attributes like method names containing IDs. Switching to delta temporality avoids this — see [Use Delta Temporality](#1-use-delta-temporality).
 
 ## Cost Reduction Strategies
 
-### 1. Remove or Template High-Cardinality Attributes
+### 1. Use Delta Temporality
+
+OpenTelemetry SDKs export metrics with **cumulative** temporality by default: on every export interval, the SDK re-sends the running total for every active series — even when nothing has changed since the last export. With **delta** temporality, synchronous instruments (Counter, Histogram) that record no measurements during an export interval export no data points at all for that interval, so idle series don't add billable samples.
+
+We recommend setting delta temporality in your application's SDK using the standard environment variable:
+
+```bash
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
+```
+
+This environment variable is supported by the OpenTelemetry SDKs for Java, Python, Go, JavaScript/Node.js, .NET, and Ruby. Some SDKs (such as Rust) configure temporality in code instead — see the [application metrics guides](https://signoz.io/docs/metrics-management/send-metrics/#applications) for language-specific instructions.
+
+<Admonition type="info">
+The savings apply to synchronous instruments only. Observable (asynchronous) instruments emit a data point on every collection cycle regardless of temporality.
+</Admonition>
+
+<Admonition type="warning">
+Deriving deltas at the OpenTelemetry Collector with the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/cumulativetodeltaprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">cumulativetodelta processor</a> does **not** reduce costs. The SDK still exports the cumulative value on every interval even when nothing changed, and the processor converts each of those points into a zero-value delta point — which is still ingested and billed. To get the savings, set delta temporality in the SDK itself.
+</Admonition>
+
+### 2. Remove or Template High-Cardinality Attributes
 
 Replace unique IDs with templated values to reduce the number of unique time series being created.
 
-### 2. Optimize Histogram Buckets
+### 3. Optimize Histogram Buckets
 
 Reduce the number of buckets while maintaining meaningful data. See [Configure Custom Buckets](https://signoz.io/docs/metrics-management/configure-custom-buckets/) for more details.
 
-### 3. Implement Sampling
+### 4. Implement Sampling
 
 Reduce the volume of metrics sent from your application. This directly reduces the number of data points ingested.
 
-### 4. Review Attribute Necessity
+### 5. Review Attribute Necessity
 
 Ensure all identifying attributes are essential for your monitoring needs. Remove any attributes that don't provide actionable insights.
 
-### 5. Aggregate or Drop Metrics
+### 6. Aggregate or Drop Metrics
 
 Consider using the following techniques:
 

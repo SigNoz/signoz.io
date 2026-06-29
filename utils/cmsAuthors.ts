@@ -16,7 +16,7 @@ export type AuthorDirectory = Record<string, CMSAuthor>
 
 async function fetchAuthorsFromCMS(): Promise<AuthorDirectory> {
   if (!API_URL) {
-    throw new Error('NEXT_PUBLIC_SIGNOZ_CMS_API_URL is not configured')
+    return {}
   }
 
   const directory: AuthorDirectory = {}

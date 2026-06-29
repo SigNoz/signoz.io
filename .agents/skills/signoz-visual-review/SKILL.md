@@ -73,8 +73,11 @@ On dark backgrounds, sections blend together without explicit visual breaks:
 - **Button hierarchy**: Primary = solid default variant, Secondary = outline/secondary variant, both with `ArrowRight` icon
 - **Hero pattern**: `FeaturePageHeader` with gradient text title, max 2 buttons, hero image below
 - **Image sizing**: Use `width={10000} height={10000}` pattern for responsive images within containers
-- **Split layouts**: `GridLayout variant="split"` for alternating text + image — alternate sides for rhythm
-- **CTA banners**: Centered text with `ButtonGroup`, `py-20` padding
+- **Full-width sections**: `FeatureShowcase` — title + description + optional button + image below
+- **Split layouts**: `SplitSection` for alternating text + image — alternate sides for rhythm; use `withVerticalDivider` for side-by-side features
+- **CTA banners**: `CTABanner` component — centered title + `ButtonGroup`, `py-20` padding
+- **Section dividers**: `<Divider />` placed between sections by the parent page (NOT inside content components)
+- **Data separation**: Section content in `.constants.tsx`, JSX composition in page file
 - **Standard page tail**: `UsageBasedPricing` → `SigNozStats` → `CustomerStoriesSection`
 
 ### Comparison Page Patterns

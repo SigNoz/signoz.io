@@ -3,8 +3,6 @@ date: 2026-05-01
 title: Deploying to Kubernetes with Kustomize
 tags: [Self-Host]
 description: Learn how to deploy SigNoz on Kubernetes using Foundry and Kustomize. Foundry generates Kustomize manifests from your casting so you can deploy the full SigNoz stack without Helm.
-id: kubernetes-kustomize
-slug: /setup/kubernetes/kustomize
 doc_type: howto
 ---
 
@@ -12,7 +10,7 @@ doc_type: howto
 
 This guide explains how to deploy SigNoz on Kubernetes using <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> and <a href="https://kustomize.io" target="_blank" rel="noopener noreferrer nofollow">Kustomize</a>. Foundry generates and deploys a complete set of Kustomize manifests from your configuration.
 
-<KeyPointCallout title="Why Kustomize?" defaultCollapsed={true}>
+<KeyPointCallout title="Why Kustomize?" defaultCollapsed="true">
 Kustomize is built into `kubectl` and lets you customize Kubernetes manifests without templates. This approach is useful when you want:
 
 - Plain YAML manifests you can inspect and version-control directly
@@ -39,7 +37,7 @@ For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the
 
 Create a casting file that targets Kubernetes with `flavor: kustomize` and `mode: kubernetes`.
 
-<KeyPointCallout title="Casting reference" defaultCollapsed={true}>
+<KeyPointCallout title="Casting reference" defaultCollapsed="true">
 For a complete guide on casting configuration, see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/casting.md" target="_blank" rel="noopener noreferrer nofollow">How to Write a Casting</a>. For the minimal Kustomize example, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/kubernetes/kustomize" target="_blank" rel="noopener noreferrer nofollow">Foundry Kubernetes Kustomize example</a>.
 </KeyPointCallout>
 
@@ -114,7 +112,7 @@ The recommended way to deploy is with `foundryctl cast`, which runs forge and th
 foundryctl cast -f casting.yaml
 ```
 
-<KeyPointCallout title="Skip cast and apply with kubectl directly" defaultCollapsed={true}>
+<KeyPointCallout title="Skip cast and apply with kubectl directly" defaultCollapsed="true">
 If you prefer to apply manifests yourself instead of using `foundryctl cast`, you must install the Altinity ClickHouse Operator CRDs **before** applying the kustomize manifests. The generated ClickHouseInstallation and ClickHouseKeeperInstallation resources depend on them:
 
 ```bash
@@ -168,7 +166,7 @@ curl -X GET http://localhost:8080/api/v1/health
 
 Instead of manually editing generated manifests, use `spec.patches` in your casting to apply RFC 6902 JSON Patches during forge. Patches target generated files by path and are applied before writing to `pours/`, so your customizations are reproducible and survive re-forging.
 
-<KeyPointCallout title="Patches reference" defaultCollapsed={true}>
+<KeyPointCallout title="Patches reference" defaultCollapsed="true">
 For the full patches reference, see <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">Foundry Patches documentation</a>. For a complete production-ready example, see the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/kubernetes/kustomize-patches" target="_blank" rel="noopener noreferrer nofollow">Kustomize with Patches example</a>.
 </KeyPointCallout>
 
@@ -377,5 +375,5 @@ kubectl logs -n signoz job/signoz-telemetrystore-migrator
 
 ## Next Steps
 - [OpenTelemetry Collection Agents](https://signoz.io/docs/opentelemetry-collection-agents/get-started/)
-- [Instrument your application](https://signoz.io/docs/instrumentation/overview)
-- [Tutorials](https://signoz.io/docs/tutorials/)
+- [Instrument your application](https://signoz.io/docs/instrumentation/overview/)
+- [Tutorials](https://signoz.io/docs/install/)

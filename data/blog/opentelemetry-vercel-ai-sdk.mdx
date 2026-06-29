@@ -1,15 +1,17 @@
 ---
 title: Observing Vercel AI SDK with OpenTelemetry + SigNoz
-date: 2025-07-28
+meta_title: Observing Vercel AI SDK with OpenTelemetry
+published_date: 2025-07-31
+updated_date: 2026-06-16
 tags: [OpenTelemetry, Vercel AI SDK, SigNoz]
 authors: [goutham_karthi]
-description: Monitor Vercel AI SDK apps with SigNoz and OpenTelemetry. This blog takes takes you through a practical implementation of OTel in an app built using Vercel AI SDK.
+description: Monitor Vercel AI SDK apps with OpenTelemetry and SigNoz. A practical guide to instrumenting an LLM app and tracking traces, latency, and token usage.
 keywords: [monitor, observe, opentelemetry, Vercel, AI, integrations, SigNoz]
 related_articles:
   - '/comparisons/opentelemetry-api-vs-sdk'
   - '/opentelemetry/customize-metrics-streams-produced-by-opentelemetry-python-sdk'
   - '/blog/opentelemetry-architecture'
-  - '/blog/opentelemetry-ui'
+  - '/blog/opentelemetry-visualization'
 ---
 
 LLM-powered apps are growing fast, and frameworks like the Vercel AI SDK make it easy to build them. But with AI comes complexity. Latency issues, unpredictable outputs, and opaque failures can impact user experience. That’s why monitoring is essential. By using OpenTelemetry for standard instrumentation and SigNoz for observability, you can track performance, detect errors, and gain insights into your AI app’s behavior with minimal setup.
@@ -39,7 +41,7 @@ The Vercel AI SDK makes it easy to build LLM-powered apps with support for provi
 
 To demonstrate how monitoring works in practice, we’ve built a simple product support chatbot using the Vercel AI SDK. The app allows users to ask questions about a product, choose from suggested starter prompts, and give feedback on the chatbot’s responses. A thumbs-up triggers the bot to suggest helpful follow-up questions to deepen the conversation. If the user gives a thumbs-down, the LLM regenerates a new response in an attempt to better address the query. 
 
-The chatbot leverages streaming and LLM calls under the hood—making it a great candidate for observability. By instrumenting this app with OpenTelemetry and analyzing it in SigNoz, we can gain visibility into response times, error patterns, and user interactions. You can check out the github repository for the code [here](https://github.com/SigNoz/vercel-ai-sdk-opentelemetry-example).
+The chatbot leverages streaming and LLM calls under the hood—making it a great candidate for observability. By instrumenting this app with OpenTelemetry and analyzing it in SigNoz, we can gain visibility into response times, error patterns, and user interactions. You can check out the code in the [example chatbot GitHub repository](https://github.com/SigNoz/vercel-ai-sdk-opentelemetry-example).
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2025/08/combined-chatbot-image.webp" alt="Chatbot App Image"/>
@@ -48,7 +50,7 @@ The chatbot leverages streaming and LLM calls under the hood—making it a great
 
 Watch our demo video showcasing the chatbot's capabilities here:
 
-<YouTube id="AMeLYQe59j8" mute={false} />
+<YouTube id="AMeLYQe59j8" mute="false" />
 
 ## Work With Our Demo Chatbot
 
@@ -64,7 +66,9 @@ Once you’ve cloned the example or set up your own Next.js project, follow the 
 
 ## Instrument your Next.js application
 
-Check out detailed instructions on how to set up OpenTelemetry instrumentation in your Nextjs applications and view your application traces in SigNoz over [here](https://signoz.io/docs/instrumentation/opentelemetry-nextjs/).
+Check out our [OpenTelemetry Next.js instrumentation guide](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nextjs/) for detailed instructions on how to set up OpenTelemetry instrumentation in your [Next.js applications](https://signoz.io/blog/opentelemetry-nextjs/) and view your application traces in SigNoz.
+
+This blog covers the essential steps to get started. For the complete reference guide, including self-hosted SigNoz setup, custom tracers, and dashboard import, see our [Vercel AI SDK observability documentation](https://signoz.io/docs/vercel-ai-sdk-observability/).
 
 ### Prerequisites
 
@@ -152,7 +156,7 @@ The Vercel AI SDK uses [OpenTelemetry](https://signoz.io/opentelemetry/) to co
 
 ### Enabling Telemetry
 
-Check out more detailed information about Vercel AI SDK’s telemetry options visit [here](https://ai-sdk.dev/docs/ai-sdk-core/telemetry#telemetry).
+Check out the [Vercel AI SDK telemetry options documentation](https://ai-sdk.dev/docs/ai-sdk-core/telemetry#telemetry) for more detailed information.
 
 You can then use the `experimental_telemetry` option to enable telemetry on specific function calls while the feature is experimental:
 
@@ -207,7 +211,7 @@ const result = await generateText({
 });
 ```
 
-Your Vercel AI SDK commands should now automatically emit traces, spans, and events. You can find more details on the types of spans and events generated [here](https://ai-sdk.dev/docs/ai-sdk-core/telemetry#collected-data).
+Your Vercel AI SDK commands should now automatically emit traces, spans, and events. You can find more details on the [types of spans and events generated](https://ai-sdk.dev/docs/ai-sdk-core/telemetry#collected-data) in the Vercel AI SDK telemetry reference.
 
 Finally, you should be able to view this data in Signoz Cloud under the traces tab:
 
@@ -315,7 +319,7 @@ These are what the log details would look like:
 
 ## What Your Telemetry Data Tells You
 
-When you enable telemetry for the Vercel AI SDK, it automatically captures detailed performance data for its core functions. But what do these spans and events actually mean for you?
+When you enable telemetry for the Vercel AI SDK, it automatically captures detailed performance data for its core functions. But what do these [spans](https://signoz.io/blog/opentelemetry-spans/) and events actually mean for you?
 
 This data is your key to answering critical questions about your LLM's performance:
 
@@ -379,4 +383,4 @@ This panel tracks the percentage of requests where the LLM response time exceeds
 
 ## Wrapping it Up
 
-Monitoring LLM applications is no longer optional, especially as they become more interactive, user-facing, and business-critical. With the Vercel AI SDK, it’s easy to build powerful AI-driven experiences, but combining it with OpenTelemetry and SigNoz gives you the visibility needed to operate them reliably. From tracking token usage and latency to understanding user behaviour through feedback and prompt patterns, this [observability stack](https://signoz.io/guides/observability-stack/) helps you build faster, troubleshoot smarter, and continuously improve your AI app.
+[Monitoring LLM](https://signoz.io/blog/opentelemetry-llm/) applications is no longer optional, especially as they become more interactive, user-facing, and business-critical. With the Vercel AI SDK, it’s easy to build powerful AI-driven experiences, but combining it with OpenTelemetry and SigNoz gives you the visibility needed to operate them reliably. From tracking token usage and latency to understanding user behaviour through feedback and prompt patterns, this [observability stack](https://signoz.io/guides/observability-stack/) helps you build faster, troubleshoot smarter, and continuously improve your AI app.

@@ -1,8 +1,7 @@
 ---
-date: 2026-05-13
+date: 2026-06-11
 title: Metric Types and Aggregation
 description: Learn about the different metric types (Counter, Gauge, Histogram, Exponential Histogram) supported by SigNoz and how temporal and spatial aggregation works for each type.
-id: types-and-aggregation
 doc_type: explanation
 ---
 
@@ -45,6 +44,10 @@ A table representing the different types of metrics and their temporality suppor
 | Exponential Histogram | No | Yes |
 
 The Gauge metric type does not have a temporality, as it represents a single value at a point in time.
+
+<Admonition type="tip">
+We recommend exporting metrics with **delta** temporality. It reduces ingestion costs because synchronous instruments that record nothing during an export interval send no data points for that interval (with cumulative, every active series is re-sent on each interval), and it is required for exponential histograms in SigNoz. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for how to configure it.
+</Admonition>
 
 ## Aggregation
 
@@ -123,7 +126,7 @@ Gauge metrics do not support Rate or Increase temporal aggregation. To compute c
 2. Clone it as query **B** and add a **Time Shift** function to **B**, with the shift value in seconds (for example, `3600` for a 1-hour comparison).
 3. Add a formula **A − B** to calculate the difference between the current and shifted values.
 
-See the <a href="https://signoz.io/docs/userguide/query-builder/#functions-for-extended-data-analysis" target="_blank" rel="noopener noreferrer nofollow">Time Shift function documentation</a> for details.
+See the <a href="https://signoz.io/docs/userguide/query-builder-v5/#functions-for-extended-data-analysis" target="_blank" rel="noopener noreferrer nofollow">Time Shift function documentation</a> for details.
 </Admonition>
 
 For each interval, the aggregated value is calculated based on the temporal aggregation function specified in the query. The result of this step is a single aggregated value for each interval within the time series. The number of time series remains the same after temporal aggregation.

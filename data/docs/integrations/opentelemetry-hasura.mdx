@@ -1,16 +1,13 @@
 ---
-date: 2026-05-18
-id: opentelemetry-hasura
+date: 2026-06-11
 title: OpenTelemetry Hasura Integration Guide
 description: Learn how to configure Hasura's built-in OpenTelemetry support to export traces, metrics, and logs to SigNoz for end-to-end GraphQL observability.
 doc_type: howto
 ---
 
-import GetHelp from '@/components/shared/get-help.md'
-
 Hasura provides built-in OpenTelemetry support for distributed tracing, metrics, and logs on Hasura Cloud and Enterprise editions. Starting from version v2.18.0, you can configure Hasura to export telemetry data directly to SigNoz.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -30,7 +27,7 @@ You can configure OpenTelemetry export for Hasura using either the Console UI or
 2. Click on **OpenTelemetry Exporter**.
 3. Configure your connection based on the type of telemetry you want to export:
 
-<Tabs>
+<Tabs entityName="signal">
 <TabItem value="traces" label="Traces">
 
 - **Endpoint**: `https://ingest.<region>.signoz.cloud:443/v1/traces`
@@ -127,7 +124,7 @@ hasura metadata apply
 
 Hasura exports the following telemetry data to SigNoz:
 
-<Tabs>
+<Tabs entityName="telemetry">
 <TabItem value="traces" label="Traces" default>
 
 Hasura traces operations across:
@@ -168,7 +165,7 @@ All logs printed to the output stream are exported to SigNoz. Log structure foll
 
 Hasura Data Connectors run as separate services alongside the GraphQL Engine. Each connector handles communication with a specific database. Data connectors only support traces. To visualize the full timeline of a GraphQL request (including the actual database execution), you must also configure OpenTelemetry for your data connectors using environment variables in their respective deployments.
 
-<Tabs>
+<Tabs entityName="connector">
 <TabItem value="graphql" label="GraphQL Data Connectors">
 
 The GraphQL Data Connectors (which power Athena, MariaDB, MySQL, Oracle, Redshift, Snowflake, etc.) are built on top of Quarkus. Set the following environment variables on the connector container:
@@ -287,7 +284,7 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 - Set up [dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize Hasura performance
 - Create [alerts](https://signoz.io/docs/userguide/alerts-management/) for critical metrics like error rates or high latency
 - Explore [distributed tracing](https://signoz.io/docs/userguide/traces/) to identify performance bottlenecks
-- Query [logs](https://signoz.io/docs/userguide/logs/) to debug issues in your Hasura setup
+- Query [logs](https://signoz.io/docs/userguide/logs_query_builder/) to debug issues in your Hasura setup
 
 ## Get Help
 

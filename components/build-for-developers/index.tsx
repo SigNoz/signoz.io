@@ -54,7 +54,7 @@ const BuildForDevelopers = ({ className }: { className?: string }) => {
   return (
     <section
       className={cn(
-        'mx-auto w-full border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+        'mx-auto w-full max-w-8xl border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400',
         className
       )}
     >

@@ -5,7 +5,7 @@
   "scripts": {
     "start": "next dev",
     "dev": "cross-env INIT_CWD=$PWD next dev",
-    "build": "cross-env INIT_CWD=$PWD NODE_OPTIONS='--max-old-space-size=8192' next build && cross-env NODE_OPTIONS='--experimental-json-modules' node ./scripts/postbuild.mjs",
+    "build": "cross-env INIT_CWD=$PWD NODE_OPTIONS='--max-old-space-size=8192' next build",
     "serve": "next start",
     "analyze": "cross-env ANALYZE=true next build",
     "lint": "next lint --fix --dir pages --dir app --dir components --dir lib --dir layouts --dir scripts",
@@ -13,6 +13,9 @@
     "test:doc-redirects": "node --test tests/doc-redirects.test.js",
     "check:docs-metadata": "node scripts/check-docs-metadata.js",
     "test:docs-metadata": "node --test tests/docs-metadata.test.js",
+    "check:stale-urls": "node scripts/check-stale-urls.js --all",
+    "fix:stale-urls": "node scripts/check-stale-urls.js --fix --all",
+    "test:stale-urls": "node --test tests/check-stale-urls.test.js",
     "test:component-items": "node --test tests/component-items-sync.test.js",
     "test": "vitest run",
     "prepare": "husky"
@@ -37,9 +40,8 @@
     "@vimeo/player": "^2.23.0",
     "algoliasearch": "^5.37.0",
     "autoprefixer": "^10.4.13",
-    "contentlayer2": "0.5.5",
     "date-fns": "^3.6.0",
-    "dompurify": "^3.4.0",
+    "dompurify": "^3.4.11",
     "framer-motion": "^11.13.5",
     "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.2",
@@ -48,11 +50,11 @@
     "js-cookie": "^3.0.7",
     "lucide-react": "0.540.0",
     "next": "^15.5.18",
-    "next-contentlayer2": "0.5.5",
     "next-mdx-remote": "^6.0.0",
     "pliny": "0.4.1",
     "postcss": "^8.5.10",
-    "qs": "^6.14.2",
+    "posthog-node": "5.21.0",
+    "qs": "^6.15.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-ga4": "^2.1.0",
@@ -74,6 +76,7 @@
     "remark-stringify": "^11.0.0",
     "tailwindcss": "^3.4.3",
     "unified": "^11.0.5",
+    "uuid": "11.1.1",
     "vaul": "^1.1.2",
     "word-exists": "^1.0.0"
   },
@@ -103,14 +106,21 @@
     "vitest": "^4.1.5"
   },
   "resolutions": {
-    "form-data": "4.0.4",
+    "form-data": "4.0.6",
     "minimatch": "^9.0.7",
     "lodash": "^4.18.0",
     "@sentry/browser": "^7.119.1",
-    "pliny/js-yaml": "^4.1.1",
-    "qs": "^6.14.2",
+    "pliny/js-yaml": "^4.2.0",
+    "eslint/js-yaml": "^4.2.0",
+    "cosmiconfig/js-yaml": "^4.2.0",
+    "qs": "^6.15.2",
     "yaml": "^2.8.3",
-    "postcss": "^8.5.10"
+    "postcss": "^8.5.10",
+    "js-cookie": "^3.0.7",
+    "react-router": "^6.30.4",
+    "undici": "^7.28.0",
+    "**/postman-collection/uuid": "^11.1.1",
+    "**/mdx-bundler/uuid": "^11.1.1"
   },
   "lint-staged": {
     "*.+(js|jsx|ts|tsx)": [

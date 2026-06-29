@@ -87,7 +87,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
         <div className="my-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <TrackingLink
             id="pricing-page-get-started-card-cta"
-            href="/teams"
+            href="/teams/"
             clickType="Primary CTA"
             clickName="Sign Up Button"
             clickLocation="Pricing Overview Card"

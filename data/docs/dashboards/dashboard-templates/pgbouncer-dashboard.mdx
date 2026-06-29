@@ -1,0 +1,94 @@
+---
+date: 2026-06-23
+title: PgBouncer Metrics Dashboard
+description: Monitor PgBouncer connection-pool health in SigNoz, covering pool states, query throughput, client wait times, and per-database connections.
+doc_type: explanation
+---
+
+Use this dashboard to monitor your PgBouncer connection pooler: client and server pool states, query and transaction throughput, client wait times, network traffic, prepared statements, and per-database connections.
+
+The <a href="https://github.com/prometheus-community/pgbouncer_exporter" target="_blank" rel="noopener noreferrer nofollow">prometheus-community PgBouncer exporter</a> exposes `pgbouncer_*` metrics, and the OpenTelemetry Collector scrapes them for this dashboard.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow the [Monitor PgBouncer Metrics with OpenTelemetry](https://signoz.io/docs/metrics-management/opentelemetry-pgbouncer/) guide.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/pgbouncer-dashboard.webp"
+  alt="PgBouncer Dashboard"
+  caption="PgBouncer Dashboard"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/pgbouncer/pgbouncer-dashboard.json"
+    dashboardName="PgBouncer"
+  />
+</div>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Confirm pooler health**: See whether PgBouncer is up and how many pools are active.
+- **Track connection usage**: Monitor client and server connections pooler-wide and by state.
+- **Watch pool saturation**: Compare active and waiting client connections against pool size per database.
+- **Measure throughput and latency**: Track queries and transactions per second, average query duration, and average transaction time.
+- **Catch contention**: Surface client wait times so you can spot pool exhaustion before clients stall.
+- **Inspect per-database behavior**: Break down connections, throughput, and waits by database.
+
+## Metrics Included
+
+### Overview
+
+- **PgBouncer Up**: Shows if the exporter can reach PgBouncer (`pgbouncer_up`).
+- **Queries /s** and **Transactions /s**: Pooler-wide query and transaction rates.
+- **Avg Query Duration**: Average time spent executing queries.
+- **Max Client Wait**: Longest time a client has waited for a server connection.
+- **Active Pools**: Number of active pools.
+
+### Connections
+
+- **Client Connections (pooler-wide)**: Total client connections including used, free, and login states.
+- **Server Connections (pooler-wide)**: Total server connections including used, idle, and testing states.
+- **Client Connections by State** and **by Database**: Client connection breakdowns.
+- **Server Connection States**: Server connections by state (active, idle, used, testing, login).
+
+### Pools
+
+- **Pool Client Active Connections by Database**: Active client connections per pool.
+- **Pool Client Waiting Connections by Database**: Clients waiting for a server connection.
+- **Client Max Wait by Database**: Longest client wait per database.
+
+### Throughput & Latency
+
+- **Queries /s by Database** and **Transactions /s by Database**: Per-database rates.
+- **Avg Query Duration** and **Avg Transaction Time**: Latency derived from `pgbouncer_stats_totals_*` counters.
+- **Client Wait Time /s by Database**: Rate of accumulated client wait time.
+
+### Network & Prepared Statements
+
+- **Network Throughput**: Bytes sent and received.
+- **Server Assignments /s**: Rate of server connections assigned to clients.
+- **Prepared Statement Ops /s**: Client and server prepare/bind operation rates.
+
+### Databases & Config
+
+- **Per-Database Connections**: Table of current connections, pool size, and limits per database.
+- **Database Connections vs Pool Size**: Current connections compared to configured pool size.
+- **DNS Cache**: Cached DNS names and zones, plus in-flight DNS queries.
+- **Database Paused / Disabled State**: Shows if databases are paused or disabled.
+- **Max Client Conn** and **Max User Conn**: Configured connection limits.
+
+## Dashboard Variables
+
+The dashboard includes these filter variables:
+
+- **service_name**: Filter by the service name.
+- **database**: Filter panels by a specific database.
+
+## Related Dashboards
+
+- [PostgreSQL](https://signoz.io/docs/dashboards/dashboard-templates/postgresql/)
+- [MySQL](https://signoz.io/docs/dashboards/dashboard-templates/mysql/)
+- [APM Metrics](https://signoz.io/docs/dashboards/dashboard-templates/apm-metrics/)

@@ -16,10 +16,9 @@ Pair it with [docs-authoring.md](docs-authoring.md) for the underlying content s
 Review these when relevant:
 
 - `data/docs/**`
-- `public/img/docs/**`
-- `constants/docsSideNav.ts`
-- `constants/componentItems.ts`
-- `constants/componentItems/*.ts`
+- `data-assets/img/docs/**`
+- `data/docs-side-nav/main.json`
+- `constants/listicles/*.json`
 - `next.config.js` when docs URLs change
 - `components/**/*.mdx` when the PR adds or meaningfully changes these alongside docs (see **Shared doc fragments** below)
 
@@ -61,8 +60,9 @@ Review each changed doc against these checks in order:
 13. Next steps help users complete the broader job.
 14. Links directly help readers complete the current step.
 15. Added or edited links resolve and use canonical production paths.
-16. Discovery surfaces are updated when the new doc should appear in an existing list or overview.
-17. Added or changed images are WebP, at least 1200 px wide, and use the `Figure` component with descriptive alt text.
+16. When `entityName="plans"` tabs are present, every Self-Hosted `TabItem` value starts with `self-host` (e.g., `self-host`, `self-hosted`, `self-host-deployment`). Values that don't match this prefix will leak through and show in the in-product onboarding iframe.
+17. Discovery surfaces are updated when the new doc should appear in an existing list or overview.
+18. Added or changed images are WebP, at least 1200 px wide, and use the `Figure` component with descriptive alt text.
 
 If a check cannot be validated from the PR context, call out the assumption and residual risk.
 
@@ -205,7 +205,7 @@ cat contributing/docs-review.md
 rg -n "## Next steps|## Troubleshooting|KeyPointCallout|ToggleHeading|https?://|<[^>]+>" data/docs
 
 # image quality — flag images narrower than 1200 px
-identify -format '%w %f\n' public/img/docs/<topic>/*.webp 2>/dev/null | awk '$1 < 1200'
+identify -format '%w %f\n' data-assets/img/docs/<topic>/*.webp 2>/dev/null | awk '$1 < 1200'
 
 # link health
 curl -sI <URL>

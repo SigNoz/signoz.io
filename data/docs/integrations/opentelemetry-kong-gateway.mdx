@@ -1,20 +1,17 @@
 ---
-date: 2026-05-27
-id: opentelemetry-kong-gateway
+date: 2026-06-11
 title: OpenTelemetry Kong Gateway Integration
 description: Monitor Kong Gateway by exporting OpenTelemetry traces, metrics, and logs natively to SigNoz.
 doc_type: howto
 ---
 
-import GetHelp from '@/components/shared/get-help.md'
-
 Kong Gateway provides a native OpenTelemetry plugin to capture proxy latencies, upstream traces, traffic metrics, and access logs. By configuring this plugin, you send your telemetry data directly to SigNoz.
 
-<Admonition type="info" title="Looking for a single-plugin setup?" defaultCollapsed={true}>
+<Admonition type="info" title="Looking for a single-plugin setup?" defaultCollapsed="true">
   For traces and structured logs from one SigNoz-built plugin, see the [SigNoz Plugin](https://signoz.io/docs/integrations/outposts/kong/) guide. To compare both approaches, see [Kong Gateway Monitoring](https://signoz.io/docs/integrations/kong-gateway/).
 </Admonition>
 
-<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
   Most steps remain identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud vs Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
@@ -29,7 +26,7 @@ Kong Gateway provides a native OpenTelemetry plugin to capture proxy latencies, 
 
 Configure the <a href="https://developer.konghq.com/plugins/opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">opentelemetry plugin</a> either via declarative config (<a href="https://github.com/kong/deck" target="_blank" rel="noopener noreferrer nofollow">decK</a>) or via the Kong Ingress Controller in Kubernetes.
 
-<Tabs>
+<Tabs entityName="method">
 <TabItem value="deck" label="Declarative Config (decK)" default>
 
 ```yaml:kong-state.yaml
@@ -124,7 +121,7 @@ kubectl apply -f kong-plugin-otel.yaml
 
 ## Available Telemetry
 
-<Tabs>
+<Tabs entityName="signal">
 <TabItem value="traces" label="Traces" default>
 
 Kong instruments each proxied request as an OTel span with child spans for each phase:

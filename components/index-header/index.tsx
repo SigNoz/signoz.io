@@ -8,11 +8,11 @@ import { HeroSectionPill } from './HeroSectionPill'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 
 // Server component with single CTA
-export function Header() {
+export function Header({ variant = 'control' }: { variant?: 'control' | 'ai-agents' }) {
   const primaryCTA = 'Get Started - Free'
 
   return (
-    <header className="relative mx-auto mt-16 max-w-8xl md:w-[80vw]">
+    <header className="relative mx-auto mt-16 w-full max-w-8xl">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
 
       <div className="relative mx-auto flex w-full flex-col items-center border  !border-b-0 !border-t-0  border-dashed border-signoz_slate-400 pt-12 text-center md:pt-16">
@@ -23,12 +23,19 @@ export function Header() {
           text="Introducing Agent Native Observability →"
         />
         {/* End of newsletter section */}
-        <Hero>
-          <span className="md:hidden">Observability on Your Terms, Powered by Open Standards.</span>
-          <span className="hidden md:inline">Observability on Your Terms,</span>
-          <br className="hidden md:inline" />
-          <span className="hidden md:inline">Powered by Open Standards.</span>
-        </Hero>
+        {variant === 'ai-agents' ? (
+          <Hero>
+            Observability for Your Team and AI Agents.
+            <br />
+            Powered by Open Standards.
+          </Hero>
+        ) : (
+          <Hero>
+            Observability on Your Terms,
+            <br className="hidden md:block" />
+            Powered by Open Standards.
+          </Hero>
+        )}
         <div className="w-full border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 px-6 py-2">
           <p className="m-0 p-3 text-base font-medium sm:p-0">
             Traces, metrics, and logs in a unified, OpenTelemetry-native platform. Simple

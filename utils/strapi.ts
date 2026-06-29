@@ -231,7 +231,7 @@ export const fetchChangelogById = async (
   }
 }
 
-// MDX Content schema
+// MDX Content schema — see utils/dateUtils.ts for date field semantics
 export type MDXContent = {
   id: number
   documentId: string
@@ -243,6 +243,8 @@ export type MDXContent = {
   publishedAt: string
   createdAt: string
   updatedAt: string
+  published_date?: string
+  updated_date?: string
   image?: string
   layout?: string
   [key: string]: any
@@ -304,6 +306,11 @@ const singleContentPopulateByCollection: Record<string, Record<string, unknown>>
     keywords: '*',
   },
   blogs: {
+    ...commonContentPopulate,
+    tags: '*',
+    keywords: '*',
+  },
+  docs: {
     ...commonContentPopulate,
     tags: '*',
     keywords: '*',

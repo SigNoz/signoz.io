@@ -37,13 +37,6 @@ export interface ProductItem {
   order: number
 }
 
-export interface ComparisonItem {
-  key: string
-  url: string
-  name: string
-  description: string
-}
-
 export interface ResourceItem {
   key: string
   url: string
@@ -56,7 +49,7 @@ const PRODUCT_ICON_CLASS = 'h-4 w-4 shrink-0 pt-0.5 text-signoz_vanilla-100'
 export const productDropdownItems: ProductItem[] = [
   {
     key: 'apm',
-    url: '/application-performance-monitoring',
+    url: '/application-performance-monitoring/',
     icon: <BarChart2 className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Monitor your applications',
     name: 'APM',
@@ -64,7 +57,7 @@ export const productDropdownItems: ProductItem[] = [
   },
   {
     key: 'Alerts',
-    url: '/alerts-management',
+    url: '/alerts-management/',
     icon: <ConciergeBell className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Multiple thresholds and dynamic routing at scale',
     name: 'Alerts',
@@ -80,7 +73,7 @@ export const productDropdownItems: ProductItem[] = [
   },
   {
     key: 'DistributedTracing',
-    url: '/distributed-tracing',
+    url: '/distributed-tracing/',
     icon: <DraftingCompass className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Track requests across your services',
     name: 'Distributed Tracing',
@@ -88,7 +81,7 @@ export const productDropdownItems: ProductItem[] = [
   },
   {
     key: 'MetricsDashboards',
-    url: '/metrics-and-dashboards',
+    url: '/metrics-and-dashboards/',
     icon: <LayoutGrid className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Monitor key metrics and build dashboards',
     name: 'Metrics & Dashboards',
@@ -104,7 +97,7 @@ export const productDropdownItems: ProductItem[] = [
   },
   {
     key: 'LogManagement',
-    url: '/log-management',
+    url: '/log-management/',
     icon: <ScrollText className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Fast queries with columnar database',
     name: 'Log Management',
@@ -112,7 +105,7 @@ export const productDropdownItems: ProductItem[] = [
   },
   {
     key: 'Exceptions',
-    url: '/exceptions-monitoring',
+    url: '/exceptions-monitoring/',
     icon: <Bug className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Record exceptions automatically',
     name: 'Exceptions',
@@ -152,79 +145,6 @@ export const productDropdownItems: ProductItem[] = [
   },
 ]
 
-export const comparisonItems: ComparisonItem[] = [
-  {
-    key: 'signozvsdatadog',
-    url: '/product-comparison/signoz-vs-datadog/',
-    name: 'SigNoz vs DataDog',
-    description: 'Save up to 80% on monitoring costs',
-  },
-  {
-    key: 'signozvsgrafana',
-    url: '/product-comparison/signoz-vs-grafana/',
-    name: 'SigNoz vs Grafana',
-    description: 'One platform replaces the LGTM stack',
-  },
-  {
-    key: 'signozvsnewrelic',
-    url: '/product-comparison/signoz-vs-newrelic/',
-    name: 'SigNoz vs New Relic',
-    description: 'No user-based pricing surprises',
-  },
-  {
-    key: 'cloudwatch-alternative',
-    url: '/cloudwatch-alternative/',
-    name: 'SigNoz vs CloudWatch',
-    description: 'Unified view, transparent billing',
-  },
-  {
-    key: 'clickstack-alternative',
-    url: '/clickstack-alternative/',
-    name: 'SigNoz vs ClickStack',
-    description: 'Ingest-based pricing, no per-query costs',
-  },
-]
-
-export interface MigrationItem {
-  key: string
-  url: string
-  name: string
-  description: string
-}
-
-export const migrationItems: MigrationItem[] = [
-  {
-    key: 'migrate-datadog',
-    url: '/docs/migration/migrate-from-datadog-to-signoz/',
-    name: 'Migrate from Datadog',
-    description: 'Metrics, traces, logs, dashboards & alerts',
-  },
-  {
-    key: 'migrate-grafana',
-    url: '/docs/migration/migrate-from-grafana-to-signoz/',
-    name: 'Migrate from Grafana',
-    description: 'Replace the LGTM stack end-to-end',
-  },
-  {
-    key: 'migrate-newrelic',
-    url: '/docs/migration/migrate-from-newrelic-to-signoz/',
-    name: 'Migrate from New Relic',
-    description: 'Move to open-source, keep full visibility',
-  },
-  {
-    key: 'migrate-elk',
-    url: '/docs/migration/migrate-from-elk-to-signoz/',
-    name: 'Migrate from ELK',
-    description: 'Simplify log management with ClickHouse',
-  },
-  {
-    key: 'migrate-honeycomb',
-    url: '/docs/migration/migrate-from-honeycomb-to-signoz/',
-    name: 'Migrate from Honeycomb',
-    description: 'Full observability with cost control',
-  },
-]
-
 export const productDropdownItemsSorted = [...productDropdownItems].sort(
   (a, b) => a.order - b.order
 )
@@ -233,25 +153,25 @@ export const resourcesDropdownItems = {
   learn: [
     {
       key: 'blog',
-      url: '/blog',
+      url: '/blog/',
       description: 'News, ideas, and insights on observability',
       name: 'Blog',
     },
     {
       key: 'comparisons',
-      url: '/comparisons',
+      url: '/comparisons/',
       description: 'Compare observability tools',
       name: 'Comparisons',
     },
     {
       key: 'guides',
-      url: '/guides',
+      url: '/guides/',
       description: 'How-to guides and tutorials',
       name: 'Guides',
     },
     {
       key: 'opentelemetry',
-      url: '/opentelemetry',
+      url: '/opentelemetry/',
       description: 'OpenTelemetry concepts and its use cases',
       name: 'OpenTelemetry',
     },
@@ -283,10 +203,8 @@ export const NAV_BREAKPOINTS = {
   PRODUCT: 840,
   DOCS: 900,
   RESOURCES: 960,
-  COMPARE_SIGNOZ: 1040,
   PRICING: 1140,
   GITHUB_STARS: 1220,
-  FULL_NAV: 1320,
 } as const
 
 export const POPOVER_CONTENT_CLASS =

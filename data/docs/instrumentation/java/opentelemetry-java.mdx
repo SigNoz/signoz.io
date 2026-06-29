@@ -1,6 +1,5 @@
 ---
-date: 2026-05-18
-id: java-springboot
+date: 2026-06-17
 
 title: Java & Spring Boot OpenTelemetry Setup Guide
 description: Learn how to instrument Java and Spring Boot apps with the OpenTelemetry Java agent. Auto-instrument JDBC, HTTP clients, and queues for real-time tracing.
@@ -81,7 +80,7 @@ For generic Java applications, you can also pass config as system properties:
 ```bash
 java -javaagent:./opentelemetry-javaagent.jar \
   -Dotel.service.name=my-service \
-  -Dotel.exporter.otlp.endpoint=https://ingest.us.signoz.cloud:443 \
+  -Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443 \
   -Dotel.exporter.otlp.headers=signoz-ingestion-key=<key> \
   -jar your-app.jar
 ```
@@ -265,7 +264,7 @@ For generic Java applications, you can also pass config as system properties:
 ```powershell
 java -javaagent:.\opentelemetry-javaagent.jar `
   -Dotel.service.name=my-service `
-  -Dotel.exporter.otlp.endpoint=https://ingest.us.signoz.cloud:443 `
+  -Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443 `
   -Dotel.exporter.otlp.headers=signoz-ingestion-key=<key> `
   -jar your-app.jar
 ```
@@ -324,7 +323,7 @@ Or pass environment variables at runtime:
 ```bash
 docker run -p 8080:8080 \
   -e OTEL_RESOURCE_ATTRIBUTES="service.name=my-service" \
-  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.us.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<key>" \
   -e OTEL_METRICS_EXPORTER="none" \
   -e OTEL_LOGS_EXPORTER="none" \
@@ -449,9 +448,10 @@ See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetr
 
 ## Next steps
 
-- [Add manual instrumentation](https://signoz.io/docs/instrumentation/java/manual-instrumentation) for custom spans and business context
-- Send [metrics](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-java/) and [logs](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java/) from your Java application for complete observability
+- [Add manual instrumentation](https://signoz.io/docs/instrumentation/java/manual-instrumentation/) for custom spans and business context
+- Send [metrics](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-java/) and [logs](https://signoz.io/docs/logs-management/send-logs/java-logs/) from your Java application for complete observability
 - [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for your Java application
+- For a framework-focused walkthrough, our [Spring Boot OpenTelemetry tutorial](https://signoz.io/blog/opentelemetry-spring-boot/) covers instrumentation patterns specific to Spring alongside the agent setup above.
 
 **Sample applications**:
 - <a href="https://github.com/SigNoz/distributed-tracing-java-sample" target="_blank" rel="noopener noreferrer nofollow">Distributed tracing Java sample</a>
