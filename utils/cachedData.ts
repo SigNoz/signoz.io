@@ -1,76 +1,29 @@
-import { unstable_cache } from 'next/cache'
+import { cacheLife, cacheTag } from 'next/cache'
 import { transformBlog, transformComparison, transformDoc, transformGuide } from './mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { getAllContent, getContentBySlug, isLocalContentOverlayEnabled } from './contentRepository'
 
-async function getCachedMDXContent<T>(
-  cacheKey: string,
-  deploymentStatus: string,
-  tags: string[],
-  fetchFn: () => Promise<T[]>
-): Promise<T[]> {
-  if (isLocalContentOverlayEnabled()) {
-    return fetchFn()
-  }
-
-  const cachedFn = unstable_cache(
-    async () => {
-      const result = await fetchFn()
-      if (!result || result.length === 0) {
-        throw new Error(`Empty content received for ${cacheKey}, skipping cache`)
-      }
-      return result
-    },
-    [cacheKey, deploymentStatus],
-    {
-      tags: ['mdx-content-list', ...tags],
-      revalidate: CMS_REVALIDATE_INTERVAL,
-    }
-  )
-
-  return cachedFn()
-}
-
-async function getCachedSingleMDXContent<T>(
-  cacheKey: string,
-  deploymentStatus: string,
-  tags: string[],
-  fetchFn: () => Promise<T>
-): Promise<T> {
-  if (isLocalContentOverlayEnabled()) {
-    return fetchFn()
-  }
-
-  const cachedFn = unstable_cache(
-    async () => {
-      const result = await fetchFn()
-      if (!result) {
-        throw new Error(`Empty content received for ${cacheKey}, skipping cache`)
-      }
-      return result
-    },
-    [cacheKey, deploymentStatus],
-    {
-      tags: ['mdx-content-list', ...tags],
-      revalidate: CMS_REVALIDATE_INTERVAL,
-    }
-  )
-
-  return cachedFn()
-}
+// --- Comparisons ---
 
 async function fetchComparisons(deploymentStatus: string) {
   const comparisons = await getAllContent('comparisons', deploymentStatus)
   return comparisons.map((comparison) => transformComparison(comparison))
 }
 
+async function cachedFetchComparisons(deploymentStatus: string) {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', 'comparisons-list')
+  const result = await fetchComparisons(deploymentStatus)
+  if (!result || result.length === 0) {
+    throw new Error('Empty content received for cached-comparisons-list, skipping cache')
+  }
+  return result
+}
+
 export function getCachedComparisons(deploymentStatus: string) {
-  return getCachedMDXContent(
-    'cached-comparisons-list',
-    deploymentStatus,
-    ['comparisons-list'],
-    () => fetchComparisons(deploymentStatus)
-  )
+  if (isLocalContentOverlayEnabled()) return fetchComparisons(deploymentStatus)
+  return cachedFetchComparisons(deploymentStatus)
 }
 
 export async function fetchAllComparisonsForPage() {
@@ -105,13 +58,20 @@ async function fetchSingleComparison(slug: string, deploymentStatus: string) {
   throw new Error(`Comparison content not found for slug: ${slug}`)
 }
 
+async function cachedFetchSingleComparison(slug: string, deploymentStatus: string) {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', `comparisons-${slug}`, `mdx-content-${slug}`)
+  const result = await fetchSingleComparison(slug, deploymentStatus)
+  if (!result) {
+    throw new Error(`Empty content received for cached-comparison-${slug}, skipping cache`)
+  }
+  return result
+}
+
 export function getCachedSingleComparison(slug: string, deploymentStatus: string) {
-  return getCachedSingleMDXContent(
-    `cached-comparison-${slug}`,
-    deploymentStatus,
-    [`comparisons-${slug}`, `mdx-content-${slug}`],
-    () => fetchSingleComparison(slug, deploymentStatus)
-  )
+  if (isLocalContentOverlayEnabled()) return fetchSingleComparison(slug, deploymentStatus)
+  return cachedFetchSingleComparison(slug, deploymentStatus)
 }
 
 export async function fetchComparisonBySlug(slug: string) {
@@ -142,10 +102,20 @@ async function fetchGuides(deploymentStatus: string) {
   return guides.map((guide) => transformGuide(guide))
 }
 
+async function cachedFetchGuides(deploymentStatus: string) {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', 'guides-list')
+  const result = await fetchGuides(deploymentStatus)
+  if (!result || result.length === 0) {
+    throw new Error('Empty content received for cached-guides-list, skipping cache')
+  }
+  return result
+}
+
 export function getCachedGuides(deploymentStatus: string) {
-  return getCachedMDXContent('cached-guides-list', deploymentStatus, ['guides-list'], () =>
-    fetchGuides(deploymentStatus)
-  )
+  if (isLocalContentOverlayEnabled()) return fetchGuides(deploymentStatus)
+  return cachedFetchGuides(deploymentStatus)
 }
 
 export async function fetchAllGuidesForPage() {
@@ -180,13 +150,20 @@ async function fetchSingleGuide(slug: string, deploymentStatus: string) {
   throw new Error(`Guide content not found for slug: ${slug}`)
 }
 
+async function cachedFetchSingleGuide(slug: string, deploymentStatus: string) {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', `guides-${slug}`, `mdx-content-${slug}`)
+  const result = await fetchSingleGuide(slug, deploymentStatus)
+  if (!result) {
+    throw new Error(`Empty content received for cached-guide-${slug}, skipping cache`)
+  }
+  return result
+}
+
 export function getCachedSingleGuide(slug: string, deploymentStatus: string) {
-  return getCachedSingleMDXContent(
-    `cached-guide-${slug}`,
-    deploymentStatus,
-    [`guides-${slug}`, `mdx-content-${slug}`],
-    () => fetchSingleGuide(slug, deploymentStatus)
-  )
+  if (isLocalContentOverlayEnabled()) return fetchSingleGuide(slug, deploymentStatus)
+  return cachedFetchSingleGuide(slug, deploymentStatus)
 }
 
 export async function fetchGuideBySlug(slug: string) {
@@ -217,10 +194,20 @@ async function fetchBlogs(deploymentStatus: string) {
   return blogs.map((blog) => transformBlog(blog))
 }
 
+async function cachedFetchBlogs(deploymentStatus: string) {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', 'blogs-list')
+  const result = await fetchBlogs(deploymentStatus)
+  if (!result || result.length === 0) {
+    throw new Error('Empty content received for cached-blogs-list, skipping cache')
+  }
+  return result
+}
+
 export function getCachedBlogs(deploymentStatus: string) {
-  return getCachedMDXContent('cached-blogs-list', deploymentStatus, ['blogs-list'], () =>
-    fetchBlogs(deploymentStatus)
-  )
+  if (isLocalContentOverlayEnabled()) return fetchBlogs(deploymentStatus)
+  return cachedFetchBlogs(deploymentStatus)
 }
 
 export async function fetchAllBlogsForPage() {
@@ -255,13 +242,20 @@ async function fetchSingleBlog(slug: string, deploymentStatus: string) {
   throw new Error(`Blog content not found for slug: ${slug}`)
 }
 
+async function cachedFetchSingleBlog(slug: string, deploymentStatus: string) {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', `blogs-${slug}`, `mdx-content-${slug}`)
+  const result = await fetchSingleBlog(slug, deploymentStatus)
+  if (!result) {
+    throw new Error(`Empty content received for cached-blog-${slug}, skipping cache`)
+  }
+  return result
+}
+
 export function getCachedSingleBlog(slug: string, deploymentStatus: string) {
-  return getCachedSingleMDXContent(
-    `cached-blog-${slug}`,
-    deploymentStatus,
-    [`blogs-${slug}`, `mdx-content-${slug}`],
-    () => fetchSingleBlog(slug, deploymentStatus)
-  )
+  if (isLocalContentOverlayEnabled()) return fetchSingleBlog(slug, deploymentStatus)
+  return cachedFetchSingleBlog(slug, deploymentStatus)
 }
 
 export async function fetchBlogBySlug(slug: string) {
@@ -292,10 +286,20 @@ async function fetchDocs(deploymentStatus: string) {
   return docs.map((doc) => transformDoc(doc))
 }
 
+async function cachedFetchDocs(deploymentStatus: string) {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', 'docs-list')
+  const result = await fetchDocs(deploymentStatus)
+  if (!result || result.length === 0) {
+    throw new Error('Empty content received for cached-docs-list, skipping cache')
+  }
+  return result
+}
+
 export function getCachedDocs(deploymentStatus: string) {
-  return getCachedMDXContent('cached-docs-list', deploymentStatus, ['docs-list'], () =>
-    fetchDocs(deploymentStatus)
-  )
+  if (isLocalContentOverlayEnabled()) return fetchDocs(deploymentStatus)
+  return cachedFetchDocs(deploymentStatus)
 }
 
 export async function fetchAllDocsForPage() {
@@ -330,13 +334,20 @@ async function fetchSingleDoc(slug: string, deploymentStatus: string) {
   throw new Error(`Doc content not found for slug: ${slug}`)
 }
 
+async function cachedFetchSingleDoc(slug: string, deploymentStatus: string) {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', `docs-${slug}`, `mdx-content-${slug}`)
+  const result = await fetchSingleDoc(slug, deploymentStatus)
+  if (!result) {
+    throw new Error(`Empty content received for cached-doc-${slug}, skipping cache`)
+  }
+  return result
+}
+
 export function getCachedSingleDoc(slug: string, deploymentStatus: string) {
-  return getCachedSingleMDXContent(
-    `cached-doc-${slug}`,
-    deploymentStatus,
-    [`docs-${slug}`, `mdx-content-${slug}`],
-    () => fetchSingleDoc(slug, deploymentStatus)
-  )
+  if (isLocalContentOverlayEnabled()) return fetchSingleDoc(slug, deploymentStatus)
+  return cachedFetchSingleDoc(slug, deploymentStatus)
 }
 
 export async function fetchDocBySlug(slug: string) {
