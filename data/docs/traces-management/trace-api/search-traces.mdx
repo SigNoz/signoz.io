@@ -1,7 +1,8 @@
 ---
-date: 2024-06-06
+date: 2026-06-27
 title: Search Traces
 description: Search and filter traces using the SigNoz Trace API with examples for querying spans by attributes, methods, error status, and resource attributes.
+doc_type: reference
 
 ---
 This section provides detailed examples of searching traces using the SigNoz Trace API. The example queries demonstrate querying traces with specific attributes and filters.
@@ -15,14 +16,14 @@ This query is useful when identifying all spans with specific characteristics, s
 This query searches for all spans where:
 
 - `deployment_name`= hotrod
-- `httpMethod`= GET
-- `hasError` = true
+- `http_method`= GET
+- `has_error` = true
 
 ### Attributes and Columns
 
 - Resource Attribute: `deployment_name`
-- Tag Attributes + Columns: `httpMethod`, `hasError`
-- Selected Columns: `serviceName`, `httpMethod`, `responseStatusCode`, `httpUrl`
+- Tag Attributes + Columns: `http_method`, `has_error`
+- Selected Columns: `service.name`, `http_method`, `response_status_code`, `http_url`
 
 You can specify the start and end timestamps in Unix format (milliseconds).
 
@@ -44,20 +45,24 @@ This is the JSON payload for the example query.
                     "name": "A",
                     "signal": "traces",
                     "filter": {
-                        "expression": "deployment_name = 'hotrod' AND httpMethod = 'GET' AND hasError = true"
+                        "expression": "deployment_name = 'hotrod' AND http_method = 'GET' AND has_error = true"
                     },
                     "selectFields": [
                         {
-                            "name": "serviceName",
+                            "name": "service.name",
+                            "fieldContext": "resource"
                         },
                         {
-                            "name": "httpMethod",
+                            "name": "http_method",
+                            "fieldContext": "span"
                         },
                         {
-                            "name": "responseStatusCode",
+                            "name": "response_status_code",
+                            "fieldContext": "span"
                         },
                         {
-                            "name": "httpUrl",
+                            "name": "http_url",
+                            "fieldContext": "span"
                         }
                     ],
                     "order": [
@@ -87,19 +92,19 @@ This type of query can be useful to find the initial operation or root spans in 
 This query searches for  root spans with:
 
 - `deployment_name`= hotrod
-- `httpMethod`= GET
+- `http_method`= GET
 
 ### Attributes and Columns
 
 - Resource Attribute: `deployment_name`
-- Tag Attributes + Columns: `httpMethod`
-- Selected Columns: `serviceName`, `httpMethod`, `responseStatusCode`, `some_custom_tag`
+- Tag Attributes + Columns: `http_method`
+- Selected Columns: `service.name`, `http_method`, `response_status_code`, `some_custom_tag`
 
 You can specify the start and end timestamps in Unix format (milliseconds).
 
 <Admonition>
 
-To search for root spans, you need to add `parentSpanID = ''` in the filter expression
+To search for root spans, you need to add `parent_span_id = ''` in the filter expression
 
 </Admonition>
 
@@ -121,20 +126,23 @@ This is the JSON payload for the example query.
                     "name": "A",
                     "signal": "traces",
                     "filter": {
-                        "expression": "deployment_name = 'hotrod' AND httpMethod = 'GET' AND parentSpanID = ''"
+                        "expression": "deployment_name = 'hotrod' AND http_method = 'GET' AND parent_span_id = ''"
                     },
                     "selectFields": [
                         {
-                            "name": "serviceName",
+                            "name": "service.name",
+                            "fieldContext": "resource"
                         },
                         {
-                            "name": "httpMethod",
+                            "name": "http_method",
+                            "fieldContext": "span"
                         },
                         {
-                            "name": "responseStatusCode",
+                            "name": "response_status_code",
+                            "fieldContext": "span"
                         },
                         {
-                            "name": "some_custom_tag",
+                            "name": "some_custom_tag"
                         }
                     ],
                     "order": [
