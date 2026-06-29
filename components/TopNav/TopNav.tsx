@@ -18,8 +18,9 @@ import { NavDropdownProvider } from './NavDropdownContext'
 import NavDropdownPanel from './NavDropdownPanel'
 import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
+import type { NavItem } from '@/components/DocsSidebar/types'
 
-export default function TopNav() {
+export default function TopNav({ sideNav }: { sideNav: NavItem[] }) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -193,6 +194,7 @@ export default function TopNav() {
           isDocsBasePath={isDocsBasePath}
           isSignupRoute={isSignupRoute}
           onShowMainMenu={() => setShowMainMenu(true)}
+          sideNav={sideNav}
         />
       </header>
 
