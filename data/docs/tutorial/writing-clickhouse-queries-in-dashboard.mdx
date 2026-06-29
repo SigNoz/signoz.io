@@ -1,7 +1,8 @@
 ---
-date: 2024-06-06
+date: 2026-06-27
 title: ClickHouse queries for building dashboards and alerts
 description: Example clickhouse queries to run analytics on observability data
+doc_type: reference
 ---
 
 SigNoz gives you the ability to write powerful ClickHouse queries to plot charts. You can run SQL queries supported by ClickHouse to extract immense value out of your distributed tracing data or logs data. 
@@ -19,7 +20,7 @@ Sharing a few examples of some queries which might be helpful in building dashbo
 ```sql
 SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, 
 attributes_string['http.method'] AS method,
-toFloat64(avg(durationNano)) AS value 
+toFloat64(avg(duration_nano)) AS value
 FROM signoz_traces.distributed_signoz_index_v3
 WHERE attributes_string['http.method']!=''
 AND timestamp > now() - INTERVAL 30 MINUTE
@@ -49,19 +50,19 @@ FROM
 (
     SELECT
         interval,
-        traceID,
+        trace_id,
         if(startTime1 != 0, if(startTime2 != 0, (toUnixTimestamp64Nano(startTime2) - toUnixTimestamp64Nano(startTime1)) / 1000000, nan), nan) AS time_diff
     FROM
     (
         SELECT
             toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
-            traceID,
+            trace_id,
             minIf(timestamp, if(resource_string_service$$name='driver', if(name = '/driver.DriverService/FindNearest', if((resources_string['component']) = 'gRPC', true, false), false), false)) AS startTime1,
             minIf(timestamp, if(resource_string_service$$name='route', if(name = 'HTTP GET /route', true, false), false)) AS startTime2
         FROM signoz_traces.distributed_signoz_index_v3
         WHERE (timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}) AND (ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}) AND (resource_string_service$$name IN ('driver', 'route'))
-        GROUP BY (interval, traceID)
-        ORDER BY (interval, traceID) ASC
+        GROUP BY (interval, trace_id)
+        ORDER BY (interval, trace_id) ASC
     )
 )
 WHERE isNaN(time_diff) = 0
@@ -94,7 +95,7 @@ FROM (
  SELECT timestamp 
  FROM signoz_traces.distributed_signoz_index_v3
  WHERE resource_string_service$$name='frontend' 
- AND durationNano>=50*exp10(6) 
+ AND duration_nano>=50*exp10(6)
  AND timestamp > now() - INTERVAL 1 MINUTE AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(1))) - 1800)
  GROUP BY interval 
  ORDER BY interval ASC;
@@ -187,5 +188,3 @@ The reserved bind variables `{{.start_datetime}}` and `{{.end_datetime}}` would 
 
 
  
-
-

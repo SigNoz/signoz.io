@@ -1,7 +1,8 @@
 ---
-date: 2024-06-06
+date: 2026-06-27
 title: Trace API Payload Model
 description: Detailed reference for the SigNoz Trace API JSON payload structure, including compositeQuery, builder queries, filters, and ClickHouse query fields.
+doc_type: reference
 
 ---
 
@@ -90,7 +91,7 @@ A `selectField` consists of:
 |---|---|
 |name | Name of the field |
 |fieldDataType | Data type of the field (e.g., string, int64, float64, bool) |
-|fieldContext | Type of the field, i.e., attribute/resource. |
+|fieldContext | Type of the field, i.e., attribute/resource/span. |
 
 ### GroupBy Key
 
@@ -100,7 +101,7 @@ The `groupByKey` includes:
 |---|---|
 |name | Name of the field |
 |fieldDataType | Data type of the field (e.g., string, int64, float64, bool) |
-|fieldContext | Type of the field, i.e., attribute/resource |
+|fieldContext | Type of the field, i.e., attribute/resource/span |
 
 ### Order By
 
@@ -123,7 +124,7 @@ A `having` consists of:
 
 ### For builderQuery with table requestType
 
-This sample payload contains the different fields that we looked at above. It queries the SigNoz Trace API and illustrates how to count errors and group them by `serviceName` where `hasError` is `true`.
+This sample payload contains the different fields that we looked at above. It queries the SigNoz Trace API and illustrates how to count errors and group them by `service.name` where `has_error` is `true`.
 
 ```json
 {
@@ -146,11 +147,12 @@ This sample payload contains the different fields that we looked at above. It qu
                         }
                     ],
                     "filter": {
-                        "expression": "hasError = true"
+                        "expression": "has_error = true"
                     },
                     "groupBy": [
                         {
-                            "name": "serviceName",
+                            "name": "service.name",
+                            "fieldContext": "resource"
                         }
                     ],
                     "order": [
@@ -184,7 +186,7 @@ This sample payload contains the different fields that we looked at above. It qu
                 "type": "clickhouse_sql",
                 "spec": {
                     "name": "A",
-                    "query": "SELECT resource_string_service$$name AS `service.name`, toFloat64(avg(durationNano)) AS value FROM signoz_traces.distributed_signoz_index_v3 WHERE timestamp BETWEEN $start_datetime AND $end_datetime AND ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp GROUP BY (`service.name`) order by (`service.name`) ASC;",
+                    "query": "SELECT resource_string_service$$name AS `service.name`, toFloat64(avg(duration_nano)) AS value FROM signoz_traces.distributed_signoz_index_v3 WHERE timestamp BETWEEN $start_datetime AND $end_datetime AND ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp GROUP BY (`service.name`) order by (`service.name`) ASC;",
                     "disabled": false
                 }
             }

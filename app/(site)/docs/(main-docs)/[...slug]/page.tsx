@@ -70,7 +70,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const toc = post?.toc || []
   const { title, hide_table_of_contents } = post
   const jsonLd = post.structuredData
-  const breadcrumbs = getDocsBreadcrumbs(slug, title)
+  const breadcrumbs = await getDocsBreadcrumbs(slug, title)
   const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
   const postForClient = {

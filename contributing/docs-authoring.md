@@ -288,7 +288,7 @@ async redirects() {
 
 ### Sidebar Updates
 
-- When a doc should appear in docs navigation, update `constants/docsSideNav.ts`.
+- When a doc should appear in docs navigation, update `data/docs-side-nav/main.json`.
 - Match the route to the rendered docs path.
 - Add the entry in the most relevant existing section instead of creating duplicate navigation paths.
 

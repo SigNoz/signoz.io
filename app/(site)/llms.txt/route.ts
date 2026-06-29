@@ -5,7 +5,7 @@ import { getLlmStarterLinks } from '@/utils/docs/agentDiscovery'
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
 export async function GET() {
-  const starters = getLlmStarterLinks()
+  const starters = await getLlmStarterLinks()
   const starterLines =
     starters.length > 0
       ? starters.map((item) => `- ${item.label}: ${siteMetadata.siteUrl}${item.route}/`).join('\n')
