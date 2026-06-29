@@ -63,6 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang={siteMetadata.language}
       className={`dark ${inter.className}`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <GoogleTagManager gtmId="GTM-N9B6D4H" />
