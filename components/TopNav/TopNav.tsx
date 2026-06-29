@@ -18,19 +18,30 @@ import { NavDropdownProvider } from './NavDropdownContext'
 import NavDropdownPanel from './NavDropdownPanel'
 import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
-import type { NavItem } from '@/components/DocsSidebar/types'
+import {
+  useDocsMobileSidebarOpen,
+  toggleDocsMobileSidebar,
+  closeDocsMobileSidebar,
+} from '@/hooks/useDocsMobileSidebar'
+import { OPEN_MAIN_MENU_EVENT } from '@/components/DocsSidebar/MobileDocsSideNav'
 
-export default function TopNav({ sideNav = [] }: { sideNav?: NavItem[] }) {
+export default function TopNav() {
   const pathname = usePathname()
   const router = useRouter()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isDocsBasePath, setIsDocsBasePath] = useState(false)
-  const [showMainMenu, setShowMainMenu] = useState(false)
   const [activeTab, setActiveTab] = useState(TABS.GUIDES)
   const [shouldShowTabs, setShouldShowTabs] = useState(false)
 
+  const docsSidebarOpen = useDocsMobileSidebarOpen()
+  const isDocsBasePath = pathname.startsWith('/docs')
   const visibility = useNavVisibility()
+
+  useEffect(() => {
+    const handler = () => setMobileMenuOpen(true)
+    window.addEventListener(OPEN_MAIN_MENU_EVENT, handler)
+    return () => window.removeEventListener(OPEN_MAIN_MENU_EVENT, handler)
+  }, [])
 
   const isLoginRoute = pathname === '/login/'
   const isSignupRoute = pathname === '/teams/'
@@ -38,10 +49,6 @@ export default function TopNav({ sideNav = [] }: { sideNav?: NavItem[] }) {
   const isWordleRoute = pathname === '/todaysdevopswordle/'
 
   useEffect(() => {
-    const docsBase = pathname.startsWith('/docs')
-    setIsDocsBasePath(docsBase)
-    setShowMainMenu(!docsBase)
-
     const isListingOrPagination = (base: string) =>
       pathname === base || pathname === `${base}/` || pathname.startsWith(`${base}/page/`)
 
@@ -82,7 +89,10 @@ export default function TopNav({ sideNav = [] }: { sideNav?: NavItem[] }) {
               clickName="SigNoz Logo"
               clickText="SigNoz"
               clickLocation="Top Navbar"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={() => {
+                setMobileMenuOpen(false)
+                closeDocsMobileSidebar()
+              }}
             >
               <SigNozLogo
                 className="h-5 w-auto shrink-0"
@@ -175,10 +185,24 @@ export default function TopNav({ sideNav = [] }: { sideNav?: NavItem[] }) {
             <button
               type="button"
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 min-[1280px]:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => {
+                if (mobileMenuOpen) {
+                  setMobileMenuOpen(false)
+                  return
+                }
+                if (docsSidebarOpen) {
+                  closeDocsMobileSidebar()
+                  return
+                }
+                if (isDocsBasePath) {
+                  toggleDocsMobileSidebar()
+                } else {
+                  setMobileMenuOpen(true)
+                }
+              }}
             >
               <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? (
+              {mobileMenuOpen || docsSidebarOpen ? (
                 <X strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
               ) : (
                 <Menu strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
@@ -190,11 +214,7 @@ export default function TopNav({ sideNav = [] }: { sideNav?: NavItem[] }) {
         <MobileMenu
           open={mobileMenuOpen}
           onClose={setMobileMenuOpen}
-          showMainMenu={showMainMenu}
-          isDocsBasePath={isDocsBasePath}
           isSignupRoute={isSignupRoute}
-          onShowMainMenu={() => setShowMainMenu(true)}
-          sideNav={sideNav}
         />
       </header>
 
