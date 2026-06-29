@@ -56,7 +56,7 @@ export default function TrackingButton({
 
   return (
     <Button
-      isButton
+      unstyled
       className={className}
       onClick={handleClick}
       type={type}

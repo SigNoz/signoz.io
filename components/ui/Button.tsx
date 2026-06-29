@@ -103,6 +103,11 @@ export interface ButtonProps
    */
   type?: ButtonHtmlType | LegacyButtonType
   /**
+   * Render only the supplied className. Useful for wrappers that already own
+   * their full visual styling.
+   */
+  unstyled?: boolean
+  /**
    * Opt-in split icon treatment used by the homepage redesign CTAs.
    */
   withIcon?: boolean
@@ -132,6 +137,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       rounded,
       children,
       type,
+      unstyled = false,
       withIcon = false,
       ...props
     },
@@ -184,16 +190,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         : mappedVariant === 'secondary'
           ? 'homepage-button homepage-button--secondary'
           : ''
-    const shouldRenderSplitIcon = withIcon && Boolean(splitIconClass) && !asChild
-    const resolvedClassName = hasLegacyButtonType
-      ? [legacyButtonClassName, shouldRenderSplitIcon && splitIconClass, className]
-          .filter(Boolean)
-          .join(' ')
-      : cn(
-          buttonVariants({ variant: mappedVariant, size, rounded: mappedRounded }),
-          shouldRenderSplitIcon && splitIconClass,
-          className
-        )
+    const shouldRenderSplitIcon = !unstyled && withIcon && Boolean(splitIconClass) && !asChild
+    const resolvedClassName = unstyled
+      ? className
+      : hasLegacyButtonType
+        ? [legacyButtonClassName, shouldRenderSplitIcon && splitIconClass, className]
+            .filter(Boolean)
+            .join(' ')
+        : cn(
+            buttonVariants({ variant: mappedVariant, size, rounded: mappedRounded }),
+            shouldRenderSplitIcon && splitIconClass,
+            className
+          )
 
     return (
       <Comp
