@@ -17,7 +17,7 @@ Review these when relevant:
 
 - `data/docs/**`
 - `data-assets/img/docs/**`
-- `constants/docsSideNav.ts`
+- `data/docs-side-nav/main.json`
 - `constants/listicles/*.json`
 - `next.config.js` when docs URLs change
 - `components/**/*.mdx` when the PR adds or meaningfully changes these alongside docs (see **Shared doc fragments** below)

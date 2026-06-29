@@ -12,6 +12,8 @@ on:
       - 'data/**/*.mdx'
       - 'data/**/*.md'
       - 'data-assets/**'
+      - 'data/docs-side-nav/**'
+      - 'constants/listicles/**'
   push:
     branches:
       - main  # Configurable: Change to your production branch
@@ -20,6 +22,8 @@ on:
       - 'data/**/*.mdx'
       - 'data/**/*.md'
       - 'data-assets/**'
+      - 'data/docs-side-nav/**'
+      - 'constants/listicles/**'
 
 env:
   # Configurable: Array of folders to sync to CMS
@@ -53,6 +57,8 @@ jobs:
       any_changed: ${{ steps.changed-content.outputs.any_changed }}
       any_deleted: ${{ steps.changed-content.outputs.any_deleted }}
       any_assets_changed: ${{ steps.changed-assets.outputs.any_changed }}
+      sidenav_changed: ${{ steps.changed-sidenav.outputs.any_changed }}
+      listicles_changed: ${{ steps.changed-listicles.outputs.any_changed }}
       deployment_status: ${{ steps.determine-status.outputs.deployment_status }}
       should_sync: ${{ steps.check-sync.outputs.should_sync }}
     
@@ -103,6 +109,35 @@ jobs:
             mv .github/outputs/all_changed_files.json .github/outputs/assets_changed_files.json
           else
             echo "[]" > .github/outputs/assets_changed_files.json
+          fi
+
+      - name: Get Changed Sidenav Files
+        id: changed-sidenav
+        uses: tj-actions/changed-files@v46
+        with:
+          files: data/docs-side-nav/**
+
+      - name: Get Changed Listicle Files
+        id: changed-listicles
+        uses: tj-actions/changed-files@v46
+        with:
+          files: constants/listicles/**/*.json
+          json: true
+          escape_json: false
+          write_output_files: true
+
+      - name: Rename Listicle Output Files
+        run: |
+          if [ -f .github/outputs/all_changed_files.json ]; then
+            mv .github/outputs/all_changed_files.json .github/outputs/listicles_changed_files.json
+          else
+            echo "[]" > .github/outputs/listicles_changed_files.json
+          fi
+
+          if [ -f .github/outputs/deleted_files.json ]; then
+            mv .github/outputs/deleted_files.json .github/outputs/listicles_deleted_files.json
+          else
+            echo "[]" > .github/outputs/listicles_deleted_files.json
           fi
 
       - name: Check if Sync is Required
@@ -170,11 +205,17 @@ jobs:
           echo "🖼️ Changed assets detected."
           echo "Count: $(jq '. | length' .github/outputs/assets_changed_files.json)"
 
+      - name: Display Changed Listicles Summary
+        if: steps.changed-listicles.outputs.any_changed == 'true'
+        run: |
+          echo "📋 Changed listicle files detected."
+          echo "Count: $(jq '. | length' .github/outputs/listicles_changed_files.json)"
+
   sync-to-cms:
     name: Sync Content to CMS
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: (needs.detect-changes.outputs.any_changed == 'true' || needs.detect-changes.outputs.any_deleted == 'true' || needs.detect-changes.outputs.any_assets_changed == 'true') && needs.detect-changes.outputs.should_sync == 'true'
+    if: (needs.detect-changes.outputs.any_changed == 'true' || needs.detect-changes.outputs.any_deleted == 'true' || needs.detect-changes.outputs.any_assets_changed == 'true' || needs.detect-changes.outputs.sidenav_changed == 'true' || needs.detect-changes.outputs.listicles_changed == 'true') && needs.detect-changes.outputs.should_sync == 'true'
     
     steps:
       - name: Checkout Repository
@@ -236,6 +277,10 @@ jobs:
           DELETED_FILES_PATH: .github/outputs/content_deleted_files.json
           CHANGED_ASSETS_PATH: .github/outputs/assets_changed_files.json
           DEPLOYMENT_STATUS: ${{ needs.detect-changes.outputs.deployment_status }}
+          SIDENAV_CHANGED: ${{ needs.detect-changes.outputs.sidenav_changed }}
+          LISTICLES_CHANGED: ${{ needs.detect-changes.outputs.listicles_changed }}
+          CHANGED_LISTICLES_PATH: .github/outputs/listicles_changed_files.json
+          DELETED_LISTICLES_PATH: .github/outputs/listicles_deleted_files.json
           CMS_BATCH_SIZE: '10'
           CMS_BATCH_DELAY_MS: '1000'
           CMS_MAX_RETRIES: '5'
@@ -249,6 +294,10 @@ jobs:
           CHANGED_FILES_PATH: .github/outputs/content_changed_files.json
           DELETED_FILES_PATH: .github/outputs/content_deleted_files.json
           CHANGED_ASSETS_PATH: .github/outputs/assets_changed_files.json
+          SIDENAV_CHANGED: ${{ needs.detect-changes.outputs.sidenav_changed }}
+          LISTICLES_CHANGED: ${{ needs.detect-changes.outputs.listicles_changed }}
+          CHANGED_LISTICLES_PATH: .github/outputs/listicles_changed_files.json
+          DELETED_LISTICLES_PATH: .github/outputs/listicles_deleted_files.json
           REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
         run: |
           if [ "$DEPLOYMENT_STATUS" = "live" ]; then
@@ -293,7 +342,7 @@ jobs:
           exit 1
 
       - name: Report Skipped
-        if: needs.detect-changes.outputs.should_sync != 'true' || (needs.detect-changes.outputs.any_changed != 'true' && needs.detect-changes.outputs.any_deleted != 'true' && needs.detect-changes.outputs.any_assets_changed != 'true')
+        if: needs.detect-changes.outputs.should_sync != 'true' || (needs.detect-changes.outputs.any_changed != 'true' && needs.detect-changes.outputs.any_deleted != 'true' && needs.detect-changes.outputs.any_assets_changed != 'true' && needs.detect-changes.outputs.sidenav_changed != 'true' && needs.detect-changes.outputs.listicles_changed != 'true')
         run: |
           echo "⏭️ Sync was skipped."
           if [[ "${{ needs.detect-changes.outputs.any_changed }}" != "true" && "${{ needs.detect-changes.outputs.any_deleted }}" != "true" && "${{ needs.detect-changes.outputs.any_assets_changed }}" != "true" ]]; then
