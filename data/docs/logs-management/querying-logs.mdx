@@ -1,5 +1,5 @@
 ---
-date: 2026-05-20
+date: 2026-06-25
 title: Querying Logs
 description: Query logs in SigNoz using the Query Builder in Logs Explorer and Dashboards, with ClickHouse SQL available in Dashboards.
 doc_type: reference
@@ -55,6 +55,27 @@ Combine up to ten queries using formulas. For example, calculate error ratio: `(
 
 For full details on the Query Builder, see the [Query Builder documentation](https://signoz.io/docs/userguide/query-builder-v5/).
 
+## Querying JSON Log Bodies
+
+When your log bodies are stored as JSON, you can filter, aggregate, and group by individual keys inside the body — using the same Query Builder operators above.
+
+- **Filter on body keys** — reference any key from the body directly in the filter (e.g. `status = 400`, `level = 'error'`).
+- **Query inside arrays** — use `[]` notation to match against any element of an array. Index-based access is not supported; the filter returns true if **any** element matches:
+
+  ```
+  requests[].status_code >= 500
+  ```
+
+  To check whether a scalar value exists in an array, use the `has` function:
+
+  ```
+  has(tags, "production")
+  ```
+
+- **Group By body keys** — any body key can be used in the **Group By** field, the same as resource and attribute keys, letting you aggregate and chart logs by values inside the body.
+
+For how JSON bodies are stored and transformed (the `message` field, synonym promotion, and map flattening), see [Native JSON Log Body](https://signoz.io/docs/logs-management/features/json-logs/).
+
 ## ClickHouse SQL (Dashboards Only)
 
 When building Dashboard panels, you can write raw ClickHouse SQL queries against the logs tables for advanced analytics beyond what the Query Builder supports.
@@ -70,6 +91,7 @@ For details and example queries, see the [ClickHouse Logs Query guide](https://s
 - [Time Aggregation Windows](https://signoz.io/docs/querying/time-aggregation/) — how step intervals work for time series queries
 - [Advanced Query Examples](https://signoz.io/docs/userguide/search-advanced-examples/) — complex query patterns and real-world use cases
 - [Fields in Logs](https://signoz.io/docs/userguide/logs_fields/) — understand log attributes, parsing, and sensitive data masking
+- [Native JSON Log Body](https://signoz.io/docs/logs-management/features/json-logs/) — how JSON bodies are stored, transformed, and queried by key
 - [Log-based Alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) — get notified when log patterns match your conditions
 - [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) — transform and enrich logs before storage using processors
 - [Correlate Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) — navigate between related logs and traces

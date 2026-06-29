@@ -5,7 +5,7 @@ Use this playbook for product documentation under `data/docs/**`.
 ## Docs file and URL names
 
 - **Do not put `.` in the MDX filename**
-- Encode version-like segments with hyphens instead, for example `upgrade-0-8-1.mdx` → slug `operate/migration/upgrade-0-8-1`, and align the frontmatter `id` with that slug (for example `id: upgrade-0-8-1`).
+- Encode version-like segments with hyphens instead, for example `upgrade-0-8-1.mdx` → URL `operate/migration/upgrade-0-8-1`. The URL comes from the file path; docs frontmatter no longer uses `id` or `slug`.
 
 ## Core Writing Principles
 
@@ -56,10 +56,11 @@ Use the template in [templates/docs-frontmatter.md](templates/docs-frontmatter.m
 Required keys:
 
 - `date`
-- `id`
 - `title`
 - `description`
 - `doc_type`
+
+`id` and `slug` are no longer used. The URL is derived from the file path.
 
 ### Title Guidelines
 
@@ -160,7 +161,7 @@ When documenting OpenTelemetry Collector changes:
 
 - Use descriptive anchor text instead of "here" or raw URLs in body text.
 - Validate all added internal and external links before the PR.
-- Store docs images under `public/img/docs/<topic>/...`.
+- Store docs images under `data-assets/img/docs/<topic>/...`.
 - Use WebP format for all docs images. See [Creating WebP images doc](https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74) for tips and tools.
 - **Minimum image width: 1200 px** (ideally 1400–1600 px for retina sharpness). Images below 1200 px render blurry when the docs layout stretches them to the content column width. Take screenshots at 2× resolution on retina displays or use browser DevTools device toolbar set to a wide viewport.
 - Use `Figure` with descriptive alt text and a concise caption.
@@ -287,7 +288,7 @@ async redirects() {
 
 ### Sidebar Updates
 
-- When a doc should appear in docs navigation, update `constants/docsSideNav.ts`.
+- When a doc should appear in docs navigation, update `data/docs-side-nav/main.json`.
 - Match the route to the rendered docs path.
 - Add the entry in the most relevant existing section instead of creating duplicate navigation paths.
 
@@ -329,7 +330,7 @@ node --test tests/component-items-sync.test.js
 
 Use the PR snippet in [templates/pr-checklists.md#docs-changes](templates/pr-checklists.md#docs-changes) when preparing or reviewing docs work.
 
-- Frontmatter includes `date`, `id`, `title`, `description`, `doc_type`, and correct tags.
+- Frontmatter includes `date`, `title`, `description`, `doc_type`, and correct tags.
 - Title is 50–60 characters, leads with the primary keyword, and uses an action word.
 - Description is 120–160 characters, action-oriented, and explains what the page covers and what the reader will learn.
 - Content matches the chosen `doc_type`.

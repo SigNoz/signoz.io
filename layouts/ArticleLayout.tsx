@@ -19,7 +19,7 @@ import NewsletterSubscription from '@/components/NewsletterSubscription/Newslett
 import { useScrollToHash } from '@/hooks/useScrollToHash'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
-import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
 import { getFormattedDates } from '@/utils/dateUtils'
 
 const MAIN_CONTENT_ID = 'article-main'
