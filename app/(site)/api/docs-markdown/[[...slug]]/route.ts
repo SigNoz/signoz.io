@@ -3,8 +3,6 @@ import { renderDocMarkdownForAgents } from '@/utils/docs/renderDocMarkdownForAge
 import { resolveDocsMarkdownSlug } from '@/utils/docs/markdownRouting'
 import { fetchAllDocsForPage, fetchDocBySlug } from '@/utils/cachedData'
 
-export const runtime = 'nodejs'
-
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
 export async function generateStaticParams() {
