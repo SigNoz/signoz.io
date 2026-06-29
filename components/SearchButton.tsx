@@ -22,13 +22,10 @@ import {
   useInstantSearch,
   useSearchBox,
 } from 'react-instantsearch'
-import { Clock3, Loader2, Search, Sparkles } from 'lucide-react'
+import { Clock3, Command, Loader2, Search, Sparkles } from 'lucide-react'
 
 import siteMetadata from '@/data/siteMetadata'
 import { cn } from 'app/lib/utils'
-import { Button } from '@/components/ui/Button'
-import { AppTooltip } from '@/components/ui/AppTooltip'
-import { TooltipProvider } from '@radix-ui/react-tooltip'
 import { useLogEvent } from 'hooks/useLogEvent'
 import { usePathname } from 'next/navigation'
 import { openDecimalChat } from '@/utils/decimal'
@@ -170,7 +167,7 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [disableShortcut, hasAlgoliaConfig])
+  }, [disableShortcut, hasAlgoliaConfig, trackSearchOpen])
 
   useEffect(() => {
     if (!initiallyOpen) {
@@ -213,27 +210,27 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
 
   return (
     <>
-      <TooltipProvider delayDuration={400}>
-        <AppTooltip content="Search Docs" side="left">
-          <Button
-            isButton
-            variant="ghost"
-            rounded="full"
-            aria-label="Search Docs"
-            onClick={() => {
-              trackSearchOpen('click')
-              open()
-            }}
-            className={cn(
-              'group h-8 w-8 shrink-0 bg-signoz_slate-500 !p-0 text-slate-300 transition',
-              'hover:bg-slate-700/50 hover:text-white',
-              'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80'
-            )}
-          >
-            <Search className="h-4 w-4 text-slate-400 transition group-hover:text-white" />
-          </Button>
-        </AppTooltip>
-      </TooltipProvider>
+      <button
+        type="button"
+        onClick={() => {
+          trackSearchOpen('click')
+          open()
+        }}
+        aria-label="Open docs search"
+        className={cn(
+          'group flex shrink-0 items-center gap-1.5 rounded-full bg-signoz_slate-500 px-3 py-1 text-xs text-slate-300 transition',
+          'hover:bg-slate-700/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+          'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80 dark:focus-visible:ring-slate-600'
+        )}
+      >
+        <Search className="h-3.5 w-3.5 text-slate-400 transition group-hover:text-white" />
+        <span className="hidden text-xs sm:inline">Search docs...</span>
+        {!disableShortcut && (
+          <span className="ml-1.5 hidden items-center gap-1 rounded-md border border-slate-700 bg-slate-900/60 px-1 py-[1px] text-[10px] font-medium text-slate-400 sm:flex">
+            <Command className="h-2.5 w-2.5" />K
+          </span>
+        )}
+      </button>
 
       <SearchModal
         isOpen={isOpen}

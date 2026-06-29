@@ -22,8 +22,8 @@ export const metadata: Metadata = {
     'Learn about SigNoz, an open-source observability platform that helps you monitor your applications with distributed tracing, metrics, and logs.',
 }
 
-export default function DocsIntroductionPage() {
-  const breadcrumbJsonLd = generateDocsBreadcrumb('introduction', 'Introduction')
+export default async function DocsIntroductionPage() {
+  const breadcrumbJsonLd = await generateDocsBreadcrumb('introduction', 'Introduction')
 
   return (
     <>

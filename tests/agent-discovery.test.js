@@ -5,7 +5,7 @@ const { loadTsModule } = require('./helpers/loadTsModule')
 const { getLlmStarterLinks } = loadTsModule('utils/docs/agentDiscovery.ts')
 
 test('getLlmStarterLinks includes LLM, AWS, and GCP landing routes', async () => {
-  const starters = getLlmStarterLinks()
+  const starters = await getLlmStarterLinks()
   const routes = starters.map((item) => item.route)
 
   assert.equal(routes.includes('/docs/llm-observability'), true)
@@ -14,7 +14,7 @@ test('getLlmStarterLinks includes LLM, AWS, and GCP landing routes', async () =>
 })
 
 test('getLlmStarterLinks includes migration landing pages', async () => {
-  const starters = getLlmStarterLinks()
+  const starters = await getLlmStarterLinks()
   const routes = starters.map((item) => item.route)
 
   assert.equal(routes.includes('/docs/migration/migrate-to-signoz'), true)
@@ -31,7 +31,7 @@ test('getLlmStarterLinks includes migration landing pages', async () => {
 })
 
 test('getLlmStarterLinks orders setup before LLM/AWS/GCP and migration routes', async () => {
-  const starters = getLlmStarterLinks()
+  const starters = await getLlmStarterLinks()
   const routes = starters.map((item) => item.route)
 
   const setupIndex = routes.indexOf('/docs/opentelemetry-collection-agents/get-started')
@@ -54,7 +54,7 @@ test('getLlmStarterLinks orders setup before LLM/AWS/GCP and migration routes', 
 })
 
 test('getLlmStarterLinks is unique and respects default max size', async () => {
-  const starters = getLlmStarterLinks()
+  const starters = await getLlmStarterLinks()
   const routes = starters.map((item) => item.route)
   const uniqueRoutes = new Set(routes)
 

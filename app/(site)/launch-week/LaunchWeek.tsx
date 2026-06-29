@@ -46,12 +46,12 @@ const MainSection: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="mt-8 max-w-full border-b-2 border-dashed border-signoz_slate-200/50 px-6 text-5xl font-medium uppercase text-signoz_vanilla-100 max-md:max-w-full max-md:text-4xl">
+              <h1 className="mt-8 max-w-full border-b-2 border-dashed border-signoz_slate-200/50 px-6 text-5xl font-medium uppercase text-signoz_vanilla-100 max-md:max-w-full max-md:text-4xl">
                 Launch Week{' '}
                 <span className="launch-week-counter rounded bg-signoz_cherry-500  text-signoz_vanilla-100">
                   5
                 </span>
-              </div>
+              </h1>
             </div>
             <div className="z-10 mt-11 self-stretch border-b-2 border-dashed border-signoz_slate-200/50 px-6 font-mono text-base font-medium leading-8 text-signoz_vanilla-400 max-md:mt-10 max-md:max-w-full">
               Join us for a week of new features and find new ways
