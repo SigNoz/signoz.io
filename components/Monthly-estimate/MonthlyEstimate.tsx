@@ -394,10 +394,7 @@ const MonthlyEstimate = () => {
             clickLocation="Monthly Estimate Calculator"
             id="pricing-page-get-started-card-cta"
           >
-            <Button
-              type={Button.TYPES.PRIMARY}
-              className="flex items-center justify-center font-bold"
-            >
+            <Button variant="legacyPrimary" className="flex items-center justify-center font-bold">
               Get Started - Free
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -414,7 +411,7 @@ const MonthlyEstimate = () => {
             Reach out to us for custom pricing and retention for high volume
           </span>
           <div className="w-2/5 border-b border-dashed border-signoz_slate-400" />
-          <Button type={Button.TYPES.PRIMARY} id="btn-contact-us-pricing-monthly-estimate">
+          <Button variant="legacyPrimary" id="btn-contact-us-pricing-monthly-estimate">
             <TrackingLink
               href={'https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af'}
               clickType="Primary CTA"
@@ -446,7 +443,7 @@ const MonthlyEstimate = () => {
             clickLocation="Monthly Estimate Calculator"
             id="pricing-page-startup-program-cta"
           >
-            <Button type={Button.TYPES.PRIMARY}>Learn More</Button>
+            <Button variant="legacySecondary">Learn More</Button>
           </TrackingLink>
         </div>
       </div>

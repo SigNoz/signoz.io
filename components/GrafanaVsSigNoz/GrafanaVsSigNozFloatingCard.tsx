@@ -68,7 +68,7 @@ const GrafanaVsSigNozFloatingCard: React.FC = () => {
         <Button
           id="grafana-vs-signoz-compare-button"
           href="/grafana-alternative/"
-          type={Button.TYPES.PRIMARY}
+          variant="legacyPrimary"
           className="flex w-full items-center justify-center gap-1 text-xs font-bold"
         >
           <Scale className="h-4 w-4" />
@@ -77,7 +77,7 @@ const GrafanaVsSigNozFloatingCard: React.FC = () => {
         <Button
           id="grafana-vs-signoz-try-signoz-button"
           href="/teams/"
-          type={Button.TYPES.SECONDARY}
+          variant="legacySecondary"
           className="flex w-full items-center justify-center gap-1 text-xs font-bold"
         >
           Try SigNoz for Free <ArrowRight className="h-3 w-3" />

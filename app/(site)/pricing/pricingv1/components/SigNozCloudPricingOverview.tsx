@@ -95,7 +95,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
             className="flex-1 sm:flex-[0.6]"
           >
             <Button
-              type={Button.TYPES.PRIMARY}
+              variant="legacyPrimary"
               className="!w-full !px-16 py-3 text-lg font-bold shadow-lg transition-all duration-200 hover:shadow-xl"
             >
               Get Started - Free <ArrowRight className="h-5 w-5" />
@@ -112,7 +112,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
             className="flex-1 sm:flex-[0.4]"
           >
             <Button
-              type={Button.TYPES.SECONDARY}
+              variant="legacySecondary"
               className="!w-full !px-6 !py-3 text-base font-semibold"
             >
               Estimate Your Monthly Bill

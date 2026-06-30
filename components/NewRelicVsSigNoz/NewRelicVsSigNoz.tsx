@@ -19,13 +19,18 @@ export default function NewRelicVsSigNoz() {
           <div className="flex flex-col gap-4 sm:flex-row">
             <Button
               href="/newrelic-alternative/"
+              variant="legacyPrimary"
               id="newrelic-vs-signoz-compare-button"
               className="flex items-center gap-2"
             >
               <Scale className="h-4 w-4" />
               Compare SigNoz vs. New Relic
             </Button>
-            <Button href="/teams/" type={Button.TYPES.SECONDARY}>
+            <Button
+              href="/teams/"
+              variant="legacySecondary"
+              id="grafana-vs-signoz-try-signoz-button"
+            >
               Try SigNoz for Free &rarr;
             </Button>
           </div>

@@ -47,28 +47,36 @@ export const buttonVariants = cva(
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
-/**
- * @deprecated Prefer the `variant` prop for new code.
- */
-export enum BUTTON_TYPES {
-  PRIMARY = 'PRIMARY',
-  SECONDARY = 'SECONDARY',
-}
-
-const LEGACY_TYPE_TO_STYLES_MAP = {
-  [BUTTON_TYPES.PRIMARY]:
+const LEGACY_VARIANT_TO_STYLES_MAP = {
+  legacyPrimary:
     'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-signoz_robin-500 text-center font-medium leading-5 text-white no-underline outline-none hover:text-white',
-  [BUTTON_TYPES.SECONDARY]:
+  legacySecondary:
     'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 button-background text-center font-medium leading-5 text-white no-underline outline-none hover:text-white',
-}
+} as const
 
 type ButtonElementType = React.ElementType
 type ButtonHtmlType = 'button' | 'submit' | 'reset'
-type LegacyButtonType = (typeof BUTTON_TYPES)[keyof typeof BUTTON_TYPES]
+type ButtonVariant = Exclude<VariantProps<typeof buttonVariants>['variant'], null | undefined>
+type LegacyButtonVariant = keyof typeof LEGACY_VARIANT_TO_STYLES_MAP
+type ButtonStyleVariant = ButtonVariant | LegacyButtonVariant
+
+const SIGNOZ_INTERNAL_HOSTS = new Set(['signoz.io', 'www.signoz.io'])
+
+const isExternalHref = (destination: string) => {
+  if (!/^https?:\/\//.test(destination)) return false
+
+  try {
+    const { hostname } = new URL(destination)
+    return !SIGNOZ_INTERNAL_HOSTS.has(hostname) && !hostname.endsWith('.signoz.io')
+  } catch {
+    return false
+  }
+}
 
 export interface ButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>,
-    VariantProps<typeof buttonVariants> {
+    Omit<VariantProps<typeof buttonVariants>, 'variant'> {
+  variant?: ButtonStyleVariant
   /**
    * Legacy prop from the previous button implementation. Prefer `asChild` for new code.
    */
@@ -98,10 +106,7 @@ export interface ButtonProps
    * If provided (and `href` is not), it will be used as the destination.
    */
   to?: string
-  /**
-   * Legacy primary/secondary button variant or native HTML button type.
-   */
-  type?: ButtonHtmlType | LegacyButtonType
+  type?: ButtonHtmlType
   /**
    * Render only the supplied className. Useful for wrappers that already own
    * their full visual styling.
@@ -115,9 +120,7 @@ export interface ButtonProps
 
 type ButtonComponent = React.ForwardRefExoticComponent<
   ButtonProps & React.RefAttributes<HTMLButtonElement>
-> & {
-  TYPES: typeof BUTTON_TYPES
-}
+>
 
 // -----------------------------------------------------------------------------
 // Component
@@ -147,20 +150,23 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // Legacy prop mapping
     // -------------------------------------------------------------------------
     const legacyButtonClassName =
-      type === BUTTON_TYPES.PRIMARY
-        ? LEGACY_TYPE_TO_STYLES_MAP[BUTTON_TYPES.PRIMARY]
-        : type === BUTTON_TYPES.SECONDARY
-          ? LEGACY_TYPE_TO_STYLES_MAP[BUTTON_TYPES.SECONDARY]
+      variant === 'legacyPrimary'
+        ? LEGACY_VARIANT_TO_STYLES_MAP.legacyPrimary
+        : variant === 'legacySecondary'
+          ? LEGACY_VARIANT_TO_STYLES_MAP.legacySecondary
           : undefined
-    const hasLegacyButtonType = Boolean(legacyButtonClassName)
+    const hasLegacyButtonVariant = Boolean(legacyButtonClassName)
 
-    let mappedVariant: VariantProps<typeof buttonVariants>['variant'] = variant
+    let mappedVariant: ButtonVariant | undefined =
+      variant === 'legacyPrimary'
+        ? 'default'
+        : variant === 'legacySecondary'
+          ? 'secondary'
+          : variant
     if (outlined) mappedVariant = 'outline'
-    if (type === BUTTON_TYPES.PRIMARY) mappedVariant = 'default'
-    if (type === BUTTON_TYPES.SECONDARY) mappedVariant = 'secondary'
-    if (!mappedVariant && !isButton && !hasLegacyButtonType) mappedVariant = 'link'
+    if (!mappedVariant && !isButton && !hasLegacyButtonVariant) mappedVariant = 'link'
     if (!mappedVariant) mappedVariant = 'default'
-    const mappedRounded = rounded ?? (hasLegacyButtonType ? 'full' : undefined)
+    const mappedRounded = rounded
 
     // Decide which element to render
     const shouldRenderLink = Boolean(href || (!isButton && to))
@@ -168,8 +174,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const extraProps: Record<string, unknown> = {}
     if (Comp === Link) {
-      extraProps.href = href ?? to
-      if (href && /^https?:\/\//.test(href)) {
+      const destination = href ?? to
+      extraProps.href = destination
+      if (destination && isExternalHref(destination)) {
         extraProps.target = '_blank'
         extraProps.rel = 'noopener noreferrer'
       }
@@ -193,7 +200,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const shouldRenderSplitIcon = !unstyled && withIcon && Boolean(splitIconClass) && !asChild
     const resolvedClassName = unstyled
       ? className
-      : hasLegacyButtonType
+      : hasLegacyButtonVariant
         ? [legacyButtonClassName, shouldRenderSplitIcon && splitIconClass, className]
             .filter(Boolean)
             .join(' ')
@@ -234,8 +241,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   }
 ) as ButtonComponent
 Button.displayName = 'Button'
-
-Button.TYPES = BUTTON_TYPES
 
 export { Button }
 

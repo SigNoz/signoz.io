@@ -416,14 +416,14 @@ const GetStarted = ({ page }) => {
                 Get started with <br /> SigNoz Cloud today
               </p>
               <div className="mb-10 flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                <Button type={Button.TYPES.PRIMARY} id={getStartedId}>
+                <Button variant="legacyPrimary" id={getStartedId}>
                   <Link href="/teams/" className="flex-center">
                     Get Started - Free
                     <ArrowRight size={14} />
                   </Link>
                 </Button>
 
-                <Button type={Button.TYPES.SECONDARY} id={readDocumentationId}>
+                <Button variant="legacySecondary" id={readDocumentationId}>
                   <Link href="/docs/introduction/" className="flex-center">
                     <BookOpen size={14} />
                     Read Documentation

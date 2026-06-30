@@ -24,7 +24,9 @@ export default function GetStartedInfrastructureMonitoring({
             started in minutes with our guided setup process.
           </p>
           <div className="pt-2">
-            <Button href="/teams/">Start Monitoring Now - Free</Button>
+            <Button href="/teams/" variant="legacyPrimary">
+              Start Monitoring Now - Free
+            </Button>
           </div>
         </div>
       </div>
@@ -76,7 +78,7 @@ export default function GetStartedInfrastructureMonitoring({
             </div>
           </div>
           <div className="mt-6 self-center">
-            <Button href="/teams/">
+            <Button href="/teams/" variant="legacyPrimary">
               <span className="flex items-center gap-2">
                 Start Monitoring Now - Free
                 <ArrowRight className="h-4 w-4" />
@@ -124,7 +126,7 @@ export default function GetStartedInfrastructureMonitoring({
           </div>
 
           <div className="pt-2">
-            <Button href="/teams/">
+            <Button href="/teams/" variant="legacyPrimary">
               <span className="flex items-center gap-2">
                 Start Monitoring Now - Free
                 <ArrowRight className="h-4 w-4" />

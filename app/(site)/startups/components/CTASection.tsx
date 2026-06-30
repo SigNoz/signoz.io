@@ -2,7 +2,6 @@ import React from 'react'
 import CTAButton from './CTAButton'
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
-import { BUTTON_TYPES } from '@/components/ui/Button'
 
 export default function CTASection() {
   return (
@@ -24,7 +23,7 @@ export default function CTASection() {
 
                 <Link href="/teams/" prefetch={false}>
                   <Button
-                    type={BUTTON_TYPES.SECONDARY}
+                    variant="legacySecondary"
                     className="rounded-md px-6 py-2 font-medium text-white hover:opacity-90 md:px-6 md:py-3"
                   >
                     Start your free trial

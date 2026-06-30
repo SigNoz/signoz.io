@@ -16,7 +16,7 @@ const GetStartedOpenTelemetryButton: React.FC<GetStartedOpenTelemetryButtonProps
 }) => {
   return (
     <Link href={href} className="no-underline hover:no-underline">
-      <Button type={Button.TYPES.PRIMARY} className={`flex items-center gap-2 ${className}`}>
+      <Button variant="legacyPrimary" className={`flex items-center gap-2 ${className}`}>
         {children} <ArrowRight size={14} />
       </Button>
     </Link>

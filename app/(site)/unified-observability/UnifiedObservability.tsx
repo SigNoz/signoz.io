@@ -43,7 +43,7 @@ const UnifiedObservability = () => {
             <div className="flex flex-col gap-2">
               <Link href="/teams/">
                 <Button
-                  type={Button.TYPES.PRIMARY}
+                  variant="legacyPrimary"
                   className="flex items-center justify-center gap-2 font-bold"
                 >
                   Get Started - Free <ArrowRight className="h-4 w-4" />
@@ -300,7 +300,7 @@ const UnifiedObservability = () => {
               </ul>
               <div className="mt-8 flex items-center gap-4">
                 <Link href="/teams/">
-                  <Button type={Button.TYPES.PRIMARY} className="flex items-center gap-2">
+                  <Button variant="legacyPrimary" className="flex items-center gap-2">
                     Get Started with OpenTelemetry
                     <ArrowRight className="h-4 w-4" />
                   </Button>
@@ -944,7 +944,7 @@ const UnifiedObservability = () => {
           <div className="mt-4">
             <Link href="/teams/" className="block max-w-md">
               <Button
-                type={Button.TYPES.PRIMARY}
+                variant="legacyPrimary"
                 className="flex w-full items-center justify-center gap-2 font-bold"
               >
                 Get Started - Free <ArrowRight className="h-4 w-4" />

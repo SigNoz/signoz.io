@@ -14,7 +14,7 @@ export default function CTAButton() {
 
   return (
     <Button
-      type={Button.TYPES.PRIMARY}
+      variant="legacyPrimary"
       onClick={scrollToForm}
       className="rounded-md px-6 py-2 font-medium text-white hover:opacity-90"
     >

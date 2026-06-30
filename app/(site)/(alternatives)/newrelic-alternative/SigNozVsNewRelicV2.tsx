@@ -147,7 +147,7 @@ const SigNozVsNewRelicV2 = () => {
                   clickLocation="Hero Section"
                 >
                   <Button
-                    type={Button.TYPES.PRIMARY}
+                    variant="legacyPrimary"
                     className="flex items-center justify-center gap-2 font-bold"
                   >
                     Get Started - Free <ArrowRight className="h-4 w-4" />
@@ -161,7 +161,7 @@ const SigNozVsNewRelicV2 = () => {
                   clickLocation="Hero Section"
                 >
                   <Button
-                    type={Button.TYPES.SECONDARY}
+                    variant="legacySecondary"
                     className="flex items-center justify-center gap-2 font-bold"
                   >
                     <FileText className="h-4 w-4" />
@@ -520,10 +520,7 @@ const SigNozVsNewRelicV2 = () => {
                               on 09 January 2025.
                             </p>
                             <Link href="/teams/">
-                              <Button
-                                type={Button.TYPES.PRIMARY}
-                                className="flex items-center gap-2"
-                              >
+                              <Button variant="legacyPrimary" className="flex items-center gap-2">
                                 Get Started with OpenTelemetry
                                 <ArrowRight className="h-4 w-4" />
                               </Button>
@@ -565,13 +562,13 @@ const SigNozVsNewRelicV2 = () => {
 
                 <div className="mb-6 flex flex-wrap gap-4">
                   <Link href="/teams/" target="_blank" className="block">
-                    <Button type={Button.TYPES.PRIMARY} className="flex items-center gap-2">
+                    <Button variant="legacyPrimary" className="flex items-center gap-2">
                       Start Monitoring Kafka
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
                   <Link href="/docs/messaging-queues/kafka/" target="_blank">
-                    <Button type={Button.TYPES.SECONDARY} className="flex items-center gap-2">
+                    <Button variant="legacySecondary" className="flex items-center gap-2">
                       <BookOpen className="h-4 w-4" />
                       Read Kafka Monitoring Documentation
                     </Button>
@@ -1704,7 +1701,7 @@ const SigNozVsNewRelicV2 = () => {
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link href="/product-comparison/migrate-from-newrelic/" className="block max-w-md">
                 <Button
-                  type={Button.TYPES.PRIMARY}
+                  variant="legacyPrimary"
                   className="flex w-full items-center justify-center gap-2 font-bold"
                 >
                   Request migration support <ArrowRight className="h-4 w-4" />
@@ -1712,7 +1709,7 @@ const SigNozVsNewRelicV2 = () => {
               </Link>
               <Link href="/teams/" className="block max-w-md" target="_blank">
                 <Button
-                  type={Button.TYPES.SECONDARY}
+                  variant="legacySecondary"
                   className="flex w-full items-center justify-center gap-2 font-bold"
                 >
                   Try SigNoz Free

@@ -56,7 +56,7 @@ export default function QuickStartCloud() {
 
           {/* Button remains below the stepper */}
           <div className="mt-8">
-            <Button type={Button.TYPES.PRIMARY} id="btn-quick-start-cloud">
+            <Button variant="legacyPrimary" id="btn-quick-start-cloud">
               <TrackingLink
                 href="/teams/" // Link to the signup page
                 className="flex-center"

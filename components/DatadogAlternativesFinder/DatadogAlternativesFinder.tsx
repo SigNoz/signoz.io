@@ -494,7 +494,7 @@ const DatadogAlternativeFinder: React.FC = () => {
                           </Button>
                           <Button
                             href="https://signoz.io/application-performance-monitoring/"
-                            type={Button.TYPES.SECONDARY}
+                            variant="legacySecondary"
                           >
                             Explore Features &rarr;
                           </Button>

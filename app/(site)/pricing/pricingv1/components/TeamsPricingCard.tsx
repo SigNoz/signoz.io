@@ -43,7 +43,7 @@ export default function TeamsPricingCard() {
           clickText="Get Started with SigNoz Cloud"
           clickLocation="Teams Pricing Card"
         >
-          <Button type={Button.TYPES.PRIMARY} className="mb-6 w-full px-4 py-3 md:py-6">
+          <Button variant="legacyPrimary" className="mb-6 w-full px-4 py-3 md:py-6">
             Get Started with SigNoz Cloud
           </Button>
         </TrackingLink>
@@ -275,7 +275,7 @@ export default function TeamsPricingCard() {
             clickText="Estimate your monthly bill"
             clickLocation="Teams Pricing Card"
           >
-            <Button type={Button.TYPES.PRIMARY} className="mb-3 w-full px-4 py-3 md:py-6">
+            <Button variant="legacyPrimary" className="mb-3 w-full px-4 py-3 md:py-6">
               Estimate your monthly bill
             </Button>
           </TrackingLink>

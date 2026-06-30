@@ -57,7 +57,7 @@ export function Header({ variant = 'control' }: { variant?: 'control' | 'ai-agen
               className="block w-[220px]"
             >
               <Button
-                type={Button.TYPES.PRIMARY}
+                variant="legacyPrimary"
                 className="flex-center !w-full"
                 id="btn-get-started-homepage-hero"
               >
@@ -78,7 +78,7 @@ export function Header({ variant = 'control' }: { variant?: 'control' | 'ai-agen
             className="block w-[220px]"
             prefetch={false}
           >
-            <Button className="flex-center !w-full" type={Button.TYPES.SECONDARY}>
+            <Button className="flex-center !w-full" variant="legacySecondary">
               <Calendar size={14} />
               Book a Demo
             </Button>

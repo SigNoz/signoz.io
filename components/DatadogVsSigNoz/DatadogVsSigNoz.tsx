@@ -17,11 +17,15 @@ export default function DatadogVsSigNoz() {
             and up to <b>80% cost savings</b>.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">
-            <Button href="/datadog-alternative/" className="flex items-center gap-2">
+            <Button
+              href="/datadog-alternative/"
+              variant="legacyPrimary"
+              className="flex items-center gap-2"
+            >
               <Scale className="h-4 w-4" />
               Compare SigNoz vs. Datadog
             </Button>
-            <Button href="/datadog-migration-tool/" type={Button.TYPES.SECONDARY}>
+            <Button href="/datadog-migration-tool/" variant="legacySecondary">
               Try our Datadog Migration Tool &rarr;
             </Button>
           </div>

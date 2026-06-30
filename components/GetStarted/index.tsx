@@ -42,7 +42,7 @@ export const GetStarted = ({
                   clickLocation="Get Started Section"
                 >
                   <Button
-                    type={Button.TYPES.PRIMARY}
+                    variant="legacyPrimary"
                     as="span"
                     id={getStartedId}
                     className="flex-center"
@@ -64,7 +64,7 @@ export const GetStarted = ({
                 >
                   <Button
                     as="span"
-                    type={Button.TYPES.SECONDARY}
+                    variant="legacySecondary"
                     id={readDocumentationId}
                     className="flex-center"
                     withIcon={withIcon}

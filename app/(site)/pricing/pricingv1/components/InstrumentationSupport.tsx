@@ -21,7 +21,7 @@ import {
   SiMongodb,
 } from 'react-icons/si'
 import TrackingLink from '@/components/TrackingLink'
-import Button, { BUTTON_TYPES } from '@/components/ui/Button'
+import Button from '@/components/ui/Button'
 import { ArrowUpRight, LucideServer, Database, Workflow } from 'lucide-react'
 
 const InstrumentationSupport = () => {
@@ -213,7 +213,7 @@ const InstrumentationSupport = () => {
                 clickText="View Full Documentation"
                 className="pointer-events-none"
               >
-                <Button type={BUTTON_TYPES.SECONDARY} className="pointer-events-auto">
+                <Button variant="legacySecondary" className="pointer-events-auto">
                   View Full Documentation
                   <ArrowUpRight className="h-4 w-4" />
                 </Button>

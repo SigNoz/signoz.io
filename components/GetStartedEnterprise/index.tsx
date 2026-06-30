@@ -19,7 +19,7 @@ export const GetStartedEnterprise = () => {
                 Sign up for <br /> SigNoz Enterprise
               </p>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                <Button type={Button.TYPES.PRIMARY} id={getStartedId} className="gap-2">
+                <Button variant="legacyPrimary" id={getStartedId} className="gap-2">
                   <Cloud size={16} />
                   <Link
                     href="/contact-us/?source=get-started-enterprise-cloud"
@@ -29,7 +29,7 @@ export const GetStartedEnterprise = () => {
                   </Link>
                 </Button>
 
-                <Button type={Button.TYPES.SECONDARY} id={selfHostedId} className="gap-2">
+                <Button variant="legacySecondary" id={selfHostedId} className="gap-2">
                   <Server size={16} />
                   <Link
                     href="/contact-us/?source=get-started-enterprise-self-hosted"
@@ -39,7 +39,7 @@ export const GetStartedEnterprise = () => {
                   </Link>
                 </Button>
 
-                <Button type={Button.TYPES.SECONDARY} id={byocId} className="gap-2">
+                <Button variant="legacySecondary" id={byocId} className="gap-2">
                   <CloudUpload size={16} />
                   <Link
                     href="/contact-us/?source=get-started-enterprise-byoc"

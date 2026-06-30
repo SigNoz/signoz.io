@@ -84,7 +84,7 @@ const SigNozStats = ({ className }: { className?: string }) => {
               target="_blank"
             >
               <Button
-                type={Button.TYPES.PRIMARY}
+                variant="legacyPrimary"
                 className="flex-center text-xs sm:text-sm"
                 id="btn-join-community-homepage"
               >
@@ -103,7 +103,7 @@ const SigNozStats = ({ className }: { className?: string }) => {
               target="_blank"
             >
               <Button
-                type={Button.TYPES.SECONDARY}
+                variant="legacySecondary"
                 className="flex-center text-xs sm:text-sm"
                 id="btn-github-repo-homepage"
               >
@@ -122,7 +122,7 @@ const SigNozStats = ({ className }: { className?: string }) => {
               target="_blank"
             >
               <Button
-                type={Button.TYPES.SECONDARY}
+                variant="legacySecondary"
                 className="flex-center text-xs sm:text-sm"
                 id="btn-newsletter-homepage"
               >
