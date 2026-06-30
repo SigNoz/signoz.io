@@ -1,5 +1,5 @@
 ---
-date: 2026-06-22
+date: 2026-06-30
 title: K8s Infra - Configure
 id: k8s-infra-otel-config
 description: Configure the k8s-infra OpenTelemetry collection agent to send Kubernetes metrics, logs, and traces to SigNoz.
@@ -27,10 +27,11 @@ or OtelAgent service name.
 For OtelAgent service name, the endpoint would be something like
 `my-release-k8s-infra-otel-agent.default.svc:4317`. Replace `my-release` with
 your helm release name and `default` with your namespace.
+
 </Admonition>
 
 To send data from your applications, you must first instrument it with OpenTelemetry.
-You can find instrumentation instructions for your specific language [here][10]. 
+You can find instrumentation instructions for your specific language [here][10].
 
 Once you're done instrumenting your application, add below to your application manifest
 files for applications to start sending data to the otel-collectors running as DaemonSet.
@@ -58,11 +59,12 @@ env:
     value: $(HOST_IP):4317
   - name: OTEL_RESOURCE_ATTRIBUTES
     value: service.name=APPLICATION_NAME,k8s.pod.ip=$(K8S_POD_IP),k8s.pod.uid=$(K8S_POD_UID)
-  ```
-  
+```
+
 <Admonition>
-  - Replace `APPLICATION_NAME` with your application name that you wish to see in SigNoz.
-  - In cases of some SDKs, you would need to include `http://` or `https://` prefix for `OTEL_EXPORTER_OTLP_ENDPOINT`
+  - Replace `APPLICATION_NAME` with your application name that you wish to see in SigNoz. - In cases
+  of some SDKs, you would need to include `http://` or `https://` prefix for
+  `OTEL_EXPORTER_OTLP_ENDPOINT`
 </Admonition>
 
 ### Disable Logs Collection
@@ -95,99 +97,103 @@ otelDeployment:
 ```
 
 ## Essential Presets
+
 SigNoz allows you to use the presets in the k8s-infra Helm chart to easily configure OtelCollector. The following configurations can be set by modifying the `values.yml` in the [k8s-infra Helm chart](https://github.com/signoz/charts/tree/main/charts/k8s-infra/values.yaml).
 
 <Admonition>
-  The `presets` section in the `values.yaml` file allows you to enable or disable specific configurations. To check the available presets, refer to the [k8s-infra Helm chart documentation](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/README.md#presets-configuration).
+  The `presets` section in the `values.yaml` file allows you to enable or disable specific
+  configurations. To check the available presets, refer to the [k8s-infra Helm chart
+  documentation](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/README.md#presets-configuration).
 </Admonition>
-### 1. OTLP/HTTP Exporter
-```yaml
-presets:
-  otlphttpExporter:
-    enabled: true  # Must be enabled for data to reach SigNoz
-```
+### 1. OTLP/HTTP Exporter ```yaml presets: otlphttpExporter: enabled: true # Must be enabled for
+data to reach SigNoz ```
 
 **What it does**: Enables sending telemetry data to SigNoz backend over OTLP/HTTP. This is required for SigNoz to receive any data.
 
 ### 2. Host Metrics Collection
+
 ```yaml
 presets:
   hostMetrics:
     enabled: true
-    collectionInterval: 30s  # Adjust based on your monitoring needs
+    collectionInterval: 30s # Adjust based on your monitoring needs
     scrapers:
-      cpu: {}        # Collects CPU usage, time, and utilization metrics
-      load: {}       # Collects system load averages
-      memory: {}     # Collects memory usage metrics
-      disk:          # Collects disk I/O metrics
+      cpu: {} # Collects CPU usage, time, and utilization metrics
+      load: {} # Collects system load averages
+      memory: {} # Collects memory usage metrics
+      disk: # Collects disk I/O metrics
         exclude:
-          devices:   # Regex patterns to exclude specific devices
+          devices: # Regex patterns to exclude specific devices
             - ^ram\d+$
             - ^loop\d+$
             # Add custom device exclusions here
-      filesystem:    # Collects filesystem metrics
+      filesystem: # Collects filesystem metrics
         exclude_fs_types:
           fs_types:
             - tmpfs
             - squashfs
             # Add filesystem types to exclude
-      network:       # Collects network metrics
+      network: # Collects network metrics
         exclude:
           interfaces:
-            - ^veth.*$    # Excludes virtual ethernet devices
-            - ^docker.*$  # Excludes docker interfaces
+            - ^veth.*$ # Excludes virtual ethernet devices
+            - ^docker.*$ # Excludes docker interfaces
             # Add network interfaces to exclude
 ```
 
 **Key points**:
+
 - Adjust `collectionInterval` based on your monitoring granularity needs
 - Customize device exclusions to reduce noise from irrelevant storage devices
 - Configure network interface exclusions to focus on relevant network metrics
 
 ### 3. Container Log Collection
+
 ```yaml
 presets:
   logsCollection:
     enabled: true
-    startAt: beginning      # Options: beginning or end
-    includeFilePath: true   # Adds file path as metadata
-    includeFileName: false  # Adds file name as metadata
-    
+    startAt: beginning # Options: beginning or end
+    includeFilePath: true # Adds file path as metadata
+    includeFileName: false # Adds file name as metadata
+
     # Exclusion configuration
     blacklist:
       enabled: true
-      signozLogs: true     # Excludes SigNoz's own logs
+      signozLogs: true # Excludes SigNoz's own logs
       namespaces:
-        - kube-system      # Add namespaces to exclude
+        - kube-system # Add namespaces to exclude
       pods:
-        - hotrod          # Add pod names to exclude
+        - hotrod # Add pod names to exclude
         - locust
-      containers: []       # Add container names to exclude
-    
+      containers: [] # Add container names to exclude
+
     # Inclusion configuration (overrides blacklist if enabled)
     whitelist:
       enabled: false
       signozLogs: true
-      namespaces: []      # Only collect logs from these namespaces
-      pods: []            # Only collect logs from these pods
-      containers: []      # Only collect logs from these containers
+      namespaces: [] # Only collect logs from these namespaces
+      pods: [] # Only collect logs from these pods
+      containers: [] # Only collect logs from these containers
 ```
 
 **Best practices**:
+
 - Use blacklist for excluding noisy system pods
 - Enable whitelist when you need to monitor specific applications only
 - Consider disk usage implications when enabling file path/name inclusion
 
 ### 4. Kubernetes Metrics Collection
+
 ```yaml
 presets:
   kubeletMetrics:
     enabled: true
     collectionInterval: 30s
-    authType: serviceAccount    # Authentication method
+    authType: serviceAccount # Authentication method
     endpoint: ${env:K8S_HOST_IP}:10250
-    insecureSkipVerify: true   # Set to false in production
-    
+    insecureSkipVerify: true # Set to false in production
+
     # Metrics configuration
     metrics:
       k8s.pod.cpu_limit_utilization:
@@ -198,17 +204,19 @@ presets:
 ```
 
 **Important settings**:
+
 - Set appropriate `collectionInterval` based on cluster size
 - Configure `insecureSkipVerify: false` in production environments
 - Enable specific metrics based on monitoring requirements
 
 ### 5. Kubernetes Metadata Enrichment
+
 ```yaml
 presets:
   kubernetesAttributes:
     enabled: true
-    passthrough: false    # Set true to disable k8s API calls
-    
+    passthrough: false # Set true to disable k8s API calls
+
     # Control which metadata to collect
     extractMetadatas:
       - k8s.namespace.name
@@ -216,17 +224,17 @@ presets:
       - k8s.pod.name
       - k8s.node.name
       # Add or remove metadata fields
-    
+
     # Pod association configuration
     podAssociation:
       - sources:
-        - from: resource_attribute
-          name: k8s.pod.ip
+          - from: resource_attribute
+            name: k8s.pod.ip
       - sources:
-        - from: resource_attribute
-          name: k8s.pod.uid
+          - from: resource_attribute
+            name: k8s.pod.uid
       - sources:
-        - from: connection
+          - from: connection
     # This label/annotation extraction rule takes the value of the key from labels/annotations and maps it to the tag_name attribute which will be added to the associated resources
     extractLabels:
       # Example from pod
@@ -237,7 +245,7 @@ presets:
       - tag_name: os.type
         key: beta.kubernetes.io/os
         from: node
-    
+
     # Annotation extraction configuration
     extractAnnotations:
       # Example from node
@@ -247,6 +255,7 @@ presets:
 ```
 
 **Configuration tips**:
+
 - Enable only required metadata fields to optimize performance
 - Use `passthrough: true` in very large clusters to reduce API load
 - Configure pod association based on your networking setup
@@ -270,41 +279,54 @@ If you customize `podAssociation`, include the rules you need from the chart def
 </KeyPointCallout>
 
 ### 6. Cluster-level Metrics
+
 ```yaml
 presets:
   clusterMetrics:
     enabled: true
     collectionInterval: 30s
-    
+
     # Node conditions to monitor
     nodeConditionsToReport:
       - Ready
       - MemoryPressure
       - DiskPressure
       # Add conditions based on monitoring needs
-    
+
     # Resource types to monitor
     allocatableTypesToReport:
       - cpu
       - memory
       # - storage    # Uncomment if needed
+
+    # Fine-grained metric enablement
+    metrics:
+      k8s.pod.status_reason:
+        enabled: true
+      k8s.container.status.reason:
+        enabled: true
 ```
 
 **When to use**:
+
 - Enable for cluster health monitoring
 - Useful for capacity planning and resource optimization
 - Essential for multi-node cluster monitoring
 
+**What `metrics` powers**: `k8s.pod.status_reason` and `k8s.container.status.reason` are disabled by default in the upstream `k8s_cluster` receiver but enabled by default in this chart. Together they drive the kubectl-style **Pod Status** column on the Pods view (and the per-entity Pod Counts by Status breakdown). Keep them enabled to retain pod-status visibility; without them, pod status falls back to the lifecycle phase only.
+
 ### 7. Kubernetes Events
+
 ```yaml
 presets:
   k8sEvents:
     enabled: true
     authType: serviceAccount
-    namespaces: []    # Empty for all namespaces, or specify list
+    namespaces: [] # Empty for all namespaces, or specify list
 ```
 
 **Usage scenarios**:
+
 - Enable for debugging and audit trails
 - Monitor specific namespaces by listing them
 - Useful for compliance and security monitoring
@@ -317,13 +339,13 @@ Prometheus preset allows to scrapes metrics from pods that have the appropriate 
 presets:
   prometheus:
     enabled: true
-    annotationsPrefix: signoz.io    # Prefix for pod annotations
-    scrapeInterval: 60s              # How often to scrape metrics
-    namespaceScoped: false           # Limit to same namespace only
-    namespaces: []                   # Specific namespaces to scrape
-    includePodLabel: false           # Include pod labels (may increase cardinality)
-    includeContainerName: false      # Include container name in metrics
-    scrapeConfigs: []                # Custom scrape configurations
+    annotationsPrefix: signoz.io # Prefix for pod annotations
+    scrapeInterval: 60s # How often to scrape metrics
+    namespaceScoped: false # Limit to same namespace only
+    namespaces: [] # Specific namespaces to scrape
+    includePodLabel: false # Include pod labels (may increase cardinality)
+    includeContainerName: false # Include container name in metrics
+    scrapeConfigs: [] # Custom scrape configurations
 ```
 
 #### Custom Scrape Configurations
@@ -336,11 +358,11 @@ presets:
     enabled: true
     scrapeConfigs:
       # Scrape metrics from a specific service
-      - job_name: 'my-custom-service'
+      - job_name: "my-custom-service"
         static_configs:
-          - targets: ['my-service.default.svc.cluster.local:9090']
+          - targets: ["my-service.default.svc.cluster.local:9090"]
             labels:
-              environment: 'production'
+              environment: "production"
 ```
 
 ## Configurations
@@ -363,8 +385,10 @@ otelAgent:
 +        send_batch_size: 15000
 +        send_batch_max_size: 20000 # settings can be provided as key value pairs
 ```
+
 <Admonition type="info">
-Any setting supported by the OpenTelemetry batch processor can be set under `processors.batch` in the chart values.
+  Any setting supported by the OpenTelemetry batch processor can be set under `processors.batch` in
+  the chart values.
 </Admonition>
 
 ### Adding Custom Processors to Pipelines
@@ -380,6 +404,7 @@ When you override a pipeline's `processors` list, Helm replaces the entire list 
 ## Common Deployment Scenarios
 
 ### Production Cluster with Full Monitoring
+
 ```yaml
 presets:
   otlphttpExporter:
@@ -391,7 +416,7 @@ presets:
     enabled: true
     blacklist:
       enabled: true
-      namespaces: 
+      namespaces:
         - kube-system
   kubeletMetrics:
     enabled: true
@@ -405,6 +430,7 @@ presets:
 ```
 
 ### Resource-Constrained Environment
+
 ```yaml
 presets:
   otlphttpExporter:
@@ -416,7 +442,7 @@ presets:
     enabled: true
     whitelist:
       enabled: true
-      namespaces: 
+      namespaces:
         - production
   kubeletMetrics:
     enabled: true
@@ -458,11 +484,13 @@ ports:
 ```
 
 ## Configuring otelDeployment to collect from additional components
+
 The otelDeployment collector is configured to collect cluster metrics and events by default. There are some use cases where you might want to collect metrics from components other than the ones that are being collected by default.
 
 This section describes how to override the default configuration of the otelDeployment collector to collect metrics from additional components. The override-values.yaml file contains the configurations that you can override.
 
 #### Example 1: Redis Receiver Configuration
+
 The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a Redis server running inside a namespace "redis-ns" with the name "redis-server" and port 6379:
 
 ```yaml
@@ -534,10 +562,10 @@ Helm replaces array values rather than merging them, so an override on `podAssoc
 Recommended resource allocations based on preset combinations:
 
 | Configuration | CPU Request | Memory Request | CPU Limit | Memory Limit |
-|--------------|-------------|----------------|-----------|--------------|
-| Minimal | 100m | 256Mi | 200m | 512Mi |
-| Standard | 200m | 512Mi | 500m | 1Gi |
-| Full | 500m | 1Gi | 1000m | 2Gi |
+| ------------- | ----------- | -------------- | --------- | ------------ |
+| Minimal       | 100m        | 256Mi          | 200m      | 512Mi        |
+| Standard      | 200m        | 512Mi          | 500m      | 1Gi          |
+| Full          | 500m        | 1Gi            | 1000m     | 2Gi          |
 
 Adjust these values based on your cluster size and monitoring requirements.
 
