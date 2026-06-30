@@ -1,22 +1,39 @@
 'use client'
 
 import { ChevronDown } from 'lucide-react'
+import { type ReactNode } from 'react'
 import { useState } from 'react'
 
 import Button from '@/components/ui/Button'
-import { useLogEvent } from '@/hooks/useLogEvent'
 import TrackingLink from '@/components/TrackingLink'
+import { useLogEvent } from '@/hooks/useLogEvent'
 
 type Faq = {
-  answer: string
+  answer: ReactNode
   question: string
 }
 
 const faqs: Faq[] = [
   {
     question: 'How quickly can we start sending data to SigNoz?',
-    answer:
-      'Most teams start with OpenTelemetry instrumentation or the OpenTelemetry Collector. For Kubernetes, the SigNoz Helm chart can collect cluster metrics, logs, and traces; for AWS, CloudWatch logs can be routed to SigNoz Cloud. Your exact path depends on language, cloud, and whether you use SigNoz Cloud or self-host.',
+    answer: (
+      <>
+        Most teams start with{' '}
+        <TrackingLink
+          className="text-signoz_robin-300 underline underline-offset-4 transition-colors hover:text-signoz_robin-200"
+          clickLocation="Homepage FAQ Section"
+          clickName="Instrumentation Docs Link"
+          clickText="OpenTelemetry instrumentation"
+          clickType="Inline Link"
+          href="/docs/instrumentation/"
+        >
+          OpenTelemetry instrumentation
+        </TrackingLink>{' '}
+        or the OpenTelemetry Collector. For Kubernetes, the SigNoz Helm chart can collect cluster
+        metrics, logs, and traces; for AWS, CloudWatch logs can be routed to SigNoz Cloud. Your
+        exact path depends on language, cloud, and whether you use SigNoz Cloud or self-host.
+      </>
+    ),
   },
   {
     question: 'Can SigNoz replace Datadog, Grafana, or CloudWatch?',
@@ -25,8 +42,24 @@ const faqs: Faq[] = [
   },
   {
     question: 'How is SigNoz pricing calculated?',
-    answer:
-      'SigNoz pricing is usage based. There is no user-based pricing, no host-based pricing, and no special pricing for custom metrics. Teams can estimate cost from expected logs, traces, metrics volume, and retention, then use ingestion controls to drop noisy telemetry before it is stored.',
+    answer: (
+      <>
+        SigNoz pricing is usage based. There is no user-based pricing, no host-based pricing, and no
+        special pricing for custom metrics. Teams can estimate cost from expected logs, traces,
+        metrics volume, and retention with the{' '}
+        <TrackingLink
+          className="text-signoz_robin-300 underline underline-offset-4 transition-colors hover:text-signoz_robin-200"
+          clickLocation="Homepage FAQ Section"
+          clickName="Pricing Calculator Link"
+          clickText="pricing calculator"
+          clickType="Inline Link"
+          href="/pricing/#estimate-your-monthly-bill"
+        >
+          pricing calculator
+        </TrackingLink>
+        , then use ingestion controls to drop noisy telemetry before it is stored.
+      </>
+    ),
   },
   {
     question: 'Can we self-host SigNoz or keep data in our cloud?',

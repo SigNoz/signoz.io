@@ -21,6 +21,8 @@ type WhySigNozItemMeasurement = {
   center: number
 }
 
+const MIN_REVEAL_PROGRESS = 0.32
+
 const items: WhySigNozItem[] = [
   {
     title: 'Debug faster with correlated signals',
@@ -78,6 +80,48 @@ function getItemClasses(index: number, activeIndex: number) {
   }
 
   return 'blur-[0.6px]'
+}
+
+function clamp(value: number, min = 0, max = 1) {
+  return Math.min(Math.max(value, min), max)
+}
+
+function easeOutCubic(value: number) {
+  const normalizedValue = clamp(value)
+
+  return 1 - Math.pow(1 - normalizedValue, 3)
+}
+
+function RevealWords({ progress, text }: { progress: number; text: string }) {
+  const tokens = text.split(/(\s+)/).filter(Boolean)
+  const wordCount = tokens.filter((token) => !/^\s+$/.test(token)).length
+  let wordIndex = -1
+
+  return (
+    <span aria-hidden="true">
+      {tokens.map((token, tokenIndex) => {
+        if (/^\s+$/.test(token)) {
+          return token
+        }
+
+        wordIndex += 1
+
+        const revealStart = wordCount <= 1 ? 0 : (wordIndex / (wordCount - 1)) * 0.72
+        const revealProgress = easeOutCubic((progress - revealStart) / 0.24)
+        const opacity = MIN_REVEAL_PROGRESS + revealProgress * (1 - MIN_REVEAL_PROGRESS)
+
+        return (
+          <span
+            className="transition-opacity duration-300 ease-out"
+            key={`${token}-${tokenIndex}`}
+            style={{ opacity }}
+          >
+            {token}
+          </span>
+        )
+      })}
+    </span>
+  )
 }
 
 function WhySignozImage({
@@ -147,8 +191,8 @@ function WhySignozImage({
 
 export default function WhySignoz() {
   const [activeIndex, setActiveIndex] = useState(0)
-  const [itemOpacities, setItemOpacities] = useState<number[]>(() =>
-    items.map((_, index) => (index === 0 ? 1 : 0.38))
+  const [itemRevealProgresses, setItemRevealProgresses] = useState<number[]>(() =>
+    items.map((_, index) => (index === 0 ? 1 : 0))
   )
   const itemRefs = useRef<Array<HTMLDivElement | null>>([])
   const frameRef = useRef<number | null>(null)
@@ -170,10 +214,10 @@ export default function WhySignoz() {
 
     const updateActiveItem = () => {
       const focusLine = window.scrollY + window.innerHeight * 0.5
-      const focusBand = window.innerHeight * 0.3
+      const focusBand = Math.max(window.innerHeight * 0.48, 420)
       let nextIndex = 0
       let nearestDistance = Number.POSITIVE_INFINITY
-      const nextOpacities = items.map(() => 0.38)
+      const nextRevealProgresses = items.map(() => 0)
 
       itemMeasurements.forEach((measurement, index) => {
         if (!measurement) return
@@ -181,7 +225,7 @@ export default function WhySignoz() {
         const distance = Math.abs(measurement.center - focusLine)
         const focusAmount = Math.max(0, 1 - distance / focusBand)
 
-        nextOpacities[index] = Math.max(0.38, 0.38 + focusAmount * 0.62)
+        nextRevealProgresses[index] = easeOutCubic(Math.min(focusAmount * 1.18, 1))
 
         if (distance < nearestDistance) {
           nearestDistance = distance
@@ -189,9 +233,9 @@ export default function WhySignoz() {
         }
       })
 
-      nextOpacities[nextIndex] = 1
       setActiveIndex(nextIndex)
-      setItemOpacities(nextOpacities)
+      nextRevealProgresses[nextIndex] = Math.max(nextRevealProgresses[nextIndex], 0.72)
+      setItemRevealProgresses(nextRevealProgresses)
       frameRef.current = null
     }
 
@@ -256,15 +300,16 @@ export default function WhySignoz() {
             <div className="relative z-10 mt-9 h-px w-full bg-signoz_slate-100" />
           </div>
 
-          <div className="pb-16 pt-14 lg:pb-[18vh] lg:pt-20">
+          <div className="pb-16 pt-14 lg:pb-[24vh] lg:pt-20">
             {items.map((item, index) => {
               const Icon = item.icon
               const isActive = index === activeIndex
+              const revealProgress = itemRevealProgresses[index] ?? (isActive ? 1 : 0)
 
               return (
                 <div
                   aria-current={index === activeIndex ? 'step' : undefined}
-                  className={`grid min-h-[178px] grid-cols-[40px_minmax(0,1fr)] gap-6 border-b border-signoz_slate-100 py-8 transition-[filter,opacity] duration-500 ease-out lg:min-h-[206px] lg:py-10 ${getItemClasses(
+                  className={`grid min-h-[178px] grid-cols-[40px_minmax(0,1fr)] gap-6 border-b border-signoz_slate-100 py-8 transition-[filter] duration-500 ease-out lg:min-h-[286px] lg:py-14 ${getItemClasses(
                     index,
                     activeIndex
                   )}`}
@@ -272,17 +317,24 @@ export default function WhySignoz() {
                   ref={(node) => {
                     itemRefs.current[index] = node
                   }}
-                  style={{ opacity: itemOpacities[index] ?? (isActive ? 1 : 0.38) }}
                 >
-                  <div className="pt-1 text-signoz_robin-300">
+                  <div
+                    className="pt-1 text-signoz_robin-300 transition-opacity duration-300 ease-out"
+                    style={{ opacity: MIN_REVEAL_PROGRESS + revealProgress * 0.68 }}
+                  >
                     <Icon aria-hidden="true" className="h-6 w-6" strokeWidth={1.7} />
                   </div>
                   <div>
                     <h3 className="m-0 text-[22px] font-semibold leading-7 text-signoz_vanilla-100">
-                      {item.title}
+                      <span className="sr-only">{item.title}</span>
+                      <RevealWords progress={revealProgress} text={item.title} />
                     </h3>
                     <p className="m-0 mt-3 max-w-[470px] text-[15px] font-medium leading-7 text-signoz_vanilla-300">
-                      {item.description}
+                      <span className="sr-only">{item.description}</span>
+                      <RevealWords
+                        progress={Math.max(0, revealProgress - 0.12) / 0.88}
+                        text={item.description}
+                      />
                     </p>
                   </div>
                   <div className="col-span-2 mt-5 overflow-hidden rounded-md border border-signoz_slate-100 bg-signoz_slate-400 shadow-xl lg:hidden">
