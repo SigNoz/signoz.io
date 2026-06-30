@@ -586,7 +586,7 @@ const MobileEstimate = () => {
           <span className="text-base font-medium text-signoz_robin-400">
             Reach out to us for SigNoz's Start Up Program Discount
           </span>
-          <Button variant="legacySecondary" className="w-full">
+          <Button variant="legacyPrimary" className="w-full">
             <TrackingLink
               href="/startups/"
               clickType="Secondary CTA"
