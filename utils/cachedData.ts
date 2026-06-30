@@ -46,16 +46,11 @@ export async function fetchAllComparisonsForPage() {
 
 async function fetchSingleComparison(slug: string, deploymentStatus: string) {
   const content = await getContentBySlug('comparisons', slug, deploymentStatus)
+  if (!content) return null
 
-  if (content) {
-    const comparison = transformComparison(content)
-    if (!comparison || !comparison.title || !comparison.content) {
-      throw new Error(`Empty or invalid comparison content for slug: ${slug}`)
-    }
-    return comparison
-  }
-
-  throw new Error(`Comparison content not found for slug: ${slug}`)
+  const comparison = transformComparison(content)
+  if (!comparison || !comparison.title || !comparison.content) return null
+  return comparison
 }
 
 async function cachedFetchSingleComparison(slug: string, deploymentStatus: string) {
@@ -79,20 +74,22 @@ export async function fetchComparisonBySlug(slug: string) {
   const deploymentStatus = isProduction ? 'live' : 'staging'
 
   try {
-    return await getCachedSingleComparison(slug, deploymentStatus)
+    const result = await getCachedSingleComparison(slug, deploymentStatus)
+    if (result) return result
   } catch (cacheError) {
     console.warn(
       `Cached single comparison fetch failed for "${slug}", retrying without cache:`,
       cacheError
     )
-
-    try {
-      return await fetchSingleComparison(slug, deploymentStatus)
-    } catch (directError) {
-      console.error(`Direct single comparison fetch also failed for "${slug}":`, directError)
-      return undefined
-    }
   }
+
+  const directResult = await fetchSingleComparison(slug, deploymentStatus)
+  if (!directResult) {
+    console.warn(
+      `Comparison content not found for slug: "${slug}" (deployment: ${deploymentStatus})`
+    )
+  }
+  return directResult
 }
 
 // --- Guides ---
@@ -138,16 +135,11 @@ export async function fetchAllGuidesForPage() {
 
 async function fetchSingleGuide(slug: string, deploymentStatus: string) {
   const content = await getContentBySlug('guides', slug, deploymentStatus)
+  if (!content) return null
 
-  if (content) {
-    const guide = transformGuide(content)
-    if (!guide || !guide.title || !guide.content) {
-      throw new Error(`Empty or invalid guide content for slug: ${slug}`)
-    }
-    return guide
-  }
-
-  throw new Error(`Guide content not found for slug: ${slug}`)
+  const guide = transformGuide(content)
+  if (!guide || !guide.title || !guide.content) return null
+  return guide
 }
 
 async function cachedFetchSingleGuide(slug: string, deploymentStatus: string) {
@@ -171,20 +163,20 @@ export async function fetchGuideBySlug(slug: string) {
   const deploymentStatus = isProduction ? 'live' : 'staging'
 
   try {
-    return await getCachedSingleGuide(slug, deploymentStatus)
+    const result = await getCachedSingleGuide(slug, deploymentStatus)
+    if (result) return result
   } catch (cacheError) {
     console.warn(
       `Cached single guide fetch failed for "${slug}", retrying without cache:`,
       cacheError
     )
-
-    try {
-      return await fetchSingleGuide(slug, deploymentStatus)
-    } catch (directError) {
-      console.error(`Direct single guide fetch also failed for "${slug}":`, directError)
-      return undefined
-    }
   }
+
+  const directResult = await fetchSingleGuide(slug, deploymentStatus)
+  if (!directResult) {
+    console.warn(`Guide content not found for slug: "${slug}" (deployment: ${deploymentStatus})`)
+  }
+  return directResult
 }
 
 // --- Blogs ---
@@ -230,16 +222,11 @@ export async function fetchAllBlogsForPage() {
 
 async function fetchSingleBlog(slug: string, deploymentStatus: string) {
   const content = await getContentBySlug('blogs', slug, deploymentStatus)
+  if (!content) return null
 
-  if (content) {
-    const blog = transformBlog(content)
-    if (!blog || !blog.title || !blog.content) {
-      throw new Error(`Empty or invalid blog content for slug: ${slug}`)
-    }
-    return blog
-  }
-
-  throw new Error(`Blog content not found for slug: ${slug}`)
+  const blog = transformBlog(content)
+  if (!blog || !blog.title || !blog.content) return null
+  return blog
 }
 
 async function cachedFetchSingleBlog(slug: string, deploymentStatus: string) {
@@ -263,20 +250,20 @@ export async function fetchBlogBySlug(slug: string) {
   const deploymentStatus = isProduction ? 'live' : 'staging'
 
   try {
-    return await getCachedSingleBlog(slug, deploymentStatus)
+    const result = await getCachedSingleBlog(slug, deploymentStatus)
+    if (result) return result
   } catch (cacheError) {
     console.warn(
       `Cached single blog fetch failed for "${slug}", retrying without cache:`,
       cacheError
     )
-
-    try {
-      return await fetchSingleBlog(slug, deploymentStatus)
-    } catch (directError) {
-      console.error(`Direct single blog fetch also failed for "${slug}":`, directError)
-      return undefined
-    }
   }
+
+  const directResult = await fetchSingleBlog(slug, deploymentStatus)
+  if (!directResult) {
+    console.warn(`Blog content not found for slug: "${slug}" (deployment: ${deploymentStatus})`)
+  }
+  return directResult
 }
 
 // --- Docs ---
@@ -322,16 +309,11 @@ export async function fetchAllDocsForPage() {
 
 async function fetchSingleDoc(slug: string, deploymentStatus: string) {
   const content = await getContentBySlug('docs', slug, deploymentStatus)
+  if (!content) return null
 
-  if (content) {
-    const doc = transformDoc(content)
-    if (!doc || !doc.title || !doc.content) {
-      throw new Error(`Empty or invalid doc content for slug: ${slug}`)
-    }
-    return doc
-  }
-
-  throw new Error(`Doc content not found for slug: ${slug}`)
+  const doc = transformDoc(content)
+  if (!doc || !doc.title || !doc.content) return null
+  return doc
 }
 
 async function cachedFetchSingleDoc(slug: string, deploymentStatus: string) {
@@ -355,18 +337,18 @@ export async function fetchDocBySlug(slug: string) {
   const deploymentStatus = isProduction ? 'live' : 'staging'
 
   try {
-    return await getCachedSingleDoc(slug, deploymentStatus)
+    const result = await getCachedSingleDoc(slug, deploymentStatus)
+    if (result) return result
   } catch (cacheError) {
     console.warn(
       `Cached single doc fetch failed for "${slug}", retrying without cache:`,
       cacheError
     )
-
-    try {
-      return await fetchSingleDoc(slug, deploymentStatus)
-    } catch (directError) {
-      console.error(`Direct single doc fetch also failed for "${slug}":`, directError)
-      return undefined
-    }
   }
+
+  const directResult = await fetchSingleDoc(slug, deploymentStatus)
+  if (!directResult) {
+    console.warn(`Doc content not found for slug: "${slug}" (deployment: ${deploymentStatus})`)
+  }
+  return directResult
 }
