@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 460" font-family="'Inter', 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0f1a"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="signozGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6c5ce7"/>
+      <stop offset="100%" stop-color="#4834d4"/>
+    </linearGradient>
+    <linearGradient id="collectorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00b894"/>
+      <stop offset="100%" stop-color="#00997b"/>
+    </linearGradient>
+
+    <filter id="glowBlue" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#74b9ff" flood-opacity="0.6" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowGreen" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#55efc4" flood-opacity="0.6" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+
+    <circle id="dotBlue"  r="5" fill="#74b9ff" filter="url(#glowBlue)"/>
+    <circle id="dotGreen" r="5" fill="#55efc4" filter="url(#glowGreen)"/>
+
+    <marker id="arrBlue" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#74b9ff"/>
+    </marker>
+    <marker id="arrGreen" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#55efc4"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="460" fill="url(#bgGrad)" rx="12"/>
+
+  <!-- Title -->
+  <text x="500" y="48" text-anchor="middle" fill="#f5f6fa" font-size="20" font-weight="700">
+    How OpAMP Works in SigNoz
+  </text>
+
+  <!-- ============ LEFT: SigNoz ============ -->
+  <g filter="url(#shadow)">
+    <rect x="70" y="120" width="320" height="230" rx="16" fill="url(#signozGrad)"/>
+    <text x="230" y="166" text-anchor="middle" fill="#fff" font-size="18" font-weight="700">SigNoz</text>
+    <text x="230" y="192" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="12">You enable a feature in the UI</text>
+    <!-- feature pills -->
+    <rect x="160" y="220" width="140" height="48" rx="9" fill="rgba(255,255,255,0.16)"/>
+    <text x="230" y="249" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Logs Pipelines</text>
+    <text x="230" y="312" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="11">Sends the new config over OpAMP</text>
+  </g>
+
+  <!-- ============ RIGHT: SigNoz Collector ============ -->
+  <g filter="url(#shadow)">
+    <rect x="610" y="120" width="320" height="230" rx="16" fill="url(#collectorGrad)"/>
+    <text x="770" y="166" text-anchor="middle" fill="#fff" font-size="18" font-weight="700">SigNoz Collector</text>
+    <text x="770" y="194" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="12">Receives the config automatically</text>
+    <line x1="650" y1="216" x2="890" y2="216" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <text x="770" y="248" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="12">Applies it and restarts</text>
+    <text x="770" y="278" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-size="12">No SSH or manual edits needed</text>
+    <text x="770" y="312" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-size="11">Reports its status back to SigNoz</text>
+  </g>
+
+  <!-- ============ ARROWS ============ -->
+  <!-- Push config (left -> right) -->
+  <path id="pPush" d="M390,200 L610,200" fill="none" stroke="#74b9ff" stroke-width="2.5" stroke-opacity="0.5" marker-end="url(#arrBlue)"/>
+  <text x="500" y="188" text-anchor="middle" fill="#74b9ff" font-size="12" font-weight="700">1. Push new config</text>
+
+  <!-- Report status (right -> left) -->
+  <path id="pReport" d="M610,275 L390,275" fill="none" stroke="#55efc4" stroke-width="2.5" stroke-opacity="0.5" marker-end="url(#arrGreen)"/>
+  <text x="500" y="298" text-anchor="middle" fill="#55efc4" font-size="12" font-weight="700">2. Report status back</text>
+
+  <!-- Channel label -->
+  <text x="500" y="240" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="10" font-style="italic">OpAMP over WebSocket</text>
+
+  <!-- ============ ANIMATED DOTS ============ -->
+  <use href="#dotBlue"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.85;1" dur="2.5s" repeatCount="indefinite"/><animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#pPush"/></animateMotion></use>
+  <use href="#dotBlue"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.85;1" dur="2.5s" repeatCount="indefinite" begin="1.2s"/><animateMotion dur="2.5s" repeatCount="indefinite" begin="1.2s"><mpath href="#pPush"/></animateMotion></use>
+
+  <use href="#dotGreen"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.85;1" dur="2.5s" repeatCount="indefinite" begin="0.6s"/><animateMotion dur="2.5s" repeatCount="indefinite" begin="0.6s"><mpath href="#pReport"/></animateMotion></use>
+  <use href="#dotGreen"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.85;1" dur="2.5s" repeatCount="indefinite" begin="1.8s"/><animateMotion dur="2.5s" repeatCount="indefinite" begin="1.8s"><mpath href="#pReport"/></animateMotion></use>
+
+  <!-- ============ LEGEND ============ -->
+  <circle cx="372" cy="408" r="5" fill="#74b9ff"/>
+  <text x="384" y="412" fill="rgba(255,255,255,0.7)" font-size="11">SigNoz → Collector (config)</text>
+  <circle cx="592" cy="408" r="5" fill="#55efc4"/>
+  <text x="604" y="412" fill="rgba(255,255,255,0.7)" font-size="11">Collector → SigNoz (status)</text>
+</svg>
