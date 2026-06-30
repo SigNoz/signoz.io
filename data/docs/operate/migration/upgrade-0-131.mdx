@@ -1,15 +1,15 @@
 ---
 date: 2026-06-30
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
-title: Upgrade to v0.131.0 (ClickHouse 25.12.5 Upgrade)
-description: Upgrade self-hosted SigNoz to v0.131.0 with Foundry or the Helm chart. Its collector needs ClickHouse 25.12.5, so upgrade ClickHouse first.
+title: Upgrade SigNoz to v0.131.0 with ClickHouse 25.12.5
+description: Upgrade self-hosted SigNoz to v0.131.0 with Foundry or the Helm chart. A future collector will require ClickHouse 25.12.5, so upgrade ClickHouse now.
 doc_type: howto
 ---
 
-SigNoz v0.131.0 needs ClickHouse 25.12.5. This is a transitive upgrade: the next time you update SigNoz, it pulls a newer [`signoz-otel-collector`](https://github.com/SigNoz/signoz-otel-collector) whose schema migration only runs on ClickHouse 25.12.5, so upgrade ClickHouse first. This guide covers both [Foundry](https://github.com/SigNoz/foundry) and the Helm chart.
+Upgrade the ClickHouse behind your self-hosted SigNoz to 25.12.5 before a newer SigNoz release starts requiring it. This is a transitive upgrade: a future <a href="https://github.com/SigNoz/signoz-otel-collector" target="_blank" rel="noopener noreferrer nofollow"><code>signoz-otel-collector</code></a> release will not run on ClickHouse older than 25.12.5, and a routine SigNoz update will eventually pull it. Upgrading ClickHouse on its own, first, keeps that move safe. This guide covers both <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> and the Helm chart.
 
 <Admonition type="warning">
-  <strong>Upgrade ClickHouse to 25.12.5 to stay on supported SigNoz releases.</strong> An upcoming
+  <strong>Upgrade ClickHouse to 25.12.5 to stay on supported SigNoz releases.</strong> A future
   `signoz-otel-collector` release stores trace attributes as a ClickHouse JSON column (
   <a
     href="https://github.com/SigNoz/signoz-otel-collector/pull/833"
@@ -57,7 +57,7 @@ ClickHouse upgrades its on-disk format in place on first start, and downgrades a
 <Tabs entityName="installer">
 <TabItem value="foundry" label="Foundry" default>
 
-Upgrade [`foundryctl`](https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md) first. It brings the v0.131.0 defaults (ClickHouse 25.12.5 and the matching collector) and the compatibility check that blocks an incompatible pairing:
+Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow"><code>foundryctl</code></a> first. It brings the v0.131.0 defaults (ClickHouse 25.12.5) and the compatibility check that blocks an incompatible pairing once the new collector lands:
 
 ```bash
 curl -fsSL https://signoz.io/foundry.sh | bash
@@ -71,7 +71,7 @@ foundryctl cast -f casting.yaml
 
 Or run `foundryctl forge -f casting.yaml` to render the deployment files into `pours/`, then apply them with your platform's own command. That apply step varies by mode and flavor (`docker compose up -d`, `kubectl apply`, `helm upgrade`, and so on).
 
-If your [`casting.yaml`](https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md) pins image versions, the new defaults will not override them (your config wins), so bump the pins yourself, at minimum ClickHouse to 25.12.5. Otherwise the old version sticks and `forge` flags the mismatch:
+If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow"><code>casting.yaml</code></a> pins image versions, the new defaults will not override them (your config wins), so bump the pins yourself, at minimum ClickHouse to 25.12.5. Otherwise the old version sticks and `forge` flags the mismatch:
 
 ```yaml
 spec:
@@ -86,12 +86,14 @@ spec:
 </TabItem>
 <TabItem value="helm" label="Kubernetes (Helm chart)">
 
-Update the [chart](https://github.com/SigNoz/charts) and upgrade. The v0.131.0 chart sets ClickHouse 25.12.5 and the new collector:
+Update the <a href="https://github.com/SigNoz/charts" target="_blank" rel="noopener noreferrer nofollow">chart</a> and upgrade. The v0.131.0 chart sets ClickHouse 25.12.5:
 
 ```bash
 helm repo update
 helm -n signoz upgrade signoz signoz/signoz
 ```
+
+`helm upgrade` takes the newest chart; add `--version 0.131.0` to pin the v0.131.0 chart.
 
 To pin ClickHouse explicitly, override the tag:
 
