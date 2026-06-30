@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Calendar } from 'lucide-react'
 import Hero from '@/components/ui/Hero'
 import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
