@@ -1,49 +1,19 @@
 ---
 date: 2026-06-30
-tags: [Self-Hosted Community, Self-Hosted Enterprise]
 title: Upgrade SigNoz to v0.131.0 with ClickHouse 25.12.5
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
 description: Upgrade self-hosted SigNoz to v0.131.0 with Foundry or the Helm chart. A future collector will require ClickHouse 25.12.5, so upgrade ClickHouse now.
 doc_type: howto
 ---
 
-Upgrade the ClickHouse behind your self-hosted SigNoz to 25.12.5 before a newer SigNoz release starts requiring it. This is a transitive upgrade: a future <a href="https://github.com/SigNoz/signoz-otel-collector" target="_blank" rel="noopener noreferrer nofollow"><code>signoz-otel-collector</code></a> release will not run on ClickHouse older than 25.12.5, and a routine SigNoz update will eventually pull it. Upgrading ClickHouse on its own, first, keeps that move safe. This guide covers both <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> and the Helm chart.
+Upgrade the ClickHouse behind your self-hosted SigNoz to 25.12.5 before a newer SigNoz release starts requiring it. This is a transitive upgrade: a future <a href="https://github.com/SigNoz/signoz-otel-collector" target="_blank" rel="noopener noreferrer nofollow">signoz-otel-collector</a> release will not run on ClickHouse older than 25.12.5, and a routine SigNoz update will eventually pull it. Upgrading ClickHouse on its own, first, keeps that move safe. This guide covers both <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> and the Helm chart.
 
-<Admonition type="warning">
-  <strong>Upgrade ClickHouse to 25.12.5 to stay on supported SigNoz releases.</strong> A future
-  `signoz-otel-collector` release stores trace attributes as a ClickHouse JSON column (
-  <a
-    href="https://github.com/SigNoz/signoz-otel-collector/pull/833"
-    target="_blank"
-    rel="noopener noreferrer nofollow"
-  >
-    otel-collector#833
-  </a>
-  ), and its schema migration uses settings that exist only in 25.12.5. With Foundry, `forge` and
-  `cast` block the mismatch.
+<Admonition type="warning" title="Upgrade ClickHouse to 25.12.5 to stay on supported SigNoz releases">
+A future `signoz-otel-collector` release stores trace attributes as a ClickHouse JSON column (<a href="https://github.com/SigNoz/signoz-otel-collector/pull/833" target="_blank" rel="noopener noreferrer nofollow">otel-collector#833</a>), and its schema migration uses settings that exist only in 25.12.5. With Foundry, `forge` and `cast` block the mismatch.
 </Admonition>
 
-<Admonition
-  type="info"
-  title="Still on the install script or bundled Docker Compose?"
-  defaultCollapsed="true"
->
-  `install.sh` and the `deploy/` Compose and Swarm files are deprecated as of{' '}
-  <a
-    href="https://github.com/SigNoz/signoz/releases/tag/v0.130.0"
-    target="_blank"
-    rel="noopener noreferrer nofollow"
-  >
-    SigNoz v0.130.0
-  </a>{' '}
-  and are no longer distributed. Move to Foundry first with the{' '}
-  <a
-    href="https://github.com/SigNoz/signoz/blob/main/deploy/MIGRATION.md"
-    target="_blank"
-    rel="noopener noreferrer nofollow"
-  >
-    migration guide
-  </a>{' '}
-  (it reattaches your volumes), then come back here.
+<Admonition type="info" title="Still on the install script or bundled Docker Compose?" defaultCollapsed="true">
+`install.sh` and the `deploy/` Compose and Swarm files are deprecated as of <a href="https://github.com/SigNoz/signoz/releases/tag/v0.130.0" target="_blank" rel="noopener noreferrer nofollow">SigNoz v0.130.0</a> and are no longer distributed. Move to Foundry first with the <a href="https://github.com/SigNoz/signoz/blob/main/deploy/MIGRATION.md" target="_blank" rel="noopener noreferrer nofollow">migration guide</a> (it reattaches your volumes), then come back here.
 </Admonition>
 
 ## Upgrade
@@ -57,7 +27,7 @@ ClickHouse upgrades its on-disk format in place on first start, and downgrades a
 <Tabs entityName="installer">
 <TabItem value="foundry" label="Foundry" default>
 
-Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow"><code>foundryctl</code></a> first. It brings the v0.131.0 defaults (ClickHouse 25.12.5) and the compatibility check that blocks an incompatible pairing once the new collector lands:
+Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundryctl</a> first. It brings the v0.131.0 defaults (ClickHouse 25.12.5) and the compatibility check that blocks an incompatible pairing once the new collector lands:
 
 ```bash
 curl -fsSL https://signoz.io/foundry.sh | bash
@@ -71,7 +41,7 @@ foundryctl cast -f casting.yaml
 
 Or run `foundryctl forge -f casting.yaml` to render the deployment files into `pours/`, then apply them with your platform's own command. That apply step varies by mode and flavor (`docker compose up -d`, `kubectl apply`, `helm upgrade`, and so on).
 
-If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow"><code>casting.yaml</code></a> pins image versions, the new defaults will not override them (your config wins), so bump the pins yourself, at minimum ClickHouse to 25.12.5. Otherwise the old version sticks and `forge` flags the mismatch:
+If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting.yaml</a> pins image versions, the new defaults will not override them (your config wins), so bump the pins yourself, at minimum ClickHouse to 25.12.5. Otherwise the old version sticks and `forge` flags the mismatch:
 
 ```yaml
 spec:
@@ -115,9 +85,7 @@ helm -n signoz upgrade signoz signoz/signoz --set clickhouse.image.tag=25.12.5
 <details>
 
 <ToggleHeading>
-
 ## Troubleshooting
-
 </ToggleHeading>
 
 ### Migrator fails with "Unknown setting 'object_serialization_version'"
