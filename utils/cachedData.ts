@@ -57,11 +57,7 @@ async function cachedFetchSingleComparison(slug: string, deploymentStatus: strin
   'use cache'
   cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
   cacheTag('mdx-content-list', `comparisons-${slug}`, `mdx-content-${slug}`)
-  const result = await fetchSingleComparison(slug, deploymentStatus)
-  if (!result) {
-    throw new Error(`Empty content received for cached-comparison-${slug}, skipping cache`)
-  }
-  return result
+  return await fetchSingleComparison(slug, deploymentStatus)
 }
 
 export function getCachedSingleComparison(slug: string, deploymentStatus: string) {
@@ -146,11 +142,7 @@ async function cachedFetchSingleGuide(slug: string, deploymentStatus: string) {
   'use cache'
   cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
   cacheTag('mdx-content-list', `guides-${slug}`, `mdx-content-${slug}`)
-  const result = await fetchSingleGuide(slug, deploymentStatus)
-  if (!result) {
-    throw new Error(`Empty content received for cached-guide-${slug}, skipping cache`)
-  }
-  return result
+  return await fetchSingleGuide(slug, deploymentStatus)
 }
 
 export function getCachedSingleGuide(slug: string, deploymentStatus: string) {
@@ -233,11 +225,7 @@ async function cachedFetchSingleBlog(slug: string, deploymentStatus: string) {
   'use cache'
   cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
   cacheTag('mdx-content-list', `blogs-${slug}`, `mdx-content-${slug}`)
-  const result = await fetchSingleBlog(slug, deploymentStatus)
-  if (!result) {
-    throw new Error(`Empty content received for cached-blog-${slug}, skipping cache`)
-  }
-  return result
+  return await fetchSingleBlog(slug, deploymentStatus)
 }
 
 export function getCachedSingleBlog(slug: string, deploymentStatus: string) {
@@ -320,11 +308,7 @@ async function cachedFetchSingleDoc(slug: string, deploymentStatus: string) {
   'use cache'
   cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
   cacheTag('mdx-content-list', `docs-${slug}`, `mdx-content-${slug}`)
-  const result = await fetchSingleDoc(slug, deploymentStatus)
-  if (!result) {
-    throw new Error(`Empty content received for cached-doc-${slug}, skipping cache`)
-  }
-  return result
+  return await fetchSingleDoc(slug, deploymentStatus)
 }
 
 export function getCachedSingleDoc(slug: string, deploymentStatus: string) {
