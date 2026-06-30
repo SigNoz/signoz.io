@@ -1,5 +1,5 @@
 ---
-date: 2026-06-22
+date: 2026-06-30
 id: k8s-daemonsets
 title: DaemonSets
 description: Monitor Kubernetes DaemonSet rollout status and resource usage in SigNoz — available vs desired nodes with CPU and memory metrics.
@@ -86,6 +86,12 @@ The **DaemonSets** view shows rollout status and aggregated resource usage. If A
 - This column relies on the OTel metric `k8s.pod.phase` from the k8s_cluster receiver, encoded `1` = Pending, `2` = Running, `3` = Succeeded, `4` = Failed, `5` = Unknown.
 - Counts of the DaemonSet's pods grouped by their latest observed lifecycle phase within the selected window, per the Kubernetes pod-lifecycle spec.
 - A `Pending` count means one or more of the DaemonSet's pods can't be placed on their target nodes — typically a taint without matching toleration or `requests` larger than the node's available capacity; `Failed` / `Unknown` warrant inspecting `kubectl describe daemonset/<name>` and the affected pods' events.
+
+### Pod Counts by Status
+
+- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` from the k8s_cluster receiver. The latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics); all three must be flowing for this column to be populated.
+- Counts of the DaemonSet's pods grouped by their kubectl-style display status within the selected window. The status is derived exactly as on the Pods view — see [Pod Status](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/#pod-status) for the full priority cascade, the statuses it surfaces, and the statuses it cannot derive.
+- Because a DaemonSet runs the same pod fleet-wide, a `CrashLoopBackOff` / `Error` count usually means the agent image or config is broken on every node at once, while `OOMKilled` points to the per-node resource budget being too tight; inspect with `kubectl describe daemonset/<name>` and the affected pods' logs.
 
 ## DaemonSet Detail Page
 

@@ -1,5 +1,5 @@
 ---
-date: 2026-06-22
+date: 2026-06-30
 id: k8s-deployments
 title: Deployments
 description: Monitor Kubernetes deployment availability and resource usage in SigNoz — CPU and memory with request/limit utilization and network activity.
@@ -86,6 +86,12 @@ The **Deployments** view shows aggregated resource usage across all pods in each
 - This column relies on the OTel metric `k8s.pod.phase` from the k8s_cluster receiver, encoded `1` = Pending, `2` = Running, `3` = Succeeded, `4` = Failed, `5` = Unknown.
 - Counts of the Deployment's pods grouped by their latest observed lifecycle phase within the selected window, per the Kubernetes pod-lifecycle spec.
 - A persistent `Pending` count means the Deployment's pods can't be scheduled (insufficient capacity, taints blocking placement, or a ResourceQuota); `Failed` / `Unknown` spikes warrant inspecting `kubectl describe deployment` and the failing pods' events.
+
+### Pod Counts by Status
+
+- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` from the k8s_cluster receiver. The latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics); all three must be flowing for this column to be populated.
+- Counts of the Deployment's pods grouped by their kubectl-style display status within the selected window. The status is derived exactly as on the Pods view — see [Pod Status](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/#pod-status) for the full priority cascade, the statuses it surfaces, and the statuses it cannot derive.
+- Any `CrashLoopBackOff` / `OOMKilled` / `ImagePullBackOff` count is a failing-rollout signal — the new ReplicaSet's pods aren't coming up; read it alongside the **Available** vs **Desired** counts and confirm with `kubectl rollout status deployment/<name>`.
 
 ## Deployment Detail Page
 

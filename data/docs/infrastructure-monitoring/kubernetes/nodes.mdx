@@ -1,5 +1,5 @@
 ---
-date: 2026-06-22
+date: 2026-06-30
 id: k8s-nodes
 title: Nodes
 description: Monitor Kubernetes node CPU, memory, and network performance in SigNoz — usage vs allocatable capacity, top pods by resource, and filesystem utilization.
@@ -64,6 +64,12 @@ The **Nodes** view shows CPU and memory usage alongside allocatable capacity for
 - This column relies on the OTel metric `k8s.pod.phase` from the k8s_cluster receiver, encoded `1` = Pending, `2` = Running, `3` = Succeeded, `4` = Failed, `5` = Unknown.
 - Counts of pods on this node grouped by their latest observed lifecycle phase within the selected window, per the Kubernetes pod-lifecycle spec.
 - A `Pending` spike on a single node typically means the scheduler can't place pods there (check **CPU Alloc** / **Memory Allocatable** headroom and node taints); `Failed` / `Unknown` spikes warrant drilling into those pods' events and logs from the node detail page.
+
+### Pod Counts by Status
+
+- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` from the k8s_cluster receiver. The latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics); all three must be flowing for this column to be populated.
+- Counts of the pods on this node grouped by their kubectl-style display status within the selected window. The status is derived exactly as on the Pods view — see [Pod Status](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/#pod-status) for the full priority cascade, the statuses it surfaces, and the statuses it cannot derive.
+- A cluster of `OOMKilled` / `Evicted` pods on a single node points to memory pressure on that node specifically, while concentrated `CrashLoopBackOff` may indicate a node-local fault (disk, container runtime, networking) rather than an application bug; open the node detail page to inspect events and logs.
 
 ## Node Detail Page
 

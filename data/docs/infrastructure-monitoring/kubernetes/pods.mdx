@@ -1,5 +1,5 @@
 ---
-date: 2026-06-22
+date: 2026-06-30
 id: k8s-pods
 title: Pods
 description: Monitor Kubernetes pod CPU, memory, and network performance in SigNoz — request/limit utilization, per-container breakdowns, and correlated traces and logs.
@@ -61,6 +61,27 @@ The **Pods** view is the default Kubernetes monitoring view. It shows all active
 - This column relies on the OTel metric(s): `k8s.pod.phase`.
 - Latest lifecycle phase for the pod within the selected window — one of `Pending`, `Running`, `Succeeded`, `Failed`, or `Unknown`. Per the Kubernetes Pod-lifecycle docs: `Pending` means containers haven't been set up yet (waiting to be scheduled or downloading images); `Succeeded` and `Failed` are terminal (`Failed` means at least one container exited non-zero or was terminated by the system); `Unknown` "typically occurs due to an error in communicating with the node where the Pod should be running."
 - Use this to spot stuck `Pending` pods (scheduling pressure, image-pull failure, missing toleration) or unexpected `Failed` / `Unknown` pods — open the pod detail page to inspect events and logs for the root cause.
+
+### Pod Status
+
+- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` (all from the k8s_cluster receiver; the latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics)). All three must be flowing for this column to be populated.
+- The kubectl-style display status for the pod — the value `kubectl get pods` prints under STATUS — derived from the latest value of each metric in the selected window via a priority cascade: a container-level reason (`k8s.container.status.reason`) takes precedence, then a pod-level reason (`k8s.pod.status_reason`), then the lifecycle phase (`k8s.pod.phase`). Surfaced statuses are the five phases `Pending` / `Running` / `Succeeded` / `Failed` / `Unknown`; container reasons `CrashLoopBackOff`, `ImagePullBackOff`, `ErrImagePull`, `CreateContainerConfigError`, `ContainerCreating`, `OOMKilled`, `Completed`, `Error`, `ContainerCannotRun`; and pod-level reasons `Evicted`, `NodeAffinity`, `NodeLost`, `Shutdown`, `UnexpectedAdmissionError`.
+- A few statuses that `kubectl` can show are not derivable from these metrics. Note these gaps and why they exist:
+  - `Terminating` is not surfaced, because the metrics emit no pod deletion timestamp.
+  - `Init:*` states are not surfaced, because the k8s_cluster receiver reports only regular containers and not init containers.
+  - `Signal:N` and `ExitCode:N` are not surfaced, because uncoded terminated reasons collapse to `Error`.
+- Use this to triage pods directly from the list without `kubectl` — `CrashLoopBackOff`, `OOMKilled`, `ImagePullBackOff`, and `Evicted` are the pods to investigate first; click the pod name to open its logs and events for the root cause.
+
+### Restarts
+
+- This column relies on the OTel metric(s): `k8s.container.restarts` (from the k8s_cluster receiver; enabled by default).
+- Total container restarts for the pod — the sum across the pod's containers of each container's latest cumulative restart count within the selected window, the same value `kubectl get pods` prints under RESTARTS. It excludes init containers, which the receiver does not report restarts for. OpenTelemetry cautions against reading too much into the exact number:
+
+  > "How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that."
+  >
+  > — <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerrestarts" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry k8sclusterreceiver documentation</a>
+
+- Treat the value as a signal rather than a precise count: `0` means no restarts in the recent past, anything `> 0` is a pod worth investigating (crash loops, OOM kills, failing liveness probes). Read it alongside the **Pod Status** column to tell a one-off restart from sustained flapping, then open the pod's logs and events to find the cause.
 
 Additional columns available via the Columns selector: **Namespace**, **Node**, **Cluster**.
 
