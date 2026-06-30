@@ -1,7 +1,7 @@
 ---
 date: 2026-06-24
 title: Install SigNoz on Linux - Self-Host Guide
-tags: [Self-Host]
+tags: [Self-Hosted Community]
 description: Learn how to install SigNoz on Linux with Foundry. Prepare dependencies, deploy the systemd units, verify services, and open the SigNoz UI.
 doc_type: howto
 ---
@@ -19,8 +19,8 @@ Use this page to install SigNoz on a Linux host that runs systemd. You use <a hr
 
 ## Install SigNoz
 
-<Admonition type="info" title="Why use Foundry?" defaultCollapsed="true">
-Foundry turns one `casting.yaml` file into the service files, configs, users, directories, and startup order that SigNoz needs on systemd.
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
 </Admonition>
 
 ### Step 1: Install foundryctl
@@ -31,20 +31,7 @@ Run the installer on the Linux host:
 curl -fsSL https://signoz.io/foundry.sh | bash
 ```
 
-Add `foundryctl` to your current shell and verify the install:
-
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-foundryctl --help
-```
-
-Persist the PATH change by adding the same line to your shell profile (`~/.bashrc` for bash, `~/.zshrc` for zsh):
-
-```bash
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-```
-
-For manual install options or version pinning, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">Foundry getting-started guide</a>.
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">Foundry getting-started guide</a>.
 
 ### Step 2: Install host dependencies
 
@@ -60,16 +47,7 @@ Install PostgreSQL with the <a href="https://www.postgresql.org/download/linux/"
 sudo systemctl disable --now postgresql.service
 ```
 
-On Debian and Ubuntu, PostgreSQL stores binaries under `/usr/lib/postgresql/<version>/bin`. Expose the latest installed version where Foundry expects it:
-
-```bash
-PG_VERSION=$(ls /usr/lib/postgresql/ | sort -V | tail -n 1)
-sudo ln -sf /usr/lib/postgresql/${PG_VERSION}/bin/initdb /usr/bin/initdb
-sudo ln -sf /usr/lib/postgresql/${PG_VERSION}/bin/postgres /usr/bin/postgres
-sudo ln -sf /usr/lib/postgresql/${PG_VERSION}/bin/pg_ctl /usr/bin/pg_ctl
-```
-
-For other distributions, create equivalent links or set binary path annotations in `casting.yaml`. See the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/systemd/binary" target="_blank" rel="noopener noreferrer nofollow">Foundry systemd binary example</a>.
+PostgreSQL packages install the server binary outside `/usr/bin` on most distros. Debian and Ubuntu use `/usr/lib/postgresql/<version>/bin`; RHEL and Fedora use `/usr/pgsql-<version>/bin`. Note the path to your `postgres` binary; you point Foundry at it in Step 4.
 
 ### Step 3: Download SigNoz binaries
 
@@ -87,7 +65,7 @@ curl -fsSL "https://github.com/SigNoz/signoz-otel-collector/releases/latest/down
   | sudo tar -xz --strip-components=1 -C /opt/ingester
 ```
 
-<Admonition type="info">
+<Admonition type="warning" title="Extract the full tarball">
 Extract the full SigNoz tarball; do not move the `signoz` binary on its own. It loads the web UI and email/alert templates relative to itself, so `bin/`, `web/`, `templates/`, and `conf/` must stay together.
 </Admonition>
 
@@ -117,6 +95,19 @@ spec:
     mode: systemd
 EOF
 ```
+
+<Admonition type="info">
+If your `postgres` binary is not at `/usr/bin/postgres` (Step 2), point Foundry at it with a binary-path annotation under `metadata`. The directory must also contain `initdb`:
+
+```yaml
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/metastore-postgres-binary-path: /usr/lib/postgresql/16/bin/postgres
+```
+
+See the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/systemd/binary" target="_blank" rel="noopener noreferrer nofollow">Foundry systemd binary example</a> for all binary-path annotations.
+</Admonition>
 
 ### Step 5: Deploy with Foundry
 
@@ -278,9 +269,9 @@ journalctl -u <service-name> -n 200 --no-pager
 
 ## Next Steps
 
-- [Send telemetry to self-hosted SigNoz](https://signoz.io/docs/ingestion/self-hosted/overview/)
+- [Collect host metrics from your Linux VMs](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/)
 - [Instrument your application](https://signoz.io/docs/instrumentation/overview/)
-- [Collect host metrics from Linux VMs](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/)
+- <a href="https://github.com/SigNoz/opentelemetry-demo-lite" target="_blank" rel="noopener noreferrer nofollow">Send Sample Telemetry with OpenTelemetry Demo Lite</a>
 
 ## Get Help
 
