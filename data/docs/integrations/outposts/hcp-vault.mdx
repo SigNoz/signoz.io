@@ -1,0 +1,135 @@
+---
+date: 2026-07-01
+title: Monitor HCP Vault Dedicated Audit Logs with SigNoz
+description: Stream HCP Vault Dedicated audit logs to SigNoz using the generic HTTP sink. Configure it from the HCP portal or with Terraform. No agent required.
+doc_type: howto
+---
+
+HCP Vault Dedicated streams audit logs to SigNoz through its Generic HTTP Sink. For SigNoz Cloud, HCP posts to the Vector log intake. Configure the sink from the HCP portal or with Terraform. SigNoz Cloud does not require an agent or collector.
+
+<Admonition type="warning">
+  Audit log streaming requires an **Essentials** or **Standard** tier cluster. Development tier clusters cannot stream audit logs. HCP Vault Dedicated streams to **one log destination at a time**, so enabling SigNoz replaces any existing audit log destination.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  HCP sends requests from outside your network, so your Vector endpoint must be:
+
+  1. **Internet reachable:** not behind a private network or VPN.
+  2. **HTTPS with a valid certificate:** HCP rejects plain HTTP.
+
+  Self-hosted SigNoz does not expose a `/logs/vector` intake. Route the HTTP sink through a Vector instance using the `opentelemetry` sink instead. See the self-hosted path in [Send Vector Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs/vector-logs-to-signoz/).
+</Admonition>
+
+## Prerequisites
+
+- HCP Vault Dedicated cluster on the **Essentials** or **Standard** tier
+- **Admin** role on your HCP organization
+- An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Configure audit log streaming
+
+<Tabs entityName="setup">
+<TabItem value="portal" label="HCP Portal" default>
+
+1. Log in to the <a href="https://portal.cloud.hashicorp.com/" target="_blank" rel="noopener noreferrer nofollow">HCP portal</a> and open your Vault cluster.
+
+2. Go to **Audit Logs** and click **Enable log streaming**.
+
+3. Select **Generic HTTP Sink** as the provider and click **Next**.
+
+4. Enter the provider details:
+
+  - **URI**: `https://ingest.<region>.signoz.cloud/logs/vector`
+  - **Method**: `POST`
+  - **Encoding codec**: `JSON`
+  - **Headers**: add `signoz-ingestion-key` with your ingestion key as the value
+
+  Leave compression, authentication strategy, and payload prefix/suffix at their defaults.
+
+5. Click **Save**.
+
+</TabItem>
+<TabItem value="terraform" label="Terraform">
+
+Add an `audit_log_config` block to your `hcp_vault_cluster` resource:
+
+```hcl
+resource "hcp_vault_cluster" "example" {
+  cluster_id = "vault-cluster"
+  hvn_id     = hcp_hvn.example.hvn_id
+  tier       = "standard_small"
+
+  audit_log_config {
+    http_uri    = "https://ingest.<region>.signoz.cloud/logs/vector"
+    http_codec  = "JSON"
+    http_method = "POST"
+    http_headers = {
+      "signoz-ingestion-key" = var.signoz_ingestion_key
+    }
+  }
+}
+```
+
+Apply the change:
+
+```bash
+terraform apply
+```
+
+</TabItem>
+</Tabs>
+
+Verify these values:
+
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+HCP can take a few minutes to start streaming after you save.
+
+## Validate
+
+1. Open **Logs** in SigNoz.
+2. Generate Vault activity: log in, read a secret, or run `vault status` against the cluster.
+3. Audit log entries appear within a few minutes. Each record carries Vault audit fields such as `auth`, `request.path`, and resource attributes like `cluster_id`, `cluster_tier`, and `hcp_product`.
+
+<Figure
+  src="/img/docs/integrations/outposts/hcp-vault/sample-audit-logs.webp"
+  alt="HCP Vault Dedicated audit log opened in the SigNoz Logs Explorer, showing auth, cluster_id, cluster_tier, and hcp_product fields"
+  caption="An HCP Vault Dedicated audit log record in SigNoz"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No logs arrive in SigNoz
+
+- Confirm the cluster is on the **Essentials** or **Standard** tier. Development tier clusters cannot stream audit logs.
+- Recheck the URI region against your [SigNoz region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint). A wrong region drops data with no error.
+- Confirm the path is `/logs/vector` and the codec is `JSON`.
+- Copy the `signoz-ingestion-key` value fresh from [SigNoz settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- For self-hosted SigNoz, confirm HCP can reach `https://<your-vector-host>/hcp-vault/audit` and Vector can reach `http://<signoz-host>:4318/v1/logs`.
+- HCP can take a few minutes to begin streaming. Generate Vault activity, since an idle cluster produces few audit events.
+
+### Streaming to a different destination stopped
+
+HCP Vault Dedicated streams to one log destination at a time. Enabling SigNoz replaces the previous destination. Re-add the previous endpoint if you need it back, but only one can be active.
+
+</details>
+
+## Limitations
+
+- **Essentials or Standard tier required.** Development tier clusters cannot stream audit logs.
+- **One destination at a time.** Enabling SigNoz replaces any existing audit log destination.
+- **Audit logs only.** This path covers audit logs. Vault metrics use a separate streaming destination.
+
+## Next Steps
+
+- [Build dashboards](https://signoz.io/docs/userguide/manage-dashboards/) on Vault audit activity
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) to detect anomalous access patterns
+- [Parse and transform logs](https://signoz.io/docs/logs-pipelines/introduction/) with Logs Pipelines
+
+## Get Help
+
+<GetHelp />
