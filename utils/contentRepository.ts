@@ -208,6 +208,8 @@ async function readSingleLocalContent(
   config: CollectionConfig,
   slug: string
 ): Promise<MDXContent | undefined> {
+  if (process.env.NODE_ENV !== 'development') return undefined
+
   const rootDir = path.join(process.cwd(), 'data', config.dataDir)
   const normalizedSlug = slug.replace(/^\/+|\/+$/g, '')
 
@@ -489,37 +491,40 @@ async function getLocalContentBySlug(
   slug: string,
   deploymentStatus: string
 ) {
-  // Fast path: read single file directly — O(1) instead of reading all 1,623 files
-  const content = await readSingleLocalContent(config, slug)
-  if (!content) return undefined
+  const fastContent = await readSingleLocalContent(config, slug)
+  if (fastContent) {
+    const rawUrls = normalizeStringArray(fastContent.related_articles_raw || [])
+    if (rawUrls.length === 0) return fastContent
 
-  // Resolve related articles lazily — read only the referenced files
-  const rawUrls = normalizeStringArray(content.related_articles_raw || [])
-  if (rawUrls.length === 0) return content
+    const relatedArticles = (
+      await Promise.all(
+        rawUrls.map(async (url) => {
+          const parsed = parseRelatedArticleUrl(url)
+          if (!parsed) return null
 
-  const relatedArticles = (
-    await Promise.all(
-      rawUrls.map(async (url) => {
-        const parsed = parseRelatedArticleUrl(url)
-        if (!parsed) return null
+          const collection = RELATED_PREFIX_TO_COLLECTION[parsed.prefix]
+          if (!collection) return null
 
-        const collection = RELATED_PREFIX_TO_COLLECTION[parsed.prefix]
-        if (!collection) return null
+          const relConfig = COLLECTION_CONFIGS[collection]
+          const relSlug = parsed.path.replace(/^\/+|\/+$/g, '')
+          const relatedDoc = await readSingleLocalContent(relConfig, relSlug)
+          if (!relatedDoc) return null
 
-        const relConfig = COLLECTION_CONFIGS[collection]
-        const relSlug = parsed.path.replace(/^\/+|\/+$/g, '')
-        const relatedDoc = await readSingleLocalContent(relConfig, relSlug)
-        if (!relatedDoc) return null
+          return {
+            content_type: relConfig.contentType,
+            [relConfig.contentType]: relatedDoc,
+          }
+        })
+      )
+    ).filter(Boolean)
 
-        return {
-          content_type: relConfig.contentType,
-          [relConfig.contentType]: relatedDoc,
-        }
-      })
-    )
-  ).filter(Boolean)
+    return { ...fastContent, related_articles: relatedArticles } as MDXContent
+  }
 
-  return { ...content, related_articles: relatedArticles } as MDXContent
+  const entriesByCollection = await readAllLocalContent()
+  const maps = buildContentMaps(entriesByCollection)
+  const content = maps[config.canonical]?.get(normalizeContentPath(slug))
+  return content ? resolveRelatedArticles(content, maps, deploymentStatus) : undefined
 }
 
 async function fetchCMSContentBySlug(
@@ -562,9 +567,7 @@ export async function getContentBySlug(
   }
 }
 
-async function readLocalContentCollectionCached(
-  config: CollectionConfig
-): Promise<MDXContent[]> {
+async function readLocalContentCollectionCached(config: CollectionConfig): Promise<MDXContent[]> {
   if (process.env.NODE_ENV !== 'development') {
     return readLocalContentCollection(config)
   }
