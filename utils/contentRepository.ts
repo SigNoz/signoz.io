@@ -9,13 +9,7 @@ import { fetchMDXContentByPath, type MDXContent } from './strapi'
 export type { AuthorDirectory } from './cmsAuthors'
 
 type CanonicalCollection =
-  | 'docs'
-  | 'blogs'
-  | 'guides'
-  | 'comparisons'
-  | 'faqs'
-  | 'case-studies'
-  | 'opentelemetries'
+  'docs' | 'blogs' | 'guides' | 'comparisons' | 'faqs' | 'case-studies' | 'opentelemetries'
 
 type CollectionConfig = {
   canonical: CanonicalCollection
@@ -228,47 +222,8 @@ async function readSingleLocalContent(
       throw error
     }
 
-    const { data, content } = matter(fileContent)
-    const frontmatter = normalizeFrontmatter(data)
     const contentPath = normalizeContentPath(normalizedSlug)
-    const slugPart = normalizedSlug.split('/').filter(Boolean).pop() || ''
-    const id = deterministicLocalId(config.canonical, contentPath)
-    const frontmatterDate = dateToString(frontmatter.date)
-    const frontmatterPublishedDate = dateToString(frontmatter.published_date)
-    const publishedAt = frontmatterPublishedDate || frontmatterDate || stats.mtime.toISOString()
-    const title = typeof frontmatter.title === 'string' ? frontmatter.title : slugPart
-
-    const entry: MDXContent = {
-      ...frontmatter,
-      id: (() => {
-        const numericId = Number.parseInt(id.slice(0, 8), 16)
-        if (!Number.isFinite(numericId)) {
-          throw new Error(`Failed to generate numeric ID for ${config.canonical}:${contentPath}`)
-        }
-        return numericId
-      })(),
-      documentId: `local-${id}`,
-      title,
-      slug: slugPart,
-      path: contentPath,
-      content,
-      authors: normalizeStringArray(frontmatter.authors),
-      related_articles: [],
-      related_articles_raw: normalizeStringArray(frontmatter.related_articles),
-      publishedAt,
-      createdAt: publishedAt,
-      updatedAt: dateToString(frontmatter.lastmod) || publishedAt,
-      published_date: frontmatterPublishedDate,
-      updated_date: dateToString(frontmatter.updated_date),
-      date: frontmatterDate,
-      filePath: path.relative(path.join(process.cwd(), 'data'), filePath).replace(/\\/g, '/'),
-      __source: 'local',
-    }
-
-    if (frontmatter.tags !== undefined) entry.tags = normalizeTaxonomy(frontmatter.tags)
-    if (frontmatter.keywords !== undefined) entry.keywords = normalizeTaxonomy(frontmatter.keywords)
-
-    return entry
+    return buildMDXEntry(config, filePath, fileContent, stats, contentPath)
   }
 
   return undefined
@@ -304,6 +259,55 @@ function deterministicLocalId(collection: CanonicalCollection, contentPath: stri
   return createHash('sha1').update(`${collection}:${contentPath}`).digest('hex')
 }
 
+function buildMDXEntry(
+  config: CollectionConfig,
+  filePath: string,
+  fileContent: string,
+  stats: { mtime: Date },
+  contentPath: string
+): MDXContent {
+  const { data, content } = matter(fileContent)
+  const frontmatter = normalizeFrontmatter(data)
+  const slug = contentPath.split('/').filter(Boolean).pop() || ''
+  const id = deterministicLocalId(config.canonical, contentPath)
+  const frontmatterDate = dateToString(frontmatter.date)
+  const frontmatterPublishedDate = dateToString(frontmatter.published_date)
+  const publishedAt = frontmatterPublishedDate || frontmatterDate || stats.mtime.toISOString()
+  const title = typeof frontmatter.title === 'string' ? frontmatter.title : slug
+
+  const entry: MDXContent = {
+    ...frontmatter,
+    id: (() => {
+      const numericId = Number.parseInt(id.slice(0, 8), 16)
+      if (!Number.isFinite(numericId)) {
+        throw new Error(`Failed to generate numeric ID for ${config.canonical}:${contentPath}`)
+      }
+      return numericId
+    })(),
+    documentId: `local-${id}`,
+    title,
+    slug,
+    path: contentPath,
+    content,
+    authors: normalizeStringArray(frontmatter.authors),
+    related_articles: [],
+    related_articles_raw: normalizeStringArray(frontmatter.related_articles),
+    publishedAt,
+    createdAt: publishedAt,
+    updatedAt: dateToString(frontmatter.lastmod) || publishedAt,
+    published_date: frontmatterPublishedDate,
+    updated_date: dateToString(frontmatter.updated_date),
+    date: frontmatterDate,
+    filePath: path.relative(path.join(process.cwd(), 'data'), filePath).replace(/\\/g, '/'),
+    __source: 'local',
+  }
+
+  if (frontmatter.tags !== undefined) entry.tags = normalizeTaxonomy(frontmatter.tags)
+  if (frontmatter.keywords !== undefined) entry.keywords = normalizeTaxonomy(frontmatter.keywords)
+
+  return entry
+}
+
 async function readLocalContentCollection(config: CollectionConfig): Promise<MDXContent[]> {
   const rootDir = path.join(process.cwd(), 'data', config.dataDir)
   const files = await collectMdxFiles(rootDir)
@@ -312,48 +316,8 @@ async function readLocalContentCollection(config: CollectionConfig): Promise<MDX
     files.map(async (filePath) => {
       const fileContent = await fs.readFile(filePath, 'utf8')
       const stats = await fs.stat(filePath)
-      const { data, content } = matter(fileContent)
-      const frontmatter = normalizeFrontmatter(data)
       const contentPath = relativePathToContentPath(rootDir, filePath)
-      const slug = contentPath.split('/').filter(Boolean).pop() || ''
-      const id = deterministicLocalId(config.canonical, contentPath)
-      const frontmatterDate = dateToString(frontmatter.date)
-      const frontmatterPublishedDate = dateToString(frontmatter.published_date)
-      const publishedAt = frontmatterPublishedDate || frontmatterDate || stats.mtime.toISOString()
-      const title = typeof frontmatter.title === 'string' ? frontmatter.title : slug
-
-      const entry: MDXContent = {
-        ...frontmatter,
-        id: (() => {
-          const numericId = Number.parseInt(id.slice(0, 8), 16)
-          if (!Number.isFinite(numericId)) {
-            throw new Error(`Failed to generate numeric ID for ${config.canonical}:${contentPath}`)
-          }
-          return numericId
-        })(),
-        documentId: `local-${id}`,
-        title,
-        slug,
-        path: contentPath,
-        content,
-        authors: normalizeStringArray(frontmatter.authors),
-        related_articles: [],
-        related_articles_raw: normalizeStringArray(frontmatter.related_articles),
-        publishedAt,
-        createdAt: publishedAt,
-        updatedAt: dateToString(frontmatter.lastmod) || publishedAt,
-        published_date: frontmatterPublishedDate,
-        updated_date: dateToString(frontmatter.updated_date),
-        date: frontmatterDate,
-        filePath: path.relative(path.join(process.cwd(), 'data'), filePath).replace(/\\/g, '/'),
-        __source: 'local',
-      }
-
-      if (frontmatter.tags !== undefined) entry.tags = normalizeTaxonomy(frontmatter.tags)
-      if (frontmatter.keywords !== undefined)
-        entry.keywords = normalizeTaxonomy(frontmatter.keywords)
-
-      return entry
+      return buildMDXEntry(config, filePath, fileContent, stats, contentPath)
     })
   )
 }
