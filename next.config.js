@@ -98,6 +98,9 @@ module.exports = () => {
     experimental: {
       useCache: true,
     },
+    // Turbopack traces path.join(CWD, 'data', <dynamic>) in contentRepository.ts
+    // and generates a broad pattern that also matches 'data-assets/'
+    // Without this exclusion serverless function size increases significantly
     outputFileTracingExcludes: {
       '*': ['./data-assets/**'],
     },
