@@ -60,19 +60,6 @@ type ButtonVariant = Exclude<VariantProps<typeof buttonVariants>['variant'], nul
 type LegacyButtonVariant = keyof typeof LEGACY_VARIANT_TO_STYLES_MAP
 type ButtonStyleVariant = ButtonVariant | LegacyButtonVariant
 
-const SIGNOZ_INTERNAL_HOSTS = new Set(['signoz.io', 'www.signoz.io'])
-
-const isExternalHref = (destination: string) => {
-  if (!/^https?:\/\//.test(destination)) return false
-
-  try {
-    const { hostname } = new URL(destination)
-    return !SIGNOZ_INTERNAL_HOSTS.has(hostname) && !hostname.endsWith('.signoz.io')
-  } catch {
-    return false
-  }
-}
-
 export interface ButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>,
     Omit<VariantProps<typeof buttonVariants>, 'variant'> {
@@ -174,12 +161,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const extraProps: Record<string, unknown> = {}
     if (Comp === Link) {
-      const destination = href ?? to
-      extraProps.href = destination
-      if (destination && isExternalHref(destination)) {
-        extraProps.target = '_blank'
-        extraProps.rel = 'noopener noreferrer'
-      }
+      extraProps.href = href ?? to
     }
 
     if (Comp === 'button') {
