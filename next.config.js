@@ -98,6 +98,9 @@ module.exports = () => {
     experimental: {
       useCache: true,
     },
+    outputFileTracingExcludes: {
+      '*': ['./data-assets/**'],
+    },
     images: {
       remotePatterns: getAllowedImageDomains().map((domain) => ({
         protocol: 'https',
