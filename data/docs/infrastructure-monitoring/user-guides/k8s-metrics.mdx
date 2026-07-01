@@ -1,5 +1,5 @@
 ---
-date: 2026-06-22
+date: 2026-06-30
 title: Setup Kubernetes Metrics with OpenTelemetry
 description: Configure the OpenTelemetry kubeletstats and k8scluster receivers (plus k8sattributesprocessor) on top of a running Kubernetes Collection Agent to track node, pod, container, and volume metrics in SigNoz.
 doc_type: howto
@@ -236,7 +236,10 @@ These allocations are exposed via the `k8s.node.allocatable_cpu`, `k8s.node.allo
 #### 3. Optional Metrics
 Key optional metrics for enhanced monitoring:
 - `k8s.node.condition`: Detailed node health status
-- `k8s.pod.status_reason`: Root cause analysis for pod states
+- `k8s.pod.status_reason`: Pod-level status reasons (`Evicted`, `NodeLost`, `Shutdown`, ...)
+- `k8s.container.status.reason`: Container-level status reasons (`CrashLoopBackOff`, `OOMKilled`, `ImagePullBackOff`, ...)
+
+`k8s.pod.status_reason` and `k8s.container.status.reason` are disabled by default in the upstream receiver but enabled by default in the [`k8s-infra`](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) Helm chart — together they drive the kubectl-style **Pod Status** column. Enable them manually only if you run the `k8s_cluster` receiver without the chart (or on a chart version older than the one that ships them on by default).
 
 For a comprehensive list of available metrics, conditions, and resources, refer to the [k8sclusterreceiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md).
 
@@ -257,6 +260,8 @@ receivers:
       k8s.node.condition:
         enabled: true
       k8s.pod.status_reason:
+        enabled: true
+      k8s.container.status.reason:
         enabled: true
 ```
 

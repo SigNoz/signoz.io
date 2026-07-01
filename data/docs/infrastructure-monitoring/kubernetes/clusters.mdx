@@ -1,5 +1,5 @@
 ---
-date: 2026-06-22
+date: 2026-06-30
 id: k8s-clusters
 title: Clusters
 description: Monitor Kubernetes cluster resource allocation in SigNoz — CPU and memory vs allocatable capacity, node readiness, and workload health summaries.
@@ -58,6 +58,12 @@ The **Clusters** view provides a high-level overview of resource allocation and 
 - This column relies on the OTel metric `k8s.pod.phase` from the k8s_cluster receiver, encoded `1` = Pending, `2` = Running, `3` = Succeeded, `4` = Failed, `5` = Unknown.
 - Cluster-wide counts of pods grouped by their latest observed lifecycle phase within the selected window, per the Kubernetes pod-lifecycle spec.
 - A growing `Pending` backlog cluster-wide indicates scheduling pressure (insufficient CPU/memory across all nodes, taints blocking placement, or namespace ResourceQuotas saturated); persistent `Failed` / `Unknown` warrants drilling into specific workloads.
+
+### Pod Counts by Status
+
+- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` from the k8s_cluster receiver. The latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics); all three must be flowing for this column to be populated.
+- Cluster-wide counts of pods grouped by their kubectl-style display status within the selected window. The status is derived exactly as on the Pods view — see [Pod Status](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/#pod-status) for the full priority cascade, the statuses it surfaces, and the statuses it cannot derive.
+- A rising `CrashLoopBackOff` / `OOMKilled` / `ImagePullBackOff` count cluster-wide points to a bad rollout or an image/registry problem hitting many workloads at once, while climbing `Evicted` counts signal node resource pressure; use it as the cluster-level health rollup, then drill into the offending workloads from their own views.
 
 ## Cluster Detail Page
 

@@ -1,5 +1,5 @@
 ---
-date: 2026-06-22
+date: 2026-06-30
 id: k8s-statefulsets
 title: StatefulSets
 description: Monitor Kubernetes StatefulSet availability and resource usage in SigNoz — available vs desired pods with CPU and memory utilization percentages.
@@ -86,6 +86,12 @@ The **StatefulSets** view shows rollout status and resource utilization. Statefu
 - This column relies on the OTel metric `k8s.pod.phase` from the k8s_cluster receiver, encoded `1` = Pending, `2` = Running, `3` = Succeeded, `4` = Failed, `5` = Unknown.
 - Counts of the StatefulSet's pods grouped by their latest observed lifecycle phase within the selected window, per the Kubernetes pod-lifecycle spec.
 - StatefulSets create pods sequentially with stable ordinal names (`<name>-0`, `<name>-1`, ...) — a single pod stuck in `Pending` blocks all higher-ordinal pods from being created, so a persistent `Pending` count of 1 can mean the entire scale-up is stalled; inspect the affected ordinal with `kubectl describe pod <name>-N`.
+
+### Pod Counts by Status
+
+- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` from the k8s_cluster receiver. The latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics); all three must be flowing for this column to be populated.
+- Counts of the StatefulSet's pods grouped by their kubectl-style display status within the selected window. The status is derived exactly as on the Pods view — see [Pod Status](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/#pod-status) for the full priority cascade, the statuses it surfaces, and the statuses it cannot derive.
+- A `CrashLoopBackOff` on an early ordinal blocks the rest of the StatefulSet from rolling out, while `OOMKilled` counts usually mean memory is undersized for the workload's data set; inspect the lowest failing ordinal first with `kubectl describe pod <name>-N`.
 
 ## StatefulSet Detail Page
 
