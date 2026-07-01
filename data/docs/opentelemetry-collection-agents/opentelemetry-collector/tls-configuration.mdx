@@ -5,8 +5,6 @@ description: Secure your OpenTelemetry Collector with TLS. Configure encrypted r
 doc_type: howto
 ---
 
-import GetHelp from '@/components/shared/get-help.md'
-
 ## Overview
 
 By default, the OTel Collector accepts and sends telemetry over plaintext connections. In production, you should encrypt both directions:
@@ -16,6 +14,10 @@ By default, the OTel Collector accepts and sends telemetry over plaintext connec
 - **Mutual TLS (mTLS):** both sides present certificates; the collector rejects unauthenticated clients
 
 This guide covers each case with working config snippets. For background on collector configuration structure, see [OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+<Admonition type="info">
+This guide applies when you run your own OpenTelemetry Collector (self-hosted SigNoz or a standalone collector). **SigNoz Cloud** terminates TLS at the ingestion endpoint, so it encrypts the collector-to-SigNoz connection for you; skip exporter TLS for that leg. Receiver TLS and mTLS still apply when you want to secure the app-to-collector hop.
+</Admonition>
 
 ## Prerequisites
 
