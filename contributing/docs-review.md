@@ -64,6 +64,7 @@ Review each changed doc against these checks in order:
 17. Discovery surfaces are updated when the new doc should appear in an existing list or overview.
 18. Added or changed images are WebP, at least 1200 px wide, and use the `Figure` component with descriptive alt text.
 19. Prose reads clean: no em dashes (`—`), no AI-writing tells (adverb padding, throat-clearing openers, "not X, but Y" contrasts), and varied sentence length.
+20. New or moved docs are added to `data/docs-side-nav/main.json`, and removed or redirected pages are updated there, so navigation stays correct.
 
 If a check cannot be validated from the PR context, call out the assumption and residual risk.
 
