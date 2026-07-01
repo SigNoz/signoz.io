@@ -1,5 +1,5 @@
 ---
-date: 2026-06-09
+date: 2026-07-01
 title: Trace Details
 description: Visualize and analyze individual traces using the flamegraph, waterfall chart, and span inspection tools in SigNoz.
 doc_type: howto
@@ -56,6 +56,7 @@ The details are organized into tabs:
 
 - **Overview** — span attributes in a structured view
 - **Events** — timestamped log messages and span events recorded during the span
+- **Links** — linked span references (OpenTelemetry span links) for the span. This tab appears only when the span has links, and its label shows the count (for example, `Links 5`)
 - **Logs** — correlated log lines from the span's service and time window
 - **Metrics** — infrastructure metrics (CPU, memory) for the host or pod
 
@@ -80,6 +81,14 @@ Hover over any attribute value to see quick action icons:
   caption="Quick actions on span attributes — Pin, Filter for/out Value, Group By, Copy Field Name/Value"
   className="box-shadowed-image"
 />
+
+### Span Links
+
+When a span carries OpenTelemetry span links, the Span Details panel adds a **Links** tab and the panel header shows the linked spans count. Span links are typed references to related spans that are _not_ parent-child: SigNoz renders parent-child relationships in the waterfall and surfaces these non-hierarchical references in the Links tab.
+
+Each reference carries the linked span's **trace ID**, **span ID**, and **relationship type** (`refType`). The Links tab lists each linked **Span ID** — click one to open that span in its own trace, even when it lives in a trace separate from the one you are viewing.
+
+The Links tab appears only when the instrumented service creates links with the OpenTelemetry span link API (for example, `span.addLink()`, or `links=[...]` passed at span creation). For when to use span links and how to instrument them, see [Span Links](https://signoz.io/docs/traces-management/guides/span-links/).
 
 ### Span Percentile
 
