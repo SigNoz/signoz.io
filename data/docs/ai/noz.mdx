@@ -1,5 +1,5 @@
 ---
-date: 2026-06-29
+date: 2026-07-01
 title: "Noz: SigNoz's AI Teammate for Observability"
 meta_title: Noz - SigNoz's In-Product AI Teammate & Assistant
 description: Noz is SigNoz's built-in AI teammate. Ask about your traces, logs, and metrics in plain English to get answers grounded in your telemetry, and let Noz create dashboards, alerts, and views for you.
@@ -51,6 +51,18 @@ Use **Add Context** below the input to point Noz at a specific entity before you
 Adding context narrows Noz's scope so its answer covers only the dashboard, alert, or service you care about.
 
 <Figure src="/img/docs/noz/noz-add-context.webp" alt="Noz Add Context picker open with Dashboards, Alerts, and Services tabs, letting you attach a specific entity to scope the investigation" caption="The Add Context picker, where you attach a dashboard, alert, or service before you ask." />
+
+### When a tab has nothing to show
+
+Each tab gives you a targeted empty state instead of a generic "not found" message, so you always know why a tab is empty and what to do next. The picker tells apart two cases:
+
+- **No entities exist yet.** If you haven't created any dashboards or alerts, or haven't instrumented any services, the tab says so and offers a starter action:
+  - **Dashboards**: *No dashboards yet.* with an **Ask me to create one** call-to-action.
+  - **Alerts**: *No alerts yet.* with an **Ask me to create one** call-to-action.
+  - **Services**: *No services yet.* with an **Ask me to help set up instrumentation** call-to-action. Services come from telemetry you send rather than something you create in SigNoz, so this prompt points you to instrumentation instead of creation.
+- **No search matches.** If your search returns nothing, the tab shows *No [category] match "[query]"* along with a call-to-action seeded with what you typed, for example *Create a dashboard for "[query]"*, or *Set up instrumentation for "[query]"* on the Services tab.
+
+Clicking any of these calls-to-action drops a starter prompt into the **Ask anything** box and places the cursor at the end. Noz doesn't send it automatically, so you can edit the prompt before you submit it.
 
 ## Understand and act on an answer
 
