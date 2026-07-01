@@ -4,25 +4,24 @@ import React, { useState, useCallback, useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useSearchParamsState } from '@/hooks/useSearchParamsState'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
+import type { TabItemProps } from './TabItem'
 
-const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?: string }) => {
+interface TabsProps {
+  children: React.ReactNode
+  entityName?: string
+  variant?: 'default' | 'pill'
+  className?: string
+}
+
+const Tabs = ({ children, entityName, variant = 'default', className }: TabsProps) => {
   const searchParams = useSearchParamsState()
   const router = useRouter()
   const pathname = usePathname()
 
-  type TabItemProps = {
-    value: string
-    label: React.ReactNode
-    default?: boolean
-    children?: React.ReactNode
-  }
   const childrenArray = React.Children.toArray(children)
-
-  const isValidElement = (element: unknown): element is React.ReactElement<TabItemProps> => {
-    return React.isValidElement(element)
-  }
-
-  const validChildren = childrenArray.filter(isValidElement)
+  const validChildren = childrenArray.filter((child): child is React.ReactElement<TabItemProps> =>
+    React.isValidElement(child)
+  )
 
   const tabValuesKey = validChildren.map((child) => child.props.value).join(',')
   const tabValuesSet = useMemo(
@@ -66,24 +65,39 @@ const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?
   const isOnboarding = isDocsOnboardingPathname(pathname)
   const hideSelfHostTab = isOnboarding && entityName === 'plans'
 
+  const isPill = variant === 'pill'
+
   return (
-    <div className="w-full" data-tabs-root>
-      <div className="flex border-b border-gray-200 dark:border-gray-700">
-        {childrenArray.map((child) => {
-          if (!isValidElement(child)) return null
+    <div className={className || 'w-full'} data-tabs-root>
+      <div
+        className={
+          isPill
+            ? 'mb-6 flex flex-wrap gap-2'
+            : 'flex border-b border-gray-200 dark:border-gray-700'
+        }
+      >
+        {validChildren.map((child) => {
           const { value, label } = child.props
 
-          if (hideSelfHostTab && value.startsWith('self-host')) return null
+          if (hideSelfHostTab && (value as string).startsWith('self-host')) return null
           return (
             <button
-              key={value}
+              key={value as string}
               data-tab-value={value}
-              className={`border-b-2 px-4 py-2 text-sm font-medium focus:outline-none ${
-                activeTab === value
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
-              }`}
-              onClick={() => handleTabChange(value)}
+              className={
+                isPill
+                  ? `rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                      activeTab === value
+                        ? 'bg-signoz_robin-500 text-white shadow-sm dark:bg-signoz_robin-400'
+                        : 'border-signoz_vanilla-300 bg-signoz_vanilla-100 text-signoz_ink-200 hover:border-signoz_robin-400 hover:text-signoz_ink-100 dark:border-signoz_ink-200 dark:bg-signoz_ink-400 dark:text-signoz_vanilla-200 dark:hover:text-white'
+                    }`
+                  : `border-b-2 px-4 py-2 text-sm font-medium focus:outline-none ${
+                      activeTab === value
+                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                        : 'border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+                    }`
+              }
+              onClick={() => handleTabChange(value as string)}
             >
               {label}
             </button>
@@ -91,17 +105,18 @@ const Tabs = ({ children, entityName }: { children: React.ReactNode; entityName?
         })}
       </div>
       <div className="mt-4">
-        {childrenArray.map((child) => {
-          if (
-            !isValidElement(child) ||
-            (hideSelfHostTab && child.props.value.startsWith('self-host'))
-          ) {
+        {validChildren.map((child) => {
+          if (hideSelfHostTab && (child.props.value as string).startsWith('self-host')) {
             return null
           }
 
           const isActive = child.props.value === activeTab
           return (
-            <div key={child.props.value} data-tab-value={child.props.value} hidden={!isActive}>
+            <div
+              key={child.props.value as string}
+              data-tab-value={child.props.value}
+              hidden={!isActive}
+            >
               {child.props.children}
             </div>
           )

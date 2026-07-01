@@ -1,7 +1,6 @@
 ---
 date: 2026-06-22
 title: Docker Swarm Collection Agent - Install
-id: install
 description: Install the OpenTelemetry Collector on your Docker Swarm cluster to collect metrics, logs, and traces and send them to SigNoz.
 doc_type: howto
 ---
@@ -15,7 +14,7 @@ This guide walks you through installing the OpenTelemetry Collector **contrib** 
 - SigNoz Cloud account or self-hosted SigNoz instance
 - Ports `4317`, `4318` available on each Swarm node
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -121,7 +120,7 @@ Verify the following values:
 
 Deploy the collector as a **global** service so one replica runs on each Swarm node. Each replica collects host metrics, container metrics, and logs from its local node.
 
-<KeyPointCallout title="Why global mode?" defaultCollapsed={true}>
+<KeyPointCallout title="Why global mode?" defaultCollapsed="true">
 With `--mode global`, one collector runs on each Swarm node. Bind mounts (`/var/run/docker.sock`, `/var/lib/docker/containers`, `/`) are node-local, so each replica collects telemetry from its own node. For a single-node Swarm, you still get one collector.
 
 `--hostname '{{.Node.Hostname}}'` sets the container hostname to the Swarm node's hostname. Without this, the `system` resource detector reports the container ID as `host.name` instead of the actual node hostname, making it hard to identify which node data came from in SigNoz.

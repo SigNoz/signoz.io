@@ -1,26 +1,28 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { UpgradePath } from '../types/upgrade'
 import DocRenderer from './DocRender'
 import { Card } from '@/components/ui/Card'
 import Link from 'next/link'
 import { AlertTriangle } from 'lucide-react'
-import type { Doc } from 'contentlayer/generated'
 
 interface DocumentationPanelProps {
   currentStep: UpgradePath
   className?: string
   docUrl: string
   version: string
-  docsBySlug: Record<string, Doc>
+  docMetaBySlug: Record<string, { title: string }>
+  compiledDocsBySlug: Record<string, React.ReactNode>
 }
 
 const DocumentationPanel: React.FC<DocumentationPanelProps> = ({
   version,
   className,
   docUrl,
-  docsBySlug,
+  docMetaBySlug,
+  compiledDocsBySlug,
 }) => {
-  const [hasError, setHasError] = useState(false)
+  const slug = decodeURI(docUrl.replace('https://signoz.io/docs/', '').replace(/^\/+/, ''))
+  const hasError = !compiledDocsBySlug[slug]
 
   return (
     <Card className={`h-full ${className}`}>
@@ -66,7 +68,11 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({
                 </div>
               </div>
             ) : (
-              <DocRenderer docUrl={docUrl} docsBySlug={docsBySlug} setHasError={setHasError} />
+              <DocRenderer
+                docUrl={docUrl}
+                docMetaBySlug={docMetaBySlug}
+                compiledDocsBySlug={compiledDocsBySlug}
+              />
             )}
           </div>
         </Card>

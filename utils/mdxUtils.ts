@@ -77,6 +77,7 @@ export function generateTOC(content: string) {
 
 // Content type to route prefix mapping for related articles
 const contentTypeRoutePrefix: Record<string, string> = {
+  doc: 'docs',
   guide: 'guides',
   comparison: 'comparisons',
   blog: 'blog',
@@ -84,6 +85,8 @@ const contentTypeRoutePrefix: Record<string, string> = {
   opentelemetry: 'opentelemetry',
   case_study: 'case-study',
 }
+
+const DEFAULT_DOC_TAGS = ['SigNoz Cloud', 'Self-Host']
 
 // Extract the populated relation document from a related_articles component entry.
 // Each entry has content_type + one populated relation field matching that type.
@@ -373,5 +376,78 @@ export const transformGuide = (guide: MDXContent) => {
     filePath: path.endsWith('.mdx') ? path : `${path}.mdx`,
     structuredData: generateStructuredData('guides', contentForStructuredData),
     relatedArticles: transformRelatedArticles(guide),
+  }
+}
+
+export const transformDoc = (doc: MDXContent) => {
+  const slug = (doc.path || '').replace(/^\/+|\/+$/g, '')
+  const docPath = `docs/${slug}`
+
+  const { publishedDate, updatedDate, sortDate } = deriveDates(doc)
+
+  const docTags =
+    Array.isArray(doc.tags) && doc.tags.length > 0
+      ? doc.tags
+          .map((tag: string | MDXContent) => (typeof tag === 'string' ? tag : tag.value))
+          .filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0)
+      : DEFAULT_DOC_TAGS
+
+  const authors = Array.isArray(doc.authors)
+    ? doc.authors.map((author: string | MDXContent) =>
+        typeof author === 'string' ? author : author.key
+      )
+    : []
+
+  const keywords = Array.isArray(doc.keywords)
+    ? doc.keywords.map((keyword: string | MDXContent) =>
+        typeof keyword === 'string' ? keyword : keyword.value
+      )
+    : []
+
+  const readingTimeStats = readingTime(doc.content || '')
+
+  const contentForStructuredData = {
+    ...doc,
+    slug,
+    path: docPath,
+    tags: docTags,
+    published_date: publishedDate,
+    updated_date: updatedDate,
+    publishedAt: publishedDate || doc.updatedAt || doc.publishedAt,
+  } as MDXContent
+
+  return {
+    ...doc,
+    _id: doc.documentId || String(doc.id),
+    _raw: {},
+    type: 'Doc',
+    title: doc.title,
+    meta_title: doc.meta_title,
+    published_date: publishedDate,
+    updated_date: updatedDate,
+    date: sortDate,
+    lastmod: doc.lastmod || sortDate,
+    draft: doc.draft ?? false,
+    summary: doc.summary || doc.description,
+    tags: docTags,
+    docTags,
+    description: doc.description,
+    image: doc.image,
+    images: doc.images,
+    authors,
+    keywords,
+    slug,
+    content: doc.content,
+    body: { raw: doc.content || '', code: '' },
+    toc: generateTOC(doc.content || ''),
+    readingTime: readingTimeStats,
+    path: docPath,
+    filePath: docPath.endsWith('.mdx') ? docPath : `${docPath}.mdx`,
+    structuredData: generateStructuredData('docs', contentForStructuredData),
+    relatedArticles: transformRelatedArticles(doc),
+    hide_table_of_contents: doc.hide_table_of_contents ?? false,
+    canonicalUrl: doc.canonicalUrl,
+    sidebar_label: doc.sidebar_label,
+    doc_type: doc.doc_type,
   }
 }

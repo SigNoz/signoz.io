@@ -1,8 +1,8 @@
 import React from 'react'
 import Link from 'next/link'
 import { Home, ChevronRight } from 'lucide-react'
-import type { BreadcrumbCrumb } from '@/utils/breadcrumbSchema'
-import { BASE_URL } from '@/utils/breadcrumbSchema'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
+import { BASE_URL } from '@/utils/breadcrumbTypes'
 
 interface BreadcrumbProps {
   crumbs: BreadcrumbCrumb[]

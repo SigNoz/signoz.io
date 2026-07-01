@@ -88,8 +88,8 @@ function SectionedPattern({
   )
 }
 
-export default function Listicle({ name, defaultSection }: ListicleProps) {
-  const config = getListicleConfig(name)
+export default async function Listicle({ name, defaultSection }: ListicleProps) {
+  const config = await getListicleConfig(name)
   if (!config) {
     return <div className="py-4 text-red-500">Unknown listicle: &ldquo;{name}&rdquo;</div>
   }

@@ -1,7 +1,6 @@
 ---
 date: 2026-06-22
 title: Docker Swarm Collection Agent - Configure
-id: configure
 description: Configure the OpenTelemetry Collector on your Docker Swarm cluster to customize host metrics, container metrics, and log collection for SigNoz.
 doc_type: howto
 ---
@@ -84,7 +83,7 @@ service:
 
 You can enable only the scrapers you need or tune `collection_interval`. The host filesystem must be mounted at `/hostfs` as shown in the [install guide](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/).
 
-<KeyPointCallout title="Collecting host metrics from inside a container" defaultCollapsed={true}>
+<KeyPointCallout title="Collecting host metrics from inside a container" defaultCollapsed="true">
 Without `root_path: /hostfs`, the receiver reports the **container's own** CPU, memory, and disk metrics instead of the host's. Setting `root_path` tells the receiver to read from the mounted host filesystem instead.
 
 In most cases you mount the host root at `/hostfs` (e.g. `--mount type=bind,source=/,target=/hostfs,readonly`). If you prefer to expose only certain paths to the collector, mount those under `/hostfs` so paths line up.
@@ -196,7 +195,7 @@ receivers:
 
 The keys are Docker label names (check with `docker inspect <container> --format '{{json .Config.Labels}}'`), and the values are the metric attribute names that appear in SigNoz.
 
-<KeyPointCallout title="Docker socket permissions" defaultCollapsed={true}>
+<KeyPointCallout title="Docker socket permissions" defaultCollapsed="true">
 The install guide runs the collector as root (`--user 0:0`) so it can read the Docker socket and host filesystem. For production, you can avoid running as root by adding the container to the host's `docker` group: `docker service create ... --group-add $(getent group docker | cut -d: -f3) ...`. If you see permission errors on the socket, see [Troubleshooting](https://signoz.io/docs/opentelemetry-collection-agents/docker-swarm/install/#troubleshooting) in the install guide.
 </KeyPointCallout>
 
@@ -256,7 +255,7 @@ processors:
     spike_limit_mib: 800
 ```
 
-<KeyPointCallout title="Setting memory limits" defaultCollapsed={false}>
+<KeyPointCallout title="Setting memory limits" defaultCollapsed="false">
 Set `limit_mib` to approximately 80% of the memory limit you assign to the collector container. If your Swarm nodes are resource-constrained, reduce both `limit_mib` and `spike_limit_mib` accordingly.
 </KeyPointCallout>
 

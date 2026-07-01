@@ -22,15 +22,13 @@ import {
   useInstantSearch,
   useSearchBox,
 } from 'react-instantsearch'
-import { Clock3, Loader2, Search, Sparkles } from 'lucide-react'
+import { Clock3, Command, Loader2, Search, Sparkles } from 'lucide-react'
 
 import siteMetadata from '@/data/siteMetadata'
 import { cn } from 'app/lib/utils'
-import { Button } from '@/components/ui/Button'
-import { AppTooltip } from '@/components/ui/AppTooltip'
-import { TooltipProvider } from '@radix-ui/react-tooltip'
 import { useLogEvent } from 'hooks/useLogEvent'
 import { usePathname } from 'next/navigation'
+import { openDecimalChat } from '@/utils/decimal'
 
 type SearchButtonProps = {
   disableShortcut?: boolean
@@ -169,7 +167,7 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [disableShortcut, hasAlgoliaConfig])
+  }, [disableShortcut, hasAlgoliaConfig, trackSearchOpen])
 
   useEffect(() => {
     if (!initiallyOpen) {
@@ -212,27 +210,27 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
 
   return (
     <>
-      <TooltipProvider delayDuration={400}>
-        <AppTooltip content="Search Docs" side="left">
-          <Button
-            isButton
-            variant="ghost"
-            rounded="full"
-            aria-label="Search Docs"
-            onClick={() => {
-              trackSearchOpen('click')
-              open()
-            }}
-            className={cn(
-              'group h-8 w-8 shrink-0 bg-signoz_slate-500 !p-0 text-slate-300 transition',
-              'hover:bg-slate-700/50 hover:text-white',
-              'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80'
-            )}
-          >
-            <Search className="h-4 w-4 text-slate-400 transition group-hover:text-white" />
-          </Button>
-        </AppTooltip>
-      </TooltipProvider>
+      <button
+        type="button"
+        onClick={() => {
+          trackSearchOpen('click')
+          open()
+        }}
+        aria-label="Open docs search"
+        className={cn(
+          'group flex shrink-0 items-center gap-1.5 rounded-full bg-signoz_slate-500 px-3 py-1 text-xs text-slate-300 transition',
+          'hover:bg-slate-700/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+          'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80 dark:focus-visible:ring-slate-600'
+        )}
+      >
+        <Search className="h-3.5 w-3.5 text-slate-400 transition group-hover:text-white" />
+        <span className="hidden text-xs sm:inline">Search docs...</span>
+        {!disableShortcut && (
+          <span className="ml-1.5 hidden items-center gap-1 rounded-md border border-slate-700 bg-slate-900/60 px-1 py-[1px] text-[10px] font-medium text-slate-400 sm:flex">
+            <Command className="h-2.5 w-2.5" />K
+          </span>
+        )}
+      </button>
 
       <SearchModal
         isOpen={isOpen}
@@ -271,14 +269,18 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
 
   useEffect(() => {
     if (mode === 'ask-ai') {
+      // Decimal has no inline embed, so opening "Ask AI" closes the search
+      // dialog and opens the Decimal chat panel instead.
       resultsRef.current?.clearActiveResult()
+      onClose()
+      openDecimalChat({ presentation: 'modal' })
       return
     }
 
     if (mode === 'search') {
       focusSearchInput()
     }
-  }, [mode, focusSearchInput])
+  }, [mode, focusSearchInput, onClose])
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -322,9 +324,7 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
                       onClose={onClose}
                       onFocusInput={focusSearchInput}
                     />
-                  ) : (
-                    <AskAIContent />
-                  )}
+                  ) : null}
                 </InstantSearch>
               </Dialog.Panel>
             </Transition.Child>
@@ -735,25 +735,6 @@ const SearchModeToggle = ({
       <Sparkles className="h-3.5 w-3.5" />
       Ask AI
     </button>
-  </div>
-)
-
-const AskAIContent = () => (
-  <div className="max-h-[65vh] overflow-y-auto px-2 pb-2">
-    <div className="mt-2 overflow-hidden rounded-2xl bg-signoz_slate-500 shadow-[0_20px_45px] shadow-black/40">
-      <div className="w-full bg-signoz_slate-500">
-        <iframe
-          src="https://www.chatbase.co/chatbot-iframe/ZXMN63dnzm9r1LEY0He6U"
-          className="h-[420px] w-full border-0 sm:h-[520px]"
-          frameBorder="0"
-          title="SigNoz Chat Assistant"
-          allow="microphone"
-        />
-      </div>
-      <div className="border-t border-white/10 bg-black/20 px-6 py-4 text-xs text-white/60">
-        Responses are AI-generated from SigNoz docs. Double-check important details before acting.
-      </div>
-    </div>
   </div>
 )
 
