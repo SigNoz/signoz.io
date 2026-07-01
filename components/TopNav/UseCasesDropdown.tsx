@@ -3,11 +3,11 @@
 import { Button } from '@headlessui/react'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
-import { productDropdownItemsSorted } from './constants'
+import { useCasesDropdownItemsSorted } from './constants'
 import { useNavDropdown } from './NavDropdownContext'
 
-export default function ProductDropdown() {
-  const { isOpen, open, close, triggerRef } = useNavDropdown('product')
+export default function UseCasesDropdown() {
+  const { isOpen, open, close, triggerRef } = useNavDropdown('usecases')
 
   return (
     <div onPointerEnter={open} onPointerLeave={close} className="flex items-center">
@@ -17,7 +17,7 @@ export default function ProductDropdown() {
         onClick={() => (isOpen ? close() : open())}
       >
         <div className="flex items-center">
-          Product
+          Use Cases
           <ChevronDown
             size={12}
             className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
@@ -28,18 +28,17 @@ export default function ProductDropdown() {
   )
 }
 
-export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
+export function UseCasesDropdownContent({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
       <div className="grid grid-cols-1 gap-y-4">
-        {productDropdownItemsSorted.map((item) => (
+        {useCasesDropdownItemsSorted.map((item) => (
           <TrackingLink
-            href={item.url || ''}
-            disabled={item.url === undefined}
-            className={`group flex h-auto min-w-0 items-start gap-2 ${item.url === undefined ? 'cursor-not-allowed opacity-80' : ''}`}
+            href={item.url}
+            className="group flex h-auto min-w-0 items-start gap-2"
             key={item.key}
             clickType="Nav Click"
-            clickName={`${item.name} Product Link`}
+            clickName={`${item.name} Use Case Link`}
             clickText={item.name}
             clickLocation="Top Navbar"
             onClick={onClose}
