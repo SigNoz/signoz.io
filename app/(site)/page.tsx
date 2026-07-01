@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import DecimalClient from '@/components/Decimal/DecimalClient'
 
 import siteMetadata from '@/data/siteMetadata'
 import JsonLdScript from '@/components/JsonLdScript'
@@ -242,6 +243,7 @@ export default async function Page() {
             <Homepage />
           </ExperimentTracker>
         </main>
+        <DecimalClient />
       </div>
     </>
   )

@@ -1,0 +1,107 @@
+---
+date: 2026-06-30
+title: Upgrade SigNoz to v0.131.0 with ClickHouse 25.12.5
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
+description: Upgrade self-hosted SigNoz to v0.131.0 with Foundry or the Helm chart. A future collector will require ClickHouse 25.12.5, so upgrade ClickHouse now.
+doc_type: howto
+---
+
+Upgrade the ClickHouse behind your self-hosted SigNoz to 25.12.5 before a newer SigNoz release starts requiring it. This is a transitive upgrade: a future <a href="https://github.com/SigNoz/signoz-otel-collector" target="_blank" rel="noopener noreferrer nofollow">signoz-otel-collector</a> release will not run on ClickHouse older than 25.12.5, and a routine SigNoz update will eventually pull it. Doing this ClickHouse upgrade on its own, ahead of that release, keeps the move controlled. It is a significant version jump, so review this guide and back up before upgrading to avoid issues with your existing data. This guide covers both <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> and the Helm chart.
+
+<Admonition type="warning" title="Upgrade ClickHouse to 25.12.5 to stay on supported SigNoz releases">
+A future `signoz-otel-collector` release stores trace attributes as a ClickHouse JSON column (<a href="https://github.com/SigNoz/signoz-otel-collector/pull/833" target="_blank" rel="noopener noreferrer nofollow">otel-collector#833</a>), and its schema migration uses settings that exist only in 25.12.5. With Foundry, `forge` and `cast` block the mismatch.
+</Admonition>
+
+<Admonition type="info" title="Still on the install script or bundled Docker Compose?" defaultCollapsed="true">
+`install.sh` and the `deploy/` Compose and Swarm files are deprecated as of <a href="https://github.com/SigNoz/signoz/releases/tag/v0.130.0" target="_blank" rel="noopener noreferrer nofollow">SigNoz v0.130.0</a> and are no longer distributed. Move to Foundry first with the <a href="https://github.com/SigNoz/signoz/blob/main/deploy/MIGRATION.md" target="_blank" rel="noopener noreferrer nofollow">migration guide</a> (it reattaches your volumes), then come back here.
+</Admonition>
+
+## Upgrade
+
+### Step 1: Back up your data
+
+ClickHouse upgrades its on-disk format in place on first start, and downgrades are not guaranteed. Snapshot your data before upgrading: the Kubernetes PersistentVolumes, the Docker volume, or `/var/lib/clickhouse` (binary). If the upgrade goes wrong, restore that snapshot and roll back to your previous version.
+
+### Step 2: Upgrade ClickHouse and SigNoz
+
+<Tabs entityName="installer">
+<TabItem value="foundry" label="Foundry" default>
+
+Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundryctl</a> first. It brings the v0.131.0 defaults (ClickHouse 25.12.5) and the compatibility check that blocks an incompatible pairing once the new collector lands:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+Then re-forge and re-apply your existing `casting.yaml`:
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+Or run `foundryctl forge -f casting.yaml` to render the deployment files into `pours/`, then apply them with your platform's own command. That apply step varies by mode and flavor (`docker compose up -d`, `kubectl apply`, `helm upgrade`, and so on).
+
+If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting.yaml</a> pins image versions, the new defaults will not override them (your config wins), so bump the pins yourself, at minimum ClickHouse to 25.12.5. Otherwise the old version sticks and `forge` flags the mismatch:
+
+```yaml
+spec:
+  telemetrystore:
+    spec:
+      image: clickhouse/clickhouse-server:25.12.5
+  telemetrykeeper: # only if you run ClickHouse Keeper
+    spec:
+      image: clickhouse/clickhouse-keeper:25.12.5
+```
+
+</TabItem>
+<TabItem value="helm" label="Kubernetes (Helm chart)">
+
+Update the <a href="https://github.com/SigNoz/charts" target="_blank" rel="noopener noreferrer nofollow">chart</a> and upgrade. The v0.131.0 chart sets ClickHouse 25.12.5:
+
+```bash
+helm repo update
+helm -n signoz upgrade signoz signoz/signoz
+```
+
+`helm upgrade` takes the newest chart; add `--version 0.131.0` to pin the v0.131.0 chart.
+
+To pin ClickHouse explicitly, override the tag:
+
+```bash
+helm -n signoz upgrade signoz signoz/signoz --set clickhouse.image.tag=25.12.5
+```
+
+</TabItem>
+</Tabs>
+
+### Step 3: Verify the upgrade
+
+1. Pods and containers are healthy (`kubectl get pods -n signoz`, `docker compose ps`, or `systemctl status 'signoz-*'`).
+2. ClickHouse is on the new version: `SELECT version();`
+3. The `signoz-telemetrystore-migrator` job finished (no failed or restarting migrator pods).
+4. Telemetry is flowing: open the [Meter Explorer](https://signoz.io/docs/cost-meter/meter-explorer/) and confirm ingestion is recording for logs, traces, and metrics.
+5. SigNoz reports v0.131.0 under **Settings**.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Migrator fails with "Unknown setting 'object_serialization_version'"
+
+If the new collector runs before ClickHouse is on 25.12.5, the `signoz-otel-collector` pod keeps running, but the `signoz-telemetrystore-migrator` job fails (`Init:Error` / `CrashLoopBackOff` on its `sync` step):
+
+```text
+Code: 115. DB::Exception: Unknown setting 'object_serialization_version'. (UNKNOWN_SETTING)
+```
+
+The migration sets ClickHouse settings (`object_serialization_version`, `object_shared_data_serialization_version`) that exist only in 25.12.5. Upgrade ClickHouse to 25.12.5; the migrator completes on its next run.
+
+</details>
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- [GitHub Issues](https://github.com/SigNoz/signoz/issues)
+- [Community Slack](https://signoz.io/slack/)

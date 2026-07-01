@@ -443,7 +443,7 @@ const MonthlyEstimate = () => {
             clickLocation="Monthly Estimate Calculator"
             id="pricing-page-startup-program-cta"
           >
-            <Button variant="legacyPrimary">Learn More</Button>
+            <Button variant="legacySecondary">Learn More</Button>
           </TrackingLink>
         </div>
       </div>

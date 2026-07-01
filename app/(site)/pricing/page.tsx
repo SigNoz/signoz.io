@@ -1,7 +1,7 @@
 import React from 'react'
 import { Metadata } from 'next'
 import PricingV1 from './pricingv1/PricingV1'
-import ChatbaseClient from '@/components/Chatbase/ChatbaseClient'
+import DecimalClient from '@/components/Decimal/DecimalClient'
 
 export const metadata: Metadata = {
   title: {
@@ -20,7 +20,7 @@ export default function PricingPage() {
   return (
     <>
       <PricingV1 />
-      <ChatbaseClient />
+      <DecimalClient />
     </>
   )
 }

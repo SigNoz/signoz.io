@@ -121,7 +121,7 @@ export default function GlobalError({
 
   const [showOverlay, setShowOverlay] = useState(true)
 
-  // Overlay is not shown for bot requests, using the same bot detection as in middleware.ts
+  // Overlay is not shown for bot requests, using the same bot detection as in proxy.ts
   const isBotUA = (() => {
     if (typeof navigator === 'undefined') return false
     const { isBot } = detectBotFromUserAgent(navigator.userAgent || '')

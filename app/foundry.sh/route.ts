@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { unstable_cache } from 'next/cache'
+import { cacheLife, cacheTag } from 'next/cache'
 import {
   FOUNDRY_SCRIPT_EDGE_S_MAXAGE_SECONDS,
   FOUNDRY_SCRIPT_FALLBACK_INSTANCE_MEMO_MS,
@@ -49,14 +49,12 @@ async function fetchFoundryScript(): Promise<string> {
   return res.text()
 }
 
-const getCachedFoundryScript = unstable_cache(
-  async (): Promise<string> => fetchFoundryScript(),
-  ['signoz-foundry-installer-script-v1'],
-  {
-    revalidate: FOUNDRY_SCRIPT_REVALIDATE_SECONDS,
-    tags: [CACHE_TAG],
-  }
-)
+async function getCachedFoundryScript(): Promise<string> {
+  'use cache'
+  cacheLife({ revalidate: FOUNDRY_SCRIPT_REVALIDATE_SECONDS })
+  cacheTag(CACHE_TAG)
+  return fetchFoundryScript()
+}
 
 /** Same-instance memo of the last successful body, used as fallback when GitHub rate limits us. */
 let fallbackScriptMemo: { body: string; at: number } | null = null

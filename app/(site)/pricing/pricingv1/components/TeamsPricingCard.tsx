@@ -143,14 +143,14 @@ export default function TeamsPricingCard() {
                     <div className="max-w-xs">
                       <p className="m-0 text-sm text-signoz_vanilla-400">
                         <TrackingLink
-                          href="/agent-native-observability/#ai-assistant"
+                          href="/docs/ai/noz/"
                           clickType="In Page Link"
                           clickName="Agent Native Link"
                           clickText="Learn more"
                           clickLocation="Teams Pricing Card"
                         >
                           <span className="text-signoz_robin-400 hover:text-signoz_robin-500">
-                            Request Early Access
+                            Read Docs
                           </span>
                         </TrackingLink>
                       </p>
