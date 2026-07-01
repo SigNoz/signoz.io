@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-01
 description: Learn how to create, edit, delete, and manage dashboards and panels within SigNoz.
 title: Manage Dashboards in SigNoz
 doc_type: howto
@@ -131,6 +131,49 @@ Note the following about panels:
 2. Find the dashboard in which you created the panel you wish to update, and then select the pencil icon located at the top right corner of your panel.
 3. Make the changes.
 4. When you've finished, select the **Save** button.
+
+## Create an Alert from a Panel
+
+You can seed a new alert directly from a panel's query, so you don't have to rebuild the query in the alert builder. The action opens the alert builder in a **new browser tab** with the panel's query pre-loaded, including its formatting unit (for example, bytes or milliseconds).
+
+You do not need edit access. The action is available on locked and read-only dashboards as well as editable ones, since creating an alert never modifies the dashboard.
+
+There are two ways to start:
+
+**From the panel menu**
+
+1. Hover over the panel and select the **...** (three-dot) icon in the panel header.
+2. Choose **Create Alerts**.
+
+<Figure
+  src="/img/docs/userguide/manage-dashboards/create-alert-panel-menu.webp"
+  alt="Panel three-dot menu showing the Create Alerts option with a bell icon"
+  caption="Open the panel's three-dot menu and select Create Alerts to seed an alert from the panel query."
+/>
+
+**From the panel editor**
+
+1. Open the panel editor by selecting the pencil icon on the panel (or **Edit** from the three-dot menu).
+2. In the right-hand config pane, scroll to the **Actions** section at the bottom.
+3. Select **Create alert**.
+
+The alert builder opens with the panel's current draft query, including any in-progress changes you haven't saved to the dashboard yet.
+
+Either entry point lands on the alert builder with the query, panel type, and unit already applied. Set your threshold and notification channel to finish creating the alert.
+
+<Figure
+  src="/img/docs/userguide/manage-dashboards/create-alert-seeded-builder.webp"
+  alt="SigNoz alert builder pre-loaded with a panel query and its Nanoseconds unit"
+  caption="The alert builder opens in a new tab with the panel query plotted and its formatting unit applied."
+/>
+
+### Supported panel types
+
+Alert creation is available for panel types whose query can seed an alert: **Time Series**, **Bar**, **Number**, and **Histogram**. The action is hidden for **Table**, **List**, and **Pie** panels.
+
+<Admonition type="info">
+Dashboard variables are not substituted into the seeded alert query. Any variable references in the panel query pass through to the alert builder verbatim, so replace them with concrete values before saving the alert.
+</Admonition>
 
 ## Next Steps
 
