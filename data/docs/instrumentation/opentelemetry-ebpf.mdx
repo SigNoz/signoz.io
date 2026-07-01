@@ -26,7 +26,7 @@ OBI observes traffic at the protocol and kernel level. You get request rates, la
 - Linux kernel **5.8+** with BTF enabled (RHEL 4.18+ works too).
 - Root or `--privileged`, or the [required Linux capabilities](#run-obi-with-reduced-privileges).
 - A service that serves HTTP, HTTPS, or gRPC on a known port.
-- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
 
 ## Select the target process
 
@@ -223,7 +223,13 @@ Set `OTEL_SERVICE_NAME` on the target service you instrument. OBI reads the serv
 
 ### Step 2. Generate traffic
 
-Send a few requests to your instrumented service so OBI has traffic to capture. In OBI's logs, confirm an `instrumenting process ... service=<name>` line and no export errors.
+Send a few requests to your instrumented service so OBI has traffic to capture. For example:
+
+```bash
+curl http://localhost:8443/
+```
+
+In OBI's logs, confirm an `instrumenting process ... service=<name>` line and no export errors.
 
 ## Validate
 
@@ -294,7 +300,9 @@ containers:
           - BPF
           - PERFMON
           - NET_RAW
+          - NET_ADMIN
           - SYS_PTRACE
+          - SYS_ADMIN
           - DAC_READ_SEARCH
           - CHECKPOINT_RESTORE
         drop:
@@ -312,7 +320,7 @@ volumes:
       path: /sys/fs/cgroup
 ```
 
-Mount `/var/run/obi` as writable storage for OBI runtime state. Mount host `/sys/fs/cgroup` so OBI can inspect cgroup metadata. For the capability mapping, see the <a href="https://opentelemetry.io/docs/zero-code/obi/security/" target="_blank" rel="noopener noreferrer nofollow">OBI security and capabilities guide</a>.
+Mount `/var/run/obi` as writable storage for OBI runtime state. Mount host `/sys/fs/cgroup` so OBI can inspect cgroup metadata. `NET_ADMIN` covers network flow metrics and trace-context propagation, and `SYS_ADMIN` covers Go library-level trace-context propagation and BTF access. Kernels older than 5.11 additionally need `SYS_RESOURCE`. For the full capability-to-feature mapping, see the <a href="https://opentelemetry.io/docs/zero-code/obi/security/" target="_blank" rel="noopener noreferrer nofollow">OBI security and capabilities guide</a>.
 
 </details>
 
