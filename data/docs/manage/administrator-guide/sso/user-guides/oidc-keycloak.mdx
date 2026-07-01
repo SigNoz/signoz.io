@@ -1,5 +1,5 @@
 ---
-date: 2026-02-23
+date: 2026-07-01
 
 title: Setting Up SSO OIDC With Keycloak
 description: Setting Up Single Sign-On (SSO) OpenID Connect (OIDC) With Keycloak, including claim mapping and role mapping.
@@ -189,7 +189,7 @@ If you want to assign SigNoz roles directly via a Keycloak user attribute, add a
 #### Set the Attribute on Users
 
 1. Go to **Users** → select a user → **Attributes** tab
-2. Set the key `signoz_role` with a value of `ADMIN`, `EDITOR`, or `VIEWER`
+2. Set the key `signoz_role` with a value of `signoz-admin`, `signoz-editor`, or `signoz-viewer` (or the name of a custom role)
 3. Click **Save**
 
 ![KeyCloak Set User Role Attribute](/img/docs/oidc-keycloak/keycloak-set-user-signoz-role.webp)
@@ -211,16 +211,20 @@ You only need to configure claims that differ from the defaults. The standard OI
 
 ## Configure Role Mapping (Optional)
 
-Role mapping automatically assigns SigNoz roles (VIEWER, EDITOR, ADMIN) to users when they log in via OIDC, based on their Keycloak groups or a custom role claim.
+Role mapping automatically assigns SigNoz roles (`signoz-viewer`, `signoz-editor`, `signoz-admin`, or any custom role) to users when they log in via OIDC, based on their Keycloak groups or a custom role claim.
+
+<Admonition type="info">
+Both the **Default Role** dropdown and the per-group **Role** dropdown list every role in your organization — the built-in `signoz-viewer`, `signoz-editor`, and `signoz-admin` roles plus any [custom roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/) you have created. Options are loaded from the SigNoz API; if the list fails to load, click **Retry** to reload it.
+</Admonition>
 
 ### Role Resolution Priority
 
 When a user logs in, SigNoz determines their role using this priority (highest to lowest):
 
 1. **Use Role Attribute** — if enabled and the token contains a role claim, that value is used directly
-2. **Group Mappings** — if the user belongs to multiple mapped groups, the highest-privilege role wins (ADMIN > EDITOR > VIEWER)
+2. **Group Mappings** — if the user belongs to multiple mapped groups, the highest-privilege role wins (`signoz-admin` > `signoz-editor` > `signoz-viewer`)
 3. **Default Role** — fallback role from configuration
-4. **VIEWER** — ultimate default if nothing else is configured
+4. **`signoz-viewer`** — ultimate default if nothing else is configured
 
 ### Option A: Group-Based Role Mapping
 
@@ -249,14 +253,14 @@ Map Keycloak groups to SigNoz roles. Users are assigned the highest-privilege ro
 2. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
 3. Click on your OIDC domain to edit it
 4. In the **Role Mapping** section:
-   - Set **Default Role** to `VIEWER`
+   - Set **Default Role** to `signoz-viewer`
    - Under **Group Mappings**, add entries mapping each Keycloak group name to a SigNoz role:
 
      | Keycloak Group | SigNoz Role |
      |----------------|-------------|
-     | `signoz-admins` | `ADMIN` |
-     | `signoz-editors` | `EDITOR` |
-     | `signoz-viewers` | `VIEWER` |
+     | `signoz-admins` | `signoz-admin` |
+     | `signoz-editors` | `signoz-editor` |
+     | `signoz-viewers` | `signoz-viewer` |
 
    - Leave **Use Role Attribute Directly** turned **OFF**
 5. Click **Save**
@@ -271,7 +275,7 @@ Assign SigNoz roles directly via a custom user attribute in Keycloak, without us
 
 1. [Register the `signoz_role` custom attribute](#register-the-custom-attribute) in the user profile
 2. [Create the token mapper](#create-the-token-mapper) for the attribute
-3. [Set the `signoz_role` attribute](#set-the-attribute-on-users) on each user to `ADMIN`, `EDITOR`, or `VIEWER`
+3. [Set the `signoz_role` attribute](#set-the-attribute-on-users) on each user to `signoz-admin`, `signoz-editor`, or `signoz-viewer` (or the name of a custom role)
 
 #### Configure in SigNoz
 
@@ -279,14 +283,14 @@ Assign SigNoz roles directly via a custom user attribute in Keycloak, without us
 2. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
 3. Click on your OIDC domain to edit it
 4. In the **Role Mapping** section:
-   - Set **Default Role** to `VIEWER` (used as fallback)
+   - Set **Default Role** to `signoz-viewer` (used as fallback)
    - Turn **Use Role Attribute** to **ON**
 5. Click **Save**
 
 ![SigNoz OIDC Direct Role Mapping Configuration](/img/docs/oidc-keycloak/signoz-oidc-direct-role-mapping-configuration.webp)
 
 <Admonition type="info">
-The role value in the token is matched case-insensitively — `admin`, `Admin`, and `ADMIN` all resolve to the ADMIN role. If the value doesn't match any valid role, SigNoz falls back to group mappings (if configured) and then the default role.
+The role value in the token must match a SigNoz role name — `signoz-viewer`, `signoz-editor`, `signoz-admin`, or a custom role — and is matched case-insensitively (`signoz-admin`, `Signoz-Admin`, and `SIGNOZ-ADMIN` all resolve to the `signoz-admin` role). If the value doesn't match any valid role, SigNoz falls back to group mappings (if configured) and then the default role.
 </Admonition>
 
 ## Troubleshooting

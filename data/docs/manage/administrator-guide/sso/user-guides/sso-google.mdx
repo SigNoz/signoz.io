@@ -1,5 +1,5 @@
 ---
-date: 2026-02-22
+date: 2026-07-01
 description: Set up Google Workspace SSO authentication with SigNoz, including group-based access control and role mapping.
 title: Single Sign-on Authentication With Google Workspace
 doc_type: tutorial
@@ -136,30 +136,34 @@ You can restrict SigNoz access to specific Google Workspace groups and use group
 
 ### Step 6: Configure Role Mapping (Optional)
 
-Role mapping automatically assigns SigNoz roles (VIEWER, EDITOR, ADMIN) to users when they log in, based on their Google Workspace group memberships.
+Role mapping automatically assigns SigNoz roles (`signoz-viewer`, `signoz-editor`, `signoz-admin`, or any custom role) to users when they log in, based on their Google Workspace group memberships.
+
+<Admonition type="info">
+Both the **Default Role** dropdown and the per-group **Role** dropdown list every role in your organization — the built-in `signoz-viewer`, `signoz-editor`, and `signoz-admin` roles plus any [custom roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/) you have created. Options are loaded from the SigNoz API; if the list fails to load, click **Retry** to reload it.
+</Admonition>
 
 #### Role Resolution Priority
 
 When a user logs in, SigNoz determines their role using this priority (highest to lowest):
 
 1. **Use Role Attribute** — if enabled and the IDP token contains a role claim, that role is used directly
-2. **Group Mappings** — if the user belongs to multiple mapped groups, the highest-privilege role wins (ADMIN > EDITOR > VIEWER)
+2. **Group Mappings** — if the user belongs to multiple mapped groups, the highest-privilege role wins (`signoz-admin` > `signoz-editor` > `signoz-viewer`)
 3. **Default Role** — fallback role from configuration
-4. **VIEWER** — ultimate default if nothing else is configured
+4. **`signoz-viewer`** — ultimate default if nothing else is configured
 
 #### Configure in SigNoz
 
 1. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
 2. Click on your Google Auth domain to edit it
 3. In the **Role Mapping** section, configure the following:
-   - **Default Role**: Select the role assigned when no other mapping matches (e.g., `VIEWER`)
+   - **Default Role**: Select the role assigned when no other mapping matches (e.g., `signoz-viewer`)
    - **Group Mappings**: Add entries mapping Google Workspace group emails to SigNoz roles:
 
      | Google Workspace Group | SigNoz Role |
      |------------------------|-------------|
-     | `platform-admins@company.com` | `ADMIN` |
-     | `engineering@company.com` | `EDITOR` |
-     | `everyone@company.com` | `VIEWER` |
+     | `platform-admins@company.com` | `signoz-admin` |
+     | `engineering@company.com` | `signoz-editor` |
+     | `everyone@company.com` | `signoz-viewer` |
 
    - **Use Role Attribute**: Turn **ON** to use a role claim directly from the IDP token instead of group-based mapping. Leave **OFF** for group-based role mapping. This option applies only if your IDP token already includes a role claim. For standard Google Workspace OAuth, this is not typically available — use group-based mapping instead.
 4. Click **Save**
