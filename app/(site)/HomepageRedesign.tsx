@@ -1,7 +1,6 @@
 import { HomepageHeroRedesign } from '@/components/index-header'
 import { TrustedByTeams } from '@/components/trusted-by'
 import { GetStarted } from '@/components/GetStarted'
-import ChatbaseClient from '@/components/Chatbase/ChatbaseClient'
 import HomepageFloatingCta from '@/components/homepage-floating-cta/HomepageFloatingCta'
 import HomepageRedesignBodyClass from '@/components/homepage-redesign-body-class/HomepageRedesignBodyClass'
 import Faq from '@/components/index-faq/Faq'
@@ -29,7 +28,6 @@ export default function HomepageRedesign() {
       <Faq />
       <GetStarted page="homepage" className="max-w-8xl" withIcon />
       <HomepageFloatingCta />
-      <ChatbaseClient />
     </div>
   )
 }
