@@ -2,7 +2,6 @@ import * as React from 'react'
 import Link from '@/components/Link'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Slot } from '@radix-ui/react-slot'
-import { ArrowUpRight } from 'lucide-react'
 
 import { cn } from 'app/lib/utils'
 
@@ -99,10 +98,6 @@ export interface ButtonProps
    * their full visual styling.
    */
   unstyled?: boolean
-  /**
-   * Opt-in split icon treatment used by the homepage redesign CTAs.
-   */
-  withIcon?: boolean
 }
 
 type ButtonComponent = React.ForwardRefExoticComponent<
@@ -128,7 +123,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       type,
       unstyled = false,
-      withIcon = false,
       ...props
     },
     ref
@@ -173,24 +167,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             : undefined
     }
 
-    const splitIconClass =
-      mappedVariant === 'default'
-        ? 'homepage-button homepage-button--primary'
-        : mappedVariant === 'secondary'
-          ? 'homepage-button homepage-button--secondary'
-          : ''
-    const shouldRenderSplitIcon = !unstyled && withIcon && Boolean(splitIconClass) && !asChild
     const resolvedClassName = unstyled
       ? className
       : hasLegacyButtonVariant
-        ? [legacyButtonClassName, shouldRenderSplitIcon && splitIconClass, className]
-            .filter(Boolean)
-            .join(' ')
-        : cn(
-            buttonVariants({ variant: mappedVariant, size, rounded: mappedRounded }),
-            shouldRenderSplitIcon && splitIconClass,
-            className
-          )
+        ? [legacyButtonClassName, className].filter(Boolean).join(' ')
+        : cn(buttonVariants({ variant: mappedVariant, size, rounded: mappedRounded }), className)
 
     return (
       <Comp
@@ -199,25 +180,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...extraProps}
         {...props}
       >
-        {shouldRenderSplitIcon ? (
-          <>
-            <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
-              {children}
-            </span>
-            <span
-              className={`homepage-button__icon hidden ${
-                mappedVariant === 'default'
-                  ? 'homepage-button__icon--primary'
-                  : 'homepage-button__icon--secondary'
-              }`}
-              aria-hidden="true"
-            >
-              <ArrowUpRight size={16} strokeWidth={2.5} />
-            </span>
-          </>
-        ) : (
-          children
-        )}
+        {children}
       </Comp>
     )
   }
