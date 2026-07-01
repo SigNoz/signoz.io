@@ -8,7 +8,7 @@ import { cn } from 'app/lib/utils'
 // -----------------------------------------------------------------------------
 // Variants
 // -----------------------------------------------------------------------------
-// Inspired by shadcn/ui default button implementation with custom SigNoz palette
+// Button variants use the shadcn/ui pattern with custom SigNoz palette tokens.
 export const buttonVariants = cva(
   'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ring-offset-background',
   {
@@ -46,9 +46,27 @@ export const buttonVariants = cva(
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
+const LEGACY_VARIANT_TO_STYLES_MAP = {
+  legacyPrimary:
+    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-signoz_robin-500 text-center font-medium leading-5 !text-white !no-underline outline-none hover:!text-white',
+  legacySecondary:
+    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 button-background text-center font-medium leading-5 !text-white !no-underline outline-none hover:!text-white',
+} as const
+
+type ButtonElementType = React.ElementType
+type ButtonHtmlType = 'button' | 'submit' | 'reset'
+type ButtonVariant = Exclude<VariantProps<typeof buttonVariants>['variant'], null | undefined>
+type LegacyButtonVariant = keyof typeof LEGACY_VARIANT_TO_STYLES_MAP
+type ButtonStyleVariant = ButtonVariant | LegacyButtonVariant
+
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>,
+    Omit<VariantProps<typeof buttonVariants>, 'variant'> {
+  variant?: ButtonStyleVariant
+  /**
+   * Legacy prop from the previous button implementation. Prefer `asChild` for new code.
+   */
+  as?: ButtonElementType
   /**
    * When true, uses radix Slot to render children as the underlying element.
    * Useful when wrapping with Link, etc.
@@ -74,7 +92,17 @@ export interface ButtonProps
    * If provided (and `href` is not), it will be used as the destination.
    */
   to?: string
+  type?: ButtonHtmlType
+  /**
+   * Render only the supplied className. Useful for wrappers that already own
+   * their full visual styling.
+   */
+  unstyled?: boolean
 }
+
+type ButtonComponent = React.ForwardRefExoticComponent<
+  ButtonProps & React.RefAttributes<HTMLButtonElement>
+>
 
 // -----------------------------------------------------------------------------
 // Component
@@ -85,12 +113,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       className,
       variant,
       size,
+      as,
       asChild = false,
       href,
-      to = '/',
+      to,
       isButton = false,
       outlined = false,
       rounded,
+      children,
+      type,
+      unstyled = false,
       ...props
     },
     ref
@@ -98,32 +130,61 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // -------------------------------------------------------------------------
     // Legacy prop mapping
     // -------------------------------------------------------------------------
-    let mappedVariant: VariantProps<typeof buttonVariants>['variant'] = variant
+    const legacyButtonClassName =
+      variant === 'legacyPrimary'
+        ? LEGACY_VARIANT_TO_STYLES_MAP.legacyPrimary
+        : variant === 'legacySecondary'
+          ? LEGACY_VARIANT_TO_STYLES_MAP.legacySecondary
+          : undefined
+    const hasLegacyButtonVariant = Boolean(legacyButtonClassName)
+
+    let mappedVariant: ButtonVariant | undefined =
+      variant === 'legacyPrimary'
+        ? 'default'
+        : variant === 'legacySecondary'
+          ? 'secondary'
+          : variant
     if (outlined) mappedVariant = 'outline'
-    if (!isButton && !variant) mappedVariant = 'link'
+    if (!mappedVariant && !isButton && !hasLegacyButtonVariant) mappedVariant = 'link'
+    if (!mappedVariant) mappedVariant = 'default'
+    const mappedRounded = rounded
 
     // Decide which element to render
-    const Comp: any = asChild ? Slot : href || (!isButton && to) ? Link : 'button'
+    const shouldRenderLink = Boolean(href || (!isButton && to))
+    const Comp: any = asChild ? Slot : as || (shouldRenderLink ? Link : 'button')
 
     const extraProps: Record<string, unknown> = {}
     if (Comp === Link) {
       extraProps.href = href ?? to
-      // open external links in new tab
-      if (href) {
-        extraProps.target = '_blank'
-      }
     }
+
+    if (Comp === 'button') {
+      extraProps.type =
+        type === 'button' || type === 'submit' || type === 'reset'
+          ? type
+          : props.onClick
+            ? 'button'
+            : undefined
+    }
+
+    const resolvedClassName = unstyled
+      ? className
+      : hasLegacyButtonVariant
+        ? [legacyButtonClassName, className].filter(Boolean).join(' ')
+        : cn(buttonVariants({ variant: mappedVariant, size, rounded: mappedRounded }), className)
 
     return (
       <Comp
         ref={!asChild ? (ref as any) : undefined}
-        className={cn(buttonVariants({ variant: mappedVariant, size, rounded }), className)}
+        className={resolvedClassName}
         {...extraProps}
         {...props}
-      />
+      >
+        {children}
+      </Comp>
     )
   }
-)
+) as ButtonComponent
 Button.displayName = 'Button'
 
 export { Button }
