@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
 import { ArrowUpRight } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 const scrollToSection = (id) => {
@@ -394,7 +394,7 @@ const MonthlyEstimate = () => {
             clickLocation="Monthly Estimate Calculator"
             id="pricing-page-get-started-card-cta"
           >
-            <Button className="flex items-center justify-center font-bold">
+            <Button variant="legacyPrimary" className="flex items-center justify-center font-bold">
               Get Started - Free
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -411,7 +411,7 @@ const MonthlyEstimate = () => {
             Reach out to us for custom pricing and retention for high volume
           </span>
           <div className="w-2/5 border-b border-dashed border-signoz_slate-400" />
-          <Button id="btn-contact-us-pricing-monthly-estimate">
+          <Button variant="legacyPrimary" id="btn-contact-us-pricing-monthly-estimate">
             <TrackingLink
               href={'https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af'}
               clickType="Primary CTA"
@@ -443,7 +443,7 @@ const MonthlyEstimate = () => {
             clickLocation="Monthly Estimate Calculator"
             id="pricing-page-startup-program-cta"
           >
-            <Button variant="secondary">Learn More</Button>
+            <Button variant="legacySecondary">Learn More</Button>
           </TrackingLink>
         </div>
       </div>

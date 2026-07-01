@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs'
 import path from 'path'
-import { unstable_cache } from 'next/cache'
+import { cacheLife, cacheTag } from 'next/cache'
 import type { NavItem } from '@/components/DocsSidebar/types'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { hasCMSContentConfig, isLocalContentOverlayEnabled } from '@/utils/contentRepository'
@@ -46,27 +46,22 @@ async function resolveSideNav(): Promise<NavItem[]> {
   return readLocalSideNav()
 }
 
+async function cachedResolveSideNav(): Promise<NavItem[]> {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('docs-side-nav')
+  const result = await resolveSideNav()
+  if (!result || result.length === 0) {
+    throw new Error('Empty sidenav received, skipping cache')
+  }
+  return result
+}
+
 async function getCachedSideNav(): Promise<NavItem[]> {
   if (isLocalContentOverlayEnabled()) {
     return resolveSideNav()
   }
-
-  const cachedFn = unstable_cache(
-    async () => {
-      const result = await resolveSideNav()
-      if (!result || result.length === 0) {
-        throw new Error('Empty sidenav received, skipping cache')
-      }
-      return result
-    },
-    ['docs-side-nav'],
-    {
-      tags: ['docs-side-nav'],
-      revalidate: CMS_REVALIDATE_INTERVAL,
-    }
-  )
-
-  return cachedFn()
+  return cachedResolveSideNav()
 }
 
 export async function getDocsSideNav(): Promise<NavItem[]> {

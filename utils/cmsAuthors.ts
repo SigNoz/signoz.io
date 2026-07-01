@@ -1,4 +1,4 @@
-import { unstable_cache } from 'next/cache'
+import { cacheLife, cacheTag } from 'next/cache'
 import qs from 'qs'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
@@ -69,7 +69,9 @@ async function fetchAuthorsFromCMS(): Promise<AuthorDirectory> {
   return directory
 }
 
-export const getCachedAuthors = unstable_cache(fetchAuthorsFromCMS, ['cms-authors-directory'], {
-  tags: ['authors-list'],
-  revalidate: CMS_REVALIDATE_INTERVAL,
-})
+export async function getCachedAuthors(): Promise<AuthorDirectory> {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('authors-list')
+  return fetchAuthorsFromCMS()
+}

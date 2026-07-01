@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import GetStartedSigNoz from '@/components/GetStartedSigNoz/GetStartedSigNoz'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import { ArrowRight, BookOpen, Link as LinkIcon } from 'lucide-react'
 import {
   LineChart,
@@ -140,7 +140,10 @@ const SigNozVsGrafanaV2 = () => {
                   clickText="Get Started with SigNoz Cloud"
                   clickLocation="Hero Section"
                 >
-                  <Button className="flex items-center justify-center gap-2 font-bold">
+                  <Button
+                    variant="legacyPrimary"
+                    className="flex items-center justify-center gap-2 font-bold"
+                  >
                     Get Started with SigNoz Cloud <ArrowRight className="h-4 w-4" />
                   </Button>
                 </TrackingLink>
@@ -152,7 +155,7 @@ const SigNozVsGrafanaV2 = () => {
                   clickLocation="Hero Section"
                 >
                   <Button
-                    type={Button.TYPES.SECONDARY}
+                    variant="legacySecondary"
                     className="flex items-center justify-center gap-2 font-bold"
                   >
                     <Server className="h-4 w-4" />
@@ -492,13 +495,13 @@ const SigNozVsGrafanaV2 = () => {
                 </p>
                 <div className="mt-6 flex flex-wrap gap-4">
                   <Link href="/docs/install/">
-                    <Button className="flex items-center gap-2">
+                    <Button variant="legacyPrimary" className="flex items-center gap-2">
                       Start with Community Edition
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
                   <Link href="/enterprise/">
-                    <Button type={Button.TYPES.SECONDARY} className="flex items-center gap-2">
+                    <Button variant="legacySecondary" className="flex items-center gap-2">
                       Sign-up for Managed Self-host
                       <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -766,13 +769,16 @@ const SigNozVsGrafanaV2 = () => {
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link href="/teams/" className="block max-w-md">
-                <Button className="flex w-full items-center justify-center gap-2 font-bold">
+                <Button
+                  variant="legacyPrimary"
+                  className="flex w-full items-center justify-center gap-2 font-bold"
+                >
                   Try SigNoz Cloud <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/docs/install/" className="block max-w-md">
                 <Button
-                  type={Button.TYPES.SECONDARY}
+                  variant="legacySecondary"
                   className="flex w-full items-center justify-center gap-2 font-bold"
                 >
                   <Server className="h-4 w-4" />

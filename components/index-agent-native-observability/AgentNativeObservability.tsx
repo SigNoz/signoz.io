@@ -14,7 +14,7 @@ import { agentPromptTabs, signozMcpToolLine, thinkingVerbs } from './agentNative
 
 const agentIntegrations = [
   { label: 'OpenAI', iconSrc: '/img/icons/listicle/si-openai.svg' },
-  { label: 'Claude', iconSrc: '/img/icons/listicle/si-claude-b55c04.svg' },
+  { label: 'Claude', iconSrc: '/img/icons/listicle/claude-code-icon.svg' },
   { label: 'Cursor', iconSrc: '/img/docs/cursor-icon.webp' },
   { label: 'OpenCode', iconSrc: '/svgs/icons/LLMMonitoring/opencode-logo.webp' },
 ]
