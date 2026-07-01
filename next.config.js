@@ -85,10 +85,25 @@ module.exports = () => {
     reactStrictMode: true,
     productionBrowserSourceMaps: true, // Enable source maps for debugging
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-    eslint: {
-      dirs: ['app', 'components', 'layouts', 'scripts'],
-    },
     trailingSlash: true,
+    turbopack: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+          condition: { not: { query: /url/ } },
+        },
+      },
+    },
+    experimental: {
+      useCache: true,
+    },
+    // Turbopack traces path.join(CWD, 'data', <dynamic>) in contentRepository.ts
+    // and generates a broad pattern that also matches 'data-assets/'
+    // Without this exclusion serverless function size increases significantly
+    outputFileTracingExcludes: {
+      '*': ['./data-assets/**'],
+    },
     images: {
       remotePatterns: getAllowedImageDomains().map((domain) => ({
         protocol: 'https',
@@ -3010,19 +3025,6 @@ module.exports = () => {
           fullySpecified: false,
         },
       })
-
-      // this is to avoid caching for webpack
-      // reference https://nextjs.org/docs/app/building-your-application/optimizing/memory-usage#disable-webpack-cache
-      if (config.cache && !options.dev) {
-        config.cache = Object.freeze({
-          type: 'memory',
-        })
-      }
-
-      // Ensure source maps are generated in production (server & client)
-      if (!options.dev) {
-        config.devtool = 'source-map'
-      }
 
       return config
     },

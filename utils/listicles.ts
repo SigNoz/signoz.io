@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs'
 import path from 'path'
-import { unstable_cache } from 'next/cache'
+import { cacheLife, cacheTag } from 'next/cache'
 import type {
   ListicleConfig,
   ListicleItem,
@@ -153,27 +153,22 @@ async function resolveListicle(name: string): Promise<ListicleConfig | null> {
   return readLocalListicle(name)
 }
 
+async function cachedResolveListicle(name: string): Promise<ListicleConfig> {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('listicles', `listicle-${name}`)
+  const result = await resolveListicle(name)
+  if (!result) {
+    throw new Error(`Empty listicle received for "${name}", skipping cache`)
+  }
+  return result
+}
+
 async function getCachedListicle(name: string): Promise<ListicleConfig | null> {
   if (isLocalContentOverlayEnabled()) {
     return resolveListicle(name)
   }
-
-  const cachedFn = unstable_cache(
-    async () => {
-      const result = await resolveListicle(name)
-      if (!result) {
-        throw new Error(`Empty listicle received for "${name}", skipping cache`)
-      }
-      return result
-    },
-    [`listicle-${name}`],
-    {
-      tags: ['listicles', `listicle-${name}`],
-      revalidate: CMS_REVALIDATE_INTERVAL,
-    }
-  )
-
-  return cachedFn()
+  return cachedResolveListicle(name)
 }
 
 export async function getListicleConfigFromCms(name: string): Promise<ListicleConfig | null> {

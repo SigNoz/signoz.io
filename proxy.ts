@@ -36,7 +36,7 @@ const getOSFromUserAgent = (userAgent: string): string => {
   return 'unknown'
 }
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   // Get or generate anonymous ID
   const anonymousId = req.cookies.get('gb_anonymous_id')?.value
   const shouldSetCookie = !anonymousId
