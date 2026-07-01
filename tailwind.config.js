@@ -46,6 +46,10 @@ module.exports = {
           '0%': { opacity: '0', transform: 'translateY(12px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
+        'homepage-logo-marquee': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(calc(-50% - 1.5rem))' },
+        },
       },
       animation: {
         'nav-popover-in': 'nav-popover-in 150ms cubic-bezier(0.16, 1, 0.3, 1) both',
@@ -59,6 +63,7 @@ module.exports = {
           'homepage-agent-noz-enter 860ms cubic-bezier(0.16, 1, 0.3, 1) 260ms forwards',
         'homepage-agent-response-reveal':
           'homepage-agent-response-reveal 760ms ease 3600ms forwards',
+        'homepage-logo-marquee': 'homepage-logo-marquee 34s linear infinite',
       },
       maxWidth: {
         '8xl': '1440px',

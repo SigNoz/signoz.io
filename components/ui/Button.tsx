@@ -5,6 +5,7 @@ import { Slot } from '@radix-ui/react-slot'
 import { ArrowUpRight } from 'lucide-react'
 
 import { cn } from 'app/lib/utils'
+import { HOMEPAGE_BUTTON_CLASSES } from './homepageButtonClasses'
 
 // -----------------------------------------------------------------------------
 // Variants
@@ -61,7 +62,8 @@ type LegacyButtonVariant = keyof typeof LEGACY_VARIANT_TO_STYLES_MAP
 type ButtonStyleVariant = ButtonVariant | LegacyButtonVariant
 
 export interface ButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>,
+  extends
+    Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>,
     Omit<VariantProps<typeof buttonVariants>, 'variant'> {
   variant?: ButtonStyleVariant
   /**
@@ -175,9 +177,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const splitIconClass =
       mappedVariant === 'default'
-        ? 'homepage-button homepage-button--primary'
+        ? cn(HOMEPAGE_BUTTON_CLASSES.root, HOMEPAGE_BUTTON_CLASSES.primary)
         : mappedVariant === 'secondary'
-          ? 'homepage-button homepage-button--secondary'
+          ? cn(HOMEPAGE_BUTTON_CLASSES.root, HOMEPAGE_BUTTON_CLASSES.secondary)
           : ''
     const shouldRenderSplitIcon = !unstyled && withIcon && Boolean(splitIconClass) && !asChild
     const resolvedClassName = unstyled
@@ -201,15 +203,21 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {shouldRenderSplitIcon ? (
           <>
-            <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
+            <span
+              className={cn(
+                HOMEPAGE_BUTTON_CLASSES.label,
+                mappedVariant === 'default' && HOMEPAGE_BUTTON_CLASSES.primaryLabel
+              )}
+            >
               {children}
             </span>
             <span
-              className={`homepage-button__icon hidden ${
+              className={cn(
+                HOMEPAGE_BUTTON_CLASSES.icon,
                 mappedVariant === 'default'
-                  ? 'homepage-button__icon--primary'
-                  : 'homepage-button__icon--secondary'
-              }`}
+                  ? HOMEPAGE_BUTTON_CLASSES.primaryIcon
+                  : HOMEPAGE_BUTTON_CLASSES.secondaryIcon
+              )}
               aria-hidden="true"
             >
               <ArrowUpRight size={16} strokeWidth={2.5} />

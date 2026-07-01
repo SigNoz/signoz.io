@@ -18,7 +18,7 @@ export default function HomepageRedesign() {
       <TrustedByTeams
         page="homepage"
         variant="marquee"
-        className="homepage-redesign-logo-strip max-w-8xl"
+        className="relative left-1/2 w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-4 sm:px-6 lg:px-[78px]"
       />
       <WhySignoz />
       <FeatureBento />

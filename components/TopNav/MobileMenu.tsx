@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
 import { Button } from '@/components/ui/Button'
+import { HOMEPAGE_BUTTON_CLASSES } from '@/components/ui/homepageButtonClasses'
+import { cn } from 'app/lib/utils'
 import GitHubStars from '../GithubStars/GithubStars'
 import Accordion from '../Accordion/Accordion'
 import { productDropdownItemsSorted, resourcesDropdownItems } from './constants'
@@ -127,16 +129,25 @@ function MainMenuContent({
             <Button
               asChild
               variant="default"
-              className="homepage-button homepage-button--primary start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white"
+              className={cn(
+                HOMEPAGE_BUTTON_CLASSES.root,
+                HOMEPAGE_BUTTON_CLASSES.primary,
+                'start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white'
+              )}
               id="btn-get-started-website-navbar"
             >
               <span>
-                <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
+                <span
+                  className={cn(
+                    HOMEPAGE_BUTTON_CLASSES.label,
+                    HOMEPAGE_BUTTON_CLASSES.primaryLabel
+                  )}
+                >
                   Get Started - Free
                   <ArrowRight size={14} />
                 </span>
                 <span
-                  className="homepage-button__icon homepage-button__icon--primary hidden"
+                  className={cn(HOMEPAGE_BUTTON_CLASSES.icon, HOMEPAGE_BUTTON_CLASSES.primaryIcon)}
                   aria-hidden="true"
                 >
                   <ArrowRight size={16} strokeWidth={2.5} />

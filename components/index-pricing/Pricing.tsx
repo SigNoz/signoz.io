@@ -5,6 +5,8 @@ import type { LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import TrackingLink from '@/components/TrackingLink'
+import { HOMEPAGE_BUTTON_CLASSES } from '@/components/ui/homepageButtonClasses'
+import { cn } from 'app/lib/utils'
 
 const pricingValueProps = [
   {
@@ -109,20 +111,24 @@ function MigrationCta() {
   return (
     <div ref={ctaRef} className="mt-6 w-fit">
       <TrackingLink
-        className="homepage-button homepage-button--primary inline-flex h-10 w-fit items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
+        className={cn(
+          HOMEPAGE_BUTTON_CLASSES.root,
+          HOMEPAGE_BUTTON_CLASSES.primary,
+          'inline-flex h-10 w-fit items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white'
+        )}
         clickLocation="Homepage Pricing Section"
         clickName="Migration CTA"
         clickText={`Migrate from ${migrationSources[activeSourceIndex]}`}
         clickType="Primary CTA"
         href="/docs/migration/migrate-to-signoz/"
       >
-        <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
+        <span className={cn(HOMEPAGE_BUTTON_CLASSES.label, HOMEPAGE_BUTTON_CLASSES.primaryLabel)}>
           Migrate from
           <span className="inline-block min-w-[72px] text-left transition-opacity duration-200">
             {migrationSources[activeSourceIndex]}
           </span>
         </span>
-        <span className="homepage-button__icon homepage-button__icon--primary hidden">
+        <span className={cn(HOMEPAGE_BUTTON_CLASSES.icon, HOMEPAGE_BUTTON_CLASSES.primaryIcon)}>
           <ArrowRight size={14} />
         </span>
       </TrackingLink>

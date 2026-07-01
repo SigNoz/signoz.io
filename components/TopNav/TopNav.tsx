@@ -10,6 +10,8 @@ import Tabs from '@/components/ResourceCenter/Tabs'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
 import { Button } from '@/components/ui/Button'
+import { HOMEPAGE_BUTTON_CLASSES } from '@/components/ui/homepageButtonClasses'
+import { cn } from 'app/lib/utils'
 import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
@@ -163,15 +165,27 @@ export default function TopNav() {
                         asChild
                         variant="default"
                         rounded="full"
-                        className="homepage-button homepage-button--primary start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white"
+                        className={cn(
+                          HOMEPAGE_BUTTON_CLASSES.root,
+                          HOMEPAGE_BUTTON_CLASSES.primary,
+                          'start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white'
+                        )}
                       >
                         <span id="btn-get-started-website-navbar">
-                          <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
+                          <span
+                            className={cn(
+                              HOMEPAGE_BUTTON_CLASSES.label,
+                              HOMEPAGE_BUTTON_CLASSES.primaryLabel
+                            )}
+                          >
                             Get Started - Free
                             <ArrowRight size={14} />
                           </span>
                           <span
-                            className="homepage-button__icon homepage-button__icon--primary hidden"
+                            className={cn(
+                              HOMEPAGE_BUTTON_CLASSES.icon,
+                              HOMEPAGE_BUTTON_CLASSES.primaryIcon
+                            )}
                             aria-hidden="true"
                           >
                             <ArrowRight size={16} strokeWidth={2.5} />

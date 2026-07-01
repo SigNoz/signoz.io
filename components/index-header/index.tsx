@@ -104,12 +104,7 @@ export function HomepageHeroRedesign() {
                   className="block w-full sm:w-[160px]"
                   prefetch={false}
                 >
-                  <Button
-                    as="span"
-                    className="homepage-button--secondary-with-icon !w-full"
-                    variant="legacySecondary"
-                    withIcon
-                  >
+                  <Button as="span" className="!w-full" variant="legacySecondary" withIcon>
                     Book a Demo
                   </Button>
                 </TrackingLink>

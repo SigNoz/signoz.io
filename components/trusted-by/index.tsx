@@ -50,8 +50,8 @@ export const TrustedByTeams = ({ page, className, variant = 'default' }: Trusted
         <div className="mb-4 text-center text-xs font-semibold uppercase leading-5 tracking-[0.08em] text-signoz_vanilla-400 md:text-sm">
           Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
         </div>
-        <div className="homepage-logo-marquee relative overflow-hidden">
-          <div className="homepage-logo-marquee__track flex w-max items-center gap-10 md:gap-14">
+        <div className="group relative overflow-hidden [mask-image:linear-gradient(90deg,transparent_0%,#000_10%,#000_90%,transparent_100%)]">
+          <div className="flex w-max animate-homepage-logo-marquee items-center gap-10 group-hover:[animation-play-state:paused] motion-reduce:translate-x-0 motion-reduce:animate-none md:gap-14">
             {marqueeCompanies.map((company, idx) => (
               <company.Logo
                 key={`${idx}-${company.imageDesc}`}
