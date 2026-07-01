@@ -1,0 +1,141 @@
+---
+date: 2026-07-01
+title: Third-Party Frontend Integrations Configuration Guide
+description: Enable or disable PostHog, Appcues, Sentry, and Pylon frontend integrations in self-hosted SigNoz. All four are disabled by default and opt-in via config.
+doc_type: howto
+tags: [Self-Host]
+---
+
+Self-hosted SigNoz ships with four optional third-party frontend integrations: **PostHog** (product analytics), **Appcues** (in-app onboarding guides), **Sentry** (frontend error tracking), and **Pylon** (customer support widget). All four are **disabled by default** and must be explicitly enabled through configuration. There is no UI toggle — these are configured through YAML or environment variables and apply to self-hosted deployments only.
+
+<Admonition type="info">
+On SigNoz Cloud, these frontend integrations are managed by SigNoz and are not configurable by users. The settings on this page apply to **self-hosted** deployments only.
+</Admonition>
+
+## Prerequisites
+
+- A self-hosted SigNoz deployment.
+- Access to your SigNoz configuration (YAML config file or environment variables in your Docker Compose file, Helm values, or deployment manifest).
+
+## Default behavior
+
+Each integration is controlled by a `web.settings.<integration>.enabled` key that defaults to `false`:
+
+| Integration | Purpose | Config key | Default |
+|-------------|---------|-----------|---------|
+| PostHog | Product analytics | `web.settings.posthog.enabled` | `false` |
+| Appcues | In-app onboarding guides | `web.settings.appcues.enabled` | `false` |
+| Sentry | Frontend error tracking | `web.settings.sentry.enabled` | `false` |
+| Pylon | Customer support widget | `web.settings.pylon.enabled` | `false` |
+
+To activate an integration, set its `enabled` key to `true`.
+
+<Admonition type="warning">
+If you are upgrading from an older SigNoz version where these integrations were active out of the box, they will now be **off** after the upgrade. Re-enable any you want to keep by setting the corresponding `enabled` key to `true` as shown below.
+</Admonition>
+
+## Enable an integration with YAML
+
+Add the integrations you want to the `web.settings` block of your configuration file and set `enabled: true`:
+
+```yaml
+web:
+  settings:
+    posthog:
+      enabled: true
+    appcues:
+      enabled: true
+    sentry:
+      enabled: true
+    pylon:
+      enabled: true
+```
+
+Only include the integrations you actually want to turn on. Any integration you omit stays disabled.
+
+## Enable an integration with environment variables
+
+Each key can also be set with an environment variable following the `SIGNOZ_WEB_SETTINGS_<INTEGRATION>_<KEY>` pattern:
+
+```bash
+SIGNOZ_WEB_SETTINGS_POSTHOG_ENABLED=true
+SIGNOZ_WEB_SETTINGS_APPCUES_ENABLED=true
+SIGNOZ_WEB_SETTINGS_SENTRY_ENABLED=true
+SIGNOZ_WEB_SETTINGS_PYLON_ENABLED=true
+```
+
+Environment variables take precedence over values in configuration files. For the full environment variable naming convention — including how underscores in a key name are escaped — see the <a href="https://signoz.io/docs/operate/configuration/" target="_blank" rel="noopener noreferrer nofollow">Configuration reference</a>.
+
+Restart SigNoz after changing the configuration for the new values to take effect.
+
+{/*
+  ============================================================================
+  DRAFT — DO NOT PUBLISH (section 2.B)
+
+  The connection/authentication parameters below are merged into the backend
+  and injected into the runtime (PR #11912), but the frontend does not yet
+  consume them. Publish this section only AFTER the companion frontend PR
+  (tracked as SigNoz/platform-pod#2409) merges — and confirm the release tag
+  before uncommenting.
+  ============================================================================
+
+## Connection and authentication parameters
+
+Beyond `enabled`, each integration accepts optional connection and authentication
+parameters. All of these are optional — only `enabled` is required to activate an
+integration.
+
+### PostHog
+
+| Config key | Env var | Description |
+|-----------|---------|-------------|
+| `web.settings.posthog.key` | `SIGNOZ_WEB_SETTINGS_POSTHOG_KEY` | PostHog project API key. |
+| `web.settings.posthog.api_host` | `SIGNOZ_WEB_SETTINGS_POSTHOG_API__HOST` | API ingestion host. Defaults to `https://us.i.posthog.com` when omitted. |
+| `web.settings.posthog.ui_host` | `SIGNOZ_WEB_SETTINGS_POSTHOG_UI__HOST` | UI host. Used when `api_host` points at a reverse proxy. |
+
+### Appcues
+
+| Config key | Env var | Description |
+|-----------|---------|-------------|
+| `web.settings.appcues.app_id` | `SIGNOZ_WEB_SETTINGS_APPCUES_APP__ID` | Appcues account/app ID. |
+
+### Sentry
+
+| Config key | Env var | Description |
+|-----------|---------|-------------|
+| `web.settings.sentry.dsn` | `SIGNOZ_WEB_SETTINGS_SENTRY_DSN` | Sentry DSN string. |
+| `web.settings.sentry.tunnel` | `SIGNOZ_WEB_SETTINGS_SENTRY_TUNNEL` | Tunnel URL for proxying Sentry events. |
+
+### Pylon
+
+| Config key | Env var | Description |
+|-----------|---------|-------------|
+| `web.settings.pylon.app_id` | `SIGNOZ_WEB_SETTINGS_PYLON_APP__ID` | Pylon app ID. |
+| `web.settings.pylon.identity_secret` | `SIGNOZ_WEB_SETTINGS_PYLON_IDENTITY__SECRET` | Identity verification secret. |
+
+Note the double-underscore (`__`) escaping: a key whose YAML name contains an
+underscore (for example `api_host`) uses `__` in the environment variable name,
+so `web.settings.posthog.api_host` becomes `SIGNOZ_WEB_SETTINGS_POSTHOG_API__HOST`.
+
+<Admonition type="warning">
+`web.settings.pylon.identity_secret` is a credential. Inject it through an
+environment variable or your secrets manager rather than committing it to a YAML
+file, and rotate it if it is ever exposed.
+</Admonition>
+
+Example YAML enabling PostHog with connection parameters:
+
+```yaml
+web:
+  settings:
+    posthog:
+      enabled: true
+      key: "<posthog-project-api-key>"
+      api_host: "https://us.i.posthog.com"
+```
+*/}
+
+## Next steps
+
+- [Configuration reference](https://signoz.io/docs/operate/configuration/)
+- [Statistics Reporting](https://signoz.io/docs/telemetry/)
