@@ -12,7 +12,15 @@ const path = require('path')
 const { execSync } = require('child_process')
 const matter = require('gray-matter')
 
-const SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog']
+const SYNC_FOLDERS = [
+  'faqs',
+  'case-study',
+  'opentelemetry',
+  'comparisons',
+  'guides',
+  'blog',
+  'docs',
+]
 
 const MIGRATED_PATTERN = new RegExp(`^data/(${SYNC_FOLDERS.join('|')})/.*\\.mdx?$`)
 

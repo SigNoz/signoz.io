@@ -1,4 +1,3 @@
-const { withContentlayer } = require('next-contentlayer2')
 const { getAllowedImageDomains } = require('./constants/allowedImageDomains')
 
 /**
@@ -28,13 +27,13 @@ const defaultFrameAncestors =
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev https://*.clarity.ms https://snap.licdn.com;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
   connect-src * https://api.reo.dev https://www.clarity.ms https://*.clarity.ms;
   font-src * 'self';
-  frame-src * giscus.app youtube.com;
+  frame-src * giscus.app youtube.com https://app.getdecimal.ai;
   worker-src 'self' blob:;
   frame-ancestors ${process.env.CSP_FRAME_ANCESTORS || defaultFrameAncestors};
 `
@@ -81,15 +80,30 @@ const securityHeaders = [
  * @type {import('next/dist/next-server/server/config').NextConfig}
  **/
 module.exports = () => {
-  const plugins = [withContentlayer, withBundleAnalyzer]
+  const plugins = [withBundleAnalyzer]
   return plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
     productionBrowserSourceMaps: true, // Enable source maps for debugging
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-    eslint: {
-      dirs: ['app', 'components', 'layouts', 'scripts'],
-    },
     trailingSlash: true,
+    turbopack: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+          condition: { not: { query: /url/ } },
+        },
+      },
+    },
+    experimental: {
+      useCache: true,
+    },
+    // Turbopack traces path.join(CWD, 'data', <dynamic>) in contentRepository.ts
+    // and generates a broad pattern that also matches 'data-assets/'
+    // Without this exclusion serverless function size increases significantly
+    outputFileTracingExcludes: {
+      '*': ['./data-assets/**'],
+    },
     images: {
       remotePatterns: getAllowedImageDomains().map((domain) => ({
         protocol: 'https',
@@ -150,6 +164,16 @@ module.exports = () => {
         {
           source: '/docs/product-features/invite-team-member/',
           destination: '/docs/manage/administrator-guide/iam/invite-team-member/',
+          permanent: true,
+        },
+        {
+          source: '/docs/manage/administrator-guide/iam/permissions',
+          destination: '/docs/manage/administrator-guide/iam/transactions/',
+          permanent: true,
+        },
+        {
+          source: '/docs/manage/administrator-guide/iam/permissions/',
+          destination: '/docs/manage/administrator-guide/iam/transactions/',
           permanent: true,
         },
         {
@@ -225,6 +249,16 @@ module.exports = () => {
         {
           source: '/oss-to-cloud/',
           destination: '/teams/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/long-term-storage',
+          destination: '/docs/faqs/general/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/long-term-storage/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
@@ -643,12 +677,12 @@ module.exports = () => {
         },
         {
           source: '/docs/tutorial/s3-integration-iam-role-eks/',
-          destination: '/docs/userguide/retention-period/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
           source: '/docs/tutorial/oci-bucket-cold-storage-integration/',
-          destination: '/docs/userguide/retention-period/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
@@ -879,7 +913,7 @@ module.exports = () => {
         },
         {
           source: '/docs/deployment/troubleshooting/',
-          destination: '/docs/install/troubleshooting',
+          destination: '/docs/setup/docker/troubleshooting/faq',
           permanent: true,
         },
         {
@@ -1853,11 +1887,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/install/troubleshooting/',
-          destination: '/docs/setup/docker/troubleshooting/faq',
-          permanent: true,
-        },
-        {
           source: '/docs/userguide/send-metrics-cloud/',
           destination: '/docs/metrics-management/send-metrics/',
           permanent: true,
@@ -2221,12 +2250,12 @@ module.exports = () => {
         },
         {
           source: '/docs/configuration/deep_storage',
-          destination: '/docs/userguide/retention-period/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
           source: '/docs/logs-management/long-term-storage/',
-          destination: '/docs/userguide/retention-period/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
@@ -2984,18 +3013,18 @@ module.exports = () => {
       // Exclude *.svg from the original rule since we handle it above
       fileLoaderRule.exclude = /\.svg$/i
 
-      // this is to avoid caching for webpack
-      // reference https://nextjs.org/docs/app/building-your-application/optimizing/memory-usage#disable-webpack-cache
-      if (config.cache && !options.dev) {
-        config.cache = Object.freeze({
-          type: 'memory',
-        })
-      }
-
-      // Ensure source maps are generated in production (server & client)
-      if (!options.dev) {
-        config.devtool = 'source-map'
-      }
+      // @stoplight/elements-core uses ReactDOM.render which was removed
+      // in React 19. No fix upstream — https://github.com/stoplightio/elements/issues/2793
+      // javascript/auto downgrades the missing export from a hard error to a warning.
+      // Remove this when stoplight ships React 19 support or we change to a different component library.
+      config.module.rules.push({
+        test: /\.mjs$/,
+        include: /node_modules[\\/]@stoplight/,
+        type: 'javascript/auto',
+        resolve: {
+          fullySpecified: false,
+        },
+      })
 
       return config
     },
