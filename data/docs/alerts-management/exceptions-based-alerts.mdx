@@ -166,7 +166,7 @@ SELECT
     toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
     serviceName
 FROM signoz_traces.distributed_signoz_error_index_v2
-WHERE timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
+WHERE timestamp BETWEEN $start_datetime AND $end_datetime
 GROUP BY serviceName, interval;
 ```
 
@@ -186,17 +186,16 @@ Page the owning team for a known exception class.
 SELECT
     count() AS value,
     toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
-    serviceName,
-    exceptionType
+    serviceName
 FROM signoz_traces.distributed_signoz_error_index_v2
 WHERE exceptionType = 'ConnectionError'
-  AND timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
-GROUP BY serviceName, exceptionType, interval;
+  AND timestamp BETWEEN $start_datetime AND $end_datetime
+GROUP BY serviceName, interval;
 ```
 
 - **Condition**: Above, **Threshold** `0`
 - **Match type**: `at least once`
-- **Group alerts by**: `serviceName`, `exceptionType`
+- **Group alerts by**: `serviceName`
 
 <Figure
   src="/img/docs/product-features/alerts/alerts-exceptions-based.gif"
@@ -215,7 +214,7 @@ SELECT
     serviceName
 FROM signoz_traces.distributed_signoz_error_index_v2
 WHERE serviceName = '<your-service>'
-  AND timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
+  AND timestamp BETWEEN $start_datetime AND $end_datetime
 GROUP BY serviceName, interval;
 ```
 
@@ -235,7 +234,7 @@ SELECT
     exceptionType
 FROM signoz_traces.distributed_signoz_error_index_v2
 WHERE exceptionMessage LIKE '%timeout%'
-  AND timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
+  AND timestamp BETWEEN $start_datetime AND $end_datetime
 GROUP BY serviceName, exceptionType, interval;
 ```
 
@@ -256,7 +255,7 @@ SELECT
 FROM signoz_traces.distributed_signoz_error_index_v2
 WHERE exceptionEscaped = true
   AND resourceTagsMap['deployment.environment'] = '<environment>'
-  AND timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
+  AND timestamp BETWEEN $start_datetime AND $end_datetime
 GROUP BY serviceName, environment, interval;
 ```
 
