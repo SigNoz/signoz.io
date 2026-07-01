@@ -42,7 +42,7 @@ function revalidateCmsUrlPath(
         contentKey,
       })
       for (const t of strapiTags) {
-        revalidateTag(t)
+        revalidateTag(t, 'default')
         tags.push(t)
       }
     }
@@ -76,10 +76,13 @@ export async function POST(request: NextRequest) {
 
     if (revalidateAll) {
       revalidatePath('/', 'layout')
-      revalidateTag('mdx-content-list')
-      revalidateTag('comparisons-list')
-      revalidateTag('guides-list')
-      revalidateTag('blogs-list')
+      revalidateTag('mdx-content-list', 'default')
+      revalidateTag('comparisons-list', 'default')
+      revalidateTag('guides-list', 'default')
+      revalidateTag('blogs-list', 'default')
+      revalidateTag('docs-list', 'default')
+      revalidateTag('docs-side-nav', 'default')
+      revalidateTag('listicles', 'default')
 
       results.push({
         path: '/',
@@ -102,7 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (tag) {
-      revalidateTag(tag)
+      revalidateTag(tag, 'default')
 
       results.push({
         tag,
@@ -114,7 +117,7 @@ export async function POST(request: NextRequest) {
 
     if (tags && Array.isArray(tags)) {
       for (const t of tags) {
-        revalidateTag(t)
+        revalidateTag(t, 'default')
 
         results.push({
           tag: t,
@@ -168,10 +171,13 @@ export async function GET(request: NextRequest) {
 
     if (revalidateAll) {
       revalidatePath('/', 'layout')
-      revalidateTag('mdx-content-list')
-      revalidateTag('comparisons-list')
-      revalidateTag('guides-list')
-      revalidateTag('blogs-list')
+      revalidateTag('mdx-content-list', 'default')
+      revalidateTag('comparisons-list', 'default')
+      revalidateTag('guides-list', 'default')
+      revalidateTag('blogs-list', 'default')
+      revalidateTag('docs-list', 'default')
+      revalidateTag('docs-side-nav', 'default')
+      revalidateTag('listicles', 'default')
 
       results.push({
         path: '/',
@@ -186,7 +192,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (tag) {
-      revalidateTag(tag)
+      revalidateTag(tag, 'default')
 
       results.push({
         tag,

@@ -9,12 +9,7 @@ import { fetchMDXContentByPath, type MDXContent } from './strapi'
 export type { AuthorDirectory } from './cmsAuthors'
 
 type CanonicalCollection =
-  | 'blogs'
-  | 'guides'
-  | 'comparisons'
-  | 'faqs'
-  | 'case-studies'
-  | 'opentelemetries'
+  'docs' | 'blogs' | 'guides' | 'comparisons' | 'faqs' | 'case-studies' | 'opentelemetries'
 
 type CollectionConfig = {
   canonical: CanonicalCollection
@@ -28,6 +23,12 @@ type LocalContentMaps = Record<CanonicalCollection, Map<string, MDXContent>>
 type CollectionInput = CanonicalCollection | string
 
 const COLLECTION_CONFIGS: Record<CanonicalCollection, CollectionConfig> = {
+  docs: {
+    canonical: 'docs',
+    dataDir: 'docs',
+    cmsCollection: 'docs',
+    contentType: 'doc',
+  },
   blogs: {
     canonical: 'blogs',
     dataDir: 'blog',
@@ -67,6 +68,8 @@ const COLLECTION_CONFIGS: Record<CanonicalCollection, CollectionConfig> = {
 }
 
 const COLLECTION_ALIASES: Record<string, CanonicalCollection> = {
+  doc: 'docs',
+  docs: 'docs',
   blog: 'blogs',
   blogs: 'blogs',
   guide: 'guides',
@@ -83,6 +86,7 @@ const COLLECTION_ALIASES: Record<string, CanonicalCollection> = {
 }
 
 const RELATED_PREFIX_TO_COLLECTION: Record<string, CanonicalCollection> = {
+  docs: 'docs',
   blog: 'blogs',
   guides: 'guides',
   comparisons: 'comparisons',
@@ -189,6 +193,42 @@ function normalizeTaxonomy(value: unknown) {
   }))
 }
 
+const DEV_COLLECTION_CACHE_TTL_MS = 10_000 // 10 seconds
+
+type CachedCollectionEntry = { entries: MDXContent[]; timestamp: number }
+const _devCollectionCache = new Map<CanonicalCollection, CachedCollectionEntry>()
+
+async function readSingleLocalContent(
+  config: CollectionConfig,
+  slug: string
+): Promise<MDXContent | undefined> {
+  if (process.env.NODE_ENV !== 'development') return undefined
+
+  const rootDir = path.join(process.cwd(), 'data', config.dataDir)
+  const normalizedSlug = slug.replace(/^\/+|\/+$/g, '')
+
+  for (const ext of ['.mdx', '.md']) {
+    const filePath = path.join(rootDir, normalizedSlug + ext)
+    // Path traversal guard
+    if (!filePath.startsWith(rootDir + path.sep) && filePath !== rootDir) continue
+
+    let fileContent: string
+    let stats: Awaited<ReturnType<typeof fs.stat>>
+    try {
+      fileContent = await fs.readFile(filePath, 'utf8')
+      stats = await fs.stat(filePath)
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue
+      throw error
+    }
+
+    const contentPath = normalizeContentPath(normalizedSlug)
+    return buildMDXEntry(config, filePath, fileContent, stats, contentPath)
+  }
+
+  return undefined
+}
+
 async function collectMdxFiles(rootDir: string): Promise<string[]> {
   let entries: Awaited<ReturnType<typeof fs.readdir>>
 
@@ -219,6 +259,55 @@ function deterministicLocalId(collection: CanonicalCollection, contentPath: stri
   return createHash('sha1').update(`${collection}:${contentPath}`).digest('hex')
 }
 
+function buildMDXEntry(
+  config: CollectionConfig,
+  filePath: string,
+  fileContent: string,
+  stats: { mtime: Date },
+  contentPath: string
+): MDXContent {
+  const { data, content } = matter(fileContent)
+  const frontmatter = normalizeFrontmatter(data)
+  const slug = contentPath.split('/').filter(Boolean).pop() || ''
+  const id = deterministicLocalId(config.canonical, contentPath)
+  const frontmatterDate = dateToString(frontmatter.date)
+  const frontmatterPublishedDate = dateToString(frontmatter.published_date)
+  const publishedAt = frontmatterPublishedDate || frontmatterDate || stats.mtime.toISOString()
+  const title = typeof frontmatter.title === 'string' ? frontmatter.title : slug
+
+  const entry: MDXContent = {
+    ...frontmatter,
+    id: (() => {
+      const numericId = Number.parseInt(id.slice(0, 8), 16)
+      if (!Number.isFinite(numericId)) {
+        throw new Error(`Failed to generate numeric ID for ${config.canonical}:${contentPath}`)
+      }
+      return numericId
+    })(),
+    documentId: `local-${id}`,
+    title,
+    slug,
+    path: contentPath,
+    content,
+    authors: normalizeStringArray(frontmatter.authors),
+    related_articles: [],
+    related_articles_raw: normalizeStringArray(frontmatter.related_articles),
+    publishedAt,
+    createdAt: publishedAt,
+    updatedAt: dateToString(frontmatter.lastmod) || publishedAt,
+    published_date: frontmatterPublishedDate,
+    updated_date: dateToString(frontmatter.updated_date),
+    date: frontmatterDate,
+    filePath: path.relative(path.join(process.cwd(), 'data'), filePath).replace(/\\/g, '/'),
+    __source: 'local',
+  }
+
+  if (frontmatter.tags !== undefined) entry.tags = normalizeTaxonomy(frontmatter.tags)
+  if (frontmatter.keywords !== undefined) entry.keywords = normalizeTaxonomy(frontmatter.keywords)
+
+  return entry
+}
+
 async function readLocalContentCollection(config: CollectionConfig): Promise<MDXContent[]> {
   const rootDir = path.join(process.cwd(), 'data', config.dataDir)
   const files = await collectMdxFiles(rootDir)
@@ -227,48 +316,8 @@ async function readLocalContentCollection(config: CollectionConfig): Promise<MDX
     files.map(async (filePath) => {
       const fileContent = await fs.readFile(filePath, 'utf8')
       const stats = await fs.stat(filePath)
-      const { data, content } = matter(fileContent)
-      const frontmatter = normalizeFrontmatter(data)
       const contentPath = relativePathToContentPath(rootDir, filePath)
-      const slug = contentPath.split('/').filter(Boolean).pop() || ''
-      const id = deterministicLocalId(config.canonical, contentPath)
-      const frontmatterDate = dateToString(frontmatter.date)
-      const frontmatterPublishedDate = dateToString(frontmatter.published_date)
-      const publishedAt = frontmatterPublishedDate || frontmatterDate || stats.mtime.toISOString()
-      const title = typeof frontmatter.title === 'string' ? frontmatter.title : slug
-
-      const entry: MDXContent = {
-        ...frontmatter,
-        id: (() => {
-          const numericId = Number.parseInt(id.slice(0, 8), 16)
-          if (!Number.isFinite(numericId)) {
-            throw new Error(`Failed to generate numeric ID for ${config.canonical}:${contentPath}`)
-          }
-          return numericId
-        })(),
-        documentId: `local-${id}`,
-        title,
-        slug,
-        path: contentPath,
-        content,
-        authors: normalizeStringArray(frontmatter.authors),
-        related_articles: [],
-        related_articles_raw: normalizeStringArray(frontmatter.related_articles),
-        publishedAt,
-        createdAt: publishedAt,
-        updatedAt: dateToString(frontmatter.lastmod) || publishedAt,
-        published_date: frontmatterPublishedDate,
-        updated_date: dateToString(frontmatter.updated_date),
-        date: frontmatterDate,
-        filePath: path.relative(path.join(process.cwd(), 'data'), filePath).replace(/\\/g, '/'),
-        __source: 'local',
-      }
-
-      if (frontmatter.tags !== undefined) entry.tags = normalizeTaxonomy(frontmatter.tags)
-      if (frontmatter.keywords !== undefined)
-        entry.keywords = normalizeTaxonomy(frontmatter.keywords)
-
-      return entry
+      return buildMDXEntry(config, filePath, fileContent, stats, contentPath)
     })
   )
 }
@@ -406,10 +455,39 @@ async function getLocalContentBySlug(
   slug: string,
   deploymentStatus: string
 ) {
+  const fastContent = await readSingleLocalContent(config, slug)
+  if (fastContent) {
+    const rawUrls = normalizeStringArray(fastContent.related_articles_raw || [])
+    if (rawUrls.length === 0) return fastContent
+
+    const relatedArticles = (
+      await Promise.all(
+        rawUrls.map(async (url) => {
+          const parsed = parseRelatedArticleUrl(url)
+          if (!parsed) return null
+
+          const collection = RELATED_PREFIX_TO_COLLECTION[parsed.prefix]
+          if (!collection) return null
+
+          const relConfig = COLLECTION_CONFIGS[collection]
+          const relSlug = parsed.path.replace(/^\/+|\/+$/g, '')
+          const relatedDoc = await readSingleLocalContent(relConfig, relSlug)
+          if (!relatedDoc) return null
+
+          return {
+            content_type: relConfig.contentType,
+            [relConfig.contentType]: relatedDoc,
+          }
+        })
+      )
+    ).filter(Boolean)
+
+    return { ...fastContent, related_articles: relatedArticles } as MDXContent
+  }
+
   const entriesByCollection = await readAllLocalContent()
   const maps = buildContentMaps(entriesByCollection)
   const content = maps[config.canonical]?.get(normalizeContentPath(slug))
-
   return content ? resolveRelatedArticles(content, maps, deploymentStatus) : undefined
 }
 
@@ -438,6 +516,10 @@ export async function getContentBySlug(
     if (localContent) return localContent
   }
 
+  if (!hasCMSContentConfig()) {
+    return getLocalContentBySlug(config, slug, deploymentStatus)
+  }
+
   try {
     return await fetchCMSContentBySlug(config, slug, deploymentStatus)
   } catch (error) {
@@ -449,6 +531,21 @@ export async function getContentBySlug(
   }
 }
 
+async function readLocalContentCollectionCached(config: CollectionConfig): Promise<MDXContent[]> {
+  if (process.env.NODE_ENV !== 'development') {
+    return readLocalContentCollection(config)
+  }
+
+  const cached = _devCollectionCache.get(config.canonical)
+  if (cached && Date.now() - cached.timestamp < DEV_COLLECTION_CACHE_TTL_MS) {
+    return cached.entries
+  }
+
+  const entries = await readLocalContentCollection(config)
+  _devCollectionCache.set(config.canonical, { entries, timestamp: Date.now() })
+  return entries
+}
+
 export async function getAllContent(
   collection: CollectionInput,
   deploymentStatus = getDeploymentStatus(),
@@ -456,11 +553,15 @@ export async function getAllContent(
 ): Promise<MDXContent[]> {
   const config = getCollectionConfig(collection)
 
+  if (!hasCMSContentConfig()) {
+    return readLocalContentCollectionCached(config)
+  }
+
   if (!isLocalContentOverlayEnabled()) {
     return fetchAllCMSContentForCollection(config, deploymentStatus, fields)
   }
 
-  const localEntries = await readLocalContentCollection(config)
+  const localEntries = await readLocalContentCollectionCached(config)
   let cmsEntries: MDXContent[] = []
 
   if (hasCMSContentConfig()) {

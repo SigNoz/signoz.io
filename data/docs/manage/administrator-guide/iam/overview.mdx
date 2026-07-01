@@ -1,37 +1,36 @@
 ---
-date: 2026-05-16
-id: iam-overview
+date: 2026-06-26
 title: Authorization Overview
-description: Understand how role-based access control works in SigNoz — principals, permissions, roles, and how they connect.
+description: Understand how role-based access control works in SigNoz — principals, transactions, roles, and how they connect.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 doc_type: explanation
 ---
 
 <Admonition type="warning">
-Fine-grained access control is currently in private beta. Contact the SigNoz team for more information.
+Fine-grained access control is currently in beta.
 </Admonition>
 
 ## Overview
 
-SigNoz uses role-based access control to manage what principals can do. Roles group permissions together — when a principal is assigned a role, they receive all the permissions that role contains.
+SigNoz uses role-based access control to manage what principals can do. Roles group transactions together — when a principal is assigned a role, they receive all the transactions that role contains.
 
-Permissions are **additive**. When a principal has multiple roles, they receive the union of all permissions from each role.
+Transactions are **additive**. When a principal has multiple roles, they receive the union of all transactions from each role.
 
 ## Key Concepts
 
 **Principal** — A user or service account in SigNoz. Principals are the entities that authenticate and perform actions on objects.
 
-**Role** — A named collection of permissions. Principals are assigned roles, and through those roles they receive permissions. Roles can be *managed* (built-in, immutable) or *custom* (configurable).
+**Role** — A named collection of transactions. Principals are assigned roles, and through those roles they receive transactions. Roles can be *managed* (built-in, immutable) or *custom* (configurable).
 
-**Permission** — Defines what a principal is allowed to do. A permission combines a relation with a resource type. For example, "create dashboard" or "read alert rule".
+**Transaction** — Defines what a principal is allowed to do. A transaction combines a relation with a resource type. For example, "create dashboard" or "read alert rule". A role's transactions are configured and displayed together as its **Transaction Groups**.
 
-**Relation** — The action in a permission. SigNoz defines seven relations: `create`, `read`, `update`, `delete`, `list`, `attach`, and `detach`.
+**Relation** — The action in a transaction. SigNoz defines seven relations: `create`, `read`, `update`, `delete`, `list`, `attach`, and `detach`.
 
-**Selector** — Determines which instances a permission applies to. When configuring a custom role, each resource can be set to *All* (every instance), *Only selected* (specific instances), or *None* (no instances).
+**Selector** — Determines which instances a transaction applies to. When configuring a custom role, each resource can be set to *All* (every instance), *Only selected* (specific instances), or *None* (no instances).
 
 ## Relations
 
-Every permission in SigNoz is built from one of these seven relations:
+Every transaction in SigNoz is built from one of these seven relations:
 
 | Relation | Description |
 |----------|-------------|
@@ -57,17 +56,17 @@ The following resources are currently available for fine-grained access control:
 | `serviceaccount` | `serviceaccount` | Non-human identities for programmatic API access |
 | `metaresource` | `factor-api-key` | Authentication keys for service accounts |
 
-For the full permissions reference for each resource, see the [Permissions Reference](https://signoz.io/docs/manage/administrator-guide/iam/permissions/).
+For the full transactions reference for each resource, see the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/transactions/).
 
 ## Selectors
 
-A selector determines which specific instances of a resource a permission applies to. When configuring permissions on a custom role, you choose one of three selector modes for each resource:
+A selector determines which specific instances of a resource a transaction applies to. When configuring transactions on a custom role, you choose one of three selector modes for each resource:
 
 | Mode | Selector Value | Meaning |
 |------|---------------|---------|
-| **All** | `*` | The permission applies to every instance of that resource. |
-| **Only selected** | Resource name or ID | The permission applies only to the specified instances. Refer to the [Permissions Reference](https://signoz.io/docs/manage/administrator-guide/iam/permissions/) for the selector format used by each resource. |
-| **None** | No selector | The permission is not granted for any instance of that resource. |
+| **All** | `*` | The transaction applies to every instance of that resource. |
+| **Only selected** | Resource name or ID | The transaction applies only to the specified instances. Refer to the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/transactions/) for the selector format used by each resource. |
+| **None** | No selector | The transaction is not granted for any instance of that resource. |
 
 ## Managed Roles
 
@@ -82,17 +81,17 @@ SigNoz includes four built-in managed roles. These roles cannot be edited or del
 **SigNoz-Anonymous** — Grants access to public resources only, such as publicly shared dashboards. This role is assigned automatically and does not need to be managed.
 
 <Admonition type="note">
-For the complete list of permissions each managed role includes, see the [Permissions Reference](https://signoz.io/docs/manage/administrator-guide/iam/permissions/).
+For the complete list of transactions each managed role includes, see the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/transactions/).
 </Admonition>
 
 ## Custom Roles
 
-Principals with the appropriate permissions can create custom roles with granular permissions. When creating a custom role, you choose which relations to grant on which resource types, and set the selector to all instances or only selected ones. Custom roles require an active SigNoz license.
+Principals with the appropriate transactions can create custom roles with granular transactions. When creating a custom role, you choose which relations to grant on which resource types — using either the interactive editor or JSON mode — and set the selector to all instances or only selected ones. Custom roles require an active SigNoz license.
 
 See [Roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/) for a step-by-step walkthrough.
 
 ## Next Steps
 
-- [Permissions Reference](https://signoz.io/docs/manage/administrator-guide/iam/permissions/) — Look up permissions for each resource
+- [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/transactions/) — Look up transactions for each resource
 - [Roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/) — Create and manage roles
 - [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) — Set up programmatic API access

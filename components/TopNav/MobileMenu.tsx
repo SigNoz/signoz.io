@@ -1,37 +1,21 @@
 'use client'
 
 import { Dialog, Button } from '@headlessui/react'
-import { ArrowBigLeft, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
 import GitHubStars from '../GithubStars/GithubStars'
-import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import Accordion from '../Accordion/Accordion'
-import {
-  productDropdownItemsSorted,
-  resourcesDropdownItems,
-  comparisonItems,
-  migrationItems,
-} from './constants'
+import { productDropdownItemsSorted, resourcesDropdownItems } from './constants'
 
 interface MobileMenuProps {
   open: boolean
   onClose: (open: boolean) => void
-  showMainMenu: boolean
-  isDocsBasePath: boolean
   isSignupRoute: boolean
-  onShowMainMenu: () => void
 }
 
-export default function MobileMenu({
-  open,
-  onClose,
-  showMainMenu,
-  isDocsBasePath,
-  isSignupRoute,
-  onShowMainMenu,
-}: MobileMenuProps) {
+export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuProps) {
   const router = useRouter()
   const closeMobileMenu = () => onClose(false)
 
@@ -54,30 +38,11 @@ export default function MobileMenu({
         </div>
         <div className="mt-6 flow-root">
           <div className="-my-6 divide-y divide-gray-500/10">
-            {showMainMenu && (
-              <MainMenuContent
-                isSignupRoute={isSignupRoute}
-                onClose={closeMobileMenu}
-                router={router}
-              />
-            )}
-
-            {isDocsBasePath && !showMainMenu && (
-              <div className="docs-sidebar-mobile-nav">
-                <TrackingButton
-                  className="mt-4 inline-flex items-center gap-1 rounded px-1 py-1 text-sm font-bold text-white"
-                  clickType="Nav Click"
-                  clickName="Back to Main Menu Button"
-                  clickText="Back to main menu"
-                  clickLocation="Mobile Menu"
-                  onClick={onShowMainMenu}
-                >
-                  <ArrowBigLeft size={16} /> Back to main menu
-                </TrackingButton>
-
-                <DocsSidebar onNavItemClick={closeMobileMenu} />
-              </div>
-            )}
+            <MainMenuContent
+              isSignupRoute={isSignupRoute}
+              onClose={closeMobileMenu}
+              router={router}
+            />
           </div>
         </div>
       </Dialog.Panel>
@@ -118,11 +83,6 @@ function MainMenuContent({
         subtopics={[...resourcesDropdownItems.learn, ...resourcesDropdownItems.explore]}
         onLinkClick={onClose}
       />
-      <Accordion
-        topic="Compare SigNoz"
-        subtopics={[...comparisonItems, ...migrationItems]}
-        onLinkClick={onClose}
-      />
       <TrackingLink
         href="/pricing/"
         className={MOBILE_LINK_CLASS}
@@ -134,18 +94,6 @@ function MainMenuContent({
       >
         Pricing
       </TrackingLink>
-      <TrackingLink
-        href="/case-study/"
-        className={MOBILE_LINK_CLASS}
-        clickType="Nav Click"
-        clickName="Customer Stories Link"
-        clickText="Customer Stories"
-        clickLocation="Mobile Menu"
-        onClick={onClose}
-      >
-        Customer Stories
-      </TrackingLink>
-
       <div className="-mx-3 inline-block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200">
         <GitHubStars location="Mobile Menu" />
       </div>

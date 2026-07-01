@@ -5,7 +5,6 @@ import { createPortal } from 'react-dom'
 import { useNavDropdownContext } from './NavDropdownContext'
 import { ProductDropdownContent } from './ProductDropdown'
 import { ResourcesDropdownContent } from './ResourcesDropdown'
-import { CompareSignozDropdownContent } from './CompareSignozDropdown'
 
 export default function NavDropdownPanel() {
   const { activeId, closeDropdown, cancelClose, closeImmediate, getTriggerRect } =
@@ -107,9 +106,6 @@ export default function NavDropdownPanel() {
             )}
             {(activeId === 'resources' || prevActiveId.current === 'resources') && (
               <ResourcesDropdownContent onClose={closeImmediate} />
-            )}
-            {(activeId === 'compare' || prevActiveId.current === 'compare') && (
-              <CompareSignozDropdownContent onClose={closeImmediate} />
             )}
           </div>
         </div>,

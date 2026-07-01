@@ -5,7 +5,7 @@ Use this playbook for product documentation under `data/docs/**`.
 ## Docs file and URL names
 
 - **Do not put `.` in the MDX filename**
-- Encode version-like segments with hyphens instead, for example `upgrade-0-8-1.mdx` → slug `operate/migration/upgrade-0-8-1`, and align the frontmatter `id` with that slug (for example `id: upgrade-0-8-1`).
+- Encode version-like segments with hyphens instead, for example `upgrade-0-8-1.mdx` → URL `operate/migration/upgrade-0-8-1`. The URL comes from the file path; docs frontmatter no longer uses `id` or `slug`.
 
 ## Core Writing Principles
 
@@ -15,7 +15,7 @@ Use this playbook for product documentation under `data/docs/**`.
 - Be explicit about caveats such as versions, environments, or beta gaps.
 - Prefer concrete examples over abstract descriptions.
 - Define acronyms on first use, then use the short form consistently.
-- Use angle-bracket placeholders only, such as `<region>` or `<your-ingestion-key>`, and explain them right below the snippet.
+- Use angle-bracket placeholders only, such as `<region>` or `<your-ingestion-key>`, and explain them right below the snippet. Never use `{region}`, `{REGION}`, or `<REGION>`. For SigNoz Cloud ingestion endpoints, the `<region>` token is also what makes a snippet region-aware — see [SigNoz Cloud Ingestion Endpoints](#signoz-cloud-ingestion-endpoints-region-aware).
 - Cross-link existing SigNoz docs instead of duplicating instructions.
 - AI-assisted drafting is fine, but every claim must be verified and rewritten clearly.
 
@@ -56,10 +56,11 @@ Use the template in [templates/docs-frontmatter.md](templates/docs-frontmatter.m
 Required keys:
 
 - `date`
-- `id`
 - `title`
 - `description`
 - `doc_type`
+
+`id` and `slug` are no longer used. The URL is derived from the file path.
 
 ### Title Guidelines
 
@@ -118,6 +119,24 @@ Prefer these H2 sections when they fit the doc:
 - Main-path snippets should be safe defaults that work after placeholder replacement.
 - Move advanced or environment-specific options into callouts or collapsed sections.
 
+### SigNoz Cloud Ingestion Endpoints (region-aware)
+
+The docs region selector (top-right of the page) keeps SigNoz Cloud ingestion endpoints in sync by substituting the **literal `<region>` token** in every snippet on the page. A snippet is only region-aware if it uses that exact token, so anything else silently freezes on whatever the author typed — and on a page that mixes both, some snippets update with the selector while others do not.
+
+- **Always write ingestion endpoints with `<region>`**, exactly: `https://ingest.<region>.signoz.cloud:443/v1/traces`. This is the only form the selector substitutes.
+- **Never hardcode a real region** (`ingest.us.signoz.cloud`, `ingest.eu.signoz.cloud`, `ingest.in.signoz.cloud`) in a snippet. Pick `<region>` instead — it renders as `us` by default, so default readers see the same thing, but the selector can now update it.
+- **Never use a different placeholder spelling.** `{region}`, `{REGION}`, `<REGION>`, and `${region}` are not substituted and are off-convention — use `<region>`.
+- Keep this consistent across **every** endpoint on the page: code blocks, example output blocks, and inline `curl`/connectivity commands in troubleshooting all count.
+- **Exception — region reference tables.** A table that intentionally lists every region is correct as-is and should keep the hardcoded values:
+
+  ```md
+  | Region | Endpoint                     |
+  | ------ | ---------------------------- |
+  | US     | ingest.us.signoz.cloud:443   |
+  | IN     | ingest.in.signoz.cloud:443   |
+  | EU     | ingest.eu.signoz.cloud:443   |
+  ```
+
 ### Collector Config Safety
 
 When documenting OpenTelemetry Collector changes:
@@ -142,7 +161,7 @@ When documenting OpenTelemetry Collector changes:
 
 - Use descriptive anchor text instead of "here" or raw URLs in body text.
 - Validate all added internal and external links before the PR.
-- Store docs images under `public/img/docs/<topic>/...`.
+- Store docs images under `data-assets/img/docs/<topic>/...`.
 - Use WebP format for all docs images. See [Creating WebP images doc](https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74) for tips and tools.
 - **Minimum image width: 1200 px** (ideally 1400–1600 px for retina sharpness). Images below 1200 px render blurry when the docs layout stretches them to the content column width. Take screenshots at 2× resolution on retina displays or use browser DevTools device toolbar set to a wide viewport.
 - Use `Figure` with descriptive alt text and a concise caption.
@@ -269,7 +288,7 @@ async redirects() {
 
 ### Sidebar Updates
 
-- When a doc should appear in docs navigation, update `constants/docsSideNav.ts`.
+- When a doc should appear in docs navigation, update `data/docs-side-nav/main.json`.
 - Match the route to the rendered docs path.
 - Add the entry in the most relevant existing section instead of creating duplicate navigation paths.
 
@@ -311,7 +330,7 @@ node --test tests/component-items-sync.test.js
 
 Use the PR snippet in [templates/pr-checklists.md#docs-changes](templates/pr-checklists.md#docs-changes) when preparing or reviewing docs work.
 
-- Frontmatter includes `date`, `id`, `title`, `description`, `doc_type`, and correct tags.
+- Frontmatter includes `date`, `title`, `description`, `doc_type`, and correct tags.
 - Title is 50–60 characters, leads with the primary keyword, and uses an action word.
 - Description is 120–160 characters, action-oriented, and explains what the page covers and what the reader will learn.
 - Content matches the chosen `doc_type`.
@@ -321,7 +340,8 @@ Use the PR snippet in [templates/pr-checklists.md#docs-changes](templates/pr-che
 - `## Validate` shows exactly where success appears in SigNoz.
 - `## Troubleshooting` maps symptom -> cause -> fix -> verification.
 - Commands and snippets explain what to do, where to do it, and the expected result.
-- Placeholders use `<...>` format and are documented.
+- Placeholders use `<...>` format and are documented — no `{region}`/`{REGION}`/`<REGION>`.
+- SigNoz Cloud ingestion endpoints use the literal `<region>` token (not a hardcoded `us`/`eu`/`in`) so the region selector keeps every snippet on the page in sync; region reference tables are the only exception.
 - Links are helpful and validated.
 - Images, if any, use the correct location, WebP format, and are at least 1200 px wide.
 - Redirect, sidebar, and discovery updates are handled when the doc URL changes or a new doc should appear in an existing surface.

@@ -23,8 +23,15 @@ const responsive = {
   },
 }
 
-export default function NextCarousel({ items }) {
-  if (!items || (!Array.isArray(items) && items.length <= 0)) {
+export default function NextCarousel({ items: rawItems }: { items: string | string[] }) {
+  const items =
+    typeof rawItems === 'string'
+      ? rawItems
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : rawItems
+  if (!items || items.length <= 0) {
     return null
   }
 

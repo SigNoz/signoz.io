@@ -1,0 +1,139 @@
+---
+date: 2026-06-30
+title: Self-Service API Keys for Viewers
+description: Let viewer users generate their own read-only API keys in SigNoz using a scoped custom role, assigned via invite or SSO group mapping.
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+doc_type: tutorial
+---
+
+<Admonition type="warning">
+Fine-grained access control is currently in beta.
+</Admonition>
+
+## Overview
+
+By default, only the `signoz-admin` role can create service accounts and API keys, so viewers must ask an admin for every key. In this tutorial you'll set up a self-service flow that lets viewers generate their own read-only API keys — without granting them broad permissions.
+
+**What you'll do:**
+
+- Create a single read-only viewer service account.
+- Build a scoped custom role that lets viewers add a key to that account only.
+- Assign the role to viewers by invite or SSO.
+- Have a viewer generate and validate their own API key.
+
+## Prerequisites
+
+Before you start, make sure you have:
+
+- An active SigNoz license.
+- The `signoz-admin` role (role assignment is admin-only).
+
+## Step 1: Create the viewer service account
+
+1. Go to **Settings > Service Accounts** and click **New Service Account**.
+2. Name it (for example, `viewer-readonly`) and click **Create**.
+3. Open it, and in the **Overview** tab assign the **`signoz-viewer`** role, then click **Save**. This makes every key under this account read-only.
+4. Copy the service account **ID** from the **Overview** tab — you'll need it in Step 2.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/iam/viewer-readonly-service-account.webp" alt="Service Account Details Overview tab showing the viewer-readonly account, its ID, and the signoz-viewer role assigned"/>
+    <figcaption><i>The viewer-readonly service account with the signoz-viewer role and its ID</i></figcaption>
+</figure>
+
+You now have a read-only service account that will hold every viewer's API key.
+
+## Step 2: Create the scoped custom role
+
+1. Go to **Settings > Roles** and click **Custom role**.
+2. Enter the name `viewer-service-account`.
+3. Configure the **Transaction Groups** below, then click **Create role**.
+
+Adding a key is a [compound transaction](https://signoz.io/docs/manage/administrator-guide/iam/transactions/#compound-transactions) (`factor-api-key:create` **and** `serviceaccount:attach`). Scope `serviceaccount:attach` to the ID from Step 1 so viewers can add keys to that account only; `serviceaccount:list` lets them find it in the UI. In **JSON** mode, paste the following, replacing `<service-account-id>` with the ID you copied in Step 1:
+
+```json
+[
+  {
+    "objectGroup": {
+      "resource": { "kind": "factor-api-key", "type": "metaresource" },
+      "selectors": ["*"]
+    },
+    "relation": "create"
+  },
+  {
+    "objectGroup": {
+      "resource": { "kind": "factor-api-key", "type": "metaresource" },
+      "selectors": ["*"]
+    },
+    "relation": "list"
+  },
+  {
+    "objectGroup": {
+      "resource": { "kind": "serviceaccount", "type": "serviceaccount" },
+      "selectors": ["<service-account-id>"]
+    },
+    "relation": "attach"
+  },
+  {
+    "objectGroup": {
+      "resource": { "kind": "serviceaccount", "type": "serviceaccount" },
+      "selectors": ["*"]
+    },
+    "relation": "list"
+  },
+  {
+    "objectGroup": {
+      "resource": { "kind": "serviceaccount", "type": "serviceaccount" },
+      "selectors": ["<service-account-id>"]
+    },
+    "relation": "read"
+  }
+]
+```
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/iam/viewer-service-account-role.webp" alt="The viewer-service-account custom role with Service Accounts attach and read scoped to a single service account ID, and list set to All"/>
+    <figcaption><i>The viewer-service-account role with attach and read scoped to the service account ID</i></figcaption>
+</figure>
+
+The role now lets its holders add a key to the `viewer-readonly` account and nothing else — they can't create service accounts, assign roles, or touch any other account.
+
+## Step 3: Assign the role to viewers
+
+Give each viewer both `signoz-viewer` and `viewer-service-account`, via invite or SSO.
+
+**Direct invite** — On **Settings > Identity & Access > Members**, click **Invite member**, enter the email, and assign both roles. See [Invite Team Member](https://signoz.io/docs/manage/administrator-guide/iam/invite-team-member/).
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/iam/viewer-service-account-member.webp" alt="Member Details panel showing a member assigned the viewer-service-account role"/>
+    <figcaption><i>Assigning the viewer-service-account role to a member — add signoz-viewer the same way</i></figcaption>
+</figure>
+
+**SSO group mapping** — On **Settings > Organization Settings > Members & SSO > Authenticated Domains**, edit your domain and, under **Role Mapping**, set the **Default Role** to `signoz-viewer` and map your viewer group to `viewer-service-account`. Requires group fetching — see the [Google Workspace SSO guide](https://signoz.io/docs/manage/administrator-guide/sso/user-guides/sso-google/#step-6-configure-role-mapping-optional).
+
+Assigned viewers now have read-only access plus permission to add their own key to the `viewer-readonly` account.
+
+## Step 4: Viewer adds a key
+
+A viewer with the role can now add a key without admin help:
+
+1. Open **Settings > Service Accounts > `viewer-readonly`**.
+2. On the **Keys** tab, click **Add Key**, name it, and click **Create**.
+3. Copy the key value immediately — it is shown **only once**.
+
+The key inherits the account's `signoz-viewer` role, so it has read-only access.
+
+## Validate
+
+```bash
+curl -X GET https://<signoz-url>/api/v1/service_accounts/me \
+  -H "SIGNOZ-API-KEY: <your-service-account-key>"
+```
+
+Replace `<signoz-url>` with your SigNoz instance URL and `<your-service-account-key>` with the key from Step 4. A `200` confirms the key works; a `401` means the key value is incorrect.
+
+## Next Steps
+
+- [Roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/) — Create and manage managed and custom roles
+- [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) — Set up programmatic API access
+- [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/transactions/) — Look up the transactions for each resource
+- [SigNoz MCP Server](https://signoz.io/docs/ai/signoz-mcp-server/) — Use service account keys to connect AI tools to SigNoz via MCP
