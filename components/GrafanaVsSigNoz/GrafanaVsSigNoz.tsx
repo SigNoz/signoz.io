@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Button from '../Button/Button'
+import Button from '@/components/ui/Button'
 import { Scale } from 'lucide-react'
 import Link from 'next/link'
 export default function GrafanaVsSigNoz() {
@@ -22,7 +22,7 @@ export default function GrafanaVsSigNoz() {
               href="/grafana-alternative/"
               className="flex items-center gap-2 no-underline"
             >
-              <Button type={Button.TYPES.SECONDARY}>
+              <Button as="span" variant="legacySecondary">
                 <Scale className="h-4 w-4" />
                 Compare SigNoz vs. Grafana
               </Button>
@@ -32,7 +32,9 @@ export default function GrafanaVsSigNoz() {
               href="/teams/"
               className="flex items-center gap-2 no-underline"
             >
-              <Button>Try SigNoz for Free &rarr;</Button>
+              <Button as="span" variant="legacyPrimary">
+                Try SigNoz for Free &rarr;
+              </Button>
             </Link>
           </div>
         </div>

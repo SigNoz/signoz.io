@@ -1,7 +1,7 @@
 import React from 'react'
 import Hero from '@/components/ui/Hero'
 import { ArrowRight, Calendar } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { VideoModalPlayer } from './VideoModalPlayer'
 import { HeroSectionPill } from './HeroSectionPill'
@@ -56,7 +56,11 @@ export function Header({ variant = 'control' }: { variant?: 'control' | 'ai-agen
               clickLocation="Hero Section"
               className="block w-[220px]"
             >
-              <Button className="flex-center !w-full" id="btn-get-started-homepage-hero">
+              <Button
+                variant="legacyPrimary"
+                className="flex-center !w-full"
+                id="btn-get-started-homepage-hero"
+              >
                 {primaryCTA}
                 <ArrowRight size={14} />
               </Button>
@@ -74,7 +78,7 @@ export function Header({ variant = 'control' }: { variant?: 'control' | 'ai-agen
             className="block w-[220px]"
             prefetch={false}
           >
-            <Button className="flex-center !w-full" type={Button.TYPES.SECONDARY}>
+            <Button className="flex-center !w-full" variant="legacySecondary">
               <Calendar size={14} />
               Book a Demo
             </Button>

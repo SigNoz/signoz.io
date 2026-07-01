@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
@@ -33,7 +33,12 @@ export const GetStarted = ({ page, className }: { page: string; className?: stri
                   clickText="Get Started - Free"
                   clickLocation="Get Started Section"
                 >
-                  <Button id={getStartedId} className="flex-center">
+                  <Button
+                    variant="legacyPrimary"
+                    as="span"
+                    id={getStartedId}
+                    className="flex-center"
+                  >
                     Get Started - Free
                     <ArrowRight size={14} />
                   </Button>
@@ -49,7 +54,8 @@ export const GetStarted = ({ page, className }: { page: string; className?: stri
                   prefetch={false}
                 >
                   <Button
-                    type={Button.TYPES.SECONDARY}
+                    as="span"
+                    variant="legacySecondary"
                     id={readDocumentationId}
                     className="flex-center"
                   >
