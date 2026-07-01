@@ -95,16 +95,6 @@ export const EXPERIMENTS = {
     concluded: true,
     defaultVariant: 'without-self-host-tab',
   },
-  CHATBASE_BUBBLE: {
-    id: 'chatbase-bubble-experiment',
-    variants: {
-      CONTROL: 'no-chatbase-bubble',
-      VARIANT: 'with-chatbase-bubble',
-    },
-    flagName: 'chatbase-bubble-experiment',
-    concluded: true,
-    defaultVariant: 'with-chatbase-bubble',
-  },
   HOMEPAGE_EMAIL_SIGNUP: {
     id: 'homepage-email-signup',
     variants: {

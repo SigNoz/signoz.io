@@ -8,7 +8,6 @@ import {
   ServerSolid,
 } from '@/components/homepage-icons/icons'
 import Line from '@/components/ui/Line'
-import ChatbaseScrollTrigger from './ChatbaseScrollTrigger'
 
 // Plan header type
 type PlanHeader = {
@@ -700,13 +699,6 @@ const ALL_FEATURES_DATA = {
 const ExploreAllFeatures: React.FC = () => {
   return (
     <>
-      <ChatbaseScrollTrigger
-        triggerElementId="choose-when-section"
-        messages={[
-          '👋 Hey, how can I help you get started?',
-          'Exploring SigNoz Pricing or Features? Share your usecase to find the right plan for you and see the relevant docs.',
-        ]}
-      />
       <div className="mx-auto mb-10 mt-6" id="all-features">
         {/* Header - Using CSS sticky positioning for smoother scrolling */}
         <div className="sticky top-[74px] z-20 bg-[#0f1013]">
