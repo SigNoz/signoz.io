@@ -10,6 +10,7 @@ interface PricingCalculatorSummaryProps {
   showFooter: boolean
   totalEstimate: number
   isHighVolume: boolean
+  contactSource: string
 }
 
 export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> = ({
@@ -17,6 +18,7 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
   showFooter,
   totalEstimate,
   isHighVolume,
+  contactSource,
 }) => (
   <>
     {/* Total estimate - always shown */}
@@ -74,7 +76,7 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
             For high volume usage, reach out to us for custom pricing and retention options
           </span>
           <TrackingLink
-            href="/contact-us/?source=pricing-calculator"
+            href={`/contact-us/?source=${contactSource}`}
             clickType="Secondary CTA"
             clickName="Volume Discount Form Link"
             clickText="Contact Us"

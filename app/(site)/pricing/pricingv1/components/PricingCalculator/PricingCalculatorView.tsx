@@ -14,6 +14,7 @@ const PricingCalculatorView: React.FC<PricingCalculatorProps> = ({
   showHeader = true,
   showFooter = true,
   embedded = false,
+  contactSource = 'pricing-page-pricing-calculator',
 }) => {
   const calculator = usePricingCalculator({ show, embedded })
   const { isMounted, isMobile, showCopiedToast, copyLinkToClipboard, shareWithTeam } = calculator
@@ -50,6 +51,7 @@ const PricingCalculatorView: React.FC<PricingCalculatorProps> = ({
           showFooter={showFooter}
           totalEstimate={calculator.totalEstimate}
           isHighVolume={calculator.isHighVolume}
+          contactSource={contactSource}
         />
       </div>
     </Card>

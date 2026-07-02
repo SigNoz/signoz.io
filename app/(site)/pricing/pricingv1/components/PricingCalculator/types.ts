@@ -5,4 +5,5 @@ export interface PricingCalculatorProps {
   showHeader?: boolean
   showFooter?: boolean
   embedded?: boolean
+  contactSource?: string
 }
