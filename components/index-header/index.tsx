@@ -17,7 +17,7 @@ export function HomepageHeroRedesign() {
 
   return (
     <header className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] -translate-x-1/2 overflow-hidden px-4 pt-24 sm:px-6 md:pt-[220px] lg:px-20">
-      <div className="pointer-events-none absolute left-1/2 top-0 h-96 w-full max-w-8xl -translate-x-1/2 [mask-image:linear-gradient(to_bottom,#000_0%,#000_58%,rgba(0,0,0,0.72)_72%,transparent_100%)]">
+      <div className="pointer-events-none absolute left-1/2 top-0 h-[640px] w-full max-w-8xl -translate-x-1/2 [mask-image:linear-gradient(to_bottom,#000_0%,#000_58%,rgba(0,0,0,0.72)_72%,transparent_100%)]">
         <GradientBlinds
           angle={20}
           blindCount={16}
