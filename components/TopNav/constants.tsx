@@ -44,6 +44,12 @@ export interface ResourceItem {
   name: string
 }
 
+export interface ComparisonItem {
+  key: string
+  url: string
+  name: string
+}
+
 const PRODUCT_ICON_CLASS = 'h-4 w-4 shrink-0 pt-0.5 text-signoz_vanilla-100'
 
 export const productDropdownItems: ProductItem[] = [
@@ -108,6 +114,34 @@ export const productDropdownItems: ProductItem[] = [
 export const productDropdownItemsSorted = [...productDropdownItems].sort(
   (a, b) => a.order - b.order
 )
+
+export const comparisonItems: ComparisonItem[] = [
+  {
+    key: 'signozvsdatadog',
+    url: '/datadog-alternative/',
+    name: 'SigNoz vs DataDog',
+  },
+  {
+    key: 'signozvsgrafana',
+    url: '/grafana-alternative/',
+    name: 'SigNoz vs Grafana',
+  },
+  {
+    key: 'signozvsnewrelic',
+    url: '/newrelic-alternative/',
+    name: 'SigNoz vs New Relic',
+  },
+  {
+    key: 'cloudwatch-alternative',
+    url: '/cloudwatch-alternative/',
+    name: 'SigNoz vs CloudWatch',
+  },
+  {
+    key: 'clickstack-alternative',
+    url: '/clickstack-alternative/',
+    name: 'SigNoz vs ClickStack',
+  },
+]
 
 export const useCasesDropdownItems: ProductItem[] = [
   {

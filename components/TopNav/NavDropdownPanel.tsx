@@ -48,7 +48,7 @@ export default function NavDropdownPanel() {
 
     // Clamp left so panel doesn't overflow the right viewport edge
     const panelWidths: Record<string, number> = {
-      product: 350,
+      product: 680,
       usecases: 380,
       resources: 500,
     }
