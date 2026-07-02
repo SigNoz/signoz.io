@@ -72,11 +72,7 @@ const logToLinear = (value, minLog, maxLog) => {
   return Math.floor(minLog + scale * (Math.log(value) - minValue))
 }
 
-interface MonthlyEstimateProps {
-  contactSource?: string
-}
-
-const MonthlyEstimate = ({ contactSource = 'monthly-estimate' }: MonthlyEstimateProps) => {
+const MonthlyEstimate = () => {
   const TRACES_AND_LOGS_PRICES = {
     15: 0.3,
     30: 0.4,
@@ -417,7 +413,7 @@ const MonthlyEstimate = ({ contactSource = 'monthly-estimate' }: MonthlyEstimate
           <div className="w-2/5 border-b border-dashed border-signoz_slate-400" />
           <Button variant="legacyPrimary" id="btn-contact-us-pricing-monthly-estimate">
             <TrackingLink
-              href={`/contact-us/?source=${contactSource}`}
+              href={'/contact-us/?source=monthly-estimate'}
               clickType="Primary CTA"
               clickName="Volume Discount Form Link"
               clickText="Contact Us"

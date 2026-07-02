@@ -71,11 +71,7 @@ const logToLinear = (value, minLog, maxLog) => {
   return Math.floor(minLog + scale * (Math.log(value) - minValue))
 }
 
-interface MobileEstimateProps {
-  contactSource?: string
-}
-
-const MobileEstimate = ({ contactSource = 'monthly-estimate-mobile' }: MobileEstimateProps) => {
+const MobileEstimate = () => {
   const TRACES_AND_LOGS_PRICES = {
     15: 0.3,
     30: 0.4,
@@ -573,7 +569,7 @@ const MobileEstimate = ({ contactSource = 'monthly-estimate-mobile' }: MobileEst
             className="w-full"
           >
             <TrackingLink
-              href={`/contact-us/?source=${contactSource}`}
+              href={'/contact-us/?source=monthly-estimate-mobile'}
               clickType="Primary CTA"
               clickName="Volume Discount Form Link"
               clickText="Contact Us"
