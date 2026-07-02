@@ -1,7 +1,7 @@
 ---
-date: 2026-05-13
-title: Manage Variables in SigNoz
-description: Learn how to create and use dashboard variables in SigNoz to build dynamic, reusable dashboards across services and infrastructure.
+date: 2026-07-02
+title: Manage Dashboard Variables for Dynamic SigNoz Dashboards
+description: Learn how to create, order, and use dashboard variables in SigNoz to build dynamic, reusable dashboards that filter panel data in real time.
 doc_type: howto
 ---
 
@@ -28,18 +28,29 @@ Variables allow you to build dynamic dashboards where multiple panels can instan
 
 To add a variable to a dashboard, follow the steps below:
 
-1. Access Dashboards from the navigation menu
-2. Open the dashboard you want to modify
-3. Enter configuration mode by selecting Configure
-4. Switch to the Variables section and select Add Variable
+1. Access Dashboards from the navigation menu.
+2. Open the dashboard you want to modify.
+3. Enter configuration mode by selecting **Configure**.
+4. Switch to the **Variables** tab and select **Add variable**.
 5. Complete the configuration:
-    1. **Name**: Define the variable identifier for use in queries
-    2. **Description**: Enter a brief and meaningful description of your variable
-    3. **Type**: Pick the appropriate variable type (UI updates based on selection)
-    4. _(Optional)_ **Sort**: Arrange values in ascending/descending order.
-    5. _(Optional)_ **Enable multiple values to be checked**: Make dropdown multi-select
-    6. _(Optional)_ **Include an option for ALL values**: Show the `ALL` option which includes all options from the multi-select dropdown
+    1. **Name**: Define the variable identifier for use in queries. For Dynamic variables, the name auto-populates from the selected attribute key until you edit it manually.
+    2. **Description**: Enter a brief and meaningful description of your variable.
+    3. **Variable Type**: Pick the variable type from the tabs (**Dynamic**, **Textbox**, **Custom**, or **Query**). The fields below update based on your selection.
+    4. _(Optional)_ **Sort Values**: Choose how values are ordered in the dropdown. See [Sort options](#sort-options).
+    5. _(Optional)_ **Enable multiple values to be checked**: Make the dropdown multi-select.
+    6. _(Optional)_ **Include an option for ALL values**: Show the `ALL` option which includes all options from the multi-select dropdown.
+    7. _(Optional)_ **Default Value**: Pick the value the variable falls back to when no selection is active. The dropdown is populated from the variable's current preview values, or you can enter a custom value. Available for Dynamic, Custom, and Query variables.
 6. When you've finished, select the **Save** button.
+
+<Figure
+  src="/img/docs/dashboards/variables/variable-editor-v2.webp"
+  alt="Dashboard variable editor showing the Dynamic, Textbox, Custom, and Query type tabs"
+  caption="Choose the variable type from the tabs, then configure the source, sort order, multi-select, and default value."
+/>
+
+### Reorder variables
+
+Variables render in the dashboard variable bar in the order they appear in the settings list. To change the order, drag a variable row by its grip handle and drop it in the new position. The change applies as soon as you drop the row.
 
 ## Supported Variable types:
 
@@ -51,9 +62,13 @@ Dynamic variables automatically retrieve attribute values without requiring manu
 
 1. Field - either an OTEL telemetry intrinsic field (like span name or log severity_text) or a custom <a href="https://opentelemetry.io/docs/concepts/glossary/#attribute" target="_blank" rel="noopener noreferrer nofollow">attribute</a> from logs, traces, or metrics
 
-2. Source: Pick where to search - it checks logs, traces, and metrics by default, but choosing just one source makes it faster. Some of the fields have identical values across signals (e.g., k8s.pod.name is the same whether from logs or traces), so one source is sufficient. Use 'All sources' only when the same field contains distinct values across different signal types.
+2. Source: Pick where to search for values. The options are **All telemetry**, **Logs**, **Traces**, and **Metrics**. **All telemetry** searches logs, traces, and metrics simultaneously. A tooltip next to the source warns that this is slower: when a field has identical values across signals (for example, `k8s.pod.name` is the same whether it comes from logs or traces), choose a single source instead. Use **All telemetry** only when the same field holds distinct values across different signal types.
 
-    ![Dynamic Variable](/img/docs/dashboards/variables/dynamic-variable.png)
+    <Figure
+      src="/img/docs/dashboards/variables/dynamic-source-all-telemetry.webp"
+      alt="Dynamic variable source dropdown showing All telemetry, Logs, Traces, and Metrics options"
+      caption="The source dropdown for a Dynamic variable. All telemetry searches logs, traces, and metrics at once."
+    />
 
 #### Dynamic variable dropdowns display values in two sections:
 
@@ -111,6 +126,22 @@ Textbox - A free text input field with an optional default value
 
     ![Variables-with-Text](/img/docs/dashboards/variables/text-box-trace_id.png)
 
+## Sort options
+
+The **Sort Values** dropdown controls the order of values in the variable's dropdown. Available options:
+
+- **Disabled**: Keep values in the order they are returned.
+- **Alphabetical ascending** / **Alphabetical descending**: Sort case-sensitively (uppercase before lowercase).
+- **Numerical ascending** / **Numerical descending**: Sort values as numbers.
+- **Case-insensitive alphabetical ascending** / **Case-insensitive alphabetical descending**: Sort alphabetically, ignoring letter case.
+
+## Validation errors
+
+Some configurations are blocked with an inline error, and the variable cannot be saved until you resolve them:
+
+- **Circular dependency**: Saving a Query variable whose query references another variable that (directly or indirectly) references it back displays an inline error and blocks the save. Break the cycle before saving.
+- **Duplicate attribute key**: Saving a Dynamic variable whose attribute key is already used by another variable displays "A variable with this attribute key already exists" and blocks the save. Choose a different attribute or edit the existing variable.
+
 ## Chaining Variables
 
 It is often useful to chain variables to make the dashboard dynamic.
@@ -166,6 +197,33 @@ If you have a specific use case where dynamic variables don't work:
 2. Or reach out to support for assistance
 
 We're actively working on dynamic variables and all feedback is welcome.
+
+## Filter panel data in real time
+
+Selections in the dashboard variable bar filter panel data in real time. Choosing a value refetches data for every panel that uses the variable, with no page reload.
+
+<Figure
+  src="/img/docs/dashboards/variables/variable-bar-runtime-filter.webp"
+  alt="Dashboard variable bar with service and environment selections filtering the panels below"
+  caption="The variable bar sits above the panels. Changing a selection refetches all panels that reference the variable."
+/>
+
+How selections are sent to each panel's query:
+
+- **Single value**: The selected value replaces the variable reference in the query.
+- **Multi-select**: When the variable allows multiple values and several are selected, all selected values are passed to each query.
+- **ALL (Dynamic variables)**: Selecting `ALL` applies no filter on that field. Internally it sends the `__all__` sentinel so the query returns results across every value of the attribute. See [Note about ALL](#note-about-all).
+- **No selection**: The query uses the variable's configured [default value](#how-to-add-a-variable-to-a-dashboard). If no default is configured, the variable is omitted from the query rather than sent as an empty value.
+
+## Create alerts from a panel
+
+When you create an alert from a Dashboard panel that has active variable selections, SigNoz resolves the variable references in the panel query into their current values before opening the alert builder. For example, if `$service.name` is set to `adservice` in the variable bar, the alert builder opens with `adservice` in the query instead of the raw `$service.name` reference.
+
+To create the alert, open the panel's action menu and select **Create Alerts**.
+
+<Admonition type="warning">
+If variable resolution fails, SigNoz shows an error notification and does not open the alert builder. Adjust the panel query or variable selections and try again.
+</Admonition>
 
 ## Next Steps
 
