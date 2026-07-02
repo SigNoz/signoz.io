@@ -5,7 +5,6 @@ import { createPortal } from 'react-dom'
 import { useNavDropdownContext } from './NavDropdownContext'
 import { ProductDropdownContent } from './ProductDropdown'
 import { UseCasesDropdownContent } from './UseCasesDropdown'
-import { PlatformDropdownContent } from './PlatformDropdown'
 import { ResourcesDropdownContent } from './ResourcesDropdown'
 
 export default function NavDropdownPanel() {
@@ -51,7 +50,6 @@ export default function NavDropdownPanel() {
     const panelWidths: Record<string, number> = {
       product: 350,
       usecases: 380,
-      platform: 350,
       resources: 500,
     }
     const panelWidth = panelWidths[activeId] ?? 400
@@ -114,9 +112,6 @@ export default function NavDropdownPanel() {
             )}
             {(activeId === 'usecases' || prevActiveId.current === 'usecases') && (
               <UseCasesDropdownContent onClose={closeImmediate} />
-            )}
-            {(activeId === 'platform' || prevActiveId.current === 'platform') && (
-              <PlatformDropdownContent onClose={closeImmediate} />
             )}
             {(activeId === 'resources' || prevActiveId.current === 'resources') && (
               <ResourcesDropdownContent onClose={closeImmediate} />

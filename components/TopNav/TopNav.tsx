@@ -14,7 +14,6 @@ import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
 import UseCasesDropdown from './UseCasesDropdown'
-import PlatformDropdown from './PlatformDropdown'
 import ResourcesDropdown from './ResourcesDropdown'
 import { NavDropdownProvider } from './NavDropdownContext'
 import NavDropdownPanel from './NavDropdownPanel'
@@ -104,7 +103,6 @@ export default function TopNav() {
                 >
                   {visibility.showProduct && <ProductDropdown />}
                   {visibility.showUseCases && <UseCasesDropdown />}
-                  {visibility.showPlatform && <PlatformDropdown />}
                   {visibility.showDocs && (
                     <TrackingLink
                       href="/docs/introduction/"
