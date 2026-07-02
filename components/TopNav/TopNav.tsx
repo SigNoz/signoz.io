@@ -10,7 +10,6 @@ import Tabs from '@/components/ResourceCenter/Tabs'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
 import { Button } from '@/components/ui/Button'
-import { HOMEPAGE_BUTTON_CLASSES } from '@/components/ui/homepageButtonClasses'
 import { cn } from 'app/lib/utils'
 import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
@@ -166,16 +165,15 @@ export default function TopNav() {
                         variant="default"
                         rounded="full"
                         className={cn(
-                          HOMEPAGE_BUTTON_CLASSES.root,
-                          HOMEPAGE_BUTTON_CLASSES.primary,
+                          'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600',
                           'start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white'
                         )}
                       >
                         <span id="btn-get-started-website-navbar">
                           <span
                             className={cn(
-                              HOMEPAGE_BUTTON_CLASSES.label,
-                              HOMEPAGE_BUTTON_CLASSES.primaryLabel
+                              'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+                              '[&_svg:not(.animate-spin)]:hidden'
                             )}
                           >
                             Get Started - Free
@@ -183,8 +181,8 @@ export default function TopNav() {
                           </span>
                           <span
                             className={cn(
-                              HOMEPAGE_BUTTON_CLASSES.icon,
-                              HOMEPAGE_BUTTON_CLASSES.primaryIcon
+                              'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
+                              '!flex !bg-signoz_robin-400'
                             )}
                             aria-hidden="true"
                           >

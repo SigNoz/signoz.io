@@ -16,8 +16,8 @@ export function HomepageHeroRedesign() {
   const primaryCTA = 'Get Started - Free'
 
   return (
-    <header className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] -translate-x-1/2 overflow-hidden px-4 pt-24 sm:px-6 md:pt-[220px] lg:px-[78px]">
-      <div className="pointer-events-none absolute left-1/2 top-0 h-[640px] w-full max-w-8xl -translate-x-1/2 [mask-image:linear-gradient(to_bottom,#000_0%,#000_58%,rgba(0,0,0,0.72)_72%,transparent_100%)]">
+    <header className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] -translate-x-1/2 overflow-hidden px-4 pt-24 sm:px-6 md:pt-[220px] lg:px-20">
+      <div className="pointer-events-none absolute left-1/2 top-0 h-96 w-full max-w-8xl -translate-x-1/2 [mask-image:linear-gradient(to_bottom,#000_0%,#000_58%,rgba(0,0,0,0.72)_72%,transparent_100%)]">
         <GradientBlinds
           angle={20}
           blindCount={16}
@@ -35,7 +35,7 @@ export function HomepageHeroRedesign() {
           spotlightSoftness={1}
         />
       </div>
-      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col">
         <HeroCopyMotion delay={0.04}>
           <TrackingLink
             href="/agent-native-observability/"
@@ -58,7 +58,7 @@ export function HomepageHeroRedesign() {
 
         <div className="grid gap-8 md:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.72fr)] md:items-start md:gap-16">
           <HeroCopyMotion>
-            <h1 className="m-0 max-w-[760px] text-left text-[44px] font-medium leading-[1.04] tracking-[-1.408px] text-signoz_vanilla-100 sm:text-[56px] md:text-[64px] md:leading-[64px]">
+            <h1 className="m-0 max-w-3xl text-left text-5xl font-medium leading-none tracking-[-1.408px] text-signoz_vanilla-100 sm:text-6xl md:text-6xl md:leading-none">
               Observability for your
               <br />
               team, and AI agents.
@@ -69,7 +69,7 @@ export function HomepageHeroRedesign() {
 
           <div className="flex flex-col items-start md:pt-2">
             <HeroCopyMotion delay={0.12}>
-              <p className="m-0 max-w-[520px] text-left text-[17px] font-normal leading-7 tracking-[-0.165px] text-signoz_vanilla-400">
+              <p className="m-0 max-w-lg text-left text-lg font-normal leading-7 tracking-[-0.165px] text-signoz_vanilla-400">
                 SigNoz brings your traces, metrics, logs, and alerts into one OpenTelemetry-native
                 workspace so you don&apos;t have to stitch together five tools during an incident.
               </p>
@@ -101,7 +101,7 @@ export function HomepageHeroRedesign() {
                   clickName="Book a Demo Button"
                   clickText="Book a Demo"
                   clickLocation="Hero Section"
-                  className="block w-full sm:w-[160px]"
+                  className="block w-full sm:w-40"
                   prefetch={false}
                 >
                   <Button as="span" className="!w-full" variant="legacySecondary" withIcon>
@@ -113,9 +113,9 @@ export function HomepageHeroRedesign() {
           </div>
         </div>
 
-        <div className="relative left-1/2 mt-[76px] w-[calc(100dvw-8px)] -translate-x-1/2 px-5 pb-52 md:px-[78px]">
-          <div className="pointer-events-none absolute bottom-24 left-1/2 h-56 w-[calc(100%-32px)] max-w-[1410px] -translate-x-1/2 rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(190,198,207,0.46)_0%,rgba(86,95,104,0.34)_38%,rgba(8,9,10,0)_74%)] blur-2xl" />
-          <div className="pointer-events-none absolute bottom-40 left-1/2 h-28 w-[min(1180px,82vw)] -translate-x-1/2 rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.16)_0%,rgba(96,105,115,0.12)_44%,rgba(8,9,10,0)_76%)] blur-xl" />
+        <div className="relative left-1/2 mt-20 w-[calc(100dvw-8px)] -translate-x-1/2 px-5 pb-52 md:px-20">
+          <div className="pointer-events-none absolute bottom-24 left-1/2 h-56 w-[calc(100%-32px)] max-w-8xl -translate-x-1/2 rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(190,198,207,0.46)_0%,rgba(86,95,104,0.34)_38%,rgba(8,9,10,0)_74%)] blur-2xl" />
+          <div className="pointer-events-none absolute bottom-40 left-1/2 h-28 w-[min(1180px,82dvw)] -translate-x-1/2 rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.16)_0%,rgba(96,105,115,0.12)_44%,rgba(8,9,10,0)_76%)] blur-xl" />
           <HeroTracePreview />
         </div>
       </div>

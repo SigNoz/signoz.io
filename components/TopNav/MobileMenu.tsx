@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
 import { Button } from '@/components/ui/Button'
-import { HOMEPAGE_BUTTON_CLASSES } from '@/components/ui/homepageButtonClasses'
 import { cn } from 'app/lib/utils'
 import GitHubStars from '../GithubStars/GithubStars'
 import Accordion from '../Accordion/Accordion'
@@ -130,8 +129,7 @@ function MainMenuContent({
               asChild
               variant="default"
               className={cn(
-                HOMEPAGE_BUTTON_CLASSES.root,
-                HOMEPAGE_BUTTON_CLASSES.primary,
+                'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600',
                 'start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white'
               )}
               id="btn-get-started-website-navbar"
@@ -139,15 +137,18 @@ function MainMenuContent({
               <span>
                 <span
                   className={cn(
-                    HOMEPAGE_BUTTON_CLASSES.label,
-                    HOMEPAGE_BUTTON_CLASSES.primaryLabel
+                    'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+                    '[&_svg:not(.animate-spin)]:hidden'
                   )}
                 >
                   Get Started - Free
                   <ArrowRight size={14} />
                 </span>
                 <span
-                  className={cn(HOMEPAGE_BUTTON_CLASSES.icon, HOMEPAGE_BUTTON_CLASSES.primaryIcon)}
+                  className={cn(
+                    'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
+                    '!flex !bg-signoz_robin-400'
+                  )}
                   aria-hidden="true"
                 >
                   <ArrowRight size={16} strokeWidth={2.5} />

@@ -59,13 +59,13 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
       </div>
       <div className="absolute left-0 right-0 top-0 z-[2] flex h-9 items-center gap-1 overflow-x-auto overflow-y-hidden px-2 text-[11px] leading-none text-[#aaa79f] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {agentPromptTabs.map((tab, index) => {
-          const isActive = index === activePromptIndex
+          const isPromptActive = index === activePromptIndex
 
           return (
             <button
               key={tab.label}
               className={`h-7 shrink-0 rounded-md px-2.5 transition-colors ${
-                isActive
+                isPromptActive
                   ? 'bg-white/[0.075] text-signoz_vanilla-100 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]'
                   : 'text-[#8d918f] hover:bg-white/[0.04] hover:text-[#c4c0b8]'
               }`}
@@ -300,7 +300,7 @@ export default function AgentNativeObservabilitySection() {
         </div>
 
         <div className="-mx-5 mt-14 min-h-[560px] overflow-x-auto overflow-y-visible px-5 pb-4 pt-6 [scrollbar-width:none] sm:-mx-6 sm:mt-20 sm:px-6 md:hidden [&::-webkit-scrollbar]:hidden">
-          <div className="relative h-[520px] w-[132vw] min-w-[510px] max-w-[560px]">
+          <div className="relative h-[520px] w-[132dvw] min-w-[510px] max-w-[560px]">
             <div className="absolute left-5 top-[118px] z-20 flex h-8 items-center gap-2 font-mono text-[15px] tracking-[-0.01em] text-[#8f948f]">
               <span>Work with</span>
               <AgentIntegrationIcons />

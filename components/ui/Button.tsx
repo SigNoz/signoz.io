@@ -5,7 +5,6 @@ import { Slot } from '@radix-ui/react-slot'
 import { ArrowUpRight } from 'lucide-react'
 
 import { cn } from 'app/lib/utils'
-import { HOMEPAGE_BUTTON_CLASSES } from './homepageButtonClasses'
 
 // -----------------------------------------------------------------------------
 // Variants
@@ -177,9 +176,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const splitIconClass =
       mappedVariant === 'default'
-        ? cn(HOMEPAGE_BUTTON_CLASSES.root, HOMEPAGE_BUTTON_CLASSES.primary)
+        ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600'
         : mappedVariant === 'secondary'
-          ? cn(HOMEPAGE_BUTTON_CLASSES.root, HOMEPAGE_BUTTON_CLASSES.secondary)
+          ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !p-0 transition-colors duration-200 hover:!bg-signoz_ink-300'
           : ''
     const shouldRenderSplitIcon = !unstyled && withIcon && Boolean(splitIconClass) && !asChild
     const resolvedClassName = unstyled
@@ -205,18 +204,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           <>
             <span
               className={cn(
-                HOMEPAGE_BUTTON_CLASSES.label,
-                mappedVariant === 'default' && HOMEPAGE_BUTTON_CLASSES.primaryLabel
+                'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+                mappedVariant === 'default' && '[&_svg:not(.animate-spin)]:hidden'
               )}
             >
               {children}
             </span>
             <span
               className={cn(
-                HOMEPAGE_BUTTON_CLASSES.icon,
-                mappedVariant === 'default'
-                  ? HOMEPAGE_BUTTON_CLASSES.primaryIcon
-                  : HOMEPAGE_BUTTON_CLASSES.secondaryIcon
+                'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
+                mappedVariant === 'default' ? '!flex !bg-signoz_robin-400' : '!flex'
               )}
               aria-hidden="true"
             >

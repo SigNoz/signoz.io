@@ -104,12 +104,12 @@ export default function HomepageFloatingCta() {
 
   return (
     <div
-      className={`pointer-events-none fixed bottom-5 left-1/2 z-50 w-[calc(100%-32px)] max-w-[430px] -translate-x-1/2 transition-all duration-300 md:bottom-8 ${
+      className={`pointer-events-none fixed bottom-5 left-1/2 z-50 w-[calc(100%-32px)] max-w-md -translate-x-1/2 transition-all duration-300 md:bottom-8 ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
       }`}
     >
       <TrackingLink
-        className="bg-signoz_ink-400/92 group pointer-events-auto flex h-11 items-center justify-center gap-2 rounded-[6px] border border-signoz_slate-400/55 px-4 text-sm font-medium text-signoz_vanilla-100 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-colors hover:border-signoz_robin-400/70 hover:bg-signoz_ink-300"
+        className="bg-signoz_ink-400/92 group pointer-events-auto flex h-11 items-center justify-center gap-2 rounded-md border border-signoz_slate-400/55 px-4 text-sm font-medium text-signoz_vanilla-100 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-colors hover:border-signoz_robin-400/70 hover:bg-signoz_ink-300"
         clickLocation="Homepage Floating CTA"
         clickName="Floating CTA"
         clickText={cta.text}

@@ -127,14 +127,14 @@ export default function HeroTracePreview() {
         duration: 1.15,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="relative mx-auto w-full max-w-[1296px] origin-center overflow-visible shadow-[0_32px_86px_rgba(0,0,0,0.72)]"
+      className="relative mx-auto w-full max-w-7xl origin-center overflow-visible shadow-[0_32px_86px_rgba(0,0,0,0.72)]"
       style={{ scale: hasMounted ? scale : prefersReducedMotion ? 1 : 0.94 }}
     >
       <div className="-mx-5 overflow-x-auto px-5 pb-3 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:hidden [&::-webkit-scrollbar]:hidden">
         <div className="flex snap-x snap-mandatory gap-3">
           {heroTabs.map((tab, index) => (
             <article
-              className="w-[86vw] max-w-[680px] shrink-0 snap-start overflow-hidden rounded-[10px] border border-signoz_slate-400/25 bg-signoz_ink-400/60"
+              className="w-[86dvw] max-w-2xl shrink-0 snap-start overflow-hidden rounded-lg border border-signoz_slate-400/25 bg-signoz_ink-400/60"
               key={tab.label}
             >
               <div className="px-4 py-4">
@@ -145,11 +145,11 @@ export default function HeroTracePreview() {
                   {tab.description}
                 </p>
               </div>
-              <div className="relative h-[310px] overflow-hidden sm:h-[390px]">
+              <div className="relative h-80 overflow-hidden sm:h-96">
                 {renderPreviewMedia(
                   tab,
                   'h-auto w-[720px] max-w-none sm:w-full',
-                  '86vw',
+                  '86dvw',
                   index === 0
                 )}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[34%] bg-[linear-gradient(180deg,rgba(8,9,10,0)_0%,rgba(8,9,10,0.44)_62%,rgba(8,9,10,0.78)_100%)]" />
@@ -173,7 +173,7 @@ export default function HeroTracePreview() {
                 <button
                   aria-controls="homepage-hero-preview-panel"
                   aria-selected={isActive}
-                  className="group relative min-h-[62px] pb-4 text-left text-signoz_vanilla-100 transition-colors duration-200"
+                  className="group relative min-h-16 pb-4 text-left text-signoz_vanilla-100 transition-colors duration-200"
                   id={`homepage-hero-preview-tab-${index}`}
                   key={tab.label}
                   onClick={() => {
@@ -220,7 +220,7 @@ export default function HeroTracePreview() {
 
       <div
         aria-labelledby={`homepage-hero-preview-tab-${activeTab}`}
-        className="relative mt-6 hidden h-[430px] overflow-hidden bg-transparent sm:h-[490px] md:h-[570px] lg:block lg:h-[640px]"
+        className="relative mt-6 hidden h-96 overflow-hidden bg-transparent sm:h-96 md:h-[570px] lg:block lg:h-96"
         id="homepage-hero-preview-panel"
         role="tabpanel"
       >
