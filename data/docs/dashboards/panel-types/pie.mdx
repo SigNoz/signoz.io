@@ -1,7 +1,7 @@
 ---
 
 title: Pie Chart Panel Type
-date: 2026-05-13
+date: 2026-07-02
 description: Learn how to use the Pie Chart panel type in SigNoz dashboards to visualize proportional data.
 doc_type: reference
 ---
@@ -19,6 +19,10 @@ A Pie chart is a plot chart that shows the proportion of a single or a few diffe
 - Metrics
 
 This panel type supports any time series data. The time series data can be from logs, traces, or metrics.
+
+<Admonition type="info">
+Pie charts support ClickHouse queries that return multiple aggregation columns (for example, `count() AS col1, sum(duration) AS col2`). Each value column renders as its own slice instead of collapsing into one. Single-value and grouped queries are unchanged. When a grouped query returns multiple value columns, each slice is labeled `group · column`.
+</Admonition>
 
 #### Examples
 
@@ -47,6 +51,10 @@ The following graph shows the distribution of the service requests over the serv
 
 - **Unit** — The unit for the displayed values (for example, `Bytes`, `Percent`, `Requests/s`). The default is `None`.
 - **Decimal Precision** — Number of decimal places to display. The default is `2 decimals`.
+
+<Admonition type="info">
+When you create a new panel, the **Unit** is pre-filled with the unit of the selected metric, so the values match how the metric was reported. If you choose a unit that is incompatible with the unit the metric was sent with, a warning icon appears on the unit selector. Hover over the icon to see a tooltip explaining the mismatch and the unit the metric was sent with.
+</Admonition>
 
 #### Legend
 

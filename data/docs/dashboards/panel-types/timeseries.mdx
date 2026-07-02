@@ -1,7 +1,7 @@
 ---
 
 title: Timeseries Panel Type
-date: 2026-05-13
+date: 2026-07-02
 description: Learn how to use the Timeseries Chart panel type in SigNoz dashboards to visualize metrics over time.
 doc_type: reference
 ---
@@ -44,10 +44,21 @@ The following graph shows the requests per second (req/s) for a service over a p
 - **Panel Time Preference** — Override the global dashboard time range for this panel. Set to `Global Time` to use the dashboard's time picker, or choose a fixed time range.
 - **Fill Gaps** — The `Fill Gaps` option fills the gaps in the result data with zero. This is useful when you want to interpret the no data as zero. It is more appropriate for when the data is sparse. For example, if the result of a query for 10 minutes is `{t1: 12, t3: 21, t5: 42, t7:29}`, the `Fill Gaps` option will result in `{t1: 12, t2: 0, t3: 21, t4: 0, t5: 42, t6: 0, t7: 29, t8: 0, t9: 0, t10: 0}`.
 
+#### Span Gaps
+
+Use the **Span Gaps** (Disconnect Values) control to decide how the line handles gaps in a series, meaning intervals that have no data point.
+
+- **Never**: connect the line across gaps so the series stays continuous.
+- **Threshold**: disconnect the line when a gap is longer than a duration you set. When you switch to `Threshold`, the duration is seeded from the query's step interval instead of a fixed default, so it reflects the resolution the panel actually queries at. The duration input validates as you type and shows an error inline for invalid values, so you do not need to leave the field to see the problem.
+
 #### Formatting & Units
 
 - **Y Axis Unit** — The unit of the y-axis (for example, `Milliseconds (ms)`, `Bytes`, `Percent`). The default is `None`.
 - **Decimal Precision** — Number of decimal places to display. The default is `2 decimals`.
+
+<Admonition type="info">
+When you create a new panel, the **Y Axis Unit** is pre-filled with the unit of the selected metric, so the axis matches how the metric was reported. If you choose a unit that is incompatible with the unit the metric was sent with, a warning icon appears on the unit selector. Hover over the icon to see a tooltip explaining the mismatch and the unit the metric was sent with.
+</Admonition>
 
 #### Axes
 
@@ -70,6 +81,10 @@ Add context links to enable click-through navigation from the panel to other das
 #### Thresholds
 
 Thresholds are used to draw a line on the y-axis to highlight the value. The thresholds are defined as a list of tuples. Each tuple contains the value and the color. The color is optional and if not provided, the default color will be used.
+
+<Admonition type="info">
+Threshold edits stream into the panel preview as you type, so you see the effect on your data before you click **Save Changes**. Click **Discard** to roll the panel back to its state from before you started editing, which reverts the live preview as well. Thresholds are preserved when you change the panel's visualization type (for example, from Time Series to Table): their color, value, and unit carry over and are remapped to the new panel type's format.
+</Admonition>
 
 ### Get Help
 
