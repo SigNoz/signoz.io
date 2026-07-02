@@ -74,7 +74,7 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
             For high volume usage, reach out to us for custom pricing and retention options
           </span>
           <TrackingLink
-            href="/contact-us/"
+            href="/contact-us/?source=pricing-calculator"
             clickType="Secondary CTA"
             clickName="Volume Discount Form Link"
             clickText="Contact Us"
