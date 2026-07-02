@@ -159,7 +159,7 @@ export default function HeroTracePreview() {
         </div>
       </div>
 
-      <div className="hidden px-4 pt-5 sm:px-6 lg:block lg:px-8">
+      <div className="relative z-10 hidden bg-signoz_ink-500/90 px-4 pt-5 sm:px-6 lg:block lg:px-8">
         <LayoutGroup id="homepage-hero-preview-tabs">
           <div
             className="grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-3 lg:grid-cols-6"
