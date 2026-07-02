@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from '@headlessui/react'
-import Link from 'next/link'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import BrainfishIcon from '@/public/img/index_features/brainfish.svg'
@@ -64,14 +63,18 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
       </div>
       <div className="flex w-[280px] shrink-0 flex-col gap-y-6 border-l border-signoz_slate-400 bg-[hsl(240_5.88%_10%)] p-6 sm:w-[300px] lg:w-[320px]">
         <div className="flex flex-col gap-y-4">
-          <Link
+          <TrackingLink
             href="/case-study/"
             className={`flex flex-row items-center gap-1 ${SECTION_HEADING_CLASS} hover:text-[#fff]`}
+            clickType="Nav Click"
+            clickName="Customer Stories Link"
+            clickText="Customer Stories"
+            clickLocation="Top Navbar"
             onClick={onClose}
             prefetch={false}
           >
             <span>Customer Stories</span> <ArrowRight size={14} />
-          </Link>
+          </TrackingLink>
           <div>
             <TrackingLink
               href="/case-study/brainfish/"
@@ -92,7 +95,7 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
         </div>
         <div className="flex flex-col gap-y-4">
           <div className={SECTION_HEADING_CLASS}>
-            <span>Compare Signoz</span>
+            <span>Compare SigNoz</span>
           </div>
           <div className="flex flex-col gap-1 text-sm text-signoz_vanilla-400">
             {comparisonItems.map((item) => (

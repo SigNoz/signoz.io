@@ -10,6 +10,7 @@ import Accordion from '../Accordion/Accordion'
 import {
   productDropdownItemsSorted,
   useCasesDropdownItemsSorted,
+  comparisonItems,
   resourcesDropdownItems,
 } from './constants'
 
@@ -70,6 +71,19 @@ function MainMenuContent({
     <div className="space-y-2 py-8">
       <Accordion topic="Product" subtopics={productDropdownItemsSorted} onLinkClick={onClose} />
       <Accordion topic="Use Cases" subtopics={useCasesDropdownItemsSorted} onLinkClick={onClose} />
+      <Accordion topic="Compare SigNoz" subtopics={comparisonItems} onLinkClick={onClose} />
+      <TrackingLink
+        href="/case-study/"
+        className={MOBILE_LINK_CLASS}
+        clickType="Nav Click"
+        clickName="Customer Stories Link"
+        clickText="Customer Stories"
+        clickLocation="Mobile Menu"
+        onClick={onClose}
+        prefetch={false}
+      >
+        Customer Stories
+      </TrackingLink>
       <TrackingLink
         href="/docs/introduction/"
         className={MOBILE_LINK_CLASS}
