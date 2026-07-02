@@ -2,6 +2,7 @@ import ChangelogRenderer from '@/components/Changelog/Renderer/ChangelogRenderer
 import ChangelogFooter from '@/components/Changelog/Footer/ChangelogFooter'
 import ChangelogHeader from '@/components/Changelog/Header/ChangelogHeader'
 import { DeploymentType, fetchChangelogEntries } from '@/utils/strapi'
+import { isGitHubReleasePublished } from '@/utils/github'
 import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 
@@ -52,6 +53,15 @@ const Changelog = async (props: ChangelogProps) => {
     deployment_type: deploymentType,
   })
 
+  let changelogs = changelogsResponse.changelogs
+
+  if (currentPage === 1 && changelogs.length > 0) {
+    const isPublished = await isGitHubReleasePublished(changelogs[0].version)
+    if (!isPublished) {
+      changelogs = changelogs.slice(1)
+    }
+  }
+
   return (
     <section className="h-auto w-full bg-signoz_ink-500">
       <div className="container relative mx-auto flex flex-col gap-7">
@@ -59,10 +69,8 @@ const Changelog = async (props: ChangelogProps) => {
         <div className="z-10 flex w-full flex-col gap-7 py-16">
           <ChangelogHeader />
           <div className="flex max-w-4xl flex-col md:pl-4">
-            {changelogsResponse &&
-              changelogsResponse.changelogs.map((entry) => (
-                <ChangelogRenderer key={entry.id} changelog={entry} />
-              ))}
+            {changelogs &&
+              changelogs.map((entry) => <ChangelogRenderer key={entry.id} changelog={entry} />)}
           </div>
           <ChangelogFooter pagination={changelogsResponse.pagination} />
         </div>
