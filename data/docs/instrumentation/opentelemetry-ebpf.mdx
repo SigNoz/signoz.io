@@ -30,12 +30,12 @@ OBI observes traffic at the protocol and kernel level. You get request rates, la
 
 ## Select the target process
 
-Tell OBI which process to instrument with one of these selectors, then reuse it in the steps below:
+OBI does not instrument every process on the host. You point it at one target using a selector:
 
 - **By port** with `OTEL_EBPF_OPEN_PORT`: the process listening on a port or range, such as **8443** or **8000-8999**.
 - **By executable** with `OTEL_EBPF_AUTO_TARGET_EXE`: an executable path glob, such as **\*/myserver**.
 
-The Docker and Linux host examples use `OTEL_EBPF_OPEN_PORT`. The Kubernetes DaemonSet example uses `OTEL_EBPF_AUTO_TARGET_EXE` for node-wide process discovery.
+Both selectors work in any environment and are interchangeable. The examples below use `OTEL_EBPF_OPEN_PORT` for Docker and Linux, and `OTEL_EBPF_AUTO_TARGET_EXE` for the Kubernetes DaemonSet, but you can use either selector in any of them.
 
 ## Send data to SigNoz
 
@@ -49,7 +49,7 @@ Choose your environment.
 
 <TabItem value="docker" label="Docker" default>
 
-Run OBI as a sidecar container alongside the container you want to observe. OBI needs the host PID namespace and elevated privileges to load eBPF probes.
+Run OBI as a sidecar container alongside the container you want to observe. OBI needs the host PID namespace and elevated privileges to load eBPF probes. For all Docker options, see the <a href="https://opentelemetry.io/docs/zero-code/obi/setup/docker/" target="_blank" rel="noopener noreferrer nofollow">OBI Docker setup guide</a>.
 
 ```bash
 docker run --rm \
@@ -87,7 +87,7 @@ services:
 
 <TabItem value="kubernetes" label="Kubernetes">
 
-Deploy OBI as a DaemonSet so one instance runs on each node. Use this manifest to set host PID access, grant RBAC read access for pod metadata, and read the ingestion key from a Secret.
+Deploy OBI as a DaemonSet so one instance runs on each node. Use this manifest to set host PID access, grant RBAC read access for pod metadata, and read the ingestion key from a Secret. For all Kubernetes options, see the <a href="https://opentelemetry.io/docs/zero-code/obi/setup/kubernetes/" target="_blank" rel="noopener noreferrer nofollow">OBI Kubernetes setup guide</a>.
 
 Create the namespace and Secret for the ingestion key header:
 
