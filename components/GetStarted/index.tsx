@@ -6,7 +6,15 @@ import TrackingLink from '@/components/TrackingLink'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 import { cn } from '../../app/lib/utils'
 
-export const GetStarted = ({ page, className }: { page: string; className?: string }) => {
+export const GetStarted = ({
+  page,
+  className,
+  withIcon = false,
+}: {
+  page: string
+  className?: string
+  withIcon?: boolean
+}) => {
   const getStartedId = `btn-get-started-${page}-bottom`
   const readDocumentationId = `btn-read-documentation-${page}-bottom`
 
@@ -38,6 +46,7 @@ export const GetStarted = ({ page, className }: { page: string; className?: stri
                     as="span"
                     id={getStartedId}
                     className="flex-center"
+                    withIcon={withIcon}
                   >
                     Get Started - Free
                     <ArrowRight size={14} />
@@ -58,6 +67,7 @@ export const GetStarted = ({ page, className }: { page: string; className?: stri
                     variant="legacySecondary"
                     id={readDocumentationId}
                     className="flex-center"
+                    withIcon={withIcon}
                   >
                     <BookOpen size={14} />
                     Read Documentation

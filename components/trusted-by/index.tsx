@@ -30,8 +30,42 @@ export const COMPANIES = [
   { Logo: ShapedLogo, imageDesc: 'shaped logo' },
 ]
 
-export const TrustedByTeams = ({ page, className }: { page?: string; className?: string }) => {
+type TrustedByTeamsProps = {
+  page?: string
+  className?: string
+  variant?: 'default' | 'marquee'
+}
+
+export const TrustedByTeams = ({ page, className, variant = 'default' }: TrustedByTeamsProps) => {
   const customerStoriesId = `btn-customer-stories-${page}-hero`
+
+  if (variant === 'marquee') {
+    const marqueeCompanies = [...COMPANIES, ...COMPANIES]
+
+    return (
+      <section
+        className={cn('m-0 mx-auto w-full overflow-hidden border-0 py-0', className)}
+        aria-label="Trusted by platform teams"
+      >
+        <div className="mb-4 text-center text-xs font-semibold uppercase leading-5 tracking-widest text-signoz_vanilla-400 md:text-sm">
+          Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
+        </div>
+        <div className="group relative overflow-hidden [mask-image:linear-gradient(90deg,transparent_0%,#000_10%,#000_90%,transparent_100%)]">
+          <div className="flex w-max animate-homepage-logo-marquee items-center gap-10 group-hover:[animation-play-state:paused] motion-reduce:translate-x-0 motion-reduce:animate-none md:gap-14">
+            {marqueeCompanies.map((company, idx) => (
+              <company.Logo
+                key={`${idx}-${company.imageDesc}`}
+                className="h-8 w-24 shrink-0 opacity-70 grayscale transition-opacity duration-200 hover:opacity-100 md:h-8 md:w-32"
+                role="img"
+                aria-label={idx < COMPANIES.length ? company.imageDesc : undefined}
+                aria-hidden={idx >= COMPANIES.length ? 'true' : undefined}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section
@@ -50,7 +84,7 @@ export const TrustedByTeams = ({ page, className }: { page?: string; className?:
           {COMPANIES.map((company, idx) => (
             <company.Logo
               key={`${idx}-${company.imageDesc}`}
-              className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
+              className="h-10 w-24 md:h-10 md:w-32"
               role="img"
               aria-label={company.imageDesc}
             />

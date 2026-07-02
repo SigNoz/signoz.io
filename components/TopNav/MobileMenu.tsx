@@ -1,10 +1,12 @@
 'use client'
 
-import { Dialog, Button } from '@headlessui/react'
+import { Dialog } from '@headlessui/react'
 import { ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
+import { Button } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 import GitHubStars from '../GithubStars/GithubStars'
 import Accordion from '../Accordion/Accordion'
 import { productDropdownItemsSorted, resourcesDropdownItems } from './constants'
@@ -124,11 +126,34 @@ function MainMenuContent({
             onClick={onClose}
           >
             <Button
-              className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white"
+              asChild
+              variant="default"
+              className={cn(
+                'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600',
+                'start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white'
+              )}
               id="btn-get-started-website-navbar"
             >
-              Get Started - Free
-              <ArrowRight size={14} />
+              <span>
+                <span
+                  className={cn(
+                    'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+                    '[&_svg:not(.animate-spin)]:hidden'
+                  )}
+                >
+                  Get Started - Free
+                  <ArrowRight size={14} />
+                </span>
+                <span
+                  className={cn(
+                    'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
+                    '!flex !bg-signoz_robin-400'
+                  )}
+                  aria-hidden="true"
+                >
+                  <ArrowRight size={16} strokeWidth={2.5} />
+                </span>
+              </span>
             </Button>
           </TrackingLink>
         </>
