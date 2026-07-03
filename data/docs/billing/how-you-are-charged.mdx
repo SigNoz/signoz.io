@@ -7,7 +7,7 @@ doc_type: explanation
 
 SigNoz Cloud pricing is **usage-based**: you're billed for the telemetry you ingest, priced separately for each signal. There are no charges for the number of users, hosts, or custom metrics; you pay only for the data you send and how long you keep it.
 
-> This page describes the pricing *model*. For exact, current rates, the [pricing page](https://signoz.io/pricing/) is the source of truth.
+> This page explains how pricing works, with indicative rates. For exact, up-to-date pricing, the [pricing page](https://signoz.io/pricing/) is always the source of truth.
 
 ## What you're billed for
 
@@ -16,11 +16,13 @@ Your bill is driven by two things:
 1. **How much telemetry you ingest**, measured per signal.
 2. **How long you retain it** (retention period). Longer retention costs more (see [Retention](#retention) below).
 
-| Signal | Billed by | Typical rate |
-|---|---|---|
-| **Logs** | Volume ingested (per GB) | $0.30 / GB |
-| **Traces** | Volume ingested (per GB) | $0.30 / GB |
-| **Metrics** | Number of samples ingested (per million) | $0.10 / million samples |
+| Signal | Billed by | Rate | Minimum retention |
+|---|---|---|---|
+| **Logs** | Volume ingested (per GB) | $0.30 / GB | 15 days |
+| **Traces** | Volume ingested (per GB) | $0.30 / GB | 15 days |
+| **Metrics** | Number of samples ingested (per million) | $0.10 / million samples | 1 month |
+
+Rates shown apply at the minimum retention period. Longer retention increases the rate, since your data is stored for longer (see [Retention](#retention)).
 
 There are **no additional charges** for:
 
@@ -30,7 +32,7 @@ There are **no additional charges** for:
 
 ### What counts as ingested volume (logs and traces)
 
-Logs and traces are billed by the volume of data ingested, measured in GB. Volume is the size of the log records and spans you send, including their attributes, so records with more or larger attributes take up more volume. Dropping unneeded logs and spans, trimming attributes, and sampling traces all reduce ingested volume.
+Logs and traces are billed by the volume of data ingested, measured in GB. Volume is the size of the log records and spans you send, including their attributes, so records with more or larger attributes take up more volume. [Dropping unneeded logs](https://signoz.io/docs/logs-management/guides/drop-logs/) and [dropping spans](https://signoz.io/docs/traces-management/guides/drop-spans/), trimming attributes, and sampling traces all reduce ingested volume.
 
 ### What counts as a metric sample
 
