@@ -16,20 +16,12 @@ export function githubFetchHeaders(userAgent: string = 'signoz-web'): Record<str
   return headers
 }
 
-const SEMVER_TAG_RE = /^v?\d+\.\d+\.\d+$/
-
 export async function isGitHubReleasePublished(version: string): Promise<boolean> {
   'use cache'
   cacheLife({ revalidate: GITHUB_RELEASE_TAG_REVALIDATE_SECONDS })
   cacheTag(`${CACHE_TAG_PREFIX}-${version}`)
 
   const tag = version.startsWith('v') ? version : `v${version}`
-
-  if (!SEMVER_TAG_RE.test(tag)) {
-    console.warn(`GitHub release check skipped for non-semver tag "${tag}", defaulting to visible`)
-    return true
-  }
-
   const url = `https://api.github.com/repos/SigNoz/signoz/releases/tags/${encodeURIComponent(tag)}`
 
   try {
