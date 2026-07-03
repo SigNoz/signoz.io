@@ -3,10 +3,10 @@ import { GITHUB_RELEASE_TAG_REVALIDATE_SECONDS } from '@/constants/cache'
 
 const CACHE_TAG_PREFIX = 'github-release-tag'
 
-function githubFetchHeaders(): Record<string, string> {
+export function githubFetchHeaders(userAgent: string = 'signoz-web'): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github+json',
-    'User-Agent': 'signoz-web',
+    'User-Agent': userAgent,
   }
 
   if (process.env.GITHUB_TOKEN) {
@@ -16,18 +16,25 @@ function githubFetchHeaders(): Record<string, string> {
   return headers
 }
 
-async function checkRelease(version: string): Promise<boolean> {
+const SEMVER_TAG_RE = /^v?\d+\.\d+\.\d+$/
+
+export async function isGitHubReleasePublished(version: string): Promise<boolean> {
   'use cache'
   cacheLife({ revalidate: GITHUB_RELEASE_TAG_REVALIDATE_SECONDS })
   cacheTag(`${CACHE_TAG_PREFIX}-${version}`)
 
   const tag = version.startsWith('v') ? version : `v${version}`
+
+  if (!SEMVER_TAG_RE.test(tag)) {
+    console.warn(`GitHub release check skipped for non-semver tag "${tag}", defaulting to visible`)
+    return true
+  }
+
   const url = `https://api.github.com/repos/SigNoz/signoz/releases/tags/${encodeURIComponent(tag)}`
 
   try {
     const response = await fetch(url, {
       headers: githubFetchHeaders(),
-      cache: 'no-store',
     })
 
     if (response.status === 404) {
@@ -45,8 +52,4 @@ async function checkRelease(version: string): Promise<boolean> {
     console.warn(`GitHub release check failed for ${tag}:`, error)
     return true
   }
-}
-
-export async function isGitHubReleasePublished(version: string): Promise<boolean> {
-  return checkRelease(version)
 }

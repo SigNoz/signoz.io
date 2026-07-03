@@ -37,8 +37,6 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
     notFound()
   }
 
-  await guardUnpublishedLatest(changelogResponse.data)
-
   return {
     title: changelogResponse.data.release_date + ' - ' + changelogResponse.data.version,
     description:
