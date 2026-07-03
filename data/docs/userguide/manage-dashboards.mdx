@@ -1,6 +1,6 @@
 ---
-date: 2026-05-13
-description: Learn how to create, edit, delete, and manage dashboards and panels within SigNoz.
+date: 2026-07-03
+description: Learn how to create, edit, clone, delete, and manage dashboards and panels within SigNoz, including JSON editing and naming limits.
 title: Manage Dashboards in SigNoz
 doc_type: howto
 ---
@@ -19,6 +19,7 @@ From the Dashboards page, you can:
 - **New Dashboard** — Create a dashboard from scratch by entering a name and selecting **+ New Dashboard**.
 - **Import JSON** — Import a dashboard from a JSON file or a Grafana export.
 - **View templates** — Quickly jump to the templates library to import a pre-built dashboard.
+- **Filter by tag** — Narrow the list to dashboards that carry a given tag. Tag keys and values in the filter appear sorted alphabetically (case-insensitive), so the same tag is always in the same place.
 
 ## Prerequisites
 
@@ -55,16 +56,46 @@ Click the **...** (three-dot) menu at the top of any dashboard to access the fol
 <Figure
   src="/img/docs/userguide/manage-dashboards/dashboard-options-menu.webp"
   alt="Dashboard options menu in SigNoz"
-  caption="Dashboard options menu — lock, rename, export, and more."
+  caption="Dashboard options menu — lock, rename, clone, and more."
 />
 
 - **Lock Dashboard** — Prevent accidental edits by locking the dashboard. When locked, panels cannot be added, removed, resized, or rearranged. Unlock the dashboard from the same menu to resume editing.
 - **Rename** — Quickly rename the dashboard without opening the full configuration drawer.
 - **Full screen** — View the dashboard in full-screen mode for presentations or wall displays.
 - **New section** — Add a section to organize panels into logical groups within the dashboard.
-- **Export JSON** — Download the dashboard configuration as a JSON file for backup or sharing.
-- **Copy as JSON** — Copy the dashboard JSON to your clipboard.
+- **Clone** — Create a copy of the dashboard. See [Clone a dashboard](#clone-a-dashboard).
 - **Delete dashboard** — Permanently delete the dashboard.
+
+<Admonition type="note">
+To export or copy a dashboard's JSON, use the **Copy** and **Download** controls inside the JSON editor. See [Edit a dashboard as JSON](#edit-a-dashboard-as-json).
+</Admonition>
+
+## Edit a Dashboard as JSON
+
+The dashboard toolbar includes a **JSON** button that opens the JSON editor in a side drawer. Use it to review or hand-edit a dashboard's definition without leaving the page.
+
+The editor exposes only the two editable parts of a dashboard:
+
+- **`tags`** — the dashboard's tags.
+- **`spec`** — the dashboard definition: panels, layout, variables, and settings.
+
+Server-managed fields (such as `id`, `name`, schema version, image, organization ID, timestamps, and locked status) are hidden from the editor. They are preserved automatically when you save, so nothing is lost by editing only `tags` and `spec`.
+
+The drawer's **Copy** and **Download** controls export exactly what the editor shows — the `tags` and `spec` fields only. Use **Copy** to place the JSON on your clipboard or **Download** to save it as a file, for backup, review, or sharing.
+
+<Admonition type="tip">
+To move a dashboard between workspaces, download its JSON here and re-import it using [Import JSON](https://signoz.io/docs/dashboards/import-dashboard/).
+</Admonition>
+
+## Clone a Dashboard
+
+Select **Clone** from the [Dashboard Options Menu](#dashboard-options-menu) to duplicate a dashboard. SigNoz derives the new dashboard's name from the original:
+
+- The first clone appends `- Copy` to the display name. For example, `My Dashboard` becomes `My Dashboard - Copy`.
+- Cloning again increments a counter: `My Dashboard - Copy (2)`, `My Dashboard - Copy (3)`, and so on.
+- If the base name is too long to fit the suffix within the [128-character limit](#dashboard-naming-limits), the base name is truncated automatically so the suffix always fits.
+
+Rename the clone at any time from the [Dashboard Options Menu](#dashboard-options-menu) or the configuration drawer.
 
 ## Update a Custom Dashboard
 
@@ -131,6 +162,26 @@ Note the following about panels:
 2. Find the dashboard in which you created the panel you wish to update, and then select the pencil icon located at the top right corner of your panel.
 3. Make the changes.
 4. When you've finished, select the **Save** button.
+
+## Navigate Back to the List
+
+On a dashboard detail page, select the **Dashboard** breadcrumb at the top left to return to the dashboards list. The breadcrumb navigates in place (instant, no full-page reload). To open the list in a new browser tab instead, middle-click the breadcrumb or hold **Ctrl** (**Cmd** on macOS) while clicking.
+
+## Dashboard Naming Limits
+
+Display names for dashboard entities are capped by the backend. If you exceed a limit, the save request fails with an HTTP `400` error. Trim the name and save again.
+
+| Entity | Character limit |
+| --- | --- |
+| Dashboard title | 128 |
+| Panel title | 128 |
+| Variable name | 128 |
+| Layout section title | 128 |
+| Saved view name | 64 |
+
+<Admonition type="note">
+The saved view name limit was raised from 32 to 64 characters. All limits are enforced server-side, so they apply regardless of how the name is set (UI, imported JSON, or API).
+</Admonition>
 
 ## Next Steps
 
