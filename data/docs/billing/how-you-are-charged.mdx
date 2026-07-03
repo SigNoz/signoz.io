@@ -1,0 +1,84 @@
+---
+date: 2026-07-03
+title: How You're Charged in SigNoz Cloud
+description: Understand SigNoz Cloud's usage-based pricing, including per-signal ingestion rates, retention, included usage, and how overages work.
+doc_type: explanation
+---
+
+SigNoz Cloud pricing is **usage-based**: you're billed for the telemetry you ingest, priced separately for each signal. There are no charges for the number of users, hosts, or custom metrics; you pay only for the data you send and how long you keep it.
+
+> This page describes the pricing *model*. For exact, current rates, the [pricing page](https://signoz.io/pricing/) is the source of truth.
+
+## What you're billed for
+
+Your bill is driven by two things:
+
+1. **How much telemetry you ingest**, measured per signal.
+2. **How long you retain it** (retention period). Longer retention costs more (see [Retention](#retention) below).
+
+| Signal | Billed by | Typical rate |
+|---|---|---|
+| **Logs** | Volume ingested (per GB) | $0.30 / GB |
+| **Traces** | Volume ingested (per GB) | $0.30 / GB |
+| **Metrics** | Number of samples ingested (per million) | $0.10 / million samples |
+
+There are **no additional charges** for:
+
+- Number of users / teammates (seats)
+- Number of hosts monitored
+- Custom metrics or dashboards
+
+### What counts as ingested volume (logs and traces)
+
+Logs and traces are billed by the volume of data ingested, measured in GB. Volume is the size of the log records and spans you send, including their attributes, so records with more or larger attributes take up more volume. Dropping unneeded logs and spans, trimming attributes, and sampling traces all reduce ingested volume.
+
+### What counts as a metric sample
+
+Metrics are billed by sample count. A metric sample is a single data point for a single time series at a single point in time. The number of samples grows with **cardinality** (the number of unique time series) and **scrape frequency** (how often each series reports). This is why controlling cardinality is the main lever for metrics cost. See [Understanding Metrics Billing and Reducing Costs](https://signoz.io/docs/metrics-management/reducing-costs/).
+
+## Retention
+
+You choose how long each signal is retained, and **longer retention costs more** because your data is stored for longer. Choosing a shorter retention period lowers your cost.
+
+- **Logs and traces**: 15, 30, 90, 180 days, or 1 year. The minimum is **15 days**.
+- **Metrics**: 1, 3, 6, or 13 months. The minimum is **1 month**.
+
+These minimums are the floor: you can't set retention below 15 days for logs/traces or 1 month for metrics, so reducing retention only lowers cost down to those minimums, not beyond. Pick the shortest retention that still covers how far back you need to query.
+
+## Included usage and overages (Teams plan)
+
+The Teams plan starts at a monthly base that **includes an amount of usage**. You only pay for usage beyond that included amount, charged at the standard per-signal rates above.
+
+For example, the base Teams plan's included usage roughly covers **163 GB of logs/traces or 490 million metric samples**, and a mix of signals draws down against the same included amount. Beyond it, you pay standard rates for the overage.
+
+This means:
+
+- Small workloads may stay entirely within the included usage.
+- As you scale, your bill grows predictably and linearly with ingestion.
+- You never pay for capacity you don't use.
+
+## Paying through AWS Marketplace
+
+If you'd rather pay for SigNoz Cloud through AWS, you can subscribe via AWS Marketplace and have SigNoz billed through your AWS account. This consolidates SigNoz into your existing AWS bill and can draw down on your AWS commitments.
+
+To set it up:
+
+1. Subscribe to SigNoz on AWS Marketplace. After subscribing, AWS sends you to the SigNoz [AWS Marketplace activation page](https://signoz.io/aws/signup/).
+2. Create a [SigNoz Cloud account](https://signoz.io/teams/) if you don't have one. If you already have an account you want to bill through AWS, skip to the next step.
+3. In your SigNoz account, go to **Settings → Account Settings → License** and copy your license key.
+4. Paste the license key into the activation form and select **Activate Subscription**. Your AWS Marketplace subscription is now connected to your SigNoz Cloud account, and billing runs through AWS.
+
+Need help with activation? Contact <a href="mailto:cloud-support@signoz.io">cloud-support@signoz.io</a>.
+
+## Monitoring your usage
+
+To see where your spend is going before the invoice arrives, use [Cost Meter](https://signoz.io/docs/cost-meter/overview/):
+
+- [Cost Meter Dashboard](https://signoz.io/docs/cost-meter/cost-meter-dashboard/): real-time ingestion and cost by signal, with hourly granularity.
+- [Meter Explorer](https://signoz.io/docs/cost-meter/meter-explorer/): break down usage by service, team, or attribute to find cost drivers.
+- [Cost alerts](https://signoz.io/docs/cost-meter/alerts/): get notified before you exceed a budget.
+
+## Next steps
+
+- [Billing overview](https://signoz.io/docs/billing/overview/): compare Community, Teams, and Enterprise plans.
+- [Billing FAQs](https://signoz.io/docs/billing/troubleshooting/faqs/): common questions answered.
