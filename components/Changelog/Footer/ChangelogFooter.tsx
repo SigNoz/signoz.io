@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react'
 import type { TPagination } from '@/utils/strapi'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 
-const ChangelogFooter: React.FC<{ pagination: TPagination }> = ({ pagination }) => {
+const ChangelogFooter: React.FC<{
+  pagination: TPagination
+  displayedCount: number
+  hiddenLatestCount?: number
+}> = ({ pagination, displayedCount, hiddenLatestCount = 0 }) => {
   const { page } = useParams()
   const [currentPage, setCurrentPage] = useState(page ? parseInt(page as string, 10) : 1)
   const router = useRouter()
@@ -23,8 +27,9 @@ const ChangelogFooter: React.FC<{ pagination: TPagination }> = ({ pagination }) 
     router.push(`/changelog?${queryParams.toString()}`, { scroll: true })
   }
 
-  const pageStart = pagination.pageSize * (pagination.page - 1) + 1
-  const pageEnd = pageStart + Math.min(pagination.pageSize, pagination.total) - 1
+  const pageStart =
+    pagination.pageSize * (pagination.page - 1) + 1 - (pagination.page > 1 ? hiddenLatestCount : 0)
+  const pageEnd = pageStart + displayedCount - 1
 
   return (
     <div className="relative flex min-h-20 items-center justify-between px-4 md:px-8">

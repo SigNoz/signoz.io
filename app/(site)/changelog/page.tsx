@@ -54,11 +54,35 @@ const Changelog = async (props: ChangelogProps) => {
   })
 
   let changelogs = changelogsResponse.changelogs
+  let hiddenLatestCount = 0
 
   if (currentPage === 1 && changelogs.length > 0) {
     const isPublished = await isGitHubReleasePublished(changelogs[0].version)
     if (!isPublished) {
       changelogs = changelogs.slice(1)
+      hiddenLatestCount = 1
+    }
+  } else if (currentPage > 1) {
+    const latestResponse = await fetchChangelogEntries({
+      page: 1,
+      pageSize: 1,
+      deployment_type: deploymentType,
+    })
+    if (latestResponse.changelogs.length > 0) {
+      const isPublished = await isGitHubReleasePublished(latestResponse.changelogs[0].version)
+      if (!isPublished) {
+        hiddenLatestCount = 1
+      }
+    }
+  }
+
+  let pagination = changelogsResponse.pagination
+  if (hiddenLatestCount > 0) {
+    const adjustedTotal = pagination.total - hiddenLatestCount
+    pagination = {
+      ...pagination,
+      total: adjustedTotal,
+      pageCount: Math.ceil(adjustedTotal / pagination.pageSize),
     }
   }
 
@@ -72,7 +96,11 @@ const Changelog = async (props: ChangelogProps) => {
             {changelogs &&
               changelogs.map((entry) => <ChangelogRenderer key={entry.id} changelog={entry} />)}
           </div>
-          <ChangelogFooter pagination={changelogsResponse.pagination} />
+          <ChangelogFooter
+            pagination={pagination}
+            displayedCount={changelogs.length}
+            hiddenLatestCount={hiddenLatestCount}
+          />
         </div>
       </div>
     </section>
