@@ -1,7 +1,7 @@
 ---
-date: 2026-05-13
-title: Public Sharing in Dashboards
-description: Share SigNoz dashboards publicly with a generated link and control the default time range available to viewers.
+date: 2026-07-03
+title: Public Dashboard Sharing - Share Dashboards via a Link
+description: Share SigNoz dashboards publicly with a generated link, control the default time range, and let viewers auto-refresh panels on an interval.
 doc_type: howto
 ---
 
@@ -34,6 +34,22 @@ Use public sharing when you want to make a dashboard available with a link outsi
   alt="Public sharing configuration in SigNoz"
   caption="Once published, copy the public dashboard URL or open it directly. Dashboard variables won't work in public dashboards."
 />
+
+## Auto-refresh for viewers
+
+Public dashboard viewers can reload every panel on a fixed interval without logging in. The auto-refresh selector (a refresh icon with a dropdown) appears in the dashboard header, to the left of the time picker.
+
+- **Availability**: The selector appears only when you turn on **Enable time range** on the Publish form. If the dashboard is locked to a fixed default time range, viewers see no auto-refresh control.
+- **Intervals**: Viewers can choose **Off**, **5s**, **10s**, **30s**, **1m**, **5m**, **10m**, **30m**, **1h**, **2h**, or **1d**.
+- **Default is Off**: Existing public dashboards keep their current behavior until a viewer picks an interval.
+- **Custom ranges**: When a viewer switches the time picker to a custom fixed start and end time, the selector is disabled, matching the authenticated app.
+
+On each tick, auto-refresh advances the rolling window from the selected relative range (for example, "Last 30 minutes") and refetches every panel.
+
+<Admonition type="info">
+  Auto-refresh works only with relative time ranges. Selecting a fixed custom range pauses it until the
+  viewer returns to a relative range.
+</Admonition>
 
 ## Disable Public Sharing
 
