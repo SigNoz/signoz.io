@@ -147,7 +147,7 @@ export default function Faq() {
             clickName="Contact Us Button"
             clickText="Contact us"
             clickType="Primary CTA"
-            href="/contact-us/"
+            href="/contact-us/?source=homepage"
           >
             <Button as="span" className="!w-full" variant="legacyPrimary" withIcon>
               Contact us
