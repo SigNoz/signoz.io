@@ -9,7 +9,7 @@ import { features } from './FeatureBentoData'
 export default function FeatureBento() {
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-20 lg:py-32 min-[1441px]:max-w-8xl min-[1441px]:px-0"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-16 lg:py-32 xl:px-20 min-[1600px]:max-w-8xl min-[1600px]:px-0"
       data-homepage-feature-bento
     >
       <div className="mx-auto max-w-8xl">
@@ -20,13 +20,13 @@ export default function FeatureBento() {
           aria-hidden="true"
         />
 
-        <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-end md:justify-between md:gap-6">
+        <div className="mb-10 flex flex-col gap-5 md:mb-12 xl:mb-14 xl:flex-row xl:items-end xl:justify-between xl:gap-6">
           <div>
-            <h2 className="m-0 max-w-3xl text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl md:text-6xl md:leading-none">
+            <h2 className="m-0 max-w-3xl text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl lg:max-w-4xl lg:text-5xl lg:leading-none xl:max-w-3xl xl:text-6xl xl:leading-none">
               Everything your team needs to investigate production.
             </h2>
           </div>
-          <div className="max-w-md">
+          <div className="max-w-xl xl:max-w-md">
             <p className="m-0 text-base leading-7 tracking-normal text-signoz_vanilla-400 sm:text-lg sm:leading-8">
               Move from symptoms to evidence across APM, logs, traces, infra, LLM telemetry, alerts,
               and dashboards.

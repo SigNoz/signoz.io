@@ -159,7 +159,7 @@ export default function HeroTracePreview() {
         </div>
       </div>
 
-      <div className="relative z-10 hidden bg-signoz_ink-500/90 px-4 pt-5 sm:px-6 lg:block lg:px-8">
+      <div className="relative z-10 hidden bg-signoz_ink-500/90 px-4 pt-5 sm:px-6 lg:block lg:px-6 xl:px-8">
         <LayoutGroup id="homepage-hero-preview-tabs">
           <div
             className="grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-3 lg:grid-cols-6"
@@ -173,7 +173,7 @@ export default function HeroTracePreview() {
                 <button
                   aria-controls="homepage-hero-preview-panel"
                   aria-selected={isActive}
-                  className="group relative min-h-16 pb-4 text-left text-signoz_vanilla-100 transition-colors duration-200"
+                  className="group relative min-h-14 pb-3 text-left text-signoz_vanilla-100 transition-colors duration-200 xl:min-h-16 xl:pb-4"
                   id={`homepage-hero-preview-tab-${index}`}
                   key={tab.label}
                   onClick={() => {
@@ -197,7 +197,7 @@ export default function HeroTracePreview() {
                   role="tab"
                   type="button"
                 >
-                  <span className="block text-base font-medium leading-5 tracking-normal sm:text-lg sm:leading-6">
+                  <span className="block whitespace-nowrap text-base font-medium leading-5 tracking-normal xl:text-lg xl:leading-6">
                     {tab.label}
                   </span>
                   <span className="mt-1 block text-sm font-medium leading-5 tracking-normal text-signoz_vanilla-400/55 transition-colors duration-200 group-hover:text-signoz_vanilla-400/70">
@@ -220,7 +220,7 @@ export default function HeroTracePreview() {
 
       <div
         aria-labelledby={`homepage-hero-preview-tab-${activeTab}`}
-        className="relative mt-6 hidden h-96 overflow-hidden bg-transparent sm:h-96 md:h-[570px] lg:block lg:h-[640px]"
+        className="relative mt-6 hidden h-96 overflow-hidden bg-transparent sm:h-96 md:h-[570px] lg:block lg:h-[560px] xl:h-[640px]"
         id="homepage-hero-preview-panel"
         role="tabpanel"
       >
