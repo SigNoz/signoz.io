@@ -2,7 +2,7 @@
 
 import { Activity, Bot, Cable, SearchCode, ServerCog, type LucideIcon } from 'lucide-react'
 import Image, { type StaticImageData } from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import GrainientCardBackground from './GrainientCardBackground'
 
@@ -96,9 +96,26 @@ function isWhitespaceToken(token: string) {
   return /^\s+$/.test(token)
 }
 
-function RevealWords({ progress, text }: { progress: number; text: string }) {
+function getRevealWordMetadata(text: string) {
   const tokens = text.split(/(\s+)/).filter(Boolean)
-  const wordCount = tokens.filter((token) => !isWhitespaceToken(token)).length
+  const wordIndices: number[] = []
+  let wordCount = 0
+
+  tokens.forEach((token) => {
+    if (isWhitespaceToken(token)) {
+      wordIndices.push(-1)
+      return
+    }
+
+    wordIndices.push(wordCount)
+    wordCount += 1
+  })
+
+  return { tokens, wordCount, wordIndices }
+}
+
+function RevealWords({ progress, text }: { progress: number; text: string }) {
+  const { tokens, wordCount, wordIndices } = useMemo(() => getRevealWordMetadata(text), [text])
 
   return (
     <span aria-hidden="true">
@@ -107,9 +124,7 @@ function RevealWords({ progress, text }: { progress: number; text: string }) {
           return token
         }
 
-        const wordIndex =
-          tokens.slice(0, tokenIndex + 1).filter((candidate) => !isWhitespaceToken(candidate))
-            .length - 1
+        const wordIndex = wordIndices[tokenIndex]
 
         const revealStart = wordCount <= 1 ? 0 : (wordIndex / (wordCount - 1)) * 0.72
         const revealProgress = easeOutCubic((progress - revealStart) / 0.24)

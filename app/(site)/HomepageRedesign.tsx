@@ -16,7 +16,7 @@ export default function HomepageRedesign() {
       <TrustedByTeams
         page="homepage"
         variant="marquee"
-        className="relative left-1/2 w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-4 sm:px-6 lg:px-20 min-[1441px]:max-w-8xl min-[1441px]:px-0"
+        className="relative left-1/2 w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-4 sm:px-6 lg:px-20 wide:max-w-8xl wide:px-0"
       />
       <WhySignoz />
       <FeatureBento />
