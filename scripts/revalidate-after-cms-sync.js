@@ -84,6 +84,7 @@ function uniqueStrings(arr) {
 }
 
 const SIDENAV_CHANGED = process.env.SIDENAV_CHANGED === 'true'
+const RECONCILE_STAGING = process.env.RECONCILE_STAGING === 'true'
 
 const LISTICLES_CHANGED = process.env.LISTICLES_CHANGED === 'true'
 const CHANGED_LISTICLES_RAW = getAssetsListFromEnv('CHANGED_LISTICLES', 'CHANGED_LISTICLES_PATH')
@@ -134,6 +135,20 @@ function buildPayload() {
   if (SIDENAV_CHANGED) {
     console.log('📣 Sidenav changed: using full revalidation (sidebar appears on every docs page).')
     return { mode: 'all', reason: 'sidenav-changed' }
+  }
+
+  // If reconciliation happened, force full revalidation (reconciled paths may not be in changed files)
+  if (RECONCILE_STAGING) {
+    try {
+      const syncResultsPath = path.join(process.cwd(), 'sync-results.json')
+      const syncResults = JSON.parse(fs.readFileSync(syncResultsPath, 'utf8'))
+      if (syncResults.hasReconciledEntries) {
+        console.log('📣 Reconciled entries detected: using full revalidation for staging.')
+        return { mode: 'all', reason: 'reconciled-staging' }
+      }
+    } catch {
+      // sync-results.json may not exist yet; continue with normal logic
+    }
   }
 
   // Collect listicle-related paths and tags

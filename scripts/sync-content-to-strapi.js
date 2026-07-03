@@ -6,6 +6,8 @@ const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
 const mime = require('mime-types')
 
 const DEPLOYMENT_STATUS = process.env.DEPLOYMENT_STATUS
+const SYNC_MANIFEST_PATH = process.env.SYNC_MANIFEST_PATH
+const RECONCILE_STAGING = process.env.RECONCILE_STAGING === 'true'
 
 const CMS_BATCH_SIZE = parseInt(process.env.CMS_BATCH_SIZE || '10', 10)
 const CMS_BATCH_DELAY_MS = parseInt(process.env.CMS_BATCH_DELAY_MS || '1000', 10)
@@ -68,6 +70,21 @@ function chunk(array, size) {
     chunks.push(array.slice(i, i + size))
   }
   return chunks
+}
+
+function readPreviousManifest() {
+  if (!SYNC_MANIFEST_PATH || !fs.existsSync(SYNC_MANIFEST_PATH)) return []
+  try {
+    return JSON.parse(fs.readFileSync(SYNC_MANIFEST_PATH, 'utf8'))
+  } catch {
+    return []
+  }
+}
+
+function writeManifest(paths) {
+  if (!SYNC_MANIFEST_PATH) return
+  fs.mkdirSync(path.dirname(SYNC_MANIFEST_PATH), { recursive: true })
+  fs.writeFileSync(SYNC_MANIFEST_PATH, JSON.stringify(paths, null, 2))
 }
 
 async function withRetry(fn, label) {
@@ -1448,6 +1465,76 @@ async function syncToStrapi() {
     for (const op of pendingOperations) {
       await processOperation(op)
     }
+  }
+
+  // Phase 2.5: Reconcile staging CMS (PR syncs only)
+  if (RECONCILE_STAGING && DEPLOYMENT_STATUS === 'staging') {
+    console.log('\n' + '='.repeat(80))
+    console.log('🔄 PHASE 2.5: Staging CMS Reconciliation')
+    console.log('='.repeat(80))
+
+    // Current desired state: all non-deleted changed files in sync folders
+    const currentManifest = []
+    for (const { path: filePath, isDeleted } of allFiles) {
+      if (isDeleted) continue
+      const folderName = getFolderName(filePath)
+      if (!folderName || !SYNC_FOLDERS.includes(folderName)) continue
+      const pathField = generatePathField(filePath, folderName)
+      if (pathField) currentManifest.push({ folderName, pathField })
+    }
+
+    const currentPathSet = new Set(currentManifest.map((m) => `${m.folderName}:${m.pathField}`))
+
+    // Previous state: what this PR synced last time
+    const previousManifest = readPreviousManifest()
+    console.log(`Previous manifest: ${previousManifest.length} entries`)
+    console.log(`Current desired: ${currentManifest.length} entries`)
+
+    // Stale = in previous manifest but NOT in current desired set
+    const staleEntries = previousManifest.filter(
+      (m) => !currentPathSet.has(`${m.folderName}:${m.pathField}`)
+    )
+
+    console.log(`Stale entries to clean up: ${staleEntries.length}`)
+
+    if (staleEntries.length > 0) {
+      const staleByFolder = {}
+      for (const { folderName, pathField } of staleEntries) {
+        if (!staleByFolder[folderName]) staleByFolder[folderName] = []
+        staleByFolder[folderName].push(pathField)
+      }
+
+      for (const [folderName, paths] of Object.entries(staleByFolder)) {
+        const schema = COLLECTION_SCHEMAS[folderName]
+        if (!schema) continue
+
+        const entities = await fetchEntitiesByFilter(schema.endpoint, 'path', paths)
+        const stagingEntities = entities.filter((e) => e.deployment_status === 'staging')
+
+        for (const entity of stagingEntities) {
+          try {
+            await deleteEntry(folderName, entity.documentId)
+            console.log(`  Reconciled (deleted): ${entity.path}`)
+            results.deleted.push({
+              file: `(reconciled) ${folderName}${entity.path}`,
+              path: entity.path,
+            })
+          } catch (error) {
+            console.error(`  Failed to reconcile ${entity.path}: ${error.message}`)
+            results.errors.push({
+              file: `(reconciled) ${folderName}${entity.path}`,
+              error: error.message,
+            })
+          }
+        }
+      }
+    }
+
+    results.hasReconciledEntries = staleEntries.length > 0
+
+    // Save the new manifest for next run
+    writeManifest(currentManifest)
+    console.log(`Saved manifest with ${currentManifest.length} entries`)
   }
 
   // Print summary

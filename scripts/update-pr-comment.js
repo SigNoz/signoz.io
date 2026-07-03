@@ -52,10 +52,23 @@ module.exports = async ({ github, context, core }) => {
       }
 
       // Documents details
+      const reconciledDeletes = syncResults.deleted.filter(
+        (item) => item.file && item.file.startsWith('(reconciled)')
+      )
+      const intentionalDeletes = syncResults.deleted.filter(
+        (item) => !item.file || !item.file.startsWith('(reconciled)')
+      )
+
+      if (reconciledDeletes.length > 0) {
+        body += `| 🧹 Reconciled | ${reconciledDeletes.length} |\n\n`
+        body += `> **Note:** ${reconciledDeletes.length} stale staging entry(ies) were cleaned up (renamed/reverted files).\n\n`
+      }
+
       const allProcessed = [
         ...syncResults.created.map((item) => ({ ...item, operation: 'Created' })),
         ...syncResults.updated.map((item) => ({ ...item, operation: 'Updated' })),
-        ...syncResults.deleted.map((item) => ({ ...item, operation: 'Deleted' })),
+        ...intentionalDeletes.map((item) => ({ ...item, operation: 'Deleted' })),
+        ...reconciledDeletes.map((item) => ({ ...item, operation: 'Reconciled' })),
       ]
 
       if (allProcessed.length > 0) {
