@@ -12,7 +12,7 @@ import { MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
-import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
+import { mdxOptions, generateTOC, ensureTrailingSlash } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
 import { resolveLatestDate } from '@/utils/dateUtils'
 
@@ -37,11 +37,6 @@ function getRelatedArticleDoc(entry: MDXContent): { doc: MDXContent; contentType
   }
 
   return null
-}
-
-function ensureTrailingSlash(url: string): string {
-  if (url.endsWith('/')) return url
-  return `${url}/`
 }
 
 function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {

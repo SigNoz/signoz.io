@@ -17,7 +17,7 @@ import { MDXContent } from './strapi'
 import { deriveDates, resolveLatestDate } from './dateUtils'
 import siteMetadata from '@/data/siteMetadata'
 
-function ensureTrailingSlash(url: string): string {
+export function ensureTrailingSlash(url: string): string {
   if (url.endsWith('/')) return url
   return `${url}/`
 }
