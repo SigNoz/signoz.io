@@ -88,4 +88,58 @@ Additional columns available via the Columns selector: **Namespace**, **Node**, 
 
 ## Container Detail Page
 
-{/* Phase 3: charts + Logs / Traces / Events tabs */}
+Click a container's row to open its detail page. The header shows the container's **Pod**, **Namespace**, **Node**, **Cluster**, and **Image:Tag**. The detail page has four tabs: **Metrics**, **Logs**, **Traces**, and **Events**.
+
+Every panel on the **Metrics** tab is scoped to that single container by `k8s.container.name` and `k8s.pod.uid`. Charts that plot **Min / Max / Avg** lines show three time-aggregations of the metric within each step interval, so the gap between Max and Min reflects how bursty the container is inside that interval.
+
+### Container Metrics — Charts and Panels
+
+#### CPU Usage (cores)
+
+- This chart relies on the OTel metric(s): `container.cpu.usage`.
+- Plots the container's CPU consumption in CPU-core units over time, with one line each for **Avg**, **Max**, and **Min** within each step interval. A narrow band between Max and Min means steady CPU use; a wide band means the container is bursting inside the interval. This is the same metric as the list page's **CPU Usage (cores)** column, shown as a time series.
+
+#### CPU Request, Limit Utilization
+
+- This chart relies on the OTel metric(s): `k8s.container.cpu_request_utilization`, `k8s.container.cpu_limit_utilization`.
+- Plots the container's CPU usage in cores — the same value shown in the **CPU Usage (cores)** chart — as a fraction of its own CPU request and its CPU limit over time. Six lines: **Avg / Max / Min** for each of the two ratios. Request lines crossing 100% just mean the container is using more CPU than it reserved, which is allowed; Limit lines crossing 100% mean the kernel is actively throttling it.
+
+#### Memory Usage (bytes)
+
+- This chart relies on the OTel metric(s): `container.memory.usage`, `container.memory.available`.
+- Plots the container's memory in bytes over time. **Usage** (`container.memory.usage`) is all memory charged to the container, including reclaimable page cache, shown as **Avg / Max / Min** within each step interval. **Available** (`container.memory.available`) is the headroom remaining before the container reaches its memory limit. When Usage rises while Available falls toward zero, the container is nearing an OOM kill. This Usage is the total-memory value, so it reads higher than the working-set number in the **Mem Usage (WSS)** column and the **Memory by State** chart below.
+
+#### Memory Request, Limit Utilization
+
+- This chart relies on the OTel metric(s): `k8s.container.memory_request_utilization`, `k8s.container.memory_limit_utilization`.
+- Plots the container's total memory usage — the **Memory Usage (bytes)** value — as a fraction of its own memory request and its memory limit over time. Six lines: **Avg / Max / Min** for each of the two ratios. Request lines crossing 100% just mean the container is using more memory than it reserved; Limit lines approaching 100% risk an OOM kill once the kernel detects memory pressure. These are the time-series form of the **Mem Req Usage (%)** and **Mem Limit Usage (%)** columns.
+
+#### Memory by State
+
+- This chart relies on the OTel metric(s): `container.memory.rss`, `container.memory.working_set`.
+- Plots three memory components of the container over time: `container.memory.rss` as **RSS Memory** (anonymous and tmpfs memory), `container.memory.working_set` as **Working Set Memory** (the OOM- and eviction-relevant footprint), and a `working_set − rss` formula as **Cache Memory** (the file-backed cache portion of the working set). Rising RSS without rising Working Set usually points to an application heap leak; rising Cache without rising RSS typically reflects heavier file I/O.
+
+#### Memory Major Page Faults
+
+- This chart relies on the OTel metric(s): `container.memory.major_page_faults`.
+- Plots the container's major-page-fault rate over time, as a single line. A major page fault is the kernel reading a page from disk because it wasn't in RAM. Sustained high values mean the container's working set exceeds its available memory and the system is paging from disk, which is very expensive and usually correlates with severe latency spikes.
+
+#### File System (bytes)
+
+- This chart relies on the OTel metric(s): `container.filesystem.capacity`, `container.filesystem.available`, `container.filesystem.usage`.
+- Plots three values of the container's filesystem over time: **Capacity** (`container.filesystem.capacity`) is the total provisioned space, **Available** (`container.filesystem.available`) is the remaining free space, and **Usage** (`container.filesystem.usage`) is what's currently consumed. When Available trends toward zero or Usage approaches Capacity, the container's filesystem is filling up. Common causes are log accumulation, downloaded artifacts, or temp and cache files that aren't being cleaned up.
+
+#### Container Uptime
+
+- This chart relies on the OTel metric(s): `container.uptime`. This metric is disabled by default in the kubeletstats receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+- Plots the time in seconds since the container last started, as a single line that climbs steadily and drops back to zero on each restart. A sawtooth of repeated resets is an at-a-glance sign of a crash-looping or frequently-restarting container, and pairs with the **Restarts** column to confirm instability.
+
+#### Node CPU Utilization by Container
+
+- This chart relies on the OTel metric(s): `k8s.container.cpu.node.utilization`. This metric is disabled by default in the kubeletstats receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+- Plots the container's CPU usage as a fraction of the entire node's total CPU capacity over time, as a single line. The request and limit utilizations compare the container against its own reservations; this instead shows the container's share of the whole node. Use it to see how much of a node a single container is claiming and to spot noisy neighbors competing for node CPU.
+
+#### Node Memory Utilization by Container
+
+- This chart relies on the OTel metric(s): `k8s.container.memory.node.utilization`. This metric is disabled by default in the kubeletstats receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+- Plots the container's memory usage as a fraction of the entire node's total memory capacity over time, as a single line. Like **Node CPU Utilization by Container**, this measures the container's share of the whole node rather than of its own request or limit. Use it to see which containers dominate a node's memory and to spot memory pressure building at the node level.
