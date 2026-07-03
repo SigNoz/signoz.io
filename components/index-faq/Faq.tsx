@@ -136,7 +136,9 @@ export default function Faq() {
       <div className="mx-auto grid max-w-8xl gap-10 lg:grid-cols-3 lg:gap-12">
         <div>
           <h2 className="m-0 max-w-md text-4xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-5xl md:text-6xl md:leading-none">
-            Your questions, answered.
+            Your questions,
+            <br />
+            <span className="text-signoz_vanilla-400">answered.</span>
           </h2>
           <p className="m-0 mt-5 max-w-md text-base leading-7 tracking-normal text-signoz_vanilla-400 sm:mt-6 sm:text-lg sm:leading-8">
             Quick answers to the questions teams usually ask while evaluating SigNoz.

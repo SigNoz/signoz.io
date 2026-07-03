@@ -62,9 +62,11 @@ function PricingValueColumn({
       <div>
         <div className="flex items-center gap-3">
           <Icon className="h-5 w-5 shrink-0 text-signoz_robin-400" />
-          <p className="m-0 text-sm leading-5 text-signoz_vanilla-400 md:mt-0">{title}</p>
+          <p className="m-0 text-lg font-medium leading-7 tracking-normal text-signoz_vanilla-100 md:text-xl md:leading-8">
+            {title}
+          </p>
         </div>
-        <p className="m-0 mt-3 max-w-sm text-lg font-medium leading-7 tracking-normal text-signoz_vanilla-100 md:text-xl md:leading-8">
+        <p className="m-0 mt-3 max-w-sm text-base leading-7 tracking-normal text-signoz_vanilla-400 md:text-lg md:leading-8">
           {description}
         </p>
       </div>
@@ -154,7 +156,9 @@ export default function Pricing() {
       <div className="mx-auto max-w-8xl">
         <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-start md:justify-between md:gap-6">
           <h2 className="m-0 max-w-3xl text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl sm:leading-none md:text-6xl">
-            Pricing that stays predictable as you scale.
+            Pricing that stays predictable
+            <br />
+            <span className="text-signoz_vanilla-400">as you scale.</span>
           </h2>
           <div className="max-w-md">
             <p className="m-0 text-base leading-7 tracking-normal text-signoz_vanilla-400 sm:text-lg sm:leading-8">

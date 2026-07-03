@@ -273,7 +273,9 @@ export default function AgentNativeObservabilitySection() {
 
         <div className="grid gap-5 md:grid-cols-[0.9fr_1fr] md:items-start md:gap-20">
           <h2 className="m-0 max-w-[540px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[40px] sm:leading-[1.04] sm:tracking-[-1.1px] md:text-[58px] md:tracking-[-1.65px]">
-            Agent-native observability, inside your IDE and SigNoz.
+            Agent-native observability,
+            <br />
+            <span className="text-signoz_vanilla-400">inside your IDE and SigNoz.</span>
           </h2>
 
           <div className="max-w-[560px] md:pt-2">

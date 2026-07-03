@@ -311,12 +311,12 @@ export default function WhySignoz() {
               className="pointer-events-none absolute left-1/2 top-full z-0 h-40 w-[160dvw] -translate-x-1/2 bg-gradient-to-b from-signoz_ink-500 to-transparent"
             />
             <h2 className="relative z-10 m-0 max-w-lg text-3xl font-medium leading-none text-signoz_vanilla-100 sm:text-4xl sm:leading-none md:text-6xl">
-              Why SigNoz
+              <span className="whitespace-nowrap">Fast Troubleshooting.</span>
+              <br />
+              <span className="whitespace-nowrap text-signoz_vanilla-400">
+                No Context Switching.
+              </span>
             </h2>
-            <p className="relative z-10 m-0 mt-6 max-w-lg text-lg font-medium leading-7 text-signoz_vanilla-400">
-              SigNoz keeps traces, metrics, logs, dashboards, alerts, and agent workflows together
-              so every investigation starts from the same evidence.
-            </p>
             <div className="relative z-10 mt-9 h-px w-full bg-signoz_slate-100" />
           </div>
 

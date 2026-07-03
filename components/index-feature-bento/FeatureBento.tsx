@@ -23,7 +23,9 @@ export default function FeatureBento() {
         <div className="mb-10 flex flex-col gap-5 md:mb-12 xl:mb-14 xl:flex-row xl:items-end xl:justify-between xl:gap-6">
           <div>
             <h2 className="m-0 max-w-3xl text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl lg:max-w-4xl lg:text-5xl lg:leading-none xl:max-w-3xl xl:text-6xl xl:leading-none">
-              Everything your team needs to investigate production.
+              One-stop platform for all
+              <br />
+              <span className="text-signoz_vanilla-400">your observability needs.</span>
             </h2>
           </div>
           <div className="max-w-xl xl:max-w-md">

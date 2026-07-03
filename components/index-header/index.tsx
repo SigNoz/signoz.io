@@ -70,8 +70,9 @@ export function HomepageHeroRedesign() {
           <div className="flex flex-col items-start md:pt-2">
             <HeroCopyMotion delay={0.12}>
               <p className="m-0 max-w-lg text-left text-lg font-normal leading-7 tracking-[-0.165px] text-signoz_vanilla-400 lg:max-w-sm lg:text-base xl:max-w-lg xl:text-lg">
-                SigNoz brings your traces, metrics, logs, and alerts into one OpenTelemetry-native
-                workspace so you don&apos;t have to stitch together five tools during an incident.
+                SigNoz brings your traces, metrics, and logs into one OpenTelemetry-native platform.
+                Simple usage-based pricing, and the freedom to run on our cloud or your
+                infrastructure.
               </p>
             </HeroCopyMotion>
 

@@ -22,42 +22,36 @@ import tracingPreview from '@/public/img/website/hero-tabs/tracing.webp'
 const heroTabs = [
   {
     label: 'Trace',
-    description: 'every request',
     image: tracingPreview,
     video: '/img/website/hero-tabs/signoz-trace-demo.mp4',
     alt: 'SigNoz tracing flame graph and waterfall view',
   },
   {
     label: 'Log',
-    description: 'what changed',
     image: logsPreview,
     video: '/img/website/hero-tabs/signoz-log-demo.mp4',
     alt: 'SigNoz logs explorer with frequency chart and log entries',
   },
   {
     label: 'Infrastructure',
-    description: 'hosts and pods',
     image: infrastructurePreview,
     video: '/img/website/hero-tabs/signoz-infrastructure-demo.mp4',
     alt: 'SigNoz infrastructure host metrics view',
   },
   {
     label: 'APM',
-    description: 'service health',
     image: apmPreview,
     video: '/img/website/hero-tabs/signoz-apm-demo.mp4',
     alt: 'SigNoz application performance monitoring service overview',
   },
   {
     label: 'Dashboards',
-    description: 'shared views',
     image: dashboardsPreview,
     video: '/img/website/hero-tabs/signoz-dashboards-demo.mp4',
     alt: 'SigNoz dashboard with service latency charts',
   },
   {
     label: 'Alerts',
-    description: 'before impact',
     image: alertsPreview,
     video: '/img/website/hero-tabs/signoz-alert-demo.mp4',
     alt: 'SigNoz metric alert configuration view',
@@ -141,9 +135,6 @@ export default function HeroTracePreview() {
                 <h3 className="m-0 text-base font-medium leading-5 text-signoz_vanilla-100">
                   {tab.label}
                 </h3>
-                <p className="m-0 mt-1 text-sm font-medium leading-5 text-signoz_vanilla-400/60">
-                  {tab.description}
-                </p>
               </div>
               <div className="relative h-80 overflow-hidden sm:h-96">
                 {renderPreviewMedia(
@@ -173,7 +164,7 @@ export default function HeroTracePreview() {
                 <button
                   aria-controls="homepage-hero-preview-panel"
                   aria-selected={isActive}
-                  className="group relative min-h-14 pb-3 text-left text-signoz_vanilla-100 transition-colors duration-200 xl:min-h-16 xl:pb-4"
+                  className="group relative min-h-10 pb-3 text-left text-signoz_vanilla-100 transition-colors duration-200 xl:min-h-11 xl:pb-4"
                   id={`homepage-hero-preview-tab-${index}`}
                   key={tab.label}
                   onClick={() => {
@@ -199,9 +190,6 @@ export default function HeroTracePreview() {
                 >
                   <span className="block whitespace-nowrap text-base font-medium leading-5 tracking-normal xl:text-lg xl:leading-6">
                     {tab.label}
-                  </span>
-                  <span className="mt-1 block text-sm font-medium leading-5 tracking-normal text-signoz_vanilla-400/55 transition-colors duration-200 group-hover:text-signoz_vanilla-400/70">
-                    {tab.description}
                   </span>
                   <span className="absolute inset-x-0 bottom-0 h-px bg-signoz_slate-100/70 transition-colors duration-200 group-hover:bg-signoz_slate-100" />
                   {isActive && (
