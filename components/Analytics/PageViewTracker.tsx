@@ -35,8 +35,6 @@ const clampPercentage = (value: number) => Math.max(0, Math.min(1, value))
 
 const roundPercentage = (value: number) => Math.round(value * 10000) / 10000
 
-const shouldTrackHomepageScrollDepth = (pathname?: string | null) => pathname === '/'
-
 const getCurrentContentPercentage = () => {
   if (typeof window === 'undefined' || typeof document === 'undefined') return undefined
 
@@ -67,8 +65,6 @@ export default function PageViewTracker() {
   const currentPage = useRef<TrackedPage | null>(null)
 
   const updateMaxContentPercentage = useCallback((page: TrackedPage) => {
-    if (!shouldTrackHomepageScrollDepth(page.pathname)) return
-
     const currentContentPercentage = getCurrentContentPercentage()
     if (currentContentPercentage === undefined) return
 
@@ -120,11 +116,7 @@ export default function PageViewTracker() {
     }
 
     const requestContentPercentageUpdate = () => {
-      if (
-        !currentPage.current ||
-        !shouldTrackHomepageScrollDepth(currentPage.current.pathname) ||
-        animationFrameId !== null
-      ) {
+      if (!currentPage.current || animationFrameId !== null) {
         return
       }
 
@@ -252,9 +244,7 @@ export default function PageViewTracker() {
       pageReferrer,
       sessionId,
       startedAt: Date.now(),
-      maxContentPercentage: shouldTrackHomepageScrollDepth(pathname)
-        ? getCurrentContentPercentage()
-        : undefined,
+      maxContentPercentage: getCurrentContentPercentage(),
       left: false,
     }
 
