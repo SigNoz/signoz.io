@@ -1,5 +1,5 @@
 ---
-date: 2026-05-18
+date: 2026-07-03
 title: Functions for Extended Data Analysis
 description: Use exclusion, arithmetic, smoothing, and time shift functions in the SigNoz Metrics Query Builder to enhance your data analysis.
 doc_type: reference
@@ -40,11 +40,48 @@ Arithmetic functions enable mathematical operations to customize metric calculat
 
 ### Smoothing Functions
 
-Smoothing functions address volatile data through moving averages and similar techniques.
+Smoothing functions reduce noise in volatile time series so underlying trends are easier to see. SigNoz provides the **Exponentially Weighted Moving Average (EWMA)**, which smooths a series by giving exponentially decreasing weight to older data points.
 
-- **EWMA 3** — Exponentially Weighted Moving Average over 3 periods
-- **EWMA 5** — Exponentially Weighted Moving Average over 5 periods
-- **EWMA 7** — Exponentially Weighted Moving Average over 7 periods
+- **EWMA 3** — smoothing equivalent to a 3-period moving average (lightest smoothing)
+- **EWMA 5** — smoothing equivalent to a 5-period moving average
+- **EWMA 7** — smoothing equivalent to a 7-period moving average (heaviest smoothing)
+
+#### How EWMA works
+
+Each smoothed point is a weighted blend of the current raw value and the previous smoothed value:
+
+```
+EWMA(t) = α × value(t) + (1 − α) × EWMA(t−1)
+```
+
+The series is seeded with its first non-empty value, and α (alpha) is the **smoothing factor** — a number between 0 and 1 that controls how much weight each new data point gets.
+
+#### What "period" means
+
+The `3`, `5`, and `7` refer to the **window size N in data points** — not a fixed clock duration. A "period" is one data point at your query's *step (aggregation) interval*. So the real-world span depends on your step: with a 1-minute step, EWMA 5 behaves like a 5-minute window; with a 1-hour step, the same EWMA 5 behaves like a 5-hour window.
+
+The period sets the **default** smoothing factor:
+
+```
+α = 2 / (N + 1)
+```
+
+| Function | Period (N) | Default α |
+|----------|:----------:|:---------:|
+| EWMA 3   | 3          | 0.5       |
+| EWMA 5   | 5          | 0.333     |
+| EWMA 7   | 7          | 0.25      |
+
+A **larger period → smaller α → heavier smoothing** and slower response to change. A **smaller period → larger α → lighter smoothing** that tracks recent values more closely.
+
+#### The alpha parameter
+
+EWMA also accepts an optional numeric parameter that **overrides** the default α. This is the value you enter next to the function in the query builder (for example, `0.1`).
+
+- α closer to **1** → little smoothing; the output closely follows the raw data.
+- α closer to **0** → heavy smoothing; the output is very flat and reacts slowly. For example, α = `0.1` keeps 90% of the running average and blends in only 10% of each new point.
+
+If you leave the parameter empty, EWMA uses the default α from the table above.
 
 ### Time Shift Functions
 
@@ -75,3 +112,28 @@ The Time Shift function demonstrates practical value by comparing service call v
   alt="Compare performance of services"
   caption="Check the performance of frontend service an hour apart with the help of time shift function"
 />
+
+## Example: Smoothing a Noisy Metric in a Dashboard
+
+Raw metrics like p99 latency or CPU usage often spike from datapoint to datapoint, which makes the trend hard to read. Applying EWMA in a dashboard panel keeps the shape of the trend while removing that jitter.
+
+1. Open a dashboard and add (or edit) a **Time Series** panel.
+2. Build your query — for example, the p99 latency of a service.
+3. In the query row, open the **Functions** dropdown and add **EWMA 5**.
+4. (Optional) enter a custom α in the function's value field — for example, `0.2` for heavier smoothing than the EWMA 5 default of `0.333`.
+5. Save the panel.
+
+The panel now plots the smoothed series. Start with **EWMA 3** for light smoothing and move to **EWMA 5** or **EWMA 7** (or a lower custom α) if the line is still too noisy.
+
+## Example: Reducing False Alerts with EWMA
+
+Threshold alerts on spiky metrics can fire on a single transient datapoint. Smoothing the series before it reaches the threshold check makes alerts fire on sustained changes instead of momentary blips.
+
+1. Go to **Alerts → New Alert** and choose a **Metric-based alert**.
+2. Build the query for the metric you want to watch — for example, error rate or request latency.
+3. In the **Functions** dropdown, add **EWMA 5** (or a custom α such as `0.2`) to smooth transient spikes.
+4. Set your threshold on the smoothed series and configure the alert as usual.
+
+<Admonition type="info">
+Because EWMA reacts more slowly than the raw series, a heavily smoothed metric (a low α, or EWMA 7) can delay an alert or hide short bursts. If your alert is meant to catch brief spikes, use lighter smoothing (EWMA 3 or a higher α) or none at all.
+</Admonition>
