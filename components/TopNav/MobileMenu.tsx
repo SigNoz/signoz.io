@@ -9,7 +9,12 @@ import { Button } from '@/components/ui/Button'
 import { cn } from 'app/lib/utils'
 import GitHubStars from '../GithubStars/GithubStars'
 import Accordion from '../Accordion/Accordion'
-import { productDropdownItemsSorted, resourcesDropdownItems } from './constants'
+import {
+  productDropdownItemsSorted,
+  useCasesDropdownItemsSorted,
+  comparisonItems,
+  resourcesDropdownItems,
+} from './constants'
 
 interface MobileMenuProps {
   open: boolean
@@ -67,6 +72,20 @@ function MainMenuContent({
   return (
     <div className="space-y-2 py-8">
       <Accordion topic="Product" subtopics={productDropdownItemsSorted} onLinkClick={onClose} />
+      <Accordion topic="Use Cases" subtopics={useCasesDropdownItemsSorted} onLinkClick={onClose} />
+      <Accordion topic="Compare SigNoz" subtopics={comparisonItems} onLinkClick={onClose} />
+      <TrackingLink
+        href="/case-study/"
+        className={MOBILE_LINK_CLASS}
+        clickType="Nav Click"
+        clickName="Customer Stories Link"
+        clickText="Customer Stories"
+        clickLocation="Mobile Menu"
+        onClick={onClose}
+        prefetch={false}
+      >
+        Customer Stories
+      </TrackingLink>
       <TrackingLink
         href="/docs/introduction/"
         className={MOBILE_LINK_CLASS}
