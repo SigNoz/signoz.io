@@ -1,5 +1,5 @@
 ---
-date: 2026-06-29
+date: 2026-07-03
 title: Alert Examples for Common Use Cases & Best Practices
 description: Ready-to-use SigNoz alert examples for no-data, error rate, latency, resource usage, and service-down monitoring, with the settings that prevent false alerts.
 doc_type: howto
@@ -95,7 +95,7 @@ sum by ("service.name") (rate({"signoz_calls_total", "span.kind"="SPAN_KIND_SERV
 The query checks every service and returns one series per `service.name`. To check one service, add `"service.name"="<your-service>"` inside the selector. OpenTelemetry metric names keep their dots, so the metric and any dotted label go inside braces as a quoted selector. See [Writing a PromQL query](https://signoz.io/docs/userguide/write-a-prom-query-with-new-format/).
 
 <Admonition type="info">
-A rate-below-threshold alert needs **Alert when data stops coming** enabled. A down service emits no series, so the rate query returns no value.
+A rate-below-threshold alert needs **Alert when data stops coming** enabled. A down service emits no series, so the rate query returns no value. In PromQL, default an absent series to zero with `or vector(0)`. For example, `sum(round(irate({"process.uptime"}[1m])) or vector(0)) != 1` fires when a service stops reporting uptime.
 </Admonition>
 
 ### Alert when no business events occur
@@ -146,6 +146,15 @@ Build a metric alert with two queries and a formula:
 
 Keep the time aggregation and space aggregation identical for Query A and Query B. The Having clause belongs on Query B, because the denominator decides whether the ratio has enough data to evaluate.
 
+To alert on an SLO where a good call must be both successful and fast, add the response-time bound to Query A. This example pages when fewer than 90% of an endpoint's calls both succeed and finish in under 6 seconds:
+
+- **Query A** (good calls): `count()`, filter `service.name = '<your-service>' AND name = '<endpoint>' AND hasError = false AND durationNano <= 6000000000`
+- **Query B** (all calls): `count()`, filter `service.name = '<your-service>' AND name = '<endpoint>'`, **Having** `count() > 100`
+- **Formula F1**: `(A / B) * 100`, with the y-axis unit set to Percent
+- **Condition**: Below, **Threshold** `90`, **Match type** `on average` over a 5-minute window
+
+`durationNano` is the span duration in nanoseconds, so 6 seconds is `6000000000`. Replace `<endpoint>` with the operation name, such as `POST /payments/verify`.
+
 ### Alert on high latency for an endpoint
 
 Alert on P95 or P99 when endpoint slowdowns matter more than averages.
@@ -157,8 +166,14 @@ Alert on P95 or P99 when endpoint slowdowns matter more than averages.
 - **Match type**: `at least once` for spike detection, or `on average` for sustained slowness
 - **Evaluation window**: `5m`
 
+PromQL variant, using the span-latency histogram. On this metric the endpoint label is `operation`; omit it for a service-wide p99:
+
+```promql
+histogram_quantile(0.99, sum by (le, "service.name") (rate({"signoz_latency.bucket", "service.name"="<your-service>", "operation"="<operation-name>"}[5m]))) > 1200
+```
+
 <Admonition type="warning">
-Always set **Threshold Unit** to `ms`. Span duration is stored in nanoseconds, so a bare threshold of `1200` is read as 1200 ns and the alert fires on nearly every request. On self-hosted SigNoz with a sharded ClickHouse cluster, percentile values computed across shards can read higher than the raw data; cross-check against the dashboard before tuning the threshold.
+In the Query Builder recipe, always set **Threshold Unit** to `ms`. Span duration is stored in nanoseconds, so a bare threshold of `1200` is read as 1200 ns and the alert fires on nearly every request. The PromQL variant needs no conversion: `signoz_latency.bucket` boundaries are already in milliseconds, so `> 1200` means 1200 ms. On self-hosted SigNoz with a sharded ClickHouse cluster, percentile values computed across shards can read higher than the raw data; cross-check against the dashboard before tuning the threshold.
 </Admonition>
 
 ### Alert on exception spikes
