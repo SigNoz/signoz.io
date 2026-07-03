@@ -2,6 +2,7 @@ import * as React from 'react'
 import Link from '@/components/Link'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Slot } from '@radix-ui/react-slot'
+import { ArrowUpRight } from 'lucide-react'
 
 import { cn } from 'app/lib/utils'
 
@@ -60,7 +61,8 @@ type LegacyButtonVariant = keyof typeof LEGACY_VARIANT_TO_STYLES_MAP
 type ButtonStyleVariant = ButtonVariant | LegacyButtonVariant
 
 export interface ButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>,
+  extends
+    Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>,
     Omit<VariantProps<typeof buttonVariants>, 'variant'> {
   variant?: ButtonStyleVariant
   /**
@@ -98,6 +100,10 @@ export interface ButtonProps
    * their full visual styling.
    */
   unstyled?: boolean
+  /**
+   * Opt-in split icon treatment used by the homepage redesign CTAs.
+   */
+  withIcon?: boolean
 }
 
 type ButtonComponent = React.ForwardRefExoticComponent<
@@ -123,6 +129,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       type,
       unstyled = false,
+      withIcon = false,
       ...props
     },
     ref
@@ -167,11 +174,24 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             : undefined
     }
 
+    const splitIconClass =
+      mappedVariant === 'default'
+        ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600'
+        : mappedVariant === 'secondary'
+          ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !p-0 transition-colors duration-200 hover:!bg-signoz_ink-300'
+          : ''
+    const shouldRenderSplitIcon = !unstyled && withIcon && Boolean(splitIconClass) && !asChild
     const resolvedClassName = unstyled
       ? className
       : hasLegacyButtonVariant
-        ? [legacyButtonClassName, className].filter(Boolean).join(' ')
-        : cn(buttonVariants({ variant: mappedVariant, size, rounded: mappedRounded }), className)
+        ? [legacyButtonClassName, shouldRenderSplitIcon && splitIconClass, className]
+            .filter(Boolean)
+            .join(' ')
+        : cn(
+            buttonVariants({ variant: mappedVariant, size, rounded: mappedRounded }),
+            shouldRenderSplitIcon && splitIconClass,
+            className
+          )
 
     return (
       <Comp
@@ -180,7 +200,29 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...extraProps}
         {...props}
       >
-        {children}
+        {shouldRenderSplitIcon ? (
+          <>
+            <span
+              className={cn(
+                'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+                mappedVariant === 'default' && '[&_svg:not(.animate-spin)]:hidden'
+              )}
+            >
+              {children}
+            </span>
+            <span
+              className={cn(
+                'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
+                mappedVariant === 'default' ? '!flex !bg-signoz_robin-400' : '!flex'
+              )}
+              aria-hidden="true"
+            >
+              <ArrowUpRight size={16} strokeWidth={2.5} />
+            </span>
+          </>
+        ) : (
+          children
+        )}
       </Comp>
     )
   }

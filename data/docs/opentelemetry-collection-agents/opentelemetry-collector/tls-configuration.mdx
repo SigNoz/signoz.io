@@ -1,0 +1,391 @@
+---
+date: 2026-06-29
+title: Configure TLS Encryption for the OpenTelemetry Collector
+description: Secure your OpenTelemetry Collector with TLS. Configure encrypted receivers, exporter connections, and mutual TLS (mTLS) for bidirectional authentication.
+doc_type: howto
+---
+
+## Overview
+
+By default, the OTel Collector accepts and sends telemetry over plaintext connections. In production, you should encrypt both directions:
+
+- **Receiver TLS:** apps send telemetry to the collector over an encrypted channel
+- **Exporter TLS:** the collector forwards telemetry to SigNoz or another backend over an encrypted channel
+- **Mutual TLS (mTLS):** both sides present certificates; the collector rejects unauthenticated clients
+
+This guide covers each case with working config snippets. For background on collector configuration structure, see [OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+<Admonition type="info">
+This guide applies when you run your own OpenTelemetry Collector (self-hosted SigNoz or a standalone collector). **SigNoz Cloud** terminates TLS at the ingestion endpoint, so it encrypts the collector-to-SigNoz connection for you; skip exporter TLS for that leg. Receiver TLS and mTLS still apply when you want to secure the app-to-collector hop.
+</Admonition>
+
+## Prerequisites
+
+Before you start, you need:
+
+- TLS certificate and private key for the collector server (`cert.pem`, `cert-key.pem`)
+- CA certificate to verify the peer (`ca.pem`), required for exporter TLS and mTLS
+- File paths accessible to the collector process at runtime
+
+If you need to generate self-signed certificates for testing:
+
+```bash
+# Generate a CA key and cert
+openssl req -x509 -newkey rsa:4096 -keyout ca-key.pem -out ca.pem -days 365 -nodes \
+  -subj "/CN=otel-ca"
+
+# Generate a server key and CSR
+# SANs are required: modern TLS clients ignore CN for hostname verification
+# DNS:collector matches the hostname used in SDK examples (collector:4317)
+openssl req -newkey rsa:4096 -keyout cert-key.pem -out cert.csr -nodes \
+  -subj "/CN=otel-collector" \
+  -addext "subjectAltName=DNS:otel-collector,DNS:collector,DNS:localhost,IP:127.0.0.1"
+
+# Sign the server cert with the CA, copying the SANs from the CSR
+openssl x509 -req -in cert.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial \
+  -out cert.pem -days 365 -copy_extensions copy
+```
+
+For production, use certificates from a trusted CA such as Let's Encrypt or your organization's internal PKI.
+
+## TLS on Receivers
+
+Adding TLS to a receiver forces apps to connect over HTTPS or gRPC-with-TLS instead of plaintext. The collector presents `cert.pem` and the app verifies it against a trusted CA.
+
+### OTLP gRPC receiver (port 4317)
+
+Add the `tls` block to your `otlp` receiver's `grpc` section:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        tls:
+          cert_file: /etc/otelcol/certs/cert.pem
+          key_file: /etc/otelcol/certs/cert-key.pem
+```
+
+### OTLP HTTP receiver (port 4318)
+
+```yaml:otel-collector-config.yaml
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+        tls:
+          cert_file: /etc/otelcol/certs/cert.pem
+          key_file: /etc/otelcol/certs/cert-key.pem
+```
+
+You can enable TLS on both protocols at the same time. Update your app's SDK exporter endpoint to use `https://` (HTTP) or set `insecure: false` (gRPC) once the receiver is secured.
+
+## TLS on Exporters
+
+The collector acts as a TLS client when sending data to a backend. For SigNoz Cloud, the endpoint already uses TLS. No extra cert files are needed unless your backend uses a private CA.
+
+### SigNoz Cloud (already TLS-enabled)
+
+```yaml:otel-collector-config.yaml
+exporters:
+  otlp_http: # 'otlp_http' introduced in v0.144.0; use 'otlphttp' on older versions
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
+    headers:
+      'signoz-ingestion-key': '<your-ingestion-key>'
+```
+
+The `https://` scheme activates TLS. The public Let's Encrypt certificate on SigNoz Cloud is trusted by default, so no `tls` block is needed.
+
+### Self-hosted SigNoz or custom backend with a private CA
+
+If your backend uses a certificate signed by a private CA, supply the CA cert so the collector can verify the server:
+
+```yaml:otel-collector-config.yaml
+exporters:
+  otlp_grpc: # 'otlp_grpc' introduced in v0.144.0; use 'otlp' on older versions
+    endpoint: 'your-signoz-host:4317'
+    tls:
+      ca_file: /etc/otelcol/certs/ca.pem
+      insecure: false
+```
+
+For OTLP/HTTP:
+
+```yaml:otel-collector-config.yaml
+exporters:
+  otlp_http: # 'otlp_http' introduced in v0.144.0; use 'otlphttp' on older versions
+    endpoint: 'https://your-signoz-host:4318'
+    tls:
+      ca_file: /etc/otelcol/certs/ca.pem
+```
+
+<Admonition type="warning">
+  Never set `insecure: true` in production. It disables all TLS verification and exposes your
+  telemetry data to interception.
+</Admonition>
+
+## Mutual TLS (mTLS)
+
+With mTLS, the collector verifies the client's certificate in addition to presenting its own. Any client without a valid certificate gets rejected. This is useful when you control both the app and the collector and want to prevent unauthorized telemetry ingestion.
+
+### Enable mTLS on the receiver
+
+Add `client_ca_file` to the receiver's `tls` block. The collector uses this CA to validate client certificates:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        tls:
+          cert_file: /etc/otelcol/certs/cert.pem
+          key_file: /etc/otelcol/certs/cert-key.pem
+          client_ca_file: /etc/otelcol/certs/ca.pem
+      http:
+        endpoint: 0.0.0.0:4318
+        tls:
+          cert_file: /etc/otelcol/certs/cert.pem
+          key_file: /etc/otelcol/certs/cert-key.pem
+          client_ca_file: /etc/otelcol/certs/ca.pem
+```
+
+### Generate client certificates
+
+Each app needs its own client certificate signed by the same CA. Generate them with:
+
+```bash
+# Generate a client key and CSR
+openssl req -newkey rsa:4096 -keyout client-key.pem -out client.csr -nodes \
+  -subj "/CN=otel-client"
+
+# Sign the client cert with the CA
+openssl x509 -req -in client.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial \
+  -out client-cert.pem -days 365
+```
+
+Client certificates do not require SANs. Distribute `client-cert.pem` and `client-key.pem` to the app, and `ca.pem` if the app needs to verify the collector's server certificate.
+
+### Configure the app SDK for mTLS
+
+Each app sending telemetry must present a client certificate signed by the same CA.
+
+<Tabs entityName="language">
+<TabItem value="go" label="Go" default>
+
+Uses `google.golang.org/grpc/credentials`.
+
+```go
+import (
+    "crypto/tls"
+    "crypto/x509"
+    "os"
+    "google.golang.org/grpc"
+    "google.golang.org/grpc/credentials"
+)
+
+clientCert, err := tls.LoadX509KeyPair(
+    "/path/to/client-cert.pem",
+    "/path/to/client-key.pem",
+)
+caCert, err := os.ReadFile("/path/to/ca.pem")
+pool := x509.NewCertPool()
+pool.AppendCertsFromPEM(caCert)
+
+creds := credentials.NewTLS(&tls.Config{
+    Certificates: []tls.Certificate{clientCert},
+    RootCAs:      pool,
+})
+conn, err := grpc.NewClient("collector:4317", grpc.WithTransportCredentials(creds))
+```
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+Pass `grpc.ssl_channel_credentials` directly, or set environment variables and let the exporter load certs automatically.
+
+**Programmatic:**
+
+```python
+import grpc
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
+with (
+    open("/path/to/ca.pem", "rb") as ca,
+    open("/path/to/client-key.pem", "rb") as key,
+    open("/path/to/client-cert.pem", "rb") as cert,
+):
+    credentials = grpc.ssl_channel_credentials(
+        root_certificates=ca.read(),
+        private_key=key.read(),
+        certificate_chain=cert.read(),
+    )
+
+exporter = OTLPSpanExporter(
+    endpoint="collector:4317",
+    credentials=credentials,
+)
+```
+
+**Via environment variables:**
+
+```bash
+export OTEL_EXPORTER_OTLP_CERTIFICATE=/path/to/ca.pem
+export OTEL_EXPORTER_OTLP_CLIENT_KEY=/path/to/client-key.pem
+export OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE=/path/to/client-cert.pem
+```
+
+When these variables are set and `insecure` is not `True`, the exporter loads certs automatically with no code changes.
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+Uses `OtlpGrpcSpanExporter.builder()`. The client key must be PKCS8 PEM format.
+
+```java
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+OtlpGrpcSpanExporter exporter = OtlpGrpcSpanExporter.builder()
+    .setEndpoint("https://collector:4317")
+    .setTrustedCertificates(
+        Files.readAllBytes(Path.of("/path/to/ca.pem"))
+    )
+    .setClientTls(
+        Files.readAllBytes(Path.of("/path/to/client-key.pem")),  // PKCS8 PEM
+        Files.readAllBytes(Path.of("/path/to/client-cert.pem"))
+    )
+    .build();
+```
+
+</TabItem>
+<TabItem value="nodejs" label="Node.js">
+
+Pass `grpc.credentials.createSsl` via the `credentials` option. Requires `@grpc/grpc-js`.
+
+```typescript
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
+import * as grpc from '@grpc/grpc-js';
+import * as fs from 'fs';
+
+const credentials = grpc.credentials.createSsl(
+    fs.readFileSync('/path/to/ca.pem'),
+    fs.readFileSync('/path/to/client-key.pem'),
+    fs.readFileSync('/path/to/client-cert.pem'),
+);
+
+const exporter = new OTLPTraceExporter({
+    url: 'collector:4317',
+    credentials,
+});
+```
+
+</TabItem>
+</Tabs>
+
+<details>
+<ToggleHeading>
+
+## TLS Settings Reference
+</ToggleHeading>
+
+| Field | Applies to | Description |
+|---|---|---|
+| `cert_file` | Receivers, Exporters | Path to the TLS certificate (PEM) |
+| `key_file` | Receivers, Exporters | Path to the TLS private key (PEM) |
+| `ca_file` | Receivers, Exporters | CA cert to verify the peer certificate |
+| `client_ca_file` | Receivers | CA cert to verify client certificates (enables mTLS) |
+| `client_ca_file_reload` | Receivers | Set `true` to reload `client_ca_file` whenever the file changes on disk (inotify-style); distinct from `reload_interval`, which polls on a fixed timer |
+| `insecure` | Exporters | Set `true` to disable TLS entirely (dev only); to disable TLS on a receiver, omit the `tls:` block |
+| `insecure_skip_verify` | Exporters | Skip server certificate verification (dev only) |
+| `min_version` | Receivers, Exporters | Minimum TLS version; defaults to `"1.2"`. Valid values: `"1.0"`, `"1.1"`, `"1.2"`, `"1.3"` |
+| `max_version` | Receivers, Exporters | Maximum TLS version; defaults to `"1.3"` |
+| `reload_interval` | Receivers, Exporters | Interval to hot-reload `cert_file`, `key_file`, `ca_file`, and `client_ca_file` from disk, e.g. `"1h"` |
+| `cipher_suites` | Receivers, Exporters | Explicit list of allowed cipher suites; uses safe defaults when omitted |
+
+</details>
+
+## Certificate Rotation
+
+Use `reload_interval` to rotate certificates without restarting the collector:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        tls:
+          cert_file: /etc/otelcol/certs/cert.pem
+          key_file: /etc/otelcol/certs/cert-key.pem
+          reload_interval: 1h
+```
+
+The collector reloads the cert and key files from disk at the interval you set. Replace the files on disk (atomically, using a rename) before the reload fires to avoid a window where the old cert and new key are in use simultaneously.
+
+## Validate
+
+After restarting the collector with TLS enabled, verify the receiver is serving a valid certificate:
+
+```bash
+# Check gRPC receiver TLS (port 4317)
+# Pass -CAfile so the private CA is trusted, and verify the hostname matches a SAN in the cert
+openssl s_client -connect localhost:4317 \
+  -CAfile /etc/otelcol/certs/ca.pem \
+  -verify_hostname localhost \
+  -showcerts
+
+# Check HTTP receiver TLS (port 4318)
+curl -v --cacert /etc/otelcol/certs/ca.pem https://localhost:4318
+```
+
+A successful `openssl s_client` output shows the certificate chain and ends with `Verify return code: 0 (ok)`. A non-zero return code means the certificate is untrusted, expired, or mismatched.
+
+Check the collector logs for TLS errors:
+
+```bash
+# Docker
+docker logs <container-name> 2>&1 | grep -i tls
+
+# systemd
+journalctl -u otelcol --since "5 minutes ago" | grep -i tls
+```
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+**`tls: failed to find any PEM data`**
+The cert or key file path is wrong or the file is empty. Confirm the path the collector process can read:
+```bash
+ls -la /etc/otelcol/certs/
+```
+
+**`x509: certificate signed by unknown authority`**
+The client doesn't trust the CA that signed the collector's certificate. Supply the CA cert to the app SDK, or use a publicly trusted CA.
+
+**`x509: certificate has expired`**
+The certificate passed its `Not After` date. Replace it and restart (or wait for `reload_interval` to fire if configured).
+
+**`remote error: tls: certificate required`**
+mTLS is enabled on the receiver but the client sent no certificate. Configure the app SDK to present a client certificate.
+
+**`tls: no certificates configured`**
+The receiver has a `tls:` block but `cert_file` or `key_file` is missing. Both fields are required for receiver TLS.
+
+</details>
+
+## Next Steps
+
+- [OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/): full reference for receivers, processors, exporters, and pipelines
+- [Secure SigNoz in Kubernetes using Ingress NGINX and Cert Manager](https://signoz.io/docs/tutorial/setting-up-tls-for-signoz/): TLS for the SigNoz UI and collector ingress endpoint in Kubernetes
+- <a href="https://opentelemetry.io/docs/security/config-best-practices/#use-encryption-and-authentication" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Security Best Practices: Encryption and Authentication</a>
+
+## Get Help
+
+<GetHelp />

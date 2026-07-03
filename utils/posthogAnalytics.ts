@@ -15,6 +15,7 @@ type PostHogEventName =
   | '$pageleave'
   | 'site:element_click'
   | 'site:form_submit'
+  | 'experiment_viewed'
   | 'user_signed_up'
   | 'user:company_association_create'
 
@@ -255,6 +256,11 @@ const buildTrackPayload = (
         ...(getString(attributes.$prev_pageview_pathname) && {
           $prev_pageview_pathname: getString(attributes.$prev_pageview_pathname),
         }),
+        ...(getNumber(attributes.$prev_pageview_max_content_percentage) !== undefined && {
+          $prev_pageview_max_content_percentage: getNumber(
+            attributes.$prev_pageview_max_content_percentage
+          ),
+        }),
       }),
     }
   }
@@ -307,6 +313,22 @@ const buildTrackPayload = (
         ...(getString(attributes.hubspot_portal_id) && {
           hubspot_portal_id: getString(attributes.hubspot_portal_id),
         }),
+      }),
+    }
+  }
+
+  if (payload.eventName === 'experiment_viewed') {
+    return {
+      distinctId: getDistinctId(payload),
+      event: 'experiment_viewed',
+      timestamp: getDate(payload.timestamp),
+      disableGeoip: false,
+      properties: withAnonymousProfileMode({
+        ...common,
+        ...(getString(attributes.experiment_id) && {
+          experiment_id: getString(attributes.experiment_id),
+        }),
+        ...(getString(attributes.variant_id) && { variant_id: getString(attributes.variant_id) }),
       }),
     }
   }
