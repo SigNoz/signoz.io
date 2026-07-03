@@ -54,11 +54,11 @@ function GetStartedColumn({ option, index }: { option: GetStartedOption; index: 
 export default function HomepageGetStarted() {
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-12 sm:px-6 sm:py-16 lg:px-20 lg:py-20"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-12 sm:px-6 sm:py-16 lg:px-20 lg:py-20 min-[1441px]:max-w-8xl min-[1441px]:px-0"
       data-homepage-floating-cta="Get started"
       data-homepage-floating-href="/teams/"
     >
-      <div className="mx-auto max-w-7xl border-y border-signoz_slate-400/35">
+      <div className="mx-auto max-w-8xl border-y border-signoz_slate-400/35">
         <div className="grid gap-0 md:grid-cols-3">
           <div className="flex min-h-48 flex-col items-start justify-between border-b border-signoz_slate-400/35 py-7 md:min-h-56 md:border-b-0 md:py-8 md:pr-8">
             <div>

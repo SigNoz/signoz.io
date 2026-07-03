@@ -130,10 +130,10 @@ function FaqItem({ answer, question }: Faq) {
 export default function Faq() {
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-20 lg:py-32"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-20 lg:py-32 min-[1441px]:max-w-8xl min-[1441px]:px-0"
       data-homepage-floating-stop="true"
     >
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3 lg:gap-12">
+      <div className="mx-auto grid max-w-8xl gap-10 lg:grid-cols-3 lg:gap-12">
         <div>
           <h2 className="m-0 max-w-md text-4xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-5xl md:text-6xl md:leading-none">
             Your questions, answered.

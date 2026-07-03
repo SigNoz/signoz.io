@@ -58,7 +58,7 @@ function PricingValueColumn({
   title: string
 }) {
   return (
-    <article className="flex min-h-44 flex-col justify-between border-t border-signoz_slate-400/25 py-6 first:border-t-0 md:min-h-56 md:border-l md:border-t-0 md:px-10 md:py-1 md:first:border-l lg:px-12">
+    <article className="flex min-h-44 flex-col justify-between border-t border-signoz_slate-400/35 py-7 first:border-t-0 md:min-h-56 md:border-l md:border-t-0 md:px-10 md:py-8 md:first:border-l-0 lg:px-12">
       <div>
         <div className="flex items-center gap-3 md:block">
           <Icon className="h-5 w-5 shrink-0 text-signoz_robin-400" />
@@ -147,11 +147,11 @@ function MigrationCta() {
 export default function Pricing() {
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-20 lg:py-20"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-20 lg:py-20 min-[1441px]:max-w-8xl min-[1441px]:px-0"
       data-homepage-floating-cta="View pricing"
       data-homepage-floating-href="/pricing/"
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-8xl">
         <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-start md:justify-between md:gap-6">
           <h2 className="m-0 max-w-3xl text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl sm:leading-none md:text-6xl">
             Pricing that stays predictable as you scale.
@@ -177,7 +177,7 @@ export default function Pricing() {
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative border-y border-signoz_slate-400/35">
           <div className="grid md:grid-cols-3">
             {pricingValueProps.map(({ description, Icon, title }) => (
               <PricingValueColumn key={title} description={description} Icon={Icon} title={title} />
@@ -185,7 +185,7 @@ export default function Pricing() {
           </div>
         </div>
 
-        <div className="mt-12 grid gap-8 border-t border-signoz_slate-400/25 pt-8 md:mt-16 md:grid-cols-3">
+        <div className="mt-12 grid gap-10 border-t border-signoz_slate-400/25 pt-8 md:mt-16 md:grid-cols-3 lg:gap-12">
           <div>
             <p className="m-0 max-w-xs text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl md:text-5xl">
               Switch to

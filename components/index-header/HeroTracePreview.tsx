@@ -127,7 +127,7 @@ export default function HeroTracePreview() {
         duration: 1.15,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="relative mx-auto w-full max-w-7xl origin-center overflow-visible shadow-[0_32px_86px_rgba(0,0,0,0.72)]"
+      className="relative mx-auto w-full max-w-8xl origin-center overflow-visible shadow-[0_32px_86px_rgba(0,0,0,0.72)]"
       style={{ scale: hasMounted ? scale : prefersReducedMotion ? 1 : 0.94 }}
     >
       <div className="-mx-5 overflow-x-auto px-5 pb-3 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:hidden [&::-webkit-scrollbar]:hidden">

@@ -92,19 +92,24 @@ function easeOutCubic(value: number) {
   return 1 - Math.pow(1 - normalizedValue, 3)
 }
 
+function isWhitespaceToken(token: string) {
+  return /^\s+$/.test(token)
+}
+
 function RevealWords({ progress, text }: { progress: number; text: string }) {
   const tokens = text.split(/(\s+)/).filter(Boolean)
-  const wordCount = tokens.filter((token) => !/^\s+$/.test(token)).length
-  let wordIndex = -1
+  const wordCount = tokens.filter((token) => !isWhitespaceToken(token)).length
 
   return (
     <span aria-hidden="true">
       {tokens.map((token, tokenIndex) => {
-        if (/^\s+$/.test(token)) {
+        if (isWhitespaceToken(token)) {
           return token
         }
 
-        wordIndex += 1
+        const wordIndex =
+          tokens.slice(0, tokenIndex + 1).filter((candidate) => !isWhitespaceToken(candidate))
+            .length - 1
 
         const revealStart = wordCount <= 1 ? 0 : (wordIndex / (wordCount - 1)) * 0.72
         const revealProgress = easeOutCubic((progress - revealStart) / 0.24)
@@ -275,11 +280,11 @@ export default function WhySignoz() {
 
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-clip bg-signoz_ink-500 px-5 py-16 text-signoz_vanilla-100 sm:px-6 sm:py-24 lg:px-20 lg:py-28"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-clip bg-signoz_ink-500 px-5 py-16 text-signoz_vanilla-100 sm:px-6 sm:py-24 lg:px-20 lg:py-28 min-[1441px]:max-w-8xl min-[1441px]:px-0"
       data-homepage-floating-cta="Start sending telemetry in 20 minutes"
       data-homepage-floating-href="/docs/install/"
     >
-      <div className="relative z-10 mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(430px,1fr)] lg:gap-20">
+      <div className="relative z-10 mx-auto grid max-w-8xl gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(430px,1fr)] lg:gap-20">
         <div className="min-w-0">
           <div className="sticky top-28 isolate z-20 pb-8 pt-2">
             <div
@@ -300,7 +305,7 @@ export default function WhySignoz() {
             <div className="relative z-10 mt-9 h-px w-full bg-signoz_slate-100" />
           </div>
 
-          <div className="pb-16 pt-14 lg:pb-[24dvh] lg:pt-20">
+          <div className="pb-16 pt-14 lg:pb-[24dvh] lg:pt-0">
             {items.map((item, index) => {
               const Icon = item.icon
               const isActive = index === activeIndex
@@ -309,7 +314,7 @@ export default function WhySignoz() {
               return (
                 <div
                   aria-current={index === activeIndex ? 'step' : undefined}
-                  className={`grid min-h-44 grid-cols-[40px_minmax(0,1fr)] gap-6 border-b border-signoz_slate-100 py-8 transition-[filter] duration-500 ease-out lg:min-h-72 lg:py-14 ${getItemClasses(
+                  className={`grid min-h-44 grid-cols-[40px_minmax(0,1fr)] gap-6 border-b border-signoz_slate-100 py-8 transition-[filter] duration-500 ease-out lg:min-h-72 lg:auto-rows-max lg:content-end lg:py-14 ${getItemClasses(
                     index,
                     activeIndex
                   )}`}
