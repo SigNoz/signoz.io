@@ -39,6 +39,11 @@ function getRelatedArticleDoc(entry: MDXContent): { doc: MDXContent; contentType
   return null
 }
 
+function ensureTrailingSlash(url: string): string {
+  if (url.endsWith('/')) return url
+  return `${url}/`
+}
+
 function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
   if (Array.isArray(content.related_articles) && content.related_articles.length > 0) {
     return content.related_articles
@@ -52,7 +57,7 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
         return {
           title: doc.title,
           publishedOn: resolveLatestDate(doc) ?? '',
-          url: `/${routePrefix}${doc.path || ''}`,
+          url: ensureTrailingSlash(`/${routePrefix}${doc.path || ''}`),
         }
       })
       .filter(Boolean) as RelatedArticleProps[]
@@ -62,7 +67,7 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
     return content.related_faqs.map((faq: MDXContent) => ({
       title: faq.title,
       publishedOn: resolveLatestDate(faq) ?? '',
-      url: `/faqs${faq.path || ''}`,
+      url: ensureTrailingSlash(`/faqs${faq.path || ''}`),
     }))
   }
 
