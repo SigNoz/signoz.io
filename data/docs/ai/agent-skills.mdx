@@ -20,16 +20,20 @@ SigNoz ships these skills two ways:
 <Tabs entityName="agent-client">
 <TabItem value="claude-code" label="Claude Code" default>
 
-Add the marketplace and install the plugin:
+1. Add the marketplace and install the plugin:
 
-```bash
-/plugin marketplace add SigNoz/agent-skills
-/plugin install signoz@signoz-skills
-```
+   ```bash
+   /plugin marketplace add SigNoz/agent-skills
+   /plugin install signoz@signoz-skills
+   ```
 
-On install, Claude Code prompts for your **SigNoz MCP endpoint**. For SigNoz Cloud, use `https://mcp.<region>.signoz.cloud/mcp` and replace `<region>` with your region (`us`, `us2`, `eu`, `eu2`, `in`, or `in2`). Find your region under **Settings → Ingestion** in SigNoz, or see the [region reference](https://signoz.io/docs/ingestion/signoz-cloud/overview/#how-do-i-find-my-ingestion-url). For a self-hosted SigNoz, enter your own HTTP `/mcp` URL instead, for example `http://localhost:8000/mcp`.
+2. When prompted for your **SigNoz MCP endpoint**:
+   - **SigNoz Cloud** - use `https://mcp.<region>.signoz.cloud/mcp` and replace `<region>` with your region (`us`, `us2`, `eu`, `eu2`, `in`, or `in2`). Find your region under **Settings → Ingestion** in SigNoz, or see the [region reference](https://signoz.io/docs/ingestion/signoz-cloud/overview/#how-do-i-find-my-ingestion-url).
+   - **Self-hosted SigNoz** - enter your own HTTP `/mcp` URL instead, for example `http://localhost:8000/mcp`.
 
-Then run `/mcp`, select the `signoz` server, and complete the authentication flow if prompted. To change the endpoint later, reconfigure the plugin's options or run `signoz-mcp-setup` with the new region or MCP URL.
+3. Run `/mcp`, select the `signoz` server, and complete the authentication flow if prompted.
+
+To change the endpoint later, reconfigure the plugin's options or run `signoz-mcp-setup` with the new region or MCP URL.
 
 To update after new releases:
 
@@ -97,21 +101,25 @@ Follow the prompts to enter your SigNoz instance URL and API key.
 </TabItem>
 <TabItem value="devin-cli" label="Devin CLI">
 
-Install the plugin:
+1. Install the plugin:
 
-```bash
-devin plugins install SigNoz/agent-skills
-```
+   ```bash
+   devin plugins install SigNoz/agent-skills
+   ```
 
-This installs at user level and works across all projects. Devin's plugin system does not bundle MCP servers or prompt for install-time config, so run the setup skill afterward in a Devin session with your SigNoz Cloud region (`us`, `us2`, `eu`, `eu2`, `in`, `in2`) or a self-hosted HTTP MCP URL:
+   This installs at user level and works across all projects. Devin's plugin system does not bundle MCP servers or prompt for install-time config, so the next steps set that up.
 
-```bash
-/signoz:signoz-mcp-setup <region-or-mcp-url>
-```
+2. In a Devin session, run the setup skill with your SigNoz Cloud region (`us`, `us2`, `eu`, `eu2`, `in`, `in2`) or a self-hosted HTTP MCP URL. Devin namespaces plugin skills as `/<plugin>:<skill>`, so it's invoked as `/signoz:signoz-mcp-setup`:
 
-Devin namespaces plugin skills as `/<plugin>:<skill>`, so the setup skill is invoked as `/signoz:signoz-mcp-setup`. This writes a `signoz` entry into the highest-precedence Devin config scope that already has one, or `~/.config/devin/config.json` by default.
+   ```bash
+   /signoz:signoz-mcp-setup <region-or-mcp-url>
+   ```
 
-For SigNoz Cloud, start a new session and run `devin mcp login signoz` to complete OAuth. For self-hosted SigNoz, no OAuth step is needed unless the server runs with `OAUTH_ENABLED=true`.
+   This writes a `signoz` entry into the highest-precedence Devin config scope that already has one, or `~/.config/devin/config.json` by default.
+
+3. Authenticate:
+   - **SigNoz Cloud** - start a new session and run `devin mcp login signoz` to complete OAuth.
+   - **Self-hosted SigNoz** - no OAuth step is needed unless the server runs with `OAUTH_ENABLED=true`.
 
 </TabItem>
 </Tabs>
