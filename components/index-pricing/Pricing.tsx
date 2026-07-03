@@ -60,7 +60,7 @@ function PricingValueColumn({
   return (
     <article className="flex min-h-44 flex-col justify-between border-t border-signoz_slate-400/35 py-7 first:border-t-0 md:min-h-56 md:border-l md:border-t-0 md:px-10 md:py-8 md:first:border-l-0 lg:px-12">
       <div>
-        <div className="flex items-center gap-3 md:block">
+        <div className="flex items-center gap-3">
           <Icon className="h-5 w-5 shrink-0 text-signoz_robin-400" />
           <p className="m-0 text-sm leading-5 text-signoz_vanilla-400 md:mt-0">{title}</p>
         </div>
@@ -147,7 +147,7 @@ function MigrationCta() {
 export default function Pricing() {
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-20 lg:py-20 min-[1600px]:max-w-8xl min-[1600px]:px-0"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-20 lg:py-20 wide:max-w-8xl wide:px-0"
       data-homepage-floating-cta="View pricing"
       data-homepage-floating-href="/pricing/"
     >
