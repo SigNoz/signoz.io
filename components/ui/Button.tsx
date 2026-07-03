@@ -61,7 +61,8 @@ type LegacyButtonVariant = keyof typeof LEGACY_VARIANT_TO_STYLES_MAP
 type ButtonStyleVariant = ButtonVariant | LegacyButtonVariant
 
 export interface ButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>,
+  extends
+    Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>,
     Omit<VariantProps<typeof buttonVariants>, 'variant'> {
   variant?: ButtonStyleVariant
   /**
@@ -175,9 +176,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const splitIconClass =
       mappedVariant === 'default'
-        ? 'homepage-button homepage-button--primary'
+        ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600'
         : mappedVariant === 'secondary'
-          ? 'homepage-button homepage-button--secondary'
+          ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !p-0 transition-colors duration-200 hover:!bg-signoz_ink-300'
           : ''
     const shouldRenderSplitIcon = !unstyled && withIcon && Boolean(splitIconClass) && !asChild
     const resolvedClassName = unstyled
@@ -201,15 +202,19 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {shouldRenderSplitIcon ? (
           <>
-            <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
+            <span
+              className={cn(
+                'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+                mappedVariant === 'default' && '[&_svg:not(.animate-spin)]:hidden'
+              )}
+            >
               {children}
             </span>
             <span
-              className={`homepage-button__icon hidden ${
-                mappedVariant === 'default'
-                  ? 'homepage-button__icon--primary'
-                  : 'homepage-button__icon--secondary'
-              }`}
+              className={cn(
+                'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
+                mappedVariant === 'default' ? '!flex !bg-signoz_robin-400' : '!flex'
+              )}
               aria-hidden="true"
             >
               <ArrowUpRight size={16} strokeWidth={2.5} />

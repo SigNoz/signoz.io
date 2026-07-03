@@ -8,7 +8,6 @@ import { AgentNativeObservability } from '@/components/agent-native-observabilit
 import { WhyOpenTelemetry } from '@/components/why-opentelemetry'
 import WhySelectSignoz from '@/components/why-select-signoz'
 import { GetStarted } from '@/components/GetStarted'
-import ChatbaseClient from '@/components/Chatbase/ChatbaseClient'
 
 export default function HomepageControl() {
   return (
@@ -25,7 +24,6 @@ export default function HomepageControl() {
       <SigNozStats className="max-w-8xl" />
       <Testimonials page="homepage" className="max-w-8xl" />
       <GetStarted page="homepage" className="max-w-8xl" />
-      <ChatbaseClient />
     </>
   )
 }

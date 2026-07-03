@@ -23,7 +23,7 @@ const Header: React.FC = () => {
         className="!w-fit min-w-[200px] items-center gap-2"
       >
         <TrackingLink
-          href="#ai-assistant"
+          href="/docs/ai/noz/"
           clickType="Primary CTA"
           clickName="Agent Native Page Hero Noz: SigNoz AI Assistant"
           clickLocation="Agent Native Observability Page Hero"
@@ -348,7 +348,7 @@ const BottomCTA: React.FC = () => {
         <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
           <Button asChild variant="default" rounded="full" className="!w-fit items-center gap-2">
             <TrackingLink
-              href="#ai-assistant"
+              href="/docs/ai/noz/"
               clickType="Primary CTA"
               clickName="Agent Native Page Bottom CTA Noz: SigNoz AI Assistant"
               clickLocation="Agent Native Observability Page Bottom CTA"

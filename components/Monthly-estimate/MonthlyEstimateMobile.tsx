@@ -569,7 +569,7 @@ const MobileEstimate = () => {
             className="w-full"
           >
             <TrackingLink
-              href={'https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af'}
+              href={'/contact-us/?source=monthly-estimate-mobile'}
               clickType="Primary CTA"
               clickName="Volume Discount Form Link"
               clickText="Contact Us"
@@ -586,7 +586,7 @@ const MobileEstimate = () => {
           <span className="text-base font-medium text-signoz_robin-400">
             Reach out to us for SigNoz's Start Up Program Discount
           </span>
-          <Button variant="legacyPrimary" className="w-full">
+          <Button variant="legacySecondary" className="w-full">
             <TrackingLink
               href="/startups/"
               clickType="Secondary CTA"

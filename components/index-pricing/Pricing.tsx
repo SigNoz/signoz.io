@@ -5,6 +5,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import TrackingLink from '@/components/TrackingLink'
+import { cn } from 'app/lib/utils'
 
 const pricingValueProps = [
   {
@@ -57,13 +58,13 @@ function PricingValueColumn({
   title: string
 }) {
   return (
-    <article className="flex min-h-[176px] flex-col justify-between border-t border-signoz_slate-400/25 py-6 first:border-t-0 md:min-h-[220px] md:border-l md:border-t-0 md:px-10 md:py-1 md:first:border-l lg:px-12">
+    <article className="flex min-h-44 flex-col justify-between border-t border-signoz_slate-400/25 py-6 first:border-t-0 md:min-h-56 md:border-l md:border-t-0 md:px-10 md:py-1 md:first:border-l lg:px-12">
       <div>
         <div className="flex items-center gap-3 md:block">
           <Icon className="h-5 w-5 shrink-0 text-signoz_robin-400" />
           <p className="m-0 text-sm leading-5 text-signoz_vanilla-400 md:mt-0">{title}</p>
         </div>
-        <p className="m-0 mt-3 max-w-[330px] text-[18px] font-medium leading-7 tracking-[-0.15px] text-signoz_vanilla-100 md:text-xl md:leading-8 md:tracking-[-0.2px]">
+        <p className="m-0 mt-3 max-w-sm text-lg font-medium leading-7 tracking-normal text-signoz_vanilla-100 md:text-xl md:leading-8">
           {description}
         </p>
       </div>
@@ -107,22 +108,35 @@ function MigrationCta() {
   }, [isVisible])
 
   return (
-    <div ref={ctaRef} className="mt-6 w-fit">
+    <div ref={ctaRef} className="mt-6 w-64">
       <TrackingLink
-        className="homepage-button homepage-button--primary inline-flex h-10 w-fit items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
+        className={cn(
+          'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600',
+          'inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white'
+        )}
         clickLocation="Homepage Pricing Section"
         clickName="Migration CTA"
         clickText={`Migrate from ${migrationSources[activeSourceIndex]}`}
         clickType="Primary CTA"
         href="/docs/migration/migrate-to-signoz/"
       >
-        <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
+        <span
+          className={cn(
+            'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+            '[&_svg:not(.animate-spin)]:hidden'
+          )}
+        >
           Migrate from
-          <span className="inline-block min-w-[72px] text-left transition-opacity duration-200">
+          <span className="inline-block min-w-24 text-left transition-opacity duration-200">
             {migrationSources[activeSourceIndex]}
           </span>
         </span>
-        <span className="homepage-button__icon homepage-button__icon--primary hidden">
+        <span
+          className={cn(
+            'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
+            '!flex !bg-signoz_robin-400'
+          )}
+        >
           <ArrowRight size={14} />
         </span>
       </TrackingLink>
@@ -133,17 +147,17 @@ function MigrationCta() {
 export default function Pricing() {
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-[78px] lg:py-20"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-20 lg:py-20"
       data-homepage-floating-cta="View pricing"
       data-homepage-floating-href="/pricing/"
     >
-      <div className="mx-auto max-w-[1200px]">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-10 flex flex-col gap-5 md:mb-14 md:flex-row md:items-start md:justify-between md:gap-6">
-          <h2 className="m-0 max-w-[720px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[40px] sm:leading-[1.04] sm:tracking-[-1.1px] md:text-[58px] md:tracking-[-1.65px]">
+          <h2 className="m-0 max-w-3xl text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl sm:leading-none md:text-6xl">
             Pricing that stays predictable as you scale.
           </h2>
-          <div className="max-w-[430px]">
-            <p className="m-0 text-[16px] leading-7 tracking-[-0.15px] text-signoz_vanilla-400 sm:text-[17px] sm:leading-8 sm:tracking-[-0.2px]">
+          <div className="max-w-md">
+            <p className="m-0 text-base leading-7 tracking-normal text-signoz_vanilla-400 sm:text-lg sm:leading-8">
               Add teammates freely, monitor autoscaling infrastructure, and estimate telemetry costs
               before you commit.
             </p>
@@ -171,16 +185,16 @@ export default function Pricing() {
           </div>
         </div>
 
-        <div className="mt-12 grid gap-8 border-t border-signoz_slate-400/25 pt-8 md:mt-16 md:grid-cols-[0.82fr_2fr]">
+        <div className="mt-12 grid gap-8 border-t border-signoz_slate-400/25 pt-8 md:mt-16 md:grid-cols-3">
           <div>
-            <p className="m-0 max-w-[310px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[38px] sm:tracking-[-0.95px] md:text-[44px] md:tracking-[-1.15px]">
+            <p className="m-0 max-w-xs text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl md:text-5xl">
               Switch to
               <br />
               SigNoz
             </p>
             <MigrationCta />
           </div>
-          <div className="flex min-h-[220px] flex-col justify-between">
+          <div className="flex min-h-56 flex-col justify-between md:col-span-2">
             {alternativeLinks.map((link) => (
               <TrackingLink
                 key={link.title}
@@ -192,14 +206,14 @@ export default function Pricing() {
                 href={link.href}
               >
                 <span className="flex items-start justify-between gap-8">
-                  <span className="text-[18px] font-medium leading-7 tracking-[-0.15px] text-signoz_vanilla-100 transition-colors group-hover:text-signoz_robin-100">
+                  <span className="text-lg font-medium leading-7 tracking-normal text-signoz_vanilla-100 transition-colors group-hover:text-signoz_robin-100">
                     {link.title}
                   </span>
                   <span className="text-sm font-medium text-signoz_robin-400 transition-transform duration-200 group-hover:translate-x-1">
                     -&gt;
                   </span>
                 </span>
-                <span className="mt-2 block max-w-[560px] text-sm leading-6 text-signoz_vanilla-400">
+                <span className="mt-2 block max-w-xl text-sm leading-6 text-signoz_vanilla-400">
                   {link.description}
                 </span>
               </TrackingLink>

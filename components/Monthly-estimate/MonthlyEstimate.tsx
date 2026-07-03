@@ -413,7 +413,7 @@ const MonthlyEstimate = () => {
           <div className="w-2/5 border-b border-dashed border-signoz_slate-400" />
           <Button variant="legacyPrimary" id="btn-contact-us-pricing-monthly-estimate">
             <TrackingLink
-              href={'https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af'}
+              href={'/contact-us/?source=monthly-estimate'}
               clickType="Primary CTA"
               clickName="Volume Discount Form Link"
               clickText="Contact Us"
@@ -443,7 +443,7 @@ const MonthlyEstimate = () => {
             clickLocation="Monthly Estimate Calculator"
             id="pricing-page-startup-program-cta"
           >
-            <Button variant="legacyPrimary">Learn More</Button>
+            <Button variant="legacySecondary">Learn More</Button>
           </TrackingLink>
         </div>
       </div>

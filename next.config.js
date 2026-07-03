@@ -27,13 +27,13 @@ const defaultFrameAncestors =
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev https://*.clarity.ms https://snap.licdn.com;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
   connect-src * https://api.reo.dev https://www.clarity.ms https://*.clarity.ms;
   font-src * 'self';
-  frame-src * giscus.app youtube.com;
+  frame-src * giscus.app youtube.com https://app.getdecimal.ai;
   worker-src 'self' blob:;
   frame-ancestors ${process.env.CSP_FRAME_ANCESTORS || defaultFrameAncestors};
 `
@@ -85,10 +85,25 @@ module.exports = () => {
     reactStrictMode: true,
     productionBrowserSourceMaps: true, // Enable source maps for debugging
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-    eslint: {
-      dirs: ['app', 'components', 'layouts', 'scripts'],
-    },
     trailingSlash: true,
+    turbopack: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+          condition: { not: { query: /url/ } },
+        },
+      },
+    },
+    experimental: {
+      useCache: true,
+    },
+    // Turbopack traces path.join(CWD, 'data', <dynamic>) in contentRepository.ts
+    // and generates a broad pattern that also matches 'data-assets/'
+    // Without this exclusion serverless function size increases significantly
+    outputFileTracingExcludes: {
+      '*': ['./data-assets/**'],
+    },
     images: {
       remotePatterns: getAllowedImageDomains().map((domain) => ({
         protocol: 'https',
@@ -111,7 +126,7 @@ module.exports = () => {
             ? [
                 {
                   // In dev, serve static assets from data-assets/ when not found in public/
-                  source: '/:path((?!_next/).+\\.(?:avif|gif|ico|jpe?g|png|svg|webp))',
+                  source: '/:path(.+\\.(?:avif|gif|ico|jpe?g|png|svg|webp))',
                   destination: '/api/dev-asset/:path',
                 },
               ]
@@ -3010,19 +3025,6 @@ module.exports = () => {
           fullySpecified: false,
         },
       })
-
-      // this is to avoid caching for webpack
-      // reference https://nextjs.org/docs/app/building-your-application/optimizing/memory-usage#disable-webpack-cache
-      if (config.cache && !options.dev) {
-        config.cache = Object.freeze({
-          type: 'memory',
-        })
-      }
-
-      // Ensure source maps are generated in production (server & client)
-      if (!options.dev) {
-        config.devtool = 'source-map'
-      }
 
       return config
     },

@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import DecimalClient from '@/components/Decimal/DecimalClient'
 
 import siteMetadata from '@/data/siteMetadata'
 import JsonLdScript from '@/components/JsonLdScript'
@@ -234,7 +235,7 @@ export default async function Page() {
           <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
         ) : null}
         <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
-        <main className="relative z-[1] mx-auto max-w-8xl xl:max-[1728px]:max-w-[80vw]">
+        <main className="relative z-[1] mx-auto max-w-8xl xl:max-[1728px]:max-w-[80dvw]">
           <ExperimentTracker
             experimentId={EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.id}
             variantId={variant}
@@ -242,6 +243,7 @@ export default async function Page() {
             <Homepage />
           </ExperimentTracker>
         </main>
+        <DecimalClient />
       </div>
     </>
   )

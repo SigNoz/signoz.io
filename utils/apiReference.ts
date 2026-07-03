@@ -1,4 +1,4 @@
-import { unstable_cache } from 'next/cache'
+import { cacheLife, cacheTag } from 'next/cache'
 import {
   compareSemverParts,
   compareSemverTags,
@@ -128,14 +128,12 @@ async function fetchAllAPIVersions(): Promise<APIVersionInfo[]> {
     .map(({ version, publishedAt }) => ({ version, publishedAt }))
 }
 
-export const fetchAvailableAPIVersions = unstable_cache(
-  fetchAllAPIVersions,
-  [API_VERSIONS_CACHE_KEY],
-  {
-    revalidate: API_SPEC_REVALIDATE_SECONDS,
-    tags: [API_VERSIONS_CACHE_TAG],
-  }
-)
+export async function fetchAvailableAPIVersions(): Promise<APIVersionInfo[]> {
+  'use cache'
+  cacheLife({ revalidate: API_SPEC_REVALIDATE_SECONDS })
+  cacheTag(API_VERSIONS_CACHE_TAG)
+  return fetchAllAPIVersions()
+}
 
 export async function resolveLatestVersion(): Promise<string | null> {
   const versions = await fetchAvailableAPIVersions()

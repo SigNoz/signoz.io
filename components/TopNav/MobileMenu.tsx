@@ -1,33 +1,23 @@
 'use client'
 
 import { Dialog } from '@headlessui/react'
-import { ArrowBigLeft, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
 import { Button } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 import GitHubStars from '../GithubStars/GithubStars'
-import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import Accordion from '../Accordion/Accordion'
 import { productDropdownItemsSorted, resourcesDropdownItems } from './constants'
 
 interface MobileMenuProps {
   open: boolean
   onClose: (open: boolean) => void
-  showMainMenu: boolean
-  isDocsBasePath: boolean
   isSignupRoute: boolean
-  onShowMainMenu: () => void
 }
 
-export default function MobileMenu({
-  open,
-  onClose,
-  showMainMenu,
-  isDocsBasePath,
-  isSignupRoute,
-  onShowMainMenu,
-}: MobileMenuProps) {
+export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuProps) {
   const router = useRouter()
   const closeMobileMenu = () => onClose(false)
 
@@ -50,30 +40,11 @@ export default function MobileMenu({
         </div>
         <div className="mt-6 flow-root">
           <div className="-my-6 divide-y divide-gray-500/10">
-            {showMainMenu && (
-              <MainMenuContent
-                isSignupRoute={isSignupRoute}
-                onClose={closeMobileMenu}
-                router={router}
-              />
-            )}
-
-            {isDocsBasePath && !showMainMenu && (
-              <div className="docs-sidebar-mobile-nav">
-                <TrackingButton
-                  className="mt-4 inline-flex items-center gap-1 rounded px-1 py-1 text-sm font-bold text-white"
-                  clickType="Nav Click"
-                  clickName="Back to Main Menu Button"
-                  clickText="Back to main menu"
-                  clickLocation="Mobile Menu"
-                  onClick={onShowMainMenu}
-                >
-                  <ArrowBigLeft size={16} /> Back to main menu
-                </TrackingButton>
-
-                <DocsSidebar onNavItemClick={closeMobileMenu} />
-              </div>
-            )}
+            <MainMenuContent
+              isSignupRoute={isSignupRoute}
+              onClose={closeMobileMenu}
+              router={router}
+            />
           </div>
         </div>
       </Dialog.Panel>
@@ -157,16 +128,27 @@ function MainMenuContent({
             <Button
               asChild
               variant="default"
-              className="homepage-button homepage-button--primary start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white"
+              className={cn(
+                'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600',
+                'start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white'
+              )}
               id="btn-get-started-website-navbar"
             >
               <span>
-                <span className="homepage-button__label flex min-w-0 items-center justify-center gap-1.5">
+                <span
+                  className={cn(
+                    'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+                    '[&_svg:not(.animate-spin)]:hidden'
+                  )}
+                >
                   Get Started - Free
                   <ArrowRight size={14} />
                 </span>
                 <span
-                  className="homepage-button__icon homepage-button__icon--primary hidden"
+                  className={cn(
+                    'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
+                    '!flex !bg-signoz_robin-400'
+                  )}
                   aria-hidden="true"
                 >
                   <ArrowRight size={16} strokeWidth={2.5} />

@@ -47,15 +47,15 @@ export const TrustedByTeams = ({ page, className, variant = 'default' }: Trusted
         className={cn('m-0 mx-auto w-full overflow-hidden border-0 py-0', className)}
         aria-label="Trusted by platform teams"
       >
-        <div className="mb-4 text-center text-xs font-semibold uppercase leading-5 tracking-[0.08em] text-signoz_vanilla-400 md:text-sm">
+        <div className="mb-4 text-center text-xs font-semibold uppercase leading-5 tracking-widest text-signoz_vanilla-400 md:text-sm">
           Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
         </div>
-        <div className="homepage-logo-marquee relative overflow-hidden">
-          <div className="homepage-logo-marquee__track flex w-max items-center gap-10 md:gap-14">
+        <div className="group relative overflow-hidden [mask-image:linear-gradient(90deg,transparent_0%,#000_10%,#000_90%,transparent_100%)]">
+          <div className="flex w-max animate-homepage-logo-marquee items-center gap-10 group-hover:[animation-play-state:paused] motion-reduce:translate-x-0 motion-reduce:animate-none md:gap-14">
             {marqueeCompanies.map((company, idx) => (
               <company.Logo
                 key={`${idx}-${company.imageDesc}`}
-                className="h-[30px] w-[104px] shrink-0 opacity-70 grayscale transition-opacity duration-200 hover:opacity-100 md:h-[34px] md:w-[120px]"
+                className="h-8 w-24 shrink-0 opacity-70 grayscale transition-opacity duration-200 hover:opacity-100 md:h-8 md:w-32"
                 role="img"
                 aria-label={idx < COMPANIES.length ? company.imageDesc : undefined}
                 aria-hidden={idx >= COMPANIES.length ? 'true' : undefined}
@@ -84,7 +84,7 @@ export const TrustedByTeams = ({ page, className, variant = 'default' }: Trusted
           {COMPANIES.map((company, idx) => (
             <company.Logo
               key={`${idx}-${company.imageDesc}`}
-              className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
+              className="h-10 w-24 md:h-10 md:w-32"
               role="img"
               aria-label={company.imageDesc}
             />

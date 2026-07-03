@@ -95,7 +95,7 @@ function TraceSpansVisual() {
 
       <div className="absolute inset-x-4 bottom-0 top-[78px] overflow-hidden [mask-image:linear-gradient(180deg,transparent_0%,black_8%,black_88%,transparent_100%)] lg:inset-x-5">
         <div
-          className="homepage-trace-span-stream relative space-y-1.5 font-mono"
+          className="relative space-y-1.5 font-mono transition-transform duration-[140ms] ease-linear motion-reduce:transition-none"
           style={{ transform: `translateY(${-50 * scrollProgress}%)` }}
         >
           {spanRows.map((span, index) => (
