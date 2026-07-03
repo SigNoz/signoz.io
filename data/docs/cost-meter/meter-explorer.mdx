@@ -1,5 +1,5 @@
 ---
-date: 2026-06-25
+date: 2026-07-03
 
 title: Meter Explorer - Query & Analyze Cost Metrics
 description: Use Meter Explorer to query and analyze telemetry ingestion costs in SigNoz. Drill down by service, environment, or host to identify cost drivers and optimize spend.
@@ -10,8 +10,8 @@ The **Meter Explorer** provides advanced capabilities to analyze and understand 
 
 <Figure
   src="/img/docs/cost-meter/meter-explorer/meter-explorer.webp"
-  alt="Meter Explorer showing log count rate"
-  caption="Meter Explorer query interface with filters, aggregation options, and time series chart"
+  alt="Meter Explorer stacked bar chart showing log size broken down by service"
+  caption="Meter Explorer query interface with filters, aggregation options, and a stacked bar chart with a bottom legend"
 />
 
 **What you'll learn:**
@@ -44,6 +44,48 @@ You can add more filters by clicking the **settings icon** at the top of the fil
 <Admonition type="info">
 Only users with the **Admin** role can edit quick filters.
 </Admonition>
+
+## Reading the chart
+
+Meter Explorer renders query results as a **stacked bar chart**. When a query returns multiple series (for example, log size grouped by `service.name`), each series appears as a layered segment within the same bar, so you can see both the total ingestion for each interval and how it breaks down across dimensions.
+
+The chart **legend** appears below the chart area. Each entry maps a color to its series, making it easy to identify which service, environment, or host contributes to each segment.
+
+### Zoom into a time range
+
+Drag across the chart to select a time range. Meter Explorer zooms into the selected window, updates the **global time picker** at the top of the page, and reflects the new range in the page URL so you can share or bookmark the view.
+
+<Admonition type="caution">
+Drag-to-zoom changes the time context for the entire page, not just the chart. The updated range applies to every query and panel on the Explorer until you change the time picker again.
+</Admonition>
+
+### Loading and empty states
+
+The chart area shows a different state depending on where you are in the query flow:
+
+- **Before you run a query**, it prompts you to `Select a metric and run a query to see the results`.
+
+<Figure
+  src="/img/docs/cost-meter/meter-explorer/meter-explorer-empty-prequery.webp"
+  alt="Meter Explorer pre-query empty state prompting the user to select a metric and run a query"
+  caption="Pre-query empty state shown before any query runs"
+/>
+
+- **While data is being fetched**, an animated icon appears alongside the message `Retrieving your metrics`.
+
+<Figure
+  src="/img/docs/cost-meter/meter-explorer/meter-explorer-loading.webp"
+  alt="Meter Explorer loading state with an animated icon and Retrieving your metrics message"
+  caption="Loading state shown while chart data is being fetched"
+/>
+
+- **When a query returns no results**, the chart area shows `No data`. This often means the selected filters match no telemetry, or the time range is under 1 hour (meter data is aggregated hourly).
+
+<Figure
+  src="/img/docs/cost-meter/meter-explorer/meter-explorer-no-data.webp"
+  alt="Meter Explorer no-data empty state shown after a query returns no results"
+  caption="No-data state shown after a query runs but returns no results"
+/>
 
 ## Prerequisites
 
