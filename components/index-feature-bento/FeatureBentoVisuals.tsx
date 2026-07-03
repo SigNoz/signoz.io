@@ -137,7 +137,7 @@ function AlertCardVisual() {
   return (
     <div
       aria-hidden="true"
-      className="bg-signoz_ink-400/88 pointer-events-none absolute inset-x-4 bottom-[-132px] z-[1] rounded-[6px] border border-signoz_slate-100/50 p-4 font-mono shadow-[0_24px_70px_rgba(0,0,0,0.46)] backdrop-blur-sm transition-transform duration-500 ease-out group-hover:-translate-y-[112px] group-focus-visible:-translate-y-[112px] sm:inset-x-5 md:bottom-[-142px] lg:inset-x-6"
+      className="bg-signoz_ink-400/88 pointer-events-none absolute inset-x-4 bottom-[-132px] z-[1] rounded-[6px] border border-signoz_slate-100/50 p-4 font-mono shadow-[0_24px_70px_rgba(0,0,0,0.46)] backdrop-blur-sm sm:inset-x-5 md:bottom-auto md:top-[156px] lg:inset-x-6 lg:top-[164px] xl:top-[140px]"
     >
       <div className="absolute inset-0 rounded-[6px] bg-[radial-gradient(circle_at_28%_8%,rgba(229,72,77,0.12),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.025),transparent)]" />
       <div className="absolute bottom-4 left-4 top-4 w-1 rounded-full bg-signoz_cherry-500 shadow-[0_0_24px_rgba(229,72,77,0.42)]" />

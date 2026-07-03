@@ -2,7 +2,7 @@
 
 import { Activity, Bot, Cable, SearchCode, ServerCog, type LucideIcon } from 'lucide-react'
 import Image, { type StaticImageData } from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import GrainientCardBackground from './GrainientCardBackground'
 
@@ -92,19 +92,39 @@ function easeOutCubic(value: number) {
   return 1 - Math.pow(1 - normalizedValue, 3)
 }
 
-function RevealWords({ progress, text }: { progress: number; text: string }) {
+function isWhitespaceToken(token: string) {
+  return /^\s+$/.test(token)
+}
+
+function getRevealWordMetadata(text: string) {
   const tokens = text.split(/(\s+)/).filter(Boolean)
-  const wordCount = tokens.filter((token) => !/^\s+$/.test(token)).length
-  let wordIndex = -1
+  const wordIndices: number[] = []
+  let wordCount = 0
+
+  tokens.forEach((token) => {
+    if (isWhitespaceToken(token)) {
+      wordIndices.push(-1)
+      return
+    }
+
+    wordIndices.push(wordCount)
+    wordCount += 1
+  })
+
+  return { tokens, wordCount, wordIndices }
+}
+
+function RevealWords({ progress, text }: { progress: number; text: string }) {
+  const { tokens, wordCount, wordIndices } = useMemo(() => getRevealWordMetadata(text), [text])
 
   return (
     <span aria-hidden="true">
       {tokens.map((token, tokenIndex) => {
-        if (/^\s+$/.test(token)) {
+        if (isWhitespaceToken(token)) {
           return token
         }
 
-        wordIndex += 1
+        const wordIndex = wordIndices[tokenIndex]
 
         const revealStart = wordCount <= 1 ? 0 : (wordIndex / (wordCount - 1)) * 0.72
         const revealProgress = easeOutCubic((progress - revealStart) / 0.24)
@@ -275,11 +295,11 @@ export default function WhySignoz() {
 
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-clip bg-signoz_ink-500 px-5 py-16 text-signoz_vanilla-100 sm:px-6 sm:py-24 lg:px-20 lg:py-28"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-clip bg-signoz_ink-500 px-5 py-16 text-signoz_vanilla-100 sm:px-6 sm:py-24 lg:px-20 lg:py-28 wide:max-w-8xl wide:px-0"
       data-homepage-floating-cta="Start sending telemetry in 20 minutes"
       data-homepage-floating-href="/docs/install/"
     >
-      <div className="relative z-10 mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(430px,1fr)] lg:gap-20">
+      <div className="relative z-10 mx-auto grid max-w-8xl gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(430px,1fr)] lg:gap-20">
         <div className="min-w-0">
           <div className="sticky top-28 isolate z-20 pb-8 pt-2">
             <div
@@ -291,16 +311,16 @@ export default function WhySignoz() {
               className="pointer-events-none absolute left-1/2 top-full z-0 h-40 w-[160dvw] -translate-x-1/2 bg-gradient-to-b from-signoz_ink-500 to-transparent"
             />
             <h2 className="relative z-10 m-0 max-w-lg text-3xl font-medium leading-none text-signoz_vanilla-100 sm:text-4xl sm:leading-none md:text-6xl">
-              Why SigNoz
+              <span className="whitespace-nowrap">Fast Troubleshooting.</span>
+              <br />
+              <span className="whitespace-nowrap text-signoz_vanilla-400">
+                No Context Switching.
+              </span>
             </h2>
-            <p className="relative z-10 m-0 mt-6 max-w-lg text-lg font-medium leading-7 text-signoz_vanilla-400">
-              SigNoz keeps traces, metrics, logs, dashboards, alerts, and agent workflows together
-              so every investigation starts from the same evidence.
-            </p>
             <div className="relative z-10 mt-9 h-px w-full bg-signoz_slate-100" />
           </div>
 
-          <div className="pb-16 pt-14 lg:pb-[24dvh] lg:pt-20">
+          <div className="pb-16 pt-14 lg:pb-[24dvh] lg:pt-0">
             {items.map((item, index) => {
               const Icon = item.icon
               const isActive = index === activeIndex
@@ -309,7 +329,7 @@ export default function WhySignoz() {
               return (
                 <div
                   aria-current={index === activeIndex ? 'step' : undefined}
-                  className={`grid min-h-44 grid-cols-[40px_minmax(0,1fr)] gap-6 border-b border-signoz_slate-100 py-8 transition-[filter] duration-500 ease-out lg:min-h-72 lg:py-14 ${getItemClasses(
+                  className={`grid min-h-44 grid-cols-[40px_minmax(0,1fr)] gap-6 border-b border-signoz_slate-100 py-8 transition-[filter] duration-500 ease-out lg:min-h-72 lg:auto-rows-max lg:content-end lg:py-14 ${getItemClasses(
                     index,
                     activeIndex
                   )}`}
