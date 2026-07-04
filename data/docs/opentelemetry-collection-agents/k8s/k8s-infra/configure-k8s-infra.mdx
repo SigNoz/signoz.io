@@ -199,6 +199,21 @@ presets:
         enabled: true
       k8s.pod.memory_limit_utilization:
         enabled: true
+      # Container-level metrics — power the Containers view
+      k8s.container.cpu_request_utilization:
+        enabled: true
+      k8s.container.cpu_limit_utilization:
+        enabled: true
+      k8s.container.memory_request_utilization:
+        enabled: true
+      k8s.container.memory_limit_utilization:
+        enabled: true
+      container.uptime:
+        enabled: true
+      k8s.container.cpu.node.utilization:
+        enabled: true
+      k8s.container.memory.node.utilization:
+        enabled: true
       # Enable other metrics as needed
 ```
 
@@ -207,6 +222,8 @@ presets:
 - Set appropriate `collectionInterval` based on cluster size
 - Configure `insecureSkipVerify: false` in production environments
 - Enable specific metrics based on monitoring requirements
+
+**What the container metrics power**: `k8s.container.cpu_request_utilization`, `k8s.container.cpu_limit_utilization`, `k8s.container.memory_request_utilization`, `k8s.container.memory_limit_utilization`, `container.uptime`, `k8s.container.cpu.node.utilization`, and `k8s.container.memory.node.utilization` are disabled by default in the upstream kubeletstats receiver but enabled by default in this chart. They power the utilization columns and the Uptime and Node-utilization charts on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view. Keep them enabled to retain full container visibility.
 
 ### 5. Kubernetes Metadata Enrichment
 
@@ -304,6 +321,8 @@ presets:
         enabled: true
       k8s.container.status.reason:
         enabled: true
+      k8s.container.status.state:
+        enabled: true
 ```
 
 **When to use**:
@@ -312,7 +331,7 @@ presets:
 - Useful for capacity planning and resource optimization
 - Essential for multi-node cluster monitoring
 
-**What `metrics` powers**: `k8s.pod.status_reason` and `k8s.container.status.reason` are disabled by default in the upstream `k8s_cluster` receiver but enabled by default in this chart. Together they drive the kubectl-style **Pod Status** column on the Pods view (and the per-entity Pod Counts by Status breakdown). Keep them enabled to retain pod-status visibility; without them, pod status falls back to the lifecycle phase only.
+**What `metrics` powers**: `k8s.pod.status_reason`, `k8s.container.status.reason`, and `k8s.container.status.state` are disabled by default in the upstream `k8s_cluster` receiver but enabled by default in this chart. `k8s.pod.status_reason` and `k8s.container.status.reason` drive the kubectl-style **Pod Status** column on the Pods view (and the per-entity Pod Counts by Status breakdown); `k8s.container.status.reason` and `k8s.container.status.state` together drive the **Status** column on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view. Keep them enabled to retain pod- and container-status visibility; without them, status falls back to the lifecycle phase or state only. Note that `k8s.container.status.reason` and `k8s.container.status.state` are experimental (development stability) upstream, so their allowed values may change on a collector upgrade.
 
 ### 7. Kubernetes Events
 

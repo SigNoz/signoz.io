@@ -1,0 +1,145 @@
+---
+date: 2026-07-03
+id: k8s-containers
+title: Containers
+description: Monitor individual Kubernetes container CPU, memory, restarts, and readiness in SigNoz — request/limit utilization, kubectl-style status, and correlated logs and traces.
+doc_type: explanation
+---
+
+The **Containers** view breaks each pod down into the app and sidecar containers running inside it, which the Pods view rolls up into a single row. Every container gets its own row showing CPU and memory usage, utilization against its requests and limits, restarts, and health, so you can pinpoint exactly which container in a pod is throttling, leaking memory, or crash-looping.
+
+Each row follows one container across its restarts, so a container's history stays in place even after it crashes and comes back. The view covers Kubernetes containers only — standalone Docker, Podman, and ECS containers are not shown.
+
+## Containers List Page Columns
+
+### Container Name
+
+- This column is derived from the resource attribute `k8s.container.name`.
+- Name of the container as defined in the pod spec (the `name:` of a `spec.containers` entry). Together with the pod's UID (`k8s.pod.uid`) it forms the identity of each row — this pair is what keeps a container pinned to the same row across restarts, since the container name is stable where the container ID is not.
+- Use it to tell which container within a pod you're looking at (for example, the app container vs. a logging sidecar), and as the click-through to that container's charts, logs, traces, and events.
+
+### Pod Name
+
+- This column is derived from the resource attribute `k8s.pod.name`.
+- Name of the pod this container runs in. Multiple rows can share the same pod name — one per container in that pod — so pair it with **Container Name** to identify a single container.
+- Use it to group a pod's containers together at a glance, to correlate a container back to its pod in the Pods view, or to filter the list down to one pod when investigating a multi-container issue.
+
+### Image:Tag
+
+- This column is derived from the resource attributes `container.image.name` and `container.image.tag`, rendered together as `name:tag`.
+- The container image the workload is running, including its tag (for example, `nginx:1.27`). A `latest` or missing tag means the running version isn't pinned, so the same row can silently change images between restarts.
+- Use it to confirm which image version is deployed when triaging a regression, to spot containers still on an old tag after a rollout, or to catch unpinned (`latest`) images that make incidents harder to reproduce.
+
+### Status
+
+- This column relies on the OTel metric(s): `k8s.container.status.state` and `k8s.container.status.reason`, both from the k8s_cluster receiver. Both are disabled by default upstream but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics). Both must be flowing for this column to populate — otherwise it shows no data and a warning is surfaced.
+- The kubectl-style display status of the container, derived from the latest values in the selected window. A currently-active container reason (`k8s.container.status.reason`) takes precedence; otherwise the column falls back to the container's state (`k8s.container.status.state` — `Running`, `Waiting`, or `Terminated`), and to `Unknown` if neither resolves. Surfaced reasons are `CrashLoopBackOff`, `ImagePullBackOff`, `ErrImagePull`, `CreateContainerConfigError`, `ContainerCreating`, `OOMKilled`, `Completed`, `Error`, and `ContainerCannotRun`. Two gaps are worth noting: uncoded terminated reasons such as raw signals or exit codes collapse to `Error`, and init containers are not shown in this view at all.
+- Use it to triage containers straight from the list without `kubectl`. `CrashLoopBackOff`, `OOMKilled`, and `ImagePullBackOff` are the ones to be checked first. Read it alongside **Restarts** to tell a one-off blip from sustained flapping, then click through to the container's logs and events for the root cause.
+
+### Ready
+
+- This column relies on the OTel metric(s): `k8s.container.ready`, from the k8s_cluster receiver and enabled by default.
+- Whether the container currently passes its readiness probe, shown as **Ready** or **Not Ready** from the latest value in the window. This is the same readiness Kubernetes uses to decide whether a container should receive traffic through a Service — a `Not Ready` container is running but deliberately held out of the load-balancing pool.
+- Use it to catch containers that are up but not serving. A container stuck `Not Ready` while its **Status** is `Running` usually points to a failing readiness probe, a slow warm-up, or a dependency it can't reach yet. Read it with **Status** and **Restarts** to separate "starting up" from "broken."
+
+### Restarts
+
+- This column relies on the OTel metric(s): `k8s.container.restarts`, from the k8s_cluster receiver and enabled by default.
+- The container's latest cumulative restart count in the window — the same number `kubectl get pods` prints under RESTARTS, but per container rather than summed across the whole pod as the Pods view shows it. OpenTelemetry cautions that this is not a reliable exact counter: the kubelet can prune dead containers and reset it at any time, so treat it as `== 0` (no recent restarts) versus `> 0` (restarts happened) rather than reading into the precise number. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerrestarts" target="_blank" rel="noopener noreferrer nofollow">k8sclusterreceiver documentation</a>.
+- Use it as a crash signal: `0` means the container has been stable recently, anything `> 0` is worth investigating: crash loops, OOM kills, or failing liveness probes. Read it with **Status** to tell a single restart apart from sustained flapping, then open the container's logs and events for the cause.
+
+### CPU Req Usage (%)
+
+- This column relies on the OTel metric(s): `k8s.container.cpu_request_utilization`. This metric is not emitted if `requests.cpu` is not set on the container.
+- How much of its CPU request the container is actually using, expressed as a percentage. It is the **CPU Usage (cores)** value divided by the container's configured CPU request, both measured in cores. Kubernetes uses requests to <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-requests-are-scheduled" target="_blank" rel="noopener noreferrer nofollow">schedule containers onto nodes</a>. A value approaching or crossing 100% means the container is using more CPU than it reserved; this is allowed but signals the request is under-provisioned. A value well below 50% means the request is reserving capacity the container never uses.
+- Color of the in-table progress bar reflects the value: **amber** below 50% (request likely over-provisioned, wasted capacity), **green** between 50% and 100% (healthy), **red** between 100% and 150% (request under-provisioned), and **dark red** above 150%.
+
+### CPU Limit Usage (%)
+
+- This column relies on the OTel metric(s): `k8s.container.cpu_limit_utilization`. This metric is not emitted if `limits.cpu` is not set on the container.
+- How much of its CPU limit the container is actually using, expressed as a percentage. It is the **CPU Usage (cores)** value divided by the container's configured CPU limit, both measured in cores. <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits" target="_blank" rel="noopener noreferrer nofollow">CPU limits are enforced by kernel throttling</a>, so a value approaching 100% means the container is being actively or imminently throttled: its threads are made to wait even while CPU work is queued.
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high — throttling becoming likely), and **red** above 95% (critical, at or beyond the limit).
+
+### CPU Usage (cores)
+
+- This column relies on the OTel metric(s): `container.cpu.usage`.
+- Actual CPU consumed by the container, in CPU-core units. A value of `1.0` means one full core is in use, `0.5` means half a core. This is the same raw draw the **CPU Req Usage (%)** and **CPU Limit Usage (%)** columns are measured against.
+- Use it for absolute capacity planning when you want the container's real CPU draw rather than a ratio against its request or limit.
+
+### Mem Req Usage (%)
+
+- This column relies on the OTel metric(s): `k8s.container.memory_request_utilization`. This metric is not emitted if `requests.memory` is not set on the container.
+- How much of its memory request the container is actually using, expressed as a percentage. It is the container's total memory usage divided by its configured memory request, both in bytes. This ratio is based on total memory usage, which includes reclaimable page cache, so it can read higher than the working-set value shown in the **Mem Usage (WSS)** column. Kubernetes uses requests to <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-requests-are-scheduled" target="_blank" rel="noopener noreferrer nofollow">schedule containers onto nodes</a>. A value approaching or crossing 100% means the container is using more memory than it reserved; well below 50% the request is over-provisioned.
+- Color of the in-table progress bar reflects the value: **amber** below 50% (request likely over-provisioned, wasted capacity), **green** between 50% and 100% (healthy), **red** between 100% and 150% (request under-provisioned), and **dark red** above 150%.
+
+### Mem Limit Usage (%)
+
+- This column relies on the OTel metric(s): `k8s.container.memory_limit_utilization`. This metric is not emitted if `limits.memory` is not set on the container.
+- How much of its memory limit the container is actually using, expressed as a percentage. It is the container's total memory usage divided by its configured memory limit, both in bytes. Like **Mem Req Usage (%)**, this uses total memory usage, so it can read higher than the working-set value in the **Mem Usage (WSS)** column. <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits" target="_blank" rel="noopener noreferrer nofollow">Memory limits are enforced reactively by OOM kills</a> once the kernel detects memory pressure, so a value at or near 100% is a sustained OOMKill risk.
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high — OOMKill becoming likely), and **red** above 95% (critical, at or beyond the limit).
+
+### Mem Usage (WSS)
+
+- This column relies on the OTel metric(s): `container.memory.working_set`.
+- Working Set Size — the container's anonymous and active file-backed pages, excluding reclaimable inactive file cache. This is the memory that cannot be freed under pressure, so it is the value the kubelet uses for OOM and node-eviction decisions, and the same number `kubectl top` reports. It reads lower than total memory usage, which is why the **Mem Req Usage (%)** and **Mem Limit Usage (%)** columns can look higher than this value suggests.
+- Use it as the container's real memory footprint for capacity planning, and watch it against the memory limit as the truest OOM signal. When the working set approaches the limit, an OOM kill is imminent.
+
+Additional columns available via the Columns selector: **Namespace**, **Node**, **Cluster**, and **Deployment**.
+
+## Container Detail Page
+
+Click a container's row to open its detail page. The header shows the container's **Pod**, **Namespace**, **Node**, **Cluster**, and **Image:Tag**. The detail page has four tabs: **Metrics**, **Logs**, **Traces**, and **Events**.
+
+Every panel on the **Metrics** tab is scoped to that single container by `k8s.container.name` and `k8s.pod.uid`. Charts that plot **Min / Max / Avg** lines show three time-aggregations of the metric within each step interval, so the gap between Max and Min reflects how bursty the container is inside that interval.
+
+### Container Metrics — Charts and Panels
+
+#### CPU Usage (cores)
+
+- This chart relies on the OTel metric(s): `container.cpu.usage`.
+- Plots the container's CPU consumption in CPU-core units over time, with one line each for **Avg**, **Max**, and **Min** within each step interval. A narrow band between Max and Min means steady CPU use; a wide band means the container is bursting inside the interval. This is the same metric as the list page's **CPU Usage (cores)** column, shown as a time series.
+
+#### CPU Request, Limit Utilization
+
+- This chart relies on the OTel metric(s): `k8s.container.cpu_request_utilization`, `k8s.container.cpu_limit_utilization`.
+- Plots the container's CPU usage in cores — the same value shown in the **CPU Usage (cores)** chart — as a fraction of its own CPU request and its CPU limit over time. Six lines: **Avg / Max / Min** for each of the two ratios. Request lines crossing 100% just mean the container is using more CPU than it reserved, which is allowed; Limit lines crossing 100% mean the kernel is actively throttling it.
+
+#### Memory Usage (bytes)
+
+- This chart relies on the OTel metric(s): `container.memory.usage`, `container.memory.available`.
+- Plots the container's memory in bytes over time. **Usage** (`container.memory.usage`) is all memory charged to the container, including reclaimable page cache, shown as **Avg / Max / Min** within each step interval. **Available** (`container.memory.available`) is the headroom remaining before the container reaches its memory limit. When Usage rises while Available falls toward zero, the container is nearing an OOM kill. This Usage is the total-memory value, so it reads higher than the working-set number in the **Mem Usage (WSS)** column and the **Memory by State** chart below.
+
+#### Memory Request, Limit Utilization
+
+- This chart relies on the OTel metric(s): `k8s.container.memory_request_utilization`, `k8s.container.memory_limit_utilization`.
+- Plots the container's total memory usage — the **Memory Usage (bytes)** value — as a fraction of its own memory request and its memory limit over time. Six lines: **Avg / Max / Min** for each of the two ratios. Request lines crossing 100% just mean the container is using more memory than it reserved; Limit lines approaching 100% risk an OOM kill once the kernel detects memory pressure. These are the time-series form of the **Mem Req Usage (%)** and **Mem Limit Usage (%)** columns.
+
+#### Memory by State
+
+- This chart relies on the OTel metric(s): `container.memory.rss`, `container.memory.working_set`.
+- Plots three memory components of the container over time: `container.memory.rss` as **RSS Memory** (anonymous and tmpfs memory), `container.memory.working_set` as **Working Set Memory** (the OOM- and eviction-relevant footprint), and a `working_set − rss` formula as **Cache Memory** (the file-backed cache portion of the working set). Rising RSS without rising Working Set usually points to an application heap leak; rising Cache without rising RSS typically reflects heavier file I/O.
+
+#### Memory Major Page Faults
+
+- This chart relies on the OTel metric(s): `container.memory.major_page_faults`.
+- Plots the container's major-page-fault rate over time, as a single line. A major page fault is the kernel reading a page from disk because it wasn't in RAM. Sustained high values mean the container's working set exceeds its available memory and the system is paging from disk, which is very expensive and usually correlates with severe latency spikes.
+
+#### File System (bytes)
+
+- This chart relies on the OTel metric(s): `container.filesystem.capacity`, `container.filesystem.available`, `container.filesystem.usage`.
+- Plots three values of the container's filesystem over time: **Capacity** (`container.filesystem.capacity`) is the total provisioned space, **Available** (`container.filesystem.available`) is the remaining free space, and **Usage** (`container.filesystem.usage`) is what's currently consumed. When Available trends toward zero or Usage approaches Capacity, the container's filesystem is filling up. Common causes are log accumulation, downloaded artifacts, or temp and cache files that aren't being cleaned up.
+
+#### Container Uptime
+
+- This chart relies on the OTel metric(s): `container.uptime`. This metric is disabled by default in the kubeletstats receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+- Plots the time in seconds since the container last started, as a single line that climbs steadily and drops back to zero on each restart. A sawtooth of repeated resets is an at-a-glance sign of a crash-looping or frequently-restarting container, and pairs with the **Restarts** column to confirm instability.
+
+#### Node CPU Utilization by Container
+
+- This chart relies on the OTel metric(s): `k8s.container.cpu.node.utilization`. This metric is disabled by default in the kubeletstats receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+- Plots the container's CPU usage as a fraction of the entire node's total CPU capacity over time, as a single line. The request and limit utilizations compare the container against its own reservations; this instead shows the container's share of the whole node. Use it to see how much of a node a single container is claiming and to spot noisy neighbors competing for node CPU.
+
+#### Node Memory Utilization by Container
+
+- This chart relies on the OTel metric(s): `k8s.container.memory.node.utilization`. This metric is disabled by default in the kubeletstats receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+- Plots the container's memory usage as a fraction of the entire node's total memory capacity over time, as a single line. Like **Node CPU Utilization by Container**, this measures the container's share of the whole node rather than of its own request or limit. Use it to see which containers dominate a node's memory and to spot memory pressure building at the node level.
