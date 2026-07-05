@@ -1,0 +1,191 @@
+---
+title: '"It’s Basically Me, But at Scale": How Shaped Uses SigNoz MCP to Debug Latency'
+date: 2026-06-29
+tags: [AI, Observability]
+authors: [mahak_kaur]
+description: How Kathleen Xue at Shaped uses SigNoz MCP with Claude to compare slow traces, trace Redis timeouts back to code, and debug production latency faster.
+image: /img/blog/2026/07/shaped-kathleen-blog-cover.webp
+keywords: [signoz mcp, claude, trace debugging, latency debugging, agent-native observability]
+related_articles:
+  - '/blog/introducing-agent-native-observability'
+  - '/blog/signoz-mcp-log-trace-investigation'
+  - '/blog/tracing-funnels-observability-distributed-systems'
+---
+
+At SigNoz, we have been speaking with users who are [bringing AI agents into production](https://signoz.io/agent-native-observability/) debugging. Some teams are building fully agentic systems, while others are taking a more practical approach. In these setups, the agent is given access to the same traces, logs, metrics, and code context that an engineer would normally inspect, and is used to move through repetitive debugging steps faster.
+
+[Kathleen Xue](https://www.linkedin.com/in/kathleen-xue-b2004381/), Engineering at [Shaped](https://www.shaped.ai/), falls into this second group. Shaped is a Y Combinator-backed company that helps teams build production-ready ranking and recommendation models. Kathleen’s work is heavily focused on reliability and latency, and SigNoz was already a core part of her day-to-day debugging before MCP entered the picture.
+
+In this blog, we walk through how Kathleen uses the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/) with Claude to compare slow traces, identify repeated bottlenecks, and connect latency patterns back to code. We also look at a real example where this approach helped Shaped trace a Redis timeout issue back to async worker configuration after the bug had been showing up in production for months.
+
+## How Kathleen Uses MCP During Latency Debugging
+
+When Kathleen investigates latency, she does not start with MCP. Instead, she begins with a signal from her dashboards.
+
+That signal usually appears as a spike or alert. From there, she narrows the issue down to a set of slow requests and then brings MCP into the process to move through the repetitive parts of the investigation more efficiently.
+
+<Figure
+  src="/img/blog/2026/07/shaped-latency-debugging-workflow.svg"
+  alt="Shaped latency debugging workflow with SigNoz MCP"
+  caption=""
+  className="max-w-sm mx-auto"
+/>
+
+This flow reflects how Kathleen approaches latency debugging in practice. It is not a rigid workflow, but a repeatable pattern she follows once a latency spike appears. She starts with a dashboard signal, gathers a set of slow trace IDs, uses Claude with SigNoz MCP to compare them, and then validates the findings against logs and code before deciding on a fix.
+
+## Shaped Was Already Debugging from SigNoz
+
+Before MCP, Kathleen was already using SigNoz every day as part of her debugging workflow.
+
+Dashboards gave her a quick view of system health, logs helped her investigate errors, and traces showed where time was being spent within each request. As she describes it:
+
+> I use SigNoz for monitoring the dashboards every single day, multiple times a day, because my job is very much reliability and latency focused. My top-line priority is making sure our system is stable. In terms of dashboards and logs, I use those all the time.
+
+-Kathleen Xue, Engineering, Shaped
+
+While dashboards and logs were essential, the biggest shift came from traces. Before adopting SigNoz traces, Shaped relied on Python profilers to find bottlenecks within a single request. That approach worked, but it did not reveal whether the same slowdown was happening across many production requests. Kathleen explains the difference:
+
+> Prior to using SigNoz traces, we relied heavily on Python profilers to figure out bottlenecks and latency. But with SigNoz traces, I can basically do the same thing as Python profiling, but at scale across many, many requests, as opposed to just digging into one single request.
+
+-Kathleen Xue, Engineering, Shaped
+
+MCP fit naturally into this setup because it builds on telemetry Kathleen already trusts. Instead of replacing her workflow, it gives Claude access to the same SigNoz data she is already using.
+
+If you want to see how Shaped set up its observability foundation before adding MCP, read the [Shaped case study](https://signoz.io/case-study/shaped/).
+
+## Kathleen Uses MCP to Compare Slow Traces
+
+Latency debugging often involves repeating the same steps across multiple traces. Kathleen would open a slow trace, identify the bottleneck, check logs or code, and then repeat that process for the next trace.
+
+With MCP, she can shift that repetitive work to Claude by providing a batch of trace IDs and asking it to compare them.
+
+> Prior to the MCP, whenever I wanted to debug latency, I would have to dig into a single trace and then find the bottleneck and debug from there. With MCP, I can send it around 10 trace IDs and ask it to find the trend across these requests and identify the bottleneck.
+
+-Kathleen Xue, Engineering, Shaped
+
+After describing this workflow, Kathleen summed up the value in a single line:
+
+> It's basically me, but at scale.
+
+-Kathleen Xue, Engineering, Shaped
+
+<YouTube id="OAsMad3cDoE" mute="false" />
+
+Claude handles the first pass across a larger set of telemetry than Kathleen would typically inspect manually. From there, Kathleen evaluates the output, decides which patterns are meaningful, and determines what to investigate further.
+
+[Tracing Funnels](https://signoz.io/blog/tracing-funnels-observability-distributed-systems/) addresses a similar need within SigNoz by allowing teams to compare selected spans across many traces. MCP gives Kathleen another way to perform that comparison directly from her coding environment.
+
+## The Prompt Pattern Kathleen Shares with Her Team
+
+To make this workflow effective, Kathleen starts with specific, structured prompts rather than broad debugging questions.
+
+A reusable version of her approach looks like this:
+
+```
+Here are 10 slow trace IDs from the same latency spike: [trace IDs].
+Use SigNoz MCP to inspect them.
+Focus on [span or operation].
+Compare what is similar and different across the traces.
+
+Tell me:
+1. Which bottleneck repeats most often?
+2. Which traces behave differently?
+3. Which logs should I check for this trace?
+4. Which code path could explain the pattern?
+
+Do not suggest a fix until you show the trace evidence behind it.
+```
+
+The key idea here is not the exact wording, but the structure. Kathleen starts with concrete evidence, narrows the scope, and asks Claude to compare before recommending a fix.
+
+She also shares these prompts, along with trace IDs, with her teammates so they can reuse the same investigation pattern.
+
+## How Claude Helped Trace a Redis Timeout to Async Worker Config
+
+This approach became especially valuable when Shaped was dealing with a recurring Redis client timeout.
+
+For months, the issue kept appearing in production. The team tried multiple fixes, but the long-tail latency persisted and the root cause remained unclear. Kathleen describes the situation:
+
+> One thing that we struggled with for many months was a long bottleneck when we were calling our Redis client. We tried a lot of different bug fixes to fix this increase in latency, but none of the fixes really worked, and the long-tail latency was still coming up every so often unpredictably.
+
+-Kathleen Xue, Engineering, Shaped
+
+To investigate further, Kathleen sent Claude a batch of traces that showed the same timeout pattern from the same client. Because Claude had access to both SigNoz and the codebase, it could connect what was happening in the traces with how the system was configured.
+
+> Claude being connected to SigNoz as well as my codebase allowed it to quickly identify that the issue was related to how we were setting up our async worker environment configurations. That ended up fixing a bug that had been in production for almost a year, all within a single Claude session.
+
+-Kathleen Xue, Engineering, Shaped
+
+<YouTube id="7fuyN5uQK80" mute="false" />
+
+SigNoz provided the traces and logs, while the codebase provided the implementation details. By combining both, Kathleen could verify whether Claude’s explanation matched the actual system behavior before trusting the fix.
+
+This is the direction of [agent-native observability](https://signoz.io/agent-native-observability/), where agents help gather and connect evidence, but engineers remain responsible for validating and acting on it.
+
+## Kathleen Still Starts with Dashboards
+
+Even with MCP, Kathleen’s starting point has not changed. She still begins with dashboards.
+
+Dashboards provide the fastest way to understand overall system health. They surface service health, error spikes, canceled requests, and latency trends in a way that is difficult to replicate through prompts alone. As Kathleen explains:
+
+> I still start from dashboards because the dashboards are really useful in showing me trends to look out for first that I can send to the MCP. The dashboard is still really powerful in that it gives a good presentation of the entire system health that you can't really do with words.
+
+-Kathleen Xue, Engineering, Shaped
+
+Once she identifies a latency spike, she drills down into traces to find slow requests. If the bottleneck is still unclear, she then brings MCP into the investigation.
+
+> If I'm still confused about the bottleneck, I'll copy this trace ID into Claude and say, hey, can you please dig into why this trace is taking a really long time? Then I'll also give Claude information about how to search up the logs for this trace.
+
+-Kathleen Xue, Engineering, Shaped
+
+The sequence matters. Kathleen is not asking Claude to guess what is important. She starts with a real signal in SigNoz and then uses MCP to deepen the investigation.
+
+## When Claude Finds a Pattern That Is Not Really There
+
+While MCP can speed up debugging, its output depends heavily on the quality of the underlying telemetry.
+
+At Shaped, traces work well because the team has instrumented their code with detailed spans. Each span includes information about inputs, outputs, and execution context, giving Claude enough structure to compare traces meaningfully. Kathleen explains:
+
+> The good thing about the traces that we have in SigNoz is that every single span in the trace is hydrated with information of what's going into that function and what's coming out. The MCP is able to have that really rich information of what's similar between all these traces and what's different.
+
+-Kathleen Xue, Engineering, Shaped
+
+However, this approach can break down when the signal is buried in noise.
+
+> When I don't get good results from MCP, it's likely because I haven't fed the right data into SigNoz, or the data is too noisy in SigNoz. Sometimes the logs are showing a lot of noise and Claude is not able to synthesize the signal from the noise, so it gives me the wrong answer and goes in loops.
+
+-Kathleen Xue, Engineering, Shaped
+
+This is why engineers still need to validate the output. Kathleen gives a simple example:
+
+> Claude kind of hallucinates and is like, I notice a big trend here, and I'm like, no, that's not a trend.
+
+-Kathleen Xue, Engineering, Shaped
+
+<YouTube id="b6yERQSdj_M" mute="false" />
+
+For a broader walkthrough of MCP-based debugging, read [Using SigNoz MCP for Log and Trace Investigation](https://signoz.io/blog/signoz-mcp-log-trace-investigation/).
+
+## Start with the Data Before Asking MCP
+
+For teams getting started with SigNoz MCP, Kathleen’s advice is simple: focus on your data first.
+
+That means ensuring that traces, logs, metrics, Kubernetes events, and custom attributes are all flowing into SigNoz with enough context to explain what is happening inside each request. Without that foundation, Claude has less to work with and more room to guess.
+
+> First make sure that you're getting the right metrics into SigNoz. Get your logs into SigNoz, get your Kubernetes events into SigNoz, and then whatever custom metrics you specify, get all that into SigNoz so that when you use the MCP, it's going to have all that rich information to go off of.
+
+-Kathleen Xue, Engineering, Shaped
+
+You can read more about that foundation in our guide to [OpenTelemetry](https://signoz.io/opentelemetry/) and our guide to [Kubernetes events monitoring](https://signoz.io/blog/kubernetes-events-monitoring/).
+
+Once that data is in place, teams can start using MCP for targeted questions where manual investigation would take too long. For example, you can ask it to compare slow traces, identify repeated bottlenecks, inspect logs for a specific trace ID, or connect a telemetry pattern to the code path that could explain it.
+
+To try this setup, start with [SigNoz Cloud](https://signoz.io/teams/) and connect your agent using the [SigNoz MCP server docs](https://signoz.io/docs/ai/signoz-mcp-server/).
+
+---
+
+**SigNoz Cloud** lets you run SigNoz without managing the infrastructure yourself. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)
+
+---
