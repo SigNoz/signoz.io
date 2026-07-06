@@ -237,11 +237,6 @@ export function useSignupForm({ source, onError }: UseSignupFormOptions) {
 
   const handleSocialSignupCallback = useCallback(
     async (payload: { code: string }) => {
-      const url = new URL(window.location.href)
-      url.searchParams.delete('code')
-      url.searchParams.delete('has_sso_error')
-      window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
-
       setSubmitFailed(false)
       setIsSubmitting(true)
       try {
