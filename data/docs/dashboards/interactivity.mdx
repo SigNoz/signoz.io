@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-06
 title: Interactivity in dashboards
 description: Learn how interactive dashboards in SigNoz help you drill down, correlate signals, and troubleshoot faster using context menus, cross filtering, cross-panel sync, and navigation to Logs and Traces.
 
@@ -98,33 +98,66 @@ They let you attach dynamic URLs to a panel and navigate to **internal explorers
   caption="Context menu showing dynamic links that use the clicked value and time range"
 />
 
-#### How it works
-1. Edit a panel and open the **Context Links** section.  
-2. Click **+ Context Link** and configure:  
-   - **Label**: The menu text (fallback is the raw URL).  
-   - **URL**: A template URL with variables like `{{_service.name}}` or `{{timestamp_start}}`.  
-   - **Query params**: Manage key–value pairs visually in the table. 
+#### Add a context link
+1. Edit a panel and expand the **Context Links** section in the panel settings pane.
+2. Click **Add Context Link** to open the context link editor.
+3. Configure the link:
+   - **Label**: The text shown in the context menu. If you leave it empty, SigNoz shows the URL instead.
+   - **URL**: The destination URL. It can include `{{variable}}` tokens that resolve to the clicked datapoint's values (see [Available variables](#available-variables)).
+   - **URL parameters** (optional): Click **Add URL parameter** to manage query parameters as key-value rows. Each row adds a `key=value` pair to the URL.
+4. Click **Save**.
 
 <Figure
-  src="/img/docs/dashboards/interactivity/create-context-links.png"
-  alt="Configuring a Context Link with label, URL template, and query parameters"
-  caption="Configuring a Context Link with label, URL template, and query parameters"
+  src="/img/docs/dashboards/interactivity/context-links-modal.webp"
+  alt="Context link editor with Label, URL, and a key-value URL parameter row"
+  caption="Authoring a context link in the editor, with a URL parameter row derived from the URL."
 />
- 
-3. The modal keeps the URL and key–value table in sync:  
-   - Editing the URL auto-populates the params table (values are decoded).  
-   - Editing the table updates the URL (values are encoded).  
-4. In the dashboard, **click** a chart datapoint, bar segment, or table row to open the **context menu**.  
-5. **Select the created link** — variables are resolved and the destination opens.  
+
+The URL field and the URL parameters table stay in sync:
+
+- Editing the URL populates the parameter rows (values are decoded).
+- Editing a parameter row updates the URL (values are encoded).
+
+#### URL validation
+The URL must start with one of the following, or the link cannot be saved:
+
+- `http://` or `https://` for an absolute link to an external tool.
+- `/` for a root-relative path inside SigNoz, for example `/logs`.
+- A `{{variable}}/` token, so the resolved variable value forms the start of the URL.
+
+If the URL does not match, SigNoz highlights the field and shows the message `URLs must start with http(s), /, or {{.*}}/`. Fix the URL to save the link.
+
+<Figure
+  src="/img/docs/dashboards/interactivity/context-links-validation.webp"
+  alt="Context link editor showing the URL validation error on an invalid ftp URL"
+  caption="An invalid URL is flagged and blocks saving until it is corrected."
+/>
 
 #### Available variables
-You can use different types of variables inside the URL or param values:
+You can use different types of variables inside the URL or a parameter value. While editing the URL or a parameter value, type `{{` to open an autocomplete popover that lists the variables available to the current panel, grouped by type.
+
+<Figure
+  src="/img/docs/dashboards/interactivity/context-links-variables.webp"
+  alt="Variable autocomplete popover listing global timestamp variables in the URL field"
+  caption="Typing {{ opens the variable autocomplete, here showing the global timestamp variables."
+/>
 
 | Type | Description | Syntax | Example |
 |------|-------------|--------|---------|
-| **Time range** | Inserts the current dashboard’s absolute start and end time (epoch ms). | `{{timestamp_start}}`, `{{timestamp_end}}` | `from={{timestamp_start}}&to={{timestamp_end}}` |
-| **Query variables** | The group by fields in the query the user clicks on. Available only when the panel query has a **GROUP BY**. | `{{_fieldName}}` | `{{_service.name}}`, `{{_trace_id}}` |
-| **Dashboard variables** | Any dashboard-level variable defined in the dashboard settings. | `{{varName}}` | `{{host}}`, `{{env}}` |
+| **Global timestamp** | The current dashboard's absolute start and end time (epoch ms). | `{{timestamp_start}}`, `{{timestamp_end}}` | `from={{timestamp_start}}&to={{timestamp_end}}` |
+| **Query variables** | The group by fields in the query you click on. Available only when the panel query has a **GROUP BY**. | `{{_fieldName}}` | `{{_service.name}}`, `{{_trace_id}}` |
+| **Dashboard variables** | Any dashboard-level variable defined in the [dashboard settings](https://signoz.io/docs/userguide/manage-variables/). | `{{varName}}` | `{{host}}`, `{{env}}` |
+
+#### Manage and use links
+Saved links appear as a compact list under the **Context Links** section. Each row shows the label (or the URL when no label is set) as the primary text and the full URL beneath it. Hover a row to reveal its **edit** (pencil) and **delete** (trash) buttons. Click the pencil to reopen the editor with the link's values prefilled.
+
+<Figure
+  src="/img/docs/dashboards/interactivity/context-links-list.webp"
+  alt="Saved context link shown as a compact row with edit and delete buttons on hover"
+  caption="Saved links render as a compact list with per-row edit and delete actions."
+/>
+
+To use a link, **click** a chart datapoint, bar segment, or table row in the dashboard to open the **context menu**, then select the link. Variables resolve to the clicked values and the destination opens.
 
 #### Examples
 **1. View trace details from a table**
