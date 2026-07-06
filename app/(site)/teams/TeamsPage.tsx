@@ -352,11 +352,12 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
   )
 }
 
-const TeamsPage: React.FC = () => {
-  const searchParams = useSearchParams()
-  const authCode = searchParams.get('code')
-  const ssoError = searchParams.get('has_sso_error')
+interface TeamsPageProps {
+  initialAuthCode: string | null
+  initialSsoError: string | null
+}
 
+const TeamsPage: React.FC<TeamsPageProps> = ({ initialAuthCode, initialSsoError }) => {
   const {
     errors,
     isSubmitting,
@@ -369,16 +370,16 @@ const TeamsPage: React.FC = () => {
   } = useSignupForm({ source: 'teams' })
 
   useEffect(() => {
-    if (authCode) handleSocialSignupCallback({ code: authCode })
-  }, [authCode, handleSocialSignupCallback])
+    if (initialAuthCode) handleSocialSignupCallback({ code: initialAuthCode })
+  }, [initialAuthCode, handleSocialSignupCallback])
 
   useEffect(() => {
-    if (ssoError) handleError()
-  }, [handleError, ssoError])
+    if (initialSsoError) handleError()
+  }, [handleError, initialSsoError])
 
   const formSection = (
     <div className="w-full">
-      {(!isSubmitting && submitFailed) || ssoError ? (
+      {(!isSubmitting && submitFailed) || initialSsoError ? (
         <ErrorState error={errors.apiError || ''} />
       ) : (
         <SignupFormIsolated
