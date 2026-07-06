@@ -358,8 +358,6 @@ interface TeamsPageProps {
 }
 
 const TeamsPage: React.FC<TeamsPageProps> = ({ initialAuthCode, initialSsoError }) => {
-  const callbackTriggeredRef = useRef(false)
-
   const {
     errors,
     isSubmitting,
@@ -372,10 +370,7 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ initialAuthCode, initialSsoError 
   } = useSignupForm({ source: 'teams' })
 
   useEffect(() => {
-    if (initialAuthCode && !callbackTriggeredRef.current) {
-      callbackTriggeredRef.current = true
-      handleSocialSignupCallback({ code: initialAuthCode })
-    }
+    if (initialAuthCode) handleSocialSignupCallback({ code: initialAuthCode })
   }, [initialAuthCode, handleSocialSignupCallback])
 
   useEffect(() => {
