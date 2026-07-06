@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { ArrowRight, CheckCircle, Loader2 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
@@ -352,17 +352,12 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
   )
 }
 
-const cleanSocialSignupSearchParams = () => {
-  const url = new URL(window.location.href)
-  url.searchParams.delete('code')
-  url.searchParams.delete('has_sso_error')
-  window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
+interface TeamsPageProps {
+  initialAuthCode: string | null
+  initialSsoError: string | null
 }
 
-const TeamsPage: React.FC = () => {
-  const searchParams = useSearchParams()
-  const authCode = searchParams.get('code')
-  const ssoError = searchParams.get('has_sso_error')
+const TeamsPage: React.FC<TeamsPageProps> = ({ initialAuthCode, initialSsoError }) => {
   const callbackTriggeredRef = useRef(false)
 
   const {
@@ -376,24 +371,20 @@ const TeamsPage: React.FC = () => {
     logEvent,
   } = useSignupForm({ source: 'teams' })
 
-  useLayoutEffect(() => {
-    if (authCode || ssoError) cleanSocialSignupSearchParams()
-  }, [authCode, ssoError])
-
   useEffect(() => {
-    if (authCode && !callbackTriggeredRef.current) {
+    if (initialAuthCode && !callbackTriggeredRef.current) {
       callbackTriggeredRef.current = true
-      handleSocialSignupCallback({ code: authCode })
+      handleSocialSignupCallback({ code: initialAuthCode })
     }
-  }, [authCode, handleSocialSignupCallback])
+  }, [initialAuthCode, handleSocialSignupCallback])
 
   useEffect(() => {
-    if (ssoError) handleError()
-  }, [handleError, ssoError])
+    if (initialSsoError) handleError()
+  }, [handleError, initialSsoError])
 
   const formSection = (
     <div className="w-full">
-      {(!isSubmitting && submitFailed) || ssoError ? (
+      {(!isSubmitting && submitFailed) || initialSsoError ? (
         <ErrorState error={errors.apiError || ''} />
       ) : (
         <SignupFormIsolated
