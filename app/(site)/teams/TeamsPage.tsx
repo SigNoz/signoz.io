@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { ArrowRight, CheckCircle, Loader2 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
@@ -352,10 +352,18 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
   )
 }
 
+const cleanSocialSignupSearchParams = () => {
+  const url = new URL(window.location.href)
+  url.searchParams.delete('code')
+  url.searchParams.delete('has_sso_error')
+  window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
+}
+
 const TeamsPage: React.FC = () => {
   const searchParams = useSearchParams()
   const authCode = searchParams.get('code')
   const ssoError = searchParams.get('has_sso_error')
+  const callbackTriggeredRef = useRef(false)
 
   const {
     errors,
@@ -368,8 +376,15 @@ const TeamsPage: React.FC = () => {
     logEvent,
   } = useSignupForm({ source: 'teams' })
 
+  useLayoutEffect(() => {
+    if (authCode || ssoError) cleanSocialSignupSearchParams()
+  }, [authCode, ssoError])
+
   useEffect(() => {
-    if (authCode) handleSocialSignupCallback({ code: authCode })
+    if (authCode && !callbackTriggeredRef.current) {
+      callbackTriggeredRef.current = true
+      handleSocialSignupCallback({ code: authCode })
+    }
   }, [authCode, handleSocialSignupCallback])
 
   useEffect(() => {
