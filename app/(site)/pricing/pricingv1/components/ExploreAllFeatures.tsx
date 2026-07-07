@@ -728,9 +728,9 @@ const PRICING_COLUMNS = [
   {
     key: 'teams',
     cellClassName:
-      'relative z-10 flex scale-105 transform items-center justify-center rounded-lg rounded-none border-x border-signoz_slate-400/20 bg-signoz_ink-500 p-4 shadow-2xl sm:bg-[#16181d] sm:p-5',
+      'relative z-10 flex scale-105 transform items-center justify-center rounded-lg rounded-none border-x border-signoz_slate-400/20 bg-signoz_ink-500 p-4 shadow-2xl sm:bg-signoz_ink-300 sm:p-5',
     sectionCellClassName:
-      'relative z-10 scale-105 transform border-x border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-[#16181d]',
+      'relative z-10 scale-105 transform border-x border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-signoz_ink-300',
   },
   {
     key: 'enterprise',
@@ -773,7 +773,7 @@ const ExploreAllFeatures: React.FC = () => {
                 key={idx}
                 className={`${
                   idx === 2
-                    ? `relative z-10 flex scale-105 transform flex-col justify-between rounded-lg !rounded-b-none border border-signoz_slate-400/20 bg-signoz_ink-500 p-3 shadow-2xl sm:bg-[#16181d]`
+                    ? `relative z-10 flex scale-105 transform flex-col justify-between rounded-lg !rounded-b-none border border-signoz_slate-400/20 bg-signoz_ink-500 p-3 shadow-2xl sm:bg-signoz_ink-300`
                     : idx !== 0
                       ? `flex flex-col justify-between rounded-lg p-3 bg-opacity-${idx * 10}`
                       : 'hidden md:block'
@@ -797,7 +797,7 @@ const ExploreAllFeatures: React.FC = () => {
           gridClassName={PRICING_GRID}
           sectionHeadingSize="lg"
           stickyOffset="top-[220px]"
-          stickyBg="bg-[#0f1013]"
+          stickyBg="bg-signoz_ink-300"
           featureCellClassName="col-span-3 md:col-span-1"
           featureSectionClassName="col-span-3 pl-6 pr-2 md:col-span-1"
         />
@@ -806,7 +806,7 @@ const ExploreAllFeatures: React.FC = () => {
         <div className={`grid h-[18px] ${PRICING_GRID}`}>
           <div />
           <div />
-          <div className="relative z-10 scale-105 transform rounded-lg !rounded-t-none border-x border-b border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-[#16181d]" />
+          <div className="relative z-10 scale-105 transform rounded-lg !rounded-t-none border-x border-b border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-signoz_ink-300" />
           <div />
         </div>
       </div>

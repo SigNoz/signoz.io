@@ -79,7 +79,7 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
   return (
     <div className="w-full overflow-x-auto text-left text-base leading-normal md:overflow-visible">
       <div className="relative min-w-[40rem] md:min-w-0">
-        <div className="pointer-events-none absolute inset-y-0 right-48 z-0 w-48 rounded-lg bg-gradient-to-b from-[#16181d] from-[73%] to-transparent opacity-80" />
+        <div className="pointer-events-none absolute inset-y-0 right-48 z-0 w-48 rounded-lg bg-gradient-to-b from-signoz_ink-300 from-[73%] to-transparent opacity-80" />
 
         <div className="sticky top-28 z-[9]">
           <div className={`grid ${GRID_CLASS}`}>
