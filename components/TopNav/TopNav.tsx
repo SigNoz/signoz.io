@@ -14,6 +14,7 @@ import { cn } from 'app/lib/utils'
 import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
+import UseCasesDropdown from './UseCasesDropdown'
 import ResourcesDropdown from './ResourcesDropdown'
 import { NavDropdownProvider } from './NavDropdownContext'
 import NavDropdownPanel from './NavDropdownPanel'
@@ -102,6 +103,7 @@ export default function TopNav() {
                   className={`hidden items-center gap-x-3 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
                 >
                   {visibility.showProduct && <ProductDropdown />}
+                  {visibility.showUseCases && <UseCasesDropdown />}
                   {visibility.showDocs && (
                     <TrackingLink
                       href="/docs/introduction/"
