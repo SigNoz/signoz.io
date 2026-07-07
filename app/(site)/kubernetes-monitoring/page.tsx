@@ -5,10 +5,10 @@ export const revalidate = 31536000
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Kubernetes Monitoring | SigNoz',
+    absolute: 'Supercharge your Kubernetes Monitoring. With AI powered insights. | SigNoz',
   },
   openGraph: {
-    title: 'Kubernetes Monitoring | SigNoz',
+    title: 'Supercharge your Kubernetes Monitoring. With AI powered insights. | SigNoz',
     description:
       'Get actionable insights across pods, nodes, namespaces, workloads, and the services running inside them. All unified across logs, traces, and metrics in consolidated OTel-native architecture.',
     images: '/img/website/hero-tabs/infrastructure.webp',
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   description:
     'Get actionable insights across pods, nodes, namespaces, workloads, and the services running inside them. All unified across logs, traces, and metrics in consolidated OTel-native architecture.',
   twitter: {
-    title: 'Kubernetes Monitoring | SigNoz',
+    title: 'Supercharge your Kubernetes Monitoring. With AI powered insights. | SigNoz',
     description:
       'Get actionable insights across pods, nodes, namespaces, workloads, and the services running inside them. All unified across logs, traces, and metrics in consolidated OTel-native architecture.',
     images: '/img/website/hero-tabs/infrastructure.webp',
