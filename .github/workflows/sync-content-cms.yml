@@ -7,13 +7,7 @@ name: Sync Content to Strapi CMS
 
 on:
   pull_request:
-    types: [labeled, synchronize, opened, reopened]
-    paths:
-      - 'data/**/*.mdx'
-      - 'data/**/*.md'
-      - 'data-assets/**'
-      - 'data/docs-side-nav/**'
-      - 'constants/listicles/**'
+    types: [labeled, synchronize, opened, reopened, closed]
   push:
     branches:
       - main  # Configurable: Change to your production branch
@@ -62,6 +56,7 @@ jobs:
       deployment_status: ${{ steps.determine-status.outputs.deployment_status }}
       should_sync: ${{ steps.check-sync.outputs.should_sync }}
       is_pr_staging: ${{ steps.check-sync.outputs.is_pr_staging }}
+      is_pr_closed: ${{ steps.check-sync.outputs.is_pr_closed }}
     
     steps:
       - name: Checkout Repository
@@ -147,6 +142,12 @@ jobs:
           echo "Checking if sync should run..."
           
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            if [[ "${{ github.event.action }}" == "closed" ]]; then
+              echo "is_pr_closed=true" >> $GITHUB_OUTPUT
+            else
+              echo "is_pr_closed=false" >> $GITHUB_OUTPUT
+            fi
+
             if [[ "${{ contains(github.event.pull_request.labels.*.name, 'staging') }}" == "true" ]]; then
               echo "should_sync=true" >> $GITHUB_OUTPUT
               echo "is_pr_staging=true" >> $GITHUB_OUTPUT
@@ -158,6 +159,7 @@ jobs:
             fi
           else
             echo "should_sync=true" >> $GITHUB_OUTPUT
+            echo "is_pr_closed=false" >> $GITHUB_OUTPUT
             echo "✅ Sync enabled: Push event to branch"
           fi
 
@@ -306,10 +308,11 @@ jobs:
           CMS_INITIAL_RETRY_DELAY_MS: '1000'
           RECONCILE_STAGING: ${{ needs.detect-changes.outputs.is_pr_staging }}
           SYNC_MANIFEST_PATH: .github/sync-manifest.json
+          IS_PR_CLOSED: ${{ needs.detect-changes.outputs.is_pr_closed }}
         run: node scripts/sync-content-to-strapi.js
 
       - name: Save Sync Manifest
-        if: always() && needs.detect-changes.outputs.is_pr_staging == 'true'
+        if: always() && needs.detect-changes.outputs.is_pr_staging == 'true' && needs.detect-changes.outputs.is_pr_closed != 'true'
         uses: actions/cache/save@v4
         with:
           path: .github/sync-manifest.json

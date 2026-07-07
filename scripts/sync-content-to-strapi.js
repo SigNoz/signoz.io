@@ -8,6 +8,7 @@ const mime = require('mime-types')
 const DEPLOYMENT_STATUS = process.env.DEPLOYMENT_STATUS
 const SYNC_MANIFEST_PATH = process.env.SYNC_MANIFEST_PATH
 const RECONCILE_STAGING = process.env.RECONCILE_STAGING === 'true'
+const IS_PR_CLOSED = process.env.IS_PR_CLOSED === 'true'
 
 const CMS_BATCH_SIZE = parseInt(process.env.CMS_BATCH_SIZE || '10', 10)
 const CMS_BATCH_DELAY_MS = parseInt(process.env.CMS_BATCH_DELAY_MS || '1000', 10)
@@ -1240,230 +1241,238 @@ async function syncToStrapi() {
   }
 
   // Combine changed and deleted files with a flag to indicate deletion
-  const allFiles = [
-    ...CHANGED_FILES.map((file) => ({ path: file, isDeleted: false })),
-    ...DELETED_FILES.map((file) => ({ path: file, isDeleted: true })),
-  ]
+  const allFiles = IS_PR_CLOSED
+    ? []
+    : [
+        ...CHANGED_FILES.map((file) => ({ path: file, isDeleted: false })),
+        ...DELETED_FILES.map((file) => ({ path: file, isDeleted: true })),
+      ]
+
+  if (IS_PR_CLOSED) {
+    console.log('🔒 PR closed — skipping Phase 1 & 2, running cleanup only')
+  }
 
   const pendingOperations = []
 
-  console.log('\n' + '='.repeat(80))
-  console.log('🔄 PHASE 1: Asset Synchronization and Validation')
-  console.log('='.repeat(80))
+  if (!IS_PR_CLOSED) {
+    console.log('\n' + '='.repeat(80))
+    console.log('🔄 PHASE 1: Asset Synchronization and Validation')
+    console.log('='.repeat(80))
 
-  for (const { path: filePath, isDeleted } of allFiles) {
-    console.log(`\n📄 Processing: ${filePath}${isDeleted ? ' (deleted)' : ''}`)
+    for (const { path: filePath, isDeleted } of allFiles) {
+      console.log(`\n📄 Processing: ${filePath}${isDeleted ? ' (deleted)' : ''}`)
 
-    try {
-      const folderName = getFolderName(filePath)
-
-      if (!folderName || !SYNC_FOLDERS.includes(folderName)) {
-        console.log(`⏭️ Skipped: Folder '${folderName}' not in sync list`)
-        results.skipped.push(filePath)
-        continue
-      }
-
-      const schema = COLLECTION_SCHEMAS[folderName]
-      if (!schema) {
-        console.log(`⏭️ Skipped: No schema configured for '${folderName}'`)
-        results.skipped.push(filePath)
-        continue
-      }
-
-      const pathField = generatePathField(filePath, folderName)
-
-      if (!pathField) {
-        throw new Error('Could not generate path field')
-      }
-
-      const operationType = detectOperationType(filePath, isDeleted)
-
-      if (operationType === 'delete') {
-        // For delete, we just need to store the intent
-        pendingOperations.push({
-          type: 'delete',
-          folderName,
-          pathField,
-          filePath,
-        })
-      } else {
-        const { frontmatter, content } = parseMDXFile(filePath)
-
-        // --- ASSET HANDLING START ---
-        const assetPaths = extractAssetPaths(content, frontmatter)
-
-        for (const assetPath of assetPaths) {
-          await syncAsset(assetPath)
-        }
-
-        const { content: updatedContent, frontmatter: updatedFrontmatter } = replaceAssetPaths(
-          content,
-          frontmatter,
-          assetPaths
-        )
-
-        // Store data for Phase 2
-        pendingOperations.push({
-          type: 'update',
-          folderName,
-          pathField,
-          filePath,
-          frontmatter: updatedFrontmatter,
-          content: updatedContent,
-        })
-      }
-    } catch (error) {
-      console.error(`❌ Error processing ${filePath}: ${error.message}`)
-      results.errors.push({ file: filePath, error: error.message })
-    }
-  }
-
-  // Check if any errors occurred in Phase 1
-  if (results.errors.length > 0) {
-    console.error('\n' + '='.repeat(80))
-    console.error('❌ PHASE 1 FAILED: Asset synchronization or validation failed.')
-    console.error('⛔ Stopping workflow to prevent partial or invalid content sync.')
-    console.error('='.repeat(80))
-
-    results.errors.forEach(({ file, error }) => {
-      console.error(`  • ${file}: ${error}`)
-    })
-
-    // Save results for PR comment (failed state)
-    try {
-      // Extract relation types even on error for PR comment
-      const usedSchemas = new Set()
-      const allRelationNames = new Set()
-
-      // Look at all files processed so far (including those that failed if possible,
-      // but strictly we look at created/updated/pending.
-      // For Phase 1 failure, we might not have created/updated yet.
-      // We can scan ALL files in CHANGED_FILES to guess potential relations to show context.
-      const filesToScan = [...CHANGED_FILES]
-
-      filesToScan.forEach((filePath) => {
+      try {
         const folderName = getFolderName(filePath)
-        if (folderName && COLLECTION_SCHEMAS[folderName]) {
-          usedSchemas.add(folderName)
-          const schema = COLLECTION_SCHEMAS[folderName]
-          if (schema.relations) {
-            Object.keys(schema.relations).forEach((relationName) => {
-              allRelationNames.add(relationName)
-            })
-          }
-          if (schema.hasRelatedArticles) {
-            allRelationNames.add('related_articles')
-          }
-        }
-      })
 
-      results.relationTypes = Array.from(allRelationNames)
-      results.deploymentStatus = DEPLOYMENT_STATUS
-
-      fs.writeFileSync('sync-results.json', JSON.stringify(results, null, 2))
-    } catch (e) {
-      console.error('Failed to save error results:', e.message)
-    }
-
-    process.exit(1)
-  }
-
-  // PHASE 2: CMS Synchronization
-  console.log('\n' + '='.repeat(80))
-  console.log('🔄 PHASE 2: CMS Content Synchronization')
-  console.log('='.repeat(80))
-
-  if (pendingOperations.length > 0) {
-    await prefetchRelationEntities(pendingOperations)
-    await prefetchExistingEntries(pendingOperations)
-  }
-
-  async function processOperation(op) {
-    const { type, folderName, pathField, filePath } = op
-
-    try {
-      if (type === 'delete') {
-        console.log(`🗑️ Deleting from CMS: ${pathField}`)
-        const existingEntry = findEntryByPathCached(folderName, pathField)
-
-        if (existingEntry) {
-          await deleteEntry(folderName, existingEntry.documentId)
-          console.log(`✅ Deleted successfully: ${pathField}`)
-          results.deleted.push({ file: filePath, path: pathField })
-          const cache = _existingEntriesCache[folderName]
-          if (cache) cache.delete(pathField)
-        } else {
-          console.log(`⚠️ Entry not found in CMS, skipping deletion: ${pathField}`)
+        if (!folderName || !SYNC_FOLDERS.includes(folderName)) {
+          console.log(`⏭️ Skipped: Folder '${folderName}' not in sync list`)
           results.skipped.push(filePath)
+          continue
         }
-      } else {
-        const { frontmatter, content } = op
 
-        const { data: strapiData, warnings } = await mapToStrapiSchema(
-          folderName,
-          frontmatter,
-          content,
-          pathField,
-          _relationEntityCache
-        )
+        const schema = COLLECTION_SCHEMAS[folderName]
+        if (!schema) {
+          console.log(`⏭️ Skipped: No schema configured for '${folderName}'`)
+          results.skipped.push(filePath)
+          continue
+        }
 
-        // Track relation warnings
-        if (warnings && warnings.length > 0) {
-          results.relationWarnings.push({
-            file: filePath,
-            path: pathField,
-            warnings,
+        const pathField = generatePathField(filePath, folderName)
+
+        if (!pathField) {
+          throw new Error('Could not generate path field')
+        }
+
+        const operationType = detectOperationType(filePath, isDeleted)
+
+        if (operationType === 'delete') {
+          // For delete, we just need to store the intent
+          pendingOperations.push({
+            type: 'delete',
+            folderName,
+            pathField,
+            filePath,
+          })
+        } else {
+          const { frontmatter, content } = parseMDXFile(filePath)
+
+          // --- ASSET HANDLING START ---
+          const assetPaths = extractAssetPaths(content, frontmatter)
+
+          for (const assetPath of assetPaths) {
+            await syncAsset(assetPath)
+          }
+
+          const { content: updatedContent, frontmatter: updatedFrontmatter } = replaceAssetPaths(
+            content,
+            frontmatter,
+            assetPaths
+          )
+
+          // Store data for Phase 2
+          pendingOperations.push({
+            type: 'update',
+            folderName,
+            pathField,
+            filePath,
+            frontmatter: updatedFrontmatter,
+            content: updatedContent,
           })
         }
+      } catch (error) {
+        console.error(`❌ Error processing ${filePath}: ${error.message}`)
+        results.errors.push({ file: filePath, error: error.message })
+      }
+    }
 
-        const existingEntry = findEntryByPathCached(folderName, pathField)
+    // Check if any errors occurred in Phase 1
+    if (results.errors.length > 0) {
+      console.error('\n' + '='.repeat(80))
+      console.error('❌ PHASE 1 FAILED: Asset synchronization or validation failed.')
+      console.error('⛔ Stopping workflow to prevent partial or invalid content sync.')
+      console.error('='.repeat(80))
 
-        if (existingEntry) {
-          if (!existingEntry.documentId) {
-            throw new Error(`Entry found but has no documentId`)
+      results.errors.forEach(({ file, error }) => {
+        console.error(`  • ${file}: ${error}`)
+      })
+
+      // Save results for PR comment (failed state)
+      try {
+        // Extract relation types even on error for PR comment
+        const usedSchemas = new Set()
+        const allRelationNames = new Set()
+
+        // Look at all files processed so far (including those that failed if possible,
+        // but strictly we look at created/updated/pending.
+        // For Phase 1 failure, we might not have created/updated yet.
+        // We can scan ALL files in CHANGED_FILES to guess potential relations to show context.
+        const filesToScan = [...CHANGED_FILES]
+
+        filesToScan.forEach((filePath) => {
+          const folderName = getFolderName(filePath)
+          if (folderName && COLLECTION_SCHEMAS[folderName]) {
+            usedSchemas.add(folderName)
+            const schema = COLLECTION_SCHEMAS[folderName]
+            if (schema.relations) {
+              Object.keys(schema.relations).forEach((relationName) => {
+                allRelationNames.add(relationName)
+              })
+            }
+            if (schema.hasRelatedArticles) {
+              allRelationNames.add('related_articles')
+            }
           }
-          await updateEntry(folderName, existingEntry.documentId, strapiData)
-          console.log(`✅ Updated: ${pathField}`)
-          results.updated.push({ file: filePath, path: pathField })
+        })
+
+        results.relationTypes = Array.from(allRelationNames)
+        results.deploymentStatus = DEPLOYMENT_STATUS
+
+        fs.writeFileSync('sync-results.json', JSON.stringify(results, null, 2))
+      } catch (e) {
+        console.error('Failed to save error results:', e.message)
+      }
+
+      process.exit(1)
+    }
+
+    // PHASE 2: CMS Synchronization
+    console.log('\n' + '='.repeat(80))
+    console.log('🔄 PHASE 2: CMS Content Synchronization')
+    console.log('='.repeat(80))
+
+    if (pendingOperations.length > 0) {
+      await prefetchRelationEntities(pendingOperations)
+      await prefetchExistingEntries(pendingOperations)
+    }
+
+    async function processOperation(op) {
+      const { type, folderName, pathField, filePath } = op
+
+      try {
+        if (type === 'delete') {
+          console.log(`🗑️ Deleting from CMS: ${pathField}`)
+          const existingEntry = findEntryByPathCached(folderName, pathField)
+
+          if (existingEntry) {
+            await deleteEntry(folderName, existingEntry.documentId)
+            console.log(`✅ Deleted successfully: ${pathField}`)
+            results.deleted.push({ file: filePath, path: pathField })
+            const cache = _existingEntriesCache[folderName]
+            if (cache) cache.delete(pathField)
+          } else {
+            console.log(`⚠️ Entry not found in CMS, skipping deletion: ${pathField}`)
+            results.skipped.push(filePath)
+          }
         } else {
-          await createEntry(folderName, strapiData)
-          console.log(`✅ Created: ${pathField}`)
-          results.created.push({ file: filePath, path: pathField })
+          const { frontmatter, content } = op
+
+          const { data: strapiData, warnings } = await mapToStrapiSchema(
+            folderName,
+            frontmatter,
+            content,
+            pathField,
+            _relationEntityCache
+          )
+
+          // Track relation warnings
+          if (warnings && warnings.length > 0) {
+            results.relationWarnings.push({
+              file: filePath,
+              path: pathField,
+              warnings,
+            })
+          }
+
+          const existingEntry = findEntryByPathCached(folderName, pathField)
+
+          if (existingEntry) {
+            if (!existingEntry.documentId) {
+              throw new Error(`Entry found but has no documentId`)
+            }
+            await updateEntry(folderName, existingEntry.documentId, strapiData)
+            console.log(`✅ Updated: ${pathField}`)
+            results.updated.push({ file: filePath, path: pathField })
+          } else {
+            await createEntry(folderName, strapiData)
+            console.log(`✅ Created: ${pathField}`)
+            results.created.push({ file: filePath, path: pathField })
+          }
+        }
+      } catch (error) {
+        console.error(`❌ Error syncing ${filePath}: ${error.message}`)
+        if (error.response) {
+          console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
+        }
+        results.errors.push({ file: filePath, error: error.message })
+      }
+    }
+
+    // Batch when more than 50 operations, otherwise process sequentially
+    if (pendingOperations.length > 50) {
+      const batches = chunk(pendingOperations, CMS_BATCH_SIZE)
+      const totalBatches = batches.length
+
+      console.log(
+        `\n📦 Processing ${pendingOperations.length} operations in ${totalBatches} batch(es) (batch size: ${CMS_BATCH_SIZE}, delay: ${CMS_BATCH_DELAY_MS}ms)`
+      )
+
+      for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+        const batch = batches[batchIndex]
+        console.log(`\n── Batch ${batchIndex + 1}/${totalBatches} (${batch.length} items) ──`)
+
+        await Promise.all(batch.map(processOperation))
+
+        if (batchIndex < totalBatches - 1 && CMS_BATCH_DELAY_MS > 0) {
+          await sleep(CMS_BATCH_DELAY_MS)
         }
       }
-    } catch (error) {
-      console.error(`❌ Error syncing ${filePath}: ${error.message}`)
-      if (error.response) {
-        console.error(`  Response:`, JSON.stringify(error.response.data, null, 2))
+    } else {
+      console.log(`\n📦 Processing ${pendingOperations.length} operations sequentially`)
+
+      for (const op of pendingOperations) {
+        await processOperation(op)
       }
-      results.errors.push({ file: filePath, error: error.message })
-    }
-  }
-
-  // Batch when more than 50 operations, otherwise process sequentially
-  if (pendingOperations.length > 50) {
-    const batches = chunk(pendingOperations, CMS_BATCH_SIZE)
-    const totalBatches = batches.length
-
-    console.log(
-      `\n📦 Processing ${pendingOperations.length} operations in ${totalBatches} batch(es) (batch size: ${CMS_BATCH_SIZE}, delay: ${CMS_BATCH_DELAY_MS}ms)`
-    )
-
-    for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
-      const batch = batches[batchIndex]
-      console.log(`\n── Batch ${batchIndex + 1}/${totalBatches} (${batch.length} items) ──`)
-
-      await Promise.all(batch.map(processOperation))
-
-      if (batchIndex < totalBatches - 1 && CMS_BATCH_DELAY_MS > 0) {
-        await sleep(CMS_BATCH_DELAY_MS)
-      }
-    }
-  } else {
-    console.log(`\n📦 Processing ${pendingOperations.length} operations sequentially`)
-
-    for (const op of pendingOperations) {
-      await processOperation(op)
     }
   }
 
@@ -1473,14 +1482,16 @@ async function syncToStrapi() {
     console.log('🔄 PHASE 2.5: Staging CMS Reconciliation')
     console.log('='.repeat(80))
 
-    // Current desired state: all non-deleted changed files in sync folders
+    // Current desired state: empty on close, otherwise all non-deleted changed files
     const currentManifest = []
-    for (const { path: filePath, isDeleted } of allFiles) {
-      if (isDeleted) continue
-      const folderName = getFolderName(filePath)
-      if (!folderName || !SYNC_FOLDERS.includes(folderName)) continue
-      const pathField = generatePathField(filePath, folderName)
-      if (pathField) currentManifest.push({ folderName, pathField })
+    if (!IS_PR_CLOSED) {
+      for (const { path: filePath, isDeleted } of allFiles) {
+        if (isDeleted) continue
+        const folderName = getFolderName(filePath)
+        if (!folderName || !SYNC_FOLDERS.includes(folderName)) continue
+        const pathField = generatePathField(filePath, folderName)
+        if (pathField) currentManifest.push({ folderName, pathField })
+      }
     }
 
     const currentPathSet = new Set(currentManifest.map((m) => `${m.folderName}:${m.pathField}`))
@@ -1532,9 +1543,11 @@ async function syncToStrapi() {
 
     results.hasReconciledEntries = staleEntries.length > 0
 
-    // Save the new manifest for next run
-    writeManifest(currentManifest)
-    console.log(`Saved manifest with ${currentManifest.length} entries`)
+    // Save the new manifest for next run (skip on PR close — no future runs)
+    if (!IS_PR_CLOSED) {
+      writeManifest(currentManifest)
+      console.log(`Saved manifest with ${currentManifest.length} entries`)
+    }
   }
 
   // Print summary
@@ -1978,12 +1991,14 @@ if (!CMS_API_URL || !CMS_API_TOKEN) {
 async function main() {
   await syncToStrapi()
 
-  if (SIDENAV_CHANGED) {
-    await syncSidenavToStrapi()
-  }
+  if (!IS_PR_CLOSED) {
+    if (SIDENAV_CHANGED) {
+      await syncSidenavToStrapi()
+    }
 
-  if (LISTICLES_CHANGED) {
-    await syncListiclesToStrapi()
+    if (LISTICLES_CHANGED) {
+      await syncListiclesToStrapi()
+    }
   }
 
   console.log('✅ Sync completed successfully!')

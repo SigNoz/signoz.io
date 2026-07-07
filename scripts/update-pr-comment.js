@@ -28,6 +28,23 @@ module.exports = async ({ github, context, core }) => {
     }
 
     if (syncResults) {
+      // Skip comment when no creates, updates, deletes, or errors to avoid noise
+      const totalActivity =
+        syncResults.created.length +
+        syncResults.updated.length +
+        syncResults.deleted.length +
+        syncResults.errors.length
+      const hasListicleActivity =
+        listicleResults &&
+        (listicleResults.created.length > 0 ||
+          listicleResults.updated.length > 0 ||
+          listicleResults.deleted.length > 0 ||
+          listicleResults.errors.length > 0)
+      if (totalActivity === 0 && !hasListicleActivity) {
+        console.log('No sync activity to report. Skipping PR comment.')
+        return
+      }
+
       // Build comprehensive summary
       body = `✅ **CMS Sync Successful**\n\n`
       body += `Content has been synced to Strapi CMS with deployment status: \`${deploymentStatus}\`\n\n`
