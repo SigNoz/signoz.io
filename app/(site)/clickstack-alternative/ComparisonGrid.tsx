@@ -76,8 +76,8 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
   const sections = toSections(data)
 
   return (
-    <div className="w-full text-left text-base leading-normal">
-      <div className="min-w-4xl relative">
+    <div className="w-full overflow-x-auto text-left text-base leading-normal md:overflow-visible">
+      <div className="relative min-w-[40rem] md:min-w-0">
         <div className="sticky top-28 z-10 bg-signoz_ink-500">
           <div className={`grid ${GRID_CLASS}`}>
             <div />
