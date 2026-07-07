@@ -1,9 +1,11 @@
 ---
-title: Implementing Distributed Tracing in a Golang application
-date: 2023-08-01
+title: "Implementing Distributed Tracing in a Golang application"
+meta_title: "Distributed Tracing in Golang: The What and How"
+published_date: "2023-08-01"
+updated_date: "2026-07-06"
 tags: [OpenTelemetry Instrumentation, Go / Golang]
 authors: [naman]
-description: Distributed tracing provides insights into how a particular service is performing as part of the whole in a distributed system. In this article, we will implement distributed tracing for a Golang application based on microservices architecture with OpenTelemetry, and visualize the collected data with SigNoz...
+description: "Distributed tracing in Go with OpenTelemetry: instrument a Go service with the SDK, export traces over OTLP, and visualize them in SigNoz. Step-by-step."
 image: /img/blog/2023/04/distributed_tracing_golang_cover-min.jpg
 hide_table_of_contents: false
 keywords: [distributed tracing,golang,tracing golang,distributed tracing golang,opentelemetry,opentelemetry golang,traces,open source]
@@ -24,6 +26,12 @@ In this article, we will implement distributed tracing for a Golang application 
 ![Cover Image](/img/blog/2023/04/distributed_tracing_golang_cover.webp)
 
 ## What is distributed tracing?
+
+<KeyPointCallout title="A note on instrumentation">
+
+Go is the one major language with no runtime auto-instrumentation agent: you wire the OpenTelemetry Go SDK into your code, set up a tracer provider, and export spans over [OTLP](https://signoz.io/blog/what-is-otlp/). For lower-touch coverage, eBPF-based auto-instrumentation (the OpenTelemetry Go instrumentation project) is maturing as the agentless option, and either path lands traces in an OTLP backend like SigNoz.
+
+</KeyPointCallout>
 
 Modern application architecture using cloud-native, containerization, and microservices is a very complex distributed system. A typical web-search example will illustrate some of the challenges such a system needs to address.
 
@@ -427,8 +435,11 @@ If you have any questions or need any help in setting things up, join our slack 
 
 [![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack/)
 
-If you want to know more about distributed tracing or SigNoz, feel free to follow these links:
+**Further reading**
 
-[SigNoz - an open-source alternative to DataDog](https://signoz.io/blog/open-source-datadog-alternative/)
+To go deeper, start with the fundamentals of [OpenTelemetry tracing](https://signoz.io/blog/opentelemetry-tracing/) and how [spans in distributed tracing](https://signoz.io/blog/distributed-tracing-span/) capture each unit of work in a request. When you're ready to pick a backend, compare the leading [distributed tracing tools](https://signoz.io/blog/distributed-tracing-tools/) and see how tracing relates to broader monitoring in [APM vs distributed tracing](https://signoz.io/blog/apm-vs-distributed-tracing/).
 
-[Guide on Distributed Tracing](https://signoz.io/distributed-tracing/)
+For applying these ideas in practice, our guide to [microservices observability](https://signoz.io/blog/microservices-observability-with-distributed-tracing/) shows how tracing fits into a full observability setup, and if you work across stacks, see the same walkthrough for [distributed tracing in Java](https://signoz.io/blog/distributed-tracing-java/).
+
+Further, you can understand more about SigNoz by going through
+[SigNoz - an open-source alternative to DataDog](https://signoz.io/blog/open-source-datadog-alternative/).

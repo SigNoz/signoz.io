@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-07
 title: SigNoz MCP Server
 meta_title: SigNoz MCP Server - AI Assistant Integration Guide
 description: Connect Claude, Cursor, Copilot, and other AI assistants to SigNoz via MCP for natural language access to metrics, logs, traces, and alerts.
@@ -823,13 +823,16 @@ After connecting, verify the server is working:
 The MCP server exposes the following tools to your AI assistant:
 
 <Admonition type="note">
-Alert-rule and notification-channel tools use newer SigNoz rules and channels APIs. Use SigNoz v0.120.0 or later for full compatibility with the latest MCP server. Older SigNoz deployments may return HTTP 404 for those tools.
+Some tools use newer SigNoz APIs. Use SigNoz v0.131.0 or later for `signoz_check_metric_usage`, and v0.120.0 or later for alert-rule tools. Notification-channel tools also use newer channels APIs. Older SigNoz deployments may return HTTP 404 from affected tools.
 </Admonition>
 
 | Tool | Description |
 |------|-------------|
 | `signoz_list_metrics` | Search and list available metrics |
 | `signoz_query_metrics` | Query metrics with smart aggregation defaults |
+| `signoz_get_top_metrics` | Return top 100 metrics ranked by ingested sample volume with percentages for cost and volume analysis |
+| `signoz_check_metric_usage` | Given a list of metric names (up to 50 per call), return which dashboards and alerts reference each one |
+| `signoz_check_metric_cardinality` | Return label/attribute keys for a single metric with cardinality counts and sample values, sorted highest-cardinality first |
 | `signoz_get_field_keys` | Discover available field keys for metrics, traces, or logs |
 | `signoz_get_field_values` | Get possible values for a field key |
 | `signoz_list_alerts` | List firing, silenced, or inhibited Alertmanager alert instances |
