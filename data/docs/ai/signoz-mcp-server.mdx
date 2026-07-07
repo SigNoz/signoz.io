@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-07
 title: SigNoz MCP Server
 meta_title: SigNoz MCP Server - AI Assistant Integration Guide
 description: Connect Claude, Cursor, Copilot, and other AI assistants to SigNoz via MCP for natural language access to metrics, logs, traces, and alerts.
@@ -823,13 +823,16 @@ After connecting, verify the server is working:
 The MCP server exposes the following tools to your AI assistant:
 
 <Admonition type="note">
-Alert-rule and notification-channel tools use newer SigNoz rules and channels APIs. Use SigNoz v0.120.0 or later for full compatibility with the latest MCP server. Older SigNoz deployments may return HTTP 404 for those tools.
+Some tools use newer SigNoz APIs. Use SigNoz v0.131.0 or later for `signoz_check_metric_usage`, and v0.120.0 or later for alert-rule tools. Notification-channel tools also use newer channels APIs. Older SigNoz deployments may return HTTP 404 from affected tools.
 </Admonition>
 
 | Tool | Description |
 |------|-------------|
 | `signoz_list_metrics` | Search and list available metrics |
 | `signoz_query_metrics` | Query metrics with smart aggregation defaults |
+| `signoz_get_top_metrics` | Return top 100 metrics ranked by ingested sample volume with percentages for cost and volume analysis |
+| `signoz_check_metric_usage` | Given a list of metric names (up to 50 per call), return which dashboards and alerts reference each one |
+| `signoz_check_metric_cardinality` | Return label/attribute keys for a single metric with cardinality counts and sample values, sorted highest-cardinality first |
 | `signoz_get_field_keys` | Discover available field keys for metrics, traces, or logs |
 | `signoz_get_field_values` | Get possible values for a field key |
 | `signoz_list_alerts` | List firing, silenced, or inhibited Alertmanager alert instances |
@@ -856,7 +859,7 @@ Alert-rule and notification-channel tools use newer SigNoz rules and channels AP
 | `signoz_aggregate_logs` | Aggregate logs (count, avg, p99, etc.) with grouping |
 | `signoz_search_logs` | Search logs with flexible filtering |
 | `signoz_aggregate_traces` | Aggregate trace statistics with grouping |
-| `signoz_search_traces` | Search traces with flexible filtering |
+| `signoz_search_traces` | Search traces with flexible filtering. Raw result rows use canonical snake_case keys such as `trace_id`, `span_id`, `duration_nano`, and `has_error` |
 | `signoz_get_trace_details` | Get full trace with all spans |
 | `signoz_execute_builder_query` | Execute a raw Query Builder v5 query |
 | `signoz_search_docs` | Search official SigNoz docs for product, setup, instrumentation, config, API, deployment, or troubleshooting questions |
@@ -866,6 +869,10 @@ Alert-rule and notification-channel tools use newer SigNoz rules and channels AP
 | `signoz_create_notification_channel` | Create a notification channel and send a test notification |
 | `signoz_update_notification_channel` | Update a notification channel and send a test notification |
 | `signoz_delete_notification_channel` | Delete a notification channel by ID |
+
+<Admonition type="info">
+Resource read tools such as `signoz_list_dashboards`, `signoz_get_dashboard`, `signoz_list_alerts`, `signoz_get_alert`, `signoz_list_services`, `signoz_search_traces`, and `signoz_get_trace_details` include a `webUrl` field when the request includes a SigNoz instance URL. Use that URL to open the matching resource in the SigNoz UI.
+</Admonition>
 
 For detailed parameter reference, see the <a href="https://github.com/SigNoz/signoz-mcp-server?tab=readme-ov-file#available-tools" target="_blank" rel="noopener noreferrer nofollow">GitHub repository README</a>.
 
