@@ -1,7 +1,5 @@
 import type React from 'react'
 
-export type VendorKey = 'signoz' | 'clickstack'
-
 export type CellValue =
   | { type: 'check'; label?: string }
   | { type: 'cross'; label?: string }

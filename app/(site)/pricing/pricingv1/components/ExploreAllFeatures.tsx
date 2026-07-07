@@ -798,8 +798,8 @@ const ExploreAllFeatures: React.FC = () => {
           sectionHeadingSize="lg"
           stickyOffset="top-[220px]"
           stickyBg="bg-[#0f1013]"
-          featureCellClassName=""
-          featureSectionClassName="mb-3 mt-8 py-2 pl-6 pr-2 text-center text-sm font-medium sm:text-lg md:text-left"
+          featureCellClassName="col-span-3 md:col-span-1"
+          featureSectionClassName="col-span-3 pl-6 pr-2 md:col-span-1"
         />
 
         {/* Bottom rounded corner for Teams column */}

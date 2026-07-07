@@ -78,8 +78,7 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
   return (
     <div className="w-full text-left text-base leading-normal">
       <div className="min-w-4xl relative">
-        {/* Sticky column headers — z-[9] stays below ProductNav (z-10) */}
-        <div className="sticky top-28 z-[9] bg-signoz_ink-500">
+        <div className="sticky top-28 z-10 bg-signoz_ink-500">
           <div className={`grid ${GRID_CLASS}`}>
             <div />
             <div className="relative flex flex-col items-start gap-2.5 px-3 py-4">
@@ -87,7 +86,7 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
               <TrackingLink
                 href="/teams/"
                 clickType="Primary CTA"
-                clickName="ClickStack Comparison Grid Get Started"
+                clickName="Sign Up Button"
                 clickLocation="ClickStack Alternative Quick Evaluation"
                 clickText="Get Started"
                 className="flex h-8 w-40 items-center justify-center rounded-full border border-[#23262e] bg-[#4e74f8] text-xs font-medium tracking-wider text-[#eceef2] hover:bg-[#3d63e7]"
