@@ -161,8 +161,7 @@ export default function ResultsSection({ results, onRestart }: ResultsSectionPro
               <strong className="text-[var(--text)]">
                 Bainbridge&apos;s Ironies of Automation
               </strong>{' '}
-              &mdash; the more you automate, the worse you get at the exact moments automation
-              fails.
+              - the more you automate, the worse you get at the exact moments automation fails.
             </p>
             <Link
               href="https://newsletter.signoz.io/p/ai-isnt-replacing-sres-its-deskilling"

@@ -91,7 +91,7 @@ export const FEATURE_CARDS = [
           Create alerts on any K8s signal - pod restart rate, node memory pressure, OOMKilled
           events, or service error rates, directly from your dashboard, alerts tab, or a query.
           Route to Slack, PagerDuty, Opsgenie, Teams, Incident.io. No extra configuration layer for
-          maintenance windows or multi-severity rules
+          maintenance windows or multi-severity rules.
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
@@ -168,7 +168,7 @@ export const FEATURE_CARDS = [
           See actual CPU and memory usage against requests and limits across every workload.
           Identify over-provisioned deployments, pods running near OOM, and nodes with headroom to
           consolidate. CronJob monitoring shows run history, duration, and failure rates. GPU
-          utilisation tracked for AI and ML workloads alongside standard compute.
+          utilization tracked for AI and ML workloads alongside standard compute.
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
@@ -186,7 +186,7 @@ export const FEATURE_CARDS = [
     className: 'flex-col items-start justify-center gap-4',
   },
   {
-    title: 'Ask about your Kubernetes cluster in plain English. From where you Work',
+    title: 'Ask about your Kubernetes cluster in plain English, from where you work',
     description: (
       <div>
         <p>
@@ -271,8 +271,8 @@ export const FEATURE_CARDS = [
           Kubernetes workloads are ephemeral as pods come and go, deployments scale, and new
           services ship daily. SigNoz via the OTel Collector auto-discovers new services as they
           appear and starts collecting telemetry immediately. Metadata enrichment on ingest means
-          every signal is tagged with namespace, cluster, pod, and workload &mdash; so filters just
-          work,for services that didn&apos;t exist last week.
+          every signal is tagged with namespace, cluster, pod, and workload - so filters just work,
+          for services that didn&apos;t exist last week.
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
@@ -323,7 +323,7 @@ export const FEATURE_CARDS = [
           Not every incident announces itself. Anomaly detection in SigNoz surfaces outliers in
           response times, error rates, and resource usage that threshold-based alerts miss because
           you didn&apos;t know what threshold to set. Detect problematic services, unusual traffic
-          patterns, and pod behaviour that deviates from seasonal baselines automatically.
+          patterns, and pod behavior that deviates from seasonal baselines automatically.
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
