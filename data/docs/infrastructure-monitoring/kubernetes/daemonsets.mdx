@@ -40,6 +40,18 @@ The **DaemonSets** view shows rollout status and aggregated resource usage. If A
 - This is the K8s `.status.desiredNumberScheduled` field — the count of nodes that match the DaemonSet's selectors and where the controller intends to run the pod. Again a *node* count, not a pod count; the value grows as new matching nodes join the cluster (Cluster Autoscaler scale-up) and shrinks when nodes are removed.
 - Sudden changes in Desired usually trace back to a `nodeSelector` / `affinity` edit on the DaemonSet, a node-label change, or cluster auto-scaling — pair with **Current** to spot lag between scheduling intent and actual coverage.
 
+### Ready
+
+- This column relies on the OTel metric `k8s.daemonset.ready_nodes` from the k8s_cluster receiver, defined as "Number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready".
+- This is the K8s `.status.numberReady` field — the count of nodes where the DaemonSet's pod is not just placed but has passed its readiness probe. A *node* count, not a pod count; it is a subset of **Current** (a pod can be scheduled and running yet not Ready).
+- Ready < Desired means the rollout isn't fully healthy even where pods are placed — typical causes are failing/slow readiness probes, CrashLoopBackOff, or resource pressure on those nodes. Watch the gap between **Ready** and **Current**: Current says "pod is placed", Ready says "pod is actually serving".
+
+### Misscheduled
+
+- This column relies on the OTel metric `k8s.daemonset.misscheduled_nodes` from the k8s_cluster receiver, defined as "Number of nodes that are running the daemon pod, but are not supposed to run the daemon pod".
+- This is the K8s `.status.numberMisscheduled` field — the count of nodes running the DaemonSet's pod even though they no longer match its `nodeSelector` / `affinity` / `taints`. A *node* count, not a pod count; the DaemonSet controller reconciles these by evicting the stray pods, so the value should normally be **0**.
+- A non-zero value is usually transient right after a `nodeSelector` / `affinity` edit or a node relabel, while the controller cleans up stale pods. Sustained non-zero (green at 0, warning when > 0) points to pods that can't be evicted — check for recent selector/label changes or terminating-pod issues on the affected nodes.
+
 ### CPU Req Usage (%)
 
 - This column relies on the OTel metric `k8s.pod.cpu_request_utilization` from the kubeletstats receiver, averaged across the DaemonSet's pods.
