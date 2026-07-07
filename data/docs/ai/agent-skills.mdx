@@ -12,7 +12,7 @@ When you ask your AI assistant something like "why did this alert fire," "create
 
 SigNoz ships these skills two ways:
 
-- **The SigNoz plugin** - the recommended path. One install bundles every skill plus the MCP server registration, so your agent can both reason about SigNoz *and* act on your data. Available for Claude Code, Codex, Cursor, Gemini CLI, and Devin CLI.
+- **The SigNoz plugin** - the recommended path. One install bundles every skill plus the MCP server registration, so your agent can both reason about SigNoz *and* act on your data. Available for Claude Code, Codex, Cursor, Gemini CLI, Devin CLI, and Antigravity CLI.
 - **Individual skills via skills.sh** - install one or more skill files on their own, for any skills.sh-compatible agent.
 
 ## Install the plugin
@@ -120,6 +120,28 @@ Follow the prompts to enter your SigNoz instance URL and API key.
 3. Authenticate:
    - **SigNoz Cloud** - start a new session and run `devin mcp login signoz` to complete OAuth.
    - **Self-hosted SigNoz** - no OAuth step is needed unless the server runs with `OAUTH_ENABLED=true`.
+
+</TabItem>
+<TabItem value="antigravity-cli" label="Antigravity CLI">
+
+1. Install the plugin directly from the repository. Antigravity stages the repo root as a native plugin and registers the `signoz` MCP server and its skills automatically:
+
+   ```bash
+   agy plugin install https://github.com/SigNoz/agent-skills
+   agy plugin list   # confirm signoz is loaded
+   ```
+
+   Reinstall with the same command to update.
+
+2. The plugin defaults to the SigNoz Cloud `us` endpoint (`https://mcp.us.signoz.cloud/mcp`). To point it at a different region or a self-hosted instance, run the setup skill in the `agy` prompt with your SigNoz Cloud region (`us`, `us2`, `eu`, `eu2`, `in`, `in2`) or a self-hosted HTTP MCP URL (ex: `http://localhost:8000/mcp`):
+
+   ```bash
+   /signoz:signoz-mcp-setup <region-or-mcp-url>
+   ```
+
+   This rewrites `serverUrl` in the installed `mcp_config.json`. SigNoz Cloud `us` users can skip this step.
+
+3. Authenticate. In the `agy` prompt, type `/mcp`, select the `signoz` server, and choose **Authenticate** to start the OAuth flow, then complete it in the browser. Self-hosted endpoints need no OAuth unless the server runs with `OAUTH_ENABLED=true`.
 
 </TabItem>
 </Tabs>
