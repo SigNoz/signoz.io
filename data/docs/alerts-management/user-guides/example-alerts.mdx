@@ -1,5 +1,5 @@
 ---
-date: 2026-07-03
+date: 2026-07-07
 title: Alert Examples for Common Use Cases & Best Practices
 description: Ready-to-use SigNoz alert examples for no-data, error rate, latency, resource usage, and service-down monitoring, with the settings that prevent false alerts.
 doc_type: howto
@@ -130,6 +130,8 @@ Build a trace alert with two queries and a formula:
 <Admonition type="warning">
 Without the **Having** minimum-traffic guard, a single error during a quiet minute (1 error in 20 requests) reads as a 5% error rate and pages you. Require a minimum request count, and prefer `on average` or `all the times` over `at least once` so one noisy data point does not fire the alert.
 </Admonition>
+
+To page only on server-side (5xx) failures instead of every error, swap the Query A filter for the status code range: `service.name = '<your-service>' AND http.status_code >= 500`. This excludes 4xx client errors (bad requests, auth failures) that `hasError = true` may also count, depending on your instrumentation.
 
 ### Alert when a success ratio drops after enough traffic
 
