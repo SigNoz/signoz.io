@@ -744,7 +744,7 @@ const ExploreAllFeatures: React.FC = () => {
     <>
       <div className="mx-auto mb-10 mt-6" id="all-features">
         {/* Header - Using CSS sticky positioning for smoother scrolling */}
-        <div className="sticky top-[74px] z-20 bg-[#0f1013]">
+        <div className="sticky top-[74px] z-20 bg-[#0f1013] before:absolute before:inset-x-0 before:-top-10 before:h-10 before:bg-[#0f1013] before:content-['']">
           <div className="my-12">
             <div className="grid grid-cols-1">
               <div className="mx-6 flex justify-center">
@@ -797,7 +797,7 @@ const ExploreAllFeatures: React.FC = () => {
           gridClassName={PRICING_GRID}
           sectionHeadingSize="lg"
           stickyOffset="top-[220px]"
-          stickyBg="bg-signoz_ink-300"
+          stickyBg="bg-[#0f1013]"
           featureCellClassName="col-span-3 md:col-span-1"
           featureSectionClassName="col-span-3 pl-6 pr-2 md:col-span-1"
         />
