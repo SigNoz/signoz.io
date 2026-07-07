@@ -67,7 +67,7 @@ const BottomCTA: React.FC = () => {
             <TrackingLink
               href="/teams/"
               clickType="Primary CTA"
-              clickName="K8s Monitoring Page Bottom CTA Get Started Free"
+              clickName="Get Started Free"
               clickLocation="Kubernetes Monitoring Page Bottom CTA"
               clickText="Get Started Free"
             >
@@ -79,7 +79,7 @@ const BottomCTA: React.FC = () => {
             <TrackingLink
               href="/docs/infrastructure-monitoring/k8s-metrics/"
               clickType="Secondary CTA"
-              clickName="K8s Monitoring Page Bottom CTA Read the Docs"
+              clickName="Read the Docs"
               clickLocation="Kubernetes Monitoring Page Bottom CTA"
               clickText="Read the Docs"
             >

@@ -12,7 +12,7 @@ export const HEADER_BUTTONS = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
-      clickName: 'K8s Monitoring Page Hero Get Started Free',
+      clickName: 'Get Started Free',
       clickLocation: 'Kubernetes Monitoring Page Hero',
       clickText: 'Get Started Free',
     },
@@ -24,7 +24,7 @@ export const HEADER_BUTTONS = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'K8s Monitoring Page Hero Read the Docs',
+      clickName: 'Read the Docs',
       clickLocation: 'Kubernetes Monitoring Page Hero',
       clickText: 'Read the Docs',
     },
@@ -46,7 +46,7 @@ export const FEATURE_CARDS = [
           <TrackingLink
             href="/docs/infrastructure-monitoring/k8s-metrics/"
             clickType="Secondary CTA"
-            clickName="K8s Monitoring Feature 1 Read More"
+            clickName="Read More"
             clickLocation="Kubernetes Monitoring Page"
             clickText="Read More"
           >
@@ -97,7 +97,7 @@ export const FEATURE_CARDS = [
           <TrackingLink
             href="/docs/alerts-management/user-guides/kubernetes-pod-startup-alerts/"
             clickType="Secondary CTA"
-            clickName="K8s Monitoring Feature 2 Read More"
+            clickName="Read More"
             clickLocation="Kubernetes Monitoring Page"
             clickText="Read More"
           >
@@ -121,7 +121,7 @@ export const FEATURE_CARDS = [
           <TrackingLink
             href="/pricing/"
             clickType="Secondary CTA"
-            clickName="K8s Monitoring Feature 3 Read More"
+            clickName="Read More"
             clickLocation="Kubernetes Monitoring Page"
             clickText="Read More"
           >
@@ -174,7 +174,7 @@ export const FEATURE_CARDS = [
           <TrackingLink
             href="/guides/kubernetes-monitoring-best-practices/"
             clickType="Secondary CTA"
-            clickName="K8s Monitoring Feature 4 Read More"
+            clickName="Read More"
             clickLocation="Kubernetes Monitoring Page"
             clickText="Read More"
           >
@@ -199,7 +199,7 @@ export const FEATURE_CARDS = [
           <TrackingLink
             href="/agent-native-observability/"
             clickType="Secondary CTA"
-            clickName="K8s Monitoring Feature 5 Read More"
+            clickName="Read More"
             clickLocation="Kubernetes Monitoring Page"
             clickText="Read More"
           >
@@ -252,7 +252,7 @@ export const FEATURE_CARDS = [
           <TrackingLink
             href="/docs/setup/kubernetes/kustomize/"
             clickType="Secondary CTA"
-            clickName="K8s Monitoring Feature 6 Read More"
+            clickName="Read More"
             clickLocation="Kubernetes Monitoring Page"
             clickText="Read More"
           >
@@ -278,7 +278,7 @@ export const FEATURE_CARDS = [
           <TrackingLink
             href="/docs/infrastructure-monitoring/k8s-metrics/"
             clickType="Secondary CTA"
-            clickName="K8s Monitoring Feature 7 Read More"
+            clickName="Read More"
             clickLocation="Kubernetes Monitoring Page"
             clickText="Read More"
           >
@@ -329,7 +329,7 @@ export const FEATURE_CARDS = [
           <TrackingLink
             href="/docs/alerts-management/anomaly-based-alerts/"
             clickType="Secondary CTA"
-            clickName="K8s Monitoring Feature 8 Read More"
+            clickName="Read More"
             clickLocation="Kubernetes Monitoring Page"
             clickText="Read More"
           >
