@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-07
 title: Infrastructure Monitoring - Hosts & K8s Overview
 description: Discover how SigNoz Infrastructure Monitoring provides a unified view of host and Kubernetes performance. Monitor CPU, memory, disk, and network with correlated traces and logs.
 
@@ -82,6 +82,11 @@ Monitor host performance metrics across customizable time periods.
 - **System Disk I/O (Bytes)**: Total bytes read/written to disk
 - **System Disk Operations/s**: Rate of read/write operations
 - **Disk Operations Time**: Average time taken for disk operations
+- **Disk Usage (%) by mountpoint**: Filesystem space used as a percentage of total capacity, with one line per mountpoint on the host. Zero-size filesystems are excluded so only real volumes appear.
+
+<Admonition type="info">
+  Disk usage is derived from the `system.filesystem.usage` metric, which the OpenTelemetry [hostmetrics receiver](https://signoz.io/docs/infrastructure-monitoring/hostmetrics/) collects through its `filesystem` scraper. That scraper is enabled in the default host metrics configuration, so no extra setup is needed for this chart.
+</Admonition>
 
 **Time Range Selection:**
 - Choose from preset time ranges (e.g., last hour, last 24 hours)
