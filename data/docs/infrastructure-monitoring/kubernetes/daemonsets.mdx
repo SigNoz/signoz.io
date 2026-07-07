@@ -50,7 +50,7 @@ The **DaemonSets** view shows rollout status and aggregated resource usage. If A
 
 - This column relies on the OTel metric `k8s.daemonset.misscheduled_nodes` from the k8s_cluster receiver, defined as "Number of nodes that are running the daemon pod, but are not supposed to run the daemon pod".
 - This is the K8s `.status.numberMisscheduled` field — the count of nodes running the DaemonSet's pod even though they no longer match its `nodeSelector` / `affinity` / `taints`. A *node* count, not a pod count; the DaemonSet controller reconciles these by evicting the stray pods, so the value should normally be **0**.
-- A non-zero value is usually transient right after a `nodeSelector` / `affinity` edit or a node relabel, while the controller cleans up stale pods. Sustained non-zero (green at 0, warning when > 0) points to pods that can't be evicted — check for recent selector/label changes or terminating-pod issues on the affected nodes.
+- A non-zero value is usually transient right after a `nodeSelector` / `affinity` edit or a node relabel, while the controller cleans up stale pods. Sustained non-zero points to pods that can't be evicted — check for recent selector/label changes or terminating-pod issues on the affected nodes.
 
 ### CPU Req Usage (%)
 
