@@ -117,6 +117,17 @@ export const FEATURE_CARDS = [
           SigNoz adds full visibility into every layer of your Kubernetes cluster, nodes, control
           plane, and workloads without the operational overhead or tradeoffs.
         </p>
+        <Button asChild variant="secondary" rounded="full" className="mt-4">
+          <TrackingLink
+            href="/pricing/"
+            clickType="Secondary CTA"
+            clickName="K8s Monitoring Feature 3 Read More"
+            clickLocation="Kubernetes Monitoring Page"
+            clickText="Read More"
+          >
+            Read More
+          </TrackingLink>
+        </Button>
       </div>
     ),
     className: 'flex-col items-start justify-center gap-4',
@@ -159,6 +170,17 @@ export const FEATURE_CARDS = [
           consolidate. CronJob monitoring shows run history, duration, and failure rates. GPU
           utilisation tracked for AI and ML workloads alongside standard compute.
         </p>
+        <Button asChild variant="secondary" rounded="full" className="mt-4">
+          <TrackingLink
+            href="/guides/kubernetes-monitoring-best-practices/"
+            clickType="Secondary CTA"
+            clickName="K8s Monitoring Feature 4 Read More"
+            clickLocation="Kubernetes Monitoring Page"
+            clickText="Read More"
+          >
+            Read More
+          </TrackingLink>
+        </Button>
       </div>
     ),
     className: 'flex-col items-start justify-center gap-4',
