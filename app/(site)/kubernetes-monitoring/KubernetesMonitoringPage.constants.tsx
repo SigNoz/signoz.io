@@ -214,11 +214,11 @@ export const FEATURE_CARDS = [
     description: (
       <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
         <Image
-          src="/img/graphics/homepage/noz-agent-native-panel.webp"
+          src="/img/kubernetes-monitoring/noz-kubernetes-chat.webp"
           alt="SigNoz Noz AI agent — ask about your Kubernetes cluster in plain English"
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover object-top"
+          className="object-contain"
         />
       </div>
     ),
