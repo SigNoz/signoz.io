@@ -3,7 +3,7 @@ import { IconTitleDescriptionCardProps } from './IconTitleDescriptionCard.types'
 const VARIANT_STYLES = {
   lg: {
     gap: 'gap-4',
-    heading: '',
+    heading: 'text-base',
   },
   xl: {
     gap: 'gap-3',
@@ -18,7 +18,9 @@ const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
   description,
   className = '',
   variant = 'lg',
+  titleLevel = 'h4',
 }) => {
+  const Heading = titleLevel
   const styles = VARIANT_STYLES[variant]
 
   return (
@@ -35,9 +37,11 @@ const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
       </div>
 
       {title && (
-        <h4 className={`m-0 text-left font-semibold text-signoz_vanilla-100 ${styles.heading}`}>
+        <Heading
+          className={`m-0 text-left font-semibold text-signoz_vanilla-100 ${styles.heading}`}
+        >
           {title}
-        </h4>
+        </Heading>
       )}
 
       {description && (

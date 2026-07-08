@@ -44,7 +44,7 @@ const FeatureSections: React.FC = () => {
     <section className="relative mx-auto max-w-8xl overflow-hidden border-t border-dashed border-signoz_slate-400 pt-14">
       <div className="relative mx-auto flex flex-col items-center gap-6 text-center">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-          <IconTitleDescriptionCardGrid cards={FEATURE_CARDS} variant="lg" />
+          <IconTitleDescriptionCardGrid cards={FEATURE_CARDS} variant="lg" titleLevel="h2" />
         </div>
       </div>
     </section>
