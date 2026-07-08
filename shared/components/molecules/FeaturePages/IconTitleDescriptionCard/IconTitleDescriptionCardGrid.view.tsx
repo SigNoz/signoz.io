@@ -7,6 +7,7 @@ const IconTitleDescriptionCardGrid: React.FC<IconTitleDescriptionCardGridProps> 
   cards,
   className = '',
   variant = 'lg',
+  titleLevel,
 }) => {
   return (
     <div className={cn('grid grid-cols-1 md:grid-cols-2', className)}>
@@ -25,6 +26,7 @@ const IconTitleDescriptionCardGrid: React.FC<IconTitleDescriptionCardGridProps> 
               description={card.description}
               className={card.className}
               variant={variant}
+              titleLevel={titleLevel}
             />
             {!isLast && <Divider className="absolute bottom-0 left-0 md:hidden" />}
             {!isLastDesktopRow && <Divider className="absolute bottom-0 left-0 hidden md:block" />}
