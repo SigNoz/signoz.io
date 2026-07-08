@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-08
 title: Interactivity in dashboards
 description: Learn how interactive dashboards in SigNoz help you drill down, correlate signals, and troubleshoot faster using context menus, cross filtering, cross-panel sync, and navigation to Logs and Traces.
 
@@ -278,3 +278,30 @@ You can toggle individual series on and off through the chart legend. Hidden ser
 - If every matching series in the receiver is hidden, the receiver tooltip disappears entirely the next time you move the cursor on the source.
 
 This makes it easy to focus comparison on a specific subset by hiding the rest.
+
+## Empty panel state
+
+When a panel query runs successfully but returns nothing for the selected time range, the panel shows an empty state titled **No data in this time range** instead of a chart. From here you can widen the window and re-run the query without leaving the dashboard.
+
+### Extend time range
+
+The primary action in the empty state is **Extend time range**. Click it to widen the panel's time window to the next larger step and re-run the query.
+
+- **Standard windows** step up the zoom-out ladder: 15m, 45m, 2h, 7h, 21h, 1d, 2d, 3d, 1w, 2w, and 1 month. A 15-minute window widens to 45 minutes, a 45-minute window widens to 2 hours, and so on. When the new window matches one of these steps, the time picker shows it as a relative preset (for example, **Last 45 minutes**) instead of **Custom**.
+- **Narrow custom or drag-zoomed windows** shorter than 15 minutes expand about 3x around their midpoint until they reach 15 minutes, then follow the same ladder.
+- The window grows around its center. Once the widened end would move past the current time, the end anchors to now and the start moves further back instead.
+- At the widest step (1 month), **Extend time range** no longer appears.
+
+Extending from a panel on the dashboard updates the dashboard's global time range, so every panel refreshes on the wider window. This is the same behavior as the zoom-out control in the dashboard toolbar.
+
+### Retry
+
+When a retry handler is available, **Retry** appears as a secondary action alongside **Extend time range** and re-runs the query on the current window. If the window is already at the widest step and cannot be extended, **Retry** becomes the only action.
+
+### Loading state
+
+After you click **Extend time range**, a loading spinner replaces the empty-state message while the widened query is in flight. The panel moves from the spinner directly to the rendered chart, or back to the empty state if the wider window still has no data. This avoids snapping straight from the no-data message to a chart.
+
+### Panel View modal
+
+Opening a panel in its full-screen **View** modal gives that panel its own local time window, separate from the dashboard's global time range. If you move the modal's time window to a range with no data, the same **Extend time range** action appears. Extending inside the modal widens only the modal's local window. The dashboard's global time range, and any historical anchor set on the main dashboard, stay unchanged.
