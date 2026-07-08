@@ -5,6 +5,10 @@
 
 name: Sync Content to Strapi CMS
 
+concurrency:
+  group: sync-content-cms-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: false
+
 on:
   pull_request:
     types: [labeled, synchronize, opened, reopened, closed]
@@ -57,109 +61,61 @@ jobs:
       should_sync: ${{ steps.check-sync.outputs.should_sync }}
       is_pr_staging: ${{ steps.check-sync.outputs.is_pr_staging }}
       is_pr_closed: ${{ steps.check-sync.outputs.is_pr_closed }}
-    
+      is_pr_merged: ${{ steps.check-sync.outputs.is_pr_merged }}
+      has_previous_manifest: ${{ steps.check-sync.outputs.has_previous_manifest }}
+
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Restore Previous Sync Manifest
+        if: github.event_name == 'pull_request'
+        uses: actions/cache/restore@v4
         with:
-          fetch-depth: 0
-
-      - name: Get Changed Content Files
-        id: changed-content
-        uses: tj-actions/changed-files@v46
-        with:
-          files: |
-            data/**/*.mdx
-            data/**/*.md
-          json: true
-          escape_json: false
-          write_output_files: true
-
-      - name: Rename Content Output Files
-        run: |
-          if [ -f .github/outputs/all_changed_files.json ]; then
-            mv .github/outputs/all_changed_files.json .github/outputs/content_changed_files.json
-          else
-            echo "[]" > .github/outputs/content_changed_files.json
-          fi
-          
-          if [ -f .github/outputs/deleted_files.json ]; then
-            mv .github/outputs/deleted_files.json .github/outputs/content_deleted_files.json
-          else
-            echo "[]" > .github/outputs/content_deleted_files.json
-          fi
-
-      - name: Get Changed Asset Files
-        id: changed-assets
-        uses: tj-actions/changed-files@v46
-        with:
-          files: |
-            data-assets/**
-          json: true
-          escape_json: false
-          write_output_files: true
-
-      - name: Rename Asset Output Files
-        run: |
-          if [ -f .github/outputs/all_changed_files.json ]; then
-            mv .github/outputs/all_changed_files.json .github/outputs/assets_changed_files.json
-          else
-            echo "[]" > .github/outputs/assets_changed_files.json
-          fi
-
-      - name: Get Changed Sidenav Files
-        id: changed-sidenav
-        uses: tj-actions/changed-files@v46
-        with:
-          files: data/docs-side-nav/**
-
-      - name: Get Changed Listicle Files
-        id: changed-listicles
-        uses: tj-actions/changed-files@v46
-        with:
-          files: constants/listicles/**/*.json
-          json: true
-          escape_json: false
-          write_output_files: true
-
-      - name: Rename Listicle Output Files
-        run: |
-          if [ -f .github/outputs/all_changed_files.json ]; then
-            mv .github/outputs/all_changed_files.json .github/outputs/listicles_changed_files.json
-          else
-            echo "[]" > .github/outputs/listicles_changed_files.json
-          fi
-
-          if [ -f .github/outputs/deleted_files.json ]; then
-            mv .github/outputs/deleted_files.json .github/outputs/listicles_deleted_files.json
-          else
-            echo "[]" > .github/outputs/listicles_deleted_files.json
-          fi
+          path: .github/sync-manifest.json
+          key: sync-manifest-pr-${{ github.event.pull_request.number }}-${{ github.run_id }}
+          restore-keys: |
+            sync-manifest-pr-${{ github.event.pull_request.number }}-
 
       - name: Check if Sync is Required
         id: check-sync
         run: |
           echo "Checking if sync should run..."
-          
+
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            has_previous_manifest="false"
+            if [[ -s ".github/sync-manifest.json" ]]; then
+              has_previous_manifest="true"
+            fi
+
+            has_staging_label="${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'staging') || false }}"
+            is_pr_merged="${{ github.event_name == 'pull_request' && github.event.pull_request.merged || false }}"
+
+            echo "has_previous_manifest=$has_previous_manifest" >> $GITHUB_OUTPUT
+            echo "is_pr_merged=$is_pr_merged" >> $GITHUB_OUTPUT
+
             if [[ "${{ github.event.action }}" == "closed" ]]; then
               echo "is_pr_closed=true" >> $GITHUB_OUTPUT
             else
               echo "is_pr_closed=false" >> $GITHUB_OUTPUT
             fi
 
-            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'staging') }}" == "true" ]]; then
+            if [[ "${{ github.event.action }}" == "closed" && "$is_pr_merged" == "true" ]]; then
+              echo "should_sync=false" >> $GITHUB_OUTPUT
+              echo "is_pr_staging=false" >> $GITHUB_OUTPUT
+              echo "⏭️ Sync skipped: merged PR close is handled by the push workflow"
+            elif [[ "$has_staging_label" == "true" || "$has_previous_manifest" == "true" ]]; then
               echo "should_sync=true" >> $GITHUB_OUTPUT
               echo "is_pr_staging=true" >> $GITHUB_OUTPUT
-              echo "✅ Sync enabled: PR has 'staging' label"
+              echo "✅ Sync enabled: PR has 'staging' label or a previous staging manifest"
             else
               echo "should_sync=false" >> $GITHUB_OUTPUT
               echo "is_pr_staging=false" >> $GITHUB_OUTPUT
-              echo "⏭️ Sync skipped: PR does not have 'staging' label"
+              echo "⏭️ Sync skipped: PR does not have 'staging' label or previous staging manifest"
             fi
           else
             echo "should_sync=true" >> $GITHUB_OUTPUT
+            echo "is_pr_staging=false" >> $GITHUB_OUTPUT
             echo "is_pr_closed=false" >> $GITHUB_OUTPUT
+            echo "is_pr_merged=false" >> $GITHUB_OUTPUT
+            echo "has_previous_manifest=false" >> $GITHUB_OUTPUT
             echo "✅ Sync enabled: Push event to branch"
           fi
 
@@ -167,7 +123,7 @@ jobs:
         id: determine-status
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'staging') }}" == "true" ]]; then
+            if [[ "${{ steps.check-sync.outputs.is_pr_staging }}" == "true" ]]; then
               echo "deployment_status=staging" >> $GITHUB_OUTPUT
               echo "📦 Deployment Status: staging"
             else
@@ -185,7 +141,93 @@ jobs:
             echo "📦 Deployment Status: draft"
           fi
 
+      - name: Checkout Repository
+        if: steps.check-sync.outputs.should_sync == 'true'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Changed Content Files
+        id: changed-content
+        if: steps.check-sync.outputs.should_sync == 'true'
+        uses: tj-actions/changed-files@v46
+        with:
+          files: |
+            data/**/*.mdx
+            data/**/*.md
+          json: true
+          escape_json: false
+          write_output_files: true
+
+      - name: Rename Content Output Files
+        if: steps.check-sync.outputs.should_sync == 'true'
+        run: |
+          if [ -f .github/outputs/all_changed_files.json ]; then
+            mv .github/outputs/all_changed_files.json .github/outputs/content_changed_files.json
+          else
+            echo "[]" > .github/outputs/content_changed_files.json
+          fi
+
+          if [ -f .github/outputs/deleted_files.json ]; then
+            mv .github/outputs/deleted_files.json .github/outputs/content_deleted_files.json
+          else
+            echo "[]" > .github/outputs/content_deleted_files.json
+          fi
+
+      - name: Get Changed Asset Files
+        id: changed-assets
+        if: steps.check-sync.outputs.should_sync == 'true'
+        uses: tj-actions/changed-files@v46
+        with:
+          files: |
+            data-assets/**
+          json: true
+          escape_json: false
+          write_output_files: true
+
+      - name: Rename Asset Output Files
+        if: steps.check-sync.outputs.should_sync == 'true'
+        run: |
+          if [ -f .github/outputs/all_changed_files.json ]; then
+            mv .github/outputs/all_changed_files.json .github/outputs/assets_changed_files.json
+          else
+            echo "[]" > .github/outputs/assets_changed_files.json
+          fi
+
+      - name: Get Changed Sidenav Files
+        id: changed-sidenav
+        if: steps.check-sync.outputs.should_sync == 'true'
+        uses: tj-actions/changed-files@v46
+        with:
+          files: data/docs-side-nav/**
+
+      - name: Get Changed Listicle Files
+        id: changed-listicles
+        if: steps.check-sync.outputs.should_sync == 'true'
+        uses: tj-actions/changed-files@v46
+        with:
+          files: constants/listicles/**/*.json
+          json: true
+          escape_json: false
+          write_output_files: true
+
+      - name: Rename Listicle Output Files
+        if: steps.check-sync.outputs.should_sync == 'true'
+        run: |
+          if [ -f .github/outputs/all_changed_files.json ]; then
+            mv .github/outputs/all_changed_files.json .github/outputs/listicles_changed_files.json
+          else
+            echo "[]" > .github/outputs/listicles_changed_files.json
+          fi
+
+          if [ -f .github/outputs/deleted_files.json ]; then
+            mv .github/outputs/deleted_files.json .github/outputs/listicles_deleted_files.json
+          else
+            echo "[]" > .github/outputs/listicles_deleted_files.json
+          fi
+
       - name: Upload Changed Files Artifact
+        if: steps.check-sync.outputs.should_sync == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: changed-files-json
@@ -203,7 +245,7 @@ jobs:
         run: |
           echo "🗑️ Deleted content files detected."
           echo "Count: $(jq '. | length' .github/outputs/content_deleted_files.json)"
-          
+
       - name: Display Changed Assets Summary
         if: steps.changed-assets.outputs.any_changed == 'true'
         run: |
@@ -233,7 +275,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -309,14 +351,15 @@ jobs:
           RECONCILE_STAGING: ${{ needs.detect-changes.outputs.is_pr_staging }}
           SYNC_MANIFEST_PATH: .github/sync-manifest.json
           IS_PR_CLOSED: ${{ needs.detect-changes.outputs.is_pr_closed }}
+          BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || env.PRODUCTION_BRANCH }}
         run: node scripts/sync-content-to-strapi.js
 
       - name: Save Sync Manifest
-        if: always() && needs.detect-changes.outputs.is_pr_staging == 'true' && needs.detect-changes.outputs.is_pr_closed != 'true'
+        if: success() && needs.detect-changes.outputs.is_pr_staging == 'true' && needs.detect-changes.outputs.is_pr_closed != 'true'
         uses: actions/cache/save@v4
         with:
           path: .github/sync-manifest.json
-          key: sync-manifest-pr-${{ github.event.pull_request.number }}-${{ github.run_id }}
+          key: sync-manifest-pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
 
       - name: Trigger Revalidation
         if: success()
