@@ -28,6 +28,7 @@ const SKIP_IF_ONLY_CHANGES_IN = [
   'scripts/check-doc-redirects.js',
   'scripts/check-docs-metadata.js',
   'scripts/revalidate-after-cms-sync.js',
+  'scripts/cms-sync-manifest.js',
   'CONTRIBUTING.md',
   'README.md',
   'LICENSE.md',
