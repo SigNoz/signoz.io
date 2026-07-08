@@ -1,6 +1,6 @@
 ---
-date: 2026-05-13
-description: Learn how to create, edit, delete, and manage dashboards and panels within SigNoz.
+date: 2026-07-08
+description: Learn how to create, edit, delete, lock, and manage dashboards and panels within SigNoz.
 title: Manage Dashboards in SigNoz
 doc_type: howto
 ---
@@ -58,13 +58,28 @@ Click the **...** (three-dot) menu at the top of any dashboard to access the fol
   caption="Dashboard options menu — lock, rename, export, and more."
 />
 
-- **Lock Dashboard** — Prevent accidental edits by locking the dashboard. When locked, panels cannot be added, removed, resized, or rearranged. Unlock the dashboard from the same menu to resume editing.
+- **Lock Dashboard** — Prevent accidental edits by locking the dashboard. When locked, a **LOCKED** indicator appears at the bottom of the page and the editing controls are turned off. Unlock the dashboard from the same menu to resume editing. See [Locked dashboard behavior](https://signoz.io/docs/userguide/manage-dashboards/#locked-dashboard-behavior) for details.
 - **Rename** — Quickly rename the dashboard without opening the full configuration drawer.
 - **Full screen** — View the dashboard in full-screen mode for presentations or wall displays.
 - **New section** — Add a section to organize panels into logical groups within the dashboard.
 - **Export JSON** — Download the dashboard configuration as a JSON file for backup or sharing.
 - **Copy as JSON** — Copy the dashboard JSON to your clipboard.
 - **Delete dashboard** — Permanently delete the dashboard.
+
+### Locked dashboard behavior
+
+Lock a dashboard to keep it read-only and protect it from accidental changes. A pink **LOCKED** bar with a lock icon stays fixed at the bottom of the page while the dashboard is locked, so everyone viewing it can tell the dashboard is read-only.
+
+What the lock does depends on your permissions:
+
+- **Users with edit permission** keep seeing every editing control, but each one is disabled. This covers the **New Panel** and **Configure** toolbar buttons, the **Actions** menu items, the per-panel action menu (Edit panel, Clone, Move to section, Delete panel), and the section actions (Add panel, Rename section, Delete section). Hovering a disabled control shows a "This dashboard is locked" tooltip. Unlock the dashboard from the **Actions** menu to re-enable them.
+- **Users without edit permission** do not see the editing controls at all.
+
+The JSON editor opens in read-only mode while the dashboard is locked: the editor field is non-editable and the **Apply**, **Format**, and **Reset** buttons are disabled. Viewing, copying, and downloading the JSON continue to work.
+
+<Admonition type="info">
+Toggling the lock updates only the locked state. Panel charts are not reloaded when you lock or unlock a dashboard, so the data on screen stays stable.
+</Admonition>
 
 ## Update a Custom Dashboard
 
