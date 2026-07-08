@@ -91,7 +91,15 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
                 className="flex h-8 w-8 shrink-0 items-center justify-center"
                 aria-hidden="true"
               >
-                <Image src={shapedMarkIcon} alt="" width={23} height={28} className="h-7 w-auto" />
+                <Image
+                  src={shapedMarkIcon}
+                  alt=""
+                  width={23}
+                  height={28}
+                  className="h-7 w-auto"
+                  priority
+                  unoptimized
+                />
               </span>
               <div className="line-clamp-2 min-w-0 flex-1 text-sm text-signoz_vanilla-400 group-hover:text-[#fff]">
                 YC-backed Shaped AI Swapped a Siloed Toolset for SigNoz, achieving One-Stop
