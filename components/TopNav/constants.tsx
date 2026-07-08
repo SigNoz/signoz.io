@@ -5,6 +5,7 @@ import {
   Bug,
   Cone,
   ConciergeBell,
+  Container,
   DraftingCompass,
   LayoutGrid,
   Logs,
@@ -183,6 +184,14 @@ export const useCasesDropdownItems: ProductItem[] = [
     description: 'Track third-party API performance',
     name: 'External API Monitoring',
     order: 5,
+  },
+  {
+    key: 'kubernetes-monitoring',
+    url: '/kubernetes-monitoring/',
+    icon: <Container className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'Monitor pods, nodes, namespaces & workloads',
+    name: 'Kubernetes Monitoring',
+    order: 6,
   },
 ]
 
