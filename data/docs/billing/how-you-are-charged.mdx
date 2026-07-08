@@ -18,13 +18,13 @@ Your bill is driven by two things:
 1. **How much telemetry you ingest**, measured per signal.
 2. **How long you retain it** (retention period). Longer retention costs more (see [Retention](#retention) below).
 
-| Signal | Billed by | Rate | Minimum retention |
-|---|---|---|---|
-| **Logs** | Volume ingested (per GB) | $0.30 / GB | 15 days |
-| **Traces** | Volume ingested (per GB) | $0.30 / GB | 15 days |
-| **Metrics** | Number of samples ingested (per million) | $0.10 / million samples | 1 month |
+| Signal | Billed by | Starting rate |
+|---|---|---|
+| **Logs** | Volume ingested (per GB) | from $0.30 / GB |
+| **Traces** | Volume ingested (per GB) | from $0.30 / GB |
+| **Metrics** | Number of samples ingested (per million) | from $0.10 / million samples |
 
-Rates shown apply at the minimum retention period. Longer retention increases the rate, since your data is stored for longer (see [Retention](#retention)).
+The per-unit rate depends on the retention period you choose: longer retention costs more. See [Retention](#retention) for the full rate-by-retention breakdown.
 
 There are **no additional charges** for:
 
@@ -42,18 +42,34 @@ Metrics are billed by sample count. A metric sample is a single data point for a
 
 ## Retention
 
-You choose how long each signal is retained, and **longer retention costs more** because your data is stored for longer. Choosing a shorter retention period lowers your cost.
+You choose how long each signal is retained, and **longer retention costs more** because your data is stored for longer. Choosing a shorter retention period lowers your cost. The per-unit rate for each retention period is:
 
-- **Logs and traces**: 15, 30, 90, 180 days, or 1 year. The minimum is **15 days**.
-- **Metrics**: 1, 3, 6, or 13 months. The minimum is **1 month**.
+**Logs and traces** (per GB ingested):
 
-These minimums are the floor: you can't set retention below 15 days for logs/traces or 1 month for metrics, so reducing retention only lowers cost down to those minimums, not beyond. Pick the shortest retention that still covers how far back you need to query.
+| Retention | Price |
+|---|---|
+| 15 days | $0.30 / GB |
+| 30 days | $0.40 / GB |
+| 90 days | $0.60 / GB |
+| 180 days | $0.80 / GB |
+| 1 year | $1.40 / GB |
+
+**Metrics** (per million samples):
+
+| Retention | Price |
+|---|---|
+| 1 month | $0.10 / million samples |
+| 3 months | $0.12 / million samples |
+| 6 months | $0.15 / million samples |
+| 13 months | $0.18 / million samples |
+
+The minimum retention is 15 days for logs and traces and 1 month for metrics. You can't set retention below these, so reducing retention only lowers cost down to those minimums, not beyond. Pick the shortest retention that still covers how far back you need to query, and use the [pricing calculator](https://signoz.io/pricing/#estimate-your-monthly-bill) to estimate your monthly bill.
 
 ## Included usage and overages (Teams plan)
 
 The Teams plan starts at a monthly base that **includes an amount of usage**. You only pay for usage beyond that included amount, charged at the standard per-signal rates above.
 
-For example, the base Teams plan's included usage roughly covers **163 GB of logs/traces or 490 million metric samples**, and a mix of signals draws down against the same included amount. Beyond it, you pay standard rates for the overage.
+For example, at the base retention rate ($0.30/GB, $0.10/million samples), the Teams plan's included usage roughly covers **163 GB of logs/traces or 490 million metric samples**, and a mix of signals draws down against the same included amount. Longer retention uses up the included amount faster because the per-unit rate is higher. Beyond the included amount, you pay standard rates for the overage.
 
 This means:
 
