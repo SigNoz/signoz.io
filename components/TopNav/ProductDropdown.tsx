@@ -97,7 +97,6 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
                   width={23}
                   height={28}
                   className="h-7 w-auto"
-                  priority
                   unoptimized
                 />
               </span>
