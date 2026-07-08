@@ -1,0 +1,368 @@
+---
+date: 2026-07-08
+title: Troubleshoot Missing Traces, Logs, and Metrics
+description: A step-by-step guide to debug why your traces, logs, or metrics are not showing up in SigNoz, from SDK instrumentation to the OpenTelemetry Collector and ingestion endpoint.
+doc_type: howto
+---
+
+## Overview
+
+If your traces, logs, or metrics are not appearing in SigNoz, the problem is almost always in one of three places along the path from your application to SigNoz. This guide walks that path in order so you can isolate the failure quickly instead of guessing.
+
+Work through the three steps below in sequence. Each step tells you what to check, what a healthy result looks like, and where to go next based on what you find.
+
+1. [Is your application generating telemetry?](#step-1-is-your-application-generating-telemetry) Confirm the data exists before worrying about where it goes.
+2. [Is your telemetry being exported?](#step-2-is-your-telemetry-being-exported) Enable diagnostic logging and read the exporter errors.
+3. [Is your telemetry reaching SigNoz?](#step-3-is-your-telemetry-reaching-signoz) Verify connectivity and the ingestion endpoint or Collector.
+
+Most "no data" issues are a wrong ingestion endpoint, a wrong region, or an incorrect ingestion key. If you already know your instrumentation works, jump straight to [Common errors and fixes](#common-errors-and-fixes).
+
+## How your telemetry reaches SigNoz
+
+SigNoz ingests data **only in OTLP** (OpenTelemetry Protocol), over either gRPC (port `4317`) or HTTP (port `4318`). Anything that is not OTLP, such as Prometheus scrape output, StatsD packets, or Jaeger/Zipkin spans, must be converted to OTLP by an OpenTelemetry Collector before it reaches SigNoz.
+
+<Figure
+  src="/img/docs/ingestion/signoz-cloud/troubleshooting/telemetry-data-flow.webp"
+  alt="Diagram of telemetry flowing from an application to SigNoz, either directly via the SDK OTLP exporter or through an OpenTelemetry Collector that also ingests log files and log shippers"
+  caption="The paths telemetry can take from your application to SigNoz"
+/>
+
+There are two topologies. Knowing which one you use tells you where to look in [Step 3](#step-3-is-your-telemetry-reaching-signoz).
+
+- **Direct to SigNoz.** Your application's OpenTelemetry SDK exports OTLP straight to the SigNoz ingestion endpoint.
+- **Through a Collector.** Your application (or a third-party agent) sends data to an OpenTelemetry Collector, which then exports OTLP to SigNoz. The Collector may be a [K8s-Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/), the [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/), a [host binary](https://signoz.io/docs/opentelemetry-collection-agents/vm/overview/), or a [Docker container](https://signoz.io/docs/opentelemetry-collection-agents/docker/overview/).
+
+The common paths per signal:
+
+| Signal | Common sources | How it reaches SigNoz |
+| --- | --- | --- |
+| Traces | OpenTelemetry SDK; Jaeger/Zipkin clients | SDK OTLP exporter direct to SigNoz, or via a Collector. Jaeger/Zipkin must go through a Collector that converts to OTLP. |
+| Logs | OpenTelemetry SDK / log appenders; files on disk; log shippers (FluentBit, Fluentd, Logstash, Vector, Telegraf) | SDK OTLP direct or via Collector; files read by the Collector `filelog` receiver (the standard path for Kubernetes and Docker); shippers forward to the Collector or push OTLP/HTTP. |
+| Metrics | OpenTelemetry SDK; Prometheus `/metrics` endpoints; StatsD; host and Kubernetes metrics; third-party tools | SDK OTLP direct or via Collector; Collector `prometheus`, `statsd`, `hostmetrics`, or other receivers scrape or receive and export OTLP to SigNoz. |
+
+<Admonition type="info">
+SigNoz Cloud endpoints use the form `https://ingest.<region>.signoz.cloud:443`. Find your region and ingestion key under **Settings → Ingestion** in the SigNoz UI. For self-hosted SigNoz, the endpoint is your SigNoz host on port `4317` (gRPC) or `4318` (HTTP), and no ingestion key is required by default.
+</Admonition>
+
+## Step 1: Is your application generating telemetry?
+
+Before checking the network, confirm the telemetry actually exists. The most reliable way is to route the data to your console so you can see it printed locally.
+
+### Using the SDK console exporter
+
+For SDK and auto-instrumented applications, set the exporter to `console`. These are standard OpenTelemetry SDK environment variables and work across languages that support auto-instrumentation:
+
+```bash
+export OTEL_TRACES_EXPORTER=console
+export OTEL_METRICS_EXPORTER=console
+export OTEL_LOGS_EXPORTER=console
+```
+
+To keep exporting to SigNoz **and** print to the console at the same time, use a comma-separated list:
+
+```bash
+export OTEL_TRACES_EXPORTER=otlp,console
+```
+
+Restart your application and exercise the code path you expect to produce data (send a request, run the job, emit a log).
+
+- **You see spans, metrics, or logs printed in stdout.** Your instrumentation works. The data exists, so the problem is in export or connectivity. Continue to [Step 2](#step-2-is-your-telemetry-being-exported).
+- **You see nothing printed.** Your application is not producing telemetry. This is an instrumentation problem, not a networking one. See [When no data is generated](#when-no-data-is-generated) below.
+
+<Admonition type="tip">
+For a Collector-based setup, do the equivalent check at the Collector using the [debug exporter](#verify-data-inside-the-collector) in Step 3. That tells you whether data is reaching the Collector at all.
+</Admonition>
+
+### When no data is generated
+
+If nothing is printed to the console, the instrumentation is not active or is not supported for your setup. Check the following:
+
+- **The instrumentation is actually initialized.** Auto-instrumentation must be loaded before your app code runs (for example, the Java agent via `-javaagent`, `opentelemetry-instrument` for Python, or requiring the SDK first in Node.js). Follow the setup steps in your language's [instrumentation guide](https://signoz.io/docs/instrumentation/overview/).
+- **Your runtime version is supported.** Very old runtimes (for example, .NET Framework 4.5, Node.js 14, Python 3.1) may be outside the supported range for the OpenTelemetry SDK. Check the requirements in your language's guide and in the <a href="https://opentelemetry.io/docs/languages/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry language documentation</a>.
+- **Your third-party library version is supported.** Auto-instrumentation hooks into specific versions of frameworks and clients. If a library is too new or too old, its spans may not be produced. See the supported libraries lists in the <a href="https://opentelemetry.io/docs/languages/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry docs</a>.
+- **The code path is exercised.** Confirm the request or job you expect to trace actually ran while instrumentation was active.
+
+## Step 2: Is your telemetry being exported?
+
+If the data exists but is not reaching SigNoz, the exporter is either failing or misconfigured. Turn on the SDK's diagnostic logging to see the exporter's own error messages.
+
+<Tabs entityName="language">
+<TabItem value="nodejs" label="Node.js" default>
+
+Set the log level to `debug`:
+
+```bash
+export OTEL_LOG_LEVEL=debug
+```
+
+The SDK prints exporter activity and any connection or authentication errors to the console.
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+Enable the Java agent's debug logging:
+
+```bash
+export OTEL_JAVAAGENT_DEBUG=true
+# or as a JVM flag: -Dotel.javaagent.debug=true
+```
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+Set the SDK log level and route internal logs to the console. Refer to the <a href="https://opentelemetry.io/docs/languages/python/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Python docs</a> for enabling internal diagnostic logging, then re-run your app and read the exporter output.
+
+</TabItem>
+<TabItem value="other" label="Other languages">
+
+Enable the SDK's internal (self-diagnostic) logging as described in your language's <a href="https://opentelemetry.io/docs/languages/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry documentation</a>, then re-run your application and read the exporter output.
+
+</TabItem>
+</Tabs>
+
+With diagnostic logging on, restart the app and look at the output:
+
+- **You see an export error.** The exporter is trying and failing. Match the error against [Common errors and fixes](#common-errors-and-fixes) to correct the endpoint, region, or key.
+- **You see no errors and exports appear to succeed.** The data is leaving your application cleanly. Continue to [Step 3](#step-3-is-your-telemetry-reaching-signoz).
+
+## Step 3: Is your telemetry reaching SigNoz?
+
+How you verify this depends on your topology.
+
+### If you export directly to SigNoz Cloud
+
+Test that the ingestion endpoint is reachable from the machine running your application:
+
+```bash
+curl -v https://ingest.<region>.signoz.cloud:443
+```
+
+**Verify these values:**
+
+- `<region>` is the region shown under **Settings → Ingestion** in the SigNoz UI. See the [ingestion overview](https://signoz.io/docs/ingestion/signoz-cloud/overview/).
+
+If the connection fails, a firewall or network policy is blocking outbound access to the endpoint. If it connects but data still does not appear, the problem is the endpoint, region, or key, covered in [Common errors and fixes](#common-errors-and-fixes). For a full catalog of ingestion status codes (400, 401, 404, and so on) and their fixes, see the [Ingestion Troubleshooting guide](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting/).
+
+### If you use an OpenTelemetry Collector
+
+There are two links to verify: application → Collector, and Collector → SigNoz.
+
+#### Verify data inside the Collector
+
+Add the `debug` exporter to your Collector configuration and attach it to the relevant pipeline so you can see what the Collector receives. Add this snippet to your existing `otel-collector-config.yaml`, do not replace the whole file:
+
+```yaml:otel-collector-config.yaml
+exporters:
+  debug:
+    verbosity: detailed
+  otlphttp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug, otlphttp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug, otlphttp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug, otlphttp]
+```
+
+**Verify these values:**
+
+- `<region>` and `<your-ingestion-key>` come from **Settings → Ingestion** in the SigNoz UI. See [ingestion keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+Restart the Collector and check its logs.
+
+- **You see data in the debug output but not in SigNoz.** The Collector receives data but cannot export it. The problem is the `otlphttp` exporter config (endpoint, region, or key). See [Common errors and fixes](#common-errors-and-fixes).
+- **You see no data in the debug output.** Data is not reaching the Collector. Check that the application can connect to the Collector, below.
+
+Reference: <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/debugexporter/README.md" target="_blank" rel="noopener noreferrer nofollow">debug exporter README</a> and the <a href="https://opentelemetry.io/docs/collector/troubleshooting/" target="_blank" rel="noopener noreferrer nofollow">Collector troubleshooting guide</a>.
+
+#### Verify the application can reach the Collector
+
+Confirm the application points at the Collector:
+
+```bash
+echo $OTEL_EXPORTER_OTLP_ENDPOINT
+# Expect http://localhost:4318 (OTLP/HTTP) or your Collector host and port
+```
+
+Confirm the Collector is listening on the OTLP ports:
+
+```bash
+netstat -tuln | grep -E '4317|4318'
+```
+
+Ports `4317` and `4318` should be in the `LISTEN` state.
+
+For Kubernetes, verify the Collector Service has endpoints:
+
+```bash
+kubectl get svc otel-collector -n observability
+kubectl get endpoints otel-collector -n observability
+```
+
+<Admonition type="warning">
+Watch for port and protocol mismatches when talking to a **Collector or self-hosted SigNoz**: OTLP/gRPC uses port `4317` and OTLP/HTTP uses port `4318`. If your SDK is configured for HTTP but points at `4317` (or the reverse), exports fail silently or with connection errors. Prefer OTLP/HTTP on `4318` unless you specifically need gRPC.
+
+**SigNoz Cloud is different:** it uses **port `443` for both** OTLP/gRPC and OTLP/HTTP, so the endpoint is always `https://ingest.<region>.signoz.cloud:443`. Do not use `4317` or `4318` for SigNoz Cloud.
+</Admonition>
+
+### Enable Collector diagnostic logs
+
+If the Collector itself is erroring, raise its internal log level to see why:
+
+```yaml:otel-collector-config.yaml
+service:
+  telemetry:
+    logs:
+      level: DEBUG
+```
+
+## Common errors and fixes
+
+These are the most frequent causes of missing data, in rough order of how often they occur. They apply whether you export directly or through a Collector.
+
+<Tabs entityName="issue">
+<TabItem value="endpoint" label="Wrong endpoint or URL" default>
+
+**Symptom:** Connection refused, connection timeout, or no data despite successful instrumentation.
+
+**Fix:**
+
+- Use the exact ingestion endpoint for your setup: `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud, or `http://<signoz-host>:4318` for self-hosted.
+- Make sure the protocol matches the port: OTLP/HTTP on `4318`, OTLP/gRPC on `4317`.
+- Do not point an application-side SDK at a Collector that is not running, and do not point at SigNoz through a Collector endpoint that does not exist.
+
+</TabItem>
+<TabItem value="region" label="Wrong region">
+
+**Symptom:** Data is accepted by the exporter but never appears in your account, or you get authentication errors even with a valid key.
+
+**Fix:** The `<region>` in your endpoint must match the region your SigNoz Cloud account is in. A key from the EU region will not authenticate against the US endpoint. Confirm both the region and key under **Settings → Ingestion**.
+
+</TabItem>
+<TabItem value="key" label="Wrong or expired ingestion key">
+
+**Symptom:** HTTP `401` or `403`, or gRPC `Unauthenticated` or `PermissionDenied`.
+
+**Fix:**
+
+- Confirm the ingestion key is set correctly. For direct SDK export, it goes in the OTLP headers as `signoz-ingestion-key=<your-ingestion-key>`; for the Collector, under the `otlphttp` exporter `headers`.
+- Check the key has not expired or been revoked, and that its limits are not blocking your data. See [ingestion keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+<TabItem value="trailing-slash" label="Trailing slash / path">
+
+**Symptom:** HTTP `404`.
+
+**Fix:** Remove trailing slashes from the endpoint (for example, use `.../v1/logs`, not `.../v1/logs/`). A trailing slash or an incorrect path segment causes a not-found error at ingestion.
+
+</TabItem>
+<TabItem value="collector-access" label="Collector not accessible">
+
+**Symptom:** Application logs show connection refused or timeout to the Collector; no data in the Collector debug output.
+
+**Fix:**
+
+- Confirm the Collector is running and listening on `4317`/`4318` (`netstat -tuln | grep -E '4317|4318'`).
+- Confirm the application's `OTEL_EXPORTER_OTLP_ENDPOINT` points at the correct Collector host. In Kubernetes, use the Service DNS name (for example, `http://otel-collector.observability.svc.cluster.local:4318`).
+- Check network policies, security groups, and firewalls between the application and the Collector.
+
+</TabItem>
+</Tabs>
+
+For the complete list of ingestion HTTP and gRPC status codes with root causes and resolutions, see the [Ingestion Troubleshooting guide](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting/).
+
+### Other things that can silently block data
+
+These SigNoz Cloud limits reject or delay data without an obvious instrumentation error:
+
+- **Payload too large.** Payloads must be under the **16 MB** maximum, or they are rejected (HTTP `413`). Reduce batch sizes or export intervals.
+- **Timeouts on large or slow exports.** Increase the export timeout with `OTEL_EXPORTER_OTLP_TIMEOUT` (in milliseconds, for example `OTEL_EXPORTER_OTLP_TIMEOUT=30000`) and enable gzip with `OTEL_EXPORTER_OTLP_COMPRESSION=gzip`.
+- **Ingestion key limits.** A key with restrictive limits can throttle your data. Review [ingestion key limits](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+See [ingestion considerations](https://signoz.io/docs/ingestion/signoz-cloud/overview/#important-considerations) for details.
+
+## Signal-specific notes
+
+### Traces and application metrics
+
+<Figure
+  src="/img/docs/ingestion/signoz-cloud/troubleshooting/traces-data-flow.webp"
+  alt="Diagram of trace spans reaching SigNoz directly from the SDK, through an OpenTelemetry Collector, or from a Jaeger or Zipkin client via the Collector"
+  caption="How trace spans reach SigNoz"
+/>
+
+- Traces from the OpenTelemetry SDK export OTLP directly or through a Collector. Spans from **Jaeger or Zipkin clients** must pass through a Collector with the matching receiver, which converts them to OTLP.
+- If some spans are missing or you see gaps in a trace, the instrumentation is likely producing data but some spans are dropped or uninstrumented. See [Traces Management FAQs](https://signoz.io/docs/traces-management/troubleshooting/faqs/).
+- If a service is not listed in the Services tab, confirm a unique `service.name` is set on its resource attributes.
+
+### Logs
+
+Logs reach SigNoz by several paths. Identify yours first:
+
+- **Log shippers (FluentBit, Fluentd, Logstash, Vector, Telegraf) or the Collector.** Check that the receivers and exporters are wired into the pipeline correctly, that the exporter endpoint and ingestion key are set, and read the Collector or shipper logs for errors.
+- **Files on disk.** The Collector's `filelog` receiver reads log files. This is the standard path for Kubernetes and Docker. Confirm the receiver's include paths match your log file locations.
+- **SDK or log-appender bridge.** Run the [console exporter check](#step-1-is-your-application-generating-telemetry) with `OTEL_LOGS_EXPORTER=console` to confirm the SDK emits logs, then follow Steps 2 and 3.
+
+To correlate logs with traces, make sure each log line carries `trace_id` and `span_id` and parse them with the [trace parser pipeline](https://signoz.io/docs/logs-pipelines/guides/trace/). More in [Logs Management FAQs](https://signoz.io/docs/logs-management/troubleshooting/faqs/).
+
+### Metrics
+
+<Figure
+  src="/img/docs/ingestion/signoz-cloud/troubleshooting/metrics-data-flow.webp"
+  alt="Diagram of metrics reaching SigNoz via the OTel SDK directly, or through an OpenTelemetry Collector using the prometheus, statsd, and hostmetrics receivers"
+  caption="How metrics reach SigNoz across SDK, Prometheus, StatsD, and host sources"
+/>
+
+- **OpenTelemetry SDK metrics** export OTLP directly or through a Collector.
+- **Prometheus metrics** are collected by the Collector's `prometheus` receiver, which scrapes your `/metrics` endpoints. Other receivers can pull or receive from other sources.
+- **StatsD** metrics are received by the Collector's `statsd` receiver (application pushes UDP packets to the listener), then exported as OTLP.
+- **Host and Kubernetes metrics** come from the `hostmetrics` receiver and the [K8s-Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/).
+- For any Collector receiver, confirm the receivers and exporters are added to the pipeline correctly, the exporter endpoint and key are set, and check the Collector logs for errors.
+- If a specific metric is missing, a common cause is a temporality mismatch (delta versus cumulative) for that metric. See [Metrics Management FAQs](https://signoz.io/docs/metrics-management/troubleshooting/faqs/).
+
+## Still not working?
+
+If you have worked through all three steps and the data still does not appear:
+
+- Direct export to SigNoz Cloud: collect your diagnostic logs and reach out to SigNoz support via the chat widget in the SigNoz Cloud UI.
+- Collector-based setups: capture the Collector logs with `level: DEBUG` and the debug exporter output, and share them with support.
+
+<DocCardContainer>
+
+<DocCard
+    title="Ingestion Troubleshooting"
+    description="Full catalog of ingestion errors, status codes, and diagnostic log setup"
+    href="https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting/"
+/>
+
+<DocCard
+    title="Traces Management FAQs"
+    description="Missing spans, sampling, and trace query issues"
+    href="https://signoz.io/docs/traces-management/troubleshooting/faqs/"
+/>
+
+<DocCard
+    title="Logs Management FAQs"
+    description="Log ingestion, parsing, and query issues"
+    href="https://signoz.io/docs/logs-management/troubleshooting/faqs/"
+/>
+
+<DocCard
+    title="Metrics Management FAQs"
+    description="Missing metrics and temporality mismatches"
+    href="https://signoz.io/docs/metrics-management/troubleshooting/faqs/"
+/>
+
+</DocCardContainer>
