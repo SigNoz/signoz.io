@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-08
 title: Manage Variables in SigNoz
 description: Learn how to create and use dashboard variables in SigNoz to build dynamic, reusable dashboards across services and infrastructure.
 doc_type: howto
@@ -137,6 +137,30 @@ Note for Dynamic Variables: If you're using dynamic variables, explicit chaining
     WHERE metric_name = 'signoz_calls_total' AND JSONExtractString(labels, 'service.name') IN $service.name
     ```
 
+
+## How variables load and refresh
+
+SigNoz resolves dashboard variables in dependency order and refreshes only the panels that need it. Understanding this behavior helps you build fast, predictable dashboards.
+
+### Dependency-ordered loading
+
+Query variables load in [dependency](#chaining-variables) order. When a child variable references a parent variable (for example, a `pod` query that filters on `$namespace`), the child does not start fetching until the parent has resolved. This prevents the child from loading a stale or empty option list before the parent value is known.
+
+Dynamic variables wait for all Query variables on the dashboard to finish resolving before they fetch their own options. This removes the race conditions that could otherwise show incomplete option lists on the first load.
+
+### Selective panel refresh
+
+When you change a variable, SigNoz reloads only the panels that actually reference that variable. Panels that do not use the changed variable keep their current data and do not trigger new queries, so unrelated parts of the dashboard stay responsive.
+
+While a referenced variable is updating, each affected panel keeps showing its last-known data and renders a loading indicator in the background. The panel does not go blank during the update.
+
+### The variables bar
+
+Selected variables appear in the variables bar at the top of the dashboard. When there are more variables than fit, the bar collapses the overflow into a **+N** button. Hover the **+N** button to see a tooltip listing each hidden variable's name and its currently selected value.
+
+<Admonition type="info">
+A default value set on a variable can be cleared at any time. Clearing the selection applies no filter for that variable (see [Note about ALL](#note-about-all) for how the empty selection behaves for dynamic variables).
+</Admonition>
 
 ## Why avoid ClickHouse query variables
 

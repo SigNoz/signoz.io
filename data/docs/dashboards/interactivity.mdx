@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-08
 title: Interactivity in dashboards
 description: Learn how interactive dashboards in SigNoz help you drill down, correlate signals, and troubleshoot faster using context menus, cross filtering, cross-panel sync, and navigation to Logs and Traces.
 
@@ -21,8 +21,10 @@ These interactive features make dashboards a powerful tool for root cause analys
 
 ## Features
 
-Interactive dashboards include multiple capabilities such as **View Logs and Traces**, **Breakout by**, **Context Links**, **Cross Filtering**, **Filter in Tables**, and **Cross-Panel Sync**. 
+Interactive dashboards include multiple capabilities such as **View Logs and Traces**, **View Trace Details**, **Breakout by**, **Context Links**, **Cross Filtering**, **Filter in Tables**, and **Cross-Panel Sync**. 
 Together, these features let you drill deeper, correlate across signals, and debug issues faster.
+
+You can trigger these interactions from a panel on the dashboard or from inside a panel's expanded **View** modal. See [Drill down in the expanded view](#drill-down-in-the-expanded-view) for how the two entry points differ.
 
 ### View Logs and Traces
 
@@ -56,19 +58,35 @@ This workflow shortens the gap between **observing anomalies** and **finding the
 - **Faster correlation:** Jump from metrics to traces and logs in context.
 - **Root cause focus:** Cut the time between spotting anomalies and debugging them.
 
+### View Trace Details
+
+When the data point or table row you click carries a `trace_id`, a **View Trace Details** link is added to the context menu automatically. You do not need to configure a [context link](#context-links) for it.
+
+#### How it works
+
+1. Click a data point in a chart, a pie slice, or a row in a table whose query returns a `trace_id`.
+2. Select **View Trace Details** from the context menu.
+3. The trace detail page for that `trace_id` opens in a new browser tab, so your dashboard stays open.
+
+<Admonition type="info">
+**View Trace Details** appears only when the clicked data includes a `trace_id` field. If your query does not select `trace_id`, use a [context link](#context-links) to build a custom trace URL instead.
+</Admonition>
+
 ### Breakout by
 
 The **Breakout by** option allows you to **drill deeper into aggregated data** by regrouping it with another attribute.  
 Instead of building a new query from scratch, you can click on a datapoint or table cell and break it down further to uncover patterns and anomalies.  
 
 #### How it works
-1. Click on a chart datapoint, bar segment, or table cell.  
+1. Click on a chart datapoint, bar segment, pie slice, or table cell.  
 2. From the context menu, select **Breakout by...**.  
 3. Choose an attribute from the list (for example, `k8s.pod.name` or `host.name`).  
-4. The panel is updated in place to show the new breakdown:  
+4. The regrouped result opens in the expanded **View** modal:  
    - Existing filters, time range, and dashboard variables are preserved.  
    - The **selected data is applied as a filter** so the new breakdown focuses only on that slice.  
    - The chosen attribute becomes the **new group by dimension** (it replaces the previous grouping).  
+
+   From the same modal you can keep drilling. See [Drill down in the expanded view](#drill-down-in-the-expanded-view).
 
 This lets you move from a broad overview to more granular insights step by step.  
 
@@ -192,12 +210,22 @@ The **Filter in Tables** option allows you to quickly narrow results by applying
    - **Number**: `=`, `>`, `<`, `>=`, `<=`  
    - **Boolean**: `is true`, `is false`  
 5. Enter or confirm the filter value.  
-6. The table refreshes in place with the new filter applied — no manual edits or page reloads needed.  
+6. The refined result opens in the expanded **View** modal with the new filter applied. The filter state is written to the URL, so you can share or reload the drilled-down view. No manual query edits are needed.  
 
 #### Why use it
 - **Faster narrowing**: Apply filters directly from the data you are inspecting.
 - **Context-aware operators**: Only valid operators for the column type are shown.
 - **No query editing**: Instantly re-run the query without touching the Query Builder.
+
+### Drill down in the expanded view
+
+Every panel can be expanded into a full-screen **View** modal (click the expand icon on the panel header). Drill-down interactions are available inside this modal, not just on the dashboard grid.
+
+- **Filter by value** and **Breakout by** work the same way inside the modal: click a data point, pie slice, or table cell and choose an action.
+- The result refines **in place** — the query re-runs and the chart or table updates within the same modal. A nested modal does not open.
+- Each drill-down step updates the URL, so the refined state is preserved when you reload or share the link.
+
+This lets you start from an aggregate view and keep narrowing (filter, then break out, then filter again) without leaving the expanded panel.
 
 ### Cross-Panel Sync
 
