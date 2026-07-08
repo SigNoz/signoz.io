@@ -5,6 +5,15 @@ const matter = require('gray-matter')
 const axios = require('axios')
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
 const mime = require('mime-types')
+const {
+  createEmptyManifest,
+  normalizeManifest,
+  contentManifestKey,
+  listicleManifestKey,
+  buildManifestMap,
+  getContentReconciliationAction,
+  getListicleReconciliationAction,
+} = require('./cms-sync-manifest')
 
 const DEPLOYMENT_STATUS = process.env.DEPLOYMENT_STATUS
 const SYNC_MANIFEST_PATH = process.env.SYNC_MANIFEST_PATH
@@ -16,8 +25,8 @@ const CMS_BATCH_SIZE = parseInt(process.env.CMS_BATCH_SIZE || '10', 10)
 const CMS_BATCH_DELAY_MS = parseInt(process.env.CMS_BATCH_DELAY_MS || '1000', 10)
 const CMS_MAX_RETRIES = parseInt(process.env.CMS_MAX_RETRIES || '5', 10)
 const CMS_INITIAL_RETRY_DELAY_MS = parseInt(process.env.CMS_INITIAL_RETRY_DELAY_MS || '1000', 10)
-const MANIFEST_VERSION = 2
 const REPO_ROOT = path.resolve(__dirname, '..')
+const _baseFileContentCache = new Map()
 
 const CMS_API_URL =
   DEPLOYMENT_STATUS === 'staging' ? process.env.CMS_STAGING_API_URL : process.env.CMS_API_URL
@@ -77,61 +86,6 @@ function chunk(array, size) {
   return chunks
 }
 
-function createEmptyManifest() {
-  return {
-    version: MANIFEST_VERSION,
-    content: [],
-    listicles: [],
-    sidenav: null,
-  }
-}
-
-function normalizeContentManifestEntry(entry) {
-  if (!entry || !entry.folderName || !entry.pathField) return null
-
-  return {
-    kind: entry.kind || entry.action || 'unknown',
-    folderName: entry.folderName,
-    pathField: entry.pathField,
-    filePath: entry.filePath || entry.path || null,
-    restoreData: entry.restoreData || null,
-  }
-}
-
-function normalizeListicleManifestEntry(entry) {
-  if (!entry || !entry.key) return null
-
-  return {
-    kind: entry.kind || entry.action || 'unknown',
-    key: entry.key,
-    filePath: entry.filePath || null,
-    restoreData: entry.restoreData || null,
-  }
-}
-
-function normalizeManifest(rawManifest) {
-  const manifest = createEmptyManifest()
-
-  if (Array.isArray(rawManifest)) {
-    manifest.content = rawManifest.map(normalizeContentManifestEntry).filter(Boolean)
-    return manifest
-  }
-
-  if (!rawManifest || typeof rawManifest !== 'object') {
-    return manifest
-  }
-
-  const contentEntries = rawManifest.content || rawManifest.entries || []
-  const listicleEntries = rawManifest.listicles || []
-
-  manifest.version = rawManifest.version || MANIFEST_VERSION
-  manifest.content = contentEntries.map(normalizeContentManifestEntry).filter(Boolean)
-  manifest.listicles = listicleEntries.map(normalizeListicleManifestEntry).filter(Boolean)
-  manifest.sidenav = rawManifest.sidenav || null
-
-  return manifest
-}
-
 function readPreviousManifest() {
   if (!SYNC_MANIFEST_PATH || !fs.existsSync(SYNC_MANIFEST_PATH)) return createEmptyManifest()
   try {
@@ -145,18 +99,6 @@ function writeManifest(manifest) {
   if (!SYNC_MANIFEST_PATH) return
   fs.mkdirSync(path.dirname(SYNC_MANIFEST_PATH), { recursive: true })
   fs.writeFileSync(SYNC_MANIFEST_PATH, JSON.stringify(normalizeManifest(manifest), null, 2))
-}
-
-function contentManifestKey(entry) {
-  return `${entry.folderName}:${entry.pathField}`
-}
-
-function listicleManifestKey(entry) {
-  return entry.key
-}
-
-function buildManifestMap(entries, keyFn) {
-  return new Map(entries.map((entry) => [keyFn(entry), entry]))
 }
 
 function sanitizeEntityForRestore(entity) {
@@ -207,12 +149,22 @@ function readFileFromGitRef(filePath, gitRef) {
 }
 
 function readBaseFileContent(filePath) {
-  for (const gitRef of getBaseRefCandidates()) {
-    const content = readFileFromGitRef(filePath, gitRef)
-    if (content !== null) return content
+  if (!filePath) return null
+  if (_baseFileContentCache.has(filePath)) {
+    return _baseFileContentCache.get(filePath)
   }
 
-  return null
+  let baseContent = null
+  for (const gitRef of getBaseRefCandidates()) {
+    const content = readFileFromGitRef(filePath, gitRef)
+    if (content !== null) {
+      baseContent = content
+      break
+    }
+  }
+
+  _baseFileContentCache.set(filePath, baseContent)
+  return baseContent
 }
 
 function markSyncResultsReconciled(reason) {
@@ -929,19 +881,27 @@ async function prefetchRelationEntities(pendingOperations) {
   }
 
   for (const [prefix, paths] of Object.entries(relatedPathsByPrefix)) {
-    if (_relatedArticleEntityCache[prefix]) continue
-
     const typeInfo = RELATED_ARTICLE_TYPE_MAP[prefix]
+    const cachedEntities = _relatedArticleEntityCache[prefix] || []
+    const cachedPaths = new Set(cachedEntities.map((entity) => entity.path).filter(Boolean))
+    const pathsToFetch = [...paths].filter((relatedPath) => !cachedPaths.has(relatedPath))
+
+    if (pathsToFetch.length === 0) continue
+
     try {
-      let entities = await fetchEntitiesByFilter(typeInfo.endpoint, 'path', [...paths])
+      let entities = await fetchEntitiesByFilter(typeInfo.endpoint, 'path', pathsToFetch)
       entities = filterEntitiesByDeploymentStatus(entities)
-      _relatedArticleEntityCache[prefix] = entities
+      const mergedByPath = new Map()
+      for (const entity of [...cachedEntities, ...entities]) {
+        if (entity.path) mergedByPath.set(entity.path, entity)
+      }
+      _relatedArticleEntityCache[prefix] = [...mergedByPath.values()]
       console.log(
-        `  ✅ related_articles/${prefix}: ${entities.length} entities (filtered from ${paths.size} paths)`
+        `  ✅ related_articles/${prefix}: ${entities.length} fetched, ${_relatedArticleEntityCache[prefix].length} cached`
       )
     } catch (err) {
       console.warn(`  ⚠️ Failed to prefetch related_articles/${prefix}: ${err.message}`)
-      _relatedArticleEntityCache[prefix] = []
+      _relatedArticleEntityCache[prefix] = cachedEntities
     }
   }
 }
@@ -1313,7 +1273,7 @@ async function buildStrapiDataFromFileContent(filePath, fileContent) {
   )
 }
 
-async function buildRestoreDataForContentEntry(entry) {
+function getContentEntryBaseFileCandidates(entry) {
   const candidates = []
   if (entry.filePath) candidates.push(entry.filePath)
   if (entry.folderName && entry.pathField) {
@@ -1322,12 +1282,67 @@ async function buildRestoreDataForContentEntry(entry) {
     candidates.push(`data/${entry.folderName}/${normalizedPath}.md`)
   }
 
-  for (const filePath of candidates) {
-    const baseContent = readBaseFileContent(filePath)
-    if (baseContent !== null) {
-      const { data } = await buildStrapiDataFromFileContent(filePath, baseContent)
-      return data
+  return [...new Set(candidates)]
+}
+
+function readBaseFileForContentEntry(entry) {
+  for (const filePath of getContentEntryBaseFileCandidates(entry)) {
+    const content = readBaseFileContent(filePath)
+    if (content !== null) {
+      return { filePath, content }
     }
+  }
+
+  return null
+}
+
+function buildRestorePrefetchOperation(entry) {
+  if (entry.kind === 'created') return null
+
+  const baseFile = readBaseFileForContentEntry(entry)
+  if (!baseFile) return null
+
+  const folderName = getFolderName(baseFile.filePath)
+  if (!folderName || !SYNC_FOLDERS.includes(folderName)) return null
+
+  const pathField = generatePathField(baseFile.filePath, folderName)
+  if (!pathField) return null
+
+  const { frontmatter } = parseMDXContent(baseFile.filePath, baseFile.content)
+
+  return {
+    type: 'update',
+    folderName,
+    pathField,
+    filePath: baseFile.filePath,
+    frontmatter,
+  }
+}
+
+async function prefetchRelationEntitiesForContentRestore(staleEntries) {
+  const restoreOperations = staleEntries.map(buildRestorePrefetchOperation).filter(Boolean)
+  if (restoreOperations.length === 0) return
+
+  await prefetchRelationEntities(restoreOperations)
+}
+
+async function buildRestoreDataForContentEntry(entry) {
+  const baseFile = readBaseFileForContentEntry(entry)
+  if (baseFile) {
+    const { data } = await buildStrapiDataFromFileContent(baseFile.filePath, baseFile.content)
+    return data
+  }
+
+  return entry.restoreData || null
+}
+
+async function buildRestoreDataForListicleEntry(entry) {
+  if (!entry.filePath) return entry.restoreData || null
+
+  const baseContent = readBaseFileContent(entry.filePath)
+  if (baseContent !== null) {
+    const jsonData = parseListicleJson(entry.filePath, baseContent)
+    return buildListicleDataFromJson(jsonData)
   }
 
   return entry.restoreData || null
@@ -1803,20 +1818,25 @@ async function syncToStrapi() {
         }
       }
 
+      await prefetchRelationEntitiesForContentRestore(staleEntries)
+
       for (const staleEntry of staleEntries) {
         const key = contentManifestKey(staleEntry)
         const existingEntity = existingByKey.get(key)
 
         try {
           const restoreData = await buildRestoreDataForContentEntry(staleEntry)
-          const shouldDelete =
-            staleEntry.kind === 'created' || (staleEntry.kind === 'unknown' && !restoreData)
+          const reconciliationAction = getContentReconciliationAction(staleEntry, restoreData)
 
-          if (restoreData && !shouldDelete) {
+          if (reconciliationAction.action === 'restore') {
             if (existingEntity?.documentId) {
-              await updateEntry(staleEntry.folderName, existingEntity.documentId, restoreData)
+              await updateEntry(
+                staleEntry.folderName,
+                existingEntity.documentId,
+                reconciliationAction.restoreData
+              )
             } else {
-              await createEntry(staleEntry.folderName, restoreData)
+              await createEntry(staleEntry.folderName, reconciliationAction.restoreData)
             }
 
             console.log(`  Reconciled (restored): ${staleEntry.pathField}`)
@@ -1825,20 +1845,7 @@ async function syncToStrapi() {
               path: staleEntry.pathField,
             })
             reconciledCount++
-          } else if (restoreData && shouldDelete) {
-            if (existingEntity?.documentId) {
-              await updateEntry(staleEntry.folderName, existingEntity.documentId, restoreData)
-            } else {
-              await createEntry(staleEntry.folderName, restoreData)
-            }
-
-            console.log(`  Reconciled (restored from base): ${staleEntry.pathField}`)
-            results.restored.push({
-              file: `(reconciled) ${staleEntry.folderName}${staleEntry.pathField}`,
-              path: staleEntry.pathField,
-            })
-            reconciledCount++
-          } else if (shouldDelete) {
+          } else if (reconciliationAction.action === 'delete') {
             if (existingEntity?.documentId) {
               await deleteEntry(staleEntry.folderName, existingEntity.documentId)
               console.log(`  Reconciled (deleted): ${staleEntry.pathField}`)
@@ -1853,7 +1860,7 @@ async function syncToStrapi() {
               results.skipped.push(`(reconciled) ${staleEntry.folderName}${staleEntry.pathField}`)
             }
           } else {
-            throw new Error(`No baseline content or restore data found for ${staleEntry.pathField}`)
+            throw new Error(reconciliationAction.error)
           }
         } catch (error) {
           console.error(`  Failed to reconcile ${staleEntry.pathField}: ${error.message}`)
@@ -2217,18 +2224,6 @@ async function deleteListicleEntry(key) {
   return true
 }
 
-async function buildListicleDataFromBase(entry) {
-  if (!entry.filePath) return null
-
-  const baseContent = readBaseFileContent(entry.filePath)
-  if (baseContent !== null) {
-    const jsonData = parseListicleJson(entry.filePath, baseContent)
-    return buildListicleDataFromJson(jsonData)
-  }
-
-  return entry.restoreData || null
-}
-
 function buildCurrentListicleManifestEntry(listicleFile, previousEntry, existingEntry, isDeleted) {
   const key = getListicleKey(listicleFile)
   const baseFileExists = readBaseFileContent(listicleFile) !== null
@@ -2380,13 +2375,14 @@ async function syncListiclesToStrapi({ reconcileStaging = false } = {}) {
 
     for (const staleEntry of staleEntries) {
       try {
-        const restoreData = await buildListicleDataFromBase(staleEntry)
+        const restoreData = await buildRestoreDataForListicleEntry(staleEntry)
+        const reconciliationAction = getListicleReconciliationAction(staleEntry, restoreData)
 
-        if (restoreData) {
-          await upsertListicleEntry(staleEntry.key, restoreData)
+        if (reconciliationAction.action === 'restore') {
+          await upsertListicleEntry(staleEntry.key, reconciliationAction.restoreData)
           console.log(`  ✅ Restored listicle: ${staleEntry.key}`)
           results.restored.push({ key: staleEntry.key })
-        } else if (staleEntry.kind === 'created' || staleEntry.kind === 'unknown') {
+        } else if (reconciliationAction.action === 'delete') {
           const wasDeleted = await deleteListicleEntry(staleEntry.key)
           if (wasDeleted) {
             console.log(`  ✅ Cleaned up listicle: ${staleEntry.key}`)
@@ -2394,14 +2390,8 @@ async function syncListiclesToStrapi({ reconcileStaging = false } = {}) {
           } else {
             console.log(`  ⚠️ Listicle already absent: ${staleEntry.key}`)
           }
-        } else if (staleEntry.restoreData) {
-          await upsertListicleEntry(staleEntry.key, staleEntry.restoreData)
-          console.log(`  ✅ Restored listicle from manifest: ${staleEntry.key}`)
-          results.restored.push({ key: staleEntry.key })
         } else {
-          throw new Error(
-            `No baseline content or restore data found for listicle ${staleEntry.key}`
-          )
+          throw new Error(reconciliationAction.error)
         }
       } catch (error) {
         const errorMsg = error.response?.data?.error?.message || error.message
@@ -2552,4 +2542,6 @@ module.exports = {
   normalizeManifest,
   contentManifestKey,
   listicleManifestKey,
+  getContentReconciliationAction,
+  getListicleReconciliationAction,
 }

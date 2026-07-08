@@ -30,12 +30,8 @@ module.exports = async ({ github, context, core }) => {
     if (syncResults) {
       // Skip comment when no creates, updates, deletes, or errors to avoid noise
       const restored = syncResults.restored || []
-      const reconciledDeletes = syncResults.deleted.filter(
-        (item) => item.reconciled || (item.file && item.file.startsWith('(reconciled)'))
-      )
-      const intentionalDeletes = syncResults.deleted.filter(
-        (item) => !item.reconciled && (!item.file || !item.file.startsWith('(reconciled)'))
-      )
+      const reconciledDeletes = syncResults.deleted.filter((item) => item.reconciled)
+      const intentionalDeletes = syncResults.deleted.filter((item) => !item.reconciled)
       const totalActivity =
         syncResults.created.length +
         syncResults.updated.length +
