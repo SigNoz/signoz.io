@@ -170,20 +170,6 @@ curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
 ]'
 ```
 
-Updating the filter in a query inside a dashboard:
-
-```bash
-curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
---header 'SIGNOZ-API-KEY: <YOUR-API-KEY>' \
---data '[
-    {
-        "op": "replace",
-        "path": "/spec/panels/<panel-name>/spec/queries/0/spec/plugin/spec/filter/expression",
-        "value": "service.name = '\''signoz'\''"
-    }
-]'
-```
-
 Adding a new panel involves one request object to add the panel, and another to add it to the layout:
 
 ```bash
@@ -270,6 +256,20 @@ curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
                 "$ref": "#/spec/panels/196021a6-3b94-454c-9c9d-2b4170708038"
             }
         }
+    }
+]'
+```
+
+Updating the filter in a query inside a panel, for example the panel added above:
+
+```bash
+curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>' \
+--data '[
+    {
+        "op": "replace",
+        "path": "/spec/panels/196021a6-3b94-454c-9c9d-2b4170708038/spec/queries/0/spec/plugin/spec/queries/0/spec/filter/expression",
+        "value": "service.name = '\''signoz'\''"
     }
 ]'
 ```
