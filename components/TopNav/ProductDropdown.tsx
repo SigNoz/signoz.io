@@ -3,7 +3,7 @@
 import { Button } from '@headlessui/react'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
-import BrainfishIcon from '@/public/img/index_features/brainfish.svg'
+import ShapedLogo from '@/public/img/case_study/logos/shaped-logo.svg'
 import { productDropdownItemsSorted, comparisonItems, SECTION_HEADING_CLASS } from './constants'
 import { useNavDropdown } from './NavDropdownContext'
 
@@ -77,18 +77,21 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
           </TrackingLink>
           <div>
             <TrackingLink
-              href="/case-study/brainfish/"
+              href="/case-study/shaped/"
               className="group flex h-auto min-w-0 items-center gap-4"
               clickType="Nav Click"
               clickName="Customer Stories Link"
-              clickText="How Brainfish leveraged SigNoz for effective Kubernetes monitoring"
+              clickText="YC-backed Shaped AI Swapped a Siloed Toolset for SigNoz, achieving One-Stop Observability"
               clickLocation="Top Navbar"
               onClick={onClose}
               prefetch={false}
             >
-              <BrainfishIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
+              <span className="flex h-5 w-5 shrink-0 overflow-hidden" aria-hidden="true">
+                <ShapedLogo className="h-5 w-[71px] max-w-none shrink-0" />
+              </span>
               <div className="line-clamp-2 max-w-[274px] text-sm text-signoz_vanilla-400 group-hover:text-[#fff]">
-                How Brainfish leveraged SigNoz for effective Kubernetes monitoring
+                YC-backed Shaped AI Swapped a Siloed Toolset for SigNoz, achieving One-Stop
+                Observability
               </div>
             </TrackingLink>
           </div>
