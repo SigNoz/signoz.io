@@ -140,4 +140,31 @@ test('replaceAssetPaths', async (t) => {
     )
     assert.ok(result.includes('https://cdn.example.com/img/photo.png'))
   })
+
+  // Pinning test: replaceAssetPaths only rewrites top-level frontmatter keys.
+  // Nested asset paths (arrays, objects) are extracted by extractAssetPaths and
+  // uploaded to S3, but not rewritten in the frontmatter payload. This matches
+  // the original monolith behavior (L553-558 of the pre-refactor file).
+  await t.test('does not rewrite nested frontmatter asset paths (pre-existing behavior)', () => {
+    const frontmatter = {
+      image: '/img/top-level.webp',
+      nested: { thumbnail: '/img/nested.png' },
+      gallery: ['/img/item1.png', '/img/item2.png'],
+    }
+    const assets = ['/img/top-level.webp', '/img/nested.png', '/img/item1.png', '/img/item2.png']
+    const { frontmatter: result } = replaceAssetPaths(
+      '',
+      frontmatter,
+      assets,
+      'https://cdn.example.com'
+    )
+
+    // Top-level is rewritten
+    assert.equal(result.image, 'https://cdn.example.com/img/top-level.webp')
+
+    // Nested paths are NOT rewritten (known asymmetry with extractAssetPaths)
+    assert.equal(result.nested.thumbnail, '/img/nested.png')
+    assert.equal(result.gallery[0], '/img/item1.png')
+    assert.equal(result.gallery[1], '/img/item2.png')
+  })
 })

@@ -146,6 +146,14 @@ function assertOpsMatch(actual, expected) {
       expected.deletes.length,
       `Expected ${expected.deletes.length} deletes, got ${actual.deletes.length}`
     )
+    for (let i = 0; i < expected.deletes.length; i++) {
+      if (expected.deletes[i].endpoint) {
+        assert.equal(actual.deletes[i].endpoint, expected.deletes[i].endpoint)
+      }
+      if (expected.deletes[i].documentId) {
+        assert.equal(actual.deletes[i].documentId, expected.deletes[i].documentId)
+      }
+    }
   }
 }
 
