@@ -29,16 +29,25 @@ module.exports = async ({ github, context, core }) => {
 
     if (syncResults) {
       // Skip comment when no creates, updates, deletes, or errors to avoid noise
+      const restored = syncResults.restored || []
+      const reconciledDeletes = syncResults.deleted.filter(
+        (item) => item.reconciled || (item.file && item.file.startsWith('(reconciled)'))
+      )
+      const intentionalDeletes = syncResults.deleted.filter(
+        (item) => !item.reconciled && (!item.file || !item.file.startsWith('(reconciled)'))
+      )
       const totalActivity =
         syncResults.created.length +
         syncResults.updated.length +
         syncResults.deleted.length +
+        restored.length +
         syncResults.errors.length
       const hasListicleActivity =
         listicleResults &&
         (listicleResults.created.length > 0 ||
           listicleResults.updated.length > 0 ||
           listicleResults.deleted.length > 0 ||
+          (listicleResults.restored && listicleResults.restored.length > 0) ||
           listicleResults.errors.length > 0)
       if (totalActivity === 0 && !hasListicleActivity) {
         console.log('No sync activity to report. Skipping PR comment.')
@@ -55,7 +64,13 @@ module.exports = async ({ github, context, core }) => {
       body += `|-----------|-------|\n`
       body += `| ✅ Created | ${syncResults.created.length} |\n`
       body += `| 🔄 Updated | ${syncResults.updated.length} |\n`
-      body += `| 🗑️ Deleted | ${syncResults.deleted.length} |\n`
+      body += `| 🗑️ Deleted | ${intentionalDeletes.length} |\n`
+      if (restored.length > 0) {
+        body += `| ♻️ Restored | ${restored.length} |\n`
+      }
+      if (reconciledDeletes.length > 0) {
+        body += `| 🧹 Cleaned up | ${reconciledDeletes.length} |\n`
+      }
       body += `| ⏭️ Skipped | ${syncResults.skipped.length} |\n\n`
 
       // Get relation types from sync results (dynamically extracted from schemas)
@@ -69,23 +84,16 @@ module.exports = async ({ github, context, core }) => {
       }
 
       // Documents details
-      const reconciledDeletes = syncResults.deleted.filter(
-        (item) => item.file && item.file.startsWith('(reconciled)')
-      )
-      const intentionalDeletes = syncResults.deleted.filter(
-        (item) => !item.file || !item.file.startsWith('(reconciled)')
-      )
-
-      if (reconciledDeletes.length > 0) {
-        body += `| 🧹 Reconciled | ${reconciledDeletes.length} |\n\n`
-        body += `> **Note:** ${reconciledDeletes.length} stale staging entry(ies) were cleaned up (renamed/reverted files).\n\n`
+      if (restored.length > 0 || reconciledDeletes.length > 0) {
+        body += `> **Note:** ${restored.length + reconciledDeletes.length} stale staging entry(ies) were reconciled after PR cleanup/revert.\n\n`
       }
 
       const allProcessed = [
         ...syncResults.created.map((item) => ({ ...item, operation: 'Created' })),
         ...syncResults.updated.map((item) => ({ ...item, operation: 'Updated' })),
         ...intentionalDeletes.map((item) => ({ ...item, operation: 'Deleted' })),
-        ...reconciledDeletes.map((item) => ({ ...item, operation: 'Reconciled' })),
+        ...restored.map((item) => ({ ...item, operation: 'Restored' })),
+        ...reconciledDeletes.map((item) => ({ ...item, operation: 'Cleaned up' })),
       ]
 
       if (allProcessed.length > 0) {
@@ -121,10 +129,16 @@ module.exports = async ({ github, context, core }) => {
       }
 
       if (listicleResults) {
+        const restoredListicles = listicleResults.restored || []
+        const reconciledListicleDeletes = listicleResults.deleted.filter((item) => item.reconciled)
+        const intentionalListicleDeletes = listicleResults.deleted.filter(
+          (item) => !item.reconciled
+        )
         const totalListicles =
           listicleResults.created.length +
           listicleResults.updated.length +
-          listicleResults.deleted.length
+          listicleResults.deleted.length +
+          restoredListicles.length
 
         if (totalListicles > 0 || listicleResults.errors.length > 0) {
           body += `\n### 📋 Listicle Sync\n\n`
@@ -132,12 +146,21 @@ module.exports = async ({ github, context, core }) => {
           body += `|-----------|-------|\n`
           body += `| ✅ Created | ${listicleResults.created.length} |\n`
           body += `| 🔄 Updated | ${listicleResults.updated.length} |\n`
-          body += `| 🗑️ Deleted | ${listicleResults.deleted.length} |\n\n`
+          body += `| 🗑️ Deleted | ${intentionalListicleDeletes.length} |\n`
+          if (restoredListicles.length > 0) {
+            body += `| ♻️ Restored | ${restoredListicles.length} |\n`
+          }
+          if (reconciledListicleDeletes.length > 0) {
+            body += `| 🧹 Cleaned up | ${reconciledListicleDeletes.length} |\n`
+          }
+          body += `\n`
 
           const allListicles = [
             ...listicleResults.created.map((item) => ({ ...item, operation: 'Created' })),
             ...listicleResults.updated.map((item) => ({ ...item, operation: 'Updated' })),
-            ...listicleResults.deleted.map((item) => ({ ...item, operation: 'Deleted' })),
+            ...intentionalListicleDeletes.map((item) => ({ ...item, operation: 'Deleted' })),
+            ...restoredListicles.map((item) => ({ ...item, operation: 'Restored' })),
+            ...reconciledListicleDeletes.map((item) => ({ ...item, operation: 'Cleaned up' })),
           ]
 
           if (allListicles.length > 0) {
@@ -171,7 +194,8 @@ module.exports = async ({ github, context, core }) => {
         const totalListicles =
           listicleResults.created.length +
           listicleResults.updated.length +
-          listicleResults.deleted.length
+          listicleResults.deleted.length +
+          ((listicleResults.restored && listicleResults.restored.length) || 0)
 
         if (totalListicles > 0) {
           body += `\n\n### 📋 Listicle Sync\n\n`

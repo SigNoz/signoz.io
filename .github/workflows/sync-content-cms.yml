@@ -5,6 +5,10 @@
 
 name: Sync Content to Strapi CMS
 
+concurrency:
+  group: sync-content-cms-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 on:
   pull_request:
     types: [labeled, synchronize, opened, reopened, closed]
@@ -233,7 +237,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -309,14 +313,15 @@ jobs:
           RECONCILE_STAGING: ${{ needs.detect-changes.outputs.is_pr_staging }}
           SYNC_MANIFEST_PATH: .github/sync-manifest.json
           IS_PR_CLOSED: ${{ needs.detect-changes.outputs.is_pr_closed }}
+          BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || env.PRODUCTION_BRANCH }}
         run: node scripts/sync-content-to-strapi.js
 
       - name: Save Sync Manifest
-        if: always() && needs.detect-changes.outputs.is_pr_staging == 'true' && needs.detect-changes.outputs.is_pr_closed != 'true'
+        if: success() && needs.detect-changes.outputs.is_pr_staging == 'true' && needs.detect-changes.outputs.is_pr_closed != 'true'
         uses: actions/cache/save@v4
         with:
           path: .github/sync-manifest.json
-          key: sync-manifest-pr-${{ github.event.pull_request.number }}-${{ github.run_id }}
+          key: sync-manifest-pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
 
       - name: Trigger Revalidation
         if: success()

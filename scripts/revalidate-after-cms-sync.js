@@ -139,15 +139,19 @@ function buildPayload() {
 
   // If reconciliation happened, force full revalidation (reconciled paths may not be in changed files)
   if (RECONCILE_STAGING) {
-    try {
-      const syncResultsPath = path.join(process.cwd(), 'sync-results.json')
-      const syncResults = JSON.parse(fs.readFileSync(syncResultsPath, 'utf8'))
-      if (syncResults.hasReconciledEntries) {
-        console.log('📣 Reconciled entries detected: using full revalidation for staging.')
-        return { mode: 'all', reason: 'reconciled-staging' }
+    const resultFiles = ['sync-results.json', 'listicle-sync-results.json']
+
+    for (const resultFile of resultFiles) {
+      try {
+        const syncResultsPath = path.join(process.cwd(), resultFile)
+        const syncResults = JSON.parse(fs.readFileSync(syncResultsPath, 'utf8'))
+        if (syncResults.hasReconciledEntries) {
+          console.log('📣 Reconciled entries detected: using full revalidation for staging.')
+          return { mode: 'all', reason: 'reconciled-staging' }
+        }
+      } catch {
+        // Result files may not exist when that surface was not synced.
       }
-    } catch {
-      // sync-results.json may not exist yet; continue with normal logic
     }
   }
 
