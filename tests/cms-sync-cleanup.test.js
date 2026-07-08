@@ -162,6 +162,10 @@ test('workflow gates expensive PR detection and skips merged close cleanup', () 
   assert.match(workflow, /has_previous_manifest/)
   assert.match(workflow, /previous staging manifest/)
   assert.match(workflow, /merged PR close is handled by the push workflow/)
+  assert.doesNotMatch(
+    workflow,
+    /key: sync-manifest-pr-\$\{\{ github\.event\.pull_request\.number \}\}-\$\{\{ github\.run_id \}\}/
+  )
   assert.match(
     workflow,
     /name: Checkout Repository\n\s+if: steps\.check-sync\.outputs\.should_sync == 'true'/

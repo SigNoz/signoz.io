@@ -14,8 +14,8 @@ on:
     types: [labeled, synchronize, opened, reopened, closed]
   push:
     branches:
-      - main  # Configurable: Change to your production branch
-      - staging  # Configurable: Change to your staging branch
+      - main # Configurable: Change to your production branch
+      - staging # Configurable: Change to your staging branch
     paths:
       - 'data/**/*.mdx'
       - 'data/**/*.md'
@@ -30,19 +30,19 @@ env:
   # Strapi Configuration (production)
   CMS_API_URL: ${{ secrets.CMS_API_URL }}
   CMS_API_TOKEN: ${{ secrets.CMS_API_TOKEN }}
-  
+
   # Strapi Configuration (staging)
   CMS_STAGING_API_URL: ${{ secrets.CMS_STAGING_API_URL }}
   CMS_STAGING_API_TOKEN: ${{ secrets.CMS_STAGING_API_TOKEN }}
-  
+
   # Revalidation Configuration
   NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
   NEXT_PUBLIC_STAGING_BASE_URL: ${{ secrets.NEXT_PUBLIC_STAGING_BASE_URL }}
   REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
-  
+
   # S3 Configuration
   S3_REGION: ${{ secrets.S3_REGION }}
-  
+
   # Branch Configuration
   PRODUCTION_BRANCH: 'main'
   STAGING_BRANCH: 'staging'
@@ -70,7 +70,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: .github/sync-manifest.json
-          key: sync-manifest-pr-${{ github.event.pull_request.number }}-${{ github.run_id }}
+          key: sync-manifest-pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
           restore-keys: |
             sync-manifest-pr-${{ github.event.pull_request.number }}-
 
@@ -270,7 +270,7 @@ jobs:
        needs.detect-changes.outputs.listicles_changed == 'true' ||
        needs.detect-changes.outputs.is_pr_staging == 'true') &&
       needs.detect-changes.outputs.should_sync == 'true'
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -306,7 +306,7 @@ jobs:
           PROD_CDN_URL: ${{ secrets.CDN_URL }}
           PROD_AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
           PROD_AWS_SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          
+
           STAGING_S3_BUCKET: ${{ secrets.S3_BUCKET_NAME_STAGING || secrets.S3_BUCKET_NAME }}
           STAGING_CDN_URL: ${{ secrets.CDN_URL_STAGING || secrets.CDN_URL }}
           STAGING_AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID_STAGING || secrets.AWS_ACCESS_KEY_ID }}
@@ -325,11 +325,12 @@ jobs:
           fi
 
       - name: Restore Previous Sync Manifest
+        id: restore-sync-manifest
         if: needs.detect-changes.outputs.is_pr_staging == 'true'
         uses: actions/cache/restore@v4
         with:
           path: .github/sync-manifest.json
-          key: sync-manifest-pr-${{ github.event.pull_request.number }}-${{ github.run_id }}
+          key: sync-manifest-pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
           restore-keys: |
             sync-manifest-pr-${{ github.event.pull_request.number }}-
 
@@ -355,11 +356,11 @@ jobs:
         run: node scripts/sync-content-to-strapi.js
 
       - name: Save Sync Manifest
-        if: success() && needs.detect-changes.outputs.is_pr_staging == 'true' && needs.detect-changes.outputs.is_pr_closed != 'true'
+        if: success() && needs.detect-changes.outputs.is_pr_staging == 'true' && needs.detect-changes.outputs.is_pr_closed != 'true' && steps.restore-sync-manifest.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: .github/sync-manifest.json
-          key: sync-manifest-pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          key: sync-manifest-pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
 
       - name: Trigger Revalidation
         if: success()
@@ -383,7 +384,7 @@ jobs:
             echo "⏭️ Skipping revalidation for draft deployment"
             exit 0
           fi
-          
+
           node scripts/revalidate-after-cms-sync.js
 
       - name: Update PR Comment
@@ -402,7 +403,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [detect-changes, sync-to-cms]
     if: always()
-    
+
     steps:
       - name: Report Success
         if: needs.sync-to-cms.result == 'success'
