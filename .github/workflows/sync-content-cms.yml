@@ -7,13 +7,7 @@ name: Sync Content to Strapi CMS
 
 on:
   pull_request:
-    types: [labeled, synchronize, opened, reopened]
-    paths:
-      - 'data/**/*.mdx'
-      - 'data/**/*.md'
-      - 'data-assets/**'
-      - 'data/docs-side-nav/**'
-      - 'constants/listicles/**'
+    types: [labeled, synchronize, opened, reopened, closed]
   push:
     branches:
       - main  # Configurable: Change to your production branch
@@ -24,6 +18,10 @@ on:
       - 'data-assets/**'
       - 'data/docs-side-nav/**'
       - 'constants/listicles/**'
+
+concurrency:
+  group: cms-sync-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 env:
   # Configurable: Array of folders to sync to CMS
@@ -61,6 +59,10 @@ jobs:
       listicles_changed: ${{ steps.changed-listicles.outputs.any_changed }}
       deployment_status: ${{ steps.determine-status.outputs.deployment_status }}
       should_sync: ${{ steps.check-sync.outputs.should_sync }}
+      is_pr_staging: ${{ steps.check-sync.outputs.is_pr_staging }}
+      is_pr_closed: ${{ steps.check-sync.outputs.is_pr_closed }}
+      is_pr_merged: ${{ steps.check-sync.outputs.is_pr_merged }}
+      has_previous_manifest: ${{ steps.check-sync.outputs.has_previous_manifest }}
     
     steps:
       - name: Checkout Repository
@@ -140,15 +142,49 @@ jobs:
             echo "[]" > .github/outputs/listicles_deleted_files.json
           fi
 
+      - name: Restore Manifest Cache
+        if: github.event_name == 'pull_request'
+        id: manifest-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .sync-manifest.json
+          key: cms-sync-manifest-pr-${{ github.event.pull_request.number }}
+
       - name: Check if Sync is Required
         id: check-sync
         run: |
           echo "Checking if sync should run..."
-          
+
+          IS_PR_STAGING="false"
+          IS_PR_CLOSED="false"
+          IS_PR_MERGED="false"
+          HAS_PREVIOUS_MANIFEST="false"
+
+          if [ -f ".sync-manifest.json" ]; then
+            HAS_PREVIOUS_MANIFEST="true"
+          fi
+
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             if [[ "${{ contains(github.event.pull_request.labels.*.name, 'staging') }}" == "true" ]]; then
+              IS_PR_STAGING="true"
+            fi
+
+            if [[ "${{ github.event.action }}" == "closed" ]]; then
+              IS_PR_CLOSED="true"
+              if [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
+                IS_PR_MERGED="true"
+                echo "should_sync=false" >> $GITHUB_OUTPUT
+                echo "⏭️ Sync skipped: PR was merged (staging entries retained)"
+              elif [[ "$IS_PR_STAGING" == "true" ]] || [[ "$HAS_PREVIOUS_MANIFEST" == "true" ]]; then
+                echo "should_sync=true" >> $GITHUB_OUTPUT
+                echo "✅ Sync enabled: PR closed without merge, cleanup needed"
+              else
+                echo "should_sync=false" >> $GITHUB_OUTPUT
+                echo "⏭️ Sync skipped: PR closed but no staging state to clean up"
+              fi
+            elif [[ "$IS_PR_STAGING" == "true" ]] || [[ "$HAS_PREVIOUS_MANIFEST" == "true" ]]; then
               echo "should_sync=true" >> $GITHUB_OUTPUT
-              echo "✅ Sync enabled: PR has 'staging' label"
+              echo "✅ Sync enabled: PR has 'staging' label or previous manifest"
             else
               echo "should_sync=false" >> $GITHUB_OUTPUT
               echo "⏭️ Sync skipped: PR does not have 'staging' label"
@@ -157,6 +193,11 @@ jobs:
             echo "should_sync=true" >> $GITHUB_OUTPUT
             echo "✅ Sync enabled: Push event to branch"
           fi
+
+          echo "is_pr_staging=$IS_PR_STAGING" >> $GITHUB_OUTPUT
+          echo "is_pr_closed=$IS_PR_CLOSED" >> $GITHUB_OUTPUT
+          echo "is_pr_merged=$IS_PR_MERGED" >> $GITHUB_OUTPUT
+          echo "has_previous_manifest=$HAS_PREVIOUS_MANIFEST" >> $GITHUB_OUTPUT
 
       - name: Determine Deployment Status
         id: determine-status
@@ -215,13 +256,28 @@ jobs:
     name: Sync Content to CMS
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: (needs.detect-changes.outputs.any_changed == 'true' || needs.detect-changes.outputs.any_deleted == 'true' || needs.detect-changes.outputs.any_assets_changed == 'true' || needs.detect-changes.outputs.sidenav_changed == 'true' || needs.detect-changes.outputs.listicles_changed == 'true') && needs.detect-changes.outputs.should_sync == 'true'
+    if: >-
+      needs.detect-changes.outputs.should_sync == 'true' &&
+      (needs.detect-changes.outputs.any_changed == 'true' ||
+       needs.detect-changes.outputs.any_deleted == 'true' ||
+       needs.detect-changes.outputs.any_assets_changed == 'true' ||
+       needs.detect-changes.outputs.sidenav_changed == 'true' ||
+       needs.detect-changes.outputs.listicles_changed == 'true' ||
+       needs.detect-changes.outputs.is_pr_staging == 'true' ||
+       needs.detect-changes.outputs.is_pr_closed == 'true')
     
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+
+      - name: Restore Manifest Cache
+        if: github.event_name == 'pull_request'
+        uses: actions/cache/restore@v4
+        with:
+          path: .sync-manifest.json
+          key: cms-sync-manifest-pr-${{ github.event.pull_request.number }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -285,7 +341,22 @@ jobs:
           CMS_BATCH_DELAY_MS: '1000'
           CMS_MAX_RETRIES: '5'
           CMS_INITIAL_RETRY_DELAY_MS: '1000'
+          RECONCILE_STAGING: ${{ needs.detect-changes.outputs.is_pr_staging }}
+          SYNC_MANIFEST_PATH: ${{ github.event_name == 'pull_request' && '.sync-manifest.json' || '' }}
+          IS_PR_CLOSED: ${{ needs.detect-changes.outputs.is_pr_closed }}
+          BASE_REF: ${{ github.event.pull_request.base.ref || 'main' }}
         run: node scripts/sync-content-to-strapi.js
+
+      - name: Save Manifest Cache
+        if: >-
+          success() &&
+          needs.detect-changes.outputs.is_pr_staging == 'true' &&
+          needs.detect-changes.outputs.is_pr_closed != 'true' &&
+          github.event_name == 'pull_request'
+        uses: actions/cache/save@v4
+        with:
+          path: .sync-manifest.json
+          key: cms-sync-manifest-pr-${{ github.event.pull_request.number }}-${{ github.run_id }}
 
       - name: Trigger Revalidation
         if: success()
@@ -299,6 +370,7 @@ jobs:
           CHANGED_LISTICLES_PATH: .github/outputs/listicles_changed_files.json
           DELETED_LISTICLES_PATH: .github/outputs/listicles_deleted_files.json
           REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+          RECONCILE_STAGING: ${{ needs.detect-changes.outputs.is_pr_staging }}
         run: |
           if [ "$DEPLOYMENT_STATUS" = "live" ]; then
             export BASE_URL="${{ env.NEXT_PUBLIC_BASE_URL }}"
