@@ -7,6 +7,8 @@ module.exports = {
   ...require('./schema-mapper'),
   ...require('./relation-resolver'),
   ...require('./listicle-transformer'),
+  ...require('./manifest'),
+  ...require('./git-reader'),
   ...require('./adapters/cms-adapter'),
   ...require('./adapters/asset-adapter'),
   ...require('./engine'),
