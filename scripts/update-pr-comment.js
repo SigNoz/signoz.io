@@ -32,13 +32,43 @@ module.exports = async ({ github, context, core }) => {
       body = `✅ **CMS Sync Successful**\n\n`
       body += `Content has been synced to Strapi CMS with deployment status: \`${deploymentStatus}\`\n\n`
 
+      const intentionalDeletes = syncResults.deleted.filter((d) => !d.reconciled)
+      const reconciledDeletes = syncResults.deleted.filter((d) => d.reconciled)
+      const restoredCount = (syncResults.restored || []).length
+
+      const totalActivity =
+        syncResults.created.length +
+        syncResults.updated.length +
+        syncResults.deleted.length +
+        restoredCount +
+        syncResults.errors.length
+
+      if (totalActivity === 0) {
+        body = `✅ **CMS Sync Successful** (no changes)\n\n`
+        body += `No content was created, updated, deleted, or restored.\n`
+
+        github.rest.issues.createComment({
+          issue_number: context.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          body: body,
+        })
+        return
+      }
+
       // Summary counts
       body += `### 📊 Summary\n\n`
       body += `| Operation | Count |\n`
       body += `|-----------|-------|\n`
       body += `| ✅ Created | ${syncResults.created.length} |\n`
       body += `| 🔄 Updated | ${syncResults.updated.length} |\n`
-      body += `| 🗑️ Deleted | ${syncResults.deleted.length} |\n`
+      body += `| 🗑️ Deleted | ${intentionalDeletes.length} |\n`
+      if (restoredCount > 0) {
+        body += `| 🔄 Restored | ${restoredCount} |\n`
+      }
+      if (reconciledDeletes.length > 0) {
+        body += `| 🧹 Cleaned up | ${reconciledDeletes.length} |\n`
+      }
       body += `| ⏭️ Skipped | ${syncResults.skipped.length} |\n\n`
 
       // Get relation types from sync results (dynamically extracted from schemas)
@@ -90,11 +120,20 @@ module.exports = async ({ github, context, core }) => {
         body += `> **Note:** Documents were still synced successfully, but some relations were omitted. Please check the values in your frontmatter.\n`
       }
 
+      if (reconciledDeletes.length > 0 || restoredCount > 0) {
+        body += `\n> **Note:** ${reconciledDeletes.length + restoredCount} entry/entries were reconciled (stale staging entries cleaned up or restored to base state).\n\n`
+      }
+
       if (listicleResults) {
+        const listicleIntentionalDeletes = listicleResults.deleted.filter((d) => !d.reconciled)
+        const listicleReconciledDeletes = listicleResults.deleted.filter((d) => d.reconciled)
+        const listicleRestoredCount = (listicleResults.restored || []).length
+
         const totalListicles =
           listicleResults.created.length +
           listicleResults.updated.length +
-          listicleResults.deleted.length
+          listicleResults.deleted.length +
+          listicleRestoredCount
 
         if (totalListicles > 0 || listicleResults.errors.length > 0) {
           body += `\n### 📋 Listicle Sync\n\n`
@@ -102,12 +141,25 @@ module.exports = async ({ github, context, core }) => {
           body += `|-----------|-------|\n`
           body += `| ✅ Created | ${listicleResults.created.length} |\n`
           body += `| 🔄 Updated | ${listicleResults.updated.length} |\n`
-          body += `| 🗑️ Deleted | ${listicleResults.deleted.length} |\n\n`
+          body += `| 🗑️ Deleted | ${listicleIntentionalDeletes.length} |\n`
+          if (listicleRestoredCount > 0) {
+            body += `| 🔄 Restored | ${listicleRestoredCount} |\n`
+          }
+          if (listicleReconciledDeletes.length > 0) {
+            body += `| 🧹 Cleaned up | ${listicleReconciledDeletes.length} |\n`
+          }
+          body += `\n`
 
           const allListicles = [
             ...listicleResults.created.map((item) => ({ ...item, operation: 'Created' })),
             ...listicleResults.updated.map((item) => ({ ...item, operation: 'Updated' })),
-            ...listicleResults.deleted.map((item) => ({ ...item, operation: 'Deleted' })),
+            ...listicleResults.deleted
+              .filter((d) => !d.reconciled)
+              .map((item) => ({ ...item, operation: 'Deleted' })),
+            ...(listicleResults.restored || []).map((item) => ({ ...item, operation: 'Restored' })),
+            ...listicleResults.deleted
+              .filter((d) => d.reconciled)
+              .map((item) => ({ ...item, operation: 'Cleaned up' })),
           ]
 
           if (allListicles.length > 0) {

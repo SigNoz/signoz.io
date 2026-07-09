@@ -83,6 +83,7 @@ function uniqueStrings(arr) {
   return [...new Set(arr.filter(Boolean))]
 }
 
+const RECONCILE_STAGING = process.env.RECONCILE_STAGING === 'true'
 const SIDENAV_CHANGED = process.env.SIDENAV_CHANGED === 'true'
 
 const LISTICLES_CHANGED = process.env.LISTICLES_CHANGED === 'true'
@@ -129,6 +130,31 @@ function buildPayload() {
 
   const hasAssetChanges = CHANGED_ASSETS.length > 0
   const hasCmsPaths = cmsUrls.length > 0
+
+  // Check for reconciled entries — requires full revalidation
+  if (RECONCILE_STAGING) {
+    try {
+      const syncResultsPath = path.join(process.cwd(), 'sync-results.json')
+      const listicleResultsPath = path.join(process.cwd(), 'listicle-sync-results.json')
+      let hasReconciled = false
+
+      if (fs.existsSync(syncResultsPath)) {
+        const syncResults = JSON.parse(fs.readFileSync(syncResultsPath, 'utf8'))
+        if (syncResults.hasReconciledEntries) hasReconciled = true
+      }
+      if (!hasReconciled && fs.existsSync(listicleResultsPath)) {
+        const listicleResults = JSON.parse(fs.readFileSync(listicleResultsPath, 'utf8'))
+        if (listicleResults.hasReconciledEntries) hasReconciled = true
+      }
+
+      if (hasReconciled) {
+        console.log('📣 Reconciled entries detected: using full revalidation.')
+        return { mode: 'all', reason: 'reconciled-staging' }
+      }
+    } catch {
+      // If we can't read results, fall through to normal logic
+    }
+  }
 
   // Sidenav changes affect every docs page — use full revalidation
   if (SIDENAV_CHANGED) {
