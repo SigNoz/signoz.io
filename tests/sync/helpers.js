@@ -19,6 +19,7 @@ function loadScenario(name) {
     relationState: load('relation-state.json') || {},
     expectedOps: load('expected-ops.json') || {},
     expectedAssetOps: load('expected-asset-ops.json') || null,
+    previousManifest: load('previous-manifest.json') || null,
   }
 }
 
@@ -157,4 +158,34 @@ function assertOpsMatch(actual, expected) {
   }
 }
 
-module.exports = { loadScenario, createMockCmsAdapter, createMockAssetAdapter, assertOpsMatch }
+function createMockGitReader(baseFiles = {}) {
+  return {
+    readFileFromGitRef(filePath, gitRef) {
+      return baseFiles[filePath] || null
+    },
+    readBaseFileContent(filePath) {
+      return baseFiles[filePath] || null
+    },
+    readBaseFileForContentEntry(entry) {
+      if (entry.filePath && baseFiles[entry.filePath]) {
+        return baseFiles[entry.filePath]
+      }
+      if (entry.folderName && entry.pathField) {
+        const constructed = `data/${entry.folderName}${entry.pathField}.mdx`
+        return baseFiles[constructed] || null
+      }
+      return null
+    },
+    getBaseRefCandidates() {
+      return ['origin/main', 'main']
+    },
+  }
+}
+
+module.exports = {
+  loadScenario,
+  createMockCmsAdapter,
+  createMockAssetAdapter,
+  createMockGitReader,
+  assertOpsMatch,
+}
