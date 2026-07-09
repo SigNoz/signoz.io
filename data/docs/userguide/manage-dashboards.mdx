@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-09
 description: Learn how to create, edit, delete, and manage dashboards and panels within SigNoz.
 title: Manage Dashboards in SigNoz
 doc_type: howto
@@ -48,6 +48,10 @@ From the Dashboards page, you can:
 
 7. When you've finished, select the **Save Layout** button.
 
+<Admonition type="info">
+In the updated dashboards experience, the blank-dashboard creation view shows a small icon picker to the left of the title input, so you can choose a dashboard icon at creation time. When you edit the dashboard title inline, clicking anywhere outside the title field saves the change, in addition to the checkmark button. These enhancements may not be available on every deployment yet.
+</Admonition>
+
 ## Dashboard Options Menu
 
 Click the **...** (three-dot) menu at the top of any dashboard to access the following options:
@@ -90,6 +94,23 @@ To change the position of a panel:
 1. From the sidebar, choose **Dashboard**.
 2. Find the dashboard you wish to remove. In the **Action** column, select the **Delete** button.
 
+## Manage Dashboard Tags
+
+<Admonition type="info">
+The inline tag editor described below is part of the updated dashboards experience and may not be available on every deployment yet.
+</Admonition>
+
+Tags help you group and filter dashboards on the Dashboards list page. You can edit a dashboard's tags without opening the dashboard:
+
+1. On the Dashboards list, open the action menu on the dashboard's row.
+2. Select **Add Tags** (if the dashboard has no tags) or **Edit Tags** (if it already has tags).
+3. In the modal, enter tags as `key:value` pairs.
+4. Save with the **Save** button or by pressing **Cmd/Ctrl + Enter**.
+
+Tags whose key and value are identical display both sides, so a tag entered as `env:env` renders as `env:env` rather than a bare `env`.
+
+The tag action is disabled on locked dashboards. Unlock the dashboard first to edit its tags.
+
 ## Add a Panel to a Dashboard
 
 SigNoz supports seven panel types: Time Series, Number, Table, List, Bar, Pie, and Histogram. To add a panel to a dashboard, follow the steps below:
@@ -123,7 +144,12 @@ Note the following about panels:
 - The total number of queries and functions you can plot on a single panel must be less or equal to ten.
 - Every time you add or modify a function or formula, you must select the **Stage & Run Query** button. If you do not select this button, the panel will not be updated and your changes will be lost whenever you move to a different tab.
 - You can hide or unhide a function or formula by selecting the eye icon at its left and then selecting the **Stage & Run Query** button.
+- When the query body is long enough to scroll, the query-type tabs and the **Run Query** button stay pinned at the top of the editor so they remain reachable while you scroll through the query.
 - When you install SigNoz, only the data provided by the Hostmetric receiver is available. To enable more metric receivers, see the [Send Metrics to SigNoz](https://signoz.io/docs/metrics-management/send-metrics/) section.
+
+<Admonition type="info">
+When a panel uses a fixed **Panel Time Preference** (for example, `Last 6 hours`) instead of `Global Time`, it ignores the dashboard-wide time range. If such a panel returns no data, its empty state shows only a **Retry** button and hides **Extend time range**, because the panel's fixed window cannot be widened from the dashboard time picker.
+</Admonition>
 
 ## Update a Panel
 
@@ -131,6 +157,18 @@ Note the following about panels:
 2. Find the dashboard in which you created the panel you wish to update, and then select the pencil icon located at the top right corner of your panel.
 3. Make the changes.
 4. When you've finished, select the **Save** button.
+
+## Organize Panels into Sections
+
+Sections group related panels into collapsible blocks within a dashboard. Add a section from the **New section** option in the [dashboard options menu](#dashboard-options-menu).
+
+To move a panel between sections:
+
+1. Open the panel's action menu (the three-dot menu on the panel header).
+2. Hover **Move to section**.
+3. Choose the target section from the submenu. Select **Dashboard (root)**, the first entry, to move the panel out of any section back to the top level of the dashboard.
+
+The **Move to section** submenu is hidden when there is nowhere to move the panel (for example, when the dashboard has no sections and the panel is already at the root).
 
 ## Next Steps
 
