@@ -9,6 +9,7 @@ function parseArgs(argv) {
     args: argv || process.argv.slice(2),
     options: {
       'changed-files': { type: 'string' },
+      'restore-files': { type: 'string' },
       'deleted-files': { type: 'string' },
       'changed-assets': { type: 'string' },
       'sidenav-changed': { type: 'boolean', default: false },
@@ -21,6 +22,7 @@ function parseArgs(argv) {
   })
   return {
     changedFilesPath: values['changed-files'],
+    restoreFilesPath: values['restore-files'],
     deletedFilesPath: values['deleted-files'],
     changedAssetsPath: values['changed-assets'],
     sidenavChanged: values['sidenav-changed'],
@@ -57,6 +59,7 @@ function loadFileList(cliPath, envPathName, envName) {
 const cliArgs = parseArgs()
 
 const CHANGED_FILES = loadFileList(cliArgs.changedFilesPath, 'CHANGED_FILES_PATH', 'CHANGED_FILES')
+const RESTORE_FILES = loadFileList(cliArgs.restoreFilesPath, 'RESTORE_FILES_PATH', 'RESTORE_FILES')
 const DELETED_FILES = loadFileList(cliArgs.deletedFilesPath, 'DELETED_FILES_PATH', 'DELETED_FILES')
 const CHANGED_ASSETS = loadFileList(
   cliArgs.changedAssetsPath,
@@ -167,16 +170,25 @@ function findDocsPathsForListicle(listicleKey) {
   return results
 }
 
-function buildPayload() {
-  const allContentFiles = [...CHANGED_FILES, ...DELETED_FILES]
+function buildPayload({
+  changedFiles = CHANGED_FILES,
+  restoreFiles = RESTORE_FILES,
+  deletedFiles = DELETED_FILES,
+  changedAssets = CHANGED_ASSETS,
+  sidenavChanged = SIDENAV_CHANGED,
+  listiclesChanged = LISTICLES_CHANGED,
+  changedListicles = CHANGED_LISTICLES_RAW,
+  deletedListicles = DELETED_LISTICLES_RAW,
+} = {}) {
+  const allContentFiles = [...changedFiles, ...restoreFiles, ...deletedFiles]
 
   const cmsUrls = uniqueStrings(allContentFiles.map(filePathToCmsUrl))
 
-  const hasAssetChanges = CHANGED_ASSETS.length > 0
+  const hasAssetChanges = changedAssets.length > 0
   const hasCmsPaths = cmsUrls.length > 0
 
   // Sidenav changes affect every docs page — use full revalidation
-  if (SIDENAV_CHANGED) {
+  if (sidenavChanged) {
     console.log('📣 Sidenav changed: using full revalidation (sidebar appears on every docs page).')
     return { mode: 'all', reason: 'sidenav-changed' }
   }
@@ -184,8 +196,8 @@ function buildPayload() {
   // Collect listicle-related paths and tags
   const listiclePaths = []
   const listicleTags = []
-  const allListicleChanges = [...CHANGED_LISTICLES_RAW, ...DELETED_LISTICLES_RAW]
-  if (LISTICLES_CHANGED && allListicleChanges.length > 0) {
+  const allListicleChanges = [...changedListicles, ...deletedListicles]
+  if (listiclesChanged && allListicleChanges.length > 0) {
     for (const file of allListicleChanges) {
       const key = listicleFileToKey(file)
       listicleTags.push(`listicle-${key}`)
@@ -302,4 +314,4 @@ if (require.main === module) {
   })
 }
 
-module.exports = { parseArgs, readJsonFile, loadFileList }
+module.exports = { buildPayload, filePathToCmsUrl, parseArgs, readJsonFile, loadFileList }

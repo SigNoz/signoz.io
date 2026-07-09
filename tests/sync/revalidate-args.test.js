@@ -4,13 +4,20 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 
-const { parseArgs, readJsonFile, loadFileList } = require('../../scripts/revalidate-after-cms-sync')
+const {
+  buildPayload,
+  parseArgs,
+  readJsonFile,
+  loadFileList,
+} = require('../../scripts/revalidate-after-cms-sync')
 
 describe('parseArgs', () => {
   it('parses all CLI arguments', () => {
     const result = parseArgs([
       '--changed-files',
       '/tmp/changed.json',
+      '--restore-files',
+      '/tmp/restore.json',
       '--deleted-files',
       '/tmp/deleted.json',
       '--changed-assets',
@@ -25,6 +32,7 @@ describe('parseArgs', () => {
       '["blog","docs"]',
     ])
     assert.equal(result.changedFilesPath, '/tmp/changed.json')
+    assert.equal(result.restoreFilesPath, '/tmp/restore.json')
     assert.equal(result.deletedFilesPath, '/tmp/deleted.json')
     assert.equal(result.changedAssetsPath, '/tmp/assets.json')
     assert.equal(result.sidenavChanged, true)
@@ -37,6 +45,7 @@ describe('parseArgs', () => {
   it('returns undefined/false for missing arguments', () => {
     const result = parseArgs([])
     assert.equal(result.changedFilesPath, undefined)
+    assert.equal(result.restoreFilesPath, undefined)
     assert.equal(result.deletedFilesPath, undefined)
     assert.equal(result.sidenavChanged, false)
     assert.equal(result.listiclesChanged, false)
@@ -47,6 +56,42 @@ describe('parseArgs', () => {
     const result = parseArgs(['--sidenav-changed'])
     assert.equal(result.sidenavChanged, true)
     assert.equal(result.listiclesChanged, false)
+  })
+})
+
+describe('buildPayload', () => {
+  it('includes restore files when building selective revalidation paths', () => {
+    const result = buildPayload({
+      changedFiles: [],
+      restoreFiles: ['data/blog/restored-post.mdx'],
+      deletedFiles: [],
+      changedAssets: [],
+      sidenavChanged: false,
+      listiclesChanged: false,
+      changedListicles: [],
+      deletedListicles: [],
+    })
+
+    assert.equal(result.mode, 'selective')
+    assert.deepEqual(result.paths, ['/blog/restored-post'])
+    assert.deepEqual(result.tags, ['blogs-list'])
+  })
+
+  it('includes deleted staging paths when building selective revalidation paths', () => {
+    const result = buildPayload({
+      changedFiles: [],
+      restoreFiles: [],
+      deletedFiles: ['data/docs/temp-page.mdx'],
+      changedAssets: [],
+      sidenavChanged: false,
+      listiclesChanged: false,
+      changedListicles: [],
+      deletedListicles: [],
+    })
+
+    assert.equal(result.mode, 'selective')
+    assert.deepEqual(result.paths, ['/docs/temp-page'])
+    assert.deepEqual(result.tags, ['docs-list'])
   })
 })
 
