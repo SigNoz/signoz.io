@@ -16,6 +16,8 @@ function buildTestConfig(scenario, fixtureDir, overrides = {}) {
     cmsApiToken: 'mock-token',
     syncFolders: ['blog', 'docs', 'guides', 'comparisons', 'faqs', 'opentelemetry', 'case-study'],
     changedFiles: scenario.changedFiles,
+    restoreFiles: [],
+    restoreRef: 'origin/main',
     deletedFiles: scenario.deletedFiles || [],
     changedAssets: [],
     listiclesChanged: false,
@@ -128,6 +130,53 @@ test('engine: blog-update scenario — verifies update payload and documentId', 
     assert.equal(payload.title, 'Updated Blog Post')
     assert.equal(payload.deployment_status, 'draft')
     assert.ok(payload.content.includes('Updated Content'))
+  } finally {
+    process.chdir(origCwd)
+  }
+})
+
+test('engine: restore file uses restore ref content', async () => {
+  const scenario = loadScenario('blog-update')
+  const fixtureDir = scenario.dir
+
+  const origCwd = process.cwd()
+  process.chdir(path.join(fixtureDir, 'input'))
+
+  try {
+    const mockCms = createMockCmsAdapter(scenario.cmsState, scenario.relationState)
+    const mockAssets = createMockAssetAdapter({})
+    const restoreContent = `---
+title: Main Blog Post
+description: Main description
+date: 2024-01-10
+authors: [ankit]
+---
+
+# Main Content
+
+This is the main branch version.
+`
+    const config = buildTestConfig(scenario, fixtureDir, {
+      changedFiles: [],
+      restoreFiles: ['data/blog/existing-post.mdx'],
+      restoreRef: 'origin/main',
+      restoreFileReader(ref, filePath) {
+        assert.equal(ref, 'origin/main')
+        assert.equal(filePath, 'data/blog/existing-post.mdx')
+        return restoreContent
+      },
+    })
+
+    const engine = createSyncEngine({ config, cmsAdapter: mockCms, assetAdapter: mockAssets })
+    const { results, exitCode } = await engine.run()
+
+    assert.equal(exitCode, 0)
+    assert.equal(results.updated.length, 1)
+    assertOpsMatch(mockCms.ops, { creates: [], updates: [{ endpoint: 'blogs' }], deletes: [] })
+
+    const payload = mockCms.ops.updates[0].data
+    assert.equal(payload.title, 'Main Blog Post')
+    assert.ok(payload.content.includes('Main Content'))
   } finally {
     process.chdir(origCwd)
   }

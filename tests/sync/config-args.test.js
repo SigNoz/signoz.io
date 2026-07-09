@@ -11,6 +11,8 @@ describe('config parseArgs', () => {
     const result = parseArgs([
       '--changed-files',
       '/tmp/changed.json',
+      '--restore-files',
+      '/tmp/restore.json',
       '--deleted-files',
       '/tmp/deleted.json',
       '--changed-assets',
@@ -25,8 +27,11 @@ describe('config parseArgs', () => {
       '["blog","docs"]',
       '--deployment-status',
       'staging',
+      '--restore-ref',
+      'origin/main',
     ])
     assert.equal(result.changedFilesPath, '/tmp/changed.json')
+    assert.equal(result.restoreFilesPath, '/tmp/restore.json')
     assert.equal(result.deletedFilesPath, '/tmp/deleted.json')
     assert.equal(result.changedAssetsPath, '/tmp/assets.json')
     assert.equal(result.sidenavChanged, true)
@@ -35,11 +40,13 @@ describe('config parseArgs', () => {
     assert.equal(result.deletedListiclesPath, '/tmp/del-listicles.json')
     assert.equal(result.syncFolders, '["blog","docs"]')
     assert.equal(result.deploymentStatus, 'staging')
+    assert.equal(result.restoreRef, 'origin/main')
   })
 
   it('returns undefined/false for missing arguments', () => {
     const result = parseArgs([])
     assert.equal(result.changedFilesPath, undefined)
+    assert.equal(result.restoreFilesPath, undefined)
     assert.equal(result.sidenavChanged, false)
     assert.equal(result.deploymentStatus, undefined)
   })
@@ -118,6 +125,25 @@ describe('buildConfig with CLI args', () => {
     })
     assert.equal(config.deploymentStatus, 'staging')
     assert.equal(config.cmsApiUrl, 'http://stg')
+  })
+
+  it('CLI --restore-files and --restore-ref override env', () => {
+    const cliFile = path.join(tmpDir, 'restore-cli.json')
+    const envFile = path.join(tmpDir, 'restore-env.json')
+    fs.writeFileSync(cliFile, '["data/blog/from-main.mdx"]')
+    fs.writeFileSync(envFile, '["data/blog/from-env.mdx"]')
+
+    const config = buildConfig({
+      env: {
+        RESTORE_FILES_PATH: envFile,
+        RESTORE_REF: 'origin/env',
+        CMS_API_URL: 'http://test',
+        CMS_API_TOKEN: 'tok',
+      },
+      argv: ['--restore-files', cliFile, '--restore-ref', 'origin/main'],
+    })
+    assert.deepEqual(config.restoreFiles, ['data/blog/from-main.mdx'])
+    assert.equal(config.restoreRef, 'origin/main')
   })
 
   it('CLI --sidenav-changed flag sets sidenavChanged', () => {
