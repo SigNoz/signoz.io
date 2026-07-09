@@ -1,6 +1,8 @@
 ---
 title: Sending and Filtering Python Logs with OpenTelemetry
-date: 2024-08-07
+meta_title: "Send and Filter Python Logs with OpenTelemetry"
+published_date: 2024-05-15
+updated_date: 2026-07-08
 tags: [guides, OpenTelemetry, Python]
 authors: [nicamellifera]
 image: /img/blog/2023/08/python-logs.jpg
@@ -35,7 +37,7 @@ Critically, while logs have often been considered a data stream separate from tr
 
 ## I. Instrument your python application
 
-While you don't have to report any traces or metrics to be able to send logs, you will need to add OpenTelemetry dependencies to your project, and run the OpenTelemetry agent.
+While you don't have to report any traces or metrics to be able to send logs, you will need to add OpenTelemetry dependencies to your project, and run the OpenTelemetry agent. The standard setup shown below follows [OpenTelemetry logging in Python](https://signoz.io/guides/logging-in-python/)'s steps before the collector stage.
 
 Logging can be sent from an application that has been [automatically instrumented](https://opentelemetry.io/docs/instrumentation/python/automatic/) with the `opentelemetry-bootstrap` command, and there is support for most major Python frameworks to send extensive tracing and metric data without any modification of your code. However, automatic instrumentation will not send any logs, so you'll still need to add code to send logs, or export logs directly to the collector as described in section II.
 
@@ -156,7 +158,13 @@ In my case, my logging was getting clogged up by docker containers I was running
 
 ## IV: Transform and filter log attributes
 
-With the unneeded logs filtered out, we can start transforming and filtering our logs data. This is done by transforming data, using the [OpenTelemetry Transformation Language (OTTL)](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/ottl/README.md). It’s not necessary or practical to learn all the ins and outs of this language, but let’s start with a simple bit of processing that adds some useful attributes.
+With the unneeded logs filtered out, we can start transforming and filtering our logs data. This is done by transforming data using the [OpenTelemetry Transformation Language (OTTL)](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/ottl/README.md). It’s not necessary or practical to learn all the ins and outs of this language, but let’s start with a simple bit of processing that adds some useful attributes.
+
+<KeyPointCallout>
+
+The transform steps below are tailored for a Python pipeline, but they mirror our general log parsing strategy. For a more comprehensive look at using OTTL across different languages, check out our guide on [parsing logs with the OpenTelemetry Collector](https://signoz.io/blog/parsing-logs-with-the-opentelemetry-collector/).
+
+</KeyPointCallout>
 
 ### Transform attributes
 
