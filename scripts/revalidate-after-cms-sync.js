@@ -1,38 +1,64 @@
-#!/usr/bin/env node
-/**
- * After CMS sync, calls /api/revalidate with selective paths + tags, or full revalidation as fallback.
- * Mirrors path logic from scripts/sync-content-to-strapi.js (generatePathField + sync folders).
- */
-
 const fs = require('fs')
 const path = require('path')
 
 const BULK_THRESHOLD = Number(process.env.REVALIDATE_BULK_THRESHOLD || '25')
 
-function getAssetsListFromEnv(envName, pathEnvName) {
-  if (process.env[pathEnvName] && fs.existsSync(process.env[pathEnvName])) {
-    try {
-      const content = fs.readFileSync(process.env[pathEnvName], 'utf8')
-      if (!content || !content.trim()) return []
-      return JSON.parse(content)
-    } catch (e) {
-      console.warn(`⚠️ Failed to read ${pathEnvName}: ${e.message}`)
-      return []
-    }
+function parseArgs(argv) {
+  const args = argv || process.argv.slice(2)
+  function getArg(name) {
+    const idx = args.indexOf(name)
+    return idx !== -1 && idx + 1 < args.length ? args[idx + 1] : null
+  }
+  function hasFlag(name) {
+    return args.includes(name)
+  }
+  return {
+    changedFilesPath: getArg('--changed-files'),
+    deletedFilesPath: getArg('--deleted-files'),
+    changedAssetsPath: getArg('--changed-assets'),
+    sidenavChanged: hasFlag('--sidenav-changed'),
+    listiclesChanged: hasFlag('--listicles-changed'),
+    changedListiclesPath: getArg('--changed-listicles'),
+    deletedListiclesPath: getArg('--deleted-listicles'),
+    syncFolders: getArg('--sync-folders'),
+  }
+}
+
+function readJsonFile(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8')
+    if (!content || !content.trim()) return []
+    return JSON.parse(content)
+  } catch (e) {
+    console.warn(`Warning: Failed to read ${filePath}: ${e.message}`)
+    return []
+  }
+}
+
+function loadFileList(cliPath, envPathName, envName) {
+  if (cliPath) return readJsonFile(cliPath)
+  if (process.env[envPathName] && fs.existsSync(process.env[envPathName])) {
+    return readJsonFile(process.env[envPathName])
   }
   return JSON.parse(process.env[envName] || '[]')
 }
 
-const CHANGED_FILES = getAssetsListFromEnv('CHANGED_FILES', 'CHANGED_FILES_PATH')
-const DELETED_FILES = getAssetsListFromEnv('DELETED_FILES', 'DELETED_FILES_PATH')
-const CHANGED_ASSETS = getAssetsListFromEnv('CHANGED_ASSETS', 'CHANGED_ASSETS_PATH')
+const cliArgs = parseArgs()
+
+const CHANGED_FILES = loadFileList(cliArgs.changedFilesPath, 'CHANGED_FILES_PATH', 'CHANGED_FILES')
+const DELETED_FILES = loadFileList(cliArgs.deletedFilesPath, 'DELETED_FILES_PATH', 'DELETED_FILES')
+const CHANGED_ASSETS = loadFileList(
+  cliArgs.changedAssetsPath,
+  'CHANGED_ASSETS_PATH',
+  'CHANGED_ASSETS'
+)
 
 let SYNC_FOLDERS
 try {
-  SYNC_FOLDERS = JSON.parse(
-    process.env.SYNC_FOLDERS ||
-      '["faqs","case-study","opentelemetry","comparisons","guides","blog","docs"]'
-  )
+  const raw = cliArgs.syncFolders || process.env.SYNC_FOLDERS
+  SYNC_FOLDERS = raw
+    ? JSON.parse(raw)
+    : ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog', 'docs']
 } catch {
   SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog', 'docs']
 }
@@ -83,11 +109,19 @@ function uniqueStrings(arr) {
   return [...new Set(arr.filter(Boolean))]
 }
 
-const SIDENAV_CHANGED = process.env.SIDENAV_CHANGED === 'true'
+const SIDENAV_CHANGED = cliArgs.sidenavChanged || process.env.SIDENAV_CHANGED === 'true'
 
-const LISTICLES_CHANGED = process.env.LISTICLES_CHANGED === 'true'
-const CHANGED_LISTICLES_RAW = getAssetsListFromEnv('CHANGED_LISTICLES', 'CHANGED_LISTICLES_PATH')
-const DELETED_LISTICLES_RAW = getAssetsListFromEnv('DELETED_LISTICLES', 'DELETED_LISTICLES_PATH')
+const LISTICLES_CHANGED = cliArgs.listiclesChanged || process.env.LISTICLES_CHANGED === 'true'
+const CHANGED_LISTICLES_RAW = loadFileList(
+  cliArgs.changedListiclesPath,
+  'CHANGED_LISTICLES_PATH',
+  'CHANGED_LISTICLES'
+)
+const DELETED_LISTICLES_RAW = loadFileList(
+  cliArgs.deletedListiclesPath,
+  'DELETED_LISTICLES_PATH',
+  'DELETED_LISTICLES'
+)
 
 const DOCS_DIR = path.resolve(__dirname, '..', 'data', 'docs')
 
@@ -250,7 +284,11 @@ async function main() {
   console.log('✅ Revalidation response:', JSON.stringify(json, null, 2))
 }
 
-main().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}
+
+module.exports = { parseArgs, readJsonFile, loadFileList }
