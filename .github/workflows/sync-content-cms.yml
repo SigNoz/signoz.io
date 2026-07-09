@@ -41,24 +41,76 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Detect Changed Files
-        id: detect
+      # Pin to SHA for supply-chain safety — do not use mutable tags
+      - name: Get Changed Content Files
+        id: changed-content
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
+        with:
+          files: |
+            data/**/*.mdx
+            data/**/*.md
+          json: true
+          escape_json: false
+          write_output_files: true
+
+      - name: Rename Content Output Files
         run: |
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            BASE_SHA="${{ github.event.before }}"
-            HEAD_SHA="${{ github.sha }}"
-            if [[ "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
-              BASE_SHA=""
-            fi
+          if [ -f .github/outputs/all_changed_files.json ]; then
+            mv .github/outputs/all_changed_files.json .github/outputs/content_changed_files.json
           else
-            BASE_SHA=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
-            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            echo "[]" > .github/outputs/content_changed_files.json
+          fi
+          if [ -f .github/outputs/deleted_files.json ]; then
+            mv .github/outputs/deleted_files.json .github/outputs/content_deleted_files.json
+          else
+            echo "[]" > .github/outputs/content_deleted_files.json
           fi
 
-          node scripts/detect-changed-files.js \
-            --base-sha "$BASE_SHA" \
-            --head-sha "$HEAD_SHA" \
-            --output-dir .github/outputs
+      - name: Get Changed Asset Files
+        id: changed-assets
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
+        with:
+          files: |
+            data-assets/**
+          json: true
+          escape_json: false
+          write_output_files: true
+
+      - name: Rename Asset Output Files
+        run: |
+          if [ -f .github/outputs/all_changed_files.json ]; then
+            mv .github/outputs/all_changed_files.json .github/outputs/assets_changed_files.json
+          else
+            echo "[]" > .github/outputs/assets_changed_files.json
+          fi
+
+      - name: Get Changed Sidenav Files
+        id: changed-sidenav
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
+        with:
+          files: data/docs-side-nav/**
+
+      - name: Get Changed Listicle Files
+        id: changed-listicles
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
+        with:
+          files: constants/listicles/**/*.json
+          json: true
+          escape_json: false
+          write_output_files: true
+
+      - name: Rename Listicle Output Files
+        run: |
+          if [ -f .github/outputs/all_changed_files.json ]; then
+            mv .github/outputs/all_changed_files.json .github/outputs/listicles_changed_files.json
+          else
+            echo "[]" > .github/outputs/listicles_changed_files.json
+          fi
+          if [ -f .github/outputs/deleted_files.json ]; then
+            mv .github/outputs/deleted_files.json .github/outputs/listicles_deleted_files.json
+          else
+            echo "[]" > .github/outputs/listicles_deleted_files.json
+          fi
 
       - name: Determine Sync Status
         id: check-sync
@@ -72,11 +124,11 @@ jobs:
             --event-name "${{ github.event_name }}" \
             --ref "${{ github.ref }}" \
             $LABEL_FLAG \
-            --any-content-changed "${{ steps.detect.outputs.any_content_changed }}" \
-            --any-content-deleted "${{ steps.detect.outputs.any_content_deleted }}" \
-            --any-assets-changed "${{ steps.detect.outputs.any_assets_changed }}" \
-            --sidenav-changed "${{ steps.detect.outputs.sidenav_changed }}" \
-            --any-listicles-changed "${{ steps.detect.outputs.any_listicles_changed }}"
+            --any-content-changed "${{ steps.changed-content.outputs.any_changed }}" \
+            --any-content-deleted "${{ steps.changed-content.outputs.any_deleted }}" \
+            --any-assets-changed "${{ steps.changed-assets.outputs.any_changed }}" \
+            --sidenav-changed "${{ steps.changed-sidenav.outputs.any_changed }}" \
+            --any-listicles-changed "${{ steps.changed-listicles.outputs.any_changed }}"
 
       - name: Install Dependencies
         if: steps.check-sync.outputs.skip != 'true'
@@ -112,6 +164,8 @@ jobs:
           echo "BASE_URL=$_BASE_URL" >> $GITHUB_ENV
           echo "REVALIDATE_SECRET=$_REVALIDATE" >> $GITHUB_ENV
 
+      # Staging secrets only exposed to same-repo PRs with 'staging' label.
+      # Fork PRs use trigger 'pull_request' (not pull_request_target), so secrets are empty.
       - name: Set Staging Environment Variables
         if: steps.check-sync.outputs.skip != 'true' && github.event_name == 'pull_request'
         env:
@@ -142,8 +196,8 @@ jobs:
           CHANGED_FILES_PATH: .github/outputs/content_changed_files.json
           DELETED_FILES_PATH: .github/outputs/content_deleted_files.json
           CHANGED_ASSETS_PATH: .github/outputs/assets_changed_files.json
-          SIDENAV_CHANGED: ${{ steps.detect.outputs.sidenav_changed }}
-          LISTICLES_CHANGED: ${{ steps.detect.outputs.any_listicles_changed }}
+          SIDENAV_CHANGED: ${{ steps.changed-sidenav.outputs.any_changed }}
+          LISTICLES_CHANGED: ${{ steps.changed-listicles.outputs.any_changed }}
           CHANGED_LISTICLES_PATH: .github/outputs/listicles_changed_files.json
           DELETED_LISTICLES_PATH: .github/outputs/listicles_deleted_files.json
           CMS_BATCH_SIZE: '10'
@@ -156,12 +210,12 @@ jobs:
         if: steps.check-sync.outputs.skip != 'true' && success()
         run: |
           SIDENAV_FLAG=""
-          if [[ "${{ steps.detect.outputs.sidenav_changed }}" == "true" ]]; then
+          if [[ "${{ steps.changed-sidenav.outputs.any_changed }}" == "true" ]]; then
             SIDENAV_FLAG="--sidenav-changed"
           fi
 
           LISTICLES_FLAG=""
-          if [[ "${{ steps.detect.outputs.any_listicles_changed }}" == "true" ]]; then
+          if [[ "${{ steps.changed-listicles.outputs.any_changed }}" == "true" ]]; then
             LISTICLES_FLAG="--listicles-changed"
           fi
 

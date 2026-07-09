@@ -34,13 +34,13 @@ describe('parseArgs', () => {
     assert.equal(result.syncFolders, '["blog","docs"]')
   })
 
-  it('returns null/false for missing arguments', () => {
+  it('returns undefined/false for missing arguments', () => {
     const result = parseArgs([])
-    assert.equal(result.changedFilesPath, null)
-    assert.equal(result.deletedFilesPath, null)
+    assert.equal(result.changedFilesPath, undefined)
+    assert.equal(result.deletedFilesPath, undefined)
     assert.equal(result.sidenavChanged, false)
     assert.equal(result.listiclesChanged, false)
-    assert.equal(result.syncFolders, null)
+    assert.equal(result.syncFolders, undefined)
   })
 
   it('handles flag without value correctly', () => {

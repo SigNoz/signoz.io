@@ -37,11 +37,11 @@ describe('config parseArgs', () => {
     assert.equal(result.deploymentStatus, 'staging')
   })
 
-  it('returns null/false for missing arguments', () => {
+  it('returns undefined/false for missing arguments', () => {
     const result = parseArgs([])
-    assert.equal(result.changedFilesPath, null)
+    assert.equal(result.changedFilesPath, undefined)
     assert.equal(result.sidenavChanged, false)
-    assert.equal(result.deploymentStatus, null)
+    assert.equal(result.deploymentStatus, undefined)
   })
 })
 

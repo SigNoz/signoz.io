@@ -1,26 +1,33 @@
 const fs = require('fs')
 const path = require('path')
+const { parseArgs: nodeParseArgs } = require('node:util')
 
 const BULK_THRESHOLD = Number(process.env.REVALIDATE_BULK_THRESHOLD || '25')
 
 function parseArgs(argv) {
-  const args = argv || process.argv.slice(2)
-  function getArg(name) {
-    const idx = args.indexOf(name)
-    return idx !== -1 && idx + 1 < args.length ? args[idx + 1] : null
-  }
-  function hasFlag(name) {
-    return args.includes(name)
-  }
+  const { values } = nodeParseArgs({
+    args: argv || process.argv.slice(2),
+    options: {
+      'changed-files': { type: 'string' },
+      'deleted-files': { type: 'string' },
+      'changed-assets': { type: 'string' },
+      'sidenav-changed': { type: 'boolean', default: false },
+      'listicles-changed': { type: 'boolean', default: false },
+      'changed-listicles': { type: 'string' },
+      'deleted-listicles': { type: 'string' },
+      'sync-folders': { type: 'string' },
+    },
+    strict: false,
+  })
   return {
-    changedFilesPath: getArg('--changed-files'),
-    deletedFilesPath: getArg('--deleted-files'),
-    changedAssetsPath: getArg('--changed-assets'),
-    sidenavChanged: hasFlag('--sidenav-changed'),
-    listiclesChanged: hasFlag('--listicles-changed'),
-    changedListiclesPath: getArg('--changed-listicles'),
-    deletedListiclesPath: getArg('--deleted-listicles'),
-    syncFolders: getArg('--sync-folders'),
+    changedFilesPath: values['changed-files'],
+    deletedFilesPath: values['deleted-files'],
+    changedAssetsPath: values['changed-assets'],
+    sidenavChanged: values['sidenav-changed'],
+    listiclesChanged: values['listicles-changed'],
+    changedListiclesPath: values['changed-listicles'],
+    deletedListiclesPath: values['deleted-listicles'],
+    syncFolders: values['sync-folders'],
   }
 }
 
@@ -40,7 +47,11 @@ function loadFileList(cliPath, envPathName, envName) {
   if (process.env[envPathName] && fs.existsSync(process.env[envPathName])) {
     return readJsonFile(process.env[envPathName])
   }
-  return JSON.parse(process.env[envName] || '[]')
+  try {
+    return JSON.parse(process.env[envName] || '[]')
+  } catch {
+    return []
+  }
 }
 
 const cliArgs = parseArgs()
