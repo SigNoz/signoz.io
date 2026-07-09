@@ -41,29 +41,6 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Determine Deployment Status
-        id: deployment
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'staging') }}" == "true" ]]; then
-              echo "status=staging" >> $GITHUB_OUTPUT
-              echo "should_sync=true" >> $GITHUB_OUTPUT
-              echo "Deployment Status: staging"
-            else
-              echo "status=draft" >> $GITHUB_OUTPUT
-              echo "should_sync=false" >> $GITHUB_OUTPUT
-              echo "Sync skipped: PR does not have 'staging' label"
-            fi
-          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "status=live" >> $GITHUB_OUTPUT
-            echo "should_sync=true" >> $GITHUB_OUTPUT
-            echo "Deployment Status: live"
-          else
-            echo "status=draft" >> $GITHUB_OUTPUT
-            echo "should_sync=false" >> $GITHUB_OUTPUT
-            echo "Deployment Status: draft"
-          fi
-
       - name: Detect Changed Files
         id: detect
         run: |
@@ -83,26 +60,23 @@ jobs:
             --head-sha "$HEAD_SHA" \
             --output-dir .github/outputs
 
-      - name: Check if Sync is Needed
+      - name: Determine Sync Status
         id: check-sync
         run: |
-          SHOULD_SYNC="${{ steps.deployment.outputs.should_sync }}"
-          ANY_CHANGED="${{ steps.detect.outputs.any_content_changed }}"
-          ANY_DELETED="${{ steps.detect.outputs.any_content_deleted }}"
-          ANY_ASSETS="${{ steps.detect.outputs.any_assets_changed }}"
-          SIDENAV="${{ steps.detect.outputs.sidenav_changed }}"
-          LISTICLES="${{ steps.detect.outputs.any_listicles_changed }}"
-
-          if [[ "$SHOULD_SYNC" != "true" ]]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "Sync skipped: not enabled for this trigger"
-          elif [[ "$ANY_CHANGED" != "true" && "$ANY_DELETED" != "true" && "$ANY_ASSETS" != "true" && "$SIDENAV" != "true" && "$LISTICLES" != "true" ]]; then
-            echo "skip=true" >> $GITHUB_OUTPUT
-            echo "Sync skipped: no relevant file changes detected"
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
-            echo "Sync will proceed"
+          LABEL_FLAG=""
+          if [[ "${{ contains(github.event.pull_request.labels.*.name, 'staging') }}" == "true" ]]; then
+            LABEL_FLAG="--has-staging-label"
           fi
+
+          node scripts/cms-sync/determine-sync.js \
+            --event-name "${{ github.event_name }}" \
+            --ref "${{ github.ref }}" \
+            $LABEL_FLAG \
+            --any-content-changed "${{ steps.detect.outputs.any_content_changed }}" \
+            --any-content-deleted "${{ steps.detect.outputs.any_content_deleted }}" \
+            --any-assets-changed "${{ steps.detect.outputs.any_assets_changed }}" \
+            --sidenav-changed "${{ steps.detect.outputs.sidenav_changed }}" \
+            --any-listicles-changed "${{ steps.detect.outputs.any_listicles_changed }}"
 
       - name: Install Dependencies
         if: steps.check-sync.outputs.skip != 'true'
@@ -206,7 +180,7 @@ jobs:
         uses: actions/github-script@v7
         env:
           JOB_STATUS: ${{ job.status }}
-          DEPLOYMENT_STATUS: ${{ steps.deployment.outputs.status }}
+          DEPLOYMENT_STATUS: ${{ steps.check-sync.outputs.deployment_status }}
         with:
           script: |
             const script = require('${{ github.workspace }}/scripts/update-pr-comment.js');
@@ -217,7 +191,7 @@ jobs:
         run: |
           if [[ "${{ steps.check-sync.outputs.skip }}" == "true" ]]; then
             echo "Sync was skipped."
-            if [[ "${{ steps.deployment.outputs.should_sync }}" != "true" ]]; then
+            if [[ "${{ steps.check-sync.outputs.should_sync }}" != "true" ]]; then
               echo "Reason: PR does not have 'staging' label"
             else
               echo "Reason: No content or asset files changed or deleted"
