@@ -2,9 +2,12 @@
  * Usage:
  *   node scripts/cms-sync/determine-sync.js \
  *     --event-name push|pull_request \
+ *     --event-action opened|synchronize|closed \
  *     --ref refs/heads/main \
  *     --has-staging-label           (flag, present if PR has staging label)
+ *     --same-repo                   (flag, present for push or same-repo PRs)
  *     --any-content-changed true \
+ *     --any-content-restored false \
  *     --any-content-deleted false \
  *     --any-assets-changed false \
  *     --sidenav-changed false \
@@ -19,9 +22,12 @@ function parseArgs(argv) {
     args: argv || process.argv.slice(2),
     options: {
       'event-name': { type: 'string', default: '' },
+      'event-action': { type: 'string', default: '' },
       ref: { type: 'string', default: '' },
       'has-staging-label': { type: 'boolean', default: false },
+      'same-repo': { type: 'boolean', default: false },
       'any-content-changed': { type: 'string', default: 'false' },
+      'any-content-restored': { type: 'string', default: 'false' },
       'any-content-deleted': { type: 'string', default: 'false' },
       'any-assets-changed': { type: 'string', default: 'false' },
       'sidenav-changed': { type: 'string', default: 'false' },
@@ -31,9 +37,12 @@ function parseArgs(argv) {
   })
   return {
     eventName: values['event-name'],
+    eventAction: values['event-action'],
     ref: values.ref,
     hasLabel: values['has-staging-label'],
+    sameRepo: values['same-repo'],
     anyContentChanged: values['any-content-changed'] === 'true',
+    anyContentRestored: values['any-content-restored'] === 'true',
     anyContentDeleted: values['any-content-deleted'] === 'true',
     anyAssetsChanged: values['any-assets-changed'] === 'true',
     sidenavChanged: values['sidenav-changed'] === 'true',
@@ -41,23 +50,30 @@ function parseArgs(argv) {
   }
 }
 
-function determineDeployment({ eventName, ref, hasLabel }) {
+function determineDeployment({ eventName, eventAction, ref, hasLabel, sameRepo }) {
   if (eventName === 'pull_request') {
-    if (hasLabel) {
-      return { status: 'staging', shouldSync: true }
+    if (!sameRepo) {
+      return { status: 'draft', shouldSync: false, reason: 'fork-pr' }
     }
-    return { status: 'draft', shouldSync: false }
+    if (eventAction === 'closed') {
+      return { status: 'staging', shouldSync: true, reason: 'closed-pr-cleanup' }
+    }
+    if (hasLabel) {
+      return { status: 'staging', shouldSync: true, reason: 'staging-label' }
+    }
+    return { status: 'draft', shouldSync: false, reason: 'missing-staging-label' }
   }
   if (ref === 'refs/heads/main') {
-    return { status: 'live', shouldSync: true }
+    return { status: 'live', shouldSync: true, reason: 'main-push' }
   }
-  return { status: 'draft', shouldSync: false }
+  return { status: 'draft', shouldSync: false, reason: 'unsupported-ref' }
 }
 
 function shouldSkip(deployment, changes) {
   if (!deployment.shouldSync) return true
   const {
     anyContentChanged,
+    anyContentRestored,
     anyContentDeleted,
     anyAssetsChanged,
     sidenavChanged,
@@ -65,6 +81,7 @@ function shouldSkip(deployment, changes) {
   } = changes
   return (
     !anyContentChanged &&
+    !anyContentRestored &&
     !anyContentDeleted &&
     !anyAssetsChanged &&
     !sidenavChanged &&
@@ -80,6 +97,7 @@ function main() {
   const flags = {
     deployment_status: deployment.status,
     should_sync: deployment.shouldSync,
+    reason: deployment.reason,
     skip,
   }
 
