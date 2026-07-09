@@ -44,4 +44,15 @@ function detectOperationType(filePath, isDeleted = false, { existsSync = fs.exis
   return 'create_or_update'
 }
 
-module.exports = { getFolderName, generatePathField, parseMDXFile, detectOperationType }
+function parseMDXContent(filePath, fileContent) {
+  const { data: frontmatter, content } = matter(fileContent)
+  return { frontmatter, content }
+}
+
+module.exports = {
+  getFolderName,
+  generatePathField,
+  parseMDXFile,
+  parseMDXContent,
+  detectOperationType,
+}

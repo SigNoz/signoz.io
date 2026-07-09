@@ -35,6 +35,11 @@ function buildConfig({ env = process.env } = {}) {
   const sidenavChanged = env.SIDENAV_CHANGED === 'true'
   const sidenavJsonPath = path.resolve(__dirname, '..', '..', 'data', 'docs-side-nav', 'main.json')
 
+  const reconcileStaging = env.RECONCILE_STAGING === 'true'
+  const isPrClosed = env.IS_PR_CLOSED === 'true'
+  const syncManifestPath = env.SYNC_MANIFEST_PATH || null
+  const baseRef = env.BASE_REF || env.GITHUB_BASE_REF || 'main'
+
   return {
     deploymentStatus,
     cmsApiUrl,
@@ -49,6 +54,10 @@ function buildConfig({ env = process.env } = {}) {
     listiclesDir,
     sidenavChanged,
     sidenavJsonPath,
+    reconcileStaging,
+    isPrClosed,
+    syncManifestPath,
+    baseRef,
     batch: {
       size: parseInt(env.CMS_BATCH_SIZE || '10', 10),
       delayMs: parseInt(env.CMS_BATCH_DELAY_MS || '1000', 10),
