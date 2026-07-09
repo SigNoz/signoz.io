@@ -1,11 +1,14 @@
 const test = require('node:test')
 const assert = require('node:assert/strict')
+const fs = require('fs')
 const path = require('path')
+const os = require('os')
 const { createSyncEngine } = require('../../scripts/cms-sync/engine')
 const {
   loadScenario,
   createMockCmsAdapter,
   createMockAssetAdapter,
+  createMockGitReader,
   assertOpsMatch,
 } = require('./helpers')
 
@@ -27,6 +30,10 @@ function buildTestConfig(scenario, fixtureDir, overrides = {}) {
     batch: { size: 10, delayMs: 0 },
     retry: { maxRetries: 1, initialDelayMs: 0 },
     s3: { cdnUrl: 'https://cdn.test.com', bucketName: 'test', region: 'us-east-1' },
+    reconcileStaging: false,
+    isPrClosed: false,
+    syncManifestPath: null,
+    baseRef: 'main',
     ...overrides,
   }
 }
@@ -288,5 +295,177 @@ test('engine: sidenav-sync — Phase 3 sends sidenav items to CMS', async () => 
     assert.equal(sidenavOp.data.items[0].label, 'Getting Started')
   } finally {
     process.chdir(origCwd)
+  }
+})
+
+// --- New manifest/reconciliation scenarios ---
+
+test('engine: pr-close-cleanup scenario', async () => {
+  const scenario = loadScenario('pr-close-cleanup')
+  const fixtureDir = scenario.dir
+
+  // Write previous manifest to a temp file
+  const manifestPath = path.join(os.tmpdir(), `test-manifest-close-${Date.now()}.json`)
+  fs.writeFileSync(manifestPath, JSON.stringify(scenario.previousManifest))
+
+  const origCwd = process.cwd()
+  process.chdir(path.join(fixtureDir, 'input'))
+
+  try {
+    const mockCms = createMockCmsAdapter(scenario.cmsState, scenario.relationState)
+    const mockAssets = createMockAssetAdapter({})
+    const config = buildTestConfig(scenario, fixtureDir, {
+      isPrClosed: true,
+      reconcileStaging: true,
+      syncManifestPath: manifestPath,
+      deploymentStatus: 'staging',
+    })
+
+    const engine = createSyncEngine({ config, cmsAdapter: mockCms, assetAdapter: mockAssets })
+    const { results, exitCode } = await engine.run()
+
+    assert.equal(exitCode, 0)
+    // Created entry should be deleted (reconciled)
+    assert.equal(results.deleted.length, 1)
+    assert.equal(results.deleted[0].reconciled, true)
+    // Updated entry should be restored
+    assert.equal(results.restored.length, 1)
+    assert.equal(results.restored[0].reconciled, true)
+    // No normal creates/updates (PR close skips content processing)
+    assert.equal(results.created.length, 0)
+    assert.equal(results.updated.length, 0)
+  } finally {
+    process.chdir(origCwd)
+    try {
+      fs.unlinkSync(manifestPath)
+    } catch {}
+  }
+})
+
+test('engine: reconcile-stale-entries scenario', async () => {
+  const scenario = loadScenario('reconcile-stale-entries')
+  const fixtureDir = scenario.dir
+
+  const manifestPath = path.join(os.tmpdir(), `test-manifest-reconcile-${Date.now()}.json`)
+  fs.writeFileSync(manifestPath, JSON.stringify(scenario.previousManifest))
+
+  const origCwd = process.cwd()
+  process.chdir(path.join(fixtureDir, 'input'))
+
+  try {
+    const mockCms = createMockCmsAdapter(scenario.cmsState, scenario.relationState)
+    const mockAssets = createMockAssetAdapter({})
+    const config = buildTestConfig(scenario, fixtureDir, {
+      reconcileStaging: true,
+      syncManifestPath: manifestPath,
+      deploymentStatus: 'staging',
+    })
+
+    const engine = createSyncEngine({ config, cmsAdapter: mockCms, assetAdapter: mockAssets })
+    const { results, exitCode } = await engine.run()
+
+    assert.equal(exitCode, 0)
+    // Post A: still in changeset → updated normally
+    assert.equal(results.updated.length, 1)
+    assert.equal(results.updated[0].path, '/post-a')
+    // Post B: was created, now stale → reconcile-deleted
+    const reconciledDeletes = results.deleted.filter((d) => d.reconciled)
+    assert.equal(reconciledDeletes.length, 1)
+    // Post C: was updated, now stale → reconcile-restored
+    assert.equal(results.restored.length, 1)
+    assert.equal(results.restored[0].reconciled, true)
+  } finally {
+    process.chdir(origCwd)
+    try {
+      fs.unlinkSync(manifestPath)
+    } catch {}
+  }
+})
+
+test('engine: manifest-tracking scenario', async () => {
+  const scenario = loadScenario('manifest-tracking')
+  const fixtureDir = scenario.dir
+
+  const manifestPath = path.join(os.tmpdir(), `test-manifest-tracking-${Date.now()}.json`)
+
+  const origCwd = process.cwd()
+  process.chdir(path.join(fixtureDir, 'input'))
+
+  try {
+    const mockCms = createMockCmsAdapter(scenario.cmsState, scenario.relationState)
+    const mockAssets = createMockAssetAdapter({})
+    const config = buildTestConfig(scenario, fixtureDir, {
+      reconcileStaging: true,
+      syncManifestPath: manifestPath,
+      deploymentStatus: 'staging',
+    })
+
+    const engine = createSyncEngine({ config, cmsAdapter: mockCms, assetAdapter: mockAssets })
+    const { results, exitCode } = await engine.run()
+
+    assert.equal(exitCode, 0)
+    assert.equal(results.created.length, 1)
+    assert.equal(results.updated.length, 1)
+    assertOpsMatch(mockCms.ops, scenario.expectedOps)
+
+    // Verify manifest was saved
+    const savedManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+    assert.equal(savedManifest.version, 2)
+    assert.equal(savedManifest.content.length, 2)
+
+    // Check the created entry
+    const createdEntry = savedManifest.content.find((e) => e.pathField === '/new-post')
+    assert.equal(createdEntry.kind, 'created')
+    assert.equal(createdEntry.restoreData, null)
+
+    // Check the updated entry
+    const updatedEntry = savedManifest.content.find((e) => e.pathField === '/existing-post')
+    assert.equal(updatedEntry.kind, 'updated')
+    assert.notEqual(updatedEntry.restoreData, null)
+    // restoreData should not contain system fields
+    assert.equal(updatedEntry.restoreData.documentId, undefined)
+  } finally {
+    process.chdir(origCwd)
+    try {
+      fs.unlinkSync(manifestPath)
+    } catch {}
+  }
+})
+
+test('engine: reconcile-empty-previous — first run with no previous manifest', async () => {
+  const scenario = loadScenario('blog-create')
+  const fixtureDir = scenario.dir
+
+  const manifestPath = path.join(os.tmpdir(), `test-manifest-empty-${Date.now()}.json`)
+
+  const origCwd = process.cwd()
+  process.chdir(path.join(fixtureDir, 'input'))
+
+  try {
+    const mockCms = createMockCmsAdapter(scenario.cmsState, scenario.relationState)
+    const mockAssets = createMockAssetAdapter({})
+    const config = buildTestConfig(scenario, fixtureDir, {
+      reconcileStaging: true,
+      syncManifestPath: manifestPath,
+      deploymentStatus: 'staging',
+    })
+
+    const engine = createSyncEngine({ config, cmsAdapter: mockCms, assetAdapter: mockAssets })
+    const { results, exitCode } = await engine.run()
+
+    assert.equal(exitCode, 0)
+    assert.equal(results.created.length, 1)
+    assert.equal(results.restored.length, 0) // No reconciliation needed
+
+    // Manifest should be saved
+    const savedManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+    assert.equal(savedManifest.version, 2)
+    assert.equal(savedManifest.content.length, 1)
+    assert.equal(savedManifest.content[0].kind, 'created')
+  } finally {
+    process.chdir(origCwd)
+    try {
+      fs.unlinkSync(manifestPath)
+    } catch {}
   }
 })
