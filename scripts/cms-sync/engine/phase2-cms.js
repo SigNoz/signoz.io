@@ -1,8 +1,13 @@
 const { COLLECTION_SCHEMAS } = require('../schemas')
 const { chunk, sleep } = require('../utils')
 const { mapToStrapiPayload } = require('../schema-mapper')
+const { buildCurrentContentManifestEntry, contentManifestKey } = require('../manifest')
 
-async function runPhase2(pendingOperations, results, { config, cmsAdapter, relationResolver }) {
+async function runPhase2(
+  pendingOperations,
+  results,
+  { config, cmsAdapter, relationResolver, previousContentMap, currentManifest, gitReader }
+) {
   console.log('\n' + '='.repeat(80))
   console.log('🔄 PHASE 2: CMS Content Synchronization')
   console.log('='.repeat(80))
@@ -34,6 +39,23 @@ async function runPhase2(pendingOperations, results, { config, cmsAdapter, relat
       if (type === 'delete') {
         console.log(`🗑️ Deleting from CMS: ${pathField}`)
         const existingEntry = findEntryByPathCached(folderName, pathField)
+
+        // Build manifest entry before mutation
+        if (currentManifest) {
+          const previousEntry = previousContentMap
+            ? previousContentMap.get(contentManifestKey({ folderName, pathField }))
+            : null
+          const baseFileExists = gitReader
+            ? !!gitReader.readBaseFileForContentEntry({ folderName, pathField, filePath })
+            : false
+          const manifestEntry = buildCurrentContentManifestEntry(op, existingEntry, {
+            previousEntry,
+            baseFileExists,
+          })
+          if (manifestEntry) {
+            currentManifest.content.push(manifestEntry)
+          }
+        }
 
         if (existingEntry) {
           const schema = COLLECTION_SCHEMAS[folderName]
@@ -99,6 +121,23 @@ async function runPhase2(pendingOperations, results, { config, cmsAdapter, relat
 
         const existingEntry = findEntryByPathCached(folderName, pathField)
         const schema = COLLECTION_SCHEMAS[folderName]
+
+        // Build manifest entry before mutation (captures pre-mutation state)
+        if (currentManifest) {
+          const previousEntry = previousContentMap
+            ? previousContentMap.get(contentManifestKey({ folderName, pathField }))
+            : null
+          const baseFileExists = gitReader
+            ? !!gitReader.readBaseFileForContentEntry({ folderName, pathField, filePath })
+            : false
+          const manifestEntry = buildCurrentContentManifestEntry(op, existingEntry, {
+            previousEntry,
+            baseFileExists,
+          })
+          if (manifestEntry) {
+            currentManifest.content.push(manifestEntry)
+          }
+        }
 
         if (existingEntry) {
           if (!existingEntry.documentId) {
