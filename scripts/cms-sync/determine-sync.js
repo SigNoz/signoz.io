@@ -12,25 +12,32 @@
  */
 
 const fs = require('fs')
+const { parseArgs: nodeParseArgs } = require('node:util')
 
 function parseArgs(argv) {
-  const args = argv || process.argv.slice(2)
-  function getArg(name) {
-    const idx = args.indexOf(name)
-    return idx !== -1 && idx + 1 < args.length ? args[idx + 1] : null
-  }
-  function hasFlag(name) {
-    return args.includes(name)
-  }
+  const { values } = nodeParseArgs({
+    args: argv || process.argv.slice(2),
+    options: {
+      'event-name': { type: 'string', default: '' },
+      ref: { type: 'string', default: '' },
+      'has-staging-label': { type: 'boolean', default: false },
+      'any-content-changed': { type: 'string', default: 'false' },
+      'any-content-deleted': { type: 'string', default: 'false' },
+      'any-assets-changed': { type: 'string', default: 'false' },
+      'sidenav-changed': { type: 'string', default: 'false' },
+      'any-listicles-changed': { type: 'string', default: 'false' },
+    },
+    strict: false,
+  })
   return {
-    eventName: getArg('--event-name'),
-    ref: getArg('--ref'),
-    hasLabel: hasFlag('--has-staging-label'),
-    anyContentChanged: getArg('--any-content-changed') === 'true',
-    anyContentDeleted: getArg('--any-content-deleted') === 'true',
-    anyAssetsChanged: getArg('--any-assets-changed') === 'true',
-    sidenavChanged: getArg('--sidenav-changed') === 'true',
-    anyListiclesChanged: getArg('--any-listicles-changed') === 'true',
+    eventName: values['event-name'],
+    ref: values.ref,
+    hasLabel: values['has-staging-label'],
+    anyContentChanged: values['any-content-changed'] === 'true',
+    anyContentDeleted: values['any-content-deleted'] === 'true',
+    anyAssetsChanged: values['any-assets-changed'] === 'true',
+    sidenavChanged: values['sidenav-changed'] === 'true',
+    anyListiclesChanged: values['any-listicles-changed'] === 'true',
   }
 }
 
