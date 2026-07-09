@@ -89,6 +89,7 @@ interface FetchChangelogEntriesParams {
   deployment_type?: DeploymentType
   page?: number
   pageSize?: number
+  excludeDocumentIds?: string[]
 }
 
 export const fetchChangelogEntries = async (
@@ -113,6 +114,15 @@ export const fetchChangelogEntries = async (
         page: params.page || 1, // Default to page 1 if not provided
         pageSize: params.pageSize || 2, // Default to page size of 10 if not provided
       },
+    }
+
+    if (params.excludeDocumentIds?.length) {
+      queryObject['filters'] = {
+        ...queryObject['filters'],
+        documentId: {
+          $notIn: params.excludeDocumentIds,
+        },
+      }
     }
 
     // If a specific deployment type is provided, filter out the others, All will not be excluded

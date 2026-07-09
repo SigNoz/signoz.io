@@ -17,6 +17,11 @@ import { MDXContent } from './strapi'
 import { deriveDates, resolveLatestDate } from './dateUtils'
 import siteMetadata from '@/data/siteMetadata'
 
+export function ensureTrailingSlash(url: string): string {
+  if (url.endsWith('/')) return url
+  return `${url}/`
+}
+
 // Heroicon mini link for auto-linking headers
 const linkIcon = fromHtmlIsomorphic(
   `<span class="content-header-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 linkicon"><path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" /><path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" /></svg></span>`,
@@ -121,7 +126,7 @@ function transformRelatedArticles(content: MDXContent): any[] {
         title: doc.title,
         date: resolveLatestDate(doc),
         publishedOn: resolveLatestDate(doc),
-        url: `${siteMetadata.siteUrl}/${routePrefix}${doc.path || ''}`,
+        url: ensureTrailingSlash(`${siteMetadata.siteUrl}/${routePrefix}${doc.path || ''}`),
         content_type: contentType,
       })
     }
@@ -147,7 +152,7 @@ function transformRelatedArticles(content: MDXContent): any[] {
           _id: item.documentId || String(item.id),
           _raw: {},
           path: `${prefix}${item.path || ''}`,
-          url: `${siteMetadata.siteUrl}/${prefix}${item.path || ''}`,
+          url: ensureTrailingSlash(`${siteMetadata.siteUrl}/${prefix}${item.path || ''}`),
           slug: (item.path || '').split('/').pop() || '',
           title: item.title,
           date: resolveLatestDate(item),

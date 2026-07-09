@@ -5,7 +5,7 @@ import { TrustedByTeams } from '@/components/trusted-by'
 import { ArrowRight, CheckCircle, CircleArrowRight } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import Image from 'next/image'
 
 const EnterprisePricing = dynamic(() => import('@/components/EnterprisePricing'), {
@@ -53,7 +53,11 @@ export default function Enterprise() {
                     compliance and support requirements.
                   </div>
 
-                  <Button id="btn-get-started-homepage-hero" className="mt-4">
+                  <Button
+                    variant="legacyPrimary"
+                    id="btn-get-started-homepage-hero"
+                    className="mt-4"
+                  >
                     <a href="#enterprise-plans" className="flex-center">
                       Check Enterprise plans
                       <ArrowRight size={14} />
@@ -176,7 +180,7 @@ export default function Enterprise() {
               </div>
 
               <Button
-                type={Button.TYPES.SECONDARY}
+                variant="legacySecondary"
                 className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
               >
                 <Link
@@ -220,7 +224,7 @@ export default function Enterprise() {
               </div>
 
               <Button
-                type={Button.TYPES.SECONDARY}
+                variant="legacySecondary"
                 className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
               >
                 <Link
@@ -252,7 +256,7 @@ export default function Enterprise() {
               </p>
 
               <Button
-                type={Button.TYPES.SECONDARY}
+                variant="legacySecondary"
                 className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
               >
                 <Link href="/contact-us/?source=enterprise-page-byoc" className="flex-center">
@@ -519,7 +523,7 @@ export default function Enterprise() {
               </div>
 
               <Button
-                type={Button.TYPES.SECONDARY}
+                variant="legacySecondary"
                 className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
               >
                 <Link href="https://trust.signoz.io/" target="_blank" className="flex-center">

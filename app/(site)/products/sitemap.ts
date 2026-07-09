@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'upgrade-path',
     'unified-observability',
     'agent-native-observability',
+    'kubernetes-monitoring',
   ].map((route) => ({
     url: `${siteUrl}/${route}/`,
     changeFrequency: 'weekly' as const,

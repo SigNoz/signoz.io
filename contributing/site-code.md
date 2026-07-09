@@ -37,15 +37,15 @@ Listicles are rendered by a single generic component (`components/Listicle/Listi
 
 Each listicle is fully self-contained in a single JSON file — items, icons, markdown output title, sections, and layout are all in one place.
 
-| Layer        | Location                           | Purpose                                                                         |
-| ------------ | ---------------------------------- | ------------------------------------------------------------------------------- |
-| JSON configs | `constants/listicles/*.json`       | Items, icons, markdown title, sections, layout — everything in one file         |
-| Registry     | `constants/listicles/registry.ts`  | Maps `name` string to config; `index.ts` re-exports                             |
-| Utilities    | `constants/listicles/utils.ts`     | Shared traversal for rendered UI and agent markdown                             |
-| Component    | `components/Listicle/Listicle.tsx` | Generic renderer for flat, sectioned, and searchable patterns                   |
-| Icons        | `public/img/icons/listicle/*.svg`  | Generated SVGs (brand icons); existing assets elsewhere are referenced directly |
-| MDX usage    | `data/docs/**/*.mdx`               | `<Listicle name="..." />` with optional `defaultSection`                        |
-| Agent stubs  | `utils/docs/agentMarkdownStubs.ts` | Markdown fallback — auto-extracts items from JSON configs                       |
+| Layer        | Location                               | Purpose                                                                 |
+| ------------ | -------------------------------------- | ----------------------------------------------------------------------- |
+| JSON configs | `constants/listicles/*.json`           | Items, icons, markdown title, sections, layout — everything in one file |
+| Registry     | `constants/listicles/registry.ts`      | Maps `name` string to config; `index.ts` re-exports                     |
+| Utilities    | `constants/listicles/utils.ts`         | Shared traversal for rendered UI and agent markdown                     |
+| Component    | `components/Listicle/Listicle.tsx`     | Generic renderer for flat, sectioned, and searchable patterns           |
+| Icons        | `data-assets/img/icons/listicle/*.svg` | Brand icon SVGs; existing assets elsewhere are referenced directly      |
+| MDX usage    | `data/docs/**/*.mdx`                   | `<Listicle name="..." />` with optional `defaultSection`                |
+| Agent stubs  | `utils/docs/agentMarkdownStubs.ts`     | Markdown fallback — auto-extracts items from JSON configs               |
 
 Discovery grids (quick starts, migration vendors, web vitals, instrumentation hubs, etc.) are listicles in `constants/listicles/*.json`. Use `<Listicle name="..." />` in MDX; agent markdown stubs read the same JSON automatically.
 
@@ -66,7 +66,7 @@ Agent stubs auto-discover items from the JSON, including `defaultSection` behavi
 ### Updating an existing listicle
 
 - **Add/remove items**: edit the `items` array in the JSON config directly. Each item has `name`, `href`, `icon`, and optional `clickName`.
-- **Change icons**: update the `icon` path on the item. To generate a new SVG from a react-icon, add it to `scripts/generate-listicle-icons.mjs` and re-run the script.
+- **Change icons**: update the `icon` path on the item. To add a new icon, place the SVG at `data-assets/img/icons/listicle/<name>.svg` and set `icon` to its `/img/icons/listicle/<name>.svg` URL path. After changing an `icon` path, confirm the SVG exists at `data-assets/img/icons/listicle/<name>.svg`.
 - **Add/remove sections**: edit the `sections` array in the JSON config. Move items between sections as needed.
 
 ### JSON config reference

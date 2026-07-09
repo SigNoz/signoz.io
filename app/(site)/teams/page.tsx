@@ -1,7 +1,10 @@
-import React, { Suspense } from 'react'
+import { Suspense } from 'react'
 import TeamsPage from './TeamsPage'
 
 import { Metadata } from 'next'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: {
@@ -16,10 +19,18 @@ export const metadata: Metadata = {
     'Sign up for SigNoz cloud and get 30 days of free trial with access to all features.',
 }
 
-export default function Teams() {
+export default async function Teams({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const params = await searchParams
+  const initialAuthCode = typeof params.code === 'string' ? params.code : null
+  const initialSsoError = typeof params.has_sso_error === 'string' ? params.has_sso_error : null
+
   return (
     <Suspense>
-      <TeamsPage />
+      <TeamsPage initialAuthCode={initialAuthCode} initialSsoError={initialSsoError} />
     </Suspense>
   )
 }
