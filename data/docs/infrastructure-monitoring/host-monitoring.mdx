@@ -1,5 +1,5 @@
 ---
-date: 2026-07-01
+date: 2026-07-09
 title: Host Monitoring
 description: Monitor host performance in SigNoz — CPU, memory, disk, network metrics with correlated traces, logs, containers, and processes.
 doc_type: explanation
@@ -167,6 +167,11 @@ Monitor host performance metrics across customizable time periods. Charts are zo
 
 - This chart relies on the OTel metric(s): `system.disk.operation_time`.
 - Plots the per-second rate of cumulative disk-busy time per `device::direction`, one line per device and direction. Values approaching `1s/s` on a single line mean that device is effectively saturated — the disk spent ~100% of wall-clock time servicing I/O. Compare against ops/s to distinguish "few slow ops" from "many fast ops".
+
+#### Disk Usage (%) by mountpoint
+
+- This chart relies on the OTel metric(s): `system.filesystem.usage`.
+- Plots each mountpoint's used space as a percentage of its own capacity (`state=used` ÷ total across all states), one line per `mountpoint`. Unlike the host-wide **Disk Usage** column, this breaks the figure out per filesystem — so a single mountpoint filling up (e.g. `/var` or `/`) is visible even when the host's overall usage looks fine. Watch any line trending toward 100%: that mountpoint is running low, which stalls writes for anything using it (log rotation, databases, container writes); a steady climb points to a leak or unrotated logs, a step change usually tracks a deploy or data import.
 
 **Time Range Selection:**
 
