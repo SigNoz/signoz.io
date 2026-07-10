@@ -1,11 +1,15 @@
 ---
-date: 2026-05-13
-title: Public Sharing in Dashboards
-description: Share SigNoz dashboards publicly with a generated link and control the default time range available to viewers.
+date: 2026-07-10
+title: Public Dashboard Sharing with Time Range and Auto-Refresh
+description: Share SigNoz dashboards publicly with a link, let anonymous viewers adjust the time range, and keep panels live with auto-refresh controls.
 doc_type: howto
 ---
 
-Use public sharing when you want to make a dashboard available with a link outside the authenticated SigNoz UI.
+Use public sharing when you want to make a dashboard available with a link outside the authenticated SigNoz UI. Dashboards built in either the classic or the new (v2) editor can be shared, and the public view automatically renders the correct viewer for each.
+
+<Admonition type="info">
+  Public sharing is available on SigNoz Cloud and Enterprise (self-hosted) plans.
+</Admonition>
 
 <Figure
   src="/img/docs/dashboards/overview/share-page-link.webp"
@@ -33,6 +37,35 @@ Use public sharing when you want to make a dashboard available with a link outsi
   src="/img/docs/dashboards/public-sharing/enable-public-sharing.webp"
   alt="Public sharing configuration in SigNoz"
   caption="Once published, copy the public dashboard URL or open it directly. Dashboard variables won't work in public dashboards."
+/>
+
+Dashboards authored in the new (v2) editor are supported alongside classic dashboards. The person sharing does nothing differently: the public link detects the dashboard format and renders the matching viewer for anonymous visitors.
+
+## View a Public Dashboard
+
+Anyone with the link opens a read-only view. It shows the SigNoz branding, the dashboard title, section headings, and panels in a layout matching the editor. There are no edit controls or drill-down navigation, and panel queries execute for anonymous visitors so charts render live data.
+
+When you publish with **Enable time range** turned on, the public view header also includes a time range picker and an auto-refresh control:
+
+- **Time range picker**: viewers can switch the displayed window between relative presets (for example, Last 30 minutes, Last 6 hours) or a custom absolute date range.
+- **Auto-refresh**: viewers can keep panels live by choosing a refresh interval (for example, 5 seconds, 1 minute) without logging in.
+
+<Figure
+  src="/img/docs/dashboards/public-sharing/public-view-time-controls.webp"
+  alt="Public dashboard view showing the time range picker and auto-refresh control in the header with panels rendering data"
+  caption="The public view header shows the dashboard title, time range picker, and auto-refresh control while panels render live data."
+/>
+
+<Admonition type="info">
+  Auto-refresh applies only to relative time presets. If a viewer selects a custom (absolute) time
+  range, the auto-refresh control is automatically paused and resumes when they switch back to a
+  relative preset.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/public-sharing/public-view-autorefresh-paused.webp"
+  alt="Public dashboard view with a custom absolute time range selected and the auto-refresh control paused"
+  caption="Selecting a custom absolute time range pauses the auto-refresh control until a relative preset is chosen again."
 />
 
 ## Disable Public Sharing
