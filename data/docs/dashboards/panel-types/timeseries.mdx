@@ -1,7 +1,7 @@
 ---
 
 title: Timeseries Panel Type
-date: 2026-05-13
+date: 2026-07-11
 description: Learn how to use the Timeseries Chart panel type in SigNoz dashboards to visualize metrics over time.
 doc_type: reference
 ---
@@ -43,6 +43,13 @@ The following graph shows the requests per second (req/s) for a service over a p
 
 - **Panel Time Preference** — Override the global dashboard time range for this panel. Set to `Global Time` to use the dashboard's time picker, or choose a fixed time range.
 - **Fill Gaps** — The `Fill Gaps` option fills the gaps in the result data with zero. This is useful when you want to interpret the no data as zero. It is more appropriate for when the data is sparse. For example, if the result of a query for 10 minutes is `{t1: 12, t3: 21, t5: 42, t7:29}`, the `Fill Gaps` option will result in `{t1: 12, t2: 0, t3: 21, t4: 0, t5: 42, t6: 0, t7: 29, t8: 0, t9: 0, t10: 0}`.
+- **Span Gaps** — Control how the line is drawn across null (missing) data points. By default, the line connects across every gap. Enable **Fill Only Below** to connect only gaps shorter than a threshold, then set **Fill Less Than** to that threshold duration. Gaps longer than the threshold stay disconnected, which keeps genuine outages visible instead of drawing a line over them.
+  - **Fill Less Than** accepts durations in seconds (`s`), minutes (`m`), hours (`h`), days (`d`), and weeks (`w`), including compound values such as `1h30m`. For example, `30s`, `5m`, `2h`, `1d`, and `1w` are all valid.
+  - When **Fill Only Below** is enabled, **Fill Less Than** is required and must be a positive duration. A panel saved with **Fill Only Below** on and no (or a zero) **Fill Less Than** value fails validation.
+
+<Admonition type="warning">
+Dashboards saved before this change with **Fill Only Below** enabled but no **Fill Less Than** value now fail validation on save or load. Open the affected time series panels, set **Fill Less Than** to a positive duration (for example `5m`), and save to migrate them.
+</Admonition>
 
 #### Formatting & Units
 

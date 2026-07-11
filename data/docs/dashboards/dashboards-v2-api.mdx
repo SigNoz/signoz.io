@@ -1,5 +1,5 @@
 ---
-date: 2026-07-10
+date: 2026-07-11
 title: "Dashboards V2 API - Schema, Endpoints & PATCH Updates"
 description: "Migrate to the redesigned SigNoz Dashboards experience and learn the V2 Dashboards API: schema, endpoints, pagination, the query DSL, and partial PATCH updates."
 doc_type: howto
@@ -15,6 +15,10 @@ SigNoz is rolling out a redesigned **Dashboards** experience. Your existing dash
 - Dashboards will be migrated in the week of 27th July.
 - Nothing breaks on the platform. Your existing dashboards keep working, and this rolls out alongside them.
 - If you don't use Terraform or don't have any scripts directly working with the SigNoz Dashboards APIs, no action is required from you today.
+
+<Admonition type="warning">
+The time series `chartAppearance.spanGaps` field is now validated. When `fillOnlyBelow` is `true`, `fillLessThan` is required and must be a positive duration. `fillLessThan` accepts second (`s`), minute (`m`), hour (`h`), day (`d`), and week (`w`) units (for example `5m`, `1d`, `1w`). Any dashboard payload with `fillOnlyBelow: true` and a missing, empty, or non-positive `fillLessThan` fails validation on save or load. Update those panels or API/Terraform payloads with a valid duration before migrating. See [Span Gaps in the Timeseries panel](https://signoz.io/docs/dashboards/panel-types/timeseries/#visualization).
+</Admonition>
 
 ### If you have scripts that use the Dashboards API directly
 
