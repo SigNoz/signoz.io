@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-11
 title: Infrastructure Monitoring - Hosts & K8s Overview
 description: Discover how SigNoz Infrastructure Monitoring provides a unified view of host and Kubernetes performance. Monitor CPU, memory, disk, and network with correlated traces and logs.
 
@@ -20,6 +20,37 @@ Infrastructure Monitoring includes two main views:
 
 Both views share common controls for time range, filtering, and navigation so you can move between metrics, traces, logs, and events without losing context.
 
+## Search and filter infrastructure
+
+Every Infrastructure Monitoring list view (Hosts and all Kubernetes entities) shares one expression-based search bar. Type a filter expression, then apply it to the table.
+
+### Filter with the search bar
+
+1. In the list header, type a filter expression using an attribute, an operator, and a value. For example:
+   - `host.name = "my-host"`
+   - `k8s.namespace.name = "default"`
+   - `os.type = "linux"`
+2. Click **Run Query** to apply the filter. Changes to the expression do not apply automatically until you run the query.
+
+This search bar replaces the earlier tag-based filter picker.
+
+<Admonition type="info">
+The attribute key spelling in your expressions matches how the keys appear in your ingested data. Depending on your setup, keys can use dot notation (`host.name`) or underscore notation (`host_name`). Use the form shown in the attribute suggestions for your environment.
+</Admonition>
+
+<Admonition type="warning">
+Older bookmarked or shared links that carry a `?filters=` query parameter are no longer applied. The list opens unfiltered, with no redirect or warning. Recreate the filter in the search bar and reshare the updated link.
+</Admonition>
+
+Switching between Kubernetes entity categories (for example, Pods to Nodes) clears the current search expression. Re-enter and run your filter after switching.
+
+### Table controls
+
+- **Column header tooltips**: Key metric column headers show an info icon. Hover it to see a short description and a **Learn more** link to the related documentation.
+- **Truncated values**: Hover a truncated cell to reveal its full value in a tooltip.
+- **Adaptive page size**: The number of rows per page adjusts automatically to the height of the table area.
+- **Partial-data warning**: When some nodes did not report metrics for the selected time range, a warning banner appears above the table so you can interpret partial results correctly.
+
 ## Explore infrastructure views
 
 <Tabs entityName="environment">
@@ -35,20 +66,25 @@ The main screen of the Host interface displays a list of all monitored hosts in 
     <figcaption><i>Host List</i></figcaption>
 </figure>
 
+#### Status filter
+
+Use the **All / Active / Inactive** toggle above the table to filter the list by host status.
+
 #### Table Columns
 
-- **Host Name**: System hostname or identifier
-- **Status**: Current operational status of the host - `ACTIVE` or `INACTIVE`
-- **CPU**: CPU utilization percentage
-- **Memory**: Memory usage percentage
-- **IOWait**: Percentage of time CPU is waiting for I/O operations to complete
-- **Load Average**: System load average value 
+- **Hostname**: System hostname or identifier.
+- **Status**: Current operational status of the host, `ACTIVE` or `INACTIVE`.
+- **CPU Usage**: CPU utilization percentage.
+- **Memory Usage (WSS)**: Memory usage percentage, measured as working set size (WSS).
+- **Disk Usage**: Disk utilization, shown as a sortable progress bar.
+- **IOWait**: Percentage of time the CPU waits for I/O operations to complete.
+- **Load Avg (15min)**: System load average over the last 15 minutes.
 
 **Features:**
-- A search functionality to quickly locate specific hosts using different attributes
-- Paginated results for efficient navigation through large host sets
-- Sortable columns for easy comparison
-- Real-time metric updates
+- Filter hosts with the [expression-based search bar](#search-and-filter-infrastructure) and the **Run Query** button.
+- Paginated results for efficient navigation through large host sets.
+- Sortable columns for easy comparison.
+- Real-time metric updates.
 
 ### Host Details
 
@@ -157,6 +193,23 @@ The Kubernetes monitoring interface offers multiple views to analyze different a
 
 By default, the **Pods View** is selected, offering a detailed breakdown of pod-level resource utilization.
 
+### Workload status columns
+
+Several Kubernetes list views summarize workload health with grouped status badges.
+
+- **Clusters**:
+  - **Node Readiness**: Ready and Not Ready node counts as grouped status badges.
+  - **Pod Phases**: Breakdown of pod phases (such as Running, Pending, and Failed) as colored badges.
+  - CPU Usage (cores) and CPU Alloc (cores) display two decimal places.
+- **DaemonSets**:
+  - **Pod Phases**: Pod phase breakdown as colored badges.
+  - **Node Status**: Current and Desired node counts as grouped badges. This replaces the earlier separate Available and Desired columns.
+- **Deployments**:
+  - **Pod Phases**: Pod phase breakdown as colored badges.
+  - **Replica Status**: Available and Desired pod counts as grouped badges. This replaces the earlier separate Available and Desired pod columns.
+- **Jobs**:
+  - **Pod Phases**: Pod phase breakdown as colored badges.
+  - **Completion Status**: Active, Failed, Successful, and Desired pod counts in a combined display. This replaces the earlier separate Successful, Failed, Active, and Desired Successful columns.
 
 ### Pods View: Monitoring Kubernetes Pods
 
@@ -182,10 +235,10 @@ The **Pods View** provides real-time visibility into pod resource utilization, e
 
 ### Filtering and Selection Panel
 
-The left-side **Filters Panel** allows users to navigate through different Kubernetes resources, applying filters to refine their view.
+Filter any Kubernetes view with the [expression-based search bar](#search-and-filter-infrastructure) and **Run Query**. The left-side panel lists the available Kubernetes resource types so you can switch between them.
 
 
-#### Available Filters:
+#### Available resource types:
 
 - **Pods**: View and filter by active Kubernetes pods.
 - **Nodes**: Monitor resource utilization for different Kubernetes nodes.
