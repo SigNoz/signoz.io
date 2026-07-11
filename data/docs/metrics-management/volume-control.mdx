@@ -91,7 +91,7 @@ Rule changes are forward-looking:
 
 Once a rule is active:
 
-- **The most recent 24 hours always stay at full fidelity.** Every attribute remains queryable in this window regardless of rules, and alerts always evaluate against this full-fidelity data.
+- **The most recent 24 hours always stay at full fidelity.** Every attribute remains queryable in this window regardless of rules, and alerts always evaluate against this full-fidelity data. This is deliberate: alerting stays reliable no matter what rules exist, and when something is on fire you can debug it immediately at full detail, without pausing rules or thinking about cost. Volume control only changes how *history* is stored, where the aggregate trend is what matters.
 - **Beyond that window, ruled metrics are stored as 60-second aggregates** per surviving attribute combination. Gauges keep last/min/max values and the sums and counts needed for averages; counters and histograms are stored as reset-aware per-minute increases, so rates stay exact.
 - **Aggregated data trails real time by a few minutes** (typically 2–4), because aggregation runs on a schedule. This only matters for the aggregated copy — the full-fidelity window is as fresh as normal ingestion.
 

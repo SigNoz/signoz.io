@@ -26,6 +26,8 @@ What is *not* stored: the aggregated-away attributes (by design), the individual
 - **Alerts always evaluate on full-fidelity data.** Alert evaluation runs over the recent full-fidelity window, never over aggregated data.
 - **Aggregated data trails real time by a few minutes** (typically 2–4), because aggregation runs on a schedule after data settles. You'll normally never notice, since the freshest data is served from the full-fidelity window anyway.
 
+The full-fidelity window exists for a reason: the moments where every attribute matters are alert evaluation and live incident debugging, and both happen on recent data. By guaranteeing the last 24 hours raw, alerting stays reliable regardless of what rules exist, and a severe outage can be investigated immediately at full detail with no need to touch volume control rules or weigh the cost of keeping detail you might need. What aggregation trades away is detail in *history*, where the questions are usually about trends rather than individual instances.
+
 ## A Worked Example
 
 Say `queue.depth` is a gauge reported every 15 seconds by three instances of a service, and a rule aggregates away `service.instance.id`. During the minute starting 12:00:00 the raw samples were:
