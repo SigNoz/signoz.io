@@ -107,7 +107,7 @@ Without the `k8s.pod.*` label, you can't properly distinguish between pods. The 
 
 ## The Correct Approach: Aggregation
 
-If you genuinely don't need granularity at a certain attribute level, the correct approach is to **aggregate** the values mathematically, not just drop the label. The question is *where* to aggregate — and the collector is usually the wrong place.
+If you genuinely don't need granularity at a certain attribute level, the correct approach is to **aggregate** the values mathematically, not just drop the label. The question is *where* to aggregate and the collector is usually the wrong place.
 
 ### Why Collector Processors Can't Do This Reliably
 
@@ -133,15 +133,15 @@ On the 3-sample example above, if all three data points arrive together, this pr
 {"k8s.pod.network.io", "interface"="lo"} 200     # Sum of 200
 ```
 
-But that "if" carries a lot of weight. In real deployments, collector-side aggregation breaks down for several reasons — and this applies equally to the `metricstransform`, `interval`, and `transform` processors:
+But that "if" carries a lot of weight. In real deployments, collector-side aggregation breaks down for several reasons and this applies equally to the `metricstransform`, `interval`, and `transform` processors:
 
-1. **Aggregation is per-batch only.** As the processor's own documentation states, it <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">only aggregates within a single batch and is not suitable for aggregating metrics from multiple sources</a>. Series exported by different applications, hosts, or scrape targets arrive in different batches (and often at different collector instances) — they never meet in one batch, so they never collapse.
+1. **Aggregation is per-batch only.** As the processor's own documentation states, it <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">only aggregates within a single batch and is not suitable for aggregating metrics from multiple sources</a>. Series exported by different applications, hosts, or scrape targets arrive in different batches (and often at different collector instances) they never meet in one batch, so they never collapse.
 
-2. **Resource attributes aren't aggregatable.** The labels that carry most cardinality — `service.instance.id`, `host.name`, `k8s.pod.uid` — are *resource* attributes. `aggregate_labels` merges data points within a metric, but data points under different resources are never merged, so series that differ only in resource attributes don't collapse at all.
+2. **Resource attributes aren't aggregatable.** The labels that carry most cardinality i.e `service.instance.id`, `host.name`, `k8s.pod.uid` are *resource* attributes. `aggregate_labels` merges data points within a metric, but data points under different resources are never merged, so series that differ only in resource attributes don't collapse at all.
 
 3. **No time alignment, no state.** Different sources report on different clocks. Correct aggregation needs values grouped into aligned time windows, and for cumulative counters it needs each source's start time and reset history tracked across export intervals. A stateless per-batch processor has neither, so summing cumulative counters from different sources produces meaningless numbers even when the batching happens to line up.
 
-Collector-side aggregation is only sound in the narrow case where every series being merged is produced by a single source, differs only in data point attributes, and always arrives in the same batch — for example, collapsing a `state` label on a metric scraped from one target.
+Collector-side aggregation is only sound in the narrow case where every series being merged is produced by a single source, differs only in data point attributes, and always arrives in the same batch. For example, collapsing a `state` label on a metric scraped from one target.
 
 ### Aggregate at Storage with Volume Control (Recommended)
 

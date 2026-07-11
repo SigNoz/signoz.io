@@ -1,13 +1,13 @@
 ---
 date: 2026-07-07
 title: Understanding Aggregated Metric Data
-description: What it means when a panel renders from aggregated metric data - what volume control rules preserve, what they trade away, and why values can differ from what an alert saw.
+description: What happens when a metric is stored as aggregated data, what volume control rules preserve, what they trade away, and why values can differ from what an alert saw.
 doc_type: explanation
 ---
 
 ## Overview
 
-If a chart shows a banner saying it's rendered from aggregated data, the metric behind it has a [volume control](https://signoz.io/docs/metrics-management/volume-control/) rule: some of its attributes have been aggregated away to reduce stored cardinality and cost. The data you're looking at is mathematically correct, but it's stored at a coarser granularity than the original — and for some questions, that changes the answer.
+When a metric has a [volume control](https://signoz.io/docs/metrics-management/volume-control/) rule, some of its attributes are aggregated away to reduce stored cardinality and cost, and queries over older time ranges render from that aggregated data. The data you're looking at is mathematically correct, but it's stored at a coarser granularity than the original and for some questions, that changes the answer.
 
 This page explains exactly what is preserved, what is lost, and why a query can return different values than it did when the data was fresh.
 
@@ -16,7 +16,7 @@ This page explains exactly what is preserved, what is lost, and why a query can 
 When a rule is active, all series of a metric that differ only in the aggregated-away attributes are collapsed into one series, in fixed **60-second windows**. For each window, each surviving series stores:
 
 - **Gauges**: the minimum and maximum across all original values in the window, the sum of each original series' last value, the sum of all values, and the number of samples and of contributing series. This is enough to answer min, max, sums of current values, and both kinds of average (see [below](#two-kinds-of-average)).
-- **Counters and histograms** (counts, sums, and buckets): the **reset-aware increase** for the window — how much each original series actually grew, summed across the collapsed series, correctly accounting for counter resets and process restarts. Rates and increases over any window of 60 seconds or more remain exact.
+- **Counters and histograms** (counts, sums, and buckets): the **reset-aware increase** for the window, how much each original series actually grew, summed across the collapsed series, correctly accounting for counter resets and process restarts.
 
 What is *not* stored: the aggregated-away attributes (by design), the individual values within the window, and their timing inside the minute.
 
@@ -43,45 +43,45 @@ Now compare what common queries return on raw vs aggregated data:
 
 | Question | On raw data | On aggregated data |
 |---|---|---|
-| Total queue depth (sum of instances' latest values) | 35 | 35 ✓ |
-| Highest single reading in the minute | 50 | 50 ✓ |
-| Number of reporting instances | 3 | 3 ✓ |
-| **Peak *total* queue depth** (max over time of the sum) | **71** at 12:00:45 | **not computable** — closest available is the group max, 50 |
-| Sum of each instance's *peak* (sum of per-series max) | 78 (50 + 6 + 22) | **not computable** — collapses to the group max, 50 |
-| Which instance spiked to 50? | instance A | **not answerable** — the attribute is gone |
+| Total queue depth (sum of instances' latest values) | 35 | 35 |
+| Highest single reading in the minute | 50 | 50 |
+| Number of reporting instances | 3 | 3 |
+| **Peak *total* queue depth** (max over time of the sum) | **71** at 12:00:45 | **not computable** closest available is the group max, 50 |
+| Sum of each instance's *peak* (sum of per-series max) | 78 (50 + 6 + 22) | **not computable** collapses to the group max, 50 |
+| Which instance spiked to 50? | instance A | **not answerable** the attribute is gone |
 
-The pattern: aggregation had to commit to *one* per-window summary per statistic. Queries that match a stored statistic are exact. Queries that combine statistics in a different order — like "sum of maxes" or "max of sums" — can't be reconstructed, because they need the individual series and sample timings back. Sum-of-last and sum-of-max only agree when each series reports once per window, or when its last value happens to be its maximum.
+The pattern: aggregation had to commit to *one* per-window summary per statistic. Queries that match a stored statistic are exact. Queries that combine statistics in a different order like "sum of maxes" or "max of sums" can't be reconstructed, because they need the individual series and sample timings back. Sum-of-last and sum-of-max only agree when each series reports once per window, or when its last value happens to be its maximum.
 
 ## Two Kinds of Average
 
-"Average" hides two different questions, and aggregation keeps both — but you should know which one your panel asks:
+"Average" hides two different questions, and aggregation keeps both but you should know which one your panel asks:
 
-- **Spatial average** — *the average across instances, now*: sum of last values ÷ number of series. In the example: 35 ÷ 3 ≈ 11.7.
-- **Temporal average** — *the average level over the window*: sum of all values ÷ number of samples. In the example: 176 ÷ 12 ≈ 14.7.
+- **Spatial average**: *the average across instances, now*: sum of last values / number of series. In the example: 35 / 3 ≈ 11.7.
+- **Temporal average**: *the average level over the window*: sum of all values / number of samples. In the example: 176 / 12 ~= 14.7.
 
-Both are answerable from aggregated data. But a subtler form — "average of each instance's average", weighting each instance equally regardless of how often it reports — is not, and silently becomes the pooled temporal average when instances report at different rates.
+Both are answerable from aggregated data. But a subtler form "average of each instance's average", weighting each instance equally regardless of how often it reports is not, and silently becomes the pooled temporal average when instances report at different rates.
 
 ## Questions That Become Unanswerable
 
 Once an attribute is aggregated away for a time range, for that range you can no longer:
 
-- **Filter or group by it.** "Requests by pod", "top 5 instances by memory", "errors excluding host X" — none of these can be answered, for any query over the aggregated range.
+- **Filter or group by it.** "Requests by pod", "top 5 instances by memory", "errors excluding host X" none of these can be answered, for any query over the aggregated range.
 - **Identify outliers.** You can see *that* some instance hit 50 (the max survives); you cannot see *which one*, or whether it was the same instance each minute.
 - **Count series above a threshold.** Only the count of contributing series per window survives, not their individual values.
 - **See sub-minute detail.** A 15-second spike keeps its magnitude (it's the window max) but loses its exact timing and shape. Rates finer than 60 seconds are no longer meaningful.
 
-Everything expressible over the surviving attributes at 60-second resolution — including exact counter rates and increases — remains correct.
+Everything expressible over the surviving attributes at 60-second resolution including exact counter rates and increases remains correct.
 
 ## Why an Alert's Numbers May Not Reproduce Later
 
 Alerts evaluate on full-fidelity data. Investigations often happen days later, on aggregated data. The same query can legitimately return different values in those two views.
 
-Continuing the example: an alert on *total queue depth > 60* fired at 12:00:45, when the instantaneous sum across instances hit 71. Two weeks later you investigate, and the panel — now rendering from aggregated data — plots the per-minute sum of last values: 35. The line never crosses 60. The alert was not wrong, and the data is not corrupted; the 71 existed *between* the per-minute summaries that were kept.
+Continuing the example: an alert on *total queue depth > 60* fired at 12:00:45, when the instantaneous sum across instances hit 71. Two weeks later you investigate, and the panel now rendering from aggregated data plots the per-minute sum of last values: 35. The line never crosses 60. The alert was not wrong, and the data is not corrupted; the 71 existed *between* the per-minute summaries that were kept.
 
 When an investigation on aggregated data doesn't reproduce what an alert saw, check whether the alert's query depends on within-window timing (max of a sum, instantaneous thresholds) or on attributes the rule aggregated away.
 
 ## What You Can Do
 
 - **Query within the full-fidelity window.** Investigations within 24 hours of the data being written see everything, unaggregated.
-- **Keep the attributes you alert and group by.** Review the related-assets warning when [creating a rule](https://signoz.io/docs/metrics-management/volume-control/#create-a-rule) — it lists dashboards and alerts that query the attributes you're about to aggregate away.
+- **Keep the attributes you alert and group by.** Review the related-assets warning when [creating a rule](https://signoz.io/docs/metrics-management/volume-control/#create-a-rule) it lists dashboards and alerts that query the attributes you're about to aggregate away.
 - **Adjust the rule if you got it wrong.** Removing an attribute from a rule restores full fidelity for it going forward. Already-aggregated history stays aggregated.
