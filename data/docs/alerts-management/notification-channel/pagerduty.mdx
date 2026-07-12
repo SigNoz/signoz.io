@@ -1,17 +1,16 @@
 ---
-date: 2026-05-12
-
-title: Configure PagerDuty Channel
-description: Configure PagerDuty integration with SigNoz to streamline incident response and alert management.
+date: 2026-07-11
+title: Configure PagerDuty Notification Channel in SigNoz
+description: Set up PagerDuty as a SigNoz notification channel, get your integration key, connect alerts, and test incident delivery end to end.
 doc_type: howto
 ---
 
 ## Prerequisites
+
 Before setting up PagerDuty as a notification channel in SigNoz, ensure the following:
 
 - **Valid Integration Key**: You have a valid Integration Key (also known as Routing Key) from PagerDuty.
 - **SigNoz Version**: <a href="https://github.com/SigNoz/signoz/releases/tag/v0.8.0" target="_blank" rel="noopener noreferrer nofollow">v0.8.0</a> or later
-
 
 There are two main ways to integrate with PagerDuty:
 
@@ -24,31 +23,48 @@ To manage your alert channels in SigNoz:
 
 - Navigate to `Settings > Account Settings > Notification Channels` tab within SigNoz. This tab displays a list of configured alert channels.
 
-   ![alert-channels](/img/docs/alert-channels.webp)
+<Figure
+  src="/img/docs/alert-channels.webp"
+  alt="Notification Channels list in SigNoz settings"
+  caption="Configured notification channels in SigNoz"
+/>
 
-## Obtaining Integration or Routing key 
+## Obtaining Integration or Routing key
 
 ### For Global Event Orchestration
-1. From the **Automation** menu, select **Event Orchestration**
-2. Create a new orchestration 
-3. Click on **Global Orchestration Key** and copy your **integration key** and keep it safe for later use. 
 
-![image](/img/docs/alerts/pagerduty-1.webp)
+1. From the **AIOps** menu, select **Event Orchestration**
+2. Select or create your orchestration
+3. Expand **Global Orchestration Key** and copy the **Integration Key** shown there. Keep it safe for later use.
 
+<Admonition type="note">
+PagerDuty updates its own UI independently of this doc. If your navigation looks different from the screenshot below, follow PagerDuty's <a href="https://support.pagerduty.com/docs/event-orchestration" target="_blank" rel="noopener noreferrer nofollow">Event Orchestration documentation</a> instead.
+</Admonition>
+
+<Figure
+  src="/img/docs/alerts/pagerduty-1.webp"
+  alt="Copying the integration key from the Global Orchestration Key section of a PagerDuty event orchestration"
+  caption="Copy the integration key from Global Orchestration Key"
+/>
 
 ### For PagerDuty Service Integration
+
 1. Navigate to **Services > Service Directory** and select the **service** where you’d like to add the integration.
 2. Select **Integration tab** and click **Add another integration**
-3. Select **Events API V2** from the list 
+3. Select **Events API V2** from the list
 4. Click **Add**
 5. Locate your integration in the list and click down arrow to view and copy integration key.
 
 For more details on PagerDuty service setup, visit <a href="https://support.pagerduty.com/docs/services-and-integrations#add-integrations-to-an-existing-service" target="_blank" rel="noopener noreferrer nofollow">PagerDuty Service and Integrations</a>.
 
-![image](/img/docs/alerts/pagerduty-2.webp)
-
+<Figure
+  src="/img/docs/alerts/pagerduty-2.webp"
+  alt="Events API V2 integration key on a PagerDuty service"
+  caption="Copy the integration key for your PagerDuty service integration"
+/>
 
 ## Create a New PagerDuty Channel
+
 To create a new PagerDuty notification channel in SigNoz, follow these steps:
 
 - Navigate to `Settings > Account Settings > Notification Channels` and click on `New Channel`.
@@ -63,37 +79,67 @@ You can use <a href="https://prometheus.io/docs/alerting/latest/notifications/" 
 **Test Configuration**:
 Click the Test button to test the connection with your application.
 
-![image](/img/docs/alerts/pagerduty-3.webp)
+<Figure
+  src="/img/docs/alerts/pagerduty-3.webp"
+  alt="New PagerDuty notification channel form in SigNoz"
+  caption="New PagerDuty notification channel form in SigNoz"
+/>
 
 ## Testing the PagerDuty channel
-1. Let's create a simple alert rule that monitors average CPU performance for each host. Go to **Alerts** page in **your SigNoz app** and click `New Alert` button. When the new alert page opens, edit metric query as shown below. Feel free to choose any other metric, the idea is to pick a metric with sufficient data to raise an alert. 
 
-   ![image](/img/docs/alerts/pagerduty-4.webp)
+1. Let's create a simple alert rule that monitors average CPU performance for each host. Go to **Alerts** page in **your SigNoz app** and click `New Alert` button. When the new alert page opens, edit metric query as shown below. Feel free to choose any other metric, the idea is to pick a metric with sufficient data to raise an alert.
+
+<Figure
+  src="/img/docs/alerts/pagerduty-4.webp"
+  alt="Alert query builder configured for system.cpu.load_average.15m"
+  caption="Configure the alert query, grouped by host.name"
+/>
 
 2. We can now **review the graph** to identify a threshold that will definitely cause an alert. Here, anything below 0.2 looks like a good condition for threshold.
 
-   ![image](/img/docs/alerts/pagerduty-5.webp)
+<Figure
+  src="/img/docs/alerts/pagerduty-5.webp"
+  alt="Graph of CPU load average across hosts, used to pick an alert threshold"
+  caption="Review the graph to pick a threshold that will trigger the alert"
+/>
 
 3. Let's **set threshold to 0.12** to be sure that alert will be raised in next few minutes.
 
-   ![image](/img/docs/alerts/pagerduty-6.webp)
+<Figure
+  src="/img/docs/alerts/pagerduty-6.webp"
+  alt="Alert condition set to trigger above a threshold of 0.12"
+  caption="Set the alert threshold to 0.12"
+/>
 
 4. **Save the alert** rule. Feel free to edit severity and labels as necessary.
 
-5. Go to your **PagerDuty Alerts Dashboard** (`PagerDuty Home >> Incident >> Alerts`) and wait for a few minutes. If all goes well, you will **see an incident**. You may have to refresh the page few times to see the alert. 
+5. Go to your **PagerDuty Alerts Dashboard** (`PagerDuty Home >> Incident >> Alerts`) and wait for a few minutes. If all goes well, you will **see an incident**. You may have to refresh the page few times to see the alert.
 
-   ![image](/img/docs/alerts/pagerduty-7.webp)
+<Figure
+  src="/img/docs/alerts/pagerduty-7.webp"
+  alt="Triggered and resolved alerts listed on the PagerDuty Alerts page"
+  caption="Alert triggered and resolved in the PagerDuty Alerts dashboard"
+/>
 
-   ![image](/img/docs/alerts/pagerduty-8.webp)
+<Figure
+  src="/img/docs/alerts/pagerduty-8.webp"
+  alt="PagerDuty incident detail view showing alert summary and details"
+  caption="Incident details for a triggered alert in PagerDuty"
+/>
 
 ## Turn-off Resolved alerts
 
-The resolve alerts toggle is switched on by default. To turn-off receiveing the Resolved alerts for your Notification Channel, follow these steps:
-- Navigate to `Settings > Account Settings > Notification Channels` 
+The resolve alerts toggle is switched on by default. To turn-off receiving the Resolved alerts for your Notification Channel, follow these steps:
+
+- Navigate to `Settings > Account Settings > Notification Channels`
 - Click on `Edit` button for a particular alert.
 - Toggle off the **Send resolved alerts** button and hit `Save`.
 
-<Figure src="/img/docs/alerts/resolved-alerts.webp" alt="Turn off receiveing resolved alerts notifications." caption="Turn off receiveing resolved alerts notifications." />
+<Figure
+  src="/img/docs/alerts/resolved-alerts.webp"
+  alt="Turn off receiving resolved alerts notifications."
+  caption="Turn off receiving resolved alerts notifications."
+/>
 
 ## Configure programmatically
 
@@ -101,7 +147,7 @@ You can also configure the PagerDuty notification channel programmatically using
 
 **API Endpoint:** `POST /api/v1/channels`
 
-To create a new PagerDuty notification channel, send a `POST` request to the `/api/v1/channels` endpoint with the following `curl` command. Replace `YOUR_API_KEY` with an API key from **Settings → Service Accounts** — see [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) to create one.
+To create a new PagerDuty notification channel, send a `POST` request to the `/api/v1/channels` endpoint with the following `curl` command. Replace `YOUR_API_KEY` with an API key from **Settings → Service Accounts** (see [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) to create one).
 
 ```bash
 curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
@@ -114,7 +160,7 @@ curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
             "send_resolved": true,
             "routing_key": "PagerDutyRoutingKey",
             "client": "SigNoz Alert Manager",
-            "client_url": "https://enter-signoz-host-n-port-here/alerts",
+            "client_url": "YOUR_SIGNOZ_CLOUD_URL/alerts",
             "description": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}\n\t{{- if gt (len .CommonLabels) (len .GroupLabels) -}}\n\t {{\" \"}}(\n\t {{- with .CommonLabels.Remove .GroupLabels.Names }}\n\t\t{{- range $index, $label := .SortedPairs -}}\n\t\t {{ if $index }}, {{ end }}\n\t\t {{- $label.Name }}=\"{{ $label.Value -}}\"\n\t\t{{- end }}\n\t {{- end -}}\n\t )\n\t{{- end }}",
             "severity": "{{ (index .Alerts 0).Labels.severity }}",
             "class": "class1",
@@ -133,23 +179,23 @@ curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
 
 **Request Body Attributes:**
 
-| Field | Type | Description |
-| :--- | :--- | :--- |
-| `name` | `string` | The name of the receiver/channel. **Required**; must be unique in all the config. |
-| `pagerduty_configs` | `array` | List of PagerDuty configurations. |
-| `pagerduty_configs[].send_resolved` | `boolean` | Whether to send notifications when an alert is resolved. |
-| `pagerduty_configs[].routing_key` | `string` | The PagerDuty Integration Key (Routing Key). **Mandatory**. |
-| `pagerduty_configs[].client` | `string` | Client identification string. |
-| `pagerduty_configs[].client_url` | `string` | Client URL. |
-| `pagerduty_configs[].description` | `string` | Templated description of the incident. |
-| `pagerduty_configs[].severity` | `string` | Severity of the incident (critical, error, warning, info). |
-| `pagerduty_configs[].class` | `string` | Class of the event. |
-| `pagerduty_configs[].component` | `string` | Component of the event. |
-| `pagerduty_configs[].group` | `string` | Group of the event. |
-| `pagerduty_configs[].details` | `object` | Additional details to include in the incident. |
-
+| Field                               | Type      | Description                                                                       |
+| :---------------------------------- | :-------- | :-------------------------------------------------------------------------------- |
+| `name`                              | `string`  | The name of the receiver/channel. **Required**; must be unique in all the config. |
+| `pagerduty_configs`                 | `array`   | List of PagerDuty configurations.                                                 |
+| `pagerduty_configs[].send_resolved` | `boolean` | Whether to send notifications when an alert is resolved.                          |
+| `pagerduty_configs[].routing_key`   | `string`  | The PagerDuty Integration Key (Routing Key). **Mandatory**.                       |
+| `pagerduty_configs[].client`        | `string`  | Client identification string.                                                     |
+| `pagerduty_configs[].client_url`    | `string`  | Client URL.                                                                       |
+| `pagerduty_configs[].description`   | `string`  | Templated description of the incident.                                            |
+| `pagerduty_configs[].severity`      | `string`  | Severity of the incident (critical, error, warning, info).                        |
+| `pagerduty_configs[].class`         | `string`  | Class of the event.                                                               |
+| `pagerduty_configs[].component`     | `string`  | Component of the event.                                                           |
+| `pagerduty_configs[].group`         | `string`  | Group of the event.                                                               |
+| `pagerduty_configs[].details`       | `object`  | Additional details to include in the incident.                                    |
 
 ## Troubleshooting
+
 If you encounter issues with the PagerDuty integration:
 
 - **Check the Integration Key**: Ensure that the Routing Key or Integration Key is correctly entered in SigNoz.
