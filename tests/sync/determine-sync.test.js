@@ -28,16 +28,32 @@ describe('determineDeployment', () => {
     assert.equal(result.shouldSync, false)
   })
 
-  it('returns staging for closed same-repo PR cleanup without staging label', () => {
+  it('returns staging for closed same-repo PR cleanup without merge', () => {
     const result = determineDeployment({
       eventName: 'pull_request',
       eventAction: 'closed',
       ref: '',
       hasLabel: false,
       sameRepo: true,
+      merged: false,
     })
     assert.equal(result.status, 'staging')
     assert.equal(result.shouldSync, true)
+    assert.equal(result.reason, 'closed-pr-cleanup')
+  })
+
+  it('skips staging cleanup when PR is closed because it was merged', () => {
+    const result = determineDeployment({
+      eventName: 'pull_request',
+      eventAction: 'closed',
+      ref: '',
+      hasLabel: true,
+      sameRepo: true,
+      merged: true,
+    })
+    assert.equal(result.status, 'draft')
+    assert.equal(result.shouldSync, false)
+    assert.equal(result.reason, 'merged-pr-skip-cleanup')
   })
 
   it('returns draft for fork PR even with staging label', () => {

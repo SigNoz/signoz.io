@@ -75,7 +75,11 @@ jobs:
 
       - name: Classify PR Content Files
         id: classify-pr-content
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        # Skip classifier on merged closes — live sync comes from push to main.
+        if: >
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          (github.event.action != 'closed' || github.event.pull_request.merged == false)
         run: |
           node scripts/cms-sync/pr-file-classifier.js \
             --event-action "${{ github.event.action }}" \
@@ -142,12 +146,18 @@ jobs:
             SAME_REPO_FLAG="--same-repo"
           fi
 
+          MERGED_FLAG=""
+          if [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
+            MERGED_FLAG="--merged"
+          fi
+
           node scripts/cms-sync/determine-sync.js \
             --event-name "${{ github.event_name }}" \
             --event-action "${{ github.event.action }}" \
             --ref "${{ github.ref }}" \
             $LABEL_FLAG \
             $SAME_REPO_FLAG \
+            $MERGED_FLAG \
             --any-content-changed "${{ steps.changed-content.outputs.any_changed == 'true' || steps.classify-pr-content.outputs.any_changed == 'true' }}" \
             --any-content-restored "${{ steps.classify-pr-content.outputs.any_restored == 'true' }}" \
             --any-content-deleted "${{ steps.changed-content.outputs.any_deleted == 'true' || steps.classify-pr-content.outputs.any_deleted == 'true' }}" \

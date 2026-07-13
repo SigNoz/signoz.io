@@ -6,6 +6,7 @@
  *     --ref refs/heads/main \
  *     --has-staging-label           (flag, present if PR has staging label)
  *     --same-repo                   (flag, present for push or same-repo PRs)
+ *     --merged                      (flag, present when PR closed via merge)
  *     --any-content-changed true \
  *     --any-content-restored false \
  *     --any-content-deleted false \
@@ -26,6 +27,7 @@ function parseArgs(argv) {
       ref: { type: 'string', default: '' },
       'has-staging-label': { type: 'boolean', default: false },
       'same-repo': { type: 'boolean', default: false },
+      merged: { type: 'boolean', default: false },
       'any-content-changed': { type: 'string', default: 'false' },
       'any-content-restored': { type: 'string', default: 'false' },
       'any-content-deleted': { type: 'string', default: 'false' },
@@ -41,6 +43,7 @@ function parseArgs(argv) {
     ref: values.ref,
     hasLabel: values['has-staging-label'],
     sameRepo: values['same-repo'],
+    merged: values.merged,
     anyContentChanged: values['any-content-changed'] === 'true',
     anyContentRestored: values['any-content-restored'] === 'true',
     anyContentDeleted: values['any-content-deleted'] === 'true',
@@ -50,12 +53,17 @@ function parseArgs(argv) {
   }
 }
 
-function determineDeployment({ eventName, eventAction, ref, hasLabel, sameRepo }) {
+function determineDeployment({ eventName, eventAction, ref, hasLabel, sameRepo, merged }) {
   if (eventName === 'pull_request') {
     if (!sameRepo) {
       return { status: 'draft', shouldSync: false, reason: 'fork-pr' }
     }
     if (eventAction === 'closed') {
+      // Merged PRs are handled by the push-to-main live sync; only clean staging
+      // when a PR is closed without merging.
+      if (merged) {
+        return { status: 'draft', shouldSync: false, reason: 'merged-pr-skip-cleanup' }
+      }
       return { status: 'staging', shouldSync: true, reason: 'closed-pr-cleanup' }
     }
     if (hasLabel) {
