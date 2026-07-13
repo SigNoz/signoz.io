@@ -1,0 +1,174 @@
+---
+date: 2026-07-12
+id: cohere-monitoring-with-opentelemetry
+title: Cohere Observability & Monitoring with OpenTelemetry
+description: Set up Cohere observability with OpenTelemetry and SigNoz. Track Chat, Embed, and Rerank traces, model calls, latency, and token usage from your Cohere apps.
+doc_type: howto
+---
+
+## What is Cohere Observability?
+
+Cohere observability gives you real-time visibility into your AI applications by collecting traces using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. This guide shows you how to instrument a Python application that calls Cohere's Chat, Embed, and Rerank APIs and export its traces to SigNoz, without adding any OpenTelemetry code to your application.
+
+With full Cohere observability in SigNoz, you can trace every Cohere request end to end, correlate LLM spans carrying `gen_ai.*` attributes such as model name and token usage, set alerts on latency and errors, and continuously improve the reliability of your Cohere applications.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- Python 3.10 or later
+- A <a href="https://dashboard.cohere.com/api-keys" target="_blank" rel="noopener noreferrer nofollow">Cohere API key</a>
+- The Cohere Python SDK in your application environment
+
+## Monitor Cohere with OpenTelemetry
+
+The instrumentation is no-code: the `opentelemetry-instrument` launcher discovers the installed `opentelemetry-instrumentation-cohere` package and instruments the Cohere SDK at process startup, so you don't add any OpenTelemetry code to your application. For more details, refer to the <a href="https://github.com/traceloop/openllmetry/tree/main/packages/opentelemetry-instrumentation-cohere" target="_blank" rel="noopener noreferrer nofollow">Cohere OpenTelemetry instrumentor</a>.
+
+### Step 1: Install the dependencies
+
+Create a virtual environment and install the Cohere SDK, the OpenTelemetry distribution, the OTLP exporter, and the Cohere instrumentor:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install \
+  cohere \
+  opentelemetry-distro \
+  opentelemetry-exporter-otlp \
+  opentelemetry-instrumentation-cohere
+```
+
+Then install any remaining instrumentation for your application's other dependencies:
+
+```bash
+.venv/bin/opentelemetry-bootstrap --action=install
+```
+
+The Cohere package must be installed explicitly. The bootstrap command does not add it for you.
+
+### Step 2: Configure the OpenTelemetry export
+
+Set these environment variables through your deployment secret manager or a local `.env` file that is excluded from version control:
+
+```bash
+COHERE_API_KEY=<your-cohere-api-key>
+OTEL_RESOURCE_ATTRIBUTES=service.name=cohere-service,service.version=1.0.0
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+OTEL_TRACES_EXPORTER=otlp
+OTEL_METRICS_EXPORTER=none
+OTEL_LOGS_EXPORTER=none
+TRACELOOP_TRACE_CONTENT=false
+```
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (`us`, `eu`, or `in`)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<your-cohere-api-key>`: Your Cohere API key. Do not commit it to source control.
+
+`OTEL_METRICS_EXPORTER=none` avoids generic HTTP-client metric volume. Set it to `otlp` only when those metrics are intentionally required.
+
+`TRACELOOP_TRACE_CONTENT=false` is recommended in production. The Cohere instrumentor otherwise records prompts, completions, and embeddings in span attributes, which may contain sensitive data.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Point `OTEL_EXPORTER_OTLP_ENDPOINT` at your collector or SigNoz OTLP endpoint (for example `http://<collector-host>:4318`) and remove `OTEL_EXPORTER_OTLP_HEADERS` unless your collector requires its own authentication header. See [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted) for details.
+</KeyPointCallout>
+
+### Step 3: Start your application with instrumentation
+
+Prefix your normal Python command with `opentelemetry-instrument`:
+
+```bash
+.venv/bin/opentelemetry-instrument .venv/bin/python app.py
+```
+
+For a web service, preserve its normal command:
+
+```bash
+.venv/bin/opentelemetry-instrument .venv/bin/uvicorn myapp:app
+```
+
+No `CohereInstrumentor().instrument()` call is needed in your application code. Once running, each Cohere Chat, Embed, or Rerank request produces LLM-aware spans that carry model, operation, duration, and available token-usage information. Cohere makes API calls only when your code invokes it, so a request must actually run before data appears in SigNoz.
+
+## View Cohere Traces in SigNoz
+
+Once configured, your Cohere application automatically emits traces for every Chat, Embed, and Rerank request.
+
+Traces are available in SigNoz under the Traces tab:
+
+<Figure
+  src="/img/docs/llm/cohere/cohere-traces.webp"
+  alt="Cohere Trace View"
+  caption="Cohere Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes. LLM spans carry `gen_ai.*` attributes (model, token usage) and, when `TRACELOOP_TRACE_CONTENT=true`, the prompt and response text.
+
+<Figure
+  src="/img/docs/llm/cohere/cohere-detailed-traces.webp"
+  alt="Cohere Detailed Trace View"
+  caption="Cohere Detailed Trace View"
+/>
+
+<Admonition type="info">
+No-code instrumentation does not know application-specific context such as a prompt-template version, retrieval quality, or tenant. Add manual parent spans later only when that context is required.
+</Admonition>
+
+## Cohere Observability Dashboard
+
+You can also check out our custom [Cohere dashboard](https://signoz.io/docs/dashboards/dashboard-templates/cohere-dashboard/) which provides specialized visualizations for monitoring your Cohere usage. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/cohere/cohere-dashboard.webp"
+  alt="Cohere Dashboard"
+  caption="Cohere Dashboard Template"
+/>
+
+
+<details>
+<ToggleHeading>
+## Troubleshooting Cohere Observability
+</ToggleHeading>
+
+### No traces in SigNoz
+
+- Confirm a Cohere request actually ran. Cohere emits spans only when your code calls it.
+- Verify `opentelemetry-instrumentation-cohere` is installed in the same environment you run the app from. The bootstrap command does not add it for you.
+- Check that the region in `OTEL_EXPORTER_OTLP_ENDPOINT` matches your SigNoz account.
+- OpenTelemetry batches data before sending, so wait 10-30 seconds after making a request.
+
+### Confirm the instrumentor is working
+
+Temporarily set `OTEL_TRACES_EXPORTER=console` and rerun the process. A Cohere span printed to stdout confirms the instrumentor is loaded. Then re-check the SigNoz endpoint, region, and ingestion key. The Cohere call still requires a valid `COHERE_API_KEY`.
+
+### Auth errors (401 / 403)
+
+Re-check the ingestion key in `OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<key>`. It must be the exact key from your SigNoz Ingestion Settings, with no extra spaces or quotes.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** - Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** - Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** - The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** - Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+Additional resources:
+- Set up [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
+- Learn more about [querying traces](https://signoz.io/docs/userguide/traces/)
+- Explore [log correlation](https://signoz.io/docs/userguide/logs_query_builder/)
