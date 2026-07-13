@@ -1,0 +1,81 @@
+---
+date: 2026-07-13
+title: GCP Cloud Integration Setup and Configuration Guide
+description: Connect Google Cloud to SigNoz with the GCP Cloud Integration. Configure the deployment project, region, and monitored projects to collect metrics and logs.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+The GCP Cloud Integration connects your Google Cloud projects to SigNoz so you can collect metrics and logs from supported GCP services and view them on out-of-the-box dashboards. GCP joins AWS and Microsoft Azure as a supported cloud provider in the Integrations module.
+
+<Admonition type="info">
+GCP Cloud Integration is available on SigNoz Cloud and Self-Hosted Enterprise. It is distinct from the [manual GCP monitoring guides](https://signoz.io/docs/gcp-monitoring/), which configure the OpenTelemetry Collector yourself. Use this integration for a managed setup driven from the SigNoz UI.
+</Admonition>
+
+## Overview
+
+When you connect a GCP account, you tell SigNoz three things: where to deploy the collection agent, which region to deploy it in, and which GCP projects to monitor. SigNoz then collects telemetry from the services you enable and ships an out-of-the-box dashboard for each one.
+
+Unlike the AWS and Azure integrations, GCP uses a manual connection flow: there is no automated CloudFormation stack or Azure Deployment Stack. You provide the configuration below in the SigNoz UI, then complete the collector and log-routing setup in your GCP project.
+
+## Prerequisites
+
+- A SigNoz Cloud or Self-Hosted Enterprise account.
+- A Google Cloud organization with one or more projects you want to monitor.
+- A GCP project to host the shared Pub/Sub topic used for log delivery.
+- Permission to deploy resources (an OpenTelemetry Collector) and configure Pub/Sub and IAM in that project.
+
+## Account configuration
+
+In SigNoz, go to **Integrations**, select **GCP**, and provide the following fields when connecting an account:
+
+| Field | Config key | Description |
+|-------|-----------|-------------|
+| Deployment project ID | `deploymentProjectId` | The GCP project that hosts the central Pub/Sub topic used to deliver logs to SigNoz. |
+| Deployment region | `deploymentRegion` | The GCP region where the OpenTelemetry Collector is deployed. Must be one of the [supported regions](#supported-regions). |
+| Project IDs | `projectIds` | The list of GCP project IDs to monitor. At least one is required. |
+
+All three fields are required. You can monitor multiple GCP projects from a single connected account by adding more entries to **Project IDs**.
+
+<Admonition type="warning">
+The step-by-step procedure for deploying the collector and configuring the Pub/Sub topic and IAM roles in your GCP project is being finalized with the product team. This page documents the verified configuration reference; the connection walkthrough and screenshots will follow once available on the demo environment.
+</Admonition>
+
+## Supported regions
+
+The deployment region must be a supported GCP region. Supported regions span Africa, Asia-Pacific, Europe, the Middle East, North America, South America, and the US:
+
+- **Africa**: `africa-south1`
+- **Asia-Pacific**: `asia-east1`, `asia-east2`, `asia-northeast1`, `asia-northeast2`, `asia-northeast3`, `asia-south1`, `asia-south2`, `asia-southeast1`, `asia-southeast2`, `asia-southeast3`, `australia-southeast1`, `australia-southeast2`
+- **Europe**: `europe-central2`, `europe-north1`, `europe-north2`, `europe-southwest1`, `europe-west1`, `europe-west2`, `europe-west3`, `europe-west4`, `europe-west6`, `europe-west8`, `europe-west9`, `europe-west10`, `europe-west12`
+- **Middle East**: `me-central1`, `me-central2`, `me-west1`
+- **North America**: `northamerica-northeast1`, `northamerica-northeast2`, `northamerica-south1`
+- **South America**: `southamerica-east1`, `southamerica-west1`
+- **US**: `us-central1`, `us-east1`, `us-east4`, `us-east5`, `us-south1`, `us-west1`, `us-west2`, `us-west3`, `us-west4`
+
+## Enable a service
+
+After connecting an account, enable the services you want to monitor:
+
+1. In **Integrations** > **GCP**, select a service (for example, [GCP Cloud SQL for PostgreSQL](https://signoz.io/docs/integrations/gcp/cloud-sql-postgresql/)).
+2. Toggle **Metrics** and **Logs** on or off. Each signal is controlled independently, so you can collect metrics only, logs only, or both.
+3. Enabling a service creates its out-of-the-box dashboard automatically.
+
+## Supported services
+
+| Service | Signals |
+|---------|---------|
+| [GCP Cloud SQL for PostgreSQL](https://signoz.io/docs/integrations/gcp/cloud-sql-postgresql/) | Metrics, Logs |
+
+More GCP services will be added in future releases.
+
+## Next steps
+
+- Enable [GCP Cloud SQL for PostgreSQL](https://signoz.io/docs/integrations/gcp/cloud-sql-postgresql/) and explore its overview dashboard.
+- [Create alerts](https://signoz.io/docs/alerts/) on the metrics you collect.
+
+## Get Help
+
+<GetHelp />
+</content>
+</invoke>

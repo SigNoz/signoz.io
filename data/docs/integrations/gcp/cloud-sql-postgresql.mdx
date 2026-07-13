@@ -1,0 +1,78 @@
+---
+date: 2026-07-13
+title: GCP Cloud SQL for PostgreSQL Monitoring with SigNoz
+description: Monitor GCP Cloud SQL for PostgreSQL with SigNoz. Collect 13 metrics covering health, connections, transactions, query execution, and replication.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+The GCP Cloud SQL for PostgreSQL integration collects metrics and logs from your Cloud SQL for PostgreSQL instances and ships an out-of-the-box overview dashboard covering health, connections, transactions, query execution, and replication. It is the first available GCP service in the [GCP Cloud Integration](https://signoz.io/docs/integrations/gcp/gcp-cloud-integration/).
+
+<Admonition type="info">
+This integration is available on SigNoz Cloud and Self-Hosted Enterprise.
+</Admonition>
+
+## Getting started
+
+Connect your GCP account first. See [GCP Cloud Integration](https://signoz.io/docs/integrations/gcp/gcp-cloud-integration/) for the account configuration fields and supported regions.
+
+Once connected:
+
+1. In SigNoz, navigate to **Integrations** > **GCP**.
+2. Select **GCP Cloud SQL for PostgreSQL**.
+3. Toggle **Metrics** and **Logs** on. Each signal is controlled independently.
+
+Enabling the integration creates the **GCP Cloud SQL for PostgreSQL Overview** dashboard automatically. Data starts flowing within a few minutes.
+
+## Data collected
+
+The integration tracks 13 metrics from Cloud SQL for PostgreSQL:
+
+| Metric | Unit | Type | Description |
+|--------|------|------|-------------|
+| `cloudsql.googleapis.com/database/up` | Count | Gauge | Instance up/down status. |
+| `cloudsql.googleapis.com/database/cpu/utilization` | Percent | Gauge | CPU utilization. |
+| `cloudsql.googleapis.com/database/memory/utilization` | Percent | Gauge | Memory utilization. |
+| `cloudsql.googleapis.com/database/memory/usage` | Bytes | Gauge | Memory used, in bytes. |
+| `cloudsql.googleapis.com/database/disk/bytes_used` | Bytes | Gauge | Disk space used, in bytes. |
+| `cloudsql.googleapis.com/database/postgresql/num_backends` | Count | Gauge | PostgreSQL backend connection count. |
+| `cloudsql.googleapis.com/database/postgresql/num_backends_by_state` | Count | Gauge | Backend connections grouped by state. |
+| `cloudsql.googleapis.com/database/postgresql/transaction_count` | Count | Gauge | Transaction count. |
+| `cloudsql.googleapis.com/database/postgresql/deadlock_count` | Count | Gauge | Deadlock count. |
+| `cloudsql.googleapis.com/database/postgresql/vacuum/oldest_transaction_age` | Count | Gauge | Age of the oldest un-vacuumed transaction. |
+| `cloudsql.googleapis.com/database/postgresql/insights/aggregate/execution_time` | Microseconds | Gauge | Aggregate query execution time. |
+| `cloudsql.googleapis.com/database/postgresql/insights/perquery/execution_time` | Microseconds | Gauge | Per-query execution time. |
+| `cloudsql.googleapis.com/database/postgresql/replication/replica_byte_lag` | Bytes | Gauge | Replication lag in bytes, per replica. |
+
+## Overview dashboard
+
+The **GCP Cloud SQL for PostgreSQL Overview** dashboard is organized into five sections:
+
+- **Health, CPU, Memory, Disk**: Server Up, CPU Utilization, Memory Utilization, Memory Usage, Disk Usage.
+- **Connections**: PostgreSQL Connections (by database) and Cloud SQL Connections (by state).
+- **Transactions**: Number of Transactions (by type), Deadlocks, and Oldest Transaction Age.
+- **Execution**: Aggregate Execution Time, IO Execution Time, and Query Execution Time (top 10 slowest queries).
+- **Replication**: Replication Lag (bytes per replica).
+
+Pre-built dashboards are locked and cannot be edited. To customize, use **Export JSON** from the dashboard menu and import it as a new dashboard.
+
+### Filter variables
+
+The dashboard includes two filter variables that scope every panel:
+
+- **Project ID**: single-select, with an **All** option to show every monitored project.
+- **Database ID**: multi-select, to focus on one or more databases.
+
+## Migrating from the earlier `cloudsql` integration
+
+The service ID was renamed from `cloudsql` to `cloudsql_postgres`. If you configured the earlier stub integration under the old ID, re-enable the service under **GCP Cloud SQL for PostgreSQL** so metrics and logs continue to flow to the current dashboard.
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) on CPU saturation, connection counts, deadlocks, or replication lag.
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate database metrics with application performance.
+
+## Get Help
+
+<GetHelp />
+</content>
