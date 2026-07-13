@@ -3,6 +3,8 @@ const assert = require('node:assert/strict')
 
 const {
   classifyContentFiles,
+  ensureGitRef,
+  getOriginBranchName,
   isContentPath,
   parseNameStatus,
 } = require('../../scripts/cms-sync/pr-file-classifier')
@@ -18,6 +20,56 @@ describe('isContentPath', () => {
     assert.equal(isContentPath('data/blog/post.txt', ['blog']), false)
     assert.equal(isContentPath('data/unknown/post.mdx', ['blog']), false)
     assert.equal(isContentPath('data-assets/img/docs/example.png', ['docs']), false)
+  })
+})
+
+describe('ensureGitRef', () => {
+  it('extracts branch names from origin refs', () => {
+    assert.equal(
+      getOriginBranchName('origin/chore/sync-workflow-cleanup'),
+      'chore/sync-workflow-cleanup'
+    )
+    assert.equal(
+      getOriginBranchName('refs/remotes/origin/chore/sync-workflow-cleanup'),
+      'chore/sync-workflow-cleanup'
+    )
+    assert.equal(getOriginBranchName('b459ee54ba5536613e10edd71d77bd7fad01e2e5'), null)
+  })
+
+  it('fetches a missing origin branch ref before classification uses it', () => {
+    const refs = new Set()
+    const calls = []
+    const git = (args) => {
+      calls.push(args)
+
+      if (args[0] === 'rev-parse') {
+        const ref = args[args.length - 1].replace(/\^\{commit\}$/, '')
+        if (!refs.has(ref)) {
+          throw new Error(`missing ${ref}`)
+        }
+        return `${ref}\n`
+      }
+
+      if (args[0] === 'fetch') {
+        const refspec = args[args.length - 1]
+        const [, dest] = refspec.split(':')
+        refs.add(dest)
+        refs.add(dest.replace('refs/remotes/', ''))
+        return ''
+      }
+
+      throw new Error(`unexpected git command: ${args.join(' ')}`)
+    }
+
+    ensureGitRef('origin/chore/sync-workflow-cleanup', git)
+
+    assert.deepEqual(calls[1], [
+      'fetch',
+      '--no-tags',
+      '--prune',
+      'origin',
+      '+refs/heads/chore/sync-workflow-cleanup:refs/remotes/origin/chore/sync-workflow-cleanup',
+    ])
   })
 })
 

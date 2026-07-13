@@ -52,6 +52,48 @@ function runGit(args) {
   })
 }
 
+function getOriginBranchName(ref) {
+  if (ref.startsWith('origin/')) {
+    return ref.slice('origin/'.length)
+  }
+  if (ref.startsWith('refs/remotes/origin/')) {
+    return ref.slice('refs/remotes/origin/'.length)
+  }
+  return null
+}
+
+function refExists(ref, git = runGit) {
+  try {
+    git(['rev-parse', '--verify', '--quiet', `${ref}^{commit}`])
+    return true
+  } catch {
+    return false
+  }
+}
+
+function ensureGitRef(ref, git = runGit) {
+  if (refExists(ref, git)) {
+    return
+  }
+
+  const branchName = getOriginBranchName(ref)
+  if (!branchName) {
+    throw new Error(`Git ref "${ref}" is not available in the checkout`)
+  }
+
+  git([
+    'fetch',
+    '--no-tags',
+    '--prune',
+    'origin',
+    `+refs/heads/${branchName}:refs/remotes/origin/${branchName}`,
+  ])
+
+  if (!refExists(ref, git)) {
+    throw new Error(`Git ref "${ref}" is not available after fetching origin/${branchName}`)
+  }
+}
+
 function isContentPath(filePath, syncFolders = DEFAULT_SYNC_FOLDERS) {
   const normalized = filePath.replace(/\\/g, '/')
   const parts = normalized.split('/')
@@ -208,6 +250,9 @@ function writeOutputs(outputDir, result) {
 }
 
 function classifyFromGit({ eventAction, baseRef, headRef, syncFolders, git = runGit }) {
+  ensureGitRef(baseRef, git)
+  ensureGitRef(headRef, git)
+
   const touchedFiles = collectTouchedContentFiles({ baseRef, headRef, syncFolders, git })
   const finalStatusByPath = collectFinalStatuses({ baseRef, headRef, syncFolders, git })
 
@@ -241,9 +286,12 @@ module.exports = {
   classifyFromGit,
   collectFinalStatuses,
   collectTouchedContentFiles,
+  ensureGitRef,
+  getOriginBranchName,
   isContentPath,
   parseArgs,
   parseNameStatus,
   parseSyncFolders,
   pathExistsAtRef,
+  refExists,
 }

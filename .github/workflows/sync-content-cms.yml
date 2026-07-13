@@ -38,7 +38,7 @@ jobs:
 
       - name: Fetch PR Base Branch
         if: github.event_name == 'pull_request'
-        run: git fetch origin "${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}" --no-tags --prune
+        run: git fetch --no-tags --prune origin "+refs/heads/${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}"
 
       - name: Initialize Change Output Files
         run: |
@@ -221,7 +221,7 @@ jobs:
           CHANGED_FILES_PATH: .github/outputs/content_changed_files.json
           RESTORE_FILES_PATH: .github/outputs/content_restore_files.json
           DELETED_FILES_PATH: .github/outputs/content_deleted_files.json
-          RESTORE_REF: origin/main
+          RESTORE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.event.pull_request.base.ref) || 'origin/main' }}
           CHANGED_ASSETS_PATH: .github/outputs/assets_changed_files.json
           SIDENAV_CHANGED: ${{ steps.changed-sidenav.outputs.any_changed }}
           LISTICLES_CHANGED: ${{ steps.changed-listicles.outputs.any_changed }}
