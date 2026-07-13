@@ -7,6 +7,7 @@ function parseArgs(argv) {
     args: argv || process.argv.slice(2),
     options: {
       'changed-files': { type: 'string' },
+      'restore-files': { type: 'string' },
       'deleted-files': { type: 'string' },
       'changed-assets': { type: 'string' },
       'sidenav-changed': { type: 'boolean', default: false },
@@ -15,11 +16,13 @@ function parseArgs(argv) {
       'deleted-listicles': { type: 'string' },
       'sync-folders': { type: 'string' },
       'deployment-status': { type: 'string' },
+      'restore-ref': { type: 'string' },
     },
     strict: false,
   })
   return {
     changedFilesPath: values['changed-files'],
+    restoreFilesPath: values['restore-files'],
     deletedFilesPath: values['deleted-files'],
     changedAssetsPath: values['changed-assets'],
     sidenavChanged: values['sidenav-changed'],
@@ -28,6 +31,7 @@ function parseArgs(argv) {
     deletedListiclesPath: values['deleted-listicles'],
     syncFolders: values['sync-folders'],
     deploymentStatus: values['deployment-status'],
+    restoreRef: values['restore-ref'],
   }
 }
 
@@ -78,6 +82,12 @@ function buildConfig({ env = process.env, argv } = {}) {
     'CHANGED_FILES_PATH',
     'CHANGED_FILES'
   )
+  const restoreFiles = loadFileList(
+    cli.restoreFilesPath,
+    env,
+    'RESTORE_FILES_PATH',
+    'RESTORE_FILES'
+  )
   const deletedFiles = loadFileList(
     cli.deletedFilesPath,
     env,
@@ -115,7 +125,9 @@ function buildConfig({ env = process.env, argv } = {}) {
     cmsApiToken,
     syncFolders,
     changedFiles,
+    restoreFiles,
     deletedFiles,
+    restoreRef: cli.restoreRef || env.RESTORE_REF || 'origin/main',
     changedAssets,
     listiclesChanged,
     changedListicles,

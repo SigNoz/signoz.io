@@ -5,13 +5,65 @@ const { determineDeployment, shouldSkip } = require('../../scripts/cms-sync/dete
 
 describe('determineDeployment', () => {
   it('returns staging for PR with staging label', () => {
-    const result = determineDeployment({ eventName: 'pull_request', ref: '', hasLabel: true })
+    const result = determineDeployment({
+      eventName: 'pull_request',
+      eventAction: 'synchronize',
+      ref: '',
+      hasLabel: true,
+      sameRepo: true,
+    })
     assert.equal(result.status, 'staging')
     assert.equal(result.shouldSync, true)
   })
 
   it('returns draft for PR without staging label', () => {
-    const result = determineDeployment({ eventName: 'pull_request', ref: '', hasLabel: false })
+    const result = determineDeployment({
+      eventName: 'pull_request',
+      eventAction: 'synchronize',
+      ref: '',
+      hasLabel: false,
+      sameRepo: true,
+    })
+    assert.equal(result.status, 'draft')
+    assert.equal(result.shouldSync, false)
+  })
+
+  it('returns staging for closed same-repo PR cleanup without merge', () => {
+    const result = determineDeployment({
+      eventName: 'pull_request',
+      eventAction: 'closed',
+      ref: '',
+      hasLabel: false,
+      sameRepo: true,
+      merged: false,
+    })
+    assert.equal(result.status, 'staging')
+    assert.equal(result.shouldSync, true)
+    assert.equal(result.reason, 'closed-pr-cleanup')
+  })
+
+  it('skips staging cleanup when PR is closed because it was merged', () => {
+    const result = determineDeployment({
+      eventName: 'pull_request',
+      eventAction: 'closed',
+      ref: '',
+      hasLabel: true,
+      sameRepo: true,
+      merged: true,
+    })
+    assert.equal(result.status, 'draft')
+    assert.equal(result.shouldSync, false)
+    assert.equal(result.reason, 'merged-pr-skip-cleanup')
+  })
+
+  it('returns draft for fork PR even with staging label', () => {
+    const result = determineDeployment({
+      eventName: 'pull_request',
+      eventAction: 'synchronize',
+      ref: '',
+      hasLabel: true,
+      sameRepo: false,
+    })
     assert.equal(result.status, 'draft')
     assert.equal(result.shouldSync, false)
   })
@@ -40,6 +92,7 @@ describe('determineDeployment', () => {
 describe('shouldSkip', () => {
   const noChanges = {
     anyContentChanged: false,
+    anyContentRestored: false,
     anyContentDeleted: false,
     anyAssetsChanged: false,
     sidenavChanged: false,
@@ -64,6 +117,11 @@ describe('shouldSkip', () => {
   it('does not skip when content deleted and shouldSync', () => {
     const deployment = { status: 'staging', shouldSync: true }
     assert.equal(shouldSkip(deployment, { ...noChanges, anyContentDeleted: true }), false)
+  })
+
+  it('does not skip when content restored and shouldSync', () => {
+    const deployment = { status: 'staging', shouldSync: true }
+    assert.equal(shouldSkip(deployment, { ...noChanges, anyContentRestored: true }), false)
   })
 
   it('does not skip when assets changed and shouldSync', () => {
