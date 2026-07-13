@@ -1,14 +1,14 @@
 ---
 date: 2026-07-12
 id: cohere-monitoring-with-opentelemetry
-title: Cohere Observability & Monitoring with OpenTelemetry
-description: Set up Cohere observability with OpenTelemetry and SigNoz. Track Chat, Embed, and Rerank traces, model calls, latency, and token usage from your Cohere apps.
+title: Cohere Monitoring & Observability with OpenTelemetry
+description: Set up Cohere monitoring with OpenTelemetry and SigNoz. Track Chat, Embed, and Rerank traces, model calls, latency, and token usage from your Cohere apps.
 doc_type: howto
 ---
 
 ## What is Cohere Observability?
 
-Cohere observability gives you real-time visibility into your AI applications by collecting traces using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. This guide shows you how to instrument a Python application that calls Cohere's Chat, Embed, and Rerank APIs and export its traces to SigNoz, without adding any OpenTelemetry code to your application.
+Cohere monitoring gives you real-time visibility into your AI applications by collecting traces using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. This guide shows you how to instrument a Python application that calls Cohere's Chat, Embed, and Rerank APIs and export its traces to SigNoz, without adding any OpenTelemetry code to your application.
 
 With full Cohere observability in SigNoz, you can trace every Cohere request end to end, correlate LLM spans carrying `gen_ai.*` attributes such as model name and token usage, set alerts on latency and errors, and continuously improve the reliability of your Cohere applications.
 
@@ -47,7 +47,7 @@ The Cohere package must be installed explicitly. The bootstrap command does not 
 
 ### Step 2: Configure the OpenTelemetry export
 
-Set these environment variables through your deployment secret manager or a local `.env` file that is excluded from version control:
+Set these environment variables through your deployment secret manager or a local `.env` file:
 
 ```bash
 COHERE_API_KEY=<your-cohere-api-key>
@@ -61,9 +61,9 @@ OTEL_LOGS_EXPORTER=none
 TRACELOOP_TRACE_CONTENT=false
 ```
 
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (`us`, `eu`, or `in`)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<your-cohere-api-key>`: Your Cohere API key. Do not commit it to source control.
+- `<your-cohere-api-key>`: Your Cohere API key.
 
 `OTEL_METRICS_EXPORTER=none` avoids generic HTTP-client metric volume. Set it to `otlp` only when those metrics are intentionally required.
 
@@ -101,7 +101,7 @@ Traces are available in SigNoz under the Traces tab:
   caption="Cohere Trace View"
 />
 
-When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes. LLM spans carry `gen_ai.*` attributes (model, token usage) and, when `TRACELOOP_TRACE_CONTENT=true`, the prompt and response text.
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
 
 <Figure
   src="/img/docs/llm/cohere/cohere-detailed-traces.webp"
