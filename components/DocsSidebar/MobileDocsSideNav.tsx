@@ -31,7 +31,7 @@ export default function MobileDocsSideNav() {
             <ArrowBigLeft size={16} /> Back to main menu
           </TrackingButton>
         </div>
-        <DocsSidebar onNavItemClick={() => close()} />
+        <DocsSidebar onNavItemClick={() => close()} showRegionSelector={false} />
       </div>
     </div>
   )
