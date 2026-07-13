@@ -66,6 +66,9 @@ module.exports = {
           'homepage-agent-response-reveal 760ms ease 3600ms forwards',
         'homepage-logo-marquee': 'homepage-logo-marquee 34s linear infinite',
       },
+      screens: {
+        wide: '1600px',
+      },
       maxWidth: {
         '8xl': '1440px',
         'ot-hub': '1504px',

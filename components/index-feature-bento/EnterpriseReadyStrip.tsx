@@ -6,12 +6,10 @@ export default function EnterpriseReadyStrip() {
     {
       Logo: Soc2Logo,
       label: 'SOC 2 Type II',
-      description: 'Controls and operational safeguards for security-conscious teams.',
     },
     {
       Logo: HipaaLogo,
       label: 'HIPAA',
-      description: 'Protected health information can be handled with the right safeguards.',
     },
   ]
 
@@ -24,23 +22,24 @@ export default function EnterpriseReadyStrip() {
               Enterprise ready
             </p>
             <h3 className="m-0 mt-3 max-w-xs text-2xl font-medium leading-tight tracking-tight text-signoz_vanilla-100 md:max-w-xs md:text-3xl">
-              Compliance answers, before they become blockers.
+              Built secure, from day one.
             </h3>
           </div>
         </div>
 
-        {compliances.map(({ Logo, description, label }, index) => (
+        {compliances.map(({ Logo, label }, index) => (
           <div
             key={label}
-            className={`flex min-h-44 flex-col justify-between border-t border-signoz_slate-400/35 py-7 md:min-h-56 md:border-t-0 md:px-12 ${
+            className={`flex min-h-44 flex-col justify-center gap-5 border-t border-signoz_slate-400/35 py-7 md:min-h-56 md:border-t-0 md:px-12 ${
               index === 0 ? 'md:border-x' : ''
             } border-signoz_slate-400/35`}
           >
-            <Logo className="h-12 w-auto opacity-70" />
+            <div className="h-14 overflow-visible">
+              <Logo className="h-14 w-auto origin-left scale-[1.55] opacity-80 md:scale-[1.85]" />
+            </div>
             <div>
-              <p className="m-0 text-sm leading-5 text-signoz_vanilla-400">{label} compliance</p>
-              <p className="m-0 mt-3 max-w-xs text-lg font-medium leading-7 tracking-normal text-signoz_vanilla-100 md:text-xl md:leading-8">
-                {description}
+              <p className="m-0 text-base font-medium leading-6 text-signoz_vanilla-400 md:text-lg md:leading-7">
+                {label} compliance
               </p>
             </div>
           </div>

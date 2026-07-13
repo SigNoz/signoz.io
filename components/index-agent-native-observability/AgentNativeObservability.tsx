@@ -259,13 +259,13 @@ export default function AgentNativeObservabilitySection() {
   return (
     <section
       ref={sectionRef}
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden bg-signoz_ink-500 px-5 py-16 sm:px-6 sm:py-24 lg:px-[78px] lg:py-32"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden bg-signoz_ink-500 px-5 py-16 sm:px-6 sm:py-24 lg:px-20 lg:py-32 wide:max-w-8xl wide:px-0"
       data-homepage-agent-native-observability
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_58%_at_24%_42%,rgba(78,116,248,0.09),transparent_64%),radial-gradient(ellipse_72%_54%_at_82%_52%,rgba(35,196,248,0.055),transparent_66%),linear-gradient(180deg,rgba(22,25,34,0.08),rgba(11,12,14,0.42)_50%,rgba(11,12,14,0.1))] [mask-image:linear-gradient(180deg,transparent_0%,black_16%,black_82%,transparent_100%)]" />
-      <div className="relative mx-auto max-w-[1200px]">
+      <div className="relative mx-auto max-w-8xl">
         <div
-          className="pointer-events-none absolute left-4 right-4 top-24 h-[760px] sm:left-6 sm:right-6 lg:left-[78px] lg:right-[78px] lg:top-32"
+          className="pointer-events-none absolute left-4 right-4 top-24 h-[760px] sm:left-6 sm:right-6 lg:left-20 lg:right-20 lg:top-32"
           data-homepage-floating-cta="Explore agent-native observability"
           data-homepage-floating-href="/agent-native-observability/"
           aria-hidden="true"
@@ -273,7 +273,9 @@ export default function AgentNativeObservabilitySection() {
 
         <div className="grid gap-5 md:grid-cols-[0.9fr_1fr] md:items-start md:gap-20">
           <h2 className="m-0 max-w-[540px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[40px] sm:leading-[1.04] sm:tracking-[-1.1px] md:text-[58px] md:tracking-[-1.65px]">
-            Agent-native observability, inside your IDE and SigNoz.
+            Agent-native observability,
+            <br />
+            <span className="text-signoz_vanilla-400">inside your IDE and SigNoz.</span>
           </h2>
 
           <div className="max-w-[560px] md:pt-2">

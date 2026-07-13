@@ -1,0 +1,164 @@
+---
+date: 2026-07-08
+title: Langflow Observability & Monitoring with OpenTelemetry
+description: Set up Langflow observability with OpenTelemetry and SigNoz. Track flow and LLM traces, model calls, prompts, and token usage from your Langflow apps.
+doc_type: howto
+---
+
+## What is Langflow Observability?
+
+Langflow observability gives you real-time visibility into your visual AI workflows by collecting traces using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. Langflow (1.10+) ships with OpenTelemetry built in, so you don't build or install any instrumentation. This guide shows you how to export Langflow's flow and LLM traces to SigNoz by running the official Langflow Docker image with a few environment variables, giving you insight into components, model calls, prompts, and token usage.
+
+With full Langflow observability in SigNoz, you can trace every flow run end to end, correlate LLM spans carrying `gen_ai.*` attributes, set alerts on latency and errors, and continuously improve the reliability of your Langflow applications.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- Docker installed and running on your system
+- Langflow 1.10 or later. Follow the <a href="https://docs.langflow.org/get-started-installation" target="_blank" rel="noopener noreferrer nofollow">Langflow installation guide</a> if you don't have it yet
+
+## Monitor Langflow with OpenTelemetry
+
+Langflow's OpenTelemetry stack is bundled inside the Langflow image, so the integration is entirely configuration based. For more details, refer to the <a href="https://docs.langflow.org/" target="_blank" rel="noopener noreferrer nofollow">Langflow documentation</a>.
+
+### Step 1: Run Langflow with telemetry enabled
+
+Replace `<your-ingestion-key>` and the region in the URL, then run the official Langflow image:
+
+```bash
+docker run -d --name langflow -p 7860:7860 \
+  -e TRACELOOP_API_KEY=signoz \
+  -e TRACELOOP_BASE_URL=https://ingest.<region>.signoz.cloud:443 \
+  -e TRACELOOP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+  -e TRACELOOP_TRACE_CONTENT=true \
+  langflowai/langflow:latest
+```
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (`us`, `eu`, or `in`)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Langflow is now exporting traces to SigNoz. Keep the `https://` scheme and `:443` port. Langflow appends `/v1/traces` for you, so don't add it yourself.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+The following environment variables control the export:
+
+| Variable | Required | Value | What it does |
+|---|:--:|---|---|
+| `TRACELOOP_API_KEY` | Yes | any non-empty string (e.g. `signoz`) | Switches Langflow's OTLP tracer on. It is not used to authenticate to SigNoz. |
+| `TRACELOOP_BASE_URL` | Yes | `https://ingest.<region>.signoz.cloud:443` | Where Langflow sends OTLP data (it posts to `.../v1/traces`). |
+| `TRACELOOP_HEADERS` | Yes | `signoz-ingestion-key=<your-ingestion-key>` | Authenticates the export to SigNoz. |
+| `TRACELOOP_TRACE_CONTENT` | No | `true` / `false` (default `true`) | Include prompt and response text on spans. Set `false` to keep prompt bodies out of telemetry while still capturing model and token data. |
+
+<Admonition type="info">
+Prefer docker-compose? Set the same variables in your compose file or a `.env` file and start Langflow with `docker compose up -d`. The `langflowai/langflow` image reads the same `TRACELOOP_*` variables either way.
+</Admonition>
+
+### Step 2: Generate some telemetry
+
+1. Open Langflow at `http://localhost:7860`
+2. Build or open a flow that calls an LLM, and run it
+
+Each run produces spans, including LLM spans carrying `gen_ai.*` attributes such as the model name and token usage. An idle Langflow instance emits nothing, so a flow must actually run before data appears in SigNoz.
+
+## View Langflow Traces in SigNoz
+
+Once configured, your Langflow application automatically emits traces for every flow run.
+
+Traces are available in SigNoz under the Traces tab:
+
+<Figure
+  src="/img/docs/llm/langflow/langflow-traces.webp"
+  alt="Langflow Trace View"
+  caption="Langflow Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes. LLM spans carry `gen_ai.*` attributes (model, token usage) and, when `TRACELOOP_TRACE_CONTENT=true`, the prompt and response text.
+
+<Figure
+  src="/img/docs/llm/langflow/langflow-detailed-traces.webp"
+  alt="Langflow Detailed Trace View"
+  caption="Langflow Detailed Trace View"
+/>
+
+<Admonition type="info">
+This integration sends Langflow's flow and LLM spans from its native tracer. Full HTTP-request and service-map instrumentation is a separate mechanism and is not covered here.
+</Admonition>
+
+## Langflow Observability Dashboard
+
+You can also check out our custom [Langflow dashboard](https://signoz.io/docs/dashboards/dashboard-templates/langflow-dashboard/) which provides specialized visualizations for monitoring your Langflow usage. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/langflow/langflow-dashboard.webp"
+  alt="Langflow Dashboard"
+  caption="Langflow Dashboard Template"
+/>
+
+
+<details>
+<ToggleHeading>
+## Troubleshooting Langflow Observability
+</ToggleHeading>
+
+### No traces in SigNoz
+
+- Confirm the flow actually ran. An idle Langflow instance emits nothing.
+- Verify `TRACELOOP_API_KEY` is set to a non-empty value. This switches the tracer on.
+- Check that the region in `TRACELOOP_BASE_URL` matches your SigNoz account.
+- OpenTelemetry batches data before sending, so wait 10-30 seconds after running a flow.
+
+### Auth errors (401 / 403)
+
+Re-check the ingestion key in `TRACELOOP_HEADERS=signoz-ingestion-key=<key>`. It must be the exact key from your SigNoz Ingestion Settings, with no extra spaces or quotes.
+
+### Endpoint issues
+
+Keep the `https://` scheme and `:443` port in `TRACELOOP_BASE_URL`. Langflow appends `/v1/traces` for you, so don't add it yourself.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Upgrading Langflow
+</ToggleHeading>
+
+Nothing special is required. The OpenTelemetry stack is bundled inside the Langflow image, so it always matches the version you run. There is no separate agent or instrumentor to update:
+
+```bash
+docker pull langflowai/langflow:latest   # or a specific tag
+# recreate the container with the same env vars
+```
+
+For reproducible deploys, pin a specific tag such as `langflowai/langflow:1.10.1` instead of `latest`.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** - Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** - Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** - The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** - Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+Additional resources:
+- Set up [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
+- Learn more about [querying traces](https://signoz.io/docs/userguide/traces/)
+- Explore [log correlation](https://signoz.io/docs/userguide/logs_query_builder/)
