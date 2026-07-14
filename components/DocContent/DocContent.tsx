@@ -64,7 +64,7 @@ const DocContent: React.FC<{
         className={`box-border min-w-0 flex-[1_1_auto] [&_details+details]:mt-8 ${isOnboarding ? '!w-full px-4' : ''}`}
       >
         <div className="mb-4 md:hidden">
-          <SidebarRegionSelector />
+          <SidebarRegionSelector showInfoTip={false} />
         </div>
         {breadcrumbs && !isOnboarding && <Breadcrumb crumbs={breadcrumbs} />}
         <div className="m-0 flex items-center justify-between gap-2">

@@ -4,8 +4,13 @@ import React from 'react'
 import { Globe, Loader2 } from 'lucide-react'
 import { useRegion } from '@/components/Region/RegionContext'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@signozhq/ui/select'
+import RegionSelectorInfoTip from './RegionSelectorInfoTip'
 
-export default function SidebarRegionSelector() {
+type SidebarRegionSelectorProps = {
+  showInfoTip?: boolean
+}
+
+export default function SidebarRegionSelector({ showInfoTip = true }: SidebarRegionSelectorProps) {
   const { regions, region, cloudRegion, setRegion, isLoading } = useRegion()
   const [open, setOpen] = React.useState(false)
 
@@ -32,7 +37,7 @@ export default function SidebarRegionSelector() {
 
   const currentValue = region && cloudRegion ? `${region}_${cloudRegion}` : undefined
 
-  return (
+  const selector = (
     <div className="flex flex-col gap-1 px-2.5 pb-2">
       <div className="flex items-center gap-1.5 pb-2 pl-1.5">
         <Globe size={12} className="text-signoz_vanilla-400" />
@@ -86,4 +91,10 @@ export default function SidebarRegionSelector() {
       </Select>
     </div>
   )
+
+  if (!showInfoTip) {
+    return selector
+  }
+
+  return <RegionSelectorInfoTip>{selector}</RegionSelectorInfoTip>
 }
