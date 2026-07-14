@@ -1,0 +1,81 @@
+---
+title: "OpenTelemetry Support Isn't the Same as OpenTelemetry Native"
+published_date: 2026-07-05
+tags: [OpenTelemetry, Datadog]
+authors: [goutham_karthi]
+description: "Most backends accept OTLP at the door, then remap your OpenTelemetry data into a proprietary model, losing attributes, query power, and portability. Here is what OpenTelemetry-native actually means, with Datadog as the worked example."
+keywords: [OpenTelemetry native, OpenTelemetry backend, OTLP, Datadog OpenTelemetry, resource attributes, semantic conventions, delta temporality, gen_ai spans, SigNoz]
+hide_table_of_contents: false
+related_articles:
+  - '/blog/dd-trace/'
+  - '/blog/cost-effective-datadog-alternative/'
+  - '/blog/what-is-otlp/'
+  - '/blog/what-is-opentelemetry/'
+---
+
+Almost every observability vendor now says it "supports OpenTelemetry." That claim is true and nearly meaningless. Supporting OpenTelemetry usually means one thing: the backend accepts OTLP at the door. You can point an OpenTelemetry SDK or Collector at it and data lands. That's ingestion, and it's table stakes.
+
+The question that actually decides whether you're locked in is what happens *after* the data lands. Does it stay OpenTelemetry data, queryable with the same attribute names and the same data model you instrumented with? Or does the backend translate it into a proprietary model first? Every translation is a place where fidelity, query power, or portability leaks. A backend is OpenTelemetry-*native* when there is no translation layer: the model you send is the model you store and query.
+
+Below are the specific places that gap shows up. The thesis is general, but Datadog is the clearest worked example because its behavior is documented, so you can check every claim against its own docs.
+
+## Resource attributes stay first-class
+
+OpenTelemetry attaches [resource attributes](https://signoz.io/blog/otel-resource-attributes/) (`k8s.pod.name`, `deployment.environment`, `cloud.region`, and so on) to every signal. They are how you slice telemetry by where it came from. A native backend keeps all of them as queryable dimensions, automatically.
+
+In Datadog, that fidelity on metrics is opt-in. Per its own mapping docs, "by default, Datadog maps only the OpenTelemetry resource attributes listed in the semantic conventions table" to metric tags. To get the rest, you enable `metrics::resource_attributes_as_tags`, and the docs immediately warn that "enabling this option may significantly increase tag cardinality." So the resource attributes you carefully set are either silently dropped or turned into a cardinality-and-cost decision you have to manage.
+
+Native means the resource attributes arrive as dimensions you can group and filter by, with no allowlist and no opt-in.
+
+<a href="https://docs.datadoghq.com/opentelemetry/mapping/semantic_mapping/" target="_blank" rel="noopener noreferrer nofollow">Datadog: OpenTelemetry semantic mapping</a>
+
+## Semantic conventions, preserved not remapped
+
+OpenTelemetry's value is a shared vocabulary. `service.name`, `http.request.method`, `db.system` mean the same thing across every language and library. When you query, you query in that vocabulary.
+
+A proprietary backend remaps it. Datadog rewrites OpenTelemetry semantic-convention attributes into its own tag names: `service.name` becomes `service`, `container.id` becomes `container_id`, and so on down a conversion table. Anything without a mapping can be dropped. The practical cost is a translation tax: you learn and query in the vendor's dialect, not the OpenTelemetry names your instrumentation actually emits, and your dashboards and alerts are written against that dialect rather than the portable convention.
+
+Native means you query the exact attribute keys your SDKs produce. Nothing to translate, nothing to relearn if you switch backends.
+
+## Metrics: temporality, PromQL, and how you scale collectors
+
+This is the least visible difference and the one with the sharpest operational edge.
+
+OpenTelemetry and the Prometheus ecosystem default to **cumulative** temporality for counters. Datadog works in **delta**. If you keep cumulative on the OTLP path, Datadog's own guidance is blunt about the consequence:
+
+<Admonition type="info">
+"Your deployment is stateful, so you need to send all points on a timeseries to the same Datadog Agent or Datadog exporter. This affects how you scale your OpenTelemetry Collector deployments." — <a href="https://docs.datadoghq.com/opentelemetry/guide/otlp_delta_temporality/" target="_blank" rel="noopener noreferrer nofollow">Datadog: OTLP delta temporality</a>
+</Admonition>
+
+Read that carefully. It means you can't freely horizontally scale or load-balance your OpenTelemetry Collectors, because every point of a given timeseries has to route to the same place. A model mismatch in the backend becomes a constraint on your Collector topology. And because the data is being converted, you're not running PromQL against cumulative counters the way the rest of the ecosystem does.
+
+A native backend stores cumulative counters as sent, runs PromQL directly, and puts no stateful-routing constraint on how you deploy Collectors.
+
+## LLM and `gen_ai` spans
+
+`gen_ai.*` is a real and fast-moving [OpenTelemetry semantic convention](https://signoz.io/blog/opentelemetry-llm/) namespace: request parameters like `gen_ai.request.max_tokens`, token counts, model names, and prompt/response content all have defined attribute keys. This is exactly the kind of new convention that exposes whether a backend is native or translating.
+
+A backend that maps telemetry into its own model has to actively add support for each new namespace, and until it does, those attributes get relocated into a separate product surface or dropped from the ones you filter on. A native backend needs no special-casing: `gen_ai` spans and their attributes are queryable the moment your instrumentation emits them, in the same place as the rest of your traces. If you're instrumenting an LLM app or a coding agent, that's the difference between filtering on `gen_ai.request.max_tokens` directly and not being able to. (See [monitoring Claude Code with OpenTelemetry](https://signoz.io/blog/claude-code-monitoring-with-opentelemetry/) for what first-class `gen_ai` telemetry looks like end to end.)
+
+## Native features fall out of the model
+
+There's an upside to querying OpenTelemetry data directly rather than a translated copy: features can be built on the semantic conventions themselves. SigNoz's [external API monitoring](https://signoz.io/docs/external-api-monitoring/overview/), [messaging-queue monitoring](https://signoz.io/docs/messaging-queues/overview/), and [trace funnels](https://signoz.io/docs/trace-funnels/overview/) all read standard OpenTelemetry attributes (`http.*`, `messaging.*`, span relationships) rather than a proprietary schema. When the convention is the source of truth, the product tracks the convention.
+
+## OTLP ingest vs OpenTelemetry-native
+
+| | Proprietary backend (e.g. Datadog) | OpenTelemetry-native (SigNoz) |
+| --- | --- | --- |
+| Resource attributes | Allowlisted by default; full set is an opt-in with a cardinality warning | All kept as queryable dimensions |
+| Semantic conventions | Remapped to proprietary tag names; unmapped keys can drop | Queried by the exact OTel key you emit |
+| Metric temporality | Prefers delta; cumulative forces stateful collector routing | Cumulative stored as sent |
+| PromQL | Not run against cumulative counters directly | Runs directly |
+| Collector scaling | Timeseries pinned to one agent/exporter | No stateful-routing constraint |
+| `gen_ai` / new conventions | Need per-namespace support; attributes can be split out or dropped | Queryable as soon as emitted |
+
+## Why it matters
+
+Vendor-neutrality is the reason most teams adopt OpenTelemetry in the first place: instrument once, keep the option to move. But that neutrality is only real if the backend preserves the data model end to end. If your telemetry is remapped, allowlisted, and temporality-converted on the way in, you haven't avoided lock-in, you've moved it one layer deeper, into your dashboards, alerts, and queries, which are now written against the vendor's translation instead of the open convention.
+
+OpenTelemetry-native means there is no translation to be locked into. SigNoz is [built natively on OpenTelemetry](https://signoz.io/why-signoz/): the model you send is the model you store and query. If you're moving off a proprietary agent, [dd-trace and why teams replace it](https://signoz.io/blog/dd-trace/) covers the instrumentation side of the same story.
+
+<GetStartedSigNoz />
