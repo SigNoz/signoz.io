@@ -1,38 +1,122 @@
 const fs = require('fs')
 const path = require('path')
+const { parseArgs: nodeParseArgs } = require('node:util')
 
-function getAssetsListFromEnv(env, envName, pathEnvName) {
-  if (env[pathEnvName] && fs.existsSync(env[pathEnvName])) {
-    try {
-      const content = fs.readFileSync(env[pathEnvName], 'utf8')
-      if (!content || !content.trim()) return []
-      return JSON.parse(content)
-    } catch (e) {
-      console.warn(`⚠️ Failed to read or parse file from ${pathEnvName}: ${e.message}`)
-      return []
-    }
+function parseArgs(argv) {
+  const { values } = nodeParseArgs({
+    args: argv || process.argv.slice(2),
+    options: {
+      'changed-files': { type: 'string' },
+      'restore-files': { type: 'string' },
+      'deleted-files': { type: 'string' },
+      'changed-assets': { type: 'string' },
+      'sidenav-changed': { type: 'boolean', default: false },
+      'listicles-changed': { type: 'boolean', default: false },
+      'changed-listicles': { type: 'string' },
+      'deleted-listicles': { type: 'string' },
+      'sync-folders': { type: 'string' },
+      'deployment-status': { type: 'string' },
+      'restore-ref': { type: 'string' },
+    },
+    strict: false,
+  })
+  return {
+    changedFilesPath: values['changed-files'],
+    restoreFilesPath: values['restore-files'],
+    deletedFilesPath: values['deleted-files'],
+    changedAssetsPath: values['changed-assets'],
+    sidenavChanged: values['sidenav-changed'],
+    listiclesChanged: values['listicles-changed'],
+    changedListiclesPath: values['changed-listicles'],
+    deletedListiclesPath: values['deleted-listicles'],
+    syncFolders: values['sync-folders'],
+    deploymentStatus: values['deployment-status'],
+    restoreRef: values['restore-ref'],
   }
-  return JSON.parse(env[envName] || '[]')
 }
 
-function buildConfig({ env = process.env } = {}) {
-  const deploymentStatus = env.DEPLOYMENT_STATUS
+function readJsonFile(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8')
+    if (!content || !content.trim()) return []
+    return JSON.parse(content)
+  } catch (e) {
+    console.warn(`Warning: Failed to read ${filePath}: ${e.message}`)
+    return []
+  }
+}
+
+function loadFileList(cliPath, env, pathEnvName, envName) {
+  if (cliPath) return readJsonFile(cliPath)
+  if (env[pathEnvName] && fs.existsSync(env[pathEnvName])) {
+    return readJsonFile(env[pathEnvName])
+  }
+  try {
+    return JSON.parse(env[envName] || '[]')
+  } catch {
+    return []
+  }
+}
+
+function buildConfig({ env = process.env, argv } = {}) {
+  const cli = parseArgs(argv)
+
+  const deploymentStatus = cli.deploymentStatus || env.DEPLOYMENT_STATUS
 
   const cmsApiUrl = deploymentStatus === 'staging' ? env.CMS_STAGING_API_URL : env.CMS_API_URL
   const cmsApiToken = deploymentStatus === 'staging' ? env.CMS_STAGING_API_TOKEN : env.CMS_API_TOKEN
 
-  const syncFolders = JSON.parse(env.SYNC_FOLDERS || '[]')
+  let syncFolders
+  try {
+    const raw = cli.syncFolders || env.SYNC_FOLDERS
+    syncFolders = raw
+      ? JSON.parse(raw)
+      : ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog', 'docs']
+  } catch {
+    syncFolders = ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog', 'docs']
+  }
 
-  const changedFiles = getAssetsListFromEnv(env, 'CHANGED_FILES', 'CHANGED_FILES_PATH')
-  const deletedFiles = getAssetsListFromEnv(env, 'DELETED_FILES', 'DELETED_FILES_PATH')
-  const changedAssets = getAssetsListFromEnv(env, 'CHANGED_ASSETS', 'CHANGED_ASSETS_PATH')
+  const changedFiles = loadFileList(
+    cli.changedFilesPath,
+    env,
+    'CHANGED_FILES_PATH',
+    'CHANGED_FILES'
+  )
+  const restoreFiles = loadFileList(
+    cli.restoreFilesPath,
+    env,
+    'RESTORE_FILES_PATH',
+    'RESTORE_FILES'
+  )
+  const deletedFiles = loadFileList(
+    cli.deletedFilesPath,
+    env,
+    'DELETED_FILES_PATH',
+    'DELETED_FILES'
+  )
+  const changedAssets = loadFileList(
+    cli.changedAssetsPath,
+    env,
+    'CHANGED_ASSETS_PATH',
+    'CHANGED_ASSETS'
+  )
 
-  const listiclesChanged = env.LISTICLES_CHANGED === 'true'
-  const changedListicles = getAssetsListFromEnv(env, 'CHANGED_LISTICLES', 'CHANGED_LISTICLES_PATH')
-  const deletedListicles = getAssetsListFromEnv(env, 'DELETED_LISTICLES', 'DELETED_LISTICLES_PATH')
+  const listiclesChanged = cli.listiclesChanged || env.LISTICLES_CHANGED === 'true'
+  const changedListicles = loadFileList(
+    cli.changedListiclesPath,
+    env,
+    'CHANGED_LISTICLES_PATH',
+    'CHANGED_LISTICLES'
+  )
+  const deletedListicles = loadFileList(
+    cli.deletedListiclesPath,
+    env,
+    'DELETED_LISTICLES_PATH',
+    'DELETED_LISTICLES'
+  )
   const listiclesDir = path.resolve(__dirname, '..', '..', 'constants', 'listicles')
 
-  const sidenavChanged = env.SIDENAV_CHANGED === 'true'
+  const sidenavChanged = cli.sidenavChanged || env.SIDENAV_CHANGED === 'true'
   const sidenavJsonPath = path.resolve(__dirname, '..', '..', 'data', 'docs-side-nav', 'main.json')
 
   return {
@@ -41,7 +125,9 @@ function buildConfig({ env = process.env } = {}) {
     cmsApiToken,
     syncFolders,
     changedFiles,
+    restoreFiles,
     deletedFiles,
+    restoreRef: cli.restoreRef || env.RESTORE_REF || 'origin/main',
     changedAssets,
     listiclesChanged,
     changedListicles,
@@ -67,4 +153,4 @@ function buildConfig({ env = process.env } = {}) {
   }
 }
 
-module.exports = { buildConfig }
+module.exports = { buildConfig, parseArgs, readJsonFile, loadFileList }
