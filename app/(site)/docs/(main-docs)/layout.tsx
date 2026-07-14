@@ -45,13 +45,15 @@ export default function DocLayout({ children }: LayoutProps) {
       <SectionContainer>
         <ProgressBar target={mainRef} />
 
-        <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4 overflow-clip max-sm:px-4">
+        <div className="flex h-full w-full items-start overflow-clip max-sm:px-4">
           <div className={DOC_SIDENAV_CLASSES}>
             <DocsSidebar />
           </div>
 
-          <div className="box-border min-w-0 flex-[1_1_auto] py-6 md:px-0 lg:px-4 [&_details+details]:mt-8">
-            {children}
+          <div className="flex min-w-0 flex-[1_1_auto] justify-center">
+            <div className="box-border w-full max-w-[1200px] py-6 md:px-0 lg:px-4 [&_details+details]:mt-8">
+              {children}
+            </div>
           </div>
         </div>
       </SectionContainer>
