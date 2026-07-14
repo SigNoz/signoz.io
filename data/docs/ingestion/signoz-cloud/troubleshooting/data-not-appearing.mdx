@@ -17,6 +17,122 @@ Work through the three steps below in sequence. Each step tells you what to chec
 
 Most "no data" issues are a wrong ingestion endpoint, a wrong region, or an incorrect ingestion key. If you already know your instrumentation works, jump straight to [Common errors and fixes](#common-errors-and-fixes).
 
+## Quick debug flowchart
+
+Use this decision tree to isolate the failure fast. It works the same for traces, logs, and metrics: substitute your signal for `<SIGNAL>` (`TRACES`, `LOGS`, or `METRICS`).
+
+```text
+START: <signal> not showing up in SigNoz
+│
+├─ 1. Is the app generating telemetry?
+│      Set OTEL_<SIGNAL>_EXPORTER=console, restart, exercise the code path.
+│      ├─ Nothing in stdout ──► Instrumentation problem.
+│      │                        Check SDK init, runtime version, library support.
+│      └─ You see output ─────► go to 2
+│
+├─ 2. Is it being exported?
+│      Set OTEL_LOG_LEVEL=debug (or language equivalent), read exporter logs.
+│      ├─ Export error ───────► fix in this order: KEY ▸ ENDPOINT ▸ REGION
+│      │                        (see Common errors and fixes)
+│      └─ Exports look clean ─► go to 3
+│
+└─ 3. Is it reaching SigNoz?
+       ├─ Direct to Cloud ──► curl -v https://ingest.<region>.signoz.cloud:443
+       │                      Fails       => firewall / network policy
+       │                      Connects,   => wrong key / endpoint / region
+       │                      still no data
+       └─ Via Collector ────► add the debug exporter to the pipeline, then check:
+                              netstat -tuln | grep -E '4317|4318'  (app → Collector)
+                              service.telemetry.logs.level: DEBUG  (Collector → SigNoz)
+```
+
+### Copy-paste checklist per signal
+
+Pick your signal for an ordered checklist you can hand to an AI agent (or work through yourself). Each one starts with the most common causes, exactly as the flowchart above.
+
+<Tabs entityName="signal">
+<TabItem value="logs" label="Logs" default>
+
+```text
+Debug missing LOGS in SigNoz — check in this order:
+
+1. Ingestion key correct?
+   - Header: signoz-ingestion-key=<your-ingestion-key>
+   - HTTP 401/403 or gRPC Unauthenticated => wrong, expired, or revoked key
+2. Endpoint + port correct?
+   - Cloud:     https://ingest.<region>.signoz.cloud:443   (port 443, NOT 4317/4318)
+   - Self-host: http://<signoz-host>:4318
+   - No trailing slash on the path (.../v1/logs, not .../v1/logs/) => HTTP 404
+3. Region matches your account?  (Settings → Ingestion in the SigNoz UI)
+4. App generating logs?   OTEL_LOGS_EXPORTER=console   => logs printed in stdout?
+5. Export errors?         OTEL_LOG_LEVEL=debug         => read exporter errors
+6. Collector path (if used):
+   - filelog receiver include paths match your log file locations
+   - debug exporter shows the logs arriving
+   - pipeline "logs" has receivers, processors, and the otlphttp exporter wired
+   - raise service.telemetry.logs.level: DEBUG and read the Collector logs
+7. Payload under 16 MB, gzip on for large exports
+   (OTEL_EXPORTER_OTLP_COMPRESSION=gzip)
+```
+
+</TabItem>
+<TabItem value="traces" label="Traces">
+
+```text
+Debug missing TRACES in SigNoz — check in this order:
+
+1. Ingestion key correct?
+   - Header: signoz-ingestion-key=<your-ingestion-key>
+   - HTTP 401/403 or gRPC Unauthenticated => wrong, expired, or revoked key
+2. Endpoint + port correct?
+   - Cloud:     https://ingest.<region>.signoz.cloud:443   (port 443, NOT 4317/4318)
+   - Self-host: http://<signoz-host>:4318
+   - No trailing slash on the path (.../v1/traces, not .../v1/traces/) => HTTP 404
+3. Region matches your account?  (Settings → Ingestion in the SigNoz UI)
+4. App generating spans?  OTEL_TRACES_EXPORTER=console  => spans printed in stdout?
+5. Export errors?         OTEL_LOG_LEVEL=debug          => read exporter errors
+6. Service missing from the Services tab?
+   - set a unique service.name on the resource attributes
+7. Jaeger / Zipkin client? => must go through a Collector that converts to OTLP
+8. Collector path (if used):
+   - debug exporter shows the spans arriving
+   - pipeline "traces" has receivers, processors, and the otlphttp exporter wired
+   - raise service.telemetry.logs.level: DEBUG and read the Collector logs
+```
+
+</TabItem>
+<TabItem value="metrics" label="Metrics">
+
+```text
+Debug missing METRICS in SigNoz — check in this order:
+
+1. Ingestion key correct?
+   - Header: signoz-ingestion-key=<your-ingestion-key>
+   - HTTP 401/403 or gRPC Unauthenticated => wrong, expired, or revoked key
+2. Endpoint + port correct?
+   - Cloud:     https://ingest.<region>.signoz.cloud:443   (port 443, NOT 4317/4318)
+   - Self-host: http://<signoz-host>:4318
+   - No trailing slash on the path (.../v1/metrics, not .../v1/metrics/) => HTTP 404
+3. Region matches your account?  (Settings → Ingestion in the SigNoz UI)
+4. App generating metrics?  OTEL_METRICS_EXPORTER=console => metrics printed in stdout?
+5. Export errors?           OTEL_LOG_LEVEL=debug          => read exporter errors
+6. One specific metric missing?
+   - common cause is a temporality mismatch (delta vs cumulative)
+7. Non-OTLP source? => Collector receiver must scrape/receive and export OTLP:
+   - Prometheus /metrics  => prometheus receiver
+   - StatsD (UDP)         => statsd receiver
+   - Host / Kubernetes    => hostmetrics receiver / K8s-Infra chart
+8. Collector path (if used):
+   - debug exporter shows the metrics arriving
+   - pipeline "metrics" has receivers, processors, and the otlphttp exporter wired
+   - raise service.telemetry.logs.level: DEBUG and read the Collector logs
+```
+
+</TabItem>
+</Tabs>
+
+The sections below explain each of these checks in detail.
+
 ## How your telemetry reaches SigNoz
 
 SigNoz ingests data **only in OTLP** (OpenTelemetry Protocol), over either gRPC (port `4317`) or HTTP (port `4318`). Anything that is not OTLP, such as Prometheus scrape output, StatsD packets, or Jaeger/Zipkin spans, must be converted to OTLP by an OpenTelemetry Collector before it reaches SigNoz.
