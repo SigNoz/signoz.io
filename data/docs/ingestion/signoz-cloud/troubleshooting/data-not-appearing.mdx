@@ -276,11 +276,19 @@ There are two links to verify: application → Collector, and Collector → SigN
 This `debug` exporter is a Collector pipeline component, different from the SDK's `OTEL_LOG_LEVEL=debug` in [Step 2](#step-2-is-your-telemetry-being-exported): Step 2 shows whether your *application* is exporting, while this shows what the *Collector* actually receives. Add it to the relevant pipeline in your existing `otel-collector-config.yaml` (do not replace the whole file):
 
 ```yaml:otel-collector-config.yaml
+receivers:
+  otlp:                                                # data coming IN from your app
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317                         # OTLP/gRPC — your app sends here
+      http:
+        endpoint: 0.0.0.0:4318                         # OTLP/HTTP — your app sends here
+
 exporters:
   debug:
     verbosity: detailed
-  otlphttp:
-    endpoint: https://ingest.<region>.signoz.cloud:443
+  otlphttp:                                            # data going OUT to SigNoz
+    endpoint: https://ingest.<region>.signoz.cloud:443 # SigNoz Cloud (port 443, not 4317/4318)
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 
@@ -299,6 +307,13 @@ service:
       processors: [batch]
       exporters: [debug, otlphttp]
 ```
+
+The Collector has two sides, and they use **different ports** — this is where most people mix things up:
+
+- **Receivers** (`otlp`) are the ports the Collector *listens on* for data coming from your application: `4317` for OTLP/gRPC and `4318` for OTLP/HTTP. Point your app's `OTEL_EXPORTER_OTLP_ENDPOINT` at these (for example `http://<collector-host>:4318`).
+- **Exporters** (`otlphttp`) are where the Collector *sends* data onward. For SigNoz Cloud the endpoint is `https://ingest.<region>.signoz.cloud:443` (port `443`, **not** `4317`/`4318`); for self-hosted SigNoz it is `http://<signoz-host>:4318`.
+
+So `443` only appears on the exporter side (Collector → SigNoz Cloud); `4317`/`4318` only appear on the receiver side (your app → Collector).
 
 **Verify these values:**
 
