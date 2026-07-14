@@ -135,7 +135,12 @@ The sections below explain each of these checks in detail.
 
 ## How your telemetry reaches SigNoz
 
-SigNoz ingests data **only in OTLP** (OpenTelemetry Protocol), over either gRPC (port `4317`) or HTTP (port `4318`). Anything that is not OTLP, such as Prometheus scrape output, StatsD packets, or Jaeger/Zipkin spans, must be converted to OTLP by an OpenTelemetry Collector before it reaches SigNoz.
+SigNoz ingests data **only in OTLP** (OpenTelemetry Protocol), over either gRPC or HTTP. The port depends on *where* you send it, not on the protocol:
+
+- **SigNoz Cloud** accepts both OTLP/gRPC and OTLP/HTTP on port `443` (standard HTTPS), so the endpoint is always `https://ingest.<region>.signoz.cloud:443`.
+- **Self-hosted SigNoz and OpenTelemetry Collectors** use the OpenTelemetry default ports: `4317` for OTLP/gRPC and `4318` for OTLP/HTTP.
+
+Anything that is not OTLP, such as Prometheus scrape output, StatsD packets, or Jaeger/Zipkin spans, must be converted to OTLP by an OpenTelemetry Collector before it reaches SigNoz.
 
 <Figure
   src="/img/docs/ingestion/signoz-cloud/troubleshooting/telemetry-data-flow.webp"
