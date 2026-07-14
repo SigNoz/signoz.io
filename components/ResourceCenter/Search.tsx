@@ -1,6 +1,6 @@
 import { type FC } from 'react'
-import { Input } from '@headlessui/react'
 import { Search } from 'lucide-react'
+import { Input } from '@signozhq/ui/input'
 
 interface SearchInputProps {
   placeholder: string
@@ -9,20 +9,16 @@ interface SearchInputProps {
 
 const SearchInput: FC<SearchInputProps> = ({ placeholder, onSearch }) => {
   return (
-    <div className="mt-0 flex w-full items-center rounded border border-solid px-3 text-base leading-6 text-zinc-600 dark:border-gray-900 dark:bg-signoz_ink-400 max-md:max-w-full max-md:pr-5">
-      <div className="flex w-full items-center gap-2.5">
-        <Search size={16} />
-
-        <Input
-          className="w-full border-none focus:border-none active:border-none dark:bg-signoz_ink-400 dark:text-white"
-          name="full_name"
-          type="text"
-          placeholder={placeholder}
-          onChange={onSearch}
-          autoComplete="off"
-        />
-      </div>
-    </div>
+    <Input
+      prefix={<Search size={16} />}
+      name="full_name"
+      type="text"
+      placeholder={placeholder}
+      onChange={onSearch}
+      autoComplete="off"
+      containerClassName="mt-0 w-full max-md:max-w-full text-base leading-6 text-zinc-600 [--input-wrapper-height:auto] [--input-wrapper-box-shadow:none] [--input-wrapper-border-radius:theme(borderRadius.DEFAULT)] dark:[--input-wrapper-border-color:theme(colors.gray.900)] dark:[--input-wrapper-background:theme(colors.signoz_ink.400)]"
+      className="dark:text-white"
+    />
   )
 }
 

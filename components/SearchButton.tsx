@@ -1,10 +1,15 @@
 'use client'
 
-import { Dialog, Transition } from '@headlessui/react'
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+} from '@signozhq/ui/dialog'
 import { liteClient as algoliasearch } from 'algoliasearch/lite'
 import { useRouter } from 'next/navigation'
 import {
-  Fragment,
   forwardRef,
   useCallback,
   useEffect,
@@ -12,6 +17,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   type MutableRefObject,
 } from 'react'
@@ -283,56 +289,68 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
   }, [mode, focusSearchInput, onClose])
 
   return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-[80]" onClose={onClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-200"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-150"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black/55" />
-        </Transition.Child>
-
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-start justify-center px-3 py-10 sm:px-4 sm:py-24">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-200"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-150"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel className="relative w-full max-w-2xl overflow-visible bg-transparent text-white">
-                <InstantSearch indexName={indexName} searchClient={searchClient}>
-                  <SearchHeader
-                    mode={mode}
-                    onModeChange={setMode}
-                    onClose={onClose}
-                    registerInput={registerInput}
-                    resultsRef={resultsRef}
-                  />
-                  {mode === 'search' ? (
-                    <SearchResults
-                      ref={resultsRef}
-                      onSelect={onSelect}
-                      onClose={onClose}
-                      onFocusInput={focusSearchInput}
-                    />
-                  ) : null}
-                </InstantSearch>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}
+    >
+      <DialogPortal>
+        {/* Inline styles required: @signozhq/ui CSS modules beat Tailwind for z-index/background */}
+        <DialogOverlay style={searchOverlayStyle} />
+      </DialogPortal>
+      <DialogContent
+        showOverlay={false}
+        position="top"
+        width="wide"
+        animation="fade"
+        offset={96}
+        style={searchContentStyle}
+        className="overflow-visible text-white"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault()
+          focusSearchInput()
+        }}
+      >
+        <DialogTitle className="sr-only">Search docs</DialogTitle>
+        <div className="relative w-full max-w-2xl overflow-visible bg-transparent px-3 text-white sm:px-4">
+          <InstantSearch indexName={indexName} searchClient={searchClient}>
+            <SearchHeader
+              mode={mode}
+              onModeChange={setMode}
+              onClose={onClose}
+              registerInput={registerInput}
+              resultsRef={resultsRef}
+            />
+            {mode === 'search' ? (
+              <SearchResults
+                ref={resultsRef}
+                onSelect={onSelect}
+                onClose={onClose}
+                onFocusInput={focusSearchInput}
+              />
+            ) : null}
+          </InstantSearch>
         </div>
-      </Dialog>
-    </Transition>
+      </DialogContent>
+    </Dialog>
   )
+}
+
+const searchOverlayStyle: CSSProperties = {
+  backgroundColor: 'rgba(0, 0, 0, 0.55)',
+  zIndex: 80,
+}
+
+const searchContentStyle: CSSProperties = {
+  backgroundColor: 'transparent',
+  border: 'none',
+  boxShadow: 'none',
+  borderRadius: 0,
+  padding: 0,
+  maxWidth: '42rem',
+  zIndex: 80,
+  width: '100%',
 }
 
 const SearchHeader = ({
