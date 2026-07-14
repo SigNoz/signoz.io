@@ -156,10 +156,10 @@ There are two topologies. Knowing which one you use tells you where to look in [
 - **Direct to SigNoz.** Your application's OpenTelemetry SDK exports OTLP straight to the SigNoz ingestion endpoint.
 - **Through a Collector.** Your application (or a third-party agent) sends data to an OpenTelemetry Collector, which then exports OTLP to SigNoz. The Collector may be a [K8s-Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/), the [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/), a [host binary](https://signoz.io/docs/opentelemetry-collection-agents/vm/overview/), or a [Docker container](https://signoz.io/docs/opentelemetry-collection-agents/docker/overview/).
 
-Whichever topology you use, **instrumenting your application always comes first** — the SDK is what produces the telemetry. A Collector is optional and added later as an intermediary (for example, to batch data, enrich it, or scrape non-OTLP sources). Which path you choose decides one setting on the app side: the SDK's export endpoint, `OTEL_EXPORTER_OTLP_ENDPOINT`.
+Whichever topology you use, **instrumenting your application always comes first** — your instrumentation is what produces the telemetry, whether that is the OpenTelemetry SDK, a zero-code auto-instrumentation agent, or instrumentation libraries you add to your code. A Collector is optional and added later as an intermediary (for example, to batch data, enrich it, or scrape non-OTLP sources). Which path you choose decides one setting on the app side: the export endpoint, `OTEL_EXPORTER_OTLP_ENDPOINT`.
 
-- **Direct to SigNoz Cloud.** Point the SDK at `https://ingest.<region>.signoz.cloud:443` and set the `signoz-ingestion-key` header.
-- **Through a Collector.** Point the SDK at your Collector instead (for example `http://<collector-host>:4318`). The Collector, not the app, then holds the SigNoz Cloud endpoint and ingestion key. Adding a Collector only changes where the SDK exports to; it does not change how you instrument the app.
+- **Direct to SigNoz Cloud.** Point your instrumentation at `https://ingest.<region>.signoz.cloud:443` and set the `signoz-ingestion-key` header.
+- **Through a Collector.** Point your instrumentation at the Collector instead (for example `http://<collector-host>:4318`). The Collector, not the app, then holds the SigNoz Cloud endpoint and ingestion key. Adding a Collector only changes where your instrumentation exports to; it does not change how you instrument the app.
 
 The common paths per signal:
 
