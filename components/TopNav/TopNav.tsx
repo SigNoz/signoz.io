@@ -9,6 +9,7 @@ import GitHubStars from '../GithubStars/GithubStars'
 import Tabs from '@/components/ResourceCenter/Tabs'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
+import { Badge } from '@signozhq/ui/badge'
 import { Button } from '@/components/ui/Button'
 import { cn } from 'app/lib/utils'
 import { TABS, TAB_PATHNAMES } from './constants'
@@ -73,7 +74,10 @@ export default function TopNav() {
     <div className="fixed left-0 right-0 z-[50]">
       <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
         <nav
-          className="mx-auto flex w-full max-w-8xl justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
+          className={cn(
+            'mx-auto flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100',
+            !isDocsBasePath && 'max-w-8xl'
+          )}
           aria-label="Global"
         >
           <div className="flex justify-start gap-x-6">
@@ -96,6 +100,11 @@ export default function TopNav() {
               />
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </TrackingLink>
+            {isDocsBasePath && (
+              <Badge color="cherry" className="self-center uppercase">
+                docs
+              </Badge>
+            )}
 
             {!isLoginRoute && (
               <NavDropdownProvider>
