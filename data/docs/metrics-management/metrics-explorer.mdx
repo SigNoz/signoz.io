@@ -1,5 +1,5 @@
 ---
-date: 2026-05-15
+date: 2026-07-14
 title: Metrics Explorer
 description: Discover, explore, and visualize all metrics flowing into your SigNoz deployment using the Metrics Explorer.
 doc_type: reference
@@ -195,6 +195,23 @@ The Explorer tab provides an interactive query building environment:
 - **Save this view**: Preserve query configurations for reuse
 - **Create an Alert**: Set up monitoring alerts based on the query
 - **Add to Dashboard**: Include the visualization in existing dashboards
+
+### Downloading Chart Data
+
+In the **Time Series** view, each chart card has its own **download** icon in the chart header. Because every chart corresponds to a separate query, the buttons are per-chart, and each chart exports independently. The screen-level Y-axis unit selector stays separate from these per-chart buttons.
+
+Click the **download** icon on a chart to export the data behind it. A popover opens with a **FORMAT** selector offering **csv** (default) and **jsonl**. Choose a format and click **Export** to download the file.
+
+The export mirrors what the chart shows:
+
+- **Series names match the chart legend**, including any custom legend format or group-by values.
+- **The value column carries the unit.** The value column header includes the human-readable Y-axis unit (for example, `value (ms)`). Display-only formats such as `short` or `none` are omitted.
+
+Each row also includes the timestamp, the query name, the series name, and one column per group-by label.
+
+<Admonition type="info">
+The download button appears whenever a Time Series chart has data to export. No configuration or feature flag is required, and export behaves the same on SigNoz Cloud and self-hosted deployments.
+</Admonition>
 
 ## Saved Views in Metrics Explorer
 
