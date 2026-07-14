@@ -1,6 +1,18 @@
 html {
   scroll-padding-top: 60px; /* Adjust this value to match the height of your sticky header */
   scroll-behavior: smooth;
+  overflow-y: scroll;
+}
+
+/* Prevent Radix Select/Dialog RemoveScroll from causing layout shift.
+   RemoveScroll zeroes body padding-left (beating pl-[calc(100vw-100%)]),
+   so restore that compensation and cancel its margin gap without adding a body scrollbar. */
+html body[data-scroll-locked] {
+  overflow: visible !important;
+  margin-right: 0px !important;
+  padding-right: 0px !important;
+  padding-top: 0px !important;
+  padding-left: calc(100vw - 100%) !important;
 }
 
 .row {
