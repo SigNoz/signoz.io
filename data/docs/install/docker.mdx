@@ -2,7 +2,7 @@
 date: 2026-07-14
 title: Install SigNoz on Docker Standalone - Self-Host Guide
 tags : [Self-Hosted Community]
-description: Learn how to install SigNoz on Docker. Step-by-step self-host guide for macOS, Linux, and Windows (WSL 2), from setup to verifying the installation in the SigNoz UI.
+description: Learn how to install SigNoz on Docker. Self-host guide for macOS, Linux, and Windows (WSL 2), from setup to verifying the install in the SigNoz UI.
 doc_type: howto
 ---
 
@@ -19,12 +19,12 @@ If you have an existing install-script or Compose deployment, follow the <a href
 ## Prerequisites
 
 - A Linux or macOS machine. On Microsoft Windows, use WSL 2 with Docker Engine installed inside WSL (see the note below).
-- <a href="https://docs.docker.com/engine/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Engine</a> 20.10+ (or Docker Desktop) with the <a href="https://docs.docker.com/compose/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Compose</a> v2 plugin.
+- <a href="https://docs.docker.com/engine/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Engine</a> 20.10+ (or Docker Desktop on macOS/Linux) with the <a href="https://docs.docker.com/compose/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Compose</a> v2 plugin.
 - At least 4GB of memory allocated to Docker.
 - Open ports: `8080` (SigNoz UI), `4317` and `4318` (OTLP ingestion), and `8000` if you enable the MCP server.
 
 <Admonition type="info" title="Running SigNoz on Windows (WSL 2)" defaultCollapsed="true">
-On Windows, run everything inside a <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank" rel="noopener noreferrer nofollow">WSL 2</a> distribution with Docker Engine installed natively in WSL, not Docker Desktop. ClickHouse Keeper crashes in a restart loop with segmentation faults (exit code 139) under Docker Desktop's virtualization layer on Windows.
+On Windows, run everything inside a <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank" rel="noopener noreferrer nofollow">WSL 2</a> distribution with Docker Engine installed natively in WSL, not Docker Desktop. ClickHouse Keeper has been reported to crash in a restart loop with segmentation faults (exit code 139) under Docker Desktop's virtualization layer on Windows.
 
 1. Install Docker Engine inside your WSL distribution (for example, Ubuntu):
 
@@ -32,9 +32,17 @@ On Windows, run everything inside a <a href="https://learn.microsoft.com/en-us/w
    curl -fsSL https://get.docker.com | sh
    ```
 
-2. If Docker Desktop is installed, disable its WSL integration for the distribution (**Settings → Resources → WSL integration**) so `docker` inside WSL uses the native engine.
+2. Allow your user to run Docker without sudo, then close and reopen the WSL shell:
 
-3. Follow the rest of this guide from the WSL shell.
+   ```bash
+   sudo usermod -aG docker $USER
+   ```
+
+   If `docker ps` fails with `Cannot connect to the Docker daemon`, start the daemon with `sudo service docker start` (needed on distributions without systemd enabled).
+
+3. If Docker Desktop is installed, disable its WSL integration for the distribution (**Settings → Resources → WSL integration**) so `docker` inside WSL uses the native engine.
+
+4. Follow the rest of this guide from the WSL shell.
 </Admonition>
 
 ## Install SigNoz
