@@ -686,7 +686,7 @@ const Breadcrumbs = ({ url, hierarchy }: { url: string; hierarchy?: DocHit['hier
 
   try {
     const parsed = new URL(url)
-    const pathSegments = parsed.pathname
+    const pathSegments = decodeURIComponent(parsed.pathname)
       .split('/')
       .filter(Boolean)
       .map((segment) => segment.replace(/-/g, ' '))
