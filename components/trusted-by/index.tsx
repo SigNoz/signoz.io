@@ -10,7 +10,7 @@ import SalesforceLogo from '@/public/img/users/salesforce.svg'
 import RattleLogo from '@/public/img/users/rattle.svg'
 import SarvamLogo from '@/public/svgs/icons/sarvam.svg'
 import GoKiwiLogo from '@/public/img/users/gokiwi.svg'
-import LovartLogo from '@/public/svgs/icons/lovart.svg'
+import KernelLogo from '@/public/svgs/icons/kernel.svg'
 import BlaxelLogo from '@/public/svgs/icons/blaxel.svg'
 import ShapedLogo from '@/public/img/case_study/logos/shaped-logo.svg'
 import { cn } from '../../app/lib/utils'
@@ -25,7 +25,7 @@ export const COMPANIES = [
   { Logo: RattleLogo, imageDesc: 'rattle logo' },
   { Logo: SarvamLogo, imageDesc: 'sarvam logo' },
   { Logo: GoKiwiLogo, imageDesc: 'GoKiwi logo' },
-  { Logo: LovartLogo, imageDesc: 'lovart logo' },
+  { Logo: KernelLogo, imageDesc: 'kernel logo' },
   { Logo: BlaxelLogo, imageDesc: 'blaxel logo' },
   { Logo: ShapedLogo, imageDesc: 'shaped logo' },
 ]

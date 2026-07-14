@@ -2,8 +2,9 @@
 
 import { Button } from '@headlessui/react'
 import { ArrowRight, ChevronDown } from 'lucide-react'
+import Image from 'next/image'
 import TrackingLink from '@/components/TrackingLink'
-import BrainfishIcon from '@/public/img/index_features/brainfish.svg'
+import shapedMarkIcon from '@/public/img/case_study/logos/shaped-mark.svg?url'
 import { productDropdownItemsSorted, comparisonItems, SECTION_HEADING_CLASS } from './constants'
 import { useNavDropdown } from './NavDropdownContext'
 
@@ -77,18 +78,31 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
           </TrackingLink>
           <div>
             <TrackingLink
-              href="/case-study/brainfish/"
-              className="group flex h-auto min-w-0 items-center gap-4"
+              href="/case-study/shaped/"
+              className="group flex h-auto w-full min-w-0 items-center gap-3"
               clickType="Nav Click"
               clickName="Customer Stories Link"
-              clickText="How Brainfish leveraged SigNoz for effective Kubernetes monitoring"
+              clickText="YC-backed Shaped AI Swapped a Siloed Toolset for SigNoz, achieving One-Stop Observability"
               clickLocation="Top Navbar"
               onClick={onClose}
               prefetch={false}
             >
-              <BrainfishIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
-              <div className="line-clamp-2 max-w-[274px] text-sm text-signoz_vanilla-400 group-hover:text-[#fff]">
-                How Brainfish leveraged SigNoz for effective Kubernetes monitoring
+              <span
+                className="flex h-8 w-8 shrink-0 items-center justify-center"
+                aria-hidden="true"
+              >
+                <Image
+                  src={shapedMarkIcon}
+                  alt=""
+                  width={23}
+                  height={28}
+                  className="h-7 w-auto"
+                  unoptimized
+                />
+              </span>
+              <div className="line-clamp-2 min-w-0 flex-1 text-sm text-signoz_vanilla-400 group-hover:text-[#fff]">
+                YC-backed Shaped AI Swapped a Siloed Toolset for SigNoz, achieving One-Stop
+                Observability
               </div>
             </TrackingLink>
           </div>
