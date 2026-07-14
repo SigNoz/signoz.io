@@ -30,18 +30,21 @@ START: <signal> not showing up in SigNoz
 │      │                        Check SDK init, runtime version, library support.
 │      └─ You see output ─────► go to 2
 │
-├─ 2. Is it being exported?
-│      Set OTEL_LOG_LEVEL=debug (or language equivalent), read exporter logs.
+├─ 2. Is your app exporting it?  (SDK side, in your application)
+│      Turn on the SDK's own logging: OTEL_LOG_LEVEL=debug (or language
+│      equivalent), then read the export errors it prints.
 │      ├─ Export error ───────► fix in this order: KEY ▸ ENDPOINT ▸ REGION
 │      │                        (see Common errors and fixes)
 │      └─ Exports look clean ─► go to 3
 │
-└─ 3. Is it reaching SigNoz?
+└─ 3. Is it reaching SigNoz?  (network / Collector side)
        ├─ Direct to Cloud ──► curl -v https://ingest.<region>.signoz.cloud:443
        │                      Fails       => firewall / network policy
        │                      Connects,   => wrong key / endpoint / region
        │                      still no data
-       └─ Via Collector ────► add the debug exporter to the pipeline, then check:
+       └─ Via Collector ────► add the Collector's 'debug' exporter (a pipeline
+                              component, not the SDK log level above) to see what
+                              the Collector receives, then check both hops:
                               netstat -tuln | grep -E '4317|4318'  (app → Collector)
                               service.telemetry.logs.level: DEBUG  (Collector → SigNoz)
 ```
@@ -270,7 +273,7 @@ There are two links to verify: application → Collector, and Collector → SigN
 
 #### Verify data inside the Collector
 
-Add the `debug` exporter to your Collector configuration and attach it to the relevant pipeline so you can see what the Collector receives. Add this snippet to your existing `otel-collector-config.yaml`, do not replace the whole file:
+This `debug` exporter is a Collector pipeline component, and is different from the SDK's `OTEL_LOG_LEVEL=debug` in [Step 2](#step-2-is-your-telemetry-being-exported): Step 2 shows whether your *application* is exporting, while this shows what the *Collector* actually receives. Add the `debug` exporter to your Collector configuration and attach it to the relevant pipeline so you can see what the Collector receives. Add this snippet to your existing `otel-collector-config.yaml`, do not replace the whole file:
 
 ```yaml:otel-collector-config.yaml
 exporters:
