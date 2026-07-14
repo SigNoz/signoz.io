@@ -1,0 +1,277 @@
+import React from 'react'
+import {
+  LucideDraftingCompass,
+  LucideScrollText,
+  LucideChartNoAxesColumn,
+  Puzzle,
+  Bot,
+  LucideBoxes,
+  LayoutDashboard,
+  TriangleAlert,
+  Waypoints,
+  Bug,
+  ListFilter,
+  BookText,
+  Lock,
+  Settings,
+  ShieldCheck,
+  HelpCircle,
+  FileArchive,
+  HeartPulse,
+  BookOpen,
+  Mail,
+} from 'lucide-react'
+import { SiSlack, SiGithub, SiDocker, SiLinux, SiKubernetes } from 'react-icons/si'
+
+export interface CardData {
+  title: string
+  description: string
+  href: string
+  icon: React.ReactNode
+  clickName: string
+  external?: boolean
+}
+
+// Hero
+export const HERO_DESCRIPTION =
+  'Learn how to monitor and troubleshoot your applications with SigNoz using step-by-step guides, reference docs, and video tutorials.'
+
+export const SEARCH_PLACEHOLDERS = [
+  "Hey, I'm SigNoz AI! Ask me anything about SigNoz...",
+  'How do I send Python traces to SigNoz?',
+  'Instrument Node.js app for APM',
+  'Set up log collection from Docker containers',
+  'Migrate from Datadog to SigNoz',
+  'Visualize Prometheus metrics in SigNoz',
+  'How to send Kubernetes logs?',
+  'Migrate from Grafana to SigNoz',
+  'Set up SigNoz Cloud for my team',
+]
+
+// Send Data Section
+export const SEND_DATA_CARDS: CardData[] = [
+  {
+    title: 'APM / Send Traces',
+    description: 'Send Traces and APM Data',
+    href: '/docs/instrumentation/',
+    icon: <LucideDraftingCompass size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'APM Send Traces Card',
+  },
+  {
+    title: 'Send Logs',
+    description: 'Configure log collection and analysis',
+    href: '/docs/logs-management/send-logs-to-signoz/',
+    icon: <LucideScrollText size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Send Logs Card',
+  },
+  {
+    title: 'Send Metrics',
+    description: 'Configure metrics collection & visualization.',
+    href: '/docs/userguide/send-metrics-cloud/',
+    icon: <LucideChartNoAxesColumn size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Send Metrics Card',
+  },
+  {
+    title: 'Integrations',
+    description: 'Connect SigNoz with your favorite tools',
+    href: '/docs/integrations/integrations-list/',
+    icon: <Puzzle size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Integrations Card',
+  },
+  {
+    title: 'Agent-Native',
+    description: 'Use AI agents for instrumentation',
+    href: '/docs/agent-native/',
+    icon: <Bot size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Agent Native Card',
+  },
+]
+
+// Explore SigNoz Section
+export const EXPLORE_SIGNOZ_CARDS: CardData[] = [
+  {
+    title: 'Infrastructure Monitoring',
+    description: 'Monitor your infrastructure & resources',
+    href: '/docs/infrastructure-monitoring/overview/',
+    icon: <LucideBoxes size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Infrastructure Monitoring Card',
+  },
+  {
+    title: 'Dashboards',
+    description: 'Build, share, use templates',
+    href: '/docs/userguide/dashboards/',
+    icon: <LayoutDashboard size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Dashboards Card',
+  },
+  {
+    title: 'Alerts',
+    description: 'Monitor signals and receive timely notifications',
+    href: '/docs/userguide/alerts-management/',
+    icon: <TriangleAlert size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Alerts Card',
+  },
+  {
+    title: 'Explore Traces',
+    description: 'Analyze your traces with trace explorer',
+    href: '/docs/product-features/trace-explorer/',
+    icon: <Waypoints size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Explore Traces Card',
+  },
+  {
+    title: 'Catch Exceptions',
+    description: 'Configure exception tracking and error analysis',
+    href: '/docs/userguide/exceptions/',
+    icon: <Bug size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Catch Exceptions Card',
+  },
+  {
+    title: 'Query Builder',
+    description: 'The visual query interface for signals',
+    href: '/docs/userguide/query-builder/',
+    icon: <ListFilter size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Query Builder Card',
+  },
+]
+
+// Migrate Section
+export const MIGRATE_CARDS: CardData[] = [
+  {
+    title: 'Migrate from DataDog',
+    description: 'Step-by-step guide to migrate from Datadog',
+    href: '/docs/migration/migrate-from-datadog-to-signoz/',
+    icon: <BookText size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Datadog Migration Card',
+  },
+  {
+    title: 'Migrate from Grafana',
+    description: 'Step-by-step guide to migrate from Grafana',
+    href: '/docs/migration/migrate-from-grafana/',
+    icon: <BookText size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Grafana Migration Card',
+  },
+]
+
+// Security & Compliance Section
+export const SECURITY_CARDS: CardData[] = [
+  {
+    title: 'Authentication and RBAC',
+    description: 'Configure user authentication',
+    href: '/docs/userguide/authentication/',
+    icon: <Lock size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Authentication Card',
+  },
+  {
+    title: 'SSO SAML',
+    description: 'Set up Single Sign-On with SAML',
+    href: '/docs/userguide/sso-authentication/',
+    icon: <Settings size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'SSO SAML Card',
+  },
+  {
+    title: 'Retention Period',
+    description: 'Learn about data retention period',
+    href: '/docs/userguide/retention-period/',
+    icon: <ShieldCheck size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Retention Period Card',
+  },
+]
+
+// Troubleshooting & Community Section
+export const TROUBLESHOOTING_ROW_CARDS: CardData[] = [
+  {
+    title: 'FAQ',
+    description: 'Find solutions to common issues',
+    href: 'https://signoz.io/docs/troubleshooting/signoz-cloud/general-troubleshooting/',
+    icon: <HelpCircle size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'FAQ Card',
+  },
+  {
+    title: 'Slack Community',
+    description: 'Connect with SigNoz users and developers',
+    href: 'https://signoz.io/slack',
+    icon: <SiSlack className="text-signoz_vanilla-500 h-6 w-6" />,
+    clickName: 'Slack Community Card',
+    external: true,
+  },
+  {
+    title: 'GitHub',
+    description: 'Explore and contribute to SigNoz',
+    href: 'https://github.com/SigNoz/signoz',
+    icon: <SiGithub className="text-signoz_vanilla-500 h-6 w-6" />,
+    clickName: 'GitHub Card',
+    external: true,
+  },
+]
+
+export const RESOURCES_ROW_CARDS: CardData[] = [
+  {
+    title: 'Sample Dashboards',
+    description: 'Explore pre-built dashboards',
+    href: '/dashboards/',
+    icon: <FileArchive size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Sample Dashboards Card',
+  },
+  {
+    title: 'Changelog',
+    description: "See what's new in SigNoz",
+    href: '/changelog/',
+    icon: <HeartPulse size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Changelog Card',
+  },
+  {
+    title: 'Blog',
+    description: 'Read articles and tutorials',
+    href: '/blog/',
+    icon: <BookOpen size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Blog Card',
+  },
+  {
+    title: 'Newsletter',
+    description: 'Curated technical content in your inbox',
+    href: 'https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=docs_additional_resources&utm_campaign=newsletter',
+    icon: <Mail size={24} className="text-signoz_vanilla-100" />,
+    clickName: 'Newsletter Card',
+    external: true,
+  },
+]
+
+// Self-Host Section
+export const SELF_HOST_CARDS: CardData[] = [
+  {
+    title: 'Docker',
+    description: 'Run SigNoz using Docker Compose',
+    href: '/docs/install/docker/',
+    icon: <SiDocker className="h-6 w-6 text-signoz_vanilla-100" />,
+    clickName: 'Docker Install Card',
+  },
+  {
+    title: 'Linux',
+    description: 'Install on Debian/Ubuntu systems',
+    href: '/docs/install/linux/',
+    icon: <SiLinux className="h-6 w-6 text-signoz_vanilla-100" />,
+    clickName: 'Linux Install Card',
+  },
+  {
+    title: 'Kubernetes',
+    description: 'Deploy using Helm charts',
+    href: '/docs/install/kubernetes/',
+    icon: <SiKubernetes className="h-6 w-6 text-signoz_vanilla-100" />,
+    clickName: 'Kubernetes Install Card',
+  },
+]
+
+// CTA Section
+export const CTA_STEPS = [
+  {
+    title: 'Sign-up to SigNoz Cloud',
+    subtitle: 'Or self-host SigNoz',
+  },
+  {
+    title: 'Instrument your application',
+    subtitle: 'Or instruct your agent to do it for you',
+  },
+  {
+    title: 'Explore your data',
+    subtitle: 'Or set up extensive o11y at SigNoz.',
+  },
+]
