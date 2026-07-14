@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import SearchBar from '@/components/ui/SearchBar'
 import TrackingLink from '@/components/TrackingLink'
 import { HERO_DESCRIPTION, SEARCH_PLACEHOLDERS } from './constants'
+import Image from 'next/image'
 
 const HERO_OVERLAY_GRADIENT =
   'linear-gradient(0deg, rgb(10, 12, 16) 0%, rgb(10, 12, 16) 36%, rgba(10, 12, 16, 0.95) 50%, rgba(10, 12, 16, 0.78) 62%, rgba(10, 12, 16, 0.45) 76%, rgba(10, 12, 16, 0.12) 90%, rgba(10, 12, 16, 0) 100%)'
@@ -11,11 +12,12 @@ const HERO_OVERLAY_GRADIENT =
 export default function Hero() {
   return (
     <div className="relative h-[513px] w-full overflow-hidden">
-      {/* Image crop matches Figma 2536:5704 */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <img
+        <Image
           src="/img/docs-introduction/hero-banner.webp"
-          alt=""
+          alt="SigNoz Docs Introduction Hero Banner"
+          width={1000}
+          height={1000}
           className="absolute left-0 w-full max-w-none"
           style={{ height: '127.63%', top: '-0.44%' }}
         />
