@@ -12,8 +12,10 @@ function Footer() {
   const isLoginRoute = pathname === '/login/'
   const isTeamsRoute = pathname === '/teams/'
   const isContactUsRoute = pathname === '/contact-us/'
+  const isDocsRoute = pathname?.startsWith('/docs')
 
-  if (isLoginRoute || isTeamsRoute || isContactUsRoute) {
+  // Docs routes use DocsFooter (rising-pill) instead of the marketing footer.
+  if (isLoginRoute || isTeamsRoute || isContactUsRoute || isDocsRoute) {
     return null
   }
 
