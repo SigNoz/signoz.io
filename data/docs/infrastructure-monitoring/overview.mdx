@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-15
 title: Infrastructure Monitoring - Hosts & K8s Overview
 description: Discover how SigNoz Infrastructure Monitoring provides a unified view of host and Kubernetes performance. Monitor CPU, memory, disk, and network with correlated traces and logs.
 
@@ -286,6 +286,24 @@ debugging.
     <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/kubernetes-nodes-view.webp" alt="Nodes View"/>
     <figcaption><i>Nodes View</i></figcaption>
 </figure>
+
+### Data scoping in workload detail views
+
+When you open a workload's detail view, the Metrics, Logs, Traces, and Events tabs show data for that specific workload in its own cluster and namespace. Two workloads can share a name across different clusters or namespaces (for example a `job-1` in namespace `a` and another `job-1` in namespace `b`), so each detail tab filters by cluster and namespace to keep the view scoped to the workload you selected.
+
+Scoping depends on the entity type:
+
+| Entity | Scoped by |
+|--------|-----------|
+| Jobs, DaemonSets, Deployments, StatefulSets, Volumes | Cluster name and namespace name |
+| Namespaces | Cluster name (the entity itself is a namespace) |
+| Clusters, Nodes, Pods | Name only (names are already unique) |
+
+The detail view header shows the metadata that scopes the current view. For workloads such as StatefulSets, this includes the **Statefulset Name**, **Cluster Name**, and **Namespace Name** fields.
+
+<Admonition type="info">
+Deep links to a workload detail view (including Ctrl+click to open in a new tab) now carry the cluster name and namespace name as URL parameters. Bookmarks or shared links created before this change may not include these parameters. Reopen the workload and copy the link again to capture the correctly scoped view.
+</Admonition>
 
 </TabItem>
 
