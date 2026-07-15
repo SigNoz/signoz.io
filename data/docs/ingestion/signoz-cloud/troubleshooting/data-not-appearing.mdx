@@ -145,12 +145,6 @@ SigNoz ingests data **only in OTLP** (OpenTelemetry Protocol), over either gRPC 
 
 Anything that is not OTLP, such as Prometheus scrape output, StatsD packets, or Jaeger/Zipkin spans, must be converted to OTLP by an OpenTelemetry Collector before it reaches SigNoz.
 
-<Figure
-  src="/img/docs/ingestion/signoz-cloud/troubleshooting/telemetry-data-flow.webp"
-  alt="Diagram of telemetry flowing from an application to SigNoz, either directly via the SDK OTLP exporter or through an OpenTelemetry Collector that also ingests log files and log shippers"
-  caption="The paths telemetry can take from your application to SigNoz"
-/>
-
 There are two topologies. Knowing which one you use tells you where to look in [Step 3](#step-3-is-your-telemetry-reaching-signoz).
 
 - **Direct to SigNoz.** Your application's OpenTelemetry SDK exports OTLP straight to the SigNoz ingestion endpoint.
@@ -161,13 +155,41 @@ Whichever topology you use, **instrumenting your application always comes first*
 - **Direct to SigNoz Cloud.** Point your instrumentation at `https://ingest.<region>.signoz.cloud:443` and set the `signoz-ingestion-key` header.
 - **Through a Collector.** Point your instrumentation at the Collector instead (for example `http://<collector-host>:4318`). The Collector, not the app, then holds the SigNoz Cloud endpoint and ingestion key. Adding a Collector only changes where your instrumentation exports to; it does not change how you instrument the app.
 
-The common paths per signal:
+Here is how each signal reaches SigNoz, and what to check when one specific signal is missing.
 
-| Signal | Common sources | How it reaches SigNoz |
-| --- | --- | --- |
-| Traces | OpenTelemetry SDK; Jaeger/Zipkin clients | SDK OTLP exporter direct to SigNoz, or via a Collector. Jaeger/Zipkin must go through a Collector that converts to OTLP. |
-| Logs | OpenTelemetry SDK / log appenders; files on disk; log shippers (FluentBit, Fluentd, Logstash, Vector, Telegraf) | SDK OTLP direct or via Collector; files read by the Collector `filelog` receiver (the standard path for Kubernetes and Docker); shippers forward to the Collector or push OTLP/HTTP. |
-| Metrics | OpenTelemetry SDK; Prometheus `/metrics` endpoints; StatsD; host and Kubernetes metrics; third-party tools | SDK OTLP direct or via Collector; Collector `prometheus`, `statsd`, `hostmetrics`, or other receivers scrape or receive and export OTLP to SigNoz. |
+### Traces
+
+**Common sources:** OpenTelemetry SDK; Jaeger/Zipkin clients.
+
+**How it reaches SigNoz:** SDK OTLP exporter direct to SigNoz, or via a Collector. Spans from **Jaeger or Zipkin clients** must pass through a Collector with the matching receiver, which converts them to OTLP.
+
+- If some spans are missing or you see gaps in a trace, the instrumentation is likely producing data but some spans are dropped or uninstrumented. See [Traces Management FAQs](https://signoz.io/docs/traces-management/troubleshooting/faqs/).
+- If a service is not listed in the Services tab, confirm a unique `service.name` is set on its resource attributes.
+
+### Logs
+
+**Common sources:** OpenTelemetry SDK / log appenders; files on disk; log shippers (FluentBit, Fluentd, Logstash, Vector, Telegraf).
+
+**How it reaches SigNoz:** SDK OTLP direct or via a Collector; files read by the Collector `filelog` receiver (the standard path for Kubernetes and Docker); shippers forward to the Collector or push OTLP/HTTP. Identify your path first:
+
+- **Log shippers (FluentBit, Fluentd, Logstash, Vector, Telegraf) or the Collector.** Check that the receivers and exporters are wired into the pipeline correctly, that the exporter endpoint and ingestion key are set, and read the Collector or shipper logs for errors.
+- **Files on disk.** The Collector's `filelog` receiver reads log files. This is the standard path for Kubernetes and Docker. Confirm the receiver's include paths match your log file locations.
+- **SDK or log-appender bridge.** Run the [console exporter check](#step-1-is-your-application-generating-telemetry) with `OTEL_LOGS_EXPORTER=console` to confirm the SDK emits logs, then follow Steps 2 and 3.
+
+To correlate logs with traces, make sure each log line carries `trace_id` and `span_id` and parse them with the [trace parser pipeline](https://signoz.io/docs/logs-pipelines/guides/trace/). More in [Logs Management FAQs](https://signoz.io/docs/logs-management/troubleshooting/faqs/).
+
+### Metrics
+
+**Common sources:** OpenTelemetry SDK; Prometheus `/metrics` endpoints; StatsD; host and Kubernetes metrics; third-party tools.
+
+**How it reaches SigNoz:** SDK OTLP direct or via a Collector; the Collector's `prometheus`, `statsd`, `hostmetrics`, or other receivers scrape or receive from these sources and export OTLP to SigNoz.
+
+- **OpenTelemetry SDK metrics** export OTLP directly or through a Collector.
+- **Prometheus metrics** are collected by the Collector's `prometheus` receiver, which scrapes your `/metrics` endpoints.
+- **StatsD** metrics are received by the Collector's `statsd` receiver (application pushes UDP packets to the listener), then exported as OTLP.
+- **Host and Kubernetes metrics** come from the `hostmetrics` receiver and the [K8s-Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/).
+- For any Collector receiver, confirm the receivers and exporters are added to the pipeline correctly, the exporter endpoint and key are set, and check the Collector logs for errors.
+- If a specific metric is missing, a common cause is a temporality mismatch (delta versus cumulative) for that metric. See [Metrics Management FAQs](https://signoz.io/docs/metrics-management/troubleshooting/faqs/).
 
 <Admonition type="info">
 SigNoz Cloud endpoints use the form `https://ingest.<region>.signoz.cloud:443`. Find your region and ingestion key under **Settings → Ingestion** in the SigNoz UI. For self-hosted SigNoz, the endpoint is your SigNoz host on port `4317` (gRPC) or `4318` (HTTP), and no ingestion key is required by default.
@@ -276,7 +298,10 @@ If the connection fails, a firewall or network policy is blocking outbound acces
 
 There are two links to verify: application → Collector, and Collector → SigNoz.
 
+<details>
+<ToggleHeading>
 #### Verify data inside the Collector
+</ToggleHeading>
 
 This `debug` exporter is a Collector pipeline component, different from the SDK's `OTEL_LOG_LEVEL=debug` in [Step 2](#step-2-is-your-telemetry-being-exported): Step 2 shows whether your *application* is exporting, while this shows what the *Collector* actually receives. Add it to the relevant pipeline in your existing `otel-collector-config.yaml` (do not replace the whole file):
 
@@ -331,7 +356,12 @@ Restart the Collector and check its logs.
 
 Reference: <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/debugexporter/README.md" target="_blank" rel="noopener noreferrer nofollow">debug exporter README</a> and the <a href="https://opentelemetry.io/docs/collector/troubleshooting/" target="_blank" rel="noopener noreferrer nofollow">Collector troubleshooting guide</a>.
 
+</details>
+
+<details>
+<ToggleHeading>
 #### Verify the application can reach the Collector
+</ToggleHeading>
 
 Confirm the application points at the Collector:
 
@@ -361,7 +391,12 @@ Watch for port and protocol mismatches when talking to a **Collector or self-hos
 **SigNoz Cloud is different:** it uses **port `443` for both** OTLP/gRPC and OTLP/HTTP, so the endpoint is always `https://ingest.<region>.signoz.cloud:443`. Do not use `4317` or `4318` for SigNoz Cloud.
 </Admonition>
 
-### Enable Collector diagnostic logs
+</details>
+
+<details>
+<ToggleHeading>
+#### Enable Collector diagnostic logs
+</ToggleHeading>
 
 If the Collector itself is erroring, raise its internal log level to see why:
 
@@ -371,6 +406,8 @@ service:
     logs:
       level: DEBUG
 ```
+
+</details>
 
 ## Common errors and fixes
 
@@ -437,51 +474,7 @@ These SigNoz Cloud limits reject or delay data without an obvious instrumentatio
 
 See [ingestion considerations](https://signoz.io/docs/ingestion/signoz-cloud/overview/#important-considerations) for details.
 
-## Signal-specific notes
-
-### Traces and application metrics
-
-<Figure
-  src="/img/docs/ingestion/signoz-cloud/troubleshooting/traces-data-flow.webp"
-  alt="Diagram of trace spans reaching SigNoz directly from the SDK, through an OpenTelemetry Collector, or from a Jaeger or Zipkin client via the Collector"
-  caption="How trace spans reach SigNoz"
-/>
-
-- Traces from the OpenTelemetry SDK export OTLP directly or through a Collector. Spans from **Jaeger or Zipkin clients** must pass through a Collector with the matching receiver, which converts them to OTLP.
-- If some spans are missing or you see gaps in a trace, the instrumentation is likely producing data but some spans are dropped or uninstrumented. See [Traces Management FAQs](https://signoz.io/docs/traces-management/troubleshooting/faqs/).
-- If a service is not listed in the Services tab, confirm a unique `service.name` is set on its resource attributes.
-
-### Logs
-
-Logs reach SigNoz by several paths. Identify yours first:
-
-- **Log shippers (FluentBit, Fluentd, Logstash, Vector, Telegraf) or the Collector.** Check that the receivers and exporters are wired into the pipeline correctly, that the exporter endpoint and ingestion key are set, and read the Collector or shipper logs for errors.
-- **Files on disk.** The Collector's `filelog` receiver reads log files. This is the standard path for Kubernetes and Docker. Confirm the receiver's include paths match your log file locations.
-- **SDK or log-appender bridge.** Run the [console exporter check](#step-1-is-your-application-generating-telemetry) with `OTEL_LOGS_EXPORTER=console` to confirm the SDK emits logs, then follow Steps 2 and 3.
-
-To correlate logs with traces, make sure each log line carries `trace_id` and `span_id` and parse them with the [trace parser pipeline](https://signoz.io/docs/logs-pipelines/guides/trace/). More in [Logs Management FAQs](https://signoz.io/docs/logs-management/troubleshooting/faqs/).
-
-### Metrics
-
-<Figure
-  src="/img/docs/ingestion/signoz-cloud/troubleshooting/metrics-data-flow.webp"
-  alt="Diagram of metrics reaching SigNoz via the OTel SDK directly, or through an OpenTelemetry Collector using the prometheus, statsd, and hostmetrics receivers"
-  caption="How metrics reach SigNoz across SDK, Prometheus, StatsD, and host sources"
-/>
-
-- **OpenTelemetry SDK metrics** export OTLP directly or through a Collector.
-- **Prometheus metrics** are collected by the Collector's `prometheus` receiver, which scrapes your `/metrics` endpoints. Other receivers can pull or receive from other sources.
-- **StatsD** metrics are received by the Collector's `statsd` receiver (application pushes UDP packets to the listener), then exported as OTLP.
-- **Host and Kubernetes metrics** come from the `hostmetrics` receiver and the [K8s-Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/).
-- For any Collector receiver, confirm the receivers and exporters are added to the pipeline correctly, the exporter endpoint and key are set, and check the Collector logs for errors.
-- If a specific metric is missing, a common cause is a temporality mismatch (delta versus cumulative) for that metric. See [Metrics Management FAQs](https://signoz.io/docs/metrics-management/troubleshooting/faqs/).
-
-## Still not working?
-
-If you have worked through all three steps and the data still does not appear:
-
-- Direct export to SigNoz Cloud: collect your diagnostic logs and reach out to SigNoz support via the chat widget in the SigNoz Cloud UI.
-- Collector-based setups: capture the Collector logs with `level: DEBUG` and the debug exporter output, and share them with support.
+## Next steps
 
 <DocCardContainer>
 
