@@ -57,12 +57,12 @@ export default function RegionSelectorInfoTip({ children }: RegionSelectorInfoTi
           event.preventDefault()
           dismiss()
         }}
-        className="!w-[min(320px,calc(100vw-2rem))] !border-0 !bg-signoz_robin-500 !p-3 !text-signoz_vanilla-100 !shadow-lg !outline-none"
+        className="!bg-primary !text-primary-foreground !w-[min(320px,calc(100vw-2rem))] !border-0 !p-3 !shadow-lg !outline-none"
       >
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-semibold leading-none text-signoz_vanilla-100">
+              <p className="text-primary-foreground text-sm leading-none font-semibold">
                 Select your SigNoz region
               </p>
               <PopoverClose asChild>
@@ -70,13 +70,13 @@ export default function RegionSelectorInfoTip({ children }: RegionSelectorInfoTi
                   type="button"
                   onClick={dismiss}
                   aria-label="Dismiss region selector tip"
-                  className="flex h-3.5 w-3.5 shrink-0 items-center justify-center text-signoz_vanilla-100/80 transition-opacity hover:text-signoz_vanilla-100"
+                  className="text-primary-foreground/80 hover:text-primary-foreground flex h-3.5 w-3.5 shrink-0 items-center justify-center transition-opacity"
                 >
                   <X size={14} />
                 </button>
               </PopoverClose>
             </div>
-            <p className="text-xs leading-[18px] text-signoz_vanilla-100/80">
+            <p className="text-primary-foreground/80 text-xs leading-[18px]">
               Select your SigNoz region to ensure all code snippets in docs are updated to reflect
               your region.
             </p>
@@ -86,7 +86,7 @@ export default function RegionSelectorInfoTip({ children }: RegionSelectorInfoTi
               <button
                 type="button"
                 onClick={dismiss}
-                className="flex h-8 items-center rounded-[3px] bg-signoz_vanilla-100 px-4 text-sm font-medium text-signoz_robin-500 transition-opacity hover:opacity-90"
+                className="bg-primary-foreground text-primary flex h-8 items-center rounded-[3px] px-4 text-sm font-medium transition-opacity hover:opacity-90"
               >
                 Got it
               </button>

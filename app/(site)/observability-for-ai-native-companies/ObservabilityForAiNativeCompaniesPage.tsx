@@ -69,7 +69,7 @@ const Header: React.FC = () => {
         </>
       }
       buttons={headerButtons}
-      sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
+      sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-border max-md:-mb-[3rem]"
       heroImageAlt="Observability for AI Native Companies hero"
       heroImage="/img/platform/ObservabilityForAiNativeCompaniesMeta.webp"
     />
@@ -79,8 +79,8 @@ const Header: React.FC = () => {
 const TrustedByTeams: React.FC = () => {
   return (
     <>
-      <div className="text-center text-sm font-semibold uppercase tracking-[0.05em] text-signoz_vanilla-400">
-        Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
+      <div className="text-muted-foreground text-center text-sm font-semibold tracking-[0.05em] uppercase">
+        Trusted by the <span className="text-foreground">best platform teams</span>
       </div>
       <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-16 gap-y-8 px-4">
         {TRUSTED_BY_LOGOS.map((logo, index) => (
@@ -121,27 +121,27 @@ const TrustedByTeams: React.FC = () => {
 const CapabilitiesSection: React.FC = () => {
   return (
     <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-      <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-        <h2 className="my-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
+      <div className="text-l1-foreground dark:text-sienna-100 flex flex-col items-center gap-12 text-2xl leading-[3.25rem] font-medium">
+        <h2 className="text-l1-foreground dark:text-sienna-100 my-6 py-10 text-center text-4xl font-semibold">
           Capabilities That Make SigNoz the <br className="hidden md:block" /> Default Choice for AI
           Companies
         </h2>
         <SectionLayout variant="no-border" className="!mx-auto p-0">
-          <div className="flex flex-col items-start justify-start gap-3 border-y border-dashed border-signoz_slate-400 p-8 text-left">
-            <h4 className="mb-1 text-xl font-semibold text-signoz_robin-400">
+          <div className="border-border flex flex-col items-start justify-start gap-3 border-y border-dashed p-8 text-left">
+            <h4 className="text-accent-primary mb-1 text-xl font-semibold">
               Capabilities that AI Companies Need Most
             </h4>
-            <div className="text-sm text-signoz_vanilla-400">
+            <div className="text-muted-foreground text-sm">
               Features that help you debug non-deterministic LLM outputs, control inference costs,
               track business outcomes, and meet compliance requirements
             </div>
           </div>
           <IconTitleDescriptionCardGrid cards={CAPABILITIES_CARDS1} variant="xl" />
-          <div className="relative flex w-full flex-col items-start border border-dashed border-signoz_slate-400/50 p-8 [&>h4]:text-xl">
+          <div className="border-border/50 relative flex w-full flex-col items-start border border-dashed p-8 [&>h4]:text-xl">
             <h4 className="text-left font-semibold text-red-400">
               Full-Stack Platform Capabilities
             </h4>
-            <div className="text-left text-sm text-signoz_vanilla-400">
+            <div className="text-muted-foreground text-left text-sm">
               Unlike LLM-only observability tools, we correlate AI layer performance with your
               entire infrastructure - databases, microservices, and application logs.
             </div>
@@ -157,9 +157,9 @@ const CapabilitiesThatMakeUsTheDefaultChoiceForAiCompanies: React.FC = () => {
   return (
     <SectionLayout
       variant="full-width"
-      className="bg-blur-ellipse-388 relative mx-auto w-full max-w-8xl overflow-hidden"
+      className="bg-blur-ellipse-388 max-w-8xl relative mx-auto w-full overflow-hidden"
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
+      <div className="from-muted via-muted/50 to-background dark:from-ink-500/50 dark:via-ink-500/25 dark:to-ink-500/90 pointer-events-none absolute inset-0 bg-gradient-to-b" />
       <div className="relative flex flex-col gap-6 pt-32 md:py-20">
         <TrustedByTeams />
         <CapabilitiesSection />
@@ -170,9 +170,9 @@ const CapabilitiesThatMakeUsTheDefaultChoiceForAiCompanies: React.FC = () => {
 
 const PillarsOfAiFocusedObservabilityArchitecture: React.FC = () => {
   return (
-    <SectionLayout variant="full-width" className="bg-blur-ellipse-388 !pb-20 !pt-20">
+    <SectionLayout variant="full-width" className="bg-blur-ellipse-388 !pt-20 !pb-20">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center text-center">
-        <h2 className="mb-24 text-center text-4xl font-semibold text-signoz_sienna-100">
+        <h2 className="text-l1-foreground dark:text-sienna-100 mb-24 text-center text-4xl font-semibold">
           4 Pillars of AI-Focused <br className="hidden md:block" /> Observability Architecture
         </h2>
         <IconTitleDescriptionCardGrid cards={PILLARS_DATA} />
@@ -183,30 +183,27 @@ const PillarsOfAiFocusedObservabilityArchitecture: React.FC = () => {
 
 const CostComparison: React.FC = () => {
   return (
-    <SectionLayout
-      variant="full-width"
-      className="border-y border-dashed border-signoz_slate-400 !px-0"
-    >
+    <SectionLayout variant="full-width" className="border-border border-y border-dashed !px-0">
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">
           <div className="sticky top-[100px] min-w-fit px-10 pt-10 md:px-12">
-            <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+            <h2 className="text-l1-foreground text-4xl !leading-[3.5rem] font-bold sm:text-4xl">
               Cost <br className="hidden md:block" />
               Comparison
             </h2>
-            <div className="mt-4 flex w-fit items-center gap-2 border border-dashed border-signoz_slate-400 px-3 py-1 text-2xl font-semibold text-signoz_vanilla-100">
-              <ArrowDown size={24} className="text-signoz_vanilla-400" />
+            <div className="border-border text-l1-foreground mt-4 flex w-fit items-center gap-2 border border-dashed px-3 py-1 text-2xl font-semibold">
+              <ArrowDown size={24} className="text-muted-foreground" />
               <span>
                 <span className="text-red-500">95%</span> Saved
               </span>
             </div>
           </div>
         </div>
-        <div className="flex-[2_2_0%] border-l border-dashed border-signoz_slate-400 p-10">
-          <h3 className="mb-4 text-xl font-semibold text-signoz_vanilla-100">
+        <div className="border-border flex-[2_2_0%] border-l border-dashed p-10">
+          <h3 className="text-l1-foreground mb-4 text-xl font-semibold">
             SigNoz vs Langfuse for 1 Billion Spans/Month
           </h3>
-          <p className="mb-8 text-signoz_vanilla-400">
+          <p className="text-muted-foreground mb-8">
             We charge based on data size while Langfuse charges per unit count. AI applications
             generate more spans due to complex agent workflows and tool calls, making unit-based
             pricing expensive at scale.
@@ -214,18 +211,18 @@ const CostComparison: React.FC = () => {
 
           <div className="flex flex-col gap-4">
             <div className="rounded-lg p-6">
-              <h4 className="mb-2 font-semibold text-signoz_vanilla-100">Langfuse Core</h4>
-              <div className="mb-2 font-bold text-signoz_vanilla-100">$60,331/month</div>
-              <p className="text-sm text-signoz_vanilla-400">
+              <h4 className="text-l1-foreground mb-2 font-semibold">Langfuse Core</h4>
+              <div className="text-l1-foreground mb-2 font-bold">$60,331/month</div>
+              <p className="text-muted-foreground text-sm">
                 Base $29 + $60,302 usage (graduated pricing from 100k to 1B units). Langfuse counts
                 traces, observations, and scores as billable units.
               </p>
             </div>
 
             <div className="rounded-lg p-6">
-              <h4 className="mb-2 font-semibold text-signoz_vanilla-100">SigNoz Cloud</h4>
-              <div className="mb-2 font-bold text-signoz_vanilla-100">$300 - $3,000/month</div>
-              <p className="text-sm text-signoz_vanilla-400">
+              <h4 className="text-l1-foreground mb-2 font-semibold">SigNoz Cloud</h4>
+              <div className="text-l1-foreground mb-2 font-bold">$300 - $3,000/month</div>
+              <p className="text-muted-foreground text-sm">
                 Span sizes typically range from 1 KB to 10 KB depending on your instrumentation and
                 payload complexity. It also includes traces, logs, and metrics with no separate
                 instrumentation.
@@ -240,11 +237,11 @@ const CostComparison: React.FC = () => {
 
 const HowSigNozCompares: React.FC = () => {
   return (
-    <section className="bg-blur-ellipse-388 relative mx-auto w-full max-w-8xl overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-      <div className="container relative mx-auto flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
-        <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-          <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
+    <section className="bg-blur-ellipse-388 max-w-8xl relative mx-auto w-full overflow-hidden">
+      <div className="from-muted via-muted/50 to-background dark:from-ink-500/50 dark:via-ink-500/25 dark:to-ink-500/90 pointer-events-none absolute inset-0 bg-gradient-to-b" />
+      <div className="relative container mx-auto flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
+        <div className="text-l1-foreground dark:text-sienna-100 flex flex-col items-center gap-12 text-2xl leading-[3.25rem] font-medium">
+          <h2 className="text-l1-foreground dark:text-sienna-100 mb-6 py-10 text-center text-4xl font-semibold">
             How SigNoz Compares to <br /> LLM-Only Tools
           </h2>
           <SectionLayout variant="no-border" className="!mx-auto flex items-center justify-center">
@@ -258,11 +255,11 @@ const HowSigNozCompares: React.FC = () => {
 
 const HowSigNozComparesToTraditionalTools: React.FC = () => {
   return (
-    <section className="bg-blur-ellipse-388 relative mx-auto w-full max-w-8xl overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
-      <div className="container relative mx-auto flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
-        <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-          <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
+    <section className="bg-blur-ellipse-388 max-w-8xl relative mx-auto w-full overflow-hidden">
+      <div className="from-muted via-muted/50 to-background dark:from-ink-500/50 dark:via-ink-500/25 dark:to-ink-500/90 pointer-events-none absolute inset-0 bg-gradient-to-b" />
+      <div className="relative container mx-auto flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
+        <div className="text-l1-foreground dark:text-sienna-100 flex flex-col items-center gap-12 text-2xl leading-[3.25rem] font-medium">
+          <h2 className="text-l1-foreground dark:text-sienna-100 mb-6 py-10 text-center text-4xl font-semibold">
             How SigNoz Compares to <br /> Traditional Tools
           </h2>
           <SectionLayout variant="no-border" className="!mx-auto flex items-center justify-center">
@@ -305,19 +302,16 @@ const StartMonitoring: React.FC = () => {
     },
   ]
   return (
-    <SectionLayout
-      variant="bordered"
-      className="!border-t-1 border-dashed border-signoz_slate-400 !px-0"
-    >
+    <SectionLayout variant="bordered" className="border-border !border-t-1 border-dashed !px-0">
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-12">
+          <p className="text-l1-foreground sticky top-[100px] px-10 pt-10 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-12">
             Start Monitoring Your AI Apps in <span className="text-red-500">Minutes</span>
           </p>
         </div>
-        <div className="grid flex-[2_2_0%] grid-cols-1 border-b border-l border-dashed border-signoz_slate-400 bg-transparent p-0 lg:grid-cols-3">
+        <div className="border-border grid flex-[2_2_0%] grid-cols-1 border-b border-l border-dashed bg-transparent p-0 lg:grid-cols-3">
           <div className="col-span-2 flex flex-col gap-6 p-10">
-            <h3 className="m-0 text-2xl font-semibold text-signoz_vanilla-100">
+            <h3 className="text-l1-foreground m-0 text-2xl font-semibold">
               Get started in three steps:
             </h3>
             <div className="flex flex-col">
@@ -334,7 +328,7 @@ const StartMonitoring: React.FC = () => {
                 initialize tracing
               </div>
             </div>
-            <div className="flex flex-col items-center gap-6 text-justify text-signoz_vanilla-400 lg:items-start">
+            <div className="text-muted-foreground flex flex-col items-center gap-6 text-justify lg:items-start">
               Your existing application code remains completely untouched while traces start flowing
               to SigNoz in real-time, giving you instant visibility into every aspect of your LLM
               operations.

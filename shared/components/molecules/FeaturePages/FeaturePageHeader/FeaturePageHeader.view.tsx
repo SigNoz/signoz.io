@@ -37,18 +37,18 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
     )
 
   return (
-    <header className={cn('relative !mx-auto max-w-8xl', className)}>
-      <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
+    <header className={cn('max-w-8xl relative !mx-auto', className)}>
+      <div className="border-border absolute top-0 right-[12px] bottom-0 left-[12px] z-[0] border !border-t-0 !border-b-0 border-dashed md:right-[24px] md:left-[24px]" />
 
       <div
         className={cn(
-          'relative !mx-auto flex max-w-8xl flex-col border !border-b-0 border-dashed border-signoz_slate-400 px-6 pb-4 pt-12 md:px-8 md:pt-[4rem]',
+          'max-w-8xl border-border relative !mx-auto flex flex-col border !border-b-0 border-dashed px-6 pt-12 pb-4 md:px-8 md:pt-[4rem]',
           isLeft ? 'items-start text-left' : 'items-center text-center'
         )}
       >
         <h1
           className={cn(
-            'text-gradient z-[1] my-4 text-2xl font-semibold tracking-tight dark:text-white sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]',
+            'text-gradient z-[1] my-4 text-2xl font-semibold tracking-tight sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px] dark:text-white',
             isLeft ? '!px-0 !py-3' : '!p-3'
           )}
         >
@@ -57,7 +57,7 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
 
         <p
           className={cn(
-            'm-0 text-lg font-normal leading-normal text-signoz_vanilla-400 sm:p-0 sm:leading-8',
+            'text-muted-foreground m-0 text-lg leading-normal font-normal sm:p-0 sm:leading-8',
             isLeft ? 'px-0 py-3' : 'p-3'
           )}
         >
@@ -67,7 +67,7 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
 
       <div
         className={cn(
-          'relative z-[1] !mx-auto flex max-w-8xl flex-col gap-4 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 px-6 pb-12 pt-4 md:px-8',
+          'max-w-8xl border-border relative z-[1] !mx-auto flex flex-col gap-4 border !border-t-0 !border-b-0 border-dashed px-6 pt-4 pb-12 md:px-8',
           isLeft ? 'items-start' : 'items-center'
         )}
       >
@@ -83,7 +83,7 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
         )}
         {buttonDescription && (
           <div
-            className={cn('text-sm text-signoz_vanilla-400', isLeft ? 'text-left' : 'text-center')}
+            className={cn('text-muted-foreground text-sm', isLeft ? 'text-left' : 'text-center')}
           >
             {buttonDescription}
           </div>

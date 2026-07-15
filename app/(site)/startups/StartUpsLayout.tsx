@@ -8,7 +8,7 @@ import { StartUpsData } from './data'
 
 export default function StartUpsLayout() {
   return (
-    <div className="relative flex min-h-screen flex-col bg-signoz_ink-500">
+    <div className="bg-background relative flex min-h-screen flex-col">
       {/* Hero Section */}
       <StartUpsHero startUpsData={StartUpsData} />
 

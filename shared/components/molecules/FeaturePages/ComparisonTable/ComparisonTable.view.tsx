@@ -8,23 +8,18 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
   className = '',
 }) => {
   return (
-    <div
-      className={cn(
-        'overflow-x-auto border border-signoz_slate-400 bg-signoz_ink-500/50',
-        className
-      )}
-    >
+    <div className={cn('border-border bg-background/50 overflow-x-auto border', className)}>
       <table className="m-0 border-collapse text-left">
-        <tbody className="text-sm text-signoz_vanilla-300">
+        <tbody className="text-muted-foreground text-sm">
           <tr className="relative">
-            <td className="sticky left-[-1px] border-b border-r border-signoz_slate-400 bg-signoz_slate-400 px-6 py-4 text-left font-semibold text-signoz_vanilla-400">
+            <td className="border-border bg-muted text-muted-foreground sticky left-[-1px] border-r border-b px-6 py-4 text-left font-semibold">
               Feature
             </td>
             {vendors.map((vendor) => (
               <th
                 key={vendor.key}
                 className={cn(
-                  'border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400',
+                  'border-border text-muted-foreground border-b px-4 py-4 text-left font-semibold',
                   vendor.className
                 )}
               >
@@ -33,18 +28,15 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
             ))}
           </tr>
           {rows.map((row, index) => (
-            <tr key={index} className="transition-colors hover:bg-signoz_ink-400/30">
-              <td className="sticky left-[-1px] border-b border-r border-signoz_slate-400 bg-signoz_slate-400 px-6 py-4 text-sm text-signoz_robin-400">
+            <tr key={index} className="hover:bg-card/30 transition-colors">
+              <td className="border-border bg-muted text-accent-primary sticky left-[-1px] border-r border-b px-6 py-4 text-sm">
                 {row.feature}
               </td>
               {vendors.map((vendor) => {
                 const cellData = row.vendors[vendor.key]
 
                 return (
-                  <td
-                    key={vendor.key}
-                    className="border-b border-signoz_slate-400 px-4 py-4 text-left"
-                  >
+                  <td key={vendor.key} className="border-border border-b px-4 py-4 text-left">
                     <span className="flex items-center gap-2">
                       {cellData.supported !== undefined &&
                         (cellData.supported === 'partial' ? (

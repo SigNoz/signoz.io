@@ -23,16 +23,14 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
     <div
       className={cn(
         'mt-6 flex items-center justify-between rounded-md px-3 py-4',
-        show?.length === 1 ? 'bg-signoz_slate-400/40' : 'button-background'
+        show?.length === 1 ? 'bg-muted/40' : 'button-background'
       )}
     >
-      <span className="text-base font-medium text-signoz_vanilla-100">
+      <span className="text-l1-foreground text-base font-medium">
         {show?.length === 1 ? 'Monthly estimate for usage-based plan' : 'Monthly estimate'}
       </span>
-      <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
-      <div className="text-xl font-bold text-signoz_vanilla-100">
-        ${formatNumber(totalEstimate)}
-      </div>
+      <div className="border-border w-[45%] border-b border-dashed"></div>
+      <div className="text-l1-foreground text-xl font-bold">${formatNumber(totalEstimate)}</div>
     </div>
 
     {/* Actions section */}
@@ -43,7 +41,7 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
           <a
             href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
             target="_blank"
-            className="inline-flex items-center justify-center rounded-md bg-signoz_ink-400 px-5 py-2.5 text-sm text-white transition-colors hover:bg-signoz_ink-300"
+            className="bg-card text-foreground hover:bg-l3-background inline-flex items-center justify-center rounded-md px-5 py-2.5 text-sm transition-colors"
             rel="noreferrer"
           >
             SigNoz saves you up to 80% on datadog bills.
@@ -68,9 +66,9 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
 
     {/* High volume message when applicable */}
     {isHighVolume && (
-      <div className="mt-4 rounded-md border border-dashed border-signoz_robin-500 bg-signoz_robin-500/10 p-3">
+      <div className="border-primary bg-primary/10 mt-4 rounded-md border border-dashed p-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <span className="mb-2 text-sm font-medium text-signoz_robin-400 sm:mb-0">
+          <span className="text-accent-primary mb-2 text-sm font-medium sm:mb-0">
             For high volume usage, reach out to us for custom pricing and retention options
           </span>
           <TrackingLink

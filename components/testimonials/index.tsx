@@ -67,7 +67,8 @@ export const Testimonials = ({ page, className }: { page: string; className?: st
         review: (
           <>
             <p>
-              Recentlly moved metrics and logging to SigNoz. Gotta say, absolutely loving the tool.{' '}
+              Recentlly moved metrics and logging to SigNoz. Gotta say, absolutely loving the
+              tool.{' '}
             </p>
           </>
         ),
@@ -187,35 +188,31 @@ export const Testimonials = ({ page, className }: { page: string; className?: st
     <section>
       <div
         className={cn(
-          'section-container bg-blur-footer-backdrop relative mx-auto flex w-full max-w-8xl flex-col items-center overflow-hidden border !border-b-0 border-dashed border-signoz_slate-400 !py-8 md:!pt-24',
+          'section-container bg-blur-footer-backdrop max-w-8xl border-border relative mx-auto flex w-full flex-col items-center overflow-hidden border !border-b-0 border-dashed !py-8 md:!pt-24',
           className
         )}
       >
         <div className="z-10 mb-16 flex flex-col items-center gap-12 text-center">
           <OutplayLogo className="h-7 w-auto" aria-label="Outplay logo" />
-          <span className="max-w-[min(42rem,90%)] text-center text-sm font-normal leading-10 text-signoz_sienna-200 sm:text-2xl">
+          <span className="text-sienna-200 max-w-[min(42rem,90%)] text-center text-sm leading-10 font-normal sm:text-2xl">
             We optimized all our top endpoints and fine-tuned database calls to improve our backend
             API response times by 35% using SigNoz. <br />
             Both our dev and QA teams use SigNoz actively in dev and production environments to
             optimize application performance.
           </span>
           <div className="flex flex-col gap-2">
-            <p className="m-0 text-center text-xl font-medium text-signoz_sienna-200">
-              Vijaya Perumal
-            </p>
-            <p className="m-0 text-center text-base font-normal text-signoz_sienna-200">
-              Tech Lead
-            </p>
+            <p className="text-sienna-200 m-0 text-center text-xl font-medium">Vijaya Perumal</p>
+            <p className="text-sienna-200 m-0 text-center text-base font-normal">Tech Lead</p>
           </div>
         </div>
 
-        <div className="row z-10 max-w-screen-md">
+        <div className="z-10 flex max-w-screen-md flex-wrap">
           {TESTIMONIALS_LIST.map((column, idx) => (
-            <div key={idx} className="col col--6">
+            <div key={idx} className="w-full md:w-1/2">
               {column.map((testimonial, i) => (
-                <div className="row" key={`${idx}-${i}`}>
+                <div className="flex w-full" key={`${idx}-${i}`}>
                   <TrackingLink
-                    className="card-demo m-2 w-full"
+                    className="m-2 w-full"
                     href={testimonial.href}
                     clickType="External Click"
                     clickName="Testimonial Link"
@@ -224,28 +221,24 @@ export const Testimonials = ({ page, className }: { page: string; className?: st
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <div className="card-dark rounded-md bg-signoz_ink-400 p-2 hover:bg-signoz_ink-300">
-                      <div className="card__header">
-                        <div className="avatar">
-                          <Image
-                            className="avatar__photo"
-                            src={testimonial.avatar}
-                            alt={`Profile of ${testimonial.name}`}
-                          />
-                          <div className="flex flex-col gap-1">
-                            <div className="avatar__intro">
-                              <p className="mb-0 text-base font-medium text-signoz_vanilla-100">
-                                {testimonial.name}
-                              </p>
-                              <small className="text-sm font-normal text-signoz_vanilla-400">
-                                {testimonial.designation}
-                              </small>
-                            </div>
-                          </div>
+                    <div className="border-border bg-card hover:bg-muted rounded-md border p-2">
+                      <div className="flex items-center gap-3">
+                        <Image
+                          className="h-12 w-12 rounded-full object-cover"
+                          src={testimonial.avatar}
+                          alt={`Profile of ${testimonial.name}`}
+                        />
+                        <div>
+                          <p className="text-l1-foreground mb-0 text-base font-medium">
+                            {testimonial.name}
+                          </p>
+                          <small className="text-muted-foreground text-sm font-normal">
+                            {testimonial.designation}
+                          </small>
                         </div>
                       </div>
 
-                      <div className="card__body padding--md">{testimonial.review}</div>
+                      <div className="text-foreground p-4">{testimonial.review}</div>
                     </div>
                   </TrackingLink>
                 </div>
@@ -261,7 +254,7 @@ export const Testimonials = ({ page, className }: { page: string; className?: st
             clickName="Customer Stories Link"
             clickText="Read customer stories"
             clickLocation="Trusted By Section"
-            className="button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+            className="button-background text-foreground hover:text-foreground relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pr-3 text-center text-sm leading-5 font-medium not-italic no-underline outline-none"
           >
             Read customer stories <ArrowRight size={14} />
           </TrackingLink>

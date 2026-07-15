@@ -6,9 +6,6 @@ import TrackingLink from '@/components/TrackingLink'
 import { HERO_DESCRIPTION, SEARCH_PLACEHOLDERS } from './constants'
 import Image from 'next/image'
 
-const HERO_OVERLAY_GRADIENT =
-  'linear-gradient(0deg, rgb(10, 12, 16) 0%, rgb(10, 12, 16) 36%, rgba(10, 12, 16, 0.95) 50%, rgba(10, 12, 16, 0.78) 62%, rgba(10, 12, 16, 0.45) 76%, rgba(10, 12, 16, 0.12) 90%, rgba(10, 12, 16, 0) 100%)'
-
 export default function Hero() {
   return (
     <div className="relative h-[513px] w-full overflow-hidden">
@@ -23,19 +20,16 @@ export default function Hero() {
         />
       </div>
 
-      <div
-        className="absolute inset-x-0 bottom-0 flex h-[180px] flex-col items-center justify-end px-4 pb-4 pt-0"
-        style={{ backgroundImage: HERO_OVERLAY_GRADIENT }}
-      >
+      <div className="from-background via-background/95 absolute inset-x-0 bottom-0 flex h-[180px] flex-col items-center justify-end bg-gradient-to-t to-transparent px-4 pt-0 pb-4">
         <div className="flex w-full max-w-[671px] flex-col items-center gap-4">
-          <p className="max-w-2xl text-center text-base leading-[26px] text-[#adb4c2]">
+          <p className="text-muted-foreground max-w-2xl text-center text-base leading-[26px]">
             {HERO_DESCRIPTION}
           </p>
           <div className="flex w-full items-center gap-2">
             <SearchBar
               placeholder={SEARCH_PLACEHOLDERS}
               clickLocation="Docs Hero"
-              className="hidden !h-8 flex-1 !rounded-full !border-signoz_ink-200 !bg-signoz_ink-400 !py-0 !pl-2 !pr-4 sm:flex [&>span]:!text-xs [&_svg]:!mr-2 [&_svg]:!h-4 [&_svg]:!w-4"
+              className="!border-border !bg-card hidden !h-8 flex-1 !rounded-full !py-0 !pr-4 !pl-2 sm:flex [&_svg]:!mr-2 [&_svg]:!h-4 [&_svg]:!w-4 [&>span]:!text-xs"
             />
             <TrackingLink
               href="/teams/"
@@ -43,7 +37,7 @@ export default function Hero() {
               clickName="Sign up for SigNoz Cloud"
               clickText="Sign up for SigNoz Cloud"
               clickLocation="Docs Hero"
-              className="flex h-8 flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-signoz_robin-500 px-4 pr-3.5 text-sm font-medium text-signoz_vanilla-100 transition-colors hover:bg-signoz_robin-600"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 flex h-8 flex-shrink-0 items-center gap-2 rounded-full px-4 pr-3.5 text-sm font-medium whitespace-nowrap transition-colors"
             >
               Sign up for SigNoz Cloud
               <ArrowRight size={12} className="rotate-[-45deg]" />

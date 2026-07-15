@@ -7,12 +7,12 @@ import Link from 'next/link'
 export default function GrafanaVsSigNoz() {
   return (
     <div className="my-8 w-full">
-      <div className="transform rounded-xl bg-gradient-to-r from-blue-900/90 to-purple-900/90 p-8 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+      <div className="border-border bg-card transform rounded-xl border p-8 shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
         <div className="space-y-4">
-          <h3 className="my-0 text-2xl font-bold text-white">
+          <h3 className="text-l1-foreground my-0 text-2xl font-bold">
             Migrate from Grafana - Save up to 45% on your Grafana bill
           </h3>
-          <p className="text-gray-300">
+          <p className="text-muted-foreground">
             Tired of juggling multiple tools for observability? SigNoz gives you logs, metrics and
             traces in a single unified platform - making troubleshooting simpler.
           </p>

@@ -24,7 +24,7 @@ export enum GUIDES_TOPICS {
 
 const sidebarItems = [
   { href: GUIDES_TOPICS.ALL, icon: SidebarIcons.All, label: 'All' },
- 
+
   { href: GUIDES_TOPICS.KUBERNETES, icon: SidebarIcons.Kubernetes, label: 'Kubernetes Monitoring' },
   { href: GUIDES_TOPICS.FAQs, icon: SidebarIcons.FAQs, label: 'FAQs' },
   { href: GUIDES_TOPICS.LOGGING, icon: SidebarIcons.LOGGING, label: 'Logging' },
@@ -52,11 +52,11 @@ const SideBar = ({ onCategoryClick, activeItem }) => {
           return (
             <div
               key={index}
-              className={`rounded-md p-2 ${isActive ? 'bg-signoz_ink-200' : 'hover:bg-signoz_ink-400'}`}
+              className={`rounded-md p-2 ${isActive ? 'bg-l3-background' : 'hover:bg-card'}`}
             >
               <div
                 onClick={() => onCategoryClick(item.href)}
-                className="min-[240px] flex cursor-pointer items-center text-white"
+                className="min-[240px] text-foreground flex cursor-pointer items-center"
               >
                 <Icon />
                 <span className="pl-2.5">{item.label}</span>

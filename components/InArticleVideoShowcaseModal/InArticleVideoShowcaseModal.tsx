@@ -120,7 +120,7 @@ const InArticleVideoShowcaseModal: React.FC<InArticleVideoShowcaseModalProps> = 
             </video>
           )}
           {oneLiner && (
-            <p className="mb-0 mt-2 text-center text-sm text-signoz_vanilla-400 md:mt-4 md:text-base">
+            <p className="text-muted-foreground mt-2 mb-0 text-center text-sm md:mt-4 md:text-base">
               {oneLiner}
             </p>
           )}

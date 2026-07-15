@@ -55,8 +55,8 @@ export default function OpenTelemetryHubShellClient({ children }: { children: Re
         <SectionContainer>
           <OpenTelemetryProgressBar targetId={MAIN_CONTENT_ID} />
 
-          <div className="mb-4 hidden flex-wrap items-center justify-between gap-3 border-b border-signoz_ink-300 px-4 pb-3 pt-6 md:px-6 lg:flex lg:px-8">
-            <div className="mx-auto box-border flex w-full max-w-ot-hub flex-wrap items-center gap-6 px-12">
+          <div className="border-border mb-4 hidden flex-wrap items-center justify-between gap-3 border-b px-4 pt-6 pb-3 md:px-6 lg:flex lg:px-8">
+            <div className="max-w-ot-hub mx-auto box-border flex w-full flex-wrap items-center gap-6 px-12">
               {orderedPathMeta.map((path) => {
                 if (!path.firstRoute) return null
                 const isActive = path.key === pathKey
@@ -67,11 +67,11 @@ export default function OpenTelemetryHubShellClient({ children }: { children: Re
                     : path.key === 'quick-start'
                       ? 'OpenTelemetry Quick Start'
                       : path.label
-                const iconColor = isActive ? 'text-white' : 'text-gray-400'
+                const iconColor = isActive ? 'text-foreground' : 'text-muted-foreground'
                 const linkClassName = `border-b-2 px-1 pb-2 text-sm font-semibold transition-colors ${
                   isActive
-                    ? 'border-white/60 text-white'
-                    : 'border-transparent text-gray-400 hover:text-white'
+                    ? 'border-foreground text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`
                 return isQuickStart ? (
                   <TrackingLink

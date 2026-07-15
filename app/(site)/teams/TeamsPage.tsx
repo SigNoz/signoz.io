@@ -40,7 +40,7 @@ interface ErrorsProps {
 const ErrorState: React.FC<{ error: string }> = ({ error }) => {
   return (
     <div className="mx-auto w-full max-w-md">
-      <div className="mb-6 rounded-md border border-signoz_slate-500 bg-signoz_ink-400/30 p-4">
+      <div className="border-border bg-card/30 mb-6 rounded-md border p-4">
         <div className="text-sm">
           {error ||
             "We're sorry, it looks like something didn't go as planned. Please reach out to us for assistance."}
@@ -48,7 +48,7 @@ const ErrorState: React.FC<{ error: string }> = ({ error }) => {
       </div>
 
       <a
-        className="flex w-full items-center justify-center gap-2 rounded-md bg-signoz_cherry-500 py-3 text-sm font-medium"
+        className="bg-danger-background flex w-full items-center justify-center gap-2 rounded-md py-3 text-sm font-medium"
         href="mailto:cloud-support@signoz.io"
       >
         <span>Contact cloud support</span>
@@ -201,15 +201,15 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
   return (
     <div className="mx-auto w-full max-w-md">
       <div className="mb-8">
-        <h1 className="mb-2 text-2xl font-medium text-white">Get started with SigNoz</h1>
-        <p className="text-sm text-signoz_vanilla-100/70">
+        <h1 className="text-foreground mb-2 text-2xl font-medium">Get started with SigNoz</h1>
+        <p className="text-l1-foreground/70 text-sm">
           Experience SigNoz with 30-day free trial. No credit card required.
         </p>
       </div>
 
       <div className="mb-8 space-y-6">
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-signoz_vanilla-100" htmlFor="dataRegion">
+          <label className="text-l1-foreground block text-sm font-medium" htmlFor="dataRegion">
             Data region{' '}
           </label>
           <div className="grid grid-cols-3 gap-3">
@@ -217,12 +217,11 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
               <button
                 type="button"
                 key={region.id}
-                className={`flex items-center justify-center gap-2 rounded-md border-2 border-solid p-2.5 text-sm transition-all duration-200
-            ${
-              region.id === formState.dataRegion
-                ? 'border-signoz_robin-500 bg-signoz_robin-500/20 text-signoz_robin-400 shadow-lg shadow-signoz_robin-500/25 ring-2 ring-signoz_robin-500/30'
-                : 'border-signoz_slate-400 bg-signoz_ink-300 text-signoz_vanilla-100/70 hover:border-signoz_slate-300 hover:bg-signoz_ink-200'
-            }`}
+                className={`flex items-center justify-center gap-2 rounded-md border-2 border-solid p-2.5 text-sm transition-all duration-200 ${
+                  region.id === formState.dataRegion
+                    ? 'border-primary bg-primary/20 text-accent-primary shadow-robin-500/25 ring-ring/30 shadow-lg ring-2'
+                    : 'border-border bg-l3-background text-foreground/70 hover:border-l2-border hover:bg-l3-background'
+                }`}
                 onClick={() => handleRegionChange(region.id)}
               >
                 <Image
@@ -239,13 +238,13 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
         </div>
 
         <div className="space-y-4">
-          <div className="text-center text-sm text-signoz_vanilla-100/70">
+          <div className="text-l1-foreground/70 text-center text-sm">
             Sign up with your work account
           </div>
           <div className="flex flex-col gap-3">
             <button
               type="button"
-              className="flex w-full items-center justify-center gap-3 rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm font-medium text-white transition-colors hover:border-signoz_slate-400"
+              className="border-border bg-card text-foreground hover:border-border flex w-full items-center justify-center gap-3 rounded-md border px-4 py-3 text-sm font-medium transition-colors"
               onClick={() => handleSocialSubmit('google')}
             >
               <Image
@@ -259,7 +258,7 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
             </button>
             <button
               type="button"
-              className="flex w-full items-center justify-center gap-3 rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm font-medium text-white transition-colors hover:border-signoz_slate-400"
+              className="border-border bg-card text-foreground hover:border-border flex w-full items-center justify-center gap-3 rounded-md border px-4 py-3 text-sm font-medium transition-colors"
               onClick={() => handleSocialSubmit('github')}
             >
               <FaGithub className="h-5 w-5" />
@@ -269,15 +268,15 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
         </div>
 
         <div className="flex items-center">
-          <div className="flex-1 border-t border-signoz_slate-400"></div>
-          <span className="px-4 text-sm text-signoz_vanilla-100/50">Or use your work email</span>
-          <div className="flex-1 border-t border-signoz_slate-400"></div>
+          <div className="border-border flex-1 border-t"></div>
+          <span className="text-l1-foreground/50 px-4 text-sm">Or use your work email</span>
+          <div className="border-border flex-1 border-t"></div>
         </div>
       </div>
 
       <form className="space-y-6">
         <div className="space-y-2">
-          <label htmlFor="workEmail" className="block text-sm font-medium text-signoz_vanilla-100">
+          <label htmlFor="workEmail" className="text-l1-foreground block text-sm font-medium">
             Email
           </label>
           <input
@@ -289,7 +288,7 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
             autoComplete="email"
             onChange={handleInputChange}
             placeholder="E.g. bart@simpsonmail.com"
-            className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-300 px-4 py-3 text-sm text-signoz_vanilla-100 placeholder-signoz_vanilla-100/50 focus:border-signoz_robin-500 focus:outline-none focus:ring-1 focus:ring-signoz_robin-500"
+            className="border-border bg-l3-background text-l1-foreground placeholder-vanilla-100/50 focus:border-primary focus:ring-ring w-full rounded-md border px-4 py-3 text-sm focus:ring-1 focus:outline-none"
             ref={emailInputRef}
           />
           {errors?.workEmail && <div className="mt-1 text-xs text-red-400">{errors.workEmail}</div>}
@@ -299,7 +298,7 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
           disabled={isSubmitting}
           onClick={handleSubmit}
           type="submit"
-          className={`flex w-full items-center justify-center rounded-md bg-signoz_robin-500 py-3 font-medium transition-colors hover:bg-signoz_robin-600 ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+          className={`bg-primary hover:bg-primary-background-hover flex w-full items-center justify-center rounded-md py-3 font-medium transition-colors ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
         >
           {isSubmitting ? (
             <div className="flex items-center gap-2 text-sm">
@@ -314,13 +313,13 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
           )}
         </button>
 
-        <p className="text-center text-xs text-signoz_vanilla-100/50">
+        <p className="text-l1-foreground/50 text-center text-xs">
           By signing up, you agree to our{' '}
           <a
             href="https://signoz.io/terms-of-service/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-signoz_robin-500 hover:underline"
+            className="text-primary hover:underline"
           >
             Terms of Service
           </a>{' '}
@@ -329,7 +328,7 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
             href="https://signoz.io/privacy/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-signoz_robin-500 hover:underline"
+            className="text-primary hover:underline"
           >
             Privacy Policy
           </a>
@@ -337,12 +336,9 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
         </p>
 
         <div className="text-center">
-          <p className="text-sm text-signoz_vanilla-100/70">
+          <p className="text-l1-foreground/70 text-sm">
             Already have an account?{' '}
-            <a
-              href="https://signoz.io/login/"
-              className="font-medium text-signoz_robin-500 hover:underline"
-            >
+            <a href="https://signoz.io/login/" className="text-primary font-medium hover:underline">
               Sign in
             </a>
           </p>
@@ -394,14 +390,14 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ initialAuthCode, initialSsoError 
   )
 
   return (
-    <div className="ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-400">
+    <div className="bg-card ml-[calc(100%-100vw)] flex w-screen flex-col">
       <FocusedNavbar />
       <div className="mx-auto flex w-full max-w-[1440px] flex-col lg:mt-[8px] lg:h-[calc(100vh-56px)] lg:flex-row">
         {/* Left section — copy + checkmarks + logos (desktop only) */}
-        <div className="hidden w-full flex-col justify-center p-8 lg:flex lg:w-5/12 lg:py-12 lg:pl-[72px] lg:pr-14">
+        <div className="hidden w-full flex-col justify-center p-8 lg:flex lg:w-5/12 lg:py-12 lg:pr-14 lg:pl-[72px]">
           <div className="flex max-w-[420px] flex-col gap-8">
             {/* Headline */}
-            <h1 className="text-[36px] font-bold leading-[1.2] tracking-[-1px] text-white">
+            <h1 className="text-foreground text-[36px] leading-[1.2] font-bold tracking-[-1px]">
               One Stop Observability
               <br />
               at Scale
@@ -411,9 +407,9 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ initialAuthCode, initialSsoError 
             <div className="flex flex-col gap-3">
               {VALUE_PROPS.map((prop) => (
                 <div key={prop.title} className="flex items-start gap-2.5">
-                  <CheckCircle className="mt-[3px] h-3.5 w-3.5 flex-shrink-0 text-signoz_forest-500" />
+                  <CheckCircle className="text-callout-success-title mt-[3px] h-3.5 w-3.5 flex-shrink-0" />
                   <div className="flex flex-col">
-                    <span className="text-[14px] font-semibold leading-[1.4] text-white">
+                    <span className="text-foreground text-[14px] leading-[1.4] font-semibold">
                       {prop.title}
                     </span>
                     <span className="text-[13px] leading-[1.5] text-gray-500">
@@ -426,7 +422,7 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ initialAuthCode, initialSsoError 
 
             {/* Trust bar */}
             <div className="flex flex-col gap-3">
-              <p className="mb-0 text-[11px] font-semibold uppercase tracking-[1.2px] text-gray-500">
+              <p className="mb-0 text-[11px] font-semibold tracking-[1.2px] text-gray-500 uppercase">
                 Trusted by
               </p>
               <div className="grid grid-cols-3 gap-x-12 gap-y-6 opacity-60">
@@ -447,12 +443,12 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ initialAuthCode, initialSsoError 
 
         {/* Divider */}
         <div className="hidden lg:flex lg:items-center lg:py-16">
-          <div className="h-full w-px bg-signoz_slate-400" />
+          <div className="bg-muted h-full w-px" />
         </div>
 
         {/* Right section — sign up form */}
         <div className="relative flex w-full flex-col items-center justify-center p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:px-16 lg:py-14">
-          <div className="w-full max-w-[560px] rounded-[12px] border border-signoz_slate-400 bg-signoz_ink-500 px-10 py-10">
+          <div className="border-border bg-background w-full max-w-[560px] rounded-[12px] border px-10 py-10">
             {formSection}
           </div>
         </div>

@@ -37,7 +37,7 @@ export default function FeatureComparisonGrid({
   gridClassName,
   sectionHeadingSize = 'lg',
   stickyOffset = 'top-[220px]',
-  stickyBg = 'bg-[#0f1013]',
+  stickyBg = 'bg-background',
   stickyZIndex = 'z-10',
   overlay,
   className,
@@ -47,8 +47,8 @@ export default function FeatureComparisonGrid({
 }: FeatureComparisonGridProps) {
   const headingClass =
     sectionHeadingSize === 'lg'
-      ? 'mb-3 mt-8 py-2 text-center text-sm font-medium sm:text-lg md:text-left'
-      : 'py-3 text-sm font-medium leading-6 text-white'
+      ? 'mb-3 mt-8 py-2 text-center text-sm font-medium text-l1-foreground sm:text-lg md:text-left'
+      : 'py-3 text-sm font-medium leading-6 text-l1-foreground'
 
   return (
     <div className={`relative ${className ?? ''}`}>
@@ -68,7 +68,7 @@ export default function FeatureComparisonGrid({
             </div>
           </div>
 
-          {separator === 'line' ? <Line /> : <div className="h-px w-full bg-[#23262e]" />}
+          {separator === 'line' ? <Line /> : <div className="bg-border h-px w-full" />}
 
           {/* Rows */}
           <div className="grid grid-cols-1">
@@ -83,7 +83,7 @@ export default function FeatureComparisonGrid({
                   ))}
                 </div>
 
-                {separator === 'line' ? <Line /> : <div className="h-px w-full bg-[#23262e]" />}
+                {separator === 'line' ? <Line /> : <div className="bg-border h-px w-full" />}
               </div>
             ))}
           </div>

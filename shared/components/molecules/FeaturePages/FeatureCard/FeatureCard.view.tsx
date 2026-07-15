@@ -7,9 +7,9 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, cla
       <div className="p-8">
         <div className="grid grid-cols-1 gap-8">
           <div className="">{icon}</div>
-          <h3 className="m-0 text-xl font-semibold text-signoz_vanilla-100">{title}</h3>
+          <h3 className="text-l1-foreground m-0 text-xl font-semibold">{title}</h3>
         </div>
-        <p className="mb-0 mt-2 text-sm text-signoz_vanilla-400">{description}</p>
+        <p className="text-muted-foreground mt-2 mb-0 text-sm">{description}</p>
       </div>
     </div>
   )

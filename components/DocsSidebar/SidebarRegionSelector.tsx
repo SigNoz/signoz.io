@@ -40,8 +40,8 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
   const selector = (
     <div className="flex flex-col gap-1 px-2.5 pb-2">
       <div className="flex items-center gap-1.5 pb-2 pl-1.5">
-        <Globe size={12} className="text-signoz_vanilla-400" />
-        <span className="text-xs font-medium uppercase tracking-wider text-signoz_vanilla-400">
+        <Globe size={12} className="text-l2-foreground" />
+        <span className="text-l2-foreground text-xs font-medium tracking-wider uppercase">
           select your region
         </span>
       </div>
@@ -52,9 +52,9 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
         open={open}
         onOpenChange={setOpen}
       >
-        <SelectTrigger className="!flex !h-8 !w-full !items-center !justify-between !gap-0 !rounded !border !border-signoz_ink-300 !bg-signoz_ink-400/60 !px-3 !py-0 !text-sm !text-signoz_vanilla-100 !shadow-none !outline-none !ring-0 hover:!border-signoz_ink-200 focus:!ring-0 disabled:!cursor-wait disabled:!opacity-100 [&>span]:!min-w-0 [&>span]:!flex-1 [&>span]:!truncate [&>span]:!text-left [&_svg]:!h-3 [&_svg]:!w-3 [&_svg]:!shrink-0 [&_svg]:!text-signoz_vanilla-400">
+        <SelectTrigger className="!border-border !bg-l2-background/60 !text-l1-foreground hover:!border-border [&_svg]:!text-l2-foreground !flex !h-8 !w-full !items-center !justify-between !gap-0 !rounded !border !px-3 !py-0 !text-sm !shadow-none !ring-0 !outline-none focus:!ring-0 focus-visible:!ring-0 disabled:!cursor-wait disabled:!opacity-100 [&_svg]:!h-3 [&_svg]:!w-3 [&_svg]:!shrink-0 [&>span]:!min-w-0 [&>span]:!flex-1 [&>span]:!truncate [&>span]:!text-left">
           {isLoading ? (
-            <span className="flex items-center gap-2 text-signoz_vanilla-400">
+            <span className="text-l2-foreground flex items-center gap-2">
               <Loader2 size={12} className="animate-spin" />
               Loading...
             </span>
@@ -63,7 +63,7 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
           )}
         </SelectTrigger>
         <SelectContent
-          className="!z-[100] !w-[var(--radix-select-trigger-width)] !min-w-[var(--radix-select-trigger-width)] !animate-none !rounded !border !border-signoz_ink-300 !bg-signoz_ink-400 !shadow-lg data-[side=bottom]:!animate-none data-[side=top]:!animate-none data-[state=closed]:!animate-none data-[state=open]:!animate-none"
+          className="!border-border !bg-popover !text-popover-foreground !z-[100] !w-[var(--radix-select-trigger-width)] !min-w-[var(--radix-select-trigger-width)] !animate-none !overflow-hidden !rounded !border !p-0 !shadow-lg data-[side=bottom]:!animate-none data-[side=top]:!animate-none data-[state=closed]:!animate-none data-[state=open]:!animate-none"
           position="popper"
           side="bottom"
           align="start"
@@ -74,6 +74,8 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
               '--select-content-close-animation': 'none',
               '--select-content-slide-up-animation': 'none',
               '--select-content-slide-down-animation': 'none',
+              '--select-item-highlight-background': 'var(--l1-background-hover)',
+              '--select-item-highlight-color': 'var(--l1-foreground-hover)',
               animation: 'none',
             } as React.CSSProperties
           }
@@ -82,7 +84,8 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
             <SelectItem
               key={option.value}
               value={option.value}
-              className="!cursor-pointer !rounded-none !px-3 !py-2 !text-sm !text-signoz_vanilla-400 !outline-none hover:!bg-signoz_ink-300 hover:!text-signoz_vanilla-100 focus:!bg-signoz_ink-300 focus:!text-signoz_vanilla-100 data-[state=checked]:!text-signoz_vanilla-100"
+              indicatorClassname="!hidden"
+              className="!text-l2-foreground !cursor-pointer !rounded-none !px-3 !py-2 !pr-3 !text-sm !ring-0 !outline-none focus-visible:!ring-0"
             >
               {option.label}
             </SelectItem>

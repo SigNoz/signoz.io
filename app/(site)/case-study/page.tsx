@@ -152,23 +152,23 @@ const cardDetails = [
 
 function caseStudies() {
   return (
-    <div className="relative mt-[-30px] bg-signoz_ink-500 ">
+    <div className="bg-background relative mt-[-30px]">
       <section>
         <div
-          className="container mx-auto border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400"
+          className="border-border container mx-auto border !border-t-0 !border-b-0 border-dashed"
           style={{ marginTop: '2rem', paddingBottom: '64px' }}
         >
-          <div className="bg-blur-perlin-noise absolute left-0 right-0 top-0 z-[0] h-screen" />
-          <div className="bg-blur-ellipse-388 absolute left-0 right-0 top-0 z-[0] h-screen" />
-          <h1 className="relative mb-3 pt-24 text-center font-mono text-sm font-medium uppercase text-signoz_sakura-400">
+          <div className="bg-blur-perlin-noise absolute top-0 right-0 left-0 z-[0] h-screen" />
+          <div className="bg-blur-ellipse-388 absolute top-0 right-0 left-0 z-[0] h-screen" />
+          <h1 className="text-sakura-400 relative mb-3 pt-24 text-center font-mono text-sm font-medium uppercase">
             {' '}
             Customer Stories{' '}
           </h1>
-          <div className="relative mb-4 text-center text-[28px] font-semibold text-signoz_robin-100">
+          <div className="text-primary-foreground relative mb-4 text-center text-[28px] font-semibold">
             {' '}
             Observability for teams of all-sizes
           </div>
-          <p className="relative mb-20 text-center text-lg text-signoz_vanilla-400">
+          <p className="text-muted-foreground relative mb-20 text-center text-lg">
             SigNoz powers observability for thousands of high-impact engineering teams. From
             cutting-
             <br />
@@ -201,7 +201,7 @@ export default caseStudies
 const CustomerCard: React.FC<CardProps> = ({ logo, logoAlt, title, name, position, href }) => {
   return (
     <Link href={href}>
-      <div className="group min-h-[19rem] cursor-pointer rounded border border-signoz_slate-400 bg-signoz_ink-400 p-12 hover:bg-signoz_ink-300">
+      <div className="group border-border bg-card hover:bg-l3-background min-h-[19rem] cursor-pointer rounded border p-12">
         <div className="flex flex-col gap-3">
           <div className="mb-4 flex h-12 items-start">
             <img src={logo} alt={logoAlt} className="max-h-10 max-w-32 object-contain" />
@@ -209,12 +209,12 @@ const CustomerCard: React.FC<CardProps> = ({ logo, logoAlt, title, name, positio
           <div className="text-base font-semibold">{title}</div>
           <div>
             <div className="flex items-center justify-between">
-              <div className="flex flex-col gap-1 text-signoz_vanilla-400">
+              <div className="text-muted-foreground flex flex-col gap-1">
                 <div className="text-sm font-medium text-[#C0C1C3]">{name}</div>
-                <div className="text-xs font-medium text-signoz_slate-50">{position}</div>
+                <div className="text-muted-foreground text-xs font-medium">{position}</div>
               </div>
               <div className="mt-auto flex transform justify-end transition-transform group-hover:translate-x-2">
-                <ArrowRight size={14} className="text-signoz_robin-100" />
+                <ArrowRight size={14} className="text-primary-foreground" />
               </div>
             </div>
           </div>
@@ -230,11 +230,11 @@ const GetStarted = ({ page }) => {
 
   return (
     <div className="bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
-      <section className="container mx-auto border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0">
+      <section className="border-border container mx-auto border !border-t-0 !border-b-0 border-dashed !px-0">
         <div className="bg-blur-ellipse-206">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
-              <p className="mb-0 mt-20 text-center text-4xl font-bold">
+              <p className="mt-20 mb-0 text-center text-4xl font-bold">
                 Get started with <br /> SigNoz Cloud today
               </p>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">

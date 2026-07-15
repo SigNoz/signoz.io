@@ -13,18 +13,18 @@ export default function IntroductionLayout({ children }: LayoutProps) {
   const mainRef = useRef<HTMLDivElement | null>(null)
 
   return (
-    <div ref={mainRef} className="introduction-page relative bg-signoz_ink-500">
+    <div ref={mainRef} className="introduction-page bg-background relative">
       <div className="bg-dot-pattern masked-dots pointer-events-none absolute top-0 flex h-screen w-full items-center justify-center opacity-30" />
 
       <SectionContainer>
         <ProgressBar target={mainRef} />
 
         <div className="flex h-full w-full items-start">
-          <div className="box-border w-[276px] min-w-[276px] max-w-[276px] self-stretch border-r border-signoz_slate-500 max-md:hidden">
+          <div className="border-border box-border w-[276px] max-w-[276px] min-w-[276px] self-stretch border-r max-md:hidden">
             <DocsSidebar />
           </div>
 
-          <div className="relative flex min-w-0 flex-1 flex-col border-r border-dashed border-signoz_ink-300">
+          <div className="border-border relative flex min-w-0 flex-1 flex-col border-r border-dashed">
             {children}
           </div>
         </div>

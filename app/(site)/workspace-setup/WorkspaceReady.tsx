@@ -101,18 +101,18 @@ function WorkspaceReady({
 
   return (
     <div className="welcome-container mx-auto flex max-w-[640px] flex-col items-center py-32">
-      <CheckCircleIcon size={56} className="text-signoz_robin-500" />
+      <CheckCircleIcon size={56} className="text-primary" />
 
       <div className="mt-[28px] bg-neutral-950 text-2xl"> Your workspace is provisioned! </div>
 
-      <div className="text-md mt-[28px] rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px]">
+      <div className="text-md bg-l3-background mt-[28px] rounded-[6px] border border-[#1D212D] p-[24px]">
         <div className="flex items-center gap-4 text-sm">
           Your SigNoz cloud account has been created. The final step is to set a password to secure
           your account and access your workspace.
         </div>
       </div>
 
-      <div className="text-md mt-[28px] w-full rounded-[6px] border border-[#1D212D] bg-signoz_ink-300">
+      <div className="text-md bg-l3-background mt-[28px] w-full rounded-[6px] border border-[#1D212D]">
         <div className="flex items-center gap-4 border-b border-[#1D212D] p-[16px] text-sm">
           Workspace details
         </div>
@@ -123,7 +123,7 @@ function WorkspaceReady({
               <Link2 size={16} /> Workspace URL
             </div>
 
-            <div className="flex flex-1 items-center gap-4 text-sm text-signoz_robin-500">
+            <div className="text-primary flex flex-1 items-center gap-4 text-sm">
               <a
                 className="flex-1"
                 href={workspaceData?.invite_link}
@@ -143,17 +143,17 @@ function WorkspaceReady({
             <div className="flex items-center gap-2 text-sm">
               <AtSignIcon size={16} /> Sign-up email
             </div>
-            <div className="text-sm text-signoz_robin-500">{decodedEmail}</div>
+            <div className="text-primary text-sm">{decodedEmail}</div>
           </div>
         </div>
       </div>
 
-      <div className="text-md mt-[28px] rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px] text-sm">
+      <div className="text-md bg-l3-background mt-[28px] rounded-[6px] border border-[#1D212D] p-[24px] text-sm">
         If you face any issues with sending data to your cloud instance or getting started, please
         write to{' '}
         <a
           href="mailto:cloud-support@signoz.io"
-          className="text-signoz_robin-500"
+          className="text-primary"
           onClick={handleContactSupport}
         >
           cloud-support@signoz.io
@@ -164,7 +164,7 @@ function WorkspaceReady({
       <div className="mt-[28px] flex w-full max-w-[480px] flex-col items-center justify-center gap-4 py-[8px] text-sm font-medium">
         <a
           type="submit"
-          className="mt-[28px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_robin-500 px-[16px] py-[8px] text-sm font-medium"
+          className="bg-primary mt-[28px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full px-[16px] py-[8px] text-sm font-medium"
           href={workspaceData?.invite_link}
           onClick={handleSetPassword}
         >
@@ -173,7 +173,7 @@ function WorkspaceReady({
         </a>
 
         <Link href="/docs/introduction/" className="w-full" onClick={handleReadDocs}>
-          <button className="flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px] text-sm font-medium">
+          <button className="bg-l3-background flex h-[40px] w-full items-center justify-center gap-4 rounded-full px-[16px] py-[8px] text-sm font-medium">
             <span className="flex text-xs leading-5">Read the docs </span>
             <ArrowRight size={14} />
           </button>

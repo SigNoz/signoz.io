@@ -121,18 +121,18 @@ export default function HeroTracePreview() {
         duration: 1.15,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className="relative mx-auto w-full max-w-8xl origin-center overflow-visible shadow-[0_32px_86px_rgba(0,0,0,0.72)]"
+      className="max-w-8xl relative mx-auto w-full origin-center overflow-visible shadow-[0_32px_86px_rgba(0,0,0,0.72)]"
       style={{ scale: hasMounted ? scale : prefersReducedMotion ? 1 : 0.94 }}
     >
-      <div className="-mx-5 overflow-x-auto px-5 pb-3 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:hidden [&::-webkit-scrollbar]:hidden">
+      <div className="-mx-5 [scrollbar-width:none] overflow-x-auto px-5 pb-3 sm:-mx-6 sm:px-6 lg:hidden [&::-webkit-scrollbar]:hidden">
         <div className="flex snap-x snap-mandatory gap-3">
           {heroTabs.map((tab, index) => (
             <article
-              className="w-[86dvw] max-w-2xl shrink-0 snap-start overflow-hidden rounded-lg border border-signoz_slate-400/25 bg-signoz_ink-400/60"
+              className="border-border/25 bg-card/60 w-[86dvw] max-w-2xl shrink-0 snap-start overflow-hidden rounded-lg border"
               key={tab.label}
             >
               <div className="px-4 py-4">
-                <h3 className="m-0 text-base font-medium leading-5 text-signoz_vanilla-100">
+                <h3 className="text-l1-foreground m-0 text-base leading-5 font-medium">
                   {tab.label}
                 </h3>
               </div>
@@ -150,7 +150,7 @@ export default function HeroTracePreview() {
         </div>
       </div>
 
-      <div className="relative z-10 hidden bg-signoz_ink-500/90 px-4 pt-5 sm:px-6 lg:block lg:px-6 xl:px-8">
+      <div className="bg-background/90 relative z-10 hidden px-4 pt-5 sm:px-6 lg:block lg:px-6 xl:px-8">
         <LayoutGroup id="homepage-hero-preview-tabs">
           <div
             className="grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-3 lg:grid-cols-6"
@@ -164,7 +164,7 @@ export default function HeroTracePreview() {
                 <button
                   aria-controls="homepage-hero-preview-panel"
                   aria-selected={isActive}
-                  className="group relative min-h-10 pb-3 text-left text-signoz_vanilla-100 transition-colors duration-200 xl:min-h-11 xl:pb-4"
+                  className="group text-foreground relative min-h-10 pb-3 text-left transition-colors duration-200 xl:min-h-11 xl:pb-4"
                   id={`homepage-hero-preview-tab-${index}`}
                   key={tab.label}
                   onClick={() => {
@@ -188,13 +188,13 @@ export default function HeroTracePreview() {
                   role="tab"
                   type="button"
                 >
-                  <span className="block whitespace-nowrap text-base font-medium leading-5 tracking-normal xl:text-lg xl:leading-6">
+                  <span className="block text-base leading-5 font-medium tracking-normal whitespace-nowrap xl:text-lg xl:leading-6">
                     {tab.label}
                   </span>
-                  <span className="absolute inset-x-0 bottom-0 h-px bg-signoz_slate-100/70 transition-colors duration-200 group-hover:bg-signoz_slate-100" />
+                  <span className="bg-l3-background/70 group-hover:bg-l3-background absolute inset-x-0 bottom-0 h-px transition-colors duration-200" />
                   {isActive && (
                     <motion.span
-                      className="absolute inset-x-0 bottom-0 z-10 h-px bg-signoz_vanilla-100"
+                      className="bg-card absolute inset-x-0 bottom-0 z-10 h-px"
                       layoutId="active-tab-rail"
                       transition={{ duration: 0.44, ease: [0.16, 1, 0.3, 1] }}
                     />

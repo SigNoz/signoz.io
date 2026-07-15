@@ -36,7 +36,7 @@ function renderCell(value: CellValue) {
       return (
         <div className="flex items-center gap-1.5">
           <Icon size={15} className="shrink-0 text-[#adb4c2]" />
-          <span className="text-xs font-medium uppercase tracking-[0.48px] text-[#adb4c2]">
+          <span className="text-xs font-medium tracking-[0.48px] text-[#adb4c2] uppercase">
             {value.label}
           </span>
         </div>
@@ -69,7 +69,7 @@ const COLUMNS = [
   {
     key: 'clickstack',
     cellClassName: 'px-3 py-3',
-    sectionCellClassName: 'bg-signoz_ink-500',
+    sectionCellClassName: 'bg-background',
   },
 ]
 
@@ -79,13 +79,13 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
   return (
     <div className="w-full overflow-x-auto text-left text-base leading-normal md:overflow-visible">
       <div className="relative min-w-[40rem] md:min-w-0">
-        <div className="pointer-events-none absolute inset-y-0 right-48 z-0 w-48 rounded-lg bg-gradient-to-b from-signoz_ink-300 from-[73%] to-transparent opacity-80" />
+        <div className="from-ink-300 pointer-events-none absolute inset-y-0 right-48 z-0 w-48 rounded-lg bg-gradient-to-b from-[73%] to-transparent opacity-80" />
 
         <div className="sticky top-28 z-[9]">
           <div className={`grid ${GRID_CLASS}`}>
-            <div className="bg-signoz_ink-500" />
+            <div className="bg-background" />
             <div className="relative flex flex-col items-start gap-2.5 bg-[#14161a] px-3 py-4">
-              <span className="text-base font-medium leading-7 text-[#eceef2]">SigNoz</span>
+              <span className="text-base leading-7 font-medium text-[#eceef2]">SigNoz</span>
               <TrackingLink
                 href="/teams/"
                 clickType="Primary CTA"
@@ -97,11 +97,11 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
                 Get Started
               </TrackingLink>
             </div>
-            <div className="flex flex-col items-start gap-2.5 bg-signoz_ink-500 px-3 py-4">
-              <span className="text-base font-medium leading-7 text-[#eceef2]">ClickStack</span>
+            <div className="bg-background flex flex-col items-start gap-2.5 px-3 py-4">
+              <span className="text-base leading-7 font-medium text-[#eceef2]">ClickStack</span>
             </div>
           </div>
-          <div className="h-px w-full bg-[#23262e]" />
+          <div className="bg-border h-px w-full" />
         </div>
 
         {/* Shared grid body */}
@@ -115,7 +115,7 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
           stickyZIndex="z-[8]"
           separator="border"
           featureCellClassName="pl-6 py-3"
-          featureSectionClassName="pl-6 bg-signoz_ink-500"
+          featureSectionClassName="pl-6 bg-background"
         />
       </div>
     </div>

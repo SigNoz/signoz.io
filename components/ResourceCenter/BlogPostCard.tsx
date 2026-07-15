@@ -54,16 +54,16 @@ export default function BlogPostCard({ blog }: { blog: BlogPostCardContent }) {
     <Link href={`/${path}`} prefetch={false}>
       <div className="flex cursor-pointer flex-col max-md:ml-0 max-md:w-full">
         <div
-          className={`mx-auto flex w-full grow flex-col rounded border border-solid p-4 transition-colors duration-150 hover:bg-signoz_ink-300 active:opacity-70 dark:border-signoz_ink-500 dark:bg-signoz_ink-400 dark:hover:bg-signoz_ink-300 max-md:mt-6`}
+          className={`hover:bg-l3-background dark:border-border dark:bg-card dark:hover:bg-l3-background mx-auto flex w-full grow flex-col rounded border border-solid p-4 transition-colors duration-150 active:opacity-70 max-md:mt-6`}
         >
           <div className="content h-[96px]">
             <div
-              className={`line-clamp-3 text-base font-medium leading-6 text-neutral-700 dark:text-neutral-100`}
+              className={`line-clamp-3 text-base leading-6 font-medium text-neutral-700 dark:text-neutral-100`}
             >
               {title}
             </div>
-            <div className="mt-3 flex gap-2 text-xs font-medium uppercase leading-5 tracking-wide">
-              <div className="justify-center rounded-full bg-stone-100 bg-opacity-10 px-2.5 py-1 text-stone-700 dark:text-stone-100">
+            <div className="mt-3 flex gap-2 text-xs leading-5 font-medium tracking-wide uppercase">
+              <div className="bg-opacity-10 justify-center rounded-full bg-stone-100 px-2.5 py-1 text-stone-700 dark:text-stone-100">
                 <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
               </div>
             </div>
@@ -73,7 +73,7 @@ export default function BlogPostCard({ blog }: { blog: BlogPostCardContent }) {
             <div className="flex flex-col gap-2 font-medium text-stone-500 dark:text-white">
               {authors && Array.isArray(authors) && renderAuthor(authors[0])}
             </div>
-            <div className="flex items-center gap-1.5 whitespace-nowrap font-mono dark:text-stone-300">
+            <div className="flex items-center gap-1.5 font-mono whitespace-nowrap dark:text-stone-300">
               <Clock4 size={16} />
               <div className="font-mono text-xs dark:text-white">{blog.readingTime.text}</div>
             </div>

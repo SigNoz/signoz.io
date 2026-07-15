@@ -134,7 +134,7 @@ export const FEATURE_CARDS = [
   },
   {
     description: (
-      <div className="relative flex h-full min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg bg-signoz_ink-500">
+      <div className="bg-background relative flex h-full min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg">
         <Image
           src="/img/graphics/homepage/feature-graphic-columnar-db.svg"
           alt="SigNoz columnar database — predictable pricing with efficient storage"
@@ -225,7 +225,7 @@ export const FEATURE_CARDS = [
   },
   {
     description: (
-      <div className="relative flex h-full min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg bg-signoz_ink-500">
+      <div className="bg-background relative flex h-full min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg">
         <Image
           className="object-contain"
           src={featureGraphicOtel}

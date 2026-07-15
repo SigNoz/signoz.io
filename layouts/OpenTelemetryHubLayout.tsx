@@ -136,15 +136,15 @@ export default function OpenTelemetryHubContent({
   return (
     <>
       <div
-        className={`box-border w-full min-w-0 max-w-full flex-1 lg:px-4 ${!showSidebar ? 'mx-auto max-w-ot-narrow' : ''}`}
+        className={`box-border w-full max-w-full min-w-0 flex-1 lg:px-4 ${!showSidebar ? 'max-w-ot-narrow mx-auto' : ''}`}
       >
         {(showSidebar || hasToc) && <div id={MOBILE_TRIGGER_ID} className="mb-4 lg:hidden" />}
 
         {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
-        <article className="prose prose-slate w-full min-w-0 max-w-full break-words px-3 py-6 dark:prose-invert">
+        <article className="prose prose-slate dark:prose-invert w-full max-w-full min-w-0 px-3 py-6 break-words">
           <h1 className="text-3xl font-bold">{title}</h1>
           {(formattedPublishedDate || formattedUpdatedDate || readingTimeText) && (
-            <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
+            <div className="mt-3 mb-2 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
               {formattedPublishedDate && <span>Published on: {formattedPublishedDate}</span>}
               {formattedUpdatedDate && <span>Last Updated: {formattedUpdatedDate}</span>}
               {readingTimeText && <span>{readingTimeText}</span>}
@@ -158,7 +158,7 @@ export default function OpenTelemetryHubContent({
 
         {(renderedAuthors.length > 0 || primaryTags.length > 0) && (
           <div className="lg:hidden">
-            <div className="rounded-xl border border-signoz_ink-300/80 bg-signoz_ink-500/50 p-4 text-xs text-white/90 shadow-lg">
+            <div className="border-border/80 bg-background/50 text-foreground rounded-xl border p-4 text-xs shadow-lg">
               <div className="flex flex-col gap-4">
                 {renderedAuthors.length > 0 && (
                   <div className="flex items-center gap-3">
@@ -168,20 +168,20 @@ export default function OpenTelemetryHubContent({
                         alt={renderedAuthors[0].name}
                         width={36}
                         height={36}
-                        className="h-9 w-9 rounded-full border border-white/10 object-cover"
+                        className="border-border h-9 w-9 rounded-full border object-cover"
                       />
                     )}
                     <div className="flex flex-col gap-1">
-                      <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
+                      <span className="text-muted-foreground text-[10px] tracking-[0.3em] uppercase">
                         Author{renderedAuthors.length > 1 ? 's' : ''}
                       </span>
-                      <span className="text-sm text-white">
+                      <span className="text-foreground text-sm">
                         {renderedAuthors.map((author, idx) => (
                           <span key={`${author.name}-${idx}`}>
                             {author.url ? (
                               <Link
                                 href={author.url}
-                                className="!text-gray-200 transition-colors hover:text-signoz_robin-400"
+                                className="!text-muted-foreground hover:text-accent-primary transition-colors"
                                 prefetch={false}
                                 target="_blank"
                                 rel="noopener noreferrer nofollow"
@@ -192,7 +192,7 @@ export default function OpenTelemetryHubContent({
                               author.name
                             )}
                             {idx < renderedAuthors.length - 1 && (
-                              <span className="text-white/60">, </span>
+                              <span className="text-muted-foreground">, </span>
                             )}
                           </span>
                         ))}
@@ -203,21 +203,21 @@ export default function OpenTelemetryHubContent({
 
                 {primaryTags.length > 0 && (
                   <div className="flex flex-col gap-2">
-                    <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
+                    <span className="text-muted-foreground text-[10px] tracking-[0.3em] uppercase">
                       Tags
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {primaryTags.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/90"
+                          className="border-border text-foreground rounded-full border px-2 py-1 text-xs"
                         >
                           {tag}
                         </span>
                       ))}
                       {hiddenTags.length > 0 && (
                         <span
-                          className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/70"
+                          className="border-border text-foreground/70 rounded-full border px-2 py-1 text-xs"
                           title={hiddenTagsTitle}
                         >
                           +{hiddenTags.length} more
@@ -234,7 +234,7 @@ export default function OpenTelemetryHubContent({
 
       {(hasMetaInfo || hasToc) && (
         <aside
-          className="box-border hidden w-full min-w-0 max-w-none shrink-0 px-4 max-lg:static max-lg:h-auto max-lg:max-h-none lg:sticky lg:top-[120px] lg:block lg:h-[calc(100vh-140px)] lg:max-h-[calc(100vh-140px)] lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:self-start"
+          className="box-border hidden w-full max-w-none min-w-0 shrink-0 px-4 max-lg:static max-lg:h-auto max-lg:max-h-none lg:sticky lg:top-[120px] lg:block lg:h-[calc(100vh-140px)] lg:max-h-[calc(100vh-140px)] lg:w-80 lg:max-w-[320px] lg:min-w-[320px] lg:self-start"
           aria-label="On this page navigation"
         >
           <div className="flex h-full flex-col gap-3">

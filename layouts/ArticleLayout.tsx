@@ -184,15 +184,15 @@ export default function ArticleLayout({
   return (
     <main id={MAIN_CONTENT_ID} ref={mainRef}>
       <SectionContainer>
-        <div className="mx-auto flex h-full w-full max-w-ot-hub items-start justify-center gap-4 overflow-clip px-3 pt-8 max-lg:flex-col max-lg:gap-3 md:px-6 md:pt-12 lg:px-8">
-          <div className="mx-auto box-border w-full min-w-0 max-w-[780px] flex-auto md:px-0 lg:px-4">
+        <div className="max-w-ot-hub mx-auto flex h-full w-full items-start justify-center gap-4 overflow-clip px-3 pt-8 max-lg:flex-col max-lg:gap-3 md:px-6 md:pt-12 lg:px-8">
+          <div className="mx-auto box-border w-full max-w-[780px] min-w-0 flex-auto md:px-0 lg:px-4">
             {hasToc && <div className="mb-4 lg:hidden" />}
 
             {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
-            <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
+            <article className="prose prose-slate dark:prose-invert max-w-none px-3 py-6">
               <h1 className="text-3xl font-bold">{title}</h1>
               {(formattedPublishedDate || formattedUpdatedDate || readingTimeText) && (
-                <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
+                <div className="mt-3 mb-2 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
                   {formattedPublishedDate && <span>Published on: {formattedPublishedDate}</span>}
                   {formattedUpdatedDate && <span>Last Updated: {formattedUpdatedDate}</span>}
                   {readingTimeText && <span>{readingTimeText}</span>}
@@ -207,7 +207,7 @@ export default function ArticleLayout({
             {/* Mobile meta info card */}
             {(renderedAuthors.length > 0 || primaryTags.length > 0) && (
               <div className="lg:hidden">
-                <div className="rounded-xl border border-signoz_ink-300/80 bg-signoz_ink-500/50 p-4 text-xs text-white/90 shadow-lg">
+                <div className="border-border/80 bg-background/50 text-foreground rounded-xl border p-4 text-xs shadow-lg">
                   <div className="flex flex-col gap-4">
                     {renderedAuthors.length > 0 && (
                       <div className="flex items-center gap-3">
@@ -219,20 +219,20 @@ export default function ArticleLayout({
                             height={36}
                             objectPosition="center"
                             objectFit="cover"
-                            className="h-9 w-9 rounded-full border border-white/10 object-cover object-center"
+                            className="border-border h-9 w-9 rounded-full border object-cover object-center"
                           />
                         )}
                         <div className="flex flex-col gap-1">
-                          <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
+                          <span className="text-muted-foreground text-[10px] tracking-[0.3em] uppercase">
                             Author{renderedAuthors.length > 1 ? 's' : ''}
                           </span>
-                          <span className="text-sm text-white">
+                          <span className="text-foreground text-sm">
                             {renderedAuthors.map((author, idx) => (
                               <span key={`${author.name}-${idx}`}>
                                 {author.url ? (
                                   <Link
                                     href={author.url}
-                                    className="!text-gray-200 transition-colors hover:text-signoz_robin-400"
+                                    className="!text-muted-foreground hover:text-accent-primary transition-colors"
                                     prefetch={false}
                                     target="_blank"
                                     rel="noopener noreferrer nofollow"
@@ -243,7 +243,7 @@ export default function ArticleLayout({
                                   author.name
                                 )}
                                 {idx < renderedAuthors.length - 1 && (
-                                  <span className="text-white/60">, </span>
+                                  <span className="text-muted-foreground">, </span>
                                 )}
                               </span>
                             ))}
@@ -254,21 +254,21 @@ export default function ArticleLayout({
 
                     {primaryTags.length > 0 && (
                       <div className="flex flex-col gap-2">
-                        <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
+                        <span className="text-muted-foreground text-[10px] tracking-[0.3em] uppercase">
                           Tags
                         </span>
                         <div className="flex flex-wrap gap-2">
                           {primaryTags.map((tag) => (
                             <span
                               key={tag}
-                              className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/90"
+                              className="border-border text-foreground rounded-full border px-2 py-1 text-xs"
                             >
                               {tag}
                             </span>
                           ))}
                           {hiddenTags.length > 0 && (
                             <span
-                              className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/70"
+                              className="border-border text-foreground/70 rounded-full border px-2 py-1 text-xs"
                               title={hiddenTagsTitle}
                             >
                               +{hiddenTags.length} more
@@ -287,12 +287,12 @@ export default function ArticleLayout({
               relatedArticles &&
               Array.isArray(relatedArticles) &&
               relatedArticles.length > 0 && (
-                <div className="mt-12 border-t border-signoz_ink-300 pt-10">
+                <div className="border-border mt-12 border-t pt-10">
                   <div className="mb-6">
-                    <p className="mb-1 text-xs font-medium uppercase tracking-[0.2em] text-signoz_robin-400">
+                    <p className="text-accent-primary mb-1 text-xs font-medium tracking-[0.2em] uppercase">
                       Keep Reading
                     </p>
-                    <h2 className="text-xl font-semibold text-white">Related Articles</h2>
+                    <h2 className="text-foreground text-xl font-semibold">Related Articles</h2>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {relatedArticles.slice(0, MAX_RELATED_ARTICLES).map((article, index) => (
@@ -304,20 +304,20 @@ export default function ArticleLayout({
                         clickName="Related Article Link"
                         clickText={article.title}
                         clickLocation={`${contentType} Related Articles`}
-                        className="group flex flex-col justify-between rounded-xl border border-signoz_ink-300 bg-signoz_ink-400/50 p-5 transition-all duration-200 hover:border-signoz_robin-500/60 hover:bg-signoz_ink-400"
+                        className="group border-border bg-card/50 hover:border-primary/60 hover:bg-card flex flex-col justify-between rounded-xl border p-5 transition-all duration-200"
                       >
                         <div>
-                          <p className="mb-3 text-[11px] font-medium uppercase tracking-widest text-signoz_robin-400/70">
+                          <p className="text-accent-primary/70 mb-3 text-[11px] font-medium tracking-widest uppercase">
                             {new Date(article.publishedOn || article.date).toLocaleDateString(
                               'en-US',
                               { month: 'short', year: 'numeric' }
                             )}
                           </p>
-                          <h3 className="text-sm font-medium leading-snug text-white/90 group-hover:text-white">
+                          <h3 className="text-foreground group-hover:text-foreground text-sm leading-snug font-medium">
                             {article.title}
                           </h3>
                         </div>
-                        <div className="mt-4 flex items-center gap-1 text-xs text-signoz_robin-400/60 transition-all duration-200 group-hover:gap-2 group-hover:text-signoz_robin-400">
+                        <div className="text-accent-primary/60 group-hover:text-accent-primary mt-4 flex items-center gap-1 text-xs transition-all duration-200 group-hover:gap-2">
                           <span>Read article</span>
                           <ArrowRight size={12} />
                         </div>
@@ -329,7 +329,7 @@ export default function ArticleLayout({
 
             {/* Newsletter Section */}
             {showNewsletter && (
-              <div className="mb-16 mt-8">
+              <div className="mt-8 mb-16">
                 <NewsletterSubscription />
               </div>
             )}
@@ -338,17 +338,17 @@ export default function ArticleLayout({
           {/* Right sidebar - Desktop only */}
           {(hasMetaInfo || hasToc) && (
             <aside
-              className="sticky top-[120px] box-border hidden h-[calc(100vh-140px)] max-h-[calc(100vh-140px)] w-80 min-w-80 max-w-80 flex-[0_0_320px] self-start px-4 lg:block"
+              className="sticky top-[120px] box-border hidden h-[calc(100vh-140px)] max-h-[calc(100vh-140px)] w-80 max-w-80 min-w-80 flex-[0_0_320px] self-start px-4 lg:block"
               aria-label="On this page navigation"
             >
               <div className="flex h-full flex-col gap-3">
                 {metaInfoCard}
                 {hasToc && (
                   <div className="flex min-h-0 flex-auto flex-col gap-1">
-                    <div className="mb-3 text-xs uppercase text-gray-400">On this page</div>
+                    <div className="mb-3 text-xs text-gray-400 uppercase">On this page</div>
                     <div
                       ref={tocContainerRef}
-                      className="relative z-[1] max-h-none min-h-0 flex-auto overflow-y-auto border-l border-signoz_slate-500 pl-3"
+                      className="border-border relative z-[1] max-h-none min-h-0 flex-auto overflow-y-auto border-l pl-3"
                     >
                       <TableOfContents
                         toc={toc}

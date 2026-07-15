@@ -1,7 +1,5 @@
 'use client'
 
-import { Badge } from '@signozhq/ui/badge'
-
 interface NewBadgeProps {
   publishedDate: string
 }
@@ -15,8 +13,8 @@ export default function NewBadge({ publishedDate }: NewBadgeProps) {
   if (diffDays > 14 || diffDays < 0) return null
 
   return (
-    <Badge variant="outline" color="secondary" className="flex-shrink-0 uppercase">
+    <span className="border-secondary-border bg-secondary-background text-secondary-foreground flex-shrink-0 rounded-full border px-2 py-1 text-[11px] leading-none font-medium tracking-wide uppercase">
       NEW
-    </Badge>
+    </span>
   )
 }

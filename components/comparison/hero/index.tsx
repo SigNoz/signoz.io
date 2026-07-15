@@ -1,6 +1,6 @@
 import React from 'react'
 import styles from './styles.module.css'
-import Link from 'next/link'
+import Button from '@/components/ui/Button'
 
 const Hero = (props) => {
   const { title, desc, billForComparison, trySigNozCloud, selfHost } = props
@@ -10,31 +10,22 @@ const Hero = (props) => {
       <p className={styles.headerDesc}>{desc}</p>
       <div className={styles.ctaContainer}>
         {billForComparison.isVisible && (
-          <Link
-            className={`button ${billForComparison.className} ${styles.ctaButton}`}
-            href={billForComparison.path}
-            prefetch={false}
-          >
+          <Button href={billForComparison.path} className={styles.ctaButton}>
             Send your bill for comparison
-          </Link>
+          </Button>
         )}
         {trySigNozCloud.isVisible && (
-          <Link
-            className={`button primary-gradient bg-signoz_vanilla-300 text-signoz_ink-300`}
+          <Button
             href="/teams/"
-            prefetch={false}
+            className="primary-gradient bg-muted text-muted-foreground hover:bg-muted hover:text-muted-foreground"
           >
             Get Started - Free
-          </Link>
+          </Button>
         )}
         {selfHost.isVisible && (
-          <Link
-            className={`button ${selfHost.className} ${styles.ctaButton}`}
-            href={selfHost.path}
-            prefetch={false}
-          >
+          <Button href={selfHost.path} variant="outline" className={styles.ctaButton}>
             Self-Host
-          </Link>
+          </Button>
         )}
       </div>
       <div className={styles.headerHeroImageContainer}>

@@ -27,11 +27,11 @@ import { ArrowUpRight, LucideServer, Database, Workflow } from 'lucide-react'
 const InstrumentationSupport = () => {
   const TechIcon = ({ icon, name }: { icon: React.ReactNode; name: string }) => (
     <div
-      className="group relative flex h-10 w-10 items-center justify-center rounded-lg border border-signoz_slate-400/30 bg-signoz_ink-300/30"
+      className="group border-border/30 bg-l3-background/30 relative flex h-10 w-10 items-center justify-center rounded-lg border"
       title={name}
     >
       {icon}
-      <div className="absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 transform rounded bg-signoz_ink-200 px-2 py-1 text-xs text-signoz_vanilla-100 group-hover:block">
+      <div className="bg-l3-background text-l1-foreground absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 transform rounded px-2 py-1 text-xs group-hover:block">
         {name}
       </div>
     </div>
@@ -54,8 +54,8 @@ const InstrumentationSupport = () => {
   }) => (
     <div className="mb-8 last:mb-4">
       <div className="mb-4">
-        <h3 className="mb-1 text-lg font-semibold text-signoz_vanilla-100">{title}</h3>
-        <p className="text-sm text-signoz_vanilla-400">{description}</p>
+        <h3 className="text-l1-foreground mb-1 text-lg font-semibold">{title}</h3>
+        <p className="text-muted-foreground text-sm">{description}</p>
       </div>
       <div className="flex flex-wrap items-center gap-3">
         {techIcons.map((tech, index) => (
@@ -77,15 +77,15 @@ const InstrumentationSupport = () => {
   )
 
   return (
-    <div className="section-container !mx-auto border !border-b-0 border-dashed border-signoz_slate-400 !px-0">
+    <div className="section-container border-border !mx-auto border !border-b-0 border-dashed !px-0">
       <div className="flex w-full min-w-0 flex-col sm:flex-row">
         <div className="w-full shrink-0 sm:w-[300px] sm:max-w-[300px] md:!w-[300px]">
-          <p className="sticky top-[100px] px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-8">
+          <p className="text-l1-foreground sticky top-[100px] px-8 pt-10 pl-0 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-0 md:pl-8">
             Complete <br /> Observability <br /> for <br /> Every <br /> Use Case
           </p>
         </div>
         <div className="min-w-0 flex-[2_2_0%]">
-          <div className="ml-0 flex flex-col border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-8 py-10 md:px-4 md:pl-10">
+          <div className="border-border ml-0 flex flex-col border !border-t-0 !border-r-0 !border-b-0 border-dashed px-8 py-10 md:px-4 md:pl-10">
             {/* APM Section */}
             <CategorySection
               title="APM & Tracing"
@@ -152,7 +152,7 @@ const InstrumentationSupport = () => {
               description="Monitor hosts, containers, and orchestration platforms"
               techIcons={[
                 {
-                  icon: <LucideServer className="h-5 w-5 text-signoz_robin-500" />,
+                  icon: <LucideServer className="text-primary h-5 w-5" />,
                   name: 'Infrastructure',
                 },
                 { icon: <SiDocker className="h-5 w-5 text-blue-400" />, name: 'Docker' },
@@ -196,7 +196,7 @@ const InstrumentationSupport = () => {
 
             {/* OpenTelemetry Support Note */}
             <div className="border-signoz_accent-500/50 my-3 border-l-2 pl-4">
-              <p className="m-0 text-sm text-signoz_vanilla-400">
+              <p className="text-muted-foreground m-0 text-sm">
                 <span className="text-signoz_accent-300 font-medium">OpenTelemetry Native</span> —
                 SigNoz supports any language or framework that OpenTelemetry supports. From Rust to
                 Elixir, from mobile apps to serverless functions - if it can emit OTLP data, SigNoz

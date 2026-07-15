@@ -29,7 +29,7 @@ export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuP
   return (
     <Dialog as="div" open={open} onClose={onClose}>
       <div className="fixed inset-0 top-[56px]" />
-      <Dialog.Panel className="fixed inset-y-0 right-0 z-50 mt-[56px] w-full overflow-y-auto bg-signoz_ink-500 px-6 py-24 !pt-[calc(6rem-56px)] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 ">
+      <Dialog.Panel className="bg-background fixed inset-y-0 right-0 z-50 mt-[56px] w-full overflow-y-auto px-6 py-24 !pt-[calc(6rem-56px)] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
         <div className="flex items-center justify-between">
           <TrackingLink
             href="/"
@@ -58,7 +58,7 @@ export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuP
 }
 
 const MOBILE_LINK_CLASS =
-  '-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200'
+  '-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-l3-background'
 
 function MainMenuContent({
   isSignupRoute,
@@ -115,7 +115,7 @@ function MainMenuContent({
       >
         Pricing
       </TrackingLink>
-      <div className="-mx-3 inline-block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200">
+      <div className="hover:bg-l3-background -mx-3 inline-block rounded-lg px-3 py-2 text-base leading-7 font-semibold">
         <GitHubStars location="Mobile Menu" />
       </div>
 
@@ -140,7 +140,7 @@ function MainMenuContent({
             clickType="Primary CTA"
             clickName="Sign Up Button"
             clickText="Get Started - Free"
-            className="block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+            className="hover:bg-l3-background block rounded-lg px-3 py-2 text-base leading-7 font-semibold"
             clickLocation="Mobile Menu"
             onClick={onClose}
           >
@@ -148,15 +148,15 @@ function MainMenuContent({
               asChild
               variant="default"
               className={cn(
-                'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600',
-                'start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white'
+                'homepage-button !bg-primary hover:!bg-accent-primary-hover active:!bg-primary-background-hover !flex !h-8 !gap-0 !overflow-hidden !rounded !p-0 transition-colors duration-200',
+                'start-free-trial-btn font-heading text-primary-foreground hover:text-l1-foreground flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm leading-4 font-bold no-underline outline-none'
               )}
               id="btn-get-started-website-navbar"
             >
               <span>
                 <span
                   className={cn(
-                    'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+                    'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !px-3 !whitespace-nowrap',
                     '[&_svg:not(.animate-spin)]:hidden'
                   )}
                 >
@@ -165,8 +165,8 @@ function MainMenuContent({
                 </span>
                 <span
                   className={cn(
-                    'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
-                    '!flex !bg-signoz_robin-400'
+                    'homepage-button__icon !text-primary-foreground hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded',
+                    '!bg-accent-primary-hover !flex'
                   )}
                   aria-hidden="true"
                 >

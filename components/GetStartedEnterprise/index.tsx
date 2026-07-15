@@ -11,11 +11,11 @@ export const GetStartedEnterprise = () => {
 
   return (
     <div className="bg-[width:50%] bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat">
-      <section className="!mx-auto w-full max-w-8xl border !border-b-0 border-dashed border-signoz_slate-400">
+      <section className="max-w-8xl border-border !mx-auto w-full border !border-b-0 border-dashed">
         <div className="bg-blur-ellipse-206">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
-              <p className="mb-0 mt-20 text-center text-4xl font-bold">
+              <p className="mt-20 mb-0 text-center text-4xl font-bold">
                 Sign up for <br /> SigNoz Enterprise
               </p>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">

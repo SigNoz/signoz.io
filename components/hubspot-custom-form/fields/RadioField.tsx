@@ -28,7 +28,7 @@ export default function RadioField({
               <label
                 key={opt.value}
                 className={`flex cursor-pointer items-center gap-3 rounded-md text-sm transition ${
-                  isSelected ? 'text-signoz_robin-500' : t.textMuted
+                  isSelected ? 'text-primary' : t.textMuted
                 } ${disabled ? 'opacity-50' : ''}`}
               >
                 <input
@@ -42,10 +42,10 @@ export default function RadioField({
                 />
                 <span
                   className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition ${
-                    isSelected ? 'border-signoz_robin-500' : t.radioBorder
+                    isSelected ? 'border-primary' : t.radioBorder
                   }`}
                 >
-                  {isSelected && <span className="h-2 w-2 rounded-full bg-signoz_robin-500" />}
+                  {isSelected && <span className="bg-primary h-2 w-2 rounded-full" />}
                 </span>
                 <span>{opt.label}</span>
               </label>

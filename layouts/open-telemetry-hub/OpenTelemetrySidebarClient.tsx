@@ -224,7 +224,7 @@ export default function OpenTelemetrySidebarClient({
 
   const desktopSidebar =
     showSidebar && filteredNav.length ? (
-      <div className="box-border hidden w-full min-w-0 max-w-none max-lg:static max-lg:h-auto max-lg:max-h-none lg:block lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:self-stretch">
+      <div className="box-border hidden w-full max-w-none min-w-0 max-lg:static max-lg:h-auto max-lg:max-h-none lg:block lg:w-80 lg:max-w-[320px] lg:min-w-[320px] lg:self-stretch">
         <Sidebar
           items={filteredNav}
           activeRoute={normalizedRouteMemo}
@@ -239,7 +239,7 @@ export default function OpenTelemetrySidebarClient({
       ? createPortal(
           <button
             type="button"
-            className="my-6 flex w-full items-center justify-end gap-2 rounded-lg border border-signoz_ink-300 bg-signoz_ink-500/60 px-3 py-3 text-sm text-white shadow-sm transition-colors hover:border-signoz_robin-500"
+            className="border-border bg-background/60 text-foreground hover:border-primary my-6 flex w-full items-center justify-end gap-2 rounded-lg border px-3 py-3 text-sm shadow-sm transition-colors"
             onClick={() => setIsMobileNavOpen(true)}
           >
             <Menu size={16} />
@@ -260,12 +260,12 @@ export default function OpenTelemetrySidebarClient({
                 aria-label="Close navigation overlay"
               />
 
-              <div className="absolute inset-y-0 right-0 w-[90%] max-w-sm overflow-y-auto border-l border-signoz_ink-300 bg-signoz_ink-500 shadow-2xl">
-                <div className="flex items-center justify-between border-b border-signoz_ink-300 px-4 py-3">
-                  <div className="text-sm font-semibold text-white">Guide</div>
+              <div className="border-border bg-background absolute inset-y-0 right-0 w-[90%] max-w-sm overflow-y-auto border-l shadow-2xl">
+                <div className="border-border flex items-center justify-between border-b px-4 py-3">
+                  <div className="text-foreground text-sm font-semibold">Guide</div>
                   <button
                     type="button"
-                    className="rounded-full p-2 text-gray-300 transition-colors hover:bg-signoz_ink-400/50 hover:text-white"
+                    className="text-muted-foreground hover:bg-card/50 hover:text-foreground rounded-full p-2 transition-colors"
                     onClick={() => setIsMobileNavOpen(false)}
                     aria-label="Close navigation"
                   >

@@ -153,22 +153,18 @@ export const RegionAwarePre = (props: any) => {
       {hintVisible && (
         <div
           role="tooltip"
-          className="absolute right-2 top-12 z-20 w-56 rounded-md border border-signoz_slate-500 bg-signoz_ink-400 px-3 py-2 text-xs leading-snug text-signoz_vanilla-100 shadow-[0_8px_30px_rgba(0,0,0,0.45)]"
+          className="border-border bg-card text-l1-foreground absolute top-12 right-2 z-20 w-56 rounded-md border px-3 py-2 text-xs leading-snug shadow-[0_8px_30px_rgba(0,0,0,0.45)]"
         >
           {selectedRegion ? (
             <>
               Heads up: this snippet uses the{' '}
-              <code className="rounded bg-signoz_slate-400 px-1 py-0.5 font-semibold">
-                {selectedRegion}
-              </code>{' '}
+              <code className="bg-muted rounded px-1 py-0.5 font-semibold">{selectedRegion}</code>{' '}
               region. Double-check it matches your workspace region before copying.
             </>
           ) : (
             <>
               Set your workspace region above — this snippet still uses the{' '}
-              <code className="rounded bg-signoz_slate-400 px-1 py-0.5 font-semibold">
-                &lt;region&gt;
-              </code>{' '}
+              <code className="bg-muted rounded px-1 py-0.5 font-semibold">&lt;region&gt;</code>{' '}
               placeholder.
             </>
           )}

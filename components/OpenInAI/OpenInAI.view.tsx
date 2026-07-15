@@ -81,7 +81,7 @@ function OpenInAI({
 
   return (
     <div className={cn('flex items-center', className)}>
-      <div className="flex items-center rounded-md border border-signoz_slate-400 bg-signoz_ink-400">
+      <div className="border-border bg-card flex items-center rounded-md border">
         <Button
           isButton={true}
           type="button"
@@ -91,7 +91,7 @@ function OpenInAI({
           size="sm"
           className={cn(
             'gap-1.5 rounded-l-md rounded-r-none px-3',
-            copied && 'text-signoz_forest-500'
+            copied && 'text-callout-success-title'
           )}
           aria-label={copyLabel}
           title={copyLabel}
@@ -100,7 +100,7 @@ function OpenInAI({
           <span className="hidden lg:inline">{copied ? 'Copied!' : copyLabel}</span>
         </Button>
 
-        <div className="h-4 w-px bg-signoz_slate-400" aria-hidden="true" />
+        <div className="bg-muted h-4 w-px" aria-hidden="true" />
 
         <Menu as="div" className="relative">
           {({ open }) => (
@@ -113,7 +113,7 @@ function OpenInAI({
                 size="sm"
                 className={cn(
                   'size-9 rounded-l-none rounded-r-md px-0',
-                  open && 'bg-signoz_ink-300 text-signoz_vanilla-100'
+                  open && 'bg-l3-background text-foreground'
                 )}
                 aria-label="More options"
                 title="More options"
@@ -136,7 +136,7 @@ function OpenInAI({
               >
                 <Menu.Items
                   modal={false}
-                  className="absolute right-0 z-50 mt-2 min-w-[280px] origin-top-right rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 py-1 shadow-xl focus:outline-none"
+                  className="border-border bg-card absolute right-0 z-50 mt-2 min-w-[280px] origin-top-right rounded-lg border py-1 shadow-xl focus:outline-none"
                 >
                   <Menu.Item disabled={isCopyDisabled}>
                     {({ active, disabled }) => (
@@ -146,24 +146,24 @@ function OpenInAI({
                         disabled={disabled}
                         className={cn(
                           'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors',
-                          active && 'bg-signoz_ink-300',
+                          active && 'bg-l3-background',
                           disabled && 'cursor-not-allowed opacity-50'
                         )}
                       >
                         <div
                           className={cn(
                             'mt-0.5 flex-shrink-0',
-                            copied ? 'text-signoz_forest-500' : 'text-signoz_vanilla-400'
+                            copied ? 'text-callout-success-title' : 'text-muted-foreground'
                           )}
                           aria-hidden="true"
                         >
                           {copied ? <Check size={16} /> : <Copy size={16} />}
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium text-signoz_vanilla-100">
+                          <span className="text-l1-foreground text-sm font-medium">
                             {copied ? 'Copied!' : 'Copy page'}
                           </span>
-                          <span className="text-xs text-signoz_vanilla-400">
+                          <span className="text-muted-foreground text-xs">
                             Copy page as Markdown for LLMs
                           </span>
                         </div>
@@ -172,7 +172,7 @@ function OpenInAI({
                   </Menu.Item>
 
                   <div
-                    className="my-1 border-t border-signoz_slate-400"
+                    className="border-border my-1 border-t"
                     role="separator"
                     aria-hidden="true"
                   />
@@ -185,24 +185,24 @@ function OpenInAI({
                           onClick={() => handleOpenInAI(option)}
                           className={cn(
                             'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors',
-                            active && 'bg-signoz_ink-300'
+                            active && 'bg-l3-background'
                           )}
                         >
-                          <div className="mt-0.5 flex-shrink-0 text-signoz_vanilla-400">
+                          <div className="text-muted-foreground mt-0.5 flex-shrink-0">
                             <option.Icon className="h-4 w-4" aria-hidden="true" />
                           </div>
                           <div className="flex flex-col">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-sm font-medium text-signoz_vanilla-100">
+                              <span className="text-l1-foreground text-sm font-medium">
                                 {option.name}
                               </span>
                               <ExternalLink
                                 size={12}
-                                className="text-signoz_vanilla-400"
+                                className="text-muted-foreground"
                                 aria-hidden="true"
                               />
                             </div>
-                            <span className="text-xs text-signoz_vanilla-400">
+                            <span className="text-muted-foreground text-xs">
                               {option.description}
                             </span>
                           </div>

@@ -35,10 +35,8 @@ const IconCardGrid: React.FC<IconCardGridProps> = ({
       {/* Section Header - Only render if title or description exists */}
       {(title || description) && (
         <div className="mb-6 text-left">
-          {title && (
-            <h2 className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">{title}</h2>
-          )}
-          {description && <p className="text-base text-signoz_vanilla-400">{description}</p>}
+          {title && <h2 className="text-l1-foreground mb-2 text-2xl font-semibold">{title}</h2>}
+          {description && <p className="text-muted-foreground text-base">{description}</p>}
         </div>
       )}
 
@@ -48,7 +46,7 @@ const IconCardGrid: React.FC<IconCardGridProps> = ({
           <li key={index} className="h-full w-full">
             <TrackingLink
               href={card.href}
-              className="flex h-full w-full flex-col items-center justify-center rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 text-center no-underline transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
+              className="border-border bg-card hover:border-primary hover:bg-l3-background flex h-full w-full flex-col items-center justify-center rounded-lg border p-4 text-center no-underline transition-all"
               clickType="Nav Click"
               clickName={card.clickName}
               clickText={card.name}
@@ -57,7 +55,7 @@ const IconCardGrid: React.FC<IconCardGridProps> = ({
               <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-md">
                 {card.icon}
               </div>
-              <span className="text-sm font-medium text-signoz_vanilla-100">{card.name}</span>
+              <span className="text-l1-foreground text-sm font-medium">{card.name}</span>
             </TrackingLink>
           </li>
         ))}
@@ -68,7 +66,7 @@ const IconCardGrid: React.FC<IconCardGridProps> = ({
         <div className="mt-6 text-sm">
           <TrackingLink
             href={viewAllHref}
-            className="inline-flex items-center text-signoz_robin-500 no-underline transition-colors hover:text-signoz_robin-400"
+            className="text-primary hover:text-accent-primary inline-flex items-center no-underline transition-colors"
             clickType="Nav Click"
             clickName={`View All ${title || ''} Link`}
             clickText={viewAllText}

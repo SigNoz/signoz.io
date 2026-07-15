@@ -56,7 +56,7 @@ const Header: React.FC = () => {
       title={
         <>
           <div className="mb-4 p-3 text-base font-semibold">SIGNOZ VS AWS CLOUDWATCH</div>
-          <div className="text-5xl font-bold leading-none">
+          <div className="text-5xl leading-none font-bold">
             AWS CloudWatch <br className="hidden md:block" /> Alternative
           </div>
         </>
@@ -69,7 +69,7 @@ const Header: React.FC = () => {
         </>
       }
       buttons={headerButtons}
-      sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
+      sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-border max-md:-mb-[3rem]"
       heroImageAlt="Cloudwatch Alternative hero"
       heroImage="/img/platform/CloudwatchAlternativeMeta.webp"
     />
@@ -81,7 +81,7 @@ const WhyTeamsSwitchFromCloudWatch: React.FC = () => {
     <div className="relative flex flex-col gap-6 pt-32 md:py-20">
       <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
         <div className="flex flex-col items-center gap-12 text-2xl leading-[3.25rem]">
-          <h2 className="my-6 py-10 text-center text-4xl font-normal text-signoz_vanilla-300">
+          <h2 className="text-muted-foreground my-6 py-10 text-center text-4xl font-normal">
             Why Teams Switch From CloudWatch
           </h2>
 
@@ -98,12 +98,12 @@ const WhyTeamsSwitchFromCloudWatch: React.FC = () => {
 
 const DeploymentAndDataResidency: React.FC = () => {
   return (
-    <SectionLayout variant="bordered" className="bg-blur-ellipse-388 !pb-24 !pt-24">
+    <SectionLayout variant="bordered" className="bg-blur-ellipse-388 !pt-24 !pb-24">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center text-center">
-        <h2 className="text-center text-4xl font-normal text-signoz_vanilla-100">
+        <h2 className="text-l1-foreground text-center text-4xl font-normal">
           Deployment & Data Residency
         </h2>
-        <h4 className="mb-24 text-xl font-normal text-signoz_vanilla-100">
+        <h4 className="text-l1-foreground mb-24 text-xl font-normal">
           Your Data, Your Infrastructure, Your Rules.
         </h4>
         <IconTitleDescriptionCardGrid
@@ -111,13 +111,13 @@ const DeploymentAndDataResidency: React.FC = () => {
           variant="xl"
         />
         <div className="relative hidden w-full items-center gap-0 md:flex">
-          <Divider className="h-px flex-1 border-signoz_sakura-600" />
+          <Divider className="border-sakura-600 h-px flex-1" />
           <div className="absolute z-[1] flex w-full items-center justify-center">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white bg-signoz_sakura-600 text-xl font-bold text-white">
+            <span className="bg-sakura-600 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white text-xl font-bold text-white">
               VS
             </span>
           </div>
-          <Divider className="h-px flex-1 border-signoz_sakura-600" />
+          <Divider className="border-sakura-600 h-px flex-1" />
         </div>
         <IconTitleDescriptionCardGrid
           cards={DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW}
@@ -132,11 +132,11 @@ const CostComparison: React.FC = () => {
   return (
     <>
       <div className="flex flex-col gap-4 px-10 py-12 md:px-12">
-        <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
-        <h4 className="m-0 text-xl font-bold text-signoz_vanilla-100">
+        <h2 className="text-muted-foreground text-5xl font-normal">Pricing</h2>
+        <h4 className="text-l1-foreground m-0 text-xl font-bold">
           You shouldn't pay to look at your own data
         </h4>
-        <div className="text-sm text-signoz_vanilla-400">
+        <div className="text-muted-foreground text-sm">
           CloudWatch bills across 12+ separate components for ingestion, storage, queries, metrics,
           alarms, dashboards, and API access. SigNoz charges $0.30/GB for logs and traces, $0.10 per
           million samples for metrics. Once data is ingested, query it unlimited times at no extra
@@ -148,7 +148,7 @@ const CostComparison: React.FC = () => {
         <div className="flex flex-col sm:flex-row">
           <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
             <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
-              <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+              <h2 className="text-l1-foreground text-4xl !leading-[3.5rem] font-bold sm:text-4xl">
                 CloudWatch's <br className="hidden md:block" /> billing{' '}
                 <br className="hidden md:block" /> complexity
               </h2>
@@ -166,16 +166,16 @@ const CostComparison: React.FC = () => {
             </div>
           </div>
           <div className="flex-[2_2_0%]">
-            <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+            <div className="border-border border-l border-dashed bg-transparent p-0">
               <div className="flex flex-col gap-4 px-10 py-10">
                 {CLOUDWATCH_BILLING_CARDS.map((card) => (
                   <Card
                     key={card.title}
-                    className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
+                    className="[&>*]:border-border rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid"
                   >
                     <div className="p-6">
-                      <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
-                      <p className="text-sm text-signoz_vanilla-400">{card.description}</p>
+                      <h4 className="text-l1-foreground mb-2 font-semibold">{card.title}</h4>
+                      <p className="text-muted-foreground text-sm">{card.description}</p>
                     </div>
                   </Card>
                 ))}
@@ -190,14 +190,14 @@ const CostComparison: React.FC = () => {
 
 const ArchitectureAndApproach: React.FC = () => {
   return (
-    <section className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden">
+    <section className="bg-blur-ellipse-388 max-w-8xl relative mx-auto overflow-hidden">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 py-16 text-center md:py-20">
-        <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
+        <div className="text-l1-foreground dark:text-sienna-100 flex flex-col items-center gap-14 text-2xl leading-[3.25rem] font-medium">
           <div className="flex flex-col items-center gap-4">
-            <h2 className="text-center text-4xl font-semibold text-signoz_sakura-100">
+            <h2 className="text-l1-foreground dark:text-sakura-100 text-center text-4xl font-semibold">
               Architecture & Approach
             </h2>
-            <div className="text-center text-base text-signoz_vanilla-100">
+            <div className="text-l1-foreground text-center text-base">
               These CloudWatch problems stem from architectural choices. CloudWatch splits telemetry{' '}
               <br className="hidden md:block" />
               across separate services (Metrics, Logs, X-Ray, Application Signals), each with its

@@ -14,10 +14,10 @@ type CardProps = {
 const FeatureCard: React.FC<CardProps> = ({ title, img, description, buttonText, buttonLink }) => {
   return (
     <div
-      className={`col-span-2 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-9 sm:col-span-1`}
+      className={`border-border bg-background col-span-2 border !border-r-0 !border-b-0 border-dashed p-9 sm:col-span-1`}
     >
       <div className="items-left mb-4 flex flex-col gap-6">
-        <p className="text-3xl font-semibold text-signoz_vanilla-100">{title}</p>
+        <p className="text-l1-foreground text-3xl font-semibold">{title}</p>
         {img ? (
           <img
             src={img}
@@ -25,13 +25,13 @@ const FeatureCard: React.FC<CardProps> = ({ title, img, description, buttonText,
             className="card-background h-auto w-auto border-none"
           />
         ) : null}
-        <p className="mb-3 mt-2 text-base font-normal leading-9 text-signoz_vanilla-400">
+        <p className="text-muted-foreground mt-2 mb-3 text-base leading-9 font-normal">
           {description}
         </p>
       </div>
       <div className="mt-4">
         {buttonText ? (
-          <Button variant="legacySecondary" className="mb-4 mt-4 max-w-fit">
+          <Button variant="legacySecondary" className="mt-4 mb-4 max-w-fit">
             <Link href={buttonLink ? buttonLink : ''} className="flex-center" target="_blank">
               {buttonText} <ArrowRight size={14} />
             </Link>

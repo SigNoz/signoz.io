@@ -110,7 +110,7 @@ const FloatingTableOfContents: React.FC = () => {
     >
       {/* Menu Items */}
       <div
-        className={`absolute bottom-16 left-0 min-w-[240px] rounded-lg bg-gray-800/95 p-3 shadow-xl backdrop-blur-sm transition-all duration-300 ${
+        className={`border-border bg-popover text-popover-foreground absolute bottom-16 left-0 min-w-[240px] rounded-lg border p-3 shadow-xl backdrop-blur-sm transition-all duration-300 ${
           isOpen
             ? 'pointer-events-auto translate-y-0 opacity-100'
             : 'pointer-events-none translate-y-4 opacity-0'
@@ -128,7 +128,7 @@ const FloatingTableOfContents: React.FC = () => {
             >
               <button
                 onClick={() => handleItemClick(item.id)}
-                className="w-full rounded-md px-3 py-2 text-left text-sm text-white transition-colors hover:bg-gray-700/80"
+                className="text-foreground hover:bg-accent w-full rounded-md px-3 py-2 text-left text-sm transition-colors"
               >
                 {item.text}
               </button>
@@ -138,7 +138,7 @@ const FloatingTableOfContents: React.FC = () => {
                     <button
                       key={child.id}
                       onClick={() => handleItemClick(child.id)}
-                      className="flex items-center gap-1 rounded-md px-3 py-1.5 text-left text-xs text-gray-300 transition-colors hover:bg-gray-700/80"
+                      className="text-muted-foreground hover:bg-accent hover:text-foreground flex items-center gap-1 rounded-md px-3 py-1.5 text-left text-xs transition-colors"
                     >
                       <ChevronRight className="h-3 w-3" />
                       {child.text}
@@ -154,8 +154,8 @@ const FloatingTableOfContents: React.FC = () => {
       {/* Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 rounded-full bg-gray-800/90 px-4 py-2 text-white shadow-lg backdrop-blur-sm transition-all duration-300 hover:bg-gray-700/90 ${
-          isOpen ? 'bg-gray-700/90' : ''
+        className={`border-border bg-popover text-popover-foreground hover:bg-accent flex items-center gap-2 rounded-full border px-4 py-2 shadow-lg backdrop-blur-sm transition-all duration-300 ${
+          isOpen ? 'bg-accent' : ''
         }`}
       >
         <Menu className="h-4 w-4" />

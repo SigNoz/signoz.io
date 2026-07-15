@@ -142,20 +142,22 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
         key={doc.route}
         id={`#${doc.route}`}
         className={`group transition-all duration-200 ${
-          isGetStarted ? 'mb-4 ml-4 mr-2 mt-2' : 'mx-2 my-0.5'
+          isGetStarted ? 'mt-2 mr-2 mb-4 ml-4' : 'mx-2 my-0.5'
         }`}
         onClick={() => onNavItemClick && typeof onNavItemClick == 'function' && onNavItemClick()}
       >
         <Link
           href={constructHref(doc.route)}
-          className={`flex w-full items-center gap-2.5 rounded px-5 py-2 text-sm transition-all duration-200 ${
+          className={`flex w-full items-center gap-2.5 rounded px-5 py-2 text-sm transition-colors duration-200 ${
             isGetStarted
-              ? isActiveRoute
-                ? 'border border-signoz_ink-200 bg-signoz_ink-400 text-signoz_vanilla-100'
-                : 'border border-signoz_ink-200 text-signoz_vanilla-400 hover:bg-signoz_ink-300 hover:text-signoz_vanilla-100'
+              ? `font-medium ${
+                  isActiveRoute
+                    ? 'border-border bg-l1-background-hover text-l1-foreground-hover border'
+                    : 'border-border text-l2-foreground hover:bg-l1-background-hover hover:text-l1-foreground-hover border'
+                }`
               : isActiveRoute
-                ? 'bg-signoz_ink-300 text-signoz_vanilla-100'
-                : 'text-signoz_vanilla-400 hover:bg-signoz_ink-300 hover:text-signoz_vanilla-100'
+                ? 'bg-l1-background-hover text-l1-foreground-hover'
+                : 'text-l2-foreground hover:bg-l1-background-hover hover:text-l1-foreground-hover'
           } ${doc.className || ''}`}
         >
           <Tooltip content={doc.label} side="right" delayDuration={500}>
@@ -181,13 +183,17 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
         <Link href={category.route ? constructHref(category.route) : ''}>
           <div
             onClick={() => toggleIsExpandedByLabel(category.label)}
-            className={`flex cursor-pointer items-center gap-1 rounded px-3 py-2 text-sm transition-all duration-200 ${
+            className={`flex cursor-pointer items-center gap-1 rounded px-3 py-2 text-sm transition-colors duration-200 ${
               isActiveRoute
-                ? 'bg-signoz_ink-300 text-signoz_vanilla-100'
-                : 'text-signoz_vanilla-400 hover:bg-signoz_ink-300 hover:text-signoz_vanilla-100'
+                ? 'bg-l1-background-hover text-l1-foreground-hover'
+                : 'text-l2-foreground hover:bg-l1-background-hover hover:text-l1-foreground-hover'
             } ${category.className || ''}`}
           >
-            <div className="flex-shrink-0 text-signoz_vanilla-400">
+            <div
+              className={`flex-shrink-0 ${
+                isActiveRoute ? 'text-l1-foreground-hover' : 'text-l2-foreground'
+              }`}
+            >
               {category.isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
             </div>
             <Tooltip content={category.label} side="right" delayDuration={500}>
@@ -198,19 +204,15 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
         {category.isExpanded && (
           <div className="mt-0.5">
             {category.link && category.link.type === 'generated-index' && (
-              <div className="mx-5 mb-1 mt-1">
+              <div className="mx-5 mt-1 mb-1">
                 <Tooltip content={category.link.title} side="right" delayDuration={500}>
-                  <h4
-                    className={`truncate text-xs text-signoz_vanilla-400 ${
-                      isActiveRoute ? 'text-white' : 'hover:text-white'
-                    }`}
-                  >
+                  <h4 className="text-l2-foreground hover:text-l1-foreground-hover truncate text-xs font-medium">
                     {category.link.title}
                   </h4>
                 </Tooltip>
               </div>
             )}
-            <ul className="ml-4 space-y-0 border-l border-gray-700/50 pl-0">
+            <ul className="border-border ml-4 space-y-0.5 border-l pl-0">
               {category?.items?.map(renderItem)}
             </ul>
           </div>
@@ -247,7 +249,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
   return (
     <nav
       ref={sidebarRef}
-      className="docs-sidebar sticky top-[48px] h-full w-full overflow-y-auto py-3 text-white"
+      className="docs-sidebar text-foreground sticky top-[48px] h-full w-full overflow-y-auto py-4"
     >
       {showRegionSelector && <SidebarRegionSelector />}
       <ul className="list-none space-y-0 p-0">{sideNav.map(renderItem)}</ul>

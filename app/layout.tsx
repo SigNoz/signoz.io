@@ -7,6 +7,7 @@ import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
+import { ThemeProvider } from '@/components/ThemeProvider'
 import { AnonymousIdSetter } from './anonymous-id-setter'
 
 const inter = Inter({
@@ -62,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang={siteMetadata.language}
-      className={`dark ${inter.className}`}
+      className={inter.className}
       data-theme="default"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
@@ -96,22 +97,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000" />
       <link rel="alternate" type="application/rss+xml" href="/rss/" />
 
-      <body className="pl-[calc(100vw-100%)] text-white antialiased">
-        <SpeedInsights />
-        <Suspense fallback={null}>
-          <PageViewTracker />
-        </Suspense>
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-N9B6D4H"
-            height="0"
-            width="0"
-            style={{ display: 'none', visibility: 'hidden' }}
-          ></iframe>
-        </noscript>
+      <body className="text-foreground pl-[calc(100vw-100%)] antialiased">
+        <ThemeProvider>
+          <SpeedInsights />
+          <Suspense fallback={null}>
+            <PageViewTracker />
+          </Suspense>
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-N9B6D4H"
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+            ></iframe>
+          </noscript>
 
-        <AnonymousIdSetter />
-        {children}
+          <AnonymousIdSetter />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -1,6 +1,6 @@
 import React from 'react'
 import styles from './styles.module.css'
-import Link from 'next/link'
+import Button from '@/components/ui/Button'
 
 const GetStarted = (props) => {
   const { withHackerNews, withMigrationSupport, data } = props
@@ -40,21 +40,15 @@ const GetStartedSection = (props) => {
   return (
     <div className="container">
       <div
-        className={`${styles.trySigNozContainer} 
-        ${!withHackerNews && styles.withoutHackerNews} 
-        ${!withMigrationSupport && styles.withoutMigrationSupport} bg-indigo-500`}
+        className={`${styles.trySigNozContainer} ${!withHackerNews && styles.withoutHackerNews} ${!withMigrationSupport && styles.withoutMigrationSupport} bg-indigo-500`}
       >
         <h3 className={styles.tagline}>
           OpenTelemetry-Native Metrics, Logs, and Traces in a single pane of glass
         </h3>
         <p className={styles.desc}>SigNoz Cloud is the easiest way to run SigNoz</p>
-        <Link
-          className={`button button--secondary ${styles.trySigNozCtaBtn}`}
-          href="/teams/"
-          prefetch={false}
-        >
+        <Button href="/teams/" variant="secondary" className={styles.trySigNozCtaBtn}>
           Get Started - Free
-        </Link>
+        </Button>
       </div>
     </div>
   )
@@ -68,9 +62,7 @@ const MigrationSupport = (props) => {
   return (
     <div className="container">
       <div
-        className={`${styles.migrationSupportContainer} 
-        ${!withMigrationSupport && styles.withoutMigrationSupport} 
-        ${!withHackerNews && styles.withoutHackerNews} `}
+        className={`${styles.migrationSupportContainer} ${!withMigrationSupport && styles.withoutMigrationSupport} ${!withHackerNews && styles.withoutHackerNews} `}
       >
         <h4 className={styles.tagline}>{title}</h4>
         <p className={styles.desc}>{desc}</p>

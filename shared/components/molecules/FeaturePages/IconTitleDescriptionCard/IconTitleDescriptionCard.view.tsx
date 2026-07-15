@@ -27,25 +27,21 @@ const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
     <div
       className={`relative flex h-full w-full flex-col items-start ${styles.gap} px-8 py-6 ${className}`}
     >
-      <div className="flex items-center gap-1 text-xs font-medium uppercase tracking-[0.05rem] text-signoz_vanilla-400">
+      <div className="text-muted-foreground flex items-center gap-1 text-xs font-medium tracking-[0.05rem] uppercase">
         {icon && (
-          <span className="flex h-5 w-5 items-center justify-center text-signoz_vanilla-100">
-            {icon}
-          </span>
+          <span className="text-foreground flex h-5 w-5 items-center justify-center">{icon}</span>
         )}
         {iconText && <span>{iconText}</span>}
       </div>
 
       {title && (
-        <Heading
-          className={`m-0 text-left font-semibold text-signoz_vanilla-100 ${styles.heading}`}
-        >
+        <Heading className={`text-l1-foreground m-0 text-left font-semibold ${styles.heading}`}>
           {title}
         </Heading>
       )}
 
       {description && (
-        <div className="m-0 w-full text-left text-sm text-signoz_vanilla-400">{description}</div>
+        <div className="text-muted-foreground m-0 w-full text-left text-sm">{description}</div>
       )}
     </div>
   )

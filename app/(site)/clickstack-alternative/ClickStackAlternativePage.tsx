@@ -66,7 +66,7 @@ const Header: React.FC = () => {
         </>
       }
       buttons={headerButtons}
-      sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
+      sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-border max-md:-mb-[3rem]"
       heroImageAlt="ClickStack/HyperDX Alternative hero"
       heroImage="/img/platform/ClickStackAlternativeMeta.webp"
     />
@@ -77,12 +77,12 @@ const QuickEvaluation: React.FC = () => {
   return (
     <SectionLayout
       variant="full-width"
-      className="relative mx-auto border-b border-dashed border-signoz_slate-400"
+      className="border-border relative mx-auto border-b border-dashed"
     >
       <div className="relative flex flex-col gap-6 pt-32 md:py-20">
         <div className="mx-auto flex w-full flex-col items-center text-center">
           <div className="flex w-full flex-col items-center gap-12 text-2xl leading-[3.25rem]">
-            <h2 className="my-6 text-center text-4xl font-semibold text-signoz_sakura-100">
+            <h2 className="text-l1-foreground dark:text-sakura-100 my-6 text-center text-4xl font-semibold">
               A Quick Evaluation
             </h2>
             <div className="w-full max-w-5xl">
@@ -100,11 +100,11 @@ const CostComparison: React.FC = () => {
     <>
       <SectionLayout variant="full-width" className="flex flex-col gap-y-9 !px-0">
         <div className="flex flex-col gap-4 px-10 py-12 md:px-12">
-          <h2 className="text-5xl font-normal text-signoz_vanilla-300">Pricing</h2>
-          <h4 className="m-0 text-xl font-bold text-signoz_vanilla-100">
+          <h2 className="text-muted-foreground text-5xl font-normal">Pricing</h2>
+          <h4 className="text-l1-foreground m-0 text-xl font-bold">
             You shouldn't pay to investigate your own data
           </h4>
-          <div className="text-sm text-signoz_vanilla-400">
+          <div className="text-muted-foreground text-sm">
             ClickStack bills across 4 separate dimensions, only two of which have published rates.
             SigNoz charges $0.30/GB for logs and traces, $0.10 per million metric samples. Querying
             is free.
@@ -115,7 +115,7 @@ const CostComparison: React.FC = () => {
           <div className="flex flex-col sm:flex-row">
             <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
               <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
-                <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+                <h2 className="text-l1-foreground text-4xl !leading-[3.5rem] font-bold sm:text-4xl">
                   ClickStack's <br className="hidden md:block" /> billing{' '}
                   <br className="hidden md:block" /> complexity
                 </h2>
@@ -133,16 +133,16 @@ const CostComparison: React.FC = () => {
               </div>
             </div>
             <div className="flex-[2_2_0%]">
-              <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+              <div className="border-border border-l border-dashed bg-transparent p-0">
                 <div className="flex flex-col gap-4 px-10 py-10">
                   {CLICKSTACK_BILLING_CARDS.map((card) => (
                     <Card
                       key={card.title}
-                      className="rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid [&>*]:border-signoz_slate-500"
+                      className="[&>*]:border-border rounded-md p-0 [&>*]:rounded-md [&>*]:border-solid"
                     >
                       <div className="p-6">
-                        <h4 className="mb-2 font-semibold text-signoz_vanilla-100">{card.title}</h4>
-                        <p className="m-0 text-sm text-signoz_vanilla-400">{card.description}</p>
+                        <h4 className="text-l1-foreground mb-2 font-semibold">{card.title}</h4>
+                        <p className="text-muted-foreground m-0 text-sm">{card.description}</p>
                       </div>
                     </Card>
                   ))}
@@ -158,14 +158,14 @@ const CostComparison: React.FC = () => {
 
 const DashboardsThatHelpYouInvestigate: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden">
+    <section className="max-w-8xl relative mx-auto overflow-hidden">
       <div className="relative mx-auto flex flex-col items-center gap-6 py-16 text-center md:py-20">
-        <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
+        <div className="text-l1-foreground dark:text-sienna-100 flex flex-col items-center gap-14 text-2xl leading-[3.25rem] font-medium">
           <div className="flex max-w-4xl flex-col items-center gap-4">
-            <h2 className="text-center text-4xl font-semibold text-signoz_sakura-100">
+            <h2 className="text-l1-foreground dark:text-sakura-100 text-center text-4xl font-semibold">
               Dashboards That Help You Investigate
             </h2>
-            <div className="text-center text-base text-signoz_vanilla-100">
+            <div className="text-l1-foreground text-center text-base">
               ClickStack gives you views. SigNoz gives you the ability to move from a dashboard
               panel into <br className="hidden md:block" /> the exact logs and traces behind it,
               with all your filters intact.
@@ -192,14 +192,14 @@ const DashboardsThatHelpYouInvestigate: React.FC = () => {
 
 const AlertingThatTellsYouWhatMatters: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden">
+    <section className="max-w-8xl relative mx-auto overflow-hidden">
       <div className="relative mx-auto flex flex-col items-center gap-6 text-center">
-        <div className="flex flex-col items-center gap-20 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
+        <div className="text-l1-foreground dark:text-sienna-100 flex flex-col items-center gap-20 text-2xl leading-[3.25rem] font-medium">
           <div className="flex max-w-4xl flex-col items-center gap-4">
-            <h2 className="text-center text-4xl font-semibold text-signoz_sakura-100">
+            <h2 className="text-l1-foreground dark:text-sakura-100 text-center text-4xl font-semibold">
               Alerting That Tells You What Matters
             </h2>
-            <div className="text-center text-base text-signoz_vanilla-100">
+            <div className="text-l1-foreground text-center text-base">
               SigNoz gives you a dedicated alerts workflow with anomaly detection, multi-threshold
               rules, and <br className="hidden md:block" /> full alert history. ClickStack is
               limited to creating alerts from search or dashboard context only.
@@ -209,15 +209,15 @@ const AlertingThatTellsYouWhatMatters: React.FC = () => {
             <Divider />
             <IconTitleDescriptionCardGrid cards={ALERTING_ABOVE_HISTORY_CARDS} variant="lg" />
             <Divider />
-            <div className="flex flex-col items-start gap-4 border-dashed border-signoz_slate-400 px-8 py-6 text-left">
-              <h4 className="m-0 p-0 font-semibold text-signoz_vanilla-100">Alert history</h4>
-              <p className="m-0 p-0 text-sm text-signoz_vanilla-400">
+            <div className="border-border flex flex-col items-start gap-4 border-dashed px-8 py-6 text-left">
+              <h4 className="text-l1-foreground m-0 p-0 font-semibold">Alert history</h4>
+              <p className="text-muted-foreground m-0 p-0 text-sm">
                 SigNoz maintains a full alert history with attribute breakdowns. You can see which
                 specific attribute values, like a service name or a Kubernetes pod, contributed most
                 to triggering an alert over time.
               </p>
-              <p className="m-0 p-0 text-sm text-signoz_vanilla-400">
-                ClickStack <span className="text-signoz_cherry-300">does not maintain</span> alert
+              <p className="text-muted-foreground m-0 p-0 text-sm">
+                ClickStack <span className="text-danger-foreground">does not maintain</span> alert
                 history.
               </p>
               <Image
@@ -282,12 +282,12 @@ const BetterChoiceBanner: React.FC = () => {
 
 const QueryYourData: React.FC = () => {
   return (
-    <div className="bg-signoz_ink-500 py-16">
+    <div className="bg-background py-16">
       <div className="mx-auto my-8 max-w-4xl p-6">
-        <h2 className="my-4 text-center text-4xl font-semibold text-signoz_sakura-100">
+        <h2 className="text-l1-foreground dark:text-sakura-100 my-4 text-center text-4xl font-semibold">
           Query Your Data, Any Way You Want
         </h2>
-        <p className="mb-8 text-center leading-relaxed text-signoz_vanilla-100">
+        <p className="text-foreground mb-8 text-center leading-relaxed">
           SigNoz supports PromQL, a visual query builder, and SQL across logs, traces, and metrics.{' '}
           <br className="hidden md:block" />
           ClickStack supports Lucene search and SQL only.
@@ -340,7 +340,7 @@ const ClickStackAlternativePage: React.FC = () => {
               Use the calculator below to estimate costs, then track actual usage with{' '}
               <Link
                 href="/docs/cost-meter/overview/"
-                className="font-semibold text-signoz_robin-500 underline decoration-signoz_robin-500 underline-offset-2"
+                className="text-primary decoration-robin-500 font-semibold underline underline-offset-2"
               >
                 Cost Meter
               </Link>{' '}

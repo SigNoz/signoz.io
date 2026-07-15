@@ -23,7 +23,7 @@ export default function DocsPrevNext() {
       {prev && prev?.route && (
         <Link
           href={prev?.route || ''}
-          className="docs-prev rounded bg-signoz_slate-500 p-2 px-4 no-underline"
+          className="docs-prev bg-muted rounded p-2 px-4 no-underline"
           prefetch={false}
         >
           <div className="mb-2 text-xs font-bold">Prev</div>
@@ -37,7 +37,7 @@ export default function DocsPrevNext() {
       {next && next?.route && (
         <Link
           href={next?.route || ''}
-          className="docs-next rounded bg-signoz_slate-500 p-2 px-4 no-underline"
+          className="docs-next bg-muted rounded p-2 px-4 no-underline"
           prefetch={false}
         >
           <div className="mb-2 flex justify-end text-xs font-bold">Next</div>

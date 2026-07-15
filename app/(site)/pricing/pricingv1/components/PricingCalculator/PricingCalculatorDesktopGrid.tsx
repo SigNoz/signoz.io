@@ -28,19 +28,19 @@ export const PricingCalculatorDesktopGrid: React.FC<PricingCalculatorDesktopGrid
     >
       {/* Header Row */}
       <div className="col-start-1 p-2"></div>
-      <div className="col-start-2 py-2 pr-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
+      <div className="text-muted-foreground col-start-2 py-2 pr-2 text-xs font-semibold uppercase">
         Pricing per unit
       </div>
-      <div className="col-start-3 py-2 pr-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
+      <div className="text-muted-foreground col-start-3 py-2 pr-2 text-xs font-semibold uppercase">
         Retention
       </div>
-      <div className="col-start-4 py-2 pr-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
+      <div className="text-muted-foreground col-start-4 py-2 pr-2 text-xs font-semibold uppercase">
         Scale of ingestion (per month)
       </div>
-      <div className="col-start-5 py-2 pr-2 text-right text-xs font-semibold uppercase text-signoz_vanilla-400">
+      <div className="text-muted-foreground col-start-5 py-2 pr-2 text-right text-xs font-semibold uppercase">
         Estimated usage
       </div>
-      <div className="col-start-6 py-2 pr-2 text-right text-xs font-semibold uppercase text-signoz_vanilla-400">
+      <div className="text-muted-foreground col-start-6 py-2 pr-2 text-right text-xs font-semibold uppercase">
         Subtotal
       </div>
 

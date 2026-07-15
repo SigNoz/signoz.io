@@ -27,7 +27,7 @@ const GRID_SLIDER: Record<
     minLabel: '0GB',
     maxLabel: '100TB',
     formatFunc: formatBytes,
-    thumbColor: 'signoz_robin-500',
+    thumbColor: 'robin-500',
     ariaLabel: 'Adjust traces ingestion volume',
   },
   logs: {
@@ -35,7 +35,7 @@ const GRID_SLIDER: Record<
     minLabel: '0GB',
     maxLabel: '100TB',
     formatFunc: formatBytes,
-    thumbColor: 'signoz_sakura-500',
+    thumbColor: 'sakura-500',
     ariaLabel: 'Adjust logs ingestion volume',
   },
   metrics: {
@@ -43,17 +43,17 @@ const GRID_SLIDER: Record<
     minLabel: '0M',
     maxLabel: '100B',
     formatFunc: formatMetrics,
-    thumbColor: 'signoz_amber-500',
+    thumbColor: 'amber-500',
     ariaLabel: 'Adjust metrics ingestion volume',
   },
 }
 
 const GRID_INPUT_BORDER: Record<DesktopIngestionMode, string> = {
   traces:
-    'ml-1 w-full border-0 border-b border-signoz_robin-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none',
-  logs: 'ml-1 w-full border-0 border-b border-signoz_sakura-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none',
+    'ml-1 w-full border-0 border-b border-accent-primary/50 bg-transparent text-right text-muted-foreground outline-none',
+  logs: 'ml-1 w-full border-0 border-b border-sakura-400/50 bg-transparent text-right text-muted-foreground outline-none',
   metrics:
-    'ml-1 w-full border-0 border-b border-signoz_amber-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none',
+    'ml-1 w-full border-0 border-b border-warning-background/50 bg-transparent text-right text-muted-foreground outline-none',
 }
 
 const USAGE_UNIT: Record<DesktopIngestionMode, string> = {
@@ -86,7 +86,7 @@ export const PricingCalculatorDesktopGridRow: React.FC<PricingCalculatorDesktopG
   const priceCell =
     mode === 'metrics' ? (
       <div className="metrics-background col-start-2 flex items-center gap-1">
-        <span className="text-base font-medium text-signoz_amber-400">
+        <span className="text-callout-warning-title text-base font-medium">
           ${METRICS_PRICES[state.retentionPeriod]}
         </span>
         /mn samples
@@ -95,7 +95,7 @@ export const PricingCalculatorDesktopGridRow: React.FC<PricingCalculatorDesktopG
       <div className="metrics-background col-start-2 flex items-center gap-1">
         <span
           className={`text-base font-medium ${
-            mode === 'traces' ? 'text-signoz_robin-400' : 'text-signoz_sakura-400'
+            mode === 'traces' ? 'text-accent-primary' : 'text-sakura-400'
           }`}
         >
           ${TRACES_AND_LOGS_PRICES[state.retentionPeriod]}
@@ -113,7 +113,7 @@ export const PricingCalculatorDesktopGridRow: React.FC<PricingCalculatorDesktopG
       {priceCell}
       <div className="metrics-background col-start-3 flex items-center">
         <select
-          className="block h-[28px] w-20 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+          className="border-border bg-card text-l1-foreground block h-[28px] w-20 rounded-sm border p-1 text-xs"
           value={state.retentionPeriod}
           onChange={(e) => state.setRetentionPeriod(Number(e.target.value))}
         >
@@ -143,7 +143,7 @@ export const PricingCalculatorDesktopGridRow: React.FC<PricingCalculatorDesktopG
           inputValue={state.inputValue}
         />
       </div>
-      <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">
+      <div className="metrics-background text-muted-foreground col-start-5 p-2 text-right">
         <div className="flex items-center justify-end">
           <input
             type="number"

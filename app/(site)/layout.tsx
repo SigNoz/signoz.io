@@ -3,6 +3,7 @@ import MainFooter from '@/components/mainFooter'
 import TopNav from '@/components/TopNav/TopNav'
 import { TooltipProviderWrapper } from '@/components/TooltipProviderWrapper'
 import { MobileDocsSidebarProvider } from '@/components/DocsSidebar/MobileDocsSidebarContext'
+import { FloatingThemeToggle } from '@/components/ThemeToggle/FloatingThemeToggle'
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,10 +12,11 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         <SectionContainer>
           <div className="relative flex h-screen flex-col justify-between">
             <TopNav />
-            <main className="mb-auto mt-[48px] bg-signoz_ink-500">{children}</main>
+            <main className="bg-background mt-[48px] mb-auto">{children}</main>
             <MainFooter />
           </div>
         </SectionContainer>
+        <FloatingThemeToggle />
       </MobileDocsSidebarProvider>
     </TooltipProviderWrapper>
   )

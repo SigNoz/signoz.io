@@ -1,40 +1,38 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 
 interface VerticalTabsProps {
   tabData: {
-    [key: string]: React.ReactNode;
-  };
+    [key: string]: React.ReactNode
+  }
 }
 
 const VerticalTabs: React.FC<VerticalTabsProps> = ({ tabData }) => {
-  const [activeTab, setActiveTab] = useState(Object.keys(tabData)[0]);
+  const [activeTab, setActiveTab] = useState(Object.keys(tabData)[0])
 
   return (
-    <div className="flex flex-col md:flex-row bg-gray-900 text-gray-100 rounded-lg shadow-lg overflow-hidden h-auto md:h-[500px]">
-      <div className="w-full md:w-1/4 bg-gray-800">
-        <ul className="flex flex-row md:flex-col list-none p-0 m-0 overflow-x-auto md:overflow-x-visible">
+    <div className="bg-card text-card-foreground border-border flex h-auto flex-col overflow-hidden rounded-lg border shadow-lg md:h-[500px] md:flex-row">
+      <div className="bg-muted w-full md:w-1/4">
+        <ul className="m-0 flex list-none flex-row overflow-x-auto p-0 md:flex-col md:overflow-x-visible">
           {Object.keys(tabData).map((tabKey) => (
             <li
               key={tabKey}
-              className={`cursor-pointer my-0 p-3 transition-colors duration-200 whitespace-nowrap md:whitespace-normal ${
-                activeTab === tabKey ? 'bg-blue-600 text-white w-full h-full' : 'hover:bg-gray-700'
+              className={`my-0 cursor-pointer p-3 whitespace-nowrap transition-colors duration-200 md:whitespace-normal ${
+                activeTab === tabKey
+                  ? 'bg-primary text-primary-foreground h-full w-full'
+                  : 'hover:bg-accent'
               }`}
               onClick={() => setActiveTab(tabKey)}
             >
-              <div className="w-full h-full flex items-center justify-center">
-                {tabKey}
-              </div>
+              <div className="flex h-full w-full items-center justify-center">{tabKey}</div>
             </li>
           ))}
         </ul>
       </div>
-      <div className="w-full md:w-3/4 p-4 md:p-6 overflow-y-auto">
-        {tabData[activeTab]}
-      </div>
+      <div className="w-full overflow-y-auto p-4 md:w-3/4 md:p-6">{tabData[activeTab]}</div>
     </div>
-  );
-};
+  )
+}
 
-export default VerticalTabs;
+export default VerticalTabs

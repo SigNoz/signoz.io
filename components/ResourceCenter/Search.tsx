@@ -9,12 +9,12 @@ interface SearchInputProps {
 
 const SearchInput: FC<SearchInputProps> = ({ placeholder, onSearch }) => {
   return (
-    <div className="mt-0 flex w-full items-center rounded border border-solid px-3 text-base leading-6 text-zinc-600 dark:border-gray-900 dark:bg-signoz_ink-400 max-md:max-w-full max-md:pr-5">
+    <div className="dark:bg-card mt-0 flex w-full items-center rounded border border-solid px-3 text-base leading-6 text-zinc-600 max-md:max-w-full max-md:pr-5 dark:border-gray-900">
       <div className="flex w-full items-center gap-2.5">
         <Search size={16} />
 
         <Input
-          className="w-full border-none focus:border-none active:border-none dark:bg-signoz_ink-400 dark:text-white"
+          className="dark:bg-card w-full border-none focus:border-none active:border-none dark:text-white"
           name="full_name"
           type="text"
           placeholder={placeholder}

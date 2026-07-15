@@ -7,14 +7,14 @@ import Image from 'next/image'
 const CTASection = () => {
   return (
     <div className="relative bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
-      <section className="!mx-auto w-full max-w-8xl border-t border-dashed border-signoz_slate-400">
+      <section className="max-w-8xl border-border !mx-auto w-full border-t border-dashed">
         <div className="bg-blur-ellipse-206">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
-              <h2 className="mb-0 mt-20 text-center font-bold">
+              <h2 className="mt-20 mb-0 text-center font-bold">
                 Get started with <br /> SigNoz Cloud today
               </h2>
-              <div className="mx-10 md:absolute md:left-[5%] md:top-[15%] md:z-50 md:mx-0 md:-mb-0 md:mt-0 md:w-1/3">
+              <div className="mx-10 md:absolute md:top-[15%] md:left-[5%] md:z-50 md:mx-0 md:mt-0 md:-mb-0 md:w-1/3">
                 <Image
                   src="/img/events/kubecon-2025/edited-photo.png"
                   alt="Mascot Olly"

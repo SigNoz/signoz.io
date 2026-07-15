@@ -309,10 +309,12 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
       <div className={DOC_TOC_CLASSES} ref={tocContainerRef}>
         {hideTableOfContents ? null : (
           <>
-            <div className="mb-3 text-xs uppercase"> On this page </div>
+            <div className="text-muted-foreground mb-3 text-xs font-semibold tracking-wide uppercase">
+              On this page
+            </div>
             <div
               ref={tocItemsRef}
-              className="relative z-[1] min-h-0 flex-[1_1_auto] overflow-y-auto border-l border-signoz_slate-500 pl-3"
+              className="border-border relative z-[1] min-h-0 flex-[1_1_auto] overflow-y-auto border-l pl-3"
             >
               <TableOfContents
                 toc={filteredToc}

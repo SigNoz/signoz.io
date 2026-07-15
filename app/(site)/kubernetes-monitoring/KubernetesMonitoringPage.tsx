@@ -31,7 +31,7 @@ const Header: React.FC = () => {
         buttons={HEADER_BUTTONS}
         heroImage="/img/website/hero-tabs/infrastructure.webp"
         heroImageAlt="SigNoz Kubernetes Infrastructure Monitoring"
-        sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
+        sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-border max-md:-mb-[3rem]"
         className="mt-0"
         align="left"
       />
@@ -41,9 +41,9 @@ const Header: React.FC = () => {
 
 const FeatureSections: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden border-t border-dashed border-signoz_slate-400 pt-14">
+    <section className="max-w-8xl border-border relative mx-auto overflow-hidden border-t border-dashed pt-14">
       <div className="relative mx-auto flex flex-col items-center gap-6 text-center">
-        <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
+        <div className="text-l1-foreground dark:text-sienna-100 flex flex-col items-center gap-14 text-2xl leading-[3.25rem] font-medium">
           <IconTitleDescriptionCardGrid cards={FEATURE_CARDS} variant="lg" titleLevel="h2" />
         </div>
       </div>
@@ -57,7 +57,7 @@ const BottomCTA: React.FC = () => {
       variant="full-width"
       className="flex flex-col items-center justify-center gap-6 !px-8 !py-20 md:!px-0"
     >
-      <h2 className="mx-auto mb-6 max-w-4xl text-center text-4xl font-semibold text-signoz_vanilla-100">
+      <h2 className="text-l1-foreground mx-auto mb-6 max-w-4xl text-center text-4xl font-semibold">
         Supercharge your Kubernetes Monitoring. <br className="hidden md:block" /> With AI powered
         insights.
       </h2>
@@ -97,7 +97,7 @@ const KubernetesMonitoringPage: React.FC = () => {
   return (
     <FeaturePageLayout showProductNav={false} fullWidth>
       <Header />
-      <div className="relative mx-auto max-w-8xl">
+      <div className="max-w-8xl relative mx-auto">
         <SectionLayout variant="bordered" className="!px-0">
           <FeatureSections />
           <Divider />

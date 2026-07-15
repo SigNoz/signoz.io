@@ -109,7 +109,7 @@ export default function HomepageFloatingCta() {
       }`}
     >
       <TrackingLink
-        className="bg-signoz_ink-400/92 group pointer-events-auto flex h-11 items-center justify-center gap-2 rounded-md border border-signoz_slate-400/55 px-4 text-sm font-medium text-signoz_vanilla-100 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-colors hover:border-signoz_robin-400/70 hover:bg-signoz_ink-300"
+        className="bg-card/92 group border-border/55 text-l1-foreground hover:border-accent-primary/70 hover:bg-l3-background pointer-events-auto flex h-11 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-colors"
         clickLocation="Homepage Floating CTA"
         clickName="Floating CTA"
         clickText={cta.text}

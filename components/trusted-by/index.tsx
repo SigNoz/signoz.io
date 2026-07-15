@@ -47,11 +47,11 @@ export const TrustedByTeams = ({ page, className, variant = 'default' }: Trusted
         className={cn('m-0 mx-auto w-full overflow-hidden border-0 py-0', className)}
         aria-label="Trusted by platform teams"
       >
-        <div className="mb-4 text-center text-xs font-semibold uppercase leading-5 tracking-widest text-signoz_vanilla-400 md:text-sm">
-          Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
+        <div className="text-muted-foreground mb-4 text-center text-xs leading-5 font-semibold tracking-widest uppercase md:text-sm">
+          Trusted by the <span className="text-foreground">best platform teams</span>
         </div>
         <div className="group relative overflow-hidden [mask-image:linear-gradient(90deg,transparent_0%,#000_10%,#000_90%,transparent_100%)]">
-          <div className="flex w-max animate-homepage-logo-marquee items-center gap-10 group-hover:[animation-play-state:paused] motion-reduce:translate-x-0 motion-reduce:animate-none md:gap-14">
+          <div className="animate-homepage-logo-marquee flex w-max items-center gap-10 group-hover:[animation-play-state:paused] motion-reduce:translate-x-0 motion-reduce:animate-none md:gap-14">
             {marqueeCompanies.map((company, idx) => (
               <company.Logo
                 key={`${idx}-${company.imageDesc}`}
@@ -70,17 +70,17 @@ export const TrustedByTeams = ({ page, className, variant = 'default' }: Trusted
   return (
     <section
       className={cn(
-        'm-0 mx-auto grid w-full justify-items-stretch border !border-b-0 border-dashed border-signoz_slate-400 py-6',
+        'border-border m-0 mx-auto grid w-full justify-items-stretch border !border-b-0 border-dashed py-6',
         className
       )}
     >
       <div className="section-container">
         <div className="mb-2 flex flex-col items-center text-center md:mb-12">
-          <div className="text-sm font-semibold uppercase leading-5 tracking-[0.05em] text-signoz_vanilla-400">
-            Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
+          <div className="text-muted-foreground text-sm leading-5 font-semibold tracking-[0.05em] uppercase">
+            Trusted by the <span className="text-foreground">best platform teams</span>
           </div>
         </div>
-        <div className="mb-12 mt-12 grid grid-cols-2 place-items-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8 sm:gap-y-14 md:mt-0 lg:grid-cols-6">
+        <div className="mt-12 mb-12 grid grid-cols-2 place-items-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8 sm:gap-y-14 md:mt-0 lg:grid-cols-6">
           {COMPANIES.map((company, idx) => (
             <company.Logo
               key={`${idx}-${company.imageDesc}`}
@@ -101,7 +101,7 @@ export const TrustedByTeams = ({ page, className, variant = 'default' }: Trusted
               clickName="Customer Stories Link"
               clickText="Read customer stories"
               clickLocation="Trusted By Section"
-              className="button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+              className="button-background text-foreground hover:text-foreground relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pr-3 text-center text-sm leading-5 font-medium not-italic no-underline outline-none"
             >
               Read customer stories <ArrowRight size={14} />
             </TrackingLink>

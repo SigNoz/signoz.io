@@ -13,42 +13,42 @@ import React from 'react'
 
 export const LLM_OBSERVABILITY_CARDS: IconTitleDescriptionCardData[] = [
   {
-    icon: <TextSearch size={14} className="text-signoz_vanilla-400" />,
+    icon: <TextSearch size={14} className="text-muted-foreground" />,
     iconText: 'UNIFIED OBSERVABILITY PLATFORM',
     title: 'Correlate LLM Traces with System Logs',
     description:
       'Jump from a slow LLM trace to application logs to infrastructure metrics in one click. Understand if latency is from model inference, database queries, or network issues. No context switching between tools.',
   },
   {
-    icon: <Atom size={14} className="text-signoz_vanilla-400" />,
+    icon: <Atom size={14} className="text-muted-foreground" />,
     iconText: 'POWERFUL ALERTS AND CUSTOM DASHBOARDS',
     title: 'Get Notified Before Issues Impact Users',
     description:
       'Set alerts on any metric or trace attribute - token limits, error rates, P99 latency, or custom thresholds. Build dashboards that combine LLM metrics with infrastructure health.',
   },
   {
-    icon: <ChartBarIncreasing size={14} className="text-signoz_vanilla-400" />,
+    icon: <ChartBarIncreasing size={14} className="text-muted-foreground" />,
     iconText: 'END-TO-END REQUEST TRACING',
     title: 'Trace Every Step from User Input to Final Response',
     description:
       'Visualize complete agent workflows with distributed tracing. See every model call, tool invocation, and reasoning step in waterfall views. Quickly identify loops, bottlenecks, and failed tool calls.',
   },
   {
-    icon: <DraftingCompass size={14} className="text-signoz_vanilla-400" />,
+    icon: <DraftingCompass size={14} className="text-muted-foreground" />,
     iconText: 'TOKEN USAGE & COST ANALYTICS',
     title: 'Control Your LLM Costs with Granular Token Tracking',
     description:
       'Track input/output tokens by model, operation, and user. Get cost breakdowns, prompt efficiency scores, and budget alerts to optimize spending without sacrificing quality.',
   },
   {
-    icon: <ChartNoAxesColumn size={14} className="text-signoz_vanilla-400" />,
+    icon: <ChartNoAxesColumn size={14} className="text-muted-foreground" />,
     iconText: 'PRODUCTION-READY INFRASTRUCTURE MONITORING',
     title: 'Monitor LLMs Alongside Your Entire Stack',
     description:
       'Track Kubernetes pods running your agents, database queries in your RAG pipeline, and API gateway traffic to your LLM endpoints. One platform for complete system observability.',
   },
   {
-    icon: <DatabaseZap size={14} className="text-signoz_vanilla-400" />,
+    icon: <DatabaseZap size={14} className="text-muted-foreground" />,
     iconText: 'PRE-BUILT FRAMEWORK INTEGRATIONS',
     title: 'Start Monitoring in Minutes, Not Days',
     description:

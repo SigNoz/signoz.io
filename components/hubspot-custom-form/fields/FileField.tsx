@@ -29,7 +29,7 @@ export default function FileField({
           onChange(file ? file.name : stringValue)
         }}
         onBlur={onBlur}
-        className={`w-full rounded-md border px-4 py-3 text-sm file:mr-4 file:rounded-md file:border-0 file:bg-signoz_robin-500/10 file:px-3 file:py-1 file:text-sm file:text-signoz_robin-500 disabled:opacity-50 ${t.input}`}
+        className={`file:bg-primary/10 file:text-primary w-full rounded-md border px-4 py-3 text-sm file:mr-4 file:rounded-md file:border-0 file:px-3 file:py-1 file:text-sm disabled:opacity-50 ${t.input}`}
       />
     </FieldWrapper>
   )

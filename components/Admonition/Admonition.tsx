@@ -16,88 +16,93 @@ type AdmonitionTheme = {
   icon: (size: 'sm' | 'lg') => React.ReactNode
 }
 
+/**
+ * Use callout-* tokens (not warning/success-foreground).
+ * *-foreground tokens are for solid filled buttons (near-black text on bright amber)
+ * and break when used as titles on tinted callout surfaces in dark mode.
+ */
 const ADMONITION_THEMES: Record<AdmonitionKind, AdmonitionTheme> = {
   note: {
     root: [
-      'border-signoz_robin-500/20 bg-signoz_robin-500/10',
-      '[&_a]:text-signoz_robin-500 [&_a]:underline [&_a]:decoration-signoz_robin-500 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-signoz_robin-300/10 [&_code]:!text-[#B8C7FC]',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-signoz_robin-500/25 [&_pre]:!bg-signoz_robin-300/10 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
+      'border-callout-primary-border bg-callout-primary-background',
+      '[&_a]:text-callout-primary-title [&_a]:underline [&_a]:decoration-callout-primary-title [&_a]:underline-offset-2',
+      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-background/60 [&_code]:!text-callout-primary-title',
+      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-callout-primary-border [&_pre]:!bg-background/40 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
       '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
     ].join(' '),
-    title: 'text-signoz_robin-100',
-    bodyMuted: 'text-signoz_robin-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
+    title: 'text-callout-primary-title',
+    bodyMuted: 'text-foreground [&_p]:mb-3 [&_p:last-child]:mb-0',
     icon: (size) => (
       <Info
-        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-signoz_robin-100')}
+        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-callout-primary-icon')}
         aria-hidden
       />
     ),
   },
   tip: {
     root: [
-      'border-signoz_forest-500/20 bg-signoz_forest-500/10',
-      '[&_a]:text-signoz_forest-600 [&_a]:underline [&_a]:decoration-signoz_forest-600 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-signoz_forest-300/10 [&_code]:!text-signoz_forest-200',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-signoz_forest-500/25 [&_pre]:!bg-signoz_forest-300/10 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
+      'border-callout-success-border bg-callout-success-background',
+      '[&_a]:text-callout-success-title [&_a]:underline [&_a]:decoration-callout-success-title [&_a]:underline-offset-2',
+      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-background/60 [&_code]:!text-callout-success-title',
+      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-callout-success-border [&_pre]:!bg-background/40 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
       '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
     ].join(' '),
-    title: 'text-signoz_forest-100',
-    bodyMuted: 'text-signoz_forest-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
+    title: 'text-callout-success-title',
+    bodyMuted: 'text-foreground [&_p]:mb-3 [&_p:last-child]:mb-0',
     icon: (size) => (
       <Info
-        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-signoz_forest-100')}
+        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-callout-success-icon')}
         aria-hidden
       />
     ),
   },
   warning: {
     root: [
-      'border-signoz_amber-500/20 bg-signoz_amber-500/10',
-      '[&_a]:text-signoz_amber-600 [&_a]:underline [&_a]:decoration-signoz_amber-600 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-signoz_amber-300/10 [&_code]:!text-signoz_amber-200',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-signoz_amber-500/25 [&_pre]:!bg-signoz_amber-300/10 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
+      'border-callout-warning-border bg-callout-warning-background',
+      '[&_a]:text-callout-warning-title [&_a]:underline [&_a]:decoration-callout-warning-title [&_a]:underline-offset-2',
+      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-background/60 [&_code]:!text-callout-warning-title',
+      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-callout-warning-border [&_pre]:!bg-background/40 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
       '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
     ].join(' '),
-    title: 'text-signoz_amber-100',
-    bodyMuted: 'text-signoz_amber-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
+    title: 'text-callout-warning-title',
+    bodyMuted: 'text-foreground [&_p]:mb-3 [&_p:last-child]:mb-0',
     icon: (size) => (
       <Info
-        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-signoz_amber-100')}
+        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-callout-warning-icon')}
         aria-hidden
       />
     ),
   },
   danger: {
     root: [
-      'border-signoz_cherry-500/20 bg-signoz_cherry-500/10',
-      '[&_a]:text-signoz_cherry-600 [&_a]:underline [&_a]:decoration-signoz_cherry-600 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-signoz_cherry-300/10 [&_code]:!text-signoz_cherry-200',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-signoz_cherry-500/25 [&_pre]:!bg-signoz_cherry-300/10 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
+      'border-callout-error-border bg-callout-error-background',
+      '[&_a]:text-callout-error-title [&_a]:underline [&_a]:decoration-callout-error-title [&_a]:underline-offset-2',
+      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-background/60 [&_code]:!text-callout-error-title',
+      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-callout-error-border [&_pre]:!bg-background/40 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
       '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
     ].join(' '),
-    title: 'text-signoz_cherry-100',
-    bodyMuted: 'text-signoz_cherry-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
+    title: 'text-callout-error-title',
+    bodyMuted: 'text-foreground [&_p]:mb-3 [&_p:last-child]:mb-0',
     icon: (size) => (
       <Info
-        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-signoz_cherry-100')}
+        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-callout-error-icon')}
         aria-hidden
       />
     ),
   },
   info: {
     root: [
-      'border-signoz_robin-500/20 bg-signoz_robin-500/10',
-      '[&_a]:text-signoz_robin-500 [&_a]:underline [&_a]:decoration-signoz_robin-500 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-signoz_robin-300/10 [&_code]:!text-[#B8C7FC]',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-signoz_robin-500/25 [&_pre]:!bg-signoz_robin-300/10 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
+      'border-callout-primary-border bg-callout-primary-background',
+      '[&_a]:text-callout-primary-title [&_a]:underline [&_a]:decoration-callout-primary-title [&_a]:underline-offset-2',
+      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-background/60 [&_code]:!text-callout-primary-title',
+      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-callout-primary-border [&_pre]:!bg-background/40 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
       '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
     ].join(' '),
-    title: 'text-signoz_robin-100',
-    bodyMuted: 'text-signoz_robin-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
+    title: 'text-callout-primary-title',
+    bodyMuted: 'text-foreground [&_p]:mb-3 [&_p:last-child]:mb-0',
     icon: (size) => (
       <Info
-        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-signoz_robin-100')}
+        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-callout-primary-icon')}
         aria-hidden
       />
     ),
@@ -105,29 +110,38 @@ const ADMONITION_THEMES: Record<AdmonitionKind, AdmonitionTheme> = {
   important: {
     root: [
       'border-violet-500/20 bg-violet-500/10',
-      '[&_a]:text-violet-600 [&_a]:underline [&_a]:decoration-violet-600 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-violet-500/20 [&_code]:!text-violet-200',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-violet-500/25 [&_pre]:!bg-violet-500/[0.08] [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
+      '[&_a]:text-violet-700 [&_a]:underline [&_a]:decoration-violet-600 [&_a]:underline-offset-2 dark:[&_a]:text-violet-300',
+      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-background/60 [&_code]:!text-violet-700 dark:[&_code]:!text-violet-200',
+      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-violet-500/25 [&_pre]:!bg-background/40 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
       '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
     ].join(' '),
-    title: 'text-violet-200',
-    bodyMuted: 'text-violet-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
+    title: 'text-violet-700 dark:text-violet-200',
+    bodyMuted: 'text-foreground [&_p]:mb-3 [&_p:last-child]:mb-0',
     icon: (size) => (
-      <Info className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-violet-200')} aria-hidden />
+      <Info
+        className={cn(
+          size === 'lg' ? 'h-4 w-4' : 'h-3 w-3',
+          'text-violet-700 dark:text-violet-200'
+        )}
+        aria-hidden
+      />
     ),
   },
   default: {
     root: [
-      'border-zinc-500/20 bg-zinc-500/10',
-      '[&_a]:text-zinc-300 [&_a]:underline [&_a]:decoration-zinc-400/80 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-zinc-500/20 [&_code]:!text-zinc-200',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-zinc-500/25 [&_pre]:!bg-zinc-500/[0.08] [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
+      'border-border bg-muted/50',
+      '[&_a]:text-primary [&_a]:underline [&_a]:decoration-primary/80 [&_a]:underline-offset-2',
+      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-muted [&_code]:!text-foreground',
+      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-border [&_pre]:!bg-muted [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
       '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
     ].join(' '),
-    title: 'text-zinc-200',
-    bodyMuted: 'text-zinc-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
+    title: 'text-l1-foreground',
+    bodyMuted: 'text-foreground [&_p]:mb-3 [&_p:last-child]:mb-0',
     icon: (size) => (
-      <Info className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-zinc-200')} aria-hidden />
+      <Info
+        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-muted-foreground')}
+        aria-hidden
+      />
     ),
   },
 }
@@ -217,7 +231,7 @@ export const admonitionTitleVariants = cva('min-w-0 font-semibold leading-snug t
   },
 })
 
-export const admonitionChevronVariants = cva('shrink-0 opacity-50', {
+export const admonitionChevronVariants = cva('shrink-0 text-muted-foreground opacity-70', {
   variants: {
     size: {
       sm: 'h-4 w-4',

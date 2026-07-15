@@ -54,7 +54,7 @@ const BuildForDevelopers = ({ className }: { className?: string }) => {
   return (
     <section
       className={cn(
-        'mx-auto w-full max-w-8xl border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400',
+        'max-w-8xl border-border mx-auto w-full border !border-t-0 !border-l-0 border-dashed',
         className
       )}
     >
@@ -62,8 +62,8 @@ const BuildForDevelopers = ({ className }: { className?: string }) => {
         <div className="bg-blur-perlin-noise relative">
           <div className={`section-container mb-0 !px-0 pt-12`}>
             <div className="relative mx-auto w-full">
-              <div className="bg-blur-ellipse-388-with-dots flex flex-col items-center border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-24 py-48 text-center sm:px-0">
-                <div className="text-[44px] font-semibold leading-[3.5rem] text-signoz_sienna-100">
+              <div className="bg-blur-ellipse-388-with-dots border-border flex flex-col items-center border !border-t-0 !border-r-0 !border-b-0 border-dashed px-24 py-48 text-center sm:px-0">
+                <div className="text-sienna-100 text-[44px] leading-[3.5rem] font-semibold">
                   Built for developers, <br />
                   crafted by humans.
                 </div>

@@ -314,28 +314,28 @@ export const TRADITIONAL_COMPARISON_TABLE_ROWS: ComparisonTableRow<TraditionalVe
 
 export const PILLARS_DATA = [
   {
-    icon: <ChevronsDown size={14} className="text-signoz_vanilla-400" />,
+    icon: <ChevronsDown size={14} className="text-muted-foreground" />,
     iconText: 'ELASTIC INGESTION AT SCALE',
     title: 'Handle Unpredictable Telemetry Spikes Without Data Loss',
     description:
       'Workloads generate extreme ingestion bursts, jumping from hundreds to tens of thousands of records per second in minutes. Traditional observability systems drop data or lag during these spikes. We buffer telemetry with queued retry processors and memory limiters to prevent data loss during traffic bursts.',
   },
   {
-    icon: <TrendingUpDown size={14} className="text-signoz_vanilla-400" />,
+    icon: <TrendingUpDown size={14} className="text-muted-foreground" />,
     iconText: 'COST PREDICTABILITY',
     title: 'Pay for Data Volume Ingested, Not Host Count',
     description:
       'Companies running large GPU clusters make host-based pricing financially unsustainable. Legacy vendors charge per host and double-charge for ingestion and indexing, leading to surprise bills. We charge based on data volume ingested, not the number of nodes or containers. Set daily rate limits and ingestion quotas to prevent cost overruns.',
   },
   {
-    icon: <TextSearch size={14} className="text-signoz_vanilla-400" />,
+    icon: <TextSearch size={14} className="text-muted-foreground" />,
     iconText: 'HIGH-CARDINALITY DATA HANDLING',
     title: 'Tag Every Request Without Crashing Your Metrics Store',
     description:
       "Applications tag telemetry with user IDs, model versions, and customer IDs across thousands of nodes. Prometheus and Loki crash with out-of-memory errors under this load. We use ClickHouse's columnar storage to handle high-cardinality data natively, letting you tag aggressively without performance degradation.",
   },
   {
-    icon: <Atom size={14} className="text-signoz_vanilla-400" />,
+    icon: <Atom size={14} className="text-muted-foreground" />,
     iconText: 'FULL-STACK CORRELATION',
     title: 'Correlate LLM Performance with Infrastructure and Application Logs',
     description:

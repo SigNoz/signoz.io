@@ -30,26 +30,26 @@ const icons = [
 
 export default function Enterprise() {
   return (
-    <div className="relative mt-[-56px] bg-signoz_ink-500 ">
+    <div className="bg-background relative mt-[-56px]">
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
-      <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
+      <div className="absolute top-0 right-0 left-0 mx-auto h-[450px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
       <main className="landing-section relative z-[1]">
-        <div className="relative mt-16 w-full overflow-hidden border-b border-dashed border-signoz_slate-400">
+        <div className="border-border relative mt-16 w-full overflow-hidden border-b border-dashed">
           <header className="relative overflow-hidden">
-            <div className="absolute bottom-0 left-0 right-0 top-0 z-[-1]" />
+            <div className="absolute top-0 right-0 bottom-0 left-0 z-[-1]" />
             <div className="relative !mx-auto flex w-[90%] flex-col items-start px-4 py-12 text-center md:px-[120px] md:py-24">
               <div className="flex w-full flex-row items-start px-0 md:px-16">
                 <div className="flex flex-1 flex-col items-start">
-                  <div className="text-sm uppercase text-signoz_sakura-400">Enterprise</div>
+                  <div className="text-sakura-400 text-sm uppercase">Enterprise</div>
                   <div className="mt-3 text-left text-xl font-bold md:text-2xl">
                     SigNoz for Enterprise
                   </div>
 
-                  <div className="mt-4 whitespace-normal text-left text-sm font-light">
+                  <div className="mt-4 text-left text-sm font-light whitespace-normal">
                     Suited for larger organisations with advanced security,
                   </div>
 
-                  <div className="mb-4 mt-1 whitespace-normal text-left text-sm font-light">
+                  <div className="mt-1 mb-4 text-left text-sm font-light whitespace-normal">
                     compliance and support requirements.
                   </div>
 
@@ -66,7 +66,7 @@ export default function Enterprise() {
                 </div>
 
                 <div className="hidden flex-1 flex-col items-start md:flex">
-                  <div className="absolute right-[172px] top-0">
+                  <div className="absolute top-0 right-[172px]">
                     <Image
                       src="/svgs/enterprise/hero.svg"
                       alt="enterprise-hero-section"
@@ -81,8 +81,8 @@ export default function Enterprise() {
         </div>
         <div className="border-dashed-container !border-t-0">
           <div className="flex w-full flex-col items-start px-8 py-8 md:px-16 md:py-16">
-            <div className="text-sm uppercase text-signoz_vanilla-400">why enterprise?</div>
-            <p className="mt-3 max-w-full whitespace-normal text-left text-lg font-bold md:text-2xl">
+            <div className="text-muted-foreground text-sm uppercase">why enterprise?</div>
+            <p className="mt-3 max-w-full text-left text-lg font-bold whitespace-normal md:text-2xl">
               With SigNoz Enterprise, you get unmatched scale and flexibility ⎯ along with advanced
               security, compliance, and support
             </p>
@@ -90,35 +90,35 @@ export default function Enterprise() {
             <div className="mt-12 flex w-[70%] flex-row items-start">
               <div className="flex-1">
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Volume discounts
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Volume
+                  discounts
                 </p>
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Dedicated support
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Dedicated
+                  support
                 </p>
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />{' '}
                   Personalized onboarding
                 </p>
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Multi-year commitment
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Multi-year
+                  commitment
                 </p>
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Advanced security & compliance
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Advanced
+                  security & compliance
                 </p>
               </div>
 
               <div className="flex-1">
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Cost controls with Ingest Guard
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Cost
+                  controls with Ingest Guard
                 </p>
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Finer RBAC and ingestion controls
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Finer RBAC
+                  and ingestion controls
                 </p>
               </div>
             </div>
@@ -131,7 +131,7 @@ export default function Enterprise() {
         >
           <div className="mt-3 text-5xl font-bold">Enterprise Plans</div>
 
-          <div className="mt-4 whitespace-normal text-center text-sm font-light">
+          <div className="mt-4 text-center text-sm font-light whitespace-normal">
             We currently offer 3 Enterprise plans for Data Privacy and Flexible Deployment options.
           </div>
         </div>
@@ -139,7 +139,7 @@ export default function Enterprise() {
         {/* Enterprise Cloud */}
         <div className="border-dashed-container flex flex-row">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-            <div className="border-b-1 flex-1 flex-col items-start border-r-0 border-dashed border-signoz_slate-300 px-8 py-8 md:border-b-0 md:border-r md:border-dashed">
+            <div className="border-l2-border flex-1 flex-col items-start border-r-0 border-b-1 border-dashed px-8 py-8 md:border-r md:border-b-0 md:border-dashed">
               <div className="mt-3 text-xl font-bold">Enterprise Cloud</div>
 
               <div className="mt-4 text-lg font-normal">
@@ -150,38 +150,37 @@ export default function Enterprise() {
 
               <div className="mt-9">
                 <p className="text-md flex flex-row items-start gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Select data region in United States, Europe & India region based on your
-                  requirements.
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Select
+                  data region in United States, Europe & India region based on your requirements.
                 </p>
 
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" /> Get
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Get
                   discounted custom pricing based on volume.
                 </p>
 
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Custom retention for your data
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Custom
+                  retention for your data
                 </p>
 
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Includes monthly ingestion usage till $4000
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Includes
+                  monthly ingestion usage till $4000
                 </p>
               </div>
 
               <div className="relative mt-9 flex w-full items-center justify-center gap-2">
-                <div className="h-2 w-[33%] border !border-l-0 !border-r-0 !border-dashed !border-signoz_slate-300" />
+                <div className="!border-l2-border h-2 w-[33%] border !border-r-0 !border-l-0 !border-dashed" />
                 <div className="relative z-10 text-sm font-normal uppercase">
                   starts at $4000 / month
                 </div>
-                <div className="h-2 w-[33%] border !border-l-0 !border-r-0 !border-dashed !border-signoz_slate-300" />
+                <div className="!border-l2-border h-2 w-[33%] border !border-r-0 !border-l-0 !border-dashed" />
               </div>
 
               <Button
                 variant="legacySecondary"
-                className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
+                className="button-background text-foreground hover:text-foreground mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pr-3 pl-4 text-center text-sm leading-5 font-medium no-underline outline-none"
               >
                 <Link
                   href="/contact-us/?source=enterprise-page-enterprise-cloud"
@@ -203,29 +202,29 @@ export default function Enterprise() {
 
               <div className="mt-9">
                 <p className="text-md flex flex-row items-start gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Email and dedicated Slack support.
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Email and
+                  dedicated Slack support.
                 </p>
 
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" /> Get
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Get
                   Instrumentation Support
                 </p>
 
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Dashboard Configuration Support
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Dashboard
+                  Configuration Support
                 </p>
 
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Team Training
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Team
+                  Training
                 </p>
               </div>
 
               <Button
                 variant="legacySecondary"
-                className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
+                className="button-background text-foreground hover:text-foreground mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pr-3 pl-4 text-center text-sm leading-5 font-medium no-underline outline-none"
               >
                 <Link
                   href="/contact-us/?source=enterprise-page-enterprise-self-hosted"
@@ -249,7 +248,7 @@ export default function Enterprise() {
                 infrastruture.
               </p>
 
-              <p className="text-md mt-4 whitespace-pre-wrap font-normal">
+              <p className="text-md mt-4 font-normal whitespace-pre-wrap">
                 The main difference between BYOC and Enterprise Self-hosted is that in BYOC, our
                 team is fully responsible for running SigNoz in your cloud, while in enterprise
                 self-hosted we provide support for running SigNoz in your infrastrucure.
@@ -257,7 +256,7 @@ export default function Enterprise() {
 
               <Button
                 variant="legacySecondary"
-                className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
+                className="button-background text-foreground hover:text-foreground mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pr-3 pl-4 text-center text-sm leading-5 font-medium no-underline outline-none"
               >
                 <Link href="/contact-us/?source=enterprise-page-byoc" className="flex-center">
                   Contact us
@@ -277,11 +276,11 @@ export default function Enterprise() {
           </div>
         </div>
 
-        <section className="bg-blur-ellipse-388 mx-auto w-full max-w-8xl border !border-b-0 border-dashed border-signoz_slate-400">
+        <section className="bg-blur-ellipse-388 max-w-8xl border-border mx-auto w-full border !border-b-0 border-dashed">
           <div className={`container`}>
             <div className="flex flex-col py-20">
               <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-                <div className="text-4xl font-bold leading-[3.25rem] text-signoz_sienna-100">
+                <div className="text-l1-foreground dark:text-sienna-100 text-4xl leading-[3.25rem] font-bold">
                   Why choose SigNoz Enterprise?
                 </div>
               </div>
@@ -304,24 +303,24 @@ export default function Enterprise() {
 
               <div className="mt-9">
                 <p className="text-md flex flex-row items-start gap-2 font-normal">
-                  <CircleArrowRight size={36} className="fill-signoz_robin-500" color="black" />{' '}
-                  Reduce your MTTR significantly using correlated signals. Get better context while
+                  <CircleArrowRight size={36} className="fill-robin-500" color="black" /> Reduce
+                  your MTTR significantly using correlated signals. Get better context while
                   troubleshooting performance issues.
                 </p>
 
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={36} className="fill-signoz_robin-500" color="black" />{' '}
-                  Increase developer productivity by removing siloed monitoring tools. Train your
-                  dev & SRE teams on a single tool and get quick ROI.
+                  <CircleArrowRight size={36} className="fill-robin-500" color="black" /> Increase
+                  developer productivity by removing siloed monitoring tools. Train your dev & SRE
+                  teams on a single tool and get quick ROI.
                 </p>
 
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={36} className="fill-signoz_robin-500" color="black" />{' '}
-                  Built on top of OpenTelemetry, use a single open standard inside your codebase
-                  while creating a time-proof knowledge base.
+                  <CircleArrowRight size={36} className="fill-robin-500" color="black" /> Built on
+                  top of OpenTelemetry, use a single open standard inside your codebase while
+                  creating a time-proof knowledge base.
                 </p>
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" /> Use
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" /> Use
                   OpenTelemetry as single open-source standard to generate telemetry data across
                   teams.
                 </p>
@@ -362,7 +361,7 @@ export default function Enterprise() {
 
               <div className="mt-9 flex flex-col gap-4">
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={36} className="fill-signoz_robin-500" color="black" />{' '}
+                  <CircleArrowRight size={36} className="fill-robin-500" color="black" />{' '}
                   <div className="font-normal">
                     Powered by ClickHouse (used by likes of{' '}
                     <a
@@ -385,7 +384,7 @@ export default function Enterprise() {
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />{' '}
                   <div className="font-normal">
                     Our powerful ingestion engine has a proven track record of handling 10TB+ data
                     ingestion per day.
@@ -393,7 +392,7 @@ export default function Enterprise() {
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={36} className="fill-signoz_robin-500" color="black" />{' '}
+                  <CircleArrowRight size={36} className="fill-robin-500" color="black" />{' '}
                   <div className="font-normal">
                     Lightning fast queries at any scale - query telemetry data with
                     high-cardinality, perform complex aggregations across any attribute to get
@@ -417,7 +416,7 @@ export default function Enterprise() {
 
               <div className="mt-9 flex flex-col gap-4">
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={36} className="fill-signoz_robin-500" color="black" />
+                  <CircleArrowRight size={36} className="fill-robin-500" color="black" />
 
                   <div className="font-normal">
                     Unlock comprehensive visibility across your entire stack with unrestricted
@@ -427,7 +426,7 @@ export default function Enterprise() {
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={36} className="fill-signoz_robin-500" color="black" />
+                  <CircleArrowRight size={36} className="fill-robin-500" color="black" />
 
                   <div className="font-normal">
                     Reduce TCO by leveraging Ingest Guard and eliminating the burden of maintaining
@@ -436,7 +435,7 @@ export default function Enterprise() {
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />
 
                   <div className="font-normal">
                     Consolidate your mission-critical telemetry data in a unified, enterprise-grade
@@ -472,22 +471,20 @@ export default function Enterprise() {
               <div className="mt-16 flex flex-col gap-4">
                 <div className="flex flex-row items-center gap-16">
                   <div className="flex flex-row items-center gap-2 font-mono text-sm">
-                    <CheckCircle size={24} className="fill-signoz_sakura-500" color="black" />
+                    <CheckCircle size={24} className="fill-sakura-500" color="black" />
                     SOC 2 Type II
                   </div>
                   <div className="flex flex-row items-center gap-2 font-mono text-sm">
-                    <CheckCircle size={24} className="fill-signoz_sakura-500" color="black" />
+                    <CheckCircle size={24} className="fill-sakura-500" color="black" />
                     HIPAA Compliant
                   </div>
                 </div>
 
                 <div className="flex flex-row gap-4">
                   <div className="flex flex-row items-center gap-2 font-mono text-sm">
-                    <CheckCircle size={24} className="fill-signoz_sakura-500" color="black" />
+                    <CheckCircle size={24} className="fill-sakura-500" color="black" />
                     BAA Agreement
-                    <div className="rounded-full bg-signoz_slate-400 px-2 text-[8px] text-white">
-                      ADD-ON
-                    </div>
+                    <div className="bg-muted rounded-full px-2 text-[8px] text-white">ADD-ON</div>
                   </div>
                 </div>
               </div>
@@ -500,7 +497,7 @@ export default function Enterprise() {
 
               <div className="mt-9 flex flex-col gap-4">
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />{' '}
                   <div className="font-normal">
                     Secure your data with state-of-the-art architecture and encryption at rest and
                     in transit.
@@ -508,14 +505,14 @@ export default function Enterprise() {
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />{' '}
                   <div className="font-normal">
                     Control data access with role-based access control (RBAC).
                   </div>
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />{' '}
                   <div className="font-normal">
                     Automated data deletion based on your retention policies ensures data hygiene.
                   </div>
@@ -524,7 +521,7 @@ export default function Enterprise() {
 
               <Button
                 variant="legacySecondary"
-                className="button-background mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
+                className="button-background text-foreground hover:text-foreground mt-9 flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 pr-3 pl-4 text-center text-sm leading-5 font-medium no-underline outline-none"
               >
                 <Link href="https://trust.signoz.io/" target="_blank" className="flex-center">
                   Visit Trust Center
@@ -547,7 +544,7 @@ export default function Enterprise() {
 
               <div className="mt-9 flex flex-col gap-4">
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />
 
                   <div className="font-normal">
                     Stay free from vendor-based proprietary agents inside your codebase.
@@ -555,7 +552,7 @@ export default function Enterprise() {
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />
 
                   <div className="font-normal">
                     Future-proof your instrumentation with open-source standards.
@@ -563,7 +560,7 @@ export default function Enterprise() {
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />
 
                   <div className="font-normal">
                     Standardize observability with a single standard for all telemetry signals.
@@ -571,7 +568,7 @@ export default function Enterprise() {
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />
 
                   <div className="font-normal">
                     Compatibility with other open source standards like Prometheus, OpenFeature,
@@ -601,13 +598,13 @@ export default function Enterprise() {
 
               <div className="mt-9 flex flex-col gap-4">
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />
 
                   <div className="font-normal">Get dedicated slack channel for support.</div>
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />
 
                   <div className="font-normal">
                     Migration support from existing monitoring tools.
@@ -615,19 +612,19 @@ export default function Enterprise() {
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />
 
                   <div className="font-normal">Team training for optimized platform usage.</div>
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />
 
                   <div className="font-normal">Dashboards & alerts configuration support.</div>
                 </div>
 
                 <div className="flex flex-row items-start gap-4">
-                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />
+                  <CircleArrowRight size={24} className="fill-robin-500" color="black" />
 
                   <div className="font-normal">SLA with downtime developer pairing</div>
                 </div>

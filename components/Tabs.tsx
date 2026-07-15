@@ -88,8 +88,8 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
                 isPill
                   ? `rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
                       activeTab === value
-                        ? 'bg-signoz_robin-500 text-white shadow-sm dark:bg-signoz_robin-400'
-                        : 'border-signoz_vanilla-300 bg-signoz_vanilla-100 text-signoz_ink-200 hover:border-signoz_robin-400 hover:text-signoz_ink-100 dark:border-signoz_ink-200 dark:bg-signoz_ink-400 dark:text-signoz_vanilla-200 dark:hover:text-white'
+                        ? 'bg-primary text-primary-foreground dark:bg-accent-primary-hover shadow-sm'
+                        : 'border-border bg-card text-muted-foreground hover:border-accent-primary hover:text-foreground dark:border-border dark:bg-card dark:text-foreground dark:hover:text-foreground'
                     }`
                   : `border-b-2 px-4 py-2 text-sm font-medium focus:outline-none ${
                       activeTab === value

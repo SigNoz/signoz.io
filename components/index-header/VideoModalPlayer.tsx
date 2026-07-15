@@ -60,7 +60,7 @@ export const VideoModalPlayer = ({
           onOpenChange={onOpenChange}
           panelClassName="p-0"
         >
-          <div className="rounded bg-signoz_ink-400 px-6 py-6">
+          <div className="bg-card rounded px-6 py-6">
             {isOpen ? <VimeoPlayer videoId={videoId} /> : null}
           </div>
         </Modal>

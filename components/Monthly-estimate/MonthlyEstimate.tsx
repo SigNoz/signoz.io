@@ -186,9 +186,9 @@ const MonthlyEstimate = () => {
 
   return (
     <section ref={myRef} id="estimate-your-monthly-bill">
-      <div className="section-container !mx-auto w-full max-w-8xl border !border-t-0 border-dashed border-signoz_slate-400">
+      <div className="section-container max-w-8xl border-border !mx-auto w-full border !border-t-0 border-dashed">
         <div className="flex flex-col gap-2 pt-5">
-          <span className="group relative pl-1 text-2xl font-semibold text-signoz_vanilla-100">
+          <span className="group text-l1-foreground relative pl-1 text-2xl font-semibold">
             Estimate your monthly bill
             {isMounted ? (
               <a
@@ -208,10 +208,10 @@ const MonthlyEstimate = () => {
               </a>
             ) : null}
           </span>
-          <span className="mb-16 pl-1 text-base font-normal text-signoz_vanilla-400">
+          <span className="text-muted-foreground mb-16 pl-1 text-base font-normal">
             You can also set data ingestion limits so you never get a surprise bill.
             {isMounted ? (
-              <span className="font-medium text-signoz_robin-400">
+              <span className="text-accent-primary font-medium">
                 <Link href={'https://signoz.io/docs/ingestion/signoz-cloud/keys/'}>
                   &nbsp;Learn more
                   <ArrowUpRight className="inline" size={16} />
@@ -222,19 +222,19 @@ const MonthlyEstimate = () => {
         </div>
         <div className="grid grid-cols-6 grid-rows-4 gap-y-4">
           <div className="p-2"></div>
-          <div className="py-2 pr-2 text-[13px] font-semibold uppercase text-signoz_vanilla-400">
+          <div className="text-muted-foreground py-2 pr-2 text-[13px] font-semibold uppercase">
             Pricing per unit
           </div>
-          <div className="py-2 pr-2 text-[13px] font-semibold uppercase text-signoz_vanilla-400">
+          <div className="text-muted-foreground py-2 pr-2 text-[13px] font-semibold uppercase">
             Retention
           </div>
-          <div className="py-2 pr-2 text-[13px] font-semibold uppercase text-signoz_vanilla-400">
+          <div className="text-muted-foreground py-2 pr-2 text-[13px] font-semibold uppercase">
             Scale of ingestion (per month)
           </div>
-          <div className="py-2 pr-2 text-right text-[13px] font-semibold uppercase text-signoz_vanilla-400">
+          <div className="text-muted-foreground py-2 pr-2 text-right text-[13px] font-semibold uppercase">
             Estimated usage
           </div>
-          <div className="py-2 pr-2 text-right text-[13px] font-semibold uppercase text-signoz_vanilla-400">
+          <div className="text-muted-foreground py-2 pr-2 text-right text-[13px] font-semibold uppercase">
             Subtotal
           </div>
 
@@ -247,14 +247,14 @@ const MonthlyEstimate = () => {
             Traces
           </div>
           <div className="justify-left metrics-background flex items-center gap-1">
-            <span className="text-base font-medium text-signoz_robin-400">
+            <span className="text-accent-primary text-base font-medium">
               ${TRACES_AND_LOGS_PRICES[tracesRetentionPeriod]}
             </span>
             /GB
           </div>
           <div className="metrics-background flex items-center">
             <select
-              className="block h-[32px] w-[100px] rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-0.5 text-xs text-signoz_vanilla-100 placeholder-gray-400 accent-primary-400 focus:border-primary-500 focus:ring-primary-500 md:p-1 md:text-sm"
+              className="border-border bg-card text-l1-foreground accent-robin-400 focus:border-primary focus:ring-ring block h-[32px] w-[100px] rounded-sm border p-0.5 text-xs placeholder-gray-400 md:p-1 md:text-sm"
               value={tracesRetentionPeriod}
               onChange={(e) => setTracesRetentionPeriod(Number(e.target.value))}
             >
@@ -276,13 +276,13 @@ const MonthlyEstimate = () => {
               minLabel="0GB"
               maxLabel="200TB"
               tooltipText={formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
-              thumbColorToken="signoz_robin-500"
+              thumbColorToken="robin-500"
               aria-label="Traces data ingestion volume"
               className="max-w-md"
             />
           </div>
 
-          <div className="metrics-background p-2 text-right text-signoz_vanilla-400">
+          <div className="metrics-background text-muted-foreground p-2 text-right">
             {formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
           </div>
           <div className="metrics-background p-2 text-right">${formatNumber(tracesSubtotal)}</div>
@@ -292,14 +292,14 @@ const MonthlyEstimate = () => {
             Logs
           </div>
           <span className="justify-left metrics-background flex items-center gap-1">
-            <span className="text-base font-medium text-signoz_sakura-400">
+            <span className="text-sakura-400 text-base font-medium">
               ${TRACES_AND_LOGS_PRICES[logsRetentionPeriod]}
             </span>
             /GB
           </span>
           <div className="metrics-background flex items-center">
             <select
-              className="block h-[32px] w-[100px] rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-0.5 text-xs text-signoz_vanilla-100 placeholder-gray-400 accent-primary-400 focus:border-primary-500 focus:ring-primary-500 md:p-1 md:text-sm"
+              className="border-border bg-card text-l1-foreground accent-robin-400 focus:border-primary focus:ring-ring block h-[32px] w-[100px] rounded-sm border p-0.5 text-xs placeholder-gray-400 md:p-1 md:text-sm"
               value={logsRetentionPeriod}
               onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
             >
@@ -321,13 +321,13 @@ const MonthlyEstimate = () => {
               minLabel="0GB"
               maxLabel="200TB"
               tooltipText={formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
-              thumbColorToken="signoz_sakura-500"
+              thumbColorToken="sakura-500"
               aria-label="Logs data ingestion volume"
               className="max-w-md"
             />
           </div>
 
-          <div className="metrics-background p-2 text-right text-signoz_vanilla-400">
+          <div className="metrics-background text-muted-foreground p-2 text-right">
             {formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
           </div>
           <div className="metrics-background p-2 text-right">${formatNumber(logsSubtotal)}</div>
@@ -337,14 +337,14 @@ const MonthlyEstimate = () => {
             Metrics
           </div>
           <span className="justify-left metrics-background flex items-center gap-1">
-            <span className="text-base font-medium text-signoz_amber-400">
+            <span className="text-callout-warning-title text-base font-medium">
               ${METRICS_PRICES[metricsRetentionPeriod]}
             </span>
             / mn samples
           </span>
           <div className="metrics-background flex items-center">
             <select
-              className="block h-[32px] w-[100px] rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-0.5 text-xs text-signoz_vanilla-100 placeholder-gray-400 accent-primary-400 focus:border-primary-500 focus:ring-primary-500 md:p-1 md:text-sm"
+              className="border-border bg-card text-l1-foreground accent-robin-400 focus:border-primary focus:ring-ring block h-[32px] w-[100px] rounded-sm border p-0.5 text-xs placeholder-gray-400 md:p-1 md:text-sm"
               value={metricsRetentionPeriod}
               onChange={(e) => setMetricsRetentionPeriod(Number(e.target.value))}
             >
@@ -366,23 +366,23 @@ const MonthlyEstimate = () => {
               minLabel="0M"
               maxLabel="200B"
               tooltipText={formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
-              thumbColorToken="signoz_amber-500"
+              thumbColorToken="amber-500"
               aria-label="Metrics data ingestion volume"
               className="max-w-md"
             />
           </div>
 
-          <div className="metrics-background p-2 text-right text-signoz_vanilla-400">
+          <div className="metrics-background text-muted-foreground p-2 text-right">
             {formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
           </div>
           <div className="metrics-background p-2 text-right">${formatNumber(metricsSubtotal)}</div>
         </div>
 
         <div className="button-background mt-6 flex items-center justify-between rounded-md border border-transparent px-3 py-4 pt-4">
-          <span className="text-base font-medium text-signoz_vanilla-100">
+          <span className="text-l1-foreground text-base font-medium">
             Monthly estimate for usage-based plan
           </span>
-          <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
+          <div className="border-border w-3/5 border-b border-dashed" />
           <div>${formatNumber(totalEstimate)}</div>
         </div>
         <div className="mt-3 flex justify-end">
@@ -400,17 +400,17 @@ const MonthlyEstimate = () => {
             </Button>
           </TrackingLink>
         </div>
-        <div className="mb-3 mt-3 flex justify-end pr-12">
-          <span className="text-signoz_vanilla-400">Or</span>
+        <div className="mt-3 mb-3 flex justify-end pr-12">
+          <span className="text-muted-foreground">Or</span>
         </div>
 
         <div
-          className={`mb-6 flex items-center justify-between rounded-md border border-dashed bg-[#4E74F81A] px-3 py-4 ${isHighVolume ? 'border-signoz_robin-500' : 'border-transparent'}`}
+          className={`mb-6 flex items-center justify-between rounded-md border border-dashed bg-[#4E74F81A] px-3 py-4 ${isHighVolume ? 'border-primary' : 'border-transparent'}`}
         >
-          <span className="text-base font-medium text-signoz_vanilla-100">
+          <span className="text-l1-foreground text-base font-medium">
             Reach out to us for custom pricing and retention for high volume
           </span>
-          <div className="w-2/5 border-b border-dashed border-signoz_slate-400" />
+          <div className="border-border w-2/5 border-b border-dashed" />
           <Button variant="legacyPrimary" id="btn-contact-us-pricing-monthly-estimate">
             <TrackingLink
               href={'/contact-us/?source=monthly-estimate'}
@@ -425,16 +425,16 @@ const MonthlyEstimate = () => {
           </Button>
         </div>
 
-        <div className="mb-3 mt-3 flex justify-end pr-12">
-          <span className="text-signoz_vanilla-400">Or</span>
+        <div className="mt-3 mb-3 flex justify-end pr-12">
+          <span className="text-muted-foreground">Or</span>
         </div>
 
         {/* Start Up Program CTA */}
         <div className="mb-6 flex items-center justify-between rounded-md bg-[#BE6BF11A] px-3 py-4">
-          <span className="text-base font-medium text-signoz_vanilla-100">
+          <span className="text-l1-foreground text-base font-medium">
             Reach out to us for SigNoz's Start Up Program Discount
           </span>
-          <div className="w-2/5 border-b border-dashed border-signoz_slate-400" />
+          <div className="border-border w-2/5 border-b border-dashed" />
           <TrackingLink
             href="/startups/"
             clickType="Secondary CTA"

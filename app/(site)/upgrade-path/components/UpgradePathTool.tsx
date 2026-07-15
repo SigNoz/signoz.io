@@ -154,11 +154,11 @@ const UpgradePathTool: React.FC<UpgradePathToolProps> = ({ docMetaBySlug, compil
     <SectionContainer>
       <div className="w-full py-8">
         <div className="relative">
-          <div className="absolute left-0 right-0 top-0 mx-auto h-[300px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:h-[450px] sm:bg-[center_-500px] md:h-[956px]" />
+          <div className="absolute top-0 right-0 left-0 mx-auto h-[300px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:h-[450px] sm:bg-[center_-500px] md:h-[956px]" />
           <div className="relative mx-auto flex w-full max-w-7xl flex-col items-center gap-8 px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h1 className="text-gradient mb-2 font-bold">SigNoz Upgrade Path Tool</h1>
-              <span className="text-signoz_vanilla-400">
+              <span className="text-muted-foreground">
                 Plan and execute your SigNoz upgrade with confidence. This tool will guide you
                 through each mandatory step to ensure a safe and successful upgrade.
               </span>
@@ -181,16 +181,14 @@ const UpgradePathTool: React.FC<UpgradePathToolProps> = ({ docMetaBySlug, compil
             {isPathGenerated && (
               <Card className="w-full">
                 <div className="p-6">
-                  <h3 className="mb-4 text-lg font-semibold text-signoz_vanilla-100">
+                  <h3 className="text-l1-foreground mb-4 text-lg font-semibold">
                     Important Information
                   </h3>
 
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
-                      <h4 className="mb-2 font-medium text-signoz_vanilla-100">
-                        Pre-Upgrade Checklist
-                      </h4>
-                      <ul className="space-y-1 text-sm text-signoz_vanilla-400">
+                      <h4 className="text-l1-foreground mb-2 font-medium">Pre-Upgrade Checklist</h4>
+                      <ul className="text-muted-foreground space-y-1 text-sm">
                         {TYPED_UPGRADE_SCHEMA?.general?.checklist?.preUpgrade?.map(
                           (item, index) => (
                             <li key={index} className="flex items-start gap-2">
@@ -203,10 +201,10 @@ const UpgradePathTool: React.FC<UpgradePathToolProps> = ({ docMetaBySlug, compil
                     </div>
 
                     <div>
-                      <h4 className="mb-2 font-medium text-signoz_vanilla-100">
+                      <h4 className="text-l1-foreground mb-2 font-medium">
                         Post-Upgrade Checklist
                       </h4>
-                      <ul className="space-y-1 text-sm text-signoz_vanilla-400">
+                      <ul className="text-muted-foreground space-y-1 text-sm">
                         {TYPED_UPGRADE_SCHEMA?.general?.checklist?.postUpgrade?.map(
                           (item, index) => (
                             <li key={index} className="flex items-start gap-2">
@@ -221,17 +219,17 @@ const UpgradePathTool: React.FC<UpgradePathToolProps> = ({ docMetaBySlug, compil
 
                   {TYPED_UPGRADE_SCHEMA?.general?.commonWarnings?.length > 0 && (
                     <div className="mt-6">
-                      <h4 className="mb-2 font-medium text-signoz_vanilla-100">Common Warnings</h4>
+                      <h4 className="text-l1-foreground mb-2 font-medium">Common Warnings</h4>
                       <div className="space-y-2">
                         {TYPED_UPGRADE_SCHEMA?.general?.commonWarnings?.map((warning, index) => (
                           <div
                             key={index}
-                            className="rounded-lg border border-signoz_amber-400/20 bg-signoz_amber-400/10 p-3"
+                            className="border-callout-warning-border bg-callout-warning-background rounded-lg border p-3"
                           >
-                            <h5 className="mb-1 font-medium text-signoz_amber-400">
+                            <h5 className="text-callout-warning-title mb-1 font-medium">
                               {warning?.title ?? ''}
                             </h5>
-                            <span className="text-sm text-signoz_vanilla-400">
+                            <span className="text-muted-foreground text-sm">
                               {warning?.details ?? ''}
                             </span>
                           </div>
@@ -240,14 +238,14 @@ const UpgradePathTool: React.FC<UpgradePathToolProps> = ({ docMetaBySlug, compil
                     </div>
                   )}
 
-                  <div className="mt-6 border-t border-signoz_slate-100 pt-4">
-                    <span className="text-sm text-signoz_vanilla-400">
+                  <div className="border-l3-border mt-6 border-t pt-4">
+                    <span className="text-muted-foreground text-sm">
                       Need help? Check out our{' '}
                       <Link
                         href={TYPED_UPGRADE_SCHEMA?.general?.troubleshootingUrl ?? ''}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-lg text-signoz_robin-500 hover:text-signoz_robin-400"
+                        className="text-primary hover:text-accent-primary rounded-lg"
                       >
                         troubleshooting guide
                       </Link>

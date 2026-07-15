@@ -126,17 +126,17 @@ export const SigNozFeatures = ({ className }: { className?: string }) => {
     <>
       <section
         className={cn(
-          'bg-blur-ellipse-388 mx-auto w-full max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400',
+          'bg-blur-ellipse-388 max-w-8xl border-border mx-auto w-full border !border-t-0 !border-b-0 border-dashed',
           className
         )}
       >
         <div className={`container pb-16`}>
-          <div className="flex flex-col gap-6 pb-24 md:pb-32 ">
+          <div className="flex flex-col gap-6 pb-24 md:pb-32">
             <div className="mx-auto flex max-w-4xl flex-col items-center text-center sm:mt-[50px]">
-              <div className="text-[32px] font-medium leading-[3.25rem] text-signoz_sienna-100">
+              <div className="text-sienna-100 text-[32px] leading-[3.25rem] font-medium">
                 The one-stop observability tool
               </div>
-              <p className="m-0 mt-3 text-base font-medium text-signoz_sienna-300">
+              <p className="text-sienna-300 m-0 mt-3 text-base font-medium">
                 SigNoz is an open-source Datadog or New Relic alternative for logs, metrics, traces,
                 dashboards, alerts, and more.
               </p>
@@ -151,7 +151,7 @@ export const SigNozFeatures = ({ className }: { className?: string }) => {
                     <div className="homepage-border m-auto flex w-fit items-center justify-center rounded-full p-2 sm:p-4">
                       {icon.icon}
                     </div>
-                    <p className="m-auto mt-2 text-xs text-signoz_sienna-300">{icon.label}</p>
+                    <p className="text-sienna-300 m-auto mt-2 text-xs">{icon.label}</p>
                   </div>
                   {index !== icons.length - 1 ? <div className="homepage-separator" /> : null}
                 </React.Fragment>
@@ -168,7 +168,7 @@ export const SigNozFeatures = ({ className }: { className?: string }) => {
                     <div className="homepage-border m-auto flex w-fit items-center justify-center rounded-full p-2 sm:p-4">
                       {icon.icon}
                     </div>
-                    <p className="m-auto mt-2 text-xs text-signoz_sienna-300">{icon.label}</p>
+                    <p className="text-sienna-300 m-auto mt-2 text-xs">{icon.label}</p>
                   </div>
                 ))}
               </div>
@@ -182,7 +182,7 @@ export const SigNozFeatures = ({ className }: { className?: string }) => {
                     <div className="homepage-border m-auto flex w-fit items-center justify-center rounded-full p-2 sm:p-4">
                       {icon.icon}
                     </div>
-                    <p className="m-auto mt-2 text-xs text-signoz_sienna-300">{icon.label}</p>
+                    <p className="text-sienna-300 m-auto mt-2 text-xs">{icon.label}</p>
                   </div>
                 ))}
               </div>
@@ -192,7 +192,7 @@ export const SigNozFeatures = ({ className }: { className?: string }) => {
       </section>
       <div
         className={cn(
-          'homepage-observability-container mx-auto grid w-full max-w-8xl grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2',
+          'homepage-observability-container max-w-8xl border-border mx-auto grid w-full grid-cols-1 border !border-t-0 !border-l-0 border-dashed sm:grid-cols-2',
           className
         )}
       >

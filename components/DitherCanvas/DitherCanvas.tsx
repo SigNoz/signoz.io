@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useEffect, type ReactNode } from 'react'
+import { useTheme } from 'next-themes'
 import { cn } from '../../app/lib/utils'
 
 interface DitherCanvasProps {
@@ -10,6 +11,14 @@ interface DitherCanvasProps {
   enableClick?: boolean
   id?: string
 }
+
+/** ink-500 / subtle lift — matches dark page chrome */
+const DARK_BG: [number, number, number] = [0.043, 0.047, 0.055]
+const DARK_PX: [number, number, number] = [0.105, 0.11, 0.13]
+
+/** vanilla-200 / slightly deeper dots — matches light page chrome */
+const LIGHT_BG: [number, number, number] = [0.961, 0.961, 0.961]
+const LIGHT_PX: [number, number, number] = [0.875, 0.878, 0.886]
 
 const VERT = `#version 300 es
 in vec2 aPos;
@@ -22,6 +31,8 @@ precision highp float;
 uniform vec2 uRes;
 uniform float uTime;
 uniform float uFade;
+uniform vec3 uBg;
+uniform vec3 uPx;
 
 const int MAX_CLICKS = 10;
 uniform vec2 uClickPos[MAX_CLICKS];
@@ -78,11 +89,9 @@ void main() {
   vec2 cellCoord = floor(fc / CELL) * CELL;
   vec2 uv = (cellCoord / uRes) * vec2(ar, 1.0);
 
-  // fBm ambient noise (from pen 1)
   float feed = fbm(uv, uTime * 0.1);
   feed = feed * 0.5 + (-0.65);
 
-  // Click ripple waves (from pen 2)
   for (int i = 0; i < MAX_CLICKS; i++) {
     vec2 pos = uClickPos[i];
     if (pos.x < 0.0 && pos.y < 0.0) continue;
@@ -97,17 +106,12 @@ void main() {
   float bayer = Bayer8(fc / PX) - 0.5;
   float bw = step(0.5, feed + bayer);
 
-  // Fade toward left edge
   if (uFade > 0.5) {
     float nx = gl_FragCoord.x / uRes.x;
     bw *= smoothstep(0.0, 0.55, nx);
   }
 
-  // ink-500 background, very subtle lighter dither pixels
-  vec3 bg = vec3(0.043, 0.047, 0.055);
-  vec3 px = vec3(0.105, 0.11, 0.13);
-
-  fragColor = vec4(mix(bg, px, bw), 1.0);
+  fragColor = vec4(mix(uBg, uPx, bw), 1.0);
 }
 `
 
@@ -156,6 +160,15 @@ function initGL(canvas: HTMLCanvasElement) {
 
 const MAX_CLICKS = 10
 
+function isDarkTheme(resolvedTheme: string | undefined) {
+  if (resolvedTheme === 'light') return false
+  if (resolvedTheme === 'dark') return true
+  if (typeof document !== 'undefined') {
+    return document.documentElement.classList.contains('dark')
+  }
+  return true
+}
+
 export default function DitherCanvas({
   children,
   className,
@@ -165,6 +178,13 @@ export default function DitherCanvas({
 }: DitherCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const clickRef = useRef<((clientX: number, clientY: number) => void) | null>(null)
+  const colorRef = useRef({ bg: DARK_BG, px: DARK_PX })
+  const { resolvedTheme } = useTheme()
+
+  useEffect(() => {
+    const dark = isDarkTheme(resolvedTheme)
+    colorRef.current = dark ? { bg: DARK_BG, px: DARK_PX } : { bg: LIGHT_BG, px: LIGHT_PX }
+  }, [resolvedTheme])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -177,6 +197,8 @@ export default function DitherCanvas({
     const uRes = gl.getUniformLocation(prog, 'uRes')
     const uTime = gl.getUniformLocation(prog, 'uTime')
     const uFade = gl.getUniformLocation(prog, 'uFade')
+    const uBg = gl.getUniformLocation(prog, 'uBg')
+    const uPx = gl.getUniformLocation(prog, 'uPx')
 
     const uClickPosLocs: (WebGLUniformLocation | null)[] = []
     const uClickTLocs: (WebGLUniformLocation | null)[] = []
@@ -204,6 +226,12 @@ export default function DitherCanvas({
       clickIndex = (clickIndex + 1) % MAX_CLICKS
     }
 
+    const applyColors = () => {
+      const { bg, px } = colorRef.current
+      gl.uniform3f(uBg, bg[0], bg[1], bg[2])
+      gl.uniform3f(uPx, px[0], px[1], px[2])
+    }
+
     const resize = () => {
       const w = canvas.clientWidth
       const h = canvas.clientHeight
@@ -217,6 +245,7 @@ export default function DitherCanvas({
     const ro = new ResizeObserver(resize)
     ro.observe(canvas)
     resize()
+    applyColors()
 
     let rafId: number
     const start = performance.now()
@@ -224,11 +253,13 @@ export default function DitherCanvas({
 
     if (prefersReducedMotion) {
       gl.uniform1f(uTime, 0)
+      applyColors()
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
     } else {
       const render = () => {
         timeRef.current = (performance.now() - start) / 1000
         gl.uniform1f(uTime, timeRef.current)
+        applyColors()
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
         rafId = requestAnimationFrame(render)
       }
@@ -253,7 +284,7 @@ export default function DitherCanvas({
   return (
     <div
       id={id}
-      className={cn('relative overflow-hidden', className)}
+      className={cn('bg-background relative overflow-hidden', className)}
       onPointerDown={handlePointerDown}
     >
       <canvas
@@ -265,7 +296,8 @@ export default function DitherCanvas({
         <div
           className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-[45%]"
           style={{
-            background: 'linear-gradient(to right, #0B0C0E 0%, #0B0C0E 10%, transparent 100%)',
+            background:
+              'linear-gradient(to right, var(--background) 0%, var(--background) 10%, transparent 100%)',
           }}
         />
       )}

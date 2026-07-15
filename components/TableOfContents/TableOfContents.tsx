@@ -83,7 +83,7 @@ const TableOfContents = ({
 
         return (
           <div
-            className="min-h-6 w-full font-medium leading-none"
+            className="min-h-6 w-full leading-none font-medium"
             key={tocItem.url}
             style={{ paddingLeft: `${(tocItem.depth - 1) * 12}px` }}
           >
@@ -91,8 +91,8 @@ const TableOfContents = ({
               data-level={tocItem.depth}
               href={tocItem.url}
               onClick={handleClick}
-              className={`line-clamp-2 inline-block w-full text-xs transition-colors hover:text-signoz_robin-400 focus-visible:text-signoz_robin-400 focus-visible:outline-none ${
-                isActive ? 'text-signoz_robin-500' : 'text-signoz_vanilla-300'
+              className={`hover:text-primary focus-visible:text-primary line-clamp-2 inline-block w-full text-xs transition-colors focus-visible:outline-none ${
+                isActive ? 'text-primary font-semibold' : 'text-foreground/75'
               }`}
             >
               {tocItem.value}

@@ -10,6 +10,8 @@ type AppTooltipProps = {
   children: ReactNode
   content: ReactNode
   contentClassName?: string
+  /** Matches tooltip surface fill so the arrow blends with the body */
+  arrowClassName?: string
   side?: AppTooltipSide
   /** Radix delay in ms; defaults to provider (theme) value */
   delayDuration?: number
@@ -19,6 +21,7 @@ export function AppTooltip({
   children,
   content,
   contentClassName,
+  arrowClassName,
   side = 'right',
   delayDuration,
 }: AppTooltipProps) {
@@ -30,12 +33,16 @@ export function AppTooltip({
           side={side}
           sideOffset={6}
           className={cn(
-            'z-[200] max-w-sm rounded-md border border-signoz_slate-500 bg-signoz_ink-400 px-3 py-2 text-left text-xs leading-snug text-signoz_vanilla-100 shadow-[0_8px_30px_rgba(0,0,0,0.45)]',
+            'border-border bg-card text-l1-foreground z-[200] max-w-sm rounded-md border px-3 py-2 text-left text-xs leading-snug shadow-md',
             contentClassName
           )}
         >
           {content}
-          <TooltipPrimitive.Arrow className="fill-signoz_ink-400" width={10} height={5} />
+          <TooltipPrimitive.Arrow
+            className={cn('fill-card', arrowClassName)}
+            width={10}
+            height={5}
+          />
         </TooltipPrimitive.Content>
       </TooltipPrimitive.Portal>
     </TooltipPrimitive.Root>

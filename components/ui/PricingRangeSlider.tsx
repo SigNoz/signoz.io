@@ -6,32 +6,32 @@ import { useState, type ReactNode } from 'react'
 import { cn } from 'app/lib/utils'
 
 const rangeByColor = {
-  secondary: 'bg-signoz_robin-500',
-  danger: 'bg-signoz_sakura-500',
-  warning: 'bg-signoz_amber-500',
+  secondary: 'bg-primary',
+  danger: 'bg-sakura-500',
+  warning: 'bg-warning-background',
 } as const
 
 const thumbByToken: Record<string, string> = {
-  'signoz_robin-500': 'bg-signoz_robin-500',
-  'signoz_sakura-500': 'bg-signoz_sakura-500',
-  'signoz_amber-500': 'bg-signoz_amber-500',
+  'robin-500': 'bg-primary',
+  'sakura-500': 'bg-sakura-500',
+  'amber-500': 'bg-warning-background',
 }
 
 const tooltipByToken: Record<string, { bg: string; text: string; border: string }> = {
-  'signoz_robin-500': {
-    bg: 'bg-signoz_robin-500',
+  'robin-500': {
+    bg: 'bg-primary',
     text: 'text-white',
-    border: 'border-signoz_robin-600',
+    border: 'border-robin-600',
   },
-  'signoz_sakura-500': {
-    bg: 'bg-signoz_sakura-500',
+  'sakura-500': {
+    bg: 'bg-sakura-500',
     text: 'text-white',
-    border: 'border-signoz_sakura-600',
+    border: 'border-sakura-600',
   },
-  'signoz_amber-500': {
-    bg: 'bg-signoz_amber-500',
-    text: 'text-signoz_ink-500',
-    border: 'border-signoz_amber-600',
+  'amber-500': {
+    bg: 'bg-warning-background',
+    text: 'text-foreground',
+    border: 'border-amber-600',
   },
 }
 
@@ -47,7 +47,7 @@ type PricingRangeSliderProps = {
   minLabel: string
   maxLabel: string
   tooltipText: string
-  /** Tailwind token suffix e.g. signoz_robin-500 */
+  /** Tailwind token suffix e.g. robin-500 */
   thumbColorToken: string
   'aria-label': string
   className?: string
@@ -73,15 +73,15 @@ export function PricingRangeSlider({
   endSlot,
   markLabels,
 }: PricingRangeSliderProps) {
-  const thumbBg = thumbByToken[thumbColorToken] ?? 'bg-signoz_robin-500'
-  const tooltipColors = tooltipByToken[thumbColorToken] ?? tooltipByToken['signoz_robin-500']
+  const thumbBg = thumbByToken[thumbColorToken] ?? 'bg-primary'
+  const tooltipColors = tooltipByToken[thumbColorToken] ?? tooltipByToken['robin-500']
   const rangeBg = rangeByColor[color]
   const [isDragging, setIsDragging] = useState(false)
 
   const body = (
     <>
       <SliderPrimitive.Root
-        className="relative flex w-full touch-none select-none items-center py-2"
+        className="relative flex w-full touch-none items-center py-2 select-none"
         value={[value]}
         onValueChange={(v) => onChange(v[0] ?? min)}
         onPointerDown={() => setIsDragging(true)}
@@ -92,14 +92,14 @@ export function PricingRangeSlider({
         step={step}
         aria-label={ariaLabel}
       >
-        <SliderPrimitive.Track className="relative h-1.5 w-full grow rounded-full bg-signoz_slate-500">
+        <SliderPrimitive.Track className="bg-muted relative h-1.5 w-full grow rounded-full">
           <SliderPrimitive.Range className={cn('absolute h-full rounded-full', rangeBg)} />
         </SliderPrimitive.Track>
         <TooltipPrimitive.Root open={isDragging || undefined} delayDuration={0}>
           <TooltipPrimitive.Trigger asChild>
             <SliderPrimitive.Thumb
               className={cn(
-                'block h-5 w-5 cursor-grab rounded-full border-2 border-signoz_vanilla-100 shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-400 active:cursor-grabbing',
+                'border-card focus-visible:ring-ring block h-5 w-5 cursor-grab rounded-full border-2 shadow-md focus:outline-none focus-visible:ring-2 active:cursor-grabbing',
                 thumbBg
               )}
               aria-valuetext={tooltipText}
@@ -121,7 +121,7 @@ export function PricingRangeSlider({
           </TooltipPrimitive.Portal>
         </TooltipPrimitive.Root>
       </SliderPrimitive.Root>
-      <div className="mt-1 flex justify-between text-sm text-signoz_vanilla-400">
+      <div className="text-muted-foreground mt-1 flex justify-between text-sm">
         {markLabels && markLabels.length > 0 ? (
           markLabels.map((label, i) => <span key={i}>{label}</span>)
         ) : (

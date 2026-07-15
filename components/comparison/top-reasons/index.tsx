@@ -1,6 +1,6 @@
 import React from 'react'
 import styles from './styles.module.css'
-import Link from 'next/link'
+import Button from '@/components/ui/Button'
 
 const TopReasons = (props) => {
   if (props?.points) {
@@ -42,24 +42,24 @@ const TopReasons = (props) => {
           {(props.reasons || []).map(({ TITLE, DESC, FIGURE }, index) => {
             return (
               <div
-                className={`row ${styles.reasonRow} ${!(index % 2) ? styles.shouldImageFirst : ''}`}
+                className={`flex flex-wrap ${styles.reasonRow} ${!(index % 2) ? styles.shouldImageFirst : ''}`}
                 key={index}
               >
                 {index % 2 ? (
-                  <div className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}>
+                  <div className={`my-4 w-full md:w-1/2 ${styles.reasonImageCol}`}>
                     <div className={styles.reasonImageContainer}>
                       <img src={FIGURE} alt="reason" />
                     </div>
                   </div>
                 ) : null}
-                <div className={`col col--6 margin-vert--md`}>
+                <div className="my-4 w-full md:w-1/2">
                   <div className={styles.reasonDetailContainer}>
                     <h4 className={styles.reasonTitle}>{TITLE}</h4>
                     <p className={styles.reasonDesc}>{DESC}</p>
                   </div>
                 </div>
                 {!(index % 2) ? (
-                  <div className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}>
+                  <div className={`my-4 w-full md:w-1/2 ${styles.reasonImageCol}`}>
                     <div className={styles.reasonImageContainer}>
                       <img src={FIGURE} alt="reason" />
                     </div>
@@ -76,8 +76,8 @@ const TopReasons = (props) => {
 
 const OpenSourceReason = () => {
   return (
-    <div className={`row ${styles.reasonRow} ${styles.reasonElonMusk}`}>
-      <div className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}>
+    <div className={`flex flex-wrap ${styles.reasonRow} ${styles.reasonElonMusk}`}>
+      <div className={`my-4 w-full md:w-1/2 ${styles.reasonImageCol}`}>
         <div className={styles.reasonImageContainer}>
           <img src="/img/reasons/elon-musk.webp" alt="reason" />
           <div className={styles.reasonReviewContainer}>
@@ -88,7 +88,7 @@ const OpenSourceReason = () => {
           </div>
         </div>
       </div>
-      <div className={`col col--6 margin-vert--md`}>
+      <div className="my-4 w-full md:w-1/2">
         <div className={styles.reasonDetailContainer}>
           <h4 className={styles.reasonTitle}>SigNoz is open source</h4>
           <p className={styles.reasonDesc}>
@@ -98,9 +98,9 @@ const OpenSourceReason = () => {
             source, so you can take a look at our code, test it out, and then make an informed
             decision.
           </p>
-          <Link href="https://github.com/SigNoz/signoz" className="button button--primary">
+          <Button href="https://github.com/SigNoz/signoz" target="_blank" rel="noopener noreferrer">
             Check out our GitHub repo
-          </Link>
+          </Button>
         </div>
       </div>
     </div>

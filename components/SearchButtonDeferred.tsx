@@ -35,16 +35,16 @@ const SearchButtonPreview = ({
     onMouseEnter={onHydrate}
     onClick={onClick}
     className={cn(
-      'group flex shrink-0 items-center gap-1.5 rounded-full bg-signoz_slate-500 px-3 py-1 text-xs text-slate-300 transition',
-      'hover:bg-slate-700/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
-      'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80 dark:focus-visible:ring-slate-600'
+      'group bg-muted text-muted-foreground flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs transition',
+      'hover:bg-muted hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+      'dark:bg-muted dark:hover:bg-muted dark:focus-visible:ring-ring'
     )}
     aria-label="Open docs search"
   >
-    <Search className="h-3.5 w-3.5 text-slate-400 transition group-hover:text-white" />
+    <Search className="text-muted-foreground group-hover:text-foreground h-3.5 w-3.5 transition" />
     <span className="hidden text-xs sm:inline">Search docs...</span>
     {!disableShortcut && (
-      <span className="ml-1.5 hidden items-center gap-1 rounded-md border border-slate-700 bg-slate-900/60 px-1 py-[1px] text-[10px] font-medium text-slate-400 sm:flex">
+      <span className="border-border bg-background/60 text-muted-foreground ml-1.5 hidden items-center gap-1 rounded-md border px-1 py-[1px] text-[10px] font-medium sm:flex">
         <Command className="h-2.5 w-2.5" />K
       </span>
     )}

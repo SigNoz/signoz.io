@@ -44,7 +44,7 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
                 <SelectValue placeholder="Select current version" />
               </SelectTrigger>
               <SelectContent
-                className="transform-gpu border border-primary-600 bg-signoz_slate-400 text-white"
+                className="border-robin-600 bg-muted transform-gpu border text-white"
                 position="popper"
                 align="center"
                 side="bottom"
@@ -54,7 +54,7 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
                   <SelectItem
                     key={version}
                     value={version}
-                    className="transition-colors duration-200 hover:bg-signoz_slate-500 focus:bg-signoz_slate-500"
+                    className="hover:bg-muted focus:bg-muted transition-colors duration-200"
                   >
                     {version}
                   </SelectItem>
@@ -70,7 +70,7 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
                 <SelectValue placeholder="Select target version" />
               </SelectTrigger>
               <SelectContent
-                className="transform-gpu border border-primary-600 bg-signoz_slate-400 text-white"
+                className="border-robin-600 bg-muted transform-gpu border text-white"
                 position="popper"
                 align="center"
                 side="bottom"
@@ -80,7 +80,7 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
                   <SelectItem
                     key={version}
                     value={version}
-                    className="transition-colors duration-200 hover:bg-signoz_slate-500 focus:bg-signoz_slate-500"
+                    className="hover:bg-muted focus:bg-muted transition-colors duration-200"
                   >
                     {version}
                   </SelectItem>
@@ -91,23 +91,23 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
         </div>
 
         {isLoading && (
-          <div className="mb-4 flex items-center gap-2 text-sm text-signoz_vanilla-400">
+          <div className="text-muted-foreground mb-4 flex items-center gap-2 text-sm">
             <Loader2 className="h-4 w-4 animate-spin" />
             Fetching latest releases...
           </div>
         )}
 
         {releasesIncomplete && !isLoading && (
-          <div className="mb-4 rounded-md border border-signoz_amber-400/20 bg-signoz_amber-400/10 p-3">
-            <span className="text-sm text-signoz_amber-400">
+          <div className="border-callout-warning-border bg-callout-warning-background mb-4 rounded-md border p-3">
+            <span className="text-callout-warning-title text-sm">
               Release list may be incomplete. Refresh later for the full list.
             </span>
           </div>
         )}
 
         {error && (
-          <div className="mb-4 rounded-md border border-signoz_cherry-400/20 bg-signoz_cherry-400/10 p-3">
-            <span className="text-sm text-signoz_cherry-400">{error}</span>
+          <div className="border-cherry-400/20 bg-danger-background/10 mb-4 rounded-md border p-3">
+            <span className="text-danger-foreground text-sm">{error}</span>
           </div>
         )}
 

@@ -53,24 +53,24 @@ const HoverableSidebar: React.FC = () => {
       {/* Compact square menu button - only show when closed */}
       {!isOpen && (
         <div
-          className="fixed left-6 top-[71px] z-50 cursor-pointer transition-all duration-300"
+          className="fixed top-[71px] left-6 z-50 cursor-pointer transition-all duration-300"
           onClick={toggleSidebar}
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded border border-gray-600/50 bg-gray-800/90 shadow-sm backdrop-blur-sm hover:bg-gray-700/90">
-            <Menu size={16} className="text-gray-300" />
+          <div className="border-border bg-card flex h-10 w-10 items-center justify-center rounded border shadow-sm backdrop-blur-sm hover:bg-gray-700/90">
+            <Menu size={16} className="text-muted-foreground" />
           </div>
         </div>
       )}
 
       {/* Collapsible Sidebar - styled exactly like docs layout */}
       <div
-        className={`fixed left-0 top-[56px] z-40 h-full transition-transform duration-300 ease-in-out ${
+        className={`fixed top-[56px] left-0 z-40 h-full transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
-        <div className="box-border h-full w-80 min-w-[320px] max-w-[320px] self-stretch border-r border-signoz_slate-500 bg-black">
+        <div className="border-border box-border h-full w-80 max-w-[320px] min-w-[320px] self-stretch border-r bg-black">
           <DocsSidebar />
         </div>
       </div>

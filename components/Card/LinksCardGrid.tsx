@@ -39,21 +39,21 @@ const LinksCardGrid: React.FC<LinksCardGridProps> = ({ cards, sectionName }) => 
       {cards.map((card, index) => {
         const isCardClickable = !!card.href
         const commonClassName =
-          'flex flex-col p-4 rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 transition-all'
+          'flex flex-col p-4 rounded-lg border border-border bg-card transition-all'
         const cardWrapperClassName = `${commonClassName} ${
           isCardClickable
-            ? 'cursor-pointer hover:bg-signoz_ink-300 hover:border-signoz_robin-500'
-            : 'hover:bg-signoz_ink-300 hover:border-signoz_robin-500'
+            ? 'cursor-pointer hover:bg-l3-background hover:border-primary'
+            : 'hover:bg-l3-background hover:border-primary'
         }`
 
         const CardHeader = () => (
           <div className="mb-4 flex items-center gap-2">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-signoz_robin-500/10 text-signoz_robin-500">
+            <div className="bg-primary/10 text-primary flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md">
               {card.icon}
             </div>
             <div>
-              <h3 className="mb-1 text-base font-bold text-signoz_vanilla-100">{card.title}</h3>
-              <p className="mb-0 text-sm text-signoz_vanilla-400">{card.description}</p>
+              <h3 className="text-l1-foreground mb-1 text-base font-bold">{card.title}</h3>
+              <p className="text-muted-foreground mb-0 text-sm">{card.description}</p>
             </div>
           </div>
         )
@@ -64,15 +64,15 @@ const LinksCardGrid: React.FC<LinksCardGridProps> = ({ cards, sectionName }) => 
               <div key={linkIndex} onClick={(e) => e.stopPropagation()}>
                 <TrackingLink
                   href={link.href}
-                  className="flex items-center gap-2 rounded-md p-2 transition-colors hover:bg-signoz_robin-500/10"
+                  className="hover:bg-primary/10 flex items-center gap-2 rounded-md p-2 transition-colors"
                   clickType="Secondary CTA"
                   clickName={link.clickName}
                   clickText={link.name}
                   clickLocation={sectionName}
                 >
                   {link.icon}
-                  <span className="text-sm text-signoz_vanilla-100">{link.name}</span>
-                  <ArrowRight className="ml-1 h-3 w-3 text-signoz_vanilla-400" />
+                  <span className="text-l1-foreground text-sm">{link.name}</span>
+                  <ArrowRight className="text-muted-foreground ml-1 h-3 w-3" />
                 </TrackingLink>
               </div>
             ))}
@@ -84,7 +84,7 @@ const LinksCardGrid: React.FC<LinksCardGridProps> = ({ cards, sectionName }) => 
             <div className="mt-auto pt-2 text-sm" onClick={(e) => e.stopPropagation()}>
               <TrackingLink
                 href={card.viewAllHref}
-                className="inline-flex items-center text-signoz_robin-500 transition-colors hover:text-signoz_robin-400"
+                className="text-primary hover:text-accent-primary inline-flex items-center transition-colors"
                 clickType="Nav Click"
                 clickName={`${card.clickName} View All`}
                 clickText="View all options"

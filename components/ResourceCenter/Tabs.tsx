@@ -3,7 +3,7 @@ import React from 'react'
 
 const TAB_STYLE =
   'inline-flex h-full shrink-0 items-center whitespace-nowrap rounded-t-lg px-1 py-1.5 pb-3.5'
-const ACTIVE_STYLE = 'border-b-2 border-signoz_robin-500 text-signoz_vanilla-100'
+const ACTIVE_STYLE = 'border-b-2 border-primary text-foreground'
 
 function TabLink({
   href,
@@ -30,10 +30,10 @@ function TabLink({
 
 export default function Tabs({ activeTab }: { activeTab: string }) {
   return (
-    <header className="header-bg mx-auto box-border h-[56px] w-full border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
-      <div className="mx-auto h-fit max-w-8xl overflow-x-auto md:px-8">
+    <header className="header-bg border-border text-foreground dark:text-foreground mx-auto box-border h-[56px] w-full border-b backdrop-blur-[20px]">
+      <div className="max-w-8xl mx-auto h-fit overflow-x-auto md:px-8">
         <ul
-          className="mb-0 flex h-[55px] gap-3 pl-0 text-center text-sm font-medium text-signoz_vanilla-400 sm:gap-6"
+          className="text-muted-foreground mb-0 flex h-[55px] gap-3 pl-0 text-center text-sm font-medium sm:gap-6"
           id="default-tab"
           data-tabs-toggle="#default-tab-content"
           role="tablist"
@@ -52,7 +52,7 @@ export default function Tabs({ activeTab }: { activeTab: string }) {
           </TabLink>
           <Link
             href="https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=resource_center_tabs&utm_campaign=newsletter"
-            className={`${TAB_STYLE} text-signoz_vanilla-400 transition-colors hover:text-signoz_cherry-500`}
+            className={`${TAB_STYLE} text-muted-foreground hover:text-danger-foreground transition-colors`}
             target="_blank"
             prefetch={false}
           >

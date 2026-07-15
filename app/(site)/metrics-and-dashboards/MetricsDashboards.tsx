@@ -15,9 +15,9 @@ function MetricsDashboards() {
   return (
     <main className="!mt-[-10px] mb-auto">
       <ProductNav />
-      <div className="relative bg-signoz_ink-500">
+      <div className="bg-background relative">
         <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
-        <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
+        <div className="absolute top-0 right-0 left-0 mx-auto h-[450px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
         <Header />
         <TrustedByTeams page="MetricsDashboards" />
         <SigNozFeatures />
@@ -35,9 +35,9 @@ export default MetricsDashboards
 
 const PlatformCard = ({ title, description }) => {
   return (
-    <div className="rounded-md border border-signoz_slate-500 bg-signoz_ink-400 p-4">
-      <h3 className="mb-2 text-base font-medium text-signoz_vanilla-100">{title}</h3>
-      <p className="mb-0 text-sm font-normal text-signoz_vanilla-400">{description}</p>
+    <div className="border-border bg-card rounded-md border p-4">
+      <h3 className="text-l1-foreground mb-2 text-base font-medium">{title}</h3>
+      <p className="text-muted-foreground mb-0 text-sm font-normal">{description}</p>
     </div>
   )
 }
@@ -138,14 +138,14 @@ const DocsList = () => {
 const Header = () => {
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
-      <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
-      <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
-        <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
+      <div className="border-border absolute top-0 right-[12px] bottom-0 left-[12px] z-[0] border !border-t-0 !border-b-0 border-dashed md:right-[24px] md:left-[24px]" />
+      <div className="border-border relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed px-2 pt-12 pb-4 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
+        <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px] dark:text-white">
           Infrastructure monitoring, custom metrics & <br />
           dashboards to fit any use case
         </h1>
 
-        <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
+        <p className="text-muted-foreground m-0 p-3 text-lg leading-8 font-normal sm:p-0">
           Monitor any metrics important to you. Ingest metrics from your infrastructure or
           applications
           <br className="hidden lg:inline" />
@@ -154,7 +154,7 @@ const Header = () => {
           in your preferred notification channel.
         </p>
       </div>
-      <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
+      <div className="border-border relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-t-0 !border-b-0 border-dashed pt-4 pb-12 md:mx-5 md:!w-[80vw] md:flex-row">
         <Button variant="legacyPrimary" id="btn-get-started-homepage-hero">
           <Link href="/teams/" className="flex-center">
             Get Started - Free
@@ -169,7 +169,7 @@ const Header = () => {
           </Link>
         </Button>
       </div>
-      <div className="section-container !mx-auto !mt-0 -mb-[9rem] !w-full border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed">
+      <div className="section-container border-border !mx-auto !mt-0 -mb-[9rem] !w-full border !border-t-0 !border-b-0 border-none max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed">
         <div className="w-full">
           <div className="product-explainer-video hero-figure rounded-none p-0 md:rounded-lg md:p-3">
             <Image
@@ -191,15 +191,15 @@ const TrustedByTeams = ({ page }) => {
   const customerStoriesId = `btn-customer-stories-${page}-hero`
   return (
     <section
-      className={`relative z-[1] !m-0 !mx-auto !w-[100vw]  border !border-b-0 border-dashed border-signoz_slate-400 bg-signoz_ink-500 pt-10 md:!w-[80vw]`}
+      className={`border-border bg-background relative z-[1] !m-0 !mx-auto !w-[100vw] border !border-b-0 border-dashed pt-10 md:!w-[80vw]`}
     >
       <div className="section-container">
         <div className="mb-2 flex flex-col items-center text-center md:mb-12">
-          <div className="text-sm font-semibold uppercase leading-5 tracking-[0.05em] text-signoz_vanilla-400">
-            Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
+          <div className="text-muted-foreground text-sm leading-5 font-semibold tracking-[0.05em] uppercase">
+            Trusted by the <span className="text-foreground">best platform teams</span>
           </div>
         </div>
-        <div className="mb-12 mt-12 grid grid-cols-2 place-content-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8  sm:gap-y-14 md:mt-0 md:grid-cols-6 ">
+        <div className="mt-12 mb-12 grid grid-cols-2 place-content-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8 sm:gap-y-14 md:mt-0 md:grid-cols-6">
           {COMPANIES.map((company, idx) => (
             <div key={`${idx}-${company.imageDesc}`} className="flex items-center justify-center">
               <company.Logo
@@ -211,15 +211,13 @@ const TrustedByTeams = ({ page }) => {
           ))}
         </div>
         <div
-          className={`wavy-line relative mx-[-1rem]
-          after:absolute after:top-[50%] after:h-0 after:w-full after:bg-transparent after:content-['']
-        `}
+          className={`wavy-line relative mx-[-1rem] after:absolute after:top-[50%] after:h-0 after:w-full after:bg-transparent after:content-['']`}
         >
           <div className="flex flex-col items-center text-center">
             <Button
               variant="legacyPrimary"
               id={customerStoriesId}
-              className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+              className="button-background text-foreground hover:text-foreground relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pr-3 pl-4 text-center text-sm leading-5 font-medium not-italic no-underline outline-none"
             >
               <Link href="/case-study/" className="flex-center z-[1] mx-2">
                 Read customer stories <ArrowRight size={14} />
@@ -321,11 +319,11 @@ const SigNozFeatures = () => {
   return (
     <>
       <div className="bg-[url('/img/background_blur/Frame_1862.webp')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
-        <section className="bg-blur-ellipse-388 mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw] ">
+        <section className="bg-blur-ellipse-388 border-border mx-auto w-[100vw] border !border-t-0 !border-b-0 border-dashed md:w-[80vw]">
           <div className={`container pb-16`}>
-            <div className="flex flex-col gap-6 pb-44 pt-28 ">
+            <div className="flex flex-col gap-6 pt-28 pb-44">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
-                <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
+                <div className="text-l1-foreground dark:text-sienna-100 text-[44px] leading-[3.25rem] font-semibold">
                   Why use SigNoz for <br /> Metrics Monitoring?
                 </div>
               </div>
@@ -333,8 +331,8 @@ const SigNozFeatures = () => {
           </div>
         </section>
       </div>
-      <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
-        <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
+      <div className="border-border !mx-auto grid !w-[100vw] grid-cols-1 border !border-t-0 !border-l-0 border-dashed sm:grid-cols-2 md:!w-[80vw]">
+        <div className="border-border !mx-auto grid !w-[100vw] grid-cols-1 border !border-t-0 !border-b-0 !border-l-0 border-dashed sm:grid-cols-2 md:!w-[80vw]">
           {sections.map((section, index) => (
             <Card
               key={index}
@@ -351,11 +349,11 @@ const SigNozFeatures = () => {
       </div>
 
       <div className="bg-[url('/img/background_blur/Frame_1862.webp')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
-        <section className="bg-blur-ellipse-388 mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:w-[80vw] ">
+        <section className="bg-blur-ellipse-388 border-border mx-auto w-[100vw] border !border-t-0 !border-b-0 border-dashed md:w-[80vw]">
           <div className={`container pb-16`}>
-            <div className="flex flex-col gap-6 pb-44 pt-28 ">
+            <div className="flex flex-col gap-6 pt-28 pb-44">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
-                <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
+                <div className="text-l1-foreground dark:text-sienna-100 text-[44px] leading-[3.25rem] font-semibold">
                   SigNoz Metrics & <br /> Dashboards Overview
                 </div>
               </div>
@@ -364,7 +362,7 @@ const SigNozFeatures = () => {
         </section>
       </div>
 
-      <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
+      <div className="border-border !mx-auto grid !w-[100vw] grid-cols-1 border !border-t-0 !border-l-0 border-dashed sm:grid-cols-2 md:!w-[80vw]">
         {scrollsections.map((scrollsections, index) => (
           <FeatureCard
             key={index}
@@ -382,16 +380,16 @@ const SigNozFeatures = () => {
 
 const SigNozUsage = () => {
   return (
-    <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
+    <div className="section-container border-border !mx-auto !w-[100vw] border !border-b-0 border-dashed !px-0 md:!w-[80vw]">
       <div className="flex flex-col sm:flex-row">
-        <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+        <div className="!w-[100%] flex-1 md:!w-[300px]">
+          <p className="text-l1-foreground sticky top-[100px] px-10 pt-10 pl-0 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-0 md:pl-12">
             Use SigNoz
             <br /> Metrics & Dashboards for...
           </p>
         </div>
         <div className="flex-[2_2_0%]">
-          <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
+          <div className="border-border ml-0 justify-between gap-8 border !border-t-0 !border-r-0 !border-b-0 border-dashed px-10 py-10 sm:flex-row">
             <FeatureList />
           </div>
         </div>
@@ -402,20 +400,20 @@ const SigNozUsage = () => {
 
 const UsageBasedPricing = () => {
   return (
-    <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
+    <div className="section-container border-border !mx-auto !w-[100vw] border !border-b-0 border-dashed !px-0 md:!w-[80vw]">
       <div className="flex flex-col sm:flex-row">
-        <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+        <div className="!w-[100%] flex-1 md:!w-[300px]">
+          <p className="text-l1-foreground sticky top-[100px] px-10 pt-10 pl-0 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-0 md:pl-12">
             Simple
             <br /> usage-based <br /> pricing
           </p>
         </div>
         <div className="flex-[2_2_0%]">
-          <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
-            <div className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">
+          <div className="border-border ml-0 justify-between gap-8 border !border-t-0 !border-r-0 !border-b-0 border-dashed px-10 py-10 sm:flex-row">
+            <div className="text-l1-foreground mb-2 text-2xl font-semibold">
               Pricing you can trust
             </div>
-            <p className="text-base font-normal text-signoz_vanilla-400">
+            <p className="text-muted-foreground text-base font-normal">
               Tired of Datadog’s unpredictable bills or New Relic’s user-based pricing?
               <br />
               We’re here for you.
@@ -436,15 +434,15 @@ const UsageBasedPricing = () => {
 
 const ExploreDocs = () => {
   return (
-    <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
+    <div className="section-container border-border !mx-auto !w-[100vw] border !border-b-0 border-dashed !px-0 md:!w-[80vw]">
       <div className="flex flex-col sm:flex-row">
-        <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+        <div className="!w-[100%] flex-1 md:!w-[300px]">
+          <p className="text-l1-foreground sticky top-[100px] px-10 pt-10 pl-0 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-0 md:pl-12">
             Explore Docs
           </p>
         </div>
         <div className="flex-[2_2_0%]">
-          <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
+          <div className="border-border ml-0 justify-between gap-8 border !border-t-0 !border-r-0 !border-b-0 border-dashed px-10 py-10 sm:flex-row">
             <DocsList />
           </div>
         </div>
@@ -459,11 +457,11 @@ const GetStarted = ({ page }) => {
 
   return (
     <div className="bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
-      <section className="!mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
+      <section className="border-border !mx-auto !w-[100vw] border !border-b-0 border-dashed md:!w-[80vw]">
         <div className="bg-blur-ellipse-206">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
-              <p className="mb-0 mt-20 text-center text-4xl font-bold">
+              <p className="mt-20 mb-0 text-center text-4xl font-bold">
                 Get started with <br /> SigNoz Cloud today
               </p>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">

@@ -144,10 +144,10 @@ export const logEntries: LogEntry[] = [
 ]
 
 export const severityClassNames: Record<LogSeverity, string> = {
-  default: 'border-signoz_slate-100/30 text-signoz_vanilla-400/58',
-  error: 'border-signoz_cherry-500 bg-signoz_cherry-500/13 text-signoz_cherry-400',
-  info: 'border-signoz_robin-500 bg-signoz_robin-500/12 text-signoz_robin-400',
-  warn: 'border-signoz_amber-500 bg-signoz_amber-500/10 text-signoz_amber-400',
+  default: 'border-slate-100/30 text-vanilla-400/58',
+  error: 'border-cherry-500 bg-cherry-500/13 text-cherry-400',
+  info: 'border-robin-500 bg-robin-500/12 text-robin-400',
+  warn: 'border-amber-500 bg-amber-500/10 text-amber-400',
 }
 
 export type TraceSpan = {
@@ -166,7 +166,7 @@ export const traceSpans: TraceSpan[] = [
     depth: 0,
     offset: 0,
     width: 96,
-    color: 'bg-signoz_sienna-400',
+    color: 'bg-sienna-400',
   },
   {
     label: 'ingress',
@@ -174,7 +174,7 @@ export const traceSpans: TraceSpan[] = [
     depth: 1,
     offset: 2,
     width: 94,
-    color: 'bg-signoz_sakura-400',
+    color: 'bg-sakura-400',
   },
   {
     label: 'router frontend egress',
@@ -182,7 +182,7 @@ export const traceSpans: TraceSpan[] = [
     depth: 2,
     offset: 3,
     width: 92,
-    color: 'bg-signoz_sakura-500',
+    color: 'bg-sakura-500',
   },
   {
     label: 'POST /api/checkout',
@@ -190,7 +190,7 @@ export const traceSpans: TraceSpan[] = [
     depth: 3,
     offset: 13,
     width: 78,
-    color: 'bg-signoz_sienna-300',
+    color: 'bg-sienna-300',
   },
   {
     label: 'executing api route',
@@ -198,7 +198,7 @@ export const traceSpans: TraceSpan[] = [
     depth: 4,
     offset: 14,
     width: 76,
-    color: 'bg-signoz_sienna-300',
+    color: 'bg-sienna-300',
   },
   {
     label: 'CheckoutService/PlaceOrder',
@@ -206,7 +206,7 @@ export const traceSpans: TraceSpan[] = [
     depth: 5,
     offset: 21,
     width: 68,
-    color: 'bg-signoz_sienna-400',
+    color: 'bg-sienna-400',
   },
   {
     label: 'prepareOrderItemsAndShipping',
@@ -214,7 +214,7 @@ export const traceSpans: TraceSpan[] = [
     depth: 6,
     offset: 28,
     width: 58,
-    color: 'bg-signoz_robin-400',
+    color: 'bg-robin-400',
   },
   {
     label: 'CartService/GetCart',
@@ -222,7 +222,7 @@ export const traceSpans: TraceSpan[] = [
     depth: 7,
     offset: 31,
     width: 22,
-    color: 'bg-signoz_robin-500',
+    color: 'bg-robin-500',
   },
   {
     label: 'CurrencyService/Convert',
@@ -230,7 +230,7 @@ export const traceSpans: TraceSpan[] = [
     depth: 8,
     offset: 34,
     width: 18,
-    color: 'bg-signoz_aqua-500',
+    color: 'bg-aqua-500',
   },
   {
     label: 'POST /send_order_confirmation',
@@ -238,7 +238,7 @@ export const traceSpans: TraceSpan[] = [
     depth: 6,
     offset: 33,
     width: 54,
-    color: 'bg-signoz_robin-400',
+    color: 'bg-robin-400',
   },
   {
     label: 'send_email',
@@ -246,7 +246,7 @@ export const traceSpans: TraceSpan[] = [
     depth: 7,
     offset: 35,
     width: 51,
-    color: 'bg-signoz_robin-500',
+    color: 'bg-robin-500',
   },
   {
     label: 'HGET inventory',
@@ -254,7 +254,7 @@ export const traceSpans: TraceSpan[] = [
     depth: 8,
     offset: 38,
     width: 10,
-    color: 'bg-signoz_amber-500',
+    color: 'bg-amber-500',
   },
 ]
 

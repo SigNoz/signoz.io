@@ -8,10 +8,10 @@ interface InterlinkCardProps {
 
 export default function InterlinkCard({ href, title, className = '' }: InterlinkCardProps) {
   return (
-    <div className={`mb-6 rounded-lg border border-gray-800 bg-gray-900/50 p-4 ${className}`}>
+    <div className={`border-border bg-card mb-6 rounded-lg border p-4 ${className}`}>
       <Link
         href={href}
-        className="text-lg font-medium text-blue-400 no-underline hover:text-blue-300"
+        className="text-primary hover:text-primary/80 text-lg font-medium no-underline"
         target="_blank"
         prefetch={false}
       >

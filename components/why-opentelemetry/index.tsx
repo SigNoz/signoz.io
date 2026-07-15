@@ -39,19 +39,19 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
     <>
       <section
         className={cn(
-          'mx-auto w-full max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400',
+          'max-w-8xl border-border mx-auto w-full border !border-t-0 !border-b-0 border-dashed',
           className
         )}
       >
         <div className="bg-blur-ellipse-207 container">
           <div className="grid place-items-center py-8 text-center md:py-28">
-            <p className="text-center text-sm font-medium uppercase tracking-[.05em] text-signoz_vanilla-400">
+            <p className="text-muted-foreground text-center text-sm font-medium tracking-[.05em] uppercase">
               SigNoz is OpenTelemetry-Native
             </p>
-            <p className="text-3xl font-semibold leading-[3.5rem] text-signoz_sakura-100 sm:text-4xl">
+            <p className="text-sakura-100 text-3xl leading-[3.5rem] font-semibold sm:text-4xl">
               But why OpenTelemetry?
             </p>
-            <p className="text-center text-xs font-medium text-signoz_vanilla-100 sm:text-base">
+            <p className="text-l1-foreground text-center text-xs font-medium sm:text-base">
               OpenTelemetry is the second most active project in the CNCF, with only&nbsp;
               <br className="hidden lg:inline" />
               Kubernetes being more active.
@@ -62,7 +62,7 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
               clickName="Why Developers choose OpenTelemetry Link"
               clickText="Learn why Developers choose OpenTelemetry"
               clickLocation="Why OpenTelemetry Section"
-              className="mb-3 mt-3 flex h-10 items-center justify-center gap-1.5 rounded-full border border-signoz_slate-200 bg-signoz_slate-400 px-4 py-2 text-[10px] font-medium leading-5 text-white shadow-[0_0_20px_0_rgba(242,71,105,0.20)] sm:text-sm"
+              className="border-l2-border bg-muted text-foreground mt-3 mb-3 flex h-10 items-center justify-center gap-1.5 rounded-full border px-4 py-2 text-[10px] leading-5 font-medium shadow-[0_0_20px_0_rgba(242,71,105,0.20)] sm:text-sm"
             >
               <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               Learn why Developers choose OpenTelemetry
@@ -73,7 +73,7 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
       </section>
       <div
         className={cn(
-          'mx-auto grid w-full max-w-8xl grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2',
+          'max-w-8xl border-border mx-auto grid w-full grid-cols-1 border !border-t-0 !border-b-0 !border-l-0 border-dashed sm:grid-cols-2',
           className
         )}
       >
@@ -89,26 +89,23 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
         ))}
       </div>
       <section
-        className={cn(
-          'mx-auto w-full max-w-8xl border border-dashed border-signoz_slate-400',
-          className
-        )}
+        className={cn('max-w-8xl border-border mx-auto w-full border border-dashed', className)}
       >
         <div className="mb-16 px-0">
           <div className="grid gap-9 p-9">
             <div className="flex flex-col items-center gap-8 lg:flex-row">
               <div className="min-w-0">
-                <p className="text-2xl font-semibold text-signoz_vanilla-100">
+                <p className="text-l1-foreground text-2xl font-semibold">
                   {' '}
                   SigNoz is built from the ground up for OpenTelemetry
                 </p>
 
-                <p className="my-3 text-base font-normal leading-9 text-signoz_vanilla-400 md:max-w-[min(42rem,90%)]">
+                <p className="text-muted-foreground my-3 text-base leading-9 font-normal md:max-w-[min(42rem,90%)]">
                   SigNoz offers the best in class support for OpenTelemetry{"'"}s semantic
                   conventions with the best visualizations ⎯ powered by our powerful ingestion
                   engine.
                 </p>
-                <ul className="ul-no-padding mt-8 md:mt-0 ">
+                <ul className="ul-no-padding mt-8 md:mt-0">
                   <li className="mb-3 flex items-center gap-3 text-sm sm:text-base">
                     <ArrowRightSolid />
                     <span>OpenTelemetry-first docs</span>
@@ -157,17 +154,17 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
             </div>
             <TrackingLink
               href="https://signoz.io/blog/is-opentelemetry-a-first-class-citizen-in-your-dashboard-a-datadog-and-newrelic-comparison/"
-              className="rounded border border-signoz_slate-500 bg-signoz_ink-400 p-4"
+              className="border-border bg-card rounded border p-4"
               target="_blank"
               clickType="Nav Click"
               clickName="OpenTelemetry Blog Link"
               clickText="Comparing Datadog and New Relic's support for OpenTelemetry data"
               clickLocation="Why OpenTelemetry Section"
             >
-              <p className="mb-2 text-base font-medium text-signoz_vanilla-100">
+              <p className="text-l1-foreground mb-2 text-base font-medium">
                 Comparing Datadog and New Relic's support for OpenTelemetry data
               </p>
-              <p className="m-0 text-sm font-normal leading-9 text-signoz_vanilla-400">
+              <p className="text-muted-foreground m-0 text-sm leading-9 font-normal">
                 Walk through how native OpenTelemetry tools compare to APM products that have
                 adopted OpenTelemetry only partially.
               </p>
@@ -177,7 +174,7 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
       </section>
       <div
         className={cn(
-          'mx-auto h-12 w-full max-w-8xl border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400',
+          'max-w-8xl border-border mx-auto h-12 w-full border !border-t-0 !border-b-0 border-dashed',
           className
         )}
       />

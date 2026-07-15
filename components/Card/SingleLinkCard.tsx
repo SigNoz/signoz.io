@@ -26,18 +26,18 @@ const SingleLinkCard: React.FC<SingleLinkCardProps> = ({
     <TrackingLink
       href={href}
       target="_blank"
-      className="flex items-center gap-4 rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
+      className="border-border bg-card hover:border-primary hover:bg-l3-background flex items-center gap-4 rounded-lg border p-4 transition-all"
       clickType={clickType}
       clickName={clickName}
       clickText={clickText}
       clickLocation={clickLocation}
     >
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-signoz_robin-500/10">
+      <div className="bg-primary/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md">
         {icon}
       </div>
       <div>
-        <h3 className="mb-1 text-base font-bold text-signoz_vanilla-100">{title}</h3>
-        <p className="mb-0 text-sm text-signoz_vanilla-400">{description}</p>
+        <h3 className="text-l1-foreground mb-1 text-base font-bold">{title}</h3>
+        <p className="text-muted-foreground mb-0 text-sm">{description}</p>
       </div>
     </TrackingLink>
   )

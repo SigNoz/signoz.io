@@ -1,3 +1,5 @@
+@reference './tailwind.css';
+
 html {
   scroll-padding-top: 60px; /* Adjust this value to match the height of your sticky header */
   scroll-behavior: smooth;
@@ -13,26 +15,6 @@ html body[data-scroll-locked] {
   padding-right: 0px !important;
   padding-top: 0px !important;
   padding-left: calc(100vw - 100%) !important;
-}
-
-.row {
-  display: flex;
-}
-
-.avatar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.avatar .avatar__photo img {
-  height: 50px;
-  width: 50px;
-  border-radius: 50%;
-}
-
-.avatar .avatar__intro .avatar__name {
-  font-weight: 700;
 }
 
 pre {
@@ -82,23 +64,23 @@ pre {
 }
 
 .prose :where(blockquote code):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  color: #4e74f8;
+  color: var(--bg-primary);
 }
 
 .prose :where(h2 code):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  color: #4e74f8;
+  color: var(--bg-primary);
 }
 
 .prose :where(h1 code):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  color: #4e74f8;
+  color: var(--bg-primary);
 }
 
 .prose :where(h3 code):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  color: #4e74f8;
+  color: var(--bg-primary);
 }
 
 .prose :where(h4 code):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  color: #4e74f8;
+  color: var(--bg-primary);
 }
 
 .prose :where(code):not(:where([class~='not-prose'], [class~='not-prose'] *))::before {
@@ -110,14 +92,59 @@ pre {
 }
 
 .prose :where(pre):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  padding-left: 8px;
+  padding: 1rem 0.75rem 1rem 0.5rem;
   box-sizing: border-box;
-  background-color: rgba(103, 103, 126, 0.323);
+  /* Night Owl tokens expect a dark surface in both themes */
+  background-color: var(--bg-ink-400);
+  color: #d6deeb;
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  border-radius: 0.375rem;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.875em;
+  line-height: 1.45;
+  overflow-x: auto;
 }
 
+.prose :where(pre code):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+/* Inline code — theme-aware (Infima used light gray in light, translucent white in dark) */
 code {
-  background-color: rgba(103, 103, 126, 0.323);
-  padding: 2px 4px;
+  background-color: var(--muted);
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  color: var(--foreground);
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.9em;
+  padding: 0.125rem 0.375rem;
+  vertical-align: baseline;
+}
+
+.dark code {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: transparent;
+}
+
+/*
+ * Must beat `.dark code` specificity (0,2,0). Without this, fenced blocks get a
+ * translucent gray bar behind each code line in dark mode.
+ */
+pre code,
+.dark pre code,
+.prose :where(pre) code,
+.dark .prose :where(pre) code {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
 }
 
 /* Works on Firefox */
@@ -152,29 +179,12 @@ body::-webkit-scrollbar-thumb {
   height: calc(100vh - 48px);
 }
 
-.avatar__photo {
-  height: auto;
-}
-
-.avatar__photo img {
-  margin: 0;
-}
-
-.avatar__subtitle p {
-  padding: 4px 0;
-  margin: 0;
-}
-
-.newsroom-content .card {
-  background-color: rgb(22 25 34);
-}
-
-.newsroom-content .card .card__image img {
-  margin: 0;
+.newsroom-content .rounded-md {
+  background-color: var(--card);
 }
 
 .start-free-trial-btn {
-  background-color: #4e74f8;
+  background-color: var(--primary);
 }
 
 .privacy ol {
@@ -196,7 +206,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .border-dashed-container {
-  @apply !m-0 !mx-auto mt-4 flex w-full max-w-8xl flex-1 flex-col items-start border !border-b-0 border-dashed border-signoz_slate-400;
+  @apply max-w-8xl border-border !m-0 !mx-auto mt-4 flex w-full flex-1 flex-col items-start border !border-b-0 border-dashed;
 }
 
 .enterprise-plans {

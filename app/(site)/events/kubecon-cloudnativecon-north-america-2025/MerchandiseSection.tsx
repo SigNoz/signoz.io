@@ -45,7 +45,7 @@ const MerchandiseSection: React.FC<MerchandiseSectionProps> = ({
 
   return (
     <>
-      <div className="border-t border-dashed border-signoz_slate-500 px-8 py-10">
+      <div className="border-border border-t border-dashed px-8 py-10">
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex flex-col items-start">
             <h2 className="mb-0">{title}</h2>

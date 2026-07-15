@@ -82,23 +82,23 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
 
   return (
     <div className="flex flex-col gap-3 px-4 md:px-8 lg:px-0">
-      <h1 className={`text-3xl font-semibold text-signoz_vanilla-100 ${Styles['header-title']}`}>
+      <h1 className={`text-l1-foreground text-3xl font-semibold ${Styles['header-title']}`}>
         Changelog
       </h1>
       <div
         className={`${Styles['subscribe-cta-container']} flex flex-wrap items-center gap-x-4 gap-y-2`}
       >
         <button
-          className="text-base text-signoz_robin-400 hover:text-signoz_robin-200"
+          className="text-accent-primary hover:text-robin-200 text-base"
           onClick={handleSubscribeClick}
         >
           Subscribe for updates
         </button>
-        <span className="block h-1 w-1 rounded-full bg-signoz_slate-200"></span>
+        <span className="bg-secondary block h-1 w-1 rounded-full"></span>
         <Link
           href="https://www.linkedin.com/company/signozio"
           target="_blank"
-          className="text-base text-signoz_vanilla-400 hover:text-signoz_vanilla-100"
+          className="text-muted-foreground hover:text-l1-foreground text-base"
         >
           Follow us on LinkedIn
         </Link>
@@ -108,15 +108,15 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
           {Object.values(DeploymentType).map((type) => (
             <button
               key={type}
-              className={`flex items-center gap-1.5 rounded-full border border-signoz_slate-400 bg-signoz_ink-500 py-1 pl-3 pr-2 text-xs text-signoz_vanilla-100 transition-colors hover:bg-signoz_ink-300 active:bg-signoz_slate-400 ${
-                currentDeploymentType === type ? 'bg-signoz_slate-400' : ''
+              className={`border-border bg-background text-l1-foreground hover:bg-l3-background active:bg-muted flex items-center gap-1.5 rounded-full border py-1 pr-2 pl-3 text-xs transition-colors ${
+                currentDeploymentType === type ? 'bg-muted' : ''
               }`}
               onClick={() => handleDeploymentTypeChange(type)}
             >
               <span
-                className={`block h-1.5 w-1.5 flex-shrink-0 rounded-full ${DeploymentTypeColors[type]} ${type === DeploymentType.OSS_ONLY ? 'bg-signoz_sienna-500' : ''}`}
+                className={`block h-1.5 w-1.5 flex-shrink-0 rounded-full ${DeploymentTypeColors[type]} ${type === DeploymentType.OSS_ONLY ? 'bg-sienna-500' : ''}`}
               ></span>
-              <span className="font-medium uppercase tracking-wide">
+              <span className="font-medium tracking-wide uppercase">
                 {DeploymentTypeLabels[type]}
               </span>
             </button>
@@ -128,18 +128,16 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
         backdrop="blur"
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        panelClassName="overflow-hidden rounded-lg bg-signoz_ink-400 p-0"
+        panelClassName="overflow-hidden rounded-lg bg-card p-0"
       >
         <div className="flex flex-col">
-          <p
-            className={`p-4 text-sm text-signoz_vanilla-100 ${Styles['subscription-modal-header']}`}
-          >
+          <p className={`text-l1-foreground p-4 text-sm ${Styles['subscription-modal-header']}`}>
             Get notified when we ship something new
           </p>
-          <span className="block h-px w-full bg-signoz_slate-500"></span>
-          <div className="px-4 pb-4 pt-3">
+          <span className="bg-muted block h-px w-full"></span>
+          <div className="px-4 pt-3 pb-4">
             <form className="flex flex-col gap-2" onSubmit={handleEmailSubmit}>
-              <label htmlFor="email" className="text-sm text-signoz_vanilla-100">
+              <label htmlFor="email" className="text-l1-foreground text-sm">
                 Enter your email
               </label>
               <div className="flex">
@@ -152,12 +150,12 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
                   value={email}
                   onChange={handleEmailChange}
                   placeholder="Eg. johndoe@example.com"
-                  className="w-full rounded-l-sm border border-r-0 border-solid border-signoz_slate-400 bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300"
+                  className="border-border bg-l3-background w-full rounded-l-sm border border-r-0 border-solid px-3 py-1.5 text-sm tracking-normal text-stone-300"
                 />
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex w-32 items-center justify-center gap-1 rounded-r-sm bg-signoz_robin-500 px-4 text-xs text-signoz_vanilla-100 active:bg-signoz_robin-600"
+                  className="bg-primary text-l1-foreground active:bg-primary-background-hover flex w-32 items-center justify-center gap-1 rounded-r-sm px-4 text-xs"
                 >
                   {isSubmitting ? (
                     <Loader2 size={16} className="animate-spin" />
@@ -170,7 +168,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
                 </button>
               </div>
               {errors.email && (
-                <span className="text-xs text-signoz_cherry-500">{errors.email}</span>
+                <span className="text-danger-foreground text-xs">{errors.email}</span>
               )}
             </form>
           </div>
