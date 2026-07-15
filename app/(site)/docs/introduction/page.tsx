@@ -8,7 +8,6 @@ import TroubleshootingCommunitySection from './TroubleshootingCommunitySection'
 import SelfHostSection from './SelfHostSection'
 import DocsCtaSection from './DocsCtaSection'
 import { Metadata } from 'next'
-import DecimalClient from '@/components/Decimal/DecimalClient'
 import { generateDocsBreadcrumb } from '@/utils/breadcrumbSchema'
 import JsonLdScript from '@/components/JsonLdScript'
 
@@ -32,7 +31,6 @@ export default async function DocsIntroductionPage() {
       <TroubleshootingCommunitySection />
       <SelfHostSection />
       <DocsCtaSection />
-      <DecimalClient />
     </>
   )
 }
