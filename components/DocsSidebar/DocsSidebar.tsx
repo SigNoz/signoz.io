@@ -3,6 +3,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
+import MetronomeIcon from '@/components/icons/MetronomeIcon'
 import Link from 'next/link'
 import { NavItem, Doc, Category } from './types'
 import { useDocsSideNav } from './DocsSideNavContext'
@@ -49,13 +50,41 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
     setSideNav((prevState) => toggle(prevState))
   }
 
+  const expandLabels = (labels: string[]) => {
+    if (!labels.length) return
+    const labelSet = new Set(labels)
+    const expand = (items) =>
+      items.map((item) => {
+        if (item.type === 'category' && item.hasOwnProperty('isExpanded')) {
+          return {
+            ...item,
+            isExpanded: labelSet.has(item.label) ? true : item.isExpanded,
+            items: item.items ? expand(item.items) : item.items,
+          }
+        }
+        if (item.items) {
+          return { ...item, items: expand(item.items) }
+        }
+        return item
+      })
+    setSideNav((prev) => expand(prev))
+  }
+
   function findParentsForRoute(items, route, parents = []) {
     for (const item of items) {
-      if (item.route === route) return parents
+      const itemRoute = item.route
+        ? item.route.endsWith('/')
+          ? item.route.slice(0, -1)
+          : item.route
+        : ''
+
+      // Prefer a deeper match inside children when category route equals the path
       if (item.items) {
         const result = findParentsForRoute(item.items, route, [...parents, item.label])
         if (result) return result
       }
+
+      if (itemRoute && itemRoute === route) return parents
     }
     return null
   }
@@ -89,9 +118,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
     const currentRoute = pathname
     const normalizedRoute = currentRoute.endsWith('/') ? currentRoute.slice(0, -1) : currentRoute
     const parents = getParents(originalSideNav, normalizedRoute)
-    for (const parent of parents) {
-      toggleIsExpandedByLabel(parent, true)
-    }
+    expandLabels(parents)
 
     const rIC = window.requestIdleCallback ?? setTimeout
     rIC(() => {
@@ -141,23 +168,18 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
       <li
         key={doc.route}
         id={`#${doc.route}`}
-        className={`group transition-all duration-200 ${
-          isGetStarted ? 'mb-4 ml-4 mr-2 mt-2' : 'mx-2 my-0.5'
-        }`}
+        className="group mx-2 my-0.5 transition-all duration-200"
         onClick={() => onNavItemClick && typeof onNavItemClick == 'function' && onNavItemClick()}
       >
         <Link
           href={constructHref(doc.route)}
-          className={`flex w-full items-center gap-2.5 rounded px-5 py-2 text-sm transition-all duration-200 ${
-            isGetStarted
-              ? isActiveRoute
-                ? 'border border-signoz_ink-200 bg-signoz_ink-400 text-signoz_vanilla-100'
-                : 'border border-signoz_ink-200 text-signoz_vanilla-400 hover:bg-signoz_ink-300 hover:text-signoz_vanilla-100'
-              : isActiveRoute
-                ? 'bg-signoz_ink-300 text-signoz_vanilla-100'
-                : 'text-signoz_vanilla-400 hover:bg-signoz_ink-300 hover:text-signoz_vanilla-100'
+          className={`flex w-full items-center gap-2.5 rounded px-3 py-2 text-sm transition-all duration-200 ${
+            isActiveRoute
+              ? 'bg-signoz_ink-300 text-signoz_vanilla-100'
+              : 'text-signoz_vanilla-400 hover:bg-signoz_ink-300 hover:text-signoz_vanilla-100'
           } ${doc.className || ''}`}
         >
+          {isGetStarted && <MetronomeIcon size={14} className="flex-shrink-0" />}
           <Tooltip content={doc.label} side="right" delayDuration={500}>
             <span className="truncate">{doc.label}</span>
           </Tooltip>
