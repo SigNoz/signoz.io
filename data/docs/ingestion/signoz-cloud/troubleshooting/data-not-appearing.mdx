@@ -57,7 +57,7 @@ Pick your signal for an ordered checklist. Each one starts with the most common 
 <TabItem value="logs" label="Logs" default>
 
 ```text
-Debug missing LOGS in SigNoz — check in this order:
+Debug missing LOGS in SigNoz, check in this order:
 
 1. Ingestion key correct?
    - Header: signoz-ingestion-key=<your-ingestion-key>
@@ -82,7 +82,7 @@ Debug missing LOGS in SigNoz — check in this order:
 <TabItem value="traces" label="Traces">
 
 ```text
-Debug missing TRACES in SigNoz — check in this order:
+Debug missing TRACES in SigNoz, check in this order:
 
 1. Ingestion key correct?
    - Header: signoz-ingestion-key=<your-ingestion-key>
@@ -107,7 +107,7 @@ Debug missing TRACES in SigNoz — check in this order:
 <TabItem value="metrics" label="Metrics">
 
 ```text
-Debug missing METRICS in SigNoz — check in this order:
+Debug missing METRICS in SigNoz, check in this order:
 
 1. Ingestion key correct?
    - Header: signoz-ingestion-key=<your-ingestion-key>
@@ -151,13 +151,13 @@ Traces reach SigNoz from the OpenTelemetry SDK's OTLP exporter, either directly 
 
 - **Common sources:** OpenTelemetry SDK; Jaeger/Zipkin clients. Spans from **Jaeger or Zipkin clients** must pass through a Collector with the matching receiver, which converts them to OTLP.
 - If some spans are missing or you see gaps in a trace, the instrumentation is likely producing data but some spans are dropped or uninstrumented. See [Traces Management FAQs](https://signoz.io/docs/traces-management/troubleshooting/faqs/).
-- SigNoz builds the **Services** list in APM by grouping incoming spans on their `service.name` resource attribute. So if your traces are arriving but a service is missing from the Services tab, it usually means `service.name` is unset or not unique — set a unique `service.name` on that service so its spans are attributed to it.
+- SigNoz builds the **Services** list in APM by grouping incoming spans on their `service.name` resource attribute. So if your traces are arriving but a service is missing from the Services tab, it usually means `service.name` is unset or not unique. Set a unique `service.name` on that service so its spans are attributed to it.
 
 </details>
 
 ### Logs
 
-Logs reach SigNoz from the OpenTelemetry SDK or log appenders, from files on disk read by the Collector's `filelog` receiver, or from log shippers — over OTLP, directly or through a Collector.
+Logs reach SigNoz from the OpenTelemetry SDK or log appenders, from files on disk read by the Collector's `filelog` receiver, or from log shippers, over OTLP, directly or through a Collector.
 
 <details>
 <ToggleHeading>
@@ -176,7 +176,7 @@ To correlate logs with traces, make sure each log line carries `trace_id` and `s
 
 ### Metrics
 
-Metrics reach SigNoz from the OpenTelemetry SDK, or from Prometheus, StatsD, and host or Kubernetes sources collected by the Collector's receivers — exported as OTLP.
+Metrics reach SigNoz from the OpenTelemetry SDK, or from Prometheus, StatsD, and host or Kubernetes sources collected by the Collector's receivers, exported as OTLP.
 
 <details>
 <ToggleHeading>
@@ -307,21 +307,21 @@ receivers:
   otlp:                                                # data coming IN from your app
     protocols:
       grpc:
-        endpoint: 0.0.0.0:4317                         # OTLP/gRPC — your app sends here
+        endpoint: 0.0.0.0:4317                         # OTLP/gRPC: your app sends here
       http:
-        endpoint: 0.0.0.0:4318                         # OTLP/HTTP — your app sends here
+        endpoint: 0.0.0.0:4318                         # OTLP/HTTP: your app sends here
 
 exporters:
   debug:
     verbosity: detailed
   otlphttp:                                            # data going OUT to SigNoz
-    # SigNoz Cloud endpoint — port 443, not 4317/4318
+    # SigNoz Cloud endpoint: port 443, not 4317/4318
     endpoint: https://ingest.<region>.signoz.cloud:443
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 
 # The service section wires components into pipelines.
-# REQUIRED — a receiver or exporter does nothing until it is listed here.
+# REQUIRED: a receiver or exporter does nothing until it is listed here.
 service:
   pipelines:
     traces:
@@ -339,10 +339,10 @@ service:
 ```
 
 <Admonition type="warning">
-Configuring a receiver or exporter is not enough on its own — the Collector runs a component only once it is wired into a pipeline under `service.pipelines`. If you define the `otlphttp` and `debug` exporters but forget to list them in the relevant pipeline's `exporters`, nothing is sent and no data reaches SigNoz. Always configure the `service` section too. See the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+Configuring a receiver or exporter is not enough on its own: the Collector runs a component only once it is wired into a pipeline under `service.pipelines`. If you define the `otlphttp` and `debug` exporters but forget to list them in the relevant pipeline's `exporters`, nothing is sent and no data reaches SigNoz. Always configure the `service` section too. See the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
 </Admonition>
 
-The Collector has two sides, and they use **different ports** — this is where most people mix things up:
+The Collector has two sides, and they use **different ports**. This is where most people mix things up:
 
 - **Receivers** (`otlp`) are the ports the Collector *listens on* for data coming from your application: `4317` for OTLP/gRPC and `4318` for OTLP/HTTP. Point your app's `OTEL_EXPORTER_OTLP_ENDPOINT` at these (for example `http://<collector-host>:4318`).
 - **Exporters** (`otlphttp`) are where the Collector *sends* data onward. For SigNoz Cloud the endpoint is `https://ingest.<region>.signoz.cloud:443` (port `443`, **not** `4317`/`4318`); for self-hosted SigNoz it is `http://<signoz-host>:4318`.
@@ -494,7 +494,7 @@ There are two topologies:
 - **Direct to SigNoz.** Your application's instrumentation exports OTLP straight to the SigNoz ingestion endpoint.
 - **Through a Collector.** Your application (or a third-party agent) sends data to an OpenTelemetry Collector, which then exports OTLP to SigNoz. The Collector may be a [K8s-Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/), the [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/), a [host binary](https://signoz.io/docs/opentelemetry-collection-agents/vm/overview/), or a [Docker container](https://signoz.io/docs/opentelemetry-collection-agents/docker/overview/).
 
-Whichever topology you use, **instrumenting your application always comes first** — your instrumentation is what produces the telemetry, whether that is the OpenTelemetry SDK, a zero-code auto-instrumentation agent, or instrumentation libraries you add to your code. A Collector is optional and added later as an intermediary (for example, to batch data, enrich it, or scrape non-OTLP sources). Which path you choose decides one setting on the app side: the export endpoint, `OTEL_EXPORTER_OTLP_ENDPOINT`.
+Whichever topology you use, **instrumenting your application always comes first**. Your instrumentation is what produces the telemetry, whether that is the OpenTelemetry SDK, a zero-code auto-instrumentation agent, or instrumentation libraries you add to your code. A Collector is optional and added later as an intermediary (for example, to batch data, enrich it, or scrape non-OTLP sources). Which path you choose decides one setting on the app side: the export endpoint, `OTEL_EXPORTER_OTLP_ENDPOINT`.
 
 - **Direct to SigNoz Cloud.** Point your instrumentation at `https://ingest.<region>.signoz.cloud:443` and set the `signoz-ingestion-key` header.
 - **Through a Collector.** Point your instrumentation at the Collector instead (for example `http://<collector-host>:4318`). The Collector, not the app, then holds the SigNoz Cloud endpoint and ingestion key. Adding a Collector only changes where your instrumentation exports to; it does not change how you instrument the app.
