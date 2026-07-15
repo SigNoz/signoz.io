@@ -340,14 +340,14 @@ const searchOverlayStyle: CSSProperties = {
   zIndex: 80,
 }
 
-const searchContentStyle = {
-  '--l2-background': 'var(--l2-background-transparent)',
-  '--l2-border': 'transparent',
+const searchContentStyle: CSSProperties = {
+  backgroundColor: 'transparent',
+  border: 'none',
   boxShadow: 'none',
   maxWidth: '42rem',
   zIndex: 80,
   width: '100%',
-} as CSSProperties
+}
 
 const SearchHeader = ({
   onClose,

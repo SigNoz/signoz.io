@@ -47,10 +47,11 @@ type AppModalProps = {
   showCloseButton?: boolean
 }
 
-const transparentDialogSurfaceVars = {
-  '--l2-background': 'var(--l2-background-transparent)',
-  '--l2-border': 'transparent',
-} as CSSProperties
+const transparentDialogSurfaceStyle: CSSProperties = {
+  backgroundColor: 'transparent',
+  border: 'none',
+  boxShadow: 'none',
+}
 
 const blurOverlayStyle: CSSProperties = {
   backgroundColor: 'color-mix(in srgb, var(--bg-ink-500) 30%, transparent)',
@@ -78,8 +79,7 @@ export function AppModal({
         position="center"
         animation="fade"
         style={{
-          ...transparentDialogSurfaceVars,
-          boxShadow: 'none',
+          ...transparentDialogSurfaceStyle,
           maxWidth: sizeMaxWidth[size],
         }}
         className="overflow-hidden text-left shadow-xl"

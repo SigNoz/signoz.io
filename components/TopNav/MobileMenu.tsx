@@ -25,15 +25,15 @@ interface MobileMenuProps {
 
 const TOP_NAV_OFFSET_PX = 56
 
-const mobileMenuContentStyle = {
-  '--l2-background': 'var(--l2-background-transparent)',
-  '--l2-border': 'transparent',
+const mobileMenuContentStyle: CSSProperties = {
+  backgroundColor: 'transparent',
+  border: 'none',
   boxShadow: 'none',
   top: TOP_NAV_OFFSET_PX,
   height: `calc(100% - ${TOP_NAV_OFFSET_PX}px)`,
   maxWidth: 'min(100%, 24rem)',
   width: '100%',
-} as CSSProperties
+}
 
 export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuProps) {
   const router = useRouter()
