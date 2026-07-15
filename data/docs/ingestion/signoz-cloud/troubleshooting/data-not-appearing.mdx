@@ -315,10 +315,13 @@ exporters:
   debug:
     verbosity: detailed
   otlphttp:                                            # data going OUT to SigNoz
-    endpoint: https://ingest.<region>.signoz.cloud:443 # SigNoz Cloud (port 443, not 4317/4318)
+    # SigNoz Cloud endpoint — port 443, not 4317/4318
+    endpoint: https://ingest.<region>.signoz.cloud:443
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 
+# The service section wires components into pipelines.
+# REQUIRED — a receiver or exporter does nothing until it is listed here.
 service:
   pipelines:
     traces:
@@ -334,6 +337,10 @@ service:
       processors: [batch]
       exporters: [debug, otlphttp]
 ```
+
+<Admonition type="warning">
+Configuring a receiver or exporter is not enough on its own — the Collector runs a component only once it is wired into a pipeline under `service.pipelines`. If you define the `otlphttp` and `debug` exporters but forget to list them in the relevant pipeline's `exporters`, nothing is sent and no data reaches SigNoz. Always configure the `service` section too. See the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+</Admonition>
 
 The Collector has two sides, and they use **different ports** — this is where most people mix things up:
 
