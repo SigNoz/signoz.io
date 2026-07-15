@@ -18,26 +18,15 @@ import { AI_OPTIONS, COPY_FEEDBACK_DURATION_MS } from './OpenInAI.constants'
 import type { AIOption, OpenInAIProps } from './OpenInAI.types'
 import { getAbsoluteUrl } from './OpenInAI.utils'
 
-/* Inline styles required: @signozhq/ui CSS modules beat Tailwind for background/border */
-const menuContentStyle: CSSProperties = {
-  minWidth: 280,
-  backgroundColor: '#121317',
-  border: '1px solid #1D212D',
-  borderRadius: '0.5rem',
-  padding: '0.25rem 0',
-  boxShadow: '0 20px 25px -5px rgba(0,0,0,0.4)',
-}
-
-const menuItemStyle: CSSProperties = {
-  padding: '0.75rem 1rem',
-  borderRadius: 0,
-  gap: '0.75rem',
-  minWidth: 0,
-}
-
-const menuSeparatorStyle: CSSProperties = {
-  backgroundColor: '#1D212D',
-}
+const openInAIMenuVars = {
+  '--dropdown-menu-content-min-width': '17.5rem',
+  '--dropdown-menu-content-border-radius': 'var(--spacing-4)',
+  '--dropdown-menu-content-padding': 'var(--spacing-2) 0',
+  '--dropdown-menu-item-padding': 'var(--spacing-6) var(--spacing-8)',
+  '--dropdown-menu-item-border-radius': '0',
+  '--dropdown-menu-item-gap': 'var(--spacing-6)',
+  '--dropdown-menu-item-min-width': '0',
+} as CSSProperties
 
 function OpenInAI({
   markdownContent,
@@ -152,14 +141,13 @@ function OpenInAI({
             </Button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" sideOffset={8} style={menuContentStyle} className="z-50">
+          <DropdownMenuContent align="end" sideOffset={8} style={openInAIMenuVars} className="z-50">
             <DropdownMenuItem
               disabled={isCopyDisabled}
               clickable
               onSelect={() => {
                 void handleCopy()
               }}
-              style={menuItemStyle}
               className="items-start"
             >
               <div
@@ -181,14 +169,13 @@ function OpenInAI({
               </div>
             </DropdownMenuItem>
 
-            <DropdownMenuSeparator style={menuSeparatorStyle} />
+            <DropdownMenuSeparator />
 
             {AI_OPTIONS.map((option) => (
               <DropdownMenuItem
                 key={option.id}
                 clickable
                 onSelect={() => handleOpenInAI(option)}
-                style={menuItemStyle}
                 className="items-start"
               >
                 <div className="mt-0.5 flex-shrink-0 text-signoz_vanilla-400">

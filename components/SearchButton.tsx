@@ -296,7 +296,6 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
       }}
     >
       <DialogPortal>
-        {/* Inline styles required: @signozhq/ui CSS modules beat Tailwind for z-index/background */}
         <DialogOverlay style={searchOverlayStyle} />
       </DialogPortal>
       <DialogContent
@@ -338,20 +337,17 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
 }
 
 const searchOverlayStyle: CSSProperties = {
-  backgroundColor: 'rgba(0, 0, 0, 0.55)',
   zIndex: 80,
 }
 
-const searchContentStyle: CSSProperties = {
-  backgroundColor: 'transparent',
-  border: 'none',
+const searchContentStyle = {
+  '--l2-background': 'var(--l2-background-transparent)',
+  '--l2-border': 'transparent',
   boxShadow: 'none',
-  borderRadius: 0,
-  padding: 0,
   maxWidth: '42rem',
   zIndex: 80,
   width: '100%',
-}
+} as CSSProperties
 
 const SearchHeader = ({
   onClose,

@@ -47,24 +47,15 @@ type AppModalProps = {
   showCloseButton?: boolean
 }
 
-const neutralizedSurfaceStyle: CSSProperties = {
-  backgroundColor: 'transparent',
-  border: 'none',
-  boxShadow: 'none',
-  borderRadius: 0,
-  padding: 0,
-}
+const transparentDialogSurfaceVars = {
+  '--l2-background': 'var(--l2-background-transparent)',
+  '--l2-border': 'transparent',
+} as CSSProperties
 
-const visuallyHiddenStyle: CSSProperties = {
-  position: 'absolute',
-  width: 1,
-  height: 1,
-  padding: 0,
-  margin: -1,
-  overflow: 'hidden',
-  clip: 'rect(0, 0, 0, 0)',
-  whiteSpace: 'nowrap',
-  borderWidth: 0,
+const blurOverlayStyle: CSSProperties = {
+  backgroundColor: 'color-mix(in srgb, var(--bg-ink-500) 30%, transparent)',
+  backdropFilter: 'blur(12px) saturate(150%)',
+  WebkitBackdropFilter: 'blur(12px) saturate(150%)',
 }
 
 export function AppModal({
@@ -76,21 +67,10 @@ export function AppModal({
   backdrop = 'default',
   showCloseButton = true,
 }: AppModalProps) {
-  const overlayStyle: CSSProperties =
-    backdrop === 'blur'
-      ? {
-          backgroundColor: 'rgba(0, 0, 0, 0.3)',
-          backdropFilter: 'blur(12px) saturate(150%)',
-          WebkitBackdropFilter: 'blur(12px) saturate(150%)',
-        }
-      : {
-          backgroundColor: 'rgba(0, 0, 0, 0.55)',
-        }
-
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogPortal>
-        <DialogOverlay style={overlayStyle} />
+        <DialogOverlay {...(backdrop === 'blur' ? { style: blurOverlayStyle } : {})} />
       </DialogPortal>
       <DialogContent
         showOverlay={false}
@@ -98,12 +78,13 @@ export function AppModal({
         position="center"
         animation="fade"
         style={{
-          ...neutralizedSurfaceStyle,
+          ...transparentDialogSurfaceVars,
+          boxShadow: 'none',
           maxWidth: sizeMaxWidth[size],
         }}
         className="overflow-hidden text-left shadow-xl"
       >
-        <DialogTitle style={visuallyHiddenStyle}>Dialog</DialogTitle>
+        <DialogTitle className="sr-only">Dialog</DialogTitle>
         <div className={cn('relative w-full', panelClassName)}>
           {showCloseButton && (
             <DialogClose asChild>

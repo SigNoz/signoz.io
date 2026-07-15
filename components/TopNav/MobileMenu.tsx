@@ -25,29 +25,15 @@ interface MobileMenuProps {
 
 const TOP_NAV_OFFSET_PX = 56
 
-const mobileMenuContentStyle: CSSProperties = {
-  backgroundColor: 'transparent',
-  border: 'none',
+const mobileMenuContentStyle = {
+  '--l2-background': 'var(--l2-background-transparent)',
+  '--l2-border': 'transparent',
   boxShadow: 'none',
-  borderRadius: 0,
-  padding: 0,
   top: TOP_NAV_OFFSET_PX,
   height: `calc(100% - ${TOP_NAV_OFFSET_PX}px)`,
   maxWidth: 'min(100%, 24rem)',
   width: '100%',
-}
-
-const visuallyHiddenStyle: CSSProperties = {
-  position: 'absolute',
-  width: 1,
-  height: 1,
-  padding: 0,
-  margin: -1,
-  overflow: 'hidden',
-  clip: 'rect(0, 0, 0, 0)',
-  whiteSpace: 'nowrap',
-  borderWidth: 0,
-}
+} as CSSProperties
 
 export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuProps) {
   const router = useRouter()
@@ -64,7 +50,7 @@ export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuP
         style={mobileMenuContentStyle}
         className="overflow-y-auto"
       >
-        <DialogTitle style={visuallyHiddenStyle}>Menu</DialogTitle>
+        <DialogTitle className="sr-only">Menu</DialogTitle>
         <div className="flex min-h-full w-full flex-col bg-signoz_ink-500 px-6 py-24 pt-[calc(6rem-56px)] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
           <div className="flex items-center justify-between">
             <TrackingLink
