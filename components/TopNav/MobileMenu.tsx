@@ -1,6 +1,6 @@
 'use client'
 
-import { Dialog } from '@headlessui/react'
+import { Dialog, DialogContent, DialogTitle } from '@signozhq/ui/dialog'
 import { ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
@@ -27,32 +27,45 @@ export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuP
   const closeMobileMenu = () => onClose(false)
 
   return (
-    <Dialog as="div" open={open} onClose={onClose}>
-      <div className="fixed inset-0 top-[56px]" />
-      <Dialog.Panel className="fixed inset-y-0 right-0 z-50 mt-[56px] w-full overflow-y-auto bg-signoz_ink-500 px-6 py-24 !pt-[calc(6rem-56px)] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 ">
-        <div className="flex items-center justify-between">
-          <TrackingLink
-            href="/"
-            className="-m-1.5 p-1.5"
-            clickType="Nav Click"
-            clickName="SigNoz Logo"
-            clickText="SigNoz"
-            clickLocation="Mobile Menu"
-            onClick={closeMobileMenu}
-          >
-            <span className="sr-only">SigNoz</span>
-          </TrackingLink>
-        </div>
-        <div className="mt-6 flow-root">
-          <div className="-my-6 divide-y divide-gray-500/10">
-            <MainMenuContent
-              isSignupRoute={isSignupRoute}
-              onClose={closeMobileMenu}
-              router={router}
-            />
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent
+        showOverlay={false}
+        position="right"
+        heightMode="full"
+        animation="slide"
+        width="narrow"
+        className={cn(
+          // ! overrides needed: @signozhq/ui CSS modules beat normal Tailwind for these
+          'overflow-y-auto !border-none !bg-transparent !shadow-none',
+          '!top-14 !h-[calc(100%-3.5rem)] !w-full !max-w-[min(100%,24rem)]'
+        )}
+      >
+        <DialogTitle className="sr-only">Menu</DialogTitle>
+        <div className="flex min-h-full w-full flex-col bg-signoz_ink-500 px-6 py-24 pt-[calc(6rem-56px)] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+          <div className="flex items-center justify-between">
+            <TrackingLink
+              href="/"
+              className="-m-1.5 p-1.5"
+              clickType="Nav Click"
+              clickName="SigNoz Logo"
+              clickText="SigNoz"
+              clickLocation="Mobile Menu"
+              onClick={closeMobileMenu}
+            >
+              <span className="sr-only">SigNoz</span>
+            </TrackingLink>
+          </div>
+          <div className="mt-6 flow-root">
+            <div className="-my-6 divide-y divide-gray-500/10">
+              <MainMenuContent
+                isSignupRoute={isSignupRoute}
+                onClose={closeMobileMenu}
+                router={router}
+              />
+            </div>
           </div>
         </div>
-      </Dialog.Panel>
+      </DialogContent>
     </Dialog>
   )
 }
