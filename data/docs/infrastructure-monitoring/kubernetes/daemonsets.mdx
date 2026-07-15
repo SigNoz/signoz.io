@@ -1,0 +1,91 @@
+---
+date: 2026-07-15
+title: Monitor Kubernetes DaemonSets - Columns Reference Guide
+description: Monitor Kubernetes DaemonSets in SigNoz. Understand every column in the DaemonSets table, including Node Status, Ready, and Misscheduled node counts.
+doc_type: reference
+---
+
+The **DaemonSets** view in SigNoz Infrastructure Monitoring lists every Kubernetes DaemonSet in your clusters with aggregated pod resource usage and node-level scheduling health. Use it to confirm a DaemonSet is running on all the nodes it should, spot misscheduled pods, and drill into CPU and memory pressure.
+
+## Overview
+
+Open the view from **Infrastructure Monitoring → Kubernetes**, then select **DaemonSets** in the left **Viewing · Resource** panel. Each row is a DaemonSet (or a group when you set a **Group by** attribute), aggregating the pods it owns.
+
+Use the filters panel and search bar to scope the list by DaemonSet name, namespace, or cluster, and use the time picker to change the window the metrics are calculated over.
+
+To collect the underlying metrics, see [Kubernetes Metrics](https://signoz.io/docs/infrastructure-monitoring/k8s-metrics/). For the other Kubernetes views, see the [Infrastructure Monitoring overview](https://signoz.io/docs/infrastructure-monitoring/overview/).
+
+<Admonition type="info">
+Metric columns show `-` when no data is available for that DaemonSet in the selected time range.
+</Admonition>
+
+## Table columns
+
+The table shows a core set of columns by default. Sortable columns have a sort control in the header. Several columns are hidden by default and can be turned on from the column settings (the columns icon in the table toolbar).
+
+### DaemonSet Name
+
+Name of the DaemonSet (`k8s.daemonset.name`). Pinned to the left of the table.
+
+### Namespace Name
+
+Namespace the DaemonSet runs in (`k8s.namespace.name`).
+
+### Pod Counts by Phase
+
+Breakdown of the pods owned by the DaemonSet by their latest phase: `pending`, `running`, `succeeded`, `failed`, and `unknown` (from `k8s.pod.phase`). Use it to see how many pods are healthy versus stuck.
+
+### Node Status
+
+Summary of the DaemonSet's node-level scheduling counters, shown as four labeled, color-coded counts in a single cell:
+
+- **Ready** (green): nodes running at least one ready daemon pod.
+- **Current** (blue): nodes the DaemonSet currently runs a pod on.
+- **Desired** (pink): nodes the DaemonSet should run a pod on.
+- **Misscheduled** (amber): nodes running a daemon pod that should not be running one.
+
+These are node counts, not pod counts. In a healthy DaemonSet, Ready, Current, and Desired match, and Misscheduled is `0`. Each count is defined in more detail under [Ready](#ready), [Current](#current), [Desired](#desired), and [Misscheduled](#misscheduled).
+
+### CPU Req Usage (%)
+
+Average CPU request utilization across the DaemonSet's pods (`daemonSetCPURequest`): actual CPU usage as a percentage of requested CPU. Sortable. Hidden by default.
+
+### CPU Limit Usage (%)
+
+Average CPU limit utilization across the DaemonSet's pods (`daemonSetCPULimit`): actual CPU usage as a percentage of the CPU limit. Sortable.
+
+### CPU Usage (cores)
+
+CPU usage in cores, summed across the DaemonSet's pods (`daemonSetCPU`). Sortable. Hidden by default.
+
+### Mem Req Usage (%)
+
+Average memory request utilization across the DaemonSet's pods (`daemonSetMemoryRequest`): working set memory as a percentage of requested memory. Sortable. Hidden by default.
+
+### Mem Limit Usage (%)
+
+Average memory limit utilization across the DaemonSet's pods (`daemonSetMemoryLimit`): working set memory as a percentage of the memory limit. Sortable.
+
+### Mem Usage (WSS)
+
+Working set memory (WSS) summed across the DaemonSet's pods (`daemonSetMemory`). Sortable.
+
+## Node count columns
+
+Ready, Current, Desired, and Misscheduled are also available as individual sortable columns. They are hidden by default: enable **Ready Nodes**, **Current Nodes**, **Desired Nodes**, or **Misscheduled Nodes** from the column settings icon in the table toolbar. The same values are always visible in the [Node Status](#node-status) cell.
+
+### Ready
+
+Number of nodes running at least one ready daemon pod (`k8s.daemonset.ready_nodes`). Available as the sortable **Ready Nodes** column.
+
+### Current
+
+Number of nodes the DaemonSet currently runs a pod on (`k8s.daemonset.current_scheduled_nodes`). Available as the sortable **Current Nodes** column.
+
+### Desired
+
+Number of nodes the DaemonSet should run a pod on (`k8s.daemonset.desired_scheduled_nodes`). Available as the sortable **Desired Nodes** column.
+
+### Misscheduled
+
+Number of nodes running a daemon pod that should not be running one (`k8s.daemonset.misscheduled_nodes`). A non-zero value points to nodes where the pod no longer matches the DaemonSet's node selector or affinity. Available as the sortable **Misscheduled Nodes** column.
