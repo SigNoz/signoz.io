@@ -1,6 +1,9 @@
+'use client'
+
 import React from 'react'
-import { ArrowUpRight, BookOpen } from 'lucide-react'
+import { ArrowRight, BookOpen } from 'lucide-react'
 import Link from 'next/link'
+import FloatingRingsScene from '@/components/FloatingRingsScene/FloatingRingsScene'
 
 interface DocsIntroSectionHeaderProps {
   title: string
@@ -48,10 +51,12 @@ export default function DocsIntroSectionHeader({
               {viewAllHref && (
                 <Link
                   href={viewAllHref}
-                  className="flex items-center gap-1.5 rounded py-2 pl-1.5 pr-2 text-base text-signoz_vanilla-400 transition-colors hover:text-signoz_vanilla-100"
+                  className="group/view-all flex items-center gap-1.5 rounded py-2 pl-1.5 pr-2 text-base text-signoz_vanilla-400 transition-colors hover:text-signoz_vanilla-100"
                 >
                   <span>View all</span>
-                  <ArrowUpRight size={12} />
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full transition-colors group-hover/view-all:bg-signoz_ink-200">
+                    <ArrowRight size={12} />
+                  </span>
                 </Link>
               )}
             </div>
@@ -59,9 +64,7 @@ export default function DocsIntroSectionHeader({
         </div>
       </div>
       <div className="hidden w-1/3 flex-shrink-0 overflow-hidden border-b border-dashed border-signoz_ink-300 md:block">
-        {illustration && (
-          <img src={illustration} alt={illustrationAlt} className="h-full w-full object-cover" />
-        )}
+        {illustration && <FloatingRingsScene src={illustration} alt={illustrationAlt} />}
       </div>
     </div>
   )
