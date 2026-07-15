@@ -3,7 +3,6 @@
 import { Dialog, DialogContent, DialogTitle } from '@signozhq/ui/dialog'
 import { ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { type CSSProperties } from 'react'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
 import { Button } from '@/components/ui/Button'
@@ -23,18 +22,6 @@ interface MobileMenuProps {
   isSignupRoute: boolean
 }
 
-const TOP_NAV_OFFSET_PX = 56
-
-const mobileMenuContentStyle: CSSProperties = {
-  backgroundColor: 'transparent',
-  border: 'none',
-  boxShadow: 'none',
-  top: TOP_NAV_OFFSET_PX,
-  height: `calc(100% - ${TOP_NAV_OFFSET_PX}px)`,
-  maxWidth: 'min(100%, 24rem)',
-  width: '100%',
-}
-
 export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuProps) {
   const router = useRouter()
   const closeMobileMenu = () => onClose(false)
@@ -47,8 +34,11 @@ export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuP
         heightMode="full"
         animation="slide"
         width="narrow"
-        style={mobileMenuContentStyle}
-        className="overflow-y-auto"
+        className={cn(
+          // ! overrides needed: @signozhq/ui CSS modules beat normal Tailwind for these
+          'overflow-y-auto !border-none !bg-transparent !shadow-none',
+          '!top-14 !h-[calc(100%-3.5rem)] !w-full !max-w-[min(100%,24rem)]'
+        )}
       >
         <DialogTitle className="sr-only">Menu</DialogTitle>
         <div className="flex min-h-full w-full flex-col bg-signoz_ink-500 px-6 py-24 pt-[calc(6rem-56px)] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">

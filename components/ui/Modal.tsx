@@ -10,21 +10,21 @@ import {
   type DialogSize,
 } from '@signozhq/ui/dialog'
 import { X } from 'lucide-react'
-import { type CSSProperties, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { cn } from 'app/lib/utils'
 
-const sizeMaxWidth = {
-  sm: '24rem',
-  md: '28rem',
-  lg: '32rem',
-  xl: '36rem',
-  '2xl': '42rem',
-  '3xl': '48rem',
-  '4xl': '56rem',
-  '5xl': '64rem',
+const sizeMaxWidthClass = {
+  sm: '!max-w-sm',
+  md: '!max-w-md',
+  lg: '!max-w-lg',
+  xl: '!max-w-xl',
+  '2xl': '!max-w-2xl',
+  '3xl': '!max-w-3xl',
+  '4xl': '!max-w-4xl',
+  '5xl': '!max-w-5xl',
 } as const
 
-const sizeToDialogWidth: Record<keyof typeof sizeMaxWidth, DialogSize> = {
+const sizeToDialogWidth: Record<keyof typeof sizeMaxWidthClass, DialogSize> = {
   sm: 'narrow',
   md: 'narrow',
   lg: 'base',
@@ -35,7 +35,7 @@ const sizeToDialogWidth: Record<keyof typeof sizeMaxWidth, DialogSize> = {
   '5xl': 'extra-wide',
 }
 
-export type AppModalSize = keyof typeof sizeMaxWidth
+export type AppModalSize = keyof typeof sizeMaxWidthClass
 
 type AppModalProps = {
   isOpen: boolean
@@ -45,18 +45,6 @@ type AppModalProps = {
   panelClassName?: string
   backdrop?: 'blur' | 'default'
   showCloseButton?: boolean
-}
-
-const transparentDialogSurfaceStyle: CSSProperties = {
-  backgroundColor: 'transparent',
-  border: 'none',
-  boxShadow: 'none',
-}
-
-const blurOverlayStyle: CSSProperties = {
-  backgroundColor: 'color-mix(in srgb, var(--bg-ink-500) 30%, transparent)',
-  backdropFilter: 'blur(12px) saturate(150%)',
-  WebkitBackdropFilter: 'blur(12px) saturate(150%)',
 }
 
 export function AppModal({
@@ -71,18 +59,23 @@ export function AppModal({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogPortal>
-        <DialogOverlay {...(backdrop === 'blur' ? { style: blurOverlayStyle } : {})} />
+        <DialogOverlay
+          className={cn(
+            // ! overrides needed: @signozhq/ui CSS modules beat normal Tailwind
+            backdrop === 'blur' &&
+              '!bg-[color-mix(in_srgb,var(--bg-ink-500)_30%,transparent)] backdrop-blur-[12px] backdrop-saturate-150'
+          )}
+        />
       </DialogPortal>
       <DialogContent
         showOverlay={false}
         width={sizeToDialogWidth[size]}
         position="center"
         animation="fade"
-        style={{
-          ...transparentDialogSurfaceStyle,
-          maxWidth: sizeMaxWidth[size],
-        }}
-        className="overflow-hidden text-left shadow-xl"
+        className={cn(
+          'overflow-hidden !border-none !bg-transparent text-left !shadow-none',
+          sizeMaxWidthClass[size]
+        )}
       >
         <DialogTitle className="sr-only">Dialog</DialogTitle>
         <div className={cn('relative w-full', panelClassName)}>

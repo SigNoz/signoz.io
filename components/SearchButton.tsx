@@ -17,7 +17,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
   type MutableRefObject,
 } from 'react'
@@ -296,7 +295,7 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
       }}
     >
       <DialogPortal>
-        <DialogOverlay style={searchOverlayStyle} />
+        <DialogOverlay className="!z-[80]" />
       </DialogPortal>
       <DialogContent
         showOverlay={false}
@@ -304,8 +303,11 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
         width="wide"
         animation="fade"
         offset={96}
-        style={searchContentStyle}
-        className="overflow-visible text-white"
+        className={cn(
+          // ! overrides needed: @signozhq/ui CSS modules beat normal Tailwind
+          'overflow-visible !border-none !bg-transparent text-white !shadow-none',
+          '!z-[80] !w-full !max-w-2xl'
+        )}
         onOpenAutoFocus={(event) => {
           event.preventDefault()
           focusSearchInput()
@@ -334,19 +336,6 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
       </DialogContent>
     </Dialog>
   )
-}
-
-const searchOverlayStyle: CSSProperties = {
-  zIndex: 80,
-}
-
-const searchContentStyle: CSSProperties = {
-  backgroundColor: 'transparent',
-  border: 'none',
-  boxShadow: 'none',
-  maxWidth: '42rem',
-  zIndex: 80,
-  width: '100%',
 }
 
 const SearchHeader = ({
