@@ -80,10 +80,10 @@ export default function TopNav() {
           )}
           aria-label="Global"
         >
-          <div className="flex justify-start gap-x-6">
+          <div className="flex items-center justify-start">
             <TrackingLink
               href="/"
-              className="-m-1.5 flex items-center gap-2 p-1.5"
+              className={cn('-m-1.5 flex items-center p-1.5', isDocsBasePath ? 'gap-1.5' : 'gap-2')}
               clickType="Nav Click"
               clickName="SigNoz Logo"
               clickText="SigNoz"
@@ -101,7 +101,7 @@ export default function TopNav() {
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </TrackingLink>
             {isDocsBasePath && (
-              <Badge color="cherry" className="self-center uppercase">
+              <Badge color="cherry" className="ml-1 self-center uppercase">
                 docs
               </Badge>
             )}
@@ -109,7 +109,10 @@ export default function TopNav() {
             {!isLoginRoute && (
               <NavDropdownProvider>
                 <div
-                  className={`hidden items-center gap-x-3 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
+                  className={cn(
+                    'hidden items-center gap-x-3 min-[840px]:flex',
+                    isDocsBasePath ? 'ml-7' : visibility.showProduct ? 'ml-6' : ''
+                  )}
                 >
                   {visibility.showProduct && <ProductDropdown />}
                   {visibility.showUseCases && <UseCasesDropdown />}
