@@ -23,7 +23,7 @@ export default function DocsIntroCard({
   clickName,
   clickLocation,
   external = false,
-  className = '',
+  className = 'h-[152px]',
 }: DocsIntroCardProps) {
   return (
     <TrackingLink
@@ -33,21 +33,27 @@ export default function DocsIntroCard({
       clickText={title}
       clickLocation={clickLocation}
       {...(external ? { target: '_blank', rel: 'noopener noreferrer nofollow' } : {})}
-      className={`group border-b border-r border-dashed border-signoz_ink-300 p-4 transition-colors hover:bg-signoz_ink-500/50 ${className}`}
+      className={`group box-border flex flex-col border-b border-r border-dashed border-signoz_ink-300 bg-transparent p-4 transition-colors hover:bg-signoz_ink-300 ${className}`}
     >
-      <div className="flex h-full flex-col justify-between gap-6">
-        <div className="h-6 w-6">{icon}</div>
-        <div className="flex items-end justify-between gap-4">
+      <div className="flex h-full min-h-0 w-full flex-col justify-between">
+        <div className="h-6 w-6 shrink-0">{icon}</div>
+
+        <div className="flex w-full items-end justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-3">
-            <h3 className="text-base font-semibold leading-none text-signoz_vanilla-100">
+            <h3 className="m-0 text-base font-semibold leading-none text-signoz_vanilla-100">
               {title}
             </h3>
-            <p className="text-base leading-relaxed text-signoz_vanilla-400">{description}</p>
+            <p className="m-0 text-base leading-[26px] text-[#adb4c2] transition-colors group-hover:text-[#eceef2]">
+              {description}
+            </p>
           </div>
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-signoz_ink-300 bg-signoz_ink-400/60">
+
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-solid border-signoz_ink-200 bg-signoz_ink-300 transition-colors group-hover:border-signoz_ink-200 group-hover:bg-[#23262e]">
             <ArrowUpRight
               size={20}
+              strokeWidth={1.75}
               className="text-signoz_vanilla-400 transition-colors group-hover:text-signoz_vanilla-100"
+              aria-hidden
             />
           </div>
         </div>
