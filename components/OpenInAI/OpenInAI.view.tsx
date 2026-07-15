@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useCallback, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useMemo, useRef, useState, type CSSProperties } from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,22 +18,26 @@ import { AI_OPTIONS, COPY_FEEDBACK_DURATION_MS } from './OpenInAI.constants'
 import type { AIOption, OpenInAIProps } from './OpenInAI.types'
 import { getAbsoluteUrl } from './OpenInAI.utils'
 
-const menuContentClassName = cn(
-  'min-w-[280px]',
-  '[--dropdown-menu-content-min-width:280px]',
-  '[--dropdown-menu-content-border-radius:theme(borderRadius.lg)]',
-  '[--dropdown-menu-content-border-color:theme(colors.signoz_slate.400)]',
-  '[--dropdown-menu-content-background:theme(colors.signoz_ink.400)]',
-  '[--dropdown-menu-content-padding:0.25rem_0]',
-  '[--dropdown-menu-content-box-shadow:0_20px_25px_-5px_rgba(0,0,0,0.4)]',
-  '[--dropdown-menu-item-padding:0.75rem_1rem]',
-  '[--dropdown-menu-item-border-radius:0]',
-  '[--dropdown-menu-item-hover-background:theme(colors.signoz_ink.300)]',
-  '[--dropdown-menu-item-focus-background:theme(colors.signoz_ink.300)]',
-  '[--dropdown-menu-item-min-width:0]',
-  '[--dropdown-menu-item-gap:0.75rem]',
-  '[--dropdown-menu-separator-background:theme(colors.signoz_slate.400)]'
-)
+/* Inline styles required: @signozhq/ui CSS modules beat Tailwind for background/border */
+const menuContentStyle: CSSProperties = {
+  minWidth: 280,
+  backgroundColor: '#121317',
+  border: '1px solid #1D212D',
+  borderRadius: '0.5rem',
+  padding: '0.25rem 0',
+  boxShadow: '0 20px 25px -5px rgba(0,0,0,0.4)',
+}
+
+const menuItemStyle: CSSProperties = {
+  padding: '0.75rem 1rem',
+  borderRadius: 0,
+  gap: '0.75rem',
+  minWidth: 0,
+}
+
+const menuSeparatorStyle: CSSProperties = {
+  backgroundColor: '#1D212D',
+}
 
 function OpenInAI({
   markdownContent,
@@ -148,13 +152,14 @@ function OpenInAI({
             </Button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" sideOffset={8} className={menuContentClassName}>
+          <DropdownMenuContent align="end" sideOffset={8} style={menuContentStyle} className="z-50">
             <DropdownMenuItem
               disabled={isCopyDisabled}
               clickable
               onSelect={() => {
                 void handleCopy()
               }}
+              style={menuItemStyle}
               className="items-start"
             >
               <div
@@ -176,13 +181,14 @@ function OpenInAI({
               </div>
             </DropdownMenuItem>
 
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator style={menuSeparatorStyle} />
 
             {AI_OPTIONS.map((option) => (
               <DropdownMenuItem
                 key={option.id}
                 clickable
                 onSelect={() => handleOpenInAI(option)}
+                style={menuItemStyle}
                 className="items-start"
               >
                 <div className="mt-0.5 flex-shrink-0 text-signoz_vanilla-400">
