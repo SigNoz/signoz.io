@@ -525,7 +525,19 @@ With your FastAPI app instrumented and telemetry flowing into SigNoz, you can al
 
 ## FAQs
 
-### How does OpenTelemetry impact FastAPI application performance?
+### How do I add OpenTelemetry to a FastAPI application?
+
+Install `opentelemetry-distro` and `opentelemetry-exporter-otlp`, run `opentelemetry-bootstrap --action=install` to auto-detect and install instrumentation packages for your dependencies, then launch your app with `opentelemetry-instrument uvicorn app.main:app`. You will also need a compatible OpenTelemetry backend, such as SigNoz Cloud, to receive and visualize the telemetry data.
+
+### Does FastAPI support OpenTelemetry auto-instrumentation?
+
+Yes. The `opentelemetry-bootstrap` command detects FastAPI and its common dependencies (such as `httpx` and SQLAlchemy) and installs the corresponding instrumentation packages automatically. Running your app with `opentelemetry-instrument` then activates these packages at startup with no code changes required for basic tracing.
+
+### How do I exclude health check endpoints from OpenTelemetry tracing in FastAPI?
+
+Set the `OTEL_PYTHON_FASTAPI_EXCLUDED_URLS` environment variable to a comma-separated list of URL patterns — for example, `OTEL_PYTHON_FASTAPI_EXCLUDED_URLS="health,ping"`. Each value is treated as a regex pattern, so you can match path prefixes or use more complex expressions to manage exclusions at scale.
+
+### What is the performance overhead of OpenTelemetry in a FastAPI application?
 
 OpenTelemetry adds minimal overhead to your FastAPI application. The exact impact depends on factors like sampling rate and export frequency. In most cases, the performance hit is negligible compared to the insights gained. However, for high-traffic applications, careful tuning may be necessary.
 
