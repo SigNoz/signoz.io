@@ -1,9 +1,9 @@
 'use client'
 
-import { Button } from '@headlessui/react'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import Image from 'next/image'
 import TrackingLink from '@/components/TrackingLink'
+import { Button } from '@/components/ui/Button'
 import shapedMarkIcon from '@/public/img/case_study/logos/shaped-mark.svg?url'
 import { productDropdownItemsSorted, comparisonItems, SECTION_HEADING_CLASS } from './constants'
 import { useNavDropdown } from './NavDropdownContext'
@@ -14,6 +14,9 @@ export default function ProductDropdown() {
   return (
     <div onPointerEnter={open} onPointerLeave={close} className="flex items-center">
       <Button
+        isButton
+        unstyled
+        type="button"
         ref={triggerRef}
         className="truncate rounded-full px-2.5 py-1 text-sm outline-none transition-colors hover:bg-signoz_robin-200/20"
         onClick={() => (isOpen ? close() : open())}

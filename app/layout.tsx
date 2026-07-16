@@ -63,6 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang={siteMetadata.language}
       className={`dark ${inter.className}`}
+      data-theme="default"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >

@@ -1,4 +1,5 @@
 const { COLLECTION_SCHEMAS } = require('../schemas')
+const { execFileSync } = require('child_process')
 const {
   getFolderName,
   generatePathField,
@@ -7,6 +8,13 @@ const {
 } = require('../content-parser')
 const { extractAssetPaths, replaceAssetPaths } = require('../asset-processor')
 
+function readFileFromGitRef(ref, filePath, encoding) {
+  return execFileSync('git', ['show', `${ref}:${filePath}`], {
+    encoding: encoding || 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+}
+
 async function runPhase1(allFiles, results, { config, assetAdapter }) {
   console.log('\n' + '='.repeat(80))
   console.log('🔄 PHASE 1: Asset Synchronization and Validation')
@@ -14,8 +22,9 @@ async function runPhase1(allFiles, results, { config, assetAdapter }) {
 
   const pendingOperations = []
 
-  for (const { path: filePath, isDeleted } of allFiles) {
-    console.log(`\n📄 Processing: ${filePath}${isDeleted ? ' (deleted)' : ''}`)
+  for (const { path: filePath, isDeleted, restoreRef } of allFiles) {
+    const restoreLabel = restoreRef ? ` (restore from ${restoreRef})` : ''
+    console.log(`\n📄 Processing: ${filePath}${isDeleted ? ' (deleted)' : restoreLabel}`)
 
     try {
       const folderName = getFolderName(filePath)
@@ -39,7 +48,9 @@ async function runPhase1(allFiles, results, { config, assetAdapter }) {
         throw new Error('Could not generate path field')
       }
 
-      const operationType = detectOperationType(filePath, isDeleted)
+      const operationType = restoreRef
+        ? 'create_or_update'
+        : detectOperationType(filePath, isDeleted)
 
       if (operationType === 'delete') {
         pendingOperations.push({
@@ -49,7 +60,15 @@ async function runPhase1(allFiles, results, { config, assetAdapter }) {
           filePath,
         })
       } else {
-        const { frontmatter, content } = parseMDXFile(filePath)
+        const parseOptions = restoreRef
+          ? {
+              readFile: (targetPath, encoding) =>
+                config.restoreFileReader
+                  ? config.restoreFileReader(restoreRef, targetPath, encoding)
+                  : readFileFromGitRef(restoreRef, targetPath, encoding),
+            }
+          : undefined
+        const { frontmatter, content } = parseMDXFile(filePath, parseOptions)
 
         const assetPaths = extractAssetPaths(content, frontmatter)
 

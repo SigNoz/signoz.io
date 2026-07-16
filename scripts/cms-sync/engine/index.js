@@ -28,8 +28,13 @@ function createSyncEngine({ config, cmsAdapter, assetAdapter }) {
   }
 
   async function run() {
+    const changedFiles = config.changedFiles || []
+    const restoreFiles = config.restoreFiles || []
+    const deletedFiles = config.deletedFiles || []
+    const changedAssets = config.changedAssets || []
+
     console.log(
-      `🚀 Starting sync — Changed: ${config.changedFiles.length}, Deleted: ${config.deletedFiles.length}, Assets: ${config.changedAssets.length}\n`
+      `🚀 Starting sync — Changed: ${changedFiles.length}, Restored: ${restoreFiles.length}, Deleted: ${deletedFiles.length}, Assets: ${changedAssets.length}\n`
     )
 
     const results = {
@@ -42,8 +47,13 @@ function createSyncEngine({ config, cmsAdapter, assetAdapter }) {
     }
 
     const allFiles = [
-      ...config.changedFiles.map((file) => ({ path: file, isDeleted: false })),
-      ...config.deletedFiles.map((file) => ({ path: file, isDeleted: true })),
+      ...changedFiles.map((file) => ({ path: file, isDeleted: false })),
+      ...restoreFiles.map((file) => ({
+        path: file,
+        isDeleted: false,
+        restoreRef: config.restoreRef,
+      })),
+      ...deletedFiles.map((file) => ({ path: file, isDeleted: true })),
     ]
 
     // Phase 1: Asset sync + build pending ops
@@ -60,7 +70,7 @@ function createSyncEngine({ config, cmsAdapter, assetAdapter }) {
         console.error(`  • ${file}: ${error}`)
       })
 
-      results.relationTypes = collectRelationTypes(config.changedFiles)
+      results.relationTypes = collectRelationTypes([...changedFiles, ...restoreFiles])
       results.deploymentStatus = config.deploymentStatus
 
       try {
@@ -93,7 +103,7 @@ function createSyncEngine({ config, cmsAdapter, assetAdapter }) {
         console.error(`  • ${file}: ${error}`)
       })
 
-      results.relationTypes = collectRelationTypes(config.changedFiles)
+      results.relationTypes = collectRelationTypes([...changedFiles, ...restoreFiles])
       results.deploymentStatus = config.deploymentStatus
 
       try {

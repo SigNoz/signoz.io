@@ -1,5 +1,5 @@
 ---
-date: 2026-07-12
+date: 2026-07-16
 title: Understanding Metrics Billing and Reducing Costs
 description: Learn how metrics billing works based on cardinality and discover strategies to reduce costs effectively.
 doc_type: explanation
@@ -83,8 +83,7 @@ Ensure all identifying attributes are essential for your monitoring needs. Remov
 
 Consider using the following techniques:
 
-- **Aggregate labels**: Use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md"> MetricsTransform Processor
-    </a> to aggregate metrics, which actually reduces cardinality and sample count.
+- **Aggregate away high-cardinality attributes**: Use [Metric Volume Control](https://signoz.io/docs/metrics-management/volume-control/) to aggregate away attributes you don't query by (like `service.instance.id` or `k8s.pod.uid`) at storage, reducing stored cardinality while keeping the remaining attributes correct and queryable. Collector-side alternatives like the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">MetricsTransform Processor</a> only aggregate within a single batch and cannot aggregate resource attributes, so they don't work for data coming from multiple sources.
 - **Drop entire metrics**: See <a href="https://signoz.io/docs/userguide/drop-metrics/"> How to Drop and Filter OpenTelemetry Metrics </a> to remove unnecessary metrics entirely.
 
 <Admonition type="warning">
