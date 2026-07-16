@@ -1,9 +1,11 @@
 ---
 title: AWS ECS Monitoring | Breaking out of the observability vendor lock-in with SigNoz
-date: 2023-05-30
+meta_title: AWS ECS Monitoring with OpenTelemetry
+published_date: 2023-05-30
+updated_date: 2026-06-29
 tags: [SigNoz, Product]
 authors: [kshitij]
-description: In this article I’d like to take you through the architecture and the process through which we leverage the container orchestration capabilities of AWS ECS without depending on AWS for logging, distributed tracing, metrics, alerts, and visualizations...
+description: "AWS ECS monitoring in 2026: instrument ECS tasks with OpenTelemetry (ADOT) and monitor metrics, traces, and logs in SigNoz. Setup and best practices."
 image: /img/blog/2023/05/aws_ecs_monitoring_cover-min.jpg
 hide_table_of_contents: false
 keywords: [signoz,aws ecs,aws ecs monitoring]
@@ -21,9 +23,11 @@ In the not-too-distant past, the debate was between on-prem and cloud-native. Yo
 
 ![Cover Image](/img/blog/2023/05/aws_ecs_monitoring_cover.webp)
 
-<a href = "https://aws.amazon.com/ecs/" rel="noopener noreferrer nofollow" target="_blank" ><b>AWS ECS</b></a> is a managed service container orchestration service from AWS. It’s easy to set up, manage, and does the job. You don’t need to configure a bunch of pods, services, deployments, daemon sets, yada yada yada to run an app that responds with “hello world”. Sometimes a few clicks are all you need, and that's just what ECS does. Coming back to vendor lock-ins, through this article I’d like to take you through the architecture and the process through which we leverage the container orchestration capabilities of ECS without depending on AWS for logging, distributed tracing, metrics, alerts, and visualizations. You’re damn right, Christmas came early for you!
+<a href = "https://aws.amazon.com/ecs/" rel="noopener noreferrer nofollow" target="_blank" ><b>AWS ECS</b></a> is a managed service container orchestration service from AWS. It’s easy to set up, manage, and does the job. You don’t need to configure a bunch of pods, services, deployments, daemon sets, yada yada yada to run an app that responds with “hello world”. Sometimes a few clicks are all you need, and that's just what ECS does. Coming back to vendor lock-ins, through this article I’d like to take you through the architecture and the process through which we leverage the container orchestration capabilities of ECS without depending on AWS for logging, [distributed tracing](https://signoz.io/blog/distributed-tracing/), metrics, alerts, and visualizations. You’re damn right, Christmas came early for you!
 
-## Observability with AWS ECS
+## How to Monitor AWS ECS Workloads with OpenTelemetry
+
+On instrumentation, the modern path for ECS workloads is the AWS Distro for OpenTelemetry (ADOT): run the ADOT Collector as a sidecar or daemon in your task definitions to collect traces and metrics from your containers and ship them to a backend. That keeps your ECS telemetry vendor-neutral, whether you visualize it in CloudWatch, SigNoz, or elsewhere.
 
 If you use AWS copilot cli to deploy applications on AWS ECS Fargate, the complete process of deploying your application becomes a walk in the park. Take a look at <a href = "https://www.wednesday.is/writing-tutorials/how-to-use-copilot-to-deploy-projects-on-ecs" rel="noopener noreferrer nofollow" target="_blank" ><b>this</b></a> article for a quick walk-through. To know how to configure canary deployments for ECS workloads you can go through this article right <a href = "https://www.wednesday.is/writing-articles/reducing-blast-radius-aws-ecs-canary-deployments" rel="noopener noreferrer nofollow" target="_blank" ><b>here</b></a>. You got that right, anything ECS and Wednesday got your back.
 
@@ -49,7 +53,7 @@ You're not wrong to point out that they are the new kid on the block, however, t
 
 The rest of the article talks about what the setup would look like, and things that you need to be careful about. But if you’re more of an “enough talking, show me what it’s capable of” kinda person, <a href = "https://github.com/wednesday-solutions/ecs-signoz" rel="noopener noreferrer nofollow" target="_blank" >here’s</a> a link to a Github repo that allows you to get off the ground with a single command.
 
-## Hosting SigNoz on AWS ECS
+## Self-Hosting SigNoz on AWS ECS (Backend Setup)
 
 SigNoz architecture:
 
@@ -182,6 +186,16 @@ Here are some sample images of how the SigNoz setup looks for my workload
 At <a href = "https://wednesday.is/" rel="noopener noreferrer nofollow" target="_blank" >Wednesday</a> we migrated a few of our production workloads out of XRay and CloudWatch. This setup largely consisted of AWS CloudWatch Logs, Metrics, and Alerts with slack integration using AWS Chatbot, along with X-Ray for distributed traces. We migrated workloads with no loss of functionality and without skipping a beat. If you’d like to get your hands on the JSON to set up some commonly used dashboards, <a href = "https://www.dropbox.com/s/i3mkdkq0tbseyai/Sample%20Dashboards%20%281%29.json?dl=0" rel="noopener noreferrer nofollow" target="_blank" ><b>here</b></a> is the good stuff (wink wink)
 
 {/* [Sample Dashboards (1).json](<https://s3-us-west-2.amazonaws.com/secure.notion-static.com/cd0197a8-a131-429a-a693-0e504886d327/Sample_Dashboards_(1).json>) */}
+
+Feel free to check out related reads on AWS and cloud observability:
+
+- [AWS Lambda monitoring](https://signoz.io/guides/aws-lambda-monitoring/)
+- [OpenTelemetry vs CloudWatch](https://signoz.io/comparisons/opentelemetry-vs-cloudwatch/)
+- [AWS monitoring tools](https://signoz.io/comparisons/aws-monitoring-tools/)
+- [APM tools](https://signoz.io/blog/apm-tools/)
+- [OpenTelemetry vs X-Ray](https://signoz.io/comparisons/opentelemetry-vs-xray/)
+- [Kubernetes monitoring best practices](https://signoz.io/guides/kubernetes-monitoring-best-practices/)
+- [Cloud monitoring tools](https://signoz.io/comparisons/cloud-monitoring-tools/)
 
 ## Conclusion
 

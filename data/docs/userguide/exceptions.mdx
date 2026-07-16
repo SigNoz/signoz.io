@@ -1,8 +1,8 @@
 ---
-date: 2024-06-06
-
-title: Errors and Exceptions
+date: 2026-07-10
+title: Errors and Exceptions - Record, View, and Group Them
 description: Learn how to record exceptions in your traces using OpenTelemetry across Java, Go, Python, JavaScript, Ruby, .NET, and other languages.
+doc_type: howto
 ---
 ## Recording exceptions
 
@@ -11,6 +11,10 @@ Languages that support auto instrumentations(Python, Java, Ruby, Javascript) aut
 To manually record exceptions, we need to get the span from the tracer and then call a function called `recordException()` or `recordError()` which varies across languages. Also, you can set the status of the span to `error` if the exception means the operation results in an error state.
 
 Below are examples of how to record exceptions in different languages.
+
+<Admonition type="info">
+OpenTelemetry is <a href="https://opentelemetry.io/blog/2026/deprecating-span-events/" target="_blank" rel="noopener noreferrer nofollow">deprecating the span-event exception APIs</a> shown below in favor of the Logs API. No action is needed today: existing calls stay valid and SDKs still record span events by default. No language SDK yet ships a stable log-based equivalent of `recordException`, so these examples remain the current way to record exceptions.
+</Admonition>
 
 ### Record Exceptions in Java:
 
@@ -75,7 +79,7 @@ span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
 
 ### Record Exceptions in .NET:
 
-OpenTelemetry .NET provides several options to report Exceptions in Activity. It varies from the most basic option of setting Status, to fully recording the Exception itself to activity. Follow opentelemetry .NET [documentation](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/reporting-exceptions/README.md) to learn more.
+OpenTelemetry .NET provides several options to report Exceptions in Activity. It varies from the most basic option of setting Status, to fully recording the Exception itself to activity. Follow the <a href="https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/reporting-exceptions/README.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry .NET documentation</a> to learn more.
 
 Below is one such example:
 
@@ -134,6 +138,7 @@ try {
 } catch (Throwable $t) {
     //The library's code shouldn't be throwing unhandled exceptions (it should emit any errors via diagnostic events)
     //This is intended to illustrate a way you can capture unhandled exceptions coming from your app code
+    $rootSpan->setStatus(StatusCode::STATUS_ERROR, $t->getMessage());
     $rootSpan->recordException($t);
 } finally {
     //ensure span ends and scope is detached
@@ -149,18 +154,34 @@ It shows the list of exceptions in the applications in a separate page so that u
 
 You can sort exceptions by Last Seen, First Seen, Count, Exception type and Application name
 
-![exception-list](/img/docs/exception-list.webp)
+<Figure
+    src="/img/docs/exception-list.webp"
+    alt="Exceptions list page in SigNoz"
+    caption="Exceptions list, sortable by Last Seen, First Seen, Count, Exception Type, and Application"
+/>
 
 Exception detail page includes the stack trace of the exception, exception attributes and link to the span which caused the exception.
 
-![exception-detail-1](/img/docs/exception-detail-1.webp)
+<Figure
+    src="/img/docs/exception-detail-1.webp"
+    alt="Exception detail page showing stack trace and span attributes"
+    caption="Exception detail page with stack trace and span attributes"
+/>
 
-By clicking `errors in the trace page` you can see the exceptions in the context of the trace request in which the exception was thrown
+By clicking `See the error in trace graph` you can see the exceptions in the context of the trace request in which the exception was thrown
 
-![exception-detail-2](/img/docs/exception-detail-2.webp)
+<Figure
+    src="/img/docs/exception-detail-2.webp"
+    alt="Exception shown in the context of a trace in SigNoz"
+    caption="Exception in the context of its trace"
+/>
 
 
 ## Grouping Exceptions
+
+<Admonition type="note">
+This section applies to Self-Host only. It configures the `otel-collector`'s `clickhousetraces` exporter directly, which SigNoz Cloud manages for you.
+</Admonition>
 
 By default, exceptions on **Exception List page** are grouped by service name, exception type
 and exception message. This might result in high cardinality of exception groups, especially
@@ -204,3 +225,9 @@ helm -n platform upgrade \
     my-release signoz/signoz \
     -f override-values.yaml
 ```
+
+## Next steps
+
+- [Explore Traces](https://signoz.io/docs/userguide/traces/) to see the request each exception came from
+- [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to pull the surrounding log lines for an exception
+- [Set up exception-based alerts](https://signoz.io/docs/alerts-management/exceptions-based-alerts/) to get notified when a new exception type appears

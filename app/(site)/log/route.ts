@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server'
 import type { LogEventPayload } from '@/utils/logEvent'
 import { capturePostHogAnalyticsEvent } from '@/utils/posthogAnalytics'
 
-export const runtime = 'nodejs'
-
 const MAX_REQUEST_BYTES = 128 * 1024
 const RATE_LIMIT_WINDOW_MS = 60 * 1000
 const RATE_LIMIT_MAX_REQUESTS = 120

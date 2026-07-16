@@ -1,4 +1,4 @@
-import { unstable_cache } from 'next/cache'
+import { cacheLife, cacheTag } from 'next/cache'
 import {
   compareSemverParts,
   compareSemverTags,
@@ -9,9 +9,9 @@ import {
   GITHUB_SPEC_RAW_URL_TEMPLATE,
   MIN_API_SPEC_VERSION,
   API_SPEC_REVALIDATE_SECONDS,
-  API_VERSIONS_CACHE_KEY,
   API_VERSIONS_CACHE_TAG,
 } from '@/constants/apiReference'
+import { githubFetchHeaders } from '@/utils/github'
 
 const GITHUB_API_URL = 'https://api.github.com/repos/SigNoz/signoz/releases'
 const PER_PAGE = 100
@@ -22,17 +22,6 @@ interface GitHubApiRelease {
   published_at: string
   draft: boolean
   prerelease: boolean
-}
-
-function githubFetchHeaders(): Record<string, string> {
-  const headers: Record<string, string> = {
-    Accept: 'application/vnd.github+json',
-    'User-Agent': 'signoz-api-reference',
-  }
-  if (process.env.GITHUB_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`
-  }
-  return headers
 }
 
 function parseLinkHeader(header: string | null): string | null {
@@ -57,7 +46,7 @@ export async function fetchOpenAPISpec(version: string): Promise<string | null> 
   try {
     const res = await fetch(url, {
       headers: {
-        ...githubFetchHeaders(),
+        ...githubFetchHeaders('signoz-api-reference'),
       },
       next: { revalidate: API_SPEC_REVALIDATE_SECONDS },
     })
@@ -83,7 +72,7 @@ async function fetchAllAPIVersions(): Promise<APIVersionInfo[]> {
 
   for (let page = 0; page < MAX_PAGES && url; page++) {
     const res = await fetch(url, {
-      headers: githubFetchHeaders(),
+      headers: githubFetchHeaders('signoz-api-reference'),
       next: { revalidate: API_SPEC_REVALIDATE_SECONDS },
     })
 
@@ -128,14 +117,12 @@ async function fetchAllAPIVersions(): Promise<APIVersionInfo[]> {
     .map(({ version, publishedAt }) => ({ version, publishedAt }))
 }
 
-export const fetchAvailableAPIVersions = unstable_cache(
-  fetchAllAPIVersions,
-  [API_VERSIONS_CACHE_KEY],
-  {
-    revalidate: API_SPEC_REVALIDATE_SECONDS,
-    tags: [API_VERSIONS_CACHE_TAG],
-  }
-)
+export async function fetchAvailableAPIVersions(): Promise<APIVersionInfo[]> {
+  'use cache'
+  cacheLife({ revalidate: API_SPEC_REVALIDATE_SECONDS })
+  cacheTag(API_VERSIONS_CACHE_TAG)
+  return fetchAllAPIVersions()
+}
 
 export async function resolveLatestVersion(): Promise<string | null> {
   const versions = await fetchAvailableAPIVersions()

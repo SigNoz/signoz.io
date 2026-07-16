@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
 import ProductNav from '@/components/ProductNav/ProductNav'
@@ -151,14 +151,14 @@ const Header = () => {
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
-        <Button id="btn-get-started-homepage-hero">
+        <Button variant="legacyPrimary" id="btn-get-started-homepage-hero">
           <Link href="/teams/" className="flex-center">
             Get Started - Free
             <ArrowRight size={14} />
           </Link>
         </Button>
 
-        <Button type={Button.TYPES.SECONDARY} id="btn-read-documentation-homepage-hero">
+        <Button variant="legacySecondary" id="btn-read-documentation-homepage-hero">
           <Link href="/docs/introduction/" className="flex-center">
             <BookOpen size={14} />
             Read Documentation
@@ -215,6 +215,7 @@ const TrustedByTeams = ({ page }) => {
         >
           <div className="flex flex-col items-center text-center">
             <Button
+              variant="legacyPrimary"
               id={customerStoriesId}
               className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
             >
@@ -381,7 +382,7 @@ const UsageBasedPricing = () => {
               We’re here for you.
             </p>
             <UsageList />
-            <Button id="btn-get-started-homepage-hero" className="mt-5">
+            <Button variant="legacyPrimary" id="btn-get-started-homepage-hero" className="mt-5">
               <Link href="/pricing/" className="flex-center">
                 Check Pricing
                 <ArrowRight size={14} />
@@ -427,14 +428,14 @@ const GetStarted = ({ page }) => {
                 Get started with <br /> SigNoz Cloud today
               </p>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                <Button id={getStartedId}>
+                <Button variant="legacyPrimary" id={getStartedId}>
                   <Link href="/teams/" className="flex-center">
                     Get Started - Free
                     <ArrowRight size={14} />
                   </Link>
                 </Button>
 
-                <Button type={Button.TYPES.SECONDARY} id={readDocumentationId}>
+                <Button variant="legacySecondary" id={readDocumentationId}>
                   <Link href="/docs/introduction/" className="flex-center">
                     <BookOpen size={14} />
                     Read Documentation

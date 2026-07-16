@@ -11,11 +11,12 @@ Use this playbook for product documentation under `data/docs/**`.
 
 - Assume readers know their language or framework basics, but may not know OpenTelemetry concepts.
 - Write concise, task-first instructions in active voice.
+- Avoid em dashes (`—`). Use a period, comma, colon, or parentheses instead.
+- Cut AI-writing tells: drop adverbs and throat-clearing openers ("Here's what", "It's worth noting"), state facts directly instead of "not X, but Y" contrasts, and vary sentence length.
 - Keep terminology consistent across pages.
 - Be explicit about caveats such as versions, environments, or beta gaps.
 - Prefer concrete examples over abstract descriptions.
 - Define acronyms on first use, then use the short form consistently.
-- Use angle-bracket placeholders only, such as `<region>` or `<your-ingestion-key>`, and explain them right below the snippet. Never use `{region}`, `{REGION}`, or `<REGION>`. For SigNoz Cloud ingestion endpoints, the `<region>` token is also what makes a snippet region-aware — see [SigNoz Cloud Ingestion Endpoints](#signoz-cloud-ingestion-endpoints-region-aware).
 - Cross-link existing SigNoz docs instead of duplicating instructions.
 - AI-assisted drafting is fine, but every claim must be verified and rewritten clearly.
 
@@ -115,7 +116,16 @@ Prefer these H2 sections when they fit the doc:
 - Explain what each command does and where to run it.
 - State the expected result after major steps.
 - Annotate code blocks with language and filename when useful.
-- Explain important fields and placeholders directly below snippets.
+- Use angle-bracket placeholders only, such as `<region>` or `<your-ingestion-key>`. Never use `{region}`, `{REGION}`, or other spellings.
+- Explain important fields and placeholders directly below snippets. When a snippet has placeholders the reader must swap in, list them under a **Verify these values:** line, one bullet per placeholder, each linking to where the reader finds it:
+
+  ```md
+  **Verify these values:**
+
+  - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+  - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+  ```
+
 - Main-path snippets should be safe defaults that work after placeholder replacement.
 - Move advanced or environment-specific options into callouts or collapsed sections.
 
@@ -124,18 +134,10 @@ Prefer these H2 sections when they fit the doc:
 The docs region selector (top-right of the page) keeps SigNoz Cloud ingestion endpoints in sync by substituting the **literal `<region>` token** in every snippet on the page. A snippet is only region-aware if it uses that exact token, so anything else silently freezes on whatever the author typed — and on a page that mixes both, some snippets update with the selector while others do not.
 
 - **Always write ingestion endpoints with `<region>`**, exactly: `https://ingest.<region>.signoz.cloud:443/v1/traces`. This is the only form the selector substitutes.
-- **Never hardcode a real region** (`ingest.us.signoz.cloud`, `ingest.eu.signoz.cloud`, `ingest.in.signoz.cloud`) in a snippet. Pick `<region>` instead — it renders as `us` by default, so default readers see the same thing, but the selector can now update it.
+- **Never hardcode a real region** (such as `ingest.us.signoz.cloud`) in a snippet. Pick `<region>` instead — it renders as `us` by default, so default readers see the same thing, but the selector can now update it.
 - **Never use a different placeholder spelling.** `{region}`, `{REGION}`, `<REGION>`, and `${region}` are not substituted and are off-convention — use `<region>`.
 - Keep this consistent across **every** endpoint on the page: code blocks, example output blocks, and inline `curl`/connectivity commands in troubleshooting all count.
-- **Exception — region reference tables.** A table that intentionally lists every region is correct as-is and should keep the hardcoded values:
-
-  ```md
-  | Region | Endpoint                     |
-  | ------ | ---------------------------- |
-  | US     | ingest.us.signoz.cloud:443   |
-  | IN     | ingest.in.signoz.cloud:443   |
-  | EU     | ingest.eu.signoz.cloud:443   |
-  ```
+- **Region reference tables — use `<RegionTable />`.** To list every region and its endpoint, drop the `<RegionTable />` component into the MDX. It renders the current region list from SigNoz Cloud, so it stays correct as regions are added. Do not hand-maintain a hardcoded region table in docs MDX. Fall back to a hardcoded table only where the component cannot render, such as embedded config `.md` snippets.
 
 ### Collector Config Safety
 
@@ -299,7 +301,7 @@ Some docs also need updates beyond the sidebar. Update discovery surfaces when a
 Listicles use a generic `<Listicle name="..." />` component driven by self-contained JSON configs. To add a new entry to an existing listicle:
 
 1. Open the JSON config in `constants/listicles/<name>.json`.
-2. Add an item object with `name`, `href`, and `icon` to the relevant `items` array.
+2. Add an item object with `name`, `href`, and `icon` to the relevant `items` array. For a new brand icon, place the SVG at `data-assets/img/icons/listicle/<name>.svg` and set `icon` to its `/img/icons/listicle/<name>.svg` path; reuse an existing icon path when one fits.
 
 That's it — items, icons, and sections are all in one JSON file.
 
@@ -341,7 +343,7 @@ Use the PR snippet in [templates/pr-checklists.md#docs-changes](templates/pr-che
 - `## Troubleshooting` maps symptom -> cause -> fix -> verification.
 - Commands and snippets explain what to do, where to do it, and the expected result.
 - Placeholders use `<...>` format and are documented — no `{region}`/`{REGION}`/`<REGION>`.
-- SigNoz Cloud ingestion endpoints use the literal `<region>` token (not a hardcoded `us`/`eu`/`in`) so the region selector keeps every snippet on the page in sync; region reference tables are the only exception.
+- SigNoz Cloud ingestion endpoints use the literal `<region>` token (not a hardcoded `us`/`eu`/`in`) so the region selector keeps every snippet on the page in sync; render the full region/endpoint list with `<RegionTable />` rather than a hardcoded table.
 - Links are helpful and validated.
 - Images, if any, use the correct location, WebP format, and are at least 1200 px wide.
 - Redirect, sidebar, and discovery updates are handled when the doc URL changes or a new doc should appear in an existing surface.

@@ -1,24 +1,17 @@
 'use client'
 
-import { Button } from '@headlessui/react'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
 import { useLogEvent } from 'hooks/useLogEvent'
+import Button, { ButtonProps } from '@/components/ui/Button'
 
-interface TrackingButtonProps {
+interface TrackingButtonProps extends Omit<ButtonProps, 'onClick'> {
   children: ReactNode
   clickType: string
   clickName: string
   clickLocation: string
   clickText: string
-  className?: string
   onClick?: () => void
-  // Additional button props
-  type?: 'button' | 'submit' | 'reset'
-  disabled?: boolean
-  id?: string
-  title?: string
-  'aria-label'?: string
 }
 
 /**
@@ -63,6 +56,7 @@ export default function TrackingButton({
 
   return (
     <Button
+      unstyled
       className={className}
       onClick={handleClick}
       type={type}
