@@ -1,7 +1,7 @@
 ---
-date: 2026-05-18
+date: 2026-07-16
 title: Telemetry Data Requirements for Infrastructure Monitoring
-description: Understand the required resource attributes and metric types for SigNoz Infrastructure Monitoring. Verify host.name, entity UIDs, and data source dependencies for accurate dashboards.
+description: Verify the resource attributes and metrics SigNoz Infrastructure Monitoring needs, and use the Instrumentation checks panel to fix missing Kubernetes telemetry.
 
 doc_type: reference
 ---
@@ -9,6 +9,25 @@ doc_type: reference
 ## Overview
 
 The Infrastructure Monitoring depends on a set of resource attributes and metric types. When those attributes are missing or mis-typed, SigNoz cannot link list views (Hosts, Pods, Nodes, Deployments, etc.) with their details and queries fail silently. Use this guide to verify the required attributes, understand data source dependencies, and identify platform-specific gaps.
+
+## Instrumentation checks panel
+
+For Kubernetes entities, SigNoz surfaces the requirements below directly in the product. When it detects that monitoring is not fully configured for an entity type, an **Instrumentation checks** callout appears above the entity table on that list view (Pods, Nodes, Namespaces, Clusters, Deployments, StatefulSets, DaemonSets, Jobs, and Volumes). Use it to see what telemetry is already arriving and what is still missing, without leaving the list view.
+
+The callout groups the checks into two parts:
+
+- **Present**: metrics and attributes already being received, each marked with a green checkmark. Items are grouped under **Default enabled metrics**, **Optional metrics**, and **Required attributes**.
+- **Missing**: metrics and attributes that are absent, each marked with a warning triangle next to the associated component name. Items are grouped under **Missing default metrics**, **Missing optional metrics**, and **Missing required attributes**.
+
+To resolve a missing item:
+
+1. Find the row in the missing list and note the component it belongs to.
+2. Select the **Learn here** link on that row to open the relevant setup documentation in a new tab, then apply the change to your collector or agent configuration. Some rows may not have a link; when none is shown, use [Kubernetes Metrics setup](https://signoz.io/docs/infrastructure-monitoring/k8s-metrics/) as the starting point.
+3. After your change takes effect, select **Recheck** in the callout header to re-fetch the instrumentation status on demand. The panel updates in place, so you can confirm the fix without reloading the page.
+
+<Admonition type="info">
+The callout can be expanded or collapsed from its header. The expanded or collapsed choice is remembered per entity type across page navigations, so collapsing it on one list view does not affect the others. The panel does not appear once all required metrics and attributes for an entity type are being received.
+</Admonition>
 
 ## Prerequisites
 
