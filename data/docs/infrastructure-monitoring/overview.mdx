@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-16
 title: Infrastructure Monitoring - Hosts & K8s Overview
 description: Discover how SigNoz Infrastructure Monitoring provides a unified view of host and Kubernetes performance. Monitor CPU, memory, disk, and network with correlated traces and logs.
 
@@ -286,6 +286,42 @@ debugging.
     <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/kubernetes-nodes-view.webp" alt="Nodes View"/>
     <figcaption><i>Nodes View</i></figcaption>
 </figure>
+
+### Resource Count Cards in Detail Panels
+
+When you open a **cluster** or **namespace** detail panel, a row of count cards summarizes the child resources that belong to that entity. Each card shows a resource type, its count, and a compass button for jumping to the matching list view.
+
+A card shows `-` when the count is zero or the value is unavailable.
+
+#### Cluster Detail Panel
+
+Opening a cluster detail panel (click a row in the **Clusters** view) shows count cards for:
+
+- **Namespaces**
+- **Nodes**
+- **Deployments**
+- **StatefulSets**
+- **DaemonSets**
+- **Jobs**
+
+#### Namespace Detail Panel
+
+Opening a namespace detail panel (click a row in the **Namespaces** view) shows count cards for:
+
+- **Deployments**
+- **StatefulSets**
+- **DaemonSets**
+- **Jobs**
+
+Namespace panels omit **Namespaces** and **Nodes**, which do not apply at the namespace level.
+
+#### Navigate to a Filtered List View
+
+Each count card has a compass icon button. Select it to close the detail panel and open the Kubernetes list view pre-filtered to that resource type within the current cluster or namespace. For example, selecting the compass on a cluster's **Namespaces** card opens the Namespaces view filtered to that cluster.
+
+<Admonition type="info">
+The list view opened from a count card uses the default time range, not the time range currently selected in the detail panel. Adjust the time range in the list view if you need to match the panel's window. A follow-up change will carry the panel's time range through to the list view.
+</Admonition>
 
 </TabItem>
 
