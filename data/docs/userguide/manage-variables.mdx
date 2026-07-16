@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-16
 title: Manage Variables in SigNoz
 description: Learn how to create and use dashboard variables in SigNoz to build dynamic, reusable dashboards across services and infrastructure.
 doc_type: howto
@@ -137,6 +137,68 @@ Note for Dynamic Variables: If you're using dynamic variables, explicit chaining
     WHERE metric_name = 'signoz_calls_total' AND JSONExtractString(labels, 'service.name') IN $service.name
     ```
 
+## The variables bar
+
+The variables bar sits above your panels and holds one control per dashboard variable. Each control shows the variable name as a label above its value selector, and all controls align to the bottom of the bar so selectors stay in a straight row even when names differ in length.
+
+- **Loading indicator**: Query and dynamic variables show an animated bar along the bottom edge of their control while options are being fetched, or while they wait for a parent variable to resolve. The bar disappears once options are available.
+- **Truncated names**: If a variable name is too long to fit its control, hover the name to see the full name in a tooltip. You do not need to open settings to read it.
+- **Multi-select tags**: When you select several values in a multi-value variable, the selected tags stay on a single line and do not push the control onto a second row.
+
+<Admonition type="info">
+The `All` option in a variable dropdown appears only after at least one real option has loaded. This prevents an empty dropdown from being misread as "all values selected" during the initial page load.
+</Admonition>
+
+### View variable dependencies
+
+Hover the info icon next to a variable name to open a tooltip that shows how the variable relates to others, along with its optional description:
+
+- **Depends on**: The parent variables this variable reads from. This section is marked with an upward arrow and its names render in green.
+- **Used by**: The child variables that reference this variable. This section is marked with a downward arrow and its names render in amber.
+
+Use this to trace a chain before you change a variable, so you know which downstream variables and panels a change affects.
+
+## Rename or delete a referenced variable
+
+When you rename or delete a variable that is referenced by panel queries or by other variables, SigNoz blocks the save behind an impact dialog so you can review every affected location before applying the change.
+
+### Rename impact review
+
+1. Open **Dashboard Settings → Variables** and edit the variable.
+2. Change the **Name** and select **Save**.
+3. The impact dialog lists every usage of the variable across Query Builder, PromQL, and ClickHouse panels, and any other variable definitions that reference it. Each row shows:
+    - **Current**: the existing query text (read-only).
+    - **Result**: the proposed rewrite with the new variable name. You can edit this field before confirming.
+    - A checkbox to include or exclude that usage from the rename.
+4. Deselect any usage you do not want to update, or edit its **Result** text manually.
+5. Select **Rename** to apply every included change at once.
+
+### Delete impact review
+
+1. In **Dashboard Settings → Variables**, delete a variable that is referenced elsewhere.
+2. The same dialog appears with each affected location:
+    - Query Builder filter clauses that reference the variable are stripped automatically in the proposed **Result**.
+    - Raw queries (PromQL, ClickHouse SQL) and dependent variable definitions are shown unchanged, so you can edit them manually before deleting.
+3. Edit or exclude each usage, then select **Delete** to apply the change.
+
+<Admonition type="warning">
+If a **Result** query still contains the original variable reference after your edits (for example, a raw query you did not fully update), the dialog shows a `Still references $<variable>` warning on that row. Resolve the reference before confirming so the query does not break.
+</Admonition>
+
+## How panels load with variables
+
+Panels that reference a variable wait until every referenced variable has a resolved value before they render. They stay in a loading state (spinner or skeleton) instead of flashing "No data" while variables are still resolving.
+
+<Admonition type="info">
+If a panel appears to load slower than before, it is usually waiting for its variables to resolve, not failing. Dynamic variables fetch their options in parallel with query variables at page load, so dashboards with mixed variable types populate their dropdowns faster.
+</Admonition>
+
+## Where variable selections are stored
+
+Your variable selections are stored locally in your browser and are no longer written to the dashboard URL as a `?variables=` parameter. Two consequences follow:
+
+- The address bar no longer reflects your current variable selections. Copying the URL from the address bar will not capture them for sharing.
+- If a dashboard link includes a `?variables=` parameter, those selections are applied once when the dashboard loads to set the initial state, then the parameter is cleared from the URL.
 
 ## Why avoid ClickHouse query variables
 
