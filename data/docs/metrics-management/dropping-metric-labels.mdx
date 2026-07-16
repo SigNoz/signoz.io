@@ -1,5 +1,5 @@
 ---
-date: 2026-05-06
+date: 2026-07-14
 title: Dropping Metric Labels (Attributes)
 description: Explains why dropping metric labels (attributes) does not reduce cardinality or sample count and provides correct alternatives.
 doc_type: explanation
@@ -107,9 +107,11 @@ Without the `k8s.pod.*` label, you can't properly distinguish between pods. The 
 
 ## The Correct Approach: Aggregation
 
-If you genuinely don't need granularity at a certain attribute level, the correct approach is to **aggregate** the values mathematically, not just drop the label. Use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">Metrics Transform Processor</a> for this:
+If you genuinely don't need granularity at a certain attribute level, the correct approach is to **aggregate** the values mathematically, not just drop the label. The question is *where* to aggregate, and the collector is usually the wrong place.
 
-For example, to view network traffic *per interface* (ignoring individual pods), you should `sum` the values of all pods for each interface. 
+### Why Collector Processors Can't Do This Reliably
+
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">Metrics Transform Processor</a> offers an `aggregate_labels` operation that looks like the answer:
 
 ```yaml
 processors:
@@ -123,17 +125,27 @@ processors:
             aggregation_type: sum
 ```
 
-This produces:
+On the 3-sample example above, if all three data points arrive together, this produces mathematically correct output:
+
 ```text
 # After aggregation (2 samples with mathematically correct value)
 {"k8s.pod.network.io", "interface"="eth0"} 1500  # Sum of 1000 + 500
 {"k8s.pod.network.io", "interface"="lo"} 200     # Sum of 200
 ```
 
-Now you have:
-- **Reduced Cardinality**: 2 series instead of 3.
-- **Reduced Sample Count**: 2 samples stored instead of 3 (Lower cost).
-- **Correct Data**: The sum represents the total traffic accurately.
+But that "if" carries a lot of weight. In real deployments, collector-side aggregation breaks down for several reasons, and this applies equally to the `metricstransform`, `interval`, and `transform` processors:
+
+1. **Aggregation is per-batch only.** As the processor's own documentation states, it <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">only aggregates within a single batch and is not suitable for aggregating metrics from multiple sources</a>. Series exported by different applications, hosts, or scrape targets arrive in different batches (and often at different collector instances), so they never meet in one batch and never collapse.
+
+2. **Resource attributes aren't aggregatable.** The labels that carry the most cardinality (`service.instance.id`, `host.name`, `k8s.pod.uid`) are *resource* attributes. `aggregate_labels` merges data points within a metric, but data points under different resources are never merged, so series that differ only in resource attributes don't collapse at all.
+
+3. **No time alignment, no state.** Different sources report on different clocks. Correct aggregation needs values grouped into aligned time windows, and for cumulative counters it needs each source's start time and reset history tracked across export intervals. A stateless per-batch processor has neither, so summing cumulative counters from different sources produces meaningless numbers even when the batching happens to line up.
+
+Collector-side aggregation is only sound in the narrow case where every series being merged is produced by a single source, differs only in data point attributes, and always arrives in the same batch. For example, collapsing a `state` label on a metric scraped from one target.
+
+### Aggregate at Storage with Volume Control (Recommended)
+
+SigNoz's [Metric Volume Control](https://signoz.io/docs/metrics-management/volume-control/) performs this aggregation at storage, where data from all sources is available together: values are grouped into aligned time windows across every exporting instance, resource attributes are first-class, and counter resets are handled. You get the reduced cardinality this document's naive approaches fail to deliver, with correct results.
 
 ## Applying This to UID Labels
 
@@ -172,11 +184,13 @@ Dropping labels (without aggregation) is only safe when:
 | Action | Effect on Samples | Effect on Labels | Data Correctness |
 |--------|-------------------|------------------|------------------|
 | Drop label with `attributes` processor | No change | Label removed | Potentially incorrect |
-| Aggregate with `metricstransform` | Reduced | Labels aggregated away | Correct |
+| Aggregate with `metricstransform` | Reduced within a batch only | Labels aggregated away | Correct only for single-source, same-batch data point attributes |
+| Aggregate at storage with [Volume Control](https://signoz.io/docs/metrics-management/volume-control/) | Stored volume reduced | Labels aggregated away | Correct (windowed, cross-instance, reset-aware) |
 | Filter/drop entire metric | Reduced | N/A | Correct (data removed) |
 | Control at source | Reduced | Labels never created | Correct |
 
 ## References
 
+- [Metric Volume Control](https://signoz.io/docs/metrics-management/volume-control/) - Aggregate away metric labels correctly, at storage
 - <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md#aggregate-labels" target="_blank" rel="noopener noreferrer nofollow">MetricsTransform Processor - Aggregate Labels</a>
 - <a href="https://groups.google.com/g/prometheus-users/c/WjjWMAbLcK8/m/HQyyN2I9AgAJ" target="_blank" rel="noopener noreferrer nofollow">Prometheus Users Discussion on Label Dropping</a>
