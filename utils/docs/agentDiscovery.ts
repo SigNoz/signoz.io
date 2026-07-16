@@ -30,6 +30,9 @@ const LLM_STARTER_ROUTE_MATCHERS: Array<(route: string) => boolean> = [
   (route) => /^\/docs\/cloud(?:\/|$)/.test(route),
   (route) => /^\/docs\/opentelemetry-collection-agents\/get-started(?:\/|$)/.test(route),
   (route) => route === '/docs/llm-observability',
+  (route) => route === '/docs/ai/agent-skills',
+  (route) => route === '/docs/ai/signoz-mcp-server',
+  (route) => route === '/docs/ai/use-cases',
   (route) => route === '/docs/aws-monitoring/overview',
   (route) => route === '/docs/gcp-monitoring',
   (route) => route === '/docs/migration/migrate-to-signoz',
@@ -172,7 +175,7 @@ export async function getDocsRouteList(): Promise<DocsRouteListItem[]> {
 }
 
 export async function getLlmStarterLinks(
-  limit = 24,
+  limit = 24
 ): Promise<Array<Pick<DocsRouteListItem, 'label' | 'route'>>> {
   const routes = await getDocsRouteList()
   const starters: Array<Pick<DocsRouteListItem, 'label' | 'route'>> = []
