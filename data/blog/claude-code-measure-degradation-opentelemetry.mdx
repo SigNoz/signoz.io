@@ -1,9 +1,11 @@
 ---
 title: Is Claude Code Getting Worse? How to Measure Degradation with OpenTelemetry
-date: 2026-05-19
+meta_title: "Measuring Claude Code Degradation with OpenTelemetry"
+published_date: 2026-05-18
+updated_date: 2026-07-14
 tags: [OpenTelemetry]
 authors: [goutham_karthi]
-description: Developers report that Claude Code feels less productive over time, but anecdotes aren't actionable. Learn how to measure efficiency degradation using OpenTelemetry by tracking output-per-token ratios across commits, PRs, and lines of code to know for certain whether Claude Code is becoming less effective for your team.
+description: "Measure whether Claude Code is degrading using OpenTelemetry, with output-per-token metrics, dashboards, and efficiency alerts."
 image: /img/blog/2026/05/claude-blog-cover.webp
 keywords: [Claude Code, OpenTelemetry, observability, monitoring]
 related_articles:
@@ -73,7 +75,15 @@ export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 ```
 
-This works with any OTLP-compatible backend. Check out the [Claude Code monitoring guide](https://signoz.io/docs/claude-code-monitoring/) for detailed setup instructions.
+This works with any OTLP-compatible backend. Check out the [Claude Code monitoring guide](https://signoz.io/docs/claude-code-monitoring/) for detailed setup instructions. Setting up the pipeline end to end is covered in the guide on [monitoring Claude Code with OpenTelemetry](https://signoz.io/blog/claude-code-monitoring-with-opentelemetry/).
+
+<KeyPointCallout title="What is OTLP?">
+
+Just above, we mentioned the term `OTLP-compatible backedn`, and might wonder what OTLP actually is. 
+
+OTLP is the OpenTelemetry Protocol, the vendor-neutral protocol for data transmission that forms the backbone for performant telemetry pipelines across OTel-based observability setups. Check out our [Guide to OTLP](https://signoz.io/blog/what-is-otlp/) for an in-depth look at its functionality.
+
+</KeyPointCallout>
 
 The metrics that form the foundation of efficiency monitoring are:
 
@@ -276,6 +286,12 @@ export OTEL_RESOURCE_ATTRIBUTES="department=engineering,team.id=platform"
 ```
 
 This enables team-level efficiency dashboards, making it possible to see whether degradation is org-wide or concentrated in a specific team's workflow, which narrows the scope when something goes wrong.
+
+<KeyPointCallout>
+
+Teams comparing platforms for these metrics also often review the [LLM observability tools](https://signoz.io/comparisons/llm-observability-tools/) landscape.
+
+</KeyPointCallout>
 
 ## Conclusion
 
