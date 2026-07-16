@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-16
 title: Infrastructure Monitoring - Hosts & K8s Overview
 description: Discover how SigNoz Infrastructure Monitoring provides a unified view of host and Kubernetes performance. Monitor CPU, memory, disk, and network with correlated traces and logs.
 
@@ -286,6 +286,26 @@ debugging.
     <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/kubernetes-nodes-view.webp" alt="Nodes View"/>
     <figcaption><i>Nodes View</i></figcaption>
 </figure>
+
+### Pod Metrics Tab: Workload Pod Utilization
+
+Deployment, DaemonSet, StatefulSet, Job, and Namespace detail panels include a **Pod Metrics** tab. It shows pod-level resource utilization for the pods that belong to the selected workload, so you can inspect how individual pods behave without leaving the parent view.
+
+This tab is scoped to the pods of the selected entity. It differs from the [Metrics tab](#metrics-tab-pod-performance-monitoring) on the Pods view, which shows metrics for a single pod. Use **Pod Metrics** when you start from a Deployment, DaemonSet, StatefulSet, Job, or Namespace and want to compare its pods side by side.
+
+The tab displays five time-series charts, each grouped by pod name with one series per pod:
+
+- **CPU Limit Utilization**: Each pod's CPU usage as a percentage of its configured CPU limit.
+- **CPU Request Utilization**: Each pod's CPU usage as a percentage of its configured CPU request.
+- **Memory Limit Utilization**: Each pod's memory usage as a percentage of its configured memory limit.
+- **Memory Request Utilization**: Each pod's memory usage as a percentage of its configured memory request.
+- **Filesystem Usage Percentage**: Each pod's filesystem usage as a percentage of its capacity.
+
+For Namespace panels, the charts cover every pod in the namespace. For workload panels, the charts cover the pods managed by that workload, scoped to its cluster and namespace.
+
+<Admonition type="info">
+Clicking the currently active tab keeps it selected and its content in view. If a saved or shared URL points to a tab that is no longer available, the panel automatically falls back to the first available tab.
+</Admonition>
 
 </TabItem>
 
