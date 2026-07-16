@@ -1,7 +1,7 @@
 ---
-date: 2026-07-08
-title: Troubleshoot Missing Traces, Logs, and Metrics
-description: A step-by-step guide to debug why your traces, logs, or metrics are not showing up in SigNoz, from SDK instrumentation to the OpenTelemetry Collector and ingestion endpoint.
+date: 2026-07-15
+title: Debug Missing Traces, Logs, and Metrics Data in SigNoz
+description: Debug why your traces, logs, or metrics are not showing up in SigNoz, from SDK instrumentation to the OpenTelemetry Collector and ingestion endpoint.
 doc_type: howto
 ---
 
@@ -15,7 +15,9 @@ Work through the three steps below in sequence. Each step tells you what to chec
 2. [Is your telemetry being exported?](#step-2-is-your-telemetry-being-exported) Enable diagnostic logging and read the exporter errors.
 3. [Is your telemetry reaching SigNoz?](#step-3-is-your-telemetry-reaching-signoz) Verify connectivity and the ingestion endpoint or Collector.
 
-Most "no data" issues are a wrong ingestion endpoint, a wrong region, or an incorrect ingestion key. If you already know your instrumentation works, jump straight to [Common errors and fixes](#common-errors-and-fixes).
+<Admonition type="tip">
+Most "no data" issues are a wrong ingestion endpoint, a wrong region, or an incorrect ingestion key. If you already know your instrumentation works, skip straight to [Common errors and fixes](#common-errors-and-fixes).
+</Admonition>
 
 ## Quick debug flowchart
 
@@ -188,7 +190,7 @@ Metrics reach SigNoz from the OpenTelemetry SDK, or from Prometheus, StatsD, and
 - **StatsD** metrics are received by the Collector's `statsd` receiver (application pushes UDP packets to the listener), then exported as OTLP.
 - **Host and Kubernetes metrics** come from the `hostmetrics` receiver and the [K8s-Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/).
 - For any Collector receiver, confirm the receivers and exporters are added to the pipeline correctly, the exporter endpoint and key are set, and check the Collector logs for errors.
-- If a specific metric is missing, a common cause is a temporality mismatch (delta versus cumulative) for that metric. See [Metrics Management FAQs](https://signoz.io/docs/metrics-management/troubleshooting/faqs/).
+- If a specific metric is missing, a common cause is a temporality mismatch (delta versus cumulative) for that metric. See [Metrics Management FAQs](https://signoz.io/docs/metrics-management/troubleshooting/faqs/) and [temporality of metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics) for background.
 
 </details>
 
@@ -255,10 +257,54 @@ export OTEL_JAVAAGENT_DEBUG=true
 # or as a JVM flag: -Dotel.javaagent.debug=true
 ```
 
+<Admonition type="tip">
+Agent debug logs are verbose and go to stderr by default. To route them through your application's own slf4j/logback logging instead, set `OTEL_JAVAAGENT_LOGGING=application` (default is `simple`).
+</Admonition>
+
 </TabItem>
 <TabItem value="python" label="Python">
 
-Set the SDK log level and route internal logs to the console. Refer to the <a href="https://opentelemetry.io/docs/languages/python/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Python docs</a> for enabling internal diagnostic logging, then re-run your app and read the exporter output.
+For zero-code instrumentation, set the log level to `debug`:
+
+```bash
+export OTEL_PYTHON_LOG_LEVEL=debug
+opentelemetry-instrument python your_app.py
+```
+
+For manual SDK setup, configure Python's standard `logging` module instead:
+
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+```
+
+Either way, re-run your app and read the exporter output. See the <a href="https://opentelemetry.io/docs/zero-code/python/configuration/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Python configuration docs</a> for more.
+
+</TabItem>
+<TabItem value="go" label="Go">
+
+The Go SDK has no debug env var. Export errors already print to stderr by default through the built-in error handler, with no setup required. For more detail, set a custom logger in code:
+
+```go
+import (
+    "go.opentelemetry.io/otel"
+    "github.com/go-logr/stdr"
+    "log"
+)
+
+otel.SetLogger(stdr.New(log.Default()))
+```
+
+</TabItem>
+<TabItem value="dotnet" label=".NET">
+
+Set the log level to `debug` before starting the instrumented process:
+
+```bash
+export OTEL_LOG_LEVEL=debug
+```
+
+This applies to the zero-code auto-instrumentation agent. Logs are written to a default location; override it with `OTEL_DOTNET_AUTO_LOG_DIRECTORY` if needed.
 
 </TabItem>
 <TabItem value="other" label="Other languages">
@@ -424,7 +470,7 @@ These are the most frequent causes of missing data, in rough order of how often 
 
 **Fix:**
 
-- Use the exact ingestion endpoint for your setup: `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud, or `http://<signoz-host>:4318` for self-hosted.
+- Use the exact ingestion endpoint for your setup: `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud, or `http://<signoz-host>:4318` for self-hosted. See [how to find your ingestion URL](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - Make sure the protocol matches the port: OTLP/HTTP on `4318`, OTLP/gRPC on `4317`.
 - Do not point an application-side SDK at a Collector that is not running, and do not point at SigNoz through a Collector endpoint that does not exist.
 
@@ -433,7 +479,7 @@ These are the most frequent causes of missing data, in rough order of how often 
 
 **Symptom:** Data is accepted by the exporter but never appears in your account, or you get authentication errors even with a valid key.
 
-**Fix:** The `<region>` in your endpoint must match the region your SigNoz Cloud account is in. A key from the EU region will not authenticate against the US endpoint. Confirm both the region and key under **Settings → Ingestion**.
+**Fix:** The `<region>` in your endpoint must match the region your SigNoz Cloud account is in. A key from the EU region will not authenticate against the US endpoint. Confirm both the region and key under **Settings → Ingestion**, or check the [region and endpoint table](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 
 </TabItem>
 <TabItem value="key" label="Wrong or expired ingestion key">
@@ -474,7 +520,7 @@ These SigNoz Cloud limits reject or delay data without an obvious instrumentatio
 
 - **Payload too large.** Payloads must be under the **16 MB** maximum, or they are rejected (HTTP `413`). Reduce batch sizes or export intervals.
 - **Timeouts on large or slow exports.** Increase the export timeout with `OTEL_EXPORTER_OTLP_TIMEOUT` (in milliseconds, for example `OTEL_EXPORTER_OTLP_TIMEOUT=30000`) and enable gzip with `OTEL_EXPORTER_OTLP_COMPRESSION=gzip`.
-- **Ingestion key limits.** A key with restrictive limits can throttle your data. Review [ingestion key limits](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- **Ingestion key limits.** A key with restrictive limits can throttle your data. Review [ingestion key limits](https://signoz.io/docs/ingestion/signoz-cloud/keys/), and set up [meter alerts](https://signoz.io/docs/cost-meter/alerts/) to catch this before data drops.
 
 See [ingestion considerations](https://signoz.io/docs/ingestion/signoz-cloud/overview/#important-considerations) for details.
 
