@@ -99,7 +99,7 @@ The **Deployments** view shows aggregated resource usage across all pods in each
 
 ## Deployment Detail Page
 
-Click a Deployment name to open the detail page. The header shows **Deployment Name**, **Cluster Name**, and **Namespace Name**. The detail page includes four tabs: **Metrics**, **Logs**, **Traces**, and **Events**.
+Click a Deployment name to open the detail page. The header shows **Deployment Name**, **Cluster Name**, and **Namespace Name**. The detail page includes five tabs: **Metrics**, **Logs**, **Traces**, **Events**, and **Pod Metrics**.
 
 <Figure
   src="/img/docs/infrastructure-monitoring/kubernetes-deployments-detail.webp"
@@ -133,3 +133,37 @@ Click a Deployment name to open the detail page. The header shows **Deployment N
 - This chart relies on the OTel metric `k8s.pod.network.errors` from the kubeletstats receiver — a cumulative Sum with attributes `direction` and `interface`, shown as a per-second increase and aggregated across the Deployment's pods.
 - One line per `direction :: interface` combination, sourced from the kubelet's per-pod-interface error counters.
 - Sustained non-zero values warrant attention — common causes are misconfigured CNI plugins, MTU mismatches, or faulty NICs on the underlying nodes; correlate with the **Node Detail → Network Errors** chart on the specific node(s) hosting the Deployment's pods.
+
+### Pod Metrics
+
+The **Pod Metrics** tab breaks resource utilization down **per pod** across every pod in the Deployment. All charts are scoped to this Deployment (filtered by `k8s.cluster.name`, `k8s.namespace.name`, and `k8s.deployment.name`), grouped by `k8s.pod.name` (one line per pod), averaged within each step interval, and expressed as a percentage.
+
+#### CPU Limit Utilization By Pod Name
+
+- This chart relies on the OTel metric `k8s.pod.cpu_limit_utilization` from the kubeletstats receiver — a pod's CPU usage as a fraction of the sum of its containers' CPU limits, emitted directly as a ratio.
+- Plots one line per pod in the Deployment, each showing that pod's CPU usage against its CPU limit; values near 100% mean the kernel is actively throttling that pod's CPU.
+- Use it to pinpoint *which* replica is throttled — a single line hugging 100% while the rest sit low points to a hot pod or uneven load balancing, whereas all pods running high means the Deployment's `limits.cpu` is too low.
+
+#### CPU Request Utilization By Pod Name
+
+- This chart relies on the OTel metric `k8s.pod.cpu_request_utilization` from the kubeletstats receiver — a pod's CPU usage as a fraction of the sum of its containers' CPU requests.
+- Plots one line per pod in the Deployment, each showing usage against its CPU request; values above 100% mean the pod is using more CPU than it reserved (allowed, but a sign the request is low).
+- Use it to judge reservation accuracy per replica — pods consistently far below 100% are over-provisioned, pods above it are under-requested; uneven values across identical replicas usually indicate skewed traffic rather than a sizing problem.
+
+#### Memory Limit Utilization By Pod Name
+
+- This chart relies on the OTel metric `k8s.pod.memory_limit_utilization` from the kubeletstats receiver — a pod's memory usage as a fraction of the sum of its containers' memory limits.
+- Plots one line per pod in the Deployment, each showing that pod's memory usage against its memory limit; a line at or near 100% is a pod on the verge of an OOMKill.
+- Use it to isolate the replica at risk — a steady per-pod climb is a memory-leak signature confined to that pod; raise `limits.memory` or fix the leak rather than scaling the whole Deployment.
+
+#### Memory Request Utilization By Pod Name
+
+- This chart relies on the OTel metric `k8s.pod.memory_request_utilization` from the kubeletstats receiver — a pod's memory usage as a fraction of the sum of its containers' memory requests.
+- Plots one line per pod in the Deployment, each showing usage against its memory request; values above 100% mean the pod exceeds its reservation.
+- Use it to right-size `requests.memory` per replica and catch imbalance — pods well below 100% reserve memory they never use, while pods above it risk eviction first under node memory pressure.
+
+#### FileSystem Usage Percentage By Pod Name
+
+- This chart is derived from two kubeletstats metrics — `k8s.pod.filesystem.usage` (bytes used) divided by `k8s.pod.filesystem.capacity` (total bytes); only the computed ratio is plotted, not the raw metrics.
+- Plots one line per pod in the Deployment, each showing that pod's local/ephemeral filesystem fill level as a percentage of its capacity.
+- Watch any pod trending toward 100% — its ephemeral storage is filling (unrotated logs, cached artifacts, temp files) and writes will start failing or the pod may be evicted; a single climbing line isolates the culprit replica.
