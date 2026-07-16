@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-16
 title: Infrastructure Monitoring - Hosts & K8s Overview
 description: Discover how SigNoz Infrastructure Monitoring provides a unified view of host and Kubernetes performance. Monitor CPU, memory, disk, and network with correlated traces and logs.
 
@@ -165,6 +165,8 @@ The **Pods View** provides real-time visibility into pod resource utilization, e
 #### Table Columns
 
 - **Pod Name**: Name of the Kubernetes pod.
+- **Status**: The pod's current runtime status, shown as a colored badge (for example `Running`, `Pending`, `CrashLoopBackOff`, or `OOMKilled`). See [Pod status](#pod-status).
+- **Restarts**: Total container restart count for the pod. This column is sortable. When restart data is unavailable, it shows a dash (`-`) with a "No data" tooltip.
 - **Available**: Number of available pod replicas.
 - **Desired**: Desired number of pod replicas.
 - **CPU Request Usage (%)**: Percentage of requested CPU being utilized.
@@ -179,6 +181,30 @@ The **Pods View** provides real-time visibility into pod resource utilization, e
 - **Search & Filtering**: Quickly locate specific pods using various filters.
 - **Group By Attribute**: Group pods by Namespace, Node, or Deployment.
 - **Sortable Metrics**: Sort columns for better trend analysis.
+
+### Pod status
+
+The **Status** column reports each pod's runtime status rather than its raw Kubernetes phase field, so container-level problems (such as image pull failures or crash loops) surface directly in the list. SigNoz recognizes the following pod statuses:
+
+`Running`, `Pending`, `Unknown`, `Failed`, `CrashLoopBackOff`, `ImagePullBackOff`, `ErrImagePull`, `CreateContainerConfigError`, `ContainerCreating`, `OOMKilled`, `Error`, `ContainerCannotRun`, `Evicted`, `NodeAffinity`, `NodeLost`, `Shutdown`, and `UnexpectedAdmissionError`.
+
+<Admonition type="info">
+The **Status** column and the grouped **Pod Status** counts replace the earlier **Phase** column and **Pod Phases** counts. The status reflects the pod's observed runtime state instead of the native Kubernetes phase field.
+</Admonition>
+
+#### Pod status counts
+
+Every Kubernetes entity table (Pods, Clusters, Nodes, Namespaces, Deployments, Jobs, DaemonSets, and StatefulSets) shows a grouped **Pod Status** count bar. It rolls the individual statuses into five display categories:
+
+| Category | Meaning |
+| --- | --- |
+| **Running** | Pods that are currently running. |
+| **Completed** | Pods that finished successfully. This is the SigNoz label for what Kubernetes calls the `Succeeded` phase. |
+| **Pending** | Pods waiting to be scheduled or to start. |
+| **Unknown** | Pods whose status could not be determined. |
+| **Error Status** | A single aggregated count of all error-type statuses. Hover the count to see a breakdown of each error state and its count. |
+
+**Error Status** always aggregates the same fixed set of states: `Failed`, `CrashLoopBackOff`, `ImagePullBackOff`, `ErrImagePull`, `CreateContainerConfigError`, `ContainerCreating`, `OOMKilled`, `Error`, `ContainerCannotRun`, `Evicted`, `NodeAffinity`, `NodeLost`, `Shutdown`, and `UnexpectedAdmissionError`.
 
 ### Filtering and Selection Panel
 
