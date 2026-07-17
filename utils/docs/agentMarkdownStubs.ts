@@ -48,7 +48,6 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
 ] as const
 export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'CHClientWithOutput',
-  'CloneRepo',
   'CommonPrerequisites',
   'DashboardActions',
   'DSConfigIntro',
@@ -70,8 +69,6 @@ export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'MetricsDefinition',
   'MultiNodePart1',
   'MultiNodePart2',
-  'OtelOperatorAutoInstrumentation',
-  'OtelOperatorOTLPEndpoint',
   'PrereqsInstrument',
   'RetentionInfo',
   'SigNozCloud',
