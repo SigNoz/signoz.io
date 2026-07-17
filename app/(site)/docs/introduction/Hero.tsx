@@ -20,21 +20,24 @@ const PROGRESSIVE_BLUR_LAYERS = [
 
 export default function Hero() {
   return (
-    <DitherCanvas enableClick={false} className="relative h-[513px] w-full">
-      <div className="relative h-[513px] w-full overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <DitherCanvas
+      enableClick={false}
+      className="relative -mx-4 w-[calc(100%+2rem)] sm:mx-0 sm:w-full md:h-[513px]"
+    >
+      <div className="relative w-full overflow-hidden md:h-[513px]">
+        <div className="pointer-events-none relative w-full md:absolute md:inset-0 md:overflow-hidden">
           <Image
             src="/img/docs-introduction/hero-banner.webp"
             alt="SigNoz Docs Introduction Hero Banner"
             width={1000}
             height={1000}
-            className="absolute left-0 w-full max-w-none"
-            style={{ height: '127.63%', top: '-0.44%' }}
+            className="block h-auto w-full max-w-none object-cover object-top md:absolute md:left-0 md:top-[-0.44%] md:h-[127.63%] md:w-full"
+            sizes="100vw"
             priority
           />
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[220px]">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[160px] md:h-[220px]">
           {PROGRESSIVE_BLUR_LAYERS.map((layer, i) => (
             <div
               key={i}
@@ -50,12 +53,12 @@ export default function Hero() {
           <div className="absolute inset-0" style={{ backgroundImage: HERO_OVERLAY_GRADIENT }} />
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 flex h-[180px] flex-col items-center justify-end px-4 pb-4 pt-0">
+        <div className="relative z-10 flex flex-col items-center justify-end px-4 pb-4 pt-6 md:absolute md:inset-x-0 md:bottom-0 md:h-[180px] md:pt-0">
           <div className="flex w-full max-w-[671px] flex-col items-center gap-4">
             <p className="max-w-2xl text-center text-base leading-[26px] text-[#adb4c2]">
               {HERO_DESCRIPTION}
             </p>
-            <div className="flex w-full items-center gap-2">
+            <div className="flex w-full items-center justify-center gap-2 sm:justify-start">
               <SearchBar
                 placeholder={SEARCH_PLACEHOLDERS}
                 clickLocation="Docs Hero"

@@ -19,7 +19,7 @@ export default function ExploreSigNoz() {
         illustration="/img/docs-introduction/explore-illustration.webp"
         illustrationAlt="Explore SigNoz"
       />
-      <div className="grid grid-cols-1 md:grid-cols-3">
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-3">
         {row1.map((card) => (
           <DocsIntroCard
             key={card.clickName}
@@ -29,7 +29,7 @@ export default function ExploreSigNoz() {
           />
         ))}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3">
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-3">
         {row2.map((card) => (
           <DocsIntroCard
             key={card.clickName}

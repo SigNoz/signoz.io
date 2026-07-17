@@ -204,25 +204,25 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
   return (
     <div
       ref={containerRef}
-      className={`relative h-full w-full overflow-hidden bg-[#0A0C10] ${className}`}
+      className={`relative h-full w-full overflow-visible bg-transparent ${className}`}
     >
       <div
         className="pointer-events-none absolute inset-0 z-[1]"
         style={{
           background:
-            'radial-gradient(circle at center, transparent 30%, rgba(10, 12, 16, 0.9) 100%)',
+            'radial-gradient(circle at center, transparent 30%, rgba(10, 12, 16, 0.55) 100%)',
         }}
         aria-hidden
       />
-      {/* Image + both ring canvases share one float so they bob in sync */}
-      <div className="floating-rings-layer absolute inset-0 z-10">
+      {/* Image + rings stay behind card grids (cards use opaque bg + higher z-index) */}
+      <div className="floating-rings-layer absolute inset-0 z-0">
         <canvas
           ref={bgCanvasRef}
           className="pointer-events-none absolute inset-0 h-full w-full"
           style={{ transform: 'translateZ(0)' }}
           aria-hidden
         />
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-end justify-center pb-2">
           <Image
             src={src}
             alt={alt}

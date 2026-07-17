@@ -11,8 +11,8 @@ const SECTION_NAME = 'Docs CTA Section'
 export default function DocsCtaSection() {
   return (
     <DitherCanvas enableClick={false} className="w-full">
-      <div className="flex w-full flex-col items-start justify-between gap-8 px-4 pb-4 pt-16 md:flex-row">
-        <div className="flex flex-col gap-4 pl-12">
+      <div className="flex w-full flex-col items-start justify-between gap-8 px-4 pb-0 pt-16 md:flex-row">
+        <div className="flex flex-col gap-4 pl-0 md:pl-12">
           <h2 className="text-2xl font-semibold leading-9 text-signoz_vanilla-100">
             Slow is the new Downtime
           </h2>
@@ -27,14 +27,15 @@ export default function DocsCtaSection() {
             clickName="Sign up for SigNoz Cloud CTA"
             clickText="Sign up for SigNoz Cloud"
             clickLocation={SECTION_NAME}
-            className="flex h-8 w-fit items-center gap-2 rounded-full bg-signoz_robin-500 px-4 pr-3.5 text-sm font-medium text-signoz_vanilla-100 transition-colors hover:bg-signoz_robin-600"
+            className="mx-auto flex h-8 w-fit items-center gap-2 rounded-full bg-signoz_robin-500 px-4 pr-3.5 text-sm font-medium text-signoz_vanilla-100 transition-colors hover:bg-signoz_robin-600 md:mx-0"
           >
             Sign up for SigNoz Cloud
             <ArrowRight size={12} className="rotate-[-45deg]" />
           </TrackingLink>
         </div>
 
-        <div className="flex w-full max-w-lg flex-col">
+        {/* Align timeline under the 2nd card's arrow (~1/3 + inset); keep pt-16 on parent */}
+        <div className="flex w-full max-w-lg flex-col md:pl-[calc(33.333%-1rem)] lg:pl-16">
           {CTA_STEPS.map((step, index) => (
             <div key={index} className="flex gap-3">
               <div className="flex flex-col items-center">

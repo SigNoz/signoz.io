@@ -14,7 +14,7 @@ export default function TroubleshootingCommunitySection() {
         illustration="/img/docs-introduction/troubleshooting-illustration.webp"
         illustrationAlt="Troubleshooting"
       />
-      <div className="grid grid-cols-1 md:grid-cols-3">
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-3">
         {TROUBLESHOOTING_ROW_CARDS.map((card) => (
           <DocsIntroCard
             key={card.clickName}
@@ -24,7 +24,7 @@ export default function TroubleshootingCommunitySection() {
           />
         ))}
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4">
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-4">
         {RESOURCES_ROW_CARDS.map((card) => (
           <DocsIntroCard
             key={card.clickName}

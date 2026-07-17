@@ -1,17 +1,11 @@
 'use client'
 
 import NozPeekDock from './NozPeekDock'
-import DocsFooter from '@/components/DocsFooter/DocsFooter'
 
 /**
- * Shared docs chrome that must not remount on intro ↔ article navigations:
- * Noz-peek dock + docs footer.
+ * Shared docs chrome that must not remount on intro ↔ article navigations.
+ * Site footer is MainFooter (rising-pill links) from the root layout.
  */
 export default function DocsChrome() {
-  return (
-    <>
-      <NozPeekDock />
-      <DocsFooter />
-    </>
-  )
+  return <NozPeekDock />
 }

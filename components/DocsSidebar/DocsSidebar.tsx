@@ -173,15 +173,19 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
       >
         <Link
           href={constructHref(doc.route)}
-          className={`flex w-full items-center gap-2.5 rounded px-3 py-2 text-sm transition-all duration-200 ${
+          className={`flex w-full items-center gap-1 rounded px-3 py-2 text-sm transition-all duration-200 ${
             isActiveRoute
               ? 'bg-signoz_ink-300 text-signoz_vanilla-100'
               : 'text-signoz_vanilla-400 hover:bg-signoz_ink-300 hover:text-signoz_vanilla-100'
           } ${doc.className || ''}`}
         >
-          {isGetStarted && <MetronomeIcon size={14} className="flex-shrink-0" />}
-          <Tooltip content={doc.label} side="right" delayDuration={500}>
-            <span className="truncate">{doc.label}</span>
+          {isGetStarted && (
+            <div className="flex-shrink-0 text-signoz_vanilla-400">
+              <MetronomeIcon size={12} />
+            </div>
+          )}
+          <Tooltip content={doc.label} side="right" delayDuration={500} sideOffset={12}>
+            <span className="min-w-0 flex-1 truncate">{doc.label}</span>
           </Tooltip>
           {doc.published_date && <NewBadge publishedDate={doc.published_date} />}
         </Link>
@@ -212,8 +216,8 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
             <div className="flex-shrink-0 text-signoz_vanilla-400">
               {category.isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
             </div>
-            <Tooltip content={category.label} side="right" delayDuration={500}>
-              <span className="truncate">{category.label}</span>
+            <Tooltip content={category.label} side="right" delayDuration={500} sideOffset={12}>
+              <span className="min-w-0 flex-1 truncate">{category.label}</span>
             </Tooltip>
           </div>
         </Link>
@@ -221,7 +225,12 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
           <div className="mt-0.5">
             {category.link && category.link.type === 'generated-index' && (
               <div className="mx-5 mb-1 mt-1">
-                <Tooltip content={category.link.title} side="right" delayDuration={500}>
+                <Tooltip
+                  content={category.link.title}
+                  side="right"
+                  delayDuration={500}
+                  sideOffset={12}
+                >
                   <h4
                     className={`truncate text-xs text-signoz_vanilla-400 ${
                       isActiveRoute ? 'text-white' : 'hover:text-white'
@@ -232,9 +241,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
                 </Tooltip>
               </div>
             )}
-            <ul className="ml-4 space-y-0 border-l border-gray-700/50 pl-0">
-              {category?.items?.map(renderItem)}
-            </ul>
+            <ul className="ml-3 space-y-0 pl-1">{category?.items?.map(renderItem)}</ul>
           </div>
         )}
       </li>

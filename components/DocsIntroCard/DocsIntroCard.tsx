@@ -33,13 +33,13 @@ export default function DocsIntroCard({
       clickText={title}
       clickLocation={clickLocation}
       {...(external ? { target: '_blank', rel: 'noopener noreferrer nofollow' } : {})}
-      className={`group box-border flex flex-col border-b border-r border-dashed border-signoz_ink-300 bg-transparent p-4 transition-colors hover:bg-signoz_ink-300 ${className}`}
+      className={`group box-border flex flex-col border-b border-l border-r border-dashed border-signoz_ink-300 bg-signoz_ink-500 p-4 transition-colors hover:bg-signoz_ink-300 md:border-l-0 ${className}`}
     >
       <div className="flex h-full min-h-0 w-full flex-col justify-between">
         <div className="h-6 w-6 shrink-0">{icon}</div>
 
         <div className="flex w-full items-end justify-between gap-4">
-          <div className="flex min-w-0 flex-col gap-3">
+          <div className="flex min-w-0 flex-col gap-[12px]">
             <h3 className="m-0 text-base font-semibold leading-none text-signoz_vanilla-100">
               {title}
             </h3>

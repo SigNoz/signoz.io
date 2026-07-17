@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Globe, Loader2 } from 'lucide-react'
+import { Check, Globe, Loader2 } from 'lucide-react'
 import { useRegion } from '@/components/Region/RegionContext'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@signozhq/ui/select'
 import RegionSelectorInfoTip from './RegionSelectorInfoTip'
@@ -36,9 +36,10 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
   }
 
   const currentValue = region && cloudRegion ? `${region}_${cloudRegion}` : undefined
+  const selectedLabel = regionOptions.find((o) => o.value === currentValue)?.label
 
   const selector = (
-    <div className="flex flex-col gap-1 px-2.5 pb-2">
+    <div className="flex flex-col gap-1 px-2.5 pb-2 pt-3">
       <div className="flex items-center gap-1.5 pb-2 pl-1.5">
         <Globe size={12} className="text-signoz_vanilla-400" />
         <span className="text-xs font-medium uppercase tracking-wider text-signoz_vanilla-400">
@@ -59,7 +60,7 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
               Loading...
             </span>
           ) : (
-            <SelectValue placeholder="Select region" />
+            <SelectValue placeholder="Select region">{selectedLabel}</SelectValue>
           )}
         </SelectTrigger>
         <SelectContent
@@ -78,15 +79,25 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
             } as React.CSSProperties
           }
         >
-          {regionOptions.map((option) => (
-            <SelectItem
-              key={option.value}
-              value={option.value}
-              className="!cursor-pointer !rounded-none !px-3 !py-2 !text-sm !text-signoz_vanilla-400 !outline-none hover:!bg-signoz_ink-300 hover:!text-signoz_vanilla-100 focus:!bg-signoz_ink-300 focus:!text-signoz_vanilla-100 data-[state=checked]:!text-signoz_vanilla-100"
-            >
-              {option.label}
-            </SelectItem>
-          ))}
+          {regionOptions.map((option) => {
+            const isSelected = option.value === currentValue
+            return (
+              <SelectItem
+                key={option.value}
+                value={option.value}
+                className="!relative !flex !w-full !cursor-pointer !items-center !justify-between !gap-3 !rounded-none !px-3 !py-2 !pr-9 !text-sm !text-signoz_vanilla-400 !outline-none hover:!bg-signoz_ink-300 hover:!text-signoz_vanilla-100 focus:!bg-signoz_ink-300 focus:!text-signoz_vanilla-100 data-[state=checked]:!text-signoz_vanilla-100"
+              >
+                <span className="min-w-0 truncate">{option.label}</span>
+                {isSelected && (
+                  <Check
+                    size={14}
+                    className="pointer-events-none absolute right-3 top-1/2 shrink-0 -translate-y-1/2 text-signoz_vanilla-100"
+                    aria-hidden
+                  />
+                )}
+              </SelectItem>
+            )
+          })}
         </SelectContent>
       </Select>
     </div>
