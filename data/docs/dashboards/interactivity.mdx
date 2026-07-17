@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-17
 title: Interactivity in dashboards
 description: Learn how interactive dashboards in SigNoz help you drill down, correlate signals, and troubleshoot faster using context menus, cross filtering, cross-panel sync, and navigation to Logs and Traces.
 
@@ -278,3 +278,56 @@ You can toggle individual series on and off through the chart legend. Hidden ser
 - If every matching series in the receiver is hidden, the receiver tooltip disappears entirely the next time you move the cursor on the source.
 
 This makes it easy to focus comparison on a specific subset by hiding the rest.
+
+## Create an alert from a panel
+
+You can turn any panel into an alert without rebuilding its query. When you create an alert from a panel, SigNoz carries the panel's query into the alert builder and seeds the alert **condition** from the panel's **Reduce To** setting and its **thresholds**, so the condition arrives partly filled in.
+
+**Create Alerts** is available on **Time Series**, **Bar**, **Value** (Number), and **Histogram** panels. Table, List, and Pie panels do not offer it.
+
+### Create the alert
+
+1. Hover over the panel and open its actions menu (the **...** menu in the panel header). You can also open the same action from the panel editor.
+2. Select **Create Alerts**. SigNoz opens the alert builder in a new tab with the panel's query already loaded.
+3. Review the pre-filled condition, adjust anything you need, and save the alert.
+
+The alert condition reads as a sentence: *Send a notification when `<query>` is `<operator>` the threshold(s) `<occurrence>` during the `<evaluation window>`*. The **operator** and **occurrence** parts are the fields seeded from the panel.
+
+### Occurrence from Reduce To
+
+For **Value** (Number) panels, the panel's **Reduce To** setting maps to the alert occurrence:
+
+| Panel Reduce To | Alert occurrence |
+| --- | --- |
+| Sum | `IN TOTAL` |
+| Avg | `ON AVERAGE` |
+| Max, Min, or Latest | Default (left unchanged) |
+
+Time Series, Bar, and Histogram panels do not expose a Reduce To that maps to occurrence, so their occurrence stays at the alert builder's default.
+
+<Admonition type="info">
+For panels built from multiple queries or a formula, the occurrence is pre-filled only when **every** query uses the same Reduce To. If the queries use different Reduce To settings, the default occurrence is preserved and you should set it manually after the alert opens.
+</Admonition>
+
+### Operator and value from thresholds
+
+When the panel has thresholds configured, SigNoz picks the **most dangerous threshold** and copies its value (and unit) into the alert. Danger is ranked by threshold color:
+
+`red` > `orange` > `green` > `blue` > any other color
+
+For **Value** (Number) panels, the threshold's comparison operator is copied as well:
+
+| Panel threshold operator | Alert operator |
+| --- | --- |
+| Above (>) or Above or equal (≥) | `ABOVE` |
+| Below (<) or Below or equal (≤) | `BELOW` |
+| Equal (=) | `EQUAL TO` |
+| Not equal (≠) | `NOT EQUAL TO` |
+
+<Admonition type="warning">
+The alert operators do not include an "or equal" boundary, so **Above or equal (≥)** and **Below or equal (≤)** panel thresholds map to the closest available operators, `ABOVE` and `BELOW`. If you set a boundary threshold, confirm the operator after the alert opens.
+</Admonition>
+
+**Time Series** and **Bar** panels pre-fill the threshold **value** and **unit**, but the operator stays at the default: these panels store thresholds as value markers without a comparison operator. **Histogram** panels do not pass thresholds, so nothing threshold-related is seeded.
+
+Everything SigNoz fills in is a starting point. Review the condition and complete the remaining fields before saving. For the full list of condition options, see [Metrics based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/#step-2-define-alert-conditions).
