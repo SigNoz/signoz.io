@@ -1,5 +1,5 @@
 ---
-date: 2026-05-12
+date: 2026-07-17
 
 title: Creating SigNoz Alerts with Terraform
 description: How to create SigNoz Alerts with Terraform, and problems faced during creation of terraform alerts.
@@ -186,6 +186,10 @@ This configuration defines:
 - notification_settings: Notification settings for the alerts.
 - renotify: Renotification settings for the alerts
 - evaluation: Evaluation settings for the alerts
+
+<Admonition type="info">
+Setting `use_policy = false`, an empty `group_by = []`, or an empty `alert_states = []` now round-trips correctly. Earlier SigNoz versions dropped these values from the alert rule GET response, so Terraform read them back as `null` and reported a persistent diff on every `plan` (for example, `usePolicy was false, but now null`). If you rely on any of these fields, upgrade to a SigNoz release published after v0.133.0. In the API schema, `groupBy` and `alertStates` are now nullable, so API clients and code generators should treat `null` (explicitly empty) and an absent field (never set) as distinct.
+</Admonition>
 
 ### Step 2: Check Correctness of Definition
 
