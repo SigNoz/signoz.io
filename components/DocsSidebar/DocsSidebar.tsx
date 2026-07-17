@@ -276,7 +276,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
   return (
     <nav
       ref={sidebarRef}
-      className="docs-sidebar sticky top-[48px] h-full w-full overflow-y-auto py-3 text-white"
+      className="docs-sidebar sticky top-[48px] h-[calc(100vh-48px)] w-full overflow-y-auto py-3 text-white"
     >
       {showRegionSelector && <SidebarRegionSelector />}
       <ul className="list-none space-y-0 p-0">{sideNav.map(renderItem)}</ul>

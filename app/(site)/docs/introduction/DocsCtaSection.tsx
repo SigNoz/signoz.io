@@ -13,7 +13,7 @@ export default function DocsCtaSection() {
     <DitherCanvas enableClick={false} className="w-full">
       <div className="flex w-full flex-col items-start justify-between gap-8 px-4 pb-0 pt-16 md:flex-row">
         <div className="flex flex-col gap-4 pl-0 md:pl-12">
-          <h2 className="text-2xl font-semibold leading-9 text-signoz_vanilla-100">
+          <h2 className="m-0 text-2xl font-semibold leading-9 text-signoz_vanilla-100">
             Slow is the new Downtime
           </h2>
           <p className="text-base leading-relaxed text-signoz_vanilla-400">
@@ -47,7 +47,7 @@ export default function DocsCtaSection() {
                 )}
               </div>
               <div className={`flex flex-col gap-2 ${index < CTA_STEPS.length - 1 ? 'pb-8' : ''}`}>
-                <p className="text-base font-medium leading-6 text-signoz_vanilla-100">
+                <p className="m-0 text-base font-medium leading-6 text-signoz_vanilla-100">
                   {step.title}
                 </p>
                 <p className="text-sm leading-5 text-signoz_vanilla-400">{step.subtitle}</p>
