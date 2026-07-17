@@ -1,9 +1,9 @@
 ---
-title: How Shaped Fixed a Year-Old Latency Bug in a Single Session with SigNoz MCP
+title: How Shaped fixed a year-old latency bug with SigNoz MCP
 date: 2026-07-06
 tags: [AI, Observability]
 authors: [mahak_kaur]
-description: Kathleen Xue at Shaped used a coding agent with SigNoz MCP to fix a Redis latency bug that had lived in production for almost a year — a look at what agent-native observability actually takes.
+description: Kathleen Xue at Shaped used a coding agent with SigNoz MCP to fix a Redis latency bug that had lived in production for almost a year. A closer look at what agent-native observability actually takes.
 image: /img/blog/2026/07/shaped-kathleen-blog-cover.webp
 keywords: [signoz mcp, agent-native observability, trace debugging, latency debugging, opentelemetry]
 related_articles:
@@ -14,13 +14,15 @@ related_articles:
 
 For almost a year, the same bug kept coming back.
 
-Kathleen Xue is a Senior Software Engineer at <a href="https://www.shaped.ai/" target="_blank" rel="noopener noreferrer nofollow">Shaped</a>, the Y Combinator-backed company whose APIs let teams build production-ready ranking and recommendation models. Keeping the system stable is most of the job — "80% of my job is just checking SigNoz," she says. And for months, one thing refused to stay fixed: a long tail of latency every time Shaped's services called their Redis client. The team tried fix after fix. None of them held. The slow requests kept surfacing, every so often, unpredictably.
+<a href="https://www.linkedin.com/in/kathleen-xue-b2004381" target="_blank" rel="noopener noreferrer nofollow">Kathleen Xue</a> is a Senior Software Engineer at <a href="https://www.shaped.ai/" target="_blank" rel="noopener noreferrer nofollow">Shaped</a>, the Y Combinator-backed company whose APIs let teams build production-ready ranking and recommendation models. Keeping the system stable is most of the job. "80% of my job is just checking SigNoz," she says. And for months, one thing refused to stay fixed: a long tail of latency on Shaped's calls to their Redis client. The team tried fix after fix. None of them held. The slow requests kept surfacing, every so often, unpredictably.
 
-One day, she stopped trying to guess. She pulled a batch of traces that all showed the same timeout from the same client, handed them to a coding agent through the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/), and asked it to just tell her what was going on.
+One day, out of frustration, she stopped guessing at fixes. She pulled a batch of traces that all showed the same timeout from the same client, handed them to a coding agent through the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/), and asked it to just tell her what was going on.
 
-Because the agent could see both the traces in SigNoz and Shaped's codebase, it connected the two quickly — the problem was in how they were configuring their async worker environment.
+Because the agent could see both the traces in SigNoz and Shaped's codebase, it connected the two quickly. The problem was in how they were configuring their async worker environment.
 
 > Claude being connected to SigNoz as well as my codebase allowed it to quickly identify that the issue was related to how we were setting up our async worker environment configurations. That ended up fixing a bug that had been in production for almost a year, all within a single Claude session.
+
+-Kathleen Xue, Senior Software Engineer, Shaped
 
 A year-old bug, closed in one session. "That was really magical for me."
 
@@ -34,17 +36,13 @@ An agent inspecting your system is only as good as the telemetry it can read. At
 
 > The good thing about the traces that we have in SigNoz is that every single span in the trace is hydrated with information of what's going into that function and what's coming out. The MCP is able to have that really rich information of what's similar between all these traces and what's different.
 
-This is what agent-native observability actually means in practice. It isn't a chatbot bolted onto a dashboard — it's telemetry that's structured, unified, and rich enough that an agent can reason over it the way an engineer would. SigNoz already stores the data that way, which is why the SigNoz MCP server can hand an agent real evidence instead of fragments.
+This is what agent-native observability actually means in practice. It isn't a chatbot bolted onto a dashboard. It's telemetry that's structured, unified, and rich enough that an agent can reason over it the way an engineer would. SigNoz already stores the data that way, which is why the SigNoz MCP server can hand an agent real evidence instead of fragments.
 
 ## Before MCP: the same work, one trace at a time
 
-Kathleen was living in SigNoz long before MCP arrived — dashboards, logs, and traces, every day. Traces most of all. She's added spans "everywhere in the code base" because they're easy to dive into, and they replaced a slower habit.
+Kathleen was living in SigNoz long before MCP arrived: dashboards, logs, and traces, every day. Traces most of all. She's added spans "everywhere in the code base" because they're easy to dive into, and they replaced a slower habit. The team used to lean on Python profilers to find bottlenecks; with traces she can do "the same thing as Python profiling, but at scale across many, many requests," instead of digging into one at a time.
 
-> Prior to using SigNoz traces, we relied heavily on Python profilers to figure out bottlenecks and latency. But with SigNoz traces, I can basically do the same thing as Python profiling, but at scale across many, many requests, as opposed to just digging into one single request.
-
-Even with good traces, though, debugging latency meant repetition: open one slow trace, find the bottleneck, fix it, then do it again for the next one. MCP changed the unit of work.
-
-> Prior to the MCP, whenever I wanted to debug latency, I would have to dig into a single trace and then find the bottleneck and debug from there. With MCP, I can send it around 10 trace IDs and ask it to find the trend across these requests and identify the bottleneck.
+Even with good traces, though, debugging latency meant repetition: open one slow trace, find the bottleneck, fix it, then do it again for the next one. MCP changed the unit of work. Now she can hand the agent "around 10 trace IDs" at once and ask it to "find the trend across these requests and identify the bottleneck," instead of working through them one by one.
 
 She has a shorter way of putting it:
 
@@ -54,12 +52,12 @@ She has a shorter way of putting it:
 
 ## A practical tip: how she prompts over traces
 
-Kathleen's ad hoc workflow is repeatable enough that she shares it with teammates — she hands them the exact prompt and trace IDs and tells them to paste it in. The pattern, drawn from how she actually works:
+Kathleen's ad hoc workflow is repeatable enough that she shares it with teammates. She hands them the exact prompt and trace IDs and tells them to paste it in. The pattern, drawn from how she actually works:
 
 ```
 Here are 10 slow trace IDs from the same latency spike: [trace IDs].
 Pull them from SigNoz and focus on the [span or operation] in each
-— for example, the metadata store portion of the request.
+(for example, the metadata store portion of the request).
 
 Compare the traces: what's the same, what's different?
 Then tell me:
@@ -71,23 +69,19 @@ For the logs, filter by the Kubernetes pod name, or search the body
 for [string].
 ```
 
-The point isn't the exact wording — it's the shape. Start with concrete evidence (real trace IDs), narrow the scope to a specific span, and ask the agent to compare *before* it explains. A tip we'd add on top of hers: ask it to show the trace evidence behind any conclusion, so you can check the reasoning rather than trust it blind.
+The point isn't the exact wording. It's the shape. Start with concrete evidence (real trace IDs), narrow the scope to a specific span, and ask the agent to compare *before* it explains. A tip we'd add on top of hers: ask it to show the trace evidence behind any conclusion, so you can check the reasoning rather than trust it blind.
 
 ## Where the workflow starts: the dashboard, not the prompt
 
 Kathleen doesn't open the agent first. She starts where the signal is.
 
-A typical day begins on the inference service overview — errors, service health, canceled requests per customer, average latency. When latency climbs, she jumps to the latency dashboard, finds the spike, and zooms in. "Latency here was 25 seconds. That's really high." A panel of the slowest requests hands her traces; she opens one and follows it down. Only if the bottleneck is still unclear does she copy the trace ID into the agent.
+A typical day begins on the inference service overview: errors, service health, canceled requests per customer, average latency. When latency climbs, she jumps to the latency dashboard, finds the spike, and zooms in. "Latency here was 25 seconds. That's really high." A panel of the slowest requests hands her traces; she opens one and follows it down. Only if the bottleneck is still unclear does she copy the trace ID into the agent. She still starts from dashboards, she says, because they're "really useful in showing me trends to look out for first that I can send to the MCP."
 
-> I still start from dashboards because the dashboards are really useful in showing me trends to look out for first that I can send to the MCP. The dashboard is still really powerful in that it gives a good presentation of the entire system health that you can't really do with words.
-
-Dashboards do something prompts can't: they show the *shape* of a system at a glance — the spike, the trend, the outlier — so you know what's worth asking about. For now, that makes them the natural first step. Whether that holds as agents take on more is genuinely open. Would this workflow still begin at a dashboard if the agent watched the signals continuously and surfaced the anomaly itself? Nobody knows yet — and it's one of the more interesting questions the agent-native shift raises.
+Dashboards do something prompts can't: they show the *shape* of a system at a glance (the spike, the trend, the outlier), so you know what's worth asking about. For now, that makes them the natural first step. Whether that holds as agents take on more is genuinely open. Would this workflow still begin at a dashboard if the agent watched the signals continuously and surfaced the anomaly itself? Nobody knows yet, and it's one of the more interesting questions the agent-native shift raises.
 
 ## Telemetry quality decides how far the agent gets
 
-If there's one lesson from Shaped, it's that the effectiveness of an agent at observability is bounded by the telemetry underneath it. When Kathleen gets a bad result, the cause is almost always the data, not the model.
-
-> When I don't get good results from MCP, it's likely because I haven't fed the right data into SigNoz, or the data is too noisy in SigNoz. Sometimes the logs are showing a lot of noise and Claude is not able to synthesize the signal from the noise, so it gives me the wrong answer and goes in loops.
+If there's one lesson from Shaped, it's that the effectiveness of an agent at observability is bounded by the telemetry underneath it. When Kathleen gets a bad result, the cause is almost always the data, not the model. Bad answers tend to come when the right data isn't in SigNoz or "the data is too noisy" for the agent to pull signal from, at which point it "gives me the wrong answer and goes in loops."
 
 Which is exactly why she stays in the loop. The agent digs; she decides what's real.
 
@@ -95,13 +89,11 @@ Which is exactly why she stays in the loop. The agent digs; she decides what's r
 
 <YouTube id="b6yERQSdj_M" mute="false" />
 
-SigNoz provided the traces and logs; the codebase provided the implementation details. By combining both, Kathleen could verify whether the agent's explanation matched the actual system behavior before trusting the fix. That's the division that works today: the agent gathers and connects evidence, and the engineer brings the context — what the business cares about, and what a real trend looks like versus a coincidence.
+SigNoz provided the traces and logs; the codebase provided the implementation details. By combining both, Kathleen could verify whether the agent's explanation matched the actual system behavior before trusting the fix. That's the division that works today: the agent gathers and connects evidence, and the engineer brings the context (what the business cares about, and what a real trend looks like versus a coincidence).
 
-So her advice for teams trying this is about the data first, not the agent.
+So her advice for teams trying this is about the data first, not the agent. Get your logs, your Kubernetes events, and whatever custom metrics you track into SigNoz, she says, so that when you use the MCP "it's going to have all that rich information to go off of."
 
-> First make sure that you're getting the right metrics into SigNoz. Get your logs into SigNoz, get your Kubernetes events into SigNoz, and then whatever custom metrics you specify, get all that into SigNoz so that when you use the MCP, it's going to have all that rich information to go off of.
-
-Get the telemetry right, keep a human on the trend-checking, and let the agent do the digging. Two months in, that's shifted where Kathleen spends her time — not down into individual bugs, but up a level.
+Get the telemetry right, keep a human on the trend-checking, and let the agent do the digging. Two months in, that's shifted where Kathleen spends her time, not down into individual bugs, but up a level.
 
 > My work hasn't decreased, because I'm suddenly thinking on a higher level. Before, I was much lower level, investigating and debugging bugs. Now I let the MCP do that, and I'm the one scouting out the next low-hanging fruit or the next architectural change we need to make.
 
