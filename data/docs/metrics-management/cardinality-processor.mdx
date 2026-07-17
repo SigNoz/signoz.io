@@ -198,11 +198,13 @@ Start in **tag_only** mode so nothing is dropped while you confirm the processor
   caption="user.id is the exploding label."
 />
 
-**2. Confirm the processor is acting.** It publishes diagnostics (prefixed **otelcol_processor_cardinality_**) on the collector's Prometheus endpoint, port **8888**. Read them with `curl localhost:8888/metrics`, or use the optional [diagnostics scraper](#export-diagnostics-to-signoz-optional) to view them in SigNoz. The useful ones:
+**2. Confirm the processor is acting.** It publishes diagnostics on the collector's Prometheus endpoint, port **8888**. Read them with `curl localhost:8888/metrics`, or use the optional [diagnostics scraper](#export-diagnostics-to-signoz-optional) to view them in SigNoz. The useful ones, as they appear in SigNoz:
 
-- **labels_stripped_total**: its rate spikes when enforcement fires.
-- **top_offenders**: names the highest-growth label, so you can spot the culprit.
-- **trackers_active**: how many pairs are currently tracked.
+- **otelcol_processor_cardinality_labels.stripped_total**: its rate spikes when enforcement fires.
+- **otelcol_processor_cardinality_top.offenders**: names the highest-growth label, so you can spot the culprit.
+- **otelcol_processor_cardinality_trackers.active**: how many pairs are currently tracked.
+
+On the raw `:8888` endpoint these render with underscores instead of the dot, for example **otelcol_processor_cardinality_labels_stripped_total**.
 
 <Figure
   src="/img/docs/metrics/cardinality-processor/labels-stripped-rate.webp"
@@ -223,7 +225,7 @@ Detection is delta-based. The processor reacts to a label whose value count is *
 
 - Likely cause: the attribute's growth is below `max_cardinality_delta_per_epoch`, or the metric matches a lower threshold in `metric_overrides`.
 - Fix: lower the threshold (globally or per metric), or shorten `epoch_duration_seconds` so growth is measured over a tighter window.
-- Verify: `otelcol_processor_cardinality_top_offenders` lists the attribute and its delta.
+- Verify: `otelcol_processor_cardinality_top.offenders` lists the attribute and its delta.
 
 ### Re-aggregation falls back to tagging
 
@@ -235,7 +237,7 @@ Detection is delta-based. The processor reacts to a label whose value count is *
 
 - Likely cause: `max_tracker_count` is set and the limit has been reached.
 - Fix: raise `max_tracker_count`, or set it to `0` for unlimited. Each tracker costs roughly 2 KB of memory.
-- Verify: `otelcol_processor_cardinality_trackers_active` is at or near your configured cap.
+- Verify: `otelcol_processor_cardinality_trackers.active` is at or near your configured cap.
 
 </details>
 
