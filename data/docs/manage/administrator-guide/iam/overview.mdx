@@ -1,5 +1,5 @@
 ---
-date: 2026-06-26
+date: 2026-07-17
 title: Authorization Overview
 description: Understand how role-based access control works in SigNoz — principals, transactions, roles, and how they connect.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -55,6 +55,13 @@ The following resources are currently available for fine-grained access control:
 | `role` | `role` | Managed and custom roles |
 | `serviceaccount` | `serviceaccount` | Non-human identities for programmatic API access |
 | `metaresource` | `factor-api-key` | Authentication keys for service accounts |
+| `telemetryresource` | `logs` | Logs queried through `/api/v5/query_range` |
+| `telemetryresource` | `traces` | Traces queried through `/api/v5/query_range` |
+| `telemetryresource` | `metrics` | Metrics queried through `/api/v5/query_range` |
+| `telemetryresource` | `meter-metrics` | Meter (billing/usage) metrics |
+| `telemetryresource` | `audit-logs` | Audit-log data |
+
+Telemetry resources gate access to queried observability data. They support only the `read` relation and are enforced on the v5 query endpoints (`/api/v5/query_range` and its preview variant). See [Telemetry Resources](https://signoz.io/docs/manage/administrator-guide/iam/transactions/#telemetry-resources) for the default managed-role grants and selector format.
 
 For the full transactions reference for each resource, see the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/transactions/).
 

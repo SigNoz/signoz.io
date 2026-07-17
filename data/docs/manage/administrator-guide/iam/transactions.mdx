@@ -1,5 +1,5 @@
 ---
-date: 2026-06-26
+date: 2026-07-17
 title: Transactions Reference
 description: Complete reference of transactions for each resource in SigNoz — relations, descriptions, and managed role access.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -19,7 +19,7 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers IAM resources (roles, service accounts, API keys). Transactions for observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
+This page covers IAM resources (roles, service accounts, API keys) and telemetry query resources (logs, traces, metrics, meter-metrics, audit-logs). Transactions for other observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
 </Admonition>
 
 ## Role
@@ -64,6 +64,44 @@ Resource: `metaresource` | Kind: `factor-api-key` | Selector: API key ID
 | `update` | Modify API key metadata (for example, change the expiration date). | signoz-admin |
 | `delete` | Permanently revoke an API key. | signoz-admin |
 
+## Telemetry Resources
+
+Telemetry resources authorize the data returned by the v5 query endpoints (`/api/v5/query_range` and its preview variant). Access is enforced per telemetry type, and for Query Builder queries it can be scoped per service. Telemetry resources support only the `read` relation.
+
+Each telemetry type is a separate resource kind under the `telemetryresource` type. The type is derived from the query's signal and source: audit-logs is `signal=logs, source=audit`, and meter-metrics is `signal=metrics, source=meter`.
+
+| Resource | Kind | Source | Managed Role Access |
+|----------|------|--------|---------------------|
+| `telemetryresource` | `logs` | Application logs | signoz-admin, signoz-editor, signoz-viewer |
+| `telemetryresource` | `traces` | Distributed traces | signoz-admin, signoz-editor, signoz-viewer |
+| `telemetryresource` | `metrics` | Metrics | signoz-admin, signoz-editor, signoz-viewer |
+| `telemetryresource` | `meter-metrics` | Meter (billing/usage) metrics | signoz-admin, signoz-editor, signoz-viewer |
+| `telemetryresource` | `audit-logs` | Audit-log stream | signoz-admin |
+
+<Admonition type="warning">
+**Behavior change for upgraders:** audit-log queries are now restricted to `signoz-admin`. Under the previous flat check, any Viewer or Editor could query audit-log data. After upgrading, Editor and Viewer principals lose implicit access to audit-logs. See [Upgrade behavior](#upgrade-behavior) below.
+</Admonition>
+
+### Telemetry selectors
+
+Telemetry selectors are hierarchical and qualified by query type. A selector has the form `<query-type>/<key>/<value>`, where the query type is one of `builder_query` (Query Builder), `promql` (PromQL), or `clickhouse_sql` (ClickHouse SQL). The only key currently supported for scoping is `service.name`.
+
+| Selector | Grants |
+|----------|--------|
+| `*` | Every query type against every service for that telemetry resource. |
+| `builder_query/*` | All Query Builder queries against that resource, any service. |
+| `builder_query/service.name/<value>` | Query Builder queries filtered to `service.name = <value>` only (for example, `builder_query/service.name/checkout`). |
+| `promql/*` | All PromQL queries (applies to `metrics` only). |
+| `clickhouse_sql/*` | All ClickHouse SQL queries against that resource. |
+
+Selectors form a grant ladder: a broader selector covers everything below it. A query for `service.name = checkout` in the Query Builder is satisfied by any of `builder_query/service.name/checkout`, `builder_query/*`, or `*`.
+
+<Admonition type="info">
+**ClickHouse SQL and PromQL always require a wildcard grant.** A service-scoped `builder_query/service.name/<value>` selector does not cover raw ClickHouse SQL or PromQL, because those query types are not parsed for a `service.name` filter. To run ClickHouse SQL, the role also needs `clickhouse_sql/*` on each telemetry resource the query can touch (`logs`, `traces`, `metrics`, `meter-metrics`). To run PromQL, the role also needs `promql/*` on `metrics`.
+</Admonition>
+
+The managed roles are granted the wildcard selector (`*`) on the resources listed above, so their access is unrestricted for those telemetry types.
+
 ## Compound Transactions
 
 Some operations require transactions on multiple resources. Both transactions must be satisfied for the operation to succeed.
@@ -74,3 +112,14 @@ Some operations require transactions on multiple resources. Both transactions mu
 | Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
 | Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
 | Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |
+
+## Upgrade behavior
+
+Telemetry read permissions are seeded automatically. On the first startup after upgrading, a database migration runs and grants the managed roles their default telemetry access, so standard deployments need no manual configuration:
+
+- **signoz-admin**: read on `logs`, `traces`, `metrics`, `meter-metrics`, and `audit-logs`.
+- **signoz-editor** and **signoz-viewer**: read on `logs`, `traces`, `metrics`, and `meter-metrics`.
+
+<Admonition type="warning">
+Editor and Viewer principals do **not** receive `audit-logs` access. If any Editor or Viewer users previously relied on the flat check to query audit-log data, they lose that access after the upgrade. Grant them `audit-logs` read through a custom role if they still need it.
+</Admonition>

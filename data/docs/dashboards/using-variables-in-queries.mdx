@@ -1,11 +1,15 @@
 ---
-date: 2026-06-27
+date: 2026-07-17
 title: Using Variables in Queries
 description: Use dashboard variables in Query Builder, ClickHouse SQL, and PromQL queries in SigNoz.
 doc_type: howto
 ---
 
 Variables are referenced using `$var` syntax across all query types.
+
+<Admonition type="info">
+Dashboard variables are substituted **before** the authorization check. When a query filters on a variable (for example, `service.name = $service`), SigNoz evaluates permissions against the value the variable resolves to, not the variable name. A user with a [service-scoped role](https://signoz.io/docs/manage/administrator-guide/iam/roles/#scope-a-role-to-specific-telemetry) can use a dashboard whose variable resolves to a service they are allowed to query, but the query returns HTTP 403 if it resolves to a service outside their scope.
+</Admonition>
 
 ## Query Builder
 

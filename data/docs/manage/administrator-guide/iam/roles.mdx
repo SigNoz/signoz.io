@@ -1,5 +1,5 @@
 ---
-date: 2026-06-26
+date: 2026-07-17
 title: Roles
 description: Create and manage roles in SigNoz — managed roles, custom roles, and configuring transactions with the interactive or JSON editor.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -98,6 +98,48 @@ Each entry is a transaction group with an `objectGroup` (the resource and its se
 <Admonition type="info">
 If the JSON contains errors, switching back to Interactive mode prompts you to discard the invalid changes. Fix the errors first to keep your edits.
 </Admonition>
+
+## Scope a Role to Specific Telemetry
+
+Custom roles can restrict a user to querying data for specific services only. This is useful when a team should see telemetry for the services they own but not the rest of the platform. Telemetry access is enforced on the v5 query endpoints and is `read`-only.
+
+Telemetry selectors are qualified by query type and follow the form `<query-type>/service.name/<value>`. Grant `builder_query/service.name/<value>` to allow Query Builder queries filtered to a single service, `builder_query/*` for all services, or `*` for every query type against every service. For the full selector reference, see [Telemetry Resources](https://signoz.io/docs/manage/administrator-guide/iam/transactions/#telemetry-resources).
+
+The following JSON creates a `checkout-team` role that can query logs and traces only where `service.name = checkout`:
+
+```json
+[
+  {
+    "objectGroup": {
+      "resource": { "kind": "logs", "type": "telemetryresource" },
+      "selectors": ["builder_query/service.name/checkout"]
+    },
+    "relation": "read"
+  },
+  {
+    "objectGroup": {
+      "resource": { "kind": "traces", "type": "telemetryresource" },
+      "selectors": ["builder_query/service.name/checkout"]
+    },
+    "relation": "read"
+  }
+]
+```
+
+To build this in Interactive mode, open the telemetry resource card, set the `read` action to **Only selected**, and add the selector `builder_query/service.name/checkout`.
+
+<Admonition type="info">
+**ClickHouse SQL and PromQL are not covered by a service scope.** A `builder_query/service.name/<value>` grant does not authorize raw ClickHouse SQL or PromQL. If the role needs those, also grant `clickhouse_sql/*` (on each telemetry resource the query touches) and `promql/*` (on `metrics`). See [Telemetry Resources](https://signoz.io/docs/manage/administrator-guide/iam/transactions/#telemetry-selectors).
+</Admonition>
+
+<Admonition type="warning">
+**Current limitations of service-scoped roles**
+
+- A query that combines services with `OR` (for example, `service.name = A OR service.name = B`) is denied even when the role grants both `A` and `B` individually. Use separate dashboards or panels per service, or grant a broader selector.
+- Only `service.name` can be used to scope Query Builder telemetry access today.
+</Admonition>
+
+When a query requests a service the role does not cover, the endpoint returns **HTTP 403** (permission denied) and no data is returned.
 
 ## View a Role
 
