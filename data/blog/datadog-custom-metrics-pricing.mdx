@@ -13,7 +13,7 @@ related_articles:
   - '/blog/datadog-pricing'
 ---
 
-Datadog has been famous among engineering teams for two things: its observability products, and the complex bill that comes with them. Plenty of people have struggled just to understand how Datadog bills them in the first place, which is why we broke down the full [Datadog pricing model](https://signoz.io/blog/datadog-pricing/) in a separate blog. But custom metrics pricing is confusing enough to deserve its own dedicated post, so we've covered it in detail here.
+Datadog is known among engineering teams for two things: its observability products, and the complex bill that comes with them. Plenty of people struggle just to understand how Datadog bills them in the first place, which is why we broke down the full [Datadog pricing model](https://signoz.io/blog/datadog-pricing/) in a separate blog. But custom metrics pricing is confusing enough to deserve its own dedicated post, so we've covered it in detail here.
 
 <Figure
   src="/img/blog/2026/05/datadog-custom-metrics-pricing-reddit.webp"
@@ -21,12 +21,12 @@ Datadog has been famous among engineering teams for two things: its observabilit
   caption="Reddit post about auditing Datadog bill and discovering unused custom metrics (Credit: Reddit)"
 />
 
-This blog walks through how Datadog actually bills custom metrics, what counts as one, how cardinality drives the total, what each plan includes, and how Metrics without Limits and Metric Name pricing change the math. Every figure here comes from Datadog's official billing documentation as of July 2026.
+This blog walks through how Datadog actually bills custom metrics, what counts as one, how cardinality drives the total, what each plan includes, and how Datadog features such as, Metrics without Limits and Metric Name pricing change the math. Every figure here comes from Datadog's official billing documentation as of July 2026.
 By the end, you'll be able to decode your Datadog custom metrics pricing and know exactly what you're paying for.
 
 ## What Counts as a Datadog Custom Metric?
 
-Datadog considers a metric "custom" if it isn't emitted by one of its 1,000+ built-in integrations. That includes anything you send yourself through DogStatsD or a custom Agent check, the extra metrics that some standard integrations emit beyond their defaults, and application-defined OTel metrics or unmapped receiver metrics. The important part is how they're counted: **a custom metric is uniquely identified by the combination of a metric name and its tag values, including the host tag.** So a single metric name can expand into many billable custom metrics, depending on how you tag it.
+Datadog considers a metric "custom" if it isn't emitted by one of its 1,000+ built-in integrations. That includes anything you send yourself through <Tooltip text="DogStatsD" content="The metrics aggregation service that comes bundled with the Datadog Agent." /> or a custom Agent check, the extra metrics that some standard integrations emit beyond their defaults, and application-defined OTel metrics or unmapped receiver metrics. The important part is how they're counted: **a custom metric is uniquely identified by the combination of a metric name and its tag values, including the host tag.** So a single metric name can expand into many billable custom metrics, depending on how you tag it.
 
 For example, say you emit a metric called `request.latency` tagged with `region` (values: `us`, `eu`) and `status` (values: `200`, `400`). The number of custom metrics is the product of the distinct values across your tags, so `2 regions × 2 statuses = 4 unique combinations`. Each combination counts as its own custom metric:
 
@@ -41,7 +41,7 @@ request.latency{region:eu, status:400}
 That's one metric name, but four custom metrics on your bill. This is why cardinality matters so much. The count multiplies with every tag you add. Introduce a [high-cardinality](https://signoz.io/blog/high-cardinality-data/) tag like `user_id` with 1,250 active users, and that same metric jumps to `2 × 2 × 1,250 = 5,000 custom metrics`.
 
 <KeyPointCallout defaultCollapsed="false" title="Quick Note">
-Above mentioned clean multiplication holds only when your tags vary independently. If tags are correlated, adding one may not raise the count, Datadog notes your total usually scales with the most granular tag rather than the product of every tag.
+Above mentioned clean multiplication holds only when your tags don't overlap. If tags are correlated, adding one may not raise the count, Datadog notes that your total custom metrics count usually scales with the most granular tag rather than the product of every tag.
 </KeyPointCallout>
 
 Every Datadog plan comes with a base allotment of custom metrics, pooled across your entire infrastructure rather than locked to individual hosts. Anything beyond that allotment is billed as overage:
@@ -68,7 +68,7 @@ This detail matters more than it looks. A metric that spikes to 50,000 timeserie
 
 ### Metrics Without Limits
 
-This is where the `ingested` vs. `indexed` split from earlier comes back. By default, every custom metric you send is both ingested (received by Datadog) and indexed (kept queryable), and you're billed on the indexed count. [Metrics without Limits](https://docs.datadoghq.com/metrics/metrics-without-limits/) lets you keep sending everything while choosing which tags stay queryable, which shrinks your indexed volume and, with it, your bill. Take the `request.latency` example again. Say you drop the high-cardinality `user_id` tag from indexing but keep `region` and `status`. Your indexed count falls from 5,000 back down to 4 combinations, while all 5,000 are still ingested so the raw data isn't lost. 
+This is where the `ingested` vs. `indexed` split from earlier comes back. By default, every custom metric you send is both ingested (received by Datadog) and indexed (kept queryable), and you're billed on the indexed count. Metrics without Limits lets you keep sending everything while choosing which tags stay queryable, which shrinks your indexed volume and, with it, your bill. Take the `request.latency` example again. Say you drop the high-cardinality `user_id` tag from indexing but keep `region` and `status`. Your indexed count falls from 5,000 back down to 4 combinations, while all 5,000 are still ingested so the raw data isn't lost. 
 
 The trade-off is that, once a metric is configured with Metrics without Limits, you're billed for its ingested volume too ($0.10 per 100 ingested over your allotment), on top of the indexed charge.
 
@@ -97,7 +97,7 @@ Custom metrics are one of the biggest and quietest cost drivers in Datadog, ofte
 
 #### 1. Eliminate high-cardinality tags
 
-Each unique metric name + tag combination is its own billable timeseries, so one unbounded tag can turn a single metric into thousands. Never tag with `user_id`, UUIDs, `request_id`, `session_id`, or timestamps. Instead, replace them with low-cardinality groupings:
+Each unique metric name + tag combination is its own billable timeseries, so one unbounded tag can turn a single metric into thousands. Never tag with `user_id`, UUIDs, `request_id`, `session_id`, or timestamps. Instead, replace them with low-cardinality groupings.
 
 #### 2. Consolidate redundant and duplicate metrics
 
@@ -117,7 +117,7 @@ For metrics where you still want the raw data ingested but don't query every tag
 
 Treat your custom metrics volume like any other monitored system. Use the Metrics Summary page to find your top metrics by cardinality, clean up ones not queried in 30+ days, and set cost monitors that fire when custom metrics grow more than a few percent week over week. Guardrails keep cardinality from quietly creeping back after a cleanup.
 
-Still, these tactics are ultimately damage control. Once your team is trimming useful tags or managing a second billing configuration just to keep costs in check, the pricing model is fighting how you actually use metrics, which is why many teams start weighing [Datadog alternatives](https://signoz.io/blog/datadog-alternatives/).
+Still, these tactics are ultimately damage control. Once your team is trimming useful tags or managing a second billing configuration just to keep costs in check, *the pricing model is fighting how you actually use metrics*, which is why many teams start weighing [Datadog alternatives](https://signoz.io/blog/datadog-alternatives/).
 
 ## SigNoz Cloud: Datadog Alternative Without the Custom Metrics Tax
 
@@ -131,7 +131,7 @@ Look back at your own custom metrics prices you are paying for a moment. How muc
 | Custom metrics | $5 per 100 over allotment | $0.10 per million metric samples, all series included |
 | High-cardinality tags | Each new tag value multiplies your billable series | No per-series penalty, cost scales with volume |
 | Ingested vs. indexed | Separate charges to manage with Metrics without Limits | Single volume-based pool, no split to configure |
-| OpenTelemetry metrics | Billed as custom metrics | Not penalized, OTel-native |
+| OpenTelemetry metrics | Billed as custom metrics | Not penalized, [OTel-native](https://signoz.io/blog/opentelemetry-metrics-with-examples/) |
 | Forecasting | Cardinality is hard to predict as tags grow | Predictable, scales with raw sample volume |
 
 Run your own calculation against above table. If your bill is dominated by custom metrics and high-cardinality tags, the gap isn't a rounding difference.
