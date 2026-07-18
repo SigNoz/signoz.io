@@ -1,0 +1,370 @@
+---
+date: 2026-07-17
+title: Monitor Bugsnag Errors and Crashes with SigNoz
+description: Forward Bugsnag error and crash events to SigNoz — config-only for self-hosted using the bundled webhook event receiver, or via a small webhook bridge for SigNoz Cloud.
+doc_type: howto
+---
+
+## Overview
+
+<a href="https://www.bugsnag.com" target="_blank" rel="noopener noreferrer nofollow">Bugsnag</a> (SmartBear) is an error monitoring platform for mobile and web applications. SigNoz ingests Bugsnag error events as logs using Bugsnag's <a href="https://docs.bugsnag.com/product/integrations/data-forwarding/webhook/" target="_blank" rel="noopener noreferrer nofollow">Webhook data forwarding</a> integration.
+
+Bugsnag delivers a JSON payload to a webhook each time a notification trigger fires — a new error, a reopened error, a spike in error events, or a new release. For **self-hosted SigNoz**, no extra service is required: the SigNoz OpenTelemetry Collector already bundles the `webhookevent` receiver, and a transform processor maps Bugsnag fields (severity, exception class, app version, device, OS, user) to log attributes — the whole integration is one collector config change. For **SigNoz Cloud**, a small webhook bridge does the same mapping and forwards over OTLP.
+
+With your Bugsnag events in SigNoz, you can:
+
+- Search and analyze crashes and errors — by app version, release stage, device model, OS version, or exception class — in the [Logs explorer](https://signoz.io/docs/logs-management/overview/).
+- Import the [Bugsnag dashboard](https://signoz.io/docs/dashboards/dashboard-templates/bugsnag-dashboard/) for error volume, unhandled-crash share, affected users, and top exception classes at a glance.
+- Build [log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/), such as a spike of unhandled crashes after a release.
+- Correlate client-side errors with the backend logs, traces, and metrics already in SigNoz.
+
+<Admonition type="info">
+This integration forwards **error and crash events**. For full mobile real-user monitoring — sessions, app performance, network timing — instrument your app with the OpenTelemetry SDKs; see [Mobile monitoring](https://signoz.io/docs/mobile-monitoring/). The two work well together.
+</Admonition>
+
+## Prerequisites
+
+- A `SigNoz Cloud` or self-hosted SigNoz workspace
+- A Bugsnag account with a project reporting errors, and permission to manage that project's integrations
+- Bugsnag webhooks are not signed and cannot carry custom headers, so authentication uses a **random secret in the webhook URL path** — generate one with `openssl rand -hex 24` and use it wherever `<random-secret>` appears below
+
+## Forward Error Events
+
+<Tabs entityName="plans">
+<TabItem value="self-hosted" label="Self-Hosted SigNoz" default>
+
+### Step 1: Add the receiver and transform to your Collector
+
+Append the following to your SigNoz Collector config (`otel-collector-config.yaml` in your deploy directory). The `webhookevent` receiver accepts the Bugsnag POST, and the transform parses the payload into queryable attributes:
+
+```yaml
+receivers:
+  webhookevent/bugsnag:
+    endpoint: 0.0.0.0:4435
+    path: /webhook/<random-secret>
+```
+
+```yaml
+processors:
+  transform/bugsnag:
+    error_mode: ignore
+    log_statements:
+    - context: log
+      statements:
+      - 'set(resource.attributes["service.name"], "bugsnag")'
+      - 'set(attributes["source"], "bugsnag")'
+      - 'merge_maps(cache, ParseJSON(body), "upsert")'
+      - 'set(severity_text, "ERROR") where cache["error"]["severity"] == "error"'
+      - 'set(severity_number, 17) where cache["error"]["severity"] == "error"'
+      - 'set(severity_text, "WARN") where cache["error"]["severity"] == "warning"'
+      - 'set(severity_number, 13) where cache["error"]["severity"] == "warning"'
+      - 'set(severity_text, "INFO") where cache["error"]["severity"] == "info"'
+      - 'set(severity_number, 9) where cache["error"]["severity"] == "info"'
+      - 'set(severity_text, "INFO") where severity_text == ""'
+      - 'set(severity_number, 9) where severity_number == 0'
+      - 'set(attributes["bugsnag.trigger.type"], cache["trigger"]["type"])'
+      - 'set(attributes["bugsnag.project.name"], cache["project"]["name"])'
+      - 'set(attributes["bugsnag.error.id"], cache["error"]["id"])'
+      - 'set(attributes["bugsnag.error.url"], cache["error"]["url"])'
+      - 'set(attributes["bugsnag.error.status"], cache["error"]["status"])'
+      - 'set(attributes["bugsnag.error.unhandled"], cache["error"]["unhandled"])'
+      - 'set(attributes["bugsnag.error.context"], cache["error"]["context"])'
+      - 'set(attributes["exception.type"], cache["error"]["exceptionClass"])'
+      - 'set(attributes["exception.message"], cache["error"]["message"])'
+      - 'set(attributes["app.version"], cache["error"]["app"]["version"])'
+      - 'set(attributes["bugsnag.release_stage"], cache["error"]["app"]["releaseStage"])'
+      - 'set(attributes["device.manufacturer"], cache["error"]["device"]["manufacturer"])'
+      - 'set(attributes["device.model.name"], cache["error"]["device"]["model"])'
+      - 'set(attributes["os.name"], cache["error"]["device"]["osName"])'
+      - 'set(attributes["os.version"], cache["error"]["device"]["osVersion"])'
+      - 'set(attributes["user.id"], cache["error"]["user"]["id"])'
+      - 'set(attributes["bugsnag.release.version"], cache["release"]["version"])'
+```
+
+Add the pipeline to the `service` section:
+
+```yaml
+service:
+  pipelines:
+    logs/bugsnag:
+      receivers: [webhookevent/bugsnag]
+      processors: [transform/bugsnag, batch]
+      exporters: [clickhouselogsexporter]
+```
+
+<Admonition type="info">
+Running a separate gateway Collector (`otelcol-contrib`) in front of SigNoz? The same receiver and transform work there too — it bundles `webhookevent` as well. Use your existing `otlp` exporter to SigNoz in the pipeline instead of `clickhouselogsexporter`.
+</Admonition>
+
+### Step 2: Expose the receiver over HTTPS
+
+- If SigNoz runs in Docker, publish the port on the Collector container (add `"4435:4435"` to its `ports`).
+- Expose `https://<your-domain>/webhook/<random-secret>` publicly through your reverse proxy or load balancer with a valid certificate — Bugsnag only delivers to public HTTPS endpoints. Route only the `/webhook/*` path to port 4435 and keep the rest of SigNoz private.
+- Optionally restrict the path to Bugsnag's <a href="https://docs.bugsnag.com/product/integrations/data-forwarding/webhook/" target="_blank" rel="noopener noreferrer nofollow">published source IPs</a>.
+
+Restart the Collector and confirm the receiver is up:
+
+```bash
+curl -s http://localhost:4435/health_check
+```
+
+</TabItem>
+<TabItem value="cloud" label="SigNoz Cloud">
+
+SigNoz Cloud manages the ingestion Collector for you, so the receiver approach isn't available — instead, deploy a small **webhook bridge** that authenticates Bugsnag requests, maps the payload to log attributes, and forwards over OTLP with your ingestion key.
+
+### Step 1: Create the webhook bridge
+
+```bash
+mkdir bugsnag-signoz-bridge
+cd bugsnag-signoz-bridge
+npm init -y
+npm install express
+```
+
+Create a file named `index.js` with the following code:
+
+```javascript:index.js
+import express from "express";
+
+const app = express();
+const port = process.env.PORT || 3080;
+
+app.use(express.json({ limit: "5mb" }));
+
+// OTel log severity mapping for Bugsnag severities
+const SEVERITY = {
+  error: { text: "ERROR", number: 17 },
+  warning: { text: "WARN", number: 13 },
+  info: { text: "INFO", number: 9 },
+};
+
+app.get("/health", (_req, res) => {
+  res.send("OK");
+});
+
+app.post("/webhook/:token", async (req, res) => {
+  if (!process.env.WEBHOOK_TOKEN) {
+    console.error("Missing WEBHOOK_TOKEN environment variable");
+    return res.status(500).send("Server configuration error");
+  }
+
+  if (req.params.token !== process.env.WEBHOOK_TOKEN) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  const payload = req.body;
+  if (!payload || !payload.trigger) {
+    return res.status(400).send("Not a Bugsnag webhook payload");
+  }
+
+  try {
+    await sendToSigNoz(toLogRecord(payload));
+    res.send("OK");
+  } catch (error) {
+    console.error("Error processing webhook:", error);
+    res.status(500).send("Internal server error");
+  }
+});
+
+function toLogRecord(payload) {
+  const { trigger, project, error, release } = payload;
+  const severity = SEVERITY[error?.severity] || SEVERITY.info;
+  const exception = error?.exceptions?.[0];
+
+  const record = {
+    severity_text: severity.text,
+    severity_number: severity.number,
+    body: error
+      ? `${error.exceptionClass ?? "Error"}: ${error.message ?? ""}${error.context ? ` (${error.context})` : ""}`
+      : trigger.message || `Bugsnag: ${trigger.type}`,
+    resources: compact({
+      "service.name": process.env.SERVICE_NAME || "bugsnag",
+      "deployment.environment": error?.app?.releaseStage || release?.releaseStage,
+    }),
+    attributes: compact({
+      "bugsnag.trigger.type": trigger.type,
+      "bugsnag.project.name": project?.name,
+      "bugsnag.error.id": error?.id,
+      "bugsnag.error.url": error?.url,
+      "bugsnag.error.status": error?.status,
+      "bugsnag.error.unhandled": error?.unhandled,
+      "bugsnag.error.context": error?.context,
+      "bugsnag.release.version": release?.version,
+      "exception.type": exception?.errorClass ?? error?.exceptionClass,
+      "exception.message": exception?.message ?? error?.message,
+      "exception.stacktrace": formatStacktrace(exception?.stacktrace),
+      "app.version": error?.app?.version ?? release?.version,
+      "bugsnag.app.type": error?.app?.type,
+      "device.manufacturer": error?.device?.manufacturer,
+      "device.model.name": error?.device?.model,
+      "os.name": error?.device?.osName,
+      "os.version": error?.device?.osVersion,
+      "user.id": error?.user?.id ?? error?.userId,
+      "user.email": error?.user?.email,
+    }),
+  };
+
+  // Preserve Bugsnag's receive time when present
+  const receivedMs = Date.parse(error?.receivedAt ?? "");
+  if (!Number.isNaN(receivedMs)) {
+    record.timestamp_ms = receivedMs;
+  }
+
+  return record;
+}
+
+function formatStacktrace(frames) {
+  if (!Array.isArray(frames) || frames.length === 0) return undefined;
+  return frames
+    .slice(0, 25)
+    .map((f) => `at ${f.method ?? "?"} (${f.file ?? "?"}:${f.lineNumber ?? "?"})`)
+    .join("\n");
+}
+
+function compact(obj) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== undefined && v !== null && v !== "")
+  );
+}
+
+// OTLP/HTTP JSON envelope
+function toOtlpPayload(record) {
+  const toKeyValues = (obj) =>
+    Object.entries(obj).map(([key, v]) => ({
+      key,
+      value:
+        typeof v === "boolean"
+          ? { boolValue: v }
+          : typeof v === "number" && Number.isInteger(v)
+            ? { intValue: String(v) }
+            : { stringValue: String(v) },
+    }));
+
+  const logRecord = {
+    severityText: record.severity_text,
+    severityNumber: record.severity_number,
+    body: { stringValue: record.body },
+    attributes: toKeyValues(record.attributes),
+  };
+  if (record.timestamp_ms) {
+    logRecord.timeUnixNano = (BigInt(record.timestamp_ms) * 1000000n).toString();
+  }
+
+  return {
+    resourceLogs: [
+      {
+        resource: { attributes: toKeyValues(record.resources) },
+        scopeLogs: [{ scope: { name: "bugsnag-signoz-bridge" }, logRecords: [logRecord] }],
+      },
+    ],
+  };
+}
+
+async function sendToSigNoz(record) {
+  const url = process.env.SIGNOZ_LOGS_URL;
+  if (!url) {
+    throw new Error("Missing SIGNOZ_LOGS_URL environment variable");
+  }
+
+  const headers = { "Content-Type": "application/json" };
+  if (process.env.SIGNOZ_INGESTION_KEY) {
+    headers["signoz-ingestion-key"] = process.env.SIGNOZ_INGESTION_KEY;
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(toOtlpPayload(record)),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to send to SigNoz: ${response.status} ${text}`);
+  }
+
+  console.log(`Forwarded ${record.attributes["bugsnag.trigger.type"]} event to SigNoz`);
+}
+
+app.listen(port, () => {
+  console.log(`Webhook Bridge running on port ${port}`);
+});
+```
+
+Add `"type": "module"` to your `package.json` to enable ES modules:
+
+```json:package.json
+{
+  "type": "module"
+}
+```
+
+### Step 2: Configure and deploy
+
+```bash
+export SIGNOZ_LOGS_URL="https://ingest.<region>.signoz.cloud:443/v1/logs"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+export WEBHOOK_TOKEN="<random-secret>"
+```
+
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
+- `<your-ingestion-key>`: your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Deploy to any Node.js hosting platform (Railway, Render, Vercel, AWS) and note the public HTTPS URL.
+
+</TabItem>
+</Tabs>
+
+### Step 3: Create the webhook in Bugsnag
+
+1. In the Bugsnag dashboard, open your project and go to **Settings**, then select the **Integrations and email** tab.
+2. Under **Data forwarding**, select **Webhook**.
+3. Set the webhook URL to your endpoint, including the secret:
+   ```
+   https://<your-domain>/webhook/<random-secret>
+   ```
+4. Choose which events notify the webhook — for example, new errors (`firstException`), reopened errors, and error spikes. To forward every error occurrence, enable the per-event trigger (`exception`) — this is higher volume and may be limited on some Bugsnag plans.
+5. Save the integration and use **Send test notification**.
+
+<Admonition type="warning">
+By default, Bugsnag only notifies webhooks about **new** error types, reopened errors, and spikes — a crash that is another occurrence of an already-known error does not fire the webhook. If you expect every crash to reach SigNoz, enable the per-event trigger ("every time an error event is received") and verify it is available on your Bugsnag plan.
+</Admonition>
+
+## Validate
+
+1. Open the [Logs explorer](https://signoz.io/docs/logs-management/overview/) in SigNoz and filter `service.name = bugsnag` — the test notification appears within seconds.
+2. Each event carries the mapped severity plus attributes such as `exception.type`, `exception.message`, `app.version`, `bugsnag.release_stage`, `os.name`, `os.version`, `device.model.name`, `user.id`, `bugsnag.error.unhandled`, and a `bugsnag.error.url` deep link back to the issue in Bugsnag.
+3. Import the [Bugsnag dashboard template](https://signoz.io/docs/dashboards/dashboard-templates/bugsnag-dashboard/) to see volume, unhandled share, and breakdowns populate.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No events appearing in SigNoz
+
+- Confirm the webhook URL is reachable from the internet over HTTPS and includes the correct `<random-secret>` — the receiver answers `404` for any other path.
+- Self-hosted: check the Collector logs after a test notification, and confirm the `logs/bugsnag` pipeline is present and the Collector restarted cleanly (`curl http://localhost:4435/health_check` returns `200`).
+- SigNoz Cloud: check the bridge logs; verify the region in `SIGNOZ_LOGS_URL` and that the ingestion key is valid.
+
+### Events arrive only for some errors
+
+- Bugsnag notifies on the triggers selected in the integration's settings — by default that is notification-worthy events (new, reopened, spiking errors), not every occurrence.
+- Enable the per-event trigger in Bugsnag if you need every error event forwarded, and account for the higher volume.
+
+### Missing attributes on log records
+
+- Bugsnag includes `app`, `device`, and `user` details only on error triggers — release and project notifications carry less context (they still ingest, with severity `INFO`).
+- The raw payload is preserved in the log body, so any field not extracted by the transform remains searchable and can be added as another `set(attributes[...], cache[...])` statement.
+
+</details>
+
+## Next Steps
+
+- Import the [Bugsnag dashboard template](https://signoz.io/docs/dashboards/dashboard-templates/bugsnag-dashboard/).
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) on Bugsnag activity, such as unhandled crashes in your latest release.
+- Add [OpenTelemetry mobile instrumentation](https://signoz.io/docs/mobile-monitoring/) for the performance side of real-user monitoring.
+
+## Get Help
+
+<GetHelp />
