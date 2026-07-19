@@ -1,5 +1,5 @@
 ---
-date: 2026-05-20
+date: 2026-07-19
 title: Metrics based alerts
 description: Learn how to create metrics-based alerts in SigNoz by defining alert conditions, configuring notification settings, and using practical examples for memory usage, error rate, and latency monitoring.
 doc_type: reference
@@ -149,11 +149,18 @@ In this step, you configure how alert notifications are delivered:
 ### Notification Message
 Custom message content for alert notifications. Use template variables to include dynamic information. The default template includes the current value and threshold.
 
-You can incorporate result attributes in the alert message to make notifications more informative:
+You can incorporate template variables in the alert message to make notifications more informative:
 
-**Syntax**: Use `$<attribute-name>` to insert attribute values. Attribute values can be any attribute used in group by.
+| Variable | Description |
+| --- | --- |
+| `{{$value}}` | The current aggregated value that triggered the alert, formatted using the query's Y-axis unit |
+| `{{$threshold}}` | The threshold value that was breached, formatted using the threshold unit |
+| `$<attribute-name>` | Any attribute used in the Group By clause (e.g., `$service.name`) |
 
-**Example**: If you have a query that has the attribute `service.name` in the group by clause then to use it in the notification message, you will use `$service.name`.
+`{{$value}}` and `{{$threshold}}` use different unit sources for formatting. `{{$value}}` is formatted according to the Y-axis unit set on the query (Step 1), while `{{$threshold}}` is formatted according to the threshold unit (Step 2). If these units differ, the two variables render in different scales. For example, if the Y-axis unit is set to binary Bytes, `{{$value}}` renders as GiB/MiB/KiB, but if the threshold unit is set to decimal Bytes (SI), `{{$threshold}}` renders as GB/MB/KB. To align them, set the query's Y-axis unit to the same unit family as the threshold unit.
+
+**Example**: If you have a query grouped by `service.name` with a threshold of 500 MB, you could write:
+`Memory usage for $service.name is {{$value}} (threshold: {{$threshold}})`
 
 Using <a href="https://api.slack.com/reference/surfaces/formatting#advanced" target="_blank" rel="noopener noreferrer nofollow">advanced Slack formatting</a> is supported if you are using Slack as a notification channel.
 
