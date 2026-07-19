@@ -9,7 +9,7 @@ doc_type: explanation
   Before using this dashboard, forward your Bugsnag error events to SigNoz — a config-only Collector change for self-hosted, or a small webhook bridge for SigNoz Cloud. See the [Bugsnag integration guide](https://signoz.io/docs/integrations/outposts/bugsnag/) for complete setup instructions.
 </Admonition>
 
-This dashboard provides a comprehensive view of the Bugsnag error events forwarded to SigNoz as logs. It is built on the `bugsnag.*`, `exception.*`, `app.*`, `os.*`, and `device.*` log attributes produced by the integration's collector transform, and focuses on error volume, unhandled crash share, affected users, and how errors break down by app version, exception class, and device. Every panel filters on `service.name = bugsnag`, the service name the integration assigns to forwarded events.
+This dashboard provides a comprehensive view of the Bugsnag error events forwarded to SigNoz as logs. It is built on the `bugsnag.*`, `exception.*`, `app.*`, `os.*`, and `device.*` log attributes produced by the integration's collector transform, and focuses on error volume, unhandled crash share, affected users, and how errors break down by app version, exception class, and device. Every panel filters on `service.name = bugsnag`, the service name the integration assigns to forwarded events, and an `exception.type` dashboard variable lets you focus the breakdown panels and the events list on one exception class for drill-down.
 
 ## Dashboard Preview
 
@@ -51,12 +51,14 @@ This dashboard tracks the health of your mobile and web applications using the e
 
 ### Error Trends
 
-- **Error Events Over Time by Severity**: Time-series graph of event counts grouped by severity, revealing spikes and whether they are errors, warnings, or info events.
-- **Error Events Over Time by App Version**: Time-series graph of event counts grouped by `app.version`, making release regressions immediately visible.
+- **Crashes vs Handled Errors**: Time-series graph split by `bugsnag.error.unhandled` — crashes and caught errors as separate series, so a stability regression stands out from ordinary error noise.
+- **Error Events by Severity**: Time-series graph of event counts grouped by severity, revealing spikes and whether they are errors, warnings, or info events.
+- **Error Events by App Version**: Time-series graph of event counts grouped by `app.version`, making release regressions immediately visible.
 
 ### Top Offenders
 
-- **Top Exception Classes**: Table of `exception.type` ranked by event count, so the highest-impact bugs surface first.
+- **Top Exception Classes**: Table of `exception.type` ranked by event count and split by unhandled/handled, so the highest-impact bugs surface first. Select a class in the `exception.type` variable to focus the rest of the dashboard on it.
+- **Errors by Context**: Table of `bugsnag.error.context` — the screen, activity, or route where errors concentrate.
 
 ### Devices & Platforms
 
@@ -65,4 +67,4 @@ This dashboard tracks the health of your mobile and web applications using the e
 
 ### Recent Activity
 
-- **Recent Error Events**: List of the most recent Bugsnag events ordered by timestamp descending, each carrying the exception class, message, stacktrace, and a `bugsnag.error.url` deep link back to the issue in Bugsnag.
+- **Recent Error Events**: List of the most recent Bugsnag events with a readable `ExceptionClass: message` body line. Opening an event shows the stacktrace (`exception.stacktrace`), the full raw payload (`bugsnag.payload`), and a `bugsnag.error.url` deep link back to the issue in Bugsnag. Respects the `exception.type` variable for per-class investigation.
