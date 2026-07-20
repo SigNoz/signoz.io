@@ -6,7 +6,6 @@ import { TabsRoot, TabsList, TabsTrigger } from '@signozhq/ui/tabs'
 import { useSearchParamsState } from '@/hooks/useSearchParamsState'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import type { TabItemProps } from './TabItem'
-import { cn } from 'app/lib/utils'
 
 interface TabsProps {
   children: React.ReactNode
@@ -79,7 +78,7 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
 
   return (
     <TabsRoot
-      className={cn(className || 'w-full')}
+      className={className || 'w-full'}
       data-tabs-root=""
       value={activeTab ?? undefined}
       onValueChange={handleTabChange}
@@ -91,9 +90,12 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
             <TabsTrigger
               key={value as string}
               value={value as string}
-              data-tab-value={value as string}
               variant={dsVariant}
-              onMouseDown={() => handleTabChange(value as string)}
+              // onClick + data-tab-value: forwarded via ...props (not in TabsTriggerProps typings)
+              {...({
+                'data-tab-value': value as string,
+                onClick: () => handleTabChange(value as string),
+              } as Record<string, unknown>)}
             >
               {label}
             </TabsTrigger>
