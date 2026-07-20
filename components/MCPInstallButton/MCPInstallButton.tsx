@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@signozhq/ui/button'
 import { useRegion } from '../Region/RegionContext'
 
 interface MCPInstallButtonProps {
@@ -57,21 +58,23 @@ const MCPInstallButton: React.FC<MCPInstallButtonProps> = ({ client, children, i
   const hasSelectedRegion = selectedRegion ? availableRegions.includes(selectedRegion) : false
 
   const renderInstallLink = (href: string, label: React.ReactNode) => (
-    <a
-      href={href}
-      className="not-prose inline-flex items-center justify-center gap-2 rounded-md border border-black/10 bg-white px-3.5 py-1.5 text-sm font-semibold leading-none text-gray-900 no-underline shadow-sm transition-colors hover:bg-zinc-100 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-    >
-      {icon && ICON_SRCS[icon] && (
-        <img
-          src={ICON_SRCS[icon]}
-          alt=""
-          width={18}
-          height={18}
-          className="not-prose m-0 block shrink-0 rounded-sm p-0"
-        />
-      )}
-      <span className="leading-none">{label}</span>
-    </a>
+    <Button asChild variant="outlined" color="secondary">
+      <a
+        href={href}
+        className="not-prose inline-flex items-center justify-center gap-2 no-underline"
+      >
+        {icon && ICON_SRCS[icon] && (
+          <img
+            src={ICON_SRCS[icon]}
+            alt=""
+            width={18}
+            height={18}
+            className="not-prose m-0 block shrink-0 rounded-sm p-0"
+          />
+        )}
+        <span className="leading-none">{label}</span>
+      </a>
+    </Button>
   )
 
   return (

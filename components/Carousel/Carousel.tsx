@@ -36,7 +36,7 @@ export default function NextCarousel({ items: rawItems }: { items: string | stri
   }
 
   return (
-    <div className="next-carousel">
+    <div className="next-carousel overflow-hidden rounded-md border border-[var(--l2-border)] bg-[var(--l2-background)]">
       <Carousel responsive={responsive}>
         {items.map((item, index) => {
           return (
