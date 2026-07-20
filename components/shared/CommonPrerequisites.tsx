@@ -1,4 +1,5 @@
-import TableWrapper from '@/components/TableWrapper'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@signozhq/ui/table'
+import { Typography } from '@signozhq/ui/typography'
 
 export default function CommonPrerequisites() {
   return (
@@ -17,36 +18,36 @@ export default function CommonPrerequisites() {
         You must have <code>kubectl</code> access to your cluster
       </li>
       <li>
-        <p className="mb-3">
+        <Typography.Text as="p" className="mb-3">
           The following table describes the hardware requirements that are needed to install SigNoz
           on Kubernetes:
-        </p>
-        <TableWrapper>
-          <thead>
-            <tr>
-              <th>Component</th>
-              <th>Minimal Requirements</th>
-              <th>Recommended</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Memory</td>
-              <td>8 GB</td>
-              <td>16 GB</td>
-            </tr>
-            <tr>
-              <td>CPU</td>
-              <td>4 cores</td>
-              <td>8 cores</td>
-            </tr>
-            <tr>
-              <td>Storage</td>
-              <td>30 GB</td>
-              <td>80 GB</td>
-            </tr>
-          </tbody>
-        </TableWrapper>
+        </Typography.Text>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Component</TableHead>
+              <TableHead>Minimal Requirements</TableHead>
+              <TableHead>Recommended</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell>Memory</TableCell>
+              <TableCell>8 GB</TableCell>
+              <TableCell>16 GB</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>CPU</TableCell>
+              <TableCell>4 cores</TableCell>
+              <TableCell>8 cores</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Storage</TableCell>
+              <TableCell>30 GB</TableCell>
+              <TableCell>80 GB</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </li>
     </ul>
   )
