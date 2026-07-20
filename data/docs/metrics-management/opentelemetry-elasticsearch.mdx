@@ -1,0 +1,208 @@
+---
+date: 2026-07-20
+title: Send Elasticsearch Metrics to SigNoz with OpenTelemetry
+description: Scrape Elasticsearch cluster, node, and index metrics with the OpenTelemetry Collector and send them to SigNoz for monitoring.
+doc_type: howto
+---
+
+## Overview
+
+Use this guide to send Elasticsearch cluster metrics to SigNoz with the OpenTelemetry Collector. Monitor cluster health, node resource usage, index operations, search performance, JVM, cache, circuit breakers, and thread pools.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Use the same steps. Update the endpoint and remove the ingestion key header as shown in [Cloud -> Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- A running Elasticsearch cluster (version 7.9 or later)
+- If Elasticsearch security features are enabled, a user with the `monitor` cluster privilege (for cluster health and node stats) and the `monitor` index privilege (for index stats). See the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/authorization.html" target="_blank" rel="noopener noreferrer nofollow">Elasticsearch authorization docs</a>
+- [OpenTelemetry Collector Contrib](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) installed
+- An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Setup
+
+### Configure the Collector
+
+Add the `elasticsearch` receiver, a **resource** processor that tags the metrics with **service.name**, and a dedicated pipeline. Merge this into your existing Collector config:
+
+```yaml:config.yaml
+receivers:
+  elasticsearch:
+    endpoint: http://<elasticsearch-host>:9200
+    username: <your-username>
+    password: <your-password>
+    collection_interval: 30s
+    metrics:
+      elasticsearch.node.operations.get.completed:
+        enabled: true
+      elasticsearch.node.operations.get.time:
+        enabled: true
+      elasticsearch.index.cache.evictions:
+        enabled: true
+      elasticsearch.index.cache.memory.usage:
+        enabled: true
+      jvm.memory.heap.utilization:
+        enabled: true
+      elasticsearch.node.cache.size:
+        enabled: true
+
+processors:
+  resource/elasticsearch:
+    attributes:
+      - key: service.name
+        value: elasticsearch
+        action: upsert
+
+exporters:
+  otlphttp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      signoz-ingestion-key: "<your-ingestion-key>"
+
+service:
+  pipelines:
+    metrics/elasticsearch:
+      receivers: [elasticsearch]
+      processors: [resource/elasticsearch, batch]
+      exporters: [otlphttp]
+```
+
+Verify these values:
+
+- `<elasticsearch-host>:9200`: your cluster's HTTP API address, use `localhost:9200` if the Collector runs on the same host
+- `<your-username>` / `<your-password>`: omit both if the cluster has no security features enabled
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  The six metrics under `metrics:` above are disabled by default; the config enables them because the [Elasticsearch dashboard](https://signoz.io/docs/dashboards/dashboard-templates/elasticsearch-dashboard/) needs them for its cache, GET hit/miss, and heap utilization panels. By default the receiver scrapes all nodes (`nodes: ["_all"]`) and all indices (`indices: ["_all"]`). Narrow either with node or index filters, or set `skip_cluster_metrics: true` to skip cluster-level metrics. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/elasticsearchreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">receiver configuration reference</a>.
+</Admonition>
+
+Then apply the config where your Collector runs:
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+The config lives at **/etc/otelcol-contrib/config.yaml**. Validate it, restart, and watch the logs:
+
+```bash
+sudo /usr/bin/otelcol-contrib validate --config /etc/otelcol-contrib/config.yaml
+sudo systemctl restart otelcol-contrib
+sudo journalctl -u otelcol-contrib -f
+```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on VM](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
+</Admonition>
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Add the config to the file you mount into the Collector container, then restart and watch the logs:
+
+```bash
+docker compose up -d
+docker compose logs -f
+```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on Docker](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
+</Admonition>
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+Nest the same `receivers`, `processors`, and `service.pipelines` blocks under `otelDeployment.config` in your `override-values.yaml` for the [SigNoz K8s Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), pointing `endpoint` at the in-cluster Elasticsearch Service:
+
+```yaml:override-values.yaml
+otelDeployment:
+  config:
+    receivers:
+      elasticsearch:
+        endpoint: http://elasticsearch.default.svc.cluster.local:9200
+        username: <your-username>
+        password: <your-password>
+        collection_interval: 30s
+        metrics:
+          elasticsearch.node.operations.get.completed:
+            enabled: true
+          elasticsearch.node.operations.get.time:
+            enabled: true
+          elasticsearch.index.cache.evictions:
+            enabled: true
+          elasticsearch.index.cache.memory.usage:
+            enabled: true
+          jvm.memory.heap.utilization:
+            enabled: true
+          elasticsearch.node.cache.size:
+            enabled: true
+    processors:
+      resource/elasticsearch:
+        attributes:
+          - key: service.name
+            value: elasticsearch
+            action: upsert
+    service:
+      pipelines:
+        metrics/elasticsearch:
+          receivers: [elasticsearch]
+          processors: [resource/elasticsearch, batch]
+          exporters: [otlphttp]
+```
+
+Apply it and watch the logs:
+
+```bash
+helm upgrade --install <release-name> signoz/k8s-infra -n signoz -f override-values.yaml
+kubectl logs -n signoz <collector-pod-name> -f
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+1. Open [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) in SigNoz.
+2. Search for metrics that start with `elasticsearch.`.
+3. Look for metrics such as `elasticsearch.cluster.health` and `elasticsearch.node.cache.size`.
+
+<Figure
+  src="/img/docs/metrics/elasticsearch/sample-metrics.webp"
+  alt="Elasticsearch metrics in the SigNoz Metrics Explorer"
+  caption="Elasticsearch metrics in the SigNoz Metrics Explorer"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No `elasticsearch.` metrics in SigNoz
+
+- Cause: the Collector cannot reach the cluster's HTTP API, or the credentials are wrong.
+- Fix: confirm `endpoint` is reachable from the Collector host with `curl <elasticsearch-host>:9200`, and confirm the user has the `monitor` cluster privilege and the `monitor` index privilege if security is enabled.
+- Verify: search for `elasticsearch.cluster.health` in Metrics Explorer.
+
+### Metrics appear but the dashboard is empty
+
+- Cause: the `metrics/elasticsearch` pipeline does not include the **resource/elasticsearch** processor, so the metrics do not have **service.name**.
+- Fix: add **resource/elasticsearch** to the `metrics/elasticsearch` **processors** list and restart the Collector.
+- Verify: filter Metrics Explorer by `service.name = elasticsearch`.
+
+### Node or index metrics are missing
+
+- Cause: `nodes` or `indices` filters exclude the ones you expect, or `skip_cluster_metrics` is set to `true`.
+- Fix: confirm the node and index filters in the receiver config match the nodes and indices you want to monitor.
+- Verify: `elasticsearch.node.*` and `elasticsearch.index.*` series appear for the expected node and index names.
+
+</details>
+
+## Next Steps
+
+- Import the prebuilt [Elasticsearch dashboard](https://signoz.io/docs/dashboards/dashboard-templates/elasticsearch-dashboard/).
+- Read how to [Set up Alerts in SigNoz](https://signoz.io/docs/userguide/alerts-management/).
+
+## Get Help
+
+<GetHelp />

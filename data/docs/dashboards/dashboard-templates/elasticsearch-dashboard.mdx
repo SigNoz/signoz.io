@@ -1,0 +1,113 @@
+---
+date: 2026-07-20
+title: Elasticsearch Metrics Dashboard for Cluster Monitoring
+description: Monitor Elasticsearch cluster health, node resources, index operations, search performance, JVM, cache, circuit breakers, and thread pools in SigNoz.
+doc_type: explanation
+---
+
+Use this dashboard to monitor your Elasticsearch clusters across cluster health, node resources, index operations, search and query performance, JVM and garbage collection, cache, circuit breakers, and thread pools.
+
+Elasticsearch exposes cluster health, node stats, and index stats over its HTTP API, and the OpenTelemetry Collector's elasticsearch receiver scrapes them for this dashboard.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow the [Send Elasticsearch Metrics with OpenTelemetry](https://signoz.io/docs/metrics-management/opentelemetry-elasticsearch/) guide.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/elasticsearch-dashboard.webp"
+  alt="Elasticsearch Metrics Dashboard"
+  caption="Elasticsearch Metrics Dashboard"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/elasticsearch/elasticsearch-dashboard-detailed.json"
+    dashboardName="Elasticsearch"
+  />
+</div>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Confirm cluster health**: See cluster status, active/unassigned/relocating shards, pending tasks, and node count.
+- **Track node resources**: Monitor CPU, disk, JVM heap and non-heap usage, open file descriptors, and HTTP connections per node.
+- **Measure index activity**: Track document count, store size, segment count, operations completed and their time, and current merges.
+- **Watch search and query performance**: Track query rate, average search latency, scroll and suggest rate, and query cache hit/miss rate.
+- **Inspect JVM and GC**: Watch garbage collection time, thread count, classes loaded, OS memory, and load average.
+- **Review cache usage**: Track cache memory usage, evictions, cache size, and hit/miss counts.
+- **Watch circuit breakers**: Track estimated vs. limit memory per breaker and tripped count.
+- **Monitor thread pools**: Track thread counts, queued tasks, and finished tasks.
+
+## Metrics Included
+
+### Cluster Health
+
+- **Cluster Health Status**: Cluster health state (`elasticsearch.cluster.health`).
+- **Active Shards**, **Active Primary Shards**, **Unassigned Shards**, **Relocating Shards**: Shard counts by state (`elasticsearch.cluster.shards`).
+- **Pending Tasks**: Cluster-level changes not yet executed (`elasticsearch.cluster.pending_tasks`).
+- **Number of Nodes**: Total nodes in the cluster (`elasticsearch.cluster.nodes`).
+- **In-flight Fetches**: Unfinished fetches (`elasticsearch.cluster.in_flight_fetch`).
+
+### Node Metrics
+
+- **Node CPU Usage**: OS-level CPU usage per node (`elasticsearch.os.cpu.usage`).
+- **Node Disk Usage**: Available, free, and total disk space (`elasticsearch.node.fs.disk.*`).
+- **Node JVM Heap**: Committed, max, and used heap (`jvm.memory.heap.*`).
+- **Node JVM Non-Heap Used**: Non-heap and pool memory used (`jvm.memory.nonheap.used`, `jvm.memory.pool.used`).
+- **Node Open File Descriptors**: Open files per node (`elasticsearch.node.open_files`).
+- **Node HTTP Connections**: Open HTTP connections per node (`elasticsearch.node.http.connections`).
+
+### Index Metrics
+
+- **Index Document Count**: Documents per index (`elasticsearch.index.documents`).
+- **Index Store Size**: Shard store size on disk (`elasticsearch.index.shards.size`).
+- **Index Segments Count**: Segment count per index (`elasticsearch.index.segments.count`).
+- **Index Operations Completed** and **Index Operations Time**: Operation counts and time by type (`elasticsearch.index.operations.completed`, `elasticsearch.index.operations.time`).
+- **Index Current Merges**: In-progress segment merges (`elasticsearch.index.operations.merge.current`).
+
+### Search & Query Performance
+
+- **Search Query Rate**: Query operations per second (`elasticsearch.index.operations.completed`).
+- **Search Latency (Avg)**: Average query time derived from operation count and time.
+- **Scroll & Suggest Rate**: Scroll and suggest operation rates.
+- **Query Cache Hit/Miss Rate**: Query cache effectiveness (`elasticsearch.node.cache.count`).
+- **Query Cache Memory Usage**: Query cache memory footprint (`elasticsearch.node.cache.memory.usage`).
+- **Cache Evictions**: Query cache evictions (`elasticsearch.node.cache.evictions`).
+
+### JVM & Memory
+
+- **GC Collection Time**: Time spent in garbage collection (`jvm.gc.collections.elapsed`).
+- **JVM Threads**: Live thread count (`jvm.threads.count`).
+- **OS Memory (Free vs Used)**: Host memory usage (`elasticsearch.os.memory`).
+- **OS Load Average**: 1, 5, and 15-minute load averages (`elasticsearch.os.cpu.load_avg.*`).
+- **JVM Classes Loaded**: Loaded class count (`jvm.classes.loaded`).
+
+### Cache
+
+- **Node Cache Memory Usage** and **Node Cache Size**: Cache memory and entry counts (`elasticsearch.node.cache.memory.usage`, `elasticsearch.node.cache.size`).
+- **Node Cache Evictions**: Evictions per node (`elasticsearch.node.cache.evictions`).
+- **Cache Hit Count** and **Cache Miss Count**: Get operation hits and misses (`elasticsearch.node.operations.get.completed`).
+
+### Circuit Breaker
+
+- **Breaker Memory**: Estimated vs. limit memory per breaker (`elasticsearch.breaker.memory.estimated`, `elasticsearch.breaker.memory.limit`).
+- **Breaker Tripped Count**: Times a breaker prevented an out-of-memory error (`elasticsearch.breaker.tripped`).
+
+### Thread Pool
+
+- **Thread Pool Threads**: Threads per pool (`elasticsearch.node.thread_pool.threads`).
+- **Thread Pool Tasks Queued** and **Thread Pool Tasks Finished**: Queued and completed tasks per pool (`elasticsearch.node.thread_pool.tasks.queued`, `elasticsearch.node.thread_pool.tasks.finished`).
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **service.name**: Filter by the OpenTelemetry service name.
+- **elasticsearch.cluster.name**: Filter by cluster name.
+- **elasticsearch.node.name**: Filter by node name.
+
+## Related Dashboards
+
+- [APM Metrics](https://signoz.io/docs/dashboards/dashboard-templates/apm-metrics/)
+- [Docker Container](https://signoz.io/docs/dashboards/dashboard-templates/docker-container-metrics/)
