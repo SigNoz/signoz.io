@@ -1,11 +1,12 @@
 import React from 'react'
 import Image from 'next/image'
+import { Typography } from '@signozhq/ui/typography'
 import TrackingLink from '@/components/TrackingLink'
 
 export default function GetStartedSigNoz() {
   return (
     <div className="get-started-signoz">
-      <p>
+      <Typography.Text as="p">
         SigNoz Cloud is the easiest way to run SigNoz.{' '}
         <TrackingLink
           href="https://signoz.io/teams/"
@@ -13,12 +14,12 @@ export default function GetStartedSigNoz() {
           clickName="Sign Up Link"
           clickLocation="Get Started SigNoz Card"
           clickText="Sign up"
-          className="font-medium text-blue-600 hover:underline"
+          className="font-medium text-[var(--accent-primary)] hover:underline"
         >
           Sign up
         </TrackingLink>{' '}
         for a free account and get 30 days of unlimited access to all features.
-      </p>
+      </Typography.Text>
 
       <TrackingLink
         href="/teams/"
@@ -39,7 +40,7 @@ export default function GetStartedSigNoz() {
         />
       </TrackingLink>
 
-      <p>
+      <Typography.Text as="p">
         You can also install and self-host SigNoz yourself since it is open-source. With 24,000+
         GitHub stars,{' '}
         <TrackingLink
@@ -48,7 +49,7 @@ export default function GetStartedSigNoz() {
           clickName="GitHub Repository Link"
           clickLocation="Get Started SigNoz Card"
           clickText="open-source SigNoz"
-          className="font-medium text-blue-600 hover:underline"
+          className="font-medium text-[var(--accent-primary)] hover:underline"
         >
           open-source SigNoz
         </TrackingLink>{' '}
@@ -59,12 +60,12 @@ export default function GetStartedSigNoz() {
           clickName="Docs Link"
           clickLocation="Get Started SigNoz Card"
           clickText="instructions"
-          className="font-medium text-blue-600 hover:underline"
+          className="font-medium text-[var(--accent-primary)] hover:underline"
         >
           instructions
         </TrackingLink>{' '}
         to self-host SigNoz.
-      </p>
+      </Typography.Text>
     </div>
   )
 }
