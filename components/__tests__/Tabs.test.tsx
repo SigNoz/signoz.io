@@ -37,8 +37,8 @@ beforeEach(() => {
   mockSearchParams.mockReturnValue(new URLSearchParams())
 })
 
-const getTabButtons = () => screen.queryAllByRole('button')
-const getTabButton = (name: string) => screen.queryByRole('button', { name })
+const getTabButtons = () => screen.queryAllByRole('tab')
+const getTabButton = (name: string) => screen.queryByRole('tab', { name })
 const getTabPanels = () =>
   document.querySelectorAll<HTMLDivElement>('[data-tabs-root] > .mt-4 > [data-tab-value]')
 
@@ -321,7 +321,7 @@ describe('nested tabs do not reset parent plans tab', () => {
     const { unmount } = render(<NestedTabs />)
 
     // Click "yarn" in the nested tabs
-    fireEvent.click(screen.getByRole('button', { name: 'yarn' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'yarn' }))
     expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('plans=self-host'), {
       scroll: false,
     })
