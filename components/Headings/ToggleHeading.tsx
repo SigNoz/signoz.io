@@ -46,7 +46,10 @@ const ToggleHeading = ({ children }: { children: React.ReactNode }) => {
   })
 
   return (
-    <summary ref={summaryRef} className="toggle-summary">
+    <summary
+      ref={summaryRef}
+      className="toggle-summary text-[var(--l1-foreground)] [&::marker]:text-[var(--l2-foreground)]"
+    >
       {childrenWithProps}
     </summary>
   )
