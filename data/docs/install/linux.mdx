@@ -1,6 +1,6 @@
 ---
 date: 2026-07-20
-title: Install SigNoz on Linux - Self-Host Guide
+title: Install SigNoz on Linux with systemd - Self-Host Guide
 tags: [Self-Hosted Community]
 description: Learn how to install SigNoz on Linux with Foundry or through systemd. Prepare dependencies, deploy the systemd units, verify services, and open the SigNoz UI.
 doc_type: howto
@@ -257,6 +257,10 @@ Check the service logs again:
 journalctl -u signoz-telemetrystore-clickhouse-0-0.service -f
 ```
 
+<Admonition type="warning" title="This edit does not survive a recast">
+`foundryctl cast` regenerates the ClickHouse config and overwrites this change, so a later cast (for example, enabling the MCP server in Step 7) reintroduces the failure. To persist the fix, set the Keeper host to `127.0.0.1` through the ClickHouse component's `config.data` in `casting.yaml` so `forge` writes it on every run. See the <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">Foundry config and patches guide</a>. If you keep the manual edit, re-run the `sed` command after every `foundryctl cast`.
+</Admonition>
+
 ### A SigNoz service fails after cast
 
 Inspect the unit and logs for the failing service:
@@ -285,7 +289,7 @@ Install ClickHouse with the <a href="https://clickhouse.com/docs/install#availab
 Do not start `clickhouse-server.service` yet. Start it after you configure ZooKeeper.
 </Admonition>
 
-During installation, ClickHouse prompts for a password for the `default` user. If you leave it empty, the DSN strings below work as written. If you set a password, replace `tcp://localhost:9000` with `tcp://localhost:9000?password=<your-password>` everywhere it appears.
+During installation, ClickHouse prompts for a password for the `default` user. If you leave it empty, the DSN strings below work as written. If you set a password, add it as a `password` query parameter to each DSN below, after the database path where one is present. Use `tcp://localhost:9000?password=<your-password>` for a DSN with no database path, and `tcp://localhost:9000/signoz_traces?password=<your-password>` when a database path is present.
 
 - `<your-password>`: the password you set for the ClickHouse `default` user.
 
@@ -470,6 +474,8 @@ DOT_METRICS_ENABLED=true
 EOF'
 ```
 
+If you set a ClickHouse password, append the query parameter to `SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN` (this DSN has no database path): `tcp://localhost:9000?password=<your-password>`.
+
 Create the `signoz` user and give it ownership of the SigNoz directories:
 
 ```bash
@@ -615,6 +621,8 @@ service:
 EOF'
 ```
 
+If you set a ClickHouse password, append the query parameter after the database path in every exporter DSN above, for example `tcp://localhost:9000/signoz_traces?password=<your-password>`.
+
 Create the OpAMP config file:
 
 ```bash
@@ -681,7 +689,7 @@ Check that ClickHouse responds:
 curl -s http://localhost:8123/ping
 ```
 
-The expected response is `Ok.`. If you set a ClickHouse password, confirm that every `tcp://localhost:9000` DSN includes `?password=<your-password>`.
+The expected response is `Ok.`. If you set a ClickHouse password, confirm that every ClickHouse DSN carries `password=<your-password>` as a query parameter after the database path (for example `tcp://localhost:9000/signoz_traces?password=<your-password>`).
 
 ### SigNoz health check fails
 
