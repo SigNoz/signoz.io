@@ -1,37 +1,37 @@
 'use client'
 
 import React from 'react'
-import Button from '@/components/ui/Button'
+import { Button } from '@signozhq/ui/button'
+import { Typography } from '@signozhq/ui/typography'
 import { Scale } from 'lucide-react'
+import Link from 'next/link'
 
 export default function NewRelicVsSigNoz() {
   return (
     <div className="my-8 w-full">
-      <div className="transform rounded-xl bg-gradient-to-r from-blue-900/90 to-purple-900/90 p-8 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+      <div className="transform rounded-xl border border-[var(--l2-border)] bg-[var(--l2-background)] p-8 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-[var(--accent-primary)] hover:shadow-xl">
         <div className="space-y-4">
-          <h3 className="my-0 text-2xl font-bold text-white">
+          <Typography.Title level={3} className="my-0 text-[var(--l1-foreground)]">
             Migrate from New Relic - Save up to 67% on your New Relic bill
-          </h3>
-          <p className="text-gray-300">
-            Tired of New Relic's user-based pricing? Even for teams of 10-15 devs, New Relic's
-            pricing for user seats can be a significant portion of your monthly bill.
-          </p>
+          </Typography.Title>
+          <Typography.Text className="text-[var(--l2-foreground)]">
+            Tired of New Relic&apos;s user-based pricing? Even for teams of 10-15 devs, New
+            Relic&apos;s pricing for user seats can be a significant portion of your monthly bill.
+          </Typography.Text>
           <div className="flex flex-col gap-4 sm:flex-row">
-            <Button
-              href="/newrelic-alternative/"
-              variant="legacyPrimary"
-              id="newrelic-vs-signoz-compare-button"
-              className="flex items-center gap-2"
-            >
-              <Scale className="h-4 w-4" />
-              Compare SigNoz vs. New Relic
+            <Button asChild variant="solid" color="primary" id="newrelic-vs-signoz-compare-button">
+              <Link href="/newrelic-alternative/" className="flex items-center gap-2">
+                <Scale className="h-4 w-4" />
+                Compare SigNoz vs. New Relic
+              </Link>
             </Button>
             <Button
-              href="/teams/"
-              variant="legacySecondary"
+              asChild
+              variant="outlined"
+              color="secondary"
               id="grafana-vs-signoz-try-signoz-button"
             >
-              Try SigNoz for Free &rarr;
+              <Link href="/teams/">Try SigNoz for Free &rarr;</Link>
             </Button>
           </div>
         </div>
