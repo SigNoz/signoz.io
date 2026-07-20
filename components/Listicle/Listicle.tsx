@@ -1,3 +1,4 @@
+import { Typography } from '@signozhq/ui/typography'
 import {
   getListicleConfig,
   getListicleItems,
@@ -23,7 +24,9 @@ function FlatPattern({ config }: { config: ListicleConfig }) {
       <div>
         {sections.map((section) => (
           <div key={section.title} className="mb-10">
-            <h2 className="mb-4 text-2xl font-semibold">{section.title}</h2>
+            <Typography.Title level={2} className="mb-4 text-[var(--l1-foreground)]">
+              {section.title}
+            </Typography.Title>
             <ListicleCardGrid
               items={section.items}
               sectionName={section.sectionName}
@@ -51,7 +54,9 @@ function FlatPattern({ config }: { config: ListicleConfig }) {
   if (config.wrapperTitle) {
     return (
       <div className="mb-10">
-        <h2 className="mb-4 text-2xl font-semibold">{config.wrapperTitle}</h2>
+        <Typography.Title level={2} className="mb-4 text-[var(--l1-foreground)]">
+          {config.wrapperTitle}
+        </Typography.Title>
         {content}
       </div>
     )
@@ -91,7 +96,11 @@ function SectionedPattern({
 export default async function Listicle({ name, defaultSection }: ListicleProps) {
   const config = await getListicleConfig(name)
   if (!config) {
-    return <div className="py-4 text-red-500">Unknown listicle: &ldquo;{name}&rdquo;</div>
+    return (
+      <Typography.Text className="py-4 text-[var(--danger-foreground)]">
+        Unknown listicle: &ldquo;{name}&rdquo;
+      </Typography.Text>
+    )
   }
 
   switch (config.pattern) {
