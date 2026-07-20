@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { BsFillExclamationCircleFill } from 'react-icons/bs'
 import { Callout } from '@signozhq/ui/callout'
 import type { CalloutColor, CalloutProps } from '@signozhq/ui/callout'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react'
 
 type AdmonitionSizeVariant = 'sm' | 'lg'
 
@@ -151,18 +153,18 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
 }
 
 const BASE_CONTENT_STYLES = [
-  'not-prose my-4 min-w-0 max-w-full overflow-hidden rounded-[4px] p-4',
+  // my-4 lives on the clickable wrapper so collapsed content can stay in the DOM
+  'min-w-0 max-w-full overflow-hidden rounded-[4px] p-4',
   '!items-start !gap-2.5',
   '[&>div:first-child]:!m-0 [&>div:first-child]:!flex [&>div:first-child]:!h-7 [&>div:first-child]:!w-7',
   '[&>div:first-child]:!shrink-0 [&>div:first-child]:!items-center [&>div:first-child]:!justify-center',
-  '[&_[data-slot=callout-title]]:!flex [&_[data-slot=callout-title]]:!h-7 [&_[data-slot=callout-title]]:!items-center',
-  '[&>button]:!m-0 [&>button]:!mt-[5px] [&>button]:!flex [&>button]:!h-[18px] [&>button]:!w-[18px]',
-  '[&>button]:!shrink-0 [&>button]:!items-center [&>button]:!justify-center [&>button]:!self-start [&>button]:!p-0',
+  // Title row: icon-aligned 28px header + chevron in title flex (action=none, no Callout button)
+  '[&_[data-slot=callout-title]]:!flex [&_[data-slot=callout-title]]:!h-7 [&_[data-slot=callout-title]]:!w-full',
+  '[&_[data-slot=callout-title]]:!items-center [&_[data-slot=callout-title]]:!justify-between [&_[data-slot=callout-title]]:!gap-3',
   '[&_[data-slot=callout-description]]:w-full',
   '[&_[data-slot=callout-description]]:min-w-0',
   '[&_[data-slot=callout-description]]:max-w-full',
   '[&>div]:!gap-0',
-  '[&_[data-slot=callout-title]:has(+[data-slot=callout-description])]:!mb-3',
   '[&_[data-slot=callout-title]]:font-semibold',
   '[&_[data-slot=callout-title]]:text-base',
   '[&_[data-slot=callout-title]]:!leading-6',
@@ -228,23 +230,65 @@ const Admonition = ({
   const displayTitle = title ?? getTitle(type)
   const size = variant === 'sm' ? 'small' : 'medium'
   const isDefaultCollapsed = defaultCollapsed === true || defaultCollapsed === 'true'
+  // Own collapse state so body always stays in the DOM (SSR + hide), unlike Callout expandable
+  const [isCollapsed, setIsCollapsed] = useState(isDefaultCollapsed)
   const tone = TONE_STYLES[mapping.color]
 
+  const toggleCollapsed = () => setIsCollapsed((prev) => !prev)
+
+  const handleClick = (event: MouseEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest('[data-slot=callout-description]')) return
+    toggleCollapsed()
+  }
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    toggleCollapsed()
+  }
+
   return (
-    <Callout
-      title={displayTitle}
-      type={mapping.type}
-      color={mapping.color}
-      size={size}
-      showIcon
-      icon={admonitionIcon}
-      action="expandable"
-      defaultExpanded={!isDefaultCollapsed}
-      style={tone.cssVars}
-      className={[BASE_CONTENT_STYLES, tone.content, className].filter(Boolean).join(' ')}
+    <div
+      role="button"
+      tabIndex={0}
+      aria-expanded={!isCollapsed}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      className="not-prose my-4 cursor-pointer"
     >
-      {children}
-    </Callout>
+      <Callout
+        title={
+          <>
+            <span className="min-w-0 flex-1">{displayTitle}</span>
+            <ChevronDown
+              aria-hidden
+              className={[
+                'h-[18px] w-[18px] shrink-0 opacity-50 transition-transform duration-200',
+                isCollapsed ? 'rotate-0' : 'rotate-180',
+              ].join(' ')}
+            />
+          </>
+        }
+        type={mapping.type}
+        color={mapping.color}
+        size={size}
+        showIcon
+        icon={admonitionIcon}
+        action="none"
+        style={tone.cssVars}
+        className={[
+          BASE_CONTENT_STYLES,
+          !isCollapsed && '[&_[data-slot=callout-title]]:!mb-3',
+          isCollapsed && '[&_[data-slot=callout-description]]:!hidden',
+          tone.content,
+          className,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {children}
+      </Callout>
+    </div>
   )
 }
 
