@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import Button from '@/components/ui/Button'
+import { Button } from '@signozhq/ui/button'
 import { ArrowRight } from 'lucide-react'
 
 interface GetStartedOpenTelemetryButtonProps {
@@ -15,11 +15,11 @@ const GetStartedOpenTelemetryButton: React.FC<GetStartedOpenTelemetryButtonProps
   children = 'Get Started with OpenTelemetry',
 }) => {
   return (
-    <Link href={href} className="no-underline hover:no-underline">
-      <Button variant="legacyPrimary" className={`flex items-center gap-2 ${className}`}>
+    <Button asChild variant="solid" color="primary" className={className}>
+      <Link href={href} className="flex items-center gap-2 no-underline hover:no-underline">
         {children} <ArrowRight size={14} />
-      </Button>
-    </Link>
+      </Link>
+    </Button>
   )
 }
 
