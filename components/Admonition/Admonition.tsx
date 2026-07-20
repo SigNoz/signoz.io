@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { BsFillExclamationCircleFill } from 'react-icons/bs'
 import { Callout } from '@signozhq/ui/callout'
 import type { CalloutColor, CalloutProps } from '@signozhq/ui/callout'
-import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react'
+import type { CSSProperties, MouseEvent } from 'react'
 
 type AdmonitionSizeVariant = 'sm' | 'lg'
 
@@ -28,134 +28,130 @@ type ToneStyles = {
   content: string
 }
 
+const CALLOUT_CSS_VARS: CSSProperties = {
+  ['--callout-title-color' as string]: 'var(--admonition-title)',
+  ['--callout-icon-color' as string]: 'var(--admonition-icon)',
+  ['--callout-description-color' as string]: 'var(--admonition-description)',
+}
+
+const SHARED_CODE_CHROME =
+  '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]'
+const SHARED_PRE_CHROME = [
+  '[&_.relative]:max-w-full [&_.relative]:min-w-0',
+  '[&_pre]:max-w-full [&_pre]:min-w-0 [&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border',
+].join(' ')
+const SHARED_PRE_BODY = [
+  '[&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed [&_pre]:!text-[var(--admonition-code)]',
+  '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
+].join(' ')
+
+type ToneTokenClasses = {
+  light: string
+  dark: string
+  code: string
+  link: string
+  codeSurface: string
+  preSurface: string
+  listMarker: string
+}
+
+const makeTone = ({
+  light,
+  dark,
+  code,
+  link,
+  codeSurface,
+  preSurface,
+  listMarker,
+}: ToneTokenClasses): ToneStyles => ({
+  cssVars: CALLOUT_CSS_VARS,
+  content: [
+    light,
+    dark,
+    code,
+    link,
+    SHARED_CODE_CHROME,
+    codeSurface,
+    SHARED_PRE_CHROME,
+    preSurface,
+    SHARED_PRE_BODY,
+    listMarker,
+  ].join(' '),
+})
+
 const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
-  robin: {
-    cssVars: {
-      ['--callout-title-color' as string]: 'var(--admonition-title)',
-      ['--callout-icon-color' as string]: 'var(--admonition-icon)',
-      ['--callout-description-color' as string]: 'var(--admonition-description)',
-    },
-    content: [
+  robin: makeTone({
+    light:
       '[--admonition-title:var(--callout-primary-title)] [--admonition-icon:var(--callout-primary-icon)] [--admonition-description:var(--callout-primary-description)]',
-      'dark:[--admonition-title:var(--text-robin-100)] dark:[--admonition-icon:var(--text-robin-100)] dark:[--admonition-description:var(--text-robin-300)]',
-      '[--admonition-code:var(--text-robin-700)] dark:[--admonition-code:var(--text-robin-200)]',
-      '[&_a]:!text-[var(--accent-primary)] [&_a]:underline [&_a]:decoration-[var(--accent-primary)] [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]',
+    dark: 'dark:[--admonition-title:var(--text-robin-100)] dark:[--admonition-icon:var(--text-robin-100)] dark:[--admonition-description:var(--text-robin-300)]',
+    code: '[--admonition-code:var(--text-robin-700)] dark:[--admonition-code:var(--text-robin-200)]',
+    link: '[&_a]:!text-[var(--accent-primary)] [&_a]:underline [&_a]:decoration-[var(--accent-primary)] [&_a]:underline-offset-2',
+    codeSurface:
       '[&_code]:!bg-[var(--callout-primary-background)] [&_code]:!text-[var(--admonition-code)]',
-      '[&_.relative]:max-w-full [&_.relative]:min-w-0',
-      '[&_pre]:max-w-full [&_pre]:min-w-0 [&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border',
+    preSurface:
       '[&_pre]:!border-[var(--callout-primary-border)] [&_pre]:!bg-[var(--callout-primary-background)]',
-      '[&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed [&_pre]:!text-[var(--admonition-code)]',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-      '[&_ul]:marker:text-[var(--accent-primary)]',
-    ].join(' '),
-  },
-  forest: {
-    cssVars: {
-      ['--callout-title-color' as string]: 'var(--admonition-title)',
-      ['--callout-icon-color' as string]: 'var(--admonition-icon)',
-      ['--callout-description-color' as string]: 'var(--admonition-description)',
-    },
-    content: [
+    listMarker: '[&_ul]:marker:text-[var(--accent-primary)]',
+  }),
+  forest: makeTone({
+    light:
       '[--admonition-title:var(--callout-success-title)] [--admonition-icon:var(--callout-success-icon)] [--admonition-description:var(--callout-success-description)]',
-      'dark:[--admonition-title:var(--text-forest-100)] dark:[--admonition-icon:var(--text-forest-100)] dark:[--admonition-description:var(--text-forest-300)]',
-      '[--admonition-code:var(--text-forest-700)] dark:[--admonition-code:var(--text-forest-200)]',
-      '[&_a]:!text-[var(--accent-forest)] [&_a]:underline [&_a]:decoration-[var(--accent-forest)] [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]',
+    dark: 'dark:[--admonition-title:var(--text-forest-100)] dark:[--admonition-icon:var(--text-forest-100)] dark:[--admonition-description:var(--text-forest-300)]',
+    code: '[--admonition-code:var(--text-forest-700)] dark:[--admonition-code:var(--text-forest-200)]',
+    link: '[&_a]:!text-[var(--accent-forest)] [&_a]:underline [&_a]:decoration-[var(--accent-forest)] [&_a]:underline-offset-2',
+    codeSurface:
       '[&_code]:!bg-[var(--callout-success-background)] [&_code]:!text-[var(--admonition-code)]',
-      '[&_.relative]:max-w-full [&_.relative]:min-w-0',
-      '[&_pre]:max-w-full [&_pre]:min-w-0 [&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border',
+    preSurface:
       '[&_pre]:!border-[var(--callout-success-border)] [&_pre]:!bg-[var(--callout-success-background)]',
-      '[&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed [&_pre]:!text-[var(--admonition-code)]',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-      '[&_ul]:marker:text-[var(--accent-forest)]',
-    ].join(' '),
-  },
-  amber: {
-    cssVars: {
-      ['--callout-title-color' as string]: 'var(--admonition-title)',
-      ['--callout-icon-color' as string]: 'var(--admonition-icon)',
-      ['--callout-description-color' as string]: 'var(--admonition-description)',
-    },
-    content: [
+    listMarker: '[&_ul]:marker:text-[var(--accent-forest)]',
+  }),
+  amber: makeTone({
+    light:
       '[--admonition-title:var(--callout-warning-title)] [--admonition-icon:var(--callout-warning-icon)] [--admonition-description:var(--callout-warning-description)]',
-      'dark:[--admonition-title:var(--text-amber-100)] dark:[--admonition-icon:var(--text-amber-100)] dark:[--admonition-description:var(--text-amber-300)]',
-      '[--admonition-code:var(--text-amber-800)] dark:[--admonition-code:var(--text-amber-200)]',
-      '[&_a]:!text-[var(--accent-amber)] [&_a]:underline [&_a]:decoration-[var(--accent-amber)] [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]',
+    dark: 'dark:[--admonition-title:var(--text-amber-100)] dark:[--admonition-icon:var(--text-amber-100)] dark:[--admonition-description:var(--text-amber-300)]',
+    code: '[--admonition-code:var(--text-amber-800)] dark:[--admonition-code:var(--text-amber-200)]',
+    link: '[&_a]:!text-[var(--accent-amber)] [&_a]:underline [&_a]:decoration-[var(--accent-amber)] [&_a]:underline-offset-2',
+    codeSurface:
       '[&_code]:!bg-[var(--callout-warning-background)] [&_code]:!text-[var(--admonition-code)]',
-      '[&_.relative]:max-w-full [&_.relative]:min-w-0',
-      '[&_pre]:max-w-full [&_pre]:min-w-0 [&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border',
+    preSurface:
       '[&_pre]:!border-[var(--callout-warning-border)] [&_pre]:!bg-[var(--callout-warning-background)]',
-      '[&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed [&_pre]:!text-[var(--admonition-code)]',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-      '[&_ul]:marker:text-[var(--accent-amber)]',
-    ].join(' '),
-  },
-  cherry: {
-    cssVars: {
-      ['--callout-title-color' as string]: 'var(--admonition-title)',
-      ['--callout-icon-color' as string]: 'var(--admonition-icon)',
-      ['--callout-description-color' as string]: 'var(--admonition-description)',
-    },
-    content: [
+    listMarker: '[&_ul]:marker:text-[var(--accent-amber)]',
+  }),
+  cherry: makeTone({
+    light:
       '[--admonition-title:var(--callout-error-title)] [--admonition-icon:var(--callout-error-icon)] [--admonition-description:var(--callout-error-description)]',
-      'dark:[--admonition-title:var(--text-cherry-100)] dark:[--admonition-icon:var(--text-cherry-100)] dark:[--admonition-description:var(--text-cherry-300)]',
-      '[--admonition-code:var(--text-cherry-700)] dark:[--admonition-code:var(--text-cherry-200)]',
-      '[&_a]:!text-[var(--accent-cherry)] [&_a]:underline [&_a]:decoration-[var(--accent-cherry)] [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]',
+    dark: 'dark:[--admonition-title:var(--text-cherry-100)] dark:[--admonition-icon:var(--text-cherry-100)] dark:[--admonition-description:var(--text-cherry-300)]',
+    code: '[--admonition-code:var(--text-cherry-700)] dark:[--admonition-code:var(--text-cherry-200)]',
+    link: '[&_a]:!text-[var(--accent-cherry)] [&_a]:underline [&_a]:decoration-[var(--accent-cherry)] [&_a]:underline-offset-2',
+    codeSurface:
       '[&_code]:!bg-[var(--callout-error-background)] [&_code]:!text-[var(--admonition-code)]',
-      '[&_.relative]:max-w-full [&_.relative]:min-w-0',
-      '[&_pre]:max-w-full [&_pre]:min-w-0 [&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border',
+    preSurface:
       '[&_pre]:!border-[var(--callout-error-border)] [&_pre]:!bg-[var(--callout-error-background)]',
-      '[&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed [&_pre]:!text-[var(--admonition-code)]',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-      '[&_ul]:marker:text-[var(--accent-cherry)]',
-    ].join(' '),
-  },
-  aqua: {
-    cssVars: {
-      ['--callout-title-color' as string]: 'var(--admonition-title)',
-      ['--callout-icon-color' as string]: 'var(--admonition-icon)',
-      ['--callout-description-color' as string]: 'var(--admonition-description)',
-    },
-    content: [
+    listMarker: '[&_ul]:marker:text-[var(--accent-cherry)]',
+  }),
+  aqua: makeTone({
+    light:
       '[--admonition-title:var(--callout-aqua-title)] [--admonition-icon:var(--callout-aqua-icon)] [--admonition-description:var(--callout-aqua-description)]',
-      'dark:[--admonition-title:var(--callout-aqua-title)] dark:[--admonition-icon:var(--callout-aqua-icon)] dark:[--admonition-description:var(--callout-aqua-description)]',
-      '[--admonition-code:var(--text-aqua-700)] dark:[--admonition-code:var(--text-aqua-200)]',
-      '[&_a]:!text-[var(--accent-aqua)] [&_a]:underline [&_a]:decoration-[var(--accent-aqua)] [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]',
+    dark: 'dark:[--admonition-title:var(--callout-aqua-title)] dark:[--admonition-icon:var(--callout-aqua-icon)] dark:[--admonition-description:var(--callout-aqua-description)]',
+    code: '[--admonition-code:var(--text-aqua-700)] dark:[--admonition-code:var(--text-aqua-200)]',
+    link: '[&_a]:!text-[var(--accent-aqua)] [&_a]:underline [&_a]:decoration-[var(--accent-aqua)] [&_a]:underline-offset-2',
+    codeSurface:
       '[&_code]:!bg-[var(--callout-aqua-background)] [&_code]:!text-[var(--admonition-code)]',
-      '[&_.relative]:max-w-full [&_.relative]:min-w-0',
-      '[&_pre]:max-w-full [&_pre]:min-w-0 [&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border',
+    preSurface:
       '[&_pre]:!border-[var(--callout-aqua-border)] [&_pre]:!bg-[var(--callout-aqua-background)]',
-      '[&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed [&_pre]:!text-[var(--admonition-code)]',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-      '[&_ul]:marker:text-[var(--accent-aqua)]',
-    ].join(' '),
-  },
-  sakura: {
-    cssVars: {
-      ['--callout-title-color' as string]: 'var(--admonition-title)',
-      ['--callout-icon-color' as string]: 'var(--admonition-icon)',
-      ['--callout-description-color' as string]: 'var(--admonition-description)',
-    },
-    content: [
+    listMarker: '[&_ul]:marker:text-[var(--accent-aqua)]',
+  }),
+  sakura: makeTone({
+    light:
       '[--admonition-title:var(--text-sakura-600)] [--admonition-icon:var(--text-sakura-600)] [--admonition-description:var(--text-sakura-600)]',
-      'dark:[--admonition-title:var(--text-sakura-100)] dark:[--admonition-icon:var(--text-sakura-100)] dark:[--admonition-description:var(--text-sakura-300)]',
-      '[--admonition-code:var(--text-sakura-700)] dark:[--admonition-code:var(--text-sakura-200)]',
-      '[&_a]:!text-[var(--accent-sakura)] [&_a]:underline [&_a]:decoration-[var(--accent-sakura)] [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]',
+    dark: 'dark:[--admonition-title:var(--text-sakura-100)] dark:[--admonition-icon:var(--text-sakura-100)] dark:[--admonition-description:var(--text-sakura-300)]',
+    code: '[--admonition-code:var(--text-sakura-700)] dark:[--admonition-code:var(--text-sakura-200)]',
+    link: '[&_a]:!text-[var(--accent-sakura)] [&_a]:underline [&_a]:decoration-[var(--accent-sakura)] [&_a]:underline-offset-2',
+    codeSurface:
       '[&_code]:!bg-[color-mix(in_srgb,var(--accent-sakura)_10%,transparent)] [&_code]:!text-[var(--admonition-code)]',
-      '[&_.relative]:max-w-full [&_.relative]:min-w-0',
-      '[&_pre]:max-w-full [&_pre]:min-w-0 [&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border',
-      '[&_pre]:!border-[color-mix(in_srgb,var(--accent-sakura)_25%,transparent)]',
-      '[&_pre]:!bg-[color-mix(in_srgb,var(--accent-sakura)_10%,transparent)]',
-      '[&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed [&_pre]:!text-[var(--admonition-code)]',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-      '[&_ul]:marker:text-[var(--accent-sakura)]',
-    ].join(' '),
-  },
+    preSurface:
+      '[&_pre]:!border-[color-mix(in_srgb,var(--accent-sakura)_25%,transparent)] [&_pre]:!bg-[color-mix(in_srgb,var(--accent-sakura)_10%,transparent)]',
+    listMarker: '[&_ul]:marker:text-[var(--accent-sakura)]',
+  }),
 }
 
 const BASE_CONTENT_STYLES = [
@@ -184,6 +180,12 @@ const BASE_CONTENT_STYLES = [
   '[&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul:last-child]:mb-0',
   '[&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol:last-child]:mb-0',
   '[&_li]:mb-1 [&_li:last-child]:mb-0',
+].join(' ')
+
+const TITLE_TOGGLE_STYLES = [
+  'flex h-full w-full min-w-0 cursor-pointer items-center justify-between gap-3',
+  'border-0 bg-transparent p-0 text-left font-inherit text-inherit',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admonition-icon)] focus-visible:ring-offset-2',
 ].join(' ')
 
 const getCalloutMapping = (type?: string): CalloutMapping => {
@@ -237,32 +239,30 @@ const Admonition = ({
   // Own collapse state so body always stays in the DOM (SSR + hide), unlike Callout expandable
   const [isCollapsed, setIsCollapsed] = useState(isDefaultCollapsed)
   const tone = TONE_STYLES[mapping.color]
+  const descriptionId = useId()
 
   const toggleCollapsed = () => setIsCollapsed((prev) => !prev)
 
-  const handleClick = (event: MouseEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).closest('[data-slot=callout-description]')) return
-    toggleCollapsed()
-  }
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== 'Enter' && event.key !== ' ') return
-    event.preventDefault()
-    toggleCollapsed()
+  const handleIconClick = (event: MouseEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement
+    if (target.closest('[data-slot=callout-description]')) return
+    if (target.closest('button')) return
+    if (target.closest('[data-slot=callout] > div:first-child')) {
+      toggleCollapsed()
+    }
   }
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      aria-expanded={!isCollapsed}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      className="not-prose my-4 cursor-pointer"
-    >
+    <div className="not-prose my-4" onClick={handleIconClick}>
       <Callout
         title={
-          <>
+          <button
+            type="button"
+            className={TITLE_TOGGLE_STYLES}
+            aria-expanded={!isCollapsed}
+            aria-controls={descriptionId}
+            onClick={toggleCollapsed}
+          >
             <span className="min-w-0 flex-1">{displayTitle}</span>
             <ChevronDown
               aria-hidden
@@ -271,7 +271,7 @@ const Admonition = ({
                 isCollapsed ? 'rotate-0' : 'rotate-180',
               ].join(' ')}
             />
-          </>
+          </button>
         }
         type={mapping.type}
         color={mapping.color}
@@ -290,7 +290,7 @@ const Admonition = ({
           .filter(Boolean)
           .join(' ')}
       >
-        {children}
+        <div id={descriptionId}>{children}</div>
       </Callout>
     </div>
   )
