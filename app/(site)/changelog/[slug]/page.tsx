@@ -2,12 +2,26 @@ import ChangelogHeader from '@/components/Changelog/Header/ChangelogHeader'
 import ChangelogRenderer from '@/components/Changelog/Renderer/ChangelogRenderer'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { fetchChangelogById } from 'utils/strapi'
+import { fetchChangelogById, fetchChangelogEntries } from 'utils/strapi'
 import { notFound } from 'next/navigation'
 import { ChangelogByIdApiResponse } from 'utils/strapi'
+import { isGitHubReleasePublished } from '@/utils/github'
 import siteMetadata from '@/data/siteMetadata'
 
 export const dynamicParams = false
+
+async function guardUnpublishedLatest(changelog: { documentId: string; version: string }) {
+  const latestResponse = await fetchChangelogEntries({ page: 1, pageSize: 1 })
+  if (
+    latestResponse.changelogs.length > 0 &&
+    latestResponse.changelogs[0].documentId === changelog.documentId
+  ) {
+    const isPublished = await isGitHubReleasePublished(changelog.version)
+    if (!isPublished) {
+      notFound()
+    }
+  }
+}
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params
@@ -71,6 +85,10 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
     changelogResponse = await fetchChangelogById(changelogId as string)
   } catch (error) {
     notFound()
+  }
+
+  if (changelogResponse?.data) {
+    await guardUnpublishedLatest(changelogResponse.data)
   }
 
   return (

@@ -17,7 +17,7 @@ Review these when relevant:
 
 - `data/docs/**`
 - `data-assets/img/docs/**`
-- `constants/docsSideNav.ts`
+- `data/docs-side-nav/main.json`
 - `constants/listicles/*.json`
 - `next.config.js` when docs URLs change
 - `components/**/*.mdx` when the PR adds or meaningfully changes these alongside docs (see **Shared doc fragments** below)
@@ -63,6 +63,8 @@ Review each changed doc against these checks in order:
 16. When `entityName="plans"` tabs are present, every Self-Hosted `TabItem` value starts with `self-host` (e.g., `self-host`, `self-hosted`, `self-host-deployment`). Values that don't match this prefix will leak through and show in the in-product onboarding iframe.
 17. Discovery surfaces are updated when the new doc should appear in an existing list or overview.
 18. Added or changed images are WebP, at least 1200 px wide, and use the `Figure` component with descriptive alt text.
+19. Prose reads clean: no em dashes (`—`), no AI-writing tells (adverb padding, throat-clearing openers, "not X, but Y" contrasts), and varied sentence length.
+20. New or moved docs are added to `data/docs-side-nav/main.json`, and removed or redirected pages are updated there, so navigation stays correct.
 
 If a check cannot be validated from the PR context, call out the assumption and residual risk.
 

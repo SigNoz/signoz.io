@@ -1,6 +1,5 @@
 import { ArrowRight, Atom, X } from 'lucide-react'
-import { type VendorKey } from './ClickStackAlternativePage.types'
-import { type ComparisonTableRow } from '@/shared/components/molecules/FeaturePages/ComparisonTable'
+import { type ComparisonCategory } from './ClickStackAlternativePage.types'
 import Link from 'next/link'
 
 export const QUERY_YOUR_DATA_CARDS = [
@@ -171,96 +170,272 @@ export const DASHBOARD_HELP_YOU_INVESTIGATE_CARDS = [
   },
 ]
 
-export const CLICKSTACK_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] = [
+export const COMPARISON_GRID_DATA: ComparisonCategory[] = [
   {
-    feature: <span className="text-lg font-bold text-signoz_amber-400">Dashboard Drill-downs</span>,
-    vendors: {
-      signoz: { text: 'Logs, traces & metrics' },
-      clickstack: { text: 'View-only' },
-    },
+    category: 'Platform',
+    rows: [
+      {
+        feature: 'OTel Native',
+        signoz: { type: 'check' },
+        clickstack: { type: 'check' },
+      },
+      {
+        feature: 'Deployment Options',
+        signoz: {
+          type: 'text',
+          content: 'Open source + Cloud (GA) — Self-hosted, BYOC, managed cloud',
+        },
+        clickstack: { type: 'text', content: 'Open source + Cloud (Beta)' },
+      },
+      {
+        feature: 'Serverless Scaling',
+        signoz: { type: 'check', label: 'Platform handles scaling automatically' },
+        clickstack: {
+          type: 'text',
+          content: 'Manual upgrade required before sending data. No GA version available',
+        },
+      },
+      {
+        feature: 'MCP Server',
+        signoz: { type: 'check', label: 'All deployments' },
+        clickstack: { type: 'cross', label: 'No hosted MCP' },
+      },
+      {
+        feature: 'AI Assistant',
+        signoz: { type: 'check' },
+        clickstack: {
+          type: 'text',
+          content: 'Managed deployments only. AI Notebooks not available in self-hosted',
+        },
+      },
+      {
+        feature: 'State Store',
+        signoz: { type: 'text', content: 'PostgreSQL / SQLite (bundled)' },
+        clickstack: { type: 'text', content: 'MongoDB (managed separately)' },
+      },
+    ],
   },
   {
-    feature: <span className="text-lg font-bold text-signoz_amber-400">Dashboard Variables</span>,
-    vendors: {
-      signoz: { supported: true, text: '' },
-      clickstack: { supported: false, text: '' },
-    },
+    category: 'Observability Coverage',
+    rows: [
+      {
+        feature: 'APM & Distributed Tracing',
+        signoz: { type: 'check' },
+        clickstack: { type: 'check' },
+      },
+      {
+        feature: 'Log Management',
+        signoz: { type: 'check' },
+        clickstack: { type: 'check' },
+      },
+      {
+        feature: 'Infrastructure Monitoring',
+        signoz: { type: 'check' },
+        clickstack: { type: 'cross', label: 'No infrastructure metrics product' },
+      },
+      {
+        feature: 'Errors & Exceptions',
+        signoz: { type: 'check', label: 'Dedicated page' },
+        clickstack: { type: 'cross' },
+      },
+      {
+        feature: 'LLM & AI Observability',
+        signoz: { type: 'check', label: 'Token tracing, cost attribution, model performance' },
+        clickstack: {
+          type: 'text',
+          content: 'Managed only. Via AI Notebooks',
+        },
+      },
+      {
+        feature: 'Native Correlation',
+        signoz: { type: 'check', label: 'Logs, traces, metrics in one click' },
+        clickstack: {
+          type: 'cross',
+          label: 'Logs and traces from the same service end up in different sources',
+        },
+      },
+      {
+        feature: 'Metrics Explorer',
+        signoz: { type: 'text', content: 'Comprehensive metrics data and correlation' },
+        clickstack: { type: 'cross', label: "Can't choose spatial and temporal aggregation" },
+      },
+    ],
   },
   {
-    feature: <span className="text-lg font-bold text-signoz_amber-400">Pre-built Dashboards</span>,
-    vendors: {
-      signoz: { text: '30+ importable templates' },
-      clickstack: { text: '3 presets' },
-    },
+    category: 'User Experience & Dashboards',
+    rows: [
+      {
+        feature: 'UX maturity & feature completeness',
+        signoz: {
+          type: 'text',
+          content: 'Users share ease of use and maturity of product to move to SigNoz',
+        },
+        clickstack: {
+          type: 'text',
+          content: 'Confusing UX, unpolished. Takes more time to debug issues.',
+        },
+      },
+      {
+        feature: 'Dashboard Drill-down',
+        signoz: {
+          type: 'check',
+          label: 'Click into logs, traces, metrics from any panel',
+        },
+        clickstack: {
+          type: 'text',
+          content: 'View-only. Dashboards cannot be used for deeper troubleshooting',
+        },
+      },
+      {
+        feature: 'Dashboard Variables',
+        signoz: { type: 'check' },
+        clickstack: {
+          type: 'cross',
+          label: 'No dynamic updates to panels without changing each query individually',
+        },
+      },
+      {
+        feature: 'Pre-built Templates',
+        signoz: { type: 'text', content: '30+ importable templates' },
+        clickstack: { type: 'text', content: '3 presets' },
+      },
+      {
+        feature: 'Custom Quick Filters',
+        signoz: { type: 'check' },
+        clickstack: { type: 'cross' },
+      },
+    ],
   },
   {
-    feature: <span className="text-lg font-bold text-signoz_amber-400">Alert Creation</span>,
-    vendors: {
-      signoz: { text: 'Alerts tab, dashboards, or queries' },
-      clickstack: { text: 'No dedicated alerts workflow' },
-    },
+    category: 'Alerting',
+    rows: [
+      {
+        feature: 'Alert Types',
+        signoz: {
+          type: 'text',
+          content: '6 types: Metrics, logs, traces, exceptions, anomaly, Apdex',
+        },
+        clickstack: { type: 'text', content: '2 types. Search + chart only' },
+      },
+      {
+        feature: 'Alert Creation',
+        signoz: { type: 'text', content: 'Alerts tab, dashboards, or queries' },
+        clickstack: {
+          type: 'text',
+          content: 'No dedicated alerts workflow. Must create from search or dashboard.',
+        },
+      },
+      {
+        feature: 'Anomaly Detection',
+        signoz: { type: 'check', label: 'Built-in. Seasonality + z-score' },
+        clickstack: { type: 'cross', label: 'DIY via SQL' },
+      },
+      {
+        feature: 'Alert History',
+        signoz: { type: 'check', label: 'With detailed attribute breakdowns' },
+        clickstack: { type: 'cross' },
+      },
+      {
+        feature: 'Notification Channels',
+        signoz: {
+          type: 'text',
+          content:
+            '9 channels: Slack, PagerDuty, Opsgenie, Teams, Email, Webhook, Incident.io, Rootly, Zenduty',
+        },
+        clickstack: { type: 'text', content: '3 channels: Slack, PagerDuty, Webhooks only' },
+      },
+      {
+        feature: 'Routing Policies',
+        signoz: { type: 'check', label: 'Label-based expressions' },
+        clickstack: { type: 'cross' },
+      },
+      {
+        feature: 'Maintenance Windows',
+        signoz: { type: 'check' },
+        clickstack: { type: 'cross' },
+      },
+      {
+        feature: 'Multi-severity per Rule',
+        signoz: { type: 'text', content: 'Warning / critical / info' },
+        clickstack: { type: 'cross' },
+      },
+    ],
   },
   {
-    feature: <span className="text-lg font-bold text-signoz_amber-400">Anomaly Detection</span>,
-    vendors: {
-      signoz: { supported: true, text: '' },
-      clickstack: { supported: false, text: '' },
-    },
+    category: 'Query & Developer Experience',
+    rows: [
+      {
+        feature: 'Query Languages',
+        signoz: { type: 'text', content: 'Query Builder, ClickHouse SQL, PromQL' },
+        clickstack: { type: 'text', content: 'SQL, Lucene-style search' },
+      },
+      {
+        feature: 'UI Performance',
+        signoz: {
+          type: 'text',
+          content:
+            'Significantly faster search and aggregation. Auto-materialization of attributes and JSON column architecture',
+        },
+        clickstack: {
+          type: 'text',
+          content: 'Slow search and aggregation. Schema management is up to users',
+        },
+      },
+      {
+        feature: 'Terraform / IaC',
+        signoz: { type: 'check' },
+        clickstack: { type: 'cross' },
+      },
+    ],
   },
   {
-    feature: <span className="text-lg font-bold text-signoz_amber-400">Alert History</span>,
-    vendors: {
-      signoz: { supported: true, text: 'Yes, with attribute breakdowns' },
-      clickstack: { supported: false, text: '' },
-    },
+    category: 'Pricing',
+    rows: [
+      {
+        feature: 'Pricing Model',
+        signoz: {
+          type: 'text',
+          content: 'All-inclusive per-GB. Predictable \u2014 one number covers everything',
+        },
+        clickstack: {
+          type: 'text',
+          content: 'Storage + compute (variable). Two separate bills',
+        },
+      },
+      {
+        feature: 'Storage Pricing',
+        signoz: { type: 'text', content: 'Included in $0.30/GB' },
+        clickstack: { type: 'text', content: '$0.03/GB separate' },
+      },
+      {
+        feature: 'Compute / Query Cost',
+        signoz: { type: 'text', content: 'No charge for querying. Included in per-GB price' },
+        clickstack: {
+          type: 'text',
+          content: '$0.22\u2013$0.39/compute-unit/hour. Billed as variable compute',
+        },
+      },
+      {
+        feature: 'Pro / Base Plan',
+        signoz: { type: 'text', content: '$0.30/GB, 30-day free trial' },
+        clickstack: { type: 'text', content: 'Usage-based' },
+      },
+      {
+        feature: 'Enterprise',
+        signoz: { type: 'text', content: 'Contact sales' },
+        clickstack: { type: 'text', content: 'Contact sales' },
+      },
+    ],
   },
   {
-    feature: <span className="text-lg font-bold text-signoz_amber-400">Query Language</span>,
-    vendors: {
-      signoz: { text: 'PromQL, visual builder & SQL' },
-      clickstack: { text: 'Lucene-style search & SQL' },
-    },
-  },
-  {
-    feature: <span className="text-lg font-bold text-signoz_amber-400">Query Cost</span>,
-    vendors: {
-      signoz: { text: 'No charge for querying' },
-      clickstack: { text: 'Billed as variable compute' },
-    },
-  },
-  {
-    feature: <span className="text-lg font-bold text-signoz_amber-400">State Store</span>,
-    vendors: {
-      signoz: { text: 'PostgreSQL/SQLite (bundled)' },
-      clickstack: { text: 'MongoDB (managed separately)' },
-    },
-  },
-  {
-    feature: (
-      <span className="text-lg font-bold text-signoz_amber-400">Supported Ingestion Formats</span>
-    ),
-    vendors: {
-      signoz: { text: 'OTLP, Jaeger, Kafka, Zipkin, OpenCensus' },
-      clickstack: { text: 'OTLP, ClickHouse HTTP, Vector' },
-    },
-  },
-  {
-    feature: <span className="text-lg font-bold text-signoz_amber-400">Deployment Options</span>,
-    vendors: {
-      signoz: { text: 'Open source + Cloud (GA)' },
-      clickstack: { text: 'Open source + Cloud (Beta)' },
-    },
-  },
-]
-
-export const VENDORS = [
-  {
-    key: 'signoz',
-    label: <span className="text-xl text-signoz_forest-50">SigNoz</span>,
-  },
-  {
-    key: 'clickstack',
-    label: <span className="text-xl text-signoz_forest-50">ClickStack</span>,
+    category: 'Data Governance',
+    rows: [
+      {
+        feature: 'Data Residency',
+        signoz: { type: 'text', content: 'US, EU, India or your own VPC. BYOC available' },
+        clickstack: { type: 'text', content: 'Similar global coverage' },
+      },
+    ],
   },
 ]
 

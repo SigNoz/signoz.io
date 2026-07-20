@@ -1,10 +1,15 @@
 'use client'
 
-import { Dialog, Transition } from '@headlessui/react'
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+} from '@signozhq/ui/dialog'
 import { liteClient as algoliasearch } from 'algoliasearch/lite'
 import { useRouter } from 'next/navigation'
 import {
-  Fragment,
   forwardRef,
   useCallback,
   useEffect,
@@ -28,6 +33,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { cn } from 'app/lib/utils'
 import { useLogEvent } from 'hooks/useLogEvent'
 import { usePathname } from 'next/navigation'
+import { openDecimalChat } from '@/utils/decimal'
 
 type SearchButtonProps = {
   disableShortcut?: boolean
@@ -268,67 +274,67 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
 
   useEffect(() => {
     if (mode === 'ask-ai') {
+      // Decimal has no inline embed, so opening "Ask AI" closes the search
+      // dialog and opens the Decimal chat panel instead.
       resultsRef.current?.clearActiveResult()
+      onClose()
+      openDecimalChat({ presentation: 'modal' })
       return
     }
 
     if (mode === 'search') {
       focusSearchInput()
     }
-  }, [mode, focusSearchInput])
+  }, [mode, focusSearchInput, onClose])
 
   return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-[80]" onClose={onClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-200"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-150"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black/55" />
-        </Transition.Child>
-
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-start justify-center px-3 py-10 sm:px-4 sm:py-24">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-200"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-150"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel className="relative w-full max-w-2xl overflow-visible bg-transparent text-white">
-                <InstantSearch indexName={indexName} searchClient={searchClient}>
-                  <SearchHeader
-                    mode={mode}
-                    onModeChange={setMode}
-                    onClose={onClose}
-                    registerInput={registerInput}
-                    resultsRef={resultsRef}
-                  />
-                  {mode === 'search' ? (
-                    <SearchResults
-                      ref={resultsRef}
-                      onSelect={onSelect}
-                      onClose={onClose}
-                      onFocusInput={focusSearchInput}
-                    />
-                  ) : (
-                    <AskAIContent />
-                  )}
-                </InstantSearch>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}
+    >
+      <DialogPortal>
+        <DialogOverlay className="!z-[80]" />
+      </DialogPortal>
+      <DialogContent
+        showOverlay={false}
+        position="top"
+        width="wide"
+        animation="fade"
+        offset={96}
+        className={cn(
+          // ! overrides needed: @signozhq/ui CSS modules beat normal Tailwind
+          'overflow-visible !border-none !bg-transparent text-white !shadow-none',
+          '!z-[80] !w-full !max-w-2xl'
+        )}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault()
+          focusSearchInput()
+        }}
+      >
+        <DialogTitle className="sr-only">Search docs</DialogTitle>
+        <div className="relative w-full max-w-2xl overflow-visible bg-transparent px-3 text-white sm:px-4">
+          <InstantSearch indexName={indexName} searchClient={searchClient}>
+            <SearchHeader
+              mode={mode}
+              onModeChange={setMode}
+              onClose={onClose}
+              registerInput={registerInput}
+              resultsRef={resultsRef}
+            />
+            {mode === 'search' ? (
+              <SearchResults
+                ref={resultsRef}
+                onSelect={onSelect}
+                onClose={onClose}
+                onFocusInput={focusSearchInput}
+              />
+            ) : null}
+          </InstantSearch>
         </div>
-      </Dialog>
-    </Transition>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -683,7 +689,7 @@ const Breadcrumbs = ({ url, hierarchy }: { url: string; hierarchy?: DocHit['hier
 
   try {
     const parsed = new URL(url)
-    const pathSegments = parsed.pathname
+    const pathSegments = decodeURIComponent(parsed.pathname)
       .split('/')
       .filter(Boolean)
       .map((segment) => segment.replace(/-/g, ' '))
@@ -732,25 +738,6 @@ const SearchModeToggle = ({
       <Sparkles className="h-3.5 w-3.5" />
       Ask AI
     </button>
-  </div>
-)
-
-const AskAIContent = () => (
-  <div className="max-h-[65vh] overflow-y-auto px-2 pb-2">
-    <div className="mt-2 overflow-hidden rounded-2xl bg-signoz_slate-500 shadow-[0_20px_45px] shadow-black/40">
-      <div className="w-full bg-signoz_slate-500">
-        <iframe
-          src="https://www.chatbase.co/chatbot-iframe/ZXMN63dnzm9r1LEY0He6U"
-          className="h-[420px] w-full border-0 sm:h-[520px]"
-          frameBorder="0"
-          title="SigNoz Chat Assistant"
-          allow="microphone"
-        />
-      </div>
-      <div className="border-t border-white/10 bg-black/20 px-6 py-4 text-xs text-white/60">
-        Responses are AI-generated from SigNoz docs. Double-check important details before acting.
-      </div>
-    </div>
   </div>
 )
 

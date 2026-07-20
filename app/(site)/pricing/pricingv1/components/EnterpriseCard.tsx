@@ -1,6 +1,6 @@
 import React from 'react'
 import { CheckCircle, ArrowRight, Info } from 'lucide-react'
-import Button from 'components/Button/Button'
+import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { Card } from '@/components/ui/Card'
 
@@ -35,7 +35,7 @@ export default function EnterpriseCard() {
             clickLocation="Enterprise Pricing Card Bottom"
           >
             <Button
-              type={Button.TYPES.SECONDARY}
+              variant="legacySecondary"
               className="mb-4 flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
             >
               Contact Us <ArrowRight size={14} />
@@ -121,7 +121,7 @@ export default function EnterpriseCard() {
               clickLocation="Enterprise Pricing Card Top"
             >
               <Button
-                type={Button.TYPES.SECONDARY}
+                variant="legacySecondary"
                 className="mb-3 flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
               >
                 Contact Us <ArrowRight size={14} />

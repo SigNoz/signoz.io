@@ -4,6 +4,7 @@ import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkMdx from 'remark-mdx'
 import { getListicleConfig, getListicleItems } from '../../constants/listicles/utils'
+import type { ListicleConfig } from '../../components/Listicle/types'
 
 const HOSTING_DECISION_ITEMS = [
   {
@@ -47,7 +48,6 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
 ] as const
 export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'CHClientWithOutput',
-  'CloneRepo',
   'CommonPrerequisites',
   'DashboardActions',
   'DSConfigIntro',
@@ -69,8 +69,6 @@ export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'MetricsDefinition',
   'MultiNodePart1',
   'MultiNodePart2',
-  'OtelOperatorAutoInstrumentation',
-  'OtelOperatorOTLPEndpoint',
   'PrereqsInstrument',
   'RetentionInfo',
   'SigNozCloud',
@@ -221,10 +219,9 @@ const createUnknownComponentStub = (name: string): ComponentType<StubProps> => {
   return UnknownComponentStub
 }
 
-const createKnownComponentStubs = (): Record<
-  KnownAgentMdxComponentName,
-  ComponentType<StubProps>
-> => ({
+const createKnownComponentStubs = (
+  listicleConfigs: Map<string, ListicleConfig>
+): Record<KnownAgentMdxComponentName, ComponentType<StubProps>> => ({
   Figure: (props) => {
     const src = getStringProp(props, 'src')
     const alt = getStringProp(props, 'alt') || ''
@@ -322,13 +319,13 @@ const createKnownComponentStubs = (): Record<
   Listicle: createItemListStub(
     (props) => {
       const name = getStringProp(props, 'name')
-      const config = name ? getListicleConfig(name) : null
+      const config = name ? (listicleConfigs.get(name) ?? null) : null
       if (!config) return []
       return getListicleItems(config, { sectionId: getStringProp(props, 'defaultSection') })
     },
     (props) => {
       const name = getStringProp(props, 'name')
-      const config = name ? getListicleConfig(name) : null
+      const config = name ? (listicleConfigs.get(name) ?? null) : null
       return config?.markdownTitle || 'Listicle'
     }
   ),
@@ -357,12 +354,40 @@ export const extractMdxComponentNames = (rawMdx: string): string[] => {
   return Array.from(names)
 }
 
-export const buildAgentMdxComponentsForDoc = (doc: {
+const LISTICLE_NAME_PATTERN = /<Listicle\s[^>]*name=["']([^"']+)["']/g
+
+const extractListicleNames = (rawMdx: string): string[] => {
+  const names = new Set<string>()
+  for (const match of rawMdx.matchAll(LISTICLE_NAME_PATTERN)) {
+    names.add(match[1])
+  }
+  return Array.from(names)
+}
+
+const prefetchListicleConfigs = async (names: string[]): Promise<Map<string, ListicleConfig>> => {
+  const configs = new Map<string, ListicleConfig>()
+  const results = await Promise.all(
+    names.map(async (name) => {
+      const config = await getListicleConfig(name)
+      return [name, config] as const
+    })
+  )
+  for (const [name, config] of results) {
+    if (config) configs.set(name, config)
+  }
+  return configs
+}
+
+export const buildAgentMdxComponentsForDoc = async (doc: {
   slug?: string
   body: { raw: string }
-}): DocsComponentMap => {
+}): Promise<DocsComponentMap> => {
   const componentNames = extractMdxComponentNames(doc.body.raw)
-  const knownStubs = createKnownComponentStubs()
+
+  const listicleNames = extractListicleNames(doc.body.raw)
+  const listicleConfigMap = await prefetchListicleConfigs(listicleNames)
+
+  const knownStubs = createKnownComponentStubs(listicleConfigMap)
   const unreviewedComponentNames = componentNames.filter(
     (componentName) =>
       !Object.prototype.hasOwnProperty.call(AGENT_MDX_COMPONENT_POLICIES, componentName)

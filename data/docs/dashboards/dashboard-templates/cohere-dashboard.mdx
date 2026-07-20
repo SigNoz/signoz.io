@@ -1,0 +1,66 @@
+---
+date: 2026-07-11
+title: Cohere Dashboard
+description: Monitor Cohere LLM operations with a focus on request volume, errors, token usage, latency, model adoption, and individual spans.
+doc_type: explanation
+---
+
+<Admonition type="info">
+  Before using this dashboard, instrument your Cohere application with OpenTelemetry and configure export to SigNoz. See the [Cohere monitoring guide](https://signoz.io/docs/cohere-monitoring/) for setup instructions.
+</Admonition>
+
+This dashboard provides a comprehensive view of the `cohere-otel` service using trace data. It is built on OpenTelemetry span fields and `gen_ai.*` / `llm.*` attributes emitted by Cohere instrumentation and focuses on Cohere usage: request volume, errors, token consumption, per-operation latency, model adoption, request-type distribution, and individual spans.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/cohere-dashboard.webp"
+  alt="Cohere Dashboard"
+  caption="Cohere Dashboard Template"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/cohere/cohere-dashboard.json"
+    dashboardName="Cohere"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard tracks critical performance and cost metrics for your Cohere service using OpenTelemetry trace data to help you:
+
+- **Track Request Volume**: See total Cohere call counts to understand overall activity across Chat, Embed, Rerank, and other operations.
+- **Catch Errors Early**: Surface the count of spans with errors so you can detect failed Cohere operations immediately.
+- **Optimize LLM Cost**: Break down input and output token consumption to understand cost drivers and track usage trends over time.
+- **Monitor Latency**: Watch p95 latency per operation to surface slow responses and tail-latency regressions.
+- **Track Model Usage**: Compare call volumes across every model in use to guide model selection.
+- **Understand Request Types**: See the distribution of Chat, Embed, Rerank, and other request types at a glance.
+- **Inspect Recent Calls**: Drill into the most recent and most recent failed spans for quick debugging.
+
+## Panels Included
+
+### Overview (Top Row)
+
+| Panel | Type | What It Shows |
+|-------|------|---------------|
+| **Total Cohere Calls** | Value | Count of all spans emitted by the `cohere-otel` service in the selected window |
+| **Error Spans** | Value | Count of spans with `has_error = true`; highlights failed Cohere operations |
+| **Input Tokens** | Value | Sum of `gen_ai.usage.prompt_tokens` across spans that report prompt-token usage |
+| **Output Tokens** | Value | Sum of `gen_ai.usage.completion_tokens` across spans that report completion-token usage |
+
+### Activity & Latency
+
+- **Calls by Operation**: Time-series graph of Cohere call volume grouped by span `name`, separating Chat, Embed, Rerank, and other instrumented operations and showing how their traffic changes.
+- **P95 Latency by Operation**: Time-series graph of 95th-percentile `duration_nano` grouped by span `name`, highlighting slow Cohere operations and tail-latency changes.
+
+### Model & Operation Breakdown
+
+- **Calls by Model**: Pie chart of Cohere calls grouped by `gen_ai.request.model`, showing which models account for the most traffic.
+- **Calls by Request Type**: Pie chart of calls grouped by `llm.request.type`, making the distribution of Chat, Embed, Rerank, and other request types easy to compare.
+- **Operation Performance**: Table grouped by span `name` with call count, average latency, and p95 latency for a side-by-side performance comparison of Cohere operations.
+
+### Trace Details
+
+- **Recent Cohere Spans**: List of the 20 most recent Cohere spans with service, operation, duration, error state, model, request type, total tokens, and trace ID for inspecting individual calls and continuing investigation in the trace view.
+- **Cohere Error Spans**: List of the 20 most recent spans where `has_error = true`, including operation, duration, status message, and trace ID, providing a focused starting point for debugging failed Cohere requests.

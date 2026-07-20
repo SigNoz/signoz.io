@@ -10,26 +10,33 @@ import Tabs from '@/components/ResourceCenter/Tabs'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
 import { Button } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
+import UseCasesDropdown from './UseCasesDropdown'
 import ResourcesDropdown from './ResourcesDropdown'
 import { NavDropdownProvider } from './NavDropdownContext'
 import NavDropdownPanel from './NavDropdownPanel'
 import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
+import { useMobileDocsSidebar } from '@/components/DocsSidebar/MobileDocsSidebarContext'
 
 export default function TopNav() {
   const pathname = usePathname()
   const router = useRouter()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isDocsBasePath, setIsDocsBasePath] = useState(false)
-  const [showMainMenu, setShowMainMenu] = useState(false)
   const [activeTab, setActiveTab] = useState(TABS.GUIDES)
   const [shouldShowTabs, setShouldShowTabs] = useState(false)
 
+  const docsSidebar = useMobileDocsSidebar()
+  const isDocsBasePath = pathname.startsWith('/docs')
   const visibility = useNavVisibility()
+
+  useEffect(() => {
+    return docsSidebar.onMainMenuRequest(() => setMobileMenuOpen(true))
+  }, [docsSidebar])
 
   const isLoginRoute = pathname === '/login/'
   const isSignupRoute = pathname === '/teams/'
@@ -37,10 +44,6 @@ export default function TopNav() {
   const isWordleRoute = pathname === '/todaysdevopswordle/'
 
   useEffect(() => {
-    const docsBase = pathname.startsWith('/docs')
-    setIsDocsBasePath(docsBase)
-    setShowMainMenu(!docsBase)
-
     const isListingOrPagination = (base: string) =>
       pathname === base || pathname === `${base}/` || pathname.startsWith(`${base}/page/`)
 
@@ -81,7 +84,10 @@ export default function TopNav() {
               clickName="SigNoz Logo"
               clickText="SigNoz"
               clickLocation="Top Navbar"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={() => {
+                setMobileMenuOpen(false)
+                docsSidebar.close()
+              }}
             >
               <SigNozLogo
                 className="h-5 w-auto shrink-0"
@@ -97,6 +103,7 @@ export default function TopNav() {
                   className={`hidden items-center gap-x-3 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
                 >
                   {visibility.showProduct && <ProductDropdown />}
+                  {visibility.showUseCases && <UseCasesDropdown />}
                   {visibility.showDocs && (
                     <TrackingLink
                       href="/docs/introduction/"
@@ -123,18 +130,6 @@ export default function TopNav() {
                       Pricing
                     </TrackingLink>
                   )}
-                  {visibility.showCustomerStories && (
-                    <TrackingLink
-                      href="/case-study/"
-                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
-                      clickType="Nav Click"
-                      clickName="Customer Stories Link"
-                      clickText="Customers"
-                      clickLocation="Top Navbar"
-                    >
-                      Customers
-                    </TrackingLink>
-                  )}
                 </div>
                 <NavDropdownPanel />
               </NavDropdownProvider>
@@ -149,7 +144,9 @@ export default function TopNav() {
                 {visibility.showSignInGetStarted && (
                   <>
                     <TrackingButton
-                      className="box-border flex h-8 items-center rounded-full bg-signoz_slate-500 px-3 text-sm font-normal text-signoz_vanilla-100 no-underline outline-none hover:bg-slate-700/50 hover:text-white"
+                      variant="secondary"
+                      rounded="default"
+                      className="box-border flex h-8 items-center rounded-md bg-signoz_slate-500 px-3 text-sm font-normal text-signoz_vanilla-100 no-underline outline-none hover:bg-slate-700/50 hover:text-white"
                       clickType="Secondary CTA"
                       clickName="Sign In Button"
                       clickText="Sign In"
@@ -167,12 +164,32 @@ export default function TopNav() {
                     >
                       <Button
                         asChild
+                        variant="default"
                         rounded="full"
-                        className="start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white"
+                        className={cn(
+                          'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600',
+                          'start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white'
+                        )}
                       >
                         <span id="btn-get-started-website-navbar">
-                          Get Started - Free
-                          <ArrowRight size={14} />
+                          <span
+                            className={cn(
+                              'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+                              '[&_svg:not(.animate-spin)]:hidden'
+                            )}
+                          >
+                            Get Started - Free
+                            <ArrowRight size={14} />
+                          </span>
+                          <span
+                            className={cn(
+                              'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
+                              '!flex !bg-signoz_robin-400'
+                            )}
+                            aria-hidden="true"
+                          >
+                            <ArrowRight size={16} strokeWidth={2.5} />
+                          </span>
                         </span>
                       </Button>
                     </TrackingLink>
@@ -186,10 +203,24 @@ export default function TopNav() {
             <button
               type="button"
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 min-[1280px]:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => {
+                if (mobileMenuOpen) {
+                  setMobileMenuOpen(false)
+                  return
+                }
+                if (docsSidebar.isOpen) {
+                  docsSidebar.close()
+                  return
+                }
+                if (isDocsBasePath) {
+                  docsSidebar.toggle()
+                } else {
+                  setMobileMenuOpen(true)
+                }
+              }}
             >
               <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? (
+              {mobileMenuOpen || docsSidebar.isOpen ? (
                 <X strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
               ) : (
                 <Menu strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
@@ -201,10 +232,7 @@ export default function TopNav() {
         <MobileMenu
           open={mobileMenuOpen}
           onClose={setMobileMenuOpen}
-          showMainMenu={showMainMenu}
-          isDocsBasePath={isDocsBasePath}
           isSignupRoute={isSignupRoute}
-          onShowMainMenu={() => setShowMainMenu(true)}
         />
       </header>
 

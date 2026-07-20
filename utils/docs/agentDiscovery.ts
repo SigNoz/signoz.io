@@ -1,4 +1,4 @@
-import docsSideNav from '@/constants/docsSideNav'
+import { getDocsSideNav } from '@/utils/docsSideNav'
 import type { NavItem as DocsSideNavItem } from '@/components/DocsSidebar/types'
 
 type NavItem =
@@ -30,6 +30,9 @@ const LLM_STARTER_ROUTE_MATCHERS: Array<(route: string) => boolean> = [
   (route) => /^\/docs\/cloud(?:\/|$)/.test(route),
   (route) => /^\/docs\/opentelemetry-collection-agents\/get-started(?:\/|$)/.test(route),
   (route) => route === '/docs/llm-observability',
+  (route) => route === '/docs/ai/agent-skills',
+  (route) => route === '/docs/ai/signoz-mcp-server',
+  (route) => route === '/docs/ai/use-cases',
   (route) => route === '/docs/aws-monitoring/overview',
   (route) => route === '/docs/gcp-monitoring',
   (route) => route === '/docs/migration/migrate-to-signoz',
@@ -97,14 +100,15 @@ const buildRouteLabelLookup = (items: NavItem[], lookup: Map<string, string>) =>
   })
 }
 
-const routeLabelLookup = (() => {
+async function getRouteLabelLookup(): Promise<Map<string, string>> {
+  const docsSideNav = await getDocsSideNav()
   const lookup = new Map<string, string>()
   buildRouteLabelLookup(docsSideNav as NavItem[], lookup)
   lookup.set(DOCS_ROOT, 'Get Started')
   return lookup
-})()
+}
 
-const toTree = (items: NavItem[]): DocsRouteTreeItem[] => {
+const toTree = (items: NavItem[], lookup: Map<string, string>): DocsRouteTreeItem[] => {
   return items
     .map((item): DocsRouteTreeItem | null => {
       if (typeof item === 'string') {
@@ -112,7 +116,7 @@ const toTree = (items: NavItem[]): DocsRouteTreeItem[] => {
         if (!route) return null
 
         return {
-          label: routeLabelLookup.get(route) || fallbackLabelFromRoute(route),
+          label: lookup.get(route) || fallbackLabelFromRoute(route),
           route,
           children: [],
         }
@@ -121,7 +125,7 @@ const toTree = (items: NavItem[]): DocsRouteTreeItem[] => {
       const label =
         item.label || (item.route ? fallbackLabelFromRoute(item.route) : 'Documentation')
       const route = normalizeDocsRoute(item.route)
-      const children = Array.isArray(item.items) ? toTree(item.items as NavItem[]) : []
+      const children = Array.isArray(item.items) ? toTree(item.items as NavItem[], lookup) : []
 
       if (!route && children.length === 0) {
         return null
@@ -152,17 +156,15 @@ const flattenTree = (nodes: DocsRouteTreeItem[], depth: number, output: DocsRout
   })
 }
 
-export function getDocsRouteTree(
-  items: DocsSideNavItem[] = docsSideNav as DocsSideNavItem[]
-): DocsRouteTreeItem[] {
-  return toTree(items as NavItem[])
+export async function getDocsRouteTree(): Promise<DocsRouteTreeItem[]> {
+  const docsSideNav = await getDocsSideNav()
+  const lookup = await getRouteLabelLookup()
+  return toTree(docsSideNav as NavItem[], lookup)
 }
 
-export function getDocsRouteList(
-  items: DocsSideNavItem[] = docsSideNav as DocsSideNavItem[]
-): DocsRouteListItem[] {
+export async function getDocsRouteList(): Promise<DocsRouteListItem[]> {
   const all: DocsRouteListItem[] = []
-  flattenTree(getDocsRouteTree(items), 0, all)
+  flattenTree(await getDocsRouteTree(), 0, all)
 
   const seen = new Set<string>()
   return all.filter((item) => {
@@ -172,11 +174,10 @@ export function getDocsRouteList(
   })
 }
 
-export function getLlmStarterLinks(
-  limit = 24,
-  items: DocsSideNavItem[] = docsSideNav as DocsSideNavItem[]
-): Array<Pick<DocsRouteListItem, 'label' | 'route'>> {
-  const routes = getDocsRouteList(items)
+export async function getLlmStarterLinks(
+  limit = 24
+): Promise<Array<Pick<DocsRouteListItem, 'label' | 'route'>>> {
+  const routes = await getDocsRouteList()
   const starters: Array<Pick<DocsRouteListItem, 'label' | 'route'>> = []
   const seen = new Set<string>()
   const sortedRoutes = [...routes].sort(

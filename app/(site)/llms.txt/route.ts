@@ -5,7 +5,7 @@ import { getLlmStarterLinks } from '@/utils/docs/agentDiscovery'
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
 export async function GET() {
-  const starters = getLlmStarterLinks()
+  const starters = await getLlmStarterLinks()
   const starterLines =
     starters.length > 0
       ? starters.map((item) => `- ${item.label}: ${siteMetadata.siteUrl}${item.route}/`).join('\n')
@@ -20,6 +20,13 @@ export async function GET() {
     '',
     '## Fetching docs pages',
     `- Request ${siteMetadata.siteUrl}/docs/... with "Accept: text/markdown" to receive markdown page content.`,
+    '',
+    '## Agent tooling',
+    'SigNoz ships Agent Skills and an MCP server so agents can read the docs and act on your observability data (query traces/logs/metrics, build dashboards, manage alerts).',
+    `- Agent Skills & plugin: ${siteMetadata.siteUrl}/docs/ai/agent-skills/`,
+    `- MCP server: ${siteMetadata.siteUrl}/docs/ai/signoz-mcp-server/`,
+    '- Install all skills: npx skills add SigNoz/agent-skills',
+    `- AI use cases: ${siteMetadata.siteUrl}/docs/ai/use-cases/`,
     '',
     '## Starter docs',
     starterLines,

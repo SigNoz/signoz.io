@@ -4,7 +4,7 @@ import Image from 'next/image'
 import draftingCompassIconUrl from '@/public/img/index_features/drafting-compass.svg?url'
 import logsIconUrl from '@/public/img/index_features/logs.svg?url'
 import barChartIconUrl from '@/public/img/index_features/bar-chart-2.svg?url'
-import Button from 'components/Button/Button'
+import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { Card } from '@/components/ui/Card'
@@ -43,7 +43,9 @@ export default function TeamsPricingCard() {
           clickText="Get Started with SigNoz Cloud"
           clickLocation="Teams Pricing Card"
         >
-          <Button className="mb-6 w-full px-4 py-3 md:py-6">Get Started with SigNoz Cloud</Button>
+          <Button variant="legacyPrimary" className="mb-6 w-full px-4 py-3 md:py-6">
+            Get Started with SigNoz Cloud
+          </Button>
         </TrackingLink>
 
         <div className="my-3 w-full border-t border-dashed border-signoz_slate-400"></div>
@@ -141,14 +143,14 @@ export default function TeamsPricingCard() {
                     <div className="max-w-xs">
                       <p className="m-0 text-sm text-signoz_vanilla-400">
                         <TrackingLink
-                          href="/agent-native-observability/#ai-assistant"
+                          href="/docs/ai/noz/"
                           clickType="In Page Link"
                           clickName="Agent Native Link"
                           clickText="Learn more"
                           clickLocation="Teams Pricing Card"
                         >
                           <span className="text-signoz_robin-400 hover:text-signoz_robin-500">
-                            Request Early Access
+                            Read Docs
                           </span>
                         </TrackingLink>
                       </p>
@@ -273,7 +275,9 @@ export default function TeamsPricingCard() {
             clickText="Estimate your monthly bill"
             clickLocation="Teams Pricing Card"
           >
-            <Button className="mb-3 w-full px-4 py-3 md:py-6">Estimate your monthly bill</Button>
+            <Button variant="legacyPrimary" className="mb-3 w-full px-4 py-3 md:py-6">
+              Estimate your monthly bill
+            </Button>
           </TrackingLink>
         </div>
       </div>

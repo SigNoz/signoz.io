@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 'use client'
 
 import { usePathname } from 'next/navigation'
@@ -8,7 +7,7 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Doc, Guide } from '../types/transformedContent'
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import siteMetadata from '@/data/siteMetadata'
 import { RegionProvider } from '@/components/Region/RegionContext'
 
@@ -166,7 +165,7 @@ export default function ListLayoutWithTags({
                 </div>
                 <div className="text-center text-gray-500 dark:text-gray-400">{emptyMessage}</div>
                 <Link href="/blog">
-                  <Button type={Button.TYPES.PRIMARY}>Back to Blog</Button>
+                  <Button variant="legacyPrimary">Back to Blog</Button>
                 </Link>
               </div>
             )}

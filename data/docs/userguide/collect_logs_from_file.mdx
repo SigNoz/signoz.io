@@ -1,5 +1,5 @@
 ---
-date: 2026-03-12
+date: 2026-07-17
 title: Collecting Application Logs from Log File
 description: Learn how to configure the OpenTelemetry Collector to read logs from a file and push them to SigNoz.
 doc_type: howto
@@ -212,6 +212,53 @@ Restart-Service opentelemetry-collector
 </TabItem>
 
 </Tabs>
+
+## Tagging Logs from Multiple Applications
+
+When several named `filelog` receivers (such as `filelog/app` above) feed the same collector, tag each one so you can tell which application a log came from.
+
+### Automatic file-based tags
+
+`include_file_name` defaults to `true`, so every log already carries a `log.file.name` attribute. Set `include_file_path: true` to also capture the full path as `log.file.path`. If each application writes to its own file, this alone is enough to separate them, no extra config needed.
+
+### Custom tags per application
+
+To tag logs with your own identifier instead, such as `service.name`, add a `resource` or `attributes` map directly under each named receiver:
+
+```yaml:otel-collector-config.yaml {5-6,10-11}
+receivers:
+  filelog/nginx:
+    include: [/var/log/nginx/access.log]
+    start_at: end
+    resource:
+      service.name: nginx
+  filelog/payments:
+    include: [/var/log/payments/app.log]
+    start_at: end
+    resource:
+      service.name: payments
+```
+
+Add both receivers to the logs pipeline as usual:
+
+```yaml:otel-collector-config.yaml {4}
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, filelog/nginx, filelog/payments]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+`resource` sets resource-level attributes, filterable the same way as `service.name` on any other signal. `attributes` sets log-record-level attributes instead. Both fields are documented in the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/filelogreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">filelog receiver README</a>.
+
+For tags that should apply to every log from this collector rather than one application, such as `deployment.environment`, use the [resource processor](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/) instead.
+
+<Admonition type="info">
+On Kubernetes, pods and containers already get `k8s.pod.name`, `k8s.container.name`, and `k8s.namespace.name` attached automatically, so no manual tagging is needed to separate applications there.
+</Admonition>
+
+Once tagged, use [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) to parse or rename these attributes, for example turning `log.file.name` into a friendlier field, directly from the SigNoz UI.
 
 ## Validate Logs
 

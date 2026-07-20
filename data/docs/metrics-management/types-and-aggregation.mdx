@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-03
 title: Metric Types and Aggregation
 description: Learn about the different metric types (Counter, Gauge, Histogram, Exponential Histogram) supported by SigNoz and how temporal and spatial aggregation works for each type.
 doc_type: explanation
@@ -176,6 +176,14 @@ As we can see, the spatial aggregation function **Sum** is the most useful in th
 
 The final result is the memory usage per host for each interval.
 
+Pods are the real-world equivalent of hosts here. SigNoz's Metrics Explorer applies the same Avg (temporal) and Sum (spatial) aggregation, grouped by pod:
+
+<Figure
+  src="/img/docs/metrics/aggregation/gauge_metrics_explorer.webp"
+  alt="Gauge metric query in SigNoz Metrics Explorer with Avg temporal and Sum spatial aggregation, grouped by pod"
+  caption="Avg (temporal) and Sum (spatial) aggregation on a Gauge metric in SigNoz's Metrics Explorer"
+/>
+
 ## Counter
 
 The Counter metric can have a cumulative or delta temporality.
@@ -260,6 +268,14 @@ As we can see, the spatial aggregation function **Sum** is the most useful in th
 
 The final result is the number of requests received per service for each interval.
 
+SigNoz's Metrics Explorer applies the same Increase (temporal) and Sum (spatial) aggregation on a cumulative Counter metric, grouped by service:
+
+<Figure
+  src="/img/docs/metrics/aggregation/counter_metrics_explorer.webp"
+  alt="Counter metric query in SigNoz Metrics Explorer with Increase temporal and Sum spatial aggregation, grouped by service"
+  caption="Increase (temporal) and Sum (spatial) aggregation on a Counter metric in SigNoz's Metrics Explorer"
+/>
+
 ### Delta Counter
 
 Let's take an example of a Counter metric that represents the number of requests received by a service. The following tables show the measurements of the number of requests since the last time it was reported (Delta Counter). The measurements are reported every 5 seconds. This example has 7 time series, each representing the number of requests received by a service (Sx) running on the server (Hx).
@@ -307,3 +323,11 @@ This step is the same as the Cumulative Counter.
 The aggregation of Histogram metrics is similar to that of Counter metrics. The difference is that Histogram metrics store the distribution of a set of values. There is no configuration required for temporal aggregation as the values get aggregated into buckets based on the histogram configuration. The result of the temporal aggregation is a single aggregated histogram for each interval within the time series.
 
 The spatial aggregation step aggregates the values across multiple time series. The result of this step is a single numerical value indicating the percentile value for each interval for a group of time series. The grouping is done based on the group tags specified in the query. If no group tags are specified, all time series are considered as a single group.
+
+A Histogram metric works the same way in SigNoz's Metrics Explorer: P95 spatial aggregation grouped by service, with no separate temporal aggregation control since the values are already bucketed:
+
+<Figure
+  src="/img/docs/metrics/aggregation/histogram_metrics_explorer.webp"
+  alt="Histogram metric query in SigNoz Metrics Explorer with P95 spatial aggregation, grouped by service"
+  caption="P95 spatial aggregation on a Histogram metric in SigNoz's Metrics Explorer"
+/>

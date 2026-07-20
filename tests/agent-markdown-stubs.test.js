@@ -18,7 +18,7 @@ test('unknown component stubs preserve titles when children are rendered', async
   const doc = createDoc(
     '<KeyPointCallout title="Using self-hosted SigNoz?">Most steps are identical.</KeyPointCallout>'
   )
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(
       components.KeyPointCallout,
@@ -33,7 +33,7 @@ test('unknown component stubs preserve titles when children are rendered', async
 
 test('Admonition stubs preserve the admonition type label', async () => {
   const doc = createDoc('<Admonition type="warning">Keep existing receivers.</Admonition>')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(
       components.Admonition,
@@ -48,7 +48,7 @@ test('Admonition stubs preserve the admonition type label', async () => {
 
 test('Listicle stubs respect the selected default section', async () => {
   const doc = createDoc('<Listicle name="collection-agents" defaultSection="kubernetes" />')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(components.Listicle, {
       name: 'collection-agents',
@@ -67,7 +67,7 @@ test('Listicle stubs respect the selected default section', async () => {
 
 test('Listicle stubs render flat listicle items from JSON', async () => {
   const doc = createDoc('<Listicle name="llm-monitoring" />')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(components.Listicle, {
       name: 'llm-monitoring',
@@ -82,7 +82,7 @@ test('Listicle stubs render flat listicle items from JSON', async () => {
 
 test('Listicle stubs render metrics quick start sections from JSON', async () => {
   const doc = createDoc('<Listicle name="metrics-quick-start" defaultSection="databases" />')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(components.Listicle, {
       name: 'metrics-quick-start',
@@ -98,7 +98,7 @@ test('Listicle stubs render metrics quick start sections from JSON', async () =>
 
 test('Listicle stubs use the configured markdown title', async () => {
   const doc = createDoc('<Listicle name="aws-monitoring" />')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(components.Listicle, {
       name: 'aws-monitoring',
@@ -111,7 +111,7 @@ test('Listicle stubs use the configured markdown title', async () => {
 
 test('HostingDecision stub matches the banner CTA destinations', async () => {
   const doc = createDoc('<HostingDecision />')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(React.createElement(components.HostingDecision))
 
   assert.match(html, /Compare Self Host vs Cloud/)
@@ -124,7 +124,7 @@ test('HostingDecision stub matches the banner CTA destinations', async () => {
 
 test('RegionTable stub renders a placeholder for the endpoint table', async () => {
   const doc = createDoc('<RegionTable />')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(React.createElement(components.RegionTable))
 
   assert.match(html, /region and endpoint reference/)
@@ -133,7 +133,7 @@ test('RegionTable stub renders a placeholder for the endpoint table', async () =
 
 test('MCPInstallButton stub renders child text with client context', async () => {
   const doc = createDoc('<MCPInstallButton client="cursor">Add to Cursor</MCPInstallButton>')
-  const components = buildAgentMdxComponentsForDoc(doc)
+  const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(
     React.createElement(components.MCPInstallButton, { client: 'cursor' }, 'Add to Cursor')
   )

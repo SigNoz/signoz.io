@@ -1,0 +1,135 @@
+---
+date: 2026-06-24
+title: Send CloudNativePG Metrics to SigNoz with OpenTelemetry
+description: Scrape CloudNativePG instance metrics with the OpenTelemetry Collector and send cluster health, replication, WAL, and checkpoint metrics to SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+Use this guide to send CloudNativePG cluster metrics to SigNoz with the OpenTelemetry Collector. Monitor cluster health, connections, throughput, cache, replication, WAL and archiving, checkpoints, and storage.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Use the same steps. Update the endpoint and remove the ingestion key header as shown in [Cloud -> Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- A <a href="https://cloudnative-pg.io/" target="_blank" rel="noopener noreferrer nofollow">CloudNativePG</a> cluster running in Kubernetes
+- An OpenTelemetry Collector deployed in the same cluster. See [OpenTelemetry Collector on Kubernetes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/get-started/) to get started
+- An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## How it works
+
+Each CloudNativePG instance exposes Prometheus-format metrics with the `cnpg_` prefix on port `9187`, path `/metrics`. The instance pods carry the `cnpg.io/cluster` label and a container port named `metrics`. The Collector discovers those pods, scrapes the endpoint, and ships the metrics to SigNoz over OTLP.
+
+For the full metric list, see the <a href="https://cloudnative-pg.io/docs/current/monitoring/" target="_blank" rel="noopener noreferrer nofollow">CloudNativePG monitoring reference</a>.
+
+## Steps
+
+### Step 1: Configure the Collector
+
+Add a scrape job that filters for CloudNativePG instance pods, a **resource** processor that tags the metrics with **service.name**, and a dedicated pipeline. Merge this into your existing Collector config:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus/cnpg:
+    config:
+      scrape_configs:
+        - job_name: cloudnative-pg
+          scrape_interval: 30s
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_label_cnpg_io_cluster]
+              action: keep
+              regex: .+
+            - source_labels: [__meta_kubernetes_pod_container_port_name]
+              action: keep
+              regex: metrics
+            - source_labels: [__meta_kubernetes_pod_name]
+              target_label: pod
+            - source_labels: [__meta_kubernetes_namespace]
+              target_label: namespace
+
+processors:
+  resource/cnpg:
+    attributes:
+      - key: service.name
+        value: cloudnative-pg
+        action: upsert
+
+exporters:
+  otlphttp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      signoz-ingestion-key: "<your-ingestion-key>"
+
+service:
+  pipelines:
+    metrics/cnpg:
+      receivers: [prometheus/cnpg]
+      processors: [resource/cnpg, batch]
+      exporters: [otlphttp]
+```
+
+Verify these values:
+
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  The Collector needs `ClusterRole` permissions for Kubernetes pod discovery. The [OpenTelemetry Collector on Kubernetes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/get-started/) guide covers the required RBAC setup.
+</Admonition>
+
+### Step 2: Restart the Collector
+
+```bash
+kubectl rollout restart deployment/<collector-deployment> -n <collector-namespace>
+```
+
+## Validate
+
+1. Open [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) in SigNoz.
+2. Search for metrics that start with `cnpg_`.
+3. Look for metrics such as `cnpg_collector_up`.
+
+<Figure
+  src="/img/docs/metrics/cloudnative-pg/sample-metrics.webp"
+  alt="CloudNativePG metrics in the SigNoz Metrics Explorer"
+  caption="CloudNativePG metrics in the SigNoz Metrics Explorer"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No `cnpg_` metrics in SigNoz
+
+- Cause: the Collector cannot discover the CloudNativePG pods, or it lacks RBAC permissions.
+- Fix: confirm the Collector has `ClusterRole` access for pod discovery, and confirm the instance pods carry the `cnpg.io/cluster` label with a container port named `metrics`.
+- Verify: search for `cnpg_collector_up` in Metrics Explorer.
+
+### Metrics endpoint uses TLS
+
+- Cause: the cluster sets `.spec.monitoring.tls.enabled: true`, so the metrics endpoint serves HTTPS.
+- Fix: set `scheme: https` on the scrape job and configure `tls_config` with the cluster's CA in the Prometheus receiver.
+- Verify: the scrape job stops logging connection or protocol errors.
+
+### Per-database metrics are missing
+
+- Cause: the `cnpg_pg_stat_database_*` metrics change after queries run against the database.
+- Fix: confirm clients are connecting and running queries against the database.
+- Verify: `cnpg_pg_stat_database_xact_commit` increments between scrapes.
+
+</details>
+
+## Next Steps
+
+- Import the prebuilt [CloudNativePG dashboard](https://signoz.io/docs/dashboards/dashboard-templates/cloudnative-pg-dashboard/).
+- Read how to [Set up Alerts in SigNoz](https://signoz.io/docs/userguide/alerts-management/).
+
+## Get Help
+
+<GetHelp />
