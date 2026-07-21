@@ -6,6 +6,7 @@ import { TabsRoot, TabsList, TabsTrigger } from '@signozhq/ui/tabs'
 import { useSearchParamsState } from '@/hooks/useSearchParamsState'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import type { TabItemProps } from './TabItem'
+import styles from './Tabs.module.css'
 
 interface TabsProps {
   children: React.ReactNode
@@ -85,7 +86,7 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
 
   return (
     <TabsRoot
-      className={className || 'w-full'}
+      className={`${styles.root} ${className || 'w-full'}`}
       data-tabs-root=""
       value={activeTab ?? undefined}
       onValueChange={handleTabChange}
