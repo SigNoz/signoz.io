@@ -21,7 +21,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname),
-      '@signozhq/icons': path.resolve(__dirname, 'node_modules/@signozhq/icons/dist/index.esm.js'),
     },
   },
 })
