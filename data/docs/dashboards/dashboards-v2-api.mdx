@@ -1,5 +1,5 @@
 ---
-date: 2026-07-10
+date: 2026-07-21
 title: "Dashboards V2 API - Schema, Endpoints & PATCH Updates"
 description: "Migrate to the redesigned SigNoz Dashboards experience and learn the V2 Dashboards API: schema, endpoints, pagination, the query DSL, and partial PATCH updates."
 doc_type: howto
@@ -19,6 +19,17 @@ SigNoz is rolling out a redesigned **Dashboards** experience. Your existing dash
 ### If you have scripts that use the Dashboards API directly
 
 We suggest you migrate those scripts to use the new V2 Dashboards APIs. You can follow the examples in this guide below.
+
+<Admonition type="info">
+Recent fixes (published after `v0.132.1`) make the V2 Dashboards API round-trip zero-valued fields faithfully. Review these before parsing GET responses in scripts, SDKs, or generated clients:
+
+- **A threshold value of exactly `0` is accepted.** Panels can set a `0` threshold; the API no longer rejects it.
+- **Zero-valued fields are always present in GET responses.** Query objects always include `disabled: false` and `legend: ""`, and explicitly-set empty arrays (group-by, ordering, selected fields, aggregations, functions, and function arguments) round-trip as `[]`. Arrays that were never set stay absent. At the spec level, `image`, `duration`, `refreshInterval`, and the display description serialize as `""` when unset; text-variable `constant` serializes as `false`, and list-variable `customAllValue` and `capturingRegexp` serialize as `""`.
+- **Some fields are now nullable.** The dashboard `datasources` map, the dashboard- and panel-level `links` arrays, and several query array fields can return `null`. Generated clients type these as `Type[] | null` (or a nullable map), so handle `null` alongside `[]`.
+- **If your integration checks for the *absence* of a key to detect an unset value, switch to checking the value itself**, since these keys are now always present.
+
+Alert rules share the same underlying query format, so their GET responses gain the same `disabled`, `legend`, and empty-array behavior. The <a href="https://signoz.io/api-reference/" target="_blank" rel="noopener noreferrer nofollow">API Reference</a> is the authoritative schema. Note that the `DashboardLink` schema component was renamed to `DashboardtypesLink` (the field shape is unchanged); update any tooling or generated client that references it by name.
+</Admonition>
 
 ### If you have dashboards synced via Terraform
 
