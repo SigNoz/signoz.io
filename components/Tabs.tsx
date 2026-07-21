@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { TabsRoot, TabsList, TabsTrigger } from '@signozhq/ui/tabs'
 import { useSearchParamsState } from '@/hooks/useSearchParamsState'
@@ -37,30 +37,36 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
 
   const urlKey = entityName || null
 
-  const resolveActiveTab = useCallback((): string | null => {
+  const resolvedFromUrl = useMemo((): string | null => {
     if (urlKey) {
       const urlValue = searchParams.get(urlKey)
       if (urlValue && tabValuesSet.has(urlValue)) return urlValue
     }
+    return null
+  }, [urlKey, searchParams, tabValuesSet])
 
-    return defaultActiveTab
-  }, [urlKey, searchParams, tabValuesSet, defaultActiveTab])
+  const [override, setOverride] = useState<string | null>(null)
 
-  const [localActiveTab, setLocalActiveTab] = useState(resolveActiveTab)
+  useEffect(() => {
+    if (!urlKey) return
+    if (override !== null && resolvedFromUrl === override) {
+      setOverride(null)
+    }
+  }, [urlKey, resolvedFromUrl, override])
 
-  const activeTab = urlKey ? resolveActiveTab() : localActiveTab
+  const activeTab = override ?? resolvedFromUrl ?? defaultActiveTab
 
   const handleTabChange = useCallback(
     (value: string) => {
-      setLocalActiveTab(value)
+      setOverride(value)
 
       if (!urlKey) return
 
-      const current = new URLSearchParams(Array.from(searchParams.entries()))
+      const current = new URLSearchParams(window.location.search)
       current.set(urlKey, value)
       router.replace(`${pathname}?${current.toString()}`, { scroll: false })
     },
-    [urlKey, searchParams, router, pathname]
+    [urlKey, router, pathname]
   )
 
   const isOnboarding = isDocsOnboardingPathname(pathname)
@@ -82,6 +88,7 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
       data-tabs-root=""
       value={activeTab ?? undefined}
       onValueChange={handleTabChange}
+      activationMode="manual"
       style={
         {
           '--tab-list-wrapper-secondary-padding-left': '0px',
@@ -99,7 +106,6 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
               variant={dsVariant}
               {...({
                 'data-tab-value': value as string,
-                onClick: () => handleTabChange(value as string),
               } as Record<string, unknown>)}
             >
               {label}

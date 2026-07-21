@@ -35,12 +35,17 @@ beforeEach(() => {
   mockPathname.mockReturnValue('/docs/install/')
   mockReplace.mockClear()
   mockSearchParams.mockReturnValue(new URLSearchParams())
+  window.history.replaceState({}, '', '/docs/install/')
 })
 
 const getTabButtons = () => screen.queryAllByRole('tab')
 const getTabButton = (name: string) => screen.queryByRole('tab', { name })
 const getTabPanels = () =>
   document.querySelectorAll<HTMLDivElement>('[data-tabs-root] > .mt-4 > [data-tab-value]')
+
+const activateTab = (name: string) => {
+  fireEvent.mouseDown(getTabButton(name)!)
+}
 
 describe('Tabs basic rendering', () => {
   it('renders all tab buttons', () => {
@@ -93,7 +98,7 @@ describe('Tabs basic rendering', () => {
       </Tabs>
     )
 
-    fireEvent.click(getTabButton('Self-Hosted')!)
+    activateTab('Self-Hosted')
 
     const panels = getTabPanels()
     const cloudPanel = Array.from(panels).find((p) => p.getAttribute('data-tab-value') === 'cloud')
@@ -267,7 +272,7 @@ describe('plans tabs sync to URL', () => {
       </Tabs>
     )
 
-    fireEvent.click(getTabButton('Self-Hosted')!)
+    activateTab('Self-Hosted')
 
     expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('plans=self-host'), {
       scroll: false,
@@ -317,11 +322,11 @@ describe('nested tabs do not reset parent plans tab', () => {
     )
 
     // Render with plans=self-host already in URL (user previously clicked Self-Hosted)
+    window.history.replaceState({}, '', '/docs/install/?plans=self-host')
     mockSearchParams.mockReturnValue(new URLSearchParams('plans=self-host'))
     const { unmount } = render(<NestedTabs />)
 
-    // Click "yarn" in the nested tabs
-    fireEvent.click(screen.getByRole('tab', { name: 'yarn' }))
+    fireEvent.mouseDown(screen.getByRole('tab', { name: 'yarn' }))
     expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('plans=self-host'), {
       scroll: false,
     })
@@ -356,5 +361,56 @@ describe('nested tabs do not reset parent plans tab', () => {
       (p) => p.getAttribute('data-tab-value') === 'yarn'
     )
     expect(yarnPanel).not.toHaveAttribute('hidden')
+  })
+})
+
+describe('environment tab switch preserves nested query params', () => {
+  it('switches from k8s to windows while keeping k8s-method', () => {
+    window.history.replaceState(
+      {},
+      '',
+      '/docs/instrumentation/opentelemetry-python/?environment=k8s&k8s-method=direct'
+    )
+    mockPathname.mockReturnValue('/docs/instrumentation/opentelemetry-python/')
+    mockSearchParams.mockReturnValue(new URLSearchParams('environment=k8s&k8s-method=direct'))
+
+    render(
+      <Tabs entityName="environment">
+        <TabItem value="vm" label="VM" default>
+          VM content
+        </TabItem>
+        <TabItem value="k8s" label="Kubernetes">
+          <Tabs entityName="k8s-method">
+            <TabItem value="direct" label="Direct" default>
+              Direct content
+            </TabItem>
+            <TabItem value="otel-operator" label="OTel Operator">
+              Operator content
+            </TabItem>
+          </Tabs>
+        </TabItem>
+        <TabItem value="windows" label="Windows">
+          Windows content
+        </TabItem>
+      </Tabs>
+    )
+
+    expect(getTabButton('Kubernetes')).toHaveAttribute('aria-selected', 'true')
+
+    activateTab('Windows')
+
+    expect(getTabButton('Windows')).toHaveAttribute('aria-selected', 'true')
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('environment=windows'), {
+      scroll: false,
+    })
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('k8s-method=direct'), {
+      scroll: false,
+    })
+
+    const panels = getTabPanels()
+    const windowsPanel = Array.from(panels).find(
+      (p) => p.getAttribute('data-tab-value') === 'windows'
+    )
+    expect(windowsPanel).not.toHaveAttribute('hidden')
   })
 })
