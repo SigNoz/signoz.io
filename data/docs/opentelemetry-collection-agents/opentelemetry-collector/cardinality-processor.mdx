@@ -21,21 +21,29 @@ A few things to know before you start:
 - **Naming quirk.** The component built into the collector is named `cardinalityprocessor`, but the key you use in the `processors:` block of your config is `cardinality_guardian`.
 - **Where it runs.** You add it to a collector that *you* run. SigNoz Cloud's managed collector cannot load custom processors, so this sits in your own collector, upstream of the OTLP export to SigNoz.
 
-## How it works
-
-Instead of a fixed limit on total series, the processor watches the **rate of growth** of unique values for each `(metric, attribute)` pair:
-
-- The processor divides time into fixed windows called **epochs** (`epoch_duration_seconds`, default 300s).
-- For each pair, it estimates how many *new* unique values appear within an epoch using <a href="https://en.wikipedia.org/wiki/HyperLogLog" target="_blank" rel="noopener noreferrer nofollow">HyperLogLog++</a> sketches (roughly 2 KB of memory per tracked pair).
-- When the new-values-per-epoch count crosses `max_cardinality_delta_per_epoch` (default 100), the processor flags the attribute and applies the configured [enforcement mode](#enforcement-modes).
-
-Detection is delta-based, so a label with a large but *stable* set of values never triggers enforcement. Only a label that keeps introducing new values does.
-
 ## Prerequisites
 
 - An OpenTelemetry Collector you control, [exporting metrics to SigNoz](https://signoz.io/docs/metrics-management/send-metrics/).
 - Go toolchain, to build a custom collector with the OpenTelemetry Collector Builder (OCB).
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
+
+## How it works
+
+The processor tracks the number of distinct values for each metric attribute during a fixed time window. It compares that count with the previous window. If the increase exceeds your configured threshold, the processor flags the attribute and applies the selected [enforcement mode](#enforcement-modes).
+
+<details>
+<ToggleHeading>
+
+### Detection details
+
+</ToggleHeading>
+
+- The processor divides time into windows called **epochs** (`epoch_duration_seconds`, default 300 seconds).
+- For each `(metric, attribute)` pair, it estimates the number of distinct values using <a href="https://en.wikipedia.org/wiki/HyperLogLog" target="_blank" rel="noopener noreferrer nofollow">HyperLogLog++</a>.
+- It compares the current estimate with the previous epoch. If the increase exceeds `max_cardinality_delta_per_epoch` (default 100), enforcement applies for the rest of the epoch.
+- Attributes with many stable values do not trigger enforcement. Attributes whose value count grows at a steady rate may also remain below the threshold. See the note in [Validate](#validate).
+
+</details>
 
 ## Build a custom collector with OCB
 
