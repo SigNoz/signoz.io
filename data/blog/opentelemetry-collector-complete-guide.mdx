@@ -248,6 +248,73 @@ service:
         from_attributes: ["http.route"]
   ```
 
+## Troubleshooting Common OpenTelemetry Collector Errors
+
+Now, let's learn to troubleshoot some common OTel Collector issues, which primarily fall into three buckets: the Collector can't reach your backend, it can't accept data from your app, or its config won't load. Below are the errors you're most likely to see in the logs, what each one actually means, and how to fix it.
+
+### "context deadline exceeded" When Exporting
+
+The `DeadlineExceeded` error means the exporter couldn't deliver data to your backend before the request timed out. This is often a connectivity or endpoint problem, fixed by ensuring that the endpoint is valid and is reachable from the Collector's network (firewall, security group, etc).
+
+This error can also happen intermittently for valid connections when the network bandwidth is low, or when the Collector must export large payloads. By default, the OTLP exporter buffers incoming telemetry data before export, and performs exponential retries for failed exports. These defaults make the connection resilient to transient network issues and help handle bursts of traffic. If timeouts persist despite this, consider increasing the `timeout` setting for the exporter.
+
+<Figure src="/img/blog/2026/07/opentelemetry-collector-deadline-exceeded.webp" alt="Deadline exceeded error in OpenTelemetry Collector" caption="Deadline exceeded error in OpenTelemetry Collector" />
+
+```yaml
+exporters:
+  otlp:
+    endpoint: "localhost:4317"
+    timeout: 30s
+```
+
+### "connection refused" on Port 4317 or 4318
+
+This means that something is pointing at an address where no Collector is listening. Check for:
+
+- **Your app → Collector:** the SDK's `OTEL_EXPORTER_OTLP_ENDPOINT` is wrong. In Docker/Kubernetes, `localhost` refers to the app's own container — use the Collector's service name (K8s) or `host.docker.internal` (Docker Desktop) instead.
+- **Collector → backend:** the exporter `endpoint` host/port is wrong, or the port isn't published (`-p 4317:4317`).
+
+### "tls: first record does not look like a TLS handshake"
+
+The OTel Collector emits this warning when it attempts to initialize a secure connection to the endpoint defined in the exporter configuration, but it receives an HTTP response instead. Ensure that you explicitly disable TLS when connecting to local Collector instances if you encounter this message.
+
+```yaml
+exporters:
+  otlp:
+    endpoint: "localhost:4317"
+    tls:
+      insecure: true
+```
+
+### "401 Unauthorized" / "403 Forbidden" from the Backend
+
+This error typically happens when your [OpenTelemetry backend](https://signoz.io/blog/opentelemetry-backend/) requires validation before ingesting telemetry data from your Collector instance. Check whether you have configured credentials via headers, and whether the configured header name and API key values are valid. In production environments, you must also ensure that your API keys haven't expired — rotate them if that's the case.
+
+```yaml
+exporters:
+  otlp:
+    endpoint: "ingest.us.signoz.cloud:443"
+    headers:
+      "signoz-ingestion-key": "${SIGNOZ_INGESTION_KEY}"
+```
+
+### "Memory usage is above soft limit" / data being dropped by memory_limiter
+
+If you encounter this message, your Collector instance is reaching the soft memory limits defined in the `memory_limiter` processor. To prevent an OOM crash, it has begun refusing incoming telemetry data.
+
+Frequent occurrences mean that the Collector, its backend, or both of these components are under heavy load, often caused when more applications than anticipated are sending telemetry to the Collector.
+
+On the Collector configuration side, a common mistake is to place other processors in front of the `memory_limiter`. By keeping `memory_limiter` first in the Collector pipeline, it applies backpressure and refuses telemetry ingestion before other processors allocate more memory, preventing the situation from worsening.
+
+<Figure src="/img/blog/2026/07/opentelemetry-collector-data-refused.webp" alt="OTel Collector begins refusing data when it hits its soft memory limit." caption="OTel Collector begins refusing data when it hits its soft memory limit." />
+
+For additional information and best practices, check out the <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/memorylimiterprocessor/README.md#best-practices" target="_blank" rel="noopener noreferrer nofollow">memory_limiter processor's official documentation</a>.
+
+### "unknown type: ..." Error on Collector Startup
+
+This error indicates that your Collector configuration references a component that isn't in your Collector distribution. Most community receivers, processors, and exporters live only in **`otelcol-contrib`**, not the core binary.<br />
+Switch to the [Contrib distribution](https://signoz.io/blog/opentelemetry-collector-contrib/) and confirm the component name is spelled exactly as documented.
+
 ## OpenTelemetry Collector FAQs
 
 ### What is the difference between OpenTelemetry Agent and Collector?
