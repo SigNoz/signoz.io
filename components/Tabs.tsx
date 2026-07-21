@@ -82,6 +82,12 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
       data-tabs-root=""
       value={activeTab ?? undefined}
       onValueChange={handleTabChange}
+      style={
+        {
+          '--tab-list-wrapper-secondary-padding-left': '0px',
+          '--tab-border-spacer-min-width': '0px',
+        } as React.CSSProperties
+      }
     >
       <TabsList variant={dsVariant}>
         {visibleChildren.map((child) => {
