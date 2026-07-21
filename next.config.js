@@ -819,6 +819,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/comparisons/opentelemetry-collector-vs-agent/',
+          destination: '/blog/opentelemetry-collector-complete-guide/',
+          permanent: true,
+        },
+        {
           source: '/blog/tags/',
           destination: '/tags/',
           permanent: true,
