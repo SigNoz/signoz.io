@@ -2,7 +2,7 @@
 title: "OpenTelemetry Collector from A to Z: A Production-Ready Guide"
 meta_title: "OpenTelemetry Collector: A Production-Ready Guide"
 published_date: 2025-09-04
-updated_date: 2026-07-20
+updated_date: 2026-07-21
 tags: [OpenTelemetry]
 authors: [ankit_anand]
 description: "A complete guide to the OpenTelemetry Collector: agent vs. gateway patterns, YAML configuration, tail sampling, and production best practices."
@@ -32,15 +32,16 @@ This guide will briefly touch on what OpenTelemetry is, then provide a comprehen
 
 ## What is the OpenTelemetry Collector?
 
-[OpenTelemetry (OTel)](https://signoz.io/opentelemetry/) is an open-source observability framework, incubated by the Cloud Native Computing Foundation, that standardizes how telemetry data (logs, metrics, traces) is generated and collected. After instrumenting your applications with OpenTelemetry SDKs, the Collector is the next critical piece for managing that data.
+[OpenTelemetry (OTel)](https://signoz.io/opentelemetry/) is an open-source observability framework, graduated from the Cloud Native Computing Foundation, that standardizes how telemetry data (logs, metrics, traces) is generated and collected. After instrumenting your applications with OpenTelemetry SDKs, the Collector is the next critical piece for managing that data.
 
-In very simple words, the Collector is an agent that sits between your instrumented services, collects the telemetry data that is emitted by the services, processes it and sends it to an observability backend.  
+In very simple words, the Collector is an agent that sits between your instrumented services, collects the telemetry data that is emitted by the services, processes it and sends it to an observability backend.
+
 The most textbook definition of this [and what’s present in the official docs] is that the OTel Collector offers a *vendor-agnostic implementation of how to receive, process and export telemetry data*. Vendor-agnostic means you can plug into any observability backend of your choice and switch it up as you prefer, without changing your application code. No vendor lock-in. 
 
-The below animation shows the flow of data through the Collector. You can try the SigNoz mode, to see where SigNoz comes into the picture.
+The animation below shows the flow of data through the Collector. You can try the SigNoz mode, to see where SigNoz comes into the picture.
 <OtelCollectorFlow />
 
-Apart from acting as a buffer, it also acts as a *translation layer;* it supports the native OpenTelemetry Protocol [OTLP] for ingesting data, but can also accept other formats [like Jaeger trace data or [Prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/)] and translate them on the fly.
+Apart from acting as a buffer, it also acts as a *translation layer;* it supports the native [OpenTelemetry Protocol \[OTLP\]](https://signoz.io/blog/what-is-otlp/) for ingesting data, but can also accept other formats [like Jaeger trace data or [Prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/)] and translate them on the fly.
 
 Check out the video for a quick walkthrough of OTel Collector.
 
@@ -90,7 +91,7 @@ Many of these receivers, processors, and exporters do not ship in the core binar
 
 Before we go ahead, it's vital to understand that an "OpenTelemetry Agent" isn't a separate product from the Collector — it's the same Collector binary that is just deployed close to your application rather than as a centralized service. Agent and Gateway discussed below are the most popular deployment patterns, _not two different tools you install!_
 
-<KeyPointCallout title="Looking for auto-instrumentation agents instead?">
+<KeyPointCallout title="Understanding auto-instrumentation agents">
 
 If you're searching for how language-specific agents (like the Java or Python agent) instrument your code automatically, you're thinking of **auto-instrumentation**, which is a different concept from the Collector-as-agent pattern discussed here. See our [dedicated guide to OpenTelemetry auto-instrumentation agents](https://signoz.io/blog/opentelemetry-agent/) to learn more.
 
@@ -111,7 +112,7 @@ The following matrix helps you understand the major differences between the two,
 
 A **Hybrid Pattern** is very common: Agents are deployed on hosts for local collection and metadata enrichment, and they forward their data to a central Gateway for aggregation, heavy processing, and exporting.
 
-High-throughput observability systems often need to scale these patterns further: load-balanced gateway fleets, multi-cluster fan-in, or splitting pipelines per signal. We cover this in depth in our guide on [OTel Collector deployment patterns at scale](https://signoz.io/blog/opentelemetry-deployment-patterns/).
+High-throughput observability systems often need to scale these patterns further: load-balanced gateway fleets, multi-cluster fan-in, or splitting pipelines per signal. We cover these patterns in depth in our guide on [OTel Collector deployment patterns at scale](https://signoz.io/blog/opentelemetry-deployment-patterns/).
 
 ## Step-by-Step Configuration Tutorial
 
@@ -300,7 +301,7 @@ Frequent occurrences mean that the Collector, its backend, or both of these comp
 
 On the Collector configuration side, a common mistake is to place other processors in front of the `memory_limiter`. By keeping `memory_limiter` first in the Collector pipeline, it applies backpressure and refuses telemetry ingestion before other processors allocate more memory, preventing the situation from worsening.
 
-<Figure src="/img/blog/2026/07/opentelemetry-collector-data-refused.webp" alt="OTel Collector begins refusing data when it hits its soft memory limit." caption="OTel Collector begins refusing data when it hits its soft memory limit." />
+<Figure src="/img/blog/2026/07/opentelemetry-collector-data-refused.webp" alt="OTel Collector begins refusing data when it hits the soft memory limit." caption="OTel Collector begins refusing data when it hits the soft memory limit." />
 
 For additional information and best practices, check out the <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/memorylimiterprocessor/README.md#best-practices" target="_blank" rel="noopener noreferrer nofollow">memory_limiter processor's official documentation</a>.
 
