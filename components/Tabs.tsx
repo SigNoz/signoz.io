@@ -46,13 +46,18 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
     return defaultActiveTab
   }, [urlKey, searchParams, tabValuesSet, defaultActiveTab])
 
-  const [localActiveTab, setLocalActiveTab] = useState(resolveActiveTab)
+  const [activeTab, setActiveTab] = useState(resolveActiveTab)
 
-  const activeTab = urlKey ? resolveActiveTab() : localActiveTab
+  const resolvedTab = resolveActiveTab()
+  React.useEffect(() => {
+    if (urlKey && resolvedTab) {
+      setActiveTab(resolvedTab)
+    }
+  }, [urlKey, resolvedTab])
 
   const handleTabChange = useCallback(
     (value: string) => {
-      setLocalActiveTab(value)
+      setActiveTab(value)
 
       if (!urlKey) return
 
@@ -97,7 +102,6 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
               key={value as string}
               value={value as string}
               variant={dsVariant}
-              // onClick + data-tab-value: forwarded via ...props (not in TabsTriggerProps typings)
               {...({
                 'data-tab-value': value as string,
                 onClick: () => handleTabChange(value as string),
