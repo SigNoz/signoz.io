@@ -94,7 +94,8 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
       style={
         {
           '--tab-list-wrapper-secondary-padding-left': '0px',
-          '--tab-border-spacer-min-width': '0px',
+          /* Docs-only: short left gutter stub (faded in Tabs.module.css) */
+          '--tab-border-spacer-min-width': 'var(--spacing-5)',
         } as React.CSSProperties
       }
     >
