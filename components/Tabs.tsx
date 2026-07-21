@@ -46,18 +46,13 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
     return defaultActiveTab
   }, [urlKey, searchParams, tabValuesSet, defaultActiveTab])
 
-  const [activeTab, setActiveTab] = useState(resolveActiveTab)
+  const [localActiveTab, setLocalActiveTab] = useState(resolveActiveTab)
 
-  const resolvedTab = resolveActiveTab()
-  React.useEffect(() => {
-    if (urlKey && resolvedTab) {
-      setActiveTab(resolvedTab)
-    }
-  }, [urlKey, resolvedTab])
+  const activeTab = urlKey ? resolveActiveTab() : localActiveTab
 
   const handleTabChange = useCallback(
     (value: string) => {
-      setActiveTab(value)
+      setLocalActiveTab(value)
 
       if (!urlKey) return
 
