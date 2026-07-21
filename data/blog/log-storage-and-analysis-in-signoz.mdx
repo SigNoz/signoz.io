@@ -1,0 +1,186 @@
+---
+title: Faster Log Queries, Predictable Costs: Log Storage and Analysis with SigNoz
+slug: log-storage-and-analysis-in-signoz
+date: 2026-07-21
+tags: [log management, opentelemetry]
+authors: [ankit_anand]
+description: SigNoz stores logs in a columnar database for fast queries at scale and predictable, ingestion-based pricing. No index tax, no rehydration fees.
+keywords: [log management, log storage, log analysis, signoz, opentelemetry logs, columnar storage, observability cost]
+image: log-pipeline.webp
+related_articles:
+  - '/blog/logs-performance-benchmark'
+  - '/blog/opentelemetry-logs'
+  - '/comparisons/opentelemetry-vs-loki'
+  - '/comparisons/opentelemetry-vs-elk'
+  - '/blog/optimising-opentelemetry-pipelines-to-cut-observability-costs-and-data-noise'
+
+---
+
+Every team evaluating log management hits the same triangle: keep all your logs, query and correlate them fast, pay a sane bill. Most platforms make you pick two. SigNoz is engineered to remove the trade-off. The difference comes down to how we store, index, and bill logs.
+
+Logs are the hardest signal to get right. The volume is huge, and storage and query costs scale with it. But they are also the most critical, because the faster you can query them, the faster you close the incident.
+
+We've met an engineering team using Datadog that doesn't send all its logs there. They know it slows debugging, but they accept the trade-off. Observability shouldn't limit your view.
+
+Most teams don't go that far. They ration instead: ingest selectively and filter aggressively, accepting blind spots as the price of staying within budget. In most conversations with Datadog users, bill-shock stories inevitably come up, from the infamous [$65 million invoice](https://blog.pragmaticengineer.com/datadog-65m-year-customer-mystery/) to the fear of observability costs outgrowing AWS [spend](https://www.reddit.com/r/sre/comments/1ow3ltg/our_observability_costs_are_now_higher_than_our/).
+
+Other tools force the trade a different way. Grafana's Loki indexes only labels, so storage stays cheap, but deep queries and correlation slow down. ELK's inverted index does the reverse, delivering fast search but bloated storage and constant index-lifecycle management.
+
+SigNoz breaks the triangle: a columnar store with no index tax, fast queries at volume, and native correlation with traces and metrics, on a predictable bill. You get the unified view, close incidents faster, and never pay to look at your own logs.
+
+In this piece, we will walk through the engineering choices behind it.
+
+## How logs are stored: columnar and compressed
+
+SigNoz stores all telemetry in a columnar database. That choice matters most for log data, which is semi-structured, highly repetitive, and write-heavy.
+
+**A columnar store makes log queries fast.** A log record can contain 30+ fields, but most queries read only a handful. For example, "error count by service over the last seven days" needs just `timestamp`, `severity_text`, and `service_name`. A columnar store reads only those columns, cutting the data scanned by roughly 10x on a wide log schema.
+
+The same layout drives **high compression ratios**. Logs are highly repetitive: thousands of log records share the same `status_code` or `environment`. Storing these fields together lets the data store apply a codec matched to its type: timestamps are delta-encoded, severity is dictionary-encoded, and the bulky body gets a heavier ZSTD level. In practice, log data lands on disk 2-5x smaller than ingested, depending on how repetitive your logs are.
+
+```text
+`timestamp`          {1720988101, 1720988102, 1720988102, 1720988104, ...}
+`severity_text`      {ERROR, INFO, INFO, WARN, INFO, ERROR, ...}
+`body`               {"payment failed: card declined", "request served in 84ms", ...}
+`attributes_string`  {env: prod, service: checkout, region: us-east-1, ...}
+```
+
+```sql
+`timestamp`          UInt64 CODEC(DoubleDelta, LZ4),
+`severity_text`      LowCardinality(String) CODEC(ZSTD(1)),
+`body`               String CODEC(ZSTD(2)),
+`attributes_string`  Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+```
+
+## How logs are indexed: every key searchable, no index tax
+
+> _"They charge differently for ingestion and for indexing, so what's the case with SigNoz?" This is one of the most common questions we get from engineering teams._
+
+**Search stays fast without a heavyweight index.** The columnar storage we use sorts logs by a sort key (for example, timestamp and service) and keeps one sparse primary-index entry per 8,192-row block. Queries skip entire blocks instead of scanning row by row, so all logs stay searchable and fast.
+
+Ingestion is lighter too, especially compared with Elasticsearch, which builds an inverted index as it writes. SigNoz just writes sorted, compressed columns in batches, with far less index-building at write time. In our [benchmark](https://signoz.io/blog/logs-performance-benchmark/), SigNoz ingested logs roughly 2.5x faster.
+
+| Name    | Ingestion time  | Indexes             |
+| ------- | --------------- | ------------------- |
+| SigNoz  | 2 hours         | All Keys            |
+| Elastic | 5 hours 27 mins | All Keys            |
+| Loki    | 3 hours 20 mins | Method and Protocol |
+
+Datadog works on a split-tier model, charging separately and heavily for indexing. On top of $0.10/GB to ingest, indexing costs $1.70 per million events at 15-day retention. You pay extra to search data you've already paid to ingest. The teams we talk to ration what they index and archive the rest. When they need those logs back, they wait for rehydration, which slows the query down.
+
+Grafana's Loki indexes only labels, not the log body. That keeps storage cheap and label-based queries over short windows fast. But when labels can't narrow the search, Loki scans log chunks. Finding a `request_id` or `trace_id` across every service over 24 hours, or aggregating by `status_code` over days of data, is where [latency spikes](https://github.com/grafana/loki/issues/19134).
+
+SigNoz keeps every field searchable and every query range fast. You never pay to make it so.
+
+## Log pipelines: parse what you need, drop what you don't
+
+A lot of teams ask how to drop logs that don't add value, and whether turning a raw JSON blob into queryable fields inflates storage costs.
+
+![The SigNoz log pipeline parses, filters, and scrubs logs at ingestion.](/img/blog/2026/07/log-pipeline.webp)
+
+_The SigNoz log pipeline parses, filters, and scrubs logs at ingestion._
+
+With SigNoz [log pipelines](https://signoz.io/docs/logs-pipelines/introduction/), you parse raw logs into queryable fields on ingestion, right from the UI. Parsed fields do add some bytes from the extra layer of wrapped data, but columnar compression capabilities can balance it out, and there are no separate index fees. We bill on ingestion, not on how many fields you index or query.
+
+```text
+Parsing
+# Before — your app logs JSON. It arrives as one string in the body.
+body            "{"level":"error","order_id":"ORD-4471","customer_id":"cus_8823",
+                  "country":"DE","order_total":149.99,"msg":"payment declined"}"
+severity_text   ""
+
+# After — the pipeline parses the JSON and lifts the fields out.
+severity_text   "ERROR"
+order_id        "ORD-4471"      # Tag · String
+customer_id     "cus_8823"      # Tag · String
+country         "DE"            # Tag · String
+order_total     149.99          # Tag · Float
+```
+
+You can also control the logs you ingest into your storage layer. Drop logs before ingestion, filtering on any attribute: keep `prod` and drop `dev`, cut `DEBUG` noise, exclude a chatty health-check endpoint. Scrub PII in the pipeline so sensitive fields never land in storage. Dropped logs are never ingested, so they never touch your bill.
+
+You keep every log that answers a question and stop paying for the noise.
+
+## Resource fingerprinting: scanning 99% fewer logs
+
+Columnar storage already cuts I/O by reading only the columns a query needs. We built resource fingerprinting to reduce query scan volume even further.
+
+![Resource fingerprinting groups logs from the same source.](/img/blog/2026/07/resource-fingerprint.webp)
+
+_Resource fingerprinting groups logs from the same source._
+
+Logs from the same source share the same resource attributes: every log from one Kubernetes pod carries the same cluster, namespace, and pod name. SigNoz hashes that set into a single value, the resource fingerprint. It is hierarchical, so it works across environments: `cluster;namespace;pod` on Kubernetes or the log stream on CloudWatch.
+
+```text
+message = "hello john", cluster = c1, namespace = n1, pod = p1
+message = "hello alice", cluster = c1, namespace = n1, pod = p1
+message = "hello bob", cluster = c1, namespace = n1, pod = p2
+message = "hello charlie", cluster = c1, namespace = n2, pod = p1
+message = "hello david", cluster = c2, namespace = n1, pod = p1
+message = "bye john", ec2.tag.env = fn-prod, cloudwatch.log.stream = service1
+message = "bye alice", ec2.tag.env = fn-prod, cloudwatch.log.stream = service1
+```
+
+```text
+cluster=c1;namespace=n1;pod=p1;hash=15482603570120227210
+cluster=c1;namespace=n1;pod=p2;hash=15182603570120224210
+cluster=c1;namespace=n2;pod=p1;hash=15282603570120223210
+cluster=c2;namespace=n1;pod=p1;hash=15382603570120226210
+ec2.tag.env=fn-prod;cloudwatch.log.stream=service1;hash=10649409385811604510
+```
+
+That fingerprint leads the sort order, `(ts_bucket_start, resource_fingerprint, severity_text, timestamp, id)`, so every log from the same resource sits physically together. Filter for one namespace and the sparse primary index jumps straight to the blocks that hold it, skipping everything else.
+
+The impact is [significant](https://signoz.io/blog/query-performance-improvement/). Before the change, a namespace-filtered query scanned 99.5% of all blocks. After, it scans only under 1%. Same query, a fraction of the data scanned.
+
+## Log retention: no rehydration, no wait
+
+SigNoz gives you control over how long you retain your data, and you can set it independently per signal. Logs can have a different retention period than traces and metrics, so you can keep logs, which are volume-heavy and lose value fast, for a shorter window than metrics.
+
+By default we retain logs for 15 days at $0.30/GB, and you can extend that up to a year. Only your base ingestion price changes. There is no separate charge for reading anything inside your retention period.
+
+That is the break from the Datadog model, where the bill arrives in layers: ingestion, indexing, then rehydration on top. Almost anything you do with your log data nudges it up.
+
+> The [Kernel](https://signoz.io/case-study/kernel/) team had experienced Datadog's unpredictable costs at previous companies, making cost predictability a key factor when evaluating observability platforms.
+>
+> "The Datadog bill compounds until it's huge and unmanageable. At some point every company just accepts it and pays it like a tax." — Hiro Tamada, Founding Engineer, Kernel
+
+We have no rehydration step, because we never archive your logs out of the query path. Every log inside your retention period stays directly searchable, with no re-indexing, no waiting, and nothing extra to pay for reading your own history.
+
+## A single data store: faster correlated queries, no query tax
+
+A few Datadog teams we talk to pull their logs into a separate, cheaper store to escape the pricing. It saves money, but it fragments the telemetry. Debugging becomes context switching: hand-matching a `trace_id` in one system to the logs in another, with no dashboard that refreshes fast across all three signals. Every hop widens MTTR.
+
+SigNoz is the unified store with predictable, optimized cost.
+
+Logs, traces, and metrics live in a single backend and share the same OpenTelemetry attributes. So you pivot straight from a metric spike to the traces behind it, or from a slow span to its exact logs, with no exporting and stitching tools.
+
+And you do it in one query language, while the Grafana stack uses a different one for each signal: LogQL, PromQL, and TraceQL. The Query Builder also adds expression filtering and auto-completion, so you build these queries without writing raw SQL.
+
+![A snapshot of the SigNoz Query Builder.](/img/blog/2026/07/query-builder.webp)
+
+_A snapshot of the SigNoz Query Builder._
+
+Datadog's correlated queries are fast too, but only over indexed data, which costs extra on top of ingestion. The moment a query needs archived data, you pay to re-index it, plus a rehydration fee.
+
+ELK is built for search, not analytics. Its inverted index finds documents fast, but aggregations grind. As per our [benchmark](https://signoz.io/blog/logs-performance-benchmark/), SigNoz is about 13x faster than ELK for aggregation queries.
+
+That is what powers SigNoz's logs and traces explorer. Open a trace, click a span, and the related logs and host metrics are right there, without leaving the page. Correlated dashboards refresh automatically. No rehydration, no per-query charge.
+
+All your signals in a single store: correlated queries run fast without adding anything to your bill.
+
+## The cost model, side by side
+
+|               | Ingest                                    | Index                                    | Reading older logs                        |
+| ------------- | ----------------------------------------- | ---------------------------------------- | ----------------------------------------- |
+| SigNoz        | $0.30/GB (15-day retention)               | Included                                 | Included (within retention period)        |
+| Datadog       | $0.10/GB                                  | $1.70 per million events (15-day retention) | Rehydration: $0.10/compressed GB scanned  |
+| Grafana Cloud | ~$0.45/GB ($0.05 process + $0.40 write)   | Included (labels only)                   | Retention billed separately at ~$0.10/GB  |
+
+_\*Pricing as of July 2026. Sources: [SigNoz](https://signoz.io/pricing/), [Datadog](https://www.datadoghq.com/pricing/), [Grafana](https://grafana.com/pricing/)._
+
+> When production breaks at 5am, every log you need should be one query away. SigNoz is built to ingest and query huge volumes of logs, correlate them with your traces and metrics, and get you to answers faster, all on a single ingestion meter. Debug the incident, not the invoice.
+
+## Getting started with SigNoz
+
+Whether you're setting up observability for the first time or moving off a tool that bills you to read your own logs, [SigNoz Cloud](https://signoz.io/teams/) is the easiest way to start. Sign up for a free account with 30 days of unlimited access to every feature, and our team will help you onboard or migrate your existing setup. If you'd rather keep data in your own environment, SigNoz also comes as a self-hosted Enterprise edition (BYOC or on-prem) and an open-source Community edition.
