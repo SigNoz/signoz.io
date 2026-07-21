@@ -7,7 +7,7 @@ updated_date: 2026-06-16
 tags: [OpenTelemetry, Observability]
 authors: ["dhruv_ahuja"]
 description: "A comprehensive guide to the OpenTelemetry Collector Contrib distribution. Learn how it differs from Core, its architecture, and how to build your own."
-keywords: ["opentelemetry", "opentelemetry collector", "otel collector", "otel collector contrib", "opentelemetry collector contrib", "ocb", "otelcol", "otel contrib"]
+keywords: ["opentelemetry", "otel collector contrib", "opentelemetry collector contrib", "ocb", "otelcol", "otel contrib"]
 related_articles:
   - '/blog/opentelemetry-collector-complete-guide'
   - '/blog/opentelemetry-collector-prometheus-receiver'
@@ -221,7 +221,7 @@ docker run \
 -v ./otel-config.yaml:/etc/otelcol-contrib/config.yaml \
 -p 4317:4317 -p 4318:4318 -p 13133:13133 -p 1777:1777 -p 55679:55679  \
 --rm --name otelcol-contrib \
---rm --name otelcol-contrib otel/opentelemetry-collector-contrib:0.142.0
+otel/opentelemetry-collector-contrib:0.142.0
 ```
 
 This command mounts your local config file to the container, exposes the necessary ports, and starts the Contrib Collector.
@@ -291,7 +291,7 @@ OpenTelemetry allows us to build custom Collector distributions to suit our need
 
 ### What is OpenTelemetry Collector Builder?
 
-The <a href="https://opentelemetry.io/docs/collector/extend/ocb/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Collector Builder</a> (OCB) is a CLI tool that lets you create a custom Collector distribution that includes only the components you explicitly need. Users create a manifest file listing specific Contrib components. OCB then compiles a custom binary that including just components.
+The <a href="https://opentelemetry.io/docs/collector/extend/ocb/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Collector Builder</a> (OCB) is a CLI tool that lets you create a custom Collector distribution that includes only the components you explicitly need. Users create a manifest file listing specific Contrib components, and OCB then compiles a custom binary that includes just those components, excluding the rest.
 
 Building custom distributions has multiple benefits:
 
