@@ -1,0 +1,73 @@
+---
+date: 2026-07-21
+title: DSPy Dashboard
+description: Monitor DSPy programs with module, chain, and tool activity, LLM call volume, per-model usage, latency percentiles, and errors using OpenTelemetry traces.
+doc_type: explanation
+---
+
+<Admonition type="info" title="Instrument DSPy first">
+Before using this dashboard, instrument your DSPy program with OpenTelemetry and configure export to SigNoz. See the [DSPy observability guide](https://signoz.io/docs/dspy-observability/) for complete setup instructions.
+</Admonition>
+
+This dashboard provides a comprehensive view of your `DSPy` programs using trace data. It is built on the DSPy-native span attributes emitted by `openinference-instrumentation-dspy` (`openinference.span.kind`, `llm.model_name`, `llm.provider`), so every panel keys off the span kinds DSPy produces: `CHAIN` (module and pipeline steps), `LLM` (model requests), and `TOOL` (ReAct tool calls). Use the `service_name` picker at the top to filter the panels to one or more DSPy services.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/dspy-dashboard.webp"
+  alt="DSPy Dashboard"
+  caption="DSPy Dashboard Template"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/dspy/dspy-dashboard.json"
+    dashboardName="DSPy"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the performance, cost, and reliability of your DSPy programs using OpenTelemetry trace data to help you:
+
+- **Understand Program Activity**: See total DSPy span volume and how CHAIN, LLM, and TOOL work is distributed over time.
+- **Track Model Usage**: Compare LLM call volume and average latency across every model and provider in use to guide model selection.
+- **Monitor LLM Latency**: Watch p50, p90, p95, and p99 latency for model calls to surface slow responses and regressions.
+- **Measure Call Fan-Out**: Track average LLM calls per program run to spot changes in how many model calls each run makes.
+- **Inspect Module Behavior**: Break down CHAIN spans by module and operation to compare call counts and latency across a program.
+- **Track Tool Usage**: Identify which tools your ReAct agents call most and which are slowest.
+- **Catch Errors Early**: Watch the error rate and drill into recent failures the moment incidents begin.
+
+## Panels Included
+
+### Summary (Top Row)
+
+| Panel | Type | What It Shows |
+|-------|------|---------------|
+| **DSPy operations** | Value | Count of all instrumented DSPy spans (any span carrying `openinference.span.kind`) in the selected window |
+| **LLM calls** | Value | Count of `LLM` span-kind spans, representing the actual model requests DSPy makes |
+| **Tool calls** | Value | Count of `TOOL` span-kind spans, representing ReAct tool invocations |
+| **Error rate** | Value | Fraction of selected services' spans with an error status, shown as a percentage |
+| **Avg LLM calls / program run** | Value | `LLM` spans divided by `dspy.program.run` root spans, the model-call fan-out per program run |
+| **LLM latency (p95)** | Value | p95 duration of `LLM` span-kind spans |
+
+### Activity & Distribution
+
+- **DSPy operations by span kind (over time)**: Time-series graph of CHAIN, LLM, and TOOL span counts grouped by `openinference.span.kind`, revealing traffic patterns and which span kinds dominate.
+- **Span kind distribution**: Pie chart showing each span kind's share of total activity, complementing the trend graph with a share-of-activity view.
+
+### Model Usage & Latency
+
+- **LLM calls by model (over time)**: Time-series graph of model-request volume grouped by `llm.model_name`, showing which models drive traffic and how it trends.
+- **LLM latency percentiles (over time)**: Time-series graph of p50, p90, and p99 duration for `LLM` spans, surfacing both typical performance and tail latency over time.
+- **Model usage**: Table of `LLM` spans grouped by `llm.model_name` and `llm.provider`, with call count and average latency, showing how usage is distributed across models and providers.
+
+### Modules & Tools
+
+- **DSPy module breakdown**: Table of `CHAIN` spans grouped by module and operation name, with call count and average latency, for a side-by-side comparison across the modules in a program.
+- **Tool usage**: Table of `TOOL` spans grouped by tool name, with call count and average latency, identifying which tools are used most and which are slowest.
+
+### Recent Activity
+
+- **Recent DSPy operations**: List of the latest instrumented DSPy spans ordered by timestamp, useful for drilling into individual operations when investigating a latency spike.
+- **Errors**: List of recent errored spans across the selected DSPy services, for jumping straight to failures when the error rate climbs.
