@@ -23,9 +23,9 @@ Datadog Log Management collects, parses, and searches logs from across your stac
 
 This blog focuses specifically on Datadog [Log Management](https://signoz.io/log-management/) and walks through how the pricing works, where the costs add up, and how to reduce your bill. For a broader look at Datadog's pricing across all products, our [Datadog pricing](https://signoz.io/blog/datadog-pricing/) guide covers the rest. Every figure throughout the blog comes from Datadog's official pricing pages and docs, verified in **July 2026**.
 
-### How Datadog Log Management Pricing Works: The Billing Model
+## How Datadog Log Management Pricing Works: The Billing Model
 
-Datadog's log management pricing is decoupled into stages. Rather than a single rate for all log management, costs are distributed across four main components. Datadog refers to this model as "Logging without Limits," which separates initial log processing from storage and indexing.
+Datadog's log management pricing is decoupled into stages. Rather than a single rate for all log management openrations, costs are distributed across four main components. Datadog refers to this model as "Logging without Limits," which separates initial log processing from storage and indexing.
 
 #### 1. Ingestion: what you pay to bring logs in
 Datadog bills for log ingestion based on the volume of data processed, regardless of whether the logs are subsequently indexed. Ingestion is priced at a flat rate of `$0.10 per uncompressed GB`, which includes features like parsing, enrichment, tagging, live tail, and routing.
@@ -34,7 +34,7 @@ Datadog bills for log ingestion based on the volume of data processed, regardles
 Indexing is required to make logs searchable and available for alerts or dashboards. This component is billed per million events rather than by data volume. The cost varies based on the chosen retention period, ranging from `$1.06` to `$2.50` per 1 million events across the standard retention tiers.
 
 #### 3. Commitment: the rate you lock in
-The final rate also depends on the billing model chosen. Annual commitments offer the lowest rates, while month-to-month billing is priced higher. Usage that exceeds the committed volume is billed at an on-demand rate, which for indexed logs is `50% higher than the annual commitment rate`.
+The final rate also depends on the billing model chosen. Annual commitments offer the lowest rates, while month-to-month billing is priced higher. Usage that exceeds the committed volume is billed at an on-demand rate, which for indexed logs is **50% higher than the annual commitment rate**.
 
 #### 4. Add-ons: the meters that bill on the side
 Additional features are metered and billed separately from ingestion and indexing. For instance, querying long-term storage utilizes Flex compute, and retrieving archived logs for investigation requires rehydration. Both are billed on their own respective units.
@@ -91,28 +91,13 @@ The rate card tells you the prices, but not how the model behaves once real traf
   caption="Reddit post about Datadog's confusing log pricing (Credit: Reddit)"
 />
 
-
-
-### Impact of Daily Indexing Quotas
-When a configured daily indexing quota is reached, Datadog stops indexing new logs for the remainder of the day. While these logs are still retained in Live Tail and the storage archive, they will not be searchable within the Standard index tier. This means sudden traffic spikes can result in unindexed logs during high-volume periods.
-
-### Estimating Event-Based Indexing Costs
-While teams often estimate data volume in gigabytes, Datadog's indexing is billed by event count. Because log event sizes vary significantly, converting a gigabyte estimate into an event count can be imprecise. Accurate cost forecasting generally requires observing actual event counts in Datadog over a representative period, and must be recalibrated if the application's log formats change.
-
-### Separate Billing for Specialized Features
-Additional capabilities such as the Sensitive Data Scanner, Cloud SIEM, Observability Pipelines, custom forwarding, and log-based metrics are each billed on their own separate meters using specific units. Activating multiple features results in multiple line items on the invoice, which requires additional administrative effort to track and reconcile monthly.
-
-### Administrative and Management Overhead
-Ultimately, the Datadog billing model introduces administrative overhead alongside the direct financial cost. Effectively managing this structure requires ongoing effort to configure quotas, set up alerts, recalculate event volumes, reconcile various SKUs, and manage data placement across storage tiers. This operational effort is a factor to consider when evaluating the platform's total cost of ownership.
-
-
 #### You pay for the same log more than once
 
 Because processing, indexing, and rehydration are decoupled, a single log can incur multiple charges throughout its lifecycle. **Want it searchable?** That is the indexing meter. **Want last quarter's logs back during an incident?** That is an archive scan, and if you rehydrate them, you pay the indexing rate a second time. Predicting costs requires tracking the entire lifecycle of logs across these separate meters.
 
 #### One bad week sets the whole month
 
-Your commitment is not a ceiling. When traffic spikes and your indexed volume runs past what you committed to, Datadog keeps taking the logs and bills the overage on demand at a 50% premium. *Ingestion does not stops automatically.* You usually find out when the invoice arrives. The only thing standing between you and that surprise is a daily quota and an alert you remembered to set up.
+Your commitment is not a ceiling. When traffic spikes and your indexed volume runs past what you committed to, Datadog keeps taking the logs and bills the overage on demand at a 50% premium. *Ingestion does not stop automatically.* You usually find out when the invoice arrives. The only thing standing between you and that surprise is a daily quota and an alert you remembered to set up.
 
 #### Flex looks cheap until the moment you need it
 
