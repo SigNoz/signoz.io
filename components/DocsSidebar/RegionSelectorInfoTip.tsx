@@ -57,6 +57,7 @@ export default function RegionSelectorInfoTip({ children }: RegionSelectorInfoTi
           event.preventDefault()
           dismiss()
         }}
+        style={{ zIndex: 10 }}
         className="!w-[min(320px,calc(100vw-2rem))] !border-0 !bg-signoz_robin-500 !p-3 !text-signoz_vanilla-100 !shadow-lg !outline-none"
       >
         <div className="flex flex-col gap-3">
