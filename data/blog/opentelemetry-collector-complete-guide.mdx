@@ -267,12 +267,6 @@ exporters:
     timeout: 30s
 ```
 
-### "connection refused" on Port 4317 or 4318
-
-This means that something is pointing at an address where no Collector is listening. Check for:
-
-- **Your app → Collector:** the SDK's `OTEL_EXPORTER_OTLP_ENDPOINT` is wrong. In Docker/Kubernetes, `localhost` refers to the app's own container — use the Collector's service name (K8s) or `host.docker.internal` (Docker Desktop) instead.
-- **Collector → backend:** the exporter `endpoint` host/port is wrong, or the port isn't published (`-p 4317:4317`).
 
 ### "tls: first record does not look like a TLS handshake"
 
@@ -314,6 +308,13 @@ For additional information and best practices, check out the <a href="https://gi
 
 This error indicates that your Collector configuration references a component that isn't in your Collector distribution. Most community receivers, processors, and exporters live only in **`otelcol-contrib`**, not the core binary.<br />
 Switch to the [Contrib distribution](https://signoz.io/blog/opentelemetry-collector-contrib/) and confirm the component name is spelled exactly as documented.
+
+<KeyPointCallout>
+
+Running the Collector via Docker Compose surfaces Docker-flavored versions of a few of these same errors — containers exiting immediately on startup, "port already in use" conflicts on `docker run`/`docker compose up`, and connection-refused errors tied to container networking. For those, see our dedicated [OTel Collector Docker Compose guide](https://signoz.io/blog/otel-collector-docker/).
+
+</KeyPointCallout>
+
 
 ## OpenTelemetry Collector FAQs
 
