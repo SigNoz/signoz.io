@@ -1,5 +1,4 @@
 import { HomepageHeroRedesign } from '@/components/index-header'
-import HomepageFloatingCta from '@/components/homepage-floating-cta/HomepageFloatingCta'
 import Faq from '@/components/index-faq/Faq'
 import AgentNativeObservabilitySection from '@/components/index-agent-native-observability/AgentNativeObservability'
 import FeatureBento from '@/components/index-feature-bento/FeatureBento'
@@ -17,7 +16,6 @@ export default function HomepageRedesign() {
       <HomepageGetStarted />
       <Pricing />
       <Faq />
-      <HomepageFloatingCta />
     </div>
   )
 }

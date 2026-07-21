@@ -462,7 +462,7 @@ function QuoteCard({ attribution, className, href, isClone, logo, quote, theme }
         ) : null}
       </div>
       <blockquote className="m-0 flex min-w-0 flex-1 items-center self-stretch border-l border-white/[0.08] pl-3 pr-2">
-        <p className="m-0 line-clamp-3 text-pretty text-[11px] font-medium leading-[14px] tracking-[-0.04px] text-signoz_vanilla-100">
+        <p className="m-0 line-clamp-3 text-pretty text-[11px] font-normal leading-[14px] tracking-[-0.04px] text-signoz_vanilla-100">
           “{quote}”
         </p>
       </blockquote>
@@ -522,7 +522,7 @@ function FeaturedQuoteCard({
         </div>
       ) : null}
       <blockquote className="m-0 mt-2.5 flex min-h-0 flex-1 items-center border-l border-white/[0.12] pl-3 pr-2">
-        <p className="m-0 line-clamp-4 text-pretty text-[12px] font-medium leading-[16px] tracking-[-0.05px] text-signoz_vanilla-100">
+        <p className="m-0 line-clamp-4 text-pretty text-[12px] font-normal leading-[16px] tracking-[-0.05px] text-signoz_vanilla-100">
           “{quote}”
         </p>
       </blockquote>
@@ -626,7 +626,7 @@ const BentoBoard = memo(function BentoBoard({ isClone }: { isClone: boolean }) {
           href="/blog/alien-intelligence-ai-sre-workflow-signoz/#what-leo-built-at-alien-intelligence"
           isClone={isClone}
           logo={logos.alienIntelligence}
-          quote="[Datadog] came back and said, ‘The trial’s over — it’s going to cost you over $2K.’ I was like, ‘Sorry, what?’"
+          quote="Datadog came back and said, ‘The trial’s over — it’s going to cost you over $2K.’ I was like, ‘Sorry, what?’"
           theme="Datadog pricing"
         />
       </BentoCell>
@@ -919,11 +919,22 @@ export default function HomepageCustomerProof() {
   }
 
   const handleClickCapture = (event: MouseEvent<HTMLDivElement>) => {
-    if (!suppressClickRef.current) return
+    if (suppressClickRef.current) {
+      event.preventDefault()
+      event.stopPropagation()
+      suppressClickRef.current = false
+      return
+    }
 
-    event.preventDefault()
-    event.stopPropagation()
-    suppressClickRef.current = false
+    // Pointer-activated links open in a new tab, so their focus can otherwise keep the rail
+    // in manual mode after the user returns. Preserve focus for keyboard activation.
+    if (event.detail === 0 || !(event.target instanceof Element)) return
+
+    const link = event.target.closest<HTMLAnchorElement>('a')
+    if (!link) return
+
+    resumeAutoMotion()
+    link.blur()
   }
 
   const railStyle: CSSProperties = {
