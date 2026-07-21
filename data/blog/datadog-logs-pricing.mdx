@@ -1,76 +1,90 @@
 ---
-title: "How to Avoid the Ingest and Index Trap in Datadog Logs Pricing"
-date: 2026-05-21
-tags: [datadog, logs, pricing]
-authors: [aayush_sharma]
+title: "Datadog Logs Pricing: Ingest & Index Costs (2026)"
+meta_title: "Datadog Logs Pricing: Ingest & Index Costs (2026)"
+published_date: 2026-05-21
+updated_date: 2026-07-21
+tags: [datadog, pricing]
+authors: [ankit_anand]
 description: "Datadog charges twice for logs: `$0.10/GB` to ingest them, plus a per-event fee to make them searchable. Learn how the ingest-and-index pricing works, why bills grow faster than log volume, and how to reduce yours by switching to SigNoz"
 keywords: [datadog logs pricing, log management cost, ingest and index pricing, datadog log indexing, log retention cost]
+related_articles:
+  - '/blog/datadog-alternatives'
+  - '/blog/datadog-custom-metrics-pricing'
+  - '/blog/datadog-pricing'
 ---
 
-**TL;DR**
-
-- **SigNoz**: Best for teams that want flat, predictable log pricing without per-event indexing or retention tiers. Logs and traces are priced at $0.30/GB, and OpenTelemetry is the default path.
-- **Datadog**: Best for teams already invested in the Datadog ecosystem who can manage two separate billing meters. Logs are charged twice (\$0.10/GB to ingest, plus \$1.06–\$2.50 per million events to index, depending on retention), which is why production bills typically end up several times higher than the advertised ingest rate.
-
----
-
-One of the biggest pain points with Datadog billing is the gap between the advertised `$0.10/GB` ingest rate for logs and the actual cost of running searchable logs in production. Most teams only see this gap clearly after a month or two of production usage.
+Datadog Log Management collects, parses, and searches logs from across your stack, with out-of-the-box support for 200+ sources. It runs on a "Logging without Limits" model: you ingest everything first, then decide which logs to index for search, alerting, and dashboards. That split is exactly what makes Datadog logs pricing hard to read, because logs are billed on several meters at once, in different units. So, the headline rate rarely matches the invoice.
 
 <Figure
   src="/img/blog/2026/05/datadog-ingest-and-index-datadog-page.webp"
   alt="Datadog Log Management pricing page (Credit: Datadog)"
-  caption="Datadog Log Management pricing page,"
-  link="https://www.datadoghq.com/pricing/?product=log-management"
-  sourceText="Datadog Pricing"
+  caption="Datadog Log Management pricing page (Credit: Datadog)"
 />
 
-Datadog logs come with two separate charges:
+This blog focuses specifically on Datadog Log Management and walks through how the pricing works, where the costs add up, and how to reduce your bill. For a broader look at Datadog's pricing across all products, our [Datadog pricing](https://signoz.io/blog/datadog-pricing/) guide covers the rest. Every figure throughout the blog comes from Datadog's official pricing pages and docs, verified in **July 2026**.
 
-- **Ingestion**: The `$0.10/GB` fee for any log data you send to Datadog
-- **Standard Indexing**: A per-event fee that makes those logs searchable in Log Explorer (Datadog's log search and filter interface), available in dashboards, and usable for alerts.
+## How Datadog Log Management Pricing Works: The Billing Model
 
-Indexing prices go up the longer you want logs kept available for search, and the actual cost of running production logging on Datadog is typically several times higher than the `$0.10/GB` ingest rate once indexing, retention, and event-count math are factored in. Both charges need to be planned together to accurately forecast the bill. This is also why many teams compare Datadog against tools with simpler pricing like [SigNoz](https://signoz.io/), where logs and traces are priced at a flat rate of `$0.30/GB`.
+Datadog does not charge one price for logs. It bills them in stages, and your total can be split across the sum of four separate decisions rather than a single rate. Datadog calls the underlying approach "Logging without Limits" model, i.e., you process everything first, then choose what to keep searchable.
 
-<InlineCTA message="Logs, metrics, and traces with simpler, transparent pricing. Try SigNoz Cloud, retention as a setting, not a pricing tier." />
+### 1. Ingestion: what you pay to bring logs in
+Every log is billed the moment Datadog processes it, whether or not you make it searchable later. Ingestion runs a flat `$0.10 per uncompressed GB` and it covers parsing, enrichment, tagging, live tail, and routing.
 
-This gap, between the advertised rate and the actual cost, is what teams call the ingest-and-index problem. This article focuses specifically on Datadog log management and walks through how the pricing works, where the costs add up, and how to estimate or reduce your bill. For a broader look at Datadog's pricing across all products, our [main pricing guide](https://signoz.io/blog/datadog-pricing/) covers per-host, custom metrics, and other charges.
+### 2. Indexing: what you pay to make logs useful
+Indexing is what makes a log searchable and ready for alerts or dashboards. Datadog bills it **per million events**, and the rate rises with retention, from `$1.06 to $2.50 per 1M events` across the standard indexing tiers. The indexing costs scales with event count rather than data volume.
 
-## How Datadog Bills Your Logs
+### 3. Commitment: the rate you lock in
+The same log costs different amounts depending on how you buy. An annual commitment gets the lowest rate. Month-to-month sits higher. Anything above your committed volume bills at the higher on-demand rate, which for indexed logs is **50% above the annual rate**, so under-committing to feel safe can cost more than committing accurately.
 
-If you're already feeling the ingest-and-index problem, the next question is usually where the rest of the bill is coming from. Most of it sits in the two charges already covered. Depending on how you've set things up, you may also see line items such as below:
+### 4. Add-ons: the meters that bill on the side
+Beyond ingest and index, some features run on their own meters. Flex compute powers queries against long-term storage, and rehydration pulls archived logs back for investigation. Neither shows up in the headline rate, and each is billed on its own unit.
 
-- **Standard Indexing:** The tier most teams pay for, making logs searchable in Log Explorer, and is the only tier that powers log monitors, Watchdog, and the normal incident response workflow.
-- **Flex Logs:** A cheaper tier for logs you want to search occasionally, but don't need to alert on. Flex data shows up in Log Explorer and dashboards, but it cannot trigger monitors or Watchdog.
-- **Archive:** Logs stored long-term in your own S3, Azure Blob, or GCS bucket. Forwarding logs to your archive is included in the ingest price (only your cloud storage bill is extra). Archived logs are not part of normal search, but you can query them with Archive Search (currently Preview) or pull selected events back into full search through Rehydration.
+The point is simple. Ingestion is billed by data volume in gigabytes, and indexing is billed by event count. Indexing is the meter that grows fastest, and any log you ingest and archive without indexing does not trigger it.
 
-Most teams default to Standard Indexing for the logs they actually debug, which is why a budget built solely on the `$0.10/GB` ingest rate almost always falls short.
 
-<KeyPointCallout title="INGESTION ALONE ISN'T ENOUGH" defaultCollapsed="true">
+## Datadog Logs Pricing: Complete Rate Card
 
-Paying the `$0.10/GB` ingest rate gets logs into Datadog, but it does not give you the full logging experience. Real-time search, log monitors, Watchdog, and trace-to-log pivots all depend on Standard Indexing, which is billed separately.
+These are Datadog's published log rates. The headline column is the annual committed price. The month-to-month and on-demand rates sit in the details cell alongside what each meter covers.
 
+| **Meter** | **Annual Billing** | **Key Details & Inclusions** |
+|---|---|---|
+| **Log ingestion** | `$0.10` per GB/month | • Month-to-month: `$0.10`<br/>• On demand: `$0.10`<br/>• Per uncompressed GB ingested<br/>• Covers processing, live tail, archiving<br/>• Charged even if not indexed |
+| **Standard Indexing <br/> 3-day retention** | `$1.06` per 1M events/month | • Month-to-month: `$1.27`<br/>• On demand: `$1.59` |
+| **Standard Indexing <br/> 7-day retention** | `$1.27` per 1M events/month | • Month-to-month: `$1.52`<br/>• On demand: `$1.91` |
+| **Standard Indexing <br/> 15-day retention** | `$1.70` per 1M events/month | • Month-to-month: `$2.04`<br/>• On demand: `$2.55`<br/>• Default retention tier |
+| **Standard Indexing <br/> 30-day retention** | `$2.50` per 1M events/month | • Month-to-month: `$3.00`<br/>• On demand: `$3.75` |
+| **Flex Storage <br/> 1 to 15 months retention** | `$0.05` per 1M events stored/month | • Month-to-month: `$0.06`<br/>• On demand: `$0.075`<br/>• Lower-cost tier for logs you rarely query |
+| **Flex Logs Starter** | `$0.60` per 1M events stored/month | • Month-to-month: `$0.72`<br/>• On demand: `$0.90`<br/>• Includes Starter Compute |
+
+<KeyPointCallout title="Flex Logs Starter Retention">
+Datadog's main pricing card lists 3, 6, 12, and 15-month retention options, while its US comparison table lists 6, 12, and 15 months. Confirm the available retention periods in your Datadog order form.
 </KeyPointCallout>
 
-Here are the published Standard Indexing rates (annual billing), checked against <a href="https://www.datadoghq.com/pricing/" rel="noopener noreferrer nofollow" target="_blank">Datadog's pricing</a> page as of May 2026:
+## Datadog Log Management Additional Costs and Add-Ons
 
-| How long logs stay searchable | Price per 1 million events | Common use |
-| --- | --- | --- |
-| 3 days | $1.06 | Short troubleshooting window |
-| 7 days | $1.27 | One-week debugging window |
-| 15 days | $1.70 | Datadog's default for on-demand customers |
-| 30 days | $2.50 | Common for incident reviews |
-| Beyond 30 days | Contact Datadog sales | Compliance or audit needs (custom pricing) |
+The rate card above is only part of the potential bill. The features below each run on their own meter and land as separate line items.
 
-If you've moved some logs to Flex, you'll see one of two pricing shapes on your bill:
+| **Add-on** | **Published Price** | **Key Details & What Triggers It** |
+|---|---|---|
+| **Flex Compute <br/> Extra Small** | Starts at `$0.05` per instance-hour | • Annual starting price<br/>• Powers queries against Flex-stored logs<br/>• Other compute sizes and terms not published |
+| **Archive Search** | ⚠️ Not published on Datadog's official pricing pages | • Datadog docs state it charges "only for the scan," with the first 100,000 logs retained free for 24 hours<br/>• Confirm the per-GB rate with Datadog before using it in a cost estimate |
+| **Log Rehydration** | `$0.10` per compressed GB scanned | • Triggered when you pull archived logs back into an index<br/>• Billed on top at your contracted indexing rate for matching events |
+| **Log Forwarding to Custom Destinations** | `$0.25` per outbound GB, per destination | • Applies to external SIEM, BI tools, custom HTTP endpoints<br/>• Forwarding to supported cloud archives is included in the ingestion charge |
+| **Log-Based Custom Metrics** | `$5` per 100 metrics/month (overage) | • Triggered when metrics you generate from logs exceed your plan's Custom Metrics allocation<br/>• Overage uses the timeseries-based rate; contracts on Metric Name pricing use different, contract-specific rates |
+| **Sensitive Data Scanner <br/> Detect** | `$0.03` per ingested GB (annual) | • Month-to-month: `$0.04`<br/>• On demand: `$0.045`<br/>• Scans ingested logs to flag sensitive data |
+| **Sensitive Data Scanner <br/> Detect and Obfuscate** | `$0.30` per scanned GB (annual) | • Month-to-month: `$0.36`<br/>• On demand: `$0.45`<br/>• Can hash, redact, or mask detected values |
+| **Cloud SIEM** | `$5` per 1M analyzed events (annual) | • Month-to-month: `$6`<br/>• On demand: `$7.50`<br/>• Applies only to logs selected for Cloud SIEM analysis |
+| **Observability Pipelines** | `$0.095` per ingested GB (annual) | • Month-to-month: `$0.10`<br/>• On demand: `$0.12`<br/>• Separate product that processes and routes telemetry before it reaches downstream destinations |
 
-- **Flex Logs Starter:** `$0.60` per million events stored per month, with Starter Compute bundled in, supporting 3-15 month retention. Suited for smaller volumes, where a single bundled price is easier to plan around.
-- **Flex Storage + Flex Compute:** Storage is `$0.05` per million events stored per month, but compute is billed separately, starting at `$0.05` per instance-hour. To compare this fairly against Standard Indexing, add up both storage and compute, not just storage.
+<KeyPointCallout title="Two Pricing Clarifications">
+- **Log Rehydration is not `$1.27` per million events** - Datadog charges `$0.10` per compressed GB scanned, then the contracted indexing rate for matching events. The `$1.27` figure is the annual price for 7-day Standard Indexing, not a standalone Rehydration price.
 
-Flex works best for logs you query only occasionally, such as compliance archives or historical lookups. It's not a swap-in replacement for Standard Indexing when you need live alerting.
+- **Cloud SIEM's billing unit depends on the source** - Datadog's US comparison table lists `$5`, `$6`, and `$7.50` per 1 million analyzed events, while its main Cloud SIEM pricing card shows an annual starting price per GB analyzed. Confirm which unit applies to your order in writing with Datadog Sales before using Cloud SIEM in a purchasing calculation.
+</KeyPointCallout>
 
-## Things That Make Your Datadog Bill Unexpected
+## Datadog Logs Pricing: Limitations and Cost Traps
 
-If your bill keeps climbing while your log volume stays roughly flat, two pricing details are usually behind it. Both are common reasons teams start looking at [simpler alternatives](https://signoz.io/blog/datadog-alternatives/).
+The rate card tells you the prices. It does not tell you how the model behaves once real traffic hits it. These are the moments the bill stops matching the mental picture you started with.
 
 <Figure
   src="/img/blog/2026/05/datadog-ingest-and-index-reddit.webp"
@@ -78,151 +92,118 @@ If your bill keeps climbing while your log volume stays roughly flat, two pricin
   caption="Reddit post about Datadog's confusing log pricing (Credit: Reddit)"
 />
 
-### Retention Changes the Indexing Bill
+#### You pay for the same log more than once
 
-Most teams plan capacity in GB - *we'll send 500 GB a month*, without thinking carefully about retention. Indexing prices scale with how long you keep logs searchable, and the jumps between tiers are larger than people expect.
+Getting a log into Datadog buys you ingestion and nothing else. Want it searchable? That is the indexing meter. Want last quarter's logs back during an incident? That is an archive scan, and if you rehydrate them, you pay the indexing rate a second time. By the time a single log has earned its keep, it can show up on three separate lines, and staying ahead of it means tracing every log's full journey instead of just its entry point.
 
-At 200 million log events per month, the retention window changes the monthly indexing bill of Datadog as follows.
+#### One bad week sets the whole month
 
-| Retention | Math | Monthly indexing cost |
-| --- | --- | --- |
-| 3 days | 200M × $1.06 | $212 |
-| 7 days | 200M × $1.27 | $254 |
-| 15 days | 200M × $1.70 | $340 |
-| 30 days | 200M × $2.50 | $500 |
+Your commitment is not a ceiling. When traffic spikes and your indexed volume runs past what you committed to, Datadog keeps taking the logs and bills the overage on demand at a 50% premium. *Nothing stops automatically.* You usually find out when the invoice arrives. The only thing standing between you and that surprise is a daily quota you remembered to set and an alert you remembered to wire up.
 
-Moving from 15-day to 30-day retention represents a 47% increase in indexing costs, with ingestion costs remaining unchanged. Retention beyond 30 days is custom-priced through Datadog sales, so if you need 60 or 90 days, budget for that conversation early.
+#### Flex looks cheap until the moment you need it
 
-### Indexing Is Priced per Event, Not per GB
+Flex storage is priced to feel like a rounding error, but every million events bills for at least 30 days no matter how quickly you delete them, and Starter commits you to 3 months minimum. Then querying that data leans on a fixed compute size. Push past it and your queries slow down, retry, and can fail outright, right in the middle of the investigation you turned to Flex to run.
 
-It's easy to assume both charges use the same unit, but they don't: Ingestion is per GB, and Indexing is per million events, where one event is roughly one log line.
+#### The cheaper tier quietly removes your safety net
 
-A 200 GB month of logs could be 50 million events (large, structured payloads) or 800 million events (one-line logs per request). The same byte volume can produce indexing costs that differ by a factor of 10× or more, depending on how much your services talk to each other
+Move logs into Flex and you give up Log Monitors and Watchdog on them. Lean on Archive Search, and you lose aggregations, visualizations, and access anywhere beyond a single results page unless you rehydrate. The savings are real. So is the afternoon you go looking for an alert that was never allowed to fire.
 
-## How Event Count Drives Indexing Cost
+#### The quota that guards your budget can erase your history
 
-Standard Indexing is priced per event, so what matters most for indexing cost isn't the size of each log, it's how many log lines you emit. Short, frequent logs produce more billable events per GB than larger, richer logs.
+Set a daily index quota to keep spend under control, and the moment it is hit, new logs simply stop being indexed for the rest of the day. They survive in Live Tail and your archive, but they will never be searchable in Standard. The logs from your worst hour are exactly the ones a quota is most likely to throw away.
 
-Structured logs usually carry fields that make them valuable for debugging:
+#### You cannot actually predict the part that costs the most
 
-- Kubernetes logs enriched with `namespace`, `pod_name`, `container_id`, `node_name`.
-- Request logs carrying `customer_id`, `request_id`, `endpoint`, `method`, `status`.
-- Trace-correlated logs with `trace_id` and `span_id`.
+You plan in gigabytes because that is what you can see. Datadog charges the expensive meter in events, and event sizes swing so widely that no GB-per-day figure converts cleanly into a number you can trust. Every forecast is a guess until you count 24 hours of real events, and then you get to do it again the next time your logs change shape.
 
-These fields make [centralised logging](https://signoz.io/blog/centralized-logging/) useful because they let you filter by service, customer, request, or trace, rather than searching raw files by hand. Adding them makes each log event larger and each query more useful, but it doesn't on its own increase the number of billable events.
+#### Every feature you switch on opens its own meter
 
-What pushes the indexing bill up is the number of log lines you write. A service that logs once per request will have a much lower event count than one that logs at multiple points within the same request, even at similar byte volumes. A multi-tenant SaaS that emits more log lines per customer interaction will see indexing cost grow with usage.
+Sensitive Data Scanner, Cloud SIEM, Observability Pipelines, custom forwarding, and log-based metrics are each genuinely useful, and each one bills on its own line in its own unit. Turn on a few and your "log bill" is really five bills stacked together, and reconciling them becomes a monthly chore that never quite ends.
 
-## What Datadog Logs Cost at Different Volumes
+None of this is a glitch. It is simply how the model works. But add it all up and the true cost of Datadog logs is not only the dollars. It is the constant vigilance the pricing demands from you, like quotas to set, alerts to wire, events to recount, SKUs(Stock Keeping Unit) to reconcile, tiers to second-guess. That overhead never shows up on a rate card, and it is usually the thing that makes teams stop and ask whether logging has to work this way at all.
 
-A cost table is more useful than a single example because workloads vary widely. The table below uses Standard Indexing on annual billing at 5 million events per GB and 15-day retention, and excludes Flex Logs, rehydration, log forwarding, taxes, and other Datadog products. Replace these assumptions with your own measurements before relying on the numbers, as event counts vary widely across workloads.
+## How to Reduce Your Datadog Logs Bill
 
-| Monthly Volume | Events | Ingest Cost | Indexing Cost | Total |
-| --- | --- | --- | --- | --- |
-| 50 GB | 250M | $5 | $425 | $430 |
-| 500 GB | 2.5B | $50 | $4,250 | $4,300 |
-| 5 TB | 25B | $500 | $42,500 | $43,000 |
+Datadog does give you levers to pull. Each one works, and each one is a dial you own and have to keep watching.
 
-Retention changes these numbers further. Moving to 30-day retention raises the indexing column by about 47%, and retention beyond 30 days is custom-priced through Datadog sales.
+1. **Measure both meters.** You cannot manage what you cannot see. Track uncompressed GB ingested and events indexed or stored, broken out by source, service, environment, and team, so you know which logs actually drive each meter before you change anything.
 
-For a quick reference point, a team logging 1 TB/month with 30-day retention pays around `$12,600/month` for logs alone, before APM, infrastructure monitoring, custom metrics, and any other charges.
+2. **Route logs by their real value.** Not every log deserves the same tier. Keep the logs you alert on and actively investigate in Standard Indexing, send logs you query only occasionally to Flex, and leave rarely accessed logs in an archive.
 
-If you want to model your own workload across volume, retention, and event count, the [Datadog Pricing Calculator](https://signoz.io/datadog-pricing-calculator/) lets you plug in real numbers and see both Datadog and SigNoz Cloud costs side by side.
+3. **Exclude noisy events before they index.** Use index exclusion filters to drop low-value logs after ingestion. Excluded logs still flow through Live Tail, still generate metrics, and still land in your archive, so you cut the indexing cost without going blind.
 
-## Manage Your Datadog Bill (and What You Give Up)
+4. **Set daily quotas and warnings.** A daily quota hard-limits how much an index stores per day, and you can add a warning threshold starting at 50% of that quota. Both take effect immediately, which makes them your fastest guardrail against a runaway index. Just remember the tradeoff from the last section: once the quota is hit, logs stop being indexed.
 
-Datadog gives you a few built-in ways to bring the bill down. Each one helps in a specific situation, and each one trades something away.
+5. **Bound your archive work.** Archive retrieval has its own controls. Set a maximum scan size per archive, preview an Archive Search query before you run it, and cap how much volume and retention a rehydration can pull back. These keep an ad-hoc investigation from becoming an unplanned line item.
 
-### Skip Indexing on Some Logs (Exclusion Filters)
+These levers cover the log side of the bill. For the full set across custom metrics, hosts, and logs, our guide on [how to reduce Datadog costs](https://signoz.io/guides/how-to-reduce-datadog-costs/) walks through strategies to cut spend by 30 to 70%.
 
-Exclusion filters let you skip indexing for specific log patterns. A common setup sends `level:info` logs from a noisy service to archive and keep `level:error` indexed.
+## SigNoz: The Predictable Alternative to Datadog Log Pricing
 
-**Trade-off:** Filtered logs are no longer immediately searchable in Log Explorer. If the root cause of an incident turns out to be in a lower-severity log (a `4xx` from a misconfigured client, a `debug` line that exposes a race condition), you'd need to rehydrate those logs from the archive to investigate.
+Look back at the last two sections for a moment. The controls are real, but every one of them is more upkeep. There are quotas to set, exclusion filters to tune, compute to right-size, and SKUs to reconcile. They soften the bill without changing what creates it. Datadog logs will always run on two meters in two units, and indexing will always scale with events and retention rather than with the data you can actually see.
 
-Rehydration has two parts:
+[SigNoz](https://signoz.io/) prices logs on a single axis. You pay for the volume of data you send, at `$0.30 per GB ingested`, and that is the whole meter. There is no separate per-event indexing charge, no retention-rate ladder to manage, and no cardinality or tag penalty on top.
 
-- You pay `$0.10` per compressed GB scanned
-- Your contracted indexing rate for any rehydrated events at the retention you choose.
+That removes most of what you spend time managing on Datadog:
 
-Archive Search (currently Preview) is an alternative that queries archives directly and streams results in real time, with results held on a dedicated results page. Either way, an archive is a deferred cost, and the delay usually shows up at the worst possible time, during an active incident. Filtering works when log priorities are predictable, and works less well for open-ended debugging.
-
-### Shorter Retention Windows
-
-Cutting retention from 30 days to 7 days reduces indexing costs by about 49% (from `$2.50` to `$1.27` per million events). This works when most queries happen within the first week. Just confirm that incidents discovered later, like slow memory leaks or gradual data corruption, won't fall outside the search window.
-
-### Move Some Logs to Flex Logs
-
-Flex Logs costs less for long retention, but the comparison with Standard Indexing isn't equal. Flex Logs Starter has a lower published per-million list price than 30-day Standard Indexing (`$0.60` vs `$2.50` per million events) and bundles Starter Compute, which keeps the math simple for smaller volumes.
-
-Flex Storage at `$0.05` per million events is only the storage side, and you'll also pay Flex Compute starting at `$0.05` per instance-hour, so add storage plus compute together when comparing. Flex data is searchable in Log Explorer and dashboards, but cannot trigger monitors or Watchdog.
-
-## Reduce Your Datadog Bill By Switching To SigNoz
+- **No second meter.** One rate per GB, not ingestion plus indexing.
+- **No overage premium to fear.** You can set ingestion limits so a traffic spike cannot hand you a surprise invoice.
+- **No compute instance to size and babysit** just to query your long-term logs.
+- **No lock-in.** SigNoz is OpenTelemetry-native, so your instrumentation stays portable if you ever leave.
 
 <Figure
   src="/img/blog/2026/05/datadog-ingest-and-index-signoz-pricing-page.webp"
   alt="SigNoz pricing page (Credit: SigNoz)"
-  caption="SigNoz pricing page"
+  caption=""
+  link="https://signoz.io/pricing/"
+  sourceText="SigNoz pricing page"
 />
 
-Each cost lever in the section above (filtering logs, shortening retention, moving to Flex Logs, sampling) cuts the bill by cutting what your team can search. SigNoz Cloud is built on the premise that cost and coverage don't have to be traded off to get full search across your logs without a pricing model that penalises you for keeping them.
+| Dimension | Datadog Logs | SigNoz |
+|---|---|---|
+| **Billing meters** | Two: ingestion per GB, plus indexing per million events | `$0.30` per GB ingested |
+| **What drives the cost** | Event count and the retention tier you choose | Volume of data you send |
+| **Going over plan** | Indexed volume above commitment bills on demand at a 50% premium, and it is not capped for you | Set ingestion limits so a spike cannot surprise you |
+| **Long-term retention** | Flex storage plus a compute instance to query it | Retention configurable up to 1 year on the same data, no separate tier |
+| **Forecasting** | Estimate events per service, then map each to a retention tier | Multiply GB by `$0.30` |
+| **Vendor lock-in** | Proprietary agent and data formats. Leaving means re-instrumenting your stack | OpenTelemetry-native. Instrumentation stays portable if you switch |
 
-### One Price For Logs and Traces
+Whether Datadog's log model fits your architecture is a call only you can make, and it is best made with your own bill in front of you. If the pattern you keep hitting is event-based indexing you cannot forecast and upkeep you cannot stop, it is worth putting a volume-based model next to your next Datadog quote. For a feature-by-feature view, see the [SigNoz vs Datadog comparison](https://signoz.io/datadog-alternative/).
 
-SigNoz charges `$0.30` per GB for both, with no separate indexing fee, no per-event multiplier, and no per-host or per-user charges. Metrics are `$0.10` per million samples. This directly addresses the two-charge problem of Datadog logs. You don't pay once to send a log and again to make it useful.
+### Get started with SigNoz
 
-### Linear Cost Scaling vs. Datadog's 47% Retention Penalty
+[SigNoz Cloud](https://signoz.io/teams/) is the fastest way to try it, with a 30-day free trial and access to every feature. The Teams plan starts at `$49/month`, which includes `$49` of usage (roughly 163 GB of logs). Teams with data-residency requirements can use the [enterprise self-hosted or BYOC](https://signoz.io/contact-us/) option, and the open-source [community edition](https://signoz.io/docs/install/self-host/) is free if you would rather run the stack yourself.
 
-Using a standard 30-day retention window provides a tight, direct comparison highlighting the contrasting pricing mechanisms of both platforms:
-
-- Datadog: Spikes log indexing costs from \$1.70 to \$2.50 per 1M events. This triggers an immediate 47% price multiplier across your searchable event tier.
-- SigNoz Cloud: Shifts your flat ingestion rate from \$0.30/GB to \$0.40/GB. This results in a clear 33.3% linear adjustment managed via a single configuration slider.
-
-### Per-GB Pricing
-
-Event-count surprises (a chatty service, a multi-tenant `customer_id` tag, microservices logging at multiple points per request) don't change your bill on SigNoz. You pay for the data you send, not for how it's shaped.
-
-### OpenTelemetry-Native By Design
-
-If you've already instrumented your apps with OpenTelemetry for Datadog, you can point that same data at SigNoz without rewriting anything. [OpenTelemetry](https://signoz.io/blog/opentelemetry-vs-datadog/) is the open standard that observability tools are converging on, so your instrumentation isn't tied to a single vendor.
-
-[SigNoz Cloud](https://signoz.io/teams/) is the managed option for teams who want simpler pricing. The Teams plan starts at `$49/month`, which includes `$49` of usage credit (enough for roughly 163 GB of logs or traces). Logs and traces are priced the same at `$0.30/GB`, with 15-day retention included and longer retention available at published rates.
-
-Data residency or compliance requirements can be handled through the [enterprise self-hosted and BYOC](https://signoz.io/contact-us/) options, and teams that prefer to run their own infrastructure can use the open-source [community edition](https://signoz.io/docs/install/self-host/).
+If you are coming from Datadog, moving over is rarely a rebuild. If you already export through OpenTelemetry, pointing that exporter at SigNoz is mostly an endpoint swap. The [automated Datadog migration tool](https://signoz.io/datadog-migration-tool/) brings your dashboards across, and the [migration guide](https://signoz.io/docs/migration/migrate-from-datadog-to-signoz/) covers moving instrumentation and the rest of your setup.
 
 <InlineCTA message="Logs and traces at $0.30/GB, metrics at $0.10/M samples. No host- or user-based fees. Compare with the SigNoz Datadog Pricing Calculator." />
 
 ## FAQs
 
-**How much does Datadog log management cost?**
+#### Does Datadog have logs?
 
-Datadog charges for logs in two ways: `$0.10/GB` to ingest them, plus a per-event fee to make them searchable. The indexing fee runs from `$1.06` to `$2.50` per million events, depending on how long you want them searchable (3 to 30 days). Retention beyond 30 days is custom-priced.
+Yes. Datadog Log Management is a full logging product that collects, parses, and searches logs from across your stack, with support for 200+ sources. It runs on a "Logging without Limits" model, so you ingest everything first and then choose which logs to index for search, alerting, and dashboards.
 
-**Why is my Datadog log bill higher than I expected?**
+#### How much does Datadog log management cost?
 
-Most of the surprise comes from indexing, not ingestion. The `$0.10/GB` rate only covers sending logs in. Indexing is a separate per-event charge that scales with both event count and retention, and it's usually the biggest item on the bill.
+Datadog charges for logs in two ways. Ingestion is `$0.10/GB` to bring logs in, and indexing is a separate per-event fee to make them searchable, running from `$1.06` to `$2.50` per million events depending on retention (3 to 30 days). Retention beyond 30 days is custom-priced.
 
-**How can I reduce Datadog log costs?**
+#### How much does Datadog Flex Logs cost?
 
-The most effective way to eliminate Datadog's compounding fees is to migrate to an OpenTelemetry-native platform like [**SigNoz**](https://signoz.io/). By switching, you replace complex event-count multipliers, host metrics, and retention penalties with a simple, predictable model based strictly on total gigabytes ingested.
+Flex Logs has two parts. Storage is `$0.05` per million events stored per month on annual billing, and every million events is billed for at least 30 days. Querying that data uses Flex Compute, billed by instance-hour and starting at `$0.05` for the Extra Small size. There is also a bundled Flex Logs Starter tier at `$0.60` per million events stored that includes Starter compute. Flex suits logs you keep long-term but query rarely, and it does not support Log Monitors or Watchdog.
 
-**Are Datadog logs cheaper than other log management tools?**
+#### How is the Datadog log event count calculated?
 
-Usually not at scale. Self-hosted Loki and Elastic, and managed alternatives like SigNoz Cloud, tend to come out cheaper as log volume grows. The [Datadog Pricing Calculator](https://signoz.io/datadog-pricing-calculator/) gives a side-by-side estimate for your workload.
+Roughly one log message is one event. The number of events per GB depends on log shape, so short, frequent logs produce more events per GB than long, verbose ones. Because indexing is billed per event, run a count query in Log Explorer over 24 hours to measure your real ratio before forecasting.
 
-**How is the log event count calculated?**
+#### Does retention length affect Datadog log pricing?
 
-Roughly one log message equals one event. Events per GB vary by log shape, with short, frequent logs producing more events per GB than longer ones. Run a count query in Log Explorer to measure your actual ratio.
+Yes. Indexing is priced per million events, and the rate rises with retention. It climbs from `$1.06` (3-day) to `$1.70` (15-day) to `$2.50` (30-day) per million events on annual billing, so moving from 15-day to 30-day retention is about a 47% increase on indexing alone. Retention beyond 30 days is custom-priced through Datadog sales.
 
-**Does retention length affect Datadog log pricing?**
+#### Why is Datadog so expensive?
 
-Yes. Moving from 15-day to 30-day retention is a 47% increase in indexing alone. Retention beyond 30 days is custom-priced through Datadog sales.
+For logs, the cost usually comes from indexing rather than ingestion. The `$0.10/GB` ingestion rate only covers sending logs in. Indexing is a separate per-event charge that scales with both event count and retention, and it is typically the largest item on the bill. Add-ons such as Sensitive Data Scanner, Cloud SIEM, and custom-destination forwarding each bill on their own meter, which pushes the total higher than a single rate suggests.
 
----
+#### How can I reduce Datadog log costs?
 
-**Further Reading**
-
-[Datadog Pricing: Main Caveats Explained](https://signoz.io/blog/datadog-pricing/)
-
-[SigNoz vs Datadog vs New Relic vs Grafana: Pricing Comparison](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/)
-
-[Introducing SigNoz's LLM-Powered Datadog Migration Tool](https://signoz.io/blog/datadog-migration-tool/)
+Start with the built-in levers. Filter noisy logs before they index, match retention to how each log is used, and set daily quotas to cap spend. These help, but they are ongoing upkeep and do not change the two-meter model. Teams that want a simpler, predictable bill often move to a volume-based, OpenTelemetry-native platform like [SigNoz](https://signoz.io/), which prices logs at a single rate per GB ingested with no separate indexing meter. Our guide on [how to reduce Datadog costs](https://signoz.io/guides/how-to-reduce-datadog-costs/) covers both paths.
