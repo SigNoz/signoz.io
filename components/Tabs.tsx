@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { TabsRoot, TabsList, TabsTrigger } from '@signozhq/ui/tabs'
 import { useSearchParamsState } from '@/hooks/useSearchParamsState'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
@@ -16,7 +16,6 @@ interface TabsProps {
 
 const Tabs = ({ children, entityName, variant = 'default', className }: TabsProps) => {
   const searchParams = useSearchParamsState()
-  const router = useRouter()
   const pathname = usePathname()
 
   const childrenArray = React.Children.toArray(children)
@@ -64,9 +63,11 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
 
       const current = new URLSearchParams(window.location.search)
       current.set(urlKey, value)
-      router.replace(`${pathname}?${current.toString()}`, { scroll: false })
+      const query = current.toString()
+      const next = `${pathname}${query ? `?${query}` : ''}${window.location.hash}`
+      window.history.replaceState(window.history.state, '', next)
     },
-    [urlKey, router, pathname]
+    [urlKey, pathname]
   )
 
   const isOnboarding = isDocsOnboardingPathname(pathname)

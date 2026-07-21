@@ -19,11 +19,9 @@ const TabItem = ({
 )
 
 const mockPathname = vi.fn(() => '/docs/install/')
-const mockReplace = vi.fn()
 
 vi.mock('next/navigation', () => ({
   usePathname: () => mockPathname(),
-  useRouter: () => ({ replace: mockReplace }),
 }))
 
 const mockSearchParams = vi.fn(() => new URLSearchParams())
@@ -33,7 +31,6 @@ vi.mock('@/hooks/useSearchParamsState', () => ({
 
 beforeEach(() => {
   mockPathname.mockReturnValue('/docs/install/')
-  mockReplace.mockClear()
   mockSearchParams.mockReturnValue(new URLSearchParams())
   window.history.replaceState({}, '', '/docs/install/')
 })
@@ -260,7 +257,7 @@ describe('non-onboarding routes show all tabs', () => {
 })
 
 describe('plans tabs sync to URL', () => {
-  it('calls router.replace with plans param on tab click', () => {
+  it('updates the query string with plans param on tab click (no Next navigation)', () => {
     render(
       <Tabs entityName="plans">
         <TabItem value="cloud" label="Cloud" default>
@@ -274,9 +271,7 @@ describe('plans tabs sync to URL', () => {
 
     activateTab('Self-Hosted')
 
-    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('plans=self-host'), {
-      scroll: false,
-    })
+    expect(window.location.search).toContain('plans=self-host')
   })
 
   it('restores tab from URL search params', () => {
@@ -302,7 +297,7 @@ describe('plans tabs sync to URL', () => {
 })
 
 describe('nested tabs do not reset parent plans tab', () => {
-  it('parent stays on self-host after nested tab click triggers remount', () => {
+  it('parent stays on self-host after nested tab click and URL restore', () => {
     const NestedTabs = () => (
       <Tabs entityName="plans">
         <TabItem value="cloud" label="Cloud" default>
@@ -321,27 +316,19 @@ describe('nested tabs do not reset parent plans tab', () => {
       </Tabs>
     )
 
-    // Render with plans=self-host already in URL (user previously clicked Self-Hosted)
     window.history.replaceState({}, '', '/docs/install/?plans=self-host')
     mockSearchParams.mockReturnValue(new URLSearchParams('plans=self-host'))
     const { unmount } = render(<NestedTabs />)
 
     fireEvent.mouseDown(screen.getByRole('tab', { name: 'yarn' }))
-    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('plans=self-host'), {
-      scroll: false,
-    })
-    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('client=yarn'), {
-      scroll: false,
-    })
+    expect(window.location.search).toContain('plans=self-host')
+    expect(window.location.search).toContain('client=yarn')
 
-    // Simulate URL state after nested tab click
     mockSearchParams.mockReturnValue(new URLSearchParams('plans=self-host&client=yarn'))
 
-    // Simulate Next.js remount triggered by router.replace
     unmount()
     render(<NestedTabs />)
 
-    // Verify parent is still on Self-Hosted
     const parentRoot = document.querySelectorAll('[data-tabs-root]')[0]
     const parentPanels = parentRoot.querySelectorAll(':scope > .mt-4 > [data-tab-value]')
     const cloudPanel = Array.from(parentPanels).find(
@@ -354,7 +341,6 @@ describe('nested tabs do not reset parent plans tab', () => {
     expect(cloudPanel).toHaveAttribute('hidden')
     expect(selfHostPanel).not.toHaveAttribute('hidden')
 
-    // Verify nested tab also restored to yarn
     const nestedRoot = document.querySelectorAll('[data-tabs-root]')[1]
     const nestedPanels = nestedRoot.querySelectorAll(':scope > .mt-4 > [data-tab-value]')
     const yarnPanel = Array.from(nestedPanels).find(
@@ -400,12 +386,8 @@ describe('environment tab switch preserves nested query params', () => {
     activateTab('Windows')
 
     expect(getTabButton('Windows')).toHaveAttribute('aria-selected', 'true')
-    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('environment=windows'), {
-      scroll: false,
-    })
-    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('k8s-method=direct'), {
-      scroll: false,
-    })
+    expect(window.location.search).toContain('environment=windows')
+    expect(window.location.search).toContain('k8s-method=direct')
 
     const panels = getTabPanels()
     const windowsPanel = Array.from(panels).find(
