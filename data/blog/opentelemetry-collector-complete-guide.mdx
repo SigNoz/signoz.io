@@ -34,7 +34,7 @@ This guide will briefly touch on what OpenTelemetry is, then provide a comprehen
 
 [OpenTelemetry (OTel)](https://signoz.io/opentelemetry/) is an open-source observability framework, graduated from the Cloud Native Computing Foundation, that standardizes how telemetry data (logs, metrics, traces) is generated and collected. After instrumenting your applications with OpenTelemetry SDKs, the Collector is the next critical piece for managing that data.
 
-In very simple words, the Collector is an agent that sits between your instrumented services, collects the telemetry data that is emitted by the services, processes it and sends it to an observability backend.
+In very simple words, the Collector is an agent that sits between your instrumented services, collects the telemetry data that is emitted by the services, processes it and sends it to an [observability](https://signoz.io/guides/what-is-observability/) backend.
 
 The most textbook definition of this [and what’s present in the official docs] is that the OTel Collector offers a *vendor-agnostic implementation of how to receive, process and export telemetry data*. Vendor-agnostic means you can plug into any observability backend of your choice and switch it up as you prefer, without changing your application code. No vendor lock-in. 
 
@@ -257,7 +257,7 @@ Now, let's learn to troubleshoot some common OTel Collector issues, which primar
 
 The `DeadlineExceeded` error means the exporter couldn't deliver data to your backend before the request timed out. This is often a connectivity or endpoint problem, fixed by ensuring that the endpoint is valid and is reachable from the Collector's network (firewall, security group, etc).
 
-This error can also happen intermittently for valid connections when the network bandwidth is low, or when the Collector must export large payloads. By default, the OTLP exporter buffers incoming telemetry data before export, and performs exponential retries for failed exports. These defaults make the connection resilient to transient network issues and help handle bursts of traffic. If timeouts persist despite this, consider increasing the `timeout` setting for the exporter.
+This error can also happen intermittently for valid connections when the network bandwidth is low, or when the Collector must export large payloads. By default, the [OTLP exporter](https://signoz.io/blog/opentelemetry-exporters/) buffers incoming telemetry data before export, and performs exponential retries for failed exports. These defaults make the connection resilient to transient network issues and help handle bursts of traffic. If timeouts persist despite this, consider increasing the `timeout` setting for the exporter.
 
 <Figure src="/img/blog/2026/07/opentelemetry-collector-deadline-exceeded.webp" alt="Deadline exceeded error in OpenTelemetry Collector" caption="Deadline exceeded error in OpenTelemetry Collector" />
 
@@ -295,7 +295,7 @@ exporters:
 
 ### "Memory usage is above soft limit" / data being dropped by memory_limiter
 
-If you encounter this message, your Collector instance is reaching the soft memory limits defined in the `memory_limiter` processor. To prevent an OOM crash, it has begun refusing incoming telemetry data.
+If you encounter this message, your Collector instance is reaching the soft memory limits defined in the `memory_limiter` processor. To prevent an [OOM (Out of Memory)](https://signoz.io/guides/what-is-oom/) crash, it has begun refusing incoming telemetry data.
 
 Frequent occurrences mean that the Collector, its backend, or both of these components are under heavy load, often caused when more applications than anticipated are sending telemetry to the Collector.
 
