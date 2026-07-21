@@ -12,10 +12,16 @@ export default defineConfig({
       'hooks/**/*.test.{ts,tsx}',
       'utils/**/*.test.{ts,tsx}',
     ],
+    server: {
+      deps: {
+        inline: ['@signozhq/ui'],
+      },
+    },
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname),
+      '@signozhq/icons': path.resolve(__dirname, 'node_modules/@signozhq/icons/dist/index.esm.js'),
     },
   },
 })
