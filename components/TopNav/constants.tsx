@@ -3,6 +3,7 @@ import {
   Boxes,
   Brain,
   Bug,
+  Cloud,
   Cone,
   ConciergeBell,
   Container,
@@ -192,6 +193,14 @@ export const useCasesDropdownItems: ProductItem[] = [
     description: 'Monitor pods, nodes, namespaces & workloads',
     name: 'Kubernetes Monitoring',
     order: 6,
+  },
+  {
+    key: 'azure-monitoring',
+    url: '/azure-monitoring/',
+    icon: <Cloud className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'One-click monitoring for every Azure service',
+    name: 'Azure Monitoring',
+    order: 7,
   },
 ]
 

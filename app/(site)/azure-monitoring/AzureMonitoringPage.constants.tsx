@@ -1,4 +1,7 @@
 import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
+import section1Url from '@/public/img/azure-monitoring/section-1.svg?url'
+import section2Url from '@/public/img/azure-monitoring/section-2.svg?url'
+import section3Url from '@/public/img/azure-monitoring/section-3.svg?url'
 
 export const AZURE_MONITORING_HEADER_BUTTONS = [
   {
@@ -37,7 +40,7 @@ export const INTEGRATE_AZURE_PANEL = {
       The fastest path to full Azure visibility.
     </p>
   ),
-  image: '/img/azure-monitoring/section-1.svg',
+  image: section1Url,
   imageAlt: 'One-click Azure integration diagram',
   button: {
     text: 'Explore More',
@@ -62,7 +65,7 @@ export const RCA_NOZ_AI_PANEL = {
       data stays in your environment.
     </p>
   ),
-  image: '/img/azure-monitoring/section-2.svg',
+  image: section2Url,
   imageAlt: 'Noz AI Assistant for Azure RCA',
   button: {
     text: 'Explore More',
@@ -81,7 +84,7 @@ export const AKS_VISIBILITY_SHOWCASE = {
   title: 'Full AKS cluster visibility into pods, nodes, workloads, and application traces',
   description:
     "Deploy SigNoz's k8s-infra Helm chart on your AKS cluster. Pod logs, node metrics, and application traces all flow into the same backend. Jump from a failing AKS pod to the App Service it was calling to the SQL Database query that was slow in one investigation session, without tab-switching.",
-  image: '/img/azure-monitoring/section-3.svg',
+  image: section3Url,
   imageAlt: 'Correlated logs, metrics and traces for Azure AKS',
   button: {
     text: 'Explore More',
