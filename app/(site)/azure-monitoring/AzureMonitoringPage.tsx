@@ -27,7 +27,7 @@ const Header: React.FC = () => {
     <FeaturePageHeader
       title={
         <>
-          One-click integration for <br /> Azure Monitoring
+          One-Click integration for <br /> Azure Monitoring
         </>
       }
       description={
