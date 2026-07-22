@@ -315,6 +315,15 @@ spec:
           args: ["--config=/etc/otelcol/collector.yaml"]
           securityContext:
             runAsUser: 0
+          env:
+            - { name: MYSQL_ERROR_LOG, value: /var/log/mysql/error.log }
+            - { name: MYSQL_SLOW_LOG, value: /var/log/mysql/mysql-slow.log }
+            - { name: OTLP_DESTINATION_ENDPOINT, value: "https://ingest.<region>.signoz.cloud:443" }
+            - name: SIGNOZ_INGESTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: signoz-ingestion-key
+                  key: SIGNOZ_INGESTION_KEY
           volumeMounts:
             - { name: mysql-logs, mountPath: /var/log/mysql, readOnly: true }
             - { name: otel-config, mountPath: /etc/otelcol/collector.yaml, subPath: collector.yaml }
@@ -323,6 +332,8 @@ spec:
         - { name: mysql-logging, configMap: { name: mysql-logging } }
         - { name: otel-config, configMap: { name: mysql-logs-otel } }
 ```
+
+Create the referenced objects before applying: a `mysql-logging` ConfigMap from your `logging.cnf`, a `mysql-logs-otel` ConfigMap from `mysql-logs-collection-config.yaml` (mounted as `collector.yaml`), and a `signoz-ingestion-key` Secret holding your ingestion key.
 
 <Admonition type="info">
 If the sidecar forwards to an in-cluster gateway over OTLP/gRPC instead of exporting to SigNoz directly, keep batches small: the gRPC receiver defaults to a 4 MB max message size, which a large `general_log` backlog can exceed (`ResourceExhausted`). Lower the sidecar's `send_batch_max_size`, or raise `max_recv_msg_size_mib` on the gateway.
@@ -339,8 +350,8 @@ If the sidecar forwards to an in-cluster gateway over OTLP/gRPC instead of expor
 
 <Figure
   src="/img/docs/integrations/mysql/mysql-logs-explorer.webp"
-  alt="MySQL test-service logs in SigNoz Logs Explorer"
-  caption="MySQL logs in SigNoz, filtered by service.name = mysql-logs-test"
+  alt="MySQL logs in SigNoz Logs Explorer filtered by source = mysql"
+  caption="MySQL logs in SigNoz, filtered by source = mysql"
 />
 
 <details>

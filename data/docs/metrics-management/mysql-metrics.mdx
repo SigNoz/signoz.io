@@ -59,6 +59,37 @@ service:
 
 Now, run the OpenTelemetry collector and you should see the metrics coming in SigNoz. 
 
+<details>
+<ToggleHeading>
+
+### Step 4: Collect query samples and top queries
+
+</ToggleHeading>
+
+Beyond metrics, the `mysql` receiver can emit query-monitoring **logs** from `performance_schema`: `db.server.query_sample` (statements running now) and `db.server.top_query` (most resource-intensive queries). To collect MySQL's error, slow, and general log files instead, use the <a href="https://signoz.io/docs/integrations/opentelemetry-mysql/">filelog approach</a>.
+
+Enable the events on the receiver (requires `performance_schema`):
+
+```yaml:config.yaml
+receivers:
+  mysql:
+    # ...existing metrics config...
+    events:
+      db.server.query_sample:
+        enabled: true
+      db.server.top_query:
+        enabled: true
+
+service:
+  pipelines:
+    logs:
+      receivers: [mysql]
+```
+
+The receiver's logs signal is at <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/mysqlreceiver#logs" target="_blank" rel="noopener noreferrer nofollow">development stability</a>, so treat it as experimental.
+
+</details>
+
 ## Visualizing MySQL Metrics
 
 Once you have configured OTel Collector to send MySQL metrics to SigNoz, you can start visualizing the metrics in the [metrics explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
