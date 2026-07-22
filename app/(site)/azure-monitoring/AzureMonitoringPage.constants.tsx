@@ -8,7 +8,7 @@ export const AZURE_MONITORING_HEADER_BUTTONS = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
-      clickName: 'Azure Monitoring Hero Start Free',
+      clickName: 'Sign Up Button',
       clickLocation: 'Azure Monitoring Hero',
       clickText: 'Get Started Free',
     },
@@ -20,7 +20,7 @@ export const AZURE_MONITORING_HEADER_BUTTONS = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Azure Monitoring Hero Read Docs',
+      clickName: 'Docs Link',
       clickLocation: 'Azure Monitoring Hero',
       clickText: 'Read the Docs',
     },
@@ -44,7 +44,7 @@ export const INTEGRATE_AZURE_PANEL = {
     href: '/docs/integrations/azure/one-click-azure-integrations/',
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Azure Monitoring Integrate Explore More',
+      clickName: 'Explore Link',
       clickLocation: 'Azure Monitoring Integrate Section',
       clickText: 'Explore More',
     },
@@ -69,7 +69,7 @@ export const RCA_NOZ_AI_PANEL = {
     href: '/docs/ai/signoz-mcp-server/',
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Azure Monitoring RCA Noz Explore More',
+      clickName: 'Explore Link',
       clickLocation: 'Azure Monitoring RCA Section',
       clickText: 'Explore More',
     },
@@ -88,7 +88,7 @@ export const AKS_VISIBILITY_SHOWCASE = {
     href: '/docs/azure-monitoring/aks/',
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Azure Monitoring AKS Explore More',
+      clickName: 'Explore Link',
       clickLocation: 'Azure Monitoring AKS Section',
       clickText: 'Explore More',
     },
@@ -110,7 +110,7 @@ export const DISTRIBUTED_TRACING_PANEL = {
     href: '/docs/azure-monitoring/app-service/',
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Azure Monitoring Tracing Explore More',
+      clickName: 'Explore Link',
       clickLocation: 'Azure Monitoring Tracing Section',
       clickText: 'Explore More',
     },
@@ -133,7 +133,7 @@ export const TROUBLESHOOT_PANEL = {
     href: '/docs/azure-monitoring/',
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Azure Monitoring Troubleshoot Learn More',
+      clickName: 'Learn More Link',
       clickLocation: 'Azure Monitoring Troubleshoot Section',
       clickText: 'Learn More',
     },
@@ -156,7 +156,7 @@ export const OTEL_NATIVE_PANEL = {
     href: '/docs/azure-monitoring/',
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Azure Monitoring OTel Learn More',
+      clickName: 'Learn More Link',
       clickLocation: 'Azure Monitoring OTel Section',
       clickText: 'Learn More',
     },
@@ -179,7 +179,7 @@ export const DASHBOARD_TEMPLATES_PANEL = {
     href: '/docs/dashboards/dashboard-templates/overview/',
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Azure Monitoring Dashboards Learn More',
+      clickName: 'Learn More Link',
       clickLocation: 'Azure Monitoring Dashboards Section',
       clickText: 'Learn More',
     },
@@ -202,7 +202,7 @@ export const TRANSPARENT_PRICING_PANEL = {
     href: '/pricing/',
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Azure Monitoring Pricing Learn More',
+      clickName: 'Pricing Link',
       clickLocation: 'Azure Monitoring Pricing Section',
       clickText: 'View Pricing',
     },
@@ -218,7 +218,7 @@ export const BOTTOM_CTA_BUTTONS = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
-      clickName: 'Azure Monitoring Bottom CTA Start Free',
+      clickName: 'Sign Up Button',
       clickLocation: 'Azure Monitoring Bottom CTA',
       clickText: 'Get Started Free',
     },
@@ -230,7 +230,7 @@ export const BOTTOM_CTA_BUTTONS = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Azure Monitoring Bottom CTA Docs',
+      clickName: 'Docs Link',
       clickLocation: 'Azure Monitoring Bottom CTA',
       clickText: 'Read the Docs',
     },
