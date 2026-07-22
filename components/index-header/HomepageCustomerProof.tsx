@@ -46,11 +46,11 @@ const customerLogoSvgPath = '/svgs/customer-logos'
 
 const logos = {
   alienIntelligence: {
-    imageSrc: `${customerLogoImagePath}/alien-intelligence.png`,
+    imageSrc: `${customerLogoImagePath}/alien-intelligence.webp`,
     name: 'Alien Intelligence',
   },
-  ariso: { imageSrc: `${customerLogoImagePath}/ariso.png`, name: 'Ariso' },
-  armur: { imageSrc: `${customerLogoImagePath}/armur-ai.jpg`, name: 'Armur AI' },
+  ariso: { imageSrc: `${customerLogoImagePath}/ariso.webp`, name: 'Ariso' },
+  armur: { imageSrc: `${customerLogoImagePath}/armur-ai.webp`, name: 'Armur AI' },
   auvik: {
     cardWidth: 90,
     imageSrc: `${customerLogoSvgPath}/auvik.svg`,
@@ -76,7 +76,7 @@ const logos = {
     cardWidth: 92,
     viewBox: '72 170 1056 280',
   },
-  fiscalNote: { imageSrc: `${customerLogoImagePath}/fiscalnote.png`, name: 'FiscalNote' },
+  fiscalNote: { imageSrc: `${customerLogoImagePath}/fiscalnote.webp`, name: 'FiscalNote' },
   flutterwave: {
     cardWidth: 108,
     imageSrc: `${customerLogoSvgPath}/flutterwave.svg`,
@@ -96,7 +96,7 @@ const logos = {
     isWordmark: true,
     name: 'Formstack',
   },
-  harmonic: { imageSrc: `${customerLogoImagePath}/harmonic.png`, name: 'Harmonic Inc.' },
+  harmonic: { imageSrc: `${customerLogoImagePath}/harmonic.webp`, name: 'Harmonic Inc.' },
   harmonicAi: {
     cardWidth: 110,
     imageSrc: `${customerLogoSvgPath}/harmonic-ai.svg`,
@@ -130,7 +130,7 @@ const logos = {
     isWordmark: true,
     name: 'LG Electronics',
   },
-  moneyhub: { imageSrc: `${customerLogoImagePath}/moneyhub.png`, name: 'Moneyhub' },
+  moneyhub: { imageSrc: `${customerLogoImagePath}/moneyhub.webp`, name: 'Moneyhub' },
   oracle: {
     cardWidth: 100,
     imageSrc: `${customerLogoSvgPath}/oracle.svg`,
@@ -145,7 +145,7 @@ const logos = {
     viewBox: '39 190 1322 240',
   },
   racingAndSports: {
-    imageSrc: `${customerLogoImagePath}/racing-and-sports.png`,
+    imageSrc: `${customerLogoImagePath}/racing-and-sports.webp`,
     name: 'Racing & Sports',
   },
   sailResearch: {
@@ -187,10 +187,10 @@ const logos = {
     name: 'Tavus',
   },
   websiteEngineer: {
-    imageSrc: `${customerLogoImagePath}/website-engineer.png`,
+    imageSrc: `${customerLogoImagePath}/website-engineer.webp`,
     name: 'The Website Engineer',
   },
-  xaira: { imageSrc: `${customerLogoImagePath}/xaira.png`, name: 'Xaira' },
+  xaira: { imageSrc: `${customerLogoImagePath}/xaira.webp`, name: 'Xaira' },
   xata: { imageSrc: `${customerLogoSvgPath}/xata.svg`, name: 'Xata' },
 } satisfies Record<string, LogoSpec>
 
