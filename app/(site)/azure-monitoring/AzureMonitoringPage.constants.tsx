@@ -57,9 +57,9 @@ export const RCA_NOZ_AI_PANEL = {
   description: (
     <p className="leading-relaxed text-signoz_vanilla-400">
       SigNoz MCP Server connects to Claude Code, Cursor, and other AI coding agents. Give your agent
-      full Azure context - VM CPU, AKS pod status, App Service traces, SQL Database latency - and
-      debug production Azure issues without leaving your terminal. No separate AI SRE tool. Your
-      Azure data stays in your environment.
+      full Azure context, VM CPU, AKS pod status, App Service traces, SQL Database latency and debug
+      production Azure issues without leaving your terminal. No separate AI SRE tool. Your Azure
+      data stays in your environment.
     </p>
   ),
   image: '/img/azure-monitoring/section-2.svg',
@@ -80,7 +80,7 @@ export const RCA_NOZ_AI_PANEL = {
 export const AKS_VISIBILITY_SHOWCASE = {
   title: 'Full AKS cluster visibility into pods, nodes, workloads, and application traces',
   description:
-    "Deploy SigNoz's k8s-infra Helm chart on your AKS cluster. Pod logs, node metrics, and application traces all flow into the same backend. Jump from a failing AKS pod to the App Service it was calling to the SQL Database query that was slow - in one investigation session, without tab-switching.",
+    "Deploy SigNoz's k8s-infra Helm chart on your AKS cluster. Pod logs, node metrics, and application traces all flow into the same backend. Jump from a failing AKS pod to the App Service it was calling to the SQL Database query that was slow in one investigation session, without tab-switching.",
   image: '/img/azure-monitoring/section-3.svg',
   imageAlt: 'Correlated logs, metrics and traces for Azure AKS',
   button: {
@@ -123,7 +123,7 @@ export const TROUBLESHOOT_PANEL = {
   description: (
     <p className="leading-relaxed text-signoz_vanilla-400">
       When an App Service latency alert fires, jump from the Azure infrastructure metric to the
-      application trace to the log line that explains it - without opening Azure Monitor, App
+      application trace to the log line that explains it without opening Azure Monitor, App
       Insights, and your log tool separately. SigNoz stores all three signal types in a single
       ClickHouse backend. One query surface. No manual correlation.
     </p>
@@ -147,8 +147,8 @@ export const OTEL_NATIVE_PANEL = {
     <p className="leading-relaxed text-signoz_vanilla-400">
       SigNoz is built on OpenTelemetry from day one, not just compatible. Every Azure VM metric, AKS
       pod trace, and App Service log uses standard OTel attributes: service.name, cloud.region,
-      k8s.pod.name - correlated across signals automatically. No proprietary agents in your
-      codebase. No re-instrumentation if you change backends.
+      k8s.pod.name, correlated across signals automatically. No proprietary agents in your codebase.
+      No re-instrumentation if you change backends.
     </p>
   ),
   button: {
@@ -165,7 +165,7 @@ export const OTEL_NATIVE_PANEL = {
 }
 
 export const DASHBOARD_TEMPLATES_PANEL = {
-  title: 'Get started in minutes - First data in, first dashboards live - no setup required',
+  title: 'Get started in minutes - First data in, first dashboards live no setup required',
   description: (
     <p className="leading-relaxed text-signoz_vanilla-400">
       SigNoz ships with pre-built dashboard templates for Azure VMs, AKS, App Services, Container

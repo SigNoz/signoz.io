@@ -27,13 +27,13 @@ const Header: React.FC = () => {
     <FeaturePageHeader
       title={
         <>
-          One-Click Integration for <br /> Azure Monitoring
+          One-click integration for <br /> Azure Monitoring
         </>
       }
       description={
         <>
-          Monitor every Azure service — VMs, AKS, App Service, Container Apps, Azure Functions,
-          <br className="hidden md:block" /> SQL Database, Blob Storage, Cosmos DB — in a single
+          Monitor every Azure service; VMs, AKS, App Service, Container Apps, Azure Functions,
+          <br className="hidden md:block" /> SQL Database, Blob Storage, Cosmos DB in a single
           OTel-native ClickHouse backend.
           <br className="hidden md:block" /> Metrics, logs, and traces correlated in one view. No
           per-metric charges. No proprietary agents.
@@ -92,9 +92,9 @@ const BottomCTASection: React.FC = () => {
     <CTABanner
       title={
         <>
-          Get Started with One-Click Integration.
+          Get Started with one–click integration.
           <br />
-          Transparent Price. AI-Powered.
+          Transparent price. AI-powered.
         </>
       }
       buttons={BOTTOM_CTA_BUTTONS}
