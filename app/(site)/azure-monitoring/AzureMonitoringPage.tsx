@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Image from 'next/image'
+import section4Url from '@/public/img/azure-monitoring/section-4.svg?url'
 import {
   AZURE_MONITORING_HEADER_BUTTONS,
   INTEGRATE_AZURE_PANEL,
@@ -62,7 +63,7 @@ const DistributedTracing: React.FC = () => {
       right={
         <div className="flex h-full w-full items-center justify-center px-6">
           <Image
-            src="/img/azure-monitoring/section-4.svg"
+            src={section4Url}
             alt="End-to-end distributed tracing for Azure"
             width={528}
             height={320}

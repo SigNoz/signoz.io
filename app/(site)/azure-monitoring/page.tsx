@@ -1,8 +1,6 @@
 import AzureMonitoringPage from './AzureMonitoringPage'
 import { Metadata } from 'next'
-
-// 1 year
-export const revalidate = 31536000
+import section3Url from '@/public/img/azure-monitoring/section-3.svg?url'
 
 export const metadata: Metadata = {
   title: {
@@ -12,7 +10,7 @@ export const metadata: Metadata = {
     title: 'Azure Monitoring with One-Click Integration | SigNoz',
     description:
       'Monitor every Azure service — VMs, AKS, App Service, Container Apps, Azure Functions, SQL Database, Blob Storage, Cosmos DB — in a single OTel-native ClickHouse backend. Metrics, logs, and traces correlated in one view.',
-    images: '/img/azure-monitoring/section-3.svg',
+    images: section3Url,
   },
   description:
     'Monitor every Azure service — VMs, AKS, App Service, Container Apps, Azure Functions, SQL Database, Blob Storage, Cosmos DB — in a single OTel-native ClickHouse backend. Metrics, logs, and traces correlated in one view.',
@@ -20,7 +18,7 @@ export const metadata: Metadata = {
     title: 'Azure Monitoring with One-Click Integration | SigNoz',
     description:
       'Monitor every Azure service — VMs, AKS, App Service, Container Apps, Azure Functions, SQL Database, Blob Storage, Cosmos DB — in a single OTel-native ClickHouse backend. Metrics, logs, and traces correlated in one view.',
-    images: '/img/azure-monitoring/section-3.svg',
+    images: section3Url,
   },
 }
 
