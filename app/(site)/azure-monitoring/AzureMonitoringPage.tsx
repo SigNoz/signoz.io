@@ -94,7 +94,7 @@ const BottomCTASection: React.FC = () => {
         <>
           Get Started with One-Click Integration.
           <br />
-          Transparent Price. AI-Powered. OTel-Native.
+          Transparent Price. AI-Powered.
         </>
       }
       buttons={BOTTOM_CTA_BUTTONS}
