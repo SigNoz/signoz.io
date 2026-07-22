@@ -18,24 +18,10 @@ import {
 import { ArrowUpRight } from 'lucide-react'
 
 import TrackingLink from '@/components/TrackingLink'
-import { EXPERIMENTS } from '@/constants/experiments'
 import { cn } from 'app/lib/utils'
-import ShapedLogo from '@/public/img/case_study/logos/shaped-logo.svg'
-import BlackForestLabsLogo from '@/public/svgs/icons/blackforestlabs.svg'
-import BlaxelLogo from '@/public/svgs/icons/blaxel.svg'
 import EltropyLogo from '@/public/svgs/icons/eltropy.svg'
-import FormanceLogo from '@/public/svgs/icons/formance.svg'
-import InkeepLogo from '@/public/svgs/icons/inkeep.svg'
-import KernelLogo from '@/public/svgs/icons/kernel.svg'
 import ParallelLogo from '@/public/svgs/icons/parallel-ai.svg'
-import SalientLogo from '@/public/svgs/icons/salient.svg'
-import SarvamLogo from '@/public/svgs/icons/sarvam.svg'
-import TavusLogo from '@/public/svgs/icons/tavus.svg'
 
-import styles from './HomepageCustomerProof.module.css'
-
-const experimentId = EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.id
-const variantId = EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
 const clickLocation = 'Homepage Hero Customer Proof'
 const carouselCycleWidth = 3756
 const carouselDurationSeconds = 202
@@ -69,12 +55,17 @@ const logos = {
     name: 'Auvik',
   },
   blackForestLabs: {
-    Logo: BlackForestLabsLogo,
-    name: 'Black Forest Labs',
     cardWidth: 116,
-    viewBox: '0 0 974 200',
+    imageSrc: '/svgs/icons/blackforestlabs.svg',
+    isWordmark: true,
+    name: 'Black Forest Labs',
   },
-  blaxel: { Logo: BlaxelLogo, name: 'Blaxel', cardWidth: 92 },
+  blaxel: {
+    cardWidth: 92,
+    imageSrc: '/svgs/icons/blaxel.svg',
+    isWordmark: true,
+    name: 'Blaxel',
+  },
   cisco: { imageSrc: `${faviconPath}/cisco.svg`, name: 'Cisco' },
   eltropy: {
     Logo: EltropyLogo,
@@ -90,7 +81,12 @@ const logos = {
     isWordmark: true,
     name: 'Flutterwave',
   },
-  formance: { Logo: FormanceLogo, name: 'Formance', cardWidth: 108 },
+  formance: {
+    cardWidth: 108,
+    imageSrc: '/svgs/icons/formance.svg',
+    isWordmark: true,
+    name: 'Formance',
+  },
   formstack: {
     cardWidth: 104,
     imageSrc: `${faviconPath}/formstack.svg`,
@@ -105,18 +101,18 @@ const logos = {
     name: 'Harmonic.ai',
   },
   inkeep: {
-    Logo: InkeepLogo,
-    name: 'Inkeep',
     cardWidth: 104,
+    imageSrc: '/svgs/icons/inkeep.svg',
+    isWordmark: true,
+    name: 'Inkeep',
     quoteWidth: 96,
-    viewBox: '0 0 446 86',
   },
   kernel: {
-    Logo: KernelLogo,
-    name: 'Kernel',
     cardWidth: 96,
+    imageSrc: '/svgs/icons/kernel.svg',
+    isWordmark: true,
+    name: 'Kernel',
     quoteWidth: 88,
-    viewBox: '136 180 856.406 180',
   },
   lenskart: {
     cardWidth: 108,
@@ -157,16 +153,22 @@ const logos = {
     name: 'Sail Research',
   },
   salient: {
-    Logo: SalientLogo,
-    name: 'Salient',
     cardWidth: 92,
-    viewBox: '0 0 97 28',
+    imageSrc: '/svgs/icons/salient.svg',
+    isWordmark: true,
+    name: 'Salient',
   },
-  sarvam: { Logo: SarvamLogo, name: 'Sarvam AI', cardWidth: 98 },
+  sarvam: {
+    cardWidth: 98,
+    imageSrc: '/svgs/icons/sarvam.svg',
+    isWordmark: true,
+    name: 'Sarvam AI',
+  },
   shaped: {
-    Logo: ShapedLogo,
-    name: 'Shaped',
     cardWidth: 104,
+    imageSrc: '/img/case_study/logos/shaped-logo.svg',
+    isWordmark: true,
+    name: 'Shaped',
     quoteWidth: 94,
   },
   structureFlow: {
@@ -175,7 +177,12 @@ const logos = {
     isWordmark: true,
     name: 'StructureFlow',
   },
-  tavus: { Logo: TavusLogo, name: 'Tavus', cardWidth: 88, viewBox: '0 0 102 21' },
+  tavus: {
+    cardWidth: 88,
+    imageSrc: '/svgs/icons/tavus.svg',
+    isWordmark: true,
+    name: 'Tavus',
+  },
   websiteEngineer: {
     imageSrc: `${faviconPath}/website-engineer.png`,
     name: 'The Website Engineer',
@@ -242,8 +249,6 @@ function ProofLink({
       clickName={clickName}
       clickText={clickText}
       clickLocation={clickLocation}
-      experimentId={experimentId}
-      variantId={variantId}
       target="_blank"
       rel={isExternal ? 'noopener noreferrer nofollow' : 'noopener noreferrer'}
       tabIndex={isClone ? -1 : undefined}
@@ -372,7 +377,7 @@ function LogoCard({ className, href, isClone, logo }: LogoCardProps) {
     <ProofLink
       ariaLabel={`Read the ${logo.name} customer story`}
       className={classes}
-      clickName="Homepage Customer Logo"
+      clickName="Customer Logo Link"
       clickText={logo.name}
       href={href}
       isClone={isClone}
@@ -428,7 +433,7 @@ function QuoteCard({ attribution, className, href, isClone, logo, quote, theme }
         'flex items-center gap-3 px-4 py-2 text-left shadow-[0_0_0_1px_rgba(255,255,255,0.055)]',
         className
       )}
-      clickName="Homepage Customer Quote"
+      clickName="Customer Quote Link"
       clickText={theme}
       href={href}
       isClone={isClone}
@@ -497,7 +502,7 @@ function FeaturedQuoteCard({
         'flex flex-col px-4 py-4 text-left shadow-[0_0_0_1px_rgba(255,255,255,0.055)]',
         className
       )}
-      clickName="Homepage Customer Quote"
+      clickName="Customer Quote Link"
       clickText={theme}
       href={href}
       isClone={isClone}
@@ -561,9 +566,18 @@ const BentoBoard = memo(function BentoBoard({ isClone }: { isClone: boolean }) {
   return (
     <div
       aria-hidden={isClone ? true : undefined}
-      className="grid h-[264px] w-[3744px] shrink-0 grid-cols-[repeat(24,minmax(0,1fr))] grid-rows-3 gap-3 pl-3"
+      className={cn(
+        'grid h-[264px] w-[3744px] shrink-0 grid-cols-[repeat(24,minmax(0,1fr))] grid-rows-3 gap-3 pl-3',
+        isClone && 'motion-reduce:hidden'
+      )}
       data-proof-clone={isClone ? 'true' : undefined}
     >
+      <BentoCell column={1} columnSpan={2} row={1}>
+        <LogoCard isClone={isClone} logo={logos.lenskart} />
+      </BentoCell>
+      <BentoCell column={3} row={1}>
+        <LogoCard isClone={isClone} logo={logos.sarvam} />
+      </BentoCell>
       <BentoCell column={4} columnSpan={3} row={1} rowSpan={2}>
         <FeaturedQuoteCard
           attribution="Mark Nelson · Oracle"
@@ -577,49 +591,6 @@ const BentoBoard = memo(function BentoBoard({ isClone }: { isClone: boolean }) {
       <BentoCell column={7} columnSpan={2} row={1}>
         <LogoCard isClone={isClone} logo={logos.parallel} />
       </BentoCell>
-      <BentoCell column={3} row={3}>
-        <LogoCard isClone={isClone} logo={logos.auvik} />
-      </BentoCell>
-      <BentoCell column={1} columnSpan={2} row={2} rowSpan={2}>
-        <FeaturedQuoteCard
-          attribution="Inkeep"
-          href="https://docs.inkeep.com/get-started/traces"
-          isClone={isClone}
-          logo={logos.inkeep}
-          quote="We’ve been using SigNoz as a first-class dependency in our new agent framework."
-          theme="Agent framework"
-        />
-      </BentoCell>
-      <BentoCell column={3} row={1}>
-        <LogoCard isClone={isClone} logo={logos.sarvam} />
-      </BentoCell>
-      <BentoCell column={3} row={2}>
-        <LogoCard isClone={isClone} logo={logos.flutterwave} />
-      </BentoCell>
-      <BentoCell column={4} columnSpan={3} row={3}>
-        <QuoteCard
-          attribution="Hiro Tamada · Kernel"
-          href="/case-study/kernel/"
-          isClone={isClone}
-          logo={logos.kernel}
-          quote="SigNoz MCP has been a very big part of our engineering life."
-          theme="Agent-native triage"
-        />
-      </BentoCell>
-      <BentoCell column={1} columnSpan={2} row={1}>
-        <LogoCard isClone={isClone} logo={logos.lenskart} />
-      </BentoCell>
-      <BentoCell column={7} columnSpan={2} row={2} rowSpan={2}>
-        <FeaturedQuoteCard
-          attribution="Karl Lyons · Shaped"
-          href="/case-study/shaped/"
-          isClone={isClone}
-          logo={logos.shaped}
-          quote="Every single time we have an issue, SigNoz is always the first place to check."
-          theme="Migrated from CloudWatch + Honeycomb"
-        />
-      </BentoCell>
-
       <BentoCell column={9} columnSpan={4} row={1}>
         <QuoteCard
           attribution="Leo Blondel · CTO · Alien Intelligence"
@@ -666,6 +637,29 @@ const BentoBoard = memo(function BentoBoard({ isClone }: { isClone: boolean }) {
         <LogoCard isClone={isClone} logo={logos.harmonicAi} />
       </BentoCell>
 
+      <BentoCell column={1} columnSpan={2} row={2} rowSpan={2}>
+        <FeaturedQuoteCard
+          attribution="Inkeep"
+          href="https://docs.inkeep.com/get-started/traces"
+          isClone={isClone}
+          logo={logos.inkeep}
+          quote="We’ve been using SigNoz as a first-class dependency in our new agent framework."
+          theme="Agent framework"
+        />
+      </BentoCell>
+      <BentoCell column={3} row={2}>
+        <LogoCard isClone={isClone} logo={logos.flutterwave} />
+      </BentoCell>
+      <BentoCell column={7} columnSpan={2} row={2} rowSpan={2}>
+        <FeaturedQuoteCard
+          attribution="Karl Lyons · Shaped"
+          href="/case-study/shaped/"
+          isClone={isClone}
+          logo={logos.shaped}
+          quote="Every single time we have an issue, SigNoz is always the first place to check."
+          theme="Migrated from CloudWatch + Honeycomb"
+        />
+      </BentoCell>
       <BentoCell column={9} columnSpan={3} row={2}>
         <QuoteCard
           attribution="Doug Drechsel · Oracle"
@@ -714,6 +708,19 @@ const BentoBoard = memo(function BentoBoard({ isClone }: { isClone: boolean }) {
         <LogoCard isClone={isClone} logo={logos.racingAndSports} />
       </BentoCell>
 
+      <BentoCell column={3} row={3}>
+        <LogoCard isClone={isClone} logo={logos.auvik} />
+      </BentoCell>
+      <BentoCell column={4} columnSpan={3} row={3}>
+        <QuoteCard
+          attribution="Hiro Tamada · Kernel"
+          href="/case-study/kernel/"
+          isClone={isClone}
+          logo={logos.kernel}
+          quote="SigNoz MCP has been a very big part of our engineering life."
+          theme="Agent-native triage"
+        />
+      </BentoCell>
       <BentoCell column={9} row={3}>
         <LogoCard isClone={isClone} logo={logos.moneyhub} />
       </BentoCell>
@@ -761,12 +768,14 @@ const BentoBoard = memo(function BentoBoard({ isClone }: { isClone: boolean }) {
 export default function HomepageCustomerProof() {
   const [isDragging, setIsDragging] = useState(false)
   const [isExploring, setIsExploring] = useState(false)
+  const [isTouchPaused, setIsTouchPaused] = useState(false)
   const [animationDelay, setAnimationDelay] = useState(0)
   const viewportRef = useRef<HTMLDivElement>(null)
   const railRef = useRef<HTMLDivElement>(null)
   const dragStateRef = useRef<DragState | null>(null)
   const manualOffsetRef = useRef<number | null>(null)
   const suppressClickRef = useRef(false)
+  const touchPausedRef = useRef(false)
 
   const updateManualOffset = (offset: number, normalize = true) => {
     const nextOffset = normalize ? normalizeCarouselOffset(offset) : offset
@@ -858,11 +867,30 @@ export default function HomepageCustomerProof() {
 
     dragStateRef.current = null
     setIsDragging(false)
+
+    const target = event.target
+    const tappedNonLink =
+      event.type === 'pointerup' &&
+      event.pointerType === 'touch' &&
+      !dragState.usesNativeScroll &&
+      !suppressClickRef.current &&
+      target instanceof Element &&
+      !target.closest('a')
+
+    if (!tappedNonLink) return
+
+    const nextTouchPaused = !touchPausedRef.current
+    touchPausedRef.current = nextTouchPaused
+    setIsTouchPaused(nextTouchPaused)
+    if (!nextTouchPaused) {
+      resumeAutoMotion()
+      event.currentTarget.blur()
+    }
   }
 
   const handlePointerLeave = (event: PointerEvent<HTMLDivElement>) => {
     finishDragging(event)
-    suppressClickRef.current = false
+    if (touchPausedRef.current) return
     resumeAutoMotion()
   }
 
@@ -901,6 +929,7 @@ export default function HomepageCustomerProof() {
 
   const handleBlurCapture = (event: FocusEvent<HTMLDivElement>) => {
     if (event.relatedTarget && event.currentTarget.contains(event.relatedTarget)) return
+    if (touchPausedRef.current) return
     resumeAutoMotion()
   }
 
@@ -919,6 +948,11 @@ export default function HomepageCustomerProof() {
   }
 
   const handleClickCapture = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.detail === 0) {
+      suppressClickRef.current = false
+      return
+    }
+
     if (suppressClickRef.current) {
       event.preventDefault()
       event.stopPropagation()
@@ -928,18 +962,24 @@ export default function HomepageCustomerProof() {
 
     // Pointer-activated links open in a new tab, so their focus can otherwise keep the rail
     // in manual mode after the user returns. Preserve focus for keyboard activation.
-    if (event.detail === 0 || !(event.target instanceof Element)) return
+    if (!(event.target instanceof Element)) return
 
     const link = event.target.closest<HTMLAnchorElement>('a')
     if (!link) return
 
+    if (touchPausedRef.current) {
+      touchPausedRef.current = false
+      setIsTouchPaused(false)
+    }
     resumeAutoMotion()
     link.blur()
   }
 
-  const railStyle: CSSProperties = {
+  const railStyle = {
+    '--proof-cycle-distance': `-${carouselCycleWidth}px`,
+    '--proof-cycle-duration': `${carouselDurationSeconds}s`,
     animationDelay: `${animationDelay}s`,
-  }
+  } as CSSProperties
 
   return (
     <section
@@ -947,13 +987,16 @@ export default function HomepageCustomerProof() {
       className="relative mt-14 pb-14 sm:mt-16 md:pb-20 xl:mt-20"
       data-homepage-customer-proof
     >
-      <div className={cn(styles.frame, 'relative')}>
+      <div className="group relative">
         <div
-          aria-label="Customer stories carousel. Hover to pause, then drag or use the left and right arrow keys to explore."
+          aria-label={
+            isTouchPaused
+              ? 'Customer stories carousel paused. Tap a non-linked card to resume.'
+              : 'Customer stories carousel. Hover or focus to pause, tap a non-linked card on touch screens to pause or resume, then drag or use the left and right arrow keys to explore.'
+          }
           className={cn(
-            styles.viewport,
-            'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signoz_robin-400',
-            isDragging && styles.dragging
+            'w-full cursor-grab touch-pan-y overflow-hidden [-webkit-mask-image:linear-gradient(90deg,transparent_0,#000_24px,#000_calc(100%_-_24px),transparent_100%)] [mask-image:linear-gradient(90deg,transparent_0,#000_24px,#000_calc(100%_-_24px),transparent_100%)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signoz_robin-400 motion-reduce:touch-auto motion-reduce:overflow-x-auto motion-reduce:[-webkit-mask-image:none] motion-reduce:[mask-image:none] motion-reduce:[scrollbar-color:#3c4152_transparent] motion-reduce:[scrollbar-width:thin] motion-safe:md:[-webkit-mask-image:linear-gradient(90deg,transparent_0,#000_48px,#000_calc(100%_-_48px),transparent_100%)] motion-safe:md:[mask-image:linear-gradient(90deg,transparent_0,#000_48px,#000_calc(100%_-_48px),transparent_100%)]',
+            isDragging && 'cursor-grabbing select-none [&_*]:cursor-grabbing [&_*]:select-none'
           )}
           data-proof-carousel-viewport
           onBlurCapture={handleBlurCapture}
@@ -971,12 +1014,14 @@ export default function HomepageCustomerProof() {
           tabIndex={0}
         >
           <div
-            className={cn(styles.rail, isExploring && styles.manual)}
+            className={cn(
+              'flex w-max animate-homepage-customer-proof-rail gap-3 will-change-transform group-focus-within:[animation-play-state:paused] group-active:[animation-play-state:paused] motion-reduce:!transform-none motion-reduce:!animate-none motion-reduce:will-change-auto [@media(hover:hover)]:group-hover:[animation-play-state:paused]',
+              isExploring && '!animate-none [transform:translate3d(var(--proof-manual-offset),0,0)]'
+            )}
             ref={railRef}
             style={railStyle}
           >
             <BentoBoard isClone={false} />
-            <BentoBoard isClone />
             <BentoBoard isClone />
           </div>
         </div>

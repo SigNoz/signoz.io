@@ -9,12 +9,9 @@ import HeroCopyMotion from './HeroCopyMotion'
 import HomepageCustomerProof from './HomepageCustomerProof'
 import HomepageHeroShader from './HomepageHeroShader'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
-import { EXPERIMENTS } from '@/constants/experiments'
 
 export function HomepageHeroRedesign() {
   const primaryCTA = 'Get Started - Free'
-  const experimentId = EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.id
-  const variantId = EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
 
   return (
     <header className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden px-4 pt-24 sm:px-6 md:pt-40 lg:px-16 lg:pt-44 xl:px-20 xl:pt-[220px] wide:max-w-8xl wide:px-0">
@@ -27,8 +24,6 @@ export function HomepageHeroRedesign() {
             clickName="Agent Native Observability Link"
             clickText="New Agent Native Observability"
             clickLocation="Hero Section"
-            experimentId={experimentId}
-            variantId={variantId}
             className="group mb-6 inline-flex w-fit items-center gap-2 rounded-full bg-signoz_ink-500/55 px-2.5 py-1 text-sm font-normal leading-5 text-signoz_vanilla-400 ring-1 ring-white/10 backdrop-blur-sm transition-colors hover:bg-signoz_ink-400/80 hover:text-signoz_vanilla-100"
           >
             <span className="rounded-full border border-signoz_slate-100/80 bg-signoz_ink-500/80 px-2 py-0.5 text-xs text-signoz_vanilla-100">
@@ -70,8 +65,6 @@ export function HomepageHeroRedesign() {
                   clickName="Sign Up Button"
                   clickText={primaryCTA}
                   clickLocation="Hero Section"
-                  experimentId={experimentId}
-                  variantId={variantId}
                   className="block w-full sm:w-auto"
                 >
                   <Button
@@ -90,8 +83,6 @@ export function HomepageHeroRedesign() {
                   clickName="Book a Demo Button"
                   clickText="Book a Demo"
                   clickLocation="Hero Section"
-                  experimentId={experimentId}
-                  variantId={variantId}
                   className="block w-full sm:w-40"
                   prefetch={false}
                 >
