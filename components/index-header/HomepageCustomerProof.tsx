@@ -23,7 +23,9 @@ import EltropyLogo from '@/public/svgs/icons/eltropy.svg'
 import ParallelLogo from '@/public/svgs/icons/parallel-ai.svg'
 
 const clickLocation = 'Homepage Hero Customer Proof'
-const carouselCycleWidth = 3756
+const carouselBoardWidth = 3744
+const carouselRailGap = 12
+const carouselCycleWidth = carouselBoardWidth + carouselRailGap
 const carouselDurationSeconds = 202
 type LogoComponent = ComponentType<SVGProps<SVGSVGElement>>
 type LogoContext = 'card' | 'quote'
@@ -39,18 +41,19 @@ type LogoSpec = {
   viewBox?: string
 }
 
-const faviconPath = '/img/homepage/customer-logos'
+const customerLogoImagePath = '/img/homepage/customer-logos'
+const customerLogoSvgPath = '/svgs/customer-logos'
 
 const logos = {
   alienIntelligence: {
-    imageSrc: `${faviconPath}/alien-intelligence.png`,
+    imageSrc: `${customerLogoImagePath}/alien-intelligence.png`,
     name: 'Alien Intelligence',
   },
-  ariso: { imageSrc: `${faviconPath}/ariso.png`, name: 'Ariso' },
-  armur: { imageSrc: `${faviconPath}/armur-ai.jpg`, name: 'Armur AI' },
+  ariso: { imageSrc: `${customerLogoImagePath}/ariso.png`, name: 'Ariso' },
+  armur: { imageSrc: `${customerLogoImagePath}/armur-ai.jpg`, name: 'Armur AI' },
   auvik: {
     cardWidth: 90,
-    imageSrc: `${faviconPath}/auvik.svg`,
+    imageSrc: `${customerLogoSvgPath}/auvik.svg`,
     isWordmark: true,
     name: 'Auvik',
   },
@@ -66,17 +69,17 @@ const logos = {
     isWordmark: true,
     name: 'Blaxel',
   },
-  cisco: { imageSrc: `${faviconPath}/cisco.svg`, name: 'Cisco' },
+  cisco: { imageSrc: `${customerLogoSvgPath}/cisco.svg`, name: 'Cisco' },
   eltropy: {
     Logo: EltropyLogo,
     name: 'Eltropy',
     cardWidth: 92,
     viewBox: '72 170 1056 280',
   },
-  fiscalNote: { imageSrc: `${faviconPath}/fiscalnote.png`, name: 'FiscalNote' },
+  fiscalNote: { imageSrc: `${customerLogoImagePath}/fiscalnote.png`, name: 'FiscalNote' },
   flutterwave: {
     cardWidth: 108,
-    imageSrc: `${faviconPath}/flutterwave.svg`,
+    imageSrc: `${customerLogoSvgPath}/flutterwave.svg`,
     imageClassName: 'brightness-0 invert',
     isWordmark: true,
     name: 'Flutterwave',
@@ -89,14 +92,14 @@ const logos = {
   },
   formstack: {
     cardWidth: 104,
-    imageSrc: `${faviconPath}/formstack.svg`,
+    imageSrc: `${customerLogoSvgPath}/formstack.svg`,
     isWordmark: true,
     name: 'Formstack',
   },
-  harmonic: { imageSrc: `${faviconPath}/harmonic.png`, name: 'Harmonic Inc.' },
+  harmonic: { imageSrc: `${customerLogoImagePath}/harmonic.png`, name: 'Harmonic Inc.' },
   harmonicAi: {
     cardWidth: 110,
-    imageSrc: `${faviconPath}/harmonic-ai.svg`,
+    imageSrc: `${customerLogoSvgPath}/harmonic-ai.svg`,
     isWordmark: true,
     name: 'Harmonic.ai',
   },
@@ -116,21 +119,21 @@ const logos = {
   },
   lenskart: {
     cardWidth: 108,
-    imageSrc: `${faviconPath}/lenskart.svg`,
+    imageSrc: `${customerLogoSvgPath}/lenskart.svg`,
     imageClassName: 'brightness-0 invert',
     isWordmark: true,
     name: 'Lenskart',
   },
   lgElectronics: {
     cardWidth: 102,
-    imageSrc: `${faviconPath}/lg-electronics.svg`,
+    imageSrc: `${customerLogoSvgPath}/lg-electronics.svg`,
     isWordmark: true,
     name: 'LG Electronics',
   },
-  moneyhub: { imageSrc: `${faviconPath}/moneyhub.png`, name: 'Moneyhub' },
+  moneyhub: { imageSrc: `${customerLogoImagePath}/moneyhub.png`, name: 'Moneyhub' },
   oracle: {
     cardWidth: 100,
-    imageSrc: `${faviconPath}/oracle.svg`,
+    imageSrc: `${customerLogoSvgPath}/oracle.svg`,
     isWordmark: true,
     name: 'Oracle',
     quoteWidth: 88,
@@ -142,12 +145,12 @@ const logos = {
     viewBox: '39 190 1322 240',
   },
   racingAndSports: {
-    imageSrc: `${faviconPath}/racing-and-sports.png`,
+    imageSrc: `${customerLogoImagePath}/racing-and-sports.png`,
     name: 'Racing & Sports',
   },
   sailResearch: {
     cardWidth: 98,
-    imageSrc: `${faviconPath}/sail-research.svg`,
+    imageSrc: `${customerLogoSvgPath}/sail-research.svg`,
     imageClassName: 'brightness-0 invert',
     isWordmark: true,
     name: 'Sail Research',
@@ -173,7 +176,7 @@ const logos = {
   },
   structureFlow: {
     cardWidth: 108,
-    imageSrc: `${faviconPath}/structureflow.svg`,
+    imageSrc: `${customerLogoSvgPath}/structureflow.svg`,
     isWordmark: true,
     name: 'StructureFlow',
   },
@@ -184,11 +187,11 @@ const logos = {
     name: 'Tavus',
   },
   websiteEngineer: {
-    imageSrc: `${faviconPath}/website-engineer.png`,
+    imageSrc: `${customerLogoImagePath}/website-engineer.png`,
     name: 'The Website Engineer',
   },
-  xaira: { imageSrc: `${faviconPath}/xaira.png`, name: 'Xaira' },
-  xata: { imageSrc: `${faviconPath}/xata.svg`, name: 'Xata' },
+  xaira: { imageSrc: `${customerLogoImagePath}/xaira.png`, name: 'Xaira' },
+  xata: { imageSrc: `${customerLogoSvgPath}/xata.svg`, name: 'Xata' },
 } satisfies Record<string, LogoSpec>
 
 const cardClassName =
@@ -567,7 +570,7 @@ const BentoBoard = memo(function BentoBoard({ isClone }: { isClone: boolean }) {
     <div
       aria-hidden={isClone ? true : undefined}
       className={cn(
-        'grid h-[264px] w-[3744px] shrink-0 grid-cols-[repeat(24,minmax(0,1fr))] grid-rows-3 gap-3 pl-3',
+        'grid h-[264px] w-[var(--proof-board-width)] shrink-0 grid-cols-[repeat(24,minmax(0,1fr))] grid-rows-3 gap-3 pl-3',
         isClone && 'motion-reduce:hidden'
       )}
       data-proof-clone={isClone ? 'true' : undefined}
@@ -976,8 +979,10 @@ export default function HomepageCustomerProof() {
   }
 
   const railStyle = {
+    '--proof-board-width': `${carouselBoardWidth}px`,
     '--proof-cycle-distance': `-${carouselCycleWidth}px`,
     '--proof-cycle-duration': `${carouselDurationSeconds}s`,
+    '--proof-rail-gap': `${carouselRailGap}px`,
     animationDelay: `${animationDelay}s`,
   } as CSSProperties
 
@@ -1015,7 +1020,7 @@ export default function HomepageCustomerProof() {
         >
           <div
             className={cn(
-              'flex w-max animate-homepage-customer-proof-rail gap-3 will-change-transform group-focus-within:[animation-play-state:paused] group-active:[animation-play-state:paused] motion-reduce:!transform-none motion-reduce:!animate-none motion-reduce:will-change-auto [@media(hover:hover)]:group-hover:[animation-play-state:paused]',
+              'flex w-max animate-homepage-customer-proof-rail gap-[var(--proof-rail-gap)] will-change-transform group-focus-within:[animation-play-state:paused] group-active:[animation-play-state:paused] motion-reduce:!transform-none motion-reduce:!animate-none motion-reduce:will-change-auto [@media(hover:hover)]:group-hover:[animation-play-state:paused]',
               isExploring && '!animate-none [transform:translate3d(var(--proof-manual-offset),0,0)]'
             )}
             ref={railRef}

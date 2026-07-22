@@ -3,7 +3,7 @@
 import Link from '@/components/Link'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
-import { useLogEvent } from 'hooks/useLogEvent'
+import { useLogEvent } from '@/hooks/useLogEvent'
 import { useExperimentContext } from '@/components/ExperimentTracker'
 
 interface TrackingLinkProps {
@@ -21,7 +21,6 @@ interface TrackingLinkProps {
   // Optional experiment tracking props
   experimentId?: string
   variantId?: string
-  isExperimentConversion?: boolean
   [key: string]: any
 }
 
@@ -54,7 +53,6 @@ export default function TrackingLink({
   style,
   experimentId,
   variantId,
-  isExperimentConversion = false,
   ...rest
 }: TrackingLinkProps) {
   const pathname = usePathname()
@@ -78,9 +76,6 @@ export default function TrackingLink({
       eventAttributes.experiment_id = resolvedExperimentId
       eventAttributes.variant_id = resolvedVariantId
       eventAttributes.button_type = clickType
-      if (isExperimentConversion) {
-        eventAttributes.is_experiment_conversion = true
-      }
     }
 
     // Log a single unified event
