@@ -40,8 +40,8 @@ const Header: React.FC = () => {
         </>
       }
       buttons={AZURE_MONITORING_HEADER_BUTTONS}
-      heroImage="/img/azure-monitoring/section-3.svg"
-      heroImageAlt="Correlated logs, metrics and traces for Azure monitoring"
+      align="left"
+      sectionLayoutClassName="!mt-0 !p-0 !border-0 !hidden"
     />
   )
 }
@@ -104,7 +104,7 @@ const BottomCTASection: React.FC = () => {
 
 const AzureMonitoringPage: React.FC = () => {
   return (
-    <FeaturePageLayout>
+    <FeaturePageLayout showProductNav={false}>
       <Header />
 
       <SectionLayout variant="bordered" className="!px-0">
