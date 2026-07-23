@@ -52,7 +52,7 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
       <div className="pointer-events-none absolute inset-y-0 left-0 right-0 rounded-sm bg-gradient-to-r from-signoz_ink-400 via-signoz_ink-400/95 to-signoz_ink-400/0 shadow-[0_28px_90px_rgba(0,0,0,0.58)]" />
       <div className="pointer-events-none absolute left-0 right-0 top-0 h-9 border-b border-white/[0.055] bg-gradient-to-r from-white/[0.025] via-white/[0.012] to-transparent" />
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 top-0 rounded-sm ring-1 ring-inset ring-white/[0.05]" />
-      <div className="absolute left-0 top-[-42px] z-[3] hidden h-8 items-center gap-3 text-base tracking-[-0.01em] text-[#8f948f] md:flex">
+      <div className="absolute left-8 top-[-42px] z-[3] hidden h-8 items-center gap-3 text-base tracking-[-0.01em] text-[#8f948f] md:flex lg:left-10">
         <span>Work with your agent</span>
         <AgentIntegrationIcons />
         <span>and more</span>
@@ -259,7 +259,7 @@ export default function AgentNativeObservabilitySection() {
   return (
     <section
       ref={sectionRef}
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden bg-signoz_ink-500 px-5 py-16 sm:px-6 sm:py-24 lg:px-20 lg:py-32 wide:max-w-8xl wide:px-0"
+      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden bg-signoz_ink-500 px-5 py-16 sm:px-6 md:py-24 lg:px-20 lg:py-32 wide:max-w-8xl wide:px-0"
       data-homepage-agent-native-observability
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_58%_at_24%_42%,rgba(78,116,248,0.09),transparent_64%),radial-gradient(ellipse_72%_54%_at_82%_52%,rgba(35,196,248,0.055),transparent_66%),linear-gradient(180deg,rgba(22,25,34,0.08),rgba(11,12,14,0.42)_50%,rgba(11,12,14,0.1))] [mask-image:linear-gradient(180deg,transparent_0%,black_16%,black_82%,transparent_100%)]" />
