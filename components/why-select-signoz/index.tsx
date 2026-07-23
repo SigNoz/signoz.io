@@ -18,7 +18,7 @@ const WhySelectSignoz = ({
   return (
     <div
       className={cn(
-        'section-container mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 !px-0',
+        'section-container border-border mx-auto w-full border !border-b-0 border-dashed !px-0',
         className
       )}
     >
@@ -29,36 +29,37 @@ const WhySelectSignoz = ({
         )}
       >
         <div className="min-w-0">
-          <p className="sticky top-[3rem] px-8 pt-4 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:px-4 sm:text-4xl lg:px-8 lg:pt-10">
-            Why <br className="hidden md:block" /> select <br className="hidden md:block" /> SigNoz?{' '}
+          <p className="text-l1-foreground sticky top-[3rem] px-8 pt-4 text-4xl !leading-[3.5rem] font-bold sm:px-4 sm:text-4xl lg:px-8 lg:pt-10">
+            Why <br className="hidden md:block" /> select <br className="hidden md:block" />{' '}
+            SigNoz?{' '}
           </p>
         </div>
         <div className="min-w-0">
-          <div className="ml-0 flex flex-col gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 md:flex-row md:items-center md:py-10 md:pl-10">
+          <div className="border-border ml-0 flex flex-col gap-8 border !border-t-0 !border-r-0 !border-b-0 border-dashed md:flex-row md:items-center md:py-10 md:pl-10">
             <div className="flex min-w-0 flex-1 flex-col gap-16 px-8 md:px-0">
               <div>
-                <p className="mb-2 block text-base font-medium text-signoz_vanilla-100">
+                <p className="text-l1-foreground mb-2 block text-base font-medium">
                   Built for scale
                 </p>
-                <p className="m-0 block text-sm font-normal leading-9 text-signoz_vanilla-400">
+                <p className="text-muted-foreground m-0 block text-sm leading-9 font-normal">
                   Our powerful ingestion engine has a proven track record of handling 10TB+ data
                   ingestion per day.
                 </p>
               </div>
               <div>
-                <p className="mb-2 block text-base font-medium text-signoz_vanilla-100">
+                <p className="text-l1-foreground mb-2 block text-base font-medium">
                   Trusted across the globe
                 </p>
-                <p className="m-0 block text-sm font-normal leading-9 text-signoz_vanilla-400">
+                <p className="text-muted-foreground m-0 block text-sm leading-9 font-normal">
                   Used by teams in all 5 continents ⎯ across the mountains, rivers, and the high
                   seas.
                 </p>
               </div>
               <div>
-                <p className="mb-2 block text-base font-medium text-signoz_vanilla-100">
+                <p className="text-l1-foreground mb-2 block text-base font-medium">
                   Powering observability for teams of all sizes
                 </p>
-                <p className="m-0 block text-sm font-normal leading-9 text-signoz_vanilla-400">
+                <p className="text-muted-foreground m-0 block text-sm leading-9 font-normal">
                   Hundreds of companies ⎯from early-stage start-ups to public enterprises use SigNoz
                   to build more reliable products.
                 </p>

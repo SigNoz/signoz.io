@@ -21,7 +21,7 @@ export default function EligibilityPoint({ point, index }: EligibilityPointProps
       >
         <IconRenderer iconName={point.iconName} />
       </div>
-      <div className="text-signoz_vanilla-100">{point.title}</div>
+      <div className="text-foreground">{point.title}</div>
     </div>
   )
 }

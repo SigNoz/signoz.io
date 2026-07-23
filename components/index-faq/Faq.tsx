@@ -20,7 +20,7 @@ const faqs: Faq[] = [
       <>
         Most teams start with{' '}
         <TrackingLink
-          className="text-signoz_robin-300 underline underline-offset-4 transition-colors hover:text-signoz_robin-200"
+          className="text-accent-primary hover:text-robin-200 underline underline-offset-4 transition-colors"
           clickLocation="Homepage FAQ Section"
           clickName="Instrumentation Docs Link"
           clickText="OpenTelemetry instrumentation"
@@ -48,7 +48,7 @@ const faqs: Faq[] = [
         special pricing for custom metrics. Teams can estimate cost from expected logs, traces,
         metrics volume, and retention with the{' '}
         <TrackingLink
-          className="text-signoz_robin-300 underline underline-offset-4 transition-colors hover:text-signoz_robin-200"
+          className="text-accent-primary hover:text-robin-200 underline underline-offset-4 transition-colors"
           clickLocation="Homepage FAQ Section"
           clickName="Pricing Calculator Link"
           clickText="pricing calculator"
@@ -83,7 +83,7 @@ function FaqItem({ answer, question }: Faq) {
   const logEvent = useLogEvent()
 
   return (
-    <div className="bg-signoz_ink-500/72 rounded-xl border border-signoz_slate-400/35 transition-colors hover:border-signoz_slate-300/50 sm:rounded-2xl">
+    <div className="bg-background/72 border-border/35 hover:border-l2-border/50 rounded-xl border transition-colors sm:rounded-2xl">
       <button
         aria-expanded={isOpen}
         className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left sm:gap-6 sm:px-6 sm:py-6 md:px-8"
@@ -102,23 +102,23 @@ function FaqItem({ answer, question }: Faq) {
         }}
         type="button"
       >
-        <span className="text-base font-medium leading-6 tracking-normal text-signoz_vanilla-100 sm:text-lg sm:leading-7 md:text-xl">
+        <span className="text-l1-foreground text-base leading-6 font-medium tracking-normal sm:text-lg sm:leading-7 md:text-xl">
           {question}
         </span>
         <ChevronDown
-          className={`h-5 w-5 shrink-0 text-signoz_vanilla-400 transition-transform duration-200 ${
+          className={`text-muted-foreground h-5 w-5 shrink-0 transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
       </button>
 
       <div
-        className={`duration-250 grid transition-[grid-template-rows] ease-out ${
+        className={`grid transition-[grid-template-rows] duration-250 ease-out ${
           isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
         }`}
       >
         <div className="overflow-hidden">
-          <p className="m-0 max-w-4xl px-5 pb-5 text-base leading-7 tracking-normal text-signoz_vanilla-400 sm:px-6 sm:pb-6 md:px-8 md:text-base">
+          <p className="text-muted-foreground m-0 max-w-4xl px-5 pb-5 text-base leading-7 tracking-normal sm:px-6 sm:pb-6 md:px-8 md:text-base">
             {answer}
           </p>
         </div>
@@ -130,17 +130,17 @@ function FaqItem({ answer, question }: Faq) {
 export default function Faq() {
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-20 lg:py-32 wide:max-w-8xl wide:px-0"
+      className="wide:max-w-8xl wide:px-0 relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-20 lg:py-32"
       data-homepage-floating-stop="true"
     >
-      <div className="mx-auto grid max-w-8xl gap-10 lg:grid-cols-3 lg:gap-12">
+      <div className="max-w-8xl mx-auto grid gap-10 lg:grid-cols-3 lg:gap-12">
         <div>
-          <h2 className="m-0 max-w-md text-4xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-5xl md:text-6xl md:leading-none">
+          <h2 className="text-l1-foreground m-0 max-w-md text-4xl leading-none font-medium tracking-tight sm:text-5xl md:text-6xl md:leading-none">
             Your questions,
             <br />
-            <span className="text-signoz_vanilla-400">answered.</span>
+            <span className="text-muted-foreground">answered.</span>
           </h2>
-          <p className="m-0 mt-5 max-w-md text-base leading-7 tracking-normal text-signoz_vanilla-400 sm:mt-6 sm:text-lg sm:leading-8">
+          <p className="text-muted-foreground m-0 mt-5 max-w-md text-base leading-7 tracking-normal sm:mt-6 sm:text-lg sm:leading-8">
             Quick answers to the questions teams usually ask while evaluating SigNoz.
           </p>
           <TrackingLink

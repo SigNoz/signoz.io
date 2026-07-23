@@ -13,12 +13,12 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false }) => {
   if (concise) {
     return (
       <div className="my-4 w-full">
-        <div className="transform rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 p-6 shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+        <div className="border-border bg-card transform rounded-xl border p-6 shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
           <div className="space-y-4">
-            <h3 className="my-0 text-xl font-bold text-white">
+            <h3 className="text-l1-foreground my-0 text-xl font-bold">
               Tired of Unpredictable Pricing with DataDog?
             </h3>
-            <p className="text-sm text-gray-300">
+            <p className="text-muted-foreground text-sm">
               SigNoz offers up to 9X ROI compared to DataDog with simple, transparent pricing:
             </p>
 
@@ -31,7 +31,7 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false }) => {
                 layout="responsive"
                 className="rounded-md"
               />
-              <div className="absolute -right-2 -top-2 rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white shadow-md">
+              <div className="bg-danger text-primary-foreground absolute -top-2 -right-2 rounded-full px-2 py-0.5 text-xs font-bold shadow-md">
                 Save up to 90%
               </div>
             </div>
@@ -41,8 +41,7 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false }) => {
                 href="https://signoz.io/pricing/#estimate-your-monthly-bill"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: 'white' }}
-                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white no-underline transition duration-150 ease-in-out hover:bg-blue-700"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium no-underline transition duration-150 ease-in-out"
                 prefetch={false}
               >
                 Calculate Your Savings with SigNoz Now <ArrowRight size={14} className="ml-1" />
@@ -56,12 +55,12 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false }) => {
 
   return (
     <div className="my-8 w-full">
-      <div className="transform rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 p-8 shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+      <div className="border-border bg-card transform rounded-xl border p-8 shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
         <div className="space-y-4">
-          <h3 className="my-0 text-2xl font-bold text-white">
+          <h3 className="text-l1-foreground my-0 text-2xl font-bold">
             Tired of Unpredictable Pricing with DataDog?
           </h3>
-          <p className="text-gray-300">
+          <p className="text-muted-foreground">
             SigNoz offers up to 9X ROI compared to DataDog with simple, transparent pricing:
           </p>
 
@@ -74,8 +73,11 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false }) => {
                   'Simple usage-based pricing',
                   'No special pricing for custom metrics',
                 ].map((item, index) => (
-                  <li key={index} className="flex items-center text-gray-300">
-                    <CheckCircle className="mr-2 flex-shrink-0 text-green-500" size={16} />
+                  <li key={index} className="text-muted-foreground flex items-center">
+                    <CheckCircle
+                      className="text-callout-success-title mr-2 flex-shrink-0"
+                      size={16}
+                    />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -92,7 +94,7 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false }) => {
                   layout="responsive"
                   className="rounded-md"
                 />
-                <div className="absolute -right-3 -top-3 rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white shadow-md">
+                <div className="bg-danger text-primary-foreground absolute -top-3 -right-3 rounded-full px-3 py-1 text-xs font-bold shadow-md">
                   Save up to 90%
                 </div>
               </div>
@@ -104,8 +106,7 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false }) => {
               href="https://signoz.io/pricing/#estimate-your-monthly-bill"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: 'white' }}
-              className="inline-flex items-center justify-center rounded-md bg-blue-600 px-6 py-2 text-base font-medium text-white no-underline transition duration-150 ease-in-out hover:bg-blue-700"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-6 py-2 text-base font-medium no-underline transition duration-150 ease-in-out"
               prefetch={false}
             >
               Calculate Your Savings with SigNoz Now <ArrowRight size={16} className="ml-2" />

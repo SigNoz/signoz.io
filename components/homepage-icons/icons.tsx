@@ -7,14 +7,14 @@ export const ArrowRightSolid = () => {
       viewBox="0 0 512 512"
       width="20"
       height="20"
-      className="min-w-5 fill-signoz_robin-500"
+      className="fill-robin-500 min-w-5"
     >
       <path d="M0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM281 385c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l71-71L136 280c-13.3 0-24-10.7-24-24s10.7-24 24-24l182.1 0-71-71c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0L393 239c9.4 9.4 9.4 24.6 0 33.9L281 385z" />
     </svg>
   )
 }
 
-export const CircleCheckSolid = ({ color = 'fill-signoz_robin-500' }) => {
+export const CircleCheckSolid = ({ color = 'fill-robin-500' }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -143,7 +143,7 @@ export const CheckSolid = () => {
       viewBox="0 0 448 512"
       width="15"
       height="15"
-      className="fill-signoz_robin-500"
+      className="fill-robin-500"
     >
       <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z" />
     </svg>

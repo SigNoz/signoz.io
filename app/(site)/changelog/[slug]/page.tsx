@@ -92,17 +92,17 @@ export default async function Page(props: { params: Promise<{ slug: string }> })
   }
 
   return (
-    <section className="h-auto w-full bg-signoz_ink-500">
-      <div className="container relative mx-auto flex flex-col gap-7">
+    <section className="bg-background h-auto w-full">
+      <div className="relative container mx-auto flex flex-col gap-7">
         <div className="bg-dot-pattern masked-dots absolute top-0 h-screen w-full" />
         <div className="z-10 flex w-full flex-col gap-7 py-16">
           <ChangelogHeader showFilters={false} />
           <div className="relative mb-10 px-4 md:px-8">
-            <div className="absolute -bottom-20 left-0 top-2 hidden w-px bg-signoz_slate-400 lg:block">
-              <div className="absolute left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-signoz_slate-400" />
+            <div className="bg-muted absolute top-2 -bottom-20 left-0 hidden w-px lg:block">
+              <div className="bg-muted absolute left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full" />
             </div>
             <Link
-              className="flex items-center gap-2 text-base text-signoz_vanilla-400"
+              className="text-muted-foreground flex items-center gap-2 text-base"
               href="/changelog/"
             >
               <ArrowLeft size={16} />

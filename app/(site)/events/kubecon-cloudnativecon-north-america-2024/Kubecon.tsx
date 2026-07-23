@@ -9,52 +9,52 @@ const MainSection: React.FC = () => {
   return (
     <>
       <section className="flex w-full flex-col items-start px-20 pt-12 font-medium max-md:max-w-full max-md:px-5">
-        <div className="container !mt-[-40px] mb-0 ml-5 flex max-h-full max-w-full flex-col border-l border-r border-dashed border-signoz_slate-100 !px-0">
+        <div className="border-l3-border container !mt-[-40px] mb-0 ml-5 flex max-h-full max-w-full flex-col border-r border-l border-dashed !px-0">
           <div className="flex w-full flex-col max-md:max-w-full">
             <div className="mt-10 flex max-w-full flex-col">
               <div className="flex flex-col justify-between gap-6 sm:flex-row">
-                <div className="max-w-full px-6 font-mono text-xl text-signoz_vanilla-400 max-md:max-w-full">
+                <div className="text-muted-foreground max-w-full px-6 font-mono text-xl max-md:max-w-full">
                   {`// 12 Nov ⎯ 15 Nov`}
                 </div>
               </div>
-              <div className="mt-8 max-w-full border-b border-dashed border-signoz_slate-100 px-6 text-5xl font-medium uppercase text-signoz_vanilla-100 max-md:max-w-full max-md:text-4xl">
-                kubecon north <br /> america <span className="text-signoz_cherry-500">2024</span>
+              <div className="border-l3-border text-l1-foreground mt-8 max-w-full border-b border-dashed px-6 text-5xl font-medium uppercase max-md:max-w-full max-md:text-4xl">
+                kubecon north <br /> america <span className="text-danger-foreground">2024</span>
               </div>
             </div>
-            <div className="z-10 mt-11 self-stretch border-b border-dashed border-signoz_slate-100 px-6 font-mono text-base font-medium leading-8 text-signoz_vanilla-400 max-md:mt-10 max-md:max-w-full">
+            <div className="border-l3-border text-muted-foreground z-10 mt-11 self-stretch border-b border-dashed px-6 font-mono text-base leading-8 font-medium max-md:mt-10 max-md:max-w-full">
               7 talks from SigNoz Team have been selected for Kubecon North America.
               <br className="hidden sm:block" /> Join us for our talks or in after-parties. We would
               love to meet you.
             </div>
           </div>
 
-          <div className="z-[1] my-6 ml-5 flex min-h-[40px] w-fit items-center justify-center gap-1.5 overflow-hidden rounded-sm bg-white px-4 py-2 text-sm leading-none text-signoz_ink-500">
+          <div className="text-l1-foreground z-[1] my-6 ml-5 flex min-h-[40px] w-fit items-center justify-center gap-1.5 overflow-hidden rounded-sm bg-white px-4 py-2 text-sm leading-none">
             <Link href="https://lu.ma/8uws6qyr" target="_blank" id="launch-page-subscribe">
               <div className="flex items-center gap-1.5">
                 <Handshake size={14} />
-                <span className="px-2 py-1 text-sm font-medium leading-none text-neutral-950">
+                <span className="px-2 py-1 text-sm leading-none font-medium text-neutral-950">
                   Meet SigNoz Team
                 </span>
               </div>
             </Link>
           </div>
 
-          <div className="mb-16 mt-8 max-w-full px-6 text-5xl font-medium uppercase text-signoz_vanilla-100 max-md:max-w-full max-md:text-4xl">
-            talks from <span className="text-signoz_cherry-500"> Signoz team</span>
+          <div className="text-l1-foreground mt-8 mb-16 max-w-full px-6 text-5xl font-medium uppercase max-md:max-w-full max-md:text-4xl">
+            talks from <span className="text-danger-foreground"> Signoz team</span>
           </div>
 
-          <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="border-l3-border flex flex-col-reverse justify-between border-b border-dashed px-6 py-6 sm:flex-row">
             <div className="mt-6 flex flex-col justify-between gap-4 sm:mt-0 sm:pr-4">
               <div className="flex gap-1.5">
                 <Calendar size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="max-w-[217px] text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground max-w-[217px] text-base uppercase">
                   Tuesday Nov 12, 2024 <br />
                   2:05pm - 2:30pm MST
                 </div>
               </div>
               <div className="flex gap-1.5">
                 <MapPin size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground text-base uppercase">
                   Hyatt Regency, Level 2 <br /> 255 BC
                 </div>
               </div>
@@ -66,7 +66,7 @@ const MainSection: React.FC = () => {
                   className="button-background mb-6 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0 sm:max-w-fit"
                 >
                   <Megaphone size={16} />
-                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                  <span className="text-sm font-medium whitespace-nowrap text-[#F7F7F8]">
                     Register to attend
                   </span>
                 </Link>
@@ -75,11 +75,11 @@ const MainSection: React.FC = () => {
             <Link
               href="https://sched.co/1izsX"
               target="_blank"
-              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
+              className="launch-week-card-background border-border hover:bg-l2-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border px-5 py-4 transition-colors duration-300 sm:flex-row"
             >
               <img
                 src="/img/events/kubecon/KubeConNA24_CoLoSnackables-ObservabilityDay.webp"
-                className=" mb-4  h-auto w-auto pr-2 sm:mb-0 sm:h-56   sm:pr-0"
+                className="mb-4 h-auto w-auto pr-2 sm:mb-0 sm:h-56 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div>
@@ -124,18 +124,18 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="border-l3-border flex flex-col-reverse justify-between border-b border-dashed px-6 py-6 sm:flex-row">
             <div className="mt-6 flex flex-col justify-between gap-4 sm:mt-0 sm:pr-4">
               <div className="flex gap-1.5">
                 <Calendar size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="max-w-[217px] text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground max-w-[217px] text-base uppercase">
                   Tuesday Nov 12, 2024 <br />
                   3:20pm - 3:45pm MST
                 </div>
               </div>
               <div className="flex gap-1.5">
                 <MapPin size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground text-base uppercase">
                   Salt Palace, Level 2 <br />
                   250 A
                 </div>
@@ -148,7 +148,7 @@ const MainSection: React.FC = () => {
                   className="button-background mb-6 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0 sm:max-w-fit"
                 >
                   <Megaphone size={16} />
-                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                  <span className="text-sm font-medium whitespace-nowrap text-[#F7F7F8]">
                     Register to attend
                   </span>
                 </Link>
@@ -157,11 +157,11 @@ const MainSection: React.FC = () => {
             <Link
               href="https://sched.co/1iztV"
               target="_blank"
-              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
+              className="launch-week-card-background border-border hover:bg-l2-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border px-5 py-4 transition-colors duration-300 sm:flex-row"
             >
               <img
                 src="/img/events/kubecon/KubeConNA24_CoLoSnackables-KubernetesonEdgeDay.webp"
-                className=" mb-4  h-auto w-auto pr-2 sm:mb-0 sm:h-56   sm:pr-0"
+                className="mb-4 h-auto w-auto pr-2 sm:mb-0 sm:h-56 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div>
@@ -202,18 +202,18 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="border-l3-border flex flex-col-reverse justify-between border-b border-dashed px-6 py-6 sm:flex-row">
             <div className="mt-6 flex flex-col justify-between gap-4 sm:mt-0 sm:pr-4">
               <div className="flex gap-1.5">
                 <Calendar size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="max-w-[217px] text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground max-w-[217px] text-base uppercase">
                   Tuesday Nov 12, 2024 <br />
                   5:00pm - 5:10pm MST
                 </div>
               </div>
               <div className="flex gap-1.5">
                 <MapPin size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground text-base uppercase">
                   Salt Palace, Level 2 <br />
                   255 E
                 </div>
@@ -226,7 +226,7 @@ const MainSection: React.FC = () => {
                   className="button-background mb-6 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0 sm:max-w-fit"
                 >
                   <Megaphone size={16} />
-                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                  <span className="text-sm font-medium whitespace-nowrap text-[#F7F7F8]">
                     Register to attend
                   </span>
                 </Link>
@@ -235,11 +235,11 @@ const MainSection: React.FC = () => {
             <Link
               href="https://sched.co/1izub"
               target="_blank"
-              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
+              className="launch-week-card-background border-border hover:bg-l2-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border px-5 py-4 transition-colors duration-300 sm:flex-row"
             >
               <img
                 src="/img/events/kubecon/KubeConNA24_CoLoSnackables-ObservabilityDay.webp"
-                className=" mb-4  h-auto w-auto pr-2 sm:mb-0 sm:h-56 sm:pr-0"
+                className="mb-4 h-auto w-auto pr-2 sm:mb-0 sm:h-56 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div>
@@ -270,18 +270,18 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="border-l3-border flex flex-col-reverse justify-between border-b border-dashed px-6 py-6 sm:flex-row">
             <div className="mt-6 flex flex-col justify-between gap-4 sm:mt-0 sm:pr-4">
               <div className="flex gap-1.5">
                 <Calendar size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="max-w-[217px] text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground max-w-[217px] text-base uppercase">
                   Tuesday Nov 12, 2024 <br />
                   5:15pm - 5:25pm MST
                 </div>
               </div>
               <div className="flex gap-1.5">
                 <MapPin size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground text-base uppercase">
                   Salt Palace, Level 2 <br />
                   254 B
                 </div>
@@ -294,7 +294,7 @@ const MainSection: React.FC = () => {
                   className="button-background mb-6 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0 sm:max-w-fit"
                 >
                   <Megaphone size={16} />
-                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                  <span className="text-sm font-medium whitespace-nowrap text-[#F7F7F8]">
                     Register to attend
                   </span>
                 </Link>
@@ -303,11 +303,11 @@ const MainSection: React.FC = () => {
             <Link
               href="https://sched.co/1izuq"
               target="_blank"
-              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
+              className="launch-week-card-background border-border hover:bg-l2-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border px-5 py-4 transition-colors duration-300 sm:flex-row"
             >
               <img
                 src="/img/events/kubecon/KubeConNA24_CoLoSnackables-ArgoCon.webp"
-                className=" mb-4  h-auto w-auto pr-2 sm:mb-0 sm:h-56   sm:pr-0"
+                className="mb-4 h-auto w-auto pr-2 sm:mb-0 sm:h-56 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div>
@@ -347,18 +347,18 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="border-l3-border flex flex-col-reverse justify-between border-b border-dashed px-6 py-6 sm:flex-row">
             <div className="mt-6 flex flex-col justify-between gap-4 sm:mt-0 sm:pr-4">
               <div className="flex gap-1.5">
                 <Calendar size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="max-w-[217px] text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground max-w-[217px] text-base uppercase">
                   Tuesday Nov 12, 2024 <br />
                   10:41am - 10:46am MST
                 </div>
               </div>
               <div className="flex gap-1.5">
                 <MapPin size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground text-base uppercase">
                   Hyatt Regency, Level 4 <br /> Regency Ballroom BCD
                 </div>
               </div>
@@ -370,7 +370,7 @@ const MainSection: React.FC = () => {
                   className="button-background mb-6 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0 sm:max-w-fit"
                 >
                   <Megaphone size={16} />
-                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                  <span className="text-sm font-medium whitespace-nowrap text-[#F7F7F8]">
                     Register to attend
                   </span>
                 </Link>
@@ -379,11 +379,11 @@ const MainSection: React.FC = () => {
             <Link
               href="https://sched.co/1iW8k"
               target="_blank"
-              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
+              className="launch-week-card-background border-border hover:bg-l2-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border px-5 py-4 transition-colors duration-300 sm:flex-row"
             >
               <img
                 src="/img/events/kubecon/kubecon-na.webp"
-                className=" mb-4  h-auto w-auto pr-2 sm:mb-0 sm:h-56 sm:pr-0"
+                className="mb-4 h-auto w-auto pr-2 sm:mb-0 sm:h-56 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div>
@@ -401,18 +401,18 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="border-l3-border flex flex-col-reverse justify-between border-b border-dashed px-6 py-6 sm:flex-row">
             <div className="mt-6 flex flex-col justify-between gap-4 sm:mt-0 sm:pr-4">
               <div className="flex gap-1.5">
                 <Calendar size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="max-w-[217px] text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground max-w-[217px] text-base uppercase">
                   Wednesday Nov 13, 2024 <br />
                   3:25pm - 4:00pm MST
                 </div>
               </div>
               <div className="flex gap-1.5">
                 <MapPin size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground text-base uppercase">
                   Salt Palace, Level 1 <br /> Grand Ballroom HJ
                 </div>
               </div>
@@ -424,7 +424,7 @@ const MainSection: React.FC = () => {
                   className="button-background mb-6 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0 sm:max-w-fit"
                 >
                   <Megaphone size={16} />
-                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                  <span className="text-sm font-medium whitespace-nowrap text-[#F7F7F8]">
                     Register to attend
                   </span>
                 </Link>
@@ -433,11 +433,11 @@ const MainSection: React.FC = () => {
             <Link
               href="https://sched.co/1i7li"
               target="_blank"
-              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
+              className="launch-week-card-background border-border hover:bg-l2-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border px-5 py-4 transition-colors duration-300 sm:flex-row"
             >
               <img
                 src="/img/events/kubecon/kubecon-na.webp"
-                className=" mb-4  h-auto w-auto pr-2 sm:mb-0 sm:h-56   sm:pr-0"
+                className="mb-4 h-auto w-auto pr-2 sm:mb-0 sm:h-56 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div>
@@ -481,18 +481,18 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="border-l3-border flex flex-col-reverse justify-between border-b border-dashed px-6 py-6 sm:flex-row">
             <div className="mt-6 flex flex-col justify-between gap-4 sm:mt-0 sm:pr-4">
               <div className="flex gap-1.5">
                 <Calendar size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="max-w-[217px] text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground max-w-[217px] text-base uppercase">
                   Wednesday Nov 13, 2024 <br />
                   4:30pm - 5:05pm MST
                 </div>
               </div>
               <div className="flex gap-1.5">
                 <MapPin size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground text-base uppercase">
                   Hyatt Regency, Level 4 <br />
                   Regency Ballroom A
                 </div>
@@ -505,7 +505,7 @@ const MainSection: React.FC = () => {
                   className="button-background mb-6 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0 sm:max-w-fit"
                 >
                   <Megaphone size={16} />
-                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                  <span className="text-sm font-medium whitespace-nowrap text-[#F7F7F8]">
                     Register to attend
                   </span>
                 </Link>
@@ -514,11 +514,11 @@ const MainSection: React.FC = () => {
             <Link
               href="https://sched.co/1how7"
               target="_blank"
-              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
+              className="launch-week-card-background border-border hover:bg-l2-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border px-5 py-4 transition-colors duration-300 sm:flex-row"
             >
               <img
                 src="/img/events/kubecon/kubecon-na.webp"
-                className=" mb-4  h-auto w-auto pr-2 sm:mb-0 sm:h-56   sm:pr-0"
+                className="mb-4 h-auto w-auto pr-2 sm:mb-0 sm:h-56 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div>
@@ -564,18 +564,18 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="border-l3-border flex flex-col-reverse justify-between border-b border-dashed px-6 py-6 sm:flex-row">
             <div className="mt-6 flex flex-col justify-between gap-4 sm:mt-0 sm:pr-4">
               <div className="flex gap-1.5">
                 <Calendar size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="max-w-[217px] text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground max-w-[217px] text-base uppercase">
                   Tuesday Nov 12, 2024 <br />
                   4:30pm - 7:30pm MST
                 </div>
               </div>
               <div className="flex gap-1.5">
                 <MapPin size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground text-base uppercase">
                   Studio at Soundwell
                   <br />
                   149 W 200 S, Salt Lake City
@@ -589,7 +589,7 @@ const MainSection: React.FC = () => {
                   className="button-background mb-6 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0 sm:max-w-fit"
                 >
                   <Megaphone size={16} />
-                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                  <span className="text-sm font-medium whitespace-nowrap text-[#F7F7F8]">
                     Register to attend
                   </span>
                 </Link>
@@ -598,11 +598,11 @@ const MainSection: React.FC = () => {
             <Link
               href="https://lu.ma/8uws6qyr"
               target="_blank"
-              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
+              className="launch-week-card-background border-border hover:bg-l2-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border px-5 py-4 transition-colors duration-300 sm:flex-row"
             >
               <img
                 src="/img/events/kubecon/happy-hrs-kubecon.webp"
-                className=" mb-4  h-auto w-auto pr-2 sm:mb-0 sm:h-56   sm:pr-0"
+                className="mb-4 h-auto w-auto pr-2 sm:mb-0 sm:h-56 sm:pr-0"
               />
 
               <div className="group flex flex-col justify-between">
@@ -629,18 +629,18 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="border-l3-border flex flex-col-reverse justify-between border-b border-dashed px-6 py-6 sm:flex-row">
             <div className="mt-6 flex flex-col justify-between gap-4 sm:mt-0 sm:pr-4">
               <div className="flex gap-1.5">
                 <Calendar size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="max-w-[217px] text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground max-w-[217px] text-base uppercase">
                   Thursday Nov 14, 2024 <br />
                   7:00am - 8:30am MST
                 </div>
               </div>
               <div className="flex gap-1.5">
                 <MapPin size={16} className="mt-1 min-w-4" color="#C0C1C3" />
-                <div className="text-base uppercase text-signoz_vanilla-400">
+                <div className="text-muted-foreground text-base uppercase">
                   Salt Palace Convention Center
                   <br />
                   100 S W Temple St
@@ -654,7 +654,7 @@ const MainSection: React.FC = () => {
                   className="button-background mb-6 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0 sm:max-w-fit"
                 >
                   <Megaphone size={16} />
-                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                  <span className="text-sm font-medium whitespace-nowrap text-[#F7F7F8]">
                     Register to attend
                   </span>
                 </Link>
@@ -663,11 +663,11 @@ const MainSection: React.FC = () => {
             <Link
               href="https://lu.ma/ngeo54fh"
               target="_blank"
-              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
+              className="launch-week-card-background border-border hover:bg-l2-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border px-5 py-4 transition-colors duration-300 sm:flex-row"
             >
               <img
                 src="/img/events/kubecon/run-event-cover.webp"
-                className=" mb-4  h-auto w-auto pr-2 sm:mb-0 sm:h-56   sm:pr-0"
+                className="mb-4 h-auto w-auto pr-2 sm:mb-0 sm:h-56 sm:pr-0"
               />
 
               <div className="group flex flex-col justify-between">
@@ -712,12 +712,12 @@ const GetStarted = ({ page }) => {
   const readDocumentationId = `btn-read-documentation-${page}-bottom`
 
   return (
-    <div className="flex flex-col gap-16 px-20 font-medium max-md:max-w-full max-md:px-5 ">
+    <div className="flex flex-col gap-16 px-20 font-medium max-md:max-w-full max-md:px-5">
       <div className="bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:45%] bg-[center_top_-12rem] sm:bg-no-repeat">
-        <section className="container flex max-h-full max-w-full flex-col border-l border-r border-dashed border-signoz_slate-100 !px-0">
+        <section className="border-l3-border container flex max-h-full max-w-full flex-col border-r border-l border-dashed !px-0">
           <div className="bg-blur-ellipse-206">
             <div className="flex flex-col gap-12">
-              <p className="mb-0 mt-20 text-center text-3xl font-bold sm:text-4xl">
+              <p className="mt-20 mb-0 text-center text-3xl font-bold sm:text-4xl">
                 OpenTelemetry-Native Logs,
                 <br /> Metrics and Traces in a single pane
               </p>

@@ -19,12 +19,12 @@ export default async function APIReferenceVersionsPage() {
             <Link
               key={v.version}
               href={`/api-reference/${v.version}/`}
-              className="flex items-center justify-between rounded-lg border border-signoz_slate-400 bg-signoz_slate-500/50 px-5 py-4 transition-colors hover:border-primary-600 hover:bg-signoz_slate-400"
+              className="border-border bg-muted/50 hover:border-robin-600 hover:bg-muted flex items-center justify-between rounded-lg border px-5 py-4 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <span className="text-lg font-medium text-white">{v.version}</span>
                 {index === 0 && (
-                  <span className="rounded-full bg-primary-600 px-2.5 py-0.5 text-xs font-medium text-white">
+                  <span className="bg-primary-background-hover rounded-full px-2.5 py-0.5 text-xs font-medium text-white">
                     Latest
                   </span>
                 )}

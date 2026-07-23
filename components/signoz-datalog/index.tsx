@@ -7,15 +7,15 @@ import homepageDataProtectionGraphic2 from '@/public/img/graphics/homepage/featu
 export const SignozDatalog = () => {
   return (
     <section>
-      <div className="section-container flex h-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 !px-10 !py-10">
+      <div className="section-container border-border flex h-auto border !border-r-0 !border-b-0 border-dashed !px-10 !py-10">
         <div className="flex w-full flex-col">
           <div>
-            <p className="text-2xl font-semibold text-signoz_vanilla-100">
+            <p className="text-l1-foreground text-2xl font-semibold">
               SigNoz provides up to 9X ROI than DataDog
             </p>
-            <p className="text-base font-normal leading-9 text-signoz_vanilla-400">
+            <p className="text-muted-foreground text-base leading-9 font-normal">
               You can also set data ingestion limits so you never get a surprise bill.
-              <span className="font-medium text-signoz_robin-400">
+              <span className="text-accent-primary font-medium">
                 <Link
                   href={
                     'https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/'

@@ -49,7 +49,7 @@ const talks = {
 
 const KubeConPage: React.FC = () => {
   return (
-    <div className="mx-auto min-h-screen w-full max-w-8xl border-x border-dashed border-signoz_slate-400">
+    <div className="max-w-8xl border-border mx-auto min-h-screen w-full border-x border-dashed">
       <KubeconHeroSection />
 
       <TalksLayout
@@ -62,7 +62,7 @@ const KubeConPage: React.FC = () => {
           {talks.items1.map((talk, index) => (
             <Card
               key={index}
-              className="[&>*]:border-1 rounded-lg bg-signoz_ink-500/50 transition-colors duration-200 [&>*]:border-solid [&>*]:border-signoz_slate-200/50"
+              className="bg-background/50 [&>*]:border-l2-border/50 rounded-lg transition-colors duration-200 [&>*]:border-1 [&>*]:border-solid"
             >
               <div className="px-6 py-4">
                 <div className="mb-4 font-mono text-xs">{talk.time}</div>
@@ -87,7 +87,7 @@ const KubeConPage: React.FC = () => {
           {talks.items2.map((talk, index) => (
             <Card
               key={index}
-              className="[&>*]:border-1 rounded-lg bg-signoz_ink-500/50 transition-colors duration-200 [&>*]:border-solid [&>*]:border-signoz_slate-200/50"
+              className="bg-background/50 [&>*]:border-l2-border/50 rounded-lg transition-colors duration-200 [&>*]:border-1 [&>*]:border-solid"
             >
               <div className="px-6 py-4">
                 <div className="mb-4 font-mono text-xs">{talk.time}</div>

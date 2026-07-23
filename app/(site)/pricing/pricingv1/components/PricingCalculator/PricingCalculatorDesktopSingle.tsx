@@ -26,22 +26,22 @@ export const PricingCalculatorDesktopSingle: React.FC<PricingCalculatorDesktopSi
           {isSectionVisible('traces') && (
             <>
               <DraftingCompass isActive={true} />
-              <span className="text-md font-medium text-signoz_vanilla-100">Traces</span>
+              <span className="text-md text-l1-foreground font-medium">Traces</span>
             </>
           )}
           {isSectionVisible('logs') && (
             <>
               <LogsIcon isActive={true} />
-              <span className="text-md font-medium text-signoz_vanilla-100">Logs</span>
+              <span className="text-md text-l1-foreground font-medium">Logs</span>
             </>
           )}
           {isSectionVisible('metrics') && (
             <>
               <MetricsIcon isActive={true} />
-              <span className="text-md font-medium text-signoz_vanilla-100">Metrics</span>
+              <span className="text-md text-l1-foreground font-medium">Metrics</span>
             </>
           )}
-          <span className="text-md font-medium text-signoz_robin-400">
+          <span className="text-md text-accent-primary font-medium">
             $
             {isSectionVisible('metrics')
               ? METRICS_PRICES[metrics.retentionPeriod]
@@ -53,18 +53,18 @@ export const PricingCalculatorDesktopSingle: React.FC<PricingCalculatorDesktopSi
         </div>
         <div className="flex items-center gap-8">
           <div className="text-center">
-            <div className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+            <div className="text-muted-foreground text-xs font-semibold uppercase">
               ESTIMATED USAGE
             </div>
-            <div className="text-md font-medium text-signoz_vanilla-100">
+            <div className="text-md text-l1-foreground font-medium">
               {isSectionVisible('traces') && `${formatNumber(Number(traces.inputValue))} GB`}
               {isSectionVisible('logs') && `${formatNumber(Number(logs.inputValue))} GB`}
               {isSectionVisible('metrics') && `${formatNumber(Number(metrics.inputValue))} mn`}
             </div>
           </div>
           <div className="text-center">
-            <div className="text-xs font-semibold uppercase text-signoz_vanilla-400">SUBTOTAL</div>
-            <div className="text-md font-medium text-signoz_vanilla-100">
+            <div className="text-muted-foreground text-xs font-semibold uppercase">SUBTOTAL</div>
+            <div className="text-md text-l1-foreground font-medium">
               $
               {formatNumber(
                 isSectionVisible('traces')
@@ -82,11 +82,11 @@ export const PricingCalculatorDesktopSingle: React.FC<PricingCalculatorDesktopSi
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div>
-            <div className="mb-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
+            <div className="text-muted-foreground mb-2 text-xs font-semibold uppercase">
               RETENTION
             </div>
             <select
-              className="block h-8 w-32 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 py-1.5 pl-2 pr-1.5 text-sm text-signoz_vanilla-100"
+              className="border-border bg-card text-l1-foreground block h-8 w-32 rounded-sm border py-1.5 pr-1.5 pl-2 text-sm"
               value={
                 isSectionVisible('traces')
                   ? traces.retentionPeriod
@@ -119,7 +119,7 @@ export const PricingCalculatorDesktopSingle: React.FC<PricingCalculatorDesktopSi
           </div>
         </div>
         <div className="ml-8 max-w-md flex-1">
-          <div className="mb-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
+          <div className="text-muted-foreground mb-2 text-xs font-semibold uppercase">
             SCALE OF INGESTION
           </div>
           {isSectionVisible('traces') && (
@@ -130,7 +130,7 @@ export const PricingCalculatorDesktopSingle: React.FC<PricingCalculatorDesktopSi
               minLabel="0 GB"
               maxLabel="500TB"
               formatFunc={formatBytes}
-              thumbColor="signoz_robin-500"
+              thumbColor="robin-500"
               ariaLabel="Adjust traces ingestion volume"
               inputValue={traces.inputValue}
             />
@@ -143,7 +143,7 @@ export const PricingCalculatorDesktopSingle: React.FC<PricingCalculatorDesktopSi
               minLabel="0 GB"
               maxLabel="500TB"
               formatFunc={formatBytes}
-              thumbColor="signoz_sakura-500"
+              thumbColor="sakura-500"
               ariaLabel="Adjust logs ingestion volume"
               inputValue={logs.inputValue}
             />
@@ -156,7 +156,7 @@ export const PricingCalculatorDesktopSingle: React.FC<PricingCalculatorDesktopSi
               minLabel="0M"
               maxLabel="500B"
               formatFunc={formatMetrics}
-              thumbColor="signoz_amber-500"
+              thumbColor="amber-500"
               ariaLabel="Adjust metrics ingestion volume"
               inputValue={metrics.inputValue}
             />

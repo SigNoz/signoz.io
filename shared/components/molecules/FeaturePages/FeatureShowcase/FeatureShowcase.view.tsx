@@ -18,12 +18,12 @@ const FeatureShowcase: React.FC<FeatureShowcaseProps> = ({
   const hasContent = title || description || button
 
   return (
-    <div className={cn('bg-signoz_ink-500 p-6', className)}>
+    <div className={cn('bg-background p-6', className)}>
       {hasContent && (
         <div className={cn('mb-8 max-w-4xl', contentClassName)}>
-          {title && <h2 className="mb-6 text-signoz_vanilla-100">{title}</h2>}
+          {title && <h2 className="text-foreground mb-6">{title}</h2>}
           {description && (
-            <div className="mb-8 leading-relaxed text-signoz_vanilla-400">{description}</div>
+            <div className="text-muted-foreground mb-8 leading-relaxed">{description}</div>
           )}
           {button && <FeatureButton button={button} />}
         </div>

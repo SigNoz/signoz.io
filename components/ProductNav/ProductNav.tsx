@@ -55,21 +55,19 @@ export default function ProductNav() {
   }, [pathname])
 
   return (
-    <div className="fixed left-0 right-0 top-[56px] z-10">
-      <header className="header-bg mx-auto box-border h-[56px] w-full border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
-        <div className="mx-auto h-fit max-w-8xl overflow-x-auto">
+    <div className="fixed top-[56px] right-0 left-0 z-10">
+      <header className="header-bg border-border text-foreground dark:text-foreground mx-auto box-border h-[56px] w-full border-b backdrop-blur-[20px]">
+        <div className="max-w-8xl mx-auto h-fit overflow-x-auto">
           <nav
-            className="mb-0 flex h-[55px] gap-3 pl-0 text-center text-sm font-medium text-signoz_vanilla-400 sm:gap-6"
+            className="text-muted-foreground mb-0 flex h-[55px] gap-3 pl-0 text-center text-sm font-medium sm:gap-6"
             aria-label="Product Navigation"
           >
             {navigationItems.map((item) => (
               <Link
                 key={item.key}
                 href={item.href}
-                className={`inline-flex h-full shrink-0 items-center whitespace-nowrap rounded-t-lg px-1 py-1.5 pb-3.5 ${
-                  activeTab === item.key
-                    ? 'border-b-2 border-signoz_robin-500 text-signoz_vanilla-100'
-                    : ''
+                className={`inline-flex h-full shrink-0 items-center rounded-t-lg px-1 py-1.5 pb-3.5 whitespace-nowrap ${
+                  activeTab === item.key ? 'border-primary text-foreground border-b-2' : ''
                 }`}
                 prefetch={false}
               >

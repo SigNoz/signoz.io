@@ -33,7 +33,7 @@ export const AZURE_MONITORING_HEADER_BUTTONS = [
 export const INTEGRATE_AZURE_PANEL = {
   title: 'Integrate your Azure account - with just one click - no agents, no config files',
   description: (
-    <p className="leading-relaxed text-signoz_vanilla-400">
+    <p className="text-signoz_vanilla-400 leading-relaxed">
       SigNoz&apos;s One-Click Azure Integration deploys via an ARM template and automatically
       discovers your Azure resources. VMs, AKS, App Services, Container Apps, Blob Storage, Cosmos
       DB, and databases start sending metrics immediately - no manual OTel Collector setup required.
@@ -58,7 +58,7 @@ export const INTEGRATE_AZURE_PANEL = {
 export const RCA_NOZ_AI_PANEL = {
   title: 'RCA of your Azure infrastructure in plain English. With Noz AI Assistant.',
   description: (
-    <p className="leading-relaxed text-signoz_vanilla-400">
+    <p className="text-signoz_vanilla-400 leading-relaxed">
       SigNoz MCP Server connects to Claude Code, Cursor, and other AI coding agents. Give your agent
       full Azure context, VM CPU, AKS pod status, App Service traces, SQL Database latency and debug
       production Azure issues without leaving your terminal. No separate AI SRE tool. Your Azure
@@ -101,7 +101,7 @@ export const AKS_VISIBILITY_SHOWCASE = {
 export const DISTRIBUTED_TRACING_PANEL = {
   title: 'End-to-end distributed tracing for Azure App Service and Azure Functions',
   description: (
-    <p className="leading-relaxed text-signoz_vanilla-400">
+    <p className="text-signoz_vanilla-400 leading-relaxed">
       Instrument your App Service or Functions app with the OTel SDK and see p50/p90/p99 latencies,
       error rates, and service dependency maps alongside underlying Azure infrastructure metrics
       (CPU, memory, requests). See exactly which function invocation, downstream API call, or SQL
@@ -124,7 +124,7 @@ export const DISTRIBUTED_TRACING_PANEL = {
 export const TROUBLESHOOT_PANEL = {
   title: 'Single place to troubleshoot metrics, traces & logs',
   description: (
-    <p className="leading-relaxed text-signoz_vanilla-400">
+    <p className="text-signoz_vanilla-400 leading-relaxed">
       When an App Service latency alert fires, jump from the Azure infrastructure metric to the
       application trace to the log line that explains it without opening Azure Monitor, App
       Insights, and your log tool separately. SigNoz stores all three signal types in a single
@@ -147,7 +147,7 @@ export const TROUBLESHOOT_PANEL = {
 export const OTEL_NATIVE_PANEL = {
   title: 'Your Azure instrumentation stays yours. Forever.',
   description: (
-    <p className="leading-relaxed text-signoz_vanilla-400">
+    <p className="text-signoz_vanilla-400 leading-relaxed">
       SigNoz is built on OpenTelemetry from day one, not just compatible. Every Azure VM metric, AKS
       pod trace, and App Service log uses standard OTel attributes: service.name, cloud.region,
       k8s.pod.name, correlated across signals automatically. No proprietary agents in your codebase.
@@ -170,7 +170,7 @@ export const OTEL_NATIVE_PANEL = {
 export const DASHBOARD_TEMPLATES_PANEL = {
   title: 'Get started in minutes - First data in, first dashboards live no setup required',
   description: (
-    <p className="leading-relaxed text-signoz_vanilla-400">
+    <p className="text-signoz_vanilla-400 leading-relaxed">
       SigNoz ships with pre-built dashboard templates for Azure VMs, AKS, App Services, Container
       Apps, and database services. Import in one click. All templates are open source under Apache
       2.0, maintained by the SigNoz community, and fully customisable. No dashboard-building
@@ -193,7 +193,7 @@ export const DASHBOARD_TEMPLATES_PANEL = {
 export const TRANSPARENT_PRICING_PANEL = {
   title: 'One transparent price. No per-VM, per-metric, or per-query charges.',
   description: (
-    <p className="leading-relaxed text-signoz_vanilla-400">
+    <p className="text-signoz_vanilla-400 leading-relaxed">
       Azure Monitor charges per metric query and per GB of log ingestion. Most observability tools
       add another unpredictable bill on top - per host, per seat, or per custom metric. SigNoz
       charges $0.30/GB for logs and traces, $0.10 per million metric samples. No per-VM fees. No

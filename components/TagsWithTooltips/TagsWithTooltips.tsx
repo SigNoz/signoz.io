@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Badge } from '@signozhq/badge'
+import { Badge } from '@signozhq/ui/badge'
 import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { tagDefinitions } from '@/constants/tagDefinitions'
 
@@ -25,7 +25,8 @@ const TagsWithTooltips: React.FC<TagsWithTooltipsProps> = ({ tags, className = '
             key={tag}
             content={tooltipContent}
             side="right"
-            contentClassName="max-w-96 break-words rounded-none border-signoz_slate-400 bg-signoz_ink-200 text-xs text-signoz_vanilla-100"
+            contentClassName="max-w-96 break-words rounded-none border-border bg-l3-background text-xs text-l1-foreground"
+            arrowClassName="fill-l3-background"
           >
             <div className="inline-flex items-center justify-center">
               <Badge color="vanilla" className="cursor-pointer transition-colors">

@@ -23,9 +23,9 @@ const SigNozStats = () => {
     title,
     description,
   }) => (
-    <div className="rounded-md border border-signoz_slate-500 bg-signoz_ink-400 p-4">
-      <h3 className="mb-2 text-base font-medium text-signoz_vanilla-100">{title}</h3>
-      <p className="mb-0 text-sm font-normal text-signoz_vanilla-400">{description}</p>
+    <div className="border-border bg-card rounded-md border p-4">
+      <h3 className="text-l1-foreground mb-2 text-base font-medium">{title}</h3>
+      <p className="text-muted-foreground mb-0 text-sm font-normal">{description}</p>
     </div>
   )
 
@@ -65,8 +65,8 @@ const SigNozStats = () => {
 
   return (
     <SectionLayout variant="bordered" className="flex flex-col !px-0 md:flex-row">
-      <div className="flex-1 border-b border-dashed border-signoz_slate-400 md:border-b-0">
-        <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+      <div className="border-border flex-1 border-b border-dashed md:border-b-0">
+        <p className="text-l1-foreground pt-10 pl-12 text-left text-4xl !leading-[3.5rem] font-bold sm:text-4xl">
           Developers <br />
           Love
           <br />
@@ -75,12 +75,12 @@ const SigNozStats = () => {
       </div>
 
       <div className="flex min-w-0 flex-[2_2_0%] flex-col">
-        <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+        <div className="border-border border-l border-dashed bg-transparent p-0">
           <div className="p-10 md:p-6">
-            <h2 className="text-2xl font-bold text-signoz_vanilla-100">
+            <h2 className="text-l1-foreground text-2xl font-bold">
               Your data stays where you want
             </h2>
-            <p className="text-base text-signoz_vanilla-400">
+            <p className="text-muted-foreground text-base">
               Use SigNoz cloud with your data staying in the US, EU, or India, or self-host.
             </p>
             <div className="flex w-full flex-col gap-4">
@@ -89,7 +89,7 @@ const SigNozStats = () => {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-1 text-left md:grid-cols-2 [&>div]:!border-r [&>div]:border-l-0 [&>div]:border-signoz_slate-400">
+          <div className="[&>div]:border-border grid grid-cols-1 text-left md:grid-cols-2 [&>div]:!border-r [&>div]:border-l-0">
             {STATS_LIST.map((stat, index) => (
               <StatsCard
                 logo={stat.logo}
@@ -100,7 +100,7 @@ const SigNozStats = () => {
               />
             ))}
           </div>
-          <div className="border-t border-dashed border-signoz_slate-400 py-6 md:pl-10">
+          <div className="border-border border-t border-dashed py-6 md:pl-10">
             <ButtonGroup
               buttons={communityButtons}
               className="flex-col flex-wrap gap-3 sm:flex-row"

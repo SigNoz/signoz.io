@@ -53,7 +53,7 @@ const CopyCell = ({ text }: { text: string }) => {
             variant="ghost"
             size="icon"
             onClick={handleCopy}
-            className="h-6 w-6 p-0 text-gray-400 opacity-0 transition-opacity hover:bg-transparent hover:text-gray-600 group-hover:opacity-100 dark:text-gray-500 dark:hover:text-gray-300"
+            className="h-6 w-6 p-0 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-transparent hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
             title="Copy to clipboard"
             aria-label="Copy to clipboard"
           >
@@ -75,7 +75,7 @@ const RegionTable = () => {
   if (isLoading) {
     return (
       <div className="w-full overflow-x-auto">
-        <div className="h-32 w-full animate-pulse rounded bg-signoz_slate-400" />
+        <div className="bg-muted h-32 w-full animate-pulse rounded" />
       </div>
     )
   }
@@ -116,7 +116,7 @@ const RegionTable = () => {
               className="border-b border-gray-200 last:border-0 dark:border-gray-700"
             >
               <td className="px-6 py-4 text-gray-900 dark:text-gray-100">{row.name}</td>
-              <td className="px-6 py-4 uppercase text-gray-900 dark:text-gray-100">
+              <td className="px-6 py-4 text-gray-900 uppercase dark:text-gray-100">
                 {row.provider}
               </td>
               <td className="px-6 py-4 text-gray-900 dark:text-gray-100">{row.cloudRegion}</td>

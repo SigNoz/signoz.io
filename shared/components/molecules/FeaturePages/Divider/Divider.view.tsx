@@ -10,7 +10,7 @@ const Divider: React.FC<DividerProps> = ({
     <div
       role="separator"
       className={cn(
-        'border-signoz_slate-400',
+        'border-border',
         variant === 'dashed' ? 'border-dashed' : 'border-solid',
         orientation === 'horizontal' ? 'w-full border-t' : 'h-full border-l',
         className

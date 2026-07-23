@@ -34,13 +34,13 @@ const CountdownTimer: React.FC<TimerProps> = ({ eventDate }) => {
   }, [eventDate])
 
   return (
-    <div className="w-[68%] text-signoz_vanilla-400">
+    <div className="text-muted-foreground w-[68%]">
       {timeLeft != '' ? (
         <>
-          <span className="font-mono text-sm font-bold text-signoz_slate-50 sm:text-base">
+          <span className="text-muted-foreground font-mono text-sm font-bold sm:text-base">
             LIVE IN :
           </span>
-          <span className="ml-2 font-mono ">{timeLeft}</span>
+          <span className="ml-2 font-mono">{timeLeft}</span>
         </>
       ) : (
         'Event Started!'

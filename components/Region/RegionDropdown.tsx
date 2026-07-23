@@ -29,7 +29,7 @@ export const RegionDropdown = () => {
   }, [regions])
 
   if (isLoading) {
-    return <div className="h-9 w-40 animate-pulse rounded bg-signoz_slate-400" />
+    return <div className="bg-muted h-9 w-40 animate-pulse rounded" />
   }
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -43,8 +43,11 @@ export const RegionDropdown = () => {
   const currentValue = region && cloudRegion ? `${region}_${cloudRegion}` : ''
 
   return (
-    <div className="relative w-fit min-w-[180px] rounded-md border border-signoz_slate-500 p-4">
-      <label htmlFor="region-dropdown" className="text-xs uppercase">
+    <div className="border-border bg-card text-card-foreground relative w-fit min-w-[180px] rounded-md border p-4">
+      <label
+        htmlFor="region-dropdown"
+        className="text-muted-foreground text-xs font-semibold uppercase"
+      >
         Selected Region
       </label>
       <select
@@ -52,24 +55,24 @@ export const RegionDropdown = () => {
         value={currentValue}
         onChange={handleChange}
         className={cn(
-          'w-full appearance-none rounded-md border bg-signoz_slate-400 px-3 py-2 pr-8 text-sm text-white shadow-sm outline-none transition-all duration-200',
-          'border-primary-600 hover:bg-signoz_slate-500',
-          'focus:border-signoz_robin-500 focus:ring-2 focus:ring-signoz_robin-500',
+          'bg-background text-foreground mt-1 w-full appearance-none rounded-md border px-3 py-2 pr-8 text-sm shadow-sm transition-all duration-200 outline-none',
+          'border-border hover:bg-muted',
+          'focus:border-primary focus:ring-ring focus:ring-2',
           'cursor-pointer'
         )}
       >
         {regionOptions.map((option) => (
-          <option key={option.value} value={option.value} className="bg-signoz_slate-500">
+          <option key={option.value} value={option.value} className="bg-background text-foreground">
             {option.label}
           </option>
         ))}
       </select>
-      <div className="mt-2 text-xs">
+      <div className="text-muted-foreground mt-2 text-xs">
         Applies to code snippets on this page (and other Cloud docs pages).
       </div>
       <Link
         href="/docs/ingestion/signoz-cloud/overview/#endpoint"
-        className="text-xs text-signoz_robin-500"
+        className="text-primary text-xs"
         prefetch={false}
       >
         How do I find my workspace region?

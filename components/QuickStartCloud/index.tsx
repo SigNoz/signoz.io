@@ -10,17 +10,17 @@ export default function QuickStartCloud() {
     <div className="mx-auto w-full bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:100%_auto] bg-[center_top] bg-no-repeat py-8 sm:bg-[length:55%] sm:bg-[center_top_-2rem] sm:py-12 md:py-16">
       <div className="bg-blur-ellipse-206">
         <div className="flex flex-col items-center gap-2 px-4 text-center sm:px-0">
-          <h2 className="text-4xl font-bold text-signoz_vanilla-100 md:text-5xl">
+          <h2 className="text-l1-foreground text-4xl font-bold md:text-5xl">
             SigNoz Cloud is the Fastest Way to Try Out SigNoz
           </h2>
 
-          <div className="mt-6 flex w-full max-w-4xl flex-col items-center rounded-lg border border-signoz_slate-500 bg-signoz_ink-400 p-4 shadow-md md:flex-row md:items-stretch">
+          <div className="border-border bg-card mt-6 flex w-full max-w-4xl flex-col items-center rounded-lg border p-4 shadow-md md:flex-row md:items-stretch">
             {/* Step 1: Sign Up */}
             <div className="mb-4 flex flex-1 items-center justify-center md:mb-0 md:justify-start">
-              <div className="mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-signoz_robin-500 text-sm font-bold text-white">
+              <div className="bg-primary mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white">
                 1
               </div>
-              <span className="text-base font-medium text-signoz_vanilla-100">Sign Up</span>
+              <span className="text-l1-foreground text-base font-medium">Sign Up</span>
             </div>
 
             {/* Separator 1 - Hidden by default, shown on md */}
@@ -30,12 +30,10 @@ export default function QuickStartCloud() {
 
             {/* Step 2: Choose Data Source */}
             <div className="mb-4 flex flex-1 items-center justify-center md:mb-0 md:justify-start">
-              <div className="mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-signoz_robin-500 text-sm font-bold text-white">
+              <div className="bg-primary mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white">
                 2
               </div>
-              <span className="text-base font-medium text-signoz_vanilla-100">
-                Choose Data Source
-              </span>
+              <span className="text-l1-foreground text-base font-medium">Choose Data Source</span>
             </div>
 
             {/* Separator 2 - Hidden by default, shown on md */}
@@ -45,12 +43,10 @@ export default function QuickStartCloud() {
 
             {/* Step 3: Set Up and Visualize */}
             <div className="flex flex-1 items-center justify-center md:justify-start">
-              <div className="mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-signoz_robin-500 text-sm font-bold text-white">
+              <div className="bg-primary mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white">
                 3
               </div>
-              <span className="text-base font-medium text-signoz_vanilla-100">
-                Set Up & Visualize
-              </span>
+              <span className="text-l1-foreground text-base font-medium">Set Up & Visualize</span>
             </div>
           </div>
 

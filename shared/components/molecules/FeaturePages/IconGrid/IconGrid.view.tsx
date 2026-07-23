@@ -8,7 +8,7 @@ function isImageSrc(src: unknown): src is string | StaticImageData {
 const IconGrid: React.FC<IconGridProps> = ({ icons, title, className = '' }) => {
   return (
     <div className={className}>
-      <h3 className="mb-4 text-xs font-medium uppercase text-signoz_vanilla-400">{title}</h3>
+      <h3 className="text-muted-foreground mb-4 text-xs font-medium uppercase">{title}</h3>
       <div className="flex items-center justify-start gap-4">
         {icons.map((icon, index) => (
           <div key={index} className="flex items-center">

@@ -8,24 +8,24 @@ import featureGraphicDataProtection from '@/public/img/graphics/homepage/feature
 const DataProtectionLaws = ({ isInPricingPage = false }) => {
   return (
     <section>
-      <div className="section-container grid h-auto w-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 !py-10 px-8 md:px-10">
+      <div className="section-container border-border grid h-auto w-auto border !border-r-0 !border-b-0 border-dashed px-8 !py-10 md:px-10">
         <div className="grid min-w-0 grid-cols-1">
           <div>
-            <p className="mb-4 block text-2xl font-semibold text-signoz_vanilla-100 md:mb-2">
+            <p className="text-l1-foreground mb-4 block text-2xl font-semibold md:mb-2">
               Worried about Data Protection Laws?
             </p>
             {!isInPricingPage ? (
-              <ul className="list-['—_'] pl-5 ">
-                <li className="mb-2 max-w-full text-sm font-normal leading-9 text-signoz_vanilla-400 sm:w-[35rem] md:max-w-[min(35rem,100%)] md:text-base">
+              <ul className="list-['—_'] pl-5">
+                <li className="text-muted-foreground mb-2 max-w-full text-sm leading-9 font-normal sm:w-[35rem] md:max-w-[min(35rem,100%)] md:text-base">
                   &nbsp;Store your data in the US, EU or India region depending on your needs.
                 </li>
-                <li className="max-w-full text-sm font-normal leading-9 text-signoz_vanilla-400 sm:w-[35rem] md:max-w-[min(35rem,100%)] md:text-base">
+                <li className="text-muted-foreground max-w-full text-sm leading-9 font-normal sm:w-[35rem] md:max-w-[min(35rem,100%)] md:text-base">
                   &nbsp;You can self-host SigNoz or opt for our managed self-hosted offerings to
                   have complete adherence to data privacy and regulation laws.
                 </li>
               </ul>
             ) : (
-              <div className="mb-10 text-base font-normal leading-9 text-signoz_vanilla-400">
+              <div className="text-muted-foreground mb-10 text-base leading-9 font-normal">
                 No need to send data outside your region. We have data centers in US, EU and India
                 to comply with data privacy regulations. You can also host SigNoz in your own cloud.
               </div>

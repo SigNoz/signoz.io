@@ -250,21 +250,21 @@ export default function Login() {
   const isValid = useMemo(() => isValidCompanyEmail(workEmail), [workEmail])
 
   return (
-    <main className="login-container relative bg-signoz_ink-500">
+    <main className="login-container bg-background relative">
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
       <div className="relative m-auto h-full max-w-[1440px]">
         <div className="flex items-center justify-center max-lg:flex-col max-md:gap-0">
-          <section className="login-form-section x-md:ml-0 flex w-full flex-col py-16 max-md:w-full lg:w-[50%] xl:w-[60%] ">
-            <div className="flex w-full grow flex-col justify-center bg-signoz_ink-500 px-8 py-4 text-sm leading-5 text-signoz_vanilla-100 max-md:mt-10 max-md:max-w-full lg:px-12 lg:py-8 xl:px-36 xl:py-8">
-              <h1 className="mb-[8px] text-2xl font-semibold leading-8 max-md:mt-10 max-md:max-w-full">
+          <section className="login-form-section x-md:ml-0 flex w-full flex-col py-16 max-md:w-full lg:w-[50%] xl:w-[60%]">
+            <div className="bg-background text-l1-foreground flex w-full grow flex-col justify-center px-8 py-4 text-sm leading-5 max-md:mt-10 max-md:max-w-full lg:px-12 lg:py-8 xl:px-36 xl:py-8">
+              <h1 className="mb-[8px] text-2xl leading-8 font-semibold max-md:mt-10 max-md:max-w-full">
                 Log in to your SigNoz account.
               </h1>
-              <div className="w-100 text-sm leading-6 text-signoz_vanilla-400 max-md:max-w-full">
+              <div className="text-muted-foreground w-100 text-sm leading-6 max-md:max-w-full">
                 Enter your email to sign in.
               </div>
 
               {!isSubmitting && submitFailed ? (
-                <div className="mt-4 rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-6">
+                <div className="border-border bg-card mt-4 rounded-lg border p-6">
                   <div className="error-container mb-4 rounded p-4 text-sm">
                     We couldn't complete your request. Please try refreshing the page or contact
                     cloud support for assistance.
@@ -291,9 +291,9 @@ export default function Login() {
                   </Button>
                 </div>
               ) : (
-                <form className="w-100 mt-6" onSubmit={handleSubmit}>
+                <form className="mt-6 w-100" onSubmit={handleSubmit}>
                   <div
-                    className={`rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 px-6 pt-6 ${pagination && pagination.total > PER_PAGE ? 'pb-0' : 'pb-6'}`}
+                    className={`border-border bg-card rounded-lg border px-6 pt-6 ${pagination && pagination.total > PER_PAGE ? 'pb-0' : 'pb-6'}`}
                   >
                     <label htmlFor="workEmail" className="mb-2 block font-medium">
                       Work email
@@ -308,7 +308,7 @@ export default function Login() {
                         value={workEmail}
                         onChange={handleEmailUpdate}
                         placeholder="E.g. bart@simpsonmail.com"
-                        className="flex-1 rounded-sm border border-signoz_slate-400 bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300"
+                        className="border-border bg-l3-background flex-1 rounded-sm border px-3 py-1.5 text-sm tracking-normal text-stone-300"
                       />
                       {workEmail && submitSuccess && (
                         <Button
@@ -330,34 +330,34 @@ export default function Login() {
                     )}
 
                     {submitSuccess && userTenants.length > 0 && (
-                      <div className="mt-4 rounded-sm border border-signoz_slate-400">
-                        <div className="border-b border-signoz_slate-400 px-3 py-2 text-sm font-medium text-signoz_vanilla-100">
+                      <div className="border-border mt-4 rounded-sm border">
+                        <div className="border-border text-l1-foreground border-b px-3 py-2 text-sm font-medium">
                           Associated Teams&apos; URLs
                         </div>
 
                         {isFetchingPage ? (
                           <div className="flex items-center justify-center py-10">
-                            <Loader2 size={18} className="animate-spin text-signoz_vanilla-400" />
+                            <Loader2 size={18} className="text-muted-foreground animate-spin" />
                           </div>
                         ) : (
                           userTenants.map((tenant: Tenant) => (
                             <div
                               key={tenant.name}
-                              className="flex items-center justify-between border-b border-signoz_slate-400 px-3 py-3 last:border-b-0"
+                              className="border-border flex items-center justify-between border-b px-3 py-3 last:border-b-0"
                             >
                               <div className="min-w-0 flex-1 pr-3">
-                                <div className="truncate text-sm text-signoz_vanilla-100">
+                                <div className="text-l1-foreground truncate text-sm">
                                   {tenant.name}.{tenant.region.dns}
                                 </div>
                                 <div className="mt-1 flex items-center">
                                   {tenant.state !== TenantState.DELETED ? (
                                     <span className="flex items-center text-xs text-emerald-400">
-                                      <Dot size={16} className="-ml-1 text-signoz_forest-500" />
+                                      <Dot size={16} className="text-callout-success-title -ml-1" />
                                       Active
                                     </span>
                                   ) : (
-                                    <span className="flex items-center text-xs text-signoz_vanilla-400 opacity-50">
-                                      <Dot size={16} className="-ml-1 text-signoz_slate-100" />
+                                    <span className="text-muted-foreground flex items-center text-xs opacity-50">
+                                      <Dot size={16} className="text-muted-foreground -ml-1" />
                                       Expired
                                     </span>
                                   )}
@@ -367,7 +367,7 @@ export default function Login() {
                                 <a
                                   href={`https://${tenant.name}.${tenant.region.dns}/login`}
                                   target="_blank"
-                                  className="shrink-0 rounded-sm bg-signoz_robin-500 px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
+                                  className="bg-primary shrink-0 rounded-sm px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
                                 >
                                   Login
                                 </a>
@@ -397,7 +397,7 @@ export default function Login() {
                       variant={'default'}
                       rounded={'full'}
                       disabled={isSubmitting || !isValid}
-                      className="mb-4 mt-6 w-full"
+                      className="mt-6 mb-4 w-full"
                     >
                       <span className="flex items-center gap-1.5 px-px text-sm">
                         Next
@@ -413,7 +413,7 @@ export default function Login() {
               )}
 
               {noDeployments && (
-                <div className="mt-4 text-sm text-signoz_vanilla-400">
+                <div className="text-muted-foreground mt-4 text-sm">
                   No deployments are currently associated with this email. You can get started now
                   with a free trial account for 30 days.
                   <Button
@@ -437,7 +437,7 @@ export default function Login() {
 
       <div className="absolute bottom-0 m-auto mt-8 flex w-full items-center justify-center">
         <div className="flex w-[70%] items-center justify-center max-sm:w-[90%]">
-          <section className="b mb-6 grid grid-cols-2 items-center gap-4 self-stretch rounded-md border border-signoz_slate-400 bg-signoz_ink-400 p-4 max-md:w-full max-md:max-w-full md:flex md:flex-wrap md:p-2">
+          <section className="b border-border bg-card mb-6 grid grid-cols-2 items-center gap-4 self-stretch rounded-md border p-4 max-md:w-full max-md:max-w-full md:flex md:flex-wrap md:p-2">
             {trustBadges.map((badge, index) => (
               <div
                 className="my-auto flex items-center justify-center gap-2.5 self-stretch md:justify-start"
@@ -448,21 +448,21 @@ export default function Login() {
                     loading="lazy"
                     src={badge.icon}
                     alt=""
-                    className="aspect-[1.93] w-[29px] shrink-0 object-contain"
+                    className="aspect-[1.93] w-[29px] shrink-0 object-contain brightness-0 dark:brightness-100"
                   />
                 )}
 
                 {badge.url ? (
                   <a href={badge.url} className="flex items-center gap-2" target="_blank">
-                    <span className="text-xs text-signoz_vanilla-400">{badge.text}</span>
+                    <span className="text-muted-foreground text-xs">{badge.text}</span>
                     <ArrowUpRight size={12} />
                   </a>
                 ) : (
-                  <span className="text-xs text-signoz_vanilla-400">{badge.text}</span>
+                  <span className="text-muted-foreground text-xs">{badge.text}</span>
                 )}
 
                 {index < trustBadges.length - 1 && (
-                  <Dot size={24} color="#3C4152" className="ml-4 hidden md:block" />
+                  <Dot size={24} className="text-muted-foreground ml-4 hidden md:block" />
                 )}
               </div>
             ))}

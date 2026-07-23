@@ -6,7 +6,7 @@ import TrackingLink from '@/components/TrackingLink'
 import SourcesTabsGrid from '@/shared/components/molecules/SourcesTabsGrid'
 
 const OBSERVABILITY_LANDSCAPE_SOURCE_LINK_CLASS_NAME =
-  'mt-1 inline-flex items-center gap-1 text-xs text-signoz_vanilla-400 underline decoration-signoz_slate-400 underline-offset-2 hover:text-signoz_robin-400'
+  'mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground underline decoration-slate-400 underline-offset-2 hover:text-accent-primary'
 
 const OBSERVABILITY_LANDSCAPE_ITEM_DATA = [
   {
@@ -71,7 +71,7 @@ export const TRUSTED_BY_LOGOS = [
 
 export const NUMBERS_THAT_SPEAK_CARDS = [
   {
-    icon: <div className="text-4xl font-bold text-signoz_cherry-500">47%</div>,
+    icon: <div className="text-danger-foreground text-4xl font-bold">47%</div>,
     title: <div className="min-h-14">Reduction in MTTR and TCO</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
@@ -89,7 +89,7 @@ export const NUMBERS_THAT_SPEAK_CARDS = [
     ),
   },
   {
-    icon: <div className="text-4xl font-bold text-signoz_cherry-500">10 TB+/Day</div>,
+    icon: <div className="text-danger-foreground text-4xl font-bold">10 TB+/Day</div>,
     title: <div className="min-h-14">Daily Ingest - Single Deployment</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
@@ -107,7 +107,7 @@ export const NUMBERS_THAT_SPEAK_CARDS = [
     ),
   },
   {
-    icon: <div className="text-4xl font-bold text-signoz_cherry-500">1,000s</div>,
+    icon: <div className="text-danger-foreground text-4xl font-bold">1,000s</div>,
     title: <div className="min-h-14">Engineering Teams in Production</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
@@ -272,7 +272,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
           href="https://trust.signoz.io/"
           target="_blank"
           rel="noopener noreferrer"
-          className="opacity-60 hover:opacity-100"
+          className="opacity-70 brightness-0 transition-opacity hover:opacity-100 dark:opacity-70 dark:brightness-100 dark:hover:opacity-100"
         >
           <Image
             src="/svgs/icons/hipaa.svg"
@@ -290,7 +290,7 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
           href="https://trust.signoz.io/"
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-full opacity-60 shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] transition-opacity hover:opacity-100"
+          className="rounded-full opacity-70 brightness-0 transition-opacity hover:opacity-100 dark:opacity-70 dark:shadow-[0px_0_40px_0_rgba(255,255,255,0.18)] dark:brightness-100 dark:hover:opacity-100"
         >
           <Image
             src="/svgs/icons/SOC-2.svg"

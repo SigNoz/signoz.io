@@ -54,7 +54,7 @@ const Card: React.FC<CardProps> = ({
   className = '',
 }) => {
   const logoSizeClassnames =
-    logoSize === 24 ? 'w-6 h-6 fill-signoz_vanilla-400' : 'w-4 h-4 fill-signoz_vanilla-400'
+    logoSize === 24 ? 'w-6 h-6 fill-vanilla-400' : 'w-4 h-4 fill-vanilla-400'
 
   const subTitleSizeClassnames =
     subTitleSize === 2 ? 'text-2xl font-semibold' : 'text-base font-semibold'
@@ -83,7 +83,7 @@ const Card: React.FC<CardProps> = ({
   return (
     <div
       className={cn(
-        'col-span-2 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-9 sm:col-span-1',
+        'border-border bg-background col-span-2 border !border-r-0 !border-b-0 border-dashed p-9 sm:col-span-1',
         className
       )}
     >
@@ -100,22 +100,22 @@ const Card: React.FC<CardProps> = ({
             />
           )
         ) : null}
-        <span className="text-sm font-medium uppercase tracking-[0.05em] text-signoz_vanilla-400">
+        <span className="text-muted-foreground text-sm font-medium tracking-[0.05em] uppercase">
           {iconTag}
         </span>
-        <span className="text-2xl font-semibold text-signoz_vanilla-100">{title}</span>
+        <span className="text-l1-foreground text-2xl font-semibold">{title}</span>
       </div>
 
       <div>
-        <span className="font-mono text-2xl font-normal text-signoz_slate-50">{number}</span>
+        <span className="text-muted-foreground font-mono text-2xl font-normal">{number}</span>
         {subTitle ? (
-          <p className={`${subTitleSizeClassnames} m-0 pt-4 text-signoz_vanilla-100`}>{subTitle}</p>
+          <p className={`${subTitleSizeClassnames} text-foreground m-0 pt-4`}>{subTitle}</p>
         ) : null}
       </div>
 
       <div>
         {text ? (
-          <span className="my-3 block max-w-md text-xl font-semibold leading-9 text-signoz_vanilla-400">
+          <span className="text-muted-foreground my-3 block max-w-md text-xl leading-9 font-semibold">
             {text}
           </span>
         ) : null}
@@ -123,17 +123,14 @@ const Card: React.FC<CardProps> = ({
 
       <div>
         {stats ? (
-          <p className="mb-2 block pt-4 font-mono text-[32px] font-semibold leading-10 text-signoz_vanilla-100">
+          <p className="text-l1-foreground mb-2 block pt-4 font-mono text-[32px] leading-10 font-semibold">
             {stats}
           </p>
         ) : null}
       </div>
 
       {descriptionArray.map((desc, index) => (
-        <p
-          key={index}
-          className="mb-3 mt-2 text-base font-normal leading-9 text-signoz_vanilla-400"
-        >
+        <p key={index} className="text-muted-foreground mt-2 mb-3 text-base leading-9 font-normal">
           {desc}
         </p>
       ))}
@@ -159,12 +156,12 @@ const Card: React.FC<CardProps> = ({
             clickLocation={sectionName}
             className="inline-block"
           >
-            <Button variant="legacySecondary" className="flex-center mb-4 mt-6">
+            <Button variant="legacySecondary" className="flex-center mt-6 mb-4">
               {buttonText} <ArrowRight size={14} />
             </Button>
           </TrackingLink>
         ) : (
-          <Button variant="legacySecondary" className="flex-center mb-4 mt-6">
+          <Button variant="legacySecondary" className="flex-center mt-6 mb-4">
             {buttonText} <ArrowRight size={14} />
           </Button>
         )

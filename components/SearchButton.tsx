@@ -223,15 +223,15 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
         }}
         aria-label="Open docs search"
         className={cn(
-          'group flex shrink-0 items-center gap-1.5 rounded-full bg-signoz_slate-500 px-3 py-1 text-xs text-slate-300 transition',
-          'hover:bg-slate-700/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
-          'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80 dark:focus-visible:ring-slate-600'
+          'group bg-muted text-muted-foreground flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs transition',
+          'hover:bg-muted hover:text-foreground focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+          'dark:bg-muted dark:hover:bg-muted dark:focus-visible:ring-ring'
         )}
       >
-        <Search className="h-3.5 w-3.5 text-slate-400 transition group-hover:text-white" />
+        <Search className="text-muted-foreground group-hover:text-foreground h-3.5 w-3.5 transition" />
         <span className="hidden text-xs sm:inline">Search docs...</span>
         {!disableShortcut && (
-          <span className="ml-1.5 hidden items-center gap-1 rounded-md border border-slate-700 bg-slate-900/60 px-1 py-[1px] text-[10px] font-medium text-slate-400 sm:flex">
+          <span className="border-border bg-background/60 text-muted-foreground ml-1.5 hidden items-center gap-1 rounded-md border px-1 py-[1px] text-[10px] font-medium sm:flex">
             <Command className="h-2.5 w-2.5" />K
           </span>
         )}
@@ -305,7 +305,7 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
         offset={96}
         className={cn(
           // ! overrides needed: @signozhq/ui CSS modules beat normal Tailwind
-          'overflow-visible !border-none !bg-transparent text-white !shadow-none',
+          'text-foreground overflow-visible !border-none !bg-transparent !shadow-none',
           '!z-[80] !w-full !max-w-2xl'
         )}
         onOpenAutoFocus={(event) => {
@@ -314,7 +314,7 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
         }}
       >
         <DialogTitle className="sr-only">Search docs</DialogTitle>
-        <div className="relative w-full max-w-2xl overflow-visible bg-transparent px-3 text-white sm:px-4">
+        <div className="text-foreground relative w-full max-w-2xl overflow-visible bg-transparent px-3 sm:px-4">
           <InstantSearch indexName={indexName} searchClient={searchClient}>
             <SearchHeader
               mode={mode}
@@ -406,7 +406,7 @@ const SearchHeader = ({
     <div className="px-2 py-2">
       <div
         className={cn(
-          'flex flex-col gap-3 rounded-2xl bg-signoz_slate-500/95 p-4 text-white shadow-[0_18px_40px] shadow-black/40 ring-1 ring-black/40',
+          'bg-muted/95 text-foreground ring-border flex flex-col gap-3 rounded-2xl p-4 shadow-[0_18px_40px] ring-1 shadow-black/20',
           'sm:h-14 sm:flex-row sm:items-center sm:gap-4',
           isSearchMode ? undefined : 'sm:justify-between'
         )}
@@ -414,7 +414,7 @@ const SearchHeader = ({
         {isSearchMode ? (
           <>
             <div className="flex items-center gap-3 sm:flex-1">
-              <Search className="h-5 w-5 flex-shrink-0 text-white/70" />
+              <Search className="text-foreground/70 h-5 w-5 flex-shrink-0" />
               <input
                 ref={inputRef}
                 value={query}
@@ -422,11 +422,13 @@ const SearchHeader = ({
                 onKeyDown={handleKeyDown}
                 onFocus={() => resultsRef.current?.clearActiveResult()}
                 placeholder="Search SigNoz's Docs..."
-                className="flex-1 border-none bg-transparent text-base text-white outline-none placeholder:text-white/50 focus:outline-none focus:ring-0"
+                className="text-l1-foreground placeholder:text-muted-foreground flex-1 border-none bg-transparent text-base outline-none focus:ring-0 focus:outline-none"
               />
             </div>
             <div className="flex items-center justify-between gap-3 sm:flex-none sm:justify-end">
-              {isSearchStalled ? <Loader2 className="h-4 w-4 animate-spin text-white/60" /> : null}
+              {isSearchStalled ? (
+                <Loader2 className="text-foreground/60 h-4 w-4 animate-spin" />
+              ) : null}
               <SearchModeToggle
                 mode={mode}
                 onModeChange={onModeChange}
@@ -437,8 +439,8 @@ const SearchHeader = ({
         ) : (
           <>
             <div className="flex items-center gap-3 text-sm sm:flex-1 sm:text-base">
-              <Sparkles className="h-5 w-5 text-white/70" />
-              <span className="font-medium text-white">Ask your question below</span>
+              <Sparkles className="text-foreground/70 h-5 w-5" />
+              <span className="text-l1-foreground font-medium">Ask your question below</span>
             </div>
             <SearchModeToggle
               mode={mode}
@@ -566,8 +568,8 @@ const SearchResults = forwardRef<SearchResultsHandle, SearchResultsProps>(
     return (
       <div className="max-h-[65vh] overflow-y-auto px-2 pb-2">
         {renderEmptyState && (
-          <div className="mt-4 flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-signoz_slate-500 px-6 py-10 text-center text-sm text-white/70">
-            <Loader2 className="h-6 w-6 animate-spin text-primary-300" />
+          <div className="border-border bg-muted text-l1-foreground/70 mt-4 flex flex-col items-center justify-center gap-3 rounded-lg border px-6 py-10 text-center text-sm">
+            <Loader2 className="text-accent-primary h-6 w-6 animate-spin" />
             <p>Searching the SigNoz docs…</p>
           </div>
         )}
@@ -575,15 +577,15 @@ const SearchResults = forwardRef<SearchResultsHandle, SearchResultsProps>(
         {!renderEmptyState && !query && hits.length === 0 && null}
 
         {!renderEmptyState && query && hits.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-signoz_slate-500 px-6 py-10 text-center text-sm text-white/70">
-            <Clock3 className="h-6 w-6 text-white/50" />
+          <div className="border-border bg-muted text-l1-foreground/70 flex flex-col items-center justify-center gap-3 rounded-lg border px-6 py-10 text-center text-sm">
+            <Clock3 className="text-foreground/50 h-6 w-6" />
             <p>No results found.</p>
           </div>
         )}
 
         {!renderEmptyState && hits.length > 0 && (
-          <div className="mt-2 overflow-hidden rounded-2xl bg-signoz_slate-500 shadow-[0_20px_45px] shadow-black/40">
-            <ul className="divide-white/6 my-0 divide-y p-0 text-sm" role="listbox">
+          <div className="bg-muted mt-2 overflow-hidden rounded-2xl shadow-[0_20px_45px] shadow-black/20">
+            <ul className="my-0 divide-y divide-white/6 p-0 text-sm" role="listbox">
               {hits.map((hit, index) => {
                 const titleAttribute = hit.title
                   ? 'title'
@@ -642,17 +644,17 @@ const SearchResults = forwardRef<SearchResultsHandle, SearchResultsProps>(
                         }
                       }}
                       className={cn(
-                        'w-full px-8 py-6 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
+                        'w-full px-8 py-6 text-left transition focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:outline-none',
                         isActive ? 'bg-white/10' : 'hover:bg-white/10'
                       )}
                     >
-                      <p className="text-[15px] font-semibold leading-6 text-white">
+                      <p className="text-l1-foreground text-[15px] leading-6 font-semibold">
                         {titleAttribute ? (
                           <Highlight
                             hit={hit}
                             attribute={titleAttribute as any}
                             classNames={{
-                              highlighted: 'bg-white/15 text-white px-1 py-[2px] rounded-sm',
+                              highlighted: 'bg-muted text-foreground px-1 py-[2px] rounded-sm',
                             }}
                           />
                         ) : (
@@ -660,7 +662,7 @@ const SearchResults = forwardRef<SearchResultsHandle, SearchResultsProps>(
                         )}
                       </p>
                       {hit.url && (
-                        <p className="mb-0 mt-2 text-[13px] text-white/55">
+                        <p className="text-foreground/55 mt-2 mb-0 text-[13px]">
                           <Breadcrumbs url={hit.url} hierarchy={hit.hierarchy} />
                         </p>
                       )}
@@ -711,7 +713,7 @@ const SearchModeToggle = ({
 }) => (
   <div
     className={cn(
-      'flex items-center rounded-xl border border-white/10 bg-white/5 p-1 text-xs font-medium text-white/70',
+      'border-border bg-muted/50 text-l1-foreground/70 flex items-center rounded-xl border p-1 text-xs font-medium',
       'sm:w-auto',
       className
     )}
@@ -720,8 +722,8 @@ const SearchModeToggle = ({
       type="button"
       onClick={() => onModeChange('search')}
       className={cn(
-        'flex w-full items-center justify-center gap-1 rounded-md px-2.5 py-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:w-auto sm:justify-start',
-        mode === 'search' ? 'bg-white/15 text-white shadow-inner' : 'hover:text-white'
+        'flex w-full items-center justify-center gap-1 rounded-md px-2.5 py-1 transition focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none sm:w-auto sm:justify-start',
+        mode === 'search' ? 'bg-muted text-foreground shadow-inner' : 'hover:text-foreground'
       )}
     >
       <Search className="h-3.5 w-3.5" />
@@ -731,8 +733,8 @@ const SearchModeToggle = ({
       type="button"
       onClick={() => onModeChange('ask-ai')}
       className={cn(
-        'flex w-full items-center justify-center gap-1 rounded-md px-2.5 py-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:w-auto sm:justify-start',
-        mode === 'ask-ai' ? 'bg-white/15 text-white shadow-inner' : 'hover:text-white'
+        'flex w-full items-center justify-center gap-1 rounded-md px-2.5 py-1 transition focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none sm:w-auto sm:justify-start',
+        mode === 'ask-ai' ? 'bg-muted text-foreground shadow-inner' : 'hover:text-foreground'
       )}
     >
       <Sparkles className="h-3.5 w-3.5" />

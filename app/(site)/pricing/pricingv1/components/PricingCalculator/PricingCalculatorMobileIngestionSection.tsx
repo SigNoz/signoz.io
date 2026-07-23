@@ -16,7 +16,7 @@ const MODE_SLIDER = {
     minLabel: '0GB',
     maxLabel: '100TB',
     formatFunc: formatBytes,
-    thumbColor: 'signoz_robin-500' as const,
+    thumbColor: 'robin-500' as const,
     ariaLabel: 'Adjust traces ingestion volume',
   },
   logs: {
@@ -24,7 +24,7 @@ const MODE_SLIDER = {
     minLabel: '0GB',
     maxLabel: '100TB',
     formatFunc: formatBytes,
-    thumbColor: 'signoz_sakura-500' as const,
+    thumbColor: 'sakura-500' as const,
     ariaLabel: 'Adjust logs ingestion volume',
   },
   metrics: {
@@ -32,17 +32,17 @@ const MODE_SLIDER = {
     minLabel: '0M',
     maxLabel: '100B',
     formatFunc: formatMetrics,
-    thumbColor: 'signoz_amber-500' as const,
+    thumbColor: 'amber-500' as const,
     ariaLabel: 'Adjust metrics ingestion volume',
   },
 }
 
 const INPUT_BORDER: Record<MobileIngestionMode, string> = {
   traces:
-    ' w-full border-0 border-b border-signoz_robin-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none',
-  logs: ' w-full border-0 border-b border-signoz_sakura-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none',
+    ' w-full border-0 border-b border-accent-primary/50 bg-transparent text-right text-muted-foreground outline-none',
+  logs: ' w-full border-0 border-b border-sakura-400/50 bg-transparent text-right text-muted-foreground outline-none',
   metrics:
-    'w-full border-0 border-b border-signoz_amber-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none',
+    'w-full border-0 border-b border-warning-background/50 bg-transparent text-right text-muted-foreground outline-none',
 }
 
 const USAGE_UNIT: Record<MobileIngestionMode, string> = {
@@ -67,28 +67,28 @@ export const PricingCalculatorMobileIngestionSection: React.FC<
 
   const priceBlock =
     mode === 'metrics' ? (
-      <div className="text-signoz_amber-400">
+      <div className="text-callout-warning-title">
         ${METRICS_PRICES[state.retentionPeriod]}/mn samples
       </div>
     ) : (
-      <div className={mode === 'traces' ? 'text-signoz_robin-400' : 'text-signoz_sakura-400'}>
+      <div className={mode === 'traces' ? 'text-accent-primary' : 'text-sakura-400'}>
         ${TRACES_AND_LOGS_PRICES[state.retentionPeriod]}/GB
       </div>
     )
 
   return (
-    <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 px-3 pb-4 pt-6">
+    <div className="data-section bg-card bg-opacity-5 rounded-md px-3 pt-6 pb-4">
       <div className="mb-4 flex justify-between">
-        <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+        <span className="text-muted-foreground text-xs font-semibold uppercase">
           Price per unit
         </span>
-        <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">Retention</span>
+        <span className="text-muted-foreground text-xs font-semibold uppercase">Retention</span>
       </div>
 
       <div className="mb-6 flex justify-between">
         {priceBlock}
         <select
-          className="block h-[32px] w-32 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 py-1.5 pl-2 pr-1.5 text-xs text-signoz_vanilla-100"
+          className="border-border bg-card text-l1-foreground block h-[32px] w-32 rounded-sm border py-1.5 pr-1.5 pl-2 text-xs"
           value={state.retentionPeriod}
           onChange={(e) => state.setRetentionPeriod(Number(e.target.value))}
         >
@@ -107,7 +107,7 @@ export const PricingCalculatorMobileIngestionSection: React.FC<
       </div>
 
       <div className="mb-2">
-        <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+        <span className="text-muted-foreground text-xs font-semibold uppercase">
           Scale of ingestion (per month)
         </span>
         <div className="mt-4">
@@ -125,9 +125,9 @@ export const PricingCalculatorMobileIngestionSection: React.FC<
         </div>
       </div>
 
-      <div className="mb-4 mt-10 flex justify-between uppercase">
-        <span className="text-xs font-semibold text-signoz_vanilla-400">Estimated usage</span>
-        <span className="text-xs font-semibold text-signoz_vanilla-400">Subtotal</span>
+      <div className="mt-10 mb-4 flex justify-between uppercase">
+        <span className="text-muted-foreground text-xs font-semibold">Estimated usage</span>
+        <span className="text-muted-foreground text-xs font-semibold">Subtotal</span>
       </div>
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center">
@@ -139,10 +139,10 @@ export const PricingCalculatorMobileIngestionSection: React.FC<
             min="0"
             max={MAX_VALUE.toString()}
           />
-          <span className="text-base text-signoz_vanilla-400">{USAGE_UNIT[mode]}</span>
+          <span className="text-muted-foreground text-base">{USAGE_UNIT[mode]}</span>
         </div>
-        <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
-        <span className="text-base font-medium text-signoz_vanilla-100">
+        <div className="border-border w-[45%] border-b border-dashed"></div>
+        <span className="text-l1-foreground text-base font-medium">
           ${formatNumber(state.subtotal)}
         </span>
       </div>

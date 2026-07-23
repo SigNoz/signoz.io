@@ -45,9 +45,7 @@ export default function MultipleCheckboxesField({
               />
               <span
                 className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
-                  isChecked
-                    ? 'border-signoz_robin-500 bg-signoz_robin-500'
-                    : `${t.checkboxBorder} bg-transparent`
+                  isChecked ? 'border-primary bg-primary' : `${t.checkboxBorder} bg-transparent`
                 }`}
               >
                 {isChecked && <Check className="h-3 w-3 text-white" strokeWidth={2.5} />}

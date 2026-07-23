@@ -6,14 +6,14 @@ import SignozIcon from '@/public/svgs/icons/signoz.svg'
 export const CommunityEdition = () => {
   return (
     <section>
-      <div className="section-container !md:px-10 flex h-auto border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 !px-10 !py-10">
+      <div className="section-container !md:px-10 border-border flex h-auto border !border-r-0 !border-b-0 border-dashed !px-10 !py-10">
         <div className="flex w-full flex-col">
           <div>
-            <p className="text-2xl font-semibold text-signoz_vanilla-100">
+            <p className="text-l1-foreground text-2xl font-semibold">
               {' '}
               Get started with Community Edition
             </p>
-            <p className="text-base font-normal leading-9 text-signoz_vanilla-400">
+            <p className="text-muted-foreground text-base leading-9 font-normal">
               You always have the open source version of SigNoz to get started with your
               observability journey.
             </p>
@@ -26,15 +26,15 @@ export const CommunityEdition = () => {
               clickText="SigNoz / signoz"
               clickLocation="Community Edition Section"
             >
-              <div className="group flex items-center rounded border border-none bg-signoz_ink-400 p-4 text-white hover:bg-signoz_ink-300">
+              <div className="group bg-card text-foreground hover:bg-l3-background flex items-center rounded border border-none p-4">
                 <div className="mr-4">
                   <SignozIcon className="h-10 w-10" role="img" aria-label="SigNoz Icon" />
                 </div>
                 <div className="flex-grow">
-                  <div className="text-sm font-medium text-signoz_vanilla-400 sm:text-base">
-                    SigNoz / <span className="text-signoz_vanilla-100">signoz</span>
+                  <div className="text-muted-foreground text-sm font-medium sm:text-base">
+                    SigNoz / <span className="text-foreground">signoz</span>
                   </div>
-                  <div className="text-[10px] text-signoz_vanilla-400 sm:text-sm">
+                  <div className="text-muted-foreground text-[10px] sm:text-sm">
                     The open-source observability platform
                   </div>
                 </div>

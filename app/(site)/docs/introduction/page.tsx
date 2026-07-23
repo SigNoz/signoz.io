@@ -1,18 +1,14 @@
 import React from 'react'
-import Header from './Header'
-import SendData from './SendData'
-import Monitor from './Monitor'
-import Integrations from './Integrations'
-import MigrateFromDatadog from './MigrateFromDatadog'
-import SecurityCompliance from './SecurityCompliance'
-import SigNozFeatures from './SigNozFeatures'
-import TroubleshootingCommunity from './TroubleshootingCommunity'
-import AdditionalResources from './AdditionalResources'
-import QuickStartCloud from '@/components/QuickStartCloud'
-import InstallLocallySection from './InstallLocallySection'
+import Hero from './Hero'
+import SendDataSection from './SendDataSection'
+import ExploreSigNoz from './ExploreSigNoz'
+import MigrateSection from './MigrateSection'
+import SecurityComplianceSection from './SecurityComplianceSection'
+import TroubleshootingCommunitySection from './TroubleshootingCommunitySection'
+import SelfHostSection from './SelfHostSection'
+import DocsCtaSection from './DocsCtaSection'
 import { Metadata } from 'next'
 import DecimalClient from '@/components/Decimal/DecimalClient'
-import HoverableSidebar from '@/components/HoverableSidebar'
 import { generateDocsBreadcrumb } from '@/utils/breadcrumbSchema'
 import JsonLdScript from '@/components/JsonLdScript'
 
@@ -28,18 +24,14 @@ export default async function DocsIntroductionPage() {
   return (
     <>
       <JsonLdScript data={breadcrumbJsonLd} />
-      <HoverableSidebar />
-      <Header showSearchBar />
-      <SendData />
-      <Monitor />
-      <Integrations />
-      <MigrateFromDatadog />
-      <SigNozFeatures />
-      <SecurityCompliance />
-      <TroubleshootingCommunity />
-      <AdditionalResources />
-      <InstallLocallySection />
-      <QuickStartCloud />
+      <Hero />
+      <SendDataSection />
+      <ExploreSigNoz />
+      <MigrateSection />
+      <SecurityComplianceSection />
+      <TroubleshootingCommunitySection />
+      <SelfHostSection />
+      <DocsCtaSection />
       <DecimalClient />
     </>
   )

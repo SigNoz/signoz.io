@@ -133,7 +133,7 @@ export default function APIVersionSwitcher({
         <SelectValue placeholder="Version" />
       </SelectTrigger>
       <SelectContent
-        className="border border-primary-600 bg-signoz_slate-400 text-white"
+        className="border-border bg-popover text-popover-foreground border"
         position="popper"
         align="start"
         side="bottom"
@@ -143,7 +143,7 @@ export default function APIVersionSwitcher({
           <SelectItem
             key={v}
             value={v}
-            className="text-xs transition-colors duration-200 hover:bg-signoz_slate-500 focus:bg-signoz_slate-500"
+            className="hover:bg-muted focus:bg-muted text-xs transition-colors duration-200"
           >
             {v}
           </SelectItem>

@@ -18,13 +18,13 @@ function Footer() {
   }
 
   return (
-    <div className="z-[10] flex flex-col justify-center border-t border-solid border-gray-900 bg-signoz_ink-500 bg-opacity-70 backdrop-blur-md">
-      <div className="flex w-full items-center justify-center bg-opacity-70 px-4 py-14 max-md:max-w-full">
-        <div className="w-full max-w-8xl justify-between max-md:max-w-full">
+    <div className="border-border bg-background z-[10] flex flex-col justify-center border-t border-solid">
+      <div className="flex w-full items-center justify-center px-4 py-14 max-md:max-w-full">
+        <div className="max-w-8xl w-full justify-between max-md:max-w-full">
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex flex-col pb-2.5 text-sm tracking-wide text-stone-300 max-md:mt-10">
-                <div className="text-sm font-semibold uppercase leading-5 tracking-wide">Docs</div>
+              <div className="text-muted-foreground flex flex-col pb-2.5 text-sm tracking-wide max-md:mt-10">
+                <div className="text-sm leading-5 font-semibold tracking-wide uppercase">Docs</div>
                 <Link href="/docs/introduction/" className="mt-5 hover:underline" prefetch={false}>
                   Introduction
                 </Link>
@@ -41,7 +41,7 @@ function Footer() {
                 <Link href="/api-reference/" className="mt-5 hover:underline" prefetch={false}>
                   SigNoz API
                 </Link>
-                <div className="mt-10 text-sm font-semibold uppercase leading-5 tracking-wide">
+                <div className="mt-10 text-sm leading-5 font-semibold tracking-wide uppercase">
                   OpenTelemetry
                 </div>
                 <Link href="/opentelemetry/" className="mt-5 hover:underline" prefetch={false}>
@@ -64,8 +64,8 @@ function Footer() {
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-stone-300 max-md:mt-10">
-                <div className="text-sm font-semibold uppercase leading-5 tracking-wide">
+              <div className="text-muted-foreground flex grow flex-col self-stretch pb-20 text-sm tracking-wide max-md:mt-10">
+                <div className="text-sm leading-5 font-semibold tracking-wide uppercase">
                   Community
                 </div>
 
@@ -81,13 +81,13 @@ function Footer() {
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                <div className="mt-5 flex items-center gap-2 pr-8 whitespace-nowrap hover:underline max-md:pr-5">
                   <Link href="https://x.com/SigNozHQ" target="_blank" prefetch={false}>
                     X
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                <div className="mt-5 flex items-center gap-2 pr-8 whitespace-nowrap hover:underline max-md:pr-5">
                   <Link href="/launch-week/" target="_blank" prefetch={false}>
                     Launch Week
                   </Link>
@@ -98,7 +98,7 @@ function Footer() {
                     Changelog
                   </Link>
                 </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                <div className="mt-5 flex items-center gap-2 pr-8 whitespace-nowrap hover:underline max-md:pr-5">
                   <Link
                     href="/docs/dashboards/dashboard-templates/overview/"
                     target="_blank"
@@ -108,18 +108,18 @@ function Footer() {
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                <div className="mt-5 flex items-center gap-2 pr-8 whitespace-nowrap hover:underline max-md:pr-5">
                   <Link href="/todaysdevopswordle/" target="_blank" prefetch={false}>
                     DevOps Wordle
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                <div className="mt-5 flex items-center gap-2 pr-8 whitespace-nowrap hover:underline max-md:pr-5">
                   <Link href="https://newsletter.signoz.io/" target="_blank" prefetch={false}>
                     Newsletter
                   </Link>
                 </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                <div className="mt-5 flex items-center gap-2 pr-8 whitespace-nowrap hover:underline max-md:pr-5">
                   <Link
                     href="/events/kubecon-cloudnativecon-north-america-2025/"
                     target="_blank"
@@ -132,8 +132,8 @@ function Footer() {
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-stone-300 max-md:mt-10">
-                <div className="text-sm font-semibold uppercase leading-5 tracking-wide">More</div>
+              <div className="text-muted-foreground flex grow flex-col self-stretch pb-20 text-sm tracking-wide max-md:mt-10">
+                <div className="text-sm leading-5 font-semibold tracking-wide uppercase">More</div>
 
                 <Link
                   href="/datadog-alternative/"
@@ -164,14 +164,14 @@ function Footer() {
                   SigNoz vs Dynatrace
                 </Link>
 
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                <div className="mt-5 flex items-center gap-2 pr-8 whitespace-nowrap hover:underline max-md:pr-5">
                   <Link href="https://signoz.io/careers/" target="_blank" prefetch={false}>
                     Careers
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
 
-                <Link href="/about-us/" className="mt-5 hover:underline " prefetch={false}>
+                <Link href="/about-us/" className="mt-5 hover:underline" prefetch={false}>
                   About
                 </Link>
                 <Link href="/terms-of-service/" className="mt-5 hover:underline" prefetch={false}>
@@ -191,8 +191,8 @@ function Footer() {
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex flex-col items-end shadow-sm max-md:mt-10">
-                <div className="flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-white">
+              <div className="flex flex-col items-end max-md:mt-10">
+                <div className="text-foreground flex items-center justify-between gap-2 self-end text-center text-lg leading-5 font-medium whitespace-nowrap">
                   <Link href="/" prefetch={false} className="flex items-center gap-2">
                     <Image
                       className="h-5 w-auto"
@@ -206,17 +206,18 @@ function Footer() {
                     <div className="font-satoshi-bold font-medium">SigNoz</div>
                   </Link>
                 </div>
-                <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
+                <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-600 dark:text-emerald-300">
                   <Link href="https://status.signoz.io/" target="_blank" prefetch={false}>
                     All systems operational
                   </Link>
                 </div>
-                <div className="footer-icons mt-5 flex items-end justify-between gap-4 py-2">
+                <div className="footer-icons text-muted-foreground mt-5 flex items-end justify-between gap-4 py-2">
                   <Link
                     href={'https://github.com/SigNoz'}
                     target="_blank"
                     aria-label="SigNoz Github URL"
                     prefetch={false}
+                    className="hover:text-foreground transition-colors"
                   >
                     <Github />
                   </Link>
@@ -226,6 +227,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz LinkedIN URL"
                     prefetch={false}
+                    className="hover:text-foreground transition-colors"
                   >
                     <Linkedin />
                   </Link>
@@ -235,6 +237,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz Slack Connect URL"
                     prefetch={false}
+                    className="hover:text-foreground transition-colors"
                   >
                     <Slack />
                   </Link>
@@ -244,6 +247,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz Twitter URL"
                     prefetch={false}
+                    className="hover:text-foreground transition-colors"
                   >
                     <Twitter />
                   </Link>
@@ -253,13 +257,14 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz Youtube Channel URL"
                     prefetch={false}
+                    className="hover:text-foreground transition-colors"
                   >
                     <Youtube />
                   </Link>
                 </div>
-                <div className="mt-5 flex flex-row gap-8">
+                <div className="mt-5 flex flex-row items-center gap-8">
                   <Image
-                    className="cursor-pointer opacity-60 hover:opacity-100"
+                    className="cursor-pointer opacity-70 brightness-0 transition-opacity hover:opacity-100 dark:opacity-70 dark:brightness-100 dark:hover:opacity-100"
                     src="/svgs/icons/hipaa.svg"
                     width={90}
                     height={90}
@@ -268,7 +273,7 @@ function Footer() {
                     onClick={() => window.open('https://trust.signoz.io/', '_blank')}
                   />
                   <Image
-                    className="cursor-pointer rounded-full opacity-60 shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] transition-opacity hover:opacity-100"
+                    className="cursor-pointer rounded-full opacity-70 brightness-0 transition-opacity hover:opacity-100 dark:opacity-70 dark:shadow-[0px_0_40px_0_rgba(255,255,255,0.18)] dark:brightness-100 dark:hover:opacity-100"
                     src="/svgs/icons/SOC-2.svg"
                     width={60}
                     height={60}

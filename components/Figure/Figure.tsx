@@ -19,6 +19,8 @@ interface FigureProps {
   className?: string
   figureClassName?: string
   captionClassName?: string
+  /** When false, skip light-mode color invert. Default true. */
+  themeInvert?: boolean
 }
 
 export default function Figure({
@@ -33,8 +35,10 @@ export default function Figure({
   className,
   figureClassName,
   captionClassName,
+  themeInvert = true,
 }: FigureProps) {
   const useNextImage = isSrcAllowedForNextImage(src)
+  const imageClassName = cn('rounded-md', !themeInvert && 'no-theme-invert', className)
 
   return (
     <ClientZoom>
@@ -47,10 +51,10 @@ export default function Figure({
             height={height}
             priority={priority}
             loading={priority ? undefined : 'lazy'}
-            className={cn('rounded-md', className)}
+            className={imageClassName}
           />
         ) : (
-          <img src={src} alt={alt} className={cn('rounded-md', className)} />
+          <img src={src} alt={alt} className={imageClassName} />
         )}
         <figcaption className={captionClassName}>
           <i>

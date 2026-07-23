@@ -140,14 +140,14 @@ export function Sidebar({
         if (node.type === 'doc') {
           const isActive = normalizeRoute(node.route) === activeRoute
           return (
-            <li key={node.route} className="group mx-2 my-1 transition-all duration-200">
+            <li key={node.route} className="group mx-2 my-1 transition-colors duration-200">
               <Link
                 href={`${SITE_BASE_URL}${node.route}`}
                 target="_self"
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors duration-200 ${
                   isActive
-                    ? 'bg-blue-500/10 text-blue-400 shadow-sm'
-                    : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
+                    ? 'bg-l1-background-hover text-l1-foreground-hover'
+                    : 'text-l2-foreground hover:bg-l1-background-hover hover:text-l1-foreground-hover'
                 }`}
                 onClick={onNavigate}
                 ref={isActive ? activeItemRef : undefined}
@@ -161,28 +161,21 @@ export function Sidebar({
 
         const key = [...trail, node.label].join('>')
         const isExpanded = expanded.has(key)
-        const containsActive = categoryContainsRoute(node, activeRoute)
 
         return (
           <li key={key} className="group mx-2 my-1">
             <div
-              className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
-                containsActive
-                  ? 'bg-blue-500/10 text-blue-400'
-                  : isExpanded
-                    ? 'bg-gray-800/30 text-gray-200 hover:bg-gray-800/50 hover:text-white'
-                    : 'text-gray-200 hover:bg-gray-800/50 hover:text-white'
-              }`}
+              className="text-l2-foreground hover:bg-l1-background-hover hover:text-l1-foreground-hover flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200"
               onClick={() => toggle(key)}
             >
-              <div className="flex-shrink-0 opacity-60 group-hover:opacity-100">
+              <div className="text-l2-foreground group-hover:text-l1-foreground-hover flex-shrink-0 opacity-60 group-hover:opacity-100">
                 {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               </div>
               <span className="truncate">{node.label}</span>
             </div>
             {node.items.length > 0 && (
               <div
-                className={`border-l border-gray-700/50 pl-3 ${
+                className={`border-border border-l pl-3 ${
                   isExpanded ? 'mt-1' : 'h-0 overflow-hidden'
                 }`}
               >
@@ -197,7 +190,7 @@ export function Sidebar({
 
   return (
     <nav
-      className="docs-sidebar sticky top-[80px] h-[calc(100vh-100px)] w-full overflow-y-auto py-4 text-white"
+      className="docs-sidebar text-foreground sticky top-[80px] h-[calc(100vh-100px)] w-full overflow-y-auto py-4"
       ref={containerRef}
     >
       {languageSelector}

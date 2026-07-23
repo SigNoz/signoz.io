@@ -23,8 +23,8 @@ const UnifiedObservability = () => {
   return (
     <div className="relative min-h-screen bg-[#0A0A0A]">
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
-      <div className="absolute left-0 right-0 top-0 mx-auto h-[300px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:h-[450px] sm:bg-[center_-500px] md:h-[956px]" />
-      <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:pt-32">
+      <div className="absolute top-0 right-0 left-0 mx-auto h-[300px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:h-[450px] sm:bg-[center_-500px] md:h-[956px]" />
+      <div className="relative mx-auto max-w-7xl px-6 pt-20 pb-24 sm:pb-32 lg:px-8 lg:pt-32">
         {/* Hero Section */}
         <section className="container mx-auto mb-10 flex flex-col items-center justify-between lg:flex-row">
           <motion.div
@@ -142,7 +142,7 @@ const UnifiedObservability = () => {
                     <p className="mb-0 text-sm text-green-400">Logs</p>
                   </div>
                 </div>
-                <p className="mb-0 mt-4 text-center text-sm text-gray-400">
+                <p className="mt-4 mb-0 text-center text-sm text-gray-400">
                   All Signals in One Single Pane
                 </p>
               </div>
@@ -179,7 +179,7 @@ const UnifiedObservability = () => {
         </section>
 
         {/* Current State Section */}
-        <section className="container mx-auto py-16 ">
+        <section className="container mx-auto py-16">
           <h2 className="mb-8 text-left text-2xl font-bold lg:text-3xl">
             Traditional Approach: Fragmented Tools & Complex Environments
           </h2>
@@ -273,7 +273,7 @@ const UnifiedObservability = () => {
                   height={533}
                   className="h-auto w-full rounded-xl shadow-2xl"
                 />
-                <figcaption className="mb-4 mt-2 px-4 text-center text-sm text-gray-400 sm:px-8">
+                <figcaption className="mt-2 mb-4 px-4 text-center text-sm text-gray-400 sm:px-8">
                   SigNoz unified observability platform bringing metrics, traces and logs together
                 </figcaption>
               </figure>
@@ -426,7 +426,7 @@ const UnifiedObservability = () => {
                   height={540}
                   className="rounded-xl shadow-2xl"
                 />
-                <figcaption className="mb-8 mt-2 text-center text-sm text-gray-400">
+                <figcaption className="mt-2 mb-8 text-center text-sm text-gray-400">
                   SigNoz provides a unified view of your entire system's observability data
                 </figcaption>
               </figure>
@@ -452,7 +452,7 @@ const UnifiedObservability = () => {
               </div>
             </div>
 
-            <p className="mb-4 mt-4 text-xl font-bold text-gray-200">The difference is clear:</p>
+            <p className="mt-4 mb-4 text-xl font-bold text-gray-200">The difference is clear:</p>
             <div className="mb-8 space-y-3 text-lg text-gray-300">
               <div className="flex items-center gap-3">
                 <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-400" />
@@ -711,13 +711,13 @@ const UnifiedObservability = () => {
               </div>
             </div>
           </div>
-          <div className="section-container !mx-auto hidden w-full max-w-8xl border !border-b-0 border-dashed border-signoz_slate-400 !px-0 sm:block">
+          <div className="section-container max-w-8xl border-border !mx-auto hidden w-full border !border-b-0 border-dashed !px-0 sm:block">
             <div className="flex flex-col sm:flex-row">
               <div className="!w-[100%] flex-1 md:!w-[300px]">
                 <div className="space-y-[10vh]">
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+                      <p className="text-l1-foreground px-8 pt-10 pl-0 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-0 md:pl-12">
                         Application Performance Monitoring
                       </p>
                       <Link
@@ -731,7 +731,7 @@ const UnifiedObservability = () => {
                   </div>
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+                      <p className="text-l1-foreground px-8 pt-10 pl-0 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-0 md:pl-12">
                         Log Management
                       </p>
                       <Link
@@ -745,7 +745,7 @@ const UnifiedObservability = () => {
                   </div>
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+                      <p className="text-l1-foreground px-8 pt-10 pl-0 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-0 md:pl-12">
                         Distributed Tracing
                       </p>
                       <Link
@@ -759,7 +759,7 @@ const UnifiedObservability = () => {
                   </div>
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+                      <p className="text-l1-foreground px-8 pt-10 pl-0 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-0 md:pl-12">
                         Infrastructure Monitoring
                       </p>
                       <Link
@@ -773,7 +773,7 @@ const UnifiedObservability = () => {
                   </div>
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+                      <p className="text-l1-foreground px-8 pt-10 pl-0 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-0 md:pl-12">
                         Metrics and Dashboards
                       </p>
                       <Link
@@ -787,7 +787,7 @@ const UnifiedObservability = () => {
                   </div>
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+                      <p className="text-l1-foreground px-8 pt-10 pl-0 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-0 md:pl-12">
                         Alerts
                       </p>
                       <Link
@@ -801,7 +801,7 @@ const UnifiedObservability = () => {
                   </div>
                   <div className="h-screen">
                     <div className="sticky top-[100px] space-y-4">
-                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+                      <p className="text-l1-foreground px-8 pt-10 pl-0 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-0 md:pl-12">
                         Exceptions Monitoring
                       </p>
                       <Link
@@ -937,7 +937,7 @@ const UnifiedObservability = () => {
               <li>Best practices and architecture recommendations</li>
             </ul>
           </div>
-          <p className="mb-0 mt-8 text-lg">
+          <p className="mt-8 mb-0 text-lg">
             Take the first step toward comprehensive observability by signing up for a free trial of
             SigNoz today.
           </p>

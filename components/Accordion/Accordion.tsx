@@ -6,7 +6,7 @@ const Accordion = ({ topic, subtopics, onLinkClick }) => {
   const [accordionIsOpen, setAccordionIsOpen] = useState(false)
 
   return (
-    <div className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-[#18181B]">
+    <div className="hover:bg-muted -mx-3 block rounded-lg px-3 py-2 text-base leading-7 font-semibold">
       <button
         onClick={() => setAccordionIsOpen(!accordionIsOpen)}
         className="flex w-full items-center gap-1"
@@ -15,7 +15,7 @@ const Accordion = ({ topic, subtopics, onLinkClick }) => {
         {accordionIsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
       </button>
       <div
-        className={`grid overflow-hidden text-sm text-slate-600 transition-all duration-300 ease-in-out ${
+        className={`text-muted-foreground grid overflow-hidden text-sm transition-all duration-300 ease-in-out ${
           accordionIsOpen ? 'grid-rows-[1fr] py-4 opacity-100' : 'grid-rows-[0fr] opacity-0'
         }`}
       >
@@ -24,7 +24,7 @@ const Accordion = ({ topic, subtopics, onLinkClick }) => {
             <TrackingLink
               key={index}
               href={subtopic.url}
-              className="flex items-center gap-2 text-signoz_vanilla-300"
+              className="text-muted-foreground flex items-center gap-2"
               clickType="Nav Click"
               clickName={`${subtopic.name} Link`}
               clickText={subtopic.name}

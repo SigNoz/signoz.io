@@ -46,10 +46,10 @@ export function Pagination({
   const shouldRenderTwoNextPages = currentPage === 1
 
   return (
-    <div className="flex items-center justify-between space-y-2 pb-8 pt-6 md:space-y-5">
+    <div className="flex items-center justify-between space-y-2 pt-6 pb-8 md:space-y-5">
       <nav className="flex w-full items-center justify-between">
-        <span className="font-mono text-sm font-normal text-signoz_vanilla-100">
-          {startPost} ⎯ {endPost} <span className="text-signoz_vanilla-400">of {totalPosts}</span>
+        <span className="text-l1-foreground font-mono text-sm font-normal">
+          {startPost} ⎯ {endPost} <span className="text-muted-foreground">of {totalPosts}</span>
         </span>
         <div className="flex items-center gap-2.5 font-mono">
           {prevPage ? (
@@ -73,7 +73,7 @@ export function Pagination({
               1
             </Link>
           ) : null}
-          {currentPage - 2 > 1 ? <div className="h-px w-8 bg-signoz_vanilla-400"></div> : null}
+          {currentPage - 2 > 1 ? <div className="bg-muted h-px w-8"></div> : null}
 
           {shouldRenderTwoPrevPages ? (
             <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage - 2}`}>
@@ -89,7 +89,7 @@ export function Pagination({
 
           <Link
             href={`/${pageRoute}/page/${currentPage}`}
-            className={`${PAGE_NUMBER_STYLES} bg-signoz_robin-500 text-black`}
+            className={`${PAGE_NUMBER_STYLES} bg-primary text-black`}
           >
             {currentPage}
           </Link>
@@ -106,9 +106,7 @@ export function Pagination({
             </Link>
           ) : null}
 
-          {totalPages - 2 > currentPage ? (
-            <div className="h-px w-8 bg-signoz_vanilla-400"></div>
-          ) : null}
+          {totalPages - 2 > currentPage ? <div className="bg-muted h-px w-8"></div> : null}
           {currentPage !== totalPages ? (
             <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${totalPages}`}>
               {totalPages}
@@ -163,11 +161,11 @@ export default function GridLayout({
 
   return (
     <RegionProvider>
-      <div className="mx-auto max-w-8xl p-0">
+      <div className="max-w-8xl mx-auto p-0">
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
           <div className="my-8 flex flex-col">
             <div
-              className={`w-full text-sm font-semibold uppercase leading-5 tracking-wide max-md:max-w-full ${isDarkMode ? 'text-signoz_slate-100' : 'text-signoz_slate-300'}`}
+              className={`w-full text-sm leading-5 font-semibold tracking-wide uppercase max-md:max-w-full ${isDarkMode ? 'text-muted-foreground' : 'text-muted-foreground'}`}
             >
               All posts
             </div>

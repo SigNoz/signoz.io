@@ -1,6 +1,6 @@
-import Link from 'next/link'
 import React from 'react'
 import type { Metadata } from 'next'
+import Button from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title: 'About us',
@@ -11,9 +11,9 @@ function aboutus() {
   return (
     <div title="About Us">
       <section>
-        <div className="container" style={{ marginTop: '4rem', marginBottom: '4rem' }}>
+        <div className="container mx-auto my-16">
           <h1 className="mb-4 text-center text-4xl font-bold">About Us</h1>
-          <p className="text--center margin-vert--lg">
+          <p className="my-8 text-center">
             {' '}
             Some of you may wonder, what does SigNoz mean? As engineers we are obsessed with the
             idea of signal vs noise. How do devops engineers find signals which they can act on from
@@ -23,95 +23,76 @@ function aboutus() {
             <br></br>
             And, hence the name Sig.Noz ( Signal vs Noise) 🤓
           </p>
-          <div className="row">
-            <div className="col col--6">
-              <div className="card-demo margin--md">
-                <div className="card-dark bg-signoz_slate-500">
-                  <div className="avatar margin--md">
-                    <img
-                      className="avatar__photo avatar__photo--lg"
-                      src="/img/504541.webp"
-                      alt="Profile pic of Pranay Prateek"
-                    />
-                    <div className="avatar__intro">
-                      <h4 className="avatar__name">Pranay Prateek</h4>
-                      <small className="avatar__subtitle">Co-founder & CEO </small>
-                    </div>
+          <div className="flex flex-wrap">
+            <div className="w-full p-4 md:w-1/2">
+              <div className="border-border bg-card rounded-md border">
+                <div className="m-4 flex items-center gap-4">
+                  <img
+                    className="h-16 w-16 rounded-full object-cover"
+                    src="/img/504541.webp"
+                    alt="Profile pic of Pranay Prateek"
+                  />
+                  <div>
+                    <h4 className="text-l1-foreground mb-0 text-base font-semibold">
+                      Pranay Prateek
+                    </h4>
+                    <small className="text-muted-foreground text-sm">Co-founder & CEO </small>
                   </div>
-                  <div className="card__body">
-                    <p>
-                      After spending a lot of time in college reading philosophy, I got interested
-                      in technology. Biometric & image recognition was especially interesting to me.
-                      Led product teams in startups & MNCs like Microsoft, before stumbling into the
-                      domain of observability.
-                      <br></br>
-                      <br></br>
-                      Reducing noise in developers' and devops engineers' life is my current passion
-                      :)
-                    </p>
-                  </div>
-                  <div className="card__footer">
-                    <Link
-                      className="button button--secondary button--outline"
-                      href={'https://twitter.com/pranay01'}
-                    >
-                      <div className=""> Twitter </div>
-                    </Link>
+                </div>
+                <div className="px-4 pb-4">
+                  <p>
+                    After spending a lot of time in college reading philosophy, I got interested in
+                    technology. Biometric & image recognition was especially interesting to me. Led
+                    product teams in startups & MNCs like Microsoft, before stumbling into the
+                    domain of observability.
+                    <br></br>
+                    <br></br>
+                    Reducing noise in developers&apos; and devops engineers&apos; life is my current
+                    passion :)
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 p-4 pt-0">
+                  <Button href="https://twitter.com/pranay01" variant="outline">
+                    Twitter
+                  </Button>
 
-                    <a
-                      className="button button--link"
-                      style={{ color: 'white' }}
-                      href="mailto:pranay@signoz.io"
-                    >
-                      pranay at signoz dot io
-                    </a>
-
-                    {/* <button className="button button--secondary button--outline button--link" href="https://twitter.com/pranay01">Twitter</button> */}
-                  </div>
+                  <Button href="mailto:pranay@signoz.io" variant="link" className="text-foreground">
+                    pranay at signoz dot io
+                  </Button>
                 </div>
               </div>
             </div>
-            <div className="col col--6">
-              <div className="card-demo margin--md">
-                <div className="card-dark bg-signoz_slate-500">
-                  <div className="avatar margin--md">
-                    <img
-                      className="avatar__photo avatar__photo--lg"
-                      src="/img/12460410.webp"
-                      alt="Profile pic of Ankit Nayan"
-                    />
-                    <div className="avatar__intro">
-                      <h4 className="avatar__name">Ankit Nayan</h4>
-                      <small className="avatar__subtitle"> Co-Founder & CTO </small>
-                    </div>
+            <div className="w-full p-4 md:w-1/2">
+              <div className="border-border bg-card rounded-md border">
+                <div className="m-4 flex items-center gap-4">
+                  <img
+                    className="h-16 w-16 rounded-full object-cover"
+                    src="/img/12460410.webp"
+                    alt="Profile pic of Ankit Nayan"
+                  />
+                  <div>
+                    <h4 className="text-l1-foreground mb-0 text-base font-semibold">Ankit Nayan</h4>
+                    <small className="text-muted-foreground text-sm"> Co-Founder & CTO </small>
                   </div>
-                  <div className="card__body">
-                    <p>
-                      Playing Badminton professionally was my dream at one time. But that seemed too
-                      tough, so I started coding. I have delved in all sorts of technologies
-                      including crypto when it was exciting.
-                      <br></br> <br></br>
-                      Always interested in solving interesting problems with technology.
-                      Microservices & Distributed systems is what I am most interested in these
-                      days.{' '}
-                    </p>
-                  </div>
-                  <div className="card__footer">
-                    <Link
-                      className="button button--secondary button--outline text-white"
-                      href={'https://twitter.com/ankitnayan'}
-                    >
-                      <div className=""> Twitter </div>
-                    </Link>
+                </div>
+                <div className="px-4 pb-4">
+                  <p>
+                    Playing Badminton professionally was my dream at one time. But that seemed too
+                    tough, so I started coding. I have delved in all sorts of technologies including
+                    crypto when it was exciting.
+                    <br></br> <br></br>
+                    Always interested in solving interesting problems with technology. Microservices
+                    & Distributed systems is what I am most interested in these days.{' '}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 p-4 pt-0">
+                  <Button href="https://twitter.com/ankitnayan" variant="outline">
+                    Twitter
+                  </Button>
 
-                    <a
-                      className="button button--link"
-                      style={{ color: 'white' }}
-                      href="mailto:pranay@signoz.io"
-                    >
-                      ankit at signoz dot io
-                    </a>
-                  </div>
+                  <Button href="mailto:ankit@signoz.io" variant="link" className="text-foreground">
+                    ankit at signoz dot io
+                  </Button>
                 </div>
               </div>
             </div>

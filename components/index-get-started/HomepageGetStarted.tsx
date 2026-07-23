@@ -28,22 +28,22 @@ const getStartedOptions: GetStartedOption[] = [
 function GetStartedColumn({ option, index }: { option: GetStartedOption; index: number }) {
   return (
     <article
-      className={`flex min-h-48 flex-col justify-between border-t border-signoz_slate-400/35 py-7 md:min-h-56 md:border-t-0 md:px-12 md:py-8 ${
+      className={`border-border/35 flex min-h-48 flex-col justify-between border-t py-7 md:min-h-56 md:border-t-0 md:px-12 md:py-8 ${
         index === 0 ? 'md:border-x' : ''
       }`}
     >
       <div className="max-w-sm">
-        <h3 className="m-0 text-sm leading-5 text-signoz_vanilla-400">{option.title}</h3>
-        <p className="m-0 mt-3 text-lg font-medium leading-7 tracking-normal text-signoz_vanilla-100 md:text-xl md:leading-8">
+        <h3 className="text-muted-foreground m-0 text-sm leading-5">{option.title}</h3>
+        <p className="text-l1-foreground m-0 mt-3 text-lg leading-7 font-medium tracking-normal md:text-xl md:leading-8">
           {option.description}
         </p>
       </div>
 
       <div>
-        <p className="m-0 text-xs font-medium uppercase tracking-widest text-signoz_robin-400">
+        <p className="text-accent-primary m-0 text-xs font-medium tracking-widest uppercase">
           {option.priceLabel}
         </p>
-        <p className="m-0 mt-2 text-2xl font-medium leading-none tracking-tight text-signoz_vanilla-100 md:text-2xl">
+        <p className="text-l1-foreground m-0 mt-2 text-2xl leading-none font-medium tracking-tight md:text-2xl">
           {option.price}
         </p>
       </div>
@@ -54,15 +54,15 @@ function GetStartedColumn({ option, index }: { option: GetStartedOption; index: 
 export default function HomepageGetStarted() {
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-12 sm:px-6 sm:py-16 lg:px-20 lg:py-20 wide:max-w-8xl wide:px-0"
+      className="wide:max-w-8xl wide:px-0 relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-12 sm:px-6 sm:py-16 lg:px-20 lg:py-20"
       data-homepage-floating-cta="Get started"
       data-homepage-floating-href="/teams/"
     >
-      <div className="mx-auto max-w-8xl border-y border-signoz_slate-400/35">
+      <div className="max-w-8xl border-border/35 mx-auto border-y">
         <div className="grid gap-0 md:grid-cols-3">
-          <div className="flex min-h-48 flex-col items-start justify-between border-b border-signoz_slate-400/35 py-7 md:min-h-56 md:border-b-0 md:py-8 md:pr-8">
+          <div className="border-border/35 flex min-h-48 flex-col items-start justify-between border-b py-7 md:min-h-56 md:border-b-0 md:py-8 md:pr-8">
             <div>
-              <h2 className="m-0 max-w-xs text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl md:text-5xl">
+              <h2 className="text-l1-foreground m-0 max-w-xs text-3xl leading-none font-medium tracking-tight sm:text-4xl md:text-5xl">
                 Get started with SigNoz.
               </h2>
             </div>

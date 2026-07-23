@@ -26,15 +26,15 @@ export const GetStarted = ({
       <section
         className={cn(
           isHomepageRedesign
-            ? 'relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden border-y border-signoz_slate-400/35 px-5 sm:px-6 lg:px-20 wide:max-w-8xl wide:px-0'
-            : 'mx-auto w-full max-w-8xl border !border-b-0 border-dashed border-signoz_slate-400',
+            ? 'border-border/35 wide:max-w-8xl wide:px-0 relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden border-y px-5 sm:px-6 lg:px-20'
+            : 'max-w-8xl border-border mx-auto w-full border !border-b-0 border-dashed',
           className
         )}
       >
-        <div className={cn('bg-blur-ellipse-206', isHomepageRedesign && 'mx-auto max-w-8xl')}>
+        <div className={cn('bg-blur-ellipse-206', isHomepageRedesign && 'max-w-8xl mx-auto')}>
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
-              <p className="mb-0 mt-20 text-center text-4xl font-bold">
+              <p className="mt-20 mb-0 text-center text-4xl font-bold">
                 Slow is the new <br /> downtime.
               </p>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">

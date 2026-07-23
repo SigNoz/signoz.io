@@ -24,7 +24,7 @@ export const FEATURE_CARDS = [
           80+ templates or from scratch. Generate alerts with sensible defaults. Run queries and get
           results in chat, no query language required.
         </p>
-        <p className="mt-3 italic text-signoz_vanilla-300">
+        <p className="text-muted-foreground mt-3 italic">
           &ldquo;Create a latency dashboard for my payment service&rdquo; → Done. Fully interactive.
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
@@ -139,7 +139,7 @@ export const FEATURE_CARDS = [
   },
   {
     description: (
-      <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg bg-signoz_ink-500">
+      <div className="bg-background relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
         <Image
           src="/img/graphics/homepage/feature-graphic-5.svg"
           alt="GitHub, Slack, GitLab, and Jira connected to SigNoz — tribal knowledge and integrations flow"
@@ -199,7 +199,7 @@ export const FEATURE_CARDS = [
   },
   {
     description: (
-      <div className="relative flex h-full min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg bg-signoz_ink-500">
+      <div className="bg-background relative flex h-full min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg">
         <Image
           className="object-contain"
           src={featureGraphicOtel}

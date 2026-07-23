@@ -16,14 +16,12 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-signoz_robin-500 text-white hover:bg-signoz_robin-600 active:bg-signoz_robin-700',
-        outline:
-          'border border-signoz_robin-500 bg-transparent text-signoz_robin-500 hover:bg-signoz_robin-500/10',
-        secondary:
-          'bg-signoz_ink-400 button-background text-signoz_vanilla-300 hover:bg-signoz_ink-300', // TODO: the bg color doesn't match any variable in tailwind, check design guidelines
-        tertiary: 'bg-signoz_vanilla-200 text-signoz_ink-200 hover:bg-signoz_vanilla-300',
-        ghost: 'bg-transparent hover:bg-signoz_ink-400',
-        link: 'text-signoz_robin-500',
+          'bg-primary text-primary-foreground hover:bg-primary-background-hover active:bg-primary-background-hover',
+        outline: 'border border-primary bg-transparent text-primary hover:bg-primary/10',
+        secondary: 'button-background bg-secondary text-secondary-foreground hover:bg-muted',
+        tertiary: 'bg-background text-muted-foreground hover:bg-muted',
+        ghost: 'bg-transparent hover:bg-muted',
+        link: 'text-primary',
       },
       size: {
         default: 'h-10 px-4 py-2',
@@ -49,9 +47,9 @@ export const buttonVariants = cva(
 // -----------------------------------------------------------------------------
 const LEGACY_VARIANT_TO_STYLES_MAP = {
   legacyPrimary:
-    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-signoz_robin-500 text-center font-medium leading-5 !text-white !no-underline outline-none hover:!text-white',
+    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-primary text-center font-medium leading-5 !text-primary-foreground !no-underline outline-none hover:!text-primary-foreground',
   legacySecondary:
-    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 button-background text-center font-medium leading-5 !text-white !no-underline outline-none hover:!text-white',
+    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 button-background text-center font-medium leading-5 !text-l1-foreground !no-underline outline-none hover:!text-l1-foreground',
 } as const
 
 type ButtonElementType = React.ElementType
@@ -78,6 +76,14 @@ export interface ButtonProps
    * Provide an href to render the button as a Link (anchor tag).
    */
   href?: string
+  /**
+   * Anchor target when rendering as a link.
+   */
+  target?: React.HTMLAttributeAnchorTarget
+  /**
+   * Anchor rel when rendering as a link.
+   */
+  rel?: string
   /**
    * Legacy prop from the previous implementation. When `false`, behaviour
    * matched an inline link. Retained for backwards-compatibility and
@@ -176,9 +182,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const splitIconClass =
       mappedVariant === 'default'
-        ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600'
+        ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-primary !p-0 transition-colors duration-200 hover:!bg-accent-primary-hover active:!bg-primary-background-hover'
         : mappedVariant === 'secondary'
-          ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !p-0 transition-colors duration-200 hover:!bg-signoz_ink-300'
+          ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !p-0 transition-colors duration-200 hover:!bg-l3-background'
           : ''
     const shouldRenderSplitIcon = !unstyled && withIcon && Boolean(splitIconClass) && !asChild
     const resolvedClassName = unstyled
@@ -204,7 +210,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           <>
             <span
               className={cn(
-                'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+                'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !px-3 !whitespace-nowrap',
                 mappedVariant === 'default' && '[&_svg:not(.animate-spin)]:hidden'
               )}
             >
@@ -213,7 +219,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             <span
               className={cn(
                 'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
-                mappedVariant === 'default' ? '!flex !bg-signoz_robin-400' : '!flex'
+                mappedVariant === 'default' ? '!bg-accent-primary-hover !flex' : '!flex'
               )}
               aria-hidden="true"
             >

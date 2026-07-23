@@ -6,9 +6,9 @@ import MainFooter from '@/components/mainFooter'
 export default function NotFound() {
   return (
     <SectionContainer>
-      <div className="relative flex h-screen flex-col justify-between ">
+      <div className="relative flex h-screen flex-col justify-between">
         <TopNav />
-        <main className="mb-auto mt-[48px] bg-signoz_ink-500">
+        <main className="bg-background mt-[48px] mb-auto">
           <NotFoundRecoveryClient />
         </main>
         <MainFooter />

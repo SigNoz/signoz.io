@@ -30,9 +30,7 @@ export default function CheckboxField({
         />
         <span
           className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
-            checked
-              ? 'border-signoz_robin-500 bg-signoz_robin-500'
-              : `${t.checkboxBorder} bg-transparent`
+            checked ? 'border-primary bg-primary' : `${t.checkboxBorder} bg-transparent`
           }`}
         >
           {checked && <Check className="h-3 w-3 text-white" strokeWidth={2.5} />}

@@ -14,17 +14,11 @@ const MigrateSaving = ({ data: { TITLE, DESC, PORTAL_ID, FORM_ID } }: MigrateSav
       <div className={styles.svsdHeaderContainer}>
         <h2 className={styles.headerTitle}>{TITLE}</h2>
         <p className={styles.headerDesc}>{DESC}</p>
-        <div className="container">
-          <div className="row">
-            <div className={'col col--3 margin-vert--md'}></div>
-            <div className={'col col--6 margin-vert--md'}>
-              <div className={`card ${styles.hubForm}`}>
-                <div className="card__body">
-                  <HubspotCustomForm portalId={PORTAL_ID} formId={FORM_ID} formName={TITLE} />
-                </div>
-              </div>
+        <div className="container mx-auto">
+          <div className="mx-auto my-4 w-full max-w-xl">
+            <div className={`border-border bg-card rounded-md border ${styles.hubForm}`}>
+              <HubspotCustomForm portalId={PORTAL_ID} formId={FORM_ID} formName={TITLE} />
             </div>
-            <div className={'col col--3 margin-vert--md'}></div>
           </div>
         </div>
       </div>

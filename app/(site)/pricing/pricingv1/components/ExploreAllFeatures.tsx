@@ -42,7 +42,7 @@ const ALL_FEATURES_DATA = {
       action: (
         <TrackingLink
           href={'/docs/introduction/'}
-          className="button-background flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
+          className="button-background text-foreground flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 text-center text-[9px] leading-5 font-medium sm:text-sm"
           clickType="Secondary CTA"
           clickName="Docs Link"
           clickText="Read Documentation"
@@ -59,7 +59,7 @@ const ALL_FEATURES_DATA = {
       action: (
         <TrackingLink
           href={'/teams/'}
-          className="flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full bg-signoz_robin-500 px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
+          className="bg-primary text-primary-foreground flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 text-center text-[9px] leading-5 font-medium sm:text-sm"
           clickType="Primary CTA"
           clickName="Sign Up Button"
           clickText="Get Started - Free"
@@ -76,7 +76,7 @@ const ALL_FEATURES_DATA = {
       action: (
         <TrackingLink
           href={'/contact-us/?source=pricing'}
-          className="button-background flex h-8 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 text-center text-[9px] font-medium text-white sm:text-sm"
+          className="button-background text-foreground flex h-8 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 text-center text-[9px] font-medium sm:text-sm"
           clickType="Secondary CTA"
           clickName="Enterprise Contact Button"
           clickText="Contact Us"
@@ -95,17 +95,17 @@ const ALL_FEATURES_DATA = {
         {
           feature: 'Best suited for your needs when you',
           inCommunity: (
-            <div className="text-center text-xs text-signoz_vanilla-400">
+            <div className="text-muted-foreground text-center text-xs">
               🛠️ Have DevOps expertise & want full control
             </div>
           ),
           inTeams: (
-            <div className="text-center text-xs text-signoz_vanilla-400">
+            <div className="text-muted-foreground text-center text-xs">
               ☁️ Want zero operational overhead & quick setup
             </div>
           ),
           inEnterprise: (
-            <div className="text-center text-xs text-signoz_vanilla-400">
+            <div className="text-muted-foreground text-center text-xs">
               🏢 Want dedicated environments or bring-your-own-cloud
             </div>
           ),
@@ -113,17 +113,17 @@ const ALL_FEATURES_DATA = {
         {
           feature: 'Ideal for',
           inCommunity: (
-            <div className="text-center text-xs text-signoz_vanilla-400">
+            <div className="text-muted-foreground text-center text-xs">
               Solo developers & small startups
             </div>
           ),
           inTeams: (
-            <div className="text-center text-xs text-signoz_vanilla-400">
+            <div className="text-muted-foreground text-center text-xs">
               Teams scaling fast & growing companies
             </div>
           ),
           inEnterprise: (
-            <div className="text-center text-xs text-signoz_vanilla-400">
+            <div className="text-muted-foreground text-center text-xs">
               Orgs with compliance & security requirements
             </div>
           ),
@@ -704,7 +704,7 @@ function toPricingSections(): ComparisonSection[] {
     id: section.section === 'Choose When' ? 'choose-when-section' : undefined,
     rows: section.features.map((f) => ({
       feature: (
-        <h4 className="col-span-3 m-0 py-4 pl-6 pr-2 text-center text-sm font-normal text-signoz_vanilla-400 sm:py-5 md:col-span-1 md:text-left">
+        <h4 className="text-muted-foreground col-span-3 m-0 py-4 pr-2 pl-6 text-center text-sm font-normal sm:py-5 md:col-span-1 md:text-left">
           {f.feature}
         </h4>
       ),
@@ -728,9 +728,9 @@ const PRICING_COLUMNS = [
   {
     key: 'teams',
     cellClassName:
-      'relative z-10 flex scale-105 transform items-center justify-center rounded-lg rounded-none border-x border-signoz_slate-400/20 bg-signoz_ink-500 p-4 shadow-2xl sm:bg-signoz_ink-300 sm:p-5',
+      'relative z-10 flex scale-105 transform items-center justify-center rounded-lg rounded-none border-x border-border/20 bg-background p-4 shadow-2xl sm:bg-l3-background sm:p-5',
     sectionCellClassName:
-      'relative z-10 scale-105 transform border-x border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-signoz_ink-300',
+      'relative z-10 scale-105 transform border-x border-border/20 bg-background shadow-2xl sm:bg-l3-background',
   },
   {
     key: 'enterprise',
@@ -742,25 +742,25 @@ const PRICING_COLUMNS = [
 const ExploreAllFeatures: React.FC = () => {
   return (
     <>
-      <div className="mx-auto mb-10 mt-6" id="all-features">
+      <div className="mx-auto mt-6 mb-10" id="all-features">
         {/* Header - Using CSS sticky positioning for smoother scrolling */}
-        <div className="sticky top-[74px] z-20 bg-[#0f1013] before:absolute before:inset-x-0 before:-top-10 before:h-10 before:bg-[#0f1013] before:content-['']">
-          <div className="mb-20 mt-12 sm:my-12">
+        <div className="bg-background before:bg-background sticky top-[74px] z-20 before:absolute before:inset-x-0 before:-top-10 before:h-10 before:content-['']">
+          <div className="mt-12 mb-20 sm:my-12">
             <div className="grid grid-cols-1">
               <div className="mx-6 flex justify-center">
                 <TrackingLink
                   href="/teams/"
-                  className="absolute -top-10 my-6 cursor-pointer rounded-full border border-signoz_slate-400 bg-signoz_ink-400 px-6 py-3 text-center transition-all duration-200 hover:border-signoz_robin-500/50 hover:bg-signoz_ink-300 hover:shadow-lg"
+                  className="border-border bg-card hover:border-primary/50 hover:bg-l3-background absolute -top-10 my-6 cursor-pointer rounded-full border px-6 py-3 text-center transition-all duration-200 hover:shadow-lg"
                   clickType="Secondary CTA"
                   clickName="Pro Tip Pill"
                   clickText="Most teams start with Teams Cloud free trial to test with real data, then decide based on their specific needs. You can always migrate between options as your requirements evolve!"
                   clickLocation="Explore All Features Pro Tip"
                   id="btn-pro-tip-teams-link"
                 >
-                  <p className="m-0 text-xs text-signoz_vanilla-400 hover:text-signoz_vanilla-300">
-                    <span className="font-medium text-signoz_vanilla-200">💡 Pro tip:</span> Most
-                    teams start with Teams Cloud free trial to test with real data, then decide
-                    based on their specific needs. You can always migrate between options as your
+                  <p className="text-muted-foreground hover:text-muted-foreground m-0 text-xs">
+                    <span className="text-l1-foreground font-medium">💡 Pro tip:</span> Most teams
+                    start with Teams Cloud free trial to test with real data, then decide based on
+                    their specific needs. You can always migrate between options as your
                     requirements evolve!
                   </p>
                 </TrackingLink>
@@ -773,7 +773,7 @@ const ExploreAllFeatures: React.FC = () => {
                 key={idx}
                 className={`${
                   idx === 2
-                    ? `relative z-10 flex scale-105 transform flex-col justify-between rounded-lg !rounded-b-none border border-signoz_slate-400/20 bg-signoz_ink-500 p-3 shadow-2xl sm:bg-signoz_ink-300`
+                    ? `border-border/20 bg-background sm:bg-l3-background relative z-10 flex scale-105 transform flex-col justify-between rounded-lg !rounded-b-none border p-3 shadow-2xl`
                     : idx !== 0
                       ? `flex flex-col justify-between rounded-lg p-3 bg-opacity-${idx * 10}`
                       : 'hidden md:block'
@@ -781,7 +781,7 @@ const ExploreAllFeatures: React.FC = () => {
               >
                 <div className="flex flex-col gap-1">
                   <h2 className="m-0 text-sm max-sm:h-16 md:text-base">{header.heading}</h2>
-                  <p className="text-xs text-signoz_vanilla-400">{header.desc}</p>
+                  <p className="text-muted-foreground text-xs">{header.desc}</p>
                 </div>
                 <div className="flex w-full justify-center">{header.action}</div>
               </div>
@@ -797,7 +797,7 @@ const ExploreAllFeatures: React.FC = () => {
           gridClassName={PRICING_GRID}
           sectionHeadingSize="lg"
           stickyOffset="top-[220px]"
-          stickyBg="bg-[#0f1013]"
+          stickyBg="bg-background"
           featureCellClassName="col-span-3 md:col-span-1"
           featureSectionClassName="col-span-3 pl-6 pr-2 md:col-span-1"
         />
@@ -806,7 +806,7 @@ const ExploreAllFeatures: React.FC = () => {
         <div className={`grid h-[18px] ${PRICING_GRID}`}>
           <div />
           <div />
-          <div className="relative z-10 scale-105 transform rounded-lg !rounded-t-none border-x border-b border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-signoz_ink-300" />
+          <div className="border-border/20 bg-background sm:bg-l3-background relative z-10 scale-105 transform rounded-lg !rounded-t-none border-x border-b shadow-2xl" />
           <div />
         </div>
       </div>

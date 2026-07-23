@@ -63,8 +63,8 @@ test('cleanup preserves KeyPointCallout headings while removing button chrome', 
     <div class="my-8 w-full rounded-2xl border border-white/10 bg-white/5 text-gray-100 shadow-lg shadow-black/10 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/10">
       <button type="button" class="flex w-full items-center justify-between px-6 py-5 text-left">
         <div class="flex items-center gap-3">
-          <div class="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-signoz_sakura-200">
-            <span class="inline-block h-1.5 w-6 rounded-full bg-signoz_sakura-400/70" aria-hidden="true"></span>
+          <div class="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-sakura-200">
+            <span class="inline-block h-1.5 w-6 rounded-full bg-sakura-400/70" aria-hidden="true"></span>
             Using self-hosted SigNoz?
           </div>
         </div>

@@ -23,9 +23,9 @@ export default function NewsroomLayout({ content, next, prev, children }: Layout
         <ScrollTopAndComment />
         <article>
           <div className="newsroom-content">
-            <div className="grid-rows-[auto_1fr] divide-y divide-gray-200 pb-8 dark:divide-gray-700 xl:divide-y-0">
-              <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-3 xl:row-span-2 xl:pb-0">
-                <div className="prose max-w-none pb-8 pt-10 dark:prose-invert">{children}</div>
+            <div className="grid-rows-[auto_1fr] divide-y divide-gray-200 pb-8 xl:divide-y-0 dark:divide-gray-700">
+              <div className="divide-y divide-gray-200 xl:col-span-3 xl:row-span-2 xl:pb-0 dark:divide-gray-700">
+                <div className="prose dark:prose-invert max-w-none pt-10 pb-8">{children}</div>
               </div>
               <footer>
                 <div className="flex flex-col text-sm font-medium sm:flex-row sm:justify-between sm:text-base">
@@ -33,7 +33,7 @@ export default function NewsroomLayout({ content, next, prev, children }: Layout
                     <div className="pt-4 xl:pt-8">
                       <Link
                         href={`/${prev.path}`}
-                        className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                        className="text-primary hover:text-robin-600 dark:hover:text-accent-primary"
                         aria-label={`Previous post: ${prev.title}`}
                       >
                         &larr; {prev.title}
@@ -44,7 +44,7 @@ export default function NewsroomLayout({ content, next, prev, children }: Layout
                     <div className="pt-4 xl:pt-8">
                       <Link
                         href={`/${next.path}`}
-                        className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                        className="text-primary hover:text-robin-600 dark:hover:text-accent-primary"
                         aria-label={`Next post: ${next.title}`}
                       >
                         {next.title} &rarr;

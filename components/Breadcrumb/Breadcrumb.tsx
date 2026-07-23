@@ -1,4 +1,3 @@
-
 import React from 'react'
 import Link from 'next/link'
 import { Home, ChevronRight } from 'lucide-react'
@@ -17,7 +16,7 @@ const toRelativePath = (url: string): string => {
 }
 
 const Separator = () => (
-  <ChevronRight size={12} className="shrink-0 text-signoz_vanilla-400/40" aria-hidden="true" />
+  <ChevronRight size={12} className="text-muted-foreground/40 shrink-0" aria-hidden="true" />
 )
 
 export default function Breadcrumb({ crumbs }: BreadcrumbProps) {
@@ -40,7 +39,7 @@ export default function Breadcrumb({ crumbs }: BreadcrumbProps) {
       items.push(
         <li key="ellipsis" className="flex items-center gap-1.5 md:hidden" aria-hidden="true">
           <Separator />
-          <span className="text-signoz_vanilla-400">...</span>
+          <span className="text-muted-foreground">...</span>
         </li>
       )
     }
@@ -55,21 +54,21 @@ export default function Breadcrumb({ crumbs }: BreadcrumbProps) {
         {isLast ? (
           <span
             aria-current="page"
-            className="max-w-[300px] truncate font-medium text-signoz_vanilla-100"
+            className="text-l1-foreground max-w-[300px] truncate font-medium"
           >
             {crumb.name}
           </span>
         ) : isFirst ? (
           <Link
             href={toRelativePath(crumb.url)}
-            className="flex items-center text-signoz_vanilla-400 transition-colors hover:text-signoz_robin-400"
+            className="text-muted-foreground hover:text-accent-primary flex items-center transition-colors"
           >
             <Home size={14} aria-label="Home" />
           </Link>
         ) : (
           <Link
             href={toRelativePath(crumb.url)}
-            className="whitespace-nowrap text-signoz_vanilla-400 transition-colors hover:text-signoz_robin-400"
+            className="text-muted-foreground hover:text-accent-primary whitespace-nowrap transition-colors"
           >
             {crumb.name}
           </Link>

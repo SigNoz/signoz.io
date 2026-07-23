@@ -4,56 +4,56 @@ import { type ComparisonTableRow } from '@/shared/components/molecules/FeaturePa
 
 export const TEAM_SWITCH_CARDS = [
   {
-    icon: <Atom size={16} className="text-signoz_vanilla-400" />,
+    icon: <Atom size={16} className="text-muted-foreground" />,
     title: 'Unpredictable costs after free tier',
     description: (
       <>
         Debug logging at INFO level generates approximately{' '}
-        <span className="font-bold text-signoz_cherry-300">1GB per EC2</span> instance daily. At{' '}
-        <span className="font-bold text-signoz_cherry-300">$0.50/GB</span> ingestion, verbose
+        <span className="text-danger-foreground font-bold">1GB per EC2</span> instance daily. At{' '}
+        <span className="text-danger-foreground font-bold">$0.50/GB</span> ingestion, verbose
         logging across 20 instances costs $300/day. Custom metrics bill at{' '}
-        <span className="font-bold text-signoz_cherry-300">$0.30/month</span> per unique dimension
+        <span className="text-danger-foreground font-bold">$0.30/month</span> per unique dimension
         combination.
       </>
     ),
   },
   {
-    icon: <Atom size={16} className="text-signoz_vanilla-400" />,
+    icon: <Atom size={16} className="text-muted-foreground" />,
     title: 'Four separate consoles during incidents',
     description: (
       <>
         Query logs in Logs Insights, check metrics in Metrics console, view traces in X-Ray, check
         service health in Application Signals. Each uses{' '}
-        <span className="font-bold text-signoz_cherry-300">different query syntax</span>. Clicking
+        <span className="text-danger-foreground font-bold">different query syntax</span>. Clicking
         from metrics to logs{' '}
-        <span className="font-bold text-signoz_cherry-300">resets time filters</span>.
+        <span className="text-danger-foreground font-bold">resets time filters</span>.
       </>
     ),
   },
   {
-    icon: <Atom size={16} className="text-signoz_vanilla-400" />,
+    icon: <Atom size={16} className="text-muted-foreground" />,
     title: 'High context-switching tax',
     description: (
       <>
         Finding logs for a trace requires copying{' '}
-        <span className="font-bold text-signoz_cherry-300">trace IDs</span> from{' '}
-        <span className="font-bold text-signoz_cherry-300">X-Ray</span> and running a separate
-        search in <span className="font-bold text-signoz_cherry-300">CloudWatch Logs</span>. X-Ray
+        <span className="text-danger-foreground font-bold">trace IDs</span> from{' '}
+        <span className="text-danger-foreground font-bold">X-Ray</span> and running a separate
+        search in <span className="text-danger-foreground font-bold">CloudWatch Logs</span>. X-Ray
         setup requires installing the daemon, modifying application code, and configuring IAM roles.
       </>
     ),
   },
   {
-    icon: <Atom size={16} className="text-signoz_vanilla-400" />,
+    icon: <Atom size={16} className="text-muted-foreground" />,
     title: 'Per-query billing on every search',
     description: (
       <>
         Logs Insights charges{' '}
-        <span className="font-bold text-signoz_cherry-300">$0.005 per GB scanned</span>. Querying
-        100GB five times costs <span className="font-bold text-signoz_cherry-300">$2.50</span>.
+        <span className="text-danger-foreground font-bold">$0.005 per GB scanned</span>. Querying
+        100GB five times costs <span className="text-danger-foreground font-bold">$2.50</span>.
         Grafana polling CloudWatch APIs generates additional{' '}
-        <span className="font-bold text-signoz_cherry-300">GetMetricData</span> charges at{' '}
-        <span className="font-bold text-signoz_cherry-300">$0.01 per 1,000 metrics</span>.
+        <span className="text-danger-foreground font-bold">GetMetricData</span> charges at{' '}
+        <span className="text-danger-foreground font-bold">$0.01 per 1,000 metrics</span>.
         Incident-driven query volume makes costs impossible to predict.
       </>
     ),
@@ -62,11 +62,11 @@ export const TEAM_SWITCH_CARDS = [
 
 export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] = [
   {
-    feature: <span className="text-xl font-bold text-signoz_amber-400">Query Interface</span>,
+    feature: <span className="text-callout-warning-title text-xl font-bold">Query Interface</span>,
     vendors: {
       signoz: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center">
             <span className="text-lg">Single UI for all correlated signals </span>{' '}
             <span className="text-sm">(Logs, Metrics and Traces)</span>
           </div>
@@ -74,7 +74,7 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
       },
       cloudwatch: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center">
             <span className="text-lg">Separate consoles </span>
             <span className="text-sm">(CloudWatch, Logs Insights, X-Ray, Application Signals)</span>
           </div>
@@ -83,11 +83,11 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
     },
   },
   {
-    feature: <span className="text-xl font-bold text-signoz_amber-400">Billing model</span>,
+    feature: <span className="text-callout-warning-title text-xl font-bold">Billing model</span>,
     vendors: {
       signoz: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center">
             <span className="text-lg">Usage-based (GB ingested), </span>{' '}
             <span className="text-sm">predictable scaling using cost meter</span>
           </div>
@@ -95,7 +95,7 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
       },
       cloudwatch: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center">
             <span className="text-lg">Per-service, per-query, per-API call charges, </span>{' '}
             <span className="text-sm">unpredictable</span>
           </div>
@@ -104,18 +104,20 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
     },
   },
   {
-    feature: <span className="text-xl font-bold text-signoz_amber-400">Telemetry standard</span>,
+    feature: (
+      <span className="text-callout-warning-title text-xl font-bold">Telemetry standard</span>
+    ),
     vendors: {
       signoz: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center">
             <span className="text-lg">OpenTelemetry-native</span>
           </div>
         ),
       },
       cloudwatch: {
         text: (
-          <div className="flex w-full flex-col text-center text-lg text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col text-center text-lg">
             Proprietary (migrating to OpenTelemetry via ADOT)
           </div>
         ),
@@ -123,18 +125,18 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
     },
   },
   {
-    feature: <span className="text-xl font-bold text-signoz_amber-400">Query language</span>,
+    feature: <span className="text-callout-warning-title text-xl font-bold">Query language</span>,
     vendors: {
       signoz: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-lg text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center text-lg">
             Supports Query builder, PromQL and ClickHouse QL
           </div>
         ),
       },
       cloudwatch: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center">
             <span className="text-lg">Different query language per signal </span>{' '}
             <span className="text-sm">
               Logs Insights QL, Metrics statistics, X-Ray filter expressions, OpenSearch PPL/SQL
@@ -145,18 +147,18 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
     },
   },
   {
-    feature: <span className="text-xl font-bold text-signoz_amber-400">Data storage</span>,
+    feature: <span className="text-callout-warning-title text-xl font-bold">Data storage</span>,
     vendors: {
       signoz: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center">
             <span className="text-lg">ClickHouse columnar database</span>
           </div>
         ),
       },
       cloudwatch: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center">
             <span className="text-lg">Separate stores per service </span>{' '}
             <span className="text-sm">(Metrics, Logs, X-Ray, Application Signals)</span>
           </div>
@@ -165,11 +167,11 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
     },
   },
   {
-    feature: <span className="text-xl font-bold text-signoz_amber-400">Retention</span>,
+    feature: <span className="text-callout-warning-title text-xl font-bold">Retention</span>,
     vendors: {
       signoz: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center">
             <span className="text-lg">Hot storage (15-180 days), </span>{' '}
             <span className="text-lg">Cold storage (upto 2 years)</span>
           </div>
@@ -177,7 +179,7 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
       },
       cloudwatch: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center">
             <span className="text-sm">
               Metrics: 3 hours to 15 months with auto-aggregation. Logs: $0.03/GB/month. X-Ray: 30
               days max
@@ -188,18 +190,20 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
     },
   },
   {
-    feature: <span className="text-xl font-bold text-signoz_amber-400">Deployment Options</span>,
+    feature: (
+      <span className="text-callout-warning-title text-xl font-bold">Deployment Options</span>
+    ),
     vendors: {
       signoz: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center">
             <span className="text-lg">SigNoz Cloud or Self-hosted</span>
           </div>
         ),
       },
       cloudwatch: {
         text: (
-          <div className="flex w-full flex-col justify-center text-center text-lg text-signoz_vanilla-400">
+          <div className="text-muted-foreground flex w-full flex-col justify-center text-center text-lg">
             AWS managed per region
           </div>
         ),
@@ -211,12 +215,12 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
 export const VENDORS = [
   {
     key: 'signoz',
-    label: <span className="text-xl text-signoz_forest-50">SigNoz</span>,
+    label: <span className="text-forest-50 text-xl">SigNoz</span>,
     className: 'text-center',
   },
   {
     key: 'cloudwatch',
-    label: <span className="text-xl text-signoz_forest-50 ">AWS CloudWatch</span>,
+    label: <span className="text-forest-50 text-xl">AWS CloudWatch</span>,
     className: 'text-center',
   },
 ]
@@ -246,7 +250,7 @@ export const CLOUDWATCH_BILLING_CARDS = [
 
 export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_ABOVE = [
   {
-    icon: <TextSearch size={16} className="text-signoz_vanilla-400" />,
+    icon: <TextSearch size={16} className="text-muted-foreground" />,
     iconText: 'Regional Silos',
     title: 'Fragmented AWS CloudWatch',
     description: (
@@ -259,7 +263,7 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_ABOVE = [
     ),
   },
   {
-    icon: <TextSearch size={16} className="text-signoz_vanilla-400" />,
+    icon: <TextSearch size={16} className="text-muted-foreground" />,
     iconText: 'The Bill Snowball',
     title: 'Opaque Infrastructure Costs',
     description: (
@@ -275,7 +279,7 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_ABOVE = [
 
 export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW = [
   {
-    icon: <TextSearch size={16} className="text-signoz_vanilla-400" />,
+    icon: <TextSearch size={16} className="text-muted-foreground" />,
     iconText: 'Managed SaaS',
     title: 'SigNoz Cloud',
     description: (
@@ -290,7 +294,7 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW = [
     ),
   },
   {
-    icon: <TextSearch size={16} className="text-signoz_vanilla-400" />,
+    icon: <TextSearch size={16} className="text-muted-foreground" />,
     iconText: 'Hybrid Managed / BYOC',
     title: 'Managed Data Residency',
     description: (
@@ -306,7 +310,7 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW = [
     ),
   },
   {
-    icon: <TextSearch size={16} className="text-signoz_vanilla-400" />,
+    icon: <TextSearch size={16} className="text-muted-foreground" />,
     iconText: 'Self-Managed Enterprise',
     title: 'Enterprise Self-Hosted',
     description: (
@@ -321,7 +325,7 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW = [
     ),
   },
   {
-    icon: <TextSearch size={16} className="text-signoz_vanilla-400" />,
+    icon: <TextSearch size={16} className="text-muted-foreground" />,
     iconText: 'Open Source Core',
     title: 'Community Edition',
     description: (

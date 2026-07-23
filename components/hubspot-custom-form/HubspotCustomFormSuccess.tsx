@@ -19,7 +19,7 @@ export default function HubspotCustomFormSuccess({
 
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-      <CheckCircle className="h-7 w-7 text-signoz_robin-500" />
+      <CheckCircle className="text-primary h-7 w-7" />
       {message ? (
         <div
           className={`text-sm ${t.successText} [&_p]:mb-1 [&_p]:last:mb-0`}

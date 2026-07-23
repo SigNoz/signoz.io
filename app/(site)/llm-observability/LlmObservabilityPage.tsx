@@ -79,10 +79,10 @@ const EverythingYouNeedCards: React.FC = () => {
   return (
     <SectionLayout
       variant="bordered"
-      className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden px-0"
+      className="bg-blur-ellipse-388 max-w-8xl relative mx-auto overflow-hidden px-0"
     >
       <div className="relative mx-auto flex flex-col items-center gap-6 pt-32 text-center">
-        <h2 className="mb-6 max-w-4xl py-10 text-center text-4xl font-semibold leading-[3.25rem] text-signoz_sienna-100">
+        <h2 className="text-l1-foreground dark:text-sienna-100 mb-6 max-w-4xl py-10 text-center text-4xl leading-[3.25rem] font-semibold">
           Everything You Need to <br className="hidden md:block" /> Monitor LLM Applications
         </h2>
         <div>
@@ -100,18 +100,18 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
     <>
       <SectionLayout
         variant="bordered"
-        className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden"
+        className="bg-blur-ellipse-388 max-w-8xl relative mx-auto overflow-hidden"
       >
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
+        <div className="from-muted via-muted/50 to-background dark:from-ink-500/50 dark:via-ink-500/25 dark:to-ink-500/90 pointer-events-none absolute inset-0 bg-gradient-to-b" />
         <div className="relative">
           <div className="flex flex-col gap-6">
             <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-              <div className="flex flex-col items-center gap-8 font-medium leading-[3.25rem] text-signoz_sienna-100">
-                <h2 className="text-center text-4xl font-semibold text-signoz_sakura-100">
+              <div className="text-l1-foreground dark:text-sienna-100 flex flex-col items-center gap-8 leading-[3.25rem] font-medium">
+                <h2 className="text-l1-foreground dark:text-sakura-100 text-center text-4xl font-semibold">
                   Works with Your Favorite LLM Tools
                 </h2>
 
-                <p className="text-sm leading-relaxed text-signoz_vanilla-400">
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   Automatic instrumentation for every part of your LLM stack. From model{' '}
                   <br className="hidden md:block" /> providers to vector databases to agent
                   frameworks, get instant visibility <br className="hidden md:block" /> without
@@ -130,9 +130,9 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
                     clickLocation="LLM Observability Integrations Section"
                     clickText="See All Integrations"
                   >
-                    <BookOpen className="h-5 w-5 text-signoz_vanilla-400" />
+                    <BookOpen className="text-muted-foreground h-5 w-5" />
                     See All Integrations
-                    <ArrowRight className="h-5 w-5 text-signoz_vanilla-400" />
+                    <ArrowRight className="text-muted-foreground h-5 w-5" />
                   </TrackingLink>
                 </Button>
               </div>
@@ -155,21 +155,17 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
             return (
               <div
                 key={index}
-                className={`flex flex-col gap-6 border-dashed border-signoz_slate-400 px-6 py-8 md:px-10 md:py-12 ${desktopClasses}`}
+                className={`border-border flex flex-col gap-6 border-dashed px-6 py-8 md:px-10 md:py-12 ${desktopClasses}`}
               >
-                <h3 className="m-0 text-xl font-semibold text-signoz_vanilla-100">
-                  {section.title}
-                </h3>
+                <h3 className="text-l1-foreground m-0 text-xl font-semibold">{section.title}</h3>
 
                 <div className="flex flex-col gap-4">
                   {section.items.map((item) => (
                     <div key={item.id} className="flex items-start gap-3">
                       <div className="mt-1 shrink-0">
-                        <CircleArrowRight className="h-4 w-4 text-signoz_robin-400" />
+                        <CircleArrowRight className="text-accent-primary h-4 w-4" />
                       </div>
-                      <p className="m-0 text-sm leading-6 text-signoz_vanilla-300">
-                        {item.content}
-                      </p>
+                      <p className="text-muted-foreground m-0 text-sm leading-6">{item.content}</p>
                     </div>
                   ))}
                 </div>
@@ -186,15 +182,15 @@ const HowSigNozCompares: React.FC = () => {
   return (
     <SectionLayout
       variant="bordered"
-      className="bg-blur-ellipse-388 relative mx-auto max-w-8xl overflow-hidden"
+      className="bg-blur-ellipse-388 max-w-8xl relative mx-auto overflow-hidden"
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
+      <div className="from-muted via-muted/50 to-background dark:from-ink-500/50 dark:via-ink-500/25 dark:to-ink-500/90 pointer-events-none absolute inset-0 bg-gradient-to-b" />
       <div className="relative">
         <div className="container pb-16">
           <div className="flex flex-col gap-6 py-32">
             <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-              <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-                <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
+              <div className="text-l1-foreground dark:text-sienna-100 flex flex-col items-center gap-12 text-2xl leading-[3.25rem] font-medium">
+                <h2 className="text-l1-foreground dark:text-sienna-100 mb-6 py-10 text-center text-4xl font-semibold">
                   How SigNoz Compares to <br /> LLM-Only Tools
                 </h2>
                 <SectionLayout
@@ -244,15 +240,15 @@ const StartMonitoring: React.FC = () => {
       <Divider />
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-12">
+          <p className="text-l1-foreground sticky top-[100px] px-10 pt-10 text-4xl !leading-[3.5rem] font-bold sm:text-4xl md:px-12">
             Start Monitoring Your LLM Apps in <span className="text-red-500">Minutes</span>
           </p>
         </div>
         <div className="flex-[2_2_0%]">
-          <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+          <div className="border-border border-l border-dashed bg-transparent p-0">
             <div className="grid grid-cols-1 lg:grid-cols-3">
               <div className="col-span-2 flex flex-col gap-6 p-10">
-                <h3 className="m-0 text-2xl font-semibold text-signoz_vanilla-100">
+                <h3 className="text-l1-foreground m-0 text-2xl font-semibold">
                   Get started in three steps:
                 </h3>
                 <div className="flex flex-col">
@@ -269,7 +265,7 @@ const StartMonitoring: React.FC = () => {
                     lines to initialize tracing
                   </div>
                 </div>
-                <div className="flex flex-col items-center gap-6 text-justify text-signoz_vanilla-400 lg:items-start">
+                <div className="text-muted-foreground flex flex-col items-center gap-6 text-justify lg:items-start">
                   Your existing application code remains completely untouched while traces start
                   flowing to SigNoz in real-time, giving you instant visibility into every aspect of
                   your LLM operations.

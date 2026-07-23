@@ -48,16 +48,16 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
   const responseGridTemplate = `minmax(0, 1.9fr) repeat(${activePrompt.columns.length - 1}, minmax(72px, 0.82fr))`
 
   return (
-    <div className="relative h-full overflow-hidden rounded-sm px-4 pb-6 pt-11 font-mono md:overflow-visible md:pb-10 md:pl-8 md:pr-10 md:pt-14 lg:pl-10 lg:pr-12">
-      <div className="pointer-events-none absolute inset-y-0 left-0 right-0 rounded-sm bg-gradient-to-r from-signoz_ink-400 via-signoz_ink-400/95 to-signoz_ink-400/0 shadow-[0_28px_90px_rgba(0,0,0,0.58)]" />
-      <div className="pointer-events-none absolute left-0 right-0 top-0 h-9 border-b border-white/[0.055] bg-gradient-to-r from-white/[0.025] via-white/[0.012] to-transparent" />
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 top-0 rounded-sm ring-1 ring-inset ring-white/[0.05]" />
-      <div className="absolute left-0 top-[-42px] z-[3] hidden h-8 items-center gap-3 text-base tracking-[-0.01em] text-[#8f948f] md:flex">
+    <div className="relative h-full overflow-hidden rounded-sm px-4 pt-11 pb-6 font-mono md:overflow-visible md:pt-14 md:pr-10 md:pb-10 md:pl-8 lg:pr-12 lg:pl-10">
+      <div className="from-ink-400 via-ink-400/95 to-ink-400/0 pointer-events-none absolute inset-y-0 right-0 left-0 rounded-sm bg-gradient-to-r shadow-[0_28px_90px_rgba(0,0,0,0.58)]" />
+      <div className="pointer-events-none absolute top-0 right-0 left-0 h-9 border-b border-white/[0.055] bg-gradient-to-r from-white/[0.025] via-white/[0.012] to-transparent" />
+      <div className="pointer-events-none absolute top-0 right-0 bottom-0 left-0 rounded-sm ring-1 ring-white/[0.05] ring-inset" />
+      <div className="absolute top-[-42px] left-0 z-[3] hidden h-8 items-center gap-3 text-base tracking-[-0.01em] text-[#8f948f] md:flex">
         <span>Work with your agent</span>
         <AgentIntegrationIcons />
         <span>and more</span>
       </div>
-      <div className="absolute left-0 right-0 top-0 z-[2] flex h-9 items-center gap-1 overflow-x-auto overflow-y-hidden px-2 text-[11px] leading-none text-[#aaa79f] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="absolute top-0 right-0 left-0 z-[2] flex h-9 [scrollbar-width:none] items-center gap-1 overflow-x-auto overflow-y-hidden px-2 text-[11px] leading-none text-[#aaa79f] [&::-webkit-scrollbar]:hidden">
         {agentPromptTabs.map((tab, index) => {
           const isPromptActive = index === activePromptIndex
 
@@ -66,7 +66,7 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
               key={tab.label}
               className={`h-7 shrink-0 rounded-md px-2.5 transition-colors ${
                 isPromptActive
-                  ? 'bg-white/[0.075] text-signoz_vanilla-100 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]'
+                  ? 'text-foreground bg-white/[0.075] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]'
                   : 'text-[#8d918f] hover:bg-white/[0.04] hover:text-[#c4c0b8]'
               }`}
               onClick={() => {
@@ -92,7 +92,7 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
       </div>
       <div key={`${activePrompt.label}-${animationCycle}`} className="relative z-[1] max-w-[840px]">
         <div className="grid grid-cols-[16px_minmax(0,1fr)] gap-x-3 text-[13px] leading-[1.65] text-[#f1eee7] md:grid-cols-[20px_minmax(0,1fr)] md:gap-x-4 md:text-[15px] md:leading-[1.75]">
-          <span className="homepage-agent-prompt-marker text-[18px] font-semibold leading-[1.75] text-[#ff8a3d]">
+          <span className="homepage-agent-prompt-marker text-[18px] leading-[1.75] font-semibold text-[#ff8a3d]">
             &gt;
           </span>
           <div className="min-w-0">
@@ -114,7 +114,7 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
               <div
                 key={verb}
                 className={cn(
-                  'absolute inset-0 grid grid-cols-[16px_minmax(0,1fr)] gap-x-3 text-[13px] font-semibold leading-[1.65] text-[#ff8a3d] opacity-0 motion-reduce:opacity-100 md:grid-cols-[20px_minmax(0,1fr)] md:gap-x-4 md:text-[15px] md:leading-[1.75]',
+                  'absolute inset-0 grid grid-cols-[16px_minmax(0,1fr)] gap-x-3 text-[13px] leading-[1.65] font-semibold text-[#ff8a3d] opacity-0 motion-reduce:opacity-100 md:grid-cols-[20px_minmax(0,1fr)] md:gap-x-4 md:text-[15px] md:leading-[1.75]',
                   isActive && 'animate-homepage-agent-thinking-cycle motion-reduce:animate-none'
                 )}
                 style={{ animationDelay: `${1600 + index * 650}ms` }}
@@ -126,7 +126,7 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
 
             <div
               className={cn(
-                'absolute inset-0 m-0 max-h-[300px] overflow-y-auto overflow-x-hidden rounded-none bg-transparent p-0 pr-1 text-[#b8b5ad] opacity-0 motion-reduce:opacity-100 md:max-h-[350px] md:pr-3',
+                'absolute inset-0 m-0 max-h-[300px] overflow-x-hidden overflow-y-auto rounded-none bg-transparent p-0 pr-1 text-[#b8b5ad] opacity-0 motion-reduce:opacity-100 md:max-h-[350px] md:pr-3',
                 isActive && 'animate-homepage-agent-response-reveal motion-reduce:animate-none'
               )}
             >
@@ -191,7 +191,7 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
                     ))}
                   </div>
 
-                  <p className="mb-0 mt-5 md:mt-7">{activePrompt.findingsTitle}</p>
+                  <p className="mt-5 mb-0 md:mt-7">{activePrompt.findingsTitle}</p>
                   <div className="mt-3 space-y-2">
                     {activePrompt.findings.map((finding) => (
                       <p
@@ -210,7 +210,7 @@ function LocalAgentSurface({ isActive }: { isActive: boolean }) {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-signoz_ink-400 via-signoz_ink-400/90 to-transparent" />
+      <div className="from-ink-400 via-ink-400/90 pointer-events-none absolute right-0 bottom-0 left-0 h-40 bg-gradient-to-t to-transparent" />
     </div>
   )
 }
@@ -259,33 +259,33 @@ export default function AgentNativeObservabilitySection() {
   return (
     <section
       ref={sectionRef}
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden bg-signoz_ink-500 px-5 py-16 sm:px-6 sm:py-24 lg:px-20 lg:py-32 wide:max-w-8xl wide:px-0"
+      className="bg-background wide:max-w-8xl wide:px-0 relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden px-5 py-16 sm:px-6 sm:py-24 lg:px-20 lg:py-32"
       data-homepage-agent-native-observability
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_58%_at_24%_42%,rgba(78,116,248,0.09),transparent_64%),radial-gradient(ellipse_72%_54%_at_82%_52%,rgba(35,196,248,0.055),transparent_66%),linear-gradient(180deg,rgba(22,25,34,0.08),rgba(11,12,14,0.42)_50%,rgba(11,12,14,0.1))] [mask-image:linear-gradient(180deg,transparent_0%,black_16%,black_82%,transparent_100%)]" />
-      <div className="relative mx-auto max-w-8xl">
+      <div className="max-w-8xl relative mx-auto">
         <div
-          className="pointer-events-none absolute left-4 right-4 top-24 h-[760px] sm:left-6 sm:right-6 lg:left-20 lg:right-20 lg:top-32"
+          className="pointer-events-none absolute top-24 right-4 left-4 h-[760px] sm:right-6 sm:left-6 lg:top-32 lg:right-20 lg:left-20"
           data-homepage-floating-cta="Explore agent-native observability"
           data-homepage-floating-href="/agent-native-observability/"
           aria-hidden="true"
         />
 
         <div className="grid gap-5 md:grid-cols-[0.9fr_1fr] md:items-start md:gap-20">
-          <h2 className="m-0 max-w-[540px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[40px] sm:leading-[1.04] sm:tracking-[-1.1px] md:text-[58px] md:tracking-[-1.65px]">
+          <h2 className="text-l1-foreground m-0 max-w-[540px] text-[32px] leading-[1.08] font-medium tracking-[-0.65px] sm:text-[40px] sm:leading-[1.04] sm:tracking-[-1.1px] md:text-[58px] md:tracking-[-1.65px]">
             Agent-native observability,
             <br />
-            <span className="text-signoz_vanilla-400">inside your IDE and SigNoz.</span>
+            <span className="text-muted-foreground">inside your IDE and SigNoz.</span>
           </h2>
 
           <div className="max-w-[560px] md:pt-2">
-            <p className="text-signoz_vanilla-300/82 m-0 text-base leading-7 tracking-[-0.15px] sm:text-[19px] sm:leading-9 sm:tracking-[-0.28px]">
+            <p className="text-muted-foreground/82 m-0 text-base leading-7 tracking-[-0.15px] sm:text-[19px] sm:leading-9 sm:tracking-[-0.28px]">
               Use the SigNoz MCP server to bring telemetry into coding agents, or use Noz, your AI
               teammate inside SigNoz, to investigate incidents, tune alerts, and build dashboards
               with the same production context your team sees.
             </p>
             <TrackingLink
-              className="group mt-6 inline-flex items-center gap-2 text-sm font-medium text-signoz_robin-400 transition-colors hover:text-signoz_robin-300 sm:mt-9"
+              className="group text-accent-primary hover:text-accent-primary mt-6 inline-flex items-center gap-2 text-sm font-medium transition-colors sm:mt-9"
               clickLocation="Homepage Agent Native Observability Section"
               clickName="Explore MCP and Noz Link"
               clickText="Explore MCP and Noz"
@@ -301,15 +301,15 @@ export default function AgentNativeObservabilitySection() {
           </div>
         </div>
 
-        <div className="-mx-5 mt-14 min-h-[560px] overflow-x-auto overflow-y-visible px-5 pb-4 pt-6 [scrollbar-width:none] sm:-mx-6 sm:mt-20 sm:px-6 md:hidden [&::-webkit-scrollbar]:hidden">
-          <div className="relative h-[520px] w-[132dvw] min-w-[510px] max-w-[560px]">
-            <div className="absolute left-5 top-[118px] z-20 flex h-8 items-center gap-2 font-mono text-[15px] tracking-[-0.01em] text-[#8f948f]">
+        <div className="-mx-5 mt-14 min-h-[560px] [scrollbar-width:none] overflow-x-auto overflow-y-visible px-5 pt-6 pb-4 sm:-mx-6 sm:mt-20 sm:px-6 md:hidden [&::-webkit-scrollbar]:hidden">
+          <div className="relative h-[520px] w-[132dvw] max-w-[560px] min-w-[510px]">
+            <div className="absolute top-[118px] left-5 z-20 flex h-8 items-center gap-2 font-mono text-[15px] tracking-[-0.01em] text-[#8f948f]">
               <span>Work with</span>
               <AgentIntegrationIcons />
             </div>
             <div
               className={cn(
-                'absolute left-0 top-12 h-[calc(100%-48px)] w-[66%] rounded-[18px] border border-signoz_slate-400/20 bg-[#06090d] opacity-0 shadow-[0_34px_120px_rgba(0,0,0,0.42)] will-change-[opacity,transform] motion-reduce:transform-none motion-reduce:opacity-100 motion-reduce:will-change-auto',
+                'border-border/20 absolute top-12 left-0 h-[calc(100%-48px)] w-[66%] rounded-[18px] border bg-[#06090d] opacity-0 shadow-[0_34px_120px_rgba(0,0,0,0.42)] will-change-[opacity,transform] motion-reduce:transform-none motion-reduce:opacity-100 motion-reduce:will-change-auto',
                 isActive && 'animate-homepage-agent-terminal-enter motion-reduce:animate-none'
               )}
             />
@@ -333,7 +333,7 @@ export default function AgentNativeObservabilitySection() {
         <div className="relative mt-20 hidden min-h-[650px] md:block lg:min-h-[700px]">
           <div
             className={cn(
-              'absolute left-0 top-[88px] h-[560px] w-[76%] opacity-0 will-change-[opacity,transform] motion-reduce:transform-none motion-reduce:opacity-100 motion-reduce:will-change-auto lg:top-[108px] lg:h-[592px] lg:w-[78%]',
+              'absolute top-[88px] left-0 h-[560px] w-[76%] opacity-0 will-change-[opacity,transform] motion-reduce:transform-none motion-reduce:opacity-100 motion-reduce:will-change-auto lg:top-[108px] lg:h-[592px] lg:w-[78%]',
               isActive && 'animate-homepage-agent-terminal-enter motion-reduce:animate-none'
             )}
           >
@@ -342,7 +342,7 @@ export default function AgentNativeObservabilitySection() {
 
           <div
             className={cn(
-              'absolute right-0 top-0 z-20 w-[388px] opacity-0 will-change-[opacity,transform] motion-reduce:transform-none motion-reduce:opacity-100 motion-reduce:will-change-auto lg:w-[430px]',
+              'absolute top-0 right-0 z-20 w-[388px] opacity-0 will-change-[opacity,transform] motion-reduce:transform-none motion-reduce:opacity-100 motion-reduce:will-change-auto lg:w-[430px]',
               isActive && 'animate-homepage-agent-noz-enter motion-reduce:animate-none'
             )}
           >

@@ -18,7 +18,7 @@ const [compareHostingOption, getStartedHostingOption] = HOSTING_DECISION_ITEMS
 
 const HostingBanner = () => {
   return (
-    <div className="my-4  rounded-lg bg-signoz_ink-300 p-4 ">
+    <div className="bg-l3-background my-4 rounded-lg p-4">
       <div className="mb-3 text-sm text-zinc-300">
         Choose SigNoz Cloud for ease, or self-host for control—with the freedom to switch as your
         needs grow.

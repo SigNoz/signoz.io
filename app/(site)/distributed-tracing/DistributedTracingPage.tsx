@@ -5,7 +5,7 @@ import { MonitorDown, Shovel } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { Card } from '@/components/ui/Card'
-import { Badge } from '@signozhq/badge'
+import { Badge } from '@signozhq/ui/badge'
 import Image from 'next/image'
 import {
   CARDS,
@@ -103,7 +103,7 @@ const LogProcessingSection: React.FC = () => {
       <div className="flex flex-col items-center gap-8 md:flex-row">
         <div>
           <div className="mb-4 flex items-center gap-3">
-            <h3 className="m-0 text-xs font-medium uppercase text-signoz_vanilla-400">
+            <h3 className="text-muted-foreground m-0 text-xs font-medium uppercase">
               COLLECTOR AS AGENT
             </h3>
             <Badge color="vanilla" className="text-xs">
@@ -124,7 +124,7 @@ const LogProcessingSection: React.FC = () => {
       </div>
 
       <div>
-        <h3 className="mb-4 text-xs font-medium uppercase text-signoz_vanilla-400">
+        <h3 className="text-muted-foreground mb-4 text-xs font-medium uppercase">
           SUPPORTED PROTOCOLS
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -164,7 +164,7 @@ const LogProcessingSection: React.FC = () => {
         <div className="-my-10 flex flex-col px-6 py-8">
           <div className="flex min-h-72 flex-col justify-between">
             <div>
-              <Card className="[&>div]:border-1 bg-signoz_ink-400 [&>*]:p-4">
+              <Card className="bg-card [&>*]:p-4 [&>div]:border-1">
                 <Tabs entityName="sources">
                   <TabItem
                     value="supported-sources"
@@ -245,7 +245,7 @@ const DistributedTracing: React.FC = () => {
         <Divider />
         <FeatureShowcase
           {...MASSIVE_TRACES_SHOWCASE}
-          className="!mx-auto px-6 pb-0 pt-6"
+          className="!mx-auto px-6 pt-6 pb-0"
           contentClassName="mb-0"
         />
         <Divider orientation="vertical" />

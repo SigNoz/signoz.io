@@ -30,14 +30,14 @@ export default function HubspotCustomFormError({
           <button
             type="button"
             onClick={onRetry}
-            className="rounded-md bg-signoz_robin-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-signoz_robin-500/90"
+            className="bg-primary hover:bg-primary/90 rounded-md px-4 py-2 text-sm font-medium text-white transition"
           >
             Retry
           </button>
         )}
         <a
           href="mailto:cloud-support@signoz.io"
-          className="text-sm text-signoz_robin-500 underline underline-offset-2 transition hover:text-signoz_robin-400"
+          className="text-primary hover:text-accent-primary text-sm underline underline-offset-2 transition"
         >
           Email us instead
         </a>

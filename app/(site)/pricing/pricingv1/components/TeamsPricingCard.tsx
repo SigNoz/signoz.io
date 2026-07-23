@@ -21,17 +21,17 @@ export default function TeamsPricingCard() {
             >
               Teams
             </h3>
-            <p className="text-base text-gray-400">
+            <p className="text-muted-foreground text-base">
               For fast-scaling teams that need observability to scale with them.
             </p>
           </div>
           <div className="mt-4 flex w-full flex-col items-start md:mt-0 md:w-[40%] md:items-end">
-            <span className="text-sm text-signoz_vanilla-400">starts from</span>
+            <span className="text-muted-foreground text-sm">starts from</span>
             <div className="flex items-baseline">
-              <span className="text-3xl font-bold text-signoz_vanilla-100 md:text-4xl">
-                <span className="text-2xl text-signoz_vanilla-400 line-through">$199</span> $49
+              <span className="text-l1-foreground text-3xl font-bold md:text-4xl">
+                <span className="text-muted-foreground text-2xl line-through">$199</span> $49
               </span>
-              <span className="ml-1 text-signoz_vanilla-400">/month</span>
+              <span className="text-muted-foreground ml-1">/month</span>
             </div>
           </div>
         </div>
@@ -48,13 +48,11 @@ export default function TeamsPricingCard() {
           </Button>
         </TrackingLink>
 
-        <div className="my-3 w-full border-t border-dashed border-signoz_slate-400"></div>
+        <div className="border-border my-3 w-full border-t border-dashed"></div>
 
         {/* Base pricing table */}
-        <div className="mb-6 rounded-md bg-signoz_ink-400 bg-opacity-10 p-3">
-          <h5 className="mb-3 text-sm font-medium text-signoz_vanilla-100">
-            After $49, billed at:
-          </h5>
+        <div className="bg-card bg-opacity-10 mb-6 rounded-md p-3">
+          <h5 className="text-l1-foreground mb-3 text-sm font-medium">After $49, billed at:</h5>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             <div className="flex items-center gap-2">
               <Image
@@ -65,20 +63,20 @@ export default function TeamsPricingCard() {
                 className="h-5 w-5"
               />
               <div>
-                <div className="text-xs text-signoz_vanilla-400">Traces</div>
+                <div className="text-muted-foreground text-xs">Traces</div>
                 <div className="text-sm">
-                  <span className="font-medium text-signoz_robin-400">$0.30</span>
-                  <span className="text-signoz_vanilla-400">/GB</span>
+                  <span className="text-accent-primary font-medium">$0.30</span>
+                  <span className="text-muted-foreground">/GB</span>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Image src={logsIconUrl} alt="Logs Icon" width={20} height={20} className="h-5 w-5" />
               <div>
-                <div className="text-xs text-signoz_vanilla-400">Logs</div>
+                <div className="text-muted-foreground text-xs">Logs</div>
                 <div className="text-sm">
-                  <span className="font-medium text-signoz_sakura-400">$0.30</span>
-                  <span className="text-signoz_vanilla-400">/GB</span>
+                  <span className="text-sakura-400 font-medium">$0.30</span>
+                  <span className="text-muted-foreground">/GB</span>
                 </div>
               </div>
             </div>
@@ -91,23 +89,21 @@ export default function TeamsPricingCard() {
                 className="h-5 w-5"
               />
               <div>
-                <div className="text-xs text-signoz_vanilla-400">Metrics</div>
+                <div className="text-muted-foreground text-xs">Metrics</div>
                 <div className="text-sm">
-                  <span className="font-medium text-signoz_amber-400">$0.10</span>
-                  <span className="text-signoz_vanilla-400">/mn samples</span>
+                  <span className="text-callout-warning-title font-medium">$0.10</span>
+                  <span className="text-muted-foreground">/mn samples</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">
-          What's included in $49/month?
-        </h4>
+        <h4 className="text-l1-foreground mb-4 text-lg font-bold">What's included in $49/month?</h4>
         <ul className="mb-10 space-y-3">
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">
+            <span className="text-muted-foreground">
               Access to all{' '}
               <TrackingLink
                 href="#all-features"
@@ -116,7 +112,7 @@ export default function TeamsPricingCard() {
                 clickText="features"
                 clickLocation="Teams Pricing Card"
               >
-                <span className="inline-flex items-center text-signoz_robin-400 hover:text-signoz_robin-500">
+                <span className="text-accent-primary hover:text-primary inline-flex items-center">
                   features
                   <ChevronDown size={12} className="ml-1" />
                 </span>
@@ -125,23 +121,23 @@ export default function TeamsPricingCard() {
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Send any mix of logs, traces & metrics</span>
+            <span className="text-muted-foreground">Send any mix of logs, traces & metrics</span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">
+            <span className="text-muted-foreground">
               Usage worth $49 (e.g. 163 GB logs/traces or 490 mn metric samples)
             </span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">
+            <span className="text-muted-foreground">
               <span className="flex items-center gap-1">
                 Access to MCP Server and Noz: Our new AI teammate
                 <Tooltip
                   content={
                     <div className="max-w-xs">
-                      <p className="m-0 text-sm text-signoz_vanilla-400">
+                      <p className="text-muted-foreground m-0 text-sm">
                         <TrackingLink
                           href="/docs/ai/noz/"
                           clickType="In Page Link"
@@ -149,23 +145,21 @@ export default function TeamsPricingCard() {
                           clickText="Learn more"
                           clickLocation="Teams Pricing Card"
                         >
-                          <span className="text-signoz_robin-400 hover:text-signoz_robin-500">
-                            Read Docs
-                          </span>
+                          <span className="text-accent-primary hover:text-primary">Read Docs</span>
                         </TrackingLink>
                       </p>
                     </div>
                   }
-                  contentClassName="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
+                  contentClassName="border border-border bg-card p-2"
                 >
-                  <Info className="mt-0.5 min-w-4 cursor-pointer text-signoz_robin-400" size={14} />
+                  <Info className="text-accent-primary mt-0.5 min-w-4 cursor-pointer" size={14} />
                 </Tooltip>
               </span>
             </span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">
+            <span className="text-muted-foreground">
               Need more?{' '}
               <TrackingLink
                 href="#estimate-your-monthly-bill"
@@ -174,7 +168,7 @@ export default function TeamsPricingCard() {
                 clickText="Pay only for what exceeds $49 based on usage"
                 clickLocation="Teams Pricing Card"
               >
-                <span className="text-signoz_robin-400 hover:text-signoz_robin-500">
+                <span className="text-accent-primary hover:text-primary">
                   Pay only for what exceeds $49 based on usage
                 </span>
               </TrackingLink>
@@ -182,7 +176,7 @@ export default function TeamsPricingCard() {
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">
+            <span className="text-muted-foreground">
               Add unlimited teammates and monitor any number of hosts
             </span>
           </li>
@@ -190,14 +184,14 @@ export default function TeamsPricingCard() {
           {/* Support */}
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">
+            <span className="text-muted-foreground">
               <span className="flex items-center gap-1">
                 Support via in-product Chat, Email, and Slack
                 <Tooltip
                   content={
                     <div className="max-w-xs">
-                      <p className="mb-1 font-medium text-signoz_vanilla-100">Support includes:</p>
-                      <ul className="list-disc pl-4 text-sm text-signoz_vanilla-400">
+                      <p className="text-l1-foreground mb-1 font-medium">Support includes:</p>
+                      <ul className="text-muted-foreground list-disc pl-4 text-sm">
                         <li>In-Product Chat Support</li>
                         <li>Email</li>
                         <li>Dedicated Slack Channel (on spends above $999/mo)</li>
@@ -205,9 +199,9 @@ export default function TeamsPricingCard() {
                       </ul>
                     </div>
                   }
-                  contentClassName="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
+                  contentClassName="border border-border bg-card p-2"
                 >
-                  <Info className="mt-0.5 min-w-4 cursor-pointer text-signoz_robin-400" size={14} />
+                  <Info className="text-accent-primary mt-0.5 min-w-4 cursor-pointer" size={14} />
                 </Tooltip>
               </span>
             </span>
@@ -216,25 +210,23 @@ export default function TeamsPricingCard() {
           {/* Compliance */}
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">
+            <span className="text-muted-foreground">
               <span className="flex items-center gap-1">
                 SOC2 Type II & HIPAA Compliant
                 <Tooltip
                   content={
                     <div className="max-w-xs">
-                      <p className="mb-1 font-medium text-signoz_vanilla-100">
-                        Compliance details:
-                      </p>
-                      <ul className="list-disc pl-4 text-sm text-signoz_vanilla-400">
+                      <p className="text-l1-foreground mb-1 font-medium">Compliance details:</p>
+                      <ul className="text-muted-foreground list-disc pl-4 text-sm">
                         <li>SOC2 Type II Compliant</li>
                         <li>HIPAA Compliant</li>
                         <li>BAA Agreement (Add On)</li>
                       </ul>
                     </div>
                   }
-                  contentClassName="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
+                  contentClassName="border border-border bg-card p-2"
                 >
-                  <Info className="mt-0.5 min-w-4 cursor-pointer text-signoz_robin-400" size={14} />
+                  <Info className="text-accent-primary mt-0.5 min-w-4 cursor-pointer" size={14} />
                 </Tooltip>
               </span>
             </span>
@@ -243,7 +235,7 @@ export default function TeamsPricingCard() {
           {/* Data Centers */}
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">
+            <span className="text-muted-foreground">
               Data centers available in the US, EU & India
             </span>
           </li>
@@ -258,7 +250,7 @@ export default function TeamsPricingCard() {
                 clickText="Learn how the price for metrics is calculated"
                 clickLocation="Teams Pricing Card"
               >
-                <span className="text-signoz_vanilla-400 hover:text-signoz_robin-500">
+                <span className="text-muted-foreground hover:text-primary">
                   <ArrowUpRight size={20} className="mr-1 inline" />
                   Learn how the price for metrics is calculated
                 </span>

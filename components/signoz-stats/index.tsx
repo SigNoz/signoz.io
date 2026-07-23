@@ -39,12 +39,12 @@ const SigNozStats = ({ className }: { className?: string }) => {
     <section>
       <div
         className={cn(
-          'section-container mx-auto grid w-full max-w-8xl grid-cols-1 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0 sm:grid-cols-[minmax(0,300px)_minmax(0,1fr)]',
+          'section-container max-w-8xl border-border mx-auto grid w-full grid-cols-1 border !border-t-0 !border-b-0 border-dashed !px-0 sm:grid-cols-[minmax(0,300px)_minmax(0,1fr)]',
           className
         )}
       >
-        <div className="min-w-0 border !border-b-0 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
-          <p className="px-4 pt-4 text-left text-3xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl lg:px-8 lg:pt-10">
+        <div className="border-border min-w-0 border !border-r-0 !border-b-0 !border-l-0 border-dashed">
+          <p className="text-l1-foreground px-4 pt-4 text-left text-3xl !leading-[3.5rem] font-bold sm:text-4xl lg:px-8 lg:pt-10">
             Developers <br className="hidden sm:block" />
             Love <br className="hidden sm:block" />
             SigNoz
@@ -57,23 +57,23 @@ const SigNozStats = ({ className }: { className?: string }) => {
               <div
                 key={stat.name}
                 className={cn(
-                  'col-span-2 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-signoz_ink-500 sm:col-span-1',
+                  'border-border bg-background col-span-2 border !border-r-0 !border-b-0 border-dashed sm:col-span-1',
                   'p-4 xl:p-9'
                 )}
               >
                 <div className="mb-4 flex items-center">
-                  <span className="mr-2.5 h-6 w-6 fill-signoz_vanilla-400">{stat.logo}</span>
+                  <span className="fill-vanilla-400 mr-2.5 h-6 w-6">{stat.logo}</span>
                 </div>
-                <p className="mb-2 block pt-4 font-mono text-[32px] font-semibold leading-10 text-signoz_vanilla-100">
+                <p className="text-l1-foreground mb-2 block pt-4 font-mono text-[32px] leading-10 font-semibold">
                   {stat.value}
                 </p>
-                <p className="mb-3 mt-2 text-base font-normal leading-9 text-signoz_vanilla-400">
+                <p className="text-muted-foreground mt-2 mb-3 text-base leading-9 font-normal">
                   {stat.name}
                 </p>
               </div>
             ))}
           </div>
-          <div className="flex flex-col gap-3 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 p-6 xl:flex-row">
+          <div className="border-border flex flex-col gap-3 border !border-r-0 !border-b-0 border-dashed p-6 xl:flex-row">
             <TrackingLink
               href="https://signoz.io/slack/"
               className="inline-block"

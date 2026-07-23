@@ -29,7 +29,7 @@ const TOOLS = [
 ]
 
 const Label = ({ children }: { children: React.ReactNode }) => (
-  <span className="block text-[11px] font-medium uppercase tracking-wide text-gray-500">
+  <span className="block text-[11px] font-medium tracking-wide text-gray-500 uppercase">
     {children}
   </span>
 )
@@ -155,8 +155,8 @@ export default function ContactFormCustom() {
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-        <CheckCircle className="h-7 w-7 text-signoz_robin-500" />
-        <h3 className="text-lg font-semibold text-signoz_vanilla-300">We'll be in touch soon.</h3>
+        <CheckCircle className="text-primary h-7 w-7" />
+        <h3 className="text-muted-foreground text-lg font-semibold">We'll be in touch soon.</h3>
       </div>
     )
   }
@@ -172,7 +172,7 @@ export default function ContactFormCustom() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@company.com"
-          className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm text-signoz_vanilla-300 placeholder-gray-500/50 outline-none transition focus:border-signoz_robin-500 focus:ring-1 focus:ring-signoz_robin-500"
+          className="border-border bg-card text-muted-foreground focus:border-primary focus:ring-ring w-full rounded-md border px-4 py-3 text-sm placeholder-gray-500/50 transition outline-none focus:ring-1"
         />
       </Field>
 
@@ -190,8 +190,8 @@ export default function ContactFormCustom() {
               }}
               className={`rounded-full border px-4 py-2 text-sm transition ${
                 hosting === opt.value
-                  ? 'border-signoz_robin-500 bg-signoz_robin-500/10 text-signoz_robin-500'
-                  : 'border-signoz_slate-400 bg-signoz_ink-400 text-gray-400 hover:border-signoz_slate-200 hover:text-signoz_vanilla-300'
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-card hover:border-l2-border hover:text-muted-foreground text-gray-400'
               }`}
             >
               {opt.label}
@@ -209,7 +209,7 @@ export default function ContactFormCustom() {
           value={scale}
           onChange={(e) => setScale(e.target.value)}
           placeholder="e.g. 5B logs/month, 10K requests/sec"
-          className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm text-signoz_vanilla-300 placeholder-gray-500/50 outline-none transition focus:border-signoz_robin-500 focus:ring-1 focus:ring-signoz_robin-500"
+          className="border-border bg-card text-muted-foreground focus:border-primary focus:ring-ring w-full rounded-md border px-4 py-3 text-sm placeholder-gray-500/50 transition outline-none focus:ring-1"
         />
       </Field>
 
@@ -231,15 +231,15 @@ export default function ContactFormCustom() {
               <span
                 className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
                   tools.includes(tool.value)
-                    ? 'border-signoz_robin-500 bg-signoz_robin-500'
-                    : 'border-signoz_slate-100 bg-transparent'
+                    ? 'border-primary bg-primary'
+                    : 'border-l3-border bg-transparent'
                 }`}
               >
                 {tools.includes(tool.value) && (
                   <Check className="h-3 w-3 text-white" strokeWidth={2.5} />
                 )}
               </span>
-              <span className="text-sm text-signoz_vanilla-300">{tool.label}</span>
+              <span className="text-muted-foreground text-sm">{tool.label}</span>
             </label>
           ))}
         </div>
@@ -252,7 +252,7 @@ export default function ContactFormCustom() {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
-          className="w-full resize-none rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-3 text-sm text-signoz_vanilla-300 placeholder-gray-500/50 outline-none transition focus:border-signoz_robin-500 focus:ring-1 focus:ring-signoz_robin-500"
+          className="border-border bg-card text-muted-foreground focus:border-primary focus:ring-ring w-full resize-none rounded-md border px-4 py-3 text-sm placeholder-gray-500/50 transition outline-none focus:ring-1"
         />
       </Field>
 
@@ -265,7 +265,7 @@ export default function ContactFormCustom() {
       <button
         type="submit"
         disabled={loading}
-        className="flex h-[44px] w-full items-center justify-center gap-2 rounded-md bg-signoz_robin-500 text-sm font-semibold text-white transition hover:bg-signoz_robin-500/90 disabled:opacity-60"
+        className="bg-primary hover:bg-primary/90 flex h-[44px] w-full items-center justify-center gap-2 rounded-md text-sm font-semibold text-white transition disabled:opacity-60"
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {loading ? 'Submitting…' : 'Book a Demo'}

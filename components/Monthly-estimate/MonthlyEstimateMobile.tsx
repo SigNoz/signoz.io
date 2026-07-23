@@ -185,9 +185,9 @@ const MobileEstimate = () => {
 
   return (
     <section id="estimate-your-monthly-bill">
-      <div className="section-container mx-auto w-full max-w-8xl border border-dashed border-signoz_slate-400">
+      <div className="section-container max-w-8xl border-border mx-auto w-full border border-dashed">
         <div className="flex flex-col gap-2 pt-6">
-          <span className="group relative pl-1 text-2xl font-semibold text-signoz_vanilla-100">
+          <span className="group text-l1-foreground relative pl-1 text-2xl font-semibold">
             Estimate your monthly bill
             {isMounted ? (
               <a
@@ -207,12 +207,12 @@ const MobileEstimate = () => {
               </a>
             ) : null}
           </span>
-          <span className="mb-4 pl-1 text-sm text-signoz_vanilla-400">
+          <span className="text-muted-foreground mb-4 pl-1 text-sm">
             You can also set data ingestion limits so you never get a surprise bill.
             {isMounted ? (
               <Link
                 href={'https://signoz.io/docs/ingestion/signoz-cloud/keys/'}
-                className="ml-1 font-medium text-signoz_robin-400"
+                className="text-accent-primary ml-1 font-medium"
               >
                 Learn more
                 <ArrowUpRight className="inline" size={16} />
@@ -223,7 +223,7 @@ const MobileEstimate = () => {
 
         <div className="tabs mt-4 flex justify-between gap-2">
           <button
-            className={`tab flex w-full items-center justify-center gap-2 p-1 text-base font-normal text-signoz_vanilla-400 ${activeTab === 'traces' ? 'rounded-md bg-signoz_ink-400 !text-signoz_vanilla-100' : ''}`}
+            className={`tab text-muted-foreground flex w-full items-center justify-center gap-2 p-1 text-base font-normal ${activeTab === 'traces' ? 'bg-card !text-foreground rounded-md' : ''}`}
             onClick={() => setActiveTab('traces')}
           >
             {activeTab === 'traces' ? (
@@ -280,7 +280,7 @@ const MobileEstimate = () => {
             Traces
           </button>
           <button
-            className={`tab flex w-full items-center justify-center gap-2 p-1 text-base font-normal text-signoz_vanilla-400 ${activeTab === 'logs' ? 'rounded-md bg-signoz_ink-400 !text-signoz_vanilla-100' : ''}`}
+            className={`tab text-muted-foreground flex w-full items-center justify-center gap-2 p-1 text-base font-normal ${activeTab === 'logs' ? 'bg-card !text-foreground rounded-md' : ''}`}
             onClick={() => setActiveTab('logs')}
           >
             {activeTab === 'logs' ? (
@@ -324,7 +324,7 @@ const MobileEstimate = () => {
             Logs
           </button>
           <button
-            className={`tab flex w-full items-center justify-center gap-2 p-1 text-base font-normal text-signoz_vanilla-400 ${activeTab === 'metrics' ? 'rounded-md bg-signoz_ink-400 !text-signoz_vanilla-100' : ''}`}
+            className={`tab text-muted-foreground flex w-full items-center justify-center gap-2 p-1 text-base font-normal ${activeTab === 'metrics' ? 'bg-card !text-foreground rounded-md' : ''}`}
             onClick={() => setActiveTab('metrics')}
           >
             {activeTab === 'metrics' ? (
@@ -369,20 +369,20 @@ const MobileEstimate = () => {
         </div>
 
         {activeTab === 'traces' && (
-          <div className="px-3 pb-0 pt-6">
+          <div className="px-3 pt-6 pb-0">
             <div className="mb-4 flex justify-between uppercase">
-              <span className="text-[13px] font-semibold text-signoz_vanilla-400">
+              <span className="text-muted-foreground text-[13px] font-semibold">
                 Pricing per unit
               </span>
-              <span className="text-[13px] font-semibold text-signoz_vanilla-400">Retention</span>
+              <span className="text-muted-foreground text-[13px] font-semibold">Retention</span>
             </div>
             <div className="mb-6 flex justify-between">
-              <div className="text-signoz_robin-400">
+              <div className="text-accent-primary">
                 ${TRACES_AND_LOGS_PRICES[tracesRetentionPeriod]}/GB
               </div>
               <div>
                 <select
-                  className="block h-[32px] w-32 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 py-1.5 pl-2 pr-1.5 text-xs text-signoz_vanilla-100 focus:border-primary-500 focus:ring-primary-500"
+                  className="border-border bg-card text-l1-foreground focus:border-primary focus:ring-ring block h-[32px] w-32 rounded-sm border py-1.5 pr-1.5 pl-2 text-xs"
                   value={tracesRetentionPeriod}
                   onChange={(e) => setTracesRetentionPeriod(Number(e.target.value))}
                 >
@@ -395,7 +395,7 @@ const MobileEstimate = () => {
               </div>
             </div>
             <div className="mb-2">
-              <span className="text-[13px] font-semibold uppercase text-signoz_vanilla-400">
+              <span className="text-muted-foreground text-[13px] font-semibold uppercase">
                 Scale of ingestion (per month)
               </span>
               <PricingRangeSlider
@@ -409,41 +409,41 @@ const MobileEstimate = () => {
                 minLabel="0GB"
                 maxLabel="200TB"
                 tooltipText={formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
-                thumbColorToken="signoz_robin-500"
+                thumbColorToken="robin-500"
                 aria-label="Traces data ingestion volume"
               />
             </div>
-            <div className="mb-4 mt-0 flex justify-between pt-6 uppercase">
-              <span className="text-[13px] font-semibold text-signoz_vanilla-400">
+            <div className="mt-0 mb-4 flex justify-between pt-6 uppercase">
+              <span className="text-muted-foreground text-[13px] font-semibold">
                 Estimated usage
               </span>
-              <span className="text-[13px] font-semibold text-signoz_vanilla-400">Subtotal</span>
+              <span className="text-muted-foreground text-[13px] font-semibold">Subtotal</span>
             </div>
             <div className="mb-6 flex items-center justify-between uppercase">
-              <div className="text-base text-signoz_vanilla-400">
+              <div className="text-muted-foreground text-base">
                 {formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
               </div>
-              <div className="w-[65%] border-b border-dashed border-signoz_slate-400"></div>
-              <div className="text-signoz_vanilla-100">${formatNumber(tracesSubtotal)}</div>
+              <div className="border-border w-[65%] border-b border-dashed"></div>
+              <div className="text-foreground">${formatNumber(tracesSubtotal)}</div>
             </div>
           </div>
         )}
 
         {activeTab === 'logs' && (
-          <div className="px-3 pb-0 pt-6">
+          <div className="px-3 pt-6 pb-0">
             <div className="mb-4 flex justify-between uppercase">
-              <span className="text-[13px] font-semibold text-signoz_vanilla-400">
+              <span className="text-muted-foreground text-[13px] font-semibold">
                 Pricing per unit
               </span>
-              <span className="text-[13px] font-semibold text-signoz_vanilla-400">Retention</span>
+              <span className="text-muted-foreground text-[13px] font-semibold">Retention</span>
             </div>
             <div className="mb-6 flex justify-between">
-              <div className="text-signoz_sakura-400">
+              <div className="text-sakura-400">
                 ${TRACES_AND_LOGS_PRICES[logsRetentionPeriod]}/GB
               </div>
               <div>
                 <select
-                  className="block h-[32px] w-32 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 py-1.5 pl-2 pr-1.5 text-xs text-signoz_vanilla-100 focus:border-primary-500 focus:ring-primary-500"
+                  className="border-border bg-card text-l1-foreground focus:border-primary focus:ring-ring block h-[32px] w-32 rounded-sm border py-1.5 pr-1.5 pl-2 text-xs"
                   value={logsRetentionPeriod}
                   onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
                 >
@@ -456,7 +456,7 @@ const MobileEstimate = () => {
               </div>
             </div>
             <div className="mb-2">
-              <span className="text-[13px] font-semibold uppercase text-signoz_vanilla-400">
+              <span className="text-muted-foreground text-[13px] font-semibold uppercase">
                 Scale of ingestion (per month)
               </span>
               <PricingRangeSlider
@@ -470,41 +470,41 @@ const MobileEstimate = () => {
                 minLabel="0GB"
                 maxLabel="200TB"
                 tooltipText={formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
-                thumbColorToken="signoz_sakura-500"
+                thumbColorToken="sakura-500"
                 aria-label="Logs data ingestion volume"
               />
             </div>
-            <div className="mb-4 mt-0 flex justify-between pt-6 uppercase">
-              <span className="text-[13px] font-semibold text-signoz_vanilla-400">
+            <div className="mt-0 mb-4 flex justify-between pt-6 uppercase">
+              <span className="text-muted-foreground text-[13px] font-semibold">
                 Estimated usage
               </span>
-              <span className="text-[13px] font-semibold text-signoz_vanilla-400">Subtotal</span>
+              <span className="text-muted-foreground text-[13px] font-semibold">Subtotal</span>
             </div>
             <div className="mb-6 flex items-center justify-between uppercase">
-              <div className="text-base text-signoz_vanilla-400">
+              <div className="text-muted-foreground text-base">
                 {formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
               </div>
-              <div className="w-[65%] border-b border-dashed border-signoz_slate-400"></div>
-              <div className="text-signoz_vanilla-100">${formatNumber(logsSubtotal)}</div>
+              <div className="border-border w-[65%] border-b border-dashed"></div>
+              <div className="text-foreground">${formatNumber(logsSubtotal)}</div>
             </div>
           </div>
         )}
 
         {activeTab === 'metrics' && (
-          <div className="px-3 pb-0 pt-6">
+          <div className="px-3 pt-6 pb-0">
             <div className="mb-4 flex justify-between uppercase">
-              <span className="text-[13px] font-semibold text-signoz_vanilla-400">
+              <span className="text-muted-foreground text-[13px] font-semibold">
                 Pricing per unit
               </span>
-              <span className="text-[13px] font-semibold text-signoz_vanilla-400">Retention</span>
+              <span className="text-muted-foreground text-[13px] font-semibold">Retention</span>
             </div>
             <div className="mb-6 flex justify-between">
-              <div className="text-signoz_amber-400">
+              <div className="text-callout-warning-title">
                 ${METRICS_PRICES[metricsRetentionPeriod]}/mn samples
               </div>
               <div>
                 <select
-                  className="block h-[32px] w-32 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 py-1.5 pl-2 pr-1.5 text-xs text-signoz_vanilla-100 focus:border-primary-500 focus:ring-primary-500"
+                  className="border-border bg-card text-l1-foreground focus:border-primary focus:ring-ring block h-[32px] w-32 rounded-sm border py-1.5 pr-1.5 pl-2 text-xs"
                   value={metricsRetentionPeriod}
                   onChange={(e) => setMetricsRetentionPeriod(Number(e.target.value))}
                 >
@@ -517,7 +517,7 @@ const MobileEstimate = () => {
               </div>
             </div>
             <div className="mb-2">
-              <span className="text-[13px] font-semibold uppercase text-signoz_vanilla-400">
+              <span className="text-muted-foreground text-[13px] font-semibold uppercase">
                 Scale of ingestion (per month)
               </span>
               <PricingRangeSlider
@@ -531,36 +531,36 @@ const MobileEstimate = () => {
                 minLabel="0M"
                 maxLabel="200B"
                 tooltipText={formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
-                thumbColorToken="signoz_amber-500"
+                thumbColorToken="amber-500"
                 aria-label="Metrics data ingestion volume"
               />
             </div>
-            <div className="mb-4 mt-0 flex justify-between pt-6 uppercase">
-              <span className="text-[13px] font-semibold text-signoz_vanilla-400">
+            <div className="mt-0 mb-4 flex justify-between pt-6 uppercase">
+              <span className="text-muted-foreground text-[13px] font-semibold">
                 Estimated usage
               </span>
-              <span className="text-[13px] font-semibold text-signoz_vanilla-400">Subtotal</span>
+              <span className="text-muted-foreground text-[13px] font-semibold">Subtotal</span>
             </div>
             <div className="mb-6 flex items-center justify-between uppercase">
-              <div className="text-base text-signoz_vanilla-400">
+              <div className="text-muted-foreground text-base">
                 {formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
               </div>
-              <div className="w-[65%] border-b border-dashed border-signoz_slate-400"></div>
-              <div className="text-signoz_vanilla-100">${formatNumber(metricsSubtotal)}</div>
+              <div className="border-border w-[65%] border-b border-dashed"></div>
+              <div className="text-foreground">${formatNumber(metricsSubtotal)}</div>
             </div>
           </div>
         )}
 
         <div className="button-background mt-6 flex items-center justify-between rounded-md px-3 py-4 pt-4">
-          <span className="text-base font-medium text-signoz_vanilla-100">Monthly estimate</span>
-          <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
-          <div className="text-signoz_vanilla-100">${formatNumber(totalEstimate)}</div>
+          <span className="text-l1-foreground text-base font-medium">Monthly estimate</span>
+          <div className="border-border w-[45%] border-b border-dashed"></div>
+          <div className="text-foreground">${formatNumber(totalEstimate)}</div>
         </div>
 
         <div
-          className={`mb-6 mt-3 flex flex-col items-center justify-between gap-4 rounded-md border border-dashed bg-[#4E74F81A] px-4 py-3 ${isHighVolume ? 'border-signoz_robin-500' : 'border-transparent'}`}
+          className={`mt-3 mb-6 flex flex-col items-center justify-between gap-4 rounded-md border border-dashed bg-[#4E74F81A] px-4 py-3 ${isHighVolume ? 'border-primary' : 'border-transparent'}`}
         >
-          <span className="text-base font-medium text-signoz_robin-400">
+          <span className="text-accent-primary text-base font-medium">
             Reach out to us for custom pricing and retention for high volume
           </span>
           <Button
@@ -582,8 +582,8 @@ const MobileEstimate = () => {
         </div>
 
         {/* Start Up Program CTA */}
-        <div className="mb-6 mt-3 flex flex-col items-center justify-between gap-4 rounded-md bg-[#BE6BF11A] px-4 py-3">
-          <span className="text-base font-medium text-signoz_robin-400">
+        <div className="mt-3 mb-6 flex flex-col items-center justify-between gap-4 rounded-md bg-[#BE6BF11A] px-4 py-3">
+          <span className="text-accent-primary text-base font-medium">
             Reach out to us for SigNoz's Start Up Program Discount
           </span>
           <Button variant="legacySecondary" className="w-full">

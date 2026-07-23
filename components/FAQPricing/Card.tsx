@@ -35,12 +35,12 @@ const Card = ({ title, body, idx }: CardProps): JSX.Element => {
             style={{
               marginLeft: '0.5rem',
             }}
-            className="w-9/12 font-bold text-signoz_vanilla-100"
+            className="text-l1-foreground w-9/12 font-bold"
           >
             {title}
           </div>
 
-          <div className="text-signoz_vanilla-400">{!isActive ? <LucidePlus /> : <X />}</div>
+          <div className="text-muted-foreground">{!isActive ? <LucidePlus /> : <X />}</div>
         </div>
         <div
           className={`transition-max-height overflow-hidden duration-500 ease-in-out ${
@@ -48,7 +48,7 @@ const Card = ({ title, body, idx }: CardProps): JSX.Element => {
           }`}
         >
           <div
-            className="card__body p-4 text-signoz_vanilla-400"
+            className="card__body text-muted-foreground p-4"
             dangerouslySetInnerHTML={{ __html: body }}
           />
         </div>

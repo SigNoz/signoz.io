@@ -69,15 +69,15 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
         <div className="flex items-center justify-between gap-4 font-bold">
           <div className="flex items-center gap-2">
             <CheckCircle className="text-green-500" size={16} />
-            <span className="text-base text-signoz_vanilla-400">No user-based pricing</span>
+            <span className="text-muted-foreground text-base">No user-based pricing</span>
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle className="text-green-500" size={16} />
-            <span className="text-base text-signoz_vanilla-400">No host-based pricing</span>
+            <span className="text-muted-foreground text-base">No host-based pricing</span>
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle className="text-green-500" size={16} />
-            <span className="text-base text-signoz_vanilla-400">
+            <span className="text-muted-foreground text-base">
               No special pricing for custom metrics
             </span>
           </div>
@@ -122,7 +122,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
         </div>
 
         {/* Pricing info */}
-        <div className="flex items-center gap-4 text-center text-sm text-signoz_vanilla-400">
+        <div className="text-muted-foreground flex items-center gap-4 text-center text-sm">
           <div className="flex-1 border-t border-dashed border-gray-500"></div>
           <div>
             <p className="mb-1">
@@ -134,7 +134,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
         </div>
 
         {/* Telemetry types */}
-        <div className="mb-8 mt-4 flex items-center justify-between">
+        <div className="mt-4 mb-8 flex items-center justify-between">
           <div className="text-left">
             <h4 className="mb-1 text-xl font-medium">Logs</h4>
             <p className="mb-0 text-sm text-gray-400">
@@ -145,7 +145,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
               <select
                 value={logsRetentionPeriod}
                 onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
-                className="absolute left-0 top-0 z-10 h-full w-max cursor-pointer opacity-0"
+                className="absolute top-0 left-0 z-10 h-full w-max cursor-pointer opacity-0"
               >
                 {RETENTION_PERIOD.TRACES_AND_LOGS.map(({ days }) => (
                   <option key={days} value={days}>
@@ -166,7 +166,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
               <select
                 value={tracesRetentionPeriod}
                 onChange={(e) => setTracesRetentionPeriod(Number(e.target.value))}
-                className="absolute left-0 top-0 z-10 h-full w-max cursor-pointer opacity-0"
+                className="absolute top-0 left-0 z-10 h-full w-max cursor-pointer opacity-0"
               >
                 {RETENTION_PERIOD.TRACES_AND_LOGS.map(({ days }) => (
                   <option key={days} value={days}>
@@ -187,7 +187,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
               <select
                 value={metricsRetentionPeriod}
                 onChange={(e) => setMetricsRetentionPeriod(Number(e.target.value))}
-                className="absolute left-0 top-0 z-10 h-full w-max cursor-pointer opacity-0"
+                className="absolute top-0 left-0 z-10 h-full w-max cursor-pointer opacity-0"
               >
                 {RETENTION_PERIOD.METRICS.map(({ months }) => (
                   <option key={months} value={months}>
@@ -201,13 +201,13 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
 
         {/* Bottom link */}
         <div className="text-center text-sm">
-          <p className="text-signoz_vanilla-400">
+          <p className="text-muted-foreground">
             Tired of unpredictable pricing and complex billing structure?
             <br />
             Migrate your Datadog dashboards in minutes with our{' '}
             <TrackingLink
               href="https://signoz.io/datadog-migration-tool/"
-              className="text-signoz_robin-500 hover:underline"
+              className="text-primary hover:underline"
               clickType="Nav Click"
               clickName="Migration Tool Link"
               clickLocation="Pricing Overview Card"
@@ -218,7 +218,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
             and save up to{' '}
             <TrackingLink
               href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
-              className="text-signoz_robin-500 hover:underline"
+              className="text-primary hover:underline"
               clickType="Nav Click"
               clickName="Pricing Comparison Blog Link"
               clickLocation="Pricing Overview Card"

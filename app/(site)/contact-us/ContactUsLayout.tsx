@@ -45,15 +45,15 @@ export default function ContactUsLayout() {
   }
 
   return (
-    <div className="ml-[calc(100%-100vw)] flex w-screen flex-col overflow-hidden bg-signoz_ink-400">
+    <div className="bg-card ml-[calc(100%-100vw)] flex w-screen flex-col overflow-hidden">
       <FocusedNavbar />
       <div className="mx-auto flex w-full max-w-[1440px] flex-col lg:mt-[8px] lg:h-[calc(100vh-56px)] lg:flex-row">
         {/* Left col — desktop only */}
-        <div className="hidden w-full flex-col justify-center p-8 lg:flex lg:w-5/12 lg:py-12 lg:pl-[72px] lg:pr-14">
+        <div className="hidden w-full flex-col justify-center p-8 lg:flex lg:w-5/12 lg:py-12 lg:pr-14 lg:pl-[72px]">
           <div className="flex max-w-[420px] flex-col gap-8">
             {/* Headline + subtitle */}
             <div className="flex flex-col gap-2">
-              <h1 className="text-[36px] font-bold leading-[1.2] tracking-[-1px] text-white">
+              <h1 className="text-[36px] leading-[1.2] font-bold tracking-[-1px] text-white">
                 Talk to our Team.
               </h1>
               <p className="text-[15px] leading-[1.6] text-gray-400">
@@ -63,15 +63,15 @@ export default function ContactUsLayout() {
 
             {/* Options */}
             <div className="flex flex-col gap-3">
-              <p className="mb-0 text-[11px] font-semibold uppercase tracking-[1.2px] text-gray-500">
+              <p className="mb-0 text-[11px] font-semibold tracking-[1.2px] text-gray-500 uppercase">
                 Choose from
               </p>
               <div className="flex flex-col gap-3">
                 {OPTIONS.map((opt) => (
                   <div key={opt.title} className="flex items-start gap-2.5">
-                    <CheckCircle className="mt-[3px] h-3.5 w-3.5 flex-shrink-0 text-signoz_forest-500" />
+                    <CheckCircle className="text-callout-success-title mt-[3px] h-3.5 w-3.5 flex-shrink-0" />
                     <div className="flex flex-col">
-                      <span className="text-[14px] font-semibold leading-[1.4] text-white">
+                      <span className="text-[14px] leading-[1.4] font-semibold text-white">
                         {opt.title}
                       </span>
                       <span className="text-[13px] leading-[1.5] text-gray-500">
@@ -85,7 +85,7 @@ export default function ContactUsLayout() {
 
             {/* Trust bar */}
             <div className="flex flex-col gap-3">
-              <p className="mb-0 text-[11px] font-semibold uppercase tracking-[1.2px] text-gray-500">
+              <p className="mb-0 text-[11px] font-semibold tracking-[1.2px] text-gray-500 uppercase">
                 Trusted by
               </p>
               <div className="grid grid-cols-3 gap-x-12 gap-y-6 opacity-60">
@@ -106,12 +106,12 @@ export default function ContactUsLayout() {
 
         {/* Divider */}
         <div className="hidden lg:flex lg:items-center lg:py-16">
-          <div className="h-full w-px bg-signoz_slate-400" />
+          <div className="bg-muted h-full w-px" />
         </div>
 
         {/* Right col — form */}
         <div className="relative flex w-full flex-col items-center justify-center p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:overflow-y-auto lg:px-16 lg:py-14">
-          <div className="w-full max-w-[560px] rounded-[12px] border border-signoz_slate-400 bg-signoz_ink-500 px-10 py-10">
+          <div className="border-border bg-background w-full max-w-[560px] rounded-[12px] border px-10 py-10">
             <HubspotCustomForm
               portalId={contactUsData.PORTAL_ID}
               formId={contactUsData.FORM_ID}

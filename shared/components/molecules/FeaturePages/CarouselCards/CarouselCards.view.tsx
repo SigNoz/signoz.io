@@ -59,29 +59,29 @@ const CarouselCards: React.FC<{
                 onClick={() => handleCardClick(index)}
                 className={`transform cursor-pointer transition-all duration-500 ease-in-out ${
                   activeIndex === index
-                    ? 'border-signoz_robin-500/10 bg-signoz_robin-500/10 shadow-lg'
-                    : 'border-signoz_slate-400 bg-signoz_ink-400 hover:bg-signoz_ink-300'
+                    ? 'border-primary/10 bg-primary/10 shadow-lg'
+                    : 'border-border bg-card hover:bg-l3-background'
                 } relative overflow-hidden rounded-lg border p-4`}
               >
                 <div className="flex h-fit gap-2">
                   <div className="mr-2 flex h-11 w-0.5 flex-shrink-0 items-center justify-center">
                     <div
                       className={`h-full w-full rounded-full ${
-                        activeIndex === index ? 'bg-signoz_robin-600/60' : 'bg-signoz_slate-200/80'
+                        activeIndex === index ? 'bg-primary-background-hover/60' : 'bg-secondary/80'
                       }`}
                     ></div>
                   </div>
                   <div>
                     <h3
                       className={`mb-2 text-sm font-semibold transition-colors duration-300 ${
-                        activeIndex === index ? 'text-signoz_robin-600' : 'text-signoz_vanilla-100'
+                        activeIndex === index ? 'text-robin-600' : 'text-foreground'
                       }`}
                     >
                       {item.title}
                     </h3>
                     <p
                       className={`m-0 text-xs transition-colors duration-300 ${
-                        activeIndex === index ? 'text-signoz_robin-200' : 'text-signoz_vanilla-100'
+                        activeIndex === index ? 'text-robin-200' : 'text-foreground'
                       }`}
                     >
                       {item.description}

@@ -17,11 +17,11 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
         <div className="flex items-center gap-4">
           <Image src={image} alt={name} width={48} height={48} className="rounded-full" />
           <div>
-            <h3 className="mb-0 font-medium text-signoz_vanilla-100">{name}</h3>
-            <p className="mb-0 text-sm text-signoz_vanilla-400">{role}</p>
+            <h3 className="text-l1-foreground mb-0 font-medium">{name}</h3>
+            <p className="text-muted-foreground mb-0 text-sm">{role}</p>
           </div>
         </div>
-        <p className="mb-0 text-signoz_vanilla-100">{testimonial}</p>
+        <p className="text-foreground mb-0">{testimonial}</p>
       </div>
     </Card>
   )

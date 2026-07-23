@@ -74,7 +74,7 @@ export default function ArticleSeriesTop({
       <div className="flex items-center space-x-4">
         {showPrevious && prevLink ? (
           <Tooltip
-            contentClassName="text-signoz_vanilla-100 text-sm"
+            contentClassName="text-foreground text-sm"
             content={`Previous: ${prevLink.title}`}
             delayDuration={150}
             side="top"

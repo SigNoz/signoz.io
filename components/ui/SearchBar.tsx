@@ -71,21 +71,18 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <>
       <div
-        className={`relative flex w-full max-w-lg cursor-pointer items-center rounded-lg border border-signoz_slate-400 bg-signoz_ink-500 px-4 py-3 transition-all duration-200 focus-within:border-signoz_robin-500 focus-within:ring-2 focus-within:ring-signoz_robin-500/20 hover:border-signoz_robin-500 hover:shadow-md ${className}`}
+        className={`border-border bg-background focus-within:border-primary focus-within:ring-ring/20 hover:border-primary relative flex w-full max-w-lg cursor-pointer items-center rounded-lg border px-4 py-3 transition-all duration-200 focus-within:ring-2 hover:shadow-md ${className}`}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         tabIndex={0}
         role="button"
         aria-label="Open search and chat interface"
       >
-        <Sparkles
-          strokeWidth={1.25}
-          className="mr-3 h-5 w-5 flex-shrink-0 text-signoz_vanilla-400"
-        />
-        <span className="flex-1 text-left text-sm text-signoz_vanilla-400 transition-all duration-300">
+        <Sparkles strokeWidth={1.25} className="text-muted-foreground mr-3 h-5 w-5 flex-shrink-0" />
+        <span className="text-muted-foreground flex-1 text-left text-sm transition-all duration-300">
           {currentPlaceholder}
         </span>
-        <kbd className="text-signoz_vanilla-500 rounded border border-signoz_slate-300 bg-signoz_slate-500 px-2 py-1 font-mono text-xs">
+        <kbd className="border-l2-border bg-muted text-muted-foreground flex h-4 w-4 items-center justify-center rounded border font-mono text-[10px] leading-none">
           /
         </kbd>
       </div>

@@ -15,6 +15,7 @@ import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import { resolveLatestDate, formatDisplayDate } from '@/utils/dateUtils'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
 import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
+import SidebarRegionSelector from '@/components/DocsSidebar/SidebarRegionSelector'
 
 const DocContent: React.FC<{
   title: string
@@ -62,10 +63,15 @@ const DocContent: React.FC<{
       <div
         className={`box-border min-w-0 flex-[1_1_auto] [&_details+details]:mt-8 ${isOnboarding ? '!w-full px-4' : ''}`}
       >
+        <div className="mb-4 md:hidden">
+          <SidebarRegionSelector showInfoTip={false} />
+        </div>
         {breadcrumbs && !isOnboarding && <Breadcrumb crumbs={breadcrumbs} />}
         <div className="m-0 flex items-center justify-between gap-2">
           <div className="flex flex-col items-start gap-2">
-            <h1 className="mt-2 text-3xl leading-tight">{title}</h1>
+            <h1 className="text-l1-foreground mt-2 text-3xl leading-tight font-bold tracking-tight">
+              {title}
+            </h1>
           </div>
           {!isIntroductionPage && post.body?.raw && (
             <OpenInAI
@@ -80,13 +86,11 @@ const DocContent: React.FC<{
         {!isOnboarding && post.docTags && post.docTags.length > 0 && (
           <TagsWithTooltips tags={post.docTags} />
         )}
-        <article ref={articleRef} className="prose prose-slate max-w-none py-6 dark:prose-invert">
+        <article ref={articleRef} className="prose prose-slate dark:prose-invert max-w-none py-6">
           {children}
         </article>
         <div className="mt-8 flex items-center justify-between text-sm">
-          {formattedDate && (
-            <p className="text-gray-500 dark:text-gray-400">Last updated: {formattedDate}</p>
-          )}
+          {formattedDate && <p className="text-muted-foreground">Last updated: {formattedDate}</p>}
           {editLink && (
             <Button href={editLink} variant="outline" className="gap-2 no-underline">
               <Edit size={16} />

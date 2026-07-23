@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { Badge } from '@signozhq/badge'
+import { Badge } from '@signozhq/ui/badge'
 import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { Card } from '@/components/ui/Card'
@@ -27,12 +27,12 @@ const SourcesTabsGrid: React.FC = () => {
         <IconGrid
           icons={CLOUD_ICONS}
           title="CLOUD"
-          className="border-r-1 border-dashed border-signoz_slate-400 pr-4"
+          className="border-border border-r-1 border-dashed pr-4"
         />
         <IconGrid icons={CONTAINER_ICONS} title="CONTAINERS" />
       </div>
 
-      <div className="border-b-1 border-dashed border-signoz_slate-400" />
+      <div className="border-border border-b-1 border-dashed" />
 
       <IconGrid icons={POPULAR_TOOLS_ICONS} title="POPULAR TOOLS" />
 
@@ -61,7 +61,7 @@ const SourcesTabsGrid: React.FC = () => {
       <div className="flex flex-col items-center gap-8 md:flex-row">
         <div>
           <div className="mb-4 flex items-center gap-3">
-            <h3 className="m-0 text-xs font-medium uppercase text-signoz_vanilla-400">
+            <h3 className="text-muted-foreground m-0 text-xs font-medium uppercase">
               OPENTELEMETRY
             </h3>
             <Badge color="vanilla" className="text-xs">
@@ -82,7 +82,7 @@ const SourcesTabsGrid: React.FC = () => {
       </div>
 
       <div>
-        <h3 className="mb-4 text-xs font-medium uppercase text-signoz_vanilla-400">
+        <h3 className="text-muted-foreground mb-4 text-xs font-medium uppercase">
           DIRECT INTEGRATIONS
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -115,7 +115,7 @@ const SourcesTabsGrid: React.FC = () => {
   )
 
   return (
-    <Card className="bg-signoz_ink-400 [&>*]:p-4 [&>div]:border-1">
+    <Card className="bg-card [&>*]:p-4 [&>div]:border-1">
       <Tabs entityName="sources">
         <TabItem value="supported-sources" label="Supported Sources">
           {sourcesTabContent}

@@ -17,7 +17,7 @@ export const PricingCalculatorHeader: React.FC<PricingCalculatorHeaderProps> = (
 }) => (
   <div className="mb-4 flex items-start justify-between">
     <div className="flex-1">
-      <span className="group relative text-lg font-semibold text-signoz_vanilla-100/90 md:text-2xl">
+      <span className="group text-l1-foreground/90 relative text-lg font-semibold md:text-2xl">
         Estimate your monthly bill
         {isMounted && (
           <a
@@ -39,11 +39,11 @@ export const PricingCalculatorHeader: React.FC<PricingCalculatorHeaderProps> = (
         )}
       </span>
       {isMounted && (
-        <p className="mt-1 text-sm text-signoz_vanilla-400">
+        <p className="text-muted-foreground mt-1 text-sm">
           You can also set data ingestion limits so you never get a surprise bill.
           <Link
             href="https://signoz.io/docs/ingestion/signoz-cloud/keys/"
-            className="ml-1 font-medium text-signoz_robin-400"
+            className="text-accent-primary ml-1 font-medium"
           >
             Learn more
             <ArrowUpRight className="inline" size={16} />
@@ -60,7 +60,7 @@ export const PricingCalculatorHeader: React.FC<PricingCalculatorHeaderProps> = (
           clickName="Share Pricing Calculator Configuration"
           clickLocation="Pricing Calculator Header"
           clickText="Share with your team"
-          className="flex items-center gap-2 rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-3 py-2 text-sm text-signoz_vanilla-100 transition-colors hover:bg-signoz_ink-300"
+          className="border-border bg-card text-l1-foreground hover:bg-l3-background flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors"
           aria-label="Share calculator configuration with your team"
         >
           <svg
@@ -83,8 +83,8 @@ export const PricingCalculatorHeader: React.FC<PricingCalculatorHeaderProps> = (
 
         {/* Toast notification positioned near the button */}
         {showCopiedToast && (
-          <div className="absolute right-0 top-full mt-2 w-max rounded-md bg-signoz_robin-500 px-3 py-2 text-sm text-white shadow-lg">
-            <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 bg-signoz_robin-500"></div>
+          <div className="bg-primary absolute top-full right-0 mt-2 w-max rounded-md px-3 py-2 text-sm text-white shadow-lg">
+            <div className="bg-primary absolute -top-1 right-4 h-2 w-2 rotate-45"></div>
             Configuration copied to clipboard!
           </div>
         )}

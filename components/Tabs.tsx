@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import React, { useState, useCallback, useMemo, useEffect, useId } from 'react'
 import { usePathname } from 'next/navigation'
 import { TabsRoot, TabsList, TabsTrigger } from '@signozhq/ui/tabs'
 import { useSearchParamsState } from '@/hooks/useSearchParamsState'
@@ -18,6 +18,7 @@ interface TabsProps {
 const Tabs = ({ children, entityName, variant = 'default', className }: TabsProps) => {
   const searchParams = useSearchParamsState()
   const pathname = usePathname()
+  const tabsBaseId = useId()
 
   const childrenArray = React.Children.toArray(children)
   const validChildren = childrenArray.filter((child): child is React.ReactElement<TabItemProps> =>
@@ -45,6 +46,8 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
     return null
   }, [urlKey, searchParams, tabValuesSet])
 
+  // Optimistic selection until URL search params catch up after replaceState.
+  // Cleared when URL matches, or on popstate (back/forward) so we follow the URL.
   const [override, setOverride] = useState<string | null>(null)
 
   useEffect(() => {
@@ -53,6 +56,13 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
       setOverride(null)
     }
   }, [urlKey, resolvedFromUrl, override])
+
+  useEffect(() => {
+    if (!urlKey) return
+    const clearOverride = () => setOverride(null)
+    window.addEventListener('popstate', clearOverride)
+    return () => window.removeEventListener('popstate', clearOverride)
+  }, [urlKey])
 
   const activeTab = override ?? resolvedFromUrl ?? defaultActiveTab
 
@@ -84,6 +94,8 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
     return true
   })
 
+  const tabDomId = (kind: 'trigger' | 'content', value: string) => `${tabsBaseId}-${kind}-${value}`
+
   return (
     <TabsRoot
       className={`${styles.root} ${className || 'w-full'}`}
@@ -102,14 +114,18 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
       <TabsList variant={dsVariant}>
         {visibleChildren.map((child) => {
           const { value, label } = child.props
+          const tabValue = value as string
           return (
             <TabsTrigger
-              key={value as string}
-              value={value as string}
+              key={tabValue}
+              value={tabValue}
               variant={dsVariant}
+              id={tabDomId('trigger', tabValue)}
+              // data-tab-value: DocsTOC + Copy Markdown. aria-controls: match custom panels below.
               {...({
-                'data-tab-value': value as string,
-              } as Record<string, unknown>)}
+                'data-tab-value': tabValue,
+                'aria-controls': tabDomId('content', tabValue),
+              } as React.ComponentPropsWithoutRef<'button'>)}
             >
               {label}
             </TabsTrigger>
@@ -118,11 +134,15 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
       </TabsList>
       <div className="mt-4">
         {visibleChildren.map((child) => {
-          const isActive = child.props.value === activeTab
+          const tabValue = child.props.value as string
+          const isActive = tabValue === activeTab
           return (
             <div
-              key={child.props.value as string}
-              data-tab-value={child.props.value}
+              key={tabValue}
+              id={tabDomId('content', tabValue)}
+              role="tabpanel"
+              aria-labelledby={tabDomId('trigger', tabValue)}
+              data-tab-value={tabValue}
               hidden={!isActive}
             >
               {child.props.children}

@@ -94,30 +94,22 @@ const comparisons = [
 export default function ProductComparisons() {
   return (
     <div className="container mx-auto">
-      <h2 className="font-heading text-gradient mt-8 px-8 text-center text-4xl font-bold tracking-normal ">
+      <h2 className="font-heading text-gradient mt-8 px-8 text-center text-4xl font-bold tracking-normal">
         Product Comparisons
       </h2>
 
       <div className="my-8 flex flex-wrap">
         {comparisons.map((comparison) => {
           return (
-            <div className="col col--6" key={comparison.id}>
-              <div className="card-demo margin--md">
-                <Link href={comparison.url}>
-                  <div className="card-dark min-h-[240px] rounded-sm border p-4">
-                    <div className="card__header">
-                      <div className="avatar">
-                        <div className="avatar__intro">
-                          <h2 className="avatar__name mb-0 text-2xl">{comparison.title}</h2>
-                          {/* <small className="avatar__subtitle">{comparison.designation}</small> */}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="card__body">{comparison?.desc}</div>
-                  </div>
-                </Link>
-              </div>
+            <div className="w-full p-4 md:w-1/2" key={comparison.id}>
+              <Link href={comparison.url}>
+                <div className="border-border bg-card min-h-[240px] rounded-md border p-4">
+                  <h2 className="text-l1-foreground mb-3 text-2xl font-semibold">
+                    {comparison.title}
+                  </h2>
+                  <div className="text-foreground">{comparison?.desc}</div>
+                </div>
+              </Link>
             </div>
           )
         })}

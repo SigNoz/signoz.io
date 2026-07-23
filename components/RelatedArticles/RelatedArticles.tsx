@@ -13,21 +13,17 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ title, publishedOn, url }) =>
     <Link
       href={url}
       target="_blank"
-      className="flex flex-col rounded-sm dark:border-gray-900 dark:bg-signoz_ink-400 max-md:ml-0 max-md:w-full"
+      className="dark:bg-card flex flex-col rounded-sm max-md:ml-0 max-md:w-full dark:border-gray-900"
       prefetch={false}
     >
-      <img
-        className="h-24 w-full object-cover"
-        src="/img/hexagonal-pattern.webp"
-        alt=""
-      />
+      <img className="h-24 w-full object-cover" src="/img/hexagonal-pattern.webp" alt="" />
 
-      <article className="mx-auto flex w-full grow flex-col rounded px-4 py-8  max-md:mt-6">
-        <h3 className="truncate text-sm font-medium leading-6 text-signoz_ink-300 dark:text-neutral-100">
+      <article className="mx-auto flex w-full grow flex-col rounded px-4 py-8 max-md:mt-6">
+        <h3 className="text-muted-foreground truncate text-sm leading-6 font-medium dark:text-neutral-100">
           {title}
         </h3>
-        <div className="mt-3 flex gap-2 text-xs font-medium uppercase leading-5 tracking-wide">
-          <div className="justify-center rounded-full bg-slate-500 bg-opacity-10 px-2.5 py-1 text-xs dark:bg-stone-300 dark:text-slate-950">
+        <div className="mt-3 flex gap-2 text-xs leading-5 font-medium tracking-wide uppercase">
+          <div className="bg-muted bg-opacity-10 justify-center rounded-full px-2.5 py-1 text-xs dark:bg-stone-300 dark:text-slate-950">
             {publishedOn}
           </div>
         </div>
@@ -42,7 +38,7 @@ const RelatedArticles: React.FC<{
   return (
     <div className="related-articles my-8 flex flex-col">
       {relatedArticles && Array.isArray(relatedArticles) && relatedArticles.length > 0 && (
-        <h2 className="w-full text-sm font-semibold uppercase leading-5 tracking-wide text-white max-md:max-w-full">
+        <h2 className="text-foreground w-full text-sm leading-5 font-semibold tracking-wide uppercase max-md:max-w-full">
           Related Articles
         </h2>
       )}

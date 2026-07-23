@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="mx-auto mt-10 max-w-5xl px-6">
-      <h1 className="text-4xl font-bold tracking-tight text-signoz_vanilla-100">
+      <h1 className="text-l1-foreground text-4xl font-bold tracking-tight">
         SigNoz Expert Contributors Program
       </h1>
 
@@ -36,30 +36,30 @@ export default function Page() {
       />
 
       <div className="mt-16">
-        <h2 className="flex items-center gap-2 text-2xl font-semibold text-signoz_vanilla-100">
+        <h2 className="text-l1-foreground flex items-center gap-2 text-2xl font-semibold">
           A Heartfelt Thank You{' '}
-          <HeartHandshakeIcon className="inline-block h-6 w-6 text-signoz_cherry-500" />
+          <HeartHandshakeIcon className="text-danger-foreground inline-block h-6 w-6" />
         </h2>
-        <p className="mt-4 text-base leading-relaxed text-signoz_vanilla-400">
+        <p className="text-muted-foreground mt-4 text-base leading-relaxed">
           The SigNoz Expert Contributors Program brought together talented professionals from across
           the observability space to help build dashboards, documentation, and resources used by
           thousands of developers worldwide. We&apos;re incredibly grateful for every contribution
           made through this program.
         </p>
-        <p className="mt-4 text-base leading-relaxed text-signoz_vanilla-400">
+        <p className="text-muted-foreground mt-4 text-base leading-relaxed">
           Your dashboards, tutorials, and documentation continue to help developers monitor,
           optimize, and maintain their applications with ease. The impact of your work lives on in
           the SigNoz ecosystem.
         </p>
       </div>
 
-      <hr className="my-12 border-t border-dashed border-signoz_slate-400" />
+      <hr className="border-border my-12 border-t border-dashed" />
 
       <div>
-        <h2 className="flex items-center gap-2 text-2xl font-semibold text-signoz_vanilla-100">
+        <h2 className="text-l1-foreground flex items-center gap-2 text-2xl font-semibold">
           We Still Welcome Contributions
         </h2>
-        <p className="mt-4 text-base leading-relaxed text-signoz_vanilla-400">
+        <p className="text-muted-foreground mt-4 text-base leading-relaxed">
           While the formal program has ended, SigNoz remains an open-source project at heart - and
           we always welcome community contributions. Here are some ways you can get involved:
         </p>
@@ -92,7 +92,7 @@ export default function Page() {
         </div>
       </div>
 
-      <p className="mt-16 text-center text-base leading-relaxed text-signoz_vanilla-400">
+      <p className="text-muted-foreground mt-16 text-center text-base leading-relaxed">
         Thank you for being part of the SigNoz journey.
         <br />
         We look forward to continued collaboration with the community!
@@ -117,16 +117,16 @@ function ContributionCard({
       href={href}
       target="_blank"
       rel="noopener noreferrer nofollow"
-      className="group flex flex-col justify-between rounded-xl border border-signoz_ink-300 bg-signoz_ink-400/50 p-5 transition-all duration-200 hover:border-signoz_robin-500/60 hover:bg-signoz_ink-400"
+      className="group border-border bg-card/50 hover:border-primary/60 hover:bg-card flex flex-col justify-between rounded-xl border p-5 transition-all duration-200"
       prefetch={false}
     >
       <div>
-        <h3 className="text-sm font-medium leading-snug text-white/90 group-hover:text-white">
+        <h3 className="text-sm leading-snug font-medium text-white/90 group-hover:text-white">
           {title}
         </h3>
-        <p className="mt-2 text-xs leading-relaxed text-signoz_vanilla-400">{description}</p>
+        <p className="text-muted-foreground mt-2 text-xs leading-relaxed">{description}</p>
       </div>
-      <div className="mt-4 flex items-center gap-1 text-xs text-signoz_robin-400/60 transition-all duration-200 group-hover:gap-2 group-hover:text-signoz_robin-400">
+      <div className="text-accent-primary/60 group-hover:text-accent-primary mt-4 flex items-center gap-1 text-xs transition-all duration-200 group-hover:gap-2">
         <span>{linkText}</span>
         <ArrowRight size={12} />
       </div>

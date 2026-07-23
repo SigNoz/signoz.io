@@ -71,7 +71,7 @@ const Header: React.FC = () => {
           </span>
         }
         buttonGroup={headerButtonGroup}
-        sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
+        sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-border max-md:-mb-[3rem]"
         heroImage={
           <Image
             src={agentNativeHeroImageUrl}
@@ -84,7 +84,7 @@ const Header: React.FC = () => {
           />
         }
         buttonDescription={
-          <div className="text-sm text-signoz_vanilla-400">
+          <div className="text-muted-foreground text-sm">
             No learning new Dashboard UX. In-context Observability in your workflows.
           </div>
         }
@@ -97,9 +97,9 @@ const Header: React.FC = () => {
 
 const TrustedByTeams: React.FC = () => {
   return (
-    <div className="relative mx-auto flex max-w-8xl flex-col items-center justify-center gap-10 overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 py-16">
-      <div className="text-center text-sm font-semibold uppercase tracking-[0.05em] text-signoz_vanilla-400">
-        Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
+    <div className="max-w-8xl border-border relative mx-auto flex flex-col items-center justify-center gap-10 overflow-hidden border !border-t-0 !border-b-0 border-dashed py-16">
+      <div className="text-muted-foreground text-center text-sm font-semibold tracking-[0.05em] uppercase">
+        Trusted by the <span className="text-foreground">best platform teams</span>
       </div>
       <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-16 gap-y-10 px-4">
         {TRUSTED_BY_LOGOS.map((logo) => (
@@ -226,19 +226,19 @@ const InContextObservability: React.FC = () => {
       className="flex flex-col items-center justify-center gap-10 !px-8 !py-20 md:!px-0"
     >
       <div className="mx-auto max-w-4xl text-center">
-        <h2 className="mb-4 text-4xl font-semibold text-signoz_vanilla-100">
+        <h2 className="text-l1-foreground mb-4 text-4xl font-semibold">
           Powerful, In-context Observability
         </h2>
-        <p className="text-lg text-signoz_vanilla-400">
+        <p className="text-muted-foreground text-lg">
           In the tools you need. At the time you need.
         </p>
       </div>
-      <div className="mx-auto w-full overflow-hidden border-y border-dashed border-signoz_slate-400/50">
+      <div className="border-border/50 mx-auto w-full overflow-hidden border-y border-dashed">
         <div className="grid grid-cols-1 md:grid-cols-2">
           <DitherCanvas
             fadeToLeft
             enableClick
-            className="border-b border-dashed border-signoz_slate-400/50 md:border-b-0 md:border-r"
+            className="border-border/50 border-b border-dashed md:border-r md:border-b-0"
           >
             <div className="flex h-full flex-col gap-4 p-8">
               <div>
@@ -249,13 +249,13 @@ const InContextObservability: React.FC = () => {
                   height={36}
                 />
               </div>
-              <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">SigNoz MCP Server</h3>
-              <p className="text-sm leading-relaxed text-signoz_vanilla-400">
+              <h3 className="text-l1-foreground m-0 text-2xl font-bold">SigNoz MCP Server</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 Plug into Claude Code or Cursor in minutes. Get full observability context in every
                 session: traces, logs, metrics, service topology, and deployment history. Start
                 debugging in your terminal.
               </p>
-              <div className="mt-auto pb-5 pt-4">
+              <div className="mt-auto pt-4 pb-5">
                 <Button
                   asChild
                   variant="default"
@@ -279,10 +279,10 @@ const InContextObservability: React.FC = () => {
           <DitherCanvas fadeToLeft enableClick id="ai-assistant">
             <div className="flex h-full flex-col gap-4 p-8">
               <NozAnimatedIcon size={40} />
-              <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">
+              <h3 className="text-l1-foreground m-0 text-2xl font-bold">
                 Noz : SigNoz AI Teammate
               </h3>
-              <p className="text-sm leading-relaxed text-signoz_vanilla-400">
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 Your AI teammate inside SigNoz. Ask about your logs, traces, and metrics in plain
                 English, and Noz investigates across your data, explains what it finds, and suggests
                 what to do next. It can also create dashboards, alerts, and views for you.
@@ -316,14 +316,14 @@ const InContextObservability: React.FC = () => {
 
 const FeatureSections: React.FC = () => {
   return (
-    <section className="relative mx-auto max-w-8xl overflow-hidden border-t border-dashed border-signoz_slate-400 pt-14">
+    <section className="max-w-8xl border-border relative mx-auto overflow-hidden border-t border-dashed pt-14">
       <div className="relative mx-auto flex flex-col items-center gap-6 text-center">
-        <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
+        <div className="text-l1-foreground dark:text-sienna-100 flex flex-col items-center gap-14 text-2xl leading-[3.25rem] font-medium">
           <div className="flex max-w-4xl flex-col items-center gap-4">
-            <h2 className="text-center text-4xl font-semibold text-signoz_vanilla-100">
+            <h2 className="text-l1-foreground text-center text-4xl font-semibold">
               Why Agent Native Observability
             </h2>
-            <div className="text-center text-base text-signoz_vanilla-400">
+            <div className="text-muted-foreground text-center text-base">
               Debug faster. Ship with confidence. All from your dev environment.
             </div>
           </div>
@@ -340,7 +340,7 @@ const BottomCTA: React.FC = () => {
       variant="full-width"
       className="flex flex-col items-center justify-center gap-6 !px-8 !py-20 md:!px-0"
     >
-      <h2 className="mx-auto mb-6 max-w-4xl text-center text-4xl font-semibold text-signoz_vanilla-100">
+      <h2 className="text-l1-foreground mx-auto mb-6 max-w-4xl text-center text-4xl font-semibold">
         No more context-switching to a <br className="hidden md:block" /> separate observability
         tool.
       </h2>
@@ -380,7 +380,7 @@ const AgentNativeObservabilityPage: React.FC = () => {
   return (
     <FeaturePageLayout showProductNav={false} fullWidth>
       <Header />
-      <div className="relative mx-auto max-w-8xl">
+      <div className="max-w-8xl relative mx-auto">
         <TrustedByTeams />
         <InContextObservability />
 

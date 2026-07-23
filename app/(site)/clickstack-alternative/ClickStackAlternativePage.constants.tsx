@@ -23,7 +23,7 @@ export const QUERY_YOUR_DATA_CARDS = [
         Querying is included in your ingestion pricing. In ClickStack, query compute is{' '}
         <Link
           href="/blog/clickstack-managed-pricing-compute-costs/"
-          className="underline decoration-signoz_robin-400 underline-offset-2"
+          className="decoration-robin-400 underline underline-offset-2"
         >
           billed separately
         </Link>{' '}
@@ -45,7 +45,7 @@ export const ALERTING_ABOVE_HISTORY_CARDS = [
           looking at.
         </p>
         <p>
-          ClickStack has <span className="text-signoz_cherry-300">no dedicated</span> alerts
+          ClickStack has <span className="text-danger-foreground">no dedicated</span> alerts
           workflow. Alerts can only be created from a search or a dashboard, which means alert
           management is always a detour from your current investigation.
         </p>
@@ -62,7 +62,7 @@ export const ALERTING_ABOVE_HISTORY_CARDS = [
           expected traffic patterns rather than firing on normal fluctuations.
         </p>
         <p>
-          ClickStack <span className="text-signoz_cherry-300">does not support</span> anomaly
+          ClickStack <span className="text-danger-foreground">does not support</span> anomaly
           detection.
         </p>
       </div>
@@ -79,7 +79,7 @@ export const ALERTING_BELOW_HISTORY_CARDS = [
           A single alert rule in SigNoz can have multiple severity thresholds: warning, critical,
           and info. Each threshold can route to a different notification channel, so your on-call
           engineer gets paged for critical while the team Slack channel gets a summary. ClickStack
-          <span className="text-signoz_cherry-300">supports one threshold per alert</span>.
+          <span className="text-danger-foreground">supports one threshold per alert</span>.
         </p>
       </div>
     ),
@@ -92,7 +92,7 @@ export const ALERTING_BELOW_HISTORY_CARDS = [
           SigNoz provides a Terraform provider for alert management. Alerts can be defined, version
           controlled, and deployed alongside application code. The provider supports thresholds,
           labels, notification channels, and maintenance windows. ClickStack{' '}
-          <span className="text-signoz_cherry-300">does not offer</span> this.
+          <span className="text-danger-foreground">does not offer</span> this.
         </p>
       </div>
     ),

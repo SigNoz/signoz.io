@@ -189,7 +189,7 @@ function WhySignozImage({
     <div className={fill ? 'relative h-full w-full' : 'relative aspect-[760/640] w-full'}>
       <Image
         alt={fill ? '' : item.alt}
-        className="absolute left-0 top-0 h-auto w-[88%]"
+        className="absolute top-0 left-0 h-auto w-[88%]"
         height={302}
         loading={fill ? undefined : loading}
         priority={priority}
@@ -199,7 +199,7 @@ function WhySignozImage({
       <Image
         alt=""
         aria-hidden="true"
-        className="absolute bottom-[2%] right-0 h-auto w-[74%]"
+        className="absolute right-0 bottom-[2%] h-auto w-[74%]"
         height={302}
         priority={priority}
         src={item.overlayImage}
@@ -295,32 +295,30 @@ export default function WhySignoz() {
 
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-clip bg-signoz_ink-500 px-5 py-16 text-signoz_vanilla-100 sm:px-6 sm:py-24 lg:px-20 lg:py-28 wide:max-w-8xl wide:px-0"
+      className="bg-background text-foreground wide:max-w-8xl wide:px-0 relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-clip px-5 py-16 sm:px-6 sm:py-24 lg:px-20 lg:py-28"
       data-homepage-floating-cta="Start sending telemetry in 20 minutes"
       data-homepage-floating-href="/docs/install/"
     >
-      <div className="relative z-10 mx-auto grid max-w-8xl gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(430px,1fr)] lg:gap-20">
+      <div className="max-w-8xl relative z-10 mx-auto grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(430px,1fr)] lg:gap-20">
         <div className="min-w-0">
-          <div className="sticky top-28 isolate z-20 pb-8 pt-2">
+          <div className="sticky top-28 isolate z-20 pt-2 pb-8">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -top-40 bottom-0 left-1/2 z-0 w-[160dvw] -translate-x-1/2 bg-signoz_ink-500"
+              className="bg-background pointer-events-none absolute -top-40 bottom-0 left-1/2 z-0 w-[160dvw] -translate-x-1/2"
             />
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 top-full z-0 h-40 w-[160dvw] -translate-x-1/2 bg-gradient-to-b from-signoz_ink-500 to-transparent"
+              className="from-ink-500 pointer-events-none absolute top-full left-1/2 z-0 h-40 w-[160dvw] -translate-x-1/2 bg-gradient-to-b to-transparent"
             />
-            <h2 className="relative z-10 m-0 max-w-lg text-3xl font-medium leading-none text-signoz_vanilla-100 sm:text-4xl sm:leading-none md:text-6xl">
+            <h2 className="text-l1-foreground relative z-10 m-0 max-w-lg text-3xl leading-none font-medium sm:text-4xl sm:leading-none md:text-6xl">
               <span className="whitespace-nowrap">Fast Troubleshooting.</span>
               <br />
-              <span className="whitespace-nowrap text-signoz_vanilla-400">
-                No Context Switching.
-              </span>
+              <span className="text-muted-foreground whitespace-nowrap">No Context Switching.</span>
             </h2>
-            <div className="relative z-10 mt-9 h-px w-full bg-signoz_slate-100" />
+            <div className="bg-l3-background relative z-10 mt-9 h-px w-full" />
           </div>
 
-          <div className="pb-16 pt-14 lg:pb-[24dvh] lg:pt-0">
+          <div className="pt-14 pb-16 lg:pt-0 lg:pb-[24dvh]">
             {items.map((item, index) => {
               const Icon = item.icon
               const isActive = index === activeIndex
@@ -329,7 +327,7 @@ export default function WhySignoz() {
               return (
                 <div
                   aria-current={index === activeIndex ? 'step' : undefined}
-                  className={`grid min-h-44 grid-cols-[40px_minmax(0,1fr)] gap-6 border-b border-signoz_slate-100 py-8 transition-[filter] duration-500 ease-out lg:min-h-72 lg:auto-rows-max lg:content-end lg:py-14 ${getItemClasses(
+                  className={`border-l3-border grid min-h-44 grid-cols-[40px_minmax(0,1fr)] gap-6 border-b py-8 transition-[filter] duration-500 ease-out lg:min-h-72 lg:auto-rows-max lg:content-end lg:py-14 ${getItemClasses(
                     index,
                     activeIndex
                   )}`}
@@ -339,17 +337,17 @@ export default function WhySignoz() {
                   }}
                 >
                   <div
-                    className="pt-1 text-signoz_robin-300 transition-opacity duration-300 ease-out"
+                    className="text-accent-primary pt-1 transition-opacity duration-300 ease-out"
                     style={{ opacity: MIN_REVEAL_PROGRESS + revealProgress * 0.68 }}
                   >
                     <Icon aria-hidden="true" className="h-6 w-6" strokeWidth={1.7} />
                   </div>
                   <div>
-                    <h3 className="m-0 text-2xl font-semibold leading-7 text-signoz_vanilla-100">
+                    <h3 className="text-l1-foreground m-0 text-2xl leading-7 font-semibold">
                       <span className="sr-only">{item.title}</span>
                       <RevealWords progress={revealProgress} text={item.title} />
                     </h3>
-                    <p className="m-0 mt-3 max-w-lg text-base font-medium leading-7 text-signoz_vanilla-300">
+                    <p className="text-muted-foreground m-0 mt-3 max-w-lg text-base leading-7 font-medium">
                       <span className="sr-only">{item.description}</span>
                       <RevealWords
                         progress={Math.max(0, revealProgress - 0.12) / 0.88}
@@ -357,7 +355,7 @@ export default function WhySignoz() {
                       />
                     </p>
                   </div>
-                  <div className="col-span-2 mt-5 overflow-hidden rounded-md border border-signoz_slate-100 bg-signoz_slate-400 shadow-xl lg:hidden">
+                  <div className="border-l3-border bg-muted col-span-2 mt-5 overflow-hidden rounded-md border shadow-xl lg:hidden">
                     <WhySignozImage item={item} loading={index === 0 ? 'eager' : 'lazy'} />
                   </div>
                 </div>
@@ -370,7 +368,7 @@ export default function WhySignoz() {
           <div className="sticky top-24 flex h-[calc(100dvh-124px)] max-h-[760px] min-h-96 items-center">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 top-1/2 h-[70%] w-[84%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-[radial-gradient(ellipse_at_center,rgba(190,198,207,0.12)_0%,rgba(86,95,104,0.08)_42%,rgba(8,9,10,0)_72%)] blur-2xl"
+              className="pointer-events-none absolute top-1/2 left-1/2 h-[70%] w-[84%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-[radial-gradient(ellipse_at_center,rgba(190,198,207,0.12)_0%,rgba(86,95,104,0.08)_42%,rgba(8,9,10,0)_72%)] blur-2xl"
             />
             <div className="relative aspect-[0.92] w-full overflow-hidden rounded-2xl bg-[#010409] shadow-[0_32px_90px_rgba(0,0,0,0.52)]">
               <div className="absolute inset-0 overflow-hidden">
@@ -384,7 +382,7 @@ export default function WhySignoz() {
                     {index === 0 && activeIndex === 0 ? (
                       <>
                         <GrainientCardBackground className="absolute inset-0 opacity-70" />
-                        <div className="absolute inset-0 bg-signoz_ink-500/35" />
+                        <div className="bg-background/35 absolute inset-0" />
                       </>
                     ) : null}
                     <div className="relative z-10 h-full">

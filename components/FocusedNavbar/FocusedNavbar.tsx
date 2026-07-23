@@ -32,9 +32,9 @@ const NavGitHubStars: React.FC = () => {
 export const FocusedNavbar = ({ className }: { className?: string }) => {
   return (
     <div
-      className={`fixed left-0 right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px] ${className}`}
+      className={`text-foreground fixed top-0 right-0 left-0 z-[30] mx-auto flex h-[56px] w-full items-center backdrop-blur-[20px] ${className}`}
     >
-      <div className="flex h-full w-full items-center bg-signoz_ink-500 px-4 md:pl-12 lg:w-5/12 lg:pl-16">
+      <div className="bg-background flex h-full w-full items-center px-4 md:pl-12 lg:w-5/12 lg:pl-16">
         <div className="flex justify-start">
           <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
             <Image
@@ -49,7 +49,7 @@ export const FocusedNavbar = ({ className }: { className?: string }) => {
           </Link>
         </div>
       </div>
-      <div className="hidden h-full items-center justify-end gap-3 bg-signoz_ink-500 px-4 md:pr-12 lg:flex lg:w-7/12 lg:pr-16">
+      <div className="bg-background hidden h-full items-center justify-end gap-3 px-4 md:pr-12 lg:flex lg:w-7/12 lg:pr-16">
         <NavGitHubStars />
         <TrackingLink
           target="_blank"
@@ -58,7 +58,7 @@ export const FocusedNavbar = ({ className }: { className?: string }) => {
           clickLocation="focused_navbar"
           clickText="Documentation"
           href="/docs/introduction/"
-          className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
+          className="hover:text-primary flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400"
         >
           <ExternalLink className="mr-2 h-4 w-4" />
           Documentation
@@ -70,12 +70,12 @@ export const FocusedNavbar = ({ className }: { className?: string }) => {
           clickLocation="focused_navbar"
           clickText="Pricing"
           href="/pricing/"
-          className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
+          className="hover:text-primary flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400"
         >
           Pricing
         </TrackingLink>
       </div>
-      <div className="flex h-full items-center justify-end bg-signoz_ink-500 px-4 md:px-8 lg:hidden">
+      <div className="bg-background flex h-full items-center justify-end px-4 md:px-8 lg:hidden">
         <TrackingLink
           target="_blank"
           clickType="Nav Click"
@@ -83,7 +83,7 @@ export const FocusedNavbar = ({ className }: { className?: string }) => {
           clickLocation="focused_navbar"
           clickText="Docs"
           href="/docs/introduction/"
-          className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
+          className="hover:text-primary flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400"
         >
           <ExternalLink className="mr-2 h-4 w-4" />
           Docs

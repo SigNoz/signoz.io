@@ -70,6 +70,18 @@ CMS-migrated content stores images in `data-assets/` (not `public/`):
 
 Assets for CMS-migrated content are synced to a CDN during the CMS sync process. Keeping them separate from `public/` avoids duplication and gives the sync pipeline a single source of truth.
 
+### Light-mode image invert
+
+In light mode, images inside MDX `.prose` content are automatically color-inverted (`invert` + `hue-rotate`) so dark product screenshots read as light UI. The original CDN files are unchanged.
+
+Opt out for logos, photos, or diagrams that already look correct in light mode:
+
+```mdx
+<Figure src="/img/docs/..." alt="..." caption="..." themeInvert={false} />
+<Image src="/img/blog/..." alt="..." width={800} height={450} themeInvert={false} />
+<img src="/img/blog/photo.webp" alt="..." className="no-theme-invert" />
+```
+
 ## Pre-Commit Hook
 
 When staged files include changes to CMS-migrated content (`data/(docs|faqs|case-study|opentelemetry|comparisons|guides|blog)/**`), the pre-commit hook runs `node scripts/check-cms-assets.js`.

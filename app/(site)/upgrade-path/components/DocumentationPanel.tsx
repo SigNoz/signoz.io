@@ -33,7 +33,7 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({
             href={docUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-sm text-signoz_robin-500 hover:text-signoz_robin-400"
+            className="text-primary hover:text-accent-primary flex items-center gap-1 text-sm"
             prefetch={false}
           >
             Open in new tab
@@ -49,9 +49,9 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({
         </div>
 
         <Card className="relative min-h-[20vh] flex-1 overflow-auto">
-          <div className="prose prose-slate relative relative flex h-full min-h-[20vh] max-w-none flex-1 flex-col overflow-auto p-2 dark:prose-invert">
+          <div className="prose prose-slate dark:prose-invert relative flex h-full min-h-[20vh] max-w-none flex-1 flex-col overflow-auto p-2">
             {hasError ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-signoz_slate-400">
+              <div className="bg-muted absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <div className="mb-3">
                     <AlertTriangle className="mx-auto h-12 w-12 text-gray-400" />
@@ -61,7 +61,7 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({
                   <Link
                     href={docUrl}
                     target="_blank"
-                    className="text-sm text-signoz_robin-500 hover:text-signoz_robin-400"
+                    className="text-primary hover:text-accent-primary text-sm"
                   >
                     View in new tab instead
                   </Link>
@@ -80,11 +80,7 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({
         <div className="mt-4 text-xs text-gray-400">
           <span>
             Documentation URL:{' '}
-            <Link
-              href={docUrl}
-              target="_blank"
-              className="text-signoz_robin-500 hover:text-signoz_robin-400"
-            >
+            <Link href={docUrl} target="_blank" className="text-primary hover:text-accent-primary">
               {docUrl}
             </Link>
           </span>

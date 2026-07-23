@@ -20,7 +20,7 @@ export default function PricingV1Page() {
   return (
     <FeaturePageLayout showProductNav={false}>
       <div title="SigNoz Plans">
-        <div className="relative !mx-auto flex flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-0 pt-12 md:px-5 md:pt-24">
+        <div className="border-border relative !mx-auto flex flex-col items-center border !border-b-0 border-dashed px-0 pt-12 md:px-5 md:pt-24">
           {/* Header */}
           <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
             <Heading type={1} className="z-[1]">
@@ -41,13 +41,13 @@ export default function PricingV1Page() {
           <Card variant="gradient">
             <div className="p-8 md:p-12">
               <div className="mb-8 text-center">
-                <div className="mb-4 inline-flex items-center rounded-full border border-signoz_robin-500/30 bg-signoz_robin-500/20 px-4 py-2 text-sm font-medium text-signoz_robin-300">
+                <div className="border-primary/30 bg-primary/20 text-accent-primary mb-4 inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium">
                   🧮 Pricing Calculator
                 </div>
-                <h2 className="mb-4 text-2xl font-bold text-signoz_vanilla-100 md:text-3xl">
+                <h2 className="text-l1-foreground mb-4 text-2xl font-bold md:text-3xl">
                   Calculate Your Exact Monthly Bill
                 </h2>
-                <p className="mx-auto max-w-2xl text-lg text-signoz_vanilla-400">
+                <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
                   Get an instant estimate based on your usage. No surprises, no hidden fees.
                 </p>
               </div>

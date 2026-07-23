@@ -20,9 +20,9 @@ export const DeploymentTypeLabels = {
 }
 
 export const DeploymentTypeColors: Record<DeploymentType, string> = {
-  [DeploymentType.ALL]: 'bg-signoz_robin-500',
-  [DeploymentType.CLOUD_ONLY]: 'bg-signoz_sakura-500',
-  [DeploymentType.OSS_ONLY]: 'bg-signoz_sienna-500',
+  [DeploymentType.ALL]: 'bg-primary',
+  [DeploymentType.CLOUD_ONLY]: 'bg-sakura-500',
+  [DeploymentType.OSS_ONLY]: 'bg-sienna-500',
 }
 
 export type Media = {

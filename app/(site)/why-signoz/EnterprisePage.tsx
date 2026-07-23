@@ -92,11 +92,11 @@ const Header: React.FC = () => {
         </>
       }
       buttonGroup={enterpriseHeaderButtonGroup}
-      sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
+      sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-border max-md:-mb-[3rem]"
       heroImageAlt="Enterprise observability hero"
       heroImage="/img/platform/ClickStackAlternativeMeta.webp"
       buttonDescription={
-        <div className="text-center text-sm text-signoz_vanilla-400">
+        <div className="text-muted-foreground text-center text-sm">
           No sales deck. No 45-minute intro call. <br /> Engineers talk to engineers.
         </div>
       }
@@ -107,9 +107,9 @@ const Header: React.FC = () => {
 
 const TrustedByTeams: React.FC = () => {
   return (
-    <div className="!border-b-1 relative mx-auto flex w-full max-w-8xl flex-col items-center justify-center gap-10 overflow-hidden border !border-t-0 border-dashed border-signoz_slate-400 py-16">
-      <div className="text-center text-sm font-semibold uppercase tracking-[0.05em] text-signoz_vanilla-400">
-        Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
+    <div className="max-w-8xl border-border relative mx-auto flex w-full flex-col items-center justify-center gap-10 overflow-hidden border !border-t-0 !border-b-1 border-dashed py-16">
+      <div className="text-muted-foreground text-center text-sm font-semibold tracking-[0.05em] uppercase">
+        Trusted by the <span className="text-foreground">best platform teams</span>
       </div>
       <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-16 gap-y-10 px-4">
         {TRUSTED_BY_LOGOS.map((logo) => (
@@ -149,15 +149,15 @@ const TrustedByTeams: React.FC = () => {
 
 const HighGrowthTeams: React.FC = () => {
   return (
-    <section className="relative mx-auto w-full max-w-8xl overflow-hidden border-t border-dashed border-signoz_slate-400 pt-14">
+    <section className="max-w-8xl border-border relative mx-auto w-full overflow-hidden border-t border-dashed pt-14">
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 text-center">
-        <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
+        <div className="text-l1-foreground dark:text-sienna-100 flex flex-col items-center gap-14 text-2xl leading-[3.25rem] font-medium">
           <div className="flex flex-col items-center gap-4">
-            <h2 className="text-center text-4xl font-semibold text-signoz_vanilla-100">
-              <span className="text-signoz_cherry-500">#1</span> Observability Platform for{' '}
+            <h2 className="text-l1-foreground text-center text-4xl font-semibold">
+              <span className="text-danger-foreground">#1</span> Observability Platform for{' '}
               <br className="hidden md:block" /> High-Growth Engineering Teams
             </h2>
-            <div className="text-center text-base text-signoz_vanilla-100">
+            <div className="text-l1-foreground text-center text-base">
               Every signal type. One backend. Built on open standards.{' '}
               <br className="hidden md:block" /> Advanced observability for micro services to LLMs.
             </div>
@@ -177,7 +177,7 @@ const ObservabilityLandscape: React.FC = () => {
       variant="bordered"
       className="flex flex-col items-center justify-center gap-10 !px-8 !py-20 md:!px-0"
     >
-      <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
+      <h2 className="text-l1-foreground mb-6 text-center text-4xl">
         Observability Landscape is changing. <br /> Are you Ready?
       </h2>
       <div className="mx-auto grid max-w-4xl grid-cols-1 gap-10 md:grid-cols-3">
@@ -188,7 +188,7 @@ const ObservabilityLandscape: React.FC = () => {
                 {card.title}
               </span>
               {card.description && (
-                <div className="m-0 w-full text-left text-xs text-signoz_vanilla-400">
+                <div className="text-muted-foreground m-0 w-full text-left text-xs">
                   {card.description}
                 </div>
               )}
@@ -202,9 +202,9 @@ const ObservabilityLandscape: React.FC = () => {
 
 const NumbersThatSpeak: React.FC = () => {
   return (
-    <div className="border-y-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 py-12">
+    <div className="border-border bg-background border-y-1 border-dashed py-12">
       <div className="mx-auto my-8 max-w-4xl p-6">
-        <h2 className="my-4 text-center text-4xl font-semibold text-signoz_vanilla-100">
+        <h2 className="text-l1-foreground my-4 text-center text-4xl font-semibold">
           Numbers that speak for themselves
         </h2>
       </div>
@@ -225,12 +225,12 @@ const EnterpriseObservability: React.FC = () => {
       variant="full-width"
       className="flex flex-col items-center justify-center gap-6 !px-8 !py-20 md:!px-0"
     >
-      <h2 className="mx-auto mb-6 max-w-4xl text-center text-4xl font-semibold text-signoz_vanilla-100">
+      <h2 className="text-l1-foreground mx-auto mb-6 max-w-4xl text-center text-4xl font-semibold">
         Enterprise Observability that scales with you.
         <br />
-        <span className="text-signoz_cherry-500">No Pricing Shocks. Guaranteed.</span>
+        <span className="text-danger-foreground">No Pricing Shocks. Guaranteed.</span>
       </h2>
-      <p className="mx-auto max-w-2xl text-center text-base text-signoz_vanilla-100">
+      <p className="text-l1-foreground mx-auto max-w-2xl text-center text-base">
         30 minutes with a SigNoz Observability Expert. We will show you what your stack looks like
         unified, and give you a predictable cost model you can trust from Day Zero.
       </p>
@@ -240,7 +240,7 @@ const EnterpriseObservability: React.FC = () => {
           bookDemoClickName="Why SigNoz Page Enterprise Observability Section Book a demo"
           startTrialClickName="Why SigNoz Page Enterprise Observability Section Start Trial"
         />
-        <p className="text-center text-sm text-signoz_vanilla-400">
+        <p className="text-muted-foreground text-center text-sm">
           No sales deck. No 45-minute intro call. <br /> Engineers talk to engineers.
         </p>
       </div>
@@ -252,11 +252,9 @@ const GettingStarted: React.FC = () => {
   return (
     <SectionLayout
       variant="full-width"
-      className="flex flex-col items-center justify-center gap-10 border-y border-dashed border-signoz_slate-400 !px-8 !py-20 md:!px-0"
+      className="border-border flex flex-col items-center justify-center gap-10 border-y border-dashed !px-8 !py-20 md:!px-0"
     >
-      <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
-        Getting Started with SigNoz
-      </h2>
+      <h2 className="text-l1-foreground mb-6 text-center text-4xl">Getting Started with SigNoz</h2>
       <IconTitleDescriptionCardGrid
         cards={GETTING_STARTED_CARDS}
         variant="lg"
@@ -273,10 +271,10 @@ const PricingToScale: React.FC = () => {
       className="flex flex-col items-center justify-center gap-10 !px-8 !py-20 md:!px-0"
     >
       <div>
-        <h2 className="mb-4 text-center text-4xl text-signoz_vanilla-100">
+        <h2 className="text-l1-foreground mb-4 text-center text-4xl">
           Pricing to scale your business, <br className="hidden md:block" /> not slow you down
         </h2>
-        <p className="text-center text-base text-signoz_vanilla-400">
+        <p className="text-muted-foreground text-center text-base">
           We have 2 deployment options - Cloud and Self-Managed. <br className="hidden md:block" />{' '}
           Almost all our features are available on both. For more details, see below
         </p>
@@ -284,8 +282,8 @@ const PricingToScale: React.FC = () => {
       <div className="mx-auto grid max-w-4xl grid-cols-1 gap-10 md:grid-cols-2">
         <Card variant={'gradient'}>
           <div className="m-6 flex flex-grow flex-col">
-            <h3 className="text-2xl font-bold text-signoz_vanilla-100">Enterprise Cloud</h3>
-            <p className="text-base text-signoz_vanilla-400">
+            <h3 className="text-l1-foreground text-2xl font-bold">Enterprise Cloud</h3>
+            <p className="text-muted-foreground text-base">
               SigNoz hosts everything - ClickHouse cluster, the ingestion pipeline, the dashboards,
               the storage. You get zero ops overhead, SOC 2 / HIPAA compliance, and you're live in
               minutes.
@@ -311,10 +309,8 @@ const PricingToScale: React.FC = () => {
         </Card>
         <Card variant={'gradient'}>
           <div className="m-6 flex flex-grow flex-col">
-            <h3 className="text-2xl font-bold text-signoz_vanilla-100">
-              Enterprise Self-Hosted / BYOC
-            </h3>
-            <p className="text-base text-signoz_vanilla-400">
+            <h3 className="text-l1-foreground text-2xl font-bold">Enterprise Self-Hosted / BYOC</h3>
+            <p className="text-muted-foreground text-base">
               SigNoz deploys and manages the SigNoz stack inside your AWS/GCP/Azure account. You own
               the infrastructure, SigNoz operates it. Your data never leaves your VPC.
             </p>
@@ -353,7 +349,7 @@ const EnterpriseDemoPage: React.FC = () => {
         <HighGrowthTeams />
 
         <div className="flex flex-col items-center justify-center gap-6 pt-12">
-          <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
+          <h2 className="text-l1-foreground mb-6 text-center text-4xl">
             What our Customers have to say
           </h2>
           <CustomerStoriesSection

@@ -32,12 +32,12 @@ export const DEFINE_MULTI_STEP_SEQUENCES_PANEL = {
   title: 'Define multi-step sequences',
   description: (
     <>
-      <p className="leading-relaxed text-signoz_vanilla-400">
+      <p className="text-muted-foreground leading-relaxed">
         Build funnels with unlimited steps. Each step filters traces by service name, operation,
         HTTP status code, or any custom attribute from your instrumentation. Use operators like
         CONTAINS, REGEX, IN, or EXISTS.
       </p>
-      <p className="leading-relaxed text-signoz_vanilla-400">
+      <p className="text-muted-foreground leading-relaxed">
         Save funnel definitions to reuse across different time ranges or share with your team.
       </p>
     </>
