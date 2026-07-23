@@ -34,9 +34,9 @@ Once you've identified the product responsible for the largest share of your Dat
 
 ## Reduce Costs for Your Highest-Cost Datadog Product
 
-Start with the product or billing dimension identified in the previous section. You do not need to apply every recommendation below. Focus on the largest charge first, make one controlled change, and compare its usage before and after the change. Many unexpected increases in Datadog bills are caused by changes in usage rather than changes in pricing.
+Start with the product or billing dimension identified in the previous section. You do not need to apply every recommendation below. Focus on the largest charge first, make one controlled change, and run a before-and-after comparison. Many unexpected increases in Datadog bills are caused by evolving usage patterns over time, rather than explicit cost increases.
 
-For example, autoscaling events can significantly increase the number of monitored hosts, new integrations may begin emitting hundreds of additional metrics, verbose production logging can drive up log ingestion costs, and dynamic tags can create [high-cardinality](https://signoz.io/blog/high-cardinality-data/) metrics that are much more expensive to store. Because Datadog's pricing scales with your usage of hosts, metrics, logs, traces, and other telemetry, uncontrolled growth in any of these areas can quickly translate into a much higher bill.
+For example, autoscaling events can significantly increase the number of monitored hosts, new integrations may begin emitting hundreds of additional metrics, verbose production logging can drive up log ingestion costs, and dynamic tags can create [high-cardinality](https://signoz.io/blog/high-cardinality-data/) metrics that are much more expensive to store. Because Datadog's pricing scales with your usage of hosts, metrics, logs, traces, and other signals, uncontrolled growth in any of these areas can quickly translate into a much higher bill.
 
 <KeyPointCallout>
 The strategies below are intended as starting points for investigation rather than guaranteed cost-saving measures. The actual reduction you achieve will depend on factors such as your Datadog pricing plan, current usage patterns, and how much telemetry your organization can safely reduce without compromising visibility into your applications and infrastructure.
@@ -80,7 +80,7 @@ Use Datadog's **Metrics Summary** page to identify top metrics by cardinality. S
 
 ### 2. Optimize Log Collection, Indexing, and Retention
 
-For many organizations, logs account for a significant portion of their Datadog bill. Datadog's **Logging without Limits™** approach allows you to ingest all of your logs without indexing every one of them. This gives you the flexibility to decide which logs should be indexed for search and analysis, which can be excluded, and how long different categories of logs should be retained. Making thoughtful decisions around ingestion, indexing, and retention is one of the most effective ways to reduce Datadog logging costs.
+For many organizations, logs account for a significant portion of their Datadog bill. Datadog's [Logging without Limits](https://signoz.io/blog/datadog-logs-pricing/#how-datadog-log-management-pricing-works-the-billing-model) approach allows you to ingest all of your logs without indexing every one of them. This gives you the flexibility to decide which logs should be indexed for search and analysis, which can be excluded, and how long different categories of logs should be retained. Making thoughtful decisions around ingestion, indexing, and retention is one of the most effective ways to reduce Datadog logging costs.
 
 #### Filter at Source
 Configure the Datadog Agent to drop logs before ingestion:
@@ -202,7 +202,7 @@ Where Datadog meters each product separately and scales your bill with hosts, in
 That billing model removes two cost decisions. Adding a tag costs nothing extra (additional tag combinations can increase the number of metric samples sent and therefore increase usage-based costs), and indexing every log you ingest costs nothing extra, so cardinality control and index tuning stop being recurring billing tasks. Because your spend follows data volume, you can estimate next month's bill from this month's usage instead of modelling event counts. And since SigNoz is OpenTelemetry native, data sent through OTel is never surcharged the way it is in Datadog, and your instrumentation stays portable if you ever move.
 
 <KeyPointCallout title="No Vendor Lock-in">
-There is also no vendor lock-in. Datadog's proprietary agents tie your instrumentation to the vendor, so leaving means re-instrumenting everything, which is a cost in itself. With SigNoz, your telemetry is standard OpenTelemetry that you own, so you can move between SigNoz Cloud, self-hosted, or any other OTel-compatible backend without rewriting a line of instrumentation.
+There is also no vendor lock-in. Datadog's proprietary agents tie your instrumentation to the vendor, so leaving means re-instrumenting everything, which is a cost in itself. With SigNoz, your telemetry is standard OpenTelemetry that you own, so you can move between SigNoz Cloud, self-hosted, or any other [OTel-compatible backend](https://signoz.io/blog/opentelemetry-backend/) without rewriting a line of instrumentation.
 </KeyPointCallout>
 
 | **Cost driver** | **Datadog** | **SigNoz Cloud** |
