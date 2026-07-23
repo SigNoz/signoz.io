@@ -4,6 +4,7 @@ import {
   Brain,
   Bug,
   Cloud,
+  CloudCog,
   Cone,
   ConciergeBell,
   Container,
@@ -201,6 +202,14 @@ export const useCasesDropdownItems: ProductItem[] = [
     description: 'One-click monitoring for every Azure service',
     name: 'Azure Monitoring',
     order: 7,
+  },
+  {
+    key: 'google-cloud-monitoring',
+    url: '/google-cloud-monitoring/',
+    icon: <CloudCog className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'OTel-native monitoring for every GCP service',
+    name: 'Google Cloud Monitoring',
+    order: 8,
   },
 ]
 
