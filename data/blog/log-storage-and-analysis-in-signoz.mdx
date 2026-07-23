@@ -75,9 +75,11 @@ SigNoz keeps every field searchable and every query range fast. You never pay to
 
 A lot of teams ask how to drop logs that don't add value, and whether turning a raw JSON blob into queryable fields inflates storage costs.
 
-![A visual representation of how logs pass through the OpenTelemetry Collector and SigNoz.](/img/blog/2026/07/log-pipeline.webp)
-
-_A visual representation of how logs pass through the OpenTelemetry Collector and SigNoz._
+<Figure
+  src="/img/blog/2026/07/log-pipeline.webp"
+  alt="A visual representation of how logs pass through the OpenTelemetry Collector and SigNoz."
+  caption="A visual representation of how logs pass through the OpenTelemetry Collector and SigNoz."
+/>
 
 With SigNoz [log pipelines](https://signoz.io/docs/logs-pipelines/introduction/), you parse raw logs into queryable fields on ingestion, right from the UI. Parsed fields do add some bytes from the extra layer of wrapped data, but columnar compression capabilities can balance it out, and there are no separate index fees. We bill on ingestion, not on how many fields you index or query.
 
@@ -104,9 +106,11 @@ You keep every log that answers a question and stop paying for the noise.
 
 Columnar storage already cuts I/O by reading only the columns a query needs. We built resource fingerprinting to reduce query scan volume even further.
 
-![Resource fingerprinting groups logs from the same source.](/img/blog/2026/07/resource-fingerprint.webp)
-
-_Resource fingerprinting groups logs from the same source._
+<Figure
+  src="/img/blog/2026/07/resource-fingerprint.webp"
+  alt="Resource fingerprinting groups logs from the same source."
+  caption="Resource fingerprinting groups logs from the same source."
+/>
 
 Logs from the same source share the same resource attributes: every log from one Kubernetes pod carries the same cluster, namespace, and pod name. SigNoz hashes that set into a single value, the resource fingerprint. It is hierarchical, so it works across environments: `cluster;namespace;pod` on Kubernetes or the log stream on CloudWatch.
 
@@ -156,9 +160,11 @@ Logs, traces, and metrics live in a single backend and share the same OpenTeleme
 
 And you do it in one query language, while Grafana uses a different one for each signal (LogQL, PromQL, and TraceQL). The Query Builder also adds expression filtering and auto-completion, so you build these queries without writing raw SQL.
 
-![A snapshot of the SigNoz Query Builder.](/img/blog/2026/07/query-builder.webp)
-
-_A snapshot of the SigNoz Query Builder._
+<Figure
+  src="/img/blog/2026/07/query-builder.webp"
+  alt="A snapshot of the SigNoz Query Builder."
+  caption="A snapshot of the SigNoz Query Builder."
+/>
 
 Datadog's correlated queries are fast too, but only over indexed data, which costs extra on top of ingestion. The moment a query needs archived data, you pay to re-index it, plus a rehydration fee.
 
