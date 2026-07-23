@@ -30,7 +30,7 @@ export default function DatadogPricingCalculatorPage() {
             Understanding Datadog pricing can be complex due to its various components and
             usage-based model. This calculator helps you estimate costs for different Datadog
             services including infrastructure monitoring, APM, and{' '}
-            <Link href="/blog/datadog-logs-pricing/" className="text-blue-600 hover:underline">
+            <Link href="/blog/datadog-logs-pricing/" className="text-blue-400 hover:underline">
               log management
             </Link>
             .
@@ -38,7 +38,7 @@ export default function DatadogPricingCalculatorPage() {
           <p>
             For a comprehensive breakdown of Datadog's pricing structure and optimization
             strategies, check out our{' '}
-            <Link href="/blog/datadog-pricing/" className="text-blue-600 hover:underline">
+            <Link href="/blog/datadog-pricing/" className="text-blue-400 hover:underline">
               detailed guide on Datadog pricing
             </Link>
             .
@@ -107,8 +107,8 @@ export default function DatadogPricingCalculatorPage() {
               },
               {
                 title: 'Real User Monitoring',
-                price: '$0.15/1000 sessions',
-                note: 'User journey tracking, performance metrics, session replays, and error tracking',
+                price: '$0.15–$3/1000 sessions',
+                note: 'RUM Measure (ingest) starts at $0.15/1000 sessions and RUM Investigate is $3/1000 filtered sessions. User journey tracking, performance metrics, and error tracking',
               },
               {
                 title: 'Database Monitoring',
