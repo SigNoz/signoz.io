@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useState, useCallback, useMemo } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import React, { useState, useCallback, useMemo, useEffect, useId } from 'react'
+import { usePathname } from 'next/navigation'
+import { TabsRoot, TabsList, TabsTrigger } from '@signozhq/ui/tabs'
 import { useSearchParamsState } from '@/hooks/useSearchParamsState'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import type { TabItemProps } from './TabItem'
+import styles from './Tabs.module.css'
 
 interface TabsProps {
   children: React.ReactNode
@@ -15,8 +17,8 @@ interface TabsProps {
 
 const Tabs = ({ children, entityName, variant = 'default', className }: TabsProps) => {
   const searchParams = useSearchParamsState()
-  const router = useRouter()
   const pathname = usePathname()
+  const tabsBaseId = useId()
 
   const childrenArray = React.Children.toArray(children)
   const validChildren = childrenArray.filter((child): child is React.ReactElement<TabItemProps> =>
@@ -36,85 +38,111 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
 
   const urlKey = entityName || null
 
-  const resolveActiveTab = useCallback((): string | null => {
+  const resolvedFromUrl = useMemo((): string | null => {
     if (urlKey) {
       const urlValue = searchParams.get(urlKey)
       if (urlValue && tabValuesSet.has(urlValue)) return urlValue
     }
+    return null
+  }, [urlKey, searchParams, tabValuesSet])
 
-    return defaultActiveTab
-  }, [urlKey, searchParams, tabValuesSet, defaultActiveTab])
+  // Optimistic selection until URL search params catch up after replaceState.
+  // Cleared when URL matches, or on popstate (back/forward) so we follow the URL.
+  const [override, setOverride] = useState<string | null>(null)
 
-  const [localActiveTab, setLocalActiveTab] = useState(resolveActiveTab)
+  useEffect(() => {
+    if (!urlKey) return
+    if (override !== null && resolvedFromUrl === override) {
+      setOverride(null)
+    }
+  }, [urlKey, resolvedFromUrl, override])
 
-  const activeTab = urlKey ? resolveActiveTab() : localActiveTab
+  useEffect(() => {
+    if (!urlKey) return
+    const clearOverride = () => setOverride(null)
+    window.addEventListener('popstate', clearOverride)
+    return () => window.removeEventListener('popstate', clearOverride)
+  }, [urlKey])
+
+  const activeTab = override ?? resolvedFromUrl ?? defaultActiveTab
 
   const handleTabChange = useCallback(
     (value: string) => {
-      setLocalActiveTab(value)
+      setOverride(value)
 
       if (!urlKey) return
 
-      const current = new URLSearchParams(Array.from(searchParams.entries()))
+      const current = new URLSearchParams(window.location.search)
       current.set(urlKey, value)
-      router.replace(`${pathname}?${current.toString()}`, { scroll: false })
+      const query = current.toString()
+      const next = `${pathname}${query ? `?${query}` : ''}${window.location.hash}`
+      window.history.replaceState(window.history.state, '', next)
     },
-    [urlKey, searchParams, router, pathname]
+    [urlKey, pathname]
   )
 
   const isOnboarding = isDocsOnboardingPathname(pathname)
   const hideSelfHostTab = isOnboarding && entityName === 'plans'
 
-  const isPill = variant === 'pill'
+  // Site `default` → DS secondary (underline); site `pill` → DS primary (segmented)
+  const dsVariant = variant === 'pill' ? 'primary' : 'secondary'
+
+  const visibleChildren = validChildren.filter((child) => {
+    if (hideSelfHostTab && (child.props.value as string).startsWith('self-host')) {
+      return false
+    }
+    return true
+  })
+
+  const tabDomId = (kind: 'trigger' | 'content', value: string) => `${tabsBaseId}-${kind}-${value}`
 
   return (
-    <div className={className || 'w-full'} data-tabs-root>
-      <div
-        className={
-          isPill
-            ? 'mb-6 flex flex-wrap gap-2'
-            : 'flex border-b border-gray-200 dark:border-gray-700'
-        }
-      >
-        {validChildren.map((child) => {
+    <TabsRoot
+      className={`${styles.root} ${className || 'w-full'}`}
+      data-tabs-root=""
+      value={activeTab ?? undefined}
+      onValueChange={handleTabChange}
+      activationMode="manual"
+      style={
+        {
+          '--tab-list-wrapper-secondary-padding-left': '0px',
+          /* Docs-only: short left gutter stub (faded in Tabs.module.css) */
+          '--tab-border-spacer-min-width': 'var(--spacing-5)',
+        } as React.CSSProperties
+      }
+    >
+      <TabsList variant={dsVariant}>
+        {visibleChildren.map((child) => {
           const { value, label } = child.props
-
-          if (hideSelfHostTab && (value as string).startsWith('self-host')) return null
+          const tabValue = value as string
           return (
-            <button
-              key={value as string}
-              data-tab-value={value}
-              className={
-                isPill
-                  ? `rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                      activeTab === value
-                        ? 'bg-primary text-primary-foreground dark:bg-accent-primary-hover shadow-sm'
-                        : 'border-border bg-card text-muted-foreground hover:border-accent-primary hover:text-foreground dark:border-border dark:bg-card dark:text-foreground dark:hover:text-foreground'
-                    }`
-                  : `border-b-2 px-4 py-2 text-sm font-medium focus:outline-none ${
-                      activeTab === value
-                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                        : 'border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
-                    }`
-              }
-              onClick={() => handleTabChange(value as string)}
+            <TabsTrigger
+              key={tabValue}
+              value={tabValue}
+              variant={dsVariant}
+              id={tabDomId('trigger', tabValue)}
+              // data-tab-value: DocsTOC + Copy Markdown. aria-controls: match custom panels below.
+              {...({
+                'data-tab-value': tabValue,
+                'aria-controls': tabDomId('content', tabValue),
+              } as React.ComponentPropsWithoutRef<'button'>)}
             >
               {label}
-            </button>
+            </TabsTrigger>
           )
         })}
-      </div>
+      </TabsList>
       <div className="mt-4">
-        {validChildren.map((child) => {
-          if (hideSelfHostTab && (child.props.value as string).startsWith('self-host')) {
-            return null
-          }
-
-          const isActive = child.props.value === activeTab
+        {visibleChildren.map((child) => {
+          const tabValue = child.props.value as string
+          const isActive = tabValue === activeTab
           return (
             <div
-              key={child.props.value as string}
-              data-tab-value={child.props.value}
+              key={tabValue}
+              id={tabDomId('content', tabValue)}
+              role="tabpanel"
+              aria-labelledby={tabDomId('trigger', tabValue)}
+              data-tab-value={tabValue}
               hidden={!isActive}
             >
               {child.props.children}
@@ -122,7 +150,7 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
           )
         })}
       </div>
-    </div>
+    </TabsRoot>
   )
 }
 

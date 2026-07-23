@@ -1,7 +1,13 @@
 'use client'
 
-import { Fragment, memo, useCallback, useMemo, useRef, useState } from 'react'
-import { Menu, Transition } from '@headlessui/react'
+import { memo, useCallback, useMemo, useRef, useState, type CSSProperties } from 'react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@signozhq/ui/dropdown-menu'
 import { ChevronDown, Copy, Check, ExternalLink } from 'lucide-react'
 
 import { cn } from '../../app/lib/utils'
@@ -11,6 +17,16 @@ import Button from '@/components/ui/Button'
 import { AI_OPTIONS, COPY_FEEDBACK_DURATION_MS } from './OpenInAI.constants'
 import type { AIOption, OpenInAIProps } from './OpenInAI.types'
 import { getAbsoluteUrl } from './OpenInAI.utils'
+
+const openInAIMenuVars = {
+  '--dropdown-menu-content-min-width': '17.5rem',
+  '--dropdown-menu-content-border-radius': 'var(--spacing-4)',
+  '--dropdown-menu-content-padding': 'var(--spacing-2) 0',
+  '--dropdown-menu-item-padding': 'var(--spacing-6) var(--spacing-8)',
+  '--dropdown-menu-item-border-radius': '0',
+  '--dropdown-menu-item-gap': 'var(--spacing-6)',
+  '--dropdown-menu-item-min-width': '0',
+} as CSSProperties
 
 function OpenInAI({
   markdownContent,
@@ -22,6 +38,7 @@ function OpenInAI({
 }: OpenInAIProps) {
   const [copied, setCopied] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [open, setOpen] = useState(false)
   const isCopyingRef = useRef(false)
   const logEvent = useLogEvent()
 
@@ -102,119 +119,79 @@ function OpenInAI({
 
         <div className="bg-muted h-4 w-px" aria-hidden="true" />
 
-        <Menu as="div" className="relative">
-          {({ open }) => (
-            <>
-              <Menu.Button
-                as={Button}
-                isButton={true}
-                type="button"
-                variant="secondary"
-                size="sm"
+        <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              isButton={true}
+              type="button"
+              variant="secondary"
+              size="sm"
+              className={cn(
+                'size-9 rounded-l-none rounded-r-md px-0',
+                open && 'bg-l3-background text-foreground'
+              )}
+              aria-label="More options"
+              title="More options"
+            >
+              <ChevronDown
+                size={14}
+                aria-hidden="true"
+                className={cn('transition-transform duration-150', open && 'rotate-180')}
+              />
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end" sideOffset={8} style={openInAIMenuVars} className="z-50">
+            <DropdownMenuItem
+              disabled={isCopyDisabled}
+              clickable
+              onSelect={() => {
+                void handleCopy()
+              }}
+              className="items-start"
+            >
+              <div
                 className={cn(
-                  'size-9 rounded-l-none rounded-r-md px-0',
-                  open && 'bg-l3-background text-foreground'
+                  'mt-0.5 flex-shrink-0',
+                  copied ? 'text-callout-success-title' : 'text-muted-foreground'
                 )}
-                aria-label="More options"
-                title="More options"
+                aria-hidden="true"
               >
-                <ChevronDown
-                  size={14}
-                  aria-hidden="true"
-                  className={cn('transition-transform duration-150', open && 'rotate-180')}
-                />
-              </Menu.Button>
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-l1-foreground text-sm font-medium">
+                  {copied ? 'Copied!' : 'Copy page'}
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  Copy page as Markdown for LLMs
+                </span>
+              </div>
+            </DropdownMenuItem>
 
-              <Transition
-                as={Fragment}
-                enter="transition ease-out duration-100"
-                enterFrom="transform opacity-0 scale-95"
-                enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="transform opacity-100 scale-100"
-                leaveTo="transform opacity-0 scale-95"
+            <DropdownMenuSeparator />
+
+            {AI_OPTIONS.map((option) => (
+              <DropdownMenuItem
+                key={option.id}
+                clickable
+                onSelect={() => handleOpenInAI(option)}
+                className="items-start"
               >
-                <Menu.Items
-                  modal={false}
-                  className="border-border bg-card absolute right-0 z-50 mt-2 min-w-[280px] origin-top-right rounded-lg border py-1 shadow-xl focus:outline-none"
-                >
-                  <Menu.Item disabled={isCopyDisabled}>
-                    {({ active, disabled }) => (
-                      <button
-                        type="button"
-                        onClick={handleCopy}
-                        disabled={disabled}
-                        className={cn(
-                          'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors',
-                          active && 'bg-l3-background',
-                          disabled && 'cursor-not-allowed opacity-50'
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            'mt-0.5 flex-shrink-0',
-                            copied ? 'text-callout-success-title' : 'text-muted-foreground'
-                          )}
-                          aria-hidden="true"
-                        >
-                          {copied ? <Check size={16} /> : <Copy size={16} />}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-l1-foreground text-sm font-medium">
-                            {copied ? 'Copied!' : 'Copy page'}
-                          </span>
-                          <span className="text-muted-foreground text-xs">
-                            Copy page as Markdown for LLMs
-                          </span>
-                        </div>
-                      </button>
-                    )}
-                  </Menu.Item>
-
-                  <div
-                    className="border-border my-1 border-t"
-                    role="separator"
-                    aria-hidden="true"
-                  />
-
-                  {AI_OPTIONS.map((option) => (
-                    <Menu.Item key={option.id}>
-                      {({ active }) => (
-                        <button
-                          type="button"
-                          onClick={() => handleOpenInAI(option)}
-                          className={cn(
-                            'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors',
-                            active && 'bg-l3-background'
-                          )}
-                        >
-                          <div className="text-muted-foreground mt-0.5 flex-shrink-0">
-                            <option.Icon className="h-4 w-4" aria-hidden="true" />
-                          </div>
-                          <div className="flex flex-col">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-l1-foreground text-sm font-medium">
-                                {option.name}
-                              </span>
-                              <ExternalLink
-                                size={12}
-                                className="text-muted-foreground"
-                                aria-hidden="true"
-                              />
-                            </div>
-                            <span className="text-muted-foreground text-xs">
-                              {option.description}
-                            </span>
-                          </div>
-                        </button>
-                      )}
-                    </Menu.Item>
-                  ))}
-                </Menu.Items>
-              </Transition>
-            </>
-          )}
-        </Menu>
+                <div className="text-muted-foreground mt-0.5 flex-shrink-0">
+                  <option.Icon className="h-4 w-4" aria-hidden="true" />
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-l1-foreground text-sm font-medium">{option.name}</span>
+                    <ExternalLink size={12} className="text-muted-foreground" aria-hidden="true" />
+                  </div>
+                  <span className="text-muted-foreground text-xs">{option.description}</span>
+                </div>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   )

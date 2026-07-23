@@ -1,5 +1,5 @@
 ---
-date: 2026-07-07
+date: 2026-07-22
 title: SigNoz MCP Server
 meta_title: SigNoz MCP Server - AI Assistant Integration Guide
 description: Connect Claude, Cursor, Copilot, and other AI assistants to SigNoz via MCP for natural language access to metrics, logs, traces, and alerts.
@@ -791,8 +791,11 @@ Environment variables for the self-hosted MCP server. SigNoz Cloud users do not 
 | `SIGNOZ_URL` | URL of your SigNoz instance | _(required for stdio; optional for http with OAuth)_ |
 | `SIGNOZ_API_KEY` | API key for authenticating with SigNoz | _(required for stdio; optional for http with OAuth)_ |
 | `TRANSPORT_MODE` | Transport protocol: `stdio` or `http` | `stdio` |
+| `MCP_SERVER_HOST` | Host/interface for the HTTP server. Empty listens on all interfaces; set `127.0.0.1` for loopback-only access | _(all interfaces)_ |
 | `MCP_SERVER_PORT` | Port for HTTP server (when `TRANSPORT_MODE=http`) | `8000` |
 | `LOG_LEVEL` | Logging verbosity: `debug`, `info`, `warn`, `error` | `info` |
+| `CLIENT_CACHE_SIZE` | Maximum cached tenant clients in multi-tenant HTTP mode | `256` |
+| `CLIENT_CACHE_TTL_MINUTES` | Tenant-client cache lifetime in minutes | `30` |
 | `SIGNOZ_CUSTOM_HEADERS` | Extra HTTP headers added to every SigNoz API request, such as reverse-proxy auth headers. Format: `Key1:Value1,Key2:Value2` | _(optional)_ |
 | `SIGNOZ_DOCS_REFRESH_INTERVAL` | Refresh interval for the embedded docs sitemap used by `signoz_search_docs` / `signoz_fetch_doc` (Go duration) | `6h` |
 | `SIGNOZ_DOCS_FULL_REFRESH_INTERVAL` | Full refresh interval for the embedded docs corpus (Go duration) | `24h` |
@@ -823,13 +826,13 @@ After connecting, verify the server is working:
 The MCP server exposes the following tools to your AI assistant:
 
 <Admonition type="note">
-Some tools use newer SigNoz APIs. Use SigNoz v0.131.0 or later for `signoz_check_metric_usage`, and v0.120.0 or later for alert-rule tools. Notification-channel tools also use newer channels APIs. Older SigNoz deployments may return HTTP 404 from affected tools.
+Some tools use newer SigNoz APIs. Use SigNoz v0.131.0 or later for `signoz_check_metric_usage`, v0.120.0 or later for alert-rule list/get/create/update/delete tools, and v0.118.0 or later for `signoz_get_alert_history`. Notification-channel tools also use newer channels APIs. Older SigNoz deployments may return HTTP 404 from affected tools.
 </Admonition>
 
 | Tool | Description |
 |------|-------------|
-| `signoz_list_metrics` | Search and list available metrics |
-| `signoz_query_metrics` | Query metrics with smart aggregation defaults |
+| `signoz_list_metrics` | Discover active metric names and catalog metadata such as type, temporality, and unit |
+| `signoz_query_metrics` | Query a known metric for values, trends, breakdowns, or formulas with metric-aware defaults |
 | `signoz_get_top_metrics` | Return top 100 metrics ranked by ingested sample volume with percentages for cost and volume analysis |
 | `signoz_check_metric_usage` | Given a list of metric names (up to 50 per call), return which dashboards and alerts reference each one |
 | `signoz_check_metric_cardinality` | Return label/attribute keys for a single metric with cardinality counts and sample values, sorted highest-cardinality first |
@@ -838,7 +841,7 @@ Some tools use newer SigNoz APIs. Use SigNoz v0.131.0 or later for `signoz_check
 | `signoz_list_alerts` | List firing, silenced, or inhibited Alertmanager alert instances |
 | `signoz_list_alert_rules` | List configured alert rules, including inactive or disabled rules |
 | `signoz_get_alert` | Get an alert rule definition by ID |
-| `signoz_get_alert_history` | Get alert history timeline for a rule |
+| `signoz_get_alert_history` | Get a rule's firing and state-transition history (cursor-paginated) |
 | `signoz_create_alert` | Create an alert rule using v2 schema validation |
 | `signoz_update_alert` | Update an existing alert rule |
 | `signoz_delete_alert` | Delete an alert rule |
@@ -849,7 +852,7 @@ Some tools use newer SigNoz APIs. Use SigNoz v0.131.0 or later for `signoz_check
 | `signoz_delete_dashboard` | Delete a dashboard by UUID |
 | `signoz_list_dashboard_templates` | List the bundled SigNoz dashboard template catalog so the model can pick one |
 | `signoz_import_dashboard` | Create a dashboard from a curated SigNoz dashboard template by path |
-| `signoz_list_services` | List services within a time range |
+| `signoz_list_services` | List APM services with trace activity in a time range |
 | `signoz_get_service_top_operations` | Get top operations for a service |
 | `signoz_list_views` | List saved Explorer views for traces, logs, or metrics |
 | `signoz_get_view` | Get a saved Explorer view by UUID |
@@ -861,7 +864,7 @@ Some tools use newer SigNoz APIs. Use SigNoz v0.131.0 or later for `signoz_check
 | `signoz_aggregate_traces` | Aggregate trace statistics with grouping |
 | `signoz_search_traces` | Search traces with flexible filtering |
 | `signoz_get_trace_details` | Get full trace with all spans |
-| `signoz_execute_builder_query` | Execute a raw Query Builder v5 query |
+| `signoz_execute_builder_query` | Run Query Builder v5 requests the dedicated tools cannot express, including multi-query requests, formulas, PromQL, and ClickHouse SQL |
 | `signoz_search_docs` | Search official SigNoz docs for product, setup, instrumentation, config, API, deployment, or troubleshooting questions |
 | `signoz_fetch_doc` | Fetch full markdown for one official SigNoz docs page or heading |
 | `signoz_list_notification_channels` | List notification channels |
@@ -870,7 +873,9 @@ Some tools use newer SigNoz APIs. Use SigNoz v0.131.0 or later for `signoz_check
 | `signoz_update_notification_channel` | Update a notification channel and send a test notification |
 | `signoz_delete_notification_channel` | Delete a notification channel by ID |
 
-For detailed parameter reference, see the <a href="https://github.com/SigNoz/signoz-mcp-server?tab=readme-ov-file#available-tools" target="_blank" rel="noopener noreferrer nofollow">GitHub repository README</a>.
+The server also exposes read-only MCP resources (`signoz://...` URIs) with schemas, query-builder guides, and payload examples that AI assistants read before composing alert, dashboard, and view payloads.
+
+For detailed parameter reference and the full resource list, see the <a href="https://github.com/SigNoz/signoz-mcp-server?tab=readme-ov-file#available-tools" target="_blank" rel="noopener noreferrer nofollow">GitHub repository README</a>.
 
 </details>
 

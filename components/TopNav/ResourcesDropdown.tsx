@@ -1,8 +1,8 @@
 'use client'
 
-import { Button } from '@headlessui/react'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
+import { Button } from '@/components/ui/Button'
 import { resourcesDropdownItems, ResourceItem, SECTION_HEADING_CLASS } from './constants'
 import { useNavDropdown } from './NavDropdownContext'
 
@@ -12,6 +12,9 @@ export default function ResourcesDropdown() {
   return (
     <div onPointerEnter={open} onPointerLeave={close} className="flex items-center">
       <Button
+        isButton
+        unstyled
+        type="button"
         ref={triggerRef}
         className="hover:bg-robin-200/20 truncate rounded-full px-2.5 py-1 text-sm transition-colors outline-none"
         onClick={() => (isOpen ? close() : open())}

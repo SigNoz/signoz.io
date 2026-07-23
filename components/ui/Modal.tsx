@@ -1,22 +1,41 @@
 'use client'
 
-import { Dialog, DialogPanel, DialogBackdrop } from '@headlessui/react'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  type DialogSize,
+} from '@signozhq/ui/dialog'
 import { X } from 'lucide-react'
 import { type ReactNode } from 'react'
 import { cn } from 'app/lib/utils'
 
-const sizeClass = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-  xl: 'max-w-xl',
-  '2xl': 'max-w-2xl',
-  '3xl': 'max-w-3xl',
-  '4xl': 'max-w-4xl',
-  '5xl': 'max-w-5xl',
+const sizeMaxWidthClass = {
+  sm: '!max-w-sm',
+  md: '!max-w-md',
+  lg: '!max-w-lg',
+  xl: '!max-w-xl',
+  '2xl': '!max-w-2xl',
+  '3xl': '!max-w-3xl',
+  '4xl': '!max-w-4xl',
+  '5xl': '!max-w-5xl',
 } as const
 
-export type AppModalSize = keyof typeof sizeClass
+const sizeToDialogWidth: Record<keyof typeof sizeMaxWidthClass, DialogSize> = {
+  sm: 'narrow',
+  md: 'narrow',
+  lg: 'base',
+  xl: 'base',
+  '2xl': 'wide',
+  '3xl': 'wide',
+  '4xl': 'extra-wide',
+  '5xl': 'extra-wide',
+}
+
+export type AppModalSize = keyof typeof sizeMaxWidthClass
 
 type AppModalProps = {
   isOpen: boolean
@@ -38,45 +57,42 @@ export function AppModal({
   showCloseButton = true,
 }: AppModalProps) {
   return (
-    <Dialog
-      as="div"
-      className="fixed inset-0 z-50 h-screen w-screen"
-      open={isOpen}
-      onClose={() => onOpenChange(false)}
-      transition
-    >
-      <DialogBackdrop
-        transition
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogPortal>
+        <DialogOverlay
+          className={cn(
+            // ! overrides needed: @signozhq/ui CSS modules beat normal Tailwind
+            backdrop === 'blur' &&
+              '!bg-[color-mix(in_srgb,var(--bg-ink-500)_30%,transparent)] backdrop-blur-[12px] backdrop-saturate-150'
+          )}
+        />
+      </DialogPortal>
+      <DialogContent
+        showOverlay={false}
+        width={sizeToDialogWidth[size]}
+        position="center"
+        animation="fade"
         className={cn(
-          'fixed inset-0 transition duration-200 ease-out data-[closed]:opacity-0',
-          backdrop === 'blur' ? 'bg-black/30 backdrop-blur-md backdrop-saturate-150' : 'bg-black/55'
+          'overflow-hidden !border-none !bg-transparent text-left !shadow-none',
+          sizeMaxWidthClass[size]
         )}
-      />
-
-      <div className="fixed inset-0 overflow-y-auto">
-        <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-6">
-          <DialogPanel
-            transition
-            className={cn(
-              'relative w-full transform overflow-hidden text-left align-middle shadow-xl transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0',
-              sizeClass[size],
-              panelClassName
-            )}
-          >
-            {showCloseButton && (
+      >
+        <DialogTitle className="sr-only">Dialog</DialogTitle>
+        <div className={cn('relative w-full', panelClassName)}>
+          {showCloseButton && (
+            <DialogClose asChild>
               <button
                 type="button"
                 aria-label="Close modal"
-                className="focus-visible:outline-robin-500 absolute top-1 right-1 appearance-none rounded-full p-2 text-zinc-400 transition-[background-color,color] outline-none select-none [-webkit-tap-highlight-color:transparent] hover:bg-zinc-700/40 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 active:bg-zinc-600/40"
-                onClick={() => onOpenChange(false)}
+                className="focus-visible:outline-robin-500 absolute top-1 right-1 z-10 appearance-none rounded-full p-2 text-zinc-400 transition-[background-color,color] outline-none select-none [-webkit-tap-highlight-color:transparent] hover:bg-zinc-700/40 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 active:bg-zinc-600/40"
               >
                 <X className="h-5 w-5" strokeWidth={2} aria-hidden />
               </button>
-            )}
-            {children}
-          </DialogPanel>
+            </DialogClose>
+          )}
+          {children}
         </div>
-      </div>
+      </DialogContent>
     </Dialog>
   )
 }

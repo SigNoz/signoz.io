@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-17
 title: Collecting Tomcat Access and Garbage Collector Logs
 description: Collect Tomcat access logs and garbage collector logs with OpenTelemetry Collector and send them to SigNoz.
 doc_type: howto
@@ -28,9 +28,13 @@ receivers:
   filelog/access_logs:
     include: [/<path_to_access_log>/localhost_access_log.*] # Path to access logs
     start_at: end
+    resource:
+      service.name: tomcat-access
   filelog/gc_logs:
     include: [/<path_to_gc_log>/garbage-collection.log.*] # Path to garbage collector logs
     start_at: end
+    resource:
+      service.name: tomcat-gc
 ```
 
 <Admonition type="info">
@@ -38,6 +42,7 @@ receivers:
 - Update log paths using server arguments:
   - Access logs: `-Dcatalina.base=<new_access_logs_path>`
   - GC logs: `-Xloggc:<new_gc_logs_path>`
+- The `resource` field tags each receiver's logs so they're distinguishable in SigNoz. See [Tagging Logs from Multiple Applications](https://signoz.io/docs/userguide/collect_logs_from_file/#tagging-logs-from-multiple-applications) for more.
 </Admonition>
 
 #### 3. Update Pipelines Configuration
@@ -103,9 +108,13 @@ receivers:
   filelog/access_logs:
     include: [/<path>/localhost_access_log.*] # Path to access logs
     start_at: end
+    resource:
+      service.name: tomcat-access
   filelog/gc_logs:
     include: [/<path>/garbage-collection.log.*] # Path to GC logs
     start_at: end
+    resource:
+      service.name: tomcat-gc
 ```
 
 ##### 3. Update Pipelines Configuration
@@ -148,9 +157,13 @@ receivers:
   filelog/access_logs:
     include: [/<path>/localhost_access_log.*]
     start_at: end
+    resource:
+      service.name: tomcat-access
   filelog/gc_logs:
     include: [/<path>/garbage-collection.log.*]
     start_at: end
+    resource:
+      service.name: tomcat-gc
 processors:
   batch:
     send_batch_size: 10000
