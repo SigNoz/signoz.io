@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-23
 id: optimize-traces
 title: Optimize Traces
 description: Reduce trace volume through head-based and tail-based sampling strategies.
@@ -39,7 +39,30 @@ export OTEL_TRACES_SAMPLER_ARG=0.1  # Retain 10% of all traces
 
 ## Solution 2: Tail-Based Sampling
 
-Tail sampling buffers the complete trace in Collector memory before making a sampling decision. This lets you retain 100% of error traces and slow traces while dropping healthy traffic, a guarantee head-based sampling cannot provide. For full setup instructions, policy reference, memory and topology requirements, and APM metrics impact, see [Tail Sampling](https://signoz.io/docs/traces-management/guides/tail-sampling/).
+Tail sampling buffers the complete trace in Collector memory before making a sampling decision. This lets you retain 100% of error traces and slow traces while dropping healthy traffic, a guarantee head-based sampling cannot provide.
+
+A typical cost-saving policy set keeps every error trace, keeps every slow trace above a latency threshold, and applies a low-percentage sample to everything else. Policies are OR-ed: a trace is kept if it matches any policy. Add this to your existing `otel-collector-config.yaml` and enable `tail_sampling` in the `traces` pipeline:
+
+```yaml
+processors:
+  tail_sampling:
+    decision_wait: 10s
+    policies:
+      - name: keep-errors
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+      - name: keep-slow-traces
+        type: latency
+        latency:
+          threshold_ms: 2000
+      - name: sample-the-rest
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 3
+```
+
+Adjust `threshold_ms` and `sampling_percentage` to your own latency SLO and cost target. For full setup instructions, policy reference, memory and topology requirements, and APM metrics impact, see [Control Traces Volume](https://signoz.io/docs/traces-management/guides/drop-spans/).
 
 ## Solution 3: Pre-Filter Before Sampling
 

@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-23
 id: optimize-logs
 title: Optimize Logs
 description: Reduce log volume by filtering verbose and low-value log records at the Collector edge.
@@ -12,11 +12,15 @@ Log ingestion volume is measured in **Gigabytes (GB)** and is often dominated by
 
 If your application's logging framework supports level configuration, setting the appropriate log level at source is more effective than Collector-level filtering: it prevents the log from being generated at all. If you do not have control over the source, use the Collector-level approach below.
 
+<Admonition type="note">
+[Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) (the Regex, Grok, JSON, and other processors configured in the SigNoz UI) run after logs are ingested, so they do not reduce billed volume. Use them for parsing and enrichment. To reduce ingestion volume, drop logs at the Collector before they reach SigNoz, as shown below.
+</Admonition>
+
 ## Filter Logs at the Edge
 
 Use the `filter` processor in the OpenTelemetry Collector to drop data before it reaches SigNoz. Read [Filtering and Dropping Logs](https://signoz.io/docs/logs-management/guides/drop-logs/) for configuration patterns by severity and resource attributes.
 
-## Decision Guide
+### Decision Guide
 
 The log types below use `severity_text` values as examples.
 
@@ -26,6 +30,66 @@ The log types below use `severity_text` values as examples.
 | `INFO` | Review before dropping |
 | `ERROR` / `WARN` | Retain |
 | Kubernetes health check probes | Safe to drop |
+
+## Deduplicate Repetitive Logs
+
+Health check retries, connection errors, and heartbeat messages often emit the same log line hundreds of times within a short window. Use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/logdedupprocessor" target="_blank" rel="noopener noreferrer nofollow">`logdedup` processor</a> to collapse these into a single entry instead of dropping them. It aggregates identical log records (matched on body, resource attributes, severity, and log attributes) over a configurable interval, and emits one consolidated entry carrying `log_count`, `first_observed_timestamp`, and `last_observed_timestamp`. Add it to your existing `otel-collector-config.yaml`:
+
+```yaml
+processors:
+  logdedup:
+    interval: 10s
+    log_count_attribute: log_count
+    exclude_fields:
+      - attributes.request_id
+```
+
+Then enable it in the `logs` pipeline:
+
+```yaml
+service:
+  pipelines:
+    logs:
+      processors: [logdedup, batch]
+```
+
+Scope deduplication with `conditions` (OTTL expressions) instead of applying it to the whole pipeline, for example to only `DEBUG`/`INFO` severities:
+
+```yaml
+processors:
+  logdedup:
+    interval: 10s
+    conditions:
+      - severity_number < SEVERITY_NUMBER_WARN
+```
+
+<Admonition type="note">
+`logdedup` is an alpha-stability component. Confirm your Collector build includes it before deploying. It also delays log delivery by up to `interval`, and logs that require per-occurrence timestamps (audit or compliance logs) should be excluded via `conditions` instead of deduplicated.
+</Admonition>
+
+## Truncate Oversized Log Bodies
+
+Full JSON payloads, stack traces, and verbose SQL statements are often worth keeping but larger than they need to be. Use the `transform` processor's `truncate_all` function to cap log body size at the Collector:
+
+```yaml
+processors:
+  transform/truncate_logs:
+    log_statements:
+      - context: log
+        statements:
+          - truncate_all(body, 4096)
+```
+
+Enable it in the `logs` pipeline:
+
+```yaml
+service:
+  pipelines:
+    logs:
+      processors: [transform/truncate_logs, batch]
+```
+
+Adjust `4096` to the smallest size that still keeps the fields you query on. See [Guide to Drop Logs](https://signoz.io/docs/logs-management/guides/drop-logs/#limit-log-body-size) for details.
 
 ## Validate Your Changes
 

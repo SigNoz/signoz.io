@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-23
 id: optimize-metrics
 title: Optimize Metrics
 description: Reduce metric sample volume by dropping unused metrics, aggregating high-cardinality labels, and optimising temporality.
@@ -91,6 +91,28 @@ If you have large idle infrastructure (e.g., 1000 pods with only 10 receiving tr
 export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta
 ```
 
+## Problem 4: Collection Interval
+
+Sample count scales directly with how often each time series is emitted. A metric exported every 5 seconds generates 12x the samples of the same metric exported every 60 seconds, with no change in cardinality.
+
+**SDK metrics:** raise `OTEL_METRIC_EXPORT_INTERVAL` (milliseconds, default `60000`):
+
+```bash
+export OTEL_METRIC_EXPORT_INTERVAL=60000
+```
+
+**Collector receivers** (for example `hostmetrics`): raise `collection_interval` in the receiver config:
+
+```yaml
+receivers:
+  hostmetrics:
+    collection_interval: 60s
+```
+
+<Admonition type="warning">
+Increasing the interval reduces the resolution of rate-based queries (for example `rate()` over a short window) and delays how quickly a spike shows up on dashboards or triggers an alert. Do not raise the interval on metrics feeding low-latency alerts.
+</Admonition>
+
 ## Validate Your Changes
 
 <Admonition type="note">
@@ -105,4 +127,5 @@ To confirm the volume reduction:
 ## Next Steps
 
 - Configure [Cost Meter Alert](https://signoz.io/docs/cost-meter/alerts/) to be notified when ingestion volume crosses your expected threshold.
+- Read [Understanding Metrics Billing and Reducing Costs](https://signoz.io/docs/metrics-management/reducing-costs/) for how cardinality maps to your bill and additional cost-driver examples.
 - Need help? Ask in the [SigNoz Community Forum](https://github.com/SigNoz/signoz/discussions).
