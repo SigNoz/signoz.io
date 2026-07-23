@@ -8,6 +8,8 @@ const HERO_GRADIENT_COLORS = ['#0B0C0E', '#121317', '#161922', '#2C3140', '#3F5E
 
 const GradientBlinds = dynamic(() => import('./GradientBlinds'), { ssr: false })
 
+// Keep the JavaScript render guard reactive: CSS hiding alone would leave the WebGL
+// canvas, observers, and animation loop mounted after the viewport drops below `md`.
 function subscribeToDesktopViewport(onStoreChange: () => void) {
   const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY)
   mediaQuery.addEventListener('change', onStoreChange)
