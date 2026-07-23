@@ -16,7 +16,7 @@ This guide walks those three points in order. You do not have to read all of it.
 3. [Is your telemetry reaching SigNoz?](#step-3-is-your-telemetry-reaching-signoz) Verify connectivity and the ingestion endpoint or Collector.
 
 <Admonition type="tip">
-Most "no data" issues are a wrong ingestion endpoint, a wrong region, or an incorrect ingestion key. If you already know your instrumentation works, skip straight to [Common errors and fixes](#common-errors-and-fixes).
+Most "no data" issues are a wrong ingestion endpoint, a wrong region, or an incorrect ingestion key. If you already know your instrumentation works, skip straight to [Errors you might see](#errors-you-might-see).
 </Admonition>
 
 ## Find your problem
@@ -205,7 +205,7 @@ Enable the SDK's internal (self-diagnostic) logging as described in your languag
 
 With diagnostic logging on, restart the app and look at the output:
 
-- **You see an export error.** The exporter is trying and failing. Match the error against [Common errors and fixes](#common-errors-and-fixes) to correct the endpoint, region, or key.
+- **You see an export error.** The exporter is trying and failing. Match the error against [Errors you might see](#errors-you-might-see) to correct the endpoint, region, or key.
 - **You see no errors and exports appear to succeed.** The data is leaving your application cleanly. Continue to [Step 3](#step-3-is-your-telemetry-reaching-signoz).
 
 ## Step 3: Is your telemetry reaching SigNoz?
@@ -224,7 +224,7 @@ curl -v https://ingest.<region>.signoz.cloud:443
 
 - `<region>` is the region shown under **Settings → Ingestion** in the SigNoz UI. See the [ingestion overview](https://signoz.io/docs/ingestion/signoz-cloud/overview/).
 
-If the connection fails, a firewall or network policy is blocking outbound access to the endpoint. If it connects but data still does not appear, the problem is the endpoint, region, or key, covered in [Common errors and fixes](#common-errors-and-fixes). For a full catalog of ingestion status codes (400, 401, 404, and so on) and their fixes, see the [Ingestion Troubleshooting guide](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting/).
+If the connection fails, a firewall or network policy is blocking outbound access to the endpoint. If it connects but data still does not appear, the problem is the endpoint, region, or key, covered in [Errors you might see](#errors-you-might-see). For a full catalog of ingestion status codes (400, 401, 404, and so on) and their fixes, see the [Ingestion Troubleshooting guide](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting/).
 
 ### If you use an OpenTelemetry Collector
 
@@ -290,7 +290,7 @@ So `443` only appears on the exporter side (Collector → SigNoz Cloud); `4317`/
 
 Restart the Collector and check its logs.
 
-- **You see data in the debug output but not in SigNoz.** The Collector receives data but cannot export it. The problem is the `otlphttp` exporter config (endpoint, region, or key). See [Common errors and fixes](#common-errors-and-fixes).
+- **You see data in the debug output but not in SigNoz.** The Collector receives data but cannot export it. The problem is the `otlphttp` exporter config (endpoint, region, or key). See [Errors you might see](#errors-you-might-see).
 - **You see no data in the debug output.** Data is not reaching the Collector. Check that the application can connect to the Collector, below.
 
 Reference: the <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/debugexporter/README.md" target="_blank" rel="noopener noreferrer nofollow">debug exporter documentation</a> and the <a href="https://opentelemetry.io/docs/collector/troubleshooting/" target="_blank" rel="noopener noreferrer nofollow">Collector troubleshooting guide</a>.
@@ -348,57 +348,29 @@ service:
 
 </details>
 
-## Common errors and fixes
+## Errors you might see
 
-These are the most frequent causes of missing data, in rough order of how often they occur. They apply whether you export directly or through a Collector.
+First turn on your diagnostic logs ([Step 2](#step-2-is-your-telemetry-being-exported)): for a direct SDK export they appear in your application's own console, and with a Collector, in the Collector's logs. Then find the entry below that matches what you see. (A wrong region is the exception, with no error at all: exports succeed and the only sign is an empty view in the SigNoz UI.)
 
-**Where you see these symptoms:** almost always in the diagnostic output you turned on in [Step 2](#step-2-is-your-telemetry-being-exported), not in the SigNoz UI. For a direct SDK export, that is your application's own console or logs (`OTEL_LOG_LEVEL=debug`). For a Collector setup, it is the Collector's logs (`service.telemetry.logs.level: DEBUG`). The one exception is a wrong region, where exports succeed silently and the only symptom is an empty view in the SigNoz UI. Each tab below tells you exactly where to look.
+### `401`, `403`, or `Unauthenticated`
 
-<Tabs entityName="issue">
-<TabItem value="endpoint" label="Wrong endpoint, region, or path" default>
+Your ingestion key is missing, wrong, expired, or revoked, so the endpoint rejects the request before it accepts any data. Set the key correctly: `signoz-ingestion-key=<your-ingestion-key>` in the OTLP headers for a direct export, or under the `otlphttp` exporter `headers` for a Collector. Then confirm it has not expired or been revoked. See [ingestion keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-Wrong endpoint, wrong region, and a trailing slash are the same class of problem: your exporter is pointed at the wrong URL. Check all three together.
+### `404 Not Found`
 
-| | Details |
-| --- | --- |
-| **Where you see it** | SDK debug logs (direct export) or Collector logs (Collector setup), as a connection error or HTTP `404`. A wrong *region* is the exception: exports report success, and the only symptom is an empty Traces, Logs, or Metrics view in the SigNoz UI. |
-| **What it looks like** | `connection refused`, `connection timeout`, `no such host`, or `HTTP 404` in your logs, or clean exports with no data in the UI. |
+The URL is wrong. The usual causes are a trailing slash (`.../v1/logs/` instead of `.../v1/logs`), the wrong signal path, or using `4317`/`4318` instead of `443` for SigNoz Cloud. Use exactly `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud, or `http://<signoz-host>:4318` for self-hosted. See [how to find your ingestion URL](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 
-**Fix:**
+### `connection refused`, a timeout, or `no such host`
 
-- **Endpoint:** use exactly `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud (port `443`, not `4317`/`4318`), or `http://<signoz-host>:4318` for self-hosted. Do not point an SDK at a Collector that is not running. See [how to find your ingestion URL](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- **Region:** the `<region>` must match the region your SigNoz Cloud account is in. A key from one region will not authenticate against another region's endpoint, and data sent to the wrong region never appears in your account. Confirm the region under **Settings → Ingestion**, or the [region and endpoint table](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- **Path:** do not add a trailing slash (use `.../v1/logs`, not `.../v1/logs/`). A trailing slash or the wrong signal path returns `404`.
+Nothing is listening at the address you are exporting to. If you export directly, the endpoint host or port is wrong, or a firewall is blocking outbound `443`. If you use a Collector, it is not running or not reachable: confirm it is listening (`netstat -tuln | grep -E '4317|4318'`), that your app's `OTEL_EXPORTER_OTLP_ENDPOINT` points at the right host (in Kubernetes, the Service DNS name such as `http://otel-collector.observability.svc.cluster.local:4318`), and that network policies and security groups allow the connection.
 
-</TabItem>
-<TabItem value="key" label="Wrong or expired ingestion key">
+### Exports succeed, but nothing appears in SigNoz
 
-| | Details |
-| --- | --- |
-| **Where you see it** | SDK debug logs (direct export) or Collector logs (Collector setup), as an authentication failure returned by the ingestion endpoint. |
-| **What it looks like** | HTTP `401 Unauthorized` or `403 Forbidden`, or gRPC `Unauthenticated` / `PermissionDenied`. |
+There is no error in your logs, yet the UI stays empty. This is almost always a wrong region: data sent to a region that does not match your account never shows up, even with a valid-looking key. Confirm your `<region>` under **Settings → Ingestion** or the [region and endpoint table](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint). If the region is correct, widen the time range in the UI, since recently sent data can fall outside a narrow window.
 
-**Fix:**
+### Data arrives, then drops off or goes missing
 
-- Confirm the ingestion key is set correctly. For direct SDK export, it goes in the OTLP headers as `signoz-ingestion-key=<your-ingestion-key>`; for the Collector, under the `otlphttp` exporter `headers`.
-- Check the key has not expired or been revoked, and that its limits are not blocking your data. See [ingestion keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-
-</TabItem>
-<TabItem value="collector-access" label="Collector not accessible">
-
-| | Details |
-| --- | --- |
-| **Where you see it** | Your *application's* SDK logs (not the Collector or SigNoz), as a connection error to the Collector. The Collector's own [debug exporter](#verify-data-inside-the-collector) shows nothing arriving. |
-| **What it looks like** | `connection refused` or `context deadline exceeded` reaching your Collector host on `4317`/`4318`. |
-
-**Fix:**
-
-- Confirm the Collector is running and listening on `4317`/`4318` (`netstat -tuln | grep -E '4317|4318'`).
-- Confirm the application's `OTEL_EXPORTER_OTLP_ENDPOINT` points at the correct Collector host. In Kubernetes, use the Service DNS name (for example, `http://otel-collector.observability.svc.cluster.local:4318`).
-- Check network policies, security groups, and firewalls between the application and the Collector.
-
-</TabItem>
-</Tabs>
+If telemetry showed up and then stopped, or only part of it arrives, your ingestion key may have hit its rate or volume limit and SigNoz is throttling. Review [ingestion key limits](https://signoz.io/docs/ingestion/signoz-cloud/keys/), and set up [meter alerts](https://signoz.io/docs/cost-meter/alerts/) to catch this before data drops.
 
 For the complete list of ingestion HTTP and gRPC status codes with root causes and resolutions, see the [Ingestion Troubleshooting guide](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting/).
 
@@ -408,7 +380,6 @@ These SigNoz Cloud limits drop data without an obvious instrumentation error: ex
 
 - **Payload too large.** Payloads must be under the **16 MB** maximum, or they are rejected (HTTP `413`). Reduce batch sizes or export intervals.
 - **Timeouts on large or slow exports.** Increase the export timeout with `OTEL_EXPORTER_OTLP_TIMEOUT` (in milliseconds, for example `OTEL_EXPORTER_OTLP_TIMEOUT=30000`) and enable gzip with `OTEL_EXPORTER_OTLP_COMPRESSION=gzip`.
-- **Ingestion key limits.** A key with restrictive limits can throttle your data. Review [ingestion key limits](https://signoz.io/docs/ingestion/signoz-cloud/keys/), and set up [meter alerts](https://signoz.io/docs/cost-meter/alerts/) to catch this before data drops.
 
 See [ingestion considerations](https://signoz.io/docs/ingestion/signoz-cloud/overview/#important-considerations) for details.
 

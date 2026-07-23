@@ -7,7 +7,7 @@ import React, { useMemo, useState } from 'react'
  *
  * An interactive, click-through version of the "why is my telemetry not showing
  * up in SigNoz" decision tree. It mirrors the written Steps 1-3 and the
- * "Common errors and fixes" section on the same page, so it is an additive
+ * "Errors you might see" section on the same page, so it is an additive
  * convenience: the full guidance still lives in the prose (which is what the
  * agent markdown and Copy Markdown capture).
  */
@@ -204,7 +204,7 @@ function buildTree(m: SignalMeta): Record<string, Node> {
             </li>
           </ul>
           <p>
-            See <DocLink href="#common-errors-and-fixes">Common errors and fixes</DocLink> and{' '}
+            See <DocLink href="#errors-you-might-see">Errors you might see</DocLink> and{' '}
             <DocLink href="https://signoz.io/docs/ingestion/signoz-cloud/keys/">
               ingestion keys
             </DocLink>
@@ -234,7 +234,7 @@ function buildTree(m: SignalMeta): Record<string, Node> {
             </li>
           </ul>
           <p>
-            See <DocLink href="#common-errors-and-fixes">Common errors and fixes</DocLink>.
+            See <DocLink href="#errors-you-might-see">Errors you might see</DocLink>.
           </p>
         </>
       ),
@@ -279,7 +279,7 @@ function buildTree(m: SignalMeta): Record<string, Node> {
             <li>
               If it <strong>connects but data still does not appear</strong>, the problem is your
               key, endpoint, or region: see{' '}
-              <DocLink href="#common-errors-and-fixes">Common errors and fixes</DocLink>.
+              <DocLink href="#errors-you-might-see">Errors you might see</DocLink>.
             </li>
           </ul>
         </>
