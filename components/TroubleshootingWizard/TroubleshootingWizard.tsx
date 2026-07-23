@@ -91,6 +91,8 @@ function buildTree(m: SignalMeta): Record<string, Node> {
         <>
           This checks whether the data exists at all, before worrying about where it goes. Use{' '}
           <Code>{m.envExporter}=otlp,console</Code> to keep exporting to SigNoz while you look.
+          Works for the Java, Node.js, Python, .NET, Ruby, and PHP agents; in Go or Rust, add a
+          stdout exporter in code instead.
         </>
       ),
       options: [

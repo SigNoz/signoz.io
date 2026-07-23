@@ -21,65 +21,67 @@ Most "no data" issues are a wrong ingestion endpoint, a wrong region, or an inco
 
 ## Find your problem
 
-Answer the questions below and the troubleshooter points you to the most likely cause and its fix. It works the same for traces, logs, and metrics: pick your signal at the top.
+Telemetry can only go missing at a few well-defined points between your app and SigNoz. This flowchart maps them; it works the same for traces, logs, and metrics.
+
+<Figure
+  src="/img/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting-flowchart.webp"
+  alt="Flowchart for diagnosing missing telemetry in SigNoz. Step 1: enable the console exporter, restart, and exercise the code path; if nothing prints, it is an instrumentation problem (SDK not initialized, unsupported runtime or library). Step 2: check the SDK debug logs for export errors and match them: 401/403 is a wrong or expired key, 404 is a wrong endpoint or path, connection refused or timeout means the endpoint or Collector is unreachable, and exports that succeed while the UI stays empty mean the wrong region. Step 3: if sending directly, curl the endpoint and check key, endpoint, and region. Step 4: if using a Collector, add its debug exporter; if data appears in the Collector logs it is a Collector-to-SigNoz export problem, otherwise it is an app-to-Collector problem (endpoint, ports 4317/4318, firewalls)."
+  caption="Where telemetry gets lost between your app and SigNoz, and the fix for each branch"
+/>
+
+Prefer to click through it one question at a time? Use the interactive troubleshooter. Pick your signal at the top; it points you to the most likely cause and its fix.
 
 <TroubleshootingWizard />
 
-Prefer to work through it yourself? The rest of this page explains each check in detail.
+Either way, the rest of this page explains each check in detail.
 
 ## Signal-specific notes
 
-Each signal takes a slightly different path to SigNoz. Below is a one-line summary per signal; expand the toggle for common sources and what to check when that specific signal is missing. For the full picture of the paths and ports, see [How your telemetry reaches SigNoz](#how-your-telemetry-reaches-signoz) at the end of this page.
+Each signal reaches SigNoz a little differently. Expand your telemetry type for its common sources and the checks specific to it.
 
-### Traces
+<details>
+<ToggleHeading>
+#### Traces
+</ToggleHeading>
 
 Traces reach SigNoz from the OpenTelemetry SDK's OTLP exporter, either directly or through a Collector.
 
-<details>
-<ToggleHeading>
-#### More on traces
-</ToggleHeading>
-
 - **Common sources:** OpenTelemetry SDK; Jaeger/Zipkin clients. Spans from **Jaeger or Zipkin clients** must pass through a Collector with the matching receiver, which converts them to OTLP.
 - If some spans are missing or you see gaps in a trace, the instrumentation is likely producing data but some spans are dropped or uninstrumented. See [Traces Management FAQs](https://signoz.io/docs/traces-management/troubleshooting/faqs/).
-- SigNoz builds the **Services** list in APM by grouping incoming spans on their `service.name` resource attribute. So if your traces are arriving but a service is missing from the Services tab, it usually means `service.name` is unset or not unique. Set a unique `service.name` on that service so its spans are attributed to it.
+- SigNoz builds the **Services** list in APM by grouping incoming spans on their `service.name` resource attribute. If your traces are arriving but a service is missing from the Services tab, it usually means `service.name` is unset or not unique. Set a unique `service.name` on that service.
 
 </details>
 
-### Logs
+<details>
+<ToggleHeading>
+#### Logs
+</ToggleHeading>
 
 Logs reach SigNoz from the OpenTelemetry SDK or log appenders, from files on disk read by the Collector's `filelog` receiver, or from log shippers, over OTLP, directly or through a Collector.
 
-<details>
-<ToggleHeading>
-#### More on logs
-</ToggleHeading>
-
 **Common sources:** OpenTelemetry SDK / log appenders; files on disk; log shippers (FluentBit, Fluentd, Logstash, Vector, Telegraf). Identify your path first:
 
-- **Log shippers (FluentBit, Fluentd, Logstash, Vector, Telegraf) or the Collector.** Check that the receivers and exporters are wired into the pipeline correctly, that the exporter endpoint and ingestion key are set, and read the Collector or shipper logs for errors.
-- **Files on disk.** The Collector's `filelog` receiver reads log files. This is the standard path for Kubernetes and Docker. Confirm the receiver's include paths match your log file locations.
-- **SDK or log-appender bridge.** Run the [console exporter check](#step-1-is-your-application-generating-telemetry) with `OTEL_LOGS_EXPORTER=console` to confirm the SDK emits logs, then follow Steps 2 and 3.
+- **Log shippers or the Collector.** Check that receivers and exporters are wired into the pipeline correctly, that the exporter endpoint and ingestion key are set, and read the Collector or shipper logs for errors.
+- **Files on disk.** The Collector's `filelog` receiver reads log files (the standard path for Kubernetes and Docker). Confirm the receiver's include paths match your log file locations.
+- **SDK or log-appender bridge.** Run the console-exporter check in [Step 1](#step-1-is-your-application-generating-telemetry) to confirm the SDK emits logs, then follow Steps 2 and 3.
 
 To correlate logs with traces, make sure each log line carries `trace_id` and `span_id` and parse them with the [trace parser pipeline](https://signoz.io/docs/logs-pipelines/guides/trace/). More in [Logs Management FAQs](https://signoz.io/docs/logs-management/troubleshooting/faqs/).
 
 </details>
 
-### Metrics
+<details>
+<ToggleHeading>
+#### Metrics
+</ToggleHeading>
 
 Metrics reach SigNoz from the OpenTelemetry SDK, or from Prometheus, StatsD, and host or Kubernetes sources collected by the Collector's receivers, exported as OTLP.
 
-<details>
-<ToggleHeading>
-#### More on metrics
-</ToggleHeading>
-
 - **OpenTelemetry SDK metrics** export OTLP directly or through a Collector.
 - **Prometheus metrics** are collected by the Collector's `prometheus` receiver, which scrapes your `/metrics` endpoints.
-- **StatsD** metrics are received by the Collector's `statsd` receiver (application pushes UDP packets to the listener), then exported as OTLP.
+- **StatsD** metrics are received by the Collector's `statsd` receiver (the app pushes UDP packets to the listener), then exported as OTLP.
 - **Host and Kubernetes metrics** come from the `hostmetrics` receiver and the [K8s-Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/).
-- For any Collector receiver, confirm the receivers and exporters are added to the pipeline correctly, the exporter endpoint and key are set, and check the Collector logs for errors.
-- If a specific metric is missing, a common cause is a temporality mismatch (delta versus cumulative) for that metric. See [Metrics Management FAQs](https://signoz.io/docs/metrics-management/troubleshooting/faqs/) and [temporality of metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics) for background.
+- For any Collector receiver, confirm receivers and exporters are wired into the pipeline, the exporter endpoint and key are set, and check the Collector logs for errors.
+- If a specific metric is missing, a common cause is a temporality mismatch (delta vs cumulative). See [Metrics Management FAQs](https://signoz.io/docs/metrics-management/troubleshooting/faqs/) and [temporality of metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
 
 </details>
 
@@ -87,9 +89,9 @@ Metrics reach SigNoz from the OpenTelemetry SDK, or from Prometheus, StatsD, and
 
 Before checking the network, confirm the telemetry actually exists. The most reliable way is to route the data to your console so you can see it printed locally.
 
-### Using the SDK console exporter
+### Using the console exporter
 
-For SDK and auto-instrumented applications, set the exporter to `console`. These are standard OpenTelemetry SDK environment variables and work across languages that support auto-instrumentation:
+For the zero-code and auto-instrumentation agents in **Java, Node.js, Python, .NET, Ruby, and PHP**, set the exporter to `console` and telemetry prints to stdout. These are the OpenTelemetry SDK environment variables (use `console`, the current spec value, not the deprecated `logging`):
 
 ```bash
 export OTEL_TRACES_EXPORTER=console
@@ -102,6 +104,10 @@ To keep exporting to SigNoz **and** print to the console at the same time, use a
 ```bash
 export OTEL_TRACES_EXPORTER=otlp,console
 ```
+
+<Admonition type="info">
+These environment variables select the exporter only where the language's zero-code layer implements it. **PHP** also needs `OTEL_PHP_AUTOLOAD_ENABLED=true`. **Go** and **Rust** have no agent and do not read `OTEL_*_EXPORTER`, so add a stdout exporter in code instead: the <a href="https://pkg.go.dev/go.opentelemetry.io/contrib/exporters/autoexport" target="_blank" rel="noopener noreferrer nofollow">`autoexport`</a> module for Go, or the <a href="https://crates.io/crates/opentelemetry-stdout" target="_blank" rel="noopener noreferrer nofollow">`opentelemetry-stdout`</a> crate for Rust. See your language's [instrumentation guide](https://signoz.io/docs/instrumentation/overview/).
+</Admonition>
 
 Restart your application and exercise the code path you expect to produce data (send a request, run the job, emit a log).
 

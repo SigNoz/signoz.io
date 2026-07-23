@@ -246,7 +246,7 @@ const createTroubleshootingWizardStub = (): ComponentType<StubProps> => {
         'ol',
         null,
         li(
-          'Set OTEL_<SIGNAL>_EXPORTER=console, restart, and exercise the code path.',
+          'Set OTEL_<SIGNAL>_EXPORTER=console (Java, Node.js, Python, .NET, Ruby, PHP; in Go or Rust add a stdout exporter in code), restart, and exercise the code path.',
           ul(
             li(
               'No data in the console: instrumentation problem. Check SDK init order, runtime version support, third-party library support, and that the code path ran.'
