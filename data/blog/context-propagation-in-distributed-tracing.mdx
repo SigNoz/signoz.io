@@ -1,13 +1,20 @@
 ---
 title: What is Context Propagation in Distributed Tracing?
-slug: context-propagation-in-distributed-tracing
-date: 2023-04-03
+published_date: "2023-04-03"
+updated_date: "2026-07-06"
 tags: [Distributed Tracing]
 authors: [ankit_anand]
-description: Distributed tracing is built on causal metadata context propagation. Context propagation correlates events in a specific user request or transaction with the help of global identifiers and some other metadata..
+description: "Context propagation in distributed tracing: what it is, why traces need it to span services, and how trace context flows across service boundaries."
 image: /img/blog/2022/02/context_propagation_distributed_tracing.webp
 hide_table_of_contents: false
 keywords: [distributed tracing,context propagation,context propagation in distributed tracing,trace contexts,distributed tracing context,metadata propagation,traceID,spanID]
+related_articles:
+  - '/blog/distributed-tracing'
+  - '/blog/distributed-tracing-span'
+  - '/blog/opentelemetry-context-propagation'
+  - '/blog/opentelemetry-tracing'
+  - '/blog/what-is-distributed-tracing-in-opentelemetry'
+  - '/blog/distributed-tracing-in-microservices'
 ---
 In modern microservices-based applications, it is difficult to get an overview of how requests are performing across multiple services, infrastructure, and protocols. As companies began moving to distributed systems, they realized they needed a way to track requests in their entirety for debugging applications. Distributed tracing is a technology that was born out of this need.
 
@@ -43,6 +50,8 @@ Distributed tracing is becoming the go-to solution for solving this complexity a
 
 
 ## Context Propagation in Distributed Tracing
+
+Before we move forward, this blog explains the concept of context propagation, what it is, why a distributed trace falls apart without it, and how trace context flows from one service to the next. For the OpenTelemetry-specific implementation (the propagator API, the W3C Trace Context headers, and baggage setup), check out the dedicated [OpenTelemetry context propagation guide](https://signoz.io/blog/opentelemetry-context-propagation/).
 
 ### Introduction
 
@@ -95,7 +104,7 @@ World Wide Web Consortium (W3C) has recommendations on the format of <a href = "
 
 Popular open standards for [application instrumentation](https://signoz.io/docs/instrumentation/)(the process of enabling application code to generate trace data) like <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> follow the W3C Trace Context specification.
 
-There are two important identifiers used for passing [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/):
+There are two important identifiers used for passing context propagation:
 
 - A global identifier usually called **TraceID** identifies the set of correlated events
 - An identifier for child events usually called **SpanID** to show the causal relationship between events in an execution flow
@@ -117,6 +126,9 @@ Context Propagation in distributed tracing is what makes tracing possible. And w
 OpenTelemetry provides libraries to take care of your application instrumentation. You need a tracing backend to store, analyze and visualize the generated trace data by OpenTelemetry. [SigNoz](https://signoz.io/) is an open-source distributed tracing tool built natively to support OpenTelemetry. You can check out its GitHub repo.
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+
+To go deeper: start with our complete guide to [distributed tracing](https://signoz.io/blog/distributed-tracing/) for the end-to-end picture, then see how it plays out in [microservices observability](https://signoz.io/blog/microservices-observability-with-distributed-tracing/) and how [OpenTelemetry tracing](https://signoz.io/blog/opentelemetry-tracing/) generates the underlying data.<br />
+To analyze conversion and drop-offs across a request path, [tracing funnels](https://signoz.io/blog/tracing-funnels-observability-distributed-systems/) show how spans connect to business outcomes, while [distributed tracing in Java](https://signoz.io/blog/distributed-tracing-java/) is a hands-on language-specific walkthrough. If you are weighing your options, [APM vs distributed tracing](https://signoz.io/blog/apm-vs-distributed-tracing/) explains where each approach fits.
 
 Read more from SigNoz blog:<br></br>
 [Spans - a key concept of distributed tracing](https://signoz.io/blog/distributed-tracing-span/)<br></br>

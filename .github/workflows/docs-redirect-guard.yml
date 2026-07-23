@@ -20,6 +20,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Reminder if PR touches components MDX partials
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set +e
+          touched="$(git diff --name-only "$BASE_SHA" HEAD | grep -E '^components/.*\.mdx$' || true)"
+          set -e
+          if [ -n "$touched" ]; then
+            echo "::notice title=Shared doc components::This PR changes MDX under components/. Prefer React (.tsx) for new shared fragments (wiring in MDXComponents and agent-markdown stubs is simpler). Reviewers: flag newly added .mdx partials here unless there is a strong reason to keep them."
+          fi
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:

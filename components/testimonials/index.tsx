@@ -187,7 +187,7 @@ export const Testimonials = ({ page, className }: { page: string; className?: st
     <section>
       <div
         className={cn(
-          'section-container bg-blur-footer-backdrop relative mx-auto flex w-full flex-col items-center overflow-hidden border !border-b-0 border-dashed border-signoz_slate-400 !py-8 md:w-[80vw] md:!py-24',
+          'section-container bg-blur-footer-backdrop relative mx-auto flex w-full max-w-8xl flex-col items-center overflow-hidden border !border-b-0 border-dashed border-signoz_slate-400 !py-8 md:!pt-24',
           className
         )}
       >

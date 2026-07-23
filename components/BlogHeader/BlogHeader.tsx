@@ -24,6 +24,7 @@ interface BlogHeaderProps {
   authors: string[]
   publishedDate: string
   readingTime: string
+  authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
 }
 
 export default function BlogHeader({
@@ -32,11 +33,12 @@ export default function BlogHeader({
   authors,
   publishedDate,
   readingTime,
+  authorDirectory = {},
 }: BlogHeaderProps) {
   return (
     <div className="mb-4 p-4">
       <div className="mb-4">
-        {/* <Link href="/blog" className="flex items-center gap-4">
+        {/* <Link href="/blog/" className="flex items-center gap-4">
           <ArrowLeft size={16} /> Back to Blog
         </Link> */}
       </div>
@@ -54,7 +56,9 @@ export default function BlogHeader({
             <h2 className="text-xs font-medium uppercase tracking-wide text-stone-700 dark:text-stone-300">
               written by
             </h2>
-            {authors?.map((author, index) => <AuthorInfo author={author} key={index} />)}
+            {authors?.map((author, index) => (
+              <AuthorInfo author={author} authorData={authorDirectory[author]} key={index} />
+            ))}
           </div>
           <div className="flex flex-col">
             <h2 className="text-xs font-medium uppercase tracking-wide text-stone-700 dark:text-stone-300">

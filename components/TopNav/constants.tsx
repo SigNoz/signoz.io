@@ -1,12 +1,20 @@
-import { Brain, Cone, Logs, ShieldPlus, WorkflowIcon } from 'lucide-react'
+import {
+  BarChart2,
+  Boxes,
+  Brain,
+  Bug,
+  Cloud,
+  Cone,
+  ConciergeBell,
+  Container,
+  DraftingCompass,
+  LayoutGrid,
+  Logs,
+  ScrollText,
+  ShieldPlus,
+  WorkflowIcon,
+} from 'lucide-react'
 import React from 'react'
-import BarChartFeatureIcon from '@/public/img/index_features/bar-chart-2_feature.svg'
-import ConciergeBellFeatureIcon from '@/public/img/index_features/concierge-bell_feature.svg'
-import DraftingCompassFeatureIcon from '@/public/img/index_features/drafting-compass_feature.svg'
-import LayoutGridFeatureIcon from '@/public/img/index_features/layout-grid_feature.svg'
-import LogsFeatureIcon from '@/public/img/index_features/logs_feature.svg'
-import BugFeatureIcon from '@/public/img/index_features/bug_feature.svg'
-import BoxesIcon from '@/public/img/index_features/boxes.svg'
 
 export enum TABS {
   BLOG = 'blog-tab',
@@ -31,12 +39,6 @@ export interface ProductItem {
   order: number
 }
 
-export interface ComparisonItem {
-  key: string
-  url: string
-  name: string
-}
-
 export interface ResourceItem {
   key: string
   url: string
@@ -44,125 +46,91 @@ export interface ResourceItem {
   name: string
 }
 
-const PRODUCT_ICON_CLASS = 'h-5 w-5 shrink-0'
+export interface ComparisonItem {
+  key: string
+  url: string
+  name: string
+}
+
+const PRODUCT_ICON_CLASS = 'h-4 w-4 shrink-0 pt-0.5 text-signoz_vanilla-100'
 
 export const productDropdownItems: ProductItem[] = [
   {
-    key: 'apm',
-    url: '/application-performance-monitoring',
-    icon: <BarChartFeatureIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
-    description: 'Monitor your applications',
-    name: 'APM',
+    key: 'DistributedTracing',
+    url: '/distributed-tracing/',
+    icon: <DraftingCompass className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'Track requests across your services',
+    name: 'Distributed Tracing',
     order: 1,
   },
   {
-    key: 'Alerts',
-    url: '/alerts-management',
-    icon: <ConciergeBellFeatureIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
-    description: 'Multiple thresholds and dynamic routing at scale',
-    name: 'Alerts',
-    order: 5,
-  },
-  {
-    key: 'external-apis',
-    url: '/external-apis/',
-    icon: (
-      <WorkflowIcon className={`${PRODUCT_ICON_CLASS} text-signoz_robin-400`} aria-hidden="true" />
-    ),
-    description: 'Track third-party API performance',
-    name: 'External API Monitoring',
-    order: 9,
-  },
-  {
-    key: 'DistributedTracing',
-    url: '/distributed-tracing',
-    icon: <DraftingCompassFeatureIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
-    description: 'Track requests across your services',
-    name: 'Distributed Tracing',
+    key: 'LogManagement',
+    url: '/log-management/',
+    icon: <ScrollText className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'Fast queries with columnar database',
+    name: 'Log Management',
     order: 2,
   },
   {
-    key: 'MetricsDashboards',
-    url: '/metrics-and-dashboards',
-    icon: <LayoutGridFeatureIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
-    description: 'Monitor key metrics and build dashboards',
-    name: 'Metrics & Dashboards',
-    order: 6,
-  },
-  {
-    key: 'messaging-queues',
-    url: '/docs/messaging-queues/overview/',
-    icon: <Logs className={`${PRODUCT_ICON_CLASS} text-signoz_robin-400`} aria-hidden="true" />,
-    description: 'Monitor Kafka, Celery lag & throughput',
-    name: 'Messaging Queues',
-    order: 10,
-  },
-  {
-    key: 'LogManagement',
-    url: '/log-management',
-    icon: <LogsFeatureIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
-    description: 'Fast queries with columnar database',
-    name: 'Log Management',
+    key: 'Alerts',
+    url: '/alerts-management/',
+    icon: <ConciergeBell className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'Multiple thresholds and dynamic routing at scale',
+    name: 'Alerts',
     order: 3,
   },
   {
-    key: 'Exceptions',
-    url: '/exceptions-monitoring',
-    icon: <BugFeatureIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
-    description: 'Record exceptions automatically',
-    name: 'Exceptions',
-    order: 7,
-  },
-  {
-    key: 'llm-observability',
-    url: '/llm-observability/',
-    icon: <Brain className={`${PRODUCT_ICON_CLASS} text-signoz_robin-400`} aria-hidden="true" />,
-    description: 'Monitor AI and LLM workflows',
-    name: 'LLM Observability',
-    order: 11,
-  },
-  {
-    key: 'InfraMonitoring',
-    url: '/docs/infrastructure-monitoring/overview/',
-    icon: <BoxesIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
-    description: 'Monitor your infrastructure',
-    name: 'Infrastructure Monitoring',
+    key: 'MetricsDashboards',
+    url: '/metrics-and-dashboards/',
+    icon: <LayoutGrid className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'Monitor key metrics and build dashboards',
+    name: 'Metrics & Dashboards',
     order: 4,
   },
   {
     key: 'trace-funnels',
     url: '/trace-funnels/',
-    icon: <Cone className={`${PRODUCT_ICON_CLASS} text-signoz_sakura-400`} aria-hidden="true" />,
+    icon: <Cone className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
     description: 'Track drop-offs in multi-step flows',
-    name: 'Trace Funnels',
-    order: 8,
+    name: 'Trace Funnels - OTel Native',
+    order: 5,
   },
   {
-    key: 'observability-for-ai-native-companies',
-    url: '/observability-for-ai-native-companies/',
-    icon: (
-      <ShieldPlus className={`${PRODUCT_ICON_CLASS} text-signoz_robin-400`} aria-hidden="true" />
-    ),
-    description: 'Full-stack monitoring for AI applications',
-    name: 'AI Observability',
-    order: 12,
+    key: 'Exceptions',
+    url: '/exceptions-monitoring/',
+    icon: <Bug className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'Record exceptions automatically',
+    name: 'Exceptions',
+    order: 6,
+  },
+  {
+    key: 'messaging-queues',
+    url: '/docs/messaging-queues/overview/',
+    icon: <Logs className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'Monitor Kafka, Celery lag & throughput',
+    name: 'Messaging Queues - OTel Native',
+    order: 7,
   },
 ]
+
+export const productDropdownItemsSorted = [...productDropdownItems].sort(
+  (a, b) => a.order - b.order
+)
 
 export const comparisonItems: ComparisonItem[] = [
   {
     key: 'signozvsdatadog',
-    url: '/product-comparison/signoz-vs-datadog/',
+    url: '/datadog-alternative/',
     name: 'SigNoz vs DataDog',
   },
   {
     key: 'signozvsgrafana',
-    url: '/product-comparison/signoz-vs-grafana/',
+    url: '/grafana-alternative/',
     name: 'SigNoz vs Grafana',
   },
   {
     key: 'signozvsnewrelic',
-    url: '/product-comparison/signoz-vs-newrelic/',
+    url: '/newrelic-alternative/',
     name: 'SigNoz vs New Relic',
   },
   {
@@ -177,7 +145,66 @@ export const comparisonItems: ComparisonItem[] = [
   },
 ]
 
-export const productDropdownItemsSorted = [...productDropdownItems].sort(
+export const useCasesDropdownItems: ProductItem[] = [
+  {
+    key: 'InfraMonitoring',
+    url: '/docs/infrastructure-monitoring/overview/',
+    icon: <Boxes className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'Monitor servers, containers, and cloud resources',
+    name: 'Infrastructure Monitoring',
+    order: 1,
+  },
+  {
+    key: 'apm',
+    url: '/application-performance-monitoring/',
+    icon: <BarChart2 className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'End-to-end application performance visibility',
+    name: 'APM',
+    order: 2,
+  },
+  {
+    key: 'llm-observability',
+    url: '/llm-observability/',
+    icon: <Brain className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'Monitor AI and LLM workflows',
+    name: 'LLM Observability',
+    order: 3,
+  },
+  {
+    key: 'agent-native-observability',
+    url: '/agent-native-observability/',
+    icon: <ShieldPlus className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'Observability for your coding agents via MCP',
+    name: 'Agent Native Observability',
+    order: 4,
+  },
+  {
+    key: 'external-apis',
+    url: '/external-apis/',
+    icon: <WorkflowIcon className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'Track third-party API performance',
+    name: 'External API Monitoring',
+    order: 5,
+  },
+  {
+    key: 'kubernetes-monitoring',
+    url: '/kubernetes-monitoring/',
+    icon: <Container className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'Monitor pods, nodes, namespaces & workloads',
+    name: 'Kubernetes Monitoring',
+    order: 6,
+  },
+  {
+    key: 'azure-monitoring',
+    url: '/azure-monitoring/',
+    icon: <Cloud className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'One-click monitoring for every Azure service',
+    name: 'Azure Monitoring',
+    order: 7,
+  },
+]
+
+export const useCasesDropdownItemsSorted = [...useCasesDropdownItems].sort(
   (a, b) => a.order - b.order
 )
 
@@ -185,25 +212,25 @@ export const resourcesDropdownItems = {
   learn: [
     {
       key: 'blog',
-      url: '/blog',
+      url: '/blog/',
       description: 'News, ideas, and insights on observability',
       name: 'Blog',
     },
     {
       key: 'comparisons',
-      url: '/comparisons',
+      url: '/comparisons/',
       description: 'Compare observability tools',
       name: 'Comparisons',
     },
     {
       key: 'guides',
-      url: '/guides',
+      url: '/guides/',
       description: 'How-to guides and tutorials',
       name: 'Guides',
     },
     {
       key: 'opentelemetry',
-      url: '/opentelemetry',
+      url: '/opentelemetry/',
       description: 'OpenTelemetry concepts and its use cases',
       name: 'OpenTelemetry',
     },
@@ -233,12 +260,11 @@ export const resourcesDropdownItems = {
 export const NAV_BREAKPOINTS = {
   SIGN_IN: 640,
   PRODUCT: 840,
-  WHY_SIGNOZ: 900,
-  DOCS: 960,
-  RESOURCES: 1020,
-  PRICING: 1100,
-  GITHUB_STARS: 1180,
-  FULL_NAV: 1280,
+  USE_CASES: 920,
+  DOCS: 1000,
+  RESOURCES: 1120,
+  PRICING: 1200,
+  GITHUB_STARS: 1280,
 } as const
 
 export const POPOVER_CONTENT_CLASS =

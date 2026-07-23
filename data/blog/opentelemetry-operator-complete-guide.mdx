@@ -1,13 +1,21 @@
 ---
 title: OpenTelemetry Operator Complete Guide [OTel Collector + Auto-Instrumentation Demo]
-slug: opentelemetry-operator-complete-guide
-date: 2025-09-16
+meta_title: "OpenTelemetry Operator: A Complete Guide"
+published_date: 2025-09-16
+updated_date: 2026-06-17
 tags: [OpenTelemetry]
 authors: [daniel]
 image: /img/blog/2023/11/opentelemetry-operator-cover.jpeg
 hide_table_of_contents: false
-description: Learn how to deploy and manage OpenTelemetry resources in Kubernetes using the OpenTelemetry Operator. Streamline your observability setup with this comprehensive guide.
+description: Learn how to deploy and manage OpenTelemetry in Kubernetes with the OpenTelemetry Operator, including auto-instrumenting a Java app.
 keywords: [OpenTelemetry Operator, Kubernetes, observability, telemetry, auto-instrumentation, collectors, SigNoz]
+related_articles:
+  - '/blog/opentelemetry-kubernetes-cluster-metrics-monitoring'
+  - '/blog/opentelemetry-collector-complete-guide'
+  - '/blog/opentelemetry-kubernetes'
+  - '/blog/kubernetes-events-monitoring'
+  - '/blog/eks-monitoring-with-opentelemetry'
+  - '/blog/using-signoz-to-monitor-your-kubernetes-cluster'
 ---
 
 Manually deploying and managing OpenTelemetry components in a Kubernetes environment can be a complex and time-consuming task. It involves creating various Kubernetes resources, setting up configurations, and ensuring the components are properly integrated with the applications.
@@ -60,6 +68,8 @@ The OpenTelemetry Operator can be used to simplify and automate the following ta
 - Auto-instrumenting workloads with OpenTelemetry
 - Configuring OpenTelemetry Collectors and Exporters
 - Routing telemetry data to multiple destinations
+
+The Operator is the most automated way to run collectors in a cluster, but if you prefer to wire the Collector up by hand as a DaemonSet and Deployment, our full walkthrough on [Kubernetes observability with OpenTelemetry](https://signoz.io/blog/opentelemetry-kubernetes/) covers that path step by step.
 
 ## Using an OpenTelemetry Operator to auto-instrument a Java application
 
@@ -236,7 +246,7 @@ You can find the ingestion details in the SigNoz dashboard under the `Settings` 
 
 Applications can be instrumented through both manual instrumentation and auto-instrumentation. Manual instrumentation offers granular control and customization of instrumentation code but may be time-consuming and require existing code modification. Alternatively, auto-instrumentation automates this process without code modifications, saving time and effort. In this case, auto-instrumentation will be utilized for simplicity.
 
-There are different ways to set up auto-instrumentation for your applications using the OpenTelemetry Operator, which you can look at [here](https://signoz.io/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection).
+There are different ways to set up auto-instrumentation for your applications using the OpenTelemetry Operator, which you can look at [here](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/#opentelemetry-auto-instrumentation-injection).
 
 The sample Java application that was set up earlier is to be auto-instrumented with OpenTelemetry. It has already been packaged into a docker image and is being referenced in the below Kubernetes manifest. Once the deployment is created, the image will be pulled into your cluster from the GitHub Container Registry, where it is hosted. Auto instrumentation has been set up for the application using the “Auto-instrumentation without Sidecar” method in the below manifest.
 

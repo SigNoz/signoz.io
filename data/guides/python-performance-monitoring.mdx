@@ -1,13 +1,20 @@
 ---
 
 title: Python Performance Monitoring - Implementation, Tools and Best Practices
-slug: python-performance-monitoring
-date: 2024-07-26
+meta_title: "Python Performance Monitoring Guide"
+published_date: 2024-07-26
+updated_date: 2026-06-29
 tags: [apm]
 authors: [bhavya_sachdeva]
 description: Discover essential tools and best practices for Python performance monitoring. Learn how to optimize your applications and boost efficiency.
 keywords: [Python performance, application monitoring, APM tools, performance optimization, Python profiling, monitoring best practices, Python metrics, application efficiency]
-
+related_articles:
+  - '/guides/logging-in-python'
+  - '/opentelemetry/python'
+  - '/guides/what-is-apm'
+  - '/blog/python-application-monitoring'
+  - '/guides/apm-metrics'
+  - '/blog/api-monitoring-complete-guide'
 ---
 
 Python performance monitoring is a critical aspect of maintaining efficient and reliable applications. It involves tracking key metrics, identifying bottlenecks, and optimizing code to ensure your Python programs run smoothly. 
@@ -126,6 +133,8 @@ Using Python application monitoring tools is similar to having an advanced healt
 
 Python application monitoring is made more accessible with SigNoz, as it provides a uniform platform for visualizing application traces and data. Full-fledged [distributed tracing](https://signoz.io/distributed-tracing/) is supported, which aids in identifying the underlying reasons for failures or performance bottlenecks in a microservices architecture.
 
+When it comes to instrumentation, OpenTelemetry's [auto-instrumentation](https://signoz.io/blog/opentelemetry-agent/) (running `opentelemetry-instrument` after `opentelemetry-bootstrap`) is the modern baseline. It captures spans for common frameworks without any code changes, and from there you can add manual spans around the specific hot paths you most want to optimize.
+
 These tools can integrate seamlessly to give a comprehensive view of your application's performance, helping developers make data-driven decisions.
 
 ### Benefits of Monitoring Python Applications
@@ -234,9 +243,9 @@ OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument python3 app.py
 
 <Figure src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-25_at_12.20.32_AM.webp" alt="Screenshot 2024-07-25 at 12.20.32 AM.webp"  />
 
-But you haven’t seen anything in the SigNoz Cloud. There are two ways to send data to SigNoz Cloud. You can read that from here. In this guide, we are using the [Send traces via OTel Collector binary](https://signoz.io/docs/instrumentation/python/#send-traces-via-otel-collector-binary), which is also recommended one as well.
+But you haven’t seen anything in the SigNoz Cloud. There are two ways to send data to SigNoz Cloud. You can read that from here. In this guide, we are using the [Send traces via OTel Collector binary](https://signoz.io/docs/instrumentation/opentelemetry-python/#send-traces-via-otel-collector-binary), which is also recommended one as well.
 
-OpenTelemetry-instrumented applications in a VM can send data to the `otel-binary` agent running in the same VM. The [OTel agent](https://signoz.io/comparisons/opentelemetry-collector-vs-agent/) can then be configured to send data to the SigNoz cloud. Refer to this [documentation](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to download according to your platform and operating system. 
+OpenTelemetry-instrumented applications in a VM can send data to the `otel-binary` agent running in the same VM. The [OTel agent](https://signoz.io/blog/opentelemetry-collector-complete-guide/) can then be configured to send data to the SigNoz cloud. Refer to this [documentation](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) to download according to your platform and operating system. 
 
 Here are the steps to set up OpenTelemetry binary as an agent.
 
@@ -363,6 +372,8 @@ To get the most out of your monitoring efforts:
 3. Set Up Effective Alerts: Define meaningful thresholds and create clear escalation policies to address issues promptly.
 4. Create Insightful Dashboards: Design visualizations that provide at-a-glance understanding of your application's performance trends.
 5. Integrate with Development Workflow: Use monitoring data to inform code reviews and guide optimization efforts.
+
+If you also run services in other languages, the same principles carry over. See our guide on [Java application monitoring](https://signoz.io/guides/monitoring-java-applications/) for a parallel walkthrough. It also helps to understand how [traces vs spans](https://signoz.io/comparisons/opentelemetry-trace-vs-span/) relate before you read your instrumentation data, and to survey the broader landscape of [APM tools](https://signoz.io/blog/apm-tools/) when choosing a platform. See also [APM metrics](https://signoz.io/guides/apm-metrics/) for the core signals to track.
 
 ## Monitoring with Python-specific Libraries
 

@@ -1,24 +1,37 @@
 import React from 'react'
 import Image from 'next/image'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 import { cn } from '../../app/lib/utils'
 
-export const GetStarted = ({ page, className }: { page: string; className?: string }) => {
+export const GetStarted = ({
+  page,
+  className,
+  variant = 'default',
+  withIcon = false,
+}: {
+  page: string
+  className?: string
+  variant?: 'default' | 'homepageRedesign'
+  withIcon?: boolean
+}) => {
   const getStartedId = `btn-get-started-${page}-bottom`
   const readDocumentationId = `btn-read-documentation-${page}-bottom`
+  const isHomepageRedesign = variant === 'homepageRedesign'
 
   return (
     <>
       <section
         className={cn(
-          'mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 md:w-[80vw]',
+          isHomepageRedesign
+            ? 'relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden border-y border-signoz_slate-400/35 px-5 sm:px-6 lg:px-20 wide:max-w-8xl wide:px-0'
+            : 'mx-auto w-full max-w-8xl border !border-b-0 border-dashed border-signoz_slate-400',
           className
         )}
       >
-        <div className="bg-blur-ellipse-206">
+        <div className={cn('bg-blur-ellipse-206', isHomepageRedesign && 'mx-auto max-w-8xl')}>
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
               <p className="mb-0 mt-20 text-center text-4xl font-bold">
@@ -33,7 +46,13 @@ export const GetStarted = ({ page, className }: { page: string; className?: stri
                   clickText="Get Started - Free"
                   clickLocation="Get Started Section"
                 >
-                  <Button id={getStartedId} className="flex-center">
+                  <Button
+                    variant="legacyPrimary"
+                    as="span"
+                    id={getStartedId}
+                    className="flex-center"
+                    withIcon={withIcon}
+                  >
                     Get Started - Free
                     <ArrowRight size={14} />
                   </Button>
@@ -49,9 +68,11 @@ export const GetStarted = ({ page, className }: { page: string; className?: stri
                   prefetch={false}
                 >
                   <Button
-                    type={Button.TYPES.SECONDARY}
+                    as="span"
+                    variant="legacySecondary"
                     id={readDocumentationId}
                     className="flex-center"
+                    withIcon={withIcon}
                   >
                     <BookOpen size={14} />
                     Read Documentation

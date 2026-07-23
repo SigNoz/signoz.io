@@ -5,23 +5,28 @@ import React, { useEffect, useRef, useState } from 'react'
 import { ChevronDown, ChevronRight, File, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { NavItem, Doc, Category } from './types'
-import docsSideNav from 'constants/docsSideNav'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { useDocsSideNav } from './DocsSideNavContext'
+import { usePathname } from 'next/navigation'
 import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
+import { useBrowserSearch } from '@/hooks/useBrowserSearch'
 
 interface DocsSidebarProps {
   onNavItemClick?: () => void
 }
 
 const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
+  const originalSideNav = useDocsSideNav()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const regionParam = searchParams.get('region')
-  const cloudRegionParam = searchParams.get('cloud_region')
-  const [sideNav, setSideNav] = useState(docsSideNav)
+  const search = useBrowserSearch()
+  const [sideNav, setSideNav] = useState(originalSideNav)
   const [isClient, setIsClient] = useState(false)
   const [activeRoute, setActiveRoute] = useState<string | null>(null)
   const sidebarRef = useRef<HTMLDivElement>(null)
+
+  // Only parse after client-side mount
+  const searchParams = isClient ? new URLSearchParams(search) : null
+  const regionParam = searchParams?.get('region')
+  const cloudRegionParam = searchParams?.get('cloud_region')
 
   useEffect(() => {
     setIsClient(true)
@@ -74,7 +79,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     // Normalize the currentRoute by stripping the trailing slash if it exists
     const normalizedRoute = currentRoute.endsWith('/') ? currentRoute.slice(0, -1) : currentRoute
 
-    const parents = getParents(docsSideNav, normalizedRoute)
+    const parents = getParents(originalSideNav, normalizedRoute)
 
     for (const parent of parents) {
       toggleIsExpandedByLabel(parent, true)
@@ -226,7 +231,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
 
   const renderItem = (item: NavItem | string) => {
     if (typeof item === 'string') {
-      const referencedItem = findItemById(item, docsSideNav)
+      const referencedItem = findItemById(item, originalSideNav)
       if (referencedItem) {
         return renderItem(referencedItem)
       }

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
 import { ArrowUpRight } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import TrackingLink from '../TrackingLink'
 
 const scrollToSection = (id) => {
@@ -185,7 +185,7 @@ const MobileEstimate = () => {
 
   return (
     <section id="estimate-your-monthly-bill">
-      <div className="section-container mx-[auto] w-[90vw] border border-dashed border-signoz_slate-400">
+      <div className="section-container mx-auto w-full max-w-8xl border border-dashed border-signoz_slate-400">
         <div className="flex flex-col gap-2 pt-6">
           <span className="group relative pl-1 text-2xl font-semibold text-signoz_vanilla-100">
             Estimate your monthly bill
@@ -563,9 +563,13 @@ const MobileEstimate = () => {
           <span className="text-base font-medium text-signoz_robin-400">
             Reach out to us for custom pricing and retention for high volume
           </span>
-          <Button id="btn-contact-us-pricing-monthly-estimate" className="w-full">
+          <Button
+            variant="legacyPrimary"
+            id="btn-contact-us-pricing-monthly-estimate"
+            className="w-full"
+          >
             <TrackingLink
-              href={'https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af'}
+              href={'/contact-us/?source=monthly-estimate-mobile'}
               clickType="Primary CTA"
               clickName="Volume Discount Form Link"
               clickText="Contact Us"
@@ -582,7 +586,7 @@ const MobileEstimate = () => {
           <span className="text-base font-medium text-signoz_robin-400">
             Reach out to us for SigNoz's Start Up Program Discount
           </span>
-          <Button variant="secondary" className="w-full">
+          <Button variant="legacySecondary" className="w-full">
             <TrackingLink
               href="/startups/"
               clickType="Secondary CTA"

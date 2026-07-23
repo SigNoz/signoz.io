@@ -1,6 +1,5 @@
 ---
-date: 2026-03-25
-id: tracing
+date: 2026-05-12
 title: Cloud Functions OpenTelemetry Tracing
 description: Send traces from Google Cloud Functions to SigNoz Cloud using OpenTelemetry zero-code auto instrumentation for Node.js.
 doc_type: howto
@@ -8,7 +7,7 @@ doc_type: howto
 
 This guide shows you how to send traces from a Google Cloud Function to SigNoz using OpenTelemetry. The default path uses zero-code auto instrumentation through environment variables. If you need deeper control, use the optional code-based setup section.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -104,7 +103,7 @@ curl "https://<your-cloud-function-url>?message=hello-signoz"
 
 ## Validate
 
-<KeyPointCallout title="Missing root span in SigNoz? This is expected on GCP serverless." defaultCollapsed={true}>
+<KeyPointCallout title="Missing root span in SigNoz? This is expected on GCP serverless." defaultCollapsed="true">
 Cloud Run/Cloud Functions can generate the incoming request trace context at the platform layer and pass only trace headers (like `traceparent` or `X-Cloud-Trace-Context`) to your function. Your function can continue that trace when headers are present, but the platform-generated root span itself remains in Cloud Trace and is not sent by your app exporter to SigNoz.
 
 In practice, this can show up as:
@@ -301,5 +300,5 @@ Set `OTEL_SERVICE_NAME` to a stable value, redeploy, and invoke again.
 ## Next steps
 
 - [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to speed up debugging.
-- [Create trace-based alerts](https://signoz.io/docs/alerts-management/) for latency and error spikes.
+- [Create trace-based alerts](https://signoz.io/docs/userguide/alerts-management/) for latency and error spikes.
 - [Build dashboards](https://signoz.io/docs/userguide/manage-dashboards/) for latency and error trends.

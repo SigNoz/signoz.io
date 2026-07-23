@@ -1,7 +1,4 @@
-import TOCInline from 'pliny/ui/TOCInline'
-import BlogNewsletterForm from 'pliny/ui/BlogNewsletterForm'
 import type { MDXComponents } from 'mdx/types'
-import Image from './Image'
 import CustomLink from './Link'
 import TableWrapper from './TableWrapper'
 import YouTube from './VideoPlayer/VideoPlayer'
@@ -10,7 +7,6 @@ import Admonition from './Admonition/Admonition'
 import SignUps from './SignUps/SignUps'
 import LogsPerf from './LogsPerf/LogsPerf'
 import VersionPin from './NodeVersionPin/NodeVersionPin'
-import VersionPinNestJs from './NestVersionPin/NestVersionPin'
 import Tabs from './Tabs'
 import TabItem from './TabItem'
 import DocCard from './DocCard'
@@ -19,60 +15,40 @@ import NextCarousel from './Carousel/Carousel'
 import Figure from './Figure/Figure'
 import NextImage from 'next/image'
 import PricingCTA from './PricingCTA'
-import PageFeedback from './PageFeedback/PageFeedback'
-import CustomMetricPlayground from './CustomMetricPlayground/CustomMetricPlayground'
-import VerticalTabs from './VerticalTabs/VerticalTabs'
-import FAQAccordion from './FAQAccordion/FAQAccordion'
-import Button from './Button/Button'
-import DatadogPricingCalculator from './DatadogPricingCalculator/DatadogPricingCalculator'
+import Button from '@/components/ui/Button'
 import DatadogVsSigNoz from './DatadogVsSigNoz/DatadogVsSigNoz'
 import GrafanaVsSigNoz from './GrafanaVsSigNoz/GrafanaVsSigNoz'
 import NewRelicVsSigNoz from './NewRelicVsSigNoz/NewRelicVsSigNoz'
-import DatadogAlternativesFinder from './DatadogAlternativesFinder/DatadogAlternativesFinder'
-import KeyPointCallout from './KeyPointCallout/KeyPointCallout'
 import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetStartedOpenTelemetryButton'
 import InterlinkCard from './InterlinkCard/InterlinkCard'
-import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticleVideoShowcaseModal'
 import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonitoring/GetStartedInfrastructureMonitoring'
-import ImageCTA from './ImageCTA/ImageCTA'
-import TrackingLink from './TrackingLink'
-import APMQuickStartOverview from './APM/APMQuickStartOverview'
-import APMInstrumentationListicle from './APM/APMInstrumentationListicle'
-import JavascriptInstrumentationListicle from './APM/JavascriptInstrumentationListicle'
-import JavaInstrumentationListicle from './APM/JavaInstrumentationListicle'
-import LibraryTabs from './LibraryTabs/LibraryTabs'
-import LibraryTab from './LibraryTabs/LibraryTab'
+import Listicle from './Listicle/Listicle'
 import MDXButton from './MDXButton/MDXButton'
-import IconCardGrid from './Card/IconCardGrid'
-import LogsQuickStartOverview from './Logs/LogsQuickStartOverview'
-import LogsInstrumentationListicle from './Logs/LogsInstrumentationListicle'
-import IntegrationsListicle from './Integrations/IntegrationsListicle'
 import HostingDecision from './shared/HostingDecision'
-import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
-import K8sInstallationListicle from './Setup/K8sInstallationListicle'
-import MarketplaceInstallationListicle from './Setup/MarketplaceInstallationListicle'
-import CollectionAgentsListicle from './Setup/CollectionAgentsListicle'
+import CommonPrerequisites from './shared/CommonPrerequisites'
+import K8sInstall from './shared/K8sInstall'
+import K8sOtelDemo from './shared/K8sOtelDemo'
+import RetentionInfo from './shared/RetentionInfo'
+import SigNozCloud from './shared/SigNozCloud'
+import UpgradeInfo from './shared/UpgradeInfo'
+import GetHelp from './shared/GetHelp'
+import K8sNextSteps from './shared/K8sNextSteps'
+import MultiNodePart1 from './shared/MultiNodePart1'
+import MultiNodePart2 from './shared/MultiNodePart2'
+import PrereqsInstrument from './shared/PrereqsInstrument'
+import TraefikMetrics from './shared/TraefikMetrics'
+import MetricsDefinition from './shared/MetricsDefinition'
+import CHClientWithOutput from './shared/CHClientWithOutput'
 
 import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
 import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
-import MigrateToSigNoz from './MigrateToSigNoz/MigrateToSigNozOverview'
-import DashboardTemplatesListicle from './Dashboards/DashboardTemplatesListicle'
 import DashboardActions from './Dashboards/DashboardActions'
-import KubernetesDashboardsListicle from './Dashboards/KubernetesDashboardsListicle'
-import APMDashboardsListicle from './Dashboards/APMDashboardsListicle'
-import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsListicle'
-import LiteLLMDashboardsListicle from './Dashboards/LiteLLMDashboardsListicle'
 import ProductFeatureShowcase from './ProductFeatureShowcase/ProductFeatureShowcase'
 
-import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
 import OtelCollectorFlow from './OtelCollectorFlow/OtelCollectorFlow'
 
 import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
-import MetricsQuickStartOverview from './Metrics/MetricsQuickStartOverview'
-import CICDMonitoringListicle from './CICD/CICDMonitoringListicle'
 import ToggleHeading from './Headings/ToggleHeading'
-import AWSMonitoringListicle from './AWS/AWSMonitoringListicle'
-import AWSOneClickListicle from './AWS/AWSOneClickListicle'
 import Region from './Region/Region'
 import RegionTable from './Region/RegionTable'
 import { RegionAwarePre, RegionAwareCode } from './Region/RegionAwareComponents'
@@ -86,21 +62,21 @@ import Tooltip from './ui/Tooltip'
 import InlineCTA from './InlineCTA/InlineCTA'
 import DatabaseTable from './HighCardinalityData/DatabaseTable'
 import MCPInstallButton from './MCPInstallButton/MCPInstallButton'
-import dynamic from 'next/dynamic'
-const IncidentCostGraphic = dynamic(() => import('./Blog/IncidentCostGraphic'), { ssr: false })
+import IncidentCostGraphic from './Blog/IncidentCostGraphic.lazy'
 
-export const components: MDXComponents = {
+// MDXComponents type from @types/mdx@2.0.13 expects React-18-shape components
+// (props: any) => Element | null, while @types/react@19 widens FC return to
+// ReactNode | Promise<ReactNode> to support async components. The runtime
+// shape is unchanged. Casting through unknown until @types/mdx catches up.
+export const components = {
   Region,
   region: Region,
   RegionTable,
   ToggleHeading,
-  Image,
-  TOCInline,
   a: CustomLink,
   pre: RegionAwarePre,
   code: RegionAwareCode,
   table: TableWrapper,
-  BlogNewsletterForm,
   YouTube,
   IncidentCostGraphic,
   GetStartedSigNoz,
@@ -108,7 +84,6 @@ export const components: MDXComponents = {
   SignUps,
   LogsPerf,
   VersionPin,
-  VersionPinNestJs,
   Tabs,
   TabItem,
   DocCard,
@@ -117,56 +92,37 @@ export const components: MDXComponents = {
   Figure,
   NextImage,
   PricingCTA,
-  PageFeedback,
-  CustomMetricPlayground,
-  VerticalTabs,
-  FAQAccordion,
   Button,
-  DatadogPricingCalculator,
   DatadogVsSigNoz,
   GrafanaVsSigNoz,
   NewRelicVsSigNoz,
-  DatadogAlternativesFinder,
-  KeyPointCallout,
+  KeyPointCallout: ({ children, title, type, ...rest }) => (
+    <Admonition
+      {...rest}
+      title={title === '' || title == null ? 'Note' : title}
+      type={type ?? 'info'}
+    >
+      {children}
+    </Admonition>
+  ),
   GetStartedOpenTelemetryButton,
   InterlinkCard,
-  InArticleVideoShowcaseModal,
   GetStartedInfrastructureMonitoring,
-  ImageCTA,
-  TrackingLink,
-  APMQuickStartOverview,
-  APMInstrumentationListicle,
-  JavascriptInstrumentationListicle,
-  JavaInstrumentationListicle,
-  LibraryTabs,
-  LibraryTab,
+  Listicle,
   MDXButton,
-  IconCardGrid,
-  LogsQuickStartOverview,
-  LogsInstrumentationListicle,
-  IntegrationsListicle,
   HostingDecision,
-  SelfHostInstallationListicle,
-  K8sInstallationListicle,
   ArticleSeriesBottom,
   ArticleSeriesTop,
-  MigrateToSigNoz,
-  DashboardTemplatesListicle,
   DashboardActions,
-  KubernetesDashboardsListicle,
-  APMDashboardsListicle,
-  HostMetricsDashboardsListicle,
-  LiteLLMDashboardsListicle,
-  MarketplaceInstallationListicle,
-  LLMMonitoringListicle,
   OtelCollectorFlow,
-  CollectionAgentsListicle,
+  K8sInstall,
+  K8sOtelDemo,
+  RetentionInfo,
+  SigNozCloud,
+  UpgradeInfo,
   ResponseTimeVisualizer,
   ProductFeatureShowcase,
-  MetricsQuickStartOverview,
-  CICDMonitoringListicle,
-  AWSMonitoringListicle,
-  AWSOneClickListicle,
+  CommonPrerequisites,
   CardinalityExplosion,
   MemoryGauge,
   QueryRace,
@@ -176,4 +132,12 @@ export const components: MDXComponents = {
   DatabaseTable,
   InlineCTA,
   MCPInstallButton,
-}
+  GetHelp,
+  K8sNextSteps,
+  MultiNodePart1,
+  MultiNodePart2,
+  PrereqsInstrument,
+  TraefikMetrics,
+  MetricsDefinition,
+  CHClientWithOutput,
+} as unknown as MDXComponents

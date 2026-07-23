@@ -73,7 +73,8 @@ export const getPageType = (pathname: string): string => {
   if (normalizedPath.startsWith('/case-study/')) return 'Case Study Page' // Match /case-study/*
   if (normalizedPath === '/login') return 'Sign In Page'
   if (normalizedPath === '/teams') return 'Teams Page'
-  if (normalizedPath === '/api-reference') return 'API Reference Page'
+  if (normalizedPath === '/api-reference' || normalizedPath.startsWith('/api-reference/'))
+    return 'API Reference Page'
   if (normalizedPath === '/support') return 'Support Page'
   if (normalizedPath === '/launch-week') return 'Launch Week Listing Page'
   if (normalizedPath === '/changelog') return 'Change Log Listing Page'
@@ -97,8 +98,7 @@ export const getPageType = (pathname: string): string => {
 
   // Enterprise pages
   if (normalizedPath === '/enterprise') return 'Enterprise Page'
-  if (normalizedPath === '/enterprise-cloud') return 'Enterprise Cloud Form Page'
-  if (normalizedPath === '/enterprise-self-hosted') return 'Enterprise Self Hosted Form Page'
+  if (normalizedPath === '/contact-us') return 'Contact Us Page'
 
   // Default for any other page
   return 'Other'

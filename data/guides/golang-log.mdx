@@ -1,11 +1,19 @@
 ---
-title: Complete Guide to Logging in Go - Golang Log
-slug: golang-log
-date: 2024-07-02
+title: "Go Logging: Standard Library, slog, Logrus, Zap, and Best Practices"
+meta_title: "Go Logging: Standard Library, slog, Logrus & Zap"
+published_date: 2024-07-03
+updated_date: 2026-06-18
 tags: [logging]
 authors: [eromosele]
-description: This guide explores the critical role of logging in GoLang application development. It introduces the basics of effective logging practices and dives into the `log` package from the standard library, covering usage and customization. Popular third-party logging libraries like Logrus, Zap, and Zerolog are detailed for their features and setup. Additionally, it provides instructions on integrating SigNoz for log management.
+description: "Learn Go logging with the standard log package, slog, Logrus, Zap, Zerolog, best practices, and monitoring with SigNoz."
 keywords: [log, logging, golang, zap, zerolog, logrus, logxi, klog, seelog, log15, glog]
+related_articles:
+  - '/guides/zerolog-golang'
+  - '/guides/golang-logrus'
+  - '/guides/golang-slog'
+  - '/guides/zap-logger'
+  - '/blog/golang-monitoring'
+  - '/opentelemetry/go'
 ---
 
 
@@ -13,7 +21,7 @@ Logging is crucial for detecting bugs early, tracing issues efficiently, and mit
 
 This article will teach us how to use Golang to generate logs effectively, including setting up loggers, formatting log messages, and managing log levels. By mastering these techniques, you can ensure robust and reliable logging in your applications.
 
-## Basics of Logging in GoLang
+## Basics of Logging in Go
 
 Logging is the practice of recording or storing information and messages that provide insights into the behavior and execution of a program.
 
@@ -25,12 +33,12 @@ Logging and monitoring are crucial for several reasons, including:
 - Enhanced User Experience: Improved reliability and satisfaction for customers.
 - Stronger Security Measures: Better detection and response to security threats.
 
-## Prerequisites
+## Prerequisites for Go Logging
 
 - Go Installation: Ensure that Go is installed on your system. You can download and install it from the official <a href="https://golang.org/" rel="noopener noreferrer nofollow" target="_blank">Go website</a>.
 - Text Editor or IDE: Choose a text editor or integrated development environment (IDE) for writing Go code. A popular choice is Visual Studio Code, if you do not have it, you can download it <a href="https://code.visualstudio.com/download" rel="noopener noreferrer nofollow" target="_blank">here</a>.
 
-## Standard Library Logging
+## Standard Library Logging in Go
 
 In Golang, the standard package provided for logging is the `log` package. The `log` package offers a simple and easy-to-use interface for logging messages, errors, and other information.
 
@@ -154,7 +162,7 @@ WARNING: 2024/06/27 12:34:56 main.go:13: This is a warning message.
 ERROR: 2024/06/27 12:34:56 main.go:14: This is an error message.
 ```
 
-## Third-Party Logging Libraries
+## Third-Party Go Logging Libraries
 
 In addition to the standard `log` package provided by Go, several popular third-party logging libraries offerres and flexibility.
 
@@ -169,7 +177,7 @@ Let's discuss some popular logging libraries in GoLang:
 
 ### logrus
 
-`logrus` is a structured logging library for Go (Golang) that offers extensive features and flexibility. It is widely used for its ability to handle structured log data efficiently and its customizable logging levels.
+[`logrus`](https://signoz.io/guides/golang-logrus/) is a structured logging library for Go (Golang) that offers extensive features and flexibility. It is widely used for its ability to handle structured log data efficiently and its customizable logging levels.
 
 Installation and Setup
 
@@ -283,7 +291,7 @@ Output:
 
 ### Zap
 
-`Zap` is a high-performance, structured logging library for Go. It is designed for speed and efficiency, making it ideal for performance-critical applications.
+[`Zap`](https://signoz.io/guides/zap-logger/) is a high-performance, structured logging library for Go. It is designed for speed and efficiency, making it ideal for performance-critical applications.
 
 Installation and Setup
 
@@ -451,12 +459,12 @@ func main() {
 Output:
 
 ```json
-{"level":"info","ts":"2024-06-27T12:00:00Z","caller":"main/main.go:29","msg":"This is a log message with custom configuration"
+{"level":"info","ts":"2024-06-27T12:00:00Z","caller":"main/main.go:29","msg":"This is a log message with custom configuration"}
 ```
 
 ### Zerolog
 
-`Zerolog` is a fast and efficient structured logging library for Go, distinguished by its ability to perform pretty logging in addition to its high performance and low memory overhead.
+[`Zerolog`](https://signoz.io/guides/zerolog-golang/) is a fast and efficient structured logging library for Go, distinguished by its ability to perform pretty logging in addition to its high performance and low memory overhead.
 
 Installation and Setup
 
@@ -1095,7 +1103,7 @@ Output:
 12:05:40.560013 WRN example This is a warning message in:
 ```
 
-## Guidelines for Effective Logging in GoLang
+## Go Logging Best Practices
 
 1. Categorize Logs According to Their Respective Levels
 
@@ -1107,7 +1115,7 @@ Output:
    - ERROR: logs errors that are recoverable and allow the application to continue running.
    - FATAL: logs critical errors that cause the application to terminate.
 
-2. Structured Logging: Use structured formats like JSON for logs to enhance searchability and parsing.
+2. [Structured Logging](https://signoz.io/blog/structured-logs/): Use structured formats like JSON for logs to enhance searchability and parsing.
 3. Consistent Log Formatting: Maintain uniform log formats across applications for clarity and automated processing.
 4. Log Rotation and Retention: Implement log rotation to efficiently manage log file sizes, prevent disk space overload, and establish retention policies specifying the duration logs are stored before archiving or deletion.
 5. Sensitive Data Handling: Avoid logging sensitive information like passwords or credit card numbers to mitigate security risks and if necessary, ensure it is masked or obfuscated.
@@ -1115,7 +1123,7 @@ Output:
 7. Centralized Logging: Aggregate logs from various sources into a [centralized logging system](https://signoz.io/blog/centralized-logging/) (e.g., ELK Stack, Splunk) for easier management and analysis.
 8. Log Enrichment: Enrich logs with additional context such as user details, transaction IDs, or session information to facilitate troubleshooting and analysis.
 
-## Monitoring Logs with an Observability Tool
+## Monitoring Go Logs with an Observability Tool
 
 In this article, we have learned about different logging packages and implemented logs using the `log` package in Golang. However, simply logging events is not enough to ensure the health and performance of your application. Monitoring these logs is essential for gaining real-time insights, promptly detecting issues, and maintaining the overall stability of your system.
 
@@ -1139,7 +1147,7 @@ Here are the key reasons why monitoring logs is crucial:
    - Automated Notifications: Observability tools can automatically generate alerts based on log data, enabling faster response times and reducing the need for manual monitoring.
    - Anomaly Detection: Advanced log monitoring tools can use machine learning to detect anomalies in log data, helping to identify potential issues before they escalate.
 
-## Sending GoLang Logs to Signoz
+## Sending Go Logs to SigNoz
 
 SigNoz is an open-source observability platform designed to help developers monitor and troubleshoot applications in real-time. It provides a unified interface for capturing and analyzing [distributed traces](https://signoz.io/blog/distributed-tracing/), metrics, and logs, leveraging [OpenTelemetry](https://signoz.io/opentelemetry/) as its primary data collection framework. By utilizing OpenTelemetry, SigNoz ensures compatibility with various application environments and supports a wide range of instrumentation libraries.
 
@@ -1324,7 +1332,7 @@ After running the above application and making the correct configurations, you c
 
 Signoz log output of Go application
 
-## Conclusion
+## Go Logging: Key Takeaways
 
 - Throughout this guide, we've delved into the foundational importance of logging in GoLang application development, emphasizing its role in diagnosing issues, ensuring system stability, and enhancing security.
 - We've explored the benefits of effective logging, including its ability to provide real-time insights into application behavior, facilitate performance monitoring, and support compliance efforts.

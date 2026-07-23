@@ -9,14 +9,15 @@ import type { AlgoliaHit, SuggestedDoc } from './types'
 export const hasAlgoliaConfig = (): boolean => {
   return Boolean(
     process.env.NEXT_PUBLIC_ALGOLIA_APP_ID &&
-      process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY &&
-      process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
+    (process.env.ALGOLIA_SEARCH_API_KEY || process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY) &&
+    process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
   )
 }
 
 const getAlgoliaConfig = (): { appId: string; apiKey: string; indexName: string } | null => {
   const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
-  const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
+  const apiKey =
+    process.env.ALGOLIA_SEARCH_API_KEY || process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
   const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
 
   if (!appId || !apiKey || !indexName) {
@@ -40,10 +41,11 @@ const getTitleFromHit = (hit: AlgoliaHit): string | null => {
 const toDocsHref = (url: string): string | null => {
   try {
     const parsed = new URL(url, 'https://signoz.io')
-    if (!parsed.pathname.startsWith('/docs/')) {
+    const pathname = decodeURIComponent(parsed.pathname)
+    if (!pathname.startsWith('/docs/')) {
       return null
     }
-    return `${parsed.pathname}${parsed.hash}`
+    return `${pathname}${parsed.hash}`
   } catch {
     return null
   }
@@ -117,7 +119,9 @@ export const getNotFoundSuggestions = async (
 
     const reranked = rerankSuggestions(dedupeByHref(fromAlgolia), tokens)
     return dedupeByHref([...reranked, ...QUICK_LINK_FALLBACK]).slice(0, count)
-  } catch {
+  } catch (e) {
+    console.error(`Failed to send request to Algolia: `, e)
+
     return QUICK_LINK_FALLBACK.slice(0, count)
   }
 }

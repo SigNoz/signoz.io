@@ -1,0 +1,129 @@
+---
+date: 2026-06-29
+title: "Noz: SigNoz's AI Teammate for Observability"
+meta_title: Noz - SigNoz's In-Product AI Teammate & Assistant
+description: Noz is SigNoz's built-in AI teammate. Ask about your traces, logs, and metrics in plain English to get answers grounded in your telemetry, and let Noz create dashboards, alerts, and views for you.
+doc_type: explanation
+tags: [SigNoz Cloud]
+---
+
+Noz is SigNoz's AI teammate, built into the SigNoz UI. Ask about your traces, logs, metrics, dashboards, alerts, and infrastructure in plain English, and Noz investigates across your telemetry and replies with answers grounded in your real data. It works through a problem step by step, points to the likely root cause, and suggests a next action, without you writing queries or leaving SigNoz. Noz can also take that next step for you, like creating a dashboard, setting up an alert, or saving a view.
+
+## Open Noz
+
+Click **Noz** in the top-right of the SigNoz header from any page. Noz opens as a side panel next to your current view, so you can keep your dashboard, trace, or logs list in context while you ask.
+
+<Figure src="/img/docs/noz/noz-side-panel.webp" alt="Noz AI teammate open as a side panel beside the SigNoz Logs Explorer, showing starter prompts for a new conversation" caption="Noz opens beside your current view (here, next to the Logs Explorer) and starts a new conversation with suggested prompts." />
+
+The panel header gives you a few controls:
+
+- **Recent conversations**: jump back into an earlier conversation.
+- **New conversation**: start a fresh thread.
+- **Expand**: open Noz full screen, with a searchable conversation list on the left and more room to read long answers.
+- **Close**: dismiss the panel.
+
+## Ask your first question
+
+A new conversation opens with starter prompts so you don't have to think of one. These are customized to your SigNoz instance, so they reference the services, alerts, and infrastructure you're actually running. Click any of them to run it instantly:
+
+- *Show me the top errors in the last hour*
+- *What services have the highest latency?*
+- *Give me an overview of system health*
+- *Create a dashboard for my checkout service*
+- *Set up an alert when error rate goes above 5%*
+
+Or type your own question in the **Ask anything** box (use `Shift+Enter` for a new line) or use voice input, then send it. Noz investigates and responds.
+
+<Figure src="/img/docs/noz/noz-starter-prompts.webp" alt="Noz full-screen view with a conversations list on the left and a new-conversation screen showing starter prompts such as what's firing now, errors after the last deploy, restarting pods, and hot hosts, with the Ask anything box, Add Context, and voice input below" caption="A new Noz conversation suggests starter prompts; ask your own in the box below or use voice input." width={2000} height={1179} className="mx-auto block w-full h-auto" />
+
+<Admonition type="tip">
+You don't need to know query syntax, exact service names, or metric names. Ask the way you'd ask a teammate, for example *"why is checkout slow this afternoon?"*. The more specific you are about the symptom, service, or time window, the more targeted Noz's answer is.
+</Admonition>
+
+## Add context
+
+Use **Add Context** below the input to point Noz at a specific entity before you ask. You can attach:
+
+- **Dashboards**: ask Noz to explain or diagnose a specific dashboard.
+- **Alerts**: ask why an alert is firing, or whether it is noisy.
+- **Services**: focus the investigation on a single service.
+
+Adding context narrows Noz's scope so its answer covers only the dashboard, alert, or service you care about.
+
+<Figure src="/img/docs/noz/noz-add-context.webp" alt="Noz Add Context picker open with Dashboards, Alerts, and Services tabs, letting you attach a specific entity to scope the investigation" caption="The Add Context picker, where you attach a dashboard, alert, or service before you ask." />
+
+## Understand and act on an answer
+
+Noz doesn't just give you a conclusion. It shows the steps it took to get there and usually offers one-click follow-ups, so you can trust what you're seeing and keep moving without breaking flow. Expand the section below to see how Noz works through a problem and what it lets you do next.
+
+<details>
+<ToggleHeading>
+## How Noz investigates
+</ToggleHeading>
+
+Noz works as an agent: it runs multiple steps against your data, then reasons over the results. On answers that required investigation, expand **Worked through N steps** to see the trace. For example: *think → decide what to query → run builder queries across traces, logs, and metrics → pull representative traces or logs → reason to a conclusion*.
+
+Because every step runs against your live telemetry, Noz tailors each answer to your environment.
+
+### Example: investigating what changed after a deploy
+
+> **You:** Errors on the checkout service jumped after the latest deploy. What changed?
+
+Noz traces a failing request end to end, identifies which dependency is returning errors, and checks whether the failures line up with the new release, then reports back something like:
+
+> Checkout's `POST /checkout` is returning **502s**, and they're sustained across the window, all on `v2.0.0`. The trigger is downstream, not checkout itself:
+>
+> - **The failure is in one dependency.** The outbound `external_api_call` to `external-svc` gets an HTTP 500 from `https://httpbin.org/status/500`; `POST /checkout` then surfaces it to the caller as a 502.
+> - **Checkout isn't broken.** It's faithfully propagating a downstream 500 as a 502.
+> - **The errors are concentrated in `external-svc`.** The other three dependencies in the checkout path are clean.
+>
+> Worth confirming whether the `v2.0.0` release pointed checkout at that `external-svc` endpoint (or changed how its 500s are handled), since that's the only failing leg.
+
+It then points to the likely cause and offers **Suggested Actions** (here, *Check external-svc*, *Alert on 5xx*, and *Confirm regression*) to keep investigating.
+
+<Figure src="/img/docs/noz/noz-agentic-answer.webp" alt="Noz answer ending in a Suggested Actions panel with Check external-svc, Alert on 5xx, and Confirm regression buttons, plus copy, feedback, and regenerate controls" caption="Noz traces the failing checkout request to a downstream dependency, ties the spike to the new release, and ends with Suggested Actions." width={920} height={904} className="mx-auto block w-full max-w-[480px] h-auto" />
+
+### Suggested actions and follow-ups
+
+After most answers, Noz shows **Suggested Actions**, one-click follow-ups tailored to the result (for example, *Pull failing traces*, *Compare to the previous deploy*, or *Adjust the alert threshold*). They save you from typing the obvious next question and keep the investigation moving. When a suggested fix would change your configuration, Noz asks for confirmation first ("Want me to do that?"), so you stay in control of any change.
+
+</details>
+
+## Manage your conversations
+
+Every conversation is saved, so an investigation you started this morning is still there when you come back to it.
+
+- **Pick up where you left off.** Open **Recent conversations** in the panel header to reopen a thread, or hit **Expand** for the full-screen view, where conversations are grouped by recency (**Today**, **Last 30 days**) with an **Archived** section.
+- **Find a past investigation.** Use **Search** in the full-screen view to pull up an old conversation by what you asked.
+- **Keep your list focused.** Start a **new conversation** for an unrelated question so each thread stays on one topic, and **archive** the ones you're done with.
+
+On any answer you can **copy** it to drop into a ticket or share with your team, **regenerate** it for another pass, and use **thumbs up / thumbs down** to flag when an answer was helpful or off. Your feedback trains Noz to give better answers over time.
+
+## Noz vs. the SigNoz MCP Server
+
+Noz and the [SigNoz MCP Server](https://signoz.io/docs/ai/signoz-mcp-server/) are two ways to bring AI to your observability data:
+
+- **Noz** is the AI teammate inside the SigNoz UI. Reach for it when you are already in SigNoz and want to explore data, understand a dashboard, or triage an incident without writing queries. It can also build a dashboard, alert, or view for you on the spot.
+- **The SigNoz MCP Server** connects external coding agents (Claude Code, Cursor, and others) to SigNoz, so you can query telemetry and create dashboards, alerts, and views from your IDE or terminal, right alongside your code.
+
+Both are grounded in the same unified telemetry. Use whichever fits where you are working.
+
+## Next steps
+
+<DocCardContainer>
+
+<DocCard
+    title="AI Use Cases"
+    description="Real-world workflows you can run with Noz and the SigNoz MCP Server."
+    href="https://signoz.io/docs/ai/use-cases/"
+/>
+
+<DocCard
+    title="SigNoz MCP Server"
+    description="Connect Claude, Cursor, and other coding agents to your SigNoz data."
+    href="https://signoz.io/docs/ai/signoz-mcp-server/"
+/>
+
+</DocCardContainer>
+
+<GetHelp />

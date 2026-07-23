@@ -8,13 +8,20 @@ const SKIP_IF_ONLY_CHANGES_IN = [
   'data/opentelemetry',
   'data/case-study',
   'data/faqs',
+  'data/guides',
+  'data/blog',
+  'data/docs',
+  'data/docs-side-nav',
   'data-assets',
+  '.agents',
+  '.claude',
   '.github',
   '.husky',
   '.vscode',
   'tests',
   'reports',
   'faq',
+  'contributing',
   'scripts/vercel-ignore-build.mjs',
   'scripts/sync-content-to-strapi.js',
   'scripts/update-pr-comment.js',
@@ -39,9 +46,7 @@ const {
 const isLocal = process.argv.includes('--local')
 
 function isInRestrictedPath(file) {
-  return SKIP_IF_ONLY_CHANGES_IN.some(
-    (prefix) => file === prefix || file.startsWith(prefix + '/')
-  )
+  return SKIP_IF_ONLY_CHANGES_IN.some((prefix) => file === prefix || file.startsWith(prefix + '/'))
 }
 
 function gitDiff(args) {
@@ -128,7 +133,9 @@ async function main() {
 
   if (changed.length === 0) {
     if (VERCEL_ENV === 'preview' && PR_ID) {
-      console.log('Warning: Could not determine changed files (empty diff). Proceeding with build to be safe.')
+      console.log(
+        'Warning: Could not determine changed files (empty diff). Proceeding with build to be safe.'
+      )
       process.exit(1)
     }
     console.log('Skip: No changed files detected. Skipping build.')

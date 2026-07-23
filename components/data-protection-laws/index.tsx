@@ -1,7 +1,7 @@
 import React from 'react'
 import Image from 'next/image'
 import { ArrowRight, BookOpen } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import featureGraphicDataProtection from '@/public/img/graphics/homepage/feature-graphic-data-protection.svg?url'
 
@@ -49,6 +49,7 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
                 clickLocation="Data Protection Section"
               >
                 <Button
+                  variant="legacyPrimary"
                   className="flex-center text-xs sm:text-sm"
                   id="btn-use-signoz-cloud-homepage"
                 >
@@ -64,7 +65,7 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
                 clickLocation="Data Protection Section"
               >
                 <Button
-                  type={Button.TYPES.SECONDARY}
+                  variant="legacySecondary"
                   className="flex-center text-xs sm:text-sm"
                   id="btn-self-host-signoz-homepage"
                 >
@@ -81,7 +82,7 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
                 clickLocation="Data Protection Section"
               >
                 <Button
-                  type={Button.TYPES.SECONDARY}
+                  variant="legacySecondary"
                   className="flex-center text-xs sm:text-sm"
                   id="btn-on-prem-signoz-homepage"
                 >

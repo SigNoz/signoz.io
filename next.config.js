@@ -1,5 +1,21 @@
-const { withContentlayer } = require('next-contentlayer2')
 const { getAllowedImageDomains } = require('./constants/allowedImageDomains')
+
+/**
+ * Generate /docs-onboarding/* versions of all /docs/* redirects.
+ * This ensures redirect rules apply consistently in the onboarding context.
+ */
+function withDocsOnboardingRedirects(redirects) {
+  const docsOnboardingRedirects = redirects
+    .filter((r) => r.source.startsWith('/docs/'))
+    .map((r) => ({
+      ...r,
+      source: r.source.replace(/^\/docs\//, '/docs-onboarding/'),
+      destination: r.destination.startsWith('/docs/')
+        ? r.destination.replace(/^\/docs\//, '/docs-onboarding/')
+        : r.destination,
+    }))
+  return [...redirects, ...docsOnboardingRedirects]
+}
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
@@ -11,13 +27,13 @@ const defaultFrameAncestors =
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev https://*.clarity.ms https://snap.licdn.com;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
   connect-src * https://api.reo.dev https://www.clarity.ms https://*.clarity.ms;
   font-src * 'self';
-  frame-src * giscus.app youtube.com;
+  frame-src * giscus.app youtube.com https://app.getdecimal.ai;
   worker-src 'self' blob:;
   frame-ancestors ${process.env.CSP_FRAME_ANCESTORS || defaultFrameAncestors};
 `
@@ -64,16 +80,30 @@ const securityHeaders = [
  * @type {import('next/dist/next-server/server/config').NextConfig}
  **/
 module.exports = () => {
-  const plugins = [withContentlayer, withBundleAnalyzer]
+  const plugins = [withBundleAnalyzer]
   return plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
     productionBrowserSourceMaps: true, // Enable source maps for debugging
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-    eslint: {
-      dirs: ['app', 'components', 'layouts', 'scripts'],
-    },
     trailingSlash: true,
-    swcMinify: true,
+    turbopack: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+          condition: { not: { query: /url/ } },
+        },
+      },
+    },
+    experimental: {
+      useCache: true,
+    },
+    // Turbopack traces path.join(CWD, 'data', <dynamic>) in contentRepository.ts
+    // and generates a broad pattern that also matches 'data-assets/'
+    // Without this exclusion serverless function size increases significantly
+    outputFileTracingExcludes: {
+      '*': ['./data-assets/**'],
+    },
     images: {
       remotePatterns: getAllowedImageDomains().map((domain) => ({
         protocol: 'https',
@@ -88,8 +118,199 @@ module.exports = () => {
         },
       ]
     },
+    async rewrites() {
+      return {
+        beforeFiles: [],
+        afterFiles:
+          process.env.NODE_ENV === 'development'
+            ? [
+                {
+                  // In dev, serve static assets from data-assets/ when not found in public/
+                  source: '/:path(.+\\.(?:avif|gif|ico|jpe?g|png|svg|webp))',
+                  destination: '/api/dev-asset/:path',
+                },
+              ]
+            : [],
+        fallback: [],
+      }
+    },
     async redirects() {
-      return [
+      return withDocsOnboardingRedirects([
+        {
+          source: '/docs/product-features/saved-view',
+          destination: '/docs/metrics-management/metrics-explorer/#saved-views-in-metrics-explorer',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/saved-view/',
+          destination: '/docs/metrics-management/metrics-explorer/#saved-views-in-metrics-explorer',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/query-builder',
+          destination: '/docs/userguide/query-builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/query-builder/',
+          destination: '/docs/userguide/query-builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/invite-team-member',
+          destination: '/docs/manage/administrator-guide/iam/invite-team-member/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/invite-team-member/',
+          destination: '/docs/manage/administrator-guide/iam/invite-team-member/',
+          permanent: true,
+        },
+        {
+          source: '/docs/manage/administrator-guide/iam/permissions',
+          destination: '/docs/manage/administrator-guide/iam/transactions/',
+          permanent: true,
+        },
+        {
+          source: '/docs/manage/administrator-guide/iam/permissions/',
+          destination: '/docs/manage/administrator-guide/iam/transactions/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/keyboard-shortcuts',
+          destination: '/docs/manage/keyboard-shortcuts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/keyboard-shortcuts/',
+          destination: '/docs/manage/keyboard-shortcuts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/trace-explorer',
+          destination: '/docs/userguide/traces/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/trace-explorer/',
+          destination: '/docs/userguide/traces/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/alert-management',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/alert-management/',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/clickhouse-faqs/',
+          destination: '/docs/userguide/query-troubleshooting-faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/clickhouse-faqs',
+          destination: '/docs/userguide/query-troubleshooting-faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/querying/querying-data/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/querying/querying-data',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/query-builder/',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/query-builder',
+          destination: '/docs/userguide/query-builder-v5/',
+          permanent: true,
+        },
+        {
+          source: '/enterprise-self-hosted/',
+          destination: '/contact-us/?source=redirect-enterprise-self-hosted',
+          permanent: true,
+        },
+        {
+          source: '/enterprise-cloud/',
+          destination: '/contact-us/?source=redirect-enterprise-cloud',
+          permanent: true,
+        },
+        {
+          source: '/oss-to-cloud/',
+          destination: '/teams/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/long-term-storage',
+          destination: '/docs/faqs/general/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/long-term-storage/',
+          destination: '/docs/faqs/general/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/apm-metrics',
+          destination: '/docs/userguide/custom-apm-dashboards-alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/apm-metrics/',
+          destination: '/docs/userguide/custom-apm-dashboards-alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/application-monitoring/api-monitoring',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/application-monitoring/api-monitoring/',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/entry-point-spans-service-overview',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/traces-management/guides/entry-point-spans-service-overview/',
+          destination: '/docs/apm-and-distributed-tracing/application-details/',
+          permanent: true,
+        },
+        {
+          source: '/docs/apm-and-distributed-tracing/trace-anomalies',
+          destination: '/docs/traces-management/troubleshooting/faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/apm-and-distributed-tracing/trace-anomalies/',
+          destination: '/docs/traces-management/troubleshooting/faqs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/alerts-management/overview',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/alerts-management/overview/',
+          destination: '/docs/alerts/',
+          permanent: true,
+        },
         {
           source: '/docs/operate/migration/upgrade-0.113/',
           destination: '/docs/operate/migration/upgrade-0-113/',
@@ -420,6 +641,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/logs-pipelines/concepts/',
+          destination: '/docs/logs-pipelines/introduction/',
+          permanent: true,
+        },
+        {
           source: '/docs/logs-pipelines/guides/severity/',
           destination: '/docs/logs-pipelines/guides/severity-parsing/',
           permanent: true,
@@ -450,6 +676,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/tutorial/s3-integration-iam-role-eks/',
+          destination: '/docs/faqs/general/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/oci-bucket-cold-storage-integration/',
+          destination: '/docs/faqs/general/',
+          permanent: true,
+        },
+        {
           source: '/docs/tutorial/jvm-metrics/',
           destination:
             '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics',
@@ -465,6 +701,11 @@ module.exports = () => {
           source: '/docs/metrics-management/send-metrics/runtimes/java-metrics/jmx-metrics/',
           destination:
             '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/working-with-metrics-guides/',
+          destination: '/docs/metrics-management/metrics-explorer/',
           permanent: true,
         },
         {
@@ -533,6 +774,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/manage-panels/',
+          destination: '/docs/userguide/manage-dashboards/',
+          permanent: true,
+        },
+        {
           source: '/docs/userguide/overview/',
           destination: '/docs/what-is-signoz/',
           permanent: true,
@@ -573,6 +819,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/comparisons/opentelemetry-collector-vs-agent/',
+          destination: '/blog/opentelemetry-collector-complete-guide/',
+          permanent: true,
+        },
+        {
           source: '/blog/tags/',
           destination: '/tags/',
           permanent: true,
@@ -595,6 +846,11 @@ module.exports = () => {
         {
           source: '/blog/introduction-to-opentelemetry-metrics/',
           destination: '/blog/opentelemetry-metrics-with-examples/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-ui/',
+          destination: '/blog/opentelemetry-visualization/',
           permanent: true,
         },
         {
@@ -635,7 +891,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3uf4h5hpi-qnBT5dBELJIxWFHjRB28Sw',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-44dhfywli-MO0PhJOea9XObIfn9TfeUw',
           basePath: false,
           permanent: true,
         },
@@ -662,7 +918,7 @@ module.exports = () => {
         },
         {
           source: '/docs/deployment/troubleshooting/',
-          destination: '/docs/install/troubleshooting',
+          destination: '/docs/setup/docker/troubleshooting/faq',
           permanent: true,
         },
         {
@@ -774,6 +1030,11 @@ module.exports = () => {
         {
           source: '/monitoring-openclaw-with-opentelemetry/',
           destination: '/blog/monitoring-openclaw-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/openclaw-monitoring/',
+          destination: '/docs/openclaw-observability/',
           permanent: true,
         },
         // Keep /opentelemetry/ as the canonical hub landing instead of redirecting to the Resource Center.
@@ -1300,6 +1561,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/logs-query-troubleshooting/',
+          destination: '/docs/logs-management/troubleshooting/troubleshooting/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/logs-json-filters/',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
           source: '/docs/troubleshooting/signoz-cloud/traces-troubleshooting/',
           destination: '/docs/traces-management/troubleshooting/troubleshooting/',
           permanent: true,
@@ -1321,7 +1592,7 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/query-handles-missing-values/',
-          destination: '/docs/userguide/query-builder/',
+          destination: '/docs/userguide/query-builder-v5/',
           permanent: true,
         },
         {
@@ -1621,11 +1892,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/install/troubleshooting/',
-          destination: '/docs/setup/docker/troubleshooting/faq',
-          permanent: true,
-        },
-        {
           source: '/docs/userguide/send-metrics-cloud/',
           destination: '/docs/metrics-management/send-metrics/',
           permanent: true,
@@ -1643,6 +1909,16 @@ module.exports = () => {
         {
           source: '/docs/integrations/aws/integration-template/',
           destination: '/docs/integrations/aws/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/flyio/',
+          destination: '/docs/integrations/outposts/flyio/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/render-metrics/',
+          destination: '/docs/integrations/outposts/render/',
           permanent: true,
         },
         {
@@ -1696,8 +1972,23 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/userguide/logs',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
           source: '/docs/userguide/logs/',
-          destination: '/docs/logs-management/overview/',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/logs-explorer',
+          destination: '/docs/userguide/logs_query_builder/',
+          permanent: true,
+        },
+        {
+          source: '/docs/product-features/logs-explorer/',
+          destination: '/docs/userguide/logs_query_builder/',
           permanent: true,
         },
         {
@@ -1862,11 +2153,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/userguide/trac',
-          destination: '/docs/userguide/traces/',
-          permanent: true,
-        },
-        {
           source: '/firebase-alternatives',
           destination: '/comparisons/firebase-alternatives/',
           permanent: true,
@@ -1923,6 +2209,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/metrics-management/data-storage/',
+          destination: '/docs/metrics-management/reference/',
+          permanent: true,
+        },
+        {
           source: '/docs/traces/',
           destination: '/docs/instrumentation/overview/',
           permanent: true,
@@ -1964,7 +2255,12 @@ module.exports = () => {
         },
         {
           source: '/docs/configuration/deep_storage',
-          destination: '/docs/logs-management/long-term-storage/',
+          destination: '/docs/faqs/general/',
+          permanent: true,
+        },
+        {
+          source: '/docs/logs-management/long-term-storage/',
+          destination: '/docs/faqs/general/',
           permanent: true,
         },
         {
@@ -2591,6 +2887,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/opentelemetry-collector-processors/',
+          destination: '/blog/opentelemetry-processors/',
+          permanent: true,
+        },
+        {
           source: '/alerts',
           destination: '/alerts-management/',
           permanent: true,
@@ -2643,6 +2944,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/trace-funnels/working-with-trace-funnels/',
+          destination: '/docs/trace-funnels/setup/',
+          permanent: true,
+        },
+        {
           source: '/docs/troubleshooting/',
           destination: '/docs/faqs/general/',
           permanent: true,
@@ -2667,7 +2973,27 @@ module.exports = () => {
           destination: '/docs/instrumentation/opentelemetry-deno/',
           permanent: true,
         },
-      ]
+        {
+          source: '/docs/cost-meter/query-setup-guides/',
+          destination: '/docs/cost-meter/meter-explorer-query-guide/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/query-setup-guides',
+          destination: '/docs/cost-meter/meter-explorer-query-guide/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/alert-setup-guides/',
+          destination: '/docs/cost-meter/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/cost-meter/alert-setup-guides',
+          destination: '/docs/cost-meter/alerts/',
+          permanent: true,
+        },
+      ])
     },
     webpack: (config, options) => {
       // Find Next.js's existing rule that handles SVG imports
@@ -2692,18 +3018,18 @@ module.exports = () => {
       // Exclude *.svg from the original rule since we handle it above
       fileLoaderRule.exclude = /\.svg$/i
 
-      // this is to avoid caching for webpack
-      // reference https://nextjs.org/docs/app/building-your-application/optimizing/memory-usage#disable-webpack-cache
-      if (config.cache && !options.dev) {
-        config.cache = Object.freeze({
-          type: 'memory',
-        })
-      }
-
-      // Ensure source maps are generated in production (server & client)
-      if (!options.dev) {
-        config.devtool = 'source-map'
-      }
+      // @stoplight/elements-core uses ReactDOM.render which was removed
+      // in React 19. No fix upstream — https://github.com/stoplightio/elements/issues/2793
+      // javascript/auto downgrades the missing export from a hard error to a warning.
+      // Remove this when stoplight ships React 19 support or we change to a different component library.
+      config.module.rules.push({
+        test: /\.mjs$/,
+        include: /node_modules[\\/]@stoplight/,
+        type: 'javascript/auto',
+        resolve: {
+          fullySpecified: false,
+        },
+      })
 
       return config
     },

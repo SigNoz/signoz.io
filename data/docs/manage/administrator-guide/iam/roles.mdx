@@ -1,0 +1,142 @@
+---
+date: 2026-06-26
+title: Roles
+description: Create and manage roles in SigNoz — managed roles, custom roles, and configuring transactions with the interactive or JSON editor.
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+doc_type: howto
+---
+
+<Admonition type="warning">
+Fine-grained access control is currently in beta.
+</Admonition>
+
+## Overview
+
+Roles are the core unit of access control in SigNoz. A role groups transactions together — when a principal is assigned a role, they receive all the transactions that role contains.
+
+## Prerequisites
+
+- An active SigNoz license
+- A role with the required transactions. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/transactions/) for the detailed transactions required for each role action.
+
+<Admonition type="info">
+Role assignments to users can currently only be managed by principals with the signoz-admin role. Fine-grained access control for the user resource is not yet available.
+</Admonition>
+
+## Managed Roles
+
+SigNoz includes four built-in managed roles:
+
+- **SigNoz-Admin** — Full administrative access to all SigNoz resources.
+- **SigNoz-Editor** — Can create and modify observability resources such as dashboards, alerts, and pipelines. Cannot manage users, roles, or service accounts.
+- **SigNoz-Viewer** — Read-only access to observability data and resources.
+- **SigNoz-Anonymous** — Access to public resources only, such as publicly shared dashboards. Assigned automatically.
+
+<Admonition type="warning">
+Managed roles cannot be edited or deleted. Opening a managed role shows its transactions in read-only mode.
+</Admonition>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/iam/roles-listing.webp" alt="Settings > Roles page showing managed and custom roles"/>
+    <figcaption><i>Roles listing page in Settings — managed and custom roles</i></figcaption>
+</figure>
+
+## Create a Custom Role
+
+1. Navigate to **Settings > Roles**.
+2. Click **Custom role**. This opens the create role page.
+3. Enter a **Name** and an optional **Description**. Names must use only lowercase letters and hyphens, and can be up to 50 characters long (for example, `service-owner` or `platform-readonly`).
+4. Configure the role's transactions in the **Transaction Groups** section (see [Configure Transactions](#configure-transactions) below).
+5. Click **Create role**.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/iam/create-role.webp" alt="Create role page showing Name, Description, and the Transaction Groups editor in Interactive mode"/>
+    <figcaption><i>Create a custom role and configure its Transaction Groups</i></figcaption>
+</figure>
+
+<Admonition type="info">
+Role names cannot be changed after creation. Choose a descriptive name that reflects the role's purpose.
+</Admonition>
+
+## Configure Transactions
+
+A role's access is defined by its **Transaction Groups** — the set of relations the role grants on each resource. You can configure them in two modes using the toggle at the top of the Transaction Groups section: **Interactive** and **JSON**. Switching between modes preserves your configuration (as long as the JSON is valid).
+
+### Interactive mode
+
+Interactive mode presents one card per resource (**Roles**, **Service Accounts**, **API Keys**). Use **Expand all** / **Collapse all** to open every card at once. Within a card, set the scope for each action (relation):
+
+- **All** — Grants the transaction on every instance of that resource type.
+- **Only selected** — Grants the transaction only on specific instances. Enter the selector for each instance (for example, a role name or a service account ID) and press **Add**. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/transactions/) for the selector format used by each resource.
+- **None** — Does not grant the transaction on any instance of that resource type.
+
+### JSON mode
+
+Switch to **JSON** mode to edit the role's transactions directly. This is useful for bulk edits, copying a configuration between roles, or fine-grained selector setups. The editor validates against the transaction-group schema and shows inline parse and schema errors; use the copy button to copy the current JSON.
+
+Each entry is a transaction group with an `objectGroup` (the resource and its selectors) and a `relation`. A selector of `["*"]` grants the relation on all instances; list specific IDs or names to scope it.
+
+```json
+[
+  {
+    "objectGroup": {
+      "resource": { "kind": "role", "type": "role" },
+      "selectors": ["*"]
+    },
+    "relation": "read"
+  },
+  {
+    "objectGroup": {
+      "resource": { "kind": "serviceaccount", "type": "serviceaccount" },
+      "selectors": ["my-service-account-id"]
+    },
+    "relation": "read"
+  }
+]
+```
+
+<Admonition type="info">
+If the JSON contains errors, switching back to Interactive mode prompts you to discard the invalid changes. Fix the errors first to keep your edits.
+</Admonition>
+
+## View a Role
+
+Click any role in the listing to open its view page. The page shows the role's description, created and last modified timestamps, and its **Transaction Groups**. Use the **List** / **JSON** toggle to switch between the card preview and a read-only JSON view of the same configuration.
+
+- For **custom roles**, the **Update** and **Delete** actions are available (subject to your own transactions).
+- For **managed roles**, the transactions are read-only — **Update** is disabled.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/iam/view-role.webp" alt="View role page showing description, timestamps, and Transaction Groups in List mode"/>
+    <figcaption><i>View role page — Transaction Groups preview</i></figcaption>
+</figure>
+
+## Edit a Custom Role
+
+1. Open the role's view page.
+2. Click **Update**.
+3. Edit the **Description** and adjust the **Transaction Groups** in Interactive or JSON mode. The role name cannot be changed.
+4. Click **Save changes**.
+
+Unsaved edits are flagged with an **Unsaved changes** indicator. Navigating away with unsaved changes prompts you to discard or keep editing.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/iam/edit-role.webp" alt="Edit role page with an editable description and Transaction Groups, and a Save changes button"/>
+    <figcaption><i>Edit a custom role — the name is fixed; the description and Transaction Groups are editable</i></figcaption>
+</figure>
+
+## Delete a Custom Role
+
+1. Open the role's view page.
+2. Click **Delete**.
+3. In the confirmation dialog, click **Delete Role**.
+
+<Admonition type="warning">
+A role can only be deleted if no principals are assigned to it and it is not used in any SSO group mapping. Remove all assignees and any SSO group mappings that reference the role before deleting. Deleting a role cannot be undone.
+</Admonition>
+
+## Next Steps
+
+- [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) — Set up programmatic API access
+- [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/transactions/) — Look up transactions for each resource
+- [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/) — Understand how access control works

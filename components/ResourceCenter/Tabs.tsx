@@ -30,24 +30,24 @@ function TabLink({
 
 export default function Tabs({ activeTab }: { activeTab: string }) {
   return (
-    <header className="header-bg mx-auto box-border h-[56px] w-full border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8">
-      <div className="container h-fit overflow-x-auto">
+    <header className="header-bg mx-auto box-border h-[56px] w-full border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
+      <div className="mx-auto h-fit max-w-8xl overflow-x-auto md:px-8">
         <ul
           className="mb-0 flex h-[55px] gap-3 pl-0 text-center text-sm font-medium text-signoz_vanilla-400 sm:gap-6"
           id="default-tab"
           data-tabs-toggle="#default-tab-content"
           role="tablist"
         >
-          <TabLink href="/blog" tabId="blog-tab" activeTab={activeTab}>
+          <TabLink href="/blog/" tabId="blog-tab" activeTab={activeTab}>
             Blog
           </TabLink>
-          <TabLink href="/comparisons" tabId="comparisons-tab" activeTab={activeTab}>
+          <TabLink href="/comparisons/" tabId="comparisons-tab" activeTab={activeTab}>
             Comparisons
           </TabLink>
-          <TabLink href="/guides" tabId="guides-tab" activeTab={activeTab}>
+          <TabLink href="/guides/" tabId="guides-tab" activeTab={activeTab}>
             Guides
           </TabLink>
-          <TabLink href="/opentelemetry" tabId="openTelemetry-tab" activeTab={activeTab}>
+          <TabLink href="/opentelemetry/" tabId="openTelemetry-tab" activeTab={activeTab}>
             OpenTelemetry
           </TabLink>
           <Link

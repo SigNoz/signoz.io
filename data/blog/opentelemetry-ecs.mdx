@@ -1,13 +1,21 @@
 ---
 title: OpenTelemetry ECS Tutorial - Monitor AWS ECS metrics [Step-By-Step Guide]
-slug: opentelemetry-ecs
-date: 2023-12-28
+meta_title: "OpenTelemetry ECS: Monitor AWS ECS Metrics"
+published_date: 2023-12-28
+updated_date: 2026-06-17
 tags: [OpenTelemetry]
 authors: [abhishek-kothari]
-description: A guide to collecting and monitoring AWS ECS metrics with OpenTelemetry. Steps to monitor AWS ECS metrics with OpenTelemetry 1. Setting up OpenTelemetry Collector 2. Configuring OpenTelemetry Collector to collect AWS ECS metrics 3. Send collected metrics to SigNoz...
+description: Monitor AWS ECS metrics with OpenTelemetry. Set up the Collector to gather ECS Container Insights metrics and send them to SigNoz.
 image: /img/blog/2023/12/opentelemetry-ecs-cover.jpeg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,observability,AWS_ECS,metrics]
+related_articles:
+  - '/blog/eks-monitoring-with-opentelemetry'
+  - '/blog/opentelemetry-mysql-metrics-monitoring'
+  - '/blog/mongodb-metrics-monitoring-with-opentelemetry'
+  - '/blog/opentelemetry-apache-server-metrics-monitoring'
+  - '/blog/opentelemetry-kubernetes-cluster-metrics-monitoring'
+  - '/blog/opentelemetry-rabbitmq-metrics-monitoring'
 ---
 OpenTelemetry can be used to monitor ECS clusters. In this tutorial, you will install OpenTelemetry Collector to collect ECS metrics and then send the collected data to SigNoz for monitoring and visualization.
 
@@ -32,7 +40,9 @@ Containerization is a popular deployment mechanism in today’s ever-changing te
 
 ## A brief overview of AWS ECS
 
-AWS ECS is the container orchestration platform proprietory to AWS. It simplifies the provisioning of Docker containers using EC2 or Fargate-based computing. With AWS ECS, you can easily deploy containers, autoscale them as well as load balance them using AWS ELB. Thus, it provides a fully integrated solution for deploying, managing, and scaling containers. Although AWS provides a decent amount of metrics related to the service itself, it still does not provide sufficient insights into the actual container metrics themselves. In this article, we try to get deeper into how to monitor the services and tasks on AWS ECS using an OpenTelemetry Collector.
+AWS ECS is the container orchestration platform proprietory to AWS. It simplifies the provisioning of Docker containers using EC2 or Fargate-based computing. With AWS ECS, you can easily deploy containers, autoscale them as well as load balance them using AWS ELB. Thus, it provides a fully integrated solution for deploying, managing, and scaling containers. Although AWS provides a decent amount of metrics related to the service itself, it still does not provide sufficient insights into the actual container metrics themselves.
+
+In this article, we try to get deeper into monitoring the services and tasks on AWS ECS using an OpenTelemetry Collector. If you wish to first understand the basics, such as which signals matter on ECS and the failure modes to be aware of, check out our [overview of AWS ECS monitoring](https://signoz.io/blog/aws-ecs-monitoring/) blog.
 
 ## What is OpenTelemetry Collector?
 

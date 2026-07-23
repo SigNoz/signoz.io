@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
 import { ArrowUpRight } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 const scrollToSection = (id) => {
@@ -186,7 +186,7 @@ const MonthlyEstimate = () => {
 
   return (
     <section ref={myRef} id="estimate-your-monthly-bill">
-      <div className="section-container !mx-[auto] !w-[80vw] border !border-t-0 border-dashed border-signoz_slate-400">
+      <div className="section-container !mx-auto w-full max-w-8xl border !border-t-0 border-dashed border-signoz_slate-400">
         <div className="flex flex-col gap-2 pt-5">
           <span className="group relative pl-1 text-2xl font-semibold text-signoz_vanilla-100">
             Estimate your monthly bill
@@ -387,14 +387,14 @@ const MonthlyEstimate = () => {
         </div>
         <div className="mt-3 flex justify-end">
           <TrackingLink
-            href="/teams"
+            href="/teams/"
             clickType="Primary CTA"
             clickName="Sign Up Button"
             clickText="Get Started - Free"
             clickLocation="Monthly Estimate Calculator"
             id="pricing-page-get-started-card-cta"
           >
-            <Button className="flex items-center justify-center font-bold">
+            <Button variant="legacyPrimary" className="flex items-center justify-center font-bold">
               Get Started - Free
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -411,9 +411,9 @@ const MonthlyEstimate = () => {
             Reach out to us for custom pricing and retention for high volume
           </span>
           <div className="w-2/5 border-b border-dashed border-signoz_slate-400" />
-          <Button id="btn-contact-us-pricing-monthly-estimate">
+          <Button variant="legacyPrimary" id="btn-contact-us-pricing-monthly-estimate">
             <TrackingLink
-              href={'https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af'}
+              href={'/contact-us/?source=monthly-estimate'}
               clickType="Primary CTA"
               clickName="Volume Discount Form Link"
               clickText="Contact Us"
@@ -443,7 +443,7 @@ const MonthlyEstimate = () => {
             clickLocation="Monthly Estimate Calculator"
             id="pricing-page-startup-program-cta"
           >
-            <Button variant="secondary">Learn More</Button>
+            <Button variant="legacySecondary">Learn More</Button>
           </TrackingLink>
         </div>
       </div>

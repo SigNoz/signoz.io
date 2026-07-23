@@ -1,10 +1,17 @@
 'use client'
 
-import './APIReference.styles.css'
-import { API } from '@stoplight/elements'
-import '@stoplight/elements/styles.min.css'
-import React from 'react'
+import dynamic from 'next/dynamic'
 
-export default function OpenAPISpec() {
-  return <API apiDescriptionUrl="/openAPISpec/api.yaml" router="hash" layout="responsive" />
+// @stoplight/elements@9 touches `window` during render (its mosaic styling layer
+// and react-router-dom v6 internals), which throws under Next 15's SSR pass.
+const OpenAPISpecInner = dynamic(() => import('./OpenAPISpecInner'), {
+  ssr: false,
+})
+
+interface OpenAPISpecProps {
+  specContent: string
+}
+
+export default function OpenAPISpec({ specContent }: OpenAPISpecProps) {
+  return <OpenAPISpecInner specContent={specContent} />
 }

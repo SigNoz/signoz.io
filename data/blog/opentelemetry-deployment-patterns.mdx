@@ -1,14 +1,18 @@
 ---
 
 title: Patterns for Deploying OpenTelemetry Collector at Scale
-slug: opentelemetry-deployment-patterns
-date: 2025-12-02
-tags: [Newsletter]
+meta_title: "OpenTelemetry Deployment Patterns Explained"
+published_date: 2025-12-02
+updated_date: 2026-07-14
+tags: [OpenTelemetry, Newsletter]
 authors: [elizabeth_mathew]
-description: Learn about the different patterns for deploying OpenTelemetry Collector at scale.
-image: /img/blog/2025/12/deployment-patterns.webp
-keywords: [opentelemetry collector, deployment patterns, observability, telemetry]
-
+description: "Compare OpenTelemetry Collector deployment patterns - agent, gateway, sidecar, and no-collector - and when to use each."
+keywords: [opentelemetry collector deployment patterns, deployment patterns, observability, telemetry]
+related_articles:
+  - '/blog/opentelemetry-collector-complete-guide'
+  - '/blog/opentelemetry-collector-prometheus-receiver'
+  - '/blog/opentelemetry-agent'
+  - '/guides/opentelemetry-collector-vs-exporter'
 ---
 
 
@@ -18,7 +22,7 @@ So, you've embraced OpenTelemetry, and it's been great.
 
 That single, vendor-neutral pipeline for your traces, metrics, and logs felt like the future. But now, the *future is getting bigger*. That simple OTel Collector configuration that worked perfectly for a few services is starting to show its limits as you scale. The data volume is climbing, reliability is becoming a concern, and you're wondering if that single collector instance is now a bottleneck waiting to happen.
 
-*You're not alone*. As applications grow, the question quickly shifts from *what* OTel can do to *how* we can deploy it effectively at scale. In this post, we'll explore some deployment patterns for the OpenTelemetry Collector, moving from a simple agent to a robust, multi-layered architecture. Let’s look at the three main deployment patterns for OTel collectors and break down how each trades off complexity, scalability, and isolation; thus, choosing the right one depends on your architecture and goals.
+*You're not alone*. As applications grow, the question quickly shifts from *what* OTel can do to *how* we can deploy it effectively at scale. In this post, we'll explore some deployment patterns for the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/), moving from a simple agent to a robust, multi-layered architecture. Let’s look at the three main deployment patterns for OTel collectors and break down how each trades off complexity, scalability, and isolation; thus, choosing the right one depends on your architecture and goals.
 
 <Figure src="/img/blog/2025/12/deployment-pattern-cover.webp" alt="Overview of Deployment Patterns" caption="Overview of Deployment Patterns" />
 
@@ -118,8 +122,6 @@ Each gateway fleet is configured and optimised only for its specific signal type
 
 <Figure src="/img/blog/2025/12/per-signal.webp" alt="Per-signal Architecture" caption="Per-signal Architecture" />
 
-Per-signal Architecture
-
 ### Trade-Offs & Consideration
 
 **Independent Scalability:** You can scale your logging fleet to handle huge volumes without over-provisioning your tracing or metrics pipelines.
@@ -132,7 +134,15 @@ Per-signal Architecture
 
 ## How To Choose the Right Deployment?
 
-The short answer is that there is *no hard-and-fast rule* for what is *right*. But we have put out a small guide that can help you understand some potential options you can explore.
+The short answer is that there is *no hard-and-fast rule* for what is *right*. But we have put out a small guide that can help you understand some potential options you can explore. 
+
+<KeyPointCallout title="Clarifying what OTel Agents Mean">
+
+The agent pattern covered in this section is about OpenTelemetry Collector as Agents, not the auto-instrumentation agents, which are used to help applications emit telemetry which is typically then forwarded to the Collector instance or a gateway.
+
+We have covered OpenTelemetry auto-instrumentations in-depth in our [dedicated guide](https://signoz.io/blog/opentelemetry-agent/).
+
+</KeyPointCallout>
 
 If you have many clusters or regions that need unified telemetry, use the *multi-cluster* [control-plane] pattern. Designate one cluster as the central collector host, and configure each cluster’s agent/sidecar to export to it. This way, you get consistent processing [e.g. cross-cluster tail sampling] at the cost of cross-cluster links.
 
@@ -145,7 +155,7 @@ When you need maximum ingestion throughput and uptime, deploy a load-balanced co
 
 *OR*
 
-If your metrics/trace/log volumes differ greatly, consider splitting pipelines by [signal.](http://signal.Like) Like we mentioned above, run one collector for metrics [allowing many scraper replicas] and another for traces [optimised for tail sampling]. This lets you scale each pipeline to its workload without interference.
+If your metrics/trace/log volumes differ greatly, consider splitting pipelines by signal. Like we mentioned above, run one collector for metrics [allowing many scraper replicas] and another for traces [optimised for tail sampling]. This lets you scale each pipeline to its workload without interference.
 
 *OR*
 

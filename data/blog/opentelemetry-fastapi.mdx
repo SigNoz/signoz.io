@@ -1,13 +1,19 @@
 ---
-title: Implementing OpenTelemetry in FastAPI - A Practical Guide
-slug: opentelemetry-fastapi
-date: 2026-04-21
-tags: [OpenTelemetry, FastAPI, Python]
+title: A Practical Guide to OpenTelemetry FastAPI Instrumentation
+meta_title: OpenTelemetry FastAPI Instrumentation [Practical Guide]
+date: 2026-07-16
+tags: [OpenTelemetry, Python]
 authors: [ankit_anand, dhruv_ahuja]
-description: Learn how to instrument FastAPI with OpenTelemetry for production-grade observability. Covers auto-instrumentation, programmatic setup, multi-worker deployments, structured logging, and sampling strategies.
+description: "Learn how to instrument FastAPI with OpenTelemetry: auto-instrumentation, multi-worker setups, structured logging, and production sampling strategies."
 image: /img/blog/2024/02/opentelemetry-fastapi-cover.webp
 keywords: [opentelemetry,opentelemetry python,opentelemetry fastapi,fastapi instrumentation,fastapi monitoring,fastapi observability,python tracing,distributed tracing,signoz]
-
+related_articles:
+  - '/blog/opentelemetry-llm'
+  - '/blog/opentelemetry-flask'
+  - '/blog/opentelemetry-tracing'
+  - '/blog/opentelemetry-architecture'
+  - '/opentelemetry/python'
+  - '/blog/opentelemetry-visualization'
 ---
 
 FastAPI is a modern, high-performance Python web framework based on Python type hints that makes it easy to develop type-safe applications. Since its launch in 2018, companies of all sizes have quickly adopted it, including giants such as Uber, Netflix, and Microsoft, for building production-grade web applications.
@@ -21,17 +27,17 @@ This guide will walk you through the process of implementing OpenTelemetry in yo
 
 ## What is OpenTelemetry and Why Use it with FastAPI?
 
-Instrumentation is the biggest challenge engineering teams face when starting out with monitoring their application performance. [OpenTelemetry](https://signoz.io/opentelemetry/) is the leading open-source standard that is solving the problem of instrumentation. It is currently an incubating project under the <a href="https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">Cloud Native Computing Foundation</a>.
+Instrumentation is the biggest challenge engineering teams face when starting out with [application performance monitoring](https://signoz.io/application-performance-monitoring/) (APM). [OpenTelemetry](https://signoz.io/opentelemetry/) is the leading open-source standard that is solving the problem of instrumentation. It is a graduated project under the <a href="https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">Cloud Native Computing Foundation</a>.
 
 OpenTelemetry (OTel) is an open-source observability framework that provides a standardized way to collect and export telemetry data. It offers a unified approach to tracing, metrics, and logging — the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/).
 
-OpenTelemetry's data model has three core components:
+The OTel data model has three core components:
 
 - **Traces**: Represent the journey of a request through your system.
 - **Metrics**: Provide quantitative measurements of your application's performance.
 - **Logs**: Offer contextual information about events in your application.
 
-Integrating OpenTelemetry with FastAPI has several benefits:
+Integrating OTel with FastAPI has several benefits:
 
 1. **Enhanced visibility**: Gain insights into request flows, performance bottlenecks, and error patterns.
 2. **Standardization**: Use a vendor-neutral solution that works with various backends and tools.
@@ -40,6 +46,12 @@ Integrating OpenTelemetry with FastAPI has several benefits:
 
 The key advantage of OpenTelemetry is that it decouples instrumentation from the backend. You instrument once, and can send data to any compatible backend without any vendor lock-in.<br />
 In this guide, we'll use [SigNoz](https://signoz.io/) as the backend for visualizing the telemetry data.
+
+<KeyPointCallout title="Building AI and LLM apps with FastAPI?">
+FastAPI has become one of the most popular web frameworks for building high-throughput AI backends and agentic workflows due to its strong async support and validation guarantees. 
+
+If you are using FastAPI to serve LLMs and build agentic workflows, standard observability isn't enough to handle non-deterministic outputs and track token usage. We have a dedicated guide that walks through instrumenting these specific AI workloads — check out [Observing LLM Applications with OpenTelemetry](https://signoz.io/blog/opentelemetry-llm/).
+</KeyPointCallout>
 
 ## Running a FastAPI Application with OpenTelemetry
 
@@ -70,7 +82,7 @@ To help you understand OpenTelemetry in practice, we have prepared a sample Fast
 
 ```bash
 git clone git@github.com:SigNoz/examples.git
-cd fastapi/opentelemetry-fastapi-demo
+cd examples/fastapi/opentelemetry-fastapi-demo
 ```
 
 Create and activate a Python virtual environment. Setting up virtual environments prevents dependency conflicts between different Python projects on your system.
@@ -81,6 +93,12 @@ source .venv/bin/activate
 ```
 
 **Step 2. Install dependencies**
+
+<KeyPointCallout title="What is OTLP?">
+
+You'll see the term "OTLP" mentioned several times in this article. It is OpenTelemetry's vendor-neutral protocol for data transmission, and forms the backbone for performant telemetry pipelines across OTel-based observability setups. Check out our [Guide to OTLP](https://signoz.io/blog/what-is-otlp/) for an in-depth look.
+
+</KeyPointCallout>
 
 The `requirements.txt` file contains all the necessary [OpenTelemetry Python](https://signoz.io/docs/instrumentation/opentelemetry-python/) packages. Install them by running:
 
@@ -143,7 +161,7 @@ However, as of April 2026, the FastAPI deployment guide recommends <a href="http
 
 </KeyPointCallout>
 
-Your app is now running at `http://localhost:5002/`. Generate some traffic by hitting the following endpoints:
+Your app is now running at `http://localhost:5002/`. Generate some traffic by hitting the following endpoints in a new terminal window:
 
 ```bash
 curl http://localhost:5002/
@@ -161,6 +179,7 @@ These endpoints show:
 - Exception recording and error status on `/exception`
 
 You can use Locust to generate more traffic and observe application behaviour across various data points.
+With the app running in the background, re-activate your virtual environment and start Locust with the shipped configuration:
 
 ```bash
 pip3 install locust
@@ -189,8 +208,8 @@ Next, run the container with the OpenTelemetry environment variables configured.
 docker run --rm -p 5002:5002 \
   -e OTEL_SERVICE_NAME=sample-fastapi-app \
   -e OTEL_RESOURCE_ATTRIBUTES=deployment.environment=docker \
-  -e OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<your-region>.signoz.cloud:443 \
-  -e OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<YOUR_INGESTION_KEY> \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<your-region>.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<YOUR_INGESTION_KEY>" \
   -e OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
   sample-fastapi-app
 ```
@@ -198,8 +217,8 @@ docker run --rm -p 5002:5002 \
 Alternatively, you can also use the Docker Compose manifest with pre-configured defaults for the general environment variables. Simply replace the placeholders with actual region and key values, and run the following command.
 
 ```bash
-OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<your-region>.signoz.cloud:443 \
-OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<YOUR_INGESTION_KEY> \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<your-region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<YOUR_INGESTION_KEY>" \
 docker compose up --build
 ```
 
@@ -246,6 +265,20 @@ Using this `request duration` metric, we can understand how each endpoint behave
 Breaking down traffic by endpoint, we can see consistent traffic patterns emerging. If these patterns change in the future, we'll know that something is wrong.
 
 For example, if the `/external-api` begins exceeding the 5s mark, an engineer must investigate the cause: are we getting rate-limited by the external API, is our FastAPI web server hitting its limits, and so on.
+
+## Logging for OTel FastAPI Setups
+
+Logging in an OTel-instrumented FastAPI application is not much different from [logging in a typical Python application](https://signoz.io/guides/logging-in-python/). You define and initialize the logging configuration during application startup, and individual logger instances honor that configuration throughout the lifecycle of the application.
+
+The OTel-specific benefit is trace-log correlation: when OpenTelemetry is active, the SDK automatically injects the current `trace_id` and `span_id` into log records. This means every log line emitted during a request is linkable back to its trace in SigNoz, letting you jump from a log entry directly to the flamegraph for that request.
+
+<Figure
+  src="/img/blog/2026/07/opentelemetry-llm-log-correlation.webp"
+  alt="Correlated logs can be directly accessed from the Trace view."
+  caption="Correlated logs can be directly accessed from the Trace view."
+/>
+
+Most production FastAPI applications rely on [Loguru](https://signoz.io/guides/loguru/) or [Structlog](https://signoz.io/guides/structlog/#structlog-with-fastapi) for their richer feature sets and better async ergonomics versus Python's standard `logging` module, and both integrate well with the [OTel logging pipeline](https://signoz.io/blog/opentelemetry-logs/).
 
 ## Advanced OpenTelemetry Techniques for FastAPI
 
@@ -500,9 +533,25 @@ With this guide, you now have the fundamental knowledge to instrument FastAPI ap
 
 If you're interested in trying out SigNoz for your FastAPI applications, [sign up](https://signoz.io/teams/) for a 30-day free trial (no credit card required).
 
+### Investigate FastAPI Telemetry from Your IDE
+
+With your FastAPI app instrumented and telemetry flowing into SigNoz, you can also investigate that telemetry directly from your coding workflow. As an optional next step, connect the [SigNoz MCP Server](https://signoz.io/docs/ai/signoz-mcp-server/) and ask about endpoint latency, error rates, or slow operations like `load_item` in natural language without leaving your IDE. For a broader overview, see [Agent Native Observability](https://signoz.io/agent-native-observability/).
+
 ## FAQs
 
-### How does OpenTelemetry impact FastAPI application performance?
+### How do I add OpenTelemetry to a FastAPI application?
+
+Install `opentelemetry-distro` and `opentelemetry-exporter-otlp`, run `opentelemetry-bootstrap --action=install` to auto-detect and install instrumentation packages for your dependencies, then launch your app with `opentelemetry-instrument uvicorn app.main:app`. You will also need a compatible OpenTelemetry backend, such as SigNoz Cloud, to receive and visualize the telemetry data.
+
+### Does FastAPI support OpenTelemetry auto-instrumentation?
+
+Yes. The `opentelemetry-bootstrap` command detects FastAPI and its common dependencies (such as `httpx` and SQLAlchemy) and installs the corresponding instrumentation packages automatically. Running your app with `opentelemetry-instrument` then activates these packages at startup with no code changes required for basic tracing.
+
+### How do I exclude health check endpoints from OpenTelemetry tracing in FastAPI?
+
+Set the `OTEL_PYTHON_FASTAPI_EXCLUDED_URLS` environment variable to a comma-separated list of URL patterns — for example, `OTEL_PYTHON_FASTAPI_EXCLUDED_URLS="health,ping"`. Each value is treated as a regex pattern, so you can match path prefixes or use more complex expressions to manage exclusions at scale.
+
+### What is the performance overhead of OpenTelemetry in a FastAPI application?
 
 OpenTelemetry adds minimal overhead to your FastAPI application. The exact impact depends on factors like sampling rate and export frequency. In most cases, the performance hit is negligible compared to the insights gained. However, for high-traffic applications, careful tuning may be necessary.
 

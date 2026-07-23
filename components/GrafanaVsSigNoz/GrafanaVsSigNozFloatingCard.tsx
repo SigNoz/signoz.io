@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { ArrowRight, Scale, X } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 
 const GrafanaVsSigNozFloatingCard: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false)
@@ -62,23 +61,27 @@ const GrafanaVsSigNozFloatingCard: React.FC = () => {
 
       <h3 className="mb-2 text-lg font-bold text-white">Save up to 45% on your Grafana bill</h3>
       <p className="mb-3 text-xs text-gray-300">
-      Tired of juggling multiple tools for observability? SigNoz gives you logs, metrics and traces in a single unified platform.  
+        Tired of juggling multiple tools for observability? SigNoz gives you logs, metrics and
+        traces in a single unified platform.
       </p>
       <div className="flex flex-col gap-2">
-        <Link id="grafana-vs-signoz-compare-button" href="/product-comparison/signoz-vs-grafana/" className="w-full">
-          <Button className="flex w-full items-center justify-center gap-1 text-xs font-bold">
+        <Button
+          id="grafana-vs-signoz-compare-button"
+          href="/grafana-alternative/"
+          variant="legacyPrimary"
+          className="flex w-full items-center justify-center gap-1 text-xs font-bold"
+        >
           <Scale className="h-4 w-4" />
           Compare SigNoz vs. Grafana
-          </Button>
-        </Link>
-        <Link id="grafana-vs-signoz-try-signoz-button" href="/teams/" className="w-full">
-          <Button
-            type={Button.TYPES.SECONDARY}
-            className="flex w-full items-center justify-center gap-1 text-xs font-bold"
-          >
-            Try SigNoz for Free <ArrowRight className="h-3 w-3" />
-          </Button>
-        </Link>
+        </Button>
+        <Button
+          id="grafana-vs-signoz-try-signoz-button"
+          href="/teams/"
+          variant="legacySecondary"
+          className="flex w-full items-center justify-center gap-1 text-xs font-bold"
+        >
+          Try SigNoz for Free <ArrowRight className="h-3 w-3" />
+        </Button>
       </div>
     </div>
   )

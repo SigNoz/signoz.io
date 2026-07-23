@@ -23,12 +23,11 @@ export function useNavVisibility() {
   }, [])
 
   return {
-    showCustomerStories: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.FULL_NAV,
     showGithubStars: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.GITHUB_STARS,
     showPricing: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.PRICING,
     showResources: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.RESOURCES,
     showDocs: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.DOCS,
-    showWhySignoz: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.WHY_SIGNOZ,
+    showUseCases: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.USE_CASES,
     showProduct: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.PRODUCT,
     showSignInGetStarted: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.SIGN_IN,
   }

@@ -1,0 +1,38 @@
+name: Stale URL Guard
+
+on:
+  pull_request:
+    paths:
+      - 'components/**'
+      - 'app/**'
+      - 'constants/**'
+      - 'hooks/**'
+      - 'utils/**'
+      - 'data/**/*.mdx'
+      - 'next.config.js'
+      - 'scripts/check-stale-urls.js'
+      - 'tests/check-stale-urls.test.js'
+      - 'tests/fixtures/stale-urls/**'
+      - 'package.json'
+      - '.github/workflows/stale-url-guard.yml'
+
+jobs:
+  check-stale-urls:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --non-interactive
+
+      - name: Run stale URL tests
+        run: yarn test:stale-urls
+
+      - name: Check for stale URLs
+        run: yarn check:stale-urls

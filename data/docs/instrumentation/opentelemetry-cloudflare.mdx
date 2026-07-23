@@ -1,8 +1,8 @@
 ---
-date: 2026-01-27
-id: opentelemetry-cloudflare
-title: Cloudflare Workers OpenTelemetry Instrumentation
-description: Learn how to instrument Cloudflare Workers with OpenTelemetry and send traces to SigNoz
+date: 2026-06-17
+title: Cloudflare Workers OpenTelemetry Guide
+meta_title: Cloudflare Workers OpenTelemetry Guide
+description: Instrument Cloudflare Workers with OpenTelemetry and send traces to SigNoz. Supports both official Cloudflare export and community SDK integration methods.
 
 doc_type: howto
 ---
@@ -37,7 +37,7 @@ Cloudflare Workers supports exporting OpenTelemetry (OTel)-compliant traces dire
    - **Type**: Traces
    - **OTLP Endpoint**:
      - `https://ingest.<region>.signoz.cloud:443/v1/traces`
-     - See [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview)
+     - See [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
    - **Headers**:
      - Add `signoz-ingestion-key: <your-ingestion-key>`
 5. Click Save
@@ -118,16 +118,27 @@ const config: ResolveConfigFn = (env: Env, _trigger) => {
             url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
             headers: { 'signoz-ingestion-key': '<your-ingestion-key>' },
         },
-        service: { name: '<service-name>' },
+        service: { name: '<service-name>', version: '<service-version>' },
     }
 }
 
 export default instrument(handler, config)
 ```
 
+Verify these values:
+
 - `<region>`: Your SigNoz [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- Replace `<service-name>` with the name of the service associated with this trace
+- `<service-name>`: A descriptive name for your service (e.g., `my-worker`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 4: Deploy the project
 
@@ -185,7 +196,7 @@ You can click on a particular `TraceID` in the `Traces` view to get the detailed
 2. **Incorrect OTLP endpoint**
 
    - Wrong region or endpoint format
-   - Verify the endpoint matches your SigNoz setup: [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview)
+   - Verify the endpoint matches your SigNoz setup: [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
 
 3. **Missing or invalid ingestion key**
 
@@ -212,7 +223,7 @@ You can click on a particular `TraceID` in the `Traces` view to get the detailed
 
 ## Next steps
 
-- **Set up logs**: Send Cloudflare Worker logs to SigNoz by following the [Cloudflare logs guide](/docs/logs-management/send-logs/cloudflare-logs)
+- **Set up logs**: Send Cloudflare Worker logs to SigNoz by following the [Cloudflare logs guide](/docs/logs-management/send-logs/cloudflare-logs/)
 - **Create dashboards**: Build custom dashboards to visualize your Worker performance
 - **Set up alerts**: Configure alerts based on trace data to monitor Worker health
 - **Analyze traces**: Use the [Trace Explorer](https://signoz.io/docs/userguide/traces/) to debug issues and optimize performance

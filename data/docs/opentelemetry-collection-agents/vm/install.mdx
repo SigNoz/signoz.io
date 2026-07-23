@@ -1,7 +1,7 @@
 ---
-date: 2026-02-27
-title: VM Collection Agent - Install
-id: install
+date: 2026-06-17
+title: Install the OpenTelemetry Collector on a Virtual Machine
+meta_title: Install OpenTelemetry Collector on a VM
 description: Install the OpenTelemetry Collector binary on your virtual machine to collect telemetry data.
 doc_type: howto
 ---
@@ -14,16 +14,16 @@ This guide walks you through installing the OpenTelemetry Collector **contrib** 
 - SigNoz ingestion endpoint accessible from the VM
 - Availability of ports: `4317`, `4318`, `8888`, `1777`, `13133`
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## OpenTelemetry Collector Installation
 
-<Tabs>
+<Tabs entityName="os">
 <TabItem value="linux" label="Linux" default>
 
-<Tabs groupId="linux-method">
+<Tabs entityName="linux-method">
 <TabItem value="deb" label="DEB" default>
 
 The DEB package installs the Collector as a `systemd` service on Debian or Ubuntu. After installation, the default configuration is at `/etc/otelcol-contrib/config.yaml`.
@@ -88,10 +88,8 @@ processors:
   resourcedetection:
     detectors: [env, host, system, docker, k8snode]
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 service:
@@ -99,22 +97,22 @@ service:
     metrics:
       receivers: [otlp, hostmetrics]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 Verify the following values:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-<KeyPointCallout title="Using a custom config path?" defaultCollapsed={true}>
+<KeyPointCallout title="Using a custom config path?" defaultCollapsed="true">
 The Collector service uses `/etc/otelcol-contrib/config.yaml` by default. To use a different config file, edit the `OTELCOL_OPTIONS` variable in `/etc/otelcol-contrib/otelcol-contrib.conf` and set `--config=/path/to/your/config.yaml`. You can also add other collector flags there (e.g. `--set` for feature gates). To see all options:
 
 ```bash
@@ -210,10 +208,8 @@ processors:
   resourcedetection:
     detectors: [env, host, system, docker, k8snode]
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 service:
@@ -221,15 +217,15 @@ service:
     metrics:
       receivers: [otlp, hostmetrics]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 Verify the following values:
 
@@ -237,7 +233,7 @@ Verify the following values:
 - `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 
-<KeyPointCallout title="Using a custom config path?" defaultCollapsed={true}>
+<KeyPointCallout title="Using a custom config path?" defaultCollapsed="true">
 The Collector service uses `/etc/otelcol-contrib/config.yaml` by default. To use a different config file, edit the `OTELCOL_OPTIONS` variable in `/etc/otelcol-contrib/otelcol-contrib.conf` and set `--config=/path/to/your/config.yaml`. You can also add other collector flags there (e.g. `--set` for feature gates). To see all options:
 
 ```bash
@@ -328,10 +324,8 @@ processors:
   resourcedetection:
     detectors: [env, host, system, docker, k8snode]
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 service:
@@ -339,15 +333,15 @@ service:
     metrics:
       receivers: [otlp, hostmetrics]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 Verify the following values:
 
@@ -439,10 +433,8 @@ processors:
   resourcedetection:
     detectors: [env, host, system, docker, k8snode]
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 service:
@@ -450,15 +442,15 @@ service:
     metrics:
       receivers: [otlp, hostmetrics]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 Verify the following values:
 
@@ -491,7 +483,7 @@ In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your h
 </TabItem>
 <TabItem value="windows" label="Windows">
 
-<Tabs groupId="windows-method">
+<Tabs entityName="windows-method">
 <TabItem value="msi" label="MSI" default>
 
 The MSI installs the Collector as a Windows service (display name "OpenTelemetry Collector") and registers an Application Event Log source.
@@ -537,10 +529,8 @@ processors:
   resourcedetection:
     detectors: [env, host, system, docker, k8snode]
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 service:
@@ -548,15 +538,15 @@ service:
     metrics:
       receivers: [otlp, hostmetrics]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 Verify the following values:
 
@@ -644,10 +634,8 @@ processors:
   resourcedetection:
     detectors: [env, host, system, docker, k8snode]
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
-    tls:
-      insecure: false
     headers:
       signoz-ingestion-key: <your-ingestion-key>
 service:
@@ -655,15 +643,15 @@ service:
     metrics:
       receivers: [otlp, hostmetrics]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [otlp]
       processors: [batch, resourcedetection]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 Verify the following values:
 
@@ -699,6 +687,14 @@ In SigNoz, navigate to **Infrastructure Monitoring → Hosts** and verify your h
 </TabItem>
 </Tabs>
 
+## Video Walkthrough
+
+If you are someone who understands things better through video implementation, here is a video to help you. Check it out:
+
+**OpenTelemetry VM Setup Guide: SigNoz Collection Agents Explained**
+
+<YouTube id="FEDdaOVynbE" />
+
 <details>
 <ToggleHeading>
 
@@ -722,17 +718,17 @@ exporters:
     verbosity: detailed
 ```
 
-Then add `debug` to each pipeline's `exporters` list (before `otlp`):
+Then add `debug` to each pipeline's `exporters` list (before `otlphttp`):
 
 ```yaml:/etc/otelcol-contrib/config.yaml {4-11}
 service:
   pipelines:
     metrics:
-      exporters: [debug, otlp]
+      exporters: [debug, otlphttp]
     traces:
-      exporters: [debug, otlp]
+      exporters: [debug, otlphttp]
     logs:
-      exporters: [debug, otlp]
+      exporters: [debug, otlphttp]
 ```
 
 The `verbosity: detailed` setting logs full telemetry payloads to the Collector output.

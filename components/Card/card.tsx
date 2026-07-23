@@ -1,7 +1,7 @@
 import React from 'react'
 import Image, { type StaticImageData } from 'next/image'
 import { ArrowRight } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { cn } from '../../app/lib/utils'
 
@@ -159,12 +159,12 @@ const Card: React.FC<CardProps> = ({
             clickLocation={sectionName}
             className="inline-block"
           >
-            <Button type={Button.TYPES.SECONDARY} className="flex-center mb-4 mt-6">
+            <Button variant="legacySecondary" className="flex-center mb-4 mt-6">
               {buttonText} <ArrowRight size={14} />
             </Button>
           </TrackingLink>
         ) : (
-          <Button type={Button.TYPES.SECONDARY} className="flex-center mb-4 mt-6">
+          <Button variant="legacySecondary" className="flex-center mb-4 mt-6">
             {buttonText} <ArrowRight size={14} />
           </Button>
         )

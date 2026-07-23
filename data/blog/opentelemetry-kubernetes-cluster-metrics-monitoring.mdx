@@ -1,16 +1,21 @@
 ---
 title: Kubernetes Cluster Monitoring with OpenTelemetry | Complete Tutorial
-slug: opentelemetry-kubernetes-cluster-metrics-monitoring
 date: 2023-12-04
 tags: [OpenTelemetry]
 authors: [daniel]
 description: Steps to monitor Kubernetes cluster metrics with OpenTelemetry 1. Setting up OpenTelemetry Collector 2. Configuring OpenTelemetry Collector to collect Kubernetes cluster metrics 3. Send collected metrics to SigNoz for monitoring and visualization...
-image: /img/blog/2023/12/otel-k8s-cluster-metrics-monitoring-cover.jpeg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,observability,kubernetes,metrics]
+related_articles:
+  - '/blog/kubernetes-events-monitoring'
+  - '/blog/using-signoz-to-monitor-your-kubernetes-cluster'
+  - '/blog/opentelemetry-kubernetes'
+  - '/blog/kubernetes-monitoring'
+  - '/blog/opentelemetry-operator-complete-guide'
+  - '/blog/eks-monitoring-with-opentelemetry'
 ---
 <Admonition type="warning">
-For a more comprehensive, modern, and automated guide using the official OpenTelemetry Helm charts, check out our new definitive tutorial: [Kubernetes Observability with OpenTelemetry](https://signoz.io/blog/kubernetes-observability-with-opentelemetry/).
+For a more comprehensive, modern, and automated guide using the official OpenTelemetry Helm charts, check out our new definitive tutorial: [Kubernetes Observability with OpenTelemetry](https://signoz.io/blog/opentelemetry-kubernetes/).
 </Admonition>
 
 Monitoring Kubernetes cluster metrics ensures your containerized infrastructure operates as it should. By tracking essential indicators like CPU utilization, memory consumption, and pod/node statuses, you gain insights to proactively address issues, optimize resources, and maintain overall health. In this tutorial, you will configure OpenTelemetry Collector to collect Kubernetes cluster metrics and send them to SigNoz for monitoring and visualization.
@@ -82,7 +87,7 @@ receivers:
           max_age: 7200
 ```
 
-You can find more details on advanced configurations <a href = "https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+You can find more details on <a href = "https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md" rel="noopener noreferrer nofollow" target="_blank" >advanced configurations for the OTLP receiver</a>.
 
 Once a receiver is configured, it needs to be **enabled** to start the data flow. This involves setting up **pipelines** within a **`service`**. A **pipeline** acts as a streamlined pathway for data, outlining how it should be processed and where it should go. A pipeline comprises the following:
 
@@ -120,7 +125,7 @@ In this section, you will learn how Kubernetes cluster metrics can be collected 
 
 You need a backend to which you can send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
 
-SigNoz cloud is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+SigNoz cloud is the easiest way to run SigNoz. You can [sign up for a free account](https://signoz.io/teams/) and get 30 days of unlimited access to all features.
 
 You can also install and self-host SigNoz yourself. Check out the [docs](https://signoz.io/docs/install/) for installing self-host SigNoz.
 
@@ -380,7 +385,7 @@ Users-MacBook-Pro-2:k8s demo$ kubectl logs otelcontribcol-764d65d6d5-mkv97
 2023-11-27T23:32:57.075Z        info    k8sclusterreceiver@v0.89.0/receiver.go:74       Completed syncing shared informer caches.       {"kind": "receiver", "name": "k8s_cluster", "data_type": "logs"}
 ```
 
-You can find more information on OpenTelemetry Kubernetes receiver <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sclusterreceiver" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+You can find more information on the <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sclusterreceiver" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry Kubernetes receiver</a>.
 
 ## Monitoring Kubernetes cluster metrics with SigNoz dashboard
 
@@ -432,7 +437,7 @@ You can query the collected metrics using the [query builder](https://signoz.io/
 </figure>
 
 
-Visit the SigNoz [documentation](https://signoz.io/docs/userguide/manage-dashboards-and-panels/) to learn more about creating dashboards and running queries.
+Visit the SigNoz [documentation](https://signoz.io/docs/userguide/manage-dashboards/) to learn more about creating dashboards and running queries.
 
 Besides just setting up dashboards to monitor your Kubernetes cluster metrics, you can create alerts for the different metrics you query. Click on the drop-down of the panel from your dashboard, and then click on “Create Alerts”.
 

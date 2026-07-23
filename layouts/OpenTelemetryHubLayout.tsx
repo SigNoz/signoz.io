@@ -6,16 +6,21 @@ import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableO
 import ArticleMetaDetailsCard, {
   type RenderedAuthor,
 } from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
-import authorsDirectory from '@/constants/authors.json'
 import OpenTelemetryTocClient from './open-telemetry-hub/OpenTelemetryTocClient'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
+import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
+import { getFormattedDates } from '@/utils/dateUtils'
 
 const MOBILE_TRIGGER_ID = 'ot-hub-mobile-trigger'
 
 export interface HubContentProps {
   content: {
     title?: string
-    date?: string
+    published_date?: string | null
+    updated_date?: string | null
+    /** @deprecated Use `published_date` and `updated_date` instead. */
+    date?: string | null
     lastmod?: string
     tags?: string[]
     readingTime?: { text?: string; minutes?: number; time?: number; words?: number }
@@ -26,6 +31,8 @@ export interface HubContentProps {
   children: React.ReactNode
   toc: { url: string; depth: number; value: string }[]
   showSidebar: boolean
+  authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
+  breadcrumbs?: BreadcrumbCrumb[]
 }
 
 export function buildRenderedAuthors(
@@ -79,17 +86,6 @@ export function getReadingTimeText(content: HubContentProps['content']) {
   return null
 }
 
-export function getFormattedDate(content: HubContentProps['content']) {
-  const updatedDate = content.date
-  return updatedDate
-    ? new Date(updatedDate).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    : null
-}
-
 /**
  * Content-only hub component. The outer shell (sidebar, header tabs, grid
  * container) lives in `app/(opentelemetry-hub-routes)/layout.tsx` so the
@@ -102,16 +98,15 @@ export default function OpenTelemetryHubContent({
   children,
   toc,
   showSidebar,
+  authorDirectory = {},
+  breadcrumbs,
 }: HubContentProps) {
   const title = content.title || ''
   const hasToc = Array.isArray(toc) && toc.length > 0
 
-  const renderedAuthors = buildRenderedAuthors(
-    authorDetails,
-    authors,
-    authorsDirectory as Record<string, { name?: string; url?: string; image_url?: string }>
-  )
-  const formattedUpdatedDate = getFormattedDate(content)
+  const renderedAuthors = buildRenderedAuthors(authorDetails, authors, authorDirectory)
+  const { publishedDate: formattedPublishedDate, updatedDate: formattedUpdatedDate } =
+    getFormattedDates(content)
   const readingTimeText = getReadingTimeText(content)
 
   const MAX_VISIBLE_TAGS = 2
@@ -122,6 +117,7 @@ export default function OpenTelemetryHubContent({
   const hasMetaInfo =
     renderedAuthors.length > 0 ||
     Boolean(readingTimeText) ||
+    Boolean(formattedPublishedDate) ||
     Boolean(formattedUpdatedDate) ||
     primaryTags.length > 0
 
@@ -129,6 +125,7 @@ export default function OpenTelemetryHubContent({
     <ArticleMetaDetailsCard
       authors={renderedAuthors}
       readingTimeText={readingTimeText}
+      formattedPublishedDate={formattedPublishedDate}
       formattedUpdatedDate={formattedUpdatedDate}
       primaryTags={primaryTags}
       hiddenTags={hiddenTags}
@@ -143,11 +140,13 @@ export default function OpenTelemetryHubContent({
       >
         {(showSidebar || hasToc) && <div id={MOBILE_TRIGGER_ID} className="mb-4 lg:hidden" />}
 
+        {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
         <article className="prose prose-slate w-full min-w-0 max-w-full break-words px-3 py-6 dark:prose-invert">
           <h1 className="text-3xl font-bold">{title}</h1>
-          {(formattedUpdatedDate || readingTimeText) && (
+          {(formattedPublishedDate || formattedUpdatedDate || readingTimeText) && (
             <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
-              {formattedUpdatedDate && <span>Updated {formattedUpdatedDate}</span>}
+              {formattedPublishedDate && <span>Published on: {formattedPublishedDate}</span>}
+              {formattedUpdatedDate && <span>Last Updated: {formattedUpdatedDate}</span>}
               {readingTimeText && <span>{readingTimeText}</span>}
             </div>
           )}

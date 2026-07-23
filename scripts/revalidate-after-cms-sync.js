@@ -1,38 +1,80 @@
-#!/usr/bin/env node
-/**
- * After CMS sync, calls /api/revalidate with selective paths + tags, or full revalidation as fallback.
- * Mirrors path logic from scripts/sync-content-to-strapi.js (generatePathField + sync folders).
- */
-
 const fs = require('fs')
+const path = require('path')
+const { parseArgs: nodeParseArgs } = require('node:util')
 
 const BULK_THRESHOLD = Number(process.env.REVALIDATE_BULK_THRESHOLD || '25')
 
-function getAssetsListFromEnv(envName, pathEnvName) {
-  if (process.env[pathEnvName] && fs.existsSync(process.env[pathEnvName])) {
-    try {
-      const content = fs.readFileSync(process.env[pathEnvName], 'utf8')
-      if (!content || !content.trim()) return []
-      return JSON.parse(content)
-    } catch (e) {
-      console.warn(`⚠️ Failed to read ${pathEnvName}: ${e.message}`)
-      return []
-    }
+function parseArgs(argv) {
+  const { values } = nodeParseArgs({
+    args: argv || process.argv.slice(2),
+    options: {
+      'changed-files': { type: 'string' },
+      'restore-files': { type: 'string' },
+      'deleted-files': { type: 'string' },
+      'changed-assets': { type: 'string' },
+      'sidenav-changed': { type: 'boolean', default: false },
+      'listicles-changed': { type: 'boolean', default: false },
+      'changed-listicles': { type: 'string' },
+      'deleted-listicles': { type: 'string' },
+      'sync-folders': { type: 'string' },
+    },
+    strict: false,
+  })
+  return {
+    changedFilesPath: values['changed-files'],
+    restoreFilesPath: values['restore-files'],
+    deletedFilesPath: values['deleted-files'],
+    changedAssetsPath: values['changed-assets'],
+    sidenavChanged: values['sidenav-changed'],
+    listiclesChanged: values['listicles-changed'],
+    changedListiclesPath: values['changed-listicles'],
+    deletedListiclesPath: values['deleted-listicles'],
+    syncFolders: values['sync-folders'],
   }
-  return JSON.parse(process.env[envName] || '[]')
 }
 
-const CHANGED_FILES = getAssetsListFromEnv('CHANGED_FILES', 'CHANGED_FILES_PATH')
-const DELETED_FILES = getAssetsListFromEnv('DELETED_FILES', 'DELETED_FILES_PATH')
-const CHANGED_ASSETS = getAssetsListFromEnv('CHANGED_ASSETS', 'CHANGED_ASSETS_PATH')
+function readJsonFile(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8')
+    if (!content || !content.trim()) return []
+    return JSON.parse(content)
+  } catch (e) {
+    console.warn(`Warning: Failed to read ${filePath}: ${e.message}`)
+    return []
+  }
+}
+
+function loadFileList(cliPath, envPathName, envName) {
+  if (cliPath) return readJsonFile(cliPath)
+  if (process.env[envPathName] && fs.existsSync(process.env[envPathName])) {
+    return readJsonFile(process.env[envPathName])
+  }
+  try {
+    return JSON.parse(process.env[envName] || '[]')
+  } catch {
+    return []
+  }
+}
+
+const cliArgs = parseArgs()
+
+const CHANGED_FILES = loadFileList(cliArgs.changedFilesPath, 'CHANGED_FILES_PATH', 'CHANGED_FILES')
+const RESTORE_FILES = loadFileList(cliArgs.restoreFilesPath, 'RESTORE_FILES_PATH', 'RESTORE_FILES')
+const DELETED_FILES = loadFileList(cliArgs.deletedFilesPath, 'DELETED_FILES_PATH', 'DELETED_FILES')
+const CHANGED_ASSETS = loadFileList(
+  cliArgs.changedAssetsPath,
+  'CHANGED_ASSETS_PATH',
+  'CHANGED_ASSETS'
+)
 
 let SYNC_FOLDERS
 try {
-  SYNC_FOLDERS = JSON.parse(
-    process.env.SYNC_FOLDERS || '["faqs","case-study","opentelemetry","comparisons"]'
-  )
+  const raw = cliArgs.syncFolders || process.env.SYNC_FOLDERS
+  SYNC_FOLDERS = raw
+    ? JSON.parse(raw)
+    : ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog', 'docs']
 } catch {
-  SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons']
+  SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog', 'docs']
 }
 
 const FOLDER_TO_URL_PREFIX = {
@@ -40,6 +82,9 @@ const FOLDER_TO_URL_PREFIX = {
   faqs: 'faqs',
   'case-study': 'case-study',
   comparisons: 'comparisons',
+  guides: 'guides',
+  blog: 'blog',
+  docs: 'docs',
 }
 
 function getFolderName(filePath) {
@@ -78,38 +123,128 @@ function uniqueStrings(arr) {
   return [...new Set(arr.filter(Boolean))]
 }
 
-function buildPayload() {
-  const allContentFiles = [...CHANGED_FILES, ...DELETED_FILES]
+const SIDENAV_CHANGED = cliArgs.sidenavChanged || process.env.SIDENAV_CHANGED === 'true'
+
+const LISTICLES_CHANGED = cliArgs.listiclesChanged || process.env.LISTICLES_CHANGED === 'true'
+const CHANGED_LISTICLES_RAW = loadFileList(
+  cliArgs.changedListiclesPath,
+  'CHANGED_LISTICLES_PATH',
+  'CHANGED_LISTICLES'
+)
+const DELETED_LISTICLES_RAW = loadFileList(
+  cliArgs.deletedListiclesPath,
+  'DELETED_LISTICLES_PATH',
+  'DELETED_LISTICLES'
+)
+
+const DOCS_DIR = path.resolve(__dirname, '..', 'data', 'docs')
+
+function listicleFileToKey(filePath) {
+  const base = filePath.split('/').pop() || filePath
+  return base.replace(/\.json$/, '')
+}
+
+function findDocsPathsForListicle(listicleKey) {
+  const results = []
+  const escaped = listicleKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const pattern = new RegExp(`<Listicle\\s[^>]*name=["']${escaped}["']`)
+
+  function walk(dir) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true })
+    for (const entry of entries) {
+      const full = path.join(dir, entry.name)
+      if (entry.isDirectory()) {
+        walk(full)
+      } else if (entry.name.endsWith('.mdx') || entry.name.endsWith('.md')) {
+        const content = fs.readFileSync(full, 'utf8')
+        if (pattern.test(content)) {
+          const rel = path.relative(DOCS_DIR, full)
+          const urlPath = '/docs/' + rel.replace(/\.(mdx?|md)$/, '')
+          results.push(urlPath)
+        }
+      }
+    }
+  }
+
+  walk(DOCS_DIR)
+  return results
+}
+
+function buildPayload({
+  changedFiles = CHANGED_FILES,
+  restoreFiles = RESTORE_FILES,
+  deletedFiles = DELETED_FILES,
+  changedAssets = CHANGED_ASSETS,
+  sidenavChanged = SIDENAV_CHANGED,
+  listiclesChanged = LISTICLES_CHANGED,
+  changedListicles = CHANGED_LISTICLES_RAW,
+  deletedListicles = DELETED_LISTICLES_RAW,
+} = {}) {
+  const allContentFiles = [...changedFiles, ...restoreFiles, ...deletedFiles]
+
   const cmsUrls = uniqueStrings(allContentFiles.map(filePathToCmsUrl))
 
-  const hasAssetChanges = CHANGED_ASSETS.length > 0
+  const hasAssetChanges = changedAssets.length > 0
   const hasCmsPaths = cmsUrls.length > 0
 
-  if (cmsUrls.length > BULK_THRESHOLD) {
+  // Sidenav changes affect every docs page — use full revalidation
+  if (sidenavChanged) {
+    console.log('📣 Sidenav changed: using full revalidation (sidebar appears on every docs page).')
+    return { mode: 'all', reason: 'sidenav-changed' }
+  }
+
+  // Collect listicle-related paths and tags
+  const listiclePaths = []
+  const listicleTags = []
+  const allListicleChanges = [...changedListicles, ...deletedListicles]
+  if (listiclesChanged && allListicleChanges.length > 0) {
+    for (const file of allListicleChanges) {
+      const key = listicleFileToKey(file)
+      listicleTags.push(`listicle-${key}`)
+      const docsPaths = findDocsPathsForListicle(key)
+      listiclePaths.push(...docsPaths)
+    }
     console.log(
-      `📣 Selective revalidation skipped: ${cmsUrls.length} paths exceed BULK_THRESHOLD (${BULK_THRESHOLD})`
+      `📣 Listicle changes: ${allListicleChanges.length} listicle(s) changed/deleted, ${listiclePaths.length} doc path(s) to revalidate.`
+    )
+  }
+
+  const allPaths = uniqueStrings([...cmsUrls, ...listiclePaths])
+
+  if (allPaths.length > BULK_THRESHOLD) {
+    console.log(
+      `📣 Selective revalidation skipped: ${allPaths.length} paths exceed BULK_THRESHOLD (${BULK_THRESHOLD})`
     )
     return { mode: 'all', reason: 'bulk' }
   }
 
-  if (!hasCmsPaths && hasAssetChanges) {
+  if (!hasCmsPaths && hasAssetChanges && listiclePaths.length === 0) {
     console.log('📣 Asset-only change: using full revalidation (cannot map to page paths).')
     return { mode: 'all', reason: 'assets-only' }
   }
 
-  if (!hasCmsPaths) {
+  if (!hasCmsPaths && listiclePaths.length === 0 && listicleTags.length === 0) {
     console.log('⏭️ No CMS-backed content paths in this sync; skipping revalidation.')
     return { mode: 'skip', reason: 'no-cms-paths' }
   }
 
-  const extraTags = []
+  const extraTags = [...listicleTags]
   if (cmsUrls.some((u) => u.startsWith('/comparisons/'))) {
     extraTags.push('comparisons-list')
+  }
+  if (cmsUrls.some((u) => u.startsWith('/guides/'))) {
+    extraTags.push('guides-list')
+  }
+  if (cmsUrls.some((u) => u.startsWith('/blog/'))) {
+    extraTags.push('blogs-list')
+  }
+  if (cmsUrls.some((u) => u.startsWith('/docs/'))) {
+    extraTags.push('docs-list')
   }
 
   return {
     mode: 'selective',
-    paths: cmsUrls,
+    paths: allPaths,
     tags: uniqueStrings(extraTags),
   }
 }
@@ -172,7 +307,11 @@ async function main() {
   console.log('✅ Revalidation response:', JSON.stringify(json, null, 2))
 }
 
-main().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}
+
+module.exports = { buildPayload, filePathToCmsUrl, parseArgs, readJsonFile, loadFileList }

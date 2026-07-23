@@ -1,13 +1,17 @@
 ---
-date: 2026-03-12
-id: cloudflare-logs
-title: Send Cloudflare Workers Logs to SigNoz
-description: Learn how to send Cloudflare Workers logs to SigNoz using OpenTelemetry. Configure native OTLP export for seamless log management and observability.
+date: 2026-06-11
+title: Send Cloudflare Logs to SigNoz
+meta_title: "Cloudflare Logs to SigNoz: Edge Log Collection"
+description: "Learn how to send Cloudflare logs to SigNoz, configure collection, and analyze edge traffic with observability context."
 
 doc_type: howto
 ---
 
 Cloudflare Workers supports exporting OpenTelemetry (OTel)-compliant logs directly to SigNoz without code changes, using Cloudflare's built-in observability features.
+
+<Admonition type="info">
+Need traces too? See [Monitor Cloudflare Workers Traces and Logs with SigNoz](https://signoz.io/docs/integrations/outposts/cloudflare-workers/).
+</Admonition>
 
 <Admonition type="info">
 Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -20,7 +24,7 @@ Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update 
 
 ## Step 1: Create destination in Cloudflare
 
-1. Go to [Workers Observability](https://dash.cloudflare.com/?to=/:account/workers-and-pages/observability/pipelines) in your Cloudflare dashboard
+1. Go to <a href="https://dash.cloudflare.com/?to=/:account/workers-and-pages/observability/pipelines" target="_blank" rel="noopener noreferrer nofollow">Workers Observability</a> in your Cloudflare dashboard
 2. Click on **Destinations** Tab
 3. Click **Add destination**
 4. Configure:
@@ -28,7 +32,7 @@ Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update 
    - **Type**: Logs
    - **OTLP Endpoint**:
      - `https://ingest.<region>.signoz.cloud:443/v1/logs`
-     - See [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview)
+     - See [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
    - **Headers**:
      - Add `signoz-ingestion-key: <your-ingestion-key>`
 5. Click Save
@@ -55,7 +59,7 @@ You can customize the configuration with additional options such as:
 - `head_sampling_rate`: Control sampling rate for logs
 - `persist: false`: Disable storing data in Cloudflare dashboard (only send to SigNoz)
 
-For complete configuration options, refer to [Cloudflare's OpenTelemetry documentation](https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#enabling-opentelemetry-export-for-your-worker).
+For complete configuration options, refer to <a href="https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#enabling-opentelemetry-export-for-your-worker" target="_blank" rel="noopener noreferrer nofollow">Cloudflare's OpenTelemetry documentation</a>.
 
 ## Step 3: Deploy
 
@@ -99,7 +103,7 @@ You can click on a particular log entry in the `Logs` view to get the detailed v
 2. **Incorrect OTLP endpoint**
 
    - Wrong region or endpoint format
-   - Verify the endpoint matches your SigNoz setup: [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview)
+   - Verify the endpoint matches your SigNoz setup: [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
 
 3. **Missing or invalid ingestion key**
 
@@ -119,7 +123,7 @@ You can click on a particular log entry in the `Logs` view to get the detailed v
 
 ## Next steps
 
-- **Set up traces**: Correlate logs with traces by setting up [Cloudflare Workers trace instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-cloudflare)
+- **Set up traces**: Correlate logs with traces by setting up [Cloudflare Workers trace instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-cloudflare/)
 - **Query logs**: Use the [Logs Explorer](https://signoz.io/docs/logs-management/overview/) to search and filter your Worker logs
 - **Create alerts**: Set up alerts based on log patterns to monitor Worker issues
 - **Build dashboards**: Create custom dashboards combining logs and traces for complete observability
@@ -127,4 +131,4 @@ You can click on a particular log entry in the `Logs` view to get the detailed v
 ## Limitations
 
 - **Beta status**: OpenTelemetry data export from Cloudflare Workers is in beta. Features may change.
-- **Limited log types**: Currently only application logs (including console.log() output) and system-generated logs are supported. For more information please refer to [Cloudflare Workers official OpenTelemetry Docs](https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#supported-telemetry-types)
+- **Limited log types**: Currently only application logs (including console.log() output) and system-generated logs are supported. For more information please refer to <a href="https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#supported-telemetry-types" target="_blank" rel="noopener noreferrer nofollow">Cloudflare Workers official OpenTelemetry Docs</a>

@@ -1,9 +1,7 @@
 ---
-date: 2026-03-05
-id: golang
+date: 2026-06-11
 title: Send Metrics from Go application
 description: Learn how to instrument your Go application with OpenTelemetry to send metrics to SigNoz
-
 doc_type: howto
 ---
 
@@ -21,7 +19,7 @@ This guide shows you how to instrument your Go application with OpenTelemetry to
 
 ## Send metrics to SigNoz
 
-<Tabs entityName="deployment">
+<Tabs entityName="environment">
 <TabItem value="vm" label="VM" default>
 <KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
     A VM is a virtual computer that runs on physical hardware. This includes:
@@ -35,9 +33,10 @@ This guide shows you how to instrument your Go application with OpenTelemetry to
 ### Step 1. Set environment variables
 Set the following environment variables to configure the OpenTelemetry exporter:
 ```bash
-export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/metrics"
 export OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 ```
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
@@ -52,11 +51,13 @@ Add these environment variables to your deployment manifest:
 ```yaml
 env:
 - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
-  value: 'https://ingest.<region>.signoz.cloud:443'
+  value: 'https://ingest.<region>.signoz.cloud:443/v1/metrics'
 - name: OTEL_EXPORTER_OTLP_METRICS_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: OTEL_RESOURCE_ATTRIBUTES
   value: 'service.name=<service-name>'
+- name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+  value: 'delta'
 ```
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
@@ -67,9 +68,10 @@ Verify these values:
 <TabItem value="windows" label="Windows">
 ### Step 1. Set environment variables (PowerShell)
 ```powershell
-$env:OTEL_EXPORTER_OTLP_METRICS_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_METRICS_ENDPOINT = "https://ingest.<region>.signoz.cloud:443/v1/metrics"
 $env:OTEL_EXPORTER_OTLP_METRICS_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_RESOURCE_ATTRIBUTES = "service.name=<service-name>"
+$env:OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE = "delta"
 ```
 Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
@@ -84,18 +86,20 @@ Add environment variables to your Dockerfile:
 # ... build stages ...
 
 # Set OpenTelemetry environment variables
-ENV OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/metrics"
 ENV OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+ENV OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 
 CMD ["./main"]
 ```
 
 Or pass them at runtime using `docker run`:
 ```bash
-docker run -e OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+docker run -e OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/metrics" \
     -e OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
     -e OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>" \
+    -e OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta" \
     your-image:latest
 ```
 
@@ -106,6 +110,12 @@ Verify these values:
 </TabItem>
 </Tabs>
 
+<KeyPointCallout title="Why delta temporality?" defaultCollapsed="true">
+OpenTelemetry SDKs export metrics with **cumulative** temporality by default, which re-sends the running total of every active series on each export interval — even when nothing has changed. With `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` set to `delta`, synchronous instruments (like Counters and Histograms) that record nothing during an export interval send no data points for that interval, reducing the number of billable samples.
+
+Observable (asynchronous) instruments emit a data point on every collection cycle regardless of temporality. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for details.
+</KeyPointCallout>
+
 ### Step 2. Install OpenTelemetry packages
 
 Run the following command in your project directory to install the necessary packages for metrics and OTLP export:
@@ -114,7 +124,7 @@ Run the following command in your project directory to install the necessary pac
 go get \
 go.opentelemetry.io/otel \
 go.opentelemetry.io/otel/sdk/metric \
-go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc \
+go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp \
 go.opentelemetry.io/otel/attribute
 ```
 
@@ -131,7 +141,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 )
@@ -139,9 +149,9 @@ import (
 func initMeterProvider(ctx context.Context) (func(context.Context) error, error) {
 	// Create the OTLP exporter
 	// It will automatically use OTEL_EXPORTER_OTLP_METRICS_ENDPOINT and headers from env
-	exporter, err := otlpmetricgrpc.New(ctx)
+	exporter, err := otlpmetrichttp.New(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("new otlp metric grpc exporter failed: %w", err)
+		return nil, fmt.Errorf("new otlp metric http exporter failed: %w", err)
 	}
 
 	// Create the resource with attributes from environment (OTEL_RESOURCE_ATTRIBUTES)
@@ -241,7 +251,7 @@ func main() {
 
 You can use OpenTelemetry's auto-instrumentation packages and middleware for popular Go libraries to automatically collect metrics, or create custom metrics manually.
 
-<Tabs>
+<Tabs entityName="metric-type">
 <TabItem value="runtime" label="Runtime Metrics" default>
 
 The `runtime` package provides auto-instrumentation for Go runtime metrics such as memory usage, goroutine count, and GC stats.
@@ -315,7 +325,7 @@ The `runtime` package automatically exports the following Go runtime metrics:
 - `go.schedule.duration` (Histogram) - Time goroutines spent in the scheduler in a runnable state before running
 
 <Admonition type="info">
-Metric names and types follow the OpenTelemetry semantic conventions for Go runtime metrics. For the complete specification, see the [Go runtime semantic conventions](https://opentelemetry.io/docs/specs/semconv/runtime/go-metrics/).
+Metric names and types follow the OpenTelemetry semantic conventions for Go runtime metrics. For the complete specification, see the <a href="https://opentelemetry.io/docs/specs/semconv/runtime/go-metrics/" target="_blank" rel="noopener noreferrer nofollow">Go runtime semantic conventions</a>.
 </Admonition>
 
 </details>
@@ -388,7 +398,7 @@ Metrics are tagged with attributes such as:
 - `url.scheme` - The URI scheme (http, https)
 
 <Admonition type="info">
-Metric names and attributes follow the OpenTelemetry semantic conventions. For the complete list and latest updates, see the [HTTP semantic conventions](https://opentelemetry.io/docs/specs/semconv/http/http-metrics/).
+Metric names and attributes follow the OpenTelemetry semantic conventions. For the complete list and latest updates, see the <a href="https://opentelemetry.io/docs/specs/semconv/http/http-metrics/" target="_blank" rel="noopener noreferrer nofollow">HTTP semantic conventions</a>.
 </Admonition>
 
 </details>
@@ -509,10 +519,9 @@ caption="Visualizing Go metrics in SigNoz"
 ### Metrics not appearing?
 
 1. **Check Environment Variables**: Ensure `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` is set correctly:
-    - For gRPC (default in this guide): `https://ingest.<region>.signoz.cloud:443`
-    - For HTTP (if using `otlpmetrichttp`): `https://ingest.<region>.signoz.cloud:443/v1/metrics`
+    - `https://ingest.<region>.signoz.cloud:443/v1/metrics`
 
-2. **Check Exporter Protocol**: This guide uses `otlpmetricgrpc`. If you are behind a proxy that only supports HTTP/1.1, switch to `otlpmetrichttp`.
+2. **Check Exporter Protocol**: This guide uses `otlpmetrichttp`. Ensure the endpoint is reachable over HTTPS.
 
 3. **Check Console Errors**: The OpenTelemetry SDK prints errors to stderr by default. Check your application logs for any connection refused or authentication errors.
 

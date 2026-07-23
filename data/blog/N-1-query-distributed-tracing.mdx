@@ -1,16 +1,15 @@
 ---
 title: What is N+1 query problem and how distributed tracing solves it?
-slug: n+1-query-distributed-tracing
-date: 2022-09-06
+meta_title: "Finding N+1 Query Problems with Distributed Tracing"
+published_date: "2022-09-06"
+updated_date: "2026-07-06"
 tags: [Distributed Tracing]
 authors: [pranay]
-description: N+1 query problem is a problem in database retrieval where the related entities of an object are queried individually from a database, leading to O(n) queries
+description: "Find N+1 query problems with distributed tracing: spot repeated database spans in a trace, diagnose the cause, and fix the query pattern in SigNoz."
 image: /img/blog/2022/09/n_plus_cover.webp
 hide_table_of_contents: false
 keywords: [N+1 query problem,performance,distributed tracing,database retrieval]
 ---
-
-
 
 N+1 query problem is a problem in database retrieval where the related entities of an object are queried individually from a database, leading to O(n) queries where n is the number of related entities of the object.
 
@@ -19,6 +18,8 @@ Mouthful of words, I agree 🙂
 Let’s take an example to illustrate what it means.
 
 ## What is N+1 query problem?
+
+On detection, an N+1 query problem shows up unmistakably in a trace: one parent operation followed by a long run of near-identical database spans, each a separate query. With OpenTelemetry's database semantic conventions tagging those spans (`db.system.name`, `db.query.text`), a trace view makes the repeated pattern obvious and points straight at the call site, which is faster than reading query logs.
 
 ![Cover Image](/img/blog/2022/09/n_plus_cover.webp)
 
@@ -116,6 +117,14 @@ Once you see a pattern like the above, where a single request is fanning out mul
     <figcaption><i>N+1 queries are suboptimal and can lead to significant perf impact</i></figcaption>
 </figure>
 
+
+<KeyPointCallout title="Deeper-dives into the observability ecosystem">
+
+To go deeper, start with the fundamentals of [distributed tracing](https://signoz.io/blog/distributed-tracing/) and how it compares to broader [APM tools](https://signoz.io/blog/apm-tools/) — see [APM vs distributed tracing](https://signoz.io/blog/apm-vs-distributed-tracing/) for where each fits.
+
+To pick the right stack, browse our roundups of [distributed tracing tools](https://signoz.io/blog/distributed-tracing-tools/) and [database monitoring tools](https://signoz.io/comparisons/database-monitoring-tools/). And once you are analyzing traces, [tracing funnels](https://signoz.io/blog/tracing-funnels-observability-distributed-systems/) help you spot where multi-step flows break down.
+
+</KeyPointCallout>
 
 ### Why just logs may not be able to help you identify such issues
 

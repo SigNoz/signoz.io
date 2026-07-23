@@ -1,13 +1,20 @@
 ---
 title: OpenTelemetry Exporters - Types and Configuration Steps
-slug: opentelemetry-exporters
-date: 2025-09-22
+meta_title: "OpenTelemetry Exporters: Types & Configuration"
+published_date: 2024-05-15
+updated_date: 2026-06-16
 tags: [OpenTelemetry]
 authors: [daniel]
-description: An OpenTelemetry Exporter is an OpenTelemetry component responsible for transmitting the collected telemetry data from the application to the chosen backend. These software components are designed to transform code objects, which represent the...
-image: /img/blog/2023/10/opentelemetry-exporters-cover.jpeg
+description: OpenTelemetry exporters send your collected telemetry to a backend. Learn the exporter types (OTLP, Zipkin, Jaeger) and how to configure them.
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,observability]
+related_articles:
+  - '/blog/opentelemetry-architecture'
+  - '/blog/opentelemetry-collector-complete-guide'
+  - '/blog/what-is-opentelemetry'
+  - '/blog/opentelemetry-tools'
+  - '/blog/opentelemetry-logs'
+  - '/blog/opentelemetry-vs-opentracing'
 ---
 In this post, we will talk about OpenTelemetry exporters. OpenTelemetry exporters help in exporting the telemetry data collected by OpenTelemetry. OpenTelemetry frees you from any kind of vendor lock-in by letting you export the collected telemetry data to any backend of your choice.
 
@@ -60,9 +67,6 @@ Here are the some exporters you can choose from:
 - OTLP
 - Zipkin
 - Jaeger
-- OpenCensus
-
-
 
 ### OpenTelemetry Protocol (OTLP)
 
@@ -72,7 +76,7 @@ OTLP employs protocol buffers for efficient telemetry data serialization, utiliz
 
 Additionally, it outlines guidelines for implementing both client and server components, covering serialization, data transmission, and response handling.
 
-It is recommended to use the OTLP exporter for any OpenTelemetry setup.
+It is recommended to use the OTLP exporter for any OpenTelemetry setup. To learn more, see our guide on [what is OTLP and how it works](https://signoz.io/blog/what-is-otlp/).
 
 ### Zipkin
 
@@ -84,23 +88,15 @@ The <a href = "https://opentelemetry-python.readthedocs.io/en/latest/exporter/zi
 
 Additionally, the <a href = "https://opentelemetry-python.readthedocs.io/en/latest/exporter/zipkin/zipkin.html#opentelemetry-zipkin-protobuf-exporter/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry Zipkin Protobuf Exporter</a> efficiently sends traces to Zipkin by transmitting the traces to the designated Zipkin collector endpoint via HTTP, and it supports the efficient v2 protobuf format for trace data.
 
- ### Jaeger Exporter (Legacy)
+### Jaeger Exporter (Legacy)
 
-  In the past, OpenTelemetry provided a specific exporter to send trace data directly to Jaeger backends.
+In the past, OpenTelemetry provided a specific exporter to send trace data directly to Jaeger backends.
 
-  However, this dedicated Jaeger exporter is now broadly deprecated in most language SDKs and will be 
-  removed in future versions.
+However, this dedicated Jaeger exporter is now broadly deprecated in most language SDKs and will be removed in future versions. The modern and officially recommended way to send data to a Jaeger backend is to use the OTLP Exporter. The Jaeger project has added native support for the OpenTelemetry Protocol (OTLP) and encourages this approach for all new instrumentation.
 
-  The modern and officially recommended way to send data to a Jaeger backend is to use the OTLP Exporter. The Jaeger project has added
-  native support for the OpenTelemetry Protocol (OTLP) and encourages this approach for all new instrumentation.
- 
-  You can also refer [this](https://github.com/open-telemetry/opentelemetry-java/issues/5096) for more information.
+You can also refer [this](https://github.com/open-telemetry/opentelemetry-java/issues/5096) for more information.
 
-### OpenCensus
-
-OpenCensus was an open-source project, now merged into OpenTelemetry, that provided a set of libraries and instrumentation to enable observability in software systems. Like OpenTelemetry, OpenCensus focused on collecting metrics, traces, and other telemetry data to help developers and operators monitor and troubleshoot their applications.
-
-## Configuring an exporter
+## How to Configure an OpenTelemetry Exporter
 
 In this section, we will see how an exporter can be configured for a Python application with the OTLP Collector or OTLP endpoint.
 
@@ -117,7 +113,7 @@ pip install opentelemetry-exporter-otlp-proto-grpc
 ### Setup tracing
 
 <Admonition>
-The below instructions are only valid for manual instrumentation. If you want to setup auto-instrumentation, please refer to docs [here](https://signoz.io/docs/instrumentation/python/).
+The below instructions are only valid for manual instrumentation. If you want to setup auto-instrumentation, please refer to docs [here](https://signoz.io/docs/instrumentation/opentelemetry-python/).
 </Admonition>
 
 Once the exporter has been installed, we can proceed to setting up traces for the application.

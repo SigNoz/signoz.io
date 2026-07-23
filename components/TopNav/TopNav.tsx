@@ -1,48 +1,49 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button } from '@headlessui/react'
 import { Menu, X, ArrowRight } from 'lucide-react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import SigNozLogo from '@/public/img/SigNozLogo-orange.svg'
 import SearchButtonDeferred from '../SearchButtonDeferred'
 import GitHubStars from '../GithubStars/GithubStars'
 import Tabs from '@/components/ResourceCenter/Tabs'
-import { QUERY_PARAMS } from '@/constants/queryParams'
-import { ONBOARDING_SOURCE } from '@/constants/globals'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
+import { Button } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
+import UseCasesDropdown from './UseCasesDropdown'
 import ResourcesDropdown from './ResourcesDropdown'
+import { NavDropdownProvider } from './NavDropdownContext'
+import NavDropdownPanel from './NavDropdownPanel'
 import MobileMenu from './MobileMenu'
 import LoginActions from './LoginActions'
+import { useMobileDocsSidebar } from '@/components/DocsSidebar/MobileDocsSidebarContext'
 
 export default function TopNav() {
   const pathname = usePathname()
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isDocsBasePath, setIsDocsBasePath] = useState(false)
-  const [showMainMenu, setShowMainMenu] = useState(false)
   const [activeTab, setActiveTab] = useState(TABS.GUIDES)
   const [shouldShowTabs, setShouldShowTabs] = useState(false)
 
+  const docsSidebar = useMobileDocsSidebar()
+  const isDocsBasePath = pathname.startsWith('/docs')
   const visibility = useNavVisibility()
+
+  useEffect(() => {
+    return docsSidebar.onMainMenuRequest(() => setMobileMenuOpen(true))
+  }, [docsSidebar])
 
   const isLoginRoute = pathname === '/login/'
   const isSignupRoute = pathname === '/teams/'
   const isContactUsRoute = pathname === '/contact-us/'
   const isWordleRoute = pathname === '/todaysdevopswordle/'
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
 
   useEffect(() => {
-    const docsBase = pathname.startsWith('/docs')
-    setIsDocsBasePath(docsBase)
-    setShowMainMenu(!docsBase)
-
     const isListingOrPagination = (base: string) =>
       pathname === base || pathname === `${base}/` || pathname.startsWith(`${base}/page/`)
 
@@ -63,16 +64,16 @@ export default function TopNav() {
     }
   }, [pathname])
 
-  // Hide TopNav on teams, contact-us page or if source is onboarding
-  if (isSignupRoute || isContactUsRoute || isWordleRoute || source === ONBOARDING_SOURCE) {
+  // Hide TopNav on teams, contact-us page
+  if (isSignupRoute || isContactUsRoute || isWordleRoute) {
     return null
   }
 
   return (
     <div className="fixed left-0 right-0 z-[50]">
-      <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8">
+      <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
         <nav
-          className="container flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
+          className="mx-auto flex w-full max-w-8xl justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
           aria-label="Global"
         >
           <div className="flex justify-start gap-x-6">
@@ -83,73 +84,59 @@ export default function TopNav() {
               clickName="SigNoz Logo"
               clickText="SigNoz"
               clickLocation="Top Navbar"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={() => {
+                setMobileMenuOpen(false)
+                docsSidebar.close()
+              }}
             >
-              <SigNozLogo className="h-5 w-auto shrink-0" aria-hidden="true" />
+              <SigNozLogo
+                className="h-5 w-auto shrink-0"
+                aria-hidden="true"
+                title="Open Source Datadog Alternative"
+              />
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </TrackingLink>
 
             {!isLoginRoute && (
-              <div
-                className={`hidden items-center gap-x-6 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
-              >
-                {visibility.showProduct && <ProductDropdown />}
-                {visibility.showWhySignoz && (
-                  <TrackingLink
-                    href="/why-signoz"
-                    className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-                    clickType="Nav Click"
-                    clickName="Why Signoz Link"
-                    clickText="Why Signoz"
-                    clickLocation="Top Navbar"
-                    prefetch={false}
-                  >
-                    Why SigNoz
-                  </TrackingLink>
-                )}
-                {visibility.showDocs && (
-                  <TrackingLink
-                    href="/docs"
-                    className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-                    clickType="Nav Click"
-                    clickName="Docs Link"
-                    clickText="Docs"
-                    clickLocation="Top Navbar"
-                    prefetch={false}
-                  >
-                    Docs
-                  </TrackingLink>
-                )}
-                {visibility.showResources && <ResourcesDropdown />}
-                {visibility.showPricing && (
-                  <TrackingLink
-                    href="/pricing"
-                    className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-                    clickType="Nav Click"
-                    clickName="Pricing Link"
-                    clickText="Pricing"
-                    clickLocation="Top Navbar"
-                  >
-                    Pricing
-                  </TrackingLink>
-                )}
-                {visibility.showCustomerStories && (
-                  <TrackingLink
-                    href="/case-study"
-                    className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-                    clickType="Nav Click"
-                    clickName="Customer Stories Link"
-                    clickText="Customer Stories"
-                    clickLocation="Top Navbar"
-                  >
-                    Customer Stories
-                  </TrackingLink>
-                )}
-              </div>
+              <NavDropdownProvider>
+                <div
+                  className={`hidden items-center gap-x-3 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
+                >
+                  {visibility.showProduct && <ProductDropdown />}
+                  {visibility.showUseCases && <UseCasesDropdown />}
+                  {visibility.showDocs && (
+                    <TrackingLink
+                      href="/docs/introduction/"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
+                      clickType="Nav Click"
+                      clickName="Docs Link"
+                      clickText="Docs"
+                      clickLocation="Top Navbar"
+                      prefetch={false}
+                    >
+                      Docs
+                    </TrackingLink>
+                  )}
+                  {visibility.showResources && <ResourcesDropdown />}
+                  {visibility.showPricing && (
+                    <TrackingLink
+                      href="/pricing/"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
+                      clickType="Nav Click"
+                      clickName="Pricing Link"
+                      clickText="Pricing"
+                      clickLocation="Top Navbar"
+                    >
+                      Pricing
+                    </TrackingLink>
+                  )}
+                </div>
+                <NavDropdownPanel />
+              </NavDropdownProvider>
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center justify-end gap-2">
             {!isLoginRoute && (
               <>
                 <SearchButtonDeferred />
@@ -157,7 +144,9 @@ export default function TopNav() {
                 {visibility.showSignInGetStarted && (
                   <>
                     <TrackingButton
-                      className="-ml-1 box-border flex h-8 items-center gap-2 rounded-full bg-signoz_slate-500 px-4 py-2 pl-2 pr-2.5 text-sm font-normal not-italic leading-5 text-signoz_vanilla-100 no-underline outline-none hover:text-white"
+                      variant="secondary"
+                      rounded="default"
+                      className="box-border flex h-8 items-center rounded-md bg-signoz_slate-500 px-3 text-sm font-normal text-signoz_vanilla-100 no-underline outline-none hover:bg-slate-700/50 hover:text-white"
                       clickType="Secondary CTA"
                       clickName="Sign In Button"
                       clickText="Sign In"
@@ -167,16 +156,41 @@ export default function TopNav() {
                       Sign In
                     </TrackingButton>
                     <TrackingLink
-                      href="/teams"
-                      className="start-free-trial-btn flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+                      href="/teams/"
                       clickType="Primary CTA"
                       clickName="Sign Up Button"
                       clickText="Get Started - Free"
                       clickLocation="Top Navbar"
                     >
-                      <Button id="btn-get-started-website-navbar" className="flex-center">
-                        Get Started - Free
-                        <ArrowRight size={14} />
+                      <Button
+                        asChild
+                        variant="default"
+                        rounded="full"
+                        className={cn(
+                          'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600',
+                          'start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white'
+                        )}
+                      >
+                        <span id="btn-get-started-website-navbar">
+                          <span
+                            className={cn(
+                              'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+                              '[&_svg:not(.animate-spin)]:hidden'
+                            )}
+                          >
+                            Get Started - Free
+                            <ArrowRight size={14} />
+                          </span>
+                          <span
+                            className={cn(
+                              'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
+                              '!flex !bg-signoz_robin-400'
+                            )}
+                            aria-hidden="true"
+                          >
+                            <ArrowRight size={16} strokeWidth={2.5} />
+                          </span>
+                        </span>
                       </Button>
                     </TrackingLink>
                   </>
@@ -189,10 +203,24 @@ export default function TopNav() {
             <button
               type="button"
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 min-[1280px]:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => {
+                if (mobileMenuOpen) {
+                  setMobileMenuOpen(false)
+                  return
+                }
+                if (docsSidebar.isOpen) {
+                  docsSidebar.close()
+                  return
+                }
+                if (isDocsBasePath) {
+                  docsSidebar.toggle()
+                } else {
+                  setMobileMenuOpen(true)
+                }
+              }}
             >
               <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? (
+              {mobileMenuOpen || docsSidebar.isOpen ? (
                 <X strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
               ) : (
                 <Menu strokeWidth={1.5} className="h-6 w-6" aria-hidden="true" />
@@ -204,10 +232,7 @@ export default function TopNav() {
         <MobileMenu
           open={mobileMenuOpen}
           onClose={setMobileMenuOpen}
-          showMainMenu={showMainMenu}
-          isDocsBasePath={isDocsBasePath}
           isSignupRoute={isSignupRoute}
-          onShowMainMenu={() => setShowMainMenu(true)}
         />
       </header>
 

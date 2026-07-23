@@ -1,0 +1,351 @@
+---
+date: 2026-07-01
+title: Zero-Code eBPF Instrumentation with OpenTelemetry OBI
+description: Auto-instrument applications with eBPF using OpenTelemetry eBPF Instrumentation (OBI) and send RED metrics and traces to SigNoz with no code changes.
+doc_type: howto
+---
+
+## Overview
+
+OpenTelemetry eBPF Instrumentation (OBI) attaches eBPF probes to a running process and its network sockets, then emits OpenTelemetry metrics and traces without any code changes or recompilation. Use it when you cannot or do not want to add an OpenTelemetry SDK to an application, for example a compiled C/C++ binary, a third-party service, or a legacy process you cannot rebuild.
+
+OBI gives you:
+
+- **RED metrics** (Rate, Errors, Duration) for HTTP, HTTPS, and gRPC traffic.
+- **Distributed traces** (spans) for the same requests.
+- **Network flow metrics** such as TCP round-trip time and failed connections.
+
+OBI observes traffic at the protocol and kernel level. You get request rates, latency, errors, and connection health for supported protocols. OBI does not read application-internal state, so use an SDK when you need custom business metrics or spans from inside your code. Pair OBI with the [language SDKs](https://signoz.io/docs/instrumentation/overview/) when you need both.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Use the same steps for self-hosted SigNoz. Point the export endpoint at your OTel Collector or SigNoz instance and drop the ingestion key header, as shown in [Cloud -> Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- Linux kernel **5.8+** with BTF enabled (RHEL 4.18+ works too).
+- Root or `--privileged`, or the [required Linux capabilities](#run-obi-with-reduced-privileges).
+- A service that serves HTTP, HTTPS, or gRPC on a known port.
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
+
+## Select the target process
+
+OBI does not instrument every process on the host. You point it at one target using a selector:
+
+- **By port** with `OTEL_EBPF_OPEN_PORT`: the process listening on a port or range, such as **8443** or **8000-8999**.
+- **By executable** with `OTEL_EBPF_AUTO_TARGET_EXE`: an executable path glob, such as **\*/myserver**.
+
+Both selectors work in any environment and are interchangeable. The examples below use `OTEL_EBPF_OPEN_PORT` for Docker and Linux, and `OTEL_EBPF_AUTO_TARGET_EXE` for the Kubernetes DaemonSet, but you can use either selector in any of them.
+
+## Send data to SigNoz
+
+OBI exports OTLP to SigNoz Cloud.
+
+### Step 1. Run OBI against your service
+
+Choose your environment.
+
+<Tabs entityName="environment">
+
+<TabItem value="docker" label="Docker" default>
+
+Run OBI as a sidecar container alongside the container you want to observe. OBI needs the host PID namespace and elevated privileges to load eBPF probes. For all Docker options, see the <a href="https://opentelemetry.io/docs/zero-code/obi/setup/docker/" target="_blank" rel="noopener noreferrer nofollow">OBI Docker setup guide</a>.
+
+```bash
+docker run --rm \
+  --pid=host \
+  --privileged \
+  -e OTEL_EBPF_OPEN_PORT=8443 \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+  -e OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
+  otel/ebpf-instrument:v0.10.0
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `OTEL_EBPF_OPEN_PORT`: The port your target container serves traffic on.
+
+With Docker Compose, add OBI as a service in the same file:
+
+```yaml
+services:
+  obi:
+    image: otel/ebpf-instrument:v0.10.0
+    pid: host
+    privileged: true
+    environment:
+      OTEL_EBPF_OPEN_PORT: 8443
+      OTEL_EXPORTER_OTLP_ENDPOINT: "https://ingest.<region>.signoz.cloud:443"
+      OTEL_EXPORTER_OTLP_HEADERS: "signoz-ingestion-key=<your-ingestion-key>"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+```
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Deploy OBI as a DaemonSet so one instance runs on each node. Use this manifest to set host PID access, grant RBAC read access for pod metadata, and read the ingestion key from a Secret. For all Kubernetes options, see the <a href="https://opentelemetry.io/docs/zero-code/obi/setup/kubernetes/" target="_blank" rel="noopener noreferrer nofollow">OBI Kubernetes setup guide</a>.
+
+Create the namespace and Secret for the ingestion key header:
+
+```bash
+kubectl create namespace obi-system
+kubectl create secret generic signoz-ingestion \
+  --namespace obi-system \
+  --from-literal=headers="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Then apply the DaemonSet and RBAC:
+
+```yaml:obi-daemonset.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: obi
+  namespace: obi-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: obi
+rules:
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods", "services", "nodes"]
+    verbs: ["list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: obi
+subjects:
+  - kind: ServiceAccount
+    name: obi
+    namespace: obi-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: obi
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: obi
+  namespace: obi-system
+  labels:
+    app: obi
+spec:
+  selector:
+    matchLabels:
+      app: obi
+  template:
+    metadata:
+      labels:
+        app: obi
+    spec:
+      hostPID: true
+      serviceAccountName: obi
+      containers:
+        - name: obi
+          image: otel/ebpf-instrument:v0.10.0
+          securityContext:
+            privileged: true
+          env:
+            - name: OTEL_EBPF_AUTO_TARGET_EXE
+              value: "*/myserver"
+            - name: OTEL_EBPF_KUBE_METADATA_ENABLE
+              value: "true"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "https://ingest.<region>.signoz.cloud:443"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "http/protobuf"
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              valueFrom:
+                secretKeyRef:
+                  name: signoz-ingestion
+                  key: headers
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `OTEL_EBPF_AUTO_TARGET_EXE`: A glob matching the executable path of the pods you want to instrument.
+- `obi-system`: Change this namespace in the Secret command, ServiceAccount, DaemonSet, and ClusterRoleBinding subject if you deploy OBI in another namespace.
+
+Apply it:
+
+```bash
+kubectl apply -f obi-daemonset.yaml
+```
+
+`OTEL_EBPF_KUBE_METADATA_ENABLE=true` tags every metric and span with pod, namespace, and node names, so services group under the right names in SigNoz.
+
+</TabItem>
+
+<TabItem value="linux" label="Linux host">
+
+Download the OBI binary and run it as root against a process on the same host.
+
+```bash
+VERSION=0.10.0
+ARCH=amd64
+wget https://github.com/open-telemetry/opentelemetry-ebpf-instrumentation/releases/download/v${VERSION}/obi-v${VERSION}-linux-${ARCH}.tar.gz
+tar -xzf obi-v${VERSION}-linux-${ARCH}.tar.gz
+```
+
+Export the configuration and start OBI. `sudo -E` preserves the exported variables:
+
+```bash
+export OTEL_EBPF_OPEN_PORT=8443
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+
+sudo -E ./obi
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+</Tabs>
+
+Set `OTEL_SERVICE_NAME` on the target service you instrument. OBI reads the service name from `OTEL_SERVICE_NAME` or `OTEL_RESOURCE_ATTRIBUTES` on the target process or container. If those values are missing, OBI falls back to the Kubernetes workload name, then the executable name. See the <a href="https://opentelemetry.io/docs/zero-code/obi/configure/service-discovery/" target="_blank" rel="noopener noreferrer nofollow">OBI service discovery guide</a>.
+
+### Step 2. Generate traffic
+
+Send a few requests to your instrumented service so OBI has traffic to capture. For example:
+
+```bash
+curl http://localhost:8443/
+```
+
+In OBI's logs, confirm an `instrumenting process ... service=<name>` line and no export errors.
+
+## Validate
+
+Send some traffic to your instrumented service, then check SigNoz.
+
+Open **Services**. Your service appears with request rate, error rate, and latency (P50/P90/P99) within a minute or two.
+
+<Figure
+  src="/img/docs/instrumentation/ebpf/ebpf-services.webp"
+  alt="OBI-instrumented service with RED metrics on the SigNoz Services page"
+  caption="RED metrics for an OBI-instrumented service, with no code changes"
+/>
+
+Open **Traces** and filter by the service name to see spans for individual requests.
+
+<Figure
+  src="/img/docs/instrumentation/ebpf/ebpf-traces.webp"
+  alt="eBPF-captured HTTP spans in the SigNoz Traces Explorer"
+  caption="Individual HTTP request spans captured by OBI via eBPF"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No service or traces in SigNoz
+
+- Cause: OBI did not match the target process.
+- Fix: Confirm the target selector. If you used `OTEL_EBPF_OPEN_PORT`, make sure the process listens on that exact port. Set `OTEL_EBPF_TRACE_PRINTER=text` to print captured spans to OBI's stdout, which confirms whether OBI sees traffic at all.
+- Verify: OBI logs list the discovered executable, and spans print to the console.
+
+### OBI fails to start or load probes
+
+- Cause: The kernel is older than 5.8, BTF is disabled, or OBI lacks privileges.
+- Fix: Run `uname -r` to check the kernel version and confirm `/sys/kernel/btf/vmlinux` exists. Run OBI with `--privileged` (Docker) or `privileged: true` (Kubernetes) while validating.
+- Verify: OBI starts without capability or permission errors in its logs.
+
+### Data reaches OBI but not SigNoz
+
+- Cause: Wrong endpoint, missing ingestion key, or a protocol mismatch.
+- Fix: Recheck `OTEL_EXPORTER_OTLP_ENDPOINT` for your region and confirm `OTEL_EXPORTER_OTLP_HEADERS` carries `signoz-ingestion-key`. Keep `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf` for the `:443` endpoint.
+- Verify: OBI logs show successful OTLP exports with no connection or authentication errors.
+
+### OBI logs "creating OTEL namespace in bpffs failed (is bpffs mounted?)"
+
+- Cause: The BPF filesystem is not mounted where OBI can pin maps.
+- Impact: OBI continues exporting metrics and traces. Features that rely on pinned maps, such as the log enricher and profile correlation, stay disabled. Ignore this warning if you do not use those features.
+- Fix (optional): Mount the BPF filesystem into the OBI container, for example add a `/sys/fs/bpf` volume mount, then restart OBI.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Run OBI with reduced privileges
+</ToggleHeading>
+
+Instead of `--privileged`, grant the capabilities OBI needs. In Kubernetes, replace the OBI container's `securityContext` and add the matching mounts:
+
+```yaml
+containers:
+  - name: obi
+    securityContext:
+      runAsUser: 0
+      readOnlyRootFilesystem: true
+      capabilities:
+        add:
+          - BPF
+          - PERFMON
+          - NET_RAW
+          - NET_ADMIN
+          - SYS_PTRACE
+          - SYS_ADMIN
+          - DAC_READ_SEARCH
+          - CHECKPOINT_RESTORE
+        drop:
+          - ALL
+    volumeMounts:
+      - name: var-run-obi
+        mountPath: /var/run/obi
+      - name: cgroup
+        mountPath: /sys/fs/cgroup
+volumes:
+  - name: var-run-obi
+    emptyDir: {}
+  - name: cgroup
+    hostPath:
+      path: /sys/fs/cgroup
+```
+
+Mount `/var/run/obi` as writable storage for OBI runtime state. Mount host `/sys/fs/cgroup` so OBI can inspect cgroup metadata. `NET_ADMIN` covers network flow metrics and trace-context propagation, and `SYS_ADMIN` covers Go library-level trace-context propagation and BTF access. Kernels older than 5.11 additionally need `SYS_RESOURCE`. For the full capability-to-feature mapping, see the <a href="https://opentelemetry.io/docs/zero-code/obi/security/" target="_blank" rel="noopener noreferrer nofollow">OBI security and capabilities guide</a>.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+Use the OpenTelemetry Collector when you need to process, filter, or route telemetry before it reaches SigNoz. Follow the [Switch to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) guide for setup instructions.
+
+For OBI, point the OTLP endpoint to your Collector:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="http://<collector-host>:4318"
+OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+```
+
+</details>
+
+## Next steps
+
+- [Create dashboards](https://signoz.io/docs/dashboards/dashboard-templates/overview/) from OBI's RED metrics.
+- [Set up alerts](https://signoz.io/docs/userguide/alerts-management/) on error rate and latency.
+- Add a [language SDK](https://signoz.io/docs/instrumentation/overview/) when you need custom spans or business metrics alongside eBPF data.
+
+## Get Help
+
+<GetHelp />

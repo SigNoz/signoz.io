@@ -1,12 +1,9 @@
 ---
-date: 2026-03-25
-id: routing-connector
+date: 2026-05-11
 title: OpenTelemetry Collector Routing Connector
 description: Learn how to separate telemetry from multiple services using a single OpenTelemetry Collector and send it to different destinations or ingestion keys.
 doc_type: howto
 ---
-
-import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
@@ -78,18 +75,18 @@ You can point each exporter to a different SigNoz account, ingestion key, or bac
 
 ```yaml:otel-collector-config.yaml
 exporters:
-  otlp/signoz:
-    endpoint: "ingest.<region>.signoz.cloud:443"
+  otlphttp/signoz:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<default-ingestion-key>"
 
-  otlp/vendor-payments:
-    endpoint: "ingest.<region>.signoz.cloud:443"
+  otlphttp/vendor-payments:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<payments-ingestion-key>"
 
-  otlp/vendor-search:
-    endpoint: "ingest.<region>.signoz.cloud:443"
+  otlphttp/vendor-search:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<search-ingestion-key>"
 ```
@@ -109,13 +106,13 @@ service:
       exporters: [routing]
     traces/payments:
       receivers: [routing]
-      exporters: [otlp/vendor-payments]
+      exporters: [otlphttp/vendor-payments]
     traces/search:
       receivers: [routing]
-      exporters: [otlp/vendor-search]
+      exporters: [otlphttp/vendor-search]
     traces/default:
       receivers: [routing]
-      exporters: [otlp/signoz]
+      exporters: [otlphttp/signoz]
 ```
 <Admonition type="info">
 A connector appears as an **exporter** in the upstream pipeline and as a **receiver** in each downstream pipeline. This is how the Collector bridges pipelines together.
@@ -147,18 +144,18 @@ connectors:
         pipelines: [traces/search]
 
 exporters:
-  otlp/signoz:
-    endpoint: "ingest.<region>.signoz.cloud:443"
+  otlphttp/signoz:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<default-ingestion-key>"
 
-  otlp/vendor-payments:
-    endpoint: "ingest.<region>.signoz.cloud:443"
+  otlphttp/vendor-payments:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<payments-ingestion-key>"
 
-  otlp/vendor-search:
-    endpoint: "ingest.<region>.signoz.cloud:443"
+  otlphttp/vendor-search:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<search-ingestion-key>"
 
@@ -170,13 +167,13 @@ service:
       exporters: [routing]
     traces/payments:
       receivers: [routing]
-      exporters: [otlp/vendor-payments]
+      exporters: [otlphttp/vendor-payments]
     traces/search:
       receivers: [routing]
-      exporters: [otlp/vendor-search]
+      exporters: [otlphttp/vendor-search]
     traces/default:
       receivers: [routing]
-      exporters: [otlp/signoz]
+      exporters: [otlphttp/signoz]
 ```
 </details>
 
@@ -197,6 +194,7 @@ If nothing matches and `default_pipelines` is missing, unmatched telemetry is dr
 
 - [Collector configuration reference](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/) — Review receivers, processors, and exporters.
 - [Switch to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) — Move apps to a central Collector before you add routing.
+- [GeoIP Processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/geoip-processor/) — Enrich telemetry with geographic location data from IP addresses.
 
 ## Get Help
 

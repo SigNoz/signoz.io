@@ -1,6 +1,5 @@
 ---
-date: 2026-02-04
-id: overview
+date: 2026-06-11
 title: ECS EC2 Collection Agent - Install
 description: View metrics and logs for your ECS infrastructure
 ---
@@ -22,7 +21,7 @@ Before starting, verify you have:
 
 The CloudFormation template defines the infrastructure needed for the daemon service, including container specifications, IAM roles, and network settings.
 
-<Tabs groupId="launch-type">
+<Tabs entityName="launch-type">
 <TabItem value="ec2" label="EC2" default>
 
 ```yaml
@@ -481,10 +480,8 @@ processors:
 exporters:
   # Exports telemetry to your backend (e.g., SigNoz)
   # Uses environment variables for portability, which you'll set in your ECS task definition.
-  otlp:
-    endpoint: 'ingest.{region}.signoz.cloud:443'
-    tls:
-      insecure: false
+  otlphttp:
+    endpoint: 'https://ingest.{region}.signoz.cloud:443'
     headers:
       signoz-ingestion-key: '<your-ingestion-key>'
   # Useful for debugging; prints telemetry to the collector's logs.
@@ -498,17 +495,17 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
 
     metrics:
       receivers: [otlp, hostmetrics, awsecscontainermetrics]
       processors: [resourcedetection, batch]
-      exporters: [otlp, debug]
+      exporters: [otlphttp, debug]
 
     logs:
       receivers: [otlp, filelog]
       processors: [resourcedetection, batch]
-      exporters: [otlp, debug]
+      exporters: [otlphttp, debug]
 ```
 
 </TabItem>
@@ -580,10 +577,8 @@ processors:
 exporters:
   # Exports telemetry to your backend (e.g., SigNoz)
   # Uses environment variables for portability, which you'll set in your ECS task definition.
-  otlp:
-    endpoint: '<SIGNOZ_SELF_HOST_ENDPOINT>'
-    tls:
-      insecure: true # Set to false in production if your endpoint has a valid TLS certificate
+  otlphttp:
+    endpoint: 'http://<SIGNOZ_SELF_HOST_ENDPOINT>:4318'
 
   # Useful for debugging; prints telemetry to the collector's logs.
   # Can be disabled by removing it from the pipelines below.
@@ -596,17 +591,17 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
 
     metrics:
       receivers: [otlp, hostmetrics, awsecscontainermetrics]
       processors: [resourcedetection, batch]
-      exporters: [otlp, debug]
+      exporters: [otlphttp, debug]
 
     logs:
       receivers: [otlp, filelog]
       processors: [resourcedetection, batch]
-      exporters: [otlp, debug]
+      exporters: [otlphttp, debug]
 ```
 
 </TabItem>
@@ -693,6 +688,18 @@ Look for:
 - **Health Status**: Should be `HEALTHY`
 - **Container Status**: All containers should be `RUNNING`
 
+## Video Walkthrough
+
+If you are someone who understands things better through video implementation, here are videos to help you. Check them out:
+
+**Part 1 — AWS ECS OpenTelemetry Tutorial: Daemon Service Setup, SSM Config & CloudFormation Deploy**
+
+<YouTube id="adodyKwlh84" />
+
+**Part 2 — AWS ECS OpenTelemetry Tutorial: Deploy App Containers, Route OTLP & Validate Signals in SigNoz**
+
+<YouTube id="NxW0XhWhN-s" />
+
 ## Troubleshooting Installation
 
 ### Common Issues
@@ -729,7 +736,7 @@ This will remove all resources created by the CloudFormation template, including
 
 ## Next Steps
 
-- [Configure the Daemon Service Collection Agent](/docs/collection-agents/ecs/ec2/configure/)
+- [Configure the Daemon Service Collection Agent](/docs/opentelemetry-collection-agents/ecs/ec2/configure/)
 - [Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
-- [Learn more about Collection from EC2](/docs/collection-agents/ecs/ec2/overview)
+- [Learn more about Collection from EC2](/docs/opentelemetry-collection-agents/ecs/ec2/overview/)

@@ -2,22 +2,20 @@ import 'css/tailwind.css'
 import 'css/global.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GoogleTagManager } from '@next/third-parties/google'
-import SectionContainer from '@/components/SectionContainer'
 import siteMetadata from '@/data/siteMetadata'
-import { ThemeProviders } from './theme-providers'
 import { Metadata } from 'next'
-import MainFooter from '@/components/mainFooter'
-import TopNav from '@/components/TopNav/TopNav'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
-import { GrowthBookProvider } from '@/components/GrowthBookProvider'
 import { AnonymousIdSetter } from './anonymous-id-setter'
 
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
 })
+
+// Restore Next 14 implicit fetch caching — Next 15 defaults to no-cache.
+export const fetchCache = 'default-cache'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl),
@@ -38,7 +36,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: './',
     types: {
-      'application/rss+xml': `${siteMetadata.siteUrl}/feed.xml`,
+      'application/rss+xml': `${siteMetadata.siteUrl}/rss/`,
     },
   },
   robots: {
@@ -62,7 +60,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={siteMetadata.language} className={inter.className} suppressHydrationWarning>
+    <html
+      lang={siteMetadata.language}
+      className={`dark ${inter.className}`}
+      data-theme="default"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <GoogleTagManager gtmId="GTM-N9B6D4H" />
       <link rel="apple-touch-icon" sizes="76x76" href="/static/favicons/apple-touch-icon.png" />
       <link rel="icon" type="image/png" sizes="32x32" href="/static/favicons/favicon-32x32.png" />
@@ -90,7 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <meta name="msapplication-TileColor" content="#000000" />
       <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fff" />
       <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000" />
-      <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
+      <link rel="alternate" type="application/rss+xml" href="/rss/" />
 
       <body className="pl-[calc(100vw-100%)] text-white antialiased">
         <SpeedInsights />
@@ -107,18 +111,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
 
         <AnonymousIdSetter />
-
-        <ThemeProviders>
-          <GrowthBookProvider>
-            <SectionContainer>
-              <div className="relative flex h-screen flex-col justify-between ">
-                <TopNav />
-                <main className="mb-auto mt-[48px] bg-signoz_ink-500">{children}</main>
-                <MainFooter />
-              </div>
-            </SectionContainer>
-          </GrowthBookProvider>
-        </ThemeProviders>
+        {children}
       </body>
     </html>
   )

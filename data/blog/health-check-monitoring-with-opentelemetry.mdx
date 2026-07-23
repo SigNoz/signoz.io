@@ -1,15 +1,22 @@
 ---
 
 title: Health Check Monitoring With OpenTelemetry | Complete Code Tutorial
-slug: health-check-monitoring-with-opentelemetry
-date: 2024-09-26
+meta_title: "Health Check Monitoring with OpenTelemetry"
+published_date: 2024-09-26
+updated_date: 2026-06-30
 tags: [OpenTelemetry]
 authors: [daniel]
-description: HTTP endpoints can be monitored with OpenTelemetry. The HTTP Check Receiver is a component of the OpenTelemetry Collector that enables monitoring of HTTP endpoints. It periodically sends HTTP requests to specified endpoints...
+description: "Health check monitoring with OpenTelemetry: use the Collector's httpcheck receiver to probe HTTP endpoints and track uptime in SigNoz. Step-by-step guide."
 image: /img/blog/2023/12/http-endpoint-monitoring-cover.jpeg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,observability,metrics]
-
+related_articles:
+  - '/blog/what-is-opentelemetry'
+  - '/blog/opentelemetry-logs'
+  - '/blog/opentelemetry-apache-server-metrics-monitoring'
+  - '/blog/should-you-diy-your-opentelemetry-monitoring-observability'
+  - '/blog/opentelemetry-nginx'
+  - '/blog/opentelemetry-alternatives'
 ---
 
 Health check monitoring is a critical practice for maintaining reliable and high-performing systems. It allows you to proactively identify and address issues before they impact your users. 
@@ -18,7 +25,7 @@ This guide explores the fundamentals of health check monitoring, its importance 
 
 You will also learn how HTTP endpoints can be monitored with OpenTelemetry. You will use the OpenTelemetry Collector to collect metrics from the target endpoint and send them to SigNoz for monitoring and visualization.
 
-If you want to jump straight into implementation, start with this [prerequisites](/blog/health-check-monitoring-with-opentelemetry#prerequisites).
+If you want to jump straight into implementation, start with this [prerequisites](/blog/health-check-monitoring-with-opentelemetry/#prerequisites).
 
 ## What is Health Check Monitoring?
 
@@ -127,7 +134,7 @@ receivers:
 
 ```
 
-You can find more details on advanced configurations <a href = "https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+You can find more details on <a href = "https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md" rel="noopener noreferrer nofollow" target="_blank" >advanced configurations for the OTLP receiver</a>.
 
 Once a receiver is configured, it needs to be **enabled** to start the data flow. This involves setting up **pipelines** within a **`service`**. A **pipeline** acts as a streamlined pathway for data, outlining how it should be processed and where it should go. A pipeline comprises of the following:
 
@@ -155,6 +162,8 @@ Here’s a breakdown of the above metrics pipeline:
 
 ## Monitoring HTTP endpoint with OpenTelemetry Collector
 
+On collection, the modern, OpenTelemetry-native way to do this is the Collector's httpcheck receiver: it periodically issues requests to your HTTP endpoints and emits availability and latency metrics over [OTLP](https://signoz.io/blog/what-is-otlp/), so health checks live in the same pipeline as your traces and metrics in a backend like SigNoz, with no separate uptime service.
+
 In this section, you will learn how HTTP endpoints can be monitored and how metrics can be collected from those endpoints using the OpenTelemetry Collector. You will also learn how the collected metrics can be sent to SigNoz for visualization.
 
 ## Prerequisites
@@ -170,7 +179,7 @@ You need a backend to send the collected data for monitoring and visualization.�
 
 ## Setting up OpenTelemetry Collector
 
-The OpenTelemetry Collector offers various deployment options to suit different environments and preferences. It can be deployed using Docker, Kubernetes, Nomad, or directly on Linux systems. You can find all the installation options <a href = "https://opentelemetry.io/docs/collector/installation" rel="noopener noreferrer nofollow" target="_blank" >here</a>. For the purpose of this article, the OpenTelemetry Collector will be installed manually.
+The OpenTelemetry Collector offers various deployment options to suit different environments and preferences. It can be deployed using Docker, Kubernetes, Nomad, or directly on Linux systems. You can find all the <a href = "https://opentelemetry.io/docs/collector/installation" rel="noopener noreferrer nofollow" target="_blank" >installation options</a>. For the purpose of this article, the OpenTelemetry Collector will be installed manually.
 
 ### Download the OpenTelemetry Collector
 
@@ -274,7 +283,7 @@ service:
 
 ```
 
-The HTTP Check Receiver is a component of the OpenTelemetry Collector that enables monitoring of HTTP endpoints. It periodically sends HTTP requests to specified endpoints and collects metrics about the responses, such as response time, status code, and error messages. You can find more information on the OpenTelemetry HTTP Check receiver <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/httpcheckreceiver" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+The HTTP Check Receiver is a component of the OpenTelemetry Collector that enables monitoring of HTTP endpoints. It periodically sends HTTP requests to specified endpoints and collects metrics about the responses, such as response time, status code, and error messages. You can find more information on the <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/httpcheckreceiver" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry HTTP Check receiver</a>.
 
 In the above config file, you can see that we are setting the endpoints as targets to be monitored.
 
@@ -357,7 +366,7 @@ It will take you to the alerts page; from there, you can create the alerts.
 <figcaption><i>Create alerts to be notified in case an endpoint is down</i></figcaption>
 </figure>
 
-Visit the SigNoz [documentation](https://signoz.io/docs/userguide/manage-dashboards-and-panels/) to learn more about creating dashboards and running queries.
+Visit the SigNoz [documentation](https://signoz.io/docs/userguide/manage-dashboards/) to learn more about creating dashboards and running queries.
 
 ## Metrics and Resource Attributes for HTTP receiver supported by OpenTelemetry
 
@@ -455,5 +464,9 @@ Start by identifying key indicators of your system's health, such as response ti
 
 - [Complete Guide on OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
 - [An OpenTelemetry-native APM](https://signoz.io/blog/opentelemetry-apm/)
-
+- [Essential Guide to Endpoint Monitoring - Secure Your Network](https://signoz.io/guides/endpoint-monitoring/)
+- [Essential Guide to Server Health Monitoring - Tools and Best Practices](https://signoz.io/guides/server-health-monitoring/)
+- [What is Distributed Tracing and How to implement it with Open Source?](https://signoz.io/blog/distributed-tracing/)
+- [Top APM Tools](https://signoz.io/blog/apm-tools/)
+- [APM Metrics: All You Need to Know](https://signoz.io/guides/apm-metrics/)
 ---

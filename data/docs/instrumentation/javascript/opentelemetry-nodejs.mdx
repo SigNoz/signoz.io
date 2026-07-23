@@ -1,8 +1,7 @@
 ---
-date: 2026-03-26
-id: nodejs
-title: Node.js OpenTelemetry Instrumentation
-description: Learn how to instrument your Node.js application with OpenTelemetry and send telemetry data to SigNoz
+date: 2026-07-18
+title: Node.js OpenTelemetry Instrumentation Guide
+description: Learn how to instrument your Node.js or NestJS app with OpenTelemetry. Use auto or manual instrumentation to send traces to SigNoz for faster debugging.
 doc_type: howto
 ---
 
@@ -20,7 +19,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ## Send traces to SigNoz
 
-<Tabs entityName="deployment">
+<Tabs entityName="environment">
 <TabItem value="vm" label="VM" default>
 
 <KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
@@ -39,6 +38,7 @@ export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 ```
@@ -47,6 +47,15 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `payment-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Install OpenTelemetry packages
 
@@ -89,6 +98,8 @@ env:
   value: 'env,host,os'
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.version=<service-version>'
 - name: OTEL_EXPORTER_OTLP_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: NODE_OPTIONS
@@ -99,6 +110,15 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `payment-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Install OpenTelemetry packages
 
@@ -152,7 +172,21 @@ Add these annotations to your pod template's `metadata.annotations`:
 
 ```yaml
 instrumentation.opentelemetry.io/inject-nodejs: "true"
+resource.opentelemetry.io/service.name: "<service-name>"
+resource.opentelemetry.io/service.version: "<service-version>"
 ```
+
+Verify these values:
+- `<service-name>`: A descriptive name for your service (e.g., `my-node-app`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 </TabItem>
 </Tabs>
@@ -168,6 +202,7 @@ $env:OTEL_TRACES_EXPORTER = "otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_NODE_RESOURCE_DETECTORS = "env,host,os"
 $env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.version=<service-version>"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:NODE_OPTIONS = "--require @opentelemetry/auto-instrumentations-node/register"
 ```
@@ -176,6 +211,15 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service.
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Install OpenTelemetry packages
 
@@ -210,6 +254,7 @@ ENV OTEL_TRACES_EXPORTER="otlp"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 
@@ -224,6 +269,7 @@ docker run \
   -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
   -e OTEL_NODE_RESOURCE_DETECTORS="env,host,os" \
   -e OTEL_SERVICE_NAME="<service-name>" \
+  -e OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>" \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
   -e NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register" \
   your-image:latest
@@ -233,6 +279,15 @@ Verify these values:
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `payment-service`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Build and run
 
@@ -293,6 +348,20 @@ If your application exits quickly, explicitly shutdown the SDK to flush all span
 // Assumes 'sdk' is your NodeSDK instance from the setup
 await sdk.shutdown();
 ```
+
+### Why does node -r throw ERR_REQUIRE_ESM?
+
+If your project's package.json sets **type to module**, Node treats every JavaScript file as an ES module. The `-r`/`--require` flag only supports CommonJS, so preloading `tracing.js` this way throws **ERR_REQUIRE_ESM**.
+
+Renaming `tracing.js` to `tracing.cjs` stops the crash, but it doesn't fix instrumentation: `require-in-the-middle` (what auto-instrumentation relies on) can't patch modules your app loads through import, so spans for those modules stay missing even though the process starts.
+
+For a module-type project, write the tracing file in ESM instead (see the TypeScript tab in the Code-Based Setup (Optional) section below for the equivalent import syntax, saved as `tracing.mjs`) and load it with the OpenTelemetry ESM hook:
+
+```bash
+node --experimental-loader=@opentelemetry/instrumentation/hook.mjs --import ./tracing.mjs app.js
+```
+
+See the <a href="https://github.com/open-telemetry/opentelemetry-js/blob/main/doc/esm-support.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry ESM support guide</a> for the `--require`/.cjs variant needed on Node 16.x and 18.1.0-18.18.x.
 
 ### Service not appearing in SigNoz
 
@@ -464,8 +533,9 @@ See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetr
 ## Next steps
 
 - Complete your observability setup by sending [metrics](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs/) and [logs](https://signoz.io/docs/logs-management/send-logs/nodejs-logs/) from your Node.js application.
-- [Instrument the client-side of your app for traces](https://signoz.io/docs/frontend-monitoring/sending-traces-with-opentelemetry)
-- [Capture frontend metrics, logs, and vitals](https://signoz.io/docs/frontend-monitoring)
+- [Instrument the client-side of your app for traces](https://signoz.io/docs/frontend-monitoring/sending-traces-with-opentelemetry/)
+- [Capture frontend metrics, logs, and vitals](https://signoz.io/docs/frontend-monitoring/)
 - [Exclude HTTP Endpoints](https://signoz.io/docs/instrumentation/javascript/nodejs-exclude-http-endpoints/)
 - [Selective Instrumentation](https://signoz.io/docs/instrumentation/javascript/nodejs-selective-instrumentation/)
 - [Manual Instrumentation](https://signoz.io/docs/instrumentation/javascript/nodejs-manual-instrumentation/)
+- For framework-specific walkthroughs, see our guides on [instrumenting Express applications](https://signoz.io/blog/opentelemetry-express/) and [NestJS applications](https://signoz.io/blog/opentelemetry-nestjs/), which build on the base setup above.

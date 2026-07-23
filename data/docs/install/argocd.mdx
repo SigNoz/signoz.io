@@ -1,15 +1,10 @@
 ---
-date: 2025-05-06
-id: argocd
+date: 2026-06-11
 tags : [Self-Host]
 title: Deploying with ArgoCD
 description: Learn how to install SigNoz using ArgoCD for GitOps based deployment
 ---
 
-import CommonPrerequisites from '@/components/shared/k8s-common-prerequisites.md'
-import K8sInstall from '@/components/shared/k8s-install.mdx'
-import K8sOtelDemo from '@/components/shared/k8s-oteldemo.mdx'
-import K8sNextSteps from '@/components/shared/k8s-next-steps.md'
 
 <HostingDecision />
 
@@ -35,7 +30,7 @@ We will be using the SigNoz Helm [chart](https://github.com/SigNoz/charts), whic
 - Zookeeper
 
 ArgoCD allows to install application by using the helm charts through the UI, or in the declarative GitOps way. For detailed instructions on using helm charts with ArgoCD, please refer to the documentation [documentation][4]
-<Tabs>
+<Tabs entityName="method">
 
 <TabItem label="Apply the argo application with kubectl" value="kubectl">
 
@@ -52,7 +47,7 @@ spec:
   project: default
   source:
     repoURL: https://charts.signoz.io
-    targetRevision: 0.79.0
+    targetRevision: 0.116.2
     chart: signoz
   destination:
     server: https://kubernetes.default.svc
@@ -80,10 +75,11 @@ Follow the [docs][3] for creating an application from the ArgoCD CLI.
 
 </Tabs>
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/argocd-dashboard.webp" alt="ArgoCD dashboard for signoz application"/>
-    <figcaption><i>ArgoCD dashboard for signoz application</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/argocd-dashboard.webp"
+  alt="ArgoCD dashboard for signoz application"
+  caption="ArgoCD dashboard for signoz application"
+/>
 ## Configuration
 
 ### Customizing the Installation
@@ -97,7 +93,7 @@ signoz:
   image:
     registry: docker.io
     repository: signoz/signoz
-    tag: v0.81.0
+    tag: v0.116.1
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
@@ -121,7 +117,7 @@ spec:
   project: default
   source:
     repoURL: https://charts.signoz.io
-    targetRevision: 0.79.0
+    targetRevision: 0.116.2
     chart: signoz
     helm:
       valueFiles:

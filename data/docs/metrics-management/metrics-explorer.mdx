@@ -1,8 +1,8 @@
 ---
-date: 2025-06-06
+date: 2026-05-15
 title: Metrics Explorer
-id: metrics-explorer
-
+description: Discover, explore, and visualize all metrics flowing into your SigNoz deployment using the Metrics Explorer.
+doc_type: reference
 ---
 
 ## Overview
@@ -11,17 +11,11 @@ Metrics Explorer provides instant visibility into all metrics flowing into your 
 
 Unlike traditional monitoring workflows that require you to guess metric names from dropdowns, Metrics Explorer shows you exactly what's being ingested with real-time metadata, including types, sample counts, time series cardinality, and data sources.
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics/metrics-explorer/overview-interface.webp"
-      alt="Metrics Explorer overview interface showing comprehensive metrics visibility"
-    />
-    <figcaption>
-      <i>
-        Metrics Explorer overview interface showing comprehensive metrics visibility
-      </i>
-    </figcaption>
-</figure>
+<Figure
+  src="/img/docs/metrics/metrics-explorer/overview-interface-new.webp"
+  alt="Metrics Explorer overview interface showing comprehensive metrics visibility"
+  caption="Metrics Explorer overview interface showing comprehensive metrics visibility"
+/>
 
 ## When to Use & Key Benefits
 
@@ -58,19 +52,18 @@ The Metrics Explorer main interface provides two primary visualisation modes:
 
 #### Proportion View
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics/metrics-explorer/proportion-view.webp"
-      alt="Proportion view showing metrics consumption and ingestion resource usage"
-    />
-    <figcaption>
-      <i>
-        Proportion view showing metrics consumption and ingestion resource usage
-      </i>
-    </figcaption>
-</figure>
+<Figure
+  src="/img/docs/metrics/metrics-explorer/proportion-view-new.webp"
+  alt="Proportion view showing metrics distribution by time series and samples"
+  caption="Proportion view showing metrics distribution with Time Series and Samples toggle"
+/>
 
-The Proportion View presents a treemap visualisation that shows the relative volume of metrics being ingested. Each rectangle represents a metric, with the size proportional to its ingestion volume. This view helps you:
+The Proportion View presents a treemap visualisation that shows the relative volume of metrics being ingested. Each rectangle represents a metric, with the size proportional to its ingestion volume. You can toggle between two modes using the dropdown in the top-right corner:
+
+- **Time Series**: Shows the proportion based on the number of unique time series (unique metric name + label combinations) each metric produces. This helps identify metrics with high cardinality.
+- **Samples**: Shows the proportion based on the total number of data points ingested. This helps identify metrics that generate the most data volume.
+
+This view helps you:
 
 - **Identify high-volume metrics** that consume the most ingestion resources
 - **Spot anomalies** in metric volume distribution
@@ -79,17 +72,11 @@ The Proportion View presents a treemap visualisation that shows the relative vol
 
 #### List View
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics/metrics-explorer/list-view.webp"
-      alt="Metrics Explorer list view showing detailed metrics information in tabular format"
-    />
-    <figcaption>
-      <i>
-        Metrics Explorer list view showing detailed metrics information in tabular format
-      </i>
-    </figcaption>
-</figure>
+<Figure
+  src="/img/docs/metrics/metrics-explorer/list-view.webp"
+  alt="Metrics Explorer list view showing detailed metrics information in tabular format"
+  caption="Metrics Explorer list view showing detailed metrics information in tabular format"
+/>
 
 The List View displays all metrics in a comprehensive table format with the following columns:
 
@@ -102,22 +89,16 @@ The List View displays all metrics in a comprehensive table format with the foll
 
 #### Navigation and Filtering
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics/metrics-explorer/search-and-filter-interface.webp"
-      alt="Metrics Explorer search and filter interface for finding specific metrics"
-    />
-    <figcaption>
-      <i>
-        Metrics Explorer search and filter interface for finding specific metrics
-      </i>
-    </figcaption>
-</figure>
+<Figure
+  src="/img/docs/metrics/metrics-explorer/search-and-filter-interface.webp"
+  alt="Metrics Explorer search and filter interface for finding specific metrics"
+  caption="Metrics Explorer search and filter interface for finding specific metrics"
+/>
 
 You can navigate and filter metrics using:
 
 - **Search Filter**: Use the search bar at the top to filter metrics by name or keywords
-- **Column Sorting**: Click on any column header to sort metrics by that attribute
+- **Column Sorting**: Click on the **METRIC**, **SAMPLES**, or **TIME SERIES** column headers to sort the list by that attribute
 - **Time Range Selection**: Adjust the time window (shown as "Last 30 minutes" in the top right)
 - **Pagination**: Navigate through large metric lists using the pagination controls at the bottom
 
@@ -135,26 +116,47 @@ The top section displays essential metric details:
 
 #### 2. Metadata Section
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics/metrics-explorer/metadata-view-detailed.webp"
-      alt="Detailed metadata view showing comprehensive metric information"
-    />
-    <figcaption>
-      <i>
-        Detailed metadata section showing comprehensive metric information
-      </i>
-    </figcaption>
-</figure>
+<Figure
+  src="/img/docs/metrics/metrics-explorer/metadata-view-new.webp"
+  alt="Metric detail panel showing metadata, dashboard usage, and Open in Explorer option"
+  caption="Metric detail panel showing metadata, dashboard usage, and actions"
+/>
 
 The Metadata section provides configurable information about the metric:
 
 - **Metric Type**: Displayed as a colored badge (e.g., "GAUGE")
 - **Description**: Human-readable description of the metric's purpose (editable)
-- **Unit**: Measurement unit specification (e.g., `{pod}`)
+- **Unit**: Measurement unit specification (e.g., `{cpu}`)
 - **Temporality**: Specification of how the metric data is aggregated
+- **Monotonic**: Indicates whether the metric value only increases
 
-If you feel the Metric Type, description, or temporality is incorrect, you can edit them using the **edit button**.
+**Dashboard usage**: If the metric is used in any dashboard, a badge (e.g., "1 dashboard") appears in the detail panel. Clicking it takes you directly to that dashboard. This makes it easy to see where a metric is being used across your monitoring setup. If the metric is not referenced by any dashboard, the badge is not shown.
+
+**Open in Explorer**: Click the **Open in Explorer** button in the top-right corner of the metric detail panel to open the selected metric directly in the Explorer query interface with the metric pre-populated.
+
+<Figure
+  src="/img/docs/metrics/metrics-explorer/open-in-explorer.webp"
+  alt="Metric opened in Explorer interface with query builder pre-populated"
+  caption="Clicking 'Open in Explorer' opens the metric directly in the Explorer query interface"
+/>
+
+**Inspect Metric**: Next to the "Open in Explorer" button, click the **Inspect Metric** icon to open the Metrics Inspector. The inspector provides:
+
+- **Graph View / Table View toggle**: Switch between a time-series chart and a raw data table
+- **Temporal Aggregation guidance**: Helps you align the data by selecting a Temporal Aggregation
+- **Individual time series breakdown**: See each unique time series for the metric plotted separately
+- **Data point details**: Hover over the chart to see exact values, timestamps, and all associated labels for each time series
+- **Query Builder**: Filter by specific attributes (e.g., `k8s_node_name`) and configure aggregation intervals
+
+<Figure
+  src="/img/docs/metrics/metrics-explorer/inspect-metric.webp"
+  alt="Metrics Inspector showing time series breakdown and data point details"
+  caption="Metrics Inspector showing individual time series breakdown and detailed data points"
+/>
+
+<Admonition type="info">
+If you feel the Metric Type, description, or temporality is incorrect, you can edit them using the **Edit** button in the Metadata section.
+</Admonition>
 
 #### 3. All Attributes Section
 
@@ -163,92 +165,71 @@ The "All Attributes" section displays the dimensional structure of the metric:
 - **Unique Identifiers**: Shows the specific attribute values associated with the metric
 - **Search Functionality**: Allows filtering through attribute values
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics/metrics-explorer/all-attributes-view-detailed.webp"
-      alt="Detailed All attributes section"
-    />
-    <figcaption>
-      <i>
-        Detailed metadata view showing comprehensive metric information
-      </i>
-    </figcaption>
-</figure>
+<Figure
+  src="/img/docs/metrics/metrics-explorer/all-attributes-view-detailed.webp"
+  alt="Detailed All attributes section"
+  caption="Detailed metadata view showing comprehensive metric information"
+/>
 
 ### Explorer Interface
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics/metrics-explorer/query-playground-interface.webp"
-      alt="Explorer interface showing query building and visualisation capabilities"
-    />
-    <figcaption>
-      <i>
-        Explorer interface showing query building and visualisation capabilities
-      </i>
-    </figcaption>
-</figure>
+<Figure
+  src="/img/docs/metrics/metrics-explorer/query-playground-interface.webp"
+  alt="Explorer interface showing query building and visualisation capabilities"
+  caption="Explorer interface showing query building and visualisation capabilities"
+/>
 
 The Explorer tab provides an interactive query building environment:
 
 **Query Configuration**:
-- **Metrics Selection**: Choose metrics from a dropdown with autocompletion
-- **WHERE Clause**: Add filters using the search interface for attribute-based filtering
-- **Sum By**: Group results by specific attributes or dimensions
-- **Aggregation Controls**: Set conditions for time-based aggregation and filters
-- **Legend Format**: Customise how the query results are displayed
+- **Metric**: Select the metric to query — the field auto-completes as you type
+- **Filter**: Add a filter expression to narrow results by attribute values (e.g., `service.name = 'frontend'`)
+- **Aggregate within time series**: Choose the time aggregation function (Avg, Sum, Min, Max, Count, Rate, etc.) and the step interval
+- **Aggregate across time series**: Choose the space aggregation function and optional group-by dimension
+- **Having / Order By / Limit / Legend format**: Refine results with post-aggregation filters, sorting, row limits, and custom legend labels
+- **Add Formula**: Combine multiple queries with mathematical expressions
+- **F(x)**: Apply functions like Cut Off Min, Log2, Time Shift, etc.
 
-**Visualization Options**:
-- **Y-axis Unit Selection**: Choose appropriate units for the visualization
-- **Time Range Control**: Adjust the query time window
-- **Chart Rendering**: View results in various chart formats
-- **Real-time Updates**: Get live updates as new data arrives
-
-**Action Buttons**:
-- **Stage & Run Query**: Execute the configured query
+**Actions**:
+- **Run Query**: Execute the configured query and render the chart
 - **Save this view**: Preserve query configurations for reuse
 - **Create an Alert**: Set up monitoring alerts based on the query
 - **Add to Dashboard**: Include the visualization in existing dashboards
 
 ## Saved Views in Metrics Explorer
 
-Similar to the [Saved Views feature](https://signoz.io/docs/product-features/saved-view/#how-to-use-saved-views) available in Logs and Traces Explorer, Metrics Explorer also supports saving your query configurations for quick access later.
+Saved Views let you preserve specific filter and query configurations so you can return to them instantly. This works across the Metrics, Logs, Traces, and Meter Explorers — any saved view is accessible to all users in your organization.
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics/metrics-explorer/saved-view-interface.webp"
-      alt="Saved View in Metrics Explorer"
-    />
-    <figcaption>
-      <i>
-        Saved View in Metrics Explorer
-      </i>
-    </figcaption>
-</figure>
+<Figure
+  src="/img/docs/metrics/metrics-explorer/saved-view-interface.webp"
+  alt="Saved View in Metrics Explorer"
+  caption="Saved View in Metrics Explorer"
+/>
 
 ### How to Use Saved Views
 
 **Saving a View:**
-1. Configure your metric query with desired filters and parameters in the Explorer interface
-2. Click the **"Save this view"** button 
-3. Enter a descriptive label for easy identification
-4. Confirm to save your view - a pop-up will confirm successful saving
+1. Configure your query with desired filters and parameters in the Explorer
+2. Click **Save this view** at the bottom of the page
+3. Enter a descriptive label and confirm
 
 **Accessing Saved Views:**
-- Use the dropdown at the bottom of the Explorer interface
+- Use the **Select a view** dropdown at the bottom of the Explorer
 - Select any saved view to instantly apply the preset configuration
-- Views are preserved across sessions for quick access
 
 **Managing Views:**
-- **Update**: Modify an existing view and click "Update this View" when changes are made
-- **Rename**: Edit view labels in the Views tab
-- **Delete**: Remove unused views from the Views tab
+- **Update**: Make changes to a loaded view, then click **Update this View**
+- **Rename**: Go to the **Views** tab, search for the view, and click the edit icon
+- **Delete**: Go to the **Views** tab, search for the view, and click the delete icon
+
+<Admonition type="info">
+Saved views are shared across your organization. All users can access saved views, but only users with **Editor** or **Admin** roles can edit or delete them.
+</Admonition>
 
 ### Use Cases for Saved Views
 
-- **Performance Monitoring**: Save views for key metrics you check regularly during daily operations
-- **Incident Response**: Quick access to critical metrics during outages and troubleshooting sessions
-- **Team Collaboration**: Share common metric views across team members for consistent monitoring
-- **Cost Analysis**: Monitor high-cardinality or high-volume metrics to optimise observability costs
-- **Routine Health Checks**: Create daily dashboard-style views without rebuilding filters each time
+- **Incident Response**: Quickly apply predefined filters to diagnose issues faster
+- **Team Collaboration**: Share consistent data perspectives across team members
+- **Routine Monitoring**: Use saved views as daily dashboards without rebuilding filters each time
+- **Cost Analysis**: Monitor high-cardinality or high-volume metrics to optimize observability costs
 

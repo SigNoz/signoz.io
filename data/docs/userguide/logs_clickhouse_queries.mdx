@@ -1,11 +1,22 @@
 ---
-date: 2026-02-11
-id: logs_clickhouse_queries
-title: Logs Schema and Writing ClickHouse Queries for Building Dashboard Panels
-description: Learn the SigNoz logs schema and how to write custom ClickHouse queries for building dashboard panels, including queries to find the largest logs for payload auditing.
+date: 2026-06-26
+title: Log Schema - Write ClickHouse Queries & Build Dashboard Panels
+description: Explore the SigNoz logs schema and learn to write ClickHouse queries for timeseries, value, and table panels using resource attributes for optimized performance.
 ---
 
+<Admonition type="info">
+ClickHouse queries are only supported in **Dashboards**. To write a ClickHouse query, go to **Dashboards**, create a new dashboard or open an existing one, add a new panel, and select the **ClickHouse Query** tab.
+</Admonition>
+
+<Figure
+  src="/img/docs/product-features/query-builder/clickhouse-query-editor.webp"
+  alt="ClickHouse Query editor in SigNoz Dashboards"
+  caption="ClickHouse Query editor in SigNoz Dashboards"
+/>
+
 At SigNoz we store our data on ClickHouse. In this documentation, we will go through the schema of the logs table and see how we can write clickhouse queries to create different dashboard panels from Logs Data.
+
+To write ClickHouse queries for logs, go to **[Dashboards](https://signoz.io/docs/userguide/manage-dashboards/)**, add or edit a panel (for example, Time Series or Table), and select the **ClickHouse Query** tab in the panel editor. The Logs Explorer does not support ClickHouse SQL queries — it uses the Query Builder interface only.
 
 ## Logs Schema V2
 
@@ -71,7 +82,7 @@ Any query that we write will be written for the `distributed_logs_v2` table. If 
 |**scope_version** | Instrumentation scope version. |
 |**scope_string** | Instrumentation scope attributes |
 
-The attributes and resources can be added and transformed using different processors and operators. You can read more about them [here](/docs/userguide/logs/#operators-for-parsing-and-manipulating-logs)
+The attributes and resources can be added and transformed using different processors and operators. You can read more about them [here](/docs/userguide/logs_query_builder/#operators-for-parsing-and-manipulating-logs)
 
 ## Timestamp Bucketing
 In the new schema for logs i.e `distributed_logs_v2`, we have a new column 
@@ -92,6 +103,10 @@ You can read more about it [here](/blog/query-performance-improvement/).
 
 <Admonition type="tip">
 **Always include resource attribute filters** in your queries when possible. This is one of the most effective ways to optimize log query performance.
+</Admonition>
+
+<Admonition type="warning">
+If you use an AI assistant to generate ClickHouse queries, review the output before relying on it. AI-generated queries can return **incorrect or misleading results** (for example, wrong filters, columns, or time range), may be **unoptimized** (leading to slow or expensive scans), and in some cases can lead to **potential data loss**. Always double-check the query and verify that it returns what you expect before using it in a dashboard panel.
 </Admonition>
 
 ### How to Filter Using Resource Attributes

@@ -1,11 +1,19 @@
 ---
-title: Django Logging - How to Configure, Customize, and Centralize Your Logs
-slug: django-logging
-date: 2026-02-23
+title: "Django Logging: Setup, Configuration, and Best Practices"
+meta_title: "Django Logging: Configuration and Best Practices"
+published_date: 2024-07-24
+updated_date: 2026-07-06
 tags: [python, opentelemetry]
 authors: [saurabh_patil]
-description: Learn how to set up Django logging with built-in tools, customize formatters and handlers, and send logs to SigNoz using OpenTelemetry.
+description: "Learn Django logging setup, configuration, handlers, formatters, levels, errors, and monitoring with SigNoz."
 keywords: [django logging, django logging configuration, python django logging, django logging best practices, django logging opentelemetry, django logging signoz, django structured logging]
+related_articles:
+  - '/guides/flask-logging'
+  - '/guides/logging-in-python'
+  - '/guides/python-logging-best-practices'
+  - '/guides/structlog'
+  - '/guides/python-logging-create-log-if-not-exists-or-open-and-continue-logging-if-it-does'
+  - '/guides/loguru'
 ---
 
 Django uses Python’s built-in logging module however, the default setup only surfaces warnings and errors, making debugging in production painful. This guide covers all the steps to set up effective logging in your Django application.
@@ -135,7 +143,8 @@ At this point, you won't see the `logger.info` or `logger.debug` messages anywhe
 
 ## How to use Logging in Django?
 
-Django uses Python’s built-in `logging` framework for all its logging needs. This means you get a standardized, flexible logging system that can route log messages to different outputs (console, files, external systems), filter them by severity, and format them consistently.
+Django uses Python’s built-in `logging` framework for all its logging needs. This means you get a standardized, flexible logging system that can route log messages to different outputs (console, files, external systems), filter them by severity, and format them consistently.<br />
+Any [Python logging best practices](https://signoz.io/guides/python-logging-best-practices/) you follow elsewhere, carry over here as well.
 
 At a high level, Django logging is configured through the `LOGGING` setting in `settings.py`. This setting is a dictionary that follows Python’s `logging.config.dictConfig` schema and lets you define:
 
@@ -720,7 +729,7 @@ opentelemetry-instrument gunicorn myproject.wsgi:application \
     --workers 4
 ```
 
-Gunicorn's default fork model works with OpenTelemetry out of the box. Each worker gets its own copy of the instrumentation after forking. If you use the `--preload` flag, you'll need a `post_fork` hook to reinitialize the SDK in each worker. For details, see [Django OpenTelemetry Instrumentation docs](/docs/instrumentation/opentelemetry-django/).
+Gunicorn's default fork model works with OpenTelemetry out of the box. Each worker gets its own copy of the instrumentation after forking. If you use the `--preload` flag, you'll need a `post_fork` hook to reinitialize the SDK in each worker. For details, see [Django OpenTelemetry Instrumentation docs](/docs/instrumentation/opentelemetry-python/).
 
 ## Troubleshooting
 

@@ -1,9 +1,11 @@
 ---
 title: Complete Guide to Implementing OpenTelemetry in Go Applications
-date: 2025-12-05
+meta_title: "OpenTelemetry in Go: Complete Implementation Guide"
+published_date: 2024-05-07
+updated_date: 2026-07-14
 tags: [opentelemetry, golang]
 authors: [aayush_sharma, ankit_anand]
-description: Learn how to use the language-specific implementation of OpenTelemetry in Go. OpenTelemetry Go libraries can be used to generate telemetry data from your Go applications, which can then be sent to an observability backend for visualization.
+description: "Learn how to instrument Go applications with OpenTelemetry, from SDK setup and tracing to custom attributes and events."
 image: /img/blog/2023/07/opentelemetry_golang_cover-min.jpg
 keywords: [opentelemetry, opentelemetry golang, opentelemetry go, distributed tracing, observability, golang application monitoring, golang instrumentation, signoz]
 ---
@@ -163,7 +165,7 @@ func initTracer() func(context.Context) error {
 
 ```
 
-The function above configures OpenTelemetry tracing for your Go service. It creates the OTLP exporter that pushes traces to your collector and assigns metadata. Hence, the backend knows which service the traces belong to and configures the tracer provider to sample, batch, and manage spans efficiently. It also returns a shutdown function that flushes all pending traces when the app stops.
+The function above configures OpenTelemetry tracing for your Go service. It creates the OTLP exporter that pushes traces to your [OTel Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) instance and assigns metadata. Hence, the backend knows which service the traces belong to and configures the tracer provider to sample, batch, and manage spans efficiently. It also returns a shutdown function that flushes all pending traces when the app stops.
 
 <KeyPointCallout title="Keyword glossary for the above function" defaultCollapsed="true">
 - **`otlptrace.New`**: creates the OTLP trace exporter
@@ -380,7 +382,13 @@ Now that your application is instrumented and generating traces, let's configure
 
 ## Monitoring Your Go Application
 
-To visualize and analyze the telemetry data we are generating, we need a backend that supports the OpenTelemetry Protocol (OTLP). We will use SigNoz, which ingests this data natively.
+To visualize and analyze the telemetry data we are generating, we need a backend that supports the [OpenTelemetry Protocol (OTLP)](https://signoz.io/blog/what-is-otlp/). We will use SigNoz, which ingests this data natively.
+
+<KeyPointCallout>
+
+Applications already using a structured logger can pair this with a [Go logging library such as Logrus](https://signoz.io/guides/golang-logrus/).
+
+</KeyPointCallout>
 
 ### Setting Up SigNoz
 
@@ -634,7 +642,7 @@ Now that your Go application is sending traces to SigNoz, here is what you shoul
 
 Distributed tracing is just one piece of the puzzle. Enhance your visibility by correlating traces with logs and metrics.
 
-* **[Golang Monitoring Guide - Traces, Logs, APM and Go Runtime Metrics](https://signoz.io/blog/monitoring-your-go-application-with-signoz/)**
+* **[Golang Monitoring Guide - Traces, Logs, APM and Go Runtime Metrics](https://signoz.io/blog/golang-monitoring/)**
 * **[Complete Guide to Logging in Go - Golang Log](https://signoz.io/guides/golang-log/)**
 
 Hope we answered all your questions regarding OpenTelemetry in Go. If you have more questions, feel free to use the SigNoz AI chatbot or join our [Slack community](https://signoz.io/slack/).

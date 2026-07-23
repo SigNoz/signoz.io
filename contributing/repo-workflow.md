@@ -23,12 +23,18 @@ Use this playbook for the shared workflow across docs, blogs, site code, and rev
 - Pre-commit runs `lint-staged` on staged files, which auto-fixes common JS, TS, MD, and MDX issues.
 - When staged changes include docs or redirect-related files (`data/docs/**/*.mdx`, `next.config.js`, or `scripts/check-doc-redirects.js`), pre-commit also runs `yarn check:doc-redirects`.
 - When staged changes include docs (`data/docs/**/*.mdx`), pre-commit also runs `yarn check:docs-metadata`.
+- When staged changes include code or content files (`components/`, `app/`, `constants/`, `hooks/`, `utils/`, `data/**/*.mdx`), pre-commit runs `node scripts/check-stale-urls.js --staged` to catch stale/redirected URLs and missing trailing slashes.
+- When staged changes include CMS-migrated content (`data/(docs|faqs|case-study|opentelemetry|comparisons|guides|blog)/**`), pre-commit runs `node scripts/check-cms-assets.js` to validate referenced assets exist in `data-assets/`.
+- When staged changes include dated content (`data/(blog|guides|comparisons|faqs|opentelemetry|case-study)/**`), pre-commit runs `node scripts/check-date-deprecation.js` to validate date-field combinations. It blocks on invalid combinations and warns on the deprecated `date` field.
 
 ### Fixing Hook Failures
 
 - Lint or format issues: run `yarn lint`, review auto-fixes, and re-stage changed files.
 - Redirect failures: run `yarn check:doc-redirects`, add the missing permanent redirect, then re-stage.
 - Metadata failures: run `yarn check:docs-metadata`, fix the MDX frontmatter, then re-stage.
+- Stale URL failures: run `yarn check:stale-urls`, update the link to the final destination shown in the output, then re-stage. Optional test: `yarn test:stale-urls`.
+- CMS asset failures: add the missing asset(s) to `data-assets/`, stage them, then re-commit. See [cms-content.md](cms-content.md#pre-commit-hook).
+- Date-field failures: fix the frontmatter date fields per the script output (remove the deprecated `date` field / resolve the invalid combination), then re-stage.
 - Optional redirect test: run `yarn test:doc-redirects`.
 
 ### Hooks Path
@@ -48,17 +54,18 @@ Use this playbook for the shared workflow across docs, blogs, site code, and rev
   - `yarn test:docs-metadata`
   - `yarn test:doc-redirects`
 - Site code changes (`app/**`, `components/**`, `hooks/**`, `utils/**`, config):
+  - `yarn check:stale-urls` + `yarn test:stale-urls`
   - `yarn lint`
   - `yarn build`
 - Mixed docs + code changes:
   - run both sets
-- `constants/componentItems/*.ts` changes:
-  - `yarn tsc --noEmit`
+- `constants/listicles/*.json` changes:
   - `node --test tests/component-items-sync.test.js`
 
 ## CI Checks
 
 - Docs Redirect Guard runs redirect tests and validation when docs paths or redirect-related files change.
+- Stale URL Guard runs stale URL tests and validation when code, content, or redirect-related files change.
 - Docs Metadata Guard runs metadata tests and validation when docs files or metadata tooling changes.
 - Add to Onboarding is label-driven. The eligibility policy lives in [docs-review.md](docs-review.md).
 

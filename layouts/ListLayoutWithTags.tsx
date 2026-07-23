@@ -1,16 +1,14 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 'use client'
 
 import { usePathname } from 'next/navigation'
 import { slug } from 'github-slugger'
 import { formatDate } from 'pliny/utils/formatDate'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Doc, Guide } from 'contentlayer/generated'
+import type { Blog, Doc, Guide } from '../types/transformedContent'
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import siteMetadata from '@/data/siteMetadata'
-import tagData from 'app/tag-data.json'
 import { RegionProvider } from '@/components/Region/RegionContext'
 
 interface PaginationProps {
@@ -23,6 +21,7 @@ interface ListLayoutProps {
   initialDisplayPosts?: CoreContent<Blog | Doc | Guide>[]
   pagination?: PaginationProps
   emptyMessage?: string
+  tagCounts?: Record<string, number>
 }
 
 function Pagination({ totalPages, currentPage }: PaginationProps) {
@@ -71,9 +70,9 @@ export default function ListLayoutWithTags({
   initialDisplayPosts = [],
   pagination,
   emptyMessage = 'No posts found.',
+  tagCounts = {},
 }: ListLayoutProps) {
   const pathname = usePathname()
-  const tagCounts = tagData as Record<string, number>
   const tagKeys = Object.keys(tagCounts)
   const sortedTags = tagKeys.sort((a, b) => tagCounts[b] - tagCounts[a])
   const displayPosts = initialDisplayPosts.length > 0 ? initialDisplayPosts : posts
@@ -166,7 +165,7 @@ export default function ListLayoutWithTags({
                 </div>
                 <div className="text-center text-gray-500 dark:text-gray-400">{emptyMessage}</div>
                 <Link href="/blog">
-                  <Button type={Button.TYPES.PRIMARY}>Back to Blog</Button>
+                  <Button variant="legacyPrimary">Back to Blog</Button>
                 </Link>
               </div>
             )}

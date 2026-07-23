@@ -1,13 +1,21 @@
 ---
 title: Using OpenTelemetry Collector Loki Receiver to Send Logs to SigNoz [Code Tutorial]
-slug: using-opentelemetry-loki-receiver-to-collect-logs
-date: 2023-12-09
+meta_title: "OpenTelemetry Collector Loki Receiver for Logs"
+published_date: 2023-12-09
+updated_date: 2026-07-08
 tags: [OpenTelemetry]
 authors: [daniel]
-description: In this tutorial, you will configure Promtail to send logs to OpenTelemetry Collector instead of Loki. This can be done by using the Loki receiver in OpenTelemetry Collector. The logs collected by OpenTelemetry Collector can then be sent to SigNoz - an OpenTelemetry-native APM...
+description: "Configure Promtail to send logs through the OpenTelemetry Collector Loki receiver to SigNoz, with a step-by-step code tutorial."
 image: /img/blog/2023/12/otel-col-loki-cover.jpeg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,observability,metrics,logs,loki]
+related_articles:
+  - '/blog/nginx-metrics-and-logs-monitoring-with-opentelemetry'
+  - '/blog/parsing-logs-with-the-opentelemetry-collector'
+  - '/blog/opentelemetry-apm'
+  - '/opentelemetry/setting-up-signoz'
+  - '/blog/community-update-15'
+  - '/blog/opentelemetry-rabbitmq-metrics-monitoring'
 ---
 In this tutorial, you will learn how to collect logs using the Loki receiver in OpenTelemetry Collector to send logs to SigNoz. If you’re using Promtail to collect logs, you can send them to SigNoz instead of Loki via the OpenTelemetry Collector.
 
@@ -76,6 +84,12 @@ service:
 
 The Loki receiver in the OpenTelemetry collector implements the <a href = "https://grafana.com/docs/loki/latest/reference/api/#push-log-entries-to-loki" rel="noopener noreferrer nofollow" target="_blank" >Loki push API</a>. To send data to OpenTelemetry Collector, you need to configure your Promtail to send logs to the collector and enable the Loki receiver in OpenTelemetry Collector.
 
+<KeyPointCallout>
+
+While this article focuses specifically on ingesting logs via the Loki receiver, you can check out our guide on the [OpenTelemetry Collector log-parsing workflow](https://signoz.io/blog/parsing-logs-with-the-opentelemetry-collector/) to learn how to transform and filter your log data once it arrives.
+
+</KeyPointCallout>
+
 To demonstrate the entire setup, we’re using a sample flask app that generates logs and saves them in a local file. Promtail is used to collect logs from this file.
 
 Let’s get into the demo.
@@ -89,7 +103,7 @@ Let’s get into the demo.
 
 You need a backend to which you can send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
 
-SigNoz cloud is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+SigNoz cloud is the easiest way to run SigNoz. You can [sign up for a free account](https://signoz.io/teams/) and get 30 days of unlimited access to all features.
 
 You can also install and self-host SigNoz yourself. Check out the [docs](https://signoz.io/docs/install/) for installing self-host SigNoz.
 
@@ -108,7 +122,7 @@ Note down the path where this file exists.
 
 ## Setting up OpenTelemetry Collector
 
-The OpenTelemetry Collector offers various deployment options to suit different environments and preferences. It can be deployed using Docker, Kubernetes, Nomad, or directly on Linux systems. You can find all the installation options <a href = "https://opentelemetry.io/docs/collector/installation" rel="noopener noreferrer nofollow" target="_blank" >here</a>. For this article, the OpenTelemetry Collector will be installed manually.
+The OpenTelemetry Collector offers various deployment options to suit different environments and preferences. It can be deployed using Docker, Kubernetes, Nomad, or directly on Linux systems. You can find all the <a href = "https://opentelemetry.io/docs/collector/installation" rel="noopener noreferrer nofollow" target="_blank" >installation options</a>. For this article, the OpenTelemetry Collector will be installed manually.
 
 <Admonition type="info">
 We are assuming that the OpenTelemetry Collector will be installed on the same host as your Promtail server for this tutorial.
@@ -209,7 +223,7 @@ The Loki receiver is a component of the OpenTelemetry Collector designed to rece
 
 The Loki receiver essentially acts as a bridge between Promtail and the OpenTelemetry Collector.
 
-It receives logs from Promtail, transforms them from the Loki format to the OTLP format, and then passes them to the OpenTelemetry Collector for further processing and exporting to SigNoz. You can find more information on the OpenTelemetry Loki receiver <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/lokireceiver" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+It receives logs from Promtail, transforms them from the Loki format to the OTLP format, and then passes them to the OpenTelemetry Collector for further processing and exporting to SigNoz. You can find more information on the <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/lokireceiver" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry Loki receiver</a>.
 
 Replace `{region}` with the region for your SigNoz cloud account and `<SIGNOZ_INGESTION_KEY>` with the ingestion key for your account. You can find these settings in the SigNoz dashboard under `Settings > Ingestion Settings`.
 
@@ -249,7 +263,7 @@ You should receive a similar output to show it has started successfully:
 
 ## Configuring Promtail
 
-If you already have promtail running, skip to [setting up the configuration file](/blog/using-opentelemetry-loki-receiver-to-collect-logs#setting-up-the-configuration-file).
+If you already have promtail running, skip to [setting up the configuration file](/blog/using-opentelemetry-loki-receiver-to-collect-logs/#setting-up-the-configuration-file).
 
 ### Download Promtail
 
@@ -388,7 +402,7 @@ Specify a name of your preference for the pipeline, optionally include a descrip
 
 After successfully creating the pipeline, a processor needs to be created for that pipeline.
 
-In the context of logs and data processing pipelines, a "[processor](https://signoz.io/docs/logs-pipelines/concepts/#processors)" refers to a component that performs specific operations on the logs as they flow through the pipeline. Processors are used to manipulate, transform, or enrich the log data according to predefined rules or configurations.
+In the context of logs and data processing pipelines, a "[processor](https://signoz.io/docs/logs-pipelines/introduction/#processors)" refers to a component that performs specific operations on the logs as they flow through the pipeline. Processors are used to manipulate, transform, or enrich the log data according to predefined rules or configurations.
 
 Click "Add Processor" to choose a method for processing the logs.
 
@@ -400,7 +414,7 @@ Click "Add Processor" to choose a method for processing the logs.
 
 There are several processor types to select from; pick any one of your choice. For this example, select the “Regex” processor type.
 
-Regular expressions, often abbreviated as “regex,” are powerful and flexible sequences of characters that define a search pattern. It is a tool used for pattern matching within strings, making it useful for tasks such as string validation, search and replace operations, and data extraction. You can learn more about Regex <a href = "https://www.sitepoint.com/learn-regex/" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+Regular expressions, often abbreviated as “regex,” are powerful and flexible sequences of characters that define a search pattern. It is a tool used for pattern matching within strings, making it useful for tasks such as string validation, search and replace operations, and data extraction. You can learn more about Regex from this <a href = "https://www.sitepoint.com/learn-regex/" rel="noopener noreferrer nofollow" target="_blank" >regex tutorial</a>.
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2023/12/loki_processor_types.webp" alt="Processor types"/>

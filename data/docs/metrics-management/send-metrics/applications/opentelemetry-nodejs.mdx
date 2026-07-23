@@ -1,6 +1,5 @@
 ---
-date: 2026-03-05
-id: opentelemetry-nodejs
+date: 2026-06-11
 title: Send Metrics from Node.js application
 description: Learn how to send metrics from Node.js applications (Express, Fastify, Koa, NestJS, Runtime) to SigNoz using OpenTelemetry
 
@@ -21,7 +20,7 @@ This guide shows you how to send metrics from your Node.js application (Express,
 
 ## Send metrics to SigNoz
 
-<Tabs entityName="deployment">
+<Tabs entityName="environment">
 <TabItem value="vm" label="VM" default>
 <KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
     A VM is a virtual computer that runs on physical hardware. This includes:
@@ -37,11 +36,13 @@ Set the following environment variables to configure the OpenTelemetry exporter:
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 export OTEL_SERVICE_NAME="<service-name>"
 export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_TRACES_EXPORTER="none"
 export OTEL_LOGS_EXPORTER="none"
 export OTEL_METRIC_EXPORT_INTERVAL="60000"
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 ```
 Verify these values:
@@ -49,6 +50,7 @@ Verify these values:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
+- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`: Set to `delta` to reduce metric costs. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
 
 </TabItem>
 
@@ -61,6 +63,8 @@ env:
   value: 'https://ingest.<region>.signoz.cloud:443'
 - name: OTEL_EXPORTER_OTLP_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_EXPORTER_OTLP_PROTOCOL
+  value: 'http/protobuf'
 - name: OTEL_SERVICE_NAME
   value: '<service-name>'
 - name: OTEL_METRICS_EXPORTER
@@ -71,6 +75,8 @@ env:
   value: 'none'
 - name: OTEL_METRIC_EXPORT_INTERVAL
   value: '60000'
+- name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+  value: 'delta'
 - name: NODE_OPTIONS
   value: '--require @opentelemetry/auto-instrumentations-node/register'
 ```
@@ -79,6 +85,7 @@ Verify these values:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
+- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`: Set to `delta` to reduce metric costs. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
 
 </TabItem>
 
@@ -87,11 +94,13 @@ Verify these values:
 ```powershell
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
 $env:OTEL_SERVICE_NAME = "<service-name>"
 $env:OTEL_METRICS_EXPORTER = "otlp"
 $env:OTEL_TRACES_EXPORTER = "none"
 $env:OTEL_LOGS_EXPORTER = "none"
 $env:OTEL_METRIC_EXPORT_INTERVAL = "60000"
+$env:OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE = "delta"
 $env:NODE_OPTIONS = "--require @opentelemetry/auto-instrumentations-node/register"
 ```
 Verify these values:
@@ -99,6 +108,7 @@ Verify these values:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service.
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
+- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`: Set to `delta` to reduce metric costs. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
 
 </TabItem>
 
@@ -111,11 +121,13 @@ Add environment variables to your Dockerfile:
 # Set OpenTelemetry environment variables
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 ENV OTEL_SERVICE_NAME="<service-name>"
 ENV OTEL_METRICS_EXPORTER="otlp"
 ENV OTEL_TRACES_EXPORTER="none"
 ENV OTEL_LOGS_EXPORTER="none"
 ENV OTEL_METRIC_EXPORT_INTERVAL="60000"
+ENV OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 ENV NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 
 CMD ["node", "app.js"]
@@ -125,11 +137,13 @@ Or pass them at runtime using `docker run`:
 ```bash
 docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
     -e OTEL_SERVICE_NAME="<service-name>" \
     -e OTEL_METRICS_EXPORTER="otlp" \
     -e OTEL_TRACES_EXPORTER="none" \
     -e OTEL_LOGS_EXPORTER="none" \
     -e OTEL_METRIC_EXPORT_INTERVAL="60000" \
+    -e OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta" \
     -e NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register" \
     your-image:latest
 ```
@@ -139,6 +153,7 @@ Verify these values:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 - `OTEL_METRIC_EXPORT_INTERVAL`: How often to export metrics in milliseconds (default: 60000 for 60 seconds).
+- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`: Set to `delta` to reduce metric costs. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
 
 </TabItem>
 </Tabs>
@@ -149,6 +164,12 @@ The auto-instrumentation package (`@opentelemetry/auto-instrumentations-node`) i
 Since OpenTelemetry Node.js enables traces and logs export by default, these would be sent to SigNoz even though this guide only covers metrics. For apps handling many requests, this can generate significant volume and costs.
 
 Setting `OTEL_TRACES_EXPORTER` and `OTEL_LOGS_EXPORTER` to `none` disables traces and logs while keeping metrics working as expected. If you want traces or logs later, you can change them to `otlp` or remove these variables altogether.
+</KeyPointCallout>
+
+<KeyPointCallout title="Why delta temporality?" defaultCollapsed="true">
+OpenTelemetry SDKs export metrics with **cumulative** temporality by default, which re-sends the running total of every active series on each export interval — even when nothing has changed. With `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` set to `delta`, synchronous instruments (like Counters and Histograms) that record nothing during an export interval send no data points for that interval, reducing the number of billable samples.
+
+Observable (asynchronous) instruments emit a data point on every collection cycle regardless of temporality. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for details.
 </KeyPointCallout>
 
 ### Step 2. Install OpenTelemetry packages
@@ -195,7 +216,7 @@ node app.js
 ```
 
 <Admonition type="info">
-The auto-instrumentation package automatically generates HTTP metrics (`http.server.request.duration` and `http.client.request.duration`) for Node.js built-in `http` and `https` modules. Since frameworks like Express, Fastify, and Koa use these modules internally, HTTP metrics are captured automatically. See the [HTTP instrumentation documentation](https://github.com/open-telemetry/opentelemetry-js/blob/main/experimental/packages/opentelemetry-instrumentation-http/README.md) for more details.
+The auto-instrumentation package automatically generates HTTP metrics (`http.server.request.duration` and `http.client.request.duration`) for Node.js built-in `http` and `https` modules. Since frameworks like Express, Fastify, and Koa use these modules internally, HTTP metrics are captured automatically. See the <a href="https://github.com/open-telemetry/opentelemetry-js/blob/main/experimental/packages/opentelemetry-instrumentation-http/README.md" target="_blank" rel="noopener noreferrer nofollow">HTTP instrumentation documentation</a> for more details.
 </Admonition>
 
 ## Validate
@@ -370,8 +391,7 @@ See the OpenTelemetry semantic conventions for the complete list:
 ### Metrics not appearing?
 
 1. **Check Environment Variables**: Ensure `OTEL_EXPORTER_OTLP_ENDPOINT` is set correctly:
-    - For gRPC (default): `https://ingest.<region>.signoz.cloud:443`
-    - For HTTP: `https://ingest.<region>.signoz.cloud:443` (SDK appends `/v1/metrics` automatically)
+    - `https://ingest.<region>.signoz.cloud:443` (the SDK appends `/v1/metrics` automatically when using `http/protobuf`)
 
 2. **Check Metrics Exporter**: Ensure `OTEL_METRICS_EXPORTER` is set to `otlp` (this is the default).
 

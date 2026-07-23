@@ -1,40 +1,50 @@
 'use client'
 
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import { Cloud, CloudUpload, Server } from 'lucide-react'
 import Link from 'next/link'
 
 export const GetStartedEnterprise = () => {
   const getStartedId = `btn-get-started-enterprise-bottom`
-  const readDocumentationId = `btn-read-documentation-enterprise-bottom`
+  const selfHostedId = `btn-enterprise-self-hosted-bottom`
+  const byocId = `btn-enterprise-byoc-bottom`
 
   return (
     <div className="bg-[width:50%] bg-[url('/img/background_blur/Frame_2185.webp')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat">
-      <section className="!mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
-        <div className="bg-[url('/img/background_blur/Ellipse_206.webp')] bg-[center_top_calc(-250px)] bg-no-repeat">
+      <section className="!mx-auto w-full max-w-8xl border !border-b-0 border-dashed border-signoz_slate-400">
+        <div className="bg-blur-ellipse-206">
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-12">
               <p className="mb-0 mt-20 text-center text-4xl font-bold">
                 Sign up for <br /> SigNoz Enterprise
               </p>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                <Button id={getStartedId} className="gap-2">
+                <Button variant="legacyPrimary" id={getStartedId} className="gap-2">
                   <Cloud size={16} />
-                  <Link href="/enterprise-cloud" className="flex-center gap-8">
+                  <Link
+                    href="/contact-us/?source=get-started-enterprise-cloud"
+                    className="flex-center gap-8"
+                  >
                     Enterprise Cloud
                   </Link>
                 </Button>
 
-                <Button type={Button.TYPES.SECONDARY} id={readDocumentationId} className="gap-2">
+                <Button variant="legacySecondary" id={selfHostedId} className="gap-2">
                   <Server size={16} />
-                  <Link href="/enterprise-self-hosted" className="flex-center gap-8">
+                  <Link
+                    href="/contact-us/?source=get-started-enterprise-self-hosted"
+                    className="flex-center gap-8"
+                  >
                     Enterprise Self-Hosted
                   </Link>
                 </Button>
 
-                <Button type={Button.TYPES.SECONDARY} id={readDocumentationId} className="gap-2">
+                <Button variant="legacySecondary" id={byocId} className="gap-2">
                   <CloudUpload size={16} />
-                  <Link href="/enterprise-self-hosted" className="flex-center gap-8">
+                  <Link
+                    href="/contact-us/?source=get-started-enterprise-byoc"
+                    className="flex-center gap-8"
+                  >
                     Bring your own cloud
                   </Link>
                 </Button>

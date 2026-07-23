@@ -89,7 +89,7 @@ tags: ["test"]
       const filePath = createTestFile('no-date.mdx', content)
       const { errors } = validateMetadata(filePath)
 
-      assert.ok(errors.includes('missing date'))
+      assert.ok(errors.some((e) => e.startsWith('missing date')))
     })
 
     it('should error when title is missing', () => {
@@ -154,7 +154,7 @@ tags: ["test"]
       const filePath = createTestFile('invalid-date.mdx', content)
       const { errors } = validateMetadata(filePath)
 
-      assert.ok(errors.includes('invalid date format - use YYYY-MM-DD'))
+      assert.ok(errors.some((e) => e.includes('invalid') && e.includes('format')))
     })
 
     it('should error for dates more than 7 days in the future', () => {
@@ -174,7 +174,7 @@ tags: ["test"]
       const filePath = createTestFile('future-date.mdx', content)
       const { errors } = validateMetadata(filePath)
 
-      assert.ok(errors.includes('date cannot be more than 7 days in the future'))
+      assert.ok(errors.some((e) => e.includes('cannot be more than 7 days in the future')))
     })
 
     it('should allow dates up to 7 days in the future', () => {
@@ -215,7 +215,7 @@ tags: ["test"]
       const filePath = createTestFile('old-date.mdx', content)
       const { errors } = validateMetadata(filePath)
 
-      assert.ok(errors.includes('date cannot be more than 7 days in the past'))
+      assert.ok(errors.some((e) => e.includes('cannot be more than 7 days in the past')))
     })
 
     it('should allow dates up to 7 days in the past', () => {
@@ -301,6 +301,100 @@ tags: ["test"]
       assert.strictEqual(warnings.length, 0)
     })
 
+    it('should allow older dates when only title and description change', () => {
+      const oldDate = new Date()
+      oldDate.setDate(oldDate.getDate() - 30)
+      const oldDateStr = oldDate.toISOString().split('T')[0]
+
+      const previousContent = `---
+title: Previous Title
+date: ${oldDateStr}
+description: Previous description
+tags: ["test"]
+---
+
+# Content
+`
+
+      const currentContent = `---
+title: Updated Title
+date: ${oldDateStr}
+description: Updated description
+tags: ["test"]
+---
+
+# Content
+`
+
+      const filePath = createTestFile('metadata-only-change.mdx', currentContent)
+      const { errors, warnings } = validateMetadata(filePath, { previousContent })
+
+      assert.strictEqual(errors.length, 0)
+      assert.strictEqual(warnings.length, 0)
+    })
+
+    it('should allow older dates when previousContent has no trailing newline', () => {
+      const oldDate = new Date()
+      oldDate.setDate(oldDate.getDate() - 30)
+      const oldDateStr = oldDate.toISOString().split('T')[0]
+
+      const previousContent = `---
+title: Previous Title
+date: ${oldDateStr}
+description: Previous description
+tags: ["test"]
+---
+
+# Content`
+
+      const currentContent = `---
+title: Updated Title
+date: ${oldDateStr}
+description: Updated description
+tags: ["test"]
+---
+
+# Content
+`
+
+      const filePath = createTestFile('trimmed-previous.mdx', currentContent)
+      const { errors, warnings } = validateMetadata(filePath, { previousContent })
+
+      assert.strictEqual(errors.length, 0)
+      assert.strictEqual(warnings.length, 0)
+    })
+
+    it('should still require a recent date when body content changes', () => {
+      const oldDate = new Date()
+      oldDate.setDate(oldDate.getDate() - 30)
+      const oldDateStr = oldDate.toISOString().split('T')[0]
+
+      const previousContent = `---
+title: Existing Title
+date: ${oldDateStr}
+description: Existing description
+tags: ["test"]
+---
+
+# Content
+`
+
+      const currentContent = `---
+title: Existing Title
+date: ${oldDateStr}
+description: Existing description
+tags: ["test"]
+---
+
+# Updated Content
+`
+
+      const filePath = createTestFile('body-change-old-date.mdx', currentContent)
+      const { errors } = validateMetadata(filePath, { previousContent })
+
+      assert.ok(errors.some((e) => e.includes('cannot be more than 7 days in the past')))
+    })
+
     it('should warn when tags is not an array', () => {
       const today = new Date().toISOString().split('T')[0]
       const content = `---
@@ -343,7 +437,7 @@ tags: []
       const { errors } = validateMetadata(filePath)
 
       assert.ok(errors.length > 0)
-      assert.ok(errors.includes('missing date'))
+      assert.ok(errors.some((e) => e.startsWith('missing date')))
       assert.ok(errors.includes('missing title'))
       assert.ok(errors.includes('missing description'))
     })
@@ -367,7 +461,115 @@ date: invalid-date
       assert.ok(errors.length > 1)
       assert.ok(errors.includes('missing title'))
       assert.ok(errors.includes('missing description'))
-      assert.ok(errors.includes('invalid date format - use YYYY-MM-DD'))
+      assert.ok(errors.some((e) => e.includes('invalid') && e.includes('format')))
+    })
+
+    // Date field combination validation tests
+    it('should accept published_date + updated_date (new-style)', () => {
+      const today = new Date().toISOString().split('T')[0]
+      const content = `---
+title: New Style Dates
+published_date: ${today}
+updated_date: ${today}
+description: Both new-style date fields
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('new-style-dates.mdx', content)
+      const { errors } = validateMetadata(filePath)
+
+      assert.strictEqual(errors.length, 0)
+    })
+
+    it('should accept published_date only', () => {
+      const today = new Date().toISOString().split('T')[0]
+      const content = `---
+title: Published Only
+published_date: ${today}
+description: Only published_date set
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('published-only.mdx', content)
+      const { errors } = validateMetadata(filePath)
+
+      assert.strictEqual(errors.length, 0)
+    })
+
+    it('should reject date combined with published_date', () => {
+      const today = new Date().toISOString().split('T')[0]
+      const content = `---
+title: Mixed Date Fields
+published_date: ${today}
+date: ${today}
+description: Both date and published_date
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('mixed-date-published.mdx', content)
+      const { errors } = validateMetadata(filePath)
+
+      assert.ok(errors.some((e) => e.includes('date must not be combined')))
+    })
+
+    it('should reject date combined with updated_date', () => {
+      const today = new Date().toISOString().split('T')[0]
+      const content = `---
+title: Mixed Date Fields
+date: ${today}
+updated_date: ${today}
+description: Both date and updated_date
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('mixed-date-updated.mdx', content)
+      const { errors } = validateMetadata(filePath)
+
+      assert.ok(errors.some((e) => e.includes('date must not be combined')))
+    })
+
+    it('should reject updated_date without published_date', () => {
+      const today = new Date().toISOString().split('T')[0]
+      const content = `---
+title: Updated Only
+updated_date: ${today}
+description: Only updated_date set
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('updated-only.mdx', content)
+      const { errors } = validateMetadata(filePath)
+
+      assert.ok(errors.some((e) => e.includes('updated_date requires published_date')))
+    })
+
+    it('should reject all three date fields combined', () => {
+      const today = new Date().toISOString().split('T')[0]
+      const content = `---
+title: All Three Dates
+published_date: ${today}
+updated_date: ${today}
+date: ${today}
+description: All three date fields
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('all-three-dates.mdx', content)
+      const { errors } = validateMetadata(filePath)
+
+      assert.ok(errors.some((e) => e.includes('date must not be combined')))
     })
   })
 })

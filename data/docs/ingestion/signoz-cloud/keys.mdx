@@ -1,10 +1,10 @@
 ---
-date: 2026-03-19
+date: 2026-05-27
 title: Ingestion Keys
+meta_title: Ingestion Keys - Create & Manage API Tokens
 tags: [SigNoz Cloud]
-id: ingestion-keys
-description: Managing SigNoz Ingestion Keys
-doc_type: how-to
+description: Learn how to create and manage SigNoz Cloud ingestion keys for authenticating telemetry data. Covers key creation, expiration, tags, limits, and access control.
+doc_type: howto
 ---
 
 <Admonition type="info">
@@ -14,6 +14,21 @@ You don't need ingestion keys for self-hosted/community edition of SigNoz. Inges
 ## Overview
 
 Ingestion Keys are secure tokens used to authenticate your telemetry Ingestion requests. These keys are unique to your account and should be kept confidential.
+
+Ingestion keys are **write-only** — they can only send telemetry data (traces, logs, metrics) into your account. They cannot be used to query, read, or delete any data. This is in contrast to **API keys**, which allow querying and reading data from your account and should never be exposed in client-side code.
+
+## Using Ingestion Keys in Frontend/Browser Applications
+
+Because ingestion keys are write-only, they can be used in frontend applications where the key is visible in browser code. The primary risk of an exposed ingestion key is that a third party could send unwanted telemetry data to your account, increasing ingestion volume and costs.
+
+To limit this risk, create a dedicated ingestion key for frontend use with the following safeguards:
+
+- **Ingestion limits**: Set daily size and count caps per signal type (see [Add Limits to a Key](#add-limits-to-a-key)) to bound the impact of misuse.
+- **Expiration date**: Set an expiration so the key automatically becomes invalid after a defined period.
+
+<Admonition type="warning">
+API keys allow querying and reading data from your account. Never expose API keys in frontend or client-side code.
+</Admonition>
 
 ## Pre-requisite
 
@@ -58,6 +73,10 @@ SigNoz offers the flexibility to set limits on your Ingestion keys. To add a lim
     <img src="/img/docs/ingestion/limits.png" alt="Limits for an Ingestion Key"/>
     <figcaption><i>Limits for an Ingestion Key</i></figcaption>
 </figure>
+
+<Admonition type="warning">
+When an ingestion key reaches its configured limit for a signal, data ingestion for that signal is stopped and any incoming data is dropped until the limit resets. This can result in gaps in your logs, traces, or metrics. To avoid unexpected data loss, you can set up alerts to be notified when an ingestion key is nearing its daily quota — see [Meter Alerts](https://signoz.io/docs/cost-meter/alerts/) for details.
+</Admonition>
 
 ## Modify a Limit
 To modify an existing limit, navigate to the Ingestion key and click the edit option corresponding to the limit in question. It's important to note that modifying a limit does not reset the accumulated values. For example, if the initial limit was 20GB/day and you've used 15GB before increasing the limit to 25GB/day, the usage count will continue from 15GB.

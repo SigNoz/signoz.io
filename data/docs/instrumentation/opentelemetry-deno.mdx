@@ -1,16 +1,13 @@
 ---
-date: 2026-02-28
-title: Deno OpenTelemetry Instrumentation
-description: Learn how to instrument your Deno application with OpenTelemetry and send traces, metrics, and logs to SigNoz.
-id: deno-instrumentation
+date: 2026-05-18
+title: Deno OpenTelemetry Instrumentation Guide
+description: Instrument your Deno application with built-in OpenTelemetry support. Send traces, metrics, and logs to SigNoz with zero external dependencies.
 doc_type: howto
 ---
 
-import GetHelp from '@/components/shared/get-help.md'
-
 This guide shows you how to instrument your Deno application with OpenTelemetry and send traces, metrics, and logs to SigNoz. Deno has built-in support for OpenTelemetry, making it easy to get started without complex dependencies.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -30,10 +27,10 @@ Deno <a href="https://docs.deno.com/runtime/fundamentals/open_telemetry/#auto-in
 
 ### Run the application
 
-<Tabs entityName="platform">
+<Tabs entityName="environment">
 <TabItem value="vm" label="VM" default>
 
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
 A VM is a virtual computer that runs on physical hardware. This includes:
 - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
 - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
@@ -49,12 +46,22 @@ export OTEL_DENO=true
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ```
 
-Replace the following:
+Verify these values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `deno-app`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Run the application
 
@@ -90,12 +97,23 @@ env:
     value: "signoz-ingestion-key=<your-ingestion-key>"
   - name: OTEL_SERVICE_NAME
     value: "<service-name>"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "service.version=<service-version>"
 ```
 
-Replace the following:
+Verify these values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `deno-app`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 </TabItem>
 
@@ -127,14 +145,24 @@ docker run \
   -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
   -e OTEL_SERVICE_NAME="<service-name>" \
+  -e OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>" \
   -p 8000:8000 \
   deno-app
 ```
 
-Replace the following:
+Verify these values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `deno-app`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 </TabItem>
 
@@ -147,12 +175,22 @@ $env:OTEL_DENO = "true"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.version=<service-version>"
 ```
 
-Replace the following:
+Verify these values:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: Name of your service (e.g., `deno-app`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 2. Run the application
 
@@ -226,9 +264,9 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 ## Next Steps
 
 - Need to create custom spans or add attributes yourself? Use the [Manual Instrumentation in Deno guide](https://signoz.io/docs/instrumentation/manual-instrumentation/deno/manual-instrumentation/) once the base setup is in place.
-- [Explore your traces in SigNoz](https://signoz.io/docs/product-features/trace-explorer/)
-- [Query and filter traces](https://signoz.io/docs/product-features/query-builder/)
-- [Set up alerts for your Deno service](https://signoz.io/docs/product-features/alert-management/)
+- [Explore your traces in SigNoz](https://signoz.io/docs/userguide/traces/)
+- [Query and filter traces](https://signoz.io/docs/userguide/query-builder-v5/)
+- [Set up alerts for your Deno service](https://signoz.io/docs/alerts/)
 
 ## Get Help
 

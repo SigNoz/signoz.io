@@ -82,6 +82,8 @@ export const EXPERIMENTS = {
       VARIANT: 'value-props-social-proof',
     },
     flagName: 'teams-page-value-props',
+    concluded: true,
+    defaultVariant: 'value-props-social-proof',
   },
   CLOUD_FIRST_PRICING_PAGE: {
     id: 'cloud-first-pricing-page',
@@ -93,16 +95,6 @@ export const EXPERIMENTS = {
     concluded: true,
     defaultVariant: 'without-self-host-tab',
   },
-  CHATBASE_BUBBLE: {
-    id: 'chatbase-bubble-experiment',
-    variants: {
-      CONTROL: 'no-chatbase-bubble',
-      VARIANT: 'with-chatbase-bubble',
-    },
-    flagName: 'chatbase-bubble-experiment',
-    concluded: true,
-    defaultVariant: 'with-chatbase-bubble',
-  },
   HOMEPAGE_EMAIL_SIGNUP: {
     id: 'homepage-email-signup',
     variants: {
@@ -112,6 +104,15 @@ export const EXPERIMENTS = {
     flagName: 'homepage-email-signup',
     concluded: true,
     defaultVariant: 'existing-cta-buttons',
+  },
+  HOMEPAGE_HERO_REDESIGN: {
+    id: 'homepage-hero-redesign',
+    variants: {
+      CONTROL: 'existing-homepage-hero',
+      VARIANT: 'new-homepage-hero',
+    },
+    flagName: 'homepage-hero-redesign',
+    defaultVariant: 'existing-homepage-hero',
   },
   // Add more experiments here as needed
 } as const

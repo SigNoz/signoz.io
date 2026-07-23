@@ -1,12 +1,18 @@
 ---
 
 title: Apache Cassandra Monitoring with OpenTelemetry [including dashboards and alerts]
-slug: cassandra-monitoring 
-date: 2026-01-10
+meta_title: Cassandra Monitoring with OpenTelemetry
+published_date: 2026-01-10
+updated_date: 2026-06-29
 tags: [monitoring, cassandra]
 authors: [saurabh_patil]
-description: A practical guide to monitoring Apache Cassandra with OpenTelemetry and SigNoz. Track latency, compaction, and GC pauses early so you can debug slowdowns before they page you.
+description: "Cassandra monitoring in 2026: collect key metrics over JMX with the OpenTelemetry Collector and track them in SigNoz. Checklist, demo, and troubleshooting."
 keywords: [cassandra monitoring, apache cassandra metrics, cassandra alert rules, cassandra troubleshooting]
+related_articles:
+  - '/blog/distributed-tracing-jaeger-cassandra'
+  - '/blog/ha-prometheus-cortex-cassandra'
+  - '/guides/what-database-does-jaeger-use'
+  - '/guides/database-monitoring'
 
 ---
 
@@ -17,6 +23,8 @@ This happens because the database performs many heavy maintenance tasks in the b
 This guide will walk you through a complete monitoring setup, starting with an introduction to modern tools like OpenTelemetry for metrics collection, focusing on metrics that matter most, a hands-on demonstration to implement monitoring and finally a troubleshooting playbook.
 
 ## How to Collect Key Metrics from Cassandra using OpenTelemetry?
+
+Quick note: because Cassandra exposes its internals through JMX, the OpenTelemetry Collector's JMX receiver can scrape those MBeans, read/write latency, pending compactions, heap, and thread pools, and forward them over [OTLP](https://signoz.io/blog/what-is-otlp/), so you get vendor-neutral Cassandra metrics without a proprietary agent.
 
 We can break down the metrics collection process into two clear steps:
 
@@ -521,7 +529,7 @@ To create an alert for read request latency:
     - Select your previously created **notification channel** (email in this demo).
     - Optionally, send a **test notification** to verify delivery.
 
-    <Figure src="/img/guides/2026/01/cassandra-monitoring-read-request-alert%201.webp" alt="SigNoz alert rule configuration for Cassandra read request latency, defining a warning alert that triggers when latency crosses a configured threshold within a 5-minute window and sends notifications via the selected channel." caption="SigNoz alert rule configuration for Cassandra read request latency" />
+    <Figure src="/img/guides/2026/01/cassandra-monitoring-read-request-alert 1.webp" alt="SigNoz alert rule configuration for Cassandra read request latency, defining a warning alert that triggers when latency crosses a configured threshold within a 5-minute window and sends notifications via the selected channel." caption="SigNoz alert rule configuration for Cassandra read request latency" />
 
     Create the rule to finish alert setup.
 
@@ -617,6 +625,7 @@ Yes. If running on Kubernetes (e.g., K8ssandra), the Prometheus operator or Open
 
 ---
 
-Hope this guide has helped in setting up monitoring on your Cassandra Node.
+Hope this guide has helped in setting up monitoring on your Cassandra Node. If you liked this write-up, feel free to check out: [database monitoring](https://signoz.io/guides/database-monitoring/), [JMX monitoring](https://signoz.io/guides/jmx-monitoring/), [database monitoring tools](https://signoz.io/comparisons/database-monitoring-tools/), [APM tools](https://signoz.io/blog/apm-tools/), [MongoDB monitoring](https://signoz.io/blog/mongodb-monitoring/), and [PostgreSQL monitoring](https://signoz.io/blog/postgresql-monitoring/).
+
 
 You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.

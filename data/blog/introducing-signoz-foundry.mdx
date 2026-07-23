@@ -1,12 +1,16 @@
 ---
-title: Introducing SigNoz Foundry - One Config, One Command Deployment
-slug: introducing-signoz-foundry
+title: Introducing SigNoz Foundry for your One Config, One Command Deployment
 date: 2026-04-16
 tags: [Product]
 authors: [dhruv_ahuja]
 description: Deploy and manage self-hosted SigNoz across multiple platforms using a single config and a single command.
 keywords: [signoz foundry, deployment, self-hosted signoz, observability, docker compose, gitops]
 image: /img/blog/2026/04/introducing-signoz-foundry.webp
+related_articles:
+  - '/blog/cloud-vs-self-hosted-deployment-guide'
+  - '/blog/launching-signoz-single-binary'
+  - '/blog/cloud-teams-plan-now-at-49usd'
+  - '/blog/open-source-observability'
 ---
 
 Our open source version of SigNoz powers mission-critical observability for thousands of engineering teams across the globe. We're constantly shipping things that make it easier to adopt, run, and trust SigNoz in production.
@@ -101,27 +105,15 @@ Compared to the massive requirement of 9 config files, Foundry's equivalent at j
 
 Foundry is a big step towards simplifying open-source observability for our users. It has laid the groundwork that will enable us not only to ship features and bug fixes faster, but also confidently distribute SigNoz across more platforms in the future.
 
-To start using Foundry right away, you can download the latest release and run your first deployment. 
+To start using Foundry right away, install `foundryctl` with the installer script and run your first deployment.
 
 **1. Install foundryctl**
 
-Download a release from [GitHub Releases](https://github.com/signoz/foundry/releases), or use the command line:
-
 ```bash
-# Linux
-curl -L "https://github.com/SigNoz/foundry/releases/latest/download/foundry_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz" -o foundry.tar.gz
-tar -xzf foundry.tar.gz
-
-# macOS
-curl -L "https://github.com/SigNoz/foundry/releases/latest/download/foundry_darwin_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/arm64/arm64/g').tar.gz" -o foundry.tar.gz
-tar -xzf foundry.tar.gz
-
-# Windows
-
-$ARCH = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm64" } else { "amd64" }
-Invoke-WebRequest -Uri "https://github.com/SigNoz/foundry/releases/latest/download/foundry_windows_${ARCH}.tar.gz" -OutFile foundry.tar.gz -UseBasicParsing
-tar -xzf foundry.tar.gz
+curl -fsSL https://signoz.io/foundry.sh | bash
 ```
+
+For manual install (Windows PowerShell, air-gapped environments, etc.) or configuring installation specifics, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">Foundry getting-started guide</a>.
 
 **2. Create a casting.yaml**
 

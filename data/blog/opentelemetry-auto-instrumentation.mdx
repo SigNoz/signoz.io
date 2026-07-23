@@ -1,33 +1,38 @@
 ---
 title: How OpenTelemetry Auto-instrumentation Works - Behind the Scenes
-slug: opentelemetry-auto-instrumentation
-date: 2026-01-12
+meta_title: How OpenTelemetry Auto-instrumentation Works
+published_date: 2026-01-12
+updated_date: 2026-06-16
 tags: [OpenTelemetry]
 authors: [elizabeth_mathew]
-description: OpenTelemetry Auto Instrumentation is a library that automatically instruments your code to collect telemetry data. This happens behind the scenes in a few different ways, depending on the language and framework you are using like monkey-patching, byte-code instrumentation, and abstract syntax tree modification.
+description: "How OpenTelemetry auto-instrumentation works under the hood: monkey-patching, bytecode instrumentation, and AST modification across languages."
 image: /img/blog/2026/01/what-is-auto-instrumentation-cover.webp
-keywords: [opentelemetry, auto instrumentation, telemetry, observability, distributed tracing]
+keywords: [opentelemetry, auto instrumentation, telemetry, observability, distributed tracing,opentelemetry agent, java agent]
+related_articles:
+  - '/blog/opentelemetry-agent'
+  - '/blog/opentelemetry-operator-complete-guide'
+  - '/opentelemetry/python-auto-instrumentation'
+  - '/blog/opentelemetry-django'
 ---
 
-
-I’ve been an OpenTelemetry advocate for over a year and have written many many blogs on adopting OpenTelemetry in your systems to achieve deep observability. Yet, I’ve always wondered how and what actually happens behind the scenes, in the context of auto-instrumentation. 
+I’ve been an OpenTelemetry advocate for over a year and have written many blogs on adopting OpenTelemetry in your systems to achieve deep observability. Yet, I’ve always wondered how and what actually happens behind the scenes, in the context of auto-instrumentation. 
 
 <Figure src="/img/blog/2026/01/what-is-auto-instrumentation-cover.webp" alt="What is Auto Instrumentation?" />
 
 So, this is me breaking down what happens under the hood of OpenTelemetry for you.
 
-## Refresher on Auto-instrumentation
+## What is Auto-instrumentation? A Refresher
 
 For those who are new to the space, auto-instrumentation refers to collecting telemetry [traces, metrics, logs] from your application without requiring you to make changes to the application code. You can read more about it from the [official docs](https://opentelemetry.io/docs/concepts/instrumentation/zero-code/) here.
 
 A helpful way to understand how this works is to separate the OpenTelemetry API from the OpenTelemetry SDK.
 
-- The OTel API is the interface for creating telemetry — “start a span”, “add an event”, “record a metric”, “propagate context”, etc. Both manual instrumentation [your code] and auto-instrumentatio**n** [instrumentation libraries/agents] ultimately use these same API calls. But in auto-instrumentation, it’s taken care of for you automatically.
+- The OTel API is the interface for creating telemetry — “start a span”, “add an event”, “record a metric”, “propagate context”, etc. Both manual instrumentation [your code] and auto-instrumentation [instrumentation libraries/agents] ultimately use these same API calls. But in auto-instrumentation, it’s taken care of for you automatically.
 - The OTel SDK is the implementation behind the API — it decides what actually happens to that telemetry [sampling, batching, processing] and where it goes [exporting].
 
 So auto-instrumentation is typically achieved in two parts,
 
-- Instrumentation hooks [libraries/agents] that wrap existing functions and call the OTel API at the right points.
+- Instrumentation hooks [libraries/agents] that wrap existing functions and call the OTel API at the right points to start [a span](https://signoz.io/blog/opentelemetry-spans/) and [propagate context](https://signoz.io/blog/opentelemetry-context-propagation/) across services.
 - SDK configuration that ensures those API calls actually record telemetry and can be exported.
 
 In Auto-instrumentation, OpenTelemetry wraps existing function implementations and extracts useful data, such as function parameters, execution duration, and results. It’s important to note that the way this wrapping and hooking is done varies widely across programming languages. Broadly, we can say that there’s a clear difference between how it works in dynamic languages [like JavaScript, Python, and Ruby] versus statically-typed or compiled languages [like Java, Go, and .NET].  
@@ -37,9 +42,11 @@ Let’s dive into those differences (or similarities!) next.
 ## Dynamic vs. Static Languages
 
 It becomes easier to understand what happens behind the scenes when classifying the languages broadly into dynamic and static. Dynamic languages allow instrumentation to patch or wrap functions at runtime easily, whereas static languages, on the other hand, don’t natively allow such runtime patching, so they require different techniques to insert instrumentation code.
-That is, most dynamic languages like Python, JavaScript, and Ruby, which are more flexible at run-time, depend on methods like monkey-patching to implement auto-instrumentation. While other static languages or those that run on virtual machines like Go or C rely on techniques like build-time injection for the same. 
+That is, most dynamic languages like Python, JavaScript, and Ruby, which are more flexible at run-time, depend on methods like monkey-patching to implement auto-instrumentation. While other static languages or those that run on virtual machines like Go or C rely on techniques like build-time injection for the same.
 
-## Some Cool Techniques
+The concepts in this write-up explain the theory. For production-grade setups, you might wish to understand the actual instrumentation setup process. You can refer to our [Python instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-python/) and [Node.js instrumentation guide](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/) for the same.
+
+## Auto-instrumentation Techniques: Monkey-patching, Bytecode & AST
 
 OpenTelemetry’s auto-instrumentation toolkit boils down to a couple of clever techniques that make all of this possible. Let’s discuss two of the most common methods used under the hood.
 
@@ -111,7 +118,7 @@ Calling these requests won’t result in any observable change, albeit the auto-
 This is the underlying technique for languages that run on a virtual machine. Instead of modifying functions at the language level, this approach modifies the compiled code [bytecode] as it’s being loaded into the runtime. Essentially, the instrumentation injects extra bytecode instructions that call OpenTelemetry APIs around the target method’s original instructions. 
 
 In the ~~Jurassic~~ Java world, this is done via a special agent. When you run a Java app with the
-`-javaagent`flag pointing to the OpenTelemetry Java Agent JAR, the JVM invokes the agent’s `premain()` method before anything else. 
+`-javaagent` flag pointing to the OpenTelemetry Java Agent JAR, the JVM invokes the agent’s `premain()` method before anything else. 
 
 ```java
 public static void premain(String args, Instrumentation inst) {

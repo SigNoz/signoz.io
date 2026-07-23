@@ -1,12 +1,9 @@
 ---
-date: 2026-03-12
+date: 2026-06-11
 title: Send logs from Node.js default console logger to SigNoz using OpenTelemetry
-id: opentelemetry-nodejs-logs
 doc_type: howto
 description: Learn how to send logs from Node.js default console logger to SigNoz using the OpenTelemetry SDK for OTLP log export.
 ---
-
-import GetHelp from '@/components/shared/get-help.md'
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
@@ -16,7 +13,7 @@ import GetHelp from '@/components/shared/get-help.md'
 
 ## Prerequisites
 
-- Node.js [version 18 or higher](https://github.com/open-telemetry/opentelemetry-js/blob/main/README.md#supported-runtimes)
+- Node.js <a href="https://github.com/open-telemetry/opentelemetry-js/blob/main/README.md#supported-runtimes" target="_blank" rel="noopener noreferrer nofollow">version 18 or higher</a>
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 - An existing Node.js application
 
@@ -28,10 +25,10 @@ This guide will walk you through instrumenting your Node.js application to send 
 
 Install the required OpenTelemetry packages:
 
-<Tabs>
+<Tabs entityName="package-manager">
 <TabItem value="npm" label="npm" default>
 
-<Tabs>
+<Tabs entityName="language">
 <TabItem value="javascript" label="JavaScript" default>
 
 ```bash
@@ -65,7 +62,7 @@ npm install --save @opentelemetry/api-logs \
 </TabItem>
 <TabItem value="yarn" label="yarn">
 
-<Tabs>
+<Tabs entityName="language">
 <TabItem value="javascript" label="JavaScript" default>
 
 ```bash
@@ -101,7 +98,7 @@ yarn add @opentelemetry/api-logs \
 
 ### Step 2: Set environment variables
 
-<Tabs>
+<Tabs entityName="environment">
 <TabItem value="vm" label="VM" default>
 
 <KeyPointCallout title="What classifies as VM?" defaultCollapsed="true">
@@ -237,7 +234,7 @@ Replace the placeholders:
 
 Create a new file called `logger.js` or `logger.ts` in your project root. This file reads the configuration from the environment variables set in the previous step.
 
-<Tabs>
+<Tabs entityName="language">
 <TabItem value="javascript" label="JavaScript" default>
 
 ```javascript:logger.js
@@ -303,7 +300,7 @@ export default loggerProvider;
 
 Create a new file called `console-instrumentation.js` or `console-instrumentation.ts` in your project root. This file wraps the default console methods to send logs to OpenTelemetry:
 
-<Tabs>
+<Tabs entityName="language">
 <TabItem value="javascript" label="JavaScript" default>
 
 ```javascript:console-instrumentation.js
@@ -518,7 +515,7 @@ console.debug = function (...args: any[]) {
 
 Import the instrumentation at the very top of your main application file (e.g., `index.js` or `index.ts`):
 
-<Tabs>
+<Tabs entityName="language">
 <TabItem value="javascript" label="JavaScript" default>
 
 ```javascript:index.js
@@ -563,7 +560,7 @@ app.listen(3000, () => {
 
 Run your application:
 
-<Tabs>
+<Tabs entityName="language">
 <TabItem value="javascript" label="JavaScript" default>
 
 ```bash
@@ -584,22 +581,17 @@ npx ts-node index.ts
 
 Captured logs can be viewed in the [Logs Explorer](https://signoz.io/docs/logs-management/overview/) section.
 
-<figure data-zoomable align="center">
-  <img src="/img/docs/logs-management/send-logs/nodejs-logs.webp" alt="Node.js Logs" />
-  <figcaption>
-    <i>Node.js Logs</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/logs-management/send-logs/nodejs-logs.webp"
+  alt="Node.js Logs"
+  caption="Node.js Logs"
+/>
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/logs-management/send-logs/nodejs-logs-detailed-view.webp"
-    alt="Node.js Logs Detailed View"
-  />
-  <figcaption>
-    <i>Node.js Logs Detailed View</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/logs-management/send-logs/nodejs-logs-detailed-view.webp"
+  alt="Node.js Logs Detailed View"
+  caption="Node.js Logs Detailed View"
+/>
 
 <details>
 <ToggleHeading>
@@ -650,8 +642,8 @@ This usually happens if the endpoint URL is incorrect.
 ## Next Steps
 
 - Complete your observability setup by sending [traces](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/) and [metrics](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs/) from your Node.js application.
-- [Send Logs from Node.js Pino Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs)
-- [Send Logs from Node.js Winston Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs)
+- [Send Logs from Node.js Pino Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs/)
+- [Send Logs from Node.js Winston Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs/)
 - [Log Query/Filtering guides](https://signoz.io/docs/logs-management/overview/)
 - [Alerts setup for logs](https://signoz.io/docs/alerts-management/log-based-alerts/)
 

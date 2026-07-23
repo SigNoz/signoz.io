@@ -18,7 +18,7 @@ const WhySelectSignoz = ({
   return (
     <div
       className={cn(
-        'section-container mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:w-[80vw]',
+        'section-container mx-auto w-full border !border-b-0 border-dashed border-signoz_slate-400 !px-0',
         className
       )}
     >
@@ -64,7 +64,7 @@ const WhySelectSignoz = ({
                 </p>
               </div>
             </div>
-            <div className="mx-auto aspect-[272/352] w-[272px] max-w-[80vw] md:shrink-0">
+            <div className="mx-auto aspect-[272/352] w-[272px] max-w-full md:shrink-0">
               <Image
                 className="w-full"
                 src={featureGraphicEnterprise}

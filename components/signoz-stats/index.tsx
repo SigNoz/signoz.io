@@ -1,5 +1,5 @@
 import React from 'react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import { cn } from '../../app/lib/utils'
 import { ArrowRight, BookOpen, Mail } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
@@ -39,7 +39,7 @@ const SigNozStats = ({ className }: { className?: string }) => {
     <section>
       <div
         className={cn(
-          'section-container mx-auto grid w-full grid-cols-1 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0 sm:grid-cols-[minmax(0,300px)_minmax(0,1fr)] md:w-[80vw]',
+          'section-container mx-auto grid w-full max-w-8xl grid-cols-1 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0 sm:grid-cols-[minmax(0,300px)_minmax(0,1fr)]',
           className
         )}
       >
@@ -83,7 +83,11 @@ const SigNozStats = ({ className }: { className?: string }) => {
               clickLocation="Stats Section"
               target="_blank"
             >
-              <Button className="flex-center text-xs sm:text-sm" id="btn-join-community-homepage">
+              <Button
+                variant="legacyPrimary"
+                className="flex-center text-xs sm:text-sm"
+                id="btn-join-community-homepage"
+              >
                 <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 Join the community
                 <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
@@ -99,7 +103,7 @@ const SigNozStats = ({ className }: { className?: string }) => {
               target="_blank"
             >
               <Button
-                type={Button.TYPES.SECONDARY}
+                variant="legacySecondary"
                 className="flex-center text-xs sm:text-sm"
                 id="btn-github-repo-homepage"
               >
@@ -118,7 +122,7 @@ const SigNozStats = ({ className }: { className?: string }) => {
               target="_blank"
             >
               <Button
-                type={Button.TYPES.SECONDARY}
+                variant="legacySecondary"
                 className="flex-center text-xs sm:text-sm"
                 id="btn-newsletter-homepage"
               >

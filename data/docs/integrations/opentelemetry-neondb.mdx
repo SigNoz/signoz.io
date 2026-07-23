@@ -1,12 +1,9 @@
 ---
-date: 2026-03-14
-id: opentelemetry-neon
+date: 2026-04-28
 title: OpenTelemetry Neon DB Integration
 description: Learn how to monitor your Neon Postgres databases in SigNoz using Neon's native OpenTelemetry integrations.
 doc_type: howto
 ---
-
-import GetHelp from '@/components/shared/get-help.md'
 
 Monitor your Neon DB project's health and performance in SigNoz by directly configuring your observability pipeline using the OpenTelemetry Protocol (OTLP). Neon supports natively exporting Postgres logs and infrastructural metrics without the need for an intermediate OpenTelemetry Collector.
 
@@ -48,7 +45,7 @@ https://ingest.<region>.signoz.cloud:443
     - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
     - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
   If you are using **self-hosted SigNoz**, update the endpoint to your self-hosted URL and port. An ingestion key is not required — since Neon requires an authentication method, keep **API Key** selected and enter any placeholder value (e.g., `not-needed`). The self-hosted collector does not validate this header. See [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted) for details.
 </KeyPointCallout>
 
@@ -70,6 +67,13 @@ Click **Save** to complete the setup. If successful, the integration will be lis
   alt="Neon DB Integration - Status"
 />
 
+## Validate
+
+Verify the metrics are being collected by SigNoz. Neon data should start appearing in SigNoz within a few minutes.
+
+- To check for metrics, go to the **Dashboards** > **Metrics Explorer** and look for metrics prefixed with `neon_` or metrics carrying your configured `service.name` related to Postgres.
+- Go to the **Logs** tab in SigNoz and query using your configured `service.name` to see Postgres logs.
+
 <Figure
   src="/img/docs/integrations/neondb/sample-metrics.webp"
   caption="Neon DB Metrics in SigNoz"
@@ -81,13 +85,6 @@ Click **Save** to complete the setup. If successful, the integration will be lis
   caption="Neon DB Logs in SigNoz"
   alt="Neon DB Logs in SigNoz"
 />
-
-## Validate
-
-Verify the metrics are being collected by SigNoz. Neon data should start appearing in SigNoz within a few minutes.
-
-- To check for metrics, go to the **Dashboards** > **Metrics Explorer** and look for metrics prefixed with `neon_` or metrics carrying your configured `service.name` related to Postgres.
-- Go to the **Logs** tab in SigNoz and query using your configured `service.name` to see Postgres logs.
 
 <details>
 <ToggleHeading>

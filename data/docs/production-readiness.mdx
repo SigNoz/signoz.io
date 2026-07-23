@@ -1,16 +1,15 @@
 ---
-date: 2024-06-06
-id: production-readiness
+date: 2026-06-29
 tags : [SigNoz Cloud]
 title: Best Practices to follow to run SigNoz in production
+description: Production readiness checklist for SigNoz covering cluster setup, scaling, TLS, sampling, and operational best practices for running SigNoz reliably.
 ---
-import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
 
 <SigNozCloud />
 
 1. Create a separate cluster for running SigNoz. This will help in the isolation of application and APM environments and hence, reduce the impact radius of operational issues.
 
-2. If you are running in k8s, use [k8s-infra](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) to collect telemetry (logs, metrics, traces).
+2. If you are running in k8s, use [k8s-infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) to collect telemetry (logs, metrics, traces).
     
 3. Configure TTL for disk and use move to s3 for reduced costs. Perf of s3 is 2-3x slower than EBS. Configure retention for each of metrics, traces and logs. See [Retention Period | SigNoz](https://signoz.io/docs/userguide/retention-period/)
     
@@ -18,7 +17,7 @@ import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
 
 5. Harness the power of distributed tracing data by creating dashboards using Clickhouse queries. You can run group by and aggregates on tags(attributeMap) and events of a span. Also, filtering by more specific conditions should be possible. Let us know if you would like us to help write a few queries to plot a chart using the traces data. Same also, applies for the logs data.
 
-6. Secure signoz and otel-collector using TLS ingress. See [Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager | SigNoz](https://signoz.io/docs/tutorial/setting-up-tls-for-signoz/)
+6. Secure signoz and otel-collector using TLS ingress. See [Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager | SigNoz](https://signoz.io/docs/tutorial/setting-up-tls-for-signoz/). To secure collector receivers and exporters at the component level, see [Enable TLS for OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/tls-configuration/).
     
 7. Horizontally scale `otel-collector` which works on the push model.
 

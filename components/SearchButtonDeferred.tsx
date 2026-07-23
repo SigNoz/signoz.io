@@ -1,10 +1,12 @@
 'use client'
 
-import { Search, Command } from 'lucide-react'
+import { Command, Search } from 'lucide-react'
 import { useCallback, useEffect, useState, type ComponentType } from 'react'
 
 import siteMetadata from '@/data/siteMetadata'
 import { cn } from 'app/lib/utils'
+import { useLogEvent } from 'hooks/useLogEvent'
+import { usePathname } from 'next/navigation'
 
 type SearchButtonDeferredProps = {
   disableShortcut?: boolean
@@ -54,6 +56,8 @@ const SearchButtonDeferred = ({ disableShortcut = false }: SearchButtonDeferredP
   const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
   const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
   const hasAlgoliaConfig = Boolean(siteMetadata.search && appId && apiKey && indexName)
+  const logEvent = useLogEvent()
+  const pathname = usePathname()
   const [shouldHydrate, setShouldHydrate] = useState(false)
   const [shouldOpenOnMount, setShouldOpenOnMount] = useState(false)
   const [LoadedSearchButton, setLoadedSearchButton] =
@@ -95,15 +99,39 @@ const SearchButtonDeferred = ({ disableShortcut = false }: SearchButtonDeferredP
       }
 
       event.preventDefault()
+      logEvent({
+        eventName: 'Website Click',
+        eventType: 'track',
+        attributes: {
+          clickType: 'Search',
+          clickName: 'Cmd+K Search',
+          clickText: 'Search Docs',
+          clickLocation: 'Top Navbar',
+          pageLocation: pathname,
+          trigger: 'cmd+k',
+        },
+      })
       setShouldOpenOnMount(true)
       hydrateSearch()
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [disableShortcut, hydrateSearch, shouldHydrate, LoadedSearchButton])
+  }, [disableShortcut, hydrateSearch, shouldHydrate, LoadedSearchButton, logEvent, pathname])
 
   const handlePreviewClick = () => {
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType: 'Search',
+        clickName: 'Search Icon Click',
+        clickText: 'Search Docs',
+        clickLocation: 'Top Navbar',
+        pageLocation: pathname,
+        trigger: 'click',
+      },
+    })
     setShouldOpenOnMount(true)
     hydrateSearch()
   }

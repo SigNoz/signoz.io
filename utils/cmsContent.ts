@@ -1,21 +1,45 @@
-import { fetchMDXContentByPath } from './strapi'
-import type { MDXContentApiResponse } from './strapi'
+import { getAllContent } from './contentRepository'
+import type { MDXContent, MDXContentApiResponse } from './strapi'
 
 export type CMSContentResult = {
   faqs: MDXContentApiResponse | undefined
   caseStudies: MDXContentApiResponse | undefined
   opentelemetries: MDXContentApiResponse | undefined
   comparisons: MDXContentApiResponse | undefined
+  guides: MDXContentApiResponse | undefined
+  blogs: MDXContentApiResponse | undefined
+}
+
+function toApiResponse(data: MDXContent[]): MDXContentApiResponse {
+  return {
+    data,
+    meta: {
+      pagination: {
+        page: 1,
+        pageSize: data.length,
+        pageCount: data.length > 0 ? 1 : 0,
+        total: data.length,
+      },
+    },
+  }
 }
 
 export async function fetchAllCMSContent(deploymentStatus: string): Promise<CMSContentResult> {
-  const [faqsResult, caseStudiesResult, opentelemetryResult, comparisonsResult] =
-    await Promise.allSettled([
-      fetchMDXContentByPath('faqs', undefined, deploymentStatus, true),
-      fetchMDXContentByPath('case-studies', undefined, deploymentStatus, true),
-      fetchMDXContentByPath('opentelemetries', undefined, deploymentStatus, true),
-      fetchMDXContentByPath('comparisons', undefined, deploymentStatus, true),
-    ])
+  const [
+    faqsResult,
+    caseStudiesResult,
+    opentelemetryResult,
+    comparisonsResult,
+    guidesResult,
+    blogsResult,
+  ] = await Promise.allSettled([
+    getAllContent('faqs', deploymentStatus, null),
+    getAllContent('case-studies', deploymentStatus, null),
+    getAllContent('opentelemetries', deploymentStatus, null),
+    getAllContent('comparisons', deploymentStatus, null),
+    getAllContent('guides', deploymentStatus, null),
+    getAllContent('blogs', deploymentStatus, null),
+  ])
 
   if (faqsResult.status === 'rejected') {
     console.error('Failed to fetch FAQs for CMS content:', faqsResult.reason)
@@ -29,21 +53,24 @@ export async function fetchAllCMSContent(deploymentStatus: string): Promise<CMSC
   if (comparisonsResult.status === 'rejected') {
     console.error('Failed to fetch comparisons for CMS content:', comparisonsResult.reason)
   }
+  if (guidesResult.status === 'rejected') {
+    console.error('Failed to fetch guides for CMS content:', guidesResult.reason)
+  }
+  if (blogsResult.status === 'rejected') {
+    console.error('Failed to fetch blogs for CMS content:', blogsResult.reason)
+  }
 
   return {
-    faqs:
-      faqsResult.status === 'fulfilled' ? (faqsResult.value as MDXContentApiResponse) : undefined,
+    faqs: faqsResult.status === 'fulfilled' ? toApiResponse(faqsResult.value) : undefined,
     caseStudies:
-      caseStudiesResult.status === 'fulfilled'
-        ? (caseStudiesResult.value as MDXContentApiResponse)
-        : undefined,
+      caseStudiesResult.status === 'fulfilled' ? toApiResponse(caseStudiesResult.value) : undefined,
     opentelemetries:
       opentelemetryResult.status === 'fulfilled'
-        ? (opentelemetryResult.value as MDXContentApiResponse)
+        ? toApiResponse(opentelemetryResult.value)
         : undefined,
     comparisons:
-      comparisonsResult.status === 'fulfilled'
-        ? (comparisonsResult.value as MDXContentApiResponse)
-        : undefined,
+      comparisonsResult.status === 'fulfilled' ? toApiResponse(comparisonsResult.value) : undefined,
+    guides: guidesResult.status === 'fulfilled' ? toApiResponse(guidesResult.value) : undefined,
+    blogs: blogsResult.status === 'fulfilled' ? toApiResponse(blogsResult.value) : undefined,
   }
 }

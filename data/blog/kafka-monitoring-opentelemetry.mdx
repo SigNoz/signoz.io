@@ -1,12 +1,20 @@
 ---
 title: Deep dive into observability of Messaging Queues with OpenTelemetry
-slug: kafka-monitoring-opentelemetry
-date: 2024-06-02
+meta_title: "Kafka Observability with OpenTelemetry: A Deep Dive"
+published_date: 2024-05-31
+updated_date: 2026-07-14
 tags: [Tech Tutorial]
 authors: [pranay, shivanshu]
-description: In this deep dive blog, we explore how monitoring Kafka based applications and troubleshooting issues can be made much better by leveraging traces and OpenTelemetry. 
+description: "A deep dive into observability for Kafka and messaging queues with OpenTelemetry, including common debugging scenarios."
 hide_table_of_contents: false
 keywords: [kafka monitoring, opentelemetry, distributed tracing, signoz, troubleshooting, producers, consumers, consumer lag]
+related_articles:
+  - '/blog/opentelemetry-kafka'
+  - '/blog/maximizing-scalability-apache-kafka-and-opentelemetry'
+  - '/blog/what-is-distributed-tracing-in-opentelemetry'
+  - '/blog/signoz-tracetest-opentelemetry-native-observability-meets-testing'
+  - '/blog/opentelemetry-tracing'
+  - '/comparisons/opentelemetry-trace-vs-span'
 ---
 ## Introduction
 
@@ -21,7 +29,6 @@ We would love to hear if these problem statements resonate with the community an
 One of our key objectives is to leverage [distributed tracing](https://signoz.io/distributed-tracing/). Most current monitoring solutions for Kafka show metrics about Kafka, but metrics are often aggregated and don’t give much details on exactly where things are going wrong. Traces on the other hand show you the exact path a message takes, offering much more detailed information. Our focus is on how we can use this trace information to resolve issues more quickly and effectively.
 
 ## Background
-
 In the modern distributed architecture, [Infrastructure monitoring](https://signoz.io/guides/infrastructure-monitoring/) has become crucial, there are many components which contribute to system stability. In this blog post, we will see how end-to-end observability of Messaging queues can be achieved using [OpenTelemetry](https://opentelemetry.io/) and the problems it can solve to ensure the stability and scalability of Distributed Asynchronous Architectures.
 
 ![request_flow.png](/img/blog/2024/05/kafka-monitoring/request_flow.png)
@@ -52,7 +59,7 @@ Some challenges that can be solved include:
 For this, we assume that the Kakfa producers and consumers use OpenTelemetry client libraries for [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/). If you’re new to OpenTelemetry or want to follow along with an example, you can follow the [github guide](https://github.com/SigNoz/kafka-opentelemetry-instrumentation) which will help you configure the above kafka setup along with producer and consumer applications in Java, which are automatically instrumented with [Opentelemetry Java Agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation). You’d be able to see metrics and traces in the [SigNoz](https://signoz.io/docs/introduction/) UI.
 
 
- **Fig 2** below describes the setup from the [guide](https://github.com/SigNoz/kafka-opentelemetry-instrumentation). We use JMX receiver, [Kafkametrics receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kafkametricsreceiver/README.md) from OpenTelemetry and also traces data sent in OTLP format. 
+ **Fig 2** below describes the setup from the [guide](https://github.com/SigNoz/kafka-opentelemetry-instrumentation). We use JMX receiver, [Kafkametrics receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kafkametricsreceiver/README.md) from OpenTelemetry and also traces data sent in [OTLP format](https://signoz.io/blog/what-is-otlp/). 
 
 
 ![kafka-otel-signoz](/img/blog/2024/05/kafka-monitoring/kafka-otel-signoz.png)
@@ -71,7 +78,7 @@ As you can see, both `kafka-producer`  and `kafka-consumer` are shown in the tra
 
 If we look at the attributes collected from Producer and Consumer spans, we can identify some attributes that can help us correlate with metrics for a given time period.
 
-You can follow along in [this](https://github.com/SigNoz/kafka-opentelemetry-instrumentation/tree/master/client-spans) GitHub repo to implement the above example.
+You can follow along in [kafka opentelemetry instrumentation GitHub repo](https://github.com/SigNoz/kafka-opentelemetry-instrumentation/tree/master/client-spans) to implement the above example.
 
 ```jsx
 // Some important attributes from producer span
@@ -101,7 +108,7 @@ Attributes:
 
 **Fig. 4:**  Key attributes available in Producer and Consumer spans instrumented with OpenTelemetry
 
-You check out our detailed video tutorial here on how to set up complete client-side monitoring of Kafka [here](https://www.youtube.com/watch?v=ov1pyCBwlJs) 
+You check out our detailed video tutorial on how to set up [complete client-side monitoring of Kafka](https://www.youtube.com/watch?v=ov1pyCBwlJs) 
 
 ## Common debugging scenarios in Kafka
 
@@ -122,7 +129,7 @@ Possible reasons for an increase in partition latencies are:
 3. Producers are sending a high volume of data 
 
 
-<NextCarousel items={['/img/blog/2024/05/kafka-monitoring/kafka-latency-1.png', '/img/blog/2024/05/kafka-monitoring/kafka-latency-2.png', '/img/blog/2024/05/kafka-monitoring/kafka-latency-3.png' , '/img/blog/2024/05/kafka-monitoring/kafka-latency-4.png' , '/img/blog/2024/05/kafka-monitoring/kafka-latency-5.png', '/img/blog/2024/05/kafka-monitoring/kafka-latency-6.png']} />
+<NextCarousel items="/img/blog/2024/05/kafka-monitoring/kafka-latency-1.png,/img/blog/2024/05/kafka-monitoring/kafka-latency-2.png,/img/blog/2024/05/kafka-monitoring/kafka-latency-3.png,/img/blog/2024/05/kafka-monitoring/kafka-latency-4.png,/img/blog/2024/05/kafka-monitoring/kafka-latency-5.png,/img/blog/2024/05/kafka-monitoring/kafka-latency-6.png" />
 **Fig 5:** Kafka Partition latency troubleshooting
 
 In the above proposal, users can find Topic and Partition wise latency and throughput metrics. As shown in Fig. 4, the producer and consumer spans have `topic` and `partition`  as attributes and we will leverage this to show the above details.
@@ -160,7 +167,7 @@ In this proposal, a user can see consumer lag graphs for for different Consumer 
 
 If she wants to find more details about a particular point ( which corresponds to a specific consumer group and partition), she can find more details about it in a side panel.
 
-<NextCarousel items={['/img/blog/2024/05/kafka-monitoring/consumer-lag-1.png', '/img/blog/2024/05/kafka-monitoring/consumer-lag-2.png','/img/blog/2024/05/kafka-monitoring/consumer-lag-3.png','/img/blog/2024/05/kafka-monitoring/consumer-lag-4.png','/img/blog/2024/05/kafka-monitoring/consumer-lag-5.png','/img/blog/2024/05/kafka-monitoring/consumer-lag-6.png']} />
+<NextCarousel items="/img/blog/2024/05/kafka-monitoring/consumer-lag-1.png,/img/blog/2024/05/kafka-monitoring/consumer-lag-2.png,/img/blog/2024/05/kafka-monitoring/consumer-lag-3.png,/img/blog/2024/05/kafka-monitoring/consumer-lag-4.png,/img/blog/2024/05/kafka-monitoring/consumer-lag-5.png,/img/blog/2024/05/kafka-monitoring/consumer-lag-6.png" />
 
 **Fig 6:** Consumer Lag troubleshooting and possible causes
 
@@ -196,7 +203,7 @@ Question: Is breaking down a consumer group into corresponding consumer instance
 This use case is designed to cater scenarios where platform owners want to get an overview of all the producers and consumers which are writing to Kafka and their performance. 
 
 
-<NextCarousel items={['/img/blog/2024/05/kafka-monitoring/producer-consumer-overview-1.png','/img/blog/2024/05/kafka-monitoring/producer-consumer-overview-2.png','/img/blog/2024/05/kafka-monitoring/producer-consumer-overview-3.png','/img/blog/2024/05/kafka-monitoring/producer-consumer-overview-4.png' ]} />
+<NextCarousel items="/img/blog/2024/05/kafka-monitoring/producer-consumer-overview-1.png,/img/blog/2024/05/kafka-monitoring/producer-consumer-overview-2.png,/img/blog/2024/05/kafka-monitoring/producer-consumer-overview-3.png,/img/blog/2024/05/kafka-monitoring/producer-consumer-overview-4.png" />
 **Fig 7:** Producer and Consumer Overview
 
 
@@ -234,7 +241,7 @@ In the above sections, we have explained the limitations of currently available 
 
 Which of the scenarios seem most relevant to you and is the proposed solution useful or you would like to see any more data points. Would love to get any inputs on that.
 
-Write to us at <a href="mailto:support@signoz.io">support@signoz.io</a> or book a call <a href="https://calendly.com/pranay-signoz/kafka-monitoring-signoz">here</a>
+Write to us at <a href="mailto:support@signoz.io">support@signoz.io</a> or <a href="https://calendly.com/pranay-signoz/kafka-monitoring-signoz">book a call</a>
 
 [![Schedule-Call](/img/blog/2024/05/kafka-monitoring/CTA-Kafka.png)](https://calendly.com/pranay-signoz/kafka-monitoring-signoz)
 

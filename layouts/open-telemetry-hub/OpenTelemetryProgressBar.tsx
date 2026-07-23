@@ -21,5 +21,5 @@ export default function OpenTelemetryProgressBar({ targetId }: OpenTelemetryProg
     progressTarget.current = document.getElementById(targetId)
   }, [targetId])
 
-  return <ProgressBar target={progressTarget as RefObject<HTMLElement>} />
+  return <ProgressBar target={progressTarget as RefObject<HTMLElement | null>} />
 }

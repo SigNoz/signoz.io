@@ -1,16 +1,13 @@
 ---
-date: 2026-03-16
-id: swift
-title: Swift OpenTelemetry Instrumentation
-description: Send events from your Swift application to SigNoz
+date: 2026-05-18
+title: Swift OpenTelemetry Instrumentation Guide
+description: Instrument your Swift application with OpenTelemetry and send traces to SigNoz. Setup guide using Swift Package Manager with gRPC exporter configuration.
 doc_type: howto
 ---
 
-import GetHelp from '@/components/shared/get-help.md'
-
 This document contains instructions on how to set up OpenTelemetry instrumentation in your Swift applications and view your application traces in SigNoz.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -85,9 +82,9 @@ struct SwiftExample {
         let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
         let spanProcessor = BatchSpanProcessor(spanExporter: otlpTraceExporter)
 
-        // Replace <service_name> with the name of your service
         let resource = Resource(attributes: [
-            "service.name": AttributeValue.string("<service_name>")
+            "service.name": AttributeValue.string("<service_name>"),
+            "service.version": AttributeValue.string("<service_version>")
         ])
 
         let tracerProvider = TracerProviderBuilder()
@@ -103,7 +100,16 @@ Verify these values:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>`: A name to identify your service in SigNoz (e.g., `my-swift-app`)
+- `<service_name>`: A name to identify your service in SigNoz (e.g., `my-swift-app`).
+- `<service_version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
 
 ### Step 3: Instrument your application
 
@@ -270,9 +276,9 @@ let grpcChannel = ClientConnection(configuration: configuration)
 let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
 let spanProcessor = BatchSpanProcessor(spanExporter: otlpTraceExporter)
 
-// Replace <service_name> with the name of your service
 let resource = Resource(attributes: [
-    "service.name": AttributeValue.string("<service_name>")
+    "service.name": AttributeValue.string("<service_name>"),
+    "service.version": AttributeValue.string("<service_version>")
 ])
 
 let tracerProvider = TracerProviderBuilder()
@@ -286,7 +292,7 @@ let tracer = OpenTelemetry.instance.tracerProvider.get(instrumentationName: inst
 
 </details>
 
-<KeyPointCallout title="OpenTelemetry Swift Status" defaultCollapsed={true}>
+<KeyPointCallout title="OpenTelemetry Swift Status" defaultCollapsed="true">
 While tracing is stable, logging and metrics in OpenTelemetry Swift are not yet. Please keep this precaution in mind.
 For more details, check the <a href="https://opentelemetry.io/docs/languages/swift/#status-and-releases" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Swift status page</a>.
 </KeyPointCallout>
@@ -294,7 +300,7 @@ For more details, check the <a href="https://opentelemetry.io/docs/languages/swi
 ## Next Steps
 
 - View your [Traces](https://signoz.io/docs/userguide/traces/) to find performance bottlenecks.
-- Create [Custom Dashboards](https://signoz.io/docs/userguide/dashboards/) to monitor application health.
+- Create [Custom Dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to monitor application health.
 - Set up [Alerts](https://signoz.io/docs/userguide/alerts-management/) to get notified when things go wrong.
 
 #### Sample Swift Application:

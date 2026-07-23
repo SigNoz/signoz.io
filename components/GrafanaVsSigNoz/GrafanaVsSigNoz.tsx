@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Button from '../Button/Button'
+import Button from '@/components/ui/Button'
 import { Scale } from 'lucide-react'
 import Link from 'next/link'
 export default function GrafanaVsSigNoz() {
@@ -13,25 +13,26 @@ export default function GrafanaVsSigNoz() {
             Migrate from Grafana - Save up to 45% on your Grafana bill
           </h3>
           <p className="text-gray-300">
-            Tired of juggling multiple tools for observability? SigNoz gives you logs, metrics and traces in a single unified platform - making troubleshooting simpler.
+            Tired of juggling multiple tools for observability? SigNoz gives you logs, metrics and
+            traces in a single unified platform - making troubleshooting simpler.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">
             <Link
               id="grafana-vs-signoz-compare-button"
-              href="/product-comparison/signoz-vs-grafana/"
-              className="flex items-center no-underline gap-2"
+              href="/grafana-alternative/"
+              className="flex items-center gap-2 no-underline"
             >
-              <Button type={Button.TYPES.SECONDARY}>
+              <Button as="span" variant="legacySecondary">
                 <Scale className="h-4 w-4" />
                 Compare SigNoz vs. Grafana
               </Button>
             </Link>
             <Link
-              id="grafana-vs-signoz-try-signoz-button" 
+              id="grafana-vs-signoz-try-signoz-button"
               href="/teams/"
-              className="flex items-center no-underline gap-2"
+              className="flex items-center gap-2 no-underline"
             >
-              <Button>
+              <Button as="span" variant="legacyPrimary">
                 Try SigNoz for Free &rarr;
               </Button>
             </Link>

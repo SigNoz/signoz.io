@@ -1,13 +1,21 @@
 ---
 title: How to Monitor MongoDB Metrics with OpenTelemetry
-slug: mongodb-metrics-monitoring-with-opentelemetry
-date: 2023-11-29
+meta_title: "How to Monitor MongoDB Metrics with OpenTelemetry"
+published_date: 2023-11-29
+updated_date: 2026-07-14
 tags: [OpenTelemetry]
 authors: [abhishek-kothari]
-description: Steps to monitor MongoDB metrics with OpenTelemetry 1. Setting up OpenTelemetry Collector 2. Configuring OpenTelemetry Collector to collect MongoDB metrics 3. Send collected metrics to SigNoz...
+description: "Monitor MongoDB metrics with OpenTelemetry using the Collector's MongoDB receiver, then visualize them in SigNoz."
 image: /img/blog/2023/11/opentelemetry-mongodb-metrics-cover.jpeg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,observability,mongodb,mertics]
+related_articles:
+  - '/blog/opentelemetry-postgresql-metrics-monitoring'
+  - '/blog/opentelemetry-mysql-metrics-monitoring'
+  - '/blog/opentelemetry-rabbitmq-metrics-monitoring'
+  - '/blog/opentelemetry-ecs'
+  - '/blog/opentelemetry-docker'
+  - '/blog/opentelemetry-collector-prometheus-receiver'
 ---
 For high throughput systems that focus on gathering continuous data or have a heavy read-only traffic, NoSQL databases came as a blessing. NoSQL databases, due to their unstructured nature of data, allow relatively faster inserts as well as reads compared to relational databases. One such database that’s quite popular today is MongoDB. In this article, our focus would be to understand how to extract metrics out of MongoDB and ship them to Signoz using the [Open Telemetry](https://signoz.io/opentelemetry/) collector.
 
@@ -54,6 +62,12 @@ It can understand different data formats and send it to different backends, maki
 
 ## How does OpenTelemetry Collector collect data?
 
+<KeyPointCallout>
+
+Teams evaluating options more broadly often compare [MongoDB monitoring tools](https://signoz.io/blog/mongodb-monitoring-tools/) before committing.
+
+</KeyPointCallout>
+
 A receiver is how data gets into the OpenTelemetry Collector. Receivers are configured via YAML under the top-level `receivers` tag. There must be at least one enabled receiver for a configuration to be considered valid.
 
 Here’s an example of an `otlp` receiver:
@@ -66,7 +80,7 @@ receivers:
       http:
 ```
 
-An OTLP receiver can receive data via gRPC or HTTP using the <a href = "https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md" rel="noopener noreferrer nofollow" target="_blank">OTLP</a> format. There are advanced configurations that you can enable via the YAML file.
+An [OTLP (OpenTelemetry Protocol)](https://signoz.io/blog/what-is-otlp/) receiver can receive data via gRPC or HTTP using the <a href = "https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md" rel="noopener noreferrer nofollow" target="_blank">OTLP</a> format. There are advanced configurations that you can enable via the YAML file.
 
 Here’s a sample configuration for an otlp receiver.
 
@@ -157,13 +171,13 @@ This is a very simple Docker compose file that can spin up MongoDB Database in n
 
 You need a backend to which you can send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
 
-SigNoz cloud is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+SigNoz cloud is the easiest way to run SigNoz. You can [sign up for a free account](https://signoz.io/teams/) and get 30 days of unlimited access to all features.
 
 You can also install and self-host SigNoz yourself. Check out the [docs](https://signoz.io/docs/install/) for installing self-host SigNoz.
 
 ## Setting up OpenTelemetry collector
 
-The OpenTelemetry Collector offers various deployment options to suit different environments and preferences. It can be deployed using Docker, Kubernetes, Nomad, or directly on Linux systems. You can find all the installation options <a href = "https://opentelemetry.io/docs/collector/installation" rel="noopener noreferrer nofollow" target="_blank">here</a>.
+The OpenTelemetry Collector offers various deployment options to suit different environments and preferences. It can be deployed using Docker, Kubernetes, Nomad, or directly on Linux systems. You can find all the <a href = "https://opentelemetry.io/docs/collector/installation" rel="noopener noreferrer nofollow" target="_blank">installation options</a>.
 
 We are going to discuss the manual installation here and resolve any hiccups that come in the way.
 
@@ -335,7 +349,7 @@ You should start seeing the metrics on your Signoz Cloud UI in about 30 seconds.
 
 ## Monitoring with Signoz Dashboard
 
-Once the above setup is done, you will be able to access the metrics in the SigNoz dashboard. You can go to the Dashboards tab and try adding a new panel. You can learn how to create dashboards in SigNoz [here](https://signoz.io/docs/userguide/manage-dashboards-and-panels/).
+Once the above setup is done, you will be able to access the metrics in the SigNoz dashboard. You can go to the Dashboards tab and try adding a new panel. You can learn how to [create dashboards in SigNoz](https://signoz.io/docs/userguide/manage-dashboards/).
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2023/11/mongodb_metrics.webp" alt="MongoDB metrics collected using Opentelemetry Collector"/>
@@ -343,7 +357,7 @@ Once the above setup is done, you will be able to access the metrics in the SigN
 </figure>
 
 
-You can easily create charts with [query builder](https://signoz.io/docs/userguide/create-a-custom-query/#sample-examples-to-create-custom-query) in SigNoz. Here are the [steps](https://signoz.io/docs/userguide/manage-panels/#steps-to-add-a-panel-to-a-dashboard) to add a new panel to the dashboard.
+You can easily create charts with [query builder](https://signoz.io/docs/userguide/query-builder-v5/#sample-examples-to-create-custom-query) in SigNoz. Here are the [steps](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-add-a-panel-to-a-dashboard) to add a new panel to the dashboard.
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2023/11/mongodb_create_dashboard.webp" alt="Creating a dashboard panel for average queries executed"/>
@@ -359,7 +373,7 @@ You can build a complete dashboard around various metrics emitted. Here’s a lo
 </figure>
 
 
-You can also create alerts on any metric. Learn how to create alerts [here](https://signoz.io/docs/userguide/alerts-management/).
+You can also create alerts on any metric. Learn how to [create alerts in SigNoz](https://signoz.io/docs/userguide/alerts-management/).
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2023/11/mongodb_alerts.webp" alt="Creating alerts from Dashboard panels"/>

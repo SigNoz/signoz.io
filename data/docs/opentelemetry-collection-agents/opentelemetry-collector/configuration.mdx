@@ -1,12 +1,10 @@
 ---
-date: 2026-02-27
-id: otel-collector-config
+date: 2026-06-29
 title: OpenTelemetry Collector Configuration
-description: Learn how to configure the OpenTelemetry Collector — receivers, processors, exporters, extensions, and service pipelines — to collect, process, and export telemetry data.
+meta_title: OpenTelemetry Collector Configuration
+description: "Configure the OpenTelemetry Collector: receivers, processors, exporters, extensions, and service pipelines for collecting and exporting telemetry."
 doc_type: reference
 ---
-
-import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
@@ -16,7 +14,7 @@ The OpenTelemetry (OTel) Collector is a vendor-agnostic telemetry data pipeline 
 - **Process:** Data through transformation and filtering
 - **Export:** To one or more observability backends
 
-This guide covers each configuration component in detail and includes best practices for production deployments. For background on why you might use a Collector, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/).
+This guide covers each configuration component in detail and includes best practices for production deployments. For background on why you might use a Collector, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/). For a broader conceptual walkthrough before configuring Collector, see our [OpenTelemetry Collector complete guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/).
 
 ## OTel Collector Configuration Structure
 
@@ -287,6 +285,21 @@ processors:
 
 For more examples, see the PII scrubbing guides for [logs](https://signoz.io/docs/logs-management/guides/pii-scrubbing/) and [traces](https://signoz.io/docs/traces-management/guides/pii-scrubbing/).
 
+#### GeoIP Processor
+
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/geoipprocessor" target="_blank" rel="noopener noreferrer nofollow">GeoIP processor</a> reads an IP address from a configured attribute, looks it up in a local MaxMind database, and writes geographic attributes (`geo.city_name`, `geo.country.iso_code`, `geo.location.lat`, `geo.location.lon`, and more) back onto the same record. It works across traces, logs, and metrics.
+
+```yaml
+processors:
+  geoip:
+    providers:
+      maxmind:
+        database_path: /var/lib/GeoLite2-City.mmdb
+    context: record
+```
+
+See the [GeoIP processor guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/geoip-processor/) for setup, configuration options, and troubleshooting.
+
 <Admonition>
   For the full list of available processors, see the
   <a href="https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor" target="_blank" rel="noopener noreferrer nofollow">opentelemetry-collector processors</a>
@@ -353,8 +366,6 @@ Exports data via HTTP using OpenTelemetry protocol.
 exporters:
   otlphttp:
     endpoint: 'https://ingest.<region>.signoz.cloud:443'
-    tls:
-      insecure: false
     headers:
       'signoz-ingestion-key': '<your-ingestion-key>'
 ```
@@ -454,15 +465,11 @@ A pipeline is a directed path that telemetry data follows through the collector.
 2. [Processors](#2-processors) - How data is transformed (applied in order)
 3. [Exporters](#3-exporters) - Where data exits
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/opentelemetry-collector-service.svg"
-    alt="Receivers → Processors → Exporters"
-  />
-  <figcaption>
-    <i>OpenTelemetry Collector: Receivers → Processors → Exporters → SigNoz Cloud</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/opentelemetry-collector-service.svg"
+  alt="Receivers → Processors → Exporters"
+  caption="OpenTelemetry Collector: Receivers → Processors → Exporters → SigNoz Cloud"
+/>
 
 #### Pipeline Types
 
@@ -494,7 +501,7 @@ service:
       exporters: [otlp, debug]
 ```
 
-The `type/name` naming convention (for example, `httpcheck/critical`) applies to all component types — receivers, processors, and exporters. When using named instances, reference the full `type/name` in the pipeline:
+The `type/name` naming convention (for example, `httpcheck/critical`) applies to all component types: receivers, processors, and exporters. When using named instances, reference the full `type/name` in the pipeline:
 
 ```yaml
 service:
@@ -566,10 +573,8 @@ Then reference these environment variables in `otel-collector-config.yaml`:
 
 ```yaml
 exporters:
-  otlp:
-    endpoint: 'ingest.${SIGNOZ_REGION}.signoz.cloud:443'
-    tls:
-      insecure: false
+  otlphttp:
+    endpoint: 'https://ingest.${SIGNOZ_REGION}.signoz.cloud:443'
     headers:
       'signoz-ingestion-key': '${SIGNOZ_INGESTION_KEY}'
 ```
@@ -606,6 +611,8 @@ Only enable receivers, processors, exporters and extensions, you actually need. 
 
 Use TLS enabled HTTP endpoints for receivers/exporters. Don't leave endpoints open as `0.0.0.0` unless absolutely necessary.
 
+See [Enable TLS for OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/tls-configuration/) for step-by-step configuration of receiver TLS, exporter TLS, and mutual TLS (mTLS).
+
 See the <a href="https://opentelemetry.io/docs/security/config-best-practices/#use-encryption-and-authentication" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Security Best Practices on encryption and authentication</a> for more details.
 
 #### Bind to specific interface
@@ -624,7 +631,7 @@ You can configure these settings under the `sending_queue` and `retry_on_failure
 
 ```yaml
 exporters:
-  otlp:
+  otlphttp:
     endpoint: 'https://ingest.<region>.signoz.cloud:443'
     compression: gzip
     sending_queue:
@@ -651,7 +658,7 @@ Wherever possible, use compression in exporters to reduce network bandwidth and 
 
 ```yaml
 exporters:
-  otlp:
+  otlphttp:
     endpoint: 'https://ingest.<region>.signoz.cloud:443'
     compression: gzip
 ```
@@ -677,9 +684,9 @@ otelcol-contrib --config ./otel-collector-config.yaml --dry-run
 
 ## Next Steps
 
-- [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) — Understand when and why to use a Collector in your telemetry pipeline.
-- [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) — Migrate from direct OTLP export to a Collector-based setup.
-- [SigNoz Cloud ingestion endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) — Find the correct region endpoint for SigNoz Cloud.
+- [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/): understand when and why to use a Collector in your telemetry pipeline.
+- [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/): migrate from direct OTLP export to a Collector-based setup.
+- [SigNoz Cloud ingestion endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): find the correct region endpoint for SigNoz Cloud.
 
 ## Get Help
 

@@ -1,62 +1,328 @@
 ---
-date: 2026-03-26
-title: Linux
-tags : [Self-Host]
-description: Learn how to install SigNoz on Linux
-id: linux
-slug: /install/linux
+date: 2026-07-20
+title: Install SigNoz on Linux with systemd - Self-Host Guide
+tags: [Self-Hosted Community]
+description: Learn how to install SigNoz on Linux with Foundry or through systemd. Prepare dependencies, deploy the systemd units, verify services, and open the SigNoz UI.
+doc_type: howto
 ---
-
-import RetentionInfo from '@/components/shared/retention-info.mdx'
 
 <HostingDecision />
 
-This section provides information on installing SigNoz on Linux.
+Use this page to install SigNoz on a Linux host that runs systemd. The recommended path uses <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> to create and manage the systemd units for SigNoz, ClickHouse, ClickHouse Keeper, PostgreSQL, the SigNoz OTel Collector, and the database migrator. If you need full control over every service unit and config, use the Manual tab instead.
 
 ## Prerequisites
 
-- A Linux machine
-- Root access to the machine
+- A Linux host with systemd.
+- Root access or a user with **sudo** privileges.
+- Open inbound ports: **8080** for the SigNoz UI, and **4317** and **4318** for OpenTelemetry Protocol (OTLP) ingestion.
+- At least 4 GB of memory for a small test installation. For production sizing, see [resource planning](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/).
 
-<KeyPointCallout title="Deploy with Foundry" defaultCollapsed={false}>
-<a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> can deploy SigNoz on Linux for you using <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/systemd/binary" target="_blank" rel="noopener noreferrer nofollow">systemd binary casting</a> (a configuration file). You install the dependencies, and Foundry handles everything else, from service configuration to startup.
-</KeyPointCallout>
+## Install SigNoz
 
-## Install Clickhouse
+<Tabs entityName="setup">
+<TabItem value="foundry" label="Foundry" default>
 
-1. Install Clickhouse using the Clickhouse installation [guide](https://clickhouse.com/docs/install#available-installation-options)
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
+</Admonition>
 
-> Note: Do not start the clickhouse service yet. We will do that after installing zookeeper.
+### Step 1: Install foundryctl
 
-## Install Zookeeper
+Run the installer on the Linux host:
 
-1. Install Java
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">Foundry getting-started guide</a>.
+
+### Step 2: Install host dependencies
+
+Install ClickHouse with the <a href="https://clickhouse.com/docs/install" target="_blank" rel="noopener noreferrer nofollow">official ClickHouse installation guide</a>. The single `clickhouse` binary serves both the telemetry store and the keeper, so no separate Keeper package is needed. Foundry manages the ClickHouse services after deployment, so stop any package-managed services:
+
+```bash
+sudo systemctl disable --now clickhouse-server.service clickhouse-keeper.service 2>/dev/null || true
+```
+
+Install PostgreSQL with the <a href="https://www.postgresql.org/download/linux/" target="_blank" rel="noopener noreferrer nofollow">official PostgreSQL Linux installation guide</a>, then stop the package-managed service:
+
+```bash
+sudo systemctl disable --now postgresql.service
+```
+
+PostgreSQL packages install the server binary outside `/usr/bin` on most distros. Debian and Ubuntu use `/usr/lib/postgresql/<version>/bin`; RHEL and Fedora use `/usr/pgsql-<version>/bin`. Note the path to your `postgres` binary; you point Foundry at it in Step 4.
+
+### Step 3: Download SigNoz binaries
+
+Download the SigNoz and SigNoz OTel Collector release archives into the paths that the Foundry systemd casting uses:
+
+```bash
+ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+
+sudo mkdir -p /opt/signoz
+curl -fsSL "https://github.com/SigNoz/signoz/releases/latest/download/signoz_linux_${ARCH}.tar.gz" \
+  | sudo tar -xz --strip-components=1 -C /opt/signoz
+
+sudo mkdir -p /opt/ingester
+curl -fsSL "https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_${ARCH}.tar.gz" \
+  | sudo tar -xz --strip-components=1 -C /opt/ingester
+```
+
+<Admonition type="warning" title="Extract the full tarball">
+Extract the full SigNoz tarball; do not move the `signoz` binary on its own. It loads the web UI and email/alert templates relative to itself, so `bin/`, `web/`, `templates/`, and `conf/` must stay together.
+</Admonition>
+
+`foundryctl cast` creates the `signoz` service user and the data directories automatically.
+
+### Step 4: Create casting.yaml
+
+Create a working directory outside `/root` so the generated `pours/` files remain readable by the `signoz` system user:
+
+```bash
+sudo mkdir -p /opt/signoz-foundry
+sudo chown "$(id -u):$(id -g)" /opt/signoz-foundry
+cd /opt/signoz-foundry
+```
+
+Create `casting.yaml` for the systemd binary deployment:
+
+```bash
+cat <<'EOF' > casting.yaml
+apiVersion: v1alpha1
+kind: Installation
+metadata:
+  name: signoz
+spec:
+  deployment:
+    flavor: binary
+    mode: systemd
+EOF
+```
+
+<Admonition type="info">
+If your `postgres` binary is not at `/usr/bin/postgres` (Step 2), point Foundry at it with a binary-path annotation under `metadata`. The directory must also contain `initdb`:
+
+```yaml
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/metastore-postgres-binary-path: /usr/lib/postgresql/16/bin/postgres
+```
+
+See the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/systemd/binary" target="_blank" rel="noopener noreferrer nofollow">Foundry systemd binary example</a> for all binary-path annotations.
+</Admonition>
+
+### Step 5: Deploy with Foundry
+
+Run the full deployment pipeline:
+
+```bash
+sudo foundryctl cast -f casting.yaml
+```
+
+`foundryctl cast` validates dependencies, generates service files and configs under `pours/`, installs systemd units, and starts the SigNoz services.
+
+<Admonition type="warning" title="Note">
+`foundryctl cast` needs `sudo` because it writes to system directories and manages systemd services.
+</Admonition>
+
+### Step 6: Validate the installation
+
+Check that the main services are running:
+
+```bash
+systemctl status signoz-signoz.service
+systemctl status signoz-ingester.service
+systemctl status signoz-telemetrystore-clickhouse-0-0.service
+systemctl status signoz-telemetrykeeper-clickhousekeeper-0.service
+systemctl status signoz-metastore-postgres.service
+```
+
+Each service should show `active (running)`.
+
+View logs for all SigNoz services:
+
+```bash
+journalctl -u 'signoz-*' -f
+```
+
+View logs for one service:
+
+```bash
+journalctl -u signoz-signoz.service -f
+```
+
+Open `http://<your-server-ip>:8080/` in a browser. The SigNoz setup screen should load.
+
+### Step 7: Enable the SigNoz MCP server (optional)
+
+Foundry can also deploy the <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/mcp-server.md" target="_blank" rel="noopener noreferrer nofollow">SigNoz MCP server</a> alongside the stack so AI clients can query your telemetry. It is disabled by default.
+
+1. Download the MCP server binary into the path the casting expects:
+
+   ```bash
+   ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+   sudo mkdir -p /opt/mcp
+   curl -fsSL "https://github.com/SigNoz/signoz-mcp-server/releases/latest/download/signoz-mcp-server_linux_${ARCH}.tar.gz" \
+     | sudo tar -xz --strip-components=1 -C /opt/mcp
+   ```
+
+2. Add an `mcp` block under `spec` in `casting.yaml`:
+
+   ```yaml
+   apiVersion: v1alpha1
+   kind: Installation
+   metadata:
+     name: signoz
+   spec:
+     deployment:
+       flavor: binary
+       mode: systemd
+     mcp:
+       spec:
+         enabled: true
+   ```
+
+3. Re-run cast to add the MCP service on port `8000`:
+
+   ```bash
+   sudo foundryctl cast -f casting.yaml
+   ```
+
+   Verify it is live:
+
+   ```bash
+   curl -fsS localhost:8000/livez && echo " OK"
+   ```
+
+4. Create an API key from a [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) (**Settings → Service Accounts**, requires **Admin** role).
+
+5. Add the server to your AI client. For example, with Claude Code:
+
+   ```bash
+   claude mcp add --scope user --transport http signoz http://localhost:8000/mcp \
+     --header "SIGNOZ-API-KEY: <your-api-key>"
+   ```
+
+   - `<your-api-key>`: the key from step 4
+
+   To confirm the connection, run `/mcp` inside Claude Code and check that the `signoz` server is listed as connected.
+
+For other clients and example workflows, see [SigNoz MCP Server](https://signoz.io/docs/ai/signoz-mcp-server/) and [AI use cases](https://signoz.io/docs/ai/use-cases/).
+
+## Customize the installation
+
+Every change follows the same loop: edit `casting.yaml`, then re-run `foundryctl cast` to apply it.
+
+- **Binary locations**: if a component lives outside its default path, point Foundry at it with a binary-path annotation under `metadata.annotations`. The <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/systemd/binary" target="_blank" rel="noopener noreferrer nofollow">systemd binary example</a> lists every annotation.
+- **Anything Foundry does not model**: add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches`. Do not edit the generated files in `pours/` by hand, since `forge` overwrites them.
+- **Pin a version**: download a specific SigNoz or SigNoz OTel Collector release in Step 3 instead of `latest`.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### `foundryctl cast` fails
+
+Re-run the failing command with `--debug` for verbose logs:
+
+```bash
+sudo foundryctl cast -f casting.yaml --debug
+```
+
+### `sudo` cannot find `foundryctl`
+
+Run `foundryctl` through `sudo` with your current PATH:
+
+```bash
+sudo env "PATH=$PATH" foundryctl cast -f casting.yaml
+```
+
+You can also install `foundryctl` into a system path such as `/usr/local/bin`.
+
+### ClickHouse cannot connect to Keeper on Ubuntu
+
+On some Ubuntu hosts, `localhost` resolves to `::1` first while ClickHouse Keeper listens on IPv4. If `signoz-telemetrystore-clickhouse-0-0.service` fails to start, replace `localhost` with `127.0.0.1` in the generated config:
+
+```bash
+sudo sed -i 's/host: localhost/host: 127.0.0.1/' /etc/clickhouse-server/config-0-0.yaml
+sudo systemctl restart signoz-telemetrystore-clickhouse-0-0.service
+```
+
+Check the service logs again:
+
+```bash
+journalctl -u signoz-telemetrystore-clickhouse-0-0.service -f
+```
+
+<Admonition type="warning" title="This edit does not survive a recast">
+`foundryctl cast` regenerates the ClickHouse config and overwrites this change, so a later cast (for example, enabling the MCP server in Step 7) reintroduces the failure. To persist the fix, set the Keeper host to `127.0.0.1` through the ClickHouse component's `config.data` in `casting.yaml` so `forge` writes it on every run. See the <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">Foundry config and patches guide</a>. If you keep the manual edit, re-run the `sed` command after every `foundryctl cast`.
+</Admonition>
+
+### A SigNoz service fails after cast
+
+Inspect the unit and logs for the failing service:
+
+```bash
+systemctl status <service-name>
+journalctl -u <service-name> -n 200 --no-pager
+```
+
+</details>
+
+</TabItem>
+<TabItem value="manual" label="Manual">
+
+<Admonition type="warning" title="Use manual installation when you need full control">
+The manual path installs ClickHouse, ZooKeeper, SigNoz, and the SigNoz OTel Collector as separate systemd services. Use it when you need to own every config file and service unit. The Foundry path handles more of this work for you.
+</Admonition>
+
+These commands use Debian and Ubuntu package commands. Adapt package-manager commands for another Linux distribution.
+
+### Step 1: Install ClickHouse
+
+Install ClickHouse with the <a href="https://clickhouse.com/docs/install#available-installation-options" target="_blank" rel="noopener noreferrer nofollow">official ClickHouse installation guide</a>.
+
+<Admonition type="warning">
+Do not start `clickhouse-server.service` yet. Start it after you configure ZooKeeper.
+</Admonition>
+
+During installation, ClickHouse prompts for a password for the `default` user. If you leave it empty, the DSN strings below work as written. If you set a password, add it as a `password` query parameter to each DSN below, after the database path where one is present. Use `tcp://localhost:9000?password=<your-password>` for a DSN with no database path, and `tcp://localhost:9000/signoz_traces?password=<your-password>` when a database path is present.
+
+- `<your-password>`: the password you set for the ClickHouse `default` user.
+
+### Step 2: Install ZooKeeper
+
+ClickHouse uses ZooKeeper for distributed coordination. A single ZooKeeper instance is enough for this single-node ClickHouse setup.
+
+Install Java:
 
 ```bash
 sudo apt update
-sudo apt upgrade -y
-sudo apt install default-jdk -y
+sudo apt install -y default-jdk
 ```
 
-2. Get and extract the latest release of Zookeeper from the [releases page](https://zookeeper.apache.org/releases.html)
+Download and extract ZooKeeper:
 
 ```bash
-curl -L https://dlcdn.apache.org/zookeeper/zookeeper-3.8.5/apache-zookeeper-3.8.5-bin.tar.gz -o zookeeper.tar.gz
+ZOOKEEPER_VERSION=3.9.5
+curl -L "https://archive.apache.org/dist/zookeeper/zookeeper-${ZOOKEEPER_VERSION}/apache-zookeeper-${ZOOKEEPER_VERSION}-bin.tar.gz" -o zookeeper.tar.gz
 tar -xzf zookeeper.tar.gz
 ```
 
-3. Create the necessary zookeeper directories and copy the extracted files to `/opt/zookeeper`:
+Create ZooKeeper directories and copy the extracted files:
 
 ```bash
-sudo mkdir -p /opt/zookeeper
-sudo mkdir -p /var/lib/zookeeper
-sudo mkdir -p /var/log/zookeeper
-sudo cp -r apache-zookeeper-3.8.5-bin/* /opt/zookeeper
+ZOOKEEPER_VERSION=3.9.5
+sudo mkdir -p /opt/zookeeper /var/lib/zookeeper /var/log/zookeeper
+sudo cp -R "apache-zookeeper-${ZOOKEEPER_VERSION}-bin/"* /opt/zookeeper/
 ```
 
-4. Create the zookeeper config file:
+Create the ZooKeeper config file:
 
-```bash 
+```bash
 sudo bash -c 'cat <<EOF > /opt/zookeeper/conf/zoo.cfg
 tickTime=2000
 dataDir=/var/lib/zookeeper
@@ -65,29 +331,28 @@ admin.serverPort=3181
 EOF'
 ```
 
-5. Create the zookeeper systemd environment file:
+Create the ZooKeeper systemd environment file:
+
 ```bash
 sudo bash -c 'cat <<EOF > /opt/zookeeper/conf/zoo.env
 ZOO_LOG_DIR=/var/log/zookeeper
 EOF'
 ```
 
-6. Create a user and group to run Zookeeper and give it ownership of the zookeeper directories:
+Create the `zookeeper` user and give it ownership of the ZooKeeper directories:
 
 ```bash
-sudo getent passwd zookeeper >/dev/null || sudo useradd --system --home /opt/zookeeper --no-create-home --user-group --shell /sbin/nologin zookeeper
-sudo chown -R zookeeper:zookeeper /opt/zookeeper
-sudo chown -R zookeeper:zookeeper /var/lib/zookeeper
-sudo chown -R zookeeper:zookeeper /var/log/zookeeper
+getent passwd zookeeper >/dev/null || sudo useradd --system --home /opt/zookeeper --no-create-home --user-group --shell /sbin/nologin zookeeper
+sudo chown -R zookeeper:zookeeper /opt/zookeeper /var/lib/zookeeper /var/log/zookeeper
 ```
 
-7. Create the zookeeper systemd service:
+Create the ZooKeeper systemd service:
 
 ```bash
 sudo bash -c 'cat <<EOF > /etc/systemd/system/zookeeper.service
 [Unit]
-Description=Zookeeper
-Documentation=http://zookeeper.apache.org
+Description=ZooKeeper
+Documentation=https://zookeeper.apache.org/
 
 [Service]
 EnvironmentFile=/opt/zookeeper/conf/zoo.env
@@ -106,14 +371,14 @@ WantedBy=multi-user.target
 EOF'
 ```
 
-8. Reload the systemd daemon and start the zookeeper service:
+Start ZooKeeper:
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl start zookeeper.service
+sudo systemctl enable --now zookeeper.service
 ```
 
-9. Configure clickhouse to use zookeeper and start the clickhouse service:
+Configure ClickHouse to use ZooKeeper and start ClickHouse:
 
 ```bash
 sudo bash -c 'cat <<EOF > /etc/clickhouse-server/config.d/cluster.xml
@@ -144,104 +409,89 @@ sudo bash -c 'cat <<EOF > /etc/clickhouse-server/config.d/cluster.xml
 </clickhouse>
 EOF'
 sudo chown clickhouse:clickhouse /etc/clickhouse-server/config.d/cluster.xml
-sudo systemctl start clickhouse-server.service
+sudo systemctl enable --now clickhouse-server.service
 ```
 
-### Verify the installation
-
-1. Check the status of the clickhouse and zookeeper services:
+Verify both services:
 
 ```bash
-sudo systemctl status clickhouse-server.service
-sudo systemctl status zookeeper.service
+systemctl is-active clickhouse-server.service
+systemctl is-active zookeeper.service
 ```
 
-2. If the services are running, you should see the following output:
+Both commands should print `active`.
+
+### Step 3: Run ClickHouse migrations
+
+Download the SigNoz OTel Collector binary and run the ClickHouse migrations:
 
 ```bash
-clickhouse-server.service - ClickHouse Server (analytic DBMS for big data)
-    Loaded: loaded (/lib/systemd/system/clickhouse-server.service; enabled; preset: enabled)
-    Active: active (running) since ...
-
-zookeeper.service - Zookeeper
-    Loaded: loaded (/etc/systemd/system/zookeeper.service; disabled; preset: enabled)
-    Active: active (running) ...
-```
-
-3. (Optional) Check the logs of the clickhouse and zookeeper services:
-
-```bash
-sudo journalctl -u clickhouse-server.service -f
-sudo journalctl -u zookeeper.service -f
-```
-
-## Run Clickhouse migrations
-
-1. Get and extract the latest release of SigNoz Otel Collector:
-
-```bash
-curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-otel-collector.tar.gz
+ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+curl -L "https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_${ARCH}.tar.gz" -o signoz-otel-collector.tar.gz
 tar -xzf signoz-otel-collector.tar.gz
+
+COLLECTOR="./signoz-otel-collector_linux_${ARCH}/bin/signoz-otel-collector"
+CLICKHOUSE_DSN="tcp://localhost:9000"
+
+"$COLLECTOR" migrate bootstrap --clickhouse-dsn="$CLICKHOUSE_DSN" --clickhouse-replication=true
+"$COLLECTOR" migrate sync up --clickhouse-dsn="$CLICKHOUSE_DSN" --clickhouse-replication=true
+"$COLLECTOR" migrate async up --clickhouse-dsn="$CLICKHOUSE_DSN" --clickhouse-replication=true
 ```
 
-2. Run the migrations:
+If you set a ClickHouse password, change `CLICKHOUSE_DSN` to `tcp://localhost:9000?password=<your-password>`.
+
+### Step 4: Install SigNoz
+
+Download and extract the SigNoz binary:
 
 ```bash
-./signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-otel-collector migrate bootstrap --clickhouse-dsn="tcp://localhost:9000?password=password" --clickhouse-replication=true
-./signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-otel-collector migrate sync up --clickhouse-dsn="tcp://localhost:9000?password=password" --clickhouse-replication=true
-./signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-otel-collector migrate async up --clickhouse-dsn="tcp://localhost:9000?password=password" --clickhouse-replication=true
-```
-
-
-## Install SigNoz
-
-1. Get and extract the latest release of SigNoz:
-
-```bash
-curl -L https://github.com/SigNoz/signoz/releases/latest/download/signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz.tar.gz
+ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+curl -L "https://github.com/SigNoz/signoz/releases/latest/download/signoz_linux_${ARCH}.tar.gz" -o signoz.tar.gz
 tar -xzf signoz.tar.gz
 ```
 
-2. Create the necessary directories and copy the extracted files to `/opt/signoz`:
+Copy the files into `/opt/signoz`:
 
 ```bash
-sudo mkdir -p /opt/signoz
-sudo mkdir -p /var/lib/signoz
-sudo cp -r signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz
+sudo mkdir -p /opt/signoz /var/lib/signoz /opt/signoz/conf
+sudo cp -R "signoz_linux_${ARCH}/"* /opt/signoz/
 ```
 
-3. Create the SigNoz systemd environment file:
+Create the SigNoz systemd environment file:
 
 ```bash
 sudo bash -c 'cat <<EOF > /opt/signoz/conf/systemd.env
 SIGNOZ_INSTRUMENTATION_LOGS_LEVEL=info
-INVITE_EMAIL_TEMPLATE=/opt/signoz/templates/invitation_email_template.html
+INVITE_EMAIL_TEMPLATE=/opt/signoz/templates/email/invitation.gotmpl
 SIGNOZ_SQLSTORE_SQLITE_PATH=/var/lib/signoz/signoz.db
 SIGNOZ_WEB_ENABLED=true
 SIGNOZ_WEB_DIRECTORY=/opt/signoz/web
-SIGNOZ_JWT_SECRET=secret
+SIGNOZ_JWT_SECRET=$(openssl rand -hex 32)
 SIGNOZ_ALERTMANAGER_PROVIDER=signoz
 SIGNOZ_TELEMETRYSTORE_PROVIDER=clickhouse
-SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://localhost:9000?password=password
+SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://localhost:9000
 DOT_METRICS_ENABLED=true
 EOF'
 ```
 
-4. Create a user and group to run SigNoz and give it ownership of the signoz directories:
+If you set a ClickHouse password, append the query parameter to `SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN` (this DSN has no database path): `tcp://localhost:9000?password=<your-password>`.
+
+Create the `signoz` user and give it ownership of the SigNoz directories:
+
 ```bash
-sudo getent passwd signoz >/dev/null || sudo useradd --system --home /opt/signoz --no-create-home --user-group --shell /sbin/nologin signoz
-sudo chown -R signoz:signoz /var/lib/signoz
-sudo chown -R signoz:signoz /opt/signoz
+getent passwd signoz >/dev/null || sudo useradd --system --home /opt/signoz --no-create-home --user-group --shell /sbin/nologin signoz
+sudo chown -R signoz:signoz /var/lib/signoz /opt/signoz
 ```
 
-5. Create the SigNoz systemd service:
+Create the SigNoz systemd service:
 
 ```bash
 sudo bash -c 'cat <<EOF > /etc/systemd/system/signoz.service
 [Unit]
 Description=SigNoz
 Documentation=https://signoz.io/docs
-After=clickhouse-server.service
+After=clickhouse-server.service zookeeper.service
+Wants=clickhouse-server.service zookeeper.service
 
 [Service]
 User=signoz
@@ -258,61 +508,36 @@ WantedBy=multi-user.target
 EOF'
 ```
 
-6. Reload the systemd daemon and start the SigNoz service:
+Start SigNoz:
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl start signoz.service
+sudo systemctl enable --now signoz.service
 ```
 
-### Verify the installation
-
-1. Check the status of the signoz service:
+Verify SigNoz:
 
 ```bash
-sudo systemctl status signoz.service
+systemctl is-active signoz.service
+curl -fsS http://localhost:8080/api/v1/health
 ```
 
-2. If the services are running, you should see the following output:
+The service check should print `active`, and the health endpoint should return `{"status":"ok"}`.
+
+### Step 5: Install the SigNoz OTel Collector
+
+The SigNoz OTel Collector receives traces, metrics, and logs from your applications and writes them to ClickHouse.
+
+Create the Collector directories and copy the binary files:
 
 ```bash
-signoz.service - SigNoz
-    Loaded: loaded (/etc/systemd/system/signoz.service; enabled; preset: enabled)
-    Active: active (running) since ...
+ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+sudo mkdir -p /var/lib/signoz-otel-collector /opt/signoz-otel-collector /opt/signoz-otel-collector/conf
+sudo cp -R "signoz-otel-collector_linux_${ARCH}/"* /opt/signoz-otel-collector/
+sudo chown -R signoz:signoz /var/lib/signoz-otel-collector /opt/signoz-otel-collector
 ```
 
-3. (Optional) Check the logs of the signoz service:
-
-```bash
-sudo journalctl -u signoz.service -f
-```
-
-
-## Install SigNoz Otel Collector
-
-1. Get and extract the latest release of SigNoz Otel Collector:
-
-```bash
-curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-otel-collector.tar.gz
-tar -xzf signoz-otel-collector.tar.gz
-```
-
-2. Create the necessary directories and copy the extracted files to `/opt/signoz-otel-collector`:
-
-```bash
-sudo mkdir -p /var/lib/signoz-otel-collector
-sudo mkdir -p /opt/signoz-otel-collector
-sudo cp -r signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz-otel-collector
-```
-
-3. Change the ownership of the files to the `signoz` user and group:
-
-```bash
-sudo chown -R signoz:signoz /var/lib/signoz-otel-collector
-sudo chown -R signoz:signoz /opt/signoz-otel-collector
-```
-
-4. Create a `config.yaml` file in the `/opt/signoz-otel-collector/conf` directory:
+Create the Collector config file:
 
 ```bash
 sudo bash -c 'cat <<EOF > /opt/signoz-otel-collector/conf/config.yaml
@@ -341,7 +566,7 @@ processors:
     send_batch_size: 50000
     timeout: 1s
   signozspanmetrics/delta:
-    metrics_exporter: signozclickhousemetrics 
+    metrics_exporter: signozclickhousemetrics
     latency_histogram_buckets: [100us, 1ms, 2ms, 6ms, 10ms, 50ms, 100ms, 250ms, 500ms, 1000ms, 1400ms, 2000ms, 5s, 10s, 20s, 40s, 60s]
     dimensions_cache_size: 100000
     dimensions:
@@ -360,17 +585,17 @@ extensions:
     endpoint: localhost:1777
 exporters:
   clickhousetraces:
-    datasource: tcp://localhost:9000/signoz_traces?password=password
+    datasource: tcp://localhost:9000/signoz_traces
     use_new_schema: true
   signozclickhousemetrics:
-    dsn: tcp://localhost:9000/signoz_metrics?password=password
+    dsn: tcp://localhost:9000/signoz_metrics
     timeout: 45s
   clickhouselogsexporter:
-    dsn: tcp://localhost:9000/signoz_logs?password=password
+    dsn: tcp://localhost:9000/signoz_logs
     timeout: 10s
     use_new_schema: true
   metadataexporter:
-    dsn: tcp://localhost:9000/signoz_metadata?password=password
+    dsn: tcp://localhost:9000/signoz_metadata
     timeout: 10s
     tenant_id: default
     cache:
@@ -396,7 +621,9 @@ service:
 EOF'
 ```
 
-5. Create a `opamp.yaml` file in the `/opt/signoz-otel-collector/conf` directory:
+If you set a ClickHouse password, append the query parameter after the database path in every exporter DSN above, for example `tcp://localhost:9000/signoz_traces?password=<your-password>`.
+
+Create the OpAMP config file:
 
 ```bash
 sudo bash -c 'cat <<EOF > /opt/signoz-otel-collector/conf/opamp.yaml
@@ -404,14 +631,15 @@ server_endpoint: ws://127.0.0.1:4320/v1/opamp
 EOF'
 ```
 
-6. Create the SigNoz Otel Collector systemd service:
+Create the Collector systemd service:
 
 ```bash
 sudo bash -c 'cat <<EOF > /etc/systemd/system/signoz-otel-collector.service
 [Unit]
 Description=SigNoz OTel Collector
 Documentation=https://signoz.io/docs
-After=clickhouse-server.service
+After=clickhouse-server.service signoz.service
+Wants=clickhouse-server.service signoz.service
 
 [Service]
 User=signoz
@@ -427,48 +655,73 @@ WantedBy=multi-user.target
 EOF'
 ```
 
-7. Reload the systemd daemon and start the SigNoz Otel Collector service:
+Start the Collector:
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl start signoz-otel-collector.service
+sudo systemctl enable --now signoz-otel-collector.service
 ```
 
-### Verify the installation
-
-1. Check the status of the signoz otel collector service:
+Verify the Collector:
 
 ```bash
-sudo systemctl status signoz-otel-collector.service
+systemctl is-active signoz-otel-collector.service
+sudo ss -ltnp | grep -E ':4317|:4318'
 ```
 
-2. If the services are running, you should see the following output:
+The service check should print `active`, and `ss` should show listeners on `4317` and `4318`.
+
+### Step 6: Open the SigNoz UI
+
+Open `http://<your-server-ip>:8080/` in a browser. The SigNoz setup screen should load.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Migrations fail
+
+Check that ClickHouse responds:
 
 ```bash
-signoz-otel-collector.service - SigNoz OTel Collector
-    Loaded: loaded (/etc/systemd/system/signoz-otel-collector.service; enabled; preset: enabled)
-    Active: active (running) since ...
+curl -s http://localhost:8123/ping
 ```
 
-3. (Optional) Check the logs of the signoz otel collector service:
+The expected response is `Ok.`. If you set a ClickHouse password, confirm that every ClickHouse DSN carries `password=<your-password>` as a query parameter after the database path (for example `tcp://localhost:9000/signoz_traces?password=<your-password>`).
+
+### SigNoz health check fails
+
+Check the SigNoz service and logs:
 
 ```bash
-sudo journalctl -u signoz-otel-collector.service -f
+systemctl status signoz.service
+journalctl -u signoz.service -n 200 --no-pager
 ```
 
-## Test the installation
+### Telemetry does not arrive
 
-1. Run the following command to check the health of signoz:
+Check that the Collector runs and listens on the OTLP ports:
 
 ```bash
-curl -X GET http://localhost:8080/api/v1/health
+systemctl status signoz-otel-collector.service
+sudo ss -ltnp | grep -E ':4317|:4318'
 ```
 
-2. If the installation is successful, you should see the following output:
+</details>
 
-```bash
-{"status":"ok"}
-```
-
+</TabItem>
+</Tabs>
 
 <RetentionInfo />
+
+## Next Steps
+
+- [Collect host metrics from your Linux VMs](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/)
+- [Instrument your application](https://signoz.io/docs/instrumentation/overview/)
+- <a href="https://github.com/SigNoz/opentelemetry-demo-lite" target="_blank" rel="noopener noreferrer nofollow">Send Sample Telemetry with OpenTelemetry Demo Lite</a>
+
+## Get Help
+
+<GetHelp />

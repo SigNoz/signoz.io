@@ -89,6 +89,7 @@ interface FetchChangelogEntriesParams {
   deployment_type?: DeploymentType
   page?: number
   pageSize?: number
+  excludeDocumentIds?: string[]
 }
 
 export const fetchChangelogEntries = async (
@@ -113,6 +114,15 @@ export const fetchChangelogEntries = async (
         page: params.page || 1, // Default to page 1 if not provided
         pageSize: params.pageSize || 2, // Default to page size of 10 if not provided
       },
+    }
+
+    if (params.excludeDocumentIds?.length) {
+      queryObject['filters'] = {
+        ...queryObject['filters'],
+        documentId: {
+          $notIn: params.excludeDocumentIds,
+        },
+      }
     }
 
     // If a specific deployment type is provided, filter out the others, All will not be excluded
@@ -231,7 +241,7 @@ export const fetchChangelogById = async (
   }
 }
 
-// MDX Content schema
+// MDX Content schema — see utils/dateUtils.ts for date field semantics
 export type MDXContent = {
   id: number
   documentId: string
@@ -243,6 +253,8 @@ export type MDXContent = {
   publishedAt: string
   createdAt: string
   updatedAt: string
+  published_date?: string
+  updated_date?: string
   image?: string
   layout?: string
   [key: string]: any
@@ -270,6 +282,51 @@ let pathsCache: string[] | null = null
 let pathsCacheTimestamp: number = 0
 const PATHS_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
+// For related articles component, populate: '*' does shallow populate, so nested relations in related_articles component are not populated.
+// Specific fields that do not exist on a content type make the API throw.
+// Example: keywords do not exist on faqs, so each collection gets its own populate map.
+const relatedArticlesPopulate = {
+  populate: '*',
+}
+
+const commonContentPopulate = {
+  authors: '*',
+  related_articles: relatedArticlesPopulate,
+}
+
+const singleContentPopulateByCollection: Record<string, Record<string, unknown>> = {
+  faqs: {
+    ...commonContentPopulate,
+    tags: '*',
+  },
+  'case-studies': commonContentPopulate,
+  comparisons: {
+    ...commonContentPopulate,
+    tags: '*',
+    keywords: '*',
+  },
+  guides: {
+    ...commonContentPopulate,
+    tags: '*',
+    keywords: '*',
+  },
+  opentelemetries: {
+    ...commonContentPopulate,
+    tags: '*',
+    keywords: '*',
+  },
+  blogs: {
+    ...commonContentPopulate,
+    tags: '*',
+    keywords: '*',
+  },
+  docs: {
+    ...commonContentPopulate,
+    tags: '*',
+    keywords: '*',
+  },
+}
+
 // Fetch MDX content by path or all content for a collection
 export const fetchMDXContentByPath = async (
   collectionName: string,
@@ -280,7 +337,7 @@ export const fetchMDXContentByPath = async (
 ): Promise<MDXContentByIdApiResponse | MDXContentApiResponse> => {
   try {
     const queryObject: any = {
-      populate: '*',
+      populate: fetchAll ? '*' : singleContentPopulateByCollection[collectionName] || '*',
       pagination: {
         page: 1,
         pageSize: 100,
@@ -429,8 +486,9 @@ export const fetchMDXContentByPath = async (
       addQueryPrefix: true,
       arrayFormat: 'repeat',
     })
+    const requestUrl = `${API_URL}/api/${collectionName}${queryParams}`
 
-    const response = await fetch(`${API_URL}/api/${collectionName}${queryParams}`, {
+    const response = await fetch(requestUrl, {
       cache: 'force-cache',
       next: {
         tags: [`${collectionName}-${path}`, `mdx-content-${path}`],
