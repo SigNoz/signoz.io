@@ -45,6 +45,7 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'TabItem',
   'Tabs',
   'ToggleHeading',
+  'TroubleshootingWizard',
 ] as const
 export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'CHClientWithOutput',
@@ -222,6 +223,70 @@ const createUnknownComponentStub = (name: string): ComponentType<StubProps> => {
   return UnknownComponentStub
 }
 
+// The TroubleshootingWizard renders as an interactive click-through on the page.
+// For agent markdown we emit its decision tree as static text so the logic is
+// still readable without the UI. The full explanations live in the surrounding
+// prose (Steps 1-3 and "Common errors and fixes"), which agents also receive.
+const createTroubleshootingWizardStub = (): ComponentType<StubProps> => {
+  const li = (text: string, children?: ReactNode) =>
+    React.createElement('li', null, text, children ?? null)
+  const ul = (...items: ReactNode[]) => React.createElement('ul', null, ...items)
+
+  const TroubleshootingWizardStub = () =>
+    React.createElement(
+      'section',
+      null,
+      React.createElement(
+        'p',
+        null,
+        React.createElement(
+          'strong',
+          null,
+          'Interactive troubleshooter (rendered as a clickable wizard on the page). Decision tree:'
+        )
+      ),
+      React.createElement(
+        'ol',
+        null,
+        li(
+          'Set OTEL_<SIGNAL>_EXPORTER=console, restart, and exercise the code path.',
+          ul(
+            li(
+              'No data in the console: instrumentation problem. Check SDK init order, runtime version support, third-party library support, and that the code path ran.'
+            ),
+            li('Data in the console: continue.')
+          )
+        ),
+        li(
+          'Enable OTEL_LOG_LEVEL=debug (or your language equivalent) and read the export errors.',
+          ul(
+            li('401 / 403 / Unauthenticated: wrong, expired, or revoked ingestion key.'),
+            li(
+              '404 Not Found: wrong endpoint or path. Remove any trailing slash, use the correct signal path, and note SigNoz Cloud uses port 443.'
+            ),
+            li('Connection refused / timeout / no such host: check the topology below.'),
+            li('Exports succeed but nothing appears in SigNoz: wrong region.'),
+            li('No errors: check the topology below.')
+          )
+        ),
+        li(
+          'Topology:',
+          ul(
+            li(
+              'Direct to SigNoz Cloud: run curl -v https://ingest.<region>.signoz.cloud:443. Fails to connect means a firewall or network policy; connects but no data means the key, endpoint, or region is wrong.'
+            ),
+            li(
+              'Through a Collector: add the Collector debug exporter. Data in the Collector logs means a Collector-to-SigNoz export problem (otlphttp endpoint/key/region, exporter wired into the pipeline). Nothing in the Collector logs means an app-to-Collector problem (OTEL_EXPORTER_OTLP_ENDPOINT, ports 4317/4318, network).'
+            )
+          )
+        )
+      )
+    )
+
+  TroubleshootingWizardStub.displayName = 'TroubleshootingWizardStub'
+  return TroubleshootingWizardStub
+}
+
 const createKnownComponentStubs = (
   listicleConfigs: Map<string, ListicleConfig>
 ): Record<KnownAgentMdxComponentName, ComponentType<StubProps>> => ({
@@ -311,6 +376,7 @@ const createKnownComponentStubs = (
     )
   },
   ToggleHeading: (props) => React.createElement('div', null, props.children),
+  TroubleshootingWizard: createTroubleshootingWizardStub(),
   RegionTable: () => {
     return React.createElement(
       'p',
