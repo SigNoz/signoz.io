@@ -1,6 +1,6 @@
 ---
 title: How Shaped fixed a year-old latency bug with SigNoz MCP
-date: 2026-07-20
+date: 2026-07-23
 tags: [AI, Observability]
 authors: [mahak_kaur]
 description: Kathleen Xue at Shaped used a coding agent with SigNoz MCP to fix a Redis latency bug that had lived in production for almost a year. A closer look at what agent-native observability actually takes.
@@ -14,7 +14,13 @@ related_articles:
 
 For almost a year, the same bug kept coming back.
 
-<a href="https://www.linkedin.com/in/kathleen-xue-b2004381" target="_blank" rel="noopener noreferrer nofollow">Kathleen Xue</a> is a Senior Software Engineer at <a href="https://www.shaped.ai/" target="_blank" rel="noopener noreferrer nofollow">Shaped</a>, the Y Combinator-backed company whose APIs let teams build production-ready ranking and recommendation models. Her work centers on reliability and latency, so keeping the system stable is the priority, and that means one tool is almost always open. "80% of my job is just checking SigNoz," she says. And for months, one thing refused to stay fixed. Shaped's calls to their Redis client carried a long tail of latency. The team tried fix after fix. None of them held. The slow requests kept surfacing, every so often, unpredictably.
+<a href="https://www.linkedin.com/in/kathleen-xue-b2004381" target="_blank" rel="noopener noreferrer nofollow">Kathleen Xue</a> is a Senior Software Engineer at <a href="https://www.shaped.ai/" target="_blank" rel="noopener noreferrer nofollow">Shaped</a>, the Y Combinator-backed company whose APIs let teams build production-ready ranking and recommendation models. Her work centers on reliability and latency, so keeping the system stable is the priority, and that means one tool is almost always open. "80% of my infra debugging work is checking SigNoz," she says. And for months, one thing refused to stay fixed. Shaped's calls to their Redis client carried a long tail of latency. The team tried fix after fix. None of them held. The slow requests kept surfacing, every so often, unpredictably.
+
+<Admonition type="note">
+
+After this conversation, Shaped announced that it had been acquired by Whatnot. [Read the full announcement here](https://www.shaped.ai/blog/shaped-is-joining-whatnot).
+
+</Admonition>
 
 One day, out of frustration, she stopped guessing at fixes. She pulled a batch of traces that all showed the same timeout from the same client, handed them to a coding agent through the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/), and asked it to just tell her what was going on.
 
