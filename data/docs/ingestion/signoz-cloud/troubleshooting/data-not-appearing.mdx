@@ -402,9 +402,9 @@ Wrong endpoint, wrong region, and a trailing slash are the same class of problem
 
 For the complete list of ingestion HTTP and gRPC status codes with root causes and resolutions, see the [Ingestion Troubleshooting guide](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting/).
 
-### Other things that can silently block data
+### Other things that can silently drop data
 
-These SigNoz Cloud limits reject or delay data without an obvious instrumentation error:
+These SigNoz Cloud limits drop data without an obvious instrumentation error: exports are rejected or throttled after they leave your app, so nothing looks wrong on your side.
 
 - **Payload too large.** Payloads must be under the **16 MB** maximum, or they are rejected (HTTP `413`). Reduce batch sizes or export intervals.
 - **Timeouts on large or slow exports.** Increase the export timeout with `OTEL_EXPORTER_OTLP_TIMEOUT` (in milliseconds, for example `OTEL_EXPORTER_OTLP_TIMEOUT=30000`) and enable gzip with `OTEL_EXPORTER_OTLP_COMPRESSION=gzip`.
