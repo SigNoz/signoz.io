@@ -1,0 +1,279 @@
+---
+date: 2026-07-23
+id: collect-logs
+title: Collect GCP Logs
+description: Route Google Cloud Logging logs to SigNoz by creating a Pub/Sub topic and push subscription, a log sink per project, and an exclusion filter to avoid duplicate log costs.
+doc_type: howto
+tags: [SigNoz Cloud, GCP]
+---
+
+GCP services write logs to **Cloud Logging**. To get them into SigNoz, you route the logs you care about to a **Pub/Sub topic**, deliver them to the Collector with a **push subscription**, and let the Collector export them over OTLP. This is step 5 of the [GCP integration](https://signoz.io/docs/integrations/gcp/gcp-integration/).
+
+The log pipeline has four parts:
+
+1. A **Pub/Sub topic** in your deployment project. This is the buffer logs flow through.
+2. A **push subscription** that authenticates to the Collector's Cloud Run service and delivers messages to it.
+3. A **log sink** (log router) per monitored project that routes selected logs to the topic.
+4. An **exclusion filter** on the `_Default` sink so you don't pay to store the same logs twice.
+
+<Figure
+  src="/img/docs/integrations/gcp/gcp-integration-logs-pipeline.webp"
+  alt="Diagram: Cloud Logging in each monitored project routes through a log sink to a Pub/Sub topic in the deployment project, then a push subscription delivers to the Collector on Cloud Run"
+  caption="Logs flow from each project's Cloud Logging, through a per-project sink, into one Pub/Sub topic, then push to the Collector"
+  className="box-shadowed-image"
+/>
+
+## Prerequisites
+
+- The [Collector is deployed and running](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/) (on Cloud Run or the compute of your choice) with the `googlecloudpubsubpush` receiver, and you have noted the HTTPS **endpoint URL** Pub/Sub will push to (the Cloud Run Service URL, or your own compute's endpoint).
+- The Pub/Sub API and Cloud Logging API are enabled in your deployment project, and the Cloud Logging API is enabled in each monitored project.
+
+<Admonition type="info">
+Create the **Pub/Sub topic and subscription in your `<deployment-project-id>`**, the same project as the Collector. This keeps push delivery on GCP's internal network and lets the internal-ingress Collector receive it. Log **sinks**, by contrast, are created in **each monitored project**, and they point back at the topic in your deployment project.
+</Admonition>
+
+## Step 1: Create the Pub/Sub topic
+
+In your **deployment project**, create one topic that all sinks publish to.
+
+<Tabs>
+<TabItem value="cli" label="gcloud CLI" default>
+
+```bash
+gcloud pubsub topics create signoz-integration-logs \
+  --project=<deployment-project-id>
+```
+
+</TabItem>
+<TabItem value="console" label="Console">
+
+1. Select your `<deployment-project-id>` in the project picker.
+2. Go to **Pub/Sub** > **Topics** > **Create topic**.
+3. Set **Topic ID** to `signoz-integration-logs`.
+4. Clear **Add a default subscription**. You create a push subscription explicitly in step 3.
+5. Click **Create**.
+
+</TabItem>
+</Tabs>
+
+The topic's fully-qualified name is `projects/<deployment-project-id>/topics/signoz-integration-logs`. You reference this exact path when creating sinks in other projects, so keep it handy.
+
+## Step 2: Grant the push subscription permission to invoke the Collector
+
+Because the Collector uses `--ingress=internal` and requires authentication, the push subscription must present a valid identity. Pub/Sub push does this by signing an OIDC token with a **push-auth service account**; Cloud Run validates the token automatically.
+
+You can reuse the `signoz-integration` service account as the push-auth identity, or create a dedicated one. Grant it permission to invoke the Cloud Run service, and let the Pub/Sub service agent mint tokens as it.
+
+<Admonition type="info">
+The steps below are for a Cloud Run Collector, where `roles/run.invoker` and automatic token validation handle authentication. If you run the Collector on other compute (a VM, GKE, or an existing cluster), you still configure the push subscription with a push-auth service account (step 3), but your endpoint is responsible for **validating the OIDC token itself** and for restricting inbound traffic (for example, firewall rules or ingress limited to Pub/Sub). Skip the `run.invoker` grant in that case.
+</Admonition>
+
+<Tabs>
+<TabItem value="cli" label="gcloud CLI" default>
+
+```bash
+# 1. Allow the push-auth service account to invoke the Collector service.
+gcloud run services add-iam-policy-binding signoz-otel-collector \
+  --region=<deployment-region> \
+  --project=<deployment-project-id> \
+  --member="serviceAccount:signoz-integration@<deployment-project-id>.iam.gserviceaccount.com" \
+  --role="roles/run.invoker"
+
+# 2. Let the Pub/Sub service agent create OIDC tokens as that service account.
+#    Replace <deployment-project-number> with your project's numeric ID
+#    (gcloud projects describe <deployment-project-id> --format='value(projectNumber)').
+gcloud iam service-accounts add-iam-policy-binding \
+  signoz-integration@<deployment-project-id>.iam.gserviceaccount.com \
+  --project=<deployment-project-id> \
+  --member="serviceAccount:service-<deployment-project-number>@gcp-sa-pubsub.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountTokenCreator"
+```
+
+</TabItem>
+<TabItem value="console" label="Console">
+
+1. **Grant invoker on the Collector:** Go to **Cloud Run** > **signoz-otel-collector** > **Permissions** > **Add principal**. Add `signoz-integration@<deployment-project-id>.iam.gserviceaccount.com` with role **Cloud Run Invoker** (`roles/run.invoker`).
+2. **Allow token creation:** Go to **IAM & Admin** > **Service Accounts** > `signoz-integration` > **Permissions** > **Grant access**. Add the Pub/Sub service agent `service-<deployment-project-number>@gcp-sa-pubsub.iam.gserviceaccount.com` with role **Service Account Token Creator** (`roles/iam.serviceAccountTokenCreator`). Find your project number under **IAM & Admin** > **Settings**.
+
+</TabItem>
+</Tabs>
+
+## Step 3: Create the push subscription
+
+Create a push subscription on the topic that delivers to the Collector's Service URL, authenticated with the push-auth service account.
+
+<Tabs>
+<TabItem value="cli" label="gcloud CLI" default>
+
+```bash
+gcloud pubsub subscriptions create signoz-integration-logs-push \
+  --project=<deployment-project-id> \
+  --topic=signoz-integration-logs \
+  --push-endpoint="<collector-service-url>/" \
+  --push-auth-service-account="signoz-integration@<deployment-project-id>.iam.gserviceaccount.com" \
+  --ack-deadline=30
+```
+
+</TabItem>
+<TabItem value="console" label="Console">
+
+1. Go to **Pub/Sub** > **Subscriptions** > **Create subscription**.
+2. **Subscription ID**: `signoz-integration-logs-push`.
+3. **Select a Cloud Pub/Sub topic**: `projects/<deployment-project-id>/topics/signoz-integration-logs`.
+4. **Delivery type**: **Push**.
+5. **Endpoint URL**: your `<collector-service-url>/` (include the trailing slash).
+6. Enable **Enable authentication** and select the `signoz-integration` service account.
+7. Click **Create**.
+
+</TabItem>
+</Tabs>
+
+Replace `<collector-service-url>` with the Cloud Run **Service URL** from [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-4-note-the-service-url).
+
+<Admonition type="info">
+Push subscriptions **cannot** attach a custom header such as a SigNoz ingestion key; GCP only supports service-account authentication on the push request. This is exactly why the Collector runs in your project rather than SigNoz pushing straight to its gateway. The Collector holds the SigNoz ingestion key and forwards logs on to SigNoz over OTLP.
+</Admonition>
+
+## Step 4: Create a log sink per monitored project
+
+A **log sink** (in **Logging** > **Log Router**) selects logs with an inclusion filter and routes them to a destination. Create one sink in **each project** in your **Projects to Monitor**, pointing at the topic in your deployment project.
+
+### Sink in the deployment project
+
+<Tabs>
+<TabItem value="cli" label="gcloud CLI" default>
+
+```bash
+gcloud logging sinks create signoz-integration-logs-sink \
+  pubsub.googleapis.com/projects/<deployment-project-id>/topics/signoz-integration-logs \
+  --project=<deployment-project-id> \
+  --log-filter='resource.type="cloud_run_revision"'
+```
+
+</TabItem>
+<TabItem value="console" label="Console">
+
+1. In the deployment project, go to **Logging** > **Log Router** > **Create sink**.
+2. **Sink name**: `signoz-integration-logs-sink`.
+3. **Sink destination**: **Cloud Pub/Sub topic** > select `signoz-integration-logs`.
+4. **Build inclusion filter**: enter a filter for the logs you want, for example `resource.type="cloud_run_revision"`.
+5. Click **Create sink**.
+
+</TabItem>
+</Tabs>
+
+Set the `--log-filter` (inclusion filter) to match the services you enabled in SigNoz. Use the <a href="https://cloud.google.com/logging/docs/view/logging-query-language" target="_blank" rel="noopener noreferrer nofollow">Logging query language</a>; filter by `resource.type`, `log_id`, or labels to keep only the logs you need.
+
+### Sink in another monitored project
+
+For a monitored project that is **not** your deployment project, the destination must be the **fully-qualified** topic path that includes your **Deployment Project ID**. The sink lives in one project but publishes to the topic in another:
+
+<Tabs>
+<TabItem value="cli" label="gcloud CLI" default>
+
+```bash
+gcloud logging sinks create signoz-integration-logs-sink \
+  pubsub.googleapis.com/projects/<deployment-project-id>/topics/signoz-integration-logs \
+  --project=<monitored-project-id> \
+  --log-filter='resource.type="cloud_run_revision"'
+```
+
+</TabItem>
+<TabItem value="console" label="Console">
+
+1. Switch to the **monitored** project (`<monitored-project-id>`).
+2. Go to **Logging** > **Log Router** > **Create sink**.
+3. **Sink destination**: choose **Cloud Pub/Sub topic** > **Use a topic in another project**, and enter the full path `pubsub.googleapis.com/projects/<deployment-project-id>/topics/signoz-integration-logs`.
+4. Set the inclusion filter and click **Create sink**.
+
+</TabItem>
+</Tabs>
+
+<Admonition type="info">
+The `<deployment-project-id>` in the topic path is the **Deployment Project ID** you entered when [connecting your account](https://signoz.io/docs/integrations/gcp/connect-gcp-account/). Every sink, no matter which project it lives in, points at the single topic in that deployment project.
+</Admonition>
+
+## Step 5: Authorize the sink to publish to the topic
+
+Each sink is created with an automatically generated **writer identity** (a service account). GCP prints it when the sink is created, or you can read it back. Grant that identity `roles/pubsub.publisher` on the topic so it can publish routed logs. Repeat for every sink.
+
+<Tabs>
+<TabItem value="cli" label="gcloud CLI" default>
+
+```bash
+# 1. Read the sink's writer identity.
+WRITER=$(gcloud logging sinks describe signoz-integration-logs-sink \
+  --project=<monitored-project-id> \
+  --format='value(writerIdentity)')
+
+# 2. Grant it publisher on the topic (topic lives in the deployment project).
+gcloud pubsub topics add-iam-policy-binding signoz-integration-logs \
+  --project=<deployment-project-id> \
+  --member="$WRITER" \
+  --role="roles/pubsub.publisher"
+```
+
+</TabItem>
+<TabItem value="console" label="Console">
+
+1. In the project that owns the sink, open **Logging** > **Log Router**, click the sink, and copy its **Writer identity** (an email like `serviceAccount:p123-...@gcp-sa-logging.iam.gserviceaccount.com`).
+2. In your `<deployment-project-id>`, go to **Pub/Sub** > **Topics** > `signoz-integration-logs` > **Permissions** > **Add principal**.
+3. Paste the writer identity and assign the role **Pub/Sub Publisher** (`roles/pubsub.publisher`). Save.
+
+</TabItem>
+</Tabs>
+
+<Admonition type="warning">
+Without this binding the sink cannot write to the topic and logs never reach the Collector. If logs don't appear, check this grant first.
+</Admonition>
+
+## Step 6: Avoid duplicate log costs
+
+Every project already routes all logs to the built-in **`_Default`** sink, which stores them in Cloud Logging. Your new sink adds a **second** copy flowing to Pub/Sub, so you pay to store the same logs twice.
+
+To stop that, add an **exclusion filter** on the `_Default` sink matching the logs you now send to SigNoz. Excluded logs are still routed to Pub/Sub by your sink; they are only dropped from `_Default` storage.
+
+<Tabs>
+<TabItem value="console" label="Console" default>
+
+1. In the project, go to **Logging** > **Log Router**.
+2. Click the **`_Default`** sink > **Edit sink**.
+3. Under **Exclusion filters**, add a filter that matches what your SigNoz sink includes, for example `resource.type="cloud_run_revision"`.
+4. Save.
+
+</TabItem>
+<TabItem value="cli" label="gcloud CLI">
+
+```bash
+gcloud logging sinks update _Default \
+  --project=<monitored-project-id> \
+  --add-exclusion=name=signoz-monitored,filter='resource.type="cloud_run_revision"'
+```
+
+</TabItem>
+</Tabs>
+
+<Admonition type="warning">
+Once you exclude a log type from `_Default`, those entries are no longer stored in Cloud Logging for that project. They live only in SigNoz. Exclude only the services you actively monitor in SigNoz, and keep the exclusion filter in sync with your sink's inclusion filter.
+</Admonition>
+
+## Step 7: Verify logs in SigNoz
+
+1. In the SigNoz UI, open **Integrations** > **Google Cloud Platform**, select a service, and toggle **Log Collection** on.
+2. Generate some activity in the monitored service so it emits logs.
+3. Open **Logs** in SigNoz and filter by a GCP resource attribute such as `gcp.project` or `gcp.resource_type`. Logs arrive with GCP labels and resource attributes preserved as structured fields (thanks to the `googlecloudpubsubpush` receiver and the `googlecloudlogentry_encoding` extension).
+
+If logs don't arrive, work back through the pipeline:
+
+- **Pub/Sub subscription**: in the Console, check the subscription's **Unacked message count** and **Push errors**. Non-zero push errors usually mean the auth binding (step 2) or the endpoint URL (step 3) is wrong.
+- **Sink**: confirm the writer identity has `roles/pubsub.publisher` on the topic (step 5) and that the inclusion filter matches real logs.
+- **Collector**: check the Cloud Run logs for the `googlecloudpubsubpush` receiver accepting requests.
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) on log volume or error patterns.
+- [Build log pipelines](https://signoz.io/docs/logs-pipelines/introduction/) to parse and enrich GCP logs in SigNoz.
+
+## Get Help
+
+<GetHelp />
