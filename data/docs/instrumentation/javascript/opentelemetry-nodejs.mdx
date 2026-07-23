@@ -1,5 +1,5 @@
 ---
-date: 2026-07-15
+date: 2026-07-18
 title: Node.js OpenTelemetry Instrumentation Guide
 description: Learn how to instrument your Node.js or NestJS app with OpenTelemetry. Use auto or manual instrumentation to send traces to SigNoz for faster debugging.
 doc_type: howto
@@ -349,13 +349,27 @@ If your application exits quickly, explicitly shutdown the SDK to flush all span
 await sdk.shutdown();
 ```
 
+### Why does node -r throw ERR_REQUIRE_ESM?
+
+If your project's package.json sets **type to module**, Node treats every JavaScript file as an ES module. The `-r`/`--require` flag only supports CommonJS, so preloading `tracing.js` this way throws **ERR_REQUIRE_ESM**.
+
+Renaming `tracing.js` to `tracing.cjs` stops the crash, but it doesn't fix instrumentation: `require-in-the-middle` (what auto-instrumentation relies on) can't patch modules your app loads through import, so spans for those modules stay missing even though the process starts.
+
+For a module-type project, write the tracing file in ESM instead (see the TypeScript tab in the Code-Based Setup (Optional) section below for the equivalent import syntax, saved as `tracing.mjs`) and load it with the OpenTelemetry ESM hook:
+
+```bash
+node --experimental-loader=@opentelemetry/instrumentation/hook.mjs --import ./tracing.mjs app.js
+```
+
+See the <a href="https://github.com/open-telemetry/opentelemetry-js/blob/main/doc/esm-support.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry ESM support guide</a> for the `--require`/.cjs variant needed on Node 16.x and 18.1.0-18.18.x.
+
 ### Service not appearing in SigNoz
 
 - Verify your `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` are set correctly
 - Check network connectivity to the SigNoz endpoint
 - Ensure your application is receiving traffic (OpenTelemetry buffers data before sending)
 
-Still no data, or seeing the same issue for logs or metrics? See [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) for a full walkthrough covering SDK diagnostics, Collector connectivity, and common ingestion errors.
+Still no data, or seeing the same issue for logs or metrics? See [Troubleshoot missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) for a full walkthrough covering SDK diagnostics, Collector connectivity, and common ingestion errors.
 
 </details>
 
