@@ -1,7 +1,4 @@
-import TOCInline from 'pliny/ui/TOCInline'
-import BlogNewsletterForm from 'pliny/ui/BlogNewsletterForm'
 import type { MDXComponents } from 'mdx/types'
-import Image from './Image'
 import CustomLink from './Link'
 import TableWrapper from './TableWrapper'
 import YouTube from './VideoPlayer/VideoPlayer'
@@ -10,7 +7,6 @@ import Admonition from './Admonition/Admonition'
 import SignUps from './SignUps/SignUps'
 import LogsPerf from './LogsPerf/LogsPerf'
 import VersionPin from './NodeVersionPin/NodeVersionPin'
-import VersionPinNestJs from './NestVersionPin/NestVersionPin'
 import Tabs from './Tabs'
 import TabItem from './TabItem'
 import DocCard from './DocCard'
@@ -19,35 +15,22 @@ import NextCarousel from './Carousel/Carousel'
 import Figure from './Figure/Figure'
 import NextImage from 'next/image'
 import PricingCTA from './PricingCTA'
-import PageFeedback from './PageFeedback/PageFeedback'
-import CustomMetricPlayground from './CustomMetricPlayground/CustomMetricPlayground'
-import VerticalTabs from './VerticalTabs/VerticalTabs'
-import FAQAccordion from './FAQAccordion/FAQAccordion'
 import Button from '@/components/ui/Button'
-import DatadogPricingCalculator from './DatadogPricingCalculator/DatadogPricingCalculator'
 import DatadogVsSigNoz from './DatadogVsSigNoz/DatadogVsSigNoz'
 import GrafanaVsSigNoz from './GrafanaVsSigNoz/GrafanaVsSigNoz'
 import NewRelicVsSigNoz from './NewRelicVsSigNoz/NewRelicVsSigNoz'
-import DatadogAlternativesFinder from './DatadogAlternativesFinder/DatadogAlternativesFinder'
 import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetStartedOpenTelemetryButton'
 import InterlinkCard from './InterlinkCard/InterlinkCard'
-import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticleVideoShowcaseModal'
 import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonitoring/GetStartedInfrastructureMonitoring'
-import ImageCTA from './ImageCTA/ImageCTA'
-import TrackingLink from './TrackingLink'
 import Listicle from './Listicle/Listicle'
 import MDXButton from './MDXButton/MDXButton'
-import IconCardGrid from './Card/IconCardGrid'
 import HostingDecision from './shared/HostingDecision'
-import CloneRepo from './shared/CloneRepo'
 import CommonPrerequisites from './shared/CommonPrerequisites'
 import K8sInstall from './shared/K8sInstall'
 import K8sOtelDemo from './shared/K8sOtelDemo'
 import RetentionInfo from './shared/RetentionInfo'
 import SigNozCloud from './shared/SigNozCloud'
 import UpgradeInfo from './shared/UpgradeInfo'
-import OtelOperatorOTLPEndpoint from './shared/OtelOperatorOTLPEndpoint'
-import OtelOperatorAutoInstrumentation from './shared/OtelOperatorAutoInstrumentation'
 import GetHelp from './shared/GetHelp'
 import K8sNextSteps from './shared/K8sNextSteps'
 import MultiNodePart1 from './shared/MultiNodePart1'
@@ -90,13 +73,10 @@ export const components = {
   region: Region,
   RegionTable,
   ToggleHeading,
-  Image,
-  TOCInline,
   a: CustomLink,
   pre: RegionAwarePre,
   code: RegionAwareCode,
   table: TableWrapper,
-  BlogNewsletterForm,
   YouTube,
   IncidentCostGraphic,
   GetStartedSigNoz,
@@ -104,7 +84,6 @@ export const components = {
   SignUps,
   LogsPerf,
   VersionPin,
-  VersionPinNestJs,
   Tabs,
   TabItem,
   DocCard,
@@ -113,16 +92,10 @@ export const components = {
   Figure,
   NextImage,
   PricingCTA,
-  PageFeedback,
-  CustomMetricPlayground,
-  VerticalTabs,
-  FAQAccordion,
   Button,
-  DatadogPricingCalculator,
   DatadogVsSigNoz,
   GrafanaVsSigNoz,
   NewRelicVsSigNoz,
-  DatadogAlternativesFinder,
   KeyPointCallout: ({ children, title, type, ...rest }) => (
     <Admonition
       {...rest}
@@ -134,13 +107,9 @@ export const components = {
   ),
   GetStartedOpenTelemetryButton,
   InterlinkCard,
-  InArticleVideoShowcaseModal,
   GetStartedInfrastructureMonitoring,
-  ImageCTA,
-  TrackingLink,
   Listicle,
   MDXButton,
-  IconCardGrid,
   HostingDecision,
   ArticleSeriesBottom,
   ArticleSeriesTop,
@@ -151,11 +120,8 @@ export const components = {
   RetentionInfo,
   SigNozCloud,
   UpgradeInfo,
-  OtelOperatorOTLPEndpoint,
-  OtelOperatorAutoInstrumentation,
   ResponseTimeVisualizer,
   ProductFeatureShowcase,
-  CloneRepo,
   CommonPrerequisites,
   CardinalityExplosion,
   MemoryGauge,
