@@ -1,7 +1,7 @@
 ---
-date: 2026-07-15
-title: Debug Missing Traces, Logs, and Metrics Data in SigNoz
-description: Debug why your traces, logs, or metrics are not showing up in SigNoz, from SDK instrumentation to the OpenTelemetry Collector and ingestion endpoint.
+date: 2026-07-23
+title: Troubleshoot Missing Traces, Logs, and Metrics Data in SigNoz
+description: Troubleshoot why your traces, logs, or metrics are not showing up in SigNoz, from SDK instrumentation to the OpenTelemetry Collector and ingestion endpoint.
 doc_type: howto
 ---
 
@@ -19,7 +19,7 @@ Work through the three steps below in sequence. Each step tells you what to chec
 Most "no data" issues are a wrong ingestion endpoint, a wrong region, or an incorrect ingestion key. If you already know your instrumentation works, skip straight to [Common errors and fixes](#common-errors-and-fixes).
 </Admonition>
 
-## Quick debug flowchart
+## Quick troubleshooting flowchart
 
 Use this decision tree to isolate the failure fast. It works the same for traces, logs, and metrics: substitute your signal for `<SIGNAL>` (`TRACES`, `LOGS`, or `METRICS`).
 
@@ -35,7 +35,7 @@ START: <signal> not showing up in SigNoz
 ├─ 2. Is your app exporting it?  (SDK side, in your application)
 │      Turn on the SDK's own logging: OTEL_LOG_LEVEL=debug (or language
 │      equivalent), then read the export errors it prints.
-│      ├─ Export error ───────► fix in this order: KEY ▸ ENDPOINT ▸ REGION
+│      ├─ Export error ───────► fix in this order: KEY ▸ ENDPOINT / REGION / PATH
 │      │                        (see Common errors and fixes)
 │      └─ Exports look clean ─► go to 3
 │
@@ -59,7 +59,7 @@ Pick your signal for an ordered checklist. Each one starts with the most common 
 <TabItem value="logs" label="Logs" default>
 
 ```text
-Debug missing LOGS in SigNoz, check in this order:
+Troubleshoot missing LOGS in SigNoz, check in this order:
 
 1. Ingestion key correct?
    - Header: signoz-ingestion-key=<your-ingestion-key>
@@ -84,7 +84,7 @@ Debug missing LOGS in SigNoz, check in this order:
 <TabItem value="traces" label="Traces">
 
 ```text
-Debug missing TRACES in SigNoz, check in this order:
+Troubleshoot missing TRACES in SigNoz, check in this order:
 
 1. Ingestion key correct?
    - Header: signoz-ingestion-key=<your-ingestion-key>
@@ -109,7 +109,7 @@ Debug missing TRACES in SigNoz, check in this order:
 <TabItem value="metrics" label="Metrics">
 
 ```text
-Debug missing METRICS in SigNoz, check in this order:
+Troubleshoot missing METRICS in SigNoz, check in this order:
 
 1. Ingestion key correct?
    - Header: signoz-ingestion-key=<your-ingestion-key>
@@ -463,28 +463,31 @@ service:
 
 These are the most frequent causes of missing data, in rough order of how often they occur. They apply whether you export directly or through a Collector.
 
-<Tabs entityName="issue">
-<TabItem value="endpoint" label="Wrong endpoint or URL" default>
+**Where you see these symptoms:** almost always in the diagnostic output you turned on in [Step 2](#step-2-is-your-telemetry-being-exported), not in the SigNoz UI. For a direct SDK export, that is your application's own console or logs (`OTEL_LOG_LEVEL=debug`). For a Collector setup, it is the Collector's logs (`service.telemetry.logs.level: DEBUG`). The one exception is a wrong region, where exports succeed silently and the only symptom is an empty view in the SigNoz UI. Each tab below tells you exactly where to look.
 
-**Symptom:** Connection refused, connection timeout, or no data despite successful instrumentation.
+<Tabs entityName="issue">
+<TabItem value="endpoint" label="Wrong endpoint, region, or path" default>
+
+Wrong endpoint, wrong region, and a trailing slash are the same class of problem: your exporter is pointed at the wrong URL. Check all three together.
+
+| | Details |
+| --- | --- |
+| **Where you see it** | SDK debug logs (direct export) or Collector logs (Collector setup), as a connection error or HTTP `404`. A wrong *region* is the exception: exports report success, and the only symptom is an empty Traces, Logs, or Metrics view in the SigNoz UI. |
+| **What it looks like** | `connection refused`, `connection timeout`, `no such host`, or `HTTP 404` in your logs, or clean exports with no data in the UI. |
 
 **Fix:**
 
-- Use the exact ingestion endpoint for your setup: `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud, or `http://<signoz-host>:4318` for self-hosted. See [how to find your ingestion URL](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- Make sure the protocol matches the port: OTLP/HTTP on `4318`, OTLP/gRPC on `4317`.
-- Do not point an application-side SDK at a Collector that is not running, and do not point at SigNoz through a Collector endpoint that does not exist.
-
-</TabItem>
-<TabItem value="region" label="Wrong region">
-
-**Symptom:** Data is accepted by the exporter but never appears in your account, or you get authentication errors even with a valid key.
-
-**Fix:** The `<region>` in your endpoint must match the region your SigNoz Cloud account is in. A key from the EU region will not authenticate against the US endpoint. Confirm both the region and key under **Settings → Ingestion**, or check the [region and endpoint table](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- **Endpoint:** use exactly `https://ingest.<region>.signoz.cloud:443` for SigNoz Cloud (port `443`, not `4317`/`4318`), or `http://<signoz-host>:4318` for self-hosted. Do not point an SDK at a Collector that is not running. See [how to find your ingestion URL](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- **Region:** the `<region>` must match the region your SigNoz Cloud account is in. A key from one region will not authenticate against another region's endpoint, and data sent to the wrong region never appears in your account. Confirm the region under **Settings → Ingestion**, or the [region and endpoint table](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- **Path:** do not add a trailing slash (use `.../v1/logs`, not `.../v1/logs/`). A trailing slash or the wrong signal path returns `404`.
 
 </TabItem>
 <TabItem value="key" label="Wrong or expired ingestion key">
 
-**Symptom:** HTTP `401` or `403`, or gRPC `Unauthenticated` or `PermissionDenied`.
+| | Details |
+| --- | --- |
+| **Where you see it** | SDK debug logs (direct export) or Collector logs (Collector setup), as an authentication failure returned by the ingestion endpoint. |
+| **What it looks like** | HTTP `401 Unauthorized` or `403 Forbidden`, or gRPC `Unauthenticated` / `PermissionDenied`. |
 
 **Fix:**
 
@@ -492,16 +495,12 @@ These are the most frequent causes of missing data, in rough order of how often 
 - Check the key has not expired or been revoked, and that its limits are not blocking your data. See [ingestion keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 </TabItem>
-<TabItem value="trailing-slash" label="Trailing slash / path">
-
-**Symptom:** HTTP `404`.
-
-**Fix:** Remove trailing slashes from the endpoint (for example, use `.../v1/logs`, not `.../v1/logs/`). A trailing slash or an incorrect path segment causes a not-found error at ingestion.
-
-</TabItem>
 <TabItem value="collector-access" label="Collector not accessible">
 
-**Symptom:** Application logs show connection refused or timeout to the Collector; no data in the Collector debug output.
+| | Details |
+| --- | --- |
+| **Where you see it** | Your *application's* SDK logs (not the Collector or SigNoz), as a connection error to the Collector. The Collector's own [debug exporter](#verify-data-inside-the-collector) shows nothing arriving. |
+| **What it looks like** | `connection refused` or `context deadline exceeded` reaching your Collector host on `4317`/`4318`. |
 
 **Fix:**
 
