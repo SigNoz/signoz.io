@@ -29,7 +29,11 @@ export default function DatadogPricingCalculatorPage() {
           <p className="mb-4">
             Understanding Datadog pricing can be complex due to its various components and
             usage-based model. This calculator helps you estimate costs for different Datadog
-            services including infrastructure monitoring, APM, and log management.
+            services including infrastructure monitoring, APM, and{' '}
+            <Link href="/blog/datadog-logs-pricing/" className="text-blue-600 hover:underline">
+              log management
+            </Link>
+            .
           </p>
           <p>
             For a comprehensive breakdown of Datadog's pricing structure and optimization
@@ -103,7 +107,7 @@ export default function DatadogPricingCalculatorPage() {
               },
               {
                 title: 'Real User Monitoring',
-                price: '$1.50/1000 sessions',
+                price: '$0.15/1000 sessions',
                 note: 'User journey tracking, performance metrics, session replays, and error tracking',
               },
               {
@@ -113,7 +117,7 @@ export default function DatadogPricingCalculatorPage() {
               },
               {
                 title: 'Continuous Profiler',
-                price: '$12/host/month',
+                price: '$19/host/month',
                 note: 'CPU, memory, and lock profiling for production code optimization',
               },
               {
@@ -123,12 +127,12 @@ export default function DatadogPricingCalculatorPage() {
               },
               {
                 title: 'Synthetic Monitoring',
-                price: '$5/1000 tests',
+                price: '$5/10,000 tests',
                 note: 'API tests, browser tests, and multi-step journeys',
               },
               {
                 title: 'Security Monitoring',
-                price: '$0.20/GB',
+                price: '$5/1M events',
                 note: 'Threat detection, compliance monitoring, and SIEM functionality',
               },
               {
@@ -172,17 +176,26 @@ export default function DatadogPricingCalculatorPage() {
               </li>
               <li>
                 <span className="font-semibold">Hidden Costs:</span> Additional charges for features
-                like extra span ingestion or exceeding committed usage can significantly impact your
-                bill
+                like extra span ingestion,{' '}
+                <Link
+                  href="/blog/datadog-custom-metrics-pricing/"
+                  className="text-blue-400 hover:underline"
+                >
+                  custom metrics
+                </Link>
+                , or exceeding committed usage can significantly impact your bill
               </li>
             </ul>
 
             <p>
-              For a detailed breakdown of Datadog's pricing models and optimization strategies,{' '}
-              <Link href="/blog/datadog-pricing/" className="text-blue-400 hover:underline">
-                read our comprehensive guide on Datadog Pricing
-              </Link>
-              .
+              If your bill is already climbing, our guide on{' '}
+              <Link
+                href="/guides/how-to-reduce-datadog-costs/"
+                className="text-blue-400 hover:underline"
+              >
+                how to reduce Datadog costs
+              </Link>{' '}
+              walks through practical ways to bring it down.
             </p>
           </div>
         </div>
