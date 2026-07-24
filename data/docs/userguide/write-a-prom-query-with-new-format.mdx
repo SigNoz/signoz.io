@@ -1,6 +1,6 @@
 ---
 title: PromQL UTF-8 Syntax Guide
-date: 2026-05-18
+date: 2026-07-24
 authors: [aniket_agarwal]
 description: Learn SigNoz's new PromQL UTF-8 syntax with quoted metric and label names. Includes migration examples for counters, gauges, histograms, and OTel metric names.
 ---
@@ -32,6 +32,22 @@ To support these characters, PromQL queries in SigNoz use a **new quoted syntax*
 # New syntax for metrics with dots
 {"my.noncompliant.metric", "noncompliant.label"="value"}
 ```
+
+## Regex Label Matchers Are Fully Anchored
+
+The regex matchers `=~` and `!~` are fully anchored, following standard Prometheus semantics. This means `=~"foo"` is evaluated as `=~"^foo$"` and must match the **entire** label value, not just a substring.
+
+To perform a substring match, wrap the pattern with `.*` on both sides:
+
+```promql
+# Matches only label values that are exactly "Docman"
+{service=~"Docman"}
+
+# Matches any label value containing "Docman" (substring match)
+{service=~".*Docman.*"}
+```
+
+This applies to alternation patterns as well. For example, `env=~"prod|stag"` matches values that are exactly `prod` or `stag`, not values that merely contain those strings.
 
 ## Migration Examples
 
