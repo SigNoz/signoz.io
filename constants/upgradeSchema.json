@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0",
-  "pathHead": "v0.131.0",
+  "pathHead": "v0.135.0",
   "general": {
     "upgradeSummary": [
       "This tool provides the mandatory sequential path to upgrade your instance safely.",
@@ -28,9 +28,27 @@
     "troubleshootingUrl": "https://signoz.io/docs/user-guide/troubleshooting/"
   },
   "releases": {
-    "v0.131.0": {
+    "v0.135.0": {
       "isMandatoryStop": true,
       "nextMandatoryStop": null,
+      "releaseDate": "2026-07-27",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0-135",
+      "instructions": [
+        "The redesigned Dashboards experience rolls out: dashboards move to a strictly validated, Perses-compatible schema with new /api/v2/dashboards APIs. Existing dashboards, inbuilt dashboards, and templates are migrated to the new schema automatically.",
+        "Scripts calling /api/v1/dashboards should migrate to the V2 endpoints; during the rollout window the v2 Create/Update APIs accept v1 payloads, but this compatibility shim will be removed in a few releases.",
+        "Terraform users must upgrade the SigNoz provider to v0.1.0 and migrate signoz_dashboard resources to the typed V2 schema."
+      ],
+      "deprecations": [],
+      "warnings": [
+        {
+          "title": "Back up the Metastore before upgrading",
+          "details": "Dashboards live in the SigNoz Metastore (SQLite, Postgres) and are converted to the new schema during the rollout. Back up the store before upgrading."
+        }
+      ]
+    },
+    "v0.131.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.135.0",
       "releaseDate": "2026-06-30",
       "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0-131",
       "instructions": [],
