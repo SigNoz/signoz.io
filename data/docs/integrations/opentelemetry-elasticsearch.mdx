@@ -1,0 +1,396 @@
+---
+date: 2026-07-24
+title: Monitor Elasticsearch with OpenTelemetry and SigNoz
+description: Collect Elasticsearch metrics and logs in SigNoz using the OpenTelemetry Collector elasticsearch and filelog receivers.
+doc_type: howto
+---
+
+## Overview
+
+Monitor an Elasticsearch cluster in SigNoz using the OpenTelemetry Collector. You collect two signals:
+
+- **Metrics:** cluster health, node resource usage, index operations, search performance, JVM, cache, circuit breakers, and thread pools through the Collector [elasticsearch receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/elasticsearchreceiver), which scrapes the Elasticsearch REST API.
+- **Logs:** the structured JSON logs Elasticsearch writes (server, deprecation, slow, and GC) through the Collector filelog receiver.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+<Admonition type="info" title="Migrating off the ELK Stack?" defaultCollapsed="true">
+  This guide monitors Elasticsearch as a database. If you instead want to replace ELK with SigNoz for your own application telemetry, see [Migrate from ELK Stack](https://signoz.io/docs/migration/migrate-from-elk-to-signoz/).
+</Admonition>
+
+## Prerequisites
+
+- A running Elasticsearch cluster (version 7.9 or later)
+- If Elasticsearch security features are enabled, a user with the `monitor` cluster privilege (for cluster health and node stats) and the `monitor` index privilege (for index stats). See the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/authorization.html" target="_blank" rel="noopener noreferrer nofollow">Elasticsearch authorization docs</a>
+- [OpenTelemetry Collector Contrib](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) installed, with access to the Elasticsearch REST API (for metrics) and its log files (for logs)
+- An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+<Admonition type="warning" title="Elastic Cloud">
+  Managed Elastic Cloud restricts some node and cluster stats endpoints and uses API-key or token auth rather than the basic auth shown here. The metrics path targets self-managed clusters. On Elastic Cloud, expect a reduced metric set, and route logs through Elastic's own shipping options.
+</Admonition>
+
+## Set Up Telemetry
+
+Both signals flow through the OpenTelemetry Collector. Set up each one you want, then apply the config where your Collector runs.
+
+<Tabs entityName="signal">
+<TabItem value="metrics" label="Metrics">
+
+### Step 1: Configure the Collector
+
+Add the `elasticsearch` receiver, a **resource** processor that tags the metrics with **service.name**, and a dedicated pipeline. Merge this into your existing Collector config:
+
+```yaml:config.yaml
+receivers:
+  elasticsearch:
+    endpoint: http://<elasticsearch-host>:9200
+    username: <your-username>
+    password: <your-password>
+    collection_interval: 30s
+    metrics:
+      elasticsearch.node.operations.get.completed:
+        enabled: true
+      elasticsearch.node.operations.get.time:
+        enabled: true
+      elasticsearch.index.cache.evictions:
+        enabled: true
+      elasticsearch.index.cache.memory.usage:
+        enabled: true
+      jvm.memory.heap.utilization:
+        enabled: true
+      elasticsearch.node.cache.size:
+        enabled: true
+
+processors:
+  resource/elasticsearch:
+    attributes:
+      - key: service.name
+        value: elasticsearch
+        action: upsert
+  batch: {}
+
+exporters:
+  # On collectors older than v0.144.0 use the otlphttp alias
+  otlp_http/elasticsearch:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      "signoz-ingestion-key": "<your-ingestion-key>"
+
+service:
+  pipelines:
+    metrics/elasticsearch:
+      receivers: [elasticsearch]
+      processors: [resource/elasticsearch, batch]
+      exporters: [otlp_http/elasticsearch]
+```
+
+**Verify these values:**
+
+- `<elasticsearch-host>:9200`: your cluster's HTTP API address, use `localhost:9200` if the Collector runs on the same host. Use `https://` if TLS is enabled.
+- `<your-username>` / `<your-password>`: omit both if the cluster has no security features enabled.
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="info">
+  The six metrics under `metrics:` above are disabled by default; the config enables them because the [Elasticsearch dashboard](https://signoz.io/docs/dashboards/dashboard-templates/elasticsearch-dashboard/) needs them for its cache, GET hit/miss, and heap utilization panels. By default the receiver scrapes all nodes (`nodes: ["_all"]`) and all indices (`indices: ["_all"]`). Narrow either with node or index filters, or set `skip_cluster_metrics: true` to skip cluster-level metrics. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/elasticsearchreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">receiver configuration reference</a>.
+</Admonition>
+
+### Step 2: Apply the config and restart the Collector
+
+Pick the environment where your Collector runs:
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+The config lives at **/etc/otelcol-contrib/config.yaml**. Validate it, restart, and watch the logs:
+
+```bash
+sudo /usr/bin/otelcol-contrib validate --config /etc/otelcol-contrib/config.yaml
+sudo systemctl restart otelcol-contrib
+sudo journalctl -u otelcol-contrib -f
+```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on VM](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
+</Admonition>
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Add the config to the file you mount into the Collector container, then restart and watch the logs:
+
+```bash
+docker compose up -d
+docker compose logs -f
+```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on Docker](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
+</Admonition>
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+Nest the same `receivers`, `processors`, and `service.pipelines` blocks under `otelDeployment.config` in your `override-values.yaml` for the [SigNoz K8s Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), pointing `endpoint` at the in-cluster Elasticsearch Service:
+
+```yaml:override-values.yaml
+otelDeployment:
+  config:
+    receivers:
+      elasticsearch:
+        endpoint: http://elasticsearch.default.svc.cluster.local:9200
+        username: <your-username>
+        password: <your-password>
+        collection_interval: 30s
+        metrics:
+          elasticsearch.node.operations.get.completed:
+            enabled: true
+          elasticsearch.node.operations.get.time:
+            enabled: true
+          elasticsearch.index.cache.evictions:
+            enabled: true
+          elasticsearch.index.cache.memory.usage:
+            enabled: true
+          jvm.memory.heap.utilization:
+            enabled: true
+          elasticsearch.node.cache.size:
+            enabled: true
+    processors:
+      resource/elasticsearch:
+        attributes:
+          - key: service.name
+            value: elasticsearch
+            action: upsert
+    service:
+      pipelines:
+        metrics/elasticsearch:
+          receivers: [elasticsearch]
+          processors: [resource/elasticsearch, batch]
+          exporters: [otlphttp]
+```
+
+Apply the override to your **existing** k8s-infra release, then watch the logs. Use the release name and namespace where k8s-infra is already installed (`helm list -A` shows them), not a hardcoded `signoz`:
+
+```bash
+helm upgrade <release-name> signoz/k8s-infra -n <collector-namespace> -f override-values.yaml
+kubectl logs -n <collector-namespace> <collector-pod-name> -f
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="logs" label="Logs">
+
+### Step 1: Add the filelog receiver and logs pipeline
+
+Elasticsearch writes structured ECS JSON logs. On file-based deployments, the filelog receiver tails them, parses each line, and forwards it to SigNoz. Add this receiver and a logs pipeline to the same Collector config you use for metrics:
+
+```yaml:config.yaml
+receivers:
+  filelog/elasticsearch:
+    # Server logs. Add other files (e.g. *_deprecation.json, *_index_search_slowlog.json) as needed.
+    include: ["/var/log/elasticsearch/*_server.json"]
+    operators:
+      # Elasticsearch 8.x writes ECS JSON logs. Parse the JSON into attributes.
+      - type: json_parser
+        parse_from: body
+        parse_to: attributes
+        timestamp:
+          parse_from: attributes["@timestamp"]
+          layout: '2006-01-02T15:04:05.000Z07:00'
+          layout_type: gotime
+        severity:
+          parse_from: attributes["log.level"]
+          overwrite_text: true
+      # Promote the human-readable message to the log body
+      - type: move
+        if: attributes.message != nil
+        from: attributes.message
+        to: body
+      # Drop the fields already mapped to top-level log fields
+      - type: remove
+        if: attributes["@timestamp"] != nil
+        field: attributes["@timestamp"]
+      - type: remove
+        if: attributes["log.level"] != nil
+        field: attributes["log.level"]
+
+processors:
+  resource/elasticsearch:
+    attributes:
+      - key: service.name
+        value: elasticsearch
+        action: upsert
+  batch: {}
+
+exporters:
+  # On collectors older than v0.144.0 use the otlphttp alias
+  otlp_http/elasticsearch-logs:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      "signoz-ingestion-key": "<your-ingestion-key>"
+
+service:
+  pipelines:
+    logs/elasticsearch:
+      receivers: [filelog/elasticsearch]
+      processors: [resource/elasticsearch, batch]
+      exporters: [otlp_http/elasticsearch-logs]
+```
+
+**Verify these values:**
+
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="info">
+  The `layout` above matches the ECS `@timestamp` format Elasticsearch 8.x writes (for example `2026-07-24T13:34:03.717Z`). Older 7.x JSON logs use a `timestamp` field instead of `@timestamp` and a `level` field instead of `log.level`; adjust the `parse_from` paths and layout if you run 7.x.
+</Admonition>
+
+### Step 2: Make the log files available to the Collector
+
+The log file location, and whether you tail files at all, depends on your environment.
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+Package installs (deb/rpm) enable the JSON file appenders by default, so the `include` path above already matches.
+
+1. Confirm the log files exist:
+
+   ```bash
+   ls /var/log/elasticsearch/*_server.json
+   ```
+
+2. Confirm the user that runs the Collector can read the log directory. Add the Collector's user to the `elasticsearch` group if the files are group-readable:
+
+   ```bash
+   sudo usermod -aG elasticsearch otelcol-contrib
+   ```
+
+3. Restart the Collector and watch the logs:
+
+   ```bash
+   sudo systemctl restart otelcol-contrib
+   sudo journalctl -u otelcol-contrib -f
+   ```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on VM](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
+</Admonition>
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+The Elasticsearch Docker image logs to stdout and writes no JSON files by default. Switch it to file logging and share the log directory with the Collector.
+
+1. Set `ES_LOG_STYLE=file` on the Elasticsearch service and mount a shared volume into both containers. Mount it at `/var/log/elasticsearch` in the Collector so the `include` path above works unchanged:
+
+   ```yaml:docker-compose.yaml
+   services:
+     elasticsearch:
+       environment:
+         - ES_LOG_STYLE=file
+       volumes:
+         - es-logs:/usr/share/elasticsearch/logs
+
+     otel-collector:
+       volumes:
+         - es-logs:/var/log/elasticsearch:ro
+
+   volumes:
+     es-logs:
+   ```
+
+2. Recreate the stack:
+
+   ```bash
+   docker compose up -d
+   ```
+
+3. Confirm the Collector reads the files and exports logs:
+
+   ```bash
+   docker compose logs -f otel-collector
+   ```
+
+   Look for `Started watching file` with the `/var/log/elasticsearch/..._server.json` path.
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on Docker](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
+</Admonition>
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+Elasticsearch pods log to stdout, and the SigNoz [k8s-infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) collector already tails pod stdout. You do not need the filelog receiver or the logs pipeline separately in Kubernetes.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+After you start the Collector, confirm each signal arrives in SigNoz.
+
+1. **Metrics:** Open [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) and search for metrics that start with `elasticsearch.` (for example `elasticsearch.cluster.health` and `elasticsearch.node.cache.size`) and `jvm.`.
+2. **Logs:** Open the **Logs** explorer and add filter **service.name = elasticsearch**.
+
+<Figure
+  src="/img/docs/integrations/elasticsearch/sample-metrics.webp"
+  alt="Elasticsearch metrics in the SigNoz Metrics Explorer"
+  caption="Elasticsearch metrics in the SigNoz Metrics Explorer"
+/>
+
+<Figure
+  src="/img/docs/integrations/elasticsearch/sample-logs.webp"
+  alt="Elasticsearch logs in the SigNoz Logs explorer, filtered by service.name = elasticsearch"
+  caption="Elasticsearch logs in SigNoz, filtered by service.name = elasticsearch"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### No `elasticsearch.` metrics in SigNoz
+
+- Cause: the Collector cannot reach the cluster's HTTP API, or the credentials are wrong.
+- Fix: confirm `endpoint` is reachable from the Collector host with `curl <elasticsearch-host>:9200`, and confirm the user has the `monitor` cluster privilege (and the `monitor` index privilege if security is enabled). If security is disabled, remove the `username` and `password` fields.
+- Verify: search for `elasticsearch.cluster.health` in Metrics Explorer.
+
+### Metrics appear but the dashboard is empty
+
+- Cause: the `metrics/elasticsearch` pipeline does not include the **resource/elasticsearch** processor, so the metrics do not have **service.name**.
+- Fix: add **resource/elasticsearch** to the `metrics/elasticsearch` **processors** list and restart the Collector.
+- Verify: filter Metrics Explorer by `service.name = elasticsearch`.
+
+### Node or index metrics are missing
+
+- Cause: `nodes` or `indices` filters exclude the ones you expect, or `skip_cluster_metrics` is set to `true`.
+- Fix: confirm the node and index filters in the receiver config match the nodes and indices you want to monitor.
+- Verify: `elasticsearch.node.*` and `elasticsearch.index.*` series appear for the expected node and index names.
+
+### Logs arrive but timestamps fail to parse
+
+- Cause: you are tailing the plaintext `.log` files, or the cluster runs Elasticsearch 7.x, which uses different JSON field names.
+- Fix: confirm the `include` glob targets the JSON files. On 7.x, switch the timestamp `parse_from` to `attributes.timestamp` and the severity `parse_from` to `attributes.level`.
+- Verify: entries appear in the Logs explorer with a parsed timestamp and severity.
+
+</details>
+
+## Next Steps
+
+- Import the prebuilt [Elasticsearch dashboard](https://signoz.io/docs/dashboards/dashboard-templates/elasticsearch-dashboard/).
+- [Set up alerts](https://signoz.io/docs/userguide/alerts-management/) on cluster health and JVM heap pressure.
+- [Migrate from ELK Stack](https://signoz.io/docs/migration/migrate-from-elk-to-signoz/) if you are moving your own telemetry off Elastic.
+
+## Get Help
+
+<GetHelp />
