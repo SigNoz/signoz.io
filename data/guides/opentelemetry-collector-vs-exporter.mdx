@@ -68,7 +68,7 @@ If you're searching for how language-specific agents (like the Java or Python ag
 
 ## What is an OpenTelemetry Exporter?
 
-An OpenTelemetry Exporter is a critical component in the [observability pipeline](https://signoz.io/guides/observability-pipeline/) that sends telemetry data—logs, metrics, and traces—from OpenTelemetry SDKs or Collectors to backend systems for storage, analysis, and visualization. Acting as a bridge between OpenTelemetry components (like SDKs and Collectors) and observability platforms, it ensures data compatibility, efficient transmission, and reliable delivery.
+An OpenTelemetry Exporter is a critical component in the [observability pipeline](https://signoz.io/guides/observability-pipeline/) that sends telemetry data (logs, metrics, and traces) from OpenTelemetry SDKs or Collectors to backend systems for storage, analysis, and visualization. Acting as a bridge between OpenTelemetry components (like SDKs and Collectors) and observability platforms, it ensures data compatibility, efficient transmission, and reliable delivery.
 
 The Exporter’s main role is to:
 
@@ -102,7 +102,7 @@ The Exporter’s main role is to:
     - Examples include AWS X-Ray, Datadog, and New Relic exporters.
 3. **Standard Protocol Exporters**
     
-    For legacy or established systems, the Zipkin exporter is still widely used to stay compatible with existing setups. Note that Jaeger now supports OTLP as of <a href="https://opentelemetry.io/blog/2023/jaeger-exporter-collector-migration/" target="_blank" rel="noopener noreferrer nofollow">Collector v0.85.0</a>, so a dedicated Jaeger exporter is no longer required - send [OTLP data](https://signoz.io/blog/what-is-otlp/) to Jaeger directly instead. These exporters:
+    For legacy or established systems, the Zipkin exporter is still widely used to stay compatible with existing setups. Note that the <a href="https://opentelemetry.io/blog/2023/jaeger-exporter-collector-migration/" target="_blank" rel="noopener noreferrer nofollow">Jaeger exporter was removed from the Collector in v0.85.0</a>; Jaeger ingests OTLP natively, so send [OTLP data](https://signoz.io/blog/what-is-otlp/) to Jaeger directly instead. These exporters:
     
     - Ensure compatibility with existing observability setups.
     - Are suitable for organizations transitioning to OpenTelemetry while retaining legacy systems.
@@ -124,7 +124,7 @@ tracer_provider = TracerProvider()
 
 # Configure the OTLP Exporter
 otlp_exporter = OTLPSpanExporter(
-    endpoint="collector:4317",  # host:port — the gRPC exporter takes no URL scheme
+    endpoint="collector:4317",  # host:port, no URL scheme for the gRPC exporter
     insecure=True,              # disable TLS for a local/testing setup
 )
 
@@ -162,7 +162,7 @@ While both collectors and exporters are essential components of an OpenTelemetry
 - Collectors
     - Act as an intermediary between telemetry data sources (applications or SDKs) and backends.
     - Serve as a standalone service capable of receiving, processing, and forwarding telemetry data.
-    - Can be deployed in various modes (as an agent—typically a sidecar or daemon—or as a centralized gateway) to suit specific environments.
+    - Can be deployed in various modes (as an agent, typically a sidecar or daemon, or as a centralized gateway) to suit specific environments.
     
     Responsibility: Collectors provide a flexible, centralized system for receiving, processing, and routing telemetry data across various sources and backends.
     
@@ -223,7 +223,7 @@ Example: In a typical setup, an application SDK generates telemetry data, which 
 
 To effectively monitor your applications and systems, leveraging an advanced observability platform like [SigNoz](https://signoz.io/) can significantly enhance your monitoring strategy. SigNoz is an open-source observability tool that offers end-to-end monitoring, troubleshooting, and alerting capabilities across your entire application stack.
 
-Built on OpenTelemetry, SigNoz natively ingests OpenTelemetry data—[along with Prometheus metrics](https://signoz.io/blog/opentelemetry-vs-prometheus/)—and unifies metrics, traces, and logs in a single application. This gives you a complete, end-to-end view of system performance without stitching together separate tools.
+Built on OpenTelemetry, SigNoz natively ingests OpenTelemetry data (along with [Prometheus metrics](https://signoz.io/blog/opentelemetry-vs-prometheus/)) and unifies metrics, traces, and logs in a single application. This gives you a complete, end-to-end view of system performance without stitching together separate tools.
 
 <GetStartedSigNoz />
 
