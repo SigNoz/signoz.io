@@ -26,10 +26,10 @@ Telemetry can only go missing at a few well-defined points between your app and 
 <TroubleshootingWizard />
 
 <Admonition type="info">
-One step is language-specific: the console-exporter check ([Step 1](#step-1-is-your-application-generating-telemetry)) works out of the box for the Java, Node.js, Python, .NET, Ruby, and PHP agents, but Go and Rust have no agent and set it up in code.
+One step is language-specific: the console-exporter check ([Step 1](#step-1-is-your-application-generating-telemetry)) works out of the box for the Java, Node.js, Python, .NET, Ruby, and PHP agents, but Go has no agent and sets it up in code.
 </Admonition>
 
-Prefer the whole picture at a glance? This flowchart maps the same checks.
+Prefer to see the whole flow at once? The flowchart below covers the same checks.
 
 <Figure
   src="/img/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting-flowchart.webp"
@@ -98,7 +98,7 @@ Before checking the network, confirm the telemetry actually exists. The most rel
 How you do this depends on your language, because not every SDK reads the exporter environment variables.
 
 <Tabs entityName="sdk">
-<TabItem value="agents" label="Java, Node.js, Python, .NET, Ruby, PHP" default>
+<TabItem value="agents" label="Java, Node.js, Python, .NET, Ruby" default>
 
 These auto-instrumentation agents read the OpenTelemetry exporter environment variables. Set the exporter to `console` (the current spec value, not the deprecated `logging`) and telemetry prints to stdout:
 
@@ -110,17 +110,22 @@ export OTEL_LOGS_EXPORTER=console
 
 To keep exporting to SigNoz **and** print to the console at the same time, use a comma-separated list, for example `OTEL_TRACES_EXPORTER=otlp,console`.
 
-**PHP** additionally needs `OTEL_PHP_AUTOLOAD_ENABLED=true`.
+</TabItem>
+<TabItem value="php" label="PHP">
+
+PHP reads the same environment variables, but you must also enable autoloading. Set the exporter to `console` and turn on `OTEL_PHP_AUTOLOAD_ENABLED`:
+
+```bash
+export OTEL_PHP_AUTOLOAD_ENABLED=true
+export OTEL_TRACES_EXPORTER=console
+export OTEL_METRICS_EXPORTER=console
+export OTEL_LOGS_EXPORTER=console
+```
 
 </TabItem>
 <TabItem value="go" label="Go">
 
 The Go SDK has no auto-instrumentation agent and does not read `OTEL_*_EXPORTER`. Add a stdout exporter in code, either with the <a href="https://pkg.go.dev/go.opentelemetry.io/contrib/exporters/autoexport" target="_blank" rel="noopener noreferrer nofollow">`autoexport`</a> contrib module (which then honors `OTEL_TRACES_EXPORTER=console`) or by wiring `stdouttrace` / `stdoutmetric` / `stdoutlog` directly. See the [Go instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-golang/).
-
-</TabItem>
-<TabItem value="rust" label="Rust">
-
-The Rust SDK has no agent and does not select exporters from environment variables. Add the <a href="https://crates.io/crates/opentelemetry-stdout" target="_blank" rel="noopener noreferrer nofollow">`opentelemetry-stdout`</a> crate and construct the exporter in code. See the [Rust instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-rust/).
 
 </TabItem>
 </Tabs>
@@ -396,7 +401,7 @@ If telemetry showed up and then stopped, or only part of it arrives, your ingest
 
 For the complete list of ingestion HTTP and gRPC status codes with root causes and resolutions, see the [Ingestion Troubleshooting guide](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting/).
 
-### Other things that can silently drop data
+## Other things that can silently drop data
 
 These SigNoz Cloud limits drop data without an obvious instrumentation error: exports are rejected or throttled after they leave your app, so nothing looks wrong on your side.
 
