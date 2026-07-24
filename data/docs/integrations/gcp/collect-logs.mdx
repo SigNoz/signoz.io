@@ -92,11 +92,15 @@ gcloud iam service-accounts add-iam-policy-binding \
 </TabItem>
 <TabItem value="console" label="Console">
 
-1. **Grant invoker on the Collector:** Go to **Cloud Run** > **signoz-otel-collector** > **Permissions** > **Add principal**. Add `signoz-integration@<deployment-project-id>.iam.gserviceaccount.com` with role **Cloud Run Invoker** (`roles/run.invoker`).
-2. **Allow token creation:** Go to **IAM & Admin** > **Service Accounts** > `signoz-integration` > **Permissions** > **Grant access**. Add the Pub/Sub service agent `service-<deployment-project-number>@gcp-sa-pubsub.iam.gserviceaccount.com` with role **Service Account Token Creator** (`roles/iam.serviceAccountTokenCreator`). Find your project number under **IAM & Admin** > **Settings**.
+1. **Grant invoker on the Collector:** Go to **Cloud Run** and, in the services list, select the **checkbox** next to `signoz-otel-collector` (don't open the service). In the info panel on the right, open the **Permissions** tab (click **Show Info Panel** if it's hidden), then click **Add principal**. Add `signoz-integration@<deployment-project-id>.iam.gserviceaccount.com` with role **Cloud Run Invoker** (`roles/run.invoker`).
+2. **Allow token creation:** Go to **IAM & Admin** > **Service Accounts** and click the `signoz-integration` account. Open the **Principals with access** tab and click **Grant access**. Add the Pub/Sub service agent `service-<deployment-project-number>@gcp-sa-pubsub.iam.gserviceaccount.com` with role **Service Account Token Creator** (`roles/iam.serviceAccountTokenCreator`). Find your project number under **IAM & Admin** > **Settings**.
 
 </TabItem>
 </Tabs>
+
+<Admonition type="info">
+The Pub/Sub service agent is a Google-managed identity, so the grant you just added is hidden by default on the **Principals with access** tab. To see it, enable **Include Google-provided role grants** (top-right of that tab). Without it checked, the service account can look like it has no principals even though the binding exists.
+</Admonition>
 
 ## Step 3: Create the push subscription
 
@@ -111,7 +115,9 @@ gcloud pubsub subscriptions create signoz-integration-logs-push \
   --topic=signoz-integration-logs \
   --push-endpoint="<collector-service-url>/" \
   --push-auth-service-account="signoz-integration@<deployment-project-id>.iam.gserviceaccount.com" \
-  --ack-deadline=30
+  --ack-deadline=30 \
+  --min-retry-delay=10s \
+  --max-retry-delay=600s
 ```
 
 </TabItem>
@@ -123,12 +129,17 @@ gcloud pubsub subscriptions create signoz-integration-logs-push \
 4. **Delivery type**: **Push**.
 5. **Endpoint URL**: your `<collector-service-url>/` (include the trailing slash).
 6. Enable **Enable authentication** and select the `signoz-integration` service account.
-7. Click **Create**.
+7. Under **Retry policy**, choose **Retry after exponential backoff delay** and set the minimum and maximum backoff to suit your needs.
+8. Click **Create**.
 
 </TabItem>
 </Tabs>
 
 Replace `<collector-service-url>` with the Cloud Run **Service URL** from [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-4-note-the-service-url).
+
+<Admonition type="info">
+**Tune the retry policy to your needs.** When the Collector is briefly unavailable (a redeploy, a restart, or backpressure), Pub/Sub retries delivery. The exponential-backoff settings (`--min-retry-delay` / `--max-retry-delay`, `10s` to `600s` here) control how aggressively it retries. For a stricter durability guarantee, also attach a <a href="https://cloud.google.com/pubsub/docs/handling-failures#dead_letter_topic" target="_blank" rel="noopener noreferrer nofollow">dead-letter topic</a> (`--dead-letter-topic` with `--max-delivery-attempts`) so messages that repeatedly fail are captured instead of dropped after Pub/Sub's default 7-day retention. Choose values that fit your tolerance for delayed versus lost logs.
+</Admonition>
 
 <Admonition type="info">
 Push subscriptions **cannot** attach a custom header such as a SigNoz ingestion key; GCP only supports service-account authentication on the push request. This is exactly why the Collector runs in your project rather than SigNoz pushing straight to its gateway. The Collector holds the SigNoz ingestion key and forwards logs on to SigNoz over OTLP.
@@ -183,7 +194,7 @@ gcloud logging sinks create signoz-integration-logs-sink \
 
 1. Switch to the **monitored** project (`<monitored-project-id>`).
 2. Go to **Logging** > **Log Router** > **Create sink**.
-3. **Sink destination**: choose **Cloud Pub/Sub topic** > **Use a topic in another project**, and enter the full path `pubsub.googleapis.com/projects/<deployment-project-id>/topics/signoz-integration-logs`.
+3. **Sink destination**: choose **Cloud Pub/Sub topic**. The topic dropdown lists only topics in the current (monitored) project, so click **Enter topic manually** and enter the full path `projects/<deployment-project-id>/topics/signoz-integration-logs`.
 4. Set the inclusion filter and click **Create sink**.
 
 </TabItem>
@@ -217,7 +228,7 @@ gcloud pubsub topics add-iam-policy-binding signoz-integration-logs \
 <TabItem value="console" label="Console">
 
 1. In the project that owns the sink, open **Logging** > **Log Router**, click the sink, and copy its **Writer identity** (an email like `serviceAccount:p123-...@gcp-sa-logging.iam.gserviceaccount.com`).
-2. In your `<deployment-project-id>`, go to **Pub/Sub** > **Topics** > `signoz-integration-logs` > **Permissions** > **Add principal**.
+2. In your `<deployment-project-id>`, go to **Pub/Sub** > **Topics** and select the **checkbox** next to `signoz-integration-logs` (don't open the topic). In the info panel on the right, open the **Permissions** tab (click **Show info panel** if it's hidden), then click **Add principal**.
 3. Paste the writer identity and assign the role **Pub/Sub Publisher** (`roles/pubsub.publisher`). Save.
 
 </TabItem>
