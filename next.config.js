@@ -312,6 +312,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/operate/migration/upgrade-0.135/',
+          destination: '/docs/operate/migration/upgrade-0-135/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/migration/upgrade-0.135',
           destination: '/docs/operate/migration/upgrade-0-135/',
           permanent: true,

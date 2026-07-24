@@ -1,7 +1,7 @@
 ---
 date: 2026-07-24
 title: Upgrade SigNoz to v0.135.0 with Dashboards V2 Schema
-tags: [SigNoz Cloud, Self-Hosted Community, Self-Hosted Enterprise]
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
 description: SigNoz v0.135.0 rolls out the redesigned, Perses-compatible Dashboards V2. Existing dashboards migrate automatically; API scripts and Terraform need migration.
 doc_type: howto
 ---
@@ -13,7 +13,7 @@ Dashboards move to a strictly validated schema based on the <a href="https://per
 
 Key changes:
 
-- **Schema & APIs**: v2 CRUD APIs with Perses validation, `PATCH` for granular panel and metadata updates, and list APIs with pagination, sorting, and a query DSL
+- **Schema & APIs**: V2 CRUD APIs with Perses validation, `PATCH` for granular panel and metadata updates, and list APIs with pagination, sorting, and a query DSL
 - **Editing**: optimistic updates; panels and query changes save without "Stage & Run"
 - **Variables**: inline creation with `ALL` support and paginated options
 - **List page & panels**: tags, pins, saved views, and sorting; panel copy, drilldown, CSV/PNG/SVG export, and alerts from a panel
@@ -75,9 +75,9 @@ helm -n signoz upgrade signoz signoz/signoz
 
 ## Migrate API scripts to the V2 Dashboards APIs
 
-Existing scripts keep working during the rollout: the v2 Create and Update APIs accept v1 payloads, and the v2 list API marks not-yet-migrated dashboards as `legacy` instead of erroring. This backward compatibility will be deprecated in an upcoming release (<a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>), so move your scripts to the V2 endpoints:
+Existing scripts keep working during the rollout: the V2 Create and Update APIs accept V1 payloads, and the V2 list API marks not-yet-migrated dashboards as `legacy` instead of erroring. This backward compatibility will be deprecated in an upcoming release (<a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>), so move your scripts to the V2 endpoints:
 
-| v1 endpoint | V2 endpoint |
+| V1 endpoint | V2 endpoint |
 | --- | --- |
 | `GET /api/v1/dashboards` | `GET /api/v2/dashboards` |
 | `POST /api/v1/dashboards` | `POST /api/v2/dashboards` |
