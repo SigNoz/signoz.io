@@ -1,6 +1,5 @@
 ---
 date: 2026-07-23
-id: deploy-otel-collector
 title: Deploy the OpenTelemetry Collector on Cloud Run
 description: Deploy the SigNoz OpenTelemetry Collector as a Cloud Run service in your GCP deployment project to scrape Cloud Monitoring metrics and receive Cloud Logging logs via Pub/Sub.
 doc_type: howto
@@ -16,7 +15,7 @@ The OpenTelemetry Collector is the engine of the GCP integration: it pulls metri
 ## Prerequisites
 
 - You have [created the `signoz-integration` service account](https://signoz.io/docs/integrations/gcp/create-service-account/) and granted it `roles/monitoring.viewer` on your monitored projects.
-- You have [connected your GCP account in SigNoz](https://signoz.io/docs/integrations/gcp/connect-gcp-account/) and copied the **Ingestion URL** and **Ingestion Key**.
+- You have [connected your GCP account in SigNoz](https://signoz.io/docs/integrations/gcp/connect-gcp-account/) and noted your SigNoz Cloud region (from the **Ingestion URL**) and copied the **Ingestion Key**.
 - The Cloud Run Admin API and the Secret Manager API are enabled in your `<deployment-project-id>`.
 - The <a href="https://cloud.google.com/sdk/docs/install" target="_blank" rel="noopener noreferrer nofollow">`gcloud` CLI</a> is installed and authenticated, or use <a href="https://cloud.google.com/shell" target="_blank" rel="noopener noreferrer nofollow">Cloud Shell</a>.
 
@@ -61,7 +60,7 @@ processors:
 
 exporters:
   otlphttp:
-    endpoint: "https://<ingestion-url>"
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       "signoz-ingestion-key": "<ingestion-key>"
     tls:
@@ -83,7 +82,10 @@ service:
       exporters: [otlphttp]
 ```
 
-Replace `<ingestion-url>` and `<ingestion-key>` with the values you copied from the SigNoz connection panel.
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (for example, `us`, `eu`, or `in`). This is the region in the **Ingestion URL** shown on the SigNoz connection panel; use the region only, not the full URL.
+- `<ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/), copied from the connection panel.
 
 <Admonition type="info">
 **Cloud Run requires a listening port.** Cloud Run health-checks a service by connecting to the port named in `--port` and considers the revision ready only once the container listens on it. The `googlecloudpubsubpush` receiver listens on `:8090`, so this config also serves as the container's HTTP port. Keep the receiver `endpoint` port and the Cloud Run `--port` the same value (`8090` here).
