@@ -1,7 +1,7 @@
 ---
 date: 2026-07-23
-title: Deploy the OpenTelemetry Collector on Cloud Run
-description: Deploy the SigNoz OpenTelemetry Collector as a Cloud Run service in your GCP deployment project to scrape Cloud Monitoring metrics and receive Cloud Logging logs via Pub/Sub.
+title: Deploy the OpenTelemetry Collector on GCP Cloud Run
+description: Deploy the SigNoz OpenTelemetry Collector as a Cloud Run service that scrapes Cloud Monitoring metrics and receives Cloud Logging logs through Pub/Sub.
 doc_type: howto
 tags: [SigNoz Cloud, GCP]
 ---
@@ -43,7 +43,7 @@ receivers:
 
   # Metrics: one block per monitored project.
   # See "Collect metrics" for the metrics_list per service.
-  googlecloudmonitoring/<monitored-project-id>:
+  googlecloudmonitoring:
     project_id: "<monitored-project-id>"
     collection_interval: 300s
     metrics_list:
@@ -77,7 +77,7 @@ service:
       processors: [memory_limiter, batch]
       exporters: [otlphttp]
     metrics:
-      receivers: [googlecloudmonitoring/<monitored-project-id>]
+      receivers: [googlecloudmonitoring]
       processors: [memory_limiter, batch]
       exporters: [otlphttp]
 ```
