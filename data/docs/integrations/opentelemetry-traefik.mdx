@@ -82,8 +82,8 @@ Create a file named `traefik-logs-collection-config.yaml` with the following con
 
 ```yaml:traefik-logs-collection-config.yaml
 receivers:
-  # On Collector releases before v0.151.0, use the "filelog" alias instead of "file_log".
-  file_log/traefik-access:
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
+  filelog/traefik-access:
     include: ["${env:TRAEFIK_ACCESS_LOG_FILE}"]
     operators:
       # Traefik's json access log format. Each line is one request record with
@@ -137,8 +137,8 @@ processors:
     timeout: 10s
 
 exporters:
-  # On Collector releases before v0.144.0, use the "otlphttp" alias instead of "otlp_http".
-  otlp_http/traefik:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/traefik:
     endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
     headers:
       "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
@@ -146,9 +146,9 @@ exporters:
 service:
   pipelines:
     logs/traefik:
-      receivers: [file_log/traefik-access]
+      receivers: [filelog/traefik-access]
       processors: [resource/traefik, batch]
-      exporters: [otlp_http/traefik]
+      exporters: [otlphttp/traefik]
 ```
 
 `Duration`, `OriginDuration`, and `Overhead` arrive in nanoseconds. Divide by 1,000,000 when you chart them as milliseconds.
