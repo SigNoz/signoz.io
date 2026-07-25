@@ -82,8 +82,8 @@ processors:
     timeout: 10s
 
 exporters:
-  # On Collector releases before v0.144.0, use the "otlphttp" alias instead of "otlp_http".
-  otlp_http/apache:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/apache:
     endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
     headers:
       "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
@@ -93,7 +93,7 @@ service:
     metrics/apache:
       receivers: [apache]
       processors: [resource/apache, batch]
-      exporters: [otlp_http/apache]
+      exporters: [otlphttp/apache]
 ```
 
 ### Step 3: Deploy the Collector
@@ -157,7 +157,7 @@ docker compose up -d otelcol
 </TabItem>
 <TabItem value="kubernetes" label="Kubernetes">
 
-If you run the [SigNoz k8s-infra Helm chart](https://signoz.io/docs/install/kubernetes/), add the `apache` receiver through a values override instead of the standalone config file from Step 2. Point the endpoint at the Apache Service DNS:
+If you run the [SigNoz k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), add the `apache` receiver through a values override instead of the standalone config file from Step 2. Point the endpoint at the Apache Service DNS:
 
 ```yaml:override-values.yaml
 otelDeployment:
@@ -202,8 +202,8 @@ Create a file named `apache-logs-collection-config.yaml` with the following cont
 
 ```yaml:apache-logs-collection-config.yaml
 receivers:
-  # On Collector releases before v0.151.0, use the "filelog" alias instead of "file_log".
-  file_log/apache-access:
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
+  filelog/apache-access:
     include: ["${env:APACHE_ACCESS_LOG_FILE}"]
     operators:
       # Parse the default Apache Combined Log Format:
@@ -232,8 +232,8 @@ receivers:
         field: attributes.source
         value: apache
 
-  # On Collector releases before v0.151.0, use the "filelog" alias instead of "file_log".
-  file_log/apache-error:
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
+  filelog/apache-error:
     include: ["${env:APACHE_ERROR_LOG_FILE}"]
     operators:
       # Parse the default Apache 2.4 error log format:
@@ -284,8 +284,8 @@ processors:
     timeout: 10s
 
 exporters:
-  # On Collector releases before v0.144.0, use the "otlphttp" alias instead of "otlp_http".
-  otlp_http/apache:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/apache:
     endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
     headers:
       "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
@@ -293,9 +293,9 @@ exporters:
 service:
   pipelines:
     logs/apache:
-      receivers: [file_log/apache-access, file_log/apache-error]
+      receivers: [filelog/apache-access, filelog/apache-error]
       processors: [resource/apache, batch]
-      exporters: [otlp_http/apache]
+      exporters: [otlphttp/apache]
 ```
 
 The parsers assume the default **Combined Log Format** for access logs and the default **Apache 2.4** error log format. If you use a custom `LogFormat` or `ErrorLogFormat`, adjust the regex in the matching receiver.
@@ -375,7 +375,7 @@ docker compose up -d otelcol
 </TabItem>
 <TabItem value="kubernetes" label="Kubernetes">
 
-The official Apache image writes access logs to stdout and error logs to stderr. If you run the [SigNoz k8s-infra Helm chart](https://signoz.io/docs/install/kubernetes/), it already collects pod stdout and stderr, so Apache logs reach SigNoz without a file log receiver.
+The official Apache image writes access logs to stdout and error logs to stderr. If you run the [SigNoz k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), it already collects pod stdout and stderr, so Apache logs reach SigNoz without a file log receiver.
 
 To parse those lines into the fields shown above, add a [Logs Pipeline](https://signoz.io/docs/logs-pipelines/introduction/) in SigNoz using the same regex as the config in Step 1.
 
