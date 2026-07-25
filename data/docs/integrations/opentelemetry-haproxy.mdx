@@ -1,0 +1,583 @@
+---
+date: 2026-07-25
+title: Monitor HAProxy Metrics and Logs with OpenTelemetry
+description: Collect HAProxy metrics and HTTP traffic logs in SigNoz using the OpenTelemetry Collector, then visualize them with the HAProxy dashboard.
+doc_type: howto
+---
+
+## Overview
+
+Monitor HAProxy in SigNoz with the OpenTelemetry Collector. You collect two signals:
+
+- **Metrics:** connection rates, session counts, request throughput, and error counters through the Collector `haproxy` receiver, which polls the HAProxy stats socket.
+- **Logs:** HTTP traffic logs through the Collector `syslog` receiver, parsed into structured fields such as status code, backend, server, and request timers.
+
+HAProxy does not write log files. It emits logs over the syslog protocol through its `log` directive, so the Collector listens for syslog instead of tailing a file.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+Ensure you have:
+
+- A running HAProxy instance, with access to edit `haproxy.cfg`
+- An [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) that can read the HAProxy stats socket and accept syslog traffic from HAProxy
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Collect HAProxy telemetry
+
+<Tabs entityName="signal">
+<TabItem value="metrics" label="Metrics" default>
+
+The `haproxy` receiver polls HAProxy through its stats socket and maps the stats counters to OpenTelemetry metrics.
+
+### Step 1: Enable the HAProxy stats socket
+
+Add a `stats socket` line to the `global` section of your `haproxy.cfg`:
+
+```haproxy:haproxy.cfg
+global
+    stats socket /var/run/haproxy.sock mode 660 level admin
+```
+
+Reload HAProxy to apply the change:
+
+```bash
+sudo systemctl reload haproxy
+```
+
+The Collector needs read access to this socket. Either run it as a user in the socket's group, or adjust `mode` and the socket's group ownership to grant access.
+
+<Admonition type="info" title="Prefer an HTTP stats endpoint?" defaultCollapsed="true">
+  The receiver also accepts an HTTP stats URL instead of a socket path. Enable the stats page in a `listen` section:
+
+  ```haproxy:haproxy.cfg
+  listen stats
+      bind *:8404
+      stats enable
+      stats uri /stats
+  ```
+
+  Then set the receiver `endpoint` to `http://localhost:8404/stats` instead of the socket path used below. The receiver appends `;csv` to that URL when it scrapes.
+</Admonition>
+
+### Step 2: Create the Collector config file
+
+Create a file named `haproxy-metrics-collection-config.yaml` with the following content:
+
+```yaml:haproxy-metrics-collection-config.yaml
+receivers:
+  haproxy:
+    # Plain filesystem path to the stats socket, or an http:// stats URL.
+    # Do not prefix the socket path with file://, the receiver dials it as-is.
+    endpoint: "${env:HAPROXY_STATS_ENDPOINT}"
+    collection_interval: 30s
+
+processors:
+  # sets service.name so HAProxy metrics are easy to filter in SigNoz
+  resource/haproxy:
+    attributes:
+      - key: service.name
+        value: haproxy
+        action: upsert
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 10s
+
+exporters:
+  # On Collector releases before v0.144.0, use the "otlphttp" alias instead of "otlp_http".
+  otlp_http/haproxy:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    metrics/haproxy:
+      receivers: [haproxy]
+      processors: [resource/haproxy, batch]
+      exporters: [otlp_http/haproxy]
+```
+
+### Step 3: Deploy the Collector
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+Set the environment variables the config reads:
+
+```bash
+# HAProxy stats socket, readable by the otel collector
+export HAPROXY_STATS_ENDPOINT="/var/run/haproxy.sock"
+
+# region specific SigNoz cloud ingestion endpoint
+export OTLP_DESTINATION_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+# your SigNoz ingestion key
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+Start the Collector with the config file:
+
+```bash
+otelcol-contrib --config haproxy-metrics-collection-config.yaml
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+The Collector reads the stats socket, so share it between both containers through a named volume. Point HAProxy's `stats socket` at a path inside that volume:
+
+```haproxy:haproxy.cfg
+global
+    stats socket /var/run/haproxy/haproxy.sock mode 666 level admin
+```
+
+Then mount that volume into both services in your `docker-compose.yml`:
+
+```yaml:docker-compose.yml
+services:
+  haproxy:
+    image: haproxy:3.0
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - haproxy-run:/var/run/haproxy
+
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:0.157.0
+    container_name: otelcol
+    volumes:
+      - ./haproxy-metrics-collection-config.yaml:/etc/otelcol/config.yaml:ro
+      - haproxy-run:/var/run/haproxy
+    environment:
+      - "HAPROXY_STATS_ENDPOINT=/var/run/haproxy/haproxy.sock"
+      - "OTLP_DESTINATION_ENDPOINT=https://ingest.<region>.signoz.cloud:443"
+      - "SIGNOZ_INGESTION_KEY=<your-ingestion-key>"
+    command: ["--config", "/etc/otelcol/config.yaml"]
+
+volumes:
+  haproxy-run:
+```
+
+`mode 666` keeps this example simple. Tighten it to `660` and give the Collector's user the socket's group in production. Start the Collector:
+
+```bash
+docker compose up -d otelcol
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+Pods cannot share a unix socket, so run the Collector as a sidecar in the HAProxy pod and share the socket directory through an `emptyDir` volume.
+
+The socket has to live inside that shared directory, so change the Step 1 path from `/var/run/haproxy.sock` to a path under the mount:
+
+```haproxy:haproxy.cfg
+global
+    stats socket /var/run/haproxy/haproxy.sock mode 666 level admin
+```
+
+Then mount the volume into both containers:
+
+```yaml:haproxy-deployment.yaml
+spec:
+  containers:
+    - name: haproxy
+      image: haproxy:3.0
+      volumeMounts:
+        - { name: haproxy-run, mountPath: /var/run/haproxy }
+    - name: otelcol
+      image: otel/opentelemetry-collector-contrib:0.157.0
+      args: ["--config", "/etc/otelcol/config.yaml"]
+      env:
+        - name: HAPROXY_STATS_ENDPOINT
+          value: "/var/run/haproxy/haproxy.sock"
+        - name: OTLP_DESTINATION_ENDPOINT
+          value: "https://ingest.<region>.signoz.cloud:443"
+        - name: SIGNOZ_INGESTION_KEY
+          valueFrom:
+            secretKeyRef: { name: signoz-ingestion-key, key: key }
+      volumeMounts:
+        - { name: haproxy-run, mountPath: /var/run/haproxy }
+        - { name: otelcol-config, mountPath: /etc/otelcol }
+  volumes:
+    - name: haproxy-run
+      emptyDir: {}
+    - name: otelcol-config
+      configMap: { name: otelcol-config }
+```
+
+Store the config file from Step 2 in the `otelcol-config` ConfigMap, and the ingestion key in a Secret:
+
+```bash
+kubectl create configmap otelcol-config --from-file=config.yaml=haproxy-metrics-collection-config.yaml
+kubectl create secret generic signoz-ingestion-key --from-literal=key="<your-ingestion-key>"
+```
+
+If you expose HAProxy's HTTP stats page instead, you can scrape it from a separate Collector Deployment with the `haproxy` receiver pointed at the HAProxy Service DNS.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="logs" label="Logs">
+
+HAProxy sends its logs over the syslog protocol. The Collector `syslog` receiver listens on a port, parses the syslog envelope, and a regex operator extracts the HTTP log fields.
+
+### Step 1: Configure HAProxy logging
+
+Point HAProxy at the Collector and enable the HTTP log format. Add the `log` line to your `global` section and `option httplog` to the frontend you want to trace:
+
+```haproxy:haproxy.cfg
+global
+    # Send logs to the Collector's syslog receiver over UDP, in RFC5424 format.
+    # len raises the message cap so long URLs are not truncated.
+    log 127.0.0.1:54527 len 4096 format rfc5424 local0
+
+defaults
+    mode http
+    option httplog
+    log global
+```
+
+Replace `127.0.0.1` with the address where the Collector listens. Reload HAProxy to apply the change:
+
+```bash
+sudo systemctl reload haproxy
+```
+
+<Admonition type="info" title="Need TCP instead of UDP?" defaultCollapsed="true">
+  Prefix the address with `tcp@` to use a TCP stream, which avoids datagram loss on busy proxies:
+
+  ```haproxy:haproxy.cfg
+  log tcp@127.0.0.1:54527 len 4096 format rfc5424 local0
+  ```
+
+  Then swap the receiver's `udp` block for a `tcp` block in the config below.
+</Admonition>
+
+### Step 2: Create the Collector config file
+
+Create a file named `haproxy-logs-collection-config.yaml` with the following content:
+
+```yaml:haproxy-logs-collection-config.yaml
+receivers:
+  syslog:
+    udp:
+      listen_address: "0.0.0.0:54527"
+    protocol: rfc5424
+    operators:
+      # The syslog parser puts the HAProxy log line in attributes.message.
+      # Parse the "option httplog" format, which HAProxy declares as:
+      # %ci:%cp [%tr] %ft %b/%s %TR/%Tw/%Tc/%Tr/%Ta %ST %B %CC %CS %tsc %ac/%fc/%bc/%sc/%rc %sq/%bq %hr %hs %{+Q}r
+      # 172.18.0.5:53478 [25/Jul/2026:08:18:00.201] http-in web/web1 0/0/0/0/0 200 404 - - ---- 1/1/0/0/0 0/0 "GET / HTTP/1.1"
+      # The {captured_request_headers} {captured_response_headers} pair only appears
+      # when you set "capture request header" or "capture response header", so it is
+      # optional here.
+      # See https://docs.haproxy.org/3.0/configuration.html#8.2.3
+      - type: regex_parser
+        parse_from: attributes.message
+        regex: '^(?P<client_ip>\S+):(?P<client_port>\d+) \[(?P<request_date>[^\]]+)\] (?P<frontend_name>\S+) (?P<backend_name>[^/\s]+)/(?P<server_name>\S+) (?P<time_request>-?\d+)/(?P<time_queue>-?\d+)/(?P<time_connect>-?\d+)/(?P<time_response>-?\d+)/(?P<time_total>\+?-?\d+) (?P<status_code>-?\d+) (?P<bytes_read>\+?\d+) (?P<captured_request_cookie>\S+) (?P<captured_response_cookie>\S+) (?P<termination_state>\S+) (?P<actconn>\d+)/(?P<feconn>\d+)/(?P<beconn>\d+)/(?P<srv_conn>\d+)/(?P<retries>\+?\d+) (?P<srv_queue>\d+)/(?P<backend_queue>\d+)(?: \{(?P<captured_request_headers>[^}]*)\} \{(?P<captured_response_headers>[^}]*)\})? "(?P<http_request>[^"]*)"$'
+        severity:
+          parse_from: attributes.status_code
+          overwrite_text: true
+          mapping:
+            info:
+              - "2xx"
+              - "3xx"
+            warn: "4xx"
+            error: "5xx"
+        # Startup lines and health-check events do not match the HTTP format.
+        # Send them through unparsed instead of dropping them.
+        on_error: send
+      - type: move
+        if: attributes.message != nil
+        from: attributes.message
+        to: body
+      - type: add
+        field: attributes.source
+        value: haproxy
+
+processors:
+  # sets service.name so HAProxy logs are easy to filter in SigNoz
+  resource/haproxy:
+    attributes:
+      - key: service.name
+        value: haproxy
+        action: upsert
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 10s
+
+exporters:
+  # On Collector releases before v0.144.0, use the "otlphttp" alias instead of "otlp_http".
+  otlp_http/haproxy:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    logs/haproxy:
+      receivers: [syslog]
+      processors: [resource/haproxy, batch]
+      exporters: [otlp_http/haproxy]
+```
+
+The regex targets the default `option httplog` format. If you set a custom `log-format`, adjust the regex to match your field order.
+
+### Step 3: Deploy the Collector
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+Set the environment variables the config reads:
+
+```bash
+# region specific SigNoz cloud ingestion endpoint
+export OTLP_DESTINATION_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+# your SigNoz ingestion key
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+Start the Collector with the config file:
+
+```bash
+otelcol-contrib --config haproxy-logs-collection-config.yaml
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Add the Collector as a service and publish the syslog port on the Compose network. Point HAProxy's `log` line at the Collector service name, for example `log otelcol:54527 len 4096 format rfc5424 local0`:
+
+```yaml:docker-compose.yml
+otelcol:
+  image: otel/opentelemetry-collector-contrib:0.157.0
+  container_name: otelcol
+  volumes:
+    - ./haproxy-logs-collection-config.yaml:/etc/otelcol/config.yaml:ro
+  ports:
+    - "54527:54527/udp"
+  environment:
+    - "OTLP_DESTINATION_ENDPOINT=https://ingest.<region>.signoz.cloud:443"
+    - "SIGNOZ_INGESTION_KEY=<your-ingestion-key>"
+  command: ["--config", "/etc/otelcol/config.yaml"]
+```
+
+Start the Collector:
+
+```bash
+docker compose up -d otelcol
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+Run the Collector as a Deployment with the config from Step 2, and expose the syslog port through a Service so HAProxy pods can reach it:
+
+```yaml:otelcol-syslog-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: otelcol-syslog
+  namespace: <namespace>
+spec:
+  selector:
+    app: otelcol
+  ports:
+    - protocol: UDP
+      port: 54527
+      targetPort: 54527
+```
+
+Then point HAProxy at that Service DNS name:
+
+```haproxy:haproxy.cfg
+log otelcol-syslog.<namespace>.svc.cluster.local:54527 len 4096 format rfc5424 local0
+```
+
+Replace `<namespace>` with the namespace where the Collector runs.
+
+<Admonition type="info" title="Using log stdout instead?" defaultCollapsed="true">
+  HAProxy can write logs to stdout with `log stdout format raw daemon`. If you run the [SigNoz k8s-infra Helm chart](https://signoz.io/docs/install/kubernetes/), it already collects pod stdout, so those lines reach SigNoz without a syslog receiver. Parse them with a [Logs Pipeline](https://signoz.io/docs/logs-pipelines/introduction/) using the same regex as Step 2.
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+<details>
+<ToggleHeading>
+## Collecting both signals with one Collector
+</ToggleHeading>
+
+Run one Collector with both receivers rather than two instances. Merge the two configs into a single file: keep both receivers, both pipelines, and one shared exporter and `resource` processor.
+
+```yaml:haproxy-collection-config.yaml
+receivers:
+  haproxy:
+    endpoint: "${env:HAPROXY_STATS_ENDPOINT}"
+    collection_interval: 30s
+
+  syslog:
+    udp:
+      listen_address: "0.0.0.0:54527"
+    protocol: rfc5424
+    operators:
+      # Same operators as the Logs tab above.
+      - type: regex_parser
+        parse_from: attributes.message
+        regex: '^(?P<client_ip>\S+):(?P<client_port>\d+) \[(?P<request_date>[^\]]+)\] (?P<frontend_name>\S+) (?P<backend_name>[^/\s]+)/(?P<server_name>\S+) (?P<time_request>-?\d+)/(?P<time_queue>-?\d+)/(?P<time_connect>-?\d+)/(?P<time_response>-?\d+)/(?P<time_total>\+?-?\d+) (?P<status_code>-?\d+) (?P<bytes_read>\+?\d+) (?P<captured_request_cookie>\S+) (?P<captured_response_cookie>\S+) (?P<termination_state>\S+) (?P<actconn>\d+)/(?P<feconn>\d+)/(?P<beconn>\d+)/(?P<srv_conn>\d+)/(?P<retries>\+?\d+) (?P<srv_queue>\d+)/(?P<backend_queue>\d+)(?: \{(?P<captured_request_headers>[^}]*)\} \{(?P<captured_response_headers>[^}]*)\})? "(?P<http_request>[^"]*)"$'
+        severity:
+          parse_from: attributes.status_code
+          overwrite_text: true
+          mapping:
+            info:
+              - "2xx"
+              - "3xx"
+            warn: "4xx"
+            error: "5xx"
+        on_error: send
+      - type: move
+        if: attributes.message != nil
+        from: attributes.message
+        to: body
+      - type: add
+        field: attributes.source
+        value: haproxy
+
+processors:
+  resource/haproxy:
+    attributes:
+      - key: service.name
+        value: haproxy
+        action: upsert
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 10s
+
+exporters:
+  # On Collector releases before v0.144.0, use the "otlphttp" alias instead of "otlp_http".
+  otlp_http/haproxy:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    metrics/haproxy:
+      receivers: [haproxy]
+      processors: [resource/haproxy, batch]
+      exporters: [otlp_http/haproxy]
+    logs/haproxy:
+      receivers: [syslog]
+      processors: [resource/haproxy, batch]
+      exporters: [otlp_http/haproxy]
+```
+
+Complete Step 1 of both tabs first: enable the stats socket and point HAProxy's `log` line at this Collector. Then start it with a single `--config haproxy-collection-config.yaml`.
+
+On Docker, define **one** `otelcol` service that mounts this config, joins the shared `haproxy-run` volume, and publishes `54527/udp`. Two separate `otelcol` services with the same `container_name` collide, so do not paste both tabs' snippets into the same Compose file.
+
+</details>
+
+## Validate
+
+After you start the Collector, confirm each signal arrives in SigNoz.
+
+1. **Metrics:** Open [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) and search for metrics that start with `haproxy.` (for example `haproxy.requests.total` and `haproxy.sessions.count`).
+2. **Logs:** Open the **Logs** explorer and add filter **service.name = haproxy**.
+
+<Figure
+  src="/img/docs/integrations/haproxy/sample-metrics.webp"
+  alt="HAProxy metrics in the SigNoz Metrics Explorer"
+  caption="HAProxy metrics in the SigNoz Metrics Explorer"
+/>
+
+<Figure
+  src="/img/docs/integrations/haproxy/sample-logs.webp"
+  alt="HAProxy HTTP traffic logs in the SigNoz Logs explorer, filtered by service.name = haproxy"
+  caption="HAProxy logs in SigNoz, filtered by service.name = haproxy"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No metrics arrive
+
+- Confirm the stats socket exists and the Collector can read it: `sudo socat - UNIX-CONNECT:/var/run/haproxy.sock <<< "show stat"` should return CSV output.
+- Check the socket's permissions. `mode 660` restricts it to the owning user and group, so the Collector process must belong to that group.
+- Confirm `HAPROXY_STATS_ENDPOINT` is a plain socket path such as `/var/run/haproxy.sock`. A `file://` prefix fails with `dial unix file:///...: connect: no such file or directory`, because the receiver dials the value as-is. Use `http://` only for the stats page.
+
+### No logs arrive
+
+- Confirm HAProxy can reach the Collector on the syslog port. HAProxy fails silently when the log target is unreachable, since syslog over UDP is fire-and-forget.
+- Confirm the receiver's `protocol` matches the `format` in the HAProxy `log` line. An `rfc5424` receiver drops RFC3164 messages, and the reverse also fails.
+- Generate traffic through a frontend that has `option httplog` set. HAProxy logs at the end of each session, so an idle proxy produces no HTTP log lines.
+- In Docker or Kubernetes, confirm you published the syslog port as UDP and that HAProxy targets the Collector's service name.
+
+### Log fields are not parsed
+
+- The regex targets the default `option httplog` format. A custom `log-format` breaks it, so update the regex to match your field order.
+- Startup notices and health-check state changes pass through unparsed. Only HTTP log lines match the regex.
+- If long request lines look cut off, raise `len` on the HAProxy `log` line.
+
+### No data at all
+
+- Recheck the `OTLP_DESTINATION_ENDPOINT` region against your [SigNoz region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint). A wrong region drops data with no error.
+- Copy the `signoz-ingestion-key` value fresh from [SigNoz settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</details>
+
+<details>
+<ToggleHeading>
+## Limitations
+</ToggleHeading>
+
+- **Metrics require the stats socket or stats page.** The `haproxy` receiver polls one of them. Without either, it collects nothing.
+- **Logs arrive over syslog, not files.** HAProxy writes no log files by default, so the Collector needs a reachable syslog listener or a stdout collection path.
+- **The parser expects the default `option httplog`.** A custom `log-format` needs regex changes.
+- **Log severity comes from the HTTP status code.** `2xx` and `3xx` map to info, `4xx` to warn, and `5xx` to error.
+
+</details>
+
+## Next Steps
+
+- [Visualize metrics](https://signoz.io/docs/dashboards/dashboard-templates/haproxy-monitoring/) with the built-in HAProxy Monitoring dashboard.
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) to catch spikes in `5xx` responses or backend connection errors.
+- [Parse and transform logs](https://signoz.io/docs/logs-pipelines/introduction/) further with Logs Pipelines.
+
+## Get Help
+
+<GetHelp />
