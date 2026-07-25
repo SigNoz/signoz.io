@@ -88,8 +88,8 @@ processors:
     timeout: 10s
 
 exporters:
-  # On Collector releases before v0.144.0, use the "otlphttp" alias instead of "otlp_http".
-  otlp_http/haproxy:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/haproxy:
     endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
     headers:
       "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
@@ -99,7 +99,7 @@ service:
     metrics/haproxy:
       receivers: [haproxy]
       processors: [resource/haproxy, batch]
-      exporters: [otlp_http/haproxy]
+      exporters: [otlphttp/haproxy]
 ```
 
 ### Step 3: Deploy the Collector
@@ -324,8 +324,8 @@ processors:
     timeout: 10s
 
 exporters:
-  # On Collector releases before v0.144.0, use the "otlphttp" alias instead of "otlp_http".
-  otlp_http/haproxy:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/haproxy:
     endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
     headers:
       "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
@@ -335,7 +335,7 @@ service:
     logs/haproxy:
       receivers: [syslog]
       processors: [resource/haproxy, batch]
-      exporters: [otlp_http/haproxy]
+      exporters: [otlphttp/haproxy]
 ```
 
 The regex targets the default `option httplog` format. If you set a custom `log-format`, adjust the regex to match your field order.
@@ -372,17 +372,18 @@ otelcol-contrib --config haproxy-logs-collection-config.yaml
 Add the Collector as a service and publish the syslog port on the Compose network. Point HAProxy's `log` line at the Collector service name, for example `log otelcol:54527 len 4096 format rfc5424 local0`:
 
 ```yaml:docker-compose.yml
-otelcol:
-  image: otel/opentelemetry-collector-contrib:0.157.0
-  container_name: otelcol
-  volumes:
-    - ./haproxy-logs-collection-config.yaml:/etc/otelcol/config.yaml:ro
-  ports:
-    - "54527:54527/udp"
-  environment:
-    - "OTLP_DESTINATION_ENDPOINT=https://ingest.<region>.signoz.cloud:443"
-    - "SIGNOZ_INGESTION_KEY=<your-ingestion-key>"
-  command: ["--config", "/etc/otelcol/config.yaml"]
+services:
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:0.157.0
+    container_name: otelcol
+    volumes:
+      - ./haproxy-logs-collection-config.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "54527:54527/udp"
+    environment:
+      - "OTLP_DESTINATION_ENDPOINT=https://ingest.<region>.signoz.cloud:443"
+      - "SIGNOZ_INGESTION_KEY=<your-ingestion-key>"
+    command: ["--config", "/etc/otelcol/config.yaml"]
 ```
 
 Start the Collector:
@@ -486,8 +487,8 @@ processors:
     timeout: 10s
 
 exporters:
-  # On Collector releases before v0.144.0, use the "otlphttp" alias instead of "otlp_http".
-  otlp_http/haproxy:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/haproxy:
     endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
     headers:
       "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
@@ -497,11 +498,11 @@ service:
     metrics/haproxy:
       receivers: [haproxy]
       processors: [resource/haproxy, batch]
-      exporters: [otlp_http/haproxy]
+      exporters: [otlphttp/haproxy]
     logs/haproxy:
       receivers: [syslog]
       processors: [resource/haproxy, batch]
-      exporters: [otlp_http/haproxy]
+      exporters: [otlphttp/haproxy]
 ```
 
 Complete Step 1 of both tabs first: enable the stats socket and point HAProxy's `log` line at this Collector. Then start it with a single `--config haproxy-collection-config.yaml`.
