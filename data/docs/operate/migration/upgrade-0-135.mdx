@@ -1,0 +1,104 @@
+---
+date: 2026-07-24
+title: Upgrade SigNoz to v0.135.0 with Dashboards V2 Schema
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
+description: SigNoz v0.135.0 rolls out the redesigned, Perses-compatible Dashboards V2. Existing dashboards migrate automatically; API scripts and Terraform need migration.
+doc_type: howto
+---
+
+SigNoz v0.135.0 rolls out the redesigned [Dashboards](https://signoz.io/docs/dashboards/dashboards-v2-api/) experience and the new Dashboards V2 APIs. Your existing dashboards, queries, variables, and panels are migrated to the new Perses-compatible schema automatically. You only need to act if you have scripts calling the Dashboards API directly, or manage dashboards with the Terraform provider.
+
+<Admonition type="info" title="What changed in v0.135" defaultCollapsed="true">
+Dashboards move to a strictly validated schema based on the <a href="https://perses.dev/" target="_blank" rel="noopener noreferrer nofollow">Perses</a> dashboard-as-code standard.
+
+Key changes:
+
+- **Schema & APIs**: V2 CRUD APIs with Perses validation, `PATCH` for granular panel and metadata updates, and list APIs with pagination, sorting, and a query DSL
+- **Editing**: optimistic updates; panels and query changes save without "Stage & Run"
+- **Variables**: inline creation with `ALL` support and paginated options
+- **List page & panels**: tags, pins, saved views, and sorting; panel copy, drilldown, CSV/PNG/SVG export, and alerts from a panel
+- **Performance**: only on-screen panels refetch on time-range change and auto-refresh
+- **Ecosystem**: public dashboards on the V2 API, MCP server support, and a typed schema for GitOps and Terraform
+- **Migration**: existing dashboards, inbuilt dashboards, and templates migrate to the new schema automatically
+
+For the full release scope, see <a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>; for the schema and API details, see the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/).
+</Admonition>
+
+## Who needs to act
+
+| If you | Then |
+| --- | --- |
+| Use dashboards only through the UI | Nothing: dashboards are migrated automatically |
+| Have scripts calling `/api/v1/dashboards` | [Migrate them to the V2 APIs](#migrate-api-scripts-to-the-v2-dashboards-apis) |
+| Manage dashboards with the Terraform provider | [Upgrade the provider and migrate resources](#migrate-terraform-managed-dashboards) |
+
+## Upgrade self-hosted SigNoz
+
+### Step 1: Back up your data
+
+Dashboards live in the SigNoz Metastore (SQLite or Postgres) and are converted to the new schema during the rollout. Back up the Metastore before upgrading. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops (v0.131 requires a ClickHouse upgrade) before jumping to v0.135.0.
+
+### Step 2: Upgrade SigNoz
+
+<Tabs entityName="installer">
+<TabItem value="foundry" label="Foundry" default>
+
+Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundryctl</a> to pick up the v0.135.0 defaults, then re-apply your existing `casting.yaml`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+foundryctl cast -f casting.yaml
+```
+
+If your `casting.yaml` pins image versions, the new defaults will not override them (your config wins), so bump the SigNoz image pin to v0.135.0 yourself.
+
+</TabItem>
+<TabItem value="helm" label="Kubernetes (Helm chart)">
+
+Update the <a href="https://github.com/SigNoz/charts" target="_blank" rel="noopener noreferrer nofollow">chart</a> and upgrade:
+
+```bash
+helm repo update
+helm -n signoz upgrade signoz signoz/signoz
+```
+
+`helm upgrade` takes the newest chart; add `--version 0.135.0` to pin the v0.135.0 chart.
+
+</TabItem>
+</Tabs>
+
+### Step 3: Verify the upgrade
+
+1. Pods and containers are healthy (`kubectl get pods -n signoz`, `docker compose ps`, or `systemctl status 'signoz-*'`).
+2. SigNoz reports v0.135.0 under **Settings**.
+3. Open **Dashboards**: the redesigned list page loads, and your existing dashboards render with data.
+
+## Migrate API scripts to the V2 Dashboards APIs
+
+Existing scripts keep working during the rollout: the V2 Create and Update APIs accept V1 payloads, and the V2 list API marks not-yet-migrated dashboards as `legacy` instead of erroring. This backward compatibility will be deprecated in an upcoming release (<a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>), so move your scripts to the V2 endpoints:
+
+| V1 endpoint | V2 endpoint |
+| --- | --- |
+| `GET /api/v1/dashboards` | `GET /api/v2/dashboards` |
+| `POST /api/v1/dashboards` | `POST /api/v2/dashboards` |
+| `GET /api/v1/dashboards/{id}` | `GET /api/v2/dashboards/{id}` |
+| `PUT /api/v1/dashboards/{id}` | `PUT /api/v2/dashboards/{id}` |
+| `DELETE /api/v1/dashboards/{id}` | `DELETE /api/v2/dashboards/{id}` |
+
+The V2 APIs also add a `PATCH` endpoint for partial updates, split lock and unlock endpoints, a pin-aware per-user listing, and pagination, sorting, and a query DSL on the list endpoint. The payload changes shape too, from flat JSON to a Perses `spec` tree. See the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/) for the full endpoint list, schema, and `PATCH` examples.
+
+## Migrate Terraform-managed dashboards
+
+Terraform provider v0.1.0 rebuilds `signoz_dashboard` on the V2 APIs as a fully typed resource, so the `jsonencode(...)` attributes become a typed `spec` tree and existing config and state must be migrated. It requires SigNoz v0.135.0 or newer. This is a breaking change tracked in <a href="https://github.com/SigNoz/terraform-provider-signoz/issues/122" target="_blank" rel="noopener noreferrer nofollow">terraform-provider-signoz#122</a>.
+
+Follow the provider's <a href="https://registry.terraform.io/providers/SigNoz/signoz/latest/docs/guides/v0.0.x-to-v0.1.0" target="_blank" rel="noopener noreferrer nofollow">v0.0.x to v0.1.0 upgrade guide</a> for the full migration workflow. For general usage, see the [Terraform provider guide](https://signoz.io/docs/dashboards/terraform-provider-signoz/).
+
+<Admonition type="warning" title="Provider v0.1.0 also removes signoz_alert">
+Separate from the dashboard migration, provider v0.1.0 removes the `signoz_alert` resource in favor of `signoz_rule`. If you manage alerts with Terraform, follow the <a href="https://registry.terraform.io/providers/SigNoz/signoz/latest/docs/guides/migrate-signoz-alert-to-signoz-rule" target="_blank" rel="noopener noreferrer nofollow">migrate signoz_alert to signoz_rule guide</a> in the same upgrade.
+</Admonition>
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- [GitHub Issues](https://github.com/SigNoz/signoz/issues)
+- [Community Slack](https://signoz.io/slack/)
