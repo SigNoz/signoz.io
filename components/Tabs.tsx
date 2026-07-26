@@ -99,7 +99,7 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
         } as React.CSSProperties
       }
     >
-      <TabsList variant={dsVariant} className="overflow-scroll">
+      <TabsList variant={dsVariant} className="overflow-x-scroll">
         {visibleChildren.map((child) => {
           const { value, label } = child.props
           return (
