@@ -1,7 +1,7 @@
 ---
 date: 2026-07-23
 title: GCP Integration - Monitor Google Cloud Metrics & Logs
-description: Learn how the SigNoz GCP integration works: connect a Google Cloud account, deploy an OpenTelemetry Collector, and stream Cloud Monitoring metrics and logs.
+description: Learn how the SigNoz GCP integration works. Connect a Google Cloud account, deploy an OpenTelemetry Collector, and stream Cloud Monitoring metrics and logs.
 doc_type: explanation
 tags: [SigNoz Cloud, GCP]
 ---
@@ -72,19 +72,14 @@ Follow the [Manual Setup](https://signoz.io/docs/integrations/gcp/manual-setup/)
 
 </DocCardContainer>
 
-## The four connection fields
+## Supported services
 
-When you connect a GCP account in SigNoz (step 2), you provide four values. They anchor the rest of the setup, so keep them handy: every guide in this section refers back to them.
+Once the Collector is running, enable the individual GCP services you want to monitor. Each service page lists the metrics to add to your Collector config and the log filter to route its logs, and ships with a pre-built SigNoz dashboard.
 
-| Field | What it means | Where it's used later |
-| --- | --- | --- |
-| **Account Name** | A label you choose to uniquely identify this integration in SigNoz. GCP projects are globally unique and need not sit under an organization, so there is no automatic account ID as with AWS or Azure. Use your organization ID, billing account, or an environment name (for example, `production` or `my-org`). | Identifies the connected account in the SigNoz UI. It does not name any GCP resource. |
-| **Deployment Project ID** | The GCP project where you deploy the **OpenTelemetry Collector** (Cloud Run) and, for logs, the **Pub/Sub topic** and **push subscription**. | The project you build resources in during steps 3 and 5. When a monitored project differs from this one, you reference this project ID in fully-qualified resource names (for example, the Pub/Sub topic path). |
-| **Deployment Region** | The GCP region where the Cloud Run Collector runs. Selected from a dropdown; a single region. | The `--region` for the Cloud Run service in step 3. |
-| **Projects to Monitor** | The list of project IDs whose metrics and logs you want in SigNoz. It may include the Deployment Project ID and any number of other projects. | One `googlecloudmonitoring` receiver block per project (step 4) and one log sink per project (step 5). |
+<Listicle name="gcp-services" />
 
 <Admonition type="info">
-Throughout these guides, `<deployment-project-id>`, `<deployment-region>`, and `<monitored-project-id>` refer to the values you enter in these fields. Substitute your own values wherever you see them.
+More services are being added. Each one is configured the same way: add its metric names to the `googlecloudmonitoring` receiver and, if it emits logs you want, extend your log sink's inclusion filter.
 </Admonition>
 
 ## Costs to expect
