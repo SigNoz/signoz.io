@@ -35,6 +35,7 @@ For the full release scope, see <a href="https://github.com/SigNoz/signoz/issues
 | Use dashboards only through the UI | Nothing: dashboards are migrated automatically. Check afterwards for any dashboard marked **Legacy** |
 | Have scripts calling `/api/v1/dashboards` | [Migrate them to the V2 APIs](#migrate-api-scripts-to-the-v2-dashboards-apis) **before upgrading**: the V1 endpoints stop responding |
 | Manage dashboards with the Terraform provider | [Upgrade the provider and migrate resources](#migrate-terraform-managed-dashboards) |
+| Use the SigNoz MCP server with an AI assistant | [Upgrade it to v0.10.0](#upgrade-the-signoz-mcp-server) |
 
 ## Upgrade self-hosted SigNoz
 
@@ -96,6 +97,21 @@ The public sharing routes (`/api/v1/dashboards/{id}/public` and `/api/v1/public/
 One compatibility shim remains, on create only: `POST /api/v2/dashboards` still accepts a V1 payload (a body carrying `version` and no `schemaVersion`) and converts it to V2, so import flows and existing create automation keep working during the rollout window. This shim will be removed in a few releases (<a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>). `PUT /api/v2/dashboards/{id}` does **not** accept V1 payloads; it requires `schemaVersion: "v6"`.
 
 The V2 APIs also add a `PATCH` endpoint for partial updates, split lock and unlock endpoints, a pin-aware per-user listing, and pagination, sorting, and a query DSL on the list endpoint. The payload changes shape too, from flat JSON to a Perses `spec` tree. See the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/) for the full endpoint list, schema, and `PATCH` examples.
+
+## Upgrade the SigNoz MCP server
+
+The MCP server's dashboard tools moved to the V2 APIs in **v0.10.0**, so the two upgrades are coupled. On SigNoz Cloud's hosted MCP endpoint this happens for you; self-hosted MCP deployments need the version bump.
+
+| signoz-mcp-server | SigNoz | Result |
+| --- | --- | --- |
+| v0.9.x or older | v0.134.x or older | Works on the V1 dashboard API |
+| v0.9.x or older | v0.135.0 or newer | Dashboard tools fail: they call the retired V1 routes |
+| v0.10.0 | v0.134.x or older | Dashboard tools fail: the V2 routes do not exist yet |
+| v0.10.0 | v0.135.0 or newer | Supported |
+
+Only the dashboard tools are affected. The metrics, traces, logs, alerts, services, and docs tools work across both versions. Tool names are unchanged, so MCP client configs need no edits beyond the version bump. v0.10.0 also adds `signoz_patch_dashboard`, which applies an RFC 6902 JSON Patch so an assistant can edit one panel without resending the whole dashboard.
+
+For the full list of changes and known limitations, see <a href="https://github.com/SigNoz/signoz-mcp-server/issues/262" target="_blank" rel="noopener noreferrer nofollow">signoz-mcp-server#262</a>.
 
 ## Migrate Terraform-managed dashboards
 
