@@ -1,11 +1,15 @@
 ---
-date: 2026-07-10
+date: 2026-07-27
 title: "Dashboards V2 API - Schema, Endpoints & PATCH Updates"
 description: "Migrate to the redesigned SigNoz Dashboards experience and learn the V2 Dashboards API: schema, endpoints, pagination, the query DSL, and partial PATCH updates."
 doc_type: howto
 ---
 
 SigNoz is rolling out a redesigned **Dashboards** experience. Your existing dashboards, queries, variables, and panels continue to work exactly as they do now. This release keeps all of that intact and adds improvements that make dashboards easier to find, organize, and manage at scale.
+
+<Admonition type="warning" title="The V1 dashboard APIs are retired">
+The V1 dashboard endpoints (`/api/v1/dashboards` and its sub-routes) are permanently disabled. Every call now returns HTTP `501 Not Implemented` with the error code `dashboard_deprecated` and a message naming the V2 replacement endpoint. There is no grace period, so a `501` may be the first signal your integration, service account, or automation receives. Move any direct API calls to the [V2 endpoints](#migrating-from-the-v1-dashboard-apis) below. The public sharing routes (`/api/v1/dashboards/{id}/public` and `/api/v1/public/dashboards/{id}`) are not affected and keep working.
+</Admonition>
 
 - **Dashboards get easier to find and manage:** organize with key-value tags, personal pins, shared saved views, and quick cloning, plus a defined JSON/Terraform schema that enables direct editing, partial (token-efficient) updates, and reliable AI-driven changes.
 - **Panels get more expressive:** new styling controls (fill mode, line interpolation, disconnect lines, show points) and PNG/SVG export for sharing in reports and incident write-ups.
@@ -90,6 +94,21 @@ PATCH /api/v2/dashboards/{id}  -- Patch a Dashboard
 ```
 
 Full details of all the APIs are present in the <a href="https://signoz.io/api-reference/v0.132.1#/operations/ListDashboardsV2" target="_blank" rel="noopener noreferrer nofollow">API Reference</a>.
+
+### Migrating from the V1 dashboard APIs
+
+The V1 dashboard endpoints are retired. Every call returns HTTP `501 Not Implemented` with the error code `dashboard_deprecated` and a message naming the V2 replacement, so integrations can self-diagnose from the response body. Move each call to its V2 equivalent:
+
+| V1 endpoint (now `501`) | V2 endpoint | Action |
+| --- | --- | --- |
+| `GET /api/v1/dashboards` | `GET /api/v2/dashboards` | List dashboards |
+| `POST /api/v1/dashboards` | `POST /api/v2/dashboards` | Create a dashboard |
+| `GET /api/v1/dashboards/{id}` | `GET /api/v2/dashboards/{id}` | Fetch a dashboard |
+| `PUT /api/v1/dashboards/{id}` | `PUT /api/v2/dashboards/{id}` or `PATCH /api/v2/dashboards/{id}` | Update a dashboard (`PUT` replaces the full dashboard, `PATCH` applies partial updates) |
+| `DELETE /api/v1/dashboards/{id}` | `DELETE /api/v2/dashboards/{id}` | Delete a dashboard |
+| `PUT /api/v1/dashboards/{id}/lock` | `PUT /api/v2/dashboards/{id}/lock` (lock), `DELETE /api/v2/dashboards/{id}/lock` (unlock) | Lock or unlock a dashboard |
+
+The payload also changes shape, from flat V1 JSON to the Perses `spec` tree described above. Self-hosted users upgrading to v0.135.0 should follow the [upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-135/), which also covers Terraform provider and MCP server migration.
 
 ### New listing APIs
 
