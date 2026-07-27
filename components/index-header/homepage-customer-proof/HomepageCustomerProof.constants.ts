@@ -105,7 +105,12 @@ export const logos = {
     name: 'Oracle',
     quoteWidth: 88,
   },
-  hedra: { imageSrc: '/svgs/icons/hedra.svg', name: 'Hedra' },
+  hedra: {
+    imageSrc: '/svgs/icons/hedra.svg',
+    isWordmark: true,
+    name: 'Hedra',
+    cardWidth: 92,
+  },
   racingAndSports: {
     imageSrc: `${customerLogoImagePath}/racing-and-sports.webp`,
     name: 'Racing & Sports',
