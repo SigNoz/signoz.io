@@ -1,5 +1,5 @@
 ---
-date: 2026-05-18
+date: 2026-07-27
 
 title: Query Builder v5 - Advanced Querying Guide
 description: Master SigNoz Query Builder with filtering, aggregations, trace operators, multi-query formulas, and performance tips to analyze logs, traces, and metrics at scale.
@@ -70,6 +70,18 @@ Filtering is the foundation of every query. The Query Builder supports expressio
 
 <Admonition type="tip">
 Use the keyboard shortcut `CMD+ENTER` (Mac) or `CTRL+ENTER` (Windows/Linux) to quickly execute Stage & Run Query.
+</Admonition>
+
+#### Scope autocomplete with field context prefixes
+
+Every telemetry key belongs to a field context: `attribute.`, `resource.`, `span.`, `body.`, `log.`, or `metric.`. Type one of these prefixes followed by a dot in the filter bar to scope the key suggestions to that context. The dropdown then lists only keys from that context, each shown in its full prefixed form. For example, typing `attribute.` surfaces keys such as `attribute.status.code`.
+
+Prefixes also make operator suggestions type-accurate. The same key name can exist under more than one context or data type (for example, `status.code` stored as both a string and a number). Select or type it without a prefix and the operator dropdown offers every operator that applies across all of its types. Add a context prefix and the key resolves to a single variant, so the operator list narrows to the operators valid for that type. If `status.code` is string-only in the resource context, `resource.status.code` offers `LIKE` but hides numeric comparisons like `>`.
+
+Use a prefix when a bare key name is ambiguous, or when you want the operator list to match the exact variant you intend to filter on. For a full explanation of contexts, data types, and when a prefix is required, see [Field Context & Data Types](https://signoz.io/docs/userguide/field-context-data-types/).
+
+<Admonition type="info">
+The prefixed form (for example, `resource.status.code`) is valid filter syntax you can type directly into an expression, not only an autocomplete aid. Autocomplete inserts the same prefixed key it displays.
 </Admonition>
 
 For the full list of supported operators and syntax patterns, see the [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) and [Search Syntax](https://signoz.io/docs/userguide/search-syntax/).

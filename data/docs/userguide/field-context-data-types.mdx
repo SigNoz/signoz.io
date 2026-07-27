@@ -1,8 +1,9 @@
 ---
-date: 2025-11-20
+date: 2026-07-27
 
 title: Field Context and Data Types Guide
 description: Learn when to use explicit field contexts like resource. or attribute. in SigNoz queries. Understand data types, type specification syntax, and performance implications.
+doc_type: reference
 ---
 
 
@@ -92,6 +93,20 @@ span.duration > 1000
 log.severity_text = 'ERROR'
 log.body CONTAINS 'failed'
 ```
+
+**Log body:**
+```
+body.status = 'failed'
+```
+Use `body.` to scope to fields inside a structured (JSON) log body.
+
+**Metrics:**
+
+Use the `metric.` prefix to scope suggestions to metric fields when querying metric data.
+
+<Admonition type="tip">
+In the Query Builder filter bar, type any context prefix followed by a dot (`attribute.`, `resource.`, `span.`, `body.`, `log.`, `metric.`) to scope the autocomplete dropdown to keys in that context. A prefix also makes operator suggestions type-accurate for the resolved key. See [Query Builder filtering](https://signoz.io/docs/userguide/query-builder-v5/#filtering).
+</Admonition>
 
 ## Performance Considerations
 
