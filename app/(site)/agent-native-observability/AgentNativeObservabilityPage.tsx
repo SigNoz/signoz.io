@@ -107,9 +107,9 @@ const TrustedByTeams: React.FC = () => {
             <Image
               src={logo.src}
               alt={logo.displayName ? '' : logo.alt}
-              width={logo.displayName ? 48 : 140}
+              width={logo.displayName ? 36 : 140}
               height={48}
-              className={logo.displayName ? 'h-12 w-12 object-contain' : 'object-contain'}
+              className={logo.displayName ? 'h-9 w-9 object-contain' : 'object-contain'}
             />
             {logo.displayName ? (
               <span className="text-lg font-medium text-signoz_vanilla-100">
