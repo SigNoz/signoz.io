@@ -1,5 +1,5 @@
 ---
-date: 2026-07-19
+date: 2026-07-27
 title: Metrics based alerts
 description: Learn how to create metrics-based alerts in SigNoz by defining alert conditions, configuring notification settings, and using practical examples for memory usage, error rate, and latency monitoring.
 doc_type: reference
@@ -121,6 +121,8 @@ The condition configuration of an alert in SigNoz consists of 5 core parts:
    - Count for request totals
     
    Helps interpret the threshold in the correct context and also for correct scaling while comparing 2 values.
+
+   This dropdown stays disabled until you set a unit on the query in Step 1, and it then offers the units in that same category.
     
 ### Advanced Options
 
@@ -153,11 +155,11 @@ You can incorporate template variables in the alert message to make notification
 
 | Variable | Description |
 | --- | --- |
-| `{{$value}}` | The current aggregated value that triggered the alert, formatted using the query's Y-axis unit |
-| `{{$threshold}}` | The threshold value that was breached, formatted using the threshold unit |
-| `$<attribute-name>` | Any attribute used in the Group By clause (e.g., `$service.name`) |
+| `{{$value}}` | The current aggregated value that triggered the alert, formatted with the unit set on the query in Step 1 |
+| `{{$threshold}}` | The threshold value that was breached, formatted with the [Threshold Unit](#threshold-unit) from Step 2 |
+| `$<attribute-name>` | Any attribute used in the Group By clause (e.g., `$service.name`). The `{{$service.name}}` form works too |
 
-`{{$value}}` and `{{$threshold}}` use different unit sources for formatting. `{{$value}}` is formatted according to the Y-axis unit set on the query (Step 1), while `{{$threshold}}` is formatted according to the threshold unit (Step 2). If these units differ, the two variables render in different scales. For example, if the Y-axis unit is set to binary Bytes, `{{$value}}` renders as GiB/MiB/KiB, but if the threshold unit is set to decimal Bytes (SI), `{{$threshold}}` renders as GB/MB/KB. To align them, set the query's Y-axis unit to the same unit family as the threshold unit.
+The two variables read their units from different places. `{{$value}}` uses the unit set on the query in Step 1, and `{{$threshold}}` uses the Threshold Unit in Step 2. The Threshold Unit list is filtered to the query unit's category but still mixes decimal and binary units, so choosing `Gigabytes (GB)` for the query and `Bytes (B) (IEC)` for the threshold renders GB in one half of your message and GiB in the other. Pick both from the same family to keep them consistent.
 
 **Example**: If you have a query grouped by `service.name` with a threshold of 500 MB, you could write:
 `Memory usage for $service.name is {{$value}} (threshold: {{$threshold}})`
