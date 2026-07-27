@@ -1,5 +1,5 @@
 ---
-date: 2026-07-10
+date: 2026-07-27
 title: "Dashboards V2 API - Schema, Endpoints & PATCH Updates"
 description: "Migrate to the redesigned SigNoz Dashboards experience and learn the V2 Dashboards API: schema, endpoints, pagination, the query DSL, and partial PATCH updates."
 doc_type: howto
@@ -57,6 +57,36 @@ The full schema can be seen in the payload of the <a href="https://signoz.io/api
     }
 }
 ```
+
+### Scalar panels require `reduceTo` on metric queries
+
+Value (number) panels, pie charts, and tables render a single value per query, so they issue a **scalar** request. A metric query produces a time series, so a scalar request must say how to collapse that series to one number. Set `reduceTo` on each metric aggregation in these panels.
+
+Valid values are: `sum`, `count`, `avg`, `min`, `max`, `last`, `median`.
+
+```json
+"aggregations": [
+    {
+        "metricName": "system.cpu.time",
+        "timeAggregation": "rate",
+        "spaceAggregation": "sum",
+        "reduceTo": "sum"
+    }
+]
+```
+
+The visual query builder sets `reduceTo` for you, so this only affects requests you construct programmatically. A scalar metric query that omits it, or uses an unsupported value, is rejected at query time with `400 Bad Request` and the `invalid_input` error code:
+
+```json
+{
+    "error": {
+        "code": "invalid_input",
+        "message": "reduceTo is required for aggregation #1 in query 'A' for the scalar request type"
+    }
+}
+```
+
+Existing V1 dashboards do not need edits: their scalar metric queries have `reduceTo` derived automatically during migration (rate and increase map to `sum`, percentile aggregations map to `avg`, other gauge aggregations map to `last`).
 
 ### Dashboard APIs
 
