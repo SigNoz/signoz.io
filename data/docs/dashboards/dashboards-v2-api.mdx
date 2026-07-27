@@ -1,5 +1,5 @@
 ---
-date: 2026-07-10
+date: 2026-07-27
 title: "Dashboards V2 API - Schema, Endpoints & PATCH Updates"
 description: "Migrate to the redesigned SigNoz Dashboards experience and learn the V2 Dashboards API: schema, endpoints, pagination, the query DSL, and partial PATCH updates."
 doc_type: howto
@@ -38,6 +38,7 @@ The full schema can be seen in the payload of the <a href="https://signoz.io/api
 
 ```json
 {
+    "image": "/assets/Icons/eight-ball",
     "tags": [
         {
             "key": "string",
@@ -57,6 +58,21 @@ The full schema can be seen in the payload of the <a href="https://signoz.io/api
     }
 }
 ```
+
+### The `image` field
+
+The top-level `image` field sets the dashboard's icon. It accepts three shapes:
+
+- `/assets/Icons/<name>` — a bundled system icon (for example `/assets/Icons/eight-ball`, the default). These are the icons shown in the [dashboard icon picker](https://signoz.io/docs/userguide/manage-dashboards/#set-a-dashboard-icon).
+- `/assets/Logos/<name>` — a bundled logo (for example `/assets/Logos/aws-dark`). Logos render at load time but are not exposed in the picker.
+- A base64 image data URI (for example `data:image/png;base64,...`).
+
+Any other value (a remote URL, a `javascript:` URI, a non-image data URI, or raw markup) is rejected. Validation is enforced at three layers: the in-product JSON editor, dashboard import, and the Create and Update APIs.
+
+- **API:** `POST` and `PUT` reject an invalid `image` with a 400-class error, so the constraint holds even when dashboards are created or modified directly through the API.
+- **JSON editor:** the **Apply** button is blocked and this message is shown: `"image" must be an /assets/Icons/<name> or /assets/Logos/<name> path, or a base64 image data URI`.
+
+Dashboards saved earlier with an inline base64 icon keep rendering unchanged. No migration is required.
 
 ### Dashboard APIs
 

@@ -1,6 +1,6 @@
 ---
-date: 2026-05-13
-description: Learn how to create, edit, delete, and manage dashboards and panels within SigNoz.
+date: 2026-07-27
+description: Learn how to create, edit, delete, and manage dashboards and panels within SigNoz, including dashboard icons.
 title: Manage Dashboards in SigNoz
 doc_type: howto
 ---
@@ -47,6 +47,47 @@ From the Dashboards page, you can:
 6. _(Optional)_ You can change the order of your panels by dragging and dropping them.
 
 7. When you've finished, select the **Save Layout** button.
+
+## Set a Dashboard Icon
+
+Each dashboard shows an icon next to its name in the list and header. To change it, open **Configure** (the dashboard configuration drawer), stay on the **Overview** tab, and select the icon dropdown to the left of the **Dashboard Name** field.
+
+<Figure
+  src="/img/docs/userguide/manage-dashboards/dashboard-icon-picker.webp"
+  alt="Dashboard icon picker in the Overview tab of the configuration drawer"
+  caption="Pick a dashboard icon from the Overview tab of the configuration drawer."
+/>
+
+New dashboards use the **eight-ball** icon by default. The picker offers these icons:
+
+`avocado`, `bagel`, `basketball`, `bow`, `carousel-horse`, `cheese`, `circus-tent`, `cookie`, `crane`, `dartboard`, `drum`, `eight-ball`, `fries`, `hamburger`, `headphones`, `motorcycle`, `ninja`, `orange`, `police-car`, and `siren`.
+
+The picker is the source of truth for available icons, and the set may grow in later releases.
+
+### Icon paths in dashboard JSON
+
+Icons are stored as a path in the top-level `image` field of the dashboard JSON, not as inline image data. A picker selection is saved as `/assets/Icons/<name>`, for example:
+
+```json
+{
+  "image": "/assets/Icons/avocado",
+  "name": "My Dashboard",
+  "tags": [],
+  "spec": { "display": { "name": "My Dashboard" } }
+}
+```
+
+The `image` field accepts three shapes:
+
+- `/assets/Icons/<name>` — a bundled system icon (for example `/assets/Icons/eight-ball`).
+- `/assets/Logos/<name>` — a bundled logo (for example `/assets/Logos/aws-dark`). Logos render at load time but are not shown in the picker, so you can only set them by editing the JSON.
+- A base64 image data URI (for example `data:image/png;base64,...`).
+
+Any other value (a remote URL, a `javascript:` URI, or raw markup) is rejected. An unrecognized but well-formed path (an icon name that does not exist) falls back to the default eight-ball icon at render time.
+
+<Admonition type="info">
+Dashboards saved earlier with an inline base64 icon keep rendering unchanged. No migration is required.
+</Admonition>
 
 ## Dashboard Options Menu
 
