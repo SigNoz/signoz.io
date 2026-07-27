@@ -103,14 +103,19 @@ const TrustedByTeams: React.FC = () => {
       </div>
       <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-16 gap-y-10 px-4">
         {TRUSTED_BY_LOGOS.map((logo) => (
-          <div key={logo.alt} className="flex h-12 items-center justify-center">
+          <div key={logo.alt} className="flex h-12 items-center justify-center gap-2">
             <Image
               src={logo.src}
               alt={logo.alt}
-              width={140}
+              width={logo.displayName ? 48 : 140}
               height={48}
-              className="object-contain"
+              className={logo.displayName ? 'h-12 w-12 object-contain' : 'object-contain'}
             />
+            {logo.displayName ? (
+              <span className="text-lg font-medium text-signoz_vanilla-100">
+                {logo.displayName}
+              </span>
+            ) : null}
           </div>
         ))}
       </div>

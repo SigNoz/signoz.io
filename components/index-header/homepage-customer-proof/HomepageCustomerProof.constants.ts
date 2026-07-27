@@ -1,5 +1,4 @@
 import EltropyLogo from '@/public/svgs/icons/eltropy.svg'
-import ParallelLogo from '@/public/svgs/icons/parallel-ai.svg'
 
 import type { LogoSpec } from './HomepageCustomerProof.types'
 
@@ -106,12 +105,7 @@ export const logos = {
     name: 'Oracle',
     quoteWidth: 88,
   },
-  parallel: {
-    Logo: ParallelLogo,
-    name: 'Parallel',
-    cardWidth: 104,
-    viewBox: '39 190 1322 240',
-  },
+  hedra: { imageSrc: '/svgs/icons/hedra.svg', name: 'Hedra' },
   racingAndSports: {
     imageSrc: `${customerLogoImagePath}/racing-and-sports.webp`,
     name: 'Racing & Sports',
