@@ -132,12 +132,32 @@ export const GCP_ICON_GRID_CARDS: IconTitleDescriptionCardData[] = [
     title: 'One config. Every GCP service logs automatically. Forever.',
     description:
       "Traditional log shipping means installing an agent on every VM, repeating for every new instance. With GCP's Log Router, configure routing once. Logs from Compute Engine, App Engine, Cloud Functions, and every GCP service flow automatically into SigNoz; all searchable and correlated. No per-VM setup.",
+    button: {
+      text: 'Explore More',
+      href: '/docs/gcp-monitoring/app-engine/logging/',
+      tracking: {
+        clickType: 'Secondary CTA',
+        clickName: 'Explore Link',
+        clickLocation: 'GCP Monitoring Log Config Section',
+        clickText: 'Explore More',
+      },
+    },
   },
   {
     icon: <Telescope size={20} />,
     title: 'Built on OpenTelemetry - Your GCP Instrumentation Stays Yours',
     description:
       'SigNoz is built on OpenTelemetry, not just compatible with it. Every Cloud Run trace, GKE metric, and Compute Engine log uses standard OTel attributes, correlated across signals automatically, no custom mapping needed. No proprietary agents, no re-instrumentation, no premium for using open standards.',
+    button: {
+      text: 'Explore More',
+      href: '/docs/gcp-monitoring/',
+      tracking: {
+        clickType: 'Secondary CTA',
+        clickName: 'Explore Link',
+        clickLocation: 'GCP Monitoring OTel Section',
+        clickText: 'Explore More',
+      },
+    },
   },
   {
     icon: <Microscope size={20} />,
@@ -152,12 +172,32 @@ export const GCP_ICON_GRID_CARDS: IconTitleDescriptionCardData[] = [
         memory, and instance counts in the same view.
       </>
     ),
+    button: {
+      text: 'Explore More',
+      href: '/docs/gcp-monitoring/cloud-run/tracing/',
+      tracking: {
+        clickType: 'Secondary CTA',
+        clickName: 'Explore Link',
+        clickLocation: 'GCP Monitoring APM Section',
+        clickText: 'Explore More',
+      },
+    },
   },
   {
     icon: <BanknoteCheckIcon className="h-5 w-5" aria-hidden="true" />,
     title: 'Predictable Pricing for Google Cloud Observability',
     description:
       "GCP already charges you for Cloud Monitoring metrics queries, log ingestion, and log storage. Your observability tool shouldn't add another unpredictable bill on top. SigNoz charges $0.30/GB for logs and traces. $0.10 per million metric samples. No per-host fees. No per-metric charges. No surprise at month-end.",
+    button: {
+      text: 'View Pricing',
+      href: '/pricing/',
+      tracking: {
+        clickType: 'Secondary CTA',
+        clickName: 'Pricing Link',
+        clickLocation: 'GCP Monitoring Pricing Section',
+        clickText: 'View Pricing',
+      },
+    },
   },
 ]
 

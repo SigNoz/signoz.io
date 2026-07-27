@@ -1,3 +1,4 @@
+import FeatureButton from '../FeatureButton'
 import { IconTitleDescriptionCardProps } from './IconTitleDescriptionCard.types'
 
 const VARIANT_STYLES = {
@@ -16,6 +17,7 @@ const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
   iconText,
   title,
   description,
+  button,
   className = '',
   variant = 'lg',
   titleLevel = 'h4',
@@ -47,6 +49,8 @@ const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
       {description && (
         <div className="m-0 w-full text-left text-sm text-signoz_vanilla-400">{description}</div>
       )}
+
+      {button && <FeatureButton button={button} className="mt-2" />}
     </div>
   )
 }
