@@ -2,7 +2,7 @@
 date: 2026-07-24
 title: Upgrade SigNoz to v0.135.0 with Dashboards V2 Schema
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
-description: SigNoz v0.135.0 rolls out the redesigned, Perses-compatible Dashboards V2. Existing dashboards migrate automatically; the V1 dashboard APIs are retired, so API scripts and Terraform need migration.
+description: Upgrade self-hosted SigNoz to v0.135.0. Dashboards convert to the V2 schema automatically, and the retired V1 dashboard APIs need script and Terraform changes.
 doc_type: howto
 ---
 
@@ -32,8 +32,8 @@ For the full release scope, see <a href="https://github.com/SigNoz/signoz/issues
 
 | If you | Then |
 | --- | --- |
-| Use dashboards only through the UI | Nothing: dashboards are migrated automatically. Check afterwards for any dashboard marked `legacy` |
-| Have scripts calling `/api/v1/dashboards` | [Migrate them to the V2 APIs](#migrate-api-scripts-to-the-v2-dashboards-apis) **before upgrading** — the V1 endpoints stop responding |
+| Use dashboards only through the UI | Nothing: dashboards are migrated automatically. Check afterwards for any dashboard marked **Legacy** |
+| Have scripts calling `/api/v1/dashboards` | [Migrate them to the V2 APIs](#migrate-api-scripts-to-the-v2-dashboards-apis) **before upgrading**: the V1 endpoints stop responding |
 | Manage dashboards with the Terraform provider | [Upgrade the provider and migrate resources](#migrate-terraform-managed-dashboards) |
 
 ## Upgrade self-hosted SigNoz
@@ -76,7 +76,7 @@ helm -n signoz upgrade signoz signoz/signoz
 1. Pods and containers are healthy (`kubectl get pods -n signoz`, `docker compose ps`, or `systemctl status 'signoz-*'`).
 2. SigNoz reports v0.135.0 under **Settings**.
 3. Open **Dashboards**: the redesigned list page loads, and your existing dashboards render with data.
-4. Scan the list for rows marked **Legacy**. The conversion runs per dashboard, and a dashboard whose stored data cannot be converted is left on the old schema and flagged rather than failing the upgrade. Legacy dashboards are listed but cannot be opened in the new experience — open the row's dialog to copy the dashboard ID and share it with support.
+4. Scan the list for rows marked **Legacy**. The conversion runs per dashboard, and a dashboard whose stored data cannot be converted is left on the old schema and flagged rather than failing the upgrade. Legacy dashboards are listed but cannot be opened in the new experience. Open the row's dialog to copy the dashboard ID and share it with support.
 
 ## Migrate API scripts to the V2 Dashboards APIs
 
@@ -93,7 +93,7 @@ The V1 dashboard endpoints are retired in v0.135.0. They respond with `501 Not I
 
 The public sharing routes (`/api/v1/dashboards/{id}/public` and `/api/v1/public/dashboards/{id}`) are not affected and keep working.
 
-One compatibility shim remains, on create only: `POST /api/v2/dashboards` still accepts a V1 payload — a body carrying `version` and no `schemaVersion` — and converts it to V2, so import flows and existing create automation keep working during the rollout window. This shim will be removed in a few releases (<a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>). `PUT /api/v2/dashboards/{id}` does **not** accept V1 payloads; it requires `schemaVersion: "v6"`.
+One compatibility shim remains, on create only: `POST /api/v2/dashboards` still accepts a V1 payload (a body carrying `version` and no `schemaVersion`) and converts it to V2, so import flows and existing create automation keep working during the rollout window. This shim will be removed in a few releases (<a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>). `PUT /api/v2/dashboards/{id}` does **not** accept V1 payloads; it requires `schemaVersion: "v6"`.
 
 The V2 APIs also add a `PATCH` endpoint for partial updates, split lock and unlock endpoints, a pin-aware per-user listing, and pagination, sorting, and a query DSL on the list endpoint. The payload changes shape too, from flat JSON to a Perses `spec` tree. See the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/) for the full endpoint list, schema, and `PATCH` examples.
 
