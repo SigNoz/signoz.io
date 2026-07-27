@@ -106,7 +106,7 @@ const TrustedByTeams: React.FC = () => {
           <div key={logo.alt} className="flex h-12 items-center justify-center gap-2">
             <Image
               src={logo.src}
-              alt={logo.alt}
+              alt={logo.displayName ? '' : logo.alt}
               width={logo.displayName ? 48 : 140}
               height={48}
               className={logo.displayName ? 'h-12 w-12 object-contain' : 'object-contain'}
