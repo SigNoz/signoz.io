@@ -63,7 +63,7 @@ export const SCRAPE_GCP_PANEL = {
   description: (
     <p className="leading-relaxed text-signoz_vanilla-400">
       Use the OTel Collector&apos;s googlecloudmonitoring receiver to scrape metrics from any GCP
-      service — Cloud SQL, App Engine, BigQuery, Cloud Storage, Pub/Sub — and send them to SigNoz.
+      service - Cloud SQL, App Engine, BigQuery, Cloud Storage, Pub/Sub - and send them to SigNoz.
       Select exactly which metrics to collect. No proprietary agents, no vendor lock-in, your config
       stays yours
     </p>
@@ -88,8 +88,8 @@ export const NOZ_AI_PANEL = {
   description: (
     <p className="leading-relaxed text-signoz_vanilla-400">
       SigNoz MCP Server connects to Claude Code, Cursor, and other AI coding agents. Give your agent
-      full GCP context — Cloud Run latency, GKE pod status, Cloud SQL query performance, Pub/Sub
-      backlog — and debug production GCP issues without leaving your terminal.
+      full GCP context - Cloud Run latency, GKE pod status, Cloud SQL query performance, Pub/Sub
+      backlog - and debug production GCP issues without leaving your terminal.
     </p>
   ),
   button: {
@@ -143,7 +143,7 @@ export const GCP_ICON_GRID_CARDS: IconTitleDescriptionCardData[] = [
     title: 'APM & Distributed Tracing for Cloud Run',
     description: (
       <>
-        See inside every Cloud Run request — not just infrastructure metrics.
+        See inside every Cloud Run request - not just infrastructure metrics.
         <br />
         <br />
         Instrument your Cloud Run service with the OTel SDK. Every request is traced end-to-end:
