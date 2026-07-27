@@ -1,11 +1,11 @@
 ---
-date: 2026-05-13
-description: Learn how to create, edit, delete, and manage dashboards and panels within SigNoz.
+date: 2026-07-27
+description: Learn how to create, edit, delete, filter, and manage dashboards and panels within SigNoz.
 title: Manage Dashboards in SigNoz
 doc_type: howto
 ---
 
-This section shows how you can create, update, and remove dashboards and panels.
+This section shows how you can create, update, filter, and remove dashboards and panels.
 
 <Figure
   src="/img/docs/userguide/manage-dashboards/dashboards-page.webp"
@@ -19,6 +19,62 @@ From the Dashboards page, you can:
 - **New Dashboard** — Create a dashboard from scratch by entering a name and selecting **+ New Dashboard**.
 - **Import JSON** — Import a dashboard from a JSON file or a Grafana export.
 - **View templates** — Quickly jump to the templates library to import a pre-built dashboard.
+
+## Find and filter dashboards
+
+The Dashboards list page has a single query box that filters the list using a structured expression language (DSL). Build a query from keys, operators, values, and `AND` / `OR` connectors. The **Created by** and **Updated** dropdowns next to the box write their conditions into the same query.
+
+### Filter keys
+
+Reserved fields appear as **field** pills in the autocomplete list:
+
+| Key | Type | Operators | Example |
+| --- | --- | --- | --- |
+| `name` | string | `=` `!=` `CONTAINS` `NOT CONTAINS` `LIKE` `NOT LIKE` `ILIKE` `NOT ILIKE` `IN` `NOT IN` | `name CONTAINS 'prod'` |
+| `description` | string | Same as `name` | `description ILIKE '%latency%'` |
+| `created_by` | string | Same as `name` | `created_by = 'me@example.com'` |
+| `created_at` | timestamp | `=` `!=` `<` `<=` `>` `>=` `BETWEEN` `NOT BETWEEN` | `created_at >= '2026-07-01T00:00:00Z'` |
+| `updated_at` | timestamp | Same as `created_at` | `updated_at >= '2026-07-20T00:00:00Z'` |
+| `locked` | boolean | `=` `!=` | `locked = true` |
+
+Any key that is not a reserved field is treated as an organization **tag** key and appears as a **tag** pill. Tag keys use the string operators plus `EXISTS` and `NOT EXISTS`:
+
+```text
+env = 'prod' AND team = 'core'
+owner EXISTS
+```
+
+Value formats:
+
+- String values are quoted: `name = 'API latency'`.
+- `IN` / `NOT IN` take a bracketed list: `created_by IN ['a@example.com', 'b@example.com']`.
+- Boolean values are unquoted: `locked = true`.
+- Timestamps use RFC3339: `updated_at >= '2026-07-20T00:00:00Z'`.
+- `EXISTS` / `NOT EXISTS` take no value.
+
+### Autocomplete
+
+Click into the query box, or start typing, to open the suggestions popup. It guides you one stage at a time: **keys → operators → values → connectors** (`AND` / `OR`). Use ↑/↓ to move through suggestions, Enter to apply the highlighted one, and Esc to dismiss the popup. Typed expressions are color-highlighted so keys, operators, `AND` / `OR` keywords, quoted strings, and bare values are easy to tell apart.
+
+### Draft-and-run model
+
+The query box uses a draft model: typing does not run a search. Apply the filter with **Cmd/Ctrl + Enter** or the **Run** button. A blue dot appears on **Run** whenever there are typed changes that have not been applied yet.
+
+### Created by and Updated dropdowns
+
+- **Created by** is a multi-select dropdown with a checkbox per creator, inline search, and a clear-all control. It writes a `created_by` condition into the query and runs the filter when the dropdown closes, not on each individual pick.
+- **Updated** is a single-select dropdown. Choosing a time window adds the matching `updated_at` condition to the query and applies it immediately.
+
+Editing a simple top-level condition in the query box is reflected back into these dropdowns.
+
+### List behavior
+
+- The list header (title and filter bar) stays pinned to the top of the viewport as the list scrolls.
+- Deleting the last dashboard on a page other than the first steps back to the previous page instead of showing an empty result.
+
+<Admonition type="warning" title="Saved and shared list URLs">
+The old list URL parameters (`search`, `createdBy`, `updated`, and `tags`) no longer apply filters. Bookmarks or shared links that use them open the list unfiltered. Re-create the filter in the query box and re-share the URL.
+</Admonition>
 
 ## Prerequisites
 
@@ -131,6 +187,27 @@ Note the following about panels:
 2. Find the dashboard in which you created the panel you wish to update, and then select the pencil icon located at the top right corner of your panel.
 3. Make the changes.
 4. When you've finished, select the **Save** button.
+
+## Panel editor behavior
+
+The full-page panel editor keeps your in-progress work as you move around:
+
+- **Switching to view mode keeps unsaved changes.** All pending configuration (thresholds, units, table and list columns, legend, axes, and formatting) carries into **Switch to View Mode** along with the query.
+- **Query edits survive a browser refresh.** In-progress builder edits are restored on reload. Configuration changes such as title, thresholds, and units are not currently retained across a hard refresh.
+- **The Save button reflects state.** **Save** is enabled when there are unsaved changes and disabled when there are none, including after a refresh or after switching from the View modal to the full editor.
+- **New queries do not auto-run.** Adding a query does not trigger a preview fetch. The preview runs after you select **Run Query**.
+- **Query-builder dropdowns render fully.** Group-by, order-by, having, filter, metric name, aggregator, and unit menus are no longer clipped by the resizable editor pane.
+- **A custom time range is preserved.** A time range picked in the editor's time picker is kept when you navigate back to the dashboard.
+- **Variables seed on direct load.** Opening the editor from a pasted link or a hard refresh seeds all variable values into the query preview.
+- **Visualization-type switches carry settings forward.** Changing the panel type (for example Time Series to Table) carries over axes soft min/max, log scale, time preference, stacking, fill spans, legend position and mode, and chart appearance instead of resetting them to defaults.
+- **Context links with a literal `%`** (for example `?search=95%`) open correctly.
+
+The **Switch to Edit Mode** button in a panel's View modal appears only when you have edit permission on an unlocked dashboard.
+
+## Arrange panels
+
+- After you save a panel, clone a panel, or add a section, the dashboard scrolls to reveal the new or affected item.
+- New panels are placed in an open grid position without overlapping tall panels that extend into the lower rows.
 
 ## Next Steps
 

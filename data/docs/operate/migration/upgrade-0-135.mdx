@@ -1,5 +1,5 @@
 ---
-date: 2026-07-24
+date: 2026-07-27
 title: Upgrade SigNoz to v0.135.0 with Dashboards V2 Schema
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
 description: SigNoz v0.135.0 rolls out the redesigned, Perses-compatible Dashboards V2. Existing dashboards migrate automatically; API scripts and Terraform need migration.
@@ -36,7 +36,11 @@ For the full release scope, see <a href="https://github.com/SigNoz/signoz/issues
 
 ### Step 1: Back up your data
 
-Dashboards live in the SigNoz Metastore (SQLite or Postgres) and are converted to the new schema during the rollout. Back up the Metastore before upgrading. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops (v0.131 requires a ClickHouse upgrade) before jumping to v0.135.0.
+Dashboards live in the SigNoz Metastore (SQLite or Postgres) and are converted to the new schema automatically when the server starts up. Back up the Metastore before upgrading. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops (v0.131 requires a ClickHouse upgrade) before jumping to v0.135.0.
+
+<Admonition type="warning" title="Dashboard names must be unique per organization">
+V2 enforces a unique dashboard name within each organization. Before upgrading, rename any dashboards that share a name in the same organization. A dashboard with a duplicate name may not migrate and is left in the legacy format.
+</Admonition>
 
 ### Step 2: Upgrade SigNoz
 
@@ -73,6 +77,12 @@ helm -n signoz upgrade signoz signoz/signoz
 2. SigNoz reports v0.135.0 under **Settings**.
 3. Open **Dashboards**: the redesigned list page loads, and your existing dashboards render with data.
 
+## What changes after migration
+
+- **Automatic conversion.** Existing dashboards, inbuilt dashboards, and templates convert to the V2 schema when the server starts. SVG dashboard icons stored as percent-encoded inline data URIs are preserved during conversion.
+- **Dashboards that can't be converted stay on the legacy format.** A dashboard that fails conversion (for example, one with a duplicate name in its organization) is logged and left in the V1 format instead of blocking startup. These dashboards keep working. Resolve the underlying issue, such as a duplicate name, so the dashboard can migrate.
+- **Saved list-filter URLs no longer apply filters.** The Dashboards list page now filters with a query expression. The old URL parameters (`search`, `createdBy`, `updated`, and `tags`) no longer apply filters, so bookmarks or shared links using them open the list unfiltered. See [Find and filter dashboards](https://signoz.io/docs/userguide/manage-dashboards/#find-and-filter-dashboards).
+
 ## Migrate API scripts to the V2 Dashboards APIs
 
 Existing scripts keep working during the rollout: the V2 Create and Update APIs accept V1 payloads, and the V2 list API marks not-yet-migrated dashboards as `legacy` instead of erroring. This backward compatibility will be deprecated in an upcoming release (<a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>), so move your scripts to the V2 endpoints:
@@ -86,6 +96,8 @@ Existing scripts keep working during the rollout: the V2 Create and Update APIs 
 | `DELETE /api/v1/dashboards/{id}` | `DELETE /api/v2/dashboards/{id}` |
 
 The V2 APIs also add a `PATCH` endpoint for partial updates, split lock and unlock endpoints, a pin-aware per-user listing, and pagination, sorting, and a query DSL on the list endpoint. The payload changes shape too, from flat JSON to a Perses `spec` tree. See the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/) for the full endpoint list, schema, and `PATCH` examples.
+
+The V2 schema is strictly validated. Before migrating scripts, note that empty enum strings are rejected (omit the field for the default), `links` is required and non-nullable (send `[]` when there are none), and a dynamic variable's `signal` must be one of `traces`, `logs`, `metrics`, or `all`. See [Strict validation on the V2 spec](https://signoz.io/docs/dashboards/dashboards-v2-api/#if-you-have-scripts-that-use-the-dashboards-api-directly) in the API guide for the complete list.
 
 ## Migrate Terraform-managed dashboards
 

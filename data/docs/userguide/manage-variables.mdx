@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-27
 title: Manage Variables in SigNoz
 description: Learn how to create and use dashboard variables in SigNoz to build dynamic, reusable dashboards across services and infrastructure.
 doc_type: howto
@@ -41,6 +41,18 @@ To add a variable to a dashboard, follow the steps below:
     6. _(Optional)_ **Include an option for ALL values**: Show the `ALL` option which includes all options from the multi-select dropdown
 6. When you've finished, select the **Save** button.
 
+## Multi-select variable behavior
+
+When a variable has **Enable multiple values to be checked** turned on, it appears in the variables bar as a multi-select dropdown:
+
+- **Selections commit when the dropdown closes.** Dependent panels and variables update once, after you close the dropdown, instead of cascading on every individual checkbox click.
+- **Only button.** Hovering an option row shows an **Only** button. Selecting it keeps that single value and deselects all others.
+- **Clearing resets to the default.** Clearing the selection with the × button falls back to the variable's configured default instead of leaving it empty.
+- **Overflow chip.** When more than one value is selected, the variable pill shows the first selected value plus a **+N** chip for the remaining selections.
+- **Stable defaults.** Re-running the variable's query no longer clears the default when it returns the same option set. The default is reset only when the option set changes and no longer contains the current default.
+
+Variable selections are preserved when you move between the dashboard and the panel editor, including across a hard refresh of the editor.
+
 ## Supported Variable types:
 
 SigNoz supports four ways of creating variables: dynamic, query, custom, and textbox.
@@ -51,7 +63,7 @@ Dynamic variables automatically retrieve attribute values without requiring manu
 
 1. Field - either an OTEL telemetry intrinsic field (like span name or log severity_text) or a custom <a href="https://opentelemetry.io/docs/concepts/glossary/#attribute" target="_blank" rel="noopener noreferrer nofollow">attribute</a> from logs, traces, or metrics
 
-2. Source: Pick where to search - it checks logs, traces, and metrics by default, but choosing just one source makes it faster. Some of the fields have identical values across signals (e.g., k8s.pod.name is the same whether from logs or traces), so one source is sufficient. Use 'All sources' only when the same field contains distinct values across different signal types.
+2. Signal: Pick where to search. The options are **All**, **Logs**, **Traces**, and **Metrics**. **All** (the default) queries traces, logs, and metrics at the same time; choosing a single signal makes the lookup faster. Some fields have identical values across signals (for example, `k8s.pod.name` is the same whether it comes from logs or traces), so a single signal is sufficient. Use **All** only when the same field contains distinct values across different signal types.
 
     ![Dynamic Variable](/img/docs/dashboards/variables/dynamic-variable.png)
 

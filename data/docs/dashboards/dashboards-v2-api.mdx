@@ -1,24 +1,33 @@
 ---
-date: 2026-07-10
+date: 2026-07-27
 title: "Dashboards V2 API - Schema, Endpoints & PATCH Updates"
-description: "Migrate to the redesigned SigNoz Dashboards experience and learn the V2 Dashboards API: schema, endpoints, pagination, the query DSL, and partial PATCH updates."
+description: "Use the SigNoz V2 Dashboards API: schema, endpoints, pagination, the query DSL, partial PATCH updates, and the validation rules for API and dashboard-as-code clients."
 doc_type: howto
 ---
 
-SigNoz is rolling out a redesigned **Dashboards** experience. Your existing dashboards, queries, variables, and panels continue to work exactly as they do now. This release keeps all of that intact and adds improvements that make dashboards easier to find, organize, and manage at scale.
+SigNoz **Dashboards** run on a redesigned, Perses-compatible schema. Your existing dashboards, queries, variables, and panels are migrated to it automatically. The new schema makes dashboards easier to find, organize, and manage at scale.
 
 - **Dashboards get easier to find and manage:** organize with key-value tags, personal pins, shared saved views, and quick cloning, plus a defined JSON/Terraform schema that enables direct editing, partial (token-efficient) updates, and reliable AI-driven changes.
 - **Panels get more expressive:** new styling controls (fill mode, line interpolation, disconnect lines, show points) and PNG/SVG export for sharing in reports and incident write-ups.
 
 ## What you need to know
 
-- Dashboards will be migrated in the week of 27th July.
-- Nothing breaks on the platform. Your existing dashboards keep working, and this rolls out alongside them.
-- If you don't use Terraform or don't have any scripts directly working with the SigNoz Dashboards APIs, no action is required from you today.
+- Existing dashboards are migrated to the V2 schema automatically when SigNoz starts up.
+- Dashboards used through the UI keep working with no action required.
+- If you have Terraform-managed dashboards or scripts calling the Dashboards APIs directly, migrate them to the V2 schema and endpoints. See the [v0.135.0 upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-135/) for the migration path.
 
 ### If you have scripts that use the Dashboards API directly
 
 We suggest you migrate those scripts to use the new V2 Dashboards APIs. You can follow the examples in this guide below.
+
+<Admonition type="warning" title="Strict validation on the V2 spec">
+The V2 schema is strictly validated. Update API and dashboard-as-code (Terraform) clients for these rules:
+
+- **Empty enum strings are rejected.** Sending an explicit `""` for any enum field returns `400 Bad Request` with error code `dashboard_invalid_input`. Affected fields: `timePreference`, `legendPosition`, `legendMode`, `thresholdFormat`, `comparisonOperator`, `lineInterpolation`, `lineStyle`, `fillMode`, `precisionOption`, and `listVariableSort`. Omit the field to use its default instead of sending `""`.
+- **`links` is required and non-nullable.** Both dashboard-level and panel-level specs must include `links`. Send `"links": []` when there are none. Omitting the field or sending `null` is rejected.
+- **Dynamic-variable `signal` is required.** It accepts only `traces`, `logs`, `metrics`, or `all`. Clients that previously omitted it receive the `all` default on migration, but must send an explicit value going forward.
+- **List-variable `sort` always returns `none`.** When a list variable's sort is not set at creation, the response returns `"sort": "none"` explicitly instead of omitting the field.
+</Admonition>
 
 ### If you have dashboards synced via Terraform
 
@@ -319,7 +328,7 @@ curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
                     "kind": "signoz/DynamicVariable",
                     "spec": {
                         "name": "http.route",
-                        "signal": ""
+                        "signal": "all"
                     }
                 }
             }
