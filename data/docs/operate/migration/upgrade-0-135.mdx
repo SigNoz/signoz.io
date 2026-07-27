@@ -2,11 +2,15 @@
 date: 2026-07-24
 title: Upgrade SigNoz to v0.135.0 with Dashboards V2 Schema
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
-description: SigNoz v0.135.0 rolls out the redesigned, Perses-compatible Dashboards V2. Existing dashboards migrate automatically; API scripts and Terraform need migration.
+description: SigNoz v0.135.0 rolls out the redesigned, Perses-compatible Dashboards V2. Existing dashboards migrate automatically; the V1 dashboard APIs are retired, so API scripts and Terraform need migration.
 doc_type: howto
 ---
 
-SigNoz v0.135.0 rolls out the redesigned [Dashboards](https://signoz.io/docs/dashboards/dashboards-v2-api/) experience and the new Dashboards V2 APIs. Your existing dashboards, queries, variables, and panels are migrated to the new Perses-compatible schema automatically. You only need to act if you have scripts calling the Dashboards API directly, or manage dashboards with the Terraform provider.
+SigNoz v0.135.0 rolls out the redesigned [Dashboards](https://signoz.io/docs/dashboards/dashboards-v2-api/) experience and the new Dashboards V2 APIs. Your existing dashboards, queries, variables, and panels are migrated to the new Perses-compatible schema automatically, so no action is needed if you only use dashboards through the UI.
+
+<Admonition type="warning" title="The V1 dashboard endpoints stop responding in v0.135.0">
+`/api/v1/dashboards` and its sub-routes return `501 Not Implemented` after this upgrade. If you have scripts calling the Dashboards API directly, or manage dashboards with the Terraform provider, [migrate them](#migrate-api-scripts-to-the-v2-dashboards-apis) before you upgrade.
+</Admonition>
 
 <Admonition type="info" title="What changed in v0.135" defaultCollapsed="true">
 Dashboards move to a strictly validated schema based on the <a href="https://perses.dev/" target="_blank" rel="noopener noreferrer nofollow">Perses</a> dashboard-as-code standard.
@@ -15,11 +19,11 @@ Key changes:
 
 - **Schema & APIs**: V2 CRUD APIs with Perses validation, `PATCH` for granular panel and metadata updates, and list APIs with pagination, sorting, and a query DSL
 - **Editing**: optimistic updates; panels and query changes save without "Stage & Run"
-- **Variables**: inline creation with `ALL` support and paginated options
-- **List page & panels**: tags, pins, saved views, and sorting; panel copy, drilldown, CSV/PNG/SVG export, and alerts from a panel
+- **Variables**: inline creation, `ALL` support, orchestrated refetch with correct load ordering, and `$variable` suggestions in queries
+- **List page & panels**: tags, pins, saved views, and sorting; panel and section cloning, drilldown, CSV/PNG/SVG export, and alerts from a panel
 - **Performance**: only on-screen panels refetch on time-range change and auto-refresh
 - **Ecosystem**: public dashboards on the V2 API, MCP server support, and a typed schema for GitOps and Terraform
-- **Migration**: existing dashboards, inbuilt dashboards, and templates migrate to the new schema automatically
+- **Migration**: existing dashboards and inbuilt dashboards are converted to the new schema in place during the upgrade; the V1 dashboard APIs are retired
 
 For the full release scope, see <a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>; for the schema and API details, see the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/).
 </Admonition>
@@ -28,8 +32,8 @@ For the full release scope, see <a href="https://github.com/SigNoz/signoz/issues
 
 | If you | Then |
 | --- | --- |
-| Use dashboards only through the UI | Nothing: dashboards are migrated automatically |
-| Have scripts calling `/api/v1/dashboards` | [Migrate them to the V2 APIs](#migrate-api-scripts-to-the-v2-dashboards-apis) |
+| Use dashboards only through the UI | Nothing: dashboards are migrated automatically. Check afterwards for any dashboard marked `legacy` |
+| Have scripts calling `/api/v1/dashboards` | [Migrate them to the V2 APIs](#migrate-api-scripts-to-the-v2-dashboards-apis) **before upgrading** — the V1 endpoints stop responding |
 | Manage dashboards with the Terraform provider | [Upgrade the provider and migrate resources](#migrate-terraform-managed-dashboards) |
 
 ## Upgrade self-hosted SigNoz
@@ -72,18 +76,24 @@ helm -n signoz upgrade signoz signoz/signoz
 1. Pods and containers are healthy (`kubectl get pods -n signoz`, `docker compose ps`, or `systemctl status 'signoz-*'`).
 2. SigNoz reports v0.135.0 under **Settings**.
 3. Open **Dashboards**: the redesigned list page loads, and your existing dashboards render with data.
+4. Scan the list for rows marked **Legacy**. The conversion runs per dashboard, and a dashboard whose stored data cannot be converted is left on the old schema and flagged rather than failing the upgrade. Legacy dashboards are listed but cannot be opened in the new experience — open the row's dialog to copy the dashboard ID and share it with support.
 
 ## Migrate API scripts to the V2 Dashboards APIs
 
-Existing scripts keep working during the rollout: the V2 Create and Update APIs accept V1 payloads, and the V2 list API marks not-yet-migrated dashboards as `legacy` instead of erroring. This backward compatibility will be deprecated in an upcoming release (<a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>), so move your scripts to the V2 endpoints:
+The V1 dashboard endpoints are retired in v0.135.0. They respond with `501 Not Implemented`, the error code `dashboard_deprecated`, and a message naming the V2 replacement. Move your scripts to the V2 endpoints before you upgrade:
 
-| V1 endpoint | V2 endpoint |
+| V1 endpoint (now `501`) | V2 endpoint |
 | --- | --- |
 | `GET /api/v1/dashboards` | `GET /api/v2/dashboards` |
 | `POST /api/v1/dashboards` | `POST /api/v2/dashboards` |
 | `GET /api/v1/dashboards/{id}` | `GET /api/v2/dashboards/{id}` |
 | `PUT /api/v1/dashboards/{id}` | `PUT /api/v2/dashboards/{id}` |
 | `DELETE /api/v1/dashboards/{id}` | `DELETE /api/v2/dashboards/{id}` |
+| `PUT /api/v1/dashboards/{id}/lock` | `PUT /api/v2/dashboards/{id}/lock`, `DELETE /api/v2/dashboards/{id}/lock` |
+
+The public sharing routes (`/api/v1/dashboards/{id}/public` and `/api/v1/public/dashboards/{id}`) are not affected and keep working.
+
+One compatibility shim remains, on create only: `POST /api/v2/dashboards` still accepts a V1 payload — a body carrying `version` and no `schemaVersion` — and converts it to V2, so import flows and existing create automation keep working during the rollout window. This shim will be removed in a few releases (<a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>). `PUT /api/v2/dashboards/{id}` does **not** accept V1 payloads; it requires `schemaVersion: "v6"`.
 
 The V2 APIs also add a `PATCH` endpoint for partial updates, split lock and unlock endpoints, a pin-aware per-user listing, and pagination, sorting, and a query DSL on the list endpoint. The payload changes shape too, from flat JSON to a Perses `spec` tree. See the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/) for the full endpoint list, schema, and `PATCH` examples.
 
