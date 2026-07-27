@@ -1,5 +1,5 @@
 ---
-date: 2026-07-10
+date: 2026-07-27
 title: "Dashboards V2 API - Schema, Endpoints & PATCH Updates"
 description: "Migrate to the redesigned SigNoz Dashboards experience and learn the V2 Dashboards API: schema, endpoints, pagination, the query DSL, and partial PATCH updates."
 doc_type: howto
@@ -57,6 +57,10 @@ The full schema can be seen in the payload of the <a href="https://signoz.io/api
     }
 }
 ```
+
+<Admonition type="info">
+The spec has no `datasources` field. Any payload that still sets `datasources` has it ignored, so remove it from scripts, Terraform, and MCP integrations that build the dashboard spec. When a panel has the wrong number of queries, the validation error now reports the actual count it found, which makes API-level debugging easier.
+</Admonition>
 
 ### Dashboard APIs
 
