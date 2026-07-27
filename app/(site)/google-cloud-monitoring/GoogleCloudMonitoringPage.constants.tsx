@@ -1,4 +1,5 @@
-import { MonitorCog, Telescope, Microscope, BadgeDollarSign } from 'lucide-react'
+import { MonitorCog, Telescope, Microscope } from 'lucide-react'
+import BanknoteCheckIcon from '@/public/img/icons/banknote-check.svg'
 import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 import section1Url from '@/public/img/google-cloud-monitoring/section-1.svg?url'
 import section2Url from '@/public/img/google-cloud-monitoring/section-2.svg?url'
@@ -65,7 +66,7 @@ export const SCRAPE_GCP_PANEL = {
       Use the OTel Collector&apos;s googlecloudmonitoring receiver to scrape metrics from any GCP
       service - Cloud SQL, App Engine, BigQuery, Cloud Storage, Pub/Sub - and send them to SigNoz.
       Select exactly which metrics to collect. No proprietary agents, no vendor lock-in, your config
-      stays yours
+      stays yours.
     </p>
   ),
   image: section2Url,
@@ -108,7 +109,7 @@ export const NOZ_AI_PANEL = {
 export const RESOLVE_PERFORMANCE_SHOWCASE = {
   title: 'Resolve Google Cloud Performance Issues Faster',
   description:
-    'Jump from a Cloud Run latency spike to the failing trace to the Cloud SQL query that caused it  without switching tools. Overlay GCP deployment events on your metrics and catch regressions the moment they ship.',
+    'Jump from a Cloud Run latency spike to the failing trace to the Cloud SQL query that caused it, without switching tools. Overlay GCP deployment events on your metrics and catch regressions the moment they ship.',
   image: section4Url,
   imageAlt: 'Resolve Google Cloud performance issues with correlated signals',
   button: {
@@ -130,13 +131,13 @@ export const GCP_ICON_GRID_CARDS: IconTitleDescriptionCardData[] = [
     icon: <MonitorCog size={20} />,
     title: 'One config. Every GCP service logs automatically. Forever.',
     description:
-      "Traditional log shipping means installing an agent on every VM, repeating for every new instance. With GCP's Log Router, configure routing once. Logs  Engine, App Engine, Cloud Functions, and every GCP service flows  automatically into SigNoz; all searchable and correlated. No per-VM setup.",
+      "Traditional log shipping means installing an agent on every VM, repeating for every new instance. With GCP's Log Router, configure routing once. Logs from Compute Engine, App Engine, Cloud Functions, and every GCP service flow automatically into SigNoz; all searchable and correlated. No per-VM setup.",
   },
   {
     icon: <Telescope size={20} />,
     title: 'Built on OpenTelemetry - Your GCP Instrumentation Stays Yours',
     description:
-      'SigNoz is built on OpenTelemetry,  not just compatible with it. Every Cloud Run trace, GKE metric, and Compute Engine log uses standard OTel attributes, correlated across signals automatically, no custom mapping needed. No proprietary agents, no re-instrumentation, no premium for using open standards.',
+      'SigNoz is built on OpenTelemetry, not just compatible with it. Every Cloud Run trace, GKE metric, and Compute Engine log uses standard OTel attributes, correlated across signals automatically, no custom mapping needed. No proprietary agents, no re-instrumentation, no premium for using open standards.',
   },
   {
     icon: <Microscope size={20} />,
@@ -153,7 +154,7 @@ export const GCP_ICON_GRID_CARDS: IconTitleDescriptionCardData[] = [
     ),
   },
   {
-    icon: <BadgeDollarSign size={20} />,
+    icon: <BanknoteCheckIcon className="h-5 w-5" aria-hidden="true" />,
     title: 'Predictable Pricing for Google Cloud Observability',
     description:
       "GCP already charges you for Cloud Monitoring metrics queries, log ingestion, and log storage. Your observability tool shouldn't add another unpredictable bill on top. SigNoz charges $0.30/GB for logs and traces. $0.10 per million metric samples. No per-host fees. No per-metric charges. No surprise at month-end.",
