@@ -50,7 +50,7 @@ const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
         <div className="m-0 w-full text-left text-sm text-signoz_vanilla-400">{description}</div>
       )}
 
-      {button && <FeatureButton button={button} className="mt-2" />}
+      {button && <FeatureButton button={button} className="mt-2 flex w-fit items-center gap-2" />}
     </div>
   )
 }
