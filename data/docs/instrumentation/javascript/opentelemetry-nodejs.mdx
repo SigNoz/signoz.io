@@ -1,5 +1,5 @@
 ---
-date: 2026-07-18
+date: 2026-07-27
 title: Node.js OpenTelemetry Instrumentation Guide
 description: Learn how to instrument your Node.js or NestJS app with OpenTelemetry. Use auto or manual instrumentation to send traces to SigNoz for faster debugging.
 doc_type: howto
@@ -430,7 +430,7 @@ process.on('SIGTERM', () => {
 </TabItem>
 <TabItem value="typescript" label="TypeScript">
 
-```ts:tracing.ts
+```ts:src/tracing.ts
 import process from 'process';
 import * as opentelemetry from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
@@ -482,18 +482,44 @@ node -r ./tracing.js app.js
 </TabItem>
 <TabItem value="typescript" label="TypeScript">
 
-Import the tracing file at the top of your entry point:
+Import the tracing file at the top of your entry point, before any other import:
 
 ```typescript
-// index.ts or main.ts
+// src/index.ts
 import './tracing';
 ```
 
-Then run:
+Then run your app with <a href="https://tsx.is/" target="_blank" rel="noopener noreferrer nofollow">tsx</a>, which executes TypeScript directly and needs no build step or `tsconfig.json`:
 
 ```bash
-npx ts-node src/index.ts
+npm install --save-dev tsx
+npx tsx src/index.ts
 ```
+
+<Admonition type="info">
+Avoid `ts-node` here. On current TypeScript releases it fails before your app starts with `TypeError: Cannot read properties of undefined (reading 'fileExists')`.
+</Admonition>
+
+If you would rather compile ahead of time, add a `tsconfig.json` with an `outDir` and run the build output:
+
+```json:tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "outDir": "dist",
+    "rootDir": "src",
+    "esModuleInterop": true
+  },
+  "include": ["src"]
+}
+```
+
+```bash
+npx tsc && node dist/index.js
+```
+
+Without a `tsconfig.json`, `npx tsc` emits no files and `node dist/index.js` fails with `MODULE_NOT_FOUND`.
 
 </TabItem>
 </Tabs>
