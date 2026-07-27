@@ -1,0 +1,84 @@
+---
+date: 2026-07-27
+title: Restrict SSO Redirect Origins with allowed_origins
+description: Configure global.allowed_origins in self-hosted SigNoz to restrict SSO login and callback redirects and close open-redirect attacks.
+doc_type: howto
+tags: [Self-Host]
+---
+
+`global.allowed_origins` restricts which origins are valid redirect targets during single sign-on (SSO) login and OAuth/SAML callbacks. Setting it closes an open-redirect and token-exfiltration path where a crafted redirect or forged SAML `RelayState` could send an authenticated user (and their session token) to an attacker-controlled origin.
+
+The field is opt-in and off by default. When `allowed_origins` is empty, SigNoz accepts all redirect origins, so existing deployments behave exactly as before until you configure it.
+
+<Admonition type="info">
+This field is available from SigNoz v0.134.0 or later, and applies to self-hosted deployments running SSO (OAuth or SAML). SigNoz Cloud is managed by SigNoz and requires no action.
+</Admonition>
+
+## Configuration
+
+`allowed_origins` is a list of permitted origins. Each entry must be `scheme://host[:port]` with no path component.
+
+<Admonition type="warning">
+Include the origin your SigNoz UI is served on. If it is missing from the list, SSO login will break for your own users.
+</Admonition>
+
+Configure it in your SigNoz config file under the `global` section:
+
+```yaml
+global:
+  allowed_origins:
+    - https://signoz.example.com
+```
+
+Or set it through the environment variable. Separate multiple origins with commas:
+
+```bash
+SIGNOZ_GLOBAL_ALLOWED__ORIGINS=https://signoz.example.com,https://signoz-admin.example.com
+```
+
+**Verify these values:**
+
+- `https://signoz.example.com`: The origin(s) your SigNoz UI is served on, including any reverse-proxy or alternate hostnames users reach it through. Use the exact scheme and port your users hit (for example `https://signoz.example.com:8080`).
+
+Restart SigNoz after changing the configuration.
+
+### Format rules
+
+- Use `scheme://host[:port]` only. `https://signoz.example.com` and `https://signoz.example.com:8080` are valid.
+- Do not include a path. `https://signoz.example.com/login` is rejected at startup with an `invalid_global_config` error.
+- Origins are matched on scheme and host (and port when present). `http` and `https`, or two different ports, are distinct origins.
+
+## How validation works
+
+When `allowed_origins` is set, SigNoz validates the redirect origin at two points:
+
+- **Login initiation.** The `ref` redirect parameter is checked before any OAuth/SAML URL is minted. A disallowed origin fails immediately with HTTP `400` and error code `origin_not_allowed`.
+- **Callback.** The state URL returned from the identity provider is re-validated. A disallowed origin is rejected with HTTP `403` and error code `origin_not_allowed`, which closes the forged SAML `RelayState` path.
+
+## Validate
+
+1. Add your UI origin to `allowed_origins` and restart SigNoz.
+2. Sign in through your identity provider from an incognito window. Login should complete and redirect back to your SigNoz UI as before.
+3. Confirm SigNoz started without an `invalid_global_config` error in the logs (this indicates a malformed entry, such as one containing a path).
+
+## Troubleshooting
+
+### Login fails with 400 `origin_not_allowed`
+
+The `ref` origin the login request is trying to redirect to is not in `allowed_origins`. Add the exact origin your users reach the UI on (matching scheme, host, and port) and restart SigNoz.
+
+### Callback fails with 403 `origin_not_allowed`
+
+The state URL returned during the OAuth/SAML callback resolved to an origin that is not allowed. If this happens for a legitimate origin, add it to `allowed_origins`. If you did not initiate the login, this is the protection working as intended against a forged redirect.
+
+### SigNoz fails to start with `invalid_global_config`
+
+An `allowed_origins` entry is malformed. Each entry must be `scheme://host[:port]` with no path. Remove any trailing path (for example change `https://signoz.example.com/` variants that include a path) and restart.
+
+## Next steps
+
+- [Single Sign-on (SSO) Overview](https://signoz.io/docs/manage/administrator-guide/sso/overview/)
+- [Serving SigNoz on an External URL](https://signoz.io/docs/manage/administrator-guide/configuration/serving-on-external-url/)
+- [JWT Secret Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/)
+</content>
+</invoke>
