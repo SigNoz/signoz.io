@@ -32,9 +32,8 @@ const Header: React.FC = () => {
       }
       description={
         <>
-          End-to-end monitoring for every GCP service - Cloud Run, GKE, Compute Engine, Cloud SQL,
-          Pub/Sub, Cloud Storage, App Engine, Cloud Functions, and more - in a single OTel-native
-          backend.
+          Monitor every Google Cloud service - Cloud Run, GKE, Compute Engine, Cloud SQL, Pub/Sub,
+          Cloud Storage, App Engine, Cloud Functions, and more - in a single OTel-native backend.
           <br className="hidden md:block" /> Correlated metrics, logs, and traces. No per-metric
           charges. No proprietary agents.
         </>

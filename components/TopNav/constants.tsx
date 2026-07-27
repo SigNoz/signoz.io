@@ -207,7 +207,7 @@ export const useCasesDropdownItems: ProductItem[] = [
     key: 'google-cloud-monitoring',
     url: '/google-cloud-monitoring/',
     icon: <CloudCog className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
-    description: 'OTel-native monitoring for every GCP service',
+    description: 'End-to-end monitoring for every GCP service',
     name: 'Google Cloud Monitoring',
     order: 8,
   },
