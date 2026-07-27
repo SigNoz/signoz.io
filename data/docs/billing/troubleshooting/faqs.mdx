@@ -1,0 +1,90 @@
+---
+date: 2026-07-12
+title: Billing FAQs - Ingestion, Retention, Overages, and Plans
+description: Answers to common SigNoz billing questions about what counts as ingestion, how retention affects cost, overages, and more.
+doc_type: reference
+tags: [SigNoz Cloud]
+---
+
+Common questions about SigNoz Cloud billing. For exact rates and plan details, see the [pricing page](https://signoz.io/pricing/).
+
+### Q. How does SigNoz pricing work?
+
+SigNoz Cloud is usage-based. SigNoz bills you for the telemetry you ingest: logs and traces by volume (per GB), and metrics by sample count (per million samples). There are no per-seat, per-host, or custom-metric charges. See [How you're charged](https://signoz.io/docs/billing/how-you-are-charged/).
+
+### Q. Do I pay per user or per host?
+
+No. Teammates and monitored hosts are unlimited on the Teams plan and don't affect your bill. You only pay for ingested telemetry.
+
+### Q. What counts as "ingestion"?
+
+For logs and traces, it's the volume of data ingested, measured in GB. For metrics, it's the number of samples, where a sample is each data point for each unique time series at each scrape. More unique series (cardinality) and more frequent scrapes both increase sample count.
+
+### Q. Does retention affect my cost?
+
+Yes. Longer retention costs more because your data is stored for longer, so a shorter retention period lowers your bill. Each signal has its own retention (logs/traces: 15, 30, 90, 180 days, or 1 year, minimum 15 days; metrics: 1, 3, 6, or 13 months, minimum 1 month). Because of those minimums, reducing retention only saves money down to 15 days (logs/traces) or 1 month (metrics), not below. See [retention](https://signoz.io/docs/billing/how-you-are-charged/#retention).
+
+### Q. How do I change my retention period?
+
+Contact the SigNoz team through in-product chat or email with the retention you want for each signal. Changes apply only to newly ingested data; existing data keeps its earlier retention. Once data passes its retention period, SigNoz deletes it permanently, and increasing retention later doesn't restore it.
+
+### Q. What happens if I exceed my included usage?
+
+On the Teams plan, SigNoz charges usage beyond the included amount at standard per-signal rates as overage. Your bill scales predictably with ingestion, and you never pay for capacity you don't use. To catch overages before they grow, set [cost alerts](https://signoz.io/docs/cost-meter/alerts/) or [limits on your ingestion keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/#add-limits-to-a-key).
+
+### Q. What happens when my trial ends?
+
+If you don't add a payment method before your SigNoz Cloud trial ends, SigNoz deletes your deployment after a 7-day grace period, with email reminders before deletion. To keep your deployment, add a credit card in the Billing section of your account before the trial expires or during the grace period. See the [general FAQs](https://signoz.io/docs/faqs/general/) for details on trial accounts.
+
+### Q. Where do I add a payment method?
+
+In the **Billing** section of your SigNoz Cloud account, where you can also see your current usage.
+
+### Q. How do I cancel my subscription?
+
+Go to **Settings → Billing**, select **Cancel subscription**, and confirm. You can also reach out through the in-product chatbox. See the [general FAQs](https://signoz.io/docs/faqs/general/) for the full flow.
+
+### Q. How can I monitor my spend before the invoice?
+
+Use [Cost Meter](https://signoz.io/docs/cost-meter/overview/) for real-time, hourly visibility into ingestion and cost by signal. Set [cost alerts](https://signoz.io/docs/cost-meter/alerts/) to be notified before you cross a budget threshold.
+
+### Q. How do I reduce my bill?
+
+Send less low-value data and use shorter retention. In practice that means [dropping noisy logs](https://signoz.io/docs/logs-management/guides/drop-logs/), [dropping spans](https://signoz.io/docs/traces-management/guides/drop-spans/), [sampling traces](https://signoz.io/docs/traces-management/guides/tail-sampling/), and [controlling metric cardinality](https://signoz.io/docs/metrics-management/reducing-costs/). Use [Cost Meter](https://signoz.io/docs/cost-meter/overview/) to find your biggest cost drivers first.
+
+### Q. Is the Community Edition free?
+
+Yes. The open-source, self-hosted Community Edition is free to use, with no ingestion bill. You provision and manage the infrastructure yourself. See the [Billing overview](https://signoz.io/docs/billing/overview/).
+
+### Q. Is there a discount for startups?
+
+Eligible early-stage companies can get a discount on the Teams plan through the SigNoz startup program. See the <a href="https://signoz.io/startups/" target="_blank" rel="noopener noreferrer nofollow">SigNoz for Startups</a> page for current eligibility and details.
+
+### Q. How is Enterprise different?
+
+Enterprise adds volume discounts, annual contracts, guided migration, and a choice of deployment: a dedicated environment on SigNoz Cloud, bring your own cloud, or self-hosted with a support contract. <a href="https://signoz.io/enterprise/" target="_blank" rel="noopener noreferrer nofollow">Contact the SigNoz team</a> to discuss.
+
+### Q. Can I pay through AWS Marketplace?
+
+Yes. You can subscribe to SigNoz Cloud through AWS Marketplace and have it billed through your AWS account. After subscribing on AWS Marketplace, connect your SigNoz Cloud account on the [AWS Marketplace activation page](https://signoz.io/aws/signup/) by entering your license key (found under Settings → Account Settings → License). See [Paying through AWS Marketplace](https://signoz.io/docs/billing/how-you-are-charged/#paying-through-aws-marketplace) for the full steps.
+
+### Q. Where can I see SigNoz's security certifications?
+
+SigNoz is SOC 2 Type II and HIPAA compliant. Find certifications and other security details on the <a href="https://trust.signoz.io/" target="_blank" rel="noopener noreferrer nofollow">SigNoz Trust Center</a>.
+
+### Q. What terms govern my use of SigNoz Cloud?
+
+The <a href="https://signoz.io/terms-of-service/" target="_blank" rel="noopener noreferrer nofollow">SigNoz Terms of Service</a> govern your use of SigNoz Cloud, including billing and payment.
+
+### Q. How is SigNoz licensed?
+
+The <a href="https://github.com/SigNoz/signoz" target="_blank" rel="noopener noreferrer nofollow">signoz/signoz</a> repository (and the published `signoz/signoz` image built from it) is dual-licensed, as defined in the root <a href="https://github.com/SigNoz/signoz/blob/main/LICENSE" target="_blank" rel="noopener noreferrer nofollow">LICENSE</a>:
+
+- Everything outside `ee/` and `cmd/enterprise/` is **MIT (Expat)**, which is free to use, modify, distribute, and sell.
+- Everything under `ee/` and `cmd/enterprise/` is governed by the **SigNoz Enterprise License** (<a href="https://github.com/SigNoz/signoz/blob/main/ee/LICENSE" target="_blank" rel="noopener noreferrer nofollow">ee/LICENSE</a>).
+
+## Get Help
+
+Still have questions? See the [general product FAQs](https://signoz.io/docs/faqs/), or reach out:
+
+<GetHelp />

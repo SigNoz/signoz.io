@@ -1,0 +1,124 @@
+---
+date: 2026-07-12
+title: How You're Charged in SigNoz Cloud - Usage-Based Pricing
+description: Understand SigNoz Cloud's usage-based pricing, including per-signal ingestion rates, retention, included usage, and how overages work.
+doc_type: explanation
+tags: [SigNoz Cloud]
+---
+
+## Overview
+
+SigNoz Cloud pricing is **usage-based**: SigNoz bills you for the telemetry you ingest, priced per signal. You pay nothing for the number of users, hosts, or custom metrics; your bill depends only on the data you send and how long you keep it.
+
+<Admonition type="info">
+This page explains how pricing works, with indicative rates. For exact, up-to-date pricing, the [pricing page](https://signoz.io/pricing/) is always the source of truth.
+</Admonition>
+
+## What You're Billed For
+
+Two things drive your bill:
+
+1. **How much telemetry you ingest**, measured per signal.
+2. **How long you retain it** (retention period). Longer retention costs more (see [Retention](#retention) below).
+
+| Signal | Billed by | Starting rate |
+|---|---|---|
+| **Logs** | Volume ingested (per GB) | from $0.30 / GB |
+| **Traces** | Volume ingested (per GB) | from $0.30 / GB |
+| **Metrics** | Number of samples ingested (per million) | from $0.10 / million samples |
+
+There are **no additional charges** for:
+
+- Number of users / teammates (seats)
+- Number of hosts monitored
+- Custom metrics or dashboards
+
+### What Counts as Ingested Volume (Logs and Traces)
+
+SigNoz bills logs and traces by the volume of data ingested, measured in GB. Volume is the size of the log records and spans you send, including their attributes, so records with more or larger attributes take up more volume. [Dropping unneeded logs](https://signoz.io/docs/logs-management/guides/drop-logs/) and [dropping spans](https://signoz.io/docs/traces-management/guides/drop-spans/), trimming attributes, and sampling traces all reduce ingested volume.
+
+### What Counts as a Metric Sample
+
+SigNoz bills metrics by sample count. A metric sample is a single data point for a single time series at a single point in time. The number of samples grows with **cardinality** (the number of unique time series) and **scrape frequency** (how often each series reports). This is why controlling cardinality is the main lever for metrics cost. See [Understanding Metrics Billing and Reducing Costs](https://signoz.io/docs/metrics-management/reducing-costs/).
+
+## Retention
+
+Each signal has its own retention period, and **longer retention costs more** because your data is stored for longer. Choosing a shorter retention period lowers your cost. The per-unit rate for each retention period is:
+
+<div className="flex flex-col gap-6 md:flex-row md:gap-8">
+
+<div className="md:flex-1">
+
+**Logs and traces** (per GB ingested):
+
+| Retention | Price |
+|---|---|
+| 15 days | $0.30 / GB |
+| 30 days | $0.40 / GB |
+| 90 days | $0.60 / GB |
+| 180 days | $0.80 / GB |
+| 1 year | $1.40 / GB |
+
+</div>
+
+<div className="md:flex-1">
+
+**Metrics** (per million samples):
+
+| Retention | Price |
+|---|---|
+| 1 month | $0.10 / million samples |
+| 3 months | $0.12 / million samples |
+| 6 months | $0.15 / million samples |
+| 13 months | $0.18 / million samples |
+
+</div>
+
+</div>
+
+The minimum retention is 15 days for logs and traces and 1 month for metrics. You can't set retention below these, so reducing retention only lowers cost down to those minimums, not beyond. Pick the shortest retention that still covers how far back you need to query, and use the [pricing calculator](https://signoz.io/pricing/#estimate-your-monthly-bill) to estimate your monthly bill.
+
+To change the retention period for your account, contact the SigNoz team through in-product chat or email. Retention changes apply only to newly ingested data; existing data keeps its earlier retention. Once data passes its retention period, SigNoz deletes it permanently.
+
+## Included Usage and Overages (Teams Plan)
+
+The Teams plan starts at a monthly base that **includes an amount of usage**. You only pay for usage beyond that included amount, charged at the standard [per-signal rates](#what-youre-billed-for).
+
+For example, at the base retention rate ($0.30/GB, $0.10/million samples), the Teams plan's included usage roughly covers **163 GB of logs/traces or 490 million metric samples**, and a mix of signals draws down against the same included amount. Longer retention uses up the included amount faster because the per-unit rate is higher. Beyond the included amount, you pay standard rates for the overage.
+
+In practice:
+
+- Small workloads may stay entirely within the included usage.
+- As you scale, your bill grows linearly with ingestion.
+- You never pay for capacity you don't use.
+
+## Paying Through AWS Marketplace
+
+If you'd rather pay for SigNoz Cloud through AWS, you can subscribe via AWS Marketplace and have SigNoz billed through your AWS account. This consolidates SigNoz into your existing AWS bill and can draw down on your AWS commitments.
+
+To set it up:
+
+1. Subscribe to SigNoz on AWS Marketplace. After subscribing, AWS sends you to the SigNoz [AWS Marketplace activation page](https://signoz.io/aws/signup/).
+2. Create a [SigNoz Cloud account](https://signoz.io/teams/) if you don't have one. If you already have an account you want to bill through AWS, skip to the next step.
+3. In your SigNoz account, go to **Settings → Account Settings → License** and copy your license key.
+4. Paste the license key into the activation form and select **Activate Subscription**. Your AWS Marketplace subscription is now connected to your SigNoz Cloud account, and billing runs through AWS.
+
+Need help with activation? Contact [cloud-support@signoz.io](mailto:cloud-support@signoz.io).
+
+## Monitoring Your Usage
+
+To see where your spend is going before the invoice arrives, use [Cost Meter](https://signoz.io/docs/cost-meter/overview/):
+
+- [Cost Meter Dashboard](https://signoz.io/docs/cost-meter/cost-meter-dashboard/): real-time ingestion and cost by signal, with hourly granularity.
+- [Meter Explorer](https://signoz.io/docs/cost-meter/meter-explorer/): break down usage by service, team, or attribute to find cost drivers.
+- [Cost alerts](https://signoz.io/docs/cost-meter/alerts/): get notified before you exceed a budget.
+
+## Next Steps
+
+- [Billing overview](https://signoz.io/docs/billing/overview/): compare Community, Teams, and Enterprise plans.
+- [Billing FAQs](https://signoz.io/docs/billing/troubleshooting/faqs/): common questions answered.
+- [Pricing calculator](https://signoz.io/pricing/#estimate-your-monthly-bill): estimate your monthly bill.
+
+## Get Help
+
+<GetHelp />
