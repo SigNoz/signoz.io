@@ -1,2 +1,4 @@
-export { default, CodeTab, CodeTabs } from './CodeBlock'
-export type { CodeBlockProps, CodeTabProps, CodeTabsProps } from './CodeBlock'
+export { default } from './code-block-mdx'
+export { CodeBlock } from './code-block'
+export { CodeTab, CodeTabs } from './code-tabs'
+export type { CodeBlockProps, CodeBlockMdxProps, CodeTabProps, CodeTabsProps } from './types'
