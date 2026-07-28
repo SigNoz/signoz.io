@@ -6,22 +6,7 @@ doc_type: explanation
 tags: [SigNoz Cloud, GCP]
 ---
 
-Step-by-step walkthrough for setting up the [GCP integration](https://signoz.io/docs/integrations/gcp/gcp-integration/) manually. Read the [Overview](https://signoz.io/docs/integrations/gcp/gcp-integration/) first to understand how telemetry flows and the costs, then review the four connection fields below before working through the steps in order.
-
-## The four connection fields
-
-When you connect a GCP account in SigNoz (step 2), you provide four values. They anchor the rest of the setup, so keep them handy: every guide in this section refers back to them.
-
-| Field | What it means | Where it's used later |
-| --- | --- | --- |
-| **Account Name** | A label you choose to uniquely identify this integration in SigNoz. GCP projects are globally unique and need not sit under an organization, so there is no automatic account ID as with AWS or Azure. Use your organization ID, billing account, or an environment name (for example, `production` or `my-org`). | Identifies the connected account in the SigNoz UI. It does not name any GCP resource. |
-| **Deployment Project ID** | The GCP project where you deploy the **OpenTelemetry Collector** (Cloud Run) and, for logs, the **Pub/Sub topic** and **push subscription**. | The project you build resources in during steps 3 and 5. When a monitored project differs from this one, you reference this project ID in fully-qualified resource names (for example, the Pub/Sub topic path). |
-| **Deployment Region** | The GCP region where the Cloud Run Collector runs. Selected from a dropdown; a single region. | The `--region` for the Cloud Run service in step 3. |
-| **Projects to Monitor** | The list of project IDs whose metrics and logs you want in SigNoz. It may include the Deployment Project ID and any number of other projects. | One `googlecloudmonitoring` receiver block per project (step 4) and one log sink per project (step 5). |
-
-<Admonition type="info">
-Throughout these guides, `<deployment-project-id>`, `<deployment-region>`, and `<monitored-project-id>` refer to the values you enter in these fields. Substitute your own values wherever you see them.
-</Admonition>
+Step-by-step walkthrough for setting up the [GCP integration](https://signoz.io/docs/integrations/gcp/gcp-integration/) manually. Read the [Overview](https://signoz.io/docs/integrations/gcp/gcp-integration/) first to understand how telemetry flows and the costs, then work through the steps below in order.
 
 <DocCardContainer>
 
@@ -57,12 +42,17 @@ Throughout these guides, `<deployment-project-id>`, `<deployment-region>`, and `
 
 </DocCardContainer>
 
-## Next: enable a service
+## Connection fields
 
-With the Collector running, configure the individual services you want to monitor. Each page lists the metrics to add to your Collector config and the log filter to route its logs.
+Step 2 asks for four values. Keep them handy, since later steps refer back to them.
 
-<Listicle name="gcp-services" />
+| Field | What it means |
+| --- | --- |
+| **Account Name** | A label to identify this integration in SigNoz, for example `production`. |
+| **Deployment Project ID** | The project where you deploy the Collector and, for logs, the Pub/Sub topic. |
+| **Deployment Region** | The region the Cloud Run Collector runs in. |
+| **Projects to Monitor** | The project IDs whose metrics and logs you want in SigNoz. |
 
-## Get Help
-
-<GetHelp />
+<Admonition type="info">
+Throughout these guides, `<deployment-project-id>`, `<deployment-region>`, and `<monitored-project-id>` refer to the values you enter here.
+</Admonition>

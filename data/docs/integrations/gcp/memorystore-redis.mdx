@@ -37,7 +37,7 @@ Until then, use the **Manual setup** tab.
 
 Before configuring this service, complete the shared GCP integration setup:
 
-- Your [GCP account is connected in SigNoz](https://signoz.io/docs/integrations/gcp/connect-gcp-account/), and the project running your Redis instances is in **Projects to Monitor**.
+- Your [GCP account is connected in SigNoz](https://signoz.io/docs/integrations/gcp/connect-gcp-account/), and the project running your Redis instances is in [**Projects to Monitor**](https://signoz.io/docs/integrations/gcp/manual-setup/#connection-fields).
 - The [OpenTelemetry Collector is deployed and running](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/).
 - The `signoz-integration` service account has `roles/monitoring.viewer` on the project that hosts the instances. See [Create a service account](https://signoz.io/docs/integrations/gcp/create-service-account/#step-3-grant-metrics-permission-on-each-monitored-project).
 - The **Cloud Monitoring API** is enabled in that project. For logs, the **Cloud Logging API**, the **Pub/Sub API**, and a working [log pipeline](https://signoz.io/docs/integrations/gcp/collect-logs/) are also required.
@@ -183,7 +183,10 @@ Routed by the sink filter you set in step 4. Memorystore emits audit and mainten
 
 </details>
 
+<details>
+<ToggleHeading>
 ## Troubleshooting
+</ToggleHeading>
 
 **A dashboard panel is empty.** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `config.yaml`, add what's missing, and repeat step 3.
 
@@ -192,6 +195,8 @@ Routed by the sink filter you set in step 4. Memorystore emits audit and mainten
 **Cache hit ratio looks wrong right after a restart.** The ratio is derived from counters that reset when the instance restarts. Check `server/uptime` before reading too much into a sudden change.
 
 **No Redis query logs.** This is expected. Memorystore does not export command or slow-log entries to Cloud Logging. Use the keyspace and cache metrics above, or instrument the application's Redis client to get per-command visibility.
+
+</details>
 
 ## Next steps
 

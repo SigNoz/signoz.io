@@ -36,21 +36,21 @@ Create the **Pub/Sub topic and subscription in your `<deployment-project-id>`**,
 In your **deployment project**, create one topic that all sinks publish to.
 
 <Tabs>
-<TabItem value="cli" label="gcloud CLI" default>
-
-```bash
-gcloud pubsub topics create signoz-integration-logs \
-  --project=<deployment-project-id>
-```
-
-</TabItem>
-<TabItem value="console" label="Console">
+<TabItem value="console" label="Console" default>
 
 1. Select your `<deployment-project-id>` in the project picker.
 2. Go to **Pub/Sub** > **Topics** > **Create topic**.
 3. Set **Topic ID** to `signoz-integration-logs`.
 4. Clear **Add a default subscription**. You create a push subscription explicitly in step 3.
 5. Click **Create**.
+
+</TabItem>
+<TabItem value="cli" label="gcloud CLI">
+
+```bash
+gcloud pubsub topics create signoz-integration-logs \
+  --project=<deployment-project-id>
+```
 
 </TabItem>
 </Tabs>
@@ -68,7 +68,13 @@ The steps below are for a Cloud Run Collector, where `roles/run.invoker` and aut
 </Admonition>
 
 <Tabs>
-<TabItem value="cli" label="gcloud CLI" default>
+<TabItem value="console" label="Console" default>
+
+1. **Grant invoker on the Collector:** Go to **Cloud Run** and, in the services list, select the **checkbox** next to `signoz-otel-collector` (don't open the service). In the info panel on the right, open the **Permissions** tab (click **Show Info Panel** if it's hidden), then click **Add principal**. Add `signoz-integration@<deployment-project-id>.iam.gserviceaccount.com` with role **Cloud Run Invoker** (`roles/run.invoker`).
+2. **Allow token creation:** Go to **IAM & Admin** > **Service Accounts** and click the `signoz-integration` account. Open the **Principals with access** tab and click **Grant access**. Add the Pub/Sub service agent `service-<deployment-project-number>@gcp-sa-pubsub.iam.gserviceaccount.com` with role **Service Account Token Creator** (`roles/iam.serviceAccountTokenCreator`). Find your project number under **IAM & Admin** > **Settings**.
+
+</TabItem>
+<TabItem value="cli" label="gcloud CLI">
 
 ```bash
 # 1. Allow the push-auth service account to invoke the Collector service.
@@ -89,12 +95,6 @@ gcloud iam service-accounts add-iam-policy-binding \
 ```
 
 </TabItem>
-<TabItem value="console" label="Console">
-
-1. **Grant invoker on the Collector:** Go to **Cloud Run** and, in the services list, select the **checkbox** next to `signoz-otel-collector` (don't open the service). In the info panel on the right, open the **Permissions** tab (click **Show Info Panel** if it's hidden), then click **Add principal**. Add `signoz-integration@<deployment-project-id>.iam.gserviceaccount.com` with role **Cloud Run Invoker** (`roles/run.invoker`).
-2. **Allow token creation:** Go to **IAM & Admin** > **Service Accounts** and click the `signoz-integration` account. Open the **Principals with access** tab and click **Grant access**. Add the Pub/Sub service agent `service-<deployment-project-number>@gcp-sa-pubsub.iam.gserviceaccount.com` with role **Service Account Token Creator** (`roles/iam.serviceAccountTokenCreator`). Find your project number under **IAM & Admin** > **Settings**.
-
-</TabItem>
 </Tabs>
 
 <Admonition type="info">
@@ -106,7 +106,19 @@ The Pub/Sub service agent is a Google-managed identity, so the grant you just ad
 Create a push subscription on the topic that delivers to the Collector's Service URL, authenticated with the push-auth service account.
 
 <Tabs>
-<TabItem value="cli" label="gcloud CLI" default>
+<TabItem value="console" label="Console" default>
+
+1. Go to **Pub/Sub** > **Subscriptions** > **Create subscription**.
+2. **Subscription ID**: `signoz-integration-logs-push`.
+3. **Select a Cloud Pub/Sub topic**: `projects/<deployment-project-id>/topics/signoz-integration-logs`.
+4. **Delivery type**: **Push**.
+5. **Endpoint URL**: your `<collector-service-url>/` (include the trailing slash).
+6. Enable **Enable authentication** and select the `signoz-integration` service account.
+7. Under **Retry policy**, choose **Retry after exponential backoff delay** and set the minimum and maximum backoff to suit your needs.
+8. Click **Create**.
+
+</TabItem>
+<TabItem value="cli" label="gcloud CLI">
 
 ```bash
 gcloud pubsub subscriptions create signoz-integration-logs-push \
@@ -118,18 +130,6 @@ gcloud pubsub subscriptions create signoz-integration-logs-push \
   --min-retry-delay=10s \
   --max-retry-delay=600s
 ```
-
-</TabItem>
-<TabItem value="console" label="Console">
-
-1. Go to **Pub/Sub** > **Subscriptions** > **Create subscription**.
-2. **Subscription ID**: `signoz-integration-logs-push`.
-3. **Select a Cloud Pub/Sub topic**: `projects/<deployment-project-id>/topics/signoz-integration-logs`.
-4. **Delivery type**: **Push**.
-5. **Endpoint URL**: your `<collector-service-url>/` (include the trailing slash).
-6. Enable **Enable authentication** and select the `signoz-integration` service account.
-7. Under **Retry policy**, choose **Retry after exponential backoff delay** and set the minimum and maximum backoff to suit your needs.
-8. Click **Create**.
 
 </TabItem>
 </Tabs>
@@ -151,7 +151,16 @@ A **log sink** (in **Logging** > **Log Router**) selects logs with an inclusion 
 ### Sink in the deployment project
 
 <Tabs>
-<TabItem value="cli" label="gcloud CLI" default>
+<TabItem value="console" label="Console" default>
+
+1. In the deployment project, go to **Logging** > **Log Router** > **Create sink**.
+2. **Sink name**: `signoz-integration-logs-sink`.
+3. **Sink destination**: **Cloud Pub/Sub topic** > select `signoz-integration-logs`.
+4. **Build inclusion filter**: enter a filter for the logs you want, for example `resource.type="cloud_run_revision"`.
+5. Click **Create sink**.
+
+</TabItem>
+<TabItem value="cli" label="gcloud CLI">
 
 ```bash
 gcloud logging sinks create signoz-integration-logs-sink \
@@ -159,15 +168,6 @@ gcloud logging sinks create signoz-integration-logs-sink \
   --project=<deployment-project-id> \
   --log-filter='resource.type="cloud_run_revision"'
 ```
-
-</TabItem>
-<TabItem value="console" label="Console">
-
-1. In the deployment project, go to **Logging** > **Log Router** > **Create sink**.
-2. **Sink name**: `signoz-integration-logs-sink`.
-3. **Sink destination**: **Cloud Pub/Sub topic** > select `signoz-integration-logs`.
-4. **Build inclusion filter**: enter a filter for the logs you want, for example `resource.type="cloud_run_revision"`.
-5. Click **Create sink**.
 
 </TabItem>
 </Tabs>
@@ -179,7 +179,15 @@ Set the `--log-filter` (inclusion filter) to match the services you enabled in S
 For a monitored project that is **not** your deployment project, the destination must be the **fully-qualified** topic path that includes your **Deployment Project ID**. The sink lives in one project but publishes to the topic in another:
 
 <Tabs>
-<TabItem value="cli" label="gcloud CLI" default>
+<TabItem value="console" label="Console" default>
+
+1. Switch to the **monitored** project (`<monitored-project-id>`).
+2. Go to **Logging** > **Log Router** > **Create sink**.
+3. **Sink destination**: choose **Cloud Pub/Sub topic**. The topic dropdown lists only topics in the current (monitored) project, so click **Enter topic manually** and enter the full path `projects/<deployment-project-id>/topics/signoz-integration-logs`.
+4. Set the inclusion filter and click **Create sink**.
+
+</TabItem>
+<TabItem value="cli" label="gcloud CLI">
 
 ```bash
 gcloud logging sinks create signoz-integration-logs-sink \
@@ -189,18 +197,10 @@ gcloud logging sinks create signoz-integration-logs-sink \
 ```
 
 </TabItem>
-<TabItem value="console" label="Console">
-
-1. Switch to the **monitored** project (`<monitored-project-id>`).
-2. Go to **Logging** > **Log Router** > **Create sink**.
-3. **Sink destination**: choose **Cloud Pub/Sub topic**. The topic dropdown lists only topics in the current (monitored) project, so click **Enter topic manually** and enter the full path `projects/<deployment-project-id>/topics/signoz-integration-logs`.
-4. Set the inclusion filter and click **Create sink**.
-
-</TabItem>
 </Tabs>
 
 <Admonition type="info">
-The `<deployment-project-id>` in the topic path is the **Deployment Project ID** you entered when [connecting your account](https://signoz.io/docs/integrations/gcp/connect-gcp-account/). Every sink, no matter which project it lives in, points at the single topic in that deployment project.
+The `<deployment-project-id>` in the topic path is the **Deployment Project ID** from the [connection fields](https://signoz.io/docs/integrations/gcp/manual-setup/#connection-fields) you entered when connecting your account. Every sink, no matter which project it lives in, points at the single topic in that deployment project.
 </Admonition>
 
 ## Step 5: Authorize the sink to publish to the topic
@@ -208,7 +208,14 @@ The `<deployment-project-id>` in the topic path is the **Deployment Project ID**
 Each sink is created with an automatically generated **writer identity** (a service account). GCP prints it when the sink is created, or you can read it back. Grant that identity `roles/pubsub.publisher` on the topic so it can publish routed logs. Repeat for every sink.
 
 <Tabs>
-<TabItem value="cli" label="gcloud CLI" default>
+<TabItem value="console" label="Console" default>
+
+1. In the project that owns the sink, open **Logging** > **Log Router**, click the sink, and copy its **Writer identity** (an email like `serviceAccount:p123-...@gcp-sa-logging.iam.gserviceaccount.com`).
+2. In your `<deployment-project-id>`, go to **Pub/Sub** > **Topics** and select the **checkbox** next to `signoz-integration-logs` (don't open the topic). In the info panel on the right, open the **Permissions** tab (click **Show info panel** if it's hidden), then click **Add principal**.
+3. Paste the writer identity and assign the role **Pub/Sub Publisher** (`roles/pubsub.publisher`). Save.
+
+</TabItem>
+<TabItem value="cli" label="gcloud CLI">
 
 ```bash
 # 1. Read the sink's writer identity.
@@ -222,13 +229,6 @@ gcloud pubsub topics add-iam-policy-binding signoz-integration-logs \
   --member="$WRITER" \
   --role="roles/pubsub.publisher"
 ```
-
-</TabItem>
-<TabItem value="console" label="Console">
-
-1. In the project that owns the sink, open **Logging** > **Log Router**, click the sink, and copy its **Writer identity** (an email like `serviceAccount:p123-...@gcp-sa-logging.iam.gserviceaccount.com`).
-2. In your `<deployment-project-id>`, go to **Pub/Sub** > **Topics** and select the **checkbox** next to `signoz-integration-logs` (don't open the topic). In the info panel on the right, open the **Permissions** tab (click **Show info panel** if it's hidden), then click **Add principal**.
-3. Paste the writer identity and assign the role **Pub/Sub Publisher** (`roles/pubsub.publisher`). Save.
 
 </TabItem>
 </Tabs>

@@ -20,7 +20,7 @@ The OpenTelemetry Collector is the engine of the GCP integration: it pulls metri
 - The <a href="https://cloud.google.com/sdk/docs/install" target="_blank" rel="noopener noreferrer nofollow">`gcloud` CLI</a> is installed and authenticated, or use <a href="https://cloud.google.com/shell" target="_blank" rel="noopener noreferrer nofollow">Cloud Shell</a>.
 
 <Admonition type="info">
-`<deployment-project-id>` and `<deployment-region>` below are the **Deployment Project ID** and **Deployment Region** you entered when connecting the account.
+`<deployment-project-id>` and `<deployment-region>` below are the **Deployment Project ID** and **Deployment Region** from the [connection fields](https://signoz.io/docs/integrations/gcp/manual-setup/#connection-fields) you entered when connecting the account.
 </Admonition>
 
 ## Why the SigNoz Collector image
@@ -98,7 +98,18 @@ Rather than baking a custom image, keep your `config.yaml` in <a href="https://c
 Create the secret from your `config.yaml`, then grant the `signoz-integration` service account permission to read it.
 
 <Tabs>
-<TabItem value="cli" label="gcloud CLI" default>
+<TabItem value="console" label="Console" default>
+
+1. In the deployment project, go to **Security** > **Secret Manager** > **+ Create secret**.
+2. Set **Name** to `signoz-collector-config`.
+3. Under **Secret value**, choose **Upload file** and select your `config.yaml` (or paste its contents into the value box).
+4. Click **Create secret**.
+5. Open the new secret, go to the **Permissions** tab, and click **Grant access**.
+6. In **New principals**, paste `signoz-integration@<deployment-project-id>.iam.gserviceaccount.com`.
+7. In **Role**, select **Secret Manager** > **Secret Manager Secret Accessor**, then click **Save**.
+
+</TabItem>
+<TabItem value="cli" label="gcloud CLI">
 
 Create the secret:
 
@@ -118,17 +129,6 @@ gcloud secrets add-iam-policy-binding signoz-collector-config \
 ```
 
 </TabItem>
-<TabItem value="console" label="Console">
-
-1. In the deployment project, go to **Security** > **Secret Manager** > **+ Create secret**.
-2. Set **Name** to `signoz-collector-config`.
-3. Under **Secret value**, choose **Upload file** and select your `config.yaml` (or paste its contents into the value box).
-4. Click **Create secret**.
-5. Open the new secret, go to the **Permissions** tab, and click **Grant access**.
-6. In **New principals**, paste `signoz-integration@<deployment-project-id>.iam.gserviceaccount.com`.
-7. In **Role**, select **Secret Manager** > **Secret Manager Secret Accessor**, then click **Save**.
-
-</TabItem>
 </Tabs>
 
 <Admonition type="info">
@@ -140,7 +140,24 @@ When you change the config later, add a new secret version (`gcloud secrets vers
 Deploy the stock `signoz/signoz-otel-collector` image as a Cloud Run service. Attach the `signoz-integration` service account, mount the config secret as the `COLLECTOR_CONFIG` environment variable, and point the Collector at it with `--config=env:COLLECTOR_CONFIG`.
 
 <Tabs>
-<TabItem value="cli" label="gcloud CLI" default>
+<TabItem value="console" label="Console" default>
+
+1. In the deployment project, go to **Cloud Run** > **Deploy container** > **Service**.
+2. Set the **Container image URL** to `signoz/signoz-otel-collector:0.144.5`.
+3. Set **Region** to your `<deployment-region>`.
+4. Under **Authentication**, choose **Require authentication** (do not allow unauthenticated invocations).
+5. Under **Ingress control**, choose **Internal**.
+6. Expand **Container(s), Volumes, Networking, Security**:
+   - **Container port**: `8090`.
+   - **Resources**: 2 vCPU, 4 GiB memory.
+   - **Security** > **Service account**: `signoz-integration@<deployment-project-id>.iam.gserviceaccount.com`.
+   - **Variables & Secrets** > **Reference a secret**: select `signoz-collector-config`, expose it as the environment variable `COLLECTOR_CONFIG`, and use the `latest` version.
+   - **Container** > **Container arguments**: add `--config=env:COLLECTOR_CONFIG`.
+   - **Autoscaling**: set **Minimum number of instances** to `1` so the Collector always runs.
+7. Click **Create**.
+
+</TabItem>
+<TabItem value="cli" label="gcloud CLI">
 
 ```bash
 gcloud run deploy signoz-otel-collector \
@@ -159,23 +176,6 @@ gcloud run deploy signoz-otel-collector \
 ```
 
 </TabItem>
-<TabItem value="console" label="Console">
-
-1. In the deployment project, go to **Cloud Run** > **Deploy container** > **Service**.
-2. Set the **Container image URL** to `signoz/signoz-otel-collector:0.144.5`.
-3. Set **Region** to your `<deployment-region>`.
-4. Under **Authentication**, choose **Require authentication** (do not allow unauthenticated invocations).
-5. Under **Ingress control**, choose **Internal**.
-6. Expand **Container(s), Volumes, Networking, Security**:
-   - **Container port**: `8090`.
-   - **Resources**: 2 vCPU, 4 GiB memory.
-   - **Security** > **Service account**: `signoz-integration@<deployment-project-id>.iam.gserviceaccount.com`.
-   - **Variables & Secrets** > **Reference a secret**: select `signoz-collector-config`, expose it as the environment variable `COLLECTOR_CONFIG`, and use the `latest` version.
-   - **Container** > **Container arguments**: add `--config=env:COLLECTOR_CONFIG`.
-   - **Autoscaling**: set **Minimum number of instances** to `1` so the Collector always runs.
-7. Click **Create**.
-
-</TabItem>
 </Tabs>
 
 **Why these flags:**
@@ -191,7 +191,13 @@ The deploy command prints a **Service URL** like `https://signoz-otel-collector-
 Retrieve it any time:
 
 <Tabs>
-<TabItem value="cli" label="gcloud CLI" default>
+<TabItem value="console" label="Console" default>
+
+1. In the deployment project, go to **Cloud Run** and open the **signoz-otel-collector** service.
+2. The **URL** is shown at the top of the service details page. Click the copy icon next to it.
+
+</TabItem>
+<TabItem value="cli" label="gcloud CLI">
 
 ```bash
 gcloud run services describe signoz-otel-collector \
@@ -199,12 +205,6 @@ gcloud run services describe signoz-otel-collector \
   --project=<deployment-project-id> \
   --format='value(status.url)'
 ```
-
-</TabItem>
-<TabItem value="console" label="Console">
-
-1. In the deployment project, go to **Cloud Run** and open the **signoz-otel-collector** service.
-2. The **URL** is shown at the top of the service details page. Click the copy icon next to it.
 
 </TabItem>
 </Tabs>
