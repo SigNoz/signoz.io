@@ -1,10 +1,10 @@
 'use client'
 
 import React, { Children, isValidElement, cloneElement, ReactNode } from 'react'
-import Pre from 'pliny/ui/Pre'
+import CodeBlock from '@/components/CodeBlock'
 import { useRegion } from './RegionContext'
 
-// pliny's <Pre> renders its copy button with this aria-label.
+// CodeBlock copy control uses this aria-label.
 const COPY_BUTTON_SELECTOR = '[aria-label="Copy code"]'
 
 // Use Element (not HTMLElement): the button's icon is an <svg>/<path>, which are
@@ -129,7 +129,7 @@ export const RegionAwarePre = (props: any) => {
   const [hintVisible, setHintVisible] = React.useState(false)
 
   if (!isRegionAware || isOnboarding) {
-    return <Pre {...props}>{renderedChildren}</Pre>
+    return <CodeBlock {...props}>{renderedChildren}</CodeBlock>
   }
 
   // What the copy button actually puts on the clipboard (region already substituted).
@@ -149,7 +149,7 @@ export const RegionAwarePre = (props: any) => {
       onMouseOver={(e) => isCopyButtonTarget(e.target) && setHintVisible(true)}
       onMouseLeave={() => setHintVisible(false)}
     >
-      <Pre {...props}>{renderedChildren}</Pre>
+      <CodeBlock {...props}>{renderedChildren}</CodeBlock>
       {hintVisible && (
         <div
           role="tooltip"
