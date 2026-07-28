@@ -1,0 +1,485 @@
+/**
+ * CodeBlock — Shiki (rehype-pretty-code) + Periscope semantic tokens.
+ * Themes: github-dark-dimmed (dark) / github-light (light).
+ * Chrome specs from Figma ✅ Codeblock (Periscope Primitives).
+ */
+
+.root {
+  --cb-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+  --cb-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --cb-font-size: 14px;
+  --cb-line-height: 24px;
+  --cb-radius: 6px;
+  /* Dark (Ink/400, Slate/500) */
+  --cb-border: var(--bg-slate-500, #161922);
+  --cb-bg: var(--bg-ink-400, #121317);
+  --cb-header-bg: var(--bg-ink-400, #121317);
+  --cb-fg: var(--text-vanilla-100, #ffffff);
+  --cb-muted: var(--text-vanilla-400, #c0c1c3);
+  --cb-title: var(--text-vanilla-400, #c0c1c3);
+  --cb-tab-active: var(--text-vanilla-100, #ffffff);
+  --cb-line-number: var(--bg-slate-100, #3c4152);
+  --cb-copy-bg: var(--bg-ink-300, #16181d);
+  --cb-copy-border: var(--bg-slate-400, #1d212d);
+  --cb-copy-fg: var(--text-vanilla-400, #c0c1c3);
+  --cb-robin: var(--bg-robin-500, #4e74f8);
+  /* Figma CodeLine: 10% fill + 2px solid rail, full row width */
+  --cb-hl-robin: color-mix(in srgb, var(--cb-robin) 10%, transparent);
+  --cb-hl-robin-border: var(--cb-robin);
+  --cb-hl-cherry: color-mix(in srgb, var(--bg-cherry-500, #e5484d) 10%, transparent);
+  --cb-hl-cherry-border: var(--bg-cherry-500, #e5484d);
+  --cb-hl-forest: color-mix(in srgb, var(--bg-forest-500, #25e192) 10%, transparent);
+  --cb-hl-forest-border: var(--bg-forest-500, #25e192);
+  --cb-hl-amber: color-mix(in srgb, var(--bg-amber-500, #ffcd56) 10%, transparent);
+  --cb-hl-amber-border: var(--bg-amber-500, #ffcd56);
+
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 1.25rem 0;
+  overflow: hidden;
+  border: 1px solid var(--cb-border);
+  border-radius: var(--cb-radius);
+  background: var(--cb-bg);
+  color: var(--cb-fg);
+  font-family: var(--cb-mono);
+  font-size: var(--cb-font-size);
+  line-height: var(--cb-line-height);
+}
+
+/*
+ * Light: Periscope slate-* tokens are dark greys — never use them for light borders.
+ */
+:global(html:not(.dark)) .root {
+  --cb-border: var(--bg-vanilla-300, #e9e9e9);
+  --cb-bg: var(--bg-vanilla-100, #ffffff);
+  --cb-header-bg: var(--bg-vanilla-100, #ffffff);
+  --cb-fg: var(--text-ink-300, #1a1a1a);
+  --cb-muted: var(--text-slate-50, #62687c);
+  --cb-title: var(--text-slate-50, #62687c);
+  --cb-tab-active: var(--bg-slate-500, #161922);
+  --cb-line-number: var(--bg-slate-100, #3c4152);
+  --cb-copy-bg: var(--bg-vanilla-200, #f5f5f5);
+  --cb-copy-border: var(--bg-vanilla-300, #e9e9e9);
+  --cb-copy-fg: var(--text-slate-50, #62687c);
+}
+
+.nested {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Shared top chrome (~48px): single filename OR multi-tab */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 48px;
+  padding: 10px 12px 0 16px;
+  border-bottom: 1px solid var(--cb-border);
+  background: var(--cb-header-bg);
+}
+
+.tabList {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: flex-start;
+  gap: 24px;
+  overflow-x: auto;
+}
+
+.title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Single filename — Figma TabItem with underline opacity:0.
+ * Not an active tab: muted Inter label, no robin underline.
+ */
+.fileTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 4px 6px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--cb-title);
+  font-family: var(--cb-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.07px;
+  white-space: nowrap;
+}
+
+.titleIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--cb-title);
+}
+
+/* Multi-tab triggers (CodeTabs only) */
+.tab {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--cb-muted);
+  font-family: var(--cb-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.07px;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.tabInner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.tabButton {
+  cursor: pointer;
+}
+
+.tabUnderline {
+  display: block;
+  width: 100%;
+  height: 2px;
+  border-radius: 20px;
+  background: var(--cb-robin);
+  opacity: 0;
+}
+
+.tabActive {
+  color: var(--cb-tab-active);
+}
+
+.tabActive .tabUnderline {
+  opacity: 1;
+}
+
+.tabIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: inherit;
+}
+
+/* Header copy — icon only (Figma Frame 1540) */
+.copy {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  align-self: flex-start;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 1px;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--cb-muted);
+  font-family: var(--cb-sans);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.copy:hover {
+  color: var(--cb-fg);
+}
+
+.copy svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Header / floating copy — hidden until codeblock hover or keyboard focus */
+.copyHoverReveal,
+.copyFloating {
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.root:hover .copyHoverReveal,
+.root:focus-within .copyHoverReveal,
+.root:hover .copyFloating,
+.root:focus-within .copyFloating {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Untitled block — labeled Copy chip (Figma Component 20) */
+.copyFloating {
+  position: absolute;
+  top: 11px;
+  right: 11px;
+  z-index: 3;
+  align-self: auto;
+  margin-top: 0;
+  height: 28px;
+  padding: 0 12px;
+  border-color: var(--cb-copy-border);
+  border-radius: 3px;
+  background: var(--cb-copy-bg);
+  color: var(--cb-copy-fg);
+}
+
+.copyFloating svg {
+  width: 12px;
+  height: 12px;
+}
+
+.copyFloating:hover {
+  border-color: var(--cb-copy-border);
+  background: var(--cb-copy-bg);
+  color: var(--cb-fg);
+}
+
+.body {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  max-height: none;
+}
+
+.collapsed .body {
+  max-height: 480px;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, #000 70%, transparent);
+}
+
+/* Scroll the code pane only — minimap stays fixed beside the viewport. */
+.collapsed .pre {
+  min-height: 0;
+  overflow-y: auto;
+  /* Nested scroll must not nudge document scroll anchoring. */
+  overflow-anchor: none;
+}
+
+.pre {
+  margin: 0 !important;
+  min-width: 0;
+  flex: 1;
+  overflow-x: auto;
+  /* Vertical padding only — horizontal padding lives on [data-line] so
+     highlight fills run edge-to-edge (Figma CodeLine full-bleed). */
+  padding: 12px 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.pre :global(code) {
+  display: grid;
+  min-width: 100%;
+  background: transparent !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  counter-reset: line;
+}
+
+/* Dual Shiki themes via CSS variables */
+.pre :global(code),
+.pre :global(code span) {
+  color: var(--shiki-dark);
+}
+
+:global(html:not(.dark)) .pre :global(code),
+:global(html:not(.dark)) .pre :global(code span) {
+  color: var(--shiki-light);
+}
+
+.pre :global([data-line]) {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0 12px;
+  border-left: 2px solid transparent;
+  background: transparent;
+}
+
+.pre :global(code[data-line-numbers] > [data-line])::before {
+  display: inline-block;
+  width: 1.25rem;
+  margin-right: 12px;
+  color: var(--cb-line-number);
+  content: counter(line);
+  counter-increment: line;
+  text-align: right;
+  opacity: 1;
+  user-select: none;
+}
+
+.pre :global(code[data-line-numbers-max-digits='2'] > [data-line])::before {
+  width: 1.25rem;
+}
+
+.pre :global(code[data-line-numbers-max-digits='3'] > [data-line])::before {
+  width: 1.75rem;
+}
+
+.pre :global(code[data-line-numbers-max-digits='4'] > [data-line])::before {
+  width: 2.25rem;
+}
+
+.pre :global([data-highlighted-line]) {
+  background: var(--cb-hl-robin);
+  border-left-color: var(--cb-hl-robin-border);
+}
+
+.pre :global([data-highlighted-line-id='robin']) {
+  background: var(--cb-hl-robin);
+  border-left-color: var(--cb-hl-robin-border);
+}
+
+.pre :global([data-highlighted-line-id='cherry']) {
+  background: var(--cb-hl-cherry);
+  border-left-color: var(--cb-hl-cherry-border);
+}
+
+.pre :global([data-highlighted-line-id='forest']) {
+  background: var(--cb-hl-forest);
+  border-left-color: var(--cb-hl-forest-border);
+}
+
+.pre :global([data-highlighted-line-id='amber']) {
+  background: var(--cb-hl-amber);
+  border-left-color: var(--cb-hl-amber-border);
+}
+
+/* Compact minimap (Figma-style fixed bars) — may be shorter than the code pane */
+.minimap {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-self: flex-start;
+  width: 64px;
+  max-width: 18%;
+  padding: 12px 8px;
+  border-left: 1px solid var(--cb-border);
+  /* Subtle rail lift (ink-300 over ink-400) — no card chrome */
+  background: var(--cb-copy-bg);
+  overflow: hidden;
+  user-select: none;
+}
+
+.minimapTrack {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  cursor: pointer;
+  outline: none;
+}
+
+.minimapTrack:focus-visible {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cb-robin) 50%, transparent);
+}
+
+.minimapContent {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5px;
+  pointer-events: none;
+}
+
+.minimapLine {
+  flex: none;
+  height: 2px;
+  margin: 0;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--cb-muted) 40%, transparent);
+}
+
+.minimapRobin {
+  background: var(--cb-hl-robin-border);
+}
+
+.minimapCherry {
+  background: var(--cb-hl-cherry-border);
+}
+
+.minimapForest {
+  background: var(--cb-hl-forest-border);
+}
+
+.minimapAmber {
+  background: var(--cb-hl-amber-border);
+}
+
+/* Soft viewport pill — only shown when code pane can scroll */
+.minimapViewport {
+  position: absolute;
+  z-index: 1;
+  right: -2px;
+  left: -2px;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--cb-muted) 28%, transparent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--cb-fg) 7%, transparent);
+  pointer-events: none;
+}
+
+.collapseToggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border: none;
+  border-top: 1px solid var(--cb-border);
+  background: var(--cb-header-bg);
+  color: var(--cb-muted);
+  font-family: var(--cb-sans);
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.collapseToggle:hover {
+  color: var(--cb-fg);
+}
+
+.tabPanel > .root {
+  margin: 0;
+}
