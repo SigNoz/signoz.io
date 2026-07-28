@@ -1,5 +1,5 @@
 ---
-date: 2026-07-15
+date: 2026-07-27
 title: Trace Explorer
 description: Understand the Trace Explorer in SigNoz — views, filtering, trace matching, and how to save and act on your results.
 doc_type: explanation
@@ -105,6 +105,12 @@ Both Time Series and Table views use the Query Builder for filtering, aggregatio
   alt="Query Builder showing Group By, Having, Order By, and Limit fields"
   caption="Query Builder in Time Series and Table views"
 />
+
+## Missing Spans
+
+A span shows as missing when a collected span references a Parent Span ID that no other span in the trace matches. That parent span still exists in your system but never reached SigNoz, so the waterfall view shows a gap where it should sit. SigNoz marks these traces with a "This trace has missing spans" banner in the trace details view.
+
+Tail sampling, spans dropped in transit, and services that never export are the usual causes. For the full explanation and how to identify each cause, see [Why are some spans missing from a trace?](https://signoz.io/docs/traces-management/troubleshooting/faqs/#q-why-are-some-spans-missing-from-a-trace).
 
 ## Export Spans and Traces
 
