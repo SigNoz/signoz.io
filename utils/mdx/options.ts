@@ -1,5 +1,6 @@
 import GithubSlugger from 'github-slugger'
 import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
+import { toString } from 'hast-util-to-string'
 import remarkGfm from 'remark-gfm'
 import { remarkExtractFrontmatter, remarkImgToJsx } from 'pliny/mdx-plugins/index.js'
 import rehypeSlug from 'rehype-slug'
@@ -50,8 +51,27 @@ export const mdxOptions = {
             light: 'github-light',
           },
           keepBackground: false,
-          defaultLang: 'tsx',
+          defaultLang: {
+            block: 'plaintext',
+            inline: 'plaintext',
+          },
           filterMetaString: filterCodeBlockMetaString,
+          // ```diff: Shiki only colors +/- tokens. Mark lines for row backgrounds.
+          // Scope to lang=diff so YAML list items ("- foo") are not marked.
+          transformers: [
+            {
+              name: 'signoz-diff-line-bg',
+              line(hast) {
+                if (this.options.lang !== 'diff') return
+                const text = toString(hast)
+                if (text.startsWith('+')) {
+                  hast.properties['data-diff'] = 'add'
+                } else if (text.startsWith('-')) {
+                  hast.properties['data-diff'] = 'remove'
+                }
+              },
+            },
+          ],
         },
       ],
       rehypeCodeBlockDefaults,

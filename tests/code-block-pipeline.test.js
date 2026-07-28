@@ -73,6 +73,42 @@ f
   assert.match(html, /data-collapse-threshold="5"/)
 })
 
+test('diff fences mark add/remove lines for row backgrounds', async () => {
+  const { compileMDX } = await import('next-mdx-remote/rsc')
+
+  const source = `\`\`\`diff:docker-compose.yaml
+- schema-migrator-sync:
++ schema-migrator:
+  depends_on:
+\`\`\`
+
+\`\`\`yaml
+- item
+  key: val
+\`\`\`
+
+\`\`\`
+./otelcol --config=config.yaml
+\`\`\`
+`
+
+  const { content } = await compileMDX({
+    source,
+    options: mdxOptions,
+    components: {
+      pre: (props) => React.createElement('pre', {}, props.children),
+    },
+  })
+
+  const html = renderToStaticMarkup(content)
+  assert.match(html, /data-diff="remove"/)
+  assert.match(html, /data-diff="add"/)
+  assert.match(html, /data-language="plaintext"/)
+  // YAML list items start with "-" but must not get diff row chrome
+  const yamlSection = html.slice(html.indexOf('data-language="yaml"'))
+  assert.equal(/data-diff=/.test(yamlSection), false)
+})
+
 test('cleanHastForMarkdown unwraps sz-codeblock chrome and joins shiki lines', async () => {
   const { hastToMarkdown } = loadTsModule('utils/docs/markdownCore.ts')
   const { unified } = await import('unified')

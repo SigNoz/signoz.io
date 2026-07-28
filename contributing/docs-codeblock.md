@@ -20,6 +20,7 @@ No meta needed:
 |------|--------|
 | `lang:path` | Filename title in the chrome (e.g. `yaml:otel-collector-config.yaml`). Prefer this over `title="…"`. |
 | `{5}` / `{5-9}` / `{2,4-6}` | Neutral (robin) line highlight. Prefer for “look here” callouts. |
+| `diff` / `diff:file` | Unified diff. Lines starting with `-` get a cherry (destructive) row background; `+` get forest (success). Context lines stay unshaded. Prefer this over hand-coloring removals with `{n}#cherry`. |
 | `{5}#cherry` / `#forest` / `#amber` / `#robin` | Sentiment highlights (error / success / warning / info). |
 | `noLineNumbers` | Hide the line-number gutter. |
 | `minimap` | Right-side minimap strip (useful for long samples). |
@@ -136,6 +137,21 @@ service:
     logs:
       receivers: [otlp]
       exporters: [otlp]
+```
+````
+
+## Diff fences
+
+Use language `diff` (optionally with a filename title) for add/remove edits. Lines that start with `-` get a cherry (destructive) row background; `+` get forest (success). Context lines stay unshaded.
+
+````md
+```diff:docker-compose.yaml
+ x-db-depend: &db-depend
+   depends_on:
+     clickhouse:
+       condition: service_healthy
+-    schema-migrator-sync:
+-      condition: service_completed_successfully
 ```
 ````
 
