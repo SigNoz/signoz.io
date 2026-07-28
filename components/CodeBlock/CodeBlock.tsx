@@ -373,6 +373,9 @@ function collectMinimapLines(node: ReactNode): MinimapLineMeta[] {
   return lines
 }
 
+const COPY_LABEL_WIDTH_PX = 68
+const COPIED_LABEL_WIDTH_PX = 80
+
 function CopyButton({
   text,
   className,
@@ -395,7 +398,15 @@ function CopyButton({
   }, [text])
 
   return (
-    <button type="button" aria-label="Copy code" className={className} onClick={onCopy}>
+    <button
+      type="button"
+      aria-label="Copy code"
+      className={className}
+      onClick={onCopy}
+      style={
+        withLabel ? { width: copied ? COPIED_LABEL_WIDTH_PX : COPY_LABEL_WIDTH_PX } : undefined
+      }
+    >
       {copied ? <CheckIcon /> : <CopyIcon />}
       {withLabel ? <span>{copied ? 'Copied' : 'Copy'}</span> : null}
     </button>
@@ -473,21 +484,28 @@ export default function CodeBlock({
           </div>
           <CopyButton text={copyText} className={cn(styles.copy, styles.copyHoverReveal)} />
         </div>
-      ) : !insideTabs ? (
-        <CopyButton text={copyText} withLabel className={cn(styles.copy, styles.copyFloating)} />
       ) : null}
 
       <div className={styles.body}>
-        <pre
-          ref={preRef}
-          className={cn(
-            styles.pre,
-            typeof preProps.className === 'string' ? preProps.className : undefined
-          )}
-          {...(preProps as React.HTMLAttributes<HTMLPreElement>)}
-        >
-          {children}
-        </pre>
+        <div className={styles.codePane}>
+          {!hasTopBar && !insideTabs ? (
+            <CopyButton
+              text={copyText}
+              withLabel
+              className={cn(styles.copy, styles.copyFloating)}
+            />
+          ) : null}
+          <pre
+            ref={preRef}
+            className={cn(
+              styles.pre,
+              typeof preProps.className === 'string' ? preProps.className : undefined
+            )}
+            {...(preProps as React.HTMLAttributes<HTMLPreElement>)}
+          >
+            {children}
+          </pre>
+        </div>
         {showMinimap ? <CodeBlockMinimap lines={minimapLines} preRef={preRef} /> : null}
       </div>
 

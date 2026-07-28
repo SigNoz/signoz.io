@@ -1,9 +1,3 @@
-/**
- * CodeBlock — Shiki (rehype-pretty-code) + Periscope semantic tokens.
- * Themes: github-dark-dimmed (dark) / github-light (light).
- * Chrome specs from Figma ✅ Codeblock (Periscope Primitives).
- */
-
 .root {
   --cb-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
@@ -12,8 +6,7 @@
   --cb-font-size: 14px;
   --cb-line-height: 24px;
   --cb-radius: 6px;
-  /* Dark (Ink/400, Slate/500) */
-  --cb-border: var(--bg-slate-500, #161922);
+  --cb-border: var(--border, var(--bg-slate-500, #161922));
   --cb-bg: var(--bg-ink-400, #121317);
   --cb-header-bg: var(--bg-ink-400, #121317);
   --cb-fg: var(--text-vanilla-100, #ffffff);
@@ -25,7 +18,6 @@
   --cb-copy-border: var(--bg-slate-400, #1d212d);
   --cb-copy-fg: var(--text-vanilla-400, #c0c1c3);
   --cb-robin: var(--bg-robin-500, #4e74f8);
-  /* Figma CodeLine: 10% fill + 2px solid rail, full row width */
   --cb-hl-robin: color-mix(in srgb, var(--cb-robin) 10%, transparent);
   --cb-hl-robin-border: var(--cb-robin);
   --cb-hl-cherry: color-mix(in srgb, var(--bg-cherry-500, #e5484d) 10%, transparent);
@@ -50,11 +42,20 @@
   line-height: var(--cb-line-height);
 }
 
-/*
- * Light: Periscope slate-* tokens are dark greys — never use them for light borders.
- */
+.root ::selection,
+.root *::selection {
+  background-color: var(--bg-robin-500, #4e74f8);
+  color: var(--l1-background, var(--bg-ink-500, #0b0c0e));
+}
+
+.root ::-moz-selection,
+.root *::-moz-selection {
+  background-color: var(--bg-robin-500, #4e74f8);
+  color: var(--l1-background, var(--bg-ink-500, #0b0c0e));
+}
+
 :global(html:not(.dark)) .root {
-  --cb-border: var(--bg-vanilla-300, #e9e9e9);
+  --cb-border: var(--border, var(--bg-vanilla-300, #e9e9e9));
   --cb-bg: var(--bg-vanilla-100, #ffffff);
   --cb-header-bg: var(--bg-vanilla-100, #ffffff);
   --cb-fg: var(--text-ink-300, #1a1a1a);
@@ -74,7 +75,6 @@
   background: transparent;
 }
 
-/* Shared top chrome (~48px): single filename OR multi-tab */
 .header {
   display: flex;
   align-items: flex-start;
@@ -101,10 +101,6 @@
   white-space: nowrap;
 }
 
-/*
- * Single filename — Figma TabItem with underline opacity:0.
- * Not an active tab: muted Inter label, no robin underline.
- */
 .fileTitle {
   display: inline-flex;
   align-items: center;
@@ -240,23 +236,32 @@
   pointer-events: auto;
 }
 
-/* Untitled block — labeled Copy chip (Figma Component 20) */
 .copyFloating {
   position: absolute;
   top: 11px;
   right: 11px;
   z-index: 3;
+  box-sizing: border-box;
   align-self: auto;
   margin-top: 0;
   height: 28px;
-  padding: 0 12px;
+  padding: 0 10px;
+  overflow: hidden;
   border-color: var(--cb-copy-border);
   border-radius: 3px;
   background: var(--cb-copy-bg);
   color: var(--cb-copy-fg);
+  white-space: nowrap;
+  transition:
+    width 0.2s ease,
+    opacity 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .copyFloating svg {
+  flex-shrink: 0;
   width: 12px;
   height: 12px;
 }
@@ -274,17 +279,23 @@
   max-height: none;
 }
 
+.codePane {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
 .collapsed .body {
   max-height: 480px;
   overflow: hidden;
   mask-image: linear-gradient(to bottom, #000 70%, transparent);
 }
 
-/* Scroll the code pane only — minimap stays fixed beside the viewport. */
 .collapsed .pre {
   min-height: 0;
   overflow-y: auto;
-  /* Nested scroll must not nudge document scroll anchoring. */
   overflow-anchor: none;
 }
 
@@ -293,8 +304,6 @@
   min-width: 0;
   flex: 1;
   overflow-x: auto;
-  /* Vertical padding only — horizontal padding lives on [data-line] so
-     highlight fills run edge-to-edge (Figma CodeLine full-bleed). */
   padding: 12px 0 !important;
   border: none !important;
   border-radius: 0 !important;
@@ -316,7 +325,6 @@
   counter-reset: line;
 }
 
-/* Dual Shiki themes via CSS variables */
 .pre :global(code),
 .pre :global(code span) {
   color: var(--shiki-dark);
@@ -389,18 +397,36 @@
   border-left-color: var(--cb-hl-amber-border);
 }
 
-/* Compact minimap (Figma-style fixed bars) — may be shorter than the code pane */
+.pre :global(code[data-line-numbers] > [data-highlighted-line])::before {
+  color: var(--callout-primary-title, var(--bg-robin-400, #6b8afb));
+}
+
+.pre :global(code[data-line-numbers] > [data-highlighted-line-id='robin'])::before {
+  color: var(--callout-primary-title, var(--bg-robin-400, #6b8afb));
+}
+
+.pre :global(code[data-line-numbers] > [data-highlighted-line-id='cherry'])::before {
+  color: var(--callout-error-title, var(--bg-cherry-400, #f1767a));
+}
+
+.pre :global(code[data-line-numbers] > [data-highlighted-line-id='forest'])::before {
+  color: var(--callout-success-title, var(--bg-forest-400, #4ae8a8));
+}
+
+.pre :global(code[data-line-numbers] > [data-highlighted-line-id='amber'])::before {
+  color: var(--callout-warning-title, var(--bg-amber-400, #ffd76e));
+}
+
 .minimap {
   position: relative;
   display: flex;
   flex-shrink: 0;
   flex-direction: column;
-  align-self: flex-start;
+  align-self: stretch;
   width: 64px;
   max-width: 18%;
   padding: 12px 8px;
   border-left: 1px solid var(--cb-border);
-  /* Subtle rail lift (ink-300 over ink-400) — no card chrome */
   background: var(--cb-copy-bg);
   overflow: hidden;
   user-select: none;
@@ -451,7 +477,6 @@
   background: var(--cb-hl-amber-border);
 }
 
-/* Soft viewport pill — only shown when code pane can scroll */
 .minimapViewport {
   position: absolute;
   z-index: 1;
