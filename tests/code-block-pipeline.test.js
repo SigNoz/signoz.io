@@ -94,6 +94,59 @@ test('cleanHastForMarkdown unwraps sz-codeblock chrome and joins shiki lines', a
   assert.doesNotMatch(markdown, /Copy code/)
 })
 
+test('cleanHastForMarkdown strips collapse, minimap, and titled chrome', async () => {
+  const { hastToMarkdown } = loadTsModule('utils/docs/markdownCore.ts')
+  const { unified } = await import('unified')
+  const { default: rehypeParse } = await import('rehype-parse')
+
+  const hast = unified().use(rehypeParse, { fragment: true }).parse(`
+    <div data-sz-codeblock>
+      <div>
+        <span>server.ts</span>
+        <button aria-label="Copy code">Copy</button>
+      </div>
+      <div>
+        <pre><code data-language="ts"><span data-line>const a = 1</span><span data-line>const b = 2</span></code></pre>
+        <nav aria-label="Code minimap"><button aria-label="Go to line 1">1</button></nav>
+      </div>
+      <button type="button">Expand 40 lines</button>
+    </div>
+  `)
+
+  const markdown = await hastToMarkdown(hast, { cleanForDocsUi: true })
+  assert.match(markdown, /const a = 1/)
+  assert.match(markdown, /const b = 2/)
+  assert.doesNotMatch(markdown, /Copy code/)
+  assert.doesNotMatch(markdown, /Expand 40 lines/)
+  assert.doesNotMatch(markdown, /Code minimap/)
+  assert.doesNotMatch(markdown, /Go to line/)
+})
+
+test('cleanHastForMarkdown strips CodeTabs chrome buttons but keeps code', async () => {
+  const { hastToMarkdown } = loadTsModule('utils/docs/markdownCore.ts')
+  const { unified } = await import('unified')
+  const { default: rehypeParse } = await import('rehype-parse')
+
+  const hast = unified().use(rehypeParse, { fragment: true }).parse(`
+    <div data-sz-codeblock data-sz-codeblock-tabs>
+      <div role="tablist">
+        <button role="tab" aria-selected="true">HTTP</button>
+        <button role="tab">gRPC</button>
+        <button aria-label="Copy code">Copy</button>
+      </div>
+      <div role="tabpanel">
+        <div data-sz-codeblock>
+          <pre><code data-language="bash"><span data-line>curl https://example.com</span></code></pre>
+        </div>
+      </div>
+    </div>
+  `)
+
+  const markdown = await hastToMarkdown(hast, { cleanForDocsUi: true })
+  assert.match(markdown, /curl https:\/\/example\.com/)
+  assert.doesNotMatch(markdown, /Copy code/)
+})
+
 test('countCodeLines ignores interstitial newlines between data-line spans', () => {
   // Shiki emits line spans interleaved with "\n" text nodes.
   // Old bug: "\n".split("\n") => ["", ""] counted as 2 lines each
