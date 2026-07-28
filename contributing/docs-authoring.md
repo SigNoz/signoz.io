@@ -129,43 +129,13 @@ Prefer these H2 sections when they fit the doc:
 - Main-path snippets should be safe defaults that work after placeholder replacement.
 - Move advanced or environment-specific options into callouts or collapsed sections.
 
-### Code block fence options
+### Code blocks (MDX fences)
 
-Keep authoring as normal fenced backticks. Filename titles use `lang:path` (or `title="…"`).
+Docs fences render through the site **CodeBlock** (Shiki / `rehype-pretty-code`). Keep authoring as normal fenced backticks.
 
-| Meta | Effect |
-|------|--------|
-| `{5-9}` | Neutral (robin) line highlight — preferred for callouts |
-| `{5-9}#robin {12}#cherry {14-15}#forest {18}#amber` | Sentiment highlights (robin / cherry / forest / amber) |
-| `noLineNumbers` | Hide line numbers (on by default) |
-| `minimap` | Show a minimap strip beside the code |
-| `collapse` / `collapse={30}` | Enable collapse controls with threshold 20 / custom line count |
-| `noCollapse` | Never show collapse controls |
-| `defaultCollapsed` | Start collapsed (only when collapse controls apply; default is expanded) |
+**Defaults:** line numbers on · collapse when lines > 20 (starts expanded) · untitled = floating Copy · `lang:path` = filename chrome.
 
-Examples:
-
-````md
-```ts:server.ts {5-9}
-// neutral highlight on lines 5–9; line numbers on
-```
-
-```yaml minimap collapse={40}
-# long config with minimap + collapse above 40 lines
-```
-
-```bash noLineNumbers
-echo "no gutter"
-```
-
-```text collapse={5} defaultCollapsed
-# starts collapsed when line count exceeds the threshold
-```
-````
-
-Visual permutation reference (dev only): [`/dev/codeblock`](https://signoz.io/dev/codeblock/) ← `data/docs/codeblock-variants.mdx`.
-
-In-chrome tabbed code (`<CodeTabs>` / `<CodeTab>`) is available in MDX for product-style chrome, but prefer the existing page-level `<Tabs>` / `<TabItem>` for docs unless you specifically need tabs inside the codeblock header.
+Full meta reference and copy-paste examples (titles, highlights, minimap, collapse, `CodeTabs`): [docs-codeblock.md](docs-codeblock.md).
 
 ### SigNoz Cloud Ingestion Endpoints (region-aware)
 
