@@ -46,27 +46,14 @@ receivers:
 
 You can find more details about the MySQL receiver configuration in the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mysqlreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">receiver documentation</a>.
 
-### Step 3: Configuring the pipelines
-
-Once the receiver is configured, you need to enable it in the `pipelines` section of the OTel Collector config file:
-
-```yaml:config.yaml
-service:
-  pipelines:
-    metrics:
-      receivers: [mysql]
-```
-
-Now, run the OpenTelemetry collector and you should see the metrics coming in SigNoz. 
-
 <details>
 <ToggleHeading>
 
-### Step 4: Collect query samples and top queries
+#### Also collect query samples and top queries
 
 </ToggleHeading>
 
-Beyond metrics, the `mysql` receiver can emit query-monitoring **logs** from `performance_schema`: `db.server.query_sample` (statements running now) and `db.server.top_query` (most resource-intensive queries). To collect MySQL's error, slow, and general log files instead, use the <a href="https://signoz.io/docs/integrations/opentelemetry-mysql/">filelog approach</a>.
+Beyond metrics, the `mysql` receiver can emit query-monitoring **logs** from `performance_schema`: `db.server.query_sample` (statements running now) and `db.server.top_query` (most resource-intensive queries). To collect MySQL's error, slow, and general log files instead, use the [filelog approach](https://signoz.io/docs/integrations/opentelemetry-mysql/).
 
 Enable the events on the receiver (requires `performance_schema`):
 
@@ -89,6 +76,19 @@ service:
 The receiver's logs signal is at <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/mysqlreceiver#logs" target="_blank" rel="noopener noreferrer nofollow">development stability</a>, so treat it as experimental.
 
 </details>
+
+### Step 3: Configuring the pipelines
+
+Once the receiver is configured, you need to enable it in the `pipelines` section of the OTel Collector config file:
+
+```yaml:config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [mysql]
+```
+
+Now, run the OpenTelemetry collector and you should see the metrics coming in SigNoz. 
 
 ## Visualizing MySQL Metrics
 
