@@ -47,7 +47,7 @@ export const BentoBoard = memo(function BentoBoard({ isClone }: { isClone: boole
         />
       </BentoCell>
       <BentoCell column={7} columnSpan={2} row={1}>
-        <LogoCard isClone={isClone} logo={logos.parallel} />
+        <LogoCard isClone={isClone} logo={logos.hedra} />
       </BentoCell>
       <BentoCell column={9} columnSpan={4} row={1}>
         <QuoteCard
@@ -160,7 +160,7 @@ export const BentoBoard = memo(function BentoBoard({ isClone }: { isClone: boole
         />
       </BentoCell>
       <BentoCell column={23} row={2}>
-        <LogoCard isClone={isClone} logo={logos.xaira} />
+        <LogoCard isClone={isClone} logo={logos.kognitos} />
       </BentoCell>
       <BentoCell column={24} row={2}>
         <LogoCard isClone={isClone} logo={logos.racingAndSports} />

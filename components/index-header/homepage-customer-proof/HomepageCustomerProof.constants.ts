@@ -1,5 +1,4 @@
 import EltropyLogo from '@/public/svgs/icons/eltropy.svg'
-import ParallelLogo from '@/public/svgs/icons/parallel-ai.svg'
 
 import type { LogoSpec } from './HomepageCustomerProof.types'
 
@@ -85,6 +84,12 @@ export const logos = {
     name: 'Kernel',
     quoteWidth: 88,
   },
+  kognitos: {
+    cardWidth: 116,
+    imageSrc: '/svgs/icons/kognitos.svg',
+    isWordmark: true,
+    name: 'Kognitos',
+  },
   lenskart: {
     cardWidth: 108,
     imageSrc: `${customerLogoSvgPath}/lenskart.svg`,
@@ -106,11 +111,11 @@ export const logos = {
     name: 'Oracle',
     quoteWidth: 88,
   },
-  parallel: {
-    Logo: ParallelLogo,
-    name: 'Parallel',
-    cardWidth: 104,
-    viewBox: '39 190 1322 240',
+  hedra: {
+    imageSrc: '/svgs/icons/hedra.svg',
+    isWordmark: true,
+    name: 'Hedra',
+    cardWidth: 92,
   },
   racingAndSports: {
     imageSrc: `${customerLogoImagePath}/racing-and-sports.webp`,
@@ -158,7 +163,6 @@ export const logos = {
     imageSrc: `${customerLogoImagePath}/website-engineer.webp`,
     name: 'The Website Engineer',
   },
-  xaira: { imageSrc: `${customerLogoImagePath}/xaira.webp`, name: 'Xaira' },
   xata: { imageSrc: `${customerLogoSvgPath}/xata.svg`, name: 'Xata' },
 } satisfies Record<string, LogoSpec>
 
