@@ -1,4 +1,4 @@
-import { isValidElement, type ReactNode } from 'react'
+import { isValidElement, type ReactElement, type ReactNode } from 'react'
 import type { HighlightKind, MinimapLineMeta } from './types'
 
 export const DEFAULT_COLLAPSE_THRESHOLD = 20
@@ -9,24 +9,27 @@ export function hasDataAttr(props: Record<string, unknown>, name: string): boole
 
 export function getTextContent(node: ReactNode): string {
   if (typeof node === 'string' || typeof node === 'number') return String(node)
+
   if (Array.isArray(node)) {
-    const parts: string[] = []
-    let sawDataLine = false
-    for (const child of node) {
-      if (
-        isValidElement(child) &&
-        hasDataAttr(child.props as Record<string, unknown>, 'data-line')
-      ) {
-        if (sawDataLine) parts.push('\n')
-        sawDataLine = true
-      }
-      parts.push(getTextContent(child))
+    const lineNodes = node.filter(
+      (child): child is ReactElement =>
+        isValidElement(child) && hasDataAttr(child.props as Record<string, unknown>, 'data-line')
+    )
+    if (lineNodes.length > 0) {
+      return lineNodes
+        .map((line) =>
+          getTextContent((line.props as { children?: ReactNode }).children).replace(/\n$/, '')
+        )
+        .join('\n')
     }
-    return parts.join('')
+
+    return node.map((child) => getTextContent(child)).join('')
   }
+
   if (isValidElement(node)) {
     return getTextContent((node.props as { children?: ReactNode }).children)
   }
+
   return ''
 }
 

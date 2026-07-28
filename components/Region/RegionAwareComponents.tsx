@@ -2,6 +2,7 @@
 
 import React, { Children, isValidElement, cloneElement, ReactNode } from 'react'
 import CodeBlock from '@/components/CodeBlock'
+import { getTextContent } from '@/components/CodeBlock/utils'
 import { useRegion } from './RegionContext'
 
 // CodeBlock copy control uses this aria-label.
@@ -15,23 +16,6 @@ const isCopyButtonTarget = (target: EventTarget | null) =>
 type Replacement = {
   search: string
   replace: string
-}
-
-const getTextContent = (node: ReactNode): string => {
-  if (typeof node === 'string') {
-    return node
-  }
-  if (typeof node === 'number') {
-    return String(node)
-  }
-  if (Array.isArray(node)) {
-    return node.map(getTextContent).join('')
-  }
-  if (isValidElement(node)) {
-    const props = node.props as { children?: ReactNode }
-    return getTextContent(props.children)
-  }
-  return ''
 }
 
 type TextLeafRef = { value: string }

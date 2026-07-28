@@ -8,6 +8,7 @@ const { mdxOptions } = loadTsModule('utils/mdx/options.ts')
 const { filterCodeBlockMetaString, parseCodeBlockMetaFlags } = loadTsModule(
   'utils/mdx/rehypeCodeBlockMeta.ts'
 )
+const { getTextContent } = loadTsModule('components/CodeBlock/utils.ts')
 
 test('parseCodeBlockMetaFlags strips custom flags and keeps highlight meta', () => {
   const { flags, cleanedMeta } = parseCodeBlockMetaFlags(
@@ -185,4 +186,29 @@ test('countCodeLines ignores interstitial newlines between data-line spans', () 
   }
 
   assert.equal(countCodeLines(children), 8)
+})
+
+test('getTextContent does not double newlines between Shiki data-line nodes', () => {
+  // Mirrors rehype-pretty-code output: line spans separated by "\n" text nodes.
+  const line = (text) => React.createElement('span', { 'data-line': '' }, text)
+  const code = React.createElement('code', null, [
+    line('export const a = 1'),
+    '\n',
+    line('export const b = 2'),
+    '\n',
+    line('export const c = 3'),
+  ])
+  const pre = React.createElement('pre', null, code)
+
+  assert.equal(
+    getTextContent(pre),
+    ['export const a = 1', 'export const b = 2', 'export const c = 3'].join('\n')
+  )
+})
+
+test('getTextContent preserves a blank line between data-line nodes', () => {
+  const line = (text) => React.createElement('span', { 'data-line': '' }, text)
+  const code = React.createElement('code', null, [line('a'), '\n', line(''), '\n', line('b')])
+
+  assert.equal(getTextContent(code), 'a\n\nb')
 })
