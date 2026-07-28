@@ -17,28 +17,6 @@ type Replacement = {
   replace: string
 }
 
-const replaceInText = (text: string, replacements: Replacement[]) => {
-  let newText = text
-  replacements.forEach(({ search, replace }) => {
-    newText = newText.split(search).join(replace)
-  })
-  return newText
-}
-
-const hasPlaceholder = (node: ReactNode, placeholders: string[]): boolean => {
-  if (typeof node === 'string') {
-    return placeholders.some((p) => node.includes(p))
-  }
-  if (Array.isArray(node)) {
-    return node.some((child) => hasPlaceholder(child, placeholders))
-  }
-  if (isValidElement(node)) {
-    const props = node.props as { children?: ReactNode }
-    return hasPlaceholder(props.children, placeholders)
-  }
-  return false
-}
-
 const getTextContent = (node: ReactNode): string => {
   if (typeof node === 'string') {
     return node
@@ -56,45 +34,119 @@ const getTextContent = (node: ReactNode): string => {
   return ''
 }
 
+type TextLeafRef = { value: string }
+
+/**
+ * Collect depth-first text leaves so we can substitute placeholders that Shiki
+ * may have split across spans (e.g. `<` + `region` + `>`) without flattening
+ * the highlighted tree (which drops [data-line] padding and colors).
+ */
+const collectTextLeaves = (node: ReactNode, leaves: TextLeafRef[]): void => {
+  if (typeof node === 'string' || typeof node === 'number') {
+    leaves.push({ value: String(node) })
+    return
+  }
+  if (Array.isArray(node)) {
+    node.forEach((child) => collectTextLeaves(child, leaves))
+    return
+  }
+  if (isValidElement(node)) {
+    collectTextLeaves((node.props as { children?: ReactNode }).children, leaves)
+  }
+}
+
+const applyReplacementsToLeaves = (leaves: TextLeafRef[], replacements: Replacement[]) => {
+  const combined = leaves.map((leaf) => leaf.value).join('')
+  if (!replacements.some(({ search }) => combined.includes(search))) return false
+
+  type Range = { start: number; end: number; replace: string }
+  const ranges: Range[] = []
+  for (const { search, replace } of replacements) {
+    let from = 0
+    while (from <= combined.length) {
+      const index = combined.indexOf(search, from)
+      if (index === -1) break
+      ranges.push({ start: index, end: index + search.length, replace })
+      from = index + search.length
+    }
+  }
+  if (ranges.length === 0) return false
+  ranges.sort((a, b) => a.start - b.start)
+
+  const starts: number[] = []
+  let cursor = 0
+  for (const leaf of leaves) {
+    starts.push(cursor)
+    cursor += leaf.value.length
+  }
+
+  let rangeIndex = 0
+  for (let leafIndex = 0; leafIndex < leaves.length; leafIndex++) {
+    const leafStart = starts[leafIndex]
+    const leafText = leaves[leafIndex].value
+    let local = 0
+    let out = ''
+
+    while (local < leafText.length) {
+      const abs = leafStart + local
+      while (rangeIndex < ranges.length && ranges[rangeIndex].end <= abs) {
+        rangeIndex++
+      }
+      const range = rangeIndex < ranges.length ? ranges[rangeIndex] : null
+
+      if (range && abs >= range.start && abs < range.end) {
+        if (abs === range.start) out += range.replace
+        local = Math.min(leafText.length, range.end - leafStart)
+        continue
+      }
+
+      out += leafText[local]
+      local++
+    }
+
+    leaves[leafIndex].value = out
+  }
+
+  return true
+}
+
+const rebuildWithLeaves = (
+  node: ReactNode,
+  leaves: TextLeafRef[],
+  index: { at: number }
+): ReactNode => {
+  if (typeof node === 'string' || typeof node === 'number') {
+    return leaves[index.at++]?.value ?? ''
+  }
+  if (Array.isArray(node)) {
+    return Children.toArray(node.map((child) => rebuildWithLeaves(child, leaves, index)))
+  }
+  if (isValidElement(node)) {
+    const props = node.props as { children?: ReactNode }
+    if (props.children == null) return node
+    return cloneElement(node as React.ReactElement<{ children?: ReactNode }>, {
+      children: rebuildWithLeaves(props.children, leaves, index),
+    })
+  }
+  return node
+}
+
 const processCodeChildren = (children: ReactNode, replacements: Replacement[]): ReactNode => {
-  const placeholders = replacements.map((r) => r.search)
+  if (replacements.length === 0) return children
 
-  if (typeof children === 'string') {
-    return replaceInText(children, replacements)
+  const leaves: TextLeafRef[] = []
+  collectTextLeaves(children, leaves)
+  if (leaves.length === 0) return children
+
+  const changed = applyReplacementsToLeaves(leaves, replacements)
+  if (!changed) return children
+
+  // Fast path: single string child
+  if (typeof children === 'string' || typeof children === 'number') {
+    return leaves[0]?.value ?? ''
   }
 
-  if (Array.isArray(children)) {
-    const combinedText = getTextContent(children)
-    const hasAnyPlaceholder = placeholders.some((p) => combinedText.includes(p))
-
-    if (hasAnyPlaceholder && !children.some((child) => hasPlaceholder(child, placeholders))) {
-      return replaceInText(combinedText, replacements)
-    }
-
-    return Children.toArray(children.map((child) => processCodeChildren(child, replacements)))
-  }
-
-  if (isValidElement(children)) {
-    const props = children.props as { children?: ReactNode }
-
-    const combinedText = getTextContent(props.children)
-    const hasAnyPlaceholder = placeholders.some((p) => combinedText.includes(p))
-
-    if (hasAnyPlaceholder && !hasPlaceholder(props.children, placeholders)) {
-      return cloneElement(children as React.ReactElement<any>, {
-        children: replaceInText(combinedText, replacements),
-      })
-    }
-
-    if (props.children) {
-      return cloneElement(children as React.ReactElement<any>, {
-        children: processCodeChildren(props.children, replacements),
-      })
-    }
-    return children
-  }
-
-  return children
+  return rebuildWithLeaves(children, leaves, { at: 0 })
 }
 
 export const RegionAwarePre = (props: any) => {
