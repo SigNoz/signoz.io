@@ -1,0 +1,82 @@
+---
+date: 2026-07-23
+title: Open WebUI Dashboard
+description: Monitor Open WebUI with request throughput, latency percentiles, error rates, database query performance, and LLM token usage, cost, and latency by model.
+doc_type: explanation
+---
+
+<Admonition type="info" title="Instrument Open WebUI first">
+Before using this dashboard, instrument your Open WebUI deployment with OpenTelemetry and configure export to SigNoz. See the [Open WebUI monitoring guide](https://signoz.io/docs/open-webui-monitoring/) for complete setup instructions.
+</Admonition>
+
+This dashboard provides a comprehensive view of your `Open WebUI` deployment using trace and log data. It combines two telemetry sources: Open WebUI's native OpenTelemetry auto-instrumentation of FastAPI, SQLAlchemy, and HTTP clients (server spans carrying `http.route`, database spans carrying `db.system` and `db.operation`), and OpenLIT GenAI instrumentation for model calls (chat spans carrying the OpenTelemetry `gen_ai.*` semantic conventions such as `gen_ai.request.model`, `gen_ai.usage.input_tokens`, and `gen_ai.usage.output_tokens`, plus OpenLIT's own `gen_ai.usage.cost` extension). Every panel keys off these attributes and filters through the `service_name` picker at the top, so you can scope the view to one or more services (for example the application service and the OpenLIT LLM service).
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/openwebui-dashboard.webp"
+  alt="Open WebUI Dashboard"
+  caption="Open WebUI Dashboard Template"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/open-webui/open-webui-dashboard.json"
+    dashboardName="Open WebUI"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the performance, cost, and reliability of your Open WebUI deployment using OpenTelemetry trace and log data to help you:
+
+- **Track Application Health**: See total request volume, error rate, and p95/p99 latency for the Open WebUI backend at a glance.
+- **Analyze Endpoints**: Break down traffic and latency by `http.route` to find the busiest and slowest API endpoints.
+- **Monitor the Database**: Watch p95/p99 query latency and per-operation counts to catch database-driven slowness.
+- **Measure LLM Usage**: Track model request volume, input and output tokens, and total cost across every model in use.
+- **Control LLM Cost**: Follow spend over time and compare cost per model to keep the bill predictable.
+- **Watch LLM Latency**: See p50, p95, and p99 latency for model calls to surface slow responses and regressions.
+- **Catch Errors Early**: Watch the error rate by service and drill into recent failed traces and logs the moment incidents begin.
+
+## Panels Included
+
+### Application Health
+
+| Panel | Type | What It Shows |
+|-------|------|---------------|
+| **Total Requests** | Value | Count of inbound HTTP requests (FastAPI server spans) handled by the selected services |
+| **Error Rate** | Value | Fraction of server requests that ended in an error status, shown as a percentage |
+| **Latency p95** | Value | 95th-percentile request duration across all endpoints |
+| **Latency p99** | Value | 99th-percentile request duration across all endpoints |
+
+- **Request Rate by Endpoint**: Time-series graph of request volume grouped by `http.route`, showing the traffic mix and which endpoints dominate.
+- **Latency Percentiles (p50 / p95 / p99)**: Time-series graph of request duration percentiles, showing both typical performance and tail latency over time.
+- **Error Rate Over Time**: Time-series graph of the error fraction of server requests, revealing incident windows and regressions.
+- **Request Distribution by Endpoint**: Pie chart of each endpoint's share of requests (`http.route`), a clear view of where traffic concentrates.
+- **Endpoint Performance**: Table of endpoints with request count and p95/p99 latency, for a side-by-side comparison to find the slow routes.
+
+### Database
+
+- **DB Query Latency (p95 / p99)**: Time-series graph of p95 and p99 duration for database (SQLAlchemy) query spans, surfacing database-driven slowness.
+- **Database Operations**: Table of database operations grouped by `db.operation`, with query count and average latency, showing which queries run most and which are slowest.
+
+### LLM / GenAI
+
+| Panel | Type | What It Shows |
+|-------|------|---------------|
+| **LLM Requests** | Value | Count of LLM chat requests captured by the OpenLIT `gen_ai` spans |
+| **Input Tokens** | Value | Total prompt tokens consumed across LLM calls (`gen_ai.usage.input_tokens`) |
+| **Output Tokens** | Value | Total completion tokens generated across LLM calls (`gen_ai.usage.output_tokens`) |
+| **Total Cost (USD)** | Value | Summed OpenLIT-computed cost of LLM calls (`gen_ai.usage.cost`) |
+
+- **LLM Latency Percentiles (p50 / p95 / p99)**: Time-series graph of duration percentiles for LLM chat spans, showing model-call latency both typical and tail.
+- **Token Usage Over Time**: Time-series graph of input vs output token volume, showing demand and how prompt/response sizes trend.
+- **LLM Cost Over Time (USD)**: Time-series graph of LLM spend, to spot cost spikes and trends before they surprise the bill.
+- **Requests by Model**: Pie chart of each model's share of LLM requests (`gen_ai.request.model`), showing which models carry the load.
+- **Model Breakdown**: Table of models with request count, input/output tokens, cost, and average latency, for the cost and usage comparison across models.
+
+### Errors & Logs
+
+- **Errors Over Time by Service**: Time-series graph of error span count grouped by `service.name`, pinpointing which service is failing and when.
+- **Recent Error Traces**: List of the latest errored spans across the selected services, for jumping straight to failures when the error rate climbs.
+- **Recent Logs**: List of the most recent logs from the selected services, for quick log context to read alongside the traces.
