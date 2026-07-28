@@ -84,6 +84,12 @@ export const logos = {
     name: 'Kernel',
     quoteWidth: 88,
   },
+  kognitos: {
+    cardWidth: 116,
+    imageSrc: '/svgs/icons/kognitos.svg',
+    isWordmark: true,
+    name: 'Kognitos',
+  },
   lenskart: {
     cardWidth: 108,
     imageSrc: `${customerLogoSvgPath}/lenskart.svg`,
@@ -157,7 +163,6 @@ export const logos = {
     imageSrc: `${customerLogoImagePath}/website-engineer.webp`,
     name: 'The Website Engineer',
   },
-  xaira: { imageSrc: `${customerLogoImagePath}/xaira.webp`, name: 'Xaira' },
   xata: { imageSrc: `${customerLogoSvgPath}/xata.svg`, name: 'Xata' },
 } satisfies Record<string, LogoSpec>
 
