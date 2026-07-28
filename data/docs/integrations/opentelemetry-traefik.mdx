@@ -7,12 +7,7 @@ doc_type: howto
 
 ## Overview
 
-Traefik writes two kinds of logs:
-
-- **Access logs:** one record per HTTP request, with the router, backend service, status code, and timings. This guide collects these.
-- **Application logs:** Traefik's own startup and configuration events, controlled by the separate `log` option.
-
-Set the access log format to `json` and let the OpenTelemetry Collector file log receiver tail it. A `json_parser` operator turns each line into structured fields you can query and aggregate in SigNoz.
+This guide ships Traefik access logs to SigNoz with the OpenTelemetry Collector, parsed into structured fields you can query by router, service, and status code.
 
 <Admonition type="info" title="Looking for metrics and traces?" defaultCollapsed="true">
   Traefik exports metrics and traces to SigNoz over OTLP without a Collector. See [Traefik Observability with OpenTelemetry](https://signoz.io/docs/tutorial/traefik-observability/) for that setup. This guide covers the third signal.
@@ -30,15 +25,25 @@ Ensure you have:
 - An [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) that can read the Traefik access log file
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
+## How it works
+
+Traefik writes two log streams, each with its own block in the static configuration:
+
+- **Access logs** (the `accessLog` block): one record per HTTP request, with the router, backend service, status code, and timings. This guide collects these.
+- **Application logs** (the `log` block): Traefik's own diagnostics, such as startup and configuration reloads. Traefik writes them to stdout at `ERROR` level by default, and your `accessLog` settings do not change them. This guide skips them.
+
+Set the access log format to `json` and let the OpenTelemetry Collector file log receiver tail it. A `json_parser` operator turns each line into structured fields you can query and aggregate in SigNoz.
+
 ## Collect Traefik access logs
 
-Traefik writes the access log itself. The Collector tails that file, parses each JSON line into fields, and forwards the result to SigNoz.
+Switch Traefik's access log to `json`, write a Collector config that tails and parses that file, then deploy the Collector.
 
 ### Step 1: Enable JSON access logs
 
 Traefik ships with access logs off, and its `common` default format needs regex parsing. Turn access logs on and switch the format to `json`.
 
-Using CLI flags:
+<Tabs entityName="config">
+<TabItem value="cli" label="CLI flags" default>
 
 ```bash
 --accesslog=true
@@ -46,7 +51,8 @@ Using CLI flags:
 --accesslog.filepath=/var/log/traefik/access.log
 ```
 
-Or in `traefik.yml`:
+</TabItem>
+<TabItem value="file" label="traefik.yml">
 
 ```yaml:traefik.yml
 accessLog:
@@ -54,7 +60,10 @@ accessLog:
   filePath: /var/log/traefik/access.log
 ```
 
-Traefik writes to stdout when you omit `filepath`. Restart Traefik to apply the change.
+</TabItem>
+</Tabs>
+
+Traefik writes to stdout when you omit the file path. Restart Traefik to apply the change.
 
 <Admonition type="info" title="Trimming noisy fields" defaultCollapsed="true">
   Access logs carry one record per request. To cut volume, drop fields you do not query or filter out successful requests:
