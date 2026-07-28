@@ -157,7 +157,12 @@ export const logos = {
     imageSrc: `${customerLogoImagePath}/website-engineer.webp`,
     name: 'The Website Engineer',
   },
-  xaira: { imageSrc: `${customerLogoImagePath}/xaira.webp`, name: 'Xaira' },
+  kognitos: {
+    cardWidth: 116,
+    imageSrc: '/svgs/icons/kognitos.svg',
+    isWordmark: true,
+    name: 'Kognitos',
+  },
   xata: { imageSrc: `${customerLogoSvgPath}/xata.svg`, name: 'Xata' },
 } satisfies Record<string, LogoSpec>
 
