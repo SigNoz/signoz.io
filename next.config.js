@@ -312,6 +312,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/operate/migration/upgrade-0.135/',
+          destination: '/docs/operate/migration/upgrade-0-135/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.135',
+          destination: '/docs/operate/migration/upgrade-0-135/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/migration/upgrade-0.113/',
           destination: '/docs/operate/migration/upgrade-0-113/',
           permanent: true,
@@ -816,6 +826,21 @@ module.exports = () => {
         {
           source: '/comparisons/signoz-vs-dynatrace/',
           destination: '/product-comparison/signoz-vs-dynatrace/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/opentelemetry-collector-vs-agent/',
+          destination: '/blog/opentelemetry-collector-complete-guide/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-exporters/',
+          destination: '/guides/opentelemetry-collector-vs-exporter/',
+          permanent: true,
+        },
+        {
+          source: '/blog/using-opentelemetry-collector-processor/',
+          destination: '/blog/opentelemetry-collector-complete-guide/',
           permanent: true,
         },
         {
