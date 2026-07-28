@@ -129,6 +129,44 @@ Prefer these H2 sections when they fit the doc:
 - Main-path snippets should be safe defaults that work after placeholder replacement.
 - Move advanced or environment-specific options into callouts or collapsed sections.
 
+### Code block fence options
+
+Keep authoring as normal fenced backticks. Filename titles use `lang:path` (or `title="…"`).
+
+| Meta | Effect |
+|------|--------|
+| `{5-9}` | Neutral (robin) line highlight — preferred for callouts |
+| `{5-9}#robin {12}#cherry {14-15}#forest {18}#amber` | Sentiment highlights (robin / cherry / forest / amber) |
+| `noLineNumbers` | Hide line numbers (on by default) |
+| `minimap` | Show a minimap strip beside the code |
+| `collapse` / `collapse={30}` | Enable collapse controls with threshold 20 / custom line count |
+| `noCollapse` | Never show collapse controls |
+| `defaultCollapsed` | Start collapsed (only when collapse controls apply; default is expanded) |
+
+Examples:
+
+````md
+```ts:server.ts {5-9}
+// neutral highlight on lines 5–9; line numbers on
+```
+
+```yaml minimap collapse={40}
+# long config with minimap + collapse above 40 lines
+```
+
+```bash noLineNumbers
+echo "no gutter"
+```
+
+```text collapse={5} defaultCollapsed
+# starts collapsed when line count exceeds the threshold
+```
+````
+
+Visual permutation reference (dev only): [`/dev/codeblock`](https://signoz.io/dev/codeblock/) ← `data/docs/codeblock-variants.mdx`.
+
+In-chrome tabbed code (`<CodeTabs>` / `<CodeTab>`) is available in MDX for product-style chrome, but prefer the existing page-level `<Tabs>` / `<TabItem>` for docs unless you specifically need tabs inside the codeblock header.
+
 ### SigNoz Cloud Ingestion Endpoints (region-aware)
 
 The docs region selector (top-right of the page) keeps SigNoz Cloud ingestion endpoints in sync by substituting the **literal `<region>` token** in every snippet on the page. A snippet is only region-aware if it uses that exact token, so anything else silently freezes on whatever the author typed — and on a page that mixes both, some snippets update with the selector while others do not.
