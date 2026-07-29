@@ -16,6 +16,19 @@ type FooterPillLinkProps = {
   className?: string
 }
 
+function isSigNozOwnedHref(href: string): boolean {
+  if (href.startsWith('/') || href.startsWith('#')) {
+    return true
+  }
+
+  try {
+    const { hostname } = new URL(href)
+    return hostname === 'signoz.io' || hostname.endsWith('.signoz.io')
+  } catch {
+    return false
+  }
+}
+
 function FooterPillLink({
   href,
   children,
@@ -24,10 +37,19 @@ function FooterPillLink({
   className = '',
 }: FooterPillLinkProps) {
   const classes = `footer-pill-link mt-5 ${className}`.trim()
+  const isOwned = isSigNozOwnedHref(href)
+
+  if ((external || newTab) && isOwned) {
+    return (
+      <Link href={href} className={classes} target="_blank" prefetch={false}>
+        {children}
+      </Link>
+    )
+  }
 
   if (external) {
     return (
-      <a href={href} className={classes} target="_blank" rel="noopener noreferrer nofollow">
+      <a href={href} className={classes} target="_blank" rel="noopener nofollow">
         {children}
       </a>
     )
@@ -91,11 +113,11 @@ function Footer() {
                 </div>
 
                 <FooterPillLink href="/support/">Support</FooterPillLink>
-                <FooterPillLink href="https://signoz.io/slack/" external>
+                <FooterPillLink href="https://signoz.io/slack/" newTab>
                   Slack
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
-                <FooterPillLink href="https://x.com/SigNozHQ" external>
+                <FooterPillLink href="https://x.com/SigNozHQ" newTab>
                   X
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
@@ -112,7 +134,7 @@ function Footer() {
                   DevOps Wordle
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
-                <FooterPillLink href="https://newsletter.signoz.io/" external>
+                <FooterPillLink href="https://newsletter.signoz.io/" newTab>
                   Newsletter
                 </FooterPillLink>
                 <FooterPillLink href="/events/kubecon-cloudnativecon-north-america-2025/" newTab>
@@ -133,14 +155,14 @@ function Footer() {
                 <FooterPillLink href="/product-comparison/signoz-vs-dynatrace/">
                   SigNoz vs Dynatrace
                 </FooterPillLink>
-                <FooterPillLink href="https://signoz.io/careers/" external>
+                <FooterPillLink href="https://signoz.io/careers/" newTab>
                   Careers
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
                 <FooterPillLink href="/about-us/">About</FooterPillLink>
                 <FooterPillLink href="/terms-of-service/">Terms</FooterPillLink>
                 <FooterPillLink href="/privacy/">Privacy</FooterPillLink>
-                <FooterPillLink href="https://trust.signoz.io/" external>
+                <FooterPillLink href="https://trust.signoz.io/" newTab>
                   Security & Compliance
                 </FooterPillLink>
               </div>
@@ -166,12 +188,7 @@ function Footer() {
                     className="size-1.5 shrink-0 rounded-full bg-[var(--callout-success-description)]"
                     aria-hidden
                   />
-                  <Link
-                    href="https://status.signoz.io/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    prefetch={false}
-                  >
+                  <Link href="https://status.signoz.io/" target="_blank" prefetch={false}>
                     All systems operational
                   </Link>
                 </div>
