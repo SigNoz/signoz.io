@@ -1,0 +1,448 @@
+---
+date: 2026-07-22
+title: MySQL Logs Monitoring with OpenTelemetry Collector
+description: Collect and parse MySQL error, slow query, and general query logs with the OpenTelemetry Collector and send them to SigNoz for search and alerting.
+doc_type: howto
+---
+
+## Overview
+
+Collect MySQL error, slow query, and general query logs with the OpenTelemetry Collector and send them to SigNoz. Start with the error log, which most MySQL packages already write to a file, then add the other logs and field parsing as you need them.
+
+<Admonition type="tip" title="Looking for MySQL metrics?" defaultCollapsed="true">
+See [Monitor MySQL metrics](https://signoz.io/docs/metrics-management/mysql-metrics/) to collect database and performance metrics with the OpenTelemetry Collector.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Update the exporter endpoint and remove the ingestion-key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- A MySQL 8.0+ server that you can access, and restart if you enable the slow query log later
+- An [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) v0.144.0+ on the MySQL host, running as a user with read access to the log files
+
+## Send your first MySQL logs
+
+MySQL packages on most Linux distributions already write the error log to a file, so you can ship it without editing MySQL configuration or restarting the server.
+
+### Step 1: Locate the error log
+
+Connect to MySQL with a client such as `mysql` and ask where it writes the error log:
+
+```sql
+SHOW VARIABLES LIKE 'log_error';
+```
+
+An absolute path means MySQL writes to a file the Collector can tail. A value of `stderr` means MySQL writes to the console instead, so set a file path under `[mysqld]` in your MySQL configuration file (`/etc/mysql/my.cnf` or `/etc/my.cnf`, depending on your distribution) and restart MySQL:
+
+```ini:my.cnf
+[mysqld]
+log_error = /var/log/mysql/error.log
+```
+
+Keep `log_output` set to `FILE`, its default. MySQL can write logs to database tables instead, which the `filelog` receiver cannot read.
+
+<Admonition type="info" title="Default error log location by distribution" defaultCollapsed="true">
+- Debian and Ubuntu: `/var/log/mysql/error.log`
+- RHEL, CentOS, and Rocky: `/var/log/mysqld.log`
+- Other distributions: `<hostname>.err` in the MySQL data directory
+</Admonition>
+
+### Step 2: Create the Collector config file
+
+Create a file named `mysql-logs-collection-config.yaml`:
+
+```yaml:mysql-logs-collection-config.yaml
+receivers:
+  filelog/mysql_error:
+    include: ["${env:MYSQL_ERROR_LOG}"]
+    # Ship the log file's existing contents on the first run so you see data
+    # right away. Remove this line once the pipeline works.
+    start_at: beginning
+    operators:
+      - type: add
+        field: attributes.source
+        value: mysql
+      - type: add
+        field: attributes.log_type
+        value: error
+
+processors:
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 10s
+
+exporters:
+  # Export to SigNoz Cloud over OTLP/HTTP.
+  otlp_http/mysql-logs:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    logs/mysql:
+      receivers: [filelog/mysql_error]
+      processors: [batch]
+      exporters: [otlp_http/mysql-logs]
+```
+
+Each line arrives in SigNoz as raw text, tagged with `source` and `log_type` so you can tell MySQL logs apart from other sources. To pull out the timestamp, severity, and message, see [Parse the logs into fields](#parse-the-logs-into-fields).
+
+### Step 3: Run the Collector
+
+The config above is the same everywhere. Only file access and startup differ by environment.
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+Set the environment variables referenced in the config:
+
+```bash
+# Absolute path to the MySQL error log, readable by the Collector
+export MYSQL_ERROR_LOG="/var/log/mysql/error.log"
+
+# Region-specific SigNoz Cloud OTLP/HTTP endpoint
+export OTLP_DESTINATION_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+# your SigNoz ingestion key
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+Start the Collector with the config file. It accepts multiple `--config` flags, so you can run this alongside your metrics config:
+
+```bash
+otelcol-contrib --config mysql-logs-collection-config.yaml
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Run MySQL and the Collector as separate containers sharing a volume for the log files, mounted read-only into the Collector.
+
+The `mysql` image writes its error log to the container's stderr, so point it at a file on the shared volume:
+
+```ini:mysql-logging.cnf
+[mysqld]
+log_error = /var/log/mysql/error.log
+```
+
+```yaml:docker-compose.yaml
+services:
+  mysql:
+    image: mysql:8.0
+    volumes:
+      - ./mysql-logging.cnf:/etc/mysql/conf.d/zz-logging.cnf:ro
+      - mysql-logs:/var/log/mysql
+
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:latest
+    user: "0:0" # read the mysql-owned log files
+    command: ["--config=/etc/otelcol/config.yaml"]
+    environment:
+      MYSQL_ERROR_LOG: /var/log/mysql/error.log
+      OTLP_DESTINATION_ENDPOINT: "https://ingest.<region>.signoz.cloud:443"
+      SIGNOZ_INGESTION_KEY: "<your-ingestion-key>"
+    volumes:
+      - ./mysql-logs-collection-config.yaml:/etc/otelcol/config.yaml:ro
+      - mysql-logs:/var/log/mysql:ro
+
+volumes:
+  mysql-logs:
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+Run the Collector as a **sidecar** in the MySQL pod, sharing an `emptyDir` that holds the log files. Store `logging.cnf` and the Collector config as ConfigMaps, and set the log-path and SigNoz environment variables on the sidecar.
+
+<Admonition type="warning">
+MySQL writes its error, slow, and general logs to **files**, not stdout. A node-level agent that only tails container stdout (such as a DaemonSet collector) will **not** capture them. Use the sidecar with a shared volume below.
+</Admonition>
+
+```yaml:mysql-with-sidecar.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      # mysql runs as uid/gid 999; fsGroup makes the shared volume writable by it and readable by the sidecar
+      securityContext:
+        fsGroup: 999
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          volumeMounts:
+            - { name: mysql-logs, mountPath: /var/log/mysql }
+            - { name: mysql-logging, mountPath: /etc/mysql/conf.d/zz-logging.cnf, subPath: logging.cnf }
+        - name: otel-sidecar
+          image: otel/opentelemetry-collector-contrib:latest
+          args: ["--config=/etc/otelcol/collector.yaml"]
+          securityContext:
+            runAsUser: 0
+          env:
+            - { name: MYSQL_ERROR_LOG, value: /var/log/mysql/error.log }
+            - { name: OTLP_DESTINATION_ENDPOINT, value: "https://ingest.<region>.signoz.cloud:443" }
+            - name: SIGNOZ_INGESTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: signoz-ingestion-key
+                  key: SIGNOZ_INGESTION_KEY
+          volumeMounts:
+            - { name: mysql-logs, mountPath: /var/log/mysql, readOnly: true }
+            - { name: otel-config, mountPath: /etc/otelcol/collector.yaml, subPath: collector.yaml }
+      volumes:
+        - { name: mysql-logs, emptyDir: {} }
+        - { name: mysql-logging, configMap: { name: mysql-logging } }
+        - { name: otel-config, configMap: { name: mysql-logs-otel } }
+```
+
+Create the referenced objects before applying: a `mysql-logging` ConfigMap holding a `logging.cnf` that sets `log_error = /var/log/mysql/error.log`, a `mysql-logs-otel` ConfigMap from `mysql-logs-collection-config.yaml` (mounted as `collector.yaml`), and a `signoz-ingestion-key` Secret holding your ingestion key.
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `signoz-ingestion-key` Secret: Holds your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) under the `SIGNOZ_INGESTION_KEY` key.
+
+<Admonition type="info">
+If the sidecar forwards to an in-cluster gateway over OTLP/gRPC instead of exporting to SigNoz directly, keep batches small: the gRPC receiver defaults to a 4 MB max message size, which a large `general_log` backlog can exceed (`ResourceExhausted`). Lower the sidecar's `send_batch_max_size`, or raise `max_recv_msg_size_mib` on the gateway.
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+<details>
+<ToggleHeading>
+
+## Optional configuration
+
+</ToggleHeading>
+
+The steps above ship raw error log lines. Expand any of these to parse those lines into fields, or to collect MySQL's other log files.
+
+### Parse the logs into fields
+
+The minimal config sends each error log line as raw text. Add `regex_parser` operators to pull out the timestamp, severity, and message so you can filter and aggregate on them in SigNoz.
+
+Replace the `operators` block of `filelog/mysql_error` with:
+
+```yaml:mysql-logs-collection-config.yaml
+    operators:
+      # Error log lines look like:
+      # 2020-08-06T14:25:02.835618Z 0 [Warning] [MY-010068] [Server] <message>
+      - type: regex_parser
+        parse_from: body
+        regex: '^(?P<ts>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)\s+(?P<thread_id>\d+)\s+\[(?P<log_level>[^\]]+)\]\s+\[(?P<error_code>[^\]]+)\]\s+\[(?P<subsystem>[^\]]+)\]\s+(?P<message>.*)$'
+        timestamp:
+          parse_from: attributes.ts
+          layout: '%Y-%m-%dT%H:%M:%S.%fZ'
+        severity:
+          parse_from: attributes.log_level
+          mapping:
+            error: ERROR
+            warn: Warning
+            info:
+              - Note
+              - System
+        on_error: send
+      - type: move
+        if: attributes.message != nil
+        from: attributes.message
+        to: body
+      - type: remove
+        if: attributes.ts != nil
+        field: attributes.ts
+      - type: add
+        field: attributes.source
+        value: mysql
+      - type: add
+        field: attributes.log_type
+        value: error
+```
+
+Restart the Collector. New entries arrive with `thread_id`, `error_code`, `subsystem`, and `severity_text` as attributes. `on_error: send` sends unparseable lines through with their raw text intact instead of dropping them.
+
+<Admonition type="info">
+The parsers target **MySQL 8.0+** log formats. The MySQL 5.7 error log omits the `[MY-code]` and `[subsystem]` fields, so drop those groups from the regex for that version.
+</Admonition>
+
+### Collect slow query logs
+
+The slow query log records statements that run longer than `long_query_time` seconds. It is off by default.
+
+#### Enable the slow query log
+
+Set these under `[mysqld]` in your MySQL configuration file and restart MySQL:
+
+```ini:my.cnf
+[mysqld]
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/mysql-slow.log
+long_query_time = 2
+# Optional: log statements that run without an index
+log_queries_not_using_indexes = 1
+```
+
+For a quick test, set these at runtime with `SET GLOBAL` instead, which needs no restart. MySQL marks `log_error` as non-dynamic, so the error log path always requires a restart.
+
+MySQL's own default for `slow_query_log_file` is `<hostname>-slow.log` in the data directory (typically `/var/lib/mysql/`). Use any absolute path the Collector can read.
+
+<Admonition type="info" title="Configuration parameters" defaultCollapsed="true">
+- `slow_query_log`: set to `1` to enable.
+- `slow_query_log_file`: absolute path to the log file the Collector will tail.
+- `long_query_time`: threshold in seconds (default `10`, supports microsecond precision such as `0.5`).
+- `log_queries_not_using_indexes`: optional, logs full-scan queries regardless of duration.
+</Admonition>
+
+<Admonition type="info" title="What a slow query log entry looks like" defaultCollapsed="true">
+Each entry spans several lines, so the receiver below uses a `multiline` block to recombine them into one record:
+
+```text
+# Time: 2024-01-15T14:32:45.123456Z
+# User@Host: appuser[appuser] @ localhost []  Id:    42
+# Query_time: 12.567890  Lock_time: 0.001234  Rows_sent: 25  Rows_examined: 1000000
+SET timestamp=1705334365;
+SELECT id, email FROM users WHERE country = 'US' ORDER BY created_at;
+```
+</Admonition>
+
+#### Add the receiver
+
+Add a second receiver to `mysql-logs-collection-config.yaml` and include it in the pipeline:
+
+```yaml:mysql-logs-collection-config.yaml
+receivers:
+  filelog/mysql_slow:
+    include: ["${env:MYSQL_SLOW_LOG}"]
+    # Each entry starts with "# Time:" and spans several lines. Recombine
+    # them into one log record for parsing.
+    multiline:
+      line_start_pattern: '^# Time:'
+    operators:
+      - type: regex_parser
+        parse_from: body
+        regex: '# Time: (?P<ts>\S+)\n# User@Host:\s+(?P<user>\S+)\s+@\s+(?P<host>\S*)\s+\[(?P<ip>[^\]]*)\](?:\s+Id:\s+(?P<conn_id>\d+))?\n# Query_time:\s+(?P<query_time>[\d.]+)\s+Lock_time:\s+(?P<lock_time>[\d.]+)\s+Rows_sent:\s+(?P<rows_sent>\d+)\s+Rows_examined:\s+(?P<rows_examined>\d+)\n(?:SET timestamp=\d+;\n)?(?P<query>(?s:.*))'
+        timestamp:
+          parse_from: attributes.ts
+          layout: '%Y-%m-%dT%H:%M:%S.%fZ'
+        on_error: send
+      - type: remove
+        if: attributes.ts != nil
+        field: attributes.ts
+      - type: add
+        field: attributes.source
+        value: mysql
+      - type: add
+        field: attributes.log_type
+        value: slow_query
+
+service:
+  pipelines:
+    logs/mysql:
+      receivers: [filelog/mysql_error, filelog/mysql_slow]
+```
+
+Set `MYSQL_SLOW_LOG` to the configured `slow_query_log_file` path, then restart the Collector:
+
+```bash
+export MYSQL_SLOW_LOG="/var/log/mysql/mysql-slow.log"
+```
+
+Run `SELECT SLEEP(3);` to generate an entry, then filter by `log_type = slow_query` in SigNoz. Entries carry `query_time`, `lock_time`, `rows_sent`, `rows_examined`, `user`, and the statement itself.
+
+### Collect general query logs
+
+The general query log records client connections and statements received by MySQL. It is verbose and has a measurable performance cost, so keep it off in production and enable it for short debugging sessions.
+
+```ini:my.cnf
+[mysqld]
+general_log = 1
+general_log_file = /var/log/mysql/mysql.log
+```
+
+Entries are tab-separated with `Time`, `Id` (connection ID), `Command`, and `Argument`:
+
+```text
+2024-01-15T10:45:23.000000Z	   42	Query	SELECT * FROM users WHERE id = 1
+2024-01-15T10:45:26.000000Z	   43	Connect	root@localhost on  using TCP/IP
+```
+
+Add a `filelog/mysql_general` receiver pointed at `general_log_file` and include it in the logs pipeline. A minimal receiver that keeps the raw line in `body` and tags the source:
+
+```yaml:mysql-logs-collection-config.yaml
+receivers:
+  filelog/mysql_general:
+    include: ["${env:MYSQL_GENERAL_LOG}"]
+    operators:
+      - type: add
+        field: attributes.source
+        value: mysql
+      - type: add
+        field: attributes.log_type
+        value: general
+```
+
+Set `MYSQL_GENERAL_LOG` to the configured `general_log_file` path, then add `filelog/mysql_general` to `service.pipelines.logs/mysql.receivers`.
+
+</details>
+
+## Validate
+
+1. Run `FLUSH LOGS;` in a MySQL client, or restart MySQL, to write a fresh error log entry.
+2. Open **Logs > Explorer** in SigNoz and filter by `source = mysql`.
+3. Confirm that error log lines appear, tagged with `log_type = error`.
+
+With `start_at: beginning`, the error log's existing entries also arrive within seconds of the Collector starting.
+
+<Figure
+  src="/img/docs/integrations/mysql/mysql-logs-explorer.webp"
+  alt="MySQL logs in SigNoz Logs Explorer filtered by source = mysql"
+  caption="MySQL logs in SigNoz, filtered by source = mysql"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+**No logs in SigNoz**: Run `tail` against each configured log path as the Collector's OS user. Check the Collector logs for `permission denied` or `no such file` errors, and verify `MYSQL_ERROR_LOG` and `MYSQL_SLOW_LOG` point to the real paths (`SHOW VARIABLES LIKE 'slow_query_log_file';`).
+
+**Slow-query entries split across multiple records**: The `multiline.line_start_pattern` must match the start of each entry. Confirm your slow log begins each block with `# Time:`. If the last entry is delayed, set `force_flush_period: 5s` on the receiver.
+
+**Fields not parsed (raw line in body)**: The regex targets the MySQL 8.0 format. On MySQL 5.7 the error-log line has no `[MY-code]`/`[subsystem]` fields; drop those groups from the regex. With `on_error: send`, unparsed lines reach SigNoz with the raw text in `body`.
+
+**Logs missing from the file**: The slow and general query logs are off by default. Verify `SHOW VARIABLES LIKE 'slow_query_log';` returns `ON` and that `log_output` includes `FILE` (`SHOW VARIABLES LIKE 'log_output';`).
+
+</details>
+
+## Next Steps
+
+- [Monitor MySQL metrics](https://signoz.io/docs/metrics-management/mysql-metrics/) and import the [MySQL dashboard](https://signoz.io/docs/dashboards/dashboard-templates/mysql/).
+- [Create log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) on slow-query volume or error severity.
+- [Query and filter logs](https://signoz.io/docs/logs-management/overview/) in SigNoz.
+
+## Get Help
+
+<GetHelp />

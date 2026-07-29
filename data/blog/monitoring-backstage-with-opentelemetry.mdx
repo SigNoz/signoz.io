@@ -1,9 +1,11 @@
 ---
-title: Monitoring Backstage with OpenTelemetry:Closing the observability blind spot
-date: 2025-06-02
+title: "Monitoring Backstage with OpenTelemetry:Closing the observability blind spot"
+meta_title: "Monitoring Backstage with OpenTelemetry"
+published_date: 2025-06-02
+updated_date: 2026-07-14
 tags: [OpenTelemetry]
 authors: [elizabeth_mathew, shivanshu, ekansh_gupta]
-description: Learn how to monitor Backstage, the developer portal, using OpenTelemetry. This guide covers the importance of observability, common failure modes, and a step-by-step implementation to ensure your Backstage instance is fully instrumented.
+description: "Instrument your Backstage developer portal with OpenTelemetry and monitor its performance in SigNoz."
 image: /img/blog/2025/06/backstage-flow.webp
 keywords: [monitoring, observability, OpenTelemetry, Backstage, developer portal, instrumentation, metrics, traces, logs]
 related_articles:
@@ -62,7 +64,7 @@ OTel attaches context [like trace IDs] to operations and propagates it across fu
 
 ### Collectors and Exporters
 
-OpenTelemetry data can be exported to a backend of your choice. Often this is done via an OpenTelemetry Collector, a separate service that receives data and forwards it to one or more observability platforms. You can export data in OTLP format and send it to backends like SigNoz, Jaeger or Prometheus. 
+OpenTelemetry data can be exported to a backend of your choice. Often this is done via an OpenTelemetry Collector, a separate service that receives data and forwards it to one or more observability platforms. You can export data in [OTLP format](https://signoz.io/blog/what-is-otlp/) and send it to backends like SigNoz, Jaeger or Prometheus. 
 
 ### Signals like Traces, Metrics, Logs
 
@@ -71,6 +73,12 @@ With OTel, Backstage can emit [distributed traces](https://signoz.io/blog/distri
 In summary, OpenTelemetry provides the tools to instrument and export Backstage’s internal behaviour. Next, we’ll walk through how to apply OTel to Backstage’s backend.
 
 ## Instrumenting the Backstage Backend with OpenTelemetry
+
+<KeyPointCallout>
+
+Backstage's Node.js backend is instrumented like any other Node service, following the [OpenTelemetry Node.js guide](https://signoz.io/opentelemetry/nodejs/).
+
+</KeyPointCallout>
 
 To get Backstage emitting telemetry, we need to integrate the OpenTelemetry Node.js SDK into the Backstage backend service. Backstage is built on Node/Express, so we can leverage OTel’s Node auto-instrumentation to capture many out-of-the-box data points like HTTP requests and certain database or HTTP client calls. We can also add manual instrumentation for anything custom.
 
