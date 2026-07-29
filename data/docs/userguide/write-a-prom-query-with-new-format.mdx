@@ -35,16 +35,16 @@ To support these characters, PromQL queries in SigNoz use a **new quoted syntax*
 
 ## Regex Label Matchers Are Fully Anchored
 
-The regex matchers `=~` and `!~` are fully anchored, following standard Prometheus semantics. This means `=~"foo"` is evaluated as `=~"^foo$"` and must match the **entire** label value, not just a substring.
+The regex matchers `=~` and `!~` are fully anchored, following standard Prometheus semantics. The pattern is wrapped and anchored as `^(?:...)$`, so `=~"foo"` is evaluated as `=~"^(?:foo)$"` and must match the **entire** label value, not just a substring.
 
 To perform a substring match, wrap the pattern with `.*` on both sides:
 
 ```promql
 # Matches only label values that are exactly "Docman"
-{service=~"Docman"}
+{"service.name"=~"Docman"}
 
 # Matches any label value containing "Docman" (substring match)
-{service=~".*Docman.*"}
+{"service.name"=~".*Docman.*"}
 ```
 
 This applies to alternation patterns as well. For example, `env=~"prod|stag"` matches values that are exactly `prod` or `stag`, not values that merely contain those strings.
