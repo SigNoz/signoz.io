@@ -1,5 +1,5 @@
 ---
-date: 2026-06-27
+date: 2026-07-16
 title: Querying Traces
 description: Query traces in SigNoz using the Query Builder in Trace Explorer and Dashboards, with ClickHouse SQL available in Dashboards.
 doc_type: reference
@@ -25,6 +25,23 @@ Use the **Filter** field to narrow down spans using attributes. Supported operat
 
 Combine filters with `AND` / `OR` for complex queries. See the [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) guide and [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) for the full list of operators and syntax details.
 
+#### Missing attribute keys
+
+If a filter, selected field, group-by, or aggregation references an attribute key that is not found in field metadata (because of indexing lag, TTL eviction, or a typo), the trace query no longer fails. SigNoz runs the query against the raw span data stored in ClickHouse and returns results with a warning in the query response:
+
+```
+key `<name>` not found in metadata; querying the underlying data directly. If this is unexpected, check the key name for typos.
+```
+
+Key resolution follows these rules:
+
+- A qualified key such as `resource.service.name` or `mykey:string` is honored exactly. The context and data type you specify are used as-is, and the same fallback applies if the key is absent from metadata.
+- A bare key name defaults to the attribute context, with its data type inferred from the filter value you provide (`mykey = 'a'` is treated as a string, `mykey > 5` as a number).
+
+<Admonition type="info">
+This graceful fallback applies to traces only. Queries on logs, metrics, and other signals still return a `key not found` error when a referenced key is absent from metadata.
+</Admonition>
+
 ### Aggregation (Time Series & Table views)
 
 Trace queries support a full set of [aggregation functions](https://signoz.io/docs/querying/aggregation-grouping/) in the **Time Series** and **Table** views:
@@ -36,6 +53,12 @@ Trace queries support a full set of [aggregation functions](https://signoz.io/do
 ### Group By (Time Series & Table views)
 
 Segment results by one or more attributes in the **Time Series** and **Table** views. For example, grouping by `service.name` and `operation` produces a separate series for each service-operation pair. Useful for comparing latency or error rates across services, endpoints, or status codes.
+
+When you group by an attribute key that is not present on every span, spans missing that key now appear in a `null` group instead of an empty-string (`''`) group.
+
+<Admonition type="warning">
+If you have dashboards or alert rules that match or compare against the empty-string group-by bucket for traces, update them to match `null` instead. After this change, matching on `''` silently returns no rows for spans that lack the grouped key.
+</Admonition>
 
 ### Having
 
