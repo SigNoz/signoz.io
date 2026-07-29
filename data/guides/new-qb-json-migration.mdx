@@ -332,64 +332,9 @@ When using Terraform or the API to manage alerts after the migration to Query Bu
 1. **Add version field**: Set `version = "v5"` in your alert resource (at the same level as `alert_type`)
 2. **Update the condition field**: Replace your entire condition JSON with the new v5 format that uses the unified `queries` array
 
-#### Terraform Alert Example
+#### Managing alerts with Terraform
 
-Using the error rate alert example from above, here's how it looks in Terraform:
-
-```hcl
-resource "signoz_alert" "error_rate_alert" {
-  # All other fields remain unchanged
-  ...
-  version            = "v5"  # Required for v5 migration
-  
-  # Only the condition field changes - use the new v5 format
-  condition = jsonencode({
-    "compositeQuery": {
-      "queries": [
-        {
-          "type": "builder_query",
-          "spec": {
-            "name": "A",
-            "signal": "traces",
-            "aggregations": [{"expression": "count()"}],
-            "filter": {
-              "expression": "serviceName = 'redis' AND statusCode = 'STATUS_CODE_ERROR'"
-            }
-          }
-        },
-        {
-          "type": "builder_query",
-          "spec": {
-            "name": "B",
-            "signal": "traces",
-            "aggregations": [{"expression": "count()"}],
-            "filter": {
-              "expression": "serviceName = 'redis'"
-            }
-          }
-        },
-        {
-          "type": "builder_formula",
-          "spec": {
-            "name": "F1",
-            "expression": "A/B*100",
-            "legend": "error percentage"
-          }
-        }
-      ]
-    },
-    "op": "1",
-    "target": 5,
-    "matchType": "1",
-    "selectedQueryName": "F1"
-  })
-  
-  # All other fields remain unchanged
-  ...
-}
-```
-
-**Important**: The Terraform provider currently defaults to v4, so the `version = "v5"` field is mandatory for using the new format. Without this field, you may encounter 502 errors when testing alerts created via Terraform.
+The `signoz_alert` resource was **removed** in SigNoz Terraform provider v0.1.0 and replaced by the typed `signoz_rule` resource, which expresses queries, conditions, and thresholds as first-class HCL attributes instead of opaque `jsonencode(...)` strings. If you manage alerts as code, migrate to `signoz_rule` — see the <a href="https://registry.terraform.io/providers/SigNoz/signoz/latest/docs/guides/migrate-signoz-alert-to-signoz-rule" target="_blank" rel="noopener noreferrer nofollow">signoz_alert to signoz_rule migration guide</a> and the <a href="https://registry.terraform.io/providers/SigNoz/signoz/latest/docs/guides/v0.0.x-to-v0.1.0" target="_blank" rel="noopener noreferrer nofollow">v0.0.x to v0.1.0 upgrade guide</a>. For an overview, see the [SigNoz Terraform provider guide](https://signoz.io/docs/alerts-management/terraform-provider-signoz/).
 
 ### 1. Alert Query Structure Changes
 
