@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-29
 title: Collecting Docker Logs
 description: Collect Docker container logs and Docker daemon logs using OpenTelemetry Collector and send them to SigNoz.
 doc_type: howto
@@ -44,6 +44,7 @@ Add to your `config.yaml`, replacing `<OTEL_COLLECTOR_CONTAINER_ID>` with that I
 
 ```yaml:config.yaml
 receivers:
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
   filelog/docker:
     include: [/var/lib/docker/containers/*/*-json.log]
     exclude:
@@ -87,6 +88,7 @@ processors:
     check_interval: 1s
     limit_mib: 4000
     spike_limit_mib: 800
+  # On Collector v0.153.0 and newer, use "resource_detection" to avoid a deprecation warning.
   resourcedetection:
     detectors: [env, system]
     timeout: 5s
@@ -105,9 +107,9 @@ processors:
 service:
   pipelines:
     logs:
-      receivers: [filelog/docker]
+      receivers: [otlp, filelog/docker]
       processors: [memory_limiter, resourcedetection, transform/docker-meta, batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 
 What each operator does:
@@ -148,6 +150,7 @@ receivers:
   receiver_creator/docker-logs:
     watch_observers: [docker_observer]
     receivers:
+      # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
       filelog/per-container:
         rule: type == "container"
         resource_attributes:
@@ -183,6 +186,7 @@ processors:
     check_interval: 1s
     limit_mib: 4000
     spike_limit_mib: 800
+  # On Collector v0.153.0 and newer, use "resource_detection" to avoid a deprecation warning.
   resourcedetection:
     detectors: [env, system]
     timeout: 5s
@@ -202,9 +206,9 @@ service:
   extensions: [docker_observer]
   pipelines:
     logs:
-      receivers: [receiver_creator/docker-logs]
+      receivers: [otlp, receiver_creator/docker-logs]
       processors: [memory_limiter, resourcedetection, transform/docker-meta, batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 
 What each key part does:
@@ -338,7 +342,7 @@ service:
     logs:
       receivers: [otlp, journald/docker-daemon]
       processors: [batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 
 `root_path` tells the receiver to chroot into `/hostfs` (the mounted host filesystem) before running journalctl. `journalctl_path` resolves inside that chroot, so it points to the **host's** journalctl binary — the container image needs none. Update this path if journalctl lives elsewhere on your host (for example, `/bin/journalctl` on some Debian systems).
@@ -390,6 +394,7 @@ Append the <a href="https://github.com/open-telemetry/opentelemetry-collector-co
 
 ```yaml:config.yaml
 receivers:
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
   filelog/docker-daemon-syslog:
     include:
       - /var/log/syslog
@@ -402,7 +407,7 @@ service:
     logs:
       receivers: [otlp, filelog/docker-daemon-syslog]
       processors: [batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 
 <Admonition type="note">
