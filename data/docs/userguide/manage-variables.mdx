@@ -263,6 +263,30 @@ Panels that reference a variable wait until every referenced variable has a reso
 If a panel appears to load slower than before, it is usually waiting for its variables to resolve, not failing.
 </Admonition>
 
+## Apply a Dynamic variable to panels
+
+A Dynamic variable does not filter anything until it is wired into panel queries. Rather than editing each panel by hand, pick the panels the variable should apply to and SigNoz writes the filter clause into their queries for you.
+
+1. Open **Configure**, go to the **Variables** tab, and add or edit a **Dynamic** variable.
+2. Use the **Apply to panels** multi-select to choose the panels the variable should filter. Panels that already reference the variable are pre-selected, so the picker reflects the current state.
+3. Select **Save**.
+
+For each selected panel, SigNoz composes a filter clause of the form `<attribute> IN $<variable>` into the panel's builder queries. For example, a Dynamic variable named `pod` on the `k8s.pod.name` attribute adds `k8s.pod.name IN $pod`.
+
+<Admonition type="info">
+**Apply to panels** is available for Dynamic variables. For Query, Custom, and Textbox variables, reference the variable in the panel query yourself. See [Using Variables in Queries](https://signoz.io/docs/dashboards/using-variables-in-queries/).
+</Admonition>
+
+### Review the impact before applying
+
+Because applying a variable rewrites panel queries, SigNoz shows an impact dialog before the change lands:
+
+> Applying `$<variable>` can update upto N panel queries. Review the changes before applying.
+
+Each row shows the panel's **Current** query text (read-only) and the proposed **Result**, which you can edit. Clear a row's checkbox to leave that panel untouched. Confirm to apply every included change at once.
+
+This is the same review dialog used when you [rename or delete a referenced variable](#rename-or-delete-a-referenced-variable).
+
 ## Rename or delete a referenced variable
 
 When you rename or delete a variable that is referenced by panel queries or by other variables, SigNoz blocks the save behind an impact dialog so you can review every affected location before applying the change.
