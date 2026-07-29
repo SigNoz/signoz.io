@@ -139,6 +139,14 @@ Tags whose key and value are identical display both sides, so a tag entered as `
 
 You can rename a dashboard later from the options menu, or by editing its title inline in the dashboard header. When you edit the title inline, clicking anywhere outside the title field saves the change, in addition to the checkmark button.
 
+### Links in the dashboard description
+
+The description is plain text, but any URL you put in it becomes clickable when the description is shown in the dashboard header tooltip. Both `http://` and `https://` URLs and bare `www.` links are detected, and they open in a new tab. Trailing punctuation is left outside the link, so a sentence like `see https://signoz.io/docs/.` links only the URL.
+
+<Admonition type="info">
+The description does not support Markdown. Write plain text and paste full URLs rather than using link syntax.
+</Admonition>
+
 ## Dashboard Options Menu
 
 Select the **...** (three-dot) menu at the top of any dashboard to access the following options, grouped by what they affect:
@@ -269,6 +277,29 @@ Select **Clone dashboard** from the [Dashboard Options Menu](#dashboard-options-
 - If the base name is too long to fit the suffix within the [128-character limit](#dashboard-naming-limits), the base name is truncated automatically so the suffix always fits.
 
 Rename the clone at any time from the [Dashboard Options Menu](#dashboard-options-menu) or the configuration drawer.
+
+## Locked and read-only dashboards
+
+A dashboard becomes read-only for one of two reasons, and SigNoz treats them the same way in the UI:
+
+- **The dashboard is locked.** Lock it from the [options menu](#dashboard-options-menu) to prevent accidental edits. Only the dashboard's author and Admins can lock or unlock.
+- **You do not have edit permission.** Viewers have read-only access to every dashboard.
+
+In read-only mode, editing controls stay visible but disabled rather than being hidden, so the dashboard looks the same to everyone. Hovering a disabled control explains why, with either `This dashboard is locked` or `You don't have permission to edit this dashboard`.
+
+What stays available in read-only mode:
+
+- Viewing panels, expanding them, and using every [drill-down interaction](https://signoz.io/docs/dashboards/interactivity/).
+- Changing variable selections and the time range.
+- [Creating an alert from a panel](https://signoz.io/docs/dashboards/interactivity/#create-an-alert-from-a-panel), which never modifies the dashboard.
+- Reading, copying, and downloading the [dashboard JSON](https://signoz.io/docs/dashboards/json-editor/).
+- **Clone dashboard**, because it creates a new dashboard rather than changing this one.
+
+What is blocked: adding, editing, moving, resizing, or deleting panels and sections; renaming; editing tags; changing variables; and saving JSON edits.
+
+<Admonition type="info">
+Dashboards created by an integration cannot be unlocked.
+</Admonition>
 
 ## Collaborative editing
 
