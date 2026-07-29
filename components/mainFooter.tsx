@@ -44,13 +44,13 @@ function Footer() {
   }
 
   return (
-    <div className="bg-[var(--l1-background)]/70 z-[10] flex flex-col justify-center border-t border-solid border-[var(--l2-border)] backdrop-blur-md">
-      <div className="flex w-full items-center justify-center bg-opacity-70 px-4 py-14 max-md:max-w-full">
+    <div className="z-[10] flex flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px]">
+      <div className="flex w-full items-center justify-center px-4 py-14 max-md:max-w-full">
         <div className="w-full max-w-8xl justify-between max-md:max-w-full">
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex flex-col pb-2.5 text-sm tracking-wide text-[var(--l2-foreground)] max-md:mt-10">
-                <div className="text-sm font-semibold uppercase leading-5 tracking-wide text-[var(--l1-foreground)]">
+                <div className="text-sm font-medium uppercase leading-none tracking-wide text-[var(--l3-foreground)]">
                   Docs
                 </div>
                 <FooterPillLink href="/docs/introduction/">Introduction</FooterPillLink>
@@ -59,7 +59,7 @@ function Footer() {
                   Migrate from Datadog
                 </FooterPillLink>
                 <FooterPillLink href="/api-reference/">SigNoz API</FooterPillLink>
-                <div className="mt-10 text-sm font-semibold uppercase leading-5 tracking-wide text-[var(--l1-foreground)]">
+                <div className="mt-10 text-sm font-medium uppercase leading-5 tracking-wide text-[var(--l3-foreground)]">
                   OpenTelemetry
                 </div>
                 <FooterPillLink href="/opentelemetry/">What is OpenTelemetry</FooterPillLink>
@@ -71,7 +71,7 @@ function Footer() {
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)] max-md:mt-10">
-                <div className="text-sm font-semibold uppercase leading-5 tracking-wide text-[var(--l1-foreground)]">
+                <div className="text-sm font-medium uppercase leading-none tracking-wide text-[var(--l3-foreground)]">
                   Community
                 </div>
 
@@ -108,7 +108,7 @@ function Footer() {
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)] max-md:mt-10">
-                <div className="text-sm font-semibold uppercase leading-5 tracking-wide text-[var(--l1-foreground)]">
+                <div className="text-sm font-medium uppercase leading-none tracking-wide text-[var(--l3-foreground)]">
                   More
                 </div>
 
@@ -146,7 +146,11 @@ function Footer() {
                     <div className="font-satoshi-bold font-medium">SigNoz</div>
                   </Link>
                 </div>
-                <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-[var(--accent-forest)]">
+                <div className="mt-5 flex items-center justify-end gap-2 rounded text-sm font-medium leading-none tracking-[-0.065px] text-[var(--callout-success-description)]">
+                  <span
+                    className="size-1.5 shrink-0 rounded-full bg-[var(--bg-forest-300)]"
+                    aria-hidden
+                  />
                   <Link href="https://status.signoz.io/" target="_blank" prefetch={false}>
                     All systems operational
                   </Link>
