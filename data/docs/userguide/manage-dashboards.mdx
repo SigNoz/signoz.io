@@ -121,68 +121,198 @@ Tags whose key and value are identical display both sides, so a tag entered as `
 ## Create a Custom Dashboard
 
 1. From the sidebar, choose **Dashboards**.
-2. Select the **New Dashboard** button.
-3. Select the **Configure** icon, and then enter the following information:
+2. Select the **New Dashboard** button and stay on the **Blank** tab.
+3. Enter the following information:
 
-   1. A descriptive name for your new dashboard.
+   1. A descriptive name for your new dashboard. Use the icon dropdown to the left of the name field to pick a [dashboard icon](#set-a-dashboard-icon).
    2. _(Optional)_ A brief description of your new dashboard.
    3. _(Optional)_ Add one or more tags by typing a tag name and pressing enter.
 
 <Figure
   src="/img/docs/userguide/manage-dashboards/dashboard-configuration.webp"
-  alt="Dashboard configuration — set name, description, and tags"
-  caption="Dashboard configuration — set the name, description, and tags for your dashboard."
+  alt="Dashboard configuration showing the name, description, and tags fields"
+  caption="Dashboard configuration: set the name, description, and tags for your dashboard."
 />
 
-4. Select the **Save** button at the far right.
-
+4. Select the **Save** button.
 5. For each panel you wish to add, follow the steps in the [Add a Panel to a Dashboard](#add-a-panel-to-a-dashboard) section below.
 
-6. _(Optional)_ You can change the order of your panels by dragging and dropping them.
-
-7. When you've finished, select the **Save Layout** button.
+You can rename a dashboard later from the options menu, or by editing its title inline in the dashboard header. When you edit the title inline, clicking anywhere outside the title field saves the change, in addition to the checkmark button.
 
 ## Dashboard Options Menu
 
-Click the **...** (three-dot) menu at the top of any dashboard to access the following options:
+Select the **...** (three-dot) menu at the top of any dashboard to access the following options, grouped by what they affect:
 
 <Figure
   src="/img/docs/userguide/manage-dashboards/dashboard-options-menu.webp"
-  alt="Dashboard options menu in SigNoz"
-  caption="Dashboard options menu — lock, rename, export, and more."
+  alt="Dashboard options menu in SigNoz showing the Dashboard and Layout groups"
+  caption="Dashboard options menu: rename, clone, lock, full screen, and section actions."
 />
 
-- **Lock Dashboard** — Prevent accidental edits by locking the dashboard. When locked, panels cannot be added, removed, resized, or rearranged. Unlock the dashboard from the same menu to resume editing.
-- **Rename** — Quickly rename the dashboard without opening the full configuration drawer.
-- **Full screen** — View the dashboard in full-screen mode for presentations or wall displays.
-- **New section** — Add a section to organize panels into logical groups within the dashboard.
-- **Export JSON** — Download the dashboard configuration as a JSON file for backup or sharing.
-- **Copy as JSON** — Copy the dashboard JSON to your clipboard.
-- **Delete dashboard** — Permanently delete the dashboard.
+**Dashboard**
+
+- **Rename**: rename the dashboard without opening the configuration drawer.
+- **Clone dashboard**: create a copy of the dashboard. See [Clone a Dashboard](#clone-a-dashboard).
+- **Lock dashboard** or **Unlock dashboard**: prevent accidental edits. When locked, panels cannot be added, removed, resized, or rearranged. Available to the dashboard's author and to Admins.
+- **Full screen**: view the dashboard in full-screen mode for presentations or wall displays.
+
+**Layout**
+
+- **New section**: add a section to organize panels into logical groups. See [Manage Sections](#manage-sections).
+
+**Delete dashboard** sits below the groups and permanently deletes the dashboard.
+
+<Admonition type="note">
+Editing actions are disabled on a locked dashboard, and hovering a disabled item explains why. **Clone dashboard** stays available because it creates a new dashboard rather than modifying this one.
+</Admonition>
+
+<Admonition type="note">
+To export or copy a dashboard's JSON, use the **Copy** and **Download** controls inside the JSON editor. See [Edit a Dashboard as JSON](#edit-a-dashboard-as-json).
+</Admonition>
 
 ## Update a Custom Dashboard
 
-To update the name, description and tags:
+To update the name, description, and tags, open **Configure** to reach the configuration drawer, make your changes, and save.
 
-1. Select the **Edit** button at the far right.
-2. Make the changes.
-3. Select the **Save Layout** button.
+Layout changes are saved as you make them, so there is no separate save step:
 
-To resize a panel:
+- **To resize a panel**, drag its bottom-right corner.
+- **To move a panel**, drag and drop it into the new position.
 
-1. Click the bottom-left corner of the panel you want to resize.
-2. Keep your left mouse button pressed and resize the panel.
-3. When you've finished, select the **Save Layout** button.
+After you save a panel, clone a panel, or add a section, the dashboard scrolls to reveal the new or affected item. New panels are placed in an open grid position without overlapping tall panels that extend into the lower rows.
 
-To change the position of a panel:
+## Set a Dashboard Icon
 
-1. Drag and drop a panel to the new position.
-2. When you've finished, select the **Save Layout** button.
+Each dashboard shows an icon next to its name in the list and header. To change it, open **Configure** (the dashboard configuration drawer), stay on the **Overview** tab, and select the icon dropdown to the left of the **Dashboard Name** field.
+
+<Figure
+  src="/img/docs/userguide/manage-dashboards/dashboard-icon-picker.webp"
+  alt="Dashboard icon picker in the Overview tab of the configuration drawer"
+  caption="Pick a dashboard icon from the Overview tab of the configuration drawer."
+/>
+
+New dashboards use the **eight-ball** icon by default. The picker offers these icons:
+
+`avocado`, `bagel`, `basketball`, `bow`, `carousel-horse`, `cheese`, `circus-tent`, `cookie`, `crane`, `dartboard`, `drum`, `eight-ball`, `fries`, `hamburger`, `headphones`, `motorcycle`, `ninja`, `orange`, `police-car`, and `siren`.
+
+The picker is the source of truth for available icons, and the set may grow in later releases.
+
+### Icon paths in dashboard JSON
+
+Icons are stored as a path in the top-level `image` field of the dashboard JSON, not as inline image data. A picker selection is saved as `/assets/Icons/<name>`, for example:
+
+```json
+{
+  "image": "/assets/Icons/avocado",
+  "name": "My Dashboard",
+  "tags": [],
+  "spec": { "display": { "name": "My Dashboard" } }
+}
+```
+
+The `image` field accepts three shapes:
+
+- `/assets/Icons/<name>`: a bundled system icon (for example `/assets/Icons/eight-ball`).
+- `/assets/Logos/<name>`: a bundled logo (for example `/assets/Logos/aws-dark`). Logos render at load time but are not shown in the picker, so you can only set them by editing the JSON.
+- A base64 image data URI (for example `data:image/png;base64,...`).
+
+Any other value (a remote URL, a `javascript:` URI, or raw markup) is rejected. An unrecognized but well-formed path (an icon name that does not exist) falls back to the default eight-ball icon at render time.
+
+<Admonition type="info">
+Dashboards saved earlier with an inline base64 icon keep rendering unchanged. No migration is required.
+</Admonition>
+
+## Manage Sections
+
+Sections group related panels into labeled, collapsible blocks within a dashboard. Use them to separate concerns such as latency, throughput, and errors on the same dashboard.
+
+### Add a section
+
+1. Open the dashboard's **...** (three-dot) menu at the top.
+2. Select **New section**.
+
+The new section renders immediately with its title and an add-panel prompt, even before it contains any panels. The dashboard-level empty state (prompting you to create your first panel) appears only when the dashboard has no sections and no panels at all.
+
+### Clone a section
+
+Cloning copies a section and every panel inside it, so you can reuse a layout without rebuilding each panel.
+
+1. Hover over the section header and open its **...** (three-dot) menu.
+2. Select **Clone section** (located between **Rename** and **Delete**).
+
+The clone is created as `<original name> (Copy)` with all panels duplicated at the same positions and sizes. A loading toast appears while the clone saves, followed by a success or error toast.
+
+### Rename or delete a section
+
+Open a section's **...** (three-dot) menu to **Rename** or **Delete** the section. Deleting a section also removes the panels it contains.
+
+### Move a panel between sections
+
+1. Open the panel's action menu (the three-dot menu on the panel header).
+2. Hover **Move to section**.
+3. Choose the target section from the submenu. Select **Dashboard (root)**, the first entry, to move the panel out of any section back to the top level of the dashboard.
+
+The **Move to section** submenu is hidden when there is nowhere to move the panel, for example when the dashboard has no sections and the panel is already at the root.
+
+## Edit a Dashboard as JSON
+
+The dashboard toolbar includes a **JSON** button that opens the JSON editor in a side drawer. Use it to review or hand-edit a dashboard's definition, copy it, or download it, without leaving the page or calling the dashboard API.
+
+For the full reference, including validation warnings and how to resolve them, see [JSON Editor](https://signoz.io/docs/dashboards/json-editor/).
+
+## Clone a Dashboard
+
+Select **Clone dashboard** from the [Dashboard Options Menu](#dashboard-options-menu) to duplicate a dashboard. SigNoz derives the new dashboard's name from the original:
+
+- The first clone appends `- Copy` to the display name. For example, `My Dashboard` becomes `My Dashboard - Copy`.
+- Cloning again increments a counter: `My Dashboard - Copy (2)`, `My Dashboard - Copy (3)`, and so on.
+- If the base name is too long to fit the suffix within the [128-character limit](#dashboard-naming-limits), the base name is truncated automatically so the suffix always fits.
+
+Rename the clone at any time from the [Dashboard Options Menu](#dashboard-options-menu) or the configuration drawer.
+
+## Collaborative editing
+
+Dashboards are shared resources, so the same dashboard can be open in more than one browser tab or edited by more than one person at the same time. To stop you from overwriting or missing someone else's changes, SigNoz records the version you loaded and checks for newer saved versions in the background.
+
+Every time you return focus to a tab with an open dashboard, SigNoz checks whether that dashboard was saved by another user or in another browser tab since you loaded it. If a newer version exists, the **Dashboard updated elsewhere** dialog appears over the dashboard:
+
+> This dashboard was changed in another tab or by another user. Reload to see the latest version.
+
+The dialog offers two actions:
+
+- **Reload**: fetches the latest saved version and re-arms the check, so any later change triggers a new prompt.
+- **Dismiss**: closes the dialog and keeps your current view. The prompt is suppressed only for that specific saved revision. If the dashboard is saved again afterward, the dialog reappears the next time you focus the tab.
+
+<Admonition type="info">
+This check runs automatically for every open dashboard with no configuration required. It compares saved versions only, so your own in-progress edits and saves never trigger the prompt.
+</Admonition>
+
+## Navigate Back to the List
+
+On a dashboard detail page, select the **Dashboard** breadcrumb at the top left to return to the dashboards list. The breadcrumb navigates in place, with no full-page reload. To open the list in a new browser tab instead, middle-click the breadcrumb or hold **Ctrl** (**Cmd** on macOS) while clicking.
+
+## Dashboard Naming Limits
+
+Display names for dashboard entities are capped by the backend. If you exceed a limit, the save request fails with an HTTP `400` error. Trim the name and save again.
+
+| Entity | Character limit |
+| --- | --- |
+| Dashboard title | 128 |
+| Panel title | 128 |
+| Variable name | 128 |
+| Layout section title | 128 |
+| Saved view name | 64 |
+
+<Admonition type="note">
+All limits are enforced server-side, so they apply regardless of how the name is set (UI, imported JSON, or API).
+</Admonition>
 
 ## Remove a Custom Dashboard
 
-1. From the sidebar, choose **Dashboard**.
-2. Find the dashboard you wish to remove. In the **Action** column, select the **Delete** button.
+1. From the sidebar, choose **Dashboards**.
+2. Find the dashboard you wish to remove, open its row action menu, and select **Delete**.
+
+You can also delete the dashboard you are viewing from its [options menu](#dashboard-options-menu).
 
 ## Add a Panel to a Dashboard
 
@@ -228,9 +358,12 @@ Note the following about panels:
 
 ## Next Steps
 
-- [Panel Types](https://signoz.io/docs/dashboards/panel-types/) — Choose the best visualization for your query.
-- [Manage Variables](https://signoz.io/docs/userguide/manage-variables/) — Create dynamic variables for your dashboards.
-- [Public Sharing](https://signoz.io/docs/dashboards/public-sharing/) — Enable or disable public sharing for your dashboards.
+- [Panel Types](https://signoz.io/docs/dashboards/panel-types/): choose the best visualization for your query.
+- [Manage Variables](https://signoz.io/docs/userguide/manage-variables/): create dynamic variables for your dashboards.
+- [Saved Views](https://signoz.io/docs/dashboards/saved-views/): filter and organize the dashboards list, then save and reuse views.
+- [JSON Editor](https://signoz.io/docs/dashboards/json-editor/): edit a dashboard as raw JSON and validate its panels and layout.
+- [Interactivity in Dashboards](https://signoz.io/docs/dashboards/interactivity/): drill down from panels into logs and traces, and create alerts from a panel.
+- [Public Sharing](https://signoz.io/docs/dashboards/public-sharing/): enable or disable public sharing for your dashboards.
 
 ## Get Help
 
