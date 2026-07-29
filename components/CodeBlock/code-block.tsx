@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, useContext, useMemo, useRef, useState } from 'react'
+import { forwardRef, useContext, useRef, useState } from 'react'
 import { cn } from 'app/lib/utils'
 import { CodeBlockCopyButton } from './code-block-copy-button'
 import { CodeBlockMinimap } from './code-block-minimap'
@@ -32,9 +32,9 @@ export const CodeBlock = forwardRef<HTMLDivElement, CodeBlockProps>(function Cod
   const { insideTabs } = useContext(CodeTabsContext)
   const preRef = useRef<HTMLPreElement>(null)
 
-  const lineCount = useMemo(() => countCodeLines(children), [children])
-  const minimapLines = useMemo(() => collectMinimapLines(children), [children])
-  const copyText = useMemo(() => getTextContent(children).replace(/\n$/, ''), [children])
+  const lineCount = countCodeLines(children)
+  const minimapLines = collectMinimapLines(children)
+  const copyText = getTextContent(children).replace(/\n$/, '')
 
   const canCollapse = collapsible && lineCount > collapseThreshold
   const [expanded, setExpanded] = useState(defaultExpanded)

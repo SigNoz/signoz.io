@@ -160,10 +160,8 @@ export const RegionAwarePre = (props: any) => {
   // lazy element reference changing — memoization would keep a stale false forever.
   const isRegionAware = getTextContent(props.children).includes('<region>')
 
-  const modifiedChildren = React.useMemo(() => {
-    if (replacements.length === 0) return props.children
-    return processCodeChildren(props.children, replacements)
-  }, [props.children, replacements])
+  const modifiedChildren =
+    replacements.length === 0 ? props.children : processCodeChildren(props.children, replacements)
 
   const renderedChildren = Array.isArray(modifiedChildren)
     ? Children.toArray(modifiedChildren)
@@ -232,10 +230,8 @@ export const RegionAwareCode = (props: any) => {
     return list
   }, [region])
 
-  const modifiedChildren = React.useMemo(() => {
-    if (replacements.length === 0) return props.children
-    return processCodeChildren(props.children, replacements)
-  }, [props.children, replacements])
+  const modifiedChildren =
+    replacements.length === 0 ? props.children : processCodeChildren(props.children, replacements)
 
   return (
     <code {...props}>
