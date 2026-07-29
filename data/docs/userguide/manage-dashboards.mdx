@@ -320,7 +320,7 @@ SigNoz supports seven panel types: Time Series, Number, Table, List, Bar, Pie, a
 
 1. From the sidebar, choose **Dashboards**.
 2. Find the dashboard to which you want to add a new panel.
-3. Select **Add Panel**.
+3. Select **New Panel**.
 4. Choose a panel type from the dialog.
 
 <Figure
@@ -328,10 +328,14 @@ SigNoz supports seven panel types: Time Series, Number, Table, List, Bar, Pie, a
   alt="New Panel dialog showing available panel types"
   caption="Choose from seven panel types when adding a new panel."
 />
-5. Populate the following fields:
+
+   - On a dashboard with a **single section**, selecting a panel type creates the panel immediately, with no section picker or confirm step.
+   - On a dashboard with **multiple sections**, select the section to place the panel in from the picker at the bottom of the dialog, then confirm.
+
+5. Populate the following fields in the config pane on the right:
     1. **Panel Title**: Enter a descriptive name for your panel.
     2. **Description**: Enter a brief and meaningful description of your new panel.
-    3. _(Optional)_ **Panel Time Preference**: You can use the the drop-down list to specify the time range for which you want to view data. The time range you specify here overrides the global value.
+    3. _(Optional)_ **Panel time preference**: Use the drop-down list to specify the time range for which you want to view data. The time range you specify here overrides the global value.
     4. _(Optional)_ **Y Axis Unit**: Specify the unit of measurement for the y-axis.
 6. To specify the data displayed on your panel, you can use:
     - The query builder. The query builder provides an easy-to-use graphical interface that allows you create custom queries. For instructions, see the [Create a Custom Query](https://signoz.io/docs/userguide/query-builder-v5/) page.
@@ -345,16 +349,30 @@ SigNoz supports seven panel types: Time Series, Number, Table, List, Bar, Pie, a
 Note the following about panels:
 
 - The total number of queries and functions you can plot on a single panel must be less or equal to ten.
-- Every time you add or modify a function or formula, you must select the **Stage & Run Query** button. If you do not select this button, the panel will not be updated and your changes will be lost whenever you move to a different tab.
-- You can hide or unhide a function or formula by selecting the eye icon at its left and then selecting the **Stage & Run Query** button.
+- Adding a query does not run it. Select **Run Query** to refresh the preview after you add or modify a query, function, or formula.
+- You can hide or unhide a function or formula by selecting the eye icon at its left and then selecting **Run Query**.
+- When the query body is long enough to scroll, the query-type tabs and the **Run Query** button stay pinned at the top of the editor so they remain reachable.
 - When you install SigNoz, only the data provided by the Hostmetric receiver is available. To enable more metric receivers, see the [Send Metrics to SigNoz](https://signoz.io/docs/metrics-management/send-metrics/) section.
 
 ## Update a Panel
 
-1. From the sidebar, choose **Dashboard**.
-2. Find the dashboard in which you created the panel you wish to update, and then select the pencil icon located at the top right corner of your panel.
+1. From the sidebar, choose **Dashboards**.
+2. Find the dashboard in which you created the panel you wish to update, and then select the pencil icon on your panel (or **Edit** from its three-dot menu).
 3. Make the changes.
 4. When you've finished, select the **Save** button.
+
+## Panel editor behavior
+
+The full-page panel editor keeps your in-progress work as you move around:
+
+- **Switching to view mode keeps unsaved changes.** All pending configuration (thresholds, units, table and list columns, legend, axes, and formatting) carries into **Switch to View Mode** along with the query.
+- **Query edits survive a browser refresh.** In-progress builder edits are restored on reload. Configuration changes such as title, thresholds, and units are not currently retained across a hard refresh.
+- **The Save button reflects state.** **Save** is enabled when there are unsaved changes and disabled when there are none, including after a refresh or after switching from the View modal to the full editor.
+- **A custom time range is preserved.** A time range picked in the editor's time picker is kept when you navigate back to the dashboard.
+- **Variables seed on direct load.** Opening the editor from a pasted link or a hard refresh seeds all variable values into the query preview.
+- **Visualization-type switches carry settings forward.** Changing the panel type (for example Time Series to Table) carries over axes soft min/max, log scale, time preference, stacking, fill spans, legend position and mode, and chart appearance instead of resetting them to defaults.
+
+The **Switch to Edit Mode** button in a panel's View modal appears only when you have edit permission on an unlocked dashboard.
 
 ## Next Steps
 
