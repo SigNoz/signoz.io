@@ -175,12 +175,12 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
           href={constructHref(doc.route)}
           className={`flex w-full items-center gap-1 rounded px-3 py-2 text-sm transition-all duration-200 ${
             isActiveRoute
-              ? 'bg-signoz_ink-300 text-signoz_vanilla-100'
-              : 'text-signoz_vanilla-400 hover:bg-signoz_ink-300 hover:text-signoz_vanilla-100'
+              ? 'bg-[var(--l1-background-hover)] text-[var(--l1-foreground-hover)]'
+              : 'text-[var(--l2-foreground)] hover:bg-[var(--l1-background-hover)] hover:text-[var(--l1-foreground-hover)]'
           } ${doc.className || ''}`}
         >
           {isGetStarted && (
-            <div className="flex-shrink-0 text-signoz_vanilla-400">
+            <div className="flex-shrink-0 text-[var(--l2-foreground)]">
               <MetronomeIcon size={12} />
             </div>
           )}
@@ -209,11 +209,11 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
             onClick={() => toggleIsExpandedByLabel(category.label)}
             className={`flex cursor-pointer items-center gap-1 rounded px-3 py-2 text-sm transition-all duration-200 ${
               isActiveRoute
-                ? 'bg-signoz_ink-300 text-signoz_vanilla-100'
-                : 'text-signoz_vanilla-400 hover:bg-signoz_ink-300 hover:text-signoz_vanilla-100'
+                ? 'bg-[var(--l1-background-hover)] text-[var(--l1-foreground-hover)]'
+                : 'text-[var(--l2-foreground)] hover:bg-[var(--l1-background-hover)] hover:text-[var(--l1-foreground-hover)]'
             } ${category.className || ''}`}
           >
-            <div className="flex-shrink-0 text-signoz_vanilla-400">
+            <div className="flex-shrink-0 text-[var(--l2-foreground)]">
               {category.isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
             </div>
             <Tooltip content={category.label} side="right" delayDuration={500} sideOffset={12}>
@@ -232,8 +232,10 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
                   sideOffset={12}
                 >
                   <h4
-                    className={`truncate text-xs text-signoz_vanilla-400 ${
-                      isActiveRoute ? 'text-white' : 'hover:text-white'
+                    className={`truncate text-xs text-[var(--l2-foreground)] ${
+                      isActiveRoute
+                        ? 'text-[var(--l1-foreground-hover)]'
+                        : 'hover:text-[var(--l1-foreground-hover)]'
                     }`}
                   >
                     {category.link.title}
@@ -274,12 +276,18 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
   if (!isClient) return null
 
   return (
-    <nav
-      ref={sidebarRef}
-      className="docs-sidebar sticky top-[48px] h-[calc(100vh-48px)] w-full overflow-y-auto py-3 text-white"
-    >
-      {showRegionSelector && <SidebarRegionSelector />}
-      <ul className="list-none space-y-0 p-0">{sideNav.map(renderItem)}</ul>
+    <nav className="docs-sidebar sticky top-[64px] flex h-[calc(100vh-64px)] w-full flex-col overflow-hidden text-[var(--l1-foreground)]">
+      {showRegionSelector && (
+        <div className="relative z-10 shrink-0 bg-[var(--l1-background)] shadow-[0_8px_16px_-6px_color-mix(in_srgb,var(--base-black)_55%,transparent)]">
+          <SidebarRegionSelector />
+        </div>
+      )}
+      <div
+        ref={sidebarRef}
+        className={`min-h-0 flex-1 overflow-y-auto ${showRegionSelector ? 'pb-3 pt-1' : 'py-3'}`}
+      >
+        <ul className="list-none space-y-0 p-0">{sideNav.map(renderItem)}</ul>
+      </div>
     </nav>
   )
 }

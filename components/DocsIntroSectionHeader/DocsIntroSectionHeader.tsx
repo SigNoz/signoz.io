@@ -16,7 +16,7 @@ interface DocsIntroSectionHeaderProps {
 }
 
 const CHIP_LINK_CLASS =
-  'group/chip flex h-8 items-center gap-1.5 rounded py-2 pl-1.5 pr-2 text-base text-signoz_vanilla-400 transition-colors hover:bg-signoz_ink-300 hover:text-signoz_vanilla-100'
+  'group/chip flex h-8 items-center gap-1.5 rounded py-2 pl-1.5 pr-2 text-base text-[var(--l3-foreground)] transition-colors hover:bg-[var(--l2-background-hover)] hover:text-[var(--l1-foreground)]'
 
 export default function DocsIntroSectionHeader({
   title,
@@ -36,10 +36,12 @@ export default function DocsIntroSectionHeader({
 
   return (
     <div className={`relative z-0 flex overflow-visible ${height}`}>
-      <div className="relative z-[1] flex flex-1 flex-col justify-end border-b border-l border-dashed border-signoz_ink-300 p-4 md:border-l-0">
+      <div className="relative z-[1] flex flex-1 flex-col justify-end border-b border-l border-dashed border-[var(--l2-border)] p-4 md:border-l-0">
         <div className="flex flex-col gap-2">
-          <h2 className="m-0 text-2xl font-semibold leading-9 text-signoz_vanilla-100">{title}</h2>
-          <p className="text-base leading-relaxed text-signoz_vanilla-400">{description}</p>
+          <h2 className="m-0 text-2xl font-semibold leading-9 text-[var(--l1-foreground)]">
+            {title}
+          </h2>
+          <p className="text-base leading-relaxed text-[var(--l3-foreground)]">{description}</p>
           {hasGuides && (
             <div className="flex items-center gap-2">
               {guidesCount != null &&
@@ -55,7 +57,7 @@ export default function DocsIntroSectionHeader({
                   </div>
                 ))}
               {guidesCount != null && viewAllHref && (
-                <div className="h-1 w-1 rounded-full bg-signoz_slate-50" />
+                <div className="h-1 w-1 rounded-full bg-[var(--l3-foreground)]" />
               )}
               {viewAllHref && (
                 <Link href={viewAllHref} className={CHIP_LINK_CLASS}>
@@ -70,7 +72,7 @@ export default function DocsIntroSectionHeader({
           )}
         </div>
       </div>
-      <div className="pointer-events-none relative z-0 hidden w-1/3 flex-shrink-0 overflow-visible border-b border-dashed border-signoz_ink-300 md:block">
+      <div className="pointer-events-none relative z-0 hidden w-1/3 flex-shrink-0 overflow-visible border-b border-dashed border-[var(--l2-border)] md:block">
         {illustration && (
           <FloatingRingsScene
             src={illustration}

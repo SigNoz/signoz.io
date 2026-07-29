@@ -33,26 +33,26 @@ export default function DocsIntroCard({
       clickText={title}
       clickLocation={clickLocation}
       {...(external ? { target: '_blank', rel: 'noopener noreferrer nofollow' } : {})}
-      className={`group box-border flex flex-col border-b border-l border-r border-dashed border-signoz_ink-300 bg-signoz_ink-500 p-4 transition-colors hover:bg-signoz_ink-300 md:border-l-0 ${className}`}
+      className={`group box-border flex flex-col border-b border-l border-r border-dashed border-[var(--l2-border)] bg-[var(--l1-background)] p-4 transition-colors hover:bg-[var(--l2-background)] md:border-l-0 ${className}`}
     >
       <div className="flex h-full min-h-0 w-full flex-col justify-between">
         <div className="h-6 w-6 shrink-0">{icon}</div>
 
         <div className="flex w-full items-end justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-[12px]">
-            <h3 className="m-0 text-base font-semibold leading-none text-signoz_vanilla-100">
+            <h3 className="m-0 text-base font-semibold leading-none text-[var(--l1-foreground)]">
               {title}
             </h3>
-            <p className="m-0 text-base leading-[26px] text-[#adb4c2] transition-colors group-hover:text-[#eceef2]">
+            <p className="m-0 text-base leading-[26px] text-[var(--l3-foreground)] transition-colors group-hover:text-[var(--l1-foreground)]">
               {description}
             </p>
           </div>
 
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-solid border-signoz_ink-200 bg-signoz_ink-300 transition-colors group-hover:border-signoz_ink-200 group-hover:bg-[#23262e]">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-solid border-[var(--l2-border)] bg-[var(--l2-background)] transition-colors group-hover:border-[var(--l2-border)] group-hover:bg-[var(--l3-background)]">
             <ArrowUpRight
               size={20}
               strokeWidth={1.75}
-              className="text-signoz_vanilla-400 transition-colors group-hover:text-signoz_vanilla-100"
+              className="text-[var(--l3-foreground)] transition-colors group-hover:text-[var(--l1-foreground)]"
               aria-hidden
             />
           </div>

@@ -13,10 +13,10 @@ export default function DocsCtaSection() {
     <DitherCanvas enableClick={false} className="w-full">
       <div className="flex w-full flex-col items-start justify-between gap-8 px-4 pb-0 pt-16 md:flex-row">
         <div className="flex flex-col gap-4 pl-0 md:pl-12">
-          <h2 className="m-0 text-2xl font-semibold leading-9 text-signoz_vanilla-100">
+          <h2 className="m-0 text-2xl font-semibold leading-9 text-[var(--l1-foreground)]">
             Slow is the new Downtime
           </h2>
-          <p className="text-base leading-relaxed text-signoz_vanilla-400">
+          <p className="text-base leading-relaxed text-[var(--l3-foreground)]">
             SigNoz Cloud is the fastest way to try out SigNoz. Instrument your
             <br className="hidden md:block" />
             application and start sending data today.
@@ -27,7 +27,7 @@ export default function DocsCtaSection() {
             clickName="Sign up for SigNoz Cloud CTA"
             clickText="Sign up for SigNoz Cloud"
             clickLocation={SECTION_NAME}
-            className="mx-auto flex h-8 w-fit items-center gap-2 rounded-full bg-signoz_robin-500 px-4 pr-3.5 text-sm font-medium text-signoz_vanilla-100 transition-colors hover:bg-signoz_robin-600 md:mx-0"
+            className="mx-auto flex h-8 w-fit items-center gap-2 rounded-full bg-[var(--primary-background)] px-4 pr-3.5 text-sm font-medium text-[var(--primary-foreground)] transition-colors hover:bg-[var(--primary-background-hover)] md:mx-0"
           >
             Sign up for SigNoz Cloud
             <ArrowRight size={12} className="rotate-[-45deg]" />
@@ -39,18 +39,18 @@ export default function DocsCtaSection() {
           {CTA_STEPS.map((step, index) => (
             <div key={index} className="flex gap-3">
               <div className="flex flex-col items-center">
-                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-signoz_ink-300">
-                  <span className="font-mono text-sm text-signoz_vanilla-100">{index + 1}</span>
+                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[var(--l3-background)]">
+                  <span className="font-mono text-sm text-[var(--l1-foreground)]">{index + 1}</span>
                 </div>
                 {index < CTA_STEPS.length - 1 && (
-                  <div className="my-1 w-px flex-1 border-l border-dashed border-signoz_ink-200" />
+                  <div className="my-1 w-px flex-1 border-l border-dashed border-[var(--l1-border)]" />
                 )}
               </div>
               <div className={`flex flex-col gap-2 ${index < CTA_STEPS.length - 1 ? 'pb-8' : ''}`}>
-                <p className="m-0 text-base font-medium leading-6 text-signoz_vanilla-100">
+                <p className="m-0 text-base font-medium leading-6 text-[var(--l1-foreground)]">
                   {step.title}
                 </p>
-                <p className="text-sm leading-5 text-signoz_vanilla-400">{step.subtitle}</p>
+                <p className="text-sm leading-5 text-[var(--l3-foreground)]">{step.subtitle}</p>
               </div>
             </div>
           ))}

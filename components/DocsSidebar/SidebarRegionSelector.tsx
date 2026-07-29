@@ -41,8 +41,8 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
   const selector = (
     <div className="flex flex-col gap-1 px-2.5 pb-2 pt-3">
       <div className="flex items-center gap-1.5 pb-2 pl-1.5">
-        <Globe size={12} className="text-signoz_vanilla-400" />
-        <span className="text-xs font-medium uppercase tracking-wider text-signoz_vanilla-400">
+        <Globe size={12} className="text-[var(--l3-foreground)]" />
+        <span className="text-xs font-medium uppercase tracking-wider text-[var(--l3-foreground)]">
           select your region
         </span>
       </div>
@@ -53,9 +53,9 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
         open={open}
         onOpenChange={setOpen}
       >
-        <SelectTrigger className="!flex !h-8 !w-full !items-center !justify-between !gap-0 !rounded !border !border-signoz_ink-300 !bg-signoz_ink-400/60 !px-3 !py-0 !text-sm !text-signoz_vanilla-100 !shadow-none !outline-none !ring-0 hover:!border-signoz_ink-200 focus:!ring-0 disabled:!cursor-wait disabled:!opacity-100 [&>span]:!min-w-0 [&>span]:!flex-1 [&>span]:!truncate [&>span]:!text-left [&_svg]:!h-3 [&_svg]:!w-3 [&_svg]:!shrink-0 [&_svg]:!text-signoz_vanilla-400">
+        <SelectTrigger className="!flex !h-8 !w-full !items-center !justify-between !gap-0 !rounded !border !border-[var(--l2-border)] !bg-[var(--l2-background-60)] !px-3 !py-0 !text-sm !text-[var(--l1-foreground)] !shadow-none !outline-none !ring-0 hover:!border-[var(--l1-border)] focus:!ring-0 disabled:!cursor-wait disabled:!opacity-100 [&>span]:!min-w-0 [&>span]:!flex-1 [&>span]:!truncate [&>span]:!text-left [&_svg]:!h-3 [&_svg]:!w-3 [&_svg]:!shrink-0 [&_svg]:!text-[var(--l3-foreground)]">
           {isLoading ? (
-            <span className="flex items-center gap-2 text-signoz_vanilla-400">
+            <span className="flex items-center gap-2 text-[var(--l3-foreground)]">
               <Loader2 size={12} className="animate-spin" />
               Loading...
             </span>
@@ -64,7 +64,7 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
           )}
         </SelectTrigger>
         <SelectContent
-          className="!z-[100] !w-[var(--radix-select-trigger-width)] !min-w-[var(--radix-select-trigger-width)] !animate-none !rounded !border !border-signoz_ink-300 !bg-signoz_ink-400 !shadow-lg data-[side=bottom]:!animate-none data-[side=top]:!animate-none data-[state=closed]:!animate-none data-[state=open]:!animate-none"
+          className="!z-[100] !w-[var(--radix-select-trigger-width)] !min-w-[var(--radix-select-trigger-width)] !animate-none !rounded !border !border-[var(--l2-border)] !bg-[var(--l2-background)] !shadow-lg data-[side=bottom]:!animate-none data-[side=top]:!animate-none data-[state=closed]:!animate-none data-[state=open]:!animate-none"
           position="popper"
           side="bottom"
           align="start"
@@ -85,13 +85,13 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
               <SelectItem
                 key={option.value}
                 value={option.value}
-                className="!relative !flex !w-full !cursor-pointer !items-center !justify-between !gap-3 !rounded-none !px-3 !py-2 !pr-9 !text-sm !text-signoz_vanilla-400 !outline-none hover:!bg-signoz_ink-300 hover:!text-signoz_vanilla-100 focus:!bg-signoz_ink-300 focus:!text-signoz_vanilla-100 data-[state=checked]:!text-signoz_vanilla-100"
+                className="!relative !flex !w-full !cursor-pointer !items-center !justify-between !gap-3 !rounded-none !px-3 !py-2 !pr-9 !text-sm !text-[var(--l3-foreground)] !outline-none hover:!bg-[var(--l2-background-hover)] hover:!text-[var(--l1-foreground)] focus:!bg-[var(--l2-background-hover)] focus:!text-[var(--l1-foreground)] data-[state=checked]:!text-[var(--l1-foreground)]"
               >
                 <span className="min-w-0 truncate">{option.label}</span>
                 {isSelected && (
                   <Check
                     size={14}
-                    className="pointer-events-none absolute right-3 top-1/2 shrink-0 -translate-y-1/2 text-signoz_vanilla-100"
+                    className="pointer-events-none absolute right-3 top-1/2 shrink-0 -translate-y-1/2 text-[var(--l1-foreground)]"
                     aria-hidden
                   />
                 )}
