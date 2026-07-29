@@ -1,28 +1,122 @@
 ---
-date: 2026-05-13
-description: Learn how to create, edit, delete, and manage dashboards and panels within SigNoz.
+date: 2026-07-29
+description: Learn how to create, edit, filter, and manage dashboards and panels in SigNoz, including list filters, row actions, tags, sections, and the panel editor.
 title: Manage Dashboards in SigNoz
 doc_type: howto
 ---
 
-This section shows how you can create, update, and remove dashboards and panels.
+This section shows how you can create, update, filter, and remove dashboards and panels.
 
 <Figure
   src="/img/docs/userguide/manage-dashboards/dashboards-page.webp"
-  alt="Dashboards page in SigNoz"
-  caption="Dashboards page — browse templates, create new dashboards, or import from JSON."
+  alt="Dashboards list page in SigNoz showing the views rail and the filter query box"
+  caption="The dashboards list: switch views, filter with a query, and act on any row."
 />
 
-From the Dashboards page, you can:
+The list page opens with a **Views** rail on the left, a query box for filtering, and one row per dashboard. Selecting **New Dashboard** opens a modal with three tabs:
 
-- **Browse dashboard templates** — Select the link at the top to explore [60+ pre-built dashboard templates](https://signoz.io/docs/dashboards/dashboard-templates/overview/) for popular integrations. If a template you need is not available, you can request a new one from the templates page.
-- **New Dashboard** — Create a dashboard from scratch by entering a name and selecting **+ New Dashboard**.
-- **Import JSON** — Import a dashboard from a JSON file or a Grafana export.
-- **View templates** — Quickly jump to the templates library to import a pre-built dashboard.
+- **Blank**: create a dashboard from scratch by entering a name, description, and tags.
+- **From a template**: import one of the [60+ pre-built dashboard templates](https://signoz.io/docs/dashboards/dashboard-templates/overview/) for popular integrations. If a template you need is not available, you can request a new one from the templates page.
+- **Import JSON**: import a dashboard from a JSON file or a Grafana export.
 
 ## Prerequisites
 
 <PrereqsInstrument />
+
+## Find and filter dashboards
+
+The list page has a single query box that filters the list using a structured expression language (DSL). Build a query from keys, operators, values, and `AND` / `OR` connectors. The **Created by** and **Updated** dropdowns next to the box write their conditions into the same query.
+
+To save a filter configuration and return to it later, see [Saved Views](https://signoz.io/docs/dashboards/saved-views/).
+
+### Filter keys
+
+Reserved fields appear as **field** pills in the autocomplete list:
+
+| Key | Type | Operators | Example |
+| --- | --- | --- | --- |
+| `name` | string | `=` `!=` `CONTAINS` `NOT CONTAINS` `LIKE` `NOT LIKE` `ILIKE` `NOT ILIKE` `IN` `NOT IN` | `name CONTAINS 'prod'` |
+| `description` | string | Same as `name` | `description ILIKE '%latency%'` |
+| `created_by` | string | Same as `name` | `created_by = 'me@example.com'` |
+| `created_at` | timestamp | `=` `!=` `<` `<=` `>` `>=` `BETWEEN` `NOT BETWEEN` | `created_at >= '2026-07-01T00:00:00Z'` |
+| `updated_at` | timestamp | Same as `created_at` | `updated_at >= '2026-07-20T00:00:00Z'` |
+| `locked` | boolean | `=` `!=` | `locked = true` |
+
+Any key that is not a reserved field is treated as an organization **tag** key and appears as a **tag** pill. Tag keys use the string operators plus `EXISTS` and `NOT EXISTS`:
+
+```text
+env = 'prod' AND team = 'core'
+owner EXISTS
+```
+
+Value formats:
+
+- String values are quoted: `name = 'API latency'`.
+- `IN` / `NOT IN` take a bracketed list: `created_by IN ['a@example.com', 'b@example.com']`.
+- Boolean values are unquoted: `locked = true`.
+- Timestamps use RFC3339: `updated_at >= '2026-07-20T00:00:00Z'`.
+- `EXISTS` / `NOT EXISTS` take no value.
+
+<Admonition type="info">
+`updated_by` and `source` are not queryable.
+</Admonition>
+
+### Autocomplete
+
+Click into the query box, or start typing, to open the suggestions popup. It guides you one stage at a time: keys, then operators, then values, then connectors (`AND` / `OR`). Use the up and down arrow keys to move through suggestions, Enter to apply the highlighted one, and Esc to dismiss the popup. Typed expressions are color-highlighted so keys, operators, `AND` / `OR` keywords, quoted strings, and bare values are easy to tell apart.
+
+### Draft-and-run model
+
+The query box uses a draft model, so typing does not run a search. Apply the filter with **Cmd/Ctrl + Enter** or the **Run** button. A blue dot appears on **Run** whenever there are typed changes that have not been applied yet.
+
+### Created by and Updated dropdowns
+
+- **Created by** is a multi-select dropdown with a checkbox per creator, inline search, and a clear-all control. It writes a `created_by` condition into the query and runs the filter when the dropdown closes, not on each individual pick.
+- **Updated** is a single-select dropdown. Choosing a time window adds the matching `updated_at` condition to the query and applies it immediately.
+
+Editing a simple top-level condition in the query box is reflected back into these dropdowns.
+
+<Admonition type="warning" title="Saved and shared list URLs">
+The old list URL parameters (`search`, `createdBy`, `updated`, and `tags`) no longer apply filters. Bookmarks or shared links that use them open the list unfiltered. Re-create the filter in the query box and re-share the URL.
+</Admonition>
+
+### List behavior
+
+- The list header (title and filter bar) stays pinned to the top of the viewport as the list scrolls.
+- Deleting the last dashboard on a page other than the first steps back to the previous page instead of showing an empty result.
+
+## Row Actions and Role Access on the Dashboards List
+
+Every user sees the per-row actions menu on the dashboards list, but the actions it offers depend on their permission. Read-only actions are available to all roles, and edit actions are available only to users with edit permission (Editor, Author, and Admin roles).
+
+**Read-only actions (all roles, including Viewer):**
+
+- **View**: open the dashboard.
+- **Open in New Tab**: open the dashboard in a new browser tab.
+- **Copy Link**: copy a direct link to the dashboard.
+
+**Edit actions (Editor, Author, and Admin roles):**
+
+- **Rename**: rename the dashboard.
+- **Add Tags** or **Edit Tags**: manage the dashboard's tags. See [Manage Dashboard Tags](#manage-dashboard-tags).
+- **Duplicate**: create a copy of the dashboard.
+- **Lock Dashboard** or **Unlock Dashboard**: prevent or re-allow edits.
+- **Delete**: permanently delete the dashboard.
+
+Viewers keep the read-only actions, so they can still open, view, and share dashboards, but the edit actions stay hidden from them.
+
+On a locked dashboard, **Rename** and the tag actions are disabled, and hovering them explains why. Unlock the dashboard first to use them.
+
+## Manage Dashboard Tags
+
+Tags help you group and filter dashboards on the list page. You can edit a dashboard's tags without opening the dashboard:
+
+1. On the dashboards list, open the action menu on the dashboard's row.
+2. Select **Add Tags** (if the dashboard has no tags) or **Edit Tags** (if it already has tags).
+3. In the modal, enter tags as `key:value` pairs.
+4. Save with the **Save** button or by pressing **Cmd/Ctrl + Enter**.
+
+Tags whose key and value are identical display both sides, so a tag entered as `env:env` renders as `env:env` rather than a bare `env`.
 
 ## Create a Custom Dashboard
 
