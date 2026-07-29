@@ -7,7 +7,7 @@ doc_type: howto
 
 ## What is Open WebUI Monitoring?
 
-Open WebUI monitoring gives you real-time visibility into your self-hosted <a href="https://openwebui.com/" target="_blank" rel="noopener noreferrer nofollow">Open WebUI</a> deployment using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. Open WebUI's backend ships with OpenTelemetry built in, auto-instrumenting FastAPI, SQLAlchemy, and its HTTP clients, so it emits traces, metrics, and logs for API requests, database queries, and outbound calls without any code changes. Adding <a href="https://openlit.io/" target="_blank" rel="noopener noreferrer nofollow">OpenLIT</a> through Open WebUI Pipelines extends this with GenAI telemetry (model, tokens, and cost) for every LLM call.
+Open WebUI monitoring gives you real-time visibility into your self-hosted <a href="https://openwebui.com/" target="_blank" rel="noopener noreferrer nofollow">Open WebUI</a> deployment using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. Open WebUI's backend ships with OpenTelemetry built in, auto-instrumenting FastAPI, SQLAlchemy, and its HTTP clients, so it emits traces, metrics, and logs for API requests, database queries, and outbound calls without any code changes. If you also want GenAI telemetry (model, tokens, and cost) for every LLM call, you can optionally add <a href="https://openlit.io/" target="_blank" rel="noopener noreferrer nofollow">OpenLIT</a> through Open WebUI Pipelines.
 
 With full Open WebUI observability in SigNoz, you can trace API requests end to end, monitor database and endpoint latency, track LLM token usage and cost per model, set alerts on errors and latency, and keep your deployment reliable.
 
@@ -16,11 +16,11 @@ With full Open WebUI observability in SigNoz, you can trace API requests end to 
 - A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
 - Docker and Docker Compose installed and running on your system
 - A running Open WebUI deployment (a recent version with OpenTelemetry support). Follow the <a href="https://docs.openwebui.com/" target="_blank" rel="noopener noreferrer nofollow">Open WebUI docs</a> if you don't have it yet
-- An OpenAI API key (or other OpenAI-compatible provider) for the LLM telemetry step
+- Only for the optional LLM telemetry add-on: an OpenAI API key (or another OpenAI-compatible provider)
 
 ## Monitor Open WebUI with OpenTelemetry
 
-Open WebUI's OpenTelemetry stack is bundled inside its backend and turned on with environment variables, so there is no instrumentation package to install. Open WebUI's exporter does not attach custom headers, so it sends OTLP to a lightweight OpenTelemetry Collector that adds your SigNoz ingestion key and forwards the data. For LLM-level telemetry (model, tokens, cost), you add OpenLIT through Open WebUI Pipelines. The steps below wire all three together with Docker Compose.
+Open WebUI's OpenTelemetry stack is bundled inside its backend and turned on with environment variables, so there is no instrumentation package to install. Open WebUI's exporter does not attach custom headers, so it sends OTLP to a lightweight OpenTelemetry Collector that adds your SigNoz ingestion key and forwards the data. The three steps below wire both together with Docker Compose and get data into SigNoz. Once that works, you can optionally [add LLM telemetry with OpenLIT](#add-llm-telemetry-with-openlit-optional) for per-call model, token, and cost data.
 
 ### Step 1: Configure the OpenTelemetry Collector
 
@@ -72,17 +72,84 @@ service:
 SigNoz Cloud authenticates ingestion with the `signoz-ingestion-key` header. Open WebUI initializes its OTLP exporter without custom headers, so it cannot attach that key itself. The Collector adds it on Open WebUI's behalf. If you run self-hosted SigNoz, you can point Open WebUI's exporter straight at your SigNoz OTLP endpoint and skip this hop.
 </Admonition>
 
-### Step 2 (optional): Add LLM telemetry with OpenLIT
+### Step 2: Start the stack with Docker Compose
 
-<Admonition type="info" title="Only need application telemetry (no LLM tokens or cost)?" defaultCollapsed="true">
-This step is optional. If you only want Open WebUI's API, database, and HTTP telemetry, skip it: omit the `pipelines` service (and `OPENAI_API_KEY`) from the compose file in Step 3, and skip Step 4. Open WebUI's native instrumentation still exports traces, metrics, and logs on its own. Add this step when you also want per-call model, token, and cost data.
+Create `docker-compose.yaml`. It runs Open WebUI and the Collector on one network, with Open WebUI exporting its native OTLP to the Collector.
+
+```yaml
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    depends_on: [otel-collector]
+    environment:
+      ENABLE_OTEL: "true"
+      ENABLE_OTEL_TRACES: "true"
+      ENABLE_OTEL_METRICS: "true"
+      ENABLE_OTEL_LOGS: "true"
+      OTEL_SERVICE_NAME: "open-webui"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+      OTEL_OTLP_SPAN_EXPORTER: "http"
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
+    ports:
+      - "3000:8080"
+    volumes:
+      - open-webui-data:/app/backend/data
+
+volumes:
+  open-webui-data:
+```
+
+Start everything:
+
+```bash
+docker compose up -d
+```
+
+The Open WebUI environment variables above control the native export:
+
+| Variable | Required | Value | What it does |
+|---|:--:|---|---|
+| `ENABLE_OTEL` | Yes | `true` | Turns on Open WebUI's OpenTelemetry stack. |
+| `ENABLE_OTEL_TRACES` / `ENABLE_OTEL_METRICS` / `ENABLE_OTEL_LOGS` | No | `true` (default `false`) | Enable each signal. |
+| `OTEL_SERVICE_NAME` | No | `open-webui` | The `service.name` Open WebUI reports. |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Yes | `http://otel-collector:4318` | The Collector's OTLP HTTP endpoint. |
+| `OTEL_OTLP_SPAN_EXPORTER` | No | `http` (default `grpc`) | Selects the OTLP/HTTP exporter for traces. |
+| `OTEL_EXPORTER_OTLP_INSECURE` | Yes | `true` | Plaintext OTLP to the Collector on the local network. |
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the Collector's exporter endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
-Open WebUI's native instrumentation captures API, database, and HTTP spans, but not token usage, cost, or the model behind each call. To capture those, run an Open WebUI Pipelines server with an OpenLIT-instrumented OpenAI client. Create `pipelines/openai_openlit_pipeline.py`:
+### Step 3: Generate telemetry
+
+1. Open Open WebUI at `http://localhost:3000` and create the first (admin) account.
+2. Browse the app and start a chat to exercise the API.
+
+App activity produces FastAPI, database, and HTTP spans. An idle instance emits little, so use the app before checking SigNoz, and allow a few seconds for export. Your Open WebUI telemetry is now in SigNoz.
+
+<details>
+<ToggleHeading>
+## Add LLM Telemetry with OpenLIT (Optional)
+</ToggleHeading>
+
+Open WebUI's native instrumentation captures API, database, and HTTP spans, but not token usage, cost, or the model behind each call. To capture those, run an Open WebUI Pipelines server with an OpenLIT-instrumented OpenAI client. This adds a container and some manual wiring, so set it up after the steps above are sending data.
 
 <Admonition type="info" title="Why OpenLIT, and why a pipe pipeline?" defaultCollapsed="true">
 Open WebUI's Pipelines framework supports two plugin kinds: a `pipe` (which is itself a selectable model) and a `filter` (inlet/outlet hooks that wrap an existing model, used by the built-in Langfuse and DataDog integrations). We use a `pipe` because <a href="https://openlit.io/" target="_blank" rel="noopener noreferrer nofollow">OpenLIT</a> auto-instruments the OpenAI client it hosts, so every call emits full `gen_ai.*` telemetry (model, tokens, cost, prompt and response, time to first token) with no per-request code. OpenLIT is also OpenTelemetry-native: it exports standard `gen_ai.*` semantic-convention spans over OTLP, so they flow straight to SigNoz through the same Collector. The Langfuse and DataDog filters, by contrast, send to their own backends rather than to SigNoz over OTLP.
 </Admonition>
+
+### Create the pipeline
+
+Create `pipelines/openai_openlit_pipeline.py`:
 
 ```python
 """
@@ -130,21 +197,11 @@ class Pipeline:
                 yield chunk.choices[0].delta.content
 ```
 
-### Step 3: Start the stack with Docker Compose
+### Add the Pipelines service
 
-Create `docker-compose.yaml`. It runs Open WebUI, the Collector, and the Pipelines server on one network. Open WebUI exports its native OTLP to the Collector, and OpenLIT exports GenAI telemetry to the Collector as well.
+Add this service to the `docker-compose.yaml` from Step 2. It exports GenAI telemetry to the same Collector:
 
 ```yaml
-services:
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
-    command: ["--config=/etc/otel-collector-config.yaml"]
-    volumes:
-      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
-    ports:
-      - "4317:4317"
-      - "4318:4318"
-
   pipelines:
     image: ghcr.io/open-webui/pipelines:main
     depends_on: [otel-collector]
@@ -155,64 +212,36 @@ services:
       - ./pipelines:/app/pipelines
     ports:
       - "9099:9099"
+```
 
-  open-webui:
-    image: ghcr.io/open-webui/open-webui:main
+Then add `pipelines` to the `open-webui` service's `depends_on` so it starts after the Pipelines server:
+
+```yaml
     depends_on: [otel-collector, pipelines]
-    environment:
-      ENABLE_OTEL: "true"
-      ENABLE_OTEL_TRACES: "true"
-      ENABLE_OTEL_METRICS: "true"
-      ENABLE_OTEL_LOGS: "true"
-      OTEL_SERVICE_NAME: "open-webui"
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
-      OTEL_OTLP_SPAN_EXPORTER: "http"
-      OTEL_EXPORTER_OTLP_INSECURE: "true"
-    ports:
-      - "3000:8080"
-    volumes:
-      - open-webui-data:/app/backend/data
-
-volumes:
-  open-webui-data:
 ```
 
 <Admonition type="info" title="Configure your OpenAI API key">
-Before starting the stack, configure the `OPENAI_API_KEY` environment variable so the pipeline can call OpenAI. Add it to a `.env` file next to `docker-compose.yaml` (for example, `OPENAI_API_KEY=<your-openai-api-key>`). Docker Compose reads that file automatically for `${OPENAI_API_KEY}`, keeping your real key out of the committed compose file.
+Before restarting the stack, configure the `OPENAI_API_KEY` environment variable so the pipeline can call OpenAI. Add it to a `.env` file next to `docker-compose.yaml` (for example, `OPENAI_API_KEY=<your-openai-api-key>`). Docker Compose reads that file automatically for `${OPENAI_API_KEY}`, keeping your real key out of the committed compose file.
 </Admonition>
 
-Start everything:
+Restart the stack:
 
 ```bash
 docker compose up -d
 ```
 
-The Open WebUI environment variables above control the native export:
+### Connect the pipeline
 
-| Variable | Required | Value | What it does |
-|---|:--:|---|---|
-| `ENABLE_OTEL` | Yes | `true` | Turns on Open WebUI's OpenTelemetry stack. |
-| `ENABLE_OTEL_TRACES` / `ENABLE_OTEL_METRICS` / `ENABLE_OTEL_LOGS` | No | `true` (default `false`) | Enable each signal. |
-| `OTEL_SERVICE_NAME` | No | `open-webui` | The `service.name` Open WebUI reports. |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | Yes | `http://otel-collector:4318` | The Collector's OTLP HTTP endpoint. |
-| `OTEL_OTLP_SPAN_EXPORTER` | No | `http` (default `grpc`) | Selects the OTLP/HTTP exporter for traces. |
-| `OTEL_EXPORTER_OTLP_INSECURE` | Yes | `true` | Plaintext OTLP to the Collector on the local network. |
+1. In Open WebUI, go to **Admin Panel → Settings → Connections** and add an OpenAI-compatible connection with the URL `http://pipelines:9099` and the API key `0p3n-w3bu!`.
+2. Start a chat with the **OpenAI GenAI (OpenLIT)** model.
 
-<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
-Most steps are identical. To adapt this guide, update the Collector's exporter endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</Admonition>
+Each chat now produces GenAI spans carrying `gen_ai.*` attributes (model, token usage, cost) under the service `open-webui-llm`.
 
-### Step 4: Connect the pipeline and generate telemetry
-
-1. Open Open WebUI at `http://localhost:3000` and create the first (admin) account.
-2. Point Open WebUI at the Pipelines server: go to **Admin Panel → Settings → Connections**, add an OpenAI-compatible connection with the URL `http://pipelines:9099` and the API key `0p3n-w3bu!`.
-3. Start a chat with the **OpenAI GenAI (OpenLIT)** model, and browse the app to exercise the API.
-
-Each chat produces GenAI spans carrying `gen_ai.*` attributes (model, token usage, cost), and normal app activity produces FastAPI, database, and HTTP spans. An idle instance emits little, so use the app before checking SigNoz, and allow a few seconds for export.
+</details>
 
 ## View Open WebUI Traces in SigNoz
 
-Once configured, Open WebUI emits traces for LLM calls (service `open-webui-llm`) and app requests (service `open-webui`). Traces are available in SigNoz under the Traces tab:
+Once configured, Open WebUI emits traces for app requests under the service `open-webui`, plus traces for LLM calls under `open-webui-llm` if you added the OpenLIT step. Traces are available in SigNoz under the Traces tab:
 
 <Figure
   src="/img/docs/llm/openwebui/openwebui-traces.webp"
@@ -220,7 +249,7 @@ Once configured, Open WebUI emits traces for LLM calls (service `open-webui-llm`
   caption="Open WebUI Trace View"
 />
 
-Click a trace to see the detailed view, including all spans, events, and attributes. LLM spans carry `gen_ai.*` attributes such as the model, token usage, cost, and the prompt and response messages.
+Click a trace to see the detailed view, including all spans, events, and attributes. With OpenLIT added, LLM spans carry `gen_ai.*` attributes such as the model, token usage, cost, and the prompt and response messages.
 
 <Figure
   src="/img/docs/llm/openwebui/openwebui-detailed-traces.webp"
@@ -230,7 +259,7 @@ Click a trace to see the detailed view, including all spans, events, and attribu
 
 ## View Open WebUI Metrics in SigNoz
 
-Open WebUI and OpenLIT also emit OpenTelemetry metrics. Explore them under the Metrics tab, where you can see GenAI metrics such as token usage, request cost, and time to first token, alongside HTTP client and server durations:
+Open WebUI also emits OpenTelemetry metrics. Explore them under the Metrics tab, where you can see HTTP client and server durations, alongside GenAI metrics such as token usage, request cost, and time to first token if you added OpenLIT:
 
 <Figure
   src="/img/docs/llm/openwebui/openwebui-metrics.webp"
@@ -248,7 +277,7 @@ Select a metric to inspect its metadata, type, and attributes:
 
 ## Open WebUI Observability Dashboard
 
-You can also import our custom [Open WebUI dashboard](https://signoz.io/docs/dashboards/dashboard-templates/open-webui-dashboard/), which provides ready-made panels for application health, database performance, and LLM usage, tokens, cost, and latency by model, along with import instructions to get started quickly.
+You can also import our custom [Open WebUI dashboard](https://signoz.io/docs/dashboards/dashboard-templates/open-webui-dashboard/), which provides ready-made panels for application health, database performance, and LLM usage, tokens, cost, and latency by model, along with import instructions to get started quickly. The LLM panels populate once you add the optional [OpenLIT step](#add-llm-telemetry-with-openlit-optional).
 
 <Figure
   src="/img/docs/llm/openwebui/openwebui-dashboard.webp"
@@ -270,6 +299,7 @@ You can also import our custom [Open WebUI dashboard](https://signoz.io/docs/das
 
 ### No LLM (gen_ai) spans
 
+- These spans only appear if you completed the optional [OpenLIT step](#add-llm-telemetry-with-openlit-optional).
 - Confirm the Pipelines server loaded the pipeline and that Open WebUI's OpenAI connection points at `http://pipelines:9099` with the API key `0p3n-w3bu!`.
 - Make sure you chatted with the **OpenAI GenAI (OpenLIT)** model, not another connection.
 - Check the Pipelines logs: `docker compose logs pipelines`.
