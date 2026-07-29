@@ -69,12 +69,12 @@ On a VM, run the `rabbitmqctl` commands above directly. In Docker, prefix each o
 
 ### Step 2: Configure and run the Collector
 
-The `rabbitmq` receiver reads the monitoring password from a `RABBITMQ_PASSWORD` environment variable, so it never lives in the config file. Every environment below exports to SigNoz Cloud with the same `otlp_http` exporter, so add it once if you do not have one:
+The `rabbitmq` receiver reads the monitoring password from a `RABBITMQ_PASSWORD` environment variable, so it never lives in the config file. Every environment below exports to SigNoz Cloud with the same `otlphttp` exporter, so add it once if you do not have one:
 
 ```yaml:config.yaml
 exporters:
-  # On collectors older than v0.144.0 use the otlphttp alias
-  otlp_http:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp:
     endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       signoz-ingestion-key: "<your-ingestion-key>"
@@ -113,7 +113,7 @@ service:
     metrics/rabbitmq:
       receivers: [rabbitmq]
       processors: [batch]
-      exporters: [otlp_http]
+      exporters: [otlphttp]
 ```
 
 The `otelcol-contrib` systemd unit loads `/etc/otelcol-contrib/otelcol-contrib.conf` as an environment file, so supply the password there:
@@ -152,7 +152,7 @@ service:
     metrics/rabbitmq:
       receivers: [rabbitmq]
       processors: [batch]
-      exporters: [otlp_http]
+      exporters: [otlphttp]
 ```
 
 Pass the password to the Collector container. For production, source it from a Docker secret instead of a literal:
@@ -203,7 +203,7 @@ otelDeployment:
         metrics/rabbitmq:
           receivers: [rabbitmq]
           processors: [batch]
-          exporters: [otlp_http]
+          exporters: [otlphttp]
 ```
 
 Apply it and watch the logs:
@@ -253,7 +253,7 @@ service:
     metrics/rabbitmq-prometheus:
       receivers: [prometheus/rabbitmq]
       processors: [batch]
-      exporters: [otlp_http]
+      exporters: [otlphttp]
 ```
 
 The aggregated endpoint suits most deployments. Per-object metrics can create high cardinality on installations with many queues or connections. See RabbitMQ's <a href="https://www.rabbitmq.com/docs/prometheus" target="_blank" rel="noopener noreferrer nofollow">Prometheus monitoring guide</a> before enabling them.
@@ -287,14 +287,14 @@ sudo rabbitmq-diagnostics -q log_location
 
 On Debian and RPM installs, the path is commonly **/var/log/rabbitmq/rabbit@\<hostname\>.log**. Use the exact path that `rabbitmq-diagnostics` returns. If the `RABBITMQ_LOGS` environment variable is set, it takes precedence over `rabbitmq.conf`. See the RabbitMQ <a href="https://www.rabbitmq.com/docs/logging" target="_blank" rel="noopener noreferrer nofollow">logging guide</a> for details.
 
-### Step 2: Configure the file_log receiver
+### Step 2: Configure the filelog receiver
 
 Add the receiver and a logs pipeline. It tails only new entries, parses RabbitMQ's timestamp and severity, and sets **service.name** to **rabbitmq** for filtering in SigNoz:
 
 ```yaml:config.yaml
 receivers:
-  # On Collector releases before v0.151.0 use the filelog alias
-  file_log/rabbitmq:
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
+  filelog/rabbitmq:
     include: [<rabbitmq-log-path>]
     start_at: end
     include_file_path: true
@@ -325,12 +325,12 @@ receivers:
 service:
   pipelines:
     logs/rabbitmq:
-      receivers: [file_log/rabbitmq]
+      receivers: [filelog/rabbitmq]
       processors: [batch]
-      exporters: [otlp_http]
+      exporters: [otlphttp]
 ```
 
-Set `<rabbitmq-log-path>` to the path from Step 1. If you do not have an `otlp_http` exporter yet, add the one shown in the **Metrics** tab.
+Set `<rabbitmq-log-path>` to the path from Step 1. If you do not have an `otlphttp` exporter yet, add the one shown in the **Metrics** tab.
 
 ### Step 3: Grant log file access and restart
 
@@ -348,7 +348,7 @@ sudo systemctl restart otelcol-contrib
 ```
 
 <Admonition type="info" title="RabbitMQ logs only to journald?" defaultCollapsed="true">
-  If your node logs only to the systemd journal instead of a file, skip the `file_log/rabbitmq` receiver. Use the [collect systemd logs guide](https://signoz.io/docs/logs-management/send-logs/collect-systemd-logs/) and filter the receiver to the `rabbitmq-server.service` unit.
+  If your node logs only to the systemd journal instead of a file, skip the `filelog/rabbitmq` receiver. Use the [collect systemd logs guide](https://signoz.io/docs/logs-management/send-logs/collect-systemd-logs/) and filter the receiver to the `rabbitmq-server.service` unit.
 </Admonition>
 
 </TabItem>
@@ -368,13 +368,13 @@ processors:
 Add `resource/rabbitmq` to the `processors` list of the pipeline that handles the RabbitMQ container logs.
 
 <Admonition type="warning">
-  Use one log path per RabbitMQ instance. If you collect container stdout, do not also add the `file_log/rabbitmq` receiver, or logs arrive twice.
+  Use one log path per RabbitMQ instance. If you collect container stdout, do not also add the `filelog/rabbitmq` receiver, or logs arrive twice.
 </Admonition>
 
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
 
-The SigNoz `k8s-infra` chart [collects pod logs](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/) by default, so RabbitMQ pod logs reach SigNoz with no extra receiver. Filter them in SigNoz by the RabbitMQ pod or namespace. Do not add the VM `file_log/rabbitmq` receiver when pod log collection is already active.
+The SigNoz `k8s-infra` chart [collects pod logs](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/) by default, so RabbitMQ pod logs reach SigNoz with no extra receiver. Filter them in SigNoz by the RabbitMQ pod or namespace. Do not add the VM `filelog/rabbitmq` receiver when pod log collection is already active.
 
 </TabItem>
 </Tabs>
@@ -459,7 +459,7 @@ See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contr
 
 ### Logs appear twice
 
-Use one log collection path per RabbitMQ instance. Disable `file_log/rabbitmq` if Docker or Kubernetes log collection already reads the container's stdout.
+Use one log collection path per RabbitMQ instance. Disable `filelog/rabbitmq` if Docker or Kubernetes log collection already reads the container's stdout.
 
 </details>
 
