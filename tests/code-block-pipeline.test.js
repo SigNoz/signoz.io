@@ -224,6 +224,28 @@ test('countCodeLines ignores interstitial newlines between data-line spans', () 
   assert.equal(countCodeLines(children), 8)
 })
 
+test('getTextContent unwraps fulfilled react.lazy payloads for region detection', () => {
+  const { getTextContent, unwrapReactNode, countCodeLines } = loadTsModule(
+    'components/CodeBlock/utils.ts'
+  )
+
+  const inner = React.createElement(
+    'code',
+    null,
+    React.createElement('span', { 'data-line': '' }, 'https://ingest.<region>.signoz.cloud:443')
+  )
+
+  const lazy = {
+    $$typeof: Symbol.for('react.lazy'),
+    _payload: { status: 'fulfilled', value: inner },
+  }
+
+  assert.equal(getTextContent(inner).includes('<region>'), true)
+  assert.equal(getTextContent(lazy).includes('<region>'), true)
+  assert.equal(unwrapReactNode(lazy), inner)
+  assert.equal(countCodeLines(lazy), 1)
+})
+
 test('getTextContent does not double newlines between Shiki data-line nodes', () => {
   // Mirrors rehype-pretty-code output: line spans separated by "\n" text nodes.
   const line = (text) => React.createElement('span', { 'data-line': '' }, text)
