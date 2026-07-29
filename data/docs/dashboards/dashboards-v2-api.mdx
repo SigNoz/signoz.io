@@ -27,10 +27,7 @@ Migrate those scripts to the V2 Dashboards APIs. You can follow the examples in 
 <Admonition type="warning" title="Strict validation on the V2 spec">
 The V2 schema is strictly validated. Update API and dashboard-as-code (Terraform) clients for these rules:
 
-- **Empty enum strings are rejected.** Sending an explicit `""` for any enum field returns `400 Bad Request` with error code `dashboard_invalid_input`. Affected fields: `timePreference`, `legendPosition`, `legendMode`, `thresholdFormat`, `comparisonOperator`, `lineInterpolation`, `lineStyle`, `fillMode`, `precisionOption`, and `listVariableSort`. Omit the field to use its default instead of sending `""`.
-- **`links` is required and non-nullable.** Both dashboard-level and panel-level specs must include `links`. Send `"links": []` when there are none. Omitting the field or sending `null` is rejected.
-- **Dynamic-variable `signal` is required.** It accepts only `traces`, `logs`, `metrics`, or `all`. Clients that previously omitted it receive the `all` default on migration, but must send an explicit value going forward.
-- **List-variable `sort` always returns `none`.** When a list variable's sort is not set at creation, the response returns `"sort": "none"` explicitly instead of omitting the field.
+- **Omitting an enum field is fine. Sending an empty string is not.** Leave an enum out and it takes its default. Send an explicit `""` and the request is rejected with `400 Bad Request` and error code `dashboard_invalid_input`. This trips up clients that serialize every field, including unset ones. Affected fields: `timePreference`, `legendPosition`, `legendMode`, `thresholdFormat`, `comparisonOperator`, `lineInterpolation`, `lineStyle`, `fillMode`, `precisionOption`, and `listVariableSort`.
 - **Layouts must satisfy the grid rules.** See [Dashboard layout constraints](https://signoz.io/docs/dashboards/dashboard-layout-constraints/) for the bounds, overlap rules, and error messages.
 </Admonition>
 
