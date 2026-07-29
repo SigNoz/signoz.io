@@ -1,0 +1,130 @@
+---
+date: 2026-07-24
+title: Upgrade SigNoz to v0.135.0 with Dashboards V2 Schema
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
+description: Upgrade self-hosted SigNoz to v0.135.0. Dashboards convert to the V2 schema automatically, and the retired V1 dashboard APIs need script and Terraform changes.
+doc_type: howto
+---
+
+SigNoz v0.135.0 rolls out the redesigned [Dashboards](https://signoz.io/docs/dashboards/dashboards-v2-api/) experience and the new Dashboards V2 APIs. Your existing dashboards, queries, variables, and panels are migrated to the new Perses-compatible schema automatically, so no action is needed if you only use dashboards through the UI.
+
+<Admonition type="warning" title="The V1 dashboard endpoints stop responding in v0.135.0">
+`/api/v1/dashboards` and its sub-routes return `501 Not Implemented` after this upgrade. If you have scripts calling the Dashboards API directly, or manage dashboards with the Terraform provider, [migrate them](#migrate-api-scripts-to-the-v2-dashboards-apis) before you upgrade.
+</Admonition>
+
+<Admonition type="info" title="What changed in v0.135" defaultCollapsed="true">
+Dashboards move to a strictly validated schema based on the <a href="https://perses.dev/" target="_blank" rel="noopener noreferrer nofollow">Perses</a> dashboard-as-code standard.
+
+Key changes:
+
+- **Schema & APIs**: V2 CRUD APIs with Perses validation, `PATCH` for granular panel and metadata updates, and list APIs with pagination, sorting, and a query DSL
+- **Editing**: optimistic updates; panels and query changes save without "Stage & Run"
+- **Variables**: inline creation, `ALL` support, orchestrated refetch with correct load ordering, and `$variable` suggestions in queries
+- **List page & panels**: tags, pins, saved views, and sorting; panel and section cloning, drilldown, CSV/PNG/SVG export, and alerts from a panel
+- **Performance**: only on-screen panels refetch on time-range change and auto-refresh
+- **Ecosystem**: public dashboards on the V2 API, MCP server support, and a typed schema for GitOps and Terraform
+- **Migration**: existing dashboards and inbuilt dashboards are converted to the new schema in place during the upgrade; the V1 dashboard APIs are retired
+
+For the full release scope, see <a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>; for the schema and API details, see the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/).
+</Admonition>
+
+## Who needs to act
+
+| If you | Then |
+| --- | --- |
+| Use dashboards only through the UI | Nothing: dashboards are migrated automatically. Check afterwards for any dashboard marked **Legacy** |
+| Have scripts calling `/api/v1/dashboards` | [Migrate them to the V2 APIs](#migrate-api-scripts-to-the-v2-dashboards-apis) **before upgrading**: the V1 endpoints stop responding |
+| Manage dashboards with the Terraform provider | [Upgrade the provider and migrate resources](#migrate-terraform-managed-dashboards) |
+| Use the SigNoz MCP server with an AI assistant | [Upgrade it to v0.10.0](#upgrade-the-signoz-mcp-server) |
+
+## Upgrade self-hosted SigNoz
+
+### Step 1: Back up your data
+
+Dashboards live in the SigNoz Metastore (SQLite or Postgres) and are converted to the new schema during the rollout. Back up the Metastore before upgrading. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops (v0.131 requires a ClickHouse upgrade) before jumping to v0.135.0.
+
+### Step 2: Upgrade SigNoz
+
+<Tabs entityName="installer">
+<TabItem value="foundry" label="Foundry" default>
+
+Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundryctl</a> to pick up the v0.135.0 defaults, then re-apply your existing `casting.yaml`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+foundryctl cast -f casting.yaml
+```
+
+If your `casting.yaml` pins image versions, the new defaults will not override them (your config wins), so bump the SigNoz image pin to v0.135.0 yourself.
+
+</TabItem>
+<TabItem value="helm" label="Kubernetes (Helm chart)">
+
+Update the <a href="https://github.com/SigNoz/charts" target="_blank" rel="noopener noreferrer nofollow">chart</a> and upgrade:
+
+```bash
+helm repo update
+helm -n signoz upgrade signoz signoz/signoz
+```
+
+`helm upgrade` takes the newest chart; add `--version 0.135.0` to pin the v0.135.0 chart.
+
+</TabItem>
+</Tabs>
+
+### Step 3: Verify the upgrade
+
+1. Pods and containers are healthy (`kubectl get pods -n signoz`, `docker compose ps`, or `systemctl status 'signoz-*'`).
+2. SigNoz reports v0.135.0 under **Settings**.
+3. Open **Dashboards**: the redesigned list page loads, and your existing dashboards render with data.
+4. Scan the list for rows marked **Legacy**. The conversion runs per dashboard, and a dashboard whose stored data cannot be converted is left on the old schema and flagged rather than failing the upgrade. Legacy dashboards are listed but cannot be opened in the new experience. Open the row's dialog to copy the dashboard ID and share it with support.
+
+## Migrate API scripts to the V2 Dashboards APIs
+
+The V1 dashboard endpoints are retired in v0.135.0. They respond with `501 Not Implemented`, the error code `dashboard_deprecated`, and a message naming the V2 replacement. Move your scripts to the V2 endpoints before you upgrade:
+
+| V1 endpoint (now `501`) | V2 endpoint |
+| --- | --- |
+| `GET /api/v1/dashboards` | `GET /api/v2/dashboards` |
+| `POST /api/v1/dashboards` | `POST /api/v2/dashboards` |
+| `GET /api/v1/dashboards/{id}` | `GET /api/v2/dashboards/{id}` |
+| `PUT /api/v1/dashboards/{id}` | `PUT /api/v2/dashboards/{id}` |
+| `DELETE /api/v1/dashboards/{id}` | `DELETE /api/v2/dashboards/{id}` |
+| `PUT /api/v1/dashboards/{id}/lock` | `PUT /api/v2/dashboards/{id}/lock`, `DELETE /api/v2/dashboards/{id}/lock` |
+
+The public sharing routes (`/api/v1/dashboards/{id}/public` and `/api/v1/public/dashboards/{id}`) are not affected and keep working.
+
+One compatibility shim remains, on create only: `POST /api/v2/dashboards` still accepts a V1 payload (a body carrying `version` and no `schemaVersion`) and converts it to V2, so import flows and existing create automation keep working during the rollout window. This shim will be removed in a few releases (<a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>). `PUT /api/v2/dashboards/{id}` does **not** accept V1 payloads; it requires `schemaVersion: "v6"`.
+
+The V2 APIs also add a `PATCH` endpoint for partial updates, split lock and unlock endpoints, a pin-aware per-user listing, and pagination, sorting, and a query DSL on the list endpoint. The payload changes shape too, from flat JSON to a Perses `spec` tree. See the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/) for the full endpoint list, schema, and `PATCH` examples.
+
+## Upgrade the SigNoz MCP server
+
+The MCP server's dashboard tools moved to the V2 APIs in **v0.10.0**, so the two upgrades are coupled. On SigNoz Cloud's hosted MCP endpoint this happens for you; self-hosted MCP deployments need the version bump.
+
+| signoz-mcp-server | SigNoz | Result |
+| --- | --- | --- |
+| v0.9.x or older | v0.134.x or older | Works on the V1 dashboard API |
+| v0.9.x or older | v0.135.0 or newer | Dashboard tools fail: they call the retired V1 routes |
+| v0.10.0 | v0.134.x or older | Dashboard tools fail: the V2 routes do not exist yet |
+| v0.10.0 | v0.135.0 or newer | Supported |
+
+Only the dashboard tools are affected. The metrics, traces, logs, alerts, services, and docs tools work across both versions. Tool names are unchanged, so MCP client configs need no edits beyond the version bump. v0.10.0 also adds `signoz_patch_dashboard`, which applies an RFC 6902 JSON Patch so an assistant can edit one panel without resending the whole dashboard.
+
+For the full list of changes and known limitations, see <a href="https://github.com/SigNoz/signoz-mcp-server/issues/262" target="_blank" rel="noopener noreferrer nofollow">signoz-mcp-server#262</a>.
+
+## Migrate Terraform-managed dashboards
+
+Terraform provider v0.1.0 rebuilds `signoz_dashboard` on the V2 APIs as a fully typed resource, so the `jsonencode(...)` attributes become a typed `spec` tree and existing config and state must be migrated. It requires SigNoz v0.135.0 or newer. This is a breaking change tracked in <a href="https://github.com/SigNoz/terraform-provider-signoz/issues/122" target="_blank" rel="noopener noreferrer nofollow">terraform-provider-signoz#122</a>.
+
+Follow the provider's <a href="https://registry.terraform.io/providers/SigNoz/signoz/latest/docs/guides/v0.0.x-to-v0.1.0" target="_blank" rel="noopener noreferrer nofollow">v0.0.x to v0.1.0 upgrade guide</a> for the full migration workflow. For general usage, see the [Terraform provider guide](https://signoz.io/docs/dashboards/terraform-provider-signoz/).
+
+<Admonition type="warning" title="Provider v0.1.0 also removes signoz_alert">
+Separate from the dashboard migration, provider v0.1.0 removes the `signoz_alert` resource in favor of `signoz_rule`. If you manage alerts with Terraform, follow the <a href="https://registry.terraform.io/providers/SigNoz/signoz/latest/docs/guides/migrate-signoz-alert-to-signoz-rule" target="_blank" rel="noopener noreferrer nofollow">migrate signoz_alert to signoz_rule guide</a> in the same upgrade.
+</Admonition>
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- [GitHub Issues](https://github.com/SigNoz/signoz/issues)
+- [Community Slack](https://signoz.io/slack/)
