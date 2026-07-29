@@ -12,10 +12,17 @@ type FooterPillLinkProps = {
   href: string
   children: React.ReactNode
   external?: boolean
+  newTab?: boolean
   className?: string
 }
 
-function FooterPillLink({ href, children, external = false, className = '' }: FooterPillLinkProps) {
+function FooterPillLink({
+  href,
+  children,
+  external = false,
+  newTab = false,
+  className = '',
+}: FooterPillLinkProps) {
   const classes = `footer-pill-link mt-5 ${className}`.trim()
 
   if (external) {
@@ -23,6 +30,14 @@ function FooterPillLink({ href, children, external = false, className = '' }: Fo
       <a href={href} className={classes} target="_blank" rel="noopener noreferrer nofollow">
         {children}
       </a>
+    )
+  }
+
+  if (newTab) {
+    return (
+      <Link href={href} className={classes} target="_blank" prefetch={false}>
+        {children}
+      </Link>
     )
   }
 
@@ -50,7 +65,7 @@ function Footer() {
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex flex-col pb-2.5 text-sm tracking-wide text-[var(--l2-foreground)] max-md:mt-10">
-                <div className="text-sm font-medium uppercase leading-none tracking-wide text-[var(--l3-foreground)]">
+                <div className="text-sm font-medium uppercase leading-5 tracking-wide text-[var(--l3-foreground)]">
                   Docs
                 </div>
                 <FooterPillLink href="/docs/introduction/">Introduction</FooterPillLink>
@@ -71,7 +86,7 @@ function Footer() {
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)] max-md:mt-10">
-                <div className="text-sm font-medium uppercase leading-none tracking-wide text-[var(--l3-foreground)]">
+                <div className="text-sm font-medium uppercase leading-5 tracking-wide text-[var(--l3-foreground)]">
                   Community
                 </div>
 
@@ -84,23 +99,23 @@ function Footer() {
                   X
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
-                <FooterPillLink href="/launch-week/" external>
+                <FooterPillLink href="/launch-week/" newTab>
                   Launch Week
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
                 <FooterPillLink href="/changelog/">Changelog</FooterPillLink>
-                <FooterPillLink href="/docs/dashboards/dashboard-templates/overview/" external>
+                <FooterPillLink href="/docs/dashboards/dashboard-templates/overview/" newTab>
                   Dashboard Templates
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
-                <FooterPillLink href="/todaysdevopswordle/" external>
+                <FooterPillLink href="/todaysdevopswordle/" newTab>
                   DevOps Wordle
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
                 <FooterPillLink href="https://newsletter.signoz.io/" external>
                   Newsletter
                 </FooterPillLink>
-                <FooterPillLink href="/events/kubecon-cloudnativecon-north-america-2025/" external>
+                <FooterPillLink href="/events/kubecon-cloudnativecon-north-america-2025/" newTab>
                   KubeCon, Atlanta 2025
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
@@ -108,7 +123,7 @@ function Footer() {
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)] max-md:mt-10">
-                <div className="text-sm font-medium uppercase leading-none tracking-wide text-[var(--l3-foreground)]">
+                <div className="text-sm font-medium uppercase leading-5 tracking-wide text-[var(--l3-foreground)]">
                   More
                 </div>
 
@@ -151,7 +166,12 @@ function Footer() {
                     className="size-1.5 shrink-0 rounded-full bg-[var(--callout-success-description)]"
                     aria-hidden
                   />
-                  <Link href="https://status.signoz.io/" target="_blank" prefetch={false}>
+                  <Link
+                    href="https://status.signoz.io/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    prefetch={false}
+                  >
                     All systems operational
                   </Link>
                 </div>
