@@ -2,7 +2,7 @@
 
 import React, { Children, isValidElement, cloneElement, ReactNode } from 'react'
 import CodeBlock from '@/components/CodeBlock'
-import { getTextContent } from '@/components/CodeBlock/utils'
+import { getTextContent, unwrapReactNode } from '@/components/CodeBlock/utils'
 import { useRegion } from './RegionContext'
 
 // CodeBlock copy control uses this aria-label.
@@ -26,6 +26,8 @@ type TextLeafRef = { value: string }
  * the highlighted tree (which drops [data-line] padding and colors).
  */
 const collectTextLeaves = (node: ReactNode, leaves: TextLeafRef[]): void => {
+  node = unwrapReactNode(node)
+  if (node == null) return
   if (typeof node === 'string' || typeof node === 'number') {
     leaves.push({ value: String(node) })
     return
@@ -99,6 +101,8 @@ const rebuildWithLeaves = (
   leaves: TextLeafRef[],
   index: { at: number }
 ): ReactNode => {
+  node = unwrapReactNode(node)
+  if (node == null) return null
   if (typeof node === 'string' || typeof node === 'number') {
     return leaves[index.at++]?.value ?? ''
   }
@@ -118,19 +122,21 @@ const rebuildWithLeaves = (
 const processCodeChildren = (children: ReactNode, replacements: Replacement[]): ReactNode => {
   if (replacements.length === 0) return children
 
+  const resolved = unwrapReactNode(children) ?? children
+
   const leaves: TextLeafRef[] = []
-  collectTextLeaves(children, leaves)
+  collectTextLeaves(resolved, leaves)
   if (leaves.length === 0) return children
 
   const changed = applyReplacementsToLeaves(leaves, replacements)
   if (!changed) return children
 
   // Fast path: single string child
-  if (typeof children === 'string' || typeof children === 'number') {
+  if (typeof resolved === 'string' || typeof resolved === 'number') {
     return leaves[0]?.value ?? ''
   }
 
-  return rebuildWithLeaves(children, leaves, { at: 0 })
+  return rebuildWithLeaves(resolved, leaves, { at: 0 })
 }
 
 export const RegionAwarePre = (props: any) => {
@@ -148,10 +154,11 @@ export const RegionAwarePre = (props: any) => {
   // Use the combined text content (not per-node): syntax highlighting tokenizes
   // `<region>` across separate spans, so a per-node check would miss it — the same
   // reason processCodeChildren falls back to combined text for substitution.
-  const isRegionAware = React.useMemo(
-    () => getTextContent(props.children).includes('<region>'),
-    [props.children]
-  )
+  //
+  // Do not memoize on props.children identity alone: inside Tabs, MDX children often
+  // arrive as fulfilled React.lazy payloads whose `_payload.status` flips without the
+  // lazy element reference changing — memoization would keep a stale false forever.
+  const isRegionAware = getTextContent(props.children).includes('<region>')
 
   const modifiedChildren = React.useMemo(() => {
     if (replacements.length === 0) return props.children
