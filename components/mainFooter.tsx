@@ -131,7 +131,7 @@ function Footer() {
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex flex-col items-end shadow-sm max-md:mt-10">
+              <div className="flex flex-col items-end max-md:mt-10">
                 <div className="flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-[var(--l1-foreground)]">
                   <Link href="/" prefetch={false} className="flex items-center gap-2">
                     <Image
@@ -146,16 +146,16 @@ function Footer() {
                     <div className="font-satoshi-bold font-medium">SigNoz</div>
                   </Link>
                 </div>
-                <div className="mt-5 flex items-center justify-end gap-2 rounded text-sm font-medium leading-none tracking-[-0.065px] text-[var(--callout-success-description)]">
+                <div className="mt-5 flex items-center justify-end gap-2 rounded text-[13px] font-medium leading-none tracking-[-0.065px] text-[var(--callout-success-description)]">
                   <span
-                    className="size-1.5 shrink-0 rounded-full bg-[var(--bg-forest-300)]"
+                    className="size-1.5 shrink-0 rounded-full bg-[var(--callout-success-description)]"
                     aria-hidden
                   />
                   <Link href="https://status.signoz.io/" target="_blank" prefetch={false}>
                     All systems operational
                   </Link>
                 </div>
-                <div className="footer-icons mt-5 flex items-end justify-between gap-4 py-2">
+                <div className="footer-icons mt-5 flex items-end justify-between gap-4 py-2 text-[var(--l2-foreground)] [&_a:hover]:text-[var(--l1-foreground)] [&_path]:fill-current [&_svg]:fill-current">
                   <Link
                     href={'https://github.com/SigNoz'}
                     target="_blank"
@@ -203,7 +203,7 @@ function Footer() {
                 </div>
                 <div className="mt-5 flex flex-row gap-8">
                   <Image
-                    className="cursor-pointer opacity-60 hover:opacity-100"
+                    className="cursor-pointer opacity-60 invert transition-opacity hover:opacity-100 dark:invert-0"
                     src="/svgs/icons/hipaa.svg"
                     width={90}
                     height={90}
@@ -212,7 +212,7 @@ function Footer() {
                     onClick={() => window.open('https://trust.signoz.io/', '_blank')}
                   />
                   <Image
-                    className="cursor-pointer rounded-full opacity-60 shadow-[0px_0_40px_0_color-mix(in_srgb,var(--base-white)_27%,transparent)] transition-opacity hover:opacity-100"
+                    className="cursor-pointer rounded-full opacity-60 invert transition-opacity hover:opacity-100 dark:shadow-[0px_0_40px_0_color-mix(in_srgb,var(--base-white)_27%,transparent)] dark:invert-0"
                     src="/svgs/icons/SOC-2.svg"
                     width={60}
                     height={60}
