@@ -374,7 +374,7 @@ The dashboard toolbar includes a **JSON** button that opens the JSON editor in a
 A dashboard spec has two parts that must stay in sync:
 
 - **`panels`**: the panels defined on the dashboard.
-- **`layout`**: the sections and positions that place each panel on the grid.
+- **`layouts`**: the sections and positions that place each panel on the grid.
 
 When these two drift apart, panels can silently disappear after saving. The JSON editor surfaces those mismatches as warnings before you save.
 
@@ -403,9 +403,9 @@ The editor shows only the two editable parts of a dashboard:
 - **`tags`**: the dashboard's tags.
 - **`spec`**: the dashboard definition, covering panels, layout, variables, and settings.
 
-Server-managed fields (such as `id`, `name`, schema version, image, organization ID, timestamps, and locked status) are hidden from the editor. They are preserved automatically when you save, so nothing is lost by editing only `tags` and `spec`.
+Server-managed fields (such as `id`, `name`, schema version, organization ID, timestamps, and locked status) are hidden from the editor. They are preserved automatically when you save, so nothing is lost by editing only `tags`, `spec`, and `image`.
 
-The **Copy** and **Download** controls export exactly what the editor shows, which is the `tags` and `spec` fields only.
+The **Copy** and **Download** controls export exactly what the editor shows, which is the `tags`, `spec`, and `image` fields.
 
 <Admonition type="tip">
 To move a dashboard between workspaces, download its JSON here and re-import it using [Import JSON](https://signoz.io/docs/dashboards/import-dashboard/).
@@ -413,7 +413,7 @@ To move a dashboard between workspaces, download its JSON here and re-import it 
 
 ### Validation warnings
 
-The editor shows amber warning banners in the drawer footer when the spec and layout do not match. You can save while a warning is present, but the affected panels will not render as expected until you resolve it.
+The editor shows amber warning banners in the drawer footer when the spec and layout do not match. A panel left out of the layout saves and simply does not render, but a layout item that points to a panel which no longer exists is rejected on save, so resolve that one first.
 
 #### Panels not present in layout
 
@@ -515,7 +515,7 @@ A dashboard becomes read-only for one of two reasons, and SigNoz treats them the
 - **The dashboard is locked.** Lock it from the [options menu](#dashboard-options-menu) to prevent accidental edits. Only the dashboard's author and Admins can lock or unlock.
 - **You do not have edit permission.** Viewers have read-only access to every dashboard.
 
-In read-only mode, editing controls stay visible but disabled rather than being hidden, so the dashboard looks the same to everyone. Hovering a disabled control explains why, with either `This dashboard is locked` or `You don't have permission to edit this dashboard`.
+On a locked dashboard, editing controls stay visible but disabled, and hovering one explains why with `This dashboard is locked`. Without edit permission the controls are hidden instead, so a Viewer never sees them.
 
 What stays available in read-only mode:
 
