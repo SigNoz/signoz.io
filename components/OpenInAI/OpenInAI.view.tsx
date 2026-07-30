@@ -5,28 +5,42 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@signozhq/ui/dropdown-menu'
-import { ChevronDown, Copy, Check, ExternalLink } from 'lucide-react'
+import { ChevronDown, Copy, Check, ArrowUpRight } from 'lucide-react'
 
 import { cn } from '../../app/lib/utils'
 import { useLogEvent } from '@/hooks/useLogEvent'
-import Button from '@/components/ui/Button'
 
-import { AI_OPTIONS, COPY_FEEDBACK_DURATION_MS } from './OpenInAI.constants'
+import { AI_OPTIONS, COPY_AS_MARKDOWN_LABEL, COPY_FEEDBACK_DURATION_MS } from './OpenInAI.constants'
 import type { AIOption, OpenInAIProps } from './OpenInAI.types'
 import { getAbsoluteUrl } from './OpenInAI.utils'
 
 const openInAIMenuVars = {
-  '--dropdown-menu-content-min-width': '17.5rem',
-  '--dropdown-menu-content-border-radius': 'var(--spacing-4)',
-  '--dropdown-menu-content-padding': 'var(--spacing-2) 0',
-  '--dropdown-menu-item-padding': 'var(--spacing-6) var(--spacing-8)',
+  '--dropdown-menu-content-min-width': '16rem',
+  '--dropdown-menu-content-border-radius': '4px',
+  '--dropdown-menu-content-padding': 'var(--spacing-2)',
+  '--dropdown-menu-content-background': 'var(--l1-background-60)',
+  '--dropdown-menu-content-border-color': 'var(--l1-border)',
+  '--dropdown-menu-item-padding': 'var(--spacing-5) var(--spacing-6)',
   '--dropdown-menu-item-border-radius': '0',
-  '--dropdown-menu-item-gap': 'var(--spacing-6)',
+  '--dropdown-menu-item-gap': 'var(--spacing-4)',
   '--dropdown-menu-item-min-width': '0',
+  '--dropdown-menu-item-foreground': 'var(--l2-foreground)',
+  '--dropdown-menu-item-hover-background': 'var(--l1-background-hover)',
+  '--dropdown-menu-item-focus-background': 'var(--l1-background-hover)',
 } as CSSProperties
+
+const shellClass =
+  'inline-flex h-8 items-stretch overflow-hidden rounded-[4px] border border-[var(--l1-border)] bg-[var(--l2-background-60)] text-[13px] leading-none tracking-[-0.065px] text-[var(--l2-foreground)]'
+
+const segmentClass =
+  'inline-flex h-full items-center justify-center px-2.5 leading-none transition-colors disabled:cursor-not-allowed disabled:opacity-50'
+
+const segmentHoverClass =
+  'hover:bg-[var(--l1-background-hover)] hover:text-[var(--l1-foreground-hover)]'
+
+const segmentActiveClass = 'bg-[var(--l1-background-hover)] text-[var(--l1-foreground-hover)]'
 
 function OpenInAI({
   markdownContent,
@@ -39,11 +53,25 @@ function OpenInAI({
   const [copied, setCopied] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [open, setOpen] = useState(false)
+  const [menuAlignOffset, setMenuAlignOffset] = useState(0)
   const isCopyingRef = useRef(false)
+  const shellRef = useRef<HTMLDivElement>(null)
+  const chevronRef = useRef<HTMLButtonElement>(null)
   const logEvent = useLogEvent()
 
   const absolutePageUrl = useMemo(() => getAbsoluteUrl(pageUrl), [pageUrl])
   const canCopy = Boolean(markdownContent || getMarkdownContent)
+
+  const handleOpenChange = useCallback((nextOpen: boolean) => {
+    if (nextOpen && shellRef.current && chevronRef.current) {
+      // Anchor the menu to the full split button, not just the chevron trigger.
+      setMenuAlignOffset(
+        shellRef.current.getBoundingClientRect().left -
+          chevronRef.current.getBoundingClientRect().left
+      )
+    }
+    setOpen(nextOpen)
+  }, [])
 
   const handleCopy = useCallback(async () => {
     if (!canCopy || isCopyingRef.current) return
@@ -98,102 +126,81 @@ function OpenInAI({
 
   return (
     <div className={cn('flex items-center', className)}>
-      <div className="flex items-center rounded-md border border-signoz_slate-400 bg-signoz_ink-400">
-        <Button
-          isButton={true}
+      <div ref={shellRef} className={cn(shellClass, 'relative')}>
+        <button
           type="button"
           onClick={handleCopy}
           disabled={isCopyDisabled}
-          variant="secondary"
-          size="sm"
-          className={cn(
-            'gap-1.5 rounded-l-md rounded-r-none px-3',
-            copied && 'text-signoz_forest-500'
-          )}
+          className={cn(segmentClass, segmentHoverClass, 'gap-1.5', copied && segmentActiveClass)}
           aria-label={copyLabel}
           title={copyLabel}
         >
-          {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-          <span className="hidden lg:inline">{copied ? 'Copied!' : copyLabel}</span>
-        </Button>
+          {copied ? (
+            <Check className="size-3.5 shrink-0" aria-hidden="true" />
+          ) : (
+            <Copy className="size-3.5 shrink-0" aria-hidden="true" />
+          )}
+          <span className="hidden whitespace-nowrap lg:inline">
+            {copied ? 'Copied' : copyLabel}
+          </span>
+        </button>
 
-        <div className="h-4 w-px bg-signoz_slate-400" aria-hidden="true" />
+        <div className="w-px shrink-0 self-stretch bg-[var(--l1-border)]" aria-hidden="true" />
 
-        <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+        <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
           <DropdownMenuTrigger asChild>
-            <Button
-              isButton={true}
+            <button
+              ref={chevronRef}
               type="button"
-              variant="secondary"
-              size="sm"
-              className={cn(
-                'size-9 rounded-l-none rounded-r-md px-0',
-                open && 'bg-signoz_ink-300 text-signoz_vanilla-100'
-              )}
+              className={cn(segmentClass, segmentHoverClass, open && segmentActiveClass)}
               aria-label="More options"
               title="More options"
             >
               <ChevronDown
-                size={14}
+                className={cn(
+                  'size-3.5 shrink-0 transition-transform duration-150',
+                  open && 'rotate-180'
+                )}
                 aria-hidden="true"
-                className={cn('transition-transform duration-150', open && 'rotate-180')}
               />
-            </Button>
+            </button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" sideOffset={8} style={openInAIMenuVars} className="z-50">
+          <DropdownMenuContent
+            side="bottom"
+            align="start"
+            sideOffset={4}
+            alignOffset={menuAlignOffset}
+            avoidCollisions={false}
+            style={openInAIMenuVars}
+            className="z-50 w-64 backdrop-blur-[20px]"
+          >
             <DropdownMenuItem
               disabled={isCopyDisabled}
               clickable
               onSelect={() => {
                 void handleCopy()
               }}
-              className="items-start"
+              leftIcon={
+                copied ? (
+                  <Check className="size-3.5" aria-hidden="true" />
+                ) : (
+                  <Copy className="size-3.5" aria-hidden="true" />
+                )
+              }
             >
-              <div
-                className={cn(
-                  'mt-0.5 flex-shrink-0',
-                  copied ? 'text-signoz_forest-500' : 'text-signoz_vanilla-400'
-                )}
-                aria-hidden="true"
-              >
-                {copied ? <Check size={16} /> : <Copy size={16} />}
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-signoz_vanilla-100">
-                  {copied ? 'Copied!' : 'Copy page'}
-                </span>
-                <span className="text-xs text-signoz_vanilla-400">
-                  Copy page as Markdown for LLMs
-                </span>
-              </div>
+              {copied ? 'Copied' : COPY_AS_MARKDOWN_LABEL}
             </DropdownMenuItem>
-
-            <DropdownMenuSeparator />
 
             {AI_OPTIONS.map((option) => (
               <DropdownMenuItem
                 key={option.id}
                 clickable
                 onSelect={() => handleOpenInAI(option)}
-                className="items-start"
+                leftIcon={<option.Icon className="size-3.5" aria-hidden="true" />}
+                rightIcon={<ArrowUpRight className="size-3.5" aria-hidden="true" />}
               >
-                <div className="mt-0.5 flex-shrink-0 text-signoz_vanilla-400">
-                  <option.Icon className="h-4 w-4" aria-hidden="true" />
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-medium text-signoz_vanilla-100">
-                      {option.name}
-                    </span>
-                    <ExternalLink
-                      size={12}
-                      className="text-signoz_vanilla-400"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <span className="text-xs text-signoz_vanilla-400">{option.description}</span>
-                </div>
+                {option.name}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

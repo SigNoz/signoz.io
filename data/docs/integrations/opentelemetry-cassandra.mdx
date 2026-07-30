@@ -1,5 +1,5 @@
 ---
-date: 2026-06-05
+date: 2026-07-25
 title: Monitor Apache Cassandra with OpenTelemetry and SigNoz
 description: Monitor Apache Cassandra metrics and logs in SigNoz using OpenTelemetry, and trace Cassandra queries from your application.
 doc_type: howto
@@ -256,8 +256,8 @@ processors:
         action: upsert
 
 exporters:
-  # On collectors older than v0.144.0 use the otlphttp alias
-  otlp_http/cassandra:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/cassandra:
     endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
       "signoz-ingestion-key": "<your-ingestion-key>"
@@ -267,7 +267,7 @@ service:
     metrics/cassandra:
       receivers: [jmx/cassandra]
       processors: [resource/cassandra]
-      exporters: [otlp_http/cassandra]
+      exporters: [otlphttp/cassandra]
 ```
 
 Verify these values:
@@ -338,8 +338,8 @@ processors:
     timeout: 10s
 
 exporters:
-  # On collectors older than v0.144.0 use the otlphttp alias
-  otlp_http/cassandra-logs:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/cassandra-logs:
     endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
     headers:
       "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
@@ -349,7 +349,7 @@ service:
     logs/cassandra:
       receivers: [filelog/cassandra]
       processors: [resource/cassandra, batch]
-      exporters: [otlp_http/cassandra-logs]
+      exporters: [otlphttp/cassandra-logs]
 ```
 
 <Admonition type="info">
