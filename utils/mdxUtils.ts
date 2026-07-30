@@ -57,7 +57,9 @@ export const mdxOptions = {
 
 // Generate table of contents from MDX content
 export function generateTOC(content: string) {
-  const regXHeader = /\n(?<flag>#{1,3})\s+(?<content>.+)/g
+  // Allow leading whitespace so headings nested in JSX tabs (e.g. `    ### Title`) are included.
+  // GithubSlugger order must match rehype-slug for IDs to line up with the rendered DOM.
+  const regXHeader = /\n\s*(?<flag>#{1,3})\s+(?<content>.+)/g
   const slugger = new GithubSlugger()
 
   // Remove code blocks to avoid parsing headers inside code
