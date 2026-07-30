@@ -53,25 +53,11 @@ function OpenInAI({
   const [copied, setCopied] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [open, setOpen] = useState(false)
-  const [menuAlignOffset, setMenuAlignOffset] = useState(0)
   const isCopyingRef = useRef(false)
-  const shellRef = useRef<HTMLDivElement>(null)
-  const chevronRef = useRef<HTMLButtonElement>(null)
   const logEvent = useLogEvent()
 
   const absolutePageUrl = useMemo(() => getAbsoluteUrl(pageUrl), [pageUrl])
   const canCopy = Boolean(markdownContent || getMarkdownContent)
-
-  const handleOpenChange = useCallback((nextOpen: boolean) => {
-    if (nextOpen && shellRef.current && chevronRef.current) {
-      // Anchor the menu to the full split button, not just the chevron trigger.
-      setMenuAlignOffset(
-        shellRef.current.getBoundingClientRect().left -
-          chevronRef.current.getBoundingClientRect().left
-      )
-    }
-    setOpen(nextOpen)
-  }, [])
 
   const handleCopy = useCallback(async () => {
     if (!canCopy || isCopyingRef.current) return
@@ -126,7 +112,7 @@ function OpenInAI({
 
   return (
     <div className={cn('flex items-center', className)}>
-      <div ref={shellRef} className={cn(shellClass, 'relative')}>
+      <div className={cn(shellClass, 'relative')}>
         <button
           type="button"
           onClick={handleCopy}
@@ -147,10 +133,9 @@ function OpenInAI({
 
         <div className="w-px shrink-0 self-stretch bg-[var(--l1-border)]" aria-hidden="true" />
 
-        <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
+        <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
           <DropdownMenuTrigger asChild>
             <button
-              ref={chevronRef}
               type="button"
               className={cn(segmentClass, segmentHoverClass, open && segmentActiveClass)}
               aria-label="More options"
@@ -168,10 +153,9 @@ function OpenInAI({
 
           <DropdownMenuContent
             side="bottom"
-            align="start"
+            align="end"
             sideOffset={4}
-            alignOffset={menuAlignOffset}
-            avoidCollisions={false}
+            collisionPadding={8}
             style={openInAIMenuVars}
             className="z-50 w-64 backdrop-blur-[20px]"
           >
