@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Check, PencilLine, X } from 'lucide-react'
 import { Button } from '@signozhq/ui/button'
-import { Checkbox } from '@signozhq/ui/checkbox'
 import { Popover, PopoverAnchor, PopoverContent } from '@signozhq/ui/popover'
 import { cn } from 'app/lib/utils'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
@@ -134,17 +133,15 @@ const PageFeedback: React.FC = () => {
     }
   }
 
-  const selectReason = (value: string, checked: boolean | 'indeterminate') => {
+  const toggleReason = (value: string) => {
     setSubmitError('')
-    if (checked === true) {
-      setReason(value)
-      setDetails('')
-      return
-    }
     if (reason === value) {
       setReason('')
       setDetails('')
+      return
     }
+    setReason(value)
+    setDetails('')
   }
 
   const finishSubmit = () => {
@@ -315,19 +312,38 @@ const PageFeedback: React.FC = () => {
                       key={option.value}
                       className="border-b border-[var(--l1-border)] last:border-b-0"
                     >
-                      <Checkbox
-                        color="primary"
-                        value={isSelected}
-                        onChange={(checked) => selectReason(option.value, checked)}
+                      <div
+                        role="radio"
+                        aria-checked={isSelected}
+                        aria-label={option.value}
+                        tabIndex={0}
                         className={cn(
-                          'h-8 w-full !gap-2.5 rounded-none bg-[var(--l2-background-60)] px-2.5 py-2 transition-colors hover:bg-[var(--l1-background)]',
+                          'flex h-8 w-full cursor-pointer items-center gap-2.5 bg-[var(--l2-background-60)] px-2.5 py-2 transition-colors hover:bg-[var(--l1-background)]',
                           isSelected && 'bg-[var(--l1-background)]'
                         )}
+                        onClick={() => toggleReason(option.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault()
+                            toggleReason(option.value)
+                          }
+                        }}
                       >
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            'inline-flex size-4 shrink-0 items-center justify-center rounded-[2px] border-2',
+                            isSelected
+                              ? 'border-transparent bg-[var(--primary-background)] text-[var(--primary-foreground)]'
+                              : 'border-[var(--l3-background)] bg-transparent'
+                          )}
+                        >
+                          {isSelected && <Check size={12} strokeWidth={3} />}
+                        </span>
                         <span className="min-w-0 text-[11px] leading-none text-[var(--l2-foreground)]">
                           {option.value}
                         </span>
-                      </Checkbox>
+                      </div>
                       {isSelected && (
                         <textarea
                           className="min-h-14 w-full resize-y border-0 bg-[var(--l2-background-60)] p-2.5 text-[11px] leading-[18px] text-[var(--l1-foreground-hover)] shadow-none outline-none ring-0 placeholder:text-[var(--l3-foreground)] focus:border-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
@@ -335,6 +351,7 @@ const PageFeedback: React.FC = () => {
                           aria-label={`Additional details for ${option.value}`}
                           value={details}
                           onChange={(e) => setDetails(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
                         />
                       )}
                     </div>
