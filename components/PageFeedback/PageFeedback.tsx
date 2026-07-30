@@ -301,10 +301,7 @@ const PageFeedback: React.FC = () => {
                     : 'Pick the issue(s) that blocked you. You can add details after selecting one.'}
                 </p>
               </div>
-              <div
-                className="overflow-hidden rounded-[4px] border border-[var(--l1-border)]"
-                role="radiogroup"
-              >
+              <div className="overflow-hidden rounded-[4px] border border-[var(--l1-border)]">
                 {reasonOptions.map((option) => {
                   const isSelected = reason === option.value
                   return (
@@ -313,7 +310,7 @@ const PageFeedback: React.FC = () => {
                       className="border-b border-[var(--l1-border)] last:border-b-0"
                     >
                       <div
-                        role="radio"
+                        role="checkbox"
                         aria-checked={isSelected}
                         aria-label={option.value}
                         tabIndex={0}

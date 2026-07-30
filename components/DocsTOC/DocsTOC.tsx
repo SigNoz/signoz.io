@@ -10,6 +10,7 @@ import {
   TOC_SECTION_LABEL_CLASS,
   useTocScrollFade,
 } from '@/components/TableOfContents/tocScrollFade'
+import { useScrollSpy } from '@/hooks/useScrollSpy'
 import { RegionDropdown } from '../Region/RegionDropdown'
 import PageFeedback from '../PageFeedback/PageFeedback'
 
@@ -34,60 +35,15 @@ const DocsTOC: React.FC<DocsTOCProps> = ({
   formattedDate,
   editLink,
 }) => {
-  const [activeSection, setActiveSection] = useState<string>('')
   const [filteredToc, setFilteredToc] = useState<TocItemProps[]>(toc || [])
+  // Scroll-spy only tracks headings in the filtered TOC (active tab panels).
+  // Observing every h2/h3 breaks when duplicate titles exist (e.g. page-level
+  // `#prerequisites` vs tab-level `#prerequisites-1`).
+  const { activeSection, setActiveSection } = useScrollSpy(filteredToc, { offset: 96 })
   const tocContainerRef = useRef<HTMLDivElement>(null)
   const { tocItemsRef, scrollFadeStyle } = useTocScrollFade(
     `${filteredToc.length}:${formattedDate ?? ''}:${editLink ?? ''}`
   )
-
-  // Scroll-spy: only track headings that appear in the filtered TOC.
-  // Observing every h2/h3 breaks when duplicate titles exist (e.g. page-level
-  // `#prerequisites` vs tab-level `#prerequisites-1`) — the nested id is not in
-  // the TOC, so nothing highlights. Also, IntersectionObserver + a thin
-  // rootMargin often misses the first heading at the top of the page.
-  useEffect(() => {
-    if (!filteredToc || filteredToc.length === 0) return
-
-    const HEADER_OFFSET_PX = 96
-
-    const resolveHeading = (item: TocItemProps) => {
-      const rawId = item.url.startsWith('#') ? item.url.slice(1) : item.url
-      const normalizedId = rawId.replace(/-+$/g, '')
-      const el = document.getElementById(rawId) || document.getElementById(normalizedId)
-      if (!el || el.getClientRects().length === 0) return null
-      return {
-        url: item.url.startsWith('#') ? item.url : `#${rawId}`,
-        el,
-      }
-    }
-
-    const updateActiveSection = () => {
-      const headings = filteredToc
-        .map(resolveHeading)
-        .filter((item): item is { url: string; el: HTMLElement } => item !== null)
-        .sort((a, b) => a.el.getBoundingClientRect().top - b.el.getBoundingClientRect().top)
-
-      if (headings.length === 0) return
-
-      let activeUrl = headings[0].url
-      for (const heading of headings) {
-        if (heading.el.getBoundingClientRect().top <= HEADER_OFFSET_PX) {
-          activeUrl = heading.url
-        }
-      }
-      setActiveSection((prev) => (prev === activeUrl ? prev : activeUrl))
-    }
-
-    updateActiveSection()
-    window.addEventListener('scroll', updateActiveSection, { passive: true })
-    window.addEventListener('resize', updateActiveSection)
-
-    return () => {
-      window.removeEventListener('scroll', updateActiveSection)
-      window.removeEventListener('resize', updateActiveSection)
-    }
-  }, [filteredToc])
 
   // Compute TOC entries only for headings that are currently visible (i.e., in active tab panels)
   useEffect(() => {
@@ -346,49 +302,45 @@ const DocsTOC: React.FC<DocsTOCProps> = ({
         <div className="mb-4 shrink-0">
           <RegionDropdown />
         </div>
-        {hideTableOfContents ? null : (
-          <>
-            <div className="relative z-[2] mb-5 shrink-0">
-              <PageFeedback />
+        <div className="relative z-[2] mb-5 shrink-0">
+          <PageFeedback />
+        </div>
+        <div className={TOC_SECTION_LABEL_CLASS}>On this page</div>
+        <div ref={tocItemsRef} className={TOC_SCROLL_CONTAINER_CLASS} style={scrollFadeStyle}>
+          <TableOfContents
+            toc={filteredToc}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            scrollableContainerRef={tocItemsRef}
+          />
+        </div>
+        {(formattedDate || editLink) && (
+          <div className="mt-5 shrink-0">
+            <div
+              className="mb-4 h-2 w-full bg-[radial-gradient(circle,var(--l2-border)_1px,transparent_1px)] bg-[length:6px_6px] bg-center"
+              aria-hidden="true"
+            />
+            <div className="flex flex-col gap-4">
+              {formattedDate && (
+                <p className="m-0 text-sm font-medium text-[var(--l2-foreground)]">
+                  Last updated
+                  <span className="mx-1">—</span>
+                  <span className="text-[var(--l1-foreground-hover)]">{formattedDate}</span>
+                </p>
+              )}
+              {editLink && (
+                <a
+                  href={editLink}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--l2-foreground)] no-underline transition-colors hover:text-[var(--l2-foreground-hover)]"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Edit size={12} aria-hidden="true" />
+                  Edit on GitHub
+                </a>
+              )}
             </div>
-            <div className={TOC_SECTION_LABEL_CLASS}>On this page</div>
-            <div ref={tocItemsRef} className={TOC_SCROLL_CONTAINER_CLASS} style={scrollFadeStyle}>
-              <TableOfContents
-                toc={filteredToc}
-                activeSection={activeSection}
-                setActiveSection={setActiveSection}
-                scrollableContainerRef={tocItemsRef}
-              />
-            </div>
-            {(formattedDate || editLink) && (
-              <div className="mt-5 shrink-0">
-                <div
-                  className="mb-4 h-2 w-full bg-[radial-gradient(circle,var(--l2-border)_1px,transparent_1px)] bg-[length:6px_6px] bg-center"
-                  aria-hidden="true"
-                />
-                <div className="flex flex-col gap-4">
-                  {formattedDate && (
-                    <p className="m-0 text-sm font-medium text-[var(--l2-foreground)]">
-                      Last updated
-                      <span className="mx-1">—</span>
-                      <span className="text-[var(--l1-foreground-hover)]">{formattedDate}</span>
-                    </p>
-                  )}
-                  {editLink && (
-                    <a
-                      href={editLink}
-                      className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--l2-foreground)] no-underline transition-colors hover:text-[var(--l2-foreground-hover)]"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Edit size={12} aria-hidden="true" />
-                      Edit on GitHub
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
-          </>
+          </div>
         )}
       </div>
     </>

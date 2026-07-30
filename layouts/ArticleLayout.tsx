@@ -1,8 +1,6 @@
 'use client'
 
-import Image from 'next/image'
-import Link from 'next/link'
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import { ReactNode, useRef } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { AuthorDetail, Blog, Comparison, Guide } from '../types/transformedContent'
 import { ArrowRight } from 'lucide-react'
@@ -16,17 +14,17 @@ import {
   TOC_SECTION_LABEL_CLASS,
   useTocScrollFade,
 } from '@/components/TableOfContents/tocScrollFade'
-import ArticleMetaDetailsCard, {
-  type RenderedAuthor,
-} from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
+import ArticleMetaDetailsCard from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
 import TrackingLink from '@/components/TrackingLink'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
+import { useScrollSpy } from '@/hooks/useScrollSpy'
 import { useScrollToHash } from '@/hooks/useScrollToHash'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
 import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
 import { getFormattedDates } from '@/utils/dateUtils'
+import { buildRenderedAuthors, getReadingTimeText } from '@/utils/articleMeta'
 
 const MAIN_CONTENT_ID = 'article-main'
 
@@ -59,55 +57,6 @@ interface LayoutProps {
   breadcrumbs?: BreadcrumbCrumb[]
 }
 
-const buildRenderedAuthors = (
-  authorDetails: LayoutProps['authorDetails'],
-  authors: LayoutProps['authors'],
-  directory: Record<string, { name?: string; url?: string; image_url?: string }>
-): RenderedAuthor[] => {
-  if (authorDetails && authorDetails.length > 0) {
-    return authorDetails
-      .map((detail, idx) => {
-        const slug = authors?.[idx]
-        const fallbackProfile = slug ? directory[slug] : undefined
-
-        const name = detail.name || fallbackProfile?.name
-
-        if (!name) return null
-
-        return {
-          name,
-          url: detail.url || fallbackProfile?.url,
-          image: fallbackProfile?.image_url,
-        }
-      })
-      .filter(Boolean) as RenderedAuthor[]
-  }
-
-  if (authors && authors.length > 0) {
-    return authors
-      .map((slug) => {
-        const profile = directory[slug]
-        if (!profile?.name) return null
-        return {
-          name: profile.name,
-          url: profile.url,
-          image: profile.image_url,
-        }
-      })
-      .filter(Boolean) as RenderedAuthor[]
-  }
-
-  return []
-}
-
-const getReadingTimeText = (content: LayoutProps['content']) => {
-  if ('readingTime' in content && content.readingTime) {
-    const rt = content.readingTime as { text?: string; minutes?: number }
-    return rt.text || (rt.minutes ? `${Math.ceil(rt.minutes)} min read` : null)
-  }
-  return null
-}
-
 export default function ArticleLayout({
   content,
   authorDetails,
@@ -122,54 +71,11 @@ export default function ArticleLayout({
 }: LayoutProps) {
   const { title, relatedArticles } = content
   const mainRef = useRef<HTMLElement | null>(null)
-  const [activeSection, setActiveSection] = useState<string>('')
   const hasToc = Array.isArray(toc) && toc.length > 0
+  const { activeSection, setActiveSection } = useScrollSpy(hasToc ? toc : [], { offset: 120 })
   const { tocItemsRef, scrollFadeStyle } = useTocScrollFade(toc?.length ?? 0)
 
   useScrollToHash()
-
-  useEffect(() => {
-    if (!hasToc) return
-
-    const HEADER_OFFSET_PX = 120
-
-    const resolveHeading = (item: TocItemProps) => {
-      const rawId = item.url.startsWith('#') ? item.url.slice(1) : item.url
-      const normalizedId = rawId.replace(/-+$/g, '')
-      const el = document.getElementById(rawId) || document.getElementById(normalizedId)
-      if (!el || el.getClientRects().length === 0) return null
-      return {
-        url: item.url.startsWith('#') ? item.url : `#${rawId}`,
-        el,
-      }
-    }
-
-    const updateActiveSection = () => {
-      const headings = toc
-        .map(resolveHeading)
-        .filter((item): item is { url: string; el: HTMLElement } => item !== null)
-        .sort((a, b) => a.el.getBoundingClientRect().top - b.el.getBoundingClientRect().top)
-
-      if (headings.length === 0) return
-
-      let activeUrl = headings[0].url
-      for (const heading of headings) {
-        if (heading.el.getBoundingClientRect().top <= HEADER_OFFSET_PX) {
-          activeUrl = heading.url
-        }
-      }
-      setActiveSection((prev) => (prev === activeUrl ? prev : activeUrl))
-    }
-
-    updateActiveSection()
-    window.addEventListener('scroll', updateActiveSection, { passive: true })
-    window.addEventListener('resize', updateActiveSection)
-
-    return () => {
-      window.removeEventListener('scroll', updateActiveSection)
-      window.removeEventListener('resize', updateActiveSection)
-    }
-  }, [hasToc, toc])
 
   const renderedAuthors = buildRenderedAuthors(authorDetails, authors, authorDirectory)
   const { publishedDate: formattedPublishedDate, updatedDate: formattedUpdatedDate } =
@@ -201,8 +107,6 @@ export default function ArticleLayout({
     />
   ) : null
 
-  const primaryAuthor = renderedAuthors[0]
-
   return (
     <main id={MAIN_CONTENT_ID} ref={mainRef}>
       <SectionContainer>
@@ -226,81 +130,14 @@ export default function ArticleLayout({
               <PageFeedback />
             </div>
 
-            {/* Mobile meta info card */}
             {(renderedAuthors.length > 0 || primaryTags.length > 0) && (
               <div className="lg:hidden">
-                <div className="rounded-xl border border-signoz_ink-300/80 bg-signoz_ink-500/50 p-4 text-xs text-white/90 shadow-lg">
-                  <div className="flex flex-col gap-4">
-                    {renderedAuthors.length > 0 && (
-                      <div className="flex items-center gap-3">
-                        {primaryAuthor?.image && (
-                          <Image
-                            src={primaryAuthor.image}
-                            alt={primaryAuthor.name}
-                            width={36}
-                            height={36}
-                            objectPosition="center"
-                            objectFit="cover"
-                            className="h-9 w-9 rounded-full border border-white/10 object-cover object-center"
-                          />
-                        )}
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
-                            Author{renderedAuthors.length > 1 ? 's' : ''}
-                          </span>
-                          <span className="text-sm text-white">
-                            {renderedAuthors.map((author, idx) => (
-                              <span key={`${author.name}-${idx}`}>
-                                {author.url ? (
-                                  <Link
-                                    href={author.url}
-                                    className="!text-gray-200 transition-colors hover:text-signoz_robin-400"
-                                    prefetch={false}
-                                    target="_blank"
-                                    rel="noopener noreferrer nofollow"
-                                  >
-                                    {author.name}
-                                  </Link>
-                                ) : (
-                                  author.name
-                                )}
-                                {idx < renderedAuthors.length - 1 && (
-                                  <span className="text-white/60">, </span>
-                                )}
-                              </span>
-                            ))}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {primaryTags.length > 0 && (
-                      <div className="flex flex-col gap-2">
-                        <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
-                          Tags
-                        </span>
-                        <div className="flex flex-wrap gap-2">
-                          {primaryTags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/90"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {hiddenTags.length > 0 && (
-                            <span
-                              className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/70"
-                              title={hiddenTagsTitle}
-                            >
-                              +{hiddenTags.length} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <ArticleMetaDetailsCard
+                  authors={renderedAuthors}
+                  primaryTags={primaryTags}
+                  hiddenTags={hiddenTags}
+                  hiddenTagsTitle={hiddenTagsTitle}
+                />
               </div>
             )}
 
