@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Check, PencilLine, X } from 'lucide-react'
 import { Button } from '@signozhq/ui/button'
+import { Checkbox } from '@signozhq/ui/checkbox'
 import { Popover, PopoverAnchor, PopoverContent } from '@signozhq/ui/popover'
 import { cn } from 'app/lib/utils'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
@@ -133,17 +134,6 @@ const PageFeedback: React.FC = () => {
     }
   }
 
-  const toggleReason = (value: string) => {
-    setSubmitError('')
-    if (reason === value) {
-      setReason('')
-      setDetails('')
-      return
-    }
-    setReason(value)
-    setDetails('')
-  }
-
   const finishSubmit = () => {
     modeRef.current = null
     setMode(null)
@@ -271,7 +261,7 @@ const PageFeedback: React.FC = () => {
           side="bottom"
           align="start"
           sideOffset={8}
-          className="!w-[min(100vw-2rem,280px)] !border-[var(--l1-border)] !bg-[var(--l2-background-60)] !p-1.5 !pt-3 !shadow-[4px_10px_16px_rgba(0,0,0,0.2)] !backdrop-blur-[20px]"
+          className="!z-50 !w-[min(100vw-2rem,280px)] !border-[var(--l2-border)] !bg-[var(--l2-background-60)] !p-1.5 !pt-3 !shadow-[4px_10px_16px_rgba(0,0,0,0.2)] !backdrop-blur-[20px]"
           onPointerDownOutside={keepOpenIfOnControls}
           onInteractOutside={keepOpenIfOnControls}
           onFocusOutside={keepOpenIfOnControls}
@@ -301,49 +291,40 @@ const PageFeedback: React.FC = () => {
                     : 'Pick the issue(s) that blocked you. You can add details after selecting one.'}
                 </p>
               </div>
-              <div className="overflow-hidden rounded-[4px] border border-[var(--l1-border)]">
+              <div className="overflow-hidden rounded-[4px] border border-[var(--l2-border)]">
                 {reasonOptions.map((option) => {
                   const isSelected = reason === option.value
                   return (
                     <div
                       key={option.value}
-                      className="border-b border-[var(--l1-border)] last:border-b-0"
+                      className="border-b border-[var(--l2-border)] last:border-b-0"
                     >
-                      <div
-                        role="checkbox"
-                        aria-checked={isSelected}
-                        aria-label={option.value}
-                        tabIndex={0}
+                      <label
                         className={cn(
-                          'flex h-8 w-full cursor-pointer items-center gap-2.5 bg-[var(--l2-background-60)] px-2.5 py-2 transition-colors hover:bg-[var(--l1-background)]',
-                          isSelected && 'bg-[var(--l1-background)]'
+                          'flex h-8 w-full cursor-pointer items-center gap-2.5 bg-[var(--l2-background-60)] px-2.5 py-2 transition-colors hover:bg-[var(--l2-background-hover)]'
                         )}
-                        onClick={() => toggleReason(option.value)}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault()
-                            toggleReason(option.value)
-                          }
-                        }}
                       >
-                        <span
-                          aria-hidden="true"
-                          className={cn(
-                            'inline-flex size-4 shrink-0 items-center justify-center rounded-[2px] border-2',
-                            isSelected
-                              ? 'border-transparent bg-[var(--primary-background)] text-[var(--primary-foreground)]'
-                              : 'border-[var(--l3-background)] bg-transparent'
-                          )}
-                        >
-                          {isSelected && <Check size={12} strokeWidth={3} />}
-                        </span>
+                        <Checkbox
+                          value={isSelected}
+                          aria-label={option.value}
+                          onChange={(checked) => {
+                            setSubmitError('')
+                            if (checked) {
+                              setReason(option.value)
+                              setDetails('')
+                              return
+                            }
+                            setReason('')
+                            setDetails('')
+                          }}
+                        />
                         <span className="min-w-0 text-[11px] leading-none text-[var(--l2-foreground)]">
                           {option.value}
                         </span>
-                      </div>
+                      </label>
                       {isSelected && (
                         <textarea
-                          className="min-h-14 w-full resize-y border-0 bg-[var(--l2-background-60)] p-2.5 text-[11px] leading-[18px] text-[var(--l1-foreground-hover)] shadow-none outline-none ring-0 placeholder:text-[var(--l3-foreground)] focus:border-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                          className="min-h-14 w-full resize-y border-x-0 border-b-0 border-t border-[var(--l2-border)] bg-[var(--l2-background-60)] p-2.5 text-[11px] leading-[18px] text-[var(--l1-foreground-hover)] shadow-none outline-none ring-0 placeholder:text-[var(--l3-foreground)] focus:border-x-0 focus:border-b-0 focus:border-t focus:border-[var(--l2-border)] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                           placeholder="Optional: Provide more details..."
                           aria-label={`Additional details for ${option.value}`}
                           value={details}
@@ -375,7 +356,7 @@ const PageFeedback: React.FC = () => {
           ) : (
             <form className="flex flex-col gap-3" onSubmit={submitComment}>
               <textarea
-                className="min-h-28 w-full resize-y rounded-[4px] border border-[var(--l1-border)] bg-[var(--l2-background-60)] p-2.5 text-sm text-[var(--l1-foreground-hover)] placeholder:text-[var(--l3-foreground)] focus:border-[var(--primary-background)] focus:outline-none"
+                className="min-h-28 w-full resize-y rounded-[4px] border border-[var(--l2-border)] bg-[var(--l2-background-60)] p-2.5 text-sm text-[var(--l1-foreground-hover)] placeholder:text-[var(--l3-foreground)] focus:border-[var(--primary-background)] focus:outline-none"
                 placeholder="Help us improve this page..."
                 aria-label="Help us improve this page"
                 value={comment}
