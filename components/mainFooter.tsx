@@ -87,7 +87,7 @@ function Footer() {
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex flex-col pb-2.5 text-sm tracking-wide text-[var(--l2-foreground)] max-md:mt-10">
-                <div className="text-sm font-medium uppercase leading-5 tracking-wide text-[var(--l3-foreground)]">
+                <div className="text-xs font-medium uppercase leading-5 tracking-wide text-[var(--l1-foreground-hover)]">
                   Docs
                 </div>
                 <FooterPillLink href="/docs/introduction/">Introduction</FooterPillLink>
@@ -96,7 +96,7 @@ function Footer() {
                   Migrate from Datadog
                 </FooterPillLink>
                 <FooterPillLink href="/api-reference/">SigNoz API</FooterPillLink>
-                <div className="mt-10 text-sm font-medium uppercase leading-5 tracking-wide text-[var(--l3-foreground)]">
+                <div className="mt-10 text-xs font-medium uppercase leading-5 tracking-wide text-[var(--l1-foreground-hover)]">
                   OpenTelemetry
                 </div>
                 <FooterPillLink href="/opentelemetry/">What is OpenTelemetry</FooterPillLink>
@@ -108,7 +108,7 @@ function Footer() {
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)] max-md:mt-10">
-                <div className="text-sm font-medium uppercase leading-5 tracking-wide text-[var(--l3-foreground)]">
+                <div className="text-xs font-medium uppercase leading-5 tracking-wide text-[var(--l1-foreground-hover)]">
                   Community
                 </div>
 
@@ -145,7 +145,7 @@ function Footer() {
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)] max-md:mt-10">
-                <div className="text-sm font-medium uppercase leading-5 tracking-wide text-[var(--l3-foreground)]">
+                <div className="text-xs font-medium uppercase leading-5 tracking-wide text-[var(--l1-foreground-hover)]">
                   More
                 </div>
 
