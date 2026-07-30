@@ -31,9 +31,9 @@ Use a recent tag such as `signoz/signoz-otel-collector:0.144.5`. Check the <a hr
 
 ## Step 1: Prepare the Collector configuration
 
-Create a file named `config.yaml`. The starter below wires up both signals. You fill in the receiver details in the next two guides, [Collect metrics](https://signoz.io/docs/integrations/gcp/collect-metrics/) and [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/), so it's normal for parts to be placeholders now.
+Create a file named `otel-collector-config.yaml`. The starter below wires up both signals. You fill in the receiver details in the next two guides, [Collect metrics](https://signoz.io/docs/integrations/gcp/collect-metrics/) and [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/), so it's normal for parts to be placeholders now.
 
-```yaml
+```yaml:otel-collector-config.yaml
 receivers:
   # Logs: receives messages pushed from a Pub/Sub push subscription.
   # See "Collect logs" for the matching Pub/Sub topic and subscription.
@@ -93,16 +93,16 @@ service:
 
 ## Step 2: Store the config in Secret Manager
 
-Rather than baking a custom image, keep your `config.yaml` in <a href="https://cloud.google.com/secret-manager/docs" target="_blank" rel="noopener noreferrer nofollow">Secret Manager</a> and run the stock `signoz/signoz-otel-collector` image directly. Cloud Run injects the secret as an environment variable, and the Collector reads its config from that variable at startup. Your config (and the ingestion key inside it) stays out of any image.
+Rather than baking a custom image, keep your `otel-collector-config.yaml` in <a href="https://cloud.google.com/secret-manager/docs" target="_blank" rel="noopener noreferrer nofollow">Secret Manager</a> and run the stock `signoz/signoz-otel-collector` image directly. Cloud Run injects the secret as an environment variable, and the Collector reads its config from that variable at startup. Your config (and the ingestion key inside it) stays out of any image.
 
-Create the secret from your `config.yaml`, then grant the `signoz-integration` service account permission to read it.
+Create the secret from your `otel-collector-config.yaml`, then grant the `signoz-integration` service account permission to read it.
 
 <Tabs>
 <TabItem value="console" label="Console" default>
 
 1. In the deployment project, go to **Security** > **Secret Manager** > **+ Create secret**.
 2. Set **Name** to `signoz-collector-config`.
-3. Under **Secret value**, choose **Upload file** and select your `config.yaml` (or paste its contents into the value box).
+3. Under **Secret value**, choose **Upload file** and select your `otel-collector-config.yaml` (or paste its contents into the value box).
 4. Click **Create secret**.
 5. Open the new secret, go to the **Permissions** tab, and click **Grant access**.
 6. In **New principals**, paste `signoz-integration@<deployment-project-id>.iam.gserviceaccount.com`.
@@ -115,7 +115,7 @@ Create the secret:
 
 ```bash
 gcloud secrets create signoz-collector-config \
-  --data-file=config.yaml \
+  --data-file=otel-collector-config.yaml \
   --project=<deployment-project-id>
 ```
 
@@ -132,7 +132,7 @@ gcloud secrets add-iam-policy-binding signoz-collector-config \
 </Tabs>
 
 <Admonition type="info">
-When you change the config later, add a new secret version (`gcloud secrets versions add signoz-collector-config --data-file=config.yaml`, or **Add new version** in the Console) and redeploy the service to pick it up.
+When you change the config later, add a new secret version (`gcloud secrets versions add signoz-collector-config --data-file=otel-collector-config.yaml`, or **Add new version** in the Console) and redeploy the service to pick it up.
 </Admonition>
 
 ## Step 3: Deploy to Cloud Run
@@ -222,7 +222,7 @@ The Collector does not yet have anything to do until you configure metrics or lo
 - [Collect metrics](https://signoz.io/docs/integrations/gcp/collect-metrics/): configure the `googlecloudmonitoring` receiver.
 - [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/): create the Pub/Sub topic, push subscription, and log sink.
 
-After changing `config.yaml`, add a new secret version (step 2) and redeploy the service (step 3) to roll the new configuration out.
+After changing `otel-collector-config.yaml`, add a new secret version (step 2) and redeploy the service (step 3) to roll the new configuration out.
 
 ## Get Help
 

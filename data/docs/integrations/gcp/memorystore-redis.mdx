@@ -55,9 +55,9 @@ Enabling the toggle does not start collection on its own. The metrics that reach
 
 ## Step 2: Add the metrics to your Collector config
 
-Open the `config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Memorystore metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your instances run in:
+Open the `otel-collector-config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Memorystore metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your instances run in:
 
-```yaml
+```yaml:otel-collector-config.yaml
 receivers:
   googlecloudmonitoring:
     project_id: "<monitored-project-id>"
@@ -100,7 +100,7 @@ If your instances span several projects, add one **named** receiver per project 
 
 The Collector loads its config from the `signoz-collector-config` secret, so a config change needs a new secret version and a redeploy:
 
-1. Save your updated `config.yaml`.
+1. Save your updated `otel-collector-config.yaml`.
 2. Add a new secret version ([step 2 of Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-2-store-the-config-in-secret-manager)).
 3. Redeploy the Cloud Run service ([step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-3-deploy-to-cloud-run)).
 
@@ -188,7 +188,7 @@ Routed by the sink filter you set in step 4. Memorystore emits audit and mainten
 ## Troubleshooting
 </ToggleHeading>
 
-**A dashboard panel is empty.** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `config.yaml`, add what's missing, and repeat step 3.
+**A dashboard panel is empty.** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
 
 **No Memorystore metrics at all.** Confirm the `signoz-integration` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
 

@@ -55,9 +55,9 @@ Enabling the toggle does not start collection on its own. The metrics that reach
 
 ## Step 2: Add the metrics to your Collector config
 
-Open the `config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Cloud SQL metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your instances run in:
+Open the `otel-collector-config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Cloud SQL metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your instances run in:
 
-```yaml
+```yaml:otel-collector-config.yaml
 receivers:
   googlecloudmonitoring:
     project_id: "<monitored-project-id>"
@@ -107,7 +107,7 @@ The receiver polls every metric in the list once per `collection_interval`, and 
 
 The Collector loads its config from the `signoz-collector-config` secret, so a config change needs a new secret version and a redeploy:
 
-1. Save your updated `config.yaml`.
+1. Save your updated `otel-collector-config.yaml`.
 2. Add a new secret version ([step 2 of Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-2-store-the-config-in-secret-manager)).
 3. Redeploy the Cloud Run service ([step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-3-deploy-to-cloud-run)).
 
@@ -184,7 +184,7 @@ Routed by the sink filter you set in step 4. In SigNoz, Cloud SQL log entries ca
 ## Troubleshooting
 </ToggleHeading>
 
-**A dashboard panel is empty.** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `config.yaml`, add what's missing, and repeat step 3.
+**A dashboard panel is empty.** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
 
 **Query execution time panels are empty.** The `insights/` metrics only report once Query Insights is enabled on the instance. Enabling it is a change on the Cloud SQL instance, not in the Collector. See step 2.
 
