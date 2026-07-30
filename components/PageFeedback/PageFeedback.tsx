@@ -91,6 +91,7 @@ const PageFeedback: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [showThanks, setShowThanks] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
   const controlsRef = useRef<HTMLDivElement>(null)
   const modeRef = useRef<FeedbackMode>(null)
 
@@ -99,6 +100,14 @@ const PageFeedback: React.FC = () => {
     const timeout = window.setTimeout(() => setShowThanks(false), 3200)
     return () => window.clearTimeout(timeout)
   }, [showThanks])
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 1024px)')
+    const syncDesktop = () => setIsDesktop(mediaQuery.matches)
+    syncDesktop()
+    mediaQuery.addEventListener('change', syncDesktop)
+    return () => mediaQuery.removeEventListener('change', syncDesktop)
+  }, [])
 
   if (isDocsOnboardingPathname(pathname)) return null
 
@@ -258,10 +267,11 @@ const PageFeedback: React.FC = () => {
         </PopoverAnchor>
 
         <PopoverContent
-          side="bottom"
+          side={isDesktop ? 'bottom' : 'top'}
           align="start"
           sideOffset={8}
-          className="!z-50 !w-[min(100vw-2rem,280px)] !border-[var(--l2-border)] !bg-[var(--l2-background-60)] !p-1.5 !pt-3 !shadow-[4px_10px_16px_rgba(0,0,0,0.2)] !backdrop-blur-[20px]"
+          avoidCollisions={isDesktop}
+          className="!z-[200] !max-h-[min(70dvh,480px)] !w-[min(100vw-2rem,280px)] !overflow-y-auto !border-[var(--l2-border)] !bg-[var(--l2-background-60)] !p-1.5 !pt-3 !shadow-[4px_10px_16px_rgba(0,0,0,0.2)] !backdrop-blur-[20px]"
           onPointerDownOutside={keepOpenIfOnControls}
           onInteractOutside={keepOpenIfOnControls}
           onFocusOutside={keepOpenIfOnControls}
