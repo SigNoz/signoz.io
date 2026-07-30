@@ -1,5 +1,5 @@
 ---
-date: 2026-07-23
+date: 2026-07-30
 title: Debug Missing Traces, Logs, and Metrics in SigNoz
 description: Debug why your traces, logs, or metrics are not showing up in SigNoz, from SDK instrumentation to the OpenTelemetry Collector and ingestion endpoint.
 doc_type: howto
@@ -38,56 +38,6 @@ Prefer to see the whole flow at once? The flowchart below covers the same checks
 />
 
 Either way, the rest of this page explains each check in detail.
-
-## Signal-specific notes
-
-Each signal reaches SigNoz a little differently. Expand your telemetry type for its common sources and the checks specific to it.
-
-<details>
-<ToggleHeading>
-#### Traces
-</ToggleHeading>
-
-Traces reach SigNoz from the OpenTelemetry SDK's OTLP exporter, either directly or through a Collector.
-
-- **Common sources:** OpenTelemetry SDK; Jaeger/Zipkin clients. Spans from **Jaeger or Zipkin clients** must pass through a Collector with the matching receiver, which converts them to OTLP.
-- If some spans are missing or you see gaps in a trace, the instrumentation is likely producing data but some spans are dropped or uninstrumented. See [Traces Management FAQs](https://signoz.io/docs/traces-management/troubleshooting/faqs/).
-- SigNoz builds the **Services** list in APM by grouping incoming spans on their `service.name` resource attribute. If your traces are arriving but a service is missing from the Services tab, it usually means `service.name` is unset or not unique. Set a unique `service.name` on that service.
-
-</details>
-
-<details>
-<ToggleHeading>
-#### Logs
-</ToggleHeading>
-
-Logs reach SigNoz from the OpenTelemetry SDK or log appenders, from files on disk read by the Collector's `filelog` receiver, or from log shippers, over OTLP, directly or through a Collector.
-
-**Common sources:** OpenTelemetry SDK / log appenders; files on disk; log shippers (FluentBit, Fluentd, Logstash, Vector, Telegraf). Identify your path first:
-
-- **Log shippers or the Collector.** Check that receivers and exporters are wired into the pipeline correctly, that the exporter endpoint and ingestion key are set, and read the Collector or shipper logs for errors.
-- **Files on disk.** The Collector's `filelog` receiver reads log files (the standard path for Kubernetes and Docker). Confirm the receiver's include paths match your log file locations.
-- **SDK or log-appender bridge.** Run the console-exporter check in [Step 1](#step-1-is-your-application-generating-telemetry) to confirm the SDK emits logs, then follow Steps 2 and 3.
-
-To correlate logs with traces, make sure each log line carries `trace_id` and `span_id` and parse them with the [trace parser pipeline](https://signoz.io/docs/logs-pipelines/guides/trace/). More in [Logs Management FAQs](https://signoz.io/docs/logs-management/troubleshooting/faqs/).
-
-</details>
-
-<details>
-<ToggleHeading>
-#### Metrics
-</ToggleHeading>
-
-Metrics reach SigNoz from the OpenTelemetry SDK, or from Prometheus, StatsD, and host or Kubernetes sources collected by the Collector's receivers, exported as OTLP.
-
-- **OpenTelemetry SDK metrics** export OTLP directly or through a Collector.
-- **Prometheus metrics** are collected by the Collector's `prometheus` receiver, which scrapes your `/metrics` endpoints.
-- **StatsD** metrics are received by the Collector's `statsd` receiver (the app pushes UDP packets to the listener), then exported as OTLP.
-- **Host and Kubernetes metrics** come from the `hostmetrics` receiver and the [K8s-Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/).
-- For any Collector receiver, confirm receivers and exporters are wired into the pipeline, the exporter endpoint and key are set, and check the Collector logs for errors.
-- If a specific metric is missing, a common cause is a temporality mismatch (delta vs cumulative). See [Metrics Management FAQs](https://signoz.io/docs/metrics-management/troubleshooting/faqs/) and [temporality of metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
-
-</details>
 
 ## Step 1: Is your application generating telemetry?
 
