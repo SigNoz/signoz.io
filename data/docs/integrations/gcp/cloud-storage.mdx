@@ -1,0 +1,78 @@
+---
+date: 2026-07-30
+title: GCP Cloud Storage Monitoring and Dashboards with SigNoz
+description: Monitor GCP Cloud Storage with SigNoz. Collect 7 metrics covering storage, API usage, authentication, and network traffic on an out-of-the-box dashboard.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+The GCP Cloud Storage integration collects Cloud Monitoring metrics from your Cloud Storage buckets and ships an out-of-the-box overview dashboard covering stored bytes and object counts, API request activity, signed-request authentication, and network traffic. It is one of the services available in the [GCP Cloud Integration](https://signoz.io/docs/integrations/gcp/gcp-cloud-integration/), alongside [GCP Cloud SQL for PostgreSQL](https://signoz.io/docs/integrations/gcp/cloud-sql-postgresql/).
+
+<Admonition type="info">
+This integration is available on SigNoz Cloud and Self-Hosted Enterprise.
+</Admonition>
+
+<Admonition type="warning">
+Cloud Storage is metrics-only today. Log collection is not yet available for this service, so enable **Metrics** to start ingesting data.
+</Admonition>
+
+## Getting started
+
+Connect your GCP account first. See [GCP Cloud Integration](https://signoz.io/docs/integrations/gcp/gcp-cloud-integration/) for the account configuration fields and supported regions.
+
+Once connected:
+
+1. In SigNoz, navigate to **Integrations** > **GCP**.
+2. Select **GCP Cloud Storage**.
+3. Toggle **Metrics** on.
+
+Enabling the integration creates the **GCP Cloud Storage Overview** dashboard automatically. Data starts flowing within a few minutes.
+
+## Data collected
+
+The integration tracks 7 Cloud Monitoring metrics from Cloud Storage:
+
+| Metric | Unit | Type | Description |
+|--------|------|------|-------------|
+| `storage.googleapis.com/storage/v2/total_bytes` | Bytes | Gauge | Total bytes stored per bucket. |
+| `storage.googleapis.com/storage/v2/total_count` | Count | Gauge | Total object count per bucket. |
+| `storage.googleapis.com/storage/v2/deleted_bytes` | Bytes | Sum | Bytes deleted per bucket. |
+| `storage.googleapis.com/api/request_count` | Count | Sum | Rate of GCS API calls. |
+| `storage.googleapis.com/network/received_bytes_count` | Bytes | Sum | Bytes received over the network. |
+| `storage.googleapis.com/network/sent_bytes_count` | Bytes | Sum | Bytes sent over the network. |
+| `storage.googleapis.com/authn/authentication_count` | Count | Sum | Rate of signed API requests (HMAC/RSA). |
+
+## Overview dashboard
+
+The **GCP Cloud Storage Overview** dashboard has 8 panels:
+
+- **Bucket size**: table of the total bytes stored per bucket, grouped by storage class. This is the latest snapshot value, not a time series.
+- **Total object bytes**: time series of bytes stored, broken down by bucket, storage class, and object type.
+- **Total object count**: time series of object count, covering live objects, noncurrent objects, soft-deleted objects, and multipart uploads.
+- **Deleted bytes**: rate of bytes deleted per bucket, grouped by storage class.
+- **Request count**: rate of GCS API calls, grouped by API method name and HTTP response code.
+- **Authentication count**: rate of signed API requests, grouped by authentication method (HMAC/RSA), API method name, and response code.
+- **Received bytes**: rate of bytes received over the network, grouped by API method name and response code.
+- **Sent bytes**: rate of bytes sent over the network, grouped by API method name and response code.
+
+Pre-built dashboards are locked and cannot be edited. To customize, use **Export JSON** from the dashboard menu and import it as a new dashboard.
+
+### Filter variables
+
+The dashboard includes two filter variables that scope every panel:
+
+- **project_id**: single-select, to focus on one monitored GCP project.
+- **bucket_name**: multi-select, with an **All** option, to focus on one or more buckets.
+
+<Admonition type="info">
+`bucket_name` lists every monitored bucket. On projects with a very large number of buckets, keep the selection narrow to keep panels responsive.
+</Admonition>
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) on stored bytes growth, API request rates, or network traffic.
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate storage metrics with application performance.
+
+## Get Help
+
+<GetHelp />
