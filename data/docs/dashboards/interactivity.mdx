@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-30
 title: Interactivity in dashboards
 description: Learn how interactive dashboards in SigNoz help you drill down, correlate signals, and troubleshoot faster using context menus, cross filtering, cross-panel sync, and navigation to Logs and Traces.
 
@@ -21,8 +21,10 @@ These interactive features make dashboards a powerful tool for root cause analys
 
 ## Features
 
-Interactive dashboards include multiple capabilities such as **View Logs and Traces**, **Breakout by**, **Context Links**, **Cross Filtering**, **Filter in Tables**, and **Cross-Panel Sync**. 
+Interactive dashboards include multiple capabilities such as **View Logs and Traces**, **View Trace Details**, **Breakout by**, **Context Links**, **Cross Filtering**, **Filter in Tables**, and **Cross-Panel Sync**. 
 Together, these features let you drill deeper, correlate across signals, and debug issues faster.
+
+You can trigger these interactions from a panel on the dashboard or from inside a panel's expanded **View** modal. See [Drill down in the expanded view](#drill-down-in-the-expanded-view) for how the two entry points differ.
 
 ### View Logs and Traces
 
@@ -55,6 +57,30 @@ This workflow shortens the gap between **observing anomalies** and **finding the
 
 - **Faster correlation:** Jump from metrics to traces and logs in context.
 - **Root cause focus:** Cut the time between spotting anomalies and debugging them.
+
+### View Trace Details
+
+When the data point or table row you click carries a `trace_id`, a **View Trace Details** link is added to the context menu automatically. You do not need to configure a [context link](#context-links) for it.
+
+#### How it works
+
+1. Click a data point in a chart, a pie slice, or a row in a table whose query returns a `trace_id`.
+2. Select **View Trace Details** from the context menu.
+3. The trace detail page for that `trace_id` opens in a new browser tab, so your dashboard stays open.
+
+<Admonition type="info">
+**View Trace Details** appears only when the clicked data includes a `trace_id` field. If your query does not select `trace_id`, use a [context link](#context-links) to build a custom trace URL instead.
+</Admonition>
+
+### Drill down in the expanded view
+
+Every panel can be expanded into a full-screen **View** modal by selecting the expand icon on the panel header. Drill-down interactions are available inside this modal, not just on the dashboard grid.
+
+- **Filter by value** and **Breakout by** work the same way inside the modal: click a data point, pie slice, or table cell and choose an action.
+- The result refines in place. The query re-runs and the chart or table updates within the same modal, rather than opening a nested modal.
+- Each drill-down step updates the URL, so the refined state is preserved when you reload or share the link.
+
+This lets you start from an aggregate view and keep narrowing (filter, then break out, then filter again) without leaving the expanded panel.
 
 ### Breakout by
 
@@ -98,33 +124,75 @@ They let you attach dynamic URLs to a panel and navigate to **internal explorers
   caption="Context menu showing dynamic links that use the clicked value and time range"
 />
 
-#### How it works
-1. Edit a panel and open the **Context Links** section.  
-2. Click **+ Context Link** and configure:  
-   - **Label**: The menu text (fallback is the raw URL).  
-   - **URL**: A template URL with variables like `{{_service.name}}` or `{{timestamp_start}}`.  
-   - **Query params**: Manage key–value pairs visually in the table. 
+#### Add a context link
+
+1. Edit a panel and expand the **Context Links** section in the panel settings pane.
+2. Select **Add Context Link** to open the context link editor.
+3. Configure the link:
+   - **Label**: the text shown in the context menu. If you leave it empty, SigNoz shows the URL instead.
+   - **URL**: the destination URL. It can include `{{variable}}` tokens that resolve to the clicked datapoint's values (see [Available variables](#available-variables)).
+   - **URL parameters** (optional): select **Add URL parameter** to manage query parameters as key-value rows. Each row adds a `key=value` pair to the URL.
+   - **Open in new tab**: on by default. Leave it on to open the destination in a new browser tab and keep the dashboard where it is; turn it off to navigate in place.
+4. Select **Save**.
 
 <Figure
-  src="/img/docs/dashboards/interactivity/create-context-links.png"
-  alt="Configuring a Context Link with label, URL template, and query parameters"
-  caption="Configuring a Context Link with label, URL template, and query parameters"
+  src="/img/docs/dashboards/interactivity/context-links-modal.webp"
+  alt="Add a context link dialog with Label, URL, Add URL parameter, and the Open in new tab toggle"
+  caption="Authoring a context link. The label and URL accept {{variable}} tokens."
 />
- 
-3. The modal keeps the URL and key–value table in sync:  
-   - Editing the URL auto-populates the params table (values are decoded).  
-   - Editing the table updates the URL (values are encoded).  
-4. In the dashboard, **click** a chart datapoint, bar segment, or table row to open the **context menu**.  
-5. **Select the created link** — variables are resolved and the destination opens.  
+
+
+<Figure
+  src="/img/docs/dashboards/interactivity/context-links-modal-variables.webp"
+  alt="Edit context link dialog with a {{_service.name}} token in the URL, and the saved link listed in the Context Links pane"
+  caption="A context link whose URL carries a {{_service.name}} token. Saved links appear in the Context Links pane with edit and delete actions."
+/>
+
+The URL field and the URL parameters table stay in sync:
+
+- Editing the URL populates the parameter rows (values are decoded).
+- Editing a parameter row updates the URL (values are encoded).
+
+#### URL validation
+
+The URL must start with one of the following, or the link cannot be saved:
+
+- `http://` or `https://` for an absolute link to an external tool.
+- `/` for a root-relative path inside SigNoz, for example `/logs`.
+- A `{{variable}}/` token, so the resolved variable value forms the start of the URL.
+
+If the URL does not match, SigNoz highlights the field and shows the message `URLs must start with http(s), /, or {{.*}}/`. Fix the URL to save the link.
+
+<Figure
+  src="/img/docs/dashboards/interactivity/context-links-validation.webp"
+  alt="Context link dialog showing the URL validation error beneath an invalid URL"
+  caption="An invalid URL is flagged inline and blocks saving until it is corrected."
+/>
+
 
 #### Available variables
-You can use different types of variables inside the URL or param values:
+
+You can use different types of variables inside the URL or a parameter value. While editing the URL or a parameter value, type `{{` to open an autocomplete popover that lists the variables available to the current panel, grouped by type.
+
 
 | Type | Description | Syntax | Example |
 |------|-------------|--------|---------|
-| **Time range** | Inserts the current dashboard’s absolute start and end time (epoch ms). | `{{timestamp_start}}`, `{{timestamp_end}}` | `from={{timestamp_start}}&to={{timestamp_end}}` |
-| **Query variables** | The group by fields in the query the user clicks on. Available only when the panel query has a **GROUP BY**. | `{{_fieldName}}` | `{{_service.name}}`, `{{_trace_id}}` |
-| **Dashboard variables** | Any dashboard-level variable defined in the dashboard settings. | `{{varName}}` | `{{host}}`, `{{env}}` |
+| **Global timestamp** | The current dashboard's absolute start and end time (epoch ms). | `{{timestamp_start}}`, `{{timestamp_end}}` | `from={{timestamp_start}}&to={{timestamp_end}}` |
+| **Query variables** | The group by fields in the query you click on. Available only when the panel query has a **GROUP BY**. | `{{_fieldName}}` | `{{_service.name}}`, `{{_trace_id}}` |
+| **Dashboard variables** | Any dashboard-level variable defined in the [dashboard settings](https://signoz.io/docs/userguide/manage-variables/). | `{{varName}}` | `{{host}}`, `{{env}}` |
+
+#### Manage and use links
+
+Saved links appear as a compact list under the **Context Links** section. Each row shows the label (or the URL when no label is set) as the primary text and the full URL beneath it. Hover a row to reveal its **edit** (pencil) and **delete** (trash) buttons. Select the pencil to reopen the editor with the link's values prefilled.
+
+
+To use a link, click a chart datapoint, bar segment, or table row in the dashboard to open the **context menu**, then select the link. Variables resolve to the clicked values and the destination opens.
+
+<Figure
+  src="/img/docs/dashboards/interactivity/context-links-in-menu.webp"
+  alt="Panel context menu listing a custom View service details link below the built-in drill-down actions"
+  caption="A saved context link appears in the panel's context menu alongside View in Logs, View in Traces, and Breakout by."
+/>
 
 #### Examples
 **1. View trace details from a table**
@@ -278,3 +346,104 @@ You can toggle individual series on and off through the chart legend. Hidden ser
 - If every matching series in the receiver is hidden, the receiver tooltip disappears entirely the next time you move the cursor on the source.
 
 This makes it easy to focus comparison on a specific subset by hiding the rest.
+
+## Create an alert from a panel
+
+You can turn any panel into an alert without rebuilding its query. When you create an alert from a panel, SigNoz carries the panel's query into the alert builder and seeds the alert **condition** from the panel's **Reduce To** setting and its **thresholds**, so the condition arrives partly filled in.
+
+**Create Alerts** is available on **Time Series**, **Bar**, **Value** (Number), and **Histogram** panels. Table, List, and Pie panels do not offer it.
+
+You do not need edit access. The action is available on locked and read-only dashboards as well as editable ones, since creating an alert never modifies the dashboard.
+
+### Create the alert
+
+1. Hover over the panel and open its actions menu (the **...** menu in the panel header). You can also open the same action from the panel editor's **Actions** section.
+2. Select **Create Alerts**. SigNoz opens the alert builder in a new tab with the panel's query already loaded, including its formatting unit.
+3. Review the pre-filled condition, adjust anything you need, and save the alert.
+
+
+The alert condition reads as a sentence: *Send a notification when `<query>` is `<operator>` the threshold(s) `<occurrence>` during the `<evaluation window>`*. The **operator** and **occurrence** parts are the fields seeded from the panel.
+
+
+### Occurrence from Reduce To
+
+For **Value** (Number) panels, the panel's **Reduce To** setting maps to the alert occurrence:
+
+| Panel Reduce To | Alert occurrence |
+| --- | --- |
+| Sum | `IN TOTAL` |
+| Avg | `ON AVERAGE` |
+| Max, Min, or Latest | Default (left unchanged) |
+
+Time Series, Bar, and Histogram panels do not expose a Reduce To that maps to occurrence, so their occurrence stays at the alert builder's default.
+
+<Admonition type="info">
+For panels built from multiple queries or a formula, the occurrence is pre-filled only when **every** query uses the same Reduce To. If the queries use different Reduce To settings, the default occurrence is preserved and you should set it manually after the alert opens.
+</Admonition>
+
+### Operator and value from thresholds
+
+When the panel has thresholds configured, SigNoz picks the **most dangerous threshold** and copies its value (and unit) into the alert. Danger is ranked by threshold color:
+
+`red` > `orange` > `green` > `blue` > any other color
+
+For **Value** (Number) panels, the threshold's comparison operator is copied as well:
+
+| Panel threshold operator | Alert operator |
+| --- | --- |
+| Above (`>`) or Above or equal (`≥`) | `ABOVE` |
+| Below (`<`) or Below or equal (`≤`) | `BELOW` |
+| Equal (`=`) | `EQUAL TO` |
+| Not equal (`≠`) | `NOT EQUAL TO` |
+
+<Admonition type="warning">
+The alert operators do not include an "or equal" boundary, so **Above or equal (≥)** and **Below or equal (≤)** panel thresholds map to the closest available operators, `ABOVE` and `BELOW`. If you set a boundary threshold, confirm the operator after the alert opens.
+</Admonition>
+
+**Time Series** and **Bar** panels pre-fill the threshold **value** and **unit**, but the operator stays at the default, because these panels store thresholds as value markers without a comparison operator. **Histogram** panels do not pass thresholds, so nothing threshold-related is seeded.
+
+Everything SigNoz fills in is a starting point. Review the condition and complete the remaining fields before saving. For the full list of condition options, see [Metrics based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/#step-2-define-alert-conditions).
+
+## Download a panel
+
+<Figure
+  src="/img/docs/dashboards/interactivity/panel-actions-menu.webp"
+  alt="A panel's actions menu showing View, Edit panel, Clone, Download, Create Alerts, Move to section, and Delete panel"
+  caption="The panel actions menu. Download and Create Alerts sit alongside the editing actions."
+/>
+
+Open a panel's **...** menu to download what it currently shows:
+
+- **Download as PNG** and **Download as SVG** are available on every panel type.
+- **Download as CSV** is available on Table panels, and exports the table's rows and columns.
+
+## Empty panel state
+
+When a panel query runs successfully but returns nothing for the selected time range, the panel shows an empty state titled **No data in this time range** instead of a chart. From here you can widen the window and re-run the query without leaving the dashboard.
+
+### Extend time range
+
+The primary action in the empty state is **Extend time range**. Select it to widen the panel's time window to the next larger step and re-run the query.
+
+- **Standard windows** step up the zoom-out ladder: 15m, 45m, 2h, 7h, 21h, 1d, 2d, 3d, 1w, 2w, and 1 month. A 15-minute window widens to 45 minutes, a 45-minute window widens to 2 hours, and so on. When the new window matches one of these steps, the time picker shows it as a relative preset (for example, **Last 45 minutes**) instead of **Custom**.
+- **Narrow custom or drag-zoomed windows** shorter than 15 minutes expand about 3x around their midpoint until they reach 15 minutes, then follow the same ladder.
+- The window grows around its center. Once the widened end would move past the current time, the end anchors to now and the start moves further back instead.
+- At the widest step (1 month), **Extend time range** no longer appears.
+
+Extending from a panel on the dashboard updates the dashboard's global time range, so every panel refreshes on the wider window. This is the same behavior as the zoom-out control in the dashboard toolbar.
+
+<Admonition type="info">
+When a panel uses a fixed **Panel time preference** (for example, `Last 6 hours`) instead of `Global Time`, it ignores the dashboard-wide time range. If such a panel returns no data, its empty state shows only a **Retry** button and hides **Extend time range**, because the panel's fixed window cannot be widened from the dashboard time picker.
+</Admonition>
+
+### Retry
+
+When a retry handler is available, **Retry** appears as a secondary action alongside **Extend time range** and re-runs the query on the current window. If the window is already at the widest step and cannot be extended, **Retry** becomes the only action.
+
+### Loading state
+
+After you select **Extend time range**, a loading spinner replaces the empty-state message while the widened query is in flight. The panel moves from the spinner directly to the rendered chart, or back to the empty state if the wider window still has no data.
+
+### Panel View modal
+
+Opening a panel in its full-screen **View** modal gives that panel its own local time window, separate from the dashboard's global time range. If you move the modal's time window to a range with no data, the same **Extend time range** action appears. Extending inside the modal widens only the modal's local window. The dashboard's global time range, and any historical anchor set on the main dashboard, stay unchanged.

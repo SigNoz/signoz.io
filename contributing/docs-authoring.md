@@ -129,6 +129,14 @@ Prefer these H2 sections when they fit the doc:
 - Main-path snippets should be safe defaults that work after placeholder replacement.
 - Move advanced or environment-specific options into callouts or collapsed sections.
 
+### Code blocks (MDX fences)
+
+Docs fences render through the site **CodeBlock** (Shiki / `rehype-pretty-code`). Keep authoring as normal fenced backticks.
+
+**Defaults:** line numbers on · collapse when lines > 20 (starts expanded) · untitled = floating Copy · `lang:path` = filename chrome.
+
+Full meta reference and copy-paste examples (titles, highlights, minimap, collapse, `CodeTabs`): [docs-codeblock.md](docs-codeblock.md).
+
 ### SigNoz Cloud Ingestion Endpoints (region-aware)
 
 The docs region selector (top-right of the page) keeps SigNoz Cloud ingestion endpoints in sync by substituting the **literal `<region>` token** in every snippet on the page. A snippet is only region-aware if it uses that exact token, so anything else silently freezes on whatever the author typed — and on a page that mixes both, some snippets update with the selector while others do not.

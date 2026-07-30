@@ -36,13 +36,13 @@ const CALLOUT_CSS_VARS: CSSProperties = {
 
 const SHARED_CODE_CHROME =
   '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]'
-const SHARED_PRE_CHROME = [
-  '[&_.relative]:max-w-full [&_.relative]:min-w-0',
-  '[&_pre]:max-w-full [&_pre]:min-w-0 [&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border',
-].join(' ')
-const SHARED_PRE_BODY = [
-  '[&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed [&_pre]:!text-[var(--admonition-code)]',
-  '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
+// Size nested CodeBlocks and undo inline-code chrome that would otherwise hit Shiki tokens.
+const SHARED_CODEBLOCK_CHROME = [
+  // Constrain to callout width so long lines scroll inside CodeBlock, not the callout.
+  '[&_[data-sz-codeblock]]:my-3 [&_[data-sz-codeblock]]:block [&_[data-sz-codeblock]]:w-full [&_[data-sz-codeblock]]:min-w-0 [&_[data-sz-codeblock]]:max-w-full',
+  '[&_[data-sz-codeblock]:first-child]:mt-0 [&_[data-sz-codeblock]:last-child]:mb-0',
+  '[&_.relative:has([data-sz-codeblock])]:min-w-0 [&_.relative:has([data-sz-codeblock])]:w-full [&_.relative:has([data-sz-codeblock])]:max-w-full',
+  '[&_[data-sz-codeblock]_code]:!rounded-none [&_[data-sz-codeblock]_code]:!bg-transparent [&_[data-sz-codeblock]_code]:!p-0 [&_[data-sz-codeblock]_code]:!text-inherit',
 ].join(' ')
 
 type ToneTokenClasses = {
@@ -51,7 +51,6 @@ type ToneTokenClasses = {
   code: string
   link: string
   codeSurface: string
-  preSurface: string
   listMarker: string
 }
 
@@ -61,7 +60,6 @@ const makeTone = ({
   code,
   link,
   codeSurface,
-  preSurface,
   listMarker,
 }: ToneTokenClasses): ToneStyles => ({
   cssVars: CALLOUT_CSS_VARS,
@@ -72,9 +70,7 @@ const makeTone = ({
     link,
     SHARED_CODE_CHROME,
     codeSurface,
-    SHARED_PRE_CHROME,
-    preSurface,
-    SHARED_PRE_BODY,
+    SHARED_CODEBLOCK_CHROME,
     listMarker,
   ].join(' '),
 })
@@ -88,8 +84,6 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
     link: '[&_a]:!text-[var(--accent-primary)] [&_a]:underline [&_a]:decoration-[var(--accent-primary)] [&_a]:underline-offset-2',
     codeSurface:
       '[&_code]:!bg-[var(--callout-primary-background)] [&_code]:!text-[var(--admonition-code)]',
-    preSurface:
-      '[&_pre]:!border-[var(--callout-primary-border)] [&_pre]:!bg-[var(--callout-primary-background)]',
     listMarker: '[&_ul]:marker:text-[var(--accent-primary)]',
   }),
   forest: makeTone({
@@ -100,8 +94,6 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
     link: '[&_a]:!text-[var(--accent-forest)] [&_a]:underline [&_a]:decoration-[var(--accent-forest)] [&_a]:underline-offset-2',
     codeSurface:
       '[&_code]:!bg-[var(--callout-success-background)] [&_code]:!text-[var(--admonition-code)]',
-    preSurface:
-      '[&_pre]:!border-[var(--callout-success-border)] [&_pre]:!bg-[var(--callout-success-background)]',
     listMarker: '[&_ul]:marker:text-[var(--accent-forest)]',
   }),
   amber: makeTone({
@@ -112,8 +104,6 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
     link: '[&_a]:!text-[var(--accent-amber)] [&_a]:underline [&_a]:decoration-[var(--accent-amber)] [&_a]:underline-offset-2',
     codeSurface:
       '[&_code]:!bg-[var(--callout-warning-background)] [&_code]:!text-[var(--admonition-code)]',
-    preSurface:
-      '[&_pre]:!border-[var(--callout-warning-border)] [&_pre]:!bg-[var(--callout-warning-background)]',
     listMarker: '[&_ul]:marker:text-[var(--accent-amber)]',
   }),
   cherry: makeTone({
@@ -124,8 +114,6 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
     link: '[&_a]:!text-[var(--accent-cherry)] [&_a]:underline [&_a]:decoration-[var(--accent-cherry)] [&_a]:underline-offset-2',
     codeSurface:
       '[&_code]:!bg-[var(--callout-error-background)] [&_code]:!text-[var(--admonition-code)]',
-    preSurface:
-      '[&_pre]:!border-[var(--callout-error-border)] [&_pre]:!bg-[var(--callout-error-background)]',
     listMarker: '[&_ul]:marker:text-[var(--accent-cherry)]',
   }),
   aqua: makeTone({
@@ -136,8 +124,6 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
     link: '[&_a]:!text-[var(--accent-aqua)] [&_a]:underline [&_a]:decoration-[var(--accent-aqua)] [&_a]:underline-offset-2',
     codeSurface:
       '[&_code]:!bg-[var(--callout-aqua-background)] [&_code]:!text-[var(--admonition-code)]',
-    preSurface:
-      '[&_pre]:!border-[var(--callout-aqua-border)] [&_pre]:!bg-[var(--callout-aqua-background)]',
     listMarker: '[&_ul]:marker:text-[var(--accent-aqua)]',
   }),
   sakura: makeTone({
@@ -148,14 +134,13 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
     link: '[&_a]:!text-[var(--accent-sakura)] [&_a]:underline [&_a]:decoration-[var(--accent-sakura)] [&_a]:underline-offset-2',
     codeSurface:
       '[&_code]:!bg-[color-mix(in_srgb,var(--accent-sakura)_10%,transparent)] [&_code]:!text-[var(--admonition-code)]',
-    preSurface:
-      '[&_pre]:!border-[color-mix(in_srgb,var(--accent-sakura)_25%,transparent)] [&_pre]:!bg-[color-mix(in_srgb,var(--accent-sakura)_10%,transparent)]',
     listMarker: '[&_ul]:marker:text-[var(--accent-sakura)]',
   }),
 }
 
 const BASE_CONTENT_STYLES = [
-  'min-w-0 max-w-full overflow-hidden rounded-[4px] p-4',
+  // Keep callout from growing with long code lines; CodeBlock's <pre> owns horizontal scroll.
+  'min-w-0 max-w-full overflow-x-hidden overflow-y-visible rounded-[4px] p-4',
   '!items-start !gap-2.5',
   '[&>div:first-child]:!m-0 [&>div:first-child]:!flex [&>div:first-child]:!h-7 [&>div:first-child]:!w-7',
   '[&>div:first-child]:!shrink-0 [&>div:first-child]:!items-center [&>div:first-child]:!justify-center',
@@ -164,6 +149,8 @@ const BASE_CONTENT_STYLES = [
   '[&_[data-slot=callout-description]]:w-full',
   '[&_[data-slot=callout-description]]:min-w-0',
   '[&_[data-slot=callout-description]]:max-w-full',
+  '[&_[data-slot=callout-description]]:justify-items-stretch',
+  '[&_[data-slot=callout-description]]:overflow-x-hidden',
   '[&>div]:!gap-0',
   '[&_[data-slot=callout-title]]:font-semibold',
   '[&_[data-slot=callout-title]]:text-base',
@@ -181,7 +168,6 @@ const BASE_CONTENT_STYLES = [
   '[&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol:last-child]:mb-0',
   '[&_li]:mb-1 [&_li:last-child]:mb-0',
 ].join(' ')
-
 const TITLE_TOGGLE_STYLES = [
   'flex h-full w-full min-w-0 cursor-pointer items-center justify-between gap-3',
   'border-0 bg-transparent p-0 text-left font-inherit text-inherit',
@@ -290,7 +276,9 @@ const Admonition = ({
           .filter(Boolean)
           .join(' ')}
       >
-        <div id={descriptionId}>{children}</div>
+        <div id={descriptionId} className="w-full min-w-0 max-w-full">
+          {children}
+        </div>
       </Callout>
     </div>
   )

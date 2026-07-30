@@ -300,7 +300,16 @@ module.exports = {
     },
     fontFamily: {
       sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-      mono: ['Geist Mono', 'monospace'],
+      mono: [
+        'ui-monospace',
+        'SFMono-Regular',
+        'Menlo',
+        'Monaco',
+        'Consolas',
+        'Liberation Mono',
+        'Courier New',
+        'monospace',
+      ],
       satoshi: ['Satoshi', 'sans-serif'],
       'satoshi-bold': ['Satoshi Bold', 'sans-serif'],
     },

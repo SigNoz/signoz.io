@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-30
 title: Import Dashboard in SigNoz
 description: Import pre-built JSON dashboard templates into SigNoz to quickly set up monitoring views for your infrastructure and applications.
 doc_type: howto
@@ -20,20 +20,29 @@ You can choose any dashboard you’d like to use. For instance, to monitor a MyS
 
 ### Step 3: Import the dashboard in SigNoz
 
-In your SigNoz UI, go to the **Dashboards** page and click on the **+ New dashboard** button. You will see an option to **Import JSON**. 
+In your SigNoz UI, go to the **Dashboards** page and select **+ New dashboard**. The **New dashboard** modal opens with three tabs: **Blank**, **From a template**, and **Import JSON**.
 
 <Figure
-  src="/img/docs/dashboards/import-dashboard/import-dashboard-json.webp"
-  alt="Import JSON"
-  caption="Import JSON"
+  src="/img/docs/dashboards/import-dashboard/import-dashboard-json-v2.webp"
+  alt="The New dashboard modal showing the Blank, From a template, and Import JSON tabs"
+  caption="The New dashboard modal. Import JSON is the third tab."
 />
 
-You can either paste the JSON that you copied or upload the JSON file that you downloaded.
+Select the **Import JSON** tab. You can either paste the JSON that you copied into the editor, or select **Upload JSON file** to upload the file that you downloaded. Then select **Import and Next**.
 
 <Figure
-  src="/img/docs/dashboards/import-dashboard/paste-or-upload-dashboard-json.webp"
-  alt="Paste or Upload Dashboard JSON"
-  caption="Paste or Upload Dashboard JSON"
+  src="/img/docs/dashboards/import-dashboard/paste-or-upload-dashboard-json-v2.webp"
+  alt="The Import JSON tab with the JSON editor, the Upload JSON file button, and the Import and Next button"
+  caption="Paste the dashboard JSON or upload the file, then select Import and Next."
 />
 
-Once the JSON is imported, you will see the new dashboard on your dashboards page. 
+Once the JSON is imported, you will see the new dashboard on your dashboards page.
+
+<Admonition type="info" title="Importing a legacy dashboard export">
+Dashboards exported from an older SigNoz version use the legacy V1 JSON format. You can import that JSON directly here. SigNoz detects the V1 format and converts it to the current dashboard schema on the server, so no manual reshaping is needed before import.
+</Admonition>
+
+<Admonition type="warning">
+Import fails with an error toast if the dashboard's `image` field holds an invalid value, such as a remote URL, a `javascript:` URI, a non-image data URI, or raw markup. Set `image` to an `/assets/Icons/<name>` path, an `/assets/Logos/<name>` path, or a base64 image data URI. See [Icon paths in dashboard JSON](https://signoz.io/docs/userguide/manage-dashboards/#icon-paths-in-dashboard-json) for the accepted formats.
+</Admonition>
+
