@@ -1,0 +1,113 @@
+---
+date: 2026-07-30
+title: GCP Kubernetes Engine (GKE) Monitoring and Dashboards
+description: Monitor GCP Kubernetes Engine (GKE) with SigNoz. Collect 16 container, pod, and node metrics on an out-of-the-box dashboard across five sections.
+doc_type: howto
+tags: [SigNoz Cloud]
+---
+
+The GCP Kubernetes Engine (GKE) integration collects Cloud Monitoring metrics from your GKE clusters and ships an out-of-the-box overview dashboard covering container CPU and memory, workload health, pod and node network throughput, storage, and node health. It is one of the services available in the [GCP Cloud Integration](https://signoz.io/docs/integrations/gcp/gcp-cloud-integration/), alongside [GCP Cloud SQL for PostgreSQL](https://signoz.io/docs/integrations/gcp/cloud-sql-postgresql/) and [GCP Cloud Storage](https://signoz.io/docs/integrations/gcp/cloud-storage/).
+
+<Admonition type="info">
+This integration is available on SigNoz Cloud and Self-Hosted Enterprise. It is distinct from the [manual GKE monitoring guide](https://signoz.io/docs/gcp-monitoring/gke/), which configures the OpenTelemetry Collector yourself.
+</Admonition>
+
+## Getting started
+
+Connect your GCP account first. See [GCP Cloud Integration](https://signoz.io/docs/integrations/gcp/gcp-cloud-integration/) for the account configuration fields and supported regions.
+
+Once connected:
+
+1. In SigNoz, navigate to **Integrations** > **GCP**.
+2. Select **GCP Kubernetes Engine**.
+3. Toggle **Metrics** on.
+
+Enabling the integration creates the **GCP Kubernetes Engine Overview** dashboard automatically. Data starts flowing within a few minutes.
+
+<Admonition type="warning">
+GKE exposes both a **Metrics** and a **Logs** toggle. The 16 metrics below and the overview dashboard are the metrics dataset. A predefined GKE log dataset is not shipped yet, so enable **Metrics** to get the out-of-the-box dashboard. When logs become available they are delivered through the shared GCP Cloud Logging routing described in the [GCP Cloud Integration](https://signoz.io/docs/integrations/gcp/gcp-cloud-integration/) setup.
+</Admonition>
+
+## Data collected
+
+The integration tracks 16 Cloud Monitoring metrics from GKE, covering the container, pod, and node levels:
+
+| Metric | Unit | Type | Description |
+|--------|------|------|-------------|
+| `kubernetes.io/container/cpu/limit_utilization` | Ratio | Gauge | Container CPU usage as a fraction of its CPU limit. |
+| `kubernetes.io/container/cpu/request_utilization` | Ratio | Gauge | Container CPU usage as a fraction of its CPU request. |
+| `kubernetes.io/container/memory/limit_utilization` | Ratio | Gauge | Container memory usage as a fraction of its memory limit. |
+| `kubernetes.io/container/memory/request_utilization` | Ratio | Gauge | Container memory usage as a fraction of its memory request. |
+| `kubernetes.io/container/restart_count` | Count | Sum | Cumulative number of container restarts. |
+| `kubernetes.io/pod/latencies/pod_first_ready` | Seconds | Gauge | End-to-end time from pod creation to first Ready state. |
+| `kubernetes.io/pod/network/received_bytes_count` | Bytes | Sum | Bytes received over the network, per pod. |
+| `kubernetes.io/pod/network/sent_bytes_count` | Bytes | Sum | Bytes sent over the network, per pod. |
+| `kubernetes.io/pod/volume/utilization` | Ratio | Gauge | PersistentVolumeClaim usage as a fraction of its capacity. |
+| `kubernetes.io/node/cpu/allocatable_utilization` | Ratio | Gauge | Node CPU usage as a fraction of allocatable CPU. |
+| `kubernetes.io/node/memory/allocatable_utilization` | Ratio | Gauge | Node memory usage as a fraction of allocatable memory. |
+| `kubernetes.io/node/ephemeral_storage/used_bytes` | Bytes | Gauge | Ephemeral storage used, per node. |
+| `kubernetes.io/node/ephemeral_storage/allocatable_bytes` | Bytes | Gauge | Allocatable ephemeral storage, per node. |
+| `kubernetes.io/node/network/received_bytes_count` | Bytes | Sum | Bytes received over the network, per node. |
+| `kubernetes.io/node/network/sent_bytes_count` | Bytes | Sum | Bytes sent over the network, per node. |
+| `kubernetes.io/node/status_condition` | State | Gauge | Node status conditions (for example Ready, MemoryPressure), used to surface unhealthy nodes. |
+
+## Overview dashboard
+
+The **GCP Kubernetes Engine Overview** dashboard has 15 panels organized into five sections:
+
+### CPU & Memory
+
+Four time series panels showing container resource pressure:
+
+- **% Container CPU Limit Utilization**: CPU usage against the configured CPU limit.
+- **% Container CPU Request Utilization**: CPU usage against the configured CPU request.
+- **% Container Memory Limit Utilization**: memory usage against the configured memory limit.
+- **% Container Memory Request Utilization**: memory usage against the configured memory request.
+
+### Workload Health
+
+Two tables that surface restart and startup problems:
+
+- **Container Restarts (total)**: cumulative restart count. Containers with no restarts are excluded, so the table lists only workloads that have restarted.
+- **Pod First-Ready Latency**: time from pod creation to first Ready state, in seconds, per pod.
+
+### Network
+
+Two time series panels for pod-level traffic:
+
+- **Pod Network Receive Throughput**: bytes received per second, per pod.
+- **Pod Network Sent Throughput**: bytes sent per second, per pod.
+
+### Storage
+
+- **% PVC Volume Utilization**: PersistentVolumeClaim usage as a percentage of capacity, per PVC.
+
+### Nodes (namespace agnostic)
+
+Six node-level panels. Node metrics have no namespace dimension, so this section ignores the **namespace_name** filter:
+
+- **% Node CPU Allocatable Utilization**: node CPU usage against allocatable CPU.
+- **% Node Memory Allocatable Utilization**: node memory usage against allocatable memory.
+- **Node status conditions**: table of node conditions, filtered to show only unhealthy states.
+- **% Node Ephemeral Storage Utilization**: ephemeral storage used against allocatable ephemeral storage.
+- **Node Network Receive Throughput**: bytes received per second, per node.
+- **Node Network Sent Throughput**: bytes sent per second, per node.
+
+Pre-built dashboards are locked and cannot be edited. To customize, use **Export JSON** from the dashboard menu and import it as a new dashboard.
+
+### Filter variables
+
+The dashboard includes three single-select filter variables that scope the panels:
+
+- **project_id**: focus on one monitored GCP project.
+- **cluster_name**: focus on one GKE cluster.
+- **namespace_name**: focus on one Kubernetes namespace. This scopes the container, pod, network, and storage panels. The **Nodes (namespace agnostic)** section ignores this filter because node metrics are not namespaced.
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) on container restarts, CPU or memory saturation, or node status conditions.
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate GKE metrics with application performance.
+
+## Get Help
+
+<GetHelp />
