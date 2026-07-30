@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useId, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Check, PencilLine, X } from 'lucide-react'
 import { Button } from '@signozhq/ui/button'
@@ -8,10 +8,6 @@ import { Checkbox } from '@signozhq/ui/checkbox'
 import { Popover, PopoverAnchor, PopoverContent } from '@signozhq/ui/popover'
 import { cn } from 'app/lib/utils'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
-
-interface PageFeedbackProps {
-  placement?: 'default' | 'toc'
-}
 
 const ANOTHER_REASON = 'Another reason'
 
@@ -81,14 +77,14 @@ async function postFeedback(
   }
 }
 
-/** Docs right-rail feedback: Yes/No open a single-choice reason list; Send feedback opens free text. */
-type TocMode = 'yes' | 'no' | 'comment' | null
+type FeedbackMode = 'yes' | 'no' | 'comment' | null
 
-const TocFeedback: React.FC<{
-  apiUrl?: string
-  feedbackPath?: string
-}> = ({ apiUrl, feedbackPath }) => {
-  const [mode, setMode] = useState<TocMode>(null)
+const PageFeedback: React.FC = () => {
+  const pathname = usePathname()
+  const apiUrl = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
+  const feedbackPath = process.env.NEXT_PUBLIC_SIGNOZ_CMS_FEEDBACK_PATH
+
+  const [mode, setMode] = useState<FeedbackMode>(null)
   const [reason, setReason] = useState('')
   const [details, setDetails] = useState('')
   const [comment, setComment] = useState('')
@@ -96,13 +92,15 @@ const TocFeedback: React.FC<{
   const [submitError, setSubmitError] = useState('')
   const [showThanks, setShowThanks] = useState(false)
   const controlsRef = useRef<HTMLDivElement>(null)
-  const modeRef = useRef<TocMode>(null)
+  const modeRef = useRef<FeedbackMode>(null)
 
   useEffect(() => {
     if (!showThanks) return
     const timeout = window.setTimeout(() => setShowThanks(false), 3200)
     return () => window.clearTimeout(timeout)
   }, [showThanks])
+
+  if (isDocsOnboardingPathname(pathname)) return null
 
   const resetForm = () => {
     setReason('')
@@ -118,7 +116,7 @@ const TocFeedback: React.FC<{
     resetForm()
   }
 
-  const openMode = (next: Exclude<TocMode, null>) => {
+  const openMode = (next: Exclude<FeedbackMode, null>) => {
     if (modeRef.current === next) {
       close()
       return
@@ -402,195 +400,6 @@ const TocFeedback: React.FC<{
       </Popover>
     </div>
   )
-}
-
-/** Mobile / no-TOC fallback: Yes/No then a single-choice reason list. */
-const DefaultFeedback: React.FC<{
-  apiUrl?: string
-  feedbackPath?: string
-}> = ({ apiUrl, feedbackPath }) => {
-  const [helpful, setHelpful] = useState<boolean | null>(null)
-  const [reason, setReason] = useState('')
-  const [details, setDetails] = useState('')
-  const [submitted, setSubmitted] = useState(false)
-  const [submitError, setSubmitError] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const fieldId = useId().replace(/:/g, '')
-
-  const options = helpful ? positiveOptions : negativeOptions
-
-  const selectReason = (value: string) => {
-    setReason(value)
-    setSubmitError('')
-    setDetails('')
-  }
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setSubmitError('')
-    if (!reason) {
-      setSubmitError('Please select an option before submitting feedback.')
-      return
-    }
-
-    setIsSubmitting(true)
-    const result = await postFeedback(apiUrl, feedbackPath, {
-      helpful: helpful === true,
-      needsImprovement: helpful === false ? reason : '',
-      positiveFeedback: helpful === true ? reason : '',
-      additionalDetails: buildAdditionalDetails(reason, details),
-    })
-    setIsSubmitting(false)
-
-    if (!result.ok) {
-      setSubmitError(result.error || 'Could not submit feedback. Please try again.')
-      return
-    }
-    setSubmitted(true)
-  }
-
-  if (submitted) {
-    return (
-      <div className="mx-auto mb-0 mt-6 max-w-[560px] px-0 pb-[10px] pt-[14px] font-sans text-[#edf2ff]">
-        <div className="mb-3 h-px w-full bg-[rgba(126,142,177,0.4)]" />
-        <section className="rounded-[10px] border border-[rgba(78,116,248,0.24)] bg-[rgba(10,15,27,0.42)] p-3 text-left">
-          <h3 className="m-0 text-[clamp(1.02rem,0.96rem+0.3vw,1.16rem)] font-semibold leading-[1.3] text-[#edf2ff]">
-            Thank you for your feedback.
-          </h3>
-          <p className="my-2 mb-3.5 text-[13px] leading-[1.45] text-[#c3cde6]">
-            Your response helps us keep docs clear, accurate, and actionable.
-          </p>
-        </section>
-      </div>
-    )
-  }
-
-  return (
-    <div className="mx-auto mb-0 mt-6 max-w-[560px] font-sans text-[#edf2ff]">
-      <div className="mb-3 h-px w-full bg-[rgba(126,142,177,0.4)]" />
-      <section className={cn(helpful === null && 'text-center')}>
-        {helpful === null ? (
-          <>
-            <h3 className="m-0 text-[clamp(1.02rem,0.96rem+0.3vw,1.16rem)] font-semibold leading-[1.3] text-[#edf2ff]">
-              Was this page helpful?
-            </h3>
-            <p className="mb-3 mt-2 text-[13px] leading-[1.45] text-[#c3cde6]">
-              Your response helps us improve this page.
-            </p>
-            <div className="flex flex-wrap justify-stretch gap-2 md:justify-center md:gap-3">
-              <button
-                type="button"
-                className="inline-flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[rgba(78,116,248,0.32)] px-4 py-[9px] text-sm text-[#edf2ff] transition-colors hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(20,29,46,0.52)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-300 md:min-w-[88px] md:flex-none"
-                onClick={() => {
-                  setSubmitError('')
-                  setHelpful(true)
-                }}
-              >
-                <span aria-hidden="true">👍</span>
-                <span>Yes</span>
-              </button>
-              <button
-                type="button"
-                className="inline-flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-[rgba(78,116,248,0.32)] px-4 py-[9px] text-sm text-[#edf2ff] transition-colors hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(20,29,46,0.52)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-300 md:min-w-[88px] md:flex-none"
-                onClick={() => {
-                  setSubmitError('')
-                  setHelpful(false)
-                }}
-              >
-                <span aria-hidden="true">👎</span>
-                <span>No</span>
-              </button>
-            </div>
-          </>
-        ) : (
-          <form className="flex flex-col" onSubmit={handleSubmit}>
-            <h3 className="m-0 text-[clamp(1.02rem,0.96rem+0.3vw,1.16rem)] font-semibold leading-[1.3] text-[#edf2ff]">
-              {helpful ? 'What did you like?' : 'What needs improvement?'}
-            </h3>
-            <p className="my-2 mb-3.5 text-[13px] leading-[1.45] text-[#c3cde6]">
-              {helpful
-                ? 'Pick the option that best describes your experience.'
-                : 'Pick the issue that blocked you.'}
-            </p>
-            <div className="mb-3 grid gap-2">
-              {options.map((option, index) => {
-                const inputId = `${fieldId}-${index}`
-                const isSelected = reason === option.value
-                return (
-                  <div
-                    key={option.value}
-                    className={cn(
-                      'flex flex-col gap-2 rounded-[10px] border border-[rgba(78,116,248,0.32)] bg-[rgba(14,21,36,0.68)] p-[10px_11px] transition-colors hover:border-[rgba(78,116,248,0.56)] hover:bg-[rgba(20,29,46,0.76)]',
-                      isSelected && 'border-[rgba(78,116,248,0.72)] bg-[rgba(31,44,78,0.88)]'
-                    )}
-                  >
-                    <label className="flex cursor-pointer items-start gap-2.5" htmlFor={inputId}>
-                      <input
-                        id={inputId}
-                        className="mt-px h-[18px] w-[18px] shrink-0 cursor-pointer accent-signoz_robin-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-300"
-                        type="radio"
-                        name={`${fieldId}-reason`}
-                        value={option.value}
-                        checked={isSelected}
-                        onChange={() => selectReason(option.value)}
-                      />
-                      <span className="flex min-w-0 flex-col gap-[3px]">
-                        <span className="text-sm font-semibold leading-[1.35] text-[#edf2ff]">
-                          {option.value}
-                        </span>
-                        {option.description && (
-                          <span className="text-xs leading-[1.35] text-[#c3cde6]">
-                            {option.description}
-                          </span>
-                        )}
-                      </span>
-                    </label>
-                    {isSelected && (
-                      <textarea
-                        className="mt-1 min-h-[88px] w-full resize-y rounded-lg border border-[rgba(78,116,248,0.32)] bg-[rgba(12,16,27,0.78)] p-2.5 text-[13px] leading-[1.45] text-[#edf2ff] placeholder:text-[#91a2c8] focus:border-signoz_robin-500 focus:outline-none md:ml-[30px] md:w-[calc(100%-30px)]"
-                        placeholder="Optional: Provide more details..."
-                        aria-label={`Additional details for ${option.value}`}
-                        value={details}
-                        onChange={(e) => setDetails(e.target.value)}
-                      />
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-            <div className="mt-0.5 flex flex-col items-center gap-2">
-              <button
-                className="mt-0.5 cursor-pointer self-center rounded-lg border border-signoz_robin-600 bg-signoz_robin-500 px-4 py-[9px] text-sm font-semibold text-[#f5f8ff] transition hover:border-signoz_robin-600 hover:bg-signoz_robin-600 hover:brightness-[1.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-300 disabled:cursor-not-allowed disabled:opacity-[0.62]"
-                type="submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </button>
-              {submitError && (
-                <p className="m-0 text-center text-xs leading-[1.45] text-[#ffb8c2]" role="alert">
-                  {submitError}
-                </p>
-              )}
-            </div>
-          </form>
-        )}
-      </section>
-    </div>
-  )
-}
-
-const PageFeedback: React.FC<PageFeedbackProps> = ({ placement = 'default' }) => {
-  const pathname = usePathname()
-  const apiUrl = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
-  const feedbackPath = process.env.NEXT_PUBLIC_SIGNOZ_CMS_FEEDBACK_PATH
-
-  if (isDocsOnboardingPathname(pathname)) return null
-
-  if (placement === 'toc') {
-    return <TocFeedback apiUrl={apiUrl} feedbackPath={feedbackPath} />
-  }
-
-  return <DefaultFeedback apiUrl={apiUrl} feedbackPath={feedbackPath} />
 }
 
 export default PageFeedback

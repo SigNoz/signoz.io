@@ -1,9 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
-import PageFeedback from '@/components/PageFeedback/PageFeedback'
+import {
+  TOC_SCROLL_CONTAINER_CLASS,
+  TOC_SECTION_LABEL_CLASS,
+  useTocScrollFade,
+} from '@/components/TableOfContents/tocScrollFade'
 import type { TocItemProps } from './types'
 
 interface OpenTelemetryTocClientProps {
@@ -17,53 +21,66 @@ interface OpenTelemetryTocClientProps {
  */
 export default function OpenTelemetryTocClient({ toc }: OpenTelemetryTocClientProps) {
   const [activeSection, setActiveSection] = useState<string>('')
-  const tocContainerRef = useRef<HTMLDivElement>(null)
+  const { tocItemsRef, scrollFadeStyle } = useTocScrollFade(toc.length)
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries.filter((entry) => entry.isIntersecting)
-        if (visibleEntries.length > 0) {
-          const sortedEntries = visibleEntries.sort(
-            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
-          )
-          const id = sortedEntries[0].target.getAttribute('id')
-          if (id) setActiveSection(`#${id}`)
-        }
-      },
-      {
-        rootMargin: '-10% -20% -80% -20%',
-        threshold: 0,
-      }
-    )
+    if (!toc.length) return
 
-    const headings = document.querySelectorAll('h2, h3')
-    headings.forEach((heading) => observer.observe(heading))
+    const HEADER_OFFSET_PX = 120
+
+    const resolveHeading = (item: TocItemProps) => {
+      const rawId = item.url.startsWith('#') ? item.url.slice(1) : item.url
+      const normalizedId = rawId.replace(/-+$/g, '')
+      const el = document.getElementById(rawId) || document.getElementById(normalizedId)
+      if (!el || el.getClientRects().length === 0) return null
+      return {
+        url: item.url.startsWith('#') ? item.url : `#${rawId}`,
+        el,
+      }
+    }
+
+    const updateActiveSection = () => {
+      const headings = toc
+        .map(resolveHeading)
+        .filter((item): item is { url: string; el: HTMLElement } => item !== null)
+        .sort((a, b) => a.el.getBoundingClientRect().top - b.el.getBoundingClientRect().top)
+
+      if (headings.length === 0) return
+
+      let activeUrl = headings[0].url
+      for (const heading of headings) {
+        if (heading.el.getBoundingClientRect().top <= HEADER_OFFSET_PX) {
+          activeUrl = heading.url
+        }
+      }
+      setActiveSection((prev) => (prev === activeUrl ? prev : activeUrl))
+    }
+
+    updateActiveSection()
+    window.addEventListener('scroll', updateActiveSection, { passive: true })
+    window.addEventListener('resize', updateActiveSection)
 
     return () => {
-      headings.forEach((heading) => observer.unobserve(heading))
+      window.removeEventListener('scroll', updateActiveSection)
+      window.removeEventListener('resize', updateActiveSection)
     }
-  }, [])
+  }, [toc])
 
   if (!toc.length) {
     return null
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-1">
-      <div className="mb-3 text-xs uppercase text-gray-400">On this page</div>
-      <div
-        ref={tocContainerRef}
-        className="relative z-[1] min-h-0 flex-1 overflow-y-auto border-l border-signoz_slate-500 pl-3"
-      >
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className={TOC_SECTION_LABEL_CLASS}>On this page</div>
+      <div ref={tocItemsRef} className={TOC_SCROLL_CONTAINER_CLASS} style={scrollFadeStyle}>
         <TableOfContents
           toc={toc}
           activeSection={activeSection}
           setActiveSection={setActiveSection}
-          scrollableContainerRef={tocContainerRef}
+          scrollableContainerRef={tocItemsRef}
         />
       </div>
-      <PageFeedback placement="toc" />
     </div>
   )
 }

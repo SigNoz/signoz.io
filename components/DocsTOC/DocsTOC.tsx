@@ -1,10 +1,15 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Edit } from 'lucide-react'
 import { ONBOARDING_SOURCE } from '../../constants/globals'
 import { DOC_TOC_CLASSES } from './docLayoutClasses'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
+import {
+  TOC_SCROLL_CONTAINER_CLASS,
+  TOC_SECTION_LABEL_CLASS,
+  useTocScrollFade,
+} from '@/components/TableOfContents/tocScrollFade'
 import { RegionDropdown } from '../Region/RegionDropdown'
 import PageFeedback from '../PageFeedback/PageFeedback'
 
@@ -22,16 +27,6 @@ interface DocsTOCProps {
   editLink?: string
 }
 
-const sectionLabelClassName =
-  'mb-3 text-xs font-medium uppercase tracking-wide text-[var(--l2-foreground)]'
-
-const getScrollFadeMask = (top: boolean, bottom: boolean): string | undefined => {
-  if (!top && !bottom) return undefined
-  const start = top ? 'transparent 0px, #000 20px' : '#000 0px'
-  const end = bottom ? '#000 calc(100% - 20px), transparent 100%' : '#000 100%'
-  return `linear-gradient(to bottom, ${start}, ${end})`
-}
-
 const DocsTOC: React.FC<DocsTOCProps> = ({
   toc,
   hideTableOfContents,
@@ -41,39 +36,10 @@ const DocsTOC: React.FC<DocsTOCProps> = ({
 }) => {
   const [activeSection, setActiveSection] = useState<string>('')
   const [filteredToc, setFilteredToc] = useState<TocItemProps[]>(toc || [])
-  const [scrollFade, setScrollFade] = useState({ top: false, bottom: false })
   const tocContainerRef = useRef<HTMLDivElement>(null)
-  const tocItemsRef = useRef<HTMLDivElement>(null)
-
-  const updateScrollFade = useCallback(() => {
-    const el = tocItemsRef.current
-    if (!el) {
-      setScrollFade({ top: false, bottom: false })
-      return
-    }
-    const { scrollTop, scrollHeight, clientHeight } = el
-    const canScroll = scrollHeight > clientHeight + 1
-    setScrollFade({
-      top: canScroll && scrollTop > 1,
-      bottom: canScroll && scrollTop + clientHeight < scrollHeight - 1,
-    })
-  }, [])
-
-  useEffect(() => {
-    const el = tocItemsRef.current
-    if (!el) return
-
-    updateScrollFade()
-    el.addEventListener('scroll', updateScrollFade, { passive: true })
-    const observer = new ResizeObserver(() => updateScrollFade())
-    observer.observe(el)
-    if (el.firstElementChild) observer.observe(el.firstElementChild)
-
-    return () => {
-      el.removeEventListener('scroll', updateScrollFade)
-      observer.disconnect()
-    }
-  }, [updateScrollFade, filteredToc, formattedDate, editLink])
+  const { tocItemsRef, scrollFadeStyle } = useTocScrollFade(
+    `${filteredToc.length}:${formattedDate ?? ''}:${editLink ?? ''}`
+  )
 
   // Scroll-spy: only track headings that appear in the filtered TOC.
   // Observing every h2/h3 breaks when duplicate titles exist (e.g. page-level
@@ -383,17 +349,10 @@ const DocsTOC: React.FC<DocsTOCProps> = ({
         {hideTableOfContents ? null : (
           <>
             <div className="relative z-[2] mb-5 shrink-0">
-              <PageFeedback placement="toc" />
+              <PageFeedback />
             </div>
-            <div className={`${sectionLabelClassName} shrink-0`}>On this page</div>
-            <div
-              ref={tocItemsRef}
-              className="min-h-0 flex-1 overflow-y-auto overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              style={{
-                WebkitMaskImage: getScrollFadeMask(scrollFade.top, scrollFade.bottom),
-                maskImage: getScrollFadeMask(scrollFade.top, scrollFade.bottom),
-              }}
-            >
+            <div className={TOC_SECTION_LABEL_CLASS}>On this page</div>
+            <div ref={tocItemsRef} className={TOC_SCROLL_CONTAINER_CLASS} style={scrollFadeStyle}>
               <TableOfContents
                 toc={filteredToc}
                 activeSection={activeSection}
