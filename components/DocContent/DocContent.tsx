@@ -83,7 +83,9 @@ const DocContent: React.FC<{
         <article ref={articleRef} className="prose prose-slate max-w-none py-6 dark:prose-invert">
           {children}
         </article>
-        <div className="mt-8 flex items-center justify-between text-sm">
+        <div
+          className={`mt-8 flex items-center justify-between text-sm ${shouldRenderTOC ? 'lg:hidden' : ''}`}
+        >
           {formattedDate && (
             <p className="text-gray-500 dark:text-gray-400">Last updated: {formattedDate}</p>
           )}
@@ -102,7 +104,13 @@ const DocContent: React.FC<{
 
       {shouldRenderTOC ? (
         <>
-          <TableOfContents toc={toc} hideTableOfContents={!shouldRenderTOC} source="" />
+          <TableOfContents
+            toc={toc}
+            hideTableOfContents={!shouldRenderTOC}
+            source=""
+            formattedDate={formattedDate || undefined}
+            editLink={editLink}
+          />
         </>
       ) : shouldReserveTocColumn ? (
         <>

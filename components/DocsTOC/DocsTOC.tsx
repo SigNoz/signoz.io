@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Edit } from 'lucide-react'
 import { ONBOARDING_SOURCE } from '../../constants/globals'
 import { DOC_TOC_CLASSES } from './docLayoutClasses'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
@@ -17,42 +18,110 @@ interface DocsTOCProps {
   toc: TocItemProps[]
   hideTableOfContents: boolean
   source: string
+  formattedDate?: string
+  editLink?: string
 }
 
-const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) => {
+const sectionLabelClassName =
+  'mb-3 text-xs font-medium uppercase tracking-wide text-[var(--l2-foreground)]'
+
+const getScrollFadeMask = (top: boolean, bottom: boolean): string | undefined => {
+  if (!top && !bottom) return undefined
+  const start = top ? 'transparent 0px, #000 20px' : '#000 0px'
+  const end = bottom ? '#000 calc(100% - 20px), transparent 100%' : '#000 100%'
+  return `linear-gradient(to bottom, ${start}, ${end})`
+}
+
+const DocsTOC: React.FC<DocsTOCProps> = ({
+  toc,
+  hideTableOfContents,
+  source,
+  formattedDate,
+  editLink,
+}) => {
   const [activeSection, setActiveSection] = useState<string>('')
   const [filteredToc, setFilteredToc] = useState<TocItemProps[]>(toc || [])
+  const [scrollFade, setScrollFade] = useState({ top: false, bottom: false })
   const tocContainerRef = useRef<HTMLDivElement>(null)
   const tocItemsRef = useRef<HTMLDivElement>(null)
 
-  // Mirror blog ToC behavior: observe headings and update active section
+  const updateScrollFade = useCallback(() => {
+    const el = tocItemsRef.current
+    if (!el) {
+      setScrollFade({ top: false, bottom: false })
+      return
+    }
+    const { scrollTop, scrollHeight, clientHeight } = el
+    const canScroll = scrollHeight > clientHeight + 1
+    setScrollFade({
+      top: canScroll && scrollTop > 1,
+      bottom: canScroll && scrollTop + clientHeight < scrollHeight - 1,
+    })
+  }, [])
+
   useEffect(() => {
-    if (!toc || toc.length === 0) return
+    const el = tocItemsRef.current
+    if (!el) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries.filter((entry) => entry.isIntersecting)
-        if (visibleEntries.length > 0) {
-          const sortedEntries = visibleEntries.sort(
-            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
-          )
-          const id = sortedEntries[0].target.getAttribute('id')
-          if (id) setActiveSection(`#${id}`)
-        }
-      },
-      {
-        rootMargin: '-10% -20% -80% -20%',
-        threshold: 0,
-      }
-    )
-
-    const headings = document.querySelectorAll('h2, h3')
-    headings.forEach((heading) => observer.observe(heading))
+    updateScrollFade()
+    el.addEventListener('scroll', updateScrollFade, { passive: true })
+    const observer = new ResizeObserver(() => updateScrollFade())
+    observer.observe(el)
+    if (el.firstElementChild) observer.observe(el.firstElementChild)
 
     return () => {
-      headings.forEach((heading) => observer.unobserve(heading))
+      el.removeEventListener('scroll', updateScrollFade)
+      observer.disconnect()
     }
-  }, [toc])
+  }, [updateScrollFade, filteredToc, formattedDate, editLink])
+
+  // Scroll-spy: only track headings that appear in the filtered TOC.
+  // Observing every h2/h3 breaks when duplicate titles exist (e.g. page-level
+  // `#prerequisites` vs tab-level `#prerequisites-1`) — the nested id is not in
+  // the TOC, so nothing highlights. Also, IntersectionObserver + a thin
+  // rootMargin often misses the first heading at the top of the page.
+  useEffect(() => {
+    if (!filteredToc || filteredToc.length === 0) return
+
+    const HEADER_OFFSET_PX = 96
+
+    const resolveHeading = (item: TocItemProps) => {
+      const rawId = item.url.startsWith('#') ? item.url.slice(1) : item.url
+      const normalizedId = rawId.replace(/-+$/g, '')
+      const el = document.getElementById(rawId) || document.getElementById(normalizedId)
+      if (!el || el.getClientRects().length === 0) return null
+      return {
+        url: item.url.startsWith('#') ? item.url : `#${rawId}`,
+        el,
+      }
+    }
+
+    const updateActiveSection = () => {
+      const headings = filteredToc
+        .map(resolveHeading)
+        .filter((item): item is { url: string; el: HTMLElement } => item !== null)
+        .sort((a, b) => a.el.getBoundingClientRect().top - b.el.getBoundingClientRect().top)
+
+      if (headings.length === 0) return
+
+      let activeUrl = headings[0].url
+      for (const heading of headings) {
+        if (heading.el.getBoundingClientRect().top <= HEADER_OFFSET_PX) {
+          activeUrl = heading.url
+        }
+      }
+      setActiveSection((prev) => (prev === activeUrl ? prev : activeUrl))
+    }
+
+    updateActiveSection()
+    window.addEventListener('scroll', updateActiveSection, { passive: true })
+    window.addEventListener('resize', updateActiveSection)
+
+    return () => {
+      window.removeEventListener('scroll', updateActiveSection)
+      window.removeEventListener('resize', updateActiveSection)
+    }
+  }, [filteredToc])
 
   // Compute TOC entries only for headings that are currently visible (i.e., in active tab panels)
   useEffect(() => {
@@ -308,15 +377,22 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
   return (
     <>
       <div className={DOC_TOC_CLASSES} ref={tocContainerRef}>
-        <div className="mb-4">
+        <div className="mb-4 shrink-0">
           <RegionDropdown />
         </div>
         {hideTableOfContents ? null : (
           <>
-            <div className="mb-3 text-xs uppercase"> On this page </div>
+            <div className="relative z-[2] mb-5 shrink-0">
+              <PageFeedback placement="toc" />
+            </div>
+            <div className={`${sectionLabelClassName} shrink-0`}>On this page</div>
             <div
               ref={tocItemsRef}
-              className="relative z-[1] min-h-0 flex-[1_1_auto] overflow-y-auto border-l border-signoz_slate-500 pl-3"
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              style={{
+                WebkitMaskImage: getScrollFadeMask(scrollFade.top, scrollFade.bottom),
+                maskImage: getScrollFadeMask(scrollFade.top, scrollFade.bottom),
+              }}
             >
               <TableOfContents
                 toc={filteredToc}
@@ -325,7 +401,34 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
                 scrollableContainerRef={tocItemsRef}
               />
             </div>
-            <PageFeedback placement="toc" />
+            {(formattedDate || editLink) && (
+              <div className="mt-5 shrink-0">
+                <div
+                  className="mb-4 h-2 w-full bg-[radial-gradient(circle,var(--l2-border)_1px,transparent_1px)] bg-[length:6px_6px] bg-center"
+                  aria-hidden="true"
+                />
+                <div className="flex flex-col gap-4">
+                  {formattedDate && (
+                    <p className="m-0 text-sm font-medium text-[var(--l2-foreground)]">
+                      Last updated
+                      <span className="mx-1">—</span>
+                      <span className="text-[var(--l1-foreground-hover)]">{formattedDate}</span>
+                    </p>
+                  )}
+                  {editLink && (
+                    <a
+                      href={editLink}
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--l2-foreground)] no-underline transition-colors hover:text-[var(--l2-foreground-hover)]"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Edit size={12} aria-hidden="true" />
+                      Edit on GitHub
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
