@@ -111,6 +111,30 @@ export function CodeBlockMinimap({
     }
   }, [])
 
+  const onKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const pre = preRef.current
+      if (!pre) return
+      const maxScroll = Math.max(0, pre.scrollHeight - pre.clientHeight)
+      if (maxScroll <= 0) return
+      const step = pre.clientHeight * 0.8
+      if (event.key === 'ArrowDown' || event.key === 'PageDown') {
+        event.preventDefault()
+        pre.scrollTo({ top: Math.min(pre.scrollTop + step, maxScroll) })
+      } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
+        event.preventDefault()
+        pre.scrollTo({ top: Math.max(pre.scrollTop - step, 0) })
+      } else if (event.key === 'Home') {
+        event.preventDefault()
+        pre.scrollTo({ top: 0 })
+      } else if (event.key === 'End') {
+        event.preventDefault()
+        pre.scrollTo({ top: maxScroll })
+      }
+    },
+    [preRef]
+  )
+
   if (lines.length <= 0) return null
 
   const viewportStyle: CSSProperties | undefined = viewport.scrollable
@@ -137,26 +161,7 @@ export function CodeBlockMinimap({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        onKeyDown={(event) => {
-          const pre = preRef.current
-          if (!pre) return
-          const maxScroll = Math.max(0, pre.scrollHeight - pre.clientHeight)
-          if (maxScroll <= 0) return
-          const step = pre.clientHeight * 0.8
-          if (event.key === 'ArrowDown' || event.key === 'PageDown') {
-            event.preventDefault()
-            pre.scrollTo({ top: Math.min(pre.scrollTop + step, maxScroll) })
-          } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
-            event.preventDefault()
-            pre.scrollTo({ top: Math.max(pre.scrollTop - step, 0) })
-          } else if (event.key === 'Home') {
-            event.preventDefault()
-            pre.scrollTo({ top: 0 })
-          } else if (event.key === 'End') {
-            event.preventDefault()
-            pre.scrollTo({ top: maxScroll })
-          }
-        }}
+        onKeyDown={onKeyDown}
       >
         <div className={styles.minimapContent}>
           {lines.map((line, i) => {
