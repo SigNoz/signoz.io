@@ -99,7 +99,7 @@ export default function OpenTelemetryHubContent({
           )}
           {children}
         </article>
-        <div className="mt-8 lg:hidden">
+        <div className="mt-8 max-lg:py-6 lg:hidden">
           <PageFeedback />
         </div>
 

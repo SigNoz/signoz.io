@@ -103,8 +103,23 @@ const PageFeedback: React.FC = () => {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 1024px)')
-    const syncDesktop = () => setIsDesktop(mediaQuery.matches)
-    syncDesktop()
+    let previousMatches = mediaQuery.matches
+    setIsDesktop(previousMatches)
+
+    const syncDesktop = () => {
+      const matches = mediaQuery.matches
+      if (previousMatches === matches) return
+      previousMatches = matches
+      setIsDesktop(matches)
+      modeRef.current = null
+      setMode(null)
+      setShowThanks(false)
+      setReason('')
+      setDetails('')
+      setComment('')
+      setSubmitError('')
+    }
+
     mediaQuery.addEventListener('change', syncDesktop)
     return () => mediaQuery.removeEventListener('change', syncDesktop)
   }, [])
@@ -271,7 +286,7 @@ const PageFeedback: React.FC = () => {
           align="start"
           sideOffset={8}
           avoidCollisions={isDesktop}
-          className="!z-[200] !max-h-[min(70dvh,480px)] !w-[min(100vw-2rem,280px)] !overflow-y-auto !border-[var(--l2-border)] !bg-[var(--l2-background-60)] !p-1.5 !pt-3 !shadow-[4px_10px_16px_rgba(0,0,0,0.2)] !backdrop-blur-[20px]"
+          className="!z-20 !max-h-[min(calc(100dvh-7rem),480px)] !w-[min(100vw-2rem,280px)] !overflow-y-auto !border-[var(--l2-border)] !bg-[var(--l2-background-60)] !p-1.5 !pt-3 !shadow-[4px_10px_16px_rgba(0,0,0,0.2)] !backdrop-blur-[20px]"
           onPointerDownOutside={keepOpenIfOnControls}
           onInteractOutside={keepOpenIfOnControls}
           onFocusOutside={keepOpenIfOnControls}
