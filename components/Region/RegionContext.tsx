@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useBrowserSearch } from '@/hooks/useBrowserSearch'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import { parseCopiedRegion } from './regionCopy'
@@ -82,7 +82,6 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [copyReminder, setCopyReminder] = useState<RegionCopyReminderState | null>(null)
   const reminderIdRef = useRef(0)
 
-  const router = useRouter()
   const pathname = usePathname()
   const search = useBrowserSearch()
   const isOnboarding = isDocsOnboardingPathname(pathname)
@@ -185,8 +184,8 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const searchString = current.toString()
     const query = searchString ? `?${searchString}` : ''
-
-    router.push(`${pathname}${query}`, { scroll: false })
+    const next = `${pathname}${query}${window.location.hash}`
+    window.history.replaceState(window.history.state, '', next)
     setRegionState(newRegion)
     setCloudRegionState(newCloudRegion)
   }
