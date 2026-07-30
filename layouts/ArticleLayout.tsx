@@ -196,7 +196,10 @@ export default function ArticleLayout({
 
           {/* Right sidebar - Desktop only */}
           {(hasMetaInfo || hasToc) && (
-            <aside className={ARTICLE_TOC_RAIL_CLASS} aria-label="On this page navigation">
+            <aside
+              className={`${ARTICLE_TOC_RAIL_CLASS} -mt-8 md:-mt-12`}
+              aria-label="On this page navigation"
+            >
               <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
                 {metaInfoCard && <div className="shrink-0">{metaInfoCard}</div>}
                 {hasToc && (

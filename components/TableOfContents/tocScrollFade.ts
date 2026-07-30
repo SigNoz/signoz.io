@@ -16,7 +16,7 @@ export const TOC_SECTION_LABEL_CLASS =
   'mb-3 shrink-0 text-xs font-medium uppercase tracking-wide text-[var(--l2-foreground)]'
 
 export const ARTICLE_TOC_RAIL_CLASS =
-  'sticky top-[48px] box-border hidden max-h-[calc(100vh-48px)] w-80 min-w-80 max-w-80 flex-[0_0_320px] flex-col self-start overflow-hidden px-4 py-2 lg:flex'
+  'sticky top-[48px] box-border hidden max-h-[calc(100vh-48px)] w-80 min-w-80 max-w-80 flex-[0_0_320px] flex-col self-start overflow-hidden px-4 py-4 lg:flex'
 
 /** Left nav rail for otel hub — stretch column like docs, sticky nav inside. */
 export const ARTICLE_SIDENAV_STICKY_CLASS =
