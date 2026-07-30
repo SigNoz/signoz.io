@@ -79,6 +79,7 @@ export default function OpenTelemetryTocClient({ toc }: OpenTelemetryTocClientPr
           activeSection={activeSection}
           setActiveSection={setActiveSection}
           scrollableContainerRef={tocItemsRef}
+          size="xs"
         />
       </div>
     </div>

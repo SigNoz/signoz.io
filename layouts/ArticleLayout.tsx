@@ -375,6 +375,7 @@ export default function ArticleLayout({
                         activeSection={activeSection}
                         setActiveSection={setActiveSection}
                         scrollableContainerRef={tocItemsRef}
+                        size="xs"
                       />
                     </div>
                   </div>

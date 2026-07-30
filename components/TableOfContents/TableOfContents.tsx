@@ -17,6 +17,7 @@ interface TableOfContentsProps {
   activeSection: string
   setActiveSection: (section: string) => void
   scrollableContainerRef: RefObject<HTMLDivElement | null>
+  size?: 'sm' | 'xs'
 }
 
 const TableOfContents = ({
@@ -24,6 +25,7 @@ const TableOfContents = ({
   activeSection,
   setActiveSection: _setActiveSection,
   scrollableContainerRef,
+  size = 'sm',
 }: TableOfContentsProps) => {
   const tocRef = useRef<HTMLDivElement>(null)
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -133,7 +135,8 @@ const TableOfContents = ({
                 href={tocItem.url}
                 onClick={handleClick}
                 className={cn(
-                  'inline-block w-full rounded-md py-2 pl-3 text-sm leading-5 transition-colors focus-visible:text-[var(--l2-foreground-hover)] focus-visible:outline-none',
+                  'inline-block w-full rounded-md py-2 pl-3 leading-5 transition-colors focus-visible:text-[var(--l2-foreground-hover)] focus-visible:outline-none',
+                  size === 'sm' ? 'text-sm' : 'text-xs',
                   isActive
                     ? 'text-[var(--l1-foreground-hover)]'
                     : 'text-[var(--l2-foreground)] hover:text-[var(--l2-foreground-hover)]'
