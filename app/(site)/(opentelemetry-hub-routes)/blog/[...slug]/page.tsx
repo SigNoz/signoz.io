@@ -1,5 +1,3 @@
-import 'css/prism.css'
-
 import { components } from '@/components/MDXComponents'
 import { coreContent } from 'pliny/utils/contentlayer'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'

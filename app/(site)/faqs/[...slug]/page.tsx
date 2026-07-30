@@ -1,4 +1,3 @@
-import 'css/prism.css'
 import { components } from '@/components/MDXComponents'
 import FAQLayout, { RelatedArticleProps } from '@/layouts/FAQLayout'
 import { Metadata } from 'next'
