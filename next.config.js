@@ -2489,6 +2489,21 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/dashboards/saved-views/',
+          destination: '/docs/userguide/manage-dashboards/#saved-views',
+          permanent: true,
+        },
+        {
+          source: '/docs/dashboards/json-editor/',
+          destination: '/docs/userguide/manage-dashboards/#edit-a-dashboard-as-json',
+          permanent: true,
+        },
+        {
+          source: '/docs/dashboards/dashboard-layout-constraints/',
+          destination: '/docs/userguide/manage-dashboards/#dashboard-layout-constraints',
+          permanent: true,
+        },
+        {
           source: '/reduce-telemetry-volume-by-40-percent',
           destination: '/blog/reduce-telemetry-volume-by-40-percent/',
           permanent: true,

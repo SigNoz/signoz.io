@@ -1,7 +1,7 @@
 ---
 
 title: Histogram Panel Type
-date: 2026-05-13
+date: 2026-07-30
 description: Learn how to use the Histogram panel type in SigNoz dashboards to visualize data distributions.
 doc_type: reference
 ---
@@ -68,12 +68,12 @@ The following table shows the requests per second (req/s) for a service over a p
 
 </details>
 
-When configured to use 15 buckets, the chart is rendered as follows:
+With **Bucket count** left on `Auto`, the chart is rendered as follows:
 
 <Figure
   src="/img/docs/dashboards/panel-types/histogram.webp"
-  alt="Histogram with one series and 15 buckets"
-  caption="Histogram with one series and 15 buckets."
+  alt="Histogram of a single series with automatic bucketing"
+  caption="Histogram of a single series with automatic bucketing."
 />
 
 ##### Multiple Series
@@ -164,22 +164,22 @@ The following tables show the requests per second (RPS) by status code over time
 
 </details>
 
-When configured to use 15 buckets, the chart is rendered as follows:
+With **Bucket count** left on `Auto`, the chart is rendered as follows:
 
 <Figure
   src="/img/docs/dashboards/panel-types/histogram-viz-multiple-ts.webp"
-  alt="Histogram with two series and 15 buckets"
-  caption="Histogram with two series and 15 buckets."
+  alt="Histogram with one distribution per series"
+  caption="Histogram with one distribution per series."
 />
 
 3. Merging the multiple series into one Histogram
 
-Multiple series can be merged into a Histogram using the option `MERGE ALL SERIES INTO ONE` from the right side of the panel configuration.
+Multiple series can be bucketed into a single distribution with the **Merge active queries** toggle, under **Histogram / Buckets** on the right side of the panel configuration.
 
 <Figure
   src="/img/docs/dashboards/panel-types/histogram-viz-multilple-series-merged-into-one.webp"
-  alt="Histogram with two series merged into one and 15 buckets"
-  caption="Histogram with two series merged into one and 15 buckets."
+  alt="Histogram with all active queries merged into one distribution"
+  caption="Histogram with all active queries merged into one distribution."
 />
 
 ### Configuration
@@ -196,9 +196,13 @@ Multiple series can be merged into a Histogram using the option `MERGE ALL SERIE
 
 #### Histogram / Buckets
 
-- **Number of Buckets** — The number of buckets to create. The default value is `30`.
-- **Bucket Width** — The size of each bucket. Leave as `Default: Auto` for automatic bucket sizing based on the data range.
-- **Merge All Series Into One** — Toggle to combine the values from multiple series into a single histogram.
+- **Bucket count** — The number of buckets to create. Leave empty for `Auto`, which picks a bucket count from the data.
+- **Bucket width** — The size of each bucket. Leave empty for `Auto`, which sizes buckets from the data range.
+- **Merge active queries** — Toggle on to bucket all active queries together into one distribution, instead of drawing a separate histogram per series.
+
+<Admonition type="info">
+A Histogram panel does not offer the **Formatting & Units** or **Axes** sections that other panel types show. When **Merge active queries** is on, the **Legend** section is hidden too, because the merged result is a single distribution.
+</Admonition>
 
 #### Context Links
 
