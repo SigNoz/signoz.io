@@ -274,7 +274,7 @@ const PageFeedback: React.FC = () => {
           side="bottom"
           align="start"
           sideOffset={8}
-          className="!w-[min(100vw-2rem,280px)] !border-[var(--l1-border)] !bg-[var(--l2-background)] !p-3 !shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
+          className="!w-[min(100vw-2rem,280px)] !border-[var(--l1-border)] !bg-[var(--l2-background-60)] !p-1.5 !pt-3 !shadow-[4px_10px_16px_rgba(0,0,0,0.2)] !backdrop-blur-[20px]"
           onPointerDownOutside={keepOpenIfOnControls}
           onInteractOutside={keepOpenIfOnControls}
           onFocusOutside={keepOpenIfOnControls}
@@ -293,41 +293,44 @@ const PageFeedback: React.FC = () => {
               Thank you! We have received your feedback.
             </div>
           ) : showingReasons ? (
-            <form className="flex flex-col gap-3" onSubmit={submitReasons}>
-              <div>
-                <h3 className="m-0 text-sm font-semibold text-[var(--l1-foreground-hover)]">
+            <form className="flex flex-col gap-1" onSubmit={submitReasons}>
+              <div className="flex flex-col gap-1 px-2.5 pb-1">
+                <h3 className="m-0 text-[13px] font-medium leading-5 tracking-[-0.065px] text-[var(--l2-foreground-hover)]">
                   {mode === 'yes' ? 'What did you like?' : 'What needs improvement'}
                 </h3>
-                <p className="mb-0 mt-1 text-xs text-[var(--l2-foreground)]">
+                <p className="m-0 text-[11px] leading-[18px] tracking-[-0.055px] text-[var(--l2-foreground)]">
                   {mode === 'yes'
                     ? 'Pick the option that best describes your experience.'
-                    : 'Pick the issue that blocked you.'}
+                    : 'Pick the issue(s) that blocked you. You can add details after selecting one.'}
                 </p>
               </div>
               <div
-                className="flex max-h-[min(42vh,360px)] flex-col gap-1 overflow-y-auto"
+                className="overflow-hidden rounded-[4px] border border-[var(--l1-border)]"
                 role="radiogroup"
               >
                 {reasonOptions.map((option) => {
                   const isSelected = reason === option.value
                   return (
-                    <div key={option.value} className="flex flex-col gap-1.5">
+                    <div
+                      key={option.value}
+                      className="border-b border-[var(--l1-border)] last:border-b-0"
+                    >
                       <Checkbox
                         color="primary"
                         value={isSelected}
                         onChange={(checked) => selectReason(option.value, checked)}
                         className={cn(
-                          'w-full rounded-md px-2 py-1.5 transition-colors hover:bg-[var(--l1-background)]',
+                          'h-8 w-full !gap-2.5 rounded-none bg-[var(--l2-background-60)] px-2.5 py-2 transition-colors hover:bg-[var(--l1-background)]',
                           isSelected && 'bg-[var(--l1-background)]'
                         )}
                       >
-                        <span className="min-w-0 text-xs text-[var(--l2-foreground)]">
+                        <span className="min-w-0 text-[11px] leading-none text-[var(--l2-foreground)]">
                           {option.value}
                         </span>
                       </Checkbox>
                       {isSelected && (
                         <textarea
-                          className="min-h-14 w-full resize-y rounded-md border border-[var(--l2-border)] bg-[var(--l2-background-60)] p-2 text-xs text-[var(--l1-foreground-hover)] placeholder:text-[var(--l3-foreground)] focus:border-[var(--primary-background)] focus:outline-none"
+                          className="min-h-14 w-full resize-y border-0 bg-[var(--l2-background-60)] p-2.5 text-[11px] leading-[18px] text-[var(--l1-foreground-hover)] shadow-none outline-none ring-0 placeholder:text-[var(--l3-foreground)] focus:border-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                           placeholder="Optional: Provide more details..."
                           aria-label={`Additional details for ${option.value}`}
                           value={details}
@@ -340,12 +343,12 @@ const PageFeedback: React.FC = () => {
               </div>
               <Button
                 type="submit"
-                color="primary"
+                color="secondary"
                 variant="solid"
                 size="sm"
                 loading={isSubmitting}
                 prefix={<Check size={14} aria-hidden="true" />}
-                className="!w-full"
+                className="!mt-0 !h-8 !w-full !rounded-[2px] !bg-[var(--l3-background-60)] !text-[12px] !font-medium !text-[var(--l1-foreground)] hover:!bg-[var(--l3-background-hover)]"
               >
                 Submit feedback
               </Button>
@@ -358,7 +361,7 @@ const PageFeedback: React.FC = () => {
           ) : (
             <form className="flex flex-col gap-3" onSubmit={submitComment}>
               <textarea
-                className="min-h-28 w-full resize-y rounded-md border border-[var(--l2-border)] bg-[var(--l2-background-60)] p-2.5 text-sm text-[var(--l1-foreground-hover)] placeholder:text-[var(--l3-foreground)] focus:border-[var(--primary-background)] focus:outline-none"
+                className="min-h-28 w-full resize-y rounded-[4px] border border-[var(--l1-border)] bg-[var(--l2-background-60)] p-2.5 text-sm text-[var(--l1-foreground-hover)] placeholder:text-[var(--l3-foreground)] focus:border-[var(--primary-background)] focus:outline-none"
                 placeholder="Help us improve this page..."
                 aria-label="Help us improve this page"
                 value={comment}
@@ -369,12 +372,12 @@ const PageFeedback: React.FC = () => {
               />
               <Button
                 type="submit"
-                color="primary"
+                color="secondary"
                 variant="solid"
                 size="sm"
                 loading={isSubmitting}
                 prefix={<Check size={14} aria-hidden="true" />}
-                className="!w-full"
+                className="!h-8 !w-full !rounded-[2px] !bg-[var(--l3-background-60)] !text-[12px] !font-medium !text-[var(--l1-foreground)] hover:!bg-[var(--l3-background-hover)]"
               >
                 Submit feedback
               </Button>
