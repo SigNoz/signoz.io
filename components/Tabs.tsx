@@ -86,7 +86,7 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
 
   return (
     <TabsRoot
-      className={`${styles.root} ${className || 'w-full'}`}
+      className={`${styles.root} ${className || 'w-full'} [&>div:first-child]:overflow-x-auto`}
       data-tabs-root=""
       value={activeTab ?? undefined}
       onValueChange={handleTabChange}
