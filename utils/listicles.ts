@@ -37,6 +37,7 @@ function transformItem(raw: Record<string, unknown>): ListicleItem {
     href: String(raw.href ?? ''),
   }
   if (raw.click_name != null) item.clickName = String(raw.click_name)
+  if (raw.description != null) item.description = String(raw.description)
   const icon = transformIcon(raw)
   if (icon != null) item.icon = icon
   return item
