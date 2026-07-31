@@ -1,5 +1,5 @@
 ---
-date: 2026-06-26
+date: 2026-07-30
 title: Authorization Overview
 description: Understand how role-based access control works in SigNoz — principals, transactions, roles, and how they connect.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -55,6 +55,10 @@ The following resources are currently available for fine-grained access control:
 | `role` | `role` | Managed and custom roles |
 | `serviceaccount` | `serviceaccount` | Non-human identities for programmatic API access |
 | `metaresource` | `factor-api-key` | Authentication keys for service accounts |
+| `telemetryresource` | `logs` | Log data queried through explorers, dashboards, alerts, and the API |
+| `telemetryresource` | `traces` | Trace data queried through explorers, dashboards, alerts, and the API |
+| `telemetryresource` | `metrics` | Metric data queried through explorers, dashboards, alerts, and the API |
+| `telemetryresource` | `meter-metrics` | Usage metering data for the workspace |
 
 For the full transactions reference for each resource, see the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/transactions/).
 
@@ -67,6 +71,10 @@ A selector determines which specific instances of a resource a transaction appli
 | **All** | `*` | The transaction applies to every instance of that resource. |
 | **Only selected** | Resource name or ID | The transaction applies only to the specified instances. Refer to the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/transactions/) for the selector format used by each resource. |
 | **None** | No selector | The transaction is not granted for any instance of that resource. |
+
+<Admonition type="info">
+Telemetry resources (logs, traces, metrics, meter metrics) use a query-scoped selector format instead of instance IDs: grants are scoped by query type and, optionally, by ingestion key. See [Telemetry Selectors](https://signoz.io/docs/manage/administrator-guide/iam/transactions/#telemetry-selectors) in the Transactions Reference.
+</Admonition>
 
 ## Managed Roles
 
@@ -95,3 +103,4 @@ See [Roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/) for a 
 - [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/transactions/) — Look up transactions for each resource
 - [Roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/) — Create and manage roles
 - [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) — Set up programmatic API access
+- [Scope Telemetry Access by Ingestion Key](https://signoz.io/docs/manage/administrator-guide/iam/user-guides/scope-telemetry-access-by-ingestion-key/) — Restrict a role to specific telemetry data

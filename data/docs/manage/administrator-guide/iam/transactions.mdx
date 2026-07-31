@@ -1,5 +1,5 @@
 ---
-date: 2026-06-26
+date: 2026-07-30
 title: Transactions Reference
 description: Complete reference of transactions for each resource in SigNoz — relations, descriptions, and managed role access.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -19,7 +19,7 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers IAM resources (roles, service accounts, API keys). Transactions for observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
+This page currently covers IAM resources (roles, service accounts, API keys) and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
 </Admonition>
 
 ## Role
@@ -64,7 +64,77 @@ Resource: `metaresource` | Kind: `factor-api-key` | Selector: API key ID
 | `update` | Modify API key metadata (for example, change the expiration date). | signoz-admin |
 | `delete` | Permanently revoke an API key. | signoz-admin |
 
-## Compound Transactions
+## Logs
+
+Resource: `telemetryresource` | Kind: `logs` | Selector: telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `read` | Query log data in the Logs Explorer, dashboards, alerts, and the API. | signoz-admin, signoz-editor, signoz-viewer |
+
+## Traces
+
+Resource: `telemetryresource` | Kind: `traces` | Selector: telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `read` | Query trace data in the Traces Explorer, dashboards, alerts, and the API. | signoz-admin, signoz-editor, signoz-viewer |
+
+## Metrics
+
+Resource: `telemetryresource` | Kind: `metrics` | Selector: telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `read` | Query metric data in the Metrics Explorer, dashboards, alerts, and the API. | signoz-admin, signoz-editor, signoz-viewer |
+
+## Meter Metrics
+
+Resource: `telemetryresource` | Kind: `meter-metrics` | Selector: telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `read` | Query usage metering data for the workspace. | signoz-admin, signoz-editor, signoz-viewer |
+
+## Telemetry Selectors
+
+Telemetry resources support only the `read` relation, but their selectors are more expressive than the instance IDs used by IAM resources. A telemetry selector scopes the grant by **query type** and, optionally, by **ingestion key**:
+
+| Selector | Meaning |
+|----------|---------|
+| `*` | Every query on that signal, regardless of query type. |
+| `<query_type>/*` | Every query of that query type. |
+| `<query_type>/signoz.workspace.key.id/*` | Queries of that query type that filter on `signoz.workspace.key.id`, for any ingestion key. |
+| `<query_type>/signoz.workspace.key.id/<key-id>` | Queries of that query type that filter on the specified ingestion key ID. |
+
+The supported query types are:
+
+| Query Type | Description | Supports Ingestion Key Scoping |
+|------------|-------------|-------------------------------|
+| `builder_query` | Queries built with the query builder (Builder Query in the UI). | Yes |
+| `promql` | PromQL queries. | No (wildcard only) |
+| `clickhouse_sql` | ClickHouse SQL queries. | No (wildcard only) |
+
+`signoz.workspace.key.id` is the only key that telemetry grants can be scoped by. Its value is the ingestion key ID, which you can find on the Ingestion Settings page. The key may be written unprefixed or as `resource.signoz.workspace.key.id`; both are treated the same.
+
+Broader grants implicitly cover narrower requests within the same query type: a grant for `builder_query/signoz.workspace.key.id/*` covers every specific key ID, `builder_query/*` covers all builder queries, and `*` covers everything on that signal. Grants never widen across query types: a `builder_query` grant does not satisfy a PromQL query.
+
+For a step-by-step walkthrough of scoping a role to an ingestion key, see [Scope Telemetry Access by Ingestion Key](https://signoz.io/docs/manage/administrator-guide/iam/user-guides/scope-telemetry-access-by-ingestion-key/).
+
+## How Queries Are Authorized
+
+Every query in SigNoz, whether it runs in an explorer, a dashboard panel, an alert evaluation preview, or through the API, is checked against the caller's telemetry transactions. The transactions a query requires depend on its query type:
+
+| Query | Transactions Required |
+|-------|----------------------|
+| Builder query on a signal | `read` on that signal's telemetry resource, with a selector derived from the query's filter |
+| PromQL query | `metrics:read` with selector `promql/*` |
+| ClickHouse SQL query | `read` with selector `clickhouse_sql/*` on **all** of `logs`, `traces`, `metrics`, and `meter-metrics` |
+| Formulas, joins, and trace operators | No transaction of their own; the queries they reference are checked |
+
+For builder queries, the required selector is derived from the query's filter expression. A query that filters on `signoz.workspace.key.id` with `=` or `IN` at the top level of the filter requires only the grants for those specific key IDs. Any other builder query (no key filter, or the key combined with `OR`, `NOT`, or `!=`) requires the broader `builder_query/*` (or `*`) grant.
+
+
 
 Some operations require transactions on multiple resources. Both transactions must be satisfied for the operation to succeed.
 
