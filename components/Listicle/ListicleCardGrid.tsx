@@ -26,7 +26,7 @@ function renderIcon(spec?: IconSpec): React.ReactNode {
 
   return (
     <span
-      className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-[var(--base-white)]"
+      className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-[var(--l1-foreground-hover)]"
       style={{ backgroundColor: spec.color }}
     >
       {spec.badge}
