@@ -146,6 +146,49 @@ For the full list of configuration options, see the <a href="https://github.com/
 
 </details>
 
+<details>
+<ToggleHeading>
+## Using S3-Compatible Object Storage
+</ToggleHeading>
+
+The `awss3` exporter works with any S3-compatible object store, for example <a href="https://min.io" target="_blank" rel="noopener noreferrer nofollow">MinIO</a>, <a href="https://developers.cloudflare.com/r2/" target="_blank" rel="noopener noreferrer nofollow">Cloudflare R2</a>, or <a href="https://www.tigrisdata.com" target="_blank" rel="noopener noreferrer nofollow">Tigris</a>. Set `endpoint` to the store's URL and enable path-style requests:
+
+<Admonition type="note">
+The AWS S3 Exporter is at **alpha** stability for traces, metrics, and logs. Its configuration can change between Collector releases.
+</Admonition>
+
+```yaml:otel-collector-config.yaml
+exporters:
+  awss3/logs:
+    s3uploader:
+      region: 'auto'
+      s3_bucket: '<bucket-name>'
+      s3_prefix: 'logs'
+      compression: gzip
+      endpoint: '<s3-compatible-endpoint>'
+      s3_force_path_style: true
+```
+
+**Verify these values:**
+
+- `<bucket-name>`: your bucket name
+- `<s3-compatible-endpoint>`: your store's URL (e.g., `https://t3.storage.dev` for Tigris, `http://localhost:9000` for a local MinIO)
+- `region`: defaults to `us-east-1`. Set the value your store expects: `auto` for Tigris and Cloudflare R2, `us-east-1` for a default MinIO deployment.
+
+Two of the options above behave differently outside AWS:
+
+- Provide credentials as a static key pair via the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables. `role_arn` requires STS, which most S3-compatible stores do not implement.
+- `storage_class` values are AWS-specific. Leave the default unless your store documents support for them.
+
+To validate, point the AWS CLI at the same endpoint:
+
+```bash
+aws s3 ls s3://<bucket-name>/logs/ --recursive \
+  --endpoint-url <s3-compatible-endpoint> | head
+```
+
+</details>
+
 ## Validate in S3
 
 This data will not appear in the SigNoz UI — verify delivery directly in S3. After deploying your updated Collector config, check that objects are appearing in your bucket:
@@ -187,6 +230,11 @@ If no objects appear, check the Collector logs for S3 permission errors or confi
 
 - Confirm you are using the `otelcol-contrib` distribution, which includes the `awss3` exporter. The core `otelcol` distribution does not include it.
 - Check YAML indentation and that exporter names use the `type/name` format with a forward slash (e.g., `awss3/logs`, not `awss3logs`).
+
+**`SignatureDoesNotMatch` or `301 Moved Permanently` with an S3-compatible store**
+
+- Set `region` to the value your store expects. Some stores validate the request signing region.
+- Confirm `s3_force_path_style: true` is set. Most non-AWS stores expect path-style requests.
 
 </details>
 

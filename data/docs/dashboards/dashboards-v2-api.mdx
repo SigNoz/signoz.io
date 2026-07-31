@@ -1,0 +1,428 @@
+---
+date: 2026-07-29
+title: "Dashboards V2 API - Schema, Endpoints & PATCH Updates"
+description: "Migrate to the redesigned SigNoz Dashboards experience and learn the V2 Dashboards API: schema, endpoints, pagination, the query DSL, and partial PATCH updates."
+doc_type: howto
+---
+
+SigNoz **Dashboards** run on a redesigned, Perses-compatible schema. Your existing dashboards, queries, variables, and panels are migrated to it automatically. The new schema makes dashboards easier to find, organize, and manage at scale.
+
+- **Dashboards get easier to find and manage:** organize with key-value tags, personal pins, shared saved views, and quick cloning, plus a defined JSON/Terraform schema that enables direct editing, partial (token-efficient) updates, and reliable AI-driven changes.
+- **Panels get more expressive:** new styling controls (fill mode, line interpolation, disconnect lines, show points) and PNG/SVG export for sharing in reports and incident write-ups.
+
+## What you need to know
+
+- Existing dashboards are migrated to the V2 schema automatically when SigNoz starts up.
+- Dashboards used through the UI keep working with no action required.
+- If you have Terraform-managed dashboards or scripts calling the Dashboards APIs directly, migrate them to the V2 schema and endpoints. See the [v0.135.0 upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-135/) for the migration path.
+
+<Admonition type="warning" title="The V1 dashboard APIs are retired">
+The V1 dashboard endpoints (`/api/v1/dashboards` and its sub-routes) are permanently disabled. Every call returns HTTP `501 Not Implemented` with the error code `dashboard_deprecated` and a message naming the V2 replacement endpoint. There is no grace period, so a `501` may be the first signal your integration, service account, or automation receives. Move any direct API calls to the [V2 endpoints](#migrating-from-the-v1-dashboard-apis) below. The public sharing routes (`/api/v1/dashboards/{id}/public` and `/api/v1/public/dashboards/{id}`) are not affected and keep working.
+</Admonition>
+
+### If you have scripts that use the Dashboards API directly
+
+Migrate those scripts to the V2 Dashboards APIs. You can follow the examples in this guide below.
+
+<Admonition type="warning" title="Strict validation on the V2 spec">
+The V2 schema is strictly validated. Update API and dashboard-as-code (Terraform) clients for these rules:
+
+- **Omitting an enum field is fine. Sending an empty string is not.** Leave an enum out and it takes its default. Send an explicit `""` and the request is rejected with `400 Bad Request` and error code `dashboard_invalid_input`. This trips up clients that serialize every field, including unset ones. Affected fields: `timePreference`, `legendPosition`, `legendMode`, `thresholdFormat`, `comparisonOperator`, `lineInterpolation`, `lineStyle`, `fillMode`, `precisionOption`, and `listVariableSort`.
+- **Layouts must satisfy the grid rules.** See [Dashboard layout constraints](https://signoz.io/docs/userguide/manage-dashboards/#dashboard-layout-constraints) for the bounds, overlap rules, and error messages.
+</Admonition>
+
+<Admonition type="warning">
+The time series `chartAppearance.spanGaps` field is validated. When `fillOnlyBelow` is `true`, `fillLessThan` is required and must be a positive duration. `fillLessThan` accepts second (`s`), minute (`m`), hour (`h`), day (`d`), and week (`w`) units, including compound values (for example `5m`, `1d`, `1w`, `1h30m`). Any dashboard payload with `fillOnlyBelow: true` and a missing, empty, or non-positive `fillLessThan` fails validation on save or load. Update those panels or API/Terraform payloads with a valid duration. In the UI these two fields are the **Disconnect values** control and its **Threshold value** input; see [Disconnect values](https://signoz.io/docs/dashboards/panel-types/timeseries/#disconnect-values).
+</Admonition>
+
+<Admonition type="info" title="Zero-valued and nullable fields in GET responses">
+The V2 Dashboards API round-trips zero-valued fields faithfully. Review these before parsing GET responses in scripts, SDKs, or generated clients:
+
+- **A threshold value of exactly `0` is accepted.** Panels can set a `0` threshold; the API does not reject it.
+- **Zero-valued fields are always present in GET responses.** Query objects always include `disabled: false` and `legend: ""`, and explicitly-set empty arrays (group-by, ordering, selected fields, aggregations, functions, and function arguments) round-trip as `[]`. Arrays that were never set stay absent. At the spec level, `image`, `duration`, `refreshInterval`, and the display description serialize as `""` when unset; text-variable `constant` serializes as `false`, and list-variable `customAllValue` and `capturingRegexp` serialize as `""`.
+- **Some fields are nullable.** The dashboard `datasources` map, the dashboard- and panel-level `links` arrays, and several query array fields can return `null`. Generated clients type these as `Type[] | null` (or a nullable map), so handle `null` alongside `[]`.
+- **If your integration checks for the absence of a key to detect an unset value, switch to checking the value itself**, since these keys are now always present.
+
+Alert rules share the same underlying query format, so their GET responses gain the same `disabled`, `legend`, and empty-array behavior. The <a href="https://signoz.io/api-reference/" target="_blank" rel="noopener noreferrer nofollow">API Reference</a> is the authoritative schema. Note that the `DashboardLink` schema component was renamed to `DashboardtypesLink` (the field shape is unchanged); update any tooling or generated client that references it by name.
+</Admonition>
+
+### If you have dashboards synced via Terraform
+
+The Terraform Provider release corresponding to this SigNoz release will contain the required script to migrate your resources to the new schema. You can run that, then arrange your resources and define any variables on top of that. See the [Terraform provider guide](https://signoz.io/docs/dashboards/terraform-provider-signoz/) for details.
+
+## Dashboards V2 API Guide
+
+Dashboards APIs now work on a properly enforced schema that follows the <a href="https://perses.dev/" target="_blank" rel="noopener noreferrer nofollow">Perses</a> schema guidelines.
+
+A dashboard is divided into layouts, and each layout has panels arranged in it. Variables can be used to filter data across panels as before.
+
+Dashboards also have tags as `key: value` pairs, which help organize them into groups and provide an easy way to query by key or value.
+
+The full schema can be seen in the payload of the <a href="https://signoz.io/api-reference/v0.132.1#/operations/CreateDashboardV2" target="_blank" rel="noopener noreferrer nofollow">new Create Dashboard API</a>.
+
+### Bird's eye view of the dashboards schema
+
+```json
+{
+    "tags": [
+        {
+            "key": "string",
+            "value": "string"
+        }
+    ],
+    "spec": {
+        "display": {
+            "name": "string",
+            "description": "string"
+        },
+        "layouts": [],
+        "panels": {
+            "panel-name": { /* panel details */ }
+        },
+        "variables": []
+    }
+}
+```
+
+### Dashboard APIs
+
+The List and CRUD (Create, Read, Update, Delete) APIs for dashboards all now get a V2 variant:
+
+```
+GET    /api/v2/dashboards          -- List Dashboards
+POST   /api/v2/dashboards          -- Create a Dashboard
+GET    /api/v2/dashboards/{id}     -- Fetch Details for a Dashboard
+PUT    /api/v2/dashboards/{id}     -- Update a Dashboard
+DELETE /api/v2/dashboards/{id}     -- Delete a Dashboard
+```
+
+Locking and unlocking a dashboard get new endpoints:
+
+```
+PUT    /api/v2/dashboards/{id}/lock  -- Lock a Dashboard
+DELETE /api/v2/dashboards/{id}/lock  -- Unlock a Dashboard
+```
+
+### Migrating from the V1 dashboard APIs
+
+The V1 dashboard endpoints are retired. Every call returns HTTP `501 Not Implemented` with the error code `dashboard_deprecated` and a message naming the V2 replacement, so integrations can self-diagnose from the response body. Move each call to its V2 equivalent:
+
+| V1 endpoint (now `501`) | V2 endpoint | Action |
+| --- | --- | --- |
+| `GET /api/v1/dashboards` | `GET /api/v2/dashboards` | List dashboards |
+| `POST /api/v1/dashboards` | `POST /api/v2/dashboards` | Create a dashboard |
+| `GET /api/v1/dashboards/{id}` | `GET /api/v2/dashboards/{id}` | Fetch a dashboard |
+| `PUT /api/v1/dashboards/{id}` | `PUT /api/v2/dashboards/{id}` or `PATCH /api/v2/dashboards/{id}` | Update a dashboard (`PUT` replaces the full dashboard, `PATCH` applies partial updates) |
+| `DELETE /api/v1/dashboards/{id}` | `DELETE /api/v2/dashboards/{id}` | Delete a dashboard |
+| `PUT /api/v1/dashboards/{id}/lock` | `PUT /api/v2/dashboards/{id}/lock` (lock), `DELETE /api/v2/dashboards/{id}/lock` (unlock) | Lock or unlock a dashboard |
+
+The payload also changes shape, from flat V1 JSON to the Perses `spec` tree described above. Self-hosted users upgrading to v0.135.0 should follow the [upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-135/), which also covers Terraform provider and MCP server migration.
+
+### The `image` field
+
+The top-level `image` field sets the dashboard's icon. It accepts three shapes:
+
+- `/assets/Icons/<name>`: a bundled system icon (for example `/assets/Icons/eight-ball`, the default). These are the icons shown in the [dashboard icon picker](https://signoz.io/docs/userguide/manage-dashboards/#set-a-dashboard-icon).
+- `/assets/Logos/<name>`: a bundled logo (for example `/assets/Logos/aws-dark`). Logos render at load time but are not exposed in the picker.
+- A base64 image data URI (for example `data:image/png;base64,...`).
+
+Any other value (a remote URL, a `javascript:` URI, a non-image data URI, or raw markup) is rejected. Validation is enforced at three layers: the in-product JSON editor, dashboard import, and the Create and Update APIs.
+
+- **API**: `POST` and `PUT` reject an invalid `image` with a 400-class error, so the constraint holds even when dashboards are created or modified directly through the API.
+- **JSON editor**: the apply action is blocked and this message is shown: `"image" must be an /assets/Icons/<name> or /assets/Logos/<name> path, or a base64 image data URI`.
+
+Dashboards saved earlier with an inline base64 icon keep rendering unchanged. No migration is required.
+
+### Scalar panels require `reduceTo` on metric queries
+
+Value (number) panels, pie charts, and tables render a single value per query, so they issue a **scalar** request. A metric query produces a time series, so a scalar request must say how to collapse that series to one number. Set `reduceTo` on each metric aggregation in these panels.
+
+Valid values are: `sum`, `count`, `avg`, `min`, `max`, `last`, `median`.
+
+```json
+"aggregations": [
+    {
+        "metricName": "system.cpu.time",
+        "timeAggregation": "rate",
+        "spaceAggregation": "sum",
+        "reduceTo": "sum"
+    }
+]
+```
+
+The visual query builder sets `reduceTo` for you, so this only affects requests you construct programmatically. A scalar metric query that omits it, or uses an unsupported value, is rejected at query time with `400 Bad Request` and the `invalid_input` error code:
+
+```json
+{
+    "error": {
+        "code": "invalid_input",
+        "message": "reduceTo is required for aggregation #1 in query 'A' for the scalar request type"
+    }
+}
+```
+
+Existing V1 dashboards do not need edits: their scalar metric queries have `reduceTo` derived automatically during migration (rate and increase map to `sum`, percentile aggregations map to `avg`, other gauge aggregations map to `last`).
+
+Users can now personally pin any dashboard, so there's a special List API to get dashboards that takes pins into account:
+
+```
+GET /api/v2/users/me/dashboards  -- List Dashboards for a User
+```
+
+The biggest quality-of-life improvement is the new partial updates API, so that updating dashboards no longer involves building the whole dashboard JSON again:
+
+```
+PATCH /api/v2/dashboards/{id}  -- Patch a Dashboard
+```
+
+Full details of all the APIs are present in the <a href="https://signoz.io/api-reference/v0.132.1#/operations/ListDashboardsV2" target="_blank" rel="noopener noreferrer nofollow">API Reference</a>.
+
+### New listing APIs
+
+Both List APIs (the user-agnostic one and the user-specific one) now support pagination. They also get a proper query field where dashboards can be searched by name, description, tags, and other properties using many different operations.
+
+Following are some examples. Only the path differs between the two APIs; the API query parameters can be passed the same way.
+
+```bash
+## Get 20 latest dashboards
+curl --location '<YOUR-SIGNOZ-URL>/api/v2/dashboards?limit=20' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>'
+
+## Get the next 20 latest dashboards
+curl --location '<YOUR-SIGNOZ-URL>/api/v2/dashboards?limit=20&offset=20' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>'
+
+## Get the first 20 dashboards sorted in alphabetical order
+curl --location '<YOUR-SIGNOZ-URL>/api/v2/dashboards?sort=name&order=asc&limit=20' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>'
+```
+
+Some examples of the query DSL:
+
+```bash
+## Get dashboards that contain "prod" in their name
+## Unencoded query: name contains prod
+curl --location '<YOUR-SIGNOZ-URL>/api/v2/dashboards?query=name%20contains%20prod&limit=20' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>'
+
+## Get dashboards that have the `env = prod` tag on them or have "prod" in their name
+## Unencoded query: name contains prod OR env = prod
+curl --location '<YOUR-SIGNOZ-URL>/api/v2/dashboards?query=name%20contains%20prod%20OR%20env%20%3D%20prod&limit=20' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>'
+```
+
+### Partial updates API
+
+This API allows for pinpointed updates to a dashboard, which makes building requests much easier.
+
+For example, updating the description of a dashboard is just this:
+
+```bash
+curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>' \
+--data '[
+    {
+        "op": "add",
+        "path": "/spec/display/description",
+        "value": "New Description"
+    }
+]'
+```
+
+Adding a tag:
+
+```bash
+curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>' \
+--data '[
+    {
+        "op": "add",
+        "path": "/tags/-",
+        "value": {
+            "key": "env",
+            "value": "prod"
+        }
+    }
+]'
+```
+
+Changing the value for a tag:
+
+```bash
+curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>' \
+--data '[
+    {
+        "op": "replace",
+        "path": "/tags/0/value",
+        "value": "production"
+    }
+]'
+```
+
+Adding a new panel involves one request object to add the panel, and another to add it to the layout:
+
+```bash
+curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>' \
+--data '[
+    {
+        "op": "add",
+        "path": "/spec/panels/196021a6-3b94-454c-9c9d-2b4170708038",
+        "value": {
+            "kind": "Panel",
+            "spec": {
+                "display": {
+                    "name": "CPU Time"
+                },
+                "plugin": {
+                    "kind": "signoz/TimeSeriesPanel",
+                    "spec": {
+                        "visualization": {
+                            "timePreference": "global_time"
+                        },
+                        "legend": {
+                            "position": "bottom"
+                        },
+                        "chartAppearance": {
+                            "lineStyle": "solid",
+                            "lineInterpolation": "spline",
+                            "fillMode": "none"
+                        },
+                        "formatting": {
+                            "unit": "s"
+                        }
+                    }
+                },
+                "queries": [
+                    {
+                        "kind": "time_series",
+                        "spec": {
+                            "plugin": {
+                                "kind": "signoz/CompositeQuery",
+                                "spec": {
+                                    "queries": [
+                                        {
+                                            "type": "builder_query",
+                                            "spec": {
+                                                "name": "A",
+                                                "signal": "metrics",
+                                                "source": "",
+                                                "stepInterval": null,
+                                                "disabled": false,
+                                                "filter": {
+                                                    "expression": ""
+                                                },
+                                                "having": {
+                                                    "expression": ""
+                                                },
+                                                "aggregations": [
+                                                    {
+                                                        "metricName": "system.cpu.time",
+                                                        "timeAggregation": "rate",
+                                                        "spaceAggregation": "sum"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "op": "add",
+        "path": "/spec/layouts/0/spec/items/-",
+        "value": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 6,
+            "content": {
+                "$ref": "#/spec/panels/196021a6-3b94-454c-9c9d-2b4170708038"
+            }
+        }
+    }
+]'
+```
+
+Updating the filter in a query inside a panel, for example the panel added above:
+
+```bash
+curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>' \
+--data '[
+    {
+        "op": "replace",
+        "path": "/spec/panels/196021a6-3b94-454c-9c9d-2b4170708038/spec/queries/0/spec/plugin/spec/queries/0/spec/filter/expression",
+        "value": "service.name = '\''signoz'\''"
+    }
+]'
+```
+
+Removing a panel involves one request object to remove the panel, and another to remove it from the layout it is in (check which layout, and within that layout which item the panel is in, then remove that whole item):
+
+```bash
+curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>' \
+--data '[
+    {
+        "op": "remove",
+        "path": "/spec/panels/196021a6-3b94-454c-9c9d-2b4170708038"
+    },
+    {
+        "op": "remove",
+        "path": "/spec/layouts/0/spec/items/3"
+    }
+]'
+```
+
+Adding a variable is similar to adding a tag. Here's an example of adding a dynamic variable named `httproute` that takes values from the `http.route` attribute:
+
+```bash
+curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>' \
+--data '[
+    {
+        "op": "add",
+        "path": "/spec/variables/-",
+        "value": {
+            "kind": "ListVariable",
+            "spec": {
+                "name": "httproute",
+                "display": {
+                    "name": "httproute",
+                    "description": ""
+                },
+                "allowMultiple": false,
+                "allowAllValue": true,
+                "sort": "none",
+                "plugin": {
+                    "kind": "signoz/DynamicVariable",
+                    "spec": {
+                        "name": "http.route",
+                        "signal": ""
+                    }
+                }
+            }
+        }
+    }
+]'
+```
+
+Removing a variable just requires knowing the index it is on in the variables array:
+
+```bash
+curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
+--header 'SIGNOZ-API-KEY: <YOUR-API-KEY>' \
+--data '[
+    {
+        "op": "remove",
+        "path": "/spec/variables/2"
+    }
+]'
+```

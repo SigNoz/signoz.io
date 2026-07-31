@@ -1,0 +1,77 @@
+---
+date: 2026-07-08
+title: Langflow Dashboard
+description: Monitor Langflow flows and agents with a focus on LLM usage such as token consumption, per-model breakdown, call latency, tool calls, and errors.
+doc_type: explanation
+---
+
+<Admonition type="info">
+  Before using this dashboard, instrument your Langflow application with OpenTelemetry and configure export to SigNoz. See the [Langflow observability guide](https://signoz.io/docs/langflow-observability/) for complete setup instructions.
+</Admonition>
+
+This dashboard provides a comprehensive view of the `Langflow` service using trace data. It is built on the `gen_ai.*` OpenTelemetry span attributes exported by Langflow's built-in Traceloop tracer and focuses on LLM usage: token consumption (input, output, and total), per-model breakdown, LLM call latency, tool calls, agent and flow runs, and errors.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/langflow-dashboard.webp"
+  alt="Langflow Dashboard"
+  caption="Langflow Dashboard Template"
+/>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/langflow/langflow-dashboard.json"
+    dashboardName="Langflow"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard tracks critical performance and cost metrics for your Langflow service using OpenTelemetry trace data to help you:
+
+- **Optimize LLM Cost**: Break down input, output, and total token consumption per model to understand cost drivers and track usage trends over time.
+- **Track Model Usage**: Compare call volumes and token consumption across every model in use to guide model selection.
+- **Monitor LLM Latency**: Watch p50, p95, and p99 latency for LLM calls to surface slow responses and regressions.
+- **Understand Agent Activity**: See how many agent and flow runs execute over time and how long they take.
+- **Track Tool Usage**: Identify which tools your agents call most frequently.
+- **Catch Errors Early**: Surface the count of spans with errors so you can detect incidents immediately.
+- **Inspect Recent Calls**: Drill into the most recent LLM calls for quick debugging.
+
+## Panels Included
+
+### Usage Summary (Top Row)
+
+| Panel | Type | What It Shows |
+|-------|------|---------------|
+| **Total LLM Tokens** | Value | Sum of `gen_ai.usage.total_tokens` across all spans in the selected window |
+| **LLM Calls** | Value | Count of spans where `gen_ai.request.model` exists, showing total LLM invocations |
+| **Input Tokens** | Value | Sum of `gen_ai.usage.input_tokens` across all LLM calls |
+| **Output Tokens** | Value | Sum of `gen_ai.usage.output_tokens` across all LLM calls |
+| **Avg Tokens / Call** | Value | Average of `gen_ai.usage.total_tokens` per LLM call |
+| **Agent / Flow Runs** | Value | Count of `invoke_agent LangGraph` spans, representing agent and flow executions |
+| **Tool Calls** | Value | Count of spans whose name matches `execute_tool%`, representing tool invocations |
+| **Errors** | Value | Count of spans with `hasError = true`; highlights failures in the selected window |
+
+### Token & Model Usage
+
+- **Token Usage Over Time by Model**: Time-series graph of total token consumption grouped by `gen_ai.request.model`, showing which models drive usage over time.
+- **Input vs Output Tokens Over Time**: Time-series graph comparing input and output token consumption to understand the balance between prompt and completion sizes.
+- **LLM Calls Over Time by Model**: Time-series graph of LLM invocation counts grouped by `gen_ai.request.model`, revealing model adoption and call-volume trends.
+- **Per-Model Usage Breakdown**: Table of call count, input tokens, output tokens, total tokens, and average duration per `gen_ai.request.model` for per-model cost and performance tracking.
+- **Tokens by Model**: Pie chart of total token consumption per model, showing the proportion of usage across models at a glance.
+- **Response Finish Reasons**: Donut chart of LLM responses grouped by finish reason (for example, `stop` versus `tool_call`), showing how often calls complete normally versus trigger a tool call.
+
+### Latency
+
+- **LLM Call Latency (p50 / p95 / p99)**: Time-series graph of p50, p95, and p99 latency for LLM calls to surface tail latency and regressions.
+
+### Agent & Tool Activity
+
+- **Tool Calls by Tool**: Bar chart of tool-invocation counts grouped by span name, revealing which tools your agents rely on most.
+- **Agent / Flow Runs Over Time**: Time-series graph of `invoke_agent LangGraph` span counts, showing agent and flow execution volume over time.
+- **Agent Run Latency (p95)**: Time-series graph of p95 latency for agent and flow runs to catch slow executions.
+
+### Recent Activity
+
+- **Recent LLM Calls**: List of the most recent spans where `gen_ai.request.model` exists, for quick inspection and debugging of individual LLM calls.

@@ -28,6 +28,7 @@ const POSTHOG_EVENT_NAMES = new Set([
   'HubSpot Form Submitted',
   'User Signed Up',
   'User Associated with Company',
+  'experiment_viewed',
 ])
 
 const shouldSendToPostHog = (payload: LogEventPayload) => {

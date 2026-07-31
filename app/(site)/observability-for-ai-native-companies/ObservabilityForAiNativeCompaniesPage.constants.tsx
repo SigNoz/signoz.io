@@ -345,8 +345,8 @@ export const PILLARS_DATA = [
 
 export const TRUSTED_BY_LOGOS = [
   {
-    src: '/svgs/icons/lovart.svg',
-    alt: 'Lovart',
+    src: '/svgs/icons/kernel.svg',
+    alt: 'Kernel',
   },
   {
     src: '/svgs/icons/sarvam.svg',

@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 
 type CardProps = {
   title?: string
@@ -31,7 +31,7 @@ const FeatureCard: React.FC<CardProps> = ({ title, img, description, buttonText,
       </div>
       <div className="mt-4">
         {buttonText ? (
-          <Button type={Button.TYPES.SECONDARY} className="mb-4 mt-4 max-w-fit">
+          <Button variant="legacySecondary" className="mb-4 mt-4 max-w-fit">
             <Link href={buttonLink ? buttonLink : ''} className="flex-center" target="_blank">
               {buttonText} <ArrowRight size={14} />
             </Link>

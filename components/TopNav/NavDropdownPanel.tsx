@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavDropdownContext } from './NavDropdownContext'
 import { ProductDropdownContent } from './ProductDropdown'
+import { UseCasesDropdownContent } from './UseCasesDropdown'
 import { ResourcesDropdownContent } from './ResourcesDropdown'
 
 export default function NavDropdownPanel() {
@@ -46,7 +47,12 @@ export default function NavDropdownPanel() {
     setShouldTransition(isSwitching)
 
     // Clamp left so panel doesn't overflow the right viewport edge
-    const panelWidth = activeId === 'product' ? 820 : 500
+    const panelWidths: Record<string, number> = {
+      product: 680,
+      usecases: 380,
+      resources: 500,
+    }
+    const panelWidth = panelWidths[activeId] ?? 400
     const clampedLeft = Math.min(rect.left, window.innerWidth - panelWidth - 16)
     setPosition({ left: Math.max(16, clampedLeft), top: rect.bottom + 4 })
     prevActiveId.current = activeId
@@ -103,6 +109,9 @@ export default function NavDropdownPanel() {
           >
             {(activeId === 'product' || prevActiveId.current === 'product') && (
               <ProductDropdownContent onClose={closeImmediate} />
+            )}
+            {(activeId === 'usecases' || prevActiveId.current === 'usecases') && (
+              <UseCasesDropdownContent onClose={closeImmediate} />
             )}
             {(activeId === 'resources' || prevActiveId.current === 'resources') && (
               <ResourcesDropdownContent onClose={closeImmediate} />

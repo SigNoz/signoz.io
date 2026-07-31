@@ -5,10 +5,10 @@ import featureGraphicOtel from '@/public/img/graphics/homepage/feature-graphic-o
 
 export const TRUSTED_BY_LOGOS = [
   { src: '/svgs/icons/eltropy.svg', alt: 'Eltropy' },
-  { src: '/svgs/icons/lovart.svg', alt: 'Lovart' },
+  { src: '/svgs/icons/kernel.svg', alt: 'Kernel' },
   { src: '/img/users/salesforce.svg', alt: 'Salesforce' },
   { src: '/img/users/comcast.svg', alt: 'Comcast' },
-  { src: '/svgs/icons/parallel-ai.svg', alt: 'Parallel AI' },
+  { src: '/svgs/icons/hedra.svg', alt: 'Hedra' },
   { src: '/svgs/icons/formance.svg', alt: 'Formance' },
   { src: '/svgs/icons/blaxel.svg', alt: 'Blaxel' },
   { src: '/svgs/icons/sarvam.svg', alt: 'sarvam logo' },

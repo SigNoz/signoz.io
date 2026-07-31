@@ -312,6 +312,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/operate/migration/upgrade-0.135/',
+          destination: '/docs/operate/migration/upgrade-0-135/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.135',
+          destination: '/docs/operate/migration/upgrade-0-135/',
+          permanent: true,
+        },
+        {
           source: '/docs/operate/migration/upgrade-0.113/',
           destination: '/docs/operate/migration/upgrade-0-113/',
           permanent: true,
@@ -819,6 +829,21 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/comparisons/opentelemetry-collector-vs-agent/',
+          destination: '/blog/opentelemetry-collector-complete-guide/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-exporters/',
+          destination: '/guides/opentelemetry-collector-vs-exporter/',
+          permanent: true,
+        },
+        {
+          source: '/blog/using-opentelemetry-collector-processor/',
+          destination: '/blog/opentelemetry-collector-complete-guide/',
+          permanent: true,
+        },
+        {
           source: '/blog/tags/',
           destination: '/tags/',
           permanent: true,
@@ -886,7 +911,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3x7z8ihiq-CJ6dU~OCOgp5nS1gTqwFTw',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-44dhfywli-MO0PhJOea9XObIfn9TfeUw',
           basePath: false,
           permanent: true,
         },

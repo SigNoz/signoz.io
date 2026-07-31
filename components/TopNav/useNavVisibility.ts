@@ -27,6 +27,7 @@ export function useNavVisibility() {
     showPricing: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.PRICING,
     showResources: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.RESOURCES,
     showDocs: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.DOCS,
+    showUseCases: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.USE_CASES,
     showProduct: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.PRODUCT,
     showSignInGetStarted: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.SIGN_IN,
   }

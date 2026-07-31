@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import GetStartedSigNoz from '@/components/GetStartedSigNoz/GetStartedSigNoz'
-import Button from '@/components/Button/Button'
+import Button from '@/components/ui/Button'
 import { ArrowRight } from 'lucide-react'
 import {
   LineChart,
@@ -42,7 +42,10 @@ const UnifiedObservability = () => {
             </h3>
             <div className="flex flex-col gap-2">
               <Link href="/teams/">
-                <Button className="flex items-center justify-center gap-2 font-bold">
+                <Button
+                  variant="legacyPrimary"
+                  className="flex items-center justify-center gap-2 font-bold"
+                >
                   Get Started - Free <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -297,7 +300,7 @@ const UnifiedObservability = () => {
               </ul>
               <div className="mt-8 flex items-center gap-4">
                 <Link href="/teams/">
-                  <Button className="flex items-center gap-2">
+                  <Button variant="legacyPrimary" className="flex items-center gap-2">
                     Get Started with OpenTelemetry
                     <ArrowRight className="h-4 w-4" />
                   </Button>
@@ -940,7 +943,10 @@ const UnifiedObservability = () => {
           </p>
           <div className="mt-4">
             <Link href="/teams/" className="block max-w-md">
-              <Button className="flex w-full items-center justify-center gap-2 font-bold">
+              <Button
+                variant="legacyPrimary"
+                className="flex w-full items-center justify-center gap-2 font-bold"
+              >
                 Get Started - Free <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>

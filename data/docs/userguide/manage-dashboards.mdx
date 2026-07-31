@@ -1,94 +1,579 @@
 ---
-date: 2026-05-13
-description: Learn how to create, edit, delete, and manage dashboards and panels within SigNoz.
+date: 2026-07-30
+description: Learn how to create, edit, filter, and manage dashboards and panels in SigNoz, including list filters, row actions, tags, sections, and the panel editor.
 title: Manage Dashboards in SigNoz
 doc_type: howto
 ---
 
-This section shows how you can create, update, and remove dashboards and panels.
+This section shows how you can create, update, filter, and remove dashboards and panels.
 
 <Figure
   src="/img/docs/userguide/manage-dashboards/dashboards-page.webp"
-  alt="Dashboards page in SigNoz"
-  caption="Dashboards page — browse templates, create new dashboards, or import from JSON."
+  alt="Dashboards list page in SigNoz showing the views rail and the filter query box"
+  caption="The dashboards list: switch views, filter with a query, and act on any row."
 />
 
-From the Dashboards page, you can:
+The list page opens with a **Views** rail on the left, a query box for filtering, and one row per dashboard. Selecting **New Dashboard** opens a modal with three tabs:
 
-- **Browse dashboard templates** — Select the link at the top to explore [60+ pre-built dashboard templates](https://signoz.io/docs/dashboards/dashboard-templates/overview/) for popular integrations. If a template you need is not available, you can request a new one from the templates page.
-- **New Dashboard** — Create a dashboard from scratch by entering a name and selecting **+ New Dashboard**.
-- **Import JSON** — Import a dashboard from a JSON file or a Grafana export.
-- **View templates** — Quickly jump to the templates library to import a pre-built dashboard.
+- **Blank**: create a dashboard from scratch by entering a name, description, and tags.
+- **From a template**: import one of the [60+ pre-built dashboard templates](https://signoz.io/docs/dashboards/dashboard-templates/overview/) for popular integrations. If a template you need is not available, you can request a new one from the templates page.
+- **Import JSON**: import a dashboard from a JSON file or a Grafana export.
 
 ## Prerequisites
 
 <PrereqsInstrument />
 
+## Find and filter dashboards
+
+The list page has a single query box that filters the list using a structured expression language (DSL). Build a query from keys, operators, values, and `AND` / `OR` connectors. The **Created by** and **Updated** dropdowns next to the box write their conditions into the same query.
+
+To save a filter configuration and return to it later, see [Saved Views](#saved-views).
+
+### Filter keys
+
+Reserved fields appear as **field** pills in the autocomplete list:
+
+| Key | Type | Operators | Example |
+| --- | --- | --- | --- |
+| `name` | string | `=` `!=` `CONTAINS` `NOT CONTAINS` `LIKE` `NOT LIKE` `ILIKE` `NOT ILIKE` `IN` `NOT IN` | `name CONTAINS 'prod'` |
+| `description` | string | Same as `name` | `description ILIKE '%latency%'` |
+| `created_by` | string | Same as `name` | `created_by = 'me@example.com'` |
+| `created_at` | timestamp | `=` `!=` `<` `<=` `>` `>=` `BETWEEN` `NOT BETWEEN` | `created_at >= '2026-07-01T00:00:00Z'` |
+| `updated_at` | timestamp | Same as `created_at` | `updated_at >= '2026-07-20T00:00:00Z'` |
+| `locked` | boolean | `=` `!=` | `locked = true` |
+
+Any key that is not a reserved field is treated as an organization **tag** key and appears as a **tag** pill. Tag keys use the string operators plus `EXISTS` and `NOT EXISTS`:
+
+```text
+env = 'prod' AND team = 'core'
+owner EXISTS
+```
+
+Value formats:
+
+- String values are quoted: `name = 'API latency'`.
+- `IN` / `NOT IN` take a bracketed list: `created_by IN ['a@example.com', 'b@example.com']`.
+- Boolean values are unquoted: `locked = true`.
+- Timestamps use RFC3339: `updated_at >= '2026-07-20T00:00:00Z'`.
+- `EXISTS` / `NOT EXISTS` take no value.
+
+<Admonition type="info">
+`updated_by` and `source` are not queryable.
+</Admonition>
+
+### Autocomplete
+
+Click into the query box, or start typing, to open the suggestions popup. It guides you one stage at a time: keys, then operators, then values, then connectors (`AND` / `OR`). Use the up and down arrow keys to move through suggestions, Enter to apply the highlighted one, and Esc to dismiss the popup. Typed expressions are color-highlighted so keys, operators, `AND` / `OR` keywords, quoted strings, and bare values are easy to tell apart.
+
+### Draft-and-run model
+
+The query box uses a draft model, so typing does not run a search. Apply the filter with **Cmd/Ctrl + Enter** or the **Run query** button. A blue dot appears on **Run query** whenever there are typed changes that have not been applied yet.
+
+### Created by and Updated dropdowns
+
+- **Created by** is a multi-select dropdown with a checkbox per creator, inline search, and a clear-all control. It writes a `created_by` condition into the query and runs the filter when the dropdown closes, not on each individual pick.
+- **Updated** is a single-select dropdown. Choosing a time window adds the matching `updated_at` condition to the query and applies it immediately.
+
+Editing a simple top-level condition in the query box is reflected back into these dropdowns.
+
+<Admonition type="warning" title="Saved and shared list URLs">
+The old list URL parameters (`search`, `createdBy`, `updated`, and `tags`) no longer apply filters. Bookmarks or shared links that use them open the list unfiltered. Re-create the filter in the query box and re-share the URL.
+</Admonition>
+
+### Sort the list
+
+Select **Sort** above the results to change the order of the list. The dropdown has two groups:
+
+- **Sort by**: **Last updated** (the default), **Name**, or **Last created**.
+- **Order**: **Ascending** or **Descending**.
+
+The button label shows the active field and an arrow for the current direction, for example **Sort: Last updated ↓**.
+
+### Choose columns
+
+Next to **Sort** is a columns control that toggles the optional metadata shown on each row:
+
+- **Updated at**: when the dashboard was last saved.
+- **Updated by**: who last saved it.
+
+Both are off by default. Turning them on adds the value to every row, alongside the created-at date and creator that always show.
+
+<Admonition type="info">
+`updated_by` and `source` can be displayed as columns but cannot be used as [filter keys](#filter-keys).
+</Admonition>
+
+### List behavior
+
+- The list header (title and filter bar) stays pinned to the top of the viewport as the list scrolls.
+- Deleting the last dashboard on a page other than the first steps back to the previous page instead of showing an empty result.
+- Select **Collapse** at the bottom of the page to hide the **Views** rail and give the list the full page width. The control then reads **Expand**.
+
+## Saved Views
+
+Saved views let you store a filter and search configuration on the dashboards list page and return to it in one click. Use them to keep a focused list of the dashboards a team owns, dashboards you created, or any other slice you look at often.
+
+### Built-in views
+
+The **Views** rail groups views into three sections. Five views are built in:
+
+**Personal**
+
+| View | Shows |
+| --- | --- |
+| My dashboards | Dashboards you created. |
+| Pinned | Dashboards you pinned. Pins are per user, so your pins are not visible to teammates. |
+| Recently viewed | Dashboards you opened most recently. |
+
+**System**
+
+| View | Shows |
+| --- | --- |
+| All dashboards | Every dashboard in the organization. |
+| Locked | Dashboards that are locked against editing. |
+
+**My views** holds the views you save yourself, and shows a count. Until you save one it displays a prompt to filter the list and save it as a view.
+
+The rail also has a **Filter views by name** search box at the top for finding a view when the list grows, and a **+** control for creating a view.
+
+### Pin a dashboard
+
+Pinning is a separate control from the row actions menu. Each row has a pin icon to the left of its **...** menu; select it to pin the dashboard, and select it again to unpin. Pinned dashboards appear in the **Pinned** view.
+
+Pins are per user, so pinning a dashboard does not change what your teammates see.
+
+### Apply and save a view
+
+1. From the sidebar, choose **Dashboards**.
+2. Use the query box and the **Created by** and **Updated** dropdowns to narrow the list.
+3. Save the current filters as a view. The name must be 64 characters or fewer. The confirm button stays disabled while the name is over the limit.
+
+Saved views appear in the **Views** list alongside the built-in views.
+
+### Rename a saved view
+
+1. Hover over a custom saved view in the **Views** list. A pencil (rename) icon and a trash (delete) icon appear on the right of the row.
+2. Select the pencil icon to open the **Rename view** popover, pre-filled with the current name.
+3. Edit the name and confirm. The name is capped at 64 characters, and the confirm button stays disabled while the limit is exceeded.
+
+The rename is applied optimistically, so the new name shows immediately.
+
+### Spot unsaved changes
+
+When the active view's current filters differ from what was saved, a small warning-colored dot appears next to the view's heading. Hover the dot to see the **Unsaved changes** tooltip.
+
+To discard the unsaved changes and revert to the view's saved state, select **Reset** in the modified-view footer.
+
+### Filter by creator
+
+The **Created by** dropdown lists every member of your organization by display name, in the format `Display Name (email)`. This includes members who are not authors of any dashboard on the current page, so you can filter to a colleague's dashboards even when none are visible yet.
+
+<Admonition type="info">
+The org-wide member list is sourced from the organization members API. Availability can vary by deployment type. If the list shows only creators of dashboards already on the page, the org-wide list is not enabled in your deployment.
+</Admonition>
+
+### Locked view
+
+Selecting the built-in **Locked** view places `locked = true` directly into the visible query box as an editable constraint, rather than applying it as a hidden filter. You can see the constraint, edit it, or combine it with other filters like any search term.
+
+## Row Actions and Role Access on the Dashboards List
+
+Every user sees the per-row actions menu on the dashboards list, but the actions it offers depend on their permission. Read-only actions are available to all roles, and edit actions are available only to users with edit permission (Editor, Author, and Admin roles).
+
+**Read-only actions (all roles, including Viewer):**
+
+- **View**: open the dashboard.
+- **Open in New Tab**: open the dashboard in a new browser tab.
+- **Copy Link**: copy a direct link to the dashboard.
+
+**Edit actions (Editor, Author, and Admin roles):**
+
+- **Rename**: rename the dashboard.
+- **Add Tags** or **Edit Tags**: manage the dashboard's tags. See [Manage Dashboard Tags](#manage-dashboard-tags).
+- **Duplicate**: create a copy of the dashboard.
+- **Lock Dashboard** or **Unlock Dashboard**: prevent or re-allow edits.
+- **Delete**: permanently delete the dashboard.
+
+Viewers keep the read-only actions, so they can still open, view, and share dashboards, but the edit actions stay hidden from them.
+
+On a locked dashboard, **Rename** and the tag actions are disabled, and hovering them explains why. Unlock the dashboard first to use them.
+
+## Manage Dashboard Tags
+
+Tags help you group and filter dashboards on the list page. You can edit a dashboard's tags without opening the dashboard:
+
+1. On the dashboards list, open the action menu on the dashboard's row.
+2. Select **Add Tags** (if the dashboard has no tags) or **Edit Tags** (if it already has tags).
+3. In the modal, enter tags as `key:value` pairs.
+4. Save with the **Save** button or by pressing **Cmd/Ctrl + Enter**.
+
+Tags whose key and value are identical display both sides, so a tag entered as `env:env` renders as `env:env` rather than a bare `env`.
+
 ## Create a Custom Dashboard
 
 1. From the sidebar, choose **Dashboards**.
-2. Select the **New Dashboard** button.
-3. Select the **Configure** icon, and then enter the following information:
+2. Select the **New Dashboard** button and stay on the **Blank** tab.
+3. Enter the following information:
 
-   1. A descriptive name for your new dashboard.
+   1. A descriptive name for your new dashboard. Use the icon dropdown to the left of the name field to pick a [dashboard icon](#set-a-dashboard-icon).
    2. _(Optional)_ A brief description of your new dashboard.
    3. _(Optional)_ Add one or more tags by typing a tag name and pressing enter.
 
 <Figure
   src="/img/docs/userguide/manage-dashboards/dashboard-configuration.webp"
-  alt="Dashboard configuration — set name, description, and tags"
-  caption="Dashboard configuration — set the name, description, and tags for your dashboard."
+  alt="Dashboard configuration showing the name, description, and tags fields"
+  caption="Dashboard configuration: set the name, description, and tags for your dashboard."
 />
 
-4. Select the **Save** button at the far right.
-
+4. Select the **Save** button.
 5. For each panel you wish to add, follow the steps in the [Add a Panel to a Dashboard](#add-a-panel-to-a-dashboard) section below.
 
-6. _(Optional)_ You can change the order of your panels by dragging and dropping them.
+You can rename a dashboard later from the options menu, or by editing its title inline in the dashboard header. When you edit the title inline, clicking anywhere outside the title field saves the change, in addition to the checkmark button.
 
-7. When you've finished, select the **Save Layout** button.
+### Links in the dashboard description
+
+The description is plain text, but any URL you put in it becomes clickable when the description is shown in the dashboard header tooltip. Both `http://` and `https://` URLs and bare `www.` links are detected, and they open in a new tab. Trailing punctuation is left outside the link, so a sentence like `see https://signoz.io/docs/.` links only the URL.
+
+<Admonition type="info">
+The description does not support Markdown. Write plain text and paste full URLs rather than using link syntax.
+</Admonition>
 
 ## Dashboard Options Menu
 
-Click the **...** (three-dot) menu at the top of any dashboard to access the following options:
+The dashboard toolbar at the top right holds four controls: **Actions**, **Configure**, **JSON**, and **New Panel**. Select **Actions** to open the options menu, whose entries are grouped by what they affect:
 
 <Figure
-  src="/img/docs/userguide/manage-dashboards/dashboard-options-menu.webp"
-  alt="Dashboard options menu in SigNoz"
-  caption="Dashboard options menu — lock, rename, export, and more."
+  src="/img/docs/userguide/manage-dashboards/dashboard-options-menu-v2.webp"
+  alt="The Actions menu open on a SigNoz dashboard, showing the Dashboard and Layout groups"
+  caption="The Actions menu: rename, clone, lock, full screen, and section actions."
 />
 
-- **Lock Dashboard** — Prevent accidental edits by locking the dashboard. When locked, panels cannot be added, removed, resized, or rearranged. Unlock the dashboard from the same menu to resume editing.
-- **Rename** — Quickly rename the dashboard without opening the full configuration drawer.
-- **Full screen** — View the dashboard in full-screen mode for presentations or wall displays.
-- **New section** — Add a section to organize panels into logical groups within the dashboard.
-- **Export JSON** — Download the dashboard configuration as a JSON file for backup or sharing.
-- **Copy as JSON** — Copy the dashboard JSON to your clipboard.
-- **Delete dashboard** — Permanently delete the dashboard.
+**Dashboard**
+
+- **Rename**: rename the dashboard without opening the configuration drawer.
+- **Clone dashboard**: create a copy of the dashboard. See [Clone a Dashboard](#clone-a-dashboard).
+- **Lock dashboard** or **Unlock dashboard**: prevent accidental edits. When locked, panels cannot be added, removed, resized, or rearranged. Available to the dashboard's author and to Admins.
+- **Full screen**: view the dashboard in full-screen mode for presentations or wall displays.
+
+**Layout**
+
+- **New section**: add a section to organize panels into logical groups. See [Manage Sections](#manage-sections).
+
+**Delete dashboard** sits below the groups and permanently deletes the dashboard.
+
+<Admonition type="note">
+Editing actions are disabled on a locked dashboard, and hovering a disabled item explains why. **Clone dashboard** stays available because it creates a new dashboard rather than modifying this one.
+</Admonition>
+
+<Admonition type="note">
+To export or copy a dashboard's JSON, use the **Copy** and **Download** controls inside the JSON editor. See [Edit a Dashboard as JSON](#edit-a-dashboard-as-json).
+</Admonition>
 
 ## Update a Custom Dashboard
 
-To update the name, description and tags:
+To update the name, description, and tags, open **Configure** to reach the configuration drawer, make your changes, and save.
 
-1. Select the **Edit** button at the far right.
-2. Make the changes.
-3. Select the **Save Layout** button.
+Layout changes are saved as you make them, so there is no separate save step:
 
-To resize a panel:
+- **To resize a panel**, drag its bottom-right corner.
+- **To move a panel**, drag and drop it into the new position.
 
-1. Click the bottom-left corner of the panel you want to resize.
-2. Keep your left mouse button pressed and resize the panel.
-3. When you've finished, select the **Save Layout** button.
+After you save a panel, clone a panel, or add a section, the dashboard scrolls to reveal the new or affected item. New panels are placed in an open grid position without overlapping tall panels that extend into the lower rows.
 
-To change the position of a panel:
+## Set a Dashboard Icon
 
-1. Drag and drop a panel to the new position.
-2. When you've finished, select the **Save Layout** button.
+Each dashboard shows an icon next to its name in the list and header. To change it, open **Configure** (the dashboard configuration drawer), stay on the **Overview** tab, and select the icon dropdown to the left of the **Dashboard Name** field.
+
+<Figure
+  src="/img/docs/userguide/manage-dashboards/dashboard-icon-picker.webp"
+  alt="Dashboard icon picker in the Overview tab of the configuration drawer"
+  caption="Pick a dashboard icon from the Overview tab of the configuration drawer."
+/>
+
+New dashboards use the **eight-ball** icon by default. The picker offers these icons:
+
+`avocado`, `bagel`, `basketball`, `bow`, `carousel-horse`, `cheese`, `circus-tent`, `cookie`, `crane`, `dartboard`, `drum`, `eight-ball`, `fries`, `hamburger`, `headphones`, `motorcycle`, `ninja`, `orange`, `police-car`, and `siren`.
+
+The picker is the source of truth for available icons, and the set may grow in later releases.
+
+### Icon paths in dashboard JSON
+
+Icons are stored as a path in the top-level `image` field of the dashboard JSON, not as inline image data. A picker selection is saved as `/assets/Icons/<name>`, for example:
+
+```json
+{
+  "image": "/assets/Icons/avocado",
+  "name": "My Dashboard",
+  "tags": [],
+  "spec": { "display": { "name": "My Dashboard" } }
+}
+```
+
+The `image` field accepts three shapes:
+
+- `/assets/Icons/<name>`: a bundled system icon (for example `/assets/Icons/eight-ball`).
+- `/assets/Logos/<name>`: a bundled logo (for example `/assets/Logos/aws-dark`). Logos render at load time but are not shown in the picker, so you can only set them by editing the JSON.
+- A base64 image data URI (for example `data:image/png;base64,...`).
+
+Any other value (a remote URL, a `javascript:` URI, or raw markup) is rejected. An unrecognized but well-formed path (an icon name that does not exist) falls back to the default eight-ball icon at render time.
+
+<Admonition type="info">
+Dashboards saved earlier with an inline base64 icon keep rendering unchanged. No migration is required.
+</Admonition>
+
+## Manage Sections
+
+Sections group related panels into labeled, collapsible blocks within a dashboard. Use them to separate concerns such as latency, throughput, and errors on the same dashboard.
+
+<Figure
+  src="/img/docs/userguide/manage-dashboards/dashboard-page-sections.webp"
+  alt="A dashboard with Latency and Load sections, the toolbar, and the time range picker"
+  caption="A dashboard split into sections, with the Actions, Configure, JSON, and New Panel controls in the toolbar."
+/>
+
+### Add a section
+
+1. Select **Actions** in the dashboard toolbar.
+2. Under **Layout**, select **New section**.
+
+The new section renders immediately with its title and an add-panel prompt, even before it contains any panels. The dashboard-level empty state (prompting you to create your first panel) appears only when the dashboard has no sections and no panels at all.
+
+### The section menu
+
+Each section header has a **...** (three-dot) menu on its right with four entries:
+
+- **Add panel**: open the **New Panel** dialog with this section pre-selected as the target. See [Add a Panel to a Dashboard](#add-a-panel-to-a-dashboard).
+- **Rename section**: rename the section.
+- **Clone section**: duplicate the section and its panels.
+- **Delete section**: delete the section and the panels it contains.
+
+### Clone a section
+
+Cloning copies a section and every panel inside it, so you can reuse a layout without rebuilding each panel.
+
+1. Open the section header's **...** (three-dot) menu.
+2. Select **Clone section**.
+
+The clone is created as `<original name> (Copy)` with all panels duplicated at the same positions and sizes. A loading toast appears while the clone saves, followed by a success or error toast.
+
+### Rename or delete a section
+
+Open a section's **...** (three-dot) menu and select **Rename section** or **Delete section**. Deleting a section also removes the panels it contains.
+
+### Move a panel between sections
+
+1. Open the panel's action menu (the three-dot menu on the panel header).
+2. Hover **Move to section**.
+3. Choose the target section from the submenu. Select **Dashboard (root)**, the first entry, to move the panel out of any section back to the top level of the dashboard.
+
+The **Move to section** submenu is hidden when there is nowhere to move the panel, for example when the dashboard has no sections and the panel is already at the root.
+
+## Edit a Dashboard as JSON
+
+The dashboard toolbar includes a **JSON** button that opens the JSON editor in a side drawer. Use it to review or hand-edit a dashboard's definition, copy it, or download it, without leaving the page or calling the dashboard API.
+
+A dashboard spec has two parts that must stay in sync:
+
+- **`panels`**: the panels defined on the dashboard.
+- **`layouts`**: the sections and positions that place each panel on the grid.
+
+When these two drift apart, panels can silently disappear after saving. The JSON editor surfaces those mismatches as warnings before you save.
+
+### Open the JSON editor
+
+1. From the sidebar, choose **Dashboards** and open a dashboard.
+2. Select **JSON** in the dashboard toolbar to open the editor drawer.
+3. Edit the JSON. The validation warnings in the drawer footer update as you type.
+
+The drawer toolbar also lets you format the JSON, copy it to your clipboard, download it as a file, and reset your edits.
+
+<Figure
+  src="/img/docs/dashboards/json-editor/json-editor-drawer.webp"
+  alt="The Dashboard JSON drawer showing the spec, the Format/Copy/Download/Reset toolbar, and a valid-JSON line count"
+  caption="The JSON drawer, with the Format, Copy, Download, and Reset controls and a live validity indicator."
+/>
+
+<Admonition type="info">
+On a locked dashboard, or if you do not have edit access, the editor opens in read-only mode. You can still read, copy, and download the JSON.
+</Admonition>
+
+### What the editor exposes
+
+The editor shows only the two editable parts of a dashboard:
+
+- **`tags`**: the dashboard's tags.
+- **`spec`**: the dashboard definition, covering panels, layout, variables, and settings.
+
+Server-managed fields (such as `id`, `name`, schema version, organization ID, timestamps, and locked status) are hidden from the editor. They are preserved automatically when you save, so nothing is lost by editing only `tags`, `spec`, and `image`.
+
+The **Copy** and **Download** controls export exactly what the editor shows, which is the `tags`, `spec`, and `image` fields.
+
+<Admonition type="tip">
+To move a dashboard between workspaces, download its JSON here and re-import it using [Import JSON](https://signoz.io/docs/dashboards/import-dashboard/).
+</Admonition>
+
+### Validation warnings
+
+The editor shows amber warning banners in the drawer footer when the spec and layout do not match. A panel left out of the layout saves and simply does not render, but a layout item that points to a panel which no longer exists is rejected on save, so resolve that one first.
+
+#### Panels not present in layout
+
+If one or more panels exist in the spec but are not placed in any layout section, an amber banner reports the count:
+
+> N panels not present in layout, they won't be shown after saving
+
+Hover the banner to see the affected panel IDs.
+
+**Resolve it:** add a layout entry for each listed panel ID, or remove the unused panels from the spec if you no longer need them.
+
+#### Layout references a missing panel
+
+If a layout item points to a panel ID that no longer exists in the spec, a second amber banner reports the count and lists the broken IDs on hover.
+
+**Resolve it:** remove the layout items that reference deleted panels, or restore the missing panel definitions in the spec so the IDs match.
+
+### Save errors
+
+When a save fails, the error modal shows the actual API rejection reason instead of a blank message. For example, editing a locked dashboard returns the lock error directly, so you know to unlock the dashboard before retrying.
+
+## Dashboard Layout Constraints
+
+When you create or update a dashboard through the SigNoz API (including AI-assisted tools such as the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/)), the backend validates the dashboard's grid layout before saving it. Layouts that break these rules are rejected with the `dashboard_invalid_input` error code and a message identifying the offending item.
+
+These constraints apply to every programmatic create and update request. Dashboards built through the UI stay within these bounds automatically, so you rarely hit them by hand. They matter most when a script or AI assistant generates the dashboard spec.
+
+### Grid model
+
+A dashboard spec places panels on a fixed grid:
+
+- `spec.panels` is a map of panel definitions, keyed by panel key.
+- `spec.layouts` is an ordered list of layout sections. Each section is a grid layout whose `spec.items` position panels on the grid.
+- Each item has an integer position (`x`, `y`) and size (`width`, `height`), and a `content` reference that points to a panel as `#/spec/panels/<key>`.
+- The grid is **12 columns** wide. Columns are fixed; rows grow downward without a limit.
+
+### Constraints
+
+| Rule | Constraint | Rejected when |
+|------|------------|---------------|
+| Section count | A dashboard may contain at most **500** layout sections. | `spec.layouts` has more than 500 entries. |
+| Items per section | Each section may contain at most **100** items. | A section's `spec.items` has more than 100 entries. |
+| Minimum width | `width` must be **≥ 1**. | `width` is 0 or negative. |
+| Minimum height | `height` must be **≥ 1**. | `height` is 0 or negative. |
+| Non-negative X | `x` must be **≥ 0**. | `x` is negative. |
+| Non-negative Y | `y` must be **≥ 0**. | `y` is negative. |
+| Width within grid | `width` must be **≤ 12**. | `width` exceeds the 12-column grid. |
+| X within grid | `x` must be **< 12**. | `x` is 12 or greater. |
+| Right edge within grid | `x + width` must be **≤ 12**. | The item extends past the right edge of the grid. |
+| No overlap | Two items in the same section must not occupy overlapping grid rectangles. | Any two items in one section intersect on both axes. |
+| No duplicate panel | A panel may be placed by **at most one** grid item across the whole dashboard. | The same panel key is referenced by more than one item. |
+| Resolvable reference | Every item's `content` must reference an existing panel as `#/spec/panels/<key>`. | The reference is missing, malformed, or points to an unknown panel key. |
+
+<Admonition type="info">
+Overlap is checked per section: two items overlap when their rectangles intersect on both the horizontal and vertical axes. Items in different sections never overlap, because each section stacks below the previous one.
+</Admonition>
+
+### Error code and messages
+
+All layout validation failures return the `dashboard_invalid_input` error code. The message names the layout and item by index (`spec.layouts[<section>].spec.items[<item>]`) so you can locate the problem in your request body.
+
+Example messages:
+
+```text
+spec.layouts: dashboard has 501 layouts; maximum is 500
+spec.layouts[0].spec.items: has 101 items; maximum is 100
+spec.layouts[0].spec.items[2]: width must be at least 1, got 0
+spec.layouts[0].spec.items[2]: height must be at least 1, got -1
+spec.layouts[0].spec.items[2]: x must not be negative, got -1
+spec.layouts[0].spec.items[2]: y must not be negative, got -1
+spec.layouts[0].spec.items[2]: width (14) exceeds grid width 12
+spec.layouts[0].spec.items[2]: x (12) must be less than grid width 12
+spec.layouts[0].spec.items[2]: x (8) + width (6) exceeds grid width 12
+spec.layouts[0].spec.items[0] and items[1] overlap
+spec.layouts[0].spec.items[1].content: panel "cpu-usage" is already placed by spec.layouts[0].spec.items[0].content
+spec.layouts[0].spec.items[0].content: references unknown panel "cpu-usage"
+```
+
+### Common causes
+
+- **AI-generated layouts**: an assistant may place two panels at the same coordinates or reuse a panel key across items. Regenerate, or nudge the assistant to give each panel a unique key and a non-overlapping position.
+- **Copy-pasted items**: duplicating an item without changing its `content` reference triggers the duplicate-panel error, since the same panel would be placed twice.
+- **Off-grid math**: a full-width panel is `x: 0, width: 12`. Setting `x: 6, width: 12` pushes the right edge to column 18 and is rejected.
+
+## Clone a Dashboard
+
+Select **Clone dashboard** from the [Dashboard Options Menu](#dashboard-options-menu) to duplicate a dashboard. SigNoz derives the new dashboard's name from the original:
+
+- The first clone appends `- Copy` to the display name. For example, `My Dashboard` becomes `My Dashboard - Copy`.
+- Cloning again increments a counter: `My Dashboard - Copy (2)`, `My Dashboard - Copy (3)`, and so on.
+- If the base name is too long to fit the suffix within the [128-character limit](#dashboard-naming-limits), the base name is truncated automatically so the suffix always fits.
+
+Rename the clone at any time from the [Dashboard Options Menu](#dashboard-options-menu) or the configuration drawer.
+
+## Locked and read-only dashboards
+
+A dashboard becomes read-only for one of two reasons, and SigNoz treats them the same way in the UI:
+
+- **The dashboard is locked.** Lock it from the [options menu](#dashboard-options-menu) to prevent accidental edits. Only the dashboard's author and Admins can lock or unlock.
+- **You do not have edit permission.** Viewers have read-only access to every dashboard.
+
+On a locked dashboard, editing controls stay visible but disabled, and hovering one explains why with `This dashboard is locked`. Without edit permission the controls are hidden instead, so a Viewer never sees them.
+
+What stays available in read-only mode:
+
+- Viewing panels, expanding them, and using every [drill-down interaction](https://signoz.io/docs/dashboards/interactivity/).
+- Changing variable selections and the time range.
+- [Creating an alert from a panel](https://signoz.io/docs/dashboards/interactivity/#create-an-alert-from-a-panel), which never modifies the dashboard.
+- Reading, copying, and downloading the [dashboard JSON](#edit-a-dashboard-as-json).
+- **Clone dashboard**, because it creates a new dashboard rather than changing this one.
+
+What is blocked: adding, editing, moving, resizing, or deleting panels and sections; renaming; editing tags; changing variables; and saving JSON edits.
+
+<Admonition type="info">
+Dashboards created by an integration cannot be unlocked.
+</Admonition>
+
+## Collaborative editing
+
+Dashboards are shared resources, so the same dashboard can be open in more than one browser tab or edited by more than one person at the same time. To stop you from overwriting or missing someone else's changes, SigNoz records the version you loaded and checks for newer saved versions in the background.
+
+Every time you return focus to a tab with an open dashboard, SigNoz checks whether that dashboard was saved by another user or in another browser tab since you loaded it. If a newer version exists, the **Dashboard updated elsewhere** dialog appears over the dashboard:
+
+> This dashboard was changed in another tab or by another user. Reload to see the latest version.
+
+The dialog offers two actions:
+
+- **Reload**: fetches the latest saved version and re-arms the check, so any later change triggers a new prompt.
+- **Dismiss**: closes the dialog and keeps your current view. The prompt is suppressed only for that specific saved revision. If the dashboard is saved again afterward, the dialog reappears the next time you focus the tab.
+
+<Admonition type="info">
+This check runs automatically for every open dashboard with no configuration required. It compares saved versions only, so your own in-progress edits and saves never trigger the prompt.
+</Admonition>
+
+## Navigate Back to the List
+
+On a dashboard detail page, select the **Dashboard** breadcrumb at the top left to return to the dashboards list. The breadcrumb navigates in place, with no full-page reload. To open the list in a new browser tab instead, middle-click the breadcrumb or hold **Ctrl** (**Cmd** on macOS) while clicking.
+
+## Dashboard Naming Limits
+
+Display names for dashboard entities are capped by the backend. If you exceed a limit, the save request fails with an HTTP `400` error. Trim the name and save again.
+
+| Entity | Character limit |
+| --- | --- |
+| Dashboard title | 128 |
+| Panel title | 128 |
+| Variable name | 128 |
+| Layout section title | 128 |
+| Saved view name | 64 |
+
+<Admonition type="note">
+All limits are enforced server-side, so they apply regardless of how the name is set (UI, imported JSON, or API).
+</Admonition>
 
 ## Remove a Custom Dashboard
 
-1. From the sidebar, choose **Dashboard**.
-2. Find the dashboard you wish to remove. In the **Action** column, select the **Delete** button.
+1. From the sidebar, choose **Dashboards**.
+2. Find the dashboard you wish to remove, open its row action menu, and select **Delete**.
+
+You can also delete the dashboard you are viewing from its [options menu](#dashboard-options-menu).
 
 ## Add a Panel to a Dashboard
 
@@ -96,47 +581,79 @@ SigNoz supports seven panel types: Time Series, Number, Table, List, Bar, Pie, a
 
 1. From the sidebar, choose **Dashboards**.
 2. Find the dashboard to which you want to add a new panel.
-3. Select **Add Panel**.
-4. Choose a panel type from the dialog.
+3. Select **New Panel** in the dashboard toolbar. To place the panel in a specific section, you can instead open that section's **...** (three-dot) menu and select **Add panel**, which pre-selects the section for you.
+4. Under **Select panel type**, choose a panel type.
 
 <Figure
-  src="/img/docs/userguide/manage-panels/new-panel-dialog.webp"
-  alt="New Panel dialog showing available panel types"
-  caption="Choose from seven panel types when adding a new panel."
+  src="/img/docs/userguide/manage-panels/new-panel-dialog-v2.webp"
+  alt="New Panel dialog showing the seven panel types and the Add panel to section picker"
+  caption="Choose a panel type, pick the target section, then select Add Panel."
 />
-5. Populate the following fields:
-    1. **Panel Title**: Enter a descriptive name for your panel.
-    2. **Description**: Enter a brief and meaningful description of your new panel.
-    3. _(Optional)_ **Panel Time Preference**: You can use the the drop-down list to specify the time range for which you want to view data. The time range you specify here overrides the global value.
-    4. _(Optional)_ **Y Axis Unit**: Specify the unit of measurement for the y-axis.
-6. To specify the data displayed on your panel, you can use:
+
+5. Under **Add panel to**, choose the section to place the panel in. The dropdown lists every section on the dashboard.
+
+<Figure
+  src="/img/docs/userguide/manage-panels/new-panel-section-picker.webp"
+  alt="The Add panel to dropdown listing the dashboard's sections"
+  caption="The Add panel to dropdown lists every section on the dashboard."
+/>
+
+6. Select **Add Panel** to open the panel editor.
+7. Populate the following fields in the config pane on the right:
+    1. Under **Panel Details**, set the **Title**. Enter a descriptive name for your panel.
+    2. Under **Panel Details**, set the **Description**. Enter a brief and meaningful description of your new panel.
+    3. _(Optional)_ Under **Display options** → **Visualization**, set **Panel time preference**. Use the drop-down list to specify the time range for which you want to view data. The time range you specify here overrides the global value.
+    4. _(Optional)_ Under **Display options** → **Formatting & Units**, set the **Y Axis Unit**. Specify the unit of measurement for the y-axis.
+
+<Admonition type="info">
+The **Display options** sections vary by panel type. A Histogram panel, for example, shows **Histogram / Buckets** instead of **Axes** and **Formatting & Units**. See [Panel Types](https://signoz.io/docs/dashboards/panel-types/) for the options each type offers.
+</Admonition>
+
+8. To specify the data displayed on your panel, you can use:
     - The query builder. The query builder provides an easy-to-use graphical interface that allows you create custom queries. For instructions, see the [Create a Custom Query](https://signoz.io/docs/userguide/query-builder-v5/) page.
     - The declarative query language based on SQL that ClickHouse supports. For details, see the <a href="https://clickhouse.com/docs/en/sql-reference/" target="_blank" rel="noopener noreferrer nofollow">SQL Reference</a> page of the ClickHouse documentation.
     - PromQL. For details see the <a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" rel="noopener noreferrer nofollow">Prometheus Querying Language</a> page of the Prometheus documentation.
-7. _(Optional)_ If you're using the query builder, you can also transform your data by adding mathematical functions. For example, you can divide the value that a query returns by a number. The following mathematical functions are supported: *exp*, *log*, *ln*, *exp2*, *log2*, *exp10*, *log10*, *sqrt*, *cbrt*, *erf*, *erfc*, *lgamma*, *tgamma*, *sin*, *cos*, *tan*, *asin*, *acos*, *atan*, *degrees*, *radians.*
-8. _(Optional)_ The result of the panel query returns a timestamp, float value, and optional set of attributes. The attributes from the response can be used in legend formatting.
-9. _(Optional)_ You can plot up to ten queries on the same panel. To plot a new query, select the **+ Query** button.
-10.  When you've finished, select the **Save** button.
+9. _(Optional)_ If you're using the query builder, you can also transform your data by adding mathematical functions. For example, you can divide the value that a query returns by a number. The following mathematical functions are supported: *exp*, *log*, *ln*, *exp2*, *log2*, *exp10*, *log10*, *sqrt*, *cbrt*, *erf*, *erfc*, *lgamma*, *tgamma*, *sin*, *cos*, *tan*, *asin*, *acos*, *atan*, *degrees*, *radians.*
+10. _(Optional)_ The result of the panel query returns a timestamp, float value, and optional set of attributes. The attributes from the response can be used in legend formatting.
+11. _(Optional)_ You can plot up to ten queries on the same panel. To plot a new query, select the **+ Query** button.
+12. When you've finished, select **Save changes**.
 
 Note the following about panels:
 
 - The total number of queries and functions you can plot on a single panel must be less or equal to ten.
-- Every time you add or modify a function or formula, you must select the **Stage & Run Query** button. If you do not select this button, the panel will not be updated and your changes will be lost whenever you move to a different tab.
-- You can hide or unhide a function or formula by selecting the eye icon at its left and then selecting the **Stage & Run Query** button.
+- Adding a query does not run it. Select **Run Query** to refresh the preview after you add or modify a query, function, or formula.
+- You can hide or unhide a function or formula by selecting the eye icon at its left and then selecting **Run Query**.
+- When the query body is long enough to scroll, the query-type tabs and the **Run Query** button stay pinned at the top of the editor so they remain reachable.
 - When you install SigNoz, only the data provided by the Hostmetric receiver is available. To enable more metric receivers, see the [Send Metrics to SigNoz](https://signoz.io/docs/metrics-management/send-metrics/) section.
 
 ## Update a Panel
 
-1. From the sidebar, choose **Dashboard**.
-2. Find the dashboard in which you created the panel you wish to update, and then select the pencil icon located at the top right corner of your panel.
+1. From the sidebar, choose **Dashboards**.
+2. Find the dashboard in which you created the panel you wish to update, open the panel's **...** (three-dot) menu, and select **Edit panel**.
 3. Make the changes.
-4. When you've finished, select the **Save** button.
+4. When you've finished, select **Save changes**.
+
+The panel's **...** menu also offers **View**, **Clone**, **Download**, **Move to section**, and **Delete panel**.
+
+## Panel editor behavior
+
+The full-page panel editor keeps your in-progress work as you move around:
+
+- **Switching to view mode keeps unsaved changes.** All pending configuration (thresholds, units, table and list columns, legend, axes, and formatting) carries into **Switch to View Mode** along with the query.
+- **Query edits survive a browser refresh.** In-progress builder edits are restored on reload. Configuration changes such as title, thresholds, and units are not currently retained across a hard refresh.
+- **The Save button reflects state.** **Save** is enabled when there are unsaved changes and disabled when there are none, including after a refresh or after switching from the View modal to the full editor.
+- **A custom time range is preserved.** A time range picked in the editor's time picker is kept when you navigate back to the dashboard.
+- **Variables seed on direct load.** Opening the editor from a pasted link or a hard refresh seeds all variable values into the query preview.
+- **Visualization-type switches carry settings forward.** Changing the panel type (for example Time Series to Table) carries over axes soft min/max, log scale, time preference, stacking, fill spans, legend position and mode, and chart appearance instead of resetting them to defaults.
+
+The **Switch to Edit Mode** button in a panel's View modal appears only when you have edit permission on an unlocked dashboard.
 
 ## Next Steps
 
-- [Panel Types](https://signoz.io/docs/dashboards/panel-types/) — Choose the best visualization for your query.
-- [Manage Variables](https://signoz.io/docs/userguide/manage-variables/) — Create dynamic variables for your dashboards.
-- [Public Sharing](https://signoz.io/docs/dashboards/public-sharing/) — Enable or disable public sharing for your dashboards.
+- [Panel Types](https://signoz.io/docs/dashboards/panel-types/): choose the best visualization for your query.
+- [Manage Variables](https://signoz.io/docs/userguide/manage-variables/): create dynamic variables for your dashboards.
+- [Interactivity in Dashboards](https://signoz.io/docs/dashboards/interactivity/): drill down from panels into logs and traces, and create alerts from a panel.
+- [Public Sharing](https://signoz.io/docs/dashboards/public-sharing/): enable or disable public sharing for your dashboards.
 
 ## Get Help
 

@@ -1,5 +1,5 @@
 ---
-date: 2026-05-20
+date: 2026-07-29
 title: Metrics based alerts
 description: Learn how to create metrics-based alerts in SigNoz by defining alert conditions, configuring notification settings, and using practical examples for memory usage, error rate, and latency monitoring.
 doc_type: reference
@@ -46,6 +46,10 @@ to choose the metric to monitor. The following fields are available:
 To know more about the functionalities of the Query Builder, checkout the [documentation](https://signoz.io/docs/userguide/query-builder-v5/).
 
 ## Step 2: Define Alert Conditions
+
+<Admonition type="info">
+If you start from a dashboard panel using [**Create Alerts**](https://signoz.io/docs/dashboards/interactivity/#create-an-alert-from-a-panel), the alert opens with the panel's query loaded and the condition partly pre-filled from the panel's Reduce To setting and thresholds. Review and complete the remaining fields below before saving.
+</Admonition>
 
 In this step, you define the specific conditions for triggering the alert, as well as the frequency of checking those conditions.
 The condition configuration of an alert in SigNoz consists of 5 core parts:
@@ -121,6 +125,8 @@ The condition configuration of an alert in SigNoz consists of 5 core parts:
    - Count for request totals
     
    Helps interpret the threshold in the correct context and also for correct scaling while comparing 2 values.
+
+   This dropdown stays disabled until you set a unit on the query in Step 1, and it then offers the units in that same category.
     
 ### Advanced Options
 
@@ -149,11 +155,18 @@ In this step, you configure how alert notifications are delivered:
 ### Notification Message
 Custom message content for alert notifications. Use template variables to include dynamic information. The default template includes the current value and threshold.
 
-You can incorporate result attributes in the alert message to make notifications more informative:
+You can incorporate template variables in the alert message to make notifications more informative:
 
-**Syntax**: Use `$<attribute-name>` to insert attribute values. Attribute values can be any attribute used in group by.
+| Variable | Description |
+| --- | --- |
+| `{{$value}}` | The current aggregated value that triggered the alert, formatted with the unit set on the query in Step 1 |
+| `{{$threshold}}` | The threshold value that was breached, formatted with the [Threshold Unit](#threshold-unit) from Step 2 |
+| `$<attribute-name>` | Any attribute used in the Group By clause (e.g., `$service.name`). The `{{$service.name}}` form works too |
 
-**Example**: If you have a query that has the attribute `service.name` in the group by clause then to use it in the notification message, you will use `$service.name`.
+The two variables read their units from different places. `{{$value}}` uses the unit set on the query in Step 1, and `{{$threshold}}` uses the Threshold Unit in Step 2. The Threshold Unit list is filtered to the query unit's category but still mixes decimal and binary units, so choosing `Gigabytes (GB)` for the query and `Bytes (B) (IEC)` for the threshold renders GB in one half of your message and GiB in the other. Pick both from the same family to keep them consistent.
+
+**Example**: If you have a query grouped by `service.name` with a threshold of 500 MB, you could write:
+`Memory usage for $service.name is {{$value}} (threshold: {{$threshold}})`
 
 Using <a href="https://api.slack.com/reference/surfaces/formatting#advanced" target="_blank" rel="noopener noreferrer nofollow">advanced Slack formatting</a> is supported if you are using Slack as a notification channel.
 
