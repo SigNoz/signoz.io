@@ -6,33 +6,9 @@ interface CardProps {
   title: string
   description: string
   href: string
-  icon?: React.ReactNode
 }
 
-const DocCard: React.FC<CardProps> = ({ title, description, href, icon }) => {
-  if (icon) {
-    return (
-      <Link
-        href={href}
-        className="block min-h-[152px] border border-dashed border-[var(--l1-border)] bg-transparent p-4 no-underline outline-none transition-colors hover:bg-[var(--l1-background-hover)] focus-visible:bg-[var(--l1-background-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--l1-border)] active:bg-[var(--l1-background-hover)]"
-      >
-        <div className="flex min-h-[120px] flex-col justify-between">
-          <div className="size-8 shrink-0 overflow-hidden rounded-[4px] text-[var(--l1-foreground)] [&_img]:size-full [&_img]:object-contain [&_svg]:size-full [&_svg]:fill-current [&_svg]:stroke-current">
-            {icon}
-          </div>
-          <div className="flex flex-col gap-3">
-            <div className="text-base font-semibold leading-none text-[var(--l1-foreground-hover)]">
-              {title}
-            </div>
-            <p className="m-0 text-[13px] leading-5 tracking-[-0.065px] text-[var(--l2-foreground)]">
-              {description}
-            </p>
-          </div>
-        </div>
-      </Link>
-    )
-  }
-
+const DocCard: React.FC<CardProps> = ({ title, description, href }) => {
   return (
     <Link
       href={href}
