@@ -115,12 +115,7 @@ In v2, the same filter is a single `filterExpression` string:
 service.name = 'checkout' AND k8s.namespace.name IN ('prod-us', 'prod-eu')
 ```
 
-Filter expressions can reference:
-
-- **any label key** attached to the rule's history entries, for example `service.name`, `host.name`, or whatever labels your alert groups by. Use the `filter_keys` endpoint below to discover them.
-- **intrinsic fields** of a history entry: `rule_id`, `rule_name`, `state`, `overall_state`, `state_changed`, `overall_state_changed`, `unix_milli`, `fingerprint`, `value`.
-
-Referencing a key that does not exist in the rule's history returns a `400` with a key-not-found error, rather than silently matching nothing.
+Filter expressions reference the label keys attached to the rule's history entries, for example `service.name`, `host.name`, or whatever labels your alert groups by. Use the `filter_keys` endpoint below to discover them.
 
 Some example expressions:
 
@@ -130,7 +125,6 @@ service.name != 'checkout'
 k8s.namespace.name IN ('prod-us', 'prod-eu')
 host.name LIKE 'ip-10-0-%'
 k8s.pod.name EXISTS
-state = 'firing' AND value > 100
 (service.name = 'checkout' OR service.name = 'payments') AND host.name EXISTS
 ```
 
