@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react'
 import { Download, Copy, CheckCircle } from 'lucide-react'
-import Button from '../ui/Button'
+import { Button } from '@signozhq/ui/button'
+import { Typography } from '@signozhq/ui/typography'
+import { toast } from '@signozhq/ui/sonner'
 
 interface DashboardActionsProps {
   dashboardJsonUrl: string
@@ -10,10 +12,10 @@ interface DashboardActionsProps {
   className?: string
 }
 
-const DashboardActions: React.FC<DashboardActionsProps> = ({ 
-  dashboardJsonUrl, 
+const DashboardActions: React.FC<DashboardActionsProps> = ({
+  dashboardJsonUrl,
   dashboardName,
-  className = ""
+  className = '',
 }) => {
   const [isDownloading, setIsDownloading] = useState(false)
   const [isCopying, setIsCopying] = useState(false)
@@ -26,12 +28,12 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
       if (!response.ok) {
         throw new Error('Failed to fetch dashboard JSON')
       }
-      
+
       const dashboardData = await response.json()
-      const blob = new Blob([JSON.stringify(dashboardData, null, 2)], { 
-        type: 'application/json' 
+      const blob = new Blob([JSON.stringify(dashboardData, null, 2)], {
+        type: 'application/json',
       })
-      
+
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -42,7 +44,7 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
       URL.revokeObjectURL(url)
     } catch (error) {
       console.error('Error downloading dashboard:', error)
-      alert('Failed to download dashboard. Please try again.')
+      toast.error('Failed to download dashboard. Please try again.')
     } finally {
       setIsDownloading(false)
     }
@@ -55,15 +57,15 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
       if (!response.ok) {
         throw new Error('Failed to fetch dashboard JSON')
       }
-      
+
       const dashboardData = await response.json()
       await navigator.clipboard.writeText(JSON.stringify(dashboardData, null, 2))
-      
+
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
       console.error('Error copying dashboard:', error)
-      alert('Failed to copy dashboard. Please try again.')
+      toast.error('Failed to copy dashboard. Please try again.')
     } finally {
       setIsCopying(false)
     }
@@ -71,44 +73,43 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
-      <div className="flex gap-3 my-6">
+      <div className="my-6 flex gap-3">
         <Button
-          variant="default"
-          rounded='default'
-          isButton={true}
+          variant="solid"
+          color="primary"
           onClick={handleDownload}
           disabled={isDownloading}
+          prefix={<Download className="h-3.5 w-3.5" />}
         >
-          <Download className="w-3.5 h-3.5 mr-1.5" />
           {isDownloading ? 'Downloading...' : 'Download JSON'}
         </Button>
-        
-        <Button 
-          variant={"tertiary"} 
-          rounded={"default"} 
-          isButton={true}
+
+        <Button
+          variant="outlined"
+          color="secondary"
           onClick={handleCopy}
           disabled={isCopying}
+          prefix={
+            copied ? (
+              <CheckCircle className="h-3.5 w-3.5 text-[var(--success-foreground)]" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )
+          }
         >
           {copied ? (
-            <>
-              <CheckCircle className="w-3.5 h-3.5 mr-1.5 text-green-600" />
-              <span className="text-green-600">Copied!</span>
-            </>
+            <span className="text-[var(--success-foreground)]">Copied!</span>
+          ) : isCopying ? (
+            'Copying...'
           ) : (
-            <>
-              <Copy className="w-3.5 h-3.5 mr-1.5" />
-              {isCopying ? 'Copying...' : 'Copy JSON'}
-            </>
+            'Copy JSON'
           )}
         </Button>
       </div>
-      
-      <div className="text-sm text-gray-600 mt-2">
-        <p className="text-center">
-          <span className="font-bold italic">Dashboards → + New dashboard → Import JSON</span>
-        </p>
-      </div>
+
+      <Typography.Text color="muted" className="mt-2 text-center text-sm">
+        <span className="font-bold italic">Dashboards → + New dashboard → Import JSON</span>
+      </Typography.Text>
     </div>
   )
 }
