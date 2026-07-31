@@ -41,9 +41,9 @@ Labeled **Pod Status** in the table. Breakdown of the pods owned by the DaemonSe
 
 Summary of the DaemonSet's node-level scheduling counters, shown as four labeled, color-coded counts in a single cell:
 
-- **Ready** (green): nodes running at least one ready daemon pod.
-- **Current** (blue): nodes the DaemonSet currently runs a pod on.
-- **Desired** (pink): nodes the DaemonSet should run a pod on.
+- **Ready** (green): nodes that should run the daemon pod and have at least one running and ready.
+- **Current** (blue): nodes that run at least one daemon pod and are supposed to run it.
+- **Desired** (pink): nodes that should run the daemon pod, including those already running it.
 - **Misscheduled** (amber): nodes running a daemon pod that should not be running one.
 
 These are node counts, not pod counts. In a healthy DaemonSet, Ready, Current, and Desired match, and Misscheduled is `0`. Each count is defined in more detail under [Ready](#ready), [Current](#current), [Desired](#desired), and [Misscheduled](#misscheduled).
@@ -78,15 +78,15 @@ Ready, Current, Desired, and Misscheduled are also available as individual sorta
 
 ### Ready
 
-Number of nodes running at least one ready daemon pod (`k8s.daemonset.ready_nodes`). Available as the sortable **Ready Nodes** column.
+Number of nodes that should be running the daemon pod and have one or more of those pods running and ready (`k8s.daemonset.ready_nodes`). Nodes running a misscheduled pod are not counted here. Available as the sortable **Ready Nodes** column.
 
 ### Current
 
-Number of nodes the DaemonSet currently runs a pod on (`k8s.daemonset.current_scheduled_nodes`). Available as the sortable **Current Nodes** column.
+Number of nodes that are running at least one daemon pod and are supposed to run it (`k8s.daemonset.current_scheduled_nodes`). Nodes running a misscheduled pod are counted under Misscheduled instead. Available as the sortable **Current Nodes** column.
 
 ### Desired
 
-Number of nodes the DaemonSet should run a pod on (`k8s.daemonset.desired_scheduled_nodes`). Available as the sortable **Desired Nodes** column.
+Number of nodes that should be running the daemon pod, including nodes already running it (`k8s.daemonset.desired_scheduled_nodes`). Available as the sortable **Desired Nodes** column.
 
 ### Misscheduled
 
@@ -94,5 +94,5 @@ Number of nodes running a daemon pod that should not be running one (`k8s.daemon
 
 ## Next steps
 
-- [Understanding CPU metrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics/): Read how the CPU request and limit percentages in this table are calculated before acting on them.
+- [Kubernetes Pod Metrics dashboard](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed/): Chart CPU and memory against requests and limits for the pods behind these DaemonSets.
 - [Metrics-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/): Alert on `k8s.daemonset.misscheduled_nodes` or a Ready/Desired mismatch instead of watching the table.
