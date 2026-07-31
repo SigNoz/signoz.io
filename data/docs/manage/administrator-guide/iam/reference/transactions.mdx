@@ -19,12 +19,14 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers IAM resources (roles, service accounts, API keys) and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
+This page currently covers roles, service accounts, API keys, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
 </Admonition>
 
-## Role
+## Resources
 
-Resource: `role` | Kind: `role` | Selector: role name (for example, `my-custom-role`)
+### Role
+
+**Resource:** `role` · **Kind:** `role` · **Selector:** role name (for example, `my-custom-role`)
 
 | Relation | Description | Managed Role Access |
 |----------|-------------|---------------------|
@@ -36,9 +38,9 @@ Resource: `role` | Kind: `role` | Selector: role name (for example, `my-custom-r
 | `attach` | Create a relationship with the role — assign this role to a principal. | signoz-admin |
 | `detach` | Remove a relationship from the role — unassign this role from a principal. | signoz-admin |
 
-## Service Account
+### Service Account
 
-Resource: `serviceaccount` | Kind: `serviceaccount` | Selector: service account ID
+**Resource:** `serviceaccount` · **Kind:** `serviceaccount` · **Selector:** service account ID
 
 | Relation | Description | Managed Role Access |
 |----------|-------------|---------------------|
@@ -52,9 +54,9 @@ Resource: `serviceaccount` | Kind: `serviceaccount` | Selector: service account 
 
 <div id="factor-api-key" />
 
-## API Key
+### API Key
 
-Resource: `metaresource` | Kind: `factor-api-key` | Selector: API key ID
+**Resource:** `metaresource` · **Kind:** `factor-api-key` · **Selector:** API key ID
 
 | Relation | Description | Managed Role Access |
 |----------|-------------|---------------------|
@@ -64,52 +66,45 @@ Resource: `metaresource` | Kind: `factor-api-key` | Selector: API key ID
 | `update` | Modify API key metadata (for example, change the expiration date). | signoz-admin |
 | `delete` | Permanently revoke an API key. | signoz-admin |
 
-## Compound Transactions
+### Logs
 
-Some operations require transactions on multiple resources. Both transactions must be satisfied for the operation to succeed.
-
-| Operation | Transactions Required |
-|-----------|----------------------|
-| Assign a role to a service account | `serviceaccount:attach` AND `role:attach` |
-| Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
-| Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
-| Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |
-
-## Logs
-
-Resource: `telemetryresource` | Kind: `logs` | Selector: telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
+**Resource:** `telemetryresource` · **Kind:** `logs` · **Selector:** telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
 
 | Relation | Description | Managed Role Access |
 |----------|-------------|---------------------|
 | `read` | Query log data in the Logs Explorer, dashboards, alerts, and the API. | signoz-admin, signoz-editor, signoz-viewer |
 
-## Traces
+### Traces
 
-Resource: `telemetryresource` | Kind: `traces` | Selector: telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
+**Resource:** `telemetryresource` · **Kind:** `traces` · **Selector:** telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
 
 | Relation | Description | Managed Role Access |
 |----------|-------------|---------------------|
 | `read` | Query trace data in the Traces Explorer, dashboards, alerts, and the API. | signoz-admin, signoz-editor, signoz-viewer |
 
-## Metrics
+### Metrics
 
-Resource: `telemetryresource` | Kind: `metrics` | Selector: telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
+**Resource:** `telemetryresource` · **Kind:** `metrics` · **Selector:** telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
 
 | Relation | Description | Managed Role Access |
 |----------|-------------|---------------------|
 | `read` | Query metric data in the Metrics Explorer, dashboards, alerts, and the API. | signoz-admin, signoz-editor, signoz-viewer |
 
-## Meter Metrics
+### Meter Metrics
 
-Resource: `telemetryresource` | Kind: `meter-metrics` | Selector: telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
+**Resource:** `telemetryresource` · **Kind:** `meter-metrics` · **Selector:** telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
 
 | Relation | Description | Managed Role Access |
 |----------|-------------|---------------------|
 | `read` | Query usage metering data for the workspace. | signoz-admin, signoz-editor, signoz-viewer |
 
-## Telemetry Selectors
+## Selectors
 
-Telemetry resources support only the `read` relation, but their selectors are more expressive than the instance IDs used by IAM resources. A telemetry selector scopes the grant by **query type** and, optionally, by **ingestion key id**:
+Roles, service accounts, and API keys are scoped by instance names or IDs, shown in each resource's metadata line above. Telemetry resources (logs, traces, metrics, meter metrics) support only the `read` relation and use a query-scoped selector format instead.
+
+### Telemetry Selectors
+
+A telemetry selector scopes the transaction by **query type** and, optionally, by **ingestion key ID**:
 
 | Selector | Meaning |
 |----------|---------|
@@ -126,21 +121,19 @@ The supported query types are:
 | `promql` | PromQL queries. | No (wildcard only) |
 | `clickhouse_sql` | ClickHouse SQL queries. | No (wildcard only) |
 
-`signoz.workspace.key.id` is the only key that telemetry grants can be scoped by. Its value is the ingestion key ID, which you can find on the Ingestion Settings page. The key may be written unprefixed or as `resource.signoz.workspace.key.id`; both are treated the same.
+<Admonition type="warning">
+`signoz.workspace.key.id` is the only key that telemetry transactions can be scoped by. Its value is the ingestion key ID, which you can find on the Ingestion Settings page.
+</Admonition>
 
-Broader grants implicitly cover narrower requests within the same query type: a grant for `builder_query/signoz.workspace.key.id/*` covers every specific key ID, `builder_query/*` covers all builder queries, and `*` covers everything on that signal. Grants never widen across query types: a `builder_query` grant does not satisfy a PromQL query.
+For transaction evaluation rules and how queries are authorized, see the [Telemetry Access Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/telemetry/).
 
-For a step-by-step walkthrough of scoping a role to an ingestion key, see [Scope Telemetry Access by Ingestion Key](https://signoz.io/docs/manage/administrator-guide/iam/user-guides/scope-telemetry-access-by-ingestion-key/).
+## Compound Transactions
 
-## How Queries Are Authorized
+Some operations require transactions on multiple resources. Both transactions must be satisfied for the operation to succeed.
 
-Every query in SigNoz, whether it runs in an explorer, a dashboard panel, an alert evaluation preview, or through the API, is checked against the caller's telemetry transactions. The transactions a query requires depend on its query type:
-
-| Query | Transactions Required |
-|-------|----------------------|
-| Builder query on a signal | `read` on that signal's telemetry resource, with a selector derived from the query's filter |
-| PromQL query | `metrics:read` with selector `promql/*` |
-| ClickHouse SQL query | `read` with selector `clickhouse_sql/*` on **all** of `logs`, `traces`, `metrics`, and `meter-metrics` |
-| Formulas, joins, and trace operators | No transaction of their own; the queries they reference are checked |
-
-For builder queries, the required selector is derived from the query's filter expression. A query that filters on `signoz.workspace.key.id` with `=` or `IN` at the top level of the filter requires only the grants for those specific key IDs. Any other builder query (no key filter, or the key combined with `OR`, `NOT`, or `!=`) requires the broader `builder_query/*` (or `*`) grant.
+| Operation | Transactions Required |
+|-----------|----------------------|
+| Assign a role to a service account | `serviceaccount:attach` AND `role:attach` |
+| Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
+| Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
+| Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |
