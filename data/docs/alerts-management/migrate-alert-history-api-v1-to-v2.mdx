@@ -73,12 +73,110 @@ curl "https://<your-tenant>.signoz.cloud/api/v2/rules/<rule-uuid>/history/stats?
   -H "SIGNOZ-API-KEY: <your-api-key>"
 ```
 
+## Migrating filters
+
+In v1, the timeline endpoint accepted a query-builder v3 `FilterSet` object in the request body:
+
+```json
+{
+  "start": 1753900000000,
+  "end": 1753990000000,
+  "offset": 0,
+  "limit": 20,
+  "order": "desc",
+  "filters": {
+    "op": "AND",
+    "items": [
+      {
+        "key": { "key": "service.name", "dataType": "string", "type": "tag" },
+        "op": "=",
+        "value": "checkout"
+      },
+      {
+        "key": { "key": "k8s.namespace.name", "dataType": "string", "type": "tag" },
+        "op": "in",
+        "value": ["prod-us", "prod-eu"]
+      }
+    ]
+  }
+}
+```
+
+In v2, the same filter is a single `filterExpression` string:
+
+```
+service.name = 'checkout' AND k8s.namespace.name IN ('prod-us', 'prod-eu')
+```
+
+Filter expressions can reference:
+
+- **any label key** attached to the rule's history entries — for example `service.name`, `host.name`, or whatever labels your alert groups by. Use the `filter_keys` endpoint below to discover them.
+- **intrinsic fields** of a history entry: `rule_id`, `rule_name`, `state`, `overall_state`, `state_changed`, `overall_state_changed`, `unix_milli`, `fingerprint`, `value`.
+
+Referencing a key that does not exist in the rule's history returns a `400` with a key-not-found error, rather than silently matching nothing.
+
+Some example expressions:
+
+```
+service.name = 'checkout'
+service.name != 'checkout'
+k8s.namespace.name IN ('prod-us', 'prod-eu')
+host.name LIKE 'ip-10-0-%'
+k8s.pod.name EXISTS
+state = 'firing' AND value > 100
+(service.name = 'checkout' OR service.name = 'payments') AND host.name EXISTS
+```
+
+Because the expression contains spaces and quotes, URL-encode it. With `curl`, the simplest way is `-G` with `--data-urlencode`:
+
+```bash
+curl -G "https://<your-tenant>.signoz.cloud/api/v2/rules/<rule-uuid>/history/timeline" \
+  -H "SIGNOZ-API-KEY: <your-api-key>" \
+  --data-urlencode "start=1753900000000" \
+  --data-urlencode "end=1753990000000" \
+  --data-urlencode "limit=20" \
+  --data-urlencode "order=desc" \
+  --data-urlencode "filterExpression=service.name = 'checkout' AND k8s.namespace.name IN ('prod-us', 'prod-eu')"
+```
+
+### Discovering filter keys and values
+
+v1 returned a `labels` map at the top level of the timeline response for building filter UIs. v2 replaces it with two dedicated endpoints. Note that these use `startUnixMilli`/`endUnixMilli` for the time range, unlike the other history endpoints:
+
+```bash
+# distinct label keys in the rule's history
+curl -G "https://<your-tenant>.signoz.cloud/api/v2/rules/<rule-uuid>/history/filter_keys" \
+  -H "SIGNOZ-API-KEY: <your-api-key>" \
+  --data-urlencode "startUnixMilli=1753900000000" \
+  --data-urlencode "endUnixMilli=1753990000000"
+
+# distinct values for one key
+curl -G "https://<your-tenant>.signoz.cloud/api/v2/rules/<rule-uuid>/history/filter_values" \
+  -H "SIGNOZ-API-KEY: <your-api-key>" \
+  --data-urlencode "startUnixMilli=1753900000000" \
+  --data-urlencode "endUnixMilli=1753990000000" \
+  --data-urlencode "name=service.name"
+```
+
+Both accept optional `searchText` (substring match on the returned keys/values) and `limit` (default 50, maximum 200). `filter_values` also accepts an optional `existingQuery` filter expression, so a filter-builder UI can narrow suggested values to those matching the filters already selected.
+
 ## Response changes
 
 The v2 payloads carry the same information with a few shape changes:
 
 - `ruleID` is now `ruleId` in timeline items.
-- `labels` was a JSON-encoded string map; it is now a structured array of label objects (timeline items and top contributors).
+- `labels` was a JSON-encoded string map; it is now a structured array of label objects (timeline items and top contributors):
+
+  ```json
+  // v1
+  "labels": "{\"service.name\":\"checkout\",\"host.name\":\"ip-10-0-0-1\"}"
+
+  // v2
+  "labels": [
+    { "key": { "name": "service.name" }, "value": "checkout" },
+    { "key": { "name": "host.name" }, "value": "ip-10-0-0-1" }
+  ]
+  ```
 - Timeline responses include `nextCursor` alongside `items` and `total`; it is omitted on the last page. The v1 top-level `labels` map on the timeline response is gone — use `filter_keys` and `filter_values` instead.
 - `currentAvgResolutionTime` and `pastAvgResolutionTime` in the stats response are now numbers (seconds) instead of formatted strings.
 - `relatedTracesLink` and `relatedLogsLink` are omitted when empty instead of always being present.
@@ -87,6 +185,5 @@ Full response schemas for every endpoint are in the [SigNoz API Reference](https
 
 ## New capabilities in v2
 
-- `GET /api/v2/rules/{id}/history/filter_keys?start=<ms>&end=<ms>` returns the distinct label keys present in the rule's history, replacing the v1 timeline's top-level `labels` map.
-- `GET /api/v2/rules/{id}/history/filter_values?start=<ms>&end=<ms>&key=<label-key>` returns the distinct values for a label key.
 - `filterExpression` accepts full query-builder expressions (`AND`/`OR`, `=`, `!=`, `IN`, `LIKE`, `EXISTS`, …) instead of the v3 `FilterSet` JSON structure.
+- `filter_keys` and `filter_values` (see [Discovering filter keys and values](#discovering-filter-keys-and-values)) replace the v1 timeline's top-level `labels` map, and support search and narrowing by an existing filter.
