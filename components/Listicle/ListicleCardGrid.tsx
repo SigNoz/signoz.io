@@ -65,12 +65,10 @@ export default function ListicleCardGrid({
               clickText={item.name}
               clickLocation={sectionName}
             >
-              {item.icon && typeof item.icon === 'string' ? (
-                <div className="mb-3 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded bg-[var(--base-white)]">
+              {item.icon ? (
+                <div className="mb-3 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden">
                   {renderIcon(item.icon)}
                 </div>
-              ) : item.icon ? (
-                <div className="mb-3 shrink-0">{renderIcon(item.icon)}</div>
               ) : null}
               <div
                 className={`flex w-full flex-col items-start ${item.description ? 'mt-auto gap-3' : ''}`}
