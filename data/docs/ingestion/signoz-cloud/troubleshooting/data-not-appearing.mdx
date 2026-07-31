@@ -7,16 +7,16 @@ doc_type: howto
 
 ## Overview
 
-Telemetry travels over OTLP from your application, optionally through an OpenTelemetry Collector, to SigNoz. Data that never appears is lost at one of three points on that path. This guide isolates which one, in order:
+This guide walks the three points where telemetry gets lost between your application and SigNoz, in order. You do not have to read all of it. Start with the [interactive troubleshooter](#find-your-problem) below, or follow the steps manually. Each step tells you what to check, what a healthy result looks like, and where to go next based on what you find.
 
-1. [Is your application generating telemetry?](#step-1-is-your-application-generating-telemetry) Confirm the data exists before checking where it goes. It does not when the SDK is not initialized, the runtime or library is unsupported, or the code path never ran.
-2. [Is your telemetry being exported?](#step-2-is-your-telemetry-being-exported) Enable diagnostic logging and read the exporter errors. A wrong endpoint, region, or ingestion key surfaces here.
-3. [Is your telemetry reaching SigNoz?](#step-3-is-your-telemetry-reaching-signoz) Verify connectivity to the endpoint, or to the Collector and onward from it.
+1. [Is your application generating telemetry?](#step-1-is-your-application-generating-telemetry) Confirm the data exists before worrying about where it goes.
+2. [Is your telemetry being exported?](#step-2-is-your-telemetry-being-exported) Enable diagnostic logging and read the exporter errors.
+3. [Is your telemetry reaching SigNoz?](#step-3-is-your-telemetry-reaching-signoz) Verify connectivity and the ingestion endpoint or Collector.
 
-Each step states what to check, what a healthy result looks like, and which step to go to next. The steps apply to both SigNoz Cloud and self-hosted SigNoz; where the two differ, the difference is called out.
+The steps apply to both SigNoz Cloud and self-hosted SigNoz. Where the two differ, the difference is called out.
 
 <Admonition type="tip">
-Most "no data" reports come down to a wrong endpoint, a wrong region, or an incorrect ingestion key. If you already know your instrumentation works, go straight to [Quick debug](#quick-debug).
+Already have an error message in your application or Collector logs? Match it in [Quick debug](#quick-debug) instead of working through the steps.
 </Admonition>
 
 ## Find your problem
@@ -25,9 +25,13 @@ Answer a few questions to get to the most likely cause and its fix. Select your 
 
 <TroubleshootingWizard />
 
-<Admonition type="info">
-One check is language-specific: the console exporter in [Step 1](#step-1-is-your-application-generating-telemetry) works out of the box for the Java, Node.js, Python, .NET, Ruby, and PHP agents. Go has no agent and configures it in code.
-</Admonition>
+Prefer to see the whole decision tree at once? The flowchart below covers the same checks.
+
+<Figure
+  src="/img/docs/ingestion/signoz-cloud/troubleshooting/missing-telemetry-flowchart.svg"
+  alt="Flowchart for diagnosing missing telemetry in SigNoz. Step 1: enable the console exporter, restart, and exercise the code path; if nothing prints, it is an instrumentation problem, meaning the SDK or agent is not initialized before your code or the runtime or library version is unsupported. If it prints, step 2: check the SDK debug logs for export errors and match them, where 401 or 403 is a wrong or expired ingestion key, 404 is a wrong endpoint or path, connection refused or timeout means the endpoint or Collector is unreachable, and exports that succeed while the UI stays empty mean the wrong region on Cloud or the wrong instance when self-hosted. If there are no errors, step 3: if sending directly, curl the endpoint and check the key, endpoint, and region. If sending via a Collector, step 4: add the Collector's debug exporter; if data appears in the Collector logs it is a Collector-to-SigNoz problem, fixed in the otlphttp exporter and its pipeline, and otherwise it is an app-to-Collector problem, fixed by checking OTEL_EXPORTER_OTLP_ENDPOINT, that the Collector listens on 4317 and 4318, and firewalls."
+  caption="Where telemetry gets lost between your application and SigNoz, and the fix for each branch"
+/>
 
 ## Step 1: Is your application generating telemetry?
 
@@ -344,7 +348,9 @@ service:
 
 ## Quick debug
 
-Turn on your diagnostic logs first ([Step 2](#step-2-is-your-telemetry-being-exported)): with a direct SDK export they appear in your application's console, and with a Collector, in the Collector's logs. Then open the tab that matches what you see.
+Open the tab that matches the error you are seeing. Errors appear in your application's console for a direct SDK export, and in the Collector's logs when you use a Collector.
+
+No error message yet? Enable diagnostic logging with `OTEL_LOG_LEVEL=debug`, restart, and read the output. [Step 2](#step-2-is-your-telemetry-being-exported) has the equivalent setting for each language.
 
 <Tabs entityName="error">
 <TabItem value="auth" label="401 / 403" default>

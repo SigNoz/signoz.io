@@ -77,7 +77,7 @@ const START = 'q_generated'
 
 // Small inline helpers so the tree stays readable.
 const Code = ({ children }: { children: React.ReactNode }) => (
-  <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-[0.85em] text-gray-800 dark:bg-gray-800 dark:text-gray-200">
+  <code className="rounded bg-signoz_ink-200 px-1 py-0.5 font-mono text-[0.85em] text-signoz_vanilla-100">
     {children}
   </code>
 )
@@ -291,7 +291,8 @@ function buildTree(m: SignalMeta): Record<string, Node> {
           <pre className="overflow-x-auto rounded bg-gray-100 p-3 text-sm dark:bg-gray-800">
             <code>
               # SigNoz Cloud{'\n'}
-              curl -v https://ingest.&lt;region&gt;.signoz.cloud:443{'\n\n'}# Self-hosted SigNoz{'\n'}
+              curl -v https://ingest.&lt;region&gt;.signoz.cloud:443{'\n\n'}# Self-hosted SigNoz
+              {'\n'}
               curl -v http://&lt;signoz-host&gt;:4318
             </code>
           </pre>
@@ -398,7 +399,16 @@ export default function TroubleshootingWizard() {
   const back = () => setHistory((h) => (h.length > 1 ? h.slice(0, -1) : h))
 
   return (
-    <div className="not-prose my-6">
+    <div className="not-prose my-6 rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-5">
+      <div className="mb-4">
+        <p className="m-0 text-sm font-semibold text-signoz_vanilla-100">
+          Interactive troubleshooter
+        </p>
+        <p className="m-0 mt-0.5 text-xs text-signoz_vanilla-400">
+          Answer a few questions to find where your data is getting lost.
+        </p>
+      </div>
+
       <TabsRoot
         value={signal}
         onValueChange={(value) => reset(value as Signal)}
@@ -420,18 +430,18 @@ export default function TroubleshootingWizard() {
         </TabsList>
       </TabsRoot>
 
-      <div className="mt-4">
+      <div className="mt-5">
         {node.kind === 'question' ? (
           <div>
-            <p className="m-0 mb-1 text-base font-semibold text-gray-900 dark:text-gray-100">
+            <p className="m-0 max-w-3xl text-[15px] font-medium leading-6 text-signoz_vanilla-100">
               {node.prompt}
             </p>
             {node.hint ? (
-              <p className="mb-3 mt-1 text-sm text-gray-500 dark:text-gray-400">{node.hint}</p>
-            ) : (
-              <div className="mb-3" />
-            )}
-            <div className="flex flex-col gap-2">
+              <p className="m-0 mt-2 max-w-3xl text-[13px] leading-5 text-signoz_vanilla-400">
+                {node.hint}
+              </p>
+            ) : null}
+            <div className="mt-4 flex flex-col gap-2">
               {node.options.map((opt) => (
                 <Button
                   key={opt.to + opt.label}
@@ -439,7 +449,7 @@ export default function TroubleshootingWizard() {
                   color="secondary"
                   onClick={() => answer(opt.to)}
                   suffix={<ArrowRight />}
-                  className="w-full !h-auto !justify-between !py-2.5 text-left"
+                  className="!h-auto w-full !justify-between !py-3 text-left !text-sm !text-signoz_vanilla-100"
                 >
                   {opt.label}
                 </Button>
@@ -456,16 +466,20 @@ export default function TroubleshootingWizard() {
         )}
       </div>
 
-      <div className="mt-3 flex items-center gap-2">
-        <Button variant="ghost" color="secondary" size="sm" onClick={back} disabled={history.length <= 1}>
+      <div className="mt-4 flex items-center gap-2 border-t border-signoz_slate-400 pt-3">
+        <Button
+          variant="ghost"
+          color="secondary"
+          size="sm"
+          onClick={back}
+          disabled={history.length <= 1}
+        >
           Back
         </Button>
         <Button variant="ghost" color="secondary" size="sm" onClick={() => reset()}>
           Start over
         </Button>
-        <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
-          Step {history.length}
-        </span>
+        <span className="ml-auto text-xs text-signoz_vanilla-400">Step {history.length}</span>
       </div>
     </div>
   )
