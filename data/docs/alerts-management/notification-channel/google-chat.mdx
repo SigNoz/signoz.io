@@ -1,0 +1,138 @@
+---
+date: 2026-07-30
+doc_type: howto
+title: Configure Google Chat Channel
+description: Set up Google Chat as a notification channel in SigNoz to receive alerts as rich cards in your team's space.
+---
+
+## Prerequisites
+
+Before configuring Google Chat as a notification channel in SigNoz, ensure that you have:
+
+- **Incoming Webhook**: Follow the steps in <a href="https://developers.google.com/workspace/chat/quickstart/webhooks" target="_blank" rel="noopener noreferrer nofollow">Google Chat's incoming webhooks documentation</a> to create an Incoming Webhook in the space where you want alerts to appear, and copy its webhook URL.
+
+## Accessing Notification Channels
+
+To manage your notification channels in SigNoz, navigate to `Settings > Notification Channels`. This tab lists all configured channels.
+
+<Figure src="/img/docs/alert-channels.webp" alt="Notification channels list in SigNoz." caption="Notification channels list in SigNoz." />
+
+## Creating a new Notification channel
+
+To create a new Google Chat notification channel:
+
+- Navigate to `Settings > Notification Channels` and click on `New Channel`.
+- Enter a **Name** for the channel and select **Google Chat** as the channel type.
+- **Webhook URL**: Paste the Incoming Webhook URL from your Google Chat space. It must use `https` and the host `chat.googleapis.com`.
+- **Title** and **Description**: These are prefilled with default templates and control the card heading and body. You can edit them (see [Customizing the message](#customizing-the-message)).
+- **Send resolved alerts**: On by default. When on, SigNoz also posts a card when an alert resolves.
+
+<Admonition>
+The **Title** and **Description** fields accept <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a> for customizing the message.
+</Admonition>
+
+<Figure src="/img/docs/google-chat-new-channel.webp" alt="Create a new Google Chat notification channel." caption="Create a new Google Chat notification channel." />
+
+**Test Configuration**: Click the **Test** button to post a sample card to the configured space. This verifies that SigNoz can reach your webhook before you save.
+
+## Editing a Notification channel
+
+To edit an existing Google Chat channel, open it from the channels list. You can change the **Webhook URL**, **Title**, **Description**, and **Send resolved alerts** toggle. The channel **Name** and **Type** cannot be changed after creation.
+
+## Receive Alerts in Google Chat
+
+Once configured, SigNoz posts a card to the space whenever an alert fires (or resolves). Each card has:
+
+- A colored **🔴 FIRING** / **🟢 RESOLVED** banner.
+- The alert title as the card heading, and the rendered Description as the body.
+- Deep-link buttons: **Open in SigNoz**, and **View Related Logs** / **View Related Traces** when the alert carries those links.
+
+Related alerts are threaded together using the alert's group key, so updates to the same alert group stay in one conversation thread.
+
+<Figure src="/img/docs/alerts-in-google-chat.webp" alt="A firing alert delivered as a card in Google Chat." caption="A firing alert delivered as a card in Google Chat." />
+
+### Grouped alerts
+
+When several alerts fire together, they are grouped into a **single card**. The card body lists every alert in the group, with one set of buttons: **View Related Logs** / **View Related Traces** for the first alert, and **Open in SigNoz** to open the alert in SigNoz. This keeps grouped notifications compact.
+
+## Customizing the message
+
+The **Description** is rendered into the card body as HTML, so write it in **standard markdown**. The following constructs are supported:
+
+- **Render well**: bold, italic, links, ordered/unordered/nested lists, inline and fenced code.
+- **Degrade to plain text**: headings, blockquotes, and horizontal rules.
+- **Flatten**: tables lose their grid and the cells stack vertically.
+
+The default template uses only bold and text, so this only matters if you write a fully custom Description. A couple of limits to keep in mind:
+
+- Google Chat caps a message at **32 KB** (bytes, not characters). SigNoz truncates anything larger before sending.
+- Google Chat rejects **empty** messages, so a template that renders to nothing is not sent.
+
+## Turn-off Resolved alerts
+
+The **Send resolved alerts** toggle is on by default. To stop receiving resolved notifications:
+
+- Navigate to `Settings > Notification Channels`.
+- Click **Edit** on the channel.
+- Toggle off **Send resolved alerts** and click **Save**.
+
+<Figure src="/img/docs/alerts/resolved-alerts.webp" alt="Turn off receiving resolved alert notifications." caption="Turn off receiving resolved alert notifications." />
+
+When on, resolved alerts arrive as a green **🟢 RESOLVED** card.
+
+<Figure src="/img/docs/google-chat-resolved-alert.webp" alt="A resolved alert delivered as a card in Google Chat." caption="A resolved alert delivered as a card in Google Chat." />
+
+## Configure programmatically
+
+You can also configure the Google Chat notification channel using the SigNoz API.
+
+**API Endpoint:** `POST /api/v1/channels`
+
+Send a `POST` request to `/api/v1/channels` with the following `curl` command. Replace `<your-api-key>` with an API key from **Settings → Service Accounts** (see <a href="https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/" target="_blank" rel="noopener noreferrer nofollow">Service Accounts</a> to create one).
+
+```bash
+curl '<your-signoz-url>/api/v1/channels' \
+  -H 'SIGNOZ-API-KEY: <your-api-key>' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "name": "Prod Critical Alerts - Google Chat",
+    "googlechat_configs": [
+        {
+            "send_resolved": true,
+            "webhook_url": "https://chat.googleapis.com/v1/spaces/SPACE_ID/messages?key=KEY&token=TOKEN",
+            "title": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}",
+            "text": "{{ range .Alerts -}}\n**Alert:** {{ .Labels.alertname }}{{ if .Labels.severity }} ({{ .Labels.severity }}){{ end }}{{ if .Annotations.summary }}\n**Summary:** {{ .Annotations.summary }}{{ end }}{{ if .Annotations.description }}\n**Description:** {{ .Annotations.description }}{{ end }}\n{{ end }}"
+        }
+    ]
+}'
+```
+
+**Request Body Attributes:**
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | The name of the receiver/channel. **Required**; must be unique across the config. |
+| `googlechat_configs` | `array` | List of Google Chat configurations. |
+| `googlechat_configs[].send_resolved` | `boolean` | Whether to send notifications when an alert is resolved. |
+| `googlechat_configs[].webhook_url` | `string` | The Google Chat Incoming Webhook URL. **Mandatory**. Must be `https` and use the host `chat.googleapis.com`. |
+| `googlechat_configs[].title` | `string` | Templated title of the message. Go templates are supported. |
+| `googlechat_configs[].text` | `string` | Templated body of the message (standard markdown). Go templates are supported. |
+
+## Troubleshooting
+
+If you encounter issues:
+
+- **Check the Webhook URL**: Ensure it is entered correctly and uses `https` with the `chat.googleapis.com` host.
+- **Verify Google Chat permissions**: Confirm the webhook is still active and allowed to post to the target space.
+- **Test the webhook**: Use the **Test** button in SigNoz to verify connectivity. If it fails, re-check the webhook in Google Chat.
+
+<Admonition type="tip">
+
+If you encounter any unexpected challenges during the use of this integration, please contact SigNoz Support at <a href="mailto:support@signoz.io" target="_blank" rel="noopener noreferrer nofollow">support@signoz.io</a>
+
+</Admonition>
+
+## Next steps
+
+- Create an alert rule and route it to this channel: [Manage Alerts](https://signoz.io/docs/userguide/alerts-management/)
+- Set up more notification channels: [Notification Channels](https://signoz.io/docs/setup-alerts-notification/)
