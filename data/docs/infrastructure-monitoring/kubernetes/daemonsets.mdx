@@ -1,7 +1,7 @@
 ---
-date: 2026-07-15
+date: 2026-07-31
 title: Monitor Kubernetes DaemonSets - Columns Reference Guide
-description: Monitor Kubernetes DaemonSets in SigNoz. Understand every column in the DaemonSets table, including Node Status, Ready, and Misscheduled node counts.
+description: Monitor Kubernetes DaemonSets in SigNoz. Understand every column in the DaemonSets table, including Pod Status, Scheduled Nodes, and Misscheduled node counts.
 doc_type: reference
 ---
 
@@ -31,11 +31,13 @@ Name of the DaemonSet (`k8s.daemonset.name`). Pinned to the left of the table.
 
 Namespace the DaemonSet runs in (`k8s.namespace.name`).
 
-### Pod Counts by Phase
+### Pod Counts by Status
 
-Breakdown of the pods owned by the DaemonSet by their latest phase: `pending`, `running`, `succeeded`, `failed`, and `unknown` (from `k8s.pod.phase`). Use it to see how many pods are healthy versus stuck.
+Labeled **Pod Status** in the table. Breakdown of the pods owned by the DaemonSet by their latest kubectl-style display status, shown as labeled, color-coded counts: **Running**, **Completed**, **Pending**, **Unknown**, and **Error Status**. Use it to see how many pods are healthy versus stuck.
 
-### Node Status
+**Error Status** is a single total covering every failure status. Expand it to see the breakdown: Failed, CrashLoopBackOff, ImagePullBackOff, ErrImagePull, CreateContainerConfigError, ContainerCreating, OOMKilled, Error, ContainerCannotRun, Evicted, NodeAffinity, NodeLost, Shutdown, and UnexpectedAdmissionError.
+
+### Scheduled Nodes
 
 Summary of the DaemonSet's node-level scheduling counters, shown as four labeled, color-coded counts in a single cell:
 
@@ -72,7 +74,7 @@ Working set memory (WSS) summed across the DaemonSet's pods (`daemonSetMemory`).
 
 ## Node count columns
 
-Ready, Current, Desired, and Misscheduled are also available as individual sortable columns. They are hidden by default: enable **Ready Nodes**, **Current Nodes**, **Desired Nodes**, or **Misscheduled Nodes** from the column settings icon in the table toolbar. The same values are always visible in the [Node Status](#node-status) cell.
+Ready, Current, Desired, and Misscheduled are also available as individual sortable columns. They are hidden by default: enable **Ready Nodes**, **Current Nodes**, **Desired Nodes**, or **Misscheduled Nodes** from the column settings icon in the table toolbar. The same values are always visible in the [Scheduled Nodes](#scheduled-nodes) cell.
 
 ### Ready
 
@@ -89,3 +91,8 @@ Number of nodes the DaemonSet should run a pod on (`k8s.daemonset.desired_schedu
 ### Misscheduled
 
 Number of nodes running a daemon pod that should not be running one (`k8s.daemonset.misscheduled_nodes`). A non-zero value points to nodes where the pod no longer matches the DaemonSet's node selector or affinity. Available as the sortable **Misscheduled Nodes** column.
+
+## Next steps
+
+- [Understanding CPU metrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics/): Read how the CPU request and limit percentages in this table are calculated before acting on them.
+- [Metrics-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/): Alert on `k8s.daemonset.misscheduled_nodes` or a Ready/Desired mismatch instead of watching the table.
