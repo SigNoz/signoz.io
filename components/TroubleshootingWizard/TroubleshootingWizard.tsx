@@ -1,15 +1,26 @@
 'use client'
 
 import React, { useMemo, useState } from 'react'
+import { ArrowRight } from 'lucide-react'
+import { Button } from '@signozhq/ui/button'
+import { TabsRoot, TabsList, TabsTrigger } from '@signozhq/ui/tabs'
+
+import tabStyles from '@/components/Tabs.module.css'
+
+import Admonition from '@/components/Admonition/Admonition'
 
 /**
  * TroubleshootingWizard
  *
  * An interactive, click-through version of the "why is my telemetry not showing
  * up in SigNoz" decision tree. It mirrors the written Steps 1-3 and the
- * "Errors you might see" section on the same page, so it is an additive
+ * "Quick debug" section on the same page, so it is an additive
  * convenience: the full guidance still lives in the prose (which is what the
  * agent markdown and Copy Markdown capture).
+ *
+ * Presentation is composed entirely from existing pieces: design-system Tabs
+ * for the signal switch, design-system Buttons for the answers, and the docs
+ * Admonition for results, so it matches the rest of the docs.
  */
 
 type Signal = 'traces' | 'logs' | 'metrics'
@@ -127,7 +138,7 @@ function buildTree(m: SignalMeta): Record<string, Node> {
       kind: 'question',
       prompt: <>How are you sending data to SigNoz?</>,
       options: [
-        { label: 'Directly to SigNoz Cloud', to: 'r_direct' },
+        { label: 'Directly to SigNoz (Cloud or self-hosted)', to: 'r_direct' },
         { label: 'Through an OpenTelemetry Collector', to: 'q_collector_sees' },
       ],
     },
@@ -204,9 +215,13 @@ function buildTree(m: SignalMeta): Record<string, Node> {
               Confirm the key under Settings &rarr; Ingestion, and that its limits are not blocking
               data.
             </li>
+            <li>
+              Self-hosted SigNoz needs no ingestion key by default, so a <Code>401</Code> there
+              usually means a proxy or gateway in front of SigNoz is rejecting the request.
+            </li>
           </ul>
           <p>
-            See <DocLink href="#errors-you-might-see">Errors you might see</DocLink> and{' '}
+            See <DocLink href="#quick-debug">Quick debug</DocLink> and{' '}
             <DocLink href="https://signoz.io/docs/ingestion/signoz-cloud/keys/">
               ingestion keys
             </DocLink>
@@ -236,7 +251,7 @@ function buildTree(m: SignalMeta): Record<string, Node> {
             </li>
           </ul>
           <p>
-            See <DocLink href="#errors-you-might-see">Errors you might see</DocLink>.
+            See <DocLink href="#quick-debug">Quick debug</DocLink>.
           </p>
         </>
       ),
@@ -244,21 +259,24 @@ function buildTree(m: SignalMeta): Record<string, Node> {
     r_region: {
       kind: 'result',
       tone: 'warning',
-      title: 'Wrong region',
+      title: 'Wrong region, or the wrong view',
       body: (
         <>
           <p>
-            When exports succeed but nothing appears in your account, the region is usually wrong.
-            The <Code>&lt;region&gt;</Code> in your endpoint must match the region your SigNoz Cloud
-            account is in. A key from one region will not authenticate against another region&apos;s
-            endpoint, and data sent to the wrong region never shows up in your account.
-          </p>
-          <p>
-            Confirm the region under Settings &rarr; Ingestion, or the{' '}
+            <strong>On SigNoz Cloud</strong>, exports that succeed while the account stays empty
+            almost always mean the wrong region. The <Code>&lt;region&gt;</Code> in your endpoint
+            must match your account&apos;s region: a key from one region will not authenticate
+            against another region&apos;s endpoint, and data sent to the wrong region never reaches
+            your account. Confirm it under Settings &rarr; Ingestion, or in the{' '}
             <DocLink href="https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint">
               region and endpoint table
             </DocLink>
             .
+          </p>
+          <p>
+            <strong>On self-hosted SigNoz</strong>, there is no region. Confirm you are querying the
+            same instance you are exporting to, then widen the time range: recently sent data can
+            fall outside a narrow window on either deployment.
           </p>
         </>
       ),
@@ -269,9 +287,13 @@ function buildTree(m: SignalMeta): Record<string, Node> {
       title: 'Test the endpoint directly',
       body: (
         <>
-          <p>From the machine running your app, check that the ingestion endpoint is reachable:</p>
+          <p>From the machine running your app, check that the endpoint is reachable:</p>
           <pre className="overflow-x-auto rounded bg-gray-100 p-3 text-sm dark:bg-gray-800">
-            <code>curl -v https://ingest.&lt;region&gt;.signoz.cloud:443</code>
+            <code>
+              # SigNoz Cloud{'\n'}
+              curl -v https://ingest.&lt;region&gt;.signoz.cloud:443{'\n\n'}# Self-hosted SigNoz{'\n'}
+              curl -v http://&lt;signoz-host&gt;:4318
+            </code>
           </pre>
           <ul>
             <li>
@@ -280,8 +302,7 @@ function buildTree(m: SignalMeta): Record<string, Node> {
             </li>
             <li>
               If it <strong>connects but data still does not appear</strong>, the problem is your
-              key, endpoint, or region: see{' '}
-              <DocLink href="#errors-you-might-see">Errors you might see</DocLink>.
+              endpoint, region, or key: see <DocLink href="#quick-debug">Quick debug</DocLink>.
             </li>
           </ul>
         </>
@@ -349,27 +370,14 @@ function buildTree(m: SignalMeta): Record<string, Node> {
   }
 }
 
-const TONE_STYLES: Record<Tone, { ring: string; badge: string; label: string }> = {
-  danger: {
-    ring: 'border-rose-300 dark:border-rose-500/40',
-    badge: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300',
-    label: 'Likely cause',
-  },
-  warning: {
-    ring: 'border-amber-300 dark:border-amber-500/40',
-    badge: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
-    label: 'Likely cause',
-  },
-  info: {
-    ring: 'border-blue-300 dark:border-blue-500/40',
-    badge: 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300',
-    label: 'Next check',
-  },
-  success: {
-    ring: 'border-emerald-300 dark:border-emerald-500/40',
-    badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
-    label: 'Resolved',
-  },
+// Result panels reuse the docs Admonition (which wraps the design-system
+// Callout), so a wizard answer looks exactly like every other callout on the
+// page rather than a bespoke widget.
+const TONE_TO_ADMONITION: Record<Tone, { type: string; label: string }> = {
+  danger: { type: 'danger', label: 'Likely cause' },
+  warning: { type: 'warning', label: 'Likely cause' },
+  info: { type: 'info', label: 'Next check' },
+  success: { type: 'tip', label: 'Resolved' },
 }
 
 export default function TroubleshootingWizard() {
@@ -390,97 +398,72 @@ export default function TroubleshootingWizard() {
   const back = () => setHistory((h) => (h.length > 1 ? h.slice(0, -1) : h))
 
   return (
-    <div className="not-prose my-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-      {/* header */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="m-0 text-sm font-semibold text-gray-900 dark:text-gray-100">
-            Interactive troubleshooter
-          </p>
-          <p className="m-0 text-xs text-gray-500 dark:text-gray-400">
-            Answer a few questions to find where your data is getting lost.
-          </p>
-        </div>
-        <div className="flex items-center gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
+    <div className="not-prose my-6">
+      <TabsRoot
+        value={signal}
+        onValueChange={(value) => reset(value as Signal)}
+        activationMode="manual"
+        className={`${tabStyles.root} w-full [&>div:first-child]:overflow-x-auto`}
+        style={
+          {
+            '--tab-list-wrapper-secondary-padding-left': '0px',
+            '--tab-border-spacer-min-width': 'var(--spacing-5)',
+          } as React.CSSProperties
+        }
+      >
+        <TabsList variant="secondary">
           {(Object.keys(SIGNALS) as Signal[]).map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => reset(s)}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                signal === s
-                  ? 'bg-signoz_robin-500 text-white'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
-              }`}
-              aria-pressed={signal === s}
-            >
+            <TabsTrigger key={s} value={s} variant="secondary">
               {SIGNALS[s].label}
-            </button>
+            </TabsTrigger>
           ))}
-        </div>
+        </TabsList>
+      </TabsRoot>
+
+      <div className="mt-4">
+        {node.kind === 'question' ? (
+          <div>
+            <p className="m-0 mb-1 text-base font-semibold text-gray-900 dark:text-gray-100">
+              {node.prompt}
+            </p>
+            {node.hint ? (
+              <p className="mb-3 mt-1 text-sm text-gray-500 dark:text-gray-400">{node.hint}</p>
+            ) : (
+              <div className="mb-3" />
+            )}
+            <div className="flex flex-col gap-2">
+              {node.options.map((opt) => (
+                <Button
+                  key={opt.to + opt.label}
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => answer(opt.to)}
+                  suffix={<ArrowRight />}
+                  className="w-full !h-auto !justify-between !py-2.5 text-left"
+                >
+                  {opt.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <Admonition
+            type={TONE_TO_ADMONITION[node.tone].type}
+            title={`${TONE_TO_ADMONITION[node.tone].label}: ${node.title}`}
+          >
+            {node.body}
+          </Admonition>
+        )}
       </div>
 
-      {/* body */}
-      {node.kind === 'question' ? (
-        <div>
-          <p className="m-0 mb-1 text-base font-medium text-gray-900 dark:text-gray-100">
-            {node.prompt}
-          </p>
-          {node.hint ? (
-            <p className="mb-3 mt-1 text-sm text-gray-500 dark:text-gray-400">{node.hint}</p>
-          ) : (
-            <div className="mb-3" />
-          )}
-          <div className="flex flex-col gap-2">
-            {node.options.map((opt) => (
-              <button
-                key={opt.to + opt.label}
-                type="button"
-                onClick={() => answer(opt.to)}
-                className="group flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-left text-sm text-gray-800 transition-colors hover:border-signoz_robin-500 hover:bg-signoz_robin-500/5 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:border-signoz_robin-500"
-              >
-                <span>{opt.label}</span>
-                <span className="text-gray-300 transition-colors group-hover:text-signoz_robin-500 dark:text-gray-600">
-                  &rarr;
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className={`rounded-lg border ${TONE_STYLES[node.tone].ring} p-4`}>
-          <span
-            className={`inline-block rounded-full px-2 py-0.5 text-[0.7rem] font-semibold uppercase tracking-wide ${TONE_STYLES[node.tone].badge}`}
-          >
-            {TONE_STYLES[node.tone].label}
-          </span>
-          <h4 className="mb-1 mt-2 text-base font-semibold text-gray-900 dark:text-gray-100">
-            {node.title}
-          </h4>
-          <div className="prose prose-sm max-w-none text-gray-700 dark:prose-invert dark:text-gray-300 [&_li]:my-0.5 [&_p]:my-1.5">
-            {node.body}
-          </div>
-        </div>
-      )}
-
-      {/* controls */}
-      <div className="mt-4 flex items-center gap-3 border-t border-gray-100 pt-3 dark:border-gray-800">
-        <button
-          type="button"
-          onClick={back}
-          disabled={history.length <= 1}
-          className="text-xs font-medium text-gray-500 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-40 dark:text-gray-400 dark:hover:text-gray-100"
-        >
-          &larr; Back
-        </button>
-        <button
-          type="button"
-          onClick={() => reset()}
-          className="text-xs font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100"
-        >
+      <div className="mt-3 flex items-center gap-2">
+        <Button variant="ghost" color="secondary" size="sm" onClick={back} disabled={history.length <= 1}>
+          Back
+        </Button>
+        <Button variant="ghost" color="secondary" size="sm" onClick={() => reset()}>
           Start over
-        </button>
-        <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
+        </Button>
+        <span className="ml-auto text-xs text-gray-500 dark:text-gray-400">
           Step {history.length}
         </span>
       </div>
