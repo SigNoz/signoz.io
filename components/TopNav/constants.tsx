@@ -3,6 +3,8 @@ import {
   Boxes,
   Brain,
   Bug,
+  Cloud,
+  CloudCog,
   Cone,
   ConciergeBell,
   Container,
@@ -192,6 +194,22 @@ export const useCasesDropdownItems: ProductItem[] = [
     description: 'Monitor pods, nodes, namespaces & workloads',
     name: 'Kubernetes Monitoring',
     order: 6,
+  },
+  {
+    key: 'azure-monitoring',
+    url: '/azure-monitoring/',
+    icon: <Cloud className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'One-click monitoring for every Azure service',
+    name: 'Azure Monitoring',
+    order: 7,
+  },
+  {
+    key: 'google-cloud-monitoring',
+    url: '/google-cloud-monitoring/',
+    icon: <CloudCog className={PRODUCT_ICON_CLASS} aria-hidden="true" />,
+    description: 'End-to-end monitoring for every GCP service',
+    name: 'Google Cloud Monitoring',
+    order: 8,
   },
 ]
 

@@ -44,11 +44,12 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'RegionTable',
   'TabItem',
   'Tabs',
+  'CodeTab',
+  'CodeTabs',
   'ToggleHeading',
 ] as const
 export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'CHClientWithOutput',
-  'CloneRepo',
   'CommonPrerequisites',
   'DashboardActions',
   'DSConfigIntro',
@@ -70,8 +71,6 @@ export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'MetricsDefinition',
   'MultiNodePart1',
   'MultiNodePart2',
-  'OtelOperatorAutoInstrumentation',
-  'OtelOperatorOTLPEndpoint',
   'PrereqsInstrument',
   'RetentionInfo',
   'SigNozCloud',
@@ -302,6 +301,16 @@ const createKnownComponentStubs = (
   },
   Tabs: (props) => React.createElement('div', null, props.children),
   TabItem: (props) => {
+    const label = getStringProp(props, 'label')
+    return React.createElement(
+      'section',
+      null,
+      label ? React.createElement('h3', null, label) : null,
+      props.children
+    )
+  },
+  CodeTabs: (props) => React.createElement('div', null, props.children),
+  CodeTab: (props) => {
     const label = getStringProp(props, 'label')
     return React.createElement(
       'section',

@@ -1,44 +1,61 @@
 ---
-date: 2026-05-13
+date: 2026-07-29
 title: Dashboards
 description: Build custom dashboards to visualize metrics, logs, and traces in SigNoz.
 doc_type: explanation
 ---
 
-Dashboards in SigNoz let you build custom visualizations over any telemetry signal — metrics, logs, or traces — and combine them into a single view for your team. Use pre-built templates to get started instantly, or compose panels from scratch.
+Dashboards let you build custom visualizations over any telemetry signal, metrics, logs or traces, and combine them into one view for your team. Start from a pre-built template or compose panels from scratch.
+
+Dashboards have been rebuilt: a views-first list you can filter with a query, sections instead of one flat grid, a full-page panel editor, and a variables runtime that only refetches the panels a change actually affects.
 
 <Figure
-  src="/img/docs/dashboards/overview/dashboards-overview.gif"
-  alt="SigNoz dashboards — list, view, and configure panels"
+  src="/img/docs/dashboards/overview/dashboards-overview-v2.gif"
+  alt="SigNoz dashboards: the list, a dashboard, and the panel editor"
 />
 
 ## Key capabilities
 
-- **[Pre-built Dashboard templates](https://signoz.io/docs/dashboards/dashboard-templates/overview/)**: Import community-maintained dashboard templates for popular integrations and skip setup entirely.
-- **[Dynamic variables](https://signoz.io/docs/userguide/manage-variables/)**: Define template variables to make dashboards interactive — filter by environment, service, host, or any attribute without duplicating dashboards.
-- **[Public sharing](https://signoz.io/docs/dashboards/public-sharing/)**: Share dashboards publicly via a link — no login required.
-- **[Interactivity](https://signoz.io/docs/dashboards/interactivity/)**: Drill down from any panel with context menus — view underlying logs and traces, break out by attributes, cross-filter with dashboard variables, filter in tables, sync crosshairs and tooltips across panels, and navigate to external tools via context links.
-- **[Terraform automation](https://signoz.io/docs/dashboards/terraform-provider-signoz/)**: Manage dashboards as code using the SigNoz Terraform provider for repeatable, version-controlled deployments.
+- **[Find the dashboard you want](https://signoz.io/docs/userguide/manage-dashboards/#saved-views)**: open on a views rail, filter the list with a query such as `tag CONTAINS prod AND updated_at >= '2026-07-20T00:00:00Z'`, pin what you use daily, and save any filter combination as a view your team can share.
+- **[Organize a dashboard into sections](https://signoz.io/docs/userguide/manage-dashboards/#manage-sections)**: group related panels into collapsible blocks, reorder by drag-and-drop, and clone a section with every panel inside it.
+- **[Build panels in a dedicated editor](https://signoz.io/docs/dashboards/panel-types/)**: seven panel types with a live preview, switchable mid-edit without losing your formatting, units or thresholds.
+- **[Filter everything with variables](https://signoz.io/docs/userguide/manage-variables/)**: dynamic, query, custom and textbox variables. Pick the panels a variable applies to and review exactly which queries change before you commit.
+- **[Drill down from any panel](https://signoz.io/docs/dashboards/interactivity/)**: jump into the underlying logs and traces, break out by an attribute, create an alert seeded from the panel, or download it as PNG, SVG or CSV.
+- **[Edit a dashboard as JSON](https://signoz.io/docs/userguide/manage-dashboards/#edit-a-dashboard-as-json)**: read, copy, download or hand-edit the whole spec in the app, without going through the API.
+- **[Share a link with your teammates](https://signoz.io/docs/dashboards/public-sharing/#share-a-link-with-variable-selections)**: copy the dashboard link with your current variable selections included, so the person you send it to opens what you were looking at. Requires a SigNoz login.
+- **[Publish a dashboard publicly](https://signoz.io/docs/dashboards/public-sharing/#enable-public-sharing)**: a separate flow that generates a public URL anyone can open without logging in. Public dashboards do not support variables.
+- **[Manage dashboards as code](https://signoz.io/docs/dashboards/terraform-provider-signoz/)**: a typed schema and the SigNoz Terraform provider, for repeatable version-controlled deployments.
 
 ## Get started
 
-- [Manage dashboards](https://signoz.io/docs/userguide/manage-dashboards/) — Create, edit, resize, and organize custom dashboards.
-- [Out of box dashboards](https://signoz.io/docs/dashboards/dashboard-templates/overview/) — Browse and import 60+ pre-built templates.
+- [Manage dashboards](https://signoz.io/docs/userguide/manage-dashboards/): create, edit, resize, and organize custom dashboards.
+- [Out of box dashboards](https://signoz.io/docs/dashboards/dashboard-templates/overview/): browse and import 60+ pre-built templates.
+- [Saved views](https://signoz.io/docs/userguide/manage-dashboards/#saved-views), Filter the dashboards list with a query, then save and reuse views.
 
 ## Build and customize
 
-- [Panel types](https://signoz.io/docs/dashboards/panel-types/) — Time series, Value, Table, Bar, Histogram, Pie, and List panels.
-- [Variables](https://signoz.io/docs/userguide/manage-variables/) — Create query, custom, and textbox variables for dynamic filtering.
-- [Using variables in queries](https://signoz.io/docs/dashboards/using-variables-in-queries/) — Reference variables inside panel queries.
-- [Interactivity](https://signoz.io/docs/dashboards/interactivity/) — Navigate between dashboards, link panels, and use click-through actions.
-- [Public sharing](https://signoz.io/docs/dashboards/public-sharing/) — Share dashboards publicly via a link.
-- [Terraform provider](https://signoz.io/docs/dashboards/terraform-provider-signoz/) — Manage dashboards as code.
+- [Panel types](https://signoz.io/docs/dashboards/panel-types/): time series, Value, Table, Bar, Histogram, Pie, and List panels.
+- [Variables](https://signoz.io/docs/userguide/manage-variables/), Create dynamic, query, custom, and textbox variables for dynamic filtering.
+- [Using variables in queries](https://signoz.io/docs/dashboards/using-variables-in-queries/): reference variables inside panel queries.
+- [Interactivity](https://signoz.io/docs/dashboards/interactivity/): navigate between dashboards, link panels, and use click-through actions.
+- [JSON editor](https://signoz.io/docs/userguide/manage-dashboards/#edit-a-dashboard-as-json), Edit a dashboard as raw JSON and validate its panels and layout.
+- [Public sharing](https://signoz.io/docs/dashboards/public-sharing/): share dashboards publicly via a link.
+- [Terraform provider](https://signoz.io/docs/dashboards/terraform-provider-signoz/): manage dashboards as code.
+
+## Add a panel from an explorer
+
+You do not have to start in a dashboard. When you have a query you like in the Logs, Traces, Metrics, or Meter explorer, you can send it straight to a dashboard as a new panel:
+
+1. Build your query in the explorer.
+2. Select **Add to dashboard**.
+3. In the **Add to dashboard** dialog, either pick an existing dashboard from **Select a dashboard**, or select **New dashboard** to create one to export into.
+4. Confirm. SigNoz opens the panel editor on the target dashboard with your query already loaded, so you can set the visualization and save.
 
 ## Related modules
 
-- [Metrics](https://signoz.io/docs/metrics-management/overview/) — Explore and query metric data powering your dashboard panels.
-- [Logs Management](https://signoz.io/docs/logs-management/overview/) — Build dashboard panels from log queries.
-- [APM & Distributed Tracing](https://signoz.io/docs/apm-and-distributed-tracing/overview/) — Visualize trace-derived metrics in dashboards.
-- [Alerts](https://signoz.io/docs/alerts/) — Link alert queries to dashboard panels.
-- [Querying](https://signoz.io/docs/querying/overview/) — Learn Query Builder, PromQL, and ClickHouse SQL for panel queries.
+- [Metrics](https://signoz.io/docs/metrics-management/overview/): explore and query metric data powering your dashboard panels.
+- [Logs Management](https://signoz.io/docs/logs-management/overview/): build dashboard panels from log queries.
+- [APM & Distributed Tracing](https://signoz.io/docs/apm-and-distributed-tracing/application-details/): visualize trace-derived metrics in dashboards.
+- [Alerts](https://signoz.io/docs/alerts/): link alert queries to dashboard panels.
+- [Querying](https://signoz.io/docs/querying/overview/): learn Query Builder, PromQL, and ClickHouse SQL for panel queries.
 
