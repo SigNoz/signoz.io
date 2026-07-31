@@ -64,6 +64,17 @@ Resource: `metaresource` | Kind: `factor-api-key` | Selector: API key ID
 | `update` | Modify API key metadata (for example, change the expiration date). | signoz-admin |
 | `delete` | Permanently revoke an API key. | signoz-admin |
 
+## Compound Transactions
+
+Some operations require transactions on multiple resources. Both transactions must be satisfied for the operation to succeed.
+
+| Operation | Transactions Required |
+|-----------|----------------------|
+| Assign a role to a service account | `serviceaccount:attach` AND `role:attach` |
+| Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
+| Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
+| Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |
+
 ## Logs
 
 Resource: `telemetryresource` | Kind: `logs` | Selector: telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
@@ -98,7 +109,7 @@ Resource: `telemetryresource` | Kind: `meter-metrics` | Selector: telemetry sele
 
 ## Telemetry Selectors
 
-Telemetry resources support only the `read` relation, but their selectors are more expressive than the instance IDs used by IAM resources. A telemetry selector scopes the grant by **query type** and, optionally, by **ingestion key**:
+Telemetry resources support only the `read` relation, but their selectors are more expressive than the instance IDs used by IAM resources. A telemetry selector scopes the grant by **query type** and, optionally, by **ingestion key id**:
 
 | Selector | Meaning |
 |----------|---------|
@@ -133,14 +144,3 @@ Every query in SigNoz, whether it runs in an explorer, a dashboard panel, an ale
 | Formulas, joins, and trace operators | No transaction of their own; the queries they reference are checked |
 
 For builder queries, the required selector is derived from the query's filter expression. A query that filters on `signoz.workspace.key.id` with `=` or `IN` at the top level of the filter requires only the grants for those specific key IDs. Any other builder query (no key filter, or the key combined with `OR`, `NOT`, or `!=`) requires the broader `builder_query/*` (or `*`) grant.
-
-
-
-Some operations require transactions on multiple resources. Both transactions must be satisfied for the operation to succeed.
-
-| Operation | Transactions Required |
-|-----------|----------------------|
-| Assign a role to a service account | `serviceaccount:attach` AND `role:attach` |
-| Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
-| Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
-| Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |
