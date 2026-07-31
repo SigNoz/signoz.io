@@ -1,14 +1,14 @@
 ---
 date: 2026-07-31
 
-title: Migrate Alert History API from v1 to v2
+title: Migrate the Alert History API from v1 to v2 Endpoints
 description: Migrate from the deprecated v1 alert history API endpoints to the v2 replacements, including request, pagination, and response changes.
 doc_type: reference
 ---
 
 The v1 alert history API endpoints are deprecated and will be removed in an upcoming release to address a security vulnerability, tracked in <a href="https://github.com/SigNoz/signoz/issues/11747" target="_blank" rel="noopener noreferrer nofollow">SigNoz/signoz#11747</a>. After removal, requests to the v1 endpoints return `404 Not Found`.
 
-Fully compatible replacements are available under `/api/v2/rules/{id}/history/*`. This guide covers everything you need to migrate. The complete v2 specification, including request and response schemas for every endpoint, is available in the [SigNoz API Reference](https://signoz.io/api-reference/).
+Equivalent replacements are available under `/api/v2/rules/{id}/history/*`. They return the same data, with the request and response changes described below. The complete v2 specification, including request and response schemas for every endpoint, is available in the [SigNoz API Reference](https://signoz.io/api-reference/).
 
 ## Endpoint mapping
 
@@ -23,7 +23,7 @@ Fully compatible replacements are available under `/api/v2/rules/{id}/history/*`
 
 Authentication and authorization are unchanged: the same API key or session works, and Viewer access is sufficient.
 
-`{id}` must be the rule's UUID. Unlike v1, v2 validates the id — malformed values return `400 Bad Request`.
+`{id}` must be the rule's UUID. Unlike v1, v2 validates the id: malformed values return `400 Bad Request`.
 
 ## Request changes
 
@@ -37,7 +37,7 @@ v1 accepted a JSON body via `POST`; v2 accepts URL query parameters via `GET`.
 | `filters` (query-builder v3 `FilterSet` object) | `filterExpression` | Timeline only. An expression string, for example `service.name = 'checkout' AND host.name = 'ip-10-0-0-1'` |
 | `limit` | `limit` | Timeline only |
 | `order` | `order` | Timeline only. `asc` or `desc` |
-| `offset` | `cursor` | Timeline only. Offset pagination is replaced by cursor pagination — pass the `nextCursor` value from the previous response, or omit for the first page |
+| `offset` | `cursor` | Timeline only. Offset pagination is replaced by cursor pagination. Pass the `nextCursor` value from the previous response, or omit it for the first page |
 
 `stats`, `top_contributors`, and `overall_status` take only `start` and `end` in v2.
 
@@ -46,7 +46,7 @@ v1 accepted a JSON body via `POST`; v2 accepts URL query parameters via `GET`.
 A v1 timeline request:
 
 ```bash
-curl -X POST "https://<your-tenant>.signoz.cloud/api/v1/rules/<rule-uuid>/history/timeline" \
+curl -X POST "https://<your-signoz-host>/api/v1/rules/<rule-uuid>/history/timeline" \
   -H "SIGNOZ-API-KEY: <your-api-key>" \
   -H "Content-Type: application/json" \
   -d '{"start": 1753900000000, "end": 1753990000000, "offset": 0, "limit": 20, "order": "desc"}'
@@ -55,21 +55,28 @@ curl -X POST "https://<your-tenant>.signoz.cloud/api/v1/rules/<rule-uuid>/histor
 becomes, in v2:
 
 ```bash
-curl "https://<your-tenant>.signoz.cloud/api/v2/rules/<rule-uuid>/history/timeline?start=1753900000000&end=1753990000000&limit=20&order=desc" \
+curl "https://<your-signoz-host>/api/v2/rules/<rule-uuid>/history/timeline?start=1753900000000&end=1753990000000&limit=20&order=desc" \
   -H "SIGNOZ-API-KEY: <your-api-key>"
 ```
+
+**Verify these values:**
+
+- `<your-signoz-host>`: Your SigNoz instance host, e.g., `example.signoz.io`.
+- `<your-api-key>`: An API key for a service account with at least the Viewer role. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) for how to create one.
+- `<rule-uuid>`: The alert rule's UUID, visible in the URL of the rule's detail page.
+- `start` / `end`: Your time range in Unix milliseconds.
 
 To fetch the next page, pass the `nextCursor` value from the previous response:
 
 ```bash
-curl "https://<your-tenant>.signoz.cloud/api/v2/rules/<rule-uuid>/history/timeline?start=1753900000000&end=1753990000000&limit=20&order=desc&cursor=<nextCursor>" \
+curl "https://<your-signoz-host>/api/v2/rules/<rule-uuid>/history/timeline?start=1753900000000&end=1753990000000&limit=20&order=desc&cursor=<nextCursor>" \
   -H "SIGNOZ-API-KEY: <your-api-key>"
 ```
 
 `stats`, `overall_status`, and `top_contributors` need only the time range:
 
 ```bash
-curl "https://<your-tenant>.signoz.cloud/api/v2/rules/<rule-uuid>/history/stats?start=1753900000000&end=1753990000000" \
+curl "https://<your-signoz-host>/api/v2/rules/<rule-uuid>/history/stats?start=1753900000000&end=1753990000000" \
   -H "SIGNOZ-API-KEY: <your-api-key>"
 ```
 
@@ -110,7 +117,7 @@ service.name = 'checkout' AND k8s.namespace.name IN ('prod-us', 'prod-eu')
 
 Filter expressions can reference:
 
-- **any label key** attached to the rule's history entries — for example `service.name`, `host.name`, or whatever labels your alert groups by. Use the `filter_keys` endpoint below to discover them.
+- **any label key** attached to the rule's history entries, for example `service.name`, `host.name`, or whatever labels your alert groups by. Use the `filter_keys` endpoint below to discover them.
 - **intrinsic fields** of a history entry: `rule_id`, `rule_name`, `state`, `overall_state`, `state_changed`, `overall_state_changed`, `unix_milli`, `fingerprint`, `value`.
 
 Referencing a key that does not exist in the rule's history returns a `400` with a key-not-found error, rather than silently matching nothing.
@@ -130,7 +137,7 @@ state = 'firing' AND value > 100
 Because the expression contains spaces and quotes, URL-encode it. With `curl`, the simplest way is `-G` with `--data-urlencode`:
 
 ```bash
-curl -G "https://<your-tenant>.signoz.cloud/api/v2/rules/<rule-uuid>/history/timeline" \
+curl -G "https://<your-signoz-host>/api/v2/rules/<rule-uuid>/history/timeline" \
   -H "SIGNOZ-API-KEY: <your-api-key>" \
   --data-urlencode "start=1753900000000" \
   --data-urlencode "end=1753990000000" \
@@ -145,13 +152,13 @@ v1 returned a `labels` map at the top level of the timeline response for buildin
 
 ```bash
 # distinct label keys in the rule's history
-curl -G "https://<your-tenant>.signoz.cloud/api/v2/rules/<rule-uuid>/history/filter_keys" \
+curl -G "https://<your-signoz-host>/api/v2/rules/<rule-uuid>/history/filter_keys" \
   -H "SIGNOZ-API-KEY: <your-api-key>" \
   --data-urlencode "startUnixMilli=1753900000000" \
   --data-urlencode "endUnixMilli=1753990000000"
 
 # distinct values for one key
-curl -G "https://<your-tenant>.signoz.cloud/api/v2/rules/<rule-uuid>/history/filter_values" \
+curl -G "https://<your-signoz-host>/api/v2/rules/<rule-uuid>/history/filter_values" \
   -H "SIGNOZ-API-KEY: <your-api-key>" \
   --data-urlencode "startUnixMilli=1753900000000" \
   --data-urlencode "endUnixMilli=1753990000000" \
@@ -177,7 +184,7 @@ The v2 payloads carry the same information with a few shape changes:
     { "key": { "name": "host.name" }, "value": "ip-10-0-0-1" }
   ]
   ```
-- Timeline responses include `nextCursor` alongside `items` and `total`; it is omitted on the last page. The v1 top-level `labels` map on the timeline response is gone — use `filter_keys` and `filter_values` instead.
+- Timeline responses include `nextCursor` alongside `items` and `total`; it is omitted on the last page. The v1 top-level `labels` map on the timeline response is gone; use `filter_keys` and `filter_values` instead.
 - `currentAvgResolutionTime` and `pastAvgResolutionTime` in the stats response are now numbers (seconds) instead of formatted strings.
 - `relatedTracesLink` and `relatedLogsLink` are omitted when empty instead of always being present.
 
