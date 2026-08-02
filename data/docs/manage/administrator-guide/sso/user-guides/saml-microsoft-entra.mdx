@@ -1,5 +1,5 @@
 ---
-date: 2026-07-10
+date: 2026-08-02
 title: SAML Authentication with Microsoft Entra ID
 description: Configure SAML single sign-on between Microsoft Entra ID (Azure AD) and SigNoz for team authentication.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -100,9 +100,97 @@ Now you'll configure SigNoz to accept authentication from Microsoft Entra ID:
 5. **Complete** the Microsoft Entra ID login process
 6. **Confirm** you're successfully logged into SigNoz
 
+## Configure Attribute Mapping (Optional)
+
+Attribute mapping tells SigNoz which SAML assertion attributes contain the user's email, display name, groups, and role. The defaults work if your Entra ID claims use standard attribute names, but Microsoft Entra ID uses non-default claim names for groups that you must configure explicitly.
+
+### Attribute Mapping Fields
+
+Configure these in SigNoz under **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains** → edit your domain → **Attribute Mapping** section:
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| **Email** | `email` | SAML attribute name containing the user's email address |
+| **Name** | `name` | SAML attribute name containing the user's display name |
+| **Groups** | `groups` | SAML attribute name containing the user's group memberships |
+| **Role** | `role` | SAML attribute name containing the user's role |
+
+### Configure Group Claims in Microsoft Entra ID
+
+Microsoft Entra ID sends group memberships using the claim name `http://schemas.microsoft.com/ws/2008/06/identity/claims/groups` rather than the plain `groups` default. You must update the SigNoz **Groups** attribute mapping field to match this claim name.
+
+Additionally, Entra ID identifies groups by their **Object ID** (a UUID such as `a1b2c3d4-5678-90ab-cdef-1234567890ab`), not by display name. When configuring group mappings in SigNoz, use the group Object ID as the group identifier.
+
+To include group claims in the SAML assertion:
+
+1. In the Microsoft Entra ID portal, go to your SAML application → **Single sign-on** → **Attributes & Claims**
+2. Click **Add a group claim**
+3. Select **Security groups** (or **All groups** depending on your needs)
+4. Under **Source attribute**, leave the default (**Group ID**) selected
+5. Click **Save**
+
+### Configure Attribute Mapping in SigNoz
+
+1. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+2. Click on your SAML domain to edit it
+3. In the **Attribute Mapping** section, set:
+   - **Groups**: `http://schemas.microsoft.com/ws/2008/06/identity/claims/groups`
+4. Click **Save**
+
+<Admonition type="note">
+The **Groups** field must exactly match the claim name from the Entra ID SAML assertion. If you customized the group claim name in Entra ID's **Attributes & Claims** configuration, use that custom name instead.
+</Admonition>
+
+## Configure Role Mapping (Optional)
+
+Role mapping automatically assigns SigNoz roles (VIEWER, EDITOR, ADMIN) to users when they log in via SAML, based on their Microsoft Entra ID group memberships or a custom role attribute.
+
+### Role Resolution Priority
+
+When a user logs in, SigNoz determines their role using this priority (highest to lowest):
+
+1. **Use Role Attribute** — if enabled and the SAML assertion contains a role attribute, that value is used directly
+2. **Group Mappings** — if the user belongs to multiple mapped groups, the highest-privilege role wins (ADMIN > EDITOR > VIEWER)
+3. **Default Role** — fallback role from configuration
+4. **VIEWER** — ultimate default if nothing else is configured
+
+### Group-Based Role Mapping
+
+Map Microsoft Entra ID groups to SigNoz roles. Because Entra ID sends group **Object IDs** in the SAML assertion, you must use the Object ID (not the display name) when configuring group mappings.
+
+#### Find Group Object IDs in Entra ID
+
+1. In the Microsoft Entra ID portal, go to **Groups** → **All groups**
+2. Locate the group you want to map
+3. Copy the **Object Id** column value (e.g., `a1b2c3d4-5678-90ab-cdef-1234567890ab`)
+
+#### Configure in SigNoz
+
+1. Ensure you have [configured attribute mapping](#configure-attribute-mapping-in-signoz) with the correct Entra groups claim name
+2. Go to **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains**
+3. Click on your SAML domain to edit it
+4. In the **Role Mapping** section:
+   - Set **Default Role** to `VIEWER`
+   - Under **Group Mappings**, add entries mapping each Entra ID group **Object ID** to a SigNoz role:
+
+     | Entra ID Group Object ID | SigNoz Role |
+     |--------------------------|-------------|
+     | `a1b2c3d4-5678-90ab-cdef-1234567890ab` | `ADMIN` |
+     | `e5f6a7b8-1234-56cd-ef78-9012345abcde` | `EDITOR` |
+     | `c9d0e1f2-3456-78ab-cdef-567890123456` | `VIEWER` |
+
+   - Leave **Use Role Attribute** turned **OFF**
+5. Click **Save**
+
+<Admonition type="info">
+Use the group Object ID exactly as shown in Microsoft Entra ID. Display names (e.g., `signoz-admins`) will not match, because the SAML assertion contains only the Object ID.
+</Admonition>
+
 ## Troubleshooting
 
 **Common issues and solutions:**
 
 - **"Authentication failed" error**: Check that the redirect URI exactly matches `https://${SIGNOZ_BASEURL}/api/v1/complete/saml` in Microsoft Entra ID
+- **Groups not mapping to roles**: Verify that the **Groups** attribute mapping field in SigNoz is set to `http://schemas.microsoft.com/ws/2008/06/identity/claims/groups` and that group mappings use the Entra ID group Object ID (not the display name)
+- **User created with wrong role**: Check the [role resolution priority](#role-resolution-priority). If **Use Role Attribute** is ON, it takes precedence over group mappings. Verify the group Object IDs in your mappings match those in Microsoft Entra ID
 - **Locked out?**: If you're unable to login because of faulty setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`
