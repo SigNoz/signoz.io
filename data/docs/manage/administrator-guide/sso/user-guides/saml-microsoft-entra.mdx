@@ -113,7 +113,10 @@ To use group-based role mapping, configure Microsoft Entra ID to include the use
 4. Select which groups to return in the claim (e.g., **All groups**, **Security groups**, or **Groups assigned to the application**)
 5. Set **Source attribute** to **Group ID**
 
-![Microsoft Entra ID Add a Group Claim](/img/docs/saml-microsoft-entra/entra-add-group-claim.webp)
+<figure data-zoomable align="center">
+  <img src="/img/docs/saml-microsoft-entra/entra-add-group-claim.webp" alt="Group Claims panel in Microsoft Entra ID Attributes & Claims" />
+  <figcaption><i>Add a group claim and set the source attribute to Group ID</i></figcaption>
+</figure>
 
 ### Customize the Group Claim Name
 
@@ -124,7 +127,10 @@ By default, Microsoft Entra ID emits the group claim as `http://schemas.microsof
 3. Set **Name** to `groups`
 4. Click **Save**
 
-![Microsoft Entra ID Customize Group Claim Name](/img/docs/saml-microsoft-entra/entra-customize-group-claim-name.webp)
+<figure data-zoomable align="center">
+  <img src="/img/docs/saml-microsoft-entra/entra-customize-group-claim-name.webp" alt="Advanced options in the Group Claims panel with a customized group claim name" />
+  <figcaption><i>Customize the name of the group claim to groups</i></figcaption>
+</figure>
 
 <Admonition type="note">
 Alternatively, you can keep the default claim name and instead set the **Groups** field in SigNoz under **Settings** → **Organization Settings** → **Members & SSO** → **Authenticated Domains** → edit your domain → **Attribute Mapping (Advanced)** to the full `http://schemas.microsoft.com/ws/2008/06/identity/claims/groups` URI.
@@ -140,10 +146,10 @@ Role mapping automatically assigns SigNoz roles (`signoz-viewer`, `signoz-editor
 
 When a user logs in, SigNoz determines their role using this priority (highest to lowest):
 
-1. **Use Role Attribute Directly** — if enabled and the SAML assertion contains a role attribute, that value is used directly
-2. **Group to Role Mappings** — the user is assigned the roles of all mapped groups they belong to
-3. **Default Role** — fallback role from configuration
-4. **`signoz-viewer`** — ultimate default if nothing else is configured
+1. **Use Role Attribute Directly**: if enabled and the SAML assertion contains a role attribute, that value is used directly
+2. **Group to Role Mappings**: the user is assigned the roles of all mapped groups they belong to
+3. **Default Role**: fallback role from configuration
+4. **`signoz-viewer`**: the ultimate default if nothing else is configured
 
 ### Configure in SigNoz
 
@@ -162,7 +168,10 @@ When a user logs in, SigNoz determines their role using this priority (highest t
 
    - Leave **Use Role Attribute Directly** unchecked
 
-   ![SigNoz Role Mapping](/img/docs/saml-microsoft-entra/signoz-role-mapping.webp)
+   <figure data-zoomable align="center">
+     <img src="/img/docs/saml-microsoft-entra/signoz-role-mapping.webp" alt="Role Mapping section in SigNoz Authenticated Domains settings" />
+     <figcaption><i>Map Microsoft Entra ID group object IDs to SigNoz roles</i></figcaption>
+   </figure>
 
 5. Click **Save**
 
@@ -171,5 +180,5 @@ When a user logs in, SigNoz determines their role using this priority (highest t
 **Common issues and solutions:**
 
 - **"Authentication failed" error**: Check that the redirect URI exactly matches `https://${SIGNOZ_BASEURL}/api/v1/complete/saml` in Microsoft Entra ID
-- **Groups not appearing or role not assigned**: Verify the group claim name in Microsoft Entra ID matches the **Groups** field in SigNoz attribute mapping (rename it to `groups` or set the field to the full claim URI — see [Configure Group Claims](#configure-group-claims-optional)), and that your group mappings use the group **object IDs** (GUIDs), not display names
+- **Groups not appearing or role not assigned**: Verify the group claim name in Microsoft Entra ID matches the **Groups** field in SigNoz attribute mapping (rename it to `groups`, or set the field to the full claim URI; see [Configure Group Claims](#configure-group-claims-optional)), and that your group mappings use the group **object IDs** (GUIDs), not display names
 - **Locked out?**: If you're unable to login because of faulty setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`
