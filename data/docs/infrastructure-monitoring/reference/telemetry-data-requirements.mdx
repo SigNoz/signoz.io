@@ -1,8 +1,7 @@
 ---
-date: 2026-07-16
+date: 2026-08-03
 title: Telemetry Data Requirements for Infrastructure Monitoring
-description: Understand the required resource attributes and metric types for SigNoz Infrastructure Monitoring. Verify host.name, entity UIDs, and data source dependencies for accurate dashboards.
-
+description: Understand the required resource attributes and metric types for SigNoz Infrastructure Monitoring, and verify data source dependencies for accurate dashboards.
 doc_type: reference
 ---
 
@@ -46,7 +45,7 @@ The Infrastructure Monitoring depends on a set of resource attributes and metric
 - **Required attributes**: `k8s.node.name`, `k8s.cluster.name`.
 - **Required metrics**:
   - From kubeletstats: `k8s.node.cpu.usage`, `k8s.node.memory.working_set`
-  - From k8s_cluster: `k8s.node.allocatable_cpu` and `k8s.node.allocatable_memory` (both **disabled by default** — enable via `allocatable_types_to_report: [cpu, memory]`), `k8s.node.condition_ready`, `k8s.pod.phase` (for the Pod Counts by Phase column)
+  - From k8s_cluster: `k8s.node.allocatable_cpu` and `k8s.node.allocatable_memory` (both **disabled by default**, enable via `allocatable_types_to_report: [cpu, memory]`), `k8s.node.condition_ready`, `k8s.pod.phase` (for the Pod Counts by Phase column)
 - **Setup**:
   - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for node CPU / memory.
   - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for allocatable, condition_ready, and pod.phase.
@@ -68,7 +67,7 @@ The Infrastructure Monitoring depends on a set of resource attributes and metric
 - **Required attributes**: `k8s.cluster.name`.
 - **Required metrics**:
   - From kubeletstats: `k8s.node.cpu.usage`, `k8s.node.memory.working_set`
-  - From k8s_cluster: `k8s.node.allocatable_cpu` and `k8s.node.allocatable_memory` (both **disabled by default** — enable via `allocatable_types_to_report: [cpu, memory]`), `k8s.node.condition_ready`, `k8s.pod.phase`
+  - From k8s_cluster: `k8s.node.allocatable_cpu` and `k8s.node.allocatable_memory` (both **disabled by default**, enable via `allocatable_types_to_report: [cpu, memory]`), `k8s.node.condition_ready`, `k8s.pod.phase`
 - **Setup**:
   - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for node CPU / memory.
   - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for allocatable, condition_ready, and pod.phase.
@@ -122,8 +121,8 @@ The Infrastructure Monitoring depends on a set of resource attributes and metric
 
 - **Required attributes**: `k8s.persistentvolumeclaim.name`, `k8s.namespace.name`, `k8s.cluster.name`.
 - **Required metrics**:
-  - From kubeletstats: `k8s.volume.capacity`, `k8s.volume.available`
-- `Volume Used` is a computed value (`capacity − available`), not a separate metric. Inode columns are an upcoming addition and will rely on `k8s.volume.inodes`, `k8s.volume.inodes.used`, `k8s.volume.inodes.free`.
+  - From kubeletstats: `k8s.volume.capacity`, `k8s.volume.available`, `k8s.volume.inodes`, `k8s.volume.inodes.used`, `k8s.volume.inodes.free`
+- `Volume Used` is a computed value (`capacity − available`), not a separate metric.
 - **Setup**:
   - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for `k8s.volume.*` metrics.
   - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to enrich Kubernetes metadata on metrics.
@@ -138,7 +137,7 @@ EKS Fargate and some managed Kubernetes clusters block kubelet metric scraping b
 
 ## Troubleshooting checklist
 
-1. Verify required attributes: Use the Metrics Explorer to query `pod.cpu.usage` or `host.cpu.usage` and confirm that `host.name`, `[entity].uid`, and `[entity].name` labels exist and are populated.
+1. Verify required attributes: Use the Metrics Explorer to query `k8s.pod.cpu.usage` or `system.cpu.time` and confirm that `host.name`, `[entity].uid`, and `[entity].name` labels exist and are populated.
 2. Confirm Metrics Data Sources: Ensure both cluster-level and kubelet scrape jobs are enabled.
 3. Check if kubelet scraping is allowed on the platform.
 

@@ -1,7 +1,7 @@
 ---
-date: 2026-07-16
+date: 2026-08-03
 title: Collect and Monitor Cert-Manager Metrics with OpenTelemetry
-description: Learn how to scrape cert-manager Prometheus metrics using OpenTelemetry Collector and monitor TLS certificate health, controller performance, and ACME operations in SigNoz.
+description: Scrape cert-manager Prometheus metrics with OpenTelemetry and monitor TLS certificate health and controller performance in SigNoz.
 doc_type: howto
 ---
 
@@ -9,9 +9,9 @@ doc_type: howto
 
 cert-manager is a Kubernetes add-on that manages TLS certificate issuance and renewal. It exposes Prometheus metrics on port 9402 across three components: the controller, the webhook, and the cainjector.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<Admonition type="note" title="Using self-hosted SigNoz?" defaultCollapsed="true">
   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+</Admonition>
 
 ## Prerequisites
 
@@ -114,7 +114,7 @@ Verify these values:
 Apply the updated config and restart the collector:
 
 ```bash
-# Kubernetes Helm example — replace <collector-namespace> with your OTel Collector namespace
+# Kubernetes Helm example: replace <collector-namespace> with your OTel Collector namespace
 helm upgrade otel-collector open-telemetry/opentelemetry-collector \
   --namespace <collector-namespace> \
   -f otel-collector-values.yaml

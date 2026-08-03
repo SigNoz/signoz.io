@@ -1,7 +1,7 @@
 ---
-date: 2026-07-09
+date: 2026-08-03
 title: Jobs
-description: Monitor Kubernetes job status and resource usage in SigNoz — active, successful, and failed pod counts with CPU and memory metrics.
+description: Monitor Kubernetes job status and resource usage in SigNoz, covering active, successful, and failed pod counts with CPU and memory metrics.
 doc_type: explanation
 ---
 
@@ -30,51 +30,51 @@ The **Jobs** view tracks job completion status alongside resource consumption, u
 
 ### Completions
 
-- A combined, always-visible summary of the job's pod counts — **Active** (blue), **Failed** (red), **Successful** (green), and **Desired** (blue) shown side by side. Each is described in full in the [Active](#active), [Failed](#failed), [Successful](#successful), and [Desired Successful](#desired-successful) sections below. At a glance: **Successful** reaching **Desired** means the job finished; a climbing **Failed** count or an **Active** count that never converges points to a job that is retrying or stuck.
-- This summary is display-only and **cannot be sorted**. To sort the list by any single count, enable the dedicated **Active Pods**, **Failed Pods**, **Successful Pods**, and **Desired Successful Pods** columns — all **hidden by default** — from the **Columns** selector.
+- A combined, always-visible summary of the job's pod counts: **Active** (blue), **Failed** (red), **Successful** (green), and **Desired** (blue) shown side by side. Each is described in full in the [Active](#active), [Failed](#failed), [Successful](#successful), and [Desired Successful](#desired-successful) sections below. At a glance: **Successful** reaching **Desired** means the job finished; a climbing **Failed** count or an **Active** count that never converges points to a job that is retrying or stuck.
+- This summary is display-only and **cannot be sorted**. To sort the list by any single count, enable the dedicated **Active Pods**, **Failed Pods**, **Successful Pods**, and **Desired Successful Pods** columns (all **hidden by default**) from the **Columns** selector.
 
 ### Successful
 
 - This column relies on the OTel metric `k8s.job.successful_pods` from the k8s_cluster receiver, defined as "The number of pods which reached phase Succeeded for a job".
-- This is the K8s `.status.succeeded` field — pods that ran to completion with exit code 0.
+- This is the K8s `.status.succeeded` field: pods that ran to completion with exit code 0.
 - Compare against **Desired Successful**: when Succeeded reaches Desired Successful, the Job is considered complete; persistent Succeeded < Desired Successful (with no Active pods) means the Job is stalled or has hit a non-retryable failure.
 
 ### Failed
 
 - This column relies on the OTel metric `k8s.job.failed_pods` from the k8s_cluster receiver, defined as "The number of pods which reached phase Failed for a job".
-- This is the K8s `.status.failed` field — pods that exited non-zero or were terminated by the system. With the default Job `backoffLimit` of 6, the Job will be marked Failed once this count exceeds the limit.
-- Non-zero values warrant investigation — inspect the failing pods' logs and events via the Job's detail page to find the root cause (application bug, missing dependency, OOMKill, image-pull failure).
+- This is the K8s `.status.failed` field: pods that exited non-zero or were terminated by the system. With the default Job `backoffLimit` of 6, the Job will be marked Failed once this count exceeds the limit.
+- Non-zero values warrant investigation. Inspect the failing pods' logs and events via the Job's detail page to find the root cause (application bug, missing dependency, OOMKill, image-pull failure).
 
 ### Desired Successful
 
 - This column relies on the OTel metric `k8s.job.desired_successful_pods` from the k8s_cluster receiver, defined as "The desired number of successfully finished pods the job should be run with".
-- This is the K8s `.spec.completions` field — number of pod completions required for the Job to be considered done. For Jobs without `.spec.completions` set (single-completion Jobs), this is `1`.
+- This is the K8s `.spec.completions` field: number of pod completions required for the Job to be considered done. For Jobs without `.spec.completions` set (single-completion Jobs), this is `1`.
 - Compare to **Successful** to gauge Job progress; a Job is complete when Successful = Desired Successful.
 
 ### Active
 
 - This column relies on the OTel metric `k8s.job.active_pods` from the k8s_cluster receiver, defined as "The number of actively running pods for a job".
-- This is the K8s `.status.active` field — pods that are currently `Pending` or `Running`, bounded above by the Job's `.spec.parallelism` (default 1).
+- This is the K8s `.status.active` field: pods that are currently `Pending` or `Running`, bounded above by the Job's `.spec.parallelism` (default 1).
 - Persistently non-zero Active with **Successful** stuck below **Desired Successful** means the Job is taking longer than expected; if Active is also zero in that state, the Job is stalled and `kubectl describe job/<name>` will show why.
 
 ### CPU Req Usage (%)
 
 - This column relies on the OTel metric `k8s.pod.cpu_request_utilization` from the kubeletstats receiver, averaged across the Job's pods.
 - Average ratio of pod CPU usage to the sum of its containers' CPU requests across the Job's pods, expressed as a percentage. Values consistently >100% mean pods are using more CPU than reserved (allowed, but a signal requests are under-provisioned); values well below 50% indicate over-provisioned reservations.
-- Use this to detect under-/over-provisioning at the Job level — adjust `resources.requests.cpu` in the Job's pod template; for batch workloads that run for minutes-to-hours, getting requests right matters because the Job pod sits on its requested capacity for its whole runtime.
+- Use this to detect under-/over-provisioning at the Job level. Adjust `resources.requests.cpu` in the Job's pod template; for batch workloads that run for minutes-to-hours, getting requests right matters because the Job pod sits on its requested capacity for its whole runtime.
 - Color of the in-table progress bar reflects the value: **amber** below 50% (request likely over-provisioned, wasted capacity), **green** between 50% and 100% (healthy), **red** between 100% and 150% (request under-provisioned), and **dark red** above 150%.
 
 ### CPU Limit Usage (%)
 
 - This column relies on the OTel metric `k8s.pod.cpu_limit_utilization` from the kubeletstats receiver, averaged across the Job's pods.
-- Average ratio of pod CPU usage to the sum of its containers' CPU limits across the Job's pods, expressed as a percentage. Per K8s docs, "when a container approaches its `cpu` limit, the kernel restricts access to the CPU" — values near 100% indicate active or imminent throttling.
+- Average ratio of pod CPU usage to the sum of its containers' CPU limits across the Job's pods, expressed as a percentage. Per K8s docs, "when a container approaches its `cpu` limit, the kernel restricts access to the CPU". Values near 100% indicate active or imminent throttling.
 - Sustained high values mean the Job's pods are throttling under load and the Job is taking longer to complete than it should; raise `limits.cpu` to give them headroom.
-- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high — throttling becoming likely), and **red** above 95% (critical, at or beyond the limit).
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high, throttling becoming likely), and **red** above 95% (critical, at or beyond the limit).
 
 ### CPU Usage (cores)
 
 - This column relies on the OTel metric `k8s.pod.cpu.usage` from the kubeletstats receiver, summed across the Job's pods.
-- Total CPU consumed by all of the Job's pods in CPU-core units — a value of `1.0` means one full core in use across the Job.
+- Total CPU consumed by all of the Job's pods in CPU-core units: a value of `1.0` means one full core in use across the Job.
 - Use this for absolute capacity planning when you need the Job's raw CPU draw rather than a ratio; pair with the chart on the detail page to see how the cores trend during the Job's lifetime.
 
 ### Mem Req Usage (%)
@@ -87,27 +87,27 @@ The **Jobs** view tracks job completion status alongside resource consumption, u
 ### Mem Limit Usage (%)
 
 - This column relies on the OTel metric `k8s.pod.memory_limit_utilization` from the kubeletstats receiver, averaged across the Job's pods.
-- Average ratio of pod memory usage to the sum of its containers' memory limits, expressed as a percentage. Per K8s docs, "when a container uses more than its `memory` limit, the kernel may terminate it" via an OOMKill — values near 100% indicate sustained OOMKill risk.
-- Sustained values approaching 100% mean the Job's pod is on the verge of an OOMKill — for Jobs this is particularly costly because an OOMKill counts against the `backoffLimit` and can fail the entire Job; raise `limits.memory` or fix the memory profile of the workload.
-- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high — OOMKill becoming likely), and **red** above 95% (critical, at or beyond the limit).
+- Average ratio of pod memory usage to the sum of its containers' memory limits, expressed as a percentage. Per K8s docs, "when a container uses more than its `memory` limit, the kernel may terminate it" via an OOMKill. Values near 100% indicate sustained OOMKill risk.
+- Sustained values approaching 100% mean the Job's pod is on the verge of an OOMKill: for Jobs this is particularly costly because an OOMKill counts against the `backoffLimit` and can fail the entire Job; raise `limits.memory` or fix the memory profile of the workload.
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high, OOMKill becoming likely), and **red** above 95% (critical, at or beyond the limit).
 
 ### Mem Usage (WSS)
 
 - This column relies on the OTel metric `k8s.pod.memory.working_set` from the kubeletstats receiver, summed across the Job's pods.
-- Total Working Set Size across the Job's pods — anonymous + active file pages, excluding reclaimable inactive file pages (the value the kubelet uses for eviction).
+- Total Working Set Size across the Job's pods: anonymous + active file pages, excluding reclaimable inactive file pages (the value the kubelet uses for eviction).
 - Sustained high WSS without explicit `limits.memory` on the Job's containers means individual pods can grow until the kubelet evicts them under node MemoryPressure; set explicit limits or add a `LimitRange` to the namespace.
 
 ### Pod Counts by Phase
 
 - This column relies on the OTel metric `k8s.pod.phase` from the k8s_cluster receiver, encoded `1` = Pending, `2` = Running, `3` = Succeeded, `4` = Failed, `5` = Unknown.
-- Counts of the Job's pods grouped by their latest observed lifecycle phase within the selected window, per the Kubernetes pod-lifecycle spec. Note this reflects ALL pods the Job has ever created, including replacements for failed retries — so the counts can grow over the Job's lifetime even with `.spec.parallelism = 1`.
+- Counts of the Job's pods grouped by their latest observed lifecycle phase within the selected window, per the Kubernetes pod-lifecycle spec. Note this reflects ALL pods the Job has ever created, including replacements for failed retries, so the counts can grow over the Job's lifetime even with `.spec.parallelism = 1`.
 - `Pending` pods mean the scheduler can't place them yet (insufficient capacity or a missing toleration); `Failed` and `Unknown` warrant inspecting `kubectl describe job/<name>` and the pod events.
 
 ### Pod Counts by Status
 
 - This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` from the k8s_cluster receiver. The latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics); all three must be flowing for this column to be populated.
-- Counts of the Job's pods grouped by their kubectl-style display status within the selected window, including replacements for failed retries. The status is derived exactly as on the Pods view — see [Pod Status](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/#pod-status) for the full priority cascade, the statuses it surfaces, and the statuses it cannot derive.
-- `OOMKilled` / `Error` counts are the primary triage signal for a failing Job — the work isn't completing; read them alongside the **Failed** count on the Jobs view and inspect with `kubectl describe job/<name>`.
+- Counts of the Job's pods grouped by their kubectl-style display status within the selected window, including replacements for failed retries. The status is derived exactly as on the Pods view: see [Pod Status](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/#pod-status) for the full priority cascade, the statuses it surfaces, and the statuses it cannot derive.
+- `OOMKilled` / `Error` counts are the primary triage signal for a failing Job: the work isn't completing; read them alongside the **Failed** count on the Jobs view and inspect with `kubectl describe job/<name>`.
 
 ## Job Detail Page
 
@@ -116,7 +116,7 @@ Click a Job name to open the detail page. The header shows **Job Name**, **Clust
 <Figure
   src="/img/docs/infrastructure-monitoring/kubernetes-jobs-detail.webp"
   alt="Job detail page showing CPU and memory charts"
-  caption="Job Detail — Metrics Tab"
+  caption="Job Detail: Metrics Tab"
   className="box-shadowed-image"
 />
 
@@ -126,25 +126,25 @@ Click a Job name to open the detail page. The header shows **Job Name**, **Clust
 
 - This chart relies on the OTel metric `k8s.pod.cpu.usage` from the kubeletstats receiver, summed across the Job's pods.
 - Plots a single line: the Job's CPU consumption in CPU-core units (averaged within each step interval, summed across the Job's pods).
-- Use this to see when the Job is most CPU-intensive over its lifetime — sustained-high segments are candidates for tightening `limits.cpu` (if you want to throttle) or raising it (if the Job is throttled and running slow); pair with the `CPU Limit Usage (%)` column on the list page.
+- Use this to see when the Job is most CPU-intensive over its lifetime: sustained-high segments are candidates for tightening `limits.cpu` (if you want to throttle) or raising it (if the Job is throttled and running slow); pair with the `CPU Limit Usage (%)` column on the list page.
 
 #### Memory Usage
 
 - This chart relies on the OTel metric `k8s.pod.memory.usage` from the kubeletstats receiver, summed across the Job's pods.
 - Plots a single line: the Job's memory consumption in bytes (averaged within each step interval, summed across the Job's pods). Note this uses `k8s.pod.memory.usage` (which includes reclaimable page cache), so it reads higher than the working-set value the kubelet uses for eviction decisions.
-- Use this with the `Mem Limit Usage (%)` column on the list page — a slow upward climb across the Job's lifetime usually indicates a memory leak; a sudden spike usually correlates with a data-driven input change.
+- Use this with the `Mem Limit Usage (%)` column on the list page: a slow upward climb across the Job's lifetime usually indicates a memory leak; a sudden spike usually correlates with a data-driven input change.
 
 #### Network IO
 
-- This chart relies on the OTel metric `k8s.pod.network.io` from the kubeletstats receiver — a cumulative Sum in bytes with attributes `direction` and `interface`, shown as a per-second rate and aggregated across the Job's pods.
+- This chart relies on the OTel metric `k8s.pod.network.io` from the kubeletstats receiver, a cumulative Sum in bytes with attributes `direction` and `interface`, shown as a per-second rate and aggregated across the Job's pods.
 - One line per `direction :: interface` combination, showing transmit/receive throughput across all pods of the Job.
-- Use this to detect whether the Job is the source of unusual network load on a node — sudden throughput spikes, sustained saturation near the underlying NIC's rated bandwidth, or a discontinuity in the receive-vs-transmit pattern that doesn't track an explained workload change are the signals worth investigating. "No Data" means none of the pods are reporting per-pod network metrics.
+- Use this to detect whether the Job is the source of unusual network load on a node: sudden throughput spikes, sustained saturation near the underlying NIC's rated bandwidth, or a discontinuity in the receive-vs-transmit pattern that doesn't track an explained workload change are the signals worth investigating. "No Data" means none of the pods are reporting per-pod network metrics.
 
 #### Network Errors Count
 
-- This chart relies on the OTel metric `k8s.pod.network.errors` from the kubeletstats receiver — a cumulative Sum with attributes `direction` and `interface`, shown as a per-second increase and aggregated across the Job's pods.
+- This chart relies on the OTel metric `k8s.pod.network.errors` from the kubeletstats receiver, a cumulative Sum with attributes `direction` and `interface`, shown as a per-second increase and aggregated across the Job's pods.
 - One line per `direction :: interface` combination, sourced from the kubelet's per-pod-interface error counters.
-- Sustained non-zero values warrant attention — common causes are misconfigured CNI plugins, MTU mismatches, or faulty NICs on the underlying nodes; correlate with the **Node Detail → Network Errors** chart on the specific node(s) hosting the Job's pods.
+- Sustained non-zero values warrant attention: common causes are misconfigured CNI plugins, MTU mismatches, or faulty NICs on the underlying nodes; correlate with the **Node Detail → Network Errors** chart on the specific node(s) hosting the Job's pods.
 
 ### Pod Metrics
 
@@ -152,30 +152,36 @@ The **Pod Metrics** tab breaks resource utilization down **per pod** across ever
 
 #### CPU Limit Utilization By Pod Name
 
-- This chart relies on the OTel metric `k8s.pod.cpu_limit_utilization` from the kubeletstats receiver — a pod's CPU usage as a fraction of the sum of its containers' CPU limits, emitted directly as a ratio.
+- This chart relies on the OTel metric `k8s.pod.cpu_limit_utilization` from the kubeletstats receiver, a pod's CPU usage as a fraction of the sum of its containers' CPU limits, emitted directly as a ratio.
 - Plots one line per pod in the Job, each showing that pod's CPU usage against its CPU limit; values near 100% mean the kernel is actively throttling that pod's CPU.
-- Use it to pinpoint *which* of the Job's pods is throttled — a single line hugging 100% while the rest sit low points to one pod doing more work, whereas all pods running high means the Job's `limits.cpu` is too low.
+- Use it to pinpoint *which* of the Job's pods is throttled: a single line hugging 100% while the rest sit low points to one pod doing more work, whereas all pods running high means the Job's `limits.cpu` is too low.
 
 #### CPU Request Utilization By Pod Name
 
-- This chart relies on the OTel metric `k8s.pod.cpu_request_utilization` from the kubeletstats receiver — a pod's CPU usage as a fraction of the sum of its containers' CPU requests.
+- This chart relies on the OTel metric `k8s.pod.cpu_request_utilization` from the kubeletstats receiver, a pod's CPU usage as a fraction of the sum of its containers' CPU requests.
 - Plots one line per pod in the Job, each showing usage against its CPU request; values above 100% mean the pod is using more CPU than it reserved (allowed, but a sign the request is low).
-- Use it to judge reservation accuracy per pod — pods consistently far below 100% are over-provisioned, while pods above it are under-requested and may crowd their node.
+- Use it to judge reservation accuracy per pod: pods consistently far below 100% are over-provisioned, while pods above it are under-requested and may crowd their node.
 
 #### Memory Limit Utilization By Pod Name
 
-- This chart relies on the OTel metric `k8s.pod.memory_limit_utilization` from the kubeletstats receiver — a pod's memory usage as a fraction of the sum of its containers' memory limits.
+- This chart relies on the OTel metric `k8s.pod.memory_limit_utilization` from the kubeletstats receiver, a pod's memory usage as a fraction of the sum of its containers' memory limits.
 - Plots one line per pod in the Job, each showing that pod's memory usage against its memory limit; a line at or near 100% is a pod on the verge of an OOMKill.
-- Use it to isolate the pod at risk — a steady climb toward the limit is what precedes an OOMKill; raise `limits.memory` or reduce the per-pod workload.
+- Use it to isolate the pod at risk: a steady climb toward the limit is what precedes an OOMKill; raise `limits.memory` or reduce the per-pod workload.
 
 #### Memory Request Utilization By Pod Name
 
-- This chart relies on the OTel metric `k8s.pod.memory_request_utilization` from the kubeletstats receiver — a pod's memory usage as a fraction of the sum of its containers' memory requests.
+- This chart relies on the OTel metric `k8s.pod.memory_request_utilization` from the kubeletstats receiver, a pod's memory usage as a fraction of the sum of its containers' memory requests.
 - Plots one line per pod in the Job, each showing usage against its memory request; values above 100% mean the pod exceeds its reservation.
-- Use it to right-size `requests.memory` — pods well below 100% reserve memory they never use, while pods above it risk eviction first under node memory pressure.
+- Use it to right-size `requests.memory`: pods well below 100% reserve memory they never use, while pods above it risk eviction first under node memory pressure.
 
 #### FileSystem Usage Percentage By Pod Name
 
-- This chart is derived from two kubeletstats metrics — `k8s.pod.filesystem.usage` (bytes used) divided by `k8s.pod.filesystem.capacity` (total bytes); only the computed ratio is plotted, not the raw metrics.
+- This chart is derived from two kubeletstats metrics: `k8s.pod.filesystem.usage` (bytes used) divided by `k8s.pod.filesystem.capacity` (total bytes); only the computed ratio is plotted, not the raw metrics.
 - Plots one line per pod in the Job, each showing that pod's local/ephemeral filesystem fill level as a percentage of its capacity.
-- Watch any pod trending toward 100% — its ephemeral storage is filling (output files, downloaded data, temp files) and writes will start failing or the pod may be evicted before the Job completes.
+- Watch any pod trending toward 100%: its ephemeral storage is filling (output files, downloaded data, temp files) and writes will start failing or the pod may be evicted before the Job completes.
+
+## Next steps
+
+- [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/): back to the Kubernetes Monitoring overview.
+- [Setup Kubernetes Metrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/): configure the receivers this page's metrics depend on.
+- [Pods](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/) and [Namespaces](https://signoz.io/docs/infrastructure-monitoring/kubernetes/namespaces/): drill into individual pods or roll up to the namespace.

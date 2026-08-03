@@ -1,11 +1,11 @@
 ---
-date: 2026-07-09
+date: 2026-08-03
 title: Pods
-description: Monitor Kubernetes pod CPU, memory, and network performance in SigNoz — request/limit utilization, per-container breakdowns, and correlated traces and logs.
+description: Monitor Kubernetes pod CPU, memory, and network performance in SigNoz, covering request/limit utilization and correlated traces and logs.
 doc_type: explanation
 ---
 
-The **Pods** view is the default Kubernetes monitoring view. It shows all active pods with color-coded progress bars — green for normal (0–60%), yellow for elevated (60–80%), and red for critical (80–100%+) usage.
+The **Pods** view is the default Kubernetes monitoring view. It shows all active pods with color-coded progress bars on the Req Usage and Limit Usage columns, detailed under [Pods List Page Columns](#pods-list-page-columns) below.
 
 <Figure
   src="/img/docs/infrastructure-monitoring/kubernetes-pods-list.webp"
@@ -24,14 +24,14 @@ The **Pods** view is the default Kubernetes monitoring view. It shows all active
 ### CPU Req Usage (%)
 
 - This column relies on the OTel metric(s): `k8s.pod.cpu_request_utilization`.
-- Ratio of the pod's CPU usage to the sum of its containers' CPU requests, expressed as a percentage. Per the [Kubernetes resource-management docs](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-requests-are-scheduled), requests are used by the scheduler when fitting pods to nodes — values approaching or exceeding 100% mean the pod is using more CPU than was reserved (allowed, but a signal the request is under-provisioned), while values well below 50% indicate the request is over-provisioned and reserving capacity the pod never uses. Not emitted if any container is missing a `requests.cpu` spec.
+- Ratio of the pod's CPU usage to the sum of its containers' CPU requests, expressed as a percentage. Per the <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-requests-are-scheduled" target="_blank" rel="noopener noreferrer nofollow">Kubernetes resource-management docs</a>, requests are used by the scheduler when fitting pods to nodes: values approaching or exceeding 100% mean the pod is using more CPU than was reserved (allowed, but a signal the request is under-provisioned), while values well below 50% indicate the request is over-provisioned and reserving capacity the pod never uses. Not emitted if any container is missing a `requests.cpu` spec.
 - Color of the in-table progress bar reflects the value: **amber** below 50% (request likely over-provisioned, wasted capacity), **green** between 50% and 100% (healthy), **red** between 100% and 150% (request under-provisioned), and **dark red** above 150%.
 
 ### CPU Limit Usage (%)
 
 - This column relies on the OTel metric(s): `k8s.pod.cpu_limit_utilization`.
-- Ratio of the pod's CPU usage to the sum of its containers' CPU limits, expressed as a percentage. [CPU limits are enforced by kernel throttling](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits), so values approaching 100% indicate active or imminent CPU throttling. Not emitted if any container is missing a `limits.cpu` spec.
-- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high — throttling becoming likely), and **red** above 95% (critical, at or beyond the limit).
+- Ratio of the pod's CPU usage to the sum of its containers' CPU limits, expressed as a percentage. <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits" target="_blank" rel="noopener noreferrer nofollow">CPU limits are enforced by kernel throttling</a>, so values approaching 100% indicate active or imminent CPU throttling. Not emitted if any container is missing a `limits.cpu` spec.
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high, throttling becoming likely), and **red** above 95% (critical, at or beyond the limit).
 
 ### CPU Usage (cores)
 
@@ -41,56 +41,50 @@ The **Pods** view is the default Kubernetes monitoring view. It shows all active
 ### Mem Req Usage (%)
 
 - This column relies on the OTel metric(s): `k8s.pod.memory_request_utilization`.
-- Ratio of the pod's memory usage to the sum of its containers' memory requests, expressed as a percentage. As with CPU, [memory requests are used by the scheduler](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-requests-are-scheduled) when fitting pods to nodes — values consistently above 100% mean the pod uses more memory than was reserved (allowed, but a signal the request is under-provisioned), while values well below 50% indicate the request is over-provisioned and reserving memory the pod never uses. Not emitted if any container is missing a `requests.memory` spec.
+- Ratio of the pod's memory usage to the sum of its containers' memory requests, expressed as a percentage. As with CPU, <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-requests-are-scheduled" target="_blank" rel="noopener noreferrer nofollow">memory requests are used by the scheduler</a> when fitting pods to nodes: values consistently above 100% mean the pod uses more memory than was reserved (allowed, but a signal the request is under-provisioned), while values well below 50% indicate the request is over-provisioned and reserving memory the pod never uses. Not emitted if any container is missing a `requests.memory` spec.
 - Color of the in-table progress bar reflects the value: **amber** below 50% (request likely over-provisioned, wasted capacity), **green** between 50% and 100% (healthy), **red** between 100% and 150% (request under-provisioned), and **dark red** above 150%.
 
 ### Mem Limit Usage (%)
 
 - This column relies on the OTel metric(s): `k8s.pod.memory_limit_utilization`.
-- Ratio of the pod's memory usage to the sum of its containers' memory limits, expressed as a percentage. [Memory limits are enforced reactively by OOM kills when the kernel detects memory pressure](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) — values at or near 100% indicate sustained OOMKill risk. Not emitted if any container is missing a `limits.memory` spec.
-- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high — OOMKill becoming likely), and **red** above 95% (critical, at or beyond the limit).
+- Ratio of the pod's memory usage to the sum of its containers' memory limits, expressed as a percentage. <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits" target="_blank" rel="noopener noreferrer nofollow">Memory limits are enforced reactively by OOM kills when the kernel detects memory pressure</a>, so values at or near 100% indicate sustained OOMKill risk. Not emitted if any container is missing a `limits.memory` spec.
+- Color of the in-table progress bar reflects the value: **green** below 60% (healthy headroom), **light amber** between 60% and 80% (caution), **amber** between 80% and 95% (high, OOMKill becoming likely), and **red** above 95% (critical, at or beyond the limit).
 
 ### Mem Usage (WSS)
 
 - This column relies on the OTel metric(s): `k8s.pod.memory.working_set`.
-- Working Set Size — anonymous + active file pages, excluding reclaimable inactive file pages. The kubelet uses this value (not total memory) for node-pressure eviction decisions, since the excluded pages can be reclaimed under pressure.
-
-### Pod Phase
-
-- This column relies on the OTel metric(s): `k8s.pod.phase`.
-- Latest lifecycle phase for the pod within the selected window — one of `Pending`, `Running`, `Succeeded`, `Failed`, or `Unknown`. Per the Kubernetes Pod-lifecycle docs: `Pending` means containers haven't been set up yet (waiting to be scheduled or downloading images); `Succeeded` and `Failed` are terminal (`Failed` means at least one container exited non-zero or was terminated by the system); `Unknown` "typically occurs due to an error in communicating with the node where the Pod should be running."
-- Use this to spot stuck `Pending` pods (scheduling pressure, image-pull failure, missing toleration) or unexpected `Failed` / `Unknown` pods — open the pod detail page to inspect events and logs for the root cause.
+- Working Set Size: anonymous + active file pages, excluding reclaimable inactive file pages. The kubelet uses this value (not total memory) for node-pressure eviction decisions, since the excluded pages can be reclaimed under pressure.
 
 ### Pod Status
 
-- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` (all from the k8s_cluster receiver; the latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics)). All three must be flowing for this column to be populated.
-- The kubectl-style display status for the pod — the value `kubectl get pods` prints under STATUS — derived from the latest value of each metric in the selected window via a priority cascade: a container-level reason (`k8s.container.status.reason`) takes precedence, then a pod-level reason (`k8s.pod.status_reason`), then the lifecycle phase (`k8s.pod.phase`). Surfaced statuses are the five phases `Pending` / `Running` / `Succeeded` / `Failed` / `Unknown`; container reasons `CrashLoopBackOff`, `ImagePullBackOff`, `ErrImagePull`, `CreateContainerConfigError`, `ContainerCreating`, `OOMKilled`, `Completed`, `Error`, `ContainerCannotRun`; and pod-level reasons `Evicted`, `NodeAffinity`, `NodeLost`, `Shutdown`, `UnexpectedAdmissionError`.
+- This column relies on the OTel metric(s): `k8s.pod.phase`, `k8s.pod.status_reason`, and `k8s.container.status.reason` (all from the k8s_cluster receiver; the latter two are disabled by default in the upstream receiver but enabled by default in the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#6-cluster-level-metrics)). All three are required together: if any one is missing, the column stays empty rather than falling back to a partial value.
+- The kubectl-style display status for the pod, the value `kubectl get pods` prints under STATUS, computed via a priority order once all three metrics are present: a container-level reason (`k8s.container.status.reason`) takes precedence, then a pod-level reason (`k8s.pod.status_reason`), then the lifecycle phase (`k8s.pod.phase`). Per the Kubernetes Pod-lifecycle docs, the phase values are `Pending` (containers not yet set up: waiting to be scheduled or downloading images), `Running`, `Succeeded` / `Failed` (terminal; `Failed` means a container exited non-zero or was terminated), and `Unknown` (typically a communication error with the node). Container reasons surfaced: `CrashLoopBackOff`, `ImagePullBackOff`, `ErrImagePull`, `CreateContainerConfigError`, `ContainerCreating`, `OOMKilled`, `Completed`, `Error`, `ContainerCannotRun`. Pod-level reasons surfaced: `Evicted`, `NodeAffinity`, `NodeLost`, `Shutdown`, `UnexpectedAdmissionError`.
 - A few statuses that `kubectl` can show are not derivable from these metrics. Note these gaps and why they exist:
   - `Terminating` is not surfaced, because the metrics emit no pod deletion timestamp.
   - `Init:*` states are not surfaced, because the k8s_cluster receiver reports only regular containers and not init containers.
   - `Signal:N` and `ExitCode:N` are not surfaced, because uncoded terminated reasons collapse to `Error`.
-- Use this to triage pods directly from the list without `kubectl` — `CrashLoopBackOff`, `OOMKilled`, `ImagePullBackOff`, and `Evicted` are the pods to investigate first; click the pod name to open its logs and events for the root cause.
+- Use this to triage pods directly from the list without `kubectl`. `CrashLoopBackOff`, `OOMKilled`, `ImagePullBackOff`, and `Evicted` are the pods to investigate first; a stuck `Pending` status points to scheduling pressure, image-pull failure, or a missing toleration. Click the pod name to open its logs and events for the root cause.
 
 ### Restarts
 
 - This column relies on the OTel metric(s): `k8s.container.restarts` (from the k8s_cluster receiver; enabled by default).
-- Total container restarts for the pod — the sum across the pod's containers of each container's latest cumulative restart count within the selected window, the same value `kubectl get pods` prints under RESTARTS. It excludes init containers, which the receiver does not report restarts for. OpenTelemetry cautions against reading too much into the exact number:
+- Total container restarts for the pod: the sum across the pod's containers of each container's latest cumulative restart count within the selected window, the same value `kubectl get pods` prints under RESTARTS. It excludes init containers, which the receiver does not report restarts for. OpenTelemetry cautions against reading too much into the exact number:
 
   > "How many times the container has restarted in the recent past. This value is pulled directly from the K8s API and the value can go indefinitely high and be reset to 0 at any time depending on how your kubelet is configured to prune dead containers. It is best to not depend too much on the exact value but rather look at it as either == 0, in which case you can conclude there were no restarts in the recent past, or > 0, in which case you can conclude there were restarts in the recent past, and not try and analyze the value beyond that."
   >
-  > — <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerrestarts" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry k8sclusterreceiver documentation</a>
+  > Source: <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerrestarts" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry k8sclusterreceiver documentation</a>
 
 - Treat the value as a signal rather than a precise count: `0` means no restarts in the recent past, anything `> 0` is a pod worth investigating (crash loops, OOM kills, failing liveness probes). Read it alongside the **Pod Status** column to tell a one-off restart from sustained flapping, then open the pod's logs and events to find the cause.
 
 ### Pod Age
 
-- This column is derived from the resource attribute `k8s.pod.start_time` — an RFC3339 timestamp ("The start time of the Pod", a stable Kubernetes semantic-convention attribute) recording when the pod started. It is set exclusively by the **Kubernetes attributes processor** (`k8sattributesprocessor`), which adds it by default; it is **not** emitted by the kubeletstats or k8s_cluster receivers.
+- This column is derived from the resource attribute `k8s.pod.start_time` (an RFC3339 timestamp ("The start time of the Pod", a stable Kubernetes semantic-convention attribute) recording when the pod started). It is set exclusively by the **Kubernetes attributes processor** (`k8sattributesprocessor`), which adds it by default; it is **not** emitted by the kubeletstats or k8s_cluster receivers.
 - Age is computed as the elapsed time between that start time and the **end of the selected time range** (`age = rangeEnd − k8s.pod.start_time`), then shown in a human-readable form (days, hours, minutes). Because age is measured to the end of the query window, a historical time range shows how old each pod was *at that point*, not its age right now.
-- Use it to catch pods whose lifetime doesn't match expectations: an age that just reset on a workload you didn't redeploy signals a recent restart or reschedule — read it alongside **Restarts** and **Pod Status** — while an unexpectedly old age can flag a pod that missed a rollout and is still running a stale spec.
+- Use it to catch pods whose lifetime doesn't match expectations: an age that just reset on a workload you didn't redeploy signals a recent restart or reschedule (read it alongside **Restarts** and **Pod Status**), while an unexpectedly old age can flag a pod that missed a rollout and is still running a stale spec.
 
 ### Additional Columns
 
-- **Namespace**, **Node**, and **Cluster** are available from the **Columns** selector — all **hidden by default**. They are derived from the resource attributes `k8s.namespace.name`, `k8s.node.name`, and `k8s.cluster.name` respectively, and let you filter and sort the pod list by where each pod is running.
+- **Namespace**, **Node**, and **Cluster** are available from the **Columns** selector (all **hidden by default**). They are derived from the resource attributes `k8s.namespace.name`, `k8s.node.name`, and `k8s.cluster.name` respectively, and let you filter and sort the pod list by where each pod is running.
 
 ## Pod Detail Page
 
@@ -99,7 +93,7 @@ Click a pod name to open the detail page. The header shows **Namespace**, **Clus
 <Figure
   src="/img/docs/infrastructure-monitoring/kubernetes-pods-detail.webp"
   alt="Pod detail page showing CPU and memory charts"
-  caption="Pod Detail — Metrics Tab"
+  caption="Pod Detail: Metrics Tab"
   className="box-shadowed-image"
 />
 
@@ -108,12 +102,12 @@ Click a pod name to open the detail page. The header shows **Namespace**, **Clus
 #### CPU Usage (cores)
 
 - This chart relies on the OTel metric(s): `k8s.pod.cpu.usage`.
-- Plots the pod's CPU consumption in CPU-core units over time, using three time-aggregations of `k8s.pod.cpu.usage` (per the kubeletstats receiver) within each step interval — one line each for **Avg**, **Max**, and **Min**. The gap between Max and Min shows intra-interval volatility — a narrow band means steady CPU use, a wide band means bursty workloads.
+- Plots the pod's CPU consumption in CPU-core units over time, using three time-aggregations of `k8s.pod.cpu.usage` (per the kubeletstats receiver) within each step interval: one line each for **Avg**, **Max**, and **Min**. The gap between Max and Min shows intra-interval volatility: a narrow band means steady CPU use, a wide band means bursty workloads.
 
 #### CPU Request, Limit Utilization
 
 - This chart relies on the OTel metric(s): `k8s.pod.cpu_request_utilization`, `k8s.pod.cpu_limit_utilization`.
-- Plots the pod's CPU usage as fractions of its containers' total CPU requests and total CPU limits over time, using `k8s.pod.cpu_request_utilization` and `k8s.pod.cpu_limit_utilization` from the kubeletstats receiver. Six lines — three per ratio (**Request util % - Avg / Max / Min** and **Limit util % - Avg / Max / Min**) showing both typical value and bursting envelope. Request lines crossing 100% just mean the pod uses more CPU than reserved (allowed); Limit lines crossing 100% indicate active CPU throttling by the kernel.
+- Plots the pod's CPU usage as fractions of its containers' total CPU requests and total CPU limits over time, using `k8s.pod.cpu_request_utilization` and `k8s.pod.cpu_limit_utilization` from the kubeletstats receiver. Six lines: three per ratio (**Request util % - Avg / Max / Min** and **Limit util % - Avg / Max / Min**) showing both typical value and bursting envelope. Request lines crossing 100% just mean the pod uses more CPU than reserved (allowed); Limit lines crossing 100% indicate active CPU throttling by the kernel.
 
 #### Memory Usage (bytes)
 
@@ -123,7 +117,7 @@ Click a pod name to open the detail page. The header shows **Namespace**, **Clus
 #### Memory Request, Limit Utilization
 
 - This chart relies on the OTel metric(s): `k8s.pod.memory_request_utilization`, `k8s.pod.memory_limit_utilization`.
-- Plots the pod's memory usage as fractions of its containers' total memory requests and total memory limits over time, using `k8s.pod.memory_request_utilization` and `k8s.pod.memory_limit_utilization` from the kubeletstats receiver. Six lines — three per ratio (**Request util % - Avg / Max / Min** and **Limit util % - Avg / Max / Min**). Request lines crossing 100% just mean the pod uses more memory than reserved; Limit lines crossing 100% risk an OOMKill once the kernel detects memory pressure.
+- Plots the pod's memory usage as fractions of its containers' total memory requests and total memory limits over time, using `k8s.pod.memory_request_utilization` and `k8s.pod.memory_limit_utilization` from the kubeletstats receiver. Six lines: three per ratio (**Request util % - Avg / Max / Min** and **Limit util % - Avg / Max / Min**). Request lines crossing 100% just mean the pod uses more memory than reserved; Limit lines crossing 100% risk an OOMKill once the kernel detects memory pressure.
 
 #### Memory by State
 
@@ -133,7 +127,7 @@ Click a pod name to open the detail page. The header shows **Namespace**, **Clus
 #### Memory Major Page Faults
 
 - This chart relies on the OTel metric(s): `k8s.pod.memory.major_page_faults`.
-- Plots the pod's major-page-fault rate over time using `k8s.pod.memory.major_page_faults` (from kubeletstats), as a single line. A major page fault means the kernel had to read a page from disk because the data wasn't in RAM — sustained high values indicate the pod's working set exceeds its allocated memory and the system is paging from disk (very expensive; usually correlates with severe performance drops).
+- Plots the pod's major-page-fault rate over time using `k8s.pod.memory.major_page_faults` (from kubeletstats), as a single line. A major page fault means the kernel had to read a page from disk because the data wasn't in RAM. Sustained high values indicate the pod's working set exceeds its allocated memory and the system is paging from disk (very expensive; usually correlates with severe performance drops).
 
 #### CPU Usage by Container (cores)
 
@@ -143,29 +137,35 @@ Click a pod name to open the detail page. The header shows **Namespace**, **Clus
 #### CPU Request, Limit Utilization by Container
 
 - This chart relies on the OTel metric(s): `container.cpu.usage`, `k8s.container.cpu_request`, `k8s.container.cpu_limit`.
-- Plots each container's CPU usage as a fraction of its own request and limit, computed via `usage / request` and `usage / limit` formulas using `container.cpu.usage` and the kubeletstats `k8s.container.cpu_request` / `k8s.container.cpu_limit` metrics, grouped by `k8s.container.name`. Two lines per container — `Req % : <container>` and `Limit % : <container>`. Useful for identifying which container in a multi-container pod is throttling or under-utilizing its allocated CPU.
+- Plots each container's CPU usage as a fraction of its own request and limit, computed via `usage / request` and `usage / limit` formulas using `container.cpu.usage` and the kubeletstats `k8s.container.cpu_request` / `k8s.container.cpu_limit` metrics, grouped by `k8s.container.name`. Two lines per container: `Req % : <container>` and `Limit % : <container>`. Useful for identifying which container in a multi-container pod is throttling or under-utilizing its allocated CPU.
 
 #### Memory Usage by Container (bytes)
 
 - This chart relies on the OTel metric(s): `container.memory.usage`, `container.memory.working_set`, `container.memory.rss`.
-- Plots three per-container memory metrics over time — `container.memory.usage`, `container.memory.working_set`, and `container.memory.rss` (all from the kubeletstats receiver) — grouped by `k8s.container.name`. Three lines per container labeled `usage :: <container>`, `working set :: <container>`, and `rss :: <container>`. Useful for identifying which container's memory is growing and whether the growth is in active workload memory (`rss`, `working set`) or reclaimable cache (the gap between `usage` and `working set`).
+- Plots three per-container memory metrics over time (`container.memory.usage`, `container.memory.working_set`, and `container.memory.rss`, all from the kubeletstats receiver), grouped by `k8s.container.name`. Three lines per container labeled `usage :: <container>`, `working set :: <container>`, and `rss :: <container>`. Useful for identifying which container's memory is growing and whether the growth is in active workload memory (`rss`, `working set`) or reclaimable cache (the gap between `usage` and `working set`).
 
 #### Memory Request, Limit Utilization by Container
 
 - This chart relies on the OTel metric(s): `container.memory.usage`, `k8s.container.memory_request`, `k8s.container.memory_limit`.
-- Plots each container's memory usage as a fraction of its own request and limit, computed via `usage / request` and `usage / limit` using `container.memory.usage` and the kubeletstats `k8s.container.memory_request` / `k8s.container.memory_limit` metrics, grouped by `k8s.container.name`. Two lines per container labeled `Req % : <container>` and `Limit % : <container>`. Limit % approaching 100% on any single container is a per-container OOMKill signal — even if the pod's overall memory ratio looks fine, a single container hitting its limit will be terminated.
+- Plots each container's memory usage as a fraction of its own request and limit, computed via `usage / request` and `usage / limit` using `container.memory.usage` and the kubeletstats `k8s.container.memory_request` / `k8s.container.memory_limit` metrics, grouped by `k8s.container.name`. Two lines per container labeled `Req % : <container>` and `Limit % : <container>`. Limit % approaching 100% on any single container is a per-container OOMKill signal: even if the pod's overall memory ratio looks fine, a single container hitting its limit will be terminated.
 
 #### Network Rate
 
 - This chart relies on the OTel metric(s): `k8s.pod.network.io`.
-- Plots the pod's network throughput in bytes per second (rate of `k8s.pod.network.io` from the kubeletstats receiver) grouped by `direction` (transmit / receive) and `network.interface.name`, with one line per `direction :: interface` combination. Use this to separate ingress vs egress traffic and spot when a specific interface is saturating. If the chart shows "No Data", the pod isn't reporting network activity — possible reasons include the CNI plugin not exposing per-pod network metrics, or the pod sharing host networking.
+- Plots the pod's network throughput in bytes per second (rate of `k8s.pod.network.io` from the kubeletstats receiver) grouped by `direction` (transmit / receive) and `network.interface.name`, with one line per `direction :: interface` combination. Use this to separate ingress vs egress traffic and spot when a specific interface is saturating. If the chart shows "No Data", the pod isn't reporting network activity: possible reasons include the CNI plugin not exposing per-pod network metrics, or the pod sharing host networking.
 
 #### Network Errors
 
 - This chart relies on the OTel metric(s): `k8s.pod.network.errors`.
-- Plots the rate of network errors observed on the pod's interfaces using `k8s.pod.network.errors` (from kubeletstats) grouped by `direction` and `network.interface.name` — one line per `direction :: interface`. Any sustained non-zero value warrants attention — common causes are misconfigured CNI plugins, faulty node NICs, MTU mismatches, or noisy neighbors saturating the underlying host network.
+- Plots the rate of network errors observed on the pod's interfaces using `k8s.pod.network.errors` (from kubeletstats) grouped by `direction` and `network.interface.name`, one line per `direction :: interface`. Any sustained non-zero value warrants attention: common causes are misconfigured CNI plugins, faulty node NICs, MTU mismatches, or noisy neighbors saturating the underlying host network.
 
 #### File System (bytes)
 
 - This chart relies on the OTel metric(s): `k8s.pod.filesystem.capacity`, `k8s.pod.filesystem.available`, `k8s.pod.filesystem.usage`.
-- Plots three values of the pod's local filesystem over time using kubeletstats metrics: **Capacity** (`k8s.pod.filesystem.capacity` — total provisioned space), **Available** (`k8s.pod.filesystem.available` — remaining free space), and **Usage** (`k8s.pod.filesystem.usage` — currently consumed). When `Available` trends toward zero or `Usage` approaches `Capacity`, the pod's local filesystem is filling up — common causes are log accumulation, downloaded artifacts, or local temp/cache files that aren't being cleaned up.
+- Plots three values of the pod's local filesystem over time using kubeletstats metrics: **Capacity** (`k8s.pod.filesystem.capacity`, total provisioned space), **Available** (`k8s.pod.filesystem.available`, remaining free space), and **Usage** (`k8s.pod.filesystem.usage`, currently consumed). When `Available` trends toward zero or `Usage` approaches `Capacity`, the pod's local filesystem is filling up: common causes are log accumulation, downloaded artifacts, or local temp/cache files that aren't being cleaned up.
+
+## Next steps
+
+- [Kubernetes Monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/): back to the Kubernetes Monitoring overview.
+- [Setup Kubernetes Metrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/): configure the receivers this page's metrics depend on.
+- [Nodes](https://signoz.io/docs/infrastructure-monitoring/kubernetes/nodes/) and [Namespaces](https://signoz.io/docs/infrastructure-monitoring/kubernetes/namespaces/): see where these pods run and how they're grouped.
