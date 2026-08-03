@@ -21,6 +21,9 @@ import {
   Mail,
 } from 'lucide-react'
 import { SiSlack, SiGithub, SiDocker, SiLinux, SiKubernetes } from 'react-icons/si'
+import type { DocsIntroCardData } from '@/components/DocsIntroCard/DocsIntroCard'
+
+export type CardData = DocsIntroCardData
 
 /** Lucide globe-check — not yet in lucide-react@0.540.0 */
 function GlobeCheck({ size = 24, className }: { size?: number; className?: string }) {
@@ -44,15 +47,6 @@ function GlobeCheck({ size = 24, className }: { size?: number; className?: strin
   )
 }
 
-export interface CardData {
-  title: string
-  description: string
-  href: string
-  icon: React.ReactNode
-  clickName: string
-  external?: boolean
-}
-
 // Hero
 export const SEARCH_PLACEHOLDERS = [
   "Hey, I'm SigNoz AI! Ask me anything about SigNoz...",
@@ -73,42 +67,36 @@ export const SEND_DATA_CARDS: CardData[] = [
     description: 'Send Traces and APM Data',
     href: '/docs/instrumentation/',
     icon: <LucideDraftingCompass size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'APM Send Traces Card',
   },
   {
     title: 'Send Logs',
     description: 'Configure log collection and analysis',
     href: '/docs/logs-management/send-logs-to-signoz/',
     icon: <LucideScrollText size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Send Logs Card',
   },
   {
     title: 'Send Metrics',
     description: 'Configure metrics collection & visualization.',
     href: '/docs/userguide/send-metrics-cloud/',
     icon: <LucideChartNoAxesColumn size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Send Metrics Card',
   },
   {
     title: 'Integrations',
     description: 'Connect SigNoz with your favorite tools',
     href: '/docs/integrations/integrations-list/',
     icon: <Puzzle size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Integrations Card',
   },
   {
     title: 'Agent-Native',
     description: 'Use AI agents for instrumentation',
     href: '/docs/agent-native/',
     icon: <Bot size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Agent Native Card',
   },
   {
     title: 'API',
     description: 'Programmatic access to your telemetry data',
     href: '/api-reference/',
     icon: <GlobeCheck size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'API Card',
   },
 ]
 
@@ -119,42 +107,36 @@ export const EXPLORE_SIGNOZ_CARDS: CardData[] = [
     description: 'Monitor your infrastructure & resources',
     href: '/docs/infrastructure-monitoring/overview/',
     icon: <LucideBoxes size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Infrastructure Monitoring Card',
   },
   {
     title: 'Dashboards',
     description: 'Build, share, use templates',
     href: '/docs/userguide/dashboards/',
     icon: <LayoutDashboard size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Dashboards Card',
   },
   {
     title: 'Alerts',
     description: 'Monitor signals and receive timely notifications',
     href: '/docs/userguide/alerts-management/',
     icon: <TriangleAlert size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Alerts Card',
   },
   {
     title: 'Explore Traces',
     description: 'Analyze your traces with trace explorer',
     href: '/docs/product-features/trace-explorer/',
     icon: <Waypoints size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Explore Traces Card',
   },
   {
     title: 'Catch Exceptions',
     description: 'Configure exception tracking and error analysis',
     href: '/docs/userguide/exceptions/',
     icon: <Bug size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Catch Exceptions Card',
   },
   {
     title: 'Query Builder',
     description: 'The visual query interface for signals',
     href: '/docs/userguide/query-builder/',
     icon: <ListFilter size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Query Builder Card',
   },
 ]
 
@@ -165,21 +147,18 @@ export const MIGRATE_CARDS: CardData[] = [
     description: 'Step-by-step guide to migrate from Datadog',
     href: '/docs/migration/migrate-from-datadog-to-signoz/',
     icon: <BookText size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Datadog Migration Card',
   },
   {
     title: 'Migrate from Grafana',
     description: 'Step-by-step guide to migrate from Grafana',
     href: '/docs/migration/migrate-from-grafana/',
     icon: <BookText size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Grafana Migration Card',
   },
   {
     title: 'Migrate from New Relic',
     description: 'Step-by-step guide to migrate from New Relic',
     href: '/docs/migration/migrate-from-newrelic/',
     icon: <BookText size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'New Relic Migration Card',
   },
 ]
 
@@ -190,39 +169,34 @@ export const SECURITY_CARDS: CardData[] = [
     description: 'Configure user authentication',
     href: '/docs/userguide/authentication/',
     icon: <Lock size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Authentication Card',
   },
   {
     title: 'SSO SAML',
     description: 'Set up Single Sign-On with SAML',
     href: '/docs/userguide/sso-authentication/',
     icon: <Settings size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'SSO SAML Card',
   },
   {
     title: 'Retention Period',
     description: 'Learn about data retention period',
     href: '/docs/userguide/retention-period/',
     icon: <ShieldCheck size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Retention Period Card',
   },
 ]
 
 // Troubleshooting & Community Section
-export const TROUBLESHOOTING_ROW_CARDS: CardData[] = [
+export const TROUBLESHOOTING_CARDS: CardData[] = [
   {
     title: 'FAQ',
     description: 'Find solutions to common issues',
     href: 'https://signoz.io/docs/troubleshooting/signoz-cloud/general-troubleshooting/',
     icon: <HelpCircle size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'FAQ Card',
   },
   {
     title: 'Slack Community',
     description: 'Connect with SigNoz users and developers',
     href: 'https://signoz.io/slack',
     icon: <SiSlack className="h-6 w-6 text-[var(--l3-foreground)]" />,
-    clickName: 'Slack Community Card',
     external: true,
   },
   {
@@ -230,32 +204,25 @@ export const TROUBLESHOOTING_ROW_CARDS: CardData[] = [
     description: 'Explore and contribute to SigNoz',
     href: 'https://github.com/SigNoz/signoz',
     icon: <SiGithub className="h-6 w-6 text-[var(--l3-foreground)]" />,
-    clickName: 'GitHub Card',
     external: true,
   },
-]
-
-export const RESOURCES_ROW_CARDS: CardData[] = [
   {
     title: 'Changelog',
     description: "See what's new in SigNoz",
     href: '/changelog/',
     icon: <HeartPulse size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Changelog Card',
   },
   {
     title: 'Blog',
     description: 'Read articles and tutorials',
     href: '/blog/',
     icon: <BookOpen size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Blog Card',
   },
   {
     title: 'Newsletter',
     description: 'Curated technical content in your inbox',
     href: 'https://newsletter.signoz.io/?utm_source=signoz_website&utm_medium=docs_additional_resources&utm_campaign=newsletter',
     icon: <Mail size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Newsletter Card',
     external: true,
   },
 ]
@@ -267,21 +234,18 @@ export const SELF_HOST_CARDS: CardData[] = [
     description: 'Run SigNoz using Docker Compose',
     href: '/docs/install/docker/',
     icon: <SiDocker className="h-6 w-6 text-[var(--l1-foreground)]" />,
-    clickName: 'Docker Install Card',
   },
   {
     title: 'Linux',
     description: 'Install on Debian/Ubuntu systems',
     href: '/docs/install/linux/',
     icon: <SiLinux className="h-6 w-6 text-[var(--l1-foreground)]" />,
-    clickName: 'Linux Install Card',
   },
   {
     title: 'Kubernetes',
     description: 'Deploy using Helm charts',
     href: '/docs/install/kubernetes/',
     icon: <SiKubernetes className="h-6 w-6 text-[var(--l1-foreground)]" />,
-    clickName: 'Kubernetes Install Card',
   },
 ]
 

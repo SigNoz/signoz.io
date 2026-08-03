@@ -4,10 +4,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { ensureDecimalScript, isDecimalChatOpen, openDecimalChat } from '@/utils/decimal'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
+import { DOC_SIDENAV_WIDTH_PX } from '@/components/DocsTOC/docLayoutClasses'
 import './NozPeek.css'
 
 const SESSION_KEY = 'noz-peek-appeared'
-const SIDEBAR_WIDTH = 276
 const ARTICLE_MAX_WIDTH = 1200
 
 const NOZ_PEEK_SVG = (
@@ -45,7 +45,7 @@ function computeDockLeft(isIntro: boolean): number {
   if (typeof window === 'undefined') return 0
   const vw = window.innerWidth
   const isMobile = vw < 768
-  const sidebar = isMobile ? 0 : SIDEBAR_WIDTH
+  const sidebar = isMobile ? 0 : DOC_SIDENAV_WIDTH_PX
 
   if (isIntro) {
     return sidebar + (vw - sidebar) / 2
@@ -245,7 +245,7 @@ export default function NozPeekDock() {
   return (
     <div
       className={`noz-peek-dock ${animateClass} ${settledClass} ${dismissed ? 'dismissed' : ''}`}
-      style={{ left: dockLeft || undefined, ...(dockLeft ? {} : { left: '50%' }) }}
+      style={{ left: dockLeft || '50%' }}
     >
       <div className="noz-peek-stage">
         <div

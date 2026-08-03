@@ -4,14 +4,17 @@ import React from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 
-interface DocsIntroCardProps {
+export interface DocsIntroCardData {
   title: string
   description: string
   href: string
   icon: React.ReactNode
+  external?: boolean
+}
+
+interface DocsIntroCardProps extends DocsIntroCardData {
   clickName: string
   clickLocation: string
-  external?: boolean
   className?: string
 }
 

@@ -244,8 +244,8 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
             alt={alt}
             width={512}
             height={512}
+            sizes="512px"
             className="floating-rings-img"
-            unoptimized
           />
         </div>
         <canvas
