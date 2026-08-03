@@ -1,0 +1,139 @@
+---
+date: 2026-07-30
+title: Transactions Reference
+description: Complete reference of transactions for each resource in SigNoz covering relations, selector formats, and managed role access.
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+doc_type: reference
+---
+
+<Admonition type="warning">
+Fine-grained access control is currently in beta.
+</Admonition>
+
+## Overview
+
+This page lists the transactions available for each resource in SigNoz. Each table shows the supported relations, what they mean for that resource, and which managed roles have access.
+
+A transaction is a single relation on a resource, optionally scoped to specific instances with a selector. When you configure a custom role, the transactions you grant are shown together as the role's **Transaction Groups**.
+
+For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
+
+<Admonition type="info">
+This page currently covers roles, service accounts, API keys, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
+</Admonition>
+
+## Resources
+
+### Role
+
+**Resource:** `role` · **Kind:** `role` · **Selector:** role name (for example, `my-custom-role`)
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Create a new custom role. | signoz-admin |
+| `list` | List all roles (managed and custom). | signoz-admin |
+| `read` | View a role's details and its configured transactions. | signoz-admin |
+| `update` | Modify a custom role's description or change its transactions. | signoz-admin |
+| `delete` | Delete a custom role (the role must have no assigned principals). | signoz-admin |
+| `attach` | Create a relationship with the role — assign this role to a principal. | signoz-admin |
+| `detach` | Remove a relationship from the role — unassign this role from a principal. | signoz-admin |
+
+### Service Account
+
+**Resource:** `serviceaccount` · **Kind:** `serviceaccount` · **Selector:** service account ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Create a new service account. | signoz-admin |
+| `list` | List all service accounts in the organization. | signoz-admin |
+| `read` | View a service account's details and its assigned roles. | signoz-admin |
+| `update` | Modify a service account (for example, rename it). | signoz-admin |
+| `delete` | Delete a service account and revoke all its API keys. | signoz-admin |
+| `attach` | Create a relationship with the service account — assign a role to it, or add an API key to it. | signoz-admin |
+| `detach` | Remove a relationship from the service account — unassign a role from it, or revoke an API key from it. | signoz-admin |
+
+<div id="factor-api-key" />
+
+### API Key
+
+**Resource:** `metaresource` · **Kind:** `factor-api-key` · **Selector:** API key ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Generate a new API key for a service account. | signoz-admin |
+| `list` | List all API keys belonging to a service account. | signoz-admin |
+| `read` | View API key metadata (name, expiration, last used). | signoz-admin |
+| `update` | Modify API key metadata (for example, change the expiration date). | signoz-admin |
+| `delete` | Permanently revoke an API key. | signoz-admin |
+
+### Logs
+
+**Resource:** `telemetryresource` · **Kind:** `logs` · **Selector:** telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `read` | Query log data in the Logs Explorer, dashboards, alerts, and the API. | signoz-admin, signoz-editor, signoz-viewer |
+
+### Traces
+
+**Resource:** `telemetryresource` · **Kind:** `traces` · **Selector:** telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `read` | Query trace data in the Traces Explorer, dashboards, alerts, and the API. | signoz-admin, signoz-editor, signoz-viewer |
+
+### Metrics
+
+**Resource:** `telemetryresource` · **Kind:** `metrics` · **Selector:** telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `read` | Query metric data in the Metrics Explorer, dashboards, alerts, and the API. | signoz-admin, signoz-editor, signoz-viewer |
+
+### Meter Metrics
+
+**Resource:** `telemetryresource` · **Kind:** `meter-metrics` · **Selector:** telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `read` | Query usage metering data for the workspace. | signoz-admin, signoz-editor, signoz-viewer |
+
+## Selectors
+
+Roles, service accounts, and API keys are scoped by instance names or IDs, shown in each resource's metadata line above. Telemetry resources (logs, traces, metrics, meter metrics) support only the `read` relation and use a query-scoped selector format instead.
+
+### Telemetry Selectors
+
+A telemetry selector scopes the transaction by **query type** and, optionally, by **ingestion key ID**:
+
+| Selector | Meaning |
+|----------|---------|
+| `*` | Every query on that signal, regardless of query type. |
+| `<query_type>/*` | Every query of that query type. |
+| `<query_type>/signoz.workspace.key.id/*` | Queries of that query type that filter on `signoz.workspace.key.id`, for any ingestion key. |
+| `<query_type>/signoz.workspace.key.id/<key-id>` | Queries of that query type that filter on the specified ingestion key ID. |
+
+The supported query types are:
+
+| Query Type | Description | Supports Ingestion Key Scoping |
+|------------|-------------|-------------------------------|
+| `builder_query` | Queries built with the query builder (Builder Query in the UI). | Yes |
+| `promql` | PromQL queries. | No (wildcard only) |
+| `clickhouse_sql` | ClickHouse SQL queries. | No (wildcard only) |
+
+<Admonition type="warning">
+`signoz.workspace.key.id` is the only key that telemetry transactions can be scoped by. Its value is the ingestion key ID, which you can find on the Ingestion Settings page.
+</Admonition>
+
+For transaction evaluation rules and how queries are authorized, see the [Telemetry Access Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/telemetry/).
+
+## Compound Transactions
+
+Some operations require transactions on multiple resources. Both transactions must be satisfied for the operation to succeed.
+
+| Operation | Transactions Required |
+|-----------|----------------------|
+| Assign a role to a service account | `serviceaccount:attach` AND `role:attach` |
+| Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
+| Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
+| Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |
