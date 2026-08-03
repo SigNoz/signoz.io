@@ -71,7 +71,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <>
       <div
-        className={`relative flex w-full max-w-lg cursor-pointer items-center rounded-lg border border-signoz_slate-400 bg-signoz_ink-500 px-4 py-3 transition-all duration-200 focus-within:border-signoz_robin-500 focus-within:ring-2 focus-within:ring-signoz_robin-500/20 hover:border-signoz_robin-500 hover:shadow-md ${className}`}
+        className={`relative flex w-full max-w-lg cursor-pointer items-center rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] px-4 py-3 transition-all duration-200 focus-within:border-[var(--accent-primary)] focus-within:ring-2 focus-within:ring-[color-mix(in_srgb,var(--accent-primary)_20%,transparent)] hover:border-[var(--l1-border)] hover:shadow-md ${className}`}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         tabIndex={0}
@@ -80,12 +80,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
       >
         <Sparkles
           strokeWidth={1.25}
-          className="mr-3 h-5 w-5 flex-shrink-0 text-signoz_vanilla-400"
+          className="mr-3 h-5 w-5 flex-shrink-0 text-[var(--l3-foreground)]"
         />
-        <span className="flex-1 text-left text-sm text-signoz_vanilla-400 transition-all duration-300">
+        <span className="flex-1 text-left text-sm text-[var(--l3-foreground)] transition-all duration-300">
           {currentPlaceholder}
         </span>
-        <kbd className="text-signoz_vanilla-500 rounded border border-signoz_slate-300 bg-signoz_slate-500 px-2 py-1 font-mono text-xs">
+        <kbd className="flex h-4 w-4 items-center justify-center rounded border border-[var(--l2-border)] bg-[var(--l3-background)] font-mono text-[10px] leading-none text-[var(--l3-foreground)]">
           /
         </kbd>
       </div>

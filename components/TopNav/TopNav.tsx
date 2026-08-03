@@ -9,6 +9,7 @@ import GitHubStars from '../GithubStars/GithubStars'
 import Tabs from '@/components/ResourceCenter/Tabs'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
+import { Badge } from '@signozhq/ui/badge'
 import { Button } from '@/components/ui/Button'
 import { cn } from 'app/lib/utils'
 import { TABS, TAB_PATHNAMES } from './constants'
@@ -73,13 +74,16 @@ export default function TopNav() {
     <div className="fixed left-0 right-0 z-[50]">
       <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
         <nav
-          className="mx-auto flex w-full max-w-8xl justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
+          className={cn(
+            'mx-auto flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100',
+            !isDocsBasePath && 'max-w-8xl'
+          )}
           aria-label="Global"
         >
-          <div className="flex justify-start gap-x-6">
+          <div className="flex items-center justify-start">
             <TrackingLink
               href="/"
-              className="-m-1.5 flex items-center gap-2 p-1.5"
+              className={cn('-m-1.5 flex items-center p-1.5', isDocsBasePath ? 'gap-1.5' : 'gap-2')}
               clickType="Nav Click"
               clickName="SigNoz Logo"
               clickText="SigNoz"
@@ -96,11 +100,19 @@ export default function TopNav() {
               />
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </TrackingLink>
+            {isDocsBasePath && (
+              <Badge color="cherry" className="ml-1 self-center uppercase">
+                docs
+              </Badge>
+            )}
 
             {!isLoginRoute && (
               <NavDropdownProvider>
                 <div
-                  className={`hidden items-center gap-x-3 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
+                  className={cn(
+                    'hidden items-center gap-x-3 min-[840px]:flex',
+                    isDocsBasePath ? 'ml-7' : visibility.showProduct ? 'ml-6' : ''
+                  )}
                 >
                   {visibility.showProduct && <ProductDropdown />}
                   {visibility.showUseCases && <UseCasesDropdown />}
