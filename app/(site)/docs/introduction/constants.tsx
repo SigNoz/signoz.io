@@ -16,12 +16,33 @@ import {
   Settings,
   ShieldCheck,
   HelpCircle,
-  FileArchive,
   HeartPulse,
   BookOpen,
   Mail,
 } from 'lucide-react'
 import { SiSlack, SiGithub, SiDocker, SiLinux, SiKubernetes } from 'react-icons/si'
+
+/** Lucide globe-check — not yet in lucide-react@0.540.0 */
+function GlobeCheck({ size = 24, className }: { size?: number; className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <path d="m15 6 2 2 4-4" />
+      <path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10" />
+    </svg>
+  )
+}
 
 export interface CardData {
   title: string
@@ -33,9 +54,6 @@ export interface CardData {
 }
 
 // Hero
-export const HERO_DESCRIPTION =
-  'Learn how to monitor and troubleshoot your applications with SigNoz using step-by-step guides, reference docs, and video tutorials.'
-
 export const SEARCH_PLACEHOLDERS = [
   "Hey, I'm SigNoz AI! Ask me anything about SigNoz...",
   'How do I send Python traces to SigNoz?',
@@ -84,6 +102,13 @@ export const SEND_DATA_CARDS: CardData[] = [
     href: '/docs/agent-native/',
     icon: <Bot size={24} className="text-[var(--l1-foreground)]" />,
     clickName: 'Agent Native Card',
+  },
+  {
+    title: 'API',
+    description: 'Programmatic access to your telemetry data',
+    href: '/api-reference/',
+    icon: <GlobeCheck size={24} className="text-[var(--l1-foreground)]" />,
+    clickName: 'API Card',
   },
 ]
 
@@ -149,6 +174,13 @@ export const MIGRATE_CARDS: CardData[] = [
     icon: <BookText size={24} className="text-[var(--l1-foreground)]" />,
     clickName: 'Grafana Migration Card',
   },
+  {
+    title: 'Migrate from New Relic',
+    description: 'Step-by-step guide to migrate from New Relic',
+    href: '/docs/migration/migrate-from-newrelic/',
+    icon: <BookText size={24} className="text-[var(--l1-foreground)]" />,
+    clickName: 'New Relic Migration Card',
+  },
 ]
 
 // Security & Compliance Section
@@ -204,13 +236,6 @@ export const TROUBLESHOOTING_ROW_CARDS: CardData[] = [
 ]
 
 export const RESOURCES_ROW_CARDS: CardData[] = [
-  {
-    title: 'Sample Dashboards',
-    description: 'Explore pre-built dashboards',
-    href: '/dashboards/',
-    icon: <FileArchive size={24} className="text-[var(--l1-foreground)]" />,
-    clickName: 'Sample Dashboards Card',
-  },
   {
     title: 'Changelog',
     description: "See what's new in SigNoz",

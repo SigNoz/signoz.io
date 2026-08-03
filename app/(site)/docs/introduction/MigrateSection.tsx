@@ -13,9 +13,8 @@ export default function MigrateSection() {
         description="Seamlessly transition from your existing observability stack."
         guidesCount={8}
         viewAllHref="/docs/migration/"
-        tall
       />
-      <div className="grid grid-cols-1 md:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-3">
         {MIGRATE_CARDS.map((card) => (
           <DocsIntroCard
             key={card.clickName}

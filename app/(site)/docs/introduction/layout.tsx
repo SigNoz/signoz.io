@@ -18,9 +18,7 @@ export default function IntroductionLayout({ children }: LayoutProps) {
       <SectionContainer>
         <ProgressBar target={mainRef} />
 
-        <div className="relative flex min-w-0 flex-1 flex-col border-r border-dashed border-[var(--l2-border)]">
-          {children}
-        </div>
+        <div className="relative flex min-w-0 flex-1 flex-col">{children}</div>
       </SectionContainer>
     </div>
   )

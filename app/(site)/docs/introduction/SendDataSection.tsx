@@ -16,17 +16,17 @@ export default function SendDataSection() {
             key={card.clickName}
             {...card}
             clickLocation={SECTION_NAME}
-            className="h-[152px]"
+            className="h-[152px] border-t"
           />
         ))}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-3">
         {bottomRow.map((card) => (
           <DocsIntroCard
             key={card.clickName}
             {...card}
             clickLocation={SECTION_NAME}
-            className="h-[180px]"
+            className="h-[152px]"
           />
         ))}
       </div>
