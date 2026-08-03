@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { themeRgb } from '@/utils/cssColor'
 import './FloatingRingsScene.css'
 
 interface FloatingRingsSceneProps {
@@ -12,7 +13,7 @@ interface FloatingRingsSceneProps {
 
 /**
  * Dual-canvas rings + sparks wrapping a floating illustration.
- * Image + rings share one float animation (no mouse tilt).
+ * Ring/spark color tracks --l1-foreground across light/dark.
  */
 export default function FloatingRingsScene({ src, alt, className = '' }: FloatingRingsSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -34,16 +35,31 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
 
     const metrics = { width: 0, height: 0, cx: 0, cy: 0, baseRadius: 0 }
     let rafId = 0
+    let ringColor = themeRgb(container, '--l1-foreground')
 
     const ringOffsets = [0, 18, 48, 96]
     const NUM_SPARKS = 80
 
     const resize = () => {
-      metrics.width = bgCanvas.width = fgCanvas.width = container.clientWidth
-      metrics.height = bgCanvas.height = fgCanvas.height = container.clientHeight
-      metrics.cx = metrics.width / 2
-      metrics.cy = metrics.height / 2
-      metrics.baseRadius = Math.min(metrics.width, metrics.height) * 0.38
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const width = container.clientWidth
+      const height = container.clientHeight
+
+      metrics.width = width
+      metrics.height = height
+      metrics.cx = width / 2
+      metrics.cy = height / 2
+      metrics.baseRadius = Math.min(width, height) * 0.38
+
+      for (const canvas of [bgCanvas, fgCanvas]) {
+        canvas.width = Math.round(width * dpr)
+        canvas.height = Math.round(height * dpr)
+        canvas.style.width = `${width}px`
+        canvas.style.height = `${height}px`
+      }
+
+      bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      fgCtx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
 
     type RingGroup = { y: number; speed: number }
@@ -55,7 +71,6 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
       radiusOffset: number
       vY: number
       vRadius: number
-      color: string
       size: number
     }
 
@@ -65,7 +80,6 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
       s.radiusOffset = (Math.random() - 0.5) * 50
       s.vY = 0
       s.vRadius = 0
-      s.color = '#ffffff'
       s.size = Math.random() * 2 + 0.5
     }
 
@@ -76,7 +90,6 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
         radiusOffset: 0,
         vY: 0,
         vRadius: 0,
-        color: '#ffffff',
         size: 1,
       }
       resetSpark(s)
@@ -87,6 +100,9 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
     resize()
     ringGroup.y = metrics.height / 2 + 100
     const sparks: Spark[] = Array.from({ length: NUM_SPARKS }, createSpark)
+
+    const rgba = (opacity: number) =>
+      `rgba(${ringColor.r}, ${ringColor.g}, ${ringColor.b}, ${opacity})`
 
     const updateRingGroup = () => {
       ringGroup.y -= ringGroup.speed
@@ -115,19 +131,19 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
             Math.PI - 0.05,
             Math.PI * 2 + 0.05
           )
-          bgCtx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.8})`
+          bgCtx.strokeStyle = rgba(opacity * 0.55)
           bgCtx.lineWidth = 1.5
           bgCtx.stroke()
-          bgCtx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.4})`
+          bgCtx.strokeStyle = rgba(opacity * 0.28)
           bgCtx.lineWidth = 0.5
           bgCtx.stroke()
 
           fgCtx.beginPath()
           fgCtx.ellipse(cx, drawY, baseRadius, baseRadius * 0.25, 0, -0.05, Math.PI + 0.05)
-          fgCtx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.8})`
+          fgCtx.strokeStyle = rgba(opacity * 0.55)
           fgCtx.lineWidth = 1.5
           fgCtx.stroke()
-          fgCtx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.4})`
+          fgCtx.strokeStyle = rgba(opacity * 0.28)
           fgCtx.lineWidth = 0.5
           fgCtx.stroke()
         }
@@ -152,7 +168,7 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
       let yOpacity = Math.cos((s.y / (height / 2)) * (Math.PI / 2))
       yOpacity = Math.max(0, yOpacity)
       const scale = 1 + depth * 0.4
-      const opacity = 0.6 * yOpacity * (0.4 + depth * 0.6)
+      const opacity = 0.45 * yOpacity * (0.4 + depth * 0.6)
 
       if (opacity > 0.02) {
         const r = baseRadius + s.radiusOffset
@@ -161,7 +177,7 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
         const targetCtx = depth < 0 ? bgCtx : fgCtx
         targetCtx.beginPath()
         targetCtx.arc(x, y, s.size * scale, 0, Math.PI * 2)
-        targetCtx.fillStyle = s.color
+        targetCtx.fillStyle = rgba(1)
         targetCtx.globalAlpha = opacity
         targetCtx.fill()
       }
@@ -173,8 +189,8 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
 
       bgCtx.globalAlpha = 1
       fgCtx.globalAlpha = 1
-      bgCtx.globalCompositeOperation = 'screen'
-      fgCtx.globalCompositeOperation = 'screen'
+      bgCtx.globalCompositeOperation = 'source-over'
+      fgCtx.globalCompositeOperation = 'source-over'
 
       updateRingGroup()
       drawRingGroup()
@@ -183,13 +199,21 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
         drawSpark(s)
       }
 
-      bgCtx.globalCompositeOperation = 'source-over'
-      fgCtx.globalCompositeOperation = 'source-over'
       bgCtx.globalAlpha = 1
       fgCtx.globalAlpha = 1
 
       rafId = requestAnimationFrame(animate)
     }
+
+    const syncColor = () => {
+      ringColor = themeRgb(container, '--l1-foreground')
+    }
+
+    const themeObserver = new MutationObserver(syncColor)
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme'],
+    })
 
     const ro = new ResizeObserver(resize)
     ro.observe(container)
@@ -198,6 +222,7 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
     return () => {
       cancelAnimationFrame(rafId)
       ro.disconnect()
+      themeObserver.disconnect()
     }
   }, [])
 
@@ -206,15 +231,6 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
       ref={containerRef}
       className={`relative h-full w-full overflow-visible bg-transparent ${className}`}
     >
-      <div
-        className="pointer-events-none absolute inset-0 z-[1]"
-        style={{
-          background:
-            'radial-gradient(circle at center, transparent 30%, rgba(10, 12, 16, 0.55) 100%)',
-        }}
-        aria-hidden
-      />
-      {/* Image + rings stay behind card grids (cards use opaque bg + higher z-index) */}
       <div className="floating-rings-layer absolute inset-0 z-0">
         <canvas
           ref={bgCanvasRef}
@@ -222,12 +238,12 @@ export default function FloatingRingsScene({ src, alt, className = '' }: Floatin
           style={{ transform: 'translateZ(0)' }}
           aria-hidden
         />
-        <div className="absolute inset-0 flex items-end justify-center pb-2">
+        <div className="absolute inset-0 flex items-end justify-center pb-0">
           <Image
             src={src}
             alt={alt}
-            width={495}
-            height={527}
+            width={512}
+            height={512}
             className="floating-rings-img"
             unoptimized
           />

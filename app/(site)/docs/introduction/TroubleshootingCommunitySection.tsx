@@ -11,8 +11,8 @@ export default function TroubleshootingCommunitySection() {
       <DocsIntroSectionHeader
         title="Troubleshooting & Community"
         description="Get help and connect with the SigNoz community."
-        illustration="/img/docs-introduction/troubleshooting-illustration.webp"
-        illustrationAlt="Troubleshooting"
+        illustration="/img/docs-introduction/explore-illustration.webp"
+        illustrationAlt="Troubleshooting and community"
       />
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-3">
         {TROUBLESHOOTING_ROW_CARDS.map((card) => (
@@ -24,7 +24,7 @@ export default function TroubleshootingCommunitySection() {
           />
         ))}
       </div>
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-4">
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-3">
         {RESOURCES_ROW_CARDS.map((card) => (
           <DocsIntroCard
             key={card.clickName}
