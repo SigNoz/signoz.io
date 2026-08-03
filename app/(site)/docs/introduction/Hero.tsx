@@ -6,7 +6,6 @@ import { SEARCH_PLACEHOLDERS } from './constants'
 import Image from 'next/image'
 import DitherCanvas from '@/components/DitherCanvas/DitherCanvas'
 
-/** l1-background opacity steps: 100% → 90% → 80% → 60% → 10% → 0% (bottom → top) */
 const HERO_OVERLAY_GRADIENT =
   'linear-gradient(0deg, var(--l1-background) 0%, color-mix(in srgb, var(--l1-background) 90%, transparent) 20%, color-mix(in srgb, var(--l1-background) 80%, transparent) 40%, color-mix(in srgb, var(--l1-background) 60%, transparent) 60%, color-mix(in srgb, var(--l1-background) 10%, transparent) 85%, transparent 100%)'
 
@@ -17,7 +16,6 @@ const PROGRESSIVE_BLUR_LAYERS = [
   { blur: 24, mask: 'linear-gradient(0deg, black 0%, transparent 85%)' },
 ]
 
-/** Figma title glow — brand sakura accent via semantic token */
 const TITLE_GLOW =
   'drop-shadow(0 8px 18px color-mix(in srgb, var(--accent-sakura) 75%, transparent)) drop-shadow(0 2px 4px color-mix(in srgb, var(--accent-sakura) 45%, transparent))'
 
@@ -64,7 +62,6 @@ export default function Hero() {
   return (
     <DitherCanvas enableClick={false} className="relative w-full md:h-[513px]">
       <div className="relative w-full overflow-hidden md:h-[513px]">
-        {/* Illustration + title share the same frame size for stacking (Notion / Figma) */}
         <div className="pointer-events-none relative w-full md:absolute md:inset-0 md:overflow-hidden">
           <Image
             src="/img/docs-introduction/hero-illustration.webp"
@@ -77,7 +74,6 @@ export default function Hero() {
             aria-hidden
           />
 
-          {/* Semantic fill via mask so title tracks theme tokens; pink glow matches Figma */}
           <div
             ref={titleLayerRef}
             className="absolute inset-0 will-change-transform"
@@ -114,12 +110,12 @@ export default function Hero() {
           <div className="absolute inset-0" style={{ backgroundImage: HERO_OVERLAY_GRADIENT }} />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-end px-4 pb-4 pt-6 md:absolute md:inset-x-0 md:bottom-0 md:h-[141px] md:pt-0">
+        <div className="relative z-10 flex flex-col items-center justify-end px-4 pb-8 pt-6 md:absolute md:inset-x-0 md:bottom-0 md:h-[141px] md:pb-8 md:pt-0">
           <div className="flex w-full max-w-[590px] flex-col items-center">
             <SearchBar
               placeholder={SEARCH_PLACEHOLDERS}
               clickLocation="Docs Hero"
-              className="!h-[52px] !max-w-none !rounded-[6px] !border-[var(--l2-border)] !bg-[var(--l2-background)] !px-[18px] !py-0 shadow-[0_12px_48px_color-mix(in_srgb,var(--base-black)_55%,transparent)] hover:!border-[var(--l1-border)] hover:!shadow-[0_12px_48px_color-mix(in_srgb,var(--base-black)_55%,transparent)] [&>span]:!text-sm [&>span]:!leading-[19px] [&>span]:!text-[var(--l3-foreground)] [&_svg]:!mr-2 [&_svg]:!h-4 [&_svg]:!w-4 [&_svg]:!text-[var(--l3-foreground)]"
+              className="!h-[52px] !max-w-none !rounded-[6px] !border-[var(--l2-border)] !bg-[var(--l2-background)] !px-[18px] !py-0 shadow-[0_12px_48px_color-mix(in_srgb,var(--base-black)_55%,transparent)] hover:!border-[var(--l2-border)] hover:!shadow-[0_12px_48px_color-mix(in_srgb,var(--base-black)_55%,transparent)] [&>span]:!text-sm [&>span]:!leading-[19px] [&>span]:!text-[var(--l3-foreground)] hover:[&>span]:!text-[var(--l1-foreground)] [&_svg]:!mr-2 [&_svg]:!h-4 [&_svg]:!w-4 [&_svg]:!text-[var(--l3-foreground)] hover:[&_svg]:!text-[var(--l1-foreground)]"
             />
           </div>
         </div>
