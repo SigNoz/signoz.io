@@ -117,7 +117,7 @@ export default function Hero() {
             <SearchBar
               placeholder={SEARCH_PLACEHOLDERS}
               clickLocation="Docs Hero"
-              className="!h-[52px] !max-w-none !rounded-[6px] !border-[var(--l2-border)] !bg-[var(--l2-background)] !px-[18px] !py-0 shadow-[0_12px_48px_color-mix(in_srgb,var(--base-black)_55%,transparent)] hover:!border-[var(--l2-border)] hover:!shadow-[0_12px_48px_color-mix(in_srgb,var(--base-black)_55%,transparent)] [&>span]:!text-sm [&>span]:!leading-[19px] [&>span]:!text-[var(--l3-foreground)] hover:[&>span]:!text-[var(--l1-foreground)] [&_svg]:!mr-2 [&_svg]:!h-4 [&_svg]:!w-4 [&_svg]:!text-[var(--l3-foreground)] hover:[&_svg]:!text-[var(--l1-foreground)]"
+              className="!h-[52px] !max-w-none !rounded-[6px] !border-[var(--l2-border)] !bg-[var(--l2-background)] !px-[18px] !py-0 shadow-[0_4px_9px_0_rgba(0,0,0,0.04)] hover:!border-[var(--l2-border)] hover:!shadow-[0_4px_9px_0_rgba(0,0,0,0.04)] [&>span]:!text-sm [&>span]:!leading-[19px] [&>span]:!text-[var(--l3-foreground)] hover:[&>span]:!text-[var(--l1-foreground)] [&_svg]:!mr-2 [&_svg]:!h-4 [&_svg]:!w-4 [&_svg]:!text-[var(--l3-foreground)] hover:[&_svg]:!text-[var(--l1-foreground)]"
             />
           </div>
         </div>
