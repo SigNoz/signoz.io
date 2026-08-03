@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import Image from 'next/image'
 import { CheckCircle } from 'lucide-react'
 import { usePathname } from 'next/navigation'
@@ -45,9 +44,9 @@ export default function ContactUsLayout() {
   }
 
   return (
-    <div className="ml-[calc(100%-100vw)] flex w-screen flex-col overflow-hidden bg-signoz_ink-400">
+    <div className="flex w-full flex-col bg-signoz_ink-400">
       <FocusedNavbar />
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col lg:mt-[8px] lg:h-[calc(100vh-56px)] lg:flex-row">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col lg:mt-[8px] lg:flex-row">
         {/* Left col — desktop only */}
         <div className="hidden w-full flex-col justify-center p-8 lg:flex lg:w-5/12 lg:py-12 lg:pl-[72px] lg:pr-14">
           <div className="flex max-w-[420px] flex-col gap-8">
@@ -110,7 +109,7 @@ export default function ContactUsLayout() {
         </div>
 
         {/* Right col — form */}
-        <div className="relative flex w-full flex-col items-center justify-center p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:overflow-y-auto lg:px-16 lg:py-14">
+        <div className="relative flex w-full flex-col items-center justify-center p-8 pt-[calc(56px+5vh)] lg:w-7/12 lg:px-16 lg:py-14">
           <div className="w-full max-w-[560px] rounded-[12px] border border-signoz_slate-400 bg-signoz_ink-500 px-10 py-10">
             <HubspotCustomForm
               portalId={contactUsData.PORTAL_ID}
