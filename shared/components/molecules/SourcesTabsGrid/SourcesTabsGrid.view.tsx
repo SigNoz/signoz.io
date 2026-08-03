@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { Badge } from '@signozhq/badge'
+import { Badge } from '@signozhq/ui/badge'
 import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { Card } from '@/components/ui/Card'
@@ -115,7 +115,7 @@ const SourcesTabsGrid: React.FC = () => {
   )
 
   return (
-    <Card className="bg-signoz_ink-400 [&>*]:p-4 [&>div]:border-1">
+    <Card className="[&>div]:border-1 bg-signoz_ink-400 [&>*]:p-4">
       <Tabs entityName="sources">
         <TabItem value="supported-sources" label="Supported Sources">
           {sourcesTabContent}
