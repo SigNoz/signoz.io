@@ -1,5 +1,5 @@
 ---
-date: 2026-07-10
+date: 2026-08-03
 title: SAML Authentication with Okta
 description: Configure SAML single sign-on between Okta and SigNoz for team authentication.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -136,9 +136,21 @@ Now you'll configure SigNoz to accept authentication from Okta:
 5. **Complete** the Okta login process
 6. **Confirm** you're successfully logged into SigNoz
 
+### Configure IdP-Initiated Login (Optional)
+
+IdP-initiated login allows users to launch SigNoz directly from the Okta dashboard without visiting the SigNoz login page first.
+
+1. In SigNoz, go to **Settings** → **Organization Settings** → **Authenticated Domains**
+2. Copy the **IDP Initiated SSO URL** shown for your domain
+3. In Okta, go to **Applications** → select your SigNoz app → **General** tab
+4. Under **SAML Settings**, click **Edit**
+5. On the **Configure SAML** step, set **Default RelayState** to the URL copied from SigNoz in step 2
+6. Click **Next** and then **Finish** to save
+
 ## Troubleshooting
 
 **Common issues and solutions:**
 
 - **"Authentication failed" error**: Check that the redirect URI exactly matches `<your-instance-url>/api/v1/complete/saml` in Okta
+- **IdP-initiated login fails**: Confirm that the **Default RelayState** in Okta's SAML settings matches the **IDP Initiated SSO URL** from SigNoz's Authenticated Domains page
 - **Locked out?**: If you're unable to login because of faulty setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`
