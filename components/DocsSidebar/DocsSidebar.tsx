@@ -2,19 +2,23 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { ChevronDown, ChevronRight, File, FileText } from 'lucide-react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
+import MetronomeIcon from '@/components/icons/MetronomeIcon'
 import Link from 'next/link'
 import { NavItem, Doc, Category } from './types'
 import { useDocsSideNav } from './DocsSideNavContext'
 import { usePathname } from 'next/navigation'
 import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { useBrowserSearch } from '@/hooks/useBrowserSearch'
+import NewBadge from './NewBadge'
+import SidebarRegionSelector from './SidebarRegionSelector'
 
 interface DocsSidebarProps {
   onNavItemClick?: () => void
+  showRegionSelector?: boolean
 }
 
-const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
+const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSelector = true }) => {
   const originalSideNav = useDocsSideNav()
   const pathname = usePathname()
   const search = useBrowserSearch()
@@ -23,7 +27,6 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   const [activeRoute, setActiveRoute] = useState<string | null>(null)
   const sidebarRef = useRef<HTMLDivElement>(null)
 
-  // Only parse after client-side mount
   const searchParams = isClient ? new URLSearchParams(search) : null
   const regionParam = searchParams?.get('region')
   const cloudRegionParam = searchParams?.get('cloud_region')
@@ -44,21 +47,44 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
         return item
       })
     }
-
     setSideNav((prevState) => toggle(prevState))
+  }
+
+  const expandLabels = (labels: string[]) => {
+    if (!labels.length) return
+    const labelSet = new Set(labels)
+    const expand = (items) =>
+      items.map((item) => {
+        if (item.type === 'category' && item.hasOwnProperty('isExpanded')) {
+          return {
+            ...item,
+            isExpanded: labelSet.has(item.label) ? true : item.isExpanded,
+            items: item.items ? expand(item.items) : item.items,
+          }
+        }
+        if (item.items) {
+          return { ...item, items: expand(item.items) }
+        }
+        return item
+      })
+    setSideNav((prev) => expand(prev))
   }
 
   function findParentsForRoute(items, route, parents = []) {
     for (const item of items) {
-      if (item.route === route) {
-        return parents
-      }
+      const itemRoute = item.route
+        ? item.route.endsWith('/')
+          ? item.route.slice(0, -1)
+          : item.route
+        : ''
+
+      // Prefer a deeper match inside children when category route equals the path
       if (item.items) {
         const result = findParentsForRoute(item.items, route, [...parents, item.label])
-        if (result) {
-          return result
-        }
+        if (result) return result
       }
+
+      if (itemRoute && itemRoute === route) return parents
     }
     return null
   }
@@ -66,54 +92,50 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   function getParents(docsSideNav, route) {
     for (const item of docsSideNav) {
       const parents = findParentsForRoute([item], route)
-      if (parents) {
-        return parents
-      }
+      if (parents) return parents
     }
     return []
+  }
+
+  // Check if a route has the active child (so the category itself should NOT be highlighted)
+  function hasActiveChild(items, normalizedActiveRoute) {
+    for (const item of items) {
+      const normalizedRoute = item.route
+        ? item.route.endsWith('/')
+          ? item.route.slice(0, -1)
+          : item.route
+        : ''
+      if (item.type === 'doc' && normalizedRoute === normalizedActiveRoute) return true
+      if (item.type === 'category') {
+        if (item.items && hasActiveChild(item.items, normalizedActiveRoute)) return true
+      }
+    }
+    return false
   }
 
   useEffect(() => {
     setActiveRoute(pathname)
     const currentRoute = pathname
-    // Normalize the currentRoute by stripping the trailing slash if it exists
     const normalizedRoute = currentRoute.endsWith('/') ? currentRoute.slice(0, -1) : currentRoute
-
     const parents = getParents(originalSideNav, normalizedRoute)
-
-    for (const parent of parents) {
-      toggleIsExpandedByLabel(parent, true)
-    }
+    expandLabels(parents)
 
     const rIC = window.requestIdleCallback ?? setTimeout
-
     rIC(() => {
       const elementId = `#${pathname.substring(0, pathname.length - 1)}`
       const element = document.getElementById(elementId)
-
       if (element && sidebarRef.current) {
-        // Only scroll within the sidebar container, not the entire document
         const sidebar = sidebarRef.current
         const elementRect = element.getBoundingClientRect()
         const sidebarRect = sidebar.getBoundingClientRect()
-
-        // Check if element is outside the visible area of the sidebar
         const isAboveView = elementRect.top < sidebarRect.top
         const isBelowView = elementRect.bottom > sidebarRect.bottom
-
         if (isAboveView || isBelowView) {
-          // Calculate scroll position to center the element within the sidebar
           const elementOffsetTop = element.offsetTop
-          const sidebarScrollTop = sidebar.scrollTop
           const sidebarHeight = sidebar.clientHeight
           const elementHeight = element.clientHeight
-
           const targetScrollTop = elementOffsetTop - sidebarHeight / 2 + elementHeight / 2
-
-          sidebar.scrollTo({
-            top: targetScrollTop,
-            behavior: 'smooth',
-          })
+          sidebar.scrollTo({ top: targetScrollTop, behavior: 'smooth' })
         }
       }
     })
@@ -130,14 +152,13 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     return href
   }
 
+  const normalizeRoute = (route: string) => (route.endsWith('/') ? route.slice(0, -1) : route)
+  const normalizedActiveRoute = normalizeRoute(activeRoute || '')
+
   const renderDoc = (doc: Doc) => {
-    // Normalize both routes for comparison
-    const normalizeRoute = (route: string) => (route.endsWith('/') ? route.slice(0, -1) : route)
-    const normalizedActiveRoute = normalizeRoute(activeRoute || '')
     const normalizedDocRoute = normalizeRoute(doc.route)
     const isGetStarted = doc.route === '/docs' && doc.label === 'Get Started'
 
-    // Special case: "Get Started" should be active when on /docs/introduction/ (since /docs/ redirects there)
     const isActiveRoute = isGetStarted
       ? normalizedActiveRoute === normalizedDocRoute ||
         normalizedActiveRoute === '/docs/introduction'
@@ -147,72 +168,74 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
       <li
         key={doc.route}
         id={`#${doc.route}`}
-        className={`group transition-all duration-200 ${
-          isGetStarted ? 'mb-4 ml-4 mr-2 mt-2' : 'mx-2 my-1'
-        }`}
+        className="group mx-2 my-0.5 transition-all duration-200"
         onClick={() => onNavItemClick && typeof onNavItemClick == 'function' && onNavItemClick()}
       >
         <Link
           href={constructHref(doc.route)}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
-            isGetStarted
-              ? `font-medium ${
-                  isActiveRoute
-                    ? 'border border-blue-500 bg-blue-500/10 text-blue-400'
-                    : 'border border-gray-600 text-gray-200 hover:border-blue-500 hover:bg-blue-500/5 hover:text-blue-400'
-                }`
-              : `${
-                  isActiveRoute
-                    ? 'bg-blue-500/10 text-blue-400 shadow-sm'
-                    : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
-                }`
+          className={`flex w-full items-center gap-1 rounded px-3 py-2 text-sm transition-all duration-200 ${
+            isActiveRoute
+              ? 'bg-[var(--l1-background-hover)] text-[var(--l1-foreground-hover)]'
+              : 'text-[var(--l2-foreground)] hover:bg-[var(--l1-background-hover)] hover:text-[var(--l1-foreground-hover)]'
           } ${doc.className || ''}`}
         >
-          {!isGetStarted && (
-            <FileText className="flex-shrink-0 opacity-60 group-hover:opacity-100" size={14} />
+          {isGetStarted && (
+            <div className="flex-shrink-0 text-[var(--l2-foreground)]">
+              <MetronomeIcon size={12} />
+            </div>
           )}
-          <Tooltip content={doc.label} side="right" delayDuration={500}>
-            <span className="truncate font-medium">{doc.label}</span>
+          <Tooltip content={doc.label} side="right" delayDuration={500} sideOffset={12}>
+            <span className="min-w-0 flex-1 truncate">{doc.label}</span>
           </Tooltip>
+          {doc.published_date && <NewBadge publishedDate={doc.published_date} />}
         </Link>
       </li>
     )
   }
 
   const renderCategory = (category: Category) => {
-    // Normalize both routes for comparison
-    const normalizeRoute = (route: string) => (route.endsWith('/') ? route.slice(0, -1) : route)
-    const normalizedActiveRoute = normalizeRoute(activeRoute || '')
     const normalizedCategoryRoute = normalizeRoute(category.route || '')
-    const isActiveRoute = normalizedActiveRoute === normalizedCategoryRoute
+    // Category is "active" only if its own route matches AND it has no active child
+    const routeMatches = normalizedActiveRoute === normalizedCategoryRoute
+    const childIsActive = category.items
+      ? hasActiveChild(category.items, normalizedActiveRoute)
+      : false
+    const isActiveRoute = routeMatches && !childIsActive
 
     return (
-      <li key={category.label} className="group mx-2 my-1">
+      <li key={category.label} className="group mx-2 my-0.5">
         <Link href={category.route ? constructHref(category.route) : ''}>
           <div
             onClick={() => toggleIsExpandedByLabel(category.label)}
-            className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+            className={`flex cursor-pointer items-center gap-1 rounded px-3 py-2 text-sm transition-all duration-200 ${
               isActiveRoute
-                ? 'bg-blue-500/10 text-blue-400'
-                : 'text-gray-200 hover:bg-gray-800/50 hover:text-white'
+                ? 'bg-[var(--l1-background-hover)] text-[var(--l1-foreground-hover)]'
+                : 'text-[var(--l2-foreground)] hover:bg-[var(--l1-background-hover)] hover:text-[var(--l1-foreground-hover)]'
             } ${category.className || ''}`}
           >
-            <div className="flex-shrink-0 opacity-60 group-hover:opacity-100">
-              {category.isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            <div className="flex-shrink-0 text-[var(--l2-foreground)]">
+              {category.isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
             </div>
-            <Tooltip content={category.label} side="right" delayDuration={500}>
-              <span className="truncate font-medium">{category.label}</span>
+            <Tooltip content={category.label} side="right" delayDuration={500} sideOffset={12}>
+              <span className="min-w-0 flex-1 truncate">{category.label}</span>
             </Tooltip>
           </div>
         </Link>
         {category.isExpanded && (
-          <div className="mt-1">
+          <div className="mt-0.5">
             {category.link && category.link.type === 'generated-index' && (
-              <div className="mx-5 mb-2 mt-2">
-                <Tooltip content={category.link.title} side="right" delayDuration={500}>
+              <div className="mx-5 mb-1 mt-1">
+                <Tooltip
+                  content={category.link.title}
+                  side="right"
+                  delayDuration={500}
+                  sideOffset={12}
+                >
                   <h4
-                    className={`truncate text-xs font-medium text-gray-400 ${
-                      isActiveRoute ? 'text-blue-400' : 'hover:text-gray-300'
+                    className={`truncate text-xs text-[var(--l2-foreground)] ${
+                      isActiveRoute
+                        ? 'text-[var(--l1-foreground-hover)]'
+                        : 'hover:text-[var(--l1-foreground-hover)]'
                     }`}
                   >
                     {category.link.title}
@@ -220,9 +243,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
                 </Tooltip>
               </div>
             )}
-            <ul className="ml-4 space-y-0.5 border-l border-gray-700/50 pl-0">
-              {category?.items?.map(renderItem)}
-            </ul>
+            <ul className="ml-3 space-y-0 pl-1">{category?.items?.map(renderItem)}</ul>
           </div>
         )}
       </li>
@@ -232,9 +253,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   const renderItem = (item: NavItem | string) => {
     if (typeof item === 'string') {
       const referencedItem = findItemById(item, originalSideNav)
-      if (referencedItem) {
-        return renderItem(referencedItem)
-      }
+      if (referencedItem) return renderItem(referencedItem)
       return null
     } else if (item.type === 'doc') {
       return renderDoc(item)
@@ -245,15 +264,10 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
 
   const findItemById = (route: string, items: NavItem[]): NavItem | undefined => {
     for (const item of items) {
-      if (item.type === 'doc' && item.route === route) {
-        return item
-      }
-
+      if (item.type === 'doc' && item.route === route) return item
       if (item.type === 'category') {
         const found = findItemById(route, item.items)
-        if (found) {
-          return found
-        }
+        if (found) return found
       }
     }
     return undefined
@@ -262,11 +276,18 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   if (!isClient) return null
 
   return (
-    <nav
-      ref={sidebarRef}
-      className="docs-sidebar sticky top-[48px] h-full w-full overflow-y-auto py-4 text-white"
-    >
-      <ul className="list-none space-y-1 p-0">{sideNav.map(renderItem)}</ul>
+    <nav className="docs-sidebar sticky top-[64px] flex h-[calc(100vh-64px)] w-full flex-col overflow-hidden text-[var(--l1-foreground)]">
+      {showRegionSelector && (
+        <div className="relative z-10 shrink-0 bg-[var(--l1-background)] shadow-[0_8px_16px_-6px_color-mix(in_srgb,var(--base-black)_55%,transparent)]">
+          <SidebarRegionSelector />
+        </div>
+      )}
+      <div
+        ref={sidebarRef}
+        className={`min-h-0 flex-1 overflow-y-auto ${showRegionSelector ? 'pb-3 pt-1' : 'py-3'}`}
+      >
+        <ul className="list-none space-y-0 p-0">{sideNav.map(renderItem)}</ul>
+      </div>
     </nav>
   )
 }
