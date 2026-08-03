@@ -1,5 +1,5 @@
 ---
-date: 2026-07-28
+date: 2026-07-29
 title: Public Sharing in Dashboards
 description: Share SigNoz dashboards publicly with a generated link and control the default time range available to viewers.
 doc_type: howto
@@ -29,6 +29,25 @@ If the **Publish** tab is unavailable, or its controls stay disabled, check both
   caption="Share the current page link with your team members."
 />
 
+## Share a Link with Variable Selections
+
+When you share a dashboard's page link with another SigNoz user, you can include your current variable selections so the recipient opens the dashboard with the same values already applied. This works with the authenticated **Share page link** dialog, not the public dashboard URLs described below.
+
+1. Open a dashboard that has at least one variable defined.
+2. Set the variable values you want to share using the variable selectors at the top of the dashboard.
+3. Select the **Share** button in the dashboard header.
+4. Turn on the **Include variables** toggle, then select **Copy page link**.
+
+<Admonition type="info">
+  The **Include variables** toggle appears only when the dashboard has at least one variable, and it is off by default. Leave it off to share a plain link that opens with each viewer's own variable selections.
+</Admonition>
+
+When the recipient opens the link, SigNoz applies your variable selections and keeps them for subsequent refreshes, then removes the encoded parameter from the URL so the address stays clean. See [Manage Variables](https://signoz.io/docs/userguide/manage-variables/#share-variable-selections) for how variable selections are stored.
+
+<Admonition type="warning">
+  **Include variables** works only with private, authenticated share links. The public dashboard URLs created through the **Publish** flow below do not support variables.
+</Admonition>
+
 ## Enable Public Sharing
 
 1. From the sidebar, choose **Dashboards** and select the respective dashboard you want to share publicly.
@@ -50,6 +69,22 @@ If the **Publish** tab is unavailable, or its controls stay disabled, check both
   alt="Public sharing configuration in SigNoz"
   caption="Once published, copy the public dashboard URL or open it directly. Dashboard variables won't work in public dashboards."
 />
+
+## Auto-refresh for viewers
+
+Public dashboard viewers can reload every panel on a fixed interval without logging in. The auto-refresh selector (a refresh icon with a dropdown) appears in the dashboard header, to the left of the time picker.
+
+- **Availability**: The selector appears only when you turn on **Enable time range** on the Publish form. If the dashboard is locked to a fixed default time range, viewers see no auto-refresh control.
+- **Intervals**: Viewers can choose **Off**, **5s**, **10s**, **30s**, **1m**, **5m**, **10m**, **30m**, **1h**, **2h**, or **1d**.
+- **Default is Off**: Existing public dashboards keep their current behavior until a viewer picks an interval.
+- **Custom ranges**: When a viewer switches the time picker to a custom fixed start and end time, the selector is disabled, matching the authenticated app.
+
+On each tick, auto-refresh advances the rolling window from the selected relative range (for example, "Last 30 minutes") and refetches every panel.
+
+<Admonition type="info">
+  Auto-refresh works only with relative time ranges. Selecting a fixed custom range pauses it until the
+  viewer returns to a relative range.
+</Admonition>
 
 ## Disable Public Sharing
 

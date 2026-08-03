@@ -1,8 +1,9 @@
 ---
-date: 2025-10-28
+date: 2026-07-31
 tags: [Self-Hosted Community]
 title: SigNoz Resources Planning
 description: Guide to SigNoz deployment requirements and capacity planning, including sizing, architecture, and resource recommendations for self-hosted signoz.
+doc_type: reference
 ---
 
 This guide provides a comprehensive overview of the core components, sizing guidelines, resource specifications, and architectural considerations crucial for scaling and capacity planning when deploying SigNoz. Use this information to plan the right deployment size and ensure your SigNoz installation is optimized for both present and future growth.
@@ -26,19 +27,29 @@ The following table outlines the resource requirements for all SigNoz components
 - **Collectors**: Scale with processing needs. More processors or pipelines will require more CPU. In very high-scale environments or if ClickHouse is throttling, allocate more memory to Collectors.
 - **ClickHouse**: Ensure storage capacity is sized according to your retention policy and expected data volume. Plan for growth over time.
 - **SigNoz Core**: Resource requirements vary based on component functionality and usage.
-- **PostgreSQL**: Size according to metadata volume and query patterns. Managed database services (AWS RDS, GCP Cloud SQL) are recommended
+- **PostgreSQL**: Size according to metadata volume and query patterns. Managed database services (AWS RDS, GCP Cloud SQL, Azure Database for PostgreSQL) are recommended
 - **ZooKeeper**: Required by ClickHouse for cluster operation; should have stable resource allocation.
 
 ## Instance Types
 
 These are the node types we suggest from various cloud providers. Please see the relevant specifications in the provider's documentation.
 
+A family fixes the chip and the CPU-to-memory ratio; capacity comes from the size you pick inside it. Choose a size that meets or exceeds the per-component CPU and memory in the table above. The smallest size in each of these families falls short of what its workload needs: `t3.nano` gives you 2 vCPUs and 0.5 GiB, against the 4 vCPUs and 16 GiB each Collector needs.
+
 **For AWS:**
 
 - **General Purpose workloads (Collectors, SigNoz Core, PostgreSQL, ZooKeeper):** Any General Purpose machine available in your region that belongs to `T3` instance family and above for Intel chips and `T4g` instance family and above for ARM chips.
 - **Compute-optimized workloads (ClickHouse):** Any Compute Optimized machine available in your region that belongs to `C5` instance family and above for Intel chips and `C6g` or `C7g` instance family and above for ARM chips.
+- **Smallest sizes that meet the table:** `t3.xlarge` or `t4g.xlarge` (4 vCPUs, 16 GiB) for General Purpose workloads, and `c5.4xlarge`, `c6g.4xlarge`, or `c7g.4xlarge` (16 vCPUs, 32 GiB) for ClickHouse.
 
 **For GCP:**
 
 - **General Purpose workloads (Collectors, SigNoz Core, PostgreSQL, ZooKeeper):** Any General Purpose machine available in your region that belongs to `E2` instance family and above.
-- **Compute-optimized workloads (ClickHouse):** Any Compute Optimized machine available in your region that belongs to `C3` or `C3D` instance family and above.
+- **Compute-optimized workloads (ClickHouse):** Any machine available in your region that belongs to `C3` or `C3D` machine series and above. GCP documents C3 and C3D under its general purpose machine family, so look for them there rather than under compute-optimized, which covers `C2`, `C2D`, `H3`, and `H4D`.
+- **Smallest sizes that meet the table:** `e2-standard-4` (4 vCPUs, 16 GiB) for General Purpose workloads, and `c3-highcpu-22` (22 vCPUs, 44 GiB) for ClickHouse. C3 has no 16-vCPU shape, jumping from 8 to 22 vCPUs, and `c3-standard-8` carries only 8 vCPUs. GCP labels these same figures `GB` in its machine type tables, defining 1 GB as 1,024 MB, so the numbers match the GiB values used here.
+
+**For Azure:**
+
+- **General Purpose workloads (Collectors, SigNoz Core, PostgreSQL, ZooKeeper):** Any General Purpose machine available in your region that belongs to the `Dsv5` size series and above for Intel chips, `Dasv5` and above for AMD chips, or `Dpsv5` and above for Arm chips.
+- **Compute-optimized workloads (ClickHouse):** Any Compute Optimized machine available in your region that belongs to the `Fsv2` size series and above for Intel chips, or `Fasv6` and above for AMD chips. Azure's compute-optimized F family has no Arm-based series, so use a general purpose `Dpsv5` or later size if you want ClickHouse on Arm.
+- **Smallest sizes that meet the table:** `Standard_D4s_v5`, `Standard_D4as_v5`, or `Standard_D4ps_v5` (4 vCPUs, 16 GiB) for General Purpose workloads, and `Standard_F16s_v2` (16 vCPUs, 32 GiB) or `Standard_F16as_v6` (16 vCPUs, 64 GiB) for ClickHouse.

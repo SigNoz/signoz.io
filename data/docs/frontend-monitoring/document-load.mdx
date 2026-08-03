@@ -1,285 +1,244 @@
 ---
-date: 2026-05-27
+date: 2026-07-31
 title: Document Load
 meta_title: Document Load Monitoring - Track Page Load Traces
-description: Learn how to auto-instrument your web app to capture document load traces in SigNoz. Identify slow resources, content delivery delays, and page load bottlenecks.
-hide_table_of_contents: true
+description: Auto-instrument your web app to capture document load traces in SigNoz. Find slow resources, content delivery delays, and page load bottlenecks.
+doc_type: howto
 ---
 
 ## Overview
 
-This documentation explains how to auto-instrument your web application to collect document load data, visualize it as traces in SigNoz, and set useful alerts.
+The OpenTelemetry document load instrumentation traces page loads in your web application. Each load arrives in SigNoz as one trace: a span for the document itself, one span per resource the page fetched, and the DNS lookup, connection, request, response, and DOM processing phases recorded as timed events on those spans.
 
-Using OpenTelemetry to capture data on **document load** is useful because it allows you to monitor your application's key performance metrics. This data is essential for:
+Those spans answer questions a single page-load number cannot:
 
-1. **Page Load Sequence**: Traces give you insight into the sequence of operations during document load, helping identify slow resources or inefficient processes that may delay rendering.
-2.  **Content Delivery**: By understanding where delays occur (such as in external resource fetches or script execution), you can take specific actions to improve how content is delivered to users.
-3. **Slow Resources**: Trace data reveals third-party services or external APIs that may cause slowdowns, enabling decisions to cache, optimize, or delay the loading of those resources.
-4. **Proactive Monitoring**: Continuously tracking document load traces helps identify bottlenecks before they affect a large portion of users, allowing for preemptive performance tuning.
-5. **Latency Causes**: Pinpointing delays in content load allow for targeted optimizations, whether caused by large assets, server issues, or inefficient scripts.
+- Which resource delayed rendering, and by how much
+- Whether a third-party script or external API caused a slow load
+- How page load time shifted after a release
 
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+This page covers the instrumentation setup and one trace-based alert on resource fetch time.
 
 ## Prerequisites
 
-* A Web Application for capturing document load data
+- A web application you can add a JavaScript file to
+- A [SigNoz Cloud](https://signoz.io/teams/) account or a self-hosted SigNoz deployment
 
 ## Setup
 
-### Step 1: Create an Instrumentation file
-
-In the `src` directory of your web application, create a new JavaScript file (e.g., `otel-setup.js`) and paste the code below. This code auto-instruments your application to capture and send document load events to your SigNoz Instance.
-
-```javascript:otel-setup.js
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { Resource } from '@opentelemetry/resources';
-
-// Initialize the provider
-const provider = new WebTracerProvider({ resource: new Resource({ "service.name": "<service_name>" }) // Set the SigNoz Cloud collector URL
-
-// create an OTLP exporter configured to send trace data to your SigNoz Cloud
-const otlpExporter = new OTLPTraceExporter({
-  url: `https://ingest.<region>.signoz.cloud:443/v1/traces`,
-  headers: { 'signoz-ingestion-key': "<your-ingestion-key>" });
-
-// Add the exporter to the span processor
-provider.addSpanProcessor(new SimpleSpanProcessor(otlpExporter));
-
-// Register the provider
-provider.register();
-
-// Register automatic instrumentation for document load
-registerInstrumentations({
-  instrumentations: [
-    new DocumentLoadInstrumentation()
-  ],
-});
-
-console.log('OpenTelemetry instrumentation initialized');
-```
-
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
-
-### Step 2: Send Telemetry data to SigNoz
-
-To send Telemetry data to SigNoz, import `otel-setup.js` into  `index.js` and save the changes.
-
-```javascript:index.js
-import './otel-setup'
-```
-
-### Step 3: Start the App
-
-Go to the root folder of your web application, and run the following command:
+### Step 1: Install dependencies
 
 ```bash
-npm start
+npm install @opentelemetry/sdk-trace-web \
+  @opentelemetry/exporter-trace-otlp-http \
+  @opentelemetry/instrumentation \
+  @opentelemetry/instrumentation-document-load \
+  @opentelemetry/resources
 ```
 
-You will now see your application in the **Services** section in the SigNoz sidebar.
+### Step 2: Create an instrumentation file
 
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/document-load-services-section-image.webp" alt="SigNoz Services Interface"/>
-<figcaption><i>SigNoz Services Interface</i></figcaption>
-</figure>
+In the `src` directory of your web application, create `otel-setup.js` and paste the code below.
 
-### Step 4: Document Load Trace Data
-
-The document load data is automatically captured in the **Traces** section of the SigNoz dashboard as soon as your application is loaded.
-
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/document-load-traces-section.webp" alt="Trace Data on Document Load"/>
-<figcaption><i>Trace Data on Document Load</i></figcaption>
-</figure>
-
-## Setup Alerts
-
-### Create an Alert
-
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/resource-fetch-alert-sample.webp" alt="Resource Alert Fetch Sample"/>
-<figcaption><i>ResourceFetch Trace Alert Sample</i></figcaption>
-</figure>
-
-You can create **trace-based alerts** by using the **Create an Alert** button at the bottom of the **Traces** section. Alternatively, you can directly create it from the **Alerts** section. To create and manage trace-based alerts, follow [this guide](https://signoz.io/docs/alerts-management/trace-based-alerts/).
-
-In this example, we will set up an alert for `ResourceFetch`. Resource Fetch reports all the resources, including external scripts, images, style sheets, fonts, and other assets, that are required to render a webpage. Knowing the time it takes to fetch resources will be useful in taking proactive action to optimize your application using caching or other optimization strategies.
-
-In the `Traces Based Alerts` page, set the `Traces` field to `service.name = <service_name>`  and `name = resourceFetch` . Next, set the `Y-axis units` to seconds. You can also set the `Legend Format` to `Resource Fetch`and then press the **Stage & Run Query** button.
-
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/define-the-metric.webp" alt="Define the Metric"/>
-<figcaption><i>Set the Traces Field to filter ResourceFetch Data</i></figcaption>
-</figure>
-
-### Define Alert Condition
-
-Define an alert condition with **Send a notification when `A` is `above` the threshold `at least once` during the last `5 mins`** and set the  `Alert Threshold` field to `10 seconds`.
-
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/alert-conditions.webp" alt="Set Alert Condition"/>
-<figcaption><i>Set the Alert Condition</i></figcaption>
-</figure>
-
-### Set Alert Configuration
-
-Set the `Severity` field to `critical`, the `Alert Name` field to `ResourceFetch`, toggle on the `Alert all the configured channels` field to alert all the notification channels. You can choose to send the alert to a particular notification channel by selecting a particular Notifcation Channel from the dropdown. Save the rule and test the notification.
-
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/alert-configuration.webp" alt="Set Alert Configuration"/>
-<figcaption><i>Set the Alert Configuration</i></figcaption>
-</figure>
-
-With this, you have successfully set up a useful alerts on your data.
-
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/alert-rules.webp" alt="Alert Rules"/>
-<figcaption><i>ResourceFetch Alert Rule is OK</i></figcaption>
-</figure>
-
-</TabItem>
-
-<TabItem value='self-host' label='Self-Host' default>
-
-## Prerequisites
-
-* A Web Application for capturing document load data
-
-## Setup
-
-### Step 1: Create an Instrumentation file
-
-In the `src` directory of your web application, create a new JavaScript file (e.g., `otel-setup.js`) and paste the code below. This code auto-instruments your application to capture and send document load events to your SigNoz Instance.
-
-```javascript
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
+```javascript:src/otel-setup.js
+import { BatchSpanProcessor, WebTracerProvider } from '@opentelemetry/sdk-trace-web';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 
-// Initialize the provider
-const provider = new WebTracerProvider({ resource: new Resource({ "service.name": "<service_name>" }) // Set the SigNoz Cloud collector URL
-
-// create an OTLP exporter configured to send trace data to your Self-Hosted SigNoz
-const otlpExporter = new OTLPTraceExporter({
-  url: '/v1/traces',
+const exporter = new OTLPTraceExporter({
+  // Self-hosted SigNoz: use your collector's OTLP HTTP endpoint instead.
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
   headers: {
-    'Content-Type': 'application/json',
+    // Not needed for self-hosted SigNoz.
+    'signoz-ingestion-key': '<your-ingestion-key>',
   },
 });
 
-// Add the exporter to the span processor
-provider.addSpanProcessor(new SimpleSpanProcessor(otlpExporter));
-
-// Register the provider
-provider.register();
-
-// Register automatic instrumentation for document load
-registerInstrumentations({
-  instrumentations: [
-    new DocumentLoadInstrumentation()
-  ],
+const provider = new WebTracerProvider({
+  resource: resourceFromAttributes({
+    'service.name': '<service_name>',
+  }),
+  spanProcessors: [new BatchSpanProcessor(exporter)],
 });
 
-console.log('OpenTelemetry instrumentation initialized');
+provider.register();
+
+registerInstrumentations({
+  instrumentations: [new DocumentLoadInstrumentation()],
+});
 ```
 
-- `<service_name>` is name of your service
+**Verify these values:**
 
-Set a proxy in your `package.json` pointing to to the SigNoz OTLP HTTP endpoint. This is an easier temporary setup to bypass CORS issues. You can use [this documentation](https://signoz.io/docs/userguide/otlp-http-enable-cors/) to guide you on dealing with CORS issues for a permanent setup.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: The name your application appears under in SigNoz.
 
-```bash
-{
-      "proxy": "http://localhost:4318"
-}
+<Admonition type="warning" title="Exporting to self-hosted SigNoz from the browser" defaultCollapsed="true">
+
+Swap the endpoint for your collector's OTLP HTTP address and drop the ingestion key header, as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted). Two browser rules then apply that a backend SDK never hits.
+
+**Serve the collector over HTTPS.** A page loaded over HTTPS cannot `fetch` a plain `http://` endpoint, so an HTTP collector URL fails before CORS matters. Loopback addresses are the exception, so `http://localhost:4318` works while you develop and breaks once you deploy. Terminate TLS at an ingress or reverse proxy in front of the receiver's port, `4318` by default, or [configure TLS on the receiver](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/tls-configuration/) itself.
+
+**Allow your frontend's origin.** Add this under the `otlp` receiver's `http` protocol in your collector config and restart the collector:
+
+```yaml
+http:
+  cors:
+    allowed_origins:
+      - https://app.example.com # URL of your frontend application
 ```
 
-### Step 3: Send Telemetry data to SigNoz
+For the steps per deployment, see [CORS in OTLP HTTP Receiver](https://signoz.io/docs/userguide/otlp-http-enable-cors/).
 
-To send Telemetry data to SigNoz, import `otel-setup.js` into  `index.js` and save the changes.
+Keeping the export same-origin sidesteps both rules: serve `/v1/traces` from your app's own host, forward it to the collector, and set the exporter `url` to `/v1/traces`. In production that is a reverse proxy rule; in local development, Create React App reads a `"proxy"` field in `package.json` and Vite takes `server.proxy` in `vite.config.js`.
 
-```javascript:index.js
-import './otel-setup'
+</Admonition>
+
+### Step 3: Import the instrumentation file
+
+Import `otel-setup.js` as the first import in your entry file, so the instrumentation loads before your application code runs.
+
+```javascript:src/index.js
+import './otel-setup';
 ```
 
-### Step 4: Start the App
+### Step 4: Start the app
 
-Go to the root folder of your web application, and run the following command:
+From the root folder of your web application, run:
 
 ```bash
 npm start
 ```
 
-You will now see your application in the **Services** section in the SigNoz sidebar.
+Load a page in the browser. Your application shows up in the **Services** section of SigNoz.
 
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/document-load-services-section-image.webp" alt="SigNoz Services Interface"/>
-<figcaption><i>SigNoz Services Interface</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/frontend-monitoring/document-load-services-section-image.webp"
+  alt="Web application listed in the SigNoz Services section"
+  caption="SigNoz Services Interface"
+/>
 
-### Step 5: Document Load Trace Data
+### Step 5: Read the document load traces
 
-The document load data is automatically captured in the **Traces** section of the SigNoz dashboard as soon as your application is loaded.
+Open the **Traces** section. Each page load appears as a trace rooted at a `documentLoad` span, with one `documentFetch` child for the HTML document and one `resourceFetch` child per resource the page pulled in.
 
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/document-load-traces-section.webp" alt="Trace Data on Document Load"/>
-<figcaption><i>Trace Data on Document Load</i></figcaption>
-</figure>
+Those three names are the only spans the instrumentation emits. Open a span to read its phase timings, which arrive as events such as `domainLookupStart`, `connectStart`, `requestStart`, `responseStart`, and `domInteractive`. Filters and alerts match on the span names, so query `name = resourceFetch` rather than a phase name.
 
-## Setup Alerts
+<Figure
+  src="/img/docs/frontend-monitoring/document-load-traces-section.webp"
+  alt="Document load traces in the SigNoz Traces explorer"
+  caption="Trace Data on Document Load"
+/>
 
-### Create an Alert
+## Set up an alert on resource fetch time
 
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/resource-fetch-alert-sample.webp" alt="Resource Alert Fetch Sample"/>
-<figcaption><i>ResourceFetch Trace Alert Sample</i></figcaption>
-</figure>
+`resourceFetch` spans cover the external scripts, images, style sheets, and fonts a page needs to render. Alerting on their duration tells you when to cache or optimize an asset, before users report a slow page.
 
-You can create **trace-based alerts** by using the **Create an Alert** button at the bottom of the **Traces** section. Alternatively, you can directly create it from the **Alerts** section. To create and manage trace-based alerts, follow [this guide](https://signoz.io/docs/alerts-management/trace-based-alerts/).
+<Figure
+  src="/img/docs/frontend-monitoring/resource-fetch-alert-sample.webp"
+  alt="Sample trace-based alert for resourceFetch spans"
+  caption="ResourceFetch Trace Alert Sample"
+/>
 
-In this example, we will set up an alert for `ResourceFetch`. Resource Fetch reports all the resources, including external scripts, images, style sheets, fonts, and other assets, that are required to render a webpage. Knowing the time it takes to fetch resources will be useful in taking proactive action to optimize your application using caching or other optimization strategies.
+### Define the query
 
-In the `Traces Based Alerts` page, set the `Traces` field to `service.name = <service_name>`  and `name = resourceFetch` . Next, set the `Y-axis units` to seconds. You can also set the `Legend Format` to `Resource Fetch`and then press the **Stage & Run Query** button.
+Use the **Create an Alert** button at the bottom of the **Traces** section, or start from the **Alerts** section. For the full options, see [trace-based alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/).
 
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/define-the-metric.webp" alt="Define the Metric"/>
-<figcaption><i>Set the Traces Field to filter ResourceFetch Data</i></figcaption>
-</figure>
+On the `Traces Based Alerts` page, set the `Traces` filter to `service.name = <service_name>` and `name = resourceFetch`. Set `Y-axis units` to seconds, set `Legend Format` to `Resource Fetch`, then press **Stage & Run Query**.
 
-### Define Alert Condition
+<Figure
+  src="/img/docs/frontend-monitoring/define-the-metric.webp"
+  alt="Trace filter set to service.name and name equals resourceFetch"
+  caption="Set the Traces Field to filter ResourceFetch Data"
+/>
 
-Define an alert condition with **Send a notification when `A` is `above` the threshold `at least once` during the last `5 mins`** and set the  `Alert Threshold` field to `10 seconds`.
+### Define the alert condition
 
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/alert-conditions.webp" alt="Set Alert Condition"/>
-<figcaption><i>Set the Alert Condition</i></figcaption>
-</figure>
+Send a notification when `A` is `above` the threshold `at least once` during the last `5 mins`, with `Alert Threshold` set to `10 seconds`.
 
-### Set Alert Configuration
+<Figure
+  src="/img/docs/frontend-monitoring/alert-conditions.webp"
+  alt="Alert condition set to above threshold at least once in the last 5 minutes"
+  caption="Set the Alert Condition"
+/>
 
-Set the `Severity` field to `critical`, the `Alert Name` field to `ResourceFetch`, toggle on the `Alert all the configured channels` field to alert all the notification channels. You can choose to send the alert to a particular notification channel by selecting a particular Notifcation Channel from the dropdown. Save the rule and test the notification.
+### Set the alert configuration
 
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/alert-configuration.webp" alt="Set Alert Configuration"/>
-<figcaption><i>Set the Alert Configuration</i></figcaption>
-</figure>
+Set `Severity` to `critical` and `Alert Name` to `ResourceFetch`. Toggle on `Alert all the configured channels`, or pick one channel from the dropdown. Save the rule and test the notification.
 
-With this, you have successfully set up a useful alerts on your data.
+<Figure
+  src="/img/docs/frontend-monitoring/alert-configuration.webp"
+  alt="Alert configuration with severity critical and notification channels selected"
+  caption="Set the Alert Configuration"
+/>
 
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/alert-rules.webp" alt="Alert Rules"/>
-<figcaption><i>ResourceFetch Alert Rule is OK</i></figcaption>
-</figure>
+The rule now shows up in the alert list and reports `OK` until a resource fetch crosses 10 seconds.
 
-</TabItem>
+<Figure
+  src="/img/docs/frontend-monitoring/alert-rules.webp"
+  alt="ResourceFetch alert rule in OK state in the SigNoz alert list"
+  caption="ResourceFetch Alert Rule is OK"
+/>
 
-</Tabs>
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+Open your browser's developer console and check the `POST` request to `/v1/traces` on the Network tab. Its status tells you which case below applies.
+
+### Console shows a CORS error and the request never reaches the collector (self-hosted)
+
+- Likely cause: the collector's OTLP HTTP receiver does not allow your frontend's origin, so the browser blocks the request at the preflight stage
+- Fix: add your frontend URL under `cors.allowed_origins` on the `otlp` receiver's `http` protocol and restart the collector, as shown in [CORS in OTLP HTTP Receiver](https://signoz.io/docs/userguide/otlp-http-enable-cors/)
+- Verify: `curl -i -X OPTIONS -H "Origin: <your-frontend-url>" -H "Access-Control-Request-Method: POST" <your-collector-otlp-http-url>/v1/traces` returns an `Access-Control-Allow-Origin` header. A `405 method not allowed` response means CORS is still off.
+
+### Console reports the request was blocked as mixed content (self-hosted)
+
+- Likely cause: an HTTPS page cannot `fetch` a plain `http://` collector endpoint. This surfaces after deploying, since `http://localhost` is exempt and works locally.
+- Fix: expose the collector over HTTPS, or proxy `/v1/traces` from your app's own origin
+- Verify: the exporter `url` starts with `https://`, or is a same-origin path, and the `POST` reaches the Network tab with a status instead of failing outright
+
+### The request returns 401 or 403 (SigNoz Cloud)
+
+- Likely cause: wrong ingestion key, or a key issued for a different region than the one in the exporter URL
+- Fix: copy the key again from your [ingestion settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/) and set `<region>` to that same workspace's [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Verify: the `POST` to `https://ingest.<region>.signoz.cloud:443/v1/traces` returns `200`
+
+### `TypeError: provider.addSpanProcessor is not a function`
+
+- Likely cause: the instrumentation file was written for OpenTelemetry JS SDK 1.x, where processors were added after construction
+- Fix: pass processors through the constructor instead: `new WebTracerProvider({ spanProcessors: [new BatchSpanProcessor(exporter)] })`
+- Verify: the page loads without console errors and a `POST` to `/v1/traces` appears on the Network tab
+
+### `Resource is not a constructor`, or `Resource` is missing from `@opentelemetry/resources`
+
+- Likely cause: SDK 2.x removed the `Resource` class
+- Fix: build the resource with `resourceFromAttributes({ 'service.name': '<service_name>' })`
+- Verify: spans in SigNoz carry your `service.name` instead of `unknown_service`
+
+### The `POST` returns 200 but nothing appears in SigNoz for a few seconds
+
+- Expected: `BatchSpanProcessor` batches spans and exports every 5 seconds by default. In the browser it also flushes when the visitor hides the tab or navigates away.
+- Fix: wait one batch interval, then refresh the **Traces** explorer. Widen the time range if you are looking at a narrow window.
+
+### A third-party asset has a `resourceFetch` span, but no breakdown inside it
+
+- Likely cause: the browser withholds phase-level timing for cross-origin resources, so the span keeps its total duration while the request and response timings collapse to zero
+- Fix: have the asset's host send a `Timing-Allow-Origin` header naming your frontend origin
+- Verify: `performance.getEntriesByName('<asset-url>')[0]` reports non-zero `requestStart` and `responseStart` in the browser console
+
+</details>
+
+## Next steps
+
+- [Capture frontend web vitals with OpenTelemetry](https://signoz.io/docs/frontend-monitoring/opentelemetry-web-vitals/)
+- [Send frontend traces for user interactions and network calls](https://signoz.io/docs/frontend-monitoring/sending-traces-with-opentelemetry/)
+- [Instrument your backend to link frontend and backend traces](https://signoz.io/docs/instrumentation/overview/)
+
+## Get Help
+
+<GetHelp />

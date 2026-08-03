@@ -1,5 +1,5 @@
 ---
-date: 2026-07-30
+date: 2026-08-03
 title: Ingestion Troubleshooting
 meta_title: Ingestion Troubleshooting Guide for SigNoz Cloud
 description: Diagnose and fix SigNoz Cloud ingestion issues including connection errors, invalid keys, auth failures, and retry behaviour. Covers diagnostic log setup and an issues catalog.
@@ -43,6 +43,10 @@ When encountering issues with ingestion, follow these steps to diagnose and pote
 5. **Evaluate retry success**: Confirm if exports succeed after retry attempts. While occasional transient errors are expected, persistent failures may indicate a more significant issue. If you suspect that transient errors are occurring more frequently than expected, please reachout to SigNoz support.
 
 6. **Monitor non-retried errors**: Be on the lookout for scenarios where transient errors are not being retried. Despite best efforts, there may be corner cases where the ingestion endpoint returns non-retriable status codes for transient errors. If you believe you've encountered this scenario, please reachout to SigNoz support.
+
+<Admonition type="tip">
+To quickly confirm that data is actually landing in SigNoz, call the [Stats API](https://signoz.io/docs/telemetry-stats-api/): `GET /api/v1/stats`. Non-zero `telemetry.traces.count`, `telemetry.logs.count`, or `telemetry.metrics.count` values and recent `last_observed` timestamps confirm that the corresponding signal is being received. The metric keys cover scalar samples only, so exponential histograms do not show up there.
+</Admonition>
 
 ## Collect Diagnostic Logs
 Diagnostic Logs capture critical information that helps identify root causes of issues and provides essential context for troubleshooting, whether performed by you or the SigNoz Support team.

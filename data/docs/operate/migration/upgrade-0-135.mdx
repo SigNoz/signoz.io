@@ -1,5 +1,5 @@
 ---
-date: 2026-07-24
+date: 2026-07-29
 title: Upgrade SigNoz to v0.135.0 with Dashboards V2 Schema
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
 description: Upgrade self-hosted SigNoz to v0.135.0. Dashboards convert to the V2 schema automatically, and the retired V1 dashboard APIs need script and Terraform changes.
@@ -41,7 +41,11 @@ For the full release scope, see <a href="https://github.com/SigNoz/signoz/issues
 
 ### Step 1: Back up your data
 
-Dashboards live in the SigNoz Metastore (SQLite or Postgres) and are converted to the new schema during the rollout. Back up the Metastore before upgrading. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops (v0.131 requires a ClickHouse upgrade) before jumping to v0.135.0.
+Dashboards live in the SigNoz Metastore (SQLite or Postgres) and are converted to the new schema automatically when the server starts up. Back up the Metastore before upgrading. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops (v0.131 requires a ClickHouse upgrade) before jumping to v0.135.0.
+
+<Admonition type="info" title="Scalar metric queries now require reduceTo">
+Value (number) panels, pie charts, and tables issue scalar requests, and a scalar metric query must now set `reduceTo` to collapse its time series to a single value. Valid values are `sum`, `count`, `avg`, `min`, `max`, `last`, and `median`. The visual query builder sets this automatically, and your existing dashboards have `reduceTo` derived for them during migration (rate and increase map to `sum`, percentile aggregations to `avg`, other gauge aggregations to `last`), so no action is needed for dashboards built in the UI. If you construct scalar queries programmatically, add `reduceTo` to each metric aggregation: a query that omits it is rejected with `400 Bad Request`. The same applies on save: a Number, Table, or Pie panel persisted without `reduceTo` on its metric aggregations is rejected with `400 Bad Request`, not just at query time. See the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/) for details.
+</Admonition>
 
 ### Step 2: Upgrade SigNoz
 
@@ -78,6 +82,13 @@ helm -n signoz upgrade signoz signoz/signoz
 2. SigNoz reports v0.135.0 under **Settings**.
 3. Open **Dashboards**: the redesigned list page loads, and your existing dashboards render with data.
 4. Scan the list for rows marked **Legacy**. The conversion runs per dashboard, and a dashboard whose stored data cannot be converted is left on the old schema and flagged rather than failing the upgrade. Legacy dashboards are listed but cannot be opened in the new experience. Open the row's dialog to copy the dashboard ID and share it with support.
+
+## What changes after migration
+
+- **Automatic conversion.** Existing dashboards, inbuilt dashboards, and templates convert to the new schema when the server starts. SVG dashboard icons stored as percent-encoded inline data URIs are preserved during conversion.
+- **Dashboards that can't be converted stay on the legacy format.** A dashboard whose stored data cannot be converted is logged and left in the V1 format instead of blocking startup. It is listed and flagged as **Legacy**, and cannot be opened in the new experience. Copy the dashboard ID from the row's dialog and share it with support.
+- **Saved list-filter URLs no longer apply filters.** The dashboards list page now filters with a query expression. The old URL parameters (`search`, `createdBy`, `updated`, and `tags`) no longer apply filters, so bookmarks or shared links using them open the list unfiltered. See [Find and filter dashboards](https://signoz.io/docs/userguide/manage-dashboards/#find-and-filter-dashboards).
+- **Layouts are validated on write.** Programmatic creates and updates must satisfy the grid rules. See [Dashboard layout constraints](https://signoz.io/docs/userguide/manage-dashboards/#dashboard-layout-constraints).
 
 ## Migrate API scripts to the V2 Dashboards APIs
 

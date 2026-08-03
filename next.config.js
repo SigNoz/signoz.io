@@ -168,12 +168,22 @@ module.exports = () => {
         },
         {
           source: '/docs/manage/administrator-guide/iam/permissions',
-          destination: '/docs/manage/administrator-guide/iam/transactions/',
+          destination: '/docs/manage/administrator-guide/iam/reference/transactions/',
           permanent: true,
         },
         {
           source: '/docs/manage/administrator-guide/iam/permissions/',
-          destination: '/docs/manage/administrator-guide/iam/transactions/',
+          destination: '/docs/manage/administrator-guide/iam/reference/transactions/',
+          permanent: true,
+        },
+        {
+          source: '/docs/manage/administrator-guide/iam/transactions',
+          destination: '/docs/manage/administrator-guide/iam/reference/transactions/',
+          permanent: true,
+        },
+        {
+          source: '/docs/manage/administrator-guide/iam/transactions/',
+          destination: '/docs/manage/administrator-guide/iam/reference/transactions/',
           permanent: true,
         },
         {

@@ -44,6 +44,8 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'RegionTable',
   'TabItem',
   'Tabs',
+  'CodeTab',
+  'CodeTabs',
   'ToggleHeading',
   'TroubleshootingWizard',
 ] as const
@@ -364,6 +366,16 @@ const createKnownComponentStubs = (
   },
   Tabs: (props) => React.createElement('div', null, props.children),
   TabItem: (props) => {
+    const label = getStringProp(props, 'label')
+    return React.createElement(
+      'section',
+      null,
+      label ? React.createElement('h3', null, label) : null,
+      props.children
+    )
+  },
+  CodeTabs: (props) => React.createElement('div', null, props.children),
+  CodeTab: (props) => {
     const label = getStringProp(props, 'label')
     return React.createElement(
       'section',
