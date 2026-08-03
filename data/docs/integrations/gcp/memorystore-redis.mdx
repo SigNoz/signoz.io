@@ -1,9 +1,9 @@
 ---
-date: 2026-07-26
+date: 2026-08-03
 title: Monitor GCP Memorystore for Redis Metrics in SigNoz
 description: Collect Memorystore for Redis metrics in SigNoz with the googlecloudmonitoring receiver, and route Redis audit and maintenance logs through Pub/Sub.
 doc_type: howto
-tags: [SigNoz Cloud, GCP]
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
 
 The **Memorystore for Redis** integration brings instance metrics (uptime, CPU, memory, clients, cache hit ratio, keyspace, and command latency) into SigNoz, with a pre-built dashboard for the service.
@@ -55,7 +55,7 @@ Enabling the toggle does not start collection on its own. The metrics that reach
 
 ## Step 2: Add the metrics to your Collector config
 
-Open the `otel-collector-config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Memorystore metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your instances run in:
+Open the `otel-collector-config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Memorystore metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your instances run in. Only the `metrics_list` shown below changes; leave the rest of the file as is:
 
 ```yaml:otel-collector-config.yaml
 receivers:
@@ -79,13 +79,6 @@ receivers:
       # Commands
       - metric_name: "redis.googleapis.com/commands/calls"
       - metric_name: "redis.googleapis.com/commands/usec_per_call"
-
-service:
-  pipelines:
-    metrics:
-      receivers: [googlecloudmonitoring]
-      processors: [memory_limiter, batch]
-      exporters: [otlphttp]
 ```
 
 **Verify these values:**

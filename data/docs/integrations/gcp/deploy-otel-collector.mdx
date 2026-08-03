@@ -1,9 +1,9 @@
 ---
-date: 2026-07-23
+date: 2026-08-03
 title: Deploy the OpenTelemetry Collector on GCP Cloud Run
 description: Deploy the SigNoz OpenTelemetry Collector as a Cloud Run service that scrapes Cloud Monitoring metrics and receives Cloud Logging logs through Pub/Sub.
 doc_type: howto
-tags: [SigNoz Cloud, GCP]
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
 
 The OpenTelemetry Collector is the engine of the GCP integration: it pulls metrics from Cloud Monitoring, receives logs pushed from Pub/Sub, and exports both to SigNoz over OTLP. This guide deploys it as a **Cloud Run** service in your deployment project. This is step 3 of the [GCP integration](https://signoz.io/docs/integrations/gcp/gcp-integration/).
@@ -27,7 +27,11 @@ The OpenTelemetry Collector is the engine of the GCP integration: it pulls metri
 
 Deploy the <a href="https://hub.docker.com/r/signoz/signoz-otel-collector" target="_blank" rel="noopener noreferrer nofollow">`signoz/signoz-otel-collector`</a> image. It bundles the **`googlecloudpubsubpush`** receiver, which receives logs pushed from a Pub/Sub subscription and preserves GCP labels and resource attributes as structured fields.
 
-Use a recent tag such as `signoz/signoz-otel-collector:0.144.5`. Check the <a href="https://hub.docker.com/r/signoz/signoz-otel-collector/tags" target="_blank" rel="noopener noreferrer nofollow">tags list</a> for the latest version and avoid `latest` in production so deployments are reproducible.
+Check the <a href="https://hub.docker.com/r/signoz/signoz-otel-collector/tags" target="_blank" rel="noopener noreferrer nofollow">tags list</a> for the latest version and use that tag (for example, `signoz/signoz-otel-collector:v0.157.0`) instead of `latest`, so deployments stay reproducible.
+
+<Admonition type="warning">
+Use **v0.157.0 or later**. Earlier versions don't include the receivers this integration depends on.
+</Admonition>
 
 ## Step 1: Prepare the Collector configuration
 
@@ -88,6 +92,10 @@ service:
 - `<ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/), copied from the connection panel.
 
 <Admonition type="info">
+**Self-Hosted Enterprise:** point `otlphttp.endpoint` at your SigNoz OTel Collector's OTLP HTTP address (for example, `http://<signoz-otel-collector-host>:4318`) instead of the Cloud endpoint, and omit the `signoz-ingestion-key` header — it's not required for self-hosted.
+</Admonition>
+
+<Admonition type="info">
 **Cloud Run requires a listening port.** Cloud Run health-checks a service by connecting to the port named in `--port` and considers the revision ready only once the container listens on it. The `googlecloudpubsubpush` receiver listens on `:8090`, so this config also serves as the container's HTTP port. Keep the receiver `endpoint` port and the Cloud Run `--port` the same value (`8090` here).
 </Admonition>
 
@@ -97,7 +105,7 @@ Rather than baking a custom image, keep your `otel-collector-config.yaml` in <a 
 
 Create the secret from your `otel-collector-config.yaml`, then grant the `signoz-integration` service account permission to read it.
 
-<Tabs>
+<Tabs entityName="method">
 <TabItem value="console" label="Console" default>
 
 1. In the deployment project, go to **Security** > **Secret Manager** > **+ Create secret**.
@@ -139,11 +147,11 @@ When you change the config later, add a new secret version (`gcloud secrets vers
 
 Deploy the stock `signoz/signoz-otel-collector` image as a Cloud Run service. Attach the `signoz-integration` service account, mount the config secret as the `COLLECTOR_CONFIG` environment variable, and point the Collector at it with `--config=env:COLLECTOR_CONFIG`.
 
-<Tabs>
+<Tabs entityName="method">
 <TabItem value="console" label="Console" default>
 
 1. In the deployment project, go to **Cloud Run** > **Deploy container** > **Service**.
-2. Set the **Container image URL** to `signoz/signoz-otel-collector:0.144.5`.
+2. Set the **Container image URL** to `signoz/signoz-otel-collector:<tag>`, using a tag from the <a href="https://hub.docker.com/r/signoz/signoz-otel-collector/tags" target="_blank" rel="noopener noreferrer nofollow">tags list</a> (v0.157.0 or later).
 3. Set **Region** to your `<deployment-region>`.
 4. Under **Authentication**, choose **Require authentication** (do not allow unauthenticated invocations).
 5. Under **Ingress control**, choose **Internal**.
@@ -153,7 +161,8 @@ Deploy the stock `signoz/signoz-otel-collector` image as a Cloud Run service. At
    - **Security** > **Service account**: `signoz-integration@<deployment-project-id>.iam.gserviceaccount.com`.
    - **Variables & Secrets** > **Reference a secret**: select `signoz-collector-config`, expose it as the environment variable `COLLECTOR_CONFIG`, and use the `latest` version.
    - **Container** > **Container arguments**: add `--config=env:COLLECTOR_CONFIG`.
-   - **Autoscaling**: set **Minimum number of instances** to `1` so the Collector always runs.
+   - **Autoscaling**: set both **Minimum number of instances** and **Maximum number of instances** to `1`, so the Collector always runs and never scales to a second scraping replica.
+   - **Billing**: choose **Instance-based billing** so CPU stays allocated between requests. With the default request-based billing, the metrics receiver's polling loop is throttled while the instance is idle.
 7. Click **Create**.
 
 </TabItem>
@@ -161,7 +170,7 @@ Deploy the stock `signoz/signoz-otel-collector` image as a Cloud Run service. At
 
 ```bash
 gcloud run deploy signoz-otel-collector \
-  --image=signoz/signoz-otel-collector:0.144.5 \
+  --image=signoz/signoz-otel-collector:<tag> \
   --region=<deployment-region> \
   --project=<deployment-project-id> \
   --service-account=signoz-integration@<deployment-project-id>.iam.gserviceaccount.com \
@@ -171,6 +180,8 @@ gcloud run deploy signoz-otel-collector \
   --ingress=internal \
   --no-allow-unauthenticated \
   --min-instances=1 \
+  --max-instances=1 \
+  --no-cpu-throttling \
   --cpu=2 \
   --memory=4Gi
 ```
@@ -182,6 +193,8 @@ gcloud run deploy signoz-otel-collector \
 
 - `--ingress=internal` and `--no-allow-unauthenticated` keep the Collector off the public internet. It is reachable only from within your GCP project and VPC, including the authenticated Pub/Sub push you configure for logs. This is the recommended posture from the integration design.
 - `--min-instances=1` keeps one instance warm. A Collector that scales to zero misses pushed logs and pauses metric scrapes, so keep at least one instance running.
+- `--no-cpu-throttling` keeps CPU allocated between requests (this is Cloud Run's **instance-based billing**). It is required alongside `--min-instances=1`: by default, Cloud Run throttles CPU whenever an instance isn't serving a request, which stalls the `googlecloudmonitoring` receiver's polling loop and leaves metrics stale. The warm instance only does useful background work with CPU always on.
+- `--max-instances=1` pins the service to a single instance. The metrics receiver polls Cloud Monitoring on a timer, independently of incoming requests, so every extra replica would scrape the same metrics again and duplicate the data points SigNoz receives. Keep one instance and scale it up (`--cpu`/`--memory`) rather than out.
 - `--cpu=2 --memory=4Gi` matches the ~$110/month sizing in the [cost estimate](https://signoz.io/docs/integrations/gcp/gcp-integration/#costs-to-expect). Adjust to your volume. If you ingest low volumes, a smaller configuration such as `--cpu=1 --memory=2Gi` costs less; scale up only if the Collector shows memory pressure or dropped data.
 
 ## Step 4: Note the service URL
@@ -190,7 +203,7 @@ The deploy command prints a **Service URL** like `https://signoz-otel-collector-
 
 Retrieve it any time:
 
-<Tabs>
+<Tabs entityName="method">
 <TabItem value="console" label="Console" default>
 
 1. In the deployment project, go to **Cloud Run** and open the **signoz-otel-collector** service.

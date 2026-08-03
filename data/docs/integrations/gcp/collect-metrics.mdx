@@ -1,9 +1,9 @@
 ---
-date: 2026-07-23
+date: 2026-08-03
 title: Collect GCP Cloud Monitoring Metrics with OpenTelemetry
 description: Configure the googlecloudmonitoring receiver to scrape Cloud Monitoring metrics from one or more GCP projects and view them in SigNoz dashboards.
 doc_type: howto
-tags: [SigNoz Cloud, GCP]
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
 
 GCP stores service metrics in **Cloud Monitoring** and exposes them through the Monitoring API. The Collector's `googlecloudmonitoring` receiver pulls the metrics you list on an interval and exports them to SigNoz. This is step 4 of the [GCP integration](https://signoz.io/docs/integrations/gcp/gcp-integration/).
@@ -33,7 +33,7 @@ You can also browse the full catalog of metric names in the <a href="https://doc
 
 ## Step 2: Configure the receiver for a single project
 
-If all your monitored resources are in one project, use one `googlecloudmonitoring` block. In your `otel-collector-config.yaml` (from [step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/)), **replace** the placeholder `googlecloudmonitoring` receiver from the starter config with this block:
+If all your monitored resources are in one project, use one `googlecloudmonitoring` block. In your `otel-collector-config.yaml` (from [step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/)), the receiver already exists from the starter config — **replace only its `project_id` and `metrics_list`**, and leave the rest of the file (the `service` pipelines, other receivers, processors, and exporters) untouched:
 
 ```yaml:otel-collector-config.yaml
 receivers:
@@ -45,20 +45,13 @@ receivers:
       - metric_name: "compute.googleapis.com/instance/disk/write_bytes_count"
       - metric_name: "cloudsql.googleapis.com/database/cpu/utilization"
       # ...add the metrics from each service's Data Collected tab
-
-service:
-  pipelines:
-    metrics:
-      receivers: [googlecloudmonitoring]
-      processors: [memory_limiter, batch]
-      exporters: [otlphttp]
 ```
 
 `<monitored-project-id>` is one of the values from your [**Projects to Monitor**](https://signoz.io/docs/integrations/gcp/manual-setup/#connection-fields) list.
 
 ## Step 3: Configure multiple projects
 
-The `googlecloudmonitoring` receiver scopes to a **single project per block**. There is no multi-project option in one receiver. To monitor several projects, add one **named** receiver instance per project (`googlecloudmonitoring/<name>`) and reference all of them in the metrics pipeline:
+The `googlecloudmonitoring` receiver scopes to a **single project per block**. There is no multi-project option in one receiver. To monitor several projects, replace the single `googlecloudmonitoring` receiver with one **named** instance per project (`googlecloudmonitoring/<name>`), and update the metrics pipeline's `receivers` list to reference all of them, as shown below. The rest of the file is unaffected:
 
 ```yaml:otel-collector-config.yaml
 receivers:

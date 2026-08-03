@@ -1,9 +1,9 @@
 ---
-date: 2026-07-26
+date: 2026-08-03
 title: Monitor GCP Cloud SQL for PostgreSQL Metrics and Logs
 description: Collect Cloud SQL for PostgreSQL metrics and logs in SigNoz. Add the metrics to your OpenTelemetry Collector and route Postgres logs through Pub/Sub.
 doc_type: howto
-tags: [SigNoz Cloud, GCP]
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
 
 The **Cloud SQL for PostgreSQL** integration brings instance metrics (availability, CPU, memory, disk, connections, transactions, vacuum age, query execution time, and replication lag) and PostgreSQL server logs into SigNoz, with a pre-built dashboard for the service.
@@ -55,7 +55,7 @@ Enabling the toggle does not start collection on its own. The metrics that reach
 
 ## Step 2: Add the metrics to your Collector config
 
-Open the `otel-collector-config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Cloud SQL metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your instances run in:
+Open the `otel-collector-config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Cloud SQL metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your instances run in. Only the `metrics_list` shown below changes; leave the rest of the file as is:
 
 ```yaml:otel-collector-config.yaml
 receivers:
@@ -82,13 +82,6 @@ receivers:
       - metric_name: "cloudsql.googleapis.com/database/postgresql/insights/perquery/execution_time"
       # Replication
       - metric_name: "cloudsql.googleapis.com/database/postgresql/replication/replica_byte_lag"
-
-service:
-  pipelines:
-    metrics:
-      receivers: [googlecloudmonitoring]
-      processors: [memory_limiter, batch]
-      exporters: [otlphttp]
 ```
 
 **Verify these values:**

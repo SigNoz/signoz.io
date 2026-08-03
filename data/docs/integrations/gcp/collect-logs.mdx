@@ -1,9 +1,9 @@
 ---
-date: 2026-07-23
+date: 2026-08-03
 title: Collect GCP Cloud Logging Logs with Pub/Sub in SigNoz
 description: Route Cloud Logging logs to SigNoz with a Pub/Sub topic, a push subscription, and a log sink per project, plus an exclusion filter to avoid duplicate costs.
 doc_type: howto
-tags: [SigNoz Cloud, GCP]
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
 
 GCP services write logs to **Cloud Logging**. To get them into SigNoz, you route the logs you care about to a **Pub/Sub topic**, deliver them to the Collector with a **push subscription**, and let the Collector export them over OTLP. This is step 5 of the [GCP integration](https://signoz.io/docs/integrations/gcp/gcp-integration/).
@@ -35,7 +35,7 @@ Create the **Pub/Sub topic and subscription in your `<deployment-project-id>`**,
 
 In your **deployment project**, create one topic that all sinks publish to.
 
-<Tabs>
+<Tabs entityName="method">
 <TabItem value="console" label="Console" default>
 
 1. Select your `<deployment-project-id>` in the project picker.
@@ -67,7 +67,7 @@ You can reuse the `signoz-integration` service account as the push-auth identity
 The steps below are for a Cloud Run Collector, where `roles/run.invoker` and automatic token validation handle authentication. If you run the Collector on other compute (a VM, GKE, or an existing cluster), you still configure the push subscription with a push-auth service account (step 3), but your endpoint is responsible for **validating the OIDC token itself** and for restricting inbound traffic (for example, firewall rules or ingress limited to Pub/Sub). Skip the `run.invoker` grant in that case.
 </Admonition>
 
-<Tabs>
+<Tabs entityName="method">
 <TabItem value="console" label="Console" default>
 
 1. **Grant invoker on the Collector:** Go to **Cloud Run** and, in the services list, select the **checkbox** next to `signoz-otel-collector` (don't open the service). In the info panel on the right, open the **Permissions** tab (click **Show Info Panel** if it's hidden), then click **Add principal**. Add `signoz-integration@<deployment-project-id>.iam.gserviceaccount.com` with role **Cloud Run Invoker** (`roles/run.invoker`).
@@ -105,7 +105,7 @@ The Pub/Sub service agent is a Google-managed identity, so the grant you just ad
 
 Create a push subscription on the topic that delivers to the Collector's Service URL, authenticated with the push-auth service account.
 
-<Tabs>
+<Tabs entityName="method">
 <TabItem value="console" label="Console" default>
 
 1. Go to **Pub/Sub** > **Subscriptions** > **Create subscription**.
@@ -150,7 +150,7 @@ A **log sink** (in **Logging** > **Log Router**) selects logs with an inclusion 
 
 ### Sink in the deployment project
 
-<Tabs>
+<Tabs entityName="method">
 <TabItem value="console" label="Console" default>
 
 1. In the deployment project, go to **Logging** > **Log Router** > **Create sink**.
@@ -178,7 +178,7 @@ Set the `--log-filter` (inclusion filter) to match the services you enabled in S
 
 For a monitored project that is **not** your deployment project, the destination must be the **fully-qualified** topic path that includes your **Deployment Project ID**. The sink lives in one project but publishes to the topic in another:
 
-<Tabs>
+<Tabs entityName="method">
 <TabItem value="console" label="Console" default>
 
 1. Switch to the **monitored** project (`<monitored-project-id>`).
@@ -207,7 +207,7 @@ The `<deployment-project-id>` in the topic path is the **Deployment Project ID**
 
 Each sink is created with an automatically generated **writer identity** (a service account). GCP prints it when the sink is created, or you can read it back. Grant that identity `roles/pubsub.publisher` on the topic so it can publish routed logs. Repeat for every sink.
 
-<Tabs>
+<Tabs entityName="method">
 <TabItem value="console" label="Console" default>
 
 1. In the project that owns the sink, open **Logging** > **Log Router**, click the sink, and copy its **Writer identity** (an email like `serviceAccount:p123-...@gcp-sa-logging.iam.gserviceaccount.com`).
@@ -243,7 +243,7 @@ Every project already routes all logs to the built-in **`_Default`** sink, which
 
 To stop that, add an **exclusion filter** on the `_Default` sink matching the logs you now send to SigNoz. Excluded logs are still routed to Pub/Sub by your sink; they are only dropped from `_Default` storage.
 
-<Tabs>
+<Tabs entityName="method">
 <TabItem value="console" label="Console" default>
 
 1. In the project, go to **Logging** > **Log Router**.
