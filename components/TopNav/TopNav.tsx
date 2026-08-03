@@ -71,8 +71,18 @@ export default function TopNav() {
   }
 
   return (
-    <div className="fixed left-0 right-0 z-[50]">
-      <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
+    <div
+      className={cn(
+        'fixed left-0 right-0 z-[50]',
+        (mobileMenuOpen || docsSidebar.isOpen) && 'z-[1200]'
+      )}
+    >
+      <header
+        className={cn(
+          'header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100',
+          (mobileMenuOpen || docsSidebar.isOpen) && '!bg-[var(--l1-background)]'
+        )}
+      >
         <nav
           className={cn(
             'mx-auto flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100',
