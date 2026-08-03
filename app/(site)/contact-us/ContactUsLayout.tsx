@@ -45,7 +45,7 @@ export default function ContactUsLayout() {
   }
 
   return (
-    <div className="ml-[calc(100%-100vw)] flex w-screen flex-col overflow-hidden bg-signoz_ink-400">
+    <div className="flex w-full flex-col overflow-hidden bg-signoz_ink-400">
       <FocusedNavbar />
       <div className="mx-auto flex w-full max-w-[1440px] flex-col lg:mt-[8px] lg:h-[calc(100vh-56px)] lg:flex-row">
         {/* Left col — desktop only */}

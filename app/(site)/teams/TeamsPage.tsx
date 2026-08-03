@@ -394,7 +394,7 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ initialAuthCode, initialSsoError 
   )
 
   return (
-    <div className="ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-400">
+    <div className="flex w-full flex-col bg-signoz_ink-400">
       <FocusedNavbar />
       <div className="mx-auto flex w-full max-w-[1440px] flex-col lg:mt-[8px] lg:h-[calc(100vh-56px)] lg:flex-row">
         {/* Left section — copy + checkmarks + logos (desktop only) */}

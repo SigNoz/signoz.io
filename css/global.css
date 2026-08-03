@@ -1,7 +1,8 @@
 html {
   scroll-padding-top: 60px; /* Adjust this value to match the height of your sticky header */
   scroll-behavior: smooth;
-  overflow-y: scroll;
+  /* auto (not scroll): do not permanently reserve a classic scrollbar gutter */
+  overflow-y: auto;
 }
 
 ::selection {
@@ -15,14 +16,13 @@ html {
 }
 
 /* Prevent Radix Select/Dialog RemoveScroll from causing layout shift.
-   RemoveScroll zeroes body padding-left (beating pl-[calc(100vw-100%)]),
-   so restore that compensation and cancel its margin gap without adding a body scrollbar. */
+   Cancel injected margin/padding gaps without forcing a body scrollbar gutter. */
 html body[data-scroll-locked] {
   overflow: visible !important;
   margin-right: 0px !important;
   padding-right: 0px !important;
   padding-top: 0px !important;
-  padding-left: calc(100vw - 100%) !important;
+  padding-left: 0px !important;
 }
 
 .row {
@@ -88,33 +88,12 @@ code {
   padding: 2px 4px;
 }
 
-/* Works on Firefox */
-* {
-  scrollbar-width: 2px;
-}
-
-::-webkit-scrollbar {
-  width: 2px;
-}
-
-*::-webkit-scrollbar-thumb {
-  border-radius: 20px;
-  width: 4px;
-  height: 4px;
-}
-
-body::-webkit-scrollbar {
-  width: 4px;
-}
-
-body::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-}
-
-body::-webkit-scrollbar-thumb {
-  background-color: darkgrey;
-  outline: 1px solid slategrey;
-}
+/*
+  No custom scrollbar styling on the document or docs sidebar.
+  ::-webkit-scrollbar / scrollbar-color force classic always-visible bars.
+  Native OS overlay scrollbars (macOS “Automatically based on mouse or trackpad”)
+  show only while scrolling and do not reserve gutter space.
+*/
 
 .docs-sidebar {
   height: calc(100vh - 48px);

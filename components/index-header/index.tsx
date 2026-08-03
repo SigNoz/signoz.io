@@ -14,7 +14,7 @@ export function HomepageHeroRedesign() {
   const primaryCTA = 'Get Started - Free'
 
   return (
-    <header className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden px-4 pt-24 sm:px-6 md:pt-40 lg:px-16 lg:pt-44 xl:px-20 xl:pt-[220px] wide:max-w-8xl wide:px-0">
+    <header className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 overflow-hidden px-4 pt-24 sm:px-6 md:pt-40 lg:px-16 lg:pt-44 xl:px-20 xl:pt-[220px] wide:max-w-8xl wide:px-0">
       <HomepageHeroShader />
       <div className="relative z-10 mx-auto flex w-full max-w-8xl flex-col">
         <HeroCopyMotion delay={0.04}>
