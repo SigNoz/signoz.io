@@ -168,12 +168,22 @@ module.exports = () => {
         },
         {
           source: '/docs/manage/administrator-guide/iam/permissions',
-          destination: '/docs/manage/administrator-guide/iam/transactions/',
+          destination: '/docs/manage/administrator-guide/iam/reference/transactions/',
           permanent: true,
         },
         {
           source: '/docs/manage/administrator-guide/iam/permissions/',
-          destination: '/docs/manage/administrator-guide/iam/transactions/',
+          destination: '/docs/manage/administrator-guide/iam/reference/transactions/',
+          permanent: true,
+        },
+        {
+          source: '/docs/manage/administrator-guide/iam/transactions',
+          destination: '/docs/manage/administrator-guide/iam/reference/transactions/',
+          permanent: true,
+        },
+        {
+          source: '/docs/manage/administrator-guide/iam/transactions/',
+          destination: '/docs/manage/administrator-guide/iam/reference/transactions/',
           permanent: true,
         },
         {
@@ -309,6 +319,16 @@ module.exports = () => {
         {
           source: '/docs/alerts-management/overview/',
           destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.135/',
+          destination: '/docs/operate/migration/upgrade-0-135/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.135',
+          destination: '/docs/operate/migration/upgrade-0-135/',
           permanent: true,
         },
         {
@@ -820,6 +840,16 @@ module.exports = () => {
         },
         {
           source: '/comparisons/opentelemetry-collector-vs-agent/',
+          destination: '/blog/opentelemetry-collector-complete-guide/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-exporters/',
+          destination: '/guides/opentelemetry-collector-vs-exporter/',
+          permanent: true,
+        },
+        {
+          source: '/blog/using-opentelemetry-collector-processor/',
           destination: '/blog/opentelemetry-collector-complete-guide/',
           permanent: true,
         },

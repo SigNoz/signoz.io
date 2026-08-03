@@ -1,5 +1,5 @@
 ---
-date: 2026-07-15
+date: 2026-07-27
 title: Trace Explorer
 description: Understand the Trace Explorer in SigNoz — views, filtering, trace matching, and how to save and act on your results.
 doc_type: explanation
@@ -86,6 +86,22 @@ The Time Series View provides a graphical representation of trace data over time
   caption="Timeseries View in Trace Explorer"
 />
 
+#### Download chart data
+
+Click the **download** icon on the right of the Time Series chart header to export the data behind the chart. A popover opens with a **FORMAT** selector offering **csv** (default) and **jsonl**. Choose a format and click **Export** to download the file.
+
+The export mirrors what the chart shows:
+
+- **Series names match the chart legend**, including any custom legend format or group-by values.
+- **The value column carries the unit.** The value column header includes the human-readable Y-axis unit (for example, `value (ms)`). Display-only formats such as `short` or `none` are omitted.
+- **Duration values are exported in milliseconds** to match what the chart displays, not the raw nanosecond values returned by the API. A `p99` latency query, for example, exports the same millisecond values you see on the chart.
+
+Each row also includes the timestamp, the query name, the series name, and one column per group-by label.
+
+<Admonition type="info">
+The download button appears whenever the Time Series chart has data to export. No configuration or feature flag is required, and export behaves the same on SigNoz Cloud and self-hosted deployments.
+</Admonition>
+
 ### Table View
 
 The Table View provides a tabular representation of the trace data.
@@ -105,6 +121,12 @@ Both Time Series and Table views use the Query Builder for filtering, aggregatio
   alt="Query Builder showing Group By, Having, Order By, and Limit fields"
   caption="Query Builder in Time Series and Table views"
 />
+
+## Missing Spans
+
+A span shows as missing when a collected span references a Parent Span ID that no other span in the trace matches. That parent span still exists in your system but never reached SigNoz, so the waterfall view shows a gap where it should sit. SigNoz marks these traces with a "This trace has missing spans" banner in the trace details view.
+
+Tail sampling, spans dropped in transit, and services that never export are the usual causes. For the full explanation and how to identify each cause, see [Why are some spans missing from a trace?](https://signoz.io/docs/traces-management/troubleshooting/faqs/#q-why-are-some-spans-missing-from-a-trace).
 
 ## Export Spans and Traces
 

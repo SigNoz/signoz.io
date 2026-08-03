@@ -52,6 +52,7 @@ import ToggleHeading from './Headings/ToggleHeading'
 import Region from './Region/Region'
 import RegionTable from './Region/RegionTable'
 import { RegionAwarePre, RegionAwareCode } from './Region/RegionAwareComponents'
+import { CodeTab, CodeTabs } from './CodeBlock'
 
 import CardinalityExplosion from './HighCardinalityData/CardinalityExplosion'
 import MemoryGauge from './HighCardinalityData/MemoryGauge'
@@ -86,6 +87,8 @@ export const components = {
   VersionPin,
   Tabs,
   TabItem,
+  CodeTabs,
+  CodeTab,
   DocCard,
   DocCardContainer,
   NextCarousel,
