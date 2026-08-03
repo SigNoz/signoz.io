@@ -30,7 +30,8 @@ export default function Hero() {
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReducedMotion) return
+    const isDesktop = window.matchMedia('(min-width: 768px)').matches
+    if (prefersReducedMotion || !isDesktop) return
 
     const tick = () => {
       const layer = titleLayerRef.current
@@ -61,14 +62,15 @@ export default function Hero() {
 
   return (
     <DitherCanvas enableClick={false} className="relative w-full md:h-[513px]">
-      <div className="relative w-full overflow-hidden md:h-[513px]">
-        <div className="pointer-events-none relative w-full md:absolute md:inset-0 md:overflow-hidden">
+      {/* Mobile: fixed-height hero so we can inset the title under the nav; search is md+ only */}
+      <div className="relative mt-2 h-[300px] w-full overflow-hidden md:mt-0 md:h-[513px]">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <Image
             src="/img/docs-introduction/hero-illustration.webp"
             alt=""
             width={4096}
             height={1805}
-            className="block h-auto w-full max-w-none object-cover object-top md:absolute md:inset-0 md:h-full md:w-full"
+            className="absolute inset-0 h-full w-full max-w-none object-cover object-[center_30%] md:object-top"
             sizes="100vw"
             priority
             aria-hidden
@@ -76,7 +78,7 @@ export default function Hero() {
 
           <div
             ref={titleLayerRef}
-            className="absolute inset-0 will-change-transform"
+            className="absolute inset-x-0 bottom-0 top-14 will-change-transform md:inset-0"
             style={{
               backgroundColor: 'var(--base-white)',
               WebkitMaskImage: 'url(/img/docs-introduction/hero-title-mask.webp)',
@@ -94,7 +96,7 @@ export default function Hero() {
           <span className="sr-only">Welcome to SigNoz Docs</span>
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[160px] md:h-[220px]">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[120px] md:h-[220px]">
           {PROGRESSIVE_BLUR_LAYERS.map((layer, i) => (
             <div
               key={i}
@@ -110,7 +112,7 @@ export default function Hero() {
           <div className="absolute inset-0" style={{ backgroundImage: HERO_OVERLAY_GRADIENT }} />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-end px-4 pb-8 pt-6 md:absolute md:inset-x-0 md:bottom-0 md:h-[141px] md:pb-8 md:pt-0">
+        <div className="absolute inset-x-0 bottom-0 z-10 hidden h-[141px] flex-col items-center justify-end px-4 pb-8 md:flex">
           <div className="flex w-full max-w-[590px] flex-col items-center">
             <SearchBar
               placeholder={SEARCH_PLACEHOLDERS}
