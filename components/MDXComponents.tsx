@@ -64,7 +64,6 @@ import InlineCTA from './InlineCTA/InlineCTA'
 import DatabaseTable from './HighCardinalityData/DatabaseTable'
 import MCPInstallButton from './MCPInstallButton/MCPInstallButton'
 import IncidentCostGraphic from './Blog/IncidentCostGraphic.lazy'
-import TroubleshootingWizard from './TroubleshootingWizard/TroubleshootingWizard'
 
 // MDXComponents type from @types/mdx@2.0.13 expects React-18-shape components
 // (props: any) => Element | null, while @types/react@19 widens FC return to
@@ -144,5 +143,4 @@ export const components = {
   TraefikMetrics,
   MetricsDefinition,
   CHClientWithOutput,
-  TroubleshootingWizard,
 } as unknown as MDXComponents
