@@ -15,6 +15,7 @@ import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import { resolveLatestDate, formatDisplayDate } from '@/utils/dateUtils'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
 import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
+import SidebarRegionSelector from '@/components/DocsSidebar/SidebarRegionSelector'
 
 const DocContent: React.FC<{
   title: string
@@ -62,6 +63,9 @@ const DocContent: React.FC<{
       <div
         className={`box-border min-w-0 flex-[1_1_auto] [&_details+details]:mt-8 ${isOnboarding ? '!w-full px-4' : ''}`}
       >
+        <div className="mb-4 md:hidden">
+          <SidebarRegionSelector showInfoTip={false} />
+        </div>
         {breadcrumbs && !isOnboarding && <Breadcrumb crumbs={breadcrumbs} />}
         <div className="m-0 flex items-center justify-between gap-2">
           <div className="flex flex-col items-start gap-2">
