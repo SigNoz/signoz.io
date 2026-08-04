@@ -42,7 +42,7 @@ export function HomepageHeroRedesign() {
             <h1 className="m-0 max-w-3xl text-left text-5xl font-medium leading-none tracking-[-1.408px] text-signoz_vanilla-100 sm:text-6xl lg:text-5xl xl:text-6xl xl:leading-none">
               Observability for your
               <br />
-              team, and AI agents.
+              team and AI agents.
               <br />
               <span className="text-signoz_vanilla-400">Powered by open standards.</span>
             </h1>
