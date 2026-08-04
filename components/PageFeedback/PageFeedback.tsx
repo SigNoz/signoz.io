@@ -44,16 +44,10 @@ type FeedbackPayload = {
   page: string
 }
 
-function buildAdditionalDetails(
-  reasons: Set<string>,
-  detailsMap: Record<string, string>
-): Record<string, string> {
-  const result: Record<string, string> = {}
-  for (const reason of reasons) {
-    const trimmed = detailsMap[reason]?.trim()
-    if (trimmed) result[reason] = trimmed
-  }
-  return result
+/** Same production contract: `{ [selectedReason]: details }` when details are non-empty. */
+function buildAdditionalDetails(reason: string, details: string): Record<string, string> {
+  const trimmed = details.trim()
+  return reason && trimmed ? { [reason]: trimmed } : {}
 }
 
 async function postFeedback(
@@ -91,8 +85,8 @@ const PageFeedback: React.FC = () => {
   const feedbackPath = process.env.NEXT_PUBLIC_SIGNOZ_CMS_FEEDBACK_PATH
 
   const [mode, setMode] = useState<FeedbackMode>(null)
-  const [reasons, setReasons] = useState<Set<string>>(new Set())
-  const [detailsMap, setDetailsMap] = useState<Record<string, string>>({})
+  const [reason, setReason] = useState('')
+  const [details, setDetails] = useState('')
   const [comment, setComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
@@ -120,8 +114,8 @@ const PageFeedback: React.FC = () => {
       modeRef.current = null
       setMode(null)
       setShowThanks(false)
-      setReasons(new Set())
-      setDetailsMap({})
+      setReason('')
+      setDetails('')
       setComment('')
       setSubmitError('')
     }
@@ -133,8 +127,8 @@ const PageFeedback: React.FC = () => {
   if (isDocsOnboardingPathname(pathname)) return null
 
   const resetForm = () => {
-    setReasons(new Set())
-    setDetailsMap({})
+    setReason('')
+    setDetails('')
     setComment('')
     setSubmitError('')
   }
@@ -174,19 +168,18 @@ const PageFeedback: React.FC = () => {
   const submitReasons = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setSubmitError('')
-    if (reasons.size === 0) {
+    if (!reason) {
       setSubmitError('Please select an option before submitting feedback.')
       return
     }
 
     const helpful = mode === 'yes'
-    const joined = Array.from(reasons).join(', ')
     setIsSubmitting(true)
     const result = await postFeedback(apiUrl, feedbackPath, {
       helpful,
-      needsImprovement: helpful ? '' : joined,
-      positiveFeedback: helpful ? joined : '',
-      additionalDetails: buildAdditionalDetails(reasons, detailsMap),
+      needsImprovement: helpful ? '' : reason,
+      positiveFeedback: helpful ? reason : '',
+      additionalDetails: buildAdditionalDetails(reason, details),
     })
     setIsSubmitting(false)
 
@@ -318,12 +311,14 @@ const PageFeedback: React.FC = () => {
                   {mode === 'yes' ? 'What did you like?' : 'What needs improvement'}
                 </h3>
                 <p className="m-0 text-[11px] leading-[18px] tracking-[-0.055px] text-[var(--l2-foreground)]">
-                  Select all that apply. You can add details after selecting.
+                  {mode === 'yes'
+                    ? 'Pick the option that best describes your experience.'
+                    : 'Pick the issue(s) that blocked you. You can add details after selecting one.'}
                 </p>
               </div>
               <div className="overflow-hidden rounded-[4px] border border-[var(--l2-border)]">
                 {reasonOptions.map((option) => {
-                  const isSelected = reasons.has(option.value)
+                  const isSelected = reason === option.value
                   return (
                     <div
                       key={option.value}
@@ -339,21 +334,13 @@ const PageFeedback: React.FC = () => {
                           aria-label={option.value}
                           onChange={(checked) => {
                             setSubmitError('')
-                            setReasons((prev) => {
-                              const next = new Set(prev)
-                              if (checked) {
-                                next.add(option.value)
-                              } else {
-                                next.delete(option.value)
-                              }
-                              return next
-                            })
-                            if (!checked) {
-                              setDetailsMap((prev) => {
-                                const { [option.value]: _, ...rest } = prev
-                                return rest
-                              })
+                            if (checked) {
+                              setReason(option.value)
+                              setDetails('')
+                              return
                             }
+                            setReason('')
+                            setDetails('')
                           }}
                         />
                         <span className="min-w-0 text-[11px] leading-none text-[var(--l2-foreground)]">
@@ -365,13 +352,8 @@ const PageFeedback: React.FC = () => {
                           className="min-h-14 w-full resize-y border-x-0 border-b-0 border-t border-[var(--l2-border)] bg-[var(--l2-background-60)] p-2.5 text-[11px] leading-[18px] text-[var(--l1-foreground-hover)] shadow-none outline-none ring-0 placeholder:text-[var(--l3-foreground)] focus:border-x-0 focus:border-b-0 focus:border-t focus:border-[var(--l2-border)] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                           placeholder="Optional: Provide more details..."
                           aria-label={`Additional details for ${option.value}`}
-                          value={detailsMap[option.value] || ''}
-                          onChange={(e) =>
-                            setDetailsMap((prev) => ({
-                              ...prev,
-                              [option.value]: e.target.value,
-                            }))
-                          }
+                          value={details}
+                          onChange={(e) => setDetails(e.target.value)}
                           onClick={(e) => e.stopPropagation()}
                         />
                       )}
