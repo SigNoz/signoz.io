@@ -75,33 +75,20 @@ type Node = QuestionNode | ResultNode
 
 const START = 'q_generated'
 
-// Small inline helpers so the tree stays readable.
-const Code = ({ children }: { children: React.ReactNode }) => (
-  <code className="rounded bg-signoz_ink-200 px-1 py-0.5 font-mono text-[0.85em] text-signoz_vanilla-100">
-    {children}
-  </code>
-)
-
-const DocLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <a href={href} className="text-signoz_robin-500 underline hover:text-signoz_robin-400">
-    {children}
-  </a>
-)
-
 function buildTree(m: SignalMeta): Record<string, Node> {
   return {
     q_generated: {
       kind: 'question',
       prompt: (
         <>
-          Set <Code>{m.envExporter}=console</Code>, restart your app, and exercise the code path. Do
+          Set <code>{m.envExporter}=console</code>, restart your app, and exercise the code path. Do
           you see {m.unit} printed in your console?
         </>
       ),
       hint: (
         <>
           This checks whether the data exists at all, before worrying about where it goes. Use{' '}
-          <Code>{m.envExporter}=otlp,console</Code> to keep exporting to SigNoz while you look.
+          <code>{m.envExporter}=otlp,console</code> to keep exporting to SigNoz while you look.
           Works for the Java, Node.js, Python, .NET, Ruby, and PHP agents; in Go, add a stdout
           exporter in code instead.
         </>
@@ -115,7 +102,7 @@ function buildTree(m: SignalMeta): Record<string, Node> {
       kind: 'question',
       prompt: (
         <>
-          Turn on the SDK&apos;s own diagnostic logging (<Code>OTEL_LOG_LEVEL=debug</Code> or your
+          Turn on the SDK&apos;s own diagnostic logging (<code>OTEL_LOG_LEVEL=debug</code> or your
           language&apos;s equivalent) and restart. Do you see export errors in your app&apos;s logs?
         </>
       ),
@@ -146,14 +133,14 @@ function buildTree(m: SignalMeta): Record<string, Node> {
       kind: 'question',
       prompt: (
         <>
-          Add the Collector&apos;s <Code>debug</Code> exporter to the pipeline and restart. Do you
+          Add the Collector&apos;s <code>debug</code> exporter to the pipeline and restart. Do you
           see your {m.unit} in the Collector&apos;s own logs?
         </>
       ),
       hint: (
         <>
-          This <Code>debug</Code> exporter is a Collector pipeline component, different from the
-          SDK&apos;s <Code>OTEL_LOG_LEVEL=debug</Code> above. It tells you what the Collector
+          This <code>debug</code> exporter is a Collector pipeline component, different from the
+          SDK&apos;s <code>OTEL_LOG_LEVEL=debug</code> above. It tells you what the Collector
           actually receives.
         </>
       ),
@@ -174,7 +161,7 @@ function buildTree(m: SignalMeta): Record<string, Node> {
           <ul>
             <li>
               The instrumentation is loaded <strong>before</strong> your app code runs (for example
-              the Java agent via <Code>-javaagent</Code>, <Code>opentelemetry-instrument</Code> for
+              the Java agent via <code>-javaagent</code>, <code>opentelemetry-instrument</code> for
               Python, or requiring the SDK first in Node.js).
             </li>
             <li>Your runtime version is supported by the OpenTelemetry SDK.</li>
@@ -184,13 +171,8 @@ function buildTree(m: SignalMeta): Record<string, Node> {
             </li>
           </ul>
           <p>
-            Details in{' '}
-            <DocLink href="#step-1-is-your-application-generating-telemetry">Step 1</DocLink> and
-            the{' '}
-            <DocLink href="https://signoz.io/docs/instrumentation/overview/">
-              instrumentation guide
-            </DocLink>
-            .
+            Details in <a href="#step-1-is-your-application-generating-telemetry">Step 1</a> and the{' '}
+            <a href="https://signoz.io/docs/instrumentation/overview/">instrumentation guide</a>.
           </p>
         </>
       ),
@@ -202,30 +184,27 @@ function buildTree(m: SignalMeta): Record<string, Node> {
       body: (
         <>
           <p>
-            A <Code>401</Code> / <Code>403</Code> (or gRPC <Code>Unauthenticated</Code>) means the
+            A <code>401</code> / <code>403</code> (or gRPC <code>Unauthenticated</code>) means the
             ingestion key is missing, wrong, expired, or revoked.
           </p>
           <ul>
             <li>
               For a direct SDK export, the key goes in the OTLP headers as{' '}
-              <Code>signoz-ingestion-key=&lt;your-ingestion-key&gt;</Code>; for a Collector, under
-              the <Code>otlphttp</Code> exporter <Code>headers</Code>.
+              <code>signoz-ingestion-key=&lt;your-ingestion-key&gt;</code>; for a Collector, under
+              the <code>otlphttp</code> exporter <code>headers</code>.
             </li>
             <li>
               Confirm the key under Settings &rarr; Ingestion, and that its limits are not blocking
               data.
             </li>
             <li>
-              Self-hosted SigNoz needs no ingestion key by default, so a <Code>401</Code> there
+              Self-hosted SigNoz needs no ingestion key by default, so a <code>401</code> there
               usually means a proxy or gateway in front of SigNoz is rejecting the request.
             </li>
           </ul>
           <p>
-            See <DocLink href="#quick-debug">Quick debug</DocLink> and{' '}
-            <DocLink href="https://signoz.io/docs/ingestion/signoz-cloud/keys/">
-              ingestion keys
-            </DocLink>
-            .
+            See <a href="#quick-debug">Quick debug</a> and{' '}
+            <a href="https://signoz.io/docs/ingestion/signoz-cloud/keys/">ingestion keys</a>.
           </p>
         </>
       ),
@@ -237,21 +216,21 @@ function buildTree(m: SignalMeta): Record<string, Node> {
       body: (
         <>
           <p>
-            A <Code>404</Code> almost always means the URL is wrong. Check:
+            A <code>404</code> almost always means the URL is wrong. Check:
           </p>
           <ul>
             <li>
-              No trailing slash on the path: use <Code>.../{m.signalPath}</Code>, not{' '}
-              <Code>.../{m.signalPath}/</Code>.
+              No trailing slash on the path: use <code>.../{m.signalPath}</code>, not{' '}
+              <code>.../{m.signalPath}/</code>.
             </li>
             <li>
-              SigNoz Cloud endpoint is <Code>https://ingest.&lt;region&gt;.signoz.cloud:443</Code>{' '}
-              (port <Code>443</Code>, not <Code>4317</Code>/<Code>4318</Code>); self-hosted is{' '}
-              <Code>http://&lt;signoz-host&gt;:4318</Code>.
+              SigNoz Cloud endpoint is <code>https://ingest.&lt;region&gt;.signoz.cloud:443</code>{' '}
+              (port <code>443</code>, not <code>4317</code>/<code>4318</code>); self-hosted is{' '}
+              <code>http://&lt;signoz-host&gt;:4318</code>.
             </li>
           </ul>
           <p>
-            See <DocLink href="#quick-debug">Quick debug</DocLink>.
+            See <a href="#quick-debug">Quick debug</a>.
           </p>
         </>
       ),
@@ -264,13 +243,13 @@ function buildTree(m: SignalMeta): Record<string, Node> {
         <>
           <p>
             <strong>On SigNoz Cloud</strong>, exports that succeed while the account stays empty
-            almost always mean the wrong region. The <Code>&lt;region&gt;</Code> in your endpoint
+            almost always mean the wrong region. The <code>&lt;region&gt;</code> in your endpoint
             must match your account&apos;s region: a key from one region will not authenticate
             against another region&apos;s endpoint, and data sent to the wrong region never reaches
             your account. Confirm it under Settings &rarr; Ingestion, or in the{' '}
-            <DocLink href="https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint">
+            <a href="https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint">
               region and endpoint table
-            </DocLink>
+            </a>
             .
           </p>
           <p>
@@ -288,7 +267,7 @@ function buildTree(m: SignalMeta): Record<string, Node> {
       body: (
         <>
           <p>From the machine running your app, check that the endpoint is reachable:</p>
-          <pre className="overflow-x-auto rounded bg-gray-100 p-3 text-sm dark:bg-gray-800">
+          <pre className="overflow-x-auto">
             <code>
               # SigNoz Cloud{'\n'}
               curl -v https://ingest.&lt;region&gt;.signoz.cloud:443{'\n\n'}# Self-hosted SigNoz
@@ -303,7 +282,7 @@ function buildTree(m: SignalMeta): Record<string, Node> {
             </li>
             <li>
               If it <strong>connects but data still does not appear</strong>, the problem is your
-              endpoint, region, or key: see <DocLink href="#quick-debug">Quick debug</DocLink>.
+              endpoint, region, or key: see <a href="#quick-debug">Quick debug</a>.
             </li>
           </ul>
         </>
@@ -317,24 +296,20 @@ function buildTree(m: SignalMeta): Record<string, Node> {
         <>
           <p>
             The Collector is receiving your {m.unit}, so the problem is the export to SigNoz. Check
-            the <Code>otlphttp</Code> exporter:
+            the <code>otlphttp</code> exporter:
           </p>
           <ul>
             <li>
-              The <Code>endpoint</Code>, region, and <Code>signoz-ingestion-key</Code> header are
+              The <code>endpoint</code>, region, and <code>signoz-ingestion-key</code> header are
               correct.
             </li>
             <li>
-              The exporter is actually wired into the pipeline under <Code>service.pipelines</Code>:
+              The exporter is actually wired into the pipeline under <code>service.pipelines</code>:
               defining it is not enough.
             </li>
           </ul>
           <p>
-            See{' '}
-            <DocLink href="#verify-data-inside-the-collector">
-              Verify data inside the Collector
-            </DocLink>
-            .
+            See <a href="#verify-data-inside-the-collector">Verify data inside the Collector</a>.
           </p>
         </>
       ),
@@ -348,21 +323,21 @@ function buildTree(m: SignalMeta): Record<string, Node> {
           <p>Your {m.unit} never arrive at the Collector. Check the app &rarr; Collector hop:</p>
           <ul>
             <li>
-              The app&apos;s <Code>OTEL_EXPORTER_OTLP_ENDPOINT</Code> points at the Collector (for
-              example <Code>http://&lt;collector-host&gt;:4318</Code>).
+              The app&apos;s <code>OTEL_EXPORTER_OTLP_ENDPOINT</code> points at the Collector (for
+              example <code>http://&lt;collector-host&gt;:4318</code>).
             </li>
             <li>
               The Collector is listening on the OTLP ports:{' '}
-              <Code>netstat -tuln | grep -E &apos;4317|4318&apos;</Code>.
+              <code>netstat -tuln | grep -E &apos;4317|4318&apos;</code>.
             </li>
             <li>Port and protocol match: OTLP/HTTP on 4318, OTLP/gRPC on 4317.</li>
             <li>No network policy, security group, or firewall blocks the two.</li>
           </ul>
           <p>
             See{' '}
-            <DocLink href="#verify-the-application-can-reach-the-collector">
+            <a href="#verify-the-application-can-reach-the-collector">
               Verify the application can reach the Collector
-            </DocLink>
+            </a>
             .
           </p>
         </>
@@ -399,12 +374,12 @@ export default function TroubleshootingWizard() {
   const back = () => setHistory((h) => (h.length > 1 ? h.slice(0, -1) : h))
 
   return (
-    <div className="not-prose my-6 rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-5">
+    <div className="not-prose my-6 rounded-lg border border-[var(--border)] bg-[var(--card)] p-5">
       <div className="mb-4">
-        <p className="m-0 text-sm font-semibold text-signoz_vanilla-100">
+        <p className="m-0 text-sm font-semibold text-[var(--card-foreground)]">
           Interactive troubleshooter
         </p>
-        <p className="m-0 mt-0.5 text-xs text-signoz_vanilla-400">
+        <p className="m-0 mt-0.5 text-xs text-[var(--muted-foreground)]">
           Answer a few questions to find where your data is getting lost.
         </p>
       </div>
@@ -433,11 +408,11 @@ export default function TroubleshootingWizard() {
       <div className="mt-5">
         {node.kind === 'question' ? (
           <div>
-            <p className="m-0 max-w-3xl text-[15px] font-medium leading-6 text-signoz_vanilla-100">
+            <p className="m-0 max-w-3xl text-[15px] font-medium leading-6 text-[var(--card-foreground)]">
               {node.prompt}
             </p>
             {node.hint ? (
-              <p className="m-0 mt-2 max-w-3xl text-[13px] leading-5 text-signoz_vanilla-400">
+              <p className="m-0 mt-2 max-w-3xl text-[13px] leading-5 text-[var(--muted-foreground)]">
                 {node.hint}
               </p>
             ) : null}
@@ -449,7 +424,7 @@ export default function TroubleshootingWizard() {
                   color="secondary"
                   onClick={() => answer(opt.to)}
                   suffix={<ArrowRight />}
-                  className="!h-auto w-full !justify-between !py-3 text-left !text-sm !text-signoz_vanilla-100"
+                  className="!h-auto w-full !justify-between !py-3 text-left !text-sm"
                 >
                   {opt.label}
                 </Button>
@@ -466,7 +441,7 @@ export default function TroubleshootingWizard() {
         )}
       </div>
 
-      <div className="mt-4 flex items-center gap-2 border-t border-signoz_slate-400 pt-3">
+      <div className="mt-4 flex items-center gap-2 border-t border-[var(--border)] pt-3">
         <Button
           variant="ghost"
           color="secondary"
@@ -479,7 +454,9 @@ export default function TroubleshootingWizard() {
         <Button variant="ghost" color="secondary" size="sm" onClick={() => reset()}>
           Start over
         </Button>
-        <span className="ml-auto text-xs text-signoz_vanilla-400">Step {history.length}</span>
+        <span className="ml-auto text-xs text-[var(--muted-foreground)]">
+          Step {history.length}
+        </span>
       </div>
     </div>
   )
