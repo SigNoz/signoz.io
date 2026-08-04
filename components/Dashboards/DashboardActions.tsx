@@ -3,6 +3,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { Check, Copy, Download } from 'lucide-react'
 import Admonition from '../Admonition/Admonition'
+import Link from '../Link'
 import Button from '../ui/Button'
 
 export const V2_MIN_SIGNOZ_VERSION = 'v0.135.0'
@@ -65,21 +66,6 @@ const TAB_CLASS = [
 
 // `not-prose` drops the docs anchor styling, so links carry it themselves.
 const LINK_CLASS = 'text-[var(--accent-primary)] underline underline-offset-2'
-// The raw JSON lives on GitHub, so following it leaves the docs site.
-const EXTERNAL_LINK_PROPS = {
-  target: '_blank',
-  rel: 'noopener noreferrer nofollow',
-} as const
-
-/**
- * Low-emphasis action styling for the deprecated version. The `secondary` Button
- * variant hardcodes dark ink/vanilla colors, so it stayed dark on a light ground;
- * these semantic tokens flip with the theme like the rest of the card.
- */
-const V1_BUTTON_CLASS = [
-  'border border-[var(--l1-border)] bg-transparent text-[var(--l2-foreground)]',
-  'hover:bg-[var(--l3-background)] hover:text-[var(--l1-foreground)]',
-].join(' ')
 
 const DashboardActions: React.FC<DashboardActionsProps> = ({
   dashboardJsonV2Url,
@@ -202,29 +188,25 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
 
       <div className="px-4 py-4">
         {isV1 ? (
-          // Admonition already carries the warning tone in both themes, so the
-          // notice does not hand-roll its own amber surface.
           <Admonition type="warning" variant="sm" title="V1 is deprecated" className="mt-0">
             Use V1 only on SigNoz older than {V2_MIN_SIGNOZ_VERSION}. From {V2_MIN_SIGNOZ_VERSION}{' '}
             onwards, import the V2 JSON — V1 imports still work through a temporary compatibility
             path that will be removed. See the{' '}
-            <a href={UPGRADE_GUIDE_URL}>{V2_MIN_SIGNOZ_VERSION} upgrade guide</a>.
+            <Link href={UPGRADE_GUIDE_URL}>{V2_MIN_SIGNOZ_VERSION} upgrade guide</Link>.
           </Admonition>
         ) : (
           <p className="mb-4 text-sm leading-6 text-[var(--l2-foreground)]">
             Recommended. Uses the{' '}
-            <a className={LINK_CLASS} href={DASHBOARDS_V2_DOC_URL}>
+            <Link className={LINK_CLASS} href={DASHBOARDS_V2_DOC_URL}>
               V2 dashboard schema
-            </a>{' '}
+            </Link>{' '}
             and needs SigNoz {V2_MIN_SIGNOZ_VERSION} or newer.
           </p>
         )}
 
         <div className="flex flex-wrap gap-3">
           <Button
-            // The deprecated version should not carry the primary CTA weight.
-            variant={isV1 ? 'ghost' : 'default'}
-            className={isV1 ? V1_BUTTON_CLASS : undefined}
+            variant="default"
             rounded="default"
             isButton={true}
             onClick={handleDownload}
@@ -235,8 +217,7 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
           </Button>
 
           <Button
-            variant={isV1 ? 'ghost' : 'tertiary'}
-            className={isV1 ? V1_BUTTON_CLASS : undefined}
+            variant="tertiary"
             rounded="default"
             isButton={true}
             onClick={handleCopy}
@@ -263,22 +244,21 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
         {error && (
           <p className="mt-3 text-sm leading-6 text-[var(--accent-cherry)]">
             {error}{' '}
-            <a
+            <Link
               className="text-[var(--accent-cherry)] underline underline-offset-2"
               href={activeUrl}
-              {...EXTERNAL_LINK_PROPS}
             >
               Open the raw JSON
-            </a>{' '}
+            </Link>{' '}
             instead.
           </p>
         )}
 
         <p className="mt-4 text-xs leading-5 text-[var(--l3-foreground)]">
           Import it in SigNoz with <strong>Dashboards → + New dashboard → Import JSON</strong>.{' '}
-          <a className={LINK_CLASS} href={IMPORT_DOC_URL}>
+          <Link className={LINK_CLASS} href={IMPORT_DOC_URL}>
             Import guide
-          </a>
+          </Link>
         </p>
       </div>
     </div>
