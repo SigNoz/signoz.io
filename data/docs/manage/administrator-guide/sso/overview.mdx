@@ -1,6 +1,6 @@
 ---
 published_date: 2026-02-26
-updated_date: 2026-06-12
+updated_date: 2026-07-27
 
 title: Single Sign on (SSO) - Overview
 description: Overview of single sign-on (SSO) in SigNoz.
@@ -39,6 +39,21 @@ At a high level, you connect your organization’s email domain to an IdP, and S
 If your provider supports IdP-initiated logins, you will see an option to set the `Relay State URL` in the IdP's configuration UI.
 
 - Copy the `IdP Initiated SSO URL` from the `Authenticated Domains` section and set this as the `Relay State URL` in your IdP
+
+## Security hardening (Self-Host)
+
+If you run self-hosted SigNoz, set `global.allowed_origins` to the origin your SigNoz UI is served on. This restricts SSO login and OAuth/SAML callback redirects to origins you trust, closing an open-redirect path where a crafted redirect or forged SAML `RelayState` could send an authenticated user and their session token to an attacker-controlled origin.
+
+The field is opt-in and off by default, so existing deployments are unaffected until you configure it. It is available from SigNoz v0.134.0. SigNoz Cloud is managed by SigNoz and needs no action.
+
+When `allowed_origins` is set, a disallowed origin surfaces as an `origin_not_allowed` error at one of two points:
+
+| Stage | HTTP status | Error code | Meaning |
+|-------|-------------|------------|---------|
+| Login initiation | `400` | `origin_not_allowed` | The `ref` redirect origin is not in `allowed_origins`. |
+| OAuth/SAML callback | `403` | `origin_not_allowed` | The callback state URL resolved to a disallowed origin. |
+
+If a legitimate origin is rejected, add it to `allowed_origins` (matching scheme, host, and port) and restart SigNoz. See [Restrict SSO Redirect Origins](https://signoz.io/docs/manage/administrator-guide/configuration/restrict-sso-redirect-origins/) for the full configuration reference.
 
 ## Next steps
 
