@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { ArrowDownRight, ArrowRight, CheckCircle, Hash } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
+import { TRACES_AND_LOGS_PRICES, METRICS_PRICES } from '@/constants/pricing'
 
 interface SigNozCloudPricingOverviewProps {
   className?: string
@@ -22,20 +23,17 @@ interface MetricsRetention {
 const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
   className = '',
 }) => {
+  // Derived from the shared rate tables so this card cannot drift from the
+  // calculator or /pricing.md.
   const RETENTION_PERIOD = {
-    TRACES_AND_LOGS: [
-      { days: 15, price: 0.3 },
-      { days: 30, price: 0.4 },
-      { days: 90, price: 0.6 },
-      { days: 180, price: 0.8 },
-      { days: 365, price: 1.4 },
-    ] as TracesAndLogsRetention[],
-    METRICS: [
-      { months: 1, price: 0.1 },
-      { months: 3, price: 0.12 },
-      { months: 6, price: 0.15 },
-      { months: 13, price: 0.18 },
-    ] as MetricsRetention[],
+    TRACES_AND_LOGS: Object.keys(TRACES_AND_LOGS_PRICES)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .map((days) => ({ days, price: TRACES_AND_LOGS_PRICES[days] })) as TracesAndLogsRetention[],
+    METRICS: Object.keys(METRICS_PRICES)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .map((months) => ({ months, price: METRICS_PRICES[months] })) as MetricsRetention[],
   }
 
   const formatTracesAndLogsRetentionLabel = (days: number) =>
