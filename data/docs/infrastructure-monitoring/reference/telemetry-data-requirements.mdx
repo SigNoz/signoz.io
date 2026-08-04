@@ -40,6 +40,17 @@ The Infrastructure Monitoring depends on a set of resource attributes and metric
   - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for `k8s.pod.phase`.
   - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to enrich Kubernetes metadata on metrics.
 
+### Containers
+
+- **Required attributes**: `k8s.container.name`, `k8s.pod.uid`, `k8s.pod.name`, `k8s.namespace.name`, `k8s.cluster.name`. `container.image.name` and `container.image.tag` populate the Image:Tag column but aren't required for the row to appear.
+- **Required metrics**:
+  - From kubeletstats: `container.cpu.usage`, `container.memory.working_set`, `k8s.container.cpu_request_utilization`, `k8s.container.cpu_limit_utilization`, `k8s.container.memory_request_utilization`, `k8s.container.memory_limit_utilization`
+  - From k8s_cluster: `k8s.container.ready`, `k8s.container.restarts`
+- **Setup**:
+  - [Setup Kubelet Stats Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-kubelet-stats-receiver) for container CPU / memory / utilization.
+  - [Setup K8s Cluster Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#setup-k8s-cluster-receiver) for readiness and restarts.
+  - [Setup k8sattributesprocessor](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/#2-setup-k8sattributesprocessor-to-enable-kubernetes-metadata) to attach `k8s.container.name` to container-level metrics.
+
 ### Nodes
 
 - **Required attributes**: `k8s.node.name`, `k8s.cluster.name`.
