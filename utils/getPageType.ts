@@ -69,8 +69,8 @@ export const getPageType = (pathname: string): string => {
   // Other specific pages
   if (normalizedPath === '/dashboards') return 'Dashboard Listing Page'
   if (normalizedPath === '/pricing') return 'Pricing Page'
-  if (normalizedPath === '/case-study') return 'Case Study Listing Page'
-  if (normalizedPath.startsWith('/case-study/')) return 'Case Study Page' // Match /case-study/*
+  if (normalizedPath === '/customers') return 'Customer Listing Page'
+  if (normalizedPath.startsWith('/customers/')) return 'Customer Story Page'
   if (normalizedPath === '/login') return 'Sign In Page'
   if (normalizedPath === '/teams') return 'Teams Page'
   if (normalizedPath === '/api-reference' || normalizedPath.startsWith('/api-reference/'))

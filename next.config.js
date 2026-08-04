@@ -137,6 +137,21 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/blog/alien-intelligence-ai-sre-workflow-signoz/',
+          destination: '/customers/alien-intelligence-ai-sre-workflow-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/blog/inkeep-ai-agent-monitoring/',
+          destination: '/customers/inkeep-ai-agent-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/:path*',
+          destination: '/customers/:path*/',
+          permanent: true,
+        },
+        {
           source: '/docs/product-features/saved-view',
           destination: '/docs/metrics-management/metrics-explorer/#saved-views-in-metrics-explorer',
           permanent: true,
@@ -1024,7 +1039,7 @@ module.exports = () => {
         },
         {
           source: '/observability-user-stories/',
-          destination: '/case-study/',
+          destination: '/customers/',
           permanent: true,
         },
         {
@@ -2898,7 +2913,7 @@ module.exports = () => {
         },
         {
           source: '/observability-user-stories',
-          destination: '/case-study/',
+          destination: '/customers/',
           permanent: true,
         },
         {

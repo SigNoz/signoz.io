@@ -62,8 +62,8 @@ export const TRUSTED_BY_LOGOS = [
   { src: '/svgs/icons/eltropy.svg', alt: 'Eltropy' },
   { src: '/svgs/icons/kernel.svg', alt: 'Kernel' },
   { src: '/img/users/salesforce.svg', alt: 'Salesforce' },
-  { src: '/img/users/comcast.svg', alt: 'Comcast' },
-  { src: '/svgs/icons/parallel-ai.svg', alt: 'Parallel AI' },
+  { src: '/svgs/icons/hedra.svg', alt: 'Hedra' },
+  { src: '/svgs/icons/kognitos.svg', alt: 'Kognitos' },
   { src: '/svgs/icons/formance.svg', alt: 'Formance' },
   { src: '/svgs/icons/blaxel.svg', alt: 'Blaxel' },
   { src: '/svgs/icons/sarvam.svg', alt: 'sarvam logo' },
@@ -113,7 +113,7 @@ export const NUMBERS_THAT_SPEAK_CARDS = [
       <div className="flex min-h-36 flex-col items-start justify-between">
         Seed-stage startups to public companies. Self-hosted, cloud, or BYOC. Your choice. With
         Enterprise-Grade Observability.
-        <Button variant="secondary" to="/case-study/" className="mt-4 block w-fit" rounded="full">
+        <Button variant="secondary" to="/customers/" className="mt-4 block w-fit" rounded="full">
           Learn more
         </Button>
       </div>
@@ -408,7 +408,7 @@ export const GETTING_STARTED_CARDS = [
         tracing, log pipeline design, cost governance. Support aligns to your business outcomes:
         reduced MTTR, high cardinality, low TCO
         <TrackingLink
-          href="/case-study/tableflow/"
+          href="/customers/tableflow/"
           clickType="Secondary CTA"
           clickName="Getting Started Section Observability Experts and Support Plans"
           clickLocation="Why SigNoz Page"

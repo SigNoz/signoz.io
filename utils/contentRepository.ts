@@ -92,6 +92,7 @@ const RELATED_PREFIX_TO_COLLECTION: Record<string, CanonicalCollection> = {
   comparisons: 'comparisons',
   faqs: 'faqs',
   opentelemetry: 'opentelemetries',
+  customers: 'case-studies',
   'case-study': 'case-studies',
 }
 

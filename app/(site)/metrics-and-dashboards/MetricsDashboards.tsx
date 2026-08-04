@@ -221,7 +221,7 @@ const TrustedByTeams = ({ page }) => {
               id={customerStoriesId}
               className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
             >
-              <Link href="/case-study/" className="flex-center z-[1] mx-2">
+              <Link href="/customers/" className="flex-center z-[1] mx-2">
                 Read customer stories <ArrowRight size={14} />
               </Link>
             </Button>

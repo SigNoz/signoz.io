@@ -12,6 +12,18 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { getAuthorKeys } from '@/utils/contentHelpers'
 
+const BLOG_NATIVE_CUSTOMER_STORY_SLUGS = new Set([
+  'alien-intelligence-ai-sre-workflow-signoz',
+  'inkeep-ai-agent-monitoring',
+])
+
+async function getCustomerStoryContent(path: string, deploymentStatus: string) {
+  const caseStudy = await getContentBySlug('case-studies', path, deploymentStatus)
+  if (caseStudy || !BLOG_NATIVE_CUSTOMER_STORY_SLUGS.has(path)) return caseStudy
+
+  return getContentBySlug('blogs', path, deploymentStatus)
+}
+
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
 
@@ -23,10 +35,10 @@ export async function generateMetadata(props: {
     // Handle root case
     if (!params.slug || params.slug.length === 0) {
       return {
-        title: 'Case Studies - SigNoz',
+        title: 'Customer Stories - SigNoz',
         description: 'Customer case studies and success stories with SigNoz',
         openGraph: {
-          title: 'Case Studies - SigNoz',
+          title: 'Customer Stories - SigNoz',
           description: 'Customer case studies and success stories with SigNoz',
           type: 'website',
         },
@@ -40,7 +52,7 @@ export async function generateMetadata(props: {
     const deploymentStatus = isProduction ? 'live' : 'staging'
 
     try {
-      const content = await getContentBySlug('case-studies', path, deploymentStatus)
+      const content = await getCustomerStoryContent(path, deploymentStatus)
 
       if (!content) {
         throw new Error(`Case study content not found for path: ${path}`)
@@ -51,13 +63,16 @@ export async function generateMetadata(props: {
       return {
         title: seoTitle,
         description: content?.description || content?.title,
+        alternates: {
+          canonical: `${siteMetadata.siteUrl}/customers/${path}/`,
+        },
         openGraph: {
           title: seoTitle,
           description: content?.description || content?.title,
           siteName: siteMetadata.title,
           locale: 'en_US',
           type: 'article',
-          url: './',
+          url: `${siteMetadata.siteUrl}/customers/${path}/`,
         },
         twitter: {
           card: 'summary_large_image',
@@ -100,7 +115,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     const isProduction = process.env.VERCEL_ENV === 'production'
     const deploymentStatus = isProduction ? 'live' : 'staging'
 
-    const response = await getContentBySlug('case-studies', path, deploymentStatus)
+    const response = await getCustomerStoryContent(path, deploymentStatus)
     if (!response) {
       console.error(`Invalid response for path: ${path}`)
       notFound()
@@ -138,10 +153,10 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const mainContent: CoreContent<MDXContent> = {
     title: content?.title,
     slug: path,
-    path: content?.path || `/case-study/${path}`,
+    path: `/customers/${path}`,
     type: 'CaseStudy',
     readingTime: readingTimeData,
-    filePath: `/case-study/${path}`,
+    filePath: `/customers/${path}`,
     toc: toc,
     image: content.image,
     authors: getAuthorKeys(content),

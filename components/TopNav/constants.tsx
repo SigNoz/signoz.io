@@ -265,6 +265,7 @@ export const NAV_BREAKPOINTS = {
   RESOURCES: 1120,
   PRICING: 1200,
   GITHUB_STARS: 1280,
+  CUSTOMERS: 1320,
 } as const
 
 export const POPOVER_CONTENT_CLASS =

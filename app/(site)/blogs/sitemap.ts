@@ -4,6 +4,11 @@ import { fetchAllCMSContent } from 'utils/cmsContent'
 import { compareSitemapEntries, toSitemapDateOnly } from 'utils/sitemapXml'
 import { resolveLatestDate } from '@/utils/dateUtils'
 
+const BLOG_NATIVE_CUSTOMER_STORY_PATHS = new Set([
+  '/alien-intelligence-ai-sre-workflow-signoz',
+  '/inkeep-ai-agent-monitoring',
+])
+
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -26,7 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let caseStudyRoutes: MetadataRoute.Sitemap = []
   if (caseStudies) {
     caseStudyRoutes = caseStudies.data.map((caseStudy) => ({
-      url: `${siteUrl}/case-study${caseStudy.path}/`,
+      url: `${siteUrl}/customers${caseStudy.path}/`,
       lastModified: resolveLatestDate(caseStudy),
     }))
   }
@@ -64,14 +69,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     blogRoutes = blogs.data
       .filter((post) => !post.excludeFromSitemap)
       .map((post) => ({
-        url: `${siteUrl}/blog${post.path}/`,
+        url: BLOG_NATIVE_CUSTOMER_STORY_PATHS.has(post.path)
+          ? `${siteUrl}/customers${post.path}/`
+          : `${siteUrl}/blog${post.path}/`,
         lastModified: resolveLatestDate(post),
         changeFrequency: 'weekly' as const,
         priority: 0.5,
       }))
   }
 
-  const staticRoutes = ['blog', 'guides', 'faqs', 'case-study', 'opentelemetry', 'comparisons'].map(
+  const staticRoutes = ['blog', 'guides', 'faqs', 'customers', 'opentelemetry', 'comparisons'].map(
     (route) => ({
       url: `${siteUrl}/${route}/`,
       changeFrequency: 'weekly' as const,

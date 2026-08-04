@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import NetAppLogo from '@/public/img/users/netapp.svg'
 import SamsungLogo from '@/public/img/users/samsung.svg'
-import ComcastLogo from '@/public/img/users/comcast.svg'
+import HedraLogo from '@/public/svgs/icons/hedra.svg'
 import FreoLogo from '@/public/img/users/freo.svg'
 import FormanceLogo from '@/public/svgs/icons/formance.svg'
 import SalesforceLogo from '@/public/img/users/salesforce.svg'
@@ -18,7 +18,7 @@ import { cn } from '../../app/lib/utils'
 export const COMPANIES = [
   { Logo: NetAppLogo, imageDesc: 'netapp logo' },
   { Logo: SamsungLogo, imageDesc: 'samsung logo' },
-  { Logo: ComcastLogo, imageDesc: 'comcast logo' },
+  { Logo: HedraLogo, imageDesc: 'Hedra logo' },
   { Logo: FreoLogo, imageDesc: 'freo logo' },
   { Logo: FormanceLogo, imageDesc: 'formance logo' },
   { Logo: SalesforceLogo, imageDesc: 'salesforce logo' },
@@ -95,7 +95,7 @@ export const TrustedByTeams = ({ page, className, variant = 'default' }: Trusted
         >
           <div className="mb-5 flex flex-col items-center text-center">
             <TrackingLink
-              href="/case-study/"
+              href="/customers/"
               id={customerStoriesId}
               clickType="Secondary CTA"
               clickName="Customer Stories Link"

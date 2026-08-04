@@ -13,7 +13,7 @@ The following content directories are managed through a CMS and synced to the re
 | `/guides` | `data/guides` |
 | `/comparisons` | `data/comparisons` |
 | `/faqs` | `data/faqs` |
-| `/case-study` | `data/case-study` |
+| `/customers` | `data/case-study` |
 | `/opentelemetry` | `data/opentelemetry` |
 
 ## Environment Setup

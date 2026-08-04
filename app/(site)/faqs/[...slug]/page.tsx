@@ -25,7 +25,7 @@ const relatedArticleRoutePrefix: Record<string, string> = {
   blog: 'blog',
   faq: 'faqs',
   opentelemetry: 'opentelemetry',
-  case_study: 'case-study',
+  case_study: 'customers',
 }
 
 function getRelatedArticleDoc(entry: MDXContent): { doc: MDXContent; contentType: string } | null {
