@@ -15,13 +15,20 @@ export async function generateMetadata(props: {
   const params = await props.params
   const metadata = await docsGenerateMetadata({ params: Promise.resolve(params) })
 
-  const slug = decodeURI(params.slug.join('/'))
+  const slug = params.slug
+    .map((segment) => decodeURIComponent(segment))
+    .filter(Boolean)
+    .join('/')
   const canonicalUrl = `${siteMetadata.siteUrl}/docs/${slug}/`
 
   return {
     ...metadata,
     alternates: {
       canonical: canonicalUrl,
+    },
+    openGraph: {
+      ...metadata?.openGraph,
+      url: canonicalUrl,
     },
   }
 }

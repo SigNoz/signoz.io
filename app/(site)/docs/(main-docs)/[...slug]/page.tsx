@@ -15,7 +15,10 @@ export async function generateMetadata(props: {
   params: Promise<{ slug: string[] }>
 }): Promise<Metadata | undefined> {
   const params = await props.params
-  const slug = decodeURI(params.slug.join('/'))
+  const slug = params.slug
+    .map((segment) => decodeURIComponent(segment))
+    .filter(Boolean)
+    .join('/')
   const post = await fetchDocBySlug(slug)
 
   if (!post) {
@@ -24,17 +27,21 @@ export async function generateMetadata(props: {
 
   const seoTitle = post?.meta_title || post?.title
   const fullTitle = seoTitle ? `${seoTitle} | SigNoz Docs` : 'SigNoz Docs'
+  const pageUrl = `${siteMetadata.siteUrl}/docs/${slug}/`
 
   return {
     title: seoTitle,
     description: post.description,
+    alternates: {
+      canonical: pageUrl,
+    },
     openGraph: {
       title: fullTitle,
       description: post.description,
       siteName: siteMetadata.title,
       locale: 'en_US',
       type: 'article',
-      url: './',
+      url: pageUrl,
     },
     twitter: {
       card: 'summary_large_image',
@@ -49,7 +56,10 @@ export const generateStaticParams = async () => {
 
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params
-  const slug = decodeURI(params.slug.join('/'))
+  const slug = params.slug
+    .map((segment) => decodeURIComponent(segment))
+    .filter(Boolean)
+    .join('/')
   const post = await fetchDocBySlug(slug)
 
   if (!post) {
