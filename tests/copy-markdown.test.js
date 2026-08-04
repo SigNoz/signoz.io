@@ -6,7 +6,7 @@ const { buildCopyMarkdownDocument, expandTabsInHast } = loadTsModule(
   'utils/docs/buildCopyMarkdownFromRendered.ts'
 )
 const { hastToMarkdown } = loadTsModule('utils/docs/markdownCore.ts')
-const { MORE_DOCS_POINTER } = loadTsModule('utils/docs/buildMarkdownDocument.ts')
+const { MORE_DOCS_POINTER, LLMS_TXT_POINTER } = loadTsModule('utils/docs/buildMarkdownDocument.ts')
 
 test('expandTabsInHast expands rendered tabs into markdown sections', async () => {
   const { unified } = await import('unified')
@@ -84,5 +84,6 @@ test('buildCopyMarkdownDocument includes tag definitions and more docs footer', 
 
   assert.match(markdown, /^# Docs Title$/m)
   assert.match(markdown, /^Tag definitions:$/m)
-  assert.match(markdown, new RegExp(`${MORE_DOCS_POINTER}$`))
+  assert.match(markdown, new RegExp(MORE_DOCS_POINTER))
+  assert.match(markdown, new RegExp(`${LLMS_TXT_POINTER}$`))
 })

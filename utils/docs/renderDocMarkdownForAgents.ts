@@ -1,7 +1,7 @@
 import React from 'react'
 import { buildAgentMdxComponentsForDoc } from './agentMarkdownStubs'
 import { htmlToMarkdown, normalizeWhitespace } from './markdownCore'
-import { buildMarkdownDocument, MORE_DOCS_POINTER } from './buildMarkdownDocument'
+import { buildMarkdownDocument, AGENT_FOOTER_LINES } from './buildMarkdownDocument'
 import { mdxOptions } from '../mdx/options'
 
 type DocMarkdownSource = {
@@ -44,7 +44,7 @@ const wrapDocument = (doc: DocMarkdownSource, bodyMarkdown: string): string =>
       description: doc.description,
       tags: getDocTags(doc),
       bodyMarkdown,
-      footerLines: [MORE_DOCS_POINTER],
+      footerLines: AGENT_FOOTER_LINES,
     })
   )
 

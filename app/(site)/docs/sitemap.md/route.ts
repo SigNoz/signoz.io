@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getDocsRouteTree, type DocsRouteTreeItem } from '@/utils/docs/agentDiscovery'
+import { LLMS_TXT_POINTER } from '@/utils/docs/buildMarkdownDocument'
 import siteMetadata from '@/data/siteMetadata'
 
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
@@ -32,8 +33,11 @@ export async function GET() {
     '# SigNoz Docs Sitemap',
     '',
     `Canonical docs base: ${siteMetadata.siteUrl}/docs/`,
+    'Append `.md` to any docs URL to get its markdown version.',
     '',
     renderTree(tree),
+    '',
+    LLMS_TXT_POINTER,
     '',
   ].join('\n')
 
@@ -41,6 +45,7 @@ export async function GET() {
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',
       'Cache-Control': CACHE_CONTROL_HEADER,
+      'X-Robots-Tag': 'noindex',
     },
   })
 }

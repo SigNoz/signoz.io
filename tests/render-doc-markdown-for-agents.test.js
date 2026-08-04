@@ -3,7 +3,7 @@ const assert = require('node:assert/strict')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
 const { renderDocMarkdownForAgents } = loadTsModule('utils/docs/renderDocMarkdownForAgents.ts')
-const { MORE_DOCS_POINTER } = loadTsModule('utils/docs/buildMarkdownDocument.ts')
+const { MORE_DOCS_POINTER, LLMS_TXT_POINTER } = loadTsModule('utils/docs/buildMarkdownDocument.ts')
 
 const createDoc = (overrides = {}) => ({
   _id: 'doc-1',
@@ -32,7 +32,8 @@ test('renderDocMarkdownForAgents includes metadata and shared footer once', asyn
   // Compiles body.raw via MDX (not the legacy body.code payload).
   assert.match(markdown, /Raw body\./)
   assert.equal((markdown.match(new RegExp(MORE_DOCS_POINTER, 'g')) || []).length, 1)
-  assert.match(markdown, new RegExp(`${MORE_DOCS_POINTER}$`))
+  assert.equal((markdown.match(new RegExp(LLMS_TXT_POINTER, 'g')) || []).length, 1)
+  assert.match(markdown, new RegExp(`${LLMS_TXT_POINTER}$`))
 })
 
 test('renderDocMarkdownForAgents avoids duplicating the leading title heading', async () => {
@@ -132,7 +133,7 @@ const b = 2
   assert.doesNotMatch(markdown, /Expand \d+ lines/)
   assert.doesNotMatch(markdown, /Collapse/)
   assert.doesNotMatch(markdown, /Code minimap/)
-  assert.match(markdown, new RegExp(`${MORE_DOCS_POINTER}$`))
+  assert.match(markdown, new RegExp(`${LLMS_TXT_POINTER}$`))
 })
 
 test('renderDocMarkdownForAgents expands CodeTabs stubs with all labels', async () => {

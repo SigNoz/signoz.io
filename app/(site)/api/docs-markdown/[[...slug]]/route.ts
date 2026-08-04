@@ -33,7 +33,11 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',
       'Cache-Control': CACHE_CONTROL_HEADER,
+      // Accept-negotiated requests share a URL with the HTML page, so the CDN
+      // must key on Accept. `.md` URLs are distinct and unaffected by this.
       Vary: 'Accept',
+      // The markdown is a duplicate of the HTML page; only the HTML should rank.
+      'X-Robots-Tag': 'noindex',
     },
   })
 }

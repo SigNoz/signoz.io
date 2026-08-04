@@ -1,6 +1,6 @@
 import type { Root as HastRoot, RootContent as HastContent, Element as HastElement } from 'hast'
 import { getTextContent, hastToMarkdown, normalizeWhitespace } from './markdownCore'
-import { buildMarkdownDocument, MORE_DOCS_POINTER } from './buildMarkdownDocument'
+import { buildMarkdownDocument, AGENT_FOOTER_LINES } from './buildMarkdownDocument'
 
 export type BuildCopyMarkdownOptions = {
   title: string
@@ -137,7 +137,7 @@ export const buildCopyMarkdownDocument = (
     tags: options.tags,
     includeTagDefinitions: options.includeTagDefinitions,
     bodyMarkdown,
-    footerLines: [MORE_DOCS_POINTER],
+    footerLines: AGENT_FOOTER_LINES,
   })
 
 export async function buildCopyMarkdownFromRendered(

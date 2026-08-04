@@ -2,6 +2,13 @@ import { tagDefinitions } from '@/constants/tagDefinitions'
 import { normalizeWhitespace } from './markdownCore'
 
 export const MORE_DOCS_POINTER = 'More docs: /docs/sitemap.md'
+export const LLMS_TXT_POINTER = 'Agent guide: /llms.txt'
+
+/**
+ * Footer appended to every agent-facing markdown document so an agent that
+ * landed on a single page can still discover the sitemap and the agent guide.
+ */
+export const AGENT_FOOTER_LINES = [MORE_DOCS_POINTER, LLMS_TXT_POINTER]
 
 export type BuildMarkdownDocumentOptions = {
   title: string

@@ -28,6 +28,12 @@ export async function generateMetadata(props: {
   return {
     title: seoTitle,
     description: post.description,
+    // Points agents that fetched the HTML at the markdown version of this page.
+    alternates: {
+      types: {
+        'text/markdown': `${siteMetadata.siteUrl}/docs/${slug}.md`,
+      },
+    },
     openGraph: {
       title: fullTitle,
       description: post.description,

@@ -1,18 +1,54 @@
+export const MARKDOWN_EXTENSION = '.md'
+
+const DOCS_SITEMAP_PATHS = new Set(['/docs/sitemap.md', '/docs/sitemap.md/'])
+
+const stripTrailingSlashes = (value: string): string => value.replace(/\/+$/, '')
+
+/**
+ * Removes a trailing `.md` from a pathname so `/docs/introduction.md` and
+ * `/docs/introduction` resolve to the same doc.
+ */
+export const stripMarkdownExtension = (pathname: string): string => {
+  const withoutTrailingSlash = stripTrailingSlashes(pathname)
+  return withoutTrailingSlash.endsWith(MARKDOWN_EXTENSION)
+    ? withoutTrailingSlash.slice(0, -MARKDOWN_EXTENSION.length)
+    : withoutTrailingSlash
+}
+
+export const hasMarkdownExtension = (pathname: string): boolean =>
+  stripTrailingSlashes(pathname).endsWith(MARKDOWN_EXTENSION)
+
 export const normalizeDocsSlugFromPathname = (pathname: string): string => {
-  const withoutPrefix = pathname.replace(/^\/docs\/?/, '')
-  return withoutPrefix.replace(/\/+$/, '')
+  const withoutExtension = stripMarkdownExtension(pathname)
+  const withoutPrefix = withoutExtension.replace(/^\/docs\/?/, '')
+  return stripTrailingSlashes(withoutPrefix)
 }
 
 export const shouldRewriteDocsToMarkdown = (
   pathname: string,
   prefersMarkdown: boolean
 ): boolean => {
-  const isDocsPath = pathname === '/docs' || pathname.startsWith('/docs/')
-  const isDocsSitemapPath = pathname === '/docs/sitemap.md' || pathname === '/docs/sitemap.md/'
+  // `/docs/sitemap.md` has its own route handler and must not be treated as a doc slug.
+  if (DOCS_SITEMAP_PATHS.has(pathname)) {
+    return false
+  }
+
   const isInternalMarkdownPath =
     pathname === '/api/docs-markdown' || pathname.startsWith('/api/docs-markdown/')
+  if (isInternalMarkdownPath) {
+    return false
+  }
 
-  return isDocsPath && !isDocsSitemapPath && !isInternalMarkdownPath && prefersMarkdown
+  // Strip the extension first so `/docs.md` and `/docs/foo.md` both register as docs paths.
+  const basePathname = stripMarkdownExtension(pathname)
+  const isDocsPath = basePathname === '/docs' || basePathname.startsWith('/docs/')
+  if (!isDocsPath) {
+    return false
+  }
+
+  // Agents reach markdown either by asking for it (Accept header) or by the
+  // `.md` URL suffix, which is the convention they try first.
+  return prefersMarkdown || hasMarkdownExtension(pathname)
 }
 
 export const buildDocsMarkdownRewritePath = (pathname: string): string => {
@@ -30,5 +66,5 @@ export const resolveDocsMarkdownSlug = (segments?: string[]): string => {
     .filter(Boolean)
     .join('/')
 
-  return joined || 'introduction'
+  return stripMarkdownExtension(joined) || 'introduction'
 }
