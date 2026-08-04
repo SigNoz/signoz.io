@@ -296,7 +296,7 @@ const PageFeedback: React.FC = () => {
         >
           {showThanks && !mode ? (
             <div
-              className="flex items-center gap-2 text-xs text-[var(--l1-foreground-hover)]"
+              className="flex items-center gap-2 pb-1.5 text-xs text-[var(--l1-foreground-hover)]"
               role="status"
             >
               <span className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--primary-background)] text-[var(--primary-foreground)]">
