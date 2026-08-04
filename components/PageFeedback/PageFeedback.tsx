@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Check, PencilLine, X } from 'lucide-react'
 import { Button } from '@signozhq/ui/button'
-import { Checkbox } from '@signozhq/ui/checkbox'
+import { RadioGroup, RadioGroupItem } from '@signozhq/ui/radio-group'
 import { Popover, PopoverAnchor, PopoverContent } from '@signozhq/ui/popover'
 import { cn } from 'app/lib/utils'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
@@ -313,53 +313,49 @@ const PageFeedback: React.FC = () => {
                 <p className="m-0 text-[11px] leading-[18px] tracking-[-0.055px] text-[var(--l2-foreground)]">
                   {mode === 'yes'
                     ? 'Pick the option that best describes your experience.'
-                    : 'Pick the issue(s) that blocked you. You can add details after selecting one.'}
+                    : 'Pick the issue that blocked you. You can add details after selecting one.'}
                 </p>
               </div>
               <div className="overflow-hidden rounded-[4px] border border-[var(--l2-border)]">
-                {reasonOptions.map((option) => {
-                  const isSelected = reason === option.value
-                  return (
-                    <div
-                      key={option.value}
-                      className="border-b border-[var(--l2-border)] last:border-b-0"
-                    >
-                      <label
-                        className={cn(
-                          'flex h-8 w-full cursor-pointer items-center gap-2.5 bg-[var(--l2-background-60)] px-2.5 py-2 transition-colors hover:bg-[var(--l2-background-hover)]'
-                        )}
+                <RadioGroup
+                  value={reason || null}
+                  onChange={(val) => {
+                    setSubmitError('')
+                    setReason(val)
+                    setDetails('')
+                  }}
+                >
+                  {reasonOptions.map((option) => {
+                    const isSelected = reason === option.value
+                    return (
+                      <div
+                        key={option.value}
+                        className="border-b border-[var(--l2-border)] last:border-b-0"
                       >
-                        <Checkbox
-                          value={isSelected}
-                          aria-label={option.value}
-                          onChange={(checked) => {
-                            setSubmitError('')
-                            if (checked) {
-                              setReason(option.value)
-                              setDetails('')
-                              return
-                            }
-                            setReason('')
-                            setDetails('')
-                          }}
-                        />
-                        <span className="min-w-0 text-[11px] leading-none text-[var(--l2-foreground)]">
-                          {option.value}
-                        </span>
-                      </label>
-                      {isSelected && (
-                        <textarea
-                          className="min-h-14 w-full resize-y border-x-0 border-b-0 border-t border-[var(--l2-border)] bg-[var(--l2-background-60)] p-2.5 text-[11px] leading-[18px] text-[var(--l1-foreground-hover)] shadow-none outline-none ring-0 placeholder:text-[var(--l3-foreground)] focus:border-x-0 focus:border-b-0 focus:border-t focus:border-[var(--l2-border)] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                          placeholder="Optional: Provide more details..."
-                          aria-label={`Additional details for ${option.value}`}
-                          value={details}
-                          onChange={(e) => setDetails(e.target.value)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      )}
-                    </div>
-                  )
-                })}
+                        <label
+                          className={cn(
+                            'flex h-8 w-full cursor-pointer items-center gap-2.5 bg-[var(--l2-background-60)] px-2.5 py-2 transition-colors hover:bg-[var(--l2-background-hover)]'
+                          )}
+                        >
+                          <RadioGroupItem value={option.value} />
+                          <span className="min-w-0 text-[11px] leading-none text-[var(--l2-foreground)]">
+                            {option.value}
+                          </span>
+                        </label>
+                        {isSelected && (
+                          <textarea
+                            className="min-h-14 w-full resize-y border-x-0 border-b-0 border-t border-[var(--l2-border)] bg-[var(--l2-background-60)] p-2.5 text-[11px] leading-[18px] text-[var(--l1-foreground-hover)] shadow-none outline-none ring-0 placeholder:text-[var(--l3-foreground)] focus:border-x-0 focus:border-b-0 focus:border-t focus:border-[var(--l2-border)] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                            placeholder="Optional: Provide more details..."
+                            aria-label={`Additional details for ${option.value}`}
+                            value={details}
+                            onChange={(e) => setDetails(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        )}
+                      </div>
+                    )
+                  })}
+                </RadioGroup>
               </div>
               <Button
                 type="submit"
