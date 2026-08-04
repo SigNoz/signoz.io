@@ -227,7 +227,17 @@ presets:
 - Configure `insecureSkipVerify: false` in production environments
 - Enable specific metrics based on monitoring requirements
 
-**What the container metrics power**: `k8s.container.cpu_request_utilization`, `k8s.container.cpu_limit_utilization`, `k8s.container.memory_request_utilization`, `k8s.container.memory_limit_utilization`, `container.uptime`, `k8s.container.cpu.node.utilization`, and `k8s.container.memory.node.utilization` are disabled by default in the upstream kubeletstats receiver but enabled by default in this chart. They power the utilization columns and the Uptime and Node-utilization charts on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view. Keep them enabled to retain full container visibility.
+These container-level metrics are disabled by default in the upstream kubeletstats receiver but enabled by default in this chart. Keep them enabled to retain full container visibility on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view:
+
+| Metric | Powers |
+|---|---|
+| `k8s.container.cpu_request_utilization` | CPU request utilization column |
+| `k8s.container.cpu_limit_utilization` | CPU limit utilization column |
+| `k8s.container.memory_request_utilization` | Memory request utilization column |
+| `k8s.container.memory_limit_utilization` | Memory limit utilization column |
+| `container.uptime` | Uptime chart |
+| `k8s.container.cpu.node.utilization` | Node-utilization chart (CPU) |
+| `k8s.container.memory.node.utilization` | Node-utilization chart (memory) |
 
 ### 5. Kubernetes Metadata Enrichment
 
@@ -335,7 +345,17 @@ presets:
 - Useful for capacity planning and resource optimization
 - Essential for multi-node cluster monitoring
 
-**What `metrics` powers**: `k8s.pod.status_reason`, `k8s.container.status.reason`, and `k8s.container.status.state` are disabled by default in the upstream `k8s_cluster` receiver but enabled by default in this chart. `k8s.pod.status_reason` and `k8s.container.status.reason` drive the kubectl-style **Pod Status** column on the Pods view (and the per-entity Pod Counts by Status breakdown); `k8s.container.status.reason` and `k8s.container.status.state` together drive the **Status** column on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view. Keep them enabled to retain pod- and container-status visibility; without them, status falls back to the lifecycle phase or state only. Note that `k8s.container.status.reason` and `k8s.container.status.state` are experimental (development stability) upstream, so their allowed values may change on a collector upgrade.
+These metrics are disabled by default in the upstream `k8s_cluster` receiver but enabled by default in this chart. Keep them enabled to retain pod- and container-status visibility. Without them, status falls back to the lifecycle phase or state only:
+
+| Metric | Powers |
+|---|---|
+| `k8s.pod.status_reason` | Pods view kubectl-style **Pod Status** column (and the per-entity Pod Counts by Status breakdown) |
+| `k8s.container.status.reason` | Pods view **Pod Status** column; [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view **Status** column |
+| `k8s.container.status.state` | [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view **Status** column |
+
+<Admonition type="info">
+<a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerstatusreason" target="_blank" rel="noopener noreferrer nofollow">`k8s.container.status.reason`</a> and <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/documentation.md#k8scontainerstatusstate" target="_blank" rel="noopener noreferrer nofollow">`k8s.container.status.state`</a> are experimental (development stability) upstream, so their allowed values may change on a collector upgrade.
+</Admonition>
 
 ### 7. Kubernetes Events
 

@@ -77,15 +77,19 @@ receivers:
         enabled: false
       k8s.pod.memory_request_utilization:
         enabled: false
-      container.cpu_limit_utilization:
+      k8s.container.cpu_limit_utilization:
         enabled: false
-      container.cpu_request_utilization:
+      k8s.container.cpu_request_utilization:
         enabled: false
-      container.memory_limit_utilization:
+      k8s.container.memory_limit_utilization:
         enabled: false
-      container.memory_request_utilization:
+      k8s.container.memory_request_utilization:
         enabled: false
 ```
+
+<Admonition type="info">
+The k8s-infra Helm chart also enables `k8s.container.cpu_request_utilization`, `k8s.container.cpu_limit_utilization`, `k8s.container.memory_request_utilization`, and `k8s.container.memory_limit_utilization` by default (see [Configure K8s-Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#4-kubernetes-metrics-collection)). They power the Containers view's utilization columns and need the same restricted RBAC access as the pod-level `{request|limit}_utilization` metrics above. Disable them on GKE Autopilot too.
+</Admonition>
 
 ### Validate
 
