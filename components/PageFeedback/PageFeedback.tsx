@@ -302,7 +302,7 @@ const PageFeedback: React.FC = () => {
               <span className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--primary-background)] text-[var(--primary-foreground)]">
                 <Check size={12} aria-hidden="true" />
               </span>
-              Thank you! We have received your feedback.
+              We have received your feedback.
             </div>
           ) : showingReasons ? (
             <form className="flex flex-col gap-1" onSubmit={submitReasons}>
