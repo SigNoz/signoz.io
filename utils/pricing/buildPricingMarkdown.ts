@@ -148,7 +148,7 @@ export const buildPricingMarkdown = (siteUrl: string): string => {
     `- Datadog migration tool: ${siteUrl}/datadog-migration-tool/`,
     `- Docs: ${siteUrl}/docs/introduction/`,
     '',
-    'Agent guide: /llms.txt',
+    `Agent guide: ${siteUrl}/llms.txt`,
     '',
   ]
 

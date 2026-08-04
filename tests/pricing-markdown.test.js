@@ -61,8 +61,8 @@ test('pricing markdown covers the plan and policy sections agents ask about', ()
   assert.match(markdown, /no surcharge for custom metrics/i)
 })
 
-test('pricing markdown references llms.txt', () => {
-  assert.match(markdown, /Agent guide: \/llms\.txt/)
+test('pricing markdown references llms.txt with an absolute URL', () => {
+  assert.match(markdown, new RegExp(`Agent guide: ${SITE_URL}/llms\\.txt`))
 })
 
 test('pricing markdown builds absolute URLs from the passed site URL', () => {

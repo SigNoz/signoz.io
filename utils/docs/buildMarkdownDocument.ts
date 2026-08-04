@@ -1,8 +1,12 @@
 import { tagDefinitions } from '@/constants/tagDefinitions'
+import siteMetadata from '@/data/siteMetadata'
 import { normalizeWhitespace } from './markdownCore'
 
-export const MORE_DOCS_POINTER = 'More docs: /docs/sitemap.md'
-export const LLMS_TXT_POINTER = 'Agent guide: /llms.txt'
+// Absolute, not site-relative: this markdown is routinely copied out of the
+// site (Copy Markdown button, agent context windows) where a bare "/llms.txt"
+// has no host to resolve against.
+export const MORE_DOCS_POINTER = `More docs: ${siteMetadata.siteUrl}/docs/sitemap.md`
+export const LLMS_TXT_POINTER = `Agent guide: ${siteMetadata.siteUrl}/llms.txt`
 
 /**
  * Footer appended to every agent-facing markdown document so an agent that

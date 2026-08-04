@@ -1,42 +1,44 @@
 import { NextResponse } from 'next/server'
 import siteMetadata from '@/data/siteMetadata'
-import { getLlmStarterLinks } from '@/utils/docs/agentDiscovery'
+import { getDocsRouteTree } from '@/utils/docs/agentDiscovery'
+import {
+  buildLlmsTxt,
+  docsSlugFromRoute,
+  type DocDescriptionLookup,
+} from '@/utils/docs/buildLlmsTxt'
+import { fetchAllDocsForPage } from '@/utils/cachedData'
 
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
-export async function GET() {
-  const starters = await getLlmStarterLinks()
-  const starterLines =
-    starters.length > 0
-      ? starters.map((item) => `- ${item.label}: ${siteMetadata.siteUrl}${item.route}/`).join('\n')
-      : `- Docs index: ${siteMetadata.siteUrl}/docs/introduction/`
+/**
+ * Descriptions live in the docs content; the nav only carries labels. A failure
+ * here degrades to a map without descriptions rather than to no map at all.
+ */
+const getDocDescriptions = async (): Promise<DocDescriptionLookup | undefined> => {
+  try {
+    const docs = await fetchAllDocsForPage()
+    const lookup: DocDescriptionLookup = new Map()
 
-  const body = [
-    '# SigNoz Documentation for AI Agents',
-    '',
-    'SigNoz is an open-source observability platform for metrics, traces, and logs.',
-    '',
-    `Docs root: ${siteMetadata.siteUrl}/docs/introduction/`,
-    '',
-    '## Fetching docs pages',
-    `- Append ".md" to any docs URL for markdown: ${siteMetadata.siteUrl}/docs/introduction.md`,
-    `- Or request ${siteMetadata.siteUrl}/docs/... with "Accept: text/markdown".`,
-    '- Both return the same markdown. Prefer markdown over HTML — it is the same content at a fraction of the size.',
-    '',
-    '## Agent tooling',
-    'SigNoz ships Agent Skills and an MCP server so agents can read the docs and act on your observability data (query traces/logs/metrics, build dashboards, manage alerts).',
-    `- Agent Skills & plugin: ${siteMetadata.siteUrl}/docs/ai/agent-skills/`,
-    `- MCP server: ${siteMetadata.siteUrl}/docs/ai/signoz-mcp-server/`,
-    '- Install all skills: npx skills add SigNoz/agent-skills',
-    `- AI use cases: ${siteMetadata.siteUrl}/docs/ai/use-cases/`,
-    '',
-    '## Starter docs',
-    starterLines,
-    '',
-    '## Discovery',
-    `- Markdown sitemap: ${siteMetadata.siteUrl}/docs/sitemap.md`,
-    '',
-  ].join('\n')
+    docs.forEach((doc: { slug?: string; description?: string }) => {
+      if (!doc?.slug || !doc?.description) return
+      lookup.set(docsSlugFromRoute(`/docs/${doc.slug}`), doc.description)
+    })
+
+    return lookup
+  } catch (error) {
+    console.warn('llms.txt: could not load doc descriptions, serving map without them:', error)
+    return undefined
+  }
+}
+
+export async function GET() {
+  const [tree, descriptions] = await Promise.all([getDocsRouteTree(), getDocDescriptions()])
+
+  const body = buildLlmsTxt({
+    siteUrl: siteMetadata.siteUrl,
+    tree,
+    descriptions,
+  })
 
   return new NextResponse(body, {
     headers: {
