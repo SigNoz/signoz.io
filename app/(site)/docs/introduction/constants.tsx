@@ -22,30 +22,9 @@ import {
 } from 'lucide-react'
 import { SiSlack, SiGithub, SiDocker, SiLinux, SiKubernetes } from 'react-icons/si'
 import type { DocsIntroCardData } from '@/components/DocsIntroCard/DocsIntroCard'
+import GlobeCheck from '@/components/icons/GlobeCheck'
 
 export type CardData = DocsIntroCardData
-
-/** Lucide globe-check — not yet in lucide-react@0.540.0 */
-function GlobeCheck({ size = 24, className }: { size?: number; className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden
-    >
-      <path d="m15 6 2 2 4-4" />
-      <path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10" />
-    </svg>
-  )
-}
 
 // Hero
 export const SEARCH_PLACEHOLDERS = [

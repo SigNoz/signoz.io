@@ -92,8 +92,16 @@ function Footer({ inDocsShell = false }: FooterProps) {
   }
 
   return (
-    <div className="z-[10] flex flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px]">
-      <div className="flex w-full items-center justify-center px-4 py-14 max-md:max-w-full">
+    <div
+      className={`z-[10] flex flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px] ${
+        inDocsShell ? 'pb-28' : ''
+      }`}
+    >
+      <div
+        className={`flex w-full items-center px-4 py-14 max-md:max-w-full ${
+          inDocsShell ? 'justify-start' : 'justify-center'
+        }`}
+      >
         <div className="w-full max-w-8xl justify-between max-md:max-w-full">
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
@@ -179,8 +187,8 @@ function Footer({ inDocsShell = false }: FooterProps) {
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex flex-col items-end max-md:mt-10">
-                <div className="flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-[var(--l1-foreground)]">
+              <div className="flex flex-col items-end max-md:mt-10 max-md:items-start">
+                <div className="flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-[var(--l1-foreground)] max-md:self-start">
                   <Link href="/" prefetch={false} className="flex items-center gap-2">
                     <Image
                       className="h-5 w-auto"
@@ -194,7 +202,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
                     <div className="font-satoshi-bold font-medium">SigNoz</div>
                   </Link>
                 </div>
-                <div className="mt-5 flex items-center justify-end gap-2 rounded text-[13px] font-medium leading-none tracking-[-0.065px] text-[var(--callout-success-description)]">
+                <div className="mt-5 flex items-center justify-end gap-2 rounded text-[13px] font-medium leading-none tracking-[-0.065px] text-[var(--callout-success-description)] max-md:justify-start">
                   <span
                     className="size-1.5 shrink-0 rounded-full bg-[var(--callout-success-description)]"
                     aria-hidden
@@ -203,7 +211,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
                     All systems operational
                   </Link>
                 </div>
-                <div className="footer-icons mt-5 flex items-end justify-between gap-4 py-2 text-[var(--l2-foreground)] [&_a:hover]:text-[var(--l1-foreground)] [&_path]:fill-current [&_svg]:fill-current">
+                <div className="footer-icons mt-5 flex items-end justify-between gap-4 py-2 text-[var(--l2-foreground)] max-md:justify-start [&_a:hover]:text-[var(--l1-foreground)] [&_path]:fill-current [&_svg]:fill-current">
                   <Link
                     href={'https://github.com/SigNoz'}
                     target="_blank"

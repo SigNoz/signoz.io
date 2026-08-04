@@ -44,7 +44,7 @@ export default function DocLayout({ children }: LayoutProps) {
         <ProgressBar target={mainRef} />
 
         <div className="flex min-w-0 flex-[1_1_auto] justify-center overflow-clip">
-          <div className="box-border w-full max-w-[1200px] py-6 md:px-0 lg:px-4 [&_details+details]:mt-8">
+          <div className="box-border w-full max-w-[1200px] px-4 py-6 [&_details+details]:mt-8">
             {children}
           </div>
         </div>
