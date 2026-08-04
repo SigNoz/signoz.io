@@ -1,9 +1,7 @@
 ---
 title: 'Configuring OpenTelemetry Kubernetes Metrics Collection for GKE Autopilot'
-date: 2026-02-04
+date: 2026-08-03
 description: Configure kubelet metrics collection in k8s-infra OpenTelemetry collection agent for GKE Autopilot clusters, where certain RBAC permissions are restricted.
-
-
 ---
 
 This guide explains how to configure kubelet metrics collection in the k8s-infra OpenTelemetry collection agent for GKE Autopilot clusters, where certain RBAC permissions are restricted.
@@ -79,15 +77,19 @@ receivers:
         enabled: false
       k8s.pod.memory_request_utilization:
         enabled: false
-      container.cpu_limit_utilization:
+      k8s.container.cpu_limit_utilization:
         enabled: false
-      container.cpu_request_utilization:
+      k8s.container.cpu_request_utilization:
         enabled: false
-      container.memory_limit_utilization:
+      k8s.container.memory_limit_utilization:
         enabled: false
-      container.memory_request_utilization:
+      k8s.container.memory_request_utilization:
         enabled: false
 ```
+
+<Admonition type="info">
+The k8s-infra Helm chart also enables `k8s.container.cpu_request_utilization`, `k8s.container.cpu_limit_utilization`, `k8s.container.memory_request_utilization`, and `k8s.container.memory_limit_utilization` by default (see [Configure K8s-Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#4-kubernetes-metrics-collection)). They power the Containers view's utilization columns and need the same restricted RBAC access as the pod-level `{request|limit}_utilization` metrics above. Disable them on GKE Autopilot too.
+</Admonition>
 
 ### Validate
 
@@ -113,5 +115,5 @@ These metrics provide comprehensive visibility into your cluster's resource cons
 
 1. **[K8s-Infra Overview](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/)**
 2. **[Configure K8s-Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/)**
-3. **[Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)**
+3. **[Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)**
 4. **[Best Practices for OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

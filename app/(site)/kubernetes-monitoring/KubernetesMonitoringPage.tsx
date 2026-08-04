@@ -77,7 +77,7 @@ const BottomCTA: React.FC = () => {
           </Button>
           <Button asChild variant="secondary" rounded="full" className="!w-fit items-center gap-2">
             <TrackingLink
-              href="/docs/infrastructure-monitoring/k8s-metrics/"
+              href="/docs/infrastructure-monitoring/user-guides/k8s-metrics/"
               clickType="Secondary CTA"
               clickName="Read the Docs"
               clickLocation="Kubernetes Monitoring Page Bottom CTA"
