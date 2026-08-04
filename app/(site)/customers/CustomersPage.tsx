@@ -1,14 +1,10 @@
 'use client'
 
-import Image from 'next/image'
-import { ArrowUpRight } from 'lucide-react'
-
-import TrackingLink from '@/components/TrackingLink'
 import Button from '@/components/ui/Button'
 
 import CustomerProofCarousel from './CustomerProofCarousel'
+import CustomerQuoteCarousel from './CustomerQuoteCarousel'
 import CustomerStoryGrid from './CustomerStoryGrid'
-import CustomerVideoCarousel from './CustomerVideoCarousel'
 
 const customerMetrics = [
   {
@@ -81,7 +77,7 @@ export default function CustomersPage() {
             </div>
 
             <div className="relative z-10 mt-12 md:mt-16">
-              <CustomerVideoCarousel />
+              <CustomerQuoteCarousel />
             </div>
           </div>
         </div>
@@ -101,47 +97,6 @@ export default function CustomersPage() {
             </div>
             <div className="mt-12">
               <CustomerStoryGrid />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-dashed border-signoz_slate-400">
-        <div className={customerPageContainerClassName}>
-          <div className="py-20 lg:py-32">
-            <div className="grid gap-12 lg:grid-cols-[minmax(220px,0.45fr)_minmax(0,1fr)] lg:items-end">
-              <div className="flex flex-col items-start gap-5 text-sm leading-6 text-signoz_vanilla-400">
-                <Image
-                  alt="Oracle"
-                  className="h-auto w-32"
-                  height={34}
-                  src="/svgs/customer-logos/oracle.svg"
-                  width={162}
-                />
-                <div className="space-y-1">
-                  <p className="font-medium text-signoz_vanilla-100">Mark Nelson</p>
-                  <p>Oracle Backend for Microservices &amp; AI</p>
-                </div>
-                <TrackingLink
-                  className="inline-flex items-center gap-2 font-medium text-signoz_robin-400 hover:text-signoz_robin-300"
-                  clickLocation="Customer Editorial Quote"
-                  clickName="Oracle Quote Source"
-                  clickText="View the original post"
-                  clickType="Customer Proof"
-                  href="https://www.linkedin.com/posts/marknelson6_oracle-backend-for-microservices-and-ai-activity-7366870519129731073-cgU2"
-                  rel="noopener noreferrer nofollow"
-                  target="_blank"
-                >
-                  View the original post
-                  <ArrowUpRight aria-hidden="true" size={16} />
-                </TrackingLink>
-              </div>
-
-              <blockquote className="m-0 max-w-5xl text-pretty text-3xl font-medium leading-tight tracking-[-0.03em] text-signoz_vanilla-400 sm:text-4xl lg:text-5xl">
-                “We’ve transitioned from{' '}
-                <span className="text-signoz_vanilla-100">Grafana to SigNoz</span>, offering a
-                simplified, unified monitoring, logging, and alerting experience.”
-              </blockquote>
             </div>
           </div>
         </div>
