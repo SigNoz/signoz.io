@@ -61,7 +61,7 @@ const DocContent: React.FC<{
     <>
       <div
         data-docs-content-column=""
-        className={`box-border min-w-0 flex-[1_1_auto] [&_details+details]:mt-8 ${isOnboarding ? '!w-full px-4' : ''}`}
+        className={`box-border min-w-0 flex-[1_1_auto] [&_details+details]:mt-8 ${isOnboarding ? 'w-full px-4' : ''}`}
       >
         {breadcrumbs && !isOnboarding && <Breadcrumb crumbs={breadcrumbs} />}
         <div className="m-0 flex items-center justify-between gap-2">

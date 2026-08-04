@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { X } from 'lucide-react'
 import { Popover, PopoverAnchor, PopoverClose, PopoverContent } from '@signozhq/ui/popover'
 
@@ -57,8 +57,18 @@ export default function RegionSelectorInfoTip({ children }: RegionSelectorInfoTi
           event.preventDefault()
           dismiss()
         }}
-        style={{ zIndex: 10 }}
-        className="!w-[min(320px,calc(100vw-2rem))] !border-0 !bg-[var(--accent-primary)] !p-3 !text-[var(--base-white)] !shadow-lg !outline-none"
+        style={
+          {
+            zIndex: 10,
+            '--popover-width': 'min(320px, calc(100vw - 2rem))',
+            '--popover-background': 'var(--accent-primary)',
+            '--popover-foreground': 'var(--base-white)',
+            '--popover-border-width': '0',
+            '--popover-padding': '0.75rem',
+            '--popover-box-shadow':
+              '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+          } as CSSProperties
+        }
       >
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">

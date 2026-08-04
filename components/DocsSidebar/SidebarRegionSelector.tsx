@@ -10,6 +10,37 @@ type SidebarRegionSelectorProps = {
   showInfoTip?: boolean
 }
 
+const triggerStyle = {
+  '--select-trigger-height': '2rem',
+  '--select-trigger-border-radius': '0.25rem',
+  '--select-trigger-border-color': 'var(--l2-border)',
+  '--select-trigger-background-color': 'var(--l2-background-60)',
+  '--select-trigger-box-shadow': 'none',
+  '--select-trigger-padding': '0 0.75rem',
+  '--select-trigger-font-size': '0.875rem',
+  '--select-trigger-outline-width': '0',
+  '--select-trigger-disabled-opacity': '1',
+  '--select-trigger-disabled-cursor': 'wait',
+  '--select-trigger-icon-size': '0.75rem',
+  color: 'var(--l1-foreground)',
+} as React.CSSProperties
+
+const contentStyle = {
+  '--select-content-border-radius': '0.25rem',
+  '--select-content-border-color': 'var(--l2-border)',
+  '--select-content-background': 'var(--l2-background)',
+  '--select-content-box-shadow': '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
+  zIndex: 100,
+} as React.CSSProperties
+
+const itemStyle = {
+  '--select-item-padding': '0.5rem 2.25rem 0.5rem 0.75rem',
+  '--select-item-font-size': '0.875rem',
+  color: 'var(--l3-foreground)',
+  '--select-item-highlight-background': 'var(--l2-background-hover)',
+  '--select-item-highlight-color': 'var(--l1-foreground)',
+} as React.CSSProperties
+
 export default function SidebarRegionSelector({ showInfoTip = true }: SidebarRegionSelectorProps) {
   const { regions, region, cloudRegion, setRegion, isLoading } = useRegion()
   const [open, setOpen] = React.useState(false)
@@ -53,7 +84,7 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
         open={open}
         onOpenChange={setOpen}
       >
-        <SelectTrigger className="h-8 w-full rounded border border-[var(--l2-border)] bg-[var(--l2-background-60)] px-3 text-sm text-[var(--l1-foreground)] shadow-none hover:border-[var(--l1-border)] focus:ring-0 disabled:cursor-wait disabled:opacity-100 [&>span]:min-w-0 [&>span]:flex-1 [&>span]:truncate [&>span]:text-left [&_svg]:h-3 [&_svg]:w-3 [&_svg]:text-[var(--l3-foreground)]">
+        <SelectTrigger className="hover:border-[var(--l1-border)]" style={triggerStyle}>
           {isLoading ? (
             <span className="flex items-center gap-2 text-[var(--l3-foreground)]">
               <Loader2 size={12} className="animate-spin" />
@@ -64,7 +95,7 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
           )}
         </SelectTrigger>
         <SelectContent
-          className="z-[100] w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] rounded border border-[var(--l2-border)] bg-[var(--l2-background)] shadow-lg"
+          style={contentStyle}
           position="popper"
           side="bottom"
           align="start"
@@ -73,16 +104,12 @@ export default function SidebarRegionSelector({ showInfoTip = true }: SidebarReg
           {regionOptions.map((option) => {
             const isSelected = option.value === currentValue
             return (
-              <SelectItem
-                key={option.value}
-                value={option.value}
-                className="relative cursor-pointer px-3 py-2 pr-9 text-sm text-[var(--l3-foreground)] hover:bg-[var(--l2-background-hover)] hover:text-[var(--l1-foreground)] focus:bg-[var(--l2-background-hover)] focus:text-[var(--l1-foreground)] data-[state=checked]:text-[var(--l1-foreground)]"
-              >
+              <SelectItem key={option.value} value={option.value} style={itemStyle}>
                 <span className="min-w-0 truncate">{option.label}</span>
                 {isSelected && (
                   <Check
                     size={14}
-                    className="pointer-events-none absolute right-3 top-1/2 shrink-0 -translate-y-1/2 text-[var(--l1-foreground)]"
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--l1-foreground)]"
                     aria-hidden
                   />
                 )}
