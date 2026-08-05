@@ -1,9 +1,17 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { Edit } from 'lucide-react'
 import { ONBOARDING_SOURCE } from '../../constants/globals'
 import { DOC_TOC_CLASSES } from './docLayoutClasses'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
+import {
+  TOC_SCROLL_CONTAINER_CLASS,
+  TOC_SECTION_LABEL_CLASS,
+  useTocScrollFade,
+} from '@/components/TableOfContents/tocScrollFade'
+import { useScrollSpy } from '@/hooks/useScrollSpy'
+import { RegionDropdown } from '../Region/RegionDropdown'
 import PageFeedback from '../PageFeedback/PageFeedback'
 
 interface TocItemProps {
@@ -16,42 +24,26 @@ interface DocsTOCProps {
   toc: TocItemProps[]
   hideTableOfContents: boolean
   source: string
+  formattedDate?: string
+  editLink?: string
 }
 
-const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) => {
-  const [activeSection, setActiveSection] = useState<string>('')
+const DocsTOC: React.FC<DocsTOCProps> = ({
+  toc,
+  hideTableOfContents,
+  source,
+  formattedDate,
+  editLink,
+}) => {
   const [filteredToc, setFilteredToc] = useState<TocItemProps[]>(toc || [])
+  // Scroll-spy only tracks headings in the filtered TOC (active tab panels).
+  // Observing every h2/h3 breaks when duplicate titles exist (e.g. page-level
+  // `#prerequisites` vs tab-level `#prerequisites-1`).
+  const { activeSection, setActiveSection } = useScrollSpy(filteredToc, { offset: 96 })
   const tocContainerRef = useRef<HTMLDivElement>(null)
-  const tocItemsRef = useRef<HTMLDivElement>(null)
-
-  // Mirror blog ToC behavior: observe headings and update active section
-  useEffect(() => {
-    if (!toc || toc.length === 0) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries.filter((entry) => entry.isIntersecting)
-        if (visibleEntries.length > 0) {
-          const sortedEntries = visibleEntries.sort(
-            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
-          )
-          const id = sortedEntries[0].target.getAttribute('id')
-          if (id) setActiveSection(`#${id}`)
-        }
-      },
-      {
-        rootMargin: '-10% -20% -80% -20%',
-        threshold: 0,
-      }
-    )
-
-    const headings = document.querySelectorAll('h2, h3')
-    headings.forEach((heading) => observer.observe(heading))
-
-    return () => {
-      headings.forEach((heading) => observer.unobserve(heading))
-    }
-  }, [toc])
+  const { tocItemsRef, scrollFadeStyle } = useTocScrollFade(
+    `${filteredToc.length}:${formattedDate ?? ''}:${editLink ?? ''}`
+  )
 
   // Compute TOC entries only for headings that are currently visible (i.e., in active tab panels)
   useEffect(() => {
@@ -307,22 +299,48 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
   return (
     <>
       <div className={DOC_TOC_CLASSES} ref={tocContainerRef}>
-        {hideTableOfContents ? null : (
-          <>
-            <div className="mb-3 text-xs uppercase"> On this page </div>
+        <div className="mb-4 shrink-0">
+          <RegionDropdown />
+        </div>
+        <div className="relative z-[2] mb-5 shrink-0">
+          <PageFeedback />
+        </div>
+        <div className={TOC_SECTION_LABEL_CLASS}>On this page</div>
+        <div ref={tocItemsRef} className={TOC_SCROLL_CONTAINER_CLASS} style={scrollFadeStyle}>
+          <TableOfContents
+            toc={filteredToc}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            scrollableContainerRef={tocItemsRef}
+          />
+        </div>
+        {(formattedDate || editLink) && (
+          <div className="mt-5 shrink-0">
             <div
-              ref={tocItemsRef}
-              className="relative z-[1] min-h-0 flex-[1_1_auto] overflow-y-auto border-l border-signoz_slate-500 pl-3"
-            >
-              <TableOfContents
-                toc={filteredToc}
-                activeSection={activeSection}
-                setActiveSection={setActiveSection}
-                scrollableContainerRef={tocItemsRef}
-              />
+              className="mb-4 h-2 w-full bg-[radial-gradient(circle,var(--l2-border)_1px,transparent_1px)] bg-[length:6px_6px] bg-center"
+              aria-hidden="true"
+            />
+            <div className="flex flex-col gap-4">
+              {formattedDate && (
+                <p className="m-0 text-sm font-medium text-[var(--l2-foreground)]">
+                  Last updated
+                  <span className="mx-1">—</span>
+                  <span className="text-[var(--l1-foreground-hover)]">{formattedDate}</span>
+                </p>
+              )}
+              {editLink && (
+                <a
+                  href={editLink}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--l2-foreground)] no-underline transition-colors hover:text-[var(--l2-foreground-hover)]"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Edit size={12} aria-hidden="true" />
+                  Edit on GitHub
+                </a>
+              )}
             </div>
-            <PageFeedback placement="toc" />
-          </>
+          </div>
         )}
       </div>
     </>
