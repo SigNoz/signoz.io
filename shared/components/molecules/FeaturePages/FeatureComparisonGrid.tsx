@@ -90,8 +90,8 @@ function useStickyBandTextOcclusion(
     const connect = () => {
       observer?.disconnect()
 
-      const cells = root.querySelectorAll<HTMLElement>('[data-occlude-sticky-text]')
-      if (cells.length === 0) return
+      const targets = root.querySelectorAll<HTMLElement>('[data-occlude-sticky-text]')
+      if (targets.length === 0) return
 
       const header = root.querySelector<HTMLElement>('[data-sticky-section-header]')
       const bandHeight = header?.getBoundingClientRect().height || 48
@@ -126,7 +126,7 @@ function useStickyBandTextOcclusion(
         }
       )
 
-      cells.forEach((cell) => observer?.observe(cell))
+      targets.forEach((target) => observer?.observe(target))
     }
 
     connect()
@@ -166,6 +166,26 @@ export default function FeatureComparisonGrid({
       ? 'mb-3 mt-8 py-2 text-center text-sm font-medium sm:text-lg md:text-left'
       : 'py-3 text-sm font-medium leading-6 text-white'
 
+  const renderSeparator = (occludeId?: string) => {
+    const isHidden = occludeId ? hiddenIds.has(occludeId) : false
+    const occludeProps = occludeId
+      ? {
+          'data-occlude-sticky-text': occludeId,
+          style: isHidden ? ({ visibility: 'hidden' } as const) : undefined,
+        }
+      : {}
+
+    if (separator === 'line') {
+      return (
+        <div {...occludeProps}>
+          <Line />
+        </div>
+      )
+    }
+
+    return <div className="h-px w-full bg-[#23262e]" {...occludeProps} />
+  }
+
   return (
     <div ref={rootRef} className={`relative ${className ?? ''}`}>
       {overlay}
@@ -187,7 +207,7 @@ export default function FeatureComparisonGrid({
             </div>
           </div>
 
-          {separator === 'line' ? <Line /> : <div className="h-px w-full bg-[#23262e]" />}
+          {renderSeparator(usesTextOcclusion ? `sep-${sectionIdx}-header` : undefined)}
 
           {/* Rows */}
           <div className="grid grid-cols-1">
@@ -214,7 +234,7 @@ export default function FeatureComparisonGrid({
                   })}
                 </div>
 
-                {separator === 'line' ? <Line /> : <div className="h-px w-full bg-[#23262e]" />}
+                {renderSeparator(usesTextOcclusion ? `sep-${sectionIdx}-${rowIdx}` : undefined)}
               </div>
             ))}
           </div>
