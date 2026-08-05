@@ -1,6 +1,5 @@
 ---
-date: 2026-06-11
-
+date: 2026-08-03
 title: OpenTelemetry Operator - Configure
 description: How to Configure the daemonset and deployment with OpenTelemetry Operator in your Kubernetes Cluster
 ---
@@ -306,6 +305,11 @@ spec:
           - container.id
           - k8s.volume.type
         insecure_skip_verify: true
+        # Required for the *.node.utilization metrics: the receiver reads the node's
+        # total capacity from the K8s API. Needs `get` on `nodes` for the service account.
+        node: ${env:K8S_NODE_NAME}
+        k8s_api_config:
+          auth_type: serviceAccount
         metric_groups:
           - container
           - pod
@@ -323,6 +327,10 @@ spec:
           k8s.container.memory_limit_utilization:
             enabled: true
           k8s.container.memory_request_utilization:
+            enabled: true
+          k8s.container.cpu.node.utilization:
+            enabled: true
+          k8s.container.memory.node.utilization:
             enabled: true
           k8s.node.cpu.usage:
             enabled: true
@@ -624,6 +632,11 @@ spec:
           - container.id
           - k8s.volume.type
         insecure_skip_verify: true
+        # Required for the *.node.utilization metrics: the receiver reads the node's
+        # total capacity from the K8s API. Needs `get` on `nodes` for the service account.
+        node: ${env:K8S_NODE_NAME}
+        k8s_api_config:
+          auth_type: serviceAccount
         metric_groups:
           - container
           - pod
@@ -641,6 +654,10 @@ spec:
           k8s.container.memory_limit_utilization:
             enabled: true
           k8s.container.memory_request_utilization:
+            enabled: true
+          k8s.container.cpu.node.utilization:
+            enabled: true
+          k8s.container.memory.node.utilization:
             enabled: true
           k8s.node.cpu.usage:
             enabled: true
@@ -925,6 +942,10 @@ spec:
             enabled: true
           k8s.pod.status_reason:
             enabled: true
+          k8s.container.status.reason:
+            enabled: true
+          k8s.container.status.state:
+            enabled: true
         node_conditions_to_report:
           - Ready
           - MemoryPressure
@@ -1108,6 +1129,10 @@ spec:
             enabled: true
           k8s.pod.status_reason:
             enabled: true
+          k8s.container.status.reason:
+            enabled: true
+          k8s.container.status.state:
+            enabled: true
         node_conditions_to_report:
           - Ready
           - MemoryPressure
@@ -1192,5 +1217,5 @@ The Operator can also inject language agents automatically into your workloads u
 
 ## Next Steps
 
-- [Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
+- [Telemetry Data Requirements for Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
