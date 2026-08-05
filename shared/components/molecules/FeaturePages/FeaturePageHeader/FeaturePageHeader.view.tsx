@@ -15,6 +15,7 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
   sectionLayoutVariant = 'bordered',
   sectionLayoutClassName = '!mt-0 max-md:-mb-[3rem]',
   className = '',
+  titleClassName = '',
   buttonDescription = '',
   align = 'center',
 }) => {
@@ -49,7 +50,8 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
         <h1
           className={cn(
             'text-gradient z-[1] my-4 text-2xl font-semibold tracking-tight dark:text-white sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]',
-            isLeft ? '!px-0 !py-3' : '!p-3'
+            isLeft ? '!px-0 !py-3' : '!p-3',
+            titleClassName
           )}
         >
           {title}
