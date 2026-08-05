@@ -70,7 +70,7 @@ export default function Hero() {
             alt=""
             width={4096}
             height={1805}
-            className="absolute inset-0 h-full w-full max-w-none object-cover object-[center_30%] md:object-top"
+            className="absolute inset-0 h-full w-full max-w-none object-cover object-center"
             sizes="100vw"
             priority
             aria-hidden
