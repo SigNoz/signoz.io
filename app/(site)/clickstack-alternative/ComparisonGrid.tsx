@@ -66,7 +66,6 @@ const COLUMNS = [
     cellClassName: 'relative px-3 py-3',
     sectionCellClassName: 'relative',
     occludeStickyText: true,
-    stickyOcclusionClassName: 'bg-[#14161a]',
   },
   {
     key: 'clickstack',

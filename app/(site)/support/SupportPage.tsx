@@ -65,7 +65,6 @@ const COLUMNS = [
     key: 'teams',
     cellClassName: 'relative px-3 py-3',
     occludeStickyText: true,
-    stickyOcclusionClassName: 'bg-[#14161a]',
   },
   {
     key: 'enterprise',
