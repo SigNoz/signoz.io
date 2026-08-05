@@ -186,7 +186,10 @@ export default function FeatureComparisonGrid({
     }
 
     return (
-      <div className={`h-px w-full ${separatorClassName ?? 'bg-[#23262e]'}`} {...occludeProps} />
+      <div
+        className={`h-px w-full ${separatorClassName ?? 'bg-[var(--l1-border)]'}`}
+        {...occludeProps}
+      />
     )
   }
 

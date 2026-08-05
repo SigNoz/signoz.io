@@ -52,9 +52,8 @@ const badgeUrlMap: Record<string, typeof soc2BadgeUrl> = {
 
 const GRID_CLASS = 'grid-cols-[1fr_12rem_12rem_12rem]'
 
-/** Fades row rules toward the right edge (non-blocking Figma polish). */
 const TABLE_SEPARATOR_CLASS =
-  'bg-gradient-to-r from-[#23262e] from-[55%] via-[#23262e]/70 via-[78%] to-transparent'
+  'bg-[linear-gradient(to_right,transparent_0%,var(--l1-border)_10%,var(--l1-border)_55%,color-mix(in_srgb,var(--l1-border)_70%,transparent)_78%,transparent_100%)]'
 
 const COLUMNS = [
   {
@@ -207,7 +206,7 @@ const SeverityDefinitionsSection = () => (
     </h3>
     <div className="flex flex-col">
       {SEVERITY_DEFINITIONS.map((sev) => (
-        <div key={sev.level} className="border-t border-[#23262e]">
+        <div key={sev.level} className="border-t border-[var(--l1-border)]">
           <div className="grid grid-cols-1 gap-4 px-6 py-6 md:grid-cols-[460px_1fr] md:gap-6">
             <div className="text-sm font-semibold leading-6 text-signoz_vanilla-100">
               {sev.level}
