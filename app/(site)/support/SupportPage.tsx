@@ -193,7 +193,7 @@ const ComparisonTable = () => {
             sections={sections}
             gridClassName={GRID_CLASS}
             sectionHeadingSize="sm"
-            stickyOffset="top-[190px]"
+            stickyOffset="top-[189px]"
             stickyBg=""
             stickyZIndex="z-[8]"
             separator="border"
