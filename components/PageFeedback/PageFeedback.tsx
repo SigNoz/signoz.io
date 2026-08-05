@@ -286,7 +286,7 @@ const PageFeedback: React.FC = () => {
           align="start"
           sideOffset={8}
           avoidCollisions={isDesktop}
-          className="!z-20 !max-h-[min(calc(100dvh-7rem),480px)] !w-[min(100vw-2rem,280px)] !overflow-y-auto !border-[var(--l2-border)] !bg-[var(--l2-background-60)] !p-1.5 !pt-3 !shadow-[4px_10px_16px_rgba(0,0,0,0.2)] !backdrop-blur-[20px]"
+          className="!z-20 !max-h-[min(calc(100dvh-7rem),480px)] !w-[min(100vw-2rem,280px)] !overflow-y-auto !border-[var(--l2-border)] !bg-[var(--l2-background-60)] !p-1.5 !pt-3 !shadow-[4px_10px_16px_rgba(0,0,0,0.2)] !backdrop-blur-[20px] [-ms-overflow-style:none] ![scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           onPointerDownOutside={keepOpenIfOnControls}
           onInteractOutside={keepOpenIfOnControls}
           onFocusOutside={keepOpenIfOnControls}
@@ -344,7 +344,7 @@ const PageFeedback: React.FC = () => {
                         </label>
                         {isSelected && (
                           <textarea
-                            className="min-h-14 w-full resize-y border-x-0 border-b-0 border-t border-[var(--l2-border)] bg-[var(--l2-background-60)] p-2.5 text-[11px] leading-[18px] text-[var(--l1-foreground-hover)] shadow-none outline-none ring-0 placeholder:text-[var(--l3-foreground)] focus:border-x-0 focus:border-b-0 focus:border-t focus:border-[var(--l2-border)] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                            className="block min-h-14 w-full resize-y border-x-0 border-b-0 border-t border-[var(--l2-border)] bg-[var(--l2-background-60)] p-2.5 text-[11px] leading-[18px] text-[var(--l1-foreground-hover)] shadow-none outline-none ring-0 placeholder:text-[var(--l3-foreground)] focus:border-x-0 focus:border-b-0 focus:border-t focus:border-[var(--l2-border)] focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                             placeholder="Optional: Provide more details..."
                             aria-label={`Additional details for ${option.value}`}
                             value={details}
@@ -377,7 +377,7 @@ const PageFeedback: React.FC = () => {
           ) : (
             <form className="flex flex-col gap-3" onSubmit={submitComment}>
               <textarea
-                className="min-h-28 w-full resize-y rounded-[4px] border border-[var(--l2-border)] bg-[var(--l2-background-60)] p-2.5 text-sm text-[var(--l1-foreground-hover)] placeholder:text-[var(--l3-foreground)] focus:border-[var(--primary-background)] focus:outline-none"
+                className="block min-h-28 w-full resize-y rounded-[4px] border border-[var(--l2-border)] bg-[var(--l2-background-60)] p-2.5 text-sm text-[var(--l1-foreground-hover)] placeholder:text-[var(--l3-foreground)] focus:border-[var(--primary-background)] focus:outline-none"
                 placeholder="Help us improve this page..."
                 aria-label="Help us improve this page"
                 value={comment}
