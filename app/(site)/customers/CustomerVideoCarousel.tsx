@@ -1,36 +1,22 @@
 'use client'
 
 import { useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react'
+import Image, { type ImageLoader } from 'next/image'
+import { ArrowLeft, ArrowRight, Play } from 'lucide-react'
+
+const youtubeThumbnailLoader: ImageLoader = ({ src, width }) => `${src}?width=${width}`
 
 const customerVideos = [
   {
     company: 'Kernel',
-    description:
-      'Hiro Tamada explains how OpenTelemetry makes new services easy to onboard across Kernel’s bare-metal browser infrastructure.',
-    href: '/customers/kernel/',
-    logo: '/img/case_study/logos/kernel-logo.svg',
-    outcome: 'OpenTelemetry-native infrastructure for AI agents',
     videoId: '0ZrTqonLE-I',
   },
   {
     company: 'Shaped',
-    description:
-      'Karl Lyons shows why SigNoz became the first place Shaped checks when an incident reaches the engineering team.',
-    href: '/customers/shaped/',
-    logo: '/img/case_study/logos/shaped-logo.svg',
-    outcome: 'One place for logs, metrics, and traces',
     videoId: 'p4-dJkDtUbw',
   },
   {
     company: 'Alien Intelligence',
-    description:
-      'Leo Blondel walks through the AI SRE workflow his team built for the first pass of production alert triage.',
-    href: '/customers/alien-intelligence-ai-sre-workflow-signoz/',
-    logo: '/img/homepage/customer-logos/alien-intelligence.webp',
-    outcome: 'Agent-led triage with a human in the loop',
     videoId: '0-IRNacWDDA',
   },
 ] as const
@@ -54,11 +40,12 @@ export default function CustomerVideoCarousel() {
     if (!viewport) return
 
     const nextIndex = (activeIndex + direction + customerVideos.length) % customerVideos.length
+    const nextSlide = viewport.children.item(nextIndex) as HTMLElement | null
 
     setActiveIndex(nextIndex)
     viewport.scrollTo({
       behavior: 'smooth',
-      left: nextIndex * viewport.clientWidth,
+      left: nextSlide?.offsetLeft ?? 0,
     })
   }
 
@@ -105,7 +92,7 @@ export default function CustomerVideoCarousel() {
       <div
         aria-label="Customer video carousel"
         aria-roledescription="carousel"
-        className="flex cursor-grab select-none snap-x snap-mandatory overflow-x-auto scroll-smooth rounded-2xl [scrollbar-width:none] [touch-action:pan-y] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+        className="flex cursor-grab select-none snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth [scrollbar-width:none] [touch-action:pan-y] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
         onClickCapture={(event) => {
           if (!suppressClickRef.current) return
           event.preventDefault()
@@ -118,93 +105,63 @@ export default function CustomerVideoCarousel() {
         onMouseUp={finishDrag}
         onScroll={(event) => {
           const viewport = event.currentTarget
-          const nextIndex = Math.round(viewport.scrollLeft / viewport.clientWidth)
-          setActiveIndex(Math.max(0, Math.min(customerVideos.length - 1, nextIndex)))
+          const slides = Array.from(viewport.children) as HTMLElement[]
+          const nextIndex = slides.reduce((closestIndex, slide, index) => {
+            const closestDistance = Math.abs(slides[closestIndex].offsetLeft - viewport.scrollLeft)
+            const slideDistance = Math.abs(slide.offsetLeft - viewport.scrollLeft)
+
+            return slideDistance < closestDistance ? index : closestIndex
+          }, 0)
+
+          setActiveIndex(nextIndex)
         }}
         ref={viewportRef}
         role="region"
         tabIndex={0}
       >
-        {customerVideos.map((video) => (
+        {customerVideos.map((video, index) => (
           <div
-            className="grid min-w-full snap-start overflow-hidden rounded-2xl border border-signoz_slate-400 bg-signoz_ink-400 lg:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.65fr)]"
+            className="relative aspect-video min-w-[88%] snap-start overflow-hidden rounded-xl border border-signoz_slate-400 bg-signoz_ink-400 sm:min-w-[82%] lg:min-w-[72%]"
             key={video.company}
           >
-            <div className="relative bg-signoz_ink-500">
-              <iframe
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="aspect-video w-full"
-                loading="lazy"
-                src={`https://www.youtube-nocookie.com/embed/${video.videoId}${
-                  interactiveVideoId === video.videoId ? '?autoplay=1' : ''
-                }`}
-                title={`${video.company} customer video`}
-              />
-              {interactiveVideoId === video.videoId ? null : (
-                <button
-                  aria-label={`Play the ${video.company} customer video`}
-                  className="absolute inset-0 cursor-grab active:cursor-grabbing"
-                  onClick={() => setInteractiveVideoId(video.videoId)}
-                  type="button"
+            <div className="absolute inset-0 bg-signoz_ink-500">
+              {interactiveVideoId === video.videoId ? (
+                <iframe
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="h-full w-full"
+                  src={`https://www.youtube-nocookie.com/embed/${video.videoId}?autoplay=1`}
+                  title={`${video.company} customer video`}
                 />
+              ) : (
+                <>
+                  <Image
+                    alt=""
+                    className="object-cover"
+                    fill
+                    loader={youtubeThumbnailLoader}
+                    priority={index === 0}
+                    sizes="(min-width: 1024px) 72vw, (min-width: 640px) 82vw, 88vw"
+                    src={`https://i.ytimg.com/vi/${video.videoId}/maxresdefault.jpg`}
+                  />
+                  <button
+                    aria-label={`Play the ${video.company} customer video`}
+                    className="absolute inset-0 flex cursor-grab items-center justify-center active:cursor-grabbing"
+                    onClick={() => setInteractiveVideoId(video.videoId)}
+                    type="button"
+                  >
+                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-signoz_cherry-500 text-signoz_vanilla-100 shadow-lg transition-transform hover:scale-105 sm:h-16 sm:w-16">
+                      <Play aria-hidden="true" className="ml-1" fill="currentColor" size={24} />
+                    </span>
+                  </button>
+                </>
               )}
             </div>
-
-            <Link
-              className="group flex min-h-72 flex-col justify-between border-t border-signoz_slate-400 p-6 transition-colors hover:bg-signoz_ink-300 lg:border-l lg:border-t-0 lg:p-8"
-              href={video.href}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <Image
-                  alt={`${video.company} logo`}
-                  className="max-h-10 w-auto max-w-36 object-contain object-left"
-                  height={40}
-                  src={video.logo}
-                  width={144}
-                />
-                <ArrowUpRight
-                  aria-hidden="true"
-                  className="text-signoz_vanilla-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                  size={18}
-                />
-              </div>
-              <div>
-                <p className="text-xl font-medium leading-7 text-signoz_vanilla-100">
-                  {video.outcome}
-                </p>
-                <p className="mt-3 text-sm leading-6 text-signoz_vanilla-400">
-                  {video.description}
-                </p>
-                <span className="mt-6 inline-flex text-sm font-medium text-signoz_robin-400">
-                  Read the story
-                </span>
-              </div>
-            </Link>
           </div>
         ))}
       </div>
 
-      <div className="mt-5 flex items-center gap-6">
-        <span
-          aria-hidden="true"
-          className="shrink-0 font-mono text-xs tabular-nums text-signoz_vanilla-400"
-        >
-          {String(activeIndex + 1).padStart(2, '0')} /{' '}
-          {String(customerVideos.length).padStart(2, '0')}
-        </span>
-        <div
-          aria-label={`Video ${activeIndex + 1} of ${customerVideos.length}`}
-          aria-valuemax={customerVideos.length}
-          aria-valuemin={1}
-          aria-valuenow={activeIndex + 1}
-          className="relative h-1 flex-1 overflow-hidden rounded-full bg-signoz_slate-400"
-          role="progressbar"
-        >
-          <span
-            className={`absolute inset-y-0 left-0 w-1/3 rounded-full bg-signoz_vanilla-100 transition-transform duration-300 ${progressPosition[activeIndex]}`}
-          />
-        </div>
+      <div className="mt-5 flex items-center gap-5">
         <div className="flex shrink-0 gap-2">
           <button
             aria-label="Previous customer video"
@@ -222,6 +179,18 @@ export default function CustomerVideoCarousel() {
           >
             <ArrowRight aria-hidden="true" size={17} />
           </button>
+        </div>
+        <div
+          aria-label={`Video ${activeIndex + 1} of ${customerVideos.length}`}
+          aria-valuemax={customerVideos.length}
+          aria-valuemin={1}
+          aria-valuenow={activeIndex + 1}
+          className="relative h-1 flex-1 overflow-hidden rounded-full bg-signoz_slate-400"
+          role="progressbar"
+        >
+          <span
+            className={`absolute inset-y-0 left-0 w-1/3 rounded-full bg-signoz_vanilla-100 transition-transform duration-300 ${progressPosition[activeIndex]}`}
+          />
         </div>
       </div>
     </div>

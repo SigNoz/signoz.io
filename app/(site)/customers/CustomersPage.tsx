@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button'
 import CustomerProofCarousel from './CustomerProofCarousel'
 import CustomerQuoteCarousel from './CustomerQuoteCarousel'
 import CustomerStoryGrid from './CustomerStoryGrid'
+import CustomerVideoCarousel from './CustomerVideoCarousel'
 
 const customerMetrics = [
   {
@@ -77,7 +78,7 @@ export default function CustomersPage() {
             </div>
 
             <div className="relative z-10 mt-12 md:mt-16">
-              <CustomerQuoteCarousel />
+              <CustomerVideoCarousel />
             </div>
           </div>
         </div>
@@ -99,6 +100,12 @@ export default function CustomersPage() {
               <CustomerStoryGrid />
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="border-b border-dashed border-signoz_slate-400">
+        <div className={customerPageContainerClassName}>
+          <CustomerQuoteCarousel />
         </div>
       </section>
 
