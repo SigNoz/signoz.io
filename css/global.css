@@ -96,11 +96,36 @@ code {
 }
 
 /*
-  No custom scrollbar styling on the document or docs sidebar.
-  ::-webkit-scrollbar / scrollbar-color force classic always-visible bars.
-  Native OS overlay scrollbars (macOS “Automatically based on mouse or trackpad”)
-  show only while scrolling and do not reserve gutter space.
+  Prefer native overlay scrollbars sitewide (no global ::-webkit-scrollbar).
+  Scope thin dark-theme bars only where overflow is intentional and always
+  visible would otherwise clash with the dark UI (docs sidenav + select menus).
 */
+.docs-sidebar-scroll,
+[data-slot='select-content'],
+[data-slot='select-viewport'] {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--l3-foreground) 55%, transparent) transparent;
+}
+
+.docs-sidebar-scroll::-webkit-scrollbar,
+[data-slot='select-content']::-webkit-scrollbar,
+[data-slot='select-viewport']::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.docs-sidebar-scroll::-webkit-scrollbar-thumb,
+[data-slot='select-content']::-webkit-scrollbar-thumb,
+[data-slot='select-viewport']::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: color-mix(in srgb, var(--l3-foreground) 45%, transparent);
+}
+
+.docs-sidebar-scroll::-webkit-scrollbar-track,
+[data-slot='select-content']::-webkit-scrollbar-track,
+[data-slot='select-viewport']::-webkit-scrollbar-track {
+  background: transparent;
+}
 
 .docs-sidebar {
   height: calc(100vh - 48px);

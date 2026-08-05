@@ -52,7 +52,20 @@ export default function RegionSelectorInfoTip({ children }: RegionSelectorInfoTi
         sideOffset={12}
         collisionPadding={16}
         onOpenAutoFocus={(event) => event.preventDefault()}
-        onInteractOutside={(event) => event.preventDefault()}
+        onInteractOutside={(event) => {
+          // Keep the tip open for casual outside clicks, but never block the
+          // region Select portal — preventing those events freezes the UI /
+          // leaves body scroll-locked after picking a region.
+          const target = event.target as HTMLElement | null
+          if (
+            target?.closest?.(
+              '[data-slot="select-content"], [data-slot="select-trigger"], [data-slot="select-item"], [role="listbox"], [role="option"]'
+            )
+          ) {
+            return
+          }
+          event.preventDefault()
+        }}
         onEscapeKeyDown={(event) => {
           event.preventDefault()
           dismiss()

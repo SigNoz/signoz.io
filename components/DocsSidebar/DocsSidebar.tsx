@@ -284,7 +284,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
       )}
       <div
         ref={sidebarRef}
-        className={`min-h-0 flex-1 overflow-y-auto ${showRegionSelector ? 'pb-3 pt-1' : 'py-3'}`}
+        className={`docs-sidebar-scroll min-h-0 flex-1 overflow-y-auto ${showRegionSelector ? 'pb-3 pt-1' : 'py-3'}`}
       >
         <ul className="list-none space-y-0 p-0">{sideNav.map(renderItem)}</ul>
       </div>
