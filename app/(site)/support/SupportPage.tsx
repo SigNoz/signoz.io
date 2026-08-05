@@ -1,9 +1,19 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
-import { ArrowRight, ArrowUpRight, Check, BookOpen, MessageSquare } from 'lucide-react'
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  BookOpen,
+  MessageSquare,
+  Mail,
+  UserRound,
+  Handshake,
+  CircleArrowRight,
+} from 'lucide-react'
 import { Slack, Github } from '@/components/social-icons/SolidIcons'
+import { TrustedByTeams } from '@/components/trusted-by'
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
@@ -15,7 +25,6 @@ import FeatureComparisonGrid from '@/shared/components/molecules/FeaturePages/Fe
 import type { ComparisonSection } from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
 import {
   SUPPORT_HEADER_BUTTONS,
-  TRUSTED_BY_LOGOS,
   SUPPORT_TIERS,
   TABLE_DATA,
   TABLE_FOOTNOTES,
@@ -29,22 +38,10 @@ import {
   BOTTOM_CTA_BUTTONS,
 } from './SupportPage.constants'
 import type { CellValue } from './SupportPage.constants'
+import '@/components/footer/footer-pill-links.css'
 
-import superLogoUrl from '@/public/img/users/super.svg?url'
-import hashnodeLogoUrl from '@/public/img/users/hashnode.svg?url'
-import zapierLogoUrl from '@/public/img/users/zapier.svg?url'
-import incidentIoLogoUrl from '@/public/img/users/incident_io.svg?url'
-import mintlifyLogoUrl from '@/public/img/users/mintlify.svg?url'
 import soc2BadgeUrl from '@/public/svgs/icons/SOC-2.svg?url'
 import hipaaBadgeUrl from '@/public/svgs/icons/hipaa.svg?url'
-
-const logoUrlMap: Record<string, typeof superLogoUrl> = {
-  '/img/users/super.svg': superLogoUrl,
-  '/img/users/hashnode.svg': hashnodeLogoUrl,
-  '/img/users/zapier.svg': zapierLogoUrl,
-  '/img/users/incident_io.svg': incidentIoLogoUrl,
-  '/img/users/mintlify.svg': mintlifyLogoUrl,
-}
 
 const badgeUrlMap: Record<string, typeof soc2BadgeUrl> = {
   '/svgs/icons/SOC-2.svg': soc2BadgeUrl,
@@ -54,6 +51,10 @@ const badgeUrlMap: Record<string, typeof soc2BadgeUrl> = {
 // --- Comparison Table ---
 
 const GRID_CLASS = 'grid-cols-[1fr_12rem_12rem_12rem]'
+
+/** Fades row rules toward the right edge (non-blocking Figma polish). */
+const TABLE_SEPARATOR_CLASS =
+  'bg-gradient-to-r from-[#23262e] from-[55%] via-[#23262e]/70 via-[78%] to-transparent'
 
 const COLUMNS = [
   {
@@ -119,33 +120,6 @@ function toSections(): ComparisonSection[] {
 
 // --- Section Components ---
 
-const TrustedBySection = () => (
-  <div className="flex flex-col items-center gap-8 px-6 py-10">
-    <p className="text-center text-sm font-medium uppercase tracking-[0.7px] text-signoz_vanilla-400">
-      trusted by <span className="text-white">500+ teams</span>
-    </p>
-    <div className="flex flex-wrap items-center justify-center gap-[88px]">
-      {TRUSTED_BY_LOGOS.map((logo) => (
-        <Image
-          key={logo.alt}
-          src={logoUrlMap[logo.src]}
-          alt={logo.alt}
-          width={logo.width}
-          height={logo.height}
-          className="h-7 w-auto"
-        />
-      ))}
-    </div>
-    <Link
-      href="/case-study/"
-      className="flex items-center gap-1.5 rounded-full bg-[rgba(171,189,255,0.08)] px-4 py-1.5 text-sm font-medium text-white backdrop-blur-[5px] transition-colors hover:bg-[rgba(171,189,255,0.14)]"
-    >
-      Read customer stories
-      <ArrowRight size={14} />
-    </Link>
-  </div>
-)
-
 const ComparisonTable = () => {
   const sections = toSections()
 
@@ -170,7 +144,17 @@ const ComparisonTable = () => {
                   <span className="text-base font-medium leading-7 text-[#eceef2]">
                     {tier.name}
                   </span>
-                  {tier.subtitle && <span className="text-sm text-[#adb4c2]">{tier.subtitle}</span>}
+                  {/* Reserve subtitle line for CTA tiers so Teams/Enterprise buttons align */}
+                  {tier.cta && (
+                    <span
+                      className={`min-h-5 text-sm leading-5 text-[#adb4c2] ${
+                        tier.subtitle ? '' : 'invisible'
+                      }`}
+                      aria-hidden={!tier.subtitle}
+                    >
+                      {tier.subtitle || 'Cloud / Self-Hosted'}
+                    </span>
+                  )}
                   {tier.cta && (
                     <Button
                       to={tier.cta.href}
@@ -184,7 +168,7 @@ const ComparisonTable = () => {
                 </div>
               ))}
             </div>
-            <div className="h-px w-full bg-[#23262e]" />
+            <div className={`h-px w-full ${TABLE_SEPARATOR_CLASS}`} />
           </div>
 
           {/* Grid body */}
@@ -197,6 +181,7 @@ const ComparisonTable = () => {
             stickyBg=""
             stickyZIndex="z-[8]"
             separator="border"
+            separatorClassName={TABLE_SEPARATOR_CLASS}
             featureCellClassName="pl-6 py-3"
             featureSectionClassName="pl-6 bg-signoz_ink-500"
           />
@@ -216,23 +201,28 @@ const ComparisonTable = () => {
 }
 
 const SeverityDefinitionsSection = () => (
-  <div className="px-6 py-10">
-    <h3 className="mb-6 text-lg font-semibold text-signoz_vanilla-100">Severity Definitions</h3>
-    <div className="flex flex-col gap-6">
+  <div className="py-10">
+    <h3 className="mb-6 px-6 text-lg font-semibold text-signoz_vanilla-100">
+      Severity Definitions
+    </h3>
+    <div className="flex flex-col">
       {SEVERITY_DEFINITIONS.map((sev) => (
-        <div
-          key={sev.level}
-          className="grid grid-cols-1 gap-4 border-t border-[#23262e] pt-6 md:grid-cols-[200px_1fr]"
-        >
-          <div className="text-sm font-semibold text-signoz_vanilla-100">{sev.level}</div>
-          <div className="flex flex-col gap-2">
-            <p className="text-sm text-signoz_vanilla-400">{sev.description}</p>
-            <p className="text-sm italic text-signoz_vanilla-400">{sev.example}</p>
+        <div key={sev.level} className="border-t border-[#23262e]">
+          <div className="grid grid-cols-1 gap-4 px-6 py-6 md:grid-cols-[460px_1fr] md:gap-6">
+            <div className="text-sm font-semibold leading-6 text-signoz_vanilla-100">
+              {sev.level}
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-sm leading-6 text-signoz_vanilla-400">{sev.description}</p>
+              <p className="text-sm italic leading-6 text-signoz_vanilla-400">{sev.example}</p>
+            </div>
           </div>
         </div>
       ))}
     </div>
-    <p className="mt-6 text-xs text-signoz_vanilla-400">* After issue is raised by the customer</p>
+    <p className="mt-6 px-6 text-xs text-signoz_vanilla-400">
+      * After issue is raised by the customer
+    </p>
   </div>
 )
 
@@ -285,28 +275,81 @@ const StatsSection = () => (
   </div>
 )
 
+/** Fixed 16×16 box so FA Slack/Github glyphs share Lucide’s optical alignment with text. */
 const ContactIcon = ({ icon }: { icon?: string }) => {
+  const box = 'inline-flex size-4 shrink-0 items-center justify-center'
   switch (icon) {
     case 'slack':
-      return <Slack className="h-4 w-4 fill-signoz_vanilla-100" />
+      return (
+        <span className={box} aria-hidden>
+          <Slack className="h-[15px] w-[15px] fill-current" />
+        </span>
+      )
     case 'github':
-      return <Github className="h-4 w-4 fill-signoz_vanilla-100" />
+      return (
+        <span className={box} aria-hidden>
+          <Github className="h-[15px] w-[15px] fill-current" />
+        </span>
+      )
     case 'docs':
-      return <BookOpen size={16} className="text-signoz_vanilla-100" />
+      return <BookOpen size={16} className="shrink-0 text-current" />
     case 'chat':
-      return <MessageSquare size={16} className="text-signoz_vanilla-100" />
+      return <MessageSquare size={16} className="shrink-0 text-current" />
     case 'email':
-      return <MessageSquare size={16} className="text-signoz_vanilla-100" />
+      return <Mail size={16} className="shrink-0 text-current" />
+    case 'user':
+      return <UserRound size={16} className="shrink-0 text-current" />
+    case 'sales':
+      return <Handshake size={16} className="shrink-0 text-current" />
     default:
       return null
   }
+}
+
+const ContactChannelItem = ({
+  item,
+}: {
+  item: { icon?: string; text: string; description?: string; href?: string }
+}) => {
+  const isExternal = Boolean(item.href && !item.href.startsWith('/') && !item.href.startsWith('#'))
+  const isMailto = item.href?.startsWith('mailto:')
+
+  const label = (
+    <>
+      {item.icon && <ContactIcon icon={item.icon} />}
+      <span>{item.text}</span>
+      {item.href && <ArrowUpRight size={16} className="shrink-0" />}
+    </>
+  )
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      {item.href ? (
+        <a
+          href={item.href}
+          target={isExternal && !isMailto ? '_blank' : undefined}
+          rel={isExternal && !isMailto ? 'noopener noreferrer nofollow' : undefined}
+          className="footer-pill-link !mt-0"
+        >
+          {label}
+        </a>
+      ) : (
+        <span className="inline-flex items-center gap-2 text-sm font-medium leading-[1.35] tracking-[-0.005em] text-[var(--l2-foreground)]">
+          {label}
+        </span>
+      )}
+      {item.description && (
+        <span className="text-sm leading-[1.35] text-signoz_vanilla-400">{item.description}</span>
+      )}
+    </div>
+  )
 }
 
 const DevelopersLoveSigNoz = () => (
   <div className="flex flex-col sm:flex-row">
     <div className="!w-full flex-1 sm:!w-[300px] sm:min-w-fit">
       <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start px-10 py-10 sm:px-0 sm:pl-12">
-        <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+        <h2 className="text-4xl font-bold !leading-[3.5rem] text-[var(--l1-foreground-hover)] sm:text-4xl">
           Developers
           <br className="hidden sm:block" />
           love
@@ -316,80 +359,51 @@ const DevelopersLoveSigNoz = () => (
       </div>
     </div>
     <div className="flex-[2_2_0%]">
-      <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
-        {/* Seamless Escalation */}
-        <div className="border-b border-dashed border-signoz_slate-400 p-8">
-          <h3 className="mb-2 text-xl font-semibold text-signoz_vanilla-100">
+      <div className="border-l border-dashed border-[var(--l1-border)] bg-transparent p-0">
+        <div className="border-b border-dashed border-[var(--l1-border)] p-8">
+          <h3 className="mb-2 text-2xl font-semibold leading-8 text-[var(--l1-foreground-hover)]">
             Seamless Escalation
           </h3>
-          <p className="mb-6 text-sm text-signoz_vanilla-400">
+          <p className="mb-16 max-w-[474px] text-base font-normal leading-6 text-[var(--l2-foreground)]">
             Escalate your issues and get support from the right person, right when you need it.
           </p>
-          <div className="flex flex-col gap-4">
+          <div className="flex max-w-[474px] flex-col gap-6">
             {ESCALATION_STEPS.map((step) => (
-              <div key={step.level} className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-signoz_slate-400">
-                  <span className="text-xs font-medium text-signoz_vanilla-400">
-                    {step.level.charAt(1)}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-sm font-semibold text-signoz_vanilla-100">
+              <div key={step.level} className="flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <CircleArrowRight
+                    size={20}
+                    className="shrink-0 fill-[var(--primary-background)] text-signoz_ink-400"
+                    aria-hidden
+                  />
+                  <span className="text-base font-medium leading-6 text-[var(--l1-foreground-hover)]">
                     {step.level} : {step.title}
                   </span>
-                  <p className="mt-1 text-sm text-signoz_vanilla-400">{step.description}</p>
                 </div>
+                <p className="pl-8 text-sm font-normal leading-5 text-[var(--l2-foreground)]">
+                  {step.description}
+                </p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* How to reach us */}
         <div className="p-8">
-          <h3 className="mb-2 text-xl font-semibold text-signoz_vanilla-100">How to reach us</h3>
-          <p className="mb-6 text-sm text-signoz_vanilla-400">
+          <h3 className="mb-2 text-2xl font-semibold leading-8 text-[var(--l1-foreground-hover)]">
+            How to reach us
+          </h3>
+          <p className="mb-6 text-base font-normal leading-6 text-[var(--l2-foreground)]">
             {`Tired of Datadog's unpredictable bills or New Relic's user-based pricing? We're here for you.`}
           </p>
           <div className="flex flex-col gap-6">
             {CONTACT_CHANNELS.map((channel) => (
               <div key={channel.category}>
-                <h4 className="mb-3 text-sm font-semibold text-signoz_vanilla-100">
+                <h4 className="mb-3 text-sm font-semibold text-[var(--l1-foreground-hover)]">
                   {channel.category}
                 </h4>
                 <div className="flex flex-col gap-2">
                   {channel.items.map((item, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      {item.icon && (
-                        <span className="mt-0.5 flex-shrink-0">
-                          <ContactIcon icon={item.icon} />
-                        </span>
-                      )}
-                      {!item.icon && (
-                        <span className="mt-0.5 flex-shrink-0 text-signoz_vanilla-400">
-                          &mdash;
-                        </span>
-                      )}
-                      <p className="text-sm text-signoz_vanilla-400">
-                        {item.href ? (
-                          <a
-                            href={item.href}
-                            target={item.href.startsWith('mailto:') ? undefined : '_blank'}
-                            rel={
-                              item.href.startsWith('mailto:')
-                                ? undefined
-                                : 'noopener noreferrer nofollow'
-                            }
-                            className="font-semibold text-signoz_vanilla-100 hover:underline"
-                          >
-                            {item.text}
-                            <ArrowUpRight size={14} className="ml-0.5 inline" />
-                          </a>
-                        ) : (
-                          <span className="font-semibold text-signoz_vanilla-100">{item.text}</span>
-                        )}
-                        {item.description && <> {item.description}</>}
-                      </p>
-                    </div>
+                    <ContactChannelItem key={i} item={item} />
                   ))}
                 </div>
               </div>
@@ -475,21 +489,20 @@ const TrustAndCompliance = () => (
             ))}
           </div>
           <p className="mb-4 text-sm text-signoz_vanilla-400">SOC 2 Type I</p>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             {COMPLIANCE_LINKS.map((link) => (
-              <p key={link.href} className="text-sm text-signoz_vanilla-400">
+              <div key={link.href} className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <a
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  className="font-semibold text-signoz_robin-400 hover:underline"
+                  className="footer-pill-link !mt-0"
                 >
                   {link.text}
-                  <ArrowUpRight size={14} className="ml-0.5 inline" />
+                  <ArrowUpRight size={16} />
                 </a>
-                {'  '}
-                {link.label}
-              </p>
+                <span className="text-sm text-signoz_vanilla-400">{link.label}</span>
+              </div>
             ))}
           </div>
         </div>
@@ -499,7 +512,7 @@ const TrustAndCompliance = () => (
 )
 
 const BottomCTA = () => (
-  <div className="flex flex-col items-center gap-6 px-6 py-16 text-center">
+  <div className="flex flex-col items-center gap-6 border-t border-dashed border-signoz_slate-400 px-6 py-16 text-center">
     <h2 className="text-2xl font-semibold text-signoz_vanilla-100 sm:text-3xl">
       Not sure which plan is right for you?
     </h2>
@@ -515,24 +528,34 @@ const BottomCTA = () => (
 
 const SupportPage = () => {
   return (
-    <FeaturePageLayout showProductNav={false}>
+    <FeaturePageLayout showProductNav={false} showDotPattern={false}>
       <DitherCanvas enableClick className="relative z-[1]">
         <FeaturePageHeader
-          title="Enterprise-grade support for every stage of your observability journey"
-          description="From open source community to mission-critical production - SigNoz support is built for engineering teams who can't afford downtime."
+          title={
+            <>
+              Enterprise-grade support for every stage of
+              <br className="hidden sm:block" /> your observability journey
+            </>
+          }
+          description={
+            <span className="block max-w-[567px]">
+              From open source community to mission-critical production - SigNoz
+              <br className="hidden sm:block" />
+              support is built for engineering teams who can&apos;t afford downtime.
+            </span>
+          }
           buttons={SUPPORT_HEADER_BUTTONS}
           align="left"
-          titleClassName="!bg-none !text-signoz_vanilla-100 ![background:none] ![-webkit-text-fill-color:unset] lg:!text-[36px] !tracking-[-1.08px]"
+          titleClassName="!my-0 !bg-none !py-0 !text-signoz_vanilla-100 ![background:none] ![-webkit-text-fill-color:unset] sm:!mb-0 lg:!text-[36px] !tracking-[-1.08px]"
+          descriptionClassName="!max-w-[567px] !py-2 !text-base !leading-[26px] sm:!py-2"
           sectionLayoutVariant="no-border"
           sectionLayoutClassName="!mt-0 !mb-0"
         />
-        <SectionLayout variant="bordered" className="!px-0">
-          <TrustedBySection />
-        </SectionLayout>
       </DitherCanvas>
 
+      <TrustedByTeams page="support" className="relative z-[1] max-w-8xl bg-signoz_ink-500" />
+
       <SectionLayout variant="bordered" className="!px-0">
-        <Divider />
         <ComparisonTable />
         <Divider />
         <SeverityDefinitionsSection />

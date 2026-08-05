@@ -16,14 +16,6 @@ export const SUPPORT_HEADER_BUTTONS = [
   },
 ]
 
-export const TRUSTED_BY_LOGOS = [
-  { src: '/img/users/super.svg', alt: 'Super', width: 134, height: 28 },
-  { src: '/img/users/hashnode.svg', alt: 'Hashnode', width: 166, height: 28 },
-  { src: '/img/users/zapier.svg', alt: 'Zapier', width: 103, height: 28 },
-  { src: '/img/users/incident_io.svg', alt: 'incident.io', width: 112, height: 28 },
-  { src: '/img/users/mintlify.svg', alt: 'Mintlify', width: 129, height: 28 },
-]
-
 export interface SupportTier {
   name: string
   subtitle?: string
@@ -328,10 +320,20 @@ export const CONTACT_CHANNELS: ContactChannel[] = [
   {
     category: 'Enterprise',
     items: [
-      { text: 'Your dedicated Slack channel with the SigNoz team.' },
-      { text: 'Dedicated onboarding and account manager.' },
       {
-        text: 'Contact Sales for Enterprise Support or email to discuss SLAs, TAM, and BYOC options.',
+        icon: 'slack',
+        text: 'Dedicated Slack channel',
+        description: 'with the SigNoz team.',
+      },
+      {
+        icon: 'user',
+        text: 'Dedicated onboarding and account manager.',
+      },
+      {
+        icon: 'sales',
+        text: 'Contact Sales',
+        description: 'for Enterprise Support or email to discuss SLAs, TAM, and BYOC options.',
+        href: '/contact-us/?source=support-enterprise',
       },
     ],
   },

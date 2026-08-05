@@ -16,6 +16,7 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
   sectionLayoutClassName = '!mt-0 max-md:-mb-[3rem]',
   className = '',
   titleClassName = '',
+  descriptionClassName = '',
   buttonDescription = '',
   align = 'center',
 }) => {
@@ -60,7 +61,8 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
         <p
           className={cn(
             'm-0 text-lg font-normal leading-normal text-signoz_vanilla-400 sm:p-0 sm:leading-8',
-            isLeft ? 'px-0 py-3' : 'p-3'
+            isLeft ? 'px-0 py-3' : 'p-3',
+            descriptionClassName
           )}
         >
           {description}
@@ -77,10 +79,16 @@ const FeaturePageHeader: React.FC<FeaturePageHeaderProps> = ({
           <div
             className={cn(
               'flex flex-col gap-3 md:flex-row',
-              isLeft ? 'items-start' : 'items-center justify-center'
+              isLeft ? 'w-full items-start justify-start' : 'items-center justify-center'
             )}
           >
-            {buttonGroup ?? (buttons && <ButtonGroup buttons={buttons} />)}
+            {buttonGroup ??
+              (buttons && (
+                <ButtonGroup
+                  buttons={buttons}
+                  className={isLeft ? '!items-start !justify-start' : undefined}
+                />
+              ))}
           </div>
         )}
         {buttonDescription && (

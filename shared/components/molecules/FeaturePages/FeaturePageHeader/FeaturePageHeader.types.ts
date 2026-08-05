@@ -13,6 +13,7 @@ export interface FeaturePageHeaderProps {
   sectionLayoutClassName?: string
   className?: string
   titleClassName?: string
+  descriptionClassName?: string
   buttonDescription?: string | React.ReactNode
   align?: 'center' | 'left'
 }

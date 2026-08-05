@@ -32,6 +32,7 @@ type FeatureComparisonGridProps = {
   featureCellClassName?: string
   featureSectionClassName?: string
   separator?: 'line' | 'border'
+  separatorClassName?: string
 }
 
 const TAILWIND_TOP_SPACING_PX: Record<string, number> = {
@@ -156,6 +157,7 @@ export default function FeatureComparisonGrid({
   featureCellClassName,
   featureSectionClassName,
   separator = 'line',
+  separatorClassName,
 }: FeatureComparisonGridProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const usesTextOcclusion = columns.some((col) => col.occludeStickyText)
@@ -183,7 +185,9 @@ export default function FeatureComparisonGrid({
       )
     }
 
-    return <div className="h-px w-full bg-[#23262e]" {...occludeProps} />
+    return (
+      <div className={`h-px w-full ${separatorClassName ?? 'bg-[#23262e]'}`} {...occludeProps} />
+    )
   }
 
   return (
