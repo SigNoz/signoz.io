@@ -70,13 +70,24 @@ function FooterPillLink({
   )
 }
 
-function Footer() {
+type FooterProps = {
+  /** When true, only render on /docs routes (content-column placement). Site layout omits this. */
+  inDocsShell?: boolean
+}
+
+function Footer({ inDocsShell = false }: FooterProps) {
   const pathname = usePathname()
   const isLoginRoute = pathname === '/login/'
   const isTeamsRoute = pathname === '/teams/'
   const isContactUsRoute = pathname === '/contact-us/'
+  const isDocsRoute = pathname?.startsWith('/docs') ?? false
 
   if (isLoginRoute || isTeamsRoute || isContactUsRoute) {
+    return null
+  }
+
+  // Docs footer lives beside the sidenav inside DocsShell — not under the full site chrome.
+  if (inDocsShell ? !isDocsRoute : isDocsRoute) {
     return null
   }
 

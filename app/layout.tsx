@@ -96,7 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000" />
       <link rel="alternate" type="application/rss+xml" href="/rss/" />
 
-      <body className="pl-[calc(100vw-100%)] text-white antialiased">
+      <body className="text-white antialiased">
         <SpeedInsights />
         <Suspense fallback={null}>
           <PageViewTracker />

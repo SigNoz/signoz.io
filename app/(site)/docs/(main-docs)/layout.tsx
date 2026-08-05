@@ -4,9 +4,6 @@ import { ReactNode, useRef, useEffect } from 'react'
 import SectionContainer from '@/components/SectionContainer'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import React from 'react'
-import DocsSidebar from '@/components/DocsSidebar/DocsSidebar'
-import { DOC_SIDENAV_CLASSES } from '@/components/DocsTOC/docLayoutClasses'
-import { RegionProvider } from '@/components/Region/RegionContext'
 
 export interface tocItemProps {
   url: string
@@ -42,22 +39,16 @@ export default function DocLayout({ children }: LayoutProps) {
   }, [])
 
   return (
-    <RegionProvider>
-      <main ref={mainRef} className="">
-        <SectionContainer>
-          <ProgressBar target={mainRef} />
+    <main ref={mainRef} className="">
+      <SectionContainer>
+        <ProgressBar target={mainRef} />
 
-          <div className="mx-auto flex h-full w-full max-w-ot-hub items-start gap-4 overflow-clip max-sm:px-4">
-            <div className={DOC_SIDENAV_CLASSES}>
-              <DocsSidebar />
-            </div>
-
-            <div className="box-border min-w-0 flex-[1_1_auto] py-6 md:px-0 lg:px-4 [&_details+details]:mt-8">
-              {children}
-            </div>
+        <div className="flex min-w-0 flex-[1_1_auto] justify-center overflow-clip">
+          <div className="box-border w-full max-w-[1200px] py-6 md:px-0 lg:px-4 [&_details+details]:mt-8">
+            {children}
           </div>
-        </SectionContainer>
-      </main>
-    </RegionProvider>
+        </div>
+      </SectionContainer>
+    </main>
   )
 }

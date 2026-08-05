@@ -2,7 +2,6 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
-import DecimalClient from '@/components/Decimal'
 import JsonLdScript from '@/components/JsonLdScript'
 import { buildBreadcrumbSchema, getDocsBreadcrumbs } from '@/utils/breadcrumbSchema'
 import { fetchDocBySlug } from '@/utils/cachedData'
@@ -97,7 +96,6 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
           {compiledContent}
         </DocContent>
       </div>
-      <DecimalClient />
     </>
   )
 }
