@@ -1,13 +1,13 @@
 ---
-date: 2026-07-31
+date: 2026-08-05
 title: Roles
 description: Create and manage roles in SigNoz — managed roles, custom roles, and configuring transactions with the interactive or JSON editor.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 doc_type: howto
 ---
 
-<Admonition type="warning">
-Fine-grained access control is currently in beta.
+<Admonition type="info">
+Fine-grained access control and custom roles are generally available on any SigNoz deployment with an active SigNoz license. A valid license is the only requirement, and no feature flag is needed.
 </Admonition>
 
 ## Overview
@@ -64,11 +64,28 @@ A role's access is defined by its **Transaction Groups** — the set of relation
 
 ### Interactive mode
 
-Interactive mode presents one card per resource (**Roles**, **Service Accounts**, **API Keys**). Use **Expand all** / **Collapse all** to open every card at once. Within a card, set the scope for each action (relation):
+Interactive mode presents one card per resource (**Roles**, **Service Accounts**, **API Keys**, **Logs**, **Traces**, **Metrics**, **Meter Metrics**). Use **Expand all** / **Collapse all** to open every card at once. Within a card, set the scope for each action (relation):
 
 - **All** — Grants the transaction on every instance of that resource type.
-- **Only selected** — Grants the transaction only on specific instances. Enter the selector for each instance (for example, a role name or a service account ID) and press **Add**. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/) for the selector format used by each resource.
+- **Only selected** — Grants the transaction only on specific instances. For roles, service accounts, and API keys, type the selector (for example, a role name or a service account ID) and press **Add**. For telemetry resources (Logs, Traces, Metrics, Meter Metrics), use the [Selector Wizard](#scope-telemetry-read-access-with-the-selector-wizard) described below. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/) for the selector format used by each resource.
 - **None** — Does not grant the transaction on any instance of that resource type.
+
+#### Scope telemetry read access with the Selector Wizard
+
+When you set the **Read** permission on **Logs**, **Traces**, **Metrics**, or **Meter Metrics** to **Only selected**, the selector input shows a **Wizard** button alongside the hint text `Enter selector as <query-type>/<key>/<value> or <query-type>/* or use wizard...`. You can type a selector by hand, but the wizard builds a valid one for you.
+
+Click **Wizard** to open the **Selector Wizard** dialog. It has four controls:
+
+- **Key** — Read-only. Always `signoz.workspace.key.id`, the ingestion key ID that telemetry grants are scoped by.
+- **Value** — The specific resource value to scope to, such as an ingestion key ID.
+- **Any resource** — When checked, fills **Value** with `*` (a wildcard that matches every value). Unchecking it clears the field.
+- **Selector** — A live, editable preview of the resulting selector string, for example `builder_query/signoz.workspace.key.id/my-service` or `builder_query/*` for a wildcard.
+
+Choose a **Query type** from the dropdown. **Builder Query** is available for all four telemetry resources. **PromQL** and **ClickHouse SQL** are available only for **Metrics** and **Meter Metrics**; they appear greyed out for **Logs** and **Traces**. Click **Add Selector** to store the result as a badge in the selector input.
+
+<Admonition type="info">
+Telemetry selectors follow the pattern `<query-type>/<key>/<value>` for a scoped grant and `<query-type>/*` for a wildcard grant. Adding the same selector twice stores only one badge — duplicates are removed automatically. Non-telemetry resources (Roles, Service Accounts, API Keys, Dashboards, Ingestion Keys) do not show a Wizard button; they use the plain selector input. For the full evaluation rules, see the [Telemetry Access Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/telemetry/).
+</Admonition>
 
 ### JSON mode
 
@@ -99,6 +116,14 @@ Each entry is a transaction group with an `objectGroup` (the resource and its se
 If the JSON contains errors, switching back to Interactive mode prompts you to discard the invalid changes. Fix the errors first to keep your edits.
 </Admonition>
 
+### Form validation
+
+The role form validates inline as you work:
+
+- Saving without a **Name** shows an error banner inside the form (not a pop-up notification).
+- A collapsed resource card that contains a validation error shows a red border, so you can find the resource that needs attention without expanding every card.
+- Validation banners clear automatically as soon as you edit any field — the name, description, or a permission.
+
 ## View a Role
 
 Click any role in the listing to open its view page. The page shows the role's description, created and last modified timestamps, and its **Transaction Groups**. Use the **List** / **JSON** toggle to switch between the card preview and a read-only JSON view of the same configuration.
@@ -120,6 +145,10 @@ Click any role in the listing to open its view page. The page shows the role's d
 
 Unsaved edits are flagged with an **Unsaved changes** indicator. Navigating away with unsaved changes prompts you to discard or keep editing.
 
+<Admonition type="info">
+Saving a role requires **both** `read` and `update` on that role. The **Save** button on the create and edit pages and the **Update** button on the view page stay disabled if you hold `update` but not `read`.
+</Admonition>
+
 <figure data-zoomable align='center'>
     <img src="/img/docs/iam/edit-role.webp" alt="Edit role page with an editable description and Transaction Groups, and a Save changes button"/>
     <figcaption><i>Edit a custom role — the name is fixed; the description and Transaction Groups are editable</i></figcaption>
@@ -134,6 +163,15 @@ Unsaved edits are flagged with an **Unsaved changes** indicator. Navigating away
 <Admonition type="warning">
 A role can only be deleted if no principals are assigned to it and it is not used in any SSO group mapping. Remove all assignees and any SSO group mappings that reference the role before deleting. Deleting a role cannot be undone.
 </Admonition>
+
+## Permission denied behavior
+
+When you lack a required transaction, SigNoz shows the restriction in place instead of a full-page block:
+
+- On the **Roles** listing, the View Role page, and the Create and Edit Role pages, a permission-denied callout appears inline within the content area. The page header and navigation stay visible, and controls such as **Cancel** remain usable.
+- Buttons gated by a missing transaction are disabled, and their tooltip states the exact transaction you are missing in the form `user/[userId] is not authorized to perform [relation]:[object]` (for example, `user/abc123 is not authorized to perform update:role`). Inline callouts use the same wording.
+
+Ask a principal with the `signoz-admin` role (or a custom role that grants the missing transaction) to update your role assignment. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/) for the transaction each action requires.
 
 ## Next Steps
 
