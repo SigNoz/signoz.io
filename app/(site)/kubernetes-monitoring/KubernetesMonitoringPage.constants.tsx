@@ -19,7 +19,7 @@ export const HEADER_BUTTONS = [
   },
   {
     text: 'Read the Docs',
-    href: '/docs/infrastructure-monitoring/k8s-metrics/',
+    href: '/docs/infrastructure-monitoring/user-guides/k8s-metrics/',
     variant: 'secondary' as const,
     className: BUTTON_CLASS_NAME,
     tracking: {
@@ -44,7 +44,7 @@ export const FEATURE_CARDS = [
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
-            href="/docs/infrastructure-monitoring/k8s-metrics/"
+            href="/docs/infrastructure-monitoring/user-guides/k8s-metrics/"
             clickType="Secondary CTA"
             clickName="Read More"
             clickLocation="Kubernetes Monitoring Page"
@@ -276,7 +276,7 @@ export const FEATURE_CARDS = [
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
-            href="/docs/infrastructure-monitoring/k8s-metrics/"
+            href="/docs/infrastructure-monitoring/user-guides/k8s-metrics/"
             clickType="Secondary CTA"
             clickName="Read More"
             clickLocation="Kubernetes Monitoring Page"

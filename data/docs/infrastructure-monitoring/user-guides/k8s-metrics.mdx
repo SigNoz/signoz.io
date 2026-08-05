@@ -1,19 +1,28 @@
 ---
-date: 2026-03-31
-title: Kubernetes Metrics - Monitor K8s Clusters
-description: Setup Kubernetes monitoring with OpenTelemetry kubeletstats and k8scluster receivers. Track node, pod, container, and volume metrics in SigNoz dashboards.
+date: 2026-08-03
+title: Setup Kubernetes Metrics with OpenTelemetry
+description: Configure the OpenTelemetry kubeletstats and k8scluster receivers (plus k8sattributesprocessor) on top of a running Kubernetes Collection Agent to track node, pod, container, and volume metrics in SigNoz.
 doc_type: howto
-
 ---
 
 ## Kubernetes Monitoring Configuration Guide
 
 This guide explains how to set up monitoring for your Kubernetes cluster using two essential OpenTelemetry receivers:
 
-- [`kubeletstats`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md): Collects metrics from individual Kubernetes nodes
-- [`k8scluster`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md): Gathers cluster-wide metrics
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow"><code>kubeletstats</code></a>: Collects metrics from individual Kubernetes nodes
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow"><code>k8scluster</code></a>: Gathers cluster-wide metrics
 
-### Setting Up Kubelet Stats Monitoring
+## Before you start: install the Kubernetes Collection Agent
+
+Make sure you have an OpenTelemetry Collector running in your cluster. Pick the install guide that matches your setup:
+
+- **Standard Kubernetes** → [k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/): Helm chart that already wires `kubeletstats`, `k8scluster`, and `k8sattributes`.
+- **EKS Fargate / GKE Autopilot / AKS Virtual Nodes** → [Serverless Kubernetes Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/): for managed clusters that block kubelet scraping on worker nodes.
+- **OpenTelemetry Operator** → [OTel Operator Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/): if you're already managing collectors via the OpenTelemetry Operator.
+
+Every install path ships a config that already includes the receivers and processors covered below. The sections that follow explain the receiver / processor options so you can adjust the shipped config for your needs.
+
+### Setup Kubelet Stats Receiver
 
 #### Overview
 
@@ -60,8 +69,10 @@ The receiver supports many optional metrics that provide deeper insights into cl
 - `k8s.container.memory_limit_utilization`: Tracks memory usage relative to configured limits
 - `k8s.container.memory_request_utilization`: Monitors memory usage versus requests
 - `container.uptime`: Tracks container uptime
+- `k8s.container.cpu.node.utilization`: Container CPU usage as a share of the node's total capacity
+- `k8s.container.memory.node.utilization`: Container memory usage as a share of the node's total capacity
 
-These are enabled by default in the [`k8s-infra`](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) Helm chart. For a complete list of available optional metrics, see the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/documentation.md#optional-metrics).
+These are enabled by default in the [`k8s-infra`](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) Helm chart. For a complete list of available optional metrics, see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/documentation.md#optional-metrics" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry documentation</a>.
 
 ### Manual Configuration Guide
 
@@ -93,6 +104,10 @@ receivers:
       - container.id
       - k8s.volume.type
     insecure_skip_verify: true
+    # Required for the *.node.utilization metrics: with `node` set (below), the receiver
+    # reads the node's total capacity from the K8s API. Needs `get` on `nodes` for the service account.
+    k8s_api_config:
+      auth_type: serviceAccount
     metric_groups:
       - container
       - pod
@@ -110,6 +125,10 @@ receivers:
       k8s.container.memory_limit_utilization:
         enabled: true
       k8s.container.memory_request_utilization:
+        enabled: true
+      k8s.container.cpu.node.utilization:
+        enabled: true
+      k8s.container.memory.node.utilization:
         enabled: true
       k8s.node.cpu.usage:
         enabled: true
@@ -130,7 +149,9 @@ receivers:
     node: ${env:K8S_NODE_NAME}
 ```
 
-#### 3. Enable Kubernetes Metadata
+The `k8s.container.{cpu,memory}.node.utilization` metrics need the receiver to read the node's total capacity from the Kubernetes API. This requires `node` set to the node name and `k8s_api_config` configured (both shown above), and the collector's service account must have `get` permission on `nodes`. See <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md#collect-k8scontainerpodcpumemorynodeutilization-as-ratio-of-total-nodes-capacity" target="_blank" rel="noopener noreferrer nofollow">the kubeletstats receiver documentation</a>.
+
+#### 3. Setup k8sattributesprocessor to enable Kubernetes metadata
 
 Configure the k8sattributes processor to enrich your metrics with Kubernetes context:
 
@@ -178,9 +199,9 @@ service:
       exporters: [otlp] # Add your exporters here
 ```
 
-Read more about the [kubeletstats receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md) and [k8sattributes processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md).
+Read more about the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">kubeletstats receiver</a> and <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">k8sattributes processor</a>.
 
-### Setting Up K8s Cluster Monitoring
+### Setup K8s Cluster Receiver
 
 #### Overview
 
@@ -215,17 +236,23 @@ Monitor the health and status of your nodes with these key conditions:
 
 #### 2. Resource Allocation Tracking
 Monitor resource allocation across your cluster:
-- `cpu`: CPU resource allocation (enabled by default)
-- `memory`: Memory resource allocation (enabled by default)
+- `cpu`: CPU resource allocation
+- `memory`: Memory resource allocation
 - `ephemeral-storage`: Temporary storage allocation
 - `storage`: Persistent storage allocation
+
+These allocations are exposed via the `k8s.node.allocatable_cpu`, `k8s.node.allocatable_memory`, etc. metrics. They are **disabled by default** in the upstream `k8scluster` receiver. Opt in via the `allocatable_types_to_report` config option (shown in the manual configuration example below).
 
 #### 3. Optional Metrics
 Key optional metrics for enhanced monitoring:
 - `k8s.node.condition`: Detailed node health status
-- `k8s.pod.status_reason`: Root cause analysis for pod states
+- `k8s.pod.status_reason`: Pod-level status reasons (`Evicted`, `NodeLost`, `Shutdown`, ...)
+- `k8s.container.status.reason`: Container-level status reasons (`CrashLoopBackOff`, `OOMKilled`, `ImagePullBackOff`, ...)
+- `k8s.container.status.state`: Container lifecycle state (`running`, `waiting`, `terminated`)
 
-For a comprehensive list of available metrics, conditions, and resources, refer to the [k8sclusterreceiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md).
+`k8s.pod.status_reason`, `k8s.container.status.reason`, and `k8s.container.status.state` are disabled by default in the upstream receiver but enabled by default in the [`k8s-infra`](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) Helm chart. `k8s.pod.status_reason` and `k8s.container.status.reason` drive the kubectl-style **Pod Status** column, while `k8s.container.status.reason` and `k8s.container.status.state` together drive the **Status** column on the [Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/) view. Enable them manually only if you run the `k8s_cluster` receiver without the chart (or on a chart version older than the one that ships them on by default).
+
+For a comprehensive list of available metrics, conditions, and resources, refer to the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">k8sclusterreceiver documentation</a>.
 
 ### Manual Configuration Guide
 
@@ -245,9 +272,13 @@ receivers:
         enabled: true
       k8s.pod.status_reason:
         enabled: true
+      k8s.container.status.reason:
+        enabled: true
+      k8s.container.status.state:
+        enabled: true
 ```
 
-#### 2. Enable Kubernetes Metadata
+#### 2. Setup k8sattributesprocessor to enable Kubernetes metadata
 
 Configure the k8sattributes processor to add Kubernetes context:
 
