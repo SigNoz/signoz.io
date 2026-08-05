@@ -4,10 +4,10 @@ import DocsIntroSectionHeader from '@/components/DocsIntroSectionHeader/DocsIntr
 
 const SHARED_CLICK_NAME = 'Docs Intro Card'
 
-const CARD_GRID_CLASS = 'relative z-10 grid grid-cols-1 md:grid-cols-3'
+const CARD_GRID_CLASS = 'relative z-10 grid grid-cols-1 lg:grid-cols-3'
 
 /** Top border on the first mobile card and the first desktop row — item-count agnostic. */
-const CARD_GRID_WITH_TOP_BORDER_CLASS = `${CARD_GRID_CLASS} [&>*:first-child]:border-t md:[&>*:nth-child(-n+3)]:border-t`
+const CARD_GRID_WITH_TOP_BORDER_CLASS = `${CARD_GRID_CLASS} [&>*:first-child]:border-t lg:[&>*:nth-child(-n+3)]:border-t`
 
 export type { DocsIntroCardData }
 
@@ -56,7 +56,7 @@ export default function DocsIntroSection({
             {...card}
             clickName={SHARED_CLICK_NAME}
             clickLocation={clickLocation}
-            className="h-[152px]"
+            className="min-h-[152px]"
           />
         ))}
       </div>

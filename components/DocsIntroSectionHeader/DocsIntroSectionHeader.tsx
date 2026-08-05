@@ -28,7 +28,7 @@ export default function DocsIntroSectionHeader({
 
   return (
     <div className="relative z-0 flex min-h-[300px] overflow-visible">
-      <div className="relative z-[1] flex flex-1 flex-col justify-end border-x border-b border-dashed border-[var(--l2-border)] p-4 md:border-l-0 md:border-r-0">
+      <div className="relative z-[1] flex flex-1 flex-col justify-end border-x border-b border-dashed border-[var(--l2-border)] p-4 lg:border-l-0 lg:border-r-0">
         <div className="flex flex-col gap-2">
           <h2 className="m-0 text-2xl font-semibold leading-9 text-[var(--l1-foreground)]">
             {title}
@@ -64,7 +64,7 @@ export default function DocsIntroSectionHeader({
           )}
         </div>
       </div>
-      <div className="pointer-events-none relative z-0 hidden w-1/3 flex-shrink-0 overflow-visible border-b border-dashed border-[var(--l2-border)] md:block">
+      <div className="pointer-events-none relative z-0 hidden w-1/3 flex-shrink-0 overflow-visible border-b border-dashed border-[var(--l2-border)] lg:block">
         {illustration && (
           <div className="absolute inset-x-0 -bottom-28 top-12">
             <FloatingRingsScene src={illustration} alt={illustrationAlt} />

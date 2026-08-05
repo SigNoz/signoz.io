@@ -276,7 +276,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
   if (!isClient) return null
 
   return (
-    <nav className="docs-sidebar sticky top-[64px] flex h-[calc(100vh-64px)] w-full flex-col overflow-hidden text-[var(--l1-foreground)]">
+    <nav className="docs-sidebar sticky top-[56px] flex h-[calc(100vh-56px)] w-full flex-col overflow-hidden text-[var(--l1-foreground)]">
       {showRegionSelector && (
         <div className="relative z-10 shrink-0 bg-[var(--l1-background)] shadow-[0_8px_16px_-6px_color-mix(in_srgb,var(--base-black)_55%,transparent)]">
           <SidebarRegionSelector />

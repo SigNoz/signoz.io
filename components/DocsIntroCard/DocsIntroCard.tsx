@@ -26,7 +26,7 @@ export default function DocsIntroCard({
   clickName,
   clickLocation,
   external = false,
-  className = 'h-[152px]',
+  className = 'min-h-[152px]',
 }: DocsIntroCardProps) {
   return (
     <TrackingLink
@@ -36,7 +36,7 @@ export default function DocsIntroCard({
       clickText={title}
       clickLocation={clickLocation}
       {...(external ? { target: '_blank', rel: 'noopener noreferrer nofollow' } : {})}
-      className={`group box-border flex flex-col border-b border-l border-r border-dashed border-[var(--l2-border)] bg-[var(--l1-background)] p-4 transition-colors md:border-l-0 md:[&:nth-child(3n)]:border-r-0 ${className}`}
+      className={`group box-border flex flex-col border-b border-l border-r border-dashed border-[var(--l2-border)] bg-[var(--l1-background)] p-4 transition-colors lg:border-l-0 lg:[&:nth-child(3n)]:border-r-0 ${className}`}
     >
       <div className="flex h-full min-h-0 w-full flex-col justify-between">
         <div className="h-6 w-6 shrink-0">{icon}</div>
@@ -46,7 +46,7 @@ export default function DocsIntroCard({
             <h3 className="m-0 text-base font-semibold leading-none text-[var(--l1-foreground)]">
               {title}
             </h3>
-            <p className="m-0 text-base leading-[26px] text-[var(--l3-foreground)] transition-colors group-hover:text-[var(--l1-foreground)]">
+            <p className="m-0 break-words text-base leading-[26px] text-[var(--l3-foreground)] transition-colors group-hover:text-[var(--l1-foreground)]">
               {description}
             </p>
           </div>
