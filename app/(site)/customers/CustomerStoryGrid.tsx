@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useSyncExternalStore } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpRight, Grid2X2, List, Search } from 'lucide-react'
@@ -12,12 +12,34 @@ import { customerStories, customerStoryFilters, type CustomerStoryFilter } from 
 type ViewMode = 'grid' | 'list'
 
 const initialStoryCount = 9
+const mobileViewQuery = '(max-width: 767px)'
+
+function subscribeToMobileView(onChange: () => void) {
+  const mediaQuery = window.matchMedia(mobileViewQuery)
+  mediaQuery.addEventListener('change', onChange)
+
+  return () => mediaQuery.removeEventListener('change', onChange)
+}
+
+function getMobileViewSnapshot() {
+  return window.matchMedia(mobileViewQuery).matches
+}
+
+function getServerMobileViewSnapshot() {
+  return false
+}
 
 export default function CustomerStoryGrid() {
   const [activeFilter, setActiveFilter] = useState<CustomerStoryFilter>('All stories')
   const [query, setQuery] = useState('')
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [selectedViewMode, setSelectedViewMode] = useState<ViewMode | null>(null)
   const [showAll, setShowAll] = useState(false)
+  const isMobileView = useSyncExternalStore(
+    subscribeToMobileView,
+    getMobileViewSnapshot,
+    getServerMobileViewSnapshot
+  )
+  const viewMode = selectedViewMode ?? (isMobileView ? 'list' : 'grid')
 
   const filteredStories = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -52,8 +74,8 @@ export default function CustomerStoryGrid() {
   const visibleStories = showAll ? filteredStories : filteredStories.slice(0, initialStoryCount)
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
-      <aside className="lg:sticky lg:top-20 lg:self-start">
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
+      <aside className="min-w-0 lg:sticky lg:top-20 lg:self-start">
         <p className="border-b border-signoz_slate-400 pb-3 text-sm font-medium text-signoz_vanilla-100">
           Filter stories
         </p>
@@ -92,7 +114,7 @@ export default function CustomerStoryGrid() {
         </div>
       </aside>
 
-      <div>
+      <div className="min-w-0">
         <div className="flex flex-col gap-3 md:sticky md:top-16 md:z-20 md:-my-3 md:flex-row md:items-center md:bg-signoz_ink-500/95 md:py-3 md:backdrop-blur-sm">
           <label className="relative flex-1">
             <span className="sr-only">Search customer stories</span>
@@ -127,7 +149,7 @@ export default function CustomerStoryGrid() {
                   ? 'bg-signoz_vanilla-200 text-signoz_ink-500'
                   : 'text-signoz_vanilla-400 hover:text-signoz_vanilla-100'
               )}
-              onClick={() => setViewMode('grid')}
+              onClick={() => setSelectedViewMode('grid')}
               type="button"
             >
               <Grid2X2 aria-hidden="true" size={15} />
@@ -141,7 +163,7 @@ export default function CustomerStoryGrid() {
                   ? 'bg-signoz_vanilla-200 text-signoz_ink-500'
                   : 'text-signoz_vanilla-400 hover:text-signoz_vanilla-100'
               )}
-              onClick={() => setViewMode('list')}
+              onClick={() => setSelectedViewMode('list')}
               type="button"
             >
               <List aria-hidden="true" size={16} />
@@ -163,7 +185,7 @@ export default function CustomerStoryGrid() {
                 className={cn(
                   'group relative overflow-hidden rounded-xl border border-signoz_slate-400 bg-signoz_ink-400 transition-colors hover:border-signoz_slate-300 hover:bg-signoz_ink-300',
                   viewMode === 'list'
-                    ? 'flex min-h-0 flex-col p-5'
+                    ? 'flex min-h-0 flex-col p-4'
                     : 'flex min-h-[330px] flex-col p-6'
                 )}
                 href={story.href}
@@ -191,48 +213,45 @@ export default function CustomerStoryGrid() {
                   </div>
                   <ArrowUpRight
                     aria-hidden="true"
-                    className="absolute right-6 top-6 shrink-0 text-signoz_vanilla-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-signoz_vanilla-100"
+                    className={cn(
+                      'absolute shrink-0 text-signoz_vanilla-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-signoz_vanilla-100',
+                      viewMode === 'list' ? 'right-4 top-4' : 'right-6 top-6'
+                    )}
                     size={18}
                   />
                   <h3
                     className={cn(
                       'text-pretty font-normal text-signoz_vanilla-300',
-                      viewMode === 'list' ? 'mt-4 text-lg leading-6' : 'mt-7 text-xl leading-7'
+                      viewMode === 'list'
+                        ? 'mt-3 pr-7 text-base leading-6'
+                        : 'mt-7 text-xl leading-7'
                     )}
                   >
                     {story.title}
                   </h3>
                 </div>
 
-                <div className={cn(viewMode === 'list' ? 'mt-5' : 'mt-auto h-28 shrink-0 pt-6')}>
-                  {story.takeaway && story.takeawayLabel ? (
-                    <>
-                      <p
-                        className={cn(
-                          'text-pretty font-medium text-signoz_vanilla-100',
-                          viewMode === 'list' ? 'text-xl leading-7' : 'text-2xl leading-8'
-                        )}
-                      >
-                        {story.takeaway}
-                      </p>
-                      <p className="mt-1 text-sm leading-5 text-signoz_vanilla-400">
-                        {story.takeawayLabel}
-                      </p>
-                    </>
-                  ) : (
-                    <div>
-                      <p
-                        className={cn(
-                          'font-medium text-signoz_vanilla-200',
-                          viewMode === 'list' ? 'text-sm' : 'text-base'
-                        )}
-                      >
-                        {story.person}
-                      </p>
-                      <p className="mt-1 text-sm text-signoz_vanilla-400">{story.role}</p>
-                    </div>
-                  )}
-                </div>
+                {viewMode === 'grid' ? (
+                  <div className="mt-auto pt-6">
+                    {story.takeaway && story.takeawayLabel ? (
+                      <>
+                        <p className="text-pretty text-2xl font-medium leading-8 text-signoz_vanilla-100">
+                          {story.takeaway}
+                        </p>
+                        <p className="mt-1 text-sm leading-5 text-signoz_vanilla-400">
+                          {story.takeawayLabel}
+                        </p>
+                      </>
+                    ) : (
+                      <div>
+                        <p className="text-base font-medium text-signoz_vanilla-200">
+                          {story.person}
+                        </p>
+                        <p className="mt-1 text-sm text-signoz_vanilla-400">{story.role}</p>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
               </Link>
             ))}
           </div>

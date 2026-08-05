@@ -51,12 +51,12 @@ export default function CustomerQuoteCarousel() {
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    const interval = window.setInterval(() => {
+    const timeout = window.setTimeout(() => {
       setActiveIndex((current) => (current + 1) % customerQuotes.length)
     }, AUTOPLAY_INTERVAL_MS)
 
-    return () => window.clearInterval(interval)
-  }, [])
+    return () => window.clearTimeout(timeout)
+  }, [activeIndex])
 
   return (
     <div aria-label="Customer quotes" aria-roledescription="carousel" role="region">
@@ -64,7 +64,7 @@ export default function CustomerQuoteCarousel() {
         Quote from {customerQuotes[activeIndex].company}
       </p>
 
-      <div className="grid min-h-96 py-12 lg:py-20">
+      <div className="grid min-h-96 min-w-0 py-12 lg:py-20">
         {customerQuotes.map((quote, index) => {
           const isActive = index === activeIndex
 
@@ -72,18 +72,18 @@ export default function CustomerQuoteCarousel() {
             <figure
               aria-hidden={!isActive}
               className={cn(
-                'col-start-1 row-start-1 flex min-h-80 flex-col items-center justify-center text-center transition-opacity duration-700 ease-in-out motion-reduce:transition-none',
+                'col-start-1 row-start-1 flex min-h-80 min-w-0 flex-col items-center justify-center text-center transition-opacity duration-700 ease-in-out motion-reduce:transition-none',
                 isActive ? 'opacity-100' : 'pointer-events-none opacity-0'
               )}
               key={quote.company}
             >
-              <blockquote className="m-0 max-w-5xl text-pretty !border-0 !pl-0 text-3xl font-medium leading-tight tracking-[-0.03em] text-signoz_vanilla-400 sm:text-4xl lg:text-5xl">
+              <blockquote className="m-0 w-full max-w-5xl text-pretty !border-0 !pl-0 text-3xl font-medium leading-tight tracking-[-0.03em] text-signoz_vanilla-400 sm:text-4xl lg:text-5xl">
                 “{quote.quoteBefore}
                 <span className="text-signoz_vanilla-100">{quote.quoteEmphasis}</span>
                 {quote.quoteAfter}”
               </blockquote>
 
-              <figcaption className="mt-10 flex items-center justify-center gap-4">
+              <figcaption className="mt-10 flex w-full max-w-xl items-center justify-center gap-4 px-2 sm:px-0">
                 <Image
                   alt={`${quote.company} logo`}
                   className="max-h-8 w-auto max-w-32 shrink-0 object-contain"
@@ -93,7 +93,7 @@ export default function CustomerQuoteCarousel() {
                   width={128}
                 />
                 <span aria-hidden="true" className="h-10 w-px bg-signoz_slate-400" />
-                <span className="min-w-max shrink-0 whitespace-nowrap text-left">
+                <span className="min-w-0 text-left">
                   <span className="block font-medium text-signoz_vanilla-100">
                     {quote.attribution}
                   </span>
@@ -118,6 +118,37 @@ export default function CustomerQuoteCarousel() {
                 />
               </Link>
             </figure>
+          )
+        })}
+      </div>
+
+      <div
+        aria-label="Choose customer quote"
+        className="flex items-center justify-center gap-1 pb-12 lg:pb-20"
+        role="group"
+      >
+        {customerQuotes.map((quote, index) => {
+          const isActive = index === activeIndex
+
+          return (
+            <button
+              aria-label={`Show quote ${index + 1} from ${quote.company}`}
+              aria-pressed={isActive}
+              className="group flex h-6 w-6 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-400"
+              key={quote.company}
+              onClick={() => setActiveIndex(index)}
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'h-1.5 w-1.5 rounded-full transition-colors',
+                  isActive
+                    ? 'bg-signoz_vanilla-100'
+                    : 'bg-signoz_slate-300 group-hover:bg-signoz_vanilla-400'
+                )}
+              />
+            </button>
           )
         })}
       </div>
