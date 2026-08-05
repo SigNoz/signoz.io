@@ -318,6 +318,7 @@ const PageFeedback: React.FC = () => {
               </div>
               <div className="overflow-hidden rounded-[4px] border border-[var(--l2-border)]">
                 <RadioGroup
+                  className="!gap-0"
                   value={reason || null}
                   onChange={(val) => {
                     setSubmitError('')
