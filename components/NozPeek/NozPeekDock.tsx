@@ -4,13 +4,11 @@ import { useCallback, useRef } from 'react'
 import { Search } from 'lucide-react'
 import { openDecimalChat } from '@/utils/decimal'
 import { NozPeekBodySvg, NozPeekHandsSvg } from './NozPeekIcon'
-import {
-  useDecimalChatRestore,
-  useNozPeekAppearAnimation,
-  useNozPeekEyeTracking,
-  useNozPeekPosition,
-  useNozPeekVisibility,
-} from './nozPeekHooks'
+import { useDecimalChatRestore } from './useDecimalChatRestore'
+import { useNozPeekAppearAnimation } from './useNozPeekAppearAnimation'
+import { useNozPeekEyeTracking } from './useNozPeekEyeTracking'
+import { useNozPeekPosition } from './useNozPeekPosition'
+import { useNozPeekVisibility } from './useNozPeekVisibility'
 import './NozPeek.css'
 
 export default function NozPeekDock() {

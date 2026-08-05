@@ -92,11 +92,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
   }
 
   return (
-    <div
-      className={`z-[10] flex flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px] ${
-        inDocsShell ? 'pb-28' : ''
-      }`}
-    >
+    <div className="z-[10] flex flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px]">
       <div
         className={`flex w-full items-center px-4 py-14 max-md:max-w-full ${
           inDocsShell ? 'justify-start' : 'justify-center'
