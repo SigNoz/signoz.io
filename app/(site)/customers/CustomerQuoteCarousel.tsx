@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 
 import { cn } from 'app/lib/utils'
+import { useLogEvent } from '@/hooks/useLogEvent'
 
 const customerQuotes = [
   {
@@ -47,6 +48,30 @@ const AUTOPLAY_INTERVAL_MS = 7000
 
 export default function CustomerQuoteCarousel() {
   const [activeIndex, setActiveIndex] = useState(0)
+  const logEvent = useLogEvent()
+
+  const trackClick = (
+    clickName: string,
+    clickText: string,
+    quoteIndex: number,
+    attributes: Record<string, unknown> = {}
+  ) => {
+    const quote = customerQuotes[quoteIndex]
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType: 'Customer Quote',
+        clickName,
+        clickLocation: 'Customers Quote Carousel',
+        clickText,
+        company: quote.company,
+        quoteIndex: quoteIndex + 1,
+        quoteCount: customerQuotes.length,
+        ...attributes,
+      },
+    })
+  }
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -106,6 +131,11 @@ export default function CustomerQuoteCarousel() {
               <Link
                 className="group mt-6 inline-flex items-center gap-2 text-sm font-medium text-signoz_robin-400 transition-colors hover:text-signoz_robin-300"
                 href={quote.href}
+                onClick={() =>
+                  trackClick('Customer Quote Source Link', quote.sourceLabel, index, {
+                    target: quote.href,
+                  })
+                }
                 rel={quote.company === 'Oracle' ? 'noopener noreferrer nofollow' : undefined}
                 tabIndex={isActive ? 0 : -1}
                 target={quote.company === 'Oracle' ? '_blank' : undefined}
@@ -136,7 +166,10 @@ export default function CustomerQuoteCarousel() {
               aria-pressed={isActive}
               className="group flex h-6 w-6 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-400"
               key={quote.company}
-              onClick={() => setActiveIndex(index)}
+              onClick={() => {
+                trackClick('Select Customer Quote', `Quote from ${quote.company}`, index)
+                setActiveIndex(index)
+              }}
               type="button"
             >
               <span

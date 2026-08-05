@@ -9,6 +9,7 @@ import {
   QuoteCard,
 } from '@/components/index-header/homepage-customer-proof/CustomerProofCards'
 import type { LogoSpec } from '@/components/index-header/homepage-customer-proof/HomepageCustomerProof.types'
+import { useLogEvent } from '@/hooks/useLogEvent'
 
 import { customerLogos, customerQuotes, type CustomerQuote } from './customerProof'
 
@@ -32,6 +33,7 @@ const featuredQuotePositions = new Map<number, 0 | 1 | 2>([
 const proofBoardWidth = 4368
 const proofCycleWidth = proofBoardWidth
 const autoScrollPixelsPerSecond = 18.5
+const customerProofClickLocation = 'Customers Proof Wall'
 let nextLogoIndex = 0
 
 const proofTiles = customerQuotes.flatMap((proof, quoteIndex) => {
@@ -93,6 +95,7 @@ function ProofBoard({ isClone }: { isClone: boolean }) {
             tile.featuredPosition !== null ? (
               <FeaturedQuoteCard
                 attribution={tile.proof.attribution}
+                clickLocation={customerProofClickLocation}
                 href={tile.proof.href}
                 isClone={isClone}
                 logo={tile.proof.logo}
@@ -102,6 +105,7 @@ function ProofBoard({ isClone }: { isClone: boolean }) {
             ) : (
               <QuoteCard
                 attribution={tile.proof.attribution}
+                clickLocation={customerProofClickLocation}
                 href={tile.proof.href}
                 isClone={isClone}
                 logo={tile.proof.logo}
@@ -110,7 +114,11 @@ function ProofBoard({ isClone }: { isClone: boolean }) {
               />
             )
           ) : (
-            <LogoCard isClone={isClone} logo={tile.logo} />
+            <LogoCard
+              clickLocation={customerProofClickLocation}
+              isClone={isClone}
+              logo={tile.logo}
+            />
           )}
         </div>
       ))}
@@ -130,6 +138,20 @@ export default function CustomerProofCarousel() {
   })
   const suppressClickRef = useRef(false)
   const [isPaused, setIsPaused] = useState(false)
+  const logEvent = useLogEvent()
+
+  const trackControl = (clickName: string, clickText: string) => {
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType: 'Customer Proof',
+        clickName,
+        clickLocation: customerProofClickLocation,
+        clickText,
+      },
+    })
+  }
 
   const normalizeScrollPosition = () => {
     const viewport = viewportRef.current
@@ -246,6 +268,7 @@ export default function CustomerProofCarousel() {
 
     suppressClickRef.current = drag.moved
     drag.active = false
+    if (drag.moved) trackControl('Drag Customer Proof Wall', 'Drag proof wall')
     normalizeScrollPosition()
 
     window.setTimeout(() => {
@@ -302,7 +325,13 @@ export default function CustomerProofCarousel() {
             }
             aria-pressed={isPaused}
             className="flex h-10 items-center justify-center gap-2 rounded-full border border-signoz_slate-400 px-4 text-sm text-signoz_vanilla-300 transition-colors hover:border-signoz_slate-300 hover:text-signoz_vanilla-100"
-            onClick={() => setIsPaused((current) => !current)}
+            onClick={() => {
+              trackControl(
+                isPaused ? 'Play Customer Proof Wall' : 'Pause Customer Proof Wall',
+                isPaused ? 'Play' : 'Pause'
+              )
+              setIsPaused((current) => !current)
+            }}
             type="button"
           >
             {isPaused ? (
@@ -316,6 +345,7 @@ export default function CustomerProofCarousel() {
             aria-label="Previous customer proof"
             className="flex h-10 w-10 items-center justify-center rounded-full border border-signoz_slate-400 text-signoz_vanilla-300 transition-colors hover:border-signoz_slate-300 hover:text-signoz_vanilla-100"
             onClick={(event) => {
+              trackControl('Previous Customer Proof', 'Previous proof')
               move(-1)
               if (event.detail !== 0) event.currentTarget.blur()
             }}
@@ -327,6 +357,7 @@ export default function CustomerProofCarousel() {
             aria-label="Next customer proof"
             className="flex h-10 w-10 items-center justify-center rounded-full border border-signoz_slate-400 text-signoz_vanilla-300 transition-colors hover:border-signoz_slate-300 hover:text-signoz_vanilla-100"
             onClick={(event) => {
+              trackControl('Next Customer Proof', 'Next proof')
               move(1)
               if (event.detail !== 0) event.currentTarget.blur()
             }}

@@ -1,11 +1,12 @@
 'use client'
 
-import { useMemo, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpRight, Grid2X2, List, Search } from 'lucide-react'
 
 import { cn } from 'app/lib/utils'
+import { useLogEvent } from '@/hooks/useLogEvent'
 
 import { customerStories, customerStoryFilters, type CustomerStoryFilter } from './customerStories'
 
@@ -34,6 +35,9 @@ export default function CustomerStoryGrid() {
   const [query, setQuery] = useState('')
   const [selectedViewMode, setSelectedViewMode] = useState<ViewMode | null>(null)
   const [showAll, setShowAll] = useState(false)
+  const hasSearchedRef = useRef(false)
+  const lastTrackedSearchRef = useRef<string | null>(null)
+  const logEvent = useLogEvent()
   const isMobileView = useSyncExternalStore(
     subscribeToMobileView,
     getMobileViewSnapshot,
@@ -73,6 +77,46 @@ export default function CustomerStoryGrid() {
 
   const visibleStories = showAll ? filteredStories : filteredStories.slice(0, initialStoryCount)
 
+  useEffect(() => {
+    if (!hasSearchedRef.current || lastTrackedSearchRef.current === query) return
+
+    const timeout = window.setTimeout(() => {
+      lastTrackedSearchRef.current = query
+      logEvent({
+        eventName: 'Customer Story Search',
+        eventType: 'track',
+        attributes: {
+          activeFilter,
+          hasQuery: query.trim().length > 0,
+          queryLength: query.trim().length,
+          resultCount: filteredStories.length,
+          viewMode,
+        },
+      })
+    }, 500)
+
+    return () => window.clearTimeout(timeout)
+  }, [activeFilter, filteredStories.length, logEvent, query, viewMode])
+
+  const trackClick = (
+    clickType: string,
+    clickName: string,
+    clickText: string,
+    attributes: Record<string, unknown> = {}
+  ) => {
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType,
+        clickName,
+        clickLocation: 'Customers Story Library',
+        clickText,
+        ...attributes,
+      },
+    })
+  }
+
   return (
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
       <aside className="min-w-0 lg:sticky lg:top-20 lg:self-start">
@@ -101,6 +145,10 @@ export default function CustomerStoryGrid() {
                 )}
                 key={filter}
                 onClick={() => {
+                  trackClick('Customer Story Filter', 'Filter Stories', filter, {
+                    previousFilter: activeFilter,
+                    resultCount: count,
+                  })
                   setActiveFilter(filter)
                   setShowAll(false)
                 }}
@@ -126,6 +174,7 @@ export default function CustomerStoryGrid() {
             <input
               className="h-11 w-full rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 pl-10 pr-4 text-sm text-signoz_vanilla-100 outline-none placeholder:text-signoz_vanilla-400 focus:border-signoz_robin-400"
               onChange={(event) => {
+                hasSearchedRef.current = true
                 setQuery(event.target.value)
                 setShowAll(false)
               }}
@@ -149,7 +198,13 @@ export default function CustomerStoryGrid() {
                   ? 'bg-signoz_vanilla-200 text-signoz_ink-500'
                   : 'text-signoz_vanilla-400 hover:text-signoz_vanilla-100'
               )}
-              onClick={() => setSelectedViewMode('grid')}
+              onClick={() => {
+                trackClick('Customer Story View', 'Grid View', 'Grid view', {
+                  previousViewMode: viewMode,
+                  viewMode: 'grid',
+                })
+                setSelectedViewMode('grid')
+              }}
               type="button"
             >
               <Grid2X2 aria-hidden="true" size={15} />
@@ -163,7 +218,13 @@ export default function CustomerStoryGrid() {
                   ? 'bg-signoz_vanilla-200 text-signoz_ink-500'
                   : 'text-signoz_vanilla-400 hover:text-signoz_vanilla-100'
               )}
-              onClick={() => setSelectedViewMode('list')}
+              onClick={() => {
+                trackClick('Customer Story View', 'List View', 'List view', {
+                  previousViewMode: viewMode,
+                  viewMode: 'list',
+                })
+                setSelectedViewMode('list')
+              }}
               type="button"
             >
               <List aria-hidden="true" size={16} />
@@ -180,7 +241,7 @@ export default function CustomerStoryGrid() {
                 : 'grid-cols-1 gap-3'
             )}
           >
-            {visibleStories.map((story) => (
+            {visibleStories.map((story, storyIndex) => (
               <Link
                 className={cn(
                   'group relative overflow-hidden rounded-xl border border-signoz_slate-400 bg-signoz_ink-400 transition-colors hover:border-signoz_slate-300 hover:bg-signoz_ink-300',
@@ -190,6 +251,17 @@ export default function CustomerStoryGrid() {
                 )}
                 href={story.href}
                 key={story.href}
+                onClick={() =>
+                  trackClick('Customer Story', 'Customer Story Link', story.title, {
+                    activeFilter,
+                    hasSearchQuery: query.trim().length > 0,
+                    publishedAt: story.publishedAt,
+                    storyCompany: story.company,
+                    storyPosition: storyIndex + 1,
+                    target: story.href,
+                    viewMode,
+                  })
+                }
               >
                 <div className="flex flex-col">
                   <div
@@ -265,7 +337,21 @@ export default function CustomerStoryGrid() {
           <div className="mt-10 flex justify-center">
             <button
               className="rounded-full border border-signoz_slate-400 bg-signoz_ink-400 px-5 py-2.5 text-sm font-medium text-signoz_vanilla-200 transition-colors hover:border-signoz_slate-300 hover:bg-signoz_ink-300"
-              onClick={() => setShowAll((current) => !current)}
+              onClick={() => {
+                trackClick(
+                  'Customer Story List',
+                  showAll ? 'Show Fewer Stories' : 'View More Stories',
+                  showAll
+                    ? 'Show fewer'
+                    : `View more (${filteredStories.length - initialStoryCount})`,
+                  {
+                    activeFilter,
+                    hasSearchQuery: query.trim().length > 0,
+                    resultCount: filteredStories.length,
+                  }
+                )
+                setShowAll((current) => !current)
+              }}
               type="button"
             >
               {showAll ? 'Show fewer' : `View more (${filteredStories.length - initialStoryCount})`}

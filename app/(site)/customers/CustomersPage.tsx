@@ -1,6 +1,7 @@
 'use client'
 
 import Button from '@/components/ui/Button'
+import { useLogEvent } from '@/hooks/useLogEvent'
 
 import CustomerProofCarousel from './CustomerProofCarousel'
 import CustomerQuoteCarousel from './CustomerQuoteCarousel'
@@ -26,6 +27,22 @@ const customerPageContainerClassName =
   'relative mx-auto w-[calc(100dvw-8px)] max-w-none border-x border-dashed border-signoz_slate-400 px-4 sm:px-6 lg:px-16 xl:px-20 wide:max-w-8xl wide:px-0'
 
 export default function CustomersPage() {
+  const logEvent = useLogEvent()
+
+  const trackHeroCta = (clickName: string, clickText: string, target: string) => {
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType: 'CTA',
+        clickName,
+        clickLocation: 'Customers Hero',
+        clickText,
+        target,
+      },
+    })
+  }
+
   return (
     <div className="relative overflow-x-clip bg-signoz_ink-500 text-signoz_vanilla-100">
       <section className="relative border-b border-dashed border-signoz_slate-400">
@@ -59,6 +76,9 @@ export default function CustomersPage() {
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                   <Button
                     className="!w-full sm:!w-auto sm:min-w-[176px]"
+                    onClick={() =>
+                      trackHeroCta('Get Started Free CTA', 'Get started free', '/teams/')
+                    }
                     to="/teams/"
                     variant="legacyPrimary"
                     withIcon
@@ -67,6 +87,9 @@ export default function CustomersPage() {
                   </Button>
                   <Button
                     className="!w-full !bg-signoz_ink-500/80 !text-signoz_vanilla-100 ring-1 ring-signoz_slate-400 hover:!bg-signoz_ink-300 sm:!w-auto sm:min-w-[176px]"
+                    onClick={() =>
+                      trackHeroCta('Contact Us CTA', 'Contact us', '/contact-us/?source=customers')
+                    }
                     to="/contact-us/?source=customers"
                     variant="legacySecondary"
                     withIcon

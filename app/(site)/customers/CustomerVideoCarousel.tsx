@@ -1,8 +1,9 @@
 'use client'
 
-import { useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import Image, { type ImageLoader } from 'next/image'
 import { ArrowLeft, ArrowRight, Play } from 'lucide-react'
+import { useLogEvent } from '@/hooks/useLogEvent'
 
 const youtubeThumbnailLoader: ImageLoader = ({ src, width }) => `${src}?width=${width}`
 
@@ -32,8 +33,50 @@ export default function CustomerVideoCarousel() {
   const suppressClickRef = useRef(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [interactiveVideoId, setInteractiveVideoId] = useState<string | null>(null)
+  const hasChangedSlideRef = useRef(false)
+  const logEvent = useLogEvent()
 
   const progressPosition = ['translate-x-0', 'translate-x-full', 'translate-x-[200%]'] as const
+
+  useEffect(() => {
+    if (!hasChangedSlideRef.current) return
+
+    const activeVideo = customerVideos[activeIndex]
+    logEvent({
+      eventName: 'Customer Video Viewed',
+      eventType: 'track',
+      attributes: {
+        company: activeVideo.company,
+        slideCount: customerVideos.length,
+        slideIndex: activeIndex + 1,
+        videoId: activeVideo.videoId,
+      },
+    })
+  }, [activeIndex, logEvent])
+
+  const trackClick = (
+    clickName: string,
+    clickText: string,
+    videoIndex: number,
+    attributes: Record<string, unknown> = {}
+  ) => {
+    const video = customerVideos[videoIndex]
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType: 'Customer Video',
+        clickName,
+        clickLocation: 'Customers Featured Videos',
+        clickText,
+        company: video.company,
+        slideCount: customerVideos.length,
+        slideIndex: videoIndex + 1,
+        videoId: video.videoId,
+        ...attributes,
+      },
+    })
+  }
 
   const move = (direction: -1 | 1) => {
     const viewport = viewportRef.current
@@ -42,6 +85,12 @@ export default function CustomerVideoCarousel() {
     const nextIndex = (activeIndex + direction + customerVideos.length) % customerVideos.length
     const nextSlide = viewport.children.item(nextIndex) as HTMLElement | null
 
+    hasChangedSlideRef.current = true
+    trackClick(
+      direction === -1 ? 'Previous Customer Video' : 'Next Customer Video',
+      direction === -1 ? 'Previous video' : 'Next video',
+      nextIndex
+    )
     setActiveIndex(nextIndex)
     viewport.scrollTo({
       behavior: 'smooth',
@@ -82,6 +131,11 @@ export default function CustomerVideoCarousel() {
     suppressClickRef.current = drag.moved
     drag.active = false
 
+    if (drag.moved) {
+      hasChangedSlideRef.current = true
+      trackClick('Drag Customer Videos', 'Drag video carousel', activeIndex)
+    }
+
     window.setTimeout(() => {
       suppressClickRef.current = false
     }, 0)
@@ -113,7 +167,10 @@ export default function CustomerVideoCarousel() {
             return slideDistance < closestDistance ? index : closestIndex
           }, 0)
 
-          setActiveIndex(nextIndex)
+          if (nextIndex !== activeIndex) {
+            hasChangedSlideRef.current = true
+            setActiveIndex(nextIndex)
+          }
         }}
         ref={viewportRef}
         role="region"
@@ -147,7 +204,10 @@ export default function CustomerVideoCarousel() {
                   <button
                     aria-label={`Play the ${video.company} customer video`}
                     className="absolute inset-0 flex cursor-grab items-center justify-center active:cursor-grabbing"
-                    onClick={() => setInteractiveVideoId(video.videoId)}
+                    onClick={() => {
+                      trackClick('Play Customer Video', `Play ${video.company} video`, index)
+                      setInteractiveVideoId(video.videoId)
+                    }}
                     type="button"
                   >
                     <span className="flex h-14 w-14 items-center justify-center rounded-full bg-signoz_cherry-500 text-signoz_vanilla-100 shadow-lg transition-transform hover:scale-105 sm:h-16 sm:w-16">
