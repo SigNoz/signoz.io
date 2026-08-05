@@ -1,20 +1,75 @@
 ---
-date: 2026-07-10
+date: 2026-08-05
 title: Errors and Exceptions - Record, View, and Group Them
-description: Learn how to record exceptions in your traces using OpenTelemetry across Java, Go, Python, JavaScript, Ruby, .NET, and other languages.
+description: Learn how SigNoz collects and groups exceptions from your traces, links each one to its request, and how to record exceptions in your code.
 doc_type: howto
 ---
-## Recording exceptions
 
-Languages that support auto instrumentations(Python, Java, Ruby, Javascript) automatically record exceptions. For other languages, we need to record exceptions manually. Also, in some cases even for an auto-instrumented app, you may want to record custom exceptions manually.
+## Overview
 
-To manually record exceptions, we need to get the span from the tracer and then call a function called `recordException()` or `recordError()` which varies across languages. Also, you can set the status of the span to `error` if the exception means the operation results in an error state.
+SigNoz reads exceptions from the traces your services already send. Your instrumentation records an exception as an `exception` span event, and SigNoz collects those events into a dedicated **Exceptions** view that groups them by service, exception type, and message.
 
-Below are examples of how to record exceptions in different languages.
+Every exception carries the span and trace IDs of the request it came from, so you can move from a row in the list to the flame graph of the failing request.
+
+With the Exceptions view you can:
+
+- Browse the exception types your services hit, with count, first seen, and last seen.
+- Filter by deployment environment, service, host, or Kubernetes cluster, namespace, deployment, and pod.
+- Read the full stack trace for any occurrence.
+- Open the trace that produced the exception to inspect the failing span and what ran before and after it.
+- Step through individual occurrences of the same exception group.
+- [Alert on exceptions](https://signoz.io/docs/alerts-management/exceptions-based-alerts/) when a new type shows up or a known one spikes.
+
+<Figure
+    src="/img/docs/exception-list.webp"
+    alt="Exceptions list page in SigNoz"
+    caption="Exceptions list, sortable by Last Seen, First Seen, Count, Exception Type, and Application"
+/>
+
+## How to View Exceptions?
+
+Open **Exceptions** from the left navigation. The list shows one row per exception group with its type, message, occurrence count, first seen, last seen, and the application that reported it. Sort by exception type, count, first seen, last seen, or application. Narrow the time range from the picker at the top, and use the filter sidebar or the search bar to scope the list to a service, environment, host, or Kubernetes workload.
+
+To follow an exception into the request that caused it:
+
+1. Click an exception type to open its detail page. You get the stack trace, the identifiers that tie the exception back to its origin (`spanID`, `traceID`, `serviceName`, and `groupID`), and **Older** and **Newer** buttons to step through other occurrences in the same group.
+
+   <Figure
+       src="/img/docs/exception-detail-1.webp"
+       alt="Exception detail page showing stack trace and span attributes"
+       caption="Exception detail page with stack trace and span attributes"
+   />
+
+2. Click **See the error in trace graph** to open the full trace. The flame graph and waterfall show the failing span in the context of the whole request, and the span details panel gives you the span's own attributes, events, and correlated logs. The exception detail page does not carry those attributes, so open the trace when you need them.
+
+   <Figure
+       src="/img/docs/exception-detail-2.webp"
+       alt="Exception shown in the context of a trace in SigNoz"
+       caption="Exception in the context of its trace"
+   />
+
+## What counts as an exception
+
+SigNoz builds the Exceptions view from span events. Log records do not feed it. SigNoz treats a span event as an exception when its name is `exception` or ends in `.exception`, which covers the current OpenTelemetry conventions:
+
+- `exception`
+- `http.client.request.exception` and `http.server.request.exception`
+- `db.client.operation.exception`
+- `rpc.client.call.exception` and `rpc.server.call.exception`
+
+From each event SigNoz stores `exception.type`, `exception.message`, `exception.stacktrace`, and `exception.escaped`. Type and message fill the list columns and decide grouping, so record at least one of them. OpenTelemetry has deprecated `exception.escaped`, so treat it as legacy data rather than something to set on new instrumentation.
 
 <Admonition type="info">
-OpenTelemetry is <a href="https://opentelemetry.io/blog/2026/deprecating-span-events/" target="_blank" rel="noopener noreferrer nofollow">deprecating the span-event exception APIs</a> shown below in favor of the Logs API. No action is needed today: existing calls stay valid and SDKs still record span events by default. No language SDK yet ships a stable log-based equivalent of `recordException`, so these examples remain the current way to record exceptions.
+OpenTelemetry is <a href="https://opentelemetry.io/blog/2026/deprecating-span-events/" target="_blank" rel="noopener noreferrer nofollow">deprecating the span-event exception APIs</a> in favor of the Logs API. No action is needed today: existing `recordException` calls stay valid and span events remain the default. The migration runs per instrumentation library, not across an SDK. A library that has adopted the `OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN` opt-in emits log records instead of span events when you set it to `logs`, and those exceptions will not appear in the Exceptions view. Libraries that have not adopted it ignore the variable, and `recordException` calls in your own code stay span events either way. Set `logs/dup` to emit both while you migrate.
 </Admonition>
+
+## Recording exceptions
+
+Instrumentation libraries record an exception event when an exception escapes the operation they wrap, so an auto-instrumented Python, Java, Ruby, or JavaScript app reports its unhandled exceptions without any code changes. Record an exception yourself when it marks a failed operation that no library captured, such as an error you catch at a request boundary and turn into a 500 response. OpenTelemetry <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/" target="_blank" rel="noopener noreferrer nofollow">no longer recommends recording exceptions</a> that you catch and recover from inside the span, since they add noise to the Exceptions view and to any alerts built on it.
+
+To record an exception, get the current span from the tracer and call `recordException()` or its language equivalent. That call adds the span event and leaves the span status alone, so set the status to error separately when the exception means the operation failed.
+
+Examples for each language:
 
 ### Record Exceptions in Java:
 
@@ -92,7 +147,7 @@ using (var activity = MyActivitySource.StartActivity("Foo"))
     }
     catch (SomeException ex)
     {
-        activity?.SetStatus(ActivityStatusCode.Error, ex.message);
+        activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
         activity?.RecordException(ex);
     }
 }
@@ -107,7 +162,9 @@ require "opentelemetry/sdk"
 # Get the current span from the tracer
 span = OpenTelemetry::Trace.current_span
 
-rescue Exception => e
+begin
+  do_work
+rescue StandardError => e
   # Record the exception and update the span status.
   span.record_exception(e)
   span.status = OpenTelemetry::Trace::Status.error(e.to_s)
@@ -117,65 +174,20 @@ end
 ### Record Exceptions in PHP:
 
 ```php
-
-//start a root span
-$rootSpan = $tracer->spanBuilder('root')->startSpan();
-//future spans will be parented to the currently active span
-$rootScope = $rootSpan->activate();
+$span = $tracer->spanBuilder('process-order')->startSpan();
+$scope = $span->activate();
 
 try {
-    $span1 = $tracer->spanBuilder('foo')->startSpan();
-    $span1Scope = $span1->activate();
-
-    try {
-        $span2 = $tracer->spanBuilder('bar')->startSpan();
-        echo 'OpenTelemetry welcomes PHP' . PHP_EOL;
-        $span2->end();
-    } finally {
-        $span1Scope->detach();
-        $span1->end();
-    }
+    doWork();
 } catch (Throwable $t) {
-    //The library's code shouldn't be throwing unhandled exceptions (it should emit any errors via diagnostic events)
-    //This is intended to illustrate a way you can capture unhandled exceptions coming from your app code
-    $rootSpan->setStatus(StatusCode::STATUS_ERROR, $t->getMessage());
-    $rootSpan->recordException($t);
+    // Record the exception and update the span status.
+    $span->recordException($t);
+    $span->setStatus(StatusCode::STATUS_ERROR, $t->getMessage());
 } finally {
-    //ensure span ends and scope is detached
-    $rootScope->detach();
-    $rootSpan->end();
+    $scope->detach();
+    $span->end();
 }
 ```
-
-## How to View Exceptions?
-The Exceptions tab shows list of exceptions which applications encounter. 
-
-It shows the list of exceptions in the applications in a separate page so that users can access them easily. It is also linked to trace pages through which you can see where in a trace is a request facing an exception
-
-You can sort exceptions by Last Seen, First Seen, Count, Exception type and Application name
-
-<Figure
-    src="/img/docs/exception-list.webp"
-    alt="Exceptions list page in SigNoz"
-    caption="Exceptions list, sortable by Last Seen, First Seen, Count, Exception Type, and Application"
-/>
-
-Exception detail page includes the stack trace of the exception, exception attributes and link to the span which caused the exception.
-
-<Figure
-    src="/img/docs/exception-detail-1.webp"
-    alt="Exception detail page showing stack trace and span attributes"
-    caption="Exception detail page with stack trace and span attributes"
-/>
-
-By clicking `See the error in trace graph` you can see the exceptions in the context of the trace request in which the exception was thrown
-
-<Figure
-    src="/img/docs/exception-detail-2.webp"
-    alt="Exception shown in the context of a trace in SigNoz"
-    caption="Exception in the context of its trace"
-/>
-
 
 ## Grouping Exceptions
 
@@ -231,3 +243,7 @@ helm -n platform upgrade \
 - [Explore Traces](https://signoz.io/docs/userguide/traces/) to see the request each exception came from
 - [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to pull the surrounding log lines for an exception
 - [Set up exception-based alerts](https://signoz.io/docs/alerts-management/exceptions-based-alerts/) to get notified when a new exception type appears
+
+## Get Help
+
+<GetHelp />
