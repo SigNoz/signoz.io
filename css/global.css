@@ -6,6 +6,8 @@ html {
   /* Prevent rubber-band overscroll from flashing a mismatched color under the page */
   overscroll-behavior-y: none;
   background-color: var(--l1-background);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--l3-foreground) 55%, transparent) transparent;
 }
 
 body {
@@ -108,35 +110,16 @@ code {
 }
 
 /*
-  Prefer native overlay scrollbars sitewide (no global ::-webkit-scrollbar).
-  Scope thin dark-theme bars only where overflow is intentional and always
-  visible would otherwise clash with the dark UI (docs sidenav + select menus).
+  Thin scrollbars without forcing classic gutters.
+  Do NOT set ::-webkit-scrollbar width/height — that switches overlay → classic
+  and reserves layout space. scrollbar-width/color keep OS overlay behavior
+  (macOS) while thinning bars where the platform uses classic.
 */
 .docs-sidebar-scroll,
 [data-slot='select-content'],
 [data-slot='select-viewport'] {
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--l3-foreground) 55%, transparent) transparent;
-}
-
-.docs-sidebar-scroll::-webkit-scrollbar,
-[data-slot='select-content']::-webkit-scrollbar,
-[data-slot='select-viewport']::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.docs-sidebar-scroll::-webkit-scrollbar-thumb,
-[data-slot='select-content']::-webkit-scrollbar-thumb,
-[data-slot='select-viewport']::-webkit-scrollbar-thumb {
-  border-radius: 9999px;
-  background-color: color-mix(in srgb, var(--l3-foreground) 45%, transparent);
-}
-
-.docs-sidebar-scroll::-webkit-scrollbar-track,
-[data-slot='select-content']::-webkit-scrollbar-track,
-[data-slot='select-viewport']::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 .docs-sidebar {
