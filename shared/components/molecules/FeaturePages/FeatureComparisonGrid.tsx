@@ -5,6 +5,8 @@ export type ComparisonColumn = {
   key: string
   cellClassName?: string
   sectionCellClassName?: string
+  occludeStickyText?: boolean
+  stickyOcclusionClassName?: string
 }
 
 export type ComparisonSection = {
@@ -63,7 +65,15 @@ export default function FeatureComparisonGrid({
                 {section.title}
               </div>
               {columns.map((col) => (
-                <div key={col.key} className={col.sectionCellClassName ?? ''} />
+                <div
+                  key={col.key}
+                  className={[
+                    col.sectionCellClassName,
+                    col.occludeStickyText ? col.stickyOcclusionClassName : undefined,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                />
               ))}
             </div>
           </div>
