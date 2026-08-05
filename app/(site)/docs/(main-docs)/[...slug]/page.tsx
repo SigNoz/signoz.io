@@ -7,6 +7,7 @@ import JsonLdScript from '@/components/JsonLdScript'
 import { buildBreadcrumbSchema, getDocsBreadcrumbs } from '@/utils/breadcrumbSchema'
 import { fetchDocBySlug } from '@/utils/cachedData'
 import { compileMdxSource } from '@/utils/compileMdx'
+import { slugFromParams } from '@/utils/docs/markdownRouting'
 
 export const revalidate = 86400
 export const dynamicParams = true
@@ -15,7 +16,7 @@ export async function generateMetadata(props: {
   params: Promise<{ slug: string[] }>
 }): Promise<Metadata | undefined> {
   const params = await props.params
-  const slug = decodeURI(params.slug.join('/'))
+  const slug = slugFromParams(params.slug)
   const post = await fetchDocBySlug(slug)
 
   if (!post) {
@@ -24,17 +25,23 @@ export async function generateMetadata(props: {
 
   const seoTitle = post?.meta_title || post?.title
   const fullTitle = seoTitle ? `${seoTitle} | SigNoz Docs` : 'SigNoz Docs'
+  // Absolute URLs — relative "./" makes Next encode nested catch-all slugs as %2F
+  // (e.g. /docs/ai%2Fsignoz-mcp-server/) in canonical and og:url.
+  const pageUrl = `${siteMetadata.siteUrl}/docs/${slug}/`
 
   return {
     title: seoTitle,
     description: post.description,
+    alternates: {
+      canonical: pageUrl,
+    },
     openGraph: {
       title: fullTitle,
       description: post.description,
       siteName: siteMetadata.title,
       locale: 'en_US',
       type: 'article',
-      url: './',
+      url: pageUrl,
     },
     twitter: {
       card: 'summary_large_image',
@@ -49,7 +56,7 @@ export const generateStaticParams = async () => {
 
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params
-  const slug = decodeURI(params.slug.join('/'))
+  const slug = slugFromParams(params.slug)
   const post = await fetchDocBySlug(slug)
 
   if (!post) {

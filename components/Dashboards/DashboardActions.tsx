@@ -1,112 +1,264 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Download, Copy, CheckCircle } from 'lucide-react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
+import { Check, Copy, Download } from 'lucide-react'
+import Admonition from '../Admonition/Admonition'
+import Link from '../Link'
 import Button from '../ui/Button'
 
-interface DashboardActionsProps {
-  dashboardJsonUrl: string
-  dashboardName: string
+export const V2_MIN_SIGNOZ_VERSION = 'v0.135.0'
+const DASHBOARDS_V2_DOC_URL = 'https://signoz.io/docs/dashboards/dashboards-v2-api/'
+const UPGRADE_GUIDE_URL = 'https://signoz.io/docs/operate/migration/upgrade-0-135/'
+const IMPORT_DOC_URL = 'https://signoz.io/docs/dashboards/import-dashboard/'
+
+export type DashboardSchemaVersion = 'v2' | 'v1'
+
+type PendingAction = 'download' | 'copy' | null
+
+export interface DashboardActionsProps {
+  /** V2 (Perses) dashboard JSON. The default and recommended version. */
+  dashboardJsonV2Url?: string
+  /**
+   * Legacy V1 dashboard JSON. Omit when the dashboard has no V1 file — the
+   * version switch is then hidden and only V2 is offered.
+   */
+  dashboardJsonV1Url?: string
+  /**
+   * Legacy alias for `dashboardJsonV2Url`, kept so docs written before the V2
+   * rollout keep rendering.
+   *
+   * @deprecated Use `dashboardJsonV2Url`.
+   */
+  dashboardJsonUrl?: string
+  dashboardName?: string
   className?: string
 }
 
-const DashboardActions: React.FC<DashboardActionsProps> = ({ 
-  dashboardJsonUrl, 
-  dashboardName,
-  className = ""
+const VERSION_LABELS: Record<DashboardSchemaVersion, string> = {
+  v2: 'V2',
+  v1: 'V1 (legacy)',
+}
+
+const slugify = (value: string): string =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+/** Falls back to the JSON file name when a doc does not pass `dashboardName`. */
+const getFileNameBase = (dashboardName: string, url: string): string => {
+  const fromName = slugify(dashboardName)
+  if (fromName) return fromName
+
+  const fileName = url.split('?')[0].split('/').pop() || ''
+  return slugify(fileName.replace(/\.json$/i, '')) || 'signoz-dashboard'
+}
+
+const CARD_CLASS = [
+  'not-prose my-6 w-full rounded-[6px] border text-left',
+  'border-[var(--l1-border)] bg-[var(--card,var(--l2-background))]',
+].join(' ')
+
+const TAB_CLASS = [
+  'rounded-[4px] px-2.5 py-1 text-xs font-medium leading-5 transition-colors',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]',
+].join(' ')
+
+// `not-prose` drops the docs anchor styling, so links carry it themselves.
+const LINK_CLASS = 'text-[var(--accent-primary)] underline underline-offset-2'
+
+const DashboardActions: React.FC<DashboardActionsProps> = ({
+  dashboardJsonV2Url,
+  dashboardJsonV1Url,
+  dashboardJsonUrl,
+  dashboardName = '',
+  className = '',
 }) => {
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [isCopying, setIsCopying] = useState(false)
+  const v2Url = dashboardJsonV2Url || dashboardJsonUrl || ''
+  const v1Url = dashboardJsonV1Url || ''
+
+  const versions = useMemo<DashboardSchemaVersion[]>(
+    () => [...(v2Url ? (['v2'] as const) : []), ...(v1Url ? (['v1'] as const) : [])],
+    [v2Url, v1Url]
+  )
+
+  const [activeVersion, setActiveVersion] = useState<DashboardSchemaVersion>(v2Url ? 'v2' : 'v1')
+  const [pending, setPending] = useState<PendingAction>(null)
   const [copied, setCopied] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  // Copying after downloading the same version should not refetch.
+  const jsonCache = useRef(new Map<string, string>())
+
+  const isV1 = activeVersion === 'v1'
+  const activeUrl = isV1 ? v1Url : v2Url
+  const shortLabel = activeVersion.toUpperCase()
+
+  const fetchJson = useCallback(async (url: string): Promise<string> => {
+    const cached = jsonCache.current.get(url)
+    if (cached) return cached
+
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch dashboard JSON: ${response.status}`)
+    }
+
+    const formatted = JSON.stringify(await response.json(), null, 2)
+    jsonCache.current.set(url, formatted)
+    return formatted
+  }, [])
+
+  const selectVersion = (version: DashboardSchemaVersion) => {
+    setActiveVersion(version)
+    setCopied(false)
+    setError(null)
+  }
 
   const handleDownload = async () => {
-    setIsDownloading(true)
+    setPending('download')
+    setError(null)
     try {
-      const response = await fetch(dashboardJsonUrl)
-      if (!response.ok) {
-        throw new Error('Failed to fetch dashboard JSON')
-      }
-      
-      const dashboardData = await response.json()
-      const blob = new Blob([JSON.stringify(dashboardData, null, 2)], { 
-        type: 'application/json' 
-      })
-      
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${dashboardName.toLowerCase().replace(/\s+/g, '-')}.json`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error('Error downloading dashboard:', error)
-      alert('Failed to download dashboard. Please try again.')
+      const json = await fetchJson(activeUrl)
+      const objectUrl = URL.createObjectURL(new Blob([json], { type: 'application/json' }))
+      const anchor = document.createElement('a')
+      anchor.href = objectUrl
+      anchor.download = `${getFileNameBase(dashboardName, activeUrl)}-${activeVersion}.json`
+      document.body.appendChild(anchor)
+      anchor.click()
+      document.body.removeChild(anchor)
+      URL.revokeObjectURL(objectUrl)
+    } catch (downloadError) {
+      console.error('Error downloading dashboard:', downloadError)
+      setError('Could not download the dashboard JSON.')
     } finally {
-      setIsDownloading(false)
+      setPending(null)
     }
   }
 
   const handleCopy = async () => {
-    setIsCopying(true)
+    setPending('copy')
+    setError(null)
     try {
-      const response = await fetch(dashboardJsonUrl)
-      if (!response.ok) {
-        throw new Error('Failed to fetch dashboard JSON')
-      }
-      
-      const dashboardData = await response.json()
-      await navigator.clipboard.writeText(JSON.stringify(dashboardData, null, 2))
-      
+      await navigator.clipboard.writeText(await fetchJson(activeUrl))
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch (error) {
-      console.error('Error copying dashboard:', error)
-      alert('Failed to copy dashboard. Please try again.')
+    } catch (copyError) {
+      console.error('Error copying dashboard:', copyError)
+      setError('Could not copy the dashboard JSON.')
     } finally {
-      setIsCopying(false)
+      setPending(null)
     }
   }
 
+  if (!activeUrl) return null
+
   return (
-    <div className={`flex flex-col items-center ${className}`}>
-      <div className="flex gap-3 my-6">
-        <Button
-          variant="default"
-          rounded='default'
-          isButton={true}
-          onClick={handleDownload}
-          disabled={isDownloading}
-        >
-          <Download className="w-3.5 h-3.5 mr-1.5" />
-          {isDownloading ? 'Downloading...' : 'Download JSON'}
-        </Button>
-        
-        <Button 
-          variant={"tertiary"} 
-          rounded={"default"} 
-          isButton={true}
-          onClick={handleCopy}
-          disabled={isCopying}
-        >
-          {copied ? (
-            <>
-              <CheckCircle className="w-3.5 h-3.5 mr-1.5 text-green-600" />
-              <span className="text-green-600">Copied!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-3.5 h-3.5 mr-1.5" />
-              {isCopying ? 'Copying...' : 'Copy JSON'}
-            </>
-          )}
-        </Button>
+    <div className={`${CARD_CLASS} ${className}`.trim()}>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--l1-border)] px-4 py-3">
+        <span className="text-sm font-medium text-[var(--l1-foreground)]">Dashboard JSON</span>
+
+        {versions.length > 1 && (
+          <div
+            role="tablist"
+            aria-label="Dashboard JSON schema version"
+            className="flex items-center gap-1 rounded-[6px] bg-[var(--l3-background)] p-1"
+          >
+            {versions.map((version) => {
+              const selected = version === activeVersion
+              return (
+                <button
+                  key={version}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => selectVersion(version)}
+                  className={[
+                    TAB_CLASS,
+                    selected
+                      ? 'bg-[var(--card,var(--l2-background))] text-[var(--l1-foreground)] shadow-sm'
+                      : 'text-[var(--l3-foreground)] hover:text-[var(--l1-foreground)]',
+                  ].join(' ')}
+                >
+                  {VERSION_LABELS[version]}
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
-      
-      <div className="text-sm text-gray-600 mt-2">
-        <p className="text-center">
-          <span className="font-bold italic">Dashboards → + New dashboard → Import JSON</span>
+
+      <div className="px-4 py-4">
+        {isV1 ? (
+          <Admonition type="warning" variant="sm" title="V1 is deprecated" className="mt-0">
+            Use V1 only on SigNoz older than {V2_MIN_SIGNOZ_VERSION}. From {V2_MIN_SIGNOZ_VERSION}{' '}
+            onwards, import the V2 JSON — V1 imports still work through a temporary compatibility
+            path that will be removed. See the{' '}
+            <Link href={UPGRADE_GUIDE_URL}>{V2_MIN_SIGNOZ_VERSION} upgrade guide</Link>.
+          </Admonition>
+        ) : (
+          <p className="mb-4 text-sm leading-6 text-[var(--l2-foreground)]">
+            Recommended. Uses the{' '}
+            <Link className={LINK_CLASS} href={DASHBOARDS_V2_DOC_URL}>
+              V2 dashboard schema
+            </Link>{' '}
+            and needs SigNoz {V2_MIN_SIGNOZ_VERSION} or newer.
+          </p>
+        )}
+
+        <div className="flex flex-wrap gap-3">
+          <Button
+            variant="default"
+            rounded="default"
+            isButton={true}
+            onClick={handleDownload}
+            disabled={pending !== null}
+          >
+            <Download aria-hidden className="mr-1.5 h-3.5 w-3.5" />
+            {pending === 'download' ? 'Downloading...' : `Download ${shortLabel} JSON`}
+          </Button>
+
+          <Button
+            variant="tertiary"
+            rounded="default"
+            isButton={true}
+            onClick={handleCopy}
+            disabled={pending !== null}
+          >
+            {copied ? (
+              <>
+                <Check aria-hidden className="mr-1.5 h-3.5 w-3.5" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy aria-hidden className="mr-1.5 h-3.5 w-3.5" />
+                {pending === 'copy' ? 'Copying...' : `Copy ${shortLabel} JSON`}
+              </>
+            )}
+          </Button>
+        </div>
+
+        <p aria-live="polite" className="sr-only">
+          {copied ? `${shortLabel} dashboard JSON copied` : ''}
+        </p>
+
+        {error && (
+          <p className="mt-3 text-sm leading-6 text-[var(--accent-cherry)]">
+            {error}{' '}
+            <Link
+              className="text-[var(--accent-cherry)] underline underline-offset-2"
+              href={activeUrl}
+            >
+              Open the raw JSON
+            </Link>{' '}
+            instead.
+          </p>
+        )}
+
+        <p className="mt-4 text-xs leading-5 text-[var(--l3-foreground)]">
+          Import it in SigNoz with <strong>Dashboards → + New dashboard → Import JSON</strong>.{' '}
+          <Link className={LINK_CLASS} href={IMPORT_DOC_URL}>
+            Import guide
+          </Link>
         </p>
       </div>
     </div>
