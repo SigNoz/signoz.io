@@ -9,8 +9,8 @@ import CustomerVideoCarousel from './CustomerVideoCarousel'
 
 const customerMetrics = [
   {
-    value: '47%',
-    label: 'reduction in MTTR and TCO',
+    value: 'Up to 80%',
+    label: 'savings on your Datadog bill',
   },
   {
     value: '10 TB+/day',
