@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-08-05
 title: "Kubernetes Pods Monitoring: CPU, Memory, and Health"
 description: Monitor Kubernetes pod CPU, memory, and network performance in SigNoz, covering request/limit utilization and correlated traces and logs.
 doc_type: explanation
@@ -152,12 +152,12 @@ Click a pod name to open the detail page. The header shows **Namespace**, **Clus
 #### Network Rate
 
 - This chart relies on the OTel metric(s): `k8s.pod.network.io`.
-- Plots the pod's network throughput in bytes per second (rate of `k8s.pod.network.io` from the kubeletstats receiver) grouped by `direction` (transmit / receive) and `network.interface.name`, with one line per `direction :: interface` combination. Use this to separate ingress vs egress traffic and spot when a specific interface is saturating. If the chart shows "No Data", the pod isn't reporting network activity: possible reasons include the CNI plugin not exposing per-pod network metrics, or the pod sharing host networking.
+- Plots the pod's network throughput in bytes per second (rate of `k8s.pod.network.io` from the kubeletstats receiver) grouped by `direction` (transmit / receive) and `interface`, with one line per `direction :: interface` combination. Use this to separate ingress vs egress traffic and spot when a specific interface is saturating. If the chart shows "No Data", the pod isn't reporting network activity: possible reasons include the CNI plugin not exposing per-pod network metrics, or the pod sharing host networking.
 
 #### Network Errors
 
 - This chart relies on the OTel metric(s): `k8s.pod.network.errors`.
-- Plots the rate of network errors observed on the pod's interfaces using `k8s.pod.network.errors` (from kubeletstats) grouped by `direction` and `network.interface.name`, one line per `direction :: interface`. Any sustained non-zero value warrants attention: common causes are misconfigured CNI plugins, faulty node NICs, MTU mismatches, or noisy neighbors saturating the underlying host network.
+- Plots network errors observed on the pod's interfaces using `k8s.pod.network.errors` (from kubeletstats), a cumulative Sum shown as a per-second increase and grouped by `direction` and `interface`, one line per `direction :: interface`. Any sustained non-zero value warrants attention: common causes are misconfigured CNI plugins, faulty node NICs, MTU mismatches, or noisy neighbors saturating the underlying host network.
 
 #### File System (bytes)
 

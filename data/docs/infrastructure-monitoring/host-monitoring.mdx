@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-08-05
 title: Host Monitoring
 description: Monitor host performance in SigNoz, covering CPU, memory, disk, and network metrics with correlated traces and logs.
 doc_type: explanation
@@ -111,7 +111,7 @@ Monitor host performance metrics across customizable time periods. Charts are zo
 #### CPU Usage
 
 - This chart relies on the OTel metric(s): `system.cpu.time`.
-- Plots `(non-idle / total)` CPU time per `state` as separate colored lines: `user`, `system`, `wait`, `softirq`, `steal`, `nice`, `interrupt`, `idle`. High `user` means application work, high `system` means kernel work, sustained `wait` points to disk I/O blocking, and any sustained `steal` on a cloud VM signals the hypervisor is giving cycles to other tenants.
+- Plots each `state`'s share of CPU time (`state / total across all states`) as separate colored lines: `user`, `system`, `wait`, `softirq`, `steal`, `nice`, `interrupt`, `idle`. High `user` means application work, high `system` means kernel work, sustained `wait` points to disk I/O blocking, and any sustained `steal` on a cloud VM signals the hypervisor is giving cycles to other tenants.
 
 #### Memory Usage
 
@@ -156,7 +156,7 @@ Monitor host performance metrics across customizable time periods. Charts are zo
 #### System Disk I/O (Bytes)
 
 - This chart relies on the OTel metric(s): `system.disk.io`.
-- Plots aggregate disk throughput in bytes per second as a single line across all devices (no per-device breakdown on this chart). Sustained spikes correlate with heavy file I/O, backup jobs, or database flushes. Pair with disk-time charts to tell whether each I/O is slow or just frequent.
+- Plots disk throughput in bytes per second with one line per `device::direction` combination (e.g. `nvme0n1::read`, `nvme0n1::write`). Sustained spikes correlate with heavy file I/O, backup jobs, or database flushes. Pair with disk-time charts to tell whether each I/O is slow or just frequent.
 
 #### System Disk Operations/s
 
