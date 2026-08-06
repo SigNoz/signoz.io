@@ -75,6 +75,7 @@ function Footer() {
   const isLoginRoute = pathname === '/login/'
   const isTeamsRoute = pathname === '/teams/'
   const isContactUsRoute = pathname === '/contact-us/'
+  const isHomepage = pathname === '/'
 
   if (isLoginRoute || isTeamsRoute || isContactUsRoute) {
     return null
@@ -149,11 +150,17 @@ function Footer() {
                   More
                 </div>
 
-                <FooterPillLink href="/datadog-alternative/">SigNoz vs Datadog</FooterPillLink>
-                <FooterPillLink href="/newrelic-alternative/">SigNoz vs New Relic</FooterPillLink>
-                <FooterPillLink href="/grafana-alternative/">SigNoz vs Grafana</FooterPillLink>
+                <FooterPillLink href="/datadog-alternative/">
+                  {isHomepage ? 'SigNoz Cloud vs Datadog' : 'SigNoz vs Datadog'}
+                </FooterPillLink>
+                <FooterPillLink href="/newrelic-alternative/">
+                  {isHomepage ? 'SigNoz Cloud vs New Relic' : 'SigNoz vs New Relic'}
+                </FooterPillLink>
+                <FooterPillLink href="/grafana-alternative/">
+                  {isHomepage ? 'SigNoz Cloud vs Grafana' : 'SigNoz vs Grafana'}
+                </FooterPillLink>
                 <FooterPillLink href="/product-comparison/signoz-vs-dynatrace/">
-                  SigNoz vs Dynatrace
+                  {isHomepage ? 'SigNoz Cloud vs Dynatrace' : 'SigNoz vs Dynatrace'}
                 </FooterPillLink>
                 <FooterPillLink href="https://signoz.io/careers/" newTab>
                   Careers
@@ -176,8 +183,12 @@ function Footer() {
                       src="/img/SigNozLogo-orange.svg"
                       width={50}
                       height={50}
-                      alt="SigNoz - Open Source Datadog Alternative"
-                      title="Open Source Datadog Alternative"
+                      alt={
+                        isHomepage
+                          ? 'SigNoz Cloud - OpenTelemetry-native Datadog alternative'
+                          : 'SigNoz - Open Source Datadog Alternative'
+                      }
+                      title={isHomepage ? 'SigNoz Cloud' : 'Open Source Datadog Alternative'}
                       loading="lazy"
                     />
                     <div className="font-satoshi-bold font-medium">SigNoz</div>

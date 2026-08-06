@@ -16,6 +16,7 @@ import featureGraphic5 from '@/public/img/graphics/homepage/feature-graphic-5.sv
 import featureGraphic6 from '@/public/img/graphics/homepage/feature-graphic-6.svg?url'
 import featureGraphic8 from '@/public/img/graphics/homepage/feature-graphic-8.svg?url'
 import { cn } from '../../app/lib/utils'
+import TrackingLink from '@/components/TrackingLink'
 
 const icons = [
   {
@@ -137,8 +138,20 @@ export const SigNozFeatures = ({ className }: { className?: string }) => {
                 The one-stop observability tool
               </div>
               <p className="m-0 mt-3 text-base font-medium text-signoz_sienna-300">
-                SigNoz is an open-source Datadog or New Relic alternative for logs, metrics, traces,
-                dashboards, alerts, and more.
+                SigNoz Cloud is a managed Datadog or New Relic alternative for logs, metrics,
+                traces, dashboards, alerts, and more.
+                <br />
+                Prefer to run it yourself?{' '}
+                <TrackingLink
+                  className="underline underline-offset-4 transition-colors hover:text-signoz_sienna-100"
+                  clickLocation="Homepage Features Intro"
+                  clickName="Install Link"
+                  clickText="Install Self-Hosted SigNoz"
+                  clickType="Inline Link"
+                  href="/docs/install/"
+                >
+                  Install Self-Hosted SigNoz.
+                </TrackingLink>
               </p>
             </div>
 

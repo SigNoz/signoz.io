@@ -18,7 +18,7 @@ const REASONS = [
   },
   {
     title: 'Flexible deployment options',
-    desc: 'You can self-host SigNoz or use our cloud services, or use both depending on your use-cases.',
+    desc: 'Run SigNoz Cloud without managing the observability stack. Choose Self-Hosted SigNoz when you need to run it on your own infrastructure. With Self-Hosted SigNoz, you pay for and operate infrastructure, storage, scaling, upgrades, and backups.',
     figure: featureGraphicFlexibleDeployment,
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,

@@ -33,7 +33,7 @@ const items: WhySigNozItem[] = [
     image: '/img/graphics/homepage/correlation.svg',
     imageClassName: 'object-bottom',
     imageFit: 'contain',
-    alt: 'SigNoz view showing correlated telemetry for root cause debugging',
+    alt: 'SigNoz Cloud view showing correlated telemetry for root cause debugging',
   },
   {
     title: 'Instrument once with OpenTelemetry',
@@ -42,7 +42,7 @@ const items: WhySigNozItem[] = [
     icon: Cable,
     image: '/img/graphics/homepage/opentelemetry.svg',
     imageClassName: 'object-center',
-    alt: 'OpenTelemetry instrumentation flowing into SigNoz',
+    alt: 'OpenTelemetry instrumentation flowing into SigNoz Cloud',
   },
   {
     title: 'Query telemetry on a columnar store',
@@ -52,7 +52,7 @@ const items: WhySigNozItem[] = [
     image: '/img/graphics/homepage/columnar2.svg',
     imageClassName: 'object-left',
     imageFit: 'cover',
-    alt: 'Flexible query controls backed by a columnar datastore in SigNoz',
+    alt: 'Flexible query controls backed by a columnar datastore in SigNoz Cloud',
   },
   {
     title: 'Give AI agents telemetry they understand',
@@ -66,13 +66,13 @@ const items: WhySigNozItem[] = [
   {
     title: 'Flexible deployment options',
     description:
-      'Use SigNoz Cloud, self-hosted, or managed deployments while keeping the same OpenTelemetry-native model.',
+      'Run SigNoz Cloud without managing the observability stack. Choose Self-Hosted SigNoz when you need to run it on your own infrastructure, where you pay for and operate infrastructure, storage, scaling, upgrades, and backups.',
     icon: ServerCog,
     image: '/img/graphics/homepage/flexible-deploy.svg',
     imageClassName: 'object-center',
     imageFit: 'contain',
     mobileImageClassName: 'mx-auto h-80 w-full object-contain sm:h-96',
-    alt: 'Flexible deployment options for running SigNoz',
+    alt: 'SigNoz Cloud and Self-Hosted SigNoz deployment options',
   },
 ]
 

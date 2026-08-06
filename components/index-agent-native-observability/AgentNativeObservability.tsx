@@ -275,14 +275,14 @@ export default function AgentNativeObservabilitySection() {
           <h2 className="m-0 max-w-[540px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[40px] sm:leading-[1.04] sm:tracking-[-1.1px] md:text-[58px] md:tracking-[-1.65px]">
             Agent-native observability,
             <br />
-            <span className="text-signoz_vanilla-400">inside your IDE and SigNoz.</span>
+            <span className="text-signoz_vanilla-400">inside your IDE and SigNoz Cloud.</span>
           </h2>
 
           <div className="max-w-[560px] md:pt-2">
             <p className="text-signoz_vanilla-300/82 m-0 text-base leading-7 tracking-[-0.15px] sm:text-[19px] sm:leading-9 sm:tracking-[-0.28px]">
               Use the SigNoz MCP server to bring telemetry into coding agents, or use Noz, your AI
-              teammate inside SigNoz, to investigate incidents, tune alerts, and build dashboards
-              with the same production context your team sees.
+              teammate inside SigNoz Cloud, to investigate incidents, tune alerts, and build
+              dashboards with the same production context your team sees.
             </p>
             <TrackingLink
               className="group mt-6 inline-flex items-center gap-2 text-sm font-medium text-signoz_robin-400 transition-colors hover:text-signoz_robin-300 sm:mt-9"
