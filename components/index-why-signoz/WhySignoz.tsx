@@ -66,7 +66,7 @@ const items: WhySigNozItem[] = [
   {
     title: 'Flexible deployment options',
     description:
-      'Run SigNoz Cloud without managing the observability stack. Choose Self-Hosted SigNoz when you need to run it on your own infrastructure, where you pay for and operate infrastructure, storage, scaling, upgrades, and backups.',
+      'Use SigNoz Cloud as a managed service, or run Self-Hosted SigNoz on infrastructure you control.',
     icon: ServerCog,
     image: '/img/graphics/homepage/flexible-deploy.svg',
     imageClassName: 'object-center',
