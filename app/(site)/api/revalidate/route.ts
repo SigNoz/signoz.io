@@ -21,20 +21,6 @@ function normalizePathInput(input: PathInput): { urlPath: string; contentKey?: s
   return { urlPath: input.urlPath, contentKey: input.contentKey }
 }
 
-// Sitemap route handlers are not covered by revalidatePath('/', 'layout') or content
-// tags, so they must be expired explicitly whenever content changes.
-function revalidateSitemaps(results: RevalidationResult[]) {
-  for (const sitemapPath of ['/blogs/sitemap.xml', '/docs/sitemap.xml']) {
-    revalidatePath(sitemapPath)
-    results.push({
-      path: sitemapPath,
-      revalidated: true,
-      type: 'path',
-      timestamp: new Date().toISOString(),
-    })
-  }
-}
-
 function revalidateCmsUrlPath(
   urlPath: string,
   explicitContentKey: string | undefined,
@@ -142,11 +128,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Content changes affect sitemap URL lists/lastModified, so expire sitemaps too.
-    if (revalidateAll || results.some((r) => r.type === 'cmsPath' || r.type === 'tag')) {
-      revalidateSitemaps(results)
-    }
-
     console.log('Revalidation completed:', JSON.stringify(results))
 
     return NextResponse.json({
@@ -219,11 +200,6 @@ export async function GET(request: NextRequest) {
         type: 'tag',
         timestamp: new Date().toISOString(),
       })
-    }
-
-    // Content changes affect sitemap URL lists/lastModified, so expire sitemaps too.
-    if (revalidateAll || results.some((r) => r.type === 'cmsPath' || r.type === 'tag')) {
-      revalidateSitemaps(results)
     }
 
     return NextResponse.json({

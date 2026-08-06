@@ -5,10 +5,7 @@ import { entriesToXml, toSitemapDateOnly } from 'utils/sitemapXml'
 import { resolveLatestDate } from '@/utils/dateUtils'
 import { fetchAllDocsForPage } from '@/utils/cachedData'
 
-// Explicit route handler instead of a sitemap.ts metadata route: metadata routes
-// are not purged by revalidatePath/revalidateTag, so on-demand revalidation via
-// /api/revalidate only works with a route handler.
-export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   const siteUrl = siteMetadata.siteUrl
