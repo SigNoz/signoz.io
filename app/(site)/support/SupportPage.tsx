@@ -13,6 +13,7 @@ import {
   CircleArrowRight,
 } from 'lucide-react'
 import { Slack, Github } from '@/components/social-icons/SolidIcons'
+import { CrossSolid } from '@/components/homepage-icons/icons'
 import { TrustedByTeams } from '@/components/trusted-by'
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
@@ -78,7 +79,7 @@ function renderCell(cell: CellValue) {
     case 'check':
       return <Check size={18} className="text-signoz_robin-400" />
     case 'dash':
-      return <span className="text-sm text-[#62687c]">&mdash;</span>
+      return <CrossSolid />
     case 'text':
       return <span className="text-sm leading-6 text-[#adb4c2]">{cell.value}</span>
     case 'link':

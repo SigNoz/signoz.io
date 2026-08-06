@@ -24,18 +24,21 @@ export interface SupportTier {
 
 export const SUPPORT_TIERS: SupportTier[] = [
   {
-    name: 'Community',
+    name: 'Community Edition',
+    subtitle: 'Install & manage yourself',
+    cta: { text: 'Read Documentation', href: '/docs/introduction/', variant: 'secondary' },
   },
   {
     name: 'Teams',
-    cta: { text: 'Get Started', href: '/teams/', variant: 'default' },
+    subtitle: 'Cloud - starts at $49/mo',
+    cta: { text: 'Get Started - Free', href: '/teams/', variant: 'default' },
   },
   {
     name: 'Enterprise*',
     subtitle: 'Cloud / Self-Hosted',
     cta: {
-      text: 'Contact us',
-      href: '/contact-us/?source=support-enterprise',
+      text: 'Contact Us',
+      href: '/contact-us/?source=support',
       variant: 'secondary',
     },
   },
@@ -111,7 +114,7 @@ export const TABLE_DATA: TableCategory[] = [
       {
         label: (
           <span>
-            Severity 1 &mdash; Critical{' '}
+            Severity 1 - Critical{' '}
             <span role="img" aria-label="fire">
               🔥
             </span>
@@ -122,13 +125,13 @@ export const TABLE_DATA: TableCategory[] = [
         enterprise: { type: 'text', value: '3 business hours**' },
       },
       {
-        label: 'Severity 2 — Major',
+        label: 'Severity 2 - Major',
         community: { type: 'text', value: 'Best effort' },
         teams: { type: 'text', value: '1 business day' },
         enterprise: { type: 'text', value: '6 business hours' },
       },
       {
-        label: 'Severity 3 — Minor / General',
+        label: 'Severity 3 - Minor / General',
         community: { type: 'text', value: 'Best effort' },
         teams: { type: 'text', value: '2 business days' },
         enterprise: { type: 'text', value: '1 business day' },
@@ -165,8 +168,8 @@ export const TABLE_DATA: TableCategory[] = [
       {
         label: 'Status Page',
         community: { type: 'link', text: 'signoz.io/status', href: 'https://status.signoz.io' },
-        teams: { type: 'check' },
-        enterprise: { type: 'check' },
+        teams: { type: 'link', text: 'signoz.io/status', href: 'https://status.signoz.io' },
+        enterprise: { type: 'link', text: 'signoz.io/status', href: 'https://status.signoz.io' },
       },
       {
         label: 'Technical Account Manager',
@@ -192,20 +195,20 @@ export interface SeverityDefinition {
 
 export const SEVERITY_DEFINITIONS: SeverityDefinition[] = [
   {
-    level: 'Severity 1 — Critical *',
+    level: 'Severity 1 - Critical *',
     description:
       'The production system is down or severely impaired. Data loss risk or complete loss of observability for production services. No workaround available.',
     example: 'Example: SigNoz Cloud is unreachable; traces and logs are not being ingested',
   },
   {
-    level: 'Severity 2 — Major',
+    level: 'Severity 2 - Major',
     description:
       'The production system is impaired with significant impact. Partial loss of functionality with no workaround, or a workaround that is not sustainable.',
     example:
       'Example: Alert notifications are not firing; dashboard load times are severely degraded',
   },
   {
-    level: 'Severity 3 — Minor / General',
+    level: 'Severity 3 - Minor / General',
     description:
       'Low-impact issue or general question. The system is operational. The issue affects non-critical functionality or has a straightforward workaround.',
     example: 'Example: Dashboard configuration question; how to set up a new integration',
@@ -223,7 +226,7 @@ export const SUPPORT_STATS: SupportStat[] = [
     value: '47%',
     title: 'Reduction in MTTR & TCO',
     description:
-      'Our logs, metrics, and traces work on an innovative co-related architecture so you find the needle in the haystack — faster.',
+      'Our logs, metrics, and traces work on an innovative co-related architecture so you find the needle in the haystack, faster.',
   },
   {
     value: '10 TB+/day',
@@ -235,7 +238,7 @@ export const SUPPORT_STATS: SupportStat[] = [
     value: '1000+',
     title: 'Engineering teams in production',
     description:
-      'SaaS start-ups to public companies. Self-hosted, cloud, or BYOC — your choice. With enterprise-grade observability.',
+      'SaaS start-ups to public companies. Self-hosted, cloud, or BYOC: your choice. With enterprise-grade observability.',
   },
 ]
 
@@ -256,7 +259,7 @@ export const ESCALATION_STEPS: EscalationStep[] = [
     level: 'L2',
     title: 'Technical Escalation',
     description:
-      'Senior SigNoz engineer joins for deeper investigation – instrumentation, ClickHouse queries, ingestion pipeline, OpenTelemetry Collector config.',
+      'Senior SigNoz engineer joins for deeper investigation: instrumentation, ClickHouse queries, ingestion pipeline, OpenTelemetry Collector config.',
   },
   {
     level: 'L3',
