@@ -60,7 +60,7 @@ const COLUMNS = [
   {
     key: 'community',
     cellClassName: 'px-3 py-3',
-    sectionCellClassName: 'bg-signoz_ink-500',
+    sectionCellClassName: 'bg-[var(--l1-background)]',
   },
   {
     key: 'teams',
@@ -70,7 +70,7 @@ const COLUMNS = [
   {
     key: 'enterprise',
     cellClassName: 'px-3 py-3',
-    sectionCellClassName: 'bg-signoz_ink-500',
+    sectionCellClassName: 'bg-[var(--l1-background)]',
   },
 ]
 
@@ -81,14 +81,14 @@ function renderCell(cell: CellValue) {
     case 'dash':
       return <CrossSolid />
     case 'text':
-      return <span className="text-sm leading-6 text-[#adb4c2]">{cell.value}</span>
+      return <span className="text-sm leading-6 text-[var(--l2-foreground)]">{cell.value}</span>
     case 'link':
       return (
         <a
           href={cell.href}
           target="_blank"
           rel="noopener noreferrer nofollow"
-          className="inline-flex items-center gap-1 text-sm text-[#adb4c2] hover:text-signoz_vanilla-100"
+          className="inline-flex items-center gap-1 text-sm text-[var(--l2-foreground)] hover:text-[var(--l1-foreground-hover)]"
         >
           {cell.text}
           <ArrowUpRight size={14} />
@@ -98,7 +98,7 @@ function renderCell(cell: CellValue) {
       return (
         <span className="inline-flex items-center gap-1 text-sm">
           <Check size={16} className="text-signoz_robin-400" />
-          <span className="text-[#adb4c2]">{cell.value}</span>
+          <span className="text-[var(--l2-foreground)]">{cell.value}</span>
         </span>
       )
   }
@@ -108,7 +108,7 @@ function toSections(): ComparisonSection[] {
   return TABLE_DATA.map((cat) => ({
     title: cat.name,
     rows: cat.rows.map((row) => ({
-      feature: <span className="text-sm leading-6 text-[#adb4c2]">{row.label}</span>,
+      feature: <span className="text-sm leading-6 text-[var(--l2-foreground)]">{row.label}</span>,
       cells: {
         community: renderCell(row.community),
         teams: renderCell(row.teams),
@@ -128,26 +128,26 @@ const ComparisonTable = () => {
       <div className="w-full overflow-x-auto text-left text-base leading-normal md:overflow-visible">
         <div className="relative min-w-[40rem] md:min-w-0">
           {/* Gradient overlay behind Teams (middle) column */}
-          <div className="pointer-events-none absolute inset-y-0 right-48 z-0 w-48 rounded-lg bg-gradient-to-b from-signoz_ink-300 from-[73%] to-transparent opacity-80" />
+          <div className="pointer-events-none absolute inset-y-0 right-48 z-0 w-48 rounded-lg bg-gradient-to-b from-[var(--l2-background)] from-[73%] to-transparent opacity-80" />
 
           {/* Sticky Tier Header */}
-          <div className="sticky top-14 z-[9] bg-signoz_ink-500">
+          <div className="sticky top-14 z-[9] bg-[var(--l1-background)]">
             <div className={`grid ${GRID_CLASS}`}>
-              <div className="bg-signoz_ink-500" />
+              <div className="bg-[var(--l1-background)]" />
               {SUPPORT_TIERS.map((tier, i) => (
                 <div
                   key={tier.name}
                   className={`flex flex-col items-start gap-2.5 px-3 py-4 ${
-                    i === 1 ? 'relative bg-[#14161a]' : 'bg-signoz_ink-500'
+                    i === 1 ? 'relative bg-[var(--l2-background)]' : 'bg-[var(--l1-background)]'
                   }`}
                 >
-                  <span className="text-base font-medium leading-7 text-[#eceef2]">
+                  <span className="text-base font-medium leading-7 text-[var(--l1-foreground)]">
                     {tier.name}
                   </span>
                   {/* Reserve subtitle line for CTA tiers so Teams/Enterprise buttons align */}
                   {tier.cta && (
                     <span
-                      className={`min-h-5 text-sm leading-5 text-[#adb4c2] ${
+                      className={`min-h-5 text-sm leading-5 text-[var(--l2-foreground)] ${
                         tier.subtitle ? '' : 'invisible'
                       }`}
                       aria-hidden={!tier.subtitle}
@@ -183,7 +183,7 @@ const ComparisonTable = () => {
             separator="border"
             separatorClassName={TABLE_SEPARATOR_CLASS}
             featureCellClassName="pl-6 py-3"
-            featureSectionClassName="pl-6 bg-signoz_ink-500"
+            featureSectionClassName="pl-6 bg-[var(--l1-background)] !text-[var(--l1-foreground)]"
           />
         </div>
       </div>
@@ -191,7 +191,7 @@ const ComparisonTable = () => {
       {/* Footnotes */}
       <div className="mt-6 flex flex-col gap-1 px-6">
         {TABLE_FOOTNOTES.map((note, i) => (
-          <p key={i} className="text-xs text-signoz_vanilla-400">
+          <p key={i} className="text-xs text-[var(--l2-foreground)]">
             {note}
           </p>
         ))}
@@ -202,25 +202,25 @@ const ComparisonTable = () => {
 
 const SeverityDefinitionsSection = () => (
   <div className="py-10">
-    <h3 className="mb-6 px-6 text-lg font-semibold text-signoz_vanilla-100">
+    <h3 className="mb-6 px-6 text-lg font-semibold text-[var(--l1-foreground-hover)]">
       Severity Definitions
     </h3>
     <div className="flex flex-col">
       {SEVERITY_DEFINITIONS.map((sev) => (
         <div key={sev.level} className="border-t border-[var(--l1-border)]">
           <div className="grid grid-cols-1 gap-4 px-6 py-6 md:grid-cols-[460px_1fr] md:gap-6">
-            <div className="text-sm font-semibold leading-6 text-signoz_vanilla-100">
+            <div className="text-sm font-semibold leading-6 text-[var(--l1-foreground-hover)]">
               {sev.level}
             </div>
             <div className="flex flex-col gap-2">
-              <p className="text-sm leading-6 text-signoz_vanilla-400">{sev.description}</p>
-              <p className="text-sm italic leading-6 text-signoz_vanilla-400">{sev.example}</p>
+              <p className="text-sm leading-6 text-[var(--l2-foreground)]">{sev.description}</p>
+              <p className="text-sm italic leading-6 text-[var(--l2-foreground)]">{sev.example}</p>
             </div>
           </div>
         </div>
       ))}
     </div>
-    <p className="mt-6 px-6 text-xs text-signoz_vanilla-400">
+    <p className="mt-6 px-6 text-xs text-[var(--l2-foreground)]">
       * After issue is raised by the customer
     </p>
   </div>
@@ -230,7 +230,7 @@ const StatsSection = () => (
   <div className="flex flex-col sm:flex-row">
     <div className="!w-full flex-1 sm:!w-[300px] sm:min-w-fit">
       <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start px-10 py-10 sm:px-0 sm:pl-12">
-        <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+        <h2 className="text-4xl font-bold !leading-[3.5rem] text-[var(--l1-foreground-hover)] sm:text-4xl">
           The numbers
           <br className="hidden sm:block" />
           speak for
@@ -240,34 +240,36 @@ const StatsSection = () => (
       </div>
     </div>
     <div className="flex-[2_2_0%]">
-      <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+      <div className="border-l border-dashed border-[var(--l1-border)] bg-transparent p-0">
         {/* Top two stats side by side */}
         <div className="grid grid-cols-1 md:grid-cols-2">
           {SUPPORT_STATS.slice(0, 2).map((stat, i) => (
             <div
               key={stat.title}
-              className={`border-b border-dashed border-signoz_slate-400 p-8 ${
-                i === 0 ? 'md:border-r md:border-dashed md:border-signoz_slate-400' : ''
+              className={`border-b border-dashed border-[var(--l1-border)] p-8 ${
+                i === 0 ? 'md:border-r md:border-dashed md:border-[var(--l1-border)]' : ''
               }`}
             >
-              <p className="mb-2 font-mono text-[32px] font-semibold leading-10 text-signoz_vanilla-100">
+              <p className="mb-2 font-mono text-[32px] font-semibold leading-10 text-[var(--l1-foreground-hover)]">
                 {stat.value}
               </p>
-              <p className="mb-1 text-base font-semibold text-signoz_vanilla-100">{stat.title}</p>
-              <p className="text-sm text-signoz_vanilla-400">{stat.description}</p>
+              <p className="mb-1 text-base font-semibold text-[var(--l1-foreground-hover)]">
+                {stat.title}
+              </p>
+              <p className="text-sm text-[var(--l2-foreground)]">{stat.description}</p>
             </div>
           ))}
         </div>
         {/* Bottom stat full width */}
         {SUPPORT_STATS[2] && (
           <div className="p-8">
-            <p className="mb-2 font-mono text-[32px] font-semibold leading-10 text-signoz_vanilla-100">
+            <p className="mb-2 font-mono text-[32px] font-semibold leading-10 text-[var(--l1-foreground-hover)]">
               {SUPPORT_STATS[2].value}
             </p>
-            <p className="mb-1 text-base font-semibold text-signoz_vanilla-100">
+            <p className="mb-1 text-base font-semibold text-[var(--l1-foreground-hover)]">
               {SUPPORT_STATS[2].title}
             </p>
-            <p className="text-sm text-signoz_vanilla-400">{SUPPORT_STATS[2].description}</p>
+            <p className="text-sm text-[var(--l2-foreground)]">{SUPPORT_STATS[2].description}</p>
           </div>
         )}
       </div>
@@ -339,7 +341,9 @@ const ContactChannelItem = ({
         </span>
       )}
       {item.description && (
-        <span className="text-sm leading-[1.35] text-signoz_vanilla-400">{item.description}</span>
+        <span className="text-sm leading-[1.35] text-[var(--l2-foreground)]">
+          {item.description}
+        </span>
       )}
     </div>
   )
@@ -373,7 +377,7 @@ const DevelopersLoveSigNoz = () => (
                 <div className="flex items-center gap-3">
                   <CircleArrowRight
                     size={20}
-                    className="shrink-0 fill-[var(--primary-background)] text-signoz_ink-400"
+                    className="shrink-0 fill-[var(--primary-background)] text-[var(--l1-background)]"
                     aria-hidden
                   />
                   <span className="text-base font-medium leading-6 text-[var(--l1-foreground-hover)]">
@@ -438,7 +442,7 @@ const WhyDifferent = () => (
   <div className="flex flex-col sm:flex-row">
     <div className="!w-full flex-1 sm:!w-[300px] sm:min-w-fit">
       <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start px-10 py-10 sm:px-0 sm:pl-12">
-        <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+        <h2 className="text-4xl font-bold !leading-[3.5rem] text-[var(--l1-foreground-hover)] sm:text-4xl">
           Why SigNoz
           <br className="hidden sm:block" />
           support is
@@ -448,14 +452,18 @@ const WhyDifferent = () => (
       </div>
     </div>
     <div className="flex-[2_2_0%]">
-      <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+      <div className="border-l border-dashed border-[var(--l1-border)] bg-transparent p-0">
         {WHY_DIFFERENT_ITEMS.map((item, i) => (
           <div
             key={item.title}
-            className={`p-8 ${i < WHY_DIFFERENT_ITEMS.length - 1 ? 'border-b border-dashed border-signoz_slate-400' : ''}`}
+            className={`p-8 ${i < WHY_DIFFERENT_ITEMS.length - 1 ? 'border-b border-dashed border-[var(--l1-border)]' : ''}`}
           >
-            <h3 className="mb-3 text-lg font-semibold text-signoz_vanilla-100">{item.title}</h3>
-            <p className="text-sm leading-relaxed text-signoz_vanilla-400">{item.description}</p>
+            <h3 className="mb-3 text-lg font-semibold text-[var(--l1-foreground-hover)]">
+              {item.title}
+            </h3>
+            <p className="text-sm leading-relaxed text-[var(--l2-foreground)]">
+              {item.description}
+            </p>
           </div>
         ))}
       </div>
@@ -467,7 +475,7 @@ const TrustAndCompliance = () => (
   <div className="flex flex-col sm:flex-row">
     <div className="!w-full flex-1 sm:!w-[300px] sm:min-w-fit">
       <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start px-10 py-10 sm:px-0 sm:pl-12">
-        <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+        <h2 className="text-4xl font-bold !leading-[3.5rem] text-[var(--l1-foreground-hover)] sm:text-4xl">
           Trust &
           <br className="hidden sm:block" />
           Compliance
@@ -475,7 +483,7 @@ const TrustAndCompliance = () => (
       </div>
     </div>
     <div className="flex-[2_2_0%]">
-      <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+      <div className="border-l border-dashed border-[var(--l1-border)] bg-transparent p-0">
         <div className="p-8">
           <div className="mb-6 flex flex-wrap items-center gap-6">
             {COMPLIANCE_BADGES.map((badge) => (
@@ -488,7 +496,7 @@ const TrustAndCompliance = () => (
               />
             ))}
           </div>
-          <p className="mb-4 text-sm text-signoz_vanilla-400">SOC 2 Type I</p>
+          <p className="mb-4 text-sm text-[var(--l2-foreground)]">SOC 2 Type I</p>
           <div className="flex flex-col gap-1">
             {COMPLIANCE_LINKS.map((link) => (
               <div key={link.href} className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -501,7 +509,7 @@ const TrustAndCompliance = () => (
                   {link.text}
                   <ArrowUpRight size={16} />
                 </a>
-                <span className="text-sm text-signoz_vanilla-400">{link.label}</span>
+                <span className="text-sm text-[var(--l2-foreground)]">{link.label}</span>
               </div>
             ))}
           </div>
@@ -512,11 +520,11 @@ const TrustAndCompliance = () => (
 )
 
 const BottomCTA = () => (
-  <div className="flex flex-col items-center gap-6 border-t border-dashed border-signoz_slate-400 px-6 py-16 text-center">
-    <h2 className="text-2xl font-semibold text-signoz_vanilla-100 sm:text-3xl">
+  <div className="flex flex-col items-center gap-6 border-t border-dashed border-[var(--l1-border)] px-6 py-16 text-center">
+    <h2 className="text-2xl font-semibold text-[var(--l1-foreground-hover)] sm:text-3xl">
       Not sure which plan is right for you?
     </h2>
-    <p className="max-w-xl text-base text-signoz_vanilla-400">
+    <p className="max-w-xl text-base text-[var(--l2-foreground)]">
       If you&apos;re running SigNoz in production and want to understand your support options, reply
       to this email or book a 20 minute call with the team.
     </p>
@@ -547,29 +555,32 @@ const SupportPage = () => {
           buttons={SUPPORT_HEADER_BUTTONS}
           align="left"
           titleClassName="!my-0 !bg-none !py-0 !text-signoz_vanilla-100 ![background:none] ![-webkit-text-fill-color:unset] sm:!mb-0 lg:!text-[36px] !tracking-[-1.08px]"
-          descriptionClassName="!max-w-[567px] !py-2 !text-base !leading-[26px] sm:!py-2"
+          descriptionClassName="!max-w-[567px] !py-2 !text-base !leading-[26px] !text-signoz_vanilla-400 sm:!py-2"
           sectionLayoutVariant="no-border"
           sectionLayoutClassName="!mt-0 !mb-0"
         />
       </DitherCanvas>
 
-      <TrustedByTeams page="support" className="relative z-[1] max-w-8xl bg-signoz_ink-500" />
+      <TrustedByTeams
+        page="support"
+        className="relative z-[1] max-w-8xl bg-[var(--l1-background)]"
+      />
 
-      <SectionLayout variant="bordered" className="!px-0">
+      <SectionLayout variant="bordered" className="border-[var(--l1-border)] !px-0">
         <ComparisonTable />
-        <Divider />
+        <Divider className="border-[var(--l1-border)]" />
         <SeverityDefinitionsSection />
-        <Divider />
+        <Divider className="border-[var(--l1-border)]" />
         <StatsSection />
-        <Divider />
+        <Divider className="border-[var(--l1-border)]" />
         <DevelopersLoveSigNoz />
-        <Divider />
+        <Divider className="border-[var(--l1-border)]" />
         <WhyDifferent />
-        <Divider />
+        <Divider className="border-[var(--l1-border)]" />
         <TrustAndCompliance />
       </SectionLayout>
 
-      <SectionLayout variant="bordered" className="!px-0">
+      <SectionLayout variant="bordered" className="border-[var(--l1-border)] !px-0">
         <BottomCTA />
       </SectionLayout>
     </FeaturePageLayout>
