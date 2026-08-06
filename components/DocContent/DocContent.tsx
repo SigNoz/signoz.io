@@ -6,7 +6,6 @@ import { cn } from 'app/lib/utils'
 import PageFeedback from '../PageFeedback/PageFeedback'
 import DocsPrevNext from '../DocsPrevNext/DocsPrevNext'
 import TableOfContents from '../DocsTOC/DocsTOC'
-import { DOC_TOC_CLASSES } from '@/components/DocsTOC/docLayoutClasses'
 import OpenInAI from '@/components/OpenInAI'
 import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
 import { usePathname } from 'next/navigation'
@@ -84,7 +83,7 @@ const DocContent: React.FC<{
           {children}
         </article>
         {/* Mobile / no-TOC: feedback → last updated → Edit on GitHub, above prev/next */}
-        <div className={cn('mt-8 flex flex-col gap-6', shouldRenderTOC && 'lg:hidden')}>
+        <div className={cn('mt-8 flex flex-col gap-6', shouldReserveTocColumn && 'lg:hidden')}>
           <PageFeedback />
           {(formattedDate || editLink) && (
             <div className="flex flex-col gap-4">
@@ -112,20 +111,14 @@ const DocContent: React.FC<{
         <DocsPrevNext />
       </div>
 
-      {shouldRenderTOC ? (
-        <>
-          <TableOfContents
-            toc={toc}
-            hideTableOfContents={!shouldRenderTOC}
-            source=""
-            formattedDate={formattedDate || undefined}
-            editLink={editLink}
-          />
-        </>
-      ) : shouldReserveTocColumn ? (
-        <>
-          <div className={`${DOC_TOC_CLASSES} invisible`} aria-hidden="true" />
-        </>
+      {shouldReserveTocColumn ? (
+        <TableOfContents
+          toc={shouldRenderTOC ? toc : []}
+          hideTableOfContents={false}
+          source=""
+          formattedDate={formattedDate || undefined}
+          editLink={editLink}
+        />
       ) : null}
     </>
   )

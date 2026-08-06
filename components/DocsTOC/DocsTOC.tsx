@@ -285,13 +285,7 @@ const DocsTOC: React.FC<DocsTOCProps> = ({
     }
   }, [])
 
-  if (
-    hideTableOfContents ||
-    !toc ||
-    !Array.isArray(toc) ||
-    toc.length === 0 ||
-    source === ONBOARDING_SOURCE
-  ) {
+  if (hideTableOfContents || source === ONBOARDING_SOURCE) {
     return null
   }
 
@@ -301,15 +295,19 @@ const DocsTOC: React.FC<DocsTOCProps> = ({
         <div className="relative z-[2] mb-5 shrink-0">
           <PageFeedback />
         </div>
-        <div className={TOC_SECTION_LABEL_CLASS}>On this page</div>
-        <div ref={tocItemsRef} className={TOC_SCROLL_CONTAINER_CLASS} style={scrollFadeStyle}>
-          <TableOfContents
-            toc={filteredToc}
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-            scrollableContainerRef={tocItemsRef}
-          />
-        </div>
+        {filteredToc.length > 0 && (
+          <>
+            <div className={TOC_SECTION_LABEL_CLASS}>On this page</div>
+            <div ref={tocItemsRef} className={TOC_SCROLL_CONTAINER_CLASS} style={scrollFadeStyle}>
+              <TableOfContents
+                toc={filteredToc}
+                activeSection={activeSection}
+                setActiveSection={setActiveSection}
+                scrollableContainerRef={tocItemsRef}
+              />
+            </div>
+          </>
+        )}
         {(formattedDate || editLink) && (
           <div className="mt-5 shrink-0">
             <div
