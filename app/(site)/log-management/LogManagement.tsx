@@ -37,8 +37,8 @@ const Header: React.FC = () => {
       }
       description={
         <>
-          Ingest logs from anywhere, quickly search and analyze with a powerful query <br />
-          builder backed by ClickHouse, and correlate your logs with other signals.
+          Use SigNoz Cloud to ingest logs from anywhere, then search and analyze with a powerful{' '}
+          <br /> query builder backed by ClickHouse and correlate logs with other signals.
         </>
       }
       buttons={LOG_MANAGEMENT_HEADER_BUTTONS}
@@ -105,8 +105,8 @@ const LogsManagement: React.FC = () => {
         <VisualQueryBuilder />
       </SectionLayout>
 
-      <UsageBasedPricing show={['logs']} />
-      <SigNozStats />
+      <UsageBasedPricing show={['logs']} sectionTitle="SigNoz Cloud pricing you can trust" />
+      <SigNozStats cloudFirstNaming />
       <Divider />
       <CustomerStoriesSection
         tracking={{

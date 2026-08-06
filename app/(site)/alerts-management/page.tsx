@@ -9,15 +9,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Alert Management Platform | SigNoz',
     description:
-      'Manage alerts for Logs, Metrics and Traces with SigNoz powered by OpenTelemetry. Get real-time notifications, set smart thresholds and resolve issues faster.',
+      'Use SigNoz Cloud to create alerts across logs, metrics, traces, and exceptions, route notifications dynamically, and resolve issues faster.',
     images: '/img/platform/AlertsManagementMeta.webp',
   },
   description:
-    'Manage alerts for Logs, Metrics and Traces with SigNoz powered by OpenTelemetry. Get real-time notifications, set smart thresholds and resolve issues faster.',
+    'Use SigNoz Cloud to create alerts across logs, metrics, traces, and exceptions, route notifications dynamically, and resolve issues faster.',
   twitter: {
     title: 'Alert Management Platform | SigNoz',
     description:
-      'Manage alerts for Logs, Metrics and Traces with SigNoz powered by OpenTelemetry. Get real-time notifications, set smart thresholds and resolve issues faster.',
+      'Use SigNoz Cloud to create alerts across logs, metrics, traces, and exceptions, route notifications dynamically, and resolve issues faster.',
     images: '/img/platform/AlertsManagementMeta.webp',
   },
 }

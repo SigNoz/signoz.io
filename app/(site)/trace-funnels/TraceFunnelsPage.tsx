@@ -37,7 +37,7 @@ const Header: React.FC = () => {
       }
       description={
         <>
-          The only distributed tracing tool that tracks multi-step request flows. See where <br />{' '}
+          Use SigNoz Cloud to track multi-step request flows with trace funnels. See where <br />{' '}
           traces succeed, where they fail, and where they drop off.
         </>
       }
@@ -149,8 +149,8 @@ const TraceFunnels: React.FC = () => {
         <StopLosingUsersBanner />
       </SectionLayout>
 
-      <UsageBasedPricing show={['traces']} />
-      <SigNozStats />
+      <UsageBasedPricing show={['traces']} sectionTitle="SigNoz Cloud pricing you can trust" />
+      <SigNozStats cloudFirstNaming />
       <Divider />
       <CustomerStoriesSection
         tracking={{

@@ -10,15 +10,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Trace Funnels - Create Visual Funnels to Track Step-by-Step Flows & Drop-Offs | SigNoz',
     description:
-      'Create visual trace funnels with SigNoz to track multi-step request flows, visualize drop-offs, and identify bottlenecks in distributed systems.',
+      'Use SigNoz Cloud trace funnels to analyze multi-step request flows, measure drop-offs, and find bottlenecks across distributed systems.',
     images: '/img/platform/TraceFunnelsMeta.webp',
   },
   description:
-    'Create visual trace funnels with SigNoz to track multi-step request flows, visualize drop-offs, and identify bottlenecks in distributed systems.',
+    'Use SigNoz Cloud trace funnels to analyze multi-step request flows, measure drop-offs, and find bottlenecks across distributed systems.',
   twitter: {
     title: 'Trace Funnels - Create Visual Funnels to Track Step-by-Step Flows & Drop-Offs | SigNoz',
     description:
-      'Create visual trace funnels with SigNoz to track multi-step request flows, visualize drop-offs, and identify bottlenecks in distributed systems.',
+      'Use SigNoz Cloud trace funnels to analyze multi-step request flows, measure drop-offs, and find bottlenecks across distributed systems.',
     images: '/img/platform/TraceFunnelsMeta.webp',
   },
 }

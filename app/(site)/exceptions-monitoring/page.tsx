@@ -9,15 +9,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Exceptions Monitoring - Track and Debug Application Errors | SigNoz',
     description:
-      'Monitor Exceptions and application errors with SigNoz powered by OpenTelemetry. Track traces, debug faster and ensure reliable performance in real time.',
+      'Use SigNoz Cloud to monitor application exceptions, inspect stack traces, correlate errors with traces, and debug issues faster.',
     images: '/img/features/exceptions/exceptions-overview.webp',
   },
   description:
-    'Monitor Exceptions and application errors with SigNoz powered by OpenTelemetry. Track traces, debug faster and ensure reliable performance in real time.',
+    'Use SigNoz Cloud to monitor application exceptions, inspect stack traces, correlate errors with traces, and debug issues faster.',
   twitter: {
     title: 'Exceptions Monitoring - Track and Debug Application Errors | SigNoz',
     description:
-      'Monitor Exceptions and application errors with SigNoz powered by OpenTelemetry. Track traces, debug faster and ensure reliable performance in real time.',
+      'Use SigNoz Cloud to monitor application exceptions, inspect stack traces, correlate errors with traces, and debug issues faster.',
     images: '/img/features/exceptions/exceptions-overview.webp',
   },
 }

@@ -24,7 +24,7 @@ function MetricsDashboards() {
         {/* <SigNozUsage /> */}
         <UsageBasedPricing />
         {/* <ExploreDocs /> */}
-        <SigNozStats />
+        <SigNozStats selfHostedLabel />
         <GetStarted page="MetricsDashboards" />
       </div>
     </main>
@@ -78,22 +78,22 @@ const UsageList = () => {
     {
       title: 'Pay only for data you send',
       description:
-        'We don’t have any SKU-based pricing. Get access to all features in the plan selected and only pay for the data you send. Pay only $0.1 per million samples for metrics.',
+        'SigNoz Cloud has no SKU-based pricing. Get all features in your selected plan and pay only for the data you send, including $0.10 per million metric samples.',
     },
     {
       title: 'No special pricing for custom metrics',
       description:
-        'Vendors like Datadog charge $0.05 per custom metric, which limits a team’s ability to send and analyze custom metrics for monitoring. SigNoz does not treat custom metrics any differently. The charges remain $0.1 per million samples no matter what type of metrics you send.',
+        'SigNoz Cloud does not add a custom-metric surcharge. Metrics cost $0.10 per million samples regardless of the metric type you send.',
     },
     {
       title: 'Add unlimited team members',
       description:
-        'Observability should be available to every developer at your company. After all, anyone can need debugging. That’s why we don’t charge for user seats, and you can add as many team members as you want.',
+        'SigNoz Cloud does not charge for user seats, so engineering, support, and on-call teams can collaborate without seat limits.',
     },
     {
       title: 'No Host (container or node) based pricing',
       description:
-        'For modern cloud-based applications it doesn’t make sense to charge on the basis of number of hosts or containers. You don’t need to worry about auto-scaling during peak hours. Only pay for the amount of data sent no matter the number of hosts.',
+        'SigNoz Cloud pricing is based on the data you send, not the number of hosts, containers, or nodes, so autoscaling does not add host-based charges.',
     },
   ]
 
@@ -146,10 +146,9 @@ const Header = () => {
         </h1>
 
         <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
-          Monitor any metrics important to you. Ingest metrics from your infrastructure or
-          applications
+          Use SigNoz Cloud to monitor metrics from your infrastructure or applications{' '}
           <br className="hidden lg:inline" />
-          and create customized dashboards to monitor them. Set alerts and get notified
+          and create customized dashboards. Set alerts and get notified{' '}
           <br className="hidden lg:inline" />
           in your preferred notification channel.
         </p>
@@ -313,7 +312,7 @@ const SigNozFeatures = () => {
     },
     {
       title: 'No separate pricing for custom metrics',
-      desc: 'All metrics are treated the same in SigNoz and are not charged separately (unlike some other popular observability tools). Metrics pricing in SigNoz is very cost-effective and you can scale your metrics monitoring with peace of mind.',
+      desc: 'SigNoz Cloud does not add a custom-metric surcharge. All metrics use the same usage-based pricing, so you can scale monitoring without per-series fees.',
       buttonText: 'Learn More',
       buttonLink: 'https://signoz.io/pricing/',
     },
@@ -326,7 +325,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  Why use SigNoz for <br /> Metrics Monitoring?
+                  Why use SigNoz Cloud for <br /> Metrics Monitoring?
                 </div>
               </div>
             </div>
@@ -356,7 +355,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  SigNoz Metrics & <br /> Dashboards Overview
+                  SigNoz Cloud Metrics & <br /> Dashboards Overview
                 </div>
               </div>
             </div>
@@ -413,7 +412,7 @@ const UsageBasedPricing = () => {
         <div className="flex-[2_2_0%]">
           <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
             <div className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">
-              Pricing you can trust
+              SigNoz Cloud pricing you can trust
             </div>
             <p className="text-base font-normal text-signoz_vanilla-400">
               Tired of Datadog’s unpredictable bills or New Relic’s user-based pricing?

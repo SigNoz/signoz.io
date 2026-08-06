@@ -38,9 +38,9 @@ const Header: React.FC = () => {
       }
       description={
         <>
-          Define warning and critical levels in a single rule. Automatically route to teams based on{' '}
-          <br /> service, environment, or labels. Group notifications by deployment, customer, or
-          any attribute.
+          Use SigNoz Cloud to define warning and critical levels in a single rule. Automatically{' '}
+          <br /> route alerts by service, environment, or labels and group notifications by any
+          attribute.
         </>
       }
       buttons={ALERTS_HEADER_BUTTONS}
@@ -144,8 +144,11 @@ const AlertsManagement: React.FC = () => {
         <StopAlertFatigueBanner />
       </SectionLayout>
 
-      <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
-      <SigNozStats />
+      <UsageBasedPricing
+        show={['traces', 'metrics', 'logs']}
+        sectionTitle="SigNoz Cloud pricing you can trust"
+      />
+      <SigNozStats cloudFirstNaming />
       <Divider />
       <CustomerStoriesSection />
     </FeaturePageLayout>

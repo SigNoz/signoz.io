@@ -23,7 +23,7 @@ function Exceptions() {
         {/* <SigNozUsage /> */}
         <UsageBasedPricing />
         {/* <ExploreDocs /> */}
-        <SigNozStats />
+        <SigNozStats selfHostedLabel />
         <GetStarted page="Exceptions" />
       </div>
     </main>
@@ -77,22 +77,22 @@ const UsageList = () => {
     {
       title: 'Pay only for data you send',
       description:
-        'We don’t have any SKU-based pricing. Get access to all features in the plan selected and only pay for the data you send. Pay only $0.1 per million samples for metrics.',
+        'SigNoz Cloud has no SKU-based pricing. Get all features in your selected plan and pay only for the data you send, including $0.10 per million metric samples.',
     },
     {
       title: 'No special pricing for custom metrics',
       description:
-        'Vendors like Datadog charge $0.05 per custom metric, which limits a team’s ability to send and analyze custom metrics for monitoring. SigNoz does not treat custom metrics any differently. The charges remain $0.1 per million samples no matter what type of metrics you send.',
+        'SigNoz Cloud does not add a custom-metric surcharge. Metrics cost $0.10 per million samples regardless of the metric type you send.',
     },
     {
       title: 'Add unlimited team members',
       description:
-        'Observability should be available to every developer at your company. After all, anyone can need debugging. That’s why we don’t charge for user seats, and you can add as many team members as you want.',
+        'SigNoz Cloud does not charge for user seats, so engineering, support, and on-call teams can collaborate without seat limits.',
     },
     {
       title: 'No Host (container or node) based pricing',
       description:
-        'For modern cloud-based applications it doesn’t make sense to charge on the basis of number of hosts or containers. You don’t need to worry about auto-scaling during peak hours. Only pay for the amount of data sent no matter the number of hosts.',
+        'SigNoz Cloud pricing is based on the data you send, not the number of hosts, containers, or nodes, so autoscaling does not add host-based charges.',
     },
   ]
 
@@ -145,8 +145,8 @@ const Header = () => {
         </h1>
 
         <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
-          Monitor exceptions automatically in Python, Java, Ruby, and Javascript.
-          <br className="hidden lg:inline" />
+          Use SigNoz Cloud to monitor exceptions automatically in Python, Java, Ruby, and
+          JavaScript. <br className="hidden lg:inline" />
           For other languages, just drop in a few lines of code and start monitoring exceptions.
         </p>
       </div>
@@ -235,13 +235,13 @@ const SigNozFeatures = () => {
     {
       title: 'Monitor Exceptions with no-code changes',
       desc: [
-        'Monitor exceptions automatically in Python, Java, Ruby, and Javascript. For other languages, just drop in a few lines of code and start monitoring exceptions.',
+        'Monitor exceptions automatically in Python, Java, Ruby, and JavaScript. For other languages, just drop in a few lines of code and start monitoring exceptions.',
       ],
       logo: '/img/log-management/fast.svg',
     },
     {
-      title: 'See detailed Stacktraces',
-      desc: 'See detailed stacktrace for all exceptions caught from your application. You can also log in custom attributes to add more context to your exceptions. For example, you can add attributes to identify users for which exceptions occurred.',
+      title: 'See detailed stack traces',
+      desc: 'See a detailed stack trace for every exception caught from your application. You can also log custom attributes to add more context, such as the users affected by an exception.',
       logo: '/img/log-management/fast.svg',
     },
     {
@@ -259,13 +259,13 @@ const SigNozFeatures = () => {
   const scrollsections = [
     {
       title: 'Record exception automatically',
-      desc: 'Monitor exceptions automatically in Python, Java, Ruby, and Javascript. For other languages, just drop in a few lines of code and start monitoring exceptions.',
+      desc: 'Monitor exceptions automatically in Python, Java, Ruby, and JavaScript. For other languages, just drop in a few lines of code and start monitoring exceptions.',
       buttonText: 'Learn More',
       buttonLink: 'https://signoz.io/docs/userguide/exceptions/',
     },
     {
-      title: 'Detailed Stacktrace with every exception',
-      desc: 'See detailed stacktrace for all exceptions caught from your application. You can also log in custom attributes to add more context to your exceptions. For example, you can add attributes to identify users for which exceptions occurred.',
+      title: 'Detailed stack trace with every exception',
+      desc: 'See a detailed stack trace for every exception caught from your application. You can also log custom attributes to add more context, such as the users affected by an exception.',
       image: '/img/features/exceptions/stacktrace.webp',
     },
     {
@@ -287,7 +287,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  Exceptions In <br /> SigNoz
+                  Exceptions in <br /> SigNoz Cloud
                 </div>
               </div>
             </div>
@@ -374,7 +374,7 @@ const UsageBasedPricing = () => {
         <div className="flex-[2_2_0%]">
           <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
             <div className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">
-              Pricing you can trust
+              SigNoz Cloud pricing you can trust
             </div>
             <p className="text-base font-normal text-signoz_vanilla-400">
               Tired of Datadog’s unpredictable bills or New Relic’s user-based pricing?

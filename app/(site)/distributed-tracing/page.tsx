@@ -11,16 +11,16 @@ export const metadata: Metadata = {
     title:
       'Distributed Tracing - High-Performance Trace Analysis Powered by OpenTelemetry | SigNoz',
     description:
-      'SigNoz offers powerful Distributed Tracing powered by OpenTelemetry. Analyze millions of spans, track requests across services & quickly find root causes to optimize application performance.',
+      'Use SigNoz Cloud for OpenTelemetry-native distributed tracing. Analyze millions of spans, correlate signals, and find root causes faster.',
     images: '/img/platform/DistributedTracingMeta.webp',
   },
   description:
-    'SigNoz offers powerful Distributed Tracing powered by OpenTelemetry. Analyze millions of spans, track requests across services & quickly find root causes to optimize application performance.',
+    'Use SigNoz Cloud for OpenTelemetry-native distributed tracing. Analyze millions of spans, correlate signals, and find root causes faster.',
   twitter: {
     title:
       'Distributed Tracing - High-Performance Trace Analysis Powered by OpenTelemetry | SigNoz',
     description:
-      'SigNoz offers powerful Distributed Tracing powered by OpenTelemetry. Analyze millions of spans, track requests across services & quickly find root causes to optimize application performance.',
+      'Use SigNoz Cloud for OpenTelemetry-native distributed tracing. Analyze millions of spans, correlate signals, and find root causes faster.',
     images: '/img/platform/DistributedTracingMeta.webp',
   },
 }
