@@ -140,11 +140,7 @@ function WorkspaceSetupHome() {
       return
     }
 
-    // encode params: searchParams.get() returns decoded values, so characters
-    // like `+` in the email would otherwise be read as a space by the backend
-    const verifyWorkSpaceSetupURL = `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/deployments/cesearch?code=${encodeURIComponent(
-      code
-    )}&email=${encodeURIComponent(email)}`
+    const verifyWorkSpaceSetupURL = `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/deployments/cesearch?code=${code}&email=${email}`
 
     try {
       const res = await fetch(verifyWorkSpaceSetupURL)
