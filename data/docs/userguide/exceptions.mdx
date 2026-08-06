@@ -15,7 +15,7 @@ With the Exceptions view you can:
 
 - Browse the exception types your services hit, with count, first seen, and last seen.
 - Filter by deployment environment, service, host, or Kubernetes cluster, namespace, deployment, and pod.
-- Read the full stack trace for any occurrence.
+- Read the stack trace for any occurrence whose instrumentation recorded one.
 - Open the trace that produced the exception to inspect the failing span and what ran before and after it.
 - Step through individual occurrences of the same exception group.
 - [Alert on exceptions](https://signoz.io/docs/alerts-management/exceptions-based-alerts/) when a new type shows up or a known one spikes.
@@ -32,7 +32,7 @@ Open **Exceptions** from the left navigation. The list shows one row per excepti
 
 To follow an exception into the request that caused it:
 
-1. Click an exception type to open its detail page. You get the stack trace, the identifiers that tie the exception back to its origin (`spanID`, `traceID`, `serviceName`, and `groupID`), and **Older** and **Newer** buttons to step through other occurrences in the same group.
+1. Click an exception type to open its detail page. You get the stack trace when the instrumentation recorded one, the identifiers that tie the exception back to its origin (`spanID`, `traceID`, `serviceName`, and `groupID`), and **Older** and **Newer** buttons to step through other occurrences in the same group. OpenTelemetry treats `exception.stacktrace` as recommended rather than required, and some SDKs omit it by default, so the panel can be empty.
 
    <Figure
        src="/img/docs/exception-detail-1.webp"
@@ -66,7 +66,9 @@ Instrumentation libraries record an exception event when an exception escapes th
 
 To record an exception, get the current span from the tracer and call `recordException()` or its language equivalent. That call adds the span event and leaves the span status alone, so set the status to error separately when the exception means the operation failed.
 
-Each example below runs inside an operation that already has an active span, which is what instrumentation gives you in a request handler. Called outside an active span, these APIs return a no-op span and discard the exception silently.
+The Java, Go, Python, JavaScript, and Ruby examples read the span that instrumentation already made current in a request handler, so they must run inside an active span. Outside one, those APIs hand back a no-op span (`undefined` in JavaScript) and the exception goes nowhere. The .NET and PHP examples start their own span instead, so they stand alone as long as a tracer provider is configured.
+
+Each example records the failure and then returns a server error rather than rethrowing. Let the exception escape instead and the surrounding instrumentation records it for you, in which case drop the manual `recordException` call to avoid two events for one failure.
 
 ### Record Exceptions in Java
 
@@ -85,6 +87,8 @@ void handleRequest() {
         span.recordException(e);
         // Mark the span as failed.
         span.setStatus(StatusCode.ERROR, e.getMessage());
+        // Surface the failure to the caller.
+        sendServerError();
     }
 }
 ```
@@ -109,6 +113,8 @@ func handleRequest(ctx context.Context) {
 		span.RecordError(err, trace.WithStackTrace(true))
 		// Mark the span as failed.
 		span.SetStatus(codes.Error, err.Error())
+		// Surface the failure to the caller.
+		sendServerError()
 	}
 }
 ```
@@ -131,6 +137,8 @@ def handle_request():
         span.record_exception(e)
         # Mark the span as failed.
         span.set_status(Status(StatusCode.ERROR, str(e)))
+        # Surface the failure to the caller.
+        send_server_error()
 ```
 
 ### Record Exceptions in JavaScript
@@ -150,6 +158,8 @@ function handleRequest() {
     span?.recordException(err);
     // Mark the span as failed.
     span?.setStatus({ code: SpanStatusCode.ERROR, message: err.message });
+    // Surface the failure to the caller.
+    sendServerError();
   }
 }
 ```
@@ -171,6 +181,8 @@ using (var activity = MyActivitySource.StartActivity("Foo"))
     {
         activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
         activity?.AddException(ex);
+        // Surface the failure to the caller.
+        SendServerError();
     }
 }
 ```
@@ -193,6 +205,8 @@ def handle_request
     # Record the exception and update the span status.
     span.record_exception(e)
     span.status = OpenTelemetry::Trace::Status.error(e.to_s)
+    # Surface the failure to the caller.
+    send_server_error
   end
 end
 ```
@@ -212,6 +226,8 @@ try {
     // Record the exception and update the span status.
     $span->recordException($t);
     $span->setStatus(StatusCode::STATUS_ERROR, $t->getMessage());
+    // Surface the failure to the caller.
+    sendServerError();
 } finally {
     $scope->detach();
     $span->end();
@@ -221,7 +237,7 @@ try {
 ## Grouping Exceptions
 
 <Admonition type="note">
-This section applies to Self-Host only. It configures the `otel-collector`'s `clickhousetraces` exporter directly, which SigNoz Cloud manages for you.
+This section applies to Self-Host only. It sets an option on the `otel-collector`'s `clickhousetraces` exporter, and SigNoz Cloud runs a managed collector that you do not configure. Cloud users cannot change the grouping strategy today. Reach out to support if variable exception messages are splitting one problem across many groups.
 </Admonition>
 
 By default, SigNoz groups the exceptions in the list by service name, exception type, and exception message. Messages that embed UUIDs or randomly generated IDs split one underlying problem across many groups.
@@ -284,7 +300,7 @@ An instrumentation library running with `OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN=lo
 
 ### One Problem Splits Into Many Exception Groups
 
-Exception messages that embed UUIDs, IDs, or other variable text produce a separate group per message. On Self-Host, switch to low-cardinality grouping as described in [Grouping Exceptions](#grouping-exceptions). The change applies to newly ingested data only.
+Exception messages that embed UUIDs, IDs, or other variable text produce a separate group per message. On Self-Host, switch to low-cardinality grouping as described in [Grouping Exceptions](#grouping-exceptions), which applies to newly ingested data only. On SigNoz Cloud the grouping strategy is not configurable, so contact support. Either way, dropping the variable part from the exception message at the source fixes it for both.
 </details>
 
 ## Next Steps
