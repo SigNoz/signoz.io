@@ -9,7 +9,7 @@ import TrackingLink from '@/components/TrackingLink'
 import { useLogEvent } from '@/hooks/useLogEvent'
 import { type HomepageFaqItem, homepageFaqItems } from './faqContent'
 
-function renderAnswer({ answer, link }: HomepageFaqItem): ReactNode {
+function renderAnswer({ answer, link }: Pick<HomepageFaqItem, 'answer' | 'link'>): ReactNode {
   if (!link) return answer
 
   return (
@@ -71,7 +71,7 @@ function FaqItem({ answer, link, question }: HomepageFaqItem) {
       >
         <div className="overflow-hidden">
           <p className="m-0 max-w-4xl px-5 pb-5 text-base leading-7 tracking-normal text-signoz_vanilla-400 sm:px-6 sm:pb-6 md:px-8 md:text-base">
-            {renderAnswer({ answer, link, question })}
+            {renderAnswer({ answer, link })}
           </p>
         </div>
       </div>

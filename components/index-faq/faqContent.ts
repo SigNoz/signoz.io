@@ -12,20 +12,13 @@ export type HomepageFaqItem = {
   question: string
 }
 
-function createLinkedAnswer({
-  after,
-  before,
-  href,
-  text,
-  trackingName,
-}: HomepageFaqLink): HomepageFaqLink & { answer: string } {
+function createLinkedAnswer(link: HomepageFaqLink): {
+  answer: string
+  link: HomepageFaqLink
+} {
   return {
-    after,
-    answer: `${before}${text}${after}`,
-    before,
-    href,
-    text,
-    trackingName,
+    answer: `${link.before}${link.text}${link.after}`,
+    link,
   }
 }
 
@@ -51,7 +44,7 @@ export const homepageFaqItems: HomepageFaqItem[] = [
   {
     question: 'How quickly can we start sending data to SigNoz Cloud?',
     answer: instrumentationAnswer.answer,
-    link: instrumentationAnswer,
+    link: instrumentationAnswer.link,
   },
   {
     question: 'Can SigNoz Cloud replace Datadog, Grafana, or CloudWatch?',
@@ -61,7 +54,7 @@ export const homepageFaqItems: HomepageFaqItem[] = [
   {
     question: 'How is SigNoz Cloud pricing calculated?',
     answer: pricingAnswer.answer,
-    link: pricingAnswer,
+    link: pricingAnswer.link,
   },
   {
     question: 'Can we use Self-Hosted SigNoz or keep data in our cloud?',

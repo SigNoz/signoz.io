@@ -60,9 +60,8 @@ const WhySelectSignoz = ({
                   Powering observability for teams of all sizes
                 </p>
                 <p className="m-0 block text-sm font-normal leading-9 text-signoz_vanilla-400">
-                  {isInPricingPage
-                    ? 'Hundreds of companies ⎯from early-stage start-ups to public enterprises use SigNoz to build more reliable products.'
-                    : 'Hundreds of companies ⎯from early-stage start-ups to public enterprises use SigNoz Cloud or Self-Hosted SigNoz to build more reliable products.'}
+                  Hundreds of companies ⎯from early-stage start-ups to public enterprises use SigNoz
+                  Cloud or Self-Hosted SigNoz to build more reliable products.
                 </p>
               </div>
             </div>
