@@ -1,12 +1,16 @@
+import { NextResponse } from 'next/server'
 import { MetadataRoute } from 'next'
 import siteMetadata from '@/data/siteMetadata'
-import { toSitemapDateOnly } from 'utils/sitemapXml'
+import { entriesToXml, toSitemapDateOnly } from 'utils/sitemapXml'
 import { resolveLatestDate } from '@/utils/dateUtils'
 import { fetchAllDocsForPage } from '@/utils/cachedData'
 
+// Explicit route handler instead of a sitemap.ts metadata route: metadata routes
+// are not purged by revalidatePath/revalidateTag, so on-demand revalidation via
+// /api/revalidate only works with a route handler.
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export async function GET() {
   const siteUrl = siteMetadata.siteUrl
 
   const introductionRoute: MetadataRoute.Sitemap[number] = {
@@ -26,5 +30,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     }))
 
-  return [introductionRoute, ...docRoutes]
+  return new NextResponse(entriesToXml([introductionRoute, ...docRoutes]), {
+    headers: {
+      'Content-Type': 'application/xml',
+    },
+  })
 }
