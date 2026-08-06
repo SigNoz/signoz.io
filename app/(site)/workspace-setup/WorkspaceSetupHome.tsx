@@ -140,7 +140,11 @@ function WorkspaceSetupHome() {
       return
     }
 
-    const verifyWorkSpaceSetupURL = `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/deployments/cesearch?code=${code}&email=${email}`
+    // encode params: searchParams.get() returns decoded values, so characters
+    // like `+` in the email would otherwise be read as a space by the backend
+    const verifyWorkSpaceSetupURL = `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/deployments/cesearch?code=${encodeURIComponent(
+      code
+    )}&email=${encodeURIComponent(email)}`
 
     try {
       const res = await fetch(verifyWorkSpaceSetupURL)
@@ -297,7 +301,6 @@ function WorkspaceSetupHome() {
       ) : verificationState === 'expired' || verificationState === 'error' ? (
         <VerificationFailed
           variant={verificationState}
-          email={decodedEmail}
           errorMessage={verificationError}
           resendStatus={resendStatus}
           canResend={canResend}

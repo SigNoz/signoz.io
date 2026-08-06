@@ -8,7 +8,6 @@ import './workspace-setup.styles.css'
 
 interface VerificationFailedProps {
   variant: 'expired' | 'error'
-  email: string
   errorMessage: string | null
   resendStatus: 'idle' | 'sending' | 'sent' | 'failed'
   canResend: boolean
@@ -17,7 +16,6 @@ interface VerificationFailedProps {
 
 function VerificationFailed({
   variant,
-  email,
   errorMessage,
   resendStatus,
   canResend,
@@ -43,15 +41,15 @@ function VerificationFailed({
 
       {resendStatus === 'sent' && (
         <div className="mt-[28px] flex w-full items-center justify-center gap-2 text-center text-xs text-signoz_forest-500">
-          <CheckCircleIcon size={16} /> New verification email sent{email ? ` to ${email}` : ''} —
-          check your inbox (and spam folder).
+          <CheckCircleIcon size={16} className="shrink-0" /> Verification email sent! Please check
+          your inbox.
         </div>
       )}
 
       {resendStatus === 'failed' && (
         <div className="mt-[28px] flex w-full items-center justify-center gap-2 text-center text-xs text-signoz_cherry-500">
-          <Frown size={16} /> We couldn't resend the verification email. Please try again or contact
-          support for assistance.
+          <Frown size={16} className="shrink-0" /> Couldn't send the email. Please try again or
+          contact support.
         </div>
       )}
 
