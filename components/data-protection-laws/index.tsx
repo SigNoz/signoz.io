@@ -34,7 +34,7 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
           <Image
             className="w-full"
             src={featureGraphicDataProtection}
-            alt="Map showing SigNoz cloud regions in the United States, European Union, and India"
+            alt="Map showing SigNoz Cloud regions in the United States, European Union, and India"
             width={720}
             height={400}
           />
