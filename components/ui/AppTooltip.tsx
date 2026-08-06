@@ -13,6 +13,7 @@ type AppTooltipProps = {
   side?: AppTooltipSide
   /** Radix delay in ms; defaults to provider (theme) value */
   delayDuration?: number
+  sideOffset?: number
 }
 
 export function AppTooltip({
@@ -21,6 +22,7 @@ export function AppTooltip({
   contentClassName,
   side = 'right',
   delayDuration,
+  sideOffset = 6,
 }: AppTooltipProps) {
   return (
     <TooltipPrimitive.Root delayDuration={delayDuration}>
@@ -28,14 +30,16 @@ export function AppTooltip({
       <TooltipPrimitive.Portal>
         <TooltipPrimitive.Content
           side={side}
-          sideOffset={6}
+          sideOffset={sideOffset}
+          collisionPadding={8}
+          avoidCollisions
           className={cn(
-            'z-[200] max-w-sm rounded-md border border-signoz_slate-500 bg-signoz_ink-400 px-3 py-2 text-left text-xs leading-snug text-signoz_vanilla-100 shadow-[0_8px_30px_rgba(0,0,0,0.45)]',
+            'z-[200] max-w-sm rounded-md border border-[var(--l2-border)] bg-[var(--l2-background)] px-3 py-2 text-left text-xs leading-snug text-[var(--l1-foreground)] shadow-[0_6px_12px_0_color-mix(in_srgb,var(--base-black)_20%,transparent)]',
             contentClassName
           )}
         >
           {content}
-          <TooltipPrimitive.Arrow className="fill-signoz_ink-400" width={10} height={5} />
+          <TooltipPrimitive.Arrow className="fill-[var(--l2-background)]" width={10} height={5} />
         </TooltipPrimitive.Content>
       </TooltipPrimitive.Portal>
     </TooltipPrimitive.Root>

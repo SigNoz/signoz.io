@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, type ReactNode } from 'react'
 import { cn } from '../../app/lib/utils'
+import { themeRgb } from '@/utils/cssColor'
 
 interface DitherCanvasProps {
   children?: ReactNode
@@ -22,6 +23,8 @@ precision highp float;
 uniform vec2 uRes;
 uniform float uTime;
 uniform float uFade;
+uniform vec3 uBg;
+uniform vec3 uPx;
 
 const int MAX_CLICKS = 10;
 uniform vec2 uClickPos[MAX_CLICKS];
@@ -78,11 +81,9 @@ void main() {
   vec2 cellCoord = floor(fc / CELL) * CELL;
   vec2 uv = (cellCoord / uRes) * vec2(ar, 1.0);
 
-  // fBm ambient noise (from pen 1)
   float feed = fbm(uv, uTime * 0.1);
   feed = feed * 0.5 + (-0.65);
 
-  // Click ripple waves (from pen 2)
   for (int i = 0; i < MAX_CLICKS; i++) {
     vec2 pos = uClickPos[i];
     if (pos.x < 0.0 && pos.y < 0.0) continue;
@@ -97,17 +98,12 @@ void main() {
   float bayer = Bayer8(fc / PX) - 0.5;
   float bw = step(0.5, feed + bayer);
 
-  // Fade toward left edge
   if (uFade > 0.5) {
     float nx = gl_FragCoord.x / uRes.x;
     bw *= smoothstep(0.0, 0.55, nx);
   }
 
-  // ink-500 background, very subtle lighter dither pixels
-  vec3 bg = vec3(0.043, 0.047, 0.055);
-  vec3 px = vec3(0.105, 0.11, 0.13);
-
-  fragColor = vec4(mix(bg, px, bw), 1.0);
+  fragColor = vec4(mix(uBg, uPx, bw), 1.0);
 }
 `
 
@@ -163,12 +159,14 @@ export default function DitherCanvas({
   enableClick = true,
   id,
 }: DitherCanvasProps) {
+  const rootRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const clickRef = useRef<((clientX: number, clientY: number) => void) | null>(null)
 
   useEffect(() => {
+    const root = rootRef.current
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!root || !canvas) return
 
     const ctx = initGL(canvas)
     if (!ctx) return
@@ -177,6 +175,8 @@ export default function DitherCanvas({
     const uRes = gl.getUniformLocation(prog, 'uRes')
     const uTime = gl.getUniformLocation(prog, 'uTime')
     const uFade = gl.getUniformLocation(prog, 'uFade')
+    const uBg = gl.getUniformLocation(prog, 'uBg')
+    const uPx = gl.getUniformLocation(prog, 'uPx')
 
     const uClickPosLocs: (WebGLUniformLocation | null)[] = []
     const uClickTLocs: (WebGLUniformLocation | null)[] = []
@@ -185,11 +185,25 @@ export default function DitherCanvas({
       uClickTLocs.push(gl.getUniformLocation(prog, `uClickT[${i}]`))
     }
 
+    const syncColors = () => {
+      const bg = themeRgb(root, '--l1-background')
+      const l3 = themeRgb(root, '--l3-background')
+      // l3/background-30 over l1/background
+      gl.uniform3f(uBg, bg.r / 255, bg.g / 255, bg.b / 255)
+      gl.uniform3f(
+        uPx,
+        (bg.r * 0.7 + l3.r * 0.3) / 255,
+        (bg.g * 0.7 + l3.g * 0.3) / 255,
+        (bg.b * 0.7 + l3.b * 0.3) / 255
+      )
+    }
+
     gl.uniform1f(uFade, fadeToLeft ? 1.0 : 0.0)
     for (let i = 0; i < MAX_CLICKS; i++) {
       gl.uniform2f(uClickPosLocs[i], -1, -1)
       gl.uniform1f(uClickTLocs[i], 0)
     }
+    syncColors()
 
     let clickIndex = 0
     const timeRef = { current: 0 }
@@ -208,15 +222,22 @@ export default function DitherCanvas({
       const w = canvas.clientWidth
       const h = canvas.clientHeight
       if (w === 0 || h === 0) return
-      canvas.width = w
-      canvas.height = h
-      gl.viewport(0, 0, w, h)
-      gl.uniform2f(uRes, w, h)
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      canvas.width = Math.round(w * dpr)
+      canvas.height = Math.round(h * dpr)
+      gl.viewport(0, 0, canvas.width, canvas.height)
+      gl.uniform2f(uRes, canvas.width, canvas.height)
     }
 
     const ro = new ResizeObserver(resize)
     ro.observe(canvas)
     resize()
+
+    const themeObserver = new MutationObserver(syncColors)
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme'],
+    })
 
     let rafId: number
     const start = performance.now()
@@ -238,6 +259,7 @@ export default function DitherCanvas({
     return () => {
       if (!prefersReducedMotion) cancelAnimationFrame(rafId)
       ro.disconnect()
+      themeObserver.disconnect()
       clickRef.current = null
       gl.deleteProgram(prog)
       gl.deleteShader(vs)
@@ -252,6 +274,7 @@ export default function DitherCanvas({
 
   return (
     <div
+      ref={rootRef}
       id={id}
       className={cn('relative overflow-hidden', className)}
       onPointerDown={handlePointerDown}
@@ -265,7 +288,8 @@ export default function DitherCanvas({
         <div
           className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-[45%]"
           style={{
-            background: 'linear-gradient(to right, #0B0C0E 0%, #0B0C0E 10%, transparent 100%)',
+            background:
+              'linear-gradient(to right, var(--l1-background) 0%, var(--l1-background) 10%, transparent 100%)',
           }}
         />
       )}
