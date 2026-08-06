@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-08-05
 title: "Kubernetes Namespaces Monitoring: Aggregated Resource Usage"
 description: Monitor Kubernetes namespace resource usage in SigNoz, covering aggregated CPU and memory, top pods, network activity, and workload health.
 doc_type: explanation
@@ -109,7 +109,7 @@ Click a namespace name to open the detail page. The header shows **Namespace Nam
 
 #### ReplicaSets
 
-- This chart relies on the OTel metrics `k8s.replicaset.desired` and `k8s.replicaset.available` from the k8s_cluster receiver, rendered as a table with one row per ReplicaSet in the namespace (empty ReplicaSets are filtered out via `HAVING max(desired) > 0`).
+- This chart relies on the OTel metrics `k8s.replicaset.desired` and `k8s.replicaset.available` from the k8s_cluster receiver, rendered as a table with one row per ReplicaSet in the namespace, including scaled-to-zero ReplicaSets left behind by past rollouts (those show **Desired** `0`).
 - Columns show **Desired** (`.spec.replicas`) and **Available** (pods ready for at least `minReadySeconds`, the `.status.availableReplicas` field).
 - Available < Desired for an extended period means the ReplicaSet can't bring pods up: typically because of an image-pull failure, a missing ConfigMap/Secret, or insufficient cluster capacity; drill into the underlying pods' events. (Most ReplicaSets are managed by Deployments; see the Deployments chart for the rollout-level view.)
 

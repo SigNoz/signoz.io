@@ -91,15 +91,15 @@ Click a cluster name to open the detail page. The header shows **Cluster Name**.
 
 #### Ready Nodes
 
-- This chart relies on the OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver (encoded `1` = Ready, `0` = NotReady, `-1` = Unknown), taking the latest value per `k8s.node.name` in each step interval and keeping only the nodes reporting Ready (`HAVING max(condition_ready) = 1`).
-- One line per Ready node, flat at `1` for as long as that node keeps accepting pods. Because the chart is filtered to `1`, a node going NotReady or Unknown leaves a gap in its line instead of dipping, so a line that stops is the signal to chase.
-- Use this to confirm cluster-wide node health at a glance: compare the number of lines against your expected node count, and check **NotReady Nodes** for the nodes that went down, were cordoned, or lost contact with the API server.
+- This chart relies on the OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver, grouped by `k8s.node.name`, plotting each node's latest `condition_ready` value in every step interval (`1` = Ready, `0` = NotReady, `-1` = Unknown).
+- One line per node the cluster is reporting on; Ready nodes sit at `1` and are the ones currently accepting pods.
+- Use this to confirm cluster-wide node health at a glance: scan for any line not at `1`; those are the nodes that went down, were cordoned, or lost contact with the API server.
 
 #### NotReady Nodes
 
-- This chart relies on the same OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver, taking the latest value per `k8s.node.name` in each step interval and keeping only the nodes reporting NotReady (`HAVING max(condition_ready) = 0`).
-- One line per node whose kubelet is reporting unhealthy. An empty chart means no node is at `0`, which is the healthy case. Nodes at `-1` (Unknown: no kubelet update within the grace period) appear in neither this chart nor **Ready Nodes**, so cross-check the node count between the two when it doesn't add up.
-- Any node plotted here means a slice of the cluster's capacity is unusable; after the default 5-minute toleration window, pods on those nodes are evicted: the line's `k8s.node.name` label tells you which nodes are about to lose their pods.
+- This chart relies on the same OTel metric `k8s.node.condition_ready` from the k8s_cluster receiver, grouped by `k8s.node.name`, plotting each node's latest `condition_ready` value in every step interval.
+- The chart plots every node; NotReady nodes sit at `0` (kubelet reporting unhealthy) and `-1` marks Unknown (no kubelet update within the grace period).
+- Any node not at `1` means a slice of the cluster's capacity is unusable; after the default 5-minute toleration window, pods on those nodes are evicted: the line's `k8s.node.name` label tells you which nodes are about to lose their pods.
 
 #### Deployments Available and Desired
 
