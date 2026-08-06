@@ -4,6 +4,8 @@ import { toSitemapDateOnly } from 'utils/sitemapXml'
 import { resolveLatestDate } from '@/utils/dateUtils'
 import { fetchAllDocsForPage } from '@/utils/cachedData'
 
+export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
 

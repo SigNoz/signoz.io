@@ -38,8 +38,9 @@ export async function fetchAllComparisonsForPage() {
     try {
       return await fetchComparisons(deploymentStatus)
     } catch (directError) {
+      // Rethrow so ISR serves the last good page instead of caching an empty one.
       console.error('Direct comparisons fetch also failed:', directError)
-      return []
+      throw directError
     }
   }
 }
@@ -123,8 +124,9 @@ export async function fetchAllGuidesForPage() {
     try {
       return await fetchGuides(deploymentStatus)
     } catch (directError) {
+      // Rethrow so ISR serves the last good page instead of caching an empty one.
       console.error('Direct guides fetch also failed:', directError)
-      return []
+      throw directError
     }
   }
 }
@@ -206,8 +208,9 @@ export async function fetchAllBlogsForPage() {
     try {
       return await fetchBlogs(deploymentStatus)
     } catch (directError) {
+      // Rethrow so ISR serves the last good page instead of caching an empty one.
       console.error('Direct blogs fetch also failed:', directError)
-      return []
+      throw directError
     }
   }
 }
@@ -289,8 +292,9 @@ export async function fetchAllDocsForPage() {
     try {
       return await fetchDocs(deploymentStatus)
     } catch (directError) {
+      // Rethrow so ISR serves the last good page instead of caching an empty one.
       console.error('Direct docs fetch also failed:', directError)
-      return []
+      throw directError
     }
   }
 }

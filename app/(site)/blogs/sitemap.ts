@@ -15,6 +15,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { faqs, caseStudies, opentelemetries, comparisons, guides, blogs } =
     await fetchAllCMSContent(deploymentStatus)
 
+  // Never cache an incomplete sitemap. With SWR revalidation ('max' profile), a CMS
+  // outage falls back to stale cached data before this guard is ever reached; the
+  // guard only fires if the CMS successfully returns an empty collection, in which
+  // case the failed render is never cached and the next request retries.
+  const collections = { faqs, caseStudies, opentelemetries, comparisons, guides, blogs }
+  for (const [name, collection] of Object.entries(collections)) {
+    if (!collection || collection.data.length === 0) {
+      throw new Error(`Empty ${name} collection received from CMS while building blogs sitemap`)
+    }
+  }
+
   let faqRoutes: MetadataRoute.Sitemap = []
   if (faqs) {
     faqRoutes = faqs.data.map((faq) => ({

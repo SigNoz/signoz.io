@@ -105,6 +105,9 @@ module.exports = () => {
       '*': ['./data-assets/**'],
     },
     images: {
+      // Next 16 default is 14400s (4h) with no invalidation mechanism; keep TTL low.
+      // Effective TTL is max(minimumCacheTTL, upstream Cache-Control max-age).
+      minimumCacheTTL: 3600,
       remotePatterns: getAllowedImageDomains().map((domain) => ({
         protocol: 'https',
         hostname: domain,

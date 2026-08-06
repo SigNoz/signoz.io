@@ -21,6 +21,20 @@ function normalizePathInput(input: PathInput): { urlPath: string; contentKey?: s
   return { urlPath: input.urlPath, contentKey: input.contentKey }
 }
 
+// Sitemap route handlers are not covered by revalidatePath('/', 'layout') or content
+// tags, so they must be expired explicitly whenever content changes.
+function revalidateSitemaps(results: RevalidationResult[]) {
+  for (const sitemapPath of ['/blogs/sitemap.xml', '/docs/sitemap.xml']) {
+    revalidatePath(sitemapPath)
+    results.push({
+      path: sitemapPath,
+      revalidated: true,
+      type: 'path',
+      timestamp: new Date().toISOString(),
+    })
+  }
+}
+
 function revalidateCmsUrlPath(
   urlPath: string,
   explicitContentKey: string | undefined,
@@ -42,7 +56,7 @@ function revalidateCmsUrlPath(
         contentKey,
       })
       for (const t of strapiTags) {
-        revalidateTag(t, 'default')
+        revalidateTag(t, 'max')
         tags.push(t)
       }
     }
@@ -76,13 +90,13 @@ export async function POST(request: NextRequest) {
 
     if (revalidateAll) {
       revalidatePath('/', 'layout')
-      revalidateTag('mdx-content-list', 'default')
-      revalidateTag('comparisons-list', 'default')
-      revalidateTag('guides-list', 'default')
-      revalidateTag('blogs-list', 'default')
-      revalidateTag('docs-list', 'default')
-      revalidateTag('docs-side-nav', 'default')
-      revalidateTag('listicles', 'default')
+      revalidateTag('mdx-content-list', 'max')
+      revalidateTag('comparisons-list', 'max')
+      revalidateTag('guides-list', 'max')
+      revalidateTag('blogs-list', 'max')
+      revalidateTag('docs-list', 'max')
+      revalidateTag('docs-side-nav', 'max')
+      revalidateTag('listicles', 'max')
 
       results.push({
         path: '/',
@@ -105,7 +119,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (tag) {
-      revalidateTag(tag, 'default')
+      revalidateTag(tag, 'max')
 
       results.push({
         tag,
@@ -117,7 +131,7 @@ export async function POST(request: NextRequest) {
 
     if (tags && Array.isArray(tags)) {
       for (const t of tags) {
-        revalidateTag(t, 'default')
+        revalidateTag(t, 'max')
 
         results.push({
           tag: t,
@@ -126,6 +140,11 @@ export async function POST(request: NextRequest) {
           timestamp: new Date().toISOString(),
         })
       }
+    }
+
+    // Content changes affect sitemap URL lists/lastModified, so expire sitemaps too.
+    if (revalidateAll || results.some((r) => r.type === 'cmsPath' || r.type === 'tag')) {
+      revalidateSitemaps(results)
     }
 
     console.log('Revalidation completed:', JSON.stringify(results))
@@ -171,13 +190,13 @@ export async function GET(request: NextRequest) {
 
     if (revalidateAll) {
       revalidatePath('/', 'layout')
-      revalidateTag('mdx-content-list', 'default')
-      revalidateTag('comparisons-list', 'default')
-      revalidateTag('guides-list', 'default')
-      revalidateTag('blogs-list', 'default')
-      revalidateTag('docs-list', 'default')
-      revalidateTag('docs-side-nav', 'default')
-      revalidateTag('listicles', 'default')
+      revalidateTag('mdx-content-list', 'max')
+      revalidateTag('comparisons-list', 'max')
+      revalidateTag('guides-list', 'max')
+      revalidateTag('blogs-list', 'max')
+      revalidateTag('docs-list', 'max')
+      revalidateTag('docs-side-nav', 'max')
+      revalidateTag('listicles', 'max')
 
       results.push({
         path: '/',
@@ -192,7 +211,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (tag) {
-      revalidateTag(tag, 'default')
+      revalidateTag(tag, 'max')
 
       results.push({
         tag,
@@ -200,6 +219,11 @@ export async function GET(request: NextRequest) {
         type: 'tag',
         timestamp: new Date().toISOString(),
       })
+    }
+
+    // Content changes affect sitemap URL lists/lastModified, so expire sitemaps too.
+    if (revalidateAll || results.some((r) => r.type === 'cmsPath' || r.type === 'tag')) {
+      revalidateSitemaps(results)
     }
 
     return NextResponse.json({
