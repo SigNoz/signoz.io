@@ -9,7 +9,7 @@ doc_type: howto
 
 SigNoz reads exceptions from the traces your services already send. Your instrumentation records an exception as an `exception` span event, and SigNoz collects those events into a dedicated **Exceptions** view that groups them by service, exception type, and message.
 
-Every exception carries the span and trace IDs of the request it came from, so you can move from a row in the list to the flame graph of the failing request.
+Every exception carries the span and trace IDs of the request it came from, so you can move from a row in the list to the flame graph of the failing request. Nothing appears until your services send traces, so [instrument them first](https://signoz.io/docs/instrumentation/overview/) if you have not already.
 
 With the Exceptions view you can:
 
@@ -26,7 +26,7 @@ With the Exceptions view you can:
     caption="Exceptions list, sortable by Last Seen, First Seen, Count, Exception Type, and Application"
 />
 
-## How to View Exceptions?
+## How to View Exceptions
 
 Open **Exceptions** from the left navigation. The list shows one row per exception group with its type, message, occurrence count, first seen, last seen, and the application that reported it. Sort by exception type, count, first seen, last seen, or application. Narrow the time range from the picker at the top, and use the filter sidebar or the search bar to scope the list to a service, environment, host, or Kubernetes workload.
 
@@ -36,8 +36,8 @@ To follow an exception into the request that caused it:
 
    <Figure
        src="/img/docs/exception-detail-1.webp"
-       alt="Exception detail page showing stack trace and span attributes"
-       caption="Exception detail page with stack trace and span attributes"
+       alt="Exception detail page showing the stack trace and exception identifiers"
+       caption="Exception detail page with the stack trace and the identifiers linking back to the span"
    />
 
 2. Click **See the error in trace graph** to open the full trace. The flame graph and waterfall show the failing span in the context of the whole request, and the span details panel gives you the span's own attributes, events, and correlated logs. The exception detail page does not carry those attributes, so open the trace when you need them.
@@ -48,7 +48,7 @@ To follow an exception into the request that caused it:
        caption="Exception in the context of its trace"
    />
 
-## What counts as an exception
+## What Counts as an Exception
 
 SigNoz builds the Exceptions view from span events. Log records do not feed it. SigNoz treats a span event as an exception when its name is `exception` or ends in `.exception`, which covers the current OpenTelemetry conventions:
 
@@ -57,13 +57,15 @@ SigNoz builds the Exceptions view from span events. Log records do not feed it. 
 - `db.client.operation.exception`
 - `rpc.client.call.exception` and `rpc.server.call.exception`
 
+Matching on the `.exception` suffix needs OTel Collector `v0.144.3` or newer, which shipped with SigNoz `v0.120.0`. Older collectors match the plain `exception` name only, so the domain-specific events never reach the Exceptions view.
+
 From each event SigNoz stores `exception.type`, `exception.message`, `exception.stacktrace`, and `exception.escaped`. Type and message fill the list columns and decide grouping, so record at least one of them. OpenTelemetry has deprecated `exception.escaped`, so treat it as legacy data rather than something to set on new instrumentation.
 
 <Admonition type="info">
 OpenTelemetry is <a href="https://opentelemetry.io/blog/2026/deprecating-span-events/" target="_blank" rel="noopener noreferrer nofollow">deprecating the span-event exception APIs</a> in favor of the Logs API. No action is needed today: existing `recordException` calls stay valid and span events remain the default. The migration runs per instrumentation library, not across an SDK. A library that has adopted the `OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN` opt-in emits log records instead of span events when you set it to `logs`, and those exceptions will not appear in the Exceptions view. Libraries that have not adopted it ignore the variable, and `recordException` calls in your own code stay span events either way. Set `logs/dup` to emit both while you migrate.
 </Admonition>
 
-## Recording exceptions
+## Recording Exceptions
 
 Instrumentation libraries record an exception event when an exception escapes the operation they wrap, so an auto-instrumented Python, Java, Ruby, or JavaScript app reports its unhandled exceptions without any code changes. Record an exception yourself when it marks a failed operation that no library captured, such as an error you catch at a request boundary and turn into a 500 response. OpenTelemetry <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/" target="_blank" rel="noopener noreferrer nofollow">no longer recommends recording exceptions</a> that you catch and recover from inside the span, since they add noise to the Exceptions view and to any alerts built on it.
 
@@ -71,7 +73,7 @@ To record an exception, get the current span from the tracer and call `recordExc
 
 Examples for each language:
 
-### Record Exceptions in Java:
+### Record Exceptions in Java
 
 ```java
 // Get the current span from the tracer
@@ -84,7 +86,7 @@ span.recordException(new RuntimeException("Something went wrong"));
 span.setStatus(StatusCode.ERROR, "Something bad happened!");
 ```
 
-### Record Exceptions in Golang:
+### Record Exceptions in Golang
 
 ```go
 import "go.opentelemetry.io/otel/codes"
@@ -99,7 +101,7 @@ span.RecordError(err)
 span.SetStatus(codes.Error, "internal error")
 ```
 
-### Record Exceptions in Python:
+### Record Exceptions in Python
 
 ```python
 # Get the current span from the tracer
@@ -116,7 +118,7 @@ span.record_exception(exception)
 span.set_status(Status(StatusCode.ERROR, "internal error"))
 ```
 
-### Record Exceptions in JavaScript:
+### Record Exceptions in JavaScript
 
 ```javascript
 // import relevant opentelemetry functions
@@ -132,11 +134,9 @@ span.recordException(err);
 span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
 ```
 
-### Record Exceptions in .NET:
+### Record Exceptions in .NET
 
-OpenTelemetry .NET provides several options to report Exceptions in Activity. It varies from the most basic option of setting Status, to fully recording the Exception itself to activity. Follow the <a href="https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/reporting-exceptions/README.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry .NET documentation</a> to learn more.
-
-Below is one such example:
+OpenTelemetry .NET offers several ways to report exceptions on an `Activity`, from setting the status alone to recording the full exception. The <a href="https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/reporting-exceptions/README.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry .NET documentation</a> covers the rest:
 
 ```csharp
 using (var activity = MyActivitySource.StartActivity("Foo"))
@@ -153,7 +153,7 @@ using (var activity = MyActivitySource.StartActivity("Foo"))
 }
 ```
 
-### Record Exceptions in Ruby:
+### Record Exceptions in Ruby
 
 ```ruby
 # Import otel sdk
@@ -171,7 +171,7 @@ rescue StandardError => e
 end
 ```
 
-### Record Exceptions in PHP:
+### Record Exceptions in PHP
 
 ```php
 $span = $tracer->spanBuilder('process-order')->startSpan();
@@ -195,23 +195,17 @@ try {
 This section applies to Self-Host only. It configures the `otel-collector`'s `clickhousetraces` exporter directly, which SigNoz Cloud manages for you.
 </Admonition>
 
-By default, exceptions on **Exception List page** are grouped by service name, exception type
-and exception message. This might result in high cardinality of exception groups, especially
-if exception messages contains UUIDs or randomly generated IDs.
+By default, SigNoz groups the exceptions in the list by service name, exception type, and exception message. Messages that embed UUIDs or randomly generated IDs split one underlying problem across many groups.
 
-To reduce the cardinality of the exception grouping, set the `low_cardinal_exception_grouping`
-to `true` in `clickhousetraces` exporter configuration. This will result in exception grouping
-by name of service and exception type.
+To group by service name and exception type only, set `low_cardinal_exception_grouping` to `true` in the `clickhousetraces` exporter configuration.
 
 <Admonition type="info">
-This new grouping strategy will only be applied to new data injected after new instance of
-`otel-collector` with updated the environment variable.
+The new strategy applies only to data ingested after you restart `otel-collector` with the updated environment variable. Groups that already exist keep their original grouping.
 </Admonition>
 
 ### Docker Standalone and Docker Swarm
 
-To enable exception grouping, users can set `LOW_CARDINAL_EXCEPTION_GROUPING=true` as an
-environment variable for otel collector service in `docker-compose.yaml`.
+Set `LOW_CARDINAL_EXCEPTION_GROUPING=true` as an environment variable on the otel-collector service in `docker-compose.yaml`.
 
 ```yaml {4}
 services:
@@ -222,23 +216,23 @@ services:
 
 ### Kubernetes (Helm)
 
-To enable exception grouping, include the following in `override-values.yaml`:
+Include the following in `override-values.yaml`:
 
 ```yaml
 otelCollector:
   lowCardinalityExceptionGrouping: true
 ```
 
-To install or upgrade SigNoz release with the updated configurations in `override-values.yaml`:
+Then install or upgrade the SigNoz release with the updated `override-values.yaml`:
 
-```yaml
+```bash
 helm -n platform upgrade \
     --create-namespace --install \
     my-release signoz/signoz \
     -f override-values.yaml
 ```
 
-## Next steps
+## Next Steps
 
 - [Explore Traces](https://signoz.io/docs/userguide/traces/) to see the request each exception came from
 - [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to pull the surrounding log lines for an exception
