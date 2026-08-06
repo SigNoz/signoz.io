@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import {
-  ArrowRight,
   ArrowUpRight,
   Check,
   BookOpen,
@@ -21,8 +20,9 @@ import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLay
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
 import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 import Button from '@/components/ui/Button'
+import TrackingLink from '@/components/TrackingLink'
 import DitherCanvas from '@/components/DitherCanvas/DitherCanvas'
-import FeatureComparisonGrid from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
+import FeatureComparisonGridWithOcclusion from '@/shared/components/molecules/FeaturePages/FeatureComparisonGridWithOcclusion'
 import type { ComparisonSection } from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
 import {
   SUPPORT_HEADER_BUTTONS,
@@ -33,12 +33,13 @@ import {
   SUPPORT_STATS,
   ESCALATION_STEPS,
   CONTACT_CHANNELS,
+  REACH_US_BUTTONS,
   WHY_DIFFERENT_ITEMS,
   COMPLIANCE_BADGES,
   COMPLIANCE_LINKS,
   BOTTOM_CTA_BUTTONS,
 } from './SupportPage.constants'
-import type { CellValue } from './SupportPage.constants'
+import type { CellValue, SupportStat } from './SupportPage.types'
 import '@/components/footer/footer-pill-links.css'
 
 import soc2BadgeUrl from '@/public/svgs/icons/SOC-2.svg?url'
@@ -48,8 +49,6 @@ const badgeUrlMap: Record<string, typeof soc2BadgeUrl> = {
   '/svgs/icons/SOC-2.svg': soc2BadgeUrl,
   '/svgs/icons/hipaa.svg': hipaaBadgeUrl,
 }
-
-// --- Comparison Table ---
 
 const GRID_CLASS = 'grid-cols-[1fr_12rem_12rem_12rem]'
 
@@ -84,15 +83,19 @@ function renderCell(cell: CellValue) {
       return <span className="text-sm leading-6 text-[var(--l2-foreground)]">{cell.value}</span>
     case 'link':
       return (
-        <a
+        <TrackingLink
           href={cell.href}
           target="_blank"
           rel="noopener noreferrer nofollow"
-          className="inline-flex items-center gap-1 text-sm text-[var(--l2-foreground)] hover:text-[var(--l1-foreground-hover)]"
+          clickType="Nav Click"
+          clickName="Status Page Link"
+          clickLocation="Support Comparison Table"
+          clickText={cell.text}
+          className="footer-pill-link !mt-0"
         >
           {cell.text}
           <ArrowUpRight size={14} />
-        </a>
+        </TrackingLink>
       )
     case 'check-text':
       return (
@@ -127,10 +130,8 @@ const ComparisonTable = () => {
     <div className="py-6">
       <div className="w-full overflow-x-auto text-left text-base leading-normal md:overflow-visible">
         <div className="relative min-w-[40rem] md:min-w-0">
-          {/* Gradient overlay behind Teams (middle) column */}
           <div className="pointer-events-none absolute inset-y-0 right-48 z-0 w-48 rounded-lg bg-gradient-to-b from-[var(--l2-background)] from-[73%] to-transparent opacity-80" />
 
-          {/* Sticky Tier Header */}
           <div className="sticky top-14 z-[9] bg-[var(--l1-background)]">
             <div className={`grid ${GRID_CLASS}`}>
               <div className="bg-[var(--l1-background)]" />
@@ -157,12 +158,20 @@ const ComparisonTable = () => {
                   )}
                   {tier.cta && (
                     <Button
-                      to={tier.cta.href}
+                      asChild
                       variant={tier.cta.variant}
                       rounded="full"
                       className="flex h-8 !w-fit items-center justify-center gap-2 text-xs font-medium"
                     >
-                      {tier.cta.text}
+                      <TrackingLink
+                        href={tier.cta.href}
+                        clickType={tier.cta.tracking.clickType}
+                        clickName={tier.cta.tracking.clickName}
+                        clickLocation="Support Comparison Table"
+                        clickText={tier.cta.text}
+                      >
+                        {tier.cta.text}
+                      </TrackingLink>
                     </Button>
                   )}
                 </div>
@@ -170,14 +179,13 @@ const ComparisonTable = () => {
             </div>
             <div className={`h-px w-full ${TABLE_SEPARATOR_CLASS}`} />
           </div>
-
-          {/* Grid body */}
-          <FeatureComparisonGrid
+          <FeatureComparisonGridWithOcclusion
             columns={COLUMNS}
             sections={sections}
             gridClassName={GRID_CLASS}
             sectionHeadingSize="sm"
             stickyOffset="top-[189px]"
+            stickyOffsetPx={189}
             stickyBg=""
             stickyZIndex="z-[8]"
             separator="border"
@@ -226,56 +234,53 @@ const SeverityDefinitionsSection = () => (
   </div>
 )
 
-const StatsSection = () => (
-  <div className="flex flex-col sm:flex-row">
-    <div className="!w-full flex-1 sm:!w-[300px] sm:min-w-fit">
-      <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start px-10 py-10 sm:px-0 sm:pl-12">
-        <h2 className="text-4xl font-bold !leading-[3.5rem] text-[var(--l1-foreground-hover)] sm:text-4xl">
-          The numbers
-          <br className="hidden sm:block" />
-          speak for
-          <br className="hidden sm:block" />
-          themselves
-        </h2>
-      </div>
-    </div>
-    <div className="flex-[2_2_0%]">
-      <div className="border-l border-dashed border-[var(--l1-border)] bg-transparent p-0">
-        {/* Top two stats side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          {SUPPORT_STATS.slice(0, 2).map((stat, i) => (
-            <div
-              key={stat.title}
-              className={`border-b border-dashed border-[var(--l1-border)] p-8 ${
-                i === 0 ? 'md:border-r md:border-dashed md:border-[var(--l1-border)]' : ''
-              }`}
-            >
-              <p className="mb-2 font-mono text-[32px] font-semibold leading-10 text-[var(--l1-foreground-hover)]">
-                {stat.value}
-              </p>
-              <p className="mb-1 text-base font-semibold text-[var(--l1-foreground-hover)]">
-                {stat.title}
-              </p>
-              <p className="text-sm text-[var(--l2-foreground)]">{stat.description}</p>
-            </div>
-          ))}
-        </div>
-        {/* Bottom stat full width */}
-        {SUPPORT_STATS[2] && (
-          <div className="p-8">
-            <p className="mb-2 font-mono text-[32px] font-semibold leading-10 text-[var(--l1-foreground-hover)]">
-              {SUPPORT_STATS[2].value}
-            </p>
-            <p className="mb-1 text-base font-semibold text-[var(--l1-foreground-hover)]">
-              {SUPPORT_STATS[2].title}
-            </p>
-            <p className="text-sm text-[var(--l2-foreground)]">{SUPPORT_STATS[2].description}</p>
-          </div>
-        )}
-      </div>
-    </div>
+const StatCard = ({ stat, className = '' }: { stat: SupportStat; className?: string }) => (
+  <div className={className}>
+    <p className="mb-2 font-mono text-[32px] font-semibold leading-10 text-[var(--l1-foreground-hover)]">
+      {stat.value}
+    </p>
+    <p className="mb-1 text-base font-semibold text-[var(--l1-foreground-hover)]">{stat.title}</p>
+    <p className="text-sm text-[var(--l2-foreground)]">{stat.description}</p>
   </div>
 )
+
+const StatsSection = () => {
+  const pairedStats = SUPPORT_STATS.slice(0, -1)
+  const lastStat = SUPPORT_STATS.at(-1)
+
+  return (
+    <div className="flex flex-col sm:flex-row">
+      <div className="!w-full flex-1 sm:!w-[300px] sm:min-w-fit">
+        <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start px-10 py-10 sm:px-0 sm:pl-12">
+          <h2 className="text-4xl font-bold !leading-[3.5rem] text-[var(--l1-foreground-hover)] sm:text-4xl">
+            The numbers
+            <br className="hidden sm:block" />
+            speak for
+            <br className="hidden sm:block" />
+            themselves
+          </h2>
+        </div>
+      </div>
+      <div className="flex-[2_2_0%]">
+        <div className="border-l border-dashed border-[var(--l1-border)] bg-transparent p-0">
+          {/* Paired stats side by side */}
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            {pairedStats.map((stat, i) => (
+              <StatCard
+                key={stat.title}
+                stat={stat}
+                className={`border-b border-dashed border-[var(--l1-border)] p-8 ${
+                  i % 2 === 0 ? 'md:border-r md:border-dashed md:border-[var(--l1-border)]' : ''
+                }`}
+              />
+            ))}
+          </div>
+          {lastStat && <StatCard stat={lastStat} className="p-8" />}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 /** Fixed 16×16 box so FA Slack/Github glyphs share Lucide’s optical alignment with text. */
 const ContactIcon = ({ icon }: { icon?: string }) => {
@@ -414,23 +419,26 @@ const DevelopersLoveSigNoz = () => (
             ))}
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button
-              to="/contact-us/?source=support-enterprise"
-              variant="default"
-              rounded="full"
-              className="flex !w-fit items-center gap-2 text-sm"
-            >
-              Enterprise Support
-              <ArrowRight size={14} />
-            </Button>
-            <Button
-              to="mailto:cloud-support@signoz.io"
-              variant="secondary"
-              rounded="full"
-              className="flex !w-fit items-center gap-2 text-sm"
-            >
-              Email the team
-            </Button>
+            {REACH_US_BUTTONS.map((button) => (
+              <Button
+                key={button.text}
+                asChild
+                variant={button.variant}
+                rounded="full"
+                className="flex !w-fit items-center gap-2 text-sm"
+              >
+                <TrackingLink
+                  href={button.href}
+                  clickType={button.tracking.clickType}
+                  clickName={button.tracking.clickName}
+                  clickLocation={button.tracking.clickLocation}
+                  clickText={button.text}
+                >
+                  {button.text}
+                  {button.icon}
+                </TrackingLink>
+              </Button>
+            ))}
           </div>
         </div>
       </div>
@@ -496,7 +504,7 @@ const TrustAndCompliance = () => (
               />
             ))}
           </div>
-          <p className="mb-4 text-sm text-[var(--l2-foreground)]">SOC 2 Type I</p>
+          <p className="mb-4 text-sm text-[var(--l2-foreground)]">SOC 2 Type II</p>
           <div className="flex flex-col gap-1">
             {COMPLIANCE_LINKS.map((link) => (
               <div key={link.href} className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -531,8 +539,6 @@ const BottomCTA = () => (
     <ButtonGroup buttons={BOTTOM_CTA_BUTTONS} />
   </div>
 )
-
-// --- Main Page Component ---
 
 const SupportPage = () => {
   return (

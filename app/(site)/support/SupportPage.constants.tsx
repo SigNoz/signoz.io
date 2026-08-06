@@ -1,5 +1,16 @@
 import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
-import { ReactNode } from 'react'
+import { ArrowRight } from 'lucide-react'
+import type {
+  SupportTier,
+  TableCategory,
+  SeverityDefinition,
+  SupportStat,
+  EscalationStep,
+  ContactChannel,
+  ReachUsButton,
+  WhyDifferentItem,
+  ComplianceBadge,
+} from './SupportPage.types'
 
 export const SUPPORT_HEADER_BUTTONS = [
   {
@@ -7,31 +18,45 @@ export const SUPPORT_HEADER_BUTTONS = [
     href: '/teams/',
     variant: 'default' as const,
     className: BUTTON_CLASS_NAME,
+    tracking: {
+      clickType: 'Primary CTA',
+      clickName: 'Sign Up Button',
+      clickLocation: 'Support Hero',
+    },
   },
   {
     text: 'Talk to Sales',
     href: '/contact-us/?source=support',
     variant: 'secondary' as const,
     className: BUTTON_CLASS_NAME,
+    tracking: {
+      clickType: 'Secondary CTA',
+      clickName: 'Contact Us Button',
+      clickLocation: 'Support Hero',
+    },
   },
 ]
-
-export interface SupportTier {
-  name: string
-  subtitle?: string
-  cta?: { text: string; href: string; variant: 'default' | 'secondary' }
-}
 
 export const SUPPORT_TIERS: SupportTier[] = [
   {
     name: 'Community Edition',
     subtitle: 'Install & manage yourself',
-    cta: { text: 'Read Documentation', href: '/docs/introduction/', variant: 'secondary' },
+    cta: {
+      text: 'Read Documentation',
+      href: '/docs/introduction/',
+      variant: 'secondary',
+      tracking: { clickType: 'Secondary CTA', clickName: 'Docs Link' },
+    },
   },
   {
     name: 'Teams',
     subtitle: 'Cloud - starts at $49/mo',
-    cta: { text: 'Get Started - Free', href: '/teams/', variant: 'default' },
+    cta: {
+      text: 'Get Started - Free',
+      href: '/teams/',
+      variant: 'default',
+      tracking: { clickType: 'Primary CTA', clickName: 'Sign Up Button' },
+    },
   },
   {
     name: 'Enterprise*',
@@ -40,28 +65,10 @@ export const SUPPORT_TIERS: SupportTier[] = [
       text: 'Contact Us',
       href: '/contact-us/?source=support',
       variant: 'secondary',
+      tracking: { clickType: 'Secondary CTA', clickName: 'Enterprise Contact Button' },
     },
   },
 ]
-
-export type CellValue =
-  | { type: 'text'; value: string }
-  | { type: 'check' }
-  | { type: 'dash' }
-  | { type: 'link'; text: string; href: string }
-  | { type: 'check-text'; value: string }
-
-export interface TableRow {
-  label: string | ReactNode
-  community: CellValue
-  teams: CellValue
-  enterprise: CellValue
-}
-
-export interface TableCategory {
-  name: string
-  rows: TableRow[]
-}
 
 export const TABLE_DATA: TableCategory[] = [
   {
@@ -167,7 +174,7 @@ export const TABLE_DATA: TableCategory[] = [
       },
       {
         label: 'Status Page',
-        community: { type: 'link', text: 'signoz.io/status', href: 'https://status.signoz.io' },
+        community: { type: 'dash' },
         teams: { type: 'link', text: 'signoz.io/status', href: 'https://status.signoz.io' },
         enterprise: { type: 'link', text: 'signoz.io/status', href: 'https://status.signoz.io' },
       },
@@ -186,12 +193,6 @@ export const TABLE_FOOTNOTES = [
   '** Based on individual contracts',
   '*** We are working on adding more self-serve migration tools',
 ]
-
-export interface SeverityDefinition {
-  level: string
-  description: string
-  example: string
-}
 
 export const SEVERITY_DEFINITIONS: SeverityDefinition[] = [
   {
@@ -215,12 +216,6 @@ export const SEVERITY_DEFINITIONS: SeverityDefinition[] = [
   },
 ]
 
-export interface SupportStat {
-  value: string
-  title: string
-  description: string
-}
-
 export const SUPPORT_STATS: SupportStat[] = [
   {
     value: '47%',
@@ -241,12 +236,6 @@ export const SUPPORT_STATS: SupportStat[] = [
       'SaaS start-ups to public companies. Self-hosted, cloud, or BYOC: your choice. With enterprise-grade observability.',
   },
 ]
-
-export interface EscalationStep {
-  level: string
-  title: string
-  description: string
-}
 
 export const ESCALATION_STEPS: EscalationStep[] = [
   {
@@ -274,11 +263,6 @@ export const ESCALATION_STEPS: EscalationStep[] = [
       'For Enterprise accounts: direct escalation to SigNoz leadership for business-critical situations.',
   },
 ]
-
-export interface ContactChannel {
-  category: string
-  items: { icon?: string; text: string; description?: string; href?: string }[]
-}
 
 export const CONTACT_CHANNELS: ContactChannel[] = [
   {
@@ -342,10 +326,29 @@ export const CONTACT_CHANNELS: ContactChannel[] = [
   },
 ]
 
-export interface WhyDifferentItem {
-  title: string
-  description: string
-}
+export const REACH_US_BUTTONS: ReachUsButton[] = [
+  {
+    text: 'Enterprise Support',
+    href: '/contact-us/?source=support-enterprise',
+    variant: 'default',
+    icon: <ArrowRight size={14} />,
+    tracking: {
+      clickType: 'Primary CTA',
+      clickName: 'Enterprise Contact Button',
+      clickLocation: 'Support How to Reach Us',
+    },
+  },
+  {
+    text: 'Email the team',
+    href: 'mailto:cloud-support@signoz.io',
+    variant: 'secondary',
+    tracking: {
+      clickType: 'Secondary CTA',
+      clickName: 'Email Support Button',
+      clickLocation: 'Support How to Reach Us',
+    },
+  },
+]
 
 export const WHY_DIFFERENT_ITEMS: WhyDifferentItem[] = [
   {
@@ -364,13 +367,6 @@ export const WHY_DIFFERENT_ITEMS: WhyDifferentItem[] = [
       "SigNoz is open source at its foundation with the same code, the same backend, the same roadmap whether you're on Community or Enterprise. 25,000+ GitHub stars. CLI-native. ClickHouse-backed. When you raise a bug, the person responding can merge the fix. That's what open source support actually looks like.",
   },
 ]
-
-export interface ComplianceBadge {
-  src: string
-  alt: string
-  width: number
-  height: number
-}
 
 export const COMPLIANCE_BADGES: ComplianceBadge[] = [
   { src: '/svgs/icons/SOC-2.svg', alt: 'SOC 2 Type II', width: 80, height: 80 },
@@ -401,11 +397,21 @@ export const BOTTOM_CTA_BUTTONS = [
     href: '/teams/',
     variant: 'default' as const,
     className: BUTTON_CLASS_NAME,
+    tracking: {
+      clickType: 'Primary CTA',
+      clickName: 'Sign Up Button',
+      clickLocation: 'Support Bottom CTA',
+    },
   },
   {
     text: 'Talk to Sales',
     href: '/contact-us/?source=support',
     variant: 'secondary' as const,
     className: BUTTON_CLASS_NAME,
+    tracking: {
+      clickType: 'Secondary CTA',
+      clickName: 'Contact Us Button',
+      clickLocation: 'Support Bottom CTA',
+    },
   },
 ]
