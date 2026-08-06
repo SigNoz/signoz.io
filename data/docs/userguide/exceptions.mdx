@@ -50,16 +50,11 @@ To follow an exception into the request that caused it:
 
 ## What Counts as an Exception
 
-SigNoz builds the Exceptions view from span events. Log records do not feed it. SigNoz treats a span event as an exception when its name is `exception` or ends in `.exception`, which covers the current OpenTelemetry conventions:
+SigNoz builds the Exceptions view from span events. Log records do not feed it. A span event counts as an exception when its name is `exception` or ends in `.exception`.
 
-- `exception`
-- `http.client.request.exception` and `http.server.request.exception`
-- `db.client.operation.exception`
-- `rpc.client.call.exception` and `rpc.server.call.exception`
+In practice that means the `exception` event. It is the only name OpenTelemetry's <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/" target="_blank" rel="noopener noreferrer nofollow">span convention</a> defines, and it is what every `recordException` call emits today. The `.exception` suffix names such as `http.server.request.exception` and `db.client.operation.exception` belong to the newer <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/" target="_blank" rel="noopener noreferrer nofollow">log-based convention</a>, so a library that has adopted them emits log records and those do not reach the Exceptions view. SigNoz matches the suffix so that the events do land there whenever an SDK routes them back onto spans. That matching needs OTel Collector `v0.144.3` or newer, which shipped with SigNoz `v0.120.0`.
 
-Matching on the `.exception` suffix needs OTel Collector `v0.144.3` or newer, which shipped with SigNoz `v0.120.0`. Older collectors match the plain `exception` name only, so the domain-specific events never reach the Exceptions view.
-
-From each event SigNoz stores `exception.type`, `exception.message`, `exception.stacktrace`, and `exception.escaped`. Type and message fill the list columns and decide grouping, so record at least one of them. OpenTelemetry has deprecated `exception.escaped`, so treat it as legacy data rather than something to set on new instrumentation.
+From the `exception` event SigNoz stores `exception.type`, `exception.message`, `exception.stacktrace`, and `exception.escaped`. Type and message fill the list columns and decide grouping, so record at least one of them. OpenTelemetry has deprecated `exception.escaped`, so treat it as legacy data rather than something to set on new instrumentation.
 
 <Admonition type="info">
 OpenTelemetry is <a href="https://opentelemetry.io/blog/2026/deprecating-span-events/" target="_blank" rel="noopener noreferrer nofollow">deprecating the span-event exception APIs</a> in favor of the Logs API. No action is needed today: existing `recordException` calls stay valid and span events remain the default. The migration runs per instrumentation library, not across an SDK. A library that has adopted the `OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN` opt-in emits log records instead of span events when you set it to `logs`, and those exceptions will not appear in the Exceptions view. Libraries that have not adopted it ignore the variable, and `recordException` calls in your own code stay span events either way. Set `logs/dup` to emit both while you migrate.
@@ -67,55 +62,75 @@ OpenTelemetry is <a href="https://opentelemetry.io/blog/2026/deprecating-span-ev
 
 ## Recording Exceptions
 
-Instrumentation libraries record an exception event when an exception escapes the operation they wrap, so an auto-instrumented Python, Java, Ruby, or JavaScript app reports its unhandled exceptions without any code changes. Record an exception yourself when it marks a failed operation that no library captured, such as an error you catch at a request boundary and turn into a 500 response. OpenTelemetry <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/" target="_blank" rel="noopener noreferrer nofollow">no longer recommends recording exceptions</a> that you catch and recover from inside the span, since they add noise to the Exceptions view and to any alerts built on it.
+Instrumentation libraries record an exception event when an exception escapes the operation they wrap, so once your services are instrumented they report unhandled exceptions with no extra code at the call site. Record an exception yourself when it marks a failed operation that no library captured, such as an error you catch at a request boundary and turn into a 500 response. OpenTelemetry <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/" target="_blank" rel="noopener noreferrer nofollow">no longer recommends recording exceptions</a> that you catch and recover from inside the span, since they add noise to the Exceptions view and to any alerts built on it.
 
 To record an exception, get the current span from the tracer and call `recordException()` or its language equivalent. That call adds the span event and leaves the span status alone, so set the status to error separately when the exception means the operation failed.
 
-Examples for each language:
+Each example below runs inside an operation that already has an active span, which is what instrumentation gives you in a request handler. Called outside an active span, these APIs return a no-op span and discard the exception silently.
 
 ### Record Exceptions in Java
 
 ```java
-// Get the current span from the tracer
-Span span = Span.current();
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
 
-// recordException converts a Throwable into a span event.
-span.recordException(new RuntimeException("Something went wrong"));
+void handleRequest() {
+    // Get the current span from the tracer
+    Span span = Span.current();
 
-// Set the status of the span to error
-span.setStatus(StatusCode.ERROR, "Something bad happened!");
+    try {
+        doWork();
+    } catch (Exception e) {
+        // recordException converts the Throwable into a span event.
+        span.recordException(e);
+        // Mark the span as failed.
+        span.setStatus(StatusCode.ERROR, e.getMessage());
+    }
+}
 ```
 
 ### Record Exceptions in Golang
 
 ```go
-import "go.opentelemetry.io/otel/codes"
+import (
+	"context"
 
-// Get the current span from the tracer
-span := trace.SpanFromContext(ctx)
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
+)
 
-// RecordError converts an error into a span event.
-span.RecordError(err)
+func handleRequest(ctx context.Context) {
+	// Get the current span from the context
+	span := trace.SpanFromContext(ctx)
 
-// Mark span as failed.
-span.SetStatus(codes.Error, "internal error")
+	if err := doWork(); err != nil {
+		// RecordError converts the error into a span event. Go omits
+		// exception.stacktrace unless you pass WithStackTrace.
+		span.RecordError(err, trace.WithStackTrace(true))
+		// Mark the span as failed.
+		span.SetStatus(codes.Error, err.Error())
+	}
+}
 ```
 
 ### Record Exceptions in Python
 
 ```python
-# Get the current span from the tracer
 from opentelemetry import trace
-from opentelemetry.trace.status import Status, StatusCode
+from opentelemetry.trace import Status, StatusCode
 
-span = trace.get_current_span()
 
-# record_exception converts the exception into a span event. 
-exception = Exception("Something went wrong")
-span.record_exception(exception)
+def handle_request():
+    # Get the current span from the tracer
+    span = trace.get_current_span()
 
-# Update the span status to failed.
-span.set_status(Status(StatusCode.ERROR, "internal error"))
+    try:
+        do_work()
+    except Exception as e:
+        # record_exception converts the exception into a span event.
+        span.record_exception(e)
+        # Mark the span as failed.
+        span.set_status(Status(StatusCode.ERROR, str(e)))
 ```
 
 ### Record Exceptions in JavaScript
@@ -124,21 +139,28 @@ span.set_status(Status(StatusCode.ERROR, "internal error"))
 // import relevant opentelemetry functions
 const { trace, SpanStatusCode } = require("@opentelemetry/api");
 
-// Get the current span from the tracer
-const span = trace.getActiveSpan();
-// Create a new sample error
-err = new Error("This is a sample error");
-// recordException converts the error into a span event. 
-span.recordException(err);
-// Update the span status to failed.
-span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
+function handleRequest() {
+  // Get the current span from the tracer. It is undefined outside an active span.
+  const span = trace.getActiveSpan();
+
+  try {
+    doWork();
+  } catch (err) {
+    // recordException converts the error into a span event.
+    span?.recordException(err);
+    // Mark the span as failed.
+    span?.setStatus({ code: SpanStatusCode.ERROR, message: err.message });
+  }
+}
 ```
 
 ### Record Exceptions in .NET
 
-OpenTelemetry .NET offers several ways to report exceptions on an `Activity`, from setting the status alone to recording the full exception. The <a href="https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/reporting-exceptions/README.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry .NET documentation</a> covers the rest:
+OpenTelemetry .NET offers several ways to report exceptions on an `Activity`, from setting the status alone to recording the full exception. The <a href="https://opentelemetry.io/docs/languages/dotnet/instrumentation/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry .NET documentation</a> covers the rest:
 
 ```csharp
+using System.Diagnostics;
+
 using (var activity = MyActivitySource.StartActivity("Foo"))
 {
     try
@@ -148,10 +170,12 @@ using (var activity = MyActivitySource.StartActivity("Foo"))
     catch (SomeException ex)
     {
         activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-        activity?.RecordException(ex);
+        activity?.AddException(ex);
     }
 }
 ```
+
+`AddException` needs .NET 9 or `System.Diagnostics.DiagnosticSource` 9.0.0 and later. On older versions, call `activity?.RecordException(ex)` from `OpenTelemetry.Api` instead. That extension method is marked obsolete in `OpenTelemetry.Api` 1.10.0 and later, where it forwards to `AddException`.
 
 ### Record Exceptions in Ruby
 
@@ -159,21 +183,26 @@ using (var activity = MyActivitySource.StartActivity("Foo"))
 # Import otel sdk
 require "opentelemetry/sdk"
 
-# Get the current span from the tracer
-span = OpenTelemetry::Trace.current_span
+def handle_request
+  # Get the current span from the tracer
+  span = OpenTelemetry::Trace.current_span
 
-begin
-  do_work
-rescue StandardError => e
-  # Record the exception and update the span status.
-  span.record_exception(e)
-  span.status = OpenTelemetry::Trace::Status.error(e.to_s)
+  begin
+    do_work
+  rescue StandardError => e
+    # Record the exception and update the span status.
+    span.record_exception(e)
+    span.status = OpenTelemetry::Trace::Status.error(e.to_s)
+  end
 end
 ```
 
 ### Record Exceptions in PHP
 
 ```php
+use OpenTelemetry\API\Trace\StatusCode;
+use Throwable;
+
 $span = $tracer->spanBuilder('process-order')->startSpan();
 $scope = $span->activate();
 
@@ -231,6 +260,32 @@ helm -n platform upgrade \
     my-release signoz/signoz \
     -f override-values.yaml
 ```
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### The Exceptions List Is Empty
+
+Work through these causes in order:
+
+1. **No traces are reaching SigNoz.** Open [Traces](https://signoz.io/docs/userguide/traces/) and check whether any spans arrive in the same time range. If none do, fix ingestion first by following [Instrumentation overview](https://signoz.io/docs/instrumentation/overview/). Exceptions ride along with trace data, so nothing can appear until spans do.
+2. **Spans arrive, but nothing records an exception.** Instrumentation libraries record only exceptions that escape the operation they wrap, so an application that catches everything internally reports none. Add a `recordException` call where the operation fails, as shown in [Recording Exceptions](#recording-exceptions).
+3. **A filter or the time range hides them.** Clear the filter sidebar and the search bar, then widen the time range. The list is scoped to the selected window.
+
+### Domain-Specific Exception Events Do Not Show Up
+
+Names such as `db.client.operation.exception` and `http.server.request.exception` come from OpenTelemetry's log-based exception convention, so a library that has adopted them emits log records. The Exceptions view reads span events, so those never arrive. They show up only when your SDK routes the events back onto spans, and in that case the collector also has to be `v0.144.3` or newer to match the `.exception` suffix. Check the collector image tag in your `docker-compose.yaml` or Helm values.
+
+### Exceptions Disappeared After Switching to Log-Based Exceptions
+
+An instrumentation library running with `OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN=logs` emits log records instead of span events, and the Exceptions view reads span events only. Set the variable to `logs/dup` to emit both while you migrate.
+
+### One Problem Splits Into Many Exception Groups
+
+Exception messages that embed UUIDs, IDs, or other variable text produce a separate group per message. On Self-Host, switch to low-cardinality grouping as described in [Grouping Exceptions](#grouping-exceptions). The change applies to newly ingested data only.
+</details>
 
 ## Next Steps
 
