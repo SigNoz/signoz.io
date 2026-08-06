@@ -66,13 +66,21 @@ A. The timestamp for functions like `toDate(timestamp)` uses the server's timezo
 
 <summary> Show detailed explanation and solution </summary>
 
-If you want to use a different timezone, you can apply a timezone parameter to the function in your ClickHouse query. For example:
+If you want to use a different timezone, you can apply a timezone parameter to the function in your ClickHouse query. The function you use depends on the result you want.
+
+To group rows by calendar day in your timezone, use `toDate`. This returns only the date, so the time of day is dropped:
 
 ```sql
 toDate(timestamp, 'Asia/Kolkata')
 ```
 
-This allows you to convert timestamps to your desired timezone for proper date grouping and analysis in your queries.
+To keep the time of day, use `toTimeZone`. This returns a full timestamp:
+
+```sql
+toTimeZone(timestamp, 'Asia/Kolkata')
+```
+
+In the logs tables, `timestamp` is a `UInt64` column of nanoseconds, so convert it first (for example, `toTimeZone(fromUnixTimestamp64Nano(timestamp), 'Asia/Kolkata')`). In the traces tables, `timestamp` is a `DateTime64(9)` column, so you can pass it directly.
 
 For more details on timezone functions and available timezone options, refer to the <a href="https://clickhouse.com/docs/sql-reference/functions/date-time-functions" rel="noopener noreferrer nofollow" target="_blank">ClickHouse documentation</a>.
 

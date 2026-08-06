@@ -98,10 +98,16 @@ Some times in SigNoz have their own timezone, or always use UTC:
 - **Planned maintenance windows.** Each window has its own timezone field. For more information, see
   [Planned Maintenance](https://signoz.io/docs/alerts-management/planned-maintenance/).
 - **ClickHouse queries.** Time functions use the timezone of the server, which is UTC. To convert a
-  timestamp in a query, give the timezone as a parameter to the function. In the traces tables,
-  `timestamp` is a `DateTime64(9)` column, so use `toDate(timestamp, 'Asia/Kolkata')`. In the logs
-  tables, `timestamp` is a `UInt64` column of nanoseconds. Convert this column first, with
-  `toDate(fromUnixTimestamp64Nano(timestamp), 'Asia/Kolkata')`. For more information, see the
+  timestamp in a query, give the timezone as a parameter to the function. The function that you use
+  depends on the result that you want:
+
+  - To keep the time of day, use `toTimeZone`. This function returns a full timestamp.
+  - To group rows by calendar day, use `toDate`. This function returns only the date.
+
+  The column type is different for each signal. In the traces tables, `timestamp` is a
+  `DateTime64(9)` column, so use `toTimeZone(timestamp, 'Asia/Kolkata')`. In the logs tables,
+  `timestamp` is a `UInt64` column of nanoseconds. Convert this column first, with
+  `toTimeZone(fromUnixTimestamp64Nano(timestamp), 'Asia/Kolkata')`. For more information, see the
   [query FAQs](https://signoz.io/docs/userguide/query-troubleshooting-faqs/#q-what-timezone-is-used-for-timestamp-functions-in-signoz-queries).
 - **Alert notifications.** The SigNoz server generates the timestamps in your notifications.
 
