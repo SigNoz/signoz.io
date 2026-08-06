@@ -91,9 +91,9 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
     ),
   },
   {
-    title: 'Managed BYOC or Self-Hosted SigNoz',
+    title: 'SigNoz Cloud (BYOC) or Self-Hosted SigNoz',
     description:
-      'Use BYOC managed by SigNoz in your cloud account, or deploy Self-Hosted SigNoz when you need telemetry to remain in infrastructure you control.',
+      'Run SigNoz Cloud in your cloud account with BYOC, or deploy Self-Hosted SigNoz when you need telemetry to remain in infrastructure you control.',
   },
   {
     title: 'Monitoring Model Token Usage',

@@ -38,11 +38,11 @@ const UnifiedObservability = () => {
             </h1>
             <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
               Transform fragmented monitoring into seamless insights with SigNoz Cloud's
-              single-pane unified observability platform. Prefer to manage it yourself? Use{' '}
+              single-pane unified observability platform.{' '}
               <Link className="underline" href="/docs/install/">
                 Self-Hosted SigNoz
-              </Link>
-              .
+              </Link>{' '}
+              is available for teams that prefer to manage their own stack.
             </h3>
             <div className="flex flex-col gap-2">
               <Link href="/teams/">
@@ -272,7 +272,7 @@ const UnifiedObservability = () => {
               <figure>
                 <Image
                   src="/img/unified-observability/unified-observability-unified-setup.webp"
-                  alt="SigNoz Platform"
+                  alt="SigNoz Cloud unified observability platform"
                   width={800}
                   height={533}
                   className="h-auto w-full rounded-xl shadow-2xl"
@@ -425,7 +425,7 @@ const UnifiedObservability = () => {
               <figure>
                 <Image
                   src="/img/unified-observability/unified-observability-unified-observabilty-with-signoz.webp"
-                  alt="Unified Observability with SigNoz"
+                  alt="Unified Observability with SigNoz Cloud"
                   width={820}
                   height={540}
                   className="rounded-xl shadow-2xl"
@@ -665,13 +665,13 @@ const UnifiedObservability = () => {
               <figure>
                 <Image
                   src="/img/unified-observability/unified-observability-anomaly-detection.webp"
-                  alt="Anomaly Detection in SigNoz"
+                  alt="Anomaly Detection in SigNoz Cloud and Self-Hosted SigNoz Enterprise"
                   width={800}
                   height={533}
                   className="h-auto w-full rounded-xl shadow-2xl"
                 />
                 <figcaption className="mt-2 text-center text-sm text-gray-400">
-                  Anamoly Detection Alert in SigNoz
+                  Anomaly Detection in SigNoz Cloud and Self-Hosted SigNoz Enterprise
                 </figcaption>
               </figure>
             </div>
@@ -687,7 +687,7 @@ const UnifiedObservability = () => {
             <div className="space-y-8">
               <div>
                 <h3 className="mb-4 text-2xl font-bold">1. Quick SetUp</h3>
-                <GetStartedSigNoz />
+                <GetStartedSigNoz cloudFirstNaming />
               </div>
               <div>
                 <h3 className="mb-4 text-2xl font-bold">2. Instrument Your Application</h3>
@@ -825,7 +825,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-apm.webp"
-                      alt="Application Performance Monitoring in SigNoz"
+                      alt="Application Performance Monitoring in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -838,7 +838,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-logs.webp"
-                      alt="Logs Management in SigNoz"
+                      alt="Logs Management in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -851,7 +851,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-traces.webp"
-                      alt="Distributed Tracing in SigNoz"
+                      alt="Distributed Tracing in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -864,7 +864,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-infrastructure-monitoring.webp"
-                      alt="Infrastructure Monitoring in SigNoz"
+                      alt="Infrastructure Monitoring in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -877,7 +877,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-metrics-and-dashboards.webp"
-                      alt="Metrics and Dashboards in SigNoz"
+                      alt="Metrics and Dashboards in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -890,7 +890,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-alerts.webp"
-                      alt="Alerts in SigNoz"
+                      alt="Alerts in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -903,7 +903,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-exceptions.webp"
-                      alt="Exceptions Monitoring in SigNoz"
+                      alt="Exceptions Monitoring in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"

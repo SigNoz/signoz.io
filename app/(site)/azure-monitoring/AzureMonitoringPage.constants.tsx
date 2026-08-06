@@ -38,7 +38,7 @@ export const INTEGRATE_AZURE_PANEL = {
       SigNoz Cloud&apos;s One-Click Azure Integration deploys via an ARM template and automatically
       discovers your Azure resources. VMs, AKS, App Services, Container Apps, Blob Storage, Cosmos
       DB, and databases start sending metrics immediately - no manual OTel Collector setup required.
-      The fastest path to full Azure visibility. Prefer to manage it yourself?{' '}
+      The fastest path to full Azure visibility.{' '}
       <Link className="underline" href="/docs/install/">
         Self-Hosted SigNoz Enterprise
       </Link>{' '}

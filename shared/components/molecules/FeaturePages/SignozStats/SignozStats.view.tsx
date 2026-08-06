@@ -3,7 +3,7 @@ import { BookOpen, Mail } from 'lucide-react'
 import ButtonGroup from '../ButtonGroup/ButtonGroup.view'
 import StatsCard from '@/components/Card/card'
 
-const SigNozStats = () => {
+const SigNozStats = ({ cloudFirstNaming = false }: { cloudFirstNaming?: boolean }) => {
   const STATS_LIST = [
     {
       id: 1,
@@ -31,12 +31,12 @@ const SigNozStats = () => {
 
   const platformFeatures = [
     {
-      title: 'Cloud',
+      title: cloudFirstNaming ? 'SigNoz Cloud' : 'Cloud',
       description:
         'Fully managed, SOC 2-compliant, ideal for teams who want to start quickly without managing infrastructure.',
     },
     {
-      title: 'Self-Host',
+      title: cloudFirstNaming ? 'Self-Hosted SigNoz' : 'Self-Host',
       description:
         'For tighter security & data residency requirements. It is Apache 2.0 open source, built on open standards.',
     },
@@ -81,7 +81,9 @@ const SigNozStats = () => {
               Your data stays where you want
             </h2>
             <p className="text-base text-signoz_vanilla-400">
-              Use SigNoz cloud with your data staying in the US, EU, or India, or self-host.
+              {cloudFirstNaming
+                ? 'Use SigNoz Cloud with your data staying in the US, EU, or India, or run Self-Hosted SigNoz.'
+                : 'Use SigNoz cloud with your data staying in the US, EU, or India, or self-host.'}
             </p>
             <div className="flex w-full flex-col gap-4">
               {platformFeatures.map((feature, index) => (

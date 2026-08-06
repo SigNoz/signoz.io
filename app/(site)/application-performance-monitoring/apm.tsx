@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Card from '@/components/Card/card'
@@ -89,12 +88,12 @@ const UsageList = () => {
     {
       title: 'Pay only for data you send',
       description:
-        'SigNoz Cloud has no SKU-based pricing. Get access to every feature in your selected plan and pay only for the data you send, including $0.30 per GB of ingested traces.',
+        "SigNoz Cloud doesn't have any SKU-based pricing. Get access to all features in the plan selected and only pay for the data you send. Pay only $0.3 per GB of ingested traces.",
     },
     {
       title: 'Add unlimited team members',
       description:
-        'Observability should be available to every developer at your company. SigNoz Cloud does not charge for user seats, so you can add as many team members as you need.',
+        "Observability should be available to every developer at your company. After all, anyone can need debugging. That's why SigNoz Cloud doesn't charge for user seats, and you can add as many team members as you want.",
     },
     {
       title: 'No Host (container or node) based pricing',
@@ -127,7 +126,7 @@ const DocsList = () => {
       description: 'Instrument your Java application and monitor with SigNoz',
     },
     {
-      title: 'Get started with SigNoz APM',
+      title: 'Get started with SigNoz Cloud APM',
       description: 'Instrument your Java application and monitor with SigNoz',
     },
   ]
@@ -157,11 +156,7 @@ const Header = () => {
           <br className="hidden lg:inline" />
           Get latency, requests per second, error percentage, apdex & other key metrics
           <br className="hidden lg:inline" />
-          to understand your application performance. Prefer to manage it yourself? Use{' '}
-          <Link className="underline" href="/docs/install/">
-            Self-Hosted SigNoz
-          </Link>
-          .
+          to understand your application performance.
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
@@ -191,7 +186,7 @@ const Header = () => {
               <div className="absolute">
                 <img
                   src="/img/features/apm/apm-cover.webp"
-                  alt="SigNoz APM service overview with latency, rate, and apdex charts"
+                  alt="SigNoz Cloud APM service overview with latency, rate, and apdex charts"
                   className="w-full rounded-lg"
                 />
               </div>
@@ -334,7 +329,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  Why use SigNoz for <br /> Application Performance Monitoring?
+                  Why use SigNoz Cloud for <br /> Application Performance Monitoring?
                 </div>
               </div>
             </div>
@@ -364,7 +359,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  SigNoz Application Performance <br /> Monitoring Overview
+                  SigNoz Cloud Application Performance <br /> Monitoring Overview
                 </div>
               </div>
             </div>
@@ -394,7 +389,7 @@ const SigNozUsage = () => {
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
           <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
-            Use SigNoz
+            Use SigNoz Cloud
             <br /> APM for...
           </p>
         </div>
@@ -504,7 +499,7 @@ const GetStarted = ({ page }) => {
             <div className="relative flex items-center justify-center">
               <img
                 src="/img/landing/landing_thumbnail.webp"
-                alt="SigNoz dashboard with application performance metrics - APM"
+                alt="SigNoz Cloud dashboard with application performance metrics - APM"
                 className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
               />
             </div>

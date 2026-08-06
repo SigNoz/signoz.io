@@ -3,7 +3,6 @@
 import { ArrowRight, BookOpen, CircleArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Image from 'next/image'
-import Link from 'next/link'
 import {
   LLM_OBSERVABILITY_CARDS,
   LLM_COMPARISON_TABLE_ROWS,
@@ -64,11 +63,7 @@ const Header: React.FC = () => {
         <>
           With SigNoz Cloud, track AI workflows, RAG pipelines, and agents alongside microservices.
           Get unified alerting, <br className="hidden md:block" /> dashboards, and correlation
-          across your entire stack. Prefer to manage it yourself? Use{' '}
-          <Link className="underline" href="/docs/install/">
-            Self-Hosted SigNoz
-          </Link>
-          .
+          across your entire stack.
         </>
       }
       buttons={headerButtons}
@@ -307,7 +302,7 @@ const LlmObservabilityPage: React.FC = () => {
 
       <StartMonitoring />
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
-      <SigNozStats />
+      <SigNozStats cloudFirstNaming />
       <Divider />
       <CustomerStoriesSection
         tracking={{

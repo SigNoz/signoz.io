@@ -68,11 +68,11 @@ const Header: React.FC = () => {
             Connect SigNoz Cloud to your coding agents (e.g. Claude Code, Cursor) and debug
             production issues without leaving your dev environment. <br className="hidden md:block" />
             Traces, logs, metrics, service topology, and your actual codebase - all in one place. Or
-            use Noz, the AI teammate built into SigNoz Cloud. Prefer to manage it yourself?{' '}
+            use Noz, the AI teammate built into SigNoz Cloud.{' '}
             <Link className="underline" href="/docs/install/">
               Self-Hosted SigNoz
             </Link>{' '}
-            can connect through a locally run MCP server.
+            connects through a locally run MCP server.
           </span>
         }
         buttonGroup={headerButtonGroup}

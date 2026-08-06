@@ -10,7 +10,6 @@ import { HEADER_BUTTONS, FEATURE_CARDS } from './KubernetesMonitoringPage.consta
 import TrackingLink from '@/components/TrackingLink'
 import DitherCanvas from '@/components/DitherCanvas/DitherCanvas'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
-import Link from 'next/link'
 
 const Header: React.FC = () => {
   return (
@@ -26,16 +25,12 @@ const Header: React.FC = () => {
           <span className="text-base">
             SigNoz Cloud gives you actionable insights across pods, nodes, namespaces, workloads,
             and the services running inside them. All unified across logs, traces, and metrics in a
-            consolidated OTel-native architecture. Prefer to manage it yourself? Use{' '}
-            <Link className="underline" href="/docs/install/">
-              Self-Hosted SigNoz
-            </Link>
-            .
+            consolidated OTel-native architecture.
           </span>
         }
         buttons={HEADER_BUTTONS}
         heroImage="/img/website/hero-tabs/infrastructure.webp"
-        heroImageAlt="SigNoz Kubernetes Infrastructure Monitoring"
+        heroImageAlt="SigNoz Cloud Kubernetes Infrastructure Monitoring"
         sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
         className="mt-0"
         align="left"

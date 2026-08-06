@@ -3,7 +3,6 @@
 import { ArrowDown, ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Image from 'next/image'
-import Link from 'next/link'
 import {
   CAPABILITIES_CARDS1,
   CAPABILITIES_CARDS2,
@@ -66,12 +65,7 @@ const Header: React.FC = () => {
         <>
           SigNoz Cloud tracks token usage, latency, and costs alongside your microservices,
           databases, and GPU clusters. <br className="hidden md:block" /> Handle high-cardinality
-          data at scale with usage-based pricing and span-level alerting for traces. Prefer to
-          manage it yourself? Use{' '}
-          <Link className="underline" href="/docs/install/">
-            Self-Hosted SigNoz
-          </Link>
-          .
+          data at scale with usage-based pricing and span-level alerting for traces.
         </>
       }
       buttons={headerButtons}
@@ -376,7 +370,7 @@ const ObservabilityForAiNativeCompaniesPage: React.FC = () => {
 
       <StartMonitoring />
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
-      <SigNozStats />
+      <SigNozStats cloudFirstNaming />
       <CustomerStoriesSection
         tracking={{
           clickName: 'Observability for AI Native Companies Customer Stories Button',

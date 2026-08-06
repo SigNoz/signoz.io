@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     absolute: 'Agent Native Observability | SigNoz',
   },
   openGraph: {
-    title: 'Agent Native Observability | SigNoz',
+    title: 'Agent Native Observability | SigNoz Cloud',
     description:
       'Connect SigNoz Cloud to coding agents such as Claude Code and Cursor to debug production issues from your development environment. Use Noz, the AI teammate built into SigNoz Cloud.',
     images: '/img/platform/AgentNativeObservabilityMeta.webp',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description:
     'Connect SigNoz Cloud to coding agents such as Claude Code and Cursor to debug production issues from your development environment. Use Noz, the AI teammate built into SigNoz Cloud.',
   twitter: {
-    title: 'Agent Native Observability | SigNoz',
+    title: 'Agent Native Observability | SigNoz Cloud',
     description:
       'Connect SigNoz Cloud to coding agents such as Claude Code and Cursor to debug production issues from your development environment. Use Noz, the AI teammate built into SigNoz Cloud.',
     images: '/img/platform/AgentNativeObservabilityMeta.webp',

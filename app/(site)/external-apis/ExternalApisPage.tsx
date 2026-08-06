@@ -24,7 +24,6 @@ import Divider from '@/shared/components/molecules/FeaturePages/Divider'
 import FeatureShowcase from '@/shared/components/molecules/FeaturePages/FeatureShowcase'
 import SplitSection from '@/shared/components/molecules/FeaturePages/SplitSection'
 import CTABanner from '@/shared/components/molecules/FeaturePages/CTABanner'
-import Link from 'next/link'
 
 // Main Component Sections
 const Header: React.FC = () => {
@@ -39,11 +38,7 @@ const Header: React.FC = () => {
         <>
           SigNoz Cloud automatically detects external API calls using OpenTelemetry semantic
           conventions. <br /> Click any metric to view the service making the call or the underlying
-          trace. Prefer to manage it yourself? Use{' '}
-          <Link className="underline" href="/docs/install/">
-            Self-Hosted SigNoz
-          </Link>
-          .
+          trace.
         </>
       }
       buttons={EXTERNAL_APIS_HEADER_BUTTONS}
@@ -122,7 +117,7 @@ const ExternalApis: React.FC = () => {
       </SectionLayout>
 
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
-      <SigNozStats />
+      <SigNozStats cloudFirstNaming />
       <Divider />
       <CustomerStoriesSection
         tracking={{

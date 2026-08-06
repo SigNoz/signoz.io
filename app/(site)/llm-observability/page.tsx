@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     absolute: 'LLM Observability - Monitor AI Agents, RAG Pipelines & LLM Performance | SigNoz',
   },
   openGraph: {
-    title: 'LLM Observability - Monitor AI Agents, RAG Pipelines & LLM Performance | SigNoz',
+    title: 'LLM Observability - Monitor AI Agents, RAG Pipelines & LLM Performance | SigNoz Cloud',
     description:
       'Monitor LLM apps and agents with SigNoz Cloud. Track AI workflows, RAG pipelines, and token usage while correlating traces, logs, and metrics in one platform.',
     images: '/img/platform/LlmObservabilityMeta.webp',
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description:
     'Monitor LLM apps and agents with SigNoz Cloud. Track AI workflows, RAG pipelines, and token usage while correlating traces, logs, and metrics in one platform.',
   twitter: {
-    title: 'LLM Observability - Monitor AI Agents, RAG Pipelines & LLM Performance | SigNoz',
+    title: 'LLM Observability - Monitor AI Agents, RAG Pipelines & LLM Performance | SigNoz Cloud',
     description:
       'Monitor LLM apps and agents with SigNoz Cloud. Track AI workflows, RAG pipelines, and token usage while correlating traces, logs, and metrics in one platform.',
     images: '/img/platform/LlmObservabilityMeta.webp',

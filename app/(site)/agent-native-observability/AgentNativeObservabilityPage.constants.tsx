@@ -20,9 +20,9 @@ export const FEATURE_CARDS = [
     description: (
       <div>
         <p>
-          Describe what you want in natural language and SigNoz builds it. Create dashboards from
-          80+ templates or from scratch. Generate alerts with sensible defaults. Run queries and get
-          results in chat, no query language required.
+          Describe what you want in natural language and Noz in SigNoz Cloud builds it. Create
+          dashboards from 80+ templates or from scratch. Generate alerts with sensible defaults. Run
+          queries and get results in chat, no query language required.
         </p>
         <p className="mt-3 italic text-signoz_vanilla-300">
           &ldquo;Create a latency dashboard for my payment service&rdquo; → Done. Fully interactive.

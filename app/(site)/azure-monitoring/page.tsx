@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     absolute: 'Azure Monitoring with One-Click Integration | SigNoz',
   },
   openGraph: {
-    title: 'Azure Monitoring with One-Click Integration | SigNoz',
+    title: 'Azure Monitoring with One-Click Integration | SigNoz Cloud',
     description:
       'Use SigNoz Cloud to monitor Azure VMs, AKS, App Service, Container Apps, Functions, SQL Database, Blob Storage, and Cosmos DB with metrics, logs, and traces correlated in one OTel-native platform.',
     images: '/img/website/hero-tabs/infrastructure.webp',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description:
     'Use SigNoz Cloud to monitor Azure VMs, AKS, App Service, Container Apps, Functions, SQL Database, Blob Storage, and Cosmos DB with metrics, logs, and traces correlated in one OTel-native platform.',
   twitter: {
-    title: 'Azure Monitoring with One-Click Integration | SigNoz',
+    title: 'Azure Monitoring with One-Click Integration | SigNoz Cloud',
     description:
       'Use SigNoz Cloud to monitor Azure VMs, AKS, App Service, Container Apps, Functions, SQL Database, Blob Storage, and Cosmos DB with metrics, logs, and traces correlated in one OTel-native platform.',
     images: '/img/website/hero-tabs/infrastructure.webp',

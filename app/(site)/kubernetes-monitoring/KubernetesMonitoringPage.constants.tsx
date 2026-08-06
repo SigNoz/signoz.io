@@ -137,7 +137,7 @@ export const FEATURE_CARDS = [
       <div className="relative flex h-full min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg bg-signoz_ink-500">
         <Image
           src="/img/graphics/homepage/feature-graphic-columnar-db.svg"
-          alt="SigNoz columnar database — predictable pricing with efficient storage"
+          alt="SigNoz Cloud columnar database — predictable pricing with efficient storage"
           width={449}
           height={352}
           className="object-contain"
@@ -215,7 +215,7 @@ export const FEATURE_CARDS = [
       <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
         <Image
           src="/img/kubernetes-monitoring/noz-kubernetes-chat.webp"
-          alt="SigNoz Noz AI agent — ask about your Kubernetes cluster in plain English"
+          alt="Noz in SigNoz Cloud — ask about your Kubernetes cluster in plain English"
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-contain"
@@ -307,7 +307,7 @@ export const FEATURE_CARDS = [
       <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
         <Image
           src="/img/unified-observability/unified-observability-anomaly-detection.webp"
-          alt="SigNoz anomaly detection — detect outliers before they surprise you"
+          alt="Anomaly detection in SigNoz Cloud and Self-Hosted SigNoz Enterprise"
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover object-top"
