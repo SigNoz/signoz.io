@@ -6,6 +6,7 @@ import section2Url from '@/public/img/google-cloud-monitoring/section-2.svg?url'
 import section3Url from '@/public/img/google-cloud-monitoring/section-3.svg?url'
 import section4Url from '@/public/img/google-cloud-monitoring/section-4.svg?url'
 import { IconTitleDescriptionCardData } from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
+import Link from 'next/link'
 
 export const GCP_MONITORING_HEADER_BUTTONS = [
   {
@@ -39,9 +40,13 @@ export const UNIFY_GCP_PANEL = {
   description: (
     <p className="leading-relaxed text-signoz_vanilla-400">
       When Cloud Run latency spikes, jump from the GCP infrastructure metric to the application
-      trace to the log line that explains it; without switching to the multiple consoles. SigNoz
+      trace to the log line that explains it; without switching to multiple consoles. SigNoz Cloud
       stores all three signal types in a single ClickHouse backend, so correlation is native, not
-      manual.
+      manual. Prefer to manage it yourself? Use{' '}
+      <Link className="underline" href="/docs/install/">
+        Self-Hosted SigNoz
+      </Link>
+      .
     </p>
   ),
   image: section1Url,
@@ -187,7 +192,7 @@ export const GCP_ICON_GRID_CARDS: IconTitleDescriptionCardData[] = [
     icon: <BanknoteCheckIcon className="h-5 w-5" aria-hidden="true" />,
     title: 'Predictable Pricing for Google Cloud Observability',
     description:
-      "GCP already charges you for Cloud Monitoring metrics queries, log ingestion, and log storage. Your observability tool shouldn't add another unpredictable bill on top. SigNoz charges $0.30/GB for logs and traces. $0.10 per million metric samples. No per-host fees. No per-metric charges. No surprise at month-end.",
+      "GCP already charges you for Cloud Monitoring metrics queries, log ingestion, and log storage. Your observability tool shouldn't add another unpredictable bill on top. SigNoz Cloud charges $0.30/GB for logs and traces and $0.10 per million metric samples. No per-host fees. No per-metric charges. No surprise at month-end.",
     button: {
       text: 'View Pricing',
       href: '/pricing/',

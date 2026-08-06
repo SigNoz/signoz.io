@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Card from '@/components/Card/card'
@@ -88,12 +89,12 @@ const UsageList = () => {
     {
       title: 'Pay only for data you send',
       description:
-        'We don’t have any SKU-based pricing. Get access to all features in the plan selected and only pay for the data you send. Pay only $0.3 per GB of ingested traces.',
+        'SigNoz Cloud has no SKU-based pricing. Get access to every feature in your selected plan and pay only for the data you send, including $0.30 per GB of ingested traces.',
     },
     {
       title: 'Add unlimited team members',
       description:
-        'Observability should be available to every developer at your company. After all, anyone can need debugging. That’s why we don’t charge for user seats, and you can add as many team members as you want.',
+        'Observability should be available to every developer at your company. SigNoz Cloud does not charge for user seats, so you can add as many team members as you need.',
     },
     {
       title: 'No Host (container or node) based pricing',
@@ -151,12 +152,16 @@ const Header = () => {
         </h1>
 
         <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
-          SigNoz APM comes with out-of-box charts for key application metrics powered by
+          SigNoz Cloud APM comes with out-of-box charts for key application metrics powered by
           OpenTelemetry.
           <br className="hidden lg:inline" />
           Get latency, requests per second, error percentage, apdex & other key metrics
           <br className="hidden lg:inline" />
-          to understand your application performance.
+          to understand your application performance. Prefer to manage it yourself? Use{' '}
+          <Link className="underline" href="/docs/install/">
+            Self-Hosted SigNoz
+          </Link>
+          .
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
@@ -421,7 +426,7 @@ const UsageBasedPricing = () => {
             <p className="text-base font-normal text-signoz_vanilla-400">
               Tired of Datadog’s unpredictable bills or New Relic’s user-based pricing?
               <br />
-              We’re here for you.
+              SigNoz Cloud gives you usage-based pricing without per-user fees.
             </p>
             <UsageList />
             <Button

@@ -37,8 +37,12 @@ const UnifiedObservability = () => {
               Unified Observability
             </h1>
             <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
-              Transform your monitoring from fragmented silos to seamless insights with SigNoz's
-              single-pane unified observability platform.
+              Transform fragmented monitoring into seamless insights with SigNoz Cloud's
+              single-pane unified observability platform. Prefer to manage it yourself? Use{' '}
+              <Link className="underline" href="/docs/install/">
+                Self-Hosted SigNoz
+              </Link>
+              .
             </h3>
             <div className="flex flex-col gap-2">
               <Link href="/teams/">
@@ -229,18 +233,18 @@ const UnifiedObservability = () => {
           </div>
         </section>
 
-        {/* SigNoz Platform Section */}
+        {/* SigNoz Cloud Platform Section */}
         <section className="container mx-auto py-16">
           <h2 className="mb-8 text-left text-2xl font-bold lg:text-3xl">
-            SigNoz: Unified Observability Platform Powered by OpenTelemetry
+            SigNoz Cloud: Unified Observability Platform Powered by OpenTelemetry
           </h2>
           <div className="relative mb-4 flex flex-wrap items-center gap-8">
             <div className="flex-1 text-gray-300">
               <p className="text-lg">
                 Unified observability is more than just monitoring—it's about gaining a
                 comprehensive understanding of your entire system's health, performance, and
-                behavior in real-time. SigNoz brings together metrics, traces, and logs into a
-                single, cohesive platform, enabling you to:
+                behavior in real-time. SigNoz Cloud brings together metrics, traces, and logs into
+                a single, cohesive platform, enabling you to:
               </p>
               <div className="my-4 space-y-3">
                 <div className="flex items-center gap-3">
@@ -274,7 +278,7 @@ const UnifiedObservability = () => {
                   className="h-auto w-full rounded-xl shadow-2xl"
                 />
                 <figcaption className="mb-4 mt-2 px-4 text-center text-sm text-gray-400 sm:px-8">
-                  SigNoz unified observability platform bringing metrics, traces and logs together
+                  SigNoz Cloud brings metrics, traces, and logs together in one platform
                 </figcaption>
               </figure>
             </div>
@@ -312,7 +316,7 @@ const UnifiedObservability = () => {
           {/* Features Carousel */}
           <section className="mx-auto pt-12">
             <h3 className="mb-8 text-left text-xl font-bold lg:text-2xl">
-              Why Choose SigNoz as Your Unified Observability Platform?
+              Why Choose SigNoz Cloud as Your Unified Observability Platform?
             </h3>
             <div className="relative overflow-x-auto">
               <div className="flex gap-8">
@@ -339,7 +343,7 @@ const UnifiedObservability = () => {
                   {
                     title: 'Flexible Deployment',
                     description:
-                      'Choose between self-hosted deployment for complete control or cloud offering for convenience',
+                      'Start with managed SigNoz Cloud, or use Self-Hosted SigNoz when you want to operate it yourself',
                   },
                 ].map((feature, index) => (
                   <motion.div
@@ -412,10 +416,10 @@ const UnifiedObservability = () => {
             </div>
           </div>
 
-          {/* How SigNoz Transforms */}
+          {/* How SigNoz Cloud Transforms */}
           <section className="container mx-auto my-8 rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 px-12 py-12">
             <h3 className="mb-8 text-left text-xl font-bold lg:text-2xl">
-              How SigNoz transforms this chaos into clarity
+              How SigNoz Cloud transforms this chaos into clarity
             </h3>
             <div className="flex justify-center">
               <figure>
@@ -427,7 +431,7 @@ const UnifiedObservability = () => {
                   className="rounded-xl shadow-2xl"
                 />
                 <figcaption className="mb-8 mt-2 text-center text-sm text-gray-400">
-                  SigNoz provides a unified view of your entire system's observability data
+                  SigNoz Cloud provides a unified view of your entire system's observability data
                 </figcaption>
               </figure>
             </div>
@@ -646,7 +650,7 @@ const UnifiedObservability = () => {
                 </div>
               </div>
               <p className="text-lg">
-                SigNoz offers{' '}
+                SigNoz Cloud and Self-Hosted SigNoz Enterprise offer{' '}
                 <Link
                   href="https://signoz.io/blog/introducing-anomaly-detection-for-smarter-alerts/"
                   className="text-blue-400 hover:text-blue-300"
@@ -939,7 +943,7 @@ const UnifiedObservability = () => {
           </div>
           <p className="mb-0 mt-8 text-lg">
             Take the first step toward comprehensive observability by signing up for a free trial of
-            SigNoz today.
+            SigNoz Cloud today.
           </p>
           <div className="mt-4">
             <Link href="/teams/" className="block max-w-md">

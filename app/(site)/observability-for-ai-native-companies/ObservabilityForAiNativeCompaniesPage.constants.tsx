@@ -91,9 +91,9 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
     ),
   },
   {
-    title: 'Self-Hosted / BYOC Compliance',
+    title: 'Managed BYOC or Self-Hosted SigNoz',
     description:
-      'Deploy on your infrastructure to meet HIPAA/GDPR compliance requirements. Keep sensitive prompt data on-premise for healthcare, banking, and government contracts.',
+      'Use BYOC managed by SigNoz in your cloud account, or deploy Self-Hosted SigNoz when you need telemetry to remain in infrastructure you control.',
   },
   {
     title: 'Monitoring Model Token Usage',
@@ -140,14 +140,14 @@ export const CAPABILITIES_CARDS2: IconTitleDescriptionCardData[] = [
 ]
 
 export const VENDORS: { key: VendorKey; label: string }[] = [
-  { key: 'signoz', label: 'SigNoz' },
+  { key: 'signoz', label: 'SigNoz Cloud' },
   { key: 'langfuse', label: 'Langfuse' },
   { key: 'langsmith', label: 'LangSmith' },
   { key: 'braintrust', label: 'Braintrust' },
 ]
 
 export const TRADITIONAL_VENDORS: { key: TraditionalVendorKey; label: string }[] = [
-  { key: 'signoz', label: 'SigNoz' },
+  { key: 'signoz', label: 'SigNoz Cloud' },
   { key: 'datadog', label: 'Datadog' },
   { key: 'honeycomb', label: 'Honeycomb' },
   { key: 'grafana', label: 'Grafana LGTM' },
@@ -295,7 +295,7 @@ export const TRADITIONAL_COMPARISON_TABLE_ROWS: ComparisonTableRow<TraditionalVe
   {
     feature: 'Self-Hosting',
     vendors: {
-      signoz: { supported: true, text: 'Built on open-standards' },
+      signoz: { supported: true, text: 'Self-Hosted SigNoz available' },
       datadog: { supported: false, text: 'SaaS-only' },
       honeycomb: { supported: 'partial', text: 'Private Cloud (Enterprise)' },
       grafana: { supported: true, text: 'Built on open-standards' },
@@ -325,7 +325,7 @@ export const PILLARS_DATA = [
     iconText: 'COST PREDICTABILITY',
     title: 'Pay for Data Volume Ingested, Not Host Count',
     description:
-      'Companies running large GPU clusters make host-based pricing financially unsustainable. Legacy vendors charge per host and double-charge for ingestion and indexing, leading to surprise bills. We charge based on data volume ingested, not the number of nodes or containers. Set daily rate limits and ingestion quotas to prevent cost overruns.',
+      'Companies running large GPU clusters make host-based pricing financially unsustainable. Legacy vendors charge per host and double-charge for ingestion and indexing, leading to surprise bills. SigNoz Cloud charges based on data volume ingested, not the number of nodes or containers. Set daily rate limits and ingestion quotas to prevent cost overruns.',
   },
   {
     icon: <TextSearch size={14} className="text-signoz_vanilla-400" />,

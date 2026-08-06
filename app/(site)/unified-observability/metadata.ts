@@ -4,11 +4,11 @@ import siteMetadata from '@/data/siteMetadata'
 export const metadata: Metadata = {
   title: 'Unified Observability Platform',
   description:
-    "Transform your monitoring from fragmented silos to seamless insights with SigNoz's single-pane unified observability platform. Combine metrics, traces, and logs for complete system visibility.",
+    'Transform fragmented monitoring into unified insights with SigNoz Cloud. Correlate metrics, traces, and logs in one OpenTelemetry-native platform for complete system visibility.',
   openGraph: {
     title: 'Unified Observability Platform | SigNoz',
     description:
-      "Transform your monitoring from fragmented silos to seamless insights with SigNoz's single-pane unified observability platform. Combine metrics, traces, and logs for complete system visibility.",
+      'Transform fragmented monitoring into unified insights with SigNoz Cloud. Correlate metrics, traces, and logs in one OpenTelemetry-native platform for complete system visibility.',
     images: [
       {
         url: '/img/unified-observability/unified-observability-unified-observabilty-with-signoz.webp',
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Unified Observability Platform | SigNoz',
     description:
-      "Transform your monitoring from fragmented silos to seamless insights with SigNoz's single-pane unified observability platform. Combine metrics, traces, and logs for complete system visibility.",
+      'Transform fragmented monitoring into unified insights with SigNoz Cloud. Correlate metrics, traces, and logs in one OpenTelemetry-native platform for complete system visibility.',
     images: [
       '/img/unified-observability/unified-observability-unified-observabilty-with-signoz.webp',
     ],
