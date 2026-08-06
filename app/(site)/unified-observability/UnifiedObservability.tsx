@@ -37,12 +37,11 @@ const UnifiedObservability = () => {
               Unified Observability
             </h1>
             <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
-              Transform fragmented monitoring into seamless insights with SigNoz Cloud's
-              single-pane unified observability platform.{' '}
+              Turn fragmented monitoring into a unified view with SigNoz Cloud, or run{' '}
               <Link className="underline" href="/docs/install/">
                 Self-Hosted SigNoz
               </Link>{' '}
-              is available for teams that prefer to manage their own stack.
+              on your own infrastructure.
             </h3>
             <div className="flex flex-col gap-2">
               <Link href="/teams/">

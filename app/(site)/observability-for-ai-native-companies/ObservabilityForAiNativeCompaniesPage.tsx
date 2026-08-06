@@ -263,7 +263,7 @@ const HowSigNozComparesToTraditionalTools: React.FC = () => {
       <div className="container relative mx-auto flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
-            How SigNoz Cloud Compares to <br /> Traditional Tools
+            How SigNoz Compares to <br /> Traditional Tools
           </h2>
           <SectionLayout variant="no-border" className="!mx-auto flex items-center justify-center">
             <ComparisonTable

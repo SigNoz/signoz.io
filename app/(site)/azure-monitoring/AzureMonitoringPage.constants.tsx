@@ -2,7 +2,6 @@ import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/co
 import section1Url from '@/public/img/azure-monitoring/section-1.svg?url'
 import section2Url from '@/public/img/azure-monitoring/section-2.svg?url'
 import section3Url from '@/public/img/azure-monitoring/section-3.svg?url'
-import Link from 'next/link'
 
 export const AZURE_MONITORING_HEADER_BUTTONS = [
   {
@@ -38,11 +37,7 @@ export const INTEGRATE_AZURE_PANEL = {
       SigNoz Cloud&apos;s One-Click Azure Integration deploys via an ARM template and automatically
       discovers your Azure resources. VMs, AKS, App Services, Container Apps, Blob Storage, Cosmos
       DB, and databases start sending metrics immediately - no manual OTel Collector setup required.
-      The fastest path to full Azure visibility.{' '}
-      <Link className="underline" href="/docs/install/">
-        Self-Hosted SigNoz Enterprise
-      </Link>{' '}
-      also supports Azure One-Click Integration.
+      The fastest path to full Azure visibility.
     </p>
   ),
   image: section1Url,

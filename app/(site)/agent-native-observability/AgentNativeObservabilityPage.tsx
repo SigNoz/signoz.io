@@ -9,7 +9,6 @@ import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/Featur
 import { TRUSTED_BY_LOGOS, FEATURE_CARDS } from './AgentNativeObservabilityPage.constants'
 import TrackingLink from '@/components/TrackingLink'
 import Image from 'next/image'
-import Link from 'next/link'
 import DitherCanvas from '@/components/DitherCanvas/DitherCanvas'
 import agentNativeHeroImageUrl from '@/public/img/platform/AgentNativeObservabilityMeta.svg?url'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
@@ -68,11 +67,7 @@ const Header: React.FC = () => {
             Connect SigNoz Cloud to your coding agents (e.g. Claude Code, Cursor) and debug
             production issues without leaving your dev environment. <br className="hidden md:block" />
             Traces, logs, metrics, service topology, and your actual codebase - all in one place. Or
-            use Noz, the AI teammate built into SigNoz Cloud.{' '}
-            <Link className="underline" href="/docs/install/">
-              Self-Hosted SigNoz
-            </Link>{' '}
-            connects through a locally run MCP server.
+            use Noz, the AI teammate built into SigNoz Cloud.
           </span>
         }
         buttonGroup={headerButtonGroup}
@@ -256,9 +251,9 @@ const InContextObservability: React.FC = () => {
               </div>
               <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">SigNoz MCP Server</h3>
               <p className="text-sm leading-relaxed text-signoz_vanilla-400">
-                Plug into Claude Code or Cursor in minutes. Get full observability context in every
-                session: traces, logs, metrics, service topology, and deployment history. Start
-                debugging in your terminal.
+                SigNoz Cloud uses a hosted MCP server; Self-Hosted SigNoz runs it locally. Plug into
+                Claude Code or Cursor in minutes and get full observability context in every session:
+                traces, logs, metrics, service topology, and deployment history.
               </p>
               <div className="mt-auto pb-5 pt-4">
                 <Button

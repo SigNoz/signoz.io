@@ -147,7 +147,7 @@ export const VENDORS: { key: VendorKey; label: string }[] = [
 ]
 
 export const TRADITIONAL_VENDORS: { key: TraditionalVendorKey; label: string }[] = [
-  { key: 'signoz', label: 'SigNoz Cloud' },
+  { key: 'signoz', label: 'SigNoz' },
   { key: 'datadog', label: 'Datadog' },
   { key: 'honeycomb', label: 'Honeycomb' },
   { key: 'grafana', label: 'Grafana LGTM' },
