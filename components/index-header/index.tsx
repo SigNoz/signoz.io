@@ -51,9 +51,9 @@ export function HomepageHeroRedesign() {
           <div className="flex flex-col items-start md:pt-2">
             <HeroCopyMotion delay={0.12}>
               <p className="m-0 max-w-lg text-left text-lg font-normal leading-7 tracking-[-0.165px] text-signoz_vanilla-400 lg:max-w-sm lg:text-base xl:max-w-lg xl:text-lg">
-                SigNoz Cloud brings traces, metrics, and logs into one OpenTelemetry-native platform
-                with simple usage-based pricing and no proprietary lock-in. Prefer to manage the
-                stack yourself? Use Self-Hosted SigNoz.
+                SigNoz Cloud brings your traces, metrics, and logs into one OpenTelemetry-native
+                platform. Simple usage-based pricing, and the freedom to run on your infrastructure
+                with Self-Hosted SigNoz.
               </p>
             </HeroCopyMotion>
 
@@ -136,10 +136,9 @@ export function Header({ variant = 'control' }: { variant?: 'control' | 'ai-agen
         )}
         <div className="w-full border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 px-6 py-2">
           <p className="m-0 p-3 text-base font-medium sm:p-0">
-            SigNoz Cloud brings traces, metrics, and logs into one OpenTelemetry-native platform
-            with simple usage-based pricing and no proprietary lock-in.
-            <br className="hidden lg:inline" /> Prefer to manage the stack yourself? Use Self-Hosted
-            SigNoz.
+            SigNoz Cloud brings your traces, metrics, and logs into one OpenTelemetry-native
+            platform. Simple usage-based pricing, and the freedom to run on your infrastructure with
+            Self-Hosted SigNoz.
           </p>
         </div>
       </div>

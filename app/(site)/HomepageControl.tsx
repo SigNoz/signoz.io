@@ -21,7 +21,7 @@ export default function HomepageControl() {
       <BuildForDevelopers className="max-w-8xl" />
       <WhyOpenTelemetry className="max-w-8xl" />
       <WhySelectSignoz className="max-w-8xl" />
-      <SigNozStats className="max-w-8xl" productName="Self-Hosted SigNoz" />
+      <SigNozStats className="max-w-8xl" />
       <Testimonials page="homepage" className="max-w-8xl" />
       <GetStarted page="homepage" className="max-w-8xl" />
     </>

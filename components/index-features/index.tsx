@@ -141,7 +141,7 @@ export const SigNozFeatures = ({ className }: { className?: string }) => {
                 SigNoz Cloud is a managed Datadog or New Relic alternative for logs, metrics,
                 traces, dashboards, alerts, and more.
                 <br />
-                Prefer to run it yourself?{' '}
+                Run it on your own infrastructure with{' '}
                 <TrackingLink
                   className="underline underline-offset-4 transition-colors hover:text-signoz_sienna-100"
                   clickLocation="Homepage Features Intro"
@@ -150,8 +150,9 @@ export const SigNozFeatures = ({ className }: { className?: string }) => {
                   clickType="Inline Link"
                   href="/docs/install/"
                 >
-                  Install Self-Hosted SigNoz.
+                  Self-Hosted SigNoz
                 </TrackingLink>
+                .
               </p>
             </div>
 
