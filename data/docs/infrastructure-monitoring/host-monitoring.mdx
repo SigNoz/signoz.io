@@ -126,12 +126,12 @@ Monitor host performance metrics across customizable time periods. Charts are zo
 #### Queue Size
 
 - This chart relies on the OTel metric(s): `system.disk.pending_operations`.
-- Plots the maximum disk request-queue depth per `device` over each step interval, one line per device. Sustained values above what the device tolerates (typically a handful for spinning disks, dozens for SSDs/NVMe) mean the storage layer is saturated and requests are waiting.
+- Plots the maximum disk request-queue depth per `device` over each step interval, one line per device; devices reporting no queued requests in an interval are omitted. Sustained values above what the device tolerates (typically a handful for spinning disks, dozens for SSDs/NVMe) mean the storage layer is saturated and requests are waiting.
 
 #### Network Usage (Bytes)
 
 - This chart relies on the OTel metric(s): `system.network.io`.
-- Plots throughput in bytes/s with one colored line per `device::direction` combination (e.g., `eth0::transmit`, `eth0::receive`). Use this to identify which Network Interface Card (NIC) is saturating, compare egress vs ingress, and spot when a sustained line approaches the NIC's rated bandwidth, a strong indicator of a network bottleneck.
+- Plots throughput in bytes/s with one colored line per `device::direction` combination (e.g., `eth0::transmit`, `eth0::receive`); interfaces with no traffic in an interval are omitted. Use this to identify which Network Interface Card (NIC) is saturating, compare egress vs ingress, and spot when a sustained line approaches the NIC's rated bandwidth, a strong indicator of a network bottleneck.
 
 #### Network Usage (Packets/s)
 
@@ -161,17 +161,17 @@ Monitor host performance metrics across customizable time periods. Charts are zo
 #### System Disk Operations/s
 
 - This chart relies on the OTel metric(s): `system.disk.operations`.
-- Plots the per-second rate of completed disk operations per `device::direction`, one line per device and direction (`read`/`write`). High and sustained values indicate I/O-intensive workloads. Pair with `System Disk I/O (Bytes)` to tell large-but-few ops from small-but-many; pair with `System disk operation time/s` to tell whether each op is also slow.
+- Plots the per-second rate of completed disk operations per `device::direction`, one line per device and direction (`read`/`write`); idle devices are omitted from an interval rather than drawn at zero. High and sustained values indicate I/O-intensive workloads. Pair with `System Disk I/O (Bytes)` to tell large-but-few ops from small-but-many; pair with `System disk operation time/s` to tell whether each op is also slow.
 
 #### System disk operation time/s
 
 - This chart relies on the OTel metric(s): `system.disk.operation_time`.
-- Plots the per-second rate of cumulative disk-busy time per `device::direction`, one line per device and direction. Values approaching `1s/s` on a single line mean that device is effectively saturated: the disk spent ~100% of wall-clock time servicing I/O. Compare against ops/s to distinguish "few slow ops" from "many fast ops".
+- Plots the per-second rate of cumulative disk-busy time per `device::direction`, one line per device and direction; idle devices are omitted from an interval rather than drawn at zero. Values approaching `1s/s` on a single line mean that device is effectively saturated: the disk spent ~100% of wall-clock time servicing I/O. Compare against ops/s to distinguish "few slow ops" from "many fast ops".
 
 #### Disk Usage (%) by mountpoint
 
 - This chart relies on the OTel metric(s): `system.filesystem.usage`.
-- Plots each mountpoint's used space as a percentage of its own capacity (`state=used` ÷ total across all states), one line per `mountpoint`. Unlike the host-wide **Disk Usage** column, this breaks the figure out per filesystem, so a single mountpoint filling up (e.g. `/var` or `/`) is visible even when the host's overall usage looks fine. Watch any line trending toward 100%: that mountpoint is running low, which stalls writes for anything using it (log rotation, databases, container writes); a steady climb points to a leak or unrotated logs, a step change usually tracks a deploy or data import.
+- Plots each mountpoint's used space as a percentage of its own capacity (`state=used` ÷ total across all states), one line per `mountpoint`, skipping mountpoints reporting zero used bytes. Unlike the host-wide **Disk Usage** column, this breaks the figure out per filesystem, so a single mountpoint filling up (e.g. `/var` or `/`) is visible even when the host's overall usage looks fine. Watch any line trending toward 100%: that mountpoint is running low, which stalls writes for anything using it (log rotation, databases, container writes); a steady climb points to a leak or unrotated logs, a step change usually tracks a deploy or data import.
 
 **Time Range Selection:**
 
