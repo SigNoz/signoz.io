@@ -1,0 +1,300 @@
+.noz-peek-dock {
+  position: fixed;
+  bottom: 12px;
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  z-index: 1000;
+  pointer-events: none;
+  overflow: visible;
+  transition:
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.4s ease-in-out,
+    opacity 0.4s ease-in-out;
+  /* left is set via inline style for path-aware centering */
+  transform: translateX(-50%);
+}
+
+.noz-peek-dock.dismissed {
+  filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.noz-peek-stage {
+  position: relative;
+  height: 52px;
+  width: 100%;
+  overflow: visible;
+}
+
+/* Mobile-only round CTA; desktop uses .noz-peek-stage. */
+.noz-peek-balloon {
+  display: none;
+}
+
+.noz-peek-input {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 52px;
+  border-radius: 6px;
+  background: var(--l2-background);
+  border: 1px solid var(--l2-border);
+  box-shadow: 0 4px 9px 0 rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  padding: 14px 18px 16px;
+  pointer-events: auto;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--l1-foreground);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.noz-peek-input:hover {
+  border-color: var(--l1-border);
+}
+
+.noz-peek-input:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.noz-peek-placeholder {
+  flex: 1;
+  min-width: 0;
+  color: var(--l3-foreground);
+  font-size: 14px;
+  line-height: 19px;
+  letter-spacing: -0.005em;
+  pointer-events: none;
+}
+
+.noz-peek-input.animate {
+  animation: noz-input-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.noz-peek-input.settled {
+  transform: none;
+  filter: none;
+  opacity: 1;
+}
+
+@keyframes noz-input-rise {
+  0% {
+    transform: translateY(170%);
+    filter: blur(14px);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+/* Noz peeks over the top-right edge of the input (behind the bar, above it). */
+.noz-peek-body {
+  position: absolute;
+  right: 6px;
+  bottom: 44px;
+  width: 40px;
+  height: 40px;
+  transform: translateY(0);
+  opacity: 1;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.noz-peek-body svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.noz-peek-body.animate {
+  animation: noz-body-peek 0.7s cubic-bezier(0.34, 1.45, 0.5, 1) 0.35s both;
+}
+
+.noz-peek-body.settled {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+@keyframes noz-body-peek {
+  0% {
+    transform: translateY(34px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.noz-peek-head {
+  transform-origin: 12px 16px;
+}
+
+.noz-peek-body.animate .noz-peek-head {
+  animation: noz-head-bob 0.5s ease-in-out 0.5s 2;
+}
+
+@keyframes noz-head-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-1px) rotate(-6deg);
+  }
+}
+
+.noz-peek-pupil {
+  transition: transform 0.13s ease-out;
+}
+
+.noz-peek-hands {
+  position: absolute;
+  top: -4px;
+  right: 9px;
+  width: 34px;
+  height: 7px;
+  display: block;
+  opacity: 1;
+  transform: translateY(2px);
+  z-index: 6;
+  pointer-events: none;
+}
+
+.noz-peek-hands svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.noz-peek-dock.animate .noz-peek-hands {
+  animation: noz-hand-peek 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+}
+
+.noz-peek-dock.settled .noz-peek-hands {
+  transform: translateY(2px);
+  opacity: 1;
+}
+
+@keyframes noz-hand-peek {
+  0% {
+    transform: translateY(16px);
+    opacity: 0;
+    z-index: 1;
+  }
+  20% {
+    opacity: 1;
+    z-index: 1;
+  }
+  50% {
+    transform: translateY(-7px);
+    z-index: 1;
+  }
+  51% {
+    transform: translateY(-7px);
+    z-index: 6;
+  }
+  100% {
+    transform: translateY(2px);
+    opacity: 1;
+    z-index: 6;
+  }
+}
+
+@media (max-width: 767px) {
+  .noz-peek-dock {
+    width: 56px;
+    max-width: 56px;
+    bottom: 16px;
+    left: auto !important;
+    right: 16px;
+    transform: none;
+  }
+
+  .noz-peek-stage {
+    display: none;
+  }
+
+  .noz-peek-balloon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 9999px;
+    border: none;
+    background: #e5484d;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(229, 72, 77, 0.35);
+    pointer-events: auto;
+    cursor: pointer;
+    padding: 0;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .noz-peek-balloon:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+  }
+
+  .noz-peek-balloon.animate {
+    animation: noz-input-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .noz-peek-balloon.settled {
+    transform: none;
+    filter: none;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noz-peek-input.animate,
+  .noz-peek-balloon.animate,
+  .noz-peek-body.animate,
+  .noz-peek-body.animate .noz-peek-head,
+  .noz-peek-dock.animate .noz-peek-hands {
+    animation: none !important;
+  }
+  .noz-peek-input.animate,
+  .noz-peek-balloon.animate {
+    transform: none;
+    filter: none;
+    opacity: 1;
+  }
+  .noz-peek-body.animate {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .noz-peek-dock.animate .noz-peek-hands {
+    transform: translateY(2px);
+    opacity: 1;
+  }
+}
+
+/*
+ * Hide Decimal's default floating launcher on docs — NozPeek replaces it.
+ * Only hide the launcher button (aria-label flips to "Close chat" when open).
+ * Do NOT hide getdecimal.ai iframes — the chat panel is an iframe, and hiding
+ * it leaves an empty black shell.
+ */
+html[data-docs-route] .decimal-widget-button[aria-label='Open chat'],
+html[data-docs-route] button[aria-label='Open chat'] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
