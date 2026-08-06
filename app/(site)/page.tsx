@@ -16,7 +16,7 @@ const selfHostedSignozId = `${siteUrl}/#self-hosted-signoz`
 const webpageId = `${siteUrl}/#webpage`
 const homepageTitle = 'SigNoz | The Open Source Datadog Alternative'
 const homepageDescription =
-  'SigNoz Cloud is a managed, OpenTelemetry-native Datadog alternative for logs, metrics, traces, dashboards, alerts, and AI. Self-Hosted SigNoz is also available.'
+  'SigNoz Cloud is a managed, OpenTelemetry-native Datadog alternative for logs, metrics, traces, alerts, and AI, with Self-Hosted SigNoz for teams that prefer to run their own stack.'
 
 export const metadata: Metadata = {
   title: {
