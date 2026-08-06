@@ -7,18 +7,18 @@ doc_type: howto
 
 ## Overview
 
-SigNoz reads exceptions from the traces your services already send. Your instrumentation records an exception as an `exception` span event, and SigNoz collects those events into a dedicated **Exceptions** view that groups them by service, exception type, and message.
+SigNoz reads exceptions from the traces that your services already send. Your instrumentation records each exception as an `exception` span event. SigNoz collects these events into the **Exceptions** view. The view groups them by service, exception type, and exception message.
 
-Every exception carries the span and trace IDs of the request it came from, so you can move from a row in the list to the flame graph of the failing request. Nothing appears until your services send traces, so [instrument them first](https://signoz.io/docs/instrumentation/overview/) if you have not already.
+Every exception carries the span ID and the trace ID of its request. You can therefore move from a row in the list to the flame graph of that request. Nothing appears until your services send traces. If your services are not instrumented, [instrument them first](https://signoz.io/docs/instrumentation/overview/).
 
 With the Exceptions view you can:
 
-- Browse the exception types your services hit, with count, first seen, and last seen.
+- Browse the exception types that your services hit, with the count, the first seen time, and the last seen time.
 - Filter by deployment environment, service, host, or Kubernetes cluster, namespace, deployment, and pod.
-- Read the stack trace for any occurrence whose instrumentation recorded one.
-- Open the trace that produced the exception to inspect the failing span and what ran before and after it.
-- Step through individual occurrences of the same exception group.
-- [Alert on exceptions](https://signoz.io/docs/alerts-management/exceptions-based-alerts/) when a new type shows up or a known one spikes.
+- Read the stack trace of an occurrence, when the instrumentation recorded one.
+- Open the trace of an exception and examine the failing span.
+- Move through the individual occurrences of one exception group.
+- [Alert on exceptions](https://signoz.io/docs/alerts-management/exceptions-based-alerts/) when a new type appears, or when a known type becomes more frequent.
 
 <Figure
     src="/img/docs/exception-list.webp"
@@ -28,11 +28,19 @@ With the Exceptions view you can:
 
 ## How to View Exceptions
 
-Open **Exceptions** from the left navigation. The list shows one row per exception group with its type, message, occurrence count, first seen, last seen, and the application that reported it. Sort by exception type, count, first seen, last seen, or application. Narrow the time range from the picker at the top, and use the filter sidebar or the search bar to scope the list to a service, environment, host, or Kubernetes workload.
+Open **Exceptions** from the left navigation.
 
-To follow an exception into the request that caused it:
+The list shows one row for each exception group. A row gives the exception type, the message, and the occurrence count. It also gives the first seen time, the last seen time, and the application. You can sort by exception type, count, first seen, last seen, or application.
 
-1. Click an exception type to open its detail page. You get the stack trace when the instrumentation recorded one, the identifiers that tie the exception back to its origin (`spanID`, `traceID`, `serviceName`, and `groupID`), and **Older** and **Newer** buttons to step through other occurrences in the same group. OpenTelemetry treats `exception.stacktrace` as recommended rather than required, and some SDKs omit it by default, so the panel can be empty.
+To reduce the list, set the time range from the picker at the top. You can also use the filter sidebar or the search bar. These limit the list to a service, an environment, a host, or a Kubernetes workload.
+
+To follow an exception to the request that caused it:
+
+1. Click an exception type. The detail page opens.
+
+   The page shows the stack trace, when the instrumentation recorded one. It also shows four identifiers: `spanID`, `traceID`, `serviceName`, and `groupID`. Use the **Older** and **Newer** buttons to move through the other occurrences in the same group.
+
+   Note: OpenTelemetry makes `exception.stacktrace` recommended, not required. Some SDKs do not record it by default. The stack trace panel can therefore be empty.
 
    <Figure
        src="/img/docs/exception-detail-1.webp"
@@ -40,7 +48,9 @@ To follow an exception into the request that caused it:
        caption="Exception detail page with the stack trace and the identifiers linking back to the span"
    />
 
-2. Click **See the error in trace graph** to open the full trace. The flame graph and waterfall show the failing span in the context of the whole request, and the span details panel gives you the span's own attributes, events, and correlated logs. The exception detail page does not carry those attributes, so open the trace when you need them.
+2. Click **See the error in trace graph**. The full trace opens.
+
+   The flame graph and the waterfall show the failing span inside the whole request. The span details panel gives the attributes, the events, and the correlated logs of that span. The exception detail page does not hold these attributes. Open the trace when you need them.
 
    <Figure
        src="/img/docs/exception-detail-2.webp"
@@ -50,25 +60,37 @@ To follow an exception into the request that caused it:
 
 ## What Counts as an Exception
 
-SigNoz builds the Exceptions view from span events. Log records do not feed it. A span event counts as an exception when its name is `exception` or ends in `.exception`.
+SigNoz builds the Exceptions view from span events. Log records do not feed it. A span event counts as an exception when its name is `exception`, or when the name ends in `.exception`.
 
-In practice that means the `exception` event. It is the only name OpenTelemetry's <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/" target="_blank" rel="noopener noreferrer nofollow">span convention</a> defines, and it is what every `recordException` call emits today. The `.exception` suffix names such as `http.server.request.exception` and `db.client.operation.exception` belong to the newer <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/" target="_blank" rel="noopener noreferrer nofollow">log-based convention</a>, so a library that has adopted them emits log records and those do not reach the Exceptions view. SigNoz matches the suffix so that the events do land there whenever an SDK routes them back onto spans. That matching needs OTel Collector `v0.144.3` or newer, which shipped with SigNoz `v0.120.0`.
+In practice this means the `exception` event. The OpenTelemetry <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/" target="_blank" rel="noopener noreferrer nofollow">span convention</a> defines only this name. Every `recordException` call emits it.
 
-From the `exception` event SigNoz stores `exception.type`, `exception.message`, `exception.stacktrace`, and `exception.escaped`. Type and message fill the list columns and decide grouping, so record at least one of them. OpenTelemetry has deprecated `exception.escaped`, so treat it as legacy data rather than something to set on new instrumentation.
+The `.exception` suffix names, such as `http.server.request.exception` and `db.client.operation.exception`, belong to the newer <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/" target="_blank" rel="noopener noreferrer nofollow">log-based convention</a>. A library that uses these names emits log records. Log records do not reach the Exceptions view.
+
+SigNoz matches the suffix for one case: an SDK can route these events back onto spans. The events then reach the Exceptions view. This match needs OTel Collector `v0.144.3` or newer. That collector version shipped with SigNoz `v0.120.0`.
+
+From the `exception` event, SigNoz stores `exception.type`, `exception.message`, `exception.stacktrace`, and `exception.escaped`. The type and the message fill the list columns and decide the grouping. Record at least one of them.
+
+OpenTelemetry deprecated `exception.escaped`. Treat it as legacy data. Do not set it on new instrumentation.
 
 <Admonition type="info">
-OpenTelemetry is <a href="https://opentelemetry.io/blog/2026/deprecating-span-events/" target="_blank" rel="noopener noreferrer nofollow">deprecating the span-event exception APIs</a> in favor of the Logs API. No action is needed today: existing `recordException` calls stay valid and span events remain the default. The migration runs per instrumentation library, not across an SDK. A library that has adopted the `OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN` opt-in emits log records instead of span events when you set it to `logs`, and those exceptions will not appear in the Exceptions view. Libraries that have not adopted it ignore the variable, and `recordException` calls in your own code stay span events either way. Set `logs/dup` to emit both while you migrate.
+OpenTelemetry <a href="https://opentelemetry.io/blog/2026/deprecating-span-events/" target="_blank" rel="noopener noreferrer nofollow">deprecates the span-event exception APIs</a> in favor of the Logs API. You do not need to do anything today. Existing `recordException` calls stay valid, and span events remain the default.
+
+The migration runs for each instrumentation library, not for a whole SDK. Some libraries support the `OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN` variable. If you set that variable to `logs`, those libraries emit log records instead of span events. These exceptions do not appear in the Exceptions view.
+
+Libraries without support for the variable ignore it. Your own `recordException` calls stay span events. Set the variable to `logs/dup` to emit both signals during a migration.
 </Admonition>
 
 ## Recording Exceptions
 
-Instrumentation libraries record an exception event when an exception escapes the operation they wrap, so once your services are instrumented they report unhandled exceptions with no extra code at the call site. Record an exception yourself when it marks a failed operation that no library captured, such as an error you catch at a request boundary and turn into a 500 response. OpenTelemetry <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/" target="_blank" rel="noopener noreferrer nofollow">no longer recommends recording exceptions</a> that you catch and recover from inside the span, since they add noise to the Exceptions view and to any alerts built on it.
+Instrumentation libraries record an exception event when the exception escapes the operation that they wrap. Your instrumented services therefore report unhandled exceptions without extra code.
 
-To record an exception, get the current span from the tracer and call `recordException()` or its language equivalent. That call adds the span event and leaves the span status alone, so set the status to error separately when the exception means the operation failed.
+Record an exception yourself when it marks a failed operation that no library captured. An example is an error that you catch at a request boundary and turn into a 500 response. OpenTelemetry <a href="https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/" target="_blank" rel="noopener noreferrer nofollow">no longer recommends</a> a record of an exception that you catch and recover from inside the span. These exceptions add noise to the Exceptions view and to your alerts.
 
-The Java, Go, Python, JavaScript, and Ruby examples read the span that instrumentation already made current in a request handler, so they must run inside an active span. Outside one, those APIs hand back a no-op span (`undefined` in JavaScript) and the exception goes nowhere. The .NET and PHP examples start their own span instead, so they stand alone as long as a tracer provider is configured.
+To record an exception, get the current span from the tracer. Then call `recordException()` or the equivalent for your language. This call adds the span event, but it does not change the span status. Set the status to error separately when the exception means that the operation failed.
 
-Each example records the failure and then returns a server error rather than rethrowing. Let the exception escape instead and the surrounding instrumentation records it for you, in which case drop the manual `recordException` call to avoid two events for one failure.
+The Java, Go, Python, JavaScript, and Ruby examples read the span that is current in a request handler. These examples must run inside an active span. Outside an active span, these APIs return a no-op span (`undefined` in JavaScript). The exception then goes nowhere. The .NET and PHP examples create their own span, so these two run alone when you configure a tracer provider.
+
+Each example records the failure and then returns a server error. The examples do not rethrow the exception. If you let the exception escape, the surrounding instrumentation records it. Remove the manual `recordException` call in that case, because two calls give two events for one failure.
 
 ### Record Exceptions in Java
 
@@ -166,7 +188,7 @@ function handleRequest() {
 
 ### Record Exceptions in .NET
 
-OpenTelemetry .NET offers several ways to report exceptions on an `Activity`, from setting the status alone to recording the full exception. The <a href="https://opentelemetry.io/docs/languages/dotnet/instrumentation/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry .NET documentation</a> covers the rest:
+OpenTelemetry .NET gives several ways to report an exception on an `Activity`. The simplest way sets only the status. The <a href="https://opentelemetry.io/docs/languages/dotnet/instrumentation/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry .NET documentation</a> gives the other ways.
 
 ```csharp
 using System.Diagnostics;
@@ -187,7 +209,7 @@ using (var activity = MyActivitySource.StartActivity("Foo"))
 }
 ```
 
-`AddException` needs .NET 9 or `System.Diagnostics.DiagnosticSource` 9.0.0 and later. On older versions, call `activity?.RecordException(ex)` from `OpenTelemetry.Api` instead. That extension method is marked obsolete in `OpenTelemetry.Api` 1.10.0 and later, where it forwards to `AddException`.
+`AddException` needs .NET 9, or `System.Diagnostics.DiagnosticSource` 9.0.0 and later. On older versions, call `activity?.RecordException(ex)` from `OpenTelemetry.Api` instead. That extension method is obsolete in `OpenTelemetry.Api` 1.10.0 and later, where it forwards to `AddException`.
 
 ### Record Exceptions in Ruby
 
@@ -237,15 +259,15 @@ try {
 ## Grouping Exceptions
 
 <Admonition type="note">
-This section applies to Self-Host only. It sets an option on the `otel-collector`'s `clickhousetraces` exporter, and SigNoz Cloud runs a managed collector that you do not configure. Cloud users cannot change the grouping strategy today. Reach out to support if variable exception messages are splitting one problem across many groups.
+This section applies to Self-Host only. It sets an option on the `clickhousetraces` exporter of the `otel-collector`. SigNoz Cloud runs a managed collector that you do not configure. Cloud users cannot change the grouping strategy today. If variable exception messages split one problem across many groups, contact support.
 </Admonition>
 
-By default, SigNoz groups the exceptions in the list by service name, exception type, and exception message. Messages that embed UUIDs or randomly generated IDs split one underlying problem across many groups.
+By default, SigNoz groups the exceptions in the list by service name, exception type, and exception message. Messages that embed UUIDs or randomly generated IDs split one problem across many groups.
 
 To group by service name and exception type only, set `low_cardinal_exception_grouping` to `true` in the `clickhousetraces` exporter configuration.
 
 <Admonition type="info">
-The new strategy applies only to data ingested after you restart `otel-collector` with the updated environment variable. Groups that already exist keep their original grouping.
+The new strategy applies only to the data that arrives after you restart `otel-collector` with the updated environment variable. Groups that already exist keep their original grouping.
 </Admonition>
 
 ### Docker Standalone and Docker Swarm
@@ -286,28 +308,32 @@ helm -n platform upgrade \
 
 Work through these causes in order:
 
-1. **No traces are reaching SigNoz.** Open [Traces](https://signoz.io/docs/userguide/traces/) and check whether any spans arrive in the same time range. If none do, fix ingestion first by following [Instrumentation overview](https://signoz.io/docs/instrumentation/overview/). Exceptions ride along with trace data, so nothing can appear until spans do.
-2. **Spans arrive, but nothing records an exception.** Instrumentation libraries record only exceptions that escape the operation they wrap, so an application that catches everything internally reports none. Add a `recordException` call where the operation fails, as shown in [Recording Exceptions](#recording-exceptions).
-3. **A filter or the time range hides them.** Clear the filter sidebar and the search bar, then widen the time range. The list is scoped to the selected window.
+1. **No traces reach SigNoz.** Open [Traces](https://signoz.io/docs/userguide/traces/) and look for spans in the same time range. If you see no spans, correct the ingestion first with [Instrumentation overview](https://signoz.io/docs/instrumentation/overview/). Exceptions arrive with the trace data, so spans must arrive first.
+2. **Spans arrive, but nothing records an exception.** Instrumentation libraries record only the exceptions that escape the operation that they wrap. An application that catches every exception reports none. Add a `recordException` call where the operation fails. See [Recording Exceptions](#recording-exceptions).
+3. **A filter or the time range hides them.** Clear the filter sidebar and the search bar. Then increase the time range. The list shows only the selected window.
 
-### Domain-Specific Exception Events Do Not Show Up
+### Domain-Specific Exception Events Do Not Appear
 
-Names such as `db.client.operation.exception` and `http.server.request.exception` come from OpenTelemetry's log-based exception convention, so a library that has adopted them emits log records. The Exceptions view reads span events, so those never arrive. They show up only when your SDK routes the events back onto spans, and in that case the collector also has to be `v0.144.3` or newer to match the `.exception` suffix. Check the collector image tag in your `docker-compose.yaml` or Helm values.
+Names such as `db.client.operation.exception` and `http.server.request.exception` come from the log-based exception convention of OpenTelemetry. A library that uses these names emits log records. The Exceptions view reads span events, so these records never arrive.
 
-### Exceptions Disappeared After Switching to Log-Based Exceptions
+These events appear only when your SDK routes them back onto spans. The collector must also be `v0.144.3` or newer to match the `.exception` suffix. Find the collector image tag in your `docker-compose.yaml` or in your Helm values.
 
-An instrumentation library running with `OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN=logs` emits log records instead of span events, and the Exceptions view reads span events only. Set the variable to `logs/dup` to emit both while you migrate.
+### Exceptions Disappeared After the Switch to Log-Based Exceptions
+
+An instrumentation library with `OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN=logs` emits log records instead of span events. The Exceptions view reads span events only. Set the variable to `logs/dup` to emit both signals during a migration.
 
 ### One Problem Splits Into Many Exception Groups
 
-Exception messages that embed UUIDs, IDs, or other variable text produce a separate group per message. On Self-Host, switch to low-cardinality grouping as described in [Grouping Exceptions](#grouping-exceptions), which applies to newly ingested data only. On SigNoz Cloud the grouping strategy is not configurable, so contact support. Either way, dropping the variable part from the exception message at the source fixes it for both.
+Exception messages that embed UUIDs, IDs, or other variable text produce one group for each message. On Self-Host, change to low-cardinality grouping. See [Grouping Exceptions](#grouping-exceptions). The change applies only to the data that arrives after the restart. On SigNoz Cloud you cannot configure the grouping strategy, so contact support.
+
+You can also remove the variable part from the exception message at the source. This correction works on both Self-Host and SigNoz Cloud.
 </details>
 
 ## Next Steps
 
-- [Explore Traces](https://signoz.io/docs/userguide/traces/) to see the request each exception came from
-- [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to pull the surrounding log lines for an exception
-- [Set up exception-based alerts](https://signoz.io/docs/alerts-management/exceptions-based-alerts/) to get notified when a new exception type appears
+- [Explore Traces](https://signoz.io/docs/userguide/traces/) to see the request of each exception
+- [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to find the log lines around an exception
+- [Configure exception-based alerts](https://signoz.io/docs/alerts-management/exceptions-based-alerts/) to get a notification when a new exception type appears
 
 ## Get Help
 
