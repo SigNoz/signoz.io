@@ -1,0 +1,152 @@
+---
+date: 2026-08-06
+title: Timezone Settings - Display Timestamps in Your Timezone
+description: Learn how to change the timezone in SigNoz so that timestamps, charts, and custom time ranges in the UI use the timezone that you select.
+doc_type: howto
+---
+
+## Overview
+
+The SigNoz UI shows timestamps in one timezone. The default is the timezone of your browser.
+You can select a different timezone from the time range picker.
+
+The timezone changes only the display of time. SigNoz stores all telemetry in UTC. A timezone change
+does not modify your data, and it does not change the result of a query.
+
+The selected timezone applies to every view in the SigNoz UI, not only to the view where you select it.
+SigNoz keeps the selection in the local storage of your browser.
+
+## Change the timezone
+
+1. Open a view that has a time range picker, such as the Logs Explorer or a dashboard. Then select the
+   picker in the top-right corner.
+
+   The footer of the picker shows the active timezone and its offset from UTC.
+
+<Figure
+  src="/img/docs/timezone/timezone-time-picker-footer.webp"
+  alt="Time range picker in the SigNoz Logs Explorer with the active timezone and its UTC offset in the footer"
+  caption="The footer of the time range picker shows the active timezone and its offset from UTC."
+/>
+
+2. Select **Change Timezone** in the footer.
+
+3. Type a city, a region, or an offset in the search box. For example, type `New_York`, `Europe`, or `5:30`.
+
+4. Select the timezone that you want.
+
+<Figure
+  src="/img/docs/timezone/timezone-picker-list.webp"
+  alt="Timezone picker in SigNoz with a search box, browser time, and UTC at the top of the list"
+  caption="The timezone picker lists browser time and UTC first, and then all other timezones."
+/>
+
+The picker closes, and the SigNoz UI applies the new timezone. The offset next to the time range picker
+shows the offset of the new timezone.
+
+To close the picker without a change, press `esc`.
+
+<Admonition type="info">
+The two entries at the top of the list are shortcuts. **Browser time** uses the timezone of your
+browser. **Coordinated Universal Time** uses UTC.
+</Admonition>
+
+## Turn timezone adaptation on or off
+
+The **Adapt to my timezone** switch controls the timezone adaptation for the SigNoz UI.
+
+1. Go to **Settings** and select the **Account** tab.
+
+2. Find **Adapt to my timezone** in the **User Preferences** section.
+
+<Figure
+  src="/img/docs/timezone/timezone-account-settings.webp"
+  alt="User Preferences section of the SigNoz account settings with the Adapt to my timezone switch"
+  caption="The Adapt to my timezone switch in the User Preferences section of the account settings."
+/>
+
+3. Set the switch to off to show the time range picker and the charts in UTC.
+
+If the selected timezone is different from the timezone of your browser, this section shows the
+offset of the selected timezone and a **Clear override** button. Select **Clear override** to go
+back to the timezone of your browser.
+
+<Admonition type="warning">
+The switch has two limits. SigNoz does not save the state of the switch, so the switch is on again
+after you reload the page. Tables and lists, such as the log list, also keep the selected timezone
+when the switch is off. To show UTC in the whole SigNoz UI, select **Coordinated Universal Time** in
+the time range picker.
+</Admonition>
+
+## Where the timezone applies
+
+The selected timezone applies to the timestamps in these places:
+
+- The time range picker, and the start time and the end time of a custom time range
+- The timestamp column in the Logs Explorer and the Traces Explorer
+- The time axis and the tooltip of a chart, in dashboards and in the explorers
+- List panels and table panels in dashboards
+- The alert rules list, the triggered alerts list, and the alert history timeline
+- The exceptions list and the exception details
+- The Metrics Explorer, saved views, and logs pipelines
+- Settings tables, such as ingestion keys, members, roles, and service accounts
+
+## Where the timezone does not apply
+
+Some times in SigNoz have their own timezone, or always use UTC:
+
+- **Planned maintenance windows.** Each window has its own timezone field. For more information, see
+  [Planned Maintenance](https://signoz.io/docs/alerts-management/planned-maintenance/).
+- **ClickHouse queries.** Time functions use the timezone of the server, which is UTC. To convert a
+  timestamp in a query, give the timezone as a parameter to the function. In the traces tables,
+  `timestamp` is a `DateTime64(9)` column, so use `toDate(timestamp, 'Asia/Kolkata')`. In the logs
+  tables, `timestamp` is a `UInt64` column of nanoseconds. Convert this column first, with
+  `toDate(fromUnixTimestamp64Nano(timestamp), 'Asia/Kolkata')`. For more information, see the
+  [query FAQs](https://signoz.io/docs/userguide/query-troubleshooting-faqs/#q-what-timezone-is-used-for-timestamp-functions-in-signoz-queries).
+- **Alert notifications.** The SigNoz server generates the timestamps in your notifications.
+
+## Limitations
+
+- The selected timezone is stored in the local storage of your browser. A different browser, a
+  different device, or a new private window falls back to the timezone of the browser.
+- A table that is already on the screen keeps the previous timezone after you select a new one.
+  Reload the page to show the new timezone in the table.
+- The trace detail page shows the start time of the trace in the timezone of your browser. This page
+  ignores the selected timezone.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Timestamps are earlier or later than you expect
+
+The SigNoz UI shows a timezone that is different from your local timezone.
+
+1. Open the time range picker and read the timezone in the footer.
+2. If the timezone is not correct, select **Change Timezone** and select the timezone that you want.
+
+### Timestamps did not change after a new selection
+
+The table on the screen was rendered with the previous timezone.
+
+Reload the page. The timestamps in the table then use the new timezone.
+
+### The timezone is correct in one browser but not in another
+
+Each browser keeps its own timezone selection.
+
+Select the timezone again in the browser that shows the wrong timestamps.
+</details>
+
+## Next steps
+
+- [Set up planned maintenance windows](https://signoz.io/docs/alerts-management/planned-maintenance/)
+- [Use keyboard shortcuts in the SigNoz UI](https://signoz.io/docs/manage/keyboard-shortcuts/)
+- [Write ClickHouse queries](https://signoz.io/docs/userguide/logs_clickhouse_queries/)
+
+## Get Help
+
+<GetHelp />
