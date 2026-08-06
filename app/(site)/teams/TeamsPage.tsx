@@ -97,7 +97,7 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
 }) => {
   const [formState, setFormState] = useState({
     workEmail: '',
-    dataRegion: 'us',
+    dataRegion: 'us2',
     termsOfServiceAccepted: true,
   })
   const emailInputRef = useRef<HTMLInputElement>(null)
