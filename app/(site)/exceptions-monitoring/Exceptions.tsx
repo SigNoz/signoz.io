@@ -23,7 +23,7 @@ function Exceptions() {
         {/* <SigNozUsage /> */}
         <UsageBasedPricing />
         {/* <ExploreDocs /> */}
-        <SigNozStats selfHostedLabel />
+        <SigNozStats />
         <GetStarted page="Exceptions" />
       </div>
     </main>
@@ -77,22 +77,22 @@ const UsageList = () => {
     {
       title: 'Pay only for data you send',
       description:
-        'SigNoz Cloud has no SKU-based pricing. Get all features in your selected plan and pay only for the data you send, including $0.10 per million metric samples.',
+        'SigNoz Cloud doesn’t have any SKU-based pricing. Get access to all features in the selected plan and only pay for the data you send. Pay only $0.10 per million samples for metrics.',
     },
     {
       title: 'No special pricing for custom metrics',
       description:
-        'SigNoz Cloud does not add a custom-metric surcharge. Metrics cost $0.10 per million samples regardless of the metric type you send.',
+        'Vendors like Datadog charge $0.05 per custom metric, which limits a team’s ability to send and analyze custom metrics for monitoring. SigNoz Cloud does not add a custom-metric surcharge. The charge remains $0.10 per million samples no matter what type of metrics you send.',
     },
     {
       title: 'Add unlimited team members',
       description:
-        'SigNoz Cloud does not charge for user seats, so engineering, support, and on-call teams can collaborate without seat limits.',
+        'Observability should be available to every developer at your company. After all, anyone can need debugging. That’s why SigNoz Cloud does not charge for user seats, and you can add as many team members as you want.',
     },
     {
       title: 'No Host (container or node) based pricing',
       description:
-        'SigNoz Cloud pricing is based on the data you send, not the number of hosts, containers, or nodes, so autoscaling does not add host-based charges.',
+        'For modern cloud-based applications, it doesn’t make sense to charge based on the number of hosts or containers. With SigNoz Cloud, you don’t need to worry about autoscaling during peak hours. Only pay for the amount of data sent, no matter the number of hosts.',
     },
   ]
 
@@ -241,7 +241,7 @@ const SigNozFeatures = () => {
     },
     {
       title: 'See detailed stack traces',
-      desc: 'See a detailed stack trace for every exception caught from your application. You can also log custom attributes to add more context, such as the users affected by an exception.',
+      desc: 'See detailed stack traces for all exceptions caught from your application. You can also log custom attributes to add more context to your exceptions. For example, you can add attributes to identify users for which exceptions occurred.',
       logo: '/img/log-management/fast.svg',
     },
     {
@@ -265,7 +265,7 @@ const SigNozFeatures = () => {
     },
     {
       title: 'Detailed stack trace with every exception',
-      desc: 'See a detailed stack trace for every exception caught from your application. You can also log custom attributes to add more context, such as the users affected by an exception.',
+      desc: 'See a detailed stack trace for every exception caught from your application. You can also log custom attributes to add more context to your exceptions. For example, you can add attributes to identify users for which exceptions occurred.',
       image: '/img/features/exceptions/stacktrace.webp',
     },
     {
@@ -287,7 +287,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  Exceptions in <br /> SigNoz Cloud
+                  Exceptions In <br /> SigNoz Cloud
                 </div>
               </div>
             </div>

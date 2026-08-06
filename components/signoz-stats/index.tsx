@@ -8,13 +8,7 @@ import GithubIcon from '@/public/img/index_features/github.svg'
 import ContributionsIcon from '@/public/img/index_features/contributions.svg'
 import CommunityIcon from '@/public/img/index_features/community.svg'
 
-const SigNozStats = ({
-  className,
-  selfHostedLabel = false,
-}: {
-  className?: string
-  selfHostedLabel?: boolean
-}) => {
+const SigNozStats = ({ className }: { className?: string }) => {
   const STATS_LIST = [
     {
       id: 1,
@@ -53,13 +47,7 @@ const SigNozStats = ({
           <p className="px-4 pt-4 text-left text-3xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl lg:px-8 lg:pt-10">
             Developers <br className="hidden sm:block" />
             Love <br className="hidden sm:block" />
-            {selfHostedLabel ? (
-              <>
-                Self-Hosted <br className="hidden sm:block" /> SigNoz
-              </>
-            ) : (
-              'SigNoz'
-            )}
+            SigNoz
           </p>
         </div>
 

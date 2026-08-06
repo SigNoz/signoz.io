@@ -68,15 +68,8 @@ const SigNozStats = ({ cloudFirstNaming = false }: { cloudFirstNaming?: boolean 
       <div className="flex-1 border-b border-dashed border-signoz_slate-400 md:border-b-0">
         <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
           Developers <br />
-          Love
-          <br />
-          {cloudFirstNaming ? (
-            <>
-              Self-Hosted <br /> SigNoz
-            </>
-          ) : (
-            'SigNoz'
-          )}
+          Love <br />
+          SigNoz
         </p>
       </div>
 
