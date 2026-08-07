@@ -30,8 +30,8 @@ const WhySelectSignoz = ({
       >
         <div className="min-w-0">
           <p className="sticky top-[3rem] px-8 pt-4 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:px-4 sm:text-4xl lg:px-8 lg:pt-10">
-            Why <br className="hidden md:block" /> select <br className="hidden md:block" />{' '}
-            {isInPricingPage ? 'SigNoz?' : 'SigNoz Cloud?'}{' '}
+            Why <br className="hidden md:block" /> select <br className="hidden md:block" /> SigNoz
+            Cloud?{' '}
           </p>
         </div>
         <div className="min-w-0">
@@ -69,11 +69,7 @@ const WhySelectSignoz = ({
               <Image
                 className="w-full"
                 src={featureGraphicEnterprise}
-                alt={
-                  isInPricingPage
-                    ? 'Illustration of SigNoz connecting observability, security, and data controls'
-                    : 'Illustration of SigNoz Cloud connecting observability, security, and data controls'
-                }
+                alt="Illustration of SigNoz Cloud connecting observability, security, and data controls"
                 width={272}
                 height={352}
                 loading="lazy"
