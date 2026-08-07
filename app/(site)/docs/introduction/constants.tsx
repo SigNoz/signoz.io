@@ -56,7 +56,7 @@ export const SEND_DATA_CARDS: CardData[] = [
   {
     title: 'Send Metrics',
     description: 'Configure metrics collection & visualization.',
-    href: '/docs/userguide/send-metrics-cloud/',
+    href: '/docs/metrics-management/send-metrics/',
     icon: <LucideChartNoAxesColumn size={24} className="text-[var(--l1-foreground)]" />,
   },
   {
@@ -68,7 +68,7 @@ export const SEND_DATA_CARDS: CardData[] = [
   {
     title: 'Agent-Native',
     description: 'Use AI agents for instrumentation',
-    href: '/docs/agent-native/',
+    href: '/docs/ai/overview/',
     icon: <Bot size={24} className="text-[var(--l1-foreground)]" />,
   },
   {
@@ -90,7 +90,7 @@ export const EXPLORE_SIGNOZ_CARDS: CardData[] = [
   {
     title: 'Dashboards',
     description: 'Build, share, use templates',
-    href: '/docs/userguide/dashboards/',
+    href: '/docs/dashboards/overview/',
     icon: <LayoutDashboard size={24} className="text-[var(--l1-foreground)]" />,
   },
   {
@@ -102,7 +102,7 @@ export const EXPLORE_SIGNOZ_CARDS: CardData[] = [
   {
     title: 'Explore Traces',
     description: 'Analyze your traces with trace explorer',
-    href: '/docs/product-features/trace-explorer/',
+    href: '/docs/userguide/traces/',
     icon: <Waypoints size={24} className="text-[var(--l1-foreground)]" />,
   },
   {
@@ -114,7 +114,7 @@ export const EXPLORE_SIGNOZ_CARDS: CardData[] = [
   {
     title: 'Query Builder',
     description: 'The visual query interface for signals',
-    href: '/docs/userguide/query-builder/',
+    href: '/docs/userguide/query-builder-v5/',
     icon: <ListFilter size={24} className="text-[var(--l1-foreground)]" />,
   },
 ]
@@ -130,13 +130,13 @@ export const MIGRATE_CARDS: CardData[] = [
   {
     title: 'Migrate from Grafana',
     description: 'Step-by-step guide to migrate from Grafana',
-    href: '/docs/migration/migrate-from-grafana/',
+    href: '/docs/migration/migrate-from-grafana-to-signoz/',
     icon: <BookText size={24} className="text-[var(--l1-foreground)]" />,
   },
   {
     title: 'Migrate from New Relic',
     description: 'Step-by-step guide to migrate from New Relic',
-    href: '/docs/migration/migrate-from-newrelic/',
+    href: '/docs/migration/migrate-from-newrelic-to-signoz/',
     icon: <BookText size={24} className="text-[var(--l1-foreground)]" />,
   },
 ]
@@ -152,7 +152,7 @@ export const SECURITY_CARDS: CardData[] = [
   {
     title: 'SSO SAML',
     description: 'Set up Single Sign-On with SAML',
-    href: '/docs/userguide/sso-authentication/',
+    href: '/docs/manage/administrator-guide/sso/overview/',
     icon: <Settings size={24} className="text-[var(--l1-foreground)]" />,
   },
   {
@@ -168,7 +168,7 @@ export const TROUBLESHOOTING_CARDS: CardData[] = [
   {
     title: 'FAQ',
     description: 'Find solutions to common issues',
-    href: 'https://signoz.io/docs/troubleshooting/signoz-cloud/general-troubleshooting/',
+    href: '/docs/faqs/general/',
     icon: <HelpCircle size={24} className="text-[var(--l1-foreground)]" />,
   },
   {
