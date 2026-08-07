@@ -6,7 +6,7 @@ import MainFooter from '@/components/mainFooter'
 export default function NotFound() {
   return (
     <SectionContainer>
-      <div className="relative flex h-screen flex-col justify-between ">
+      <div className="relative flex min-h-screen flex-col justify-between ">
         <TopNav />
         <main className="mb-auto mt-[48px] bg-[var(--l1-background)]">
           <NotFoundRecoveryClient />
