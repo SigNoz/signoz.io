@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-08-07
 title: Metrics Management FAQs
 description: Frequently asked questions about metrics management and troubleshooting in SigNoz
 doc_type: reference
@@ -12,29 +12,10 @@ Or you can also [Add a panel](https://signoz.io/docs/userguide/manage-dashboards
 
 ### Why I can't see my metric 'x'?
 
-When you can't see specific metrics in SigNoz, this is often caused by a temporality mismatch. This occurs when a single metric sends data with different temporalities (delta and cumulative), causing the query builder to produce unpredictable results or lose access to previous metrics.
+Common causes include incorrect query filters or a time range that doesn't overlap with ingestion. Verify the metric is appearing in [Metrics Explorer](/docs/metrics-management/metrics-explorer/) for your selected time range.
 
-<details>
+**Temporality and mixed temporalities:**
 
-<summary> Show resolution steps </summary>
-
-**To resolve this issue:**
-
-1. **Keep temporality unchanged** - Ensure your metrics maintain consistent temporality throughout their lifecycle
-2. **Contact support for immediate resolution** - If you're experiencing this issue, the SigNoz team can quickly restore access to your metrics from their side
-3. **Consider using ClickHouse queries as a workaround** - Direct ClickHouse queries can bypass temporality issues since they either ignore temporality information or make assumptions about it
-
-**Important considerations when using ClickHouse queries:**
-
-- While ClickHouse queries can work around temporality issues, you'll miss out on performance optimizations
-- SigNoz uses pre-aggregated tables to accelerate queries over extended time periods, which automatically redirect based on queried time ranges through the query builder
-- ClickHouse queries don't benefit from these pre-aggregated tables because they have different structures and columns
-- When metrics contain mixed temporalities, you'll need to write complex queries that merge delta and cumulative values to retrieve complete data
-
-**Best practice:**
-
-Maintain consistent temporality in your metrics to avoid these issues and ensure optimal performance through the query builder interface.
+SigNoz handles metrics with both cumulative and delta temporality simultaneously. Switching a metric's temporality (for example, from cumulative to delta) does not break queries over previously stored data.
 
 For more information about metric temporality, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
-
-</details> 
