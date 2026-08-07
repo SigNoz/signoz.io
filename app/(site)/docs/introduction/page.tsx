@@ -33,7 +33,7 @@ export default async function DocsIntroductionPage() {
         title="Explore the rest of SigNoz"
         description="Once your data is flowing in — go deeper into what we offer."
         guidesCount={12}
-        viewAllHref="/docs/what-is-signoz/"
+        viewAllHref="/docs/querying/overview/"
         illustration="/img/docs-introduction/explore-illustration.webp"
         illustrationAlt="Explore SigNoz"
         cards={EXPLORE_SIGNOZ_CARDS}
