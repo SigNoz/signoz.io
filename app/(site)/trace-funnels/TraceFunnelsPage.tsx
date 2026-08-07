@@ -149,8 +149,8 @@ const TraceFunnels: React.FC = () => {
         <StopLosingUsersBanner />
       </SectionLayout>
 
-      <UsageBasedPricing show={['traces']} sectionTitle="SigNoz Cloud pricing you can trust" />
-      <SigNozStats cloudFirstNaming />
+      <UsageBasedPricing show={['traces']} />
+      <SigNozStats />
       <Divider />
       <CustomerStoriesSection
         tracking={{

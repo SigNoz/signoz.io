@@ -146,9 +146,8 @@ const AlertsManagement: React.FC = () => {
 
       <UsageBasedPricing
         show={['traces', 'metrics', 'logs']}
-        sectionTitle="SigNoz Cloud pricing you can trust"
       />
-      <SigNozStats cloudFirstNaming />
+      <SigNozStats />
       <Divider />
       <CustomerStoriesSection />
     </FeaturePageLayout>

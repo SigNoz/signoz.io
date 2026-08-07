@@ -260,8 +260,8 @@ const DistributedTracing: React.FC = () => {
         <StorageSection />
         <Divider className="pb-12" />
       </SectionLayout>
-      <UsageBasedPricing show={['traces']} sectionTitle="SigNoz Cloud pricing you can trust" />
-      <SigNozStats cloudFirstNaming />
+      <UsageBasedPricing show={['traces']} />
+      <SigNozStats />
       <Divider />
       <CustomerStoriesSection
         tracking={{

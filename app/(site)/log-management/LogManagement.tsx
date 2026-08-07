@@ -105,8 +105,8 @@ const LogsManagement: React.FC = () => {
         <VisualQueryBuilder />
       </SectionLayout>
 
-      <UsageBasedPricing show={['logs']} sectionTitle="SigNoz Cloud pricing you can trust" />
-      <SigNozStats cloudFirstNaming />
+      <UsageBasedPricing show={['logs']} />
+      <SigNozStats />
       <Divider />
       <CustomerStoriesSection
         tracking={{
