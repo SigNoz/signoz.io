@@ -33,7 +33,7 @@ export default async function DocsIntroductionPage() {
         title="Explore the rest of SigNoz"
         description="Once your data is flowing in — go deeper into what we offer."
         guidesCount={12}
-        viewAllHref="/docs/userguide/"
+        viewAllHref="/docs/what-is-signoz/"
         illustration="/img/docs-introduction/explore-illustration.webp"
         illustrationAlt="Explore SigNoz"
         cards={EXPLORE_SIGNOZ_CARDS}
@@ -43,7 +43,7 @@ export default async function DocsIntroductionPage() {
         title="Migrate"
         description="Seamlessly transition from your existing observability stack."
         guidesCount={8}
-        viewAllHref="/docs/migration/"
+        viewAllHref="/docs/migration/migrate-to-signoz/"
         cards={MIGRATE_CARDS}
       />
       <DocsIntroSection
