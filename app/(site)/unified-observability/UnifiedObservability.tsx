@@ -664,7 +664,7 @@ const UnifiedObservability = () => {
               <figure>
                 <Image
                   src="/img/unified-observability/unified-observability-anomaly-detection.webp"
-                  alt="Anomaly Detection in SigNoz Cloud and Self-Hosted SigNoz Enterprise"
+                  alt="Anomaly detection chart in the SigNoz interface"
                   width={800}
                   height={533}
                   className="h-auto w-full rounded-xl shadow-2xl"

@@ -20,7 +20,7 @@ export const FEATURE_CARDS = [
     description: (
       <div>
         <p>
-          Describe what you want in natural language and Noz in SigNoz Cloud builds it. Create
+          Describe what you want in natural language, and Noz builds it in SigNoz Cloud. Create
           dashboards from 80+ templates or from scratch. Generate alerts with sensible defaults. Run
           queries and get results in chat, no query language required.
         </p>
