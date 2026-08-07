@@ -359,11 +359,11 @@ const DevelopersLoveSigNoz = () => (
     <div className="!w-full flex-1 sm:!w-[300px] sm:min-w-fit">
       <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start px-10 py-10 sm:px-0 sm:pl-12">
         <h2 className="text-4xl font-bold !leading-[3.5rem] text-[var(--l1-foreground-hover)] sm:text-4xl">
-          Developers
+          1000+
           <br className="hidden sm:block" />
-          love
+          Engineering Teams
           <br className="hidden sm:block" />
-          SigNoz
+          love SigNoz
         </h2>
       </div>
     </div>
