@@ -2,17 +2,11 @@ import React from 'react'
 import Image from 'next/image'
 import TrackingLink from '@/components/TrackingLink'
 
-type GetStartedSigNozProps = {
-  cloudFirstNaming?: boolean
-}
-
-export default function GetStartedSigNoz({ cloudFirstNaming = false }: GetStartedSigNozProps) {
+export default function GetStartedSigNoz() {
   return (
     <div className="get-started-signoz">
       <p>
-        {cloudFirstNaming
-          ? 'SigNoz Cloud is the easiest way to get started. '
-          : 'SigNoz Cloud is the easiest way to run SigNoz. '}
+        SigNoz Cloud is the easiest way to run SigNoz.{' '}
         <TrackingLink
           href="https://signoz.io/teams/"
           clickType="Nav Click"
@@ -46,9 +40,8 @@ export default function GetStartedSigNoz({ cloudFirstNaming = false }: GetStarte
       </TrackingLink>
 
       <p>
-        {cloudFirstNaming
-          ? 'You can also install Self-Hosted SigNoz because it is open source. With 24,000+ GitHub stars, '
-          : 'You can also install and self-host SigNoz yourself since it is open-source. With 24,000+ GitHub stars, '}
+        You can also install and self-host SigNoz yourself since it is open-source. With 24,000+
+        GitHub stars,{' '}
         <TrackingLink
           href="https://github.com/signoz/signoz"
           clickType="External Click"
@@ -70,7 +63,7 @@ export default function GetStartedSigNoz({ cloudFirstNaming = false }: GetStarte
         >
           instructions
         </TrackingLink>{' '}
-        {cloudFirstNaming ? 'to install Self-Hosted SigNoz.' : 'to self-host SigNoz.'}
+        to self-host SigNoz.
       </p>
     </div>
   )

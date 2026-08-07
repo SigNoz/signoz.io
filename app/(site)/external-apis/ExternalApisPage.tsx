@@ -117,7 +117,7 @@ const ExternalApis: React.FC = () => {
       </SectionLayout>
 
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
-      <SigNozStats cloudFirstNaming />
+      <SigNozStats />
       <Divider />
       <CustomerStoriesSection
         tracking={{

@@ -242,8 +242,8 @@ const UnifiedObservability = () => {
               <p className="text-lg">
                 Unified observability is more than just monitoring—it's about gaining a
                 comprehensive understanding of your entire system's health, performance, and
-                behavior in real-time. SigNoz Cloud brings together metrics, traces, and logs into
-                a single, cohesive platform, enabling you to:
+                behavior in real-time. SigNoz Cloud brings together metrics, traces, and logs into a
+                single, cohesive platform, enabling you to:
               </p>
               <div className="my-4 space-y-3">
                 <div className="flex items-center gap-3">
@@ -686,7 +686,7 @@ const UnifiedObservability = () => {
             <div className="space-y-8">
               <div>
                 <h3 className="mb-4 text-2xl font-bold">1. Quick SetUp</h3>
-                <GetStartedSigNoz cloudFirstNaming />
+                <GetStartedSigNoz />
               </div>
               <div>
                 <h3 className="mb-4 text-2xl font-bold">2. Instrument Your Application</h3>

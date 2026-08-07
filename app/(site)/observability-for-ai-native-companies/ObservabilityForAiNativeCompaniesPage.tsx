@@ -370,7 +370,7 @@ const ObservabilityForAiNativeCompaniesPage: React.FC = () => {
 
       <StartMonitoring />
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
-      <SigNozStats cloudFirstNaming />
+      <SigNozStats />
       <CustomerStoriesSection
         tracking={{
           clickName: 'Observability for AI Native Companies Customer Stories Button',

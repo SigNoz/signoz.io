@@ -302,7 +302,7 @@ const LlmObservabilityPage: React.FC = () => {
 
       <StartMonitoring />
       <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
-      <SigNozStats cloudFirstNaming />
+      <SigNozStats />
       <Divider />
       <CustomerStoriesSection
         tracking={{
