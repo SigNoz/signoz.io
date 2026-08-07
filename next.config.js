@@ -854,6 +854,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/opentelemetry-nextjs-use-cases/',
+          destination: '/blog/opentelemetry-nextjs-production/',
+          permanent: true,
+        },
+        {
           source: '/blog/tags/',
           destination: '/tags/',
           permanent: true,

@@ -2,7 +2,7 @@
 title: Structured Logging in NextJS with OpenTelemetry
 meta_title: "Structured Logging in Next.js with OpenTelemetry"
 published_date: 2025-06-25
-updated_date: 2026-07-08
+updated_date: 2026-08-07
 tags: [OpenTelemetry, NextJS, Logging]
 authors: [yuvraj]
 description: "Implement structured logging in your Next.js app with OpenTelemetry, including the OTLP log exporter and full trace correlation."
@@ -13,7 +13,7 @@ keywords:
     structured logs,
     opentelemetry nextjs,
     logs with traceId,
-    sigznoz,
+    signoz,
     javascript logging,
     frontend backend logging,
     logs correlation,
@@ -22,7 +22,7 @@ keywords:
   ]
 related_articles:
   - '/blog/opentelemetry-nextjs'
-  - '/blog/opentelemetry-nextjs-use-cases'
+  - '/blog/opentelemetry-nextjs-web-vitals'
   - '/blog/opentelemetry-nextjs-production'
   - '/guides/nodejs-logging'
 ---
@@ -30,8 +30,8 @@ related_articles:
 <ArticleSeriesTop
   seriesName="OpenTelemetry NextJS Tutorial"
   seriesOverviewHref="/blog/opentelemetry-nextjs"
-  currentPart="4"
-  totalParts="5"
+  currentPart="3"
+  totalParts="4"
   previousTitle="Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry"
   previousHref="/blog/opentelemetry-nextjs-web-vitals"
   nextTitle="Deploying and Scaling OpenTelemetry in Production NextJS Apps"
@@ -57,35 +57,17 @@ Note: You can find the full code for any code snippet shown in this guide in the
 
 ## Step 0 – Where we’re starting from
 
-If you haven’t instrumented tracing yet, please follow the first guide in this series, “[Monitor NextJS with OpenTelemetry](/blog/opentelemetry-nextjs/),” and then come back.
+If you haven’t instrumented tracing yet, please follow the first guide in this series, “[How to Instrument Next.js Applications with OpenTelemetry](/blog/opentelemetry-nextjs/),” and then come back.
 
-From here on, we’ll assume you already have the `nextjs-observability-demo` project running with `@vercel/otel` traces and the OpenTelemetry collector stack.
+From here on, we’ll assume you already have the `nextjs-observability-demo` project running with `@vercel/otel` traces and the OpenTelemetry collector stack — the same `create-next-app@latest --example with-supabase` scaffold and `.env.local` OTEL variables set up in [Part 1](/blog/opentelemetry-nextjs/).
 
-## Step 1 – Prep the codebase
+## Step 1 – Add an OTEL_SERVICE_NAME
 
-We'll start by scaffolding a new Next.js application using the official `with-supabase` example. This gives us a realistic starting point with database integration. We'll then `cd` into the directory and copy the example environment file.
-
-```bash
-npx create-next-app@latest nextjs-observability-demo --example with-supabase
-cd nextjs-observability-demo
-cp .env.example .env.local
-```
-
-Now, open the new `.env.local` file. You'll need to add your Supabase credentials. Below those, we'll add the OpenTelemetry configuration. These variables tell our app **what** to call itself (`OTEL_SERVICE_NAME`) and **where** to send its data (`OTEL_EXPORTER_OTLP_ENDPOINT`).
+One addition on top of your existing `.env.local`: a stable service name for the logs pipeline. This tells our app **what** to call itself when it emits logs (`OTEL_SERVICE_NAME`), separate from `OTEL_EXPORTER_OTLP_ENDPOINT`, which already tells it **where** to send data.
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=<your-url>
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<your-publishable-or-anon-key>
-
 OTEL_SERVICE_NAME=nextjs-observability-demo
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces
-OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf
-OTEL_LOG_LEVEL=debug
-NEXT_OTEL_VERBOSE=1
 ```
-
-> The `OTEL_EXPORTER_OTLP_ENDPOINT` is the key here. The OpenTelemetry SDK is smart enough to append the correct signal path (like `/v1/logs` or `/v1/traces`) automatically, so we only need to define this one base URL.
 
 ## Step 2 – Install the correct OpenTelemetry versions
 
@@ -869,8 +851,8 @@ With instrumentation, metrics, and logging in place, you're ready for production
 <ArticleSeriesBottom
   seriesName="OpenTelemetry NextJS Tutorial"
   seriesOverviewHref="/blog/opentelemetry-nextjs"
-  currentPart="4"
-  totalParts="5"
+  currentPart="3"
+  totalParts="4"
   previousTitle="Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry"
   previousHref="/blog/opentelemetry-nextjs-web-vitals"
   nextTitle="Deploying and Scaling OpenTelemetry in Production NextJS Apps"

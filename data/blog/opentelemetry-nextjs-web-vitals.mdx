@@ -3,26 +3,26 @@
 title: Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry
 meta_title: Track Web Vitals in Next.js with OpenTelemetry
 published_date: 2025-06-25
-updated_date: 2026-06-16
+updated_date: 2026-08-07
 tags: [OpenTelemetry, NextJS, Web Vitals, SigNoz, JavaScript]
 authors: [yuvraj]
 description: Instrument your Next.js frontend to track Web Vitals (LCP, INP, CLS) and third-party widget performance with OpenTelemetry, visualized in SigNoz.
 image: /img/blog/2024/12/opentelemetry-nextjs-cover.webp
-keywords: [web vitals, nextjs, frontend monitoring, opentelmetry browser, widget performance, sigznoz, LCP, INP, CLS, tracing, metrics]
+keywords: [web vitals, nextjs, frontend monitoring, opentelemetry browser, widget performance, signoz, LCP, INP, CLS, tracing, metrics]
 related_articles:
   - '/blog/opentelemetry-nextjs'
-  - '/blog/opentelemetry-nextjs-use-cases'
   - '/blog/opentelemetry-nextjs-logging'
+  - '/blog/opentelemetry-nextjs-production'
   - '/comparisons/web-application-monitoring-tools'
 ---
 
 <ArticleSeriesTop
   seriesName="OpenTelemetry NextJS Tutorial"
   seriesOverviewHref="/blog/opentelemetry-nextjs"
-  currentPart="3"
-  totalParts="5"
-  previousTitle="NextJS OpenTelemetry Use Cases - Monitoring 404s, External APIs, Exceptions & More"
-  previousHref="/blog/opentelemetry-nextjs-use-cases"
+  currentPart="2"
+  totalParts="4"
+  previousTitle="How to Instrument Next.js Applications with OpenTelemetry"
+  previousHref="/blog/opentelemetry-nextjs"
   nextTitle="Structured Logging in NextJS with OpenTelemetry"
   nextHref="/blog/opentelemetry-nextjs-logging"
 />
@@ -39,7 +39,7 @@ By capturing these metrics with [OpenTelemetry](https://signoz.io/opentelemetry/
 | **FCP** | First visible render | ≤ 1.8s | 1.8–3.0s | > 3.0s |
 | **TTFB** | Time until first byte received | ≤ 800ms | 800ms–1.8s | > 1.8s |
 
-Use these metrics to set baselines, identify regressions, and drive performance improvements where they actually matter: in the user’s browser.
+Use these metrics to set baselines, identify regressions, and drive performance improvements where they actually matter: in the user's browser.
 
 ### 1. Install Dependencies
 
@@ -57,7 +57,7 @@ npm install @opentelemetry/exporter-metrics-otlp-http \
 
 - **`@opentelemetry/sdk-metrics`**: Core metrics SDK for browser
 - **`@opentelemetry/semantic-conventions`**: Standard attribute names
-- **`web-vitals`**: Google’s web vitals measurement library
+- **`web-vitals`**: Google's web vitals measurement library
 
 ### 2. Create `lib/web-vitals.ts`
 
@@ -185,15 +185,15 @@ With just a few lines, you now get real user performance data streaming into you
 
 ### Tracking Third-Party Widget Performance
 
-Third-party widgets—chatbots, analytics, ads, support tools—bring useful functionality, but also unpredictable performance baggage. A slow widget can tank your LCP, stall interactivity, or wreck your layout—and because it’s not your code, debugging becomes a guessing game.
+Third-party widgets—chatbots, analytics, ads, support tools—bring useful functionality, but also unpredictable performance baggage. A slow widget can tank your LCP, stall interactivity, or wreck your layout—and because it's not your code, debugging becomes a guessing game.
 
-You can’t instrument **inside** a third-party `<iframe>` or `<script>`, but you **can** measure its impact on your app.
+You can't instrument **inside** a third-party `<iframe>` or `<script>`, but you **can** measure its impact on your app.
 
 
 
 ### The Strategy: Wrap and Measure
 
-Use OpenTelemetry’s manual instrumentation to wrap the widget with a [custom span](https://signoz.io/blog/opentelemetry-spans/):
+Use OpenTelemetry's manual instrumentation to wrap the widget with a [custom span](https://signoz.io/blog/opentelemetry-spans/):
 
 ```tsx
 // components/ThirdPartyWidget.tsx
@@ -223,7 +223,7 @@ export function ThirdPartyWidget() {
 
 This span tracks how long the widget takes to load and reports it to your tracing backend (e.g., [SigNoz](https://signoz.io/docs/introduction/)). Repeat this pattern for other widgets as needed.
 
-### Why It’s Worth Doing
+### Why It's Worth Doing
 
 **Find Slow Widgets**: Know exactly which scripts are hurting UX
 
@@ -233,7 +233,7 @@ This span tracks how long the widget takes to load and reports it to your tracin
 
 **Improve CWV Scores**: Clean up your LCP/INP by ditching bloated embeds
 
-Third-party performance isn’t a black box anymore. If it runs on your page, you should be tracking it.
+Third-party performance isn't a black box anymore. If it runs on your page, you should be tracking it.
 
 
 ## Next: Structured Logging with Trace Correlation
@@ -243,10 +243,10 @@ While metrics tell you **what** is happening, logs tell you **why**. In the next
 <ArticleSeriesBottom
   seriesName="OpenTelemetry NextJS Tutorial"
   seriesOverviewHref="/blog/opentelemetry-nextjs"
-  currentPart="3"
-  totalParts="5"
-  previousTitle="NextJS OpenTelemetry Use Cases - Monitoring 404s, External APIs, Exceptions & More"
-  previousHref="/blog/opentelemetry-nextjs-use-cases"
+  currentPart="2"
+  totalParts="4"
+  previousTitle="How to Instrument Next.js Applications with OpenTelemetry"
+  previousHref="/blog/opentelemetry-nextjs"
   nextTitle="Structured Logging in NextJS with OpenTelemetry"
   nextHref="/blog/opentelemetry-nextjs-logging"
 />

@@ -19,9 +19,9 @@ related_articles:
   seriesName="OpenTelemetry NextJS Tutorial"
   seriesOverviewHref="/blog/opentelemetry-nextjs"
   currentPart="1"
-  totalParts="5"
-  nextTitle="NextJS OpenTelemetry Use Cases - Monitoring 404s, External APIs, Exceptions & More"
-  nextHref="/blog/opentelemetry-nextjs-use-cases"
+  totalParts="4"
+  nextTitle="Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry"
+  nextHref="/blog/opentelemetry-nextjs-web-vitals"
 />
 
 Vercel gives you some observability out of the box for your Next.js application: function logs, perf insights, basic metrics. While these might be enough for you initially, these metrics and insights aren't enough for modern-day distributed application systems.
@@ -320,7 +320,7 @@ export NEXT_OTEL_VERBOSE=1
 
 You’ll get verbose span logs in the terminal—useful when debugging instrumentation issues.
 
-**Next**: These traces are only local for now. Let’s plug in a collector and pipe them to something visual - starting with Jaeger.
+**Next**: These traces are only local for now. Let’s plug in a Collector and pipe them to something visual - starting with Jaeger.
 
 ## Running a Collector Locally and Testing Traces
 
@@ -627,23 +627,8 @@ curl http://localhost:3000/nonexistent
 
 ## Alternatively: Direct Export to SigNoz
 
-If you're prototyping quickly or running in an environment where adding a collector isn't practical, you can send traces directly from the app to SigNoz — skipping the collector entirely:
-
-```jsx
-import { registerOTel, OTLPHttpJsonTraceExporter } from '@vercel/otel'
-
-export function register() {
-  registerOTel({
-    serviceName: 'nextjs-observability-demo',
-    traceExporter: new OTLPHttpJsonTraceExporter({
-      url: 'https://ingest.us.signoz.cloud/v1/traces',
-      headers: {
-        'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY || ''
-      }
-    })
-  })
-}
-```
+If you're prototyping quickly or running in an environment where adding an OTel Collector isn't practical, you can send traces directly from the app to SigNoz,  skipping the collector entirely, using the `OTLPHttpJsonTraceExporter` from `@vercel/otel`.<br />
+See [Collector vs Direct Exporter](https://signoz.io/blog/opentelemetry-nextjs-production/#collector-vs-direct-exporter) later in this series for the full setup and the tradeoffs involved.
 
 ### Why Stick with the Collector?
 
@@ -707,12 +692,12 @@ Same goes for your database queries: SigNoz shows frequency, duration, and highl
 
 At this point, your Next.js app is fully instrumented — traces flowing through the collector, visible in both Jaeger and SigNoz, with APM metrics derived automatically. You've gone from zero observability to a production-ready setup without writing a single custom metric.
 
-In the next part of this series, we'll go deeper into what you can actually *do* with this data:
+In the next parts of this series, we'll go deeper into what you can actually *do* with this data:
 
+- Track frontend Web Vitals and third-party widget performance
+- Implement structured logging with full trace correlation, across both server and browser
 - Trace 404s, slow external API calls, and unhandled exceptions
-- Build custom dashboards for your team
-- Set up alerts on latency spikes and error rate thresholds
-- Correlate logs with traces for full-context debugging
+- Deploy to production, set up alerting, and tune sampling for scale
 
 Let's continue our observability journey!
 
@@ -720,7 +705,7 @@ Let's continue our observability journey!
   seriesName="OpenTelemetry NextJS Tutorial"
   seriesOverviewHref="/blog/opentelemetry-nextjs"
   currentPart="1"
-  totalParts="5"
-  nextTitle="NextJS OpenTelemetry Use Cases - Monitoring 404s, External APIs, Exceptions & More"
-  nextHref="/blog/opentelemetry-nextjs-use-cases"
+  totalParts="4"
+  nextTitle="Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry"
+  nextHref="/blog/opentelemetry-nextjs-web-vitals"
 />
