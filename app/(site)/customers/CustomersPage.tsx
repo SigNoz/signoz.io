@@ -54,9 +54,9 @@ export default function CustomersPage() {
               <h1 className="m-0 max-w-3xl text-left text-5xl font-medium leading-none tracking-[-1.408px] text-signoz_vanilla-100 sm:text-6xl lg:text-5xl xl:text-6xl xl:leading-none">
                 Meet the teams
                 <br />
-                building reliable systems
+                using SigNoz Cloud
                 <br />
-                <span className="text-signoz_vanilla-400">with SigNoz.</span>
+                <span className="text-signoz_vanilla-400">in production.</span>
               </h1>
 
               <div>
