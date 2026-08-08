@@ -3048,6 +3048,16 @@ module.exports = () => {
           destination: '/docs/cost-meter/alerts/',
           permanent: true,
         },
+        {
+          source: '/docs/integrations/gcp/collect-logs/',
+          destination: '/docs/integrations/gcp/collect-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/gcp/collect-logs',
+          destination: '/docs/integrations/gcp/collect-metrics/',
+          permanent: true,
+        },
       ])
     },
     webpack: (config, options) => {
