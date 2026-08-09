@@ -1,12 +1,12 @@
 ---
 title: Send OTel Demo Telemetry to SigNoz Cloud in 5 Minutes
 tags: [SigNoz Cloud]
-date: 2026-03-12
+date: 2026-08-09
 doc_type: tutorial
 description: Spin up the OpenTelemetry Demo App and start exploring traces, logs, metrics, and service maps in SigNoz Cloud in under 5 minutes.
 ---
 
-This quickstart spins up a multi-service <a href="https://github.com/SigNoz/opentelemetry-demo-lite" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Demo</a> app and sends traces, logs, and metrics to your SigNoz Cloud account — no code changes needed.
+This quickstart starts a multi-service <a href="https://github.com/SigNoz/opentelemetry-demo-lite" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Demo</a> app and sends traces, logs, and metrics to your SigNoz Cloud workspace. No code changes are required.
 
 <video
   src="/img/docs/otel-demo-quickstart.mp4"
@@ -22,6 +22,8 @@ This quickstart spins up a multi-service <a href="https://github.com/SigNoz/open
 ## Prerequisites
 
 - A SigNoz Cloud account ([sign up free](https://signoz.io/teams/))
+- Your workspace region and ingestion key from **Settings** > **Ingestion Settings**
+- Outbound HTTPS access to `ingest.<region>.signoz.cloud` on port `443`
 - <a href="https://docs.docker.com/get-docker/" target="_blank" rel="noopener noreferrer nofollow">Docker</a> and <a href="https://docs.docker.com/compose/install/" target="_blank" rel="noopener noreferrer nofollow">Docker Compose</a> installed
 
 ## Setup
@@ -41,9 +43,10 @@ Run the following command from the `opentelemetry-demo-lite` directory:
 OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443 SIGNOZ_INGESTION_KEY=<your-ingestion-key> docker compose up -d
 ```
 
-Replace the following:
-- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 <KeyPointCallout title="Alternative: use a .env file" defaultCollapsed="true">
 Instead of passing environment variables inline, create a `.env` file in the project root:

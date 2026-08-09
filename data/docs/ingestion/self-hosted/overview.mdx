@@ -1,37 +1,39 @@
 ---
-date: 2026-06-02
+date: 2026-08-09
 title: Ingestion Overview for Self-Hosted SigNoz
 meta_title: Self-Hosted Ingestion Overview
-description: Learn how to ingest telemetry data into self-hosted SigNoz using OTLP. Covers gRPC and HTTP endpoints, port configuration, and setup prerequisites.
+description: Configure OTLP ingestion for Self-Hosted SigNoz with ports 4318 or 4317, plus user-managed networking, TLS, authentication, and proxies.
 tags: [Self-Host]
 doc_type: reference
 ---
 
 <Admonition type="info">
-  Self-hosted/community edition of SigNoz does not use ingestion keys. You control your own
-  OpenTelemetry pipeline and endpoints.
+  Self-Hosted SigNoz does not require a SigNoz Cloud ingestion key by default. Your team manages
+  the OpenTelemetry pipeline, endpoints, networking, TLS, and authentication.
 </Admonition>
 
 ## Overview
 
 SigNoz is OpenTelemetry-native and works with <a href="https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Protocol (OTLP)</a>. Send OTLP data directly to the SigNoz OpenTelemetry Collector installed with SigNoz, or run your own collector as an agent and forward to SigNoz.
 
-- OTLP/gRPC: default port 4317
 - OTLP/HTTP: default port 4318
+- OTLP/gRPC: default port 4317
 
 ## Prerequisites
 
-- A running self-hosted SigNoz instance. See: <a href="https://signoz.io/docs/install/self-host/" target="_blank" rel="noopener noreferrer">Install Self-Host SigNoz</a>
-- Network access from your applications/collectors to the SigNoz OTLP ports (4317 for gRPC, 4318 for HTTP)
+- A running [Self-Hosted SigNoz instance](https://signoz.io/docs/install/self-host/).
+- Network access from your applications or collectors to port 4318 for OTLP/HTTP or port 4317 for OTLP/gRPC.
+- A reachable hostname or proxy URL for the SigNoz OpenTelemetry Collector.
+- TLS certificates and authentication at your ingress or reverse proxy when your deployment enables them.
 
 ## Get Started
 
-1. Identify your SigNoz OTLP endpoint (host and ports). See the Address Grid below for common setups.
+1. Identify your SigNoz OTLP endpoint. Prefer OTLP/HTTP on port 4318 unless your environment requires gRPC on port 4317.
 2. Configure your language SDKs or your own OpenTelemetry Collector to export to that endpoint.
 
 ## Endpoints
 
-Unless you’ve enabled TLS, use `http://` on port 4317 (gRPC) or 4318 (HTTP). For gRPC without TLS, set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` and an `http://` endpoint. Some SDKs require `insecure: true` in their exporter config as well.
+Unless you have enabled TLS, use `http://` on port 4318 for OTLP/HTTP or port 4317 for OTLP/gRPC. With TLS, use the endpoint exposed by your ingress or reverse proxy and configure the client to trust its certificate.
 
 <div className="flex justify-center w-full">
 <table className="w-4/5 table">
@@ -139,7 +141,7 @@ OTEL_EXPORTER_OTLP_COMPRESSION=gzip
 OTEL_EXPORTER_OTLP_TIMEOUT=30000   # 30s in milliseconds
 ```
 
-When using OTLP/HTTP and the signal-agnostic endpoint, SDKs automatically append the correct path (for example, `/v1/traces`, `/v1/metrics`, `/v1/logs`). For language-specific instructions, see the <a href="https://signoz.io/docs/instrumentation/" target="_blank" rel="noopener noreferrer">instrumentation docs</a>.
+When using OTLP/HTTP and the signal-agnostic endpoint, SDKs automatically append the correct path (for example, `/v1/traces`, `/v1/metrics`, `/v1/logs`). For language-specific instructions, see the [instrumentation docs](https://signoz.io/docs/instrumentation/).
 
 ## OpenTelemetry Collector Configuration
 
@@ -183,7 +185,7 @@ Replace the placeholders:
 - `<signoz-host>`: Hostname or IP of your SigNoz OTLP endpoint
 - `insecure: true`: Use only when not using TLS. Set to `false` when using HTTPS
 
-Read more: <a href="https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/" target="_blank" rel="noopener noreferrer">OpenTelemetry Collector Configuration</a>
+Read more: [OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/)
 
 ## Authentication
 
@@ -221,7 +223,7 @@ receivers:
             - https://your-app.example.com
 ```
 
-See <a href="https://signoz.io/docs/userguide/otlp-http-enable-cors/" target="_blank" rel="noopener noreferrer">CORS in OTLP HTTP Receiver</a> for Docker and Kubernetes instructions.
+See [CORS in OTLP HTTP Receiver](https://signoz.io/docs/userguide/otlp-http-enable-cors/) for Docker and Kubernetes instructions.
 
 ### Compression
 
@@ -261,11 +263,11 @@ See the <a href="https://opentelemetry.io/docs/specs/otel/configuration/sdk-envi
 
 ### Protocol Choice
 
-OTLP/gRPC (port 4317) offers better performance and backpressure handling for server-side telemetry. OTLP/HTTP (port 4318) is simpler to configure, easier to debug, and required for browser-based telemetry where gRPC is not supported.
+Prefer OTLP/HTTP on port 4318 for new setups because it is simpler to configure and debug. Use OTLP/gRPC on port 4317 when your SDK or network requires it. Browser telemetry requires OTLP/HTTP.
 
 ### TLS in Production
 
-Secure your endpoint with TLS via ingress or a reverse proxy. After enabling TLS, use `https://` endpoints and ensure your SDKs and collectors trust the certificate. See: <a href="https://signoz.io/docs/tutorial/setting-up-tls-for-signoz/" target="_blank" rel="noopener noreferrer">Secure SigNoz in Kubernetes</a>.
+Secure your endpoint with TLS through an ingress or reverse proxy. After enabling TLS, use `https://` endpoints and ensure your SDKs and collectors trust the certificate. See [Secure SigNoz in Kubernetes](https://signoz.io/docs/tutorial/setting-up-tls-for-signoz/).
 
 ## Troubleshooting
 

@@ -1,34 +1,36 @@
 ---
-date: 2026-08-03
+date: 2026-08-09
 title: Ingestion Overview for SigNoz Cloud
 meta_title: SigNoz Cloud Ingestion Overview - Endpoints & Setup
 tags: [SigNoz Cloud]
-description: Get started with SigNoz Cloud ingestion using OTLP. Learn how to find your ingestion URL, create ingestion keys, and configure region-specific endpoints for traces, metrics, and logs.
+description: Configure SigNoz Cloud ingestion with your workspace region, HTTPS endpoint, ingestion key, and OTLP/HTTP or OTLP/gRPC on port 443.
 doc_type: reference
 ---
 
 <Admonition type="info">
-You don't need ingestion keys for self-hosted/community edition of SigNoz. Ingestion keys are only applicable for cloud account of SigNoz.
+Ingestion keys authenticate telemetry sent to SigNoz Cloud. Self-Hosted SigNoz does not use SigNoz Cloud ingestion keys by default.
 </Admonition>
 
 ## Overview
 
-SigNoz is designed with an OpenTelemetry-first approach, natively supporting the [OpenTelemetry Protocol](https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md). In addition to OpenTelemetry compatibility, SigNoz also provides custom in-house endpoints for enhanced functionality.
+SigNoz Cloud accepts telemetry through the <a href="https://opentelemetry.io/docs/specs/otlp/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Protocol (OTLP)</a>. Use your workspace endpoint and ingestion key to authenticate exports.
 
-## Get Started
+## Prerequisites
 
 - If you haven't already done so, sign up for a [SigNoz Cloud account](https://signoz.io/teams/).
-- After logging into your SigNoz Cloud account, create an [Ingestion Key](/docs/ingestion/signoz-cloud/keys/).
+- Copy your workspace region and ingestion endpoint from **Settings** > **Ingestion Settings**.
+- Create a SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- Allow outbound HTTPS traffic to your ingestion endpoint on port `443`.
 
 <Admonition type="tip">
-You can find your **Ingestion Endpoint** and **Ingestion Key** in the SigNoz UI under **Settings** > **Ingestion**.
+You can find your **Ingestion Endpoint** and **Ingestion Key** in the SigNoz UI under **Settings** > **Ingestion Settings**.
 </Admonition>
 
 ## Endpoint
 
 ### How do I find my ingestion URL?
 
-Navigate to **Settings** > **Ingestion** to find your **Ingestion URL**.
+Navigate to **Settings** > **Ingestion Settings** to find your **Ingestion URL**.
 
 <Figure
   src="/img/docs/ingestion/signoz-cloud/find-ingestion-url.webp"
@@ -45,16 +47,17 @@ Based on your SigNoz Cloud environment, you must configure your applications to 
 #### Notes
 
 - SigNoz Cloud uses **port 443 for both OTLP/HTTP and OTLP/gRPC protocols**, consolidating traffic through a single port. This approach diverges from the conventional use of separate ports (4317 for OTLP/gRPC and 4318 for OTLP/HTTP) typically seen in OpenTelemetry documentation.
+- Prefer OTLP/HTTP for new setups. Use OTLP/gRPC when your SDK or network requires it.
 
 ### Language SDK Configuration
 
-Configuration typically involves setting the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable. Refer to the SigNoz [instrumentation docs](/docs/instrumentation/) for language-specific details.
+Configuration typically involves setting the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable. Refer to the SigNoz [instrumentation docs](https://signoz.io/docs/instrumentation/) for language-specific details.
 
 If you are using the signal-agnostic environment variable, set `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443` (replace `<region>` with your region's endpoint from the table above). The exporter appends the appropriate path for each signal type (such as `v1/traces` or `v1/metrics`). This works for both OTLP/HTTP and OTLP/gRPC.
 
 ### OpenTelemetry Collector Configuration
 
-Configure the OpenTelemetry [exporter](https://opentelemetry.io/docs/specs/otel/protocol/exporter/) in your collector configuration file to point to the appropriate SigNoz endpoint. Use either the `otlp` (gRPC) or `otlphttp` exporter; the two expect different endpoint formats.
+Configure the OpenTelemetry <a href="https://opentelemetry.io/docs/specs/otel/protocol/exporter/" target="_blank" rel="noopener noreferrer nofollow">OTLP exporter</a> in your collector configuration file to point to the appropriate SigNoz endpoint. Use either the `otlp` (gRPC) or `otlphttp` exporter; the two expect different endpoint formats.
 
 ```yaml
 exporters:
@@ -81,17 +84,17 @@ All endpoints are protected by header based key authentication. The header `sign
 
 ### Language SDK Configuration
 
-The mechanism to configure headers will vary, but OpenTelemetry language SDKs generally support setting the `OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<key>` environment variable. Refer to the SigNoz [instrumentation docs](/docs/instrumentation/) for language-specific details.
+The mechanism to configure headers will vary, but OpenTelemetry language SDKs generally support setting the `OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>` environment variable. Refer to the SigNoz [instrumentation docs](https://signoz.io/docs/instrumentation/) for language-specific details.
 
 ### OpenTelemetry Collector Configuration
 
-Configure the OpenTelemetry [exporter](https://opentelemetry.io/docs/specs/otel/protocol/exporter/) in your collector configuration with the appropriate header values.
+Configure the OpenTelemetry <a href="https://opentelemetry.io/docs/specs/otel/protocol/exporter/" target="_blank" rel="noopener noreferrer nofollow">OTLP exporter</a> in your collector configuration with the appropriate header values.
 
 ```yaml
 exporters:
   <otlp|otlphttp>:
     headers:
-      signoz-ingestion-key: <key>
+      signoz-ingestion-key: <your-ingestion-key>
 ```
 
 <Admonition type="warning" title="Deprecation Notice">
@@ -116,7 +119,7 @@ The following ways of authentication are deprecated:
 
 ### Language SDK Configuration
 
-- OpenTelemetry SDKs generally support setting the following environment variables (see [OpenTelemetry docs](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) for more info):
+- OpenTelemetry SDKs generally support setting the following environment variables (see the <a href="https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry SDK environment variable specification</a>):
 
   - `OTEL_BSP_*` for spans
   - `OTEL_METRIC_EXPORT_*` for metrics
@@ -130,7 +133,7 @@ The following ways of authentication are deprecated:
 
 ### OpenTelemetry Collector Configuration
 
-Configure the OpenTelemetry [otlpexporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md) or [otlphttpexporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlphttpexporter/README.md) in your collector configuration with the appropriate values. The defaults of these exporters can be found below:
+Configure the OpenTelemetry <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md" target="_blank" rel="noopener noreferrer nofollow">OTLP/gRPC exporter</a> or <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlphttpexporter/README.md" target="_blank" rel="noopener noreferrer nofollow">OTLP/HTTP exporter</a> with the appropriate values. The defaults of these exporters are shown below:
 
 ```yaml
 exporters:

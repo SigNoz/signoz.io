@@ -13,11 +13,29 @@ import {
 import { Metadata } from 'next'
 import { generateDocsBreadcrumb } from '@/utils/breadcrumbSchema'
 import JsonLdScript from '@/components/JsonLdScript'
+import siteMetadata from '@/data/siteMetadata'
+
+const description =
+  'Start with managed SigNoz Cloud, or choose Self-Hosted SigNoz when your team needs to operate the observability platform and its infrastructure.'
 
 export const metadata: Metadata = {
   title: 'Introduction to SigNoz - Open Source Observability Platform',
-  description:
-    'Learn about SigNoz, an open-source observability platform that helps you monitor your applications with distributed tracing, metrics, and logs.',
+  description,
+  openGraph: {
+    title: siteMetadata.title,
+    description,
+    url: '/docs/introduction/',
+    siteName: siteMetadata.title,
+    images: [siteMetadata.socialBanner],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    title: siteMetadata.title,
+    description,
+    card: 'summary_large_image',
+    images: [siteMetadata.socialBanner],
+  },
 }
 
 export default async function DocsIntroductionPage() {
@@ -40,8 +58,8 @@ export default async function DocsIntroductionPage() {
       />
       <DocsIntroSection
         clickLocation="Migrate Section"
-        title="Migrate"
-        description="Seamlessly transition from your existing observability stack."
+        title="Migrate to SigNoz Cloud"
+        description="Move telemetry to the managed path. Adapt endpoint and authentication steps when you use Self-Hosted SigNoz."
         guidesCount={8}
         viewAllHref="/docs/migration/migrate-to-signoz/"
         cards={MIGRATE_CARDS}
@@ -62,8 +80,8 @@ export default async function DocsIntroductionPage() {
       />
       <DocsIntroSection
         clickLocation="Self-Host Installation Section"
-        title="Self-Host SigNoz"
-        description="Select the installation method that works best for your environment"
+        title="Self-Hosted SigNoz"
+        description="Install and operate SigNoz in your environment, including storage, scaling, upgrades, security, and availability."
         cards={SELF_HOST_CARDS}
       />
       <DocsCtaSection />
