@@ -3,7 +3,7 @@ title: How Alien Intelligence Built an AI SRE Workflow with SigNoz
 date: 2026-06-11
 tags: [AI, Observability]
 authors: [mahak_kaur]
-description: A case study of how Alien Intelligence built an AI SRE workflow on SigNoz to triage alerts, reduce noise, and keep humans in the loop.
+description: A case study of how Alien Intelligence built an AI SRE workflow on SigNoz Cloud to triage alerts, reduce noise, and keep humans in the loop.
 image: /img/blog/2026/06/alien-blog-cover.webp
 keywords: [ai sre workflow, signoz mcp, alert triage]
 related_articles:
@@ -15,9 +15,9 @@ related_articles:
 
 AI workflows are everywhere - for better or worse, everyone is preaching about it. At SigNoz, we’re busy building the [observability layer for AI agents](https://signoz.io/agent-native-observability/). We believe humans and agents can augment each other to solve harder engineering problems when it comes to observability.
 
-We recently launched our [hosted MCP server](https://signoz.io/docs/ai/signoz-mcp-server/), and our users are building interesting workflows to make their lives easier.
+We recently launched the [hosted SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/) for SigNoz Cloud, and our users are building interesting workflows to make their lives easier.
 
-We got on a call with one such user. [Leo Blondel](https://www.linkedin.com/in/leo-blondel-963435202/), CTO at [Alien Intelligence](https://www.alien.club/), was kind to take the time to discuss their AI SRE workflow, which they built with SigNoz. If you’re currently building such workflows, this blog will give you a clear look at how they built it, what worked, and what other teams can borrow from it.
+We got on a call with one such user. [Leo Blondel](https://www.linkedin.com/in/leo-blondel-963435202/), CTO at [Alien Intelligence](https://www.alien.club/), was kind to take the time to discuss their AI SRE workflow, which they built with SigNoz Cloud. If you’re currently building such workflows, this blog will give you a clear look at how they built it, what worked, and what other teams can borrow from it.
 
 ## What Leo Built at Alien Intelligence
 
@@ -33,17 +33,17 @@ When Leo started looking for a solution, he came across Datadog. But they quoted
 
 He already knew about SigNoz and wanted to use an OpenTelemetry-native solution. He also liked the fact that we’re open source.
 
-Using SigNoz’s hosted MCP server, he built an AI SRE workflow that takes over the first pass of alert triage: checking whether an alert is real, gathering context, and sending him a Slack message only when it needs attention. It also gave the team a pattern they can reuse for future workflows where humans and agents work together.
+Using the hosted SigNoz MCP server in SigNoz Cloud, he built an AI SRE workflow that takes over the first pass of alert triage: checking whether an alert is real, gathering context, and sending him a Slack message only when it needs attention. It also gave the team a pattern they can reuse for future workflows where humans and agents work together.
 
 Here’s an overview of how the AI SRE workflow looks.
 
 <Figure
   src="/img/blog/2026/06/ai-sre-workflow-alien-overview-image.webp"
-  alt="AI SRE workflow that Alien Intelligence built with SigNoz"
-  caption="AI SRE workflow that Alien Intelligence built with SigNoz"
+  alt="AI SRE workflow that Alien Intelligence built with SigNoz Cloud"
+  caption="AI SRE workflow that Alien Intelligence built with SigNoz Cloud"
 />
 
-The workflow starts with SigNoz alerts. When something fires, SigNoz POSTs a webhook to a small channel server that forwards the event into a long-running Claude agent. The agent uses the SigNoz MCP server to inspect traces, logs, and metrics. It also has *read-only* access to Kubernetes and GitLab, a Slack channel for two-way conversation with the on-call human, and its own runbook with per-alert playbooks.
+The workflow starts with alerts in SigNoz Cloud. When something fires, SigNoz Cloud POSTs a webhook to a small channel server that forwards the event into a long-running Claude agent. The agent uses the hosted SigNoz MCP server to inspect traces, logs, and metrics. It also has *read-only* access to Kubernetes and GitLab, a Slack channel for two-way conversation with the on-call human, and its own runbook with per-alert playbooks.
 
 The agent handles the first pass that usually falls to an engineer. It checks whether the alert is real, gathers evidence, looks for the likely root cause, and decides whether to ignore, escalate, or suggest a safe fix.
 
@@ -81,7 +81,7 @@ If the agent only reports that there was a 401, it has repeated what the dashboa
 
 <YouTube id="8JBlXcFLCEI" mute="false" />
 
-Following that trail means the agent needs more than telemetry. SigNoz gives it traces, logs, metrics, and alert context. Kubernetes tells it what is happening in the cluster. GitLab tells it what changed recently. The local codebase lets it inspect the suspected service directly. Slack connects it to a human when a decision needs to be made.
+Following that trail means the agent needs more than telemetry. SigNoz Cloud gives it traces, logs, metrics, and alert context. Kubernetes tells it what is happening in the cluster. GitLab tells it what changed recently. The local codebase lets it inspect the suspected service directly. Slack connects it to a human when a decision needs to be made.
 
 Leo’s design follows a simple rule. Give the agent the same sources a human would check. Without those, any investigation stops exactly where a dashboard already stops.
 
@@ -217,7 +217,7 @@ Dashboards are not going away. They are still the right tool for exploration, ca
 
 That means observability tools need two access paths: visual interfaces for humans and structured access for agents.
 
-## Why SigNoz Worked for This Workflow
+## Why SigNoz Cloud Worked for This Workflow
 
 > You guys, MCP's pretty dope, honestly. That was really neat.
 
@@ -225,21 +225,21 @@ That means observability tools need two access paths: visual interfaces for huma
 
 That was Leo's reaction after setting it up. Unfiltered. It is the most useful kind of feedback: someone who tried a thing and it worked the way it was supposed to.
 
-He had been leaning toward SigNoz before building any of this. OpenTelemetry-native, open source, and a pricing model that worked for his team. After Datadog didn't work out, he configured everything in SigNoz and found the setup faster than expected. The documentation being structured for AI consumption also cut down the prompt engineering needed to get the agent querying correctly.
+He had been leaning toward SigNoz before building any of this. OpenTelemetry-native, open source, and a pricing model that worked for his team. After Datadog didn't work out, he configured everything in SigNoz Cloud and found the setup faster than expected. The documentation being structured for AI consumption also cut down the prompt engineering needed to get the agent querying correctly.
 
-Two things made SigNoz fit this workflow specifically: direct MCP access to telemetry, and an open-source foundation the agent could reason about.
+Two things made SigNoz Cloud fit this workflow specifically: direct MCP access to telemetry, and an open-source foundation the agent could reason about.
 
 MCP gave the agent a direct path to the same data Leo would check. Alerts triggered the webhook. SigNoz MCP let the agent read traces, logs, and metrics from the same source. No scraping. No translation layer.
 
 The open-source foundation mattered too. It meant fewer black boxes for the agent to stumble through.
 
-That nuance matters because MCP alone was not the full differentiator. He said Datadog also has an MCP server, and that it is *"not bad."* What made SigNoz easier for this workflow was the combination of MCP access, OpenTelemetry-native data, open source code and docs, and a pricing model that worked for his team.
+That nuance matters because MCP alone was not the full differentiator. He said Datadog also has an MCP server, and that it is *"not bad."* What made SigNoz Cloud easier for this workflow was the combination of MCP access, OpenTelemetry-native data, open source code and docs, and a pricing model that worked for his team.
 
 He described SigNoz as *"well done"* and said it collects data in a way that's *"well formatted and well documented."* For agents, the bigger point was simple: *"there is no black box."*
 
 <YouTube id="J37a5sqFqk0" mute="false" />
 
-SigNoz gave the agent structured access to telemetry without scraping, translation layers, or black-box guesswork.
+SigNoz Cloud gave the agent structured access to telemetry without scraping, translation layers, or black-box guesswork.
 
 Leo’s view was that SigNoz being open and well documented gave the agent more public context to work with than a closed system would. That matters when an agent is trying to query telemetry correctly and understand what it is looking at.
 
@@ -264,7 +264,6 @@ A practical sequence:
 
 The broader shift Leo's workflow points to is that observability data now has two kinds of readers. Humans decide what matters and make the judgment calls. Agents gather context, connect signals, and surface the right information at the right time, without requiring someone to pause what they are doing for every alert that fires.
 
-SigNoz gives this workflow the pieces it needs: alerts, logs, metrics, traces, dashboards, and MCP access in one OpenTelemetry-native platform.
+SigNoz Cloud gives this workflow the pieces it needs: alerts, logs, metrics, traces, dashboards, and MCP access in one OpenTelemetry-native platform.
 
 You can try this with [SigNoz Cloud](https://signoz.io/teams/) and the [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/). You can also explore Leo’s open-source [AI SRE implementation](https://github.com/the-alien-club/ai-sre) on GitHub.
-
