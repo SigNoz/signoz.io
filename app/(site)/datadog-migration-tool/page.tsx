@@ -9,15 +9,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Migrate from Datadog to SigNoz in Minutes | SigNoz',
     description:
-      'LLM-powered migration tool that automatically translates your Datadog dashboards to SigNoz through a simple UI, preserving your configurations, queries, and panels.',
+      'Use the LLM-powered migration tool to translate Datadog dashboards for SigNoz Cloud or Self-Hosted SigNoz while preserving configurations, queries, and panels.',
     images: '/img/platform/DatadogMigrationToolHero.webp',
   },
   description:
-    'LLM-powered migration tool that automatically translates your Datadog dashboards to SigNoz through a simple UI, preserving your configurations, queries, and panels.',
+    'Use the LLM-powered migration tool to translate Datadog dashboards for SigNoz Cloud or Self-Hosted SigNoz while preserving configurations, queries, and panels.',
   twitter: {
     title: 'Migrate from Datadog to SigNoz in Minutes | SigNoz',
     description:
-      'LLM-powered migration tool that automatically translates your Datadog dashboards to SigNoz through a simple UI, preserving your configurations, queries, and panels.',
+      'Use the LLM-powered migration tool to translate Datadog dashboards for SigNoz Cloud or Self-Hosted SigNoz while preserving configurations, queries, and panels.',
     images: '/img/platform/DatadogMigrationToolHero.webp',
   },
 }

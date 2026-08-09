@@ -14,7 +14,7 @@ export default MigrateFromDataDog
 
 const DATA = {
   TITLE: 'Migrate easily from Datadog',
-  DESC: 'Please provide your contact info and we will reach out to you. We will understand your requirements and help you get started with SigNoz.',
+  DESC: 'Please provide your contact info and we will reach out to understand your requirements and help plan a managed migration from Datadog to SigNoz Cloud.',
   PORTAL_ID: '22308423',
   FORM_ID: '6039fbdd-3964-42df-8681-c42a676c1f1e',
 }

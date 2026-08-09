@@ -5,10 +5,12 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Migrate from Datadog',
-  description: 'Migrate from Datadog | SigNoz',
+  description:
+    'Request help with a managed Datadog migration to SigNoz Cloud. Share your requirements, and the SigNoz team will follow up.',
   openGraph: {
     title: 'Migrate from Datadog | SigNoz',
-    description: 'Migrate from Datadog | SigNoz',
+    description:
+      'Request help with a managed Datadog migration to SigNoz Cloud. Share your requirements, and the SigNoz team will follow up.',
     url: `${siteMetadata.siteUrl}/product-comparison/migrate-from-datadog`,
     siteName: siteMetadata.title,
     locale: 'en_US',
@@ -17,7 +19,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: 'Migrate from Datadog | SigNoz',
-    description: 'Migrate from Datadog | SigNoz',
+    description:
+      'Request help with a managed Datadog migration to SigNoz Cloud. Share your requirements, and the SigNoz team will follow up.',
     images: [siteMetadata.socialBanner],
     site: siteMetadata.twitter,
   },
