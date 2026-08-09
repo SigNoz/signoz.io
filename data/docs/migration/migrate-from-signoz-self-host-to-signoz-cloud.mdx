@@ -1,20 +1,20 @@
 ---
-date: 2026-06-11
+date: 2026-08-09
 title: Migrate from Self-Hosted SigNoz to SigNoz Cloud
-description: Step-by-step guide to migrate your observability setup from self-hosted SigNoz to SigNoz Cloud, including telemetry pipelines, dashboards, alerts, and pipelines.
+description: Move telemetry pipelines and supported configuration from Self-Hosted SigNoz to SigNoz Cloud, with prerequisites, validation, and cutover steps.
 
 doc_type: howto
 ---
 
 ## Overview
 
-This guide walks you through migrating from a self-hosted SigNoz instance to SigNoz Cloud. The migration involves:
+This guide explains how to move from Self-Hosted SigNoz to SigNoz Cloud. It separates the telemetry cutover that you control from configuration transfer that requires confirmation from SigNoz support.
 
 1. **Telemetry pipeline**: Redirecting your applications and collectors to send data to SigNoz Cloud
 2. **Dashboards and configuration**: Migrating dashboards, alerts, pipelines, saved views, and user settings via SigNoz support
 
 <Admonition type="warning">
-Historical telemetry data (traces, logs, metrics) cannot be migrated. Only metadata and configurations are transferred. Plan your migration timeline accordingly if you need to retain access to historical data in your self-hosted instance.
+Historical telemetry data (traces, logs, metrics) cannot be migrated. Only configuration that SigNoz support confirms is eligible can be transferred. Keep the Self-Hosted SigNoz instance available if you need access to historical data.
 </Admonition>
 
 ## Prerequisites
@@ -24,7 +24,8 @@ Before starting the migration:
 - **SigNoz Cloud account**: [Sign up for SigNoz Cloud](https://signoz.io/teams/) if you haven't already
 - **Ingestion key**: Obtain your ingestion key from [SigNoz Cloud settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - **Region**: Note your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
-- **Self-hosted access**: Admin access to your self-hosted SigNoz instance and its SQLite database
+- **Self-hosted access**: Admin access to your Self-Hosted SigNoz instance and its SQLite database
+- **Support confirmation**: Confirmation of which configuration from your SigNoz version can be transferred
 
 ## Migration Approach
 
@@ -33,10 +34,10 @@ The recommended approach is to run both systems in parallel during migration:
 1. Configure your telemetry pipeline to send data to SigNoz Cloud
 2. Validate data is flowing correctly
 3. Migrate dashboards and configurations
-4. Continue running self-hosted until you're confident in the cloud setup
-5. Decommission self-hosted when ready
+4. Continue running Self-Hosted SigNoz until you are confident in the Cloud setup
+5. Decommission Self-Hosted SigNoz when ready
 
-This approach ensures zero data loss during the transition.
+This parallel period lets you validate new telemetry in SigNoz Cloud before cutover. It does not migrate historical telemetry.
 
 ## Step 1: Update Your Telemetry Pipeline
 
@@ -45,7 +46,7 @@ Choose the tab that matches your current setup:
 <Tabs entityName="method">
 <TabItem value="own-collector" label="Using Your Own OTel Collector" default>
 
-If you're using your own OpenTelemetry Collector that forwards data to SigNoz self-hosted, update the exporter configuration.
+If you use your own OpenTelemetry Collector to forward data to Self-Hosted SigNoz, update the exporter configuration.
 
 ### Update OTel Collector Configuration
 
@@ -56,7 +57,7 @@ exporters:
   otlp/signoz-cloud:
     endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
-      signoz-ingestion-key: "SIGNOZ_INGESTION_KEY"
+      signoz-ingestion-key: "<your-ingestion-key>"
     tls:
       insecure: false
 ```
@@ -85,7 +86,7 @@ Restart the OpenTelemetry Collector to apply the configuration changes.
 </TabItem>
 <TabItem value="direct-to-signoz" label="Sending Directly to Self-Hosted SigNoz">
 
-If your applications send telemetry directly to SigNoz self-hosted's [built-in collector](https://signoz.io/docs/architecture/), you have two options:
+If your applications send telemetry directly to the [built-in collector](https://signoz.io/docs/architecture/) in Self-Hosted SigNoz, you have two options:
 
 ### Option A: Send Directly to SigNoz Cloud
 
@@ -113,9 +114,9 @@ Follow the [Kubernetes OTel Collector guide](https://signoz.io/docs/opentelemetr
 ```yaml:override-values.yaml
 global:
   cloud: others
-  clusterName: <CLUSTER_NAME>
-  deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+  clusterName: <cluster-name>
+  deploymentEnvironment: <deployment-environment>
+otelCollectorEndpoint: ingest.<region>.signoz.cloud:443
 otelInsecure: false
 signozApiKey: <your-ingestion-key>
 presets:
@@ -139,7 +140,7 @@ exporters:
   otlp:
     endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
-      signoz-ingestion-key: "SIGNOZ_INGESTION_KEY"
+      signoz-ingestion-key: "<your-ingestion-key>"
     tls:
       insecure: false
 ```
@@ -159,7 +160,7 @@ Then update your applications to send data to the local collector:
 Before migrating dashboards, confirm that telemetry data is reaching SigNoz Cloud:
 
 1. **Open SigNoz Cloud**
-3. **Check each signal type**:
+2. **Check each signal type**:
    - **Traces**: Go to Traces Explorer and filter by your service names
    - **Metrics**: Go to Metrics Explorer and search for your application metrics
    - **Logs**: Go to Logs Explorer and verify log ingestion
@@ -168,7 +169,7 @@ If data is not appearing, see the [Troubleshooting](#troubleshooting) section.
 
 ## Step 3: Migrate Dashboards and Configuration
 
-SigNoz support handles the migration of metadata from your self-hosted instance, including:
+After SigNoz support confirms compatibility for your version, the supported transfer may include:
 
 - Dashboards
 - Alerts
@@ -188,7 +189,7 @@ SigNoz support handles the migration of metadata from your self-hosted instance,
    ```
 
 3. **Submit to SigNoz support**  
-   Send the compressed file to [SigNoz support](https://signoz.io/support/) with your SigNoz Cloud organization details. The team will import your dashboards, alerts, and configurations.
+   Send the compressed file to [SigNoz support](https://signoz.io/support/) with your SigNoz Cloud organization details only after support confirms the transfer scope and secure submission method.
 
 4. **Receive confirmation**  
    Once the migration is complete, you'll receive confirmation and can verify your configurations in SigNoz Cloud.
@@ -206,13 +207,13 @@ After receiving confirmation from support:
 
 Once you're confident the migration is complete:
 
-1. **Set a cutover date**: Communicate to your team when self-hosted access will end
+1. **Set a cutover date**: Communicate to your team when Self-Hosted SigNoz access will end
 2. **Update documentation**: Update internal runbooks to reference SigNoz Cloud
-3. **Shut down self-hosted**: Stop the SigNoz services and reclaim infrastructure resources
+3. **Shut down Self-Hosted SigNoz**: Stop the SigNoz services and reclaim infrastructure resources
 
 ## Estimate Your SigNoz Cloud Costs
 
-To estimate your SigNoz Cloud bill based on current self-hosted usage, collect usage data from your existing instance.
+To estimate your SigNoz Cloud bill based on current Self-Hosted SigNoz usage, collect usage data from your existing instance.
 
 ### Reset Usage Tables
 

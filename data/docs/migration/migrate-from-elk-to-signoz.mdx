@@ -1,12 +1,16 @@
 ---
-date: 2025-11-30
+date: 2026-08-09
 
 title: Migrate from ELK Stack
-description: Learn how to migrate your metrics, traces/APM, logs, dashboards, and alerts from ELK Stack to SigNoz.
+description: Plan an incremental migration from the ELK Stack to SigNoz Cloud for metrics, traces, logs, dashboards, and alerts, with validation steps.
 doc_type: explanation
 ---
 
-SigNoz provides a unified OpenTelemetry-native solution for monitoring metrics, traces/APM, and logs, allowing for greater flexibility and control over your data. This guide outlines the process of migrating your existing ELK Stack (Elasticsearch, Logstash, Kibana) setup to SigNoz.
+This guide helps you plan an incremental migration from Elasticsearch, Logstash, and Kibana to SigNoz Cloud. Migrate one telemetry signal at a time, keep ELK available during validation, and recreate the dashboards and alerts that your team needs.
+
+<Admonition type="info" title="Using Self-Hosted SigNoz?">
+  Verify each signal guide against your deployed version, then use the endpoint and authentication that your team operates. Review the [Cloud and Self-Hosted ingestion differences](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/).
+</Admonition>
 
 ## Why Migrate to SigNoz?
 
@@ -15,16 +19,15 @@ While the ELK Stack is a powerful platform, migrating to SigNoz offers several d
 - **Unified Platform**: SigNoz provides a single, cohesive platform that eliminates the complexity of managing multiple components such as Elasticsearch clusters, Logstash pipelines, and Kibana.
 - **Native OpenTelemetry Support**: Built from the ground up to support OpenTelemetry, ensuring seamless integration with modern instrumentation standards and future-proof observability.
 - **Integrated Signals**: SigNoz correlates logs, metrics, and traces out-of-the-box, providing a more seamless debugging experience compared to correlating data across Kibana and separate APM UIs.
-- **Resource Efficiency**: SigNoz (built on ClickHouse) often requires fewer resources and offers faster query performance compared to Elasticsearch for observability workloads.
-- **Cost Efficiency**: SigNoz often provides significant cost savings with transparent pricing for both Cloud and Self-Hosted options.
+- **Managed operations**: SigNoz Cloud manages platform storage, scaling, upgrades, security, and availability.
+- **Usage-based pricing**: SigNoz Cloud pricing is based on telemetry ingestion rather than host or container count.
 
 ## Prerequisites
 
-Before starting your migration, ensure you have:
-
-- A SigNoz account (Cloud) or a running SigNoz instance (Self-Hosted).
-- Access to your ELK configuration (Filebeat, Logstash, Kibana) to view existing configurations.
-- Permissions to modify your application's instrumentation and infrastructure configuration.
+- A SigNoz Cloud workspace, ingestion endpoint, and ingestion key.
+- Access to your Filebeat, Logstash, Kibana, and Elastic APM configurations.
+- Permission to update instrumentation and collector configuration.
+- A validation window in which both backends can receive test data.
 
 ## Migration Guides
 
