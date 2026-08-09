@@ -14,7 +14,8 @@ export async function GET() {
   const body = [
     '# SigNoz Documentation for AI Agents',
     '',
-    'SigNoz is an open-source observability platform for metrics, traces, and logs.',
+    'SigNoz is the company, publisher, and open-source observability project.',
+    'SigNoz Cloud is the managed service; Self-Hosted SigNoz is the user-managed open-source deployment.',
     '',
     `Docs root: ${siteMetadata.siteUrl}/docs/introduction/`,
     '',

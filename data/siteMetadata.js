@@ -4,7 +4,7 @@ const siteMetadata = {
   author: 'SigNoz Inc',
   headerTitle: 'SigNoz',
   description:
-    'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
+    'SigNoz builds SigNoz Cloud, a managed OpenTelemetry-native observability platform, and Self-Hosted SigNoz, its open-source self-managed option.',
   language: 'en-us',
   theme: 'dark', // system, dark or light
   siteUrl: 'https://signoz.io',
