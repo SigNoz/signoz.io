@@ -19,91 +19,11 @@ import {
 } from 'lucide-react'
 import { ChartBar, GitBranch, FileText } from 'lucide-react'
 import Figure from '@/components/Figure/Figure'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts'
 import FAQAccordion from '@/components/FAQAccordion/FAQAccordion'
 import NewrelicMigrationFloatingCard from '@/components/MigrationFloatingCard/NewrelicMigrationFloatingCard'
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
 import { XCircle } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
-
-const data = [
-  {
-    name: 'Small engineering team',
-    SigNoz: 1078,
-    NewRelic: 3511,
-  },
-  {
-    name: 'Midsize engineering team',
-    SigNoz: 4903,
-    NewRelic: 14823,
-  },
-  {
-    name: 'Large engineering team',
-    SigNoz: 9412,
-    NewRelic: 29152,
-  },
-]
-
-const ValueComparisonChart = () => {
-  return (
-    <div className="w-full rounded-lg bg-gray-900 p-6">
-      <h4 className="mb-4 text-xl text-white">Get up to 67% more value for money with SigNoz</h4>
-      <div className="h-96">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-            <XAxis
-              dataKey="name"
-              stroke="#fff"
-              tick={{ fill: '#fff' }}
-              tickLine={{ stroke: '#fff' }}
-            />
-            <YAxis
-              stroke="#fff"
-              tick={{ fill: '#fff' }}
-              tickLine={{ stroke: '#fff' }}
-              tickFormatter={(value) => `$${value.toLocaleString()}`}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: '#1f2937',
-                border: 'none',
-                borderRadius: '4px',
-                color: '#fff',
-              }}
-              formatter={(value) => [`$${value.toLocaleString()}`, '']}
-            />
-            <Legend
-              wrapperStyle={{
-                color: '#fff',
-              }}
-              itemSorter={(item) => (item.dataKey === 'SigNoz' ? 0 : 1)}
-            />
-            <Bar dataKey="SigNoz" fill="#ff7f50" />
-            <Bar dataKey="NewRelic" fill="#9333ea" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  )
-}
 
 const SigNozVsNewRelicV2 = () => {
   return (
@@ -120,14 +40,14 @@ const SigNozVsNewRelicV2 = () => {
             className="mb-10 w-full lg:mb-0 lg:w-2/5"
           >
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.35em] text-blue-200">
-              SigNoz vs New Relic
+              SigNoz Cloud vs New Relic
             </p>
             <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.2] text-transparent lg:text-6xl lg:leading-[1.2]">
               New Relic Alternative
             </h1>
             <h3 className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
-              Tired of New Relic's user-based pricing? Even for teams of 10-15 devs, New Relic's
-              pricing for user seats can be a significant portion of your monthly bill - check{' '}
+              New Relic offers user-based pricing and eligible compute-based pricing. SigNoz Cloud
+              uses telemetry-volume pricing and does not charge per user. See the{' '}
               <Link
                 href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
                 className="text-blue-400 hover:text-blue-300"
@@ -135,7 +55,7 @@ const SigNozVsNewRelicV2 = () => {
               >
                 detailed SigNoz vs New Relic spreadsheet
               </Link>{' '}
-              for the full breakdown.
+              for an earlier worked example.
             </h3>
             <div className="flex flex-col gap-2">
               <div className="flex flex-row gap-2">
@@ -201,19 +121,18 @@ const SigNozVsNewRelicV2 = () => {
           >
             <Link href="#why-choose-signoz" className="flex items-center hover:text-gray-300">
               <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
-              Why do Engineering Teams Choose SigNoz over New Relic?
+              Why do Engineering Teams Choose SigNoz Cloud over New Relic?
             </Link>
           </h2>
 
           <div className="mb-8">
             <p className="text-lg text-gray-300">
-              SigNoz is a great choice as a New Relic Alternative. We built SigNoz to address the
-              absence of a great one-stop observability tool in the open-source ecosystem. Something
-              that comes with the ease of a SaaS tool like New Relic but brings along the benefits
-              of open-source standards.
+              SigNoz Cloud is the managed option for teams comparing a commercial New Relic plan.
+              Self-Hosted SigNoz provides the open-source, user-managed option. Both use the SigNoz
+              platform and OpenTelemetry-native ingestion.
               <br />
               <br />
-              Top reasons why developers prefer SigNoz over New Relic:
+              Top reasons why developers compare SigNoz Cloud with New Relic:
             </p>
           </div>
 
@@ -266,17 +185,15 @@ const SigNozVsNewRelicV2 = () => {
                   Flexible Deployment Options
                 </h4>
                 <p className="text-gray-300">
-                  SigNoz provides both cloud & self-hosted versions. You can use the cloud,
-                  enterprise self-host, or free, open-source community edition, depending on your
-                  needs. Many of our users use{' '}
+                  Choose{' '}
                   <Link
                     href="/docs/install/docker/"
                     className="text-blue-400 hover:text-blue-300"
                     target="_blank"
                   >
-                    open-source SigNoz
+                    Self-Hosted SigNoz Community Edition
                   </Link>{' '}
-                  in dev environments and{' '}
+                  for a user-managed deployment. This page uses{' '}
                   <Link
                     href="https://signoz.io/teams/"
                     className="text-blue-400 hover:text-blue-300"
@@ -284,15 +201,15 @@ const SigNozVsNewRelicV2 = () => {
                   >
                     SigNoz Cloud
                   </Link>{' '}
-                  for production environments. Privacy-focused users prefer{' '}
+                  for the managed New Relic comparison.{' '}
                   <Link
                     href="/pricing/"
                     className="text-blue-400 hover:text-blue-300"
                     target="_blank"
                   >
-                    enterprise self-hosted
+                    Self-Hosted SigNoz Enterprise
                   </Link>{' '}
-                  version.
+                  is also available for user-managed deployments.
                 </p>
               </div>
             </div>
@@ -303,13 +220,12 @@ const SigNozVsNewRelicV2 = () => {
               </div>
               <div>
                 <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
-                  Better value for money
+                  Usage-based pricing without per-user charges
                 </h4>
                 <p className="text-gray-300">
-                  New Relic charges for data ingest and user seats. New Relic's user seat pricing
-                  can go up to $418.8 per full-platform user. User-based pricing is outdated. You
-                  never know which engineer might need to access the monitoring tool for debugging.
-                  At SigNoz, we don't charge based on user seats.
+                  New Relic offers user-based plans with free basic users, paid core and full
+                  platform users, and eligible compute-based options without user licenses. SigNoz
+                  Cloud charges for telemetry use and does not charge per user.
                 </p>
               </div>
             </div>
@@ -362,7 +278,7 @@ const SigNozVsNewRelicV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           New Relic
@@ -679,7 +595,7 @@ const SigNozVsNewRelicV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           New Relic
@@ -924,7 +840,7 @@ const SigNozVsNewRelicV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           New Relic
@@ -1160,7 +1076,7 @@ const SigNozVsNewRelicV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           New Relic
@@ -1385,7 +1301,7 @@ const SigNozVsNewRelicV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           New Relic
@@ -1531,7 +1447,7 @@ const SigNozVsNewRelicV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           New Relic
@@ -1636,30 +1552,24 @@ const SigNozVsNewRelicV2 = () => {
           >
             <Link href="#savings" className="flex items-center hover:text-gray-300">
               <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
-              Save up to 67% on your New Relic Bill
+              Compare New Relic and SigNoz Cloud Pricing
             </Link>
           </h2>
 
-          <div className="mb-8">
-            <ValueComparisonChart />
-          </div>
-
           <p className="mb-6 text-[1.1rem] text-gray-300">
-            For 20 APM hosts, 50 million indexed spans, 50 infra hosts, and 2500 GB logs data,
-            SigNoz can save 67% of your New Relic bill.
-            <br />
-            <br />
-            New Relic's{' '}
+            New Relic prices data ingest and either users or eligible compute consumption. Its{' '}
             <Link
               href="https://newrelic.com/pricing"
               className="text-blue-400 hover:text-blue-300"
               target="_blank"
               rel="nofollow noreferrer"
             >
-              user pricing
+              current pricing page
             </Link>{' '}
-            can go up to $418/user. At scale, the cost of adding users can go up to 66% of the total
-            bill.
+            lists free basic users, paid core and full platform users, and optional full-consumption
+            pricing for eligible Pro and Enterprise customers. SigNoz Cloud prices telemetry volume
+            and does not add user-license charges. Compare the exact edition, users, ingest,
+            retention, and add-ons before you estimate savings.
           </p>
 
           <figure className="mb-8">
@@ -1671,8 +1581,7 @@ const SigNozVsNewRelicV2 = () => {
               className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2  transition-transform duration-300 hover:scale-[1.02]"
             />
             <figcaption className="text-sm text-gray-400">
-              User seat billing can constitute a significant portion of your total bill with New
-              Relic.
+              This user-pricing example does not include New Relic's eligible compute-based option.
             </figcaption>
           </figure>
 
@@ -1690,13 +1599,13 @@ const SigNozVsNewRelicV2 = () => {
         {/* Migration Section */}
         <section className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 px-4 py-12 sm:px-6">
           <h2 className="mb-8 text-left text-xl font-bold lg:text-2xl">
-            Migrate from New Relic - Save up to 67% on your New Relic bill
+            Migrate from New Relic to SigNoz Cloud
           </h2>
           <div className="text-gray-300">
             <p className="mb-6 text-[1.1rem] text-gray-300">
-              We provide support for migrating from New Relic to SigNoz if your monthly billing in
-              New Relic is greater than 1000 USD. Request a migration from one of our experts and
-              get started with SigNoz quickly.
+              We provide support for migrating from New Relic to SigNoz Cloud if your monthly
+              billing in New Relic is greater than 1000 USD. Request a migration from one of our
+              experts and get started with SigNoz Cloud quickly.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link href="/product-comparison/migrate-from-newrelic/" className="block max-w-md">

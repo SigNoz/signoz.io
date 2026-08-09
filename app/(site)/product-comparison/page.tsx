@@ -4,10 +4,12 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Product Comparisons',
-  description: 'Product Comparisons | SigNoz',
+  description:
+    'Compare SigNoz Cloud with managed observability platforms, with clear Self-Hosted SigNoz labels for self-managed options.',
   openGraph: {
     title: 'Product Comparisons | SigNoz',
-    description: 'Product Comparisons | SigNoz',
+    description:
+      'Compare SigNoz Cloud with managed observability platforms, with clear Self-Hosted SigNoz labels for self-managed options.',
     url: `${siteMetadata.siteUrl}/product-comparison`,
     siteName: siteMetadata.title,
     locale: 'en_US',
@@ -16,7 +18,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: 'Product Comparisons | SigNoz',
-    description: 'Product Comparisons | SigNoz',
+    description:
+      'Compare SigNoz Cloud with managed observability platforms, with clear Self-Hosted SigNoz labels for self-managed options.',
     images: [siteMetadata.socialBanner],
     site: siteMetadata.twitter,
   },
@@ -32,11 +35,12 @@ export const metadata: Metadata = {
 const comparisons = [
   {
     id: 1,
-    title: 'SigNoz vs Datadog',
+    title: 'SigNoz Cloud vs Datadog',
     url: '/datadog-alternative/',
     desc: (
       <>
-        For 20 APM and 50 infra hosts, SigNoz can save up to 90% of your Datadog bill - check{' '}
+        Compare Datadog with SigNoz Cloud for OpenTelemetry support, product capabilities, and
+        usage-based pricing. See the existing{' '}
         <Link
           href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
           className="highlight"
@@ -49,36 +53,34 @@ const comparisons = [
   },
   {
     id: 2,
-    title: 'SigNoz vs Dynatrace',
+    title: 'SigNoz Cloud vs Dynatrace',
     url: '/product-comparison/signoz-vs-dynatrace/',
     desc: (
       <>
-        Dynatrace is complex to set up and use. Its host-based billing is outdated for applications
-        that need on-demand scaling. SigNoz provides predictable usage-based billing that you can
-        rely on.
+        Compare the Dynatrace platform and its rate-card model with SigNoz Cloud and its usage-based
+        pricing.
       </>
     ),
   },
   {
     id: 3,
-    title: 'SigNoz vs Grafana',
+    title: 'SigNoz Cloud vs Grafana Cloud',
     url: '/grafana-alternative/',
     desc: (
       <>
-        Under the hood, Grafana is powered by multiple tools like Loki, Tempo, Mimir & Prometheus.
-        SigNoz is built as a single tool to serve logs, metrics, and traces in a single pane of
-        glass from Day 1.
+        Compare Grafana Cloud with SigNoz Cloud. The page also labels Grafana OSS and Self-Hosted
+        SigNoz when it discusses self-managed software.
       </>
     ),
   },
   {
     id: 4,
-    title: 'SigNoz vs NewRelic',
+    title: 'SigNoz Cloud vs New Relic',
     url: '/newrelic-alternative/',
     desc: (
       <>
-        Tired of New Relic’s user-based pricing? Even for teams of 10-15 devs, New Relic’s pricing
-        for user seats can be a significant portion of your monthly bill - check{' '}
+        Compare New Relic user-based and eligible compute-based options with SigNoz Cloud's
+        usage-based pricing. See the existing{' '}
         <Link
           href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
           className="highlight"
@@ -86,6 +88,28 @@ const comparisons = [
           comparison with detailed spreadsheet
         </Link>
         .
+      </>
+    ),
+  },
+  {
+    id: 5,
+    title: 'SigNoz Cloud vs AWS CloudWatch',
+    url: '/cloudwatch-alternative/',
+    desc: (
+      <>
+        Compare AWS CloudWatch's service and Region-based charges with SigNoz Cloud's unified
+        observability and usage-based pricing.
+      </>
+    ),
+  },
+  {
+    id: 6,
+    title: 'SigNoz Cloud vs Managed ClickStack',
+    url: '/clickstack-alternative/',
+    desc: (
+      <>
+        Compare Managed ClickStack with SigNoz Cloud. The page also separates ClickStack OSS from
+        Self-Hosted SigNoz.
       </>
     ),
   },

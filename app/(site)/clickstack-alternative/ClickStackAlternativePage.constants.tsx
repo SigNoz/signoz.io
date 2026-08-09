@@ -1,4 +1,4 @@
-import { ArrowRight, Atom, X } from 'lucide-react'
+import { ArrowRight, Atom } from 'lucide-react'
 import { type ComparisonCategory } from './ClickStackAlternativePage.types'
 import Link from 'next/link'
 
@@ -7,27 +7,28 @@ export const QUERY_YOUR_DATA_CARDS = [
     icon: <Atom className="h-4 w-4" />,
     title: 'PromQL, visual builder, and SQL',
     description:
-      'Your existing PromQL queries work without modification. The visual builder supports AND/OR logic, CONTAINS, REGEX, IN, and LIKE operators with autocomplete.',
+      'SigNoz Cloud provides PromQL, a visual query builder, and ClickHouse SQL for telemetry analysis.',
   },
   {
     icon: <Atom className="h-4 w-4" />,
-    title: 'Consistent Querying Across All Signals',
+    title: 'Managed ClickStack query options',
     description:
-      'SigNoz gives you the same query interfaces across logs, traces, and metrics. In ClickStack, Lucene search is scoped to logs only.',
+      'Managed ClickStack provides Lucene-style search and SQL through the ClickStack UI, which is HyperDX.',
   },
   {
     icon: <Atom className="h-4 w-4" />,
-    title: "No 'Query Tax'",
+    title: 'Different compute models',
     description: (
       <>
-        Querying is included in your ingestion pricing. In ClickStack, query compute is{' '}
+        SigNoz Cloud does not add a separate query charge. Managed ClickStack uses ClickHouse Cloud
+        compute for ingest and query workloads. Review the{' '}
         <Link
           href="/blog/clickstack-managed-pricing-compute-costs/"
           className="underline decoration-signoz_robin-400 underline-offset-2"
         >
-          billed separately
+          existing pricing analysis
         </Link>{' '}
-        and scales with how much you query.
+        with your current workload before you compare costs.
       </>
     ),
   },
@@ -45,9 +46,8 @@ export const ALERTING_ABOVE_HISTORY_CARDS = [
           looking at.
         </p>
         <p>
-          ClickStack has <span className="text-signoz_cherry-300">no dedicated</span> alerts
-          workflow. Alerts can only be created from a search or a dashboard, which means alert
-          management is always a detour from your current investigation.
+          Managed ClickStack also includes alerts in the ClickStack UI. Its official product page
+          identifies HyperDX as the interface for search, dashboards, alerts, and session replays.
         </p>
       </div>
     ),
@@ -62,8 +62,8 @@ export const ALERTING_ABOVE_HISTORY_CARDS = [
           expected traffic patterns rather than firing on normal fluctuations.
         </p>
         <p>
-          ClickStack <span className="text-signoz_cherry-300">does not support</span> anomaly
-          detection.
+          The Managed ClickStack product overview does not specify an equivalent built-in anomaly
+          detection workflow. Confirm this requirement against its current feature documentation.
         </p>
       </div>
     ),
@@ -78,8 +78,8 @@ export const ALERTING_BELOW_HISTORY_CARDS = [
         <p>
           A single alert rule in SigNoz can have multiple severity thresholds: warning, critical,
           and info. Each threshold can route to a different notification channel, so your on-call
-          engineer gets paged for critical while the team Slack channel gets a summary. ClickStack
-          <span className="text-signoz_cherry-300">supports one threshold per alert</span>.
+          engineer gets paged for critical while the team Slack channel gets a summary. Confirm the
+          required threshold and routing behavior in the current Managed ClickStack documentation.
         </p>
       </div>
     ),
@@ -91,8 +91,8 @@ export const ALERTING_BELOW_HISTORY_CARDS = [
         <p>
           SigNoz provides a Terraform provider for alert management. Alerts can be defined, version
           controlled, and deployed alongside application code. The provider supports thresholds,
-          labels, notification channels, and maintenance windows. ClickStack{' '}
-          <span className="text-signoz_cherry-300">does not offer</span> this.
+          labels, notification channels, and maintenance windows. Confirm the current
+          infrastructure-as-code support for Managed ClickStack before you choose a workflow.
         </p>
       </div>
     ),
@@ -105,7 +105,6 @@ export const DASHBOARD_HELP_YOU_INVESTIGATE_CARDS = [
     description: (
       <>
         Right-click any data point to navigate to related logs or traces with all filters preserved.
-        ClickStack dashboards are static, you can observe but not drill down from where you stand.
       </>
     ),
     className: 'md:min-h-64',
@@ -147,23 +146,21 @@ export const DASHBOARD_HELP_YOU_INVESTIGATE_CARDS = [
     ),
   },
   {
-    title: 'ClickStack dashboards',
+    title: 'Managed ClickStack dashboards',
     description: (
       <ul className="mt-0 list-none space-y-2 pl-0">
         <li className="flex items-start gap-2">
-          <X size={16} className="mt-0.5 shrink-0 text-red-400" />
-          ClickStack dashboards are static. You can observe but you cannot investigate from where
-          you stand.
+          <ArrowRight size={16} className="mt-0.5 shrink-0 text-blue-400" />
+          The ClickStack UI, which is HyperDX, includes interactive dashboards.
         </li>
         <li className="flex items-start gap-2">
-          <X size={16} className="mt-0.5 shrink-0 text-red-400" />
-          ClickStack does not support dashboard variables. Updating the service you are looking at
-          means editing every panel query individually.
+          <ArrowRight size={16} className="mt-0.5 shrink-0 text-blue-400" />
+          Managed ClickStack uses ClickHouse Cloud materialized views to keep dashboards fast.
         </li>
         <li className="flex items-start gap-2">
-          <X size={16} className="mt-0.5 shrink-0 text-red-400" />
-          ClickStack ships with 3 presets: Services, Kubernetes, and ClickHouse monitoring. Every
-          additional dashboard is built from scratch.
+          <ArrowRight size={16} className="mt-0.5 shrink-0 text-blue-400" />
+          Its managed product page lists built-in service maps, patterns, clustering, and
+          dashboards.
         </li>
       </ul>
     ),
@@ -183,35 +180,35 @@ export const COMPARISON_GRID_DATA: ComparisonCategory[] = [
         feature: 'Deployment Options',
         signoz: {
           type: 'text',
-          content: 'Open source + Cloud (GA) — Self-hosted, BYOC, managed cloud',
+          content: 'SigNoz Cloud + Self-Hosted SigNoz',
         },
-        clickstack: { type: 'text', content: 'Open source + Cloud (Beta)' },
+        clickstack: { type: 'text', content: 'Managed ClickStack + ClickStack OSS' },
       },
       {
-        feature: 'Serverless Scaling',
-        signoz: { type: 'check', label: 'Platform handles scaling automatically' },
+        feature: 'Managed Scaling',
+        signoz: { type: 'check', label: 'SigNoz Cloud is managed by SigNoz' },
         clickstack: {
-          type: 'text',
-          content: 'Manual upgrade required before sending data. No GA version available',
+          type: 'check',
+          label: 'Managed ClickStack handles scaling and upgrades',
         },
       },
       {
         feature: 'MCP Server',
-        signoz: { type: 'check', label: 'All deployments' },
-        clickstack: { type: 'cross', label: 'No hosted MCP' },
+        signoz: { type: 'check', label: 'SigNoz Cloud' },
+        clickstack: { type: 'check', label: 'ClickStack MCP server' },
       },
       {
-        feature: 'AI Assistant',
-        signoz: { type: 'check' },
+        feature: 'Agent Workflows',
+        signoz: { type: 'check', label: 'Noz and MCP Server' },
         clickstack: {
           type: 'text',
-          content: 'Managed deployments only. AI Notebooks not available in self-hosted',
+          content: 'MCP tools for external agent workflows',
         },
       },
       {
-        feature: 'State Store',
-        signoz: { type: 'text', content: 'PostgreSQL / SQLite (bundled)' },
-        clickstack: { type: 'text', content: 'MongoDB (managed separately)' },
+        feature: 'Self-Managed Option',
+        signoz: { type: 'text', content: 'Self-Hosted SigNoz' },
+        clickstack: { type: 'text', content: 'ClickStack OSS' },
       },
     ],
   },
@@ -230,34 +227,34 @@ export const COMPARISON_GRID_DATA: ComparisonCategory[] = [
       },
       {
         feature: 'Infrastructure Monitoring',
-        signoz: { type: 'check' },
-        clickstack: { type: 'cross', label: 'No infrastructure metrics product' },
+        signoz: { type: 'check', label: 'Metrics and dashboards' },
+        clickstack: { type: 'check', label: 'OpenTelemetry metrics and dashboards' },
       },
       {
         feature: 'Errors & Exceptions',
         signoz: { type: 'check', label: 'Dedicated page' },
-        clickstack: { type: 'cross' },
+        clickstack: { type: 'check', label: 'Errors in the ClickStack UI' },
       },
       {
-        feature: 'LLM & AI Observability',
-        signoz: { type: 'check', label: 'Token tracing, cost attribution, model performance' },
+        feature: 'Agent Integration',
+        signoz: { type: 'check', label: 'Noz and MCP workflows' },
         clickstack: {
-          type: 'text',
-          content: 'Managed only. Via AI Notebooks',
+          type: 'check',
+          label: 'ClickStack MCP workflows',
         },
       },
       {
         feature: 'Native Correlation',
         signoz: { type: 'check', label: 'Logs, traces, metrics in one click' },
         clickstack: {
-          type: 'cross',
-          label: 'Logs and traces from the same service end up in different sources',
+          type: 'check',
+          label: 'Automatic correlation of logs, traces, and metrics',
         },
       },
       {
-        feature: 'Metrics Explorer',
+        feature: 'Metrics Querying',
         signoz: { type: 'text', content: 'Comprehensive metrics data and correlation' },
-        clickstack: { type: 'cross', label: "Can't choose spatial and temporal aggregation" },
+        clickstack: { type: 'text', content: 'ClickHouse SQL and ClickStack UI' },
       },
     ],
   },
@@ -265,44 +262,44 @@ export const COMPARISON_GRID_DATA: ComparisonCategory[] = [
     category: 'User Experience & Dashboards',
     rows: [
       {
-        feature: 'UX maturity & feature completeness',
+        feature: 'Managed Operations',
         signoz: {
           type: 'text',
-          content: 'Users share ease of use and maturity of product to move to SigNoz',
+          content: 'SigNoz Cloud manages the observability backend',
         },
         clickstack: {
           type: 'text',
-          content: 'Confusing UX, unpolished. Takes more time to debug issues.',
+          content: 'Managed ClickStack handles scaling, upgrades, backups, and maintenance',
         },
       },
       {
-        feature: 'Dashboard Drill-down',
+        feature: 'Interactive Dashboards',
         signoz: {
           type: 'check',
           label: 'Click into logs, traces, metrics from any panel',
         },
         clickstack: {
-          type: 'text',
-          content: 'View-only. Dashboards cannot be used for deeper troubleshooting',
+          type: 'check',
+          label: 'Interactive dashboards in the ClickStack UI',
         },
       },
       {
-        feature: 'Dashboard Variables',
-        signoz: { type: 'check' },
+        feature: 'Dashboard Filtering',
+        signoz: { type: 'check', label: 'Variables and panel filters' },
         clickstack: {
-          type: 'cross',
-          label: 'No dynamic updates to panels without changing each query individually',
+          type: 'text',
+          content: 'Lucene-style search and SQL filters',
         },
       },
       {
-        feature: 'Pre-built Templates',
+        feature: 'Built-in Views',
         signoz: { type: 'text', content: '30+ importable templates' },
-        clickstack: { type: 'text', content: '3 presets' },
+        clickstack: { type: 'text', content: 'Service maps, patterns, clustering, and dashboards' },
       },
       {
         feature: 'Custom Quick Filters',
         signoz: { type: 'check' },
-        clickstack: { type: 'cross' },
+        clickstack: { type: 'check', label: 'Lucene-style search and SQL' },
       },
     ],
   },
@@ -315,49 +312,20 @@ export const COMPARISON_GRID_DATA: ComparisonCategory[] = [
           type: 'text',
           content: '6 types: Metrics, logs, traces, exceptions, anomaly, Apdex',
         },
-        clickstack: { type: 'text', content: '2 types. Search + chart only' },
+        clickstack: { type: 'text', content: 'Alerts in the ClickStack UI' },
       },
       {
         feature: 'Alert Creation',
         signoz: { type: 'text', content: 'Alerts tab, dashboards, or queries' },
         clickstack: {
           type: 'text',
-          content: 'No dedicated alerts workflow. Must create from search or dashboard.',
+          content: 'Alert workflows in the ClickStack UI',
         },
       },
       {
         feature: 'Anomaly Detection',
         signoz: { type: 'check', label: 'Built-in. Seasonality + z-score' },
-        clickstack: { type: 'cross', label: 'DIY via SQL' },
-      },
-      {
-        feature: 'Alert History',
-        signoz: { type: 'check', label: 'With detailed attribute breakdowns' },
-        clickstack: { type: 'cross' },
-      },
-      {
-        feature: 'Notification Channels',
-        signoz: {
-          type: 'text',
-          content:
-            '9 channels: Slack, PagerDuty, Opsgenie, Teams, Email, Webhook, Incident.io, Rootly, Zenduty',
-        },
-        clickstack: { type: 'text', content: '3 channels: Slack, PagerDuty, Webhooks only' },
-      },
-      {
-        feature: 'Routing Policies',
-        signoz: { type: 'check', label: 'Label-based expressions' },
-        clickstack: { type: 'cross' },
-      },
-      {
-        feature: 'Maintenance Windows',
-        signoz: { type: 'check' },
-        clickstack: { type: 'cross' },
-      },
-      {
-        feature: 'Multi-severity per Rule',
-        signoz: { type: 'text', content: 'Warning / critical / info' },
-        clickstack: { type: 'cross' },
+        clickstack: { type: 'text', content: 'Not specified on the managed product overview' },
       },
     ],
   },
@@ -370,21 +338,15 @@ export const COMPARISON_GRID_DATA: ComparisonCategory[] = [
         clickstack: { type: 'text', content: 'SQL, Lucene-style search' },
       },
       {
-        feature: 'UI Performance',
+        feature: 'Managed Performance',
         signoz: {
           type: 'text',
-          content:
-            'Significantly faster search and aggregation. Auto-materialization of attributes and JSON column architecture',
+          content: 'SigNoz Cloud manages ingestion and query infrastructure',
         },
         clickstack: {
           type: 'text',
-          content: 'Slow search and aggregation. Schema management is up to users',
+          content: 'Managed ClickStack separates storage, ingest compute, and query compute',
         },
-      },
-      {
-        feature: 'Terraform / IaC',
-        signoz: { type: 'check' },
-        clickstack: { type: 'cross' },
       },
     ],
   },
@@ -395,30 +357,30 @@ export const COMPARISON_GRID_DATA: ComparisonCategory[] = [
         feature: 'Pricing Model',
         signoz: {
           type: 'text',
-          content: 'All-inclusive per-GB. Predictable \u2014 one number covers everything',
+          content: 'Logs and traces by GB; metrics by samples',
         },
         clickstack: {
           type: 'text',
-          content: 'Storage + compute (variable). Two separate bills',
+          content: 'ClickHouse Cloud storage and compute resources',
         },
       },
       {
         feature: 'Storage Pricing',
-        signoz: { type: 'text', content: 'Included in $0.30/GB' },
-        clickstack: { type: 'text', content: '$0.03/GB separate' },
+        signoz: { type: 'text', content: 'Included in telemetry pricing' },
+        clickstack: { type: 'text', content: 'Object storage with compute resources' },
       },
       {
         feature: 'Compute / Query Cost',
         signoz: { type: 'text', content: 'No charge for querying. Included in per-GB price' },
         clickstack: {
           type: 'text',
-          content: '$0.22\u2013$0.39/compute-unit/hour. Billed as variable compute',
+          content: 'Compute matches ingest and query workload',
         },
       },
       {
         feature: 'Pro / Base Plan',
-        signoz: { type: 'text', content: '$0.30/GB, 30-day free trial' },
-        clickstack: { type: 'text', content: 'Usage-based' },
+        signoz: { type: 'text', content: 'Starts at $49/month with included usage' },
+        clickstack: { type: 'text', content: '30-day trial with $300 credits' },
       },
       {
         feature: 'Enterprise',
@@ -433,7 +395,7 @@ export const COMPARISON_GRID_DATA: ComparisonCategory[] = [
       {
         feature: 'Data Residency',
         signoz: { type: 'text', content: 'US, EU, India or your own VPC. BYOC available' },
-        clickstack: { type: 'text', content: 'Similar global coverage' },
+        clickstack: { type: 'text', content: 'ClickHouse Cloud provider and Region selection' },
       },
     ],
   },
@@ -443,21 +405,21 @@ export const CLICKSTACK_BILLING_CARDS = [
   {
     title: '1. Storage costs',
     description:
-      "ClickStack's headline rate is less than $0.03/GB per month. This covers data at rest in object storage only. It does not include the compute required to ingest or query that data.",
+      'Managed ClickStack separates object storage from compute. The result depends on the selected ClickHouse Cloud resources and retained data.',
   },
   {
     title: '2. Ingest compute',
     description:
-      'Processing incoming data runs continuously and is billed separately. ClickStack publishes one benchmark here: each core sustains up to 20MB/s of writes, translating to roughly $0.01/GB for ingest compute. This is estimable.',
+      'Managed ClickStack can use dedicated resources for ingestion. Ingest and query workloads can scale independently.',
   },
   {
     title: '3. Query compute',
     description:
-      'Every dashboard load, search, and incident investigation consumes compute billed separately at variable rates. No published benchmark or worked example exists for query compute costs. This is the dimension that spikes most during incidents.',
+      'Managed ClickStack can use separate compute for common queries and on-demand compute for historical analysis. The cost depends on workload and resource size.',
   },
   {
-    title: '4. Data transfer and egress',
+    title: '4. Managed operations',
     description:
-      "Data transfer and egress fees apply as a fourth cost dimension. No published rate exists in ClickStack's documentation.",
+      'Managed ClickStack handles backups, upgrades, scaling, and maintenance. Include the selected service and cloud resources in a cost comparison.',
   },
 ]

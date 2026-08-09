@@ -21,89 +21,9 @@ import {
 } from 'lucide-react'
 import { ChartBar, GitBranch, FileText } from 'lucide-react'
 import Figure from '@/components/Figure/Figure'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts'
 import FAQAccordion from '@/components/FAQAccordion/FAQAccordion'
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
 import TrackingLink from '@/components/TrackingLink'
-
-const data = [
-  {
-    name: 'Small engineering team',
-    SigNoz: 1078,
-    Grafana: 1960,
-  },
-  {
-    name: 'Midsize engineering team',
-    SigNoz: 4903,
-    Grafana: 8920,
-  },
-  {
-    name: 'Large engineering team',
-    SigNoz: 9412,
-    Grafana: 17140,
-  },
-]
-
-const ValueComparisonChart = () => {
-  return (
-    <div className="w-full rounded-lg bg-gray-900 p-6">
-      <h4 className="mb-4 text-xl text-white">Get up to 45% more value for money with SigNoz</h4>
-      <div className="h-96">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-            <XAxis
-              dataKey="name"
-              stroke="#fff"
-              tick={{ fill: '#fff' }}
-              tickLine={{ stroke: '#fff' }}
-            />
-            <YAxis
-              stroke="#fff"
-              tick={{ fill: '#fff' }}
-              tickLine={{ stroke: '#fff' }}
-              tickFormatter={(value) => `$${value.toLocaleString()}`}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: '#1f2937',
-                border: 'none',
-                borderRadius: '4px',
-                color: '#fff',
-              }}
-              formatter={(value) => [`$${value.toLocaleString()}`, '']}
-            />
-            <Legend
-              wrapperStyle={{
-                color: '#fff',
-              }}
-              itemSorter={(item) => (item.dataKey === 'SigNoz' ? 0 : 1)}
-            />
-            <Bar dataKey="SigNoz" fill="#ff7f50" />
-            <Bar dataKey="Grafana" fill="#4ade80" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  )
-}
 
 const SigNozVsGrafanaV2 = () => {
   return (
@@ -121,15 +41,14 @@ const SigNozVsGrafanaV2 = () => {
             className="mb-10 w-full lg:mb-0 lg:w-2/5"
           >
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.35em] text-green-200">
-              SigNoz vs Grafana
+              SigNoz Cloud vs Grafana Cloud
             </p>
             <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.2] text-transparent lg:text-6xl lg:leading-[1.2]">
               Grafana Alternative
             </h1>
             <h3 className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
-              Skip the Loki + Tempo + Mimir patchwork. SigNoz delivers logs, metrics, and traces on
-              a single OpenTelemetry-native datastore so you get unified context from Day 1 without
-              managing multiple backends.
+              Compare Grafana Cloud with SigNoz Cloud for managed observability. For self-managed
+              software, compare Grafana OSS and the LGTM stack with Self-Hosted SigNoz.
             </h3>
             <div className="flex flex-col gap-2">
               <div className="flex flex-row gap-2">
@@ -195,15 +114,14 @@ const SigNozVsGrafanaV2 = () => {
           >
             <Link href="#why-choose-signoz" className="flex items-center hover:text-gray-300">
               <LinkIcon className="absolute -left-8 h-6 w-6 text-green-400 opacity-0 transition-opacity group-hover:opacity-100" />
-              Why do Engineering Teams Choose SigNoz over Grafana?
+              How SigNoz Compares with Grafana Cloud and Grafana OSS
             </Link>
           </h2>
 
           <div className="mb-8">
             <p className="text-lg text-gray-300">
-              SigNoz is loved by developers. With over 20,000+ Github stars, it's one of the top
-              projects in the observability domain. We have helped many of our users to make the
-              switch from Grafana.
+              SigNoz Cloud and Grafana Cloud are managed services. Self-Hosted SigNoz and Grafana
+              OSS are user-managed software. The comparisons below name the relevant edition.
             </p>
           </div>
 
@@ -222,12 +140,13 @@ const SigNozVsGrafanaV2 = () => {
                 </p>
                 <p className="mt-4 text-gray-300">
                   For observability, Grafana offers the LGTM stack (Loki for logs, Grafana for
-                  visualization, Tempo for traces, and Mimir for metrics). You need to configure and
-                  maintain multiple configurations for a full-stack observability setup.
+                  visualization, Tempo for traces, and Mimir for metrics). Grafana Cloud manages
+                  this stack. Grafana OSS users who build a self-managed LGTM stack configure and
+                  operate the components themselves.
                 </p>
                 <p className="mt-4 text-gray-300">
-                  The spread of tooling and configs due to different backends for each signal
-                  impacts developer experience and has a steeper learning curve.
+                  Self-Hosted SigNoz uses one ClickHouse datastore for logs, metrics, and traces,
+                  which reduces the number of backends that a self-managed team operates.
                 </p>
                 <figure className="mb-8">
                   <Image
@@ -260,8 +179,8 @@ const SigNozVsGrafanaV2 = () => {
                   intelligent out-of-box correlation between the three signals.
                 </p>
                 <p className="mt-4 text-gray-300">
-                  For open-source and self-hosted users of SigNoz, there is less operational
-                  overhead and a better developer experience because of using a single data store.
+                  Self-Hosted SigNoz uses a single datastore, while a self-managed Grafana LGTM
+                  stack uses separate signal backends.
                 </p>
               </div>
             </div>
@@ -333,7 +252,7 @@ const SigNozVsGrafanaV2 = () => {
                   )
                 </p>
                 <p className="mt-4 text-gray-300">
-                  We did a logs performance benchmark of open-source SigNoz with Elasticsearch and
+                  We did a logs performance benchmark of Self-Hosted SigNoz with Elasticsearch and
                   Loki. Our key findings for Loki showed:
                 </p>
                 <ul className="mt-2 list-disc pl-6 text-gray-300">
@@ -478,13 +397,12 @@ const SigNozVsGrafanaV2 = () => {
               </div>
               <div>
                 <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
-                  SigNoz is much easier to self-host
+                  Self-Hosted SigNoz uses one telemetry datastore
                 </h4>
                 <p className="text-gray-300">
-                  If you want a self-hosted solution, SigNoz is a better choice. Since Grafana has
-                  multiple backends for different telemetry signals, it's difficult to manage. With
-                  SigNoz, you only need to manage a single backend for a full-stack observability
-                  setup. We also provide{' '}
+                  For a self-managed comparison, Grafana OSS is the visualization layer and an LGTM
+                  stack uses Loki, Tempo, Mimir, and Grafana. Self-Hosted SigNoz uses one ClickHouse
+                  backend for a full-stack observability setup. We also provide{' '}
                   <Link
                     href="https://signoz.io/pricing/"
                     className="text-blue-400 hover:text-blue-300"
@@ -533,10 +451,10 @@ const SigNozVsGrafanaV2 = () => {
                       Feature
                     </th>
                     <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                      SigNoz
+                      SigNoz Cloud / Self-Hosted SigNoz
                     </th>
                     <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                      Grafana
+                      Grafana Cloud / Grafana OSS
                     </th>
                     <th className="border-b border-gray-800 bg-gray-900/80 px-6 py-4 font-medium text-gray-400">
                       Remarks
@@ -554,13 +472,13 @@ const SigNozVsGrafanaV2 = () => {
                     </td>
                     <td className="border-b border-gray-800/50 px-4 py-4">
                       <div className="flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                        <span>Limited</span>
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Yes</span>
                       </div>
                     </td>
                     <td className="border-b border-gray-800/50 px-6 py-4">
-                      For Grafana, you need to manage multiple backends if you opt for self-host
-                      which is a lot of operational overhead.
+                      Self-Hosted SigNoz runs one datastore. A self-managed Grafana LGTM stack runs
+                      separate signal backends.
                     </td>
                   </tr>
                   <tr className="transition-colors hover:bg-gray-800/50">
@@ -603,21 +521,24 @@ const SigNozVsGrafanaV2 = () => {
                     </td>
                   </tr>
                   <tr className="transition-colors hover:bg-gray-800/50">
-                    <td className="border-b border-gray-800/50 px-6 py-4">No User-based Pricing</td>
+                    <td className="border-b border-gray-800/50 px-6 py-4">
+                      Managed observability pricing
+                    </td>
                     <td className="border-b border-gray-800/50 px-4 py-4">
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span>Yes</span>
+                        <span>Usage based</span>
                       </div>
                     </td>
                     <td className="border-b border-gray-800/50 px-4 py-4">
                       <div className="flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4 text-red-500" />
-                        <span>No</span>
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Usage based</span>
                       </div>
                     </td>
                     <td className="border-b border-gray-800/50 px-6 py-4">
-                      Grafana charges $20 per active IRM user.{' '}
+                      Grafana Cloud prices core observability by usage. Its separate IRM product
+                      starts at $20 per active IRM user.{' '}
                       <Link
                         href="https://grafana.com/pricing/#irm"
                         rel="nofollow"
@@ -732,18 +653,15 @@ const SigNozVsGrafanaV2 = () => {
           >
             <Link href="#value-for-money" className="flex items-center hover:text-gray-300">
               <LinkIcon className="absolute -left-8 h-6 w-6 text-green-400 opacity-0 transition-opacity group-hover:opacity-100" />
-              Better Value for Money
+              Compare Current Managed Pricing
             </Link>
           </h2>
 
           <p className="mb-8 text-[1.1rem] text-gray-300">
-            We did a pricing comparison of SigNoz with other popularity observability tools
-            including Grafana. SigNoz can save up to 45% of your Grafana bill.
+            Grafana Cloud and SigNoz Cloud both use usage-based pricing, but they use different
+            units and included allowances. Compare the same signals, retention, users, and incident
+            response products before you estimate savings.
           </p>
-
-          <div className="mb-12">
-            <ValueComparisonChart />
-          </div>
 
           <div className="mb-8 rounded-lg border border-gray-800 bg-gray-900/50 p-4">
             <Link
@@ -759,13 +677,12 @@ const SigNozVsGrafanaV2 = () => {
         {/* Experience Seamless All-in-one Observability */}
         <section className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 px-4 py-12 sm:px-6">
           <h2 className="mb-8 text-left text-xl font-bold lg:text-2xl">
-            Migrate from Grafana - Save up to 45% on your Grafana bill
+            Move from Grafana Cloud or Grafana OSS to the matching SigNoz edition
           </h2>
           <div className="text-gray-300">
             <p className="mb-6 text-[1.1rem] text-gray-300">
-              Under the hood, SigNoz is powered by a single datastore for all three signals - logs,
-              metrics & traces. Unlike Grafana, SigNoz is also built for all-in-one observability
-              from day 1.
+              Choose SigNoz Cloud for a managed move from Grafana Cloud. Choose Self-Hosted SigNoz
+              for a self-managed move from Grafana OSS and an LGTM stack.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link href="/teams/" className="block max-w-md">

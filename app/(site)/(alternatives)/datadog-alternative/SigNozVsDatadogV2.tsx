@@ -19,91 +19,10 @@ import {
 } from 'lucide-react'
 import { ChartBar, GitBranch, FileText } from 'lucide-react'
 import Figure from '@/components/Figure/Figure'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts'
 import FAQAccordion from '@/components/FAQAccordion/FAQAccordion'
 import MigrationFloatingCard from '@/components/MigrationFloatingCard/MigrationFloatingCard'
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
 import TrackingLink from '@/components/TrackingLink'
-
-const data = [
-  {
-    name: 'Small engineering team',
-    SigNoz: 1078,
-    Datadog: 10421,
-  },
-  {
-    name: 'Midsize engineering team',
-    SigNoz: 4903,
-    Datadog: 30213,
-  },
-  {
-    name: 'Large engineering team',
-    SigNoz: 9412,
-    Datadog: 68743,
-  },
-]
-
-const ValueComparisonChart = () => {
-  return (
-    <div className="w-full rounded-lg bg-gray-900 p-6">
-      <h4 className="mb-4 text-xl text-white">Get up to 9x more value for money with SigNoz</h4>
-      <div className="h-96">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-            <XAxis
-              dataKey="name"
-              stroke="#fff"
-              tick={{ fill: '#fff' }}
-              tickLine={{ stroke: '#fff' }}
-            />
-            <YAxis
-              stroke="#fff"
-              tick={{ fill: '#fff' }}
-              tickLine={{ stroke: '#fff' }}
-              tickFormatter={(value) => `$${value.toLocaleString()}`}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: '#1f2937',
-                border: 'none',
-                borderRadius: '4px',
-                color: '#fff',
-              }}
-              formatter={(value) => [`$${value.toLocaleString()}`, '']}
-            />
-            <Legend
-              wrapperStyle={{
-                color: '#fff',
-              }}
-              itemSorter={(item) => (item.dataKey === 'SigNoz' ? 0 : 1)}
-            />
-
-            <Bar dataKey="SigNoz" fill="#ff7f50" />
-            <Bar dataKey="Datadog" fill="#9333ea" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  )
-}
 
 const SigNozVsDatadogV2 = () => {
   return (
@@ -122,22 +41,22 @@ const SigNozVsDatadogV2 = () => {
             className="mb-10 w-full lg:mb-0 lg:w-2/5"
           >
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.35em] text-blue-200">
-              SigNoz vs Datadog
+              SigNoz Cloud vs Datadog
             </p>
             <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.2] text-transparent lg:text-6xl lg:leading-[1.2]">
               Datadog Alternative
             </h1>
             <h3 className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
-              Teams moving from Datadog save up to 80% on 20 APM and 50 infra hosts—go deeper with
-              the{' '}
+              Compare Datadog with SigNoz Cloud for OpenTelemetry-native logs, metrics, and traces
+              with usage-based pricing and no per-user charges. See the{' '}
               <Link
                 href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
                 className="text-blue-400 hover:text-blue-300"
                 target="_blank"
               >
                 detailed SigNoz vs Datadog spreadsheet
-              </Link>
-              .
+              </Link>{' '}
+              for an earlier worked example.
             </h3>
             <div className="flex flex-col gap-2">
               <div className="flex flex-row gap-2">
@@ -203,16 +122,15 @@ const SigNozVsDatadogV2 = () => {
           >
             <Link href="#why-choose-signoz" className="flex items-center hover:text-gray-300">
               <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
-              Why do Engineering Teams Choose SigNoz over Datadog?
+              Why do Engineering Teams Choose SigNoz Cloud over Datadog?
             </Link>
           </h2>
 
           <div className="mb-8">
             <p className="text-lg text-gray-300">
-              SigNoz is often referred to as "Open-Source Datadog Alternative" by our users. We
-              built SigNoz to address the absence of a great one-stop observability tool in the
-              open-source ecosystem. Something that comes with the ease of a SaaS tool like Datadog
-              but brings along the benefits of open-source standards.
+              SigNoz Cloud is the managed option for teams comparing a commercial Datadog plan.
+              Self-Hosted SigNoz provides the open-source, user-managed option. Both use the SigNoz
+              platform and OpenTelemetry-native ingestion.
               <br />
               <br />
               Switching from Datadog is now easier with our{' '}
@@ -226,7 +144,7 @@ const SigNozVsDatadogV2 = () => {
               that translates your dashboards in minutes, preserving all configurations and queries.
               <br />
               <br />
-              Top reasons why developers prefer SigNoz over Datadog
+              Top reasons why developers compare SigNoz Cloud with Datadog
             </p>
           </div>
 
@@ -257,11 +175,9 @@ const SigNozVsDatadogV2 = () => {
                   Flexible Deployment Options
                 </h4>
                 <p className="text-gray-300">
-                  SigNoz provides both cloud & self-hosted versions. You can use the cloud,
-                  enterprise self-host, or free, open-source community edition, depending on your
-                  needs. Many of our users use open-source SigNoz in dev environments and SigNoz
-                  Cloud for production environments. Privacy-focused users prefer enterprise
-                  self-hosted version.
+                  Choose SigNoz Cloud for a managed service. Choose Self-Hosted SigNoz Community
+                  Edition or Enterprise for a user-managed deployment. This page uses SigNoz Cloud
+                  for the managed Datadog comparison.
                 </p>
               </div>
             </div>
@@ -272,14 +188,13 @@ const SigNozVsDatadogV2 = () => {
               </div>
               <div>
                 <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
-                  9x better value for money
+                  Usage-based pricing without per-user charges
                 </h4>
                 <p className="text-gray-300">
-                  Signoz provides 9x more value for your money than Datadog. Complex billing
-                  practices, unpredictable pricing, and pricing that sometimes doesn't make sense
-                  are common issues that Datadog users highlight. SigNoz offers simple usage-based
-                  pricing and features that can help you take control of your observability costs
-                  better.
+                  SigNoz Cloud prices logs and traces by ingested GB and metrics by samples. It does
+                  not add per-user or per-host charges. Datadog prices products through separate
+                  plans and usage units, so the result depends on the selected products and
+                  workload.
                 </p>
               </div>
             </div>
@@ -332,7 +247,7 @@ const SigNozVsDatadogV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           Datadog
@@ -901,7 +816,7 @@ const SigNozVsDatadogV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           Datadog
@@ -1252,7 +1167,7 @@ const SigNozVsDatadogV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           Datadog
@@ -1505,7 +1420,7 @@ const SigNozVsDatadogV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           Datadog
@@ -1795,7 +1710,7 @@ const SigNozVsDatadogV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           Datadog
@@ -1975,7 +1890,7 @@ const SigNozVsDatadogV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           Datadog
@@ -2070,7 +1985,7 @@ const SigNozVsDatadogV2 = () => {
           </div>
         </section>
 
-        {/* SigNoz is 9x more value than Datadog */}
+        {/* Pricing comparison */}
         <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
           <h2
             className="group relative mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
@@ -2078,14 +1993,14 @@ const SigNozVsDatadogV2 = () => {
           >
             <Link href="#value-for-money" className="flex items-center hover:text-gray-300">
               <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
-              SigNoz is 9x More Value for Money than Datadog
+              Predictable Usage-Based Pricing with SigNoz Cloud
             </Link>
           </h2>
 
           <p className="mb-8 text-[1.1rem] text-gray-300">
-            Datadog has a very complex pricing tier which makes Datadog bills unpredictable. For 20
-            APM hosts, 50 infra hosts, and 2500 GB logs data, SigNoz can provide up to 9x more value
-            than Datadog. (
+            Datadog uses separate pricing units across its product plans. SigNoz Cloud prices logs
+            and traces by ingested volume and metrics by samples. Compare the exact products,
+            retention, and workload before you estimate savings. (
             <Link
               href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
               className="text-blue-400 hover:text-blue-300"
@@ -2094,10 +2009,6 @@ const SigNozVsDatadogV2 = () => {
             </Link>
             )
           </p>
-
-          <div className="mb-12">
-            <ValueComparisonChart />
-          </div>
 
           <p className="mb-8 text-[1.1rem] text-gray-300">
             Some of the highlights of why our pricing plan is better suited at scale are mentioned
@@ -2128,8 +2039,7 @@ const SigNozVsDatadogV2 = () => {
                 makes it hard to predict how much you will be charged at the end of the month.
               </p>
               <p className="mt-4 text-[1.1rem] text-gray-300">
-                We offer a simple usage-based pricing plan based on the amount of data that you send
-                to SigNoz.
+                SigNoz Cloud uses a usage-based plan based on the telemetry that you send.
               </p>
               <div className="mb-8 rounded-lg border border-gray-800 bg-gray-900/50 p-4">
                 <Link
@@ -2153,10 +2063,9 @@ const SigNozVsDatadogV2 = () => {
                 </Link>
               </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
-                Datadog's custom metrics pricing is insane. It charges $0.05 per custom metric. You
-                can end up with unpredictable bills, and custom metrics pricing can constitute up to
-                52% of your bill for a large engineering team. SigNoz does not treat custom metrics
-                differently and charges only $0.1 per million samples.{' '}
+                Datadog includes a custom-metric allocation with eligible infrastructure plans and
+                bills additional custom metrics by usage. SigNoz Cloud does not create a separate
+                custom-metric category and charges $0.10 per million metric samples.{' '}
                 <Link
                   href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-limits-on-custom-metrics-with-signoz"
                   className="text-blue-400 hover:text-blue-300"
@@ -2181,9 +2090,8 @@ const SigNozVsDatadogV2 = () => {
                 </Link>
               </h3>
               <p className="text-[1.1rem] text-gray-300">
-                In Datadog, you don't have any controls on the type of metrics sent to monitor your
-                infrastructure. Hence, you can't optimize your infrastructure monitoring bill in
-                Datadog. Each infrastructure host is charged at $18 per month.
+                Datadog infrastructure plans use per-host pricing, with plan and billing-term
+                differences. Review the current Datadog plan for the exact host rate.
               </p>
               <p className="mt-4 text-[1.1rem] text-gray-300">
                 SigNoz lets you collect infra metrics through the hostmetrics receiver in
@@ -2315,7 +2223,7 @@ const SigNozVsDatadogV2 = () => {
           <FAQAccordion
             faqs={[
               {
-                question: 'Does SigNoz offer a free trial?',
+                question: 'Does SigNoz Cloud offer a free trial?',
                 answer: (
                   <span>
                     Yes, we do offer a free trial. When you{' '}
@@ -2330,7 +2238,7 @@ const SigNozVsDatadogV2 = () => {
                 ),
               },
               {
-                question: 'How do I estimate my usage in SigNoz?',
+                question: 'How do I estimate my usage in SigNoz Cloud?',
                 answer: (
                   <span>
                     You can use our{' '}
@@ -2341,17 +2249,17 @@ const SigNozVsDatadogV2 = () => {
                     >
                       pricing calculator
                     </Link>{' '}
-                    to estimate your monthly bill with SigNoz.
+                    to estimate your monthly bill with SigNoz Cloud.
                   </span>
                 ),
               },
               {
-                question: 'How is custom metric charged in SigNoz?',
+                question: 'How are custom metrics charged in SigNoz Cloud?',
                 answer: (
                   <span>
-                    All metrics are charged at the same price in SigNoz. We do not categorize any
-                    metric as "custom" as is done by Datadog. You can estimate your metrics billing
-                    in SigNoz with this{' '}
+                    All metrics are charged at the same price in SigNoz Cloud. We do not categorize
+                    any metric as "custom" as is done by Datadog. You can estimate your metrics
+                    billing in SigNoz Cloud with this{' '}
                     <Link
                       href="https://signoz.io/pricing/metrics-cost-estimation/"
                       className="text-orange-500 hover:text-orange-400"
@@ -2370,13 +2278,13 @@ const SigNozVsDatadogV2 = () => {
         {/* Migration Section */}
         <section className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 px-4 py-12 sm:px-6">
           <h2 className="mb-8 text-left text-xl font-bold lg:text-2xl">
-            Migrate from Datadog - Save up to 80% on your Datadog bill
+            Migrate from Datadog to SigNoz Cloud
           </h2>
           <div className="text-gray-300">
             <p className="mb-6 text-[1.1rem] text-gray-300">
-              We provide support for migrating from Datadog to SigNoz if your monthly billing in
-              Datadog is greater than 1000 USD. Request a migration from one of our experts and get
-              started with SigNoz quickly.
+              We provide support for migrating from Datadog to SigNoz Cloud if your monthly billing
+              in Datadog is greater than 1000 USD. Request a migration from one of our experts and
+              get started with SigNoz Cloud quickly.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link

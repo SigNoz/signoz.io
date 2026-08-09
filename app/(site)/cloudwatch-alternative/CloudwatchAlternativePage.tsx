@@ -55,7 +55,7 @@ const Header: React.FC = () => {
     <FeaturePageHeader
       title={
         <>
-          <div className="mb-4 p-3 text-base font-semibold">SIGNOZ VS AWS CLOUDWATCH</div>
+          <div className="mb-4 p-3 text-base font-semibold">SIGNOZ CLOUD VS AWS CLOUDWATCH</div>
           <div className="text-5xl font-bold leading-none">
             AWS CloudWatch <br className="hidden md:block" /> Alternative
           </div>
@@ -63,9 +63,8 @@ const Header: React.FC = () => {
       }
       description={
         <>
-          Open-source observability with transparent pricing. Get logs, metrics, and traces in{' '}
-          <br className="hidden md:block" /> one place without CloudWatch's fragmented consoles and
-          12+ billing components.
+          Compare AWS CloudWatch with SigNoz Cloud for managed logs, metrics, and traces in{' '}
+          <br className="hidden md:block" /> one place with usage-based pricing.
         </>
       }
       buttons={headerButtons}
@@ -137,10 +136,9 @@ const CostComparison: React.FC = () => {
           You shouldn't pay to look at your own data
         </h4>
         <div className="text-sm text-signoz_vanilla-400">
-          CloudWatch bills across 12+ separate components for ingestion, storage, queries, metrics,
-          alarms, dashboards, and API access. SigNoz charges $0.30/GB for logs and traces, $0.10 per
-          million samples for metrics. Once data is ingested, query it unlimited times at no extra
-          charge.
+          CloudWatch prices ingestion, storage, queries, metrics, alarms, dashboards, and API use by
+          service and Region. SigNoz Cloud charges $0.30/GB for logs and traces and $0.10 per
+          million metric samples.
         </div>
       </div>
       <div>
@@ -202,7 +200,7 @@ const ArchitectureAndApproach: React.FC = () => {
               <br className="hidden md:block" />
               across separate services (Metrics, Logs, X-Ray, Application Signals), each with its
               own <br className="hidden md:block" />
-              storage, console, and query language. SigNoz stores all telemetry in a single
+              storage, console, and query language. SigNoz Cloud stores telemetry in a single
               ClickHouse <br className="hidden md:block" />
               database with a unified query interface.
             </div>
@@ -235,8 +233,8 @@ const CloudwatchAlternativePage: React.FC = () => {
         sectionDescription={
           <>
             <p>
-              SigNoz eliminates query costs, dashboard fees, and API charges. Pay only for data
-              volume ingested.
+              SigNoz Cloud prices logs and traces by ingested volume and metrics by samples. It does
+              not add separate dashboard or per-user charges.
             </p>
             <p>
               Use the calculator below to estimate costs, then track actual usage with Cost Meter to

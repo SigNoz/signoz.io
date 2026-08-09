@@ -194,11 +194,17 @@ function Footer({ inDocsShell = false }: FooterProps) {
                   More
                 </div>
 
-                <FooterPillLink href="/datadog-alternative/">SigNoz vs Datadog</FooterPillLink>
-                <FooterPillLink href="/newrelic-alternative/">SigNoz vs New Relic</FooterPillLink>
-                <FooterPillLink href="/grafana-alternative/">SigNoz vs Grafana</FooterPillLink>
+                <FooterPillLink href="/datadog-alternative/">
+                  SigNoz Cloud vs Datadog
+                </FooterPillLink>
+                <FooterPillLink href="/newrelic-alternative/">
+                  SigNoz Cloud vs New Relic
+                </FooterPillLink>
+                <FooterPillLink href="/grafana-alternative/">
+                  SigNoz Cloud vs Grafana
+                </FooterPillLink>
                 <FooterPillLink href="/product-comparison/signoz-vs-dynatrace/">
-                  SigNoz vs Dynatrace
+                  SigNoz Cloud vs Dynatrace
                 </FooterPillLink>
                 <FooterPillLink href="https://signoz.io/careers/" newTab>
                   Careers
