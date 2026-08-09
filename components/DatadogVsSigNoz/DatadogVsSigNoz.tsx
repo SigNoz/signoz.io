@@ -10,11 +10,11 @@ export default function DatadogVsSigNoz() {
       <div className="transform rounded-xl bg-gradient-to-r from-blue-900/90 to-purple-900/90 p-8 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
         <div className="space-y-4">
           <h3 className="my-0 text-2xl font-bold text-white">
-            Cut Your Observability Spend by 80%—Here's How
+            Compare This Datadog Estimate with SigNoz Cloud Pricing
           </h3>
           <p className="text-gray-300">
-            Switch from Datadog seamlessly with our automated migration tool, comparable features
-            and up to <b>80% cost savings</b>.
+            This calculator estimates Datadog only. Review current SigNoz Cloud pricing and
+            migration options before you compare total costs.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">
             <Button

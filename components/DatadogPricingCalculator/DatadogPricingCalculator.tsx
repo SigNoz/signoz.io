@@ -87,6 +87,14 @@ const DatadogPricingCalculator = () => {
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28']
 
+  const logPlanNote = {
+    ingestion: 'Ingestion only; indexed storage is not included.',
+    standardIndexing: 'Uses the 15-day indexed-log retention rate.',
+    flexStorage: 'Uses the Flex Logs Storage rate per 1 million stored events per month.',
+    flexLogsStarter:
+      'Uses the Flex Logs Starter rate per 1 million events stored with 6, 12, or 15 months of retention.',
+  }[logPlan]
+
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<any> }) => {
     if (active && payload && payload.length) {
       return (
@@ -140,7 +148,7 @@ const DatadogPricingCalculator = () => {
               />
               {logPlan === 'ingestion' ? 'GB' : 'million events'}
             </p>
-            <p className="mb-2 text-xs">(Assuming 15 day retention and no on-demand usage)</p>
+            <p className="mb-2 text-xs">{logPlanNote}</p>
           </div>
         )
       case 'apm':
@@ -265,7 +273,7 @@ const DatadogPricingCalculator = () => {
 
         <div className="pl-4 md:w-1/3">
           <div className="mb-4 h-20">
-            <h3 className="mb-1 mt-0 text-lg">Total Estimated Cost</h3>
+            <h3 className="mb-1 mt-0 text-lg">Estimated Datadog Cost</h3>
             <p className="my-2 text-2xl font-bold">${totalCost.toFixed(2)} / month</p>
           </div>
 
@@ -309,7 +317,7 @@ const DatadogPricingCalculator = () => {
             Ready to Optimize Your Observability Costs?
           </h3>
           <p className="mb-3 text-sm text-gray-300">
-            Discover how SigNoz offers comparable features with significant cost savings.
+            Review how SigNoz Cloud pricing differs from this Datadog estimate.
           </p>
           <a
             href="/datadog-alternative/"

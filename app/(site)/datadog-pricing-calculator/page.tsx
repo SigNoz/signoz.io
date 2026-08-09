@@ -6,7 +6,7 @@ import DatadogVsSigNoz from '@/components/DatadogVsSigNoz/DatadogVsSigNoz'
 export const metadata = {
   title: 'Datadog Pricing Calculator',
   description:
-    'Estimate your Datadog costs with our interactive pricing calculator. Compare Datadog pricing for logs, APM, and infrastructure monitoring.',
+    'Estimate Datadog costs for logs, APM, and infrastructure monitoring with billed-annually list rates, then review how SigNoz Cloud pricing differs.',
 }
 
 export default function DatadogPricingCalculatorPage() {
@@ -20,24 +20,24 @@ export default function DatadogPricingCalculatorPage() {
             Datadog Pricing Calculator
           </h1>
           <p className="text-xl text-gray-400">
-            Estimate your Datadog bills and make informed decisions about your observability
-            infrastructure
+            Estimate your Datadog bill, then review how SigNoz Cloud uses usage-based pricing
           </p>
         </div>
 
         <div className="mb-8">
           <p className="mb-4">
-            Understanding Datadog pricing can be complex due to its various components and
-            usage-based model. This calculator helps you estimate costs for different Datadog
-            services including infrastructure monitoring, APM, and{' '}
+            Understanding Datadog pricing can be complex because its products use different billing
+            units. This calculator estimates billed-annually list-price costs for infrastructure
+            monitoring, APM, and{' '}
             <Link href="/blog/datadog-logs-pricing/" className="text-blue-400 hover:underline">
               log management
             </Link>
             .
           </p>
           <p>
-            For a comprehensive breakdown of Datadog's pricing structure and optimization
-            strategies, check out our{' '}
+            The result estimates Datadog only. Use it with current SigNoz Cloud usage and retention
+            pricing when you compare the two products. For a full breakdown of Datadog's pricing
+            structure and optimization strategies, see our{' '}
             <Link href="/blog/datadog-pricing/" className="text-blue-400 hover:underline">
               detailed guide on Datadog pricing
             </Link>
@@ -46,6 +46,15 @@ export default function DatadogPricingCalculatorPage() {
         </div>
 
         <DatadogPricingCalculator />
+
+        <p className="mb-0 mt-3 text-xs leading-5 text-gray-400">
+          Estimate method: selected log units × selected log rate + APM hosts × selected APM rate +
+          infrastructure hosts × selected infrastructure rate. Rates are billed-annually monthly list
+          prices checked on August 9, 2026. The estimate excludes taxes, negotiated discounts,
+          contract-specific commitments, containers, custom metrics and events, extra span ingestion,
+          and products not shown. The APM DevSecOps options are not on Datadog&apos;s current public
+          price list; confirm those rates with Datadog.
+        </p>
 
         <div className="my-8 rounded-xl bg-gray-800 p-8 shadow-lg transition-all hover:shadow-xl">
           <div className="grid gap-8 md:grid-cols-2">
@@ -72,7 +81,7 @@ export default function DatadogPricingCalculatorPage() {
                 <li>Enter your estimated usage for each service</li>
                 <li>Adjust values using sliders or input fields</li>
                 <li>Review the detailed cost breakdown</li>
-                <li>Compare with alternative solutions</li>
+                <li>Review how the estimate differs from SigNoz Cloud pricing</li>
               </ol>
             </div>
           </div>
@@ -101,9 +110,9 @@ export default function DatadogPricingCalculatorPage() {
                 note: 'End-to-end distributed traces, service health metrics, and 15-day historical search & analytics',
               },
               {
-                title: 'Log Management',
+                title: 'Logs - Ingestion',
                 price: '$0.10/GB',
-                note: 'Ingest, process, and analyze logs with out-of-the-box parsing for 200+ log sources',
+                note: 'Log ingestion only; indexed storage and other log products are billed separately',
               },
               {
                 title: 'Real User Monitoring',
@@ -121,24 +130,24 @@ export default function DatadogPricingCalculatorPage() {
                 note: 'CPU, memory, and lock profiling for production code optimization',
               },
               {
-                title: 'Network Performance Monitoring',
-                price: '$5/host/month',
+                title: 'Cloud Network Monitoring',
+                price: '$5/network host/month',
                 note: 'Network flow monitoring and DNS request tracking',
               },
               {
-                title: 'Synthetic Monitoring',
-                price: '$5/10,000 tests',
-                note: 'API tests, browser tests, and multi-step journeys',
+                title: 'Synthetic API Tests',
+                price: '$5/10,000 API test runs',
+                note: 'API test runs; browser tests use a separate billing unit and rate',
               },
               {
-                title: 'Security Monitoring',
-                price: '$5/1M events',
-                note: 'Threat detection, compliance monitoring, and SIEM functionality',
+                title: 'Cloud SIEM',
+                price: '$5/1M analyzed events',
+                note: 'One million analyzed events per month at the billed-annually list rate',
               },
               {
                 title: 'Incident Management',
-                price: 'User-based',
-                note: 'Incident tracking and response coordination',
+                price: '$30/seat/month',
+                note: 'Incident tracking and response coordination at the billed-annually list rate',
               },
             ].map((plan, index) => (
               <div
@@ -203,7 +212,9 @@ export default function DatadogPricingCalculatorPage() {
         <DatadogVsSigNoz />
 
         <p className="text-gray-400">
-          Note: This calculator provides estimates. For precise pricing, please consult{' '}
+          Note: This calculator provides a billed-annually list-price estimate. Contract terms,
+          negotiated discounts, taxes, and products outside the selected inputs can change the
+          actual bill. Datadog pricing was checked on August 9, 2026. For current pricing, consult{' '}
           <Link href="https://www.datadoghq.com/pricing/" className="text-blue-400 hover:underline">
             Datadog's official pricing page
           </Link>
