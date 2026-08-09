@@ -7,7 +7,7 @@ function Support() {
       <section>
         <div className="mx-auto my-48 max-w-[1024px]">
           <h1 className="text--center mb-8 text-2xl">
-            Reach out to us for any queries you may have{' '}
+            SigNoz Cloud and Self-Hosted SigNoz support
           </h1>
 
           <div className="row flex items-stretch">
@@ -15,12 +15,12 @@ function Support() {
               <div className="card-demo margin--md">
                 <div className="card-dark h-[180px] rounded-md bg-signoz_slate-500">
                   <div className="card__header">
-                    <h3>Email</h3>
+                    <h3>Paid SigNoz support</h3>
                   </div>
                   <div className="card__body">
                     <p className="text-sm">
-                      Write to us at <a href="mailto:support@signoz.io">support@signoz.io</a> for
-                      any queries
+                      Email <a href="mailto:support@signoz.io">support@signoz.io</a> for SigNoz
+                      Cloud or a paid BYOC or Self-Hosted SigNoz contract.
                     </p>
                   </div>
                   <div className="card__footer">
@@ -39,12 +39,11 @@ function Support() {
               <div className="card-demo margin--md h-full">
                 <div className="card-dark h-[180px] rounded-md bg-signoz_slate-500">
                   <div className="card__header">
-                    <h3>Slack</h3>
+                    <h3>Self-Hosted SigNoz community Slack</h3>
                   </div>
                   <div className="card__body">
                     <p className="text-sm">
-                      If you are facing any issues in getting up and running, or have a technical
-                      query
+                      Use community Slack for Self-Hosted SigNoz setup and technical questions.
                     </p>
                   </div>
                   <div className="card__footer">
@@ -65,12 +64,12 @@ function Support() {
               <div className="card-demo margin--md">
                 <div className="card-dark h-[180px] rounded-md bg-signoz_slate-500">
                   <div className="card__header">
-                    <h3>GitHub Discussions</h3>
+                    <h3>SigNoz community discussions</h3>
                   </div>
                   <div className="card__body">
                     <p className="text-sm">
-                      For ideas about the project or something which the community would find
-                      helpful
+                      Use GitHub Discussions for project questions and ideas. This is not paid
+                      support.
                     </p>
                   </div>
                   <div className="card__footer">

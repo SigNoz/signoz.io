@@ -111,8 +111,8 @@ export const NUMBERS_THAT_SPEAK_CARDS = [
     title: <div className="min-h-14">Engineering Teams in Production</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
-        Seed-stage startups to public companies. Self-hosted, cloud, or BYOC. Your choice. With
-        Enterprise-Grade Observability.
+        Seed-stage startups to public companies. Self-Hosted SigNoz, SigNoz Cloud, or managed BYOC.
+        Your choice, with enterprise-grade observability.
         <Button variant="secondary" to="/case-study/" className="mt-4 block w-fit" rounded="full">
           Learn more
         </Button>
@@ -308,9 +308,9 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
     description: (
       <div>
         <p>
-          SOC 2 Type II. Self-hosted bring-your-own-cloud for HIPAA and GDPR requirements.
-          Fine-grained RBAC for team-level data access. With enterprise-grade support.
-          High-cardinality is a breeze with ClickHouse.
+          SigNoz Cloud is SOC 2 Type II and HIPAA compliant, with a BAA available as an add-on.
+          Managed BYOC keeps SigNoz in your cloud account. Self-Hosted SigNoz does not inherit
+          SigNoz Cloud compliance.
         </p>
         <TrackingLink
           href="https://trust.signoz.io/"
@@ -380,12 +380,11 @@ export const GETTING_STARTED_CARDS = [
     ),
   },
   {
-    title: <div className="min-h-10">Use SigNoz Cloud or host in your infrastructure</div>,
+    title: <div className="min-h-10">Choose SigNoz Cloud, BYOC, or Self-Hosted SigNoz</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
-        SigNoz Cloud is fully managed, SOC 2 compliant, and is live in minutes. If you want to run
-        in your infra - Self-host via Helm chart runs in your own VPC or air-gapped environment. Or
-        you can bring your own cloud.
+        SigNoz manages SigNoz Cloud and BYOC. Your team deploys and operates Self-Hosted SigNoz,
+        including its infrastructure, storage, scaling, upgrades, and backups.
         <TrackingLink
           href="/contact-us/?source=why-signoz-page-signoz-offerings"
           clickType="Secondary CTA"

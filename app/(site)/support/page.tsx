@@ -2,10 +2,18 @@ import Support from './Support'
 
 import { Metadata } from 'next'
 
+const supportDescription =
+  'Find SigNoz Cloud and contracted enterprise support, or use community Slack and GitHub Discussions for Self-Hosted SigNoz and project questions.'
+
 export const metadata: Metadata = {
   title: 'Support',
-  description:
-    'Reach out to Signoz for any queries - We are an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
+  description: supportDescription,
+  openGraph: {
+    description: supportDescription,
+  },
+  twitter: {
+    description: supportDescription,
+  },
 }
 
 export default function SupportPage() {

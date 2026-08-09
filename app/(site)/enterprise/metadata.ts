@@ -1,14 +1,18 @@
 import { Metadata } from 'next'
 
+const enterpriseDescription =
+  'Compare SigNoz Cloud, SigNoz Cloud — BYOC, and Self-Hosted SigNoz for enterprise security, compliance, scale, and contracted support.'
+
 export const metadata: Metadata = {
   title: {
     absolute: 'SigNoz Enterprise | Built for Scale',
   },
   openGraph: {
     title: 'SigNoz Enterprise | Built for Scale',
-    description:
-      'With SigNoz Enterprise, you get unmatched scale and flexibility along with advanced security, compliance, and support.',
+    description: enterpriseDescription,
   },
-  description:
-    'With SigNoz Enterprise, you get unmatched scale and flexibility along with advanced security, compliance, and support.',
+  twitter: {
+    description: enterpriseDescription,
+  },
+  description: enterpriseDescription,
 }
