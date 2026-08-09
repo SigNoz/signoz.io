@@ -84,7 +84,9 @@ const MetricsCostEstimation = () => {
                 <div></div>
                 <div>
                   <div className="flex flex-col gap-2">
-                    <div className="text-sm text-signoz_vanilla-100">Time series (millions)</div>
+                    <div className="text-sm text-signoz_vanilla-100">
+                      # of time series in million
+                    </div>
                     <div>
                       <input
                         className="block w-full rounded-sm border border-signoz_slate-400 bg-signoz_ink-300 px-1.5 py-3 text-sm font-normal text-signoz_vanilla-100 "
@@ -122,7 +124,7 @@ const MetricsCostEstimation = () => {
                 <div>
                   <div className="flex flex-col gap-7">
                     <div className="flex justify-between text-sm text-signoz_vanilla-100">
-                      <div className="">Datapoints per minute per time series</div>
+                      <div className=""># of datapoints per minute in a time-series</div>
                       <div className=""> {inputMetricsValue} </div>
                     </div>
                     <div>
