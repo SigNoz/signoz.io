@@ -124,7 +124,7 @@ const MetricsCostEstimation = () => {
                 <div>
                   <div className="flex flex-col gap-7">
                     <div className="flex justify-between text-sm text-signoz_vanilla-100">
-                      <div className=""># of datapoints per minute in a time-series</div>
+                      <div className=""> # of datapoints per minute in a time-series</div>
                       <div className=""> {inputMetricsValue} </div>
                     </div>
                     <div>
