@@ -11,7 +11,7 @@ export default function FAQSection() {
             Frequently Asked <span className="text-gradient">Questions</span>
           </h2>
           <p className="text-lg text-gray-300">
-            Everything you need to know about the startup program.
+            Everything you need to know about the SigNoz Cloud Startup Program.
           </p>
         </div>
         <FAQAccordion faqItems={faqItems} />

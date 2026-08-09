@@ -19,19 +19,20 @@ export default function TeamsPricingCard() {
               id="teams"
               className="pinkish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl"
             >
-              Teams
+              SigNoz Cloud — Teams
             </h3>
             <p className="text-base text-gray-400">
-              For fast-scaling teams that need observability to scale with them.
+              For teams that want SigNoz to manage storage, scaling, and upgrades.
             </p>
           </div>
           <div className="mt-4 flex w-full flex-col items-start md:mt-0 md:w-[40%] md:items-end">
             <span className="text-sm text-signoz_vanilla-400">starts from</span>
             <div className="flex items-baseline">
               <span className="text-3xl font-bold text-signoz_vanilla-100 md:text-4xl">
-                <span className="text-2xl text-signoz_vanilla-400 line-through">$199</span> $49
+                <span className="text-2xl text-signoz_vanilla-400 line-through">USD 199</span> USD
+                49
               </span>
-              <span className="ml-1 text-signoz_vanilla-400">/month</span>
+              <span className="ml-1 text-signoz_vanilla-400">per month</span>
             </div>
           </div>
         </div>
@@ -53,7 +54,7 @@ export default function TeamsPricingCard() {
         {/* Base pricing table */}
         <div className="mb-6 rounded-md bg-signoz_ink-400 bg-opacity-10 p-3">
           <h5 className="mb-3 text-sm font-medium text-signoz_vanilla-100">
-            After $49, billed at:
+            After the included USD 49 of usage, SigNoz Cloud bills:
           </h5>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             <div className="flex items-center gap-2">
@@ -67,8 +68,8 @@ export default function TeamsPricingCard() {
               <div>
                 <div className="text-xs text-signoz_vanilla-400">Traces</div>
                 <div className="text-sm">
-                  <span className="font-medium text-signoz_robin-400">$0.30</span>
-                  <span className="text-signoz_vanilla-400">/GB</span>
+                  <span className="font-medium text-signoz_robin-400">USD 0.30</span>
+                  <span className="text-signoz_vanilla-400"> per GB ingested</span>
                 </div>
               </div>
             </div>
@@ -77,8 +78,8 @@ export default function TeamsPricingCard() {
               <div>
                 <div className="text-xs text-signoz_vanilla-400">Logs</div>
                 <div className="text-sm">
-                  <span className="font-medium text-signoz_sakura-400">$0.30</span>
-                  <span className="text-signoz_vanilla-400">/GB</span>
+                  <span className="font-medium text-signoz_sakura-400">USD 0.30</span>
+                  <span className="text-signoz_vanilla-400"> per GB ingested</span>
                 </div>
               </div>
             </div>
@@ -93,8 +94,8 @@ export default function TeamsPricingCard() {
               <div>
                 <div className="text-xs text-signoz_vanilla-400">Metrics</div>
                 <div className="text-sm">
-                  <span className="font-medium text-signoz_amber-400">$0.10</span>
-                  <span className="text-signoz_vanilla-400">/mn samples</span>
+                  <span className="font-medium text-signoz_amber-400">USD 0.10</span>
+                  <span className="text-signoz_vanilla-400"> per million samples</span>
                 </div>
               </div>
             </div>
@@ -102,7 +103,7 @@ export default function TeamsPricingCard() {
         </div>
 
         <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">
-          What's included in $49/month?
+          What is included in the USD 49 monthly minimum?
         </h4>
         <ul className="mb-10 space-y-3">
           <li className="flex items-start gap-2">
@@ -130,7 +131,7 @@ export default function TeamsPricingCard() {
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
-              Usage worth $49 (e.g. 163 GB logs/traces or 490 mn metric samples)
+              USD 49 of usage (for example, 163 GB of logs or traces, or 490 million metric samples)
             </span>
           </li>
           <li className="flex items-start gap-2">
@@ -192,7 +193,7 @@ export default function TeamsPricingCard() {
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
               <span className="flex items-center gap-1">
-                Support via in-product Chat, Email, and Slack
+                SigNoz Cloud support via in-product chat, email, and Slack
                 <Tooltip
                   content={
                     <div className="max-w-xs">
@@ -218,7 +219,7 @@ export default function TeamsPricingCard() {
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
               <span className="flex items-center gap-1">
-                SOC2 Type II & HIPAA Compliant
+                SigNoz Cloud is SOC 2 Type II and HIPAA compliant
                 <Tooltip
                   content={
                     <div className="max-w-xs">
@@ -244,7 +245,7 @@ export default function TeamsPricingCard() {
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
-              Data centers available in the US, EU & India
+              SigNoz Cloud data regions are available in the US, EU, and India
             </span>
           </li>
 

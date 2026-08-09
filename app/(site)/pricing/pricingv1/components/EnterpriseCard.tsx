@@ -15,15 +15,17 @@ export default function EnterpriseCard() {
                 id="enterprise"
                 className="orangish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl"
               >
-                Enterprise
+                SigNoz Enterprise
               </h3>
               <p className="text-base text-gray-400">
-                For larger orgs that need data residency, compliance and support.
+                Choose dedicated SigNoz Cloud, managed BYOC, or Self-Hosted SigNoz with support.
               </p>
             </div>
             <div className="mt-4 flex w-full flex-col items-start md:mt-0 md:w-[40%] md:items-end">
               <span className="text-2xl font-bold text-signoz_vanilla-100 md:text-3xl">Custom</span>
-              <div className="mt-1 text-sm text-signoz_vanilla-400">starts at $4000/month</div>
+              <div className="mt-1 text-sm text-signoz_vanilla-400">
+                SigNoz Cloud — Dedicated starts at USD 4,000 per month
+              </div>
             </div>
           </div>
 
@@ -52,25 +54,26 @@ export default function EnterpriseCard() {
               <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="text-signoz_vanilla-400">
-                    A dedicated environment on SigNoz cloud
-                  </span>
+                  <span className="text-signoz_vanilla-400">SigNoz Cloud — Dedicated</span>
                 </div>
                 <span className="ml-3 mt-1 flex items-center gap-2 text-sm italic text-signoz_vanilla-400">
                   <Info className="text-signoz_vanilla-500" size={14} />
-                  Includes monthly ingestion usage till $4000
+                  Includes monthly ingestion usage up to USD 4,000
                 </span>
               </div>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
               <span className="text-signoz_vanilla-400">
-                Bring your own cloud(managed by SigNoz in your cloud)
+                SigNoz Cloud — BYOC, managed by SigNoz in your cloud account
               </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-              <span className="text-signoz_vanilla-400">Self-host with support contract</span>
+              <span className="text-signoz_vanilla-400">
+                Self-Hosted SigNoz — enterprise support. Your team operates infrastructure, storage,
+                scaling, upgrades, and backups.
+              </span>
             </li>
           </ul>
 
@@ -85,7 +88,7 @@ export default function EnterpriseCard() {
             <li className="flex items-start gap-2">
               <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
               <span className="text-signoz_vanilla-400">
-                HIPAA, BAA agreement and other certifications
+                HIPAA and BAA options for eligible SigNoz Cloud contracts
               </span>
             </li>
             <li className="flex items-start gap-2">

@@ -75,19 +75,16 @@ const MetricsCostEstimation = () => {
               <div className="flex flex-col gap-7">
                 <div>
                   <div className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">
-                    Metrics price calculator
+                    SigNoz Cloud metrics price calculator
                   </div>
                   <div className="text-base font-normal text-signoz_vanilla-400">
-                    We use a transparent and usage-based pricing model that helps you prevent costs
-                    from ballooning.
+                    Estimate your managed SigNoz Cloud bill for metric samples and retention.
                   </div>
                 </div>
                 <div></div>
                 <div>
                   <div className="flex flex-col gap-2">
-                    <div className="text-sm text-signoz_vanilla-100">
-                      # of time series in million
-                    </div>
+                    <div className="text-sm text-signoz_vanilla-100">Time series (millions)</div>
                     <div>
                       <input
                         className="block w-full rounded-sm border border-signoz_slate-400 bg-signoz_ink-300 px-1.5 py-3 text-sm font-normal text-signoz_vanilla-100 "
@@ -125,7 +122,7 @@ const MetricsCostEstimation = () => {
                 <div>
                   <div className="flex flex-col gap-7">
                     <div className="flex justify-between text-sm text-signoz_vanilla-100">
-                      <div className=""> # of datapoints per minute in a time-series</div>
+                      <div className="">Datapoints per minute per time series</div>
                       <div className=""> {inputMetricsValue} </div>
                     </div>
                     <div>
@@ -170,14 +167,14 @@ const MetricsCostEstimation = () => {
                 <div>
                   <div className="flex items-center justify-between rounded-b-none rounded-t border border-transparent bg-signoz_ink-400 px-3 py-4 pt-4">
                     <span className="text-sm font-medium text-signoz_vanilla-100">
-                      # of samples in a month
+                      Samples per month
                     </span>
                     <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
                     <div>{formatNumber(totalSamplesMonthly)}</div>
                   </div>
                   <div className="flex items-center justify-between border border-transparent bg-signoz_ink-400 px-3 py-4 pt-4">
                     <span className="text-sm font-medium text-signoz_vanilla-100">
-                      Price (per million samples)
+                      USD per million samples
                     </span>
                     <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
                     <div className="justify-left metrics-background flex items-center gap-1">
@@ -188,12 +185,16 @@ const MetricsCostEstimation = () => {
                   </div>
                   <div className="flex items-center justify-between rounded-b border border-transparent bg-signoz_ink-300 px-3 py-4 pt-4">
                     <span className="text-sm font-medium text-signoz_vanilla-100">
-                      Monthly cost
+                      Estimated monthly SigNoz Cloud cost
                     </span>
                     <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
                     <div>${formatNumber(monthlyEstimate)}</div>
                   </div>
                 </div>
+                <p className="m-0 text-sm text-signoz_vanilla-400">
+                  This calculator does not estimate Self-Hosted SigNoz infrastructure, storage, or
+                  operations costs.
+                </p>
                 <div className="flex flex-col gap-4">
                   <Link
                     href="/teams/"

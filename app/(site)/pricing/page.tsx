@@ -3,17 +3,21 @@ import { Metadata } from 'next'
 import PricingV1 from './pricingv1/PricingV1'
 import DecimalClient from '@/components/Decimal/DecimalClient'
 
+const pricingDescription =
+  'SigNoz Cloud starts at USD 49 per month, including USD 49 of usage. Logs and traces start at USD 0.30 per GB ingested with 15-day retention, and metrics start at USD 0.10 per million samples with one-month retention.'
+
 export const metadata: Metadata = {
   title: {
     absolute: 'SigNoz | Pricing',
   },
   openGraph: {
     title: 'SigNoz | Pricing',
-    description:
-      'Explore SigNoz plans and pricing. Transparent & predictable with only usage-based pricing. No user-based pricing, no pricing based on containers, hosts, or nodes. No special pricing for custom metrics.',
+    description: pricingDescription,
   },
-  description:
-    'Explore SigNoz plans and pricing. Transparent & predictable with only usage-based pricing. No user-based pricing, no pricing based on containers, hosts, or nodes. No special pricing for custom metrics.',
+  twitter: {
+    description: pricingDescription,
+  },
+  description: pricingDescription,
 }
 
 export default function PricingPage() {

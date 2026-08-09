@@ -13,7 +13,7 @@ import {
 // StartUps Main Data
 export const StartUpsData = {
   TITLE: 'SigNoz for Startups',
-  DESC: "Observability That Doesn't Burn Your Startup Budget",
+  DESC: 'Managed observability that fits your startup budget',
   PRICE: {
     originalPrice: '$49',
     discountedPrice: '$19',
@@ -128,23 +128,28 @@ export const testimonials = [
 // FAQ Items Data
 export const faqItems = [
   {
-    question: 'Who is eligible for the SigNoz Startup Program?',
+    question: 'Who is eligible for the SigNoz Cloud Startup Program?',
     answer:
-      'Startups that are less than 3 years old, have fewer than 30 employees, and have raised less than $6 million in funding are eligible for our startup program.',
+      'Startups that are less than 3 years old, have fewer than 30 employees, and have raised less than USD 6 million in funding are eligible for the SigNoz Cloud Startup Program.',
   },
   {
     question: 'What comes included in $19?',
     answer:
-      "Our usage-based pricing is applicable for any data you send to SigNoz. If your usage doesn't cross $19, your monthly bill will be $19. If it does, final bill will be calculated based on the amount of data you sent to SigNoz.",
+      'The USD 19 monthly minimum includes USD 19 of SigNoz Cloud telemetry usage. Additional usage follows the published SigNoz Cloud rates.',
   },
   {
     question: 'How long does the startup pricing last?',
     answer:
-      'The startup pricing is available for 12 months. After that, you will transition to our regular pricing plans, which will be matched to your usage needs.',
+      'The startup pricing is available for 12 months. After that, you will move to standard SigNoz Cloud pricing for your usage.',
   },
   {
     question: 'Can we cancel our subscription at any time?',
     answer:
       'Yes, you can cancel your subscription at any time with no penalties. We believe in providing value, not locking you into contracts.',
+  },
+  {
+    question: 'Is this offer for Self-Hosted SigNoz?',
+    answer:
+      'No. This program is for SigNoz Cloud. Self-Hosted SigNoz users operate and pay for their own infrastructure, storage, scaling, upgrades, and backups.',
   },
 ]

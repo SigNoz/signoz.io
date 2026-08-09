@@ -10,7 +10,7 @@ const StartupProgram = () => {
       <div className="flex w-full min-w-0 flex-col sm:flex-row">
         <div className="w-full shrink-0 sm:w-[300px] sm:max-w-[300px] md:!w-[300px]">
           <p className="sticky top-[100px] px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-8">
-            SigNoz <br /> for <br /> Startups
+            SigNoz Cloud <br /> for <br /> Startups
           </p>
         </div>
         <div className="min-w-0 flex-[2_2_0%]">
@@ -21,8 +21,9 @@ const StartupProgram = () => {
                   Special Pricing
                 </p>
                 <p className="m-0 block text-sm font-normal leading-9 text-signoz_vanilla-400">
-                  Get 50% off on SigNoz standard pricing with our Startup Program -{' '}
-                  <span className="font-bold">just $19/month</span> instead of $49/month. <br />
+                  Eligible startups get SigNoz Cloud for{' '}
+                  <span className="font-bold">USD 19 per month</span> for the first 12 months
+                  instead of USD 49 per month. This includes USD 19 of telemetry usage. <br />
                   <br />
                   Perfect for early-stage companies looking for enterprise-grade observability that
                   won't burn your startup budget.

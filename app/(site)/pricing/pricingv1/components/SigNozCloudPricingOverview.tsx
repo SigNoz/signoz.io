@@ -126,7 +126,8 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
           <div className="flex-1 border-t border-dashed border-gray-500"></div>
           <div>
             <p className="mb-1">
-              Starts at <span className="line-through">$199</span> $49/month
+              Starts at <span className="line-through">USD 199</span> USD 49 per month, including
+              USD 49 of usage
             </p>
             <p className="mb-0 text-xs opacity-75"></p>
           </div>
@@ -138,7 +139,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
           <div className="text-left">
             <h4 className="mb-1 text-xl font-medium">Logs</h4>
             <p className="mb-0 text-sm text-gray-400">
-              ${getPrice('TRACES_AND_LOGS', logsRetentionPeriod)}/GB ingested
+              USD {getPrice('TRACES_AND_LOGS', logsRetentionPeriod).toFixed(2)} per GB ingested
             </p>
             <span className="relative cursor-pointer border-b border-gray-400 text-sm text-gray-400">
               {formatTracesAndLogsRetentionLabel(logsRetentionPeriod)}
@@ -159,7 +160,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
           <div className="text-left">
             <h4 className="mb-1 text-xl font-medium">Traces</h4>
             <p className="mb-0 text-sm text-gray-400">
-              ${getPrice('TRACES_AND_LOGS', tracesRetentionPeriod)}/GB ingested
+              USD {getPrice('TRACES_AND_LOGS', tracesRetentionPeriod).toFixed(2)} per GB ingested
             </p>
             <span className="relative cursor-pointer border-b border-gray-400 text-sm text-gray-400">
               {formatTracesAndLogsRetentionLabel(tracesRetentionPeriod)}
@@ -180,7 +181,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
           <div className="text-left">
             <h4 className="mb-1 text-xl font-medium">Metrics</h4>
             <p className="mb-0 text-sm text-gray-400">
-              ${getPrice('METRICS', metricsRetentionPeriod)}/mil samples
+              USD {getPrice('METRICS', metricsRetentionPeriod).toFixed(2)} per million samples
             </p>
             <span className="relative cursor-pointer border-b border-gray-400 text-sm text-gray-400">
               {metricsRetentionPeriod} month{metricsRetentionPeriod > 1 ? 's' : ''} retention

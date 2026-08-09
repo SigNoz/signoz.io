@@ -24,7 +24,7 @@ export default function PricingV1Page() {
           {/* Header */}
           <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
             <Heading type={1} className="z-[1]">
-              Simple Usage-based Predictable Observability Costs
+              SigNoz Cloud pricing: simple, predictable, and usage-based
             </Heading>
             <div className="hidden md:block">
               <SigNozCloudPricingOverview className="w-full" />
@@ -45,10 +45,11 @@ export default function PricingV1Page() {
                   🧮 Pricing Calculator
                 </div>
                 <h2 className="mb-4 text-2xl font-bold text-signoz_vanilla-100 md:text-3xl">
-                  Calculate Your Exact Monthly Bill
+                  Calculate your SigNoz Cloud monthly bill
                 </h2>
                 <p className="mx-auto max-w-2xl text-lg text-signoz_vanilla-400">
-                  Get an instant estimate based on your usage. No surprises, no hidden fees.
+                  Get an instant estimate based on your SigNoz Cloud usage. No surprises or hidden
+                  fees.
                 </p>
               </div>
               <PricingCalculator />
