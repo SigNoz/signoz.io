@@ -14,7 +14,7 @@ export default MigrateFromNewRelic
 
 const DATA = {
   TITLE: 'Migrate easily from New Relic',
-  DESC: 'Please provide your contact info and we will reach out to you. We will understand your requirements and help you get started with SigNoz.',
+  DESC: 'Please provide your contact information. We will review your requirements and help you migrate to SigNoz Cloud.',
   PORTAL_ID: '22308423',
   FORM_ID: '69d0c2ab-c0b8-4303-8cc7-661c8001b91e',
 }

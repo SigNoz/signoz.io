@@ -5,10 +5,10 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Migrate from NewRelic',
-  description: 'Migrate from NewRelic | SigNoz',
+  description: 'Request expert help to migrate from New Relic to SigNoz Cloud.',
   openGraph: {
     title: 'Migrate from NewRelic | SigNoz',
-    description: 'Migrate from NewRelic | SigNoz',
+    description: 'Request expert help to migrate from New Relic to SigNoz Cloud.',
     url: `${siteMetadata.siteUrl}/product-comparison/migrate-from-newrelic`,
     siteName: siteMetadata.title,
     locale: 'en_US',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: 'Migrate from NewRelic | SigNoz',
-    description: 'Migrate from NewRelic | SigNoz',
+    description: 'Request expert help to migrate from New Relic to SigNoz Cloud.',
     images: [siteMetadata.socialBanner],
     site: siteMetadata.twitter,
   },

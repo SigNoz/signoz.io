@@ -5,10 +5,10 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'New Relic Savings',
-  description: 'New Relic Savings | SigNoz',
+  description: 'Request a New Relic cost comparison for your move to SigNoz Cloud.',
   openGraph: {
     title: 'New Relic Savings | SigNoz',
-    description: 'New Relic Savings | SigNoz',
+    description: 'Request a New Relic cost comparison for your move to SigNoz Cloud.',
     url: `${siteMetadata.siteUrl}/product-comparison/newrelic-savings`,
     siteName: siteMetadata.title,
     locale: 'en_US',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: 'New Relic Savings | SigNoz',
-    description: 'New Relic Savings | SigNoz',
+    description: 'Request a New Relic cost comparison for your move to SigNoz Cloud.',
     images: [siteMetadata.socialBanner],
     site: siteMetadata.twitter,
   },

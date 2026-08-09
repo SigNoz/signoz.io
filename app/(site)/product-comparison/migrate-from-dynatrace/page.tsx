@@ -5,10 +5,10 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Migrate from Dynatrace',
-  description: 'Migrate from Dynatrace | SigNoz',
+  description: 'Request expert help to migrate from Dynatrace to SigNoz Cloud.',
   openGraph: {
     title: 'Migrate from Dynatrace | SigNoz',
-    description: 'Migrate from Dynatrace | SigNoz',
+    description: 'Request expert help to migrate from Dynatrace to SigNoz Cloud.',
     url: `${siteMetadata.siteUrl}/product-comparison/migrate-from-dynatrace`,
     siteName: siteMetadata.title,
     locale: 'en_US',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: 'Migrate from Dynatrace | SigNoz',
-    description: 'Migrate from Dynatrace | SigNoz',
+    description: 'Request expert help to migrate from Dynatrace to SigNoz Cloud.',
     images: [siteMetadata.socialBanner],
     site: siteMetadata.twitter,
   },
