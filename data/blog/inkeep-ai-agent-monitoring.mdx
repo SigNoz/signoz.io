@@ -6,7 +6,7 @@ published_date: 2025-12-15
 updated_date: 2026-07-02
 tags: [AI & LLM Observability]
 authors: [anushka_karmakar]
-description: "How Inkeep monitors its AI agent framework with SigNoz and OpenTelemetry: tracing agent runs, tool calls, and token usage via GenAI conventions."
+description: "Inkeep uses Self-Hosted SigNoz for local development and SigNoz Cloud in production to trace agent runs, tool calls, and token usage."
 image: /img/blog/2025/12/inkeep-signoz-monitoring.webp
 keywords: [AI agent monitoring, LLM observability, Inkeep, SigNoz, OpenTelemetry for AI, AI agent framework, trace API, ClickHouse observability, agent debugging, AI monitoring tools]
 related_articles:
@@ -20,7 +20,7 @@ AI agents are fundamentally different beasts to monitor compared to traditional 
 
 <a href="https://inkeep.com/" rel="noopener noreferrer nofollow" target="_blank">**InKeep**</a> builds an agent framework that developers use to create production AI agents. When you're providing a framework, observability isn't optional because it's a product feature. Developers building agents with your framework will hit issues and need to debug them. If your framework doesn't provide visibility into what's happening, you're forcing every developer to figure out observability on their own.
 
-That's why Inkeep integrated SigNoz directly into their framework. Agents built with Inkeep come with observability out of the box.
+That's why Inkeep integrated both deployment paths directly into their framework: Self-Hosted SigNoz for local development and SigNoz Cloud in production. Agents built with Inkeep come with observability out of the box.
 
 ## The Inkeep Agent Framework
 
@@ -93,7 +93,7 @@ Developers building with Inkeep's framework typically start locally. They run th
 
 [Robert Tran](https://www.linkedin.com/in/robert-tran-profile/) emphasizes why this mattered: "The parity between local development and production was the deciding factor for us. Our engineers can spin up SigNoz locally with Docker to debug agent loops on their laptops, and then get that exact same visibility in production. It aligns perfectly with our 'push/pull' workflow - you can fix a performance bottleneck locally and be confident it's solved in the cloud."
 
-In practice, switching from local SigNoz to SigNoz Cloud is an environment variable change. Same traces, same dashboards, same debugging experience.
+In practice, Inkeep uses Self-Hosted SigNoz for local development and SigNoz Cloud in production. Switching between them is an environment variable change. Same traces, same dashboards, same debugging experience.
 
 ## How the Framework Instruments Agents
 
@@ -253,7 +253,7 @@ Singh explains: "The Trace API changed how we think about observability. It's no
 
 ### 4. Local Development Matters
 
-Running SigNoz locally with Docker isn't just convenient; it's fundamental. Developers building with Inkeep's framework can test agent configurations with full observability before deploying, debug performance issues with realistic trace volumes, and develop custom observability tooling without touching production.
+Running Self-Hosted SigNoz locally with Docker isn't just convenient; it's fundamental. Developers building with Inkeep's framework can test agent configurations with full observability before deploying, debug performance issues with realistic trace volumes, and develop custom observability tooling without touching production.
 
 Tran emphasizes: "This workflow alignment is huge. Developers aren't flying blind when they deploy because they've already seen the traces locally."
 
@@ -267,7 +267,7 @@ The framework's instrumentation makes this distinction clear in flamegraphs. Dev
 
 AI agents aren't like traditional applications. The non-deterministic behavior, multi-step workflows, and external dependencies create observability challenges that standard monitoring tools don't address well.
 
-For Inkeep, integrating SigNoz into their framework solved this by providing:
+For Inkeep, using Self-Hosted SigNoz locally and SigNoz Cloud in production solved this by providing:
 
 - Programmatic trace access via the Trace API
 - Fast queries over high-cardinality data with ClickHouse
