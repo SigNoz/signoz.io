@@ -104,6 +104,15 @@ test('shouldRewritePageToMarkdown excludes file-like paths', () => {
   assert.equal(shouldRewritePageToMarkdown('/llms.txt.md', false), false)
 })
 
+test('shouldRewritePageToMarkdown leaves markdown sitemap routes alone', () => {
+  assert.equal(shouldRewritePageToMarkdown('/blogs/sitemap.md', false), false)
+  assert.equal(shouldRewritePageToMarkdown('/blogs/sitemap.md', true), false)
+  assert.equal(shouldRewritePageToMarkdown('/products/sitemap.md', false), false)
+  assert.equal(shouldRewritePageToMarkdown('/corporate/sitemap.md', false), false)
+  assert.equal(shouldRewritePageToMarkdown('/alternatives/sitemap.md', false), false)
+  assert.equal(servesMarkdownAlternate('/blogs/sitemap.md'), false)
+})
+
 test('buildPageMarkdownRewritePath maps paths to the internal page route', () => {
   assert.equal(buildPageMarkdownRewritePath('/pricing.md'), '/api/page-markdown/pricing')
   assert.equal(buildPageMarkdownRewritePath('/pricing/'), '/api/page-markdown/pricing')

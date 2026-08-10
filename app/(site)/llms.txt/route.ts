@@ -57,7 +57,8 @@ export async function GET(request: Request) {
     '## Optional',
     '',
     `- [Docs sitemap (markdown)](${siteMetadata.siteUrl}/docs/sitemap.md): Markdown index of every SigNoz documentation page.`,
-    `- [llms-full.txt](${siteMetadata.siteUrl}/llms-full.txt): The complete SigNoz documentation in a single markdown file.`,
+    `- [Blog & content sitemap (markdown)](${siteMetadata.siteUrl}/blogs/sitemap.md): Markdown index of every blog post, guide, FAQ, case study, OpenTelemetry article, and comparison.`,
+    `- [llms-full.txt](${siteMetadata.siteUrl}/llms-full.txt): Entry-point map of all SigNoz content — docs, blog, product, alternatives, and company pages — with links to markdown sitemaps.`,
     '',
   ].join('\n')
 

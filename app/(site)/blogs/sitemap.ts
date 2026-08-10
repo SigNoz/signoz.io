@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCMSContent } from 'utils/cmsContent'
+import { CMS_SITEMAP_SECTIONS } from '@/utils/sitemapRoutes'
 import { compareSitemapEntries, toSitemapDateOnly } from 'utils/sitemapXml'
 import { resolveLatestDate } from '@/utils/dateUtils'
 
@@ -71,12 +72,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }))
   }
 
-  const staticRoutes = ['blog', 'guides', 'faqs', 'case-study', 'opentelemetry', 'comparisons'].map(
-    (route) => ({
-      url: `${siteUrl}/${route}/`,
-      changeFrequency: 'weekly' as const,
-    })
-  )
+  const staticRoutes = CMS_SITEMAP_SECTIONS.map(({ section }) => ({
+    url: `${siteUrl}/${section}/`,
+    changeFrequency: 'weekly' as const,
+  }))
 
   const allRoutes: MetadataRoute.Sitemap = [
     ...staticRoutes,

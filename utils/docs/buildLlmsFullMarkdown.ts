@@ -1,143 +1,90 @@
 import siteMetadata from '@/data/siteMetadata'
-import { fetchAllDocsForPage } from '@/utils/cachedData'
-import { getDocsRouteList, INTRO_DESCRIPTION } from './agentDiscovery'
 import {
-  buildIntroductionSectionsMarkdown,
-  INTRO_MARKDOWN_TITLE,
-} from './buildIntroductionAgentMarkdown'
+  ALTERNATIVES_SITEMAP_ROUTES,
+  CMS_SITEMAP_SECTIONS,
+  CORPORATE_SITEMAP_ROUTES,
+  PRODUCT_SITEMAP_ROUTES,
+  routeLabel,
+  routeUrl,
+} from '@/utils/sitemapRoutes'
+import { getLlmStarterLinks, type LlmStarterLink } from './agentDiscovery'
 
-type LlmsDoc = {
-  slug?: string
-  title?: string
-  description?: string
-  summary?: string
-  draft?: boolean
-  body?: { raw?: string }
-}
+const link = (label: string, url: string, description?: string): string =>
+  description ? `- [${label}](${url}): ${description}` : `- [${label}](${url})`
 
-const parseAttribute = (attributes: string, name: string): string | null => {
-  const match = attributes.match(new RegExp(`\\b${name}=["']([^"']*)["']`))
-  return match ? match[1] : null
-}
+const starterLink = (item: LlmStarterLink): string =>
+  link(item.label, `${siteMetadata.siteUrl}${item.route}/`, item.description)
 
-const figureToImage = (attributes: string): string => {
-  const src = parseAttribute(attributes, 'src')
-  if (!src) return ''
-  const alt = parseAttribute(attributes, 'alt') || ''
-  const caption = parseAttribute(attributes, 'caption')
-  return caption ? `![${alt}](${src})\n*${caption}*` : `![${alt}](${src})`
-}
+const routeLinks = (routes: readonly string[]): string =>
+  routes.map((route) => link(routeLabel(route), routeUrl(route))).join('\n')
 
-const labeledTagToHeading = (attributes: string): string => {
-  const label = parseAttribute(attributes, 'label') || parseAttribute(attributes, 'value')
-  return label ? `**${label}**` : ''
-}
-
-const admonitionToLabel = (attributes: string): string => {
-  const type = parseAttribute(attributes, 'type')
-  const title = parseAttribute(attributes, 'title')
-  const formattedType = type ? type.charAt(0).toUpperCase() + type.slice(1) : null
-  const label = [formattedType, title].filter(Boolean).join(': ')
-  return label ? `**${label}**` : ''
-}
-
-// Attribute run for a single tag: spans newlines, allows > inside quoted
-// values (e.g. label="Version >= 0.76.0"), but cannot cross the closing >.
-const ATTRS = `(?:[^>"']|"[^"]*"|'[^']*')*`
-
-const cleanSegment = (segment: string): string =>
-  segment
-    // Multi-line and single-line import/export statements.
-    .replace(/^import\s[\s\S]*?from\s+['"][^'"]+['"];?[^\S\n]*$/gm, '')
-    .replace(/^import\s+['"][^'"]+['"];?[^\S\n]*$/gm, '')
-    .replace(/^export\s+(?:const|default|function)\b[^\n]*$/gm, '')
-    // MDX comments.
-    .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
-    // Figures become plain markdown images.
-    .replace(new RegExp(`<Figure\\b(${ATTRS}?)/>`, 'g'), (_match, attributes) =>
-      figureToImage(attributes)
-    )
-    // Keep tab/admonition labels so the surrounding content stays attributed.
-    .replace(new RegExp(`<(?:TabItem|CodeTab)\\b(${ATTRS})>`, 'g'), (_match, attributes) =>
-      labeledTagToHeading(attributes)
-    )
-    .replace(new RegExp(`<Admonition\\b(${ATTRS})>`, 'g'), (_match, attributes) =>
-      admonitionToLabel(attributes)
-    )
-    // Remaining component tags (self-closing, opening, closing) are dropped.
-    .replace(new RegExp(`</?[A-Z][\\w.]*\\b${ATTRS}>`, 'g'), '')
-
-export const cleanDocSourceForLlms = (source: string): string => {
-  // Fenced code blocks pass through untouched so JSX/XML examples survive.
-  const segments = source.split(/(```[\s\S]*?```)/)
-  const cleaned = segments
-    .map((segment, index) => (index % 2 === 1 ? segment : cleanSegment(segment)))
-    .join('')
-
-  return cleaned.replace(/\n{3,}/g, '\n\n').trim()
-}
-
-const normalizeDescription = (doc: LlmsDoc): string | undefined => {
-  const value = doc.description || doc.summary
-  if (typeof value !== 'string') return undefined
-  const collapsed = value.replace(/\s+/g, ' ').trim()
-  return collapsed.length > 0 ? collapsed : undefined
-}
-
-const buildDocSection = (doc: LlmsDoc): string => {
-  const parts = [`## ${doc.title}`, `URL: ${siteMetadata.siteUrl}/docs/${doc.slug}/`]
-  const description = normalizeDescription(doc)
-  if (description) {
-    parts.push(description)
-  }
-  const body = cleanDocSourceForLlms(doc.body?.raw || '')
-  if (body) {
-    parts.push(body)
-  }
-  return parts.join('\n\n')
-}
-
-const buildIntroductionSection = (): string =>
-  [
-    `## ${INTRO_MARKDOWN_TITLE}`,
-    `URL: ${siteMetadata.siteUrl}/docs/introduction/`,
-    INTRO_DESCRIPTION,
-    // Demote the intro's section headings below the per-doc heading level.
-    buildIntroductionSectionsMarkdown().replace(/^## /gm, '### '),
-  ].join('\n\n')
-
+/**
+ * Entry-point map of all SigNoz content. Every page already serves its own
+ * markdown (`.md` suffix / Accept negotiation), so this file lists where to
+ * start — key docs plus every product, alternatives, and company page — and
+ * delegates exhaustive listings to the per-section markdown sitemaps that
+ * mirror the XML sitemap segments.
+ */
 export async function buildLlmsFullMarkdown(): Promise<string> {
-  const [docs, routeList] = await Promise.all([fetchAllDocsForPage(), getDocsRouteList()])
+  const starters = await getLlmStarterLinks()
 
-  const publishable = (docs as LlmsDoc[]).filter(
-    (doc) => !doc.draft && typeof doc.slug === 'string' && doc.slug.length > 0 && doc.title
-  )
-
-  const navOrder = new Map(routeList.map((item, index) => [item.route, index]))
-  const inNav: LlmsDoc[] = []
-  const outOfNav: LlmsDoc[] = []
-  for (const doc of publishable) {
-    if (navOrder.has(`/docs/${doc.slug}`)) {
-      inNav.push(doc)
-    } else {
-      outOfNav.push(doc)
-    }
-  }
-  inNav.sort(
-    (a, b) => (navOrder.get(`/docs/${a.slug}`) ?? 0) - (navOrder.get(`/docs/${b.slug}`) ?? 0)
-  )
-  outOfNav.sort((a, b) => (a.slug as string).localeCompare(b.slug as string))
-
-  const sections = [
-    buildIntroductionSection(),
-    ...[...inNav, ...outOfNav].map((doc) => buildDocSection(doc)),
-  ]
-
-  const header = [
-    '# SigNoz Documentation',
-    '',
-    '> Complete SigNoz documentation in a single markdown file. For the curated index, see https://signoz.io/llms.txt. Markdown versions of individual pages are available by appending `.md` to documentation URLs.',
+  const documentation = [
+    link(
+      'Docs sitemap (markdown)',
+      `${siteMetadata.siteUrl}/docs/sitemap.md`,
+      'Markdown index of every SigNoz documentation page.'
+    ),
+    ...starters.map(starterLink),
   ].join('\n')
 
-  return [header, ...sections].join('\n\n---\n\n')
+  const learning = [
+    link(
+      'Blog & content sitemap (markdown)',
+      `${siteMetadata.siteUrl}/blogs/sitemap.md`,
+      'Markdown index of every blog post, guide, FAQ, case study, OpenTelemetry article, and comparison.'
+    ),
+    ...CMS_SITEMAP_SECTIONS.map(({ section, label }) => link(label, routeUrl(section))),
+  ].join('\n')
+
+  const product = [
+    link('Product pages sitemap (markdown)', `${siteMetadata.siteUrl}/products/sitemap.md`),
+    routeLinks(PRODUCT_SITEMAP_ROUTES),
+  ].join('\n')
+
+  const alternatives = [
+    link('Alternatives sitemap (markdown)', `${siteMetadata.siteUrl}/alternatives/sitemap.md`),
+    routeLinks(ALTERNATIVES_SITEMAP_ROUTES),
+  ].join('\n')
+
+  const company = [
+    link('Company pages sitemap (markdown)', `${siteMetadata.siteUrl}/corporate/sitemap.md`),
+    routeLinks(CORPORATE_SITEMAP_ROUTES),
+  ].join('\n')
+
+  return [
+    '# SigNoz',
+    '',
+    `> Entry points to all SigNoz content. Every page serves a markdown version: append \`.md\` to the page URL or request it with \`Accept: text/markdown\`. For the curated quick-start index, see ${siteMetadata.siteUrl}/llms.txt.`,
+    '',
+    '## Documentation',
+    '',
+    documentation,
+    '',
+    '## Blog & learning content',
+    '',
+    learning,
+    '',
+    '## Product',
+    '',
+    product,
+    '',
+    '## Alternatives & migration',
+    '',
+    alternatives,
+    '',
+    '## Company',
+    '',
+    company,
+    '',
+  ].join('\n')
 }
