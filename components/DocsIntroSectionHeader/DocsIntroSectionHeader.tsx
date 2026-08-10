@@ -35,7 +35,7 @@ export default function DocsIntroSectionHeader({
           </h2>
           <p className="text-base leading-relaxed text-[var(--l3-foreground)]">{description}</p>
           {hasGuides && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" data-markdown-ignore>
               {guidesCount != null &&
                 (viewAllHref ? (
                   <Link href={viewAllHref} className={CHIP_LINK_CLASS}>
@@ -64,7 +64,10 @@ export default function DocsIntroSectionHeader({
           )}
         </div>
       </div>
-      <div className="pointer-events-none relative z-0 hidden w-1/3 flex-shrink-0 overflow-visible border-b border-dashed border-[var(--l2-border)] lg:block">
+      <div
+        className="pointer-events-none relative z-0 hidden w-1/3 flex-shrink-0 overflow-visible border-b border-dashed border-[var(--l2-border)] lg:block"
+        data-markdown-ignore
+      >
         {illustration && (
           <div className="absolute inset-x-0 -bottom-28 top-12">
             <FloatingRingsScene src={illustration} alt={illustrationAlt} />
