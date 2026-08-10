@@ -1,0 +1,76 @@
+---
+date: 2026-08-03
+title: GCP Integration - Monitor Google Cloud Metrics
+description: Learn how the SigNoz GCP integration works. Connect a Google Cloud account, deploy an OpenTelemetry Collector, and stream Cloud Monitoring metrics into SigNoz.
+doc_type: explanation
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+---
+
+The **SigNoz GCP Integration** brings metrics from your Google Cloud services into SigNoz, with pre-built dashboards for supported services. You connect a GCP account in the SigNoz UI, deploy an OpenTelemetry Collector inside your own GCP project, and point it at SigNoz.
+
+This first release uses a **manual flow**: you create and own the GCP resources (a service account and an OpenTelemetry Collector). SigNoz guides you through each resource with the docs in this section.
+
+<Admonition type="info">
+The GCP integration is available on **SigNoz Cloud** and **SigNoz Enterprise (Self-Hosted)**. Logs and traces are **not** part of this integration. Send traces by [instrumenting your applications](https://signoz.io/docs/instrumentation/) directly.
+</Admonition>
+
+## How it works
+
+GCP does not PUSH telemetry to third parties, so SigNoz collects it with an OpenTelemetry Collector that runs **inside your GCP project**:
+
+- **Metrics** live in **Cloud Monitoring** and are pulled through the Monitoring API. The Collector's <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/googlecloudmonitoringreceiver" target="_blank" rel="noopener noreferrer nofollow">`googlecloudmonitoring`</a> receiver scrapes them on an interval and exports them to SigNoz over OTLP.
+
+The Collector must run in your environment because the Monitoring API authenticates callers as a GCP service account, not with a SigNoz ingestion key, so SigNoz cannot read your metrics directly. The Collector runs where those credentials live, which also keeps the pipeline within GCP's trust boundary.
+
+<Admonition type="info">
+These guides use **Cloud Run** for the Collector because it is the quickest managed option, but it is **not required**. You can run the Collector on any compute you prefer (a Compute Engine VM, GKE, an existing Kubernetes cluster, or a <a href="https://cloud.google.com/run/docs/resource-model" target="_blank" rel="noopener noreferrer nofollow">Cloud Run worker pool</a>). The metrics receiver works anywhere it can authenticate to the Monitoring API.
+</Admonition>
+
+<Figure
+  src="/img/docs/integrations/gcp/gcp-integration-architecture.webp"
+  alt="Architecture diagram: Cloud Monitoring flows into an OpenTelemetry Collector on Cloud Run, which exports metrics to SigNoz over OTLP"
+  caption="GCP integration architecture: an OpenTelemetry Collector in your project pulls metrics from Cloud Monitoring, then exports them to SigNoz"
+  className="box-shadowed-image"
+/>
+
+## Setup
+
+Choose how you want to connect GCP to SigNoz:
+
+<DocCardContainer>
+
+<DocCard
+    title="Manual Setup"
+    description="Create and own the GCP resources yourself: a service account and an OpenTelemetry Collector. Available now."
+    href="https://signoz.io/docs/integrations/gcp/manual-setup/"
+/>
+
+<div className="block rounded border border-solid border-[var(--l1-border)] bg-[var(--l2-background)] p-4 opacity-60">
+    <div className="flex flex-col gap-6">
+        <div className="text-base font-medium leading-none text-[var(--l1-foreground)]">SigNoz Agent (Coming soon)</div>
+        <p className="m-0 text-[13px] leading-5 tracking-[-0.065px] text-[var(--l2-foreground)]">SigNoz deploys and manages the Collector for you: connect your GCP account, toggle a service on, and SigNoz provisions the metric receivers in the background.</p>
+    </div>
+</div>
+
+</DocCardContainer>
+
+## Supported services
+
+Once the Collector is running, enable the individual GCP services you want to monitor. Each service page lists the metrics to add to your Collector config and ships with a pre-built SigNoz dashboard.
+
+<Listicle name="gcp-services" />
+
+<Admonition type="info">
+More services are being added. Each one is configured the same way: add its metric names to the `googlecloudmonitoring` receiver.
+</Admonition>
+
+## Costs to expect
+
+The manual flow runs resources in your GCP project, so the cost is billed to you, not SigNoz. Plan for:
+
+- **Cloud Run (Collector):** roughly **~$110/month** for a Collector sized at 2 vCPU and 4 GiB running continuously. This is a comfortable default; if you ingest low volumes, you can pick a smaller configuration (for example, 1 vCPU and 1–2 GiB) to lower the cost. Size it to your throughput and scale up only if the Collector shows memory pressure or dropped data. See <a href="https://cloud.google.com/run#pricing" target="_blank" rel="noopener noreferrer nofollow">Cloud Run pricing</a>.
+- **Monitoring API (metrics):** **$0.01 per 1,000 read calls**, with the first 1 million read calls free per billing account each month. Write calls are free. See <a href="https://cloud.google.com/stackdriver/pricing" target="_blank" rel="noopener noreferrer nofollow">Cloud Monitoring pricing</a>.
+
+## Get Help
+
+<GetHelp />
