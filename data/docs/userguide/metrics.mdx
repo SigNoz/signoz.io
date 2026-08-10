@@ -58,7 +58,39 @@ OTEL_RESOURCE_ATTRIBUTES="service.name=flaskApp,service.namespace=sampleapps,dep
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument python3 app.py
 ```
 
-The Services section does not support any other filter dimension.
+<Admonition type="info" title="Self-hosted Kubernetes (Helm): add more filter dimensions" defaultCollapsed="true">
+Self-hosted deployments on Kubernetes can add more filter dimensions to the Services section.
+
+1. Send the attribute as a resource attribute on your spans.
+2. Add the attribute name to the `dimensions` list in your Helm values. List every dimension you keep, because Helm replaces the list.
+
+```yaml:values.yaml {11}
+otelCollector:
+  config:
+    processors:
+      signozspanmetrics/delta:
+        dimensions:
+          - name: service.namespace
+            default: default
+          - name: deployment.environment
+            default: default
+          - name: signoz.collector.id
+          - name: team # your custom dimension
+```
+
+3. Apply the values file:
+
+```bash
+helm upgrade <release-name> signoz/signoz -n <namespace> -f values.yaml
+```
+
+**Verify these values:**
+
+- `<release-name>`: The name of your [SigNoz Helm release](https://signoz.io/docs/install/kubernetes/). Run `helm list -A` to find it.
+- `<namespace>`: The Kubernetes namespace that runs SigNoz. The same `helm list -A` output shows it.
+
+The new dimension appears in the filter bar for new data. Keep the list short, because each dimension increases the number of span metric time series.
+</Admonition>
 
 ## Global Time
 
