@@ -101,7 +101,10 @@ function Footer({ inDocsShell = false }: FooterProps) {
   const stackStartClass = stackEarly ? 'max-lg:justify-start' : 'max-md:justify-start'
 
   return (
-    <div className="z-[10] flex min-w-0 shrink-0 flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px]">
+    <div
+      className="z-[10] flex min-w-0 shrink-0 flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px]"
+      data-markdown-ignore
+    >
       <div
         className={cn(
           'flex w-full min-w-0 items-center px-4 py-14 max-md:max-w-full',
