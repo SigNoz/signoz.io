@@ -116,6 +116,18 @@ module.exports = () => {
           source: '/(.*)',
           headers: securityHeaders,
         },
+        // Pages serve both HTML and markdown (Accept: text/markdown / .md
+        // suffix), so caches must vary on the Accept header. Static assets and
+        // API routes are excluded.
+        {
+          source: '/((?!api/|_next/|favicon.ico).*)',
+          headers: [
+            {
+              key: 'Vary',
+              value: 'Accept',
+            },
+          ],
+        },
       ]
     },
     async rewrites() {
