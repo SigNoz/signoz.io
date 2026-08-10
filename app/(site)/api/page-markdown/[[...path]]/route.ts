@@ -105,6 +105,7 @@ export async function GET(request: Request, props: { params: Promise<{ path?: st
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',
       'Cache-Control': CACHE_CONTROL_HEADER,
+      'X-Robots-Tag': 'noindex',
       Vary: 'Accept',
     },
   })
