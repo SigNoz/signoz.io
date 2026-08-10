@@ -698,6 +698,15 @@ const ALL_FEATURES_DATA = {
   ],
 }
 
+function cellToMarkdown(node: React.ReactNode): string {
+  if (React.isValidElement(node)) {
+    if (node.type === CheckSolid) return '✓'
+    if (node.type === CrossSolid) return '✗'
+  }
+  // Empty string defers to the rendered cell text (e.g. "COMING SOON", "ADD ON").
+  return ''
+}
+
 function toPricingSections(): ComparisonSection[] {
   return ALL_FEATURES_DATA.ROWS.map((section) => ({
     title: section.section,
@@ -708,10 +717,16 @@ function toPricingSections(): ComparisonSection[] {
           {f.feature}
         </h4>
       ),
+      markdownFeature: f.feature,
       cells: {
         community: f.inCommunity,
         teams: f.inTeams,
         enterprise: f.inEnterprise,
+      },
+      markdownCells: {
+        community: cellToMarkdown(f.inCommunity),
+        teams: cellToMarkdown(f.inTeams),
+        enterprise: cellToMarkdown(f.inEnterprise),
       },
     })),
   }))
@@ -800,6 +815,7 @@ const ExploreAllFeatures: React.FC = () => {
           stickyBg="bg-[#0f1013]"
           featureCellClassName="col-span-3 md:col-span-1"
           featureSectionClassName="col-span-3 pl-6 pr-2 md:col-span-1"
+          markdownColumnLabels={['Feature', 'Community Edition', 'Teams', 'Enterprise']}
         />
 
         {/* Bottom rounded corner for Teams column */}
