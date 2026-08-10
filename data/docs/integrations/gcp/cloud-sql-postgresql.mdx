@@ -1,28 +1,28 @@
 ---
 date: 2026-08-03
-title: Monitor GCP Cloud SQL for PostgreSQL Metrics and Logs
-description: Collect Cloud SQL for PostgreSQL metrics and logs in SigNoz. Add the metrics to your OpenTelemetry Collector and route Postgres logs through Pub/Sub.
+title: Monitor GCP Cloud SQL for PostgreSQL Metrics
+description: Collect Cloud SQL for PostgreSQL metrics in SigNoz. Add the metrics to your OpenTelemetry Collector and view them on a pre-built dashboard.
 doc_type: howto
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
 
-The **Cloud SQL for PostgreSQL** integration brings instance metrics (availability, CPU, memory, disk, connections, transactions, vacuum age, query execution time, and replication lag) and PostgreSQL server logs into SigNoz, with a pre-built dashboard for the service.
+The **Cloud SQL for PostgreSQL** integration brings instance metrics (availability, CPU, memory, disk, connections, transactions, vacuum age, query execution time, and replication lag) into SigNoz, with a pre-built dashboard for the service.
 
-Cloud SQL publishes its metrics to **Cloud Monitoring** and its server logs to **Cloud Logging**. SigNoz reads both through the OpenTelemetry Collector running in your GCP project.
+Cloud SQL publishes its metrics to **Cloud Monitoring**. SigNoz reads them through the OpenTelemetry Collector running in your GCP project.
 
 ## Choose a setup method
 
 <Tabs entityName="setup">
 <TabItem value="manual" label="Manual setup" default>
 
-**Available now.** You run the OpenTelemetry Collector in your own GCP project and add Cloud SQL metrics to its configuration. You control which metrics are pulled, how often, and which logs are routed.
+**Available now.** You run the OpenTelemetry Collector in your own GCP project and add Cloud SQL metrics to its configuration. You control which metrics are pulled and how often.
 
 Complete the [GCP integration setup](https://signoz.io/docs/integrations/gcp/manual-setup/) once, then follow the steps on this page for each Cloud SQL instance you want to monitor.
 
 </TabItem>
 <TabItem value="agent" label="SigNoz agent (coming soon)">
 
-**Coming soon.** SigNoz will deploy and manage the Collector for you: you connect your GCP account, toggle the service on, and SigNoz provisions the metric receivers and log routing in the background. No Collector configuration to maintain.
+**Coming soon.** SigNoz will deploy and manage the Collector for you: you connect your GCP account, toggle the service on, and SigNoz provisions the metric receivers in the background. No Collector configuration to maintain.
 
 Until then, use the **Manual setup** tab.
 
@@ -36,17 +36,13 @@ Before configuring this service, complete the shared GCP integration setup:
 - Your [GCP account is connected in SigNoz](https://signoz.io/docs/integrations/gcp/connect-gcp-account/), and the project running your Cloud SQL instances is in [**Projects to Monitor**](https://signoz.io/docs/integrations/gcp/manual-setup/#connection-fields).
 - The [OpenTelemetry Collector is deployed and running](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/).
 - The `signoz-integration` service account has `roles/monitoring.viewer` on the project that hosts the instances. See [Create a service account](https://signoz.io/docs/integrations/gcp/create-service-account/#step-3-grant-metrics-permission-on-each-monitored-project).
-- The **Cloud Monitoring API** is enabled in that project. For logs, the **Cloud Logging API**, the **Pub/Sub API**, and a working [log pipeline](https://signoz.io/docs/integrations/gcp/collect-logs/) are also required.
-
-<Admonition type="info">
-Metrics and logs are independent. You can enable metrics only, and add logs later.
-</Admonition>
+- The **Cloud Monitoring API** is enabled in that project.
 
 ## Step 1: Enable the service in SigNoz
 
 1. In SigNoz, go to **Integrations** > **Google Cloud Platform**.
 2. Select **GCP Cloud SQL for PostgreSQL** from the service list.
-3. Toggle **Metric Collection** on to activate the pre-built dashboard. Toggle **Log Collection** on if you also route Postgres logs.
+3. Toggle **Metric Collection** on to activate the pre-built dashboard.
 4. Open the **Data Collected** tab and note the metrics listed there. These are the metrics the dashboard's panels query.
 
 <Admonition type="warning">
@@ -104,33 +100,11 @@ The Collector loads its config from the `signoz-collector-config` secret, so a c
 2. Add a new secret version ([step 2 of Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-2-store-the-config-in-secret-manager)).
 3. Redeploy the Cloud Run service ([step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-3-deploy-to-cloud-run)).
 
-## Step 4: Route Cloud SQL logs
-
-Cloud SQL writes PostgreSQL server logs to Cloud Logging. To get them into SigNoz, follow [Collect logs](https://signoz.io/docs/integrations/gcp/collect-logs/) to create the Pub/Sub topic and the push subscription. When you reach [step 4, Create a log sink](https://signoz.io/docs/integrations/gcp/collect-logs/#step-4-create-a-log-sink-per-monitored-project), use this as the sink's **Build inclusion filter** value so it routes only Cloud SQL logs:
-
-```
-resource.type="cloudsql_database"
-```
-
-To narrow it to a single instance, add the instance's `database_id` (formatted as `<project-id>:<instance-id>`):
-
-```
-resource.type="cloudsql_database"
-resource.labels.database_id="<monitored-project-id>:<instance-id>"
-```
-
-<Admonition type="warning">
-Add a matching **exclusion filter** on the project's `_Default` sink, or you pay to store the same logs in both Cloud Logging and SigNoz. See [Avoid duplicate log costs](https://signoz.io/docs/integrations/gcp/collect-logs/#step-6-avoid-duplicate-log-costs).
-</Admonition>
-
-Which logs Cloud SQL emits depends on the instance's PostgreSQL flags. Statement logging (`log_statement`), slow-query logging (`log_min_duration_statement`), and connection logging (`log_connections`) are off or restrictive by default. See <a href="https://cloud.google.com/sql/docs/postgres/flags" target="_blank" rel="noopener noreferrer nofollow">Configure database flags</a> to turn on the logs you need.
-
 ## Validate
 
 1. Wait one or two collection intervals (up to about 5 minutes with the default `300s`).
 2. In SigNoz, go to **Dashboards** and open the Cloud SQL for PostgreSQL dashboard. Panels should start filling in.
 3. To check a single metric, open **Metrics Explorer** and query `cloudsql.googleapis.com/database/cpu/utilization`.
-4. For logs, open **Logs** and filter where `gcp.resource_type` = `cloudsql_database`.
 
 ## What's collected
 
@@ -158,21 +132,6 @@ See the **Data Collected** tab in the SigNoz integration for the definitive list
 </details>
 
 <details>
-<summary>Logs</summary>
-
-Routed by the sink filter you set in step 4. In SigNoz, Cloud SQL log entries carry these resource and label attributes:
-
-| Attribute | Description |
-|-----------|--------------|
-| `gcp.resource_type` | `cloudsql_database` |
-| `gcp.label.database_id` | `<project-id>:<instance-id>` |
-| `gcp.project` / `gcp.label.project_id` | The project that owns the instance |
-| `gcp.label.region` | The instance region |
-| `cloud.resource_id` | `cloudsql.googleapis.com%2Fpostgres.log` for PostgreSQL server logs |
-
-</details>
-
-<details>
 <ToggleHeading>
 ## Troubleshooting
 </ToggleHeading>
@@ -184,10 +143,6 @@ Routed by the sink filter you set in step 4. In SigNoz, Cloud SQL log entries ca
 **No Cloud SQL metrics at all.** Confirm the `signoz-integration` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
 
 **Metrics appear but are stale.** The receiver polls on `collection_interval` (default `300s`) and Cloud SQL itself samples most metrics no faster than every 60 seconds. Lower the interval only if you need the resolution, and expect a higher Monitoring API bill.
-
-**Logs don't arrive.** Work back through the log pipeline: the sink's writer identity needs `roles/pubsub.publisher` on the topic, and the push subscription must reach the Collector. See [Verify logs in SigNoz](https://signoz.io/docs/integrations/gcp/collect-logs/#step-7-verify-logs-in-signoz).
-
-**Logs arrive but contain no queries.** Statement and slow-query logging are controlled by PostgreSQL flags on the instance, not by SigNoz. Enable `log_statement` or `log_min_duration_statement` on the instance.
 
 </details>
 

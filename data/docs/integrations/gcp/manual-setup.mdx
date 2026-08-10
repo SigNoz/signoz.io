@@ -1,7 +1,7 @@
 ---
 date: 2026-08-03
 title: GCP Manual Setup - Configure the OpenTelemetry Collector
-description: Set up the SigNoz GCP integration manually in five steps. Create a service account, connect your account, deploy a Collector, and stream metrics and logs.
+description: Set up the SigNoz GCP integration manually in four steps. Create a service account, connect your account, deploy a Collector, and stream metrics.
 doc_type: explanation
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
@@ -12,7 +12,7 @@ Step-by-step walkthrough for setting up the [GCP integration](https://signoz.io/
 
 <DocCard
     title="1. Create a service account"
-    description="Enable the required APIs and create a GCP service account with least-privilege IAM roles for metrics and logs."
+    description="Enable the required APIs and create a GCP service account with least-privilege IAM roles for metrics."
     href="https://signoz.io/docs/integrations/gcp/create-service-account/"
 />
 
@@ -24,7 +24,7 @@ Step-by-step walkthrough for setting up the [GCP integration](https://signoz.io/
 
 <DocCard
     title="3. Deploy the OpenTelemetry Collector"
-    description="Run the SigNoz OpenTelemetry Collector in your deployment project (Cloud Run, or any compute reachable by Pub/Sub)."
+    description="Run the OpenTelemetry Collector in your deployment project (Cloud Run, or any compute that can reach the Monitoring API)."
     href="https://signoz.io/docs/integrations/gcp/deploy-otel-collector/"
 />
 
@@ -32,12 +32,6 @@ Step-by-step walkthrough for setting up the [GCP integration](https://signoz.io/
     title="4. Collect metrics"
     description="Configure the googlecloudmonitoring receiver to scrape Cloud Monitoring metrics across your monitored projects."
     href="https://signoz.io/docs/integrations/gcp/collect-metrics/"
-/>
-
-<DocCard
-    title="5. Collect logs"
-    description="Create a Pub/Sub topic, a push subscription, and a log sink to route Cloud Logging logs to the Collector."
-    href="https://signoz.io/docs/integrations/gcp/collect-logs/"
 />
 
 </DocCardContainer>
@@ -49,9 +43,9 @@ Step 2 asks for four values. Keep them handy, since later steps refer back to th
 | Field | What it means |
 | --- | --- |
 | **Account Name** | A label to identify this integration in SigNoz, for example `production`. |
-| **Deployment Project ID** | The project where you deploy the Collector and, for logs, the Pub/Sub topic. |
+| **Deployment Project ID** | The project where you deploy the Collector. |
 | **Deployment Region** | The region the Cloud Run Collector runs in. |
-| **Projects to Monitor** | The project IDs whose metrics and logs you want in SigNoz. |
+| **Projects to Monitor** | The project IDs whose metrics you want in SigNoz. |
 
 <Admonition type="info">
 Throughout these guides, `<deployment-project-id>`, `<deployment-region>`, and `<monitored-project-id>` refer to the values you enter here.
