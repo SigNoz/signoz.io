@@ -144,9 +144,9 @@ export const MIGRATE_CARDS: CardData[] = [
 // Security & Compliance Section
 export const SECURITY_CARDS: CardData[] = [
   {
-    title: 'Authentication and RBAC',
-    description: 'Configure user authentication',
-    href: '/docs/userguide/authentication/',
+    title: 'Identity & Access',
+    description: 'Manage roles, transactions, and service accounts',
+    href: '/docs/manage/administrator-guide/iam/overview/',
     icon: <Lock size={24} className="text-[var(--l1-foreground)]" />,
   },
   {
