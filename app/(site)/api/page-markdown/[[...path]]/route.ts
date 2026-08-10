@@ -9,9 +9,7 @@ import { renderPageHtmlToAgentMarkdown } from '@/utils/pageHtmlToMarkdown'
 
 const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
 
-export async function generateStaticParams() {
-  return []
-}
+export const dynamicParams = true
 
 const notFoundResponse = () =>
   new NextResponse('Not Found', {
