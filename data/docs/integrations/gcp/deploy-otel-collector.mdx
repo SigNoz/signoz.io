@@ -27,7 +27,7 @@ The OpenTelemetry Collector is the engine of the GCP integration: it pulls metri
 
 Deploy the <a href="https://hub.docker.com/r/otel/opentelemetry-collector-contrib" target="_blank" rel="noopener noreferrer nofollow">`otel/opentelemetry-collector-contrib`</a> image. It bundles the **`googlecloudmonitoring`** receiver, which pulls metrics from the Cloud Monitoring API, and the **`health_check`** extension used in the deployment below.
 
-Check the <a href="https://hub.docker.com/r/otel/opentelemetry-collector-contrib/tags" target="_blank" rel="noopener noreferrer nofollow">tags list</a> for the latest version and use that tag (for example, `otel/opentelemetry-collector-contrib:0.158.0`) instead of `latest`, so deployments stay reproducible. The version must be **0.158.0 or above** — earlier versions report cumulative GCP metrics in a way that prevents rate functions on counter metrics. Note that these tags have no `v` prefix.
+Check the <a href="https://hub.docker.com/r/otel/opentelemetry-collector-contrib/tags" target="_blank" rel="noopener noreferrer nofollow">tags list</a> for the latest version and use that tag (for example, `otel/opentelemetry-collector-contrib:0.158.0`) instead of `latest`, so deployments stay reproducible. The version must be **0.158.0 or above**: earlier versions report cumulative GCP metrics in a way that prevents rate functions on counter metrics. Note that these tags have no `v` prefix.
 
 ## Step 1: Prepare the Collector configuration
 
@@ -80,9 +80,11 @@ service:
 - `<ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/), copied from the connection panel.
 
 <Admonition type="info">
-**Why the `health_check` extension is here.** This Collector only makes outbound calls, so nothing else listens on a port — and a Cloud Run *service* marks a revision ready only once the container accepts connections on `--port`. `health_check` provides that listener, so a broken config fails the deploy instead of running silently and collecting nothing. Keep the extension's `endpoint` port and the Cloud Run `--port` the same (`8090` here).
+**Why the `health_check` extension is here.** This Collector only makes outbound calls, so nothing else listens on a port, and a Cloud Run *service* marks a revision ready only once the container accepts connections on `--port`. `health_check` provides that listener. Keep the extension's `endpoint` port and the Cloud Run `--port` the same (`8090` here).
 
-To skip the health endpoint, deploy to a <a href="https://cloud.google.com/run/docs/resource-model" target="_blank" rel="noopener noreferrer nofollow">Cloud Run worker pool</a>, which needs no port listener — you lose the readiness signal in exchange.
+A ready revision means the Collector started and its config parsed. It does **not** confirm metrics are flowing: a config that parses but names the wrong `project_id`, or a service account missing `roles/monitoring.viewer` on a monitored project, still reports healthy. Confirm collection in [Collect metrics](https://signoz.io/docs/integrations/gcp/collect-metrics/).
+
+To skip the health endpoint, deploy to a <a href="https://cloud.google.com/run/docs/resource-model" target="_blank" rel="noopener noreferrer nofollow">Cloud Run worker pool</a>, which needs no port listener (you lose the readiness signal in exchange).
 </Admonition>
 
 ## Step 2: Store the config in Secret Manager
@@ -189,7 +191,7 @@ gcloud run deploy signoz-otel-collector \
 2. Confirm the Collector started without configuration errors. Look for `Everything is ready. Begin running and processing data.`
 3. If the revision fails to become ready, the most common cause is a port mismatch. Confirm the `health_check` extension's `endpoint` port matches the Cloud Run container port (`8090`).
 
-The Collector has nothing to do until you tell it which metrics to pull. Continue to the next step.
+A running Collector is not yet a working one: it has nothing to pull until you give it a `metrics_list`, and it reports healthy either way. Continue to the next step, which ends with a check that metrics actually reach SigNoz.
 
 ## Next steps
 
