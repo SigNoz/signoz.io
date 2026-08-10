@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Metrics Monitoring & Customized Dashboards | SigNoz',
     description:
-      'Monitor any metrics important to you. Ingest metrics from your infrastructure or applications and create customized dashboards to monitor them. Set alerts and get notified in your preferred notification channel.',
+      'Monitor all your critical metrics. Ingest from your infrastructure, applications, or LLM calls. Create customized dashboards. Set alerts and get notified in your preferred channel. An interface built for humans and agents.',
     images: '/img/features/metrics/metrics-overview1.webp',
   },
   description:

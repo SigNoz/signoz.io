@@ -284,8 +284,8 @@ const SigNozFeatures = () => {
       image: '/img/features/metrics/support-for-functions-metrics.webp',
     },
     {
-      title: 'Rich Visualizations',
-      desc: 'Create visualization that suits your needs and add them to a dashboard to create customized monitoring dashboards.',
+      title: 'Agent-native dashboards',
+      desc: 'SigNoz dashboards run on a strictly validated schema, following the open CNCF Perses specification. Agents write to defined fields instead of inferring them. So creating and editing a dashboard with an agent is reliable, fast, and lighter on tokens. You can also edit the JSON in the app.',
       image: '/img/features/metrics/metrics-visualizations.webp',
     },
     {
