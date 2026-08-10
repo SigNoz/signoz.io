@@ -1,5 +1,5 @@
 ---
-date: 2026-07-14
+date: 2026-08-10
 title: Understanding Metrics Billing and Reducing Costs
 description: Learn how metrics billing works based on cardinality and discover strategies to reduce costs effectively.
 doc_type: explanation
@@ -54,6 +54,8 @@ export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 ```
 
 This environment variable is supported by the OpenTelemetry SDKs for Java, Python, Go, JavaScript/Node.js, .NET, and Ruby. Some SDKs (such as Rust) configure temporality in code instead — see the [application metrics guides](https://signoz.io/docs/metrics-management/send-metrics/#applications) for language-specific instructions.
+
+Switching a metric to delta does not break the data that SigNoz already stored. SigNoz reads the older cumulative points and the newer delta points together, so your existing queries still work. See [Temporality of Metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
 
 <Admonition type="info">
 The savings apply to synchronous instruments only. Observable (asynchronous) instruments emit a data point on every collection cycle regardless of temporality.
