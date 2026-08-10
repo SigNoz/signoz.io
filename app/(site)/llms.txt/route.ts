@@ -57,6 +57,7 @@ export async function GET(request: Request) {
     '## Optional',
     '',
     `- [Docs sitemap (markdown)](${siteMetadata.siteUrl}/docs/sitemap.md): Markdown index of every SigNoz documentation page.`,
+    `- [llms-full.txt](${siteMetadata.siteUrl}/llms-full.txt): The complete SigNoz documentation in a single markdown file.`,
     '',
   ].join('\n')
 

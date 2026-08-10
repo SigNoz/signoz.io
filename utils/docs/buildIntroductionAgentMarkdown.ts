@@ -11,8 +11,8 @@ const absoluteUrl = (href: string): string =>
 const cardLine = (card: CardData): string =>
   `- [${card.title}](${absoluteUrl(card.href)}): ${card.description}`
 
-export function buildIntroductionAgentMarkdown(): string {
-  const sections = INTRO_SECTIONS.map((section) => {
+export function buildIntroductionSectionsMarkdown(): string {
+  return INTRO_SECTIONS.map((section) => {
     const parts: string[] = []
     if (section.title) {
       parts.push(`## ${section.title}`)
@@ -22,12 +22,14 @@ export function buildIntroductionAgentMarkdown(): string {
     }
     parts.push(section.cards.map(cardLine).join('\n'))
     return parts.join('\n\n')
-  })
+  }).join('\n\n')
+}
 
+export function buildIntroductionAgentMarkdown(): string {
   return buildMarkdownDocument({
     title: INTRO_MARKDOWN_TITLE,
     description: INTRO_DESCRIPTION,
-    bodyMarkdown: sections.join('\n\n'),
+    bodyMarkdown: buildIntroductionSectionsMarkdown(),
     footerLines: [MORE_DOCS_POINTER],
   })
 }

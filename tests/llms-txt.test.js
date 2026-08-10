@@ -70,14 +70,14 @@ test('every bullet line is a markdown link with a description', async () => {
   })
 })
 
-test('emitted links use trailing slashes except .md files', async () => {
+test('emitted links use trailing slashes except file-extension URLs', async () => {
   const body = await getBody()
   const urls = [...body.matchAll(/\]\((https:\/\/signoz\.io\/[^)]*)\)/g)].map((match) => match[1])
 
   assert.equal(urls.length > 0, true)
   urls.forEach((url) => {
     assert.equal(
-      url.endsWith('/') || url.endsWith('.md'),
+      url.endsWith('/') || url.endsWith('.md') || url.endsWith('.txt'),
       true,
       `link would redirect (trailingSlash): ${url}`
     )
