@@ -13,6 +13,8 @@ export type ComparisonSection = {
   rows: {
     feature: React.ReactNode
     cells: Record<string, React.ReactNode>
+    markdownFeature?: string
+    markdownCells?: Record<string, string>
   }[]
 }
 
@@ -29,6 +31,8 @@ type FeatureComparisonGridProps = {
   featureCellClassName?: string
   featureSectionClassName?: string
   separator?: 'line' | 'border'
+  /** Column labels for agent markdown; when set, sections render as data-md-table grids. */
+  markdownColumnLabels?: string[]
 }
 
 export default function FeatureComparisonGrid({
@@ -44,7 +48,9 @@ export default function FeatureComparisonGrid({
   featureCellClassName,
   featureSectionClassName,
   separator = 'line',
+  markdownColumnLabels,
 }: FeatureComparisonGridProps) {
+  const markdownTableHeader = markdownColumnLabels?.join('|')
   const headingClass =
     sectionHeadingSize === 'lg'
       ? 'mb-3 mt-8 py-2 text-center text-sm font-medium sm:text-lg md:text-left'
@@ -71,13 +77,30 @@ export default function FeatureComparisonGrid({
           {separator === 'line' ? <Line /> : <div className="h-px w-full bg-[#23262e]" />}
 
           {/* Rows */}
-          <div className="grid grid-cols-1">
+          <div
+            className="grid grid-cols-1"
+            {...(markdownTableHeader ? { 'data-md-table': markdownTableHeader } : {})}
+          >
             {section.rows.map((row, rowIdx) => (
               <div key={rowIdx}>
-                <div className={`grid ${gridClassName}`}>
-                  <div className={featureCellClassName}>{row.feature}</div>
+                <div
+                  className={`grid ${gridClassName}`}
+                  {...(markdownTableHeader ? { 'data-md-row': '' } : {})}
+                >
+                  <div
+                    className={featureCellClassName}
+                    {...(markdownTableHeader ? { 'data-md-cell': row.markdownFeature ?? '' } : {})}
+                  >
+                    {row.feature}
+                  </div>
                   {columns.map((col) => (
-                    <div key={col.key} className={col.cellClassName}>
+                    <div
+                      key={col.key}
+                      className={col.cellClassName}
+                      {...(markdownTableHeader
+                        ? { 'data-md-cell': row.markdownCells?.[col.key] ?? '' }
+                        : {})}
+                    >
                       {row.cells[col.key]}
                     </div>
                   ))}
