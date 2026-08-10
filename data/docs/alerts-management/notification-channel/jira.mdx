@@ -1,7 +1,7 @@
 ---
 date: 2026-08-10
 doc_type: howto
-title: Configure Jira Cloud Channel
+title: Jira Cloud Notification Channel Setup for Alerts
 description: Set up Jira Cloud as a notification channel in SigNoz to open, update, and resolve Jira issues automatically as alerts fire and resolve.
 ---
 
@@ -11,11 +11,11 @@ Before configuring Jira Cloud as a notification channel in SigNoz, ensure that y
 
 - **A Jira Cloud site**: your site URL in the form `https://<your-site>.atlassian.net`. SigNoz appends the REST API path internally.
 - **An Atlassian account email and API token**: create a token at <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" rel="noopener noreferrer nofollow">id.atlassian.com → Security → API tokens</a>. SigNoz authenticates as this account using the email + token (basic auth).
-- **A project key and an issue type**: e.g. project `OPS` and issue type `Task`. The issue type must exist in that project — types vary per project, so `Bug` or `Incident` may not be available everywhere.
+- **A project key and an issue type**: e.g. project `OPS` and issue type `Task`. The issue type must exist in that project. Types vary per project, so `Bug` or `Incident` may not be available everywhere.
 - **Permissions**: the account needs permission to **create** issues in the project (and to **transition** them, if you use resolve/reopen).
 
 <Admonition>
-Only **Jira Cloud** (`*.atlassian.net`) is supported. **Jira Server / Data Center are not supported** — Jira Cloud API tokens and the rich v3 (Atlassian Document Format) API used here are Cloud-only.
+Only **Jira Cloud** (`*.atlassian.net`) is supported. **Jira Server / Data Center are not supported**: Jira Cloud API tokens and the rich v3 (Atlassian Document Format) API used here are Cloud-only.
 </Admonition>
 
 ## Accessing Notification Channels
@@ -38,18 +38,18 @@ To create a new Jira notification channel:
 - **Summary (issue title)** and **Description**: prefilled with default templates that control the created issue's title and body. You can edit them (see [Customizing the message](#customizing-the-message)).
 - **Send resolved alerts**: on by default. When on, SigNoz transitions the issue to a "done" status and comments on it when the alert resolves.
 
-The **Advanced Options** section is optional — the required fields alone give a fully working channel:
+The **Advanced Options** section is optional. The required fields alone give a fully working channel:
 
 - **Priority**: an issue priority that exists in the project's scheme (e.g. `High`). Leave empty to use the project default.
 - **Labels**: extra labels to add to created issues. SigNoz always adds its own deduplication label as well (see [Receive Alerts in Jira](#receive-alerts-in-jira)).
-- **Resolve transition** / **Reopen transition**: name overrides for the workflow transitions. Auto-detected by default — only set these if your project has more than one "done" transition and you want to force a specific one by name.
+- **Resolve transition** / **Reopen transition**: name overrides for the workflow transitions. Auto-detected by default. Only set these if your project has more than one "done" transition and you want to force a specific one by name.
 - **Reopen window**: how long after resolution a re-firing alert reopens the same issue (see [Issue lifecycle and transitions](#issue-lifecycle-and-transitions)).
 
 <Admonition>
 The **Summary** and **Description** fields accept <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a> for customizing the issue.
 </Admonition>
 
-<Figure src="/img/docs/jira-new-channel.png" alt="Create a new Jira notification channel." caption="Create a new Jira notification channel." />
+<Figure src="/img/docs/jira-new-channel.webp" alt="Create a new Jira notification channel." caption="Create a new Jira notification channel." />
 
 **Test Configuration**: Click the **Test** button to open a real issue end-to-end in the configured project. This verifies that SigNoz can authenticate and create issues before you save.
 
@@ -61,17 +61,17 @@ To edit an existing Jira channel, open it from the channels list. You can change
 
 Once configured, SigNoz manages a Jira issue over the full lifecycle of each alert.
 
-- An alert **firing creates** a Jira issue. The description is built as **<a href="https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/#atlassian-document-format" target="_blank" rel="noopener noreferrer nofollow">Atlassian Document Format (ADF)</a>** — the rich-text format Jira Cloud's v3 API uses — with:
+- An alert **firing creates** a Jira issue. The description is built as **<a href="https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/#atlassian-document-format" target="_blank" rel="noopener noreferrer nofollow">Atlassian Document Format (ADF)</a>** (the rich-text format Jira Cloud's v3 API uses) with:
   - A status panel: **🔴 FIRING** (red) or **🟢 RESOLVED** (green).
   - The rendered alert details.
   - Deep-link(s) back to SigNoz: **Open in SigNoz**, and **View Related Logs** / **View Related Traces** when the alert carries those links.
 
-<Figure src="/img/docs/jira-firing-issue.png" alt="A firing alert delivered as a Jira issue." caption="A firing alert delivered as a Jira issue." />
+<Figure src="/img/docs/jira-firing-issue.webp" alt="A firing alert delivered as a Jira issue." caption="A firing alert delivered as a Jira issue." />
 
-- The **same alert re-firing updates that issue** instead of creating a duplicate. SigNoz correlates alerts to issues with an auto-added label of the form `ALERT{…}` — **do not remove this label**, or SigNoz will no longer find the issue and will open a new one.
-- On each state change, SigNoz posts a **comment** carrying the current snapshot (Jira has no threads, so comments form the timeline): a re-fire adds a "still firing" comment, a resolve adds a "resolved" comment, and a reopen adds a "re-firing — reopening" comment. Issue creation posts no comment — the issue itself is the record. Comments fire per notification (roughly the re-notify interval), not per rule evaluation, so a long-firing alert gets a periodic timeline rather than spam.
+- The **same alert re-firing updates that issue** instead of creating a duplicate. SigNoz correlates alerts to issues with an auto-added label of the form `ALERT{…}`. **Do not remove this label**, or SigNoz will no longer find the issue and will open a new one.
+- On each state change, SigNoz posts a **comment** carrying the current snapshot (Jira has no threads, so comments form the timeline): a re-fire adds a "still firing" comment, a resolve adds a "resolved" comment, and a reopen adds a "re-firing, reopening" comment. Issue creation posts no comment. The issue itself is the record. Comments fire per notification (roughly the re-notify interval), not per rule evaluation, so a long-firing alert gets a periodic timeline rather than spam.
 
-<Figure src="/img/docs/jira-issue-comments.png" alt="Lifecycle comments on a Jira issue." caption="Lifecycle comments on a Jira issue." />
+<Figure src="/img/docs/jira-issue-comments.webp" alt="Lifecycle comments on a Jira issue." caption="Lifecycle comments on a Jira issue." />
 
 ### Grouped alerts
 
@@ -79,7 +79,7 @@ When several alerts fire together, they are grouped into a **single issue** whos
 
 ### Limits handled automatically
 
-- The issue **summary is capped at 255 characters** and the **description at ~32 KB** — SigNoz truncates anything larger before sending.
+- The issue **summary is capped at 255 characters** and the **description at ~32 KB**. SigNoz truncates anything larger before sending.
 - Rate-limited requests (`429`) are retried automatically.
 
 ## Issue lifecycle and transitions
@@ -89,7 +89,7 @@ When an alert resolves, SigNoz **transitions the issue to a "done" status**; whe
 Transitions are matched by Jira's **status category** (`new` / `indeterminate` / `done`), not by hardcoded status names, so this works across any custom workflow:
 
 - The **Resolve transition** moves the issue into the `done` category; the **Reopen transition** moves it back out.
-- Set a name override (in Advanced Options) only when a project has more than one matching transition — e.g. both `Done` and `Won't Do` land in `done` and you want to force one.
+- Set a name override (in Advanced Options) only when a project has more than one matching transition, e.g. both `Done` and `Won't Do` land in `done` and you want to force one.
 - If no suitable transition exists, SigNoz **skips the transition without erroring** and still posts the comment.
 
 ### Reopen window
@@ -99,7 +99,7 @@ The **Reopen window** controls how long after resolution a re-firing alert reope
 - If a resolved alert fires again **within** this window, the same issue is reopened.
 - **After** the window, a re-fire opens a **new** issue instead.
 
-Enter it as a duration using the units `m` (minutes), `h` (hours), `d` (days), `w` (weeks), or `y` (years) — e.g. `30m`, `72h`, or `3d`. The **minimum is 1m** and the **default is 3d**.
+Enter it as a duration using the units `m` (minutes), `h` (hours), `d` (days), `w` (weeks), or `y` (years), e.g. `30m`, `72h`, or `3d`. The **minimum is 1m** and the **default is 3d**.
 
 ## Customizing the message
 
@@ -116,7 +116,7 @@ The default templates use only bold and text, so this only matters if you write 
 
 The **Send resolved alerts** toggle is on by default. When on, a resolved alert transitions the issue to a "done" status and adds a **🟢 RESOLVED** comment.
 
-<Figure src="/img/docs/jira-resolved-issue.png" alt="A resolved alert transitioned to Done in Jira." caption="A resolved alert transitioned to Done in Jira." />
+<Figure src="/img/docs/jira-resolved-issue.webp" alt="A resolved alert transitioned to Done in Jira." caption="A resolved alert transitioned to Done in Jira." />
 
 To stop SigNoz from transitioning issues on resolve:
 
@@ -181,7 +181,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 | `jira_configs[].resolve_transition` | `string` | Optional name override for the resolve (→ done) transition. Auto-detected if omitted. |
 | `jira_configs[].reopen_transition` | `string` | Optional name override for the reopen transition. Auto-detected if omitted. |
 | `jira_configs[].reopen_duration` | `string` | Reopen window as a duration (e.g. `72h`, `3d`). Minimum `1m`, default `3d`. |
-| `jira_configs[].custom_fields` | `object` | Optional Jira custom field values (field id → value). API only — not available in the UI. |
+| `jira_configs[].custom_fields` | `object` | Optional Jira custom field values (field id → value). API only (not available in the UI). |
 
 ## Troubleshooting
 
