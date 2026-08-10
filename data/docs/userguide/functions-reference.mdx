@@ -1,18 +1,49 @@
 ---
-date: 2026-07-27
+date: 2026-08-10
 
 title: Functions Reference Guide
-description: Reference guide for SigNoz query functions for arrays and token matching. Learn syntax and usage examples.
+description: Reference guide for SigNoz query functions for full-text search, arrays, and token matching. Learn syntax and usage examples.
 doc_type: reference
 ---
 
-This guide covers functions available for querying array fields in SigNoz.
+This guide covers functions available in SigNoz query expressions.
 
 <Admonition type="info">
-Functions are currently supported only for JSON body searches.
+Except for `search()` and `hasToken()`, these functions are supported only for JSON body searches.
 </Admonition>
 
 ## Available Functions
+
+### search() Function
+
+Runs a case-insensitive, full-text search for a term across every field of a log record: the body, attribute keys and values, resource keys and values, and log fields such as severity.
+
+**Syntax:**
+```
+search(term)
+search(term, scope, ...)
+```
+
+Each optional scope narrows the search to one field context. Valid scopes are `body`, `attribute`, `resource`, and `log`. Multiple scopes search the union of them.
+
+**Examples:**
+```
+# Every field
+search('timeout')
+
+# Only the log body
+search('timeout', body)
+
+# Body and resource attributes
+search('checkout', body, resource)
+
+# Combined with a field filter
+search('timeout') AND service.name = 'checkout'
+```
+
+<Admonition type="warning">
+`search()` is logs-only and scan-heavy. It returns an advisory warning on every call, and SigNoz rejects the query with an HTTP 400 error if the estimated scan exceeds the per-shard budget. See [Full-Text Search](https://signoz.io/docs/userguide/full-text-search/) for scopes, matching rules, and how to stay under the limits.
+</Admonition>
 
 ### hasToken() Function
 
@@ -62,8 +93,9 @@ has(body.regions, 'us-east')
 
 ## Important Notes
 
-1. **Body fields only** - Functions currently work only with JSON body fields (fields prefixed with `body.`) except for the hasToken function.
-2. **Array data** - The field must contain an array for these functions to work properly
+1. **Body fields only** - `has()` works only with JSON body fields (fields prefixed with `body.`). `search()` and `hasToken()` are not restricted this way.
+2. **Array data** - The field must contain an array for `has()` to work properly
+3. **Logs only** - These functions apply to logs. Traces and metrics reject them and require field-based filters.
 
 ## Combining with Other Conditions
 
@@ -80,6 +112,13 @@ has(body.tags, 'production') AND status_code IN [500, 502, 503]
 ```
 # Find all logs with production tag
 has(body.tags, 'production')
+```
+
+### Finding a Value When You Do Not Know the Field
+```
+# The order ID could be in the body, an attribute, or a resource attribute
+search('ord_8123fa')
+```
 
 ## Error Messages
 
@@ -88,3 +127,10 @@ Common errors you might encounter:
 - **"unknown function"** - Check function name spelling and case
 - **"function expects key and value parameters"** - Ensure you're providing both field and value
 - **"function supports only body JSON search"** - Use only with `body.` prefixed fields
+- **"invalid search scope"** - `search()` scopes must be `body`, `attribute`, `resource`, or `log`
+
+## Related
+
+- [Full-Text Search](https://signoz.io/docs/userguide/full-text-search/) - full guide to `search()`, its scopes, and its cost limits
+- [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) - complete reference for filter bar expressions
+- [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) - all supported comparison and logical operators

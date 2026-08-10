@@ -1,0 +1,198 @@
+---
+date: 2026-08-10
+title: Free-Text Log Search Guide - Regex and Phrase Matching
+description: Learn how free-text search matches SigNoz log bodies using quoted phrases, regex, and escaping, and when to search across every field instead.
+doc_type: reference
+---
+
+Free-text search lets you search log body content without specifying a field name. Type a term into the filter bar and SigNoz matches it against the log body. This guide covers how that text is evaluated, how to escape it, and how to combine it with field filters.
+
+<Admonition type="info">
+Free-text search applies to logs only, and matches only the log body. To search every field of a log record at once (body, attributes, resources, and severity), use [`search()`](https://signoz.io/docs/userguide/full-text-search/) instead.
+</Admonition>
+
+## Free-Text Search vs `search()`
+
+The two ways to search text in logs behave differently. Pick based on where the term might be and how you want it matched:
+
+| | Free-text search | [`search()`](https://signoz.io/docs/userguide/full-text-search/) |
+| --- | --- | --- |
+| Syntax | `'connection timeout'` | `search('connection timeout')` |
+| Searches | Log body only | Body, attribute keys and values, resource keys and values, severity, trace ID, span ID |
+| Matching | Regex first (RE2), literal substring as fallback | Always literal, never regex |
+| Case | Case-sensitive | Case-insensitive |
+
+Use free-text search when you know the term is in the body and you want regex power. Use `search()` when you do not know which field holds the term.
+
+## Quoted Text
+
+Use quotes for exact phrase matching in the log body:
+```
+'failed to connect to database'
+```
+
+This finds logs where the body contains the exact phrase "failed to connect to database".
+
+<Figure
+  src="/img/docs/product-features/query-builder/free-text-search-quoted.webp"
+  alt="Quoted free-text search in SigNoz Logs Explorer"
+  caption="Quoted free-text search in the Logs Explorer"
+/>
+
+## Unquoted Text
+
+Without quotes, each word is searched separately in the log body:
+```
+error database connection
+```
+
+This searches for logs where the body contains 'error' AND 'database' AND 'connection' (not necessarily together).
+
+<Figure
+  src="/img/docs/product-features/query-builder/free-text-search-unquoted.webp"
+  alt="Unquoted free-text search in SigNoz Logs Explorer"
+  caption="Unquoted free-text search in the Logs Explorer"
+/>
+
+## How Search Text Is Evaluated
+
+SigNoz first tries to compile your search text as an <a href="https://github.com/google/re2/wiki/syntax" target="_blank" rel="noopener noreferrer nofollow">RE2 regular expression</a>. If it compiles, the search runs as a regex. If it doesn't, SigNoz matches the text as a literal substring instead.
+
+This means regex metacharacters stay active even in a search that looks like plain text:
+
+| Search | Evaluated as | Result |
+| --- | --- | --- |
+| `'status != 200'` | Regex with no metacharacters | Matches the literal text |
+| `'array[index] = value'` | Regex, where `[index]` is a character class | Matches `arrayi = value`, not the literal text |
+| `'C:\\Users\\John'` | Not valid regex, so a literal substring | Matches the literal text |
+
+Escape any of `. [ ] ( ) { } * + ? | ^ $ \` that you want to match literally.
+
+## Escaping Special Characters
+
+When searching for text that contains special characters, enclose your search in single quotes and escape only these two characters:
+- Single quotes: Use `\'` 
+- Backslashes: Use `\\`
+
+Examples:
+```
+# Searching for text with single quotes
+'user\'s email address'
+'can\'t connect to database'
+'it\'s working'
+
+# Searching for text with backslashes
+'C:\\Program Files\\App'
+'escape sequence: \\n'
+'path\\to\\file'
+
+# Combining both
+'user\'s path: C:\\Users\\John'
+```
+
+Those two escapes are for the query parser. Double quotes and other characters that mean nothing to a regex need no escaping:
+```
+'error: "connection failed"'
+'status != 200'
+```
+
+Regex metacharacters are a separate matter. Escape them when you want to match them literally:
+```
+# Wrong - [index] reads as a character class, and $ anchors to end of text
+'array[index] = value'
+'price: $99.99'
+
+# Correct
+'array\[index\] = value'
+'price: \$99\.99'
+```
+
+## Tabs, Newlines, and Other Whitespace
+
+Because search text is evaluated as a regex, the standard regex escapes match control characters:
+
+| Escape | Matches |
+| --- | --- |
+| `\t` | Tab |
+| `\n` | Newline |
+| `\r` | Carriage return |
+| `\s` | Any whitespace character |
+
+To find a tab between two values in the log body:
+```
+'error\tconnection refused'
+```
+
+To match a literal backslash followed by `t` instead of a tab, use four backslashes. The parser collapses `\\\\` to `\\`, which the regex engine then reads as an escaped backslash:
+```
+'\\\\t'
+```
+
+## Regular Expressions
+
+You can use any valid <a href="https://github.com/google/re2/wiki/syntax" target="_blank" rel="noopener noreferrer nofollow">RE2 syntax</a> as the free-text search.
+
+### Examples
+
+Match structured log entries:
+```
+'^\[SnapshotGenerator id=\d+\] Creating new KRaft snapshot file snapshot \d+-\d+ because .+ \d+ bytes\.$'
+```
+
+This matches log records with body like:
+```
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001109202-0000000001 because we have replayed at least 2800 bytes.
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001109163-0000000001 because we have replayed at least 2800 bytes.
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001109124-0000000001 because we have replayed at least 2800 bytes.
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001108539-0000000001 because we have replayed at least 2800 bytes.
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001108305-0000000001 because we have replayed at least 2800 bytes.
+```
+
+Match logs where the body contains email addresses:
+```
+'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+```
+
+## Combining Free-Text with Field Searches
+
+You can combine free-text search (on log body) with field-based filtering:
+```
+'payment failed' AND service.name = 'payment-service'
+```
+
+This finds logs where the body contains "payment failed" AND the service name is 'payment-service'.
+
+## Important: When to Use Quotes
+
+Always use quotes when:
+1. Searching for exact phrases
+2. Your search term contains special characters or operators
+3. You want to search for operator keywords as text
+
+Examples where quotes are necessary:
+```
+# Wrong - AND will be treated as boolean operator
+searching for AND operator
+
+# Correct - searches for the phrase including 'AND'
+'searching for AND operator'
+```
+
+## Best Practices
+
+1. **Use quotes for phrases** - Always quote multi-word searches unless you want each word searched separately
+2. **Be specific** - More specific searches perform better than broad ones
+3. **Combine with fields** - Add field filters to narrow down results
+4. **Test regex patterns** - Complex regex can be slow; test and optimize
+5. **Escape properly** - Escape single quotes and backslashes for the parser, plus any regex metacharacter you want matched literally
+6. **Switch to `search()` when the field is unknown** - Free-text search never looks outside the body, so a term that lives in an attribute or resource returns nothing
+
+## Related
+
+- [Full-Text Search with `search()`](https://signoz.io/docs/userguide/full-text-search/) - search every field of a log record, not just the body
+- [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) - complete reference for filter bar expressions
+- [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) - all supported comparison and logical operators
+
+## Get Help
+
+<GetHelp />

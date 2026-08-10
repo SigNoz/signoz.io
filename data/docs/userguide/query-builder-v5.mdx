@@ -1,5 +1,5 @@
 ---
-date: 2026-05-18
+date: 2026-08-10
 
 title: Query Builder v5 - Advanced Querying Guide
 description: Master SigNoz Query Builder with filtering, aggregations, trace operators, multi-query formulas, and performance tips to analyze logs, traces, and metrics at scale.
@@ -74,15 +74,23 @@ Use the keyboard shortcut `CMD+ENTER` (Mac) or `CTRL+ENTER` (Windows/Linux) to q
 
 For the full list of supported operators and syntax patterns, see the [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) and [Search Syntax](https://signoz.io/docs/userguide/search-syntax/).
 
-### Full-Text Search
+### Text Search
 
-In the **Logs Explorer**, you can search log bodies without specifying a field name. Wrap your search phrase in single quotes and enter it in the filter bar:
+In the **Logs Explorer**, you can search without specifying a field name. Wrap your search phrase in single quotes and enter it in the filter bar:
 
 ```
 'database connection timeout'
 ```
 
-This searches across log body content. Full-text search is only available for logs — traces and metrics require field-based filters. For details on quoted vs unquoted search behavior, see [Full-Text Search](https://signoz.io/docs/userguide/full-text-search/).
+This searches log body content only, and evaluates your text as a regular expression when it compiles as one. For details on quoted vs unquoted behavior, see [Free-Text Log Search](https://signoz.io/docs/userguide/free-text-search/).
+
+To search every field of a log record at once, including attributes, resource attributes, and severity, use `search()`:
+
+```
+search('database connection timeout')
+```
+
+Both forms are available for logs only. Traces and metrics require field-based filters. See [Full-Text Search](https://signoz.io/docs/userguide/full-text-search/) for scopes and query cost limits.
 
 ### Aggregation
 
@@ -235,5 +243,6 @@ For the full list, chaining behavior, and examples, see [Functions for Extended 
 - [Metric Types & Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/) — how Gauge, Counter, and Histogram metrics work with temporal and spatial aggregation
 - [Time Aggregation Windows](https://signoz.io/docs/querying/time-aggregation/) — how SigNoz calculates step intervals for time series queries
 - [Functions for Extended Analysis](https://signoz.io/docs/querying/functions-extended-analysis/) — exclusion, arithmetic, smoothing, and time shift functions
-- [Full-Text Search](https://signoz.io/docs/userguide/full-text-search/) — search log bodies without specifying field names
+- [Full-Text Search](https://signoz.io/docs/userguide/full-text-search/) — search every field of a log record with `search()`
+- [Free-Text Log Search](https://signoz.io/docs/userguide/free-text-search/) — search log bodies without specifying field names
 - [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) — complete reference for filter bar expressions and operators
