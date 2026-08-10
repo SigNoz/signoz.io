@@ -27,11 +27,7 @@ The OpenTelemetry Collector is the engine of the GCP integration: it pulls metri
 
 Deploy the <a href="https://hub.docker.com/r/otel/opentelemetry-collector-contrib" target="_blank" rel="noopener noreferrer nofollow">`otel/opentelemetry-collector-contrib`</a> image. It bundles the **`googlecloudmonitoring`** receiver, which pulls metrics from the Cloud Monitoring API, and the **`health_check`** extension used in the deployment below.
 
-Check the <a href="https://hub.docker.com/r/otel/opentelemetry-collector-contrib/tags" target="_blank" rel="noopener noreferrer nofollow">tags list</a> for the latest version and use that tag (for example, `otel/opentelemetry-collector-contrib:0.158.0`) instead of `latest`, so deployments stay reproducible.
-
-<Admonition type="warning">
-Use **0.158.0 or later**. Earlier versions report cumulative GCP metrics as non-monotonic sums, which stops SigNoz from offering rate functions on counter metrics. Note that this image's tags have no `v` prefix.
-</Admonition>
+Check the <a href="https://hub.docker.com/r/otel/opentelemetry-collector-contrib/tags" target="_blank" rel="noopener noreferrer nofollow">tags list</a> for the latest version and use that tag (for example, `otel/opentelemetry-collector-contrib:0.158.0`) instead of `latest`, so deployments stay reproducible. The version must be **0.158.0 or above** — earlier versions report cumulative GCP metrics in a way that prevents rate functions on counter metrics. Note that these tags have no `v` prefix.
 
 ## Step 1: Prepare the Collector configuration
 
@@ -84,13 +80,9 @@ service:
 - `<ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/), copied from the connection panel.
 
 <Admonition type="info">
-**Self-Hosted Enterprise:** point `otlphttp.endpoint` at your SigNoz OTel Collector's OTLP HTTP address (for example, `http://<signoz-otel-collector-host>:4318`) instead of the Cloud endpoint, and omit the `signoz-ingestion-key` header — it's not required for self-hosted.
-</Admonition>
+**Why the `health_check` extension is here.** This Collector only makes outbound calls, so nothing else listens on a port — and a Cloud Run *service* marks a revision ready only once the container accepts connections on `--port`. `health_check` provides that listener, so a broken config fails the deploy instead of running silently and collecting nothing. Keep the extension's `endpoint` port and the Cloud Run `--port` the same (`8090` here).
 
-<Admonition type="info">
-**Why the `health_check` extension is here.** This Collector only makes outbound calls: it polls the Monitoring API and exports to SigNoz, so nothing else in the config listens on a port. A Cloud Run *service* considers a revision ready only once the container accepts connections on `--port`, so without a listener the deployment never becomes healthy. The `health_check` extension provides that endpoint, and it earns its place: a config error surfaces as a failed deployment rather than a service that looks healthy while collecting nothing. Keep the extension's `endpoint` port and the Cloud Run `--port` the same value (`8090` here).
-
-If you'd rather not run a health endpoint, deploy to a <a href="https://cloud.google.com/run/docs/resource-model" target="_blank" rel="noopener noreferrer nofollow">Cloud Run worker pool</a> instead. Worker pools are built for non-request workloads and don't require the container to listen on a port, so you can drop the extension — at the cost of losing the readiness signal.
+To skip the health endpoint, deploy to a <a href="https://cloud.google.com/run/docs/resource-model" target="_blank" rel="noopener noreferrer nofollow">Cloud Run worker pool</a>, which needs no port listener — you lose the readiness signal in exchange.
 </Admonition>
 
 ## Step 2: Store the config in Secret Manager
@@ -185,11 +177,11 @@ gcloud run deploy signoz-otel-collector \
 
 **Why these flags:**
 
-- `--ingress=internal` and `--no-allow-unauthenticated` keep the Collector off the public internet. Nothing needs to reach it from outside — it only makes outbound calls — so the health endpoint stays reachable from within your GCP project and VPC and nowhere else.
-- `--min-instances=1` keeps one instance warm. A Collector that scales to zero pauses metric scrapes, so keep at least one instance running.
-- `--no-cpu-throttling` keeps CPU allocated between requests (this is Cloud Run's **instance-based billing**). It is required alongside `--min-instances=1`: by default, Cloud Run throttles CPU whenever an instance isn't serving a request, which stalls the `googlecloudmonitoring` receiver's polling loop and leaves metrics stale. The warm instance only does useful background work with CPU always on.
-- `--max-instances=1` pins the service to a single instance. The metrics receiver polls Cloud Monitoring on a timer, independently of incoming requests, so every extra replica would scrape the same metrics again and duplicate the data points SigNoz receives. Keep one instance and scale it up (`--cpu`/`--memory`) rather than out.
-- `--cpu=2 --memory=4Gi` matches the ~$110/month sizing in the [cost estimate](https://signoz.io/docs/integrations/gcp/gcp-integration/#costs-to-expect). Adjust to your volume. If you ingest low volumes, a smaller configuration such as `--cpu=1 --memory=2Gi` costs less; scale up only if the Collector shows memory pressure or dropped data.
+- `--ingress=internal` and `--no-allow-unauthenticated` keep the Collector off the public internet; it only makes outbound calls.
+- `--min-instances=1` keeps one instance warm, since scaling to zero pauses metric scrapes.
+- `--no-cpu-throttling` keeps CPU allocated between requests. Without it, Cloud Run throttles the idle instance and stalls the receiver's polling loop.
+- `--max-instances=1` prevents extra replicas from scraping the same metrics and duplicating data points. Scale up (`--cpu`/`--memory`), not out.
+- `--cpu=2 --memory=4Gi` matches the ~$110/month [cost estimate](https://signoz.io/docs/integrations/gcp/gcp-integration/#costs-to-expect). Drop to `--cpu=1 --memory=2Gi` for low volumes; scale up on memory pressure or dropped data.
 
 ## Step 4: Verify the Collector is running
 
