@@ -88,7 +88,7 @@ export const TABLE_DATA: TableCategory[] = [
         community: { type: 'text', value: 'Slack community + GitHub discussions' },
         teams: {
           type: 'text',
-          value: 'In-product chat + email + dedicated Slack channel',
+          value: 'In-product chat + email + dedicated Slack channel > $999',
         },
         enterprise: {
           type: 'text',

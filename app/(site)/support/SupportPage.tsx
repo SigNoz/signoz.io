@@ -128,11 +128,13 @@ const ComparisonTable = () => {
 
   return (
     <div className="py-6">
+      {/* Mobile is a plain horizontal scroller in normal page flow; sticky offsets
+          only engage on md+, where the page itself is the scrollport. */}
       <div className="w-full overflow-x-auto text-left text-base leading-normal md:overflow-visible">
-        <div className="relative min-w-[40rem] md:min-w-0">
+        <div className="relative min-w-[52rem] md:min-w-0">
           <div className="pointer-events-none absolute inset-y-0 right-48 z-0 w-48 rounded-lg bg-gradient-to-b from-[var(--l2-background)] from-[73%] to-transparent opacity-80" />
 
-          <div className="sticky top-14 z-[9] bg-[var(--l1-background)]">
+          <div className="sticky top-0 z-[9] bg-[var(--l1-background)] md:top-14">
             <div className={`grid ${GRID_CLASS}`}>
               <div className="bg-[var(--l1-background)]" />
               {SUPPORT_TIERS.map((tier, i) => (
@@ -184,8 +186,7 @@ const ComparisonTable = () => {
             sections={sections}
             gridClassName={GRID_CLASS}
             sectionHeadingSize="sm"
-            stickyOffset="top-[189px]"
-            stickyOffsetPx={189}
+            stickyOffset="top-0 md:top-[189px]"
             stickyBg=""
             stickyZIndex="z-[8]"
             separator="border"
@@ -332,14 +333,18 @@ const ContactChannelItem = ({
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
       {item.href ? (
-        <a
+        <TrackingLink
           href={item.href}
           target={isExternal && !isMailto ? '_blank' : undefined}
           rel={isExternal && !isMailto ? 'noopener noreferrer nofollow' : undefined}
+          clickType="Nav Click"
+          clickName="Support Channel Link"
+          clickLocation="Support How to Reach Us"
+          clickText={item.text}
           className="footer-pill-link !mt-0"
         >
           {label}
-        </a>
+        </TrackingLink>
       ) : (
         <span className="inline-flex items-center gap-2 text-sm font-medium leading-[1.35] tracking-[-0.005em] text-[var(--l2-foreground)]">
           {label}
@@ -508,15 +513,19 @@ const TrustAndCompliance = () => (
           <div className="flex flex-col gap-1">
             {COMPLIANCE_LINKS.map((link) => (
               <div key={link.href} className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <a
+                <TrackingLink
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
+                  clickType="Nav Click"
+                  clickName="Compliance Link"
+                  clickLocation="Support Trust & Compliance"
+                  clickText={link.text}
                   className="footer-pill-link !mt-0"
                 >
                   {link.text}
                   <ArrowUpRight size={16} />
-                </a>
+                </TrackingLink>
                 <span className="text-sm text-[var(--l2-foreground)]">{link.label}</span>
               </div>
             ))}

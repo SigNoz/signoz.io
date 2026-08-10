@@ -112,7 +112,6 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
           gridClassName={GRID_CLASS}
           sectionHeadingSize="sm"
           stickyOffset="top-[215px]"
-          stickyOffsetPx={215}
           stickyBg=""
           stickyZIndex="z-[8]"
           separator="border"

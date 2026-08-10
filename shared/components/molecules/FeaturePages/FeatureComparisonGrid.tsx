@@ -32,10 +32,7 @@ export type FeatureComparisonGridProps = {
   separator?: 'line' | 'border'
   separatorClassName?: string
   rootRef?: React.Ref<HTMLDivElement>
-  hiddenIds?: ReadonlySet<string>
 }
-
-const EMPTY_HIDDEN_IDS: ReadonlySet<string> = new Set()
 
 export default function FeatureComparisonGrid({
   columns,
@@ -52,7 +49,6 @@ export default function FeatureComparisonGrid({
   separator = 'line',
   separatorClassName,
   rootRef,
-  hiddenIds = EMPTY_HIDDEN_IDS,
 }: FeatureComparisonGridProps) {
   const usesTextOcclusion = columns.some((col) => col.occludeStickyText)
 
@@ -62,13 +58,7 @@ export default function FeatureComparisonGrid({
       : 'py-3 text-sm font-medium leading-6 text-white'
 
   const renderSeparator = (occludeId?: string) => {
-    const isHidden = occludeId ? hiddenIds.has(occludeId) : false
-    const occludeProps = occludeId
-      ? {
-          'data-occlude-sticky-text': occludeId,
-          style: isHidden ? ({ visibility: 'hidden' } as const) : undefined,
-        }
-      : {}
+    const occludeProps = occludeId ? { 'data-occlude-sticky-text': occludeId } : {}
 
     if (separator === 'line') {
       return (
@@ -115,23 +105,17 @@ export default function FeatureComparisonGrid({
               <div key={rowIdx}>
                 <div className={`grid ${gridClassName}`}>
                   <div className={featureCellClassName}>{row.feature}</div>
-                  {columns.map((col) => {
-                    const occludeId = col.occludeStickyText
-                      ? `${sectionIdx}-${rowIdx}-${col.key}`
-                      : undefined
-                    const isHidden = occludeId ? hiddenIds.has(occludeId) : false
-
-                    return (
-                      <div
-                        key={col.key}
-                        className={col.cellClassName}
-                        data-occlude-sticky-text={occludeId}
-                        style={isHidden ? { visibility: 'hidden' } : undefined}
-                      >
-                        {row.cells[col.key]}
-                      </div>
-                    )
-                  })}
+                  {columns.map((col) => (
+                    <div
+                      key={col.key}
+                      className={col.cellClassName}
+                      data-occlude-sticky-text={
+                        col.occludeStickyText ? `${sectionIdx}-${rowIdx}-${col.key}` : undefined
+                      }
+                    >
+                      {row.cells[col.key]}
+                    </div>
+                  ))}
                 </div>
 
                 {renderSeparator(usesTextOcclusion ? `sep-${sectionIdx}-${rowIdx}` : undefined)}
