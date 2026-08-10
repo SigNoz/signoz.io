@@ -1,7 +1,7 @@
 import { Check, X, Clock, Flame, Cloud, Server } from 'lucide-react'
 import type { CellValue, ComparisonCategory } from './ClickStackAlternativePage.types'
 import TrackingLink from '@/components/TrackingLink'
-import FeatureComparisonGrid from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
+import FeatureComparisonGridWithOcclusion from '@/shared/components/molecules/FeaturePages/FeatureComparisonGridWithOcclusion'
 import type { ComparisonSection } from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
 
 const BADGE_ICONS = {
@@ -85,6 +85,7 @@ const COLUMNS = [
     key: 'signoz',
     cellClassName: 'relative px-3 py-3',
     sectionCellClassName: 'relative',
+    occludeStickyText: true,
   },
   {
     key: 'clickstack',
@@ -125,7 +126,7 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
         </div>
 
         {/* Shared grid body */}
-        <FeatureComparisonGrid
+        <FeatureComparisonGridWithOcclusion
           columns={COLUMNS}
           sections={sections}
           gridClassName={GRID_CLASS}
