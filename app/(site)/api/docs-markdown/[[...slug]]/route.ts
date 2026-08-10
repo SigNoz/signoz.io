@@ -18,7 +18,7 @@ const notFoundResponse = () =>
     },
   })
 
-export async function GET(request: Request, props: { params: Promise<{ slug?: string[] }> }) {
+export async function GET(_: Request, props: { params: Promise<{ slug?: string[] }> }) {
   const params = await props.params
   const slug = resolveDocsMarkdownSlug(params.slug)
 
@@ -34,5 +34,5 @@ export async function GET(request: Request, props: { params: Promise<{ slug?: st
 
   const markdown = await renderDocMarkdownForAgents(doc)
 
-  return agentResponse(request, markdown, { varyAccept: true })
+  return agentResponse(null, markdown, { varyAccept: true })
 }
