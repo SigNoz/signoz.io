@@ -51,7 +51,7 @@ const asString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined
 
 export async function GET(
-  request: Request,
+  _: Request,
   props: { params: Promise<{ section: string; slug?: string[] }> }
 ) {
   const params = await props.params
@@ -83,5 +83,5 @@ export async function GET(
     { footerLines: CONTENT_FOOTER_LINES }
   )
 
-  return agentResponse(request, markdown, { varyAccept: true })
+  return agentResponse(null, markdown, { varyAccept: true })
 }
