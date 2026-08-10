@@ -338,8 +338,9 @@ function Footer({ inDocsShell = false }: FooterProps) {
       </div>
       <div
         className={cn(
-          'flex w-full min-w-0 items-center border-t border-solid border-[var(--l1-border)] px-4 py-6',
-          inDocsShell ? 'justify-start' : 'justify-center'
+          'flex w-full min-w-0 items-center border-t border-solid border-[var(--l1-border)] px-4 pt-6',
+          // Docs pages float the fixed NozPeek dock over the page bottom; leave room so the row stays clickable.
+          inDocsShell ? 'justify-start pb-24' : 'justify-center pb-6'
         )}
       >
         <div className="w-full min-w-0 max-w-8xl">
