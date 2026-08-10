@@ -56,15 +56,29 @@ export const buildDocsMarkdownRewritePath = (pathname: string): string => {
   return docsSlug ? `/api/docs-markdown/${docsSlug}` : '/api/docs-markdown'
 }
 
+/**
+ * Normalize catch-all `[...slug]` params into a docs path.
+ * Decodes per segment so a single encoded segment like `ai%2Fsignoz-mcp-server`
+ * becomes `ai/signoz-mcp-server` (decodeURI leaves `%2F` intact).
+ */
+export const slugFromParams = (slug: string[]): string =>
+  slug
+    .map((segment) => {
+      try {
+        return decodeURIComponent(segment).trim()
+      } catch {
+        // Malformed percent-encoding — keep the raw segment so content lookup
+        // 404s instead of throwing URIError from generateMetadata.
+        return segment.trim()
+      }
+    })
+    .filter(Boolean)
+    .join('/')
+
 export const resolveDocsMarkdownSlug = (segments?: string[]): string => {
   if (!segments || segments.length === 0) {
     return 'introduction'
   }
 
-  const joined = segments
-    .map((segment) => decodeURIComponent(segment).trim())
-    .filter(Boolean)
-    .join('/')
-
-  return stripMarkdownExtension(joined) || 'introduction'
+  return stripMarkdownExtension(slugFromParams(segments)) || 'introduction'
 }

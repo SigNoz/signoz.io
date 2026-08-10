@@ -9,6 +9,7 @@ const {
   resolveDocsMarkdownSlug,
   stripMarkdownExtension,
   hasMarkdownExtension,
+  slugFromParams,
 } = loadTsModule('utils/docs/markdownRouting.ts')
 
 test('shouldRewriteDocsToMarkdown rewrites docs paths when markdown is preferred', async () => {
@@ -117,4 +118,13 @@ test('resolveDocsMarkdownSlug strips a trailing .md from the last segment', asyn
     'metrics-management/overview'
   )
   assert.equal(resolveDocsMarkdownSlug(['.md']), 'introduction')
+})
+
+test('slugFromParams decodes catch-all segments without defaulting', async () => {
+  assert.equal(slugFromParams([]), '')
+  assert.equal(slugFromParams(['ai', 'signoz-mcp-server']), 'ai/signoz-mcp-server')
+  assert.equal(slugFromParams(['ai%2Fsignoz-mcp-server']), 'ai/signoz-mcp-server')
+  assert.equal(slugFromParams(['install', 'docker']), 'install/docker')
+  // Malformed percent-encoding should not throw
+  assert.equal(slugFromParams(['foo%zz']), 'foo%zz')
 })
