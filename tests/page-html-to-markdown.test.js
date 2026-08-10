@@ -83,3 +83,63 @@ test('renderPageHtmlToAgentMarkdown returns null for empty documents', async () 
   const markdown = await renderPageHtmlToAgentMarkdown('<html><head></head><body></body></html>')
   assert.equal(markdown, null)
 })
+
+const ANNOTATED_TABLE_HTML = `<!DOCTYPE html>
+<html>
+  <head><title>Compare</title></head>
+  <body>
+    <main>
+      <h1>Compare</h1>
+      <div data-md-table="Feature|SigNoz|ClickStack">
+        <div data-md-row="">
+          <div><div data-md-cell="">Platform</div></div>
+          <div data-md-cell="✓ OTel Native"><svg></svg><span>OTel Native</span></div>
+          <div data-md-cell="✗"><svg></svg></div>
+        </div>
+        <div data-md-row="">
+          <div data-md-cell="">Anomaly
+            Detection</div>
+          <div data-md-cell="✓">yes</div>
+          <div data-md-cell="">DIY via SQL</div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>`
+
+test('renderPageHtmlToAgentMarkdown converts annotated grids into GFM tables', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(ANNOTATED_TABLE_HTML, {
+    fallbackCanonicalUrl: 'https://signoz.io/compare/',
+  })
+
+  assert.match(markdown, /\| Feature\s+\| SigNoz\s+\| ClickStack\s+\|/)
+  assert.match(markdown, /\| Platform\s+\| ✓ OTel Native \| ✗\s+\|/)
+  // Cell overrides win; whitespace in text fallbacks collapses to one line.
+  assert.match(markdown, /\| Anomaly Detection \| ✓\s+\| DIY via SQL \|/)
+  assert.doesNotMatch(markdown, /\| yes\s+\|/)
+})
+
+test('renderPageHtmlToAgentMarkdown chunks header-length rows when no row markers exist', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(`<!DOCTYPE html>
+<html>
+  <head><title>Compare</title></head>
+  <body>
+    <main>
+      <h1>Compare</h1>
+      <div data-md-table="Feature|SigNoz|Dynatrace">
+        <div>header ignored</div>
+        <div data-md-cell="">APM</div>
+        <div data-md-cell="">✅</div>
+        <div data-md-cell="">✅ <small>7-day trial</small></div>
+        <div data-md-cell="">Open Source</div>
+        <div data-md-cell="">✅</div>
+        <div data-md-cell="">❌</div>
+      </div>
+    </main>
+  </body>
+</html>`)
+
+  assert.match(markdown, /\| Feature\s+\| SigNoz \| Dynatrace\s+\|/)
+  assert.match(markdown, /\| APM\s+\| ✅\s+\| ✅ 7-day trial \|/)
+  assert.match(markdown, /\| Open Source \| ✅\s+\| ❌\s+\|/)
+})
