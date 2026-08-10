@@ -48,7 +48,7 @@ export type AgentResponseOptions = {
  * 304 short-circuit when the request's If-None-Match matches.
  */
 export function agentResponse(
-  request: Request,
+  request: Request | null,
   body: string,
   options: AgentResponseOptions = {}
 ): Response {
@@ -73,7 +73,7 @@ export function agentResponse(
     headers.set('Vary', 'Accept')
   }
 
-  if (etagMatches(request.headers.get('if-none-match'), etag)) {
+  if (request && etagMatches(request.headers.get('if-none-match'), etag)) {
     return new Response(null, { status: 304, headers })
   }
 
