@@ -5,7 +5,7 @@ import { MonitorDown, Shovel } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { Card } from '@/components/ui/Card'
-import { Badge } from '@signozhq/badge'
+import { Badge } from '@signozhq/ui/badge'
 import Image from 'next/image'
 import {
   CARDS,

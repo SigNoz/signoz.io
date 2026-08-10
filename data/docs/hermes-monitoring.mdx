@@ -1,15 +1,21 @@
 ---
-date: 2026-06-23
+date: 2026-08-03
 title: Hermes Monitoring and Observability with OpenTelemetry
-description: Set up Hermes monitoring and observability with OpenTelemetry to send traces, logs, and metrics to SigNoz for full visibility into agent usage
+description: Set up Hermes Agent monitoring with OpenTelemetry and SigNoz. Trace long-running agent sessions, skill execution, subagent runs, and model calls.
 doc_type: howto
 ---
 
 ## What is Hermes Monitoring?
 
-Hermes monitoring gives you full visibility into your AI coding agent's behavior. This guide walks you through setting up Hermes monitoring and observability using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and exporting traces, metrics, and logs to SigNoz. With this integration, you can observe and track your Hermes AI agent sessions, LLM calls, tool invocations, and more.
+<a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noopener noreferrer nofollow">Hermes Agent</a> is an open source autonomous AI assistant from Nous Research. It keeps memory across sessions, generates its own skills from experience, spawns subagents for parallel work, and runs scheduled tasks unattended. You reach it from a terminal or from Telegram, Discord, Slack, WhatsApp, Signal, and email.
 
-With full Hermes monitoring in SigNoz, you can correlate traces, logs, and metrics in unified dashboards, set alerts on latency and errors, and improve the reliability of your AI coding workflows. This end to end Hermes observability gives you actionable insight into every agent session, LLM call, and tool invocation.
+That design is what makes Hermes hard to follow without telemetry: sessions are long-lived, the skill set changes underneath you, subagents run out of sight, and scheduled jobs fire when nobody is watching.
+
+This guide walks you through setting up Hermes monitoring and observability using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and exporting traces, metrics, and logs to SigNoz. With this integration, you can observe agent sessions, LLM calls, tool invocations, skill execution, and subagent runs.
+
+With full Hermes monitoring in SigNoz, you can correlate traces, logs, and metrics in unified dashboards, set alerts on latency and errors, and see which models, skills, and tools are driving your cost and failures.
+
+<YouTube id="DJHNTIKljXc" mute="false" />
 
 ## Prerequisites
 
@@ -353,7 +359,14 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 </details>
 
-Additional resources:
-- Set up [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
-- Learn more about [querying traces](https://signoz.io/docs/userguide/traces/)
-- Explore [log correlation](https://signoz.io/docs/userguide/logs_query_builder/)
+## Related integrations
+
+Instrument the other AI agents and assistants you run, using the same OpenTelemetry pipeline:
+
+- [Monitor Claude Code with OpenTelemetry](https://signoz.io/docs/claude-code-monitoring/) - track session token usage, cost per task, and API performance
+- [Monitor OpenAI Codex with OpenTelemetry](https://signoz.io/docs/codex-monitoring/) - track Codex CLI sessions, token spend, and command-level traces
+- [OpenCode observability with OpenTelemetry](https://signoz.io/docs/opencode-observability/) - trace OpenCode sessions, tool calls, and per-message cost
+- [Instrument LLM apps with OpenLIT](https://signoz.io/docs/openlit/) - a one-line OpenTelemetry SDK covering GenAI, vector DB, and GPU telemetry
+- [Monitor Ollama with OpenTelemetry](https://signoz.io/docs/ollama-monitoring/) - track local model inference latency, tokens, and resource usage
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

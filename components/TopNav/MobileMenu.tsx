@@ -35,13 +35,12 @@ export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuP
         animation="slide"
         width="narrow"
         className={cn(
-          // ! overrides needed: @signozhq/ui CSS modules beat normal Tailwind for these
-          'overflow-y-auto !border-none !bg-transparent !shadow-none',
-          '!top-14 !h-[calc(100%-3.5rem)] !w-full !max-w-[min(100%,24rem)]'
+          '!z-[1100] overflow-y-auto !border-none !bg-[var(--l1-background)] !shadow-none',
+          '!left-0 !right-0 !top-14 !h-[calc(100%-3.5rem)] !w-full !max-w-none'
         )}
       >
         <DialogTitle className="sr-only">Menu</DialogTitle>
-        <div className="flex min-h-full w-full flex-col bg-signoz_ink-500 px-6 py-24 pt-[calc(6rem-56px)] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+        <div className="flex min-h-full w-full flex-col bg-[var(--l1-background)] px-6 py-24 pt-[calc(6rem-56px)]">
           <div className="flex items-center justify-between">
             <TrackingLink
               href="/"

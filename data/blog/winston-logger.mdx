@@ -1,11 +1,10 @@
 ---
-
-title: "Winston Logger: Node.js Logging Guide"
-meta_title: "Winston Logger: Node.js Logging Guide"
+title: "Winston Logger for Node.js: Transports, Levels & Examples"
+meta_title: "Winston Logger for Node.js: Transports, Levels & Examples"
 date: 2026-06-11
 tags: [nodejs, logging]
 authors: [saurabh_patil]
-description: "Learn how to use Winston logger for Node.js with transports, formats, levels, error handling, and monitoring with SigNoz."
+description: "Learn how to install and configure Winston logger for Node.js with npm, transports, formats, log levels, exceptions, and working examples."
 keywords: [Winston logger, nodejs, log management, structured logging, winston profiling, winston transports, winston custom formats, nodejs observability]
 related_articles:
   - '/blog/morgan-logger'
@@ -16,7 +15,7 @@ related_articles:
   - '/opentelemetry/logging-nodejs'
 ---
 
-Winston logger is a simple [Node.js logging](/guides/nodejs-logging/) library. It was created to give your Node.js applications a flexible and centralized way to manage logs across multiple destinations, formats, and severity levels without tying the application to a single logging output or storage mechanism.
+Winston logger is a simple [Node.js logging](https://signoz.io/guides/nodejs-logging/) library. It was created to give your Node.js applications a flexible and centralized way to manage logs across multiple destinations, formats, and severity levels without tying the application to a single logging output or storage mechanism.
 
 Developers choose the Winston logger when building internal tools, enterprise applications, traditional backend systems, or when they need multiple transports. A transport can be described as a storage device for your logs. Multiple transports can be configured on a single Winston logger instance at different logging levels. For example, you can configure a transport to send error logs to a database, while all logs can be just printed to the console during development.
 
@@ -144,7 +143,7 @@ logger.info('Handled by my custom transport!');
 
 ## Logging Levels in Winston
 
-The Winston log levels follow the severity ordering specified by <a href="https://tools.ietf.org/html/rfc5424" rel="noopener noreferrer nofollow" target="_blank">RFC5424</a>, which assumes the levels to be numerically ordered from most important to least important. By default, Winston uses NPM style [logging levels](/blog/logging-levels/) (`0-highest`  to `6-lowest`):
+The Winston log levels follow the severity ordering specified by <a href="https://tools.ietf.org/html/rfc5424" rel="noopener noreferrer nofollow" target="_blank">RFC5424</a>, which assumes the levels to be numerically ordered from most important to least important. By default, Winston uses NPM style [logging levels](https://signoz.io/blog/logging-levels/) (`0-highest`  to `6-lowest`):
 
 ```jsx
 {
@@ -467,11 +466,11 @@ The output will include a `durationMs` field, which is injected automatically by
 
 A Node.js service usually writes logs to stdout, local files, or both. That works during local development, but it becomes painful in production. If logs stay on individual hosts or short-lived containers, debugging often means SSHing into a server or running `kubectl logs` before the pod is replaced and the output is gone. Once you have more than one instance, that workflow does not scale.
 
-A [log management tool](/blog/best-open-source-log-management-tools/) centralizes those logs so you can search them, filter by metadata, build dashboards, and create alerts. In this section, we will send Winston logs from a Node.js application to [SigNoz](https://signoz.io/), an all-in-one observability platform for logs, metrics, and traces. SigNoz supports [OpenTelemetry](/opentelemetry/), so the same logging approach can also be adapted for other OTLP-compatible backends, usually by changing exporter configuration rather than rewriting your logging calls.
+A [log management tool](https://signoz.io/blog/best-open-source-log-management-tools/) centralizes those logs so you can search them, filter by metadata, build dashboards, and create alerts. In this section, we will send Winston logs from a Node.js application to [SigNoz](https://signoz.io/), an all-in-one observability platform for logs, metrics, and traces. SigNoz supports [OpenTelemetry](https://signoz.io/opentelemetry/), so the same logging approach can also be adapted for other OTLP-compatible backends, usually by changing exporter configuration rather than rewriting your logging calls.
 
-The main benefit is log-trace correlation. When Winston logs are emitted inside an active OpenTelemetry span, they can include fields such as `trace_id` and `span_id`. That lets you move from a slow or failing trace to the log lines created during the same request. You can also query [structured log](https://signoz.io/blog/structured-logs/) attributes, [create log-based alerts](/docs/alerts-management/log-based-alerts/), and build dashboards without changing every existing `logger.info()` or `logger.error()` call site.
+The main benefit is log-trace correlation. When Winston logs are emitted inside an active OpenTelemetry span, they can include fields such as `trace_id` and `span_id`. That lets you move from a slow or failing trace to the log lines created during the same request. You can also query [structured log](https://signoz.io/blog/structured-logs/) attributes, [create log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/), and build dashboards without changing every existing `logger.info()` or `logger.error()` call site.
 
-For setup instructions, including both the no-code auto-instrumentation path and the code-level SDK setup, head over to the official guide, [Send logs from Node.js Winston logger to SigNoz](/docs/logs-management/send-logs/nodejs-winston-logs/).
+For setup instructions, including both the no-code auto-instrumentation path and the code-level SDK setup, head over to the official guide, [Send logs from Node.js Winston logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs/).
 
 ## Conclusion
 

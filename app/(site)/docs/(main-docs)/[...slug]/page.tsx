@@ -2,11 +2,11 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
-import DecimalClient from '@/components/Decimal'
 import JsonLdScript from '@/components/JsonLdScript'
 import { buildBreadcrumbSchema, getDocsBreadcrumbs } from '@/utils/breadcrumbSchema'
 import { fetchDocBySlug } from '@/utils/cachedData'
 import { compileMdxSource } from '@/utils/compileMdx'
+import { slugFromParams } from '@/utils/docs/markdownRouting'
 
 export const revalidate = 86400
 export const dynamicParams = true
@@ -15,7 +15,7 @@ export async function generateMetadata(props: {
   params: Promise<{ slug: string[] }>
 }): Promise<Metadata | undefined> {
   const params = await props.params
-  const slug = decodeURI(params.slug.join('/'))
+  const slug = slugFromParams(params.slug)
   const post = await fetchDocBySlug(slug)
 
   if (!post) {
@@ -24,12 +24,16 @@ export async function generateMetadata(props: {
 
   const seoTitle = post?.meta_title || post?.title
   const fullTitle = seoTitle ? `${seoTitle} | SigNoz Docs` : 'SigNoz Docs'
+  // Absolute URLs — relative "./" makes Next encode nested catch-all slugs as %2F
+  // (e.g. /docs/ai%2Fsignoz-mcp-server/) in canonical and og:url.
+  const pageUrl = `${siteMetadata.siteUrl}/docs/${slug}/`
 
   return {
     title: seoTitle,
     description: post.description,
-    // Points agents that fetched the HTML at the markdown version of this page.
     alternates: {
+      canonical: pageUrl,
+      // Points agents that fetched the HTML at the markdown version of this page.
       types: {
         'text/markdown': `${siteMetadata.siteUrl}/docs/${slug}.md`,
       },
@@ -40,7 +44,7 @@ export async function generateMetadata(props: {
       siteName: siteMetadata.title,
       locale: 'en_US',
       type: 'article',
-      url: './',
+      url: pageUrl,
     },
     twitter: {
       card: 'summary_large_image',
@@ -55,7 +59,7 @@ export const generateStaticParams = async () => {
 
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params
-  const slug = decodeURI(params.slug.join('/'))
+  const slug = slugFromParams(params.slug)
   const post = await fetchDocBySlug(slug)
 
   if (!post) {
@@ -103,7 +107,6 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
           {compiledContent}
         </DocContent>
       </div>
-      <DecimalClient />
     </>
   )
 }
