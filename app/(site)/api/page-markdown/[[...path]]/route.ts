@@ -8,9 +8,7 @@ import { slugFromParams } from '@/utils/docs/markdownRouting'
 import { renderPageHtmlToAgentMarkdown } from '@/utils/pageHtmlToMarkdown'
 import { agentResponse } from '@/utils/agentResponseHeaders'
 
-export async function generateStaticParams() {
-  return []
-}
+export const dynamicParams = true
 
 const notFoundResponse = () =>
   new NextResponse('Not Found', {
