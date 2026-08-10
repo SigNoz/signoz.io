@@ -12,10 +12,13 @@ Or you can also [Add a panel](https://signoz.io/docs/userguide/manage-dashboards
 
 ### Why I can't see my metric 'x'?
 
-You see this when the query filter is wrong, or when the time range holds no ingested data. Make sure that the metric is present in [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) for the selected time range.
+First look for the metric in [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) over a wide time range.
+
+- If the metric is present, the filter or the time range in your panel is wrong. Correct the filter, then widen the time range.
+- If the metric is absent, SigNoz received no data points for it. Make sure that your SDK or collector exports the metric, as described in the [send metrics guides](https://signoz.io/docs/metrics-management/send-metrics/). Then look for the metric in Metrics Explorer again.
 
 **Mixed temporality:**
 
-SigNoz queries Sum metrics that carry both cumulative and delta data points. If you change the temporality of a Sum metric from cumulative to delta, your queries over the older cumulative data still work.
+SigNoz queries Counter metrics that carry both cumulative and delta data points. If you change a Counter from cumulative to delta, your Query Builder queries over the older cumulative data still work. PromQL does not read delta series, so move PromQL panels and alerts on that metric to the Query Builder first.
 
 For more information about metric temporality, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
