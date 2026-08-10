@@ -1,10 +1,8 @@
-import { NextResponse } from 'next/server'
 import siteMetadata from '@/data/siteMetadata'
 import { getLlmStarterLinks } from '@/utils/docs/agentDiscovery'
+import { agentResponse } from '@/utils/agentResponseHeaders'
 
-const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
-
-export async function GET() {
+export async function GET(request: Request) {
   const starters = await getLlmStarterLinks()
   const starterLines =
     starters.length > 0
@@ -37,10 +35,5 @@ export async function GET() {
     '',
   ].join('\n')
 
-  return new NextResponse(body, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': CACHE_CONTROL_HEADER,
-    },
-  })
+  return agentResponse(request, body, { contentType: 'text/plain; charset=utf-8' })
 }

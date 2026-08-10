@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server'
 import { renderDocMarkdownForAgents } from '@/utils/docs/renderDocMarkdownForAgents'
 import { resolveDocsMarkdownSlug } from '@/utils/docs/markdownRouting'
 import { fetchDocBySlug } from '@/utils/cachedData'
-
-const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
+import { agentResponse } from '@/utils/agentResponseHeaders'
 
 export async function generateStaticParams() {
   return []
@@ -18,7 +17,7 @@ const notFoundResponse = () =>
     },
   })
 
-export async function GET(_: Request, props: { params: Promise<{ slug?: string[] }> }) {
+export async function GET(request: Request, props: { params: Promise<{ slug?: string[] }> }) {
   const params = await props.params
   const slug = resolveDocsMarkdownSlug(params.slug)
   const doc = await fetchDocBySlug(slug)
@@ -29,11 +28,5 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
 
   const markdown = await renderDocMarkdownForAgents(doc)
 
-  return new NextResponse(markdown, {
-    headers: {
-      'Content-Type': 'text/markdown; charset=utf-8',
-      'Cache-Control': CACHE_CONTROL_HEADER,
-      Vary: 'Accept',
-    },
-  })
+  return agentResponse(request, markdown, { varyAccept: true })
 }
