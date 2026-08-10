@@ -72,6 +72,16 @@ test('etagMatches handles missing header', () => {
   assert.equal(etagMatches(null, 'W/"abc"'), false)
 })
 
+test('agentResponse with null request never reads headers and always returns 200', async () => {
+  const response = agentResponse(null, 'body', { varyAccept: true })
+
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get('ETag'), computeWeakEtag('body'))
+  assert.equal(response.headers.get('Cache-Control'), AGENT_CACHE_CONTROL)
+  assert.equal(response.headers.get('Vary'), 'Accept')
+  assert.equal(await response.text(), 'body')
+})
+
 test('agentResponse applies X-Robots-Tag noindex by default', () => {
   const defaulted = agentResponse(makeRequest(), 'body')
   const disabled = agentResponse(makeRequest(), 'body', { noindex: false })
