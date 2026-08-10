@@ -27,6 +27,8 @@ Add the `Serilog.Sinks.OpenTelemetry` package to your project:
 dotnet add package Serilog.Sinks.OpenTelemetry
 ```
 
+This installs the latest version. If your project pins an older version, upgrade to v4.0.0 or later. Earlier versions ignore `OTEL_SERVICE_NAME` and the other `OTEL_EXPORTER_OTLP_*` environment variables used in Step 3.
+
 ### Step 2: Configure the sink
 
 Add the OpenTelemetry sink to your Serilog logger configuration. Do this where you build `Log.Logger`, usually at the start of `Program.cs`. Leave out the endpoint, protocol, and headers here. The sink reads them from environment variables at startup:
@@ -92,7 +94,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 ```
 
-Environment variables still take priority over these values, unless you pass `ignoreEnvironment: true` to `WriteTo.OpenTelemetry`.
+Environment variables still take priority over these values, unless you pass `ignoreEnvironment: true` to `WriteTo.OpenTelemetry`. Use this approach on sink versions older than v4.0.0, which do not read `OTEL_EXPORTER_OTLP_*` or `OTEL_SERVICE_NAME` from the environment.
 </Admonition>
 
 ### Step 3: Set environment variables and run
