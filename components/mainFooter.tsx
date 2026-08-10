@@ -6,6 +6,7 @@ import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import { Github, Linkedin, Slack, Twitter, Youtube } from '@/components/social-icons/SolidIcons'
 import { usePathname } from 'next/navigation'
+import { cn } from 'app/lib/utils'
 import './footer/footer-pill-links.css'
 
 type FooterPillLinkProps = {
@@ -36,7 +37,7 @@ function FooterPillLink({
   newTab = false,
   className = '',
 }: FooterPillLinkProps) {
-  const classes = `footer-pill-link mt-5 ${className}`.trim()
+  const classes = cn('footer-pill-link mt-5', className)
   const isOwned = isSigNozOwnedHref(href)
 
   if ((external || newTab) && isOwned) {
@@ -70,23 +71,57 @@ function FooterPillLink({
   )
 }
 
-function Footer() {
+type FooterProps = {
+  /** When true, only render on /docs routes (content-column placement). Site layout omits this. */
+  inDocsShell?: boolean
+}
+
+function Footer({ inDocsShell = false }: FooterProps) {
   const pathname = usePathname()
   const isLoginRoute = pathname === '/login/'
   const isTeamsRoute = pathname === '/teams/'
   const isContactUsRoute = pathname === '/contact-us/'
+  const isDocsRoute = pathname?.startsWith('/docs') ?? false
 
   if (isLoginRoute || isTeamsRoute || isContactUsRoute) {
     return null
   }
 
+  // Docs footer lives beside the sidenav inside DocsShell — not under the full site chrome.
+  if (inDocsShell ? !isDocsRoute : isDocsRoute) {
+    return null
+  }
+
+  const stackEarly = inDocsShell
+  const colClass = cn(
+    'flex min-w-0 flex-1 flex-col',
+    stackEarly ? 'max-lg:w-full' : 'max-md:w-full'
+  )
+  const stackMtClass = stackEarly ? 'max-lg:mt-10' : 'max-md:mt-10'
+  const stackStartClass = stackEarly ? 'max-lg:justify-start' : 'max-md:justify-start'
+
   return (
-    <div className="z-[10] flex flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px]">
-      <div className="flex w-full items-center justify-center px-4 py-14 max-md:max-w-full">
-        <div className="w-full max-w-8xl justify-between max-md:max-w-full">
-          <div className="flex gap-5 max-md:flex-col max-md:gap-0">
-            <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex flex-col pb-2.5 text-sm tracking-wide text-[var(--l2-foreground)] max-md:mt-10">
+    <div className="z-[10] flex min-w-0 shrink-0 flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px]">
+      <div
+        className={cn(
+          'flex w-full min-w-0 items-center px-4 py-14 max-md:max-w-full',
+          inDocsShell ? 'justify-start' : 'justify-center'
+        )}
+      >
+        <div className="w-full min-w-0 max-w-8xl justify-between max-md:max-w-full">
+          <div
+            className={cn(
+              'flex gap-5',
+              stackEarly ? 'max-lg:flex-col max-lg:gap-0' : 'max-md:flex-col max-md:gap-0'
+            )}
+          >
+            <div className={colClass}>
+              <div
+                className={cn(
+                  'flex flex-col pb-2.5 text-sm tracking-wide text-[var(--l2-foreground)]',
+                  stackMtClass
+                )}
+              >
                 <div className="text-xs font-medium uppercase leading-5 tracking-wide text-[var(--l1-foreground-hover)]">
                   Docs
                 </div>
@@ -106,8 +141,13 @@ function Footer() {
                 <FooterPillLink href="/blog/opentelemetry-demo/">OpenTelemetry Demo</FooterPillLink>
               </div>
             </div>
-            <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)] max-md:mt-10">
+            <div className={colClass}>
+              <div
+                className={cn(
+                  'flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)]',
+                  stackMtClass
+                )}
+              >
                 <div className="text-xs font-medium uppercase leading-5 tracking-wide text-[var(--l1-foreground-hover)]">
                   Community
                 </div>
@@ -143,8 +183,13 @@ function Footer() {
                 </FooterPillLink>
               </div>
             </div>
-            <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)] max-md:mt-10">
+            <div className={colClass}>
+              <div
+                className={cn(
+                  'flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)]',
+                  stackMtClass
+                )}
+              >
                 <div className="text-xs font-medium uppercase leading-5 tracking-wide text-[var(--l1-foreground-hover)]">
                   More
                 </div>
@@ -167,9 +212,19 @@ function Footer() {
                 </FooterPillLink>
               </div>
             </div>
-            <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex flex-col items-end max-md:mt-10">
-                <div className="flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-[var(--l1-foreground)]">
+            <div className={colClass}>
+              <div
+                className={cn(
+                  'flex flex-col items-end',
+                  stackEarly ? 'max-lg:mt-10 max-lg:items-start' : 'max-md:mt-10 max-md:items-start'
+                )}
+              >
+                <div
+                  className={cn(
+                    'flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-[var(--l1-foreground)]',
+                    stackEarly ? 'max-lg:self-start' : 'max-md:self-start'
+                  )}
+                >
                   <Link href="/" prefetch={false} className="flex items-center gap-2">
                     <Image
                       className="h-5 w-auto"
@@ -183,7 +238,12 @@ function Footer() {
                     <div className="font-satoshi-bold font-medium">SigNoz</div>
                   </Link>
                 </div>
-                <div className="mt-5 flex items-center justify-end gap-2 rounded text-[13px] font-medium leading-none tracking-[-0.065px] text-[var(--callout-success-description)]">
+                <div
+                  className={cn(
+                    'mt-5 flex items-center justify-end gap-2 rounded text-[13px] font-medium leading-none tracking-[-0.065px] text-[var(--callout-success-description)]',
+                    stackStartClass
+                  )}
+                >
                   <span
                     className="size-1.5 shrink-0 rounded-full bg-[var(--callout-success-description)]"
                     aria-hidden
@@ -192,7 +252,12 @@ function Footer() {
                     All systems operational
                   </Link>
                 </div>
-                <div className="footer-icons mt-5 flex items-end justify-between gap-4 py-2 text-[var(--l2-foreground)] [&_a:hover]:text-[var(--l1-foreground)] [&_path]:fill-current [&_svg]:fill-current">
+                <div
+                  className={cn(
+                    'footer-icons mt-5 flex flex-wrap items-end justify-end gap-4 py-2 text-[var(--l2-foreground)] [&_a:hover]:text-[var(--l1-foreground)] [&_path]:fill-current [&_svg]:fill-current',
+                    stackStartClass
+                  )}
+                >
                   <Link
                     href={'https://github.com/SigNoz'}
                     target="_blank"
@@ -238,7 +303,12 @@ function Footer() {
                     <Youtube />
                   </Link>
                 </div>
-                <div className="mt-5 flex flex-row gap-8">
+                <div
+                  className={cn(
+                    'mt-5 flex min-w-0 flex-row flex-wrap justify-end gap-8',
+                    stackStartClass
+                  )}
+                >
                   <Image
                     className="cursor-pointer opacity-60 invert transition-opacity hover:opacity-100 dark:invert-0"
                     src="/svgs/icons/hipaa.svg"

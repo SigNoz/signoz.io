@@ -9,9 +9,9 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
     <TooltipProviderWrapper>
       <MobileDocsSidebarProvider>
         <SectionContainer>
-          <div className="relative flex h-screen flex-col justify-between">
+          <div className="relative flex min-h-screen flex-col justify-between">
             <TopNav />
-            <main className="mb-auto mt-[48px] bg-signoz_ink-500">{children}</main>
+            <main className="mb-auto mt-[48px] bg-[var(--l1-background)]">{children}</main>
             <MainFooter />
           </div>
         </SectionContainer>
