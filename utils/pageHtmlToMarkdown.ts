@@ -35,6 +35,113 @@ const isHastElement = (node: HastContent): node is HastElement => node.type === 
 const hasMarkdownIgnoreAttribute = (node: HastElement): boolean =>
   node.properties?.['data-markdown-ignore'] != null || node.properties?.dataMarkdownIgnore != null
 
+const getDataAttribute = (node: HastElement, camel: string, kebab: string): unknown =>
+  node.properties?.[camel] ?? node.properties?.[kebab]
+
+/**
+ * CSS-grid "tables" (comparison grids, pricing matrices) carry no <table>
+ * semantics, so rehype-remark flattens them into loose paragraphs. Components
+ * opt in to proper markdown tables with data attributes:
+ *   data-md-table="Col A|Col B|..."  on the container (header labels)
+ *   data-md-row                      on each row wrapper (optional)
+ *   data-md-cell[="override text"]   on each cell; empty value = use cell text
+ * Without data-md-row, cells are chunked into rows of header length.
+ */
+const collectAnnotated = (node: HastElement, camel: string, kebab: string): HastElement[] => {
+  const found: HastElement[] = []
+  for (const child of node.children || []) {
+    if (!isHastElement(child)) continue
+    if (getDataAttribute(child, camel, kebab) != null) {
+      found.push(child)
+      continue
+    }
+    found.push(...collectAnnotated(child, camel, kebab))
+  }
+  return found
+}
+
+const getAnnotatedCellText = (cell: HastElement): string => {
+  const override = getDataAttribute(cell, 'dataMdCell', 'data-md-cell')
+  const raw =
+    typeof override === 'string' && override.trim() ? override : getTextContent(cell as HastContent)
+  return raw.replace(/\s+/g, ' ').trim()
+}
+
+const tableRowElement = (cells: string[], cellTag: 'th' | 'td'): HastElement => ({
+  type: 'element',
+  tagName: 'tr',
+  properties: {},
+  children: cells.map((text) => ({
+    type: 'element' as const,
+    tagName: cellTag,
+    properties: {},
+    children: text ? [{ type: 'text' as const, value: text }] : [],
+  })),
+})
+
+const buildAnnotatedTable = (container: HastElement): HastElement | null => {
+  const headerValue = getDataAttribute(container, 'dataMdTable', 'data-md-table')
+  if (typeof headerValue !== 'string' || !headerValue.trim()) return null
+
+  const headerLabels = headerValue
+    .split('|')
+    .map((label) => label.trim())
+    .filter(Boolean)
+  if (headerLabels.length === 0) return null
+
+  const rowElements = collectAnnotated(container, 'dataMdRow', 'data-md-row')
+  let bodyRows: string[][]
+  if (rowElements.length > 0) {
+    bodyRows = rowElements.map((row) =>
+      collectAnnotated(row, 'dataMdCell', 'data-md-cell').map(getAnnotatedCellText)
+    )
+  } else {
+    const cells = collectAnnotated(container, 'dataMdCell', 'data-md-cell').map(
+      getAnnotatedCellText
+    )
+    bodyRows = []
+    for (let i = 0; i < cells.length; i += headerLabels.length) {
+      bodyRows.push(cells.slice(i, i + headerLabels.length))
+    }
+  }
+
+  bodyRows = bodyRows.filter((cells) => cells.length > 0)
+  if (bodyRows.length === 0) return null
+
+  return {
+    type: 'element',
+    tagName: 'table',
+    properties: {},
+    children: [
+      {
+        type: 'element',
+        tagName: 'thead',
+        properties: {},
+        children: [tableRowElement(headerLabels, 'th')],
+      },
+      {
+        type: 'element',
+        tagName: 'tbody',
+        properties: {},
+        children: bodyRows.map((cells) => tableRowElement(cells, 'td')),
+      },
+    ],
+  }
+}
+
+const transformAnnotatedTables = (node: { children?: HastContent[] }) => {
+  if (!Array.isArray(node.children)) return
+
+  node.children = node.children.map((child) => {
+    if (!isHastElement(child)) return child
+    if (getDataAttribute(child, 'dataMdTable', 'data-md-table') != null) {
+      return buildAnnotatedTable(child) ?? child
+    }
+    transformAnnotatedTables(child)
+    return child
+  })
+}
+
 const isAriaHidden = (node: HastElement): boolean =>
   node.properties?.ariaHidden === 'true' || node.properties?.['aria-hidden'] === 'true'
 
@@ -122,6 +229,7 @@ export async function renderPageHtmlToAgentMarkdown(
     findFirstElement(document, 'main') || findFirstElement(document, 'body') || document
 
   pruneChrome(contentRoot as { children?: HastContent[] })
+  transformAnnotatedTables(contentRoot as { children?: HastContent[] })
 
   const bodyHast: HastRoot = {
     type: 'root',
