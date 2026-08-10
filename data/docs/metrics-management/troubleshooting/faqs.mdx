@@ -12,14 +12,15 @@ Or you can also [Add a panel](https://signoz.io/docs/userguide/manage-dashboards
 
 ### Why I can't see my metric 'x'?
 
-First look for the metric in [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) over a wide time range.
+First look for the metric in [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
 
 - If the metric is present, the filter or the time range in your panel is wrong. Correct the filter, then widen the time range.
-- If the metric is absent, SigNoz received no data points for it. Make sure that your SDK or collector exports the metric, as described in the [send metrics guides](https://signoz.io/docs/metrics-management/send-metrics/). Then look for the metric in Metrics Explorer again.
+- If the metric is not present, widen the time range in Metrics Explorer and look again.
+- If the metric is absent even for a wide time range, SigNoz received no data points for it. Make sure that your SDK or collector exports the metric, as described in the [send metrics guides](https://signoz.io/docs/metrics-management/send-metrics/). Then look for the metric in Metrics Explorer again.
 
 **Mixed temporality:**
 
-SigNoz queries Counter metrics that carry both cumulative and delta data points. If you change a Counter from cumulative to delta, your Query Builder queries over the older cumulative data still work. PromQL does not read delta series, so move PromQL panels and alerts on that metric to the Query Builder first.
+A Counter metric can send all cumulative points, all delta points, or both together. Both appear together after you switch the temporality, and also when different time series of the same metric use different temporality. The Query Builder queries all three cases, so your older cumulative data stays queryable after a switch. PromQL does not read delta series, so move PromQL panels and alerts on that metric to the Query Builder first.
 
 Metrics Explorer shows one temporality in the metric details, even when the metric carries both. This affects the display only, not your query results.
 

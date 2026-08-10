@@ -45,7 +45,7 @@ A table representing the different types of metrics and their temporality suppor
 
 The Gauge metric type does not have a temporality, as it represents a single value at a point in time.
 
-SigNoz records the temporality of every data point, so a Counter metric can carry both cumulative and delta points. If you change a Counter from cumulative to delta, your Query Builder queries over the older cumulative data still work.
+SigNoz records the temporality of every data point. A Counter metric can send all cumulative points, all delta points, or both together. Both appear together after you switch the temporality, and also when different time series of the same metric use different temporality. The Query Builder queries all three cases, so your older cumulative data stays queryable after a switch.
 
 <Admonition type="warning">
 PromQL does not read delta series. A PromQL panel or alert on a metric that you switch to delta keeps running and receives no new samples. Move those queries to the Query Builder before you change the temporality.
