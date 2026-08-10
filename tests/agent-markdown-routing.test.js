@@ -104,6 +104,12 @@ test('shouldRewritePageToMarkdown excludes file-like paths', () => {
   assert.equal(shouldRewritePageToMarkdown('/llms.txt.md', false), false)
 })
 
+test('shouldRewritePageToMarkdown excludes real .md routes', () => {
+  assert.equal(shouldRewritePageToMarkdown('/skill.md', false), false)
+  assert.equal(shouldRewritePageToMarkdown('/skill.md', true), false)
+  assert.equal(shouldRewritePageToMarkdown('/skill.md/', false), false)
+})
+
 test('buildPageMarkdownRewritePath maps paths to the internal page route', () => {
   assert.equal(buildPageMarkdownRewritePath('/pricing.md'), '/api/page-markdown/pricing')
   assert.equal(buildPageMarkdownRewritePath('/pricing/'), '/api/page-markdown/pricing')
