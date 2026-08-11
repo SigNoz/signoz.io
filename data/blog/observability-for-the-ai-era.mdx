@@ -3,24 +3,32 @@ title: "Building observability for the AI era: agent-native and AI-scale telemet
 date: 2026-08-12
 tags: [Product, AI]
 authors: [avishek_kataria]
-description: "Agent-native observability dashboards in SigNoz Cloud. A validated schema on the open CNCF Perses spec lets agents create and edit dashboards reliably."
-image: 
+description: "SigNoz is building observability for the AI era: agent-native observability and AI-scale telemetry. We shipped MCP, Noz, dashboards, and a new trace view."
+image: /img/blog/2026/08/AI-era.webp
 keywords: [agent native observability, signoz mcp server, ai agent observability, opentelemetry, signoz vision, mcp, signoz cloud dashboards, agent native dashboards]
+related_articles:
+  - '/blog//agent-native-observability-dashboard/'
+  - '/blog/new-trace-detail-view/'
+  - '/blog/introducing-agent-native-observability/'
+  - '/case-study/kernel/'
+  - '/blog/traces-without-limits/'
 ---
 <h2 className="!mb-2">TL;DR</h2>
 AI is reshaping observability. Agents are becoming the primary users, and LLMs are adding new signals and multiplying the scale of telemetry. 
 
 SigNoz is building observability for the AI era. Agent-native and AI-scale. A platform agents can run and engineers can trust, at any scale. OpenTelemetry-native, predictable bills.
 
-<p className="!mb-0">
-  SigNoz Cloud shipped four product updates on this path: SigNoz Cloud MCP, Noz (in-product AI assistant), agent-native dashboards, and a new trace view for million-span, AI-scale traces.
-</p>
+SigNoz Cloud shipped four product updates on this path: SigNoz Cloud MCP, Noz (in-product AI assistant), agent-native dashboards, and a new trace view for million-span, AI-scale traces.
 
-<hr className="!mt-2" />
+<Figure
+  src="/img/blog/2026/08/AI-era.webp"
+  alt="SigNoz Cloud Observability Platform for AI"
+  caption="SigNoz Cloud - Observability for the AI Era"
+/>
 
 **Software development is being rebuilt around AI, and SigNoz is rebuilding observability for it.**
 
-Agents are writing more of the code, scaling deployment, and entering DevOps. LLM calls are threading into most services, adding new signals and multiplying telemetry. 
+Agents are writing more of the code, shipping more of the deploys, and moving into DevOps. LLM calls are threading into most services, adding new signals and multiplying telemetry. 
 
 <Figure
   src="/img/blog/2026/08/github-kyle-daigle-post-commit-volume.webp"
@@ -32,16 +40,16 @@ Agents are writing more of the code, scaling deployment, and entering DevOps. LL
 
 These two shifts reinforce each other. Agents drive the telemetry explosion, and they're also key to managing it. Agents connect telemetry to deploys, PRs, and service context, so an issue traces back to the change that caused it. Agents are taking on more observability workflows.
 
-**This is reshaping our roadmap.** SigNoz Cloud has been shipping [agent-native observability](https://signoz.io/blog/introducing-agent-native-observability/) since early 2026. Now, we’re shipping more agent-native capabilities, rebuilding the UI for AI-scale telemetry, and enriching LLM observability.
+**This is reshaping our roadmap.** SigNoz Cloud has been shipping [agent-native observability](https://signoz.io/blog/introducing-agent-native-observability/) since early 2026. Now, we’re shipping more agent-native capabilities, rebuilding the UI for AI-scale telemetry, and enriching LLM observability.
 
-Each update moves us toward our mission of building an **observability system for the AI era.** 
+Each update moves us toward our mission of building an **observability platform for the AI era.** 
 
 > A platform where agents operate with consistently valid outputs and low token overhead, and humans stay in control at any scale. OpenTelemetry-native. Predictable bills.
 > 
 
 In this post, we’ll first take a closer look at these shifts, then walk you through what SigNoz Cloud shipped toward that mission.
 
-## Two AI shifts reshaping observability: agents and LLM calls
+## Two AI shifts reshaping observability: agents and LLM calls
 ---
 ### LLMs are adding new signals and multiplying telemetry
 
@@ -85,7 +93,7 @@ One of our customers, Kernel, tags an internal agent in the incident channel whe
 > ***When there's customer triage, incidents, or even post-launch monitoring, we let agents connect to SigNoz MCP, do queries, check metrics, and post analysis in Slack.***
 > 
 
-*-Hiro Tamada, Founding Engineer at Kernel*
+*Hiro Tamada, Founding Engineer at Kernel*
 <YouTube id="rFhv0ZcfZnY" mute="false" />
 
 With SigNoz Cloud MCP, you can expose your observability data (logs, metrics, traces, and alerts) to any MCP-compatible client. That includes Claude Code, Cursor, Codex, or a custom internal agent. SigNoz Cloud MCP puts telemetry in the dev environment, so developers and their agents find and fix issues without switching tools.
@@ -110,7 +118,7 @@ When errors or latency jump after a release, ask Noz to compare before and after
 
 Noz is becoming the first thing users reach for in SigNoz Cloud, and the fastest path to signals.
 
-[Read more about Noz.](https://signoz.io/docs/ai/noz/)
+[Read more about Noz](https://signoz.io/docs/ai/noz/)
 
 ### Agent-native dashboards: a schema built for agents
 
@@ -125,11 +133,11 @@ SigNoz Cloud dashboards are increasingly driven by agents. We are making them fu
 What are the key updates to SigNoz Cloud dashboards?
 
 1. **A structured schema for agent-native dashboards.** We replaced the old free-form dashboard JSON with a strict, validated structure. The structure is built on the open CNCF Perses specification, extended with SigNoz-native plugins for queries, panels, and variables. The schema follows `page → sections → panels → queries → variables`. A structured schema makes agentic operations more reliable, faster, and lighter on tokens.
-2. **A new dashboard organizer.** Managing and finding dashboards are now easier. We've moved from a flat list to custom views, pinning, tagging, and a new search. Search now runs on a query DSL, which is easier for both humans and agents to use.
+2. **A new dashboard organizer.** Dashboards are now easier to find and organize. We've moved from a flat list to custom views, pinning, tagging, and a new search. Search now runs on a query DSL, which is easier for both humans and agents to use.
 
 Now, it's easier for you and agents to create, edit, and organize dashboards.
 
-Get [full details](https://signoz.io/blog/agent-native-observability-dashboard/) on new Dashboards [add link to dashboard blog]
+Get [full details](https://signoz.io/blog/agent-native-observability-dashboard/) on new dashboards
 
 ### New trace detail view UI: investigate AI-scale traces faster
 
@@ -140,13 +148,13 @@ The trace detail view already [supported million-span traces](https://signoz.io/
 <Figure
   src="/img/blog/2026/08/signoz-new-trace-detail-view.webp"
   alt="SigNoz new trace detail view for AI-scale traces"
-  caption="A high-volume, AI-scale trace loaded in the new trace detail view"
+  caption="A high-volume, AI-scale trace loaded in the new trace detail view"
 />
 
 What's new in the SigNoz Cloud trace detail view?
 
-1. **The** **flame graph renders up to 100,000 spans in a single load.** And **w**e've made it zoomable. Zoom in to drill into a single span and the calls around it. Beyond 100,000 spans, it samples the most important ones. The flame graph scales and stays readable at any trace size.
-2. **The waterfall loads unlimited spans,** however large the trace. It's faster now, with a 75% reduction in memory allocations. For traces under 10,000 spans, every span loads at once.
+1. **The** **flame graph renders up to 100,000 spans in a single load.** And we've made it zoomable. Zoom in to drill into a single span and the calls around it. Beyond 100,000 spans, it samples the most important ones. The flame graph scales and stays readable at any trace size.
+2. **The waterfall loads unlimited spans,** however large the trace. It's faster now, with a 75% reduction in memory allocations. Traces under 10,000 spans load in full at once, and larger ones load as you scroll.
 3. **New search and clearer color coding.** A new search field filters spans by one or more attribute conditions. Red is now reserved for errors. Highlight errors with one click. Color spans by service, host, or domain.
 4. **A more flexible span details panel**. You can now dock it to the side or bottom, or float it. It also shows a structured attribute view alongside the raw JSON.
 5. **LLM spans are easy to isolate**. Filter LLM spans by color, or with a dedicated LLM filter. Read LLM-specific attributes like model name and tokens right in the span details.
@@ -157,11 +165,11 @@ What's new in the SigNoz Cloud trace detail view?
 ---
 These are just a few steps in a longer mission. We're building observability for the AI era, where humans and agents operate production together over a single, OpenTelemetry-native store for both traditional and LLM signals, at AI scale.
 
-Next, we're making alerts agent-native by upgrading the Alerts API, so agents can create and manage alerts far more reliably and efficiently. We're building a **dedicated span details card for LLM observability**, where LLM-specific fields like model, tokens, and cost sit at the top of the span, so the signals that matter for AI workloads are the first thing you see. 
+Next, we're building a **dedicated span detail card for LLM calls**, where LLM-specific fields like model, tokens, and cost sit at the top of the span. The fields that matter for AI workloads will be the first thing you see. We're also reshaping the Alerts API to make agentic operations far more efficient.
 
 ## Getting Started with SigNoz
 ---
-SigNoz Cloud is the fastest way to get observability for your AI systems. Sign up for a free account and get 30 days of unlimited access to every feature, including the new ones covered here. [Try SigNoz Cloud](https://signoz.io/teams/).
+SigNoz Cloud is the fastest way to get observability for your AI systems. Sign up for a free account and get 30 days of unrestricted access to every feature, including the new ones covered here. [Try SigNoz Cloud](https://signoz.io/teams/).
 
 Need to keep data in your own infrastructure? If data-privacy requirements prevent sending telemetry outside your environment, contact us for [SigNoz Enterprise self-hosted or BYOC offerings](https://signoz.io/contact-us/).
 

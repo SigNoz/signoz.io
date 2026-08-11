@@ -3,24 +3,30 @@ title: "SigNoz Cloud dashboards are now agent-native"
 date: 2026-08-12
 tags: [Product, AI, Dashboards]
 authors: [avishek_kataria]
-description: "SigNoz is building observability for the AI era: agent-native observability and AI-scale telemetry. We shipped MCP, Noz, dashboards, and a new trace view."
-image: 
+description: "Agent-native observability dashboards in SigNoz Cloud. A validated schema on the open CNCF Perses spec lets agents create and edit dashboards reliably."
+image: /img/blog/2026/08/agent-native-dashboards.webp
 keywords: [agent native observability, signoz mcp server, ai agent observability, opentelemetry, signoz vision, mcp]
 related_articles:
+  - '/blog/observability-for-the-ai-era/'
+  - '/blog/introducing-agent-native-observability/'
+  - '/blog/new-trace-detail-view/'
 ---
 <h2 className="!mb-2">TL;DR</h2>
-<p className="!mb-0">
-SigNoz Cloud dashboards now have a strict, well-defined schema built on the open CNCF Perses specification, making agent operations on dashboards more reliable and efficient. We've also rebuilt the dashboard list page, so managing hundreds of dashboards is easier.
-</p>
-<hr className="!mt-2" />
+SigNoz Cloud dashboards now have a strict, well-defined schema built on the open CNCF Perses specification, making agentic operations on dashboards more reliable and efficient. We've also rebuilt the dashboard list page, so managing hundreds of dashboards is easier.
+
+<Figure
+  src="/img/blog/2026/08/agent-native-dashboards.webp"
+  alt="SigNoz Cloud - Agent Native Observability Dashboard"
+  caption="SigNoz Cloud - Agent Native Observability Dashboard"
+/>
 
 Agents are creating a growing share of SigNoz Cloud dashboards as observability becomes agent-driven.
 
-A few months ago, we shipped [agent-native observability](https://signoz.io/blog/introducing-agent-native-observability/) with the SigNoz Cloud MCP server and Noz, our in-app AI assistant. With this release, we’re going a level deeper by redesigning the dashboard data model with agents as first-class users.
+A few months ago, we shipped [agent-native observability](https://signoz.io/blog/introducing-agent-native-observability/) with the SigNoz Cloud MCP server and Noz, our in-app AI assistant. [With this release](https://signoz.io/blog/observability-for-the-ai-era/), we’re going a level deeper by redesigning the dashboard data model with agents as first-class users.
 
 The SigNoz Cloud dashboard schema is now structured and strictly validated. Agents write against a defined schema instead of inferring field names. Creating and editing dashboards is faster, more reliable, and lighter on tokens.
 
-We’ve also revamped the dashboard list with custom views, pinning, and query DSL-powered search, making large dashboard collections easier to organize and navigate.
+We’ve also revamped the dashboard list with custom views, pinning, and search powered by a query DSL, making large dashboard collections easier to organize and navigate.
 
 Let’s look at both changes.
 
@@ -28,9 +34,9 @@ Let’s look at both changes.
 
 As more agents started operating dashboards, we found the existing JSON was not fully optimized for agents. It was largely free-form and worked well with the UI as the consumer. For an agent, inferring the schema, constructing or modifying JSON, and validating a change could become a bit challenging.
 
-The new SigNoz Cloud dashboard schema treats agents as first-class users. **Agent operations on dashboards are now faster, more reliable, and lighter on tokens.**
+The new SigNoz Cloud dashboard schema treats agents as first-class users. **Agentic operations on dashboards are now faster, more reliable, and lighter on tokens.**
 
-**1. A structured, validated schema.** The schema now has a defined hierarchy, with a place for every field. An agent knows where to look instead of inferring. Creating a panel, editing a query, or adding a variable means writing to a known path, validated on the way in.
+1. **A structured, validated schema.** The schema now has a defined hierarchy, with a place for every field. An agent knows where to look instead of inferring. Creating a panel, editing a query, or adding a variable means writing to a known path, validated on the way in.
 
 ```
 dashboard
@@ -43,16 +49,16 @@ dashboard
 
 *The new dashboard schema*
 
-1. **An open format.** The new schema is built on the open CNCF **Perses** dashboard specification, extended with SigNoz-native plugins for queries and panels. Existing Perses dashboards can be migrated with a lightweight conversion, and your dashboards aren't locked into a proprietary format.
-2. **Dashboards as code.** A built-in editor lets you read, edit, and format a dashboard's JSON in the app, with the panel updating as you change it. Agents can edit dashboards using the same JSON, and can change many panels in a single request. Panel styling is part of the schema too, so a fill mode change is one field.
+2. **An open format.** The new schema is built on the open CNCF **Perses** dashboard specification, extended with SigNoz-native plugins for queries and panels. Existing Perses dashboards can be migrated with a lightweight conversion, and your dashboards aren't locked into a proprietary format.
+3. **Dashboards as code.** A built-in editor lets you read, edit, and format a dashboard's JSON in the app, with the panel updating as you change it. Agents can edit dashboards using the same JSON, and can change many panels in a single request. Panel styling is part of the schema too, so a fill mode change is one field.
 
 <Figure
   src="/img/blog/2026/08/signoz-cloud-dashboard-json.webp"
-  alt="SigNoz Cloud dashboard json schema"
-  caption="The built-in JSON editor. Changes to the JSON apply to the dashboard as you make them"
+  alt="SigNoz Cloud dashboard JSON schema"
+  caption="The built-in JSON editor. Changes to the JSON apply to the dashboard as you make them."
 />
 
-3. **More efficient edits by agents.** An agent now sends only the field it is changing, whether that is updating a filter inside a panel query or adding a new panel. That means a single PATCH operation instead of rewriting the entire dashboard. Smaller writes use fewer tokens and reduce the risk of agent errors.
+4. **More efficient edits by agents.** An agent now sends only the field it is changing, whether that is updating a filter inside a panel query or adding a new panel. That means a single PATCH operation instead of rewriting the entire dashboard. Smaller writes use fewer tokens and reduce the risk of agent errors.
 
 ```bash
 curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
@@ -68,8 +74,8 @@ curl --location --request PATCH '<YOUR-SIGNOZ-URL>/api/v2/dashboards/<ID>' \
 
 *One PATCH request updating a single query filter*
 
-4. **JSON and UI always in sync.** Edit in the builder and the JSON updates. Edit the JSON and the dashboard re-renders. There's no import step, so an agent always works against the current state.
-5. **Terraform with better drift detection**. `signoz_dashboard` is now a typed spec tree instead of opaque `jsonencode(...)` strings. The provider validates structure at plan time rather than accepting arbitrary JSON, which cuts configuration drift. A script handles the state migration from the old resource.
+5. **JSON and UI always in sync.** Edit in the builder and the JSON updates. Edit the JSON and the dashboard re-renders. There's no import step, so an agent always works against the current state.
+6. **Terraform with better drift detection**. `signoz_dashboard` is now a typed spec tree instead of opaque `jsonencode(...)` strings. The provider validates structure at plan time rather than accepting arbitrary JSON, which cuts configuration drift. A script handles the state migration from the old resource.
 
 If you're moving to SigNoz Cloud from another platform, you can use agents to migrate your dashboard estate.
 
@@ -81,7 +87,7 @@ As your product scales, the number of dashboards can increase, and you may end u
 
 So alongside making dashboards agent-native, we revamped the dashboard list. Organizing and finding a dashboard across hundreds of them is now easier.
 
-**1. Group dashboards into custom views, like team views.** Some teams want to see only their own services' dashboards. A single team may want several views, one for services and one for databases. Until now, everyone got the same list. Now, you can create custom views from queries over `name`, `creator`, or any tag key you use. Views are shared across your organization.
+1. **Group dashboards into custom views, like team views.** Some teams want to see only their own services' dashboards. A single team may want several views, one for services and one for databases. Until now, everyone got the same list. Now, you can create custom views from queries over `name`, `creator`, or any tag key you use. Views are shared across your organization.
 
 <Figure
   src="/img/blog/2026/08/signoz-cloud-dashboard-custom-view.webp"
@@ -91,9 +97,9 @@ So alongside making dashboards agent-native, we revamped the dashboard list. Org
 
 *Custom views listed in the sidebar*
 
-**2. A new search, using query DSL.** Finding a dashboard used to mean remembering its name, which gets harder as the list grows. Now, search dashboards by writing a query, narrow the list however you need. For example, `team contains 'alpha'` narrows to one team's dashboards. A search result can be saved as a custom view in a single click. 
+2. **A new search, using query DSL.** Finding a dashboard used to mean remembering its name, which gets harder as the list grows. Now, search dashboards by writing a query, narrow the list however you need. For example, `team contains 'alpha'` narrows to one team's dashboards. A search result can be saved as a custom view in a single click. 
 
-The same DSL backs the list API, with `limit`, `offset`, `sort`, and `order`, so a script or an agent can narrow to the dashboard it needs instead of listing everything.
+The same DSL backs the list API, with `limit`, `offset`, `sort`, and `order`, so a script or an agent can narrow to the dashboard it needs instead of listing everything.
 
 <Figure
   src="/img/blog/2026/08/signoz-cloud-dashboard-list-search.gif"
@@ -103,13 +109,13 @@ The same DSL backs the list API, with `limit`, `offset`, `sort`, and `order`
 
 *Searching the dashboard list with a DSL query*
 
-**3. Pin the dashboards you open daily.** Pinned dashboards move to the top of your list. Pins are personal, so every user keeps their own set, and they apply across all your views.
+3. **Pin the dashboards you open daily.** Pinned dashboards move to the top of your list. Pins are personal, so every user keeps their own set, and they apply across all your views.
 
-**4. Clone dashboards, panels, and sections.** If you want a dashboard close to one you already have, clone it and make the changes you need, instead of exporting its JSON and importing it back. You can also export any panel as PNG or SVG to share with your team on Slack.
+4. **Clone dashboards, panels, and sections.** If you want a dashboard close to one you already have, clone it and make the changes you need, instead of exporting its JSON and importing it back. You can also export any panel as PNG or SVG to share with your team on Slack.
 
-**5. Improved dashboard header.** Adding a variable is now inline. You create it from the dashboard itself. The header stays sticky, but its size is optimized. So you don't lose the context of your variables and time range, and you get a larger surface for the panels.
+5. **Improved dashboard header.** Adding a variable is now inline. You create it from the dashboard itself. The header stays sticky, but its size is optimized. So you don't lose the context of your variables and time range, and you get a larger surface for the panels.
 
-**6. More control over panels.** New panel styling options like chart fill mode and line interpolation are part of the schema, so you or an agent can set them directly.
+6. **More control over panels.** New panel styling options like chart fill mode and line interpolation are part of the schema, so you or an agent can set them directly.
 
 ## Getting Started with SigNoz
 
