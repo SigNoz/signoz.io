@@ -116,18 +116,6 @@ module.exports = () => {
           source: '/(.*)',
           headers: securityHeaders,
         },
-        // Pages serve both HTML and markdown (Accept: text/markdown / .md
-        // suffix), so caches must vary on the Accept header. Static assets and
-        // API routes are excluded.
-        {
-          source: '/((?!api/|_next/|favicon.ico).*)',
-          headers: [
-            {
-              key: 'Vary',
-              value: 'Accept',
-            },
-          ],
-        },
       ]
     },
     async rewrites() {
@@ -863,6 +851,11 @@ module.exports = () => {
         {
           source: '/blog/using-opentelemetry-collector-processor/',
           destination: '/blog/opentelemetry-collector-complete-guide/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-nextjs-use-cases/',
+          destination: '/blog/opentelemetry-nextjs-production/',
           permanent: true,
         },
         {
@@ -3068,6 +3061,11 @@ module.exports = () => {
         {
           source: '/docs/integrations/gcp/collect-logs',
           destination: '/docs/integrations/gcp/collect-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/blog/llm-observability/',
+          destination: '/docs/llm-observability/',
           permanent: true,
         },
       ])

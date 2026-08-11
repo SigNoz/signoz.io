@@ -39,7 +39,11 @@ const resolveSelfOrigin = (request: Request): string => {
     return `http://${host}`
   }
 
-  if (host === canonicalHost || host === `www.${canonicalHost}` || host.endsWith('.vercel.app')) {
+  const isOwnVercelHost =
+    host === 'signoz-web.vercel.app' ||
+    (host.startsWith('signoz-web-') && host.endsWith('.vercel.app'))
+
+  if (host === canonicalHost || host === `www.${canonicalHost}` || isOwnVercelHost) {
     return `https://${host}`
   }
 
