@@ -1,8 +1,7 @@
 ---
 
 title: Deploying and Scaling OpenTelemetry in Production NextJS Apps
-published_date: 2025-06-23
-updated_date: 2026-08-10
+date: 2026-08-11
 tags: [OpenTelemetry, JavaScript]
 authors: [yuvraj]
 description: "Learn how to deploy OpenTelemetry-instrumented Next.js apps to production with Vercel or self-hosted infra, then monitor key operations."
@@ -26,9 +25,9 @@ related_articles:
 />
 
 
-Once you've instrumented your Next.js app with OpenTelemetry, the next step is getting it into production; then once it's live, staying on top of what actually happens in the real world. Whether you're shipping via Vercel or running your own infra, the setup has some key differences worth noting.
+Once you've instrumented your Next.js app with OpenTelemetry, the next step is getting it into production. Whether you're shipping via Vercel or running your own infra, the setup has some key differences worth noting.
 
-And once traces, metrics, and logs are flowing, this guide also covers the monitoring patterns you'll reach for first, such as 404s, external APIs, and exceptions, plus alerting, sampling, and data sanitization for when you're running at scale. (Tracking frontend [Web Vitals and widget performance](https://signoz.io/blog/opentelemetry-nextjs-web-vitals/) is covered earlier in this series.)
+Once traces, metrics, and logs are flowing, this guide covers common monitoring patterns such as tracking 404s, external API calls, and exceptions as well as alerting, sampling, and data-sanitization practices for operating at scale. (Tracking frontend [Web Vitals and widget performance](https://signoz.io/blog/opentelemetry-nextjs-web-vitals/) is covered earlier in this series.)
 
 ## Deploying to Production
 
@@ -273,11 +272,11 @@ Save the view (e.g. `404 Error Monitor`) or add it to a dashboard as a list, tim
 
 <Figure src="/img/blog/2025/06/opentelemetry-nextjs-use-cases-image 1.webp" alt="SigNoz dashboard creation interface showing query builder with visualization options for 404 monitoring" caption="Build custom 404 monitoring dashboards: Use SigNoz Query Builder to create reusable views with list, time series, or table visualizations for tracking 404 errors" />
 
-404s aren't just noise, for example, a spike after a deploy usually means a broken redirect or a route that moved without a corresponding link update.
+404s aren't just noise — a spike after a deploy, for example, usually means a broken redirect or a route that moved without a corresponding link update.
 
 ### Monitoring Third-Party APIs
 
-Modern apps are built on top of other people's APIs. Payments, weather data, analytics, social logins - chances are your Next.js app talks to at least a handful of external services. And when one of those APIs slows down, fails, or changes behavior, your app takes the hit.
+Modern apps are built on top of other people's APIs. Payments, weather data, analytics, social logins — chances are your Next.js app talks to at least a handful of external services. And when one of those APIs slows down, fails, or changes behavior, your app takes the hit.
 
 Since `fetch` is already instrumented by `@vercel/otel`, you get visibility into how those dependencies perform without writing custom wrappers around every call — you just need to make sure context propagation is configured for the domains you care about.
 
@@ -298,7 +297,7 @@ export async function GET(request: NextRequest) {
 }
 ```
 
-This endpoint hits multiple APIs—including one that's intentionally slow, and another that returns a 401 (since we're skipping the API key). Wire this up so SigNoz can track and visualize every call by adding this to your `instrumentation.ts`:
+This endpoint hits multiple APIs—including one that's intentionally slow and another that returns a 401 (since we're skipping the API key). Wire this up so SigNoz can track and visualize every call by adding this to your `instrumentation.ts`:
 
 ```ts
 import { registerOTel } from '@vercel/otel';
@@ -427,7 +426,7 @@ span?.setAttributes({
 });
 ```
 
-Useful for debugging navigation flow, understanding aspects like where users get stuck, which pages act as dead ends, and whether errors correlate with a particular entry point.
+Useful for debugging navigation flow — where users get stuck, which pages act as dead ends, and whether errors correlate with a particular entry point.
 
 **Background job monitoring** — even async work should leave traces:
 
@@ -501,7 +500,6 @@ Track if any of your key endpoints cross the 2s P99 threshold — a common user 
 - **Severity**: Critical
 
 > This catches slow endpoints after deployments, during traffic spikes, or when a downstream service misbehaves.
-> 
 
 ## Testing the Alert
 
@@ -765,9 +763,9 @@ process.on('beforeExit', async () => {
 
 ### 3. Missing Spans
 
-Not everything gets traced automatically. Common gaps: raw `fetch()` calls without context propagation, database queries using uninstrumented clients, background jobs (e.g. `setTimeout`), Server Components, and third-party SDKs (Stripe, Firebase, etc).
+Not everything gets traced automatically. Common gaps: raw `fetch()` calls without context propagation, database queries using uninstrumented clients, background jobs (e.g. `setTimeout`), Server Components, and third-party SDKs (Stripe, Firebase, etc.).
 
-For DB queries, background jobs, and similar app-level gaps, wrap them manually the same way as the [Common Monitoring Patterns](#common-monitoring-patterns) above (start a span, tag it, end it).
+For DB queries, background jobs, and similar app-level gaps, wrap them manually the same way as in [Common Monitoring Patterns](#common-monitoring-patterns) above (start a span, tag it, end it).
 
 To keep context alive across async boundaries:
 
