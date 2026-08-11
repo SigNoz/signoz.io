@@ -289,7 +289,7 @@ exporters:
   otlp_http:
     endpoint: 'https://ingest.<region>.signoz.cloud:443'
     headers:
-      signoz-ingestion-key: '<your-ingestion-key>'
+      signoz-ingestion-key: '${env:SIGNOZ_INGESTION_KEY}'
 
 service:
   pipelines:
@@ -298,6 +298,11 @@ service:
       processors: [batch, decouple]
       exporters: [otlp_http]
 ```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `${env:SIGNOZ_INGESTION_KEY}`: Leave this as written. The collector reads the key from an environment variable at startup, so your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) stays out of a file that ships inside the deployment archive. You set the variable in the next step.
 
 <Admonition type="note">
 `otlp_http` requires Collector v0.144.0 or later, which every current Lambda layer release bundles. The older `otlphttp` name still works as an alias, but the collector logs `"otlphttp" alias is deprecated; use "otlp_http" instead` on every cold start. Use `otlphttp` only if you pin a layer older than v0.144.0, and change both the exporter key and the pipeline.
@@ -313,14 +318,19 @@ The collector runs in the same sandbox as your function and needs its own memory
 
 ### Point the function at the collector
 
-Set these two environment variables on the function:
+Set these three environment variables on the function:
 
 ```ini
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 OPENTELEMETRY_COLLECTOR_CONFIG_URI=/var/task/collector.yaml
+SIGNOZ_INGESTION_KEY=<your-ingestion-key>
 ```
 
-Then remove `OTEL_EXPORTER_OTLP_HEADERS`, because the collector now holds the ingestion key. Keep `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` on the function.
+**Verify these values:**
+
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). The collector reads this variable, not the Go SDK.
+
+Then remove `OTEL_EXPORTER_OTLP_HEADERS`, because the collector now sends the key. Keep `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` on the function.
 
 Rebuild the archive with `collector.yaml` next to `bootstrap`. Then upload the archive:
 
