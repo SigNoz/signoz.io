@@ -42,7 +42,7 @@ Both signals flow through the OpenTelemetry Collector. Set up each one you want,
 
 Add the `elasticsearch` receiver, a **resource** processor that tags the metrics with **service.name**, and a dedicated pipeline. Merge this into your existing Collector config:
 
-```yaml:config.yaml minimap
+```yaml:config.yaml
 receivers:
   elasticsearch:
     endpoint: http://<elasticsearch-host>:9200
@@ -190,7 +190,7 @@ kubectl logs -n <collector-namespace> <collector-pod-name> -f
 
 Elasticsearch writes structured ECS JSON logs. On file-based deployments, the filelog receiver tails them, parses each line, and forwards it to SigNoz. Add this receiver and a logs pipeline to the same Collector config you use for metrics:
 
-```yaml:config.yaml minimap
+```yaml:config.yaml
 receivers:
   # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
   filelog/elasticsearch:

@@ -135,7 +135,7 @@ Docs fences render through the site **CodeBlock** (Shiki / `rehype-pretty-code`)
 
 **Defaults:** line numbers on · collapse when lines > 20 (starts expanded) · untitled = floating Copy · `lang:path` = filename chrome.
 
-**Large fences (more than 40 lines):** Add `minimap`. Add `defaultCollapsed` only when the fence is reference-only: a full manifest or config, a complete source file, or a log or stack trace. Do not add `defaultCollapsed` to the core instructional snippet of the step. See [When to use defaultCollapsed / minimap](docs-codeblock.md#when-to-use-defaultcollapsed--minimap).
+**Large fences (more than 40 lines):** Add `minimap defaultCollapsed` to reference-only content: a full manifest or config, a complete source file, a log, a stack trace. Leave the core instructional snippet of the step expanded, with neither flag. See [When to use defaultCollapsed / minimap](docs-codeblock.md#when-to-use-defaultcollapsed--minimap).
 
 Full meta reference and copy-paste examples (titles, highlights, minimap, collapse, `CodeTabs`): [docs-codeblock.md](docs-codeblock.md).
 

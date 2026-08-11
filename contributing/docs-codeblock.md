@@ -23,7 +23,7 @@ No meta needed:
 | `diff` / `diff:file` | Unified diff. Lines starting with `-` get a cherry (destructive) row background; `+` get forest (success). Context lines stay unshaded. Prefer this over hand-coloring removals with `{n}#cherry`. |
 | `{5}#cherry` / `#forest` / `#amber` / `#robin` | Sentiment highlights (error / success / warning / info). |
 | `noLineNumbers` | Hide the line-number gutter. |
-| `minimap` | Right-side minimap strip (useful for long samples). |
+| `minimap` | Right-side minimap strip. Pair with `defaultCollapsed`. |
 | `collapse` | Collapse controls when lines **> 20** (same as default auto behavior; explicit is fine). |
 | `collapse={N}` | Collapse controls when lines **> N**. |
 | `noCollapse` | Never show collapse controls, even for long fences. |
@@ -32,7 +32,7 @@ No meta needed:
 Combine freely:
 
 ````md
-```ts:server.ts minimap {5}#cherry collapse={40}
+```ts:server.ts minimap defaultCollapsed {5}#cherry collapse={40}
 ```
 ````
 
@@ -157,10 +157,10 @@ Use language `diff` (optionally with a filename title) for add/remove edits. Lin
 
 ## Minimap
 
-Opt in with `minimap`. Best for longer samples where readers skim structure:
+Opt in with `minimap`, paired with `defaultCollapsed`. Best for fences of more than 40 lines that readers skim ([when to use](#when-to-use-defaultcollapsed--minimap)):
 
 ````md
-```python minimap {3}#cherry {8}#forest
+```python minimap defaultCollapsed collapse={5} {3}#cherry {8}#forest
 def resolve(flag):
     try:
         return provider.get(flag)
@@ -179,7 +179,7 @@ def evaluate(ctx):
 Title + minimap + highlights:
 
 ````md
-```ts:server.ts minimap {5}#cherry {10}#forest
+```ts:server.ts minimap defaultCollapsed collapse={8} {5}#cherry {10}#forest
 import express from 'express'
 
 const app = express()
@@ -205,17 +205,19 @@ app.listen(8080)
 
 ### When to use `defaultCollapsed` / `minimap`
 
-The 20-line threshold controls only when Collapse and Expand buttons appear. The block still starts expanded. `defaultCollapsed` and `minimap` are separate settings. You must add them by hand.
+The 20-line threshold only adds the Collapse and Expand buttons. The fence still starts expanded. Add `defaultCollapsed` and `minimap` by hand.
 
-A fence is large when it has more than 40 lines. Below 40 lines, do not add `defaultCollapsed` or `minimap`. The 20-line control already gives the reader a fold.
+Use `minimap` together with `defaultCollapsed`. The minimap tracks the scroll position inside a collapsed fence.
 
-For a fence with more than 40 lines, judge it by its use, not only by its length.
+For a fence of 40 lines or fewer, skip both flags. The 20-line control already gives the reader a fold.
 
-- **Reference-only fences:** Add both `minimap` and `defaultCollapsed`. A reference-only fence is a full Kubernetes or CloudFormation manifest, a complete source file, or a generated config file. It can also be a log or a stack trace. The reader skims this content for one field, or copies the whole fence. The reader does not read it from top to bottom to finish the step. You do not need `collapse={N}` here. The 20-line threshold already applies below 40 lines.
-- **Core instructional fences:** Add `minimap` only. Do not add `defaultCollapsed`. A core instructional fence is the primary snippet for the step, even when it is long. An example is the one collector config that the reader builds line by line. `defaultCollapsed` hides content that the reader needs, and adds a click to the main path.
-- **When you are unsure:** Leave the fence expanded. Visible is the default. Collapse is the exception.
+For a fence of more than 40 lines, judge it by use:
 
-Do not use `collapse={25}` or a similar low threshold to force early collapse. Most docs fences have between 20 and 40 lines. A 25-line threshold hides this content from the reader. The reader often needs this content right away. This defeats the purpose of collapse.
+- **Reference-only:** Add `minimap defaultCollapsed`. Examples: a full manifest, a complete source file, a generated config, a log, a stack trace. The reader skims for one field, or copies the whole fence.
+- **Core instructional:** Add neither flag. This is the primary snippet for the step, even when it is long. Keep it visible on the main path.
+- **Not sure:** Leave the fence expanded. Visible is the default.
+
+Do not use `collapse={25}` or a similar low threshold. Most docs fences have 20 to 40 lines, and the reader often needs them at once.
 
 ### Custom threshold (still default expanded)
 
