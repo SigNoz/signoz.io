@@ -1,0 +1,62 @@
+---
+date: 2026-08-11
+title: Upgrade SigNoz to v0.137.0 and Repair Saved Views Data
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
+description: Upgrade self-hosted SigNoz to v0.137.0. Automatic migrations repair saved views and remove unrepairable ones, so back up the Metastore before you upgrade.
+doc_type: howto
+---
+
+SigNoz v0.137.0 runs two automatic migrations that repair the stored data behind your saved views (the named filter-and-column presets in the Logs and Traces explorers). Most views are repaired in place with no action needed. A view whose stored data cannot be repaired is deleted, so back up the SigNoz Metastore before you upgrade.
+
+<Admonition type="warning" title="Unrepairable saved views are deleted during the upgrade">
+The repair migration rewrites saved views whose stored spec has unreadable fields. A view that still cannot be parsed field-by-field is removed from the database, and this deletion is not reversible. Back up the Metastore (SQLite or Postgres) before upgrading so you can restore any view that gets dropped.
+</Admonition>
+
+## Who needs to act
+
+| If you | Then |
+| --- | --- |
+| Use saved views only through the UI | Back up the Metastore first. Views are repaired automatically; check your saved views afterward for any that went missing |
+| Call the Saved Views API directly (create, update, get) | [Update your payloads](#saved-views-api-payloads-change-shape): the request and response wire format changes in this release |
+
+## Back up before you upgrade
+
+Saved views live in the SigNoz Metastore alongside dashboards and alerts. Back up the Metastore before starting the upgrade. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops before jumping to v0.137.0.
+
+For the general upgrade steps for your deployment (Foundry, Helm, Docker, or binary), follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/).
+
+## What the saved-view migrations do
+
+Two migrations run once, automatically, when the server starts on v0.137.0:
+
+- **Repair unreadable fields.** For each saved view whose stored spec has a field that no longer parses (for example a malformed `selectedFields` entry), the migration resets that field to its empty default and keeps the rest of the view. A view that cannot be parsed field-by-field is deleted and logged with its saved-view ID.
+- **Backfill `requestType`.** Existing views that predate the new required `requestType` field are backfilled so they load correctly under the new schema.
+
+The server logs a summary of how many views were repaired and how many were deleted. If a view you expected is gone after the upgrade, search the server logs for `saved view data could not be repaired` to find the affected saved-view IDs, then restore them from your backup.
+
+## Verify the upgrade
+
+1. Pods and containers are healthy (`kubectl get pods -n signoz`, `docker compose ps`, or `systemctl status 'signoz-*'`).
+2. SigNoz reports v0.137.0 under **Settings**.
+3. Open the **Logs** and **Traces** explorers and confirm your saved views load and apply their filters and columns.
+
+## Saved Views API payloads change shape
+
+If you call the Saved Views API directly (`/api/v2/saved_views` and `/api/v2/saved_views/{id}`), the create, update, and get payloads change in v0.137.0. Update your scripts before you upgrade:
+
+- **The `data` wrapper is removed.** `schemaVersion` and `spec` are now top-level fields on the request and response body instead of nested under `data`. Callers that read `response.data.data.spec.*` must change to `response.data.spec.*`.
+- **`spec` now requires `requestType`.** Set it to one of `raw`, `trace`, `time_series`, or `scalar`.
+- **`spec.queries` must contain at least one item.** An empty `queries` array is rejected with `400 Bad Request`.
+- **`selectedFields` and `display` are optional.** Omitting them reads back as empty defaults.
+- **`schemaVersion` is enforced as `v2`.** It is the only accepted value.
+- **Duplicate names return `409 Conflict`.** Creating a saved view whose name already exists in the org now fails with `409` instead of undefined behavior.
+
+For the full request and response schema, see the Saved Views endpoints in the [SigNoz API reference](https://signoz.io/api-reference/).
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- [GitHub Issues](https://github.com/SigNoz/signoz/issues)
+- [Community Slack](https://signoz.io/slack/)
+</content>
+</invoke>
