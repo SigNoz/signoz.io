@@ -104,5 +104,5 @@ export async function GET(request: Request, props: { params: Promise<{ path?: st
     return notFoundResponse()
   }
 
-  return agentResponse(request, markdown, { varyAccept: true })
+  return agentResponse(markdown, { varyAccept: true })
 }
