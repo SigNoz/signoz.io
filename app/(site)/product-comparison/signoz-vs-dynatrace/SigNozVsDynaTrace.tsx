@@ -38,9 +38,9 @@ const COMPARISON_DATA = {
     TITLE: <>SigNoz Cloud vs Dynatrace</>,
     DESC: (
       <>
-        Dynatrace Platform Subscription uses a published rate card across host, memory, and
-        telemetry usage. SigNoz Cloud uses data-volume pricing for logs and traces and sample-based
-        pricing for metrics.
+        Dynatrace is complex to set up and use. Its host-based billing is outdated for applications
+        that need on-demand scaling. SigNoz Cloud provides predictable usage-based billing that you
+        can rely on.
       </>
     ),
     BILL_FOR_COMPARISON: {
@@ -111,12 +111,12 @@ const COMPARISON_DATA = {
     },
     {
       FIGURE: '/img/reasons/dynatrace-host-based-billing.webp',
-      TITLE: <>Compare Dynatrace rate-card pricing with usage-based pricing</>,
+      TITLE: <>Dynatrace’s host-based billing is limiting for modern apps</>,
       DESC: (
         <>
-          Dynatrace Platform Subscription uses rate-card units such as hosts, memory-GiB-hours,
-          ingested telemetry, retention, and query volume. SigNoz Cloud prices logs and traces by
-          ingested volume and metrics by samples, without per-host charges.{' '}
+          Dynatrace charges per hour per host which is not suitable for cloud-native environments
+          that need on-demand scaling. SigNoz Cloud paid plans are based on the amount of data sent
+          with rates that provides the best value for money.{' '}
           <Link href="/teams/" className="highlight">
             Sign up
           </Link>{' '}
@@ -126,14 +126,15 @@ const COMPARISON_DATA = {
     },
     {
       FIGURE: '/img/reasons/dynatrace-complex-ui.webp',
-      TITLE: <>Compare the platform scope your team needs</>,
+      TITLE: <>Dynatrace has a complex UI, and a steep learning curve </>,
       DESC: (
         <>
-          Dynatrace offers application, infrastructure, log, digital experience, security, and other
-          capabilities through its platform subscription.
+          Dynatrace is one of the top APM products. But it’s difficult to navigate its complex
+          UI/UX. There is a steep learning curve, and if your company does not have access to its
+          full platform plan, the usability reduces.
           <br />
-          SigNoz Cloud includes its observability features in the Teams plan and bills additional
-          use by telemetry volume.
+          SigNoz Cloud is not gated by any SKU-based subscription. You can access all its features
+          in its basic paid plan and pay based only on the amount of data you send.
         </>
       ),
     },
@@ -157,10 +158,9 @@ const COMPARISON_DATA = {
     OTHER_HEADING: 'Dynatrace',
     DATA: [
       {
-        sideHeader: 'Self-hosted edition available',
+        sideHeader: 'Self-Hosted SigNoz available',
         isAvailableInSignoz: true,
         isAvailableInOther: false,
-        signozExtraDetail: 'Self-Hosted SigNoz is available as a separate deployment option.',
       },
       {
         sideHeader: 'Logs, Metrics, Traces',
@@ -183,11 +183,11 @@ const COMPARISON_DATA = {
         isAvailableInOther: true,
       },
       {
-        sideHeader: 'OpenTelemetry ingestion',
+        sideHeader: 'OpenTelemetry visualization',
         isAvailableInSignoz: true,
-        isAvailableInOther: true,
-        signozExtraDetail: 'Built to ingest OpenTelemetry data.',
-        otherExtraDetail: 'Supports OpenTelemetry metrics and traces.',
+        isAvailableInOther: false,
+        signozExtraDetail: 'Best visualizations for OTel data. Built for Otel data from Day 1.',
+        otherExtraDetail: 'Has OneAgent as its primary data collection method.',
       },
       {
         sideHeader: 'Managed On-premise deployment',
@@ -198,17 +198,30 @@ const COMPARISON_DATA = {
       {
         sideHeader: 'Transparent usage-based billing',
         isAvailableInSignoz: true,
-        isAvailableInOther: true,
-        signozExtraDetail: 'Logs and traces by GB; metrics by samples.',
+        isAvailableInOther: false,
+        signozExtraDetail: 'Pay only for the amount of data you send',
         otherExtraDetail:
-          'Published rate card covers hosts, memory, telemetry, retention, and queries.',
+          'Charges per hour per host which is not suitable for microservices- based apps',
       },
       {
-        sideHeader: 'Managed cloud service',
+        sideHeader: 'No SKU-based pricing',
         isAvailableInSignoz: true,
-        isAvailableInOther: true,
-        signozExtraDetail: 'SigNoz Cloud is managed by SigNoz.',
-        otherExtraDetail: 'Dynatrace provides its platform as a managed service.',
+        isAvailableInOther: false,
+        signozExtraDetail: 'Entire platform available with all features in basic paid plan',
+        otherExtraDetail: 'Has SKU-based pricing that limits full usage of its capabilities',
+      },
+      {
+        sideHeader: 'Simple UI',
+        isAvailableInSignoz: true,
+        isAvailableInOther: false,
+        otherExtraDetail: 'Complex UI with steep learning curve',
+      },
+      {
+        sideHeader: 'Send data directly to applications',
+        isAvailableInSignoz: true,
+        isAvailableInOther: false,
+        signozExtraDetail: 'Use OTel libraries to send directly to SigNoz',
+        otherExtraDetail: 'Have to use host-based agent to collect data',
       },
     ],
   },

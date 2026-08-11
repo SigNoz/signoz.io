@@ -5,11 +5,11 @@ import { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Modern Grafana Alternative',
   description:
-    'Compare Grafana Cloud with SigNoz Cloud, and Grafana OSS with Self-Hosted SigNoz, for OpenTelemetry-native logs, metrics, and traces.',
+    'Compare Grafana with SigNoz Cloud for OpenTelemetry-native logs, metrics, and traces.',
   openGraph: {
     title: 'Modern Grafana Alternative | SigNoz',
     description:
-      'Compare Grafana Cloud with SigNoz Cloud, and Grafana OSS with Self-Hosted SigNoz, for OpenTelemetry-native logs, metrics, and traces.',
+      'Compare Grafana with SigNoz Cloud for OpenTelemetry-native logs, metrics, and traces.',
     images: [
       {
         url: '/img/product-comparisons/signoz-vs-datadog/messaging-queue-monitoring-otel.webp',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Modern Grafana Alternative | SigNoz',
     description:
-      'Compare Grafana Cloud with SigNoz Cloud, and Grafana OSS with Self-Hosted SigNoz, for OpenTelemetry-native logs, metrics, and traces.',
+      'Compare Grafana with SigNoz Cloud for OpenTelemetry-native logs, metrics, and traces.',
     images: ['/img/product-comparisons/signoz-vs-datadog/messaging-queue-monitoring-otel.webp'],
     site: siteMetadata.twitter,
   } as const,

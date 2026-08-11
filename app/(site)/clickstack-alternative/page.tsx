@@ -11,15 +11,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'ClickStack/HyperDX Alternative | SigNoz',
     description:
-      'Compare Managed ClickStack with SigNoz Cloud, and ClickStack OSS with Self-Hosted SigNoz, for OpenTelemetry observability.',
+      'Compare ClickStack/HyperDX with SigNoz Cloud for dashboards, alerting, query support, and usage-based pricing.',
     images: '/img/platform/ClickStackAlternativeMeta.webp',
   },
   description:
-    'Compare Managed ClickStack with SigNoz Cloud, and ClickStack OSS with Self-Hosted SigNoz, for OpenTelemetry observability.',
+    'Compare ClickStack/HyperDX with SigNoz Cloud for dashboards, alerting, query support, and usage-based pricing.',
   twitter: {
     title: 'ClickStack/HyperDX Alternative | SigNoz',
     description:
-      'Compare Managed ClickStack with SigNoz Cloud, and ClickStack OSS with Self-Hosted SigNoz, for OpenTelemetry observability.',
+      'Compare ClickStack/HyperDX with SigNoz Cloud for dashboards, alerting, query support, and usage-based pricing.',
     images: '/img/platform/ClickStackAlternativeMeta.webp',
   },
 }

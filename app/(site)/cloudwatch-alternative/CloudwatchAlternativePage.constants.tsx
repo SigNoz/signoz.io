@@ -5,47 +5,56 @@ import { type ComparisonTableRow } from '@/shared/components/molecules/FeaturePa
 export const TEAM_SWITCH_CARDS = [
   {
     icon: <Atom size={16} className="text-signoz_vanilla-400" />,
-    title: 'Service and Region-based charges',
+    title: 'Unpredictable costs after free tier',
     description: (
       <>
-        CloudWatch prices logs, metrics, traces, queries, alarms, and other services separately. AWS
-        states that rates vary by <span className="font-bold text-signoz_cherry-300">Region</span>{' '}
-        and service.
+        Debug logging at INFO level generates approximately{' '}
+        <span className="font-bold text-signoz_cherry-300">1GB per EC2</span> instance daily. At{' '}
+        <span className="font-bold text-signoz_cherry-300">$0.50/GB</span> ingestion, verbose
+        logging across 20 instances costs $300/day. Custom metrics bill at{' '}
+        <span className="font-bold text-signoz_cherry-300">$0.30/month</span> per unique dimension
+        combination.
       </>
     ),
   },
   {
     icon: <Atom size={16} className="text-signoz_vanilla-400" />,
-    title: 'Separate service workflows during incidents',
+    title: 'Four separate consoles during incidents',
     description: (
       <>
         Query logs in Logs Insights, check metrics in Metrics console, view traces in X-Ray, check
-        service health in Application Signals. Each service has its own{' '}
-        <span className="font-bold text-signoz_cherry-300">query and billing model</span>.
+        service health in Application Signals. Each uses{' '}
+        <span className="font-bold text-signoz_cherry-300">different query syntax</span>. Clicking
+        from metrics to logs{' '}
+        <span className="font-bold text-signoz_cherry-300">resets time filters</span>.
       </>
     ),
   },
   {
     icon: <Atom size={16} className="text-signoz_vanilla-400" />,
-    title: 'Cross-service investigation work',
+    title: 'High context-switching tax',
     description: (
       <>
-        CloudWatch distributes observability data across services such as{' '}
-        <span className="font-bold text-signoz_cherry-300">CloudWatch Logs</span>, Metrics, X-Ray,
-        and Application Signals. Teams must account for those service boundaries during an
-        investigation.
+        Finding logs for a trace requires copying{' '}
+        <span className="font-bold text-signoz_cherry-300">trace IDs</span> from{' '}
+        <span className="font-bold text-signoz_cherry-300">X-Ray</span> and running a separate
+        search in <span className="font-bold text-signoz_cherry-300">CloudWatch Logs</span>. X-Ray
+        setup requires installing the daemon, modifying application code, and configuring IAM roles.
       </>
     ),
   },
   {
     icon: <Atom size={16} className="text-signoz_vanilla-400" />,
-    title: 'Query charges depend on data scanned',
+    title: 'Per-query billing on every search',
     description: (
       <>
-        AWS pricing examples for US East show Logs Insights charges of{' '}
+        Logs Insights charges{' '}
         <span className="font-bold text-signoz_cherry-300">$0.005 per GB scanned</span>. Querying
-        100GB five times would cost <span className="font-bold text-signoz_cherry-300">$2.50</span>{' '}
-        at that example rate. Current rates depend on the selected AWS Region.
+        100GB five times costs <span className="font-bold text-signoz_cherry-300">$2.50</span>.
+        Grafana polling CloudWatch APIs generates additional{' '}
+        <span className="font-bold text-signoz_cherry-300">GetMetricData</span> charges at{' '}
+        <span className="font-bold text-signoz_cherry-300">$0.01 per 1,000 metrics</span>.
+        Incident-driven query volume makes costs impossible to predict.
       </>
     ),
   },
@@ -80,15 +89,15 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
         text: (
           <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
             <span className="text-lg">SigNoz Cloud usage-based pricing, </span>{' '}
-            <span className="text-sm">with Cost Meter for usage tracking</span>
+            <span className="text-sm">predictable scaling using cost meter</span>
           </div>
         ),
       },
       cloudwatch: {
         text: (
           <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
-            <span className="text-lg">Service and Region-based charges, </span>{' '}
-            <span className="text-sm">including query and API usage where applicable</span>
+            <span className="text-lg">Per-service, per-query, per-API call charges, </span>{' '}
+            <span className="text-sm">unpredictable</span>
           </div>
         ),
       },
@@ -107,7 +116,7 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
       cloudwatch: {
         text: (
           <div className="flex w-full flex-col text-center text-lg text-signoz_vanilla-400">
-            AWS service APIs with OpenTelemetry support through ADOT
+            Proprietary (migrating to OpenTelemetry via ADOT)
           </div>
         ),
       },
@@ -161,7 +170,8 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
       signoz: {
         text: (
           <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
-            <span className="text-lg">Configurable SigNoz Cloud retention</span>
+            <span className="text-lg">Hot storage (15-180 days), </span>{' '}
+            <span className="text-lg">Cold storage (upto 2 years)</span>
           </div>
         ),
       },
@@ -169,7 +179,8 @@ export const CLOUDWATCH_COMPARISON_TABLE_ROWS: ComparisonTableRow<VendorKey>[] =
         text: (
           <div className="flex w-full flex-col justify-center text-center text-signoz_vanilla-400">
             <span className="text-sm">
-              Retention and charges vary by CloudWatch signal and service
+              Metrics: 3 hours to 15 months with auto-aggregation. Logs: $0.03/GB/month. X-Ray: 30
+              days max
             </span>
           </div>
         ),
@@ -214,22 +225,22 @@ export const CLOUDWATCH_BILLING_CARDS = [
   {
     title: '1. Data costs',
     description:
-      'CloudWatch prices log ingestion, storage, and Logs Insights queries separately. Rates vary by AWS Region and log class.',
+      'Log ingestion at $0.50/GB (67% more than SigNoz), storage at $0.03/GB/month, and $0.005/GB scanned per query. Searching 1TB of logs costs $5 per search.',
   },
   {
     title: '2. Metric costs',
     description:
-      'CloudWatch prices custom metrics by metric count and resolution. Dimensions can create separate custom metrics and affect the bill.',
+      'Custom metrics at $0.30/metric/month where each dimension combination creates a separate billable metric. A metric tracking 1,000 user IDs becomes 1,000 metrics at $300/month.',
   },
   {
     title: '3. Observability infrastructure',
     description:
-      'Dashboards, alarms, X-Ray traces, and Application Signals have separate pricing units and free-tier allowances.',
+      'Dashboards at $3/month after first 3, alarms at $0.10-$0.30/month, X-Ray traces at $0.000005 per trace recorded and retrieved, Application Signals at $0.20/GB ingested.',
   },
   {
     title: '4. API and monitoring overhead',
     description:
-      'API calls, detailed monitoring, Container Insights, and cross-account data transfer can add separate charges.',
+      'GetMetricData charges when third-party tools poll metrics. Detailed monitoring converts free metrics into billable custom metrics. Container Insights adds per-cluster/node/pod charges. Cross-account observability adds data transfer fees.',
   },
 ]
 
@@ -237,11 +248,13 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_ABOVE = [
   {
     icon: <TextSearch size={16} className="text-signoz_vanilla-400" />,
     iconText: 'Regional Silos',
-    title: 'Regional AWS CloudWatch services',
+    title: 'Fragmented AWS CloudWatch',
     description: (
       <>
-        CloudWatch pricing and data access are Region-aware. Cross-account and cross-Region views
-        need AWS configuration, and current charges depend on the services and Regions used.
+        CloudWatch is regional by design. Data stays in the region where it was generated, forcing
+        you to set up complex "<span className="font-bold">Sinks and Links</span>" to see a unified
+        view. Even then, you are hit with 20KB policy limits per account per source, making global
+        observability a manual chore.
       </>
     ),
   },
@@ -251,9 +264,10 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_ABOVE = [
     title: 'Opaque Infrastructure Costs',
     description: (
       <>
-        CloudWatch prices ingestion, storage, queries, metrics, alarms, dashboards, and APIs through
-        separate service units. AWS pricing examples show that Logs Insights query charges depend on
-        the amount of data scanned.
+        CloudWatch billing is fragmented across 12+ separate components. You pay for ingestion,
+        storage, and even the act of looking at your data with{' '}
+        <span className="font-bold">$0.005 per GB scanned</span> in Log Insights. High-cardinality
+        metrics lead to exponential cost scaling due to per-dimension pricing models.
       </>
     ),
   },
@@ -271,7 +285,7 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW = [
           and security patches. Includes built-in SOC2 Type II and HIPAA compliance with data
           centers in US, EU, and India regions to minimize latency and meet residency requirements.
         </p>
-        <p>The service is managed by SigNoz.</p>
+        <p>Zero-ops deployment. Up and running in &lt;5 minutes.</p>
       </>
     ),
   },
@@ -284,7 +298,8 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW = [
         <p>
           Bring Your Own Cloud. SigNoz manages the <span className="font-bold">Control Plane</span>{' '}
           (UI and alerting logic), but the <span className="font-bold">Data Plane</span> (ClickHouse
-          and OTel Collectors) stays within your VPC. You get a managed deployment in your cloud.
+          and OTel Collectors) stays entirely within your VPC. You get SaaS convenience while
+          ensuring 100% of your telemetry data never leaves your network.
         </p>
         <p>Ideal for security-sensitive workloads that prohibit external data egress.</p>
       </>
@@ -313,8 +328,9 @@ export const DEPLOYMENT_AND_DATA_RESIDENCY_CARDS_BELOW = [
       <>
         <p>
           Built on open standards and trusted by thousands of developers globally. Use the same
-          high-performance SigNoz architecture on your own infrastructure. No seat limits and no
-          hidden fees, just pure observability with 25k+ GitHub stars.
+          high-performance architecture as our Cloud and Enterprise versions on your own
+          infrastructure. No seat limits and no hidden fees, just pure observability with 25k+
+          GitHub stars.
         </p>
         <p>OTel-native with total visibility into the source code.</p>
       </>

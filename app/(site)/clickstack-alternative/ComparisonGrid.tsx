@@ -98,9 +98,7 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
               </TrackingLink>
             </div>
             <div className="flex flex-col items-start gap-2.5 bg-signoz_ink-500 px-3 py-4">
-              <span className="text-base font-medium leading-7 text-[#eceef2]">
-                Managed ClickStack
-              </span>
+              <span className="text-base font-medium leading-7 text-[#eceef2]">ClickStack</span>
             </div>
           </div>
           <div className="h-px w-full bg-[#23262e]" />

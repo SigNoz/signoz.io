@@ -60,8 +60,9 @@ const Header: React.FC = () => {
       title={'ClickStack/HyperDX Alternative'}
       description={
         <>
-          Compare Managed ClickStack with SigNoz Cloud, and ClickStack OSS with{' '}
-          <br className="hidden md:block" /> Self-Hosted SigNoz, for OpenTelemetry observability.
+          SigNoz Cloud gives you interactive dashboards, anomaly detection-based alerting, and
+          PromQL <br className="hidden md:block" /> support. You're billed on how much data you
+          ingest, not how often you query it.
         </>
       }
       buttons={headerButtons}
@@ -104,9 +105,9 @@ const CostComparison: React.FC = () => {
             You shouldn't pay to investigate your own data
           </h4>
           <div className="text-sm text-signoz_vanilla-400">
-            Managed ClickStack uses ClickHouse Cloud storage and compute resources. SigNoz Cloud
-            charges $0.30/GB for logs and traces and $0.10 per million metric samples, without a
-            separate query charge.
+            ClickStack bills across 4 separate dimensions, only two of which have published rates.
+            SigNoz Cloud charges $0.30/GB for logs and traces, $0.10 per million metric samples.
+            Querying is free.
           </div>
         </div>
         <div>
@@ -115,8 +116,8 @@ const CostComparison: React.FC = () => {
             <div className="!w-[100%] flex-1 md:!w-[300px] md:min-w-fit">
               <div className="sticky top-[100px] flex min-w-fit flex-col items-start justify-start gap-4 px-10 py-10 md:px-0 md:pl-12">
                 <h2 className="text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
-                  Managed ClickStack <br className="hidden md:block" /> cost{' '}
-                  <br className="hidden md:block" /> inputs
+                  ClickStack's <br className="hidden md:block" /> billing{' '}
+                  <br className="hidden md:block" /> complexity
                 </h2>
                 <Button asChild variant="secondary" rounded="full">
                   <TrackingLink
@@ -165,9 +166,9 @@ const DashboardsThatHelpYouInvestigate: React.FC = () => {
               Dashboards That Help You Investigate
             </h2>
             <div className="text-center text-base text-signoz_vanilla-100">
-              Both managed products provide interactive dashboards. SigNoz Cloud also links
-              dashboard panels to <br className="hidden md:block" /> related logs and traces for
-              investigation.
+              ClickStack gives you views. SigNoz gives you the ability to move from a dashboard
+              panel into <br className="hidden md:block" /> the exact logs and traces behind it,
+              with all your filters intact.
             </div>
           </div>
           <div>
@@ -199,9 +200,9 @@ const AlertingThatTellsYouWhatMatters: React.FC = () => {
               Alerting That Tells You What Matters
             </h2>
             <div className="text-center text-base text-signoz_vanilla-100">
-              Both SigNoz Cloud and Managed ClickStack support alerts. SigNoz Cloud also provides{' '}
-              <br className="hidden md:block" /> anomaly detection, alert history, and policy-based
-              alert workflows.
+              SigNoz gives you a dedicated alerts workflow with anomaly detection, multi-threshold
+              rules, and <br className="hidden md:block" /> full alert history. ClickStack is
+              limited to creating alerts from search or dashboard context only.
             </div>
           </div>
           <SectionLayout variant="no-border" className="!mx-auto !p-0">
@@ -216,8 +217,8 @@ const AlertingThatTellsYouWhatMatters: React.FC = () => {
                 to triggering an alert over time.
               </p>
               <p className="m-0 p-0 text-sm text-signoz_vanilla-400">
-                Managed ClickStack includes alerts in the ClickStack UI. Check its current managed
-                feature documentation for the alert-history details required by your team.
+                ClickStack <span className="text-signoz_cherry-300">does not maintain</span> alert
+                history.
               </p>
               <Image
                 src="/img/clickstack-alternative/alert-history.webp"
@@ -269,8 +270,8 @@ const BetterChoiceBanner: React.FC = () => {
       <CTABanner
         title={
           <>
-            Managed ClickStack or ClickStack OSS? <br />
-            Compare the matching SigNoz edition.
+            ClickStack or HyperDX? <br />
+            Either way, SigNoz Cloud is the better choice.
           </>
         }
         buttons={betterChoiceButtons}
@@ -287,8 +288,9 @@ const QueryYourData: React.FC = () => {
           Query Your Data, Any Way You Want
         </h2>
         <p className="mb-8 text-center leading-relaxed text-signoz_vanilla-100">
-          SigNoz Cloud supports PromQL, a visual query builder, and SQL. Managed ClickStack supports{' '}
-          <br className="hidden md:block" /> Lucene-style search and SQL through the ClickStack UI.
+          SigNoz Cloud supports PromQL, a visual query builder, and SQL across logs, traces, and
+          metrics. <br className="hidden md:block" />
+          ClickStack supports Lucene search and SQL only.
         </p>
       </div>
 
@@ -331,8 +333,8 @@ const ClickStackAlternativePage: React.FC = () => {
         sectionDescription={
           <>
             <p>
-              SigNoz Cloud prices logs and traces by ingested volume and metrics by samples. It does
-              not add a separate query charge.
+              SigNoz Cloud eliminates query costs, dashboard fees, and API charges. Pay only for
+              data volume ingested.
             </p>
             <p>
               Use the calculator below to estimate costs, then track actual usage with{' '}

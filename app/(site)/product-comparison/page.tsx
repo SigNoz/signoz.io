@@ -39,8 +39,7 @@ const comparisons = [
     url: '/datadog-alternative/',
     desc: (
       <>
-        Compare Datadog with SigNoz Cloud for OpenTelemetry support, product capabilities, and
-        usage-based pricing. See the existing{' '}
+        For 20 APM and 50 infra hosts, SigNoz Cloud can save up to 90% of your Datadog bill - check{' '}
         <Link
           href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
           className="highlight"
@@ -57,30 +56,32 @@ const comparisons = [
     url: '/product-comparison/signoz-vs-dynatrace/',
     desc: (
       <>
-        Compare the Dynatrace platform and its rate-card model with SigNoz Cloud and its usage-based
-        pricing.
+        Dynatrace is complex to set up and use. Its host-based billing is outdated for applications
+        that need on-demand scaling. SigNoz Cloud provides predictable usage-based billing that you
+        can rely on.
       </>
     ),
   },
   {
     id: 3,
-    title: 'SigNoz Cloud vs Grafana Cloud',
+    title: 'SigNoz Cloud vs Grafana',
     url: '/grafana-alternative/',
     desc: (
       <>
-        Compare Grafana Cloud with SigNoz Cloud. The page also labels Grafana OSS and Self-Hosted
-        SigNoz when it discusses self-managed software.
+        Under the hood, Grafana is powered by multiple tools like Loki, Tempo, Mimir & Prometheus.
+        SigNoz Cloud is built as a single tool to serve logs, metrics, and traces in a single pane
+        of glass from Day 1.
       </>
     ),
   },
   {
     id: 4,
-    title: 'SigNoz Cloud vs New Relic',
+    title: 'SigNoz Cloud vs NewRelic',
     url: '/newrelic-alternative/',
     desc: (
       <>
-        Compare New Relic user-based and eligible compute-based options with SigNoz Cloud's
-        usage-based pricing. See the existing{' '}
+        Tired of New Relic’s user-based pricing? Even for teams of 10-15 devs, New Relic’s pricing
+        for user seats can be a significant portion of your monthly bill - check{' '}
         <Link
           href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
           className="highlight"
@@ -88,28 +89,6 @@ const comparisons = [
           comparison with detailed spreadsheet
         </Link>
         .
-      </>
-    ),
-  },
-  {
-    id: 5,
-    title: 'SigNoz Cloud vs AWS CloudWatch',
-    url: '/cloudwatch-alternative/',
-    desc: (
-      <>
-        Compare AWS CloudWatch's service and Region-based charges with SigNoz Cloud's unified
-        observability and usage-based pricing.
-      </>
-    ),
-  },
-  {
-    id: 6,
-    title: 'SigNoz Cloud vs Managed ClickStack',
-    url: '/clickstack-alternative/',
-    desc: (
-      <>
-        Compare Managed ClickStack with SigNoz Cloud. The page also separates ClickStack OSS from
-        Self-Hosted SigNoz.
       </>
     ),
   },
