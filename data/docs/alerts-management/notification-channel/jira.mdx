@@ -10,12 +10,58 @@ description: Set up Jira Cloud as a notification channel in SigNoz to open, upda
 Before configuring Jira Cloud as a notification channel in SigNoz, ensure that you have:
 
 - **A Jira Cloud site**: your site URL in the form `https://<your-site>.atlassian.net`. SigNoz appends the REST API path internally.
-- **An Atlassian account email and API token**: create a token at <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" rel="noopener noreferrer nofollow">id.atlassian.com → Security → API tokens</a>. SigNoz authenticates as this account using the email + token (basic auth).
+- **Authentication**: an Atlassian **email + API token**. We recommend a **service account** so issues aren't reported under a personal name and the channel doesn't break when someone leaves — see [Use a service account](#use-a-service-account-recommended). SigNoz authenticates with the email + token (basic auth).
 - **A project key and an issue type**: e.g. project `OPS` and issue type `Task`. The issue type must exist in that project. Types vary per project, so `Bug` or `Incident` may not be available everywhere.
 - **Permissions**: the account needs permission to **create** issues in the project (and to **transition** them, if you use resolve/reopen).
 
 <Admonition>
 Only **Jira Cloud** (`*.atlassian.net`) is supported. **Jira Server / Data Center are not supported**: Jira Cloud API tokens and the rich v3 (Atlassian Document Format) API used here are Cloud-only.
+</Admonition>
+
+## Use a service account (recommended)
+
+We recommend authenticating with an Atlassian **service account** rather than a personal API token:
+
+- Issues are reported by the **service account, not a teammate's name** — a clean audit trail.
+- It **survives team changes** — nothing breaks when the person who set it up leaves or rotates their password.
+- It **uses no paid Jira seat** and can be locked down to least privilege.
+
+Creating one requires **Organization admin** access in Atlassian.
+
+### 1. Create the service account
+
+1. Go to <a href="https://admin.atlassian.com" target="_blank" rel="noopener noreferrer nofollow">admin.atlassian.com</a> and select your organization.
+2. Open **Directory → Service accounts → Create service account**.
+3. Give it a clear name (e.g. `signoz-alerts-service-account`) and a description of what it's for.
+4. Under app roles, grant **Jira → User** and leave everything else **None**.
+5. Note the generated `…@serviceaccount.atlassian.com` email — that's the username you'll enter in SigNoz.
+
+### 2. Give it access to your project
+
+The service account is treated like a regular user, so add it to each project it will file issues in.
+
+- **Team-managed project**: open the project → **••• → Add people** → add the service account (search its name, or paste its full email) with the **Member** role.
+- **Company-managed project**: **Project settings → People** → add it to a role (e.g. Member), and confirm the project's permission scheme grants that role **Create Issues**, **Add Comments**, and **Transition Issues**.
+
+### 3. Create a scoped API token
+
+1. In **Directory → Service accounts**, select the account → **Create credentials → API token**.
+2. Name the token (e.g. `signoz-jira-alert-channel`) and choose an expiry (1–365 days — tokens don't auto-rotate, so put the renewal on a calendar).
+3. Select the scopes **`read:jira-work`** and **`write:jira-work`** (filter the picker by App: Jira). These cover the full create / search / comment / transition lifecycle SigNoz uses.
+4. **Copy the token** — it's shown only once.
+
+### 4. Add it to SigNoz
+
+When you create the channel (below), enter:
+
+- **Site URL** — your `https://<your-site>.atlassian.net`
+- **Email** — the service account's `…@serviceaccount.atlassian.com` address
+- **API token** — the scoped token
+
+SigNoz automatically resolves your cloud ID and routes the service-account token correctly — you don't need to deal with cloud IDs or gateway URLs.
+
+<Admonition type="info">
+A personal API token also works — create one at <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" rel="noopener noreferrer nofollow">id.atlassian.com → Security → API tokens</a> and use your own email as the username — but issues are then reported under your name and the channel breaks if you leave or rotate the token. Prefer a service account where you can.
 </Admonition>
 
 ## Accessing Notification Channels
@@ -31,7 +77,7 @@ To create a new Jira notification channel:
 - Navigate to `Settings > Notification Channels` and click on `New Channel`.
 - Enter a **Name** for the channel and select **Jira** as the channel type.
 - **Site URL**: your Jira Cloud base URL, e.g. `https://your-domain.atlassian.net`.
-- **Email**: the Atlassian account email used for authentication.
+- **Email**: the account email used for authentication — the service account's `…@serviceaccount.atlassian.com` (recommended) or a personal account email.
 - **API token**: the token created above.
 - **Project key**: e.g. `OPS`.
 - **Issue type**: an issue type that exists in the project (defaults to `Task`).
@@ -188,6 +234,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 If you encounter issues:
 
 - **401 / 403** → the API token is wrong or the account lacks permission on the project. Re-check the email + token and the project permissions.
+- **401 / 403 with a service account** → confirm you used the service account's `…@serviceaccount.atlassian.com` email, added the account to the project, and gave the token the `read:jira-work` and `write:jira-work` scopes.
 - **400 on create** → a field required by that project's issue type is missing, or the project / issue type / priority is invalid. Check the project's create screen.
 - **"can't find transition"** → only relevant when a transition-name override is set and doesn't match the workflow. Clear the override to fall back to auto-detection.
 - **Invalid Site URL** → the URL must be an `https` URL on an `atlassian.net` domain.
