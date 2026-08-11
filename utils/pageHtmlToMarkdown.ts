@@ -8,17 +8,14 @@ import { buildMarkdownDocument } from './docs/buildMarkdownDocument'
  * no MDX source.
  */
 
-// Page chrome and non-content elements dropped before conversion. Header/nav/
-// footer are shared shell; forms and media embeds carry no prose.
-const CHROME_TAG_NAMES = new Set([
+// Non-content elements dropped everywhere: scripts, forms, media embeds, and
+// nav (link lists like TOCs and pagination, never prose).
+const NON_CONTENT_TAG_NAMES = new Set([
   'script',
   'style',
   'noscript',
   'template',
-  'header',
   'nav',
-  'footer',
-  'aside',
   'iframe',
   'video',
   'audio',
@@ -29,6 +26,8 @@ const CHROME_TAG_NAMES = new Set([
   'textarea',
   'dialog',
 ])
+
+const SHELL_TAG_NAMES = new Set(['header', 'footer', 'aside'])
 
 const isHastElement = (node: HastContent): node is HastElement => node.type === 'element'
 
@@ -145,7 +144,7 @@ const transformAnnotatedTables = (node: { children?: HastContent[] }) => {
 const isAriaHidden = (node: HastElement): boolean =>
   node.properties?.ariaHidden === 'true' || node.properties?.['aria-hidden'] === 'true'
 
-const pruneChrome = (node: { children?: HastContent[] }) => {
+const pruneChrome = (node: { children?: HastContent[] }, atRoot = true) => {
   if (!Array.isArray(node.children)) return
 
   node.children = node.children.filter((child) => {
@@ -153,14 +152,15 @@ const pruneChrome = (node: { children?: HastContent[] }) => {
     if (child.type === 'comment') return false
     if (!isHastElement(child)) return true
     return (
-      !CHROME_TAG_NAMES.has(child.tagName) &&
+      !NON_CONTENT_TAG_NAMES.has(child.tagName) &&
+      !(atRoot && SHELL_TAG_NAMES.has(child.tagName)) &&
       !hasMarkdownIgnoreAttribute(child) &&
       !isAriaHidden(child)
     )
   })
 
   for (const child of node.children) {
-    if (isHastElement(child)) pruneChrome(child)
+    if (isHastElement(child)) pruneChrome(child, false)
   }
 }
 
