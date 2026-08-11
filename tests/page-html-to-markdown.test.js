@@ -79,6 +79,51 @@ test('renderPageHtmlToAgentMarkdown falls back to the document title when main h
   assert.match(markdown, /Source: https:\/\/signoz\.io\/enterprise\//)
 })
 
+test('renderPageHtmlToAgentMarkdown keeps nested header/footer/aside prose inside content', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(`<!DOCTYPE html>
+<html>
+  <head><title>Guide</title></head>
+  <body>
+    <main>
+      <header><h1>Guide title</h1><p>Header intro prose.</p></header>
+      <article>
+        <header><h2>Article heading</h2></header>
+        <p>Body copy.</p>
+        <aside><p>Callout aside prose.</p></aside>
+        <footer><p>Article footer note.</p></footer>
+        <nav><a href="/next/">Next page</a></nav>
+      </article>
+    </main>
+  </body>
+</html>`)
+
+  // Direct children of the content root are shared shell and get dropped.
+  assert.doesNotMatch(markdown, /Header intro prose/)
+  // Nested header/aside/footer are in-content and keep their prose.
+  assert.match(markdown, /## Article heading/)
+  assert.match(markdown, /Body copy\./)
+  assert.match(markdown, /Callout aside prose\./)
+  assert.match(markdown, /Article footer note\./)
+  // nav is never prose and is dropped at any depth.
+  assert.doesNotMatch(markdown, /Next page/)
+})
+
+test('renderPageHtmlToAgentMarkdown drops top-level shell when the page has no main', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(`<!DOCTYPE html>
+<html>
+  <head><title>Bare</title></head>
+  <body>
+    <header><p>Site header boilerplate</p></header>
+    <p>Bare page content.</p>
+    <footer><p>Site footer boilerplate</p></footer>
+  </body>
+</html>`)
+
+  assert.match(markdown, /Bare page content\./)
+  assert.doesNotMatch(markdown, /Site header boilerplate/)
+  assert.doesNotMatch(markdown, /Site footer boilerplate/)
+})
+
 test('renderPageHtmlToAgentMarkdown returns null for empty documents', async () => {
   const markdown = await renderPageHtmlToAgentMarkdown('<html><head></head><body></body></html>')
   assert.equal(markdown, null)
