@@ -3058,6 +3058,16 @@ module.exports = () => {
           destination: '/docs/integrations/gcp/collect-metrics/',
           permanent: true,
         },
+        {
+          source: '/blog/llm-observability/',
+          destination: '/docs/llm-observability/',
+          permanent: true,
+        },
+        {
+          source: '/blog/llm-observability',
+          destination: '/docs/llm-observability/',
+          permanent: true,
+        },
       ])
     },
     webpack: (config, options) => {
