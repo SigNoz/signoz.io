@@ -3063,11 +3063,6 @@ module.exports = () => {
           destination: '/docs/llm-observability/',
           permanent: true,
         },
-        {
-          source: '/blog/llm-observability',
-          destination: '/docs/llm-observability/',
-          permanent: true,
-        },
       ])
     },
     webpack: (config, options) => {
