@@ -83,5 +83,5 @@ export async function GET(
     { footerLines: CONTENT_FOOTER_LINES }
   )
 
-  return agentResponse(null, markdown, { varyAccept: true })
+  return agentResponse(markdown, { varyAccept: true })
 }

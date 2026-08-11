@@ -2,7 +2,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { getLlmStarterLinks } from '@/utils/docs/agentDiscovery'
 import { agentResponse } from '@/utils/agentResponseHeaders'
 
-export async function GET(request: Request) {
+export async function GET() {
   const starters = await getLlmStarterLinks()
   const starterLines =
     starters.length > 0
@@ -35,5 +35,5 @@ export async function GET(request: Request) {
     '',
   ].join('\n')
 
-  return agentResponse(request, body, { contentType: 'text/plain; charset=utf-8' })
+  return agentResponse(body, { contentType: 'text/plain; charset=utf-8' })
 }

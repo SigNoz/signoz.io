@@ -24,7 +24,7 @@ const renderTree = (items: DocsRouteTreeItem[], indent = ''): string => {
     .join('\n')
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   const tree = await getDocsRouteTree()
   const markdown = [
     '# SigNoz Docs Sitemap',
@@ -35,5 +35,5 @@ export async function GET(request: Request) {
     '',
   ].join('\n')
 
-  return agentResponse(request, markdown)
+  return agentResponse(markdown)
 }
