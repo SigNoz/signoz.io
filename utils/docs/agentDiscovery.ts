@@ -1,5 +1,5 @@
 import { getDocsSideNav } from '@/utils/docsSideNav'
-import { fetchAllDocsForPage } from '@/utils/cachedData'
+import { fetchAllDocsIndex } from '@/utils/cachedData'
 
 type NavItem =
   | {
@@ -111,10 +111,9 @@ const buildRouteLabelLookup = (items: NavItem[], lookup: Map<string, string>) =>
   })
 }
 
-async function getRouteLabelLookup(): Promise<Map<string, string>> {
-  const docsSideNav = await getDocsSideNav()
+function getRouteLabelLookup(docsSideNav: NavItem[]): Map<string, string> {
   const lookup = new Map<string, string>()
-  buildRouteLabelLookup(docsSideNav as NavItem[], lookup)
+  buildRouteLabelLookup(docsSideNav, lookup)
   lookup.set(DOCS_ROOT, 'Get Started')
   return lookup
 }
@@ -168,9 +167,8 @@ const flattenTree = (nodes: DocsRouteTreeItem[], depth: number, output: DocsRout
 }
 
 export async function getDocsRouteTree(): Promise<DocsRouteTreeItem[]> {
-  const docsSideNav = await getDocsSideNav()
-  const lookup = await getRouteLabelLookup()
-  return toTree(docsSideNav as NavItem[], lookup)
+  const docsSideNav = (await getDocsSideNav()) as NavItem[]
+  return toTree(docsSideNav, getRouteLabelLookup(docsSideNav))
 }
 
 export async function getDocsRouteList(): Promise<DocsRouteListItem[]> {
@@ -195,7 +193,7 @@ async function getDocsDescriptionLookup(): Promise<Map<string, string>> {
   const lookup = new Map<string, string>()
 
   try {
-    const docs = await fetchAllDocsForPage()
+    const docs = await fetchAllDocsIndex()
     docs.forEach((doc) => {
       if (typeof doc.slug !== 'string' || doc.slug.length === 0) return
       const description = normalizeDescription(doc.description) ?? normalizeDescription(doc.summary)
