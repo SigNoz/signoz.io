@@ -17,8 +17,7 @@ const VALUE_PROPS = [
   },
   {
     title: 'Pricing you can predict',
-    description:
-      'SigNoz Cloud: $0.30/GB logs and traces and $0.10/mn metric samples. No per-host fees.',
+    description: '$0.30/GB logs & traces. $0.10/mn metrics. No per-host fees. No surprises.',
   },
   {
     title: 'Every signal in one place',
@@ -211,7 +210,7 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
       <div className="mb-8 space-y-6">
         <div className="space-y-3">
           <label className="block text-sm font-medium text-signoz_vanilla-100" htmlFor="dataRegion">
-            SigNoz Cloud data region{' '}
+            Data region{' '}
           </label>
           <div className="grid grid-cols-3 gap-3">
             {REGIONS.map((region) => (
@@ -403,7 +402,7 @@ const TeamsPage: React.FC<TeamsPageProps> = ({ initialAuthCode, initialSsoError 
           <div className="flex max-w-[420px] flex-col gap-8">
             {/* Headline */}
             <h1 className="text-[36px] font-bold leading-[1.2] tracking-[-1px] text-white">
-              Managed SigNoz Cloud observability
+              One Stop Observability
               <br />
               at Scale
             </h1>

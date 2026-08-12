@@ -24,7 +24,7 @@ export default function EnterpriseCard() {
             <div className="mt-4 flex w-full flex-col items-start md:mt-0 md:w-[40%] md:items-end">
               <span className="text-2xl font-bold text-signoz_vanilla-100 md:text-3xl">Custom</span>
               <div className="mt-1 text-sm text-signoz_vanilla-400">
-                SigNoz Cloud — Dedicated starts at $4000/month
+                SigNoz Cloud: Dedicated starts at $4000/month
               </div>
             </div>
           </div>
@@ -54,7 +54,7 @@ export default function EnterpriseCard() {
               <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="text-signoz_vanilla-400">SigNoz Cloud — Dedicated</span>
+                  <span className="text-signoz_vanilla-400">SigNoz Cloud: Dedicated</span>
                 </div>
                 <span className="ml-3 mt-1 flex items-center gap-2 text-sm italic text-signoz_vanilla-400">
                   <Info className="text-signoz_vanilla-500" size={14} />
@@ -65,13 +65,13 @@ export default function EnterpriseCard() {
             <li className="flex items-start gap-2">
               <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
               <span className="text-signoz_vanilla-400">
-                SigNoz Cloud — BYOC, managed by SigNoz in your cloud account
+                SigNoz Cloud: BYOC, managed by SigNoz in your cloud account
               </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
               <span className="text-signoz_vanilla-400">
-                Self-Hosted SigNoz — enterprise support. Your team operates infrastructure, storage,
+                Self-Hosted SigNoz: enterprise support. Your team operates infrastructure, storage,
                 scaling, upgrades, and backups.
               </span>
             </li>

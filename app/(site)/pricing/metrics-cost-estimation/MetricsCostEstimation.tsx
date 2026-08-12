@@ -75,7 +75,7 @@ const MetricsCostEstimation = () => {
               <div className="flex flex-col gap-7">
                 <div>
                   <div className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">
-                    SigNoz Cloud metrics price calculator
+                    Metrics price calculator
                   </div>
                   <div className="text-base font-normal text-signoz_vanilla-400">
                     Estimate your managed SigNoz Cloud bill for metric samples and retention.
@@ -187,7 +187,7 @@ const MetricsCostEstimation = () => {
                   </div>
                   <div className="flex items-center justify-between rounded-b border border-transparent bg-signoz_ink-300 px-3 py-4 pt-4">
                     <span className="text-sm font-medium text-signoz_vanilla-100">
-                      Estimated monthly SigNoz Cloud cost
+                      Monthly cost
                     </span>
                     <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
                     <div>${formatNumber(monthlyEstimate)}</div>

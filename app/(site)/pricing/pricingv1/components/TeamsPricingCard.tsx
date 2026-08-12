@@ -19,7 +19,7 @@ export default function TeamsPricingCard() {
               id="teams"
               className="pinkish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl"
             >
-              SigNoz Cloud — Teams
+              SigNoz Cloud: Teams
             </h3>
             <p className="text-base text-gray-400">
               For teams that want SigNoz to manage storage, scaling, and upgrades.

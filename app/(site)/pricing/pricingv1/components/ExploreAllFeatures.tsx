@@ -37,7 +37,7 @@ const ALL_FEATURES_DATA = {
   HEADER: [
     { heading: '', desc: '' },
     {
-      heading: 'Self-Hosted SigNoz — Community',
+      heading: 'Self-Hosted SigNoz: Community',
       desc: 'Install & manage yourself',
       action: (
         <TrackingLink
@@ -54,7 +54,7 @@ const ALL_FEATURES_DATA = {
       ),
     },
     {
-      heading: 'SigNoz Cloud — Teams',
+      heading: 'SigNoz Cloud: Teams',
       desc: 'Starts at $49/mo',
       action: (
         <TrackingLink
