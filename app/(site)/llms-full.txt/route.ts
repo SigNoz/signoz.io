@@ -8,5 +8,5 @@ export async function GET() {
   const body = await buildLlmsFullMarkdown()
 
   // Statically rendered (force-static): conditional 304s are left to the CDN.
-  return agentResponse(null, body, { contentType: 'text/plain; charset=utf-8' })
+  return agentResponse(body, { contentType: 'text/plain; charset=utf-8' })
 }
