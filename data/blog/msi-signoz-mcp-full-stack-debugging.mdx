@@ -14,7 +14,7 @@ related_articles:
 
 [MSI](https://www.msisurfaces.com/) is a leading North American distributor of flooring, countertops, wall tile, and hardscaping products, founded in 1975 and headquartered in Orange, California, with more than 50 showrooms and distribution centers across the U.S. and Canada. Thousands of orders move through its internal sales-order application every day. [Taylor Mattison](https://www.linkedin.com/in/taylor-mattison/) (Front-end Developer, MSI) builds the UI for that system, while [Thang Syle](https://www.linkedin.com/in/thangsyle) (Software Engineer II, MSI) works on the API and database logic behind it.
 
-MSI brought SigNoz into that environment before a major ERP migration. The team needed a better way to store logs, inspect traces, and find the exact request behind a bug. After the migration, that evidence became part of daily debugging. One save in the UI could touch around ten endpoints, pass through older business logic and stored procedures, and still depend on the ERP and database underneath it.
+By the time post-migration debugging picked up, SigNoz was already where MSI engineers looked for API traces and logs. The team needed a better way to store logs, inspect traces, and find the exact request behind a bug. One save in the UI could touch around ten endpoints, pass through older business logic and stored procedures, and still depend on the ERP and database underneath it.
 
 That made a slow sales order hard to assign to one layer. A branch leader might hear from teams that saving an order feels slow, and the report could reach engineering with almost no reproduction steps. The slowdown could be in the front-end sales-order application, one of the APIs behind it, a stored procedure, the ERP, or a database query.
 
@@ -44,7 +44,7 @@ Taylor already knew how to investigate that by hand. He knows which front-end fe
 
 Some MSI traces run hundreds of spans deep. Taylor might be hunting the one span that errored, or an operation that took ten seconds when it should have taken closer to a hundred milliseconds. One trace is manageable; enough traces to prove a pattern is different work.
 
-So Taylor connected Claude to SigNoz through SigNoz MCP, before SigNoz shipped its in-product AI teammate, [Noz](https://signoz.io/blog/introducing-noz-your-ai-teammate-in-signoz/). Now, instead of opening one trace at a time, he could ask the agent to compare traces and hand back the pattern. "It was pulling in more context than I was able to pull in just from looking through the one span and going through each trace," he says.
+So Taylor connected Claude to SigNoz through SigNoz MCP. Now, instead of opening one trace at a time, he could ask the agent to compare traces and hand back the pattern. "It was pulling in more context than I was able to pull in just from looking through the one span and going through each trace," he says.
 
 Taylor calls the result a fingerprint. It might be repeated slow spans, recurring errors, operations in the wrong order, or a slowdown elsewhere cascading into the sales-order experience. It gave him something he could take to the rest of the team: the traces, the repeated symptoms, and the layer that best explained them.
 
@@ -84,7 +84,7 @@ Taylor uses AI, but still treats telemetry as the source of truth, because an ag
 
 The rest still belongs to the engineer. Taylor describes that role as a mix of taste and business context: taste being a sense of what clean, scalable code should look like, business context being what matters to MSI's internal users and where the tradeoffs sit. "A lot of it's taste. Making something that scales well but also reads cleanly to other developers, that's the kind of thing AI is never going to get right," he says.
 
-Taylor still decides which pattern is real, which fix is worth making, and how to explain the issue to the team that owns it.
+Taylor still decides which pattern is real, which fix is worth making, and how to explain the issue to the team that owns it. That same division of work is what [Noz](https://signoz.io/blog/introducing-noz-your-ai-teammate-in-signoz/), SigNoz's in-product AI teammate, brings into SigNoz itself: help engineers move from a symptom to the traces, logs, and patterns behind it, while keeping the final judgment with the person debugging the system.
 
 ## What other teams can take from this
 
