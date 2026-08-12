@@ -1,10 +1,13 @@
+import { NextResponse } from 'next/server'
 import { MetadataRoute } from 'next'
 import siteMetadata from '@/data/siteMetadata'
-import { toSitemapDateOnly } from 'utils/sitemapXml'
+import { entriesToXml, toSitemapDateOnly } from 'utils/sitemapXml'
 import { resolveLatestDate } from '@/utils/dateUtils'
 import { fetchAllDocsForPage } from '@/utils/cachedData'
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export const dynamic = 'force-dynamic'
+
+export async function GET() {
   const siteUrl = siteMetadata.siteUrl
 
   const introductionRoute: MetadataRoute.Sitemap[number] = {
@@ -24,5 +27,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     }))
 
-  return [introductionRoute, ...docRoutes]
+  return new NextResponse(entriesToXml([introductionRoute, ...docRoutes]), {
+    headers: {
+      'Content-Type': 'application/xml',
+    },
+  })
 }

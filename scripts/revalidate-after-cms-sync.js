@@ -229,17 +229,20 @@ function buildPayload({
   }
 
   const extraTags = [...listicleTags]
-  if (cmsUrls.some((u) => u.startsWith('/comparisons/'))) {
-    extraTags.push('comparisons-list')
-  }
-  if (cmsUrls.some((u) => u.startsWith('/guides/'))) {
-    extraTags.push('guides-list')
-  }
-  if (cmsUrls.some((u) => u.startsWith('/blog/'))) {
-    extraTags.push('blogs-list')
-  }
-  if (cmsUrls.some((u) => u.startsWith('/docs/'))) {
-    extraTags.push('docs-list')
+  const LIST_TAG_BY_PREFIX = [
+    ['/comparisons/', 'comparisons-list'],
+    ['/guides/', 'guides-list'],
+    ['/blog/', 'blogs-list'],
+    ['/docs/', 'docs-list'],
+    // These collections also feed /blogs/sitemap.xml, which reads the list caches.
+    ['/faqs/', 'faqs-list'],
+    ['/case-study/', 'case-studies-list'],
+    ['/opentelemetry/', 'opentelemetries-list'],
+  ]
+  for (const [prefix, listTag] of LIST_TAG_BY_PREFIX) {
+    if (cmsUrls.some((u) => u.startsWith(prefix))) {
+      extraTags.push(listTag)
+    }
   }
 
   return {

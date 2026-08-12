@@ -42,7 +42,7 @@ function revalidateCmsUrlPath(
         contentKey,
       })
       for (const t of strapiTags) {
-        revalidateTag(t, 'default')
+        revalidateTag(t, 'max')
         tags.push(t)
       }
     }
@@ -76,13 +76,13 @@ export async function POST(request: NextRequest) {
 
     if (revalidateAll) {
       revalidatePath('/', 'layout')
-      revalidateTag('mdx-content-list', 'default')
-      revalidateTag('comparisons-list', 'default')
-      revalidateTag('guides-list', 'default')
-      revalidateTag('blogs-list', 'default')
-      revalidateTag('docs-list', 'default')
-      revalidateTag('docs-side-nav', 'default')
-      revalidateTag('listicles', 'default')
+      revalidateTag('mdx-content-list', 'max')
+      revalidateTag('comparisons-list', 'max')
+      revalidateTag('guides-list', 'max')
+      revalidateTag('blogs-list', 'max')
+      revalidateTag('docs-list', 'max')
+      revalidateTag('docs-side-nav', 'max')
+      revalidateTag('listicles', 'max')
 
       results.push({
         path: '/',
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (tag) {
-      revalidateTag(tag, 'default')
+      revalidateTag(tag, 'max')
 
       results.push({
         tag,
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
 
     if (tags && Array.isArray(tags)) {
       for (const t of tags) {
-        revalidateTag(t, 'default')
+        revalidateTag(t, 'max')
 
         results.push({
           tag: t,
@@ -171,13 +171,13 @@ export async function GET(request: NextRequest) {
 
     if (revalidateAll) {
       revalidatePath('/', 'layout')
-      revalidateTag('mdx-content-list', 'default')
-      revalidateTag('comparisons-list', 'default')
-      revalidateTag('guides-list', 'default')
-      revalidateTag('blogs-list', 'default')
-      revalidateTag('docs-list', 'default')
-      revalidateTag('docs-side-nav', 'default')
-      revalidateTag('listicles', 'default')
+      revalidateTag('mdx-content-list', 'max')
+      revalidateTag('comparisons-list', 'max')
+      revalidateTag('guides-list', 'max')
+      revalidateTag('blogs-list', 'max')
+      revalidateTag('docs-list', 'max')
+      revalidateTag('docs-side-nav', 'max')
+      revalidateTag('listicles', 'max')
 
       results.push({
         path: '/',
@@ -192,7 +192,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (tag) {
-      revalidateTag(tag, 'default')
+      revalidateTag(tag, 'max')
 
       results.push({
         tag,

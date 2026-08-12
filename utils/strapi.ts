@@ -458,12 +458,23 @@ export const fetchMDXContentByPath = async (
 
         const pagesResults = await Promise.allSettled(pagePromises)
         pagesResults.forEach((result, idx) => {
-          if (result.status === 'fulfilled' && result.value.data?.length > 0) {
-            allData = allData.concat(result.value.data)
-          } else if (result.status === 'rejected') {
-            console.warn(`Failed to fetch page ${idx + 2} of ${collectionName}:`, result.reason)
+          // Never return (and cache) a truncated list.
+          if (result.status === 'rejected') {
+            throw new Error(
+              `Failed to fetch page ${idx + 2} of ${collectionName}: ${result.reason}`
+            )
           }
+          // Pagination meta said this page exists, so an empty page means an
+          // inconsistent/truncated snapshot.
+          if (!result.value.data || result.value.data.length === 0) {
+            throw new Error(`Empty page ${idx + 2} received for ${collectionName}`)
+          }
+          allData = allData.concat(result.value.data)
         })
+      }
+
+      if (allData.length === 0) {
+        throw new Error(`Empty ${collectionName} list received from CMS`)
       }
 
       const finalMeta = initialData.meta
