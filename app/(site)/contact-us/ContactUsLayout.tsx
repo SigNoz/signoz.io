@@ -11,18 +11,18 @@ import { contactUsData } from './data'
 
 const OPTIONS = [
   {
-    title: 'SigNoz Cloud: Enterprise',
-    description:
-      'A dedicated, managed SigNoz Cloud environment with enterprise security and compliance options.',
+    title: 'Enterprise Cloud',
+    description: 'A dedicated cloud environment with upgraded security and compliance features.',
   },
   {
-    title: 'SigNoz Cloud: BYOC',
-    description: 'SigNoz manages the stack in your cloud account.',
+    title: 'BYOC',
+    description:
+      'Managed by SigNoz in your cloud. Let the SigNoz team run SigNoz in your cloud infrastructure.',
   },
   {
-    title: 'Self-Hosted SigNoz: Enterprise support',
+    title: 'Enterprise Self-Hosted',
     description:
-      'Your team operates the stack in your infrastructure with contracted support from SigNoz.',
+      'Self-host SigNoz in your infrastructure with a support contract from SigNoz team.',
   },
 ]
 
