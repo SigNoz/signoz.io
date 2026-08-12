@@ -105,7 +105,7 @@ Traces are available in SigNoz under the Traces tab:
   caption="GitHub Copilot Trace View"
 />
 
-When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes. The `invoke_agent` span wraps one agent turn, `chat` spans are the individual model calls, and `execute_tool` spans capture each tool the agent ran.
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes. The `invoke_agent` span wraps one agent turn and is the root, `chat` spans are the individual model calls carrying `gen_ai.request.model` and `gen_ai.usage.*`, `execute_tool` spans carry `gen_ai.tool.name` for each tool the agent ran, and `embeddings` spans come from workspace indexing.
 
 <Figure
   src="/img/docs/llm/github-copilot/github-copilot-detailed-traces.webp"
@@ -113,49 +113,7 @@ When you click on a trace in SigNoz, you'll see a detailed view of the trace, in
   caption="GitHub Copilot Detailed Trace View"
 />
 
-<details>
-<ToggleHeading>
-## Attributes and metrics worth knowing about
-</ToggleHeading>
-
-### Span operations
-
-| `gen_ai.operation.name` | Span kind | Emitted when |
-|---|---|---|
-| `invoke_agent` | Internal | Wraps one agent turn. Root span. |
-| `chat` | Client | One per model call |
-| `execute_tool` | Internal | One per tool invocation |
-| `embeddings` | Client | Workspace indexing |
-| `execute_hook` | Internal | One per hook execution |
-
-### Attributes
-
-| Attribute | Where it appears |
-|---|---|
-| `gen_ai.request.model`, `gen_ai.response.model` | `chat`, `embeddings`, `invoke_agent` |
-| `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens` | `chat`, `invoke_agent` |
-| `gen_ai.usage.cache_read.input_tokens` | `chat`, `invoke_agent` |
-| `gen_ai.usage.reasoning.output_tokens` | `chat`, `invoke_agent` (reasoning models only) |
-| `gen_ai.response.time_to_first_chunk` | `chat` only |
-| `gen_ai.response.finish_reasons` | `chat` only |
-| `gen_ai.tool.name` | `execute_tool` only |
-| `gen_ai.agent.name` | `chat`, `invoke_agent` |
-| `gen_ai.conversation.id` | everything except `embeddings` |
-
-### Metrics
-
-Copilot emits the standard GenAI instruments (`gen_ai.client.token.usage`, `gen_ai.client.operation.duration`, `gen_ai.client.operation.time_to_first_chunk`, `gen_ai.client.operation.time_per_output_chunk`) plus Copilot-specific ones (`copilot_chat.agent.invocation.duration`, `copilot_chat.agent.turn.count`, `copilot_chat.time_to_first_token`, `copilot_chat.tool.call.count`, `copilot_chat.tool.call.duration`, `copilot_chat.session.count`, `github.copilot.mcp.server.connection.count`).
-
-### Four things that look obvious and are wrong
-
-1. **There is no `gen_ai.usage.total_tokens`.** Copilot never sets it, so sum `input_tokens` and `output_tokens` yourself.
-2. **`invoke_agent` carries a roll-up of its children's tokens.** Summing token attributes across all spans roughly double counts. Scope token queries to `gen_ai.operation.name = 'chat'`.
-3. **The finish reason is plural and is a JSON array string.** The attribute is `gen_ai.response.finish_reasons`, with values like `["stop"]` and `["tool_calls"]`. The singular form is never set.
-4. **Span names embed the model or tool name**, for example `chat claude-sonnet-5` and `execute_tool read_file`. Filter on `gen_ai.operation.name` rather than the span name, or your queries will miss every model you did not think of.
-
-MCP tools are identifiable by prefix: their `gen_ai.tool.name` starts with `mcp_`, so `gen_ai.tool.name REGEXP '^mcp_'` cleanly separates MCP traffic from Copilot's built-in tools.
-
-</details>
+Copilot also exports metrics on the standard GenAI instruments (`gen_ai.client.token.usage`, `gen_ai.client.operation.duration`) alongside Copilot-specific ones (`copilot_chat.tool.call.count`, `copilot_chat.agent.invocation.duration`, `copilot_chat.session.count`).
 
 ## GitHub Copilot Observability Dashboard
 
@@ -194,24 +152,6 @@ An ingestion key is region scoped. A key issued for one region sent to another r
 ### `OTEL_EXPORTER_OTLP_HEADERS` seems to be ignored
 
 Expected if you launched VS Code from the Dock or Spotlight, since GUI-launched apps on macOS do not inherit your shell environment. Use the `github.copilot.chat.otel.headers` setting instead, which is what this guide does.
-
-</details>
-
-<details>
-<ToggleHeading>
-## Rolling this out to a team (Optional)
-</ToggleHeading>
-
-The settings are identical for a fleet. What changes is how they reach each developer.
-
-Precedence, taken from the shipped extension manifest, is **enterprise policy, then environment variable, then user setting**, so a centrally managed value cannot be overridden locally. For where managed settings live and how policy is delivered on each platform, follow the <a href="https://code.visualstudio.com/docs/enterprise/ai-settings" target="_blank" rel="noopener noreferrer nofollow">VS Code enterprise AI settings documentation</a>.
-
-Two things worth doing for a fleet:
-
-- Give each rollout its own `serviceName`, for example `copilot-chat-platform` and `copilot-chat-frontend`, so the dashboard's service picker can compare them.
-- Set `lockCaptureContent` so individual developers cannot turn content capture on.
-
-A collector is still worth running in front of a fleet if you want to sample, filter, or enrich centrally. It buys you nothing for a single developer, since Copilot attaches the ingestion key itself.
 
 </details>
 
