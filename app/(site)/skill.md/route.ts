@@ -34,5 +34,5 @@ Docs-only skills such as signoz-searching-docs work standalone. Skills that act 
 `
 
 export async function GET() {
-  return agentResponse(request, SKILL_MD)
+  return agentResponse(SKILL_MD)
 }
