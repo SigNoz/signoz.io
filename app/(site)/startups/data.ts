@@ -13,7 +13,7 @@ import {
 // StartUps Main Data
 export const StartUpsData = {
   TITLE: 'SigNoz for Startups',
-  DESC: 'Managed observability that fits your startup budget',
+  DESC: "Observability That Doesn't Burn Your Startup Budget",
   PRICE: {
     originalPrice: '$49',
     discountedPrice: '$19',

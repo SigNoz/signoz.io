@@ -78,7 +78,8 @@ const MetricsCostEstimation = () => {
                     Metrics price calculator
                   </div>
                   <div className="text-base font-normal text-signoz_vanilla-400">
-                    Estimate your managed SigNoz Cloud bill for metric samples and retention.
+                    We use a transparent and usage-based pricing model that helps you prevent costs
+                    from ballooning.
                   </div>
                 </div>
                 <div></div>
