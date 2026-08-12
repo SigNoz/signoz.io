@@ -9,8 +9,6 @@ import { fetchBlogBySlug, fetchComparisonBySlug, fetchGuideBySlug } from '@/util
 import { getContentBySlug } from '@/utils/contentRepository'
 import { agentResponse } from '@/utils/agentResponseHeaders'
 
-const CONTENT_FOOTER_LINES = ['Full content index: https://signoz.io/llms.txt']
-
 type ContentRecord = {
   title?: unknown
   description?: unknown
@@ -80,7 +78,7 @@ export async function GET(
       docTags: post.tags,
       body: { raw: rawMdx },
     },
-    { footerLines: CONTENT_FOOTER_LINES }
+    { footerLines: [] }
   )
 
   return agentResponse(markdown, { varyAccept: true })
