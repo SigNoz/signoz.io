@@ -37,7 +37,8 @@ test('renderPageHtmlToAgentMarkdown keeps main content and metadata', async () =
   assert.match(markdown, /## Plans/)
   assert.match(markdown, /\[Teams\]\(\/teams\/\)/)
   assert.match(markdown, /Source: https:\/\/signoz\.io\/pricing\//)
-  assert.match(markdown, /Full content index: https:\/\/signoz\.io\/llms\.txt/)
+  // The llms.txt pointer moved from the footer into the top directive.
+  assert.doesNotMatch(markdown, /Full content index:/)
 })
 
 test('renderPageHtmlToAgentMarkdown emits the llms.txt directive once, near the top', async () => {
