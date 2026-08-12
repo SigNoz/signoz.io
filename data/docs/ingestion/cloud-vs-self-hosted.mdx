@@ -56,7 +56,7 @@ Notes:
 +    endpoint: http://<signoz-host>:4318
 ```
 
-If you switch to HTTPS on self-hosted, change the endpoint to `https://<host>:443`, remove `tls.insecure: true`, and add a `tls` block only if you need to trust custom CAs.
+If Self-Hosted SigNoz exposes OTLP/HTTP through HTTPS, use the `https://` endpoint. Add a `tls` block only when the client must trust a custom CA.
 
 ## Self-Hosted to Cloud
 
@@ -65,11 +65,10 @@ Using a guide that only shows Self-Hosted steps? Apply the following minimal cha
 ### Language SDKs
 
 ```diff
-- OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+  OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 - OTEL_EXPORTER_OTLP_ENDPOINT=http://<signoz-host>:4318
 + OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
 + OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
-+ # Keep your protocol (grpc or http/protobuf); both work on 443
 ```
 
 Notes:
