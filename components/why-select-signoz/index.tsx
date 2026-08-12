@@ -30,7 +30,8 @@ const WhySelectSignoz = ({
       >
         <div className="min-w-0">
           <p className="sticky top-[3rem] px-8 pt-4 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:px-4 sm:text-4xl lg:px-8 lg:pt-10">
-            Why <br className="hidden md:block" /> select <br className="hidden md:block" /> SigNoz?{' '}
+            Why <br className="hidden md:block" /> select <br className="hidden md:block" />
+            {isInPricingPage ? 'SigNoz Cloud?' : 'SigNoz?'}{' '}
           </p>
         </div>
         <div className="min-w-0">
@@ -59,8 +60,9 @@ const WhySelectSignoz = ({
                   Powering observability for teams of all sizes
                 </p>
                 <p className="m-0 block text-sm font-normal leading-9 text-signoz_vanilla-400">
-                  Hundreds of companies ⎯from early-stage start-ups to public enterprises use SigNoz
-                  to build more reliable products.
+                  Hundreds of companies ⎯from early-stage start-ups to public enterprises use{' '}
+                  {isInPricingPage ? 'SigNoz Cloud and Self Hosted SigNoz' : 'SigNoz'} to build more
+                  reliable products.
                 </p>
               </div>
             </div>

@@ -226,7 +226,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
             >
               80% on your Datadog bill
             </TrackingLink>{' '}
-            with SigNoz.
+            with SigNoz Cloud.
           </p>
         </div>
       </div>

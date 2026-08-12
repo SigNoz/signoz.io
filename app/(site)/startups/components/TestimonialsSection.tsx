@@ -11,7 +11,7 @@ export default function TestimonialsSection() {
             Loved by <span className="text-gradient">Startup Founders</span>
           </h2>
           <p className="text-lg text-gray-300">
-            Hear from startups that have transformed their observability with SigNoz.
+            Hear from startups that have transformed their observability with SigNoz Cloud.
           </p>
         </div>
 

@@ -26,8 +26,8 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
               </ul>
             ) : (
               <div className="mb-10 text-base font-normal leading-9 text-signoz_vanilla-400">
-                No need to send data outside your region. We have data centers in US, EU and India
-                to comply with data privacy regulations. You can also host SigNoz in your own cloud.
+                SigNoz Cloud has data regions in the US, EU, and India. You can also run Self Hosted
+                SigNoz in your own cloud.
               </div>
             )}
           </div>

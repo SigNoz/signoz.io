@@ -75,7 +75,7 @@ export const featureItems = [
     iconName: ICON_ROI,
     title: '9X ROI vs DataDog',
     description:
-      'SigNoz provides up to 9X return on investment compared to DataDog for growing startups.',
+      'SigNoz Cloud provides up to 9X return on investment compared to DataDog for growing startups.',
     bgColor: 'bg-green-500/10',
     hoverBorder: 'hover:border-green-500/40',
     hoverShadow: 'hover:shadow-green-500/5',
