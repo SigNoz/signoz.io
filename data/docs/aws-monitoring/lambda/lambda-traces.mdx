@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-08-05
 title: Send your AWS Lambda Traces to SigNoz
 meta_title: AWS Lambda Traces - OpenTelemetry Auto-Instrumentation
 description: Learn to send Lambda traces using OpenTelemetry auto-instrumentation layers for Python, Node.js, Java, and Ruby to track serverless performance.
@@ -50,7 +50,7 @@ On your machine, create a folder, say `auto-instrument-tracing-lambda`.
 
 Add a file `lambda_function.py` in that folder with the lambda function code which will be as follows:
 
-```
+```python:lambda_function.py
 import json
 import requests
 
@@ -65,19 +65,19 @@ def lambda_handler(event, context):
 
 Inside the folder, create a new directory named `package` into which you will install your dependencies.
 
-```
+```bash
 $ mkdir package
 ```
 
 Install the dependencies in the `package` directory using the command:
 
-```
+```bash
 $ pip install --target ./package requests
 ```
 
 Create a .zip file with the installed libraries at the root.
 
-```
+```bash
 $ cd package
 $ zip -r ../auto-instrument-tracing-lambda.zip .
 ```
@@ -86,7 +86,7 @@ This generates a `auto-instrument-tracing-lambda.zip` file in your project direc
 
 Add the `lambda_function.py` file to the root of the .zip file using the following command:
 
-```
+```bash
 $ cd ..
 $ zip auto-instrument-tracing-lambda.zip lambda_function.py
 ```
@@ -99,7 +99,7 @@ Upload the `auto-instrument-tracing-lambda.zip` file. Now, you can test the lamb
 
 On your machine, create a folder say `auto-instrument-tracing-lambda`. In the folder, create a file `index.js` and put the following code in it.
 
-```
+```javascript:index.js
 const https = import('https');
 
 export const handler = (event) => {
@@ -138,13 +138,13 @@ export const handler = (event) => {
 
 Install the npm package `https` using the command:
 
-```
+```bash
 npm install https
 ```
 
 Zip the nodejs package using the command:
 
-```
+```bash
 zip -r auto-instrument-tracing-lambda.zip .
 ```
 
@@ -156,7 +156,7 @@ Upload the `auto-instrument-tracing-lambda.zip` file. Now, you can test the lamb
 
 On your machine, create a Maven package in Java, say `AutoInstrumentationLambda`. The `pom.xml` file would look like as follows:
 
-```
+```xml:pom.xml minimap
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -220,7 +220,7 @@ Create the `Main.java` file in the location `src/main/java/org/example/` inside 
 have the `handleRequest` method that will run on invoking the AWS Lambda function. Here are the contents of the `Main.java` 
 file:
 
-```
+```java:src/main/java/org/example/Main.java
 package org.example;
 
 import java.io.BufferedReader;
@@ -262,7 +262,7 @@ public class Main implements RequestHandler<Object, String> {
 
 Now, run the following commands from the terminal from the base folder which contains the `pom.xml` file:
 
-```
+```bash
 # This will build the maven package
 $ mvn clean install
 
@@ -277,13 +277,13 @@ Also, edit the **Runtime Settings** to edit the **Handler** to be `org.example.M
 </TabItem>
 <TabItem value="ruby" label="Ruby" default>
 On your machine, create a folder for the project say, `auto-instrumentation-tracing`, and run the command:
-```
+```bash
 $ bundle init
 ```
 
 Open the `Gemfile` file in the `auto-instrumentation-tracing/bundle` directory, and add the gems for `net/http` and `uri` in it. The contents of the `Gemfile` will look as follows:
 
-```
+```ruby
 source "https://rubygems.org"
 gem "net/http"
 gem "uri"
@@ -291,13 +291,13 @@ gem "uri"
 
 Run the following command to install the gems specified in your `Gemfile`.
 
-```
+```bash
 $ bundle config set --local path 'auto-instrumentation-tracing/bundle' && bundle install
 ```
 
 Create the `lambda_function.rb` file that will contain the code for the function:
 
-```
+```ruby:lambda_function.rb
 require 'net/http'
 require 'uri'
 require 'json'
@@ -326,7 +326,7 @@ puts handler({})
 
 Zip the contents of the folder with the following command:
 
-```
+```bash
 $ zip -r auto-instrumentation-tracing.zip lambda_function.rb auto-instrumentation-tracing
 ```
 
@@ -381,7 +381,7 @@ The latest releases of the layers can be found in the [OpenTelemetry Lambda Laye
 
 <Tabs entityName="language">
 <TabItem value="python" label="Python" default>
-```
+```ini
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-instrument
 OTEL_PROPAGATORS=tracecontext
@@ -389,7 +389,7 @@ OTEL_TRACES_SAMPLER=always_on
 ```
 </TabItem>
 <TabItem value="nodejs" label="NodeJS" default>
-```
+```ini
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
 OTEL_PROPAGATORS=tracecontext
@@ -397,7 +397,7 @@ OTEL_TRACES_SAMPLER=always_on
 ```
 </TabItem>
 <TabItem value="java" label="Java" default>
-```
+```ini
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
 OTEL_PROPAGATORS=tracecontext
@@ -405,7 +405,7 @@ OTEL_TRACES_SAMPLER=always_on
 ```
 </TabItem>
 <TabItem value="ruby" label="Ruby" default>
-```
+```ini
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
 OTEL_PROPAGATORS=tracecontext
@@ -441,7 +441,7 @@ arn:aws:lambda:<region>:184161586896:layer:opentelemetry-collector-arm64-0_12_0:
 
 5. Add the followwing `collector.yaml` file to your project to configure the collector to send the traces to SigNoz:
 
-```
+```yaml:collector.yaml
 # collector.yaml
 receivers:
   otlp:
@@ -487,7 +487,7 @@ Depending on the choice of your region for SigNoz cloud, the otlp endpoint will 
 
 7. Add the following environment variable:
 
-```
+```ini
 OPENTELEMETRY_COLLECTOR_CONFIG_URI=/var/task/collector.yaml
 ```
 
