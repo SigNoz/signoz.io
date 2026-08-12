@@ -23,7 +23,7 @@ No meta needed:
 | `diff` / `diff:file` | Unified diff. Lines starting with `-` get a cherry (destructive) row background; `+` get forest (success). Context lines stay unshaded. Prefer this over hand-coloring removals with `{n}#cherry`. |
 | `{5}#cherry` / `#forest` / `#amber` / `#robin` | Sentiment highlights (error / success / warning / info). |
 | `noLineNumbers` | Hide the line-number gutter. |
-| `minimap` | Right-side minimap strip. Required above 40 lines, always with `defaultCollapsed`. |
+| `minimap` | Right-side minimap strip. Required above 30 lines, always with `defaultCollapsed`. |
 | `collapse` | Collapse controls when lines **> 20** (same as default auto behavior; explicit is fine). |
 | `collapse={N}` | Collapse controls when lines **> N**. |
 | `noCollapse` | Never show collapse controls, even for long fences. |
@@ -157,7 +157,7 @@ Use language `diff` (optionally with a filename title) for add/remove edits. Lin
 
 ## Minimap
 
-Opt in with `minimap`, paired with `defaultCollapsed`. Best for fences of more than 40 lines that readers skim ([when to use](#when-to-use-defaultcollapsed--minimap)):
+Opt in with `minimap`, paired with `defaultCollapsed`. Required on fences of more than 30 lines ([when to use](#when-to-use-defaultcollapsed--minimap)):
 
 ````md
 ```python minimap defaultCollapsed collapse={5} {3}#cherry {8}#forest
@@ -211,7 +211,7 @@ The 20-line threshold only adds the Collapse and Expand buttons. The fence still
 |---|---|
 | 20 lines or fewer | none |
 | More than 20 lines | `defaultCollapsed` |
-| More than 40 lines | `minimap defaultCollapsed` |
+| More than 30 lines | `minimap defaultCollapsed` |
 
 This holds for every fence, including the primary snippet of a step. `minimap` never travels alone: it tracks the scroll position inside a collapsed fence, and does nothing on an expanded one.
 
