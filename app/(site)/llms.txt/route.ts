@@ -53,7 +53,6 @@ export async function GET() {
     'SigNoz ships Agent Skills and an MCP server so agents can read the docs and act on your observability data (query traces/logs/metrics, build dashboards, manage alerts). Install all skills: npx skills add SigNoz/agent-skills',
     '',
     agentToolingLines,
-    `- [skill.md](${siteMetadata.siteUrl}/skill.md): Root Agent Skill file describing SigNoz skills and when the MCP server is required.`,
     '',
     '## Optional',
     '',
