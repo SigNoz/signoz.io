@@ -61,7 +61,7 @@ describe('shared metadata descriptions', () => {
 
     expect(globalErrorSource.match(/content=\{siteMetadata\.description\}/g)).toHaveLength(3)
     expect(llmsSource).toContain(
-      'SigNoz is the company, publisher, and open-source observability project.'
+      'SigNoz is the company behind the open-source SigNoz observability project.'
     )
     expect(llmsSource).toContain(
       'SigNoz Cloud is the managed service; Self-Hosted SigNoz is the user-managed open-source deployment.'
