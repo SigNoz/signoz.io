@@ -65,6 +65,7 @@ Review each changed doc against these checks in order:
 18. Added or changed images are WebP, at least 1200 px wide, and use the `Figure` component with descriptive alt text.
 19. Prose reads clean: no em dashes (`—`), no AI-writing tells (adverb padding, throat-clearing openers, "not X, but Y" contrasts), and varied sentence length.
 20. New or moved docs are added to `data/docs-side-nav/main.json`, and removed or redirected pages are updated there, so navigation stays correct.
+21. Check fenced code blocks that are new or edited and have more than 40 lines. Each one must have `minimap`. If the fence is reference-only content, it must also have `defaultCollapsed`. Reference-only content includes a full manifest, a complete source file, or a log or stack trace. A core instructional snippet, the primary code for the step, must not have `defaultCollapsed`, even when it is long. See [When to use defaultCollapsed / minimap](docs-codeblock.md#when-to-use-defaultcollapsed--minimap). Flag a fence that lacks `minimap` as P3. Flag a reference-only fence that lacks `defaultCollapsed` as P3. A core instructional fence without `defaultCollapsed` is compliant; do not flag it. Flag a low custom `collapse={N}` below 40 lines that hides instructional content as P2.
 
 If a check cannot be validated from the PR context, call out the assumption and residual risk.
 

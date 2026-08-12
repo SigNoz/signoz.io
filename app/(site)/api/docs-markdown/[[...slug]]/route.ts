@@ -28,5 +28,5 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
 
   const markdown = await renderDocMarkdownForAgents(doc)
 
-  return agentResponse(null, markdown, { varyAccept: true })
+  return agentResponse(markdown, { varyAccept: true })
 }

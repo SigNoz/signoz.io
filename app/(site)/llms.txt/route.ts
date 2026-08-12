@@ -27,7 +27,7 @@ const FALLBACK_AGENT_TOOLING_LINES = [
   formatLink({ label: 'AI Use Cases', route: '/docs/ai/use-cases' }),
 ].join('\n')
 
-export async function GET(request: Request) {
+export async function GET() {
   const starters = await getLlmStarterLinks()
   const starterDocs = starters.filter((item) => !item.route.startsWith(AGENT_TOOLING_ROUTE_PREFIX))
   const agentTooling = starters.filter((item) => item.route.startsWith(AGENT_TOOLING_ROUTE_PREFIX))
@@ -60,5 +60,5 @@ export async function GET(request: Request) {
     '',
   ].join('\n')
 
-  return agentResponse(request, body, { contentType: 'text/plain; charset=utf-8' })
+  return agentResponse(body, { contentType: 'text/plain; charset=utf-8' })
 }
