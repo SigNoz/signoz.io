@@ -277,17 +277,18 @@ const PricingToScale: React.FC = () => {
           Pricing to scale your business, <br className="hidden md:block" /> not slow you down
         </h2>
         <p className="text-center text-base text-signoz_vanilla-400">
-          Choose SigNoz Cloud, SigNoz Cloud: BYOC, or Self-Hosted SigNoz.{' '}
-          <br className="hidden md:block" /> The operating responsibility differs for each option.
+          We have 2 deployment options - Cloud and Self-Managed. <br className="hidden md:block" />{' '}
+          Almost all our features are available on both. For more details, see below
         </p>
       </div>
       <div className="mx-auto grid max-w-4xl grid-cols-1 gap-10 md:grid-cols-2">
         <Card variant={'gradient'}>
           <div className="m-6 flex flex-grow flex-col">
-            <h3 className="text-2xl font-bold text-signoz_vanilla-100">SigNoz Cloud</h3>
+            <h3 className="text-2xl font-bold text-signoz_vanilla-100">Enterprise Cloud</h3>
             <p className="text-base text-signoz_vanilla-400">
-              SigNoz manages the ClickHouse cluster, ingestion pipeline, dashboards, storage,
-              scaling, and upgrades. SigNoz Cloud is SOC 2 Type II and HIPAA compliant.
+              SigNoz hosts everything - ClickHouse cluster, the ingestion pipeline, the dashboards,
+              the storage. You get zero ops overhead, SOC 2 / HIPAA compliance, and you're live in
+              minutes.
             </p>
             <TrackingLink
               href="/pricing/#teams"
@@ -311,12 +312,11 @@ const PricingToScale: React.FC = () => {
         <Card variant={'gradient'}>
           <div className="m-6 flex flex-grow flex-col">
             <h3 className="text-2xl font-bold text-signoz_vanilla-100">
-              SigNoz Cloud: BYOC or Self-Hosted SigNoz
+              Enterprise Self-Hosted / BYOC
             </h3>
             <p className="text-base text-signoz_vanilla-400">
-              With BYOC, SigNoz manages the stack in your cloud account. With Self-Hosted SigNoz,
-              your team manages infrastructure, storage, scaling, upgrades, and backups. Contracted
-              enterprise support is available.
+              SigNoz deploys and manages the SigNoz stack inside your AWS/GCP/Azure account. You own
+              the infrastructure, SigNoz operates it. Your data never leaves your VPC.
             </p>
             <TrackingLink
               href="/pricing/#enterprise"
