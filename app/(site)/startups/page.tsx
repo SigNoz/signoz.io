@@ -4,7 +4,7 @@ import StartUpsLayout from './StartUpsLayout'
 import { Metadata } from 'next'
 
 const startupsDescription =
-  'Eligible startups get SigNoz Cloud for USD 19 per month for the first 12 months. This includes USD 19 of telemetry usage; additional usage follows published SigNoz Cloud rates.'
+  'Eligible startups get SigNoz Cloud for $19/month for the first 12 months. This includes $19 of telemetry usage; additional usage follows published SigNoz Cloud rates.'
 
 export const metadata: Metadata = {
   title: {

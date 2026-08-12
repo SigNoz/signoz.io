@@ -49,7 +49,7 @@ export default function StartUpsHero({ startUpsData }: StartUpsHeroProps) {
                 </div>
               </div>
               <div className="mt-2 text-sm text-signoz_vanilla-100/80">
-                Includes USD 19 of SigNoz Cloud telemetry usage for the first 12 months
+                Includes $19 of SigNoz Cloud telemetry usage for the first 12 months
               </div>
             </div>
 

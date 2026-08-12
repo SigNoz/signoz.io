@@ -22,8 +22,8 @@ const StartupProgram = () => {
                 </p>
                 <p className="m-0 block text-sm font-normal leading-9 text-signoz_vanilla-400">
                   Eligible startups get SigNoz Cloud for{' '}
-                  <span className="font-bold">USD 19 per month</span> for the first 12 months
-                  instead of USD 49 per month. This includes USD 19 of telemetry usage. <br />
+                  <span className="font-bold">$19/month</span> for the first 12 months instead of
+                  $49/month. This includes $19 of telemetry usage. <br />
                   <br />
                   Perfect for early-stage companies looking for enterprise-grade observability that
                   won't burn your startup budget.

@@ -4,7 +4,7 @@ import PricingV1 from './pricingv1/PricingV1'
 import DecimalClient from '@/components/Decimal/DecimalClient'
 
 const pricingDescription =
-  'SigNoz Cloud starts at USD 49 per month, including USD 49 of usage. Logs and traces start at USD 0.30 per GB ingested with 15-day retention, and metrics start at USD 0.10 per million samples with one-month retention.'
+  'SigNoz Cloud starts at $49/month, including $49 of usage. Logs and traces start at $0.30/GB ingested with 15-day retention, and metrics start at $0.10/mn samples with one-month retention.'
 
 export const metadata: Metadata = {
   title: {

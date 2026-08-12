@@ -18,7 +18,7 @@ const VALUE_PROPS = [
   {
     title: 'Pricing you can predict',
     description:
-      'SigNoz Cloud: USD 0.30 per GB for logs and traces, and USD 0.10 per million metric samples.',
+      'SigNoz Cloud: $0.30/GB logs and traces and $0.10/mn metric samples. No per-host fees.',
   },
   {
     title: 'Every signal in one place',

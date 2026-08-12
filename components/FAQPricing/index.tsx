@@ -7,7 +7,7 @@ const FAQs = [
     title: 'What is the difference between SigNoz Cloud and Self-Hosted SigNoz?',
   },
   {
-    body: "A time series that sends data every 30 seconds produces two samples per minute. For example, 10,000 time series produce about 864 million samples per month. At one-month retention, SigNoz Cloud charges USD 0.10 per million samples, so this example costs USD 86.40 per month. <a href='https://vimeo.com/973012522' target='_blank' className='mx-0 rounded px-0 py-0.5 text-primary-400'>Link</a>.",
+    body: "A time series that sends data every 30 seconds produces two samples per minute. For example, 10,000 time series produce about 864 mn samples per month. At one-month retention, SigNoz Cloud charges $0.10/mn samples, so this example costs 86.4 USD/month. <a href='https://vimeo.com/973012522' target='_blank' className='mx-0 rounded px-0 py-0.5 text-primary-400'>Link</a>.",
     title: 'How does SigNoz Cloud calculate metric samples?',
   },
   {

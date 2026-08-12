@@ -29,10 +29,9 @@ export default function TeamsPricingCard() {
             <span className="text-sm text-signoz_vanilla-400">starts from</span>
             <div className="flex items-baseline">
               <span className="text-3xl font-bold text-signoz_vanilla-100 md:text-4xl">
-                <span className="text-2xl text-signoz_vanilla-400 line-through">USD 199</span> USD
-                49
+                <span className="text-2xl text-signoz_vanilla-400 line-through">$199</span> $49
               </span>
-              <span className="ml-1 text-signoz_vanilla-400">per month</span>
+              <span className="ml-1 text-signoz_vanilla-400">/month</span>
             </div>
           </div>
         </div>
@@ -54,7 +53,7 @@ export default function TeamsPricingCard() {
         {/* Base pricing table */}
         <div className="mb-6 rounded-md bg-signoz_ink-400 bg-opacity-10 p-3">
           <h5 className="mb-3 text-sm font-medium text-signoz_vanilla-100">
-            After the included USD 49 of usage, SigNoz Cloud bills:
+            After the included $49 of usage, SigNoz Cloud bills:
           </h5>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             <div className="flex items-center gap-2">
@@ -68,8 +67,8 @@ export default function TeamsPricingCard() {
               <div>
                 <div className="text-xs text-signoz_vanilla-400">Traces</div>
                 <div className="text-sm">
-                  <span className="font-medium text-signoz_robin-400">USD 0.30</span>
-                  <span className="text-signoz_vanilla-400"> per GB ingested</span>
+                  <span className="font-medium text-signoz_robin-400">$0.30</span>
+                  <span className="text-signoz_vanilla-400">/GB</span>
                 </div>
               </div>
             </div>
@@ -78,8 +77,8 @@ export default function TeamsPricingCard() {
               <div>
                 <div className="text-xs text-signoz_vanilla-400">Logs</div>
                 <div className="text-sm">
-                  <span className="font-medium text-signoz_sakura-400">USD 0.30</span>
-                  <span className="text-signoz_vanilla-400"> per GB ingested</span>
+                  <span className="font-medium text-signoz_sakura-400">$0.30</span>
+                  <span className="text-signoz_vanilla-400">/GB</span>
                 </div>
               </div>
             </div>
@@ -94,8 +93,8 @@ export default function TeamsPricingCard() {
               <div>
                 <div className="text-xs text-signoz_vanilla-400">Metrics</div>
                 <div className="text-sm">
-                  <span className="font-medium text-signoz_amber-400">USD 0.10</span>
-                  <span className="text-signoz_vanilla-400"> per million samples</span>
+                  <span className="font-medium text-signoz_amber-400">$0.10</span>
+                  <span className="text-signoz_vanilla-400">/mn samples</span>
                 </div>
               </div>
             </div>
@@ -103,7 +102,7 @@ export default function TeamsPricingCard() {
         </div>
 
         <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">
-          What is included in the USD 49 monthly minimum?
+          What is included in the $49/month minimum?
         </h4>
         <ul className="mb-10 space-y-3">
           <li className="flex items-start gap-2">
@@ -131,7 +130,7 @@ export default function TeamsPricingCard() {
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
-              USD 49 of usage (for example, 163 GB of logs or traces, or 490 million metric samples)
+              $49 of usage (for example, 163 GB of logs or traces, or 490 mn metric samples)
             </span>
           </li>
           <li className="flex items-start gap-2">

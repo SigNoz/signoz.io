@@ -169,14 +169,14 @@ const MetricsCostEstimation = () => {
                 <div>
                   <div className="flex items-center justify-between rounded-b-none rounded-t border border-transparent bg-signoz_ink-400 px-3 py-4 pt-4">
                     <span className="text-sm font-medium text-signoz_vanilla-100">
-                      Samples per month
+                      # of samples in a month
                     </span>
                     <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
                     <div>{formatNumber(totalSamplesMonthly)}</div>
                   </div>
                   <div className="flex items-center justify-between border border-transparent bg-signoz_ink-400 px-3 py-4 pt-4">
                     <span className="text-sm font-medium text-signoz_vanilla-100">
-                      USD per million samples
+                      Price (per million samples)
                     </span>
                     <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
                     <div className="justify-left metrics-background flex items-center gap-1">

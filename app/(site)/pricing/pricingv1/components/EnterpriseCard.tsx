@@ -24,7 +24,7 @@ export default function EnterpriseCard() {
             <div className="mt-4 flex w-full flex-col items-start md:mt-0 md:w-[40%] md:items-end">
               <span className="text-2xl font-bold text-signoz_vanilla-100 md:text-3xl">Custom</span>
               <div className="mt-1 text-sm text-signoz_vanilla-400">
-                SigNoz Cloud — Dedicated starts at USD 4,000 per month
+                SigNoz Cloud — Dedicated starts at $4000/month
               </div>
             </div>
           </div>
@@ -58,7 +58,7 @@ export default function EnterpriseCard() {
                 </div>
                 <span className="ml-3 mt-1 flex items-center gap-2 text-sm italic text-signoz_vanilla-400">
                   <Info className="text-signoz_vanilla-500" size={14} />
-                  Includes monthly ingestion usage up to USD 4,000
+                  Includes monthly ingestion usage till $4000
                 </span>
               </div>
             </li>

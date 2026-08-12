@@ -130,12 +130,12 @@ export const faqItems = [
   {
     question: 'Who is eligible for the SigNoz Cloud Startup Program?',
     answer:
-      'Startups that are less than 3 years old, have fewer than 30 employees, and have raised less than USD 6 million in funding are eligible for the SigNoz Cloud Startup Program.',
+      'Startups that are less than 3 years old, have fewer than 30 employees, and have raised less than $6 million in funding are eligible for the SigNoz Cloud Startup Program.',
   },
   {
     question: 'What comes included in $19?',
     answer:
-      'The USD 19 monthly minimum includes USD 19 of SigNoz Cloud telemetry usage. Additional usage follows the published SigNoz Cloud rates.',
+      'The $19/month minimum includes $19 of SigNoz Cloud telemetry usage. Additional usage follows the published SigNoz Cloud rates.',
   },
   {
     question: 'How long does the startup pricing last?',

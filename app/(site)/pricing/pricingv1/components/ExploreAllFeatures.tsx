@@ -55,7 +55,7 @@ const ALL_FEATURES_DATA = {
     },
     {
       heading: 'SigNoz Cloud — Teams',
-      desc: 'Starts at USD 49 per month',
+      desc: 'Starts at $49/mo',
       action: (
         <TrackingLink
           href={'/teams/'}
