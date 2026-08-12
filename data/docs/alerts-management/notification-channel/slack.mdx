@@ -1,57 +1,104 @@
 ---
-date: 2026-05-12
-
-title: Configure Slack Channel
-description: Set up Slack notifications for SigNoz alerts to keep your team informed in real-time.
+date: 2026-08-11
+title: Slack Alerts - Configure a Slack Notification Channel
+description: Learn how to send SigNoz alerts to Slack. Set up an Incoming Webhook, create the notification channel, test it, and mention Slack user groups.
 doc_type: howto
 ---
 
+## Overview
+
+A Slack notification channel sends SigNoz alerts to Slack through an Incoming Webhook URL. Slack posts every alert to the channel that the webhook is bound to. You can then reuse this notification channel in any alert rule.
+
+This page covers the webhook setup, channel creation in the SigNoz UI, validation, Slack group mentions, and the API equivalent.
+
 ## Prerequisites
-Before configuring Slack as a notification channel in SigNoz, ensure that you have:
-- **Incoming Webhook**: Follow the steps outlined in <a href="https://api.slack.com/messaging/webhooks" target="_blank" rel="noopener noreferrer nofollow">sending messages to slack using Incoming Webhook</a> to set up an Incoming Webhook in your Slack workspace.
+
+Before you configure Slack as a notification channel, you need:
+
+- **Incoming Webhook**: Follow the steps outlined in <a href="https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks" target="_blank" rel="noopener noreferrer nofollow">sending messages to Slack using Incoming Webhooks</a> to set up an Incoming Webhook in your Slack workspace. Create it from a **Slack app**, not from Workflow Builder. The URL must start with `https://hooks.slack.com/services/`.
 - **SigNoz Version**: <a href="https://github.com/SigNoz/signoz/releases/tag/v0.5.0" target="_blank" rel="noopener noreferrer nofollow">v0.5.0</a> or later
 
-## Accessing Alert Channels
+<Admonition type="warning">
+Slack has two kinds of webhook, and only one works with SigNoz.
+
+- **App Incoming Webhook** (works): the URL starts with `https://hooks.slack.com/services/`. Slack posts the message body as sent.
+- **Workflow Builder webhook** (does not work): the URL starts with `https://hooks.slack.com/triggers/`. This URL starts a workflow and accepts only the input variables that the workflow declares. It rejects the alert message that SigNoz sends.
+
+If your webhook URL contains `/triggers/`, create an app Incoming Webhook instead.
+
+</Admonition>
+
+## Access Alert Channels
 
 To manage your alert channels in SigNoz:
 
-- Navigate to `Settings > Account Settings > Notification Channels` tab within SigNoz. This tab displays a list of configured alert channels.
+- Navigate to `Alerts > Notification Channels` within SigNoz. This tab displays a list of configured alert channels.
 
-![alert-channels](/img/docs/alert-channels.webp)
+<Admonition type="info">
+You can also reach the same tab from `Settings > Notification Channels`. Both routes open the **Notification Channels** tab on the Alerts page.
+</Admonition>
 
-## Creating a new Notification channel
+<Figure
+  src="/img/docs/alert-channels.webp"
+  alt="Notification Channels tab in SigNoz showing the list of configured alert channels."
+  caption="The Notification Channels tab lists every configured alert channel."
+/>
+
+## Create a Notification Channel
 
 To create a new Slack notification channel in SigNoz, follow these steps:
 
-- Navigate to `Settings > Account Settings > Notification Channels` and click on `New Channel`.
-- Enter a **Name** for the channel and select Slack as the channel type.
+- Navigate to `Alerts > Notification Channels` and click on `+ New Alert Channel`.
+- Enter a **Name** for the channel and select Slack as the **Type**.
 - **Webhook URL**: Paste the Incoming Webhook URL generated in Slack.
 - **Recipient**: Specify channel or user, use #channel-name, @username (has to be all lowercase, no whitespace)
+- **Title** and **Description**: Keep the default templates, or edit them to change the message that SigNoz posts.
 
-<Admonition>
-You can use <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a> for customizing the title and description.
+<Admonition type="info">
+An app Incoming Webhook is bound to the channel that was selected when the Slack app was installed. Slack does not let the request body override that destination, so the **Recipient** value cannot redirect an alert to a different channel or to a direct message. To post to another channel, create a second Incoming Webhook for that channel and a second notification channel in SigNoz. See <a href="https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks" target="_blank" rel="noopener noreferrer nofollow">Slack: sending messages using Incoming Webhooks</a>.
 </Admonition>
 
-![new-notification-channel](/img/docs/new-notification-channel.webp)
+<Admonition>
+  You can use <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a> for customizing the title and description.
+</Admonition>
 
-**Test Configuration**:
-Click the Test button to send a test alert to the configured Slack channel. This verifies that SigNoz can communicate with your Slack webhook.
+<Figure
+  src="/img/docs/new-notification-channel.webp"
+  alt="New Slack notification channel form in SigNoz with name, webhook URL, and recipient fields."
+  caption="Create a new Slack notification channel."
+/>
 
-## Mentioning Slack Groups in Alerts
+## Validate
 
-When configuring SigNoz alerts to mention Slack groups (user groups), you need to use the proper formatting to ensure the group is tagged correctly instead of appearing as plain text.
+1. On the channel form, click **Test**. SigNoz posts a test alert through the webhook.
+2. Open the Slack channel that the webhook is bound to. This is the channel that was selected when the Slack app was installed. A test alert message from SigNoz appears within a few seconds.
+3. Click **Save**. The channel now appears in the list under `Alerts > Notification Channels`.
+
+If no message reaches Slack, see [Troubleshooting](#troubleshooting).
+
+## Receive Alerts in Slack
+
+After you save the channel, select it in any alert rule. SigNoz then posts a message to the webhook's bound Slack channel each time that alert rule fires.
+
+<Figure
+  src="/img/docs/alerts-in-slack.webp"
+  alt="A SigNoz alert message delivered in a Slack channel."
+  caption="A SigNoz alert as it appears in the configured Slack channel."
+/>
+
+## Mention Slack Groups in Alerts
+
+To tag a Slack user group in an alert, use the group mention format below. A plain group name stays plain text and notifies nobody.
 
 ### Slack Group Mention Format
 
-To properly mention a Slack group in your SigNoz alerts, use the following format:
+Use this format, where `GROUP_ID` is the unique identifier of your Slack group:
 
-```
+```text
 <!subteam^GROUP_ID>
 ```
 
-Where `GROUP_ID` is the unique identifier for your Slack group.
-
-### Finding Your Group ID
+### Find Your Group ID
 
 To find the Group ID for your Slack group:
 
@@ -63,57 +110,59 @@ To find the Group ID for your Slack group:
 
 If your group ID is `S1234567890`, your mention should look like:
 
-```
+```text
 <!subteam^S1234567890>
 ```
 
-You can include this format in the **Title** or **Text** fields when creating or editing a notification channel, or directly in the **Recipient** field to notify the entire group.
+You can include this format in the **Title** or **Description** fields when creating or editing a notification channel. The mention has to sit in the message body, because that is what Slack renders. The **Description** field maps to `text` in the API payload.
 
 For more detailed information about Slack message formatting, refer to the <a href="https://docs.slack.dev/messaging/formatting-message-text/#mentioning-groups" target="_blank" rel="noopener noreferrer nofollow">official Slack documentation on mentioning groups</a>.
 
-## Editing a Notification channel
+## Edit a Notification Channel
 
 To edit an existing Slack notification channel:
-- Navigate to the channel settings in SigNoz.
-- You can edit the slack webhook URL and other parameters. However, note that the channel name and type are not editable after creation.
 
-![edit-notification-channel](/img/docs/edit-notification-channel.webp)
+- Navigate to `Alerts > Notification Channels` and click the `Edit` action for the channel.
+- You can edit the Slack webhook URL and other parameters. However, note that the channel name and type are not editable after creation.
 
+<Figure
+  src="/img/docs/edit-notification-channel.webp"
+  alt="Edit notification channel form in SigNoz with the channel name and type fields disabled."
+  caption="Edit a Slack notification channel. The name and type stay fixed."
+/>
 
-## Receive Alert in Slack
+## Turn Off Resolved Alerts
 
-Once the configuration is set up correctly, you will receive alerts in the configured Slack channel whenever monitored metrics exceed the specified thresholds in alert rules. This ensures you are promptly notified of any issues in your applications or infrastructure components.
+The **Send resolved alerts** toggle is switched on by default, on both the create form and the edit form. To stop receiving resolved alerts for an existing channel, follow these steps:
 
-![alerts-in-slack](/img/docs/alerts-in-slack.webp)
+- Navigate to `Alerts > Notification Channels`.
+- Click the `Edit` action for the channel.
+- Toggle off **Send resolved alerts** and click `Save`.
 
-## Turn-off Resolved alerts
+<Figure
+  src="/img/docs/alerts/resolved-alerts.webp"
+  alt="Send resolved alerts toggle in the SigNoz notification channel edit form."
+  caption="Turn off the Send resolved alerts toggle to stop resolved notifications."
+/>
 
-The resolve alerts toggle is switched on by default. To turn-off receiving the Resolved alerts for your Notification Channel, follow these steps:
-- Navigate to `Settings > Account Settings > Notification Channels` 
-- Click on `Edit` button for a particular alert.
-- Toggle off the **Send resolved alerts** button and hit `Save`.
+## Configure Programmatically
 
-<Figure src="/img/docs/alerts/resolved-alerts.webp" alt="Turn off receiveing resolved alerts notifications." caption="Turn off receiveing resolved alerts notifications." />
-
-
-## Configure programmatically
-
-You can also configure the Slack notification channel programmatically using the SigNoz API.
+You can also create the Slack notification channel with the SigNoz API instead of the UI.
 
 **API Endpoint:** `POST /api/v1/channels`
 
-To create a new Slack notification channel, send a `POST` request to the `/api/v1/channels` endpoint with the following `curl` command. Replace `YOUR_API_KEY` with an API key from **Settings → Service Accounts** — see [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) to create one.
+To create a new Slack notification channel, send a `POST` request to the `/api/v1/channels` endpoint with the following `curl` command.
 
 ```bash
-curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
-  -H 'SIGNOZ-API-KEY: YOUR_API_KEY' \
+curl '<your-signoz-cloud-url>/api/v1/channels' \
+  -H 'SIGNOZ-API-KEY: <your-api-key>' \
   -H 'Content-Type: application/json' \
   --data-raw '{
     "name": "Prod Critical Alerts - Slack",
     "slack_configs": [
         {
             "send_resolved": true,
-            "api_url": "https://slack.com",
+            "api_url": "https://hooks.slack.com/services/<your-webhook-path>",
             "channel": "#prod-critical-alerts",
             "title": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}\n {{- if gt (len .CommonLabels) (len .GroupLabels) -}}\n {{\" \"}}(\n {{- with .CommonLabels.Remove .GroupLabels.Names }}\n {{- range $index, $label := .SortedPairs -}}\n {{ if $index }}, {{ end }}\n {{- $label.Name }}=\"{{ $label.Value -}}\"\n {{- end }}\n {{- end -}}\n )\n {{- end }}",
             "text": "{{ range .Alerts -}}\n *Alert:* {{ .Labels.alertname }}{{ if .Labels.severity }} - {{ .Labels.severity }}{{ end }}\n\n *Summary:* {{ .Annotations.summary }}\n *Description:* {{ .Annotations.description }}\n *RelatedLogs:* {{ if gt (len .Annotations.related_logs) 0 -}} View in <{{ .Annotations.related_logs }}|logs explorer> {{- end}}\n *RelatedTraces:* {{ if gt (len .Annotations.related_traces) 0 -}} View in <{{ .Annotations.related_traces }}|traces explorer> {{- end}}\n\n *Details:*\n {{ range .Labels.SortedPairs }} • *{{ .Name }}:* {{ .Value }}\n {{ end }}\n {{ end }}"
@@ -122,21 +171,32 @@ curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
 }'
 ```
 
+**Verify these values:**
+
+- `<your-signoz-cloud-url>`: The base URL of your SigNoz instance, for example `https://<your-organization>.signoz.cloud`.
+- `<your-api-key>`: An API key from `Settings > Service Accounts`. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) to create one.
+- `<your-webhook-path>`: The path of your Slack Incoming Webhook URL, which follows `https://hooks.slack.com/services/`.
+
 **Request Body Attributes:**
 
-| Field | Type | Description |
-| :--- | :--- | :--- |
-| `name` | `string` | The name of the receiver/channel. **Required**; must be unique in all the config. |
-| `slack_configs` | `array` | List of Slack configurations. |
-| `slack_configs[].send_resolved` | `boolean` | Whether to send notifications when an alert is resolved. |
-| `slack_configs[].api_url` | `string` | The Slack Incoming Webhook URL. **Mandatory**. Must be a valid URL. |
-| `slack_configs[].channel` | `string` | The channel or user to send notifications to. |
-| `slack_configs[].title` | `string` | Templated title of the message. Go templates are supported. |
-| `slack_configs[].text` | `string` | Templated text of the message. Go templates are supported. |
-
+| Field                           | Type      | Description                                                                                                                                  |
+| :------------------------------ | :-------- | :------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                          | `string`  | The name of the receiver/channel. **Required**; must be unique in all the config.                                                            |
+| `slack_configs`                 | `array`   | List of Slack configurations.                                                                                                                |
+| `slack_configs[].send_resolved` | `boolean` | Whether to send notifications when an alert is resolved.                                                                                     |
+| `slack_configs[].api_url`       | `string`  | The Slack Incoming Webhook URL. **Mandatory**. Must be a valid URL.                                                                          |
+| `slack_configs[].channel`       | `string`  | The channel or user to send notifications to. Slack ignores this value for an app Incoming Webhook, which always posts to its bound channel. |
+| `slack_configs[].title`         | `string`  | Templated title of the message. Go templates are supported.                                                                                  |
+| `slack_configs[].text`          | `string`  | Templated text of the message. Go templates are supported.                                                                                   |
 
 ## Troubleshooting
+
 If you encounter issues:
 
-- **Check the Webhook URL**: Ensure the webhook URL is correctly entered in SigNoz.
-- **Verify Slack Permissions**: Confirm that the webhook has permissions to post to the desired channel.
+- **Check the Webhook URL**: Make sure that the webhook URL is entered correctly in SigNoz.
+- **Alerts never arrive and the URL contains `/triggers/`**: That URL is a Workflow Builder webhook, which cannot post a SigNoz alert message. Create an app Incoming Webhook (`https://hooks.slack.com/services/...`) and paste that URL instead.
+- **Check Slack Permissions**: Make sure that the webhook has permission to post to the target channel.
+
+## Get Help
+
+<GetHelp />
