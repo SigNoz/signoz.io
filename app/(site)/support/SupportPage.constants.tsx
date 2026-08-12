@@ -39,7 +39,7 @@ export const SUPPORT_HEADER_BUTTONS = [
 
 export const SUPPORT_TIERS: SupportTier[] = [
   {
-    name: 'Self-Hosted SigNoz — Community',
+    name: 'Self-Hosted SigNoz: Community',
     subtitle: 'Install & manage yourself',
     cta: {
       text: 'Read Documentation',
@@ -49,7 +49,7 @@ export const SUPPORT_TIERS: SupportTier[] = [
     },
   },
   {
-    name: 'SigNoz Cloud — Teams',
+    name: 'SigNoz Cloud: Teams',
     subtitle: 'Starts at $49/mo',
     cta: {
       text: 'Get Started - Free',

@@ -556,15 +556,15 @@ const SupportPage = () => {
         <FeaturePageHeader
           title={
             <>
-              SigNoz Cloud and Self-Hosted SigNoz
-              <br className="hidden sm:block" /> support
+              Enterprise-grade support for every stage of
+              <br className="hidden sm:block" /> your observability journey
             </>
           }
           description={
             <span className="block max-w-[567px]">
-              Use managed support for SigNoz Cloud and contracted enterprise plans, or community
+              From open source community to mission-critical production - SigNoz
               <br className="hidden sm:block" />
-              support for Self-Hosted SigNoz.
+              support is built for engineering teams who can&apos;t afford downtime.
             </span>
           }
           buttons={SUPPORT_HEADER_BUTTONS}

@@ -5,7 +5,7 @@ import { Metadata } from 'next'
 export const revalidate = 31536000
 
 const whySigNozDescription =
-  'Choose managed SigNoz Cloud, managed SigNoz Cloud — BYOC in your cloud account, or Self-Hosted SigNoz that your team operates.'
+  'Choose managed SigNoz Cloud, managed SigNoz Cloud: BYOC in your cloud account, or Self-Hosted SigNoz that your team operates.'
 
 export const metadata: Metadata = {
   title: {

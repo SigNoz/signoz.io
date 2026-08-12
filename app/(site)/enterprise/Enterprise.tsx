@@ -42,15 +42,15 @@ export default function Enterprise() {
                 <div className="flex flex-1 flex-col items-start">
                   <div className="text-sm uppercase text-signoz_sakura-400">Enterprise</div>
                   <div className="mt-3 text-left text-xl font-bold md:text-2xl">
-                    SigNoz Enterprise: Cloud or Self-Hosted
+                    SigNoz for Enterprise
                   </div>
 
                   <div className="mt-4 whitespace-normal text-left text-sm font-light">
-                    Choose SigNoz Cloud or managed BYOC, or run
+                    Suited for larger organisations with advanced security,
                   </div>
 
                   <div className="mb-4 mt-1 whitespace-normal text-left text-sm font-light">
-                    Self-Hosted SigNoz with enterprise support.
+                    compliance and support requirements.
                   </div>
 
                   <Button
@@ -140,7 +140,7 @@ export default function Enterprise() {
         <div className="border-dashed-container flex flex-row">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
             <div className="border-b-1 flex-1 flex-col items-start border-r-0 border-dashed border-signoz_slate-300 px-8 py-8 md:border-b-0 md:border-r md:border-dashed">
-              <div className="mt-3 text-xl font-bold">SigNoz Cloud — Enterprise</div>
+              <div className="mt-3 text-xl font-bold">SigNoz Cloud: Enterprise</div>
 
               <div className="mt-4 text-lg font-normal">
                 A dedicated, fully managed SigNoz Cloud environment with advanced security,
@@ -194,7 +194,7 @@ export default function Enterprise() {
             </div>
 
             <div className="relative flex-1 flex-col items-start px-8 py-8">
-              <div className="mt-3 text-xl font-bold">Self-Hosted SigNoz — Enterprise</div>
+              <div className="mt-3 text-xl font-bold">Self-Hosted SigNoz: Enterprise</div>
 
               <div className="mt-4 text-lg font-normal">
                 Your team runs Self-Hosted SigNoz and owns infrastructure, storage, scaling,
@@ -242,7 +242,7 @@ export default function Enterprise() {
         <div className="border-dashed-container flex flex-row">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
             <div className="flex-1 flex-col items-start px-8 py-8">
-              <div className="mt-3 text-xl font-bold">SigNoz Cloud — BYOC</div>
+              <div className="mt-3 text-xl font-bold">SigNoz Cloud: BYOC</div>
 
               <p className="text-md mt-4 font-normal">
                 SigNoz manages the SigNoz stack in your cloud account. Your team owns the cloud
@@ -494,7 +494,7 @@ export default function Enterprise() {
 
             <div className="flex-1 flex-col items-start px-8 py-8">
               <div className="mt-3 text-xl font-bold">
-                SigNoz Cloud Security, Privacy & Compliance
+                Enterprise-Grade Security, Privacy & Compliance
               </div>
 
               <div className="mt-9 flex flex-col gap-4">

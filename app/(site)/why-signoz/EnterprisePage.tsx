@@ -277,7 +277,7 @@ const PricingToScale: React.FC = () => {
           Pricing to scale your business, <br className="hidden md:block" /> not slow you down
         </h2>
         <p className="text-center text-base text-signoz_vanilla-400">
-          Choose SigNoz Cloud, SigNoz Cloud — BYOC, or Self-Hosted SigNoz.{' '}
+          Choose SigNoz Cloud, SigNoz Cloud: BYOC, or Self-Hosted SigNoz.{' '}
           <br className="hidden md:block" /> The operating responsibility differs for each option.
         </p>
       </div>
@@ -311,7 +311,7 @@ const PricingToScale: React.FC = () => {
         <Card variant={'gradient'}>
           <div className="m-6 flex flex-grow flex-col">
             <h3 className="text-2xl font-bold text-signoz_vanilla-100">
-              SigNoz Cloud — BYOC or Self-Hosted SigNoz
+              SigNoz Cloud: BYOC or Self-Hosted SigNoz
             </h3>
             <p className="text-base text-signoz_vanilla-400">
               With BYOC, SigNoz manages the stack in your cloud account. With Self-Hosted SigNoz,

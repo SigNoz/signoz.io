@@ -11,16 +11,16 @@ import { contactUsData } from './data'
 
 const OPTIONS = [
   {
-    title: 'SigNoz Cloud — Enterprise',
+    title: 'SigNoz Cloud: Enterprise',
     description:
       'A dedicated, managed SigNoz Cloud environment with enterprise security and compliance options.',
   },
   {
-    title: 'SigNoz Cloud — BYOC',
+    title: 'SigNoz Cloud: BYOC',
     description: 'SigNoz manages the stack in your cloud account.',
   },
   {
-    title: 'Self-Hosted SigNoz — Enterprise support',
+    title: 'Self-Hosted SigNoz: Enterprise support',
     description:
       'Your team operates the stack in your infrastructure with contracted support from SigNoz.',
   },
@@ -53,11 +53,10 @@ export default function ContactUsLayout() {
             {/* Headline + subtitle */}
             <div className="flex flex-col gap-2">
               <h1 className="text-[36px] font-bold leading-[1.2] tracking-[-1px] text-white">
-                Talk to the SigNoz enterprise team.
+                Talk to our Team.
               </h1>
               <p className="text-[15px] leading-[1.6] text-gray-400">
-                Discuss your stack, deployment responsibility, pricing, support, and migration
-                needs with a SigNoz engineer.
+                30 minutes. Your stack, your questions, pricing, and a real demo.
               </p>
             </div>
 
