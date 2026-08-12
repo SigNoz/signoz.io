@@ -93,6 +93,10 @@ export const buildContentMarkdownRewritePath = (pathname: string): string => {
 // rewritten to the generic page pipeline.
 const PAGE_MARKDOWN_EXCLUDED_PREFIXES = ['/api', '/docs', '/docs-onboarding', '/api-reference']
 
+// Real .md resources served by their own routes; the suffix is part of the
+// path, not a markdown-alternate marker.
+const MARKDOWN_ROUTE_PATHS = new Set(['/skill.md'])
+
 /**
  * File-like paths (e.g. /llms.txt, /sitemap.xml, /favicon.ico) are real
  * resources, not HTML pages — a dot in the final segment that is not the
@@ -119,6 +123,10 @@ export const shouldRewritePageToMarkdown = (
   }
 
   const normalized = stripTrailingSlashes(pathname)
+
+  if (MARKDOWN_ROUTE_PATHS.has(normalized)) {
+    return false
+  }
 
   if (PAGE_MARKDOWN_EXCLUDED_PREFIXES.some((prefix) => isPathWithinPrefix(normalized, prefix))) {
     return false
