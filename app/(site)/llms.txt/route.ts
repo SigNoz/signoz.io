@@ -14,8 +14,7 @@ export async function GET() {
   const body = [
     '# SigNoz Documentation for AI Agents',
     '',
-    'SigNoz is the company behind the open-source SigNoz observability project.',
-    'SigNoz Cloud is the managed service; Self-Hosted SigNoz is the user-managed open-source deployment.',
+    'SigNoz Cloud brings your traces, metrics, and logs into one OpenTelemetry-native platform. Simple usage-based pricing, and the freedom to run on your infrastructure with Self-Hosted SigNoz.',
     '',
     `Docs root: ${siteMetadata.siteUrl}/docs/introduction/`,
     '',

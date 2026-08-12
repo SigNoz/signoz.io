@@ -61,10 +61,7 @@ describe('shared metadata descriptions', () => {
 
     expect(globalErrorSource.match(/content=\{siteMetadata\.description\}/g)).toHaveLength(3)
     expect(llmsSource).toContain(
-      'SigNoz is the company behind the open-source SigNoz observability project.'
-    )
-    expect(llmsSource).toContain(
-      'SigNoz Cloud is the managed service; Self-Hosted SigNoz is the user-managed open-source deployment.'
+      'SigNoz Cloud brings your traces, metrics, and logs into one OpenTelemetry-native platform. Simple usage-based pricing, and the freedom to run on your infrastructure with Self-Hosted SigNoz.'
     )
   })
 })
