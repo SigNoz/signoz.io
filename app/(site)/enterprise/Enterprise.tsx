@@ -140,7 +140,7 @@ export default function Enterprise() {
         <div className="border-dashed-container flex flex-row">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
             <div className="border-b-1 flex-1 flex-col items-start border-r-0 border-dashed border-signoz_slate-300 px-8 py-8 md:border-b-0 md:border-r md:border-dashed">
-              <div className="mt-3 text-xl font-bold">SigNoz Cloud: Enterprise</div>
+              <div className="mt-3 text-xl font-bold">Enterprise SigNoz Cloud</div>
 
               <div className="mt-4 text-lg font-normal">
                 A dedicated, fully managed SigNoz Cloud environment with advanced security,
@@ -194,7 +194,7 @@ export default function Enterprise() {
             </div>
 
             <div className="relative flex-1 flex-col items-start px-8 py-8">
-              <div className="mt-3 text-xl font-bold">Self-Hosted SigNoz: Enterprise</div>
+              <div className="mt-3 text-xl font-bold">Enterprise Self Hosted SigNoz</div>
 
               <div className="mt-4 text-lg font-normal">
                 Your team runs Self-Hosted SigNoz and owns infrastructure, storage, scaling,
@@ -242,7 +242,7 @@ export default function Enterprise() {
         <div className="border-dashed-container flex flex-row">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
             <div className="flex-1 flex-col items-start px-8 py-8">
-              <div className="mt-3 text-xl font-bold">SigNoz Cloud: BYOC</div>
+              <div className="mt-3 text-xl font-bold">Bring your own cloud</div>
 
               <p className="text-md mt-4 font-normal">
                 SigNoz manages the SigNoz stack in your cloud account. Your team owns the cloud
