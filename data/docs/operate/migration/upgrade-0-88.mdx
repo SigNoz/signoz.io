@@ -1,5 +1,5 @@
 ---
-date: 2026-08-05
+date: 2026-03-12
 tags: [Self-Host]
 title: Upgrade to v0.88 (Dot Metrics Migration)
 description: Upgrade SigNoz to v0.88 and migrate metric names from underscore format to dot notation.
@@ -196,7 +196,7 @@ To migrate alerts and dashboards, add an init container to your SigNoz deploymen
 
 Add the following init container to your SigNoz deployment manifest:
 
-```yaml
+```yaml defaultCollapsed
     initContainers:
       - name: migration
         image: signoz/migrate:v0.70.5
@@ -299,7 +299,7 @@ This job runs alongside your SigNoz container and connects to ClickHouse to migr
 
 Add the following to your `docker-compose.yml` file, Kindly make sure that your Clickhouse container is running and accessible.
 
-```yaml
+```yaml defaultCollapsed
   migration-job:
     !!merge <<: *db-depend
     image: signoz/migrate:v0.70.5
@@ -360,7 +360,7 @@ Add the following service in your docker compose setup or run the container sepa
 
 **NOTE:** If running the container separately than compose setup make sure to bring down the signoz container first, as it will modify the SQLite database):
 
-```yaml
+```yaml defaultCollapsed
   migrate-signoz:
     !!merge <<: *db-depend
     image: signoz/migrate:v0.70.5
@@ -436,7 +436,7 @@ Run the migration job in your Docker Swarm setup by creating a service with the 
 
 Below service will run as a job and will not restart after completion.
 
-```bash
+```bash defaultCollapsed
 docker service create \
   --name signoz_migration_job \
   --mode replicated-job --replicas 1 \
@@ -501,7 +501,7 @@ docker service scale "${SIGNOZ_SERVICE}=0"
 
 Run the migration job to update alerts and dashboards:
 
-```bash
+```bash defaultCollapsed
 docker service create \
   --name "signoz_meta-job" \
   --mode replicated-job --replicas 1 \
@@ -702,7 +702,7 @@ sudo systemctl stop signoz.service
 ```
 
 Add this script to a file named `migrate-script.sh`:
-```bash
+```bash defaultCollapsed
 #!/usr/bin/env bash
 set -euo pipefail
 trap 'echo "❌ Migration failed at line $LINENO."; exit 1' ERR

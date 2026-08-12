@@ -23,11 +23,11 @@ No meta needed:
 | `diff` / `diff:file` | Unified diff. Lines starting with `-` get a cherry (destructive) row background; `+` get forest (success). Context lines stay unshaded. Prefer this over hand-coloring removals with `{n}#cherry`. |
 | `{5}#cherry` / `#forest` / `#amber` / `#robin` | Sentiment highlights (error / success / warning / info). |
 | `noLineNumbers` | Hide the line-number gutter. |
-| `minimap` | Right-side minimap strip. Pair with `defaultCollapsed`. |
+| `minimap` | Right-side minimap strip. Required above 40 lines, always with `defaultCollapsed`. |
 | `collapse` | Collapse controls when lines **> 20** (same as default auto behavior; explicit is fine). |
 | `collapse={N}` | Collapse controls when lines **> N**. |
 | `noCollapse` | Never show collapse controls, even for long fences. |
-| `defaultCollapsed` | Start collapsed. Only applies when collapse controls are shown. |
+| `defaultCollapsed` | Start collapsed. Required above 20 lines. Only applies when collapse controls are shown. |
 
 Combine freely:
 
@@ -200,24 +200,22 @@ app.listen(8080)
 
 - **Auto:** any fence with more than **20** lines gets Collapse / Expand controls and starts expanded. No meta needed.
 - **Custom threshold:** `collapse={N}` when you want controls sooner or later than 20.
-- **Start collapsed:** add `defaultCollapsed` (only when controls apply).
+- **Start collapsed:** add `defaultCollapsed`, required on every fence with more than 20 lines.
 - **Never collapse:** `noCollapse` for long configs readers must scan in full.
 
 ### When to use `defaultCollapsed` / `minimap`
 
-The 20-line threshold only adds the Collapse and Expand buttons. The fence still starts expanded. Add `defaultCollapsed` and `minimap` by hand.
+The 20-line threshold only adds the Collapse and Expand buttons. The fence still starts expanded, so add `defaultCollapsed` by hand.
 
-Use `minimap` together with `defaultCollapsed`. The minimap tracks the scroll position inside a collapsed fence.
+| Fence size | Flags |
+|---|---|
+| 20 lines or fewer | none |
+| More than 20 lines | `defaultCollapsed` |
+| More than 40 lines | `minimap defaultCollapsed` |
 
-For a fence of 40 lines or fewer, skip both flags. The 20-line control already gives the reader a fold.
+This holds for every fence, including the primary snippet of a step. `minimap` never travels alone: it tracks the scroll position inside a collapsed fence, and does nothing on an expanded one.
 
-For a fence of more than 40 lines, judge it by use:
-
-- **Reference-only:** Add `minimap defaultCollapsed`. Examples: a full manifest, a complete source file, a generated config, a log, a stack trace. The reader skims for one field, or copies the whole fence.
-- **Core instructional:** Add neither flag. This is the primary snippet for the step, even when it is long. Keep it visible on the main path.
-- **Not sure:** Leave the fence expanded. Visible is the default.
-
-Do not use `collapse={25}` or a similar low threshold. Most docs fences have 20 to 40 lines, and the reader often needs them at once.
+Use `noCollapse` for the rare long fence that the reader must scan in full.
 
 ### Custom threshold (still default expanded)
 
