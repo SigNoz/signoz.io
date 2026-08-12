@@ -19,22 +19,22 @@ With full GitHub Copilot monitoring in SigNoz, you can see which models the agen
 - A GitHub Copilot subscription of any tier, including the free tier
 
 <Admonition type="info" title="No paid Copilot tier or enterprise setup required">
-None of the `github.copilot.chat.otel.*` settings are licence gated in the shipped Copilot Chat extension manifest, so this works on a personal account with no enterprise configuration.
+None of the `github.copilot.chat.otel.*` settings are license gated in the shipped Copilot Chat extension manifest, so this works on a personal account with no enterprise configuration.
 </Admonition>
 
 ## Monitor GitHub Copilot with OpenTelemetry
 
 Copilot Chat reads its OpenTelemetry configuration from VS Code settings and applies your headers directly to its OTLP exporter, so you point it at SigNoz and reload. For more details, refer to the <a href="https://code.visualstudio.com/docs/agents/guides/monitoring-agents" target="_blank" rel="noopener noreferrer nofollow">VS Code guide to monitoring agents with OpenTelemetry</a>.
 
-**Step 1:** Open your user settings JSON.
+**Step 1:** In VS Code, open your user settings JSON.
 
-Press `Cmd+Shift+P` (`Ctrl+Shift+P` on Windows and Linux) and run **Preferences: Open User Settings (JSON)**.
+Open VS Code, then open the Command Palette with `Cmd+Shift+P` (`Ctrl+Shift+P` on Windows and Linux) and run **Preferences: Open User Settings (JSON)**. All four steps below are performed in VS Code.
 
 <Admonition type="warning" title="These must go in User settings, not Workspace settings">
 Every `github.copilot.chat.otel.*` setting is declared with `"scope": "application"` in the extension manifest, so a copy placed in workspace settings is ignored.
 </Admonition>
 
-**Step 2:** Add the OpenTelemetry settings.
+**Step 2:** Add the OpenTelemetry settings to that file.
 
 ```json:settings.json
 {
@@ -62,16 +62,16 @@ Every `github.copilot.chat.otel.*` setting is declared with `"scope": "applicati
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
-**Step 3:** Reload the VS Code window.
+**Step 3:** Save the file, then reload the VS Code window.
 
-Press `Cmd+Shift+P` and run **Developer: Reload Window**. Every one of these settings is read once at startup, so changes never apply to an already-running window.
+Save `settings.json`, then open the Command Palette again and run **Developer: Reload Window**. Every one of these settings is read once at startup, so changes never apply to an already-running window.
 
-**Step 4:** Send a chat message.
+**Step 4:** Send a chat message from Copilot Chat.
 
-Open Copilot Chat and ask it anything. Spans start arriving in SigNoz within about 30 seconds, and metrics follow on their own export interval.
+Once VS Code has reloaded, open the Copilot Chat view and ask it anything. Spans start arriving in SigNoz within about 30 seconds, and metrics follow on their own export interval.
 
 <Admonition type="warning" title="Content capture sends your prompts and code to SigNoz" defaultCollapsed="true">
-`github.copilot.chat.otel.captureContent` is `false` by default and this guide leaves it off. Turning it on records full prompts, model responses, tool arguments, tool results, and system instructions as span attributes, which means source code and anything else in the context window leaves your machine. It is genuinely useful for debugging agent behaviour, so decide deliberately. `github.copilot.chat.otel.maxAttributeSizeChars` caps how much content lands in any single attribute and defaults to `0`, meaning no truncation.
+`github.copilot.chat.otel.captureContent` is `false` by default and this guide leaves it off. Turning it on records full prompts, model responses, tool arguments, tool results, and system instructions as span attributes, which means source code and anything else in the context window leaves your machine. It is genuinely useful for debugging agent behavior, so decide deliberately. `github.copilot.chat.otel.maxAttributeSizeChars` caps how much content lands in any single attribute and defaults to `0`, meaning no truncation.
 </Admonition>
 
 <Admonition type="info" title="Tagging environments, teams, and machines" defaultCollapsed="true">
