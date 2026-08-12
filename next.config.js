@@ -854,6 +854,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/opentelemetry-nextjs-use-cases/',
+          destination: '/blog/opentelemetry-nextjs-production/',
+          permanent: true,
+        },
+        {
           source: '/blog/tags/',
           destination: '/tags/',
           permanent: true,
@@ -3046,6 +3051,21 @@ module.exports = () => {
         {
           source: '/docs/cost-meter/alert-setup-guides',
           destination: '/docs/cost-meter/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/gcp/collect-logs/',
+          destination: '/docs/integrations/gcp/collect-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/gcp/collect-logs',
+          destination: '/docs/integrations/gcp/collect-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/blog/llm-observability/',
+          destination: '/docs/llm-observability/',
           permanent: true,
         },
       ])

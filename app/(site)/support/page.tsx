@@ -1,4 +1,4 @@
-import Support from './Support'
+import SupportPage from './SupportPage'
 
 import { Metadata } from 'next'
 
@@ -16,6 +16,6 @@ export const metadata: Metadata = {
   },
 }
 
-export default function SupportPage() {
-  return <Support />
+export default function SupportPageRoute() {
+  return <SupportPage />
 }
