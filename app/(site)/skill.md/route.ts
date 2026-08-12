@@ -33,6 +33,6 @@ Docs-only skills such as signoz-searching-docs work standalone. Skills that act 
 - [AI Use Cases](${siteMetadata.siteUrl}/docs/ai/use-cases/)
 `
 
-export async function GET(request: Request) {
+export async function GET() {
   return agentResponse(request, SKILL_MD)
 }
