@@ -1,5 +1,5 @@
 ---
-date: 2026-05-04
+date: 2026-08-11
 title: Parse JSON logs with Pipelines
 description: Parse serialized JSON log bodies into structured attributes using SigNoz Log Pipelines with flattening and mapping options.
 doc_type: tutorial
@@ -44,8 +44,6 @@ The parsed attributes can also be used to further enrich your log records. For e
 
 In this guide, you will see how to parse interesting fields out of serialized JSON bodies into their own log attributes, and how to use the advanced JSON flattening options for even more control.
 
----
-
 ## Prerequisites
  - You are [sending logs to SigNoz](https://signoz.io/docs/userguide/logs_query_builder/).
  - Your logs contain **serialized JSON** data in the body.
@@ -70,8 +68,6 @@ The SigNoz JSON Parser provides powerful options for extracting and flattening f
 
 #### Max Flattening Depth
 - **Note:** The maximum depth for flattening is fixed at **1** for all users. This is set for query performance reasons and cannot be changed. The root of the JSON is considered level 0, so only the first level of nesting is flattened.
-
----
 
 ## Example Behaviors
 
@@ -164,8 +160,6 @@ Suppose you want to map a nested field to a top-level log field (e.g., set the l
 ```js
 body = "this is the real log"
 ```
-
----
 
 ## Step-by-Step: Creating a Pipeline with JSON Flattening
 
@@ -391,15 +385,11 @@ You can track the deployment status of your pipelines using the **Change History
 
 Wait for a few minutes to let the pipelines deploy and for the latest batches of logs to get pre-processed and stored in the database. Then you can head over to the logs explorer to verify that log attributes are getting parsed out of serialized JSON in log bodies as expected.  You can now start using the new log attributes you have extracted for more efficient filtering and aggregations.
 
----
-
 ## Best Practices & Notes
 - **Flattening Depth:** Max flattening depth is fixed at 1 for all users for performance reasons.
 - **Key Collisions:** If flattening with paths disabled, be aware of possible key collisions (e.g., multiple nested fields with the same leaf key).
 - **Mapping:** Use mapping to directly set important log fields from JSON content.
 - **Performance:** Extract only the fields you need to keep log storage efficient.
-
----
 
 ## Summary
 

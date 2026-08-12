@@ -23,7 +23,7 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
   const slug = resolveDocsMarkdownSlug(params.slug)
 
   if (slug === 'introduction') {
-    return agentResponse(null, buildIntroductionAgentMarkdown(), { varyAccept: true })
+    return agentResponse(buildIntroductionAgentMarkdown(), { varyAccept: true })
   }
 
   const doc = await fetchDocBySlug(slug)
@@ -34,5 +34,5 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
 
   const markdown = await renderDocMarkdownForAgents(doc)
 
-  return agentResponse(null, markdown, { varyAccept: true })
+  return agentResponse(markdown, { varyAccept: true })
 }

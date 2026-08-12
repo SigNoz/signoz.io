@@ -242,10 +242,7 @@ export async function renderPageHtmlToAgentMarkdown(
     return null
   }
 
-  const footerLines = [
-    canonicalUrl ? `Source: ${canonicalUrl}` : '',
-    'Full content index: https://signoz.io/llms.txt',
-  ].filter(Boolean)
+  const footerLines = canonicalUrl ? [`Source: ${canonicalUrl}`] : []
 
   return buildMarkdownDocument({
     title: title || canonicalUrl || 'SigNoz',

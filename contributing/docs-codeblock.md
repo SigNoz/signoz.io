@@ -203,6 +203,20 @@ app.listen(8080)
 - **Start collapsed:** add `defaultCollapsed` (only when controls apply).
 - **Never collapse:** `noCollapse` for long configs readers must scan in full.
 
+### When to use `defaultCollapsed` / `minimap`
+
+The 20-line threshold controls only when Collapse and Expand buttons appear. The block still starts expanded. `defaultCollapsed` and `minimap` are separate settings. You must add them by hand.
+
+A fence is large when it has more than 40 lines. Below 40 lines, do not add `defaultCollapsed` or `minimap`. The 20-line control already gives the reader a fold.
+
+For a fence with more than 40 lines, judge it by its use, not only by its length.
+
+- **Reference-only fences:** Add both `minimap` and `defaultCollapsed`. A reference-only fence is a full Kubernetes or CloudFormation manifest, a complete source file, or a generated config file. It can also be a log or a stack trace. The reader skims this content for one field, or copies the whole fence. The reader does not read it from top to bottom to finish the step. You do not need `collapse={N}` here. The 20-line threshold already applies below 40 lines.
+- **Core instructional fences:** Add `minimap` only. Do not add `defaultCollapsed`. A core instructional fence is the primary snippet for the step, even when it is long. An example is the one collector config that the reader builds line by line. `defaultCollapsed` hides content that the reader needs, and adds a click to the main path.
+- **When you are unsure:** Leave the fence expanded. Visible is the default. Collapse is the exception.
+
+Do not use `collapse={25}` or a similar low threshold to force early collapse. Most docs fences have between 20 and 40 lines. A 25-line threshold hides this content from the reader. The reader often needs this content right away. This defeats the purpose of collapse.
+
 ### Custom threshold (still default expanded)
 
 ````md
