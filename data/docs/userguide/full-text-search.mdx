@@ -1,7 +1,7 @@
 ---
-date: 2026-07-27
+date: 2026-08-13
 title: Full-Text Search Guide
-description: Learn how to use full-text search in SigNoz to search log body content. Covers quoted phrases, regex, tabs and newlines, escaping, and field filters.
+description: Learn how to use full-text search in SigNoz to search log body content. Covers quoted phrases, the search() function, regex, escaping, and field filters.
 doc_type: reference
 ---
 
@@ -139,6 +139,37 @@ Match logs where the body contains email addresses:
 ```
 '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
 ```
+
+## The search() Function
+
+You can also run a full-text search with the explicit `search()` function. Type `search` in the Logs Explorer filter bar and pick `search()` from the autocomplete, then enter your term inside the parentheses:
+
+```
+search('error')
+search(error)
+```
+
+Both forms search the log body for the term, exactly like a bare quoted phrase. The argument is treated as literal search text, not an attribute key, so `search('error')` does not create an `error` filter chip.
+
+`search()` is available in the Logs Explorer only. The Traces and Metrics query builders do not offer it, and the autocomplete omits it when either signal is active.
+
+<Admonition type="info">
+Only the single-term forms `search('term')` and `search(term)` are supported. A scope argument such as `search('err', body)` parses but has no effect yet.
+</Admonition>
+
+### Combining search() with attribute filters
+
+Combine `search()` with attribute filters using `AND`:
+
+```
+search('error') AND service.name = 'api'
+```
+
+Only the attribute condition appears as a discrete filter chip. The search term stays inside the `search()` call.
+
+<Admonition type="warning">
+`search` is now a reserved word. Filter expressions that use `search` as an attribute key, such as `search = 'x'` or `search exists`, no longer parse. Rename any saved query, alert, or dashboard panel that referenced an attribute named `search` so it keeps working.
+</Admonition>
 
 ## Combining Full-Text with Field Searches
 

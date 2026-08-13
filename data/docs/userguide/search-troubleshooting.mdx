@@ -1,7 +1,7 @@
 ---
-date: 2026-07-27
+date: 2026-08-13
 title: Search Query Troubleshooting Guide
-description: Diagnose and fix common SigNoz search query errors including syntax errors, ambiguous fields, missing keys, and function-related issues with clear examples.
+description: Diagnose and fix common SigNoz search query errors including syntax errors, ambiguous fields, missing keys, reserved words, and function issues.
 doc_type: howto
 ---
 
@@ -74,6 +74,28 @@ searching for AND operator
 # Correct — quote the phrase
 'searching for AND operator'
 ```
+
+</details>
+
+### Q. My query that filtered on a `search` attribute stopped parsing — what changed?
+
+A. `search` is now a reserved word (it registers the `search()` full-text function in the Logs Explorer), joining the other function names `has`, `hasAny`, `hasAll`, and `hasToken`. Expressions that used `search` as an attribute key no longer parse.
+
+<details>
+
+<summary>Show causes and fixes</summary>
+
+```
+# Wrong — search is reserved and cannot be an attribute key
+search = 'x'
+search exists
+
+# Correct — reference the attribute under an explicit context prefix
+attribute.search = 'x'
+attribute.search EXISTS
+```
+
+Update any saved query, alert, or dashboard panel that referenced an attribute named `search`. To run a full-text search instead, use the [`search()` function](https://signoz.io/docs/userguide/full-text-search/#the-search-function).
 
 </details>
 
@@ -197,7 +219,7 @@ If you are querying traces or metrics, rewrite the query to target a specific fi
 
 ### Q. I'm getting `unknown function '<name>'` — which functions are supported?
 
-A. Only specific functions are supported in the filter bar. Currently the only supported function is `has()`, which checks if a JSON array field contains a value.
+A. Only specific functions are supported in the filter bar: `has()` (checks whether a JSON array field contains a value), `hasToken()` (whole-token match in a string), and `search()` (full-text search across the log body, Logs Explorer only).
 
 <details>
 

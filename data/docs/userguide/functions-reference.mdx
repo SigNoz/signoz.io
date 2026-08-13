@@ -1,8 +1,8 @@
 ---
-date: 2026-07-27
+date: 2026-08-13
 
 title: Functions Reference Guide
-description: Reference guide for SigNoz query functions for arrays and token matching. Learn syntax and usage examples.
+description: Reference guide for SigNoz query functions for arrays, token matching, and full-text search. Learn syntax and usage examples.
 doc_type: reference
 ---
 
@@ -60,9 +60,31 @@ has(body.tags, 'production')
 has(body.regions, 'us-east')
 ```
 
+### search() Function
+
+Runs a full-text search across the log body. Type `search` in the Logs Explorer filter bar and pick `search()` from the autocomplete, then enter your term inside the parentheses.
+
+**Syntax:**
+```
+search('term')
+search(term)
+```
+
+**Examples:**
+```
+search('error connecting to database')
+search(timeout)
+```
+
+The argument is literal search text, not an attribute key, so it does not become a filter chip. `search()` is available in the **Logs Explorer** only. For quoted vs unquoted behavior, regex, and escaping, see the [Full-Text Search Guide](https://signoz.io/docs/userguide/full-text-search/#the-search-function).
+
+## Reserved Words
+
+Function names are reserved words in the filter grammar and cannot be used as attribute keys: `has`, `hasAny`, `hasAll`, `hasToken`, and `search`. An expression such as `search = 'x'` or `search exists` no longer parses. If a saved query, alert, or dashboard panel used one of these as an attribute name, rename that expression.
+
 ## Important Notes
 
-1. **Body fields only** - Functions currently work only with JSON body fields (fields prefixed with `body.`) except for the hasToken function.
+1. **Body fields only** - Functions currently work only with JSON body fields (fields prefixed with `body.`), except for the `hasToken()` and `search()` functions.
 2. **Array data** - The field must contain an array for these functions to work properly
 
 ## Combining with Other Conditions
