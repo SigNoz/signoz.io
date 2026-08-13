@@ -3,7 +3,7 @@ published_date: 2026-08-03
 updated_date: 2026-08-13
 title: Claude Code Monitoring & Observability with OpenTelemetry
 meta_title: Claude Code OpenTelemetry Monitoring
-description: Learn how to monitor Claude Code sessions using OpenTelemetry and SigNoz. Track token usage, costs, API performance, and session activity across your engineering team.
+description: Set CLAUDE_CODE_ENABLE_TELEMETRY and OTEL_EXPORTER_OTLP_ENDPOINT to export Claude Code metrics and events to SigNoz. Full environment variable reference.
 doc_type: howto
 ---
 
@@ -28,11 +28,11 @@ Once set up, all of this flows into SigNoz dashboards where you can correlate lo
   - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
   - Self-hosted SigNoz instance
 - Internet access to send telemetry data to SigNoz Cloud
-- [Claude Code](https://www.anthropic.com/claude-code) installed and running on your system
+- <a href="https://www.anthropic.com/claude-code" target="_blank" rel="noopener noreferrer nofollow">Claude Code</a> installed and running on your system
 
 ## Monitoring Claude Code
 
-Check out detailed instructions on how to set up OpenTelemetry instrumentation for your Claude Code usage over [here](https://docs.anthropic.com/en/docs/claude-code/monitoring-usage).
+Check out detailed instructions on how to set up OpenTelemetry instrumentation for your Claude Code usage in the <a href="https://code.claude.com/docs/en/monitoring-usage" target="_blank" rel="noopener noreferrer nofollow">Claude Code monitoring docs</a>. Every variable used below is listed in the [Environment Variable Reference](#environment-variable-reference).
 
 ### Option 1 (VSCode)
 
@@ -60,7 +60,7 @@ code .
 
 This will open VSCode with the required environment variables already configured. From here, any Claude Code activity will automatically generate telemetry and export logs to your SigNoz Cloud instance.
 
-For convenience, you can also clone our [bash script](https://github.com/SigNoz/Claude-Code-OpenTelemetry/blob/main/claude_code_otel_vscode.sh), update it with your SigNoz endpoint and ingestion key, and run it directly.
+For convenience, you can also clone our <a href="https://github.com/SigNoz/Claude-Code-OpenTelemetry/blob/main/claude_code_otel_vscode.sh" target="_blank" rel="noopener noreferrer nofollow">bash script</a>, update it with your SigNoz endpoint and ingestion key, and run it directly.
 
 ### Option 2 (Terminal)
 
@@ -88,11 +88,11 @@ claude
 
 This will launch Claude Code with telemetry enabled. Any Claude Code activity in the terminal session will automatically generate and export logs and metrics to your SigNoz Cloud instance.
 
-For convenience, you can also clone our [bash script](https://github.com/SigNoz/Claude-Code-OpenTelemetry/blob/main/claude_code_otel_terminal.sh), update it with your SigNoz endpoint and ingestion key, and run it directly.
+For convenience, you can also clone our <a href="https://github.com/SigNoz/Claude-Code-OpenTelemetry/blob/main/claude_code_otel_terminal.sh" target="_blank" rel="noopener noreferrer nofollow">bash script</a>, update it with your SigNoz endpoint and ingestion key, and run it directly.
 
 ### Administrator Configuration
 
-Administrators can configure OpenTelemetry settings for all users through the managed settings file. This allows for centralized control of telemetry settings across an organization. See the [**settings precedence**](https://docs.anthropic.com/en/docs/claude-code/settings#settings-precedence) for more information about how settings are applied.
+Administrators can configure OpenTelemetry settings for all users through the managed settings file. This allows for centralized control of telemetry settings across an organization. See the <a href="https://code.claude.com/docs/en/settings#settings-precedence" target="_blank" rel="noopener noreferrer nofollow">settings precedence</a> for more information about how settings are applied.
 
 The managed settings file is located at:
 
@@ -235,9 +235,100 @@ You can also check out our custom Claude Code dashboard [here](https://signoz.io
   </figcaption>
 </figure>
 
+## Environment Variable Reference
+
+Every setting below is an environment variable. Set them before launching `claude` or `code .`, or deploy them centrally through [managed settings](#administrator-configuration). Values verified against the <a href="https://code.claude.com/docs/en/monitoring-usage" target="_blank" rel="noopener noreferrer nofollow">Claude Code monitoring docs</a>.
+
+### Required
+
+| Variable | Description | Values | Default |
+|---|---|---|---|
+| `CLAUDE_CODE_ENABLE_TELEMETRY` | Master switch. Nothing is exported without it | `1` | disabled |
+
+Telemetry is opt-in. If this is unset, every other variable on this page is ignored.
+
+### Exporters
+
+At least one exporter must be set, and metrics and events are configured separately. Setting only one means the other signal never appears in SigNoz.
+
+| Variable | Description | Values | Default |
+|---|---|---|---|
+| `OTEL_METRICS_EXPORTER` | Metrics exporter, comma-separated | `otlp`, `console`, `prometheus`, `none` | unset |
+| `OTEL_LOGS_EXPORTER` | Events exporter, comma-separated | `otlp`, `console`, `none` | unset |
+| `OTEL_TRACES_EXPORTER` | Traces exporter, comma-separated (beta) | `otlp`, `console`, `none` | unset |
+
+### Endpoint and protocol
+
+| Variable | Description | Values | Default |
+|---|---|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Destination for all signals | URL | unset |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | Wire protocol for all signals | `grpc`, `http/protobuf`, `http/json` | unset, must be set |
+| `OTEL_EXPORTER_OTLP_HEADERS` | Headers sent with every export, used for authentication | `key=value` pairs | unset |
+
+For SigNoz Cloud, set the protocol to `grpc`, the endpoint to `https://ingest.<region>.signoz.cloud:443` for your [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint), and the headers to `signoz-ingestion-key=<your-ingestion-key>`.
+
+Each signal can override the shared values with `OTEL_EXPORTER_OTLP_METRICS_*`, `OTEL_EXPORTER_OTLP_LOGS_*` and `OTEL_EXPORTER_OTLP_TRACES_*` variants of `ENDPOINT`, `PROTOCOL` and `HEADERS`, which is how you send metrics and events to different backends.
+
+### Export intervals
+
+| Variable | Description | Values | Default |
+|---|---|---|---|
+| `OTEL_METRIC_EXPORT_INTERVAL` | Milliseconds between metric exports | integer | `60000` |
+| `OTEL_LOGS_EXPORT_INTERVAL` | Milliseconds between event exports | integer | `5000` |
+| `OTEL_TRACES_EXPORT_INTERVAL` | Milliseconds between span batch exports (beta) | integer | `5000` |
+
+The 60-second metric default is the most common reason data appears to be missing during setup. Lower it to `10000` while you verify the pipeline.
+
+### Content and privacy
+
+Prompt and response content is redacted by default. Each variable below opts a specific category back in, so review them against your data policy before enabling any.
+
+| Variable | Description | Values | Default |
+|---|---|---|---|
+| `OTEL_LOG_USER_PROMPTS` | Log user prompt text | `1` | redacted |
+| `OTEL_LOG_ASSISTANT_RESPONSES` | Log assistant response text | `1`, `0`, unset falls back to `OTEL_LOG_USER_PROMPTS` | redacted |
+| `OTEL_LOG_TOOL_DETAILS` | Log tool parameters and input arguments | `1` | disabled |
+| `OTEL_LOG_TOOL_CONTENT` | Log tool input and output content on spans, requires tracing | `1` | disabled |
+| `OTEL_LOG_RAW_API_BODIES` | Emit full Messages API request and response JSON | `1` inline, truncated at 60 KB, or `file:<dir>` untruncated | disabled |
+| `CLAUDE_CODE_OTEL_CONTENT_MAX_LENGTH` | Content attribute limit, in UTF-16 code units | integer | `61440` |
+
+### Metric attributes and cardinality
+
+These control which attributes ride along on every metric datapoint. Turning `session.id` off is the usual fix if metric cardinality becomes a problem.
+
+| Variable | Description | Values | Default |
+|---|---|---|---|
+| `OTEL_METRICS_INCLUDE_SESSION_ID` | Include `session.id` | `true`, `false` | `true` |
+| `OTEL_METRICS_INCLUDE_ACCOUNT_UUID` | Include `user.account_uuid` and `user.account_id` | `true`, `false` | `true` |
+| `OTEL_METRICS_INCLUDE_RESOURCE_ATTRIBUTES` | Include keys from `OTEL_RESOURCE_ATTRIBUTES` | `true`, `false` | `true` |
+| `OTEL_METRICS_INCLUDE_VERSION` | Include `app.version` | `true`, `false` | `false` |
+| `OTEL_METRICS_INCLUDE_ENTRYPOINT` | Include `app.entrypoint` | `true`, `false` | `false` |
+| `OTEL_RESOURCE_ATTRIBUTES` | Custom attributes, useful for tagging by team | comma-separated `key=value`, US-ASCII, no spaces | unset |
+| `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` | Metric temporality | `delta`, `cumulative` | `delta` |
+
+### Tracing (beta)
+
+Spans are separate from the metrics and events covered above and are off by default.
+
+| Variable | Description | Values | Default |
+|---|---|---|---|
+| `CLAUDE_CODE_ENHANCED_TELEMETRY_BETA` | Required to emit spans at all | `1` | disabled |
+| `CLAUDE_CODE_PROPAGATE_TRACEPARENT` | Propagate W3C `traceparent` to model and MCP requests through a custom proxy | `1` | only sent to the Anthropic API |
+
+### TLS
+
+| Variable | Description | Applies to |
+|---|---|---|
+| `OTEL_EXPORTER_OTLP_CERTIFICATE` | Trust a collector's CA | `grpc` |
+| `NODE_EXTRA_CA_CERTS` | Trust a collector's CA | `http/protobuf`, `http/json` |
+| `OTEL_EXPORTER_OTLP_CLIENT_KEY`, `OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE` | mTLS client credentials | `grpc` |
+| `CLAUDE_CODE_CLIENT_CERT`, `CLAUDE_CODE_CLIENT_KEY`, `CLAUDE_CODE_CLIENT_KEY_PASSPHRASE` | mTLS client credentials | `http/protobuf`, `http/json` |
+
+Not needed for SigNoz Cloud, which terminates TLS with a public certificate.
+
 ## Telemetry Data
 
-Claude Code emits the following metrics and events via OpenTelemetry. For the full upstream specification, see the <a href="https://docs.anthropic.com/en/docs/claude-code/monitoring-usage" target="_blank" rel="noopener noreferrer nofollow">Claude Code monitoring docs</a>.
+Claude Code emits the following metrics and events via OpenTelemetry. For the full upstream specification, see the <a href="https://code.claude.com/docs/en/monitoring-usage" target="_blank" rel="noopener noreferrer nofollow">Claude Code monitoring docs</a>.
 
 ### Standard Attributes
 
@@ -305,10 +396,15 @@ If you don't see your telemetry data in SigNoz:
 5. **Wait for the export interval** - The default metrics export interval is 60 seconds. During setup, set `OTEL_METRIC_EXPORT_INTERVAL=10000` to flush every 10 seconds instead
 6. **Confirm env vars are set before launch** - Environment variables must be set before launching `claude` or `code .`. Variables exported after launch have no effect
 
+Every variable named above, along with its accepted values and default, is listed in the [Environment Variable Reference](#environment-variable-reference).
+
 ## FAQs
 
 ### Does Claude Code have built-in monitoring?
 A. Yes. Claude Code has native OpenTelemetry support that you opt into by setting `CLAUDE_CODE_ENABLE_TELEMETRY=1`. Once enabled, it emits metrics (token usage, costs, session counts, lines of code, commits) and structured log events (API requests, tool executions, permission decisions) via the standard OTLP protocol to any compatible backend including SigNoz.
+
+### What should OTEL_EXPORTER_OTLP_ENDPOINT be for Claude Code?
+A. For SigNoz Cloud, set it to `https://ingest.<region>.signoz.cloud:443`, where `<region>` matches your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint). Pair it with `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` and `OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"`. For a self-hosted collector it is usually `http://localhost:4317` for gRPC or `http://localhost:4318` for HTTP. The variable applies to every signal at once; use `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` and `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` to split them. See the [Environment Variable Reference](#environment-variable-reference).
 
 ### How do I track Claude Code token usage?
 A. Claude Code emits a `claude_code.token.usage` metric after every API request, broken down by `type` (`input`, `output`, `cacheRead`, `cacheCreation`), `model`, and `query_source`. In SigNoz, filter this metric by user or model to see exactly where tokens are going. See the [Telemetry Data](#telemetry-data) section for the full attribute list.
