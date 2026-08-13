@@ -1,4 +1,5 @@
 import siteMetadata from '@/data/siteMetadata'
+import { agentResponse } from '@/utils/agentResponseHeaders'
 
 export const MCP_URL_TEMPLATE = 'https://mcp.<region>.signoz.cloud/mcp'
 
@@ -67,4 +68,9 @@ export function buildMcpDiscoveryDocument(regionNames: string[]) {
 
 export async function getMcpDiscoveryDocument() {
   return buildMcpDiscoveryDocument(await fetchRegionNames())
+}
+
+export async function mcpDiscoveryResponse() {
+  const body = JSON.stringify(await getMcpDiscoveryDocument(), null, 2)
+  return agentResponse(body, { contentType: 'application/json; charset=utf-8' })
 }
