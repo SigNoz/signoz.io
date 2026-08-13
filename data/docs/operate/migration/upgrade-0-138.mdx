@@ -1,15 +1,19 @@
 ---
 date: 2026-08-13
-title: Upgrade SigNoz to v0.138.0 with v1 Infra APIs Removed
+title: Upgrade to SigNoz v0.138.0 with v1 Infra & User APIs Removed
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
-description: Upgrade self-hosted SigNoz to v0.138.0. All v1 infrastructure monitoring API endpoints are removed; move any direct API callers to the v2 paths first.
+description: Upgrade self-hosted SigNoz to v0.138.0. All v1 infra monitoring endpoints and several user and auth endpoints are removed; migrate direct API callers to v2 first.
 doc_type: howto
 ---
 
-SigNoz v0.138.0 permanently removes the v1 infrastructure monitoring API endpoints. The product UI is unaffected: it already runs entirely on the `/api/v2/infra_monitoring/*` paths, so infrastructure monitoring in SigNoz keeps working exactly as before. This change only affects code that calls the v1 endpoints directly.
+SigNoz v0.138.0 permanently removes two sets of previously deprecated API endpoints: the v1 infrastructure monitoring endpoints, and six user and auth endpoints (plus a stub on `GET /api/v1/user/me`). The product UI is unaffected: it already runs entirely on the v2 paths, so SigNoz keeps working exactly as before. These changes only affect code that calls the removed endpoints directly.
 
 <Admonition type="warning" title="The v1 infra monitoring endpoints stop responding in v0.138.0">
 All v1 infra monitoring list, attribute-key, and attribute-value endpoints (`/api/v1/hosts`, `/api/v1/pods`, `/api/v1/nodes`, `/api/v1/namespaces`, `/api/v1/clusters`, `/api/v1/deployments`, `/api/v1/daemonsets`, `/api/v1/statefulsets`, `/api/v1/jobs`, `/api/v1/pvcs`, `/api/v1/processes`, and `/api/v1/infra_onboarding/k8s/status`) are removed and return an error after this upgrade. There is no deprecation window. If you call these endpoints from scripts or integrations, [migrate them to the v2 endpoints](#migrate-api-callers-to-the-v2-infra-monitoring-apis) before you upgrade.
+</Admonition>
+
+<Admonition type="warning" title="User and auth endpoints are removed in v0.138.0">
+Six user and auth endpoints are removed and `GET /api/v1/user/me` now returns HTTP `501 Not Implemented`. The four fully-removed v1 paths (`/api/v1/invite`, `/api/v1/user`, `/api/v1/getResetPasswordToken`, `/api/v1/resetPassword`) fall through to the single-page-app catch-all and return **HTTP `200` with an HTML body**, not an error code, so a client can silently parse HTML as JSON. Two v2 role routes also move to new paths. If you call any of these from scripts, SDKs, or integrations, [migrate them to the v2 endpoints](#migrate-user-and-auth-api-callers-to-v2) before you upgrade.
 </Admonition>
 
 ## Who needs to act
@@ -19,6 +23,7 @@ All v1 infra monitoring list, attribute-key, and attribute-value endpoints (`/ap
 | Use infrastructure monitoring only through the UI | Nothing: the UI already uses the v2 APIs |
 | Call `/api/v1/hosts`, `/api/v1/pods`, or any other v1 infra endpoint from scripts or integrations | [Move them to the v2 endpoints](#migrate-api-callers-to-the-v2-infra-monitoring-apis) **before upgrading** |
 | Call `/api/v1/processes/list` | No v2 replacement exists. See [Removed with no replacement](#removed-with-no-replacement) |
+| Invite users, list users, reset passwords, assign roles, or fetch the current user via the removed v1 or v2 endpoints | [Move them to the v2 endpoints](#migrate-user-and-auth-api-callers-to-v2) **before upgrading** |
 
 ## Upgrade self-hosted SigNoz
 
@@ -50,10 +55,36 @@ The v2 request and response payloads differ from v1. See the **Infrastructure Mo
 
 The Kubernetes onboarding status check (`GET /api/v1/infra_onboarding/k8s/status`) is replaced by the v2 checks endpoint (`GET /api/v2/infra_monitoring/checks`), which reports whether the metrics and attributes required by each infra monitoring section are being received.
 
+## Migrate user and auth API callers to v2
+
+v0.138.0 removes six previously deprecated user and auth endpoints and stubs `GET /api/v1/user/me`. The SigNoz UI already calls the v2 paths, so this affects only scripts, SDKs, and direct integrations. Move each caller to the v2 replacement below before you upgrade.
+
+| Endpoint (removed or stubbed) | v2 replacement |
+| --- | --- |
+| `POST /api/v1/invite` | `POST /api/v2/users` (creates a pending-invite user with roles) |
+| `GET /api/v1/user` | `GET /api/v2/users` |
+| `GET /api/v1/getResetPasswordToken/{id}` | `GET /api/v2/users/{id}/reset_password_tokens` |
+| `POST /api/v1/resetPassword` | `POST /api/v2/factor_password/reset` |
+| `POST /api/v2/users/{id}/roles` | `POST /api/v2/user_roles` |
+| `DELETE /api/v2/users/{id}/roles/{roleId}` | `DELETE /api/v2/user_roles/{id}` |
+| `GET /api/v1/user/me` (now returns `501`) | `GET /api/v2/users/me` |
+
+The request and response payloads differ from the v1 versions. See the **Users** section of the <a href="https://signoz.io/api-reference/" target="_blank" rel="noopener noreferrer nofollow">API reference</a> for the exact request schema and response fields of each endpoint.
+
+### Role assignment moves to a top-level resource
+
+The two role routes that were nested under a user (`POST /api/v2/users/{id}/roles` and `DELETE /api/v2/users/{id}/roles/{roleId}`) are removed in favor of the top-level `/api/v2/user_roles` resource. Assign a role with `POST /api/v2/user_roles` and remove one with `DELETE /api/v2/user_roles/{id}`.
+
+<Admonition type="info" title="The delete path is keyed by the user-role entry, not the role">
+`DELETE /api/v2/user_roles/{id}` deletes the `user_role` assignment by its own entry id, not by the role id. Read the entry id from the user's role list in `GET /api/v2/users/{id}` before calling delete.
+</Admonition>
+
+### The removed v1 paths return HTML, not an error
+
+The four fully-removed v1 paths (`/api/v1/invite`, `/api/v1/user`, `/api/v1/getResetPasswordToken`, and `/api/v1/resetPassword`) are unregistered, so requests fall through to the single-page-app catch-all and return **HTTP `200` with an HTML body** rather than an error status. A client that assumes JSON will parse the HTML silently and fail in confusing ways. Confirm your caller hits a `/api/v2/` path, since there is no explicit error to alert you. The stubbed `GET /api/v1/user/me` is different: it returns `501 Not Implemented` naming the v2 replacement.
+
 ## Getting help
 
 - [SigNoz Documentation](https://signoz.io/docs/introduction/)
 - [GitHub Issues](https://github.com/SigNoz/signoz/issues)
 - [Community Slack](https://signoz.io/slack/)
-</content>
-</invoke>
