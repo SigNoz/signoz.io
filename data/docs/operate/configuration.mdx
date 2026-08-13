@@ -1,5 +1,5 @@
 ---
-date: 2026-07-29
+date: 2026-08-13
 title: Configuration Reference - YAML Options and Env Variables
 description: Look up every self-hosted SigNoz configuration option with its default and environment variable, grouped by configuration file section.
 doc_type: reference
@@ -78,8 +78,9 @@ Environment variables override every configuration file, which makes them conven
 |---|---|---|
 | Duration | A Go duration string. Valid units are `ns`, `us`, `ms`, `s`, `m`, and `h`. | `168h`, `5m`, `10s` |
 | Boolean | `true` or `false`. | `true` |
-| List | A YAML sequence, or a comma-separated string when set through an environment variable. | `SIGNOZ_IDENTN_APIKEY_HEADERS=SIGNOZ-API-KEY,X-Api-Key` |
-| Map | A YAML mapping. Prefer a configuration file for these, since the environment variable form has to be inline YAML. | `headers: {X-Scope-OrgID: signoz}` |
+| List of strings | A YAML sequence, or a comma-separated string when set through an environment variable. | `SIGNOZ_IDENTN_APIKEY_HEADERS=SIGNOZ-API-KEY,X-Api-Key` |
+| List of URLs | A YAML sequence only. A comma-separated environment variable parses into a single malformed URL. Use a configuration file for options such as `global.allowed_origins`. | `allowed_origins: ["https://a.example.com", "https://b.example.com"]` |
+| Map | A YAML mapping. Environment variables cannot set map options: the value is read as a plain string, and the config decoder rejects it at startup. Use a configuration file for options such as `emailing.smtp.headers`. | `headers: {X-Scope-OrgID: signoz}` |
 
 ## Configuration reference
 
@@ -99,7 +100,7 @@ Options with a default of _unset_ have no value until you set one. Sections limi
 |---|---|---|---|
 | `global.external_url` | URL at which the SigNoz API server is externally reachable. The path component (for example `/signoz` in `https://example.com/signoz`) becomes the base path for all API and web frontend routes. | _unset_ | `SIGNOZ_GLOBAL_EXTERNAL__URL` |
 | `global.ingestion_url` | URL at which the SigNoz backend receives traces, metrics, and logs from instrumented applications. | _unset_ | `SIGNOZ_GLOBAL_INGESTION__URL` |
-| `global.allowed_origins` | Origins (`scheme://host[:port]`, no path) allowed as login redirect targets. Include the origin the SigNoz UI is served on. When unset, redirect targets are not validated. | _unset_ | `SIGNOZ_GLOBAL_ALLOWED__ORIGINS` |
+| `global.allowed_origins` | Origins (`scheme://host[:port]`, no path) allowed as login redirect targets. Include the origin the SigNoz UI is served on. When unset, redirect targets are not validated. Set this through a configuration file: a comma-separated environment variable parses into one malformed URL. | _unset_ | `SIGNOZ_GLOBAL_ALLOWED__ORIGINS` |
 | `global.mcp_url` | URL of the SigNoz MCP server. When unset, the MCP settings page is hidden in the frontend. | _unset_ | `SIGNOZ_GLOBAL_MCP__URL` |
 | `global.ai_assistant_url` | URL of the SigNoz AI Assistant server. When unset, the AI Assistant is hidden in the frontend. | _unset_ | `SIGNOZ_GLOBAL_AI__ASSISTANT__URL` |
 
@@ -161,7 +162,7 @@ Caches query results. Set `cache.provider` to `memory` or `redis`. Only the sub-
 |---|---|---|---|
 | `cache.provider` | Caching provider to use. Accepts `memory` or `redis`. | `memory` | `SIGNOZ_CACHE_PROVIDER` |
 | `cache.memory.num_counters` | Maximum number of items tracked by the in-memory cache. Set this to roughly 10x the expected number of entries. | `100000` | `SIGNOZ_CACHE_MEMORY_NUM__COUNTERS` |
-| `cache.memory.max_cost` | Total size in bytes allocated to the in-memory cache. The default is 64 MiB. | `67108864` | `SIGNOZ_CACHE_MEMORY_MAX__COST` |
+| `cache.memory.max_cost` | Total size in bytes allocated to the in-memory cache. The default is 128 MiB. | `134217728` | `SIGNOZ_CACHE_MEMORY_MAX__COST` |
 | `cache.redis.host` | Hostname or IP address of the Redis server. | `localhost` | `SIGNOZ_CACHE_REDIS_HOST` |
 | `cache.redis.port` | Port the Redis server listens on. | `6379` | `SIGNOZ_CACHE_REDIS_PORT` |
 | `cache.redis.password` | Password for authenticating with Redis, if required. | _unset_ | `SIGNOZ_CACHE_REDIS_PASSWORD` |
@@ -180,6 +181,7 @@ The relational database that stores SigNoz metadata such as dashboards, alert ru
 | `sqlstore.sqlite.mode` | SQLite journal mode. Accepts `delete` or `wal`. | `wal` | `SIGNOZ_SQLSTORE_SQLITE_MODE` |
 | `sqlstore.sqlite.busy_timeout` | How long SQLite waits for a lock before failing. | `10s` | `SIGNOZ_SQLSTORE_SQLITE_BUSY__TIMEOUT` |
 | `sqlstore.sqlite.transaction_mode` | Default transaction locking behavior. Accepts `deferred`, `immediate`, or `exclusive`. | `immediate` | `SIGNOZ_SQLSTORE_SQLITE_TRANSACTION__MODE` |
+| `sqlstore.postgres.dsn` | Postgres connection string, used when `sqlstore.provider` is `postgres`. | _unset_ | `SIGNOZ_SQLSTORE_POSTGRES_DSN` |
 
 For Postgres connection settings and migration steps, see [Configuring SigNoz to Use Relational Databases](https://signoz.io/docs/manage/administrator-guide/configuration/relational-database/).
 
@@ -232,6 +234,8 @@ Backs PromQL query evaluation.
 | Option | Description | Default | Environment variable |
 |---|---|---|---|
 | `prometheus.timeout` | Maximum time a PromQL query may run before it is aborted. | `2m` | `SIGNOZ_PROMETHEUS_TIMEOUT` |
+| `prometheus.lookback_delta` | Time since a series' last sample past which SigNoz treats it as stale. When unset, the Prometheus engine default (currently `5m`) applies. | _unset_ | `SIGNOZ_PROMETHEUS_LOOKBACK__DELTA` |
+| `prometheus.provider` | Storage provider backing PromQL evaluation. Accepts `clickhouse` or `clickhousev2`. | `clickhouse` | `SIGNOZ_PROMETHEUS_PROVIDER` |
 | `prometheus.active_query_tracker.enabled` | Whether to track active queries, which helps identify queries that were running during a crash. | `true` | `SIGNOZ_PROMETHEUS_ACTIVE__QUERY__TRACKER_ENABLED` |
 | `prometheus.active_query_tracker.path` | Path where the active query tracker writes its file. | _unset_ | `SIGNOZ_PROMETHEUS_ACTIVE__QUERY__TRACKER_PATH` |
 | `prometheus.active_query_tracker.max_concurrent` | Maximum number of concurrent PromQL queries. | `20` | `SIGNOZ_PROMETHEUS_ACTIVE__QUERY__TRACKER_MAX__CONCURRENT` |
@@ -248,9 +252,9 @@ Groups and routes alert notifications. Options under `alertmanager.signoz.global
 | `alertmanager.signoz.templates` | Globs from which SigNoz notification templates are loaded. Upstream defaults (`default.tmpl`, `email.tmpl`) always load from embedded assets, so list only SigNoz templates here. | `/opt/signoz/conf/templates/alertmanager/*.gotmpl` | `SIGNOZ_ALERTMANAGER_SIGNOZ_TEMPLATES` |
 | `alertmanager.signoz.global.resolve_timeout` | Time after which an alert is declared resolved if it has not been updated. | `5m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_RESOLVE__TIMEOUT` |
 | `alertmanager.signoz.route.group_by` | Labels used to group alerts into a single notification. | `alertname` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__BY` |
-| `alertmanager.signoz.route.group_wait` | How long to wait for more alerts before sending the first notification for a new group. | `1m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__WAIT` |
-| `alertmanager.signoz.route.group_interval` | How long to wait before sending a notification about new alerts added to an existing group. | `1m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__INTERVAL` |
-| `alertmanager.signoz.route.repeat_interval` | How long to wait before resending a notification for an alert that is still firing. | `1h` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_REPEAT__INTERVAL` |
+| `alertmanager.signoz.route.group_wait` | How long to wait for more alerts before sending the first notification for a new group. | `30s` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__WAIT` |
+| `alertmanager.signoz.route.group_interval` | How long to wait before sending a notification about new alerts added to an existing group. | `5m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__INTERVAL` |
+| `alertmanager.signoz.route.repeat_interval` | How long to wait before resending a notification for an alert that is still firing. | `4h` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_REPEAT__INTERVAL` |
 | `alertmanager.signoz.alerts.gc_interval` | Interval between garbage collection of alerts. | `30m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ALERTS_GC__INTERVAL` |
 | `alertmanager.signoz.silences.max` | Maximum number of silences, including expired ones. Zero or negative means no limit. | `0` | `SIGNOZ_ALERTMANAGER_SIGNOZ_SILENCES_MAX` |
 | `alertmanager.signoz.silences.max_size_bytes` | Maximum total size of silences in bytes. Zero or negative means no limit. | `0` | `SIGNOZ_ALERTMANAGER_SIGNOZ_SILENCES_MAX__SIZE__BYTES` |
@@ -335,12 +339,12 @@ Issues and rotates the tokens behind user sessions.
 | `tokenizer.lifetime.max` | How long a user can stay logged in before having to log in again. | `720h` | `SIGNOZ_TOKENIZER_LIFETIME_MAX` |
 | `tokenizer.rotation.interval` | How often tokens are rotated. | `30m` | `SIGNOZ_TOKENIZER_ROTATION_INTERVAL` |
 | `tokenizer.rotation.duration` | How long the previous token pair stays valid after rotation. | `60s` | `SIGNOZ_TOKENIZER_ROTATION_DURATION` |
-| `tokenizer.jwt.secret` | Secret used to sign JWT tokens. | `secret` | `SIGNOZ_TOKENIZER_JWT_SECRET` |
+| `tokenizer.jwt.secret` | Secret used to sign JWT tokens. | _unset_ | `SIGNOZ_TOKENIZER_JWT_SECRET` |
 | `tokenizer.opaque.gc.interval` | How often expired opaque tokens are garbage collected. | `1h` | `SIGNOZ_TOKENIZER_OPAQUE_GC_INTERVAL` |
 | `tokenizer.opaque.token.max_per_user` | Maximum opaque tokens per user, which caps concurrent sessions. | `5` | `SIGNOZ_TOKENIZER_OPAQUE_TOKEN_MAX__PER__USER` |
 
 <Admonition type="warning">
-`tokenizer.jwt.secret` ships with the placeholder value `secret`. Set your own value before exposing SigNoz outside a trusted network. See the [JWT Secret Configuration Guide](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/).
+`tokenizer.jwt.secret` has no default value. Set it explicitly before exposing SigNoz outside a trusted network. See the [JWT Secret Configuration Guide](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/).
 </Admonition>
 
 ### `flagger`
@@ -356,7 +360,7 @@ Overrides feature flags from the configuration file. Flags are grouped by value 
 
 | Option | Description | Default | Environment variable |
 |---|---|---|---|
-| `user.password.reset.allow_self` | Whether users can reset their own password. | `true` | `SIGNOZ_USER_PASSWORD_RESET_ALLOW__SELF` |
+| `user.password.reset.allow_self` | Whether users can reset their own password. | `false` | `SIGNOZ_USER_PASSWORD_RESET_ALLOW__SELF` |
 | `user.password.reset.max_token_lifetime` | How long a password reset link stays valid. | `6h` | `SIGNOZ_USER_PASSWORD_RESET_MAX__TOKEN__LIFETIME` |
 | `user.password.invite.max_token_lifetime` | How long an invite stays valid. | `48h` | `SIGNOZ_USER_PASSWORD_INVITE_MAX__TOKEN__LIFETIME` |
 | `user.root.enabled` | Whether to provision a root user on startup from the email and password below. The root user cannot be deleted, updated, or have their password changed through the UI. | `false` | `SIGNOZ_USER_ROOT_ENABLED` |
@@ -392,14 +396,15 @@ Enabling `identn.impersonation.enabled` removes authentication for all requests.
 
 ### `auditor`
 
-Records audit events. The community default is `noop`, which discards them. The `otlphttp` provider and its options apply to enterprise deployments.
+Records audit events. The community default is `noop`, which discards them. The `otlphttp` and `file` providers and their options apply to enterprise deployments.
 
 | Option | Description | Default | Environment variable |
 |---|---|---|---|
-| `auditor.provider` | Auditor provider to use. `noop` discards all audit events. `otlphttp` exports them over OTLP HTTP and requires an enterprise license. | `noop` | `SIGNOZ_AUDITOR_PROVIDER` |
+| `auditor.provider` | Auditor provider to use. `noop` discards all audit events. `otlphttp` and `file` require an enterprise license: `otlphttp` exports events over OTLP HTTP, `file` writes them to a local file. | `noop` | `SIGNOZ_AUDITOR_PROVIDER` |
 | `auditor.buffer_size` | Async channel capacity for audit events. Events are dropped when the buffer is full, so auditing never blocks requests. | `1000` | `SIGNOZ_AUDITOR_BUFFER__SIZE` |
 | `auditor.batch_size` | Maximum number of events per export batch. | `100` | `SIGNOZ_AUDITOR_BATCH__SIZE` |
 | `auditor.flush_interval` | Maximum time between export flushes. | `1s` | `SIGNOZ_AUDITOR_FLUSH__INTERVAL` |
+| `auditor.file.path` | Absolute path to the audit log file, used when `auditor.provider` is `file`. SigNoz opens the file in append mode and preserves existing contents across restarts. | _unset_ | `SIGNOZ_AUDITOR_FILE_PATH` |
 | `auditor.otlphttp.endpoint` | Target OTLP HTTP endpoint. | `http://localhost:4318/v1/logs` | `SIGNOZ_AUDITOR_OTLPHTTP_ENDPOINT` |
 | `auditor.otlphttp.insecure` | Whether to export over HTTP instead of HTTPS. | `false` | `SIGNOZ_AUDITOR_OTLPHTTP_INSECURE` |
 | `auditor.otlphttp.timeout` | Maximum duration for a single export attempt. | `10s` | `SIGNOZ_AUDITOR_OTLPHTTP_TIMEOUT` |
