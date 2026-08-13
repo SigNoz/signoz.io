@@ -1,5 +1,5 @@
 ---
-date: 2026-05-27
+date: 2026-08-11
 title: AWS Lambda
 meta_title: Monitor AWS Lambda - Logs, Metrics & Traces
 description: Discover how to collect Lambda logs, metrics, and traces using OpenTelemetry layers for complete serverless function observability.
@@ -21,10 +21,9 @@ SigNoz supports multiple ways to monitor AWS Lambda. This page helps you choose 
 | **Logs** (lower latency, no code changes)  | [OTel Collector Extension Layer](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs-otel-extension/) | Telemetry API integration, lower latency than S3, no code changes  |
 | **Logs** (from existing S3 pipelines)      | [S3 Lambda Forwarder](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/)                           | Reuses existing S3 log storage, no changes to Lambda functions     |
 | **Traces** (auto-instrumentation)          | [OTel Lambda Layers](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/)                          | Language-specific layers capture traces without code changes       |
+| **Traces** (Go)                            | [Go Manual Instrumentation](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-golang/)            | Go has no auto-instrumentation layer, so it uses the OTel Go SDK    |
 | **Metrics** (manual, low cost)             | [CloudWatch Exporter](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/)                        | Scrapes CloudWatch metrics with minimal AWS cost                   |
 | **Logs & Metrics** (fastest setup, Cloud only) | [One-Click Integration](https://signoz.io/docs/integrations/aws/lambda/)                                   | Auto-discovery, pre-built dashboards, ~5 minute setup              |
-
----
 
 ## Logs: OTel Extension vs S3
 
@@ -88,8 +87,6 @@ Lambda logs flow through CloudWatch Logs to an S3 bucket. A forwarder Lambda fun
 
 → [Logs via S3](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/)
 
----
-
 ## Traces: OTel Auto-Instrumentation
 
 Add language-specific OTel layers to your Lambda function to automatically capture traces without code changes.
@@ -114,7 +111,16 @@ Add language-specific OTel layers to your Lambda function to automatically captu
 
 → [APM & Tracing Guide](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/)
 
----
+### Traces for Go
+
+A Go function compiles to a binary, so OpenTelemetry publishes no auto-instrumentation layer for it. Instrument your handler with the OpenTelemetry Go SDK and the `otellambda` package instead.
+
+**Trade-offs:**
+- ✅ Full control over spans and attributes, with no agent overhead on cold start
+- ❌ Requires code changes in your function
+- ❌ Custom spans and caller trace context need explicit wiring
+
+→ [Go Lambda Tracing Guide](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-golang/)
 
 ## Metrics: CloudWatch Exporter
 
@@ -131,8 +137,6 @@ Scrape Lambda metrics (Invocations, Errors, Duration, Throttles) from CloudWatch
 
 → [Metrics Guide](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/)
 
----
-
 ## One-Click vs Manual
 
 | Feature                  | One-Click Integration           | Manual Setup                   |
@@ -146,8 +150,6 @@ Scrape Lambda metrics (Invocations, Errors, Duration, Throttles) from CloudWatch
 | **Best For**             | Quick start, managed experience | Cost optimization, self-hosted |
 
 See the full [One-Click vs Manual comparison](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) for details.
-
----
 
 ## Combining Approaches
 
