@@ -31,7 +31,7 @@ The best log management tool depends on how your team investigates production is
 
 ## What counts as a log management tool?
 
-A log management tool is software that turns records from applications, infrastructure, networks, and cloud services into a central, searchable history of what happened across a system. It should help engineers move from a symptom, such as a failed request or unusual login, to the relevant logs without checking each source separately.
+A [log management](https://signoz.io/log-management/) tool is software that turns records from applications, infrastructure, networks, and cloud services into a central, searchable history of what happened across a system. It should help engineers move from a symptom, such as a failed request or unusual login, to the relevant logs without checking each source separately.
 
 <Figure
   src="/img/blog/2026/08/log-management-tools-lifecycle.webp"
@@ -43,9 +43,9 @@ Core capabilities of a log management tool:
 
 1. **Aggregate:** Accept logs from the multiple sources you run and bring them into one place.
 2. **Ingest:** Process diverse data formats (JSON, Syslog, XML) and normalize them for uniformity.
-3. **Storage:** Retain logs for the required period while providing access controls, redaction, archival options, and predictable storage costs.
+3. **Storage:** Retain logs for the required period while providing access controls, PII redaction, archival options, and predictable storage costs.
 4. **Search:** Support fast full-text and field-based queries across large log volumes, with enough context to follow an incident across services.
-5. **Visualize:** Turn recurring queries into dashboards and connect logs with related telemetry, such as traces and metrics, when that context is available.
+5. **Visualize:** Turn recurring queries into dashboards and [correlate logs with related telemetry, such as traces and metrics](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/), when that context is available.
 6. **Alert:** Run saved-query checks or anomaly detection continuously and send useful notifications to the channels your team already uses.
 
 Together, these capabilities support production troubleshooting, security investigations, audit retention, and performance diagnosis. Their importance varies by use case. A security team may prioritize retention and access controls, while an application team may care more about search speed and correlation with traces.
@@ -58,17 +58,17 @@ List three recent incidents and write down the questions engineers asked. If mos
 
 #### Model the complete cost
 
-Calculate the cost of a normal month and a log-heavy incident. Include incoming volume, the portion that is indexed, retention, archive retrieval, query scans, users, and support. For self-hosted platforms, add infrastructure and the engineering time required for scaling, upgrades, backups, and recovery. Run the model against a normal month and a log-storm month. This gives you a comparable monthly estimate instead of a collection of unrelated unit prices.
+Calculate the cost of a normal month and a log-heavy incident. Include incoming volume, the portion that is indexed, retention, archive retrieval, query scans, occupied user seats, and support. For self-hosted platforms, add infrastructure and the engineering time required for scaling hardware, system upgrades, managing backups and handling recovery. This gives you a comparable monthly estimate instead of a collection of unrelated unit prices.
 
 #### Evaluate vendor lock-in in layers
 
 Vendor lock-in belongs in the decision, but a single yes-or-no column hides the real trade-off. Assess these three layers separately:
 
-1. **Collection and instrumentation:** OpenTelemetry makes it easier to change tools without reinstrumenting applications.
-2. **Queries and operational content:** Proprietary query languages, dashboards, monitors, parsing pipelines, and access policies usually require conversion.
+1. **Collection and instrumentation:** [OpenTelemetry](https://signoz.io/opentelemetry/) prevents vendor lock-in and makes it easier to change tools without reinstrumenting applications.
+2. **Queries and operational content:** Proprietary query languages, dashboards, monitors, parsing pipelines, and access policies usually require teams to maintain contextual knowledge and playbooks that don't carry over during migration.
 3. **Data movement:** Check archive formats, export APIs, egress charges, retention rules, and whether historical data can move to another backend.
 
-OpenTelemetry makes the collection layer easier to move between backends. Dashboards, alerts, pipelines, and saved queries still use each platform's own model and usually need to be rebuilt during a migration.
+OpenTelemetry makes the collection layer easier to move between backends. Dashboards, alerts, pipelines, and saved queries often use each platform's own model and usually need to be rebuilt during a migration.
 
 #### Run the same trial for every finalist
 
@@ -82,8 +82,8 @@ Send one representative application, one noisy infrastructure source, and one se
 | [Datadog](#2-datadog-best-for-managed-observability-with-broad-integrations) | Managed observability with broad integrations | `$0.10/GB` to ingest logs <br/> `$1.70/1M events` to index logs |
 | [Splunk](#3-splunk-best-for-enterprise-search-and-security-workflows) | Enterprise search and security workflows | Custom quote based on ingest, workload, or entities |
 | [Elastic](#4-elastic-best-for-flexible-full-text-search) | Flexible full-text search | Serverless Logs Essentials from `$0.07/GB` to ingest <br/> `$0.017/GB` to retain per month |
-| [Grafana Loki](#5-grafana-loki-best-for-grafana-and-kubernetes-environments) | Grafana and Kubernetes environments | Includes `50 GB/month` free <br/> Pro starts at `$19/month`, then usage based |
-| [Graylog](#6-graylog-best-for-centralized-syslog-and-operations) | Centralized syslog and operations | No software fee; paid editions require a quote |
+| [Grafana Loki](#5-grafana-loki-best-for-grafana-and-kubernetes-environments) | Grafana and Kubernetes environments | Includes `50 GB/month` free <br/> Pro starts at `$19/month`, then `$0.55/GB` at 30-day retention |
+| [Graylog](#6-graylog-best-for-centralized-syslog-and-operations) | Centralized syslog and operations | Open has no license fee <br/> Enterprise starts at `$15,000/year`; Security at `$18,000/year` |
 | [OpenSearch](#7-opensearch-best-for-teams-building-a-search-stack) | Teams building a search stack | No software fee; managed services bill compute, storage, and transfer |
 | [New Relic](#8-new-relic-best-for-existing-new-relic-observability-users) | Existing New Relic observability users | `100GB/month` free, then `$0.40/GB` on Original Data |
 | [Sumo Logic](#9-sumo-logic-best-for-cloud-operations-and-security-analytics) | Cloud operations and security analytics | Custom quote based on plan, ingest tier, and credits |
@@ -106,7 +106,7 @@ Pricing was checked against official vendor pages on August 12, 2026. Some rates
 
 #### How it handles the log lifecycle
 
-SigNoz receives logs through [OpenTelemetry](https://signoz.io/opentelemetry/) and supported ingestion paths, processes them with pipelines, stores telemetry in a ClickHouse-backed system, and provides Logs Explorer for full-text search, filters, and aggregations. Log queries can power dashboards and alerts. Trace and span identifiers connect an individual record to the request that produced it.
+SigNoz receives logs through OpenTelemetry and supported ingestion paths, processes them with pipelines, stores telemetry in a ClickHouse-backed system, and provides Logs Explorer for full-text search, filters, and aggregations. Log queries can power dashboards and alerts. Trace and span identifiers connect an individual record to the request that produced it.
 
 #### What to validate in a trial
 
@@ -283,7 +283,7 @@ Elastic listed Serverless Logs Essentials from `$0.07 per GB ingested` plus `$0.
 
 #### How it handles the log lifecycle
 
-Grafana Alloy, the OpenTelemetry Collector, or another compatible collector gathers and processes logs before sending them to Loki. Loki groups logs into streams, indexes low-cardinality labels rather than the full log content, and stores compressed chunks in object storage. Engineers use LogQL and Grafana to filter and parse logs, build dashboards, and create alerts.
+[Grafana Alloy (Grafana's OTel Collector distribution)](https://signoz.io/blog/opentelemetry-collector-contrib/), or another compatible Collector instance, gathers and processes logs before sending them to Loki. Loki groups logs into streams, indexes low-cardinality labels rather than the full log content, and stores compressed chunks in object storage. Engineers use LogQL and Grafana to filter and parse logs, build dashboards, and create alerts.
 
 #### What to validate in a trial
 
@@ -311,7 +311,7 @@ Design labels before ingesting production volume. Query by service and namespace
 
 #### Pricing model
 
-On August 12, 2026, Grafana Cloud's Free plan included `50 GB of logs per month with 14-day retention`. Pro had a `$19` monthly platform fee, included 50 GB, and listed an aggregate log rate of `$0.50 per GB` beyond the allowance. Self-hosted Loki replaces the service bill with infrastructure, object storage, and operating work.
+On August 12, 2026, Grafana Cloud's Free plan included `50 GB of logs per month with 14-day retention`. Pro had a `$19` monthly platform fee, included 50 GB with 30-day retention, and listed component rates totaling `$0.55 per GB` beyond the allowance at 30-day retention. Self-hosted Loki replaces the service bill with infrastructure, object storage, and operating work.
 
 ## 6. Graylog: Best for centralized syslog and operations
 
@@ -353,7 +353,7 @@ Onboard one syslog source and one JSON application source. Recreate parsing and 
 
 #### Pricing model
 
-Graylog Open has no software license fee, per-user charge, or ingest cap, but the team pays for infrastructure and operations. Graylog does not publish a stable numeric rate for Enterprise, Security, or Cloud editions, so those options require a quote for the required ingest and features.
+Graylog Open has no software license fee, per-user charge, or ingest cap, but the team pays for infrastructure and operations. Graylog Enterprise starts at `$15,000 per year`, and Graylog Security starts at `$18,000 per year`. Cloud pricing depends on the required ingest and features.
 
 ## 7. OpenSearch: Best for teams building a search stack
 
@@ -607,7 +607,7 @@ The answer depends on the alert workflow. Test query evaluation delay, grouping,
 
 #### What is the best open-source log management tool?
 
-The workload determines the choice. Loki fits label-oriented Grafana environments. Elastic and OpenSearch suit full-text search. Graylog emphasizes centralized operations, and OpenObserve provides a compact unified stack. SigNoz also has a Community Edition, while SigNoz Cloud is the recommended option here because it removes backend operations and includes Noz.
+The workload determines the choice. Loki fits label-oriented Grafana environments. Elastic and OpenSearch suit full-text search. Graylog emphasizes centralized operations, and OpenObserve provides a compact unified stack. SigNoz also has a self-hosted Community Edition, while SigNoz Cloud is the recommended option here because it removes backend operations and includes Noz.
 
 ## Get Started with SigNoz Cloud
 
