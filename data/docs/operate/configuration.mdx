@@ -162,7 +162,7 @@ Caches query results. Set `cache.provider` to `memory` or `redis`. Only the sub-
 |---|---|---|---|
 | `cache.provider` | Caching provider to use. Accepts `memory` or `redis`. | `memory` | `SIGNOZ_CACHE_PROVIDER` |
 | `cache.memory.num_counters` | Maximum number of items tracked by the in-memory cache. Set this to roughly 10x the expected number of entries. | `100000` | `SIGNOZ_CACHE_MEMORY_NUM__COUNTERS` |
-| `cache.memory.max_cost` | Total size in bytes allocated to the in-memory cache. The default is 128 MiB. | `134217728` | `SIGNOZ_CACHE_MEMORY_MAX__COST` |
+| `cache.memory.max_cost` | Total size in bytes allocated to the in-memory cache. The default is 64 MiB. | `67108864` | `SIGNOZ_CACHE_MEMORY_MAX__COST` |
 | `cache.redis.host` | Hostname or IP address of the Redis server. | `localhost` | `SIGNOZ_CACHE_REDIS_HOST` |
 | `cache.redis.port` | Port the Redis server listens on. | `6379` | `SIGNOZ_CACHE_REDIS_PORT` |
 | `cache.redis.password` | Password for authenticating with Redis, if required. | _unset_ | `SIGNOZ_CACHE_REDIS_PASSWORD` |
@@ -252,9 +252,9 @@ Groups and routes alert notifications. Options under `alertmanager.signoz.global
 | `alertmanager.signoz.templates` | Globs from which SigNoz notification templates are loaded. Upstream defaults (`default.tmpl`, `email.tmpl`) always load from embedded assets, so list only SigNoz templates here. | `/opt/signoz/conf/templates/alertmanager/*.gotmpl` | `SIGNOZ_ALERTMANAGER_SIGNOZ_TEMPLATES` |
 | `alertmanager.signoz.global.resolve_timeout` | Time after which an alert is declared resolved if it has not been updated. | `5m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_RESOLVE__TIMEOUT` |
 | `alertmanager.signoz.route.group_by` | Labels used to group alerts into a single notification. | `alertname` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__BY` |
-| `alertmanager.signoz.route.group_wait` | How long to wait for more alerts before sending the first notification for a new group. | `30s` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__WAIT` |
-| `alertmanager.signoz.route.group_interval` | How long to wait before sending a notification about new alerts added to an existing group. | `5m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__INTERVAL` |
-| `alertmanager.signoz.route.repeat_interval` | How long to wait before resending a notification for an alert that is still firing. | `4h` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_REPEAT__INTERVAL` |
+| `alertmanager.signoz.route.group_wait` | How long to wait for more alerts before sending the first notification for a new group. | `1m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__WAIT` |
+| `alertmanager.signoz.route.group_interval` | How long to wait before sending a notification about new alerts added to an existing group. | `1m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__INTERVAL` |
+| `alertmanager.signoz.route.repeat_interval` | How long to wait before resending a notification for an alert that is still firing. | `1h` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_REPEAT__INTERVAL` |
 | `alertmanager.signoz.alerts.gc_interval` | Interval between garbage collection of alerts. | `30m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ALERTS_GC__INTERVAL` |
 | `alertmanager.signoz.silences.max` | Maximum number of silences, including expired ones. Zero or negative means no limit. | `0` | `SIGNOZ_ALERTMANAGER_SIGNOZ_SILENCES_MAX` |
 | `alertmanager.signoz.silences.max_size_bytes` | Maximum total size of silences in bytes. Zero or negative means no limit. | `0` | `SIGNOZ_ALERTMANAGER_SIGNOZ_SILENCES_MAX__SIZE__BYTES` |
