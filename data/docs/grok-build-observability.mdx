@@ -88,16 +88,12 @@ Every metric lives under the `ai.xai.grok_code` meter scope. All the counters ar
 | `grok_code.startup.total` | `ms` | `outcome`, `auth_mode` |
 | `grok_code.startup.phase_duration` | `ms` | `phase`, `outcome`, `auth_mode` |
 
-Two things worth knowing when you query these:
-
-- **There is no total token metric.** Sum `input` and `output` yourself, and note that `reasoning` is reported as its own type rather than folded into output.
-- **There is no cost metric.** Join `grok_code.token.usage` against your own price sheet to track spend.
 
 <Admonition type="info" title="Reducing metric cardinality" defaultCollapsed="true">
 `session.id` is attached to metrics by default. On a large rollout that can be a lot of series, so set `OTEL_METRICS_INCLUDE_SESSION_ID=false` to drop it. `OTEL_METRICS_INCLUDE_ACCOUNT_UUID` behaves the same way, while `OTEL_METRICS_INCLUDE_VERSION` and `OTEL_METRICS_INCLUDE_ENTRYPOINT` are off by default and can be turned on.
 </Admonition>
 
-## View Grok Build Events in SigNoz
+## View Grok Build Logs in SigNoz
 
 Open the [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/) and filter with `service.name = 'grok-cli'` to see the event stream. Each event carries its detail in attributes rather than in the log body, so open a record to inspect it.
 
