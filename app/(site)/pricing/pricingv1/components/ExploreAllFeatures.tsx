@@ -589,15 +589,10 @@ const ALL_FEATURES_DATA = {
           ),
         },
         {
-          feature: 'Finer RBAC with custom roles',
+          feature: 'Fine-grained RBAC',
           inCommunity: <CrossSolid />,
           inTeams: <CrossSolid />,
-          inEnterprise: (
-            <div className="flex items-center">
-              <ClockSolid height="15" width="15" />
-              <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
-            </div>
-          ),
+          inEnterprise: <CheckSolid />,
         },
         {
           feature: 'Audit Logs',
