@@ -115,11 +115,12 @@ Node-level alerts miss a container that is throttled while the node sits idle. F
 
 `k8s.container.cpu_limit_utilization` comes from the kubeletstats receiver and reports a ratio from 0 to 1. The receiver emits it only for containers that define a CPU limit.
 
-The metric is disabled by default upstream. The k8s-infra chart turns it on; on a manually configured collector, enable it on your existing `kubelet_stats` receiver:
+The metric is disabled by default upstream. The k8s-infra chart turns it on; on a manually configured collector, enable it on your existing `kubeletstats` receiver:
 
 ```yaml:otel-collector-config.yaml
 receivers:
-  kubelet_stats:
+  # On Collector v0.152.0 and newer, use "kubelet_stats" to avoid a deprecation warning.
+  kubeletstats:
     metrics:
       k8s.container.cpu_limit_utilization:
         enabled: true
