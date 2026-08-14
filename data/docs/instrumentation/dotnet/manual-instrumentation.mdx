@@ -71,7 +71,7 @@ builder.Services.AddSingleton<Instrumentation>();
 
 Set up the TracerProvider and register your ActivitySource:
 
-```csharp:Program.cs defaultCollapsed
+```csharp:Program.cs
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -119,7 +119,7 @@ options.Endpoint = new Uri("http://<collector-host>:4318/v1/traces");
 
 Use `StartActivity()` to create spans. The `using` pattern ensures spans are properly ended:
 
-```csharp:Services/OrderService.cs defaultCollapsed
+```csharp:Services/OrderService.cs
 using System.Diagnostics;
 
 public class OrderService
@@ -158,7 +158,7 @@ Use `activity?` (null-conditional) because `StartActivity()` returns `null` when
 
 Child spans automatically link to their parent when you start them within a parent's scope:
 
-```csharp:Services/DiceService.cs defaultCollapsed
+```csharp:Services/DiceService.cs
 public int RollDice()
 {
     using var parentActivity = _instrumentation.ActivitySource.StartActivity("RollDice");

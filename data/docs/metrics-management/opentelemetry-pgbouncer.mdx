@@ -61,7 +61,7 @@ Look for `pgbouncer_up 1` plus several `pgbouncer_pools_*` and `pgbouncer_stats_
 
 Add a PgBouncer scrape job, a **resource** processor that tags metrics with **service.name**, and a dedicated pipeline. The SigNoz dashboard filters on **service.name**, so keep that processor.
 
-```yaml:config.yaml defaultCollapsed
+```yaml:config.yaml
 receivers:
   prometheus/pgbouncer:
     config:
@@ -137,7 +137,7 @@ docker compose logs -f
 
 Nest the same `receivers`, `processors`, and `service.pipelines` blocks under `otelDeployment.config` in your `override-values.yaml` for the [SigNoz K8s Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), using the in-cluster exporter Service as the scrape target:
 
-```yaml:override-values.yaml defaultCollapsed
+```yaml:override-values.yaml
 otelDeployment:
   config:
     receivers:
