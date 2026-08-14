@@ -10,23 +10,8 @@ import { SupportedImageTypes, SupportedVideoTypes } from '@/utils/strapi'
 import ChangelogTitle from '@/components/Changelog/Title/ChangelogTitle'
 import Link from 'next/link'
 
-function MarkdownLink({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
-  const isSignozUrl =
-    /^(https?:)?\/\/([^/]*\.)?signoz\.io/i.test(href ?? '') || Boolean(href?.startsWith('/'))
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel={isSignozUrl ? 'noopener' : 'noopener noreferrer nofollow'}
-      {...props}
-    >
-      {children}
-    </a>
-  )
-}
-
 function renderMarkdown(markdownContent: string) {
-  return <ReactMarkdown components={{ a: MarkdownLink }}>{markdownContent}</ReactMarkdown>
+  return <ReactMarkdown>{markdownContent}</ReactMarkdown>
 }
 
 function renderMedia(media: Media) {
