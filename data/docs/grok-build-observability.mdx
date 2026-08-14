@@ -69,6 +69,34 @@ The default metric export interval is 60 seconds, which is why the snippet above
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
+## View Grok Build Metrics in SigNoz
+
+Metrics are Grok Build's primary signal. Open the [Metrics Explorer](https://signoz.io/docs/userguide/metrics-explorer/), search for `grok_code.token.usage`, and run the query to confirm data is arriving.
+
+<Figure src="/img/docs/llm/grok-build/grok-build-metrics.webp" alt="Grok Build token usage metric charted in the SigNoz Metrics Explorer" caption="grok_code.token.usage charted in the Metrics Explorer" />
+
+Every metric lives under the `ai.xai.grok_code` meter scope. All the counters are monotonic delta sums, so aggregate them with `increase` to get totals rather than `rate`.
+
+| Metric | Unit | Key attributes |
+|---|---|---|
+| `grok_code.session.count` | `{session}` | base attributes only |
+| `grok_code.turn.count` | `{turn}` | `outcome` (`completed`, `cancelled`, `error`), `model` |
+| `grok_code.token.usage` | `{token}` | `type` (`input`, `output`, `reasoning`, `cache_read`), `model` |
+| `grok_code.tool.usage` | `{call}` | `tool_name`, `outcome` |
+| `grok_code.tool.decision` | `{decision}` | `tool_name`, `decision`, `access_kind`, `permission_mode` |
+| `grok_code.error.count` | `{error}` | `error_category`, `model` |
+| `grok_code.startup.total` | `ms` | `outcome`, `auth_mode` |
+| `grok_code.startup.phase_duration` | `ms` | `phase`, `outcome`, `auth_mode` |
+
+Two things worth knowing when you query these:
+
+- **There is no total token metric.** Sum `input` and `output` yourself, and note that `reasoning` is reported as its own type rather than folded into output.
+- **There is no cost metric.** Join `grok_code.token.usage` against your own price sheet to track spend.
+
+<Admonition type="info" title="Reducing metric cardinality" defaultCollapsed="true">
+`session.id` is attached to metrics by default. On a large rollout that can be a lot of series, so set `OTEL_METRICS_INCLUDE_SESSION_ID=false` to drop it. `OTEL_METRICS_INCLUDE_ACCOUNT_UUID` behaves the same way, while `OTEL_METRICS_INCLUDE_VERSION` and `OTEL_METRICS_INCLUDE_ENTRYPOINT` are off by default and can be turned on.
+</Admonition>
+
 ## View Grok Build Events in SigNoz
 
 Open the [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/) and filter with `service.name = 'grok-cli'` to see the event stream. Each event carries its detail in attributes rather than in the log body, so open a record to inspect it.
