@@ -1,8 +1,8 @@
 ---
-date: 2026-07-23
+date: 2026-08-14
 id: optimize-metrics
-title: Optimize Metrics
-description: Reduce metric sample volume by dropping unused metrics, aggregating high-cardinality labels, and optimising temporality.
+title: Reduce Metric Sample Volume and Cardinality
+description: Drop unused metrics, aggregate high-cardinality labels, and tune temporality and collection interval to reduce metric sample volume in SigNoz.
 doc_type: howto
 ---
 
@@ -57,7 +57,7 @@ If the label is unused, aggregating it will reduce the number of time series to 
 | `http.route` | Unparameterized raw URLs (`/user/123` instead of `/user/{id}`). | **Fix at instrumentation:** parameterize route patterns in your SDK or framework router |
 
 <Admonition type="warning">
-Using `delete_key()` via the attributes processor **does NOT merge** time series. It removes the label name but leaves colliding, undefined data. You **must** use the `metricstransform` processor to aggregate across the dropped dimension.
+Using `delete_key()` via the attributes processor **does NOT merge** time series. It removes the label name but leaves colliding, undefined data. Use the `metricstransform` processor's aggregation action to merge series within the dropped dimension instead. Note that `metricstransform` aggregates only within a single batch passing through the Collector, not across the full set of pods or nodes emitting that dimension, so cardinality reduction is bounded by your batch size and scrape topology.
 </Admonition>
 
 **Read more:** [How to safely drop metric labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/)
@@ -70,7 +70,7 @@ By default, OpenTelemetry SDKs use **Cumulative Temporality**: they emit a sampl
 
 ### When to Switch to Delta
 
-If you have large idle infrastructure (e.g., 1000 pods with only 10 receiving traffic in a given minute), Delta prevents the 990 idle pods from emitting unchanged samples every scrape interval.
+If you have large idle infrastructure (e.g., 1000 pods with only 10 receiving traffic in a given minute), Delta prevents the 990 idle pods from emitting unchanged samples every scrape interval. This applies to synchronous instruments (like a request counter incremented per request); asynchronous instruments whose callback runs on every collection cycle still emit a sample each interval regardless of temporality.
 
 | Feature | Cumulative | Delta |
 | --- | --- | --- |
@@ -95,18 +95,18 @@ export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta
 
 Sample count scales directly with how often each time series is emitted. A metric exported every 5 seconds generates 12x the samples of the same metric exported every 60 seconds, with no change in cardinality.
 
-**SDK metrics:** raise `OTEL_METRIC_EXPORT_INTERVAL` (milliseconds, default `60000`):
+**SDK metrics:** the OTel SDK default for `OTEL_METRIC_EXPORT_INTERVAL` is `60000` (60s). If your service overrides it to export more frequently, for example for a low-latency alert that no longer needs that resolution, raise it back toward the default or higher:
 
 ```bash
-export OTEL_METRIC_EXPORT_INTERVAL=60000
+export OTEL_METRIC_EXPORT_INTERVAL=60000  # raise this if your service currently overrides it lower
 ```
 
-**Collector receivers** (for example `hostmetrics`): raise `collection_interval` in the receiver config:
+**Collector receivers** (for example `hostmetrics`): the receiver's own default `collection_interval` is `1m`. If your config explicitly sets a shorter interval, raise it:
 
 ```yaml
 receivers:
   hostmetrics:
-    collection_interval: 60s
+    collection_interval: 60s # raise this if your config currently sets a shorter interval
 ```
 
 <Admonition type="warning">
@@ -128,4 +128,4 @@ To confirm the volume reduction:
 
 - Configure [Cost Meter Alert](https://signoz.io/docs/cost-meter/alerts/) to be notified when ingestion volume crosses your expected threshold.
 - Read [Understanding Metrics Billing and Reducing Costs](https://signoz.io/docs/metrics-management/reducing-costs/) for how cardinality maps to your bill and additional cost-driver examples.
-- Need help? Ask in the [SigNoz Community Forum](https://github.com/SigNoz/signoz/discussions).
+- Need help? Ask in the <a href="https://github.com/SigNoz/signoz/discussions" target="_blank" rel="noopener noreferrer nofollow">SigNoz Community Forum</a>.

@@ -1,8 +1,8 @@
 ---
-date: 2026-07-23
+date: 2026-08-14
 id: understand-ingestion-volume
-title: Analyze Ingestion Volume
-description: Use Cost Meter and Explorers to identify which service and signal is driving your ingestion volume.
+title: Analyze Ingestion Volume in SigNoz
+description: Use the Cost Meter Dashboard and the Logs, Traces, and Metrics Explorers in SigNoz to find which service and signal is driving ingestion volume.
 doc_type: howto
 ---
 
@@ -44,6 +44,10 @@ If the Ingestion Analysis Dashboard does not cover the time window you need, use
 ### Step 3: Historical Logs
 
 Navigate to **Logs** and swap to the **Table** tab. If the Cost Meter Dashboard identified a specific service, filter by `service.name` and `deployment.environment`. Group by `severity_text` over your target timeframe to see if `DEBUG` or `INFO` lines are dominating the output.
+
+<Admonition type="note">
+Sorting by count surfaces the highest-frequency severity or operation, not necessarily the highest byte volume. A lower-count group with larger average payloads (for example, verbose stack traces) can outweigh a higher-count group of short lines. Cross-check candidates against the Cost Meter Dashboard's GB breakdown before committing to a fix.
+</Admonition>
 
 <Figure src="/img/docs/cost-control/historical-logs-severity-breakdown.webp" alt="Logs Explorer grouped by severity_text showing log count per severity level" caption="Logs Explorer: group by severity_text to identify which log levels dominate volume" />
 

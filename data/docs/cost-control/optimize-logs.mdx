@@ -1,8 +1,8 @@
 ---
-date: 2026-07-23
+date: 2026-08-14
 id: optimize-logs
-title: Optimize Logs
-description: Reduce log volume by filtering verbose and low-value log records at the Collector edge.
+title: Reduce Log Ingestion Volume in SigNoz
+description: Filter, deduplicate, and truncate verbose log records at the OpenTelemetry Collector edge to reduce the log ingestion volume SigNoz bills for.
 doc_type: howto
 ---
 
@@ -30,6 +30,10 @@ The log types below use `severity_text` values as examples.
 | `INFO` | Review before dropping |
 | `ERROR` / `WARN` | Retain |
 | Kubernetes health check probes | Safe to drop |
+
+## Truncate Oversized Log Bodies
+
+Full JSON payloads, stack traces, and verbose SQL statements are often worth keeping but larger than they need to be. See [Limit Log Body Size](https://signoz.io/docs/logs-management/guides/drop-logs/#limit-log-body-size) for the `transform` processor configuration that caps log body size at the Collector.
 
 ## Deduplicate Repetitive Logs
 
@@ -67,30 +71,6 @@ processors:
 `logdedup` is an alpha-stability component. Confirm your Collector build includes it before deploying. It also delays log delivery by up to `interval`, and logs that require per-occurrence timestamps (audit or compliance logs) should be excluded via `conditions` instead of deduplicated.
 </Admonition>
 
-## Truncate Oversized Log Bodies
-
-Full JSON payloads, stack traces, and verbose SQL statements are often worth keeping but larger than they need to be. Use the `transform` processor's `truncate_all` function to cap log body size at the Collector:
-
-```yaml
-processors:
-  transform/truncate_logs:
-    log_statements:
-      - context: log
-        statements:
-          - truncate_all(body, 4096)
-```
-
-Enable it in the `logs` pipeline:
-
-```yaml
-service:
-  pipelines:
-    logs:
-      processors: [transform/truncate_logs, batch]
-```
-
-Adjust `4096` to the smallest size that still keeps the fields you query on. See [Guide to Drop Logs](https://signoz.io/docs/logs-management/guides/drop-logs/#limit-log-body-size) for details.
-
 ## Validate Your Changes
 
 <Admonition type="note">
@@ -105,4 +85,4 @@ To confirm the volume reduction:
 ## Next Steps
 
 - Configure a [Cost Meter Alert](https://signoz.io/docs/cost-meter/alerts/) on `signoz.meter.log.size` to be notified when log volume crosses your expected threshold.
-- Need help? Ask in the [SigNoz Community Forum](https://github.com/SigNoz/signoz/discussions).
+- Need help? Ask in the <a href="https://github.com/SigNoz/signoz/discussions" target="_blank" rel="noopener noreferrer nofollow">SigNoz Community Forum</a>.

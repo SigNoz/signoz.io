@@ -1,8 +1,8 @@
 ---
-date: 2026-07-23
+date: 2026-08-14
 id: optimize-traces
-title: Optimize Traces
-description: Reduce trace volume through head-based and tail-based sampling strategies.
+title: Reduce Trace Volume with Sampling Strategies
+description: Reduce trace ingestion volume in SigNoz using head-based sampling, tail-based sampling policies, and pre-filtering that removes low-value spans.
 doc_type: howto
 ---
 
@@ -32,7 +32,7 @@ export OTEL_TRACES_SAMPLER_ARG=0.1  # Retain 10% of all traces
 ```
 
 <Admonition type="note">
-`parentbased_traceidratio` is the correct sampler for distributed systems. It respects parent span sampling decisions so the entire trace is kept or dropped together. Using plain `traceidratio` makes an independent per-span decision and produces broken partial traces when requests cross service boundaries.
+`parentbased_traceidratio` is the correct sampler for distributed systems. It respects the parent span's sampling decision so the entire trace is kept or dropped together. Plain `traceidratio` ignores the parent's sampled flag: it still applies a deterministic hash of the trace ID, but each service evaluates that hash independently. If every service in the trace uses the same ratio, the decisions happen to agree; as soon as services run different ratios, the trace ID hash can pass in one service and fail in another, producing broken partial traces.
 </Admonition>
 
 **[Sampling strategies and trade-offs](https://signoz.io/blog/saving-money-with-sampling-strategies/):** covers ParentBased(TraceIdRatioBased), reservoir sampling, adaptive sampling, and byte-rate limiting.
@@ -62,7 +62,7 @@ processors:
           sampling_percentage: 3
 ```
 
-Adjust `threshold_ms` and `sampling_percentage` to your own latency SLO and cost target. For full setup instructions, policy reference, memory and topology requirements, and APM metrics impact, see [Control Traces Volume](https://signoz.io/docs/traces-management/guides/drop-spans/).
+Adjust `threshold_ms` and `sampling_percentage` to your own latency SLO and cost target. For full setup instructions, policy reference, memory and topology requirements, and APM metrics impact, see [Tail Sampling](https://signoz.io/docs/traces-management/guides/tail-sampling/).
 
 ## Solution 3: Pre-Filter Before Sampling
 
@@ -83,6 +83,10 @@ processors:
         - 'name == "grpc.health.v1.Health/Check"'
         - 'IsMatch(name, "GET /internal/.*")'
 ```
+
+<Admonition type="warning">
+The filter processor evaluates each span independently. If a matched span is a parent with child spans, dropping it orphans its children instead of removing the whole subtree, leaving a broken trace. Scope these patterns to leaf-level operations (like health check endpoints) that you've confirmed have no children.
+</Admonition>
 
 **By URL path attribute** (for HTTP spans where the operation name alone is too broad):
 
@@ -121,4 +125,4 @@ To confirm the volume reduction:
 ## Next Steps
 
 - Configure [Cost Meter Alert](https://signoz.io/docs/cost-meter/alerts/) to be notified when trace volume crosses your expected threshold.
-- Need help? Ask in the [SigNoz Community Forum](https://github.com/SigNoz/signoz/discussions).
+- Need help? Ask in the <a href="https://github.com/SigNoz/signoz/discussions" target="_blank" rel="noopener noreferrer nofollow">SigNoz Community Forum</a>.

@@ -1,5 +1,5 @@
 ---
-date: 2026-06-29
+date: 2026-08-14
 title: Drop and Filter Logs in SigNoz
 meta_title: Drop and Filter Logs in SigNoz Pipelines
 description: "Learn how to drop or filter logs in SigNoz pipelines to reduce noise, control costs, and keep high-value log data."
@@ -101,7 +101,7 @@ Refer to the <a href="https://github.com/open-telemetry/opentelemetry-collector-
 
 ## Limit Log Body Size
 
-If you're concerned about logs that are too large causing issues or potential abuse, you can control the size of log bodies using the transform processor with the `truncate_all` function.
+If you're concerned about logs that are too large causing issues or potential abuse, you can control the size of log bodies using the transform processor's `set` function with `Substring`.
 
 This is useful to:
 - Prevent accidental collection of oversized logs
@@ -118,7 +118,7 @@ processors:
     log_statements:
       - context: log
         statements:
-          - truncate_all(body, 4096)  # Limit log body to 4096 characters
+          - set(body, Substring(body, 0, 4096)) # Limit log body to 4096 characters
 ```
 
 In this example, log bodies will be truncated to 4096 characters. You can adjust this value based on your needs.
@@ -136,7 +136,7 @@ logs:
 
 </Admonition>
 
-For more information about the transform processor and the `truncate_all` function, refer to the [SigNoz documentation](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#transform-processor).
+For more information about the transform processor and OTTL functions like `Substring`, refer to the [SigNoz documentation](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#transform-processor).
 
 ## Related Guides
 
