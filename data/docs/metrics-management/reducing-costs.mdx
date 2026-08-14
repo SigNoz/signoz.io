@@ -1,22 +1,30 @@
 ---
-date: 2026-08-10
+date: 2026-08-14
 title: Understanding Metrics Billing and Reducing Costs
-description: Learn how metrics billing works based on cardinality and discover strategies to reduce costs effectively.
+description: Learn how metrics billing works per sample ingested, how cardinality drives sample volume, and strategies to reduce costs.
 doc_type: explanation
 ---
 
 ## Overview
 
-Metrics billing is based on **cardinality** - the number of unique time series created by your metrics. Understanding how attributes affect cardinality is key to managing costs effectively.
+Metrics are billed **per sample (datapoint) ingested**. There is no charge per time series, per unique metric name, or per label.
+
+Cardinality (the number of active time series) is the indirect cost driver because each active series emits one sample per export interval. The relationship is:
+
+```
+total samples ≈ active series × exports per billing period
+```
+
+For example, one series exported every 30 seconds produces roughly 86,400 samples per month (2 exports/min × 60 × 24 × 30). Doubling the number of active series doubles the samples billed.
 
 ## How Attributes Affect Billing
 
 There are two types of attributes that affect your metrics differently:
 
-1. **Identifying attributes** - These create new time series and contribute to cost. For example, adding a new `host.name` creates a new series.
-2. **Non-identifying/descriptive attributes** - These enrich existing metrics without creating new series. Examples include host family or EC2 tags.
+1. **Identifying attributes** - An attribute is identifying when its values split otherwise-identical label sets into additional time series. Each new series adds samples every export interval, increasing cost. For example, adding a `host.name` attribute with 10 unique values turns one series into 10, multiplying sample volume by 10.
+2. **Non-identifying attributes** - An attribute is non-identifying when its value is functionally dependent on attributes already present (i.e., it can be determined from the existing label set and adds zero new series). For example, `host.type` is non-identifying if every `host.id` maps to exactly one `host.type`. Adding it enriches the series without creating new ones and adds no cost.
 
-You can add as many non-identifying attributes as needed without additional cost, but each new identifying attribute with unique values increases your bill, often exponentially.
+Resource attributes (such as `service.name`, `host.id`, or `k8s.pod.uid`) are not treated specially for billing. They participate in series identity like any other label. A resource attribute increases cost only if it multiplies the number of active series (i.e., it is identifying). If every combination of your other attributes already determines the resource attribute's value, it adds zero new series and zero new samples.
 
 ## Common Cost Drivers
 
