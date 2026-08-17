@@ -1,5 +1,5 @@
 ---
-date: 2026-07-22
+date: 2026-08-17
 title: SigNoz MCP Server
 meta_title: SigNoz MCP Server - AI Assistant Integration Guide
 description: Connect Claude, Cursor, Copilot, and other AI assistants to SigNoz via MCP for natural language access to metrics, logs, traces, and alerts.
@@ -222,6 +222,48 @@ Or manually add to `mcp_config.json`:
 After saving the config, it will prompt you to complete the OAuth flow. To edit the config from within Antigravity, click the `...` menu at the top of the Agent pane → **MCP Servers** → **Manage MCP Servers** → **View raw config**.
 
 If you run into authentication issues, open the command palette and run **Authentication: Remove Dynamic Authentication Providers** to clear cached OAuth credentials and re-authenticate.
+
+</TabItem>
+<TabItem value="cloud-grok" label="Grok Build">
+
+### Configure
+
+Add the MCP server via CLI:
+
+```bash
+grok mcp add -t http signoz https://mcp.<region>.signoz.cloud/mcp
+```
+
+Or add this configuration to `~/.grok/config.toml`:
+
+```toml title="config.toml"
+[mcp_servers.signoz]
+url = "https://mcp.<region>.signoz.cloud/mcp"
+enabled = true
+```
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
+
+Adding the server does not authenticate it. Start Grok Build, run `/mcps`, select the `signoz` server, and complete the OAuth flow in your browser:
+
+```bash
+grok
+```
+
+```
+/mcps
+```
+
+No API key is stored in the config file; credentials are saved separately once the OAuth flow completes.
+
+Add `-s project` to the `add` command to write to `./.grok/config.toml` instead, sharing the server with everyone working in that directory.
+
+Verify the connection:
+
+```bash
+grok mcp list
+grok mcp doctor
+```
 
 </TabItem>
 </Tabs>
@@ -775,6 +817,50 @@ Add to `mcp_config.json` (open via `...` menu → **MCP Servers** → **Manage M
   }
 }
 ```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="sh-grok" label="Grok Build">
+
+<Tabs entityName="grok-transport">
+<TabItem value="sh-grok-stdio" label="Stdio (Recommended)" default>
+
+Add the MCP server via CLI:
+
+```bash
+grok mcp add signoz <path-to-binary>/signoz-mcp-server \
+  -e SIGNOZ_URL=<your-signoz-url> \
+  -e SIGNOZ_API_KEY=<your-api-key> \
+  -e LOG_LEVEL=info
+```
+
+- `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
+- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
+
+Stdio is the default transport, so no `-t` flag is needed. The server is written to `~/.grok/config.toml`; add `-s project` to write to `./.grok/config.toml` instead.
+
+</TabItem>
+<TabItem value="sh-grok-http" label="HTTP">
+
+1. Start the MCP server in HTTP mode.
+2. Add the MCP server via CLI:
+
+```bash
+grok mcp add -t http signoz http://localhost:8000/mcp
+```
+
+Or add to `~/.grok/config.toml`:
+
+```toml title="config.toml"
+[mcp_servers.signoz]
+url = "http://localhost:8000/mcp"
+enabled = true
+```
+
+Use `-H "<name>: <value>"` on the `add` command to pass an authentication header if your deployment requires one.
 
 </TabItem>
 </Tabs>
