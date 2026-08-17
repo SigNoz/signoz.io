@@ -1,177 +1,186 @@
 ---
-date: 2026-07-27
-title: Full-Text Search Guide
-description: Learn how to use full-text search in SigNoz to search log body content. Covers quoted phrases, regex, tabs and newlines, escaping, and field filters.
-doc_type: reference
+date: 2026-08-10
+title: Full-Text Search in Logs - Search Every Field with search()
+description: Learn how to use search() in SigNoz to run a full-text log search across the body, attributes, resources, and log fields, with scopes and cost limits.
+doc_type: howto
 ---
 
-Full-text search allows you to search through log body content without specifying field names. This guide covers all aspects of text searching in SigNoz.
+`search()` finds a term anywhere in a log record. You do not name a field, and the match is not limited to the log body: one call covers the body, attribute keys and values, resource keys and values, and log fields such as severity. Use it when you know what you are looking for but not where it is stored.
 
 <Admonition type="info">
-Full-text search is only supported for logs currently and searches only in the log body field.
+`search()` applies to logs only. Traces and metrics reject it and require field-based filters.
 </Admonition>
 
-## Quoted Text
+## Overview
 
-Use quotes for exact phrase matching in the log body:
+Type the call into the filter bar of the Logs Explorer:
+
 ```
-'failed to connect to database'
-```
-
-This finds logs where the body contains the exact phrase "failed to connect to database".
-
-<Figure
-  src="/img/docs/product-features/query-builder/full-text-search-quoted.webp"
-  alt="Quoted full-text search in SigNoz Logs Explorer"
-  caption="Quoted full-text search in the Logs Explorer"
-/>
-
-## Unquoted Text
-
-Without quotes, each word is searched separately in the log body:
-```
-error database connection
+search('timeout')
 ```
 
-This searches for logs where the body contains 'error' AND 'database' AND 'connection' (not necessarily together).
+This returns every log in the selected time range where `timeout` appears in any searchable field, so it matches all of the following without you writing three separate filters:
 
-<Figure
-  src="/img/docs/product-features/query-builder/full-text-search-unquoted.webp"
-  alt="Unquoted full-text search in SigNoz Logs Explorer"
-  caption="Unquoted full-text search in the Logs Explorer"
-/>
+- a log whose body reads `upstream request timeout`
+- a log with an `error.kind` attribute set to `timeout`
+- a log with a resource attribute named `timeout.policy`, whatever its value
 
-## How Search Text Is Evaluated
+### What Gets Searched
 
-SigNoz first tries to compile your search text as an <a href="https://github.com/google/re2/wiki/syntax" target="_blank" rel="noopener noreferrer nofollow">RE2 regular expression</a>. If it compiles, the search runs as a regex. If it doesn't, SigNoz matches the text as a literal substring instead.
-
-This means regex metacharacters stay active even in a search that looks like plain text:
-
-| Search | Evaluated as | Result |
-| --- | --- | --- |
-| `'status != 200'` | Regex with no metacharacters | Matches the literal text |
-| `'array[index] = value'` | Regex, where `[index]` is a character class | Matches `arrayi = value`, not the literal text |
-| `'C:\\Users\\John'` | Not valid regex, so a literal substring | Matches the literal text |
-
-Escape any of `. [ ] ( ) { } * + ? | ^ $ \` that you want to match literally.
-
-## Escaping Special Characters
-
-When searching for text that contains special characters, enclose your search in single quotes and escape only these two characters:
-- Single quotes: Use `\'` 
-- Backslashes: Use `\\`
-
-Examples:
-```
-# Searching for text with single quotes
-'user\'s email address'
-'can\'t connect to database'
-'it\'s working'
-
-# Searching for text with backslashes
-'C:\\Program Files\\App'
-'escape sequence: \\n'
-'path\\to\\file'
-
-# Combining both
-'user\'s path: C:\\Users\\John'
-```
-
-Those two escapes are for the query parser. Double quotes and other characters that mean nothing to a regex need no escaping:
-```
-'error: "connection failed"'
-'status != 200'
-```
-
-Regex metacharacters are a separate matter. Escape them when you want to match them literally:
-```
-# Wrong - [index] reads as a character class, and $ anchors to end of text
-'array[index] = value'
-'price: $99.99'
-
-# Correct
-'array\[index\] = value'
-'price: \$99\.99'
-```
-
-## Tabs, Newlines, and Other Whitespace
-
-Because search text is evaluated as a regex, the standard regex escapes match control characters:
-
-| Escape | Matches |
+| Context | Fields covered |
 | --- | --- |
-| `\t` | Tab |
-| `\n` | Newline |
-| `\r` | Carriage return |
-| `\s` | Any whitespace character |
+| `body` | The log body |
+| `attribute` | Keys and values of string, number, and boolean attributes |
+| `resource` | Keys and values of resource attributes |
+| `log` | `severity_text`, `trace_id`, `span_id` |
 
-To find a tab between two values in the log body:
+Keys are searched as well as values. `search('tenant')` matches a log that carries a `tenant` attribute no matter what the value is, which is a quick way to find out which services set a given attribute.
+
+## Scoping the Search
+
+Pass one or more field contexts after the term to restrict where SigNoz looks. Scoped searches read less data, so they are faster and less likely to hit the limits described below.
+
 ```
-'error\tconnection refused'
-```
-
-To match a literal backslash followed by `t` instead of a tab, use four backslashes. The parser collapses `\\\\` to `\\`, which the regex engine then reads as an escaped backslash:
-```
-'\\\\t'
-```
-
-## Regular Expressions
-
-You can use any valid <a href="https://github.com/google/re2/wiki/syntax" target="_blank" rel="noopener noreferrer nofollow">RE2 syntax</a> as the full text search.
-
-### Examples
-
-Match structured log entries:
-```
-'^\[SnapshotGenerator id=\d+\] Creating new KRaft snapshot file snapshot \d+-\d+ because .+ \d+ bytes\.$'
+search('checkout', resource)
 ```
 
-This matches log records with body like:
-```
-[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001109202-0000000001 because we have replayed at least 2800 bytes.
-[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001109163-0000000001 because we have replayed at least 2800 bytes.
-[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001109124-0000000001 because we have replayed at least 2800 bytes.
-[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001108539-0000000001 because we have replayed at least 2800 bytes.
-[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001108305-0000000001 because we have replayed at least 2800 bytes.
-```
+This matches only logs whose resource attributes contain `checkout`, ignoring a body that happens to mention checkout.
 
-Match logs where the body contains email addresses:
+The four valid scopes are `body`, `attribute`, `resource`, and `log`. Write them bare or quoted, both forms are accepted:
+
 ```
-'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+search('checkout', body)
+search('checkout', 'body')
 ```
 
-## Combining Full-Text with Field Searches
+Pass several scopes to search the union of them:
 
-You can combine full-text search (on log body) with field-based filtering:
 ```
-'payment failed' AND service.name = 'payment-service'
-```
-
-This finds logs where the body contains "payment failed" AND the service name is 'payment-service'.
-
-## Important: When to Use Quotes
-
-Always use quotes when:
-1. Searching for exact phrases
-2. Your search term contains special characters or operators
-3. You want to search for operator keywords as text
-
-Examples where quotes are necessary:
-```
-# Wrong - AND will be treated as boolean operator
-searching for AND operator
-
-# Correct - searches for the phrase including 'AND'
-'searching for AND operator'
+search('checkout', body, resource)
 ```
 
-## Best Practices
+<Admonition type="warning">
+A scope must be one of the four context names. An unknown word or a qualified field such as `body.message` is rejected with an HTTP 400 error. To match inside a specific body key, use a field filter such as `body.message CONTAINS 'checkout'` instead.
 
-1. **Use quotes for phrases** - Always quote multi-word searches unless you want each word searched separately
-2. **Be specific** - More specific searches perform better than broad ones
-3. **Combine with fields** - Add field filters to narrow down results
-4. **Test regex patterns** - Complex regex can be slow; test and optimize
-5. **Escape properly** - Escape single quotes and backslashes for the parser, plus any regex metacharacter you want matched literally
+```
+# Invalid: not a field context
+search('checkout', bogus)
+
+# Invalid: a qualified field is not a scope
+search('checkout', body.message)
+```
+</Admonition>
+
+## How the Term Is Matched
+
+`search()` performs a case-insensitive literal substring match:
+
+- **Case-insensitive.** `search('CHECKOUT')` and `search('checkout')` return the same logs.
+- **Literal, never regex.** Regex metacharacters are matched as written. `search('price: $99.99')` looks for that exact text rather than treating `$` as an end anchor.
+- **Substring, not whole word.** `search('uuid')` matches `abcuuid123xyz`. For whole-token matching, use [`hasToken()`](https://signoz.io/docs/userguide/functions-reference/#hastoken-function).
+
+Quote the term. An unquoted term is accepted only when it is a single bare word, number, or boolean, so anything with a space or punctuation must be quoted:
+
+```
+# Correct
+search('connection refused')
+
+# Wrong: unquoted multi-word text is a syntax error
+search(connection refused)
+```
+
+This literal behavior is the main difference from [free-text search](https://signoz.io/docs/userguide/free-text-search/), where SigNoz tries to compile your text as an RE2 regular expression first.
+
+## Combining With Other Filters
+
+`search()` is a normal filter expression. Combine it with field filters, boolean operators, and negation:
+
+```
+# Narrow a broad search to one severity
+search('useast') AND severity_text = 'ERROR'
+
+# Exclude noisy records
+service.name = 'checkout' AND NOT search('healthcheck')
+
+# Two terms in different places
+search('timeout', body) AND search('acme', resource)
+```
+
+Adding a selective field filter is also the best way to keep a search inside the scan limits below.
+
+## Query Cost and Limits
+
+`search()` reads every searchable column instead of a single indexed one, so it is far more expensive than a field filter. SigNoz applies two guardrails.
+
+**An advisory on every result.** Each `search()` query returns this warning alongside its results:
+
+```
+search() runs across all fields and can be slow and expensive. Prefer a specific field, e.g. `<context>.<field_key>:<type>`
+```
+
+The results are still correct. The warning is a nudge to switch to a field filter once you know where the term lives.
+
+**A scan budget checked before the query runs.** SigNoz estimates how many rows the query would read and rejects it if the estimate is over budget, so a runaway search fails fast instead of loading the cluster:
+
+```
+This query would scan about 84000000 rows per shard in this range, over the per-shard limit of 60000000
+```
+
+To get under the budget, do one of the following:
+
+- **Shorten the time range.** This is usually the fastest fix, since scan cost scales directly with the range.
+- **Add a selective filter**, such as `service.name = 'checkout' AND search('timeout')`.
+- **Scope the search**, such as `search('timeout', body)` instead of the keyless form.
+
+<Admonition type="info">
+Logs stored with the [native JSON body](https://signoz.io/docs/logs-management/features/json-logs/) carry a lower budget than logs with a plain string body, because matching a JSON body requires reconstructing every document and no index can skip rows. Expect to narrow the range more aggressively on that path.
+</Admonition>
+
+A query that cannot be planned within 5 seconds is rejected the same way, with `This query is too broad to plan within 5s`.
+
+### Tuning the Scan Budget (Self-Hosted)
+
+Self-hosted deployments can change the per-shard budgets in the `querier` section of the [configuration file](https://signoz.io/docs/operate/configuration/). Set either option to `0` to disable that check.
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `querier.search_max_scan_rows` | Per-shard scan-row budget for a `search()` over a plain string log body. | `60000000` |
+| `querier.search_max_scan_rows_json_body` | Per-shard scan-row budget for a `search()` over a native JSON log body. | `6000000` |
+
+```yaml
+querier:
+  search_max_scan_rows: 60000000
+  search_max_scan_rows_json_body: 6000000
+```
+
+Or through the equivalent environment variables:
+
+```bash
+SIGNOZ_QUERIER_SEARCH__MAX__SCAN__ROWS=60000000
+SIGNOZ_QUERIER_SEARCH__MAX__SCAN__ROWS__JSON__BODY=6000000
+```
+
+Raising these lets broader searches through at the cost of heavier queries on your ClickHouse cluster.
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `invalid search scope` 400 error | The scope is not one of `body`, `attribute`, `resource`, `log` | Use a valid context, or a field filter for a specific key |
+| Query rejected for scanning too many rows | The time range or term is too broad | Shorten the range, add a field filter, or scope the search |
+| Results include unexpected logs | Attribute and resource **keys** are searched, not just values | Scope to `body`, or use a field filter on the specific key |
+| No results for a term you can see in the UI | The rendered value differs from the stored one, for example a formatted number or a timestamp | Search a distinctive substring, or filter the field directly |
+| `search` is not recognized on traces or metrics | `search()` is logs-only | Use a field filter, or `body`-style text operators such as `CONTAINS` |
+
+For parser errors and other query failures, see the [Search Troubleshooting guide](https://signoz.io/docs/userguide/search-troubleshooting/).
+
+## Related
+
+- [Free-Text Log Search](https://signoz.io/docs/userguide/free-text-search/) - regex-capable search over the log body only
+- [Functions Reference](https://signoz.io/docs/userguide/functions-reference/) - `hasToken()`, `has()`, and other query functions
+- [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) - complete reference for filter bar expressions
+- [Field Context & Data Types](https://signoz.io/docs/userguide/field-context-data-types/) - how contexts such as `resource` and `attribute` resolve
+- [Slow Queries & Missing Results](https://signoz.io/docs/querying/query-performance/) - diagnose query performance problems
 
 ## Get Help
 

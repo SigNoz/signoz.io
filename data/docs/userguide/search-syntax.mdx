@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-08-10
 
 title: Log Search Syntax and Querying in SigNoz
 meta_title: "Log Search Syntax & Querying"
@@ -28,13 +28,19 @@ You can combine multiple conditions:
 service.name = 'payment-service' AND http.status_code >= 400
 ```
 
-For full-text search, simply type what you're looking for:
+To search the log body without naming a field, type what you're looking for:
 
 ```
 'error connecting to database'
 ```
 
 Note: Make sure the phrase you want to search is enclosed in single quotes.
+
+To search every field of a log record instead of just the body, use `search()`:
+
+```
+search('error connecting to database')
+```
 
 ## Basic Concepts
 
@@ -115,8 +121,9 @@ message CONTAINS 'NOT'
 For detailed information on specific topics:
 
 - **[Operators Reference](https://signoz.io/docs/userguide/operators-reference/)** - Complete list of operators and their behavior
-- **[Full-Text Search Guide](https://signoz.io/docs/userguide/full-text-search/)** - How to search text content in logs
-- **[Functions Reference](https://signoz.io/docs/userguide/functions-reference/)** - Array functions for JSON searches
+- **[Full-Text Search Guide](https://signoz.io/docs/userguide/full-text-search/)** - How to search every field of a log record with `search()`
+- **[Free-Text Log Search Guide](https://signoz.io/docs/userguide/free-text-search/)** - How to search log body content with phrases and regex
+- **[Functions Reference](https://signoz.io/docs/userguide/functions-reference/)** - `search()`, token matching, and array functions
 - **[Field Context & Data Types](https://signoz.io/docs/userguide/field-context-data-types/)** - Understanding contexts and type specification
 - **[Troubleshooting Guide](https://signoz.io/docs/userguide/search-troubleshooting/)** - Common errors and how to fix them
 - **[Advanced Examples](https://signoz.io/docs/userguide/search-advanced-examples/)** - Complex query patterns and use cases
