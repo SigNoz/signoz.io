@@ -1,18 +1,111 @@
 ---
-date: 2026-07-27
+date: 2026-08-17
 
 title: Functions Reference Guide
-description: Reference guide for SigNoz query functions for arrays and token matching. Learn syntax and usage examples.
+description: Reference guide for SigNoz query functions. Use search() for text across every log field, hasToken() for token matching, and has() for arrays.
 doc_type: reference
 ---
 
-This guide covers functions available for querying array fields in SigNoz.
+This guide covers functions available in SigNoz query expressions.
 
 <Admonition type="info">
-Functions are currently supported only for JSON body searches.
+Except for `search()` and `hasToken()`, these functions are supported only for JSON body searches.
 </Admonition>
 
 ## Available Functions
+
+### search() Function
+
+Runs a case-insensitive text search for a term across every field of a log record: the body, attribute keys and values, resource keys and values, and log fields such as severity. Use it when you know what you are looking for but not which field holds it.
+
+**Syntax:**
+```
+search(term)
+search(term, scope, ...)
+```
+
+**Examples:**
+```
+# Every field
+search('timeout')
+
+# Only the log body
+search('timeout', body)
+
+# Body and resource attributes
+search('checkout', body, resource)
+
+# Combined with a field filter
+search('timeout') AND service.name = 'checkout'
+```
+
+#### Scopes
+
+Each optional scope narrows the search to one field context, and several scopes search the union of them. Scopes can be written bare or quoted, so `search('checkout', body)` and `search('checkout', 'body')` are equivalent.
+
+| Scope | Fields covered |
+| --- | --- |
+| `body` | The log body |
+| `attribute` | Keys and values of string, number, and boolean attributes |
+| `resource` | Keys and values of resource attributes |
+| `log` | `severity_text`, `trace_id`, `span_id` |
+
+Keys are searched as well as values, so `search('tenant')` also matches a log that carries a `tenant` attribute whatever its value.
+
+<Admonition type="warning">
+A scope must be one of the four field contexts above. An unknown word or a qualified field such as `body.message` is rejected with an HTTP 400 error. To match inside a specific body key, use a field filter instead.
+
+```
+# Invalid: not a field context
+search('checkout', bogus)
+
+# Invalid: a qualified field is not a scope
+search('checkout', body.message)
+
+# Correct: filter the field directly
+body.message CONTAINS 'checkout'
+```
+</Admonition>
+
+#### Matching Rules
+
+- **Case-insensitive** - `search('CHECKOUT')` and `search('checkout')` return the same logs.
+- **Literal, never regex** - regex metacharacters match as written, so `search('price: $99.99')` looks for that exact text rather than treating `$` as an end anchor.
+- **Substring, not whole word** - `search('uuid')` matches `abcuuid123xyz`. For whole-token matching, use [hasToken()](https://signoz.io/docs/userguide/functions-reference/#hastoken-function).
+
+Quote the term. An unquoted term is accepted only when it is a single bare word, number, or boolean, so anything containing a space or punctuation must be quoted:
+
+```
+# Correct
+search('connection refused')
+
+# Wrong: unquoted multi-word text is a syntax error
+search(connection refused)
+```
+
+#### Query Cost
+
+`search()` reads every searchable column instead of a single indexed one, so it is far more expensive than a field filter. SigNoz applies two guardrails.
+
+Every call returns an advisory warning alongside its results. The results are still correct; the warning is a nudge to switch to a field filter once you know where the term lives:
+
+```
+search() runs across all fields and can be slow and expensive. Prefer a specific field, e.g. `<context>.<field_key>:<type>`
+```
+
+SigNoz also estimates how many rows the query would read before running it, and rejects it with an HTTP 400 error when the estimate is over the per-shard budget:
+
+```
+This query would scan about 84000000 rows per shard in this range, over the per-shard limit of 60000000
+```
+
+To get under the budget, shorten the time range, add a selective filter such as `service.name = 'checkout' AND search('timeout')`, or scope the search with `search('timeout', body)`. A query that cannot be planned within 5 seconds is rejected the same way, with `This query is too broad to plan within 5s`.
+
+<Admonition type="info">
+Deployments with the [native JSON body](https://signoz.io/docs/logs-management/features/json-logs/) enabled use a lower budget than a plain string body, because matching a JSON body requires reconstructing every document and no index can skip rows. Expect to narrow the time range more aggressively on that path.
+
+Self-hosted deployments can tune both budgets with `querier.search_max_scan_rows` and `querier.search_max_scan_rows_json_body` in the [configuration file](https://signoz.io/docs/operate/configuration/). Set either option to `0` to disable that check.
+</Admonition>
 
 ### hasToken() Function
 
@@ -62,8 +155,9 @@ has(body.regions, 'us-east')
 
 ## Important Notes
 
-1. **Body fields only** - Functions currently work only with JSON body fields (fields prefixed with `body.`) except for the hasToken function.
-2. **Array data** - The field must contain an array for these functions to work properly
+1. **Body fields only** - `has()` works only with JSON body fields (fields prefixed with `body.`). `search()` and `hasToken()` are not restricted this way.
+2. **Array data** - The field must contain an array for `has()` to work properly
+3. **Logs only** - These functions apply to logs. Traces and metrics reject them and require field-based filters.
 
 ## Combining with Other Conditions
 
@@ -80,6 +174,13 @@ has(body.tags, 'production') AND status_code IN [500, 502, 503]
 ```
 # Find all logs with production tag
 has(body.tags, 'production')
+```
+
+### Finding a Value When You Do Not Know the Field
+```
+# The order ID could be in the body, an attribute, or a resource attribute
+search('ord_8123fa')
+```
 
 ## Error Messages
 
@@ -88,3 +189,11 @@ Common errors you might encounter:
 - **"unknown function"** - Check function name spelling and case
 - **"function expects key and value parameters"** - Ensure you're providing both field and value
 - **"function supports only body JSON search"** - Use only with `body.` prefixed fields
+- **"invalid search scope"** - `search()` scopes must be `body`, `attribute`, `resource`, or `log`
+
+## Related
+
+- [Search Syntax](https://signoz.io/docs/userguide/search-syntax/) - complete reference for filter bar expressions
+- [Operators Reference](https://signoz.io/docs/userguide/operators-reference/) - all supported comparison and logical operators
+- [Search Troubleshooting](https://signoz.io/docs/userguide/search-troubleshooting/) - common query errors and how to fix them
+- [Slow Queries & Missing Results](https://signoz.io/docs/querying/query-performance/) - diagnose query performance problems
