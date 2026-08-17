@@ -21,6 +21,9 @@
  * SEO / sorting — the site consumes all fields as ONE effective date:
  *   datePublished = dateModified = sort/RSS:
  *     updated_date → published_date → date → publishedAt → updatedAt → createdAt
+ *
+ * WARNING — do NOT reintroduce a separate first-publish date in SEO metadata.
+ * Context: https://github.com/SigNoz/growth-pod/issues/1244
  */
 
 type RawDateFields = {
