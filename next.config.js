@@ -2224,7 +2224,7 @@ module.exports = () => {
         },
         {
           source: '/autoinstrumented-tracing-nodejs',
-          destination: '/opentelemetry/autoinstrumented-tracing-nodejs/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
         {
@@ -2661,7 +2661,7 @@ module.exports = () => {
         },
         {
           source: '/collector-nodejs',
-          destination: '/opentelemetry/collector-nodejs/',
+          destination: '/blog/otel-collector-docker/',
           permanent: true,
         },
         {
@@ -2676,7 +2676,7 @@ module.exports = () => {
         },
         {
           source: '/correlating-traces-logs-metrics-nodejs',
-          destination: '/opentelemetry/correlating-traces-logs-metrics-nodejs/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
         {
@@ -2686,7 +2686,7 @@ module.exports = () => {
         },
         {
           source: '/metrics-nodejs',
-          destination: '/opentelemetry/metrics-nodejs/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
         {
@@ -2706,7 +2706,7 @@ module.exports = () => {
         },
         {
           source: '/nodejs-clone-application',
-          destination: '/opentelemetry/nodejs-clone-application/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
         {
@@ -2716,7 +2716,7 @@ module.exports = () => {
         },
         {
           source: '/nodejs-tutorial-overview',
-          destination: '/opentelemetry/nodejs-tutorial-overview/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
         {
@@ -2767,7 +2767,7 @@ module.exports = () => {
         },
         {
           source: '/nodejs-docker-setup',
-          destination: '/opentelemetry/nodejs-docker-setup/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
         {
@@ -2787,7 +2787,7 @@ module.exports = () => {
         },
         {
           source: '/logging-nodejs',
-          destination: '/opentelemetry/logging-nodejs/',
+          destination: '/guides/pino-logger-nodejs-logging-library/',
           permanent: true,
         },
         {
@@ -3105,6 +3105,50 @@ module.exports = () => {
         {
           source: '/blog/llm-observability/',
           destination: '/docs/llm-observability/',
+          permanent: true,
+        },
+        // OpenTelemetry Node.js tutorial series consolidation.
+        // The series is retired; surviving standalones are
+        // /opentelemetry/add-manual-span-to-traces-nodejs/ and
+        // /opentelemetry/custom-metrics-nodejs/, which keep their URLs.
+        {
+          source: '/opentelemetry/nodejs-tutorial-overview/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/nodejs-docker-setup/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/nodejs-clone-application/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/metrics-nodejs/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/autoinstrumented-tracing-nodejs/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/collector-nodejs/',
+          destination: '/blog/otel-collector-docker/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/correlating-traces-logs-metrics-nodejs/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/logging-nodejs/',
+          destination: '/guides/pino-logger-nodejs-logging-library/',
           permanent: true,
         },
       ])
