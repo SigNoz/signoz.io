@@ -1,0 +1,80 @@
+---
+date: 2026-08-12
+title: GitHub Copilot Dashboard
+meta_title: GitHub Copilot OpenTelemetry Dashboard
+description: Monitor GitHub Copilot Chat with token usage, prompt cache hit rate, per-model call volume and latency, tool activity, and errors from OpenTelemetry traces.
+doc_type: explanation
+---
+
+<Admonition type="info" title="Turn on Copilot telemetry first">
+Before using this dashboard, enable the OpenTelemetry settings in Copilot Chat and point them at SigNoz. See the [GitHub Copilot monitoring guide](https://signoz.io/docs/github-copilot-monitoring/) for complete setup instructions.
+</Admonition>
+
+This dashboard provides a comprehensive view of `GitHub Copilot Chat` using the OpenTelemetry traces the Copilot Chat extension exports natively. Every panel keys off the GenAI semantic-convention attributes Copilot emits: `gen_ai.operation.name` (`invoke_agent`, `chat`, `execute_tool`, `embeddings`), `gen_ai.response.model`, `gen_ai.usage.*`, `gen_ai.tool.name`, `gen_ai.agent.name`, and `gen_ai.conversation.id`. Use the `Service` picker at the top to scope every panel to one or more Copilot rollouts.
+
+Token panels are deliberately scoped to `gen_ai.operation.name = 'chat'`. The `invoke_agent` span carries a roll-up of its children's token counts, so summing across every span would roughly double count. Copilot also emits no `gen_ai.usage.total_tokens`, which is why the total is computed as input plus output.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/github-copilot-dashboard.webp"
+  alt="GitHub Copilot Dashboard"
+  caption="GitHub Copilot Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/github-copilot/github-copilot-dashboard.json"
+  dashboardName="GitHub Copilot"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the cost, performance, and reliability of GitHub Copilot Chat using OpenTelemetry trace data to help you:
+
+- **Track Token Spend**: See total, cached, and reasoning tokens across model calls, and how they trend over time.
+- **Measure Cache Savings**: Watch the prompt cache hit rate, the single biggest lever on Copilot cost, since cached input is billed at a large discount.
+- **Compare Models**: Break down call volume and token consumption per model to spot when Copilot silently routes work to a different one.
+- **Monitor Perceived Latency**: Track time to first chunk alongside end-to-end model call latency, so you see what developers actually experience as slowness.
+- **Understand Tool Activity**: Identify which tools the agent reaches for, which are slowest, and how much traffic your MCP servers are earning.
+- **See Background Work**: Surface internal agents such as title generation that spend tokens without any visible chat turn.
+- **Catch Errors Early**: Watch failing spans over time and drill straight into the conversation turn that produced them.
+
+## Panels Included
+
+### Summary (Top Rows)
+
+| Panel | Type | What It Shows |
+|-------|------|---------------|
+| **Total Tokens** | Value | Input plus output tokens across `chat` spans, summed because Copilot emits no `total_tokens` attribute |
+| **Model Calls** | Value | Count of `chat` spans, the completions requested from the model |
+| **Tool Calls** | Value | Count of `execute_tool` spans, such as `read_file`, `grep_search`, or an MCP tool |
+| **Conversations** | Value | Distinct chat conversations, counted on `gen_ai.conversation.id` |
+| **Prompt Cache Hit Rate** | Value | Share of input tokens served from the prompt cache, as a percentage |
+| **Cached Input Tokens** | Value | Input tokens read from the prompt cache rather than reprocessed |
+| **Reasoning Tokens** | Value | Output tokens spent on internal reasoning, billed as output but never shown in the chat |
+| **Avg Input Tokens per Call** | Value | Average prompt size per model call, which rises as the agent carries more context per turn |
+
+### Token Usage
+
+- **Token Usage Over Time**: Time-series graph of input, output, cached-input, and reasoning tokens. Cached input is a subset of input, not an additional charge.
+- **Tokens by Model**: Pie chart of total tokens grouped by `gen_ai.response.model`, showing which model consumes the budget. Copilot routes different tasks to different models, so this rarely matches the call-count split.
+
+### Model Activity & Latency
+
+- **Model Calls Over Time**: Time-series graph of `chat` span volume grouped by `gen_ai.response.model`, useful for spotting when Copilot switches you to a different model.
+- **Finish Reasons**: Pie chart of `gen_ai.response.finish_reasons`. A rising share of `["length"]` means answers are being truncated by the token limit, and `["tool_calls"]` means the model handed control back to the agent.
+- **Model Call Latency**: Time-series graph of p50, p95, and p99 duration for `chat` spans.
+- **Time to First Chunk**: Time-series graph of p50 and p95 `gen_ai.response.time_to_first_chunk`, which is what a developer perceives as Copilot being slow, independent of total response length.
+
+### Tools
+
+- **Tool Calls by Name**: Bar chart of `execute_tool` spans grouped by `gen_ai.tool.name`, showing what kind of work Copilot is trusted with.
+- **MCP vs Built-in Tools**: Pie chart splitting tool calls between MCP server tools (names prefixed `mcp_`) and Copilot's built-in tools, so you can see whether your MCP servers are earning their place in the tool list.
+- **Tool Latency (p95)**: Table of tools ranked by p95 execution time. Long-running terminal commands and remote MCP calls dominate here and directly stall the agent.
+
+### Agent Activity & Errors
+
+- **Activity by Operation**: Pie chart of spans across `chat`, `execute_tool`, `invoke_agent`, and `embeddings`.
+- **Activity by Agent**: Bar chart of spans grouped by `gen_ai.agent.name`, which surfaces background agents such as title generation that spend real tokens without any visible chat turn.
+- **Errors Over Time**: Time-series graph of Copilot spans with an error status, most often a tool that failed rather than the model itself.
+- **Recent Errors**: List of individual failing spans with their status message, duration, and trace ID, so you can click through to the conversation turn that produced the failure.
