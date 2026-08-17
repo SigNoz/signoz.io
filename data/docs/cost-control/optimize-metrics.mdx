@@ -1,6 +1,5 @@
 ---
 date: 2026-08-14
-id: optimize-metrics
 title: Reduce Metric Sample Volume and Cardinality
 description: Drop unused metrics, aggregate high-cardinality labels, and tune temporality and collection interval to reduce metric sample volume in SigNoz.
 doc_type: howto
@@ -57,7 +56,7 @@ If the label is unused, aggregating it will reduce the number of time series to 
 | `http.route` | Unparameterized raw URLs (`/user/123` instead of `/user/{id}`). | **Fix at instrumentation:** parameterize route patterns in your SDK or framework router |
 
 <Admonition type="warning">
-Using `delete_key()` via the attributes processor **does NOT merge** time series. It removes the label name but leaves colliding, undefined data. Use the `metricstransform` processor's aggregation action to merge series within the dropped dimension instead. Note that `metricstransform` aggregates only within a single batch passing through the Collector, not across the full set of pods or nodes emitting that dimension, so cardinality reduction is bounded by your batch size and scrape topology.
+Using `delete_key()` via the attributes processor **does NOT merge** time series. It removes the label name but leaves colliding, undefined data. Use the `metricstransform` processor's aggregation action to merge series within the dropped dimension instead. `metricstransform` aggregates only within a single batch passing through the Collector, not across the full set of pods or nodes emitting that dimension, so cardinality reduction is bounded by your batch size and scrape topology.
 </Admonition>
 
 **Read more:** [How to safely drop metric labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/)
@@ -128,4 +127,7 @@ To confirm the volume reduction:
 
 - Configure [Cost Meter Alert](https://signoz.io/docs/cost-meter/alerts/) to be notified when ingestion volume crosses your expected threshold.
 - Read [Understanding Metrics Billing and Reducing Costs](https://signoz.io/docs/metrics-management/reducing-costs/) for how cardinality maps to your bill and additional cost-driver examples.
-- Need help? Ask in the <a href="https://github.com/SigNoz/signoz/discussions" target="_blank" rel="noopener noreferrer nofollow">SigNoz Community Forum</a>.
+
+## Get Help
+
+<GetHelp />
