@@ -17,7 +17,7 @@ import JsonLdScript from '@/components/JsonLdScript'
 import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
-import { resolvePublishedDate, resolveLatestDate } from '@/utils/dateUtils'
+import { resolveLatestDate } from '@/utils/dateUtils'
 
 const defaultLayout = 'GuidesLayout'
 const layouts = {
@@ -48,7 +48,7 @@ export async function generateMetadata(props: {
     return a || { name: author }
   })
 
-  const publishedAt = new Date(resolvePublishedDate(post) || Date.now()).toISOString()
+  const publishedAt = new Date(resolveLatestDate(post) || Date.now()).toISOString()
   const modifiedAt = new Date(resolveLatestDate(post) || Date.now()).toISOString()
   const authors = authorDetails.map((author) => author.name)
   let imageList = [siteMetadata.socialBanner]
