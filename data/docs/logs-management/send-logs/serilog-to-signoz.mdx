@@ -1,0 +1,285 @@
+---
+date: 2026-08-09
+title: Send .NET Serilog Logs to SigNoz Using OpenTelemetry
+description: Learn how to send Serilog logs from a .NET application to SigNoz with the official OpenTelemetry sink, including automatic trace correlation.
+doc_type: howto
+---
+
+This guide shows how to send logs from a .NET application to SigNoz. The application must use the <a href="https://serilog.net/" target="_blank" rel="noopener noreferrer nofollow">Serilog</a> logging library. The setup uses the official <a href="https://github.com/serilog/serilog-sinks-opentelemetry" target="_blank" rel="noopener noreferrer nofollow">Serilog.Sinks.OpenTelemetry</a> sink. This sink sends logs directly over OTLP, so it does not need the OpenTelemetry .NET SDK.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- <a href="https://dotnet.microsoft.com/en-us/platform/support/policy#supported-versions" target="_blank" rel="noopener noreferrer nofollow">A supported .NET version</a> or .NET Framework 4.6.2 or later
+- A .NET application that already logs with Serilog
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Send logs to SigNoz
+
+### Step 1: Install the sink
+
+Add the `Serilog.Sinks.OpenTelemetry` package to your project:
+
+```bash
+dotnet add package Serilog.Sinks.OpenTelemetry
+```
+
+This installs the latest version. If your project pins an older version, upgrade to v4.0.0 or later. Earlier versions ignore `OTEL_SERVICE_NAME` and the other `OTEL_EXPORTER_OTLP_*` environment variables used in Step 3.
+
+### Step 2: Configure the sink
+
+Add the OpenTelemetry sink to your Serilog logger configuration. Do this where you build `Log.Logger`, usually at the start of `Program.cs`. Leave out the endpoint, protocol, and headers here. The sink reads them from environment variables at startup:
+
+```csharp:Program.cs
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.OpenTelemetry()
+    .CreateLogger();
+
+try
+{
+    // Your application code
+}
+finally
+{
+    Log.CloseAndFlush();
+}
+```
+
+This works in any .NET application, including .NET Framework 4.6.2 and later.
+
+<Admonition type="tip" title="Using ASP.NET Core?" defaultCollapsed="true">
+Add the `Serilog.AspNetCore` package for the `UseSerilog()` hosting integration:
+
+```bash
+dotnet add package Serilog.AspNetCore
+```
+
+```csharp:Program.cs
+var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
+
+var app = builder.Build();
+app.Run();
+```
+</Admonition>
+
+<Admonition type="tip" title="Prefer to set values in code?" defaultCollapsed="true">
+Pass an options callback instead of environment variables:
+
+```csharp:Program.cs
+using Serilog;
+using Serilog.Sinks.OpenTelemetry;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.OpenTelemetry(options =>
+    {
+        options.Endpoint = "https://ingest.<region>.signoz.cloud:443";
+        options.Protocol = OtlpProtocol.HttpProtobuf;
+        options.Headers = new Dictionary<string, string>
+        {
+            ["signoz-ingestion-key"] = "<your-ingestion-key>"
+        };
+        options.ResourceAttributes = new Dictionary<string, object>
+        {
+            ["service.name"] = "<service_name>"
+        };
+    })
+    .CreateLogger();
+```
+
+Environment variables still take priority over these values, unless you pass `ignoreEnvironment: true` to `WriteTo.OpenTelemetry`. Use this approach on sink versions older than v4.0.0, which do not read `OTEL_EXPORTER_OTLP_*` or `OTEL_SERVICE_NAME` from the environment.
+</Admonition>
+
+### Step 3: Set environment variables and run
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+<Admonition type="info" title="What classifies as VM?" defaultCollapsed="true">
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+</Admonition>
+
+```bash
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service_name>"
+dotnet run
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_PROTOCOL
+    value: 'http/protobuf'
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_SERVICE_NAME
+    value: '<service_name>'
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+Apply the updated manifest, then restart the deployment so running pods pick up the new environment variables:
+
+```bash
+kubectl apply -f <deployment-file>.yaml
+kubectl rollout restart deployment/<deployment-name>
+```
+
+<Admonition type="warning" title="Avoiding duplicate logs">
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#disable-logs-collection)
+</Admonition>
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Add these environment variables to your Dockerfile:
+
+```dockerfile
+ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="<service_name>"
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+Rebuild the image and restart the container so it picks up the new variables:
+
+```bash
+docker build -t <image-name> .
+docker run <image-name>
+```
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set environment variables in PowerShell:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service_name>"
+dotnet run
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+</TabItem>
+</Tabs>
+
+## Correlate logs with traces
+
+The sink adds `trace_id` and `span_id` to each log record from the current `Activity`. This happens automatically and needs no extra code.
+
+For this correlation to work, your application must also send traces to SigNoz. Follow the [.NET tracing guide](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/) to set up an `AddOtlpExporter` trace pipeline alongside this log sink.
+
+<Admonition type="warning" title="Using .NET Framework?" defaultCollapsed="true">
+.NET Framework defaults `Activity.DefaultIdFormat` to `Hierarchical`, not `W3C`. Set this at startup, before any `Activity` starts, so the sink can populate `trace_id` and `span_id` correctly:
+
+```csharp
+System.Diagnostics.Activity.DefaultIdFormat = System.Diagnostics.ActivityIdFormat.W3C;
+```
+
+Source: <a href="https://github.com/serilog/serilog-sinks-opentelemetry#net-framework-activity-traces" target="_blank" rel="noopener noreferrer nofollow">Serilog.Sinks.OpenTelemetry README</a>.
+</Admonition>
+
+<Admonition type="tip" title="Combining logs and trace instrumentation?" defaultCollapsed="true">
+When the OpenTelemetry SDK also instruments `HttpClient`, the sink's own OTLP export calls can generate extra spans. Suppress this with:
+
+```csharp
+options.OnBeginSuppressInstrumentation = OpenTelemetry.SuppressInstrumentationScope.Begin;
+```
+
+This callback requires the `OpenTelemetry` NuGet package as a dependency.
+</Admonition>
+
+## Validate
+
+1. Generate some log activity in your application.
+2. Open SigNoz and go to **Logs**.
+3. Filter by your `service.name` to find your log records.
+
+<Figure
+  src="/img/docs/logs-management/send-logs/serilog-logs.webp"
+  alt="Serilog logs from a .NET application in SigNoz"
+  caption="Serilog logs sent to SigNoz through the OpenTelemetry sink"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Logs do not appear in SigNoz
+
+- Make sure that `OTEL_EXPORTER_OTLP_PROTOCOL` matches the endpoint. Use `http/protobuf` with port 443 (Cloud) or 4318 (self-hosted). Use `grpc` with port 4317 on self-hosted.
+- Make sure that the ingestion key header uses the exact key `signoz-ingestion-key`.
+- Make sure that `<region>` matches your SigNoz Cloud region.
+
+### Connection refused or timeout errors
+
+- **Cloud**: Make sure that outbound HTTPS traffic on port 443 is allowed.
+- **Self-hosted**: Make sure that the collector runs and listens on the port your protocol needs.
+
+### Logs appear without `trace_id` or `span_id`
+
+- Make sure that your application configures OpenTelemetry tracing, as described in [Correlate logs with traces](#correlate-logs-with-traces).
+- Log calls made outside an active `Activity` do not carry trace context.
+
+</details>
+
+## Next Steps
+
+- [.NET traces instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/)
+- [Log Query/Filtering guides](https://signoz.io/docs/logs-management/overview/)
+- [Alerts setup for logs](https://signoz.io/docs/alerts-management/log-based-alerts/)
+
+## Get Help
+
+<GetHelp />

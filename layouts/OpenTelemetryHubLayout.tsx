@@ -1,16 +1,14 @@
-import Image from 'next/image'
-import Link from 'next/link'
 import React from 'react'
 
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
-import ArticleMetaDetailsCard, {
-  type RenderedAuthor,
-} from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
+import { ARTICLE_TOC_RAIL_CLASS } from '@/components/TableOfContents/tocScrollFade'
+import ArticleMetaDetailsCard from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
 import OpenTelemetryTocClient from './open-telemetry-hub/OpenTelemetryTocClient'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
 import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
 import { getFormattedDates } from '@/utils/dateUtils'
+import { buildRenderedAuthors, getReadingTimeText } from '@/utils/articleMeta'
 
 const MOBILE_TRIGGER_ID = 'ot-hub-mobile-trigger'
 
@@ -33,57 +31,6 @@ export interface HubContentProps {
   showSidebar: boolean
   authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
   breadcrumbs?: BreadcrumbCrumb[]
-}
-
-export function buildRenderedAuthors(
-  authorDetails: HubContentProps['authorDetails'],
-  authors: HubContentProps['authors'],
-  directory: Record<string, { name?: string; url?: string; image_url?: string }>
-): RenderedAuthor[] {
-  if (authorDetails && authorDetails.length > 0) {
-    return authorDetails
-      .map((detail, idx) => {
-        const slug = authors?.[idx]
-        const fallbackProfile = slug ? directory[slug] : undefined
-
-        const name = detail.name || fallbackProfile?.name
-
-        if (!name) return null
-
-        return {
-          name,
-          url: detail.url || fallbackProfile?.url,
-          image: fallbackProfile?.image_url,
-        }
-      })
-      .filter(Boolean) as RenderedAuthor[]
-  }
-
-  if (authors && authors.length > 0) {
-    return authors
-      .map((slug) => {
-        const profile = directory[slug]
-        if (!profile?.name) return null
-        return {
-          name: profile.name,
-          url: profile.url,
-          image: profile.image_url,
-        }
-      })
-      .filter(Boolean) as RenderedAuthor[]
-  }
-
-  return []
-}
-
-export function getReadingTimeText(content: HubContentProps['content']) {
-  if (content.readingTime) {
-    return (
-      content.readingTime.text ||
-      (content.readingTime.minutes ? `${Math.ceil(content.readingTime.minutes)} min read` : null)
-    )
-  }
-  return null
 }
 
 /**
@@ -152,94 +99,30 @@ export default function OpenTelemetryHubContent({
           )}
           {children}
         </article>
-        <div className={hasToc ? 'lg:hidden' : ''}>
+        <div className="mt-8 max-lg:py-6 lg:hidden">
           <PageFeedback />
         </div>
 
         {(renderedAuthors.length > 0 || primaryTags.length > 0) && (
           <div className="lg:hidden">
-            <div className="rounded-xl border border-signoz_ink-300/80 bg-signoz_ink-500/50 p-4 text-xs text-white/90 shadow-lg">
-              <div className="flex flex-col gap-4">
-                {renderedAuthors.length > 0 && (
-                  <div className="flex items-center gap-3">
-                    {renderedAuthors[0].image && (
-                      <Image
-                        src={renderedAuthors[0].image}
-                        alt={renderedAuthors[0].name}
-                        width={36}
-                        height={36}
-                        className="h-9 w-9 rounded-full border border-white/10 object-cover"
-                      />
-                    )}
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
-                        Author{renderedAuthors.length > 1 ? 's' : ''}
-                      </span>
-                      <span className="text-sm text-white">
-                        {renderedAuthors.map((author, idx) => (
-                          <span key={`${author.name}-${idx}`}>
-                            {author.url ? (
-                              <Link
-                                href={author.url}
-                                className="!text-gray-200 transition-colors hover:text-signoz_robin-400"
-                                prefetch={false}
-                                target="_blank"
-                                rel="noopener noreferrer nofollow"
-                              >
-                                {author.name}
-                              </Link>
-                            ) : (
-                              author.name
-                            )}
-                            {idx < renderedAuthors.length - 1 && (
-                              <span className="text-white/60">, </span>
-                            )}
-                          </span>
-                        ))}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {primaryTags.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
-                      Tags
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {primaryTags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/90"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      {hiddenTags.length > 0 && (
-                        <span
-                          className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/70"
-                          title={hiddenTagsTitle}
-                        >
-                          +{hiddenTags.length} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <ArticleMetaDetailsCard
+              authors={renderedAuthors}
+              primaryTags={primaryTags}
+              hiddenTags={hiddenTags}
+              hiddenTagsTitle={hiddenTagsTitle}
+            />
           </div>
         )}
       </div>
 
       {(hasMetaInfo || hasToc) && (
-        <aside
-          className="box-border hidden w-full min-w-0 max-w-none shrink-0 px-4 max-lg:static max-lg:h-auto max-lg:max-h-none lg:sticky lg:top-[120px] lg:block lg:h-[calc(100vh-140px)] lg:max-h-[calc(100vh-140px)] lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:self-start"
-          aria-label="On this page navigation"
-        >
-          <div className="flex h-full flex-col gap-3">
-            {metaInfoCard}
+        <aside className={ARTICLE_TOC_RAIL_CLASS} aria-label="On this page navigation">
+          <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
+            {metaInfoCard && <div className="shrink-0">{metaInfoCard}</div>}
             {hasToc && <OpenTelemetryTocClient toc={toc} />}
+            <div className="shrink-0 rounded-xl border border-[var(--l2-border)] bg-[var(--l1-background)] p-4">
+              <PageFeedback />
+            </div>
           </div>
         </aside>
       )}

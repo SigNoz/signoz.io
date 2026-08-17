@@ -1,7 +1,8 @@
 ---
-date: 2026-07-20
+date: 2026-08-17
 title: Search Query Troubleshooting Guide
 description: Diagnose and fix common SigNoz search query errors including syntax errors, ambiguous fields, missing keys, and function-related issues with clear examples.
+doc_type: howto
 ---
 
 This page covers common error messages from the SigNoz filter bar (used in Logs Explorer, Traces Explorer, alert rules, and dashboards) and how to fix them.
@@ -257,6 +258,26 @@ If you need to check for a value in a non-body array field, use a standard opera
 ```
 attribute.tags CONTAINS 'prod'
 ```
+
+</details>
+
+### Q. I'm getting `hasToken ... contains the separator` — why does my token search fail?
+
+A. `hasToken()` matches a single whole token, so the needle must be one uninterrupted run of ASCII letters and digits. If it contains any other character (for example `_`, `-`, `.`, `@`, `/`, `:`, or a space), the query fails with an HTTP 400 error naming the offending separator. Use a substring filter with `CONTAINS` to search across separators.
+
+<details>
+
+<summary>Show causes and fixes</summary>
+
+```
+# Wrong — needle contains separators (@ and .)
+hasToken(body, 'john@test.com')
+
+# Correct — use CONTAINS to match across separators
+body CONTAINS 'john@test.com'
+```
+
+See the [hasToken function reference](https://signoz.io/docs/userguide/functions-reference/#hastoken-function) for the full token rules.
 
 </details>
 

@@ -6,193 +6,224 @@ import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import { Github, Linkedin, Slack, Twitter, Youtube } from '@/components/social-icons/SolidIcons'
 import { usePathname } from 'next/navigation'
+import { cn } from 'app/lib/utils'
+import './footer/footer-pill-links.css'
 
-function Footer() {
+type FooterPillLinkProps = {
+  href: string
+  children: React.ReactNode
+  external?: boolean
+  newTab?: boolean
+  className?: string
+}
+
+function isSigNozOwnedHref(href: string): boolean {
+  if (href.startsWith('/') || href.startsWith('#')) {
+    return true
+  }
+
+  try {
+    const { hostname } = new URL(href)
+    return hostname === 'signoz.io' || hostname.endsWith('.signoz.io')
+  } catch {
+    return false
+  }
+}
+
+function FooterPillLink({
+  href,
+  children,
+  external = false,
+  newTab = false,
+  className = '',
+}: FooterPillLinkProps) {
+  const classes = cn('footer-pill-link mt-5', className)
+  const isOwned = isSigNozOwnedHref(href)
+
+  if ((external || newTab) && isOwned) {
+    return (
+      <Link href={href} className={classes} target="_blank" prefetch={false}>
+        {children}
+      </Link>
+    )
+  }
+
+  if (external) {
+    return (
+      <a href={href} className={classes} target="_blank" rel="noopener nofollow">
+        {children}
+      </a>
+    )
+  }
+
+  if (newTab) {
+    return (
+      <Link href={href} className={classes} target="_blank" prefetch={false}>
+        {children}
+      </Link>
+    )
+  }
+
+  return (
+    <Link href={href} className={classes} prefetch={false}>
+      {children}
+    </Link>
+  )
+}
+
+type FooterProps = {
+  /** When true, only render on /docs routes (content-column placement). Site layout omits this. */
+  inDocsShell?: boolean
+}
+
+function Footer({ inDocsShell = false }: FooterProps) {
   const pathname = usePathname()
   const isLoginRoute = pathname === '/login/'
   const isTeamsRoute = pathname === '/teams/'
   const isContactUsRoute = pathname === '/contact-us/'
+  const isDocsRoute = pathname?.startsWith('/docs') ?? false
 
   if (isLoginRoute || isTeamsRoute || isContactUsRoute) {
     return null
   }
 
+  // Docs footer lives beside the sidenav inside DocsShell — not under the full site chrome.
+  if (inDocsShell ? !isDocsRoute : isDocsRoute) {
+    return null
+  }
+
+  const stackEarly = inDocsShell
+  const colClass = cn(
+    'flex min-w-0 flex-1 flex-col',
+    stackEarly ? 'max-lg:w-full' : 'max-md:w-full'
+  )
+  const stackMtClass = stackEarly ? 'max-lg:mt-10' : 'max-md:mt-10'
+  const stackStartClass = stackEarly ? 'max-lg:justify-start' : 'max-md:justify-start'
+
   return (
-    <div className="z-[10] flex flex-col justify-center border-t border-solid border-gray-900 bg-signoz_ink-500 bg-opacity-70 backdrop-blur-md">
-      <div className="flex w-full items-center justify-center bg-opacity-70 px-4 py-14 max-md:max-w-full">
-        <div className="w-full max-w-8xl justify-between max-md:max-w-full">
-          <div className="flex gap-5 max-md:flex-col max-md:gap-0">
-            <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex flex-col pb-2.5 text-sm tracking-wide text-stone-300 max-md:mt-10">
-                <div className="text-sm font-semibold uppercase leading-5 tracking-wide">Docs</div>
-                <Link href="/docs/introduction/" className="mt-5 hover:underline" prefetch={false}>
-                  Introduction
-                </Link>
-                <Link href="/docs/contributing/" className="mt-5 hover:underline" prefetch={false}>
-                  Contributing
-                </Link>
-                <Link
-                  href="/docs/migration/migrate-from-datadog-to-signoz/"
-                  className="mt-5 hover:underline"
-                  prefetch={false}
-                >
+    <div className="z-[10] flex min-w-0 shrink-0 flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px]">
+      <div
+        className={cn(
+          'flex w-full min-w-0 items-center px-4 py-14 max-md:max-w-full',
+          inDocsShell ? 'justify-start' : 'justify-center'
+        )}
+      >
+        <div className="w-full min-w-0 max-w-8xl justify-between max-md:max-w-full">
+          <div
+            className={cn(
+              'flex gap-5',
+              stackEarly ? 'max-lg:flex-col max-lg:gap-0' : 'max-md:flex-col max-md:gap-0'
+            )}
+          >
+            <div className={colClass}>
+              <div
+                className={cn(
+                  'flex flex-col pb-2.5 text-sm tracking-wide text-[var(--l2-foreground)]',
+                  stackMtClass
+                )}
+              >
+                <div className="text-xs font-medium uppercase leading-5 tracking-wide text-[var(--l1-foreground-hover)]">
+                  Docs
+                </div>
+                <FooterPillLink href="/docs/introduction/">Introduction</FooterPillLink>
+                <FooterPillLink href="/docs/contributing/">Contributing</FooterPillLink>
+                <FooterPillLink href="/docs/migration/migrate-from-datadog-to-signoz/">
                   Migrate from Datadog
-                </Link>
-                <Link href="/api-reference/" className="mt-5 hover:underline" prefetch={false}>
-                  SigNoz API
-                </Link>
-                <div className="mt-10 text-sm font-semibold uppercase leading-5 tracking-wide">
+                </FooterPillLink>
+                <FooterPillLink href="/api-reference/">SigNoz API</FooterPillLink>
+                <div className="mt-10 text-xs font-medium uppercase leading-5 tracking-wide text-[var(--l1-foreground-hover)]">
                   OpenTelemetry
                 </div>
-                <Link href="/opentelemetry/" className="mt-5 hover:underline" prefetch={false}>
-                  What is OpenTelemetry
-                </Link>
-                <Link
-                  href="/blog/opentelemetry-collector-complete-guide/"
-                  className="mt-5 hover:underline"
-                  prefetch={false}
-                >
+                <FooterPillLink href="/opentelemetry/">What is OpenTelemetry</FooterPillLink>
+                <FooterPillLink href="/blog/opentelemetry-collector-complete-guide/">
                   OpenTelemetry Collector Guide
-                </Link>
-                <Link
-                  href="/blog/opentelemetry-demo/"
-                  className="mt-5 hover:underline"
-                  prefetch={false}
-                >
-                  OpenTelemetry Demo
-                </Link>
+                </FooterPillLink>
+                <FooterPillLink href="/blog/opentelemetry-demo/">OpenTelemetry Demo</FooterPillLink>
               </div>
             </div>
-            <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-stone-300 max-md:mt-10">
-                <div className="text-sm font-semibold uppercase leading-5 tracking-wide">
+            <div className={colClass}>
+              <div
+                className={cn(
+                  'flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)]',
+                  stackMtClass
+                )}
+              >
+                <div className="text-xs font-medium uppercase leading-5 tracking-wide text-[var(--l1-foreground-hover)]">
                   Community
                 </div>
 
-                <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
-                  <Link href="/support/" prefetch={false}>
-                    Support
-                  </Link>
-                </div>
-
-                <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
-                  <Link href="https://signoz.io/slack/" target="_blank" prefetch={false}>
-                    Slack
-                  </Link>
+                <FooterPillLink href="/support/">Support</FooterPillLink>
+                <FooterPillLink href="https://signoz.io/slack/" newTab>
+                  Slack
                   <ArrowUpRight size={16} />
-                </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://x.com/SigNozHQ" target="_blank" prefetch={false}>
-                    X
-                  </Link>
+                </FooterPillLink>
+                <FooterPillLink href="https://x.com/SigNozHQ" newTab>
+                  X
                   <ArrowUpRight size={16} />
-                </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="/launch-week/" target="_blank" prefetch={false}>
-                    Launch Week
-                  </Link>
+                </FooterPillLink>
+                <FooterPillLink href="/launch-week/" newTab>
+                  Launch Week
                   <ArrowUpRight size={16} />
-                </div>
-                <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
-                  <Link href="/changelog/" prefetch={false}>
-                    Changelog
-                  </Link>
-                </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link
-                    href="/docs/dashboards/dashboard-templates/overview/"
-                    target="_blank"
-                    prefetch={false}
-                  >
-                    Dashboard Templates
-                  </Link>
+                </FooterPillLink>
+                <FooterPillLink href="/docs/dashboards/dashboard-templates/overview/" newTab>
+                  Dashboard Templates
                   <ArrowUpRight size={16} />
-                </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="/todaysdevopswordle/" target="_blank" prefetch={false}>
-                    DevOps Wordle
-                  </Link>
+                </FooterPillLink>
+                <FooterPillLink href="/todaysdevopswordle/" newTab>
+                  DevOps Wordle
                   <ArrowUpRight size={16} />
-                </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://newsletter.signoz.io/" target="_blank" prefetch={false}>
-                    Newsletter
-                  </Link>
-                </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link
-                    href="/events/kubecon-cloudnativecon-north-america-2025/"
-                    target="_blank"
-                    prefetch={false}
-                  >
-                    KubeCon, Atlanta 2025
-                  </Link>
+                </FooterPillLink>
+                <FooterPillLink href="https://newsletter.signoz.io/" newTab>
+                  Newsletter
+                </FooterPillLink>
+                <FooterPillLink href="/events/kubecon-cloudnativecon-north-america-2025/" newTab>
+                  KubeCon, Atlanta 2025
                   <ArrowUpRight size={16} />
-                </div>
+                </FooterPillLink>
               </div>
             </div>
-            <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-stone-300 max-md:mt-10">
-                <div className="text-sm font-semibold uppercase leading-5 tracking-wide">More</div>
+            <div className={colClass}>
+              <div
+                className={cn(
+                  'flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)]',
+                  stackMtClass
+                )}
+              >
+                <div className="text-xs font-medium uppercase leading-5 tracking-wide text-[var(--l1-foreground-hover)]">
+                  More
+                </div>
 
-                <Link
-                  href="/datadog-alternative/"
-                  className="mt-5 hover:underline"
-                  prefetch={false}
-                >
-                  SigNoz vs Datadog
-                </Link>
-                <Link
-                  href="/newrelic-alternative/"
-                  className="mt-5 hover:underline"
-                  prefetch={false}
-                >
-                  SigNoz vs New Relic
-                </Link>
-                <Link
-                  href="/grafana-alternative/"
-                  className="mt-5 hover:underline"
-                  prefetch={false}
-                >
-                  SigNoz vs Grafana
-                </Link>
-                <Link
-                  href="/product-comparison/signoz-vs-dynatrace/"
-                  className="mt-5 hover:underline"
-                  prefetch={false}
-                >
+                <FooterPillLink href="/datadog-alternative/">SigNoz vs Datadog</FooterPillLink>
+                <FooterPillLink href="/newrelic-alternative/">SigNoz vs New Relic</FooterPillLink>
+                <FooterPillLink href="/grafana-alternative/">SigNoz vs Grafana</FooterPillLink>
+                <FooterPillLink href="/product-comparison/signoz-vs-dynatrace/">
                   SigNoz vs Dynatrace
-                </Link>
-
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://signoz.io/careers/" target="_blank" prefetch={false}>
-                    Careers
-                  </Link>
+                </FooterPillLink>
+                <FooterPillLink href="https://signoz.io/careers/" newTab>
+                  Careers
                   <ArrowUpRight size={16} />
-                </div>
-
-                <Link href="/about-us/" className="mt-5 hover:underline " prefetch={false}>
-                  About
-                </Link>
-                <Link href="/terms-of-service/" className="mt-5 hover:underline" prefetch={false}>
-                  Terms
-                </Link>
-                <Link href="/privacy/" className="mt-5 hover:underline" prefetch={false}>
-                  Privacy
-                </Link>
-
-                <Link
-                  href="https://trust.signoz.io/"
-                  target="_blank"
-                  className="mt-5 hover:underline"
-                >
+                </FooterPillLink>
+                <FooterPillLink href="/about-us/">About</FooterPillLink>
+                <FooterPillLink href="/terms-of-service/">Terms</FooterPillLink>
+                <FooterPillLink href="/privacy/">Privacy</FooterPillLink>
+                <FooterPillLink href="https://trust.signoz.io/" newTab>
                   Security & Compliance
-                </Link>
+                </FooterPillLink>
               </div>
             </div>
-            <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex flex-col items-end shadow-sm max-md:mt-10">
-                <div className="flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-white">
+            <div className={colClass}>
+              <div
+                className={cn(
+                  'flex flex-col items-end',
+                  stackEarly ? 'max-lg:mt-10 max-lg:items-start' : 'max-md:mt-10 max-md:items-start'
+                )}
+              >
+                <div
+                  className={cn(
+                    'flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-[var(--l1-foreground)]',
+                    stackEarly ? 'max-lg:self-start' : 'max-md:self-start'
+                  )}
+                >
                   <Link href="/" prefetch={false} className="flex items-center gap-2">
                     <Image
                       className="h-5 w-auto"
@@ -206,12 +237,26 @@ function Footer() {
                     <div className="font-satoshi-bold font-medium">SigNoz</div>
                   </Link>
                 </div>
-                <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
+                <div
+                  className={cn(
+                    'mt-5 flex items-center justify-end gap-2 rounded text-[13px] font-medium leading-none tracking-[-0.065px] text-[var(--callout-success-description)]',
+                    stackStartClass
+                  )}
+                >
+                  <span
+                    className="size-1.5 shrink-0 rounded-full bg-[var(--callout-success-description)]"
+                    aria-hidden
+                  />
                   <Link href="https://status.signoz.io/" target="_blank" prefetch={false}>
                     All systems operational
                   </Link>
                 </div>
-                <div className="footer-icons mt-5 flex items-end justify-between gap-4 py-2">
+                <div
+                  className={cn(
+                    'footer-icons mt-5 flex flex-wrap items-end justify-end gap-4 py-2 text-[var(--l2-foreground)] [&_a:hover]:text-[var(--l1-foreground)] [&_path]:fill-current [&_svg]:fill-current',
+                    stackStartClass
+                  )}
+                >
                   <Link
                     href={'https://github.com/SigNoz'}
                     target="_blank"
@@ -257,9 +302,14 @@ function Footer() {
                     <Youtube />
                   </Link>
                 </div>
-                <div className="mt-5 flex flex-row gap-8">
+                <div
+                  className={cn(
+                    'mt-5 flex min-w-0 flex-row flex-wrap justify-end gap-8',
+                    stackStartClass
+                  )}
+                >
                   <Image
-                    className="cursor-pointer opacity-60 hover:opacity-100"
+                    className="cursor-pointer opacity-60 invert transition-opacity hover:opacity-100 dark:invert-0"
                     src="/svgs/icons/hipaa.svg"
                     width={90}
                     height={90}
@@ -268,7 +318,7 @@ function Footer() {
                     onClick={() => window.open('https://trust.signoz.io/', '_blank')}
                   />
                   <Image
-                    className="cursor-pointer rounded-full opacity-60 shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] transition-opacity hover:opacity-100"
+                    className="cursor-pointer rounded-full opacity-60 invert transition-opacity hover:opacity-100 dark:shadow-[0px_0_40px_0_color-mix(in_srgb,var(--base-white)_27%,transparent)] dark:invert-0"
                     src="/svgs/icons/SOC-2.svg"
                     width={60}
                     height={60}

@@ -1,148 +1,193 @@
 'use client'
 
+import { useId, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { BsFillExclamationCircleFill as Info } from 'react-icons/bs'
+import { BsFillExclamationCircleFill } from 'react-icons/bs'
+import { Callout } from '@signozhq/ui/callout'
+import type { CalloutColor, CalloutProps } from '@signozhq/ui/callout'
+import type { CSSProperties, MouseEvent } from 'react'
 
-import { cva, type VariantProps } from 'class-variance-authority'
-import { cn } from 'app/lib/utils'
-import { useState } from 'react'
+type AdmonitionSizeVariant = 'sm' | 'lg'
 
-type AdmonitionKind = 'note' | 'tip' | 'warning' | 'danger' | 'info' | 'important' | 'default'
-
-type AdmonitionTheme = {
-  root: string
-  title: string
-  bodyMuted: string
-  icon: (size: 'sm' | 'lg') => React.ReactNode
+export type AdmonitionProps = {
+  type?: string
+  title?: string
+  variant?: AdmonitionSizeVariant
+  defaultCollapsed?: boolean | 'true' | 'false'
+  children?: React.ReactNode
+  className?: string
 }
 
-const ADMONITION_THEMES: Record<AdmonitionKind, AdmonitionTheme> = {
-  note: {
-    root: [
-      'border-signoz_robin-500/20 bg-signoz_robin-500/10',
-      '[&_a]:text-signoz_robin-500 [&_a]:underline [&_a]:decoration-signoz_robin-500 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-signoz_robin-300/10 [&_code]:!text-[#B8C7FC]',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-signoz_robin-500/25 [&_pre]:!bg-signoz_robin-300/10 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-    ].join(' '),
-    title: 'text-signoz_robin-100',
-    bodyMuted: 'text-signoz_robin-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
-    icon: (size) => (
-      <Info
-        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-signoz_robin-100')}
-        aria-hidden
-      />
-    ),
-  },
-  tip: {
-    root: [
-      'border-signoz_forest-500/20 bg-signoz_forest-500/10',
-      '[&_a]:text-signoz_forest-600 [&_a]:underline [&_a]:decoration-signoz_forest-600 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-signoz_forest-300/10 [&_code]:!text-signoz_forest-200',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-signoz_forest-500/25 [&_pre]:!bg-signoz_forest-300/10 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-    ].join(' '),
-    title: 'text-signoz_forest-100',
-    bodyMuted: 'text-signoz_forest-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
-    icon: (size) => (
-      <Info
-        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-signoz_forest-100')}
-        aria-hidden
-      />
-    ),
-  },
-  warning: {
-    root: [
-      'border-signoz_amber-500/20 bg-signoz_amber-500/10',
-      '[&_a]:text-signoz_amber-600 [&_a]:underline [&_a]:decoration-signoz_amber-600 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-signoz_amber-300/10 [&_code]:!text-signoz_amber-200',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-signoz_amber-500/25 [&_pre]:!bg-signoz_amber-300/10 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-    ].join(' '),
-    title: 'text-signoz_amber-100',
-    bodyMuted: 'text-signoz_amber-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
-    icon: (size) => (
-      <Info
-        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-signoz_amber-100')}
-        aria-hidden
-      />
-    ),
-  },
-  danger: {
-    root: [
-      'border-signoz_cherry-500/20 bg-signoz_cherry-500/10',
-      '[&_a]:text-signoz_cherry-600 [&_a]:underline [&_a]:decoration-signoz_cherry-600 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-signoz_cherry-300/10 [&_code]:!text-signoz_cherry-200',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-signoz_cherry-500/25 [&_pre]:!bg-signoz_cherry-300/10 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-    ].join(' '),
-    title: 'text-signoz_cherry-100',
-    bodyMuted: 'text-signoz_cherry-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
-    icon: (size) => (
-      <Info
-        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-signoz_cherry-100')}
-        aria-hidden
-      />
-    ),
-  },
-  info: {
-    root: [
-      'border-signoz_robin-500/20 bg-signoz_robin-500/10',
-      '[&_a]:text-signoz_robin-500 [&_a]:underline [&_a]:decoration-signoz_robin-500 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-signoz_robin-300/10 [&_code]:!text-[#B8C7FC]',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-signoz_robin-500/25 [&_pre]:!bg-signoz_robin-300/10 [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-    ].join(' '),
-    title: 'text-signoz_robin-100',
-    bodyMuted: 'text-signoz_robin-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
-    icon: (size) => (
-      <Info
-        className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-signoz_robin-100')}
-        aria-hidden
-      />
-    ),
-  },
-  important: {
-    root: [
-      'border-violet-500/20 bg-violet-500/10',
-      '[&_a]:text-violet-600 [&_a]:underline [&_a]:decoration-violet-600 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-violet-500/20 [&_code]:!text-violet-200',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-violet-500/25 [&_pre]:!bg-violet-500/[0.08] [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-    ].join(' '),
-    title: 'text-violet-200',
-    bodyMuted: 'text-violet-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
-    icon: (size) => (
-      <Info className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-violet-200')} aria-hidden />
-    ),
-  },
-  default: {
-    root: [
-      'border-zinc-500/20 bg-zinc-500/10',
-      '[&_a]:text-zinc-300 [&_a]:underline [&_a]:decoration-zinc-400/80 [&_a]:underline-offset-2',
-      '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em] [&_code]:!bg-zinc-500/20 [&_code]:!text-zinc-200',
-      '[&_pre]:overflow-x-auto [&_pre]:rounded-[2px] [&_pre]:!border [&_pre]:!border-zinc-500/25 [&_pre]:!bg-zinc-500/[0.08] [&_pre]:!p-3 [&_pre]:font-mono [&_pre]:leading-relaxed',
-      '[&_pre_code]:!bg-transparent [&_pre_code]:!p-0 [&_pre_code]:!text-inherit',
-    ].join(' '),
-    title: 'text-zinc-200',
-    bodyMuted: 'text-zinc-300 [&_p]:mb-3 [&_p:last-child]:mb-0',
-    icon: (size) => (
-      <Info className={cn(size === 'lg' ? 'h-4 w-4' : 'h-3 w-3', 'text-zinc-200')} aria-hidden />
-    ),
-  },
+type CalloutMapping = {
+  type: NonNullable<CalloutProps['type']>
+  color: CalloutColor
 }
 
-const normalizeKind = (type?: string): AdmonitionKind => {
+type ToneStyles = {
+  cssVars: CSSProperties
+  content: string
+}
+
+const CALLOUT_CSS_VARS: CSSProperties = {
+  ['--callout-title-color' as string]: 'var(--admonition-title)',
+  ['--callout-icon-color' as string]: 'var(--admonition-icon)',
+  ['--callout-description-color' as string]: 'var(--admonition-description)',
+}
+
+const SHARED_CODE_CHROME =
+  '[&_code]:rounded-[2px] [&_code]:!px-1.5 [&_code]:!py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]'
+// Size nested CodeBlocks and undo inline-code chrome that would otherwise hit Shiki tokens.
+const SHARED_CODEBLOCK_CHROME = [
+  // Constrain to callout width so long lines scroll inside CodeBlock, not the callout.
+  '[&_[data-sz-codeblock]]:my-3 [&_[data-sz-codeblock]]:block [&_[data-sz-codeblock]]:w-full [&_[data-sz-codeblock]]:min-w-0 [&_[data-sz-codeblock]]:max-w-full',
+  '[&_[data-sz-codeblock]:first-child]:mt-0 [&_[data-sz-codeblock]:last-child]:mb-0',
+  '[&_.relative:has([data-sz-codeblock])]:min-w-0 [&_.relative:has([data-sz-codeblock])]:w-full [&_.relative:has([data-sz-codeblock])]:max-w-full',
+  '[&_[data-sz-codeblock]_code]:!rounded-none [&_[data-sz-codeblock]_code]:!bg-transparent [&_[data-sz-codeblock]_code]:!p-0 [&_[data-sz-codeblock]_code]:!text-inherit',
+].join(' ')
+
+type ToneTokenClasses = {
+  light: string
+  dark: string
+  code: string
+  link: string
+  codeSurface: string
+  listMarker: string
+}
+
+const makeTone = ({
+  light,
+  dark,
+  code,
+  link,
+  codeSurface,
+  listMarker,
+}: ToneTokenClasses): ToneStyles => ({
+  cssVars: CALLOUT_CSS_VARS,
+  content: [
+    light,
+    dark,
+    code,
+    link,
+    SHARED_CODE_CHROME,
+    codeSurface,
+    SHARED_CODEBLOCK_CHROME,
+    listMarker,
+  ].join(' '),
+})
+
+const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
+  robin: makeTone({
+    light:
+      '[--admonition-title:var(--callout-primary-title)] [--admonition-icon:var(--callout-primary-icon)] [--admonition-description:var(--callout-primary-description)]',
+    dark: 'dark:[--admonition-title:var(--text-robin-100)] dark:[--admonition-icon:var(--text-robin-100)] dark:[--admonition-description:var(--text-robin-300)]',
+    code: '[--admonition-code:var(--text-robin-700)] dark:[--admonition-code:var(--text-robin-200)]',
+    link: '[&_a]:!text-[var(--accent-primary)] [&_a]:underline [&_a]:decoration-[var(--accent-primary)] [&_a]:underline-offset-2',
+    codeSurface:
+      '[&_code]:!bg-[var(--callout-primary-background)] [&_code]:!text-[var(--admonition-code)]',
+    listMarker: '[&_ul]:marker:text-[var(--accent-primary)]',
+  }),
+  forest: makeTone({
+    light:
+      '[--admonition-title:var(--callout-success-title)] [--admonition-icon:var(--callout-success-icon)] [--admonition-description:var(--callout-success-description)]',
+    dark: 'dark:[--admonition-title:var(--text-forest-100)] dark:[--admonition-icon:var(--text-forest-100)] dark:[--admonition-description:var(--text-forest-300)]',
+    code: '[--admonition-code:var(--text-forest-700)] dark:[--admonition-code:var(--text-forest-200)]',
+    link: '[&_a]:!text-[var(--accent-forest)] [&_a]:underline [&_a]:decoration-[var(--accent-forest)] [&_a]:underline-offset-2',
+    codeSurface:
+      '[&_code]:!bg-[var(--callout-success-background)] [&_code]:!text-[var(--admonition-code)]',
+    listMarker: '[&_ul]:marker:text-[var(--accent-forest)]',
+  }),
+  amber: makeTone({
+    light:
+      '[--admonition-title:var(--callout-warning-title)] [--admonition-icon:var(--callout-warning-icon)] [--admonition-description:var(--callout-warning-description)]',
+    dark: 'dark:[--admonition-title:var(--text-amber-100)] dark:[--admonition-icon:var(--text-amber-100)] dark:[--admonition-description:var(--text-amber-300)]',
+    code: '[--admonition-code:var(--text-amber-800)] dark:[--admonition-code:var(--text-amber-200)]',
+    link: '[&_a]:!text-[var(--accent-amber)] [&_a]:underline [&_a]:decoration-[var(--accent-amber)] [&_a]:underline-offset-2',
+    codeSurface:
+      '[&_code]:!bg-[var(--callout-warning-background)] [&_code]:!text-[var(--admonition-code)]',
+    listMarker: '[&_ul]:marker:text-[var(--accent-amber)]',
+  }),
+  cherry: makeTone({
+    light:
+      '[--admonition-title:var(--callout-error-title)] [--admonition-icon:var(--callout-error-icon)] [--admonition-description:var(--callout-error-description)]',
+    dark: 'dark:[--admonition-title:var(--text-cherry-100)] dark:[--admonition-icon:var(--text-cherry-100)] dark:[--admonition-description:var(--text-cherry-300)]',
+    code: '[--admonition-code:var(--text-cherry-700)] dark:[--admonition-code:var(--text-cherry-200)]',
+    link: '[&_a]:!text-[var(--accent-cherry)] [&_a]:underline [&_a]:decoration-[var(--accent-cherry)] [&_a]:underline-offset-2',
+    codeSurface:
+      '[&_code]:!bg-[var(--callout-error-background)] [&_code]:!text-[var(--admonition-code)]',
+    listMarker: '[&_ul]:marker:text-[var(--accent-cherry)]',
+  }),
+  aqua: makeTone({
+    light:
+      '[--admonition-title:var(--callout-aqua-title)] [--admonition-icon:var(--callout-aqua-icon)] [--admonition-description:var(--callout-aqua-description)]',
+    dark: 'dark:[--admonition-title:var(--callout-aqua-title)] dark:[--admonition-icon:var(--callout-aqua-icon)] dark:[--admonition-description:var(--callout-aqua-description)]',
+    code: '[--admonition-code:var(--text-aqua-700)] dark:[--admonition-code:var(--text-aqua-200)]',
+    link: '[&_a]:!text-[var(--accent-aqua)] [&_a]:underline [&_a]:decoration-[var(--accent-aqua)] [&_a]:underline-offset-2',
+    codeSurface:
+      '[&_code]:!bg-[var(--callout-aqua-background)] [&_code]:!text-[var(--admonition-code)]',
+    listMarker: '[&_ul]:marker:text-[var(--accent-aqua)]',
+  }),
+  sakura: makeTone({
+    light:
+      '[--admonition-title:var(--text-sakura-600)] [--admonition-icon:var(--text-sakura-600)] [--admonition-description:var(--text-sakura-600)]',
+    dark: 'dark:[--admonition-title:var(--text-sakura-100)] dark:[--admonition-icon:var(--text-sakura-100)] dark:[--admonition-description:var(--text-sakura-300)]',
+    code: '[--admonition-code:var(--text-sakura-700)] dark:[--admonition-code:var(--text-sakura-200)]',
+    link: '[&_a]:!text-[var(--accent-sakura)] [&_a]:underline [&_a]:decoration-[var(--accent-sakura)] [&_a]:underline-offset-2',
+    codeSurface:
+      '[&_code]:!bg-[color-mix(in_srgb,var(--accent-sakura)_10%,transparent)] [&_code]:!text-[var(--admonition-code)]',
+    listMarker: '[&_ul]:marker:text-[var(--accent-sakura)]',
+  }),
+}
+
+const BASE_CONTENT_STYLES = [
+  // Keep callout from growing with long code lines; CodeBlock's <pre> owns horizontal scroll.
+  'min-w-0 max-w-full overflow-x-hidden overflow-y-visible rounded-[4px] p-4',
+  '!items-start !gap-2.5',
+  '[&>div:first-child]:!m-0 [&>div:first-child]:!flex [&>div:first-child]:!h-7 [&>div:first-child]:!w-7',
+  '[&>div:first-child]:!shrink-0 [&>div:first-child]:!items-center [&>div:first-child]:!justify-center',
+  '[&_[data-slot=callout-title]]:!flex [&_[data-slot=callout-title]]:!h-7 [&_[data-slot=callout-title]]:!w-full',
+  '[&_[data-slot=callout-title]]:!items-center [&_[data-slot=callout-title]]:!justify-between [&_[data-slot=callout-title]]:!gap-3',
+  '[&_[data-slot=callout-description]]:w-full',
+  '[&_[data-slot=callout-description]]:min-w-0',
+  '[&_[data-slot=callout-description]]:max-w-full',
+  '[&_[data-slot=callout-description]]:justify-items-stretch',
+  '[&_[data-slot=callout-description]]:overflow-x-hidden',
+  '[&>div]:!gap-0',
+  '[&_[data-slot=callout-title]]:font-semibold',
+  '[&_[data-slot=callout-title]]:text-base',
+  '[&_[data-slot=callout-title]]:!leading-6',
+  '[&_[data-slot=callout-title]]:whitespace-normal',
+  '[&_[data-slot=callout-title]]:overflow-visible',
+  '[&_[data-slot=callout-title]]:text-clip',
+  '[&_[data-slot=callout-description]]:text-base',
+  '[&_[data-slot=callout-description]]:!leading-6',
+  '[&_[data-slot=callout-description]_p]:!leading-6',
+  '[&_[data-slot=callout-description]_li]:!leading-6',
+  '[&_strong]:font-bold [&_strong]:text-[inherit]',
+  '[&_p]:mb-3 [&_p:last-child]:mb-0',
+  '[&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul:last-child]:mb-0',
+  '[&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol:last-child]:mb-0',
+  '[&_li]:mb-1 [&_li:last-child]:mb-0',
+].join(' ')
+const TITLE_TOGGLE_STYLES = [
+  'flex h-full w-full min-w-0 cursor-pointer items-center justify-between gap-3',
+  'border-0 bg-transparent p-0 text-left font-inherit text-inherit',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admonition-icon)] focus-visible:ring-offset-2',
+].join(' ')
+
+const getCalloutMapping = (type?: string): CalloutMapping => {
   switch (type) {
-    case 'note':
     case 'tip':
+      return { type: 'success', color: 'forest' }
     case 'warning':
+      return { type: 'warning', color: 'amber' }
     case 'danger':
-    case 'info':
+      return { type: 'error', color: 'cherry' }
     case 'important':
-      return type
+      return { type: 'info', color: 'aqua' }
+    case 'info':
+    case 'note':
     default:
-      return 'default'
+      return { type: 'info', color: 'robin' }
   }
 }
 
@@ -163,149 +208,78 @@ const getTitle = (type?: string) => {
   }
 }
 
-export const admonitionRootVariants = cva(
-  'admonition not-prose my-4 rounded-[4px] border border-solid shadow-none',
-  {
-    variants: {
-      size: {
-        sm: 'p-3',
-        lg: 'p-4',
-      },
-    },
-    defaultVariants: {
-      size: 'lg',
-    },
-  }
-)
+const admonitionIcon = <BsFillExclamationCircleFill aria-hidden />
 
-export const admonitionHeaderVariants = cva('flex items-center justify-between gap-3', {
-  variants: {
-    size: {
-      sm: 'mb-2',
-      lg: 'mb-3',
-    },
-  },
-  defaultVariants: {
-    size: 'lg',
-  },
-})
-
-export const admonitionIconCircleVariants = cva(
-  'flex shrink-0 items-center justify-center font-medium leading-none',
-  {
-    variants: {
-      size: {
-        sm: 'h-6 w-6 text-xs',
-        lg: 'h-7 w-7 text-sm',
-      },
-    },
-    defaultVariants: {
-      size: 'lg',
-    },
-  }
-)
-
-export const admonitionTitleVariants = cva('min-w-0 font-semibold leading-snug tracking-tight', {
-  variants: {
-    size: {
-      sm: 'text-sm',
-      lg: 'text-base',
-    },
-  },
-  defaultVariants: {
-    size: 'lg',
-  },
-})
-
-export const admonitionChevronVariants = cva('shrink-0 opacity-50', {
-  variants: {
-    size: {
-      sm: 'h-4 w-4',
-      lg: 'h-[18px] w-[18px]',
-    },
-  },
-  defaultVariants: {
-    size: 'lg',
-  },
-})
-
-export const admonitionContentVariants = cva(
-  [
-    'admonition-content max-w-none leading-relaxed',
-    '[&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_ul:last-child]:mb-0',
-    '[&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3 [&_ol:last-child]:mb-0',
-    '[&_li]:mb-1 [&_li:last-child]:mb-0',
-  ].join(' '),
-  {
-    variants: {
-      size: {
-        sm: 'pl-[34px] text-sm',
-        lg: 'pl-[38px] text-base',
-      },
-    },
-    defaultVariants: {
-      size: 'lg',
-    },
-  }
-)
-
-export type AdmonitionSizeVariant = NonNullable<VariantProps<typeof admonitionRootVariants>['size']>
-
-export type AdmonitionProps = {
-  type?: string
-  title?: string
-  variant?: AdmonitionSizeVariant
-  defaultCollapsed?: boolean | 'true' | 'false'
-  children?: React.ReactNode
-}
-
-const Admonition = ({ type, title, variant, defaultCollapsed, children }: AdmonitionProps) => {
-  const size = variant ?? 'lg'
-  const kind = normalizeKind(type)
-  const theme = ADMONITION_THEMES[kind]
+const Admonition = ({
+  type,
+  title,
+  variant,
+  defaultCollapsed,
+  children,
+  className,
+}: AdmonitionProps) => {
+  const mapping = getCalloutMapping(type)
   const displayTitle = title ?? getTitle(type)
-
+  const size = variant === 'sm' ? 'small' : 'medium'
   const isDefaultCollapsed = defaultCollapsed === true || defaultCollapsed === 'true'
+  // Own collapse state so body always stays in the DOM (SSR + hide), unlike Callout expandable
   const [isCollapsed, setIsCollapsed] = useState(isDefaultCollapsed)
+  const tone = TONE_STYLES[mapping.color]
+  const descriptionId = useId()
 
-  const iconAndTitle = (
-    <div className="flex min-w-0 flex-1 items-center gap-2.5">
-      <span className={cn(admonitionIconCircleVariants({ size }))} aria-hidden>
-        {theme.icon(size)}
-      </span>
-      <span className={cn(admonitionTitleVariants({ size }), theme.title)}>{displayTitle}</span>
-    </div>
-  )
+  const toggleCollapsed = () => setIsCollapsed((prev) => !prev)
+
+  const handleIconClick = (event: MouseEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement
+    if (target.closest('[data-slot=callout-description]')) return
+    if (target.closest('button')) return
+    if (target.closest('[data-slot=callout] > div:first-child')) {
+      toggleCollapsed()
+    }
+  }
 
   return (
-    <div className={cn(admonitionRootVariants({ size }), theme.root)}>
-      <div className={cn(admonitionHeaderVariants({ size }), isCollapsed && '!mb-0')}>
-        <button
-          type="button"
-          className="flex w-full items-center justify-between gap-3"
-          onClick={() => setIsCollapsed((prev) => !prev)}
-          aria-expanded={!isCollapsed}
-        >
-          {iconAndTitle}
-          <ChevronDown
-            className={cn(
-              admonitionChevronVariants({ size }),
-              'transition-transform duration-200',
-              isCollapsed ? 'rotate-0' : 'rotate-180'
-            )}
-            aria-hidden
-          />
-        </button>
-      </div>
-      <div
-        className={cn(
-          admonitionContentVariants({ size }),
-          theme.bodyMuted,
-          isCollapsed && 'hidden'
-        )}
+    <div className="not-prose my-4" onClick={handleIconClick}>
+      <Callout
+        title={
+          <button
+            type="button"
+            className={TITLE_TOGGLE_STYLES}
+            aria-expanded={!isCollapsed}
+            aria-controls={descriptionId}
+            onClick={toggleCollapsed}
+          >
+            <span className="min-w-0 flex-1">{displayTitle}</span>
+            <ChevronDown
+              aria-hidden
+              className={[
+                'h-[18px] w-[18px] shrink-0 opacity-50 transition-transform duration-200',
+                isCollapsed ? 'rotate-0' : 'rotate-180',
+              ].join(' ')}
+            />
+          </button>
+        }
+        type={mapping.type}
+        color={mapping.color}
+        size={size}
+        showIcon
+        icon={admonitionIcon}
+        action="none"
+        style={tone.cssVars}
+        className={[
+          BASE_CONTENT_STYLES,
+          !isCollapsed && '[&_[data-slot=callout-title]]:!mb-3',
+          isCollapsed && '[&_[data-slot=callout-description]]:!hidden',
+          tone.content,
+          className,
+        ]
+          .filter(Boolean)
+          .join(' ')}
       >
-        {children}
-      </div>
+        <div id={descriptionId} className="w-full min-w-0 max-w-full">
+          {children}
+        </div>
+      </Callout>
     </div>
   )
 }

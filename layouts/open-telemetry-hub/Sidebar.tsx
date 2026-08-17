@@ -6,6 +6,11 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { SITE_BASE_URL } from '@/components/Link'
+import {
+  ARTICLE_SIDENAV_SCROLL_CLASS,
+  ARTICLE_SIDENAV_STICKY_CLASS,
+  useTocScrollFade,
+} from '@/components/TableOfContents/tocScrollFade'
 import { categoryContainsRoute, normalizeRoute } from './navigation'
 import type { SidebarItem } from './types'
 
@@ -71,7 +76,7 @@ export function Sidebar({
 
   const activeItemRef = useRef<HTMLAnchorElement | null>(null)
   const pendingScrollRef = useRef(false)
-  const containerRef = useRef<HTMLElement | null>(null)
+  const { tocItemsRef: containerRef, scrollFadeStyle } = useTocScrollFade(items.length)
 
   useEffect(() => {
     expandedKeysCache = new Set(expanded)
@@ -196,12 +201,11 @@ export function Sidebar({
   )
 
   return (
-    <nav
-      className="docs-sidebar sticky top-[80px] h-[calc(100vh-100px)] w-full overflow-y-auto py-4 text-white"
-      ref={containerRef}
-    >
-      {languageSelector}
-      {renderItems(items, [])}
+    <nav className={ARTICLE_SIDENAV_STICKY_CLASS}>
+      <div ref={containerRef} className={ARTICLE_SIDENAV_SCROLL_CLASS} style={scrollFadeStyle}>
+        {languageSelector}
+        {renderItems(items, [])}
+      </div>
     </nav>
   )
 }
