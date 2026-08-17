@@ -1,0 +1,71 @@
+---
+date: 2026-08-14
+title: Grok Build Dashboard
+meta_title: Grok Build OpenTelemetry Dashboard
+description: Monitor Grok Build with token usage by type and model, tool activity and outcomes, error categories, and startup latency from OpenTelemetry metrics.
+doc_type: explanation
+---
+
+<Admonition type="note" title="Send telemetry first">
+To use this dashboard, you need to set up the data source and send telemetry to SigNoz. Follow the [Grok Build Observability](https://signoz.io/docs/grok-build-observability/) guide to get started.
+</Admonition>
+
+This dashboard provides comprehensive monitoring of Grok Build usage patterns and performance, offering visibility into token consumption by type and model, session and turn volume, tool effectiveness, error categories, and startup latency across your development teams.
+
+All panels read metrics under the `ai.xai.grok_code` meter scope, emitted by Grok Build's native OpenTelemetry exporter. Grok Build sends no traces, so every panel here is metrics-based. The counters are monotonic delta sums, which is why the panels aggregate them with `increase`.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/grok-build-dashboard.webp"
+  alt="Grok Build Dashboard"
+  caption="Grok Build Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/grok-build/grok-build-dashboard.json"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the metrics Grok Build emits natively to help you:
+
+- **Monitor Token Consumption**: Track input, output, cache read, and reasoning tokens to understand workload and efficiency
+- **Compare Model Usage**: See which models carry the workload and track migration between versions
+- **Measure Tool Effectiveness**: Understand which tools the agent reaches for and how often they succeed
+- **Track Reliability**: Watch turn outcomes and error categories to catch failures early
+- **Optimize Startup**: Break startup latency down by phase to find the slow step
+
+## Panels Included
+
+| Panel | Description |
+|---|---|
+| Total Tokens | Every token type combined, showing how much work Grok is doing |
+| Sessions | How many times Grok Build was started |
+| Turns | Every prompt-and-response cycle the agent completed |
+| Errors | Total errors across all categories, highlighted when above zero |
+
+### Token Usage
+
+- **Token Usage Over Time**: Tokens split by type over time. Grok reports `input`, `output`, `cache_read`, and `reasoning` separately, so reasoning spend is visible rather than folded into output.
+- **Tokens by Type**: The same four types as a share of the total. A high cache read share means prompt caching is working; a falling share usually means sessions are being restarted rather than continued.
+- **Tokens by Model**: Token spend per model, useful for tracking migration between model versions and spotting which model carries the workload.
+
+### Tool Activity
+
+- **Tool Calls by Tool**: Which tools the agent executes, from reading files to running commands to spawning subagents. MCP tools collapse to `mcp_tool` unless `OTEL_LOG_TOOL_DETAILS=1` is set.
+- **Tool Outcomes**: Success against error across all tool calls. Tool failures are usually environmental, such as a missing file or a command that exits non-zero.
+
+### Reliability
+
+- **Turns Over Time by Outcome**: Turn volume split by completed, cancelled, and error. Cancellations usually mean a developer stopped the agent mid-answer rather than anything failing.
+- **Errors by Category**: Errors over time by category. Note that `rate_limit` covers both the per-minute request ceiling and full quota exhaustion, so check the `status_code` on the `api_error` event to tell them apart.
+
+### Startup Latency
+
+- **Startup Duration p95**: Process start to a usable session. This includes a deliberate wait while Grok fetches fleet policy, which is bounded at 30 seconds.
+- **Startup Phase Duration p95**: The same cost broken down by step. Filter on a successful outcome before comparing percentiles, since truncated samples from timeouts skew the result.
+
+<Admonition type="info" title="There is no cost metric" defaultCollapsed="true">
+Grok Build does not emit a cost metric, so no panel here reports currency. To track spend, join `grok_code.token.usage` against your own price sheet.
+</Admonition>
