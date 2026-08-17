@@ -263,6 +263,12 @@ export const resourcesDropdownItems = {
       description: 'Explore dashboard templates for your use cases',
       name: 'Dashboard Templates',
     },
+    {
+      key: 'changelog',
+      url: '/changelog/',
+      description: 'Learn about latest product developments',
+      name: 'Changelog',
+    },
   ] as ResourceItem[],
 }
 
