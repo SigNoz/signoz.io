@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-07-30
 title: Manage Variables in SigNoz
 description: Learn how to create and use dashboard variables in SigNoz to build dynamic, reusable dashboards across services and infrastructure.
 doc_type: howto
@@ -21,29 +21,55 @@ Variables allow you to build dynamic dashboards where multiple panels can instan
 ## How to add a Variable to a Dashboard?
 
 <Figure
-  src="/img/docs/dashboards/variables/variable-configuration.webp"
-  alt="Variable configuration panel in SigNoz"
-  caption="Variable configuration — set the name, type, default value, and select panels to apply the variable to."
+  src="/img/docs/dashboards/variables/variable-configuration-v2.webp"
+  alt="Variable editor in the Variables tab of the dashboard configuration drawer, showing the variable type tabs, source, sort, default value, and Apply to panels"
+  caption="The variable editor: set the name, type, source, default value, and the panels the variable applies to."
 />
 
 To add a variable to a dashboard, follow the steps below:
 
-1. Access Dashboards from the navigation menu
-2. Open the dashboard you want to modify
-3. Enter configuration mode by selecting Configure
-4. Switch to the Variables section and select Add Variable
+1. Access Dashboards from the navigation menu.
+2. Open the dashboard you want to modify.
+3. Enter configuration mode by selecting **Configure**.
+4. Switch to the **Variables** tab and select **Add variable**.
 5. Complete the configuration:
-    1. **Name**: Define the variable identifier for use in queries
-    2. **Description**: Enter a brief and meaningful description of your variable
-    3. **Type**: Pick the appropriate variable type (UI updates based on selection)
-    4. _(Optional)_ **Sort**: Arrange values in ascending/descending order.
-    5. _(Optional)_ **Enable multiple values to be checked**: Make dropdown multi-select
-    6. _(Optional)_ **Include an option for ALL values**: Show the `ALL` option which includes all options from the multi-select dropdown
+    1. **Name**: Define the variable identifier for use in queries. For Dynamic variables, the name auto-populates from the selected attribute key until you edit it manually.
+    2. **Description**: Enter a brief and meaningful description of your variable.
+    3. **Variable Type**: Pick the variable type from the tabs (**Dynamic**, **Textbox**, **Custom**, or **Query**). The fields below update based on your selection.
+    4. _(Optional)_ **Sort Values**: Choose how values are ordered in the dropdown. See [Sort options](#sort-options).
+    5. _(Optional)_ **Enable multiple values to be checked**: Make the dropdown multi-select. See [Multi-select variable behavior](#multi-select-variable-behavior).
+    6. _(Optional)_ **Include an option for ALL values**: Show the `ALL` option which includes all options from the multi-select dropdown.
+    7. _(Optional)_ **Default Value**: Pick the value the variable falls back to when no selection is active. The dropdown is populated from the variable's current preview values, or you can enter a custom value. Available for Dynamic, Custom, and Query variables.
 6. When you've finished, select the **Save** button.
+
+### Sort options
+
+The **Sort Values** dropdown controls the order of values in the variable's dropdown. Available options:
+
+- **Disabled**: Keep values in the order they are returned.
+- **Alphabetical ascending** / **Alphabetical descending**: Sort case-sensitively (uppercase before lowercase).
+- **Numerical ascending** / **Numerical descending**: Sort values as numbers.
+- **Case-insensitive alphabetical ascending** / **Case-insensitive alphabetical descending**: Sort alphabetically, ignoring letter case.
+
+### Reorder variables
+
+Variables render in the variables bar in the order they appear in the settings list. To change the order, drag a variable row by its grip handle and drop it in the new position. The change applies as soon as you drop the row.
+
+### Validation errors
+
+Some configurations are blocked with an inline error, and the variable cannot be saved until you resolve them:
+
+- **Circular dependency**: Saving a Query variable whose query references another variable that (directly or indirectly) references it back displays an inline error and blocks the save. Break the cycle before saving.
+- **Duplicate attribute key**: Saving a Dynamic variable whose attribute key is already used by another variable displays "A variable with this attribute key already exists" and blocks the save. Choose a different attribute or edit the existing variable.
 
 ## Supported Variable types:
 
 SigNoz supports four ways of creating variables: dynamic, query, custom, and textbox.
+
+Two of the type tabs carry a badge in the variable editor:
+
+- **Dynamic** is marked **Beta**. It is the recommended way to filter on an attribute, and its behavior may still change.
+- **Query** is marked **Not Recommended**, because ClickHouse query variables can be slow and brittle. Prefer a Dynamic variable where one fits. See [Why avoid ClickHouse query variables](#why-avoid-clickhouse-query-variables).
 
 ### Dynamic variable
 
@@ -51,9 +77,8 @@ Dynamic variables automatically retrieve attribute values without requiring manu
 
 1. Field - either an OTEL telemetry intrinsic field (like span name or log severity_text) or a custom <a href="https://opentelemetry.io/docs/concepts/glossary/#attribute" target="_blank" rel="noopener noreferrer nofollow">attribute</a> from logs, traces, or metrics
 
-2. Source: Pick where to search - it checks logs, traces, and metrics by default, but choosing just one source makes it faster. Some of the fields have identical values across signals (e.g., k8s.pod.name is the same whether from logs or traces), so one source is sufficient. Use 'All sources' only when the same field contains distinct values across different signal types.
+2. Source: Pick where to search for values. The field reads `<attribute> from <source>`, and the options are **All telemetry**, **Logs**, **Traces**, and **Metrics**. **All telemetry** searches logs, traces, and metrics simultaneously. A tooltip next to the source warns that this is slower: when a field has identical values across signals (for example, `k8s.pod.name` is the same whether it comes from logs or traces), choose a single source instead. Use **All telemetry** only when the same field holds distinct values across different signal types.
 
-    ![Dynamic Variable](/img/docs/dashboards/variables/dynamic-variable.png)
 
 #### Dynamic variable dropdowns display values in two sections:
 
@@ -167,9 +192,171 @@ If you have a specific use case where dynamic variables don't work:
 
 We're actively working on dynamic variables and all feedback is welcome.
 
+## The variables bar
+
+<Figure
+  src="/img/docs/dashboards/variables/variable-bar-runtime-filter.webp"
+  alt="The variables bar pinned at the top of a scrolled dashboard, showing five variables and a +13 overflow chip"
+  caption="The variables bar stays pinned as you scroll, so you can change a selection from anywhere on the dashboard."
+/>
+
+The variables bar sits above your panels and holds one control per dashboard variable. Each control shows the variable name as a label above its value selector, and all controls align to the bottom of the bar so selectors stay in a straight row even when names differ in length.
+
+<Figure
+  src="/img/docs/dashboards/variables/variable-bar-runtime-filter.webp"
+  alt="Dashboard variable bar with service and environment selections filtering the panels below"
+  caption="The variable bar sits above the panels. Changing a selection refetches all panels that reference the variable."
+/>
+
+- **Loading indicator**: Query and dynamic variables show an animated bar along the bottom edge of their control while options are being fetched, or while they wait for a parent variable to resolve. The bar disappears once options are available.
+- **Truncated names**: If a variable name is too long to fit its control, hover the name to see the full name in a tooltip.
+- **Expand and collapse**: Use the **More** / **Less** toggle to expand or collapse the bar. The state is saved per dashboard and restored on your next visit, so a bar you left expanded loads expanded instead of resetting to collapsed.
+- **Overflow**: When there are more variables than fit, the bar collapses the overflow into a **+N** button. Hover it to see a tooltip listing each hidden variable's name and its currently selected value.
+- **Add a variable inline**: The **+** button at the end of the bar opens the variable editor directly, so you can add a variable without going through **Configure** → **Variables**.
+
+<Admonition type="info">
+The `ALL` option in a variable dropdown appears only after at least one real option has loaded. This prevents an empty dropdown from being misread as "all values selected" during the initial page load.
+</Admonition>
+
+### View variable dependencies
+
+Hover the info icon next to a variable name to open a tooltip that shows how the variable relates to others, along with its optional description:
+
+- **Depends on**: The parent variables this variable reads from. This section is marked with an upward arrow and its names render in green.
+- **Used by**: The child variables that reference this variable. This section is marked with a downward arrow and its names render in amber.
+
+Use this to trace a chain before you change a variable, so you know which downstream variables and panels a change affects.
+
+### Multi-select variable behavior
+
+When a variable has **Enable multiple values to be checked** turned on, it appears in the variables bar as a multi-select dropdown:
+
+- **Selections commit when the dropdown closes.** Dependent panels and variables update once, after you close the dropdown, instead of cascading on every individual checkbox click.
+- **Only button.** Hovering an option row shows an **Only** button. Selecting it keeps that single value and deselects all others.
+- **Clearing resets to the default.** Clearing the selection with the × button falls back to the variable's configured default instead of leaving it empty.
+- **Overflow chip.** When more than one value is selected, the variable pill shows the first selected value plus a **+N** chip for the remaining selections. Pills are truncated so the bar does not grow to fit every selected value.
+- **Stable defaults.** Re-running the variable's query no longer clears the default when it returns the same option set. The default is reset only when the option set changes and no longer contains the current default.
+
+Variable selections are preserved when you move between the dashboard and the panel editor, including across a hard refresh of the editor.
+
+## Filter panel data in real time
+
+Selections in the variables bar filter panel data in real time. Choosing a value refetches data for every panel that uses the variable, with no page reload.
+
+How selections are sent to each panel's query:
+
+- **Single value**: The selected value replaces the variable reference in the query.
+- **Multi-select**: When the variable allows multiple values and several are selected, all selected values are passed to each query.
+- **ALL (Dynamic variables)**: Selecting `ALL` applies no filter on that field. Internally it sends the `__all__` sentinel so the query returns results across every value of the attribute. See [Note about ALL](#note-about-all).
+- **No selection**: The query uses the variable's configured [default value](#how-to-add-a-variable-to-a-dashboard). If no default is configured, the variable is omitted from the query rather than sent as an empty value.
+
+## How variables load and refresh
+
+SigNoz resolves dashboard variables in dependency order and refreshes only the panels that need it.
+
+### Dependency-ordered loading
+
+Query variables load in [dependency](#chaining-variables) order. When a child variable references a parent variable (for example, a `pod` query that filters on `$namespace`), the child does not start fetching until the parent has resolved. This prevents the child from loading a stale or empty option list before the parent value is known.
+
+Dynamic variables fetch their options in parallel with query variables at page load, so dashboards with mixed variable types populate their dropdowns faster.
+
+### Selective panel refresh
+
+When you change a variable, SigNoz reloads only the panels that actually reference that variable. Panels that do not use the changed variable keep their current data and do not trigger new queries, so unrelated parts of the dashboard stay responsive.
+
+Panels that reference a variable wait until every referenced variable has a resolved value before they render. They stay in a loading state instead of flashing "No data" while variables are still resolving. While a referenced variable is updating, each affected panel keeps showing its last-known data and renders a loading indicator in the background, so the panel does not go blank.
+
+<Admonition type="info">
+If a panel appears to load slower than before, it is usually waiting for its variables to resolve, not failing.
+</Admonition>
+
+## Apply a Dynamic variable to panels
+
+A Dynamic variable does not filter anything until it is wired into panel queries. Rather than editing each panel by hand, pick the panels the variable should apply to and SigNoz writes the filter clause into their queries for you.
+
+1. Open **Configure**, go to the **Variables** tab, and add or edit a **Dynamic** variable.
+2. Use the **Apply to panels** multi-select to choose the panels the variable should filter. Panels that already reference the variable are pre-selected, so the picker reflects the current state.
+3. Select **Save**.
+
+For each selected panel, SigNoz composes a filter clause of the form `<attribute> IN $<variable>` into the panel's builder queries. For example, a Dynamic variable named `pod` on the `k8s.pod.name` attribute adds `k8s.pod.name IN $pod`.
+
+<Admonition type="info">
+**Apply to panels** is available for Dynamic variables. For Query, Custom, and Textbox variables, reference the variable in the panel query yourself. See [Using Variables in Queries](https://signoz.io/docs/dashboards/using-variables-in-queries/).
+</Admonition>
+
+### Review the impact before applying
+
+Because applying a variable rewrites panel queries, SigNoz shows an impact dialog before the change lands:
+
+> Applying `$<variable>` can update upto N panel queries. Review the changes before applying.
+
+Each row shows the panel's **Current** query text (read-only) and the proposed **Result**, which you can edit. Clear a row's checkbox to leave that panel untouched. Confirm to apply every included change at once.
+
+This is the same review dialog used when you [rename or delete a referenced variable](#rename-or-delete-a-referenced-variable).
+
+## Rename or delete a referenced variable
+
+When you rename or delete a variable that is referenced by panel queries or by other variables, SigNoz blocks the save behind an impact dialog so you can review every affected location before applying the change.
+
+### Rename impact review
+
+1. Open **Configure** and go to the **Variables** tab, then edit the variable.
+2. Change the **Name** and select **Save**.
+3. The impact dialog lists every usage of the variable across Query Builder, PromQL, and ClickHouse panels, and any other variable definitions that reference it. Each row shows:
+    - **Current**: the existing query text (read-only).
+    - **Result**: the proposed rewrite with the new variable name. You can edit this field before confirming.
+    - A checkbox to include or exclude that usage from the rename.
+4. Deselect any usage you do not want to update, or edit its **Result** text manually.
+5. Select **Rename** to apply every included change at once.
+
+### Delete impact review
+
+1. In the **Variables** tab, delete a variable that is referenced elsewhere.
+2. The same dialog appears with each affected location:
+    - Query Builder filter clauses that reference the variable are stripped automatically in the proposed **Result**.
+    - Raw queries (PromQL, ClickHouse SQL) and dependent variable definitions are shown unchanged, so you can edit them manually before deleting.
+3. Edit or exclude each usage, then select **Delete** to apply the change.
+
+<Figure
+  src="/img/docs/dashboards/variables/variable-impact-dialog.webp"
+  alt="Delete impact dialog listing every usage of a variable with Current and Result query text and a checkbox per row"
+  caption="The impact dialog before a delete. Each row shows the current query, an editable proposed result, and a checkbox to include or exclude that usage."
+/>
+
+<Admonition type="warning">
+If a **Result** query still contains the original variable reference after your edits (for example, a raw query you did not fully update), the dialog shows a `Still references $<variable>` warning on that row. Resolve the reference before confirming so the query does not break.
+</Admonition>
+
+## Share variable selections
+
+Variable selections are stored per dashboard in your browser rather than being written to the address bar as you change them. Copying the URL from your browser does not carry your selections to another user.
+
+To share a link that reproduces your current selections:
+
+1. Set the variable values you want to share.
+2. Select **Share** in the dashboard header.
+3. Turn on **Include variables**, then select **Copy page link**.
+
+The **Include variables** toggle appears only when the dashboard has at least one variable, and is off by default. The generated link carries your selections in an encoded `?variables=` query parameter. When the recipient opens it, SigNoz applies the selections, keeps them for subsequent refreshes, then removes the parameter from the URL.
+
+<Admonition type="info">
+Because the values persist after the parameter is cleared, a plain bookmark of the cleaned URL will not restore the shared selections. Reshare with **Include variables** enabled when you want to hand off a specific set of values.
+</Admonition>
+
+## Create alerts from a panel
+
+When you create an alert from a dashboard panel that has active variable selections, SigNoz resolves the variable references in the panel query into their current values before opening the alert builder. For example, if `$service.name` is set to `adservice` in the variables bar, the alert builder opens with `adservice` in the query instead of the raw `$service.name` reference.
+
+To create the alert, open the panel's action menu and select **Create Alerts**. For the full flow, including how the alert condition is seeded, see [Create an alert from a panel](https://signoz.io/docs/dashboards/interactivity/#create-an-alert-from-a-panel).
+
+<Admonition type="warning">
+If variable resolution fails, SigNoz shows an error notification and does not open the alert builder. Adjust the panel query or variable selections and try again.
+</Admonition>
+
 ## Next Steps
 
-- [Using Variables in Queries](https://signoz.io/docs/dashboards/using-variables-in-queries/) — Learn how to reference variables in Query Builder, ClickHouse SQL, and PromQL queries.
+- [Using Variables in Queries](https://signoz.io/docs/dashboards/using-variables-in-queries/): learn how to reference variables in Query Builder, ClickHouse SQL, and PromQL queries.
+- [Interactivity in Dashboards](https://signoz.io/docs/dashboards/interactivity/): drill down from panels and create alerts from a panel.
 
 ## Get Help
 

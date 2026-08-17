@@ -1,7 +1,7 @@
 ---
-date: 2026-06-11
-
+date: 2026-08-03
 title: Pipecat Monitoring & Observability with OpenTelemetry
+meta_title: "Pipecat Agent Monitoring: Trace Voice Latency"
 description: Learn how to monitor Pipecat voice agents with OpenTelemetry and SigNoz. Track latency, errors, and model performance in real-time dashboards.
 doc_type: tutorial
 ---
@@ -11,6 +11,8 @@ doc_type: tutorial
 This guide walks you through setting up monitoring and observability for Pipecat using [OpenTelemetry](https://opentelemetry.io/) and exporting logs, traces, and metrics to SigNoz. With this integration, you can observe the performance of various models, capture request/response details, and track system-level metrics in SigNoz, giving you real-time visibility into latency, error rates, and usage trends for your Pipecat applications.
 
 Instrumenting Pipecat in your AI applications with telemetry ensures full observability across your voice agent workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+
+<YouTube id="FDarSjhr33Y" mute="false" />
 
 ## Prerequisites
 
@@ -78,7 +80,7 @@ See this <a href="https://github.com/pipecat-ai/pipecat-examples/blob/main/open-
 
 ### Step 5: Your `bot.py` should look something like this:
 
-```python:bot.py
+```python:bot.py minimap
 #
 # Copyright (c) 2024–2025, Daily
 #
@@ -134,8 +136,6 @@ from pipecat.services.deepgram.stt import DeepgramSTTService
 from pipecat.services.openai.llm import OpenAILLMService
 from pipecat.transports.base_transport import BaseTransport, TransportParams
 from pipecat.transports.daily.transport import DailyParams
-
-
 
 
 logger.info("✅ All components loaded successfully!")
@@ -433,7 +433,7 @@ HTTPXClientInstrumentor().instrument()
 
 ### Step 8: Instrument your Pipecat application
 
-```python:bot.py
+```python:bot.py minimap
 #
 # Copyright (c) 2024–2025, Daily
 #
@@ -490,7 +490,6 @@ from pipecat.services.openai.llm import OpenAILLMService
 from pipecat.transports.base_transport import BaseTransport, TransportParams
 from pipecat.transports.daily.transport import DailyParams
 from pipecat.utils.tracing.setup import setup_tracing 
-
 
 
 logger.info("✅ All components loaded successfully!")
@@ -685,7 +684,6 @@ If you don't see your telemetry data:
 </details>
 
 
-
 ## Next Steps
 
 You can also check out our custom Pipecat dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/pipecat-dashboard/) which provides specialized visualizations for monitoring your Pipecat usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
@@ -696,9 +694,14 @@ You can also check out our custom Pipecat dashboard [here](https://signoz.io/do
   caption="Pipecat Dashboard Template"
 />
 
-Additional resources:
-- Set up [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
-- Learn more about [querying traces](https://signoz.io/docs/userguide/traces/)
-- Explore [log correlation](https://signoz.io/docs/userguide/logs_query_builder/)
+## Related integrations
 
+Trace the rest of the stack behind your voice agents:
 
+- [LiveKit observability with OpenTelemetry](https://signoz.io/docs/livekit-observability/) - trace voice agent sessions, turn latency, and STT and TTS calls
+- [Mastra observability with OpenTelemetry](https://signoz.io/docs/mastra-observability/) - trace Mastra agents, workflows, and tool calls
+- [LlamaIndex observability with OpenTelemetry](https://signoz.io/docs/llamaindex-observability/) - trace RAG queries, retrievers, and index operations
+- [Pydantic AI observability with OpenTelemetry](https://signoz.io/docs/pydantic-ai-observability/) - trace agent runs, output validation, and model calls
+- [Monitor the Anthropic API with OpenTelemetry](https://signoz.io/docs/anthropic-monitoring/) - trace Claude requests and break down input, output, and cache token usage
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

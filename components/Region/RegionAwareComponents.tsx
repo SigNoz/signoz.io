@@ -1,101 +1,18 @@
 'use client'
 
-import React, { Children, isValidElement, cloneElement, ReactNode } from 'react'
-import Pre from 'pliny/ui/Pre'
+import React, { Children } from 'react'
+import CodeBlock from '@/components/CodeBlock'
+import { getTextContent } from '@/components/CodeBlock/utils'
 import { useRegion } from './RegionContext'
+import { processCodeChildren, type Replacement } from './regionCodeSubstitution'
 
-// pliny's <Pre> renders its copy button with this aria-label.
+// CodeBlock copy control uses this aria-label.
 const COPY_BUTTON_SELECTOR = '[aria-label="Copy code"]'
 
 // Use Element (not HTMLElement): the button's icon is an <svg>/<path>, which are
 // SVGElement, so an HTMLElement check would miss hovers/clicks on the icon itself.
 const isCopyButtonTarget = (target: EventTarget | null) =>
   target instanceof Element && !!target.closest(COPY_BUTTON_SELECTOR)
-
-type Replacement = {
-  search: string
-  replace: string
-}
-
-const replaceInText = (text: string, replacements: Replacement[]) => {
-  let newText = text
-  replacements.forEach(({ search, replace }) => {
-    newText = newText.split(search).join(replace)
-  })
-  return newText
-}
-
-const hasPlaceholder = (node: ReactNode, placeholders: string[]): boolean => {
-  if (typeof node === 'string') {
-    return placeholders.some((p) => node.includes(p))
-  }
-  if (Array.isArray(node)) {
-    return node.some((child) => hasPlaceholder(child, placeholders))
-  }
-  if (isValidElement(node)) {
-    const props = node.props as { children?: ReactNode }
-    return hasPlaceholder(props.children, placeholders)
-  }
-  return false
-}
-
-const getTextContent = (node: ReactNode): string => {
-  if (typeof node === 'string') {
-    return node
-  }
-  if (typeof node === 'number') {
-    return String(node)
-  }
-  if (Array.isArray(node)) {
-    return node.map(getTextContent).join('')
-  }
-  if (isValidElement(node)) {
-    const props = node.props as { children?: ReactNode }
-    return getTextContent(props.children)
-  }
-  return ''
-}
-
-const processCodeChildren = (children: ReactNode, replacements: Replacement[]): ReactNode => {
-  const placeholders = replacements.map((r) => r.search)
-
-  if (typeof children === 'string') {
-    return replaceInText(children, replacements)
-  }
-
-  if (Array.isArray(children)) {
-    const combinedText = getTextContent(children)
-    const hasAnyPlaceholder = placeholders.some((p) => combinedText.includes(p))
-
-    if (hasAnyPlaceholder && !children.some((child) => hasPlaceholder(child, placeholders))) {
-      return replaceInText(combinedText, replacements)
-    }
-
-    return Children.toArray(children.map((child) => processCodeChildren(child, replacements)))
-  }
-
-  if (isValidElement(children)) {
-    const props = children.props as { children?: ReactNode }
-
-    const combinedText = getTextContent(props.children)
-    const hasAnyPlaceholder = placeholders.some((p) => combinedText.includes(p))
-
-    if (hasAnyPlaceholder && !hasPlaceholder(props.children, placeholders)) {
-      return cloneElement(children as React.ReactElement<any>, {
-        children: replaceInText(combinedText, replacements),
-      })
-    }
-
-    if (props.children) {
-      return cloneElement(children as React.ReactElement<any>, {
-        children: processCodeChildren(props.children, replacements),
-      })
-    }
-    return children
-  }
-
-  return children
-}
 
 export const RegionAwarePre = (props: any) => {
   const { region, notifyRegionCopy, isOnboarding } = useRegion()
@@ -112,15 +29,14 @@ export const RegionAwarePre = (props: any) => {
   // Use the combined text content (not per-node): syntax highlighting tokenizes
   // `<region>` across separate spans, so a per-node check would miss it — the same
   // reason processCodeChildren falls back to combined text for substitution.
-  const isRegionAware = React.useMemo(
-    () => getTextContent(props.children).includes('<region>'),
-    [props.children]
-  )
+  //
+  // Do not memoize on props.children identity alone: inside Tabs, MDX children often
+  // arrive as fulfilled React.lazy payloads whose `_payload.status` flips without the
+  // lazy element reference changing — memoization would keep a stale false forever.
+  const isRegionAware = getTextContent(props.children).includes('<region>')
 
-  const modifiedChildren = React.useMemo(() => {
-    if (replacements.length === 0) return props.children
-    return processCodeChildren(props.children, replacements)
-  }, [props.children, replacements])
+  const modifiedChildren =
+    replacements.length === 0 ? props.children : processCodeChildren(props.children, replacements)
 
   const renderedChildren = Array.isArray(modifiedChildren)
     ? Children.toArray(modifiedChildren)
@@ -129,7 +45,7 @@ export const RegionAwarePre = (props: any) => {
   const [hintVisible, setHintVisible] = React.useState(false)
 
   if (!isRegionAware || isOnboarding) {
-    return <Pre {...props}>{renderedChildren}</Pre>
+    return <CodeBlock {...props}>{renderedChildren}</CodeBlock>
   }
 
   // What the copy button actually puts on the clipboard (region already substituted).
@@ -144,16 +60,22 @@ export const RegionAwarePre = (props: any) => {
 
   return (
     <div
-      className="relative"
+      className="relative w-full min-w-0 max-w-full"
       onClickCapture={handleClickCapture}
-      onMouseOver={(e) => isCopyButtonTarget(e.target) && setHintVisible(true)}
-      onMouseLeave={() => setHintVisible(false)}
+      onMouseOver={(e) => {
+        if (isCopyButtonTarget(e.target)) setHintVisible(true)
+      }}
+      onMouseOut={(e) => {
+        if (isCopyButtonTarget(e.target) && !isCopyButtonTarget(e.relatedTarget)) {
+          setHintVisible(false)
+        }
+      }}
     >
-      <Pre {...props}>{renderedChildren}</Pre>
+      <CodeBlock {...props}>{renderedChildren}</CodeBlock>
       {hintVisible && (
         <div
           role="tooltip"
-          className="absolute right-2 top-12 z-20 w-56 rounded-md border border-signoz_slate-500 bg-signoz_ink-400 px-3 py-2 text-xs leading-snug text-signoz_vanilla-100 shadow-[0_8px_30px_rgba(0,0,0,0.45)]"
+          className="absolute right-2 top-10 z-20 w-56 rounded-md border border-signoz_slate-500 bg-signoz_ink-400 px-3 py-2 text-xs leading-snug text-signoz_vanilla-100 shadow-[0_8px_30px_rgba(0,0,0,0.45)]"
         >
           {selectedRegion ? (
             <>
@@ -189,10 +111,8 @@ export const RegionAwareCode = (props: any) => {
     return list
   }, [region])
 
-  const modifiedChildren = React.useMemo(() => {
-    if (replacements.length === 0) return props.children
-    return processCodeChildren(props.children, replacements)
-  }, [props.children, replacements])
+  const modifiedChildren =
+    replacements.length === 0 ? props.children : processCodeChildren(props.children, replacements)
 
   return (
     <code {...props}>

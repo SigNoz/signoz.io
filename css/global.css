@@ -1,6 +1,49 @@
 html {
   scroll-padding-top: 60px; /* Adjust this value to match the height of your sticky header */
   scroll-behavior: smooth;
+  /* auto (not scroll): do not permanently reserve a classic scrollbar gutter */
+  overflow-y: auto;
+  /* Prevent rubber-band overscroll from flashing a mismatched color under the page */
+  overscroll-behavior-y: none;
+  background-color: var(--l1-background);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--l3-foreground) 55%, transparent) transparent;
+}
+
+body {
+  overscroll-behavior-y: none;
+  background-color: var(--l1-background);
+}
+
+::selection {
+  background-color: #4e74f8; /* signoz_robin-500 / semantic primary */
+  color: #0a0c10; /* l1/background */
+}
+
+::-moz-selection {
+  background-color: #4e74f8;
+  color: #0a0c10;
+}
+
+/* Prevent Radix Select/Dialog RemoveScroll from causing layout shift.
+   Cancel injected margin/padding gaps without overriding overflow (scroll lock). */
+html body[data-scroll-locked] {
+  margin-right: 0px !important;
+  padding-right: 0px !important;
+  padding-top: 0px !important;
+  padding-left: 0px !important;
+}
+
+/* Region Select only — keep Dialog/Drawer scroll-lock working.
+   Radix Select always uses RemoveScroll; unlocking overflow here (plus capture-phase
+   wheel/touch handlers in SidebarRegionSelector) lets the page scroll while the
+   sticky sidebar region menu stays open and aligned. */
+html body[data-region-select-open][data-scroll-locked] {
+  overflow: visible !important;
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+  padding-top: 0 !important;
+  padding-left: 0 !important;
 }
 
 .row {
@@ -25,48 +68,6 @@ html {
 
 pre {
   overflow-x: auto;
-}
-
-/**
- * Inspired by gatsby remark prism - https://www.gatsbyjs.com/plugins/gatsby-remark-prismjs/
- * 1. Make the element just wide enough to fit its content.
- * 2. Always fill the visible space in .code-highlight.
- */
-
-.code-highlight {
-  float: left; /* 1 */
-  min-width: 100%; /* 2 */
-}
-
-.code-line {
-  display: block;
-  /* background-color: rgba(103, 103, 126, 0.323); */
-  border-left: 4px solid rgba(0, 0, 0, 0); /* Set placeholder for highlight accent border color to transparent */
-}
-
-.code-line.inserted {
-  background-color: rgba(16, 185, 129, 0.2); /* Set inserted line (+) color */
-}
-
-.code-line.deleted {
-  background-color: rgba(239, 68, 68, 0.2); /* Set deleted line (-) color */
-}
-
-.highlight-line {
-  margin-left: -16px;
-  margin-right: -16px;
-  background-color: rgba(55, 65, 81, 0.5); /* Set highlight bg color */
-  border-left: 4px solid rgb(59, 130, 246); /* Set highlight accent border color */
-}
-
-.line-number::before {
-  display: inline-block;
-  width: 1rem;
-  text-align: right;
-  margin-right: 16px;
-  margin-left: -8px;
-  color: rgb(156, 163, 175); /* Line number color */
-  content: attr(line);
 }
 
 .prose :where(blockquote code):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
@@ -108,32 +109,17 @@ code {
   padding: 2px 4px;
 }
 
-/* Works on Firefox */
-* {
-  scrollbar-width: 2px;
-}
-
-::-webkit-scrollbar {
-  width: 2px;
-}
-
-*::-webkit-scrollbar-thumb {
-  border-radius: 20px;
-  width: 4px;
-  height: 4px;
-}
-
-body::-webkit-scrollbar {
-  width: 4px;
-}
-
-body::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-}
-
-body::-webkit-scrollbar-thumb {
-  background-color: darkgrey;
-  outline: 1px solid slategrey;
+/*
+  Thin scrollbars without forcing classic gutters.
+  Do NOT set ::-webkit-scrollbar width/height — that switches overlay → classic
+  and reserves layout space. scrollbar-width/color keep OS overlay behavior
+  (macOS) while thinning bars where the platform uses classic.
+*/
+.docs-sidebar-scroll,
+[data-slot='select-content'],
+[data-slot='select-viewport'] {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--l3-foreground) 55%, transparent) transparent;
 }
 
 .docs-sidebar {

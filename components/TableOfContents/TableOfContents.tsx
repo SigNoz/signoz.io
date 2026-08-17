@@ -1,9 +1,10 @@
 /** @jsxImportSource react */
 'use client'
 
-import { useRef, useEffect, RefObject } from 'react'
+import { useRef, useEffect, useState, RefObject } from 'react'
 import { usePathname } from 'next/navigation'
 import { useLogEvent } from 'hooks/useLogEvent'
+import { cn } from 'app/lib/utils'
 
 export interface TocItemProps {
   url: string
@@ -16,15 +17,19 @@ interface TableOfContentsProps {
   activeSection: string
   setActiveSection: (section: string) => void
   scrollableContainerRef: RefObject<HTMLDivElement | null>
+  size?: 'sm' | 'xs'
 }
 
 const TableOfContents = ({
   toc,
   activeSection,
-  setActiveSection,
+  setActiveSection: _setActiveSection,
   scrollableContainerRef,
+  size = 'sm',
 }: TableOfContentsProps) => {
   const tocRef = useRef<HTMLDivElement>(null)
+  const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const [indicator, setIndicator] = useState<{ top: number; height: number } | null>(null)
   const pathname = usePathname()
   const logEvent = useLogEvent()
 
@@ -33,6 +38,28 @@ const TableOfContents = ({
     const noHash = s.startsWith('#') ? s.slice(1) : s
     return noHash.replace(/-+$/g, '')
   }
+
+  // Position the active indicator next to the active TOC item
+  useEffect(() => {
+    if (!tocRef.current || !activeSection) {
+      setIndicator(null)
+      return
+    }
+
+    const key = canonicalize(activeSection)
+    const activeEl = itemRefs.current.get(key)
+    if (!activeEl) {
+      setIndicator(null)
+      return
+    }
+
+    const listTop = tocRef.current.getBoundingClientRect().top
+    const itemRect = activeEl.getBoundingClientRect()
+    setIndicator({
+      top: itemRect.top - listTop,
+      height: itemRect.height,
+    })
+  }, [activeSection, toc])
 
   // Effect to handle TOC scrolling
   useEffect(() => {
@@ -60,46 +87,67 @@ const TableOfContents = ({
   }, [activeSection, scrollableContainerRef])
 
   return (
-    <div ref={tocRef} className="flex flex-col gap-1.5">
-      {toc.map((tocItem: TocItemProps) => {
-        const isActive = canonicalize(activeSection) === canonicalize(tocItem.url)
-
-        const handleClick = () => {
-          // Log the TOC click event
-          logEvent({
-            eventName: 'Website Click',
-            eventType: 'track',
-            attributes: {
-              clickType: 'ToC Click',
-              clickName: 'TOC Link',
-              clickText: tocItem.value,
-              clickLocation: 'Table of Contents',
-              pageLocation: pathname,
-            },
-          })
-          // Note: No need for e.preventDefault() or router.push()
-          // We want the default anchor link behavior to scroll the page.
-        }
-
-        return (
+    <div ref={tocRef} className="relative flex items-start gap-[3px]">
+      <div className="relative min-h-full w-[2px] shrink-0 self-stretch">
+        <div
+          className="absolute inset-y-0 left-0 w-[2px] rounded-full bg-[var(--l2-border)]"
+          aria-hidden="true"
+        />
+        {indicator && (
           <div
-            className="min-h-6 w-full font-medium leading-none"
-            key={tocItem.url}
-            style={{ paddingLeft: `${(tocItem.depth - 1) * 12}px` }}
-          >
-            <a
-              data-level={tocItem.depth}
-              href={tocItem.url}
-              onClick={handleClick}
-              className={`line-clamp-2 inline-block w-full text-xs transition-colors hover:text-signoz_robin-400 focus-visible:text-signoz_robin-400 focus-visible:outline-none ${
-                isActive ? 'text-signoz_robin-500' : 'text-signoz_vanilla-300'
-              }`}
+            className="absolute left-0 w-[2px] rounded-full bg-[var(--primary-background)] transition-[top,height] duration-200 motion-reduce:transition-none"
+            style={{ top: indicator.top, height: indicator.height }}
+            aria-hidden="true"
+          />
+        )}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-px">
+        {toc.map((tocItem: TocItemProps) => {
+          const isActive = canonicalize(activeSection) === canonicalize(tocItem.url)
+          const itemKey = canonicalize(tocItem.url)
+          const nestIndent = Math.max(tocItem.depth - 2, 0) * 20
+
+          const handleClick = () => {
+            logEvent({
+              eventName: 'Website Click',
+              eventType: 'track',
+              attributes: {
+                clickType: 'ToC Click',
+                clickName: 'TOC Link',
+                clickText: tocItem.value,
+                clickLocation: 'Table of Contents',
+                pageLocation: pathname,
+              },
+            })
+          }
+
+          return (
+            <div
+              className="w-full"
+              key={tocItem.url}
+              style={{ paddingLeft: nestIndent > 0 ? `${nestIndent}px` : undefined }}
+              ref={(el) => {
+                if (el) itemRefs.current.set(itemKey, el)
+                else itemRefs.current.delete(itemKey)
+              }}
             >
-              {tocItem.value}
-            </a>
-          </div>
-        )
-      })}
+              <a
+                href={tocItem.url}
+                onClick={handleClick}
+                className={cn(
+                  'inline-block w-full rounded-md py-2 pl-3 leading-5 transition-colors focus-visible:text-[var(--l2-foreground-hover)] focus-visible:outline-none',
+                  size === 'sm' ? 'text-sm' : 'text-xs',
+                  isActive
+                    ? 'text-[var(--l1-foreground-hover)]'
+                    : 'text-[var(--l2-foreground)] hover:text-[var(--l2-foreground-hover)]'
+                )}
+              >
+                {tocItem.value}
+              </a>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

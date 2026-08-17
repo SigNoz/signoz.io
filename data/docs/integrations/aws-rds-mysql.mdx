@@ -1,5 +1,5 @@
 ---
-date: 2026-03-12
+date: 2026-08-05
 title: AWS RDS (MySQL) Metrics and Logs
 description: Collect AWS RDS MySQL metrics and logs using OpenTelemetry Collector and send them to SigNoz for monitoring and analysis.
 doc_type: howto
@@ -10,6 +10,10 @@ This integration helps you monitor key AWS RDS (MySQL) metrics and logs, view th
 
 <Admonition type="tip">
 **SigNoz Cloud users**: You can also use the [One-Click AWS Integration](https://signoz.io/docs/integrations/aws/rds/) for automated setup with pre-built dashboards.
+</Admonition>
+
+<Admonition type="info" title="Running MySQL yourself instead of on RDS?" defaultCollapsed="true">
+See [Monitor MySQL logs](https://signoz.io/docs/integrations/opentelemetry-mysql/) and [MySQL metrics](https://signoz.io/docs/metrics-management/mysql-metrics/).
 </Admonition>
 
 ## Prerequisites
@@ -50,7 +54,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 2. Configure the Prometheus exporter
 Save the following config for collecting AWS RDS MySQL metrics in a file named `aws-rds-mysql-metrics.yaml` and update the region key with relevant value.
 
-```yaml
+```yaml minimap defaultCollapsed
 ---
 region: us-east-1
 metrics:
@@ -254,7 +258,7 @@ java -jar cloudwatch_exporter-0.15.5-jar-with-dependencies.jar 9106 aws-rds-mysq
 
 Create `mysql-metrics-collection-config.yaml`:
 
-```yaml
+```yaml minimap
 receivers:
   mysql:
     # The hostname and port of the MySQL instance, separated by a colon.
@@ -368,7 +372,7 @@ The log collection of RDS instance requires specifying the list of log group nam
 ### Step 1: Create the Collector Config File
 
 Create `mysql-logs-collection-config.yaml`:
-```yaml
+```yaml minimap
 receivers:
   awscloudwatch/rds_mysql_logs:
     region: us-east-1

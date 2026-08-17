@@ -131,6 +131,58 @@ test('RegionTable stub renders a placeholder for the endpoint table', async () =
   assert.doesNotMatch(html, /Component: RegionTable/)
 })
 
+test('DashboardActions stub renders both schema versions with their URLs', async () => {
+  const v2Url =
+    'https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/agno/agno-dashboard.json'
+  const v1Url =
+    'https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/agno/v1/agno-dashboard.json'
+  const doc = createDoc(
+    `<DashboardActions dashboardJsonV2Url="${v2Url}" dashboardJsonV1Url="${v1Url}" />`
+  )
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.DashboardActions, {
+      dashboardJsonV2Url: v2Url,
+      dashboardJsonV1Url: v1Url,
+    })
+  )
+
+  assert.match(html, /V2 dashboard JSON \(recommended, requires SigNoz v0\.135\.0 or newer\)/)
+  assert.match(html, /V1 dashboard JSON \(deprecated, only for SigNoz older than v0\.135\.0\)/)
+  assert.match(html, /agno\/agno-dashboard\.json/)
+  assert.match(html, /agno\/v1\/agno-dashboard\.json/)
+  assert.match(html, /New dashboard → Import JSON/)
+  assert.doesNotMatch(html, /Component: DashboardActions/)
+})
+
+test('DashboardActions stub omits V1 when a dashboard is V2 only', async () => {
+  const v2Url =
+    'https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/openai/openai-dashboard.json'
+  const doc = createDoc(`<DashboardActions dashboardJsonV2Url="${v2Url}" />`)
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.DashboardActions, { dashboardJsonV2Url: v2Url })
+  )
+
+  assert.match(html, /V2 dashboard JSON/)
+  assert.doesNotMatch(html, /V1 dashboard JSON/)
+})
+
+test('DashboardActions stub still handles the legacy dashboardJsonUrl prop', async () => {
+  const url = 'https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/nginx/nginx.json'
+  const doc = createDoc(`<DashboardActions dashboardJsonUrl="${url}" dashboardName="NGINX" />`)
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.DashboardActions, {
+      dashboardJsonUrl: url,
+      dashboardName: 'NGINX',
+    })
+  )
+
+  assert.match(html, /V2 dashboard JSON/)
+  assert.match(html, /nginx\/nginx\.json/)
+})
+
 test('MCPInstallButton stub renders child text with client context', async () => {
   const doc = createDoc('<MCPInstallButton client="cursor">Add to Cursor</MCPInstallButton>')
   const components = await buildAgentMdxComponentsForDoc(doc)

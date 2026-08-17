@@ -2,6 +2,7 @@ import React from 'react'
 import { buildAgentMdxComponentsForDoc } from './agentMarkdownStubs'
 import { htmlToMarkdown, normalizeWhitespace } from './markdownCore'
 import { buildMarkdownDocument, MORE_DOCS_POINTER } from './buildMarkdownDocument'
+import { mdxOptions } from '../mdx/options'
 
 type DocMarkdownSource = {
   slug?: string
@@ -50,7 +51,6 @@ const wrapDocument = (doc: DocMarkdownSource, bodyMarkdown: string): string =>
 const compileMdxToMarkdown = async (doc: DocMarkdownSource): Promise<string> => {
   const { compileMDX } = await import('next-mdx-remote/rsc')
   const { renderToStaticMarkup } = await import('react-dom/server')
-  const { mdxOptions } = await import('../mdxUtils')
 
   const components = await buildAgentMdxComponentsForDoc(doc)
 

@@ -212,24 +212,55 @@ input:-webkit-autofill:focus {
   overflow: auto hidden;
 }
 
-.content-header > a:first-child {
+.content-header {
+  display: flex;
+  align-items: center;
+}
+
+.content-header > a:last-child {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  padding: 4px;
+  background: var(--l2-background);
+  border: 1px solid var(--l2-border);
+  border-radius: 2px;
   text-decoration: none;
-}
-
-.content-header-link {
+  vertical-align: middle;
+  line-height: 1;
   opacity: 0;
-  margin-left: -24px;
-  padding-right: 4px;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    background-color 0.15s ease;
+  color: var(--l2-foreground);
 }
 
-.content-header:hover .content-header-link,
-.content-header-link:hover {
+.content-header:hover > a:last-child {
   opacity: 1;
 }
 
+.content-header > a:last-child:hover {
+  background: var(--l2-background-hover);
+  color: var(--l2-foreground-hover);
+}
+
+.content-header .linkicon {
+  width: 14px;
+  height: 14px;
+}
+
+.content-header-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
 .linkicon {
-  display: inline-block;
-  vertical-align: middle;
+  display: block;
+  width: 1em;
+  height: 1em;
 }
 
 /* TOC depth indentation (data-level set by TOC renderers) */
@@ -240,24 +271,17 @@ a[data-level='4'] {
   padding-left: 32px;
 }
 
-/* Hide content-header-link inside toggle summaries */
-.toggle-summary .content-header-link {
+/* Hide the heading anchor inside toggle summaries (the button chrome would render as an empty square) */
+.toggle-summary .content-header > a:last-child {
   display: none !important;
 }
 
-/* Position content-header-link inside toggle headings */
-.toggle-heading .content-header-link {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+/* Keep toggle headings inline so they sit on the same line as the summary marker */
+.toggle-summary .content-header {
   display: inline-flex;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.toggle-heading:hover .content-header-link {
-  opacity: 1;
+  vertical-align: middle;
+  /* Space between the disclosure arrow and the heading (padding, not margin — ToggleHeading sets inline margin: 0) */
+  padding-left: 0.5rem;
 }
 
 pre.p-0 {
@@ -412,7 +436,8 @@ pre.p-0 {
     BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol';
   --ifm-font-family-monospace:
-    SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
   --ifm-font-size-base: 100%;
 
   --ifm-font-weight-light: 300;

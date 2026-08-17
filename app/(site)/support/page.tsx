@@ -1,13 +1,13 @@
-import Support from './Support'
+import SupportPage from './SupportPage'
 
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Support',
   description:
-    'Reach out to Signoz for any queries - We are an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
+    'Enterprise-grade support for every stage of your observability journey. From open source community to mission-critical production - SigNoz support is built for engineering teams.',
 }
 
-export default function SupportPage() {
-  return <Support />
+export default function SupportPageRoute() {
+  return <SupportPage />
 }

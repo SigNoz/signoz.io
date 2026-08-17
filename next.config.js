@@ -168,12 +168,22 @@ module.exports = () => {
         },
         {
           source: '/docs/manage/administrator-guide/iam/permissions',
-          destination: '/docs/manage/administrator-guide/iam/transactions/',
+          destination: '/docs/manage/administrator-guide/iam/reference/transactions/',
           permanent: true,
         },
         {
           source: '/docs/manage/administrator-guide/iam/permissions/',
-          destination: '/docs/manage/administrator-guide/iam/transactions/',
+          destination: '/docs/manage/administrator-guide/iam/reference/transactions/',
+          permanent: true,
+        },
+        {
+          source: '/docs/manage/administrator-guide/iam/transactions',
+          destination: '/docs/manage/administrator-guide/iam/reference/transactions/',
+          permanent: true,
+        },
+        {
+          source: '/docs/manage/administrator-guide/iam/transactions/',
+          destination: '/docs/manage/administrator-guide/iam/reference/transactions/',
           permanent: true,
         },
         {
@@ -309,6 +319,16 @@ module.exports = () => {
         {
           source: '/docs/alerts-management/overview/',
           destination: '/docs/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.135/',
+          destination: '/docs/operate/migration/upgrade-0-135/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/migration/upgrade-0.135',
+          destination: '/docs/operate/migration/upgrade-0-135/',
           permanent: true,
         },
         {
@@ -824,6 +844,21 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/opentelemetry-exporters/',
+          destination: '/guides/opentelemetry-collector-vs-exporter/',
+          permanent: true,
+        },
+        {
+          source: '/blog/using-opentelemetry-collector-processor/',
+          destination: '/blog/opentelemetry-collector-complete-guide/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-nextjs-use-cases/',
+          destination: '/blog/opentelemetry-nextjs-production/',
+          permanent: true,
+        },
+        {
           source: '/blog/tags/',
           destination: '/tags/',
           permanent: true,
@@ -1014,7 +1049,37 @@ module.exports = () => {
         },
         {
           source: '/blog/open-source-log-management/',
-          destination: '/blog/best-open-source-log-management-tools',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/blog/best-open-source-log-management-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/blog/log-monitoring-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/log-analysis-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/best-frontend-cloud-logging-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/log-aggregation-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/best-error-logging-tools-for-software-development/',
+          destination: '/blog/best-log-management-tools/',
           permanent: true,
         },
         {
@@ -1953,12 +2018,37 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/hostmetrics/',
-          destination: '/docs/infrastructure-monitoring/hostmetrics/',
+          destination: '/docs/infrastructure-monitoring/user-guides/hostmetrics/',
           permanent: true,
         },
         {
           source: '/docs/userguide/k8s-metrics/',
-          destination: '/docs/infrastructure-monitoring/k8s-metrics/',
+          destination: '/docs/infrastructure-monitoring/user-guides/k8s-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/hostmetrics/',
+          destination: '/docs/infrastructure-monitoring/user-guides/hostmetrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/k8s-metrics/',
+          destination: '/docs/infrastructure-monitoring/user-guides/k8s-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/cert-manager/',
+          destination: '/docs/infrastructure-monitoring/user-guides/cert-manager/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/',
+          destination: '/docs/infrastructure-monitoring/reference/telemetry-data-requirements/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics/',
+          destination: '/docs/infrastructure-monitoring/reference/understanding-cpu-metrics/',
           permanent: true,
         },
         {
@@ -2335,7 +2425,7 @@ module.exports = () => {
         },
         {
           source: '/log-analysis-tools',
-          destination: '/comparisons/log-analysis-tools/',
+          destination: '/blog/best-log-management-tools/',
           permanent: true,
         },
         {
@@ -2430,7 +2520,7 @@ module.exports = () => {
         },
         {
           source: '/log-aggregation-tools',
-          destination: '/comparisons/log-aggregation-tools/',
+          destination: '/blog/best-log-management-tools/',
           permanent: true,
         },
         {
@@ -2991,6 +3081,21 @@ module.exports = () => {
         {
           source: '/docs/cost-meter/alert-setup-guides',
           destination: '/docs/cost-meter/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/gcp/collect-logs/',
+          destination: '/docs/integrations/gcp/collect-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/gcp/collect-logs',
+          destination: '/docs/integrations/gcp/collect-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/blog/llm-observability/',
+          destination: '/docs/llm-observability/',
           permanent: true,
         },
       ])

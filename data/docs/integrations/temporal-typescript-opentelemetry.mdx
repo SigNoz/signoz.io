@@ -1,5 +1,5 @@
 ---
-date: 2026-06-17
+date: 2026-08-05
 title: Instrumenting a Temporal TypeScript application with OpenTelemetry
 meta_title: OpenTelemetry for Temporal (TypeScript)
 description: Instrument a Temporal TypeScript application with OpenTelemetry and send traces, metrics, and logs to SigNoz.
@@ -82,7 +82,7 @@ Create `src/instrumentation.ts` to set up the OpenTelemetry SDK. This file initi
   Load this file **before** any other code to ensure automatic instrumentation works correctly.
 </Admonition>
 
-```typescript:src/instrumentation.ts
+```typescript:src/instrumentation.ts minimap
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
@@ -155,7 +155,7 @@ export function setupOtelSdk(): NodeSDK {
 
 The Temporal Worker executes workflow and activity code. Configure it to send traces, metrics, and logs to SigNoz.
 
-```typescript:src/worker.ts {1,12-24}
+```typescript:src/worker.ts {1,12-24} minimap
 import { DefaultLogger, Worker, Runtime, makeTelemetryFilterString } from '@temporalio/worker';
 import { OpenTelemetryPlugin } from '@temporalio/interceptors-opentelemetry';
 import { setupOtelSdk, resource, spanProcessor, otlpHeaders } from './instrumentation';
