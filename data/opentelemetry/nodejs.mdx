@@ -1,8 +1,7 @@
 ---
 title: OpenTelemetry Node.js - Getting Started with Tracing, Logs, and Metrics
 meta_title: "OpenTelemetry Node.js: Traces, Logs, and Metrics"
-published_date: 2023-11-20
-updated_date: 2026-07-14
+date: 2026-08-17
 tags: [nodejs, opentelemetry]
 authors: [ankit_anand, saurabh_patil]
 description: "The complete guide to instrumenting Node.js with OpenTelemetry. Implement auto & manual instrumentation to visualize traces and logs in a few simple steps."
@@ -30,7 +29,7 @@ This guide takes you from a basic "zero-code" setup to a “production ready” 
   <img src="/img/blog/2024/12/opentelemetry-nodejs-cover.webp" alt="Monitor your Nodejs applications with SigNoz" />
 </figure>
 
-## What is OpenTelemetry ?
+## What is OpenTelemetry?
 
 OpenTelemetry is an open-source framework that provides a single set of APIs, libraries, and agents to collect distributed **traces, metrics, and logs** from your application.
 
@@ -58,12 +57,6 @@ OpenTelemetry provide developers three different ways to instrument their applic
 
 To avoid manual setup, clone the [**sample Node.js app repository**](https://github.com/LuffySama-Dev/SampleNodejsExample), which is contains a sample node.js app. You can refer to [README.md](https://github.com/LuffySama-Dev/SampleNodejsExample/blob/main/README.md) for setup.
 
-<KeyPointCallout defaultCollapsed="true">
-
-If you are instrumenting an exisiting application, please feel free to skip this step and continue to learn **“How to Instrument Node.js Application with OpenTelemetry ?”.**
-
-</KeyPointCallout>
-
 ### Architecture of Sample Node.js application:
 
 - Creates a simple server using **`express`**.
@@ -76,11 +69,11 @@ If you are instrumenting an exisiting application, please feel free to skip this
 
 Once your node.js application setup is completed, proceed with next step.
 
-## How to Instrument Node.js Application with OpenTelemetry ?
+## How to Instrument Node.js Application with OpenTelemetry?
 
 As discussed earlier, there are three ways to instrument your application with OpenTelemetry. We will be focusing only on two of them which are Automatic Instrumentation & Manual Instrumentation.
 
-### How to Auto Instrument Node.js application ?
+### How to Auto Instrument Node.js application?
 
 You should use this instrumentation when :
 
@@ -100,9 +93,9 @@ These libraries enable automatic instrumentation and interaction with the [**Op
 
 **Step 2: Configure Environment Variables**
 
-<KeyPointCallout defaultCollapsed="true">
+<KeyPointCallout>
 
-These environment variables are applicable for SigNoz cloud. You don't need Ingestion key if you're using self-hosted SigNoz. For self-hosted SigNoz, please refer to instructions at [SigNoz Self-host Guide](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/).
+These environment variables are applicable for SigNoz Cloud. You don't need Ingestion key if you're using self-hosted SigNoz. For self-hosted SigNoz, please refer to instructions at [SigNoz Self-host Guide](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/).
 
 </KeyPointCallout>
 
@@ -133,7 +126,6 @@ Here is a breakdown of the environment variables used:
 
 Be sure to replace `<SIGNOZ_INGESTION_KEY>` with your actual SigNoz ingestion key. If you haven't created one yet, you can follow [Ingestion Key Guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to generate your access key.
 
-{' '}
 
 **Step 3: Start the Application**
 
@@ -167,6 +159,12 @@ SigNoz makes it easy to visualize metrics and traces captured through OpenTeleme
 - Error rate of requests
 - Duration taken by requests
 
+<KeyPointCallout>
+
+ You don't configure these metrics anywhere. SigNoz derives them from the spans your application is already exporting — each span carries a start time, a duration, and a status, which is everything needed to compute request rate, error percentage, and latency percentiles per service and per endpoint. That means auto-instrumentation alone gets you a working service dashboard, and you only need the [custom metrics](https://signoz.io/opentelemetry/custom-metrics-nodejs/) covered later for numbers that aren't derivable from spans, such as queue depth or business counters.
+
+</KeyPointCallout>
+
 Click on your application in the **`Services`** tab to be redirected to the **`Metrics`** page, where you can explore these metrics in detail.
 
 <figure data-zoomable align="center">
@@ -196,10 +194,105 @@ SigNoz provides flamegraphs, which are an invaluable tool for visualizing the ex
     <i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing</i>
   </figcaption>
 </figure>
-Congratulations !! You have successfully auto instrumented your first NodeJS application with
-OpenTelemetry and SigNoz.{' '}
 
-### How to Manually Instrument your Nodejs application ?
+Congratulations! You have successfully auto instrumented your first NodeJS application with
+OpenTelemetry and SigNoz.
+
+### How to Instrument Multiple Node.js Services with Docker Compose?
+
+The setup above instruments a single process. Real systems usually run several Node.js services side by side, and the good news is that nothing about the instrumentation changes — you set the same environment variables on each service, varying only `OTEL_SERVICE_NAME`. Because the auto-instrumentation propagates trace context across HTTP calls, requests that hop from one service to the next arrive in SigNoz as a single connected trace.
+
+Keep your credentials out of `docker-compose.yml` by putting them in a `.env` file, and add that file to `.gitignore`:
+
+```bash
+# .env
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+```
+
+Then reference those variables from each service:
+
+```yaml
+services:
+  order:
+    build: ./order-service
+    ports:
+      - '3001:3001'
+    environment:
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_HEADERS=${OTEL_EXPORTER_OTLP_HEADERS}
+      - OTEL_NODE_RESOURCE_DETECTORS=env,host,os
+      - OTEL_SERVICE_NAME=order-service
+      - NODE_OPTIONS=--require @opentelemetry/auto-instrumentations-node/register
+    networks:
+      - myapp-network
+
+  payment:
+    build: ./payment-service
+    ports:
+      - '3002:3002'
+    environment:
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_HEADERS=${OTEL_EXPORTER_OTLP_HEADERS}
+      - OTEL_NODE_RESOURCE_DETECTORS=env,host,os
+      - OTEL_SERVICE_NAME=payment-service
+      - NODE_OPTIONS=--require @opentelemetry/auto-instrumentations-node/register
+    networks:
+      - myapp-network
+
+networks:
+  myapp-network:
+```
+
+Add further services by copying one block and changing `build`, `ports`, and `OTEL_SERVICE_NAME`.
+
+#### Routing Through an OpenTelemetry Collector
+
+Sending straight to SigNoz is fine for a handful of services. Once you want to batch, filter, or enrich telemetry in one place — or collect host metrics alongside your application data — put an [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) between your services and the backend.
+
+The only change on the application side is the endpoint: point it at the collector's container name on the shared Docker network instead of at SigNoz.
+
+```yaml
+services:
+  order:
+    build: ./order-service
+    environment:
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318 # collector, not SigNoz
+      - OTEL_NODE_RESOURCE_DETECTORS=env,host,os
+      - OTEL_SERVICE_NAME=order-service
+      - NODE_OPTIONS=--require @opentelemetry/auto-instrumentations-node/register
+    depends_on:
+      - otel-collector
+    networks:
+      - myapp-network
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ['--config', '/etc/otel-collector-config.yaml']
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - '4317:4317'
+      - '4318:4318'
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - SIGNOZ_INGESTION_KEY=${SIGNOZ_INGESTION_KEY}
+    networks:
+      - myapp-network
+
+networks:
+  myapp-network:
+```
+
+Note the port: use `4318` for OTLP over HTTP and `4317` for gRPC. Pointing an HTTP exporter at `4317` produces a `Parse Error: Expected HTTP/` in the collector logs, which is one of the more common setup mistakes.
+
+For the collector configuration file itself, and for troubleshooting a containerised collector, see the [OTel Collector in Docker guide](https://signoz.io/blog/otel-collector-docker/).<br />
+Check out our dedicated guide on the [OTel Collector Contrib distribution](https://signoz.io/blog/opentelemetry-collector-contrib/) if you are interested in learning more on the topic.
+
+### How to Manually Instrument your Nodejs application?
 
 You should use Manual Instrumentation when:
 
@@ -494,7 +587,7 @@ We had added counter metrics whose count will increase every time the API is cal
   </figcaption>
 </figure>
 
-Congratulations !! You have manually instrumented your first Node.js application with OpenTelemetry and SigNoz.
+Congratulations! You have manually instrumented your first Node.js application with OpenTelemetry and SigNoz.
 
 ## Logging in NodeJs
 
@@ -509,7 +602,36 @@ If you want to Instrument your logs and forward them to SigNoz, please follow be
 
 Once your logs are flowing in, the next step is making them truly useful by tying them back to the requests they belong to. This is where trace-log correlation comes in. By embedding trace IDs into your log entries, you can jump from a slow or failing span directly to the logs that were generated during that exact execution path. It turns scattered information into a connected story, making debugging far quicker and far less guess-heavy.
 
-If you want a deeper walkthrough of how trace-log correlation works in practice, see [Correlate Logs and Traces in SigNoz](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/).
+The good news is that you rarely have to wire this up by hand. OpenTelemetry ships instrumentation for the common Node.js loggers, and it adds the trace context for you:
+
+```bash
+npm install --save @opentelemetry/instrumentation-pino
+# or @opentelemetry/instrumentation-winston, @opentelemetry/instrumentation-bunyan
+```
+
+Register it in your SDK setup:
+
+```jsx
+import { NodeSDK } from '@opentelemetry/sdk-node'
+import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino'
+
+const sdk = new NodeSDK({
+  instrumentations: [new PinoInstrumentation()],
+  // ...your exporters and resource
+})
+
+sdk.start()
+```
+
+Any log emitted while a span is active now carries `trace_id`, `span_id`, and `trace_flags`, which is exactly what SigNoz uses to link a log line to its span. The Pino instrumentation additionally routes log records to the OpenTelemetry Logs SDK, so a single package covers both correlation and log export.
+
+<KeyPointCallout>
+
+If you followed the zero-code setup earlier, you already have this. `@opentelemetry/auto-instrumentations-node` bundles the Pino, Winston, and Bunyan instrumentations, so logs written inside a span are correlated without any extra configuration.
+
+</KeyPointCallout>
+
+Manually injecting `traceId` and `spanId` into log records — for example through a Pino `formatters.log` hook — and then parsing them back out with a log pipeline is only necessary when the SDK can't inject the context itself, such as logs read from files or collected from Kubernetes stdout. For that path, and for verifying correlation once it's flowing, see [Correlate Logs and Traces in SigNoz](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/).
 
 ## Best Practices for Instrumenting Node.js with OpenTelemetry
 
@@ -536,7 +658,7 @@ OpenTelemetry makes it very convenient to instrument your Nodejs application. Yo
 
 ## Get Started with SigNoz
 
-You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [**SigNoz cloud**](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [**SigNoz Cloud**](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
 
 Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [**enterprise self-hosted or BYOC offering**](https://signoz.io/contact-us/).
 
