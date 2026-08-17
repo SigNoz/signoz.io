@@ -168,7 +168,6 @@ function Footer({ inDocsShell = false }: FooterProps) {
                   Launch Week
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
-                <FooterPillLink href="/changelog/">Changelog</FooterPillLink>
                 <FooterPillLink href="/docs/dashboards/dashboard-templates/overview/" newTab>
                   Dashboard Templates
                   <ArrowUpRight size={16} />

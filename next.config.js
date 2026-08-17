@@ -1049,7 +1049,37 @@ module.exports = () => {
         },
         {
           source: '/blog/open-source-log-management/',
-          destination: '/blog/best-open-source-log-management-tools',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/blog/best-open-source-log-management-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/blog/log-monitoring-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/log-analysis-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/best-frontend-cloud-logging-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/log-aggregation-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/best-error-logging-tools-for-software-development/',
+          destination: '/blog/best-log-management-tools/',
           permanent: true,
         },
         {
@@ -2395,7 +2425,7 @@ module.exports = () => {
         },
         {
           source: '/log-analysis-tools',
-          destination: '/comparisons/log-analysis-tools/',
+          destination: '/blog/best-log-management-tools/',
           permanent: true,
         },
         {
@@ -2490,7 +2520,7 @@ module.exports = () => {
         },
         {
           source: '/log-aggregation-tools',
-          destination: '/comparisons/log-aggregation-tools/',
+          destination: '/blog/best-log-management-tools/',
           permanent: true,
         },
         {
