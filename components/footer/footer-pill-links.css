@@ -1,0 +1,82 @@
+/* Rising-pill footer links — shared site-wide (ported from design Demos/footer-links.html) */
+
+.footer-pill-link {
+  --footer-pill-bg: var(--l1-background);
+  --footer-pill-link: var(--l2-foreground);
+  --footer-pill-link-faint: color-mix(in srgb, var(--footer-pill-link) 34%, transparent);
+  --footer-pill-pad: 3px;
+  --footer-pill-y: 3px;
+  --footer-pill-rest-h: 2px;
+  --footer-pill-rest-drop: 2px;
+  --footer-pill-radius: 2px;
+  --footer-pill-ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+  --footer-pill-dur: 80ms;
+
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: content-box;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0 var(--footer-pill-pad);
+  margin-left: calc(-1 * var(--footer-pill-pad));
+  margin-right: calc(-1 * var(--footer-pill-pad));
+  color: var(--footer-pill-link);
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  -webkit-text-stroke: 0 currentColor;
+  transition:
+    color var(--footer-pill-dur) var(--footer-pill-ease),
+    -webkit-text-stroke-width var(--footer-pill-dur) var(--footer-pill-ease);
+}
+
+.footer-pill-link::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: var(--footer-pill-pad);
+  right: var(--footer-pill-pad);
+  bottom: calc(-1 * var(--footer-pill-rest-drop));
+  height: var(--footer-pill-rest-h);
+  border-radius: var(--footer-pill-radius);
+  background: var(--footer-pill-link-faint);
+  transition:
+    height var(--footer-pill-dur) var(--footer-pill-ease),
+    left var(--footer-pill-dur) var(--footer-pill-ease),
+    right var(--footer-pill-dur) var(--footer-pill-ease),
+    background-color var(--footer-pill-dur) var(--footer-pill-ease);
+}
+
+.footer-pill-link:hover,
+.footer-pill-link:focus-visible {
+  color: var(--footer-pill-bg);
+  -webkit-text-stroke: 0.3px currentColor;
+  outline: none;
+  text-decoration: none;
+}
+
+.footer-pill-link:hover::before,
+.footer-pill-link:focus-visible::before {
+  left: 0;
+  right: 0;
+  height: calc(100% + var(--footer-pill-y) + var(--footer-pill-rest-drop));
+  background: var(--footer-pill-link);
+}
+
+.footer-pill-link:focus-visible::before {
+  box-shadow:
+    0 0 0 2px var(--footer-pill-bg),
+    0 0 0 3.5px var(--footer-pill-link);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-pill-link,
+  .footer-pill-link::before {
+    transition: none;
+  }
+}

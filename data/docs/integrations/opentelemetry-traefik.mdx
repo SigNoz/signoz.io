@@ -1,0 +1,398 @@
+---
+date: 2026-08-05
+title: Collect Traefik Access Logs with OpenTelemetry and SigNoz
+description: Ship Traefik access logs to SigNoz with the OpenTelemetry Collector. Parse the JSON format into structured fields to query routers, services, and status codes.
+doc_type: howto
+---
+
+## Overview
+
+This guide ships Traefik access logs to SigNoz with the OpenTelemetry Collector, parsed into structured fields you can query by router, service, and status code.
+
+<Admonition type="info" title="Looking for metrics and traces?" defaultCollapsed="true">
+  Traefik exports metrics and traces to SigNoz over OTLP without a Collector. See [Traefik Observability with OpenTelemetry](https://signoz.io/docs/tutorial/traefik-observability/) for that setup. This guide covers the third signal.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+Ensure you have:
+
+- Traefik v3.0 or newer, with access to edit its static configuration
+- An [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) that can read the Traefik access log file
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## How it works
+
+Traefik writes two log streams, each with its own block in the static configuration:
+
+- **Access logs** (the `accessLog` block): one record per HTTP request, with the router, backend service, status code, and timings. This guide collects these.
+- **Application logs** (the `log` block): Traefik's own diagnostics, such as startup and configuration reloads. Traefik writes them to stdout at `ERROR` level by default, and your `accessLog` settings do not change them. This guide skips them.
+
+Set the access log format to `json` and let the OpenTelemetry Collector file log receiver tail it. A `json_parser` operator turns each line into structured fields you can query and aggregate in SigNoz.
+
+## Collect Traefik access logs
+
+Switch Traefik's access log to `json`, write a Collector config that tails and parses that file, then deploy the Collector.
+
+### Step 1: Enable JSON access logs
+
+Traefik ships with access logs off, and its `common` default format needs regex parsing. Turn access logs on and switch the format to `json`.
+
+<Tabs entityName="config">
+<TabItem value="cli" label="CLI flags" default>
+
+```bash
+--accesslog=true
+--accesslog.format=json
+--accesslog.filepath=/var/log/traefik/access.log
+```
+
+</TabItem>
+<TabItem value="file" label="traefik.yml">
+
+```yaml:traefik.yml
+accessLog:
+  format: json
+  filePath: /var/log/traefik/access.log
+```
+
+</TabItem>
+</Tabs>
+
+Traefik writes to stdout when you omit the file path. Restart Traefik to apply the change.
+
+<Admonition type="info" title="Trimming noisy fields" defaultCollapsed="true">
+  Access logs carry one record per request. To cut volume, drop fields you do not query or filter out successful requests:
+
+  ```yaml:traefik.yml
+  accessLog:
+    format: json
+    filePath: /var/log/traefik/access.log
+    fields:
+      names:
+        StartLocal: drop
+      headers:
+        defaultMode: drop
+    filters:
+      statusCodes:
+        - "400-599"
+  ```
+
+  The `filters.statusCodes` setting above keeps only error responses. Remove it to log every request.
+</Admonition>
+
+### Step 2: Create the Collector config file
+
+Create a file named `traefik-logs-collection-config.yaml` with the following content:
+
+```yaml:traefik-logs-collection-config.yaml minimap
+receivers:
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
+  filelog/traefik-access:
+    include: ["${env:TRAEFIK_ACCESS_LOG_FILE}"]
+    operators:
+      # Traefik's json access log format. Each line is one request record with
+      # fields such as RouterName, ServiceName, RequestMethod, RequestPath,
+      # DownstreamStatus, and Duration.
+      # See https://doc.traefik.io/traefik/reference/install-configuration/observability/logs-and-accesslogs/
+      - type: json_parser
+        parse_from: body
+        timestamp:
+          parse_from: attributes.StartUTC
+          layout_type: gotime
+          layout: "2006-01-02T15:04:05.999999999Z07:00"
+        severity:
+          parse_from: attributes.DownstreamStatus
+          overwrite_text: true
+          mapping:
+            info:
+              - "2xx"
+              - "3xx"
+            warn: "4xx"
+            error: "5xx"
+        # Traefik also writes non-access lines to stdout on startup. Let anything
+        # that is not valid JSON through instead of dropping it.
+        on_error: send
+      # Traefik wraps each access record in its logger's envelope: "level" is always
+      # "info", "msg" is always empty, and "time" duplicates the parsed timestamp.
+      # Drop them so they do not clutter the attributes.
+      - type: remove
+        if: attributes.level != nil
+        field: attributes.level
+      - type: remove
+        if: attributes.msg != nil
+        field: attributes.msg
+      - type: remove
+        if: attributes.time != nil
+        field: attributes.time
+      - type: add
+        field: attributes.source
+        value: traefik
+
+processors:
+  # sets service.name so Traefik logs are easy to filter in SigNoz
+  resource/traefik:
+    attributes:
+      - key: service.name
+        value: traefik
+        action: upsert
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 10s
+
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/traefik:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    logs/traefik:
+      receivers: [filelog/traefik-access]
+      processors: [resource/traefik, batch]
+      exporters: [otlphttp/traefik]
+```
+
+`Duration`, `OriginDuration`, and `Overhead` arrive in nanoseconds. Divide by 1,000,000 when you chart them as milliseconds.
+
+### Step 3: Deploy the Collector
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+Set the environment variables the config reads:
+
+```bash
+# path of the Traefik access log, must be readable by the otel collector
+export TRAEFIK_ACCESS_LOG_FILE="/var/log/traefik/access.log"
+
+# region specific SigNoz cloud ingestion endpoint
+export OTLP_DESTINATION_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+# your SigNoz ingestion key
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+Start the Collector with the config file:
+
+```bash
+otelcol-contrib --config traefik-logs-collection-config.yaml
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Point Traefik's access log at a named volume and mount the same volume into the Collector, so both containers share the file:
+
+```yaml:docker-compose.yml
+services:
+  traefik:
+    image: traefik:v3.7
+    command:
+      - --providers.docker
+      - --accesslog=true
+      - --accesslog.format=json
+      - --accesslog.filepath=/var/log/traefik/access.log
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-logs:/var/log/traefik
+
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:0.157.0
+    container_name: otelcol
+    volumes:
+      - ./traefik-logs-collection-config.yaml:/etc/otelcol/config.yaml:ro
+      - traefik-logs:/var/log/traefik:ro
+    environment:
+      - "TRAEFIK_ACCESS_LOG_FILE=/var/log/traefik/access.log"
+      - "OTLP_DESTINATION_ENDPOINT=https://ingest.<region>.signoz.cloud:443"
+      - "SIGNOZ_INGESTION_KEY=<your-ingestion-key>"
+    command: ["--config", "/etc/otelcol/config.yaml"]
+
+volumes:
+  traefik-logs:
+```
+
+Start the stack:
+
+```bash
+docker compose up -d
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info" title="Collecting from container stdout instead" defaultCollapsed="true">
+  Omit `--accesslog.filepath` and Traefik writes access logs to stdout. Docker then wraps each line in its own JSON envelope, so the Collector needs two parse steps: one for the Docker envelope, then one for Traefik's payload. Tailing a shared file avoids that. If you prefer stdout, see [Collect Docker container logs](https://signoz.io/docs/userguide/collect_docker_logs/).
+</Admonition>
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+Traefik writes access logs to stdout when you omit `filepath`. If you run the [SigNoz k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), it already collects pod stdout, so those lines reach SigNoz without a file log receiver.
+
+Enable JSON access logs in the Traefik Helm values:
+
+```yaml:traefik-values.yaml
+logs:
+  access:
+    enabled: true
+    format: json
+```
+
+Then add a [Logs Pipeline](https://signoz.io/docs/logs-pipelines/introduction/) in SigNoz with a JSON parser to structure the fields, using the same field names as Step 2.
+
+To use the Collector config from Step 2 instead, run it as a sidecar in the Traefik pod, point `filePath` at a shared `emptyDir` volume, and set `TRAEFIK_ACCESS_LOG_FILE` to that path:
+
+```yaml:traefik-deployment.yaml
+spec:
+  containers:
+    - name: traefik
+      image: traefik:v3.7
+      args:
+        - --accesslog=true
+        - --accesslog.format=json
+        - --accesslog.filepath=/var/log/traefik/access.log
+      volumeMounts:
+        - { name: traefik-logs, mountPath: /var/log/traefik }
+    - name: otelcol
+      image: otel/opentelemetry-collector-contrib:0.157.0
+      args: ["--config", "/etc/otelcol/config.yaml"]
+      env:
+        - name: TRAEFIK_ACCESS_LOG_FILE
+          value: "/var/log/traefik/access.log"
+        - name: OTLP_DESTINATION_ENDPOINT
+          value: "https://ingest.<region>.signoz.cloud:443"
+        - name: SIGNOZ_INGESTION_KEY
+          valueFrom:
+            secretKeyRef: { name: signoz-ingestion-key, key: key }
+      volumeMounts:
+        - { name: traefik-logs, mountPath: /var/log/traefik }
+        - { name: otelcol-config, mountPath: /etc/otelcol }
+  volumes:
+    - name: traefik-logs
+      emptyDir: {}
+    - name: otelcol-config
+      configMap: { name: otelcol-config }
+```
+
+Store the config file from Step 2 in the `otelcol-config` ConfigMap, and the ingestion key in a Secret:
+
+```bash
+kubectl create configmap otelcol-config --from-file=config.yaml=traefik-logs-collection-config.yaml
+kubectl create secret generic signoz-ingestion-key --from-literal=key="<your-ingestion-key>"
+```
+
+</TabItem>
+</Tabs>
+
+<details>
+<ToggleHeading>
+## Sending logs over OTLP without a Collector
+</ToggleHeading>
+
+Traefik can push logs straight to SigNoz over OTLP, which removes the Collector from the logs path. The feature sits behind an experimental flag, so treat it as optional and keep the file log path above as your default.
+
+**Requires Traefik 3.3 or newer.** Traefik added OTLP access log export in 3.3. On 3.0 through 3.2 these flags do not exist and Traefik fails to start.
+
+```bash
+--experimental.otlpLogs=true
+--accesslog=true
+--accesslog.format=json
+--accesslog.otlp=true
+--accesslog.otlp.http=true
+--accesslog.otlp.http.endpoint=https://ingest.<region>.signoz.cloud:443/v1/logs
+--accesslog.otlp.http.headers.signoz-ingestion-key=<your-ingestion-key>
+--accesslog.dualOutput=true
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+- Enabling OTLP access logs disables stdio output unless you also set `--accesslog.dualOutput=true`.
+- Traefik marks this experimental and has open bugs against it, so validate on a non-production router first.
+- To use gRPC instead, swap the three `http` flags for `--accesslog.otlp.grpc=true`, `--accesslog.otlp.grpc.endpoint=ingest.<region>.signoz.cloud:443`, and `--accesslog.otlp.grpc.headers.signoz-ingestion-key=<your-ingestion-key>`. The gRPC endpoint takes no `/v1/logs` path.
+
+The same `--log.otlp.*` flags exist for Traefik's application logs.
+
+</details>
+
+## Validate
+
+After you start the Collector, generate traffic through Traefik so it writes access log records.
+
+1. Open the **Logs** explorer and add filter **service.name = traefik**.
+2. Expand a record to see the parsed fields, such as `RequestMethod`, `RequestPath`, `DownstreamStatus`, `Duration`, and `ClientHost`. Severity follows the status code, so a `404` shows as WARN and a `200` as INFO.
+3. Requests that a router matched also carry `RouterName`, `ServiceName`, `ServiceURL`, and `ServiceAddr`. Traefik omits those fields when no router matches, which is what an unrouted `404` looks like.
+
+<Figure
+  src="/img/docs/integrations/traefik/sample-logs.webp"
+  alt="Traefik access logs in the SigNoz Logs explorer, filtered by service.name = traefik"
+  caption="Traefik access logs in SigNoz, filtered by service.name = traefik"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No logs arrive
+
+- Confirm Traefik writes the file: `tail -f /var/log/traefik/access.log` should show one JSON object per request. Traefik disables access logs unless you set `--accesslog=true`.
+- Confirm the Collector can read the file. In Docker or Kubernetes, check that both containers mount the same volume.
+- Generate traffic through a router. Traefik logs one record per request, so an idle proxy writes nothing.
+- The file log receiver reads only lines written after it starts, so records that predate the Collector never appear.
+
+### Fields are not parsed
+
+- Confirm the format is `json`. Traefik defaults to `common`, which the `json_parser` operator cannot read.
+- If you set `filters.statusCodes`, Traefik logs only matching responses. Widen or remove the filter.
+- A dropped `StartUTC` field breaks timestamp parsing. Keep it, or point the timestamp parser at `StartLocal` instead.
+
+### No data at all
+
+- Recheck the `OTLP_DESTINATION_ENDPOINT` region against your [SigNoz region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint). A wrong region drops data with no error.
+- Copy the `signoz-ingestion-key` value fresh from [SigNoz settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</details>
+
+<details>
+<ToggleHeading>
+## Limitations
+</ToggleHeading>
+
+- **Access logs are off by default.** Traefik writes none until you set `--accesslog=true`.
+- **The parser expects the `json` format.** The default `common` format needs a regex parser instead.
+- **Durations are nanoseconds.** `Duration`, `OriginDuration`, and `Overhead` need scaling for millisecond charts.
+- **Log severity comes from `DownstreamStatus`.** `2xx` and `3xx` map to info, `4xx` to warn, and `5xx` to error.
+- **Native OTLP log export is experimental.** The Collector path stays the supported default.
+
+</details>
+
+## Next Steps
+
+- [Collect Traefik metrics and traces](https://signoz.io/docs/tutorial/traefik-observability/) to pair request logs with latency and throughput.
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) on spikes in `5xx` responses or slow `Duration` values.
+- [Parse and transform logs](https://signoz.io/docs/logs-pipelines/introduction/) further with Logs Pipelines.
+
+## Get Help
+
+<GetHelp />

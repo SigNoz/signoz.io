@@ -129,6 +129,16 @@ Prefer these H2 sections when they fit the doc:
 - Main-path snippets should be safe defaults that work after placeholder replacement.
 - Move advanced or environment-specific options into callouts or collapsed sections.
 
+### Code blocks (MDX fences)
+
+Docs fences render through the site **CodeBlock** (Shiki / `rehype-pretty-code`). Keep authoring as normal fenced backticks.
+
+**Defaults:** line numbers on · collapse when lines > 20 (starts expanded) · untitled = floating Copy · `lang:path` = filename chrome.
+
+**Large fences (more than 40 lines):** Add `minimap`. Add `defaultCollapsed` only when the fence is reference-only: a full manifest or config, a complete source file, or a log or stack trace. Do not add `defaultCollapsed` to the core instructional snippet of the step. See [When to use defaultCollapsed / minimap](docs-codeblock.md#when-to-use-defaultcollapsed--minimap).
+
+Full meta reference and copy-paste examples (titles, highlights, minimap, collapse, `CodeTabs`): [docs-codeblock.md](docs-codeblock.md).
+
 ### SigNoz Cloud Ingestion Endpoints (region-aware)
 
 The docs region selector (top-right of the page) keeps SigNoz Cloud ingestion endpoints in sync by substituting the **literal `<region>` token** in every snippet on the page. A snippet is only region-aware if it uses that exact token, so anything else silently freezes on whatever the author typed — and on a page that mixes both, some snippets update with the selector while others do not.
@@ -219,8 +229,26 @@ Use the template in [templates/send-data-doc.md](templates/send-data-doc.md).
 
 - Link to the relevant telemetry setup doc near the top.
 - Include a dashboard preview screenshot.
-- Provide import instructions using `DashboardActions`.
+- Provide copy/download actions using `DashboardActions`. Do not wrap it in a layout `div` — it renders as a full-width card.
 - Include sections for what the dashboard monitors, metrics included, and next steps.
+
+`DashboardActions` props:
+
+| Prop | Required | Notes |
+|---|---|---|
+| `dashboardJsonV2Url` | Yes | Raw URL of the V2 (Perses) JSON — the root path in the <a href="https://github.com/SigNoz/dashboards" target="_blank" rel="noopener noreferrer nofollow">dashboards repo</a>. |
+| `dashboardJsonV1Url` | No | Raw URL of the deprecated V1 JSON, which lives in the `v1/` subdirectory next to the V2 file. Omit it when the dashboard has no `v1/` copy; the version switch is then hidden. |
+| `dashboardName` | No | Used for the downloaded file name. Falls back to the JSON file name. |
+
+```mdx
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/nginx/nginx.json"
+  dashboardJsonV1Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/nginx/v1/nginx.json"
+  dashboardName="NGINX"
+/>
+```
+
+The component labels V2 as recommended (SigNoz v0.135.0 and newer) and V1 as deprecated, so pages do not need their own version admonition.
 
 ### Troubleshooting Docs
 

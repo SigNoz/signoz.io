@@ -1,9 +1,11 @@
 ---
 title: How to export Azure Monitor Metrics using OpenTelemetry to SigNoz
-date: 2024-01-02
+meta_title: "Azure Monitor Metrics with OpenTelemetry"
+published_date: 2024-01-02
+updated_date: 2026-07-14
 tags: [OpenTelemetry, Kubernetes]
 authors: [jaikanth]
-description: Steps to collect and export Azure Monitor metrics with OpenTelemetry 1. Setting up OpenTelemetry Collector 2. Configuring OpenTelemetry Collector to collect Azure Monitor metrics 3. Send collected metrics to SigNoz...
+description: "Collect Azure Monitor metrics with the OpenTelemetry Collector and export them to any OTLP-compatible backend."
 image: /img/blog/2024/01/opentelemetry-azure-cover.jpeg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,observability,azure,monitoring]
@@ -34,7 +36,7 @@ In this tutorial, we cover:
 
 If you want to jump straight into implementation, start with this [Prerequisites](#prerequisites) section.
 
-This is where SigNoz enters the scene, equipped with an OpenTelemetry-native approach to break down data silos and amplify your observability capabilities. By marrying Azure Monitor's meticulous metrics with SigNoz's insightful analytics, you're set to unlock a new level of operability.
+This is where [Azure monitoring with SigNoz](https://signoz.io/azure-monitoring/) enters the scene, equipped with an OpenTelemetry-native approach to break down data silos and amplify your observability capabilities. By marrying Azure Monitor's meticulous metrics with SigNoz's insightful analytics, you're set to unlock a new level of operability.
 
 ## Understanding Azure Monitor Metrics
 
@@ -63,7 +65,8 @@ OpenTelemetry is quietly becoming the open-source standard for generating teleme
 
 OpenTelemetry is a set of APIs, SDKs, libraries, and integrations aiming to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces). It is backed by the Cloud Native Computing Foundation and is the leading open-source project in the observability domain.
 
-The data you collect with OpenTelemetry is vendor-agnostic and can be exported in many formats. Telemetry data has become critical in observing the state of distributed systems. With microservices and polyglot architectures, there was a need to have a global standard. OpenTelemetry aims to fill that space and is doing a great job at it thus far.
+The data you collect with OpenTelemetry is vendor-agnostic and can be exported in many formats. Telemetry data has become critical in observing the state of distributed systems. With microservices and polyglot architectures, there was a need to have a global standard. OpenTelemetry aims to fill that space and is doing a great job at it thus far. <br />
+Teams weighing the platforms themselves often read the [OpenTelemetry vs Azure Monitor comparison](https://signoz.io/comparisons/opentelemetry-vs-azure-monitor/).
 
 In this tutorial, you will use OpenTelemetry Collector to collect Azure Monitor metrics.
 
@@ -89,9 +92,9 @@ receivers:
       http:
 ```
 
-An OTLP receiver can receive data via gRPC or HTTP using the <a href = "https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md" rel="noopener noreferrer nofollow" target="_blank" >OTLP</a> format. There are advanced configurations that you can enable via the YAML file.
+An OTLP receiver can receive data via gRPC or HTTP using the [OTLP (OpenTelemetry Protocol) format](https://signoz.io/blog/what-is-otlp/). There are advanced configurations that you can enable via the YAML file.
 
-Here’s a sample configuration for an otlp receiver.
+Here’s a sample configuration for an OTLP receiver.
 
 ```yaml
 receivers:

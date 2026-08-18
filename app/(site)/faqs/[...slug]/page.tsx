@@ -1,4 +1,3 @@
-import 'css/prism.css'
 import { components } from '@/components/MDXComponents'
 import FAQLayout, { RelatedArticleProps } from '@/layouts/FAQLayout'
 import { Metadata } from 'next'
@@ -105,8 +104,8 @@ export async function generateMetadata(props: {
           siteName: siteMetadata.title,
           locale: 'en_US',
           type: 'article',
-          publishedTime: content?.date,
-          modifiedTime: content?.updatedAt,
+          publishedTime: new Date(resolveLatestDate(content) || Date.now()).toISOString(),
+          modifiedTime: new Date(resolveLatestDate(content) || Date.now()).toISOString(),
           url: content?.path || './',
           authors: authorNames.length > 0 ? authorNames : ['SigNoz Team'],
         },

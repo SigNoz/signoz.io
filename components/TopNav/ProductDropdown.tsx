@@ -1,10 +1,9 @@
 'use client'
 
-import { Button } from '@headlessui/react'
 import { ArrowRight, ChevronDown } from 'lucide-react'
-import Image from 'next/image'
 import TrackingLink from '@/components/TrackingLink'
-import shapedMarkIcon from '@/public/img/case_study/logos/shaped-mark.svg?url'
+import { Button } from '@/components/ui/Button'
+import KernelLogo from '@/public/svgs/icons/kernel.svg'
 import { productDropdownItemsSorted, comparisonItems, SECTION_HEADING_CLASS } from './constants'
 import { useNavDropdown } from './NavDropdownContext'
 
@@ -14,6 +13,9 @@ export default function ProductDropdown() {
   return (
     <div onPointerEnter={open} onPointerLeave={close} className="flex items-center">
       <Button
+        isButton
+        unstyled
+        type="button"
         ref={triggerRef}
         className="truncate rounded-full px-2.5 py-1 text-sm outline-none transition-colors hover:bg-signoz_robin-200/20"
         onClick={() => (isOpen ? close() : open())}
@@ -78,31 +80,18 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
           </TrackingLink>
           <div>
             <TrackingLink
-              href="/case-study/shaped/"
+              href="/case-study/kernel/"
               className="group flex h-auto w-full min-w-0 items-center gap-3"
               clickType="Nav Click"
               clickName="Customer Stories Link"
-              clickText="YC-backed Shaped AI Swapped a Siloed Toolset for SigNoz, achieving One-Stop Observability"
+              clickText="How Kernel Reduced Browser Acquisition Latency from 140ms to 30ms with SigNoz MCP"
               clickLocation="Top Navbar"
               onClick={onClose}
               prefetch={false}
             >
-              <span
-                className="flex h-8 w-8 shrink-0 items-center justify-center"
-                aria-hidden="true"
-              >
-                <Image
-                  src={shapedMarkIcon}
-                  alt=""
-                  width={23}
-                  height={28}
-                  className="h-7 w-auto"
-                  unoptimized
-                />
-              </span>
+              <KernelLogo className="h-auto w-12 shrink-0" aria-hidden="true" />
               <div className="line-clamp-2 min-w-0 flex-1 text-sm text-signoz_vanilla-400 group-hover:text-[#fff]">
-                YC-backed Shaped AI Swapped a Siloed Toolset for SigNoz, achieving One-Stop
-                Observability
+                How Kernel Reduced Browser Acquisition Latency from 140ms to 30ms with SigNoz MCP
               </div>
             </TrackingLink>
           </div>
