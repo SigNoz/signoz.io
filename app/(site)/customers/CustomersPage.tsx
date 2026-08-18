@@ -28,15 +28,12 @@ interface CustomersPageProps {
 
 export default function CustomersPage({ content, stories }: CustomersPageProps) {
   return (
-    <FeaturePageLayout showProductNav={false} fullWidth>
+    <FeaturePageLayout showProductNav={false} showDotPattern={false}>
       <DitherCanvas>
         <SectionLayout variant="bordered" className="!px-0">
           <div className={sectionPaddingClassName}>
             <div className="pb-16 pt-28 md:pb-20 md:pt-40 lg:pt-44 xl:pt-[172px]">
               <CustomersHero title={HERO_TITLE} metrics={HERO_METRICS} ctas={HERO_CTAS} />
-              <div className="relative z-10 mt-12 md:mt-16">
-                <CustomerVideoCarousel videos={content.featuredVideos} />
-              </div>
             </div>
           </div>
         </SectionLayout>
@@ -44,6 +41,12 @@ export default function CustomersPage({ content, stories }: CustomersPageProps) 
 
       <div className="relative mx-auto max-w-8xl">
         <SectionLayout variant="bordered" className="!px-0">
+          <section className={sectionPaddingClassName}>
+            <div className="py-12 md:py-16">
+              <CustomerVideoCarousel videos={content.featuredVideos} />
+            </div>
+          </section>
+
           <Divider />
 
           <section className={sectionPaddingClassName} id="customer-stories">

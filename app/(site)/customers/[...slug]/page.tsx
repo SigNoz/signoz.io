@@ -9,7 +9,10 @@ import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
-import { getAuthorKeys } from '@/utils/contentHelpers'
+import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
+import { getCachedAuthors } from '@/utils/cmsAuthors'
+import JsonLdScript from '@/components/JsonLdScript'
+import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
 
 const BLOG_NATIVE_CUSTOMER_STORY_SLUGS = new Set([
   'alien-intelligence-ai-sre-workflow-signoz',
@@ -134,6 +137,14 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const readingTimeData = readingTime(content?.content || '')
   const toc = generateTOC(content?.content || '')
 
+  const authorDirectory = await getCachedAuthors()
+  const authorKeys = getAuthorKeys(content)
+  const authorList = authorKeys.length > 0 ? authorKeys : ['default']
+  const authorDetails = authorList.map((author) => {
+    const a = authorDirectory[author]
+    return a || { name: author }
+  })
+
   // Compile MDX content with all plugins
   let compiledContent
   try {
@@ -148,7 +159,9 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     notFound()
   }
 
-  // Prepare content for CaseStudyLayout
+  // Prepare content for CaseStudyLayout — no date fields on purpose: customer
+  // story pages must not display a date, and ArticleLayout only renders one
+  // when the content carries date fields.
   const mainContent: CoreContent<MDXContent> = {
     title: content?.title,
     slug: path,
@@ -158,13 +171,25 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     filePath: `/customers/${path}`,
     toc: toc,
     image: content.image,
-    authors: getAuthorKeys(content),
+    authors: authorList,
+    tags: getTagValues(content),
   }
+
+  const breadcrumbs = getSectionArticleBreadcrumbs('customers', content.title, path)
+  const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
   return (
     <>
-      <CaseStudyLayout content={mainContent} toc={toc}>
-        <div className="prose prose-slate max-w-none dark:prose-invert">{compiledContent}</div>
+      <JsonLdScript data={breadcrumbJsonLd} />
+      <CaseStudyLayout
+        content={mainContent}
+        authorDetails={authorDetails}
+        authors={authorList}
+        toc={toc}
+        authorDirectory={authorDirectory}
+        breadcrumbs={breadcrumbs}
+      >
+        {compiledContent}
       </CaseStudyLayout>
     </>
   )

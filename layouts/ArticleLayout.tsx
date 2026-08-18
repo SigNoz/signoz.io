@@ -50,7 +50,7 @@ interface LayoutProps {
   authors: string[]
   children: ReactNode
   toc: TocItemProps[]
-  contentType?: 'blog' | 'guide' | 'comparison'
+  contentType?: 'blog' | 'guide' | 'comparison' | 'customer-story'
   showNewsletter?: boolean
   showRelatedArticles?: boolean
   authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>

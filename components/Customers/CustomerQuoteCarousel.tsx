@@ -73,7 +73,7 @@ export default function CustomerQuoteCarousel({ quotes }: CustomerQuoteCarouselP
               )}
               key={quote.company}
             >
-              <blockquote className="m-0 w-full max-w-5xl text-pretty !border-0 !pl-0 text-3xl font-medium leading-tight tracking-[-0.03em] text-[var(--l2-foreground)] sm:text-4xl lg:text-5xl">
+              <blockquote className="m-0 w-full max-w-5xl text-pretty !border-0 !pl-0 text-2xl font-medium leading-tight tracking-[-0.03em] text-[var(--l2-foreground)] sm:text-3xl lg:text-4xl">
                 “
                 {quote.segments.map((segment, segmentIndex) =>
                   segment.emphasis ? (
