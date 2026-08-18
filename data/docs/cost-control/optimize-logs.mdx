@@ -1,0 +1,90 @@
+---
+date: 2026-08-14
+title: Reduce Log Ingestion Volume in SigNoz
+description: Filter, deduplicate, and truncate verbose log records at the OpenTelemetry Collector edge to reduce the log ingestion volume SigNoz bills for.
+doc_type: howto
+---
+
+This guide covers how to reduce log ingestion volume in SigNoz by filtering low-value log records before they reach ingestion.
+
+Log ingestion volume is measured in **Gigabytes (GB)** and is often dominated by verbose `DEBUG` output and repetitive infrastructure probes.
+
+If your application's logging framework supports level configuration, setting the appropriate log level at source is more effective than Collector-level filtering: it prevents the log from being generated at all. If you do not have control over the source, use the Collector-level approach below.
+
+<Admonition type="note">
+[Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) (the Regex, Grok, JSON, and other processors configured in the SigNoz UI) run after logs are ingested, so they do not reduce billed volume. Use them for parsing and enrichment. To reduce ingestion volume, drop logs at the Collector before they reach SigNoz, as shown below.
+</Admonition>
+
+## Filter Logs at the Edge
+
+Use the `filter` processor in the OpenTelemetry Collector to drop data before it reaches SigNoz. Read [Filtering and Dropping Logs](https://signoz.io/docs/logs-management/guides/drop-logs/) for configuration patterns by severity and resource attributes.
+
+### Decision Guide
+
+The log types below use `severity_text` values as examples.
+
+| Log Type | Recommendation |
+| --- | --- |
+| `DEBUG` | Safe to drop |
+| `INFO` | Review before dropping |
+| `ERROR` / `WARN` | Retain |
+| Kubernetes health check probes | Safe to drop |
+
+## Truncate Oversized Log Bodies
+
+Full JSON payloads, stack traces, and verbose SQL statements are often worth keeping but larger than they need to be. See [Limit Log Body Size](https://signoz.io/docs/logs-management/guides/drop-logs/#limit-log-body-size) for the `transform` processor configuration that caps log body size at the Collector.
+
+## Deduplicate Repetitive Logs
+
+Health check retries, connection errors, and heartbeat messages often emit the same log line hundreds of times within a short window. Use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/logdedupprocessor" target="_blank" rel="noopener noreferrer nofollow">`logdedup` processor</a> to collapse these into a single entry instead of dropping them. It aggregates identical log records (matched on body, resource attributes, severity, and log attributes) over a configurable interval, and emits one consolidated entry carrying `log_count`, `first_observed_timestamp`, and `last_observed_timestamp`. Add it to your existing `otel-collector-config.yaml`:
+
+```yaml
+processors:
+  logdedup:
+    interval: 10s
+    log_count_attribute: log_count
+    exclude_fields:
+      - attributes.request_id
+```
+
+Then enable it in the `logs` pipeline:
+
+```yaml
+service:
+  pipelines:
+    logs:
+      processors: [logdedup, batch]
+```
+
+Scope deduplication with `conditions` (OTTL expressions) instead of applying it to the whole pipeline, for example to only `DEBUG`/`INFO` severities:
+
+```yaml
+processors:
+  logdedup:
+    interval: 10s
+    conditions:
+      - severity_number < SEVERITY_NUMBER_WARN
+```
+
+<Admonition type="note">
+`logdedup` is an alpha-stability component. Confirm your Collector build includes it before deploying. It also delays log delivery by up to `interval`, and logs that require per-occurrence timestamps (audit or compliance logs) should be excluded via `conditions` instead of deduplicated.
+</Admonition>
+
+## Validate Your Changes
+
+<Admonition type="note">
+The Cost Meter Dashboard uses `signoz.meter.*` metrics which aggregate hourly. Changes may take up to one hour to appear there. Use the Logs Explorer for faster feedback first.
+</Admonition>
+
+To confirm the volume reduction:
+
+1. Navigate to **Logs**, swap to the **Table** tab. Filter by your target service and group by `severity_text`. Verify the log counts for the severities you targeted have reduced.
+2. Wait 1 hour, then check the **Cost Meter Dashboard** filtered by your target service and confirm the log GB trend has dropped.
+
+## Next Steps
+
+- Configure a [Cost Meter Alert](https://signoz.io/docs/cost-meter/alerts/) on `signoz.meter.log.size` to be notified when log volume crosses your expected threshold.
+
+## Get Help
+
+<GetHelp />
