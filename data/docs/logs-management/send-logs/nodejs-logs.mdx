@@ -1,5 +1,5 @@
 ---
-date: 2026-08-05
+date: 2026-06-11
 title: Send logs from Node.js default console logger to SigNoz using OpenTelemetry
 doc_type: howto
 description: Learn how to send logs from Node.js default console logger to SigNoz using the OpenTelemetry SDK for OTLP log export.
@@ -167,7 +167,7 @@ If using the `k8s-infra` chart (which auto-collects container logs), disable log
 
 Create a `Dockerfile` in your project root:
 
-```dockerfile
+```dockerfile defaultCollapsed
 FROM node:20-alpine
 
 WORKDIR /app
@@ -237,7 +237,7 @@ Create a new file called `logger.js` or `logger.ts` in your project root. This f
 <Tabs entityName="language">
 <TabItem value="javascript" label="JavaScript" default>
 
-```javascript:logger.js
+```javascript:logger.js defaultCollapsed
 const {
   LoggerProvider,
   BatchLogRecordProcessor,
@@ -266,7 +266,7 @@ module.exports = loggerProvider;
 </TabItem>
 <TabItem value="typescript" label="TypeScript">
 
-```typescript:logger.ts
+```typescript:logger.ts defaultCollapsed
 import {
   LoggerProvider,
   BatchLogRecordProcessor,
@@ -303,7 +303,7 @@ Create a new file called `console-instrumentation.js` or `console-instrumentatio
 <Tabs entityName="language">
 <TabItem value="javascript" label="JavaScript" default>
 
-```javascript:console-instrumentation.js minimap
+```javascript:console-instrumentation.js minimap defaultCollapsed
 require("@opentelemetry/api-logs");
 const loggerProvider = require("./logger");
 
@@ -407,7 +407,7 @@ console.debug = function (...args) {
 </TabItem>
 <TabItem value="typescript" label="TypeScript">
 
-```typescript:console-instrumentation.ts minimap
+```typescript:console-instrumentation.ts minimap defaultCollapsed
 import "@opentelemetry/api-logs";
 import loggerProvider from "./logger";
 
