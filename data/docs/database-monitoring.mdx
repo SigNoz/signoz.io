@@ -1,0 +1,128 @@
+---
+date: 2026-08-12
+title: Database Monitoring
+description: Monitor databases in SigNoz. Collect metrics and logs from PostgreSQL, MySQL, MongoDB, Redis, and managed cloud databases, and trace slow queries to your code.
+doc_type: explanation
+---
+
+SigNoz monitors your databases across three layers of telemetry:
+
+- **Metrics:** connection counts, query throughput, cache hit ratios, replication lag, and disk usage, collected by OpenTelemetry Collector receivers or by scraping the database's Prometheus exporter.
+- **Logs:** error logs, slow query logs, and audit logs, parsed into structured fields you can search and alert on.
+- **Traces:** database calls captured as spans, when your instrumentation emits the [required span attributes](https://signoz.io/docs/apm-and-distributed-tracing/database-calls/). This traces a slow endpoint to the query behind it, when the instrumentation records query text.
+
+Pick your database below. If you run a managed database from a cloud provider, use the cloud sections: those integrations pull metrics from the provider's monitoring API instead of connecting to the database directly.
+
+<Admonition type="info">
+For the fullest picture, set up both database telemetry (this page) and [application instrumentation](https://signoz.io/docs/instrumentation/overview/). Database metrics tell you *that* the database is slow; traces tell you *which query* and *which endpoint* caused it.
+</Admonition>
+
+## Find Your Database
+
+Filter by category, or browse everything: self-hosted engines, AWS, GCP, Azure, and DBaaS platforms. Azure integrations use the one-click path; see [one-click Azure integrations](https://signoz.io/docs/integrations/azure/one-click-azure-integrations/) for the shared setup.
+
+<Listicle name="database-monitoring" />
+
+## Connection Pooling and Kubernetes Operators
+
+<DocCardContainer>
+
+<DocCard
+    title="PgBouncer"
+    description="Monitor PgBouncer connection pool metrics with OpenTelemetry"
+    href="https://signoz.io/docs/metrics-management/opentelemetry-pgbouncer/"
+/>
+
+<DocCard
+    title="CloudNativePG"
+    description="Send metrics from the CloudNativePG Postgres operator to SigNoz"
+    href="https://signoz.io/docs/metrics-management/opentelemetry-cloudnative-pg/"
+/>
+
+</DocCardContainer>
+
+## Tracing Database Queries
+
+Database metrics show cluster health, but they cannot tell you which application request caused a spike. Once your application emits database spans with the required attributes, SigNoz captures each call and aggregates them per database and per operation.
+
+<DocCardContainer>
+
+<DocCard
+    title="Database Calls"
+    description="Analyze database call rate, latency, and error rate from your application traces"
+    href="https://signoz.io/docs/apm-and-distributed-tracing/database-calls/"
+/>
+
+</DocCardContainer>
+
+## Dashboard Templates
+
+Import a pre-built dashboard instead of building panels from scratch. See [importing a dashboard](https://signoz.io/docs/dashboards/import-dashboard/) for the steps.
+
+<DocCardContainer>
+
+<DocCard
+    title="PostgreSQL Dashboard"
+    description="Connections, throughput, cache hit ratio, and replication panels"
+    href="https://signoz.io/docs/dashboards/dashboard-templates/postgresql/"
+/>
+
+<DocCard
+    title="MySQL Dashboard"
+    description="Query throughput, buffer pool, and connection panels for MySQL"
+    href="https://signoz.io/docs/dashboards/dashboard-templates/mysql/"
+/>
+
+<DocCard
+    title="ClickHouse Dashboard"
+    description="Query performance, merges, and resource usage for ClickHouse"
+    href="https://signoz.io/docs/dashboards/dashboard-templates/clickhouse-monitoring/"
+/>
+
+<DocCard
+    title="PgBouncer Dashboard"
+    description="Pool utilization and client and server connection panels"
+    href="https://signoz.io/docs/dashboards/dashboard-templates/pgbouncer-dashboard/"
+/>
+
+<DocCard
+    title="CloudNativePG Dashboard"
+    description="Cluster health and Postgres metrics for the CloudNativePG operator"
+    href="https://signoz.io/docs/dashboards/dashboard-templates/cloudnative-pg-dashboard/"
+/>
+
+<DocCard
+    title="PlanetScale Postgres Dashboard"
+    description="PlanetScale Postgres query and resource panels"
+    href="https://signoz.io/docs/dashboards/dashboard-templates/planetscale-postgres-dashboard/"
+/>
+
+<DocCard
+    title="PlanetScale Vitess Dashboard"
+    description="PlanetScale Vitess cluster and keyspace panels"
+    href="https://signoz.io/docs/dashboards/dashboard-templates/planetscale-vitess-dashboard/"
+/>
+
+<DocCard
+    title="Supabase Dashboard"
+    description="Supabase project metrics at a glance"
+    href="https://signoz.io/docs/dashboards/dashboard-templates/supabase/"
+/>
+
+<DocCard
+    title="CouchDB Dashboard"
+    description="Request rates, document operations, and database size for CouchDB"
+    href="https://signoz.io/docs/dashboards/dashboard-templates/couchdb/"
+/>
+
+<DocCard
+    title="Memcached Dashboard"
+    description="Hit ratio, evictions, and connection panels for Memcached"
+    href="https://signoz.io/docs/dashboards/dashboard-templates/memcached/"
+/>
+
+</DocCardContainer>
+
+## Setting Up Alerts
+
+Once metrics are flowing, create alerts on the signals that matter for your database: connection saturation, replication lag, disk usage, or slow query volume. See [creating alert rules](https://signoz.io/docs/alerts-management/metrics-based-alerts/) to get started.
