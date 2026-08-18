@@ -154,7 +154,9 @@ SigNoz makes it easy to visualize metrics and traces captured through OpenTeleme
 
 <KeyPointCallout>
 
- You don't configure these metrics anywhere. SigNoz derives them from the spans your application is already exporting — each span carries a start time, a duration, and a status, which is everything needed to compute request rate, error percentage, and latency percentiles per service and per endpoint. That means auto-instrumentation alone gets you a working service dashboard, and you only need the [custom metrics](https://signoz.io/opentelemetry/custom-metrics-nodejs/) covered later for numbers that aren't derivable from spans, such as queue depth or business counters.
+ You don't configure these metrics anywhere. SigNoz derives them from the spans your application is already exporting — each span carries a start time, a duration, and a status, which is everything needed to compute request rate, error percentage, and latency percentiles per service and per endpoint.
+ 
+ That means auto-instrumentation alone gets you a working service dashboard, and you only need the [custom metrics](https://signoz.io/opentelemetry/custom-metrics-nodejs/) covered later for numbers that aren't derivable from spans, such as queue depth or business counters.
 
 </KeyPointCallout>
 
@@ -175,7 +177,9 @@ OpenTelemetry and SigNoz.
 
 ### Node.js Runtime Metrics: Event Loop Lag, GC, and Heap
 
-Traces tell you how long a request took. They don't tell you *why* the whole process got slow — and in Node.js the usual culprits are runtime-level: a blocked event loop, garbage-collection pauses, or a heap creeping toward its limit. Because Node runs your application on a single thread, one slow synchronous operation stalls every in-flight request, and no amount of span data will point at it directly.
+Traces tell you how long a request took. They don't tell you *why* the whole process got slow — and in Node.js the usual culprits are runtime-level: a blocked event loop, garbage-collection pauses, or a heap creeping toward its limit.
+
+Because Node runs your application on a single thread, one slow synchronous operation stalls every in-flight request, and no amount of span data will point at it directly.
 
 You already have these metrics. `@opentelemetry/auto-instrumentations-node` bundles `@opentelemetry/instrumentation-runtime-node`, and it is enabled by default, so the zero-code setup from earlier is already collecting:
 
@@ -190,7 +194,9 @@ Chart these in a SigNoz dashboard alongside your RED metrics. Latency spikes tha
 
 <KeyPointCallout title="Host-level metrics are opt-in">
 
-The related `@opentelemetry/instrumentation-host-metrics` package, which reports machine-level CPU, memory, and network usage, ships in the same bundle but sits in the default-excluded list alongside `instrumentation-fs`. Turning it on means replacing the zero-code entrypoint with your own instrumentation file, because you need somewhere to pass the config.
+The related `@opentelemetry/instrumentation-host-metrics` package, which reports machine-level CPU, memory, and network usage, ships in the same bundle but sits in the default-excluded list alongside `instrumentation-fs`.
+
+Turning it on means replacing the zero-code entrypoint with your own instrumentation file, because you need somewhere to pass the config.
 
 Create `instrumentation.mjs` next to your application entry point:
 
@@ -222,15 +228,19 @@ Then preload that file instead of `@opentelemetry/auto-instrumentations-node/reg
 node --import ./instrumentation.mjs index.js
 ```
 
-Your exporter settings do not move into the file. `NodeSDK` still reads `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_METRICS_EXPORTER` and the rest from the environment, so keep the variables from Step 2 exactly as they are. Once it restarts you should see `system.cpu.time`, `system.memory.usage` and `process.cpu.utilization` arriving alongside the runtime metrics above.
+Your exporter settings do not move into the file. `NodeSDK` still reads `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_METRICS_EXPORTER` and the rest from the environment, so keep the variables from Step 2 exactly as they are.<br />
+Once it restarts you should see `system.cpu.time`, `system.memory.usage` and `process.cpu.utilization` arriving alongside the runtime metrics above.
 
-Two things to watch. Setting the `OTEL_NODE_ENABLED_INSTRUMENTATIONS` environment variable turns it into an allowlist, so enabling host metrics that way silently disables every instrumentation you did not name. Prefer the file above unless you genuinely want a narrow list. And inside a container these metrics describe the *container*, not the Docker host, so for true host visibility run a Collector on the host instead.
+Two things to watch. Setting the `OTEL_NODE_ENABLED_INSTRUMENTATIONS` environment variable turns it into an allowlist, so enabling host metrics that way silently disables every instrumentation you did not name.
+
+Prefer the file above unless you genuinely want a narrow list. And inside a container these metrics describe the *container*, not the Docker host, so for true host visibility run a Collector on the host instead.
 
 </KeyPointCallout>
 
 ### How to Instrument Multiple Node.js Services with Docker Compose?
 
-The setup above instruments a single process. Real systems usually run several Node.js services side by side, and the good news is that nothing about the instrumentation changes — you set the same environment variables on each service, varying only `OTEL_SERVICE_NAME`. Because the auto-instrumentation propagates trace context across HTTP calls, requests that hop from one service to the next arrive in SigNoz as a single connected trace.
+The setup above instruments a single process. Real systems usually run several Node.js services side by side, and the good news is that nothing about the instrumentation changes — you set the same environment variables on each service, varying only `OTEL_SERVICE_NAME`.<br />
+Because the auto-instrumentation propagates trace context across HTTP calls, requests that hop from one service to the next arrive in SigNoz as a single connected trace.
 
 Keep your credentials out of `docker-compose.yml` by putting them in a `.env` file, and add that file to `.gitignore`:
 
