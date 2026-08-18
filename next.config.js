@@ -3152,6 +3152,11 @@ module.exports = () => {
           destination: '/opentelemetry/custom-metrics-nodejs/',
           permanent: true,
         },
+        {
+          source: '/blog/nodejs-performance-monitoring/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
       ])
     },
     webpack: (config, options) => {
