@@ -2,6 +2,9 @@ import { cacheLife, cacheTag } from 'next/cache'
 import { transformBlog, transformComparison, transformDoc, transformGuide } from './mdxUtils'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { getAllContent, getContentBySlug, isLocalContentOverlayEnabled } from './contentRepository'
+import { getTagValues } from './contentHelpers'
+import type { MDXContent } from './strapi'
+import type { CustomerStory } from '@/components/Customers/Customers.types'
 
 // --- Comparisons ---
 
@@ -252,6 +255,88 @@ export async function fetchBlogBySlug(slug: string) {
     console.warn(`Blog content not found for slug: "${slug}" (deployment: ${deploymentStatus})`)
   }
   return directResult
+}
+
+// --- Case studies (customer stories) ---
+
+// Field-projected: no `content` so the cached list stays well under the 2MB cache-item limit.
+const CUSTOMER_STORY_LIST_FIELDS = [
+  'title',
+  'description',
+  'path',
+  'publishedAt',
+  'date',
+  'company',
+  'person',
+  'role',
+  'quote',
+  'logo',
+  'logo_alt',
+  'featured',
+  'takeaway',
+  'takeaway_label',
+  'show_company_name_with_logo',
+]
+
+function transformCaseStudyToStory(entry: MDXContent): CustomerStory {
+  const contentPath = entry.path?.startsWith('/') ? entry.path : `/${entry.path || ''}`
+  return {
+    type: 'Customer story',
+    title: entry.title ?? '',
+    description: entry.description ?? '',
+    href: `/customers${contentPath}/`,
+    company: entry.company ?? '',
+    person: entry.person ?? '',
+    role: entry.role ?? '',
+    quote: entry.quote ?? undefined,
+    logo: entry.logo ?? '',
+    logoAlt: entry.logo_alt ?? entry.company ?? '',
+    filters: getTagValues(entry),
+    featured: entry.featured === true,
+    takeaway: entry.takeaway ?? undefined,
+    takeawayLabel: entry.takeaway_label ?? undefined,
+    showCompanyNameWithLogo: entry.show_company_name_with_logo === true,
+    publishedAt: entry.date || entry.publishedAt?.split('T')[0] || '',
+  }
+}
+
+async function fetchCaseStudies(deploymentStatus: string): Promise<CustomerStory[]> {
+  const entries = await getAllContent('case-studies', deploymentStatus, CUSTOMER_STORY_LIST_FIELDS)
+  return entries.map((entry) => transformCaseStudyToStory(entry))
+}
+
+async function cachedFetchCaseStudies(deploymentStatus: string): Promise<CustomerStory[]> {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', 'case-studies-list')
+  const result = await fetchCaseStudies(deploymentStatus)
+  if (!result || result.length === 0) {
+    throw new Error('Empty content received for cached-case-studies-list, skipping cache')
+  }
+  return result
+}
+
+export function getCachedCaseStudies(deploymentStatus: string) {
+  if (isLocalContentOverlayEnabled()) return fetchCaseStudies(deploymentStatus)
+  return cachedFetchCaseStudies(deploymentStatus)
+}
+
+export async function fetchAllCaseStudiesForPage(): Promise<CustomerStory[]> {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  try {
+    return await getCachedCaseStudies(deploymentStatus)
+  } catch (cacheError) {
+    console.warn('Cached case studies fetch failed, retrying without cache:', cacheError)
+
+    try {
+      return await fetchCaseStudies(deploymentStatus)
+    } catch (directError) {
+      console.error('Direct case studies fetch also failed:', directError)
+      return []
+    }
+  }
 }
 
 // --- Docs ---
