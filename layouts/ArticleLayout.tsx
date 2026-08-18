@@ -23,7 +23,7 @@ import { useScrollToHash } from '@/hooks/useScrollToHash'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
 import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
-import { getFormattedDates } from '@/utils/dateUtils'
+import { formatDisplayDate, resolveLatestDate } from '@/utils/dateUtils'
 import { buildRenderedAuthors, getReadingTimeText } from '@/utils/articleMeta'
 
 const MAIN_CONTENT_ID = 'article-main'
@@ -78,8 +78,7 @@ export default function ArticleLayout({
   useScrollToHash()
 
   const renderedAuthors = buildRenderedAuthors(authorDetails, authors, authorDirectory)
-  const { publishedDate: formattedPublishedDate, updatedDate: formattedUpdatedDate } =
-    getFormattedDates(content)
+  const formattedUpdatedDate = formatDisplayDate(resolveLatestDate(content))
   const readingTimeText = getReadingTimeText(content)
 
   const MAX_VISIBLE_TAGS = 2
@@ -91,7 +90,6 @@ export default function ArticleLayout({
   const hasMetaInfo =
     renderedAuthors.length > 0 ||
     Boolean(readingTimeText) ||
-    Boolean(formattedPublishedDate) ||
     Boolean(formattedUpdatedDate) ||
     primaryTags.length > 0
 
@@ -99,7 +97,6 @@ export default function ArticleLayout({
     <ArticleMetaDetailsCard
       authors={renderedAuthors}
       readingTimeText={readingTimeText}
-      formattedPublishedDate={formattedPublishedDate}
       formattedUpdatedDate={formattedUpdatedDate}
       primaryTags={primaryTags}
       hiddenTags={hiddenTags}
@@ -117,9 +114,8 @@ export default function ArticleLayout({
             {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
             <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
               <h1 className="text-3xl font-bold">{title}</h1>
-              {(formattedPublishedDate || formattedUpdatedDate || readingTimeText) && (
+              {(formattedUpdatedDate || readingTimeText) && (
                 <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
-                  {formattedPublishedDate && <span>Published on: {formattedPublishedDate}</span>}
                   {formattedUpdatedDate && <span>Last Updated: {formattedUpdatedDate}</span>}
                   {readingTimeText && <span>{readingTimeText}</span>}
                 </div>

@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-08-14
 title: OpenTelemetry Kong Gateway Integration
 description: Monitor Kong Gateway by exporting OpenTelemetry traces, metrics, and logs natively to SigNoz.
 doc_type: howto
@@ -21,6 +21,30 @@ Kong Gateway provides a native OpenTelemetry plugin to capture proxy latencies, 
 - For OpenTelemetry **Logs**: Kong Gateway version 3.8+ (Enterprise or OSS).
 - For OpenTelemetry **Metrics**: Kong Gateway Enterprise version 3.13+. (The latest open-source community edition release is 3.9.x, which predates native OpenTelemetry metrics support).
 - An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
+
+## Enable Kong's Tracer
+
+Kong's built-in instrumentations produce the spans, and the plugin only exports them. Two settings in `kong.conf` control the tracer. Both defaults produce no usable trace data: `tracing_instrumentations` is `off`, and `tracing_sampling_rate` is `0.01`, which is 1% of requests.
+
+Set both values on every Kong node:
+
+```ini:kong.conf
+tracing_instrumentations = all
+tracing_sampling_rate    = 1.0
+```
+
+If you run Kong in Docker or on Kubernetes, set the same values as environment variables:
+
+```bash
+KONG_TRACING_INSTRUMENTATIONS=all
+KONG_TRACING_SAMPLING_RATE=1.0
+```
+
+Restart Kong to apply the settings.
+
+The value `all` enables every instrumentation, which costs memory and bandwidth on a gateway with high traffic. After traces arrive in SigNoz, you can decrease `tracing_sampling_rate` and replace `all` with the phases you need. The available phases include `request`, `router`, `balancer`, `db_query`, `dns_query`, and `http_client`. Kong's <a href="https://developer.konghq.com/gateway/configuration/#tracing-instrumentations" target="_blank" rel="noopener noreferrer nofollow">tracing configuration reference</a> lists all of them.
+
+Metrics and logs do not depend on the tracer.
 
 ## Configure OpenTelemetry Export
 
@@ -198,6 +222,10 @@ Verify your data appears in SigNoz:
 ## Troubleshooting
 
 </ToggleHeading>
+
+### Traces do not appear in SigNoz
+
+Verify that `tracing_instrumentations` is set to a value other than `off`. With the tracer off, Kong produces no spans, and the plugin reports no error. Also verify `tracing_sampling_rate`. At the default `0.01`, only 1 request in 100 produces a trace. A gateway with low traffic can therefore appear to send nothing. Tracing instrumentations do not run in stream mode.
 
 ### Metrics do not appear in SigNoz
 
