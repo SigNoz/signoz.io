@@ -53,7 +53,7 @@ OpenTelemetry provide developers three different ways to instrument their applic
 
 ## Quick Start
 
-To avoid manual setup, clone the <a href="https://github.com/LuffySama-Dev/SampleNodejsExample" target="_blank" rel="noopener noreferrer nofollow">sample Node.js app repository</a>, which contains the sample app used throughout this guide. Refer to its <a href="https://github.com/LuffySama-Dev/SampleNodejsExample/blob/main/README.md" target="_blank" rel="noopener noreferrer nofollow">README</a> for setup.
+To avoid manual setup, clone the <a href="https://github.com/LuffySama-Dev/SampleNodejsExample" target="_blank" rel="noopener noreferrer nofollow">sample Node.js app repository</a>, which contains the sample app used throughout this guide.
 
 ### Architecture of Sample Node.js application:
 
@@ -172,6 +172,61 @@ SigNoz provides flamegraphs, which are an invaluable tool for visualizing the ex
 
 Congratulations! You have successfully auto instrumented your first NodeJS application with
 OpenTelemetry and SigNoz.
+
+### Node.js Runtime Metrics: Event Loop Lag, GC, and Heap
+
+Traces tell you how long a request took. They don't tell you *why* the whole process got slow — and in Node.js the usual culprits are runtime-level: a blocked event loop, garbage-collection pauses, or a heap creeping toward its limit. Because Node runs your application on a single thread, one slow synchronous operation stalls every in-flight request, and no amount of span data will point at it directly.
+
+You already have these metrics. `@opentelemetry/auto-instrumentations-node` bundles `@opentelemetry/instrumentation-runtime-node`, and it is enabled by default, so the zero-code setup from earlier is already collecting:
+
+| Metric | What it tells you |
+| --- | --- |
+| `nodejs.eventloop.delay.mean` / `.max` | How long work is waiting before the event loop can run it. Rising values mean something is blocking the thread. |
+| `nodejs.eventloop.utilization` | How busy the loop is. Sustained values near `1` mean the process is saturated and needs scaling out. |
+| `v8js.gc.duration` | Time spent in garbage collection. Frequent long pauses show up here before they show up as user-visible latency. |
+| `v8js.memory.heap.used` / `v8js.memory.heap.limit` | Heap growth against its ceiling. A `used` figure that climbs and never falls back is the classic memory-leak signature. |
+
+Chart these in a SigNoz dashboard alongside your RED metrics. Latency spikes that line up with event-loop delay point at blocking code; latency that tracks `v8js.gc.duration` points at memory pressure instead.
+
+<KeyPointCallout title="Host-level metrics are opt-in">
+
+The related `@opentelemetry/instrumentation-host-metrics` package, which reports machine-level CPU, memory, and network usage, ships in the same bundle but sits in the default-excluded list alongside `instrumentation-fs`. Turning it on means replacing the zero-code entrypoint with your own instrumentation file, because you need somewhere to pass the config.
+
+Create `instrumentation.mjs` next to your application entry point:
+
+```jsx
+// instrumentation.mjs
+import { NodeSDK } from '@opentelemetry/sdk-node'
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
+
+const sdk = new NodeSDK({
+  instrumentations: [
+    getNodeAutoInstrumentations({
+      '@opentelemetry/instrumentation-host-metrics': { enabled: true },
+    }),
+  ],
+})
+
+sdk.start()
+```
+
+This needs `@opentelemetry/sdk-node` alongside the packages you installed earlier:
+
+```bash
+npm install --save @opentelemetry/sdk-node
+```
+
+Then preload that file instead of `@opentelemetry/auto-instrumentations-node/register`:
+
+```bash
+node --import ./instrumentation.mjs index.js
+```
+
+Your exporter settings do not move into the file. `NodeSDK` still reads `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_METRICS_EXPORTER` and the rest from the environment, so keep the variables from Step 2 exactly as they are. Once it restarts you should see `system.cpu.time`, `system.memory.usage` and `process.cpu.utilization` arriving alongside the runtime metrics above.
+
+Two things to watch. Setting the `OTEL_NODE_ENABLED_INSTRUMENTATIONS` environment variable turns it into an allowlist, so enabling host metrics that way silently disables every instrumentation you did not name. Prefer the file above unless you genuinely want a narrow list. And inside a container these metrics describe the *container*, not the Docker host, so for true host visibility run a Collector on the host instead.
+
+</KeyPointCallout>
 
 ### How to Instrument Multiple Node.js Services with Docker Compose?
 
@@ -609,6 +664,12 @@ As you start instrumenting more services or move your setup toward production, k
   Counters, latency metrics, and error rates provide quick signals before you even look at traces.
 - **Validate locally before deploying**
   Run your app with debug logging enabled to ensure spans and metrics export correctly.
+- **Establish a baseline before you set alerts**
+  Track normal ranges for latency, error rate, event-loop delay, and heap usage first. Without a baseline you cannot tell a genuine regression from ordinary variation, and alerts thresholded on guesses mostly generate noise.
+- **Keep attribute cardinality bounded**
+  Attributes like `order.id` are fine on spans but expensive on metrics, where every distinct value creates another time series. Put identifiers on spans, and keep metric attributes to bounded sets such as status, route, or region.
+- **Instrument toward a question, not for coverage**
+  More telemetry is not more insight. Start from what you would need to answer during an incident, instrument that, and extend as real gaps appear.
 
 These small steps help keep your telemetry clean, actionable, and ready for production as your application grows.
 
