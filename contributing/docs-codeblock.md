@@ -27,7 +27,7 @@ No meta needed:
 | `collapse` | Collapse controls when lines **> 20** (same as default auto behavior; explicit is fine). |
 | `collapse={N}` | Collapse controls when lines **> N**. |
 | `noCollapse` | Never show collapse controls, even for long fences. |
-| `defaultCollapsed` | Start collapsed. Required above 30 lines, always with `minimap`. Only applies when collapse controls are shown. |
+| `defaultCollapsed` | Start collapsed. Required above 20 lines. Only applies when collapse controls are shown. |
 
 Combine freely:
 
@@ -200,7 +200,7 @@ app.listen(8080)
 
 - **Auto:** any fence with more than **20** lines gets Collapse / Expand controls and starts expanded. No meta needed.
 - **Custom threshold:** `collapse={N}` when you want controls sooner or later than 20.
-- **Start collapsed:** add `defaultCollapsed`, required on every fence with more than 30 lines.
+- **Start collapsed:** add `defaultCollapsed`, required on every fence with more than 20 lines.
 - **Never collapse:** `noCollapse` for long configs readers must scan in full.
 
 ### When to use `defaultCollapsed` / `minimap`
@@ -209,10 +209,11 @@ The 20-line threshold only adds the Collapse and Expand buttons. The fence still
 
 | Fence size | Flags |
 |---|---|
-| 30 lines or fewer | none |
+| 20 lines or fewer | none |
+| More than 20 lines | `defaultCollapsed` |
 | More than 30 lines | `minimap defaultCollapsed` |
 
-This holds for every fence, including the primary snippet of a step. The two flags always travel together: the minimap tracks the scroll position inside a collapsed fence, and does nothing on an expanded one.
+This holds for every fence, including the primary snippet of a step. `minimap` never travels alone: it tracks the scroll position inside a collapsed fence, and does nothing on an expanded one.
 
 Use `noCollapse` for the rare long fence that the reader must scan in full.
 

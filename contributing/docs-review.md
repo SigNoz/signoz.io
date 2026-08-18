@@ -65,7 +65,7 @@ Review each changed doc against these checks in order:
 18. Added or changed images are WebP, at least 1200 px wide, and use the `Figure` component with descriptive alt text.
 19. Prose reads clean: no em dashes (`—`), no AI-writing tells (adverb padding, throat-clearing openers, "not X, but Y" contrasts), and varied sentence length.
 20. New or moved docs are added to `data/docs-side-nav/main.json`, and removed or redirected pages are updated there, so navigation stays correct.
-21. Every fence of more than 30 lines carries `minimap defaultCollapsed`, including the primary snippet of a step. A fence of 30 lines or fewer carries neither flag. Count the lines, do not judge by eye. Flag a large fence that misses the pair as P2. Flag either flag on a fence of 30 lines or fewer as P3. See [When to use defaultCollapsed / minimap](docs-codeblock.md#when-to-use-defaultcollapsed--minimap).
+21. Every fence of more than 20 lines carries `defaultCollapsed`, and every fence of more than 30 lines carries `minimap defaultCollapsed`. This includes the primary snippet of a step. Count the lines, do not judge by eye. Flag each missing flag as P2. Flag `minimap` on a fence of 30 lines or fewer as P3. See [When to use defaultCollapsed / minimap](docs-codeblock.md#when-to-use-defaultcollapsed--minimap).
 
 If a check cannot be validated from the PR context, call out the assumption and residual risk.
 
