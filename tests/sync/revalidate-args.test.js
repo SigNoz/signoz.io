@@ -93,6 +93,23 @@ describe('buildPayload', () => {
     assert.deepEqual(result.paths, ['/docs/temp-page'])
     assert.deepEqual(result.tags, ['docs-list'])
   })
+
+  it('maps case-study files to /customers URLs and revalidates the listing', () => {
+    const result = buildPayload({
+      changedFiles: ['data/case-study/kernel.mdx'],
+      restoreFiles: [],
+      deletedFiles: [],
+      changedAssets: [],
+      sidenavChanged: false,
+      listiclesChanged: false,
+      changedListicles: [],
+      deletedListicles: [],
+    })
+
+    assert.equal(result.mode, 'selective')
+    assert.deepEqual(result.paths, ['/customers/kernel', '/customers'])
+    assert.deepEqual(result.tags, ['case-studies-list'])
+  })
 })
 
 describe('readJsonFile', () => {

@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
       revalidateTag('docs-list', 'default')
       revalidateTag('docs-side-nav', 'default')
       revalidateTag('listicles', 'default')
+      revalidateTag('case-studies-list', 'default')
 
       results.push({
         path: '/',
@@ -178,6 +179,7 @@ export async function GET(request: NextRequest) {
       revalidateTag('docs-list', 'default')
       revalidateTag('docs-side-nav', 'default')
       revalidateTag('listicles', 'default')
+      revalidateTag('case-studies-list', 'default')
 
       results.push({
         path: '/',

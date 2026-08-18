@@ -137,6 +137,96 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/case-study/',
+          destination: '/customers/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/blip/',
+          destination: '/customers/blip/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/brainfish/',
+          destination: '/customers/brainfish/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/cedana/',
+          destination: '/customers/cedana/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/instasafe/',
+          destination: '/customers/instasafe/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/kernel/',
+          destination: '/customers/kernel/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/kiwi/',
+          destination: '/customers/kiwi/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/linkcy/',
+          destination: '/customers/linkcy/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/mailmodo/',
+          destination: '/customers/mailmodo/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/observability-for-small-teams-and-solopreneurs/',
+          destination: '/customers/observability-for-small-teams-and-solopreneurs/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/outplay/',
+          destination: '/customers/outplay/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/shaped/',
+          destination: '/customers/shaped/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/tableflow/',
+          destination: '/customers/tableflow/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/thehindu/',
+          destination: '/customers/thehindu/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/wombo/',
+          destination: '/customers/wombo/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/:path*',
+          destination: '/customers/:path*/',
+          permanent: true,
+        },
+        {
+          source: '/blog/alien-intelligence-ai-sre-workflow-signoz/',
+          destination: '/customers/alien-intelligence-ai-sre-workflow-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/blog/inkeep-ai-agent-monitoring/',
+          destination: '/customers/inkeep-ai-agent-monitoring/',
+          permanent: true,
+        },
+        {
           source: '/docs/product-features/saved-view',
           destination: '/docs/metrics-management/metrics-explorer/#saved-views-in-metrics-explorer',
           permanent: true,
@@ -1089,7 +1179,7 @@ module.exports = () => {
         },
         {
           source: '/observability-user-stories/',
-          destination: '/case-study/',
+          destination: '/customers/',
           permanent: true,
         },
         {
@@ -2988,7 +3078,7 @@ module.exports = () => {
         },
         {
           source: '/observability-user-stories',
-          destination: '/case-study/',
+          destination: '/customers/',
           permanent: true,
         },
         {
