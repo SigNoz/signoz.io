@@ -87,16 +87,16 @@ function MainMenuContent({
       <Accordion topic="Use Cases" subtopics={useCasesDropdownItemsSorted} onLinkClick={onClose} />
       <Accordion topic="Compare SigNoz" subtopics={comparisonItems} onLinkClick={onClose} />
       <TrackingLink
-        href="/case-study/"
+        href="/customers/"
         className={MOBILE_LINK_CLASS}
         clickType="Nav Click"
-        clickName="Customer Stories Link"
-        clickText="Customer Stories"
+        clickName="Customers Link"
+        clickText="Customers"
         clickLocation="Mobile Menu"
         onClick={onClose}
         prefetch={false}
       >
-        Customer Stories
+        Customers
       </TrackingLink>
       <TrackingLink
         href="/docs/introduction/"

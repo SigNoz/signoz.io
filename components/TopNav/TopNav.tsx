@@ -145,6 +145,19 @@ export default function TopNav() {
                       Pricing
                     </TrackingLink>
                   )}
+                  {visibility.showCustomers && (
+                    <TrackingLink
+                      href="/customers/"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
+                      clickType="Nav Click"
+                      clickName="Customers Link"
+                      clickText="Customers"
+                      clickLocation="Top Navbar"
+                      prefetch={false}
+                    >
+                      Customers
+                    </TrackingLink>
+                  )}
                 </div>
                 <NavDropdownPanel />
               </NavDropdownProvider>
