@@ -227,7 +227,7 @@ const TrustedByTeams = ({ page }) => {
         `}
         >
           <div className="flex flex-col items-center text-center">
-            <Button variant="secondary" rounded="full" to="/case-study/" id={customerStoriesId}>
+            <Button variant="secondary" rounded="full" to="/customers/" id={customerStoriesId}>
               <span className="flex-center z-[1] mx-2">
                 Read customer stories <ArrowRight size={14} />
               </span>
