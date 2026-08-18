@@ -3107,10 +3107,6 @@ module.exports = () => {
           destination: '/docs/llm-observability/',
           permanent: true,
         },
-        // OpenTelemetry Node.js tutorial series consolidation.
-        // The series is retired; surviving standalones are
-        // /opentelemetry/add-manual-span-to-traces-nodejs/ and
-        // /opentelemetry/custom-metrics-nodejs/, which keep their URLs.
         {
           source: '/opentelemetry/nodejs-tutorial-overview/',
           destination: '/opentelemetry/nodejs/',
@@ -3149,6 +3145,11 @@ module.exports = () => {
         {
           source: '/opentelemetry/logging-nodejs/',
           destination: '/guides/pino-logger-nodejs-logging-library/',
+          permanent: true,
+        },
+        {
+          source: '/blog/nodejs-opensource-application-monitoring/',
+          destination: '/opentelemetry/custom-metrics-nodejs/',
           permanent: true,
         },
       ])
