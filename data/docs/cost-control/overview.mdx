@@ -1,0 +1,57 @@
+---
+date: 2026-08-14
+title: Cost Control and Optimization in SigNoz
+description: Identify high-volume metrics, traces, and logs in SigNoz and apply the matching fix, from Collector-level filtering to sampling and label aggregation.
+doc_type: explanation
+---
+
+## Overview
+
+Telemetry data has a cost. In SigNoz Cloud, ingestion volume determines your costs.
+
+<Admonition type="note">
+**Self-Hosted:** In Self-Hosted deployments, cost manifests as ClickHouse storage, query performance, and OTel Collector resource consumption.
+</Admonition>
+
+In both cases, a large fraction of ingested volume comes from a small number of high-volume sources: high-cardinality metrics, health check routes generating millions of spans, or verbose debug logs.
+
+This guide walks you through identifying and reducing that volume across three phases: **Analysis, Execution, and Validation**.
+
+## Optimization Flow
+
+### Phase 1: Analysis
+
+Identify which signal, service, and environment is driving your ingestion volume. Use the right SigNoz feature for the time window you are investigating.
+
+**[Analyze Ingestion Volume](https://signoz.io/docs/cost-control/understand-ingestion-volume/)**
+
+### Phase 2: Execution
+
+Once you have identified the high-volume source, apply the appropriate fix.
+
+<Admonition type="tip">
+**Source First, Collector Second:** Fixing the problem at source (in your application code or SDK configuration) reduces load across the entire pipeline and applies to all downstream consumers of that telemetry. Use Collector-level filtering when you do not have access to the source, or when multiple services share the same high-volume pattern and a single Collector rule is more practical than changing each service individually.
+</Admonition>
+
+Proceed to the guide for the signal you want to reduce:
+
+- **[Optimize Metrics](https://signoz.io/docs/cost-control/optimize-metrics/):** Drop unused metrics or aggregate high-cardinality labels.
+- **[Optimize Traces](https://signoz.io/docs/cost-control/optimize-traces/):** Reduce trace volume through head-based or tail-based sampling.
+- **[Optimize Logs](https://signoz.io/docs/cost-control/optimize-logs/):** Filter verbose logs at the Collector.
+
+### Phase 3: Validation
+
+After deploying a change, verify the result.
+
+1. The Cost Meter Dashboard uses `signoz.meter.*` metrics which aggregate hourly. For immediate feedback, use the relevant Explorer (Logs, Traces, or Metrics Explorer) to confirm the change is taking effect.
+2. Configure **[Cost Meter Alerts](https://signoz.io/docs/cost-meter/alerts/)** to be notified when ingestion volume crosses your expected threshold.
+
+### Non-Production Enforcements
+
+To apply hard ingestion caps on Dev or Staging environments regardless of telemetry content *(SigNoz Cloud only)*:
+
+**[Ingestion Limits](https://signoz.io/docs/cost-control/ingestion-limits/)**
+
+## Get Help
+
+<GetHelp />
