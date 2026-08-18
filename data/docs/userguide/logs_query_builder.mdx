@@ -1,5 +1,5 @@
 ---
-date: 2026-08-06
+date: 2026-08-18
 title: Logs Explorer
 meta_title: "Logs Explorer: Query, Search & Analyze Logs Efficiently"
 description: Explore logs with SigNoz Logs Explorer. Query, search and analyze logs efficiently using powerful log explorer queries and real-time insights.
@@ -186,7 +186,9 @@ Shows the complete body of the log. You can toggle **Wrap text** to switch betwe
 
 **Attributes**
 
-Shows all log attributes in a tabular format with the attribute name and its value. You can search for specific attributes using the search bar.
+Shows all log attributes with the attribute name and its value. You can search for specific attributes using the search bar. Resource attributes are grouped under `resource`, matching the traces view and OpenTelemetry conventions.
+
+Attribute values that contain stringified JSON (for example, a `payload` attribute holding `{"key":"value"}`) render as an interactive, expandable JSON tree instead of a raw escaped string. Expand the tree to inspect nested keys directly in the drawer.
 
 <Figure
   src="/img/docs/logs-management/ui/logs-detail-search-attribute.webp"
@@ -194,19 +196,27 @@ Shows all log attributes in a tabular format with the attribute name and its val
   caption="Search for a specific attribute in the Log Details panel"
 />
 
-In the log details panel, hover over any attribute value to see quick action icons. These let you instantly filter for or against a value, group by the attribute, or replace the current filters — all without manually editing the query in log explorer.
+In the log details panel, hover over any attribute value to see quick action icons. These let you instantly filter for or against a value, group by the attribute, or replace the current filters, all without manually editing the query in Logs Explorer.
 
 From the attribute values, you can:
 - **Filter for value** — add the attribute as an `IN` filter. For example, if the attribute is `container_id` and its value is `debian`, using Filter for Value will create a filter `container_id IN debian`. This will list the logs where the `container_id` attribute is `debian`.
 - **Filter out value** — add the attribute as a `NOT IN` filter. For example, if the attribute is `container_id` and its value is `debian`, using Filter out Value will create a filter `container_id NOT_IN debian`. This will list the logs where the `container_id` attribute is not `debian`.
 - **Group By Attribute** — add the attribute to Group By
 - **Replace filters with this value** — replace the current filter with this specific value
+- **Copy** — copy the attribute value to your clipboard
 
 <Figure
   src="/img/docs/logs-management/ui/logs-detail-overview-actions.webp"
   alt="Quick actions on attribute values in Log Details"
   caption="Quick actions on attribute values: Filter for value, Filter out value, Group By Attribute, Replace filters"
 />
+
+<Admonition type="info">
+Not every field exposes every action:
+
+- `trace_id` and `body` support filtering but not group-by.
+- Deeply nested sub-fields inside a JSON attribute value (for example, `attributes.payload.x`) are copy-only. Filter and group-by are not yet available for them; backend support is pending.
+</Admonition>
 
 ### JSON
 
