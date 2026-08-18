@@ -253,7 +253,7 @@ const DistributedTracing: React.FC = () => {
         <CarouselCards
           cards={CORRELATION_CAROUSEL_DATA}
           buttonLink="/docs/traces-management/guides/correlate-traces-and-logs/"
-          buttonText="Read Blog"
+          buttonText="Read Documentation"
         />
         <Divider />
         <VisualQueryBuilder />
