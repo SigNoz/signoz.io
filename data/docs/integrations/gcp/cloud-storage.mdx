@@ -1,0 +1,172 @@
+---
+date: 2026-08-18
+title: Monitor GCP Cloud Storage Metrics
+description: Collect Cloud Storage metrics in SigNoz. Add the metrics to your OpenTelemetry Collector and view bucket size, API traffic, and network throughput on a pre-built dashboard.
+doc_type: howto
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+---
+
+The **Cloud Storage** integration brings bucket metrics (stored bytes and object counts, deleted bytes, API request activity, signed-request authentication, and network throughput) into SigNoz, with a pre-built dashboard for the service.
+
+Cloud Storage publishes its metrics to **Cloud Monitoring**. SigNoz reads them through the OpenTelemetry Collector running in your GCP project.
+
+## Choose a setup method
+
+<Tabs entityName="setup">
+<TabItem value="manual" label="Manual setup" default>
+
+**Available now.** You run the OpenTelemetry Collector in your own GCP project and add Cloud Storage metrics to its configuration. You control which metrics are pulled and how often.
+
+Complete the [GCP integration setup](https://signoz.io/docs/integrations/gcp/manual-setup/) once, then follow the steps on this page for each project that hosts the buckets you want to monitor.
+
+</TabItem>
+<TabItem value="agent" label="SigNoz agent (coming soon)">
+
+**Coming soon.** SigNoz will deploy and manage the Collector for you: you connect your GCP account, toggle the service on, and SigNoz provisions the metric receivers in the background. No Collector configuration to maintain.
+
+Until then, use the **Manual setup** tab.
+
+</TabItem>
+</Tabs>
+
+## Prerequisites
+
+Before configuring this service, complete the shared GCP integration setup:
+
+- Your [GCP account is connected in SigNoz](https://signoz.io/docs/integrations/gcp/connect-gcp-account/), and the project that owns your buckets is in [**Projects to Monitor**](https://signoz.io/docs/integrations/gcp/manual-setup/#connection-fields).
+- The [OpenTelemetry Collector is deployed and running](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/).
+- The `signoz-integration` service account has `roles/monitoring.viewer` on the project that owns the buckets. See [Create a service account](https://signoz.io/docs/integrations/gcp/create-service-account/#step-3-grant-metrics-permission-on-each-monitored-project).
+- The **Cloud Monitoring API** is enabled in that project.
+
+## Step 1: Enable the service in SigNoz
+
+1. In SigNoz, go to **Integrations** > **Google Cloud Platform**.
+2. Select **GCP Cloud Storage** from the service list.
+3. Toggle **Metric Collection** on to activate the pre-built dashboard.
+4. Open the **Data Collected** tab and note the metrics listed there. These are the metrics the dashboard's panels query.
+
+<Admonition type="warning">
+Enabling the toggle does not start collection on its own. The metrics that reach SigNoz are exactly the ones in your Collector's `metrics_list`. If you skip a metric in step 2, its dashboard panel stays empty.
+</Admonition>
+
+## Step 2: Add the metrics to your Collector config
+
+Open the `otel-collector-config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Cloud Storage metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project that owns your buckets. Only the `metrics_list` shown below changes; leave the rest of the file as is:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  googlecloudmonitoring:
+    project_id: "<monitored-project-id>"
+    collection_interval: 300s   # 5 minutes; minimum is 60s
+    metrics_list:
+      # Stored data
+      - metric_name: "storage.googleapis.com/storage/v2/total_bytes"
+      - metric_name: "storage.googleapis.com/storage/v2/total_count"
+      - metric_name: "storage.googleapis.com/storage/v2/deleted_bytes"
+      # API activity
+      - metric_name: "storage.googleapis.com/api/request_count"
+      - metric_name: "storage.googleapis.com/authn/authentication_count"
+      # Network
+      - metric_name: "storage.googleapis.com/network/received_bytes_count"
+      - metric_name: "storage.googleapis.com/network/sent_bytes_count"
+```
+
+**Verify these values:**
+
+- `<monitored-project-id>`: The GCP project that owns your buckets. It must be one of the entries in your **Projects to Monitor** list.
+
+<Admonition type="info">
+If your buckets span several projects, add one **named** receiver per project (`googlecloudmonitoring/<name>`) and list them all in the metrics pipeline. See [Configure multiple projects](https://signoz.io/docs/integrations/gcp/collect-metrics/#step-3-configure-multiple-projects).
+</Admonition>
+
+The receiver polls every metric in the list once per `collection_interval`, and the Monitoring API bills per read call, so keep the list to the metrics your dashboards and alerts actually use. See [Cost and tuning](https://signoz.io/docs/integrations/gcp/collect-metrics/#cost-and-tuning).
+
+<Admonition type="info">
+`storage/v2/total_bytes` and `storage/v2/total_count` are sampled by Cloud Storage roughly **once a day**, not on your collection interval. The bucket size and object count panels move in daily steps no matter how often the Collector polls, so there is no benefit to a short interval for these two. The API, authentication, and network metrics are sampled far more often and do track your interval.
+</Admonition>
+
+## Step 3: Apply the configuration
+
+The Collector loads its config from the `signoz-collector-config` secret, so a config change needs a new secret version and a redeploy:
+
+1. Save your updated `otel-collector-config.yaml`.
+2. Add a new secret version ([step 2 of Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-2-store-the-config-in-secret-manager)).
+3. Redeploy the Cloud Run service ([step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-3-deploy-to-cloud-run)).
+
+## Validate
+
+1. Wait one or two collection intervals (up to about 5 minutes with the default `300s`).
+2. In SigNoz, go to **Dashboards** and open the Cloud Storage dashboard. The API, authentication, and network panels should start filling in first.
+3. To check a single metric, open **Metrics Explorer** and query `storage.googleapis.com/api/request_count`.
+
+<Admonition type="info">
+Give the bucket size and object count panels up to 24 hours before treating them as empty, because Cloud Storage samples those metrics daily.
+</Admonition>
+
+## What's collected
+
+<details>
+<summary>Metrics</summary>
+
+See the **Data Collected** tab in the SigNoz integration for the definitive list the dashboard uses, and the <a href="https://docs.cloud.google.com/monitoring/api/metrics_gcp_p_z#gcp-storage" target="_blank" rel="noopener noreferrer nofollow">GCP metrics list</a> for full definitions.
+
+| Metric name | Unit | Type |
+|-------------|------|------|
+| `storage.googleapis.com/storage/v2/total_bytes` | Bytes | Gauge |
+| `storage.googleapis.com/storage/v2/total_count` | Count | Gauge |
+| `storage.googleapis.com/storage/v2/deleted_bytes` | Bytes | Sum |
+| `storage.googleapis.com/api/request_count` | Count | Sum |
+| `storage.googleapis.com/authn/authentication_count` | Count | Sum |
+| `storage.googleapis.com/network/received_bytes_count` | Bytes | Sum |
+| `storage.googleapis.com/network/sent_bytes_count` | Bytes | Sum |
+
+</details>
+
+<details>
+<summary>Dashboard panels</summary>
+
+The pre-built dashboard has eight panels:
+
+| Panel | What it shows |
+|-------|---------------|
+| **Bucket size** | Table of total bytes stored per bucket, broken down by storage class. This is the latest sampled value, not a time series. |
+| **Total object bytes** | Bytes stored over time, by bucket, storage class, and object type. |
+| **Total object count** | Object count over time, covering live objects, noncurrent objects, soft-deleted objects, and multipart uploads. |
+| **Deleted bytes** | Rate of bytes deleted per bucket, by storage class. |
+| **Request count** | Rate of Cloud Storage API calls, by API method and response code. |
+| **Authentication count** | Rate of signed API requests, by authentication method (HMAC or RSA), API method, and response code. |
+| **Received bytes** | Rate of bytes received over the network, by API method and response code. |
+| **Sent bytes** | Rate of bytes sent over the network, by API method and response code. |
+
+Two variables scope every panel: **project_id** (single-select) and **bucket_name** (multi-select, with an **All** option).
+
+Pre-built dashboards are read-only. To customize one, use **Export JSON** from the dashboard menu and import it as a new dashboard.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+**A dashboard panel is empty.** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
+
+**Bucket size and object count stay empty while other panels work.** These come from `storage/v2/total_bytes` and `storage/v2/total_count`, which Cloud Storage samples about once a day. Wait 24 hours before investigating further.
+
+**No Cloud Storage metrics at all.** Confirm the `signoz-integration` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
+
+**The bucket_name variable lists far more buckets than expected.** It lists every bucket reporting metrics in the selected project. On projects with many buckets, keep the selection narrow instead of using **All**, so panels stay responsive.
+
+**Deleted bytes looks high after a lifecycle change.** `deleted_bytes` counts every deletion, including ones made by lifecycle rules and by soft-delete expiry, not just client deletes.
+
+</details>
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) on unexpected growth in stored bytes, a spike in error response codes on `request_count`, or a drop in request volume that suggests a broken client.
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate storage traffic with traces from the applications reading and writing the buckets.
+- [Monitor Cloud SQL for PostgreSQL](https://signoz.io/docs/integrations/gcp/cloud-sql-postgresql/) or [Memorystore for Redis](https://signoz.io/docs/integrations/gcp/memorystore-redis/) if your stack also uses a managed database or cache.
+
+## Get Help
+
+<GetHelp />
