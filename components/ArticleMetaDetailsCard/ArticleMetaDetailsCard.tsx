@@ -10,7 +10,6 @@ export type RenderedAuthor = {
 interface MetaCardProps {
   authors: RenderedAuthor[]
   readingTimeText?: string | null
-  formattedPublishedDate?: string | null
   formattedUpdatedDate?: string | null
   primaryTags: string[]
   hiddenTags: string[]
@@ -23,7 +22,6 @@ export const ARTICLE_META_CARD_CLASS =
 export default function ArticleMetaDetailsCard({
   authors,
   readingTimeText,
-  formattedPublishedDate,
   formattedUpdatedDate,
   primaryTags,
   hiddenTags,
@@ -81,15 +79,6 @@ export default function ArticleMetaDetailsCard({
               Read Time
             </span>
             <span>{readingTimeText}</span>
-          </div>
-        )}
-
-        {formattedPublishedDate && (
-          <div className="flex items-center justify-between text-[var(--l1-foreground)]">
-            <span className="text-xs uppercase tracking-wide text-[var(--l3-foreground)]">
-              Published
-            </span>
-            <span>{formattedPublishedDate}</span>
           </div>
         )}
 
