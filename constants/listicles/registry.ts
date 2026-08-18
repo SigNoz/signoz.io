@@ -9,6 +9,7 @@ import azureOneClick from './azure-one-click.json'
 import cicdMonitoring from './cicd-monitoring.json'
 import collectionAgents from './collection-agents.json'
 import dashboardTemplates from './dashboard-templates.json'
+import databaseMonitoring from './database-monitoring.json'
 import gcpServices from './gcp-services.json'
 import hostMetricsDashboards from './host-metrics-dashboards.json'
 import integrations from './integrations.json'
@@ -36,6 +37,7 @@ export const listicleConfigs: Record<string, ListicleConfig> = {
   'cicd-monitoring': cicdMonitoring as unknown as ListicleConfig,
   'collection-agents': collectionAgents as unknown as ListicleConfig,
   'dashboard-templates': dashboardTemplates as unknown as ListicleConfig,
+  'database-monitoring': databaseMonitoring as unknown as ListicleConfig,
   'gcp-services': gcpServices as unknown as ListicleConfig,
   'host-metrics-dashboards': hostMetricsDashboards as unknown as ListicleConfig,
   integrations: integrations as unknown as ListicleConfig,
