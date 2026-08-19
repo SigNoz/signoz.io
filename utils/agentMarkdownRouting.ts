@@ -91,7 +91,13 @@ export const buildContentMarkdownRewritePath = (pathname: string): string => {
 
 // Paths with their own markdown/negotiation handling, or that must never be
 // rewritten to the generic page pipeline.
-const PAGE_MARKDOWN_EXCLUDED_PREFIXES = ['/api', '/docs', '/docs-onboarding', '/api-reference']
+const PAGE_MARKDOWN_EXCLUDED_PREFIXES = [
+  '/api',
+  '/docs',
+  '/docs-onboarding',
+  '/api-reference',
+  '/.well-known',
+]
 
 // Real .md resources served by their own routes; the suffix is part of the
 // path, not a markdown-alternate marker.

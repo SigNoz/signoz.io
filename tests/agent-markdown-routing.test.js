@@ -93,6 +93,7 @@ test('shouldRewritePageToMarkdown excludes docs, api, api-reference, and content
   assert.equal(shouldRewritePageToMarkdown('/docs-onboarding/foo', true), false)
   assert.equal(shouldRewritePageToMarkdown('/api/page-markdown/pricing', true), false)
   assert.equal(shouldRewritePageToMarkdown('/api-reference/latest', true), false)
+  assert.equal(shouldRewritePageToMarkdown('/.well-known/mcp', true), false)
   assert.equal(shouldRewritePageToMarkdown('/blog/some-post.md', false), false)
   assert.equal(shouldRewritePageToMarkdown('/blog/some-post', true), false)
 })
