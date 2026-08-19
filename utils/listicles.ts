@@ -126,7 +126,7 @@ async function fetchCmsListicle(name: string): Promise<ListicleConfig | null> {
     'populate[static_sections][populate][items]': '*',
   })
 
-  const res = await cmsFetch(`${CMS_API_URL}/api/listicles?${params.toString()}`, {
+  const res = await cmsFetch(`/api/listicles?${params.toString()}`, {
     cache: 'force-cache',
     next: {
       tags: ['listicles', `listicle-${name}`],

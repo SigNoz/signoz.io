@@ -20,7 +20,7 @@ async function fetchCmsSideNav(): Promise<NavItem[]> {
     throw new Error('NEXT_PUBLIC_SIGNOZ_CMS_API_URL is not configured')
   }
 
-  const res = await cmsFetch(`${CMS_API_URL}/api/docs-side-nav`, {
+  const res = await cmsFetch(`/api/docs-side-nav`, {
     cache: 'force-cache',
     next: {
       tags: ['docs-side-nav'],

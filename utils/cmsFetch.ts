@@ -1,8 +1,15 @@
 import { CMS_FETCH_TIMEOUT_MS } from '@/constants/cache'
 
+const API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
+
 const errorName = (error: unknown): string => (error instanceof Error ? error.name : '')
 
-export async function cmsFetch(url: string, init: RequestInit = {}): Promise<Response> {
+export async function cmsFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  if (!API_URL) {
+    throw new Error('NEXT_PUBLIC_SIGNOZ_CMS_API_URL is not configured')
+  }
+
+  const url = `${API_URL}${path}`
   const method = init.method ?? 'GET'
   const startedAt = Date.now()
   console.log(`[cms-fetch] → ${method} ${url}`)

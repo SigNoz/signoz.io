@@ -150,7 +150,7 @@ export const fetchChangelogEntries = async (
       arrayFormat: 'repeat', // Use repeat format for arrays
     })
 
-    const response = await cmsFetch(`${API_URL}${API_PATH}${queryParams}`, {
+    const response = await cmsFetch(`${API_PATH}${queryParams}`, {
       next: {
         revalidate: CHANGELOG_REVALIDATE_SECONDS,
         tags: ['release-changelogs'],
@@ -220,7 +220,7 @@ export const fetchChangelogById = async (
       arrayFormat: 'repeat', // Use repeat format for arrays
     })
 
-    const response = await cmsFetch(`${API_URL}${API_PATH}/${changelogId}${queryParams}`, {
+    const response = await cmsFetch(`${API_PATH}/${changelogId}${queryParams}`, {
       next: {
         revalidate: CHANGELOG_REVALIDATE_SECONDS,
         tags: ['release-changelogs'],
@@ -423,18 +423,15 @@ export const fetchMDXContentByPath = async (
         arrayFormat: 'repeat',
       })
 
-      const initialResponse = await cmsFetch(
-        `${API_URL}/api/${collectionName}${initialQueryParams}`,
-        {
-          cache: 'force-cache',
-          next: {
-            tags: [`${collectionName}-list`, 'mdx-content-list'],
-          },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      )
+      const initialResponse = await cmsFetch(`/api/${collectionName}${initialQueryParams}`, {
+        cache: 'force-cache',
+        next: {
+          tags: [`${collectionName}-list`, 'mdx-content-list'],
+        },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
 
       if (!initialResponse.ok) {
         if (initialResponse.status === 404) {
@@ -476,7 +473,7 @@ export const fetchMDXContentByPath = async (
             })
 
             pageTasks.push(() =>
-              cmsFetch(`${API_URL}/api/${collectionName}${pageQueryParams}`, {
+              cmsFetch(`/api/${collectionName}${pageQueryParams}`, {
                 cache: 'force-cache',
                 next: {
                   tags: [`${collectionName}-list`, 'mdx-content-list'],
@@ -535,9 +532,7 @@ export const fetchMDXContentByPath = async (
       addQueryPrefix: true,
       arrayFormat: 'repeat',
     })
-    const requestUrl = `${API_URL}/api/${collectionName}${queryParams}`
-
-    const response = await cmsFetch(requestUrl, {
+    const response = await cmsFetch(`/api/${collectionName}${queryParams}`, {
       cache: 'force-cache',
       next: {
         tags: [`${collectionName}-${path}`, `mdx-content-${path}`],

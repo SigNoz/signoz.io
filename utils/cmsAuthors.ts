@@ -34,7 +34,7 @@ async function fetchAuthorsFromCMS(): Promise<AuthorDirectory> {
       { encode: false, addQueryPrefix: true, arrayFormat: 'repeat' }
     )
 
-    const response = await cmsFetch(`${API_URL}/api/authors${queryParams}`, {
+    const response = await cmsFetch(`/api/authors${queryParams}`, {
       cache: 'force-cache',
       next: { tags: ['authors-list'] },
       headers: { 'Content-Type': 'application/json' },
