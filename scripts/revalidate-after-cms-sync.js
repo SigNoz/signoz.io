@@ -1,38 +1,78 @@
-#!/usr/bin/env node
-/**
- * After CMS sync, calls /api/revalidate with selective paths + tags, or full revalidation as fallback.
- * Mirrors path logic from scripts/sync-content-to-strapi.js (generatePathField + sync folders).
- */
-
 const fs = require('fs')
 const path = require('path')
+const { parseArgs: nodeParseArgs } = require('node:util')
 
 const BULK_THRESHOLD = Number(process.env.REVALIDATE_BULK_THRESHOLD || '25')
 
-function getAssetsListFromEnv(envName, pathEnvName) {
-  if (process.env[pathEnvName] && fs.existsSync(process.env[pathEnvName])) {
-    try {
-      const content = fs.readFileSync(process.env[pathEnvName], 'utf8')
-      if (!content || !content.trim()) return []
-      return JSON.parse(content)
-    } catch (e) {
-      console.warn(`⚠️ Failed to read ${pathEnvName}: ${e.message}`)
-      return []
-    }
+function parseArgs(argv) {
+  const { values } = nodeParseArgs({
+    args: argv || process.argv.slice(2),
+    options: {
+      'changed-files': { type: 'string' },
+      'restore-files': { type: 'string' },
+      'deleted-files': { type: 'string' },
+      'changed-assets': { type: 'string' },
+      'sidenav-changed': { type: 'boolean', default: false },
+      'listicles-changed': { type: 'boolean', default: false },
+      'changed-listicles': { type: 'string' },
+      'deleted-listicles': { type: 'string' },
+      'sync-folders': { type: 'string' },
+    },
+    strict: false,
+  })
+  return {
+    changedFilesPath: values['changed-files'],
+    restoreFilesPath: values['restore-files'],
+    deletedFilesPath: values['deleted-files'],
+    changedAssetsPath: values['changed-assets'],
+    sidenavChanged: values['sidenav-changed'],
+    listiclesChanged: values['listicles-changed'],
+    changedListiclesPath: values['changed-listicles'],
+    deletedListiclesPath: values['deleted-listicles'],
+    syncFolders: values['sync-folders'],
   }
-  return JSON.parse(process.env[envName] || '[]')
 }
 
-const CHANGED_FILES = getAssetsListFromEnv('CHANGED_FILES', 'CHANGED_FILES_PATH')
-const DELETED_FILES = getAssetsListFromEnv('DELETED_FILES', 'DELETED_FILES_PATH')
-const CHANGED_ASSETS = getAssetsListFromEnv('CHANGED_ASSETS', 'CHANGED_ASSETS_PATH')
+function readJsonFile(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8')
+    if (!content || !content.trim()) return []
+    return JSON.parse(content)
+  } catch (e) {
+    console.warn(`Warning: Failed to read ${filePath}: ${e.message}`)
+    return []
+  }
+}
+
+function loadFileList(cliPath, envPathName, envName) {
+  if (cliPath) return readJsonFile(cliPath)
+  if (process.env[envPathName] && fs.existsSync(process.env[envPathName])) {
+    return readJsonFile(process.env[envPathName])
+  }
+  try {
+    return JSON.parse(process.env[envName] || '[]')
+  } catch {
+    return []
+  }
+}
+
+const cliArgs = parseArgs()
+
+const CHANGED_FILES = loadFileList(cliArgs.changedFilesPath, 'CHANGED_FILES_PATH', 'CHANGED_FILES')
+const RESTORE_FILES = loadFileList(cliArgs.restoreFilesPath, 'RESTORE_FILES_PATH', 'RESTORE_FILES')
+const DELETED_FILES = loadFileList(cliArgs.deletedFilesPath, 'DELETED_FILES_PATH', 'DELETED_FILES')
+const CHANGED_ASSETS = loadFileList(
+  cliArgs.changedAssetsPath,
+  'CHANGED_ASSETS_PATH',
+  'CHANGED_ASSETS'
+)
 
 let SYNC_FOLDERS
 try {
-  SYNC_FOLDERS = JSON.parse(
-    process.env.SYNC_FOLDERS ||
-      '["faqs","case-study","opentelemetry","comparisons","guides","blog","docs"]'
-  )
+  const raw = cliArgs.syncFolders || process.env.SYNC_FOLDERS
+  SYNC_FOLDERS = raw
+    ? JSON.parse(raw)
+    : ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog', 'docs']
 } catch {
   SYNC_FOLDERS = ['faqs', 'case-study', 'opentelemetry', 'comparisons', 'guides', 'blog', 'docs']
 }
@@ -83,11 +123,19 @@ function uniqueStrings(arr) {
   return [...new Set(arr.filter(Boolean))]
 }
 
-const SIDENAV_CHANGED = process.env.SIDENAV_CHANGED === 'true'
+const SIDENAV_CHANGED = cliArgs.sidenavChanged || process.env.SIDENAV_CHANGED === 'true'
 
-const LISTICLES_CHANGED = process.env.LISTICLES_CHANGED === 'true'
-const CHANGED_LISTICLES_RAW = getAssetsListFromEnv('CHANGED_LISTICLES', 'CHANGED_LISTICLES_PATH')
-const DELETED_LISTICLES_RAW = getAssetsListFromEnv('DELETED_LISTICLES', 'DELETED_LISTICLES_PATH')
+const LISTICLES_CHANGED = cliArgs.listiclesChanged || process.env.LISTICLES_CHANGED === 'true'
+const CHANGED_LISTICLES_RAW = loadFileList(
+  cliArgs.changedListiclesPath,
+  'CHANGED_LISTICLES_PATH',
+  'CHANGED_LISTICLES'
+)
+const DELETED_LISTICLES_RAW = loadFileList(
+  cliArgs.deletedListiclesPath,
+  'DELETED_LISTICLES_PATH',
+  'DELETED_LISTICLES'
+)
 
 const DOCS_DIR = path.resolve(__dirname, '..', 'data', 'docs')
 
@@ -122,16 +170,25 @@ function findDocsPathsForListicle(listicleKey) {
   return results
 }
 
-function buildPayload() {
-  const allContentFiles = [...CHANGED_FILES, ...DELETED_FILES]
+function buildPayload({
+  changedFiles = CHANGED_FILES,
+  restoreFiles = RESTORE_FILES,
+  deletedFiles = DELETED_FILES,
+  changedAssets = CHANGED_ASSETS,
+  sidenavChanged = SIDENAV_CHANGED,
+  listiclesChanged = LISTICLES_CHANGED,
+  changedListicles = CHANGED_LISTICLES_RAW,
+  deletedListicles = DELETED_LISTICLES_RAW,
+} = {}) {
+  const allContentFiles = [...changedFiles, ...restoreFiles, ...deletedFiles]
 
   const cmsUrls = uniqueStrings(allContentFiles.map(filePathToCmsUrl))
 
-  const hasAssetChanges = CHANGED_ASSETS.length > 0
+  const hasAssetChanges = changedAssets.length > 0
   const hasCmsPaths = cmsUrls.length > 0
 
   // Sidenav changes affect every docs page — use full revalidation
-  if (SIDENAV_CHANGED) {
+  if (sidenavChanged) {
     console.log('📣 Sidenav changed: using full revalidation (sidebar appears on every docs page).')
     return { mode: 'all', reason: 'sidenav-changed' }
   }
@@ -139,8 +196,8 @@ function buildPayload() {
   // Collect listicle-related paths and tags
   const listiclePaths = []
   const listicleTags = []
-  const allListicleChanges = [...CHANGED_LISTICLES_RAW, ...DELETED_LISTICLES_RAW]
-  if (LISTICLES_CHANGED && allListicleChanges.length > 0) {
+  const allListicleChanges = [...changedListicles, ...deletedListicles]
+  if (listiclesChanged && allListicleChanges.length > 0) {
     for (const file of allListicleChanges) {
       const key = listicleFileToKey(file)
       listicleTags.push(`listicle-${key}`)
@@ -250,7 +307,11 @@ async function main() {
   console.log('✅ Revalidation response:', JSON.stringify(json, null, 2))
 }
 
-main().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}
+
+module.exports = { buildPayload, filePathToCmsUrl, parseArgs, readJsonFile, loadFileList }

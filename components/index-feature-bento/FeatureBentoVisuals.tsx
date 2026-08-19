@@ -420,7 +420,7 @@ function ApmBrowserShell() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute bottom-[-26px] left-[18px] h-[330px] w-[510px] overflow-hidden rounded-t-[4px] border border-signoz_slate-100 bg-signoz_slate-300 shadow-[0_26px_80px_rgba(0,0,0,0.24)] md:bottom-[-24px] md:left-[20%] md:h-[500px] md:w-[720px] lg:bottom-[-28px] lg:left-[20%] lg:h-[520px] lg:w-[760px]"
+      className="pointer-events-none absolute bottom-auto left-[18px] top-40 h-[330px] w-[510px] overflow-hidden rounded-t-[4px] border border-signoz_slate-100 bg-signoz_slate-300 shadow-[0_26px_80px_rgba(0,0,0,0.24)] md:bottom-[-24px] md:left-[20%] md:top-auto md:h-[500px] md:w-[720px] lg:bottom-[-28px] lg:left-[20%] lg:h-[520px] lg:w-[760px]"
     >
       <div className="flex h-11 items-center gap-3 bg-signoz_slate-300 px-5 md:h-14 md:gap-5 md:px-7">
         <div className="flex gap-[6px] md:gap-[7px]">

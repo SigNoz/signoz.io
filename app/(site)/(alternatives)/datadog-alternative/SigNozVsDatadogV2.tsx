@@ -1775,7 +1775,7 @@ const SigNozVsDatadogV2 = () => {
                 But if you're looking to use OpenTelemetry, SigNoz is a better choice. OpenTelemetry
                 Collector has a{' '}
                 <Link
-                  href="https://signoz.io/docs/infrastructure-monitoring/hostmetrics/"
+                  href="https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/"
                   className="text-blue-400 hover:text-blue-300"
                   target="_blank"
                 >

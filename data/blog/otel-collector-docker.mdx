@@ -1,9 +1,11 @@
 ---
 title: OpenTelemetry Collector in Docker - Minimal Setup with Docker Compose
-date: 2026-03-25
+meta_title: "OpenTelemetry Collector in Docker: Compose Setup Guide"
+published_date: 2026-03-25
+updated_date: 2026-07-24
 tags: [opentelemetry, docker]
 authors: [mahak_kaur]
-description: Run the OpenTelemetry Collector in Docker Compose with a minimal config, validate it with telemetrygen, and send data to SigNoz.
+description: Set up the OTel Collector in Docker with a minimal Docker Compose config, validate it with telemetrygen, and send traces, metrics & logs to SigNoz.
 keywords: [opentelemetry collector docker, opentelemetry collector in docker, opentelemetry collector docker compose, telemetrygen, signoz]
 related_articles:
   - '/blog/opentelemetry-docker'
@@ -12,13 +14,13 @@ related_articles:
   - '/guides/docker-clear-logs'
 ---
 
-The [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) sits directly between your applications and your observability backend. Instead of configuring every app to send data to different places, your apps just send data to the Collector, which receives, batches, and exports it.
+The [OpenTelemetry (OTel) Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) sits directly between your applications and your observability backend. Instead of configuring every app to send data to different places, your apps just send data to the Collector, which receives, batches, and exports it.
 
-As your architecture grows, host-based Collector setups tend to drift, so running the Collector in Docker gives you one standard package and Docker Compose keeps the config, ports, and environment in one place.
+As your architecture grows, host-based Collector setups tend to drift, so running the OTel Collector in Docker gives you one standard package and Docker Compose keeps the config, ports, and environment in one place.
 
 In this guide, we will set up a minimal OpenTelemetry Collector using Docker Compose. We will:
 
-1. Create a minimal Collector configuration.
+1. Create a minimal [OTel Collector configuration](https://signoz.io/docs/opentelemetry-collection-agents%2Fopentelemetry-collector%2Fconfiguration/).
 2. Start the Collector using Docker Compose.
 3. Verify the data pipeline works end-to-end using `telemetrygen`.
 4. Connect the Collector to [SigNoz](https://signoz.io/).
@@ -96,7 +98,7 @@ networks:
 
 **What did this Compose file do?**
 
-This Compose file creates an isolated Docker network (`otel-demo`), pulls the official Collector image, maps the ports we need, and cleanly mounts the config.yaml file we just wrote directly into the container.
+This Compose file creates an isolated Docker network (`otel-demo`), pulls the official OTel Collector image, maps the ports we need, and cleanly mounts the config.yaml file we just wrote directly into the container.
 
 We use the [OpenTelemetry Collector Contrib](https://signoz.io/blog/opentelemetry-collector-contrib/) image instead of the Core version. The Contrib distribution includes hundreds of community-built receivers, processors, and exporters, making it much easier to drop in new integrations as your observability needs grow.
 
@@ -104,13 +106,13 @@ Watch the volume mount path carefully! The Contrib image specifically expects it
 
 ## Step 3: Run the Stack and Test the Setup
 
-Start the Collector:
+Start the OTel Collector:
 
 ```bash
 docker compose up -d
 ```
 
-This command starts the Collector container in the background. To confirm it is actually running (and did not crash silently), check its status:
+This command starts the OTel Collector container in the background. To confirm it is actually running (and did not crash silently), check its status:
 
 ```bash
 docker compose ps
@@ -441,13 +443,13 @@ Then stop that process or change the published port in docker-compose.yaml.
 
 ## FAQs
 
-### What is the difference between the Core and Contrib Collector images?
+### What is the difference between the Core and Contrib OTel Collector images?
 
 The official `Core` distribution only includes baseline receivers and exporters (like pure OTLP). We heavily recommend using the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib" rel="noopener noreferrer nofollow" target="_blank">`Contrib`</a> distribution in Docker environments because it comes pre-packaged with hundreds of community integrations. This allows you to easily plug in receivers for Redis, MySQL, or AWS without having to build a custom Collector image yourself.
 
 ### Why does an external app report `Connection Refused` on port 4317?
 
-This is the most common pitfall when running the Collector in Docker. By default, many quick-start configs bind the OTLP receivers to `localhost:4317`. Inside a Docker container, `localhost` strictly means the container's own internal loopback interface, meaning the Collector drops all traffic coming from outside the container. You must bind to `0.0.0.0:4317` so Docker can route external traffic into the container.
+This is the most common pitfall when running the OTel Collector in Docker. By default, many quick-start configs bind the OTLP receivers to `localhost:4317`. Inside a Docker container, `localhost` strictly means the container's own internal loopback interface, meaning the Collector drops all traffic coming from outside the container. You must bind to `0.0.0.0:4317` so Docker can route external traffic into the container.
 
 ### Do I need an ingestion key for self-hosted SigNoz?
 
@@ -459,7 +461,7 @@ Absolutely. This is the primary architectural benefit of the Collector. You can 
 
 ## Conclusion
 
-You have successfully deployed an OpenTelemetry Collector inside a Docker Compose network, structured a minimal `config.yaml`, and proven the pipeline works end-to-end by pushing telemetry from `telemetrygen` into SigNoz.
+You have successfully deployed an OTel Collector inside a Docker Compose network, structured a minimal `config.yaml`, and proven the pipeline works end-to-end by pushing telemetry from `telemetrygen` into SigNoz.
 
 By standardizing this setup in Docker Compose, your observability infrastructure is fully isolated, reproducible, and easily stored alongside your application code in Git.
 

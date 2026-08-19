@@ -1,9 +1,11 @@
 ---
 title: How to Monitor Apache Server Metrics with OpenTelemetry
-date: 2023-11-24
+meta_title: "Apache Server Monitoring with OpenTelemetry"
+published_date: 2023-11-24
+updated_date: 2026-07-14
 tags: [OpenTelemetry]
 authors: [daniel]
-description: Steps to monitor Apache Web Server metrics with OpenTelemetry 1. Setting up OpenTelemetry Collector 2. Configuring OpenTelemetry Collector to collect Apache metrics 3. Send collected metrics to SigNoz...
+description: "Monitor Apache HTTP Server metrics with OpenTelemetry using the Collector's Apache receiver and mod_status."
 image: /img/blog/2023/11/opentelemetry-apache-metrics-cover.jpeg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,apache,observability,otel_collector]
@@ -53,7 +55,7 @@ The data you collect with OpenTelemetry is vendor-agnostic and can be exported i
 
 ## What is OpenTelemetry Collector?
 
-OpenTelemetry Collector is a stand-alone service provided by OpenTelemetry. It can be used as a telemetry-processing system with a lot of flexible configurations that gather and process observability data, such as traces, metrics, and logs, from different parts of a software system. It then sends this data to chosen destinations, allowing for centralized analysis and monitoring. The collector simplifies the task of collecting and exporting telemetry data in cloud-native environments.
+OpenTelemetry Collector is a stand-alone service provided by OpenTelemetry. It can be used as a telemetry-processing system with a lot of flexible configurations that gather and process observability data, such as traces, metrics, and logs, from different parts of a software system. It then sends this data to chosen destinations, allowing for centralized analysis and monitoring. The collector simplifies the task of collecting and exporting telemetry data in cloud-native environments. The Apache receiver plugs into the standard [Collector pipeline](https://signoz.io/blog/opentelemetry-collector-complete-guide/).
 
 ## How does OpenTelemetry Collector collect data?
 
@@ -110,7 +112,7 @@ service:
 
 Here’s a breakdown of the above metrics pipeline:
 
-- **Receivers:** This pipeline is configured to receive metrics data from two sources: OTLP and Prometheus. The **`otlp`** receiver collects metrics using both gRPC and HTTP protocols, while the **`prometheus`** receiver gathers metrics from Prometheus.
+- **Receivers:** This pipeline is configured to receive metrics data from two sources: [OTLP](https://signoz.io/blog/what-is-otlp/) and Prometheus. The **`otlp`** receiver collects metrics using both gRPC and HTTP protocols, while the **`prometheus`** receiver gathers metrics from Prometheus.
 - **Processors:** Metrics data is processed using the **`batch`** processor. This processor likely batches metrics before exporting them, optimizing the data flow.
 - **Exporters:** Metrics processed through this pipeline are exported to both OTLP and Prometheus destinations. The **`otlp`** exporter sends data to an endpoint specified in the configuration, and the **`prometheus`** exporter handles the export of metrics to a Prometheus-compatible destination.
 

@@ -94,6 +94,11 @@ export function openDecimalChat(options?: { presentation?: 'modal' | 'sidebar' }
   tryShow(0)
 }
 
+export function isDecimalChatOpen(): boolean {
+  if (typeof document === 'undefined') return false
+  return !!document.querySelector('.decimal-widget-container.open')
+}
+
 declare global {
   interface Window {
     Decimal?: {

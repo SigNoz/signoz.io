@@ -1,8 +1,9 @@
 ---
-date: 2026-05-18
+date: 2026-07-27
 
 title: Functions Reference Guide
 description: Reference guide for SigNoz query functions for arrays and token matching. Learn syntax and usage examples.
+doc_type: reference
 ---
 
 This guide covers functions available for querying array fields in SigNoz.
@@ -15,21 +16,33 @@ Functions are currently supported only for JSON body searches.
 
 ### hasToken() Function
 
-Check if a token is present in a string.
+Check if a whole token is present in a string.
 
-The search term must be a single token—meaning a sequence of alphanumeric characters (A-Z, a-z, 0-9) that appears in the text separated by spaces, punctuation, or at the start/end of the string.
-hasToken will only match the term as a whole word, not as a substring inside another word (e.g., matches uuid123 but not abcuuid123xyz)
+The needle must be a single token: one uninterrupted run of ASCII letters and digits (`A-Z`, `a-z`, `0-9`) with no separator characters. `hasToken` matches the needle only as a complete word, never as a substring inside another word (for example, it matches `uuid123` but not `abcuuid123xyz`).
 
 **Syntax:**
 ```
-has(field, value)
+hasToken(field, value)
 ```
 
 **Examples:**
 ```
-has(body, "john@test.com")
-has(body, "e8ff7fe2-6f6a-4795-bd7f-d07f8e49d764")
+# Valid: the needle is a single alphanumeric token
+hasToken(body, 'uuid123')
+hasToken(body, 'timeout')
 ```
+
+<Admonition type="warning">
+The needle must be a single whole token. If it contains any character that is not an ASCII letter or digit (for example `_`, `-`, `.`, `@`, `/`, `:`, or a space), the query fails with an HTTP 400 error that names the offending separator. To search across separators, use a substring filter with `CONTAINS` instead.
+
+```
+# Invalid: the needle contains separators (@ and .), returns HTTP 400
+hasToken(body, 'john@test.com')
+
+# Correct: CONTAINS matches across separators
+body CONTAINS 'john@test.com'
+```
+</Admonition>
 
 ### has() Function
 

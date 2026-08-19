@@ -1,4 +1,3 @@
-import 'css/prism.css'
 import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
@@ -23,7 +22,7 @@ import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
-import { resolvePublishedDate, resolveLatestDate } from '@/utils/dateUtils'
+import { resolveLatestDate } from '@/utils/dateUtils'
 
 const defaultLayout = 'OpenTelemetryLayout'
 const layouts = {
@@ -58,7 +57,7 @@ export async function generateMetadata(props: {
         (author) => authorDirectory[author]?.name || author
       )
 
-      const publishedAt = new Date(resolvePublishedDate(content) || Date.now()).toISOString()
+      const publishedAt = new Date(resolveLatestDate(content) || Date.now()).toISOString()
       const modifiedAt = new Date(resolveLatestDate(content) || Date.now()).toISOString()
 
       let imageList = [siteMetadata.socialBanner]

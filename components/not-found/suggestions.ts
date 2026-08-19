@@ -9,8 +9,8 @@ import type { AlgoliaHit, SuggestedDoc } from './types'
 export const hasAlgoliaConfig = (): boolean => {
   return Boolean(
     process.env.NEXT_PUBLIC_ALGOLIA_APP_ID &&
-      (process.env.ALGOLIA_SEARCH_API_KEY || process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY) &&
-      process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
+    (process.env.ALGOLIA_SEARCH_API_KEY || process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY) &&
+    process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
   )
 }
 
@@ -41,10 +41,11 @@ const getTitleFromHit = (hit: AlgoliaHit): string | null => {
 const toDocsHref = (url: string): string | null => {
   try {
     const parsed = new URL(url, 'https://signoz.io')
-    if (!parsed.pathname.startsWith('/docs/')) {
+    const pathname = decodeURIComponent(parsed.pathname)
+    if (!pathname.startsWith('/docs/')) {
       return null
     }
-    return `${parsed.pathname}${parsed.hash}`
+    return `${pathname}${parsed.hash}`
   } catch {
     return null
   }

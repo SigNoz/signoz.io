@@ -13,6 +13,7 @@ type WhySigNozItem = {
   image: StaticImageData | string
   imageClassName?: string
   imageFit?: 'contain' | 'cover'
+  mobileImageClassName?: string
   overlayImage?: string
   title: string
 }
@@ -70,6 +71,7 @@ const items: WhySigNozItem[] = [
     image: '/img/graphics/homepage/flexible-deploy.svg',
     imageClassName: 'object-center',
     imageFit: 'contain',
+    mobileImageClassName: 'mx-auto h-80 w-full object-contain sm:h-96',
     alt: 'Flexible deployment options for running SigNoz',
   },
 ]
@@ -176,7 +178,7 @@ function WhySignozImage({
     return (
       <Image
         alt={item.alt}
-        className="h-auto w-full"
+        className={item.mobileImageClassName ?? 'h-auto w-full'}
         height={430}
         loading={loading}
         src={item.image}
@@ -295,7 +297,7 @@ export default function WhySignoz() {
 
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-clip bg-signoz_ink-500 px-5 py-16 text-signoz_vanilla-100 sm:px-6 sm:py-24 lg:px-20 lg:py-28 wide:max-w-8xl wide:px-0"
+      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 overflow-clip bg-signoz_ink-500 px-5 py-16 text-signoz_vanilla-100 sm:px-6 md:py-24 lg:px-20 lg:py-28 wide:max-w-8xl wide:px-0"
       data-homepage-floating-cta="Start sending telemetry in 20 minutes"
       data-homepage-floating-href="/docs/install/"
     >
@@ -310,17 +312,17 @@ export default function WhySignoz() {
               aria-hidden="true"
               className="pointer-events-none absolute left-1/2 top-full z-0 h-40 w-[160dvw] -translate-x-1/2 bg-gradient-to-b from-signoz_ink-500 to-transparent"
             />
-            <h2 className="relative z-10 m-0 max-w-lg text-3xl font-medium leading-none text-signoz_vanilla-100 sm:text-4xl sm:leading-none md:text-6xl">
-              <span className="whitespace-nowrap">Fast Troubleshooting.</span>
+            <h2 className="relative z-10 m-0 max-w-lg text-3xl font-medium leading-none text-signoz_vanilla-100 sm:text-4xl sm:leading-none md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-6xl">
+              <span className="xl:whitespace-nowrap">Fast Troubleshooting.</span>
               <br />
-              <span className="whitespace-nowrap text-signoz_vanilla-400">
+              <span className="text-signoz_vanilla-400 xl:whitespace-nowrap">
                 No Context Switching.
               </span>
             </h2>
             <div className="relative z-10 mt-9 h-px w-full bg-signoz_slate-100" />
           </div>
 
-          <div className="pb-16 pt-14 lg:pb-[24dvh] lg:pt-0">
+          <div className="pb-0 pt-14 lg:pb-[24dvh] lg:pt-0">
             {items.map((item, index) => {
               const Icon = item.icon
               const isActive = index === activeIndex

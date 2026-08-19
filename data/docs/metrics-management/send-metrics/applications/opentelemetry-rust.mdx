@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-08-05
 title: Send Metrics from Rust Application Using OpenTelemetry
 description: Learn how to instrument your Rust application with OpenTelemetry to send metrics to SigNoz
 
@@ -143,7 +143,7 @@ The `http-proto` and `reqwest-client` features enable HTTP-based OTLP export. Fo
 
 Create a helper function to configure the OpenTelemetry Meter Provider. This provider is responsible for creating meters and exporting metrics.
 
-```rust:src/main.rs
+```rust:src/main.rs minimap
 use opentelemetry::global;
 use opentelemetry::KeyValue;
 use opentelemetry_otlp::{MetricExporter, WithExportConfig, WithHttpConfig};
@@ -222,7 +222,7 @@ The Rust SDK does not support the `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFER
 
 Here is a complete example that tracks HTTP requests with a counter metric:
 
-```rust:src/main.rs
+```rust:src/main.rs minimap
 use opentelemetry::global;
 use opentelemetry::metrics::Counter;
 use opentelemetry::KeyValue;
@@ -301,7 +301,7 @@ For fine-grained control over your telemetry, you can create custom metrics usin
 
 Synchronous instruments are used when you know the measurement value at the time of recording.
 
-```rust:src/main.rs
+```rust:src/main.rs minimap
 use opentelemetry::global;
 use opentelemetry::metrics::{Counter, Histogram, UpDownCounter, Gauge};
 use opentelemetry::KeyValue;
@@ -406,7 +406,7 @@ Observable (asynchronous) instruments are used when the measurement value is com
 - **ObservableUpDownCounter**: Async up/down counter for bidirectional values
 - **ObservableGauge**: Async gauge for instantaneous readings
 
-```rust:src/main.rs
+```rust:src/main.rs minimap
 use opentelemetry::global;
 use opentelemetry::KeyValue;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -501,7 +501,7 @@ Observable instruments are called by the SDK during metric collection. The callb
 
 Unlike languages with runtime environments (Go, Java, Python), **Rust does not have a built-in runtime metrics** package for memory usage, goroutine counts, or similar statistics. Below is a practical example of instrumenting an HTTP server with custom metrics.
 
-```rust:src/main.rs
+```rust:src/main.rs minimap
 use opentelemetry::global;
 use opentelemetry::metrics::{Counter, Histogram, UpDownCounter};
 use opentelemetry::KeyValue;
