@@ -2862,8 +2862,12 @@ module.exports = () => {
         },
         {
           source: '/challenges-in-choosing-a-monitoring-tool-for-fintech-companies-in-india',
-          destination:
-            '/blog/challenges-in-choosing-a-monitoring-tool-for-fintech-companies-in-india/',
+          destination: '/blog/open-source-apm-tools/',
+          permanent: true,
+        },
+        {
+          source: '/blog/challenges-in-choosing-a-monitoring-tool-for-fintech-companies-in-india/',
+          destination: '/blog/open-source-apm-tools/',
           permanent: true,
         },
         {
@@ -2962,6 +2966,11 @@ module.exports = () => {
         },
         {
           source: '/open-source-apm-tools',
+          destination: '/blog/open-source-apm-tools/',
+          permanent: true,
+        },
+        {
+          source: '/blog/apm-tools/',
           destination: '/blog/open-source-apm-tools/',
           permanent: true,
         },
