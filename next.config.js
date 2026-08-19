@@ -3108,6 +3108,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/new-relic-alternatives/',
+          destination: '/blog/open-source-newrelic-alternative/',
+          permanent: true,
+        },
+        {
           source: '/opentelemetry/nodejs-tutorial-overview/',
           destination: '/opentelemetry/nodejs/',
           permanent: true,
