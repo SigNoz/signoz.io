@@ -9,6 +9,8 @@ function parseArgs(argv) {
     args: argv || process.argv.slice(2),
     options: {
       'changed-files': { type: 'string' },
+      'added-files': { type: 'string' },
+      'renamed-files': { type: 'string' },
       'restore-files': { type: 'string' },
       'deleted-files': { type: 'string' },
       'changed-assets': { type: 'string' },
@@ -22,6 +24,8 @@ function parseArgs(argv) {
   })
   return {
     changedFilesPath: values['changed-files'],
+    addedFilesPath: values['added-files'],
+    renamedFilesPath: values['renamed-files'],
     restoreFilesPath: values['restore-files'],
     deletedFilesPath: values['deleted-files'],
     changedAssetsPath: values['changed-assets'],
@@ -56,9 +60,20 @@ function loadFileList(cliPath, envPathName, envName) {
   }
 }
 
+function hasFileListSource(cliPath, envPathName, envName) {
+  if (cliPath && fs.existsSync(cliPath)) return true
+  if (process.env[envPathName] && fs.existsSync(process.env[envPathName])) return true
+  return Boolean(process.env[envName])
+}
+
 const cliArgs = parseArgs()
 
 const CHANGED_FILES = loadFileList(cliArgs.changedFilesPath, 'CHANGED_FILES_PATH', 'CHANGED_FILES')
+// null = added files unknown (legacy caller) → fall back to purging list tags on any change
+const ADDED_FILES = hasFileListSource(cliArgs.addedFilesPath, 'ADDED_FILES_PATH', 'ADDED_FILES')
+  ? loadFileList(cliArgs.addedFilesPath, 'ADDED_FILES_PATH', 'ADDED_FILES')
+  : null
+const RENAMED_FILES = loadFileList(cliArgs.renamedFilesPath, 'RENAMED_FILES_PATH', 'RENAMED_FILES')
 const RESTORE_FILES = loadFileList(cliArgs.restoreFilesPath, 'RESTORE_FILES_PATH', 'RESTORE_FILES')
 const DELETED_FILES = loadFileList(cliArgs.deletedFilesPath, 'DELETED_FILES_PATH', 'DELETED_FILES')
 const CHANGED_ASSETS = loadFileList(
@@ -172,6 +187,8 @@ function findDocsPathsForListicle(listicleKey) {
 
 function buildPayload({
   changedFiles = CHANGED_FILES,
+  addedFiles = ADDED_FILES,
+  renamedFiles = RENAMED_FILES,
   restoreFiles = RESTORE_FILES,
   deletedFiles = DELETED_FILES,
   changedAssets = CHANGED_ASSETS,
@@ -228,18 +245,38 @@ function buildPayload({
     return { mode: 'skip', reason: 'no-cms-paths' }
   }
 
+  // List tags feed list-shaped consumers (sitemaps, RSS, listing pages, sidenav membership).
+  // Purging them makes the next renders refetch the full corpus from the CMS, so scope the
+  // purge to membership changes (create/delete/rename/restore). Edited pages are already made
+  // fresh by their path + per-slug tag revalidation. When added files are unknown (legacy
+  // callers without --added-files), fall back to purging on any change.
+  const membershipUrls =
+    addedFiles === null
+      ? cmsUrls
+      : uniqueStrings(
+          [...addedFiles, ...renamedFiles, ...restoreFiles, ...deletedFiles].map(filePathToCmsUrl)
+        )
+
+  if (addedFiles !== null && hasCmsPaths && membershipUrls.length === 0) {
+    console.log('📣 Edit-only sync: skipping list-tag purges (no create/delete/rename).')
+  }
+
+  // Prefix → list cache tag (matches `${cmsCollection}-list` tags set in utils/strapi.ts)
+  const URL_PREFIX_TO_LIST_TAG = {
+    '/comparisons/': 'comparisons-list',
+    '/guides/': 'guides-list',
+    '/blog/': 'blogs-list',
+    '/docs/': 'docs-list',
+    '/faqs/': 'faqs-list',
+    '/case-study/': 'case-studies-list',
+    '/opentelemetry/': 'opentelemetries-list',
+  }
+
   const extraTags = [...listicleTags]
-  if (cmsUrls.some((u) => u.startsWith('/comparisons/'))) {
-    extraTags.push('comparisons-list')
-  }
-  if (cmsUrls.some((u) => u.startsWith('/guides/'))) {
-    extraTags.push('guides-list')
-  }
-  if (cmsUrls.some((u) => u.startsWith('/blog/'))) {
-    extraTags.push('blogs-list')
-  }
-  if (cmsUrls.some((u) => u.startsWith('/docs/'))) {
-    extraTags.push('docs-list')
+  for (const [prefix, listTag] of Object.entries(URL_PREFIX_TO_LIST_TAG)) {
+    if (membershipUrls.some((u) => u.startsWith(prefix))) {
+      extraTags.push(listTag)
+    }
   }
 
   return {
