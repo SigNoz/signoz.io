@@ -66,7 +66,7 @@ This fires when no requests reach the service. A crashed service and an idle ser
 sum by ("service.name") (rate({"http.server.request.duration.count"}[5m]))
 ```
 
-`rate()` returns requests per second, so read the normal rate in **Metrics** before you pick a number. A service that handles 40 requests a second and one that handles 0.1 need different thresholds. Set the threshold to a fraction of the normal rate, with match type **all the times**.
+`rate()` returns requests per second, so read the normal rate in **Metrics** before you pick a number. A service that handles 40 requests a second and one that handles 0.1 need different thresholds. Set the threshold to a fraction of the normal rate, comparison **below**, match type **all the times**. Every other recipe here compares **above**, which is also the form default, so this one needs changing by hand.
 
 A service that stops emitting produces no series, and a threshold alone never fires on a missing series. **Alert when data stops coming** covers that only when the whole query goes silent. SigNoz asks whether the result holds any series at all, so this grouped query still counts as having data while one other service reports.
 
