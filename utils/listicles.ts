@@ -8,7 +8,7 @@ import type {
   SubsectionConfig,
   IconSpec,
 } from '@/components/Listicle/types'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { CMS_FETCH_TIMEOUT_MS, CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { hasCMSContentConfig, isLocalContentOverlayEnabled } from '@/utils/contentRepository'
 
 async function readLocalListicle(name: string): Promise<ListicleConfig | null> {
@@ -131,6 +131,7 @@ async function fetchCmsListicle(name: string): Promise<ListicleConfig | null> {
       tags: ['listicles', `listicle-${name}`],
     },
     headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
   })
 
   if (!res.ok) {

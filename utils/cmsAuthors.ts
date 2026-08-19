@@ -1,6 +1,6 @@
 import { cacheLife, cacheTag } from 'next/cache'
 import qs from 'qs'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { CMS_FETCH_TIMEOUT_MS, CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 
 const API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
 
@@ -37,6 +37,7 @@ async function fetchAuthorsFromCMS(): Promise<AuthorDirectory> {
       cache: 'force-cache',
       next: { tags: ['authors-list'] },
       headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
     })
 
     if (!response.ok) {

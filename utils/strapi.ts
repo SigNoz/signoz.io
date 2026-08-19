@@ -1,4 +1,9 @@
 import qs from 'qs'
+import {
+  CHANGELOG_REVALIDATE_SECONDS,
+  CMS_PAGE_CONCURRENCY,
+  CMS_FETCH_TIMEOUT_MS,
+} from '@/constants/cache'
 
 const API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
 const API_PATH = process.env.SIGNOZ_CMS_CHANGELOG_PATH
@@ -149,12 +154,11 @@ export const fetchChangelogEntries = async (
     })
 
     const response = await fetch(`${API_URL}${API_PATH}${queryParams}`, {
-      headers: {
-        'Cache-Control': 'no-store', // Avoid caching
-        Pragma: 'no-cache',
-        Expires: '0',
+      next: {
+        revalidate: CHANGELOG_REVALIDATE_SECONDS,
+        tags: ['release-changelogs'],
       },
-      cache: 'no-store', // For fetch requests
+      signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
     })
 
     if (!response.ok) {
@@ -221,12 +225,11 @@ export const fetchChangelogById = async (
     })
 
     const response = await fetch(`${API_URL}${API_PATH}/${changelogId}${queryParams}`, {
-      headers: {
-        'Cache-Control': 'no-store', // Avoid caching
-        Pragma: 'no-cache',
-        Expires: '0',
+      next: {
+        revalidate: CHANGELOG_REVALIDATE_SECONDS,
+        tags: ['release-changelogs'],
       },
-      cache: 'no-store', // For fetch requests
+      signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
     })
 
     if (!response.ok) {
@@ -327,6 +330,32 @@ const singleContentPopulateByCollection: Record<string, Record<string, unknown>>
   },
 }
 
+type SettledResult<T> = { status: 'fulfilled'; value: T } | { status: 'rejected'; reason: unknown }
+
+async function runWithConcurrency<T>(
+  tasks: Array<() => Promise<T>>,
+  limit: number
+): Promise<SettledResult<T>[]> {
+  const results: SettledResult<T>[] = new Array(tasks.length)
+  let next = 0
+
+  async function worker() {
+    while (next < tasks.length) {
+      const index = next++
+      try {
+        results[index] = { status: 'fulfilled', value: await tasks[index]() }
+      } catch (reason) {
+        results[index] = { status: 'rejected', reason }
+      }
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker))
+  return results
+}
+
+const pageFetches = new Map<string, Promise<SettledResult<MDXContentApiResponse>[]>>()
+
 // Fetch MDX content by path or all content for a collection
 export const fetchMDXContentByPath = async (
   collectionName: string,
@@ -388,9 +417,10 @@ export const fetchMDXContentByPath = async (
       const BATCH_PAGE_SIZE = 50
       let allData: MDXContent[] = []
 
-      const initialQueryObject = { ...queryObject }
-      initialQueryObject.pagination.page = 1
-      initialQueryObject.pagination.pageSize = BATCH_PAGE_SIZE
+      const initialQueryObject = {
+        ...queryObject,
+        pagination: { page: 1, pageSize: BATCH_PAGE_SIZE },
+      }
 
       const initialQueryParams = qs.stringify(initialQueryObject, {
         encode: false,
@@ -406,6 +436,7 @@ export const fetchMDXContentByPath = async (
         headers: {
           'Content-Type': 'application/json',
         },
+        signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
       })
 
       if (!initialResponse.ok) {
@@ -425,38 +456,55 @@ export const fetchMDXContentByPath = async (
       const totalPages = initialData.meta.pagination.pageCount
 
       if (totalPages > 1) {
-        const pagePromises: Promise<MDXContentApiResponse>[] = []
-        for (let i = 2; i <= totalPages; i++) {
-          const pageQueryObject = { ...queryObject }
-          pageQueryObject.pagination.page = i
-          pageQueryObject.pagination.pageSize = BATCH_PAGE_SIZE
+        const pageFetchKey = [
+          collectionName,
+          deployment_status ?? '',
+          fields?.join(',') ?? '',
+          totalPages,
+        ].join('|')
 
-          const pageQueryParams = qs.stringify(pageQueryObject, {
-            encode: false,
-            addQueryPrefix: true,
-            arrayFormat: 'repeat',
-          })
+        let pageFetch = pageFetches.get(pageFetchKey)
+        if (!pageFetch) {
+          const pageTasks: Array<() => Promise<MDXContentApiResponse>> = []
+          for (let i = 2; i <= totalPages; i++) {
+            const pageQueryObject = {
+              ...queryObject,
+              pagination: { page: i, pageSize: BATCH_PAGE_SIZE },
+            }
 
-          pagePromises.push(
-            fetch(`${API_URL}/api/${collectionName}${pageQueryParams}`, {
-              cache: 'force-cache',
-              next: {
-                tags: [`${collectionName}-list`, 'mdx-content-list'],
-              },
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            }).then(async (res) => {
-              if (!res.ok) {
-                const msg = await res.text()
-                throw new Error(`Failed to fetch page ${i}: ${res.status} ${msg}`)
-              }
-              return res.json() as Promise<MDXContentApiResponse>
+            const pageQueryParams = qs.stringify(pageQueryObject, {
+              encode: false,
+              addQueryPrefix: true,
+              arrayFormat: 'repeat',
             })
-          )
+
+            pageTasks.push(() =>
+              fetch(`${API_URL}/api/${collectionName}${pageQueryParams}`, {
+                cache: 'force-cache',
+                next: {
+                  tags: [`${collectionName}-list`, 'mdx-content-list'],
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
+              }).then(async (res) => {
+                if (!res.ok) {
+                  const msg = await res.text()
+                  throw new Error(`Failed to fetch page ${i}: ${res.status} ${msg}`)
+                }
+                return res.json() as Promise<MDXContentApiResponse>
+              })
+            )
+          }
+
+          pageFetch = runWithConcurrency(pageTasks, CMS_PAGE_CONCURRENCY).finally(() => {
+            pageFetches.delete(pageFetchKey)
+          })
+          pageFetches.set(pageFetchKey, pageFetch)
         }
 
-        const pagesResults = await Promise.allSettled(pagePromises)
+        const pagesResults = await pageFetch
         pagesResults.forEach((result, idx) => {
           if (result.status === 'fulfilled' && result.value.data?.length > 0) {
             allData = allData.concat(result.value.data)
@@ -496,6 +544,7 @@ export const fetchMDXContentByPath = async (
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
     })
 
     if (!response.ok) {

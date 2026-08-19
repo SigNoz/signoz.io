@@ -2,7 +2,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import { cacheLife, cacheTag } from 'next/cache'
 import type { NavItem, Doc } from '@/components/DocsSidebar/types'
-import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { CMS_FETCH_TIMEOUT_MS, CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { hasCMSContentConfig, isLocalContentOverlayEnabled } from '@/utils/contentRepository'
 import { fetchAllDocsForPage } from '@/utils/cachedData'
 
@@ -25,6 +25,7 @@ async function fetchCmsSideNav(): Promise<NavItem[]> {
       tags: ['docs-side-nav'],
     },
     headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
   })
 
   if (!res.ok) {
