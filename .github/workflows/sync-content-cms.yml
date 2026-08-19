@@ -44,6 +44,8 @@ jobs:
         run: |
           mkdir -p .github/outputs
           echo "[]" > .github/outputs/content_changed_files.json
+          echo "[]" > .github/outputs/content_added_files.json
+          echo "[]" > .github/outputs/content_renamed_files.json
           echo "[]" > .github/outputs/content_restore_files.json
           echo "[]" > .github/outputs/content_deleted_files.json
           echo "[]" > .github/outputs/assets_changed_files.json
@@ -68,6 +70,12 @@ jobs:
         run: |
           if [ -f .github/outputs/all_changed_files.json ]; then
             mv .github/outputs/all_changed_files.json .github/outputs/content_changed_files.json
+          fi
+          if [ -f .github/outputs/added_files.json ]; then
+            mv .github/outputs/added_files.json .github/outputs/content_added_files.json
+          fi
+          if [ -f .github/outputs/renamed_files.json ]; then
+            mv .github/outputs/renamed_files.json .github/outputs/content_renamed_files.json
           fi
           if [ -f .github/outputs/deleted_files.json ]; then
             mv .github/outputs/deleted_files.json .github/outputs/content_deleted_files.json
@@ -258,6 +266,8 @@ jobs:
 
           node scripts/revalidate-after-cms-sync.js \
             --changed-files .github/outputs/content_changed_files.json \
+            --added-files .github/outputs/content_added_files.json \
+            --renamed-files .github/outputs/content_renamed_files.json \
             --restore-files .github/outputs/content_restore_files.json \
             --deleted-files .github/outputs/content_deleted_files.json \
             --changed-assets .github/outputs/assets_changed_files.json \
