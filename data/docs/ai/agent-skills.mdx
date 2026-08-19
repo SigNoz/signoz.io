@@ -1,5 +1,5 @@
 ---
-date: 2026-07-22
+date: 2026-08-17
 title: Agent Skills & Plugin
 meta_title: SigNoz Agent Skills & Plugin - AI Coding Assistant Setup
 description: Install the SigNoz plugin and Agent Skills so AI assistants like Claude Code, Codex, Cursor, and Gemini can query data, build dashboards, manage alerts, and explore SigNoz docs.
@@ -12,7 +12,7 @@ When you ask your AI assistant something like "why did this alert fire," "create
 
 SigNoz ships these skills two ways:
 
-- **The SigNoz plugin** - the recommended path. One install bundles every skill plus the MCP server registration, so your agent can both reason about SigNoz *and* act on your data. Available for Claude Code, Codex, Cursor, Gemini CLI, Devin CLI, and Antigravity CLI.
+- **The SigNoz plugin** - the recommended path. One install bundles every skill plus the MCP server registration, so your agent can both reason about SigNoz *and* act on your data. Available for Claude Code, Codex, Cursor, Gemini CLI, Devin CLI, Grok Build, and Antigravity CLI.
 - **Individual skills via skills.sh** - install one or more skill files on their own, for any skills.sh-compatible agent.
 
 ## Install the plugin
@@ -142,6 +142,39 @@ Follow the prompts to enter your SigNoz instance URL and API key.
    This rewrites `serverUrl` in the installed `mcp_config.json`. SigNoz Cloud `us` users can skip this step.
 
 3. Authenticate. In the `agy` prompt, type `/mcp`, select the `signoz` server, and choose **Authenticate** to start the OAuth flow, then complete it in the browser. Self-hosted endpoints need no OAuth unless the server runs with `OAUTH_ENABLED=true`.
+
+</TabItem>
+<TabItem value="grok-build" label="Grok Build">
+
+1. Add the marketplace and install the plugin. `--trust` is required for the bundled MCP server and hooks to activate - without it the skills load but the `signoz` server stays inactive:
+
+   ```bash
+   grok plugin marketplace add SigNoz/agent-skills
+   grok plugin install signoz --trust
+   ```
+
+   To skip the marketplace source, install the plugin subdirectory directly with `grok plugin install SigNoz/agent-skills#plugins/signoz --trust`.
+
+2. The plugin defaults to the SigNoz Cloud `us` endpoint (`https://mcp.us.signoz.cloud/mcp`), so `us` users can skip this step. To point it at a different region or a self-hosted instance, add the endpoint to Grok's own config with your SigNoz Cloud region (`us`, `us2`, `eu`, `eu2`, `in`, `in2`) or a self-hosted HTTP MCP URL (ex: `http://localhost:8000/mcp`):
+
+   ```bash
+   grok mcp add signoz -t http https://mcp.<region>.signoz.cloud/mcp -s user
+   ```
+
+   A `[mcp_servers.signoz]` entry replaces the plugin's own registration rather than adding a second server, and unlike the bundled file it survives plugin updates. Use `-s project` to write `./.grok/config.toml` and share the endpoint with everyone working in that directory. You can also run `/signoz-mcp-setup <region-or-mcp-url>` in a Grok session and let the setup skill do it.
+
+3. Authenticate. Run `/mcps` to open the MCP Servers modal, press `r` to refresh the list, select the `signoz` server, and press `i` to start the OAuth flow, then complete it in the browser. Self-hosted endpoints need no OAuth unless the server runs with `OAUTH_ENABLED=true`. Verify with `grok mcp doctor signoz`.
+
+To update after new releases:
+
+```bash
+grok plugin marketplace update
+grok plugin update signoz
+```
+
+<Admonition type="note">
+Grok reads `~/.claude.json`, `~/.cursor/mcp.json`, and `.mcp.json` as compatibility sources. If you already have SigNoz configured in Claude Code or Cursor, Grok loads that server alongside the plugin's, leaving two servers named `signoz` pointing at different endpoints. The `[mcp_servers.signoz]` entry in step 2 outranks both and collapses them to one.
+</Admonition>
 
 </TabItem>
 </Tabs>
