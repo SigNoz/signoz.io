@@ -1,5 +1,5 @@
 ---
-date: 2026-08-05
+date: 2026-06-23
 title: Instrumenting a Temporal Go application with OpenTelemetry
 description: Instrument a Temporal Go application with OpenTelemetry and send traces, metrics, and logs to SigNoz.
 doc_type: howto
@@ -61,7 +61,7 @@ go get go.opentelemetry.io/contrib/bridges/otelslog@latest
 
 Create `telemetry/setup.go` to initialize trace, metric, and log providers. All three exporters read their endpoint and auth headers from standard OTel environment variables, so no credentials appear in code.
 
-```go:telemetry/setup.go minimap
+```go:telemetry/setup.go minimap defaultCollapsed
 package telemetry
 
 import (
@@ -161,7 +161,7 @@ func InitProviders(ctx context.Context) (shutdown func(context.Context) error, e
 
 Create `config/config.go` to handle Temporal connection options. Without `TEMPORAL_PROFILE` set it connects to `localhost:7233` (local dev server). With `TEMPORAL_PROFILE=cloud` it loads address, namespace, and TLS settings from `~/.config/temporalio/temporal.toml`.
 
-```go:config/config.go
+```go:config/config.go defaultCollapsed minimap
 package config
 
 import (
@@ -211,7 +211,7 @@ func CreateClientOptions() (client.Options, error) {
 
 ### Step 4: Instrument the Temporal Worker
 
-```go:worker/main.go minimap
+```go:worker/main.go minimap defaultCollapsed
 package main
 
 import (
@@ -286,7 +286,7 @@ func main() {
 
 ### Step 5: Instrument the Temporal Client
 
-```go:starter/main.go minimap
+```go:starter/main.go minimap defaultCollapsed
 package main
 
 import (
@@ -476,7 +476,7 @@ data:
 
 **3. Deploy the worker:**
 
-```yaml:temporal-worker-deployment.yaml
+```yaml:temporal-worker-deployment.yaml defaultCollapsed minimap
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -516,7 +516,7 @@ spec:
 
 The client starts a workflow and exits, so run it as a Kubernetes **Job** rather than a Deployment:
 
-```yaml:temporal-client-job.yaml
+```yaml:temporal-client-job.yaml defaultCollapsed
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -561,7 +561,7 @@ kubectl apply -f temporal-client-job.yaml
 
 **Create a `docker-compose.yml`:**
 
-```yaml:docker-compose.yml
+```yaml:docker-compose.yml defaultCollapsed
 services:
   temporal-worker:
     build: .
@@ -703,7 +703,7 @@ By default, Temporal SDK internal logs (`Started Worker`, `ExecuteActivity`, etc
 
 **1. Create `telemetry/logger.go`:**
 
-```go:telemetry/logger.go
+```go:telemetry/logger.go defaultCollapsed
 package telemetry
 
 import (
