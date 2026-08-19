@@ -1,9 +1,6 @@
 import qs from 'qs'
-import {
-  CHANGELOG_REVALIDATE_SECONDS,
-  CMS_PAGE_CONCURRENCY,
-  CMS_FETCH_TIMEOUT_MS,
-} from '@/constants/cache'
+import { CHANGELOG_REVALIDATE_SECONDS, CMS_PAGE_CONCURRENCY } from '@/constants/cache'
+import { cmsFetch } from '@/utils/cmsFetch'
 
 const API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
 const API_PATH = process.env.SIGNOZ_CMS_CHANGELOG_PATH
@@ -153,12 +150,11 @@ export const fetchChangelogEntries = async (
       arrayFormat: 'repeat', // Use repeat format for arrays
     })
 
-    const response = await fetch(`${API_URL}${API_PATH}${queryParams}`, {
+    const response = await cmsFetch(`${API_URL}${API_PATH}${queryParams}`, {
       next: {
         revalidate: CHANGELOG_REVALIDATE_SECONDS,
         tags: ['release-changelogs'],
       },
-      signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
     })
 
     if (!response.ok) {
@@ -224,12 +220,11 @@ export const fetchChangelogById = async (
       arrayFormat: 'repeat', // Use repeat format for arrays
     })
 
-    const response = await fetch(`${API_URL}${API_PATH}/${changelogId}${queryParams}`, {
+    const response = await cmsFetch(`${API_URL}${API_PATH}/${changelogId}${queryParams}`, {
       next: {
         revalidate: CHANGELOG_REVALIDATE_SECONDS,
         tags: ['release-changelogs'],
       },
-      signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
     })
 
     if (!response.ok) {
@@ -428,16 +423,18 @@ export const fetchMDXContentByPath = async (
         arrayFormat: 'repeat',
       })
 
-      const initialResponse = await fetch(`${API_URL}/api/${collectionName}${initialQueryParams}`, {
-        cache: 'force-cache',
-        next: {
-          tags: [`${collectionName}-list`, 'mdx-content-list'],
-        },
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
-      })
+      const initialResponse = await cmsFetch(
+        `${API_URL}/api/${collectionName}${initialQueryParams}`,
+        {
+          cache: 'force-cache',
+          next: {
+            tags: [`${collectionName}-list`, 'mdx-content-list'],
+          },
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
 
       if (!initialResponse.ok) {
         if (initialResponse.status === 404) {
@@ -479,7 +476,7 @@ export const fetchMDXContentByPath = async (
             })
 
             pageTasks.push(() =>
-              fetch(`${API_URL}/api/${collectionName}${pageQueryParams}`, {
+              cmsFetch(`${API_URL}/api/${collectionName}${pageQueryParams}`, {
                 cache: 'force-cache',
                 next: {
                   tags: [`${collectionName}-list`, 'mdx-content-list'],
@@ -487,7 +484,6 @@ export const fetchMDXContentByPath = async (
                 headers: {
                   'Content-Type': 'application/json',
                 },
-                signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
               }).then(async (res) => {
                 if (!res.ok) {
                   const msg = await res.text()
@@ -536,7 +532,7 @@ export const fetchMDXContentByPath = async (
     })
     const requestUrl = `${API_URL}/api/${collectionName}${queryParams}`
 
-    const response = await fetch(requestUrl, {
+    const response = await cmsFetch(requestUrl, {
       cache: 'force-cache',
       next: {
         tags: [`${collectionName}-${path}`, `mdx-content-${path}`],
@@ -544,7 +540,6 @@ export const fetchMDXContentByPath = async (
       headers: {
         'Content-Type': 'application/json',
       },
-      signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
     })
 
     if (!response.ok) {

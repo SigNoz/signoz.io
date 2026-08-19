@@ -2,7 +2,8 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import { cacheLife, cacheTag } from 'next/cache'
 import type { NavItem, Doc } from '@/components/DocsSidebar/types'
-import { CMS_FETCH_TIMEOUT_MS, CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { cmsFetch } from '@/utils/cmsFetch'
 import { hasCMSContentConfig, isLocalContentOverlayEnabled } from '@/utils/contentRepository'
 import { fetchAllDocsForPage } from '@/utils/cachedData'
 
@@ -19,13 +20,12 @@ async function fetchCmsSideNav(): Promise<NavItem[]> {
     throw new Error('NEXT_PUBLIC_SIGNOZ_CMS_API_URL is not configured')
   }
 
-  const res = await fetch(`${CMS_API_URL}/api/docs-side-nav`, {
+  const res = await cmsFetch(`${CMS_API_URL}/api/docs-side-nav`, {
     cache: 'force-cache',
     next: {
       tags: ['docs-side-nav'],
     },
     headers: { 'Content-Type': 'application/json' },
-    signal: AbortSignal.timeout(CMS_FETCH_TIMEOUT_MS),
   })
 
   if (!res.ok) {
