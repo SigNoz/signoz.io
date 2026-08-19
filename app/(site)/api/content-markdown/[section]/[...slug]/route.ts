@@ -7,8 +7,7 @@ import {
 } from '@/utils/agentMarkdownRouting'
 import { fetchBlogBySlug, fetchComparisonBySlug, fetchGuideBySlug } from '@/utils/cachedData'
 import { getContentBySlug } from '@/utils/contentRepository'
-
-const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
+import { agentResponse } from '@/utils/agentResponseHeaders'
 
 const CONTENT_FOOTER_LINES = ['Full content index: https://signoz.io/llms.txt']
 
@@ -84,12 +83,5 @@ export async function GET(
     { footerLines: CONTENT_FOOTER_LINES }
   )
 
-  return new NextResponse(markdown, {
-    headers: {
-      'Content-Type': 'text/markdown; charset=utf-8',
-      'Cache-Control': CACHE_CONTROL_HEADER,
-      'X-Robots-Tag': 'noindex',
-      Vary: 'Accept',
-    },
-  })
+  return agentResponse(markdown, { varyAccept: true })
 }

@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server'
 import { renderDocMarkdownForAgents } from '@/utils/docs/renderDocMarkdownForAgents'
 import { resolveDocsMarkdownSlug } from '@/utils/docs/markdownRouting'
 import { fetchDocBySlug } from '@/utils/cachedData'
-
-const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
+import { agentResponse } from '@/utils/agentResponseHeaders'
 
 export async function generateStaticParams() {
   return []
@@ -29,12 +28,5 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
 
   const markdown = await renderDocMarkdownForAgents(doc)
 
-  return new NextResponse(markdown, {
-    headers: {
-      'Content-Type': 'text/markdown; charset=utf-8',
-      'Cache-Control': CACHE_CONTROL_HEADER,
-      'X-Robots-Tag': 'noindex',
-      Vary: 'Accept',
-    },
-  })
+  return agentResponse(markdown, { varyAccept: true })
 }

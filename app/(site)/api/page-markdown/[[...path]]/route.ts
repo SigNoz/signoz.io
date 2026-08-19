@@ -6,8 +6,7 @@ import {
 } from '@/utils/agentMarkdownRouting'
 import { slugFromParams } from '@/utils/docs/markdownRouting'
 import { renderPageHtmlToAgentMarkdown } from '@/utils/pageHtmlToMarkdown'
-
-const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
+import { agentResponse } from '@/utils/agentResponseHeaders'
 
 export const dynamicParams = true
 
@@ -105,12 +104,5 @@ export async function GET(request: Request, props: { params: Promise<{ path?: st
     return notFoundResponse()
   }
 
-  return new NextResponse(markdown, {
-    headers: {
-      'Content-Type': 'text/markdown; charset=utf-8',
-      'Cache-Control': CACHE_CONTROL_HEADER,
-      'X-Robots-Tag': 'noindex',
-      Vary: 'Accept',
-    },
-  })
+  return agentResponse(markdown, { varyAccept: true })
 }
