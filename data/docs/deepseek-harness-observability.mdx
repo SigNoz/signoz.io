@@ -1,0 +1,199 @@
+---
+date: 2026-08-19
+title: DeepSeek Harness Observability & Monitoring with OpenTelemetry
+meta_title: DeepSeek Harness OpenTelemetry Monitoring
+description: Monitor DeepSeek Harness (dsh) with OpenTelemetry and SigNoz. Trace every agent turn, model call, and tool execution, and track token spend.
+doc_type: howto
+---
+
+## What is DeepSeek Harness Observability?
+
+<a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noopener noreferrer nofollow">DeepSeek Harness</a> (`dsh`) is DeepSeek's open-source agent harness. It has no OpenTelemetry export of its own, so instrumenting it means installing one plugin. Once installed, every turn becomes a trace: the agent loop, each reasoning round, each model call with its token counts and time to first token, and each tool execution.
+
+With full DeepSeek Harness observability in SigNoz, you can see how much your team is spending in tokens and on which models, how many round trips a single request actually takes, which tools the agent reaches for, and where turns fail.
+
+<Admonition type="info" title="DeepSeek Harness emits traces, not metrics">
+The plugin exports two metrics, `gen_ai.client.operation.duration` and `gen_ai.client.token.usage`, but neither carries a session, user, or error dimension. Everything worth grouping by lives on the spans, so this guide and the dashboard both work from traces.
+</Admonition>
+
+## Prerequisites
+
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
+- DeepSeek Harness 0.1.0-rc.6 or later, below 0.2.0. See the <a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noopener noreferrer nofollow">DeepSeek Harness repository</a>
+- Node.js 22.19.0 or later
+- A `DEEPSEEK_API_KEY`, or another provider configured in your profile
+
+## Monitor DeepSeek Harness with OpenTelemetry
+
+Instrumentation comes from <a href="https://github.com/loongsuite/dsh-plugin" target="_blank" rel="noopener noreferrer nofollow">`@loongsuite/dsh-plugin`</a>, an Apache-2.0 plugin that hooks the harness lifecycle and exports OTLP over HTTP.
+
+**Step 1:** Install the plugin into each profile you use
+
+```bash
+dsh plugin --profile headless add @loongsuite/dsh-plugin
+dsh plugin --profile web add @loongsuite/dsh-plugin
+```
+
+Plugins are installed per profile, so a plugin added to `headless` does nothing when you launch `web`. Confirm it loaded:
+
+```bash
+dsh --profile headless --dump-config | grep loongsuite
+```
+
+You should see `id: loongsuite-observability`.
+
+**Step 2:** Point the plugin at SigNoz
+
+```bash
+export OTEL_SERVICE_NAME=dsh-agent
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning" title="Give the base URL only, with no path">
+The plugin appends `/v1/traces` and `/v1/metrics` to whatever you set. Adding a path yourself produces `/v1/traces/v1/traces`, and the export fails with no message in the terminal.
+</Admonition>
+
+**Step 3:** Run the harness
+
+```bash
+dsh --profile headless "list the files in this directory and summarise the project"
+```
+
+Spans are batched, so allow a few seconds after the turn finishes before looking in SigNoz.
+
+<Admonition type="info" title="Prefer configuration over environment variables?" defaultCollapsed="true">
+Every setting also lives in `$DSH_HOME/profiles/<profile>/cordis.patch.yml` (default `~/.dsh`). Replace the empty `[]` with:
+
+```yaml
+- id: loongsuite-observability
+  config:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    serviceName: dsh-agent
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+    resourceAttributes:
+      deployment.environment.name: production
+    captureContent: false
+    exportMetrics: true
+```
+
+This keeps the settings with the profile rather than the shell, at the cost of writing your ingestion key to disk.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## View DeepSeek Harness Traces in SigNoz
+
+Open the Traces explorer and filter on `gen_ai.agent.system = 'deepseek-harness'`. Each turn arrives as its own trace.
+
+<Figure
+  src="/img/docs/llm/deepseek-harness/deepseek-harness-traces.webp"
+  alt="DeepSeek Harness traces in the SigNoz traces explorer"
+  caption="Agent, step, model, and tool spans in the traces explorer"
+/>
+
+Open any `enter_ai_application_system` span to see the full turn. The waterfall shows each reasoning round, the model call inside it, and every tool the agent executed.
+
+<Figure
+  src="/img/docs/llm/deepseek-harness/deepseek-harness-detailed-traces.webp"
+  alt="A DeepSeek Harness turn expanded in the SigNoz trace detail view"
+  caption="One turn: five reasoning rounds, nine tool calls, and a spawned subagent"
+/>
+
+The plugin tags every span with `gen_ai.span.kind`, which is the attribute to filter and group by:
+
+| `gen_ai.span.kind` | Span name | What it covers |
+|---|---|---|
+| `ENTRY` | `enter_ai_application_system` | One turn, the root span |
+| `AGENT` | `invoke_agent deepseek-harness` | The agent loop, with turn-level token totals |
+| `STEP` | `react step` | One reasoning round |
+| `LLM` | `chat <model>` | One model call, with tokens and time to first token |
+| `TOOL` | `execute_tool <tool>` | One tool execution |
+
+Filter on `gen_ai.span.kind` rather than on the span name, since names embed the model and tool name and change per call.
+
+<Admonition type="warning" title="Token totals appear twice, so scope your queries">
+The `AGENT` span repeats the sum of its own model calls. Summing `gen_ai.usage.total_tokens` across all spans therefore double counts exactly 2x. Add `gen_ai.span.kind = 'LLM'` to every token query.
+</Admonition>
+
+## Prompts and Responses Are Not Captured by Default
+
+`captureContent` is `false`, so spans carry structure, timings, and token counts but no prompt or completion text. Enable it with `captureContent: true` in the profile config, or `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=SPAN_ONLY`.
+
+Two things to weigh before turning it on. Anything in the context window, including source code and file contents, is written to your backend. And the payload grows sharply: the same single-tool turn measured 6,350 bytes with capture off and 73,078 bytes with it on, mostly because `gen_ai.tool.definitions` repeats the full schema of every registered tool on each model call.
+
+Note that `dsh.session.cwd` records the absolute working directory on every span even with content capture off.
+
+## DeepSeek Harness Observability Dashboard
+
+The [DeepSeek Harness dashboard](https://signoz.io/docs/dashboards/dashboard-templates/deepseek-harness-dashboard/) gives you token spend and cache efficiency, turn and session volume, model latency, tool activity, and error breakdown out of the box.
+
+<Figure
+  src="/img/docs/llm/deepseek-harness/deepseek-harness-dashboard.webp"
+  alt="DeepSeek Harness dashboard in SigNoz"
+  caption="The DeepSeek Harness dashboard template"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting DeepSeek Harness Observability
+
+</ToggleHeading>
+
+### No data in SigNoz
+
+An expired or wrong ingestion key fails silently. The harness prints a normal answer and exits successfully while the exporter receives a 401, so nothing in the terminal tells you anything is wrong. Test the key directly:
+
+```bash
+curl -i -X POST "https://ingest.<region>.signoz.cloud/v1/traces" \
+  -H "content-type: application/json" \
+  -H "signoz-ingestion-key: <your-ingestion-key>" \
+  -d '{"resourceSpans":[]}'
+```
+
+A working key returns `200` with `{"partialSuccess":{}}`. An expired one returns `401` with `Expired key`.
+
+### The plugin does not appear in the config
+
+Plugins are per profile. Run `dsh --profile <profile> --dump-config | grep loongsuite` for the profile you actually launch, and add the plugin to that profile if it is missing.
+
+### Subagent work is missing from the parent trace
+
+A spawned subagent opens its own trace with its own root span, rather than nesting under the parent turn. There is no span link between them. Join them on attributes instead: the subagent's spans carry `dsh.session.parent_id`, `dsh.session.origin = 'subagent'`, and `dsh.session.delegation_depth`.
+
+### A failing tool shows as a successful span
+
+Only tools that report failure explicitly, such as an MCP tool returning `isError`, set the span status to error and add `error.type = 'TOOL_ERROR'`. A shell command exiting non-zero still records a successful span, so tool error counts based on span status will undercount.
+
+### Do not confuse this with the built-in telemetry plugin
+
+DeepSeek Harness ships its own `dsh-session-telemetry-otel` plugin, disabled by default through `DSH_TELEMETRY_MODE`, which sends OTLP logs to DeepSeek's own endpoint. That is DeepSeek's product analytics and is unrelated to this setup.
+
+</details>
+
+## Related integrations
+
+Instrument the other AI coding agents you run, using the same OpenTelemetry pipeline:
+
+- [Monitor OpenAI Codex with OpenTelemetry](https://signoz.io/docs/codex-monitoring/) - track Codex CLI sessions, token spend, and command-level traces
+- [Claude Code monitoring with OpenTelemetry](https://signoz.io/docs/claude-code-monitoring/) - track token usage, costs, and tool decisions
+- [OpenCode observability with OpenTelemetry](https://signoz.io/docs/opencode-observability/) - trace OpenCode sessions, tool calls, and per-message cost
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.
+
+Additional resources:
+
+- [Create alerts on traces](https://signoz.io/docs/alerts-management/trace-based-alerts/)
+- [Query and filter traces](https://signoz.io/docs/userguide/traces_query_builder/)
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/)
