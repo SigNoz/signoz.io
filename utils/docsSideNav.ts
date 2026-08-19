@@ -5,7 +5,7 @@ import type { NavItem, Doc } from '@/components/DocsSidebar/types'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
 import { cmsFetch } from '@/utils/cmsFetch'
 import { hasCMSContentConfig, isLocalContentOverlayEnabled } from '@/utils/contentRepository'
-import { fetchAllDocsForPage } from '@/utils/cachedData'
+import { fetchAllDocsIndex } from '@/utils/cachedData'
 
 const LOCAL_JSON_PATH = path.join(process.cwd(), 'data/docs-side-nav/main.json')
 
@@ -98,7 +98,7 @@ export async function getDocsSideNav(): Promise<NavItem[]> {
   }
 
   try {
-    const allDocs = await fetchAllDocsForPage()
+    const allDocs = await fetchAllDocsIndex()
     const dateMap = new Map<string, string>()
     for (const doc of allDocs) {
       if (doc.published_date && doc.path) {

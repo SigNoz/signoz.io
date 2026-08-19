@@ -99,6 +99,12 @@ const PAGE_MARKDOWN_EXCLUDED_PREFIXES = ['/api', '/docs', '/docs-onboarding', '/
  * trailing `.md` marker means "leave this alone".
  */
 const isFileLikePath = (pathname: string): boolean => {
+  // Markdown sitemaps (e.g. /blogs/sitemap.md) are real routes, not `.md`
+  // aliases of an HTML page.
+  if (stripTrailingSlashes(pathname).endsWith('/sitemap.md')) {
+    return true
+  }
+
   const normalized = stripMarkdownExtension(pathname)
   const lastSegment = normalized.split('/').pop() || ''
   return lastSegment.includes('.')
