@@ -1,0 +1,86 @@
+---
+date: 2026-08-11
+title: Upgrade SigNoz to v0.137.0 and Repair Saved Views Data
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
+description: Upgrade self-hosted SigNoz to v0.137.0. A migration repairs saved views and deletes the ones it cannot fix, so back up the Metastore first.
+doc_type: howto
+---
+
+SigNoz v0.137.0 moves saved views (the named filter-and-column presets in the Logs and Traces explorers) to a typed schema. Existing views are converted automatically, so no action is needed if you use saved views only through the UI. This release also adds a Saved Views v2 API and deprecates the v1 endpoints.
+
+<Admonition type="warning" title="Unrepairable saved views are deleted during the upgrade">
+The repair migration rewrites a saved view whose stored spec has unreadable fields, resetting each bad field to its empty default. A view that still cannot be parsed field-by-field is deleted from the database, and this deletion is not reversible. Back up the Metastore (SQLite or Postgres) before you upgrade. If a view is missing afterward, search the server logs for `saved view data could not be repaired` to find the affected saved-view IDs, then restore them from your backup.
+</Admonition>
+
+<Admonition type="info" title="The v1 saved-view endpoints are deprecated">
+`/api/v1/explorer/views` keeps working in v0.137.0, but it is deprecated and will be removed in a future release once the SigNoz UI moves to the v2 endpoints. If you call it from scripts, plan your move to [the v2 API](#the-new-saved-views-v2-api).
+</Admonition>
+
+If you use saved views only through the UI, back up the Metastore, upgrade, then check your views for any that went missing. If you call the v1 endpoints from scripts, note that [queries are now validated](#what-changes-for-v1-api-callers).
+
+## Upgrade self-hosted SigNoz
+
+### Step 1: Back up your data
+
+Saved views live in the SigNoz Metastore alongside dashboards and alerts. Back up the Metastore before you start. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops before you move to v0.137.0.
+
+### Step 2: Upgrade SigNoz
+
+The saved-view migrations run once, automatically, when the server starts on the new version.
+
+<Tabs entityName="installer">
+<TabItem value="foundry" label="Foundry" default>
+
+Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundryctl</a> to pick up the v0.137.0 defaults, then re-apply your existing `casting.yaml`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+foundryctl cast -f casting.yaml
+```
+
+If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting.yaml</a> pins image versions, the new defaults will not override them (your config wins), so bump the SigNoz image pin to v0.137.0 yourself.
+
+</TabItem>
+<TabItem value="helm" label="Kubernetes (Helm chart)">
+
+Update the <a href="https://github.com/SigNoz/charts" target="_blank" rel="noopener noreferrer nofollow">chart</a> and upgrade. Replace `<namespace>` and `<release-name>` with your own values:
+
+```bash
+helm repo update
+helm -n <namespace> upgrade <release-name> signoz/signoz
+```
+
+`helm upgrade` takes the newest chart; add `--version 0.137.0` to pin the v0.137.0 chart.
+
+</TabItem>
+</Tabs>
+
+For Docker or binary deployments, follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/) and set the target version to v0.137.0.
+
+### Step 3: Verify the upgrade
+
+1. Pods and containers are healthy (`kubectl get pods -n <namespace>`, `docker compose ps`, or `systemctl status 'signoz-*'`).
+2. SigNoz reports v0.137.0 under **Settings**.
+3. Open the **Logs** and **Traces** explorers, and confirm your saved views load and apply their filters and columns.
+4. Search the server logs for `saved view data could not be repaired`. Restore any listed view from your backup.
+
+## What changes for v1 API callers
+
+The v1 endpoints (`/api/v1/explorer/views`) are deprecated in v0.137.0. They keep working for now and will be removed in a future release once the SigNoz UI moves to the v2 endpoints, so plan your migration to [the v2 API](#the-new-saved-views-v2-api). Two behaviors also change behind them:
+
+- **Queries are validated on create and update.** A request whose query is not in the v5 query-builder format, or is otherwise invalid, is rejected with `400 Bad Request`. Requests that SigNoz accepted silently before can now fail.
+- **Unknown `extraData` keys are dropped.** The migration and the v1 endpoints keep only the column selection (`selectColumns`) and the display settings (`maxLines`, `fontSize`, `format`, `color`). Anything else stored in `extraData` is discarded, and a malformed `extraData` leaves those fields empty instead of failing the request.
+
+## The new Saved Views v2 API
+
+v0.137.0 adds `/api/v2/saved_views` and `/api/v2/saved_views/{id}`. These endpoints are new in this release, so no existing script depends on them. Migrate when you are ready.
+
+Responses keep the standard SigNoz envelope, with the view under the top-level `data` field. `schemaVersion` and `spec` sit beside `id` and `name` on it, so the view spec is at `response.data.spec`. On requests, `spec.requestType` is required, and it accepts `raw`, `raw_stream`, `trace`, `time_series`, or `scalar`.
+
+For the full request and response schema, see the Saved Views endpoints in the [SigNoz API reference](https://signoz.io/api-reference/).
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- <a href="https://github.com/SigNoz/signoz/issues" target="_blank" rel="noopener noreferrer nofollow">GitHub Issues</a>
+- [Community Slack](https://signoz.io/slack/)
