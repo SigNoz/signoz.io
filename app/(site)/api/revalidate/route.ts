@@ -14,6 +14,36 @@ interface RevalidationResult {
   timestamp: string
 }
 
+const LIST_TAG_DEPENDENT_PATHS: Record<string, string[]> = {
+  'docs-list': ['/docs/sitemap.xml'],
+  'blogs-list': ['/blogs/sitemap.xml', '/rss'],
+  'comparisons-list': ['/blogs/sitemap.xml'],
+  'guides-list': ['/blogs/sitemap.xml'],
+  'faqs-list': ['/blogs/sitemap.xml'],
+  'case-studies-list': ['/blogs/sitemap.xml'],
+  'opentelemetries-list': ['/blogs/sitemap.xml'],
+  'mdx-content-list': ['/blogs/sitemap.xml', '/docs/sitemap.xml', '/rss'],
+}
+
+function revalidateFeedRoutesForTags(purgedTags: string[], results: RevalidationResult[]) {
+  const feedPaths = new Set<string>()
+  for (const t of purgedTags) {
+    for (const p of LIST_TAG_DEPENDENT_PATHS[t] || []) {
+      feedPaths.add(p)
+    }
+  }
+
+  for (const p of feedPaths) {
+    revalidatePath(p, p === '/rss' ? 'layout' : undefined)
+    results.push({
+      path: p,
+      revalidated: true,
+      type: 'path',
+      timestamp: new Date().toISOString(),
+    })
+  }
+}
+
 function normalizePathInput(input: PathInput): { urlPath: string; contentKey?: string } {
   if (typeof input === 'string') {
     return { urlPath: input }
@@ -42,7 +72,7 @@ function revalidateCmsUrlPath(
         contentKey,
       })
       for (const t of strapiTags) {
-        revalidateTag(t, 'default')
+        revalidateTag(t, 'max')
         tags.push(t)
       }
     }
@@ -76,13 +106,15 @@ export async function POST(request: NextRequest) {
 
     if (revalidateAll) {
       revalidatePath('/', 'layout')
-      revalidateTag('mdx-content-list', 'default')
-      revalidateTag('comparisons-list', 'default')
-      revalidateTag('guides-list', 'default')
-      revalidateTag('blogs-list', 'default')
-      revalidateTag('docs-list', 'default')
-      revalidateTag('docs-side-nav', 'default')
-      revalidateTag('listicles', 'default')
+      revalidateTag('mdx-content-list', 'max')
+      revalidateTag('comparisons-list', 'max')
+      revalidateTag('guides-list', 'max')
+      revalidateTag('blogs-list', 'max')
+      revalidateTag('docs-list', 'max')
+      revalidateTag('docs-side-nav', 'max')
+      revalidateTag('listicles', 'max')
+
+      revalidateFeedRoutesForTags(Object.keys(LIST_TAG_DEPENDENT_PATHS), results)
 
       results.push({
         path: '/',
@@ -104,8 +136,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const purgedTags: string[] = []
+
     if (tag) {
-      revalidateTag(tag, 'default')
+      revalidateTag(tag, 'max')
+      purgedTags.push(tag)
 
       results.push({
         tag,
@@ -117,7 +152,8 @@ export async function POST(request: NextRequest) {
 
     if (tags && Array.isArray(tags)) {
       for (const t of tags) {
-        revalidateTag(t, 'default')
+        revalidateTag(t, 'max')
+        purgedTags.push(t)
 
         results.push({
           tag: t,
@@ -127,6 +163,8 @@ export async function POST(request: NextRequest) {
         })
       }
     }
+
+    revalidateFeedRoutesForTags(purgedTags, results)
 
     console.log('Revalidation completed:', JSON.stringify(results))
 
@@ -171,13 +209,15 @@ export async function GET(request: NextRequest) {
 
     if (revalidateAll) {
       revalidatePath('/', 'layout')
-      revalidateTag('mdx-content-list', 'default')
-      revalidateTag('comparisons-list', 'default')
-      revalidateTag('guides-list', 'default')
-      revalidateTag('blogs-list', 'default')
-      revalidateTag('docs-list', 'default')
-      revalidateTag('docs-side-nav', 'default')
-      revalidateTag('listicles', 'default')
+      revalidateTag('mdx-content-list', 'max')
+      revalidateTag('comparisons-list', 'max')
+      revalidateTag('guides-list', 'max')
+      revalidateTag('blogs-list', 'max')
+      revalidateTag('docs-list', 'max')
+      revalidateTag('docs-side-nav', 'max')
+      revalidateTag('listicles', 'max')
+
+      revalidateFeedRoutesForTags(Object.keys(LIST_TAG_DEPENDENT_PATHS), results)
 
       results.push({
         path: '/',
@@ -192,7 +232,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (tag) {
-      revalidateTag(tag, 'default')
+      revalidateTag(tag, 'max')
 
       results.push({
         tag,
@@ -200,6 +240,8 @@ export async function GET(request: NextRequest) {
         type: 'tag',
         timestamp: new Date().toISOString(),
       })
+
+      revalidateFeedRoutesForTags([tag], results)
     }
 
     return NextResponse.json({
