@@ -1,7 +1,7 @@
 ---
 title: We Tried & Compared Top 6 Open Source APM Tools in 2026
 meta_title: We Tried & Compared Top 6 Open Source APM Tools in 2026
-date: 2026-08-18
+date: 2026-08-19
 tags: [APM, OpenTelemetry]
 authors: [saurabh_patil]
 description: 'Compare the top 6 open source APM tools: SigNoz, Prometheus and Grafana, Elastic APM, Jaeger, Zipkin and Uptrace. Find the best fit for your needs.'
@@ -28,13 +28,12 @@ These tools are not interchangeable. SigNoz combines application metrics, logs, 
 Open-source APM and observability tools allow teams to self-host and keep ownership of their telemetry data. However, these tools do not necessarily cover the same parts of application monitoring. Some provide an integrated APM experience, while others handle only metrics or distributed tracing. The following capabilities help determine whether a tool can meet your requirements.
 
 Core capabilities to evaluate for an open source APM tool:
-
-1. **OpenTelemetry support:** Collect telemetry using vendor-neutral APIs, SDKs, and protocols so that instrumentation remains portable.
+1. **OpenTelemetry support:** Collect and export telemetry using vendor-neutral OpenTelemetry APIs and SDKs, with [OTLP](https://signoz.io/blog/what-is-otlp/) over gRPC or HTTP, so that application instrumentation remains portable across compatible backends.
 2. **Distributed tracing:** Follow requests across services, queues, databases, and external APIs to identify slow or failing operations.
 3. **[Application and infrastructure metrics](https://signoz.io/guides/apm-metrics/):** Monitor request rates, errors, latency, CPU, memory, and other indicators of application health.
 4. **Log correlation**: Correlate logs with the relevant service, trace, or span to add context during an investigation.
 5. **Service maps:** Visualize dependencies between services and identify where errors or latency originate.
-6. **Dashboards and alerting:** Track important telemetry through custom dashboards and notify teams when defined conditions are met.
+6. **Dashboards and alerting:** Track important telemetry through custom dashboards and notify teams when defined conditions are met, such as when your API latencies spike or a K8s deployment fails.
 
 You may not need every capability from the same product. If your existing stack already handles metrics and logs, a tracing system such as Zipkin or Jaeger may be sufficient. If you want to investigate metrics, traces, and logs through one interface, a unified APM platform like SigNoz will be a better fit.
 
@@ -52,6 +51,7 @@ Count every component the deployment requires, including telemetry databases, me
 
 #### Test the investigation workflow at your expected scale
 A storage engine or architecture does not guarantee good performance for your workload. Run a proof of concept with roughly the same data volume, retention period, and mix of service attributes you expect in production.
+
 Reproduce a slow or failed request and check whether engineers can identify the affected service, inspect its trace, find the relevant logs, and create an alert. Test the queries you expect to run during incidents, not only the default dashboards provided by the tool.
 
 #### Check production and security requirements
@@ -73,16 +73,16 @@ The table provides a quick summary of each tool’s scope and best fit. The indi
 
 | Tool | Best for | Core coverage |
 |---|---|---|
-| **[SigNoz](https://signoz.io/blog/open-source-apm-tools/#1-signoz-best-for-unified-opentelemetry-native-apm)** | Unified, OpenTelemetry-native APM | Application and infrastructure metrics, distributed traces, log correlation, service maps, dashboards, and alerts |
-| **[Prometheus and Grafana](https://signoz.io/blog/open-source-apm-tools/#2-prometheus-with-grafana-best-for-metrics-first-application-monitoring)** | Metrics-first monitoring | Time-series metrics, PromQL, dashboards, and alerting |
-| **[Elastic APM](https://signoz.io/blog/open-source-apm-tools/#3-elastic-apm-best-for-teams-already-using-elasticsearch-and-kibana)** | Teams already using Elasticsearch and Kibana | Transactions, traces, errors, APM metrics, service maps, and log correlation |
-| **[Uptrace](https://signoz.io/blog/open-source-apm-tools/#4-uptrace-best-for-opentelemetry-based-multi-signal-monitoring)** | OpenTelemetry-based, multi-signal monitoring | Traces, metrics, logs, dashboards, errors, and alerts |
-| **[Zipkin](https://signoz.io/blog/open-source-apm-tools/#5-zipkin-best-for-focused-trace-collection-and-lookup)** | Focused distributed tracing | Trace collection, search, visualization, and service dependency diagrams |
-| **[Jaeger](https://signoz.io/blog/open-source-apm-tools/#6-jaeger-best-for-opentelemetry-oriented-distributed-tracing)** | OpenTelemetry-oriented distributed tracing | Trace collection and search, service dependencies, sampling, and trace-derived service performance monitoring |
+| **[SigNoz](#1-signoz-best-for-unified-opentelemetry-native-apm)** | Unified, OpenTelemetry-native APM | Application and infrastructure metrics, distributed traces, log correlation, service maps, dashboards, and alerts |
+| **[Prometheus and Grafana](#2-prometheus-and-grafana-best-for-metrics-first-application-monitoring)** | Metrics-first monitoring | Time-series metrics, PromQL, dashboards, and alerting |
+| **[Elastic APM](#3-elastic-apm-best-for-teams-already-using-elasticsearch-and-kibana)** | Teams already using Elasticsearch and Kibana | Transactions, traces, errors, APM metrics, service maps, and log correlation |
+| **[Uptrace](#4-uptrace-best-for-opentelemetry-based-multi-signal-monitoring)** | OpenTelemetry-based, multi-signal monitoring | Traces, metrics, logs, dashboards, errors, and alerts |
+| **[Zipkin](#5-zipkin-best-for-focused-trace-collection-and-lookup)** | Focused distributed tracing | Trace collection, search, visualization, and service dependency diagrams |
+| **[Jaeger](#6-jaeger-best-for-opentelemetry-oriented-distributed-tracing)** | OpenTelemetry-oriented distributed tracing | Trace collection and search, service dependencies, sampling, and trace-derived service performance monitoring |
 
 ## 1. SigNoz: Best for unified, OpenTelemetry-native APM
 
-[SigNoz](https://signoz.io/) is an OpenTelemetry-native APM and observability platform for teams that want one place to investigate application and infrastructure performance. It is available as a self-hosted deployment or a managed service called SigNoz Cloud.
+[SigNoz](https://signoz.io/) is an OpenTelemetry-native APM and observability platform for teams that want one place to investigate application and infrastructure performance. It is available as a [self-hosted]((https://signoz.io/docs/install/self-host/)) deployment or a managed service called [SigNoz Cloud](https://signoz.io/teams/).
 
 <Figure src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz application overview with latency, request rate, Apdex, and key operations" caption=" Out-of-the-box RED metrics dashboard in SigNoz" />
 
