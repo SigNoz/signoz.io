@@ -37,6 +37,7 @@ export default function NozPeekDock() {
     <div
       className={`noz-peek-dock ${animateClass} ${settledClass} ${dismissed ? 'dismissed' : ''}`}
       style={{ left: dockLeft || '50%' }}
+      data-markdown-ignore
     >
       {/* Mobile: round orange balloon CTA (desktop keeps the full input bar). */}
       <button
