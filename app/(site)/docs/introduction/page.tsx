@@ -13,11 +13,11 @@ import {
 import { Metadata } from 'next'
 import { generateDocsBreadcrumb } from '@/utils/breadcrumbSchema'
 import JsonLdScript from '@/components/JsonLdScript'
+import { INTRO_DESCRIPTION } from '@/utils/docs/agentDiscovery'
 
 export const metadata: Metadata = {
   title: 'Introduction to SigNoz - Open Source Observability Platform',
-  description:
-    'Learn about SigNoz, an open-source observability platform that helps you monitor your applications with distributed tracing, metrics, and logs.',
+  description: INTRO_DESCRIPTION,
 }
 
 export default async function DocsIntroductionPage() {
