@@ -1,7 +1,7 @@
 ---
 date: 2026-08-18
-title: Monitor GCP Cloud Storage Metrics
-description: Collect Cloud Storage metrics in SigNoz. Add the metrics to your OpenTelemetry Collector and view bucket size, API traffic, and network throughput on a pre-built dashboard.
+title: Monitor GCP Cloud Storage Metrics with OpenTelemetry
+description: Collect GCP Cloud Storage metrics with the OpenTelemetry Collector, then monitor bucket size, API traffic, and network throughput in SigNoz.
 doc_type: howto
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 ---
@@ -82,7 +82,7 @@ If your buckets span several projects, add one **named** receiver per project (`
 The receiver polls every metric in the list once per `collection_interval`, and the Monitoring API bills per read call, so keep the list to the metrics your dashboards and alerts actually use. See [Cost and tuning](https://signoz.io/docs/integrations/gcp/collect-metrics/#cost-and-tuning).
 
 <Admonition type="info">
-`storage/v2/total_bytes` and `storage/v2/total_count` are sampled by Cloud Storage roughly **once a day**, not on your collection interval. The bucket size and object count panels move in daily steps no matter how often the Collector polls, so there is no benefit to a short interval for these two. The API, authentication, and network metrics are sampled far more often and do track your interval.
+Cloud Storage measures `storage/v2/total_bytes` and `storage/v2/total_count` once per day. After the measurement becomes available, Cloud Monitoring repeats it every 300 seconds until the next daily measurement. Empty buckets are not tracked by these metrics. `storage/v2/deleted_bytes` is also reported once per day and can take up to 24 hours to become available. The API, authentication, and network metrics are sampled every 60 seconds and update more frequently.
 </Admonition>
 
 ## Step 3: Apply the configuration
@@ -95,12 +95,12 @@ The Collector loads its config from the `signoz-collector-config` secret, so a c
 
 ## Validate
 
-1. Wait one or two collection intervals (up to about 5 minutes with the default `300s`).
+1. Wait one or two collection intervals (up to about 10 minutes with the default `300s`).
 2. In SigNoz, go to **Dashboards** and open the Cloud Storage dashboard. The API, authentication, and network panels should start filling in first.
 3. To check a single metric, open **Metrics Explorer** and query `storage.googleapis.com/api/request_count`.
 
 <Admonition type="info">
-Give the bucket size and object count panels up to 24 hours before treating them as empty, because Cloud Storage samples those metrics daily.
+For buckets that contain objects, give the bucket size and object count panels up to 24 hours before treating them as empty. Cloud Storage measures these values daily and does not track empty buckets.
 </Admonition>
 
 ## What's collected
@@ -123,41 +123,19 @@ See the **Data Collected** tab in the SigNoz integration for the definitive list
 </details>
 
 <details>
-<summary>Dashboard panels</summary>
-
-The pre-built dashboard has eight panels:
-
-| Panel | What it shows |
-|-------|---------------|
-| **Bucket size** | Table of total bytes stored per bucket, broken down by storage class. This is the latest sampled value, not a time series. |
-| **Total object bytes** | Bytes stored over time, by bucket, storage class, and object type. |
-| **Total object count** | Object count over time, covering live objects, noncurrent objects, soft-deleted objects, and multipart uploads. |
-| **Deleted bytes** | Rate of bytes deleted per bucket, by storage class. |
-| **Request count** | Rate of Cloud Storage API calls, by API method and response code. |
-| **Authentication count** | Rate of signed API requests, by authentication method (HMAC or RSA), API method, and response code. |
-| **Received bytes** | Rate of bytes received over the network, by API method and response code. |
-| **Sent bytes** | Rate of bytes sent over the network, by API method and response code. |
-
-Two variables scope every panel: **project_id** (single-select) and **bucket_name** (multi-select, with an **All** option).
-
-Pre-built dashboards are read-only. To customize one, use **Export JSON** from the dashboard menu and import it as a new dashboard.
-
-</details>
-
-<details>
 <ToggleHeading>
 ## Troubleshooting
 </ToggleHeading>
 
 **A dashboard panel is empty.** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
 
-**Bucket size and object count stay empty while other panels work.** These come from `storage/v2/total_bytes` and `storage/v2/total_count`, which Cloud Storage samples about once a day. Wait 24 hours before investigating further.
+**Bucket size and object count stay empty while other panels work.** These come from `storage/v2/total_bytes` and `storage/v2/total_count`, which Cloud Storage measures once per day. Confirm that the selected buckets contain objects, then wait up to 24 hours for the next measurement before investigating further.
 
 **No Cloud Storage metrics at all.** Confirm the `signoz-integration` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
 
 **The bucket_name variable lists far more buckets than expected.** It lists every bucket reporting metrics in the selected project. On projects with many buckets, keep the selection narrow instead of using **All**, so panels stay responsive.
 
-**Deleted bytes looks high after a lifecycle change.** `deleted_bytes` counts every deletion, including ones made by lifecycle rules and by soft-delete expiry, not just client deletes.
+**Deleted bytes looks high after a lifecycle change.** `deleted_bytes` reports bytes deleted during the daily reporting interval, including deletions made by lifecycle rules. It does not report only client-initiated deletes.
 
 </details>
 
