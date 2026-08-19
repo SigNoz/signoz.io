@@ -1,5 +1,5 @@
 ---
-date: 2026-08-05
+date: 2026-07-25
 title: Monitor HAProxy Metrics and Logs with OpenTelemetry
 description: Collect HAProxy metrics and HTTP traffic logs in SigNoz using the OpenTelemetry Collector, then visualize them with the HAProxy dashboard.
 doc_type: howto
@@ -67,7 +67,7 @@ The Collector needs read access to this socket. Either run it as a user in the s
 
 Create a file named `haproxy-metrics-collection-config.yaml` with the following content:
 
-```yaml:haproxy-metrics-collection-config.yaml
+```yaml:haproxy-metrics-collection-config.yaml defaultCollapsed minimap
 receivers:
   haproxy:
     # Plain filesystem path to the stats socket, or an http:// stats URL.
@@ -143,7 +143,7 @@ global
 
 Then mount that volume into both services in your `docker-compose.yml`:
 
-```yaml:docker-compose.yml
+```yaml:docker-compose.yml defaultCollapsed
 services:
   haproxy:
     image: haproxy:3.0
@@ -192,7 +192,7 @@ global
 
 Then mount the volume into both containers:
 
-```yaml:haproxy-deployment.yaml
+```yaml:haproxy-deployment.yaml defaultCollapsed
 spec:
   containers:
     - name: haproxy
@@ -273,7 +273,7 @@ sudo systemctl reload haproxy
 
 Create a file named `haproxy-logs-collection-config.yaml` with the following content:
 
-```yaml:haproxy-logs-collection-config.yaml minimap
+```yaml:haproxy-logs-collection-config.yaml minimap defaultCollapsed
 receivers:
   syslog:
     udp:

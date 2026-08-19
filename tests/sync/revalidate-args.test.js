@@ -16,6 +16,10 @@ describe('parseArgs', () => {
     const result = parseArgs([
       '--changed-files',
       '/tmp/changed.json',
+      '--added-files',
+      '/tmp/added.json',
+      '--renamed-files',
+      '/tmp/renamed.json',
       '--restore-files',
       '/tmp/restore.json',
       '--deleted-files',
@@ -32,6 +36,8 @@ describe('parseArgs', () => {
       '["blog","docs"]',
     ])
     assert.equal(result.changedFilesPath, '/tmp/changed.json')
+    assert.equal(result.addedFilesPath, '/tmp/added.json')
+    assert.equal(result.renamedFilesPath, '/tmp/renamed.json')
     assert.equal(result.restoreFilesPath, '/tmp/restore.json')
     assert.equal(result.deletedFilesPath, '/tmp/deleted.json')
     assert.equal(result.changedAssetsPath, '/tmp/assets.json')
@@ -45,6 +51,8 @@ describe('parseArgs', () => {
   it('returns undefined/false for missing arguments', () => {
     const result = parseArgs([])
     assert.equal(result.changedFilesPath, undefined)
+    assert.equal(result.addedFilesPath, undefined)
+    assert.equal(result.renamedFilesPath, undefined)
     assert.equal(result.restoreFilesPath, undefined)
     assert.equal(result.deletedFilesPath, undefined)
     assert.equal(result.sidenavChanged, false)
@@ -91,6 +99,105 @@ describe('buildPayload', () => {
 
     assert.equal(result.mode, 'selective')
     assert.deepEqual(result.paths, ['/docs/temp-page'])
+    assert.deepEqual(result.tags, ['docs-list'])
+  })
+
+  it('skips list tags for edit-only syncs when added files are known', () => {
+    const result = buildPayload({
+      changedFiles: ['data/docs/existing-page.mdx', 'data/blog/existing-post.mdx'],
+      addedFiles: [],
+      renamedFiles: [],
+      restoreFiles: [],
+      deletedFiles: [],
+      changedAssets: [],
+      sidenavChanged: false,
+      listiclesChanged: false,
+      changedListicles: [],
+      deletedListicles: [],
+    })
+
+    assert.equal(result.mode, 'selective')
+    assert.deepEqual(result.paths, ['/docs/existing-page', '/blog/existing-post'])
+    assert.deepEqual(result.tags, [])
+  })
+
+  it('purges list tags when files are added', () => {
+    const result = buildPayload({
+      changedFiles: ['data/docs/new-page.mdx', 'data/docs/edited-page.mdx'],
+      addedFiles: ['data/docs/new-page.mdx'],
+      renamedFiles: [],
+      restoreFiles: [],
+      deletedFiles: [],
+      changedAssets: [],
+      sidenavChanged: false,
+      listiclesChanged: false,
+      changedListicles: [],
+      deletedListicles: [],
+    })
+
+    assert.equal(result.mode, 'selective')
+    assert.deepEqual(result.tags, ['docs-list'])
+  })
+
+  it('purges list tags when files are renamed', () => {
+    const result = buildPayload({
+      changedFiles: ['data/blog/renamed-post.mdx'],
+      addedFiles: [],
+      renamedFiles: ['data/blog/renamed-post.mdx'],
+      restoreFiles: [],
+      deletedFiles: [],
+      changedAssets: [],
+      sidenavChanged: false,
+      listiclesChanged: false,
+      changedListicles: [],
+      deletedListicles: [],
+    })
+
+    assert.equal(result.mode, 'selective')
+    assert.deepEqual(result.tags, ['blogs-list'])
+  })
+
+  it('purges list tags for faqs, case-study, and opentelemetry membership changes', () => {
+    const result = buildPayload({
+      changedFiles: [
+        'data/faqs/new-faq.mdx',
+        'data/case-study/new-study.mdx',
+        'data/opentelemetry/new-article.mdx',
+      ],
+      addedFiles: [
+        'data/faqs/new-faq.mdx',
+        'data/case-study/new-study.mdx',
+        'data/opentelemetry/new-article.mdx',
+      ],
+      renamedFiles: [],
+      restoreFiles: [],
+      deletedFiles: [],
+      changedAssets: [],
+      sidenavChanged: false,
+      listiclesChanged: false,
+      changedListicles: [],
+      deletedListicles: [],
+    })
+
+    assert.equal(result.mode, 'selective')
+    assert.deepEqual(result.tags, ['faqs-list', 'case-studies-list', 'opentelemetries-list'])
+  })
+
+  it('falls back to purging list tags when added files are unknown (legacy caller)', () => {
+    const result = buildPayload({
+      changedFiles: ['data/docs/edited-page.mdx'],
+      addedFiles: null,
+      renamedFiles: [],
+      restoreFiles: [],
+      deletedFiles: [],
+      changedAssets: [],
+      sidenavChanged: false,
+      listiclesChanged: false,
+      changedListicles: [],
+      deletedListicles: [],
+    })
+
+    assert.equal(result.mode, 'selective')
     assert.deepEqual(result.tags, ['docs-list'])
   })
 })

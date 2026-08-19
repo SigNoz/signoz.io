@@ -9,6 +9,7 @@ import type {
   IconSpec,
 } from '@/components/Listicle/types'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { cmsFetch } from '@/utils/cmsFetch'
 import { hasCMSContentConfig, isLocalContentOverlayEnabled } from '@/utils/contentRepository'
 
 async function readLocalListicle(name: string): Promise<ListicleConfig | null> {
@@ -125,7 +126,7 @@ async function fetchCmsListicle(name: string): Promise<ListicleConfig | null> {
     'populate[static_sections][populate][items]': '*',
   })
 
-  const res = await fetch(`${CMS_API_URL}/api/listicles?${params.toString()}`, {
+  const res = await cmsFetch(`/api/listicles?${params.toString()}`, {
     cache: 'force-cache',
     next: {
       tags: ['listicles', `listicle-${name}`],
