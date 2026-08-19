@@ -55,6 +55,10 @@ Each notification is posted as a new standalone message in the space. Repeat not
 
 When several alerts fire together, they are grouped into a **single card**. The card body lists every alert in the group, with one set of buttons: **View Related Logs** / **View Related Traces** for the first alert, and **Open in SigNoz** to open the alert in SigNoz. This keeps grouped notifications compact.
 
+<Admonition>
+If an alert rule sets a per-alert body template through its annotations, each alert renders as its own section in the card, up to 30 sections per message. When more than 30 alerts fire together, the card appends an **"…and N more alerts"** note and links to SigNoz for the full list.
+</Admonition>
+
 ## Customizing the message
 
 The **Description** is rendered into the card body as HTML, so write it in **standard markdown**. The following constructs are supported:
@@ -113,7 +117,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 | :--- | :--- | :--- |
 | `name` | `string` | The name of the receiver/channel. **Required**; must be unique across the config. |
 | `googlechat_configs` | `array` | List of Google Chat configurations. |
-| `googlechat_configs[].send_resolved` | `boolean` | Whether to send notifications when an alert is resolved. |
+| `googlechat_configs[].send_resolved` | `boolean` | Whether to send notifications when an alert is resolved. Defaults to `false` when omitted. (The channel form in the SigNoz UI enables this toggle by default.) |
 | `googlechat_configs[].webhook_url` | `string` | The Google Chat Incoming Webhook URL. **Mandatory**. Must be `https` and use the host `chat.googleapis.com`. |
 | `googlechat_configs[].title` | `string` | Templated title of the message. Go templates are supported. |
 | `googlechat_configs[].text` | `string` | Templated body of the message (standard markdown). Go templates are supported. |
@@ -125,6 +129,10 @@ If you encounter issues:
 - **Check the Webhook URL**: Ensure it is entered correctly and uses `https` with the `chat.googleapis.com` host.
 - **Verify Google Chat permissions**: Confirm the webhook is still active and allowed to post to the target space.
 - **Test the webhook**: Use the **Test** button in SigNoz to verify connectivity. If it fails, re-check the webhook in Google Chat.
+
+<Admonition>
+If Google Chat rate-limits a space (HTTP 429), SigNoz automatically retries delivery, so short bursts of alert volume rarely drop notifications.
+</Admonition>
 
 <Admonition type="tip">
 
