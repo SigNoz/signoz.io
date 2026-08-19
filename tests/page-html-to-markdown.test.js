@@ -3,6 +3,7 @@ const assert = require('node:assert/strict')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
 const { renderPageHtmlToAgentMarkdown } = loadTsModule('utils/pageHtmlToMarkdown.ts')
+const { LLMS_TXT_DIRECTIVE } = loadTsModule('utils/docs/buildMarkdownDocument.ts')
 
 const SAMPLE_PAGE_HTML = `<!DOCTYPE html>
 <html>
@@ -36,7 +37,19 @@ test('renderPageHtmlToAgentMarkdown keeps main content and metadata', async () =
   assert.match(markdown, /## Plans/)
   assert.match(markdown, /\[Teams\]\(\/teams\/\)/)
   assert.match(markdown, /Source: https:\/\/signoz\.io\/pricing\//)
-  assert.match(markdown, /Full content index: https:\/\/signoz\.io\/llms\.txt/)
+  // The llms.txt pointer moved from the footer into the top directive.
+  assert.doesNotMatch(markdown, /Full content index:/)
+})
+
+test('renderPageHtmlToAgentMarkdown emits the llms.txt directive once, near the top', async () => {
+  const markdown = await renderPageHtmlToAgentMarkdown(SAMPLE_PAGE_HTML)
+
+  const escaped = LLMS_TXT_DIRECTIVE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  assert.equal((markdown.match(new RegExp(escaped, 'g')) || []).length, 1)
+  assert.equal(
+    markdown.indexOf(LLMS_TXT_DIRECTIVE) < markdown.indexOf('Pay only for the telemetry you send.'),
+    true
+  )
 })
 
 test('renderPageHtmlToAgentMarkdown drops chrome, ignored, and hidden content', async () => {
