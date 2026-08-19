@@ -33,6 +33,7 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',
       'Cache-Control': CACHE_CONTROL_HEADER,
+      'X-Robots-Tag': 'noindex',
       Vary: 'Accept',
     },
   })
