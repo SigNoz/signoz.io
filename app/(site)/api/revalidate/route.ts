@@ -16,13 +16,13 @@ interface RevalidationResult {
 
 const LIST_TAG_DEPENDENT_PATHS: Record<string, string[]> = {
   'docs-list': ['/docs/sitemap.xml'],
-  'blogs-list': ['/blogs/sitemap.xml', '/rss', '/rss/[...segments]'],
+  'blogs-list': ['/blogs/sitemap.xml', '/rss'],
   'comparisons-list': ['/blogs/sitemap.xml'],
   'guides-list': ['/blogs/sitemap.xml'],
   'faqs-list': ['/blogs/sitemap.xml'],
   'case-studies-list': ['/blogs/sitemap.xml'],
   'opentelemetries-list': ['/blogs/sitemap.xml'],
-  'mdx-content-list': ['/blogs/sitemap.xml', '/docs/sitemap.xml', '/rss', '/rss/[...segments]'],
+  'mdx-content-list': ['/blogs/sitemap.xml', '/docs/sitemap.xml', '/rss'],
 }
 
 function revalidateFeedRoutesForTags(purgedTags: string[], results: RevalidationResult[]) {
@@ -34,7 +34,7 @@ function revalidateFeedRoutesForTags(purgedTags: string[], results: Revalidation
   }
 
   for (const p of feedPaths) {
-    revalidatePath(p, p.includes('[') ? 'page' : undefined)
+    revalidatePath(p, p === '/rss' ? 'layout' : undefined)
     results.push({
       path: p,
       revalidated: true,

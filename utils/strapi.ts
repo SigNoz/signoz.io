@@ -498,16 +498,13 @@ export const fetchMDXContentByPath = async (
         }
 
         const pagesResults = await pageFetch
-        const firstRejected = pagesResults.find((result) => result.status === 'rejected')
-        if (firstRejected) {
-          throw new Error(`Failed to fetch all pages of ${collectionName}`, {
-            cause: firstRejected.reason,
-          })
-        }
-
         for (const result of pagesResults) {
-          if (result.status === 'fulfilled' && result.value.data?.length > 0) {
-            allData = allData.concat(result.value.data)
+          if (result.status === 'fulfilled') {
+            if (result.value.data?.length > 0) {
+              allData = allData.concat(result.value.data)
+            }
+          } else {
+            console.error(`Failed to fetch a page of ${collectionName}:`, result.reason)
           }
         }
       }
