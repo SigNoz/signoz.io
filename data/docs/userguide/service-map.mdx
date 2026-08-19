@@ -1,15 +1,91 @@
 ---
-date: 2024-06-06
-
-title: Service Map (Beta)
-description: Visualize your service dependencies and inter-service communication with the SigNoz Service Map, including P99 latency, error rates, and requests per second.
+date: 2026-08-19
+title: Service Map - Visualize and Debug Service Dependencies
+description: Read the SigNoz Service Map to see how your services call each other, spot errors by node color, and check P99 latency and request rate on each edge.
+doc_type: explanation
 ---
 
-Select Service Map tab in the left navigation panel to reach to the service map.
+The Service Map shows observed dependency endpoints, services, databases, or messaging systems, as nodes, and aggregates all calls between each pair of endpoints into one edge over the selected time range. Use it to see how your services connect, and to spot which endpoint is receiving errors right now.
 
-- This map gives an idea of the services in your infrastructure, and how one services calls other.
+## Prerequisites
 
-- The P99 latency, error rate and RPS is shown by hovering above the edge in between services.
-- If an edge service map is shown as red, it means that it is having some 4xx error or high latency.
+<PrereqsInstrument />
 
-![service-map](/img/docs/service-map.webp)
+## Overview
+
+Select **Service Map** in the left navigation.
+
+<Figure
+  src="/img/docs/service-map.webp"
+  alt="SigNoz Service Map showing services as nodes connected by call edges, with a hover tooltip showing P99 latency, request rate, and error rate for one edge"
+  caption="Service Map: nodes are dependency endpoints, edges are calls between them. Hover an edge to see its P99 latency, request rate, and error rate."
+/>
+
+## How To Read The Map
+
+**Node color** shows the health of the calls a node receives from other nodes, over the selected time range:
+
+- **Green**: no errors on the calls this node receives.
+- **Red**: at least one error on a call this node receives. This can be any error status on a span, not only HTTP 4xx.
+
+**Node size** shows the relative rate of calls a node receives. A bigger node receives more requests than a smaller node in the same map.
+
+<Admonition type="info">
+Both color and size come from calls a node **receives** as the callee. A service that only calls other endpoints, and never receives a call itself, always shows at the default green minimum size, regardless of its own traffic or errors.
+</Admonition>
+
+**Edge color** has no meaning. The map assigns each edge a color based on its target node, so that edges going to different nodes stay visually distinct. Do not read edge color as a health or latency signal.
+
+**Edge direction** shows the direction of calls: animated particles travel along each edge from the calling node to the called node. Particle speed has no meaning either. Read call rate from the [hover tooltip](#hover-for-details) instead.
+
+### Hover For Details
+
+Hover over an edge to see:
+
+- **P99 latency**
+- **Request rate** (requests per second)
+- **Error rate** (percent of calls on that edge that failed)
+
+Hover over a node to see its endpoint name. The map has no drill-down: clicking a node or edge does not open a details panel. To dig into a specific service, use [Application Details](https://signoz.io/docs/apm-and-distributed-tracing/application-details/) instead, or open [Trace Explorer](https://signoz.io/docs/userguide/traces/) filtered to that service.
+
+## Filters
+
+Use the **Select Environment/s** dropdown to limit the map to one or more deployment environments.
+
+The search box next to it filters by resource attribute, but only two keys apply to the Service Map:
+
+- `deployment.environment`
+- `k8s.cluster.name`
+
+Any other attribute you add here has no effect on the map, including `k8s.cluster.namespace`, which appears as a filter option but is not applied. If none of your services carry the two supported attributes, the box shows "No resource attributes available to filter."
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### The map shows "No Service Found"
+
+- **Likely cause**: no traces reached SigNoz for the selected time range, or your services do not export traces at all.
+- **Fix**: confirm traces are flowing. See [Prerequisites](#prerequisites) for instrumentation steps, and widen the time range in the top bar.
+- **Verify**: [Application Details](https://signoz.io/docs/apm-and-distributed-tracing/application-details/) shows at least one service for the same time range.
+
+- **Likely cause**: traces exist, but no span in the selected time range shows a call from one dependency endpoint to another. The map only draws a node when it can pair a caller and a callee, so a service with no recorded call to another service, database, or messaging system still produces an empty map.
+- **Fix**: widen the time range, then generate a traced request that calls another service, a database, or a messaging system. For a call to another service, confirm trace context propagates to the called service (the same trace ID on both sides of the call).
+- **Verify**: after the request, the map shows an edge from the calling service to that service, database, or messaging system.
+
+### A service I expect is missing from the map
+
+- **Likely cause**: that service made no call to, and received no call from, any other service, database, or messaging system in the selected time range, so it has no edge to draw.
+- **Fix**: widen the time range. For a call to another service, confirm trace context propagates from the calling span to the called service.
+- **Verify**: the service appears in [Trace Explorer](https://signoz.io/docs/userguide/traces/) with root spans in the same window.
+</details>
+
+## Next Steps
+
+- [Trace Explorer](https://signoz.io/docs/userguide/traces/): filter and inspect the spans behind any edge.
+- [Alerts Management](https://signoz.io/docs/userguide/alerts-management/): alert on the error rate or latency you see on the map.
+
+## Get Help
+
+<GetHelp />
