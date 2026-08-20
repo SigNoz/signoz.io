@@ -82,7 +82,7 @@ const UsageList = () => {
     {
       title: 'No special pricing for custom metrics',
       description:
-        'Vendors like Datadog charge $0.05 per custom metric, which limits a team’s ability to send and analyze custom metrics for monitoring. SigNoz Cloud does not add a custom-metric surcharge. The charge remains $0.10 per million samples no matter what type of metrics you send.',
+        'Vendors like Datadog charge $0.05 per custom metric, which limits a team’s ability to send and analyze custom metrics for monitoring. SigNoz Cloud does not treat custom metrics any differently. The charges remain $0.10 per million samples no matter what type of metrics you send.',
     },
     {
       title: 'Add unlimited team members',
