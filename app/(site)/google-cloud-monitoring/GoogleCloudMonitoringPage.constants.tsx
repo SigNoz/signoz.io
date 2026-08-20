@@ -6,7 +6,6 @@ import section2Url from '@/public/img/google-cloud-monitoring/section-2.svg?url'
 import section3Url from '@/public/img/google-cloud-monitoring/section-3.svg?url'
 import section4Url from '@/public/img/google-cloud-monitoring/section-4.svg?url'
 import { IconTitleDescriptionCardData } from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
-import Link from 'next/link'
 
 export const GCP_MONITORING_HEADER_BUTTONS = [
   {
@@ -42,11 +41,7 @@ export const UNIFY_GCP_PANEL = {
       When Cloud Run latency spikes, jump from the GCP infrastructure metric to the application
       trace to the log line that explains it; without switching to multiple consoles. SigNoz Cloud
       stores all three signal types in a single ClickHouse backend, so correlation is native, not
-      manual.{' '}
-      <Link className="underline" href="/docs/install/">
-        Self-Hosted SigNoz
-      </Link>{' '}
-      is available for teams that prefer to manage their own stack.
+      manual.
     </p>
   ),
   image: section1Url,
