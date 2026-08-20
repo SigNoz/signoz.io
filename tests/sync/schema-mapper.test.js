@@ -123,21 +123,6 @@ test('mapToStrapiPayload', async (t) => {
     assert.deepEqual(data.related_articles, [])
   })
 
-  await t.test('strips local-only frontmatter keys Strapi rejects', () => {
-    const { data } = mapToStrapiPayload(
-      'docs',
-      { title: 'Test', draft: true, description: 'desc' },
-      'content',
-      '/docs/test',
-      'staging',
-      {}
-    )
-
-    assert.ok(!('draft' in data))
-    assert.equal(data.description, 'desc')
-    assert.equal(data.title, 'Test')
-  })
-
   await t.test('warns about missing required fields', () => {
     const { warnings } = mapToStrapiPayload('docs', {}, '', '/path', 'production', {})
 

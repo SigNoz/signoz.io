@@ -1,10 +1,5 @@
 const { COLLECTION_SCHEMAS } = require('./schemas')
 
-// Frontmatter keys that exist only for the local Next.js build and have no matching
-// Strapi attribute. Strapi rejects unknown body keys with a 400 ValidationError, so these
-// must be dropped before building the payload.
-const LOCAL_ONLY_FRONTMATTER_KEYS = ['draft']
-
 // Pure transform: maps frontmatter + content + pre-resolved relations to Strapi payload.
 // All relation resolution must be done BEFORE calling this function.
 function mapToStrapiPayload(
@@ -27,11 +22,6 @@ function mapToStrapiPayload(
     content: content,
     deployment_status: deploymentStatus,
     ...frontmatter,
-  }
-
-  // Drop local-only frontmatter keys Strapi has no attribute for
-  for (const key of LOCAL_ONLY_FRONTMATTER_KEYS) {
-    delete data[key]
   }
 
   // Remove raw frontmatter relation fields
