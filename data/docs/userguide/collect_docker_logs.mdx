@@ -1,5 +1,5 @@
 ---
-date: 2026-08-05
+date: 2026-07-29
 title: Collecting Docker Logs
 description: Collect Docker container logs and Docker daemon logs using OpenTelemetry Collector and send them to SigNoz.
 doc_type: howto
@@ -46,7 +46,7 @@ docker inspect opentelemetry-collector --format='{{.Id}}'
 
 Add to your `config.yaml`, replacing `<OTEL_COLLECTOR_CONTAINER_ID>` with that ID:
 
-```yaml:config.yaml minimap
+```yaml:config.yaml minimap defaultCollapsed
 receivers:
   # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
   filelog/docker:
@@ -141,7 +141,7 @@ What each operator does:
 
 Add to your `config.yaml`:
 
-```yaml:config.yaml minimap
+```yaml:config.yaml minimap defaultCollapsed
 extensions:
   docker_observer:
     endpoint: unix:///var/run/docker.sock
@@ -257,7 +257,7 @@ docker run --name opentelemetry-collector \
 
 Create a `docker-compose.yaml` in the same directory as your `config.yaml`:
 
-```yaml:docker-compose.yaml
+```yaml:docker-compose.yaml defaultCollapsed
 services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -359,7 +359,7 @@ service:
 
 The receiver needs two Linux capabilities to read the host journal. Stop the existing Collector and restart it with the capabilities added:
 
-```bash
+```bash defaultCollapsed
 docker stop opentelemetry-collector
 docker rm opentelemetry-collector
 

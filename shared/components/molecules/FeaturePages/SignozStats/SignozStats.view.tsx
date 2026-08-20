@@ -31,12 +31,12 @@ const SigNozStats = () => {
 
   const platformFeatures = [
     {
-      title: 'Cloud',
+      title: 'SigNoz Cloud',
       description:
         'Fully managed, SOC 2-compliant, ideal for teams who want to start quickly without managing infrastructure.',
     },
     {
-      title: 'Self-Host',
+      title: 'Self-Hosted SigNoz',
       description:
         'For tighter security & data residency requirements. It is Apache 2.0 open source, built on open standards.',
     },
@@ -81,7 +81,7 @@ const SigNozStats = () => {
               Your data stays where you want
             </h2>
             <p className="text-base text-signoz_vanilla-400">
-              Use SigNoz cloud with your data staying in the US, EU, or India, or self-host.
+              Keep your data in the US, EU, or India with SigNoz Cloud, or run Self-Hosted SigNoz.
             </p>
             <div className="flex w-full flex-col gap-4">
               {platformFeatures.map((feature, index) => (
