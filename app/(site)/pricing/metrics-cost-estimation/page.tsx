@@ -2,8 +2,7 @@ import React from 'react'
 import MetricsCostEstimation from './MetricsCostEstimation'
 import { Metadata } from 'next'
 
-const metricsCalculatorDescription =
-  'Estimate managed SigNoz Cloud metric costs by samples and retention. This calculator does not estimate Self-Hosted SigNoz infrastructure, storage, or operations costs.'
+const metricsCalculatorDescription = 'Estimate SigNoz Cloud metric costs by samples and retention.'
 
 export const metadata: Metadata = {
   title: {

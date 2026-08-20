@@ -3,7 +3,7 @@ import Card from './Card'
 
 const FAQs = [
   {
-    body: 'SigNoz manages storage, scaling, and upgrades for SigNoz Cloud. With Self-Hosted SigNoz, your team deploys and operates the software and pays for its infrastructure and storage. Enterprise support is available under contract.',
+    body: 'You can deploy and manage Self-Hosted SigNoz Community Edition yourself. Choose SigNoz Cloud if you do not want to manage the SigNoz cluster. SigNoz Cloud includes features such as SSO and SAML support. Our team can also help with the initial configuration of dashboards and alerts and advise on observability setup practices.',
     title: 'What is the difference between SigNoz Cloud and Self-Hosted SigNoz?',
   },
   {
@@ -11,7 +11,7 @@ const FAQs = [
     title: 'How are number of samples calculated for metrics pricing?',
   },
   {
-    body: "SigNoz Cloud includes email and in-product chat support. Dedicated Slack and migration support depend on the current spend or contract. Self-Hosted SigNoz users can use community Slack and GitHub Discussions or buy enterprise support. Contact <a mailto='support@signoz.io'>support@signoz.io</a> for a paid support plan.",
+    body: "Contact <a mailto='support@signoz.io'>support@signoz.io</a> if you need a dedicated support plan or paid support for your initial SigNoz Cloud or Self-Hosted SigNoz setup.",
     title: 'What support is available for SigNoz Cloud and Self-Hosted SigNoz?',
   },
   {

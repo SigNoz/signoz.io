@@ -14,7 +14,8 @@ export const CommunityEdition = () => {
               Get started with Community Edition
             </p>
             <p className="text-base font-normal leading-9 text-signoz_vanilla-400">
-              You can use Self Hosted SigNoz to get started with your observability journey.
+              You can use Self-Hosted SigNoz, the open-source version of SigNoz, to get started with
+              your observability journey.
             </p>
           </div>
           <div className="h-[72px] md:h-[250px]">

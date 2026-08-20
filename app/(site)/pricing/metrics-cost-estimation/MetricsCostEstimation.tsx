@@ -75,7 +75,7 @@ const MetricsCostEstimation = () => {
               <div className="flex flex-col gap-7">
                 <div>
                   <div className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">
-                    Metrics price calculator
+                    Metrics Price Calculator for SigNoz Cloud
                   </div>
                   <div className="text-base font-normal text-signoz_vanilla-400">
                     We use a transparent and usage-based pricing model that helps you prevent costs
@@ -194,10 +194,6 @@ const MetricsCostEstimation = () => {
                     <div>${formatNumber(monthlyEstimate)}</div>
                   </div>
                 </div>
-                <p className="m-0 text-sm text-signoz_vanilla-400">
-                  This calculator does not estimate Self-Hosted SigNoz infrastructure, storage, or
-                  operations costs.
-                </p>
                 <div className="flex flex-col gap-4">
                   <Link
                     href="/teams/"
