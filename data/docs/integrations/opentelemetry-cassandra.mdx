@@ -160,7 +160,7 @@ Verify these values:
 
 Create the ConfigMap and Deployment:
 
-```yaml:cassandra-scraper.yaml
+```yaml:cassandra-scraper.yaml minimap defaultCollapsed
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -240,7 +240,7 @@ kubectl apply -f cassandra-scraper.yaml
 
 The `jmxreceiver` (deprecated 2026-01-30) embeds the JMX Metric Gatherer JAR inside the Collector. It still works on a host that has a JRE. Download a gatherer JAR version your Collector accepts from <a href="https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-metrics/" target="_blank" rel="noopener noreferrer nofollow">Maven Central</a> (on a `jar hash does not match known versions` error, the Collector logs the versions it accepts), then add the receiver:
 
-```yaml:cassandra-metrics-collection-config.yaml
+```yaml:cassandra-metrics-collection-config.yaml defaultCollapsed
 receivers:
   jmx/cassandra:
     jar_path: /opt/opentelemetry-java-contrib-jmx-metrics.jar
@@ -288,7 +288,7 @@ Cassandra writes its operational logs to `system.log`. The OpenTelemetry Collect
 
 Create a file named `cassandra-logs-collection-config.yaml` with the following content:
 
-```yaml:cassandra-logs-collection-config.yaml
+```yaml:cassandra-logs-collection-config.yaml minimap defaultCollapsed
 receivers:
   filelog/cassandra:
     include: ["${env:CASSANDRA_LOG_FILE}"]

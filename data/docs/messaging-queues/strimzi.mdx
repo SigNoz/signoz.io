@@ -21,8 +21,6 @@ tags : [SigNoz Cloud]
     - [Step 6: Visualize data in SigNoz](#step-6-visualize-data-in-signoz)
 
 
----
-
 ## Introduction
 
 Strimzi provides a Kubernetes operator for running Apache Kafka clusters on Kubernetes. It automates the deployment and management of Kafka components using custom resource definitions (CRDs). The operator handles cluster deployment, broker configurations, topic management, and user authentication while following Kubernetes-native practices. You retain full access to Kafka features while Strimzi manages the operational aspects through Kubernetes.
@@ -47,8 +45,6 @@ performance and behavior of your Strimzi Kafka cluster.
 </figure>
 
 
----
-
 ## Prerequisites
 
 Before you begin, ensure the following prerequisites are met:
@@ -63,8 +59,6 @@ Before you begin, ensure the following prerequisites are met:
 
 Once these are set up, you will be ready to proceed with Kafka monitoring and instrumentation.
 
-
----
 
 ## Steps to Follow
 
@@ -92,7 +86,7 @@ helm install strimzi-cluster-operator oci://quay.io/strimzi-helm/strimzi-kafka-o
 
 Create a Kafka cluster with JMX metrics enabled. Apply the following configuration:
 
-```yaml
+```yaml defaultCollapsed minimap
 apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
 metadata:
@@ -138,7 +132,7 @@ spec:
 
 Create and apply the Kafka metrics ConfigMap:
 
-```yaml
+```yaml minimap defaultCollapsed
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -313,7 +307,7 @@ kubectl apply -f kafka-metrics-config.yaml
 
 Install the SigNoz Kubernetes collector with automatic Strimzi discovery:
 
-```yaml
+```yaml defaultCollapsed minimap
 global:
   cloud: <aws, azure, gcp, others>
   clusterName: signoz-demo-cluster
@@ -394,7 +388,7 @@ java -javaagent:/path/to/opentelemetry-javaagent.jar \
 
 ### Example: Deploying Sample Kafka Producer and Consumer Applications with OpenTelemetry Java Agent
 
-```yaml
+```yaml minimap defaultCollapsed
 # Producer Deployment
 apiVersion: apps/v1
 kind: Deployment

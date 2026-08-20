@@ -1,5 +1,5 @@
 ---
-date: 2026-07-03
+date: 2026-08-10
 title: Metric Types and Aggregation
 description: Learn about the different metric types (Counter, Gauge, Histogram, Exponential Histogram) supported by SigNoz and how temporal and spatial aggregation works for each type.
 doc_type: explanation
@@ -44,6 +44,12 @@ A table representing the different types of metrics and their temporality suppor
 | Exponential Histogram | No | Yes |
 
 The Gauge metric type does not have a temporality, as it represents a single value at a point in time.
+
+SigNoz records the temporality of every data point. A Counter metric can send all cumulative points, all delta points, or both together. Both appear together after you switch the temporality, and also when different time series of the same metric use different temporality. The Query Builder queries all three cases, so your older cumulative data stays queryable after a switch.
+
+<Admonition type="warning">
+PromQL does not read delta series. A PromQL panel or alert on a metric that you switch to delta keeps running and receives no new samples. Move those queries to the Query Builder before you change the temporality.
+</Admonition>
 
 <Admonition type="tip">
 We recommend exporting metrics with **delta** temporality. It reduces ingestion costs because synchronous instruments that record nothing during an export interval send no data points for that interval (with cumulative, every active series is re-sent on each interval), and it is required for exponential histograms in SigNoz. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for how to configure it.
