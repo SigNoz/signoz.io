@@ -21,7 +21,7 @@ That gives you exactly two levers: **reduce the number of active series**, or **
 
 Two consequences worth knowing up front:
 
-- **Churn is free.** A series replaced by a new one (a pod restart producing a new `k8s.pod.name`) sends the same number of samples. SigNoz does not bill per series, so churn adds no cost.
+- **Churn is free.** A series replaced by a new one (a rollout giving each replacement pod a new `k8s.pod.uid`) sends the same number of samples. SigNoz does not bill per series, so churn adds no cost.
 - **Dropping labels alone saves nothing.** The same samples still arrive. Attributes have to be *aggregated away* so that the series collapse. See [Volume control](https://signoz.io/docs/metrics-management/volume-control/).
 
 Histograms are the exception to "one data point, one sample": a classic histogram data point costs (number of buckets × 1) + 4 samples, the extra four being `.sum`, `.count`, `.min`, and `.max`.
@@ -30,7 +30,7 @@ Histograms are the exception to "one data point, one sample": a classic histogra
 
 Attributes affect the series count in one of two ways:
 
-1. **Identifying attributes**: their values split otherwise-identical label sets into more series, so they multiply samples. If a metric has one label set and you add `http.route` with 10 distinct values, you now have 10 series and 10 data points per export interval instead of one. `http.route`, `http.response.status_code`, and `host.name` are all identifying.
+1. **Identifying attributes**: their values split otherwise-identical label sets into more series, so they multiply samples. If a metric has one label set and you add `http.route`, you get one series per route that actually appears, up to 10 series for 10 distinct routes, and that many data points per export interval instead of one. `http.route`, `http.response.status_code`, and `host.name` are all identifying.
 2. **Non-identifying attributes**: their value is already determined by attributes present on the series, so they create zero new series and zero new samples. `host.type` is non-identifying when `host.id` is already there, because each host has exactly one type.
 
 Resource attributes are not treated specially: they are part of series identity exactly like data point attributes, and they can be identifying or non-identifying in the same way. EC2 tags added by the AWS resource detector are a common example. They become part of series identity, but since each instance already has its own series, they add no series and no cost.
