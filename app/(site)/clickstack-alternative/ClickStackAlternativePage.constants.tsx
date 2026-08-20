@@ -183,7 +183,7 @@ export const COMPARISON_GRID_DATA: ComparisonCategory[] = [
         feature: 'Deployment Options',
         signoz: {
           type: 'text',
-          content: 'SigNoz Cloud + Self-Hosted SigNoz',
+          content: 'SigNoz Cloud (GA), BYOC, and Self-Hosted SigNoz',
         },
         clickstack: { type: 'text', content: 'Open source + Cloud (Beta)' },
       },

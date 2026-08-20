@@ -158,7 +158,7 @@ const COMPARISON_DATA = {
     OTHER_HEADING: 'Dynatrace',
     DATA: [
       {
-        sideHeader: 'Self-Hosted SigNoz available',
+        sideHeader: 'Open Source',
         isAvailableInSignoz: true,
         isAvailableInOther: false,
       },

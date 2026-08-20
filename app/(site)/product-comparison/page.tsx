@@ -4,12 +4,10 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Product Comparisons',
-  description:
-    'Compare SigNoz Cloud with managed observability platforms, with clear Self-Hosted SigNoz labels for self-managed options.',
+  description: 'Compare SigNoz Cloud with managed observability platforms.',
   openGraph: {
     title: 'Product Comparisons | SigNoz',
-    description:
-      'Compare SigNoz Cloud with managed observability platforms, with clear Self-Hosted SigNoz labels for self-managed options.',
+    description: 'Compare SigNoz Cloud with managed observability platforms.',
     url: `${siteMetadata.siteUrl}/product-comparison`,
     siteName: siteMetadata.title,
     locale: 'en_US',
@@ -18,8 +16,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: 'Product Comparisons | SigNoz',
-    description:
-      'Compare SigNoz Cloud with managed observability platforms, with clear Self-Hosted SigNoz labels for self-managed options.',
+    description: 'Compare SigNoz Cloud with managed observability platforms.',
     images: [siteMetadata.socialBanner],
     site: siteMetadata.twitter,
   },
