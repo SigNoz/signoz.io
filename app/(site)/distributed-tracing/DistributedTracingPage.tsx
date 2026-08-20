@@ -252,8 +252,8 @@ const DistributedTracing: React.FC = () => {
 
         <CarouselCards
           cards={CORRELATION_CAROUSEL_DATA}
-          buttonLink="/opentelemetry/correlating-traces-logs-metrics-nodejs/"
-          buttonText="Read Blog"
+          buttonLink="/docs/traces-management/guides/correlate-traces-and-logs/"
+          buttonText="Read Documentation"
         />
         <Divider />
         <VisualQueryBuilder />

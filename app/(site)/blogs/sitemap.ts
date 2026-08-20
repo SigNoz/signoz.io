@@ -1,10 +1,11 @@
 import { MetadataRoute } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCMSContent } from 'utils/cmsContent'
+import { CMS_SITEMAP_SECTIONS } from '@/utils/sitemapRoutes'
 import { compareSitemapEntries, toSitemapDateOnly } from 'utils/sitemapXml'
 import { resolveLatestDate } from '@/utils/dateUtils'
 
-export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400
 
 // Blog-native customer stories now canonically served at /customers/<slug>/
 const BLOG_NATIVE_CUSTOMER_STORY_PATHS = new Set([
@@ -79,12 +80,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }))
   }
 
-  const staticRoutes = ['blog', 'guides', 'faqs', 'customers', 'opentelemetry', 'comparisons'].map(
-    (route) => ({
-      url: `${siteUrl}/${route}/`,
-      changeFrequency: 'weekly' as const,
-    })
-  )
+  const staticRoutes = CMS_SITEMAP_SECTIONS.map(({ section }) => ({
+    url: `${siteUrl}/${section === 'case-study' ? 'customers' : section}/`,
+    changeFrequency: 'weekly' as const,
+  }))
 
   const allRoutes: MetadataRoute.Sitemap = [
     ...staticRoutes,

@@ -380,6 +380,75 @@ export async function fetchAllDocsForPage() {
   }
 }
 
+// Fields only; no `content`. The full docs list serializes to ~16MB, which is
+// over the data cache's 2MB per-item limit, so its cache writes always fail.
+// This 445KB index caches reliably for consumers that never read doc bodies.
+const DOCS_INDEX_FIELDS = [
+  'title',
+  'path',
+  'date',
+  'published_date',
+  'updated_date',
+  'description',
+  'updatedAt',
+  'publishedAt',
+]
+
+export type DocsIndexEntry = {
+  slug: string
+  path: string
+  title?: string
+  description?: string
+  summary?: string
+  date?: string | null
+  published_date?: string | null
+  updated_date?: string | null
+  lastmod?: string | null
+}
+
+async function fetchDocsIndex(deploymentStatus: string): Promise<DocsIndexEntry[]> {
+  const docs = await getAllContent('docs', deploymentStatus, DOCS_INDEX_FIELDS)
+  return docs.map((doc) => {
+    const { slug, path, title, description, summary, date, published_date, updated_date, lastmod } =
+      transformDoc(doc)
+    return { slug, path, title, description, summary, date, published_date, updated_date, lastmod }
+  })
+}
+
+async function cachedFetchDocsIndex(deploymentStatus: string) {
+  'use cache'
+  cacheLife({ revalidate: CMS_REVALIDATE_INTERVAL })
+  cacheTag('mdx-content-list', 'docs-list')
+  const result = await fetchDocsIndex(deploymentStatus)
+  if (!result || result.length === 0) {
+    throw new Error('Empty content received for cached-docs-index, skipping cache')
+  }
+  return result
+}
+
+export function getCachedDocsIndex(deploymentStatus: string) {
+  if (isLocalContentOverlayEnabled()) return fetchDocsIndex(deploymentStatus)
+  return cachedFetchDocsIndex(deploymentStatus)
+}
+
+export async function fetchAllDocsIndex(): Promise<DocsIndexEntry[]> {
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const deploymentStatus = isProduction ? 'live' : 'staging'
+
+  try {
+    return await getCachedDocsIndex(deploymentStatus)
+  } catch (cacheError) {
+    console.warn('Cached docs index fetch failed, retrying without cache:', cacheError)
+
+    try {
+      return await fetchDocsIndex(deploymentStatus)
+    } catch (directError) {
+      console.error('Direct docs index fetch also failed:', directError)
+      return []
+    }
+  }
+}
+
 async function fetchSingleDoc(slug: string, deploymentStatus: string) {
   const content = await getContentBySlug('docs', slug, deploymentStatus)
   if (!content) return null
