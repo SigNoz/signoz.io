@@ -87,7 +87,7 @@ export default function Faq() {
     >
       <div className="mx-auto grid max-w-8xl gap-10 lg:grid-cols-3 lg:gap-12">
         <div>
-          <h2 className="m-0 max-w-md text-4xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-5xl md:text-6xl md:leading-none">
+          <h2 className="m-0 max-w-md text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl md:text-5xl md:leading-none">
             Your questions,
             <br />
             <span className="text-signoz_vanilla-400">answered.</span>
