@@ -1,0 +1,139 @@
+---
+title: How Docupace uses SigNoz MCP to turn logs into daily operational insight
+date: 2026-08-21
+tags: [AI, Observability]
+authors: [mahak_kaur]
+description: Docupace uses SigNoz MCP to move from manual log search to daily operational reports, broad system overviews, and faster incident diagnostics across many customer environments.
+image: /img/blog/2026/08/docupace-blog-cover.webp
+keywords: [signoz mcp, agent native observability, log management, ai observability, incident diagnostics, opentelemetry]
+related_articles:
+  - '/blog/msi-signoz-mcp-full-stack-debugging'
+  - '/blog/shaped-signoz-mcp-latency-debugging'
+  - '/blog/signoz-mcp-log-trace-investigation'
+---
+
+[Docupace](https://www.docupace.com/)'s infrastructure team is working through two migrations at once: moving more of its platform to the cloud and moving more of its observability workflow into SigNoz Cloud.
+
+For [Sandijs Jercums](https://lv.linkedin.com/in/sandijs-jercums-723a8716), Infrastructure Manager at Docupace, that work is not only about responding when something breaks. A system can be up and customer workflows can keep moving, while logs still show repeated errors, soft failures, or services creating more noise than they should.
+
+Docupace operates a multi-tenant platform with many customer environments across development, QA, UAT, and production. Its infrastructure team is relatively small, so seeing those patterns manually across every environment does not scale.
+
+"You cannot just all the time set up triggers and focus on everything," Sandijs said.
+
+The team started with logs. Historically, Docupace relied on an on-prem log aggregation setup for troubleshooting, but getting useful answers required knowing where to look, how to query, and which error patterns mattered.
+
+SigNoz Cloud gave the team a more intuitive place to search and inspect logs. [SigNoz MCP](https://signoz.io/docs/ai/signoz-mcp-server/) changed the starting point.
+
+Instead of starting every investigation by writing a query, Docupace could start with a broader question: what is going on across this part of the system?
+
+Here's how Sandijs described that shift:
+
+<YouTube id="60QmNmR6_pw" mute="false" />
+
+## From Searching Logs To Discovering Patterns
+
+Before SigNoz MCP, pattern-finding usually started after someone already had a problem to chase. A service failed, a node crashed, or a customer-facing workflow behaved strangely. Then someone opened the log tool and worked backward from the failure.
+
+That workflow still matters. But it depends on a known trigger.
+
+SigNoz MCP gave Docupace another mode: discovery.
+
+For broad operational reviews, the team can ask for an overview of errors, recurring events, and problematic services across its multi-tenant environments. Not every recurring error becomes an alert. Not every soft failure is immediately visible in a dashboard.
+
+SigNoz MCP gives Docupace a way to bring those patterns into view earlier.
+
+"Right now it gives this completely different approach to logs," Sandijs said.
+
+Here is how that workflow comes together:
+
+<YouTube id="v0omNz13QTk" mute="false" />
+
+The flow looks like this:
+
+<Figure
+  src="/img/blog/2026/08/docupace-mcp-operational-flow.webp"
+  alt="Workflow diagram showing how Docupace moved from manual log search after known issues to SigNoz MCP-assisted discovery from broad operational questions"
+  caption="From manual log search to MCP-assisted discovery"
+/>
+
+## Daily Reports For Operational Awareness
+
+One of Docupace's most active MCP use cases is not incident response. It is reporting.
+
+The company generates daily reports for important client environments. Managers review them, look for patterns, and bring questions back to the infrastructure team.
+
+"They spend five minutes, they review this report, and then they will come back to me and say, okay, I'm seeing this pattern, why it is happening, what is going on?" Sandijs said.
+
+That makes observability part of the operating rhythm, not something only engineers check during an incident.
+
+Before, understanding platform behavior depended heavily on someone manually querying logs, building [dashboards](https://signoz.io/docs/dashboards/overview/), or knowing exactly which [alerts](https://signoz.io/docs/alerts/) to configure. With SigNoz MCP, repeated errors and noisy services can surface in a report before someone has already decided what to search for.
+
+For Sandijs, that helps bridge a real team gap. Engineers are focused on shipping code. Infrastructure is focused on keeping environments reliable. Managers need to understand where technical debt is showing up in day-to-day platform behavior.
+
+SigNoz MCP gives those teams a shared view of the same telemetry.
+
+Docupace can see where background errors are repeating, where services are creating operational noise, and where teams may need to improve the system even when there is no urgent incident.
+
+"For sure it gives us insight we didn't have previously at all," Sandijs said.
+
+<YouTube id="uSxaOK0DBNM" mute="false" />
+
+## A Faster Path During Incidents
+
+The same workflow helps when something does break.
+
+When Docupace sees a crash, availability issue, or application node failure, the team can ask for details around that time window. Instead of manually combing through logs and guessing which events are relevant, engineers can ask the assistant to pull together the surrounding context from SigNoz Cloud.
+
+In some cases, Docupace connects other internal systems through MCP as well. That lets the team look across multiple layers of evidence. For example, they can inspect what was happening in application logs and compare it with database context from another system.
+
+That broader view helps the team reason about sequence: what happened before the crash, what else was unusual, and which layer may need attention.
+
+"It has increased our diagnostics tenfold or even more in many cases," Sandijs said.
+
+<YouTube id="gN3m4SwGrQ8" mute="false" />
+
+The important part is where the automation stops. SigNoz MCP gathers context faster, but the team still validates the pattern and decides what action to take. The first pass across logs and related system context becomes much less manual.
+
+## Making Migration Safer
+
+SigNoz Cloud is also helping Docupace as it continues moving remaining logs from its previous setup.
+
+For this part of the work, Sandijs uses SigNoz MCP to validate whether data is flowing correctly. After configuring ingestion, he can check whether the expected logs are arriving, whether fields are parsed properly, and whether anything appears misconfigured.
+
+The validation is especially useful because the older system does not expose the same MCP-based workflow. If both sides were equally accessible, Sandijs said, the team could compare old and new sources more directly and ask what was missing from SigNoz Cloud. For now, the workflow is more focused: configure ingestion, then use SigNoz MCP to verify the data.
+
+That is a practical migration use case. Moving observability data is only useful if the team can trust what arrives on the other side.
+
+The move was not only about where logs lived. Docupace had been using Graylog on-prem for log aggregation, but Sandijs said the older workflow was not very user friendly for the team. Querying and filtering took more effort, even for experienced IT users.
+
+"With MCP, it is another level," Sandijs said. He described SigNoz Cloud as "miles better in user-friendliness" and "much more intuitive," calling it "a clear choice."
+
+<YouTube id="MoEzC-bi0s4" mute="false" />
+
+## A Different Approach To Logs
+
+By this point in the story, the shift is bigger than one report or one investigation. Docupace is not just searching logs faster; the team is using SigNoz MCP to make existing telemetry easier to question.
+
+That does not remove the need for dashboards or alerts. Docupace still uses structured observability workflows, and the team is careful about what telemetry it enables at scale. But SigNoz MCP gives the team a broader search layer across the data it already has.
+
+Without it, Sandijs said, the team would need more manual work: more dashboards, more alert setup, more log digging, and more effort to discover what was worth watching.
+
+"After years of doing this, we would miss something which we are not missing right now," he said.
+
+When asked candidly how happy he was with the SigNoz MCP experience, Sandijs rated it "eight out of 10." The missing points were not about the core workflow, he said, but about account and endpoint setup. For day-to-day use, he had not hit issues with it: "It has been just easy and smooth and very good experience that everything works what is supposed to work. It is fast."
+
+<YouTube id="WxqaVkK8wZA" mute="false" />
+
+## What Other Teams Can Learn
+
+Docupace's workflow shows where [agent-native observability](https://signoz.io/agent-native-observability/) is useful today. It does not start with an agent fixing production. It starts with a team that already has telemetry, a platform with many environments, and more operational questions than a small infrastructure team can manually chase every day.
+
+SigNoz MCP helps turn that telemetry into a more conversational investigation surface. Teams can ask for broad overviews, inspect repeated errors, validate migration work, and gather incident context faster. The AI assistant can scan and summarize, but the human team still owns the conclusion.
+
+The goal is not to replace the engineer who understands the system. The goal is to help that engineer get to the relevant evidence sooner.
+
+---
+
+**SigNoz Cloud** is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)
