@@ -38,7 +38,8 @@ export const CARDS = [
   {
     icon: <Coins />,
     title: 'Transparent Pricing',
-    description: 'Starts at $0.30 per GB with no user seat limitations or hidden retention fees.',
+    description:
+      'SigNoz Cloud starts at $0.30 per GB with no user-seat limits or hidden retention fees.',
   },
   {
     icon: <DatabaseZap />,
