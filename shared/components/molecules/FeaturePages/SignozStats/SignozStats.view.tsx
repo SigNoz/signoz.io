@@ -81,8 +81,7 @@ const SigNozStats = () => {
               Your data stays where you want
             </h2>
             <p className="text-base text-signoz_vanilla-400">
-              Use SigNoz Cloud with your data staying in the US, EU, or India, or run Self-Hosted
-              SigNoz.
+              Keep your data in the US, EU, or India with SigNoz Cloud, or run Self-Hosted SigNoz.
             </p>
             <div className="flex w-full flex-col gap-4">
               {platformFeatures.map((feature, index) => (

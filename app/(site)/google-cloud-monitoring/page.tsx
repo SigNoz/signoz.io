@@ -8,15 +8,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Google Cloud Monitoring with SigNoz Cloud | OTel-Native GCP Observability',
     description:
-      'Use SigNoz Cloud to monitor Cloud Run, GKE, Compute Engine, Cloud SQL, Pub/Sub, Cloud Storage, App Engine, Cloud Functions, and more with correlated metrics, logs, and traces.',
+      'Monitor every Google Cloud service - Cloud Run, GKE, Compute Engine, Cloud SQL, Pub/Sub, Cloud Storage, App Engine, Cloud Functions, and more - in a single OTel-native backend. Correlated metrics, logs, and traces. No per-metric charges. No proprietary agents.',
     images: '/img/website/hero-tabs/infrastructure.webp',
   },
   description:
-    'Use SigNoz Cloud to monitor Cloud Run, GKE, Compute Engine, Cloud SQL, Pub/Sub, Cloud Storage, App Engine, Cloud Functions, and more with correlated metrics, logs, and traces.',
+    'Monitor every Google Cloud service - Cloud Run, GKE, Compute Engine, Cloud SQL, Pub/Sub, Cloud Storage, App Engine, Cloud Functions, and more - in a single OTel-native backend. Correlated metrics, logs, and traces. No per-metric charges. No proprietary agents.',
   twitter: {
     title: 'Google Cloud Monitoring with SigNoz Cloud | OTel-Native GCP Observability',
     description:
-      'Use SigNoz Cloud to monitor Cloud Run, GKE, Compute Engine, Cloud SQL, Pub/Sub, Cloud Storage, App Engine, Cloud Functions, and more with correlated metrics, logs, and traces.',
+      'Monitor every Google Cloud service - Cloud Run, GKE, Compute Engine, Cloud SQL, Pub/Sub, Cloud Storage, App Engine, Cloud Functions, and more - in a single OTel-native backend. Correlated metrics, logs, and traces. No per-metric charges. No proprietary agents.',
     images: '/img/website/hero-tabs/infrastructure.webp',
   },
 }

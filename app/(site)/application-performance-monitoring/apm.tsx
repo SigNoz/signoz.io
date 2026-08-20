@@ -153,10 +153,9 @@ const Header = () => {
         <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
           SigNoz Cloud APM comes with out-of-box charts for key application metrics powered by
           OpenTelemetry.
-          <br className="hidden lg:inline" />
-          {' '}Get latency, requests per second, error percentage, apdex & other key metrics
-          <br className="hidden lg:inline" />
-          {' '}to understand your application performance.
+          <br className="hidden lg:inline" /> Get latency, requests per second, error percentage,
+          apdex & other key metrics
+          <br className="hidden lg:inline" /> to understand your application performance.
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
@@ -421,7 +420,7 @@ const UsageBasedPricing = () => {
             <p className="text-base font-normal text-signoz_vanilla-400">
               Tired of Datadog’s unpredictable bills or New Relic’s user-based pricing?
               <br />
-              SigNoz Cloud gives you usage-based pricing without per-user fees.
+              We’re here for you.
             </p>
             <UsageList />
             <Button

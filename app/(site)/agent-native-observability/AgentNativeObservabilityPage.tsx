@@ -65,7 +65,8 @@ const Header: React.FC = () => {
         description={
           <span className="text-base">
             Connect SigNoz Cloud to your coding agents (e.g. Claude Code, Cursor) and debug
-            production issues without leaving your dev environment. <br className="hidden md:block" />
+            production issues without leaving your dev environment.{' '}
+            <br className="hidden md:block" />
             Traces, logs, metrics, service topology, and your actual codebase - all in one place. Or
             use Noz, the AI teammate built into SigNoz Cloud.
           </span>
@@ -251,9 +252,9 @@ const InContextObservability: React.FC = () => {
               </div>
               <h3 className="m-0 text-2xl font-bold text-signoz_vanilla-100">SigNoz MCP Server</h3>
               <p className="text-sm leading-relaxed text-signoz_vanilla-400">
-                SigNoz Cloud uses a hosted MCP server; Self-Hosted SigNoz runs it locally. Plug into
-                Claude Code or Cursor in minutes and get full observability context in every session:
-                traces, logs, metrics, service topology, and deployment history.
+                Plug into Claude Code or Cursor in minutes. Get full observability context in every
+                session: traces, logs, metrics, service topology, and deployment history. Start
+                debugging in your terminal.
               </p>
               <div className="mt-auto pb-5 pt-4">
                 <Button
@@ -283,9 +284,9 @@ const InContextObservability: React.FC = () => {
                 Noz : SigNoz AI Teammate
               </h3>
               <p className="text-sm leading-relaxed text-signoz_vanilla-400">
-                Your AI teammate inside SigNoz Cloud. Ask about your logs, traces, and metrics in
-                plain English, and Noz investigates across your data, explains what it finds, and
-                suggests what to do next. It can also create dashboards, alerts, and views for you.
+                Your AI teammate inside SigNoz. Ask about your logs, traces, and metrics in plain
+                English, and Noz investigates across your data, explains what it finds, and suggests
+                what to do next. It can also create dashboards, alerts, and views for you.
               </p>
               <div className="mt-auto">
                 <Button

@@ -37,11 +37,8 @@ const UnifiedObservability = () => {
               Unified Observability
             </h1>
             <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
-              Turn fragmented monitoring into a unified view with SigNoz Cloud, or run{' '}
-              <Link className="underline" href="/docs/install/">
-                Self-Hosted SigNoz
-              </Link>{' '}
-              on your own infrastructure.
+              Transform your monitoring from fragmented silos to seamless insights with SigNoz's
+              single-pane unified observability platform.
             </h3>
             <div className="flex flex-col gap-2">
               <Link href="/teams/">
@@ -649,7 +646,7 @@ const UnifiedObservability = () => {
                 </div>
               </div>
               <p className="text-lg">
-                SigNoz Cloud and Self-Hosted SigNoz Enterprise offer{' '}
+                SigNoz offers{' '}
                 <Link
                   href="https://signoz.io/blog/introducing-anomaly-detection-for-smarter-alerts/"
                   className="text-blue-400 hover:text-blue-300"
@@ -664,13 +661,13 @@ const UnifiedObservability = () => {
               <figure>
                 <Image
                   src="/img/unified-observability/unified-observability-anomaly-detection.webp"
-                  alt="Anomaly detection chart in the SigNoz interface"
+                  alt="Anomaly Detection in SigNoz"
                   width={800}
                   height={533}
                   className="h-auto w-full rounded-xl shadow-2xl"
                 />
                 <figcaption className="mt-2 text-center text-sm text-gray-400">
-                  Anomaly Detection in SigNoz Cloud and Self-Hosted SigNoz Enterprise
+                  Anamoly Detection Alert in SigNoz
                 </figcaption>
               </figure>
             </div>

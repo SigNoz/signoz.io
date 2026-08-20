@@ -10,15 +10,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Supercharge your Kubernetes Monitoring. With AI powered insights. | SigNoz Cloud',
     description:
-      'Use SigNoz Cloud for actionable insights across Kubernetes pods, nodes, namespaces, workloads, and services, unified across logs, traces, and metrics in one OTel-native platform.',
+      'Get actionable insights across pods, nodes, namespaces, workloads, and the services running inside them. All unified across logs, traces, and metrics in consolidated OTel-native architecture.',
     images: '/img/website/hero-tabs/infrastructure.webp',
   },
   description:
-    'Use SigNoz Cloud for actionable insights across Kubernetes pods, nodes, namespaces, workloads, and services, unified across logs, traces, and metrics in one OTel-native platform.',
+    'Get actionable insights across pods, nodes, namespaces, workloads, and the services running inside them. All unified across logs, traces, and metrics in consolidated OTel-native architecture.',
   twitter: {
     title: 'Supercharge your Kubernetes Monitoring. With AI powered insights. | SigNoz Cloud',
     description:
-      'Use SigNoz Cloud for actionable insights across Kubernetes pods, nodes, namespaces, workloads, and services, unified across logs, traces, and metrics in one OTel-native platform.',
+      'Get actionable insights across pods, nodes, namespaces, workloads, and the services running inside them. All unified across logs, traces, and metrics in consolidated OTel-native architecture.',
     images: '/img/website/hero-tabs/infrastructure.webp',
   },
 }

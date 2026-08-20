@@ -190,10 +190,10 @@ export const FEATURE_CARDS = [
     description: (
       <div>
         <p>
-          SigNoz Cloud connects to Claude Code, Cursor, and other coding agents through its hosted
-          MCP server. Self-Hosted SigNoz can run the MCP server locally. Noz in SigNoz Cloud gets
-          full cluster context with pod status, node metrics, trace data, and service topology to
-          debug production Kubernetes issues without leaving your terminal.
+          SigNoz connects to Claude Code, Cursor, and other coding agents via MCP. Noz AI agent gets
+          full cluster context with pod status, node metrics, trace data, service topology and debug
+          production Kubernetes issues without leaving your terminal - all in one session. No
+          separate AI SRE tool.
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
@@ -215,7 +215,7 @@ export const FEATURE_CARDS = [
       <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
         <Image
           src="/img/kubernetes-monitoring/noz-kubernetes-chat.webp"
-          alt="Noz in SigNoz Cloud — ask about your Kubernetes cluster in plain English"
+          alt="SigNoz Noz AI agent — ask about your Kubernetes cluster in plain English"
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-contain"
@@ -307,7 +307,7 @@ export const FEATURE_CARDS = [
       <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg">
         <Image
           src="/img/unified-observability/unified-observability-anomaly-detection.webp"
-          alt="Anomaly detection in SigNoz Cloud and Self-Hosted SigNoz Enterprise"
+          alt="SigNoz anomaly detection — detect outliers before they surprise you"
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover object-top"
@@ -320,11 +320,10 @@ export const FEATURE_CARDS = [
     description: (
       <div>
         <p>
-          Not every incident announces itself. Anomaly detection in SigNoz Cloud and Self-Hosted
-          SigNoz Enterprise surfaces outliers in response times, error rates, and resource usage
-          that threshold-based alerts miss because you didn&apos;t know what threshold to set. Detect
-          problematic services, unusual traffic patterns, and pod behavior that deviates from
-          seasonal baselines automatically.
+          Not every incident announces itself. Anomaly detection in SigNoz surfaces outliers in
+          response times, error rates, and resource usage that threshold-based alerts miss because
+          you didn&apos;t know what threshold to set. Detect problematic services, unusual traffic
+          patterns, and pod behavior that deviates from seasonal baselines automatically.
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink

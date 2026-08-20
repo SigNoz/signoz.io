@@ -91,9 +91,9 @@ export const CAPABILITIES_CARDS1: IconTitleDescriptionCardData[] = [
     ),
   },
   {
-    title: 'SigNoz Cloud (BYOC) or Self-Hosted SigNoz',
+    title: 'Self-Hosted / BYOC Compliance',
     description:
-      'Run SigNoz Cloud in your cloud account with BYOC, or deploy Self-Hosted SigNoz when you need telemetry to remain in infrastructure you control.',
+      'Deploy on your infrastructure to meet HIPAA/GDPR compliance requirements. Keep sensitive prompt data on-premise for healthcare, banking, and government contracts.',
   },
   {
     title: 'Monitoring Model Token Usage',
@@ -295,7 +295,7 @@ export const TRADITIONAL_COMPARISON_TABLE_ROWS: ComparisonTableRow<TraditionalVe
   {
     feature: 'Self-Hosting',
     vendors: {
-      signoz: { supported: true, text: 'Self-Hosted SigNoz available' },
+      signoz: { supported: true, text: 'Built on open-standards' },
       datadog: { supported: false, text: 'SaaS-only' },
       honeycomb: { supported: 'partial', text: 'Private Cloud (Enterprise)' },
       grafana: { supported: true, text: 'Built on open-standards' },
