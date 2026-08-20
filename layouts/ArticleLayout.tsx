@@ -3,6 +3,7 @@
 import { ReactNode, useRef } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { AuthorDetail, Blog, Comparison, Guide } from '../types/transformedContent'
+import type { MDXContent } from '@/utils/strapi'
 import { ArrowRight } from 'lucide-react'
 
 import SectionContainer from '@/components/SectionContainer'
@@ -45,7 +46,7 @@ type ArticleContent = ContentType & {
 }
 
 interface LayoutProps {
-  content: CoreContent<ArticleContent>
+  content: CoreContent<ArticleContent> | CoreContent<MDXContent>
   authorDetails: AuthorDetail[]
   authors: string[]
   children: ReactNode
