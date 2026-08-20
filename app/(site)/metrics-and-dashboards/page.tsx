@@ -9,15 +9,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Metrics Monitoring & Customized Dashboards | SigNoz',
     description:
-      'Use SigNoz Cloud to monitor infrastructure and application metrics, build custom dashboards, and set alerts without a custom-metric surcharge.',
+      'Monitor any metrics important to you. Ingest metrics from your infrastructure or applications and create customized dashboards to monitor them. Set alerts and get notified in your preferred notification channel.',
     images: '/img/features/metrics/metrics-overview1.webp',
   },
   description:
-    'Use SigNoz Cloud to monitor infrastructure and application metrics, build custom dashboards, and set alerts without a custom-metric surcharge.',
+    'Monitor any metrics important to you. Ingest metrics from your infrastructure or applications and create customized dashboards to monitor them. Set alerts and get notified in your preferred notification channel.',
   twitter: {
     title: 'Metrics Monitoring & Customized Dashboards | SigNoz',
     description:
-      'Use SigNoz Cloud to monitor infrastructure and application metrics, build custom dashboards, and set alerts without a custom-metric surcharge.',
+      'Monitor any metrics important to you. Ingest metrics from your infrastructure or applications and create customized dashboards to monitor them. Set alerts and get notified in your preferred notification channel.',
     images: '/img/features/metrics/metrics-overview1.webp',
   },
 }

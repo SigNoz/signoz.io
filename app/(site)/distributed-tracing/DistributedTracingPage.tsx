@@ -50,8 +50,8 @@ const Header: React.FC = () => {
       }
       description={
         <>
-          Use SigNoz Cloud to aggregate and analyze millions of spans with ClickHouse performance.{' '}
-          <br /> Correlate traces with logs and metrics to find root cause in distributed systems.
+          Aggregate and analyze millions of spans with ClickHouse performance. Correlate <br />{' '}
+          traces with logs and metrics to find root cause in distributed systems.
         </>
       }
       buttons={DISTRIBUTED_TRACING_HEADER_BUTTONS}

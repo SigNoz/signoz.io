@@ -145,8 +145,8 @@ const Header = () => {
         </h1>
 
         <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
-          Use SigNoz Cloud to monitor exceptions automatically in Python, Java, Ruby, and
-          JavaScript. <br className="hidden lg:inline" />
+          Monitor exceptions automatically in Python, Java, Ruby, and Javascript.
+          <br className="hidden lg:inline" />
           For other languages, just drop in a few lines of code and start monitoring exceptions.
         </p>
       </div>

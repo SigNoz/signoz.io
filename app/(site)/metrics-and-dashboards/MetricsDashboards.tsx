@@ -146,8 +146,9 @@ const Header = () => {
         </h1>
 
         <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
-          Use SigNoz Cloud to monitor any metrics important to you. Ingest metrics from your
-          infrastructure or applications <br className="hidden lg:inline" />
+          Monitor any metrics important to you. Ingest metrics from your infrastructure or
+          applications
+          <br className="hidden lg:inline" />
           and create customized dashboards to monitor them. Set alerts and get notified{' '}
           <br className="hidden lg:inline" />
           in your preferred notification channel.
@@ -312,7 +313,7 @@ const SigNozFeatures = () => {
     },
     {
       title: 'No separate pricing for custom metrics',
-      desc: 'SigNoz Cloud does not add a custom-metric surcharge. All metrics use the same usage-based pricing, so you can scale monitoring without per-series fees.',
+      desc: 'All metrics are treated the same in SigNoz Cloud and are not charged separately. Metrics pricing in SigNoz Cloud is cost-effective, so you can scale your metrics monitoring with peace of mind.',
       buttonText: 'Learn More',
       buttonLink: 'https://signoz.io/pricing/',
     },

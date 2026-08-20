@@ -9,15 +9,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Log Management Tool - Ingest, Search & Analyze Logs at Scale | SigNoz',
     description:
-      'Use SigNoz Cloud to ingest, search, and analyze logs at scale, then correlate logs with metrics and traces for faster debugging.',
+      'Ingest, search, and analyze logs at scale with SigNoz Cloud, then correlate them with metrics and traces for faster debugging.',
     images: '/img/platform/LogsManagementHero.webp',
   },
   description:
-    'Use SigNoz Cloud to ingest, search, and analyze logs at scale, then correlate logs with metrics and traces for faster debugging.',
+    'Ingest, search, and analyze logs at scale with SigNoz Cloud, then correlate them with metrics and traces for faster debugging.',
   twitter: {
     title: 'Log Management Tool - Ingest, Search & Analyze Logs at Scale | SigNoz',
     description:
-      'Use SigNoz Cloud to ingest, search, and analyze logs at scale, then correlate logs with metrics and traces for faster debugging.',
+      'Ingest, search, and analyze logs at scale with SigNoz Cloud, then correlate them with metrics and traces for faster debugging.',
     images: '/img/platform/LogsManagementHero.webp',
   },
 }
