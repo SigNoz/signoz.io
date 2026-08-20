@@ -354,20 +354,6 @@ aws lambda-microvms create-microvm-auth-token \
 
 ## Validate
 
-Send a request so the application produces a trace. Mint a token as shown in
-[Step 5](#step-5-run-the-microvm), then call the endpoint:
-
-```bash
-curl "https://<microvm-endpoint>" \
-  -H "X-aws-proxy-auth: <auth-token>" \
-  -H "X-aws-proxy-port: 8080"
-```
-
-**Verify these values:**
-
-- `<microvm-endpoint>`: The `endpoint` returned by `run-microvm`. It has no scheme, so prepend `https://`.
-- `<auth-token>`: The `X-aws-proxy-auth` value returned by `create-microvm-auth-token`.
-
 Give the Collector a minute, then open SigNoz:
 
 - **Traces**: your `OTEL_SERVICE_NAME` appears as a service with spans.
@@ -376,8 +362,14 @@ Give the Collector a minute, then open SigNoz:
 
 <Figure
   src="/img/docs/aws-monitoring/lambda-microvms/microvm-traces-explorer.webp"
-  alt="SigNoz Traces Explorer showing spans from an application running inside an AWS Lambda MicroVM"
-  caption="Spans from an application inside a MicroVM, in the SigNoz Traces Explorer"
+  alt="SigNoz Traces Explorer filtered on service.name my-microvm-app, listing handle-request and run-user-code spans from a Lambda MicroVM"
+  caption="Traces Explorer filtered on the service name you set in Step 3"
+/>
+
+<Figure
+  src="/img/docs/aws-monitoring/lambda-microvms/microvm-trace-detail.webp"
+  alt="SigNoz trace detail view showing a MicroVM span with aws.lambda.microvm.image_name and aws.lambda.microvm.image_version resource attributes"
+  caption="Span details for a MicroVM trace, showing the MicroVM resource attributes"
 />
 
 To confirm the Collector itself started, check the runtime log group
