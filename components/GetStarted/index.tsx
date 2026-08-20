@@ -84,11 +84,7 @@ export const GetStarted = ({
               <div className="relative -mb-36 aspect-[2400/1194] w-full max-sm:-mb-8 xl:w-3/5">
                 <Image
                   src={landingThumbnail}
-                  alt={
-                    page === 'homepage'
-                      ? 'SigNoz Cloud dashboard with application performance metrics'
-                      : 'SigNoz dashboard with application performance metrics - Get Started'
-                  }
+                  alt="SigNoz dashboard with application performance metrics"
                   className="z-[0] rounded-lg"
                   fill
                   loading="lazy"
