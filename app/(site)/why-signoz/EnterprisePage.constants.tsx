@@ -308,9 +308,9 @@ export const HIGH_GROWTH_TEAMS_CARDS = [
     description: (
       <div>
         <p>
-          SigNoz Cloud is SOC 2 Type II and HIPAA compliant, with a BAA available as an add-on.
-          Managed BYOC keeps SigNoz in your cloud account. Self-Hosted SigNoz does not inherit
-          SigNoz Cloud compliance.
+          SOC 2 Type II. Self-hosted bring-your-own-cloud for HIPAA and GDPR requirements.
+          Fine-grained RBAC for team-level data access. With enterprise-grade support.
+          High-cardinality is a breeze with ClickHouse.
         </p>
         <TrackingLink
           href="https://trust.signoz.io/"
@@ -380,11 +380,12 @@ export const GETTING_STARTED_CARDS = [
     ),
   },
   {
-    title: <div className="min-h-10">Choose SigNoz Cloud, BYOC, or Self-Hosted SigNoz</div>,
+    title: <div className="min-h-10">Use SigNoz Cloud or host in your infrastructure</div>,
     description: (
       <div className="flex min-h-36 flex-col items-start justify-between">
-        SigNoz manages SigNoz Cloud and BYOC. Your team deploys and operates Self-Hosted SigNoz,
-        including its infrastructure, storage, scaling, upgrades, and backups.
+        SigNoz Cloud is fully managed, SOC 2 compliant, and is live in minutes. If you want to run
+        in your infra - Self-host via Helm chart runs in your own VPC or air-gapped environment. Or
+        you can bring your own cloud.
         <TrackingLink
           href="/contact-us/?source=why-signoz-page-signoz-offerings"
           clickType="Secondary CTA"

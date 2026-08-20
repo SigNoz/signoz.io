@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 
 const enterpriseDescription =
-  'Compare SigNoz Cloud, SigNoz Cloud: BYOC, and Self-Hosted SigNoz for enterprise security, compliance, scale, and contracted support.'
+  'Compare SigNoz Cloud, SigNoz-managed BYOC, and Self-Hosted SigNoz for enterprise security, compliance, scale, and contracted support.'
 
 export const metadata: Metadata = {
   title: {

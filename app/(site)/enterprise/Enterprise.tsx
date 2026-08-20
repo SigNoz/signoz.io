@@ -410,8 +410,8 @@ export default function Enterprise() {
               <div className="mt-3 text-xl font-bold">Engineered for limitless growth</div>
 
               <p className="text-md mt-4 font-normal">
-                SigNoz supports growth across managed Cloud and self-hosted deployments. SigNoz
-                manages Cloud and BYOC. Your team manages Self-Hosted SigNoz infrastructure.
+                SigNoz leverages modern distributed system principles so that you don't have to!
+                Seamlessly scale your observability alongside your enterprise ecosystem.
               </p>
 
               <div className="mt-9 flex flex-col gap-4">
