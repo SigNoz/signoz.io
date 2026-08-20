@@ -61,7 +61,7 @@ const WhySelectSignoz = ({
                 </p>
                 <p className="m-0 block text-sm font-normal leading-9 text-signoz_vanilla-400">
                   Hundreds of companies ⎯from early-stage start-ups to public enterprises use SigNoz
-                  Cloud or Self-Hosted SigNoz to build more reliable products.
+                  to build more reliable products.
                 </p>
               </div>
             </div>
