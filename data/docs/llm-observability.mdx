@@ -1,12 +1,178 @@
 ---
-date: 2026-06-10
+date: 2026-08-08
 title: LLM Observability Overview
-description: Discover SigNoz's pre-built LLM observability integrations. Monitor popular AI frameworks, track latency, errors, and usage trends with real-time dashboards.
+meta_title: "LLM Observability with OpenTelemetry"
+description: Learn what LLM observability is and how to instrument LLM apps with OpenTelemetry. Trace token usage, latency, cost, and tool calls in SigNoz.
+doc_type: explanation
 ---
 
-Explore our collection of pre-built integrations and configurations for monitoring popular LLM frameworks with SigNoz. For a quick overview of LLM observability with SigNoz, visit our [LLM Observability landing page](https://signoz.io/llm-observability/). These setups provide instant insights into AI workflows and can be customized to meet your specific observability needs.
+LLM observability is the practice of collecting traces, metrics, and logs from applications that call large language models, so you can see what each model call did, how long it took, how many tokens it consumed, and where it failed. A single user request in an LLM application often fans out into retrieval steps, several model calls, tool invocations, and retries. Without instrumentation, all of that collapses into one opaque block of latency and one line on a billing invoice.
 
-## Available Integrations
+SigNoz approaches this with OpenTelemetry rather than a proprietary agent. Your application emits `gen_ai.*` spans and metrics through standard OpenTelemetry libraries, exports them over OTLP, and SigNoz stores and queries them next to the rest of your application telemetry. The integrations below cover 46 model providers, agent frameworks, and gateways.
+
+## Supported Integrations
 
 <Listicle name="llm-monitoring" />
 
+## What LLM Observability Covers
+
+An LLM call is a network request to a nondeterministic, metered, and comparatively slow service. That combination is what makes it worth instrumenting separately from an ordinary HTTP dependency.
+
+**Traces and spans across the call chain.** The unit of analysis is the full request, not the individual model call. A retrieval-augmented generation (RAG) request typically produces an embedding span, a vector search span, a chat completion span, and often a second completion span for reranking or summarization. Modeling these as a single trace shows which stage actually consumed the wall-clock time. In SigNoz these appear in the [Traces explorer](https://signoz.io/docs/userguide/traces/) alongside spans from your web framework and database, so an LLM call sits in the same waterfall as the SQL query that fed it.
+
+**Token usage.** Input and output tokens are recorded per call. Because tokens are the billing unit, token counts attributed by model and by code path are the closest thing to a live cost signal. Cached input tokens are counted separately by providers that support prompt caching, which matters because they are usually billed at a lower rate.
+
+**Latency.** LLM latency is bimodal and heavily influenced by output length, so averages are close to useless. Track percentiles, and for streaming responses track time to first token separately from total duration. A response that starts streaming in 300 ms and finishes in 8 seconds feels fast; one that returns nothing for 8 seconds and then dumps the whole answer does not, even though total duration is identical.
+
+**Errors.** Rate limits (HTTP 429), context-length overflows, content filter rejections, upstream 5xx responses, and client timeouts all fail differently and need different responses. Recording an error class per span lets you separate "we are being throttled" from "the model rejected this prompt."
+
+**Cost attribution.** Token counts alone do not tell you who spent them. Attributing spend to a model, a tenant, a feature, or a prompt version turns a single monthly figure into something actionable.
+
+**Model and prompt attribution.** Both the requested model and the model that actually served the response are worth capturing, since providers alias versions behind names like `gpt-4`. Prompt template names and versions let you compare quality and cost across prompt revisions.
+
+**Retrieval steps.** For RAG, the retrieval stage is a common source of bad answers. Query latency, the number of documents returned, and empty result sets are the signals that separate a retrieval failure from a generation failure.
+
+**Agent and tool-call visibility.** Agent frameworks loop: the model picks a tool, the tool runs, the result is fed back, and the model decides again. Instrumenting each tool execution as its own span exposes runaway loops, tools that fail silently, and the iteration count per request.
+
+## Instrumenting LLM Applications with OpenTelemetry
+
+Instrumentation works the same way it does for any other OpenTelemetry-instrumented service. A library patches your LLM client at runtime, wraps each call in a span, attaches attributes to it, and hands the finished spans to an exporter that ships them over OTLP to SigNoz.
+
+### Automatic instrumentation
+
+Automatic instrumentation is the default path and covers most applications. You install an instrumentation package, and it patches the provider SDK so every call it makes produces a span with no changes to your application code. This works well because almost all LLM traffic flows through a small number of client libraries.
+
+Auto-instrumentation captures the mechanical facts: which model, how many tokens, how long, whether it failed. It cannot know your application's own semantics, such as which tenant made the request or which experiment arm the user is in.
+
+### Manual instrumentation
+
+Manual instrumentation fills that gap. You create spans with the OpenTelemetry API for the stages that are specific to your application, such as a document chunking step or a business-level "answer a support ticket" operation, and you add your own attributes to spans that already exist. In practice most teams run both: auto-instrumentation for the provider calls, manual spans for the application logic wrapped around them.
+
+### Instrumentation libraries
+
+Three community projects provide most of the LLM-specific instrumentation in use today. All three emit standard OpenTelemetry spans over OTLP, so all three work with SigNoz.
+
+- <a href="https://github.com/traceloop/openllmetry" target="_blank" rel="noopener noreferrer nofollow">OpenLLMetry</a> from Traceloop, a set of instrumentations covering provider SDKs and frameworks. See the [Traceloop integration guide](https://signoz.io/docs/traceloop/).
+- <a href="https://github.com/openlit/openlit" target="_blank" rel="noopener noreferrer nofollow">OpenLIT</a>, which covers LLM SDKs along with vector databases and GPU metrics. See the [OpenLIT integration guide](https://signoz.io/docs/openlit/).
+- <a href="https://github.com/Arize-ai/openinference" target="_blank" rel="noopener noreferrer nofollow">OpenInference</a> from Arize, which has strong coverage of agent and orchestration frameworks such as LangChain, LlamaIndex, and CrewAI.
+
+Some providers are also covered by instrumentation maintained in the <a href="https://github.com/open-telemetry/opentelemetry-python-contrib" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry contrib repositories</a> directly, such as `opentelemetry-instrumentation-openai-v2`. Where an official instrumentation exists, the integration guides prefer it.
+
+### No vendor SDK required
+
+SigNoz ingests OTLP. It does not ship an LLM-specific agent, and there is no SigNoz SDK to install in your application. Anything that speaks OTLP over HTTP or gRPC can send data, which has two consequences worth stating plainly. You can pick whichever instrumentation library best covers your stack, or mix them. And because the data is standard OpenTelemetry, moving it elsewhere later is a change of endpoint, not a re-instrumentation project.
+
+The exporter configuration is the same as any other OpenTelemetry service:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+## OpenTelemetry GenAI Semantic Conventions
+
+Semantic conventions are the agreed names for attributes, so that a token count from an OpenAI call and one from an Anthropic call land in the same field and can be summed in one query. The generative AI conventions live in the `gen_ai.*` namespace.
+
+<Admonition type="warning" title="These conventions are still evolving">
+Every `gen_ai.*` attribute and metric described here carries the **Development** status in the specification, which means names and semantics can still change between releases. The conventions also moved out of the main <a href="https://github.com/open-telemetry/semantic-conventions" target="_blank" rel="noopener noreferrer nofollow">semantic-conventions</a> repository into a dedicated <a href="https://github.com/open-telemetry/semantic-conventions-genai" target="_blank" rel="noopener noreferrer nofollow">semantic-conventions-genai</a> repository, and the attribute registry has already been reworked once: the provider is now identified by `gen_ai.provider.name`, and `gen_ai.system` is no longer in the registry. Pin your instrumentation versions and expect to revisit dashboards after upgrades.
+</Admonition>
+
+### Inference spans
+
+A model call is recorded as a span of kind `CLIENT`, named `{gen_ai.operation.name} {gen_ai.request.model}`, which produces span names like `chat gpt-4`. Two attributes are required:
+
+| Attribute | Notes |
+|---|---|
+| `gen_ai.operation.name` | The operation performed. Well-known values include `chat`, `text_completion`, `generate_content`, `embeddings`, `execute_tool`, `invoke_agent`, `create_agent`, `invoke_workflow`, and `retrieval`. |
+| `gen_ai.provider.name` | The provider. Well-known values include `openai`, `anthropic`, `aws.bedrock`, `azure.ai.openai`, `azure.ai.inference`, `cohere`, `deepseek`, `groq`, `mistral_ai`, `perplexity`, `x_ai`, `ibm.watsonx.ai`, `gcp.gemini`, and `gcp.vertex_ai`. |
+
+The attributes that carry most of the analytical value are recommended rather than required:
+
+| Attribute | Notes |
+|---|---|
+| `gen_ai.request.model` | The model requested, for example `gpt-4`. |
+| `gen_ai.response.model` | The model that actually served the response, for example `gpt-4-0613`. |
+| `gen_ai.usage.input_tokens` | Tokens consumed by the prompt. |
+| `gen_ai.usage.output_tokens` | Tokens produced in the completion. |
+| `gen_ai.usage.cache_read.input_tokens` | Input tokens served from a provider-managed cache. Included in the input token total. |
+| `gen_ai.usage.reasoning.output_tokens` | Output tokens spent on reasoning. Included in the output token total. |
+| `gen_ai.response.finish_reasons` | Why generation stopped, for example `["stop"]` or `["length"]`. |
+| `gen_ai.request.temperature`, `gen_ai.request.max_tokens`, `gen_ai.request.top_p` | Sampling parameters. |
+| `gen_ai.conversation.id` | Correlates messages belonging to one conversation or thread. |
+
+Note that the cached and reasoning token counts are defined as subsets of the input and output totals, so adding them to those totals double-counts.
+
+### Tool and agent spans
+
+Tool execution is a separate span of kind `INTERNAL`, named `execute_tool {gen_ai.tool.name}`, with `gen_ai.operation.name` set to `execute_tool`. It carries `gen_ai.tool.name` as required, plus `gen_ai.tool.call.id`, `gen_ai.tool.type`, and `gen_ai.tool.description`. Agent spans add `gen_ai.agent.name`, `gen_ai.agent.id`, and `gen_ai.agent.description`. Failures on both span types use the stable `error.type` attribute, which is shared with the rest of OpenTelemetry rather than specific to GenAI.
+
+### Metrics
+
+Instrumentations that emit metrics report histograms rather than counters:
+
+- `gen_ai.client.token.usage`, in units of `{token}`, split by a required `gen_ai.token.type` attribute whose values are `input` and `output`
+- `gen_ai.client.operation.duration`, in seconds
+- `gen_ai.server.time_to_first_token` and `gen_ai.server.time_per_output_token`, for server-side instrumentation of streaming responses
+
+These share the `gen_ai.operation.name`, `gen_ai.provider.name`, `gen_ai.request.model`, and `gen_ai.response.model` attributes with spans, so the same breakdowns work across both signals.
+
+### Prompt and response content
+
+Prompt and completion content is not captured by default. `gen_ai.input.messages`, `gen_ai.output.messages`, and `gen_ai.system_instructions` are all **Opt-In** in the specification, which means an instrumentation should only record them when explicitly enabled. This is a deliberate privacy default: prompts frequently contain user data. Turn content capture on knowingly, and check what your data retention policy implies before you do.
+
+## What to Alert On
+
+Useful LLM alerts fire on user-visible degradation and on spend, not on token counts drifting a few percent. Set these up in [SigNoz alerts](https://signoz.io/docs/alerts/), using [metrics-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) for aggregate signals and [trace-based alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) for span-level conditions.
+
+**Error rate.** Alert when the share of failed model calls exceeds roughly 2 to 5 percent over a 5 minute window. Alert separately on rate-limit errors, because they mean your quota is the constraint and the fix is different from a generic failure. Rate-limit errors are worth a lower threshold, around 1 percent, since they usually escalate quickly.
+
+**p95 latency.** Alert on the 95th percentile of `gen_ai.client.operation.duration`, not the mean. Pick the threshold from your own baseline rather than an absolute number, since a summarization endpoint and a classification endpoint have legitimately different profiles. For streaming interfaces, alert on time to first token as well, where anything past 1 to 2 seconds is usually perceptible.
+
+**Token spend anomalies.** Absolute thresholds age badly as traffic grows. [Anomaly-based alerts](https://signoz.io/docs/alerts-management/anomaly-based-alerts/) compare token usage against its own recent seasonal pattern, which catches the failure modes that matter: a prompt change that silently doubled context size, a retry loop, or an agent that stopped terminating. A sudden rise in input tokens per request is the more common of the two and usually points at prompt or context construction.
+
+**Retrieval failures.** Alert when retrieval spans return zero documents above a small share of requests, or when retrieval latency degrades. Empty retrieval rarely throws an error. It produces a confident, wrong answer, which no error-rate alert will catch.
+
+**Agent iteration counts.** For agent workloads, alert when tool calls per request exceed your expected ceiling. This is the clearest early signal of a runaway loop, and it shows up in cost before it shows up in complaints.
+
+**No data.** If an LLM endpoint stops emitting spans entirely, that is either a broken deployment or broken instrumentation. Both are worth paging on. See [alerts on absent data](https://signoz.io/docs/alerts-management/no-data-alerts-for-groups/).
+
+## FAQ
+
+**What is the difference between LLM observability and LLM monitoring?**
+
+Monitoring tracks known quantities against thresholds: error rate, latency, token spend. Observability is the broader property of being able to ask questions you did not plan for, such as why one tenant's p99 doubled last Tuesday, by querying high-cardinality trace data. Monitoring tells you something broke. Observability is what lets you find out why. In practice the terms are used interchangeably, and the distinction that matters is whether you kept the per-request detail or only the aggregates.
+
+**Do I need a vendor SDK to use LLM observability in SigNoz?**
+
+No. SigNoz accepts OTLP, so any OpenTelemetry instrumentation works. Use OpenLLMetry, OpenLIT, OpenInference, the official OpenTelemetry contrib instrumentations, or your own manual spans. There is no SigNoz-specific SDK to install.
+
+**Can I self-host this?**
+
+Yes. SigNoz is open source and can be self-hosted, and the LLM instrumentation is identical either way. Only the exporter endpoint and authentication differ. See [self-hosting SigNoz](https://signoz.io/docs/install/).
+
+**Are the OpenTelemetry GenAI semantic conventions stable?**
+
+Not yet. Every `gen_ai.*` attribute and metric is currently marked Development in the specification, and the conventions recently moved to a dedicated repository. Instrumentation libraries adopt changes at different speeds, so two libraries can disagree on attribute names for the same concept. Pin versions, and re-check dashboards after upgrading instrumentation.
+
+**How do I track LLM cost if OpenTelemetry only records tokens?**
+
+The conventions record token counts, not currency, because prices change and vary by contract. Multiply token counts by your own per-model rates at query time in a dashboard, keeping the rate table in one place. Because `gen_ai.request.model` and `gen_ai.response.model` are on every span, the same query can break spend down by model, and joining against your own span attributes extends it to tenant or feature.
+
+**Does this work with agent frameworks and not just direct API calls?**
+
+Yes. Frameworks such as LangChain, LlamaIndex, CrewAI, and AutoGen have dedicated instrumentation that emits spans for chains, agent steps, and tool executions rather than only the underlying model call. The integration list above covers them.
+
+**Can I correlate LLM traces with the rest of my application?**
+
+Yes, and this is the main practical argument for the OpenTelemetry approach. LLM spans are ordinary OpenTelemetry spans, so they join the same trace as your HTTP handler, database queries, and downstream services. One waterfall shows whether a slow request was the model, the vector search, or the API call your tool made.
+
+## Next Steps
+
+- Pick your provider or framework from the integration list above and follow its setup guide.
+- Import a matching [dashboard template](https://signoz.io/docs/dashboards/dashboard-templates/overview/) to get token, latency, and error panels without building them.
+- Set up [alerts](https://signoz.io/docs/alerts/) on error rate and latency once data is flowing.

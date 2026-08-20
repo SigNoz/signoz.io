@@ -1,5 +1,5 @@
 ---
-date: 2026-06-19
+date: 2026-08-11
 title: Choosing a Log Collection Method for SigNoz
 meta_title: "Log Collection Methods: OTLP & Collector"
 description: "Compare log collection methods for SigNoz, including SDK OTLP, HTTP API, files, OTel receivers, and log processors."
@@ -19,8 +19,6 @@ For step-by-step setup guides, see [Send Logs to SigNoz](https://signoz.io/docs/
 | Collect from external log sources | [OTel Collector Receivers](#path-4-otel-collector-receivers) | Native receivers for many sources |
 | Already using FluentBit/Fluentd | [Log Processors](#path-5-log-processors) | Use existing infrastructure |
 | Custom HTTP integration | [HTTP API](#path-2-http-api) | Language-agnostic, simple |
-
----
 
 ## Path 1: SDK OTLP Export for Application Logs
 
@@ -51,8 +49,6 @@ Your application uses an OpenTelemetry SDK to send logs directly to SigNoz via O
 | Java | [Java Logs](https://signoz.io/docs/logs-management/send-logs/java-logs/) |
 | Go | [Zap](https://signoz.io/docs/logs-management/send-logs/zap-to-signoz/), [Zerolog](https://signoz.io/docs/logs-management/send-logs/zerolog-to-signoz/), [Logrus](https://signoz.io/docs/logs-management/send-logs/logrus-to-signoz/), [slog](https://signoz.io/docs/logs-management/send-logs/slog-to-signoz/) |
 
----
-
 ## Path 2: Send Logs with the HTTP API
 
 Send logs directly to SigNoz over HTTP using a simple JSON payload.
@@ -73,8 +69,6 @@ Send logs directly to SigNoz over HTTP using a simple JSON payload.
 - ❌ No automatic trace correlation (include trace context fields manually if needed)
 
 → [HTTP Logs API Guide](https://signoz.io/docs/userguide/send-logs-http/)
-
----
 
 ## Path 3: Collect File Logs with the OTel Collector
 
@@ -105,8 +99,6 @@ Your application writes logs to stdout/file. The OpenTelemetry Collector reads t
 | Kubernetes | [K8s Pod Logs](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/) — DaemonSet auto-collects all pod logs |
 | Docker | [Docker Logs](https://signoz.io/docs/userguide/collect_docker_logs/) |
 | VM / Bare Metal | [Collect from File](https://signoz.io/docs/userguide/collect_logs_from_file/) |
-
----
 
 ## Path 4: Collect Logs with OTel Collector Receivers
 
@@ -142,8 +134,6 @@ The OpenTelemetry Collector supports many more receivers. See the full list in t
 
 </KeyPointCallout>
 
----
-
 ## Path 5: Forward Logs with Log Processors
 
 If you already have FluentBit, Fluentd, Logstash, or Vector in your infrastructure, you can forward logs to SigNoz.
@@ -171,8 +161,6 @@ If you already have FluentBit, Fluentd, Logstash, or Vector in your infrastructu
 | Fluentd | [Fluentd to SigNoz](https://signoz.io/docs/userguide/fluentd_to_signoz/) |
 | Logstash | [Logstash to SigNoz](https://signoz.io/docs/userguide/logstash_to_signoz/) |
 | Vector | [Vector to SigNoz](https://signoz.io/docs/logs-management/send-logs/vector-logs-to-signoz/) |
-
----
 
 ## Cloud and Platform Log Collection Scenarios
 
@@ -227,8 +215,6 @@ Different cloud platforms and deployment models support multiple collection path
 | Cloudflare Workers | Path 1 (SDK - native OTLP) | [Cloudflare Logs](https://signoz.io/docs/logs-management/send-logs/cloudflare-logs/) |
 | Supabase | OTLP | [Supabase Logs](https://signoz.io/docs/logs-management/send-logs/supabase-logs/) |
 
----
-
 ## Why Use the OTel Collector for Log Collection?
 
 The OpenTelemetry Collector is a key component in Paths 3 and 4. It provides:
@@ -240,8 +226,6 @@ The OpenTelemetry Collector is a key component in Paths 3 and 4. It provides:
 
 Learn more: [OTel Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/)
 
----
-
 ## Combining Multiple Log Collection Paths
 
 Many teams use multiple collection methods:
@@ -250,8 +234,6 @@ Many teams use multiple collection methods:
 - **OTel Collector** (File or Receivers) for infrastructure logs, databases, and third-party software
 
 If you're on Kubernetes and use both approaches, [disable automatic log collection](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#disable-logs-collection) for pods using SDK export to avoid duplicates.
-
----
 
 ## Log Collection Method Comparison Summary
 
@@ -262,8 +244,6 @@ If you're on Kubernetes and use both approaches, [disable automatic log collecti
 | File + Collector | Manual | Disk-persisted | None | K8s, Docker, VMs |
 | OTel Receivers | Manual | Managed | None | CloudWatch, Kafka, Journald |
 | Log Processors | Manual | Depends | None | Existing FluentBit/Fluentd |
-
----
 
 ## Next Steps for Sending Logs to SigNoz
 

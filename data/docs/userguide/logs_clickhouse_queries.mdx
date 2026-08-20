@@ -46,7 +46,7 @@ If we check the schema of the logs table in clickhouse this is what it looks lik
 
 For faster filtering using resource attributes we have another table i.e `logs_v2_resource`
 
-```
+```sql
 (
     `labels` String CODEC(ZSTD(5)),
     `fingerprint` String CODEC(ZSTD(1)),
@@ -315,7 +315,7 @@ You can reduce your end result to either average, latest, sum, min, or max.
 
 #### Average count of log lines where `severity_text = 'INFO'` ,  `method = 'GET'` , `service.name = 'demo'`. Here `method` is an attribute while `service.name` is a resource attribute.
 
-```sql
+```sql defaultCollapsed
 WITH __resource_filter AS (
     SELECT fingerprint FROM signoz_logs.distributed_logs_v2_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'demo') 

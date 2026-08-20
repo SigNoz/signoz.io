@@ -1,0 +1,99 @@
+---
+title: How MSI Uses SigNoz MCP to Debug Slow Sales Orders Across the Stack
+date: 2026-08-07
+tags: [AI, Observability]
+authors: [mahak_kaur]
+description: MSI's sales-order workflow runs across the UI, APIs, database, and its ERP. Engineers already used SigNoz Cloud for API traces and logs. Here's how Taylor Mattison uses SigNoz MCP with Claude to compare traces at scale, connect telemetry to code, and get to a clear answer for where slowdowns actually live.
+image: /img/blog/2026/08/msi-blog-cover.webp
+keywords: [signoz mcp, agent native observability, opentelemetry, distributed tracing, debugging, ai observability]
+related_articles:
+  - '/blog/shaped-signoz-mcp-latency-debugging'
+  - '/blog/introducing-agent-native-observability'
+  - '/blog/unhyped-take-on-mcp-servers'
+---
+
+[MSI](https://www.msisurfaces.com/) is a leading North American distributor of flooring, countertops, wall tile, and hardscaping products, founded in 1975 and headquartered in Orange, California, with more than 50 showrooms and distribution centers across the U.S. and Canada. Thousands of orders move through its internal sales-order application every day. [Taylor Mattison](https://www.linkedin.com/in/taylor-mattison/) (Front-end Developer, MSI) builds the UI for that system, while [Thang Syle](https://www.linkedin.com/in/thangsyle) (Software Engineer II, MSI) works on the API and database logic behind it.
+
+By the time post-migration debugging picked up, SigNoz Cloud was already where MSI engineers looked for API traces and logs. The team needed a better way to store logs, inspect traces, and find the exact request behind a bug. One save in the UI could touch around ten endpoints, pass through older business logic and stored procedures, and still depend on the ERP and database underneath it.
+
+That made a slow sales order hard to assign to one layer. A branch leader might hear from teams that saving an order feels slow, and the report could reach engineering with almost no reproduction steps. The slowdown could be in the front-end sales-order application, one of the APIs behind it, a stored procedure, the ERP, or a database query.
+
+The expensive part was the uncertainty. A quick fix or restart might quiet the system for a while, but if the team guessed wrong, the slowdown came back. The useful work happened earlier: getting to a trace-backed answer for where the time was going.
+
+<YouTube id="dBx3nSjPgkI" mute="false" />
+
+Taylor's MCP workflow grew out of that problem and the telemetry MSI already had in SigNoz Cloud. The traces and logs were already there. MCP let him bring that evidence into Claude, compare more traces than he could inspect by hand, and point to the part of the stack worth checking first.
+
+## MSI was already debugging in SigNoz Cloud
+
+Thang's API work spans purchase orders, item fulfillments, and invoicing. When one of those workflows breaks, his first question is simple: what data did we actually send? "SigNoz for me is my debugging tool," he says. "We work with a lot of APIs, and I send my JSON body into the log. Anytime something goes wrong, I go straight to SigNoz and search through it."
+
+<YouTube id="BcGEpxmGCXE" mute="false" />
+
+Before using SigNoz Cloud, some of that meant reading through text files. Now he filters logs, checks the JSON body sent to the ERP, and uses traces to see where the time went. After the ERP migration went live in May, he used SigNoz Cloud several times a day, digging out the request data behind new bugs.
+
+When a user reports a bug, Thang opens SigNoz Cloud, checks the API payload, and rebuilds the case in a C# unit test until he can reproduce it. "Most of the time, I use traces to find my logs," he says, "and then use my logs to do my debugging."
+
+Taylor's MCP workflow builds on that habit. SigNoz Cloud was already where MSI engineers went for request-level evidence. MCP connects him to the same evidence, but lets him compare it across more traces than one person can reasonably inspect by hand.
+
+## When one trace was not enough
+
+Slow sales-order complaints still tend to land with Taylor first. "Every time something's slow, it's 'hey, what's going on? Talk to me,'" he says.
+
+Taylor already knew how to investigate that by hand. He knows which front-end features call which endpoints; he can open SigNoz Cloud, find the traces, walk the spans, and jump into related logs. The problem was the number of traces he had to compare.
+
+Some MSI traces run hundreds of spans deep. Taylor might be hunting the one span that errored, or an operation that took ten seconds when it should have taken closer to a hundred milliseconds. One trace is manageable; enough traces to prove a pattern is different work.
+
+So Taylor connected Claude to SigNoz Cloud through SigNoz MCP. Now, instead of opening one trace at a time, he could ask the agent to compare traces and hand back the pattern. "It was pulling in more context than I was able to pull in just from looking through the one span and going through each trace," he says.
+
+Taylor calls the result a fingerprint. It might be repeated slow spans, recurring errors, operations in the wrong order, or a slowdown elsewhere cascading into the sales-order experience. It gave him something he could take to the rest of the team: the traces, the repeated symptoms, and the layer that best explained them.
+
+## Taylor starts from the feature
+
+Taylor starts from what he already knows on the front end: the feature, the endpoints it calls, and the window when users felt the slowdown. Then he asks the agent to compare traces before it explains anything.
+
+<Figure
+  src="/img/blog/2026/08/msi-mcp-debugging-flow-new.webp"
+  alt="Taylor's SigNoz MCP debugging flow"
+  caption="Taylor's SigNoz MCP debugging flow"
+/>
+
+A single slow trace can mislead; it's often a symptom, not the cause. A batch is what shows the pattern: the same span turning up again, a repeated error, operations out of order, or a slowdown that lines up with the database.
+
+SigNoz MCP gives Claude direct access to telemetry in SigNoz Cloud, and Taylor supplies the rest: a front-end error when there is one, context from other systems, or the code itself, which Claude reads directly. That lets him reason across a system he did not build end to end. "As a front-end developer who knows JavaScript really well, I can now go back, look at this stuff, feed it in, and start understanding what's really going on," he says.
+
+He still checks the answer. The difference now is that the first pass across traces, logs, and code doesn't happen one click at a time.
+
+## Patterns one person would miss
+
+The agent's most useful findings were quiet inefficiencies, the kind that live inside business systems because no one person sees the whole path clearly.
+
+In one investigation, the agent spotted operations happening in the wrong order: an ID set after another operation had already relied on it. It was the kind of race-condition pattern Taylor would never catch by staring at hundreds of spans in one endpoint. Comparing traces made the sequence visible.
+
+In another, he used traces in SigNoz Cloud alongside the code to reason about database behavior, surfacing indexing issues, inefficient joins, and table lookups that had grown expensive over time. He didn't have to own the database; he could bring the owner evidence instead of a hunch.
+
+The clearest example was pure wasted work: warning checks firing on user actions that had nothing to do with any warning they could raise. "Here's the 20 operations that make no sense to be called," Taylor says. "You're wasting database time, wasting API calls, and putting load on your servers."
+
+<YouTube id="T4p9qX_iar4" mute="false" />
+
+Cut those calls, and the system does less pointless work: lighter on the APIs, the database, and the servers. MCP moved Taylor from "something feels slow" to findings concrete enough for another engineer to act on.
+
+## Taylor still makes the call
+
+Taylor uses AI, but still treats telemetry as the source of truth, because an agent can only reason over the data it can read. Thin traces lead to thin answers; a trace, a log line, and a repeated timing pattern make the answer checkable.
+
+The rest still belongs to the engineer. Taylor describes that role as a mix of taste and business context: taste being a sense of what clean, scalable code should look like, business context being what matters to MSI's internal users and where the tradeoffs sit. "A lot of it's taste. Making something that scales well but also reads cleanly to other developers, that's the kind of thing AI is never going to get right," he says.
+
+Taylor still decides which pattern is real, which fix is worth making, and how to explain the issue to the team that owns it. That same division of work is what [Noz](https://signoz.io/blog/introducing-noz-your-ai-teammate-in-signoz/), SigNoz's in-product AI teammate, brings to SigNoz Cloud: help engineers move from a symptom to the traces, logs, and patterns behind it, while keeping the final judgment with the person debugging the system.
+
+## What other teams can take from this
+
+MSI's setup will feel familiar to many engineering teams, with work spread across teams, vague bug reports, and uneven telemetry. The agent worked because the evidence was available in SigNoz Cloud: request JSON, traces that lead to the right logs, and context behind each slowdown. That's the practical side of [agent-native observability](https://signoz.io/agent-native-observability/).
+
+For Taylor, that changes how a slow order plays out. Instead of guessing which layer is slow, he walks in with a fingerprint, the traces behind it, and a clear answer to the question everyone started with: where is the slowdown actually coming from?
+
+---
+
+**SigNoz Cloud** is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)

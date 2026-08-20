@@ -104,7 +104,7 @@ export const WhyOpenTelemetry = ({ className }: { className?: string }) => {
                 </p>
 
                 <p className="my-3 text-base font-normal leading-9 text-signoz_vanilla-400 md:max-w-[min(42rem,90%)]">
-                  SigNoz offers the best in class support for OpenTelemetry{"'"}s semantic
+                  SigNoz Cloud offers the best in class support for OpenTelemetry{"'"}s semantic
                   conventions with the best visualizations ⎯ powered by our powerful ingestion
                   engine.
                 </p>
