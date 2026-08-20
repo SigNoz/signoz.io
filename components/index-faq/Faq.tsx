@@ -7,78 +7,30 @@ import { useState } from 'react'
 import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { useLogEvent } from '@/hooks/useLogEvent'
+import { type HomepageFaqItem, homepageFaqItems } from './faqContent'
 
-type Faq = {
-  answer: ReactNode
-  question: string
+function renderAnswer({ answer, link }: Pick<HomepageFaqItem, 'answer' | 'link'>): ReactNode {
+  if (!link) return answer
+
+  return (
+    <>
+      {link.before}
+      <TrackingLink
+        className="text-signoz_robin-300 underline underline-offset-4 transition-colors hover:text-signoz_robin-200"
+        clickLocation="Homepage FAQ Section"
+        clickName={link.trackingName}
+        clickText={link.text}
+        clickType="Inline Link"
+        href={link.href}
+      >
+        {link.text}
+      </TrackingLink>
+      {link.after}
+    </>
+  )
 }
 
-const faqs: Faq[] = [
-  {
-    question: 'How quickly can we start sending data to SigNoz?',
-    answer: (
-      <>
-        Most teams start with{' '}
-        <TrackingLink
-          className="text-signoz_robin-300 underline underline-offset-4 transition-colors hover:text-signoz_robin-200"
-          clickLocation="Homepage FAQ Section"
-          clickName="Instrumentation Docs Link"
-          clickText="OpenTelemetry instrumentation"
-          clickType="Inline Link"
-          href="/docs/instrumentation/"
-        >
-          OpenTelemetry instrumentation
-        </TrackingLink>{' '}
-        or the OpenTelemetry Collector. For Kubernetes, the SigNoz Helm chart can collect cluster
-        metrics, logs, and traces; for AWS, CloudWatch logs can be routed to SigNoz Cloud. Your
-        exact path depends on language, cloud, and whether you use SigNoz Cloud or self-host.
-      </>
-    ),
-  },
-  {
-    question: 'Can SigNoz replace Datadog, Grafana, or CloudWatch?',
-    answer:
-      'Yes, for teams that want logs, metrics, traces, dashboards, alerts, and infrastructure monitoring in one OpenTelemetry-native product. Many migrations start by sending OpenTelemetry data to SigNoz, then rebuilding the dashboards, alerts, and incident workflows that matter most.',
-  },
-  {
-    question: 'How is SigNoz pricing calculated?',
-    answer: (
-      <>
-        SigNoz pricing is usage based. There is no user-based pricing, no host-based pricing, and no
-        special pricing for custom metrics. Teams can estimate cost from expected logs, traces,
-        metrics volume, and retention with the{' '}
-        <TrackingLink
-          className="text-signoz_robin-300 underline underline-offset-4 transition-colors hover:text-signoz_robin-200"
-          clickLocation="Homepage FAQ Section"
-          clickName="Pricing Calculator Link"
-          clickText="pricing calculator"
-          clickType="Inline Link"
-          href="/pricing/#estimate-your-monthly-bill"
-        >
-          pricing calculator
-        </TrackingLink>
-        , then use ingestion controls to drop noisy telemetry before it is stored.
-      </>
-    ),
-  },
-  {
-    question: 'Can we self-host SigNoz or keep data in our cloud?',
-    answer:
-      'Yes. SigNoz supports Cloud, open-source self-hosting, and enterprise options including dedicated cloud, bring-your-own-cloud, and self-hosting with support. Enterprise plans are built for teams that need data residency, compliance reviews, SSO, migration help, or stronger deployment control.',
-  },
-  {
-    question: 'Can alerts route to the right team?',
-    answer:
-      'Yes. SigNoz supports alerts on metrics, logs, traces, exceptions, anomaly detection, and Apdex. You can send notifications to channels like Slack, PagerDuty, Opsgenie, MS Teams, email, or webhooks, and use routing policies to send alerts to the right team based on labels such as service, severity, or environment.',
-  },
-  {
-    question: 'How does SigNoz help teams debug incidents faster?',
-    answer:
-      'SigNoz keeps logs, traces, metrics, exceptions, dashboards, and alerts connected in one workspace. Teams can move from a latency spike to related traces, from a trace to surrounding logs, or from an alert to the service and attributes behind it without stitching context across separate tools.',
-  },
-]
-
-function FaqItem({ answer, question }: Faq) {
+function FaqItem({ answer, link, question }: HomepageFaqItem) {
   const [isOpen, setIsOpen] = useState(false)
   const logEvent = useLogEvent()
 
@@ -119,7 +71,7 @@ function FaqItem({ answer, question }: Faq) {
       >
         <div className="overflow-hidden">
           <p className="m-0 max-w-4xl px-5 pb-5 text-base leading-7 tracking-normal text-signoz_vanilla-400 sm:px-6 sm:pb-6 md:px-8 md:text-base">
-            {answer}
+            {renderAnswer({ answer, link })}
           </p>
         </div>
       </div>
@@ -141,7 +93,7 @@ export default function Faq() {
             <span className="text-signoz_vanilla-400">answered.</span>
           </h2>
           <p className="m-0 mt-5 max-w-md text-base leading-7 tracking-normal text-signoz_vanilla-400 sm:mt-6 sm:text-lg sm:leading-8">
-            Quick answers to the questions teams usually ask while evaluating SigNoz.
+            Quick answers to the questions teams usually ask while evaluating SigNoz Cloud.
           </p>
           <TrackingLink
             className="mt-8 block w-full max-w-sm"
@@ -158,7 +110,7 @@ export default function Faq() {
         </div>
 
         <div className="space-y-3 lg:col-span-2">
-          {faqs.map((faq) => (
+          {homepageFaqItems.map((faq) => (
             <FaqItem key={faq.question} {...faq} />
           ))}
         </div>
