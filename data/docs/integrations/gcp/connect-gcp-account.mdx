@@ -1,0 +1,102 @@
+---
+date: 2026-08-03
+title: Connect Your GCP Account in SigNoz and Copy Credentials
+description: Connect a Google Cloud account in the SigNoz UI, set the deployment project and projects to monitor, then copy the ingestion credentials your Collector needs.
+doc_type: howto
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+---
+
+Connecting a GCP account registers the integration in SigNoz and gives you the **ingestion credentials** your OpenTelemetry Collector uses to send data. This is step 2 of the [GCP integration](https://signoz.io/docs/integrations/gcp/gcp-integration/).
+
+You should have already [created a service account](https://signoz.io/docs/integrations/gcp/create-service-account/) and decided your deployment project and the projects you want to monitor.
+
+## Open the connection panel
+
+1. In SigNoz, go to **Integrations** and open **Google Cloud Platform**.
+2. Click **Integrate Now** to open the **Connect Google Cloud Platform** panel.
+
+<Figure
+  src="/img/docs/integrations/gcp/gcp-integration-control-plane.webp"
+  alt="SigNoz Integrations page showing the Google Cloud Platform control plane with an Integrate Now button and the list of services"
+  caption="The GCP control plane in SigNoz. Click Integrate Now to start."
+  className="box-shadowed-image"
+/>
+
+## Choose a connection method
+
+Two methods are shown:
+
+- **Connect Manually**: you deploy and configure your own OpenTelemetry Collector. This is the flow these docs cover; select it.
+- **Connect via Agent**: SigNoz deploys and manages the Collector for you (Coming Soon).
+
+## Fill in the connection fields
+
+The panel asks for four values. They carry your setup context through every later step, so choose them deliberately. Fields marked with `*` are required.
+
+<Figure
+  src="/img/docs/integrations/gcp/gcp-integration-connect-account.webp"
+  alt="SigNoz Connect Google Cloud Platform panel showing Connect Manually selected and the Account Name, Deployment Project ID, Deployment Region, and Projects to Monitor fields"
+  caption="The Connect Google Cloud Platform panel with the manual connection method selected"
+  className="box-shadowed-image"
+/>
+
+### Account Name
+
+A label you choose to uniquely identify this integration in SigNoz. Unlike AWS (account ID) or Azure (subscription ID), GCP has no single identifier that always exists. Projects are globally unique and need not belong to an organization. Pick something stable and recognizable: your organization ID, a billing account, or an environment name.
+
+Examples: `my-org`, `billing@company.com`, `production`.
+
+This name labels the account in the SigNoz UI. It does **not** name any GCP resource.
+
+### Deployment Project ID
+
+The GCP project where you deploy the **OpenTelemetry Collector**. Enter the project ID exactly as it appears in GCP (for example, `my-deployment-project-123`).
+
+This value is the anchor for the rest of the setup. In [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/), it is the project you build resources in. The Collector runs here and reads metrics from every project in **Projects to Monitor**, which may include projects other than this one.
+
+### Deployment Region
+
+The GCP region where the Collector runs. Select one region from the dropdown (for example, `asia-south1` (Mumbai), or `us-central1` (Iowa)).
+
+If you deploy the Collector on Cloud Run, use this value as its `--region` in [step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/); if you run it on other compute (a VM, GKE, or an existing cluster), record the region that compute lives in. Choose a region close to the projects you monitor to reduce latency and egress.
+
+### Projects to Monitor
+
+The list of project IDs whose metrics you want in SigNoz. Add them one at a time; each appears as a pill. Include the Deployment Project ID here too if you want to monitor it.
+
+This list drives a later step: one [`googlecloudmonitoring` receiver block](https://signoz.io/docs/integrations/gcp/collect-metrics/) per project in the Collector config.
+
+## Copy the deployment and ingestion secrets
+
+Below the four fields, the **Deployment details & ingestion secrets** section is auto-filled by SigNoz. These are the values the Collector needs to authenticate to SigNoz. Copy them now; you paste them into the Collector configuration in [step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/).
+
+| Field | Used for | Reference |
+| --- | --- | --- |
+| **Ingestion URL** | The OTLP endpoint the Collector exports metrics to | [Ingestion overview](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) |
+| **Ingestion Key** | Authenticates telemetry ingestion, sent as the `signoz-ingestion-key` header | [Ingestion keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/) |
+
+<Admonition type="info">
+On SigNoz Cloud these are pre-filled. On SigNoz Enterprise (Self-Hosted) some values may be blank, so fill in any missing ones before connecting. Treat the ingestion key as a secret. If you don't have one, create it under **Settings** > [**Ingestion Settings**](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+</Admonition>
+
+## Connect the account
+
+Click **Connect Account**. SigNoz registers the account and marks it connected. You are returned to the GCP control plane, where the account now appears and services are listed as **Not enabled**.
+
+Connecting the account does **not** create any GCP resources or start data flowing. The manual flow leaves that to you. You enable a service and start seeing data only after you deploy the Collector and configure its metrics.
+
+## Enable services
+
+In the control plane, each supported service (for example, **GCP Cloud SQL for PostgreSQL** or **GCP Memorystore Redis**) has a **Metric Collection** toggle, plus a **Data Collected** tab listing the metrics its dashboard expects.
+
+<Admonition type="info">
+In the manual flow, this toggle records your intent and lights up the pre-built dashboards; it does **not** provision GCP resources. You must create the resources yourself: configure the [metrics receiver](https://signoz.io/docs/integrations/gcp/collect-metrics/) in your Collector. The metrics listed under **Data Collected** are the values SigNoz's dashboards use; add them to your Collector config. Your actual metrics depend on what you configure in the Collector.
+</Admonition>
+
+## Next step
+
+[Deploy the OpenTelemetry Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/) using the ingestion credentials you copied.
+
+## Get Help
+
+<GetHelp />

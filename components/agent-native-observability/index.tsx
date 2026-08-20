@@ -51,9 +51,9 @@ function AgentNativeObservabilityControl({ className }: { className?: string }) 
               Introducing Agent Native Observability
             </h2>
             <p className="max-w-3xl text-center text-xs font-medium text-signoz_vanilla-100 sm:text-base">
-              Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
-              issues without leaving your dev environment. Traces, logs, metrics, service topology,
-              and your actual codebase - all in one place. Or use Noz, our new AI teammate
+              Connect SigNoz Cloud to your coding agents (e.g. Claude Code, Cursor) and debug
+              production issues without leaving your dev environment. Traces, logs, metrics, service
+              topology, and your actual codebase - all in one place. Or use Noz, our new AI teammate
               out-of-the-box.
             </p>
             <TrackingLink

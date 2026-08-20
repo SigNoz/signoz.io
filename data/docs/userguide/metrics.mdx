@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-08-06
 title: View Services
 description: Understand the Services section in SigNoz — RED metrics, filtering, sorting, global time, refresh interval, and sharing.
 doc_type: explanation
@@ -43,7 +43,7 @@ You can switch the sorting order of the values in a column by clicking its headi
 
 ## Filter the List of Applications
 
-You can add attributes to applications and filter based on these attributes. 
+You can add the `service.namespace` and `deployment.environment` attributes to your applications and filter the Services list by them.
 
 <Figure
   src="/img/docs/resource-attribute-filtering.webp"
@@ -53,14 +53,44 @@ You can add attributes to applications and filter based on these attributes.
 
 You can add attributes with `OTEL_RESOURCE_ATTRIBUTES` flag when starting the application. The below example shows how to set values for `service.namespace` and `deployment.environment`
 
-```
+```bash
 OTEL_RESOURCE_ATTRIBUTES="service.name=flaskApp,service.namespace=sampleapps,deployment.environment=play" OTEL_EXPORTER_OTLP_ENDPOINT="http://3.11.144.34:4317"
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument python3 app.py
 ```
 
-By default, you can filter based on `service.namespace` and `deployment.environment` dimensions.
+<Admonition type="info" title="Self-hosted Kubernetes (Helm): add more filter dimensions" defaultCollapsed="true">
+Self-hosted deployments on Kubernetes can add more filter dimensions to the Services section.
 
-To add custom filter dimensions in Services, update the `dimensions` section in the [SigNoz OpenTelemetry Collector config](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) and redeploy/restart the collector. See <a href="https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml#L4" rel="noopener noreferrer nofollow" target="_blank">otel-collector-config.yaml</a> for the full YAML example.
+1. Send the attribute as a resource attribute on your spans.
+2. Add the attribute name to the `dimensions` list in your Helm values. List every dimension you keep, because Helm replaces the list.
+
+```yaml:values.yaml {11}
+otelCollector:
+  config:
+    processors:
+      signozspanmetrics/delta:
+        dimensions:
+          - name: service.namespace
+            default: default
+          - name: deployment.environment
+            default: default
+          - name: signoz.collector.id
+          - name: team # your custom dimension
+```
+
+3. Apply the values file:
+
+```bash
+helm upgrade <release-name> signoz/signoz -n <namespace> -f values.yaml
+```
+
+**Verify these values:**
+
+- `<release-name>`: The name of your [SigNoz Helm release](https://signoz.io/docs/install/kubernetes/). Run `helm list -A` to find it.
+- `<namespace>`: The Kubernetes namespace that runs SigNoz. The same `helm list -A` output shows it.
+
+The new dimension appears in the filter bar for new data. Keep the list short, because each dimension increases the number of span metric time series.
+</Admonition>
 
 ## Global Time
 
