@@ -1,13 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
-import { ArrowLeft, ArrowRight, Pause, Play } from 'lucide-react'
 
-import {
-  FeaturedQuoteCard,
-  LogoCard,
-  QuoteCard,
-} from '@/components/index-header/homepage-customer-proof/CustomerProofCards'
+import { FeaturedQuoteCard, LogoCard, QuoteCard } from './ProofWallCards'
 import type {
   LogoComponent,
   LogoSpec,
@@ -93,12 +88,6 @@ function ProofBoard({
               : tile.wide
                 ? 'col-span-2 min-h-0 min-w-0'
                 : 'col-span-1 min-h-0 min-w-0'
-          } ${
-            tile.type === 'quote'
-              ? tile.featuredPosition !== null
-                ? '[&_blockquote_p]:!text-sm [&_blockquote_p]:!leading-5'
-                : '[&_blockquote_p]:!text-xs [&_blockquote_p]:!leading-4'
-              : ''
           }`}
           key={`${tile.type}-${tileIndex}`}
         >
@@ -272,22 +261,6 @@ export default function CustomerProofWall({ quotes, logos }: CustomerProofWallPr
     return () => reducedMotionQuery.removeEventListener('change', respectReducedMotion)
   }, [])
 
-  const move = (direction: -1 | 1) => {
-    const viewport = viewportRef.current
-    if (!viewport) return
-    manualPauseUntilRef.current = performance.now() + 650
-
-    if (direction === -1 && viewport.scrollLeft < viewport.clientWidth) {
-      viewport.scrollLeft += proofCycleWidth
-    }
-
-    viewport.scrollBy({
-      behavior: 'smooth',
-      left: direction * viewport.clientWidth * 0.8,
-    })
-    window.setTimeout(normalizeScrollPosition, 500)
-  }
-
   const handleMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
     if (event.button !== 0) return
     const viewport = viewportRef.current
@@ -374,59 +347,6 @@ export default function CustomerProofWall({ quotes, logos }: CustomerProofWallPr
           aria-hidden="true"
           className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[var(--l1-background)] via-[color-mix(in_srgb,var(--l1-background)_80%,transparent)] to-transparent sm:w-24"
         />
-      </div>
-
-      <div className="mt-4 flex justify-end">
-        <div className="flex shrink-0 gap-2">
-          <button
-            aria-label={
-              isPaused
-                ? 'Resume automatic customer proof scrolling'
-                : 'Pause automatic customer proof scrolling'
-            }
-            aria-pressed={isPaused}
-            className="flex h-10 items-center justify-center gap-2 rounded-full border border-[var(--l2-border)] px-4 text-sm text-[var(--l2-foreground)] transition-colors hover:border-[var(--l3-border)] hover:text-[var(--l1-foreground)]"
-            onClick={() => {
-              trackControl(
-                isPaused ? 'Play Customer Proof Wall' : 'Pause Customer Proof Wall',
-                isPaused ? 'Play' : 'Pause'
-              )
-              setIsPaused((current) => !current)
-            }}
-            type="button"
-          >
-            {isPaused ? (
-              <Play aria-hidden="true" size={15} />
-            ) : (
-              <Pause aria-hidden="true" size={15} />
-            )}
-            {isPaused ? 'Play' : 'Pause'}
-          </button>
-          <button
-            aria-label="Previous customer proof"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--l2-border)] text-[var(--l2-foreground)] transition-colors hover:border-[var(--l3-border)] hover:text-[var(--l1-foreground)]"
-            onClick={(event) => {
-              trackControl('Previous Customer Proof', 'Previous proof')
-              move(-1)
-              if (event.detail !== 0) event.currentTarget.blur()
-            }}
-            type="button"
-          >
-            <ArrowLeft aria-hidden="true" size={17} />
-          </button>
-          <button
-            aria-label="Next customer proof"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--l2-border)] text-[var(--l2-foreground)] transition-colors hover:border-[var(--l3-border)] hover:text-[var(--l1-foreground)]"
-            onClick={(event) => {
-              trackControl('Next Customer Proof', 'Next proof')
-              move(1)
-              if (event.detail !== 0) event.currentTarget.blur()
-            }}
-            type="button"
-          >
-            <ArrowRight aria-hidden="true" size={17} />
-          </button>
-        </div>
       </div>
     </div>
   )

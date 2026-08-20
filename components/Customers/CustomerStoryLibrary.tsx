@@ -38,6 +38,36 @@ interface CustomerStoryLibraryProps {
   stories: CustomerStory[]
 }
 
+function StoryLogoRow({ story }: { story: CustomerStory }) {
+  return (
+    <div className="flex min-h-8 items-center gap-3">
+      <Image
+        alt={story.showCompanyNameWithLogo ? '' : story.logoAlt}
+        className="max-h-8 w-auto max-w-28 object-contain"
+        height={32}
+        src={story.logo}
+        width={112}
+      />
+      {story.showCompanyNameWithLogo ? (
+        <span className="text-sm font-medium text-[var(--l1-foreground)]">{story.company}</span>
+      ) : null}
+    </div>
+  )
+}
+
+function StoryArrowChip() {
+  return (
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-solid border-[var(--l2-border)] bg-[var(--l2-background)] transition-colors group-hover:bg-[var(--l3-background)]">
+      <ArrowUpRight
+        aria-hidden="true"
+        className="text-[var(--l3-foreground)] transition-colors group-hover:text-[var(--l1-foreground)]"
+        size={20}
+        strokeWidth={1.75}
+      />
+    </div>
+  )
+}
+
 export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryProps) {
   const [activeFilter, setActiveFilter] = useState<CustomerStoryFilter>('All stories')
   const [query, setQuery] = useState('')
@@ -127,13 +157,13 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
 
   return (
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
-      <aside className="min-w-0 lg:sticky lg:top-20 lg:self-start">
-        <p className="border-b border-[var(--l2-border)] pb-3 text-sm font-medium text-[var(--l1-foreground)]">
+      <aside className="min-w-0 lg:sticky lg:top-[68px] lg:z-[1] lg:self-start">
+        <p className="flex h-11 items-center bg-[linear-gradient(to_right,var(--l2-border),transparent)] bg-[length:100%_1px] bg-bottom bg-no-repeat text-sm font-medium text-[var(--l1-foreground)]">
           Filter stories
         </p>
         <div
           aria-label="Filter customer stories"
-          className="mt-3 flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible"
+          className="mt-3 flex gap-2 overflow-x-auto pb-2 [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] lg:flex-col lg:overflow-visible lg:[mask-image:none]"
           role="group"
         >
           {customerStoryFilters.map((filter) => {
@@ -146,10 +176,10 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
               <button
                 aria-pressed={activeFilter === filter}
                 className={cn(
-                  'flex shrink-0 items-center justify-between gap-4 rounded-lg px-3 py-2 text-left text-sm transition-colors lg:w-full',
+                  'flex shrink-0 items-center justify-between gap-4 rounded border px-3 py-2 text-left text-sm transition-colors lg:-mr-px lg:w-[calc(100%+1px)] lg:rounded-none',
                   activeFilter === filter
-                    ? 'bg-[var(--l3-background)] text-[var(--l1-foreground)]'
-                    : 'text-[var(--l2-foreground)] hover:bg-[var(--l2-background)] hover:text-[var(--l1-foreground)]'
+                    ? 'border-[var(--l2-border)] text-[var(--l1-foreground)] lg:border-r-[var(--l1-background)]'
+                    : 'border-transparent text-[var(--l3-foreground)] hover:text-[var(--l1-foreground)]'
                 )}
                 key={filter}
                 onClick={() => {
@@ -170,8 +200,11 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
         </div>
       </aside>
 
-      <div className="min-w-0">
-        <div className="flex flex-col gap-3 md:sticky md:top-16 md:z-20 md:-my-3 md:flex-row md:items-center md:bg-[color-mix(in_srgb,var(--l1-background)_95%,transparent)] md:py-3 md:backdrop-blur-sm">
+      {/* Full-height rail line at the tab column's right edge (1px into the 40px gap),
+          fading at both ends like the docs tabs' gradient borders. The selected tab
+          paints its right border in the page background to break it. */}
+      <div className="relative min-w-0 lg:before:absolute lg:before:-left-10 lg:before:top-0 lg:before:h-full lg:before:w-px lg:before:bg-[linear-gradient(to_bottom,transparent,var(--l2-border)_64px,var(--l2-border)_calc(100%-64px),transparent)] lg:before:content-['']">
+        <div className="flex flex-col gap-3 md:sticky md:top-14 md:z-20 md:-my-3 md:flex-row md:items-center md:bg-[color-mix(in_srgb,var(--l1-background)_95%,transparent)] md:py-3 md:backdrop-blur-sm">
           <label className="relative flex-1">
             <span className="sr-only">Search customer stories</span>
             <Search
@@ -180,7 +213,7 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
               size={16}
             />
             <input
-              className="h-11 w-full rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] pl-10 pr-4 text-sm text-[var(--l1-foreground)] outline-none placeholder:text-[var(--l2-foreground)] focus:border-[var(--accent-primary)]"
+              className="h-11 w-full rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] pl-10 pr-4 text-sm text-[var(--l1-foreground)] outline-none placeholder:text-[var(--l3-foreground)] focus:border-[var(--accent-primary)]"
               onChange={(event) => {
                 hasSearchedRef.current = true
                 setQuery(event.target.value)
@@ -192,19 +225,15 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
             />
           </label>
 
-          <div
-            aria-label="Customer story layout"
-            className="flex h-11 rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] p-1"
-            role="group"
-          >
+          <div aria-label="Customer story layout" className="flex h-11 p-1" role="group">
             <button
               aria-label="Grid view"
               aria-pressed={viewMode === 'grid'}
               className={cn(
                 'flex flex-1 items-center justify-center rounded px-3 transition-colors md:flex-none',
                 viewMode === 'grid'
-                  ? 'bg-[var(--l1-foreground)] text-[var(--l1-background)]'
-                  : 'text-[var(--l2-foreground)] hover:text-[var(--l1-foreground)]'
+                  ? 'bg-[var(--l3-background)] text-[var(--l1-foreground)]'
+                  : 'text-[var(--l3-foreground)] hover:text-[var(--l1-foreground)]'
               )}
               onClick={() => {
                 trackClick('Customer Story View', 'Grid View', 'Grid view', {
@@ -223,8 +252,8 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
               className={cn(
                 'flex flex-1 items-center justify-center rounded px-3 transition-colors md:flex-none',
                 viewMode === 'list'
-                  ? 'bg-[var(--l1-foreground)] text-[var(--l1-background)]'
-                  : 'text-[var(--l2-foreground)] hover:text-[var(--l1-foreground)]'
+                  ? 'bg-[var(--l3-background)] text-[var(--l1-foreground)]'
+                  : 'text-[var(--l3-foreground)] hover:text-[var(--l1-foreground)]'
               )}
               onClick={() => {
                 trackClick('Customer Story View', 'List View', 'List view', {
@@ -243,19 +272,15 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
         {visibleStories.length ? (
           <div
             className={cn(
-              'mt-6 grid',
-              viewMode === 'grid'
-                ? 'grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 xl:grid-cols-3'
-                : 'grid-cols-1 gap-3'
+              'mt-6 grid grid-cols-1 border-dashed border-[var(--l2-border)]',
+              viewMode === 'grid' ? 'border-l border-t sm:grid-cols-2 xl:grid-cols-3' : 'border-t'
             )}
           >
             {visibleStories.map((story, storyIndex) => (
               <Link
                 className={cn(
-                  'group relative overflow-hidden rounded-xl border border-[var(--l2-border)] bg-[var(--l2-background)] transition-colors hover:border-[var(--l3-border)] hover:bg-[var(--l3-background)]',
-                  viewMode === 'list'
-                    ? 'flex min-h-0 flex-col p-4'
-                    : 'flex min-h-[330px] flex-col p-6'
+                  'group relative box-border flex flex-col border-dashed border-[var(--l2-border)] bg-[var(--l1-background)] p-4 transition-colors',
+                  viewMode === 'list' ? 'border-b' : 'min-h-[260px] border-b border-r'
                 )}
                 href={story.href}
                 key={story.href}
@@ -271,72 +296,51 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
                   })
                 }
               >
-                <div className="flex flex-col">
-                  <div
-                    className={cn(
-                      'flex items-center gap-3 pr-8',
-                      viewMode === 'list' ? 'min-h-8' : 'min-h-9'
-                    )}
-                  >
-                    <Image
-                      alt={story.showCompanyNameWithLogo ? '' : story.logoAlt}
-                      className="max-h-8 w-auto max-w-28 object-contain"
-                      height={32}
-                      src={story.logo}
-                      width={112}
-                    />
-                    {story.showCompanyNameWithLogo ? (
-                      <span className="text-sm font-medium text-[var(--l1-foreground)]">
-                        {story.company}
-                      </span>
-                    ) : null}
-                  </div>
-                  <ArrowUpRight
-                    aria-hidden="true"
-                    className={cn(
-                      'absolute shrink-0 text-[var(--l2-foreground)] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[var(--l1-foreground)]',
-                      viewMode === 'list' ? 'right-4 top-4' : 'right-6 top-6'
-                    )}
-                    size={18}
-                  />
-                  <h3
-                    className={cn(
-                      'text-pretty font-normal text-[var(--l2-foreground)]',
-                      viewMode === 'list'
-                        ? 'mt-3 pr-7 text-base leading-6'
-                        : 'mt-7 text-xl leading-7'
-                    )}
-                  >
-                    {story.title}
-                  </h3>
-                </div>
-
                 {viewMode === 'grid' ? (
-                  <div className="mt-auto pt-6">
-                    {story.takeaway && story.takeawayLabel ? (
-                      <>
-                        <p className="text-pretty text-2xl font-medium leading-8 text-[var(--l1-foreground)]">
-                          {story.takeaway}
-                        </p>
-                        <p className="mt-1 text-sm leading-5 text-[var(--l2-foreground)]">
-                          {story.takeawayLabel}
-                        </p>
-                      </>
-                    ) : (
-                      <div>
-                        <p className="text-base font-medium text-[var(--l1-foreground)]">
-                          {story.person}
-                        </p>
-                        <p className="mt-1 text-sm text-[var(--l2-foreground)]">{story.role}</p>
+                  <div className="flex h-full min-h-0 w-full flex-col justify-between gap-6">
+                    <StoryLogoRow story={story} />
+                    <div className="flex w-full items-end justify-between gap-4">
+                      <div className="flex min-w-0 flex-col">
+                        <h3 className="m-0 text-pretty text-base font-normal leading-6 text-[var(--l3-foreground)] transition-colors group-hover:text-[var(--l1-foreground)]">
+                          {story.title}
+                        </h3>
+                        {story.takeaway && story.takeawayLabel ? (
+                          <>
+                            <p className="mt-3 text-pretty text-xl font-medium leading-7 text-[var(--l1-foreground)]">
+                              {story.takeaway}
+                            </p>
+                            <p className="mt-1 text-sm leading-5 text-[var(--l3-foreground)]">
+                              {story.takeawayLabel}
+                            </p>
+                          </>
+                        ) : (
+                          <div className="mt-3">
+                            <p className="text-base font-medium text-[var(--l1-foreground)]">
+                              {story.person}
+                            </p>
+                            <p className="mt-1 text-sm text-[var(--l3-foreground)]">{story.role}</p>
+                          </div>
+                        )}
                       </div>
-                    )}
+                      <StoryArrowChip />
+                    </div>
                   </div>
-                ) : null}
+                ) : (
+                  <div className="flex w-full items-center justify-between gap-4">
+                    <div className="flex min-w-0 flex-col">
+                      <StoryLogoRow story={story} />
+                      <h3 className="m-0 mt-3 text-pretty text-base font-normal leading-6 text-[var(--l3-foreground)] transition-colors group-hover:text-[var(--l1-foreground)]">
+                        {story.title}
+                      </h3>
+                    </div>
+                    <StoryArrowChip />
+                  </div>
+                )}
               </Link>
             ))}
           </div>
         ) : (
-          <div className="mt-6 rounded-xl border border-[var(--l2-border)] bg-[var(--l2-background)] px-6 py-16 text-center text-sm text-[var(--l2-foreground)]">
+          <div className="mt-6 border border-dashed border-[var(--l2-border)] bg-transparent px-6 py-16 text-center text-sm text-[var(--l3-foreground)]">
             No customer stories match those filters.
           </div>
         )}
@@ -344,7 +348,7 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
         {filteredStories.length > initialStoryCount ? (
           <div className="mt-10 flex justify-center">
             <button
-              className="rounded-full border border-[var(--l2-border)] bg-[var(--l2-background)] px-5 py-2.5 text-sm font-medium text-[var(--l1-foreground)] transition-colors hover:border-[var(--l3-border)] hover:bg-[var(--l3-background)]"
+              className="rounded-full border border-[var(--l2-border)] bg-[var(--l2-background)] px-5 py-2.5 text-sm font-medium text-[var(--l1-foreground)] transition-colors hover:bg-[var(--l3-background)]"
               onClick={() => {
                 trackClick(
                   'Customer Story List',
