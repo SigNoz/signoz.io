@@ -1,175 +1,189 @@
 ---
-draft: true
-date: 2026-08-19
-title: Monitor AWS Lambda MicroVMs with OpenTelemetry
-description: Collect logs, metrics, and traces from AWS Lambda MicroVMs (Firecracker sandboxes) with an embedded OpenTelemetry Collector and send them to SigNoz.
+date: 2026-08-20
+title: Monitor AWS Lambda MicroVMs with OpenTelemetry Collector
+description: Collect metrics, traces, and logs from AWS Lambda MicroVMs by running an OpenTelemetry Collector inside the MicroVM image and exporting to SigNoz.
 doc_type: howto
 ---
 
-{/*
-  DRAFT — not for publish. Internal review notes:
-  - AWS Lambda MicroVMs GA'd June 2026. This is NOT a regular Lambda function; treat it
-    like a long-running, stateful VM (up to 8h, 16 vCPU, 32GB mem/disk).
-  - Do NOT reuse the per-invocation Lambda-layer tracing pattern here.
-  - AWS's own recommended metrics agent (CloudWatch Agent) is built on Telegraf + the
-    OpenTelemetry Collector, so we redirect that pipeline to SigNoz instead of CloudWatch.
-  - Source-verified against AWS docs + the Aug 14 2026 metrics blog: CLI namespace is
-    `aws lambda-microvms` (create-microvm-image / run-microvm), code artifact from S3, base image
-    public.ecr.aws/lambda/microvms:al2023-minimal, injected env vars, egress-off-by-default,
-    and the cwagent.toml/cwagent.yaml dual-ship config.
-  - STILL NEEDS A LIVE RUN before publish: (a) confirm otelcol-contrib tarball installs/runs on the
-    al2023-minimal base, (b) confirm a custom CMD/entrypoint that backgrounds the collector is
-    honored, (c) confirm `--egress-network-connectors '[{"type":"public"}]'` is the correct shape,
-    (d) confirm SIGNOZ_* env vars can be injected at run time (vs must be baked into the image),
-    (e) confirm signals actually land in SigNoz with the image_name attribute.
-*/}
-
 ## Overview
 
-<a href="https://aws.amazon.com/lambda/lambda-microvms/" target="_blank" rel="noopener noreferrer nofollow">AWS Lambda MicroVMs</a> are Firecracker-based,
-serverless compute environments with VM-level isolation, near-instant snapshot start/resume, and
-full OS capabilities. They are designed for **long-running, stateful sandboxes** — AI agent code
-execution, interactive development environments, CI, and vulnerability scanners — with up to
-**8 hours of runtime, 16 vCPUs, 32 GB memory, and 32 GB disk** per MicroVM.
+<a href="https://aws.amazon.com/lambda/lambda-microvms/" target="_blank" rel="noopener noreferrer nofollow">AWS Lambda MicroVMs</a> are
+Firecracker-based compute environments with VM-level isolation, snapshot start and resume, and full
+OS capabilities. They suit long-running, stateful sandboxes such as AI agent code execution,
+interactive development environments, CI jobs, and vulnerability scanners.
+
+This guide runs an OpenTelemetry Collector inside the MicroVM image. The Collector scrapes host
+metrics, tails application logs, receives OTLP from your application, and exports everything to
+SigNoz.
 
 <Admonition type="warning" title="MicroVMs are not Lambda functions">
-Despite the name, a MicroVM behaves like a long-lived VM (closer to Fargate/EC2), **not** a
-short-lived Lambda function. Do not use the per-invocation
+Despite the name, a MicroVM behaves like a long-lived VM, closer to Fargate or EC2 than to a
+short-lived function. Do not use the per-invocation
 [OpenTelemetry Lambda layers](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/) here.
-Instead you run an OpenTelemetry Collector **inside** the MicroVM image and instrument your
-application the way you would a normal containerized service. For classic function monitoring, see
+Run a Collector inside the image and instrument your application the way you would a normal
+containerized service. For classic function monitoring, see
 [Monitor AWS Lambda](https://signoz.io/docs/aws-monitoring/lambda/).
 </Admonition>
 
-## How monitoring works
-
-Because a MicroVM is a full OS snapshot that you build from a `Dockerfile`, you bake an
-OpenTelemetry Collector into the image itself. It runs alongside your application and exports
-OTLP directly to SigNoz.
-
-| Signal | Source inside the MicroVM | Path to SigNoz |
-|--------|---------------------------|----------------|
-| **Metrics** (host CPU/mem/disk/net) | `hostmetrics` receiver in the embedded Collector | OTLP → SigNoz |
-| **Traces** | App instrumented with an OpenTelemetry SDK | OTLP → embedded Collector → SigNoz |
-| **Logs** (app stdout/stderr) | `filelog`/OTLP receiver, or forward from CloudWatch | OTLP → SigNoz |
-| **Lifecycle / audit** | CloudTrail data events (`RunMicrovm`, `Suspend…`, `Resume…`, `Terminate…`) | CloudWatch/S3 → SigNoz |
-
-<Admonition type="info">
-AWS's own recommended metrics agent for MicroVMs (the CloudWatch Agent) is already built on
-Telegraf + the OpenTelemetry Collector. This guide simply points that same OTLP pipeline at
-SigNoz instead of CloudWatch — so you can keep CloudWatch, replace it, or run both.
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Update the endpoint and remove the ingestion key header as shown in
+[Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
 ## Prerequisites
 
-- A [SigNoz Cloud account](https://signoz.io/teams/) and an **ingestion key**
-  (Settings → Ingestion Settings), or a [self-hosted SigNoz instance](https://signoz.io/docs/install/).
-- The AWS CLI with the `lambda-microvms` command set (`aws lambda-microvms create-microvm-image`,
-  `aws lambda-microvms run-microvm`).
-- Your application code uploaded to S3 as a ZIP, plus a `Dockerfile` built `FROM` a MicroVM base
-  image (for example `public.ecr.aws/lambda/microvms:al2023-minimal`).
-- A **build role** (for image creation) and an **execution role** (for the running MicroVM). The
-  execution role needs `logs:CreateLogGroup`, `logs:CreateLogStream`, and `logs:PutLogEvents` for
-  runtime logs to CloudWatch.
+- The AWS CLI with the `lambda-microvms` command set. Run `aws lambda-microvms help` to confirm it lists `create-microvm-image` and `run-microvm`.
+- An S3 bucket in the same region for the code artifact.
+- A **build role** that Lambda assumes during the image build. It needs `s3:GetObject` on the artifact and `logs:CreateLogGroup`, `logs:CreateLogStream`, and `logs:PutLogEvents`.
+- An **execution role** for the running MicroVM. Without it, application stdout and stderr never reach CloudWatch. It needs `logs:CreateLogGroup`, `logs:CreateLogStream`, and `logs:PutLogEvents`.
+- Both roles need a trust policy that lets Lambda assume them, with `Principal: {"Service": "lambda.amazonaws.com"}` and `Action: ["sts:AssumeRole", "sts:TagSession"]`. Your own caller needs `lambda:CreateMicrovmImage`, `lambda:RunMicrovm`, and `iam:PassRole` for both roles.
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
-<Admonition type="warning" title="Enable egress networking">
-MicroVMs have **no outbound internet access by default**. The embedded Collector cannot reach
-SigNoz Cloud unless you attach an egress network connector at launch (`--egress-network-connectors`
-on `run-microvm`). Confirm outbound `:443` to `ingest.<region>.signoz.cloud` is allowed before
-debugging anything else.
+## How monitoring works
+
+| Signal | Source inside the MicroVM | Path to SigNoz |
+|---|---|---|
+| **Metrics** (host CPU, memory, disk, network) | [`hostmetrics`](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) receiver in the embedded Collector | OTLP/HTTP to SigNoz |
+| **Traces** | Application instrumented with an OpenTelemetry SDK | OTLP to the local Collector, then to SigNoz |
+| **Logs** | [`filelog`](https://signoz.io/docs/userguide/collect_logs_from_file/) receiver, or OTLP from the SDK | OTLP/HTTP to SigNoz |
+| **Lifecycle and audit** | CloudTrail data events | CloudWatch or S3 to SigNoz |
+
+<details>
+<ToggleHeading>
+
+## How sizing works
+
+</ToggleHeading>
+
+MicroVMs use a baseline and peak model. You set the baseline with the memory value when you create
+the image, and vCPU scales with it at 2 GB per vCPU. During activity the MicroVM scales vertically
+up to four times the baseline.
+
+| Baseline | Peak | Max disk |
+|---|---|---|
+| 0.5 GB, 0.25 vCPU | 2 GB, 1 vCPU | 8 GB |
+| 1 GB, 0.5 vCPU | 4 GB, 2 vCPU | 8 GB |
+| 2 GB, 1 vCPU (default) | 8 GB, 4 vCPU | 8 GB |
+| 4 GB, 2 vCPU | 16 GB, 8 vCPU | 16 GB |
+| 8 GB, 4 vCPU | 32 GB, 16 vCPU | 32 GB |
+
+A MicroVM runs for at most 8 hours. Set the limit with `--maximum-duration-in-seconds`, which
+accepts 1 to 28,800 seconds.
+</details>
+
+## Send telemetry to SigNoz
+
+Lambda builds the MicroVM image from a ZIP you upload to S3, then snapshots the running result. The
+Collector is baked into that snapshot, so it is already running the moment a MicroVM starts. Your
+application exports to it on `localhost` instead of reaching SigNoz directly.
+
+### Step 1: Package the application and Dockerfile
+
+<Admonition type="warning" title="MicroVMs run on ARM64 only">
+`create-microvm-image` accepts `architecture=ARM_64` and no other value. Every binary you install
+in the image must be an ARM64 build, including the OpenTelemetry Collector.
 </Admonition>
 
-Set your SigNoz destination as environment variables in the image. Keep the literal `<region>`
-token — the region selector at the top-right of this page substitutes your SigNoz Cloud region
-(`us`, `eu`, or `in`) into the snippet automatically:
+The code artifact is a ZIP that contains a `Dockerfile` at the archive root plus your application
+files. Lambda pulls the ZIP from S3, runs your `Dockerfile` on top of the managed base image, starts
+your application, and snapshots the result.
 
-```bash
-SIGNOZ_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
-```
+Two different base images are involved. The **MicroVM base image** is the operating system
+environment, passed as `--base-image-arn`. The **container base image** is what your `Dockerfile`
+uses in its `FROM` instruction.
 
-## Step 1 — Add the OpenTelemetry Collector to the image
-
-Add the Collector binary and a config file to the image build, starting from a MicroVM base image.
-In your `Dockerfile`:
-
-```dockerfile
+```dockerfile:Dockerfile
 FROM public.ecr.aws/lambda/microvms:al2023-minimal
 
-# Install the OpenTelemetry Collector Contrib distribution
-ADD https://github.com/open-telemetry/opentelemetry-collector-releases/releases/latest/download/otelcol-contrib_linux_amd64.tar.gz /tmp/otelcol.tar.gz
-RUN tar -xzf /tmp/otelcol.tar.gz -C /usr/local/bin otelcol-contrib && rm /tmp/otelcol.tar.gz
+# al2023-minimal ships without tar, gzip, or procps. Install what you need
+# before extracting anything.
+RUN dnf install -y tar gzip python3 python3-pip && dnf clean all
+
+# Release assets are version-named, and MicroVMs are ARM64 only. Pin a version
+# and use the arm64 tarball.
+ARG OTELCOL_VERSION=0.159.0
+ADD https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v${OTELCOL_VERSION}/otelcol-contrib_${OTELCOL_VERSION}_linux_arm64.tar.gz /tmp/otelcol.tar.gz
+RUN mkdir -p /usr/local/bin \
+ && tar -xzf /tmp/otelcol.tar.gz -C /usr/local/bin otelcol-contrib \
+ && rm /tmp/otelcol.tar.gz
 
 COPY app.py                     /app/app.py
 COPY otel-collector-config.yaml /etc/otelcol/config.yaml
 COPY entrypoint.sh              /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh && mkdir -p /var/log/app
 
-# Start the Collector in the background during MicroVM init, then launch your app
 CMD ["/entrypoint.sh"]
 ```
 
-`entrypoint.sh`:
+The image build has outbound internet access, so pulling the Collector with `ADD` works. Start the
+Collector in the background and your application in the foreground, which keeps the MicroVM alive:
 
-```bash
+```bash:entrypoint.sh
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Start the collector in the background
-/usr/local/bin/otelcol-contrib --config /etc/otelcol/config.yaml &
+# Lambda forwards only stdout and stderr to CloudWatch, so do not redirect the
+# Collector to a file. Writing it into /var/log/app would also make the filelog
+# receiver tail the Collector's own output.
+/usr/local/bin/otelcol-contrib --config /etc/otelcol/config.yaml 2>&1 &
 
-# Start your application (foreground — keeps the MicroVM alive)
-exec python3 /app/app.py
+exec python3 -u /app/app.py
 ```
 
-This mirrors the pattern AWS uses for its CloudWatch Agent: the telemetry agent is launched in the
-background during init, and the application runs in the foreground to keep the MicroVM alive.
+### Step 2: Configure the OpenTelemetry Collector
 
-## Step 2 — Configure the Collector
-
-`otel-collector-config.yaml`:
-
-```yaml
+```yaml:otel-collector-config.yaml minimap defaultCollapsed
 receivers:
-  # Host CPU / memory / disk / network — the equivalent of AWS's cpu_usage_* and mem_used_percent,
-  # but richer and without the CloudWatch hop.
+  # On Collector v0.151.0 and newer, use "host_metrics" to avoid a deprecation warning.
   hostmetrics:
     collection_interval: 30s
     scrapers:
-      cpu: {}
+      cpu:
+        metrics:
+          # system.cpu.utilization is an optional metric and off by default.
+          # Enable it explicitly or it never reaches SigNoz.
+          system.cpu.utilization:
+            enabled: true
       memory: {}
       load: {}
-      disk: {}
       filesystem: {}
       network: {}
 
-  # Application stdout/stderr written to a log file inside the MicroVM
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
+  # This only collects anything if your application writes to this path. An
+  # application that logs to stdout alone produces no records here.
+  #
+  # Keep the Collector's own log out of this glob. A Collector that tails its own
+  # output re-exports every line it writes.
   filelog:
     include: [/var/log/app/*.log]
+    exclude: [/var/log/app/otelcol*.log]
     start_at: beginning
 
-  # Traces/metrics/logs pushed by your app's OpenTelemetry SDK
   otlp:
     protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
       http:
-        endpoint: 0.0.0.0:4318
+        endpoint: localhost:4318
 
 processors:
   batch: {}
+  # On Collector v0.153.0 and newer, use "resource_detection" to avoid a deprecation warning.
   resourcedetection:
     detectors: [env, system]
   resource:
     attributes:
-      # Tag every signal with the MicroVM image so you can group in SigNoz.
-      # AWS injects this env var into every MicroVM.
+      # Lambda injects this into every MicroVM. It is the same value the
+      # CloudWatch Agent uses for its ImageName dimension.
       - key: aws.lambda.microvm.image_name
         value: ${env:AWS_LAMBDA_MICROVM_IMAGE_NAME}
         action: upsert
+      - key: aws.lambda.microvm.image_version
+        value: ${env:AWS_LAMBDA_MICROVM_IMAGE_VERSION}
+        action: upsert
 
 exporters:
-  otlp:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp:
     endpoint: ${env:SIGNOZ_ENDPOINT}
     headers:
       signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
@@ -179,30 +193,36 @@ service:
     metrics:
       receivers: [hostmetrics, otlp]
       processors: [resourcedetection, resource, batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
     traces:
       receivers: [otlp]
       processors: [resourcedetection, resource, batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
     logs:
       receivers: [filelog, otlp]
       processors: [resourcedetection, resource, batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
 ```
 
-<Admonition type="info">
-AWS injects several identifiers into every MicroVM — `AWS_LAMBDA_MICROVM_IMAGE_NAME`,
-`AWS_LAMBDA_MICROVM_IMAGE_ARN`, `AWS_LAMBDA_MICROVM_IMAGE_VERSION`, and `AWS_REGION`.
-`AWS_LAMBDA_MICROVM_IMAGE_NAME` is the same value AWS's CloudWatch Agent uses for the `ImageName`
-metric dimension. Using it as a resource attribute lets you filter and group all three signals by
-image in SigNoz.
+<Admonition type="warning" title="Every MicroVM from one image shares these attributes">
+The Collector starts during the image build, so `resourcedetection` resolves `host.name` and
+`host.id` once, inside the build MicroVM, and the snapshot freezes those values. Every MicroVM
+restored from that image reports the same host. The image name and version are constant per image
+too, so nothing in this config distinguishes one running sandbox from another.
+
+To tell them apart, take the `microvmId` that Lambda passes to the `/run` lifecycle hook and set it
+as a resource attribute from your application. See
+<a href="https://docs.aws.amazon.com/lambda/latest/dg/microvms-launching.html" target="_blank" rel="noopener noreferrer nofollow">Running and using MicroVMs</a>.
 </Admonition>
 
-## Step 3 — Instrument your application (traces)
+Lambda injects `AWS_LAMBDA_MICROVM_IMAGE_NAME`, `AWS_LAMBDA_MICROVM_IMAGE_ARN`,
+`AWS_LAMBDA_MICROVM_IMAGE_VERSION`, and `AWS_REGION` into every MicroVM. Using the image name as a
+resource attribute lets you filter and group all three signals by image in SigNoz.
 
-Instrument the app running inside the MicroVM with the OpenTelemetry SDK for your language and
-point it at the local Collector. Because the MicroVM is long-lived, use standard service-style
-instrumentation (not the Lambda layer). Example for Node.js:
+### Step 3: Instrument your application
+
+Because the MicroVM is long-lived, use standard service-style instrumentation rather than a Lambda
+layer. Point the SDK at the embedded Collector with these variables:
 
 ```bash
 OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
@@ -210,78 +230,310 @@ OTEL_SERVICE_NAME="my-microvm-app"
 OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
 ```
 
+There is no environment variable flag on `run-microvm`, so pass these to
+`--environment-variables` when you build the image in
+[Step 4](#step-4-build-the-microvm-image). Setting them anywhere else has no effect.
+
 See the [SigNoz instrumentation guides](https://signoz.io/docs/instrumentation/) for your language.
 
-## Step 4 — Build and run
+Write your application logs to `/var/log/app/` for the `filelog` receiver from
+[Step 2](#step-2-configure-the-opentelemetry-collector) to pick them up, or remove that receiver and
+export logs over OTLP from the SDK.
 
-Upload your code to S3, build the image, then run a MicroVM with egress enabled so the Collector
-can reach SigNoz:
+Your directory now holds everything the build needs. Zip it with the `Dockerfile` at the archive
+root and upload it:
 
 ```bash
-# 1. Build the MicroVM image (code artifact comes from S3)
+zip -r app.zip Dockerfile entrypoint.sh otel-collector-config.yaml app.py
+aws s3 cp app.zip s3://<your-bucket>/app.zip
+```
+
+**Verify these values:**
+
+- `<your-bucket>`: The S3 bucket you created for the code artifact.
+
+### Step 4: Build the MicroVM image
+
+Export your SigNoz destination so the build command can read it:
+
+```bash
+export SIGNOZ_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+Then create the image:
+
+```bash
 aws lambda-microvms create-microvm-image \
   --name my-monitored-app \
-  --code-artifact uri=s3://your-bucket/app.zip \
-  --base-image-arn arn:aws:lambda:us-east-1:aws:microvm-image:al2023-1 \
-  --build-role-arn arn:aws:iam::<account-id>:role/MicrovmBuildRole
-
-# 2. Run a MicroVM from the image, with an egress connector so it can reach SigNoz
-aws lambda-microvms run-microvm \
-  --image-identifier arn:aws:lambda:us-east-1:<account-id>:microvm-image:my-monitored-app \
-  --execution-role-arn arn:aws:iam::<account-id>:role/MicrovmExecutionRole \
-  --egress-network-connectors '[{"type":"public"}]' \
-  --idle-policy '{"maxIdleDurationSeconds":300,"suspendedDurationSeconds":60,"autoResumeEnabled":true}'
+  --code-artifact uri=s3://<your-bucket>/app.zip \
+  --base-image-arn arn:aws:lambda:<aws-region>:aws:microvm-image:al2023-1 \
+  --build-role-arn arn:aws:iam::<account-id>:role/MicrovmBuildRole \
+  --cpu-configurations '[{"architecture":"ARM_64"}]' \
+  --resources '[{"minimumMemoryInMiB":2048}]' \
+  --environment-variables "SIGNOZ_ENDPOINT=$SIGNOZ_ENDPOINT,SIGNOZ_INGESTION_KEY=$SIGNOZ_INGESTION_KEY,OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318,OTEL_SERVICE_NAME=my-microvm-app" \
+  --logging '{"cloudWatch":{"logGroup":"/aws/lambda-microvms/my-monitored-app"}}'
 ```
 
-<Admonition type="info">
-The `SIGNOZ_ENDPOINT` and `SIGNOZ_INGESTION_KEY` values must be present as environment variables
-inside the running MicroVM (bake them into the image, or pass them via your run configuration) so
-the Collector config can resolve them.
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<your-bucket>`: The S3 bucket holding your code artifact.
+- `<aws-region>`: The AWS region you are deploying to, for example `us-east-1`. Discover available base images with `aws lambda-microvms list-managed-microvm-images`.
+- `<account-id>`: Your AWS account ID.
+
+The build is asynchronous. Poll until the image reports `CREATED`:
+
+```bash
+aws lambda-microvms get-microvm-image \
+  --image-identifier arn:aws:lambda:<aws-region>:<account-id>:microvm-image:my-monitored-app
+```
+
+<Admonition type="warning" title="Environment variables are set at image build time">
+There is no environment variable flag on `run-microvm`. Variables are image-level and shared by
+every MicroVM run from that image. `create-microvm-image`, `update-microvm-image`, and
+`get-microvm-image-version` all return them in plaintext, so anyone with read access to the image
+version can read your ingestion key.
+
+To keep a secret out of the image, pass a Secrets Manager path through
+`--run-hook-payload`. Fetch the value in your `/run` lifecycle hook.
+
+`update-microvm-image` does not inherit environment variables from the original create call. Pass
+`--environment-variables` again on every update, or the new version loses them.
 </Admonition>
 
-Once the MicroVM is running, open SigNoz:
+### Step 5: Run the MicroVM
 
-- **Services / Traces** → your `OTEL_SERVICE_NAME` should appear with spans.
-- **Metrics Explorer** → `system.cpu.utilization`, `system.memory.usage`, etc., tagged with
-  `aws.lambda.microvm.image_name`.
-- **Logs Explorer** → application logs, correlated to traces by trace ID.
-
-## Optional — CloudTrail lifecycle & audit events
-
-MicroVM lifecycle actions (`RunMicrovm`, `SuspendMicrovm`, `ResumeMicrovm`, `TerminateMicrovm`,
-`CreateMicrovmAuthToken`) are **data events** that must be
-<a href="https://docs.aws.amazon.com/lambda/latest/dg/microvms-monitoring.html" target="_blank" rel="noopener noreferrer nofollow">explicitly enabled in CloudTrail</a>.
-Forward the CloudTrail S3/CloudWatch stream into SigNoz using the existing
-[AWS logs ingestion patterns](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) to build
-suspend/resume and security-audit dashboards.
-
-## Alternative — keep CloudWatch, forward to SigNoz
-
-If you already run AWS's CloudWatch Agent inside the image (per the
-<a href="https://aws.amazon.com/blogs/compute/collecting-cpu-and-memory-metrics-for-aws-lambda-microvms/" target="_blank" rel="noopener noreferrer nofollow">AWS metrics blog</a>),
-that agent is itself a Telegraf + OpenTelemetry Collector pipeline exporting to CloudWatch. You can
-add an `otlp` exporter to its `cwagent.yaml` so it **dual-ships** the same metrics to SigNoz without
-a second agent:
-
-```yaml
-exporters:
-  awscloudwatch:
-    namespace: LambdaMicroVms/Application
-    region: ${env:AWS_REGION}
-    resource_to_telemetry_conversion: { enabled: true }
-  otlp:                                       # add this
-    endpoint: ${env:SIGNOZ_ENDPOINT}
-    headers:
-      signoz-ingestion-key: ${env:SIGNOZ_INGESTION_KEY}
-
-service:
-  pipelines:
-    metrics:
-      receivers:  [telegraf_cpu, telegraf_mem]
-      processors: [resource, transform/strip_cpu_dim]
-      exporters:  [awscloudwatch, otlp]       # send to both
+```bash
+aws lambda-microvms run-microvm \
+  --image-identifier arn:aws:lambda:<aws-region>:<account-id>:microvm-image:my-monitored-app \
+  --execution-role-arn arn:aws:iam::<account-id>:role/MicrovmExecutionRole \
+  --ingress-network-connectors "arn:aws:lambda:<aws-region>:aws:network-connector:aws-network-connector:ALL_INGRESS" \
+  --idle-policy '{"maxIdleDurationSeconds":900,"suspendedDurationSeconds":600,"autoResumeEnabled":true}' \
+  --maximum-duration-in-seconds 1800
 ```
 
-Alternatively, forward the CloudWatch log group `/aws/lambda-microvms/<image-name>` and the
-`LambdaMicroVms/Application` metrics namespace into SigNoz via the standard
-[CloudWatch integration](https://signoz.io/docs/aws-monitoring/).
+<Admonition type="warning" title="The idle policy pauses your telemetry">
+Lambda measures idleness by traffic arriving at the MicroVM endpoint. The Collector's outbound
+export does not count, so a MicroVM that nobody calls suspends after `maxIdleDurationSeconds` and
+stops producing host metrics. Drop `--idle-policy` for a workload that does not serve inbound
+requests, or raise the duration to match how long you need continuous metrics.
+</Admonition>
+
+MicroVMs have public internet access on the egress path by default, so the Collector reaches SigNoz
+without extra configuration. Attach a customer-managed egress connector when you want outbound traffic to route through your
+VPC instead:
+
+```bash
+--egress-network-connectors "<your-vpc-connector-arn>"
+```
+
+**Verify these values:**
+
+- `<your-vpc-connector-arn>`: The ARN of a `Lambda Network Connector` in the `ACTIVE` state.
+
+Create that connector with `aws lambda-core create-network-connector` and wait for it to reach
+`ACTIVE` before you reference it. See
+<a href="https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html" target="_blank" rel="noopener noreferrer nofollow">Networking for Lambda MicroVMs</a>.
+
+`run-microvm` returns a `microvmId` and a dedicated HTTPS `endpoint` for that MicroVM. Every request
+to the endpoint needs a token in the `X-aws-proxy-auth` header, and there is no unauthenticated
+access:
+
+```bash
+aws lambda-microvms create-microvm-auth-token \
+  --microvm-identifier <microvm-id> \
+  --expiration-in-minutes 30 \
+  --allowed-ports '[{"port":8080}]'
+```
+
+**Verify these values:**
+
+- `<microvm-id>`: The `microvmId` returned by `run-microvm`.
+
+## Validate
+
+Send a request so the application produces a trace. Mint a token as shown in
+[Step 5](#step-5-run-the-microvm), then call the endpoint:
+
+```bash
+curl "https://<microvm-endpoint>" \
+  -H "X-aws-proxy-auth: <auth-token>" \
+  -H "X-aws-proxy-port: 8080"
+```
+
+**Verify these values:**
+
+- `<microvm-endpoint>`: The `endpoint` returned by `run-microvm`. It has no scheme, so prepend `https://`.
+- `<auth-token>`: The `X-aws-proxy-auth` value returned by `create-microvm-auth-token`.
+
+Give the Collector a minute, then open SigNoz:
+
+- **Traces**: your `OTEL_SERVICE_NAME` appears as a service with spans.
+- **Metrics Explorer**: `system.memory.usage` and `system.cpu.utilization` are present and filterable by `aws.lambda.microvm.image_name`.
+- **Logs Explorer**: your application log lines appear with the same resource attribute.
+
+<Figure
+  src="/img/docs/aws-monitoring/lambda-microvms/microvm-traces-explorer.webp"
+  alt="SigNoz Traces Explorer showing spans from an application running inside an AWS Lambda MicroVM"
+  caption="Spans from an application inside a MicroVM, in the SigNoz Traces Explorer"
+/>
+
+To confirm the Collector itself started, check the runtime log group
+`/aws/lambda-microvms/<image-name>` for the line `Everything is ready. Begin running and processing
+data.`
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Image build fails with `tar: command not found`
+
+**Symptom:** The build stops with exit code 127 and `/bin/sh: line 1: tar: command not found`.
+
+- Likely cause: `al2023-minimal` ships without `tar` and `gzip`.
+- Fix: Add `RUN dnf install -y tar gzip` before any step that extracts an archive. The same applies to `pgrep` and other `procps` tools.
+- Verify: The build reaches `CREATED`.
+
+### Image build fails for another reason
+
+**Symptom:** The image reports `CREATE_FAILED`, or `latestFailedImageVersion` is set.
+
+- Likely cause: A `Dockerfile` instruction failed.
+- Fix: Read the build output in the CloudWatch log group you passed to `--logging`, which defaults to `/aws/lambda-microvms/<image-name>`.
+- Verify: The failing instruction appears with its exit code.
+
+<Admonition type="info">
+A successful build does not mean your application is healthy. Lambda snapshots the image even when
+the process inside it crashed on startup, so an image can report `CREATED` while the Collector is
+failing. Always confirm signals in SigNoz.
+</Admonition>
+
+### The endpoint returns HTTP 403
+
+**Symptom:** Requests to the MicroVM endpoint return `403 Forbidden`.
+
+- Likely cause: The token is missing, expired, or invalid, or the target port is not in the token's `allowedPorts`.
+- Fix: Mint a new token. Requests route to port 8080 unless you send an `X-aws-proxy-port` header, and whichever port you target must appear in `allowedPorts`.
+- Verify: The endpoint returns your application's response.
+
+### The endpoint returns HTTP 502
+
+**Symptom:** Requests to the MicroVM endpoint return `502 Bad Gateway` with an empty body.
+
+- Likely cause: Your application is not listening on the target port, it crashed handling the request, or auto-resume did not finish within the retry limit.
+- Fix: Check the runtime log group for a stack trace. Confirm your application listens on port 8080, or send `X-aws-proxy-port` for a different one.
+- Verify: The endpoint returns your application's response.
+
+### No `system.cpu.utilization` in SigNoz
+
+**Symptom:** `system.memory.usage` appears but `system.cpu.utilization` returns no data.
+
+- Likely cause: `system.cpu.utilization` is an optional `hostmetrics` metric, disabled by default.
+- Fix: Enable it explicitly under the `cpu` scraper as shown in [Step 2](#step-2-configure-the-opentelemetry-collector).
+- Verify: The metric appears in **Metrics Explorer**.
+
+### No logs in SigNoz
+
+**Symptom:** Traces and metrics arrive but the Logs Explorer is empty.
+
+- Likely cause: The `filelog` receiver watches `/var/log/app/*.log`, and your application writes to stdout only.
+- Fix: Write logs to a file under `/var/log/app/`, or drop `filelog` and export logs over OTLP from the SDK.
+- Verify: Records appear in **Logs Explorer**.
+
+### The Collector logs `Configuration references unset environment variable`
+
+**Symptom:** The Collector cannot resolve `${env:SIGNOZ_ENDPOINT}` or `${env:SIGNOZ_INGESTION_KEY}`.
+
+- Likely cause: An `update-microvm-image` call omitted `--environment-variables`, which drops them from the new version.
+- Fix: Pass `--environment-variables` on every update.
+- Verify: The Collector starts and exports without warnings.
+
+### The API returns HTTP 502 intermittently
+
+**Symptom:** `run-microvm`, `get-microvm`, or `list-microvm-images` fails with `Bad Gateway`.
+
+- Likely cause: A transient service error. AWS does not document 502 for these APIs, but it occurs in practice.
+- Fix: Retry with exponential backoff. Scripts that poll these APIs need retry handling. AWS documents `ThrottlingException` and `InternalServerException` as retryable, and `ResourceNotFoundException` when the image is not yet `CREATED`.
+- Verify: The call succeeds on a later attempt.
+
+</details>
+
+## Limitations
+
+- **The CloudWatch Agent cannot forward to SigNoz.** AWS's recommended metrics agent for MicroVMs runs on Telegraf and the OpenTelemetry Collector. Its Collector build has no `otlp` exporter. Its only OTLP exporter, `otlphttp`, rejects non-AWS endpoints with `invalid AWS endpoint`. The agent exits on either config, which also stops the CloudWatch metrics you already had. Run a separate OpenTelemetry Collector as described above. To get CloudWatch data into SigNoz, pull the `/aws/lambda-microvms/<image-name>` log group and the `LambdaMicroVms/Application` namespace through the [AWS monitoring integration](https://signoz.io/docs/aws-monitoring/overview/).
+- **Host metrics reflect guest-visible resources.** `hostmetrics` reads what the guest kernel reports. Those totals differ from the memory and vCPU baseline you configured, so read them as relative signals rather than capacity numbers.
+- **Metrics stop while a MicroVM is suspended.** The embedded Collector survives suspend and resume without restarting. No host metrics are produced during the suspended window, so expect gaps in dashboards.
+
+<details>
+<ToggleHeading>
+
+## Optional: CloudTrail lifecycle and audit events
+
+</ToggleHeading>
+
+MicroVM lifecycle actions are CloudTrail **data events**, and CloudTrail does not log them by
+default. Enable them with an advanced event selector on the `AWS::Lambda::MicrovmImage` resource
+type.
+
+<Admonition type="warning" title="This call replaces the trail's existing selectors">
+`put-event-selectors` overwrites every selector already on the trail. Advanced event selectors are
+opt-in, so a call that names only data events stops the trail logging management events. Read the
+current selectors with `aws cloudtrail get-event-selectors --trail-name <your-trail>` and merge them,
+or use a trail dedicated to MicroVM auditing.
+</Admonition>
+
+The selectors below keep management events and add MicroVM data events, so they are safe to apply to
+a trail that was logging management events by default:
+
+```bash
+aws cloudtrail put-event-selectors \
+  --trail-name <your-trail> \
+  --advanced-event-selectors '[
+    {
+      "Name": "Keep management events",
+      "FieldSelectors": [
+        { "Field": "eventCategory", "Equals": ["Management"] }
+      ]
+    },
+    {
+      "Name": "Log Lambda MicroVM data events",
+      "FieldSelectors": [
+        { "Field": "eventCategory", "Equals": ["Data"] },
+        { "Field": "resources.type", "Equals": ["AWS::Lambda::MicrovmImage"] }
+      ]
+    }
+  ]'
+```
+
+**Verify these values:**
+
+- `<your-trail>`: The name of an existing CloudTrail trail in the same region.
+
+The second selector captures `RunMicrovm`, `TerminateMicrovm`, `SuspendMicrovm`, `ResumeMicrovm`,
+`CreateMicrovmAuthToken`, and `CreateMicrovmShellAuthToken`. Delivery to S3 takes a few minutes.
+Forward the stream into SigNoz using the existing
+[AWS logs ingestion patterns](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) to build
+suspend and resume timelines or security audit dashboards.
+
+Image and MicroVM management calls such as `CreateMicrovmImage` and `ListMicrovms` are management
+events. CloudTrail logs them by default, and the first selector above preserves that. See
+<a href="https://docs.aws.amazon.com/lambda/latest/dg/microvms-monitoring.html" target="_blank" rel="noopener noreferrer nofollow">Monitoring for Lambda MicroVMs</a>
+for the full event list.
+
+</details>
+
+## Next steps
+
+- [Set up alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) on host metrics and error rates.
+- [Build dashboards](https://signoz.io/docs/userguide/manage-dashboards/) grouped by `aws.lambda.microvm.image_name`.
+- [Correlate traces and logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to move between signals during an investigation.
+- [Monitor AWS Lambda functions](https://signoz.io/docs/aws-monitoring/lambda/) for classic, per-invocation Lambda.
+
+## Get Help
+
+<GetHelp />
