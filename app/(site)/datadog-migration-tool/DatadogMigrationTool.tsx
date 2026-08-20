@@ -41,7 +41,7 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
       </div>
 
       <p className="mt-3 text-center text-xs text-signoz_vanilla-400">
-        Available for SigNoz Cloud and Self-Hosted SigNoz
+        Available on SigNoz Cloud paid plans
       </p>
 
       <Modal
@@ -90,9 +90,9 @@ const Header: React.FC = () => {
         </h1>
 
         <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
-          Use the LLM-powered migration tool to translate your Datadog dashboards for managed{' '}
-          <br className="hidden md:block" /> SigNoz Cloud or Self-Hosted SigNoz while preserving
-          your configurations, queries, and panels.
+          LLM-powered migration tool that automatically translates your Datadog dashboards to{' '}
+          <br className="hidden md:block" /> SigNoz through a simple UI, preserving your
+          configurations, queries, and panels.
         </p>
       </SectionLayout>
 
@@ -180,9 +180,9 @@ const SimpleAutomatedMigrationSection: React.FC = () => {
             <span className="flex items-center gap-2 font-bold uppercase text-red-400">III</span>
             <h2 className="mb-6 text-signoz_sienna-100">Import to SigNoz</h2>
             <p className="leading-relaxed text-signoz_vanilla-400">
-              Import the translated dashboards into SigNoz Cloud or Self-Hosted SigNoz through the
-              UI. Your dashboards are ready to use immediately with the same visual layouts,
-              queries, and alerting logic you had in Datadog.
+              Import the translated dashboards into SigNoz through a UI. Your dashboards are ready
+              to use immediately with the same visual layouts, queries, and alerting logic you had
+              in Datadog.
             </p>
           </div>
         </div>
@@ -221,9 +221,9 @@ const SimpleAutomatedMigrationSection: React.FC = () => {
           <span className="flex items-center gap-2 font-bold uppercase text-red-400">III</span>
           <h2 className="mb-6 text-signoz_sienna-100">Import to SigNoz</h2>
           <p className="leading-relaxed text-signoz_vanilla-400">
-            Import the translated dashboards into SigNoz Cloud or Self-Hosted SigNoz through the
-            UI. Your dashboards are ready to use immediately with the same visual layouts, queries,
-            and alerting logic you had in Datadog.
+            Import the translated dashboards into SigNoz through a UI. Your dashboards are ready to
+            use immediately with the same visual layouts, queries, and alerting logic you had in
+            Datadog.
           </p>
         </div>
       </GridLayout>
