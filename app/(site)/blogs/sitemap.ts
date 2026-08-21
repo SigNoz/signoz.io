@@ -73,7 +73,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   const staticRoutes = CMS_SITEMAP_SECTIONS.map(({ section }) => ({
-    url: `${siteUrl}/${section === 'case-study' ? 'customers' : section}/`,
+    url: `${siteUrl}/${section}/`,
     changeFrequency: 'weekly' as const,
   }))
 

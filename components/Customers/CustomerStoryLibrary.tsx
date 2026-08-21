@@ -137,7 +137,7 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
     }, 500)
 
     return () => window.clearTimeout(timeout)
-  }, [activeFilter, filteredStories.length, logEvent, query, viewMode])
+  }, [activeFilter, filteredStories.length, logEvent, pathname, query, viewMode])
 
   const trackClick = (
     clickType: string,

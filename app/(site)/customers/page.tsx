@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 
-import type { CustomerStory } from '@/components/Customers/Customers.types'
 import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCaseStudiesForPage } from '@/utils/cachedData'
 
@@ -28,17 +27,8 @@ export const metadata: Metadata = {
   },
 }
 
-function getCustomerStories(caseStudyCards: CustomerStory[]): CustomerStory[] {
-  return [...caseStudyCards].sort((a, b) => {
-    const dateDiff = (b.publishedAt || '').localeCompare(a.publishedAt || '')
-    if (dateDiff !== 0) return dateDiff
-    return a.company.localeCompare(b.company)
-  })
-}
-
 export default async function Page() {
-  const caseStudyCards = await fetchAllCaseStudiesForPage()
-  const stories = getCustomerStories(caseStudyCards)
+  const stories = await fetchAllCaseStudiesForPage()
 
   return <CustomersPage stories={stories} />
 }
