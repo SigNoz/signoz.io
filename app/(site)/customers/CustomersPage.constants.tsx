@@ -29,13 +29,13 @@ export const HERO_CTAS: CustomersHeroCta[] = [
   {
     label: 'Get started free',
     href: '/teams/',
-    clickName: 'Get Started Free CTA',
+    clickName: 'Sign Up Button',
     variant: 'default',
   },
   {
     label: 'Contact us',
     href: '/contact-us/?source=customers',
-    clickName: 'Contact Us CTA',
+    clickName: 'Contact Us Button',
     variant: 'secondary',
   },
 ]

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
+import { usePathname } from 'next/navigation'
 
 import { FeaturedQuoteCard, LogoCard, QuoteCard } from './ProofWallCards'
 import type {
@@ -139,6 +140,7 @@ export default function CustomerProofWall({ quotes, logos }: CustomerProofWallPr
   const suppressClickRef = useRef(false)
   const [isPaused, setIsPaused] = useState(false)
   const logEvent = useLogEvent()
+  const pathname = usePathname()
 
   const { boardWidth, columnCount, tiles } = useMemo(() => {
     const computedTiles = quotes.flatMap((proof, quoteIndex) => {
@@ -194,6 +196,7 @@ export default function CustomerProofWall({ quotes, logos }: CustomerProofWallPr
         clickName,
         clickLocation: customerProofClickLocation,
         clickText,
+        pageLocation: pathname,
       },
     })
   }

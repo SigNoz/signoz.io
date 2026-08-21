@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import Image, { type ImageLoader } from 'next/image'
+import { usePathname } from 'next/navigation'
 import { ArrowLeft, ArrowRight, Play } from 'lucide-react'
 import { useLogEvent } from '@/hooks/useLogEvent'
 
@@ -24,26 +25,31 @@ export default function CustomerVideoCarousel({ videos }: CustomerVideoCarouselP
   const suppressClickRef = useRef(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [interactiveVideoId, setInteractiveVideoId] = useState<string | null>(null)
-  const hasChangedSlideRef = useRef(false)
   const logEvent = useLogEvent()
+  const pathname = usePathname()
 
+  // Fires for the initial slide and again once a slide change settles (the
+  // timeout resets while the index is still moving during a scroll/drag).
   useEffect(() => {
-    if (!hasChangedSlideRef.current) return
-
     const activeVideo = videos[activeIndex]
     if (!activeVideo) return
 
-    logEvent({
-      eventName: 'Customer Video Viewed',
-      eventType: 'track',
-      attributes: {
-        company: activeVideo.company,
-        slideCount: videos.length,
-        slideIndex: activeIndex + 1,
-        videoId: activeVideo.videoId,
-      },
-    })
-  }, [activeIndex, logEvent, videos])
+    const timeout = window.setTimeout(() => {
+      logEvent({
+        eventName: 'Customer Video Slide Viewed',
+        eventType: 'track',
+        attributes: {
+          company: activeVideo.company,
+          pageLocation: pathname,
+          slideCount: videos.length,
+          slideIndex: activeIndex + 1,
+          videoId: activeVideo.videoId,
+        },
+      })
+    }, 400)
+
+    return () => window.clearTimeout(timeout)
+  }, [activeIndex, logEvent, pathname, videos])
 
   const trackClick = (
     clickName: string,
@@ -60,6 +66,7 @@ export default function CustomerVideoCarousel({ videos }: CustomerVideoCarouselP
         clickName,
         clickLocation: 'Customers Featured Videos',
         clickText,
+        pageLocation: pathname,
         company: video.company,
         slideCount: videos.length,
         slideIndex: videoIndex + 1,
@@ -76,7 +83,6 @@ export default function CustomerVideoCarousel({ videos }: CustomerVideoCarouselP
     const nextIndex = (activeIndex + direction + videos.length) % videos.length
     const nextSlide = viewport.children.item(nextIndex) as HTMLElement | null
 
-    hasChangedSlideRef.current = true
     trackClick(
       direction === -1 ? 'Previous Customer Video' : 'Next Customer Video',
       direction === -1 ? 'Previous video' : 'Next video',
@@ -123,7 +129,6 @@ export default function CustomerVideoCarousel({ videos }: CustomerVideoCarouselP
     drag.active = false
 
     if (drag.moved) {
-      hasChangedSlideRef.current = true
       trackClick('Drag Customer Videos', 'Drag video carousel', activeIndex)
     }
 
@@ -159,7 +164,6 @@ export default function CustomerVideoCarousel({ videos }: CustomerVideoCarouselP
           }, 0)
 
           if (nextIndex !== activeIndex) {
-            hasChangedSlideRef.current = true
             setActiveIndex(nextIndex)
           }
         }}

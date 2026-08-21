@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { ArrowUpRight, Grid2X2, List, Search } from 'lucide-react'
 
 import { cn } from 'app/lib/utils'
@@ -76,6 +77,7 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
   const hasSearchedRef = useRef(false)
   const lastTrackedSearchRef = useRef<string | null>(null)
   const logEvent = useLogEvent()
+  const pathname = usePathname()
   const isMobileView = useSyncExternalStore(
     subscribeToMobileView,
     getMobileViewSnapshot,
@@ -124,6 +126,7 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
         eventName: 'Customer Story Search',
         eventType: 'track',
         attributes: {
+          pageLocation: pathname,
           activeFilter,
           hasQuery: query.trim().length > 0,
           queryLength: query.trim().length,
@@ -150,6 +153,7 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
         clickName,
         clickLocation: 'Customers Story Library',
         clickText,
+        pageLocation: pathname,
         ...attributes,
       },
     })
@@ -297,29 +301,34 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
                 }
               >
                 {viewMode === 'grid' ? (
-                  <div className="flex h-full min-h-0 w-full flex-col justify-between gap-6">
+                  /* Three aligned zones: logo row pinned top (fixed min-h), title at a
+                     fixed offset below it, outcome/person block pinned to the bottom —
+                     so each zone lines up across cards in a row. */
+                  <div className="flex h-full min-h-0 w-full flex-col">
                     <StoryLogoRow story={story} />
-                    <div className="flex w-full items-end justify-between gap-4">
-                      <div className="flex min-w-0 flex-col">
-                        <h3 className="m-0 text-pretty text-base font-normal leading-6 text-[var(--l3-foreground)] transition-colors group-hover:text-[var(--l1-foreground)]">
-                          {story.title}
-                        </h3>
+                    <h3 className="m-0 mt-6 text-pretty text-base font-normal leading-6 text-[var(--l3-foreground)] transition-colors group-hover:text-[var(--l1-foreground)]">
+                      {story.title}
+                    </h3>
+                    <div className="mt-auto flex w-full items-end justify-between gap-4 pt-6">
+                      <div className="min-w-0">
                         {story.takeaway && story.takeawayLabel ? (
                           <>
-                            <p className="mt-3 text-pretty text-xl font-medium leading-7 text-[var(--l1-foreground)]">
+                            <p className="m-0 text-pretty text-xl font-medium leading-7 text-[var(--l1-foreground)]">
                               {story.takeaway}
                             </p>
-                            <p className="mt-1 text-sm leading-5 text-[var(--l3-foreground)]">
+                            <p className="m-0 mt-1 text-sm leading-5 text-[var(--l3-foreground)]">
                               {story.takeawayLabel}
                             </p>
                           </>
                         ) : (
-                          <div className="mt-3">
-                            <p className="text-base font-medium text-[var(--l1-foreground)]">
+                          <>
+                            <p className="m-0 text-base font-medium leading-7 text-[var(--l1-foreground)]">
                               {story.person}
                             </p>
-                            <p className="mt-1 text-sm text-[var(--l3-foreground)]">{story.role}</p>
-                          </div>
+                            <p className="m-0 mt-1 text-sm leading-5 text-[var(--l3-foreground)]">
+                              {story.role}
+                            </p>
+                          </>
                         )}
                       </div>
                       <StoryArrowChip />

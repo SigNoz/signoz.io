@@ -109,14 +109,14 @@ describe('app/(site)/customers/customersPageContent.ts', () => {
     }
   })
 
-  it('has 2 blog story cards with valid filters and /customers hrefs', () => {
-    assert.equal(pageContent.blogStoryCards.length, 2)
+  it('has 3 blog story cards with valid filters and /blog hrefs', () => {
+    assert.equal(pageContent.blogStoryCards.length, 3)
     for (const card of pageContent.blogStoryCards) {
       assert.equal(card.type, 'From the SigNoz blog')
       for (const key of ['company', 'title', 'description', 'person', 'role', 'logo', 'logoAlt']) {
         assert.ok(card[key], `blog story card "${card.company}" missing "${key}"`)
       }
-      assert.match(card.href, /^\/customers\/[a-z0-9-]+\/$/)
+      assert.match(card.href, /^\/blog\/[a-z0-9-]+\/$/)
       assert.match(card.publishedAt, /^\d{4}-\d{2}-\d{2}$/)
       assert.ok(Array.isArray(card.filters) && card.filters.length > 0, 'card has no filters')
       for (const filter of card.filters) {

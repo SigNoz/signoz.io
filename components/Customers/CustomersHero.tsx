@@ -57,7 +57,7 @@ export default function CustomersHero({ title, metrics, ctas }: CustomersHeroPro
               clickLocation="Customers Hero"
               clickName={cta.clickName}
               clickText={cta.label}
-              clickType="CTA"
+              clickType={cta.variant === 'default' ? 'Primary CTA' : 'Secondary CTA'}
               eventAttributes={{ target: cta.href }}
               href={cta.href}
             >

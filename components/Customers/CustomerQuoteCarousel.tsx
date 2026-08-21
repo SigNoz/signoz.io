@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { ArrowUpRight } from 'lucide-react'
 
 import { cn } from 'app/lib/utils'
@@ -60,6 +61,7 @@ export default function CustomerQuoteCarousel({ quotes }: CustomerQuoteCarouselP
   const [activeIndex, setActiveIndex] = useState(0)
   const [isInteracting, setIsInteracting] = useState(false)
   const logEvent = useLogEvent()
+  const pathname = usePathname()
 
   const trackClick = (
     clickName: string,
@@ -76,6 +78,7 @@ export default function CustomerQuoteCarousel({ quotes }: CustomerQuoteCarouselP
         clickName,
         clickLocation: 'Customers Quote Carousel',
         clickText,
+        pageLocation: pathname,
         company: quote.company,
         quoteIndex: quoteIndex + 1,
         quoteCount: quotes.length,

@@ -7,12 +7,6 @@ import { resolveLatestDate } from '@/utils/dateUtils'
 
 export const revalidate = 86400
 
-// Blog-native customer stories now canonically served at /customers/<slug>/
-const BLOG_NATIVE_CUSTOMER_STORY_PATHS = new Set([
-  '/alien-intelligence-ai-sre-workflow-signoz',
-  '/inkeep-ai-agent-monitoring',
-])
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
 
@@ -71,9 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     blogRoutes = blogs.data
       .filter((post) => !post.excludeFromSitemap)
       .map((post) => ({
-        url: BLOG_NATIVE_CUSTOMER_STORY_PATHS.has(post.path)
-          ? `${siteUrl}/customers${post.path}/`
-          : `${siteUrl}/blog${post.path}/`,
+        url: `${siteUrl}/blog${post.path}/`,
         lastModified: resolveLatestDate(post),
         changeFrequency: 'weekly' as const,
         priority: 0.5,

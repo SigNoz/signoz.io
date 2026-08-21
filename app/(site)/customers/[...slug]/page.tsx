@@ -14,16 +14,8 @@ import { getCachedAuthors } from '@/utils/cmsAuthors'
 import JsonLdScript from '@/components/JsonLdScript'
 import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
 
-const BLOG_NATIVE_CUSTOMER_STORY_SLUGS = new Set([
-  'alien-intelligence-ai-sre-workflow-signoz',
-  'inkeep-ai-agent-monitoring',
-])
-
 async function getCustomerStoryContent(path: string, deploymentStatus: string) {
-  const caseStudy = await getContentBySlug('case-studies', path, deploymentStatus)
-  if (caseStudy || !BLOG_NATIVE_CUSTOMER_STORY_SLUGS.has(path)) return caseStudy
-
-  return getContentBySlug('blogs', path, deploymentStatus)
+  return getContentBySlug('case-studies', path, deploymentStatus)
 }
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
