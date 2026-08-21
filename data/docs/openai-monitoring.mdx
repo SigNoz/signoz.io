@@ -41,14 +41,14 @@ source .venv/bin/activate
 ### Step 2. Install the OpenTelemetry dependencies
 
 ```bash
-pip install opentelemetry-distro~=0.51b0
-pip install opentelemetry-exporter-otlp~=1.30.0
-pip install opentelemetry-instrumentation-openai-v2
+pip install opentelemetry-distro opentelemetry-exporter-otlp
 pip install httpx
 ```
 
+You do not need to install `opentelemetry-instrumentation-openai-v2` yourself. `opentelemetry-bootstrap` in the next step detects `openai` in your environment and installs the matching instrumentation for you, the same way it does for `requests`, `fastapi`, or `psycopg`.
+
 <Admonition type="warning">
-  `httpx` is required even though you may not use it directly. The OpenAI Python SDK v3 ships its own HTTP client under the module name `httpx2`, while `opentelemetry-instrumentation-openai-v2` still does `from httpx import URL`. Without `httpx` installed, that import raises `ModuleNotFoundError`, `opentelemetry-instrument` skips the OpenAI instrumentor **silently**, and your OpenAI calls show up as generic `POST` spans with no `gen_ai.*` attributes and no error explaining why.
+  `httpx` is the one dependency bootstrap does not resolve for you, and it is required even though you may not use it directly. The OpenAI Python SDK v3 ships its own HTTP client under the module name `httpx2`, while `opentelemetry-instrumentation-openai-v2` still does `from httpx import URL`. Without `httpx` installed, that import raises `ModuleNotFoundError`, `opentelemetry-instrument` skips the OpenAI instrumentor **silently**, and your OpenAI calls show up as generic `POST` spans with no `gen_ai.*` attributes and no error explaining why.
 </Admonition>
 
 ### Step 3. Add automatic instrumentation
@@ -56,6 +56,10 @@ pip install httpx
 ```bash
 opentelemetry-bootstrap --action=install
 ```
+
+<Admonition type="info">
+  Bootstrap instruments only what is already installed in the environment, so run it after your application's own dependencies (including `openai`). If you add a library later, re-run this command.
+</Admonition>
 
 ### Step 4. Run your application
 
@@ -65,7 +69,7 @@ OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
 OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
-OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true \
+OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=SPAN_AND_EVENT \
 OPENAI_API_KEY=<your-openai-key> \
 opentelemetry-instrument <your_run_command>
 ```
@@ -499,7 +503,7 @@ This instrumentation captures comprehensive telemetry data for your OpenAI appli
 ### Logs
 
 - **Structured logs** for each API call when `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true` is set
-- **Message content logs** (prompts and completions) when `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true` is enabled
+- **Message content logs** (prompts and completions) when `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` is set to `SPAN_AND_EVENT` or `EVENT_ONLY`
 - **Error logs** for failed API calls with detailed error information and stack traces
 - **Performance logs** showing request duration and timing information
 
@@ -554,15 +558,15 @@ More details about the metrics can be found [here](https://opentelemetry.io/docs
 By default, message content such as prompts and completions are not captured. To capture message content as log events, set the environment variable:
 
 ```bash
-export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true
+export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=SPAN_AND_EVENT
 ```
 
+The accepted values are `NO_CONTENT`, `SPAN_ONLY`, `EVENT_ONLY`, and `SPAN_AND_EVENT`. `SPAN_AND_EVENT` records content both as span attributes and as log events.
+
 <Admonition type="warning">
-  **This value depends on the version you installed.** Content capture moved out of the instrumentation's own boolean flag and into the shared `opentelemetry-util-genai` library, which takes an enum instead: `NO_CONTENT`, `SPAN_ONLY`, `EVENT_ONLY`, or `SPAN_AND_EVENT`.
+  Older guides and blog posts set this to `true`. That is no longer accepted: content capture moved out of the instrumentation's own boolean flag and into the shared `opentelemetry-util-genai` library, which takes the enum above. On current versions `true` is rejected with a warning and falls back to `NO_CONTENT`, so prompts and completions never reach the span.
 
-  `true` is correct for the pinned versions this guide installs. If you install `opentelemetry-distro` and `opentelemetry-instrumentation-openai-v2` unpinned, use `SPAN_AND_EVENT` instead. On those newer versions `true` is rejected with a warning and falls back to `NO_CONTENT`, so prompts and completions never reach the span.
-
-  To confirm which one you are on, check whether your spans carry `gen_ai.input.messages` and `gen_ai.output.messages`.
+  To confirm content capture is working, check that your spans carry `gen_ai.input.messages` and `gen_ai.output.messages`.
 </Admonition>
 
 **Note:** Be cautious when enabling this in production as it may capture sensitive user data. This feature is already included in the run command above.
@@ -625,7 +629,7 @@ If you don't see your telemetry data:
 3. **Check ingestion key** - Verify your SigNoz ingestion key is correct
 4. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
 5. **Spans named `POST` with no `gen_ai.*` attributes** - The OpenAI instrumentor was skipped because `httpx` is not installed. Run `pip install httpx` and restart your app.
-6. **Spans arrive but carry no prompts or completions** - The value of `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` does not match your installed version. See [Capturing Message Content](#capturing-message-content-optional).
+6. **Spans arrive but carry no prompts or completions** - `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` is set to `true` rather than one of the accepted values. See [Capturing Message Content](#capturing-message-content-optional).
 
 </details>
 
