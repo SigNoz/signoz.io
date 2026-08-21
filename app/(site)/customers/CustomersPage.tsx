@@ -1,5 +1,5 @@
 import type { CustomersPageContent, CustomerStory } from '@/components/Customers/Customers.types'
-import CustomerProofMasonry from '@/components/Customers/CustomerProofMasonry'
+import CustomerProofWall from '@/components/Customers/CustomerProofWall'
 import CustomerQuoteCarousel from '@/components/Customers/CustomerQuoteCarousel'
 import CustomersHero from '@/components/Customers/CustomersHero'
 import CustomerStoryLibrary from '@/components/Customers/CustomerStoryLibrary'
@@ -63,6 +63,14 @@ export default function CustomersPage({ content, stories }: CustomersPageProps) 
         <Divider />
 
         <section className={sectionInnerClassName}>
+          <div className="py-12 lg:py-20">
+            <CustomerQuoteCarousel quotes={content.quoteCarousel} />
+          </div>
+        </section>
+
+        <Divider />
+
+        <section className={sectionInnerClassName}>
           <div className="py-16 lg:py-24">
             <h2 className={sectionHeadingClassName}>
               <span className="block max-w-3xl">{PROOF_HEADING.primary}</span>
@@ -70,13 +78,11 @@ export default function CustomersPage({ content, stories }: CustomersPageProps) 
                 {PROOF_HEADING.secondary}
               </span>
             </h2>
-            <div className="mt-12 grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-10">
-              <div className="min-w-0">
-                <CustomerQuoteCarousel quotes={content.quoteCarousel} />
-              </div>
-              <div className="min-w-0">
-                <CustomerProofMasonry quotes={content.proofWall.quotes} />
-              </div>
+            <div className="mt-12">
+              <CustomerProofWall
+                quotes={content.proofWall.quotes}
+                logos={content.proofWall.logos}
+              />
             </div>
           </div>
         </section>
