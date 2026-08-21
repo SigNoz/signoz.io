@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { Github, Linkedin, Slack, Twitter, Youtube } from '@/components/social-icons/SolidIcons'
 import { usePathname } from 'next/navigation'
 import { cn } from 'app/lib/utils'
+import AskAIRow from '@/components/AskAIRow/AskAIRow'
 import './footer/footer-pill-links.css'
 
 type FooterPillLinkProps = {
@@ -101,7 +102,10 @@ function Footer({ inDocsShell = false }: FooterProps) {
   const stackStartClass = stackEarly ? 'max-lg:justify-start' : 'max-md:justify-start'
 
   return (
-    <div className="z-[10] flex min-w-0 shrink-0 flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px]">
+    <div
+      className="z-[10] flex min-w-0 shrink-0 flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px]"
+      data-markdown-ignore
+    >
       <div
         className={cn(
           'flex w-full min-w-0 items-center px-4 py-14 max-md:max-w-full',
@@ -165,7 +169,6 @@ function Footer({ inDocsShell = false }: FooterProps) {
                   Launch Week
                   <ArrowUpRight size={16} />
                 </FooterPillLink>
-                <FooterPillLink href="/changelog/">Changelog</FooterPillLink>
                 <FooterPillLink href="/docs/dashboards/dashboard-templates/overview/" newTab>
                   Dashboard Templates
                   <ArrowUpRight size={16} />
@@ -337,6 +340,17 @@ function Footer({ inDocsShell = false }: FooterProps) {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <div
+        className={cn(
+          'flex w-full min-w-0 items-center border-t border-solid border-[var(--l1-border)] px-4 pt-6',
+          // Docs pages float the fixed NozPeek dock over the page bottom; leave room so the row stays clickable.
+          inDocsShell ? 'justify-start pb-24' : 'justify-center pb-6'
+        )}
+      >
+        <div className="w-full min-w-0 max-w-8xl">
+          <AskAIRow />
         </div>
       </div>
     </div>

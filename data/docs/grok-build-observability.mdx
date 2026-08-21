@@ -1,0 +1,162 @@
+---
+date: 2026-08-14
+title: Grok Build Observability & Monitoring with OpenTelemetry
+meta_title: Grok Build OpenTelemetry Monitoring
+description: Monitor Grok Build, xAI's terminal coding agent, with OpenTelemetry and SigNoz. Track token usage, tool calls, errors, and startup latency.
+doc_type: howto
+---
+
+## What is Grok Build Observability?
+
+<a href="https://github.com/xai-org/grok-build" target="_blank" rel="noopener noreferrer nofollow">Grok Build</a> is xAI's terminal coding agent. It ships its own OpenTelemetry exporter, so instrumenting it is a matter of configuration: there is no library to install and no collector to run. Once enabled, it emits metrics covering token usage, turns, tool calls, errors, and startup timings, plus a stream of structured events for each session.
+
+With full Grok Build observability in SigNoz, you can see how much your team is spending in tokens and on which models, which tools the agent actually reaches for, how often turns fail and why, and where startup time is going.
+
+<Admonition type="info" title="Grok Build emits metrics and events, not traces">
+Unlike most integrations in this section, Grok Build has no traces exporter. Everything arrives as metrics under the `ai.xai.grok_code` meter scope and as OTLP log records. There is no trace waterfall to explore, so the dashboard is the primary view.
+</Admonition>
+
+<YouTube id="G30t8Q4d8S0" mute="false" />
+
+## Prerequisites
+
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
+- Grok Build installed. See the <a href="https://docs.x.ai/build/overview" target="_blank" rel="noopener noreferrer nofollow">xAI installation guide</a>
+- A SuperGrok subscription or an `XAI_API_KEY`
+
+## Monitor Grok Build with OpenTelemetry
+
+Grok Build's telemetry is a double opt-in. The `GROK_EXTERNAL_OTEL` master switch and at least one exporter must both be set, since either alone emits nothing.
+
+**Step 1:** Launch Grok Build with telemetry enabled
+
+```bash
+export GROK_EXTERNAL_OTEL=1
+export OTEL_METRICS_EXPORTER=otlp
+export OTEL_LOGS_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_METRIC_EXPORT_INTERVAL=10000
+
+grok
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning" title="Use http/protobuf, not grpc">
+Grok Build 1.0.3 lists gRPC as a supported protocol, but selecting it fails at export time with `gRPC protocol is not compatible with HTTP transport`. The telemetry stream still reports itself as active and nothing appears in the terminal, so the failure is silent and no data reaches SigNoz. Run `grok --debug` and look for `external otel:` lines if nothing arrives.
+</Admonition>
+
+<Admonition type="info" title="Why the ingestion key must be an environment variable">
+Grok Build deliberately has no headers key in its config file, so credentials never touch disk. Every non-secret setting can live in `~/.grok/config.toml` under `[telemetry]` as `otel_*` keys, but the ingestion key has to come from `OTEL_EXPORTER_OTLP_HEADERS`.
+</Admonition>
+
+**Step 2:** Generate some telemetry
+
+Run a few prompts that make the agent read files or run commands, so tool and token metrics have something to report.
+
+```bash
+grok -p "List the files in this directory and summarise what this project does."
+```
+
+The default metric export interval is 60 seconds, which is why the snippet above lowers it to 10 seconds while you verify the pipeline. Events are exported every 5 seconds by default.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## View Grok Build Metrics in SigNoz
+
+Metrics are Grok Build's primary signal. Open the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/), search for `grok_code.token.usage`, and run the query to confirm data is arriving.
+
+<Figure
+  src="/img/docs/llm/grok-build/grok-build-metrics.webp"
+  alt="Grok Build token usage metric charted in the SigNoz Metrics Explorer"
+  caption="grok_code.token.usage charted in the Metrics Explorer"
+/>
+
+Every metric lives under the `ai.xai.grok_code` meter scope. All the counters are monotonic delta sums, so aggregate them with `increase` to get totals rather than `rate`.
+
+| Metric | Unit | Key attributes |
+|---|---|---|
+| `grok_code.session.count` | `{session}` | base attributes only |
+| `grok_code.turn.count` | `{turn}` | `outcome` (`completed`, `cancelled`, `error`), `model` |
+| `grok_code.token.usage` | `{token}` | `type` (`input`, `output`, `reasoning`, `cache_read`), `model` |
+| `grok_code.tool.usage` | `{call}` | `tool_name`, `outcome` |
+| `grok_code.tool.decision` | `{decision}` | `tool_name`, `decision`, `access_kind`, `permission_mode` |
+| `grok_code.error.count` | `{error}` | `error_category`, `model` |
+| `grok_code.startup.total` | `ms` | `outcome`, `auth_mode` |
+| `grok_code.startup.phase_duration` | `ms` | `phase`, `outcome`, `auth_mode` |
+
+<Admonition type="info" title="Reducing metric cardinality" defaultCollapsed="true">
+`session.id` is attached to metrics by default. On a large rollout that can be a lot of series, so set `OTEL_METRICS_INCLUDE_SESSION_ID=false` to drop it. `OTEL_METRICS_INCLUDE_ACCOUNT_UUID` behaves the same way, while `OTEL_METRICS_INCLUDE_VERSION` and `OTEL_METRICS_INCLUDE_ENTRYPOINT` are off by default and can be turned on.
+</Admonition>
+
+## View Grok Build Logs in SigNoz
+
+Open the [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/) and filter with `service.name = 'grok-cli'` to see the event stream. Each event carries its detail in attributes rather than in the log body, so open a record to inspect it.
+
+<Figure
+  src="/img/docs/llm/grok-build/grok-build-events.webp"
+  alt="A Grok Build event in SigNoz showing its attributes"
+  caption="Grok Build events carry their detail in attributes such as duration_ms, tool_call_count, and cancellation_category"
+/>
+
+Useful attributes include `model`, `input_tokens`, `output_tokens`, `cache_read_tokens`, `reasoning_tokens`, `tool_name`, `outcome`, and `duration_ms`. Every event also carries `session.id` and `prompt.id`, so you can group everything produced while handling a single prompt.
+
+## Grok Build Observability Dashboard
+
+The [Grok Build dashboard](https://signoz.io/docs/dashboards/dashboard-templates/grok-build-dashboard/) gives you token usage by type and model, tool activity, error categories, and startup latency out of the box.
+
+<Figure
+  src="/img/docs/llm/grok-build/grok-build-dashboard.webp"
+  alt="Grok Build dashboard in SigNoz"
+  caption="The Grok Build dashboard template"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting Grok Build Observability
+
+</ToggleHeading>
+
+### No data in SigNoz
+
+Check that both `GROK_EXTERNAL_OTEL=1` and at least one exporter are set. Either on its own emits nothing. Then run `grok --debug` and search the log under `~/.grok/debug/` for `external otel:` lines, which report whether the stream resolved its configuration and whether exports are succeeding.
+
+### Metrics are missing but events arrive
+
+The two signals have different export intervals. Metrics default to 60 seconds while events default to 5, so metrics can look absent for a full minute after startup. Set `OTEL_METRIC_EXPORT_INTERVAL=10000` while you verify.
+
+### Nothing arrives for the first few seconds
+
+Grok Build holds telemetry closed at startup until it has fetched fleet policy from xAI, since that policy can disable the stream. The wait is bounded and emission begins within 30 seconds regardless.
+
+### Export errors mentioning gRPC
+
+Set `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`. gRPC is documented as supported but does not work in version 1.0.3.
+
+</details>
+
+## Related integrations
+
+Instrument the other AI coding agents you run, using the same OpenTelemetry pipeline:
+
+- [Monitor OpenAI Codex with OpenTelemetry](https://signoz.io/docs/codex-monitoring/) - track Codex CLI sessions, token spend, and command-level traces
+- [Claude Code monitoring with OpenTelemetry](https://signoz.io/docs/claude-code-monitoring/) - track token usage, costs, and tool decisions
+- [OpenCode observability with OpenTelemetry](https://signoz.io/docs/opencode-observability/) - trace OpenCode sessions, tool calls, and per-message cost
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.
+
+Additional resources:
+
+- [Create alerts on metrics](https://signoz.io/docs/alerts-management/metrics-based-alerts/)
+- [Query and filter logs](https://signoz.io/docs/userguide/logs_query_builder/)
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/)

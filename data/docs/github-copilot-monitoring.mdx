@@ -1,0 +1,225 @@
+---
+date: 2026-08-12
+title: GitHub Copilot Monitoring with OpenTelemetry and SigNoz
+meta_title: GitHub Copilot OpenTelemetry Monitoring
+description: Monitor GitHub Copilot Chat with OpenTelemetry and SigNoz. Trace agent turns, model calls, and tool executions, and track token usage and latency.
+doc_type: howto
+---
+
+## What is GitHub Copilot Observability?
+
+GitHub Copilot observability gives you real-time visibility into how the Copilot Chat agent works inside VS Code by collecting traces and metrics with <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. The Copilot Chat extension ships its own OTLP exporter, so there is no instrumentation library to install and no collector to run. Every agent turn becomes a trace whose spans follow the <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry GenAI semantic conventions</a>: an `invoke_agent` root span with `chat`, `execute_tool`, and `embeddings` spans beneath it, carrying `gen_ai.request.model`, `gen_ai.usage.input_tokens`, `gen_ai.tool.name`, and `gen_ai.conversation.id`.
+
+With full GitHub Copilot monitoring in SigNoz, you can see which models the agent routes work to, track token spend and prompt-cache savings, measure time to first chunk as the developer actually experiences it, break down which tools the agent reaches for, and catch failing tool calls and rate limits before they slow the team down.
+
+<YouTube id="ccPSBysRELQ" mute="false" />
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- VS Code 1.131 or later, which bundles GitHub Copilot Chat 0.59.0 or later
+- A GitHub Copilot subscription of any tier, including the free tier
+
+<Admonition type="info" title="No paid Copilot tier or enterprise setup required">
+None of the `github.copilot.chat.otel.*` settings are license gated in the shipped Copilot Chat extension manifest, so this works on a personal account with no enterprise configuration.
+</Admonition>
+
+## Monitor GitHub Copilot with OpenTelemetry
+
+Copilot Chat reads its OpenTelemetry configuration from VS Code settings and applies your headers directly to its OTLP exporter, so you point it at SigNoz and reload. For more details, refer to the <a href="https://code.visualstudio.com/docs/agents/guides/monitoring-agents" target="_blank" rel="noopener noreferrer nofollow">VS Code guide to monitoring agents with OpenTelemetry</a>.
+
+**Step 1:** In VS Code, open your user settings JSON.
+
+Open VS Code, then open the Command Palette with `Cmd+Shift+P` (`Ctrl+Shift+P` on Windows and Linux) and run **Preferences: Open User Settings (JSON)**. All four steps below are performed in VS Code.
+
+<Admonition type="warning" title="These must go in User settings, not Workspace settings">
+Every `github.copilot.chat.otel.*` setting is declared with `"scope": "application"` in the extension manifest, so a copy placed in workspace settings is ignored.
+</Admonition>
+
+**Step 2:** Add the OpenTelemetry settings to that file.
+
+```json:settings.json
+{
+  "github.copilot.chat.otel.enabled": true,
+  "github.copilot.chat.otel.exporterType": "otlp-http",
+  "github.copilot.chat.otel.protocol": "http/protobuf",
+  "github.copilot.chat.otel.otlpEndpoint": "https://ingest.<region>.signoz.cloud:443",
+  "github.copilot.chat.otel.serviceName": "<service_name>",
+  "github.copilot.chat.otel.headers": {
+    "signoz-ingestion-key": "<your-ingestion-key>"
+  },
+  "github.copilot.chat.otel.captureContent": false
+}
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: The name Copilot appears under in SigNoz, for example `copilot-chat`. Give each team or rollout its own value if you want to tell them apart.
+
+`protocol` defaults to an empty string, which means `http/json`. Setting `http/protobuf` explicitly is what selects the protobuf exporter, so do not leave it out.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+**Step 3:** Save the file, then reload the VS Code window.
+
+Save `settings.json`, then open the Command Palette again and run **Developer: Reload Window**. Every one of these settings is read once at startup, so changes never apply to an already-running window.
+
+**Step 4:** Send a chat message from Copilot Chat.
+
+Once VS Code has reloaded, open the Copilot Chat view and ask it anything. Spans start arriving in SigNoz within about 30 seconds, and metrics follow on their own export interval.
+
+<Admonition type="warning" title="Content capture sends your prompts and code to SigNoz" defaultCollapsed="true">
+`github.copilot.chat.otel.captureContent` is `false` by default and this guide leaves it off. Turning it on records full prompts, model responses, tool arguments, tool results, and system instructions as span attributes, which means source code and anything else in the context window leaves your machine. It is genuinely useful for debugging agent behavior, so decide deliberately. `github.copilot.chat.otel.maxAttributeSizeChars` caps how much content lands in any single attribute and defaults to `0`, meaning no truncation.
+</Admonition>
+
+<Admonition type="info" title="Tagging environments, teams, and machines" defaultCollapsed="true">
+`github.copilot.chat.otel.resourceAttributes` takes a plain map and adds every key to all spans, metrics, and logs:
+
+```json:settings.json
+"github.copilot.chat.otel.resourceAttributes": {
+  "deployment.environment": "local",
+  "team": "platform"
+}
+```
+</Admonition>
+
+<Admonition type="info" title="Prefer environment variables?" defaultCollapsed="true">
+Every setting has an environment-variable equivalent, and the variable wins over the setting: `COPILOT_OTEL_ENABLED`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL`, `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUTES`, and `COPILOT_OTEL_CAPTURE_CONTENT`.
+
+The catch, and the reason this guide leads with settings: a GUI-launched VS Code on macOS inherits none of your shell environment, so exporting these in `.zshrc` and opening VS Code from the Dock does nothing. Launching with `code .` from a terminal does inherit them, but then the setup only works when you start it that way.
+</Admonition>
+
+Each agent turn emits a trace whose spans carry `gen_ai.operation.name` (`invoke_agent`, `chat`, `execute_tool`, `embeddings`) along with model, token usage, and tool attributes. OpenTelemetry batches data before sending, so allow a few seconds after a chat turn for it to appear in SigNoz.
+
+## View GitHub Copilot Traces in SigNoz
+
+Once configured, Copilot Chat automatically emits traces for every agent turn.
+
+Traces are available in SigNoz under the Traces tab:
+
+<Figure
+  src="/img/docs/llm/github-copilot/github-copilot-traces.webp"
+  alt="GitHub Copilot Trace View"
+  caption="GitHub Copilot Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes. The `invoke_agent` span wraps one agent turn, `chat` spans are the individual model calls, and `execute_tool` spans capture each tool the agent ran.
+
+<Figure
+  src="/img/docs/llm/github-copilot/github-copilot-detailed-traces.webp"
+  alt="GitHub Copilot Detailed Trace View"
+  caption="GitHub Copilot Detailed Trace View"
+/>
+
+<details>
+<ToggleHeading>
+## Attributes and metrics worth knowing about
+</ToggleHeading>
+
+### Span operations
+
+| `gen_ai.operation.name` | Span kind | Emitted when |
+|---|---|---|
+| `invoke_agent` | Internal | Wraps one agent turn. Root span. |
+| `chat` | Client | One per model call |
+| `execute_tool` | Internal | One per tool invocation |
+| `embeddings` | Client | Workspace indexing |
+| `execute_hook` | Internal | One per hook execution |
+
+### Attributes
+
+| Attribute | Where it appears |
+|---|---|
+| `gen_ai.request.model`, `gen_ai.response.model` | `chat`, `embeddings`, `invoke_agent` |
+| `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens` | `chat`, `invoke_agent` |
+| `gen_ai.usage.cache_read.input_tokens` | `chat`, `invoke_agent` |
+| `gen_ai.usage.reasoning.output_tokens` | `chat`, `invoke_agent` (reasoning models only) |
+| `gen_ai.response.time_to_first_chunk` | `chat` only |
+| `gen_ai.response.finish_reasons` | `chat` only |
+| `gen_ai.tool.name` | `execute_tool` only |
+| `gen_ai.agent.name` | `chat`, `invoke_agent` |
+| `gen_ai.conversation.id` | everything except `embeddings` |
+
+### Metrics
+
+Copilot emits the standard GenAI instruments (`gen_ai.client.token.usage`, `gen_ai.client.operation.duration`, `gen_ai.client.operation.time_to_first_chunk`, `gen_ai.client.operation.time_per_output_chunk`) plus Copilot-specific ones (`copilot_chat.agent.invocation.duration`, `copilot_chat.agent.turn.count`, `copilot_chat.time_to_first_token`, `copilot_chat.tool.call.count`, `copilot_chat.tool.call.duration`, `copilot_chat.session.count`, `github.copilot.mcp.server.connection.count`).
+
+</details>
+
+## GitHub Copilot Observability Dashboard
+
+You can also check out our custom [GitHub Copilot dashboard](https://signoz.io/docs/dashboards/dashboard-templates/github-copilot-dashboard/) which provides specialized visualizations for monitoring Copilot Chat. The dashboard includes pre-built charts for token usage and prompt-cache hit rate, per-model call volume and latency, tool activity split between MCP and built-in tools, and errors, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/github-copilot/github-copilot-dashboard.webp"
+  alt="GitHub Copilot Dashboard"
+  caption="GitHub Copilot Dashboard Template"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting GitHub Copilot Observability
+</ToggleHeading>
+
+### No traces in SigNoz
+
+- Confirm `github.copilot.chat.otel.enabled` is `true` in your **user** settings rather than workspace settings, then reload the window. Settings changes never apply to an already-running window.
+- Confirm you actually sent a chat message. Enabling the settings alone emits nothing.
+- Check that the region in the OTLP endpoint matches your SigNoz account.
+- OpenTelemetry batches data before sending, so wait 10-30 seconds after a chat turn.
+
+### Confirm whether Copilot is emitting at all
+
+Set `"github.copilot.chat.otel.exporterType": "console"`, reload the window, and check the Output panel. If spans appear there, Copilot is instrumented correctly and the problem is the endpoint, the key, or the region. Use `"file"` with `github.copilot.chat.otel.outfile` to capture the same output as JSON lines.
+
+### Spans appear but metrics do not
+
+Metrics export on an interval rather than per request, so allow a minute or two.
+
+### Data goes nowhere and there is no error
+
+An ingestion key is region scoped. A key issued for one region sent to another region's endpoint fails quietly. Re-check the ingestion key in the `signoz-ingestion-key` header against your SigNoz Ingestion Settings, with no extra spaces or quotes, and confirm the endpoint region matches.
+
+### `OTEL_EXPORTER_OTLP_HEADERS` seems to be ignored
+
+Expected if you launched VS Code from the Dock or Spotlight, since GUI-launched apps on macOS do not inherit your shell environment. Use the `github.copilot.chat.otel.headers` setting instead, which is what this guide does.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** - Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** - Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** - The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** - Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Related integrations
+
+Instrument the other AI coding agents and assistants your team runs, using the same OpenTelemetry pipeline:
+
+- [Monitor Claude Code with OpenTelemetry](https://signoz.io/docs/claude-code-monitoring/) - track token usage, cost, session activity, and tool decisions
+- [Monitor OpenAI Codex with OpenTelemetry](https://signoz.io/docs/codex-monitoring/) - trace Codex runs from the IDE extension and the CLI
+- [OpenCode observability with OpenTelemetry](https://signoz.io/docs/opencode-observability/) - trace OpenCode sessions, tool calls, and per-message cost
+- [Monitor the Claude Agent SDK with OpenTelemetry](https://signoz.io/docs/claude-agent-monitoring/) - trace agent runs, subagents, and tool execution
+- [Monitor GitHub Actions with OpenTelemetry](https://signoz.io/docs/cicd/github/github-actions-traces/) - trace the CI pipelines your agents open pull requests against
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

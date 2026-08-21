@@ -1,0 +1,133 @@
+---
+date: 2026-08-14
+title: Reduce Metric Sample Volume and Cardinality
+description: Drop unused metrics, aggregate high-cardinality labels, and tune temporality and collection interval to reduce metric sample volume in SigNoz.
+doc_type: howto
+---
+
+This guide covers the primary causes of metric volume growth in SigNoz and how to address each one.
+
+Metrics are measured in **Samples**: a single (timestamp, value) pair for one time series. Every unique combination of label values creates a distinct time series: a metric with a label carrying 500 unique values generates 500 distinct time series, each emitting a sample on every scrape interval.
+
+**[Understanding High Cardinality Data](https://signoz.io/blog/high-cardinality-data/):** explains why cardinality multiplies time series and the downstream impact on storage and query performance.
+
+## Optimization Tiers
+
+Address the problem as close to its source as possible before reaching for Collector processors:
+
+1. **Instrumentation:** parameterize dynamic routes. Addresses the problem at source, before it enters the pipeline.
+2. **OTel SDK:** use the [View API](https://signoz.io/opentelemetry/customize-metrics-streams-produced-by-opentelemetry-python-sdk/) to drop attributes or entire metrics before they are serialized to OTLP. 
+3. **[OTel Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/):** use processors to aggregate or drop metrics in the pipeline. Covered in the problems below.
+
+## Problem 1: Unused Metrics
+
+The simplest reduction is to stop ingesting metrics that serve no purpose in any dashboard or alert. Drop them at the Collector before they reach SigNoz.
+
+**Read more:** [How to Drop OpenTelemetry Metrics](https://signoz.io/docs/userguide/drop-metrics/)
+
+## Problem 2: High-Cardinality Labels
+
+OTel Instrumentation libraries commonly emit high-cardinality attributes like k8s.pod.name, client.port, url.full directly on metric data points. If a label like `k8s.pod.name` has 200 unique values, it multiplies your baseline time series by 200×.
+
+### Step 1: Find the Noisy Labels
+
+1. Go to **Metrics**. Toggle to the **Time Series** view.
+2. Select your top ingested metric. Expand the **"All Attributes"** panel.
+3. Identify labels with hundreds or thousands of unique values.
+
+### Step 2: Verify Usage
+
+Before aggregating anything, confirm the label is not in active use. **If it appears in any dashboard or alert, do not aggregate it. The aggregation will break those queries.**
+
+- Open the metric in Metrics Explorer. If it is used in any dashboards or alert rules, the counts appear at the top of the detail view. If neither is shown, the metric is not referenced anywhere and is safe to drop.
+
+<Figure src="/img/docs/cost-control/metrics-to-dashboard-linkage.webp" alt="Metric detail view showing dashboard and alert rule counts at the top" caption="Metrics Explorer: dashboard and alert rule counts appear at the top if the metric is in active use" />
+
+### Step 3: Implement the Fix (Aggregation)
+
+If the label is unused, aggregating it will reduce the number of time series to one per unique combination of the retained labels.
+
+| Label | Why it's problematic | Verdict |
+| --- | --- | --- |
+| `k8s.pod.name` / `k8s.pod.uid` | Changes on every pod restart or redeploy. Large multiplier. | **Aggregate away** |
+| `client.port` / `net.peer.port` | Ephemeral TCP ports (49152–65535). | **Aggregate away** |
+| `url.full` / `http.target` | Dynamic query params. | **Aggregate away** |
+| `db.query.text` | Full SQL with literal values. | **Aggregate away** |
+| `http.route` | Unparameterized raw URLs (`/user/123` instead of `/user/{id}`). | **Fix at instrumentation:** parameterize route patterns in your SDK or framework router |
+
+<Admonition type="warning">
+Using `delete_key()` via the attributes processor **does NOT merge** time series. It removes the label name but leaves colliding, undefined data. Use the `metricstransform` processor's aggregation action to merge series within the dropped dimension instead. `metricstransform` aggregates only within a single batch passing through the Collector, not across the full set of pods or nodes emitting that dimension, so cardinality reduction is bounded by your batch size and scrape topology.
+</Admonition>
+
+**Read more:** [How to safely drop metric labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/)
+
+## Problem 3: Cumulative Temporality
+
+By default, OpenTelemetry SDKs use **Cumulative Temporality**: they emit a sample carrying the running total on every scrape interval, even when the value is unchanged.
+
+**Delta Temporality** only emits a sample when the value changes. See [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/) for a detailed explanation of temporality and how it affects aggregation.
+
+### When to Switch to Delta
+
+If you have large idle infrastructure (e.g., 1000 pods with only 10 receiving traffic in a given minute), Delta prevents the 990 idle pods from emitting unchanged samples every scrape interval. This applies to synchronous instruments (like a request counter incremented per request); asynchronous instruments whose callback runs on every collection cycle still emit a sample each interval regardless of temporality.
+
+| Feature | Cumulative | Delta |
+| --- | --- | --- |
+| **Idle series** | Always sends | Skips unchanged |
+| **Network failure** | Next scrape recovers the total (Safe) | Gap is permanently lost |
+| **Collector memory** | Tracks running totals | Lower (no running totals to maintain) |
+| **UpDownCounter / Async UpDownCounter** | Cumulative | Cumulative (unaffected; Delta is undefined for bidirectional instruments) |
+
+`OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta` applies Delta to `Counter`, `Async Counter`, and `Histogram` only. `UpDownCounter`, `Async UpDownCounter`, `Gauge` and `Async Gauge` remain Cumulative regardless.
+
+<Admonition type="warning">
+**Migration Warning:** Switching a live metric pipeline from Cumulative to Delta mid-flight may cause unexpected values in dashboards during the transition. Panels computing rates or totals from these metrics may show incorrect readings until reporting stabilises. See [Metrics temporality FAQ](https://signoz.io/docs/metrics-management/troubleshooting/faqs/) for details on temporality mismatch behaviour.
+</Admonition>
+
+**How to Set Delta:**
+
+```bash
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta
+```
+
+## Problem 4: Collection Interval
+
+Sample count scales directly with how often each time series is emitted. A metric exported every 5 seconds generates 12x the samples of the same metric exported every 60 seconds, with no change in cardinality.
+
+**SDK metrics:** the OTel SDK default for `OTEL_METRIC_EXPORT_INTERVAL` is `60000` (60s). If your service overrides it to export more frequently, for example for a low-latency alert that no longer needs that resolution, raise it back toward the default or higher:
+
+```bash
+export OTEL_METRIC_EXPORT_INTERVAL=60000  # raise this if your service currently overrides it lower
+```
+
+**Collector receivers** (for example `hostmetrics`): the receiver's own default `collection_interval` is `1m`. If your config explicitly sets a shorter interval, raise it:
+
+```yaml
+receivers:
+  hostmetrics:
+    collection_interval: 60s # raise this if your config currently sets a shorter interval
+```
+
+<Admonition type="warning">
+Increasing the interval reduces the resolution of rate-based queries (for example `rate()` over a short window) and delays how quickly a spike shows up on dashboards or triggers an alert. Do not raise the interval on metrics feeding low-latency alerts.
+</Admonition>
+
+## Validate Your Changes
+
+<Admonition type="note">
+The Cost Meter Dashboard uses `signoz.meter.*` metrics which aggregate hourly. Changes may take up to one hour to appear there. Use the Metrics Explorer for faster feedback.
+</Admonition>
+
+To confirm the volume reduction:
+
+1. Navigate to **Metrics**. In the list view, verify that unused metrics you dropped no longer appear, or that the time series count for your target metric has reduced.
+2. Check the **Cost Meter Dashboard** after an hour to confirm the `datapoint.count` trend has dropped.
+
+## Next Steps
+
+- Configure [Cost Meter Alert](https://signoz.io/docs/cost-meter/alerts/) to be notified when ingestion volume crosses your expected threshold.
+- Read [Understanding Metrics Billing and Reducing Costs](https://signoz.io/docs/metrics-management/reducing-costs/) for how cardinality maps to your bill and additional cost-driver examples.
+
+## Get Help
+
+<GetHelp />
