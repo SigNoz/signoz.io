@@ -106,7 +106,7 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
           <div className={`grid ${GRID_CLASS}`}>
             <div className="bg-signoz_ink-500" />
             <div className="relative flex flex-col items-start gap-2.5 bg-[#14161a] px-3 py-4">
-              <span className="text-base font-medium leading-7 text-[#eceef2]">SigNoz</span>
+              <span className="text-base font-medium leading-7 text-[#eceef2]">SigNoz Cloud</span>
               <TrackingLink
                 href="/teams/"
                 clickType="Primary CTA"

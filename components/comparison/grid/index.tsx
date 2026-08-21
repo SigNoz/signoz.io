@@ -18,10 +18,10 @@ const ComparisonGridDesktop = (props) => {
   const { data, otherHeading } = props
   return (
     <div className="container">
-      <div className={styles.tableGrid} data-md-table={`Feature|SigNoz|${otherHeading}`}>
+      <div className={styles.tableGrid} data-md-table={`Feature|SigNoz Cloud|${otherHeading}`}>
         {/* header */}
         <div className={styles.tableHeader}></div>
-        <div className={styles.tableHeader}>SigNoz</div>
+        <div className={styles.tableHeader}>SigNoz Cloud</div>
         <div className={styles.tableHeader}>{otherHeading}</div>
         {/* data */}
         {data.map((row) => {
@@ -63,7 +63,7 @@ const ComparisonGridMobile = (props) => {
               <div>
                 <div className={styles.tableGridCompareCell}>
                   <span className={styles.tableGridProdCell}>
-                    Signoz
+                    SigNoz Cloud
                     {cell.signozExtraDetail && (
                       <small className={styles.tableMetricDesc}>{cell.signozExtraDetail}</small>
                     )}
