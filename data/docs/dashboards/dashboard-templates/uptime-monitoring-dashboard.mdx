@@ -1,0 +1,130 @@
+---
+date: 2026-08-22
+title: Uptime Monitoring Dashboard for HTTP Endpoint Health
+description: Monitor HTTP endpoint uptime in SigNoz with per-endpoint availability, transport errors, phase-level latency, response validation, and TLS certificate expiry.
+doc_type: explanation
+---
+
+Use this dashboard to monitor synthetic HTTP checks across availability, response content validation, phase-level latency, payload size, and TLS certificate expiry.
+
+The OpenTelemetry Collector's HTTP Check Receiver probes each endpoint on a schedule and reports the result as metrics. This dashboard reads those `httpcheck.*` metrics.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow the [Monitor HTTP Endpoints](https://signoz.io/docs/monitor-http-endpoints/) guide, including Step 3, which enables the optional metrics that most panels here read.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/uptime-monitoring-dashboard.webp"
+  alt="Uptime Monitoring Dashboard"
+  caption="Uptime Monitoring Dashboard"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/uptime-monitoring/uptime-monitoring-otlp-v1.json"
+  dashboardName="Uptime Monitoring"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Answer "is it up"**: See the overall 2xx rate, how many endpoints are reporting, how many are failing outright, and the mean probe duration.
+- **Find which endpoint broke**: Compare per-endpoint availability over time and read the exact failure text for endpoints that never got a response.
+- **Catch a 200 that lies**: Assert on response content, so an endpoint that returns HTTP 200 with an error body is flagged instead of counted as healthy.
+- **Locate the slow phase**: Split probe time into DNS, TCP connect, TLS handshake, request write, and response read.
+- **Stay ahead of certificate expiry**: Track time remaining per certificate, with issuer and common name.
+- **Inspect status codes**: Break probes down by endpoint, status code, and status class.
+
+## Required Collector Metrics
+
+The receiver enables only `httpcheck.status`, `httpcheck.duration`, and `httpcheck.error` by default. Every other metric that this dashboard reads is off until you enable it.
+
+| Panel group | Metrics it needs | Enabled by default |
+|---|---|---|
+| Availability, HTTP Status Detail | `httpcheck.status`, `httpcheck.error` | Yes |
+| Latency (total) | `httpcheck.duration` | Yes |
+| Latency (per phase) | The five `duration` metrics for DNS, connection, TLS handshake, request, and response | No |
+| Payload | `httpcheck.response.size` | No |
+| TLS | `httpcheck.tls.cert_remaining` | No |
+| Content Validation | `httpcheck.validation.passed`, `httpcheck.validation.failed` | No |
+
+[Step 3 of Monitor HTTP Endpoints](https://signoz.io/docs/monitor-http-endpoints/#step-3-enable-the-optional-metrics) enables everything except the two validation metrics, which need per-target assertions as well.
+
+## Metrics Included
+
+### Availability
+
+- **Availability**: Share of probes that returned a 2xx response (`httpcheck.status`).
+- **Endpoints Monitored**: Number of endpoints reporting probe results.
+- **Endpoints In Error**: Endpoints whose probe failed before any HTTP response (`httpcheck.error`).
+- **Avg Response Time**: Mean total probe duration (`httpcheck.duration`).
+- **Availability by Endpoint**: Per-endpoint 2xx rate over time.
+- **Transport Errors by Endpoint**: Probes that never received a response.
+- **Status Class Distribution**: Share of probe results per status class.
+- **Transport Error Messages**: The failure text per endpoint (`error.message`), with a count of affected probes. This is the reason behind the error count: refused connections, DNS failures, TLS verification errors.
+- **Endpoint Availability**: 2xx rate per endpoint over the window, sortable worst-first.
+
+### Content Validation
+
+Reachability alone cannot tell you whether a response is correct. These panels read `httpcheck.validation.passed` and `httpcheck.validation.failed`, which the receiver emits when you configure assertions on the response body.
+
+- **Validation Pass Rate**: Share of content assertions that passed.
+- **Validation Failures**: Total failed assertions in the window.
+- **Validation Failures by Endpoint and Check**: Failures over time, split by endpoint and `validation.type`.
+- **Failed Content Checks**: Which assertion failed, on which endpoint, and how often. Cross-check this against **Status Codes by Endpoint**: a row here whose status code is 2xx is a silent failure.
+
+### Latency
+
+- **Total Response Time by Endpoint**: Full probe wall time, DNS through response body (`httpcheck.duration`).
+- **DNS Lookup Duration**: Time spent resolving the hostname.
+- **TCP Connect Duration**: Time to establish the transport connection.
+- **TLS Handshake Duration**: Time spent on the TLS handshake.
+- **Request Write Duration**: Time spent writing the request.
+- **Response Read Duration**: Time spent receiving the response.
+- **Response Time by Endpoint**: Mean probe duration per endpoint, slowest first.
+
+### Payload & TLS
+
+- **Soonest Cert Expiry**: Least time remaining on any verified certificate, with a threshold that turns red inside 14 days.
+- **Avg Response Size** and **Max Response Size**: Response body size across the selected endpoints.
+- **Response Size by Endpoint**: Body size per endpoint. A sudden drop often means an error page replaced the real response.
+- **TLS Cert Time Remaining**: Seconds until expiry per endpoint.
+- **TLS Certificates**: Time remaining per certificate with issuer, common name, and SAN, soonest expiry first.
+
+### HTTP Status Detail
+
+- **Status Codes by Endpoint**: Probe count per status code each endpoint returned.
+- **Non-2xx Responses by Endpoint**: Probes that got a response outside 2xx, split by endpoint and status class.
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **Service**: Filter by the Collector service emitting the metrics (`service.name`).
+- **Endpoint**: Filter by probed endpoint URL (`http.url`).
+
+<Admonition type="info">
+The HTTP Check Receiver sets no resource attributes, so `service.name` is only populated if your Collector pipeline adds it. See [Monitor HTTP Endpoints](https://signoz.io/docs/monitor-http-endpoints/#step-5-add-the-processor-and-the-uptime-pipeline) for the `resource` processor to add.
+</Admonition>
+
+## Panels That Read Empty
+
+Some panels stay empty until the matching data exists, which is expected rather than a misconfiguration:
+
+- **Any optional-metric panel** whose metric is still disabled in the Collector. See [Required Collector Metrics](#required-collector-metrics).
+- **Content Validation** panels need `validations` configured on your targets. Enabling the two metrics alone produces nothing.
+- **Response size** panels need a response body of at least one byte. An endpoint that returns `200` with an empty body reports no size.
+- **TLS** panels only report for endpoints whose certificate verifies. An expired or untrusted certificate surfaces as a transport error instead, because the client refuses the handshake.
+- **DNS Lookup Duration** and **TLS Handshake Duration** filter out zero values, so endpoints that resolve without a lookup or reuse a connection do not appear.
+
+## Next Steps
+
+- [Alert on availability and certificate expiry](https://signoz.io/docs/monitor-http-endpoints/#set-up-alerts) from a panel in this dashboard.
+- [Add response content validation](https://signoz.io/docs/monitor-http-endpoints/#catch-a-200-that-lies) to fill the Content Validation panels.
+- [Set up a notification channel](https://signoz.io/docs/setup-alerts-notification/) for Slack, PagerDuty, or email.
+
+## Related Dashboards
+
+- [APM Metrics](https://signoz.io/docs/dashboards/dashboard-templates/apm-metrics/)
+- [HTTP API Monitoring](https://signoz.io/docs/dashboards/dashboard-templates/http-api-monitoring/)
+- [Cert Manager](https://signoz.io/docs/dashboards/dashboard-templates/cert-manager-dashboard/)
