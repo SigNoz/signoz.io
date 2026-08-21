@@ -1,0 +1,150 @@
+---
+date: 2026-08-03
+title: Monitor GCP Memorystore for Redis Metrics in SigNoz
+description: Collect Memorystore for Redis metrics in SigNoz with the googlecloudmonitoring receiver and view them on a pre-built dashboard.
+doc_type: howto
+tags: [SigNoz Cloud, Self-Hosted Enterprise]
+---
+
+The **Memorystore for Redis** integration brings instance metrics (uptime, CPU, memory, clients, cache hit ratio, keyspace, and command latency) into SigNoz, with a pre-built dashboard for the service.
+
+Memorystore publishes its metrics to **Cloud Monitoring**, and SigNoz reads them through the OpenTelemetry Collector running in your GCP project.
+
+<Admonition type="info">
+This page covers **Memorystore for Redis** (the `redis.googleapis.com/*` metrics on `redis_instance` resources). Memorystore for Redis Cluster publishes a different metric set and is not covered here.
+</Admonition>
+
+## Choose a setup method
+
+<Tabs entityName="setup">
+<TabItem value="manual" label="Manual setup" default>
+
+**Available now.** You run the OpenTelemetry Collector in your own GCP project and add Memorystore metrics to its configuration. You control which metrics are pulled and how often.
+
+Complete the [GCP integration setup](https://signoz.io/docs/integrations/gcp/manual-setup/) once, then follow the steps on this page for each project that hosts Redis instances.
+
+</TabItem>
+<TabItem value="agent" label="SigNoz agent (coming soon)">
+
+**Coming soon.** SigNoz will deploy and manage the Collector for you: you connect your GCP account, toggle the service on, and SigNoz provisions the metric receivers in the background. No Collector configuration to maintain.
+
+Until then, use the **Manual setup** tab.
+
+</TabItem>
+</Tabs>
+
+## Prerequisites
+
+Before configuring this service, complete the shared GCP integration setup:
+
+- Your [GCP account is connected in SigNoz](https://signoz.io/docs/integrations/gcp/connect-gcp-account/), and the project running your Redis instances is in [**Projects to Monitor**](https://signoz.io/docs/integrations/gcp/manual-setup/#connection-fields).
+- The [OpenTelemetry Collector is deployed and running](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/).
+- The `signoz-integration` service account has `roles/monitoring.viewer` on the project that hosts the instances. See [Create a service account](https://signoz.io/docs/integrations/gcp/create-service-account/#step-3-grant-metrics-permission-on-each-monitored-project).
+- The **Cloud Monitoring API** is enabled in that project.
+
+## Step 1: Enable the service in SigNoz
+
+1. In SigNoz, go to **Integrations** > **Google Cloud Platform**.
+2. Select **GCP Memorystore for Redis** from the service list.
+3. Toggle **Metric Collection** on to activate the pre-built dashboard.
+4. Open the **Data Collected** tab and note the metrics listed there. These are the metrics the dashboard's panels query.
+
+<Admonition type="warning">
+Enabling the toggle does not start collection on its own. The metrics that reach SigNoz are exactly the ones in your Collector's `metrics_list`. If you skip a metric in step 2, its dashboard panel stays empty.
+</Admonition>
+
+## Step 2: Add the metrics to your Collector config
+
+Open the `otel-collector-config.yaml` you created in [Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-1-prepare-the-collector-configuration) and add the Memorystore metric names to the `metrics_list` of the `googlecloudmonitoring` receiver for the project your instances run in. Only the `metrics_list` shown below changes; leave the rest of the file as is:
+
+```yaml:otel-collector-config.yaml defaultCollapsed
+receivers:
+  googlecloudmonitoring:
+    project_id: "<monitored-project-id>"
+    collection_interval: 300s   # 5 minutes; minimum is 60s
+    metrics_list:
+      # Availability
+      - metric_name: "redis.googleapis.com/server/uptime"
+      # Compute and memory
+      - metric_name: "redis.googleapis.com/stats/cpu_utilization_main_thread"
+      - metric_name: "redis.googleapis.com/stats/memory/usage_ratio"
+      - metric_name: "redis.googleapis.com/stats/memory/system_memory_usage_ratio"
+      # Clients
+      - metric_name: "redis.googleapis.com/clients/connected"
+      - metric_name: "redis.googleapis.com/clients/blocked"
+      - metric_name: "redis.googleapis.com/stats/reject_connections_count"
+      # Keyspace and cache effectiveness
+      - metric_name: "redis.googleapis.com/keyspace/keys"
+      - metric_name: "redis.googleapis.com/stats/cache_hit_ratio"
+      # Commands
+      - metric_name: "redis.googleapis.com/commands/calls"
+      - metric_name: "redis.googleapis.com/commands/usec_per_call"
+```
+
+**Verify these values:**
+
+- `<monitored-project-id>`: The GCP project that hosts your Redis instances. It must be one of the entries in your **Projects to Monitor** list.
+
+<Admonition type="info">
+If your instances span several projects, add one **named** receiver per project (`googlecloudmonitoring/<name>`) and list them all in the metrics pipeline. See [Configure multiple projects](https://signoz.io/docs/integrations/gcp/collect-metrics/#step-3-configure-multiple-projects).
+</Admonition>
+
+## Step 3: Apply the configuration
+
+The Collector loads its config from the `signoz-collector-config` secret, so a config change needs a new secret version and a redeploy:
+
+1. Save your updated `otel-collector-config.yaml`.
+2. Add a new secret version ([step 2 of Deploy the Collector](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-2-store-the-config-in-secret-manager)).
+3. Redeploy the Cloud Run service ([step 3](https://signoz.io/docs/integrations/gcp/deploy-otel-collector/#step-3-deploy-to-cloud-run)).
+
+## Validate
+
+1. Wait one or two collection intervals (up to about 5 minutes with the default `300s`).
+2. In SigNoz, go to **Dashboards** and open the Memorystore for Redis dashboard. Panels should start filling in.
+3. To check a single metric, open **Metrics Explorer** and query `redis.googleapis.com/stats/memory/usage_ratio`.
+
+## What's collected
+
+<details>
+<summary>Metrics</summary>
+
+See the **Data Collected** tab in the SigNoz integration for the definitive list the dashboard uses, and the <a href="https://docs.cloud.google.com/monitoring/api/metrics_gcp_p_z#gcp-redis" target="_blank" rel="noopener noreferrer nofollow">GCP metrics list</a> for full definitions.
+
+| Metric name | Unit | Type |
+|-------------|------|------|
+| `redis.googleapis.com/server/uptime` | Seconds | Gauge |
+| `redis.googleapis.com/stats/cpu_utilization_main_thread` | Seconds | Sum |
+| `redis.googleapis.com/stats/memory/usage_ratio` | None | Gauge |
+| `redis.googleapis.com/stats/memory/system_memory_usage_ratio` | None | Gauge |
+| `redis.googleapis.com/clients/connected` | Count | Gauge |
+| `redis.googleapis.com/clients/blocked` | Count | Gauge |
+| `redis.googleapis.com/stats/reject_connections_count` | Count | Sum |
+| `redis.googleapis.com/keyspace/keys` | Count | Gauge |
+| `redis.googleapis.com/stats/cache_hit_ratio` | None | Gauge |
+| `redis.googleapis.com/commands/calls` | Count | Sum |
+| `redis.googleapis.com/commands/usec_per_call` | Microseconds | Gauge |
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+**A dashboard panel is empty.** The metric backing that panel is missing from your `metrics_list`. Compare the **Data Collected** tab against your `otel-collector-config.yaml`, add what's missing, and repeat step 3.
+
+**No Memorystore metrics at all.** Confirm the `signoz-integration` service account holds `roles/monitoring.viewer` on the project in `project_id`, and that the Cloud Monitoring API is enabled there. Then check the Cloud Run logs for `googlecloudmonitoring` receiver errors.
+
+**Cache hit ratio looks wrong right after a restart.** The ratio is derived from counters that reset when the instance restarts. Check `server/uptime` before reading too much into a sudden change.
+
+</details>
+
+## Next steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) on memory usage ratio approaching eviction, rejected connections, or a falling cache hit ratio.
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to correlate cache behavior with application latency.
+- [Monitor Cloud SQL for PostgreSQL](https://signoz.io/docs/integrations/gcp/cloud-sql-postgresql/) if your stack also uses a managed database.
+
+## Get Help
+
+<GetHelp />

@@ -23,16 +23,16 @@ No meta needed:
 | `diff` / `diff:file` | Unified diff. Lines starting with `-` get a cherry (destructive) row background; `+` get forest (success). Context lines stay unshaded. Prefer this over hand-coloring removals with `{n}#cherry`. |
 | `{5}#cherry` / `#forest` / `#amber` / `#robin` | Sentiment highlights (error / success / warning / info). |
 | `noLineNumbers` | Hide the line-number gutter. |
-| `minimap` | Right-side minimap strip (useful for long samples). |
+| `minimap` | Right-side minimap strip. Required above 30 lines, always with `defaultCollapsed`. |
 | `collapse` | Collapse controls when lines **> 20** (same as default auto behavior; explicit is fine). |
 | `collapse={N}` | Collapse controls when lines **> N**. |
 | `noCollapse` | Never show collapse controls, even for long fences. |
-| `defaultCollapsed` | Start collapsed. Only applies when collapse controls are shown. |
+| `defaultCollapsed` | Start collapsed. Required above 20 lines. Only applies when collapse controls are shown. |
 
 Combine freely:
 
 ````md
-```ts:server.ts minimap {5}#cherry collapse={40}
+```ts:server.ts minimap defaultCollapsed {5}#cherry collapse={40}
 ```
 ````
 
@@ -157,10 +157,10 @@ Use language `diff` (optionally with a filename title) for add/remove edits. Lin
 
 ## Minimap
 
-Opt in with `minimap`. Best for longer samples where readers skim structure:
+Opt in with `minimap`, paired with `defaultCollapsed`. Required on fences of more than 30 lines ([when to use](#when-to-use-defaultcollapsed--minimap)):
 
 ````md
-```python minimap {3}#cherry {8}#forest
+```python minimap defaultCollapsed collapse={5} {3}#cherry {8}#forest
 def resolve(flag):
     try:
         return provider.get(flag)
@@ -179,7 +179,7 @@ def evaluate(ctx):
 Title + minimap + highlights:
 
 ````md
-```ts:server.ts minimap {5}#cherry {10}#forest
+```ts:server.ts minimap defaultCollapsed collapse={8} {5}#cherry {10}#forest
 import express from 'express'
 
 const app = express()
@@ -200,8 +200,22 @@ app.listen(8080)
 
 - **Auto:** any fence with more than **20** lines gets Collapse / Expand controls and starts expanded. No meta needed.
 - **Custom threshold:** `collapse={N}` when you want controls sooner or later than 20.
-- **Start collapsed:** add `defaultCollapsed` (only when controls apply).
+- **Start collapsed:** add `defaultCollapsed`, required on every fence with more than 20 lines.
 - **Never collapse:** `noCollapse` for long configs readers must scan in full.
+
+### When to use `defaultCollapsed` / `minimap`
+
+The 20-line threshold only adds the Collapse and Expand buttons. The fence still starts expanded, so add `defaultCollapsed` by hand.
+
+| Fence size | Flags |
+|---|---|
+| 20 lines or fewer | none |
+| More than 20 lines | `defaultCollapsed` |
+| More than 30 lines | `minimap defaultCollapsed` |
+
+This holds for every fence, including the primary snippet of a step. `minimap` never travels alone: it tracks the scroll position inside a collapsed fence, and does nothing on an expanded one.
+
+Use `noCollapse` for the rare long fence that the reader must scan in full.
 
 ### Custom threshold (still default expanded)
 

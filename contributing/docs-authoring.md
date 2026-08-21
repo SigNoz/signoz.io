@@ -135,6 +135,8 @@ Docs fences render through the site **CodeBlock** (Shiki / `rehype-pretty-code`)
 
 **Defaults:** line numbers on · collapse when lines > 20 (starts expanded) · untitled = floating Copy · `lang:path` = filename chrome.
 
+**Collapse flags by size:** more than 20 lines gets `defaultCollapsed`; more than 30 lines gets `minimap defaultCollapsed`; 20 lines or fewer gets neither. This applies to every fence, including the primary snippet of a step. See [When to use defaultCollapsed / minimap](docs-codeblock.md#when-to-use-defaultcollapsed--minimap).
+
 Full meta reference and copy-paste examples (titles, highlights, minimap, collapse, `CodeTabs`): [docs-codeblock.md](docs-codeblock.md).
 
 ### SigNoz Cloud Ingestion Endpoints (region-aware)

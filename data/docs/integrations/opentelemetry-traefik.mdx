@@ -89,7 +89,7 @@ Traefik writes to stdout when you omit the file path. Restart Traefik to apply t
 
 Create a file named `traefik-logs-collection-config.yaml` with the following content:
 
-```yaml:traefik-logs-collection-config.yaml
+```yaml:traefik-logs-collection-config.yaml minimap defaultCollapsed
 receivers:
   # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
   filelog/traefik-access:
@@ -196,7 +196,7 @@ otelcol-contrib --config traefik-logs-collection-config.yaml
 
 Point Traefik's access log at a named volume and mount the same volume into the Collector, so both containers share the file:
 
-```yaml:docker-compose.yml
+```yaml:docker-compose.yml defaultCollapsed
 services:
   traefik:
     image: traefik:v3.7
@@ -260,7 +260,7 @@ Then add a [Logs Pipeline](https://signoz.io/docs/logs-pipelines/introduction/) 
 
 To use the Collector config from Step 2 instead, run it as a sidecar in the Traefik pod, point `filePath` at a shared `emptyDir` volume, and set `TRAEFIK_ACCESS_LOG_FILE` to that path:
 
-```yaml:traefik-deployment.yaml
+```yaml:traefik-deployment.yaml defaultCollapsed
 spec:
   containers:
     - name: traefik

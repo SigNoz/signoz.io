@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-08-14
 title: OpenTelemetry Kong Gateway Integration
 description: Monitor Kong Gateway by exporting OpenTelemetry traces, metrics, and logs natively to SigNoz.
 doc_type: howto
@@ -22,6 +22,30 @@ Kong Gateway provides a native OpenTelemetry plugin to capture proxy latencies, 
 - For OpenTelemetry **Metrics**: Kong Gateway Enterprise version 3.13+. (The latest open-source community edition release is 3.9.x, which predates native OpenTelemetry metrics support).
 - An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
 
+## Enable Kong's Tracer
+
+Kong's built-in instrumentations produce the spans, and the plugin only exports them. Two settings in `kong.conf` control the tracer. Both defaults produce no usable trace data: `tracing_instrumentations` is `off`, and `tracing_sampling_rate` is `0.01`, which is 1% of requests.
+
+Set both values on every Kong node:
+
+```ini:kong.conf
+tracing_instrumentations = all
+tracing_sampling_rate    = 1.0
+```
+
+If you run Kong in Docker or on Kubernetes, set the same values as environment variables:
+
+```bash
+KONG_TRACING_INSTRUMENTATIONS=all
+KONG_TRACING_SAMPLING_RATE=1.0
+```
+
+Restart Kong to apply the settings.
+
+The value `all` enables every instrumentation, which costs memory and bandwidth on a gateway with high traffic. After traces arrive in SigNoz, you can decrease `tracing_sampling_rate` and replace `all` with the phases you need. The available phases include `request`, `router`, `balancer`, `db_query`, `dns_query`, and `http_client`. Kong's <a href="https://developer.konghq.com/gateway/configuration/#tracing-instrumentations" target="_blank" rel="noopener noreferrer nofollow">tracing configuration reference</a> lists all of them.
+
+Metrics and logs do not depend on the tracer.
+
 ## Configure OpenTelemetry Export
 
 Configure the <a href="https://developer.konghq.com/plugins/opentelemetry/" target="_blank" rel="noopener noreferrer nofollow">opentelemetry plugin</a> either via declarative config (<a href="https://github.com/kong/deck" target="_blank" rel="noopener noreferrer nofollow">decK</a>) or via the Kong Ingress Controller in Kubernetes.
@@ -29,7 +53,7 @@ Configure the <a href="https://developer.konghq.com/plugins/opentelemetry/" targ
 <Tabs entityName="method">
 <TabItem value="deck" label="Declarative Config (decK)" default>
 
-```yaml:kong-state.yaml
+```yaml:kong-state.yaml defaultCollapsed
 _format_version: "3.0"
 _transform: true
 
@@ -71,7 +95,7 @@ deck gateway sync kong-state.yaml --kong-addr <YOUR-KONG-ADMIN-URL>
 
 Apply a `KongClusterPlugin` to enable the plugin globally across all services managed by the Ingress Controller.
 
-```yaml:kong-plugin-otel.yaml
+```yaml:kong-plugin-otel.yaml defaultCollapsed
 apiVersion: configuration.konghq.com/v1
 kind: KongClusterPlugin
 metadata:
@@ -198,6 +222,10 @@ Verify your data appears in SigNoz:
 ## Troubleshooting
 
 </ToggleHeading>
+
+### Traces do not appear in SigNoz
+
+Verify that `tracing_instrumentations` is set to a value other than `off`. With the tracer off, Kong produces no spans, and the plugin reports no error. Also verify `tracing_sampling_rate`. At the default `0.01`, only 1 request in 100 produces a trace. A gateway with low traffic can therefore appear to send nothing. Tracing instrumentations do not run in stream mode.
 
 ### Metrics do not appear in SigNoz
 

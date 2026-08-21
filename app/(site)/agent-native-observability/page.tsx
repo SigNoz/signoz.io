@@ -9,17 +9,17 @@ export const metadata: Metadata = {
     absolute: 'Agent Native Observability | SigNoz',
   },
   openGraph: {
-    title: 'Agent Native Observability | SigNoz',
+    title: 'Agent Native Observability | SigNoz Cloud',
     description:
-      'Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production issues without leaving your dev environment. Traces, logs, metrics, service topology, and your actual codebase - all in one place. Or use Noz, our new AI teammate out-of-the-box.',
+      'Connect SigNoz Cloud to coding agents such as Claude Code and Cursor to debug production issues from your development environment. Use Noz, the AI teammate built into SigNoz Cloud.',
     images: '/img/platform/AgentNativeObservabilityMeta.webp',
   },
   description:
-    'Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production issues without leaving your dev environment. Traces, logs, metrics, service topology, and your actual codebase - all in one place. Or use Noz, our new AI teammate out-of-the-box.',
+    'Connect SigNoz Cloud to coding agents such as Claude Code and Cursor to debug production issues from your development environment. Use Noz, the AI teammate built into SigNoz Cloud.',
   twitter: {
-    title: 'Agent Native Observability | SigNoz',
+    title: 'Agent Native Observability | SigNoz Cloud',
     description:
-      'Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production issues without leaving your dev environment. Traces, logs, metrics, service topology, and your actual codebase - all in one place. Or use Noz, our new AI teammate out-of-the-box.',
+      'Connect SigNoz Cloud to coding agents such as Claude Code and Cursor to debug production issues from your development environment. Use Noz, the AI teammate built into SigNoz Cloud.',
     images: '/img/platform/AgentNativeObservabilityMeta.webp',
   },
 }

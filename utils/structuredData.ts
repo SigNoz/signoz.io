@@ -1,6 +1,6 @@
 import siteMetadata from '@/data/siteMetadata'
 import { MDXContent } from './strapi'
-import { resolvePublishedDate, resolveLatestDate } from './dateUtils'
+import { resolveLatestDate } from './dateUtils'
 
 export const STRUCTURED_DATA_IDS = {
   organization: `${siteMetadata.siteUrl}/#organization`,
@@ -172,7 +172,7 @@ export const generateStructuredData = (
       '@id': fullUrl,
     },
     url: fullUrl,
-    datePublished: resolvePublishedDate(content) ?? '',
+    datePublished: resolveLatestDate(content) ?? '',
     dateModified: resolveLatestDate(content) ?? '',
     inLanguage: siteMetadata.language,
     wordCount: getWordCount(content),

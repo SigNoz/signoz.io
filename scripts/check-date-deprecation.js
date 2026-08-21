@@ -7,13 +7,10 @@
  *   - `date` mixed with `published_date` or `updated_date`
  *   - `updated_date` without `published_date`
  *
- * NON-BLOCKING (warning only) for deprecated usage:
- *   - `date` used alone (legacy — prefer `published_date` + `updated_date`)
- *
  * Valid combinations:
  *   - `published_date` + `updated_date`
  *   - `published_date` only
- *   - `date` only (legacy, deprecated)
+ *   - `date` only (legacy)
  *   - none (CMS timestamps used as fallback)
  *
  * See utils/dateUtils.ts for the full date-field semantics.
@@ -22,7 +19,6 @@
 const fs = require('fs')
 
 const RED = '\x1b[31m'
-const YELLOW = '\x1b[33m'
 const RESET = '\x1b[0m'
 const BOLD = '\x1b[1m'
 
@@ -76,11 +72,6 @@ function checkFile(filePath) {
     }
   }
 
-  // Warning: legacy date field used alone
-  if (hasDate && !hasPublishedDate && !hasUpdatedDate) {
-    return { file: filePath, warning: true }
-  }
-
   return null
 }
 
@@ -98,7 +89,6 @@ function main() {
   if (results.length === 0) return
 
   const errors = results.filter((r) => r.error)
-  const warnings = results.filter((r) => r.warning)
 
   if (errors.length > 0) {
     console.log('')
@@ -110,24 +100,10 @@ function main() {
     console.log(`${RED}Valid combinations:${RESET}`)
     console.log(`${RED}  - published_date + updated_date  (new-style)${RESET}`)
     console.log(`${RED}  - published_date only            (published, never updated)${RESET}`)
-    console.log(`${RED}  - date only                      (legacy, deprecated)${RESET}`)
+    console.log(`${RED}  - date only                      (legacy)${RESET}`)
     console.log(`${RED}See utils/dateUtils.ts for details.${RESET}`)
     console.log('')
     process.exit(1)
-  }
-
-  if (warnings.length > 0) {
-    console.log('')
-    console.log(`${YELLOW}${BOLD}⚠  date field deprecation notice${RESET}`)
-    console.log(
-      `${YELLOW}The "date" frontmatter field is deprecated. Prefer "published_date" and "updated_date".${RESET}`
-    )
-    console.log(`${YELLOW}See utils/dateUtils.ts for details.${RESET}`)
-    console.log('')
-    for (const { file } of warnings) {
-      console.log(`${YELLOW}  → ${file}${RESET}`)
-    }
-    console.log('')
   }
 }
 
