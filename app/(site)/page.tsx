@@ -6,29 +6,50 @@ import JsonLdScript from '@/components/JsonLdScript'
 import { ExperimentTracker } from '@/components/ExperimentTracker'
 import { EXPERIMENTS } from '@/constants/experiments'
 import { getFeatureValue } from '@/utils/growthbookServer'
+import { homepageFaqItems } from '@/components/index-faq/faqContent'
+import { STRUCTURED_DATA_IDS } from '@/utils/structuredData'
 
 const siteUrl = siteMetadata.siteUrl
-const organizationId = `${siteUrl}/#organization`
-const websiteId = `${siteUrl}/#website`
-const softwareAppId = `${siteUrl}/#software`
 const webpageId = `${siteUrl}/#webpage`
+const homepageTitle = 'SigNoz | The Open Source Datadog Alternative'
+const homepageDescription =
+  'SigNoz Cloud is a one-stop observability tool built on top of OpenTelemetry. Get APM, logs, traces, metrics, exceptions, AI observability & alerts in a single tool.'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'SigNoz | The Open Source Datadog Alternative',
+    absolute: homepageTitle,
   },
+  description: homepageDescription,
   openGraph: {
-    title: 'SigNoz | The Open Source Datadog Alternative',
-    description:
-      'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
+    title: homepageTitle,
+    description: homepageDescription,
+    url: './',
+    siteName: siteMetadata.title,
+    images: [
+      {
+        url: siteMetadata.socialBanner,
+        alt: 'SigNoz Cloud OpenTelemetry-native observability platform',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
   },
-  description:
-    'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
+  twitter: {
+    title: homepageTitle,
+    description: homepageDescription,
+    card: 'summary_large_image',
+    images: [
+      {
+        url: siteMetadata.socialBanner,
+        alt: 'SigNoz Cloud OpenTelemetry-native observability platform',
+      },
+    ],
+  },
 }
 
 const organizationSchema = {
   '@type': 'Organization',
-  '@id': organizationId,
+  '@id': STRUCTURED_DATA_IDS.organization,
   name: 'SigNoz',
   url: `${siteUrl}/`,
   logo: {
@@ -39,7 +60,7 @@ const organizationSchema = {
   },
   image: `${siteUrl}/img/signoz-meta-image.webp`,
   description:
-    'SigNoz is an open-source, OpenTelemetry-native observability platform that provides unified monitoring for metrics, logs, and traces in a single pane of glass.',
+    'SigNoz builds OpenTelemetry-native observability products, including SigNoz Cloud and Self-Hosted SigNoz, for monitoring metrics, logs, and traces.',
   slogan: 'OpenTelemetry-Native Traces, Metrics, and Logs in a single pane of glass',
   email: siteMetadata.email,
   foundingDate: '2020',
@@ -66,12 +87,13 @@ const organizationSchema = {
 
 const websiteSchema = {
   '@type': 'WebSite',
-  '@id': websiteId,
+  '@id': STRUCTURED_DATA_IDS.website,
   url: `${siteUrl}/`,
   name: 'SigNoz',
-  description: siteMetadata.description,
+  description:
+    'The official website for SigNoz Cloud, the managed observability platform, and Self-Hosted SigNoz, the open-source deployment.',
   publisher: {
-    '@id': organizationId,
+    '@id': STRUCTURED_DATA_IDS.organization,
   },
 }
 
@@ -79,91 +101,74 @@ const webpageSchema = {
   '@type': 'WebPage',
   '@id': webpageId,
   url: `${siteUrl}/`,
-  name: 'SigNoz | The Open Source Datadog Alternative',
-  description:
-    'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
+  name: homepageTitle,
+  description: homepageDescription,
   isPartOf: {
-    '@id': websiteId,
+    '@id': STRUCTURED_DATA_IDS.website,
   },
   about: {
-    '@id': softwareAppId,
+    '@id': STRUCTURED_DATA_IDS.signozCloud,
+  },
+  mentions: {
+    '@id': STRUCTURED_DATA_IDS.selfHostedSignoz,
   },
 }
 
-const softwareApplicationSchema = {
+const signozCloudSchema = {
   '@type': 'SoftwareApplication',
-  '@id': softwareAppId,
-  name: 'SigNoz',
+  '@id': STRUCTURED_DATA_IDS.signozCloud,
+  name: 'SigNoz Cloud',
   applicationCategory: 'DeveloperApplication',
   applicationSubCategory: 'Observability Platform',
-  operatingSystem: 'Linux, macOS, Windows',
+  operatingSystem: 'Web',
   url: `${siteUrl}/`,
   description:
-    'Open-source, OpenTelemetry-native observability platform for application performance monitoring (APM), distributed tracing, log management, metrics monitoring, exceptions tracking, and alerts.',
+    'Managed, OpenTelemetry-native observability platform for application performance monitoring, distributed tracing, log management, metrics monitoring, exceptions tracking, alerts, and AI.',
   screenshot: `${siteUrl}/img/signoz-meta-image.webp`,
   featureList:
     'Application Performance Monitoring, Distributed Tracing, Log Management, Metrics & Dashboards, Exceptions Tracking, Alerts & Notifications, Service Maps, Flame Graphs, OpenTelemetry-Native',
-  isAccessibleForFree: true,
-  license: 'https://github.com/SigNoz/signoz/blob/develop/LICENSE',
   publisher: {
-    '@id': organizationId,
+    '@id': STRUCTURED_DATA_IDS.organization,
   },
-  offers: [
-    {
-      '@type': 'Offer',
-      name: 'Community Edition',
-      price: '0',
-      priceCurrency: 'USD',
-      description: 'Free, self-hosted open-source edition',
-      url: `${siteUrl}/docs/install/`,
-    },
-    {
-      '@type': 'Offer',
-      name: 'Cloud',
-      description: 'Fully managed SigNoz cloud with usage-based pricing',
-      url: `${siteUrl}/pricing/`,
-    },
-  ],
+  offers: {
+    '@type': 'Offer',
+    name: 'SigNoz Cloud',
+    description: 'Managed observability with usage-based pricing',
+    url: `${siteUrl}/pricing/`,
+  },
 }
 
-const reviewSchemas = [
-  {
-    '@type': 'Review',
-    reviewBody:
-      'We optimized all our top endpoints and fine-tuned database calls to improve our backend API response times by 35% using SigNoz. Both our dev and QA teams use SigNoz actively in dev and production environments to optimize application performance.',
-    author: {
-      '@type': 'Person',
-      name: 'Vijaya Perumal',
-    },
-    itemReviewed: {
-      '@id': softwareAppId,
-    },
+const selfHostedSignozSchema = {
+  '@type': 'SoftwareApplication',
+  '@id': STRUCTURED_DATA_IDS.selfHostedSignoz,
+  name: 'Self-Hosted SigNoz',
+  applicationCategory: 'DeveloperApplication',
+  applicationSubCategory: 'Observability Platform',
+  operatingSystem: 'Linux, macOS, Windows',
+  url: `${siteUrl}/docs/install/`,
+  description:
+    'Open-source, OpenTelemetry-native observability software that you run and operate on your own infrastructure, including its storage, scaling, upgrades, and backups.',
+  screenshot: `${siteUrl}/img/signoz-meta-image.webp`,
+  featureList:
+    'Application Performance Monitoring, Distributed Tracing, Log Management, Metrics & Dashboards, Exceptions Tracking, Alerts & Notifications, Service Maps, Flame Graphs, OpenTelemetry-Native',
+  license: 'https://github.com/SigNoz/signoz/blob/develop/LICENSE',
+  publisher: {
+    '@id': STRUCTURED_DATA_IDS.organization,
   },
-  {
-    '@type': 'Review',
-    reviewBody:
-      "We use OTel with SigNoz to spot redundant database connect calls. For example, we found that our database driver wasn't using the connection pool even though the documentation claimed otherwise.",
-    author: {
-      '@type': 'Person',
-      name: 'Subomi Oluwalana',
+}
+
+const faqPageSchema = {
+  '@type': 'FAQPage',
+  '@id': `${siteUrl}/#faq`,
+  mainEntity: homepageFaqItems.map(({ answer, question }) => ({
+    '@type': 'Question',
+    name: question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: answer,
     },
-    itemReviewed: {
-      '@id': softwareAppId,
-    },
-  },
-  {
-    '@type': 'Review',
-    reviewBody:
-      "Monitoring done. Thanks to SigNoz, I don't have to deal with Grafana, Loki, Prometheus, and Jaeger separately.",
-    author: {
-      '@type': 'Person',
-      name: 'Go Frendi Gunawan',
-    },
-    itemReviewed: {
-      '@id': softwareAppId,
-    },
-  },
-]
+  })),
+}
 
 const videoSchema = {
   '@type': 'VideoObject',
@@ -176,20 +181,23 @@ const videoSchema = {
   contentUrl: 'https://vimeo.com/944340217',
   embedUrl: 'https://player.vimeo.com/video/944340217',
   publisher: {
-    '@id': organizationId,
+    '@id': STRUCTURED_DATA_IDS.organization,
   },
 }
 
-const homepageStructuredData = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    organizationSchema,
-    websiteSchema,
-    webpageSchema,
-    softwareApplicationSchema,
-    ...reviewSchemas,
-    videoSchema,
-  ],
+function getHomepageStructuredData(includeFaq: boolean) {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationSchema,
+      websiteSchema,
+      webpageSchema,
+      signozCloudSchema,
+      selfHostedSignozSchema,
+      ...(includeFaq ? [faqPageSchema] : []),
+      videoSchema,
+    ],
+  }
 }
 
 type HomepageHeroVariant =
@@ -226,6 +234,7 @@ export default async function Page() {
       ? await import('./HomepageRedesign')
       : await import('./HomepageControl')
   const isControlVariant = variant === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.CONTROL
+  const homepageStructuredData = getHomepageStructuredData(!isControlVariant)
 
   return (
     <>

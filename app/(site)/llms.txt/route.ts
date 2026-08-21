@@ -40,7 +40,7 @@ export async function GET() {
   const body = [
     '# SigNoz',
     '',
-    '> SigNoz is an open-source observability platform for metrics, traces, and logs.',
+    'SigNoz Cloud brings your traces, metrics, and logs into one OpenTelemetry-native platform. Simple usage-based pricing, and the freedom to run on your infrastructure with Self-Hosted SigNoz.',
     '',
     `Markdown versions of every page are available: append ".md" to any signoz.io page URL — docs (${siteMetadata.siteUrl}/docs/introduction.md), blog posts (${siteMetadata.siteUrl}/blog/<slug>.md), comparisons, guides, and product pages like ${siteMetadata.siteUrl}/pricing.md — or request any page with "Accept: text/markdown".`,
     '',

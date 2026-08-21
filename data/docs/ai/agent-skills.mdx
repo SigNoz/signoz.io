@@ -1,14 +1,14 @@
 ---
-date: 2026-08-17
+date: 2026-08-21
 title: Agent Skills & Plugin
-meta_title: SigNoz Agent Skills & Plugin - AI Coding Assistant Setup
-description: Install the SigNoz plugin and Agent Skills so AI assistants like Claude Code, Codex, Cursor, and Gemini can query data, build dashboards, manage alerts, and explore SigNoz docs.
+meta_title: SigNoz Agent Skills & Plugin - AI Coding Agent Setup
+description: Install the SigNoz plugin and Agent Skills so AI agents like Claude Code, Codex, Cursor, and Gemini can query data, build dashboards, manage alerts, and explore SigNoz docs.
 doc_type: howto
 ---
 
-<a href="https://agentskills.io" target="_blank" rel="noopener noreferrer nofollow">Agent Skills</a> are an open format for extending AI coding assistants with specialized knowledge and capabilities. Once installed, your agent uses them whenever it detects a relevant task - no prompting required.
+<a href="https://agentskills.io" target="_blank" rel="noopener noreferrer nofollow">Agent Skills</a> are an open format for extending AI coding agents with specialized knowledge and capabilities. Once installed, your agent uses them whenever it detects a relevant task - no prompting required.
 
-When you ask your AI assistant something like "why did this alert fire," "create a dashboard for my Postgres database," or "write a ClickHouse query for these logs," the agent picks the matching skill and follows its instructions.
+When you ask your AI agent something like "why did this alert fire," "create a dashboard for my Postgres database," or "write a ClickHouse query for these logs," the agent picks the matching skill and follows its instructions.
 
 SigNoz ships these skills two ways:
 
@@ -77,9 +77,11 @@ Then, in a Codex session started from your project:
 The plugin is not yet on the public Cursor Marketplace, so install it through a Team Marketplace:
 
 1. Add `https://github.com/SigNoz/agent-skills` as a team marketplace under **Settings → Plugins**.
-2. Install the `signoz` plugin from the marketplace panel.
-3. In an agent chat, run `/signoz-mcp-setup` with your SigNoz Cloud region or self-hosted HTTP MCP URL.
+2. Install the `signoz` plugin from the marketplace panel. When prompted for your **SigNoz Region**, select your SigNoz Cloud region (`us`, `us2`, `eu`, `eu2`, `in`, or `in2`) or choose **self-hosted**. Cloud regions fill in `https://mcp.<region>.signoz.cloud/mcp` automatically.
+3. Self-hosted only: run `/signoz-mcp-setup` in an agent chat with your HTTP MCP URL (for example `/signoz-mcp-setup http://localhost:8000/mcp`). Until then, the MCP endpoint stays unconfigured. SigNoz Cloud users can skip this step.
 4. Reload Cursor, then open MCP settings and complete authentication for the `signoz` server if prompted.
+
+To change the region or endpoint later, run `/signoz-mcp-setup` again with the correct region or URL and reload Cursor.
 
 </TabItem>
 <TabItem value="gemini-cli" label="Gemini CLI">
@@ -90,7 +92,7 @@ Install the extension:
 gemini extensions install https://github.com/SigNoz/agent-skills
 ```
 
-When prompted, enter your SigNoz Cloud region (`us`, `us2`, `eu`, `eu2`, `in`, or `in2`). Then authenticate:
+When prompted for the **SigNoz MCP endpoint**, enter `https://mcp.<region>.signoz.cloud/mcp` with your SigNoz Cloud region (`us`, `us2`, `eu`, `eu2`, `in`, or `in2`), or your self-hosted URL (for example `http://localhost:8000/mcp`). Then authenticate:
 
 ```bash
 /mcp auth signoz

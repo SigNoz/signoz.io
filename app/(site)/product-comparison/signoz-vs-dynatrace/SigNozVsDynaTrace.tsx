@@ -35,12 +35,12 @@ export default SigNozVSDynatrace
 
 const COMPARISON_DATA = {
   HERO: {
-    TITLE: <>SigNoz vs Dynatrace</>,
+    TITLE: <>SigNoz Cloud vs Dynatrace</>,
     DESC: (
       <>
         Dynatrace is complex to set up and use. Its host-based billing is outdated for applications
-        that need on-demand scaling. SigNoz provides predictable usage-based billing that you can
-        rely on.
+        that need on-demand scaling. SigNoz Cloud provides predictable usage-based billing that you
+        can rely on.
       </>
     ),
     BILL_FOR_COMPARISON: {
@@ -60,19 +60,19 @@ const COMPARISON_DATA = {
     },
   },
   MIGRATE: {
-    TITLE: <>Migrate from Dynatrace to SigNoz with ease.</>,
+    TITLE: <>Migrate from Dynatrace to SigNoz Cloud with ease.</>,
     DESC: (
       <>
-        We provide support for migrating from Dynatrace to SigNoz.
+        We provide support for migrating from Dynatrace to SigNoz Cloud.
         <br />
         <Link href="/product-comparison/migrate-from-dynatrace/" className="highlight">
           Request a migration support
         </Link>{' '}
-        from one of our experts and get started with SigNoz quickly.
+        from one of our experts and get started with SigNoz Cloud quickly.
       </>
     ),
   },
-  REASON_TITLE: <>In depth: SigNoz vs Dynatrace</>,
+  REASON_TITLE: <>In depth: SigNoz Cloud vs Dynatrace</>,
   REASONS: [
     {
       FIGURE: '/img/reasons/ot-native.webp',
@@ -115,8 +115,8 @@ const COMPARISON_DATA = {
       DESC: (
         <>
           Dynatrace charges per hour per host which is not suitable for cloud-native environments
-          that need on-demand scaling. SigNoz paid plans are based on the amount of data sent with
-          rates that provides the best value for money.{' '}
+          that need on-demand scaling. SigNoz Cloud paid plans are based on the amount of data sent
+          with rates that provides the best value for money.{' '}
           <Link href="/teams/" className="highlight">
             Sign up
           </Link>{' '}
@@ -133,8 +133,8 @@ const COMPARISON_DATA = {
           UI/UX. There is a steep learning curve, and if your company does not have access to its
           full platform plan, the usability reduces.
           <br />
-          SigNoz is not gated by any SKU-based subscription. You can access all its features in its
-          basic paid plan and pay based only on the amount of data you send.
+          SigNoz Cloud is not gated by any SKU-based subscription. You can access all its features
+          in its basic paid plan and pay based only on the amount of data you send.
         </>
       ),
     },
@@ -154,7 +154,7 @@ const COMPARISON_DATA = {
     },
   ],
   COMPARISON: {
-    TITLE: <>Side by Side Comparison</>,
+    TITLE: <>SigNoz Cloud and Dynatrace Side by Side</>,
     OTHER_HEADING: 'Dynatrace',
     DATA: [
       {
@@ -227,14 +227,14 @@ const COMPARISON_DATA = {
   },
   MIGRATION_SUPPORT: {
     HACKER_THREAD_TITLE: '',
-    TITLE: <>Migrate from Dynatrace to SigNoz with ease.</>,
+    TITLE: <>Migrate from Dynatrace to SigNoz Cloud with ease.</>,
     DESC: (
       <>
-        We provide support for migrating from Dynatrace to SigNoz.{' '}
+        We provide support for migrating from Dynatrace to SigNoz Cloud.{' '}
         <Link href="/product-comparison/migrate-from-dynatrace/" className="highlight">
           Request a migration support
         </Link>{' '}
-        from one of our experts and get started with SigNoz quickly.
+        from one of our experts and get started with SigNoz Cloud quickly.
       </>
     ),
   },

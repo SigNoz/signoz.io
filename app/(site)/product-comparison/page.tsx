@@ -4,10 +4,10 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Product Comparisons',
-  description: 'Product Comparisons | SigNoz',
+  description: 'Compare SigNoz Cloud with managed observability platforms.',
   openGraph: {
     title: 'Product Comparisons | SigNoz',
-    description: 'Product Comparisons | SigNoz',
+    description: 'Compare SigNoz Cloud with managed observability platforms.',
     url: `${siteMetadata.siteUrl}/product-comparison`,
     siteName: siteMetadata.title,
     locale: 'en_US',
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: 'Product Comparisons | SigNoz',
-    description: 'Product Comparisons | SigNoz',
+    description: 'Compare SigNoz Cloud with managed observability platforms.',
     images: [siteMetadata.socialBanner],
     site: siteMetadata.twitter,
   },
@@ -32,11 +32,11 @@ export const metadata: Metadata = {
 const comparisons = [
   {
     id: 1,
-    title: 'SigNoz vs Datadog',
+    title: 'SigNoz Cloud vs Datadog',
     url: '/datadog-alternative/',
     desc: (
       <>
-        For 20 APM and 50 infra hosts, SigNoz can save up to 90% of your Datadog bill - check{' '}
+        For 20 APM and 50 infra hosts, SigNoz Cloud can save up to 90% of your Datadog bill - check{' '}
         <Link
           href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
           className="highlight"
@@ -49,31 +49,31 @@ const comparisons = [
   },
   {
     id: 2,
-    title: 'SigNoz vs Dynatrace',
+    title: 'SigNoz Cloud vs Dynatrace',
     url: '/product-comparison/signoz-vs-dynatrace/',
     desc: (
       <>
         Dynatrace is complex to set up and use. Its host-based billing is outdated for applications
-        that need on-demand scaling. SigNoz provides predictable usage-based billing that you can
-        rely on.
+        that need on-demand scaling. SigNoz Cloud provides predictable usage-based billing that you
+        can rely on.
       </>
     ),
   },
   {
     id: 3,
-    title: 'SigNoz vs Grafana',
+    title: 'SigNoz Cloud vs Grafana',
     url: '/grafana-alternative/',
     desc: (
       <>
         Under the hood, Grafana is powered by multiple tools like Loki, Tempo, Mimir & Prometheus.
-        SigNoz is built as a single tool to serve logs, metrics, and traces in a single pane of
-        glass from Day 1.
+        SigNoz Cloud is built as a single tool to serve logs, metrics, and traces in a single pane
+        of glass from Day 1.
       </>
     ),
   },
   {
     id: 4,
-    title: 'SigNoz vs NewRelic',
+    title: 'SigNoz Cloud vs NewRelic',
     url: '/newrelic-alternative/',
     desc: (
       <>

@@ -114,8 +114,8 @@ export const FEATURE_CARDS = [
       <div>
         <p>
           Most observability platforms force a trade-off between data you process and price you pay.
-          SigNoz adds full visibility into every layer of your Kubernetes cluster, nodes, control
-          plane, and workloads without the operational overhead or tradeoffs.
+          SigNoz Cloud adds full visibility into every layer of your Kubernetes cluster, nodes,
+          control plane, and workloads without the operational overhead or tradeoffs.
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
@@ -137,7 +137,7 @@ export const FEATURE_CARDS = [
       <div className="relative flex h-full min-h-[300px] w-full items-center justify-center overflow-hidden rounded-lg bg-signoz_ink-500">
         <Image
           src="/img/graphics/homepage/feature-graphic-columnar-db.svg"
-          alt="SigNoz columnar database — predictable pricing with efficient storage"
+          alt="SigNoz Cloud columnar database — predictable pricing with efficient storage"
           width={449}
           height={352}
           className="object-contain"
