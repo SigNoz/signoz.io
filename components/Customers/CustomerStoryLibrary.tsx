@@ -204,9 +204,6 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
         </div>
       </aside>
 
-      {/* Full-height rail line at the tab column's right edge (1px into the 40px gap),
-          fading at both ends like the docs tabs' gradient borders. The selected tab
-          paints its right border in the page background to break it. */}
       <div className="relative min-w-0 lg:before:absolute lg:before:-left-10 lg:before:top-0 lg:before:h-full lg:before:w-px lg:before:bg-[linear-gradient(to_bottom,transparent,var(--l2-border)_64px,var(--l2-border)_calc(100%-64px),transparent)] lg:before:content-['']">
         <div className="flex flex-col gap-3 md:sticky md:top-14 md:z-20 md:-my-3 md:flex-row md:items-center md:bg-[color-mix(in_srgb,var(--l1-background)_95%,transparent)] md:py-3 md:backdrop-blur-sm">
           <label className="relative flex-1">
@@ -301,9 +298,6 @@ export default function CustomerStoryLibrary({ stories }: CustomerStoryLibraryPr
                 }
               >
                 {viewMode === 'grid' ? (
-                  /* Three aligned zones: logo row pinned top (fixed min-h), title at a
-                     fixed offset below it, outcome/person block pinned to the bottom —
-                     so each zone lines up across cards in a row. */
                   <div className="flex h-full min-h-0 w-full flex-col">
                     <StoryLogoRow story={story} />
                     <h3 className="m-0 mt-6 text-pretty text-base font-normal leading-6 text-[var(--l3-foreground)] transition-colors group-hover:text-[var(--l1-foreground)]">

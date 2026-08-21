@@ -30,7 +30,7 @@ const PROOF_THEMES = [
 
 const YOUTUBE_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/
 
-const { CUSTOMERS_PAGE_CONTENT: pageContent } = loadTsModule(
+const { FEATURED_VIDEOS, QUOTE_CAROUSEL, PROOF_WALL_QUOTES, PROOF_WALL_LOGOS } = loadTsModule(
   'app/(site)/customers/customersPageContent.ts'
 )
 
@@ -54,8 +54,8 @@ describe('customers filter vocabulary', () => {
 
 describe('app/(site)/customers/customersPageContent.ts', () => {
   it('has 3 featured videos with valid YouTube IDs', () => {
-    assert.equal(pageContent.featuredVideos.length, 3)
-    for (const video of pageContent.featuredVideos) {
+    assert.equal(FEATURED_VIDEOS.length, 3)
+    for (const video of FEATURED_VIDEOS) {
       assert.ok(video.company, 'video missing company')
       assert.ok(video.title, 'video missing title')
       assert.match(video.videoId, YOUTUBE_ID_PATTERN, `invalid videoId "${video.videoId}"`)
@@ -63,8 +63,8 @@ describe('app/(site)/customers/customersPageContent.ts', () => {
   })
 
   it('has 3 quote carousel slides with complete attribution', () => {
-    assert.equal(pageContent.quoteCarousel.length, 3)
-    for (const slide of pageContent.quoteCarousel) {
+    assert.equal(QUOTE_CAROUSEL.length, 3)
+    for (const slide of QUOTE_CAROUSEL) {
       assert.ok(Array.isArray(slide.segments) && slide.segments.length > 0, 'slide has no segments')
       for (const segment of slide.segments) {
         assert.equal(typeof segment.text, 'string')
@@ -77,8 +77,8 @@ describe('app/(site)/customers/customersPageContent.ts', () => {
   })
 
   it('has 27 proof wall quotes with known themes', () => {
-    assert.equal(pageContent.proofWall.quotes.length, 27)
-    for (const quote of pageContent.proofWall.quotes) {
+    assert.equal(PROOF_WALL_QUOTES.length, 27)
+    for (const quote of PROOF_WALL_QUOTES) {
       assert.ok(quote.quote, 'proof quote missing quote text')
       assert.ok(quote.attribution, 'proof quote missing attribution')
       assert.ok(quote.href, `proof quote "${quote.attribution}" missing href`)
@@ -96,8 +96,8 @@ describe('app/(site)/customers/customersPageContent.ts', () => {
   })
 
   it('has 63 proof wall logos resolvable to an image or component', () => {
-    assert.equal(pageContent.proofWall.logos.length, 63)
-    for (const logo of pageContent.proofWall.logos) {
+    assert.equal(PROOF_WALL_LOGOS.length, 63)
+    for (const logo of PROOF_WALL_LOGOS) {
       assert.ok(logo.name, 'proof logo missing name')
       assert.ok(
         logo.imageSrc || logo.componentKey,

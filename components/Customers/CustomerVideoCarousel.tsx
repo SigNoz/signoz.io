@@ -28,8 +28,6 @@ export default function CustomerVideoCarousel({ videos }: CustomerVideoCarouselP
   const logEvent = useLogEvent()
   const pathname = usePathname()
 
-  // Fires for the initial slide and again once a slide change settles (the
-  // timeout resets while the index is still moving during a scroll/drag).
   useEffect(() => {
     const activeVideo = videos[activeIndex]
     if (!activeVideo) return

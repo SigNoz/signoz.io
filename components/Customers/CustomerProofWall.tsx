@@ -25,8 +25,6 @@ type ProofTile =
       type: 'logo'
     }
 
-// React SVG components cannot travel through the CMS JSON, so componentKey
-// entries are resolved against this registry at render time.
 const proofLogoComponents: Record<string, LogoComponent> = {
   eltropy: EltropyLogo,
 }
@@ -37,7 +35,6 @@ const featuredQuotePositions = new Map<number, 0 | 1 | 2>([
   [18, 2],
 ])
 const proofRowCount = 6
-// Column unit matches the prototype board: 4368px / 28 columns with a 12px gap and pr-3.
 const proofColumnUnitWidth = 156
 const autoScrollPixelsPerSecond = 18.5
 const customerProofClickLocation = 'Customers Proof Wall'
@@ -151,7 +148,6 @@ export default function CustomerProofWall({ quotes, logos }: CustomerProofWallPr
           type: 'quote',
         },
       ]
-      // First 9 quotes are followed by 3 logos each, the rest by 2.
       const logoCount = quoteIndex < 9 ? 3 : 2
       const startLogoIndex = Math.min(quoteIndex, 9) * 3 + Math.max(0, quoteIndex - 9) * 2
 

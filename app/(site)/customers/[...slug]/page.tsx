@@ -26,7 +26,6 @@ export async function generateMetadata(props: {
 }): Promise<Metadata> {
   const params = await props.params
   try {
-    // Handle root case
     if (!params.slug || params.slug.length === 0) {
       return {
         title: 'Customer Stories - SigNoz',
@@ -39,7 +38,6 @@ export async function generateMetadata(props: {
       }
     }
 
-    // Convert slug array to path
     const path = params.slug.join('/')
 
     const isProduction = process.env.VERCEL_ENV === 'production'
@@ -75,7 +73,6 @@ export async function generateMetadata(props: {
         },
       }
     } catch (error) {
-      // Content not found, return 404 metadata
       return {
         title: 'Page Not Found',
         description: 'The requested case study could not be found.',
@@ -103,7 +100,6 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const params = await props.params
   const path = params.slug.join('/')
 
-  // Fetch content from the repository with error handling
   let content: MDXContent
   try {
     const isProduction = process.env.VERCEL_ENV === 'production'
@@ -125,7 +121,6 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     notFound()
   }
 
-  // Generate computed fields
   const readingTimeData = readingTime(content?.content || '')
   const toc = generateTOC(content?.content || '')
 
@@ -137,7 +132,6 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     return a || { name: author }
   })
 
-  // Compile MDX content with all plugins
   let compiledContent
   try {
     const { content: mdxContent } = await compileMDX({
@@ -151,9 +145,6 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     notFound()
   }
 
-  // Prepare content for CaseStudyLayout — no date fields on purpose: customer
-  // story pages must not display a date, and ArticleLayout only renders one
-  // when the content carries date fields.
   const mainContent: CoreContent<MDXContent> = {
     title: content?.title,
     slug: path,

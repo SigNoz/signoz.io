@@ -5,7 +5,6 @@ import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCaseStudiesForPage } from '@/utils/cachedData'
 
 import CustomersPage from './CustomersPage'
-import { CUSTOMERS_PAGE_CONTENT } from './customersPageContent'
 
 export const metadata: Metadata = {
   title: {
@@ -41,5 +40,5 @@ export default async function Page() {
   const caseStudyCards = await fetchAllCaseStudiesForPage()
   const stories = getCustomerStories(caseStudyCards)
 
-  return <CustomersPage content={CUSTOMERS_PAGE_CONTENT} stories={stories} />
+  return <CustomersPage stories={stories} />
 }

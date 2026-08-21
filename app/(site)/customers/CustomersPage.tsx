@@ -1,4 +1,4 @@
-import type { CustomersPageContent, CustomerStory } from '@/components/Customers/Customers.types'
+import type { CustomerStory } from '@/components/Customers/Customers.types'
 import CustomerProofWall from '@/components/Customers/CustomerProofWall'
 import CustomerQuoteCarousel from '@/components/Customers/CustomerQuoteCarousel'
 import CustomersHero from '@/components/Customers/CustomersHero'
@@ -16,17 +16,22 @@ import {
   PROOF_HEADING,
   STORIES_HEADING,
 } from './CustomersPage.constants'
+import {
+  FEATURED_VIDEOS,
+  PROOF_WALL_LOGOS,
+  PROOF_WALL_QUOTES,
+  QUOTE_CAROUSEL,
+} from './customersPageContent'
 
 const sectionInnerClassName = 'px-4 sm:px-6 lg:px-16 xl:px-20'
 const sectionHeadingClassName =
   'm-0 text-pretty text-3xl font-medium leading-none tracking-tight text-[var(--l1-foreground)] sm:text-4xl'
 
 interface CustomersPageProps {
-  content: CustomersPageContent
   stories: CustomerStory[]
 }
 
-export default function CustomersPage({ content, stories }: CustomersPageProps) {
+export default function CustomersPage({ stories }: CustomersPageProps) {
   return (
     <FeaturePageLayout showProductNav={false} showDotPattern={false}>
       <DitherCanvas>
@@ -39,7 +44,7 @@ export default function CustomersPage({ content, stories }: CustomersPageProps) 
 
           <section className={sectionInnerClassName}>
             <div className="pb-16 lg:pb-24">
-              <CustomerVideoCarousel videos={content.featuredVideos} />
+              <CustomerVideoCarousel videos={FEATURED_VIDEOS} />
             </div>
           </section>
         </SectionLayout>
@@ -64,7 +69,7 @@ export default function CustomersPage({ content, stories }: CustomersPageProps) 
 
         <section className={sectionInnerClassName}>
           <div className="py-12 lg:py-20">
-            <CustomerQuoteCarousel quotes={content.quoteCarousel} />
+            <CustomerQuoteCarousel quotes={QUOTE_CAROUSEL} />
           </div>
         </section>
 
@@ -79,10 +84,7 @@ export default function CustomersPage({ content, stories }: CustomersPageProps) 
               </span>
             </h2>
             <div className="mt-12">
-              <CustomerProofWall
-                quotes={content.proofWall.quotes}
-                logos={content.proofWall.logos}
-              />
+              <CustomerProofWall quotes={PROOF_WALL_QUOTES} logos={PROOF_WALL_LOGOS} />
             </div>
           </div>
         </section>

@@ -70,14 +70,3 @@ export interface ProofQuote {
   logo?: ProofLogo
   themes: string[]
 }
-
-export interface ProofWallContent {
-  quotes: ProofQuote[]
-  logos: ProofLogo[]
-}
-
-export interface CustomersPageContent {
-  featuredVideos: CustomerVideo[]
-  quoteCarousel: QuoteSlide[]
-  proofWall: ProofWallContent
-}
