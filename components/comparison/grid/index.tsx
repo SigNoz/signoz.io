@@ -18,7 +18,7 @@ const ComparisonGridDesktop = (props) => {
   const { data, otherHeading } = props
   return (
     <div className="container">
-      <div className={styles.tableGrid} data-md-table={`Feature|SigNoz|${otherHeading}`}>
+      <div className={styles.tableGrid} data-md-table={`Feature|SigNoz Cloud|${otherHeading}`}>
         {/* header */}
         <div className={styles.tableHeader}></div>
         <div className={styles.tableHeader}>SigNoz Cloud</div>
