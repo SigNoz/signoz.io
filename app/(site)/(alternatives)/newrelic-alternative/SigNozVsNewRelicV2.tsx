@@ -268,15 +268,17 @@ const SigNozVsNewRelicV2 = () => {
                   Flexible Deployment Options
                 </h4>
                 <p className="text-gray-300">
-                  Choose{' '}
+                  SigNoz provides both cloud & self-hosted versions. You can use the cloud,
+                  enterprise self-host, or free, open-source community edition, depending on your
+                  needs. Many of our users use{' '}
                   <Link
                     href="/docs/install/docker/"
                     className="text-blue-400 hover:text-blue-300"
                     target="_blank"
                   >
-                    Self-Hosted SigNoz Community Edition
+                    open-source SigNoz
                   </Link>{' '}
-                  for a user-managed deployment, or{' '}
+                  in dev environments and{' '}
                   <Link
                     href="https://signoz.io/teams/"
                     className="text-blue-400 hover:text-blue-300"
@@ -284,15 +286,15 @@ const SigNozVsNewRelicV2 = () => {
                   >
                     SigNoz Cloud
                   </Link>{' '}
-                  for a managed deployment. Privacy-focused users can choose{' '}
+                  for production environments. Privacy-focused users prefer{' '}
                   <Link
                     href="/pricing/"
                     className="text-blue-400 hover:text-blue-300"
                     target="_blank"
                   >
-                    Self-Hosted SigNoz Enterprise
-                  </Link>
-                  .
+                    enterprise self-hosted
+                  </Link>{' '}
+                  version.
                 </p>
               </div>
             </div>

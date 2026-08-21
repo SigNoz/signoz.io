@@ -259,8 +259,11 @@ const SigNozVsDatadogV2 = () => {
                   Flexible Deployment Options
                 </h4>
                 <p className="text-gray-300">
-                  Choose SigNoz Cloud for a managed service. Choose Self-Hosted SigNoz Community
-                  Edition or Enterprise for a user-managed deployment.
+                  SigNoz provides both cloud & self-hosted versions. You can use the cloud,
+                  enterprise self-host, or free, open-source community edition, depending on your
+                  needs. Many of our users use open-source SigNoz in dev environments and SigNoz
+                  Cloud for production environments. Privacy-focused users prefer enterprise
+                  self-hosted version.
                 </p>
               </div>
             </div>

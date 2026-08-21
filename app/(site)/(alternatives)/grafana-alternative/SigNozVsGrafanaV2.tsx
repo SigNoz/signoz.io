@@ -535,7 +535,7 @@ const SigNozVsGrafanaV2 = () => {
                       Feature
                     </th>
                     <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                      SigNoz Cloud / Self-Hosted SigNoz
+                      SigNoz
                     </th>
                     <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                       Grafana
