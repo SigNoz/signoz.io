@@ -9,7 +9,6 @@ import GitHubStars from '../GithubStars/GithubStars'
 import Tabs from '@/components/ResourceCenter/Tabs'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
-import { Badge } from '@signozhq/ui/badge'
 import { Button } from '@/components/ui/Button'
 import { cn } from 'app/lib/utils'
 import { TABS, TAB_PATHNAMES } from './constants'
@@ -110,12 +109,6 @@ export default function TopNav() {
               />
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </TrackingLink>
-            {isDocsBasePath && (
-              <Badge color="cherry" className="ml-1 self-center uppercase">
-                docs
-              </Badge>
-            )}
-
             {!isLoginRoute && (
               <NavDropdownProvider>
                 <div

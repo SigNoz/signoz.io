@@ -192,7 +192,7 @@ export default function TeamsPricingCard() {
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
               <span className="flex items-center gap-1">
-                SigNoz Cloud support via in-product chat, email, and Slack
+                Support via in-product Chat, Email, and Slack
                 <Tooltip
                   content={
                     <div className="max-w-xs">
@@ -218,7 +218,7 @@ export default function TeamsPricingCard() {
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
               <span className="flex items-center gap-1">
-                SigNoz Cloud is SOC 2 Type II and HIPAA compliant
+                SOC2 Type II & HIPAA Compliant
                 <Tooltip
                   content={
                     <div className="max-w-xs">
@@ -244,7 +244,7 @@ export default function TeamsPricingCard() {
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
-              SigNoz Cloud data regions are available in the US, EU, and India
+              Data centers available in the US, EU & India
             </span>
           </li>
 

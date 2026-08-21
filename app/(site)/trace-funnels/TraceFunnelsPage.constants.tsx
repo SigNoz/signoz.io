@@ -99,7 +99,7 @@ export const ANALYZE_REQUEST_FLOW_CARDS = [
     icon: <Atom />,
     title: 'Error Clustering',
     description:
-      'View which step transitions generate how many errors and see the trace IDs causing failures at each transition point..',
+      'View which step transitions generate how many errors and see the trace IDs causing failures at each transition point.',
   },
   {
     icon: <Atom />,

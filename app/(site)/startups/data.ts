@@ -135,7 +135,7 @@ export const faqItems = [
   {
     question: 'What comes included in $19?',
     answer:
-      'The $19/month minimum includes $19 of SigNoz Cloud telemetry usage. Additional usage follows the published SigNoz Cloud rates.',
+      "Our usage-based pricing is applicable for any data you send to SigNoz Cloud. If your usage doesn't cross $19, your monthly bill will be $19. If it does, final bill will be calculated based on the amount of data you sent to SigNoz Cloud.",
   },
   {
     question: 'How long does the startup pricing last?',

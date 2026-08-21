@@ -154,6 +154,24 @@ describe('classifyContentFiles', () => {
     assert.deepEqual(result.deletedFiles, [])
   })
 
+  it('reports newly added PR files as addedFiles while the PR is open', () => {
+    const added = 'data/blog/new-post.mdx'
+    const edited = 'data/blog/existing-post.mdx'
+    const result = classifyContentFiles({
+      eventAction: 'synchronize',
+      touchedFiles: [added, edited],
+      finalStatusByPath: new Map([
+        [added, 'A'],
+        [edited, 'M'],
+      ]),
+      pathExistsInHead: existsFrom(new Set([added, edited])),
+      pathExistsInBase: existsFrom(new Set([edited])),
+    })
+
+    assert.deepEqual(result.changedFiles, [edited, added])
+    assert.deepEqual(result.addedFiles, [added])
+  })
+
   it('deletes a closed PR path that does not exist on main', () => {
     const filePath = 'data/blog/new-post.mdx'
     const result = classifyContentFiles({

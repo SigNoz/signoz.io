@@ -15,17 +15,15 @@ export default function EnterpriseCard() {
                 id="enterprise"
                 className="orangish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl"
               >
-                SigNoz Enterprise
+                Enterprise
               </h3>
               <p className="text-base text-gray-400">
-                Choose dedicated SigNoz Cloud, managed BYOC, or Self-Hosted SigNoz with support.
+                For larger orgs that need data residency, compliance and support.
               </p>
             </div>
             <div className="mt-4 flex w-full flex-col items-start md:mt-0 md:w-[40%] md:items-end">
               <span className="text-2xl font-bold text-signoz_vanilla-100 md:text-3xl">Custom</span>
-              <div className="mt-1 text-sm text-signoz_vanilla-400">
-                SigNoz Cloud: Dedicated starts at $4000/month
-              </div>
+              <div className="mt-1 text-sm text-signoz_vanilla-400">starts at $4000/month</div>
             </div>
           </div>
 

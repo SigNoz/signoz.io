@@ -7,17 +7,17 @@ export const metadata: Metadata = {
     absolute: 'Application Performance Monitoring (APM) with OpenTelemetry | SigNoz',
   },
   openGraph: {
-    title: 'Application Performance Monitoring (APM) with OpenTelemetry | SigNoz',
+    title: 'Application Performance Monitoring (APM) with OpenTelemetry | SigNoz Cloud',
     description:
-      'Monitor Latency, Error Rates, Apdex, and Requests per second with SigNoz APM Tool powered by OpenTelemetry. Get real-time insights, root cause analysis & usage-based pricing.',
+      'Monitor latency, error rates, Apdex, and requests per second with SigNoz Cloud APM powered by OpenTelemetry. Get real-time insights, root cause analysis, and usage-based pricing.',
     images: '/img/features/apm/apm-cover.webp',
   },
   description:
-    'Monitor Latency, Error Rates, Apdex, and Requests per second with SigNoz APM Tool powered by OpenTelemetry. Get real-time insights, root cause analysis & usage-based pricing.',
+    'Monitor latency, error rates, Apdex, and requests per second with SigNoz Cloud APM powered by OpenTelemetry. Get real-time insights, root cause analysis, and usage-based pricing.',
   twitter: {
-    title: 'Application Performance Monitoring (APM) with OpenTelemetry | SigNoz',
+    title: 'Application Performance Monitoring (APM) with OpenTelemetry | SigNoz Cloud',
     description:
-      'Monitor Latency, Error Rates, Apdex, and Requests per second with SigNoz APM Tool powered by OpenTelemetry. Get real-time insights, root cause analysis & usage-based pricing.',
+      'Monitor latency, error rates, Apdex, and requests per second with SigNoz Cloud APM powered by OpenTelemetry. Get real-time insights, root cause analysis, and usage-based pricing.',
     images: '/img/features/apm/apm-cover.webp',
   },
 }
