@@ -217,6 +217,21 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/alien-intelligence-ai-sre-workflow-signoz/',
+          destination: '/customers/alien-intelligence-ai-sre-workflow-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/blog/inkeep-ai-agent-monitoring/',
+          destination: '/customers/inkeep-ai-agent-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/msi-signoz-mcp-full-stack-debugging/',
+          destination: '/customers/msi-signoz-mcp-full-stack-debugging/',
+          permanent: true,
+        },
+        {
           source: '/docs/product-features/saved-view',
           destination: '/docs/metrics-management/metrics-explorer/#saved-views-in-metrics-explorer',
           permanent: true,

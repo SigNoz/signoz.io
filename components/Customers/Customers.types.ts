@@ -80,5 +80,4 @@ export interface CustomersPageContent {
   featuredVideos: CustomerVideo[]
   quoteCarousel: QuoteSlide[]
   proofWall: ProofWallContent
-  blogStoryCards: CustomerStory[]
 }

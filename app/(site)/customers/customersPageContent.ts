@@ -102,7 +102,7 @@ export const CUSTOMERS_PAGE_CONTENT: CustomersPageContent = {
       {
         attribution: 'Leo Blondel · CTO',
         company: 'Alien Intelligence',
-        href: '/blog/alien-intelligence-ai-sre-workflow-signoz/',
+        href: '/customers/alien-intelligence-ai-sre-workflow-signoz/',
         logo: {
           imageSrc: '/img/homepage/customer-logos/alien-intelligence.webp',
           name: 'Alien Intelligence',
@@ -140,7 +140,7 @@ export const CUSTOMERS_PAGE_CONTENT: CustomersPageContent = {
       {
         attribution: 'The Inkeep team',
         company: 'Inkeep',
-        href: '/blog/inkeep-ai-agent-monitoring/',
+        href: '/customers/inkeep-ai-agent-monitoring/',
         logo: {
           cardWidth: 104,
           imageSrc: '/svgs/icons/inkeep.svg',
@@ -737,55 +737,4 @@ export const CUSTOMERS_PAGE_CONTENT: CustomersPageContent = {
       },
     ],
   },
-  blogStoryCards: [
-    {
-      company: 'Alien Intelligence',
-      description:
-        'Alien Intelligence built an AI SRE workflow on SigNoz to triage alerts, reduce noise, and keep humans in the loop.',
-      featured: true,
-      filters: ['AI & agent workflows', 'Logs & alerting'],
-      href: '/blog/alien-intelligence-ai-sre-workflow-signoz/',
-      logo: '/img/homepage/customer-logos/alien-intelligence.webp',
-      logoAlt: 'Alien Intelligence',
-      person: 'Leo Blondel',
-      publishedAt: '2026-06-11',
-      quote:
-        'Datadog came back and said, “The trial’s over — it’s going to cost you over $2K.” I was like, “Sorry, what?”',
-      role: 'CTO',
-      showCompanyNameWithLogo: true,
-      title: 'How Alien Intelligence built an AI SRE workflow with SigNoz',
-      type: 'From the SigNoz blog',
-    },
-    {
-      company: 'Inkeep',
-      description:
-        'Inkeep monitors its AI agent framework with SigNoz and OpenTelemetry, tracing agent runs, tool calls, and token usage.',
-      featured: true,
-      filters: ['AI & agent workflows', 'Tracing & performance'],
-      href: '/blog/inkeep-ai-agent-monitoring/',
-      logo: '/svgs/icons/inkeep.svg',
-      logoAlt: 'Inkeep',
-      person: 'Shagun Singh',
-      publishedAt: '2025-12-15',
-      quote: 'We’ve been using SigNoz as a first-class dependency in our new agent framework.',
-      role: 'Software Engineer',
-      title: 'How Inkeep monitors its AI agent framework with SigNoz',
-      type: 'From the SigNoz blog',
-    },
-    {
-      company: 'MSI',
-      description:
-        'MSI engineers use SigNoz MCP with Claude to compare traces at scale, connect telemetry to code, and pinpoint where sales-order slowdowns actually live.',
-      featured: true,
-      filters: ['AI & agent workflows', 'Tracing & performance'],
-      href: '/blog/msi-signoz-mcp-full-stack-debugging/',
-      logo: '/img/case_study/logos/msi-logo-white.svg',
-      logoAlt: 'MSI',
-      person: 'Taylor Mattison',
-      publishedAt: '2026-08-07',
-      role: 'Front-end Developer',
-      title: 'How MSI Uses SigNoz MCP to Debug Slow Sales Orders Across the Stack',
-      type: 'From the SigNoz blog',
-    },
-  ],
 }

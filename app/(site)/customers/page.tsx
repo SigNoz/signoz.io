@@ -29,11 +29,8 @@ export const metadata: Metadata = {
   },
 }
 
-function getCustomerStories(
-  caseStudyCards: CustomerStory[],
-  blogStoryCards: CustomerStory[]
-): CustomerStory[] {
-  return [...caseStudyCards, ...blogStoryCards].sort((a, b) => {
+function getCustomerStories(caseStudyCards: CustomerStory[]): CustomerStory[] {
+  return [...caseStudyCards].sort((a, b) => {
     const dateDiff = (b.publishedAt || '').localeCompare(a.publishedAt || '')
     if (dateDiff !== 0) return dateDiff
     return a.company.localeCompare(b.company)
@@ -42,7 +39,7 @@ function getCustomerStories(
 
 export default async function Page() {
   const caseStudyCards = await fetchAllCaseStudiesForPage()
-  const stories = getCustomerStories(caseStudyCards, CUSTOMERS_PAGE_CONTENT.blogStoryCards)
+  const stories = getCustomerStories(caseStudyCards)
 
   return <CustomersPage content={CUSTOMERS_PAGE_CONTENT} stories={stories} />
 }
