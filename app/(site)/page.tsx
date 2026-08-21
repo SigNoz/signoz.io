@@ -7,12 +7,9 @@ import { ExperimentTracker } from '@/components/ExperimentTracker'
 import { EXPERIMENTS } from '@/constants/experiments'
 import { getFeatureValue } from '@/utils/growthbookServer'
 import { homepageFaqItems } from '@/components/index-faq/faqContent'
+import { STRUCTURED_DATA_IDS } from '@/utils/structuredData'
 
 const siteUrl = siteMetadata.siteUrl
-const organizationId = `${siteUrl}/#organization`
-const websiteId = `${siteUrl}/#website`
-const signozCloudId = `${siteUrl}/#signoz-cloud`
-const selfHostedSignozId = `${siteUrl}/#self-hosted-signoz`
 const webpageId = `${siteUrl}/#webpage`
 const homepageTitle = 'SigNoz | The Open Source Datadog Alternative'
 const homepageDescription =
@@ -52,7 +49,7 @@ export const metadata: Metadata = {
 
 const organizationSchema = {
   '@type': 'Organization',
-  '@id': organizationId,
+  '@id': STRUCTURED_DATA_IDS.organization,
   name: 'SigNoz',
   url: `${siteUrl}/`,
   logo: {
@@ -90,13 +87,13 @@ const organizationSchema = {
 
 const websiteSchema = {
   '@type': 'WebSite',
-  '@id': websiteId,
+  '@id': STRUCTURED_DATA_IDS.website,
   url: `${siteUrl}/`,
   name: 'SigNoz',
   description:
     'The official website for SigNoz Cloud, the managed observability platform, and Self-Hosted SigNoz, the open-source deployment.',
   publisher: {
-    '@id': organizationId,
+    '@id': STRUCTURED_DATA_IDS.organization,
   },
 }
 
@@ -107,19 +104,19 @@ const webpageSchema = {
   name: homepageTitle,
   description: homepageDescription,
   isPartOf: {
-    '@id': websiteId,
+    '@id': STRUCTURED_DATA_IDS.website,
   },
   about: {
-    '@id': signozCloudId,
+    '@id': STRUCTURED_DATA_IDS.signozCloud,
   },
   mentions: {
-    '@id': selfHostedSignozId,
+    '@id': STRUCTURED_DATA_IDS.selfHostedSignoz,
   },
 }
 
 const signozCloudSchema = {
   '@type': 'SoftwareApplication',
-  '@id': signozCloudId,
+  '@id': STRUCTURED_DATA_IDS.signozCloud,
   name: 'SigNoz Cloud',
   applicationCategory: 'DeveloperApplication',
   applicationSubCategory: 'Observability Platform',
@@ -131,7 +128,7 @@ const signozCloudSchema = {
   featureList:
     'Application Performance Monitoring, Distributed Tracing, Log Management, Metrics & Dashboards, Exceptions Tracking, Alerts & Notifications, Service Maps, Flame Graphs, OpenTelemetry-Native',
   publisher: {
-    '@id': organizationId,
+    '@id': STRUCTURED_DATA_IDS.organization,
   },
   offers: {
     '@type': 'Offer',
@@ -143,7 +140,7 @@ const signozCloudSchema = {
 
 const selfHostedSignozSchema = {
   '@type': 'SoftwareApplication',
-  '@id': selfHostedSignozId,
+  '@id': STRUCTURED_DATA_IDS.selfHostedSignoz,
   name: 'Self-Hosted SigNoz',
   applicationCategory: 'DeveloperApplication',
   applicationSubCategory: 'Observability Platform',
@@ -156,7 +153,7 @@ const selfHostedSignozSchema = {
     'Application Performance Monitoring, Distributed Tracing, Log Management, Metrics & Dashboards, Exceptions Tracking, Alerts & Notifications, Service Maps, Flame Graphs, OpenTelemetry-Native',
   license: 'https://github.com/SigNoz/signoz/blob/develop/LICENSE',
   publisher: {
-    '@id': organizationId,
+    '@id': STRUCTURED_DATA_IDS.organization,
   },
 }
 
@@ -184,7 +181,7 @@ const videoSchema = {
   contentUrl: 'https://vimeo.com/944340217',
   embedUrl: 'https://player.vimeo.com/video/944340217',
   publisher: {
-    '@id': organizationId,
+    '@id': STRUCTURED_DATA_IDS.organization,
   },
 }
 
