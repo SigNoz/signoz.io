@@ -9,10 +9,8 @@ keywords: [Winston logger, nodejs, log management, structured logging, winston p
 related_articles:
   - '/blog/morgan-logger'
   - '/guides/pino-logger-nodejs-logging-library'
-  - '/opentelemetry/correlating-traces-logs-metrics-nodejs'
-  - '/blog/nodejs-performance-monitoring'
-  - '/blog/nodejs-opensource-application-monitoring'
-  - '/opentelemetry/logging-nodejs'
+  - '/docs/traces-management/guides/correlate-traces-and-logs'
+  - '/opentelemetry/nodejs'
 ---
 
 Winston logger is a simple [Node.js logging](https://signoz.io/guides/nodejs-logging/) library. It was created to give your Node.js applications a flexible and centralized way to manage logs across multiple destinations, formats, and severity levels without tying the application to a single logging output or storage mechanism.
@@ -466,7 +464,7 @@ The output will include a `durationMs` field, which is injected automatically by
 
 A Node.js service usually writes logs to stdout, local files, or both. That works during local development, but it becomes painful in production. If logs stay on individual hosts or short-lived containers, debugging often means SSHing into a server or running `kubectl logs` before the pod is replaced and the output is gone. Once you have more than one instance, that workflow does not scale.
 
-A [log management tool](https://signoz.io/blog/best-open-source-log-management-tools/) centralizes those logs so you can search them, filter by metadata, build dashboards, and create alerts. In this section, we will send Winston logs from a Node.js application to [SigNoz](https://signoz.io/), an all-in-one observability platform for logs, metrics, and traces. SigNoz supports [OpenTelemetry](https://signoz.io/opentelemetry/), so the same logging approach can also be adapted for other OTLP-compatible backends, usually by changing exporter configuration rather than rewriting your logging calls.
+A [log management tool](https://signoz.io/blog/best-log-management-tools/) centralizes those logs so you can search them, filter by metadata, build dashboards, and create alerts. In this section, we will send Winston logs from a Node.js application to [SigNoz](https://signoz.io/), an all-in-one observability platform for logs, metrics, and traces. SigNoz supports [OpenTelemetry](https://signoz.io/opentelemetry/), so the same logging approach can also be adapted for other OTLP-compatible backends, usually by changing exporter configuration rather than rewriting your logging calls.
 
 The main benefit is log-trace correlation. When Winston logs are emitted inside an active OpenTelemetry span, they can include fields such as `trace_id` and `span_id`. That lets you move from a slow or failing trace to the log lines created during the same request. You can also query [structured log](https://signoz.io/blog/structured-logs/) attributes, [create log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/), and build dashboards without changing every existing `logger.info()` or `logger.error()` call site.
 

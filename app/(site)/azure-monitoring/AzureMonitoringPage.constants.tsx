@@ -34,7 +34,7 @@ export const INTEGRATE_AZURE_PANEL = {
   title: 'Integrate your Azure account - with just one click - no agents, no config files',
   description: (
     <p className="leading-relaxed text-signoz_vanilla-400">
-      SigNoz&apos;s One-Click Azure Integration deploys via an ARM template and automatically
+      SigNoz Cloud&apos;s One-Click Azure Integration deploys via an ARM template and automatically
       discovers your Azure resources. VMs, AKS, App Services, Container Apps, Blob Storage, Cosmos
       DB, and databases start sending metrics immediately - no manual OTel Collector setup required.
       The fastest path to full Azure visibility.
@@ -195,7 +195,7 @@ export const TRANSPARENT_PRICING_PANEL = {
   description: (
     <p className="leading-relaxed text-signoz_vanilla-400">
       Azure Monitor charges per metric query and per GB of log ingestion. Most observability tools
-      add another unpredictable bill on top - per host, per seat, or per custom metric. SigNoz
+      add another unpredictable bill on top - per host, per seat, or per custom metric. SigNoz Cloud
       charges $0.30/GB for logs and traces, $0.10 per million metric samples. No per-VM fees. No
       premium for OTel metrics. One number you can forecast.
     </p>

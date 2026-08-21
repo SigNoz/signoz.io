@@ -1,7 +1,8 @@
 ---
 title: Manual Instrumentation for Traces - OpenTelemetry NodeJS
-date: 2024-06-06
-tags: [opentelemetry-tutorials, nodejs]
+meta_title: "Node.js OpenTelemetry - Custom Spans & Manual Tracing"
+date: 2026-08-17
+tags: [nodejs, opentelemetry]
 authors: [yuvraj]
 description: Learn how to enhance observability in your NodeJS Order service by adding custom spans with OpenTelemetry. This guide focuses on the validate-order process, allowing you to track specific business logic and identify performance bottlenecks that automatic instrumentation might miss
 keywords:
@@ -13,21 +14,11 @@ keywords:
   - nodejs instrumentation
   - signoz
 ---
-<Admonition type="info">
-This article is part of the **OpenTelemetry NodeJS series**:
-- Previous Article: [Setting up the Otel Collector - OpenTelemetry NodeJS](/opentelemetry/collector-nodejs/)
-- **You are here:** Manual Instrumentation for Traces - OpenTelemetry NodeJS
-- Next Article: [Setting up Custom Metrics - OpenTelemetry NodeJS](/opentelemetry/custom-metrics-nodejs/)
-
-Check out the complete series at: [Overview - Implementing OpenTelemetry in NodeJS with SigNoz - OpenTelemetry NodeJS](/opentelemetry/nodejs-tutorial-overview/)
-
-</Admonition>
-
 In this article, we will explore how to add custom spans using OpenTelemetry to enhance observability in our Order service. Specifically, we'll focus on the **`validate-order`** process. Manual spans allow us to track specific business logic and identify performance bottlenecks that automatic instrumentation might miss.
 
 ## Prerequisites
 
-Before we begin, ensure you have the sample app set up from the previous tutorials. You'll need the following [OpenTelemetry](https://signoz.io/opentelemetry/) libraries in your order service:
+Before we begin, ensure you have a Node.js application already instrumented with OpenTelemetry — see the [OpenTelemetry Node.js guide](https://signoz.io/opentelemetry/nodejs/) if you haven't set that up yet. You'll need the following [OpenTelemetry](https://signoz.io/opentelemetry/) libraries in your order service:
 
 ```bash
 npm install @opentelemetry/api @opentelemetry/sdk-node @opentelemetry/resources @opentelemetry/semantic-conventions
@@ -168,6 +159,58 @@ Run your application and check [SigNoz](https://signoz.io/docs/introduction/) fo
 
 You can see the new span being created in the `post` request to `/orders` called `validate-order` with the added attributes and events.
 
+## Creating Nested Spans
+
+A single span tells you how long an operation took. Nesting spans tells you *where inside it* the time went. In the validation flow above, one slow order could mean a slow product lookup or a slow stock update, and a flat span can't distinguish the two.
+
+`startActiveSpan` sets the new span as the active span for the duration of its callback, so any span you start inside that callback automatically becomes its child. You don't need to pass parents around manually:
+
+```jsx
+async function validateOrder(order) {
+  return tracer.startActiveSpan('validate-order', async (parentSpan) => {
+    try {
+      for (const item of order.products) {
+        // Child span — parented to 'validate-order' automatically
+        await tracer.startActiveSpan('check-product-stock', async (childSpan) => {
+          childSpan.setAttribute('product.id', item.productId)
+          childSpan.setAttribute('product.quantity', item.quantity)
+
+          try {
+            const res = await fetch(`http://product:3003/products/${item.productId}`)
+            const product = await res.json()
+
+            if (!product || product.stock < item.quantity) {
+              throw new Error(`Product ${item.productId} is out of stock.`)
+            }
+          } catch (error) {
+            childSpan.setStatus({ code: SpanStatusCode.ERROR, message: error.message })
+            childSpan.recordException(error)
+            throw error
+          } finally {
+            childSpan.end()
+          }
+        })
+      }
+
+      parentSpan.setStatus({ code: SpanStatusCode.OK })
+    } catch (error) {
+      parentSpan.setStatus({ code: SpanStatusCode.ERROR, message: error.message })
+      parentSpan.recordException(error)
+      throw error
+    } finally {
+      parentSpan.end()
+    }
+  })
+}
+```
+
+In the SigNoz flamegraph this renders as one `validate-order` bar with a `check-product-stock` bar per product nested beneath it, so a single slow lookup is immediately visible.
+
+Two things worth getting right:
+
+- **Always end spans in a `finally` block.** A span whose `end()` is skipped by an early return or a thrown error never gets exported, and the trace arrives incomplete.
+- **Keep span names low-cardinality.** Name the operation (`check-product-stock`), not the instance (`check-product-stock-abc123`). Identifying values belong in attributes, where they stay queryable without fragmenting your trace data.
+
 ## When to Use Manual Spans
 
 Manual spans are useful in the following scenarios:
@@ -186,7 +229,7 @@ Manual spans are useful in the following scenarios:
 By adding custom spans to the **`validate-order`** process, we enhanced our observability, enabling detailed tracking and improved debugging capabilities. Manual instrumentation allows us to gain deeper insights into specific parts of our application, ensuring better performance and reliability.
 
 <Admonition type="info">
-  Read Next Article of OpenTelemetry NodeJS series on [Setting up Custom Metrics - OpenTelemetry
-  NodeJS](/opentelemetry/custom-metrics-nodejs)
+  Next, learn how to define and visualize your own metrics in [Setting up Custom Metrics -
+  OpenTelemetry Node.js](https://signoz.io/opentelemetry/custom-metrics-nodejs/).
 </Admonition>
 

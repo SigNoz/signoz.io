@@ -64,10 +64,11 @@ const Header: React.FC = () => {
         }
         description={
           <span className="text-base">
-            Connect SigNoz to your coding agents (e.g. Claude Code, Cursor) and debug production
-            issues without leaving your dev environment. <br className="hidden md:block" /> Traces,
-            logs, metrics, service topology, and your actual codebase - all in one place. Or use
-            Noz, our new AI teammate out-of-the-box.
+            Connect SigNoz Cloud to your coding agents (e.g. Claude Code, Cursor) and debug
+            production issues without leaving your dev environment.{' '}
+            <br className="hidden md:block" />
+            Traces, logs, metrics, service topology, and your actual codebase - all in one place. Or
+            use Noz, the AI teammate built into SigNoz Cloud.
           </span>
         }
         buttonGroup={headerButtonGroup}
