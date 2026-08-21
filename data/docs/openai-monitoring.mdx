@@ -1,5 +1,6 @@
 ---
-date: 2026-08-03
+published_date: 2026-08-03
+updated_date: 2026-08-21
 title: OpenAI Monitoring with OpenTelemetry
 description: Set up OpenAI monitoring and observability with SigNoz. Track token usage, model latency, request traces, and error rates across your LLM apps in real time.
 doc_type: howto
@@ -43,7 +44,12 @@ source .venv/bin/activate
 pip install opentelemetry-distro~=0.51b0
 pip install opentelemetry-exporter-otlp~=1.30.0
 pip install opentelemetry-instrumentation-openai-v2
+pip install httpx
 ```
+
+<Admonition type="warning">
+  `httpx` is required even though you may not use it directly. The OpenAI Python SDK v3 ships its own HTTP client under the module name `httpx2`, while `opentelemetry-instrumentation-openai-v2` still does `from httpx import URL`. Without `httpx` installed, that import raises `ModuleNotFoundError`, `opentelemetry-instrument` skips the OpenAI instrumentor **silently**, and your OpenAI calls show up as generic `POST` spans with no `gen_ai.*` attributes and no error explaining why.
+</Admonition>
 
 ### Step 3. Add automatic instrumentation
 
@@ -551,6 +557,14 @@ By default, message content such as prompts and completions are not captured. To
 export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true
 ```
 
+<Admonition type="warning">
+  **This value depends on the version you installed.** Content capture moved out of the instrumentation's own boolean flag and into the shared `opentelemetry-util-genai` library, which takes an enum instead: `NO_CONTENT`, `SPAN_ONLY`, `EVENT_ONLY`, or `SPAN_AND_EVENT`.
+
+  `true` is correct for the pinned versions this guide installs. If you install `opentelemetry-distro` and `opentelemetry-instrumentation-openai-v2` unpinned, use `SPAN_AND_EVENT` instead. On those newer versions `true` is rejected with a warning and falls back to `NO_CONTENT`, so prompts and completions never reach the span.
+
+  To confirm which one you are on, check whether your spans carry `gen_ai.input.messages` and `gen_ai.output.messages`.
+</Admonition>
+
 **Note:** Be cautious when enabling this in production as it may capture sensitive user data. This feature is already included in the run command above.
 
 
@@ -610,6 +624,8 @@ If you don't see your telemetry data:
 2. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
 3. **Check ingestion key** - Verify your SigNoz ingestion key is correct
 4. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
+5. **Spans named `POST` with no `gen_ai.*` attributes** - The OpenAI instrumentor was skipped because `httpx` is not installed. Run `pip install httpx` and restart your app.
+6. **Spans arrive but carry no prompts or completions** - The value of `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` does not match your installed version. See [Capturing Message Content](#capturing-message-content-optional).
 
 </details>
 
