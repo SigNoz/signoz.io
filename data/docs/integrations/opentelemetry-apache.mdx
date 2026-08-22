@@ -1,0 +1,456 @@
+---
+date: 2026-07-24
+title: Monitor Apache HTTP Server with OpenTelemetry and SigNoz
+description: Collect Apache HTTP Server metrics and access and error logs in SigNoz using the OpenTelemetry Collector, then visualize them with the Apache dashboard.
+doc_type: howto
+---
+
+## Overview
+
+Monitor Apache HTTP Server in SigNoz with the OpenTelemetry Collector. You collect two signals:
+
+- **Metrics:** worker state, request throughput, traffic, and server load through the Collector `apache` receiver, which scrapes the `mod_status` endpoint.
+- **Logs:** access and error logs through the Collector file log receiver, parsed into structured fields you can query and aggregate.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+Ensure you have:
+
+- An Apache HTTP Server running version 2.4.13 or newer (required by the `apache` receiver)
+- An [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) that can reach the Apache status endpoint and read the Apache log files
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Collect Apache telemetry
+
+<Tabs entityName="signal">
+<TabItem value="metrics" label="Metrics" default>
+
+The `apache` receiver scrapes the `mod_status` endpoint and maps the server statistics to OpenTelemetry metrics.
+
+### Step 1: Enable the Apache status endpoint
+
+Enable `mod_status` and expose the status handler. On Debian and Ubuntu, enable the module:
+
+```bash
+sudo a2enmod status
+```
+
+Add the status handler to your Apache config (for example a file under `conf-available/`, or the relevant virtual host):
+
+```apache
+<Location "/server-status">
+    SetHandler server-status
+    Require local
+</Location>
+
+# Report per-request metrics such as CPU time and request duration.
+ExtendedStatus On
+```
+
+`Require local` allows scrapes from the same host only. If the Collector runs on a different host, container, or pod, replace it with `Require ip <collector-ip>`. Reload Apache to apply the change (`sudo systemctl reload apache2`), then confirm the endpoint responds:
+
+```bash
+curl "http://localhost/server-status?auto"
+```
+
+For Docker and Kubernetes, apply the same directives to the Apache image or config you ship.
+
+### Step 2: Create the Collector config file
+
+Create a file named `apache-metrics-collection-config.yaml` with the following content:
+
+```yaml:apache-metrics-collection-config.yaml defaultCollapsed
+receivers:
+  apache:
+    endpoint: "${env:APACHE_STATUS_ENDPOINT}"
+    collection_interval: 30s
+
+processors:
+  # sets service.name so Apache metrics are easy to filter in SigNoz
+  resource/apache:
+    attributes:
+      - key: service.name
+        value: apache
+        action: upsert
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 10s
+
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/apache:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    metrics/apache:
+      receivers: [apache]
+      processors: [resource/apache, batch]
+      exporters: [otlphttp/apache]
+```
+
+### Step 3: Deploy the Collector
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+Set the environment variables the config reads:
+
+```bash
+# Apache mod_status endpoint reachable from the collector
+export APACHE_STATUS_ENDPOINT="http://localhost:80/server-status?auto"
+
+# region specific SigNoz cloud ingestion endpoint
+export OTLP_DESTINATION_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+# your SigNoz ingestion key
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+Start the Collector with the config file:
+
+```bash
+otelcol-contrib --config apache-metrics-collection-config.yaml
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Add the Collector as a service in your `docker-compose.yml`, mounting the config file. Point the status endpoint at the Apache service name so the Collector reaches it over the Compose network:
+
+```yaml:docker-compose.yml
+otelcol:
+  image: otel/opentelemetry-collector-contrib:0.157.0
+  container_name: otelcol
+  volumes:
+    - ./apache-metrics-collection-config.yaml:/etc/otelcol/config.yaml:ro
+  environment:
+    - "APACHE_STATUS_ENDPOINT=http://apache:80/server-status?auto"
+    - "OTLP_DESTINATION_ENDPOINT=https://ingest.<region>.signoz.cloud:443"
+    - "SIGNOZ_INGESTION_KEY=<your-ingestion-key>"
+  command: ["--config", "/etc/otelcol/config.yaml"]
+```
+
+`apache` is the Apache service name in your `docker-compose.yml`. Start the Collector:
+
+```bash
+docker compose up -d otelcol
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+If you run the [SigNoz k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), add the `apache` receiver through a values override instead of the standalone config file from Step 2. Point the endpoint at the Apache Service DNS:
+
+```yaml:override-values.yaml
+otelDeployment:
+  config:
+    receivers:
+      apache:
+        endpoint: "http://<apache-service>.<namespace>.svc.cluster.local/server-status?auto"
+        collection_interval: 30s
+    processors:
+      resource/apache:
+        attributes:
+          - key: service.name
+            value: apache
+            action: upsert
+    service:
+      pipelines:
+        metrics/apache:
+          receivers: [apache]
+          processors: [resource/apache]
+          exporters: [otlp]
+```
+
+Apply it with Helm:
+
+```bash
+helm upgrade <release-name> signoz/k8s-infra -n <collector-namespace> --values override-values.yaml
+```
+
+Replace `<apache-service>`, `<namespace>`, `<release-name>`, and `<collector-namespace>` with your values. The chart's built-in `otlp` exporter already ships data to SigNoz, so you don't add one here.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="logs" label="Logs">
+
+The Collector file log receiver tails the Apache access and error logs and parses each line into structured fields.
+
+### Step 1: Create the Collector config file
+
+Create a file named `apache-logs-collection-config.yaml` with the following content:
+
+```yaml:apache-logs-collection-config.yaml minimap defaultCollapsed
+receivers:
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
+  filelog/apache-access:
+    include: ["${env:APACHE_ACCESS_LOG_FILE}"]
+    operators:
+      # Parse the default Apache Combined Log Format:
+      # %h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-Agent}i"
+      # 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /index.html HTTP/1.1" 200 2326 "http://example.com/" "Mozilla/5.0"
+      # See https://httpd.apache.org/docs/current/logs.html#combined
+      - type: regex_parser
+        regex: '^(?P<remote_addr>\S+) (?P<remote_logname>\S+) (?P<remote_user>\S+) \[(?P<ts>[^\]]+)\] "(?P<request_method>\S+) (?P<request_path>.+?) (?P<request_protocol>HTTP/[0-9.]+)" (?P<status>\d{3}) (?P<response_bytes>\d+|-) "(?P<http_referrer>[^"]*)" "(?P<http_user_agent>[^"]*)"$'
+        timestamp:
+          parse_from: attributes.ts
+          layout: "02/Jan/2006:15:04:05 -0700"
+          layout_type: gotime
+        severity:
+          parse_from: attributes.status
+          overwrite_text: true
+          mapping:
+            info:
+              - "2xx"
+              - "3xx"
+            warn: "4xx"
+            error: "5xx"
+      - type: remove
+        if: attributes.ts != nil
+        field: attributes.ts
+      - type: add
+        field: attributes.source
+        value: apache
+
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
+  filelog/apache-error:
+    include: ["${env:APACHE_ERROR_LOG_FILE}"]
+    operators:
+      # Parse the default Apache 2.4 error log format:
+      # [Fri Sep 09 10:42:29.902022 2011] [core:error] [pid 35708:tid 4328636416] [client 72.15.99.187] AH00124: message
+      # The [client ...] field is omitted on startup and notice lines, so it is optional here.
+      # See https://httpd.apache.org/docs/current/mod/core.html#errorlogformat
+      - type: regex_parser
+        regex: '^\[(?P<ts>[^\]]+)\] \[(?P<module>[^:\]]+):(?P<log_level>[^\]]+)\] \[pid (?P<pid>\d+)(?::tid (?P<tid>\d+))?\](?: \[client (?P<client>[^\]]+)\])? (?P<message>.*)$'
+        timestamp:
+          parse_from: attributes.ts
+          layout: "Mon Jan 02 15:04:05.000000 2006"
+          layout_type: gotime
+        severity:
+          parse_from: attributes.log_level
+          overwrite_text: true
+          mapping:
+            fatal:
+              - emerg
+              - alert
+              - crit
+            error: error
+            warn: warn
+            info:
+              - notice
+              - info
+            debug: debug
+      - type: remove
+        if: attributes.ts != nil
+        field: attributes.ts
+      - type: move
+        if: attributes.message != nil
+        from: attributes.message
+        to: body
+      - type: add
+        field: attributes.source
+        value: apache
+
+processors:
+  # sets service.name so Apache logs are easy to filter in SigNoz
+  resource/apache:
+    attributes:
+      - key: service.name
+        value: apache
+        action: upsert
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 10s
+
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp/apache:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    logs/apache:
+      receivers: [filelog/apache-access, filelog/apache-error]
+      processors: [resource/apache, batch]
+      exporters: [otlphttp/apache]
+```
+
+The parsers assume the default **Combined Log Format** for access logs and the default **Apache 2.4** error log format. If you use a custom `LogFormat` or `ErrorLogFormat`, adjust the regex in the matching receiver.
+
+### Step 2: Deploy the Collector
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+Set the environment variables the config reads:
+
+```bash
+# path of the Apache access log, must be readable by the otel collector
+# Debian/Ubuntu: /var/log/apache2/access.log   RHEL/CentOS/Fedora: /var/log/httpd/access_log
+export APACHE_ACCESS_LOG_FILE="/var/log/apache2/access.log"
+
+# path of the Apache error log, must be readable by the otel collector
+# Debian/Ubuntu: /var/log/apache2/error.log    RHEL/CentOS/Fedora: /var/log/httpd/error_log
+export APACHE_ERROR_LOG_FILE="/var/log/apache2/error.log"
+
+# region specific SigNoz cloud ingestion endpoint
+export OTLP_DESTINATION_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+# your SigNoz ingestion key
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+Start the Collector with the config file:
+
+```bash
+otelcol-contrib --config apache-logs-collection-config.yaml
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+The Collector container reads the Apache log files, so both containers must share the log directory. The official `httpd` image sends logs to stdout and stderr by default, so first configure Apache to write its access and error logs to files on a shared volume:
+
+```apache
+CustomLog /var/log/apache/access.log combined
+ErrorLog /var/log/apache/error.log
+```
+
+Mount that same volume into both the Apache and Collector services, then add the Collector to your `docker-compose.yml`:
+
+```yaml:docker-compose.yml
+otelcol:
+  image: otel/opentelemetry-collector-contrib:0.157.0
+  container_name: otelcol
+  volumes:
+    - ./apache-logs-collection-config.yaml:/etc/otelcol/config.yaml:ro
+    - apache-logs:/var/log/apache:ro
+  environment:
+    - "APACHE_ACCESS_LOG_FILE=/var/log/apache/access.log"
+    - "APACHE_ERROR_LOG_FILE=/var/log/apache/error.log"
+    - "OTLP_DESTINATION_ENDPOINT=https://ingest.<region>.signoz.cloud:443"
+    - "SIGNOZ_INGESTION_KEY=<your-ingestion-key>"
+  command: ["--config", "/etc/otelcol/config.yaml"]
+```
+
+`apache-logs` is a shared volume that your Apache service also mounts at its log directory. Start the Collector:
+
+```bash
+docker compose up -d otelcol
+```
+
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+The official Apache image writes access logs to stdout and error logs to stderr. If you run the [SigNoz k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), it already collects pod stdout and stderr, so Apache logs reach SigNoz without a file log receiver.
+
+To parse those lines into the fields shown above, add a [Logs Pipeline](https://signoz.io/docs/logs-pipelines/introduction/) in SigNoz using the same regex as the config in Step 1.
+
+If your Apache pods write logs to files instead, run the Collector as a sidecar in the Apache pod, share the log directory through an `emptyDir` volume, and use the config file from Step 1 with `APACHE_ACCESS_LOG_FILE` and `APACHE_ERROR_LOG_FILE` pointing at the mounted path.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+After you start the Collector, confirm each signal arrives in SigNoz.
+
+1. **Metrics:** Open [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) and search for metrics that start with `apache.` (for example `apache.requests` and `apache.traffic`).
+2. **Logs:** Open the **Logs** explorer and add filter **service.name = apache**.
+
+<Figure
+  src="/img/docs/integrations/apache/sample-metrics.webp"
+  alt="Apache metrics in the SigNoz Metrics Explorer"
+  caption="Apache metrics in the SigNoz Metrics Explorer"
+/>
+
+<Figure
+  src="/img/docs/integrations/apache/sample-logs.webp"
+  alt="Apache access and error logs in the SigNoz Logs explorer, filtered by service.name = apache"
+  caption="Apache logs in SigNoz, filtered by service.name = apache"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No metrics arrive
+
+- Confirm `curl "http://localhost/server-status?auto"` returns the machine-readable status page. If it returns HTML or a 404, `mod_status` is not enabled or the `/server-status` handler is not configured.
+- If the Collector runs on a different host, container, or pod, confirm `Require ip <collector-ip>` allows it and that `APACHE_STATUS_ENDPOINT` points to a reachable address.
+- Metrics such as CPU time and request duration only appear when `ExtendedStatus On` is set.
+
+### No logs arrive
+
+- Confirm the Collector user can read the log files. Apache log directories are often restricted to `root` and the `adm` group.
+- Recheck `APACHE_ACCESS_LOG_FILE` and `APACHE_ERROR_LOG_FILE` against your distribution paths (`/var/log/apache2/` on Debian/Ubuntu, `/var/log/httpd/` on RHEL/CentOS/Fedora).
+- In Docker or Kubernetes, confirm the Collector mounts the same log volume Apache writes to.
+
+### Log fields are not parsed
+
+- The parsers assume the default Combined access format and the Apache 2.4 error format. A custom `LogFormat` or `ErrorLogFormat` breaks the regex. Update the regex in the matching receiver to fit your format.
+
+### No data at all
+
+- Recheck the `OTLP_DESTINATION_ENDPOINT` region against your [SigNoz region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint). A wrong region drops data with no error.
+- Copy the `signoz-ingestion-key` value fresh from [SigNoz settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</details>
+
+<details>
+<ToggleHeading>
+## Limitations
+</ToggleHeading>
+
+- **Metrics require `mod_status`.** The `apache` receiver reads the `/server-status?auto` endpoint. Without it, no metrics are collected.
+- **Default log formats assumed.** The parsers target the default Combined access format and the Apache 2.4 error format. Custom formats need regex changes.
+- **Access log severity is derived from HTTP status.** `2xx` and `3xx` map to info, `4xx` to warn, and `5xx` to error.
+
+</details>
+
+## Next Steps
+
+- [Visualize metrics](https://signoz.io/docs/dashboards/dashboard-templates/apache-web-server/) with the built-in Apache Web Server dashboard.
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) to catch spikes in `5xx` responses or error-log entries.
+- [Parse and transform logs](https://signoz.io/docs/logs-pipelines/introduction/) further with Logs Pipelines.
+
+## Get Help
+
+<GetHelp />

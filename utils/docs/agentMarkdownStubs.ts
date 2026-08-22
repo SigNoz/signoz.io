@@ -34,6 +34,7 @@ type AgentMdxComponentPolicy = 'custom-stub' | 'reviewed-fallback'
 
 export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'Admonition',
+  'DashboardActions',
   'DocCard',
   'DocCardContainer',
   'Figure',
@@ -44,13 +45,13 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'RegionTable',
   'TabItem',
   'Tabs',
+  'CodeTab',
+  'CodeTabs',
   'ToggleHeading',
 ] as const
 export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'CHClientWithOutput',
-  'CloneRepo',
   'CommonPrerequisites',
-  'DashboardActions',
   'DSConfigIntro',
   'DSConfigOss',
   'DSSendDataEc2',
@@ -70,8 +71,6 @@ export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
   'MetricsDefinition',
   'MultiNodePart1',
   'MultiNodePart2',
-  'OtelOperatorAutoInstrumentation',
-  'OtelOperatorOTLPEndpoint',
   'PrereqsInstrument',
   'RetentionInfo',
   'SigNozCloud',
@@ -119,6 +118,10 @@ const formatLabel = (value: string): string =>
     .join(' ')
 
 const MCP_INSTALL_REGIONS = ['us', 'eu', 'in', 'us2', 'eu2', 'in2'] as const
+
+const V2_MIN_SIGNOZ_VERSION = 'v0.135.0'
+const DASHBOARD_IMPORT_HINT =
+  'Import it in SigNoz with Dashboards → + New dashboard → Import JSON (https://signoz.io/docs/dashboards/import-dashboard/).'
 
 const buildMcpInstallLink = (client: string, region: string): string | null => {
   const mcpUrl = `https://mcp.${region}.signoz.cloud/mcp`
@@ -242,6 +245,49 @@ const createKnownComponentStubs = (
       caption ? React.createElement('figcaption', null, caption) : null
     )
   },
+  DashboardActions: (props) => {
+    const v2Url =
+      getStringProp(props, 'dashboardJsonV2Url') || getStringProp(props, 'dashboardJsonUrl')
+    const v1Url = getStringProp(props, 'dashboardJsonV1Url')
+
+    if (!v2Url && !v1Url) {
+      const UnknownDashboardActions = createUnknownComponentStub('DashboardActions')
+      return React.createElement(UnknownDashboardActions, props)
+    }
+
+    const entries: Array<[string, string]> = []
+    if (v2Url) {
+      entries.push([
+        `V2 dashboard JSON (recommended, requires SigNoz ${V2_MIN_SIGNOZ_VERSION} or newer)`,
+        v2Url,
+      ])
+    }
+    if (v1Url) {
+      entries.push([
+        `V1 dashboard JSON (deprecated, only for SigNoz older than ${V2_MIN_SIGNOZ_VERSION})`,
+        v1Url,
+      ])
+    }
+
+    return React.createElement(
+      'section',
+      null,
+      React.createElement('p', null, React.createElement('strong', null, 'Dashboard JSON')),
+      React.createElement(
+        'ul',
+        null,
+        ...entries.map(([label, href]) =>
+          React.createElement(
+            'li',
+            { key: href },
+            `${label}: `,
+            React.createElement('a', { href }, href)
+          )
+        )
+      ),
+      React.createElement('p', null, DASHBOARD_IMPORT_HINT)
+    )
+  },
   DocCard: (props) => {
     const href = getStringProp(props, 'href')
     const title = getStringProp(props, 'title') || getStringProp(props, 'name')
@@ -302,6 +348,16 @@ const createKnownComponentStubs = (
   },
   Tabs: (props) => React.createElement('div', null, props.children),
   TabItem: (props) => {
+    const label = getStringProp(props, 'label')
+    return React.createElement(
+      'section',
+      null,
+      label ? React.createElement('h3', null, label) : null,
+      props.children
+    )
+  },
+  CodeTabs: (props) => React.createElement('div', null, props.children),
+  CodeTab: (props) => {
     const label = getStringProp(props, 'label')
     return React.createElement(
       'section',

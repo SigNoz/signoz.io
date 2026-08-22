@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-07-30
 title: Getting Temporal Cloud Metrics into SigNoz
 description: Collect Temporal Cloud metrics in SigNoz by configuring an OpenTelemetry Collector to scrape the Temporal Cloud OpenMetrics endpoint.
 doc_type: howto
@@ -40,7 +40,7 @@ Choose the setup that matches your environment:
 
 Add the `prometheus` receiver and SigNoz `otlp` exporter to your `otel-collector-config.yaml`. If your collector already has other receivers, append the `prometheus` block and add it to the pipeline — do not replace your existing config.
 
-```yaml:otel-collector-config.yaml
+```yaml:otel-collector-config.yaml defaultCollapsed minimap
 receivers:
   prometheus:
     config:
@@ -51,7 +51,7 @@ receivers:
                 - 'metrics.temporal.io'
           scheme: https
           metrics_path: /v1/metrics
-          scrape_interval: 60s
+          scrape_interval: 30s
           honor_timestamps: true
           authorization:
             type: Bearer
@@ -113,7 +113,7 @@ Replace `<TEMPORAL_API_KEY>` with your Temporal API key and `<SIGNOZ_INGESTION_K
 
 Apply the manifest below. Before applying, replace `<region>` in the `SIGNOZ_OTLP_ENDPOINT` env var with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 
-```yaml:collector.yaml
+```yaml:collector.yaml minimap defaultCollapsed
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -132,7 +132,7 @@ data:
                     - "metrics.temporal.io"
               scheme: https
               metrics_path: /v1/metrics
-              scrape_interval: 60s
+              scrape_interval: 30s
               honor_timestamps: true
               authorization:
                 type: Bearer
@@ -219,15 +219,37 @@ The logs should show `Everything is ready. Begin running and processing data.` w
 </TabItem>
 </Tabs>
 
-### Step 3: Reduce scrape cardinality (optional)
+### Step 3: Tune what is scraped (optional)
 
-If you have many Temporal namespaces, use query parameters on `metrics_path` to filter what is scraped:
+Query parameters on `metrics_path` control which series Temporal returns.
+
+#### Reduce cardinality
+
+If you have many Temporal namespaces, filter what is scraped:
 
 ```yaml
 metrics_path: '/v1/metrics?namespaces=<your-namespace>'
 ```
 
 You can also filter by metric name: `?metrics=temporal_cloud_v1_workflow_success_count`. See <a href="https://docs.temporal.io/cloud/metrics/openmetrics/migration-guide#high-cardinality-management" target="_blank" rel="noopener noreferrer nofollow">high-cardinality management</a> in the Temporal docs for details.
+
+#### Enable the activity type label
+
+`temporal_activity_type` is an <a href="https://docs.temporal.io/cloud/metrics/openmetrics/metrics-reference#opt-in-labels" target="_blank" rel="noopener noreferrer nofollow">opt-in label</a> that Temporal does not return by default. Request it to break activity metrics down per activity type:
+
+```yaml
+metrics_path: '/v1/metrics?labels=temporal_activity_type'
+```
+
+This matters most for activity latency. `temporal_cloud_v1_activity_start_to_close_latency_*` and `temporal_cloud_v1_activity_schedule_to_close_latency_*` carry no other breakdown dimension, so without this label they report a single namespace-wide percentile and the dashboard's activity latency panels show one unlabelled series. `temporal_task_queue` and `temporal_workflow_type` are excluded from those metrics because pre-computed percentiles cannot be re-aggregated across extra dimensions.
+
+The label is applied to every activity metric that supports it, so series count grows with the number of distinct activity types. Enable it when you need per-activity latency rather than by default.
+
+Combine parameters with `&`:
+
+```yaml
+metrics_path: '/v1/metrics?namespaces=<your-namespace>&labels=temporal_activity_type'
+```
 
 ### Step 4: Import the dashboard
 
@@ -294,6 +316,12 @@ See the <a href="https://docs.temporal.io/cloud/metrics/openmetrics/migration-gu
 - **Likely cause**: dashboard queries may reference old v0 metric names if you imported an older dashboard version.
 - **Fix**: confirm the dashboard queries use `temporal_cloud_v1_*` names. Re-download the latest dashboard JSON from the link in Step 4.
 - **Verify**: individual metric panels populate in the dashboard.
+
+### Activity latency panels show a single unlabelled series
+
+- **Likely cause**: the `temporal_activity_type` label is not enabled on the scrape. It is opt-in, so activity latency arrives as one namespace-wide percentile with no per-activity breakdown.
+- **Fix**: add `?labels=temporal_activity_type` to `metrics_path` as shown in Step 3, then restart the collector.
+- **Verify**: `curl -H "Authorization: Bearer <TEMPORAL_API_KEY>" 'https://metrics.temporal.io/v1/metrics?labels=temporal_activity_type'` returns activity metrics carrying a `temporal_activity_type` label.
 
 </details>
 

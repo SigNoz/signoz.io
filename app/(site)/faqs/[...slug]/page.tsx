@@ -1,4 +1,3 @@
-import 'css/prism.css'
 import { components } from '@/components/MDXComponents'
 import FAQLayout, { RelatedArticleProps } from '@/layouts/FAQLayout'
 import { Metadata } from 'next'
@@ -12,7 +11,7 @@ import { MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
-import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
+import { mdxOptions, generateTOC, ensureTrailingSlash } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
 import { resolveLatestDate } from '@/utils/dateUtils'
 
@@ -52,7 +51,7 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
         return {
           title: doc.title,
           publishedOn: resolveLatestDate(doc) ?? '',
-          url: `/${routePrefix}${doc.path || ''}`,
+          url: ensureTrailingSlash(`/${routePrefix}${doc.path || ''}`),
         }
       })
       .filter(Boolean) as RelatedArticleProps[]
@@ -62,7 +61,7 @@ function buildRelatedArticles(content: MDXContent): RelatedArticleProps[] {
     return content.related_faqs.map((faq: MDXContent) => ({
       title: faq.title,
       publishedOn: resolveLatestDate(faq) ?? '',
-      url: `/faqs${faq.path || ''}`,
+      url: ensureTrailingSlash(`/faqs${faq.path || ''}`),
     }))
   }
 
@@ -105,8 +104,8 @@ export async function generateMetadata(props: {
           siteName: siteMetadata.title,
           locale: 'en_US',
           type: 'article',
-          publishedTime: content?.date,
-          modifiedTime: content?.updatedAt,
+          publishedTime: new Date(resolveLatestDate(content) || Date.now()).toISOString(),
+          modifiedTime: new Date(resolveLatestDate(content) || Date.now()).toISOString(),
           url: content?.path || './',
           authors: authorNames.length > 0 ? authorNames : ['SigNoz Team'],
         },

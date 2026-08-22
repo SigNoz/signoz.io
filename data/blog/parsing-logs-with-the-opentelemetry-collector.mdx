@@ -1,6 +1,8 @@
 ---
 title: Parsing logs with the OpenTelemetry Collector
-date: 2023-08-21
+meta_title: "Parsing Logs with the OpenTelemetry Collector"
+published_date: 2023-08-21
+updated_date: 2026-07-08
 tags: [guides, OpenTelemetry]
 authors: [nicamellifera]
 description: This guide is for anyone who is getting started monitoring their application with OpenTelemetry, and is generating unstructured logs. 
@@ -24,7 +26,7 @@ With SigNoz, you get some parsing automatically to identify details like timesta
 
 ## Step 1. Send OpenTelemetry data to SigNoz
 
-If you’re not reporting data already, check out our guide on [sending data from a demo Node.js application](https://signoz.io/blog/nodejs-opensource-application-monitoring/), then come back here!
+If you’re not reporting data already, check out our guide on [instrumenting a Node.js application with OpenTelemetry](https://signoz.io/opentelemetry/nodejs/), then come back here!
 
 For the purposes of this tutorial, we’ll be running the SigNoz collector and other components locally as Docker containers, but you can just as well run on [Kubernetes](https://signoz.io/docs/install/kubernetes/) or with [Docker Swarm](https://signoz.io/docs/install/docker-swarm/).
 
@@ -64,6 +66,12 @@ It’s critical to include some batching configuration within the collector, as 
 `timeout`: Time duration after which a batch will be sent regardless of size. Note that while testing you may want to reduce this, since it’s unlikely your test data will fill up the batch size, giving you 10+ seconds of latency. I set this down to `1s`
 
 ### Filter processors for unwanted logs
+
+<KeyPointCallout>
+
+If you're looking for a dedicated guide on filtering application logs, check out this guide on [sending and filtering Python logs](https://signoz.io/blog/sending-and-filtering-python-logs-with-opentelemetry/).
+
+</KeyPointCallout>
 
 In the `receivers:` section you’ll find this rather large expression:
 

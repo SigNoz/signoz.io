@@ -140,7 +140,7 @@ export const CAPABILITIES_CARDS2: IconTitleDescriptionCardData[] = [
 ]
 
 export const VENDORS: { key: VendorKey; label: string }[] = [
-  { key: 'signoz', label: 'SigNoz' },
+  { key: 'signoz', label: 'SigNoz Cloud' },
   { key: 'langfuse', label: 'Langfuse' },
   { key: 'langsmith', label: 'LangSmith' },
   { key: 'braintrust', label: 'Braintrust' },
@@ -325,7 +325,7 @@ export const PILLARS_DATA = [
     iconText: 'COST PREDICTABILITY',
     title: 'Pay for Data Volume Ingested, Not Host Count',
     description:
-      'Companies running large GPU clusters make host-based pricing financially unsustainable. Legacy vendors charge per host and double-charge for ingestion and indexing, leading to surprise bills. We charge based on data volume ingested, not the number of nodes or containers. Set daily rate limits and ingestion quotas to prevent cost overruns.',
+      'Companies running large GPU clusters make host-based pricing financially unsustainable. Legacy vendors charge per host and double-charge for ingestion and indexing, leading to surprise bills. SigNoz Cloud charges based on data volume ingested, not the number of nodes or containers. Set daily rate limits and ingestion quotas to prevent cost overruns.',
   },
   {
     icon: <TextSearch size={14} className="text-signoz_vanilla-400" />,
@@ -345,8 +345,8 @@ export const PILLARS_DATA = [
 
 export const TRUSTED_BY_LOGOS = [
   {
-    src: '/svgs/icons/lovart.svg',
-    alt: 'Lovart',
+    src: '/svgs/icons/kernel.svg',
+    alt: 'Kernel',
   },
   {
     src: '/svgs/icons/sarvam.svg',

@@ -1,5 +1,5 @@
 ---
-date: 2026-04-26
+date: 2026-07-26
 title: Apache Druid Metrics via OpenTelemetry
 description: Send Apache Druid metrics to SigNoz via the StatsD emitter and OpenTelemetry Collector.
 doc_type: howto
@@ -26,7 +26,7 @@ Apache Druid has no native OpenTelemetry receiver. Use its built-in **StatsD emi
 
 Create `druid-metrics-collection-config.yaml` in the same directory as your `docker-compose.yml`:
 
-```yaml:druid-metrics-collection-config.yaml
+```yaml:druid-metrics-collection-config.yaml defaultCollapsed
 receivers:
   statsd:
     endpoint: 0.0.0.0:8125
@@ -108,9 +108,9 @@ docker compose up -d
 
 ### Step 1: Configure the SigNoz collector
 
-If you deploy via the [SigNoz k8s-infra Helm chart](https://signoz.io/docs/install/kubernetes/), apply a values override to enable StatsD ingestion:
+If you deploy via the [SigNoz k8s-infra Helm chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), apply a values override to enable StatsD ingestion:
 
-```yaml:override-values.yaml
+```yaml:override-values.yaml defaultCollapsed
 otelDeployment:
   config:
     receivers:

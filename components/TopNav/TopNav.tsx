@@ -10,9 +10,11 @@ import Tabs from '@/components/ResourceCenter/Tabs'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
 import { Button } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
 import ProductDropdown from './ProductDropdown'
+import UseCasesDropdown from './UseCasesDropdown'
 import ResourcesDropdown from './ResourcesDropdown'
 import { NavDropdownProvider } from './NavDropdownContext'
 import NavDropdownPanel from './NavDropdownPanel'
@@ -68,16 +70,29 @@ export default function TopNav() {
   }
 
   return (
-    <div className="fixed left-0 right-0 z-[50]">
-      <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
+    <div
+      className={cn(
+        'fixed left-0 right-0 z-[50]',
+        (mobileMenuOpen || docsSidebar.isOpen) && 'z-[1200]'
+      )}
+    >
+      <header
+        className={cn(
+          'header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100',
+          (mobileMenuOpen || docsSidebar.isOpen) && '!bg-[var(--l1-background)]'
+        )}
+      >
         <nav
-          className="mx-auto flex w-full max-w-8xl justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
+          className={cn(
+            'mx-auto flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100',
+            !isDocsBasePath && 'max-w-8xl'
+          )}
           aria-label="Global"
         >
-          <div className="flex justify-start gap-x-6">
+          <div className="flex items-center justify-start">
             <TrackingLink
               href="/"
-              className="-m-1.5 flex items-center gap-2 p-1.5"
+              className={cn('-m-1.5 flex items-center p-1.5', isDocsBasePath ? 'gap-1.5' : 'gap-2')}
               clickType="Nav Click"
               clickName="SigNoz Logo"
               clickText="SigNoz"
@@ -94,13 +109,16 @@ export default function TopNav() {
               />
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </TrackingLink>
-
             {!isLoginRoute && (
               <NavDropdownProvider>
                 <div
-                  className={`hidden items-center gap-x-3 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
+                  className={cn(
+                    'hidden items-center gap-x-3 min-[840px]:flex',
+                    isDocsBasePath ? 'ml-7' : visibility.showProduct ? 'ml-6' : ''
+                  )}
                 >
                   {visibility.showProduct && <ProductDropdown />}
+                  {visibility.showUseCases && <UseCasesDropdown />}
                   {visibility.showDocs && (
                     <TrackingLink
                       href="/docs/introduction/"
@@ -141,7 +159,9 @@ export default function TopNav() {
                 {visibility.showSignInGetStarted && (
                   <>
                     <TrackingButton
-                      className="box-border flex h-8 items-center rounded-full bg-signoz_slate-500 px-3 text-sm font-normal text-signoz_vanilla-100 no-underline outline-none hover:bg-slate-700/50 hover:text-white"
+                      variant="secondary"
+                      rounded="default"
+                      className="box-border flex h-8 items-center rounded-md bg-signoz_slate-500 px-3 text-sm font-normal text-signoz_vanilla-100 no-underline outline-none hover:bg-slate-700/50 hover:text-white"
                       clickType="Secondary CTA"
                       clickName="Sign In Button"
                       clickText="Sign In"
@@ -159,12 +179,32 @@ export default function TopNav() {
                     >
                       <Button
                         asChild
+                        variant="default"
                         rounded="full"
-                        className="start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white"
+                        className={cn(
+                          'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600',
+                          'start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white'
+                        )}
                       >
                         <span id="btn-get-started-website-navbar">
-                          Get Started - Free
-                          <ArrowRight size={14} />
+                          <span
+                            className={cn(
+                              'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
+                              '[&_svg:not(.animate-spin)]:hidden'
+                            )}
+                          >
+                            Get Started - Free
+                            <ArrowRight size={14} />
+                          </span>
+                          <span
+                            className={cn(
+                              'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
+                              '!flex !bg-signoz_robin-400'
+                            )}
+                            aria-hidden="true"
+                          >
+                            <ArrowRight size={16} strokeWidth={2.5} />
+                          </span>
                         </span>
                       </Button>
                     </TrackingLink>

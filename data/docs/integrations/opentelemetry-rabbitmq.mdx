@@ -1,0 +1,474 @@
+---
+date: 2026-07-22
+title: Monitor RabbitMQ Logs and Metrics with OpenTelemetry
+description: Collect RabbitMQ logs and metrics with the OpenTelemetry Collector, send them to SigNoz, and validate queue health in dashboards and Logs Explorer.
+doc_type: howto
+---
+
+## Overview
+
+This guide shows you how to monitor RabbitMQ with OpenTelemetry and SigNoz. The OpenTelemetry Collector reads queue metrics from the RabbitMQ Management API and collects RabbitMQ logs, then sends both signals to SigNoz over OTLP/HTTP.
+
+You collect two signals here:
+
+- **Metrics:** message counts, publish and delivery rates, acknowledgements, dropped messages, and consumer counts through the OpenTelemetry `rabbitmq` receiver.
+- **Logs:** node startup, connections, alarms, authentication failures, cluster events, and errors, collected by the OpenTelemetry Collector.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. Update the OTLP endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+Ensure you have:
+
+- A running RabbitMQ node and administrative access to it
+- An [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) that can reach the RabbitMQ Management API (for metrics) and collect RabbitMQ logs (for logs)
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Set Up Telemetry
+
+Set up each signal on its own. Pick a signal below, then the tab for where RabbitMQ runs.
+
+<Tabs entityName="signal">
+<TabItem value="metrics" label="Metrics" default>
+
+The OpenTelemetry `rabbitmq` receiver reads queue metrics from the Management API on port **15672** and exports them to SigNoz.
+
+<Admonition type="warning">
+  The `rabbitmq` receiver is beta, and its documentation declares support for RabbitMQ **3.8** and **3.9**. Test it against newer releases before you rely on it. For current production versions, consider the [Prometheus plugin path](#use-the-rabbitmq-prometheus-plugin) that RabbitMQ recommends.
+</Admonition>
+
+### Step 1: Enable the Management Plugin and create a monitoring user
+
+The receiver reads from the Management API, so enable the plugin on the RabbitMQ node:
+
+```bash
+rabbitmq-plugins enable rabbitmq_management
+```
+
+Create a dedicated monitoring user. The **monitoring** tag grants read-only access to management statistics, and the empty permission patterns (`^$`) stop the user from configuring, writing to, or reading from queues:
+
+```bash
+rabbitmqctl add_user '<monitoring-user>' '<monitoring-password>'
+rabbitmqctl set_user_tags '<monitoring-user>' monitoring
+rabbitmqctl set_permissions --vhost '<rabbitmq-vhost>' '<monitoring-user>' '^$' '^$' '^$'
+```
+
+**Verify these values:**
+
+- `<monitoring-user>`: a dedicated username, such as **otel-monitoring**
+- `<monitoring-password>`: a strong password for the monitoring user
+- `<rabbitmq-vhost>`: the virtual host to monitor, such as **/**. Repeat the permissions command for each virtual host the user must see.
+
+On a VM, run the `rabbitmqctl` commands above directly. In Docker, prefix each one with `docker exec <rabbitmq-container>`; in Kubernetes, with `kubectl exec <rabbitmq-pod> --`.
+
+<Admonition type="note">
+  Keep port **15672** off the public network. Use HTTPS with certificate verification if the Collector connects across hosts. See the RabbitMQ <a href="https://www.rabbitmq.com/docs/management#monitoring-only-user" target="_blank" rel="noopener noreferrer nofollow">monitoring-only user</a> guidance.
+</Admonition>
+
+### Step 2: Configure and run the Collector
+
+The `rabbitmq` receiver reads the monitoring password from a `RABBITMQ_PASSWORD` environment variable, so it never lives in the config file. Every environment below exports to SigNoz Cloud with the same `otlphttp` exporter, so add it once if you do not have one:
+
+```yaml:config.yaml
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      signoz-ingestion-key: "<your-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Then add the receiver, supply the password, and run the Collector. Pick your environment:
+
+<Admonition type="info">
+  These snippets belong in one Collector config file. Merge them into your existing `config.yaml`, keeping a single `receivers`, `exporters`, and `service` key with the entries combined under each.
+</Admonition>
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on VM](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
+</Admonition>
+
+RabbitMQ and the Collector share the host, so reach the Management API on **http://localhost:15672**. Add the receiver and metrics pipeline to **/etc/otelcol-contrib/config.yaml**:
+
+```yaml:/etc/otelcol-contrib/config.yaml
+receivers:
+  rabbitmq:
+    endpoint: http://localhost:15672
+    username: <monitoring-user>
+    password: ${env:RABBITMQ_PASSWORD}
+    collection_interval: 30s
+
+service:
+  pipelines:
+    metrics/rabbitmq:
+      receivers: [rabbitmq]
+      processors: [batch]
+      exporters: [otlphttp]
+```
+
+The `otelcol-contrib` systemd unit loads `/etc/otelcol-contrib/otelcol-contrib.conf` as an environment file, so supply the password there:
+
+```ini:/etc/otelcol-contrib/otelcol-contrib.conf
+RABBITMQ_PASSWORD=<monitoring-password>
+```
+
+Validate, restart, and watch the logs:
+
+```bash
+sudo /usr/bin/otelcol-contrib validate --config /etc/otelcol-contrib/config.yaml
+sudo systemctl restart otelcol-contrib
+sudo journalctl -u otelcol-contrib -f
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on Docker](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
+</Admonition>
+
+Reach RabbitMQ by its service name on the shared Docker network, such as **http://rabbitmq:15672**. Add the receiver and metrics pipeline to the config you mount into the Collector container:
+
+```yaml:config.yaml
+receivers:
+  rabbitmq:
+    endpoint: http://rabbitmq:15672
+    username: <monitoring-user>
+    password: ${env:RABBITMQ_PASSWORD}
+    collection_interval: 30s
+
+service:
+  pipelines:
+    metrics/rabbitmq:
+      receivers: [rabbitmq]
+      processors: [batch]
+      exporters: [otlphttp]
+```
+
+Pass the password to the Collector container. For production, source it from a Docker secret instead of a literal:
+
+```yaml:docker-compose.yml
+services:
+  otel-collector:
+    environment:
+      - RABBITMQ_PASSWORD=<monitoring-password>
+```
+
+Restart and watch the logs:
+
+```bash
+docker compose up -d
+docker compose logs -f
+```
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+Reach RabbitMQ by its in-cluster Service, such as **http://rabbitmq.default.svc.cluster.local:15672**. Store the password in a Secret:
+
+```bash
+kubectl create secret generic rabbitmq-monitoring -n signoz \
+  --from-literal=RABBITMQ_PASSWORD='<monitoring-password>'
+```
+
+In your `override-values.yaml` for the [SigNoz K8s Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/), add the receiver and pipeline under `otelDeployment.config`, and inject the Secret through `otelDeployment.additionalEnvs`:
+
+```yaml:override-values.yaml
+otelDeployment:
+  additionalEnvs:
+    RABBITMQ_PASSWORD:
+      valueFrom:
+        secretKeyRef:
+          name: rabbitmq-monitoring
+          key: RABBITMQ_PASSWORD
+  config:
+    receivers:
+      rabbitmq:
+        endpoint: http://rabbitmq.default.svc.cluster.local:15672
+        username: <monitoring-user>
+        password: ${env:RABBITMQ_PASSWORD}
+        collection_interval: 30s
+    service:
+      pipelines:
+        metrics/rabbitmq:
+          receivers: [rabbitmq]
+          processors: [batch]
+          exporters: [otlphttp]
+```
+
+Apply it and watch the logs:
+
+```bash
+helm upgrade --install <release-name> signoz/k8s-infra -n signoz -f override-values.yaml
+kubectl logs -n signoz <collector-pod-name> -f
+```
+
+</TabItem>
+</Tabs>
+
+<details>
+<ToggleHeading>
+
+### Use the RabbitMQ Prometheus plugin
+
+</ToggleHeading>
+
+RabbitMQ recommends Prometheus for long-term production monitoring. Use this path when you run a newer RabbitMQ version, need broader node metrics, or do not want the Collector to query the Management API.
+
+<Admonition type="warning">
+  The Prometheus plugin produces `rabbitmq_*` metric names. The prebuilt SigNoz RabbitMQ dashboard expects `rabbitmq.*` metrics from the `rabbitmq` receiver, so it will not populate without adapting its queries.
+</Admonition>
+
+Enable the plugin, which exposes metrics on port **15692**:
+
+```bash
+rabbitmq-plugins enable rabbitmq_prometheus
+curl http://<rabbitmq-host>:15692/metrics
+```
+
+Add a Prometheus receiver and a separate metrics pipeline. Use either this pipeline or `metrics/rabbitmq`, unless you intentionally want both metric sets:
+
+```yaml:config.yaml
+receivers:
+  prometheus/rabbitmq:
+    config:
+      scrape_configs:
+        - job_name: rabbitmq
+          scrape_interval: 30s
+          static_configs:
+            - targets: ["<rabbitmq-host>:15692"]
+
+service:
+  pipelines:
+    metrics/rabbitmq-prometheus:
+      receivers: [prometheus/rabbitmq]
+      processors: [batch]
+      exporters: [otlphttp]
+```
+
+The aggregated endpoint suits most deployments. Per-object metrics can create high cardinality on installations with many queues or connections. See RabbitMQ's <a href="https://www.rabbitmq.com/docs/prometheus" target="_blank" rel="noopener noreferrer nofollow">Prometheus monitoring guide</a> before enabling them.
+
+</details>
+
+</TabItem>
+<TabItem value="logs" label="Logs">
+
+How you collect RabbitMQ logs depends on where the node runs. Pick your environment:
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+If you do not already run a Collector on the RabbitMQ host, [install the OpenTelemetry Collector on VM](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) first.
+
+### Step 1: Write RabbitMQ logs as JSON
+
+RabbitMQ can emit one JSON object per log line, which the Collector parses without a custom regular expression. Add this to `rabbitmq.conf`:
+
+```ini:/etc/rabbitmq/rabbitmq.conf
+log.file.formatter = json
+```
+
+RabbitMQ applies logging changes only after a node restart. Restart it, then ask for the active log path:
+
+```bash
+sudo systemctl restart rabbitmq-server
+sudo rabbitmq-diagnostics -q log_location
+```
+
+On Debian and RPM installs, the path is commonly **/var/log/rabbitmq/rabbit@\<hostname\>.log**. Use the exact path that `rabbitmq-diagnostics` returns. If the `RABBITMQ_LOGS` environment variable is set, it takes precedence over `rabbitmq.conf`. See the RabbitMQ <a href="https://www.rabbitmq.com/docs/logging" target="_blank" rel="noopener noreferrer nofollow">logging guide</a> for details.
+
+### Step 2: Configure the filelog receiver
+
+Add the receiver and a logs pipeline. It tails only new entries, parses RabbitMQ's timestamp and severity, and sets **service.name** to **rabbitmq** for filtering in SigNoz:
+
+```yaml:config.yaml defaultCollapsed minimap
+receivers:
+  # On Collector v0.149.0 and newer, use "file_log" to avoid a deprecation warning.
+  filelog/rabbitmq:
+    include: [<rabbitmq-log-path>]
+    start_at: end
+    include_file_path: true
+    operators:
+      - type: json_parser
+        parse_from: body
+        parse_to: attributes
+        timestamp:
+          parse_from: attributes.time
+          layout_type: gotime
+          layout: "2006-01-02 15:04:05.999999999Z07:00"
+        severity:
+          parse_from: attributes.level
+          mapping:
+            debug: debug
+            info: info
+            warn: warning
+            error: error
+            fatal: critical
+      - type: move
+        if: attributes.msg != nil
+        from: attributes.msg
+        to: body
+      - type: add
+        field: resource["service.name"]
+        value: rabbitmq
+
+service:
+  pipelines:
+    logs/rabbitmq:
+      receivers: [filelog/rabbitmq]
+      processors: [batch]
+      exporters: [otlphttp]
+```
+
+Set `<rabbitmq-log-path>` to the path from Step 1. If you do not have an `otlphttp` exporter yet, add the one shown in the **Metrics** tab.
+
+### Step 3: Grant log file access and restart
+
+Confirm the Collector service account can read the log file:
+
+```bash
+sudo -u otelcol-contrib test -r <rabbitmq-log-path>
+```
+
+A successful check produces no output and exits with status **0**. If it fails, grant the **otelcol-contrib** user read access through the file's group or an ACL. Do not make RabbitMQ logs world-readable, since they can contain node and connection details. Then validate and restart:
+
+```bash
+sudo /usr/bin/otelcol-contrib validate --config /etc/otelcol-contrib/config.yaml
+sudo systemctl restart otelcol-contrib
+```
+
+<Admonition type="info" title="RabbitMQ logs only to journald?" defaultCollapsed="true">
+  If your node logs only to the systemd journal instead of a file, skip the `filelog/rabbitmq` receiver. Use the [collect systemd logs guide](https://signoz.io/docs/logs-management/send-logs/collect-systemd-logs/) and filter the receiver to the `rabbitmq-server.service` unit.
+</Admonition>
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+RabbitMQ containers log to stdout, so collect the container output instead of tailing a file. Follow the [collect Docker container logs guide](https://signoz.io/docs/userguide/collect_docker_logs/) to add the Collector, then add a `resource` processor so the logs carry **service.name = rabbitmq** (the attribute the [Validate](#validate) step filters on):
+
+```yaml:config.yaml
+processors:
+  resource/rabbitmq:
+    attributes:
+      - key: service.name
+        value: rabbitmq
+        action: upsert
+```
+
+Add `resource/rabbitmq` to the `processors` list of the pipeline that handles the RabbitMQ container logs.
+
+<Admonition type="warning">
+  Use one log path per RabbitMQ instance. If you collect container stdout, do not also add the `filelog/rabbitmq` receiver, or logs arrive twice.
+</Admonition>
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+The SigNoz `k8s-infra` chart [collects pod logs](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/) by default, so RabbitMQ pod logs reach SigNoz with no extra receiver. Filter them in SigNoz by the RabbitMQ pod or namespace. Do not add the VM `filelog/rabbitmq` receiver when pod log collection is already active.
+
+</TabItem>
+</Tabs>
+
+<Admonition type="info">
+  RabbitMQ does not log individual message routing, delivery, acknowledgement, or unroutable-message events by design. Use RabbitMQ metrics to investigate message flow and rates. Logs stay useful for errors, alarms, lifecycle events, and authentication or cluster problems.
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+### Metrics
+
+1. In SigNoz, open **Metrics**.
+2. Search for `rabbitmq.message.current`.
+3. Run a query and group by `rabbitmq.queue.name` to confirm that queue-level series arrive.
+
+<Figure
+  src="/img/docs/integrations/rabbitmq/rabbitmq-metrics.webp"
+  alt="RabbitMQ metrics in the SigNoz Metrics Explorer"
+  caption="RabbitMQ metrics in SigNoz, filtered by service.name = rabbitmq"
+/>
+
+### Logs
+
+1. In SigNoz, open **Logs**.
+2. Filter for **service.name = rabbitmq** (VM and Docker). On Kubernetes, pod logs arrive without that attribute, so filter by the RabbitMQ pod or namespace instead (**k8s.pod.name** or **k8s.namespace.name**).
+3. Restart a test node or open and close a client connection to generate a fresh entry.
+
+<Figure
+  src="/img/docs/integrations/rabbitmq/rabbitmq-logs.webp"
+  alt="RabbitMQ logs in the SigNoz Logs Explorer"
+  caption="RabbitMQ logs in SigNoz, filtered by service.name = rabbitmq"
+/>
+
+<details>
+<ToggleHeading>
+
+## Data Collected
+
+</ToggleHeading>
+
+The `rabbitmq` receiver enables queue-level metrics by default:
+
+| Metric                          | What it measures                        |
+| ------------------------------- | --------------------------------------- |
+| `rabbitmq.consumer.count`       | Consumers attached to a queue           |
+| `rabbitmq.message.current`      | Messages currently in a queue           |
+| `rabbitmq.message.published`    | Messages published to a queue           |
+| `rabbitmq.message.delivered`    | Messages delivered to consumers         |
+| `rabbitmq.message.acknowledged` | Messages acknowledged by consumers      |
+| `rabbitmq.message.dropped`      | Unroutable messages dropped by RabbitMQ |
+
+See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/rabbitmqreceiver/documentation.md" target="_blank" rel="noopener noreferrer nofollow">RabbitMQ receiver metric reference</a> for types, units, and attributes. Node and exchange metrics are available but disabled by default.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### RabbitMQ metrics do not appear
+
+- Confirm `rabbitmq_management` is enabled with `rabbitmq-plugins list`.
+- Verify that the Collector reaches `http://<rabbitmq-host>:15672/api/overview`.
+- Check that the monitoring user has the **monitoring** tag and permissions for every virtual host you expect to see.
+- Inspect Collector errors with `sudo journalctl -u otelcol-contrib -f`.
+- If you use the prebuilt dashboard, confirm your metric names start with `rabbitmq.`. Prometheus plugin metrics use different names.
+
+### RabbitMQ logs do not appear
+
+- Run `sudo rabbitmq-diagnostics -q log_location` again and compare it with the receiver's `include` path.
+- Verify file access with `sudo -u otelcol-contrib test -r <rabbitmq-log-path>`.
+- Confirm that new lines are JSON objects after RabbitMQ restarts.
+- Generate a new event, since `start_at: end` does not ingest lines written before the Collector starts.
+- Check for parser and permission errors with `sudo journalctl -u otelcol-contrib -f`.
+
+### Logs appear twice
+
+Use one log collection path per RabbitMQ instance. Disable `filelog/rabbitmq` if Docker or Kubernetes log collection already reads the container's stdout.
+
+</details>
+
+## Next Steps
+
+- Import the [RabbitMQ dashboard](https://signoz.io/docs/dashboards/dashboard-templates/rabbitmq/).
+- Create [metric-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) for queue depth, dropped messages, or consumer availability.
+- Create [log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) for RabbitMQ alarms and errors.
+
+## Get Help
+
+<GetHelp />

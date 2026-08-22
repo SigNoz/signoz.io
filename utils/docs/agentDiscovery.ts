@@ -1,5 +1,5 @@
 import { getDocsSideNav } from '@/utils/docsSideNav'
-import type { NavItem as DocsSideNavItem } from '@/components/DocsSidebar/types'
+import { fetchAllDocsIndex } from '@/utils/cachedData'
 
 type NavItem =
   | {
@@ -22,7 +22,18 @@ export type DocsRouteTreeItem = {
   children: DocsRouteTreeItem[]
 }
 
+export type LlmStarterLink = {
+  label: string
+  route: string
+  description?: string
+}
+
 const DOCS_ROOT = '/docs/introduction'
+
+// Single source for the docs introduction meta description; the introduction
+// page metadata and /llms.txt both read it (issue #1173 requires this string).
+export const INTRO_DESCRIPTION =
+  'Learn about SigNoz, an open-source observability platform that helps you monitor your applications with distributed tracing, metrics, and logs.'
 
 const LLM_STARTER_ROUTE_MATCHERS: Array<(route: string) => boolean> = [
   (route) => route === DOCS_ROOT,
@@ -30,6 +41,9 @@ const LLM_STARTER_ROUTE_MATCHERS: Array<(route: string) => boolean> = [
   (route) => /^\/docs\/cloud(?:\/|$)/.test(route),
   (route) => /^\/docs\/opentelemetry-collection-agents\/get-started(?:\/|$)/.test(route),
   (route) => route === '/docs/llm-observability',
+  (route) => route === '/docs/ai/agent-skills',
+  (route) => route === '/docs/ai/signoz-mcp-server',
+  (route) => route === '/docs/ai/use-cases',
   (route) => route === '/docs/aws-monitoring/overview',
   (route) => route === '/docs/gcp-monitoring',
   (route) => route === '/docs/migration/migrate-to-signoz',
@@ -97,10 +111,9 @@ const buildRouteLabelLookup = (items: NavItem[], lookup: Map<string, string>) =>
   })
 }
 
-async function getRouteLabelLookup(): Promise<Map<string, string>> {
-  const docsSideNav = await getDocsSideNav()
+function getRouteLabelLookup(docsSideNav: NavItem[]): Map<string, string> {
   const lookup = new Map<string, string>()
-  buildRouteLabelLookup(docsSideNav as NavItem[], lookup)
+  buildRouteLabelLookup(docsSideNav, lookup)
   lookup.set(DOCS_ROOT, 'Get Started')
   return lookup
 }
@@ -154,9 +167,8 @@ const flattenTree = (nodes: DocsRouteTreeItem[], depth: number, output: DocsRout
 }
 
 export async function getDocsRouteTree(): Promise<DocsRouteTreeItem[]> {
-  const docsSideNav = await getDocsSideNav()
-  const lookup = await getRouteLabelLookup()
-  return toTree(docsSideNav as NavItem[], lookup)
+  const docsSideNav = (await getDocsSideNav()) as NavItem[]
+  return toTree(docsSideNav, getRouteLabelLookup(docsSideNav))
 }
 
 export async function getDocsRouteList(): Promise<DocsRouteListItem[]> {
@@ -171,11 +183,36 @@ export async function getDocsRouteList(): Promise<DocsRouteListItem[]> {
   })
 }
 
-export async function getLlmStarterLinks(
-  limit = 24,
-): Promise<Array<Pick<DocsRouteListItem, 'label' | 'route'>>> {
+const normalizeDescription = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') return undefined
+  const collapsed = value.replace(/\s+/g, ' ').trim()
+  return collapsed.length > 0 ? collapsed : undefined
+}
+
+async function getDocsDescriptionLookup(): Promise<Map<string, string>> {
+  const lookup = new Map<string, string>()
+
+  try {
+    const docs = await fetchAllDocsIndex()
+    docs.forEach((doc) => {
+      if (typeof doc.slug !== 'string' || doc.slug.length === 0) return
+      const description = normalizeDescription(doc.description) ?? normalizeDescription(doc.summary)
+      if (description) {
+        lookup.set(`/docs/${doc.slug}`, description)
+      }
+    })
+  } catch (error) {
+    console.warn('Docs description lookup failed, emitting links without descriptions:', error)
+  }
+
+  lookup.set(DOCS_ROOT, INTRO_DESCRIPTION)
+  return lookup
+}
+
+export async function getLlmStarterLinks(limit = 24): Promise<LlmStarterLink[]> {
   const routes = await getDocsRouteList()
-  const starters: Array<Pick<DocsRouteListItem, 'label' | 'route'>> = []
+  const descriptions = await getDocsDescriptionLookup()
+  const starters: LlmStarterLink[] = []
   const seen = new Set<string>()
   const sortedRoutes = [...routes].sort(
     (a, b) => a.depth - b.depth || a.route.length - b.route.length
@@ -184,7 +221,11 @@ export async function getLlmStarterLinks(
   const addStarter = (item: Pick<DocsRouteListItem, 'label' | 'route'> | undefined) => {
     if (!item || starters.length >= limit || seen.has(item.route)) return
     seen.add(item.route)
-    starters.push({ label: item.label, route: item.route })
+    starters.push({
+      label: item.label,
+      route: item.route,
+      description: descriptions.get(item.route),
+    })
   }
 
   LLM_STARTER_ROUTE_MATCHERS.forEach((matcher) => {

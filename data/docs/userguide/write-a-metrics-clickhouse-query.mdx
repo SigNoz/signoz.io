@@ -26,7 +26,7 @@ There are four main tables in the database. One is for storing the samples/measu
 The schemas are not final. We might change it in the future. 
 </Admonition>
 
-```
+```sql
 CREATE TABLE signoz_metrics.distributed_samples_v4
 (
     `env` LowCardinality(String) DEFAULT 'default',
@@ -107,7 +107,7 @@ Explanation of the columns:
 
 There are three time series tables, namely `time_series_v4`, `time_series_v4_6hrs`, `time_series_v4_1day`. The time series tables are used to store the label set that is used to identify the metric. See the description of the column `unix_milli` for the explanation of the granularity of the time series tables.
 
-```
+```sql minimap defaultCollapsed
 CREATE TABLE signoz_metrics.distributed_time_series_v4
 (
     `env` LowCardinality(String) DEFAULT 'default',
@@ -249,7 +249,7 @@ The following queries are used to generate the graphs for the frontend service R
 
 #### Request rate for a service
 
-```sql
+```sql defaultCollapsed minimap
 SELECT
     ts,
     sum(per_series_value) AS value
@@ -290,7 +290,7 @@ ORDER BY ts ASC
 
 This is the query for the error rate for a service. The query is similar to the request rate query. The only difference is that we are filtering the samples based on the status code. Then, we divide the error samples by the total samples to get the error rate.
 
-```sql
+```sql minimap defaultCollapsed
 SELECT
     A.ts AS ts,
     (A.value * 100) / B.value AS value
@@ -372,7 +372,7 @@ INNER JOIN
 
 This is the query for the 99th percentile latency for a service. The query is similar to the request rate query. We are using the histogramQuantile function to get the 99th percentile latency. The histogramQuantile function is used to get the quantile value from a histogram. The histogram is represented as two arrays. One array contains the buckets and the other array contains the values. The histogramQuantile function takes the two arrays and the quantile value as input and returns the quantile value. The bucket bounds and values are obtained by taking the rate of change for each bucket.
 
-```sql
+```sql minimap defaultCollapsed
 SELECT
     ts,
     histogramQuantile(arrayMap(x -> toFloat64(x), groupArray(le)), groupArray(value), 0.99) AS value
@@ -436,7 +436,7 @@ SigNoz supports using variables in queries. This allows you to create a single d
 
 The variable `{{.service_name}}` is used to get the service name from the variable. The variable is replaced with the service name when the query is executed.
 
-```sql
+```sql defaultCollapsed minimap
 SELECT
     ts,
     sum(per_series_value) AS value

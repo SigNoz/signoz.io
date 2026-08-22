@@ -1,0 +1,254 @@
+---
+date: 2026-08-03
+title: DSPy Observability & Monitoring with OpenTelemetry
+description: Set up DSPy observability with OpenTelemetry and SigNoz. Trace module, chain, and tool calls, model requests, latency, and errors from your DSPy programs.
+doc_type: howto
+---
+
+## What is DSPy Observability?
+
+DSPy observability gives you real-time visibility into your DSPy programs by collecting traces using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. The <a href="https://pypi.org/project/openinference-instrumentation-dspy/" target="_blank" rel="noopener noreferrer nofollow">OpenInference DSPy instrumentation</a> automatically captures every DSPy module call (`Predict`, `ChainOfThought`, `ReAct`, custom `Module` pipelines) and the underlying language model request as spans, tagged with DSPy-native attributes such as `openinference.span.kind` (CHAIN, LLM, TOOL), `llm.model_name`, and `llm.provider`.
+
+With full DSPy monitoring in SigNoz, you can trace every program run end to end, break down module and tool activity, compare model usage and latency, set alerts on latency and errors, and continuously improve the reliability of your DSPy applications.
+
+<YouTube id="pPnIX6p5xT8" mute="false" />
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- Python 3.9 or later
+- A DSPy program and a configured language model provider (for example, an Anthropic or OpenAI API key)
+
+## Monitoring DSPy with OpenTelemetry
+
+DSPy does not ship with OpenTelemetry built in, so you add the <a href="https://pypi.org/project/openinference-instrumentation-dspy/" target="_blank" rel="noopener noreferrer nofollow">OpenInference DSPy instrumentation</a> and export traces to SigNoz over OTLP/HTTP. You can wire this up two ways. For more details, refer to the <a href="https://dspy.ai/" target="_blank" rel="noopener noreferrer nofollow">DSPy documentation</a>.
+
+<Tabs entityName="instrumentation">
+<TabItem value="No Code" label="No Code (Recommended)" default>
+
+No-code auto-instrumentation is recommended for quick setup with minimal code changes. It is ideal when you want observability up and running without modifying your application code, using the OpenInference DSPy instrumentor loaded automatically at startup.
+
+**Step 1:** Install the necessary packages in your Python environment.
+
+```bash
+pip install \
+  dspy \
+  opentelemetry-distro \
+  opentelemetry-exporter-otlp \
+  openinference-instrumentation-dspy
+```
+
+**Step 2:** Add automatic instrumentation.
+
+```bash
+opentelemetry-bootstrap --action=install
+```
+
+**Step 3:** Run an example.
+
+```python
+import dspy
+
+dspy.configure(lm=dspy.LM("anthropic/claude-sonnet-5"))
+
+predict = dspy.Predict("question -> answer")
+result = predict(question="What is OpenTelemetry in one sentence?")
+print(result.answer)
+```
+
+<Admonition type="info" title="Set your provider API key">
+Before running this code, ensure that you have set the API key for your model provider (for example, `ANTHROPIC_API_KEY`).
+</Admonition>
+
+**Step 4:** Run your application with auto-instrumentation.
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>" \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
+OTEL_TRACES_EXPORTER=otlp \
+opentelemetry-instrument <your_run_command>
+```
+
+**Verify these values:**
+
+- `<service_name>`: The name your DSPy service appears under in SigNoz.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<your_run_command>`: The command you use to run your application, for example `python main.py`.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+</TabItem>
+
+<TabItem value="Code" label="Code">
+
+Code-based instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
+
+**Step 1:** Install the necessary packages in your Python environment.
+
+```bash
+pip install \
+  dspy \
+  openinference-instrumentation-dspy \
+  opentelemetry-sdk \
+  opentelemetry-exporter-otlp-proto-http
+```
+
+**Step 2:** Configure the OpenTelemetry exporter.
+
+Create a `telemetry.py` module that sets up the tracer provider, wires the OTLP/HTTP exporter to SigNoz, and turns on the DSPy instrumentation:
+
+```python defaultCollapsed
+from openinference.instrumentation.dspy import DSPyInstrumentor
+from opentelemetry import trace as trace_api
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk import trace as trace_sdk
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+
+def setup_tracing() -> None:
+    resource = Resource.create({"service.name": "<service_name>"})
+    tracer_provider = trace_sdk.TracerProvider(resource=resource)
+
+    exporter = OTLPSpanExporter(
+        endpoint="https://ingest.<region>.signoz.cloud:443/v1/traces",
+        headers={"signoz-ingestion-key": "<your-ingestion-key>"},
+    )
+    tracer_provider.add_span_processor(BatchSpanProcessor(exporter))
+    trace_api.set_tracer_provider(tracer_provider)
+
+    # Turn on OpenInference DSPy auto-instrumentation.
+    DSPyInstrumentor().instrument(tracer_provider=tracer_provider)
+```
+
+**Verify these values:**
+
+- `<service_name>`: The name your DSPy service appears under in SigNoz.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+**Step 3:** Instrument your DSPy program.
+
+Call `setup_tracing()` once, before you configure DSPy and run your modules. Every DSPy module call and each underlying model request is then captured automatically:
+
+```python
+import dspy
+
+from telemetry import setup_tracing
+
+setup_tracing()
+
+dspy.configure(lm=dspy.LM("anthropic/claude-sonnet-5"))
+
+predict = dspy.Predict("question -> answer")
+result = predict(question="What is OpenTelemetry in one sentence?")
+print(result.answer)
+```
+
+<Admonition type="info" title="Set your provider API key">
+Before running this code, ensure that you have set the API key for your model provider (for example, `ANTHROPIC_API_KEY`).
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+Each run emits a trace whose spans carry `openinference.span.kind` (CHAIN, LLM, TOOL) along with `llm.model_name` and `llm.provider` on the model spans. OpenTelemetry batches spans before sending, so allow a few seconds after a run for data to appear in SigNoz.
+
+## View DSPy Traces in SigNoz
+
+Once configured, your DSPy program automatically emits traces for every run.
+
+Traces are available in SigNoz under the Traces tab:
+
+<Figure
+  src="/img/docs/llm/dspy/dspy-traces.webp"
+  alt="DSPy Trace View"
+  caption="DSPy Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes. CHAIN spans represent DSPy module and pipeline steps, LLM spans carry `llm.model_name` and `llm.provider`, and TOOL spans capture ReAct tool calls.
+
+<Figure
+  src="/img/docs/llm/dspy/dspy-detailed-traces.webp"
+  alt="DSPy Detailed Trace View"
+  caption="DSPy Detailed Trace View"
+/>
+
+## DSPy Observability Dashboard
+
+You can also check out our custom [DSPy dashboard](https://signoz.io/docs/dashboards/dashboard-templates/dspy-dashboard/) which provides specialized visualizations for monitoring your DSPy programs. The dashboard includes pre-built charts for module, chain, and tool activity, per-model usage, latency percentiles, and errors, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/dspy/dspy-dashboard.webp"
+  alt="DSPy Dashboard"
+  caption="DSPy Dashboard Template"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting DSPy Observability
+</ToggleHeading>
+
+### No traces in SigNoz
+
+- Confirm your program actually ran a DSPy module. Setting up tracing alone emits nothing.
+- Verify `setup_tracing()` is called before `dspy.configure(...)` and before any module runs.
+- Check that the region in the OTLP endpoint matches your SigNoz account.
+- OpenTelemetry batches data before sending, so wait 10-30 seconds after a run.
+
+### Verify the instrumentor
+
+Make sure `DSPyInstrumentor().instrument(...)` runs against the same tracer provider you registered with `trace_api.set_tracer_provider(...)`. If you build multiple providers, spans can be dropped silently.
+
+### Auth errors (401 / 403)
+
+Re-check the ingestion key in the `signoz-ingestion-key` header. It must be the exact key from your SigNoz Ingestion Settings, with no extra spaces or quotes.
+
+### Endpoint issues
+
+Keep the `https://` scheme and `:443` port on the endpoint, and the `/v1/traces` path for OTLP/HTTP. Do not send OTLP/HTTP traffic to the gRPC port.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** - Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** - Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** - The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** - Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Related integrations
+
+Trace the rest of your LLM application and retrieval stack:
+
+- [Vercel AI SDK observability with OpenTelemetry](https://signoz.io/docs/vercel-ai-sdk-observability/) - trace generateText, streamText, and tool calls inside Next.js
+- [LangChain and LangGraph observability with OpenTelemetry](https://signoz.io/docs/langchain-observability/) - trace chains, agents, graph nodes, and tool calls
+- [LlamaIndex observability with OpenTelemetry](https://signoz.io/docs/llamaindex-observability/) - trace RAG queries, retrievers, and index operations
+- [Langflow observability with OpenTelemetry](https://signoz.io/docs/langflow-observability/) - trace Langflow flows, components, and model calls
+- [Monitor Inkeep with OpenTelemetry](https://signoz.io/docs/inkeep-monitoring/) - trace Inkeep assistant queries and the retrieval behind them
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

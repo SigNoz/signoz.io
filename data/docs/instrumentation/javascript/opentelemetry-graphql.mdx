@@ -1,5 +1,5 @@
 ---
-date: 2026-05-18
+date: 2026-07-18
 title: GraphQL OpenTelemetry Instrumentation Guide for Node.js
 description: Instrument your Node.js GraphQL server with OpenTelemetry and send traces to SigNoz. Works with Apollo Server, graphql-http, and graphql-js.
 doc_type: howto
@@ -246,7 +246,7 @@ npm install --save @opentelemetry/instrumentation-graphql
 <Tabs entityName="language">
 <TabItem value="javascript" label="JavaScript" default>
 
-```js:tracing.js
+```js:tracing.js defaultCollapsed minimap
 'use strict'
 const { NodeSDK } = require('@opentelemetry/sdk-node');
 const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
@@ -285,7 +285,7 @@ sdk.start();
 </TabItem>
 <TabItem value="typescript" label="TypeScript">
 
-```ts:tracing.ts
+```ts:tracing.ts defaultCollapsed minimap
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql';
@@ -374,6 +374,20 @@ export OTEL_LOG_LEVEL=debug
 ```
 
 Look for `query`, `graphql.parse`, `graphql.validate`, or `graphql.resolve` in the span output.
+
+### Why does node -r throw ERR_REQUIRE_ESM?
+
+If your project's package.json sets **type to module**, Node treats every JavaScript file as an ES module. The `-r`/`--require` flag only supports CommonJS, so preloading `tracing.js` this way throws **ERR_REQUIRE_ESM**.
+
+Renaming `tracing.js` to `tracing.cjs` stops the crash, but it doesn't fix instrumentation: `require-in-the-middle` (what auto-instrumentation relies on) can't patch modules your app loads through import, so spans for those modules stay missing even though the process starts.
+
+For a module-type project, write the tracing file in ESM instead (see the TypeScript tab above for the equivalent import syntax, saved as `tracing.mjs`) and load it with the OpenTelemetry ESM hook:
+
+```bash
+node --experimental-loader=@opentelemetry/instrumentation/hook.mjs --import ./tracing.mjs server.js
+```
+
+See the <a href="https://github.com/open-telemetry/opentelemetry-js/blob/main/doc/esm-support.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry ESM support guide</a> for the `--require`/.cjs variant needed on **Node 16.x** and **18.1.0-18.18.x**.
 
 ### Service not appearing in SigNoz
 

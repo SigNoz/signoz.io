@@ -1,4 +1,5 @@
 @import '@signozhq/design-tokens/dist/style.css';
+@import '@signozhq/design-tokens/dist/themes/signoz-tokens.css';
 
 @tailwind base;
 @tailwind components;
@@ -162,7 +163,8 @@
         height: 90vw;
       }
 
-      background: radial-gradient(
+      background:
+        radial-gradient(
           circle,
           transparent 48%,
           rgba(239, 160, 112, 0.07) 48.18%,
@@ -210,24 +212,55 @@ input:-webkit-autofill:focus {
   overflow: auto hidden;
 }
 
-.content-header > a:first-child {
+.content-header {
+  display: flex;
+  align-items: center;
+}
+
+.content-header > a:last-child {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  padding: 4px;
+  background: var(--l2-background);
+  border: 1px solid var(--l2-border);
+  border-radius: 2px;
   text-decoration: none;
-}
-
-.content-header-link {
+  vertical-align: middle;
+  line-height: 1;
   opacity: 0;
-  margin-left: -24px;
-  padding-right: 4px;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    background-color 0.15s ease;
+  color: var(--l2-foreground);
 }
 
-.content-header:hover .content-header-link,
-.content-header-link:hover {
+.content-header:hover > a:last-child {
   opacity: 1;
 }
 
+.content-header > a:last-child:hover {
+  background: var(--l2-background-hover);
+  color: var(--l2-foreground-hover);
+}
+
+.content-header .linkicon {
+  width: 14px;
+  height: 14px;
+}
+
+.content-header-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
 .linkicon {
-  display: inline-block;
-  vertical-align: middle;
+  display: block;
+  width: 1em;
+  height: 1em;
 }
 
 /* TOC depth indentation (data-level set by TOC renderers) */
@@ -238,24 +271,17 @@ a[data-level='4'] {
   padding-left: 32px;
 }
 
-/* Hide content-header-link inside toggle summaries */
-.toggle-summary .content-header-link {
+/* Hide the heading anchor inside toggle summaries (the button chrome would render as an empty square) */
+.toggle-summary .content-header > a:last-child {
   display: none !important;
 }
 
-/* Position content-header-link inside toggle headings */
-.toggle-heading .content-header-link {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+/* Keep toggle headings inline so they sit on the same line as the summary marker */
+.toggle-summary .content-header {
   display: inline-flex;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.toggle-heading:hover .content-header-link {
-  opacity: 1;
+  vertical-align: middle;
+  /* Space between the disclosure arrow and the heading (padding, not margin — ToggleHeading sets inline margin: 0) */
+  padding-left: 0.5rem;
 }
 
 pre.p-0 {
@@ -405,11 +431,13 @@ pre.p-0 {
   --ifm-font-color-base: var(--ifm-color-content);
   --ifm-font-color-base-inverse: var(--ifm-color-content-inverse);
   --ifm-font-color-secondary: var(--ifm-color-content-secondary);
-  --ifm-font-family-base: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans,
-    sans-serif, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+  --ifm-font-family-base:
+    system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif,
+    BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol';
-  --ifm-font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+  --ifm-font-family-monospace:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
   --ifm-font-size-base: 100%;
 
   --ifm-font-weight-light: 300;
@@ -1424,20 +1452,14 @@ html[data-theme='dark'] {
 }
 
 .primary-gradient {
-  background: linear-gradient(
-      273.58deg,
-      rgba(221, 80, 49, 0.9) -2.13%,
-      rgba(255, 108, 75, 0.9) 110.24%
-    ),
+  background:
+    linear-gradient(273.58deg, rgba(221, 80, 49, 0.9) -2.13%, rgba(255, 108, 75, 0.9) 110.24%),
     linear-gradient(93.31deg, #ffb4a4 0.38%, #ff5e3a 100.69%);
   transition: all 0.5s ease-out;
 }
 .primary-gradient:hover {
-  background: linear-gradient(
-      273.58deg,
-      rgba(255, 108, 75, 0.9) -2.13%,
-      rgba(221, 80, 49, 0.9) 110.24%
-    ),
+  background:
+    linear-gradient(273.58deg, rgba(255, 108, 75, 0.9) -2.13%, rgba(221, 80, 49, 0.9) 110.24%),
     linear-gradient(93.31deg, #ff5e3a 0.38%, #ffb4a4 100.69%);
 }
 a.no-underline {

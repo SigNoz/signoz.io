@@ -1,9 +1,11 @@
 ---
-title: Understanding Flame Graphs for Visualizing Distributed Tracing
-date: 2024-01-24
+title: "Understanding Flame Graphs for Visualizing Distributed Tracing"
+meta_title: "Understanding Flame Graphs for Distributed Tracing"
+published_date: "2024-01-24"
+updated_date: "2026-07-06"
 tags: [Distributed Tracing]
 authors: [priyansh]
-description: Imagine you want to debug a slow web service. What would you need? Well, you might want to use a tool (called flamegraphs) to see which functions in your code, or even in other services, are causing this slowdown. This way, you can focus your optimization efforts where they'll have the most...
+description: "Flame graphs explained: how to read them, what they reveal about CPU and latency, and how continuous profiling with OpenTelemetry generates them."
 image: /img/blog/2023/10/flamegraphs-cover.jpeg
 hide_table_of_contents: false
 keywords: [distributed tracing,signoz,observability,flamegraphs]
@@ -22,6 +24,12 @@ Flamegraphs, a brainchild of Brendan Gregg, has emerged as an important visualiz
 <NextImage src="/img/blog/2023/10/flamegraphs-cover.webp" alt="Cover Image" width={1200} height={675} priority />
 
 ## What is Flamegraph?
+
+<KeyPointCallout title="Evolving standards">
+
+On standards, flame graphs are increasingly fed by OpenTelemetry: in March 2026 the OpenTelemetry Profiles signal entered public Alpha, establishing continuous profiling as the fourth signal alongside traces, metrics, and logs. Built on the pprof format and collected by an eBPF profiler that runs as an [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) receiver, [OTLP](https://signoz.io/blog/what-is-otlp/) profiles render as flame graphs, and because samples can carry a trace and span ID, you can jump from a slow span straight to the flame graph for that exact time window.
+
+</KeyPointCallout>
 
 A Flamegraph is a visualization of hierarchical data created by Brendan Gregg, primarily used for performance profiling analysis of software applications by representing telemetry data of service latency, error causing those latencies, and pinpointing the service causing error.
 
@@ -181,6 +189,12 @@ The following illustration shows the Span Details page:
 ## Getting started with SigNoz
 
 <GetStartedSigNoz />
+
+<KeyPointCallout title="To go deeper">
+
+To better understand the concepts: if you work in Java, the [Java application profiling](https://signoz.io/guides/java-application-profiling/) guide walks through capturing profiles that render as flame graphs. To understand the trace data behind these visualizations, start with the fundamentals of [distributed tracing](https://signoz.io/blog/distributed-tracing/) and how it fits into the broader landscape of [APM tools](https://signoz.io/blog/open-source-apm-tools/), then dig into [OpenTelemetry spans](https://signoz.io/blog/opentelemetry-spans/) as the building blocks of each trace. For richer analysis, see how [tracing funnels](https://signoz.io/blog/tracing-funnels-observability-distributed-systems/) map multi-step user journeys and how root and entry spans power [trace analytics](https://signoz.io/blog/deeper-trace-analytics-root-and-entry-spans/).
+
+</KeyPointCallout>
 
 ---
 

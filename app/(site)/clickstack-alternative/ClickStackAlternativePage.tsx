@@ -8,13 +8,12 @@ import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/Featur
 import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
 import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
 import IconTitleDescriptionCardGrid from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
-import ComparisonTable from '@/shared/components/molecules/FeaturePages/ComparisonTable'
+import ComparisonGrid from './ComparisonGrid'
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import CustomerStoriesSection from '@/shared/components/molecules/FeaturePages/CustomerStoriesSection'
 import {
   CLICKSTACK_BILLING_CARDS,
-  VENDORS,
-  CLICKSTACK_COMPARISON_TABLE_ROWS,
+  COMPARISON_GRID_DATA,
   DASHBOARD_HELP_YOU_INVESTIGATE_CARDS,
   ALERTING_ABOVE_HISTORY_CARDS,
   ALERTING_BELOW_HISTORY_CARDS,
@@ -61,9 +60,9 @@ const Header: React.FC = () => {
       title={'ClickStack/HyperDX Alternative'}
       description={
         <>
-          SigNoz gives you interactive dashboards, anomaly detection-based alerting, and PromQL{' '}
-          <br className="hidden md:block" /> support. You're billed on how much data you ingest, not
-          how often you query it.
+          SigNoz Cloud gives you interactive dashboards, anomaly detection-based alerting, and
+          PromQL <br className="hidden md:block" /> support. You're billed on how much data you
+          ingest, not how often you query it.
         </>
       }
       buttons={headerButtons}
@@ -78,21 +77,17 @@ const QuickEvaluation: React.FC = () => {
   return (
     <SectionLayout
       variant="full-width"
-      className="relative mx-auto overflow-hidden border-b border-dashed border-signoz_slate-400"
+      className="relative mx-auto border-b border-dashed border-signoz_slate-400"
     >
       <div className="relative flex flex-col gap-6 pt-32 md:py-20">
-        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-          <div className="flex flex-col items-center gap-12 text-2xl leading-[3.25rem]">
+        <div className="mx-auto flex w-full flex-col items-center text-center">
+          <div className="flex w-full flex-col items-center gap-12 text-2xl leading-[3.25rem]">
             <h2 className="my-6 text-center text-4xl font-semibold text-signoz_sakura-100">
               A Quick Evaluation
             </h2>
-            <SectionLayout variant="no-border" className="flex items-center justify-center">
-              <ComparisonTable
-                vendors={VENDORS}
-                rows={CLICKSTACK_COMPARISON_TABLE_ROWS}
-                className="[&_td]:text-center [&_td_span]:justify-center [&_th]:text-center"
-              />
-            </SectionLayout>
+            <div className="w-full max-w-5xl">
+              <ComparisonGrid data={COMPARISON_GRID_DATA} />
+            </div>
           </div>
         </div>
       </div>
@@ -111,8 +106,8 @@ const CostComparison: React.FC = () => {
           </h4>
           <div className="text-sm text-signoz_vanilla-400">
             ClickStack bills across 4 separate dimensions, only two of which have published rates.
-            SigNoz charges $0.30/GB for logs and traces, $0.10 per million metric samples. Querying
-            is free.
+            SigNoz Cloud charges $0.30/GB for logs and traces, $0.10 per million metric samples.
+            Querying is free.
           </div>
         </div>
         <div>
@@ -164,9 +159,9 @@ const CostComparison: React.FC = () => {
 const DashboardsThatHelpYouInvestigate: React.FC = () => {
   return (
     <section className="relative mx-auto max-w-8xl overflow-hidden">
-      <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 py-16 text-center md:py-20">
+      <div className="relative mx-auto flex flex-col items-center gap-6 py-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex max-w-4xl flex-col items-center gap-4">
             <h2 className="text-center text-4xl font-semibold text-signoz_sakura-100">
               Dashboards That Help You Investigate
             </h2>
@@ -198,9 +193,9 @@ const DashboardsThatHelpYouInvestigate: React.FC = () => {
 const AlertingThatTellsYouWhatMatters: React.FC = () => {
   return (
     <section className="relative mx-auto max-w-8xl overflow-hidden">
-      <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 text-center">
-        <div className="flex flex-col items-center gap-14 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
-          <div className="flex flex-col items-center gap-4">
+      <div className="relative mx-auto flex flex-col items-center gap-6 text-center">
+        <div className="flex flex-col items-center gap-20 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
+          <div className="flex max-w-4xl flex-col items-center gap-4">
             <h2 className="text-center text-4xl font-semibold text-signoz_sakura-100">
               Alerting That Tells You What Matters
             </h2>
@@ -276,7 +271,7 @@ const BetterChoiceBanner: React.FC = () => {
         title={
           <>
             ClickStack or HyperDX? <br />
-            Either way, SigNoz is the better choice.
+            Either way, SigNoz Cloud is the better choice.
           </>
         }
         buttons={betterChoiceButtons}
@@ -293,8 +288,8 @@ const QueryYourData: React.FC = () => {
           Query Your Data, Any Way You Want
         </h2>
         <p className="mb-8 text-center leading-relaxed text-signoz_vanilla-100">
-          SigNoz supports PromQL, a visual query builder, and SQL across logs, traces, and metrics.{' '}
-          <br className="hidden md:block" />
+          SigNoz Cloud supports PromQL, a visual query builder, and SQL across logs, traces, and
+          metrics. <br className="hidden md:block" />
           ClickStack supports Lucene search and SQL only.
         </p>
       </div>
@@ -338,8 +333,8 @@ const ClickStackAlternativePage: React.FC = () => {
         sectionDescription={
           <>
             <p>
-              SigNoz eliminates query costs, dashboard fees, and API charges. Pay only for data
-              volume ingested.
+              SigNoz Cloud eliminates query costs, dashboard fees, and API charges. Pay only for
+              data volume ingested.
             </p>
             <p>
               Use the calculator below to estimate costs, then track actual usage with{' '}

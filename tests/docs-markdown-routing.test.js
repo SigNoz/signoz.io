@@ -4,9 +4,11 @@ const { loadTsModule } = require('./helpers/loadTsModule')
 
 const {
   shouldRewriteDocsToMarkdown,
+  hasDocsMarkdownExtension,
   normalizeDocsSlugFromPathname,
   buildDocsMarkdownRewritePath,
   resolveDocsMarkdownSlug,
+  slugFromParams,
 } = loadTsModule('utils/docs/markdownRouting.ts')
 
 test('shouldRewriteDocsToMarkdown rewrites docs paths when markdown is preferred', async () => {
@@ -24,6 +26,37 @@ test('shouldRewriteDocsToMarkdown excludes sitemap and internal markdown routes'
   assert.equal(shouldRewriteDocsToMarkdown('/docs/sitemap.md/', true), false)
   assert.equal(shouldRewriteDocsToMarkdown('/api/docs-markdown', true), false)
   assert.equal(shouldRewriteDocsToMarkdown('/api/docs-markdown/introduction', true), false)
+})
+
+test('shouldRewriteDocsToMarkdown rewrites .md-suffixed docs paths without the Accept header', async () => {
+  assert.equal(shouldRewriteDocsToMarkdown('/docs/introduction.md', false), true)
+  assert.equal(shouldRewriteDocsToMarkdown('/docs/metrics-management/overview.md', false), true)
+  assert.equal(shouldRewriteDocsToMarkdown('/docs/introduction.md/', false), true)
+})
+
+test('shouldRewriteDocsToMarkdown still excludes the markdown sitemap on the .md path', async () => {
+  assert.equal(shouldRewriteDocsToMarkdown('/docs/sitemap.md', false), false)
+  assert.equal(shouldRewriteDocsToMarkdown('/docs/sitemap.md/', false), false)
+})
+
+test('hasDocsMarkdownExtension detects .md-suffixed docs paths', async () => {
+  assert.equal(hasDocsMarkdownExtension('/docs/introduction.md'), true)
+  assert.equal(hasDocsMarkdownExtension('/docs/foo/bar.md/'), true)
+  assert.equal(hasDocsMarkdownExtension('/docs/introduction'), false)
+  assert.equal(hasDocsMarkdownExtension('/blog/post.md'), false)
+})
+
+test('normalizeDocsSlugFromPathname strips a trailing .md extension', async () => {
+  assert.equal(normalizeDocsSlugFromPathname('/docs/introduction.md'), 'introduction')
+  assert.equal(normalizeDocsSlugFromPathname('/docs/foo/bar.md/'), 'foo/bar')
+})
+
+test('buildDocsMarkdownRewritePath maps .md-suffixed paths to the internal route', async () => {
+  assert.equal(
+    buildDocsMarkdownRewritePath('/docs/introduction.md'),
+    '/api/docs-markdown/introduction'
+  )
+  assert.equal(buildDocsMarkdownRewritePath('/docs/foo/bar.md/'), '/api/docs-markdown/foo/bar')
 })
 
 test('shouldRewriteDocsToMarkdown does not rewrite non-docs paths', async () => {
@@ -55,4 +88,13 @@ test('resolveDocsMarkdownSlug resolves slug from route segments', async () => {
     'metrics-management/overview'
   )
   assert.equal(resolveDocsMarkdownSlug(['logs%2Fmanagement']), 'logs/management')
+})
+
+test('slugFromParams decodes catch-all segments without defaulting', async () => {
+  assert.equal(slugFromParams([]), '')
+  assert.equal(slugFromParams(['ai', 'signoz-mcp-server']), 'ai/signoz-mcp-server')
+  assert.equal(slugFromParams(['ai%2Fsignoz-mcp-server']), 'ai/signoz-mcp-server')
+  assert.equal(slugFromParams(['install', 'docker']), 'install/docker')
+  // Malformed percent-encoding should not throw
+  assert.equal(slugFromParams(['foo%zz']), 'foo%zz')
 })

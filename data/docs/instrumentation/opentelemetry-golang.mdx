@@ -1,5 +1,5 @@
 ---
-date: 2026-06-17
+date: 2026-07-27
 title: Go OpenTelemetry Instrumentation Guide
 description: Learn how to instrument your Go application with the OpenTelemetry Go SDK and send traces to SigNoz Cloud or self-hosted for distributed tracing.
 doc_type: howto
@@ -168,7 +168,7 @@ go get \
 
 Create a file named `tracing.go` in your project:
 
-```go:tracing.go
+```go:tracing.go minimap defaultCollapsed
 package main
 
 import (
@@ -223,29 +223,44 @@ func initTracer(ctx context.Context) (func(context.Context) error, error) {
 
 Here's a complete example using net/http with automatic instrumentation:
 
-```go:main.go
+```go:main.go minimap defaultCollapsed
 package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 func main() {
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer cancel()
+	// Keep log.Fatal out of run() so that run()'s deferred calls still execute.
+	if err := run(); err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func run() (err error) {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
 
 	shutdown, err := initTracer(ctx)
 	if err != nil {
-		log.Fatalf("Failed to initialize tracer: %v", err)
+		return err
 	}
-	defer shutdown(ctx)
+	// Shut down with a fresh context. ctx is already cancelled once the signal
+	// arrives, and a cancelled context aborts the final span flush.
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		err = errors.Join(err, shutdown(shutdownCtx))
+	}()
 
 	mux := http.NewServeMux()
 
@@ -256,8 +271,24 @@ func main() {
 	// Wrap with otelhttp middleware for automatic instrumentation
 	handler := otelhttp.NewHandler(mux, "my-service")
 
+	srv := &http.Server{Addr: ":8080", Handler: handler}
+
+	srvErr := make(chan error, 1)
+	go func() {
+		srvErr <- srv.ListenAndServe()
+	}()
+
 	log.Println("Server starting on :8080")
-	log.Fatal(http.ListenAndServe(":8080", handler))
+
+	select {
+	case err := <-srvErr:
+		return err
+	case <-ctx.Done():
+		stop()
+	}
+
+	// ListenAndServe returns ErrServerClosed once Shutdown is called.
+	return srv.Shutdown(context.Background())
 }
 ```
 
@@ -284,7 +315,7 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
 
         ### Configure GORM with tracing
 
-        ```go
+        ```go defaultCollapsed
         import (
         	"gorm.io/driver/postgres"
         	"gorm.io/gorm"
@@ -429,7 +460,7 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
 
         ### Instrument Redis client
 
-        ```go
+        ```go defaultCollapsed
         import (
         	"context"
         	"github.com/redis/go-redis/v9"
@@ -480,19 +511,20 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
 
         Full working example using standard net/http:
 
-        ```go
+        ```go minimap defaultCollapsed
         package main
 
         import (
         	"context"
+        	"errors"
         	"fmt"
         	"log"
         	"net/http"
         	"os"
         	"os/signal"
+        	"time"
 
         	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-        	"go.opentelemetry.io/otel"
         	"go.opentelemetry.io/otel/attribute"
         	"go.opentelemetry.io/otel/trace"
         )
@@ -504,14 +536,27 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         }
 
         func main() {
-        	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-        	defer cancel()
+        	// Keep log.Fatal out of run() so that run()'s deferred calls still execute.
+        	if err := run(); err != nil {
+        		log.Fatalln(err)
+        	}
+        }
+
+        func run() (err error) {
+        	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+        	defer stop()
 
         	shutdown, err := initTracer(ctx)
         	if err != nil {
-        		log.Fatal(err)
+        		return err
         	}
-        	defer shutdown(ctx)
+        	// Shut down with a fresh context. ctx is already cancelled once the signal
+        	// arrives, and a cancelled context aborts the final span flush.
+        	defer func() {
+        		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        		defer cancel()
+        		err = errors.Join(err, shutdown(shutdownCtx))
+        	}()
 
         	mux := http.NewServeMux()
 
@@ -529,13 +574,33 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         	handler := otelhttp.NewHandler(mux, "net-http-server")
 
         	log.Println("Server starting on :8080")
-        	log.Fatal(http.ListenAndServe(":8080", handler))
+        	return serve(ctx, stop, &http.Server{Addr: ":8080", Handler: handler})
+        }
+
+        // serve runs srv until it fails or ctx is cancelled, then shuts it down.
+        func serve(ctx context.Context, stop context.CancelFunc, srv *http.Server) error {
+        	srvErr := make(chan error, 1)
+        	go func() {
+        		srvErr <- srv.ListenAndServe()
+        	}()
+
+        	select {
+        	case err := <-srvErr:
+        		return err
+        	case <-ctx.Done():
+        		stop()
+        	}
+
+        	// ListenAndServe returns ErrServerClosed once Shutdown is called.
+        	return srv.Shutdown(context.Background())
         }
         ```
 
         ### Adding manual spans
 
         Create custom child spans to trace specific operations within your handlers:
+
+        Add `go.opentelemetry.io/otel` to your imports to use `otel.Tracer`.
 
         ```go
         mux.HandleFunc("/manual", func(w http.ResponseWriter, r *http.Request) {
@@ -574,18 +639,20 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
 
         ### Complete example
 
-        ```go
+        ```go minimap defaultCollapsed
         package main
 
         import (
         	"context"
+        	"errors"
         	"log"
+        	"net/http"
         	"os"
         	"os/signal"
+        	"time"
 
         	"github.com/gin-gonic/gin"
         	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-        	"go.opentelemetry.io/otel"
         	"go.opentelemetry.io/otel/attribute"
         	"go.opentelemetry.io/otel/trace"
         )
@@ -597,14 +664,27 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         }
 
         func main() {
-        	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-        	defer cancel()
+        	// Keep log.Fatal out of run() so that run()'s deferred calls still execute.
+        	if err := run(); err != nil {
+        		log.Fatalln(err)
+        	}
+        }
+
+        func run() (err error) {
+        	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+        	defer stop()
 
         	shutdown, err := initTracer(ctx)
         	if err != nil {
-        		log.Fatal(err)
+        		return err
         	}
-        	defer shutdown(ctx)
+        	// Shut down with a fresh context. ctx is already cancelled once the signal
+        	// arrives, and a cancelled context aborts the final span flush.
+        	defer func() {
+        		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        		defer cancel()
+        		err = errors.Join(err, shutdown(shutdownCtx))
+        	}()
 
         	r := gin.Default()
 
@@ -623,13 +703,31 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         	})
 
         	log.Println("Server starting on :8080")
-        	log.Fatal(r.Run(":8080"))
+        	// Use http.Server rather than r.Run so the server can be shut down cleanly.
+        	srv := &http.Server{Addr: ":8080", Handler: r}
+
+        	srvErr := make(chan error, 1)
+        	go func() {
+        		srvErr <- srv.ListenAndServe()
+        	}()
+
+        	select {
+        	case err := <-srvErr:
+        		return err
+        	case <-ctx.Done():
+        		stop()
+        	}
+
+        	// ListenAndServe returns ErrServerClosed once Shutdown is called.
+        	return srv.Shutdown(context.Background())
         }
         ```
 
         ### Adding manual child spans
 
         Create additional spans to trace specific operations within your handlers:
+
+        Add `go.opentelemetry.io/otel` to your imports to use `otel.Tracer`.
 
         ```go
         r.GET("/process", func(c *gin.Context) {
@@ -663,25 +761,26 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
 
         ```bash
         go get github.com/labstack/echo/v4
-        go get go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/v4/otelecho
+        go get go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho
         ```
 
         ### Complete example
 
-        ```go
+        ```go minimap defaultCollapsed
         package main
 
         import (
         	"context"
+        	"errors"
         	"log"
         	"net/http"
         	"os"
         	"os/signal"
+        	"time"
 
         	"github.com/labstack/echo/v4"
         	"github.com/labstack/echo/v4/middleware"
-        	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/v4/otelecho"
-        	"go.opentelemetry.io/otel"
+        	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
         	"go.opentelemetry.io/otel/attribute"
         	"go.opentelemetry.io/otel/trace"
         )
@@ -693,14 +792,27 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         }
 
         func main() {
-        	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-        	defer cancel()
+        	// Keep log.Fatal out of run() so that run()'s deferred calls still execute.
+        	if err := run(); err != nil {
+        		log.Fatalln(err)
+        	}
+        }
+
+        func run() (err error) {
+        	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+        	defer stop()
 
         	shutdown, err := initTracer(ctx)
         	if err != nil {
-        		log.Fatal(err)
+        		return err
         	}
-        	defer shutdown(ctx)
+        	// Shut down with a fresh context. ctx is already cancelled once the signal
+        	// arrives, and a cancelled context aborts the final span flush.
+        	defer func() {
+        		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        		defer cancel()
+        		err = errors.Join(err, shutdown(shutdownCtx))
+        	}()
 
         	e := echo.New()
 
@@ -720,13 +832,29 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         	})
 
         	log.Println("Server starting on :8080")
-        	log.Fatal(e.Start(":8080"))
+        	srvErr := make(chan error, 1)
+        	go func() {
+        		srvErr <- e.Start(":8080")
+        	}()
+
+        	select {
+        	case err := <-srvErr:
+        		return err
+        	case <-ctx.Done():
+        		stop()
+        	}
+
+        	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        	defer cancel()
+        	return e.Shutdown(shutdownCtx)
         }
         ```
 
         ### Adding manual child spans
 
         Create additional spans to trace specific operations within your handlers:
+
+        Add `go.opentelemetry.io/otel` to your imports to use `otel.Tracer`.
 
         ```go
         e.GET("/process", func(c echo.Context) error {
@@ -748,7 +876,7 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         Tested with:
         - Go 1.25.1
         - OpenTelemetry Go SDK v1.38.0
-        - go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/v4/otelecho v0.63.0
+        - go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.63.0
         ```
 
             </TabItem>
@@ -765,18 +893,19 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
 
         ### Complete example
 
-        ```go
+        ```go minimap defaultCollapsed
         package main
 
         import (
         	"context"
+        	"errors"
         	"log"
         	"os"
         	"os/signal"
+        	"time"
 
         	fiberotel "github.com/gofiber/contrib/v3/otel"
         	"github.com/gofiber/fiber/v3"
-        	"go.opentelemetry.io/otel"
         	"go.opentelemetry.io/otel/attribute"
         	"go.opentelemetry.io/otel/trace"
         )
@@ -788,14 +917,27 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         }
 
         func main() {
-        	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-        	defer cancel()
+        	// Keep log.Fatal out of run() so that run()'s deferred calls still execute.
+        	if err := run(); err != nil {
+        		log.Fatalln(err)
+        	}
+        }
+
+        func run() (err error) {
+        	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+        	defer stop()
 
         	shutdown, err := initTracer(ctx)
         	if err != nil {
-        		log.Fatal(err)
+        		return err
         	}
-        	defer shutdown(ctx)
+        	// Shut down with a fresh context. ctx is already cancelled once the signal
+        	// arrives, and a cancelled context aborts the final span flush.
+        	defer func() {
+        		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        		defer cancel()
+        		err = errors.Join(err, shutdown(shutdownCtx))
+        	}()
 
         	app := fiber.New()
 
@@ -813,13 +955,29 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         	})
 
         	log.Println("Server starting on :8080")
-        	log.Fatal(app.Listen(":8080"))
+        	srvErr := make(chan error, 1)
+        	go func() {
+        		srvErr <- app.Listen(":8080")
+        	}()
+
+        	select {
+        	case err := <-srvErr:
+        		return err
+        	case <-ctx.Done():
+        		stop()
+        	}
+
+        	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        	defer cancel()
+        	return app.ShutdownWithContext(shutdownCtx)
         }
         ```
 
         ### Adding manual child spans
 
         Create additional spans to trace specific operations within your handlers:
+
+        Add `go.opentelemetry.io/otel` to your imports to use `otel.Tracer`.
 
         ```go
         app.Get("/process", func(c fiber.Ctx) error {
@@ -859,20 +1017,21 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
 
         ### Complete example
 
-        ```go
+        ```go minimap defaultCollapsed
         package main
 
         import (
         	"context"
+        	"errors"
         	"log"
         	"net/http"
         	"os"
         	"os/signal"
+        	"time"
 
         	"github.com/go-chi/chi/v5"
         	"github.com/go-chi/chi/v5/middleware"
         	"github.com/riandyrn/otelchi"
-        	"go.opentelemetry.io/otel"
         	"go.opentelemetry.io/otel/attribute"
         	"go.opentelemetry.io/otel/trace"
         )
@@ -884,14 +1043,27 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         }
 
         func main() {
-        	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-        	defer cancel()
+        	// Keep log.Fatal out of run() so that run()'s deferred calls still execute.
+        	if err := run(); err != nil {
+        		log.Fatalln(err)
+        	}
+        }
+
+        func run() (err error) {
+        	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+        	defer stop()
 
         	shutdown, err := initTracer(ctx)
         	if err != nil {
-        		log.Fatal(err)
+        		return err
         	}
-        	defer shutdown(ctx)
+        	// Shut down with a fresh context. ctx is already cancelled once the signal
+        	// arrives, and a cancelled context aborts the final span flush.
+        	defer func() {
+        		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        		defer cancel()
+        		err = errors.Join(err, shutdown(shutdownCtx))
+        	}()
 
         	r := chi.NewRouter()
 
@@ -913,13 +1085,30 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         	})
 
         	log.Println("Server starting on :8080")
-        	log.Fatal(http.ListenAndServe(":8080", r))
+        	srv := &http.Server{Addr: ":8080", Handler: r}
+
+        	srvErr := make(chan error, 1)
+        	go func() {
+        		srvErr <- srv.ListenAndServe()
+        	}()
+
+        	select {
+        	case err := <-srvErr:
+        		return err
+        	case <-ctx.Done():
+        		stop()
+        	}
+
+        	// ListenAndServe returns ErrServerClosed once Shutdown is called.
+        	return srv.Shutdown(context.Background())
         }
         ```
 
         ### Adding manual child spans
 
         Create additional spans to trace specific operations within your handlers:
+
+        Add `go.opentelemetry.io/otel` to your imports to use `otel.Tracer`.
 
         ```go
         r.Get("/process", func(w http.ResponseWriter, r *http.Request) {
@@ -959,19 +1148,20 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
 
         ### Complete example
 
-        ```go
+        ```go minimap defaultCollapsed
         package main
 
         import (
         	"context"
+        	"errors"
         	"log"
         	"net/http"
         	"os"
         	"os/signal"
+        	"time"
 
         	"github.com/gorilla/mux"
         	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
-        	"go.opentelemetry.io/otel"
         	"go.opentelemetry.io/otel/attribute"
         	"go.opentelemetry.io/otel/trace"
         )
@@ -983,14 +1173,27 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         }
 
         func main() {
-        	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-        	defer cancel()
+        	// Keep log.Fatal out of run() so that run()'s deferred calls still execute.
+        	if err := run(); err != nil {
+        		log.Fatalln(err)
+        	}
+        }
+
+        func run() (err error) {
+        	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+        	defer stop()
 
         	shutdown, err := initTracer(ctx)
         	if err != nil {
-        		log.Fatal(err)
+        		return err
         	}
-        	defer shutdown(ctx)
+        	// Shut down with a fresh context. ctx is already cancelled once the signal
+        	// arrives, and a cancelled context aborts the final span flush.
+        	defer func() {
+        		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        		defer cancel()
+        		err = errors.Join(err, shutdown(shutdownCtx))
+        	}()
 
         	r := mux.NewRouter()
 
@@ -1008,13 +1211,30 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         	})
 
         	log.Println("Server starting on :8080")
-        	log.Fatal(http.ListenAndServe(":8080", r))
+        	srv := &http.Server{Addr: ":8080", Handler: r}
+
+        	srvErr := make(chan error, 1)
+        	go func() {
+        		srvErr <- srv.ListenAndServe()
+        	}()
+
+        	select {
+        	case err := <-srvErr:
+        		return err
+        	case <-ctx.Done():
+        		stop()
+        	}
+
+        	// ListenAndServe returns ErrServerClosed once Shutdown is called.
+        	return srv.Shutdown(context.Background())
         }
         ```
 
         ### Adding manual child spans
 
         Create additional spans to trace specific operations within your handlers:
+
+        Add `go.opentelemetry.io/otel` to your imports to use `otel.Tracer`.
 
         ```go
         r.HandleFunc("/process", func(w http.ResponseWriter, r *http.Request) {
@@ -1059,7 +1279,7 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
 
         ### Add server interceptors
 
-        ```go
+        ```go defaultCollapsed
         import (
         	"google.golang.org/grpc"
         	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -1105,7 +1325,7 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
 
         ### Add client interceptors
 
-        ```go
+        ```go defaultCollapsed
         import (
         	"context"
         	"google.golang.org/grpc"
@@ -1142,6 +1362,8 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         </Tabs>
     </TabItem>
 </Tabs>
+
+For libraries not listed here, see the <a href="https://opentelemetry.io/ecosystem/registry/?component=instrumentation&language=go" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry registry</a> for the full list of Go instrumentation packages.
 
 ## Validate
 

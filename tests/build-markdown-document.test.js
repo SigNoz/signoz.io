@@ -2,16 +2,40 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
-const { buildMarkdownDocument, MORE_DOCS_POINTER } = loadTsModule(
+const { buildMarkdownDocument, MORE_DOCS_POINTER, LLMS_TXT_DIRECTIVE } = loadTsModule(
   'utils/docs/buildMarkdownDocument.ts'
 )
 
-test('buildMarkdownDocument renders title-only markdown', () => {
+test('buildMarkdownDocument renders title-only markdown with the llms.txt directive', () => {
   const markdown = buildMarkdownDocument({
     title: 'Docs Title',
   })
 
-  assert.equal(markdown, '# Docs Title')
+  assert.equal(markdown, `# Docs Title\n\n${LLMS_TXT_DIRECTIVE}`)
+})
+
+test('LLMS_TXT_DIRECTIVE matches the required Agent Score directive', () => {
+  assert.equal(
+    LLMS_TXT_DIRECTIVE,
+    '> For the complete documentation index, see [llms.txt](https://signoz.io/llms.txt). Markdown versions are also available by appending `.md` to documentation URLs.'
+  )
+})
+
+test('buildMarkdownDocument emits the directive once, right after title and description', () => {
+  const markdown = buildMarkdownDocument({
+    title: 'Docs Title',
+    description: 'Doc description.',
+    tags: ['logs'],
+    bodyMarkdown: 'Body content.',
+    footerLines: [MORE_DOCS_POINTER],
+  })
+
+  const escaped = LLMS_TXT_DIRECTIVE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  assert.equal((markdown.match(new RegExp(escaped, 'g')) || []).length, 1)
+  assert.equal(
+    markdown.startsWith(`# Docs Title\n\nDoc description.\n\n${LLMS_TXT_DIRECTIVE}\n\nTags:`),
+    true
+  )
 })
 
 test('buildMarkdownDocument renders tags without definitions by default', () => {

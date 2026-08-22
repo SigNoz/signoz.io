@@ -5,7 +5,7 @@ import { MonitorDown, Shovel } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
 import { Card } from '@/components/ui/Card'
-import { Badge } from '@signozhq/badge'
+import { Badge } from '@signozhq/ui/badge'
 import Image from 'next/image'
 import {
   CARDS,
@@ -252,8 +252,8 @@ const DistributedTracing: React.FC = () => {
 
         <CarouselCards
           cards={CORRELATION_CAROUSEL_DATA}
-          buttonLink="/opentelemetry/correlating-traces-logs-metrics-nodejs/"
-          buttonText="Read Blog"
+          buttonLink="/docs/traces-management/guides/correlate-traces-and-logs/"
+          buttonText="Read Documentation"
         />
         <Divider />
         <VisualQueryBuilder />

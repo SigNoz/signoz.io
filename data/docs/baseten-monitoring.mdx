@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-08-03
 title: Baseten Monitoring & Observability with OpenTelemetry
 description: Setup Baseten monitoring with OpenTelemetry and SigNoz. Track traces, logs, and metrics for your Baseten LLM applications and model usage.
 doc_type: howto
@@ -10,6 +10,8 @@ doc_type: howto
 This guide walks you through setting up monitoring and observability for Baseten using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and exporting traces, logs, and metrics to SigNoz. With this integration, you can observe and track various metrics for your Baseten applications and LLM usage.
 
 Monitoring Baseten in your AI applications with telemetry ensures full observability across your AI and LLM workflows. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+
+<YouTube id="MmnHJwScu9o" mute="false" />
 
 ## Prerequisites
 
@@ -62,7 +64,7 @@ This sets the minimum log level for the root logger to DEBUG, which ensures that
 
 ### Step 4: Create an example Baseten application
 
-```python:main.py
+```python:main.py defaultCollapsed
 from openai import OpenAI
 import os
 import logging
@@ -177,7 +179,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ### Step 3: Set up Metrics
 
-```python
+```python defaultCollapsed
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
@@ -218,7 +220,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ### Step 4: Set up Logs
 
-```python
+```python defaultCollapsed
 import logging
 from opentelemetry.sdk.resources import Resource
 from opentelemetry._logs import set_logger_provider
@@ -265,7 +267,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
    Ensure you have completed the steps above (traces, logs, and metrics configuration) before running this code. All OpenTelemetry instrumentation must be initialized first.
 </Admonition>
 
-```python:main.py
+```python:main.py defaultCollapsed
 from openai import OpenAI
 import os
 import logging
@@ -410,9 +412,14 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 </details>
 
-Additional resources:
-- Set up [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
-- Learn more about [querying traces](https://signoz.io/docs/userguide/traces/)
-- Explore [log correlation](https://signoz.io/docs/userguide/logs_query_builder/)
+## Related integrations
 
+Instrument the rest of your self-hosted inference stack:
 
+- [Monitor Open WebUI with OpenTelemetry](https://signoz.io/docs/open-webui-monitoring/) - trace chat requests, database queries, and model token usage
+- [Monitor Ollama with OpenTelemetry](https://signoz.io/docs/ollama-monitoring/) - track local model inference latency, tokens, and resource usage
+- [Hugging Face observability with OpenTelemetry](https://signoz.io/docs/huggingface-observability/) - trace inference API calls and local pipeline runs
+- [Monitor Haystack pipelines with OpenTelemetry](https://signoz.io/docs/haystack-monitoring/) - trace RAG pipelines, retrievers, and generator nodes
+- [LangChain and LangGraph observability with OpenTelemetry](https://signoz.io/docs/langchain-observability/) - trace chains, agents, graph nodes, and tool calls
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

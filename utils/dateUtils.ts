@@ -16,13 +16,14 @@
  * Setting `updated_date` without `published_date` is forbidden.
  *
  * Display:
- *   "Published on:" → published_date (null for legacy `date`-only articles)
- *   "Last Updated:" → updated_date, or `date` for legacy articles (null when only published_date)
+ *   "Last Updated:" → latest date (updated_date → published_date → date)
  *
- * SEO / sorting:
- *   datePublished:  published_date → date → publishedAt → updatedAt → createdAt
- *   dateModified:   updated_date → published_date → date → publishedAt → updatedAt → createdAt
- *   sort/RSS:       updated_date → published_date → date → publishedAt → updatedAt → createdAt
+ * SEO / sorting — the site consumes all fields as ONE effective date:
+ *   datePublished = dateModified = sort/RSS:
+ *     updated_date → published_date → date → publishedAt → updatedAt → createdAt
+ *
+ * WARNING — do NOT reintroduce a separate first-publish date in SEO metadata.
+ * Context: https://github.com/SigNoz/growth-pod/issues/1244
  */
 
 type RawDateFields = {
@@ -66,18 +67,6 @@ export function formatDisplayDate(dateStr: string | undefined | null): string | 
     : null
 }
 
-/**
- * Get formatted display dates from **already-transformed** content.
- *
- * Transforms (`deriveDates`) set `updated_date` to the correct value
- * (including the legacy `date` fallback), so no secondary fallback is needed.
- */
-export function getFormattedDates(content: RawDateFields) {
-  const publishedDate = formatDisplayDate(content.published_date)
-  const updatedDate = formatDisplayDate(content.updated_date)
-  return { publishedDate, updatedDate }
-}
-
 type CMSDateFields = RawDateFields & {
   publishedAt?: string | null
   updatedAt?: string | null
@@ -85,7 +74,9 @@ type CMSDateFields = RawDateFields & {
 }
 
 /**
- * Resolve the most-recent date for sorting, RSS `<pubDate>`, and sitemap `lastModified`.
+ * Resolve the single effective date used everywhere: SEO metadata
+ * (`datePublished` and `dateModified`), visible "Last Updated" bylines,
+ * sorting, RSS `<pubDate>`, and sitemap `lastModified`.
  *
  * Prefers `updated_date` so that recently-updated content sorts first.
  * Falls through CMS timestamps (`publishedAt`, `updatedAt`, `createdAt`)
@@ -94,28 +85,6 @@ type CMSDateFields = RawDateFields & {
 export function resolveLatestDate(content: CMSDateFields): string | undefined {
   return (
     content.updated_date ??
-    content.published_date ??
-    content.date ??
-    content.publishedAt ??
-    content.updatedAt ??
-    content.createdAt ??
-    undefined
-  )
-}
-
-/**
- * Resolve the original publication date.
- *
- * Prefers `published_date` since that explicitly represents first-publish.
- * Does **not** include `updated_date` — callers that need the latest date
- * should use {@link resolveLatestDate} instead.
- *
- * Used by:
- *   - `structuredData.ts` → Schema.org `datePublished`
- *   - hub route metadata  → OpenGraph `publishedTime`
- */
-export function resolvePublishedDate(content: CMSDateFields): string | undefined {
-  return (
     content.published_date ??
     content.date ??
     content.publishedAt ??

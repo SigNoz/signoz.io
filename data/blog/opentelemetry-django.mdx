@@ -1,7 +1,8 @@
 ---
 title: A Practical OpenTelemetry Django Auto-Instrumentation Guide
-published_date: 2024-02-08
-updated_date: 2026-06-16
+meta_title: "OpenTelemetry Django Instrumentation Explained"
+published_date: "2024-02-08"
+updated_date: "2026-06-30"
 tags: [Observability, Python, OpenTelemetry, Monitoring]
 authors: [ankit_anand, dhruv_ahuja]
 description: Learn how to set up OpenTelemetry Django auto-instrumentation using opentelemetry-instrumentation-django to monitor traces, metrics, and logs.
@@ -23,6 +24,13 @@ In this hands-on guide, we will set up OpenTelemetry Django auto-instrumentation
 Finally, we'll verify that telemetry flows end to end, visualize your application's telemetry, and understand how it works under the hood.
 
 ## What is OpenTelemetry Django?
+
+<KeyPointCallout title="Note">
+
+Before we begin, note that the scope of this guide is limited to instrumenting Django with OpenTelemetry, auto-instrumentation, manual spans and metrics, and exporting telemetry.<br />
+For what to monitor once data is flowing (the Django metrics that matter, dashboards, and alerts), the dedicated [Django monitoring guide](https://signoz.io/guides/django-monitoring/) covers that side.
+
+</KeyPointCallout>
 
 [OpenTelemetry instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-python/) with Django enables the generation and management of telemetry data (logs, metrics, and traces) from your Django application. This data is then used to observe the application and gain insights into its performance and behavior.<br />
 [OpenTelemetry](https://signoz.io/opentelemetry/) provides an open-source standard with a consistent data format and collection mechanism. As application owners, you will always have the freedom to choose different vendors to visualize the collected telemetry data, and can consume this data in a variety of formats.
@@ -420,3 +428,10 @@ Check out the <a href="https://opentelemetry-python-contrib.readthedocs.io/en/la
 ### How do I prevent tracing health checks or noisy endpoints in Django?
 
 Use OpenTelemetry Python configuration to exclude URLs. OpenTelemetry provides [Python-specific environment variables](https://opentelemetry.io/docs/zero-code/python/configuration/#excluded-urls) for exclusions. You can set a global excluded URL pattern (`OTEL_PYTHON_EXCLUDED_URLS`) list, or set Django-specific excluded URL patterns (`OTEL_PYTHON_DJANGO_EXCLUDED_URLS`). This is a common best practice to reduce noise and cost while keeping high-value traces.
+
+**Further reading**
+
+To go deeper once Django telemetry is flowing, the [Python performance monitoring guide](https://signoz.io/guides/python-performance-monitoring/) and broader [Python application monitoring guide](https://signoz.io/blog/python-application-monitoring/) help you turn that data into actionable insights.<br />
+To understand the concepts behind the traces you're collecting, see our primer on [distributed tracing](https://signoz.io/blog/distributed-tracing/) and how it fits into the wider landscape of [APM tools](https://signoz.io/blog/open-source-apm-tools/).
+
+And if you want to know when to reach for the instrumentation API versus the SDK, our breakdown of the [OpenTelemetry API vs SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/) clarifies the distinction.

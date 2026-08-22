@@ -97,7 +97,7 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
 }) => {
   const [formState, setFormState] = useState({
     workEmail: '',
-    dataRegion: 'us',
+    dataRegion: 'us2',
     termsOfServiceAccepted: true,
   })
   const emailInputRef = useRef<HTMLInputElement>(null)
@@ -352,11 +352,12 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
   )
 }
 
-const TeamsPage: React.FC = () => {
-  const searchParams = useSearchParams()
-  const authCode = searchParams.get('code')
-  const ssoError = searchParams.get('has_sso_error')
+interface TeamsPageProps {
+  initialAuthCode: string | null
+  initialSsoError: string | null
+}
 
+const TeamsPage: React.FC<TeamsPageProps> = ({ initialAuthCode, initialSsoError }) => {
   const {
     errors,
     isSubmitting,
@@ -369,16 +370,16 @@ const TeamsPage: React.FC = () => {
   } = useSignupForm({ source: 'teams' })
 
   useEffect(() => {
-    if (authCode) handleSocialSignupCallback({ code: authCode })
-  }, [authCode, handleSocialSignupCallback])
+    if (initialAuthCode) handleSocialSignupCallback({ code: initialAuthCode })
+  }, [initialAuthCode, handleSocialSignupCallback])
 
   useEffect(() => {
-    if (ssoError) handleError()
-  }, [handleError, ssoError])
+    if (initialSsoError) handleError()
+  }, [handleError, initialSsoError])
 
   const formSection = (
     <div className="w-full">
-      {(!isSubmitting && submitFailed) || ssoError ? (
+      {(!isSubmitting && submitFailed) || initialSsoError ? (
         <ErrorState error={errors.apiError || ''} />
       ) : (
         <SignupFormIsolated
@@ -393,9 +394,9 @@ const TeamsPage: React.FC = () => {
   )
 
   return (
-    <div className="ml-[calc(100%-100vw)] flex w-screen flex-col bg-signoz_ink-400">
+    <div className="flex w-full flex-col bg-signoz_ink-400">
       <FocusedNavbar />
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col lg:mt-[8px] lg:h-[calc(100vh-56px)] lg:flex-row">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col lg:mt-[8px] lg:flex-row">
         {/* Left section — copy + checkmarks + logos (desktop only) */}
         <div className="hidden w-full flex-col justify-center p-8 lg:flex lg:w-5/12 lg:py-12 lg:pl-[72px] lg:pr-14">
           <div className="flex max-w-[420px] flex-col gap-8">

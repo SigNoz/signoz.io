@@ -1,22 +1,22 @@
 ---
-date: 2026-03-26
-
+date: 2026-07-25
 title: Traefik Observability with OpenTelemetry
 description: Tutorial to export Traefik metrics and traces to SigNoz using OpenTelemetry.
 doc_type: tutorial
 ---
 
-
 ## Overview
 
 In this tutorial, we will see how to export metrics and traces of Traefik to SigNoz. Visualizing Traefik metrics and traces will help you to understand the performance of services running behind Traefik and troubleshoot issues.
 
+<Admonition type="info" title="Looking for access logs?" defaultCollapsed="true">
+  Traefik access logs use a separate path through the OpenTelemetry Collector. See [Collect Traefik Access Logs](https://signoz.io/docs/integrations/opentelemetry-traefik/).
+</Admonition>
+
 ## Prerequisites
 
 - Traefik v3.0 or above
-- SigNoz setup (choose one):
-  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
-  - Self-hosted SigNoz instance
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
 ## Steps
 
@@ -33,14 +33,14 @@ You need to enable OTLP export for both metrics and traces in your Traefik confi
 **For Metrics:**
 - `--metrics.otlp=true`: Enables OTLP metrics export.
 - `--metrics.otlp.grpc=true`: Uses gRPC for transport (recommended).
-- `--metrics.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443`: Sets the destination endpoint.
-- `--metrics.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY`: Authenticates with your SigNoz Cloud key.
+- `--metrics.otlp.grpc.endpoint=ingest.<region>.signoz.cloud:443`: Sets the destination endpoint.
+- `--metrics.otlp.grpc.headers.signoz-ingestion-key=<your-ingestion-key>`: Authenticates with your SigNoz Cloud key.
 
 **For Traces:**
 - `--tracing.otlp=true`: Enables OTLP tracing.
 - `--tracing.otlp.grpc=true`: Uses gRPC for transport.
-- `--tracing.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443`: Sets the destination endpoint.
-- `--tracing.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY`: Authenticates with your SigNoz Cloud key.
+- `--tracing.otlp.grpc.endpoint=ingest.<region>.signoz.cloud:443`: Sets the destination endpoint.
+- `--tracing.otlp.grpc.headers.signoz-ingestion-key=<your-ingestion-key>`: Authenticates with your SigNoz Cloud key.
 
 ### Step 2: Create the Docker Compose File
 
@@ -48,11 +48,10 @@ We will use a `docker-compose.yaml` file to run Traefik and a sample `hello-app`
 
 Create a file named `docker-compose.yaml` with the following content:
 
-```yaml
-version: '3'
+```yaml defaultCollapsed minimap
 services:
   reverse-proxy:
-    image: traefik:latest
+    image: traefik:v3.7
     extra_hosts:
       - signoz:host-gateway
     command:
@@ -62,14 +61,14 @@ services:
       - --metrics.otlp=true
       - --metrics.otlp.grpc=true
       - --metrics.otlp.grpc.insecure=false
-      - --metrics.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443
-      - --metrics.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY
+      - --metrics.otlp.grpc.endpoint=ingest.<region>.signoz.cloud:443
+      - --metrics.otlp.grpc.headers.signoz-ingestion-key=<your-ingestion-key>
       # Tracing Configuration
       - --tracing.otlp=true
       - --tracing.otlp.grpc=true
       - --tracing.otlp.grpc.insecure=false
-      - --tracing.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443
-      - --tracing.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY
+      - --tracing.otlp.grpc.endpoint=ingest.<region>.signoz.cloud:443
+      - --tracing.otlp.grpc.headers.signoz-ingestion-key=<your-ingestion-key>
     ports:
       - "80:80"
       - "8080:8080"
@@ -86,10 +85,10 @@ services:
       traefik.http.routers.hello-app.service: hello-app
 ```
 
-<Admonition>
-- Replace `SIGNOZ_INGESTION_KEY` with your actual [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- Replace `{region}` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-</Admonition>
+**Verify these values:**
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 3: Run the Services and Generate Traffic
 
@@ -117,5 +116,3 @@ You can also check the list of available metrics below to know what you can visu
 ## List of Metrics
 
 <TraefikMetrics />
-
-

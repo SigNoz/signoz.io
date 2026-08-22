@@ -5,10 +5,10 @@ import featureGraphicOtel from '@/public/img/graphics/homepage/feature-graphic-o
 
 export const TRUSTED_BY_LOGOS = [
   { src: '/svgs/icons/eltropy.svg', alt: 'Eltropy' },
-  { src: '/svgs/icons/lovart.svg', alt: 'Lovart' },
+  { src: '/svgs/icons/kernel.svg', alt: 'Kernel' },
   { src: '/img/users/salesforce.svg', alt: 'Salesforce' },
   { src: '/img/users/comcast.svg', alt: 'Comcast' },
-  { src: '/svgs/icons/parallel-ai.svg', alt: 'Parallel AI' },
+  { src: '/svgs/icons/hedra.svg', alt: 'Hedra' },
   { src: '/svgs/icons/formance.svg', alt: 'Formance' },
   { src: '/svgs/icons/blaxel.svg', alt: 'Blaxel' },
   { src: '/svgs/icons/sarvam.svg', alt: 'sarvam logo' },
@@ -20,9 +20,9 @@ export const FEATURE_CARDS = [
     description: (
       <div>
         <p>
-          Describe what you want in natural language and SigNoz builds it. Create dashboards from
-          80+ templates or from scratch. Generate alerts with sensible defaults. Run queries and get
-          results in chat, no query language required.
+          Describe what you want in natural language, and Noz builds it in SigNoz Cloud. Create
+          dashboards from 80+ templates or from scratch. Generate alerts with sensible defaults. Run
+          queries and get results in chat, no query language required.
         </p>
         <p className="mt-3 italic text-signoz_vanilla-300">
           &ldquo;Create a latency dashboard for my payment service&rdquo; → Done. Fully interactive.
