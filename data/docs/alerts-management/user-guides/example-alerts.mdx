@@ -1,11 +1,11 @@
 ---
-date: 2026-07-07
+date: 2026-08-22
 title: Alert Examples for Common Use Cases & Best Practices
 description: Ready-to-use SigNoz alert examples for no-data, error rate, latency, resource usage, and service-down monitoring, with the settings that prevent false alerts.
 doc_type: howto
 ---
 
-This page collects ready-to-use alert recipes for the jobs teams set up most often: catching a service that went silent, an endpoint that got slow or error-prone, a host running out of memory, and a business flow that stopped. Each recipe gives the Query Builder fields to set, a PromQL or ClickHouse variant where it helps, and the settings that keep the alert from firing when nothing is wrong.
+Use these recipes to alert on a silent service, a slow or failing endpoint, a host running out of memory, or a business flow that stopped. Each one lists the Query Builder fields, a PromQL or ClickHouse variant where one helps, and the settings that stop false alerts.
 
 For the meaning of each condition field (operators, match type, evaluation window, threshold unit, no-data handling), see the per-signal references: [metrics](https://signoz.io/docs/alerts-management/metrics-based-alerts/), [logs](https://signoz.io/docs/alerts-management/log-based-alerts/), [traces](https://signoz.io/docs/alerts-management/trace-based-alerts/), and [exceptions](https://signoz.io/docs/alerts-management/exceptions-based-alerts/).
 
@@ -17,12 +17,12 @@ For the meaning of each condition field (operators, match type, evaluation windo
 
 ## Settings that prevent false alerts
 
-Most alert pain comes from configuration, not from the data. Set these correctly and you avoid the common failure modes: alerts that fire on a single spike, alerts that never fire when a service dies, and ratios that report impossible values.
+Configuration causes most false alerts. Get these settings right and you avoid alerts that fire on a single spike, alerts that stay silent when a service dies, and ratios that report 300%.
 
 | Setting | Use it for | Why it matters |
 | --- | --- | --- |
 | **Match type** (`at least once`, `all the times`, `on average`) | Every alert | `at least once` catches brief spikes; `all the times` and `on average` require a sustained breach, which stops one transient data point from paging you. |
-| **Threshold Unit** | Latency and size alerts | Span duration is stored in nanoseconds. If you type `500` for "500 ms" without setting the unit to `ms`, SigNoz compares against raw nanoseconds and the alert fires constantly. Always set the unit. |
+| **Y-axis unit**, then **Threshold Unit** | Latency and size alerts | Span duration is stored in nanoseconds. Set the query's y-axis unit to `Nanoseconds` first: the **Threshold Unit** list is filtered to that unit's category and stays disabled until you do. Then set **Threshold Unit** to `ms` so `500` means 500 ms. Setting neither compares `500` against raw nanoseconds and the alert fires constantly. |
 | **Alert when data stops coming** (no-data) | Availability and dead-man alerts | A service that fully stops returns no series, so there is no value to compare against a threshold. Only no-data handling catches a total outage. |
 | **Threshold ≠ 0 for no-data** | Availability alerts | A threshold of `0` collides with the literal value `0` that a no-data result reports. Use no-data handling instead of a zero threshold. |
 | **Aligned aggregation on both sides of a ratio** | Percentage formulas | Summing the numerator across many series while the denominator covers one series produces values like 300% or 1300%. Group both queries by the same key and use the same space aggregation. |
@@ -37,29 +37,91 @@ Set evaluation windows wider than your collection interval plus any ingestion de
 
 ## Availability and no-data alerts
 
-### Alert when a service stops sending data
+### Alert when a service's request rate drops
 
-Create this alert for a service that emits telemetry during normal operation. Telemetry silence points to a stopped service, a crashed process, or broken instrumentation.
+`signoz_calls_total` counts request spans, so its rate tracks traffic and not liveness. Use this recipe only for a service with guaranteed continuous traffic: a healthy service that receives less than one request per second trips `Below 1`. To alert on the process itself, use the next recipe.
 
-Configure a metric alert on any metric the service emits continuously, such as `signoz_calls_total`:
+Configure a metric alert on a metric the service emits on every request, such as `signoz_calls_total`:
 
 - **Signal**: Metrics
 - **Metric**: `signoz_calls_total`
-- **Filter**: `service.name = '<your-service>'`
+- **Filter**: `service.name = '<your-service>' AND span.kind = 'SPAN_KIND_SERVER'`
 - **Aggregate within time series**: Rate
 - **Aggregate across time series**: Sum, grouped by `service.name`
 - **Condition**: Below, **Threshold** `1`
 - **Advanced Options → Alert when data stops coming**: enabled, with a "no data for" duration of 2 to 3 times your collection interval
 
-`<your-service>` is the service name as it appears in SigNoz.
+`<your-service>` is the service name as it appears in SigNoz. The `span.kind` filter keeps the count to inbound requests the service served, so outbound client calls do not hold the rate up while the service serves nothing.
+
+To watch every service with one rule, drop the `service.name` condition and keep the group-by. The rule then produces one alert series per service, and each is evaluated against the same threshold.
 
 <Admonition type="warning">
-The threshold path alone cannot detect a dead service: when the series disappears there is no data point to compare. **Alert when data stops coming** is what fires on a true outage. Do not set the threshold to `0` to approximate this, because `0` is also the value a no-data result reports.
+The threshold path alone cannot detect a dead service: when the series disappears there is no data point to compare. **Alert when data stops coming** fires on a true outage. Do not set the threshold to `0` to approximate this, because `0` is also the value a no-data result reports.
+
+No-data handling cannot tell an idle service from a stopped one, which is the other reason this recipe is not a liveness check.
+</Admonition>
+
+### Alert when a service process stops running
+
+Telemetry silence and a dead process are different failures. Use this recipe for liveness itself, whether or not the service is handling traffic. It reads `process.uptime`, which ticks on a timer instead of moving with requests.
+
+The OpenTelemetry Collector reports this metric through the `process` scraper of the `hostmetrics` receiver. The scraper is off by default, so add it to your existing collector config and keep the scrapers you already run:
+
+```yaml defaultCollapsed
+receivers:
+  hostmetrics:
+    scrapers:
+      process:
+        metrics:
+          process.uptime:
+            enabled: true
+          # The scraper's four default metrics are off here to keep this to one
+          # series per process. Enable them if you want per-process CPU and memory.
+          process.cpu.time:
+            enabled: false
+          process.disk.io:
+            enabled: false
+          process.memory.usage:
+            enabled: false
+          process.memory.virtual:
+            enabled: false
+
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+```
+
+Add `hostmetrics` to the receivers your metrics pipeline already lists. A receiver that is defined but absent from a pipeline collects nothing.
+
+When the Collector runs in a container, mount the host filesystem and point the receiver at it with `root_path: /hostfs`. A Collector installed directly on the host does not need `root_path`. Either way the Collector needs to run as root, because the scraper reads `/proc` entries owned by other users.
+
+Then alert on it:
+
+- **Signal**: Metrics
+- **Metric**: `process.uptime`
+- **Filter**: `process.executable.name = '<process-name>' AND host.name = '<host>'`
+- **Aggregate within time series**: Latest
+- **Aggregate across time series**: Max, grouped by `process.executable.name` and `host.name`
+- **Condition**: Below, **Threshold** `1`
+- **Evaluation window**: 2 to 3 times your collection interval
+- **Advanced Options → Alert when data stops coming**: enabled, with a "no data for" duration of 2 to 3 times your collection interval
+
+A live process reports an uptime far above `1`, so the threshold never fires on its own. The rule exists for its no-data setting, which is the part that detects the stopped process. Group by `process.executable.name` rather than `process.pid`: a restart gives the process a new pid, so a pid-keyed alert resolves and reopens on every restart.
+
+<Admonition type="warning">
+Pin the filter to one host. No-data detection covers the whole query, so a rule that matches the same executable on several hosts stays "present" while one host's process is gone. To watch the same process across a fleet with one rule, use the time-shift comparison in [Alert when one group stops reporting](#alert-when-one-group-stops-reporting) instead.
+</Admonition>
+
+<Admonition type="info">
+The `process` scraper reads `/proc` entries owned by other users, so the collector needs to run as root to see anything but itself. It also emits one series per process per node, so leave the scraper's four default-on metrics disabled unless you want them, and scope it with the scraper's `include` filter on a busy host.
+
+A .NET service running the release-candidate <a href="https://github.com/open-telemetry/opentelemetry-dotnet-contrib/tree/main/src/OpenTelemetry.Instrumentation.Process" target="_blank" rel="noopener noreferrer nofollow">Process instrumentation</a> reports the same metric from the SDK instead. Those series carry `service.name`, so filter and group on that rather than on `process.executable.name`. No other language's instrumentation emits `process.uptime` today.
 </Admonition>
 
 ### Alert when one group stops reporting
 
-Create this alert for grouped entities that must keep reporting while other groups remain healthy. Examples include one host in a fleet, one Kubernetes pod, one environment, or one Kafka cluster.
+Grouped entities need a different approach: one host in a fleet, one Kubernetes pod, one environment, or one Kafka cluster must keep reporting while its siblings stay healthy.
 
 The built-in no-data toggle is global for the alert query. If one group still returns data, the query is still "present." Use a time-shift comparison instead:
 
@@ -76,7 +138,7 @@ Query A shows groups that existed in the shifted window. If Query B has no curre
 
 ### Alert when request rate drops to zero
 
-Create this alert for a service that should handle traffic throughout the day.
+Use this for a service that should handle traffic throughout the day.
 
 - **Signal**: Metrics
 - **Metric**: `signoz_calls_total`
@@ -86,21 +148,17 @@ Create this alert for a service that should handle traffic throughout the day.
 - **Condition**: Below, **Threshold** a small amount above the service's idle request rate
 - **Advanced Options → Alert when data stops coming**: enabled
 
-PromQL variant:
-
-```promql
-sum by ("service.name") (rate({"signoz_calls_total", "span.kind"="SPAN_KIND_SERVER"}[5m])) < 1
-```
-
-The query checks every service and returns one series per `service.name`. To check one service, add `"service.name"="<your-service>"` inside the selector. OpenTelemetry metric names keep their dots, so the metric and any dotted label go inside braces as a quoted selector. See [Writing a PromQL query](https://signoz.io/docs/userguide/write-a-prom-query-with-new-format/).
+<Admonition type="info">
+There is no PromQL variant for this recipe. SigNoz PromQL reads only metrics with cumulative or unspecified temporality, and `signoz_calls_total` uses delta temporality by default, so a PromQL rate over it returns no series and the alert never evaluates. Write this one in the Query Builder, which reads delta metrics. See [Calculating score from metrics](https://signoz.io/docs/alerts-management/apdex-alerts/#calculating-score-from-metrics).
+</Admonition>
 
 <Admonition type="info">
-A rate-below-threshold alert needs **Alert when data stops coming** enabled. A down service emits no series, so the rate query returns no value. In PromQL, default an absent series to zero with `or vector(0)`. For example, `sum(round(irate({"process.uptime"}[1m])) or vector(0)) != 1` fires when a service stops reporting uptime.
+A rate-below-threshold alert needs **Alert when data stops coming** enabled. A down service emits no series, so the rate query returns no value instead of a low one. To detect the process itself rather than its traffic, use [Alert when a service process stops running](#alert-when-a-service-process-stops-running).
 </Admonition>
 
 ### Alert when no business events occur
 
-Create this dead man's switch for a flow that should happen on a schedule, such as orders, payments, or a recurring job. It catches silent failures that resource metrics miss.
+Set a dead man's switch on a flow that should happen on a schedule, such as orders, payments, or a recurring job. Resource metrics stay green while the flow stops, so alert on the event itself.
 
 - **Signal**: Logs
 - **Aggregation**: `count()`
@@ -123,12 +181,12 @@ Build a trace alert with two queries and a formula:
 - **Query A** (error spans): `count()`, filter `service.name = '<your-service>' AND hasError = true`, group by `service.name` and `http.route`
 - **Query B** (all spans): `count()`, filter `service.name = '<your-service>'`, group by `service.name` and `http.route`
 - **Query B → Having**: `count() > 100` to require a minimum request volume
-- **Formula F1**: `(A / B) * 100`, with the y-axis unit set to Percent
+- **Formula F1**: `(A / B) * 100`, with the y-axis unit set to `Percent (0 - 100)`
 - **Alert on**: F1
 - **Condition**: Above, **Threshold** `5`, **Match type** `on average` over a 5-minute window
 
 <Admonition type="warning">
-Without the **Having** minimum-traffic guard, a single error during a quiet minute (1 error in 20 requests) reads as a 5% error rate and pages you. Require a minimum request count, and prefer `on average` or `all the times` over `at least once` so one noisy data point does not fire the alert.
+Without the **Having** minimum-traffic guard, a single error during a quiet minute (1 error in 30 requests) reads as a 3% error rate and pages you. Require a minimum request count, and prefer `on average` or `all the times` over `at least once` so one noisy data point does not fire the alert.
 </Admonition>
 
 To page only on server-side (5xx) failures instead of every error, swap the Query A filter for the status code range: `service.name = '<your-service>' AND http.status_code >= 500`. This excludes 4xx client errors (bad requests, auth failures) that `hasError = true` may also count, depending on your instrumentation.
@@ -142,45 +200,56 @@ Build a metric alert with two queries and a formula:
 - **Query A** (successful events): count or increase the event metric, filter to success, and group by the entity key, for example `orgId`, `tenant.id`, or `service.name`
 - **Query B** (all events): count or increase the same event metric without the success filter, grouped by the same entity key
 - **Query B → Having**: require enough volume, for example `count() > 100` or `sum() > 100`
-- **Formula F1**: `(A / B) * 100`
+- **Formula F1**: `(A / B) * 100`, with the y-axis unit set to `Percent (0 - 100)`
 - **Alert on**: F1
 - **Condition**: Below, **Threshold** `90`, **Match type** `on average`
 
-Keep the time aggregation and space aggregation identical for Query A and Query B. The Having clause belongs on Query B, because the denominator decides whether the ratio has enough data to evaluate.
+Keep the time aggregation and space aggregation identical for Query A and Query B. Put the Having clause on Query B, since Query B counts the total traffic the ratio needs before it means anything.
 
 To alert on an SLO where a good call must be both successful and fast, add the response-time bound to Query A. This example pages when fewer than 90% of an endpoint's calls both succeed and finish in under 6 seconds:
 
 - **Query A** (good calls): `count()`, filter `service.name = '<your-service>' AND name = '<endpoint>' AND hasError = false AND durationNano <= 6000000000`
 - **Query B** (all calls): `count()`, filter `service.name = '<your-service>' AND name = '<endpoint>'`, **Having** `count() > 100`
-- **Formula F1**: `(A / B) * 100`, with the y-axis unit set to Percent
+- **Formula F1**: `(A / B) * 100`, with the y-axis unit set to `Percent (0 - 100)`
 - **Condition**: Below, **Threshold** `90`, **Match type** `on average` over a 5-minute window
 
 `durationNano` is the span duration in nanoseconds, so 6 seconds is `6000000000`. Replace `<endpoint>` with the operation name, such as `POST /payments/verify`.
 
-### Alert on high latency for an endpoint
+### Alert on high latency for a service or endpoint
 
-Alert on P95 or P99 when endpoint slowdowns matter more than averages.
+Alert on P95 or P99 when slowdowns matter more than averages.
 
 - **Signal**: Traces
 - **Aggregation**: P95 (or P99) of span duration
-- **Filter**: `service.name = '<your-service>' AND name = '<operation-name>'`
+- **Filter**: `service.name = '<your-service>' AND name = '<operation-name>'`, or drop the `name` condition for a service-wide percentile
+- **Y-axis unit**: `Nanoseconds`
 - **Condition**: Above, **Threshold** `1200`, **Threshold Unit** `ms`
 - **Match type**: `at least once` for spike detection, or `on average` for sustained slowness
 - **Evaluation window**: `5m`
 
-PromQL variant, using the span-latency histogram. On this metric the endpoint label is `operation`; omit it for a service-wide p99:
+PromQL variant, against a histogram your application exports with **cumulative** temporality:
 
 ```promql
-histogram_quantile(0.99, sum by (le, "service.name") (rate({"signoz_latency.bucket", "service.name"="<your-service>", "operation"="<operation-name>"}[5m]))) > 1200
+histogram_quantile(0.99, sum by (le, "service.name") (rate({"http.server.request.duration.bucket", "service.name"="<your-service>"}[5m]))) > 1.2
 ```
 
+Add the histogram's own endpoint label inside the selector to scope it, or leave it out for a service-wide percentile. Match the threshold to the histogram's unit: OpenTelemetry HTTP duration histograms record seconds, so `1.2` means 1200 ms.
+
 <Admonition type="warning">
-In the Query Builder recipe, always set **Threshold Unit** to `ms`. Span duration is stored in nanoseconds, so a bare threshold of `1200` is read as 1200 ns and the alert fires on nearly every request. The PromQL variant needs no conversion: `signoz_latency.bucket` boundaries are already in milliseconds, so `> 1200` means 1200 ms. On self-hosted SigNoz with a sharded ClickHouse cluster, percentile values computed across shards can read higher than the raw data; cross-check against the dashboard before tuning the threshold.
+Point this at a cumulative histogram, not at SigNoz's span metrics. SigNoz PromQL reads only cumulative and unspecified temporality, and `signoz_latency.bucket` is delta by default, so `histogram_quantile` over it returns no series and the alert never evaluates. Check a metric's temporality in [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) before you write PromQL against it. See [Calculating score from metrics](https://signoz.io/docs/alerts-management/apdex-alerts/#calculating-score-from-metrics).
+</Admonition>
+
+<Admonition type="warning">
+In the Query Builder recipe, set the y-axis unit to `Nanoseconds` before you set **Threshold Unit** to `ms`. The Query Builder returns span duration in nanoseconds and does not set the unit for you, and the **Threshold Unit** list is filtered to the y-axis unit's category, so it stays disabled until the y-axis unit is set. With both set, `1200` means 1200 ms. With neither, a bare threshold of `1200` is read as 1200 ns and the alert fires on almost every request.
+</Admonition>
+
+<Admonition type="info">
+On self-hosted SigNoz with a sharded ClickHouse cluster, percentile values computed across shards can read higher than the raw data. Cross-check against the dashboard before you tune the threshold.
 </Admonition>
 
 ### Alert on exception spikes
 
-Alert when application exceptions appear or exceed a count. Build it in the Query Builder as an [Exceptions-based alert](https://signoz.io/docs/alerts-management/exceptions-based-alerts/), or use a ClickHouse query for full control:
+Alert when application exceptions appear or exceed a count. The exception type, message, and stack trace live on span events, which the traces Query Builder does not expose, so write this alert as a ClickHouse query. Reserve the Query Builder for span-level error conditions, such as the count of failed spans. See [Exceptions-based alerts](https://signoz.io/docs/alerts-management/exceptions-based-alerts/).
 
 ```sql
 SELECT
@@ -203,7 +272,7 @@ For more ClickHouse examples, including any exception, service-specific spikes, 
 
 ### Alert on host or pod memory usage
 
-Use a utilization metric directly when one exists, since it avoids manual math:
+Use a utilization metric when one exists, so you skip the byte math:
 
 - **Signal**: Metrics
 - **Metric**: `k8s.pod.memory_request_utilization` (ratio, 0.0 to 1.0)
@@ -217,7 +286,7 @@ To derive a percentage from raw bytes instead, use a formula. For a host, query 
 - **Alert on**: F1, Above `0.7`, `all the times`
 
 <Admonition type="warning">
-Group both query A and query B by the same key (`host.name` or `k8s.pod.name`) and use the same space aggregation. If the numerator sums memory across several pods while the denominator covers one, the formula reports impossible values like 300% and pages you even though every pod is healthy.
+Group both query A and query B by the same key (`host.name` or `k8s.pod.name`) and use the same space aggregation. If the numerator sums memory across several pods while the denominator covers one, the formula reports impossible values like 300% and pages you while the pods sit idle.
 </Admonition>
 
 ### Alert on container CPU usage
@@ -244,14 +313,14 @@ Alert on a rising share of error logs for a service when a fixed count would pag
 
 - **Query A** (error logs): `count()`, filter `service.name = '<your-service>' AND severity_text IN ('ERROR', 'FATAL')`
 - **Query B** (all logs): `count()`, filter `service.name = '<your-service>'`
-- **Formula F1**: `(A / B) * 100`, with the y-axis unit set to Percent
+- **Formula F1**: `(A / B) * 100`, with the y-axis unit set to `Percent (0 - 100)`
 - **Alert on**: F1, Above `5`, `on average` over `5m`
 
-For a simpler absolute count, drop query B and alert directly on query A with a count threshold. To write the same logic as a ClickHouse query, see the examples in [Log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/).
+For an absolute count, drop Query B and alert on Query A with a count threshold. To write the same logic as a ClickHouse query, see the examples in [Log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/).
 
 ### Alert when telemetry export errors appear
 
-Create this alert when application or OpenTelemetry Collector logs reach SigNoz and export failures should page before they create gaps.
+Your application or Collector logs must already reach SigNoz. Then export failures page you before they leave gaps in your data.
 
 - **Signal**: Logs
 - **Aggregation**: `count()`
@@ -266,7 +335,7 @@ The process producing exporter errors must send its logs to SigNoz. For persiste
 
 ### Alert when log ingestion spikes
 
-Create this alert when a deploy, batch job, debug logging change, or runaway loop can multiply log volume and affect cost or query performance.
+A deploy, a batch job, a debug-logging change, or a runaway loop can multiply log volume overnight and move your bill.
 
 - **Product area**: Cost Meter Alerts
 - **Meter metric**: `signoz.meter.log.size` for bytes, or `signoz.meter.log.count` when you care about event volume
@@ -278,9 +347,24 @@ Create this alert when a deploy, batch job, debug logging change, or runaway loo
 
 Use [Meter Explorer](https://signoz.io/docs/cost-meter/meter-explorer/) to find the normal baseline first, then configure the alert with [Cost Meter Alert Configuration Guide with Examples](https://signoz.io/docs/cost-meter/alert-configuration-guide/). To get notified before an ingestion key reaches its daily cap, use the bell icon on the ingestion key limit as described in the cost meter alert guide.
 
-## Next steps
+## Validate
+
+Confirm a recipe works before you rely on it:
+
+1. Run the query in the alert form. The chart preview must show at least one series against the threshold line.
+2. Click **Test Notification**. Confirm the alert reaches every channel you selected.
+3. Read the delivered message. Each attribute you referenced must show a real value, not the attribute name.
+4. Wait for one evaluation window. Then open [alert history](https://signoz.io/docs/alerts-management/alerts-history/) and confirm the rule evaluated.
+
+An empty chart preview means the query returns no data. Correct the query before you save the rule.
+
+## Next Steps
 
 - Tune which alerts reach which teams with a [routing policy](https://signoz.io/docs/alerts-management/routing-policy/).
 - Silence alerts during deploys with [planned maintenance](https://signoz.io/docs/alerts-management/planned-maintenance/).
 - Detect deviations from normal patterns with [anomaly-based alerts](https://signoz.io/docs/alerts-management/anomaly-based-alerts/).
 - Review fired alerts over time in [alert history](https://signoz.io/docs/alerts-management/alerts-history/).
+
+## Get Help
+
+<GetHelp />
