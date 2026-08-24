@@ -42,9 +42,9 @@ See <a href="https://learn.microsoft.com/en-us/troubleshoot/power-platform/power
 
 ## Access Notification Channels
 
-Navigate to `Alerts > Notification Channels` in SigNoz. SigNoz lists configured notification channels on this page.
+Navigate to `Settings > Notification Channels` in SigNoz. SigNoz lists configured notification channels on this page.
 
-You can reach the same page from `Settings > Notification Channels`.
+You can reach the same page from the **Notification Channels** tab on the `Alerts` page.
 
 <Figure
   src="/img/docs/alert-channels.webp"
@@ -54,20 +54,24 @@ You can reach the same page from `Settings > Notification Channels`.
 
 ## Create a Notification Channel
 
-1. Navigate to `Alerts > Notification Channels` and click **+ New Alert Channel**.
+1. Navigate to `Settings > Notification Channels` and click **+ New Alert Channel**.
 2. Enter a channel **Name**.
 3. Select **Microsoft Teams** as the **Type**.
 4. Paste the Workflow webhook URL into **Webhook URL**.
-5. Keep the default **Title** and **Description**.
-6. If you want a custom message, edit the **Title** and **Description** templates.
+5. Leave **Title** and **Description** empty. SigNoz then sends the default alert message.
+6. If you want a custom message, enter your own **Title** and **Description** templates.
 7. Keep **Send resolved alerts** on to receive a notification when an alert resolves.
 
-The **Title** and **Description** fields support <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a>.
+The **Title** and **Description** fields support <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a>. Microsoft Teams renders the message as an Adaptive Card, which supports a small subset of Markdown: `**bold**`, `_italic_`, lists, and `[label](url)` links. Headers, tables, and images do not render.
+
+<Admonition type="info">
+The default message shows the labels and the annotations of each alert. It leaves out the `summary`, `related_logs`, and `related_traces` annotations. To show these values in Microsoft Teams, add them to a custom **Description** template.
+</Admonition>
 
 <Figure
   src="/img/docs/ms-teams-new-channel.webp"
-  alt="Microsoft Teams notification channel form with a Power Automate Workflow webhook URL."
-  caption="Configure a Microsoft Teams notification channel with a Workflow webhook URL."
+  alt="Microsoft Teams notification channel form with a Power Automate Workflow webhook URL, and Title and Description templates."
+  caption="A Microsoft Teams notification channel that uses a Workflow webhook URL and custom templates."
 />
 
 ## Validate
@@ -77,14 +81,14 @@ The **Title** and **Description** fields support <a href="https://prometheus.io/
 3. Return to SigNoz.
 4. Click **Save**.
 
-If the test fails, see [Troubleshooting](https://signoz.io/docs/alerts-management/notification-channel/ms-teams/#troubleshooting).
+If the test fails, see [Troubleshooting](#troubleshooting).
 
 ## Migrate From an Office 365 Connector
 
 If an existing notification channel uses an Office 365 Connector URL, replace it with a Workflow webhook URL:
 
 1. Create a Workflow webhook for the same Microsoft Teams channel.
-2. Navigate to `Alerts > Notification Channels` in SigNoz.
+2. Navigate to `Settings > Notification Channels` in SigNoz.
 3. Click **Edit** for the Microsoft Teams notification channel.
 4. Replace the old **Webhook URL** with the Workflow webhook URL.
 5. Click **Test**. Make sure that the test alert appears in Microsoft Teams.
@@ -104,7 +108,7 @@ Add the notification channel to an alert rule. SigNoz sends a message when the a
 
 The **Send resolved alerts** toggle is on by default. To stop resolved notifications:
 
-1. Navigate to `Alerts > Notification Channels`.
+1. Navigate to `Settings > Notification Channels`.
 2. Click **Edit** for the Microsoft Teams notification channel.
 3. Toggle off **Send resolved alerts**.
 4. Click **Save**.
@@ -133,8 +137,8 @@ curl '<your-signoz-url>/api/v1/channels' \
         {
             "send_resolved": true,
             "webhook_url": "<your-teams-workflow-webhook-url>",
-            "title": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}\n {{- if gt (len .CommonLabels) (len .GroupLabels) -}}\n {{\" \"}}(\n {{- with .CommonLabels.Remove .GroupLabels.Names }}\n {{- range $index, $label := .SortedPairs -}}\n {{ if $index }}, {{ end }}\n {{- $label.Name }}=\"{{ $label.Value -}}\"\n {{- end }}\n {{- end -}}\n )\n {{- end }}",
-            "text": "{{ range .Alerts -}}\n *Alert:* {{ .Labels.alertname }}{{ if .Labels.severity }} - {{ .Labels.severity }}{{ end }}\n\n *Summary:* {{ .Annotations.summary }}\n *Description:* {{ .Annotations.description }}\n *RelatedLogs:* {{ if gt (len .Annotations.related_logs) 0 -}} View in <{{ .Annotations.related_logs }}|logs explorer> {{- end}}\n *RelatedTraces:* {{ if gt (len .Annotations.related_traces) 0 -}} View in <{{ .Annotations.related_traces }}|traces explorer> {{- end}}\n\n *Details:*\n {{ range .Labels.SortedPairs }} • *{{ .Name }}:* {{ .Value }}\n {{ end }}\n {{ end }}"
+            "title": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}{{ if .CommonLabels.job }} for {{ .CommonLabels.job }}{{ end }}\n {{- if gt (len .CommonLabels) (len .GroupLabels) -}}\n {{\" \"}}(\n {{- with .CommonLabels.Remove .GroupLabels.Names }}\n {{- range $index, $label := .SortedPairs -}}\n {{ if $index }}, {{ end }}\n {{- $label.Name }}=\"{{ $label.Value -}}\"\n {{- end }}\n {{- end -}}\n )\n {{- end }}",
+            "text": "{{ range .Alerts -}}\n**Alert:** {{ .Labels.alertname }}{{ if .Labels.severity }} - {{ .Labels.severity }}{{ end }}\n\n{{ if .Annotations.summary -}}\n**Summary:** {{ .Annotations.summary }}\n\n{{ end -}}\n{{ if .Annotations.description -}}\n**Description:** {{ .Annotations.description }}\n\n{{ end -}}\n{{ if .Annotations.related_logs -}}\n**Related logs:** [View in logs explorer]({{ .Annotations.related_logs }})\n\n{{ end -}}\n{{ if .Annotations.related_traces -}}\n**Related traces:** [View in traces explorer]({{ .Annotations.related_traces }})\n\n{{ end -}}\n**Details:**\n\n{{ range .Labels.SortedPairs }}- **{{ .Name }}:** {{ .Value }}\r{{ end }}\n{{ end }}"
         }
     ]
 }'
@@ -179,7 +183,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 
 ### The test works, but alert notifications do not arrive
 
-Make sure that the alert rule routes notifications to this Microsoft Teams channel. See [Notification Channels](https://signoz.io/docs/setup-alerts-notification/).
+Make sure that the alert rule routes notifications to this Microsoft Teams channel. See [Routing Policies](https://signoz.io/docs/alerts-management/routing-policy/).
 
 If the problem continues, contact SigNoz Support at <a href="mailto:support@signoz.io" target="_blank" rel="noopener noreferrer nofollow">support@signoz.io</a>.
 </details>
