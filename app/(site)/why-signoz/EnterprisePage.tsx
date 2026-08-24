@@ -132,7 +132,7 @@ const TrustedByTeams: React.FC = () => {
           asChild
         >
           <TrackingLink
-            href="/case-study/"
+            href="/customers/"
             clickType="Secondary CTA"
             clickName="Observability for AI Native Companies Customer Stories Button"
             clickLocation="Observability for AI Native Companies Testimonials"

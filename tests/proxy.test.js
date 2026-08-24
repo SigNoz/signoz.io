@@ -165,7 +165,7 @@ test('rewrites .md content-section URLs to the content markdown API', () => {
     rewriteTarget(run('/faqs/what-is-signoz.md')),
     '/api/content-markdown/faqs/what-is-signoz'
   )
-  assert.equal(rewriteTarget(run('/case-study/acme.md')), '/api/content-markdown/case-study/acme')
+  assert.equal(rewriteTarget(run('/customers/acme.md')), '/api/content-markdown/customers/acme')
 })
 
 test('rewrites content-section URLs via Accept negotiation and trailing slashes', () => {

@@ -67,7 +67,7 @@ const CustomerStoriesSection: React.FC<CustomerStoriesSectionProps> = ({
                 asChild
               >
                 <TrackingLink
-                  href="/case-study/"
+                  href="/customers/"
                   clickType="Secondary CTA"
                   clickName={tracking.clickName}
                   clickLocation={tracking.clickLocation}
@@ -82,7 +82,7 @@ const CustomerStoriesSection: React.FC<CustomerStoriesSectionProps> = ({
                 variant="secondary"
                 rounded="full"
                 className="flex items-center gap-2"
-                to="/case-study/"
+                to="/customers/"
               >
                 Read customer stories
                 <ArrowRight size={14} />
