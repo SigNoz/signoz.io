@@ -52,7 +52,7 @@ export const BentoBoard = memo(function BentoBoard({ isClone }: { isClone: boole
       <BentoCell column={9} columnSpan={4} row={1}>
         <QuoteCard
           attribution="Leo Blondel · CTO · Alien Intelligence"
-          href="/blog/alien-intelligence-ai-sre-workflow-signoz/#what-leo-built-at-alien-intelligence"
+          href="/customers/alien-intelligence-ai-sre-workflow-signoz/#what-leo-built-at-alien-intelligence"
           isClone={isClone}
           logo={logos.alienIntelligence}
           quote="Datadog came back and said, ‘The trial’s over — it’s going to cost you over $2K.’ I was like, ‘Sorry, what?’"
@@ -111,7 +111,7 @@ export const BentoBoard = memo(function BentoBoard({ isClone }: { isClone: boole
       <BentoCell column={7} columnSpan={2} row={2} rowSpan={2}>
         <FeaturedQuoteCard
           attribution="Karl Lyons · Shaped"
-          href="/case-study/shaped/"
+          href="/customers/shaped/"
           isClone={isClone}
           logo={logos.shaped}
           quote="Every single time we have an issue, SigNoz is always the first place to check."
@@ -172,7 +172,7 @@ export const BentoBoard = memo(function BentoBoard({ isClone }: { isClone: boole
       <BentoCell column={4} columnSpan={3} row={3}>
         <QuoteCard
           attribution="Hiro Tamada · Kernel"
-          href="/case-study/kernel/"
+          href="/customers/kernel/"
           isClone={isClone}
           logo={logos.kernel}
           quote="SigNoz MCP has been a very big part of our engineering life."
