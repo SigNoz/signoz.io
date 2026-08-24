@@ -6,6 +6,11 @@ const meta = {
   component: OtelCollectorFlow,
   parameters: {
     chromatic: { pauseAnimationAtEnd: true },
+    mdxUsage: `
+The animation below shows the flow of data through the Collector.
+
+<OtelCollectorFlow />
+`,
   },
 } satisfies Meta<typeof OtelCollectorFlow>
 

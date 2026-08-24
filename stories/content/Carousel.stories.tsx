@@ -4,7 +4,13 @@ import NextCarousel from '@/components/Carousel/Carousel'
 const meta = {
   title: 'MDX Components/Content/Carousel',
   component: NextCarousel,
-  parameters: { docsProse: false },
+  parameters: {
+    docsProse: false,
+    mdxUsage: `
+{/* The MDX-registered name is NextCarousel; items is a comma-separated list of image paths */}
+<NextCarousel items="/img/blog/2024/05/kafka-monitoring/kafka-latency-1.png,/img/blog/2024/05/kafka-monitoring/kafka-latency-2.png,/img/blog/2024/05/kafka-monitoring/kafka-latency-3.png" />
+`,
+  },
   args: {
     items:
       '/img/blog/2024/05/kafka-monitoring/kafka-latency-1.png,/img/blog/2024/05/kafka-monitoring/kafka-latency-2.png,/img/blog/2024/05/kafka-monitoring/kafka-latency-3.png',

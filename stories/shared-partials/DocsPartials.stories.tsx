@@ -17,6 +17,26 @@ import UpgradeInfo from '@/components/shared/UpgradeInfo'
 
 const meta = {
   title: 'MDX Components/Shared Partials/Docs Partials',
+  parameters: {
+    mdxUsage: `
+{/* Self-contained docs partials. Each renders a full prewritten section, no props */}
+<HostingDecision />
+<CommonPrerequisites />
+<K8sInstall />
+<K8sOtelDemo />
+<K8sNextSteps />
+<RetentionInfo />
+<SigNozCloud />
+<UpgradeInfo />
+<GetHelp />
+<MultiNodePart1 />
+<MultiNodePart2 />
+<PrereqsInstrument />
+<TraefikMetrics />
+<MetricsDefinition />
+<CHClientWithOutput />
+`,
+  },
 } satisfies Meta
 
 export default meta

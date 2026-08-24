@@ -5,6 +5,17 @@ import RegionTable from '@/components/Region/RegionTable'
 const meta = {
   title: 'MDX Components/Code/Region',
   component: Region,
+  parameters: {
+    mdxUsage: `
+{/* <RegionTable /> lists every SigNoz Cloud region with its endpoints (from docs/ingestion/signoz-cloud/overview) */}
+Based on your SigNoz Cloud environment, configure your applications to use the relevant endpoint from the table below:
+
+<RegionTable />
+
+{/* Inline <Region /> renders the reader's selected region (default: us) */}
+Set the OTLP endpoint for the <Region /> region before starting your service.
+`,
+  },
 } satisfies Meta<typeof Region>
 
 export default meta
@@ -19,8 +30,8 @@ export const InlineInProse: Story = {
         ingest.
         <Region />
         .signoz.cloud:443
-      </code>{' '}
-      — the region segment substitutes the workspace region selected via the <code>
+      </code>
+      . The region segment substitutes the workspace region selected via the <code>
         ?region=
       </code>{' '}
       query param (default: <code>us</code>).

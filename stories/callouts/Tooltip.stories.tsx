@@ -4,6 +4,15 @@ import Tooltip from '@/components/ui/Tooltip'
 const meta = {
   title: 'MDX Components/Callouts/Tooltip',
   component: Tooltip,
+  parameters: {
+    mdxUsage: `
+{/* Inline term definition. Hover the underlined text to see the popup */}
+To understand cardinality explosion, you first need to understand how <Tooltip text="metrics" content="A metric is a measurement collected over time, such as CPU usage, request count, or error rate." link="https://signoz.io/blog/opentelemetry-metrics-with-examples/" /> work in time-series databases like Prometheus.
+
+{/* link is optional; linkText customizes the popup's footer link */}
+Each trace is a tree of <Tooltip text="spans" content="A span represents a single unit of work in a trace, such as an HTTP request or a database query." link="https://signoz.io/blog/distributed-tracing-span/" linkText="Read more →" /> showing how a request moved through your services.
+`,
+  },
   args: {
     text: 'metrics',
     content:

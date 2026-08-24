@@ -5,6 +5,23 @@ import { components } from '@/components/MDXComponents'
 const meta = {
   title: 'MDX Components/Callouts/Admonition',
   component: Admonition,
+  parameters: {
+    mdxUsage: `
+<Admonition type="info" title="Before you begin">
+  Make sure you have a [SigNoz Cloud account](https://signoz.io/teams/) and
+  your ingestion key from **Settings → Ingestion Settings**.
+</Admonition>
+
+<Admonition type="warning">
+  Restarting the collector drops any telemetry buffered in memory.
+</Admonition>
+
+{/* Collapsed by default; type controls the color: note | info | tip | warning | danger | important */}
+<Admonition type="tip" title="Optional: advanced configuration" defaultCollapsed>
+  Tune batch size with the \`batch\` processor.
+</Admonition>
+`,
+  },
   args: {
     children: (
       <p>

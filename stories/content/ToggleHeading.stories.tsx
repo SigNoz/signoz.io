@@ -6,6 +6,31 @@ import { markdownToHast, renderHast } from '../lib/markdownFixture'
 const meta = {
   title: 'MDX Components/Content/ToggleHeading',
   component: ToggleHeading,
+  parameters: {
+    mdxUsage: `
+<details>
+<ToggleHeading>
+## Troubleshooting Langflow Observability
+</ToggleHeading>
+
+### No traces in SigNoz
+
+- Confirm the flow actually ran. An idle Langflow instance emits nothing.
+- Verify \`TRACELOOP_API_KEY\` is set to a non-empty value. This switches the tracer on.
+
+</details>
+
+{/* Add the open attribute to render expanded by default */}
+<details open>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+Body content goes here.
+
+</details>
+`,
+  },
 } satisfies Meta<typeof ToggleHeading>
 
 export default meta

@@ -7,6 +7,31 @@ import MDXButton from '@/components/MDXButton/MDXButton'
 const meta = {
   title: 'MDX Components/CTAs/Buttons',
   component: Button,
+  parameters: {
+    mdxUsage: `
+{/* Button: generic UI button, usually wrapped in a link */}
+<a href="/teams/">
+  <Button className="flex items-center gap-2">Get Started with OpenTelemetry &rarr;</Button>
+</a>
+
+{/* MDXButton: tracked CTA; type defaults to "primary", also accepts "secondary" */}
+<MDXButton
+  href="/teams/"
+  clickName="Primary CTA"
+  clickLocation="Docs Article Body"
+  clickText="Get Started with SigNoz Cloud - Free"
+>
+  Get Started with SigNoz Cloud - Free
+</MDXButton>
+
+{/* GetStartedOpenTelemetryButton: fixed CTA, no props */}
+<GetStartedOpenTelemetryButton />
+
+{/* MCPInstallButton: one-click MCP install links */}
+<MCPInstallButton client="cursor" icon="cursor">Add to Cursor</MCPInstallButton>
+<MCPInstallButton client="vscode" icon="vscode">Add to VS Code</MCPInstallButton>
+`,
+  },
   args: {
     children: 'Get Started - Free',
   },

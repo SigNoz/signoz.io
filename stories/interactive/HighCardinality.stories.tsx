@@ -8,6 +8,22 @@ import UsersAnalogy from '@/components/HighCardinalityData/UsersAnalogy'
 
 const meta = {
   title: 'MDX Components/Interactive/High Cardinality',
+  parameters: {
+    mdxUsage: `
+{/* Interactive graphics from the high-cardinality-data blog post. All prop-less */}
+<UsersAnalogy />
+
+<DatabaseTable />
+
+<CardinalityExplosion />
+
+<QueryRace />
+
+<MemoryGauge />
+
+<SamplingAggregation />
+`,
+  },
 } satisfies Meta
 
 export default meta

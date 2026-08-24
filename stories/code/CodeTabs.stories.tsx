@@ -7,6 +7,25 @@ const meta = {
   component: CodeTabs,
   parameters: {
     layout: 'padded',
+    mdxUsage: `
+{/* default marks the initially active tab; each tab wraps a fenced code block */}
+<CodeTabs>
+<CodeTab value="npm" label="npm" default>
+
+\`\`\`bash
+npm install @opentelemetry/api @opentelemetry/auto-instrumentations-node
+\`\`\`
+
+</CodeTab>
+<CodeTab value="yarn" label="yarn">
+
+\`\`\`bash
+yarn add @opentelemetry/api @opentelemetry/auto-instrumentations-node
+\`\`\`
+
+</CodeTab>
+</CodeTabs>
+`,
   },
   args: {
     children: null,

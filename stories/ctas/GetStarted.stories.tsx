@@ -8,7 +8,26 @@ import SignUps from '@/components/SignUps/SignUps'
 const meta = {
   title: 'MDX Components/CTAs/Get Started',
   component: GetStartedSigNoz,
-  parameters: { docsProse: false },
+  parameters: {
+    docsProse: false,
+    mdxUsage: `
+{/* GetStartedSigNoz: standard end-of-article CTA, no props */}
+<GetStartedSigNoz />
+
+{/* GetStartedInfrastructureMonitoring: default or showcase variant */}
+<GetStartedInfrastructureMonitoring variant="showcase" />
+
+{/* PricingCTA: pricing banner; add concise for the compact version */}
+<PricingCTA />
+<PricingCTA concise />
+
+{/* InlineCTA: short in-article callout with a message */}
+<InlineCTA message="Logs, metrics, traces, and alerts: one OpenTelemetry-native platform. 50+ integrations, set up in minutes." />
+
+{/* SignUps: newsletter signup block, no props */}
+<SignUps />
+`,
+  },
 } satisfies Meta<typeof GetStartedSigNoz>
 
 export default meta

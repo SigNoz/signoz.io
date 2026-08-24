@@ -5,6 +5,25 @@ import DocCardContainer from '@/components/DocCardContainer'
 const meta = {
   title: 'MDX Components/Content/DocCard',
   component: DocCard,
+  parameters: {
+    mdxUsage: `
+<DocCardContainer>
+
+<DocCard
+    title="Investigate What Changed After a Deploy"
+    description="When errors or latency jump after a release, ask Noz to compare before and after and point at the regression."
+    href="https://signoz.io/docs/ai/use-cases/noz-incident-triage/"
+/>
+
+<DocCard
+    title="Find Where Latency Is Going"
+    description="Ask Noz where a slow endpoint spends its time and get a trace broken down to the bottleneck span."
+    href="https://signoz.io/docs/ai/use-cases/noz-latency-bottleneck/"
+/>
+
+</DocCardContainer>
+`,
+  },
   args: {
     title: 'Post Deployment Monitoring',
     description:

@@ -9,6 +9,14 @@ const meta = {
   title: 'MDX Components/Comparisons/Vs SigNoz',
   parameters: {
     docsProse: false,
+    mdxUsage: `
+{/* Migration CTA banners for comparison posts. All prop-less, pick the one matching the competitor */}
+<DatadogVsSigNoz />
+
+<GrafanaVsSigNoz />
+
+<NewRelicVsSigNoz />
+`,
   },
 } satisfies Meta
 

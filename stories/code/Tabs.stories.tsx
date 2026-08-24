@@ -6,6 +6,37 @@ import { markdownToHast, renderHast } from '../lib/markdownFixture'
 const meta = {
   title: 'MDX Components/Code/Tabs',
   component: Tabs,
+  parameters: {
+    mdxUsage: `
+{/* entityName syncs the selected tab to a ?language= query param; default marks the initially active tab */}
+<Tabs entityName="language">
+<TabItem value="python" label="Python" default>
+
+\`\`\`bash
+pip install opentelemetry-distro opentelemetry-exporter-otlp
+\`\`\`
+
+</TabItem>
+<TabItem value="javascript" label="JavaScript">
+
+\`\`\`bash
+npm install @opentelemetry/api @opentelemetry/auto-instrumentations-node
+\`\`\`
+
+</TabItem>
+</Tabs>
+
+{/* variant="pill" renders compact pill-style tabs; without entityName the selection is local only */}
+<Tabs variant="pill">
+<TabItem value="cloud" label="SigNoz Cloud" default>
+Create a [SigNoz Cloud account](https://signoz.io/teams/) and copy your ingestion key.
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
+Install SigNoz with Docker or Helm, then point your exporter at \`http://localhost:4317\`.
+</TabItem>
+</Tabs>
+`,
+  },
   args: {
     children: null,
   },
@@ -56,7 +87,7 @@ const javaContent = [
   'No code changes are required for auto-instrumentation.',
 ].join('\n')
 
-// Mirrors `<Tabs entityName="language">` from data/docs — the selected tab is
+// Mirrors `<Tabs entityName="language">` from data/docs. The selected tab is
 // written to a ?language= query param. Note: clicking a tab rewrites the
 // Storybook iframe URL via history.replaceState (harmless at runtime).
 export const LanguageTabs: Story = {
@@ -89,7 +120,7 @@ export const PillVariant: Story = {
         'Create a [SigNoz Cloud account](https://signoz.io/teams/) and copy your ingestion key from **Settings → Ingestion Settings**.'
       ),
       selfHost: await markdownToHast(
-        'Install SigNoz with Docker or Helm — see the [install docs](https://signoz.io/docs/install/) — then point your exporter at `http://localhost:4317`.'
+        'Install SigNoz with Docker or Helm, see the [install docs](https://signoz.io/docs/install/), then point your exporter at `http://localhost:4317`.'
       ),
     }),
   ],
@@ -111,7 +142,7 @@ export const DefaultOnSecondTab: Story = {
   loaders: [
     async () => ({
       manual: await markdownToHast(
-        'Manual instrumentation gives you full control over spans — create a tracer with `trace.getTracer()` and wrap the operations you care about.'
+        'Manual instrumentation gives you full control over spans. Create a tracer with `trace.getTracer()` and wrap the operations you care about.'
       ),
       auto: await markdownToHast(
         'Auto-instrumentation covers popular frameworks (HTTP servers, database clients, message queues) with zero code changes. Recommended starting point.'

@@ -7,6 +7,31 @@ const meta = {
   component: RegionAwarePre,
   parameters: {
     layout: 'padded',
+    mdxUsage: `
+{/* Fenced code blocks are markdown, not JSX. The language enables syntax highlighting */}
+\`\`\`bash
+docker compose up -d
+\`\`\`
+
+{/* :filename adds a title bar; {4} highlights line 4 */}
+\`\`\`yaml:otel-collector-config.yaml {4}
+receivers:
+  otlp:
+    protocols:
+      grpc:
+\`\`\`
+
+{/* Other meta flags: minimap (scroll minimap for long blocks), collapse={5} (fold after 5 lines), noLineNumbers (hide the gutter) */}
+\`\`\`bash minimap collapse={5} noLineNumbers
+echo "step 1"
+echo "step 2"
+\`\`\`
+
+{/* <region> is substituted with the reader's selected SigNoz Cloud region */}
+\`\`\`bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+\`\`\`
+`,
   },
 } satisfies Meta<typeof RegionAwarePre>
 

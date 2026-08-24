@@ -4,6 +4,18 @@ import CustomLink from '@/components/Link'
 const meta = {
   title: 'MDX Components/HTML Overrides/Link (a)',
   component: CustomLink,
+  parameters: {
+    mdxUsage: `
+{/* Internal links: plain markdown with absolute signoz.io URLs */}
+Follow the [instrumentation docs](https://signoz.io/docs/instrumentation/) to send traces to SigNoz.
+
+{/* Anchor links jump to a heading on the same page */}
+Already instrumented? Skip ahead to [Send traces to SigNoz](#send-traces-to-signoz).
+
+{/* External links must use the anchor form with these rel attributes */}
+See the <a href="https://opentelemetry.io/docs/collector/configuration/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collector configuration reference</a>.
+`,
+  },
   args: {
     href: 'https://signoz.io/docs/instrumentation/',
     children: 'instrumentation docs',

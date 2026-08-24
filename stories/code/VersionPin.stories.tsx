@@ -4,6 +4,14 @@ import NodeVersionPin from '@/components/NodeVersionPin/NodeVersionPin'
 const meta = {
   title: 'MDX Components/Code/VersionPin',
   component: NodeVersionPin,
+  parameters: {
+    mdxUsage: `
+{/* Renders the pinned OpenTelemetry Node.js dependency versions with an npm install command */}
+If spans do not appear in SigNoz, pin the OpenTelemetry dependency versions below:
+
+<VersionPin />
+`,
+  },
 } satisfies Meta<typeof NodeVersionPin>
 
 export default meta

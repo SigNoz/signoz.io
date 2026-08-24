@@ -5,6 +5,16 @@ import { markdownToHast, renderHast } from '../lib/markdownFixture'
 const meta = {
   title: 'MDX Components/HTML Overrides/Table',
   component: TableWrapper,
+  parameters: {
+    mdxUsage: `
+{/* Plain GFM markdown tables, no component needed */}
+| Signal  | Receiver      | Protocol | Default endpoint    |
+| ------- | ------------- | -------- | ------------------- |
+| Traces  | \`otlp\`        | gRPC     | \`0.0.0.0:4317\`      |
+| Metrics | \`hostmetrics\` | -        | scraped every 60s   |
+| Logs    | \`filelog\`     | -        | \`/var/log/**/*.log\` |
+`,
+  },
   args: {
     children: null,
   },
@@ -25,8 +35,8 @@ export const CollectorReceivers: Story = fixtureStory(
     '| ------- | ------------- | -------- | --------------------- |',
     '| Traces  | `otlp`        | gRPC     | `0.0.0.0:4317`        |',
     '| Traces  | `otlp`        | HTTP     | `0.0.0.0:4318`        |',
-    '| Metrics | `hostmetrics` | —        | scraped every 60s     |',
-    '| Logs    | `filelog`     | —        | `/var/log/**/*.log`   |',
+    '| Metrics | `hostmetrics` | -        | scraped every 60s     |',
+    '| Logs    | `filelog`     | -        | `/var/log/**/*.log`   |',
   ].join('\n')
 )
 

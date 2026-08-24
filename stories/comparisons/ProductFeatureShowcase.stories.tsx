@@ -6,6 +6,10 @@ const meta = {
   component: ProductFeatureShowcase,
   parameters: {
     docsProse: false,
+    mdxUsage: `
+{/* Feature-comparison showcase card used in Datadog-alternative posts */}
+<ProductFeatureShowcase />
+`,
   },
 } satisfies Meta<typeof ProductFeatureShowcase>
 

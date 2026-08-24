@@ -4,6 +4,11 @@ import InterlinkCard from '@/components/InterlinkCard/InterlinkCard'
 const meta = {
   title: 'MDX Components/Content/InterlinkCard',
   component: InterlinkCard,
+  parameters: {
+    mdxUsage: `
+<InterlinkCard title="Docs for instrumenting your application to send traces" href="https://signoz.io/docs/instrumentation/" />
+`,
+  },
   args: {
     title: 'Docs for instrumenting your application to send traces',
     href: 'https://signoz.io/docs/instrumentation/',

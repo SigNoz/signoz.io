@@ -4,6 +4,11 @@ import YouTube from '@/components/VideoPlayer/VideoPlayer'
 const meta = {
   title: 'MDX Components/Content/YouTube',
   component: YouTube,
+  parameters: {
+    mdxUsage: `
+<YouTube id="sKQrv7RM3YY" mute="false" />
+`,
+  },
   args: {
     // Real id from data/docs/langflow-observability.mdx
     id: 'sKQrv7RM3YY',

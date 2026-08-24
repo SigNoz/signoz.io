@@ -5,10 +5,31 @@ import Figure from '@/components/Figure/Figure'
 const meta = {
   title: 'MDX Components/Content/Figure',
   component: Figure,
+  parameters: {
+    mdxUsage: `
+<Figure
+  src="/img/docs/alerts/alerts-metrics-based-1.webp"
+  alt="Using Query Builder to define the metric to monitor"
+  caption="Using Query Builder to define the metric to monitor"
+/>
+
+{/* Optional: link + sourceText append a source attribution to the caption */}
+<Figure
+  src="/img/docs/alerts-query-builder.webp"
+  alt="Query builder while creating a metrics-based alert in SigNoz"
+  caption="Building an alert query on p99 latency."
+  link="https://signoz.io/docs/alerts/"
+  sourceText="SigNoz Alerts docs"
+/>
+
+{/* NextImage is also registered in MDX for raw next/image rendering */}
+<NextImage src="/img/docs/alerts-query-builder.webp" alt="Alert query builder" width={1200} height={675} />
+`,
+  },
   args: {
     src: '/img/docs/alert-rules.webp',
     alt: 'Alert rules list in SigNoz showing rule name, severity, and firing state',
-    caption: 'Alert rules in SigNoz — click the image to zoom',
+    caption: 'Alert rules in SigNoz. Click the image to zoom',
   },
 } satisfies Meta<typeof Figure>
 

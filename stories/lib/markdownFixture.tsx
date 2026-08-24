@@ -17,7 +17,7 @@ const processor = unified()
   .use(remarkCodeTitleToMeta)
   .use(remarkMath)
   .use(remarkRehype)
-   
+
   .use(docsRehypePlugins as any)
 
 export async function markdownToHast(markdown: string): Promise<Root> {
@@ -30,7 +30,7 @@ export function renderHast(tree: Root): ReactNode {
     Fragment,
     jsx,
     jsxs,
-     
+
     components: components as any,
   })
 }

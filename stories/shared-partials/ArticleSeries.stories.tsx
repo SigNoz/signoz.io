@@ -4,6 +4,33 @@ import ArticleSeriesTop from '@/components/ArticleSeries/ArticleSeriesTop'
 
 const meta = {
   title: 'MDX Components/Shared Partials/Article Series',
+  parameters: {
+    mdxUsage: `
+{/* Top of the post, right after frontmatter; omit the previous/next props on the first/last part */}
+<ArticleSeriesTop
+  seriesName="OpenTelemetry NextJS Tutorial"
+  seriesOverviewHref="/blog/opentelemetry-nextjs"
+  currentPart="3"
+  totalParts="4"
+  previousTitle="Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry"
+  previousHref="/blog/opentelemetry-nextjs-web-vitals"
+  nextTitle="Deploying and Scaling OpenTelemetry in Production NextJS Apps"
+  nextHref="/blog/opentelemetry-nextjs-production"
+/>
+
+{/* Same props, placed at the end of the post */}
+<ArticleSeriesBottom
+  seriesName="OpenTelemetry NextJS Tutorial"
+  seriesOverviewHref="/blog/opentelemetry-nextjs"
+  currentPart="3"
+  totalParts="4"
+  previousTitle="Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry"
+  previousHref="/blog/opentelemetry-nextjs-web-vitals"
+  nextTitle="Deploying and Scaling OpenTelemetry in Production NextJS Apps"
+  nextHref="/blog/opentelemetry-nextjs-production"
+/>
+`,
+  },
 } satisfies Meta
 
 export default meta

@@ -5,6 +5,14 @@ import Listicle from '@/components/Listicle/Listicle'
 const meta = {
   title: 'MDX Components/Content/Listicle',
   component: Listicle,
+  parameters: {
+    mdxUsage: `
+<Listicle name="apm-instrumentation" />
+
+{/* Optional: pre-select a section tab */}
+<Listicle name="integrations" defaultSection="all" />
+`,
+  },
 } satisfies Meta<typeof Listicle>
 
 export default meta
