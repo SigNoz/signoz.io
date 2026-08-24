@@ -10,12 +10,12 @@ import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import { cn } from 'app/lib/utils'
 
 const cardClassName =
-  'group flex w-full flex-col gap-2.5 rounded border border-[var(--action-border)] bg-[var(--action-background)] p-4 no-underline transition-colors hover:bg-[var(--action-background-hover)] sm:w-auto sm:min-w-[200px] sm:max-w-[48%]'
+  'group flex w-full flex-col gap-2.5 rounded border border-[var(--l1-border)] bg-[var(--l2-background-transparent)] p-4 no-underline transition-colors hover:bg-[var(--l2-background)] sm:w-auto sm:min-w-[200px] sm:max-w-[48%]'
 const labelClassName =
-  'whitespace-nowrap text-base leading-6 text-[var(--action-foreground)] transition-colors group-hover:text-[var(--action-foreground-hover)]'
+  'whitespace-nowrap text-base leading-6 text-[var(--l2-foreground)] transition-colors group-hover:text-[var(--l2-foreground-hover)]'
 const arrowClassName =
-  'shrink-0 text-[var(--action-foreground)] transition duration-200 group-hover:text-[var(--action-foreground-hover)]'
-const titleClassName = 'text-sm leading-5 text-[var(--action-foreground)]'
+  'shrink-0 text-[var(--l2-foreground)] transition duration-200 group-hover:text-[var(--l2-foreground-hover)]'
+const titleClassName = 'text-sm leading-5 text-[var(--l2-foreground)]'
 
 export default function DocsPrevNext() {
   const sideNav = useDocsSideNav()
