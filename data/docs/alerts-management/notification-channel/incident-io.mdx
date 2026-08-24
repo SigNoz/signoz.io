@@ -19,6 +19,8 @@ Before configuring incident.io as a notification channel in SigNoz, ensure that 
    - The **alert events URL**, of the form `https://api.incident.io/v2/alert_events/http/<source_config_id>`.
    - The **secret token**.
 
+<Figure src="/img/docs/incident-io-source-setup.webp" alt="incident.io HTTP alert source setup page with the alert events URL and secret token." caption="The source's setup page — copy the URL and the token." />
+
 ## Creating a new Notification channel
 
 To create a new incident.io notification channel in SigNoz:
@@ -36,11 +38,15 @@ To create a new incident.io notification channel in SigNoz:
 | **Description** | Template for the alert body. Markdown — incident.io renders it natively. Prefilled with a default that includes the alert summary, description, and deep links back to SigNoz. |
 | **Additional metadata** | Optional key-value pairs added to every alert's metadata. See [Send metadata to incident.io](#send-metadata-to-incidentio). |
 
+<Figure src="/img/docs/incident-io-channel-form.webp" alt="SigNoz incident.io channel form with URL, token, templates and additional metadata." caption="The incident.io channel form in SigNoz." />
+
 - Click **Test** to send a test alert, then **Save**.
 
 <Admonition>
 A successful test confirms the URL and token are correct. incident.io accepts events asynchronously, so also check the alert appeared: in incident.io, open your source's **Requests** tab (On-call → Alert routing → your source) — it lists every event received, with its outcome, for 7 days.
 </Admonition>
+
+<Figure src="/img/docs/incident-io-requests-tab.webp" alt="incident.io Requests tab showing each received event with its payload and outcome." caption="The source's Requests tab — every event SigNoz sent, with payload and outcome." />
 
 ## Editing a Notification channel
 
@@ -58,9 +64,15 @@ To make metadata usable inside incident.io (visible on alerts, filterable in rou
 ## Receive alerts in incident.io
 
 - An alert **firing creates** an incident.io alert. The description renders the markdown template, including deep links back to SigNoz: **View in SigNoz**, and **View related logs** / **View related traces** when the alert carries those links. The alert's **Links** panel also carries a link to the SigNoz rule.
+
+<Figure src="/img/docs/incident-io-firing-alert.webp" alt="A firing SigNoz alert delivered in incident.io with markdown description and SigNoz deep links." caption="A firing alert delivered in incident.io." />
+
 - When several alerts fire together, they are delivered as a **single incident.io alert** for the group.
 - **Repeat notifications while the alert is firing are ignored by incident.io** — the alert keeps the content of its first event, with no duplicates created. For current values, follow the SigNoz links on the alert.
 - A **resolve** closes the incident.io alert (`Send resolved alerts` on). If the same alert fires again later, a fresh incident.io alert is created.
+
+<Figure src="/img/docs/incident-io-resolved-alert.webp" alt="A resolved alert in incident.io showing the SigNoz labels mapped as attributes." caption="A resolved alert — SigNoz labels appear under Attributes once mapped." />
+
 - If someone resolves the alert manually in incident.io while the SigNoz alert is still firing, the next repeat notification from SigNoz re-creates it.
 
 ### Limits handled automatically
