@@ -1,0 +1,52 @@
+name: 'Chromatic (PR)'
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'components/**'
+      - 'shared/**'
+      - 'stories/**'
+      - '.storybook/**'
+      - 'css/**'
+      - 'utils/mdx/**'
+      - 'tailwind.config.js'
+      - 'postcss.config.js'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'chromatic.config.json'
+      - '.github/workflows/chromatic-pr.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  chromatic:
+    name: Run Chromatic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --non-interactive
+
+      - name: Run Chromatic
+        uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          onlyChanged: true
+          exitOnceUploaded: true
