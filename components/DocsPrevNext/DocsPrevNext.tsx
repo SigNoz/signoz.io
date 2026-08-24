@@ -4,9 +4,18 @@ import { usePathname } from 'next/navigation'
 import React from 'react'
 import { useDocsSideNav } from '@/components/DocsSidebar/DocsSideNavContext'
 import { getPrevAndNextRoutes } from '../../utils/common'
-import { ChevronsLeft, ChevronsRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
+import { cn } from 'app/lib/utils'
+
+const cardClassName =
+  'group flex w-full flex-col gap-2.5 rounded border border-[var(--action-border)] bg-[var(--action-background)] p-4 no-underline transition-colors hover:bg-[var(--action-background-hover)] sm:w-auto sm:min-w-[200px] sm:max-w-[48%]'
+const labelClassName =
+  'whitespace-nowrap text-base leading-6 text-[var(--action-foreground)] transition-colors group-hover:text-[var(--action-foreground-hover)]'
+const arrowClassName =
+  'shrink-0 text-[var(--action-foreground)] transition duration-200 group-hover:text-[var(--action-foreground-hover)]'
+const titleClassName = 'text-sm leading-5 text-[var(--action-foreground)]'
 
 export default function DocsPrevNext() {
   const sideNav = useDocsSideNav()
@@ -19,34 +28,28 @@ export default function DocsPrevNext() {
 
   const { prev, next } = getPrevAndNextRoutes(sideNav, pathname)
   return (
-    <div className="docs-prev-next-nav mt-16 flex items-center justify-between">
-      {prev && prev?.route && (
-        <Link
-          href={prev?.route || ''}
-          className="docs-prev rounded bg-signoz_slate-500 p-2 px-4 no-underline"
-          prefetch={false}
-        >
-          <div className="mb-2 text-xs font-bold">Prev</div>
-
-          <div className="flex items-center justify-center gap-1 text-sm font-bold">
-            <ChevronsLeft size={14} /> {prev?.label}
+    <div className="docs-prev-next-nav mt-16 flex flex-col gap-4 sm:flex-row sm:justify-between">
+      {prev?.route && (
+        <Link href={prev.route} className={cn('docs-prev', cardClassName)} prefetch={false}>
+          <div className="flex items-center justify-between gap-4">
+            <ArrowLeft size={16} className={cn(arrowClassName, 'group-hover:-translate-x-1')} />
+            <span className={labelClassName}>Previous</span>
           </div>
+          <div className={cn('text-right', titleClassName)}>{prev.label}</div>
         </Link>
       )}
 
-      {next && next?.route && (
+      {next?.route && (
         <Link
-          href={next?.route || ''}
-          className="docs-next rounded bg-signoz_slate-500 p-2 px-4 no-underline"
+          href={next.route}
+          className={cn('docs-next sm:ml-auto', cardClassName)}
           prefetch={false}
         >
-          <div className="mb-2 flex justify-end text-xs font-bold">Next</div>
-
-          <div className="flex items-center justify-end gap-1 text-sm font-bold">
-            {next?.label}
-
-            <ChevronsRight size={14} />
+          <div className="flex items-center justify-between gap-4">
+            <span className={labelClassName}>Next</span>
+            <ArrowRight size={16} className={cn(arrowClassName, 'group-hover:translate-x-1')} />
           </div>
+          <div className={titleClassName}>{next.label}</div>
         </Link>
       )}
     </div>
