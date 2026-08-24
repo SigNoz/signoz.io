@@ -8,7 +8,7 @@ doc_type: howto
 
 ## What is Qwen Code Observability?
 
-<a href="https://github.com/QwenLM/qwen-code" target="_blank" rel="noopener noreferrer nofollow">Qwen Code</a> is Alibaba's open-source terminal coding agent. It ships its own OpenTelemetry exporter, so instrumenting it is a matter of configuration: there is no library to install and no collector to run. Once enabled it emits all three signals, with traces covering every agent turn, model call, and tool execution, metrics covering token usage and runtime health, and structured log events for each session.
+<a href="https://github.com/QwenLM/qwen-code" target="_blank" rel="noopener noreferrer nofollow">Qwen Code</a> is Alibaba's open-source terminal coding agent. It ships its own <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> exporter, so instrumenting it is a matter of configuration: there is no library to install and no collector to run. Once enabled it emits all three signals, with traces covering every agent turn, model call, and tool execution, metrics covering token usage and runtime health, and structured log events for each session.
 
 With full Qwen Code observability in SigNoz, you can see how many tokens your team is spending and on which models, how much of each prompt is served from cache, how many round trips a single request actually takes, which tools the agent reaches for, and how much you are paying for background work nobody asked for.
 
@@ -52,7 +52,7 @@ export OTEL_SERVICE_NAME=qwen-code
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-<Admonition type="warning" title="The ingestion key has no settings key, so the environment variable is the only route">
+<Admonition type="warning" title="The ingestion key has no settings key, so the environment variable is the only route" defaultCollapsed="true">
 `settings.json` has no field for OTLP headers. `OTEL_EXPORTER_OTLP_HEADERS` is the only way to authenticate, and Qwen Code does read it. Set it in the shell that launches the CLI, or export it from your shell profile.
 </Admonition>
 
@@ -63,10 +63,6 @@ qwen "list the files in this directory and summarise the project"
 ```
 
 Spans are batched, so allow a few seconds after the turn finishes before looking in SigNoz.
-
-<Admonition type="info" title="Why there is no collector in this setup" defaultCollapsed="true">
-`otlpProtocol` accepts `grpc` or `http`, and `http` means OTLP/HTTP with a JSON payload rather than protobuf. SigNoz Cloud accepts that encoding, so the CLI can export straight to the ingestion endpoint with no collector in between. If you already run a collector for other reasons, point `otlpEndpoint` at it instead.
-</Admonition>
 
 <Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -112,11 +108,11 @@ qwen-code.interaction                 root, one per user turn
 | `qwen-code.tool.execution` | The execution phase of that same tool call |
 | `qwen-code.hook` | The hook runner, invoked per tool call |
 
-<Admonition type="warning" title="Every hook span reports an error, even on a healthy install">
+<Admonition type="warning" title="Every hook span reports an error, even on a healthy install" defaultCollapsed="true">
 With no hooks configured, every `qwen-code.hook` span carries `status_message = "hook runner returned no output without error detail"` and `error.type = hook_error`. This is the hook runner reporting an empty result and it is harmless, but on a normal workload these are the large majority of all error spans. A panel or alert built on `has_error = true` alone will read close to 100% failure on a perfectly healthy setup. Add `name != 'qwen-code.hook'` to every error query.
 </Admonition>
 
-<Admonition type="warning" title="Do not count tool calls across both tool span names">
+<Admonition type="warning" title="Do not count tool calls across both tool span names" defaultCollapsed="true">
 `qwen-code.tool.execution` is a child of `qwen-code.tool`, and both carry `gen_ai.tool.name`. Counting tool calls across both span names double counts every call. Use `name = 'qwen-code.tool'` on its own.
 </Admonition>
 
@@ -144,7 +140,7 @@ Alongside traces, Qwen Code exports a full metric set including `qwen-code.token
 
 It also emits structured log events per session, including `session.start`, `qwen-code.user_prompt`, `qwen-code.api_request`, `qwen-code.api_response`, `qwen-code.subagent_execution`, and `session.end`.
 
-<Admonition type="warning" title="logPrompts writes your prompt text to your backend">
+<Admonition type="warning" title="logPrompts writes your prompt text to your backend" defaultCollapsed="true">
 Setting `"logPrompts": true` in the telemetry block attaches prompt content to the log events. That means anything in the context window, including source code and file contents, is stored in SigNoz. Leave it off unless you specifically need prompt text and have weighed where that content ends up.
 </Admonition>
 
