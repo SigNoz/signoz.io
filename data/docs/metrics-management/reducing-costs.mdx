@@ -1,5 +1,5 @@
 ---
-date: 2026-08-10
+date: 2026-08-25
 title: Understanding Metrics Billing and Reducing Costs
 description: Learn how metrics billing works based on cardinality and discover strategies to reduce costs effectively.
 doc_type: explanation
@@ -39,13 +39,13 @@ Use a templated approach:
 Histogram metrics are particularly costly because:
 
 1. **Bucket configuration** - Each bucket distribution creates a separate series. Optimize your bucket configuration based on your workload's latency patterns.
-2. **Cumulative nature** - With cumulative histogram metrics, values continue to be sent even when there's no recent activity, especially problematic when combined with high-cardinality attributes like method names containing IDs. Switching to delta temporality avoids this — see [Use Delta Temporality](#1-use-delta-temporality).
+2. **Cumulative nature** - With cumulative histogram metrics, values continue to be sent even when there's no recent activity, especially problematic when combined with high-cardinality attributes like method names containing IDs. Switching to delta temporality avoids this. See [Use Delta Temporality](#1-use-delta-temporality).
 
 ## Cost Reduction Strategies
 
 ### 1. Use Delta Temporality
 
-OpenTelemetry SDKs export metrics with **cumulative** temporality by default: on every export interval, the SDK re-sends the running total for every active series — even when nothing has changed since the last export. With **delta** temporality, synchronous instruments (Counter, Histogram) that record no measurements during an export interval export no data points at all for that interval, so idle series don't add billable samples.
+OpenTelemetry SDKs export metrics with **cumulative** temporality by default: on every export interval, the SDK re-sends the running total for every active series, even when nothing has changed since the last export. With **delta** temporality, synchronous instruments (Counter, Histogram) that record no measurements during an export interval export no data points at all for that interval, so idle series don't add billable samples.
 
 <Admonition type="warning">
 PromQL does not read delta series. Before you switch a metric to delta, move any PromQL panel or alert on that metric to the Query Builder. A PromQL query on a delta metric keeps running and receives no new samples.
@@ -57,7 +57,7 @@ We recommend setting delta temporality in your application's SDK using the stand
 export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
 ```
 
-This environment variable is supported by the OpenTelemetry SDKs for Java, Python, Go, JavaScript/Node.js, .NET, and Ruby. Some SDKs (such as Rust) configure temporality in code instead — see the [application metrics guides](https://signoz.io/docs/metrics-management/send-metrics/#applications) for language-specific instructions.
+This environment variable is supported by the OpenTelemetry SDKs for Java, Python, Go, JavaScript/Node.js, .NET, and Ruby. Some SDKs (such as Rust) configure temporality in code instead. See the [application metrics guides](https://signoz.io/docs/metrics-management/send-metrics/#applications) for language-specific instructions.
 
 Switching a metric to delta does not break the cumulative data that SigNoz already stored. The Query Builder reads the older cumulative points and the newer delta points together. See [Temporality of Metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
 
@@ -66,7 +66,7 @@ The savings apply to synchronous instruments only. Observable (asynchronous) ins
 </Admonition>
 
 <Admonition type="warning">
-Deriving deltas at the OpenTelemetry Collector with the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/cumulativetodeltaprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">cumulativetodelta processor</a> does **not** reduce costs. The SDK still exports the cumulative value on every interval even when nothing changed, and the processor converts each of those points into a zero-value delta point — which is still ingested and billed. To get the savings, set delta temporality in the SDK itself.
+Deriving deltas at the OpenTelemetry Collector with the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/cumulativetodeltaprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">cumulativetodelta processor</a> does **not** reduce costs. The SDK still exports the cumulative value on every interval even when nothing changed, and the processor converts each of those points into a zero-value delta point, which is still ingested and billed. To get the savings, set delta temporality in the SDK itself.
 </Admonition>
 
 ### 2. Remove or Template High-Cardinality Attributes
@@ -93,7 +93,7 @@ Consider using the following techniques:
 - **Drop entire metrics** - See <a href="https://signoz.io/docs/userguide/drop-metrics/"> How to Drop and Filter OpenTelemetry Metrics </a> to remove unnecessary metrics entirely.
 
 <Admonition type="warning">
-Note that simply dropping metric labels/attributes does **not** reduce cardinality or costs. See [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/) for a detailed explanation of why this doesn't work and what to do instead.
+Dropping metric labels or attributes does **not** reduce cardinality or costs. See [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/) for a detailed explanation of why this doesn't work and what to do instead.
 </Admonition>
 
 ## Monitoring Your Costs
@@ -108,5 +108,6 @@ Use the [Cost Meter](https://signoz.io/docs/cost-meter/overview/) to:
 ## Additional Resources
 
 - <a href="https://signoz.io/blog/high-cardinality-data/" rel="noopener noreferrer nofollow" target="_blank">Comprehensive guide on cardinality</a>
-- [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/) - Why dropping labels doesn't reduce costs
-- [Cost Meter Overview](https://signoz.io/docs/cost-meter/overview/) - Monitor your observability costs
+- [Cost Control](https://signoz.io/docs/cost-control/optimize-metrics/): find which metrics drive your sample volume, then verify the reduction
+- [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/): why dropping labels doesn't reduce costs
+- [Cost Meter Overview](https://signoz.io/docs/cost-meter/overview/): monitor your observability costs
