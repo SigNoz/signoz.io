@@ -94,12 +94,14 @@ Add or remove columns for different attributes available in your logs. This work
   caption="List View settings showing Format, Font Size, Max Lines Per Row, and Columns options"
 />
 
-The columns search also accepts field names that do not appear in the suggestions list, including nested JSON paths written in dot notation (for example `body.orderId`). Type the name, and when it does not match an existing suggestion or an already-added column, it surfaces as an addable row at the top of the **Other Fields** section. Select it to add the column, then click **Save Changes**. Names are matched case-insensitively, and the search keeps the casing you type.
+The columns search also accepts field names that do not appear in the suggestions list, including nested JSON paths written in dot notation. Type the field name as it appears inside the log body, without a `body.` prefix, for example `orderId` for a top-level body field or `order.id` for a nested one. When the name does not match an existing suggestion or an already-added column, it surfaces as an addable row at the top of the **Other Fields** section. Select it to add the column, then click **Save Changes**. Names are matched case-insensitively, and the search keeps the casing you type.
 
 This works the same in the Logs Explorer and the [Live View](#live-view), and applies to logs only.
 
 <Admonition type="info">
-Resolving values from nested JSON body fields requires JSON body parsing to be enabled for your deployment. Without it, the column is added but its cells stay empty. Array-indexed paths and paths written with a leading `body.` prefix do not resolve values in the table yet.
+Resolving values from nested JSON body fields requires JSON body parsing to be enabled for your deployment. Without it, the column is added but its cells stay empty.
+
+A path written with a leading `body.` prefix, such as `body.orderId`, is still accepted and added as a column, but its cells stay empty. Drop the prefix and type just `orderId` to see values. Array-indexed paths do not resolve values in the table yet either.
 </Admonition>
 
 #### Show in Context
