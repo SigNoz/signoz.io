@@ -11,7 +11,7 @@ export const SignozDatalog = () => {
         <div className="flex w-full flex-col">
           <div>
             <p className="text-2xl font-semibold text-signoz_vanilla-100">
-              SigNoz provides up to 9X ROI than DataDog
+              SigNoz Cloud provides up to 9X ROI than DataDog
             </p>
             <p className="text-base font-normal leading-9 text-signoz_vanilla-400">
               You can also set data ingestion limits so you never get a surprise bill.

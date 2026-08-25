@@ -37,7 +37,7 @@ const ALL_FEATURES_DATA = {
   HEADER: [
     { heading: '', desc: '' },
     {
-      heading: 'Community Edition',
+      heading: 'Self Hosted SigNoz (Community)',
       desc: 'Install & manage yourself',
       action: (
         <TrackingLink
@@ -54,8 +54,8 @@ const ALL_FEATURES_DATA = {
       ),
     },
     {
-      heading: 'Teams',
-      desc: 'Cloud ⎯ starts at $49/mo',
+      heading: 'SigNoz Cloud (Teams)',
+      desc: 'Starts at $49/mo',
       action: (
         <TrackingLink
           href={'/teams/'}
@@ -71,8 +71,8 @@ const ALL_FEATURES_DATA = {
       ),
     },
     {
-      heading: 'Enterprise',
-      desc: 'Cloud / Self-Hosted',
+      heading: 'SigNoz Enterprise',
+      desc: 'Cloud, BYOC, or Self-Hosted',
       action: (
         <TrackingLink
           href={'/contact-us/?source=pricing'}
