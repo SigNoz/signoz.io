@@ -1,11 +1,25 @@
 import path from 'path'
+import remarkGfm from 'remark-gfm'
 import type { StorybookConfig } from '@storybook/nextjs-vite'
 
 const repoRoot = path.resolve(import.meta.dirname, '..')
 
 const config: StorybookConfig = {
   stories: ['../stories/**/*.mdx', '../stories/**/*.stories.@(ts|tsx)'],
-  addons: ['@storybook/addon-docs', '@storybook/addon-themes', '@chromatic-com/storybook'],
+  addons: [
+    {
+      name: '@storybook/addon-docs',
+      options: {
+        mdxPluginOptions: {
+          mdxCompileOptions: {
+            remarkPlugins: [remarkGfm],
+          },
+        },
+      },
+    },
+    '@storybook/addon-themes',
+    '@chromatic-com/storybook',
+  ],
   framework: {
     name: '@storybook/nextjs-vite',
     options: {},
