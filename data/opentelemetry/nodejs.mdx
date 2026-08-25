@@ -31,15 +31,15 @@ This guide takes you from a basic "zero-code" setup to a “production ready” 
 
 OpenTelemetry is an open-source, vendor-neutral framework for collecting **traces, metrics, and logs** from your application. It gives you three ways to instrument a Node.js service:
 
-- **Zero-code (automatic)** — no application changes. You install the auto-instrumentation libraries and preload them at startup.
-- **Code-based (automatic + manual)** — auto-instrumentation for the common libraries, plus your own spans around business logic.
-- **Manual** — you create every span and metric yourself, for full control over what gets recorded.
+- **Zero-code (automatic)**: no application changes. You install the auto-instrumentation libraries and preload them at startup.
+- **Code-based (automatic + manual)**: auto-instrumentation for the common libraries, plus your own spans around business logic.
+- **Manual**: you create every span and metric yourself, for full control over what gets recorded.
 
 This guide walks through the first and the third. The middle option is simply the two combined.
 
 ## Prerequisites
 
-- Node.js **18.19+** or **20.6+**, per the <a href="https://github.com/open-telemetry/opentelemetry-js/blob/main/doc/upgrade-to-2.x.md#-nodejs-supported-versions" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry JS 2.x supported versions</a>. Node 18 reached <a href="https://nodejs.org/en/about/eol" target="_blank" rel="noopener noreferrer nofollow">end of life on March 27, 2025</a>, so 20+ is the practical floor for new projects.
+- Node.js **18.19+** or **20.6+**, per the <a href="https://github.com/open-telemetry/opentelemetry-js/blob/main/doc/upgrade-to-2.x.md#-nodejs-supported-versions" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry JS 2.x supported versions</a>. Node 18 reached <a href="https://nodejs.org/en/about/eol" target="_blank" rel="noopener noreferrer nofollow">end of life on March 27, 2025</a>, so use Node 20 or later.
 - A destination for your telemetry data (we will use [SigNoz Cloud](https://signoz.io/teams/) for the examples, but the concepts apply to any OTLP-compliant backend).
 
 ## Quick Start
@@ -86,11 +86,9 @@ One line in `package.json` decides how you load OpenTelemetry later:
 }
 ```
 
-Because this project is CommonJS, every setup in this guide preloads instrumentation with `--require`. An ESM project (`"type": "module"`) needs a different mechanism entirely — see the note after the first run command below.
-
 ## How to Instrument Node.js Application with OpenTelemetry?
 
-### How to Auto Instrument Node.js application?
+### Auto Instrumenting your Node.js Application
 
 You should use this instrumentation when:
 
@@ -105,7 +103,7 @@ npm install --save @opentelemetry/api @opentelemetry/auto-instrumentations-node
 
 | Package | What it does |
 | --- | --- |
-| `@opentelemetry/api` | The instrumentation API — tracers, meters, and context propagation. Your code and your dependencies call this; it stays a no-op until an SDK is registered. |
+| `@opentelemetry/api` | The instrumentation API, including tracers, meters, and context propagation. Your code and your dependencies call this; it stays a no-op until an SDK is registered. |
 | `@opentelemetry/auto-instrumentations-node` | A meta-package pulling in the instrumentation libraries for common modules (`http`, `express`, database drivers), patching them at load time so they emit spans with no code changes. |
 
 For how the API and the SDK differ, see [OpenTelemetry API vs SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/).
@@ -144,7 +142,6 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 
 </KeyPointCallout>
 
-
 **Step 3: Start the Application**
 
 After setting the environment variables, start your application by running:
@@ -156,8 +153,9 @@ node index.js
 Note that there are _no flags on that command_. Node reads `NODE_OPTIONS` from your environment at startup, so the `--require` you exported in Step 2 is applied for you. That is what makes this path zero-code: your existing `npm start` script or container `CMD` keeps working unchanged.
 
 <KeyPointCallout title="Using ESM? You need two extra flags">
+Because this project is CommonJS, every setup in this guide preloads instrumentation with `--require`. An ESM project (`"type": "module"`) needs a different mechanism entirely: see [Using ESM?](#using-esm) below.
 
-`--require` only preloads CommonJS. If your `package.json` sets `"type": "module"`, you need `--import` to load the SDK and a loader hook so the instrumentation can patch your dependencies. Node 18.19.0+ is required:
+If your `package.json` sets `"type": "module"`, you need `--import` to load the SDK and a loader hook so the instrumentation can patch your dependencies. Node 18.19.0+ is required:
 
 ```bash
 node --experimental-loader=@opentelemetry/instrumentation/hook.mjs \
@@ -200,7 +198,7 @@ OTel makes it easy to get started with your observability setup, and any further
 
 ### Node.js Runtime Metrics: Event Loop Lag, GC, and Heap
 
-Traces tell you how long a request took. They don't tell you *why* the whole process got slow — and in Node.js the usual culprits are runtime-level: a blocked event loop, garbage-collection pauses, or a heap creeping toward its limit.
+Traces tell you how long a request took. They don't tell you *why* the whole process got slow. In Node.js the usual culprits are runtime-level: a blocked event loop, garbage-collection pauses, or a heap creeping toward its limit.
 
 Because Node runs your application on a single thread, one slow synchronous operation stalls every in-flight request, and no amount of span data will point at it directly.
 
@@ -261,7 +259,7 @@ Two things to watch. Setting the `OTEL_NODE_ENABLED_INSTRUMENTATIONS` environmen
 Prefer the file above unless you genuinely want a narrow list. And inside a container these metrics describe the *container*, not the Docker host, so for true host visibility run a Collector on the host instead.
 
 
-### How to Manually Instrument your Nodejs application?
+### Manually Instrumenting your Node.js Application
 
 You should use Manual Instrumentation when:
 
@@ -422,7 +420,7 @@ Three things changed. `trace.getTracer()` and `metrics.getMeter()` return the ha
 
 `tracer.startActiveSpan()` wraps `fetchData()` in a span and makes it the *active* span for the duration of the callback, so anything instrumented inside it is recorded as a child. `span.addEvent()` marks a moment in time within that span rather than a duration, which is how you record that a request started, succeeded, or failed. The `span.end()` in the `finally` block matters most: a span that is never ended is never exported.
 
-The counters are independent of tracing. `dataCounter.add(1)` increments a metric each time a route is hit — a running total, rather than something derived from spans.
+The counters are independent of tracing. `dataCounter.add(1)` increments a metric each time a route is hit. It is a running total, not something derived from spans.
 
 **Step 4: Start the Application**
 
@@ -441,17 +439,17 @@ Hit both endpoints a few times, then check your backend.
 
 **Step 5: Verify the Custom Telemetry**
 
-Your custom span appears in the trace as `fetchDataFunction`, with the events you recorded marked along its timeline. Note that the `axios` calls themselves produce no spans here and the HTTP columns read `N/A` — this SDK setup registers no instrumentation libraries, so the only spans that exist are the ones you created by hand:
+Your custom span appears in the trace as `fetchDataFunction`, with the events you recorded marked along its timeline. Note that the `axios` calls themselves produce no spans here and the HTTP columns read `N/A`; this SDK setup registers no instrumentation libraries, so the only spans that exist are the ones you created by hand:
 
 <Figure src="/img/blog/2025/12/node_manual_trace_tab.webp" alt="Custom fetchDataFunction span shown in the trace view" caption="The custom fetchDataFunction span, with the auto-instrumented HTTP calls nested inside it" />
 
-The counters will not show up on the trace — they are metrics, so you query them separately and chart them on a dashboard. In SigNoz, add a panel on `data.fetchData.counter` following the [dashboards guide](https://signoz.io/docs/userguide/manage-dashboards/).
+The counters will not show up on the trace: they are metrics, so you query them separately and chart them on a dashboard. In SigNoz, add a panel on `data.fetchData.counter` following the [dashboards guide](https://signoz.io/docs/userguide/manage-dashboards/).
 
 <Figure src="/img/blog/2025/12/metrics_counter_node_panel.webp" alt="Custom Metrics Counter panel" caption="Custom Metrics Counter panel" />
 
 ### How to Instrument Multiple Node.js Services with Docker Compose?
 
-The setup above instruments a single process. Real systems usually run several Node.js services side by side, and the good news is that nothing about the instrumentation changes — you set the same environment variables on each service, varying only `OTEL_SERVICE_NAME`.<br />
+The setup above instruments a single process. Real systems usually run several Node.js services side by side, and the good news is that nothing about the instrumentation changes: you set the same environment variables on each service, varying only `OTEL_SERVICE_NAME`.<br />
 Because the auto-instrumentation [propagates trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) across HTTP calls, a request that hops from one service to the next arrives as a single connected trace rather than as several unrelated ones.
 
 Keep your credentials out of `docker-compose.yml` by putting them in a `.env` file, and add that file to `.gitignore`:
@@ -502,7 +500,7 @@ Add further services by copying one block and changing `build`, `ports`, and `OT
 
 #### Routing Through an OpenTelemetry Collector
 
-Exporting straight to your backend is fine for a handful of services. Once you want to batch, filter, or enrich telemetry in one place — or collect host machine metrics alongside your application data — put an [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) between your services and the backend.
+Exporting straight to your backend is fine for a handful of services. Once you want to batch, filter, or enrich telemetry in one place (or collect host machine metrics alongside your application data), put an [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) between your services and the backend.
 
 The only change on the application side is the endpoint: point it at the collector's container name on the shared Docker network instead of at your backend.
 
@@ -613,7 +611,7 @@ These small steps help keep your telemetry clean, actionable, and ready for prod
 
 ## Conclusion
 
-You now have a Node.js service emitting traces, runtime metrics, and correlated logs through OpenTelemetry. Because all of it is [standard OTLP](https://signoz.io/blog/what-is-otlp/), the same instrumentation points at any compliant backend — the only thing that changes is the endpoint.
+You now have a Node.js service emitting traces, runtime metrics, and correlated logs through OpenTelemetry. Because all of it is [standard OTLP](https://signoz.io/blog/what-is-otlp/), the same instrumentation points at any compliant backend. It is only the endpoint that changes.
 
 From here, [custom metrics in Node.js](https://signoz.io/opentelemetry/custom-metrics-nodejs/) covers business counters and gauges, and [adding manual spans](https://signoz.io/opentelemetry/add-manual-span-to-traces-nodejs/) goes deeper on tracing your own code paths.
 
