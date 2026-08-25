@@ -1,0 +1,390 @@
+---
+date: 2026-08-25
+title: "OpenTelemetry Environment Variables: Configure SDKs"
+description: Learn how common OpenTelemetry environment variables configure service identity, OTLP endpoints, headers, protocols, batching, and sampling for SigNoz.
+doc_type: reference
+---
+
+## Overview
+
+OpenTelemetry SDKs use environment variables to configure telemetry collection and export. This page explains the common variables for sending data to SigNoz.
+
+Use this reference with a language-specific [instrumentation guide](https://signoz.io/docs/instrumentation/). The guide shows which variables its SDK or agent supports.
+
+<Admonition type="info">
+OpenTelemetry defines standard variable names, but SDK support varies by language. Before you depend on a variable, review the <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/spec-compliance-matrix.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry compliance matrix</a>.
+</Admonition>
+
+## Configure SigNoz Cloud
+
+Set these variables in the process that runs your instrumented application:
+
+```bash
+export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+```
+
+**Verify these values:**
+
+- `<service-name>`: Use one stable name for each deployable service.
+- `<region>`: Use your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Use your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+After you set the variables, restart your application. SigNoz Cloud accepts OTLP/HTTP and OTLP/gRPC on port 443.
+
+<Admonition type="info">
+Self-hosted SigNoz does not require an ingestion key by default. Use your collector address and follow the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
+</Admonition>
+
+## Validate the configuration
+
+Generate traffic for your application. Then validate each signal that your instrumentation produces:
+
+- **Traces:** Open **Services** and find the value of `OTEL_SERVICE_NAME`.
+- **Logs:** Open **Logs Explorer** and search for recent records from your service.
+- **Metrics:** Open **Metrics Explorer** and search for a metric from your instrumentation.
+
+If data does not appear, use the [troubleshooting section](#troubleshooting).
+
+## Core variables
+
+| Variable | Purpose | SigNoz Cloud value |
+|---|---|---|
+| `OTEL_SERVICE_NAME` | Sets the `service.name` resource attribute | `<service-name>` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Sets the base endpoint for OTLP export | `https://ingest.<region>.signoz.cloud:443` |
+| `OTEL_EXPORTER_OTLP_HEADERS` | Adds authentication headers to OTLP requests | `signoz-ingestion-key=<your-ingestion-key>` |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | Selects the OTLP transport and encoding | `http/protobuf` |
+
+### OTEL_SERVICE_NAME
+
+`OTEL_SERVICE_NAME` sets the `service.name` resource attribute. SigNoz shows this value in the Services list.
+
+If you do not set a service name, OpenTelemetry uses `unknown_service:<executable-name>`. If the executable name is unavailable, it uses `unknown_service`.
+
+Use the same service name for all replicas of one service. Use different names for services that perform different functions.
+
+### OTEL_RESOURCE_ATTRIBUTES
+
+`OTEL_RESOURCE_ATTRIBUTES` adds resource attributes to each span, metric, and log record. Use these attributes to describe the service and its environment.
+
+```bash
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment.name=production,service.version=1.4.2"
+```
+
+The value contains comma-separated `key=value` pairs. Percent-encode commas and equals signs that occur inside a key or value.
+
+`OTEL_SERVICE_NAME` takes precedence over `service.name` in `OTEL_RESOURCE_ATTRIBUTES`.
+
+<Admonition type="info">
+Use `deployment.environment.name` for the deployment environment. OpenTelemetry deprecated `deployment.environment` in favor of this attribute. See the <a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/deployment/" target="_blank" rel="noopener noreferrer nofollow">deployment attribute registry</a>.
+</Admonition>
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
+
+### OTEL_EXPORTER_OTLP_ENDPOINT
+
+`OTEL_EXPORTER_OTLP_ENDPOINT` sets one base endpoint for traces, metrics, and logs. The endpoint behavior depends on the selected protocol.
+
+For OTLP/HTTP, the SDK appends a path for each signal:
+
+```text
+https://ingest.<region>.signoz.cloud:443/v1/traces
+https://ingest.<region>.signoz.cloud:443/v1/metrics
+https://ingest.<region>.signoz.cloud:443/v1/logs
+```
+
+For OTLP/gRPC, the SDK uses the endpoint as a gRPC target. Do not add an OTLP/HTTP signal path to a gRPC endpoint.
+
+<Admonition type="warning">
+Do not add `/v1/traces` to `OTEL_EXPORTER_OTLP_ENDPOINT` for OTLP/HTTP. The SDK appends another signal path and sends the request to an incorrect URL.
+</Admonition>
+
+### OTEL_EXPORTER_OTLP_HEADERS
+
+`OTEL_EXPORTER_OTLP_HEADERS` adds headers to trace, metric, and log export requests. SigNoz Cloud uses `signoz-ingestion-key` for authentication.
+
+```bash
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Separate multiple headers with commas:
+
+```bash
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>,x-tenant=acme"
+```
+
+The format follows the W3C Baggage header format. Semicolons cannot separate headers.
+
+Do not add a `Bearer` prefix to the ingestion key. Do not use the deprecated `signoz-access-token` header.
+
+### OTEL_EXPORTER_OTLP_PROTOCOL
+
+`OTEL_EXPORTER_OTLP_PROTOCOL` selects the transport and encoding. Set it because SDK defaults can differ.
+
+| Value | Transport | SigNoz Cloud | Self-hosted default |
+|---|---|---|---|
+| `http/protobuf` | Protobuf over HTTP | Port 443 | Port 4318 |
+| `grpc` | Protobuf over gRPC | Port 443 | Port 4317 |
+| `http/json` | JSON over HTTP | Port 443 | Port 4318 |
+
+An OTLP exporter must support `grpc`, `http/protobuf`, or both. Support for `http/json` is optional.
+
+SigNoz documentation recommends `http/protobuf`. It is easier to configure across proxies and load balancers.
+
+## Signal-specific variables
+
+If one signal needs a different endpoint or setting, use a signal-specific variable. The signal-specific value takes precedence for that signal.
+
+The common signal-specific forms are:
+
+| All signals | Traces | Metrics | Logs |
+|---|---|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` | `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` | `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` |
+| `OTEL_EXPORTER_OTLP_HEADERS` | `OTEL_EXPORTER_OTLP_TRACES_HEADERS` | `OTEL_EXPORTER_OTLP_METRICS_HEADERS` | `OTEL_EXPORTER_OTLP_LOGS_HEADERS` |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL` | `OTEL_EXPORTER_OTLP_METRICS_PROTOCOL` | `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL` |
+| `OTEL_EXPORTER_OTLP_TIMEOUT` | `OTEL_EXPORTER_OTLP_TRACES_TIMEOUT` | `OTEL_EXPORTER_OTLP_METRICS_TIMEOUT` | `OTEL_EXPORTER_OTLP_LOGS_TIMEOUT` |
+| `OTEL_EXPORTER_OTLP_COMPRESSION` | `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION` | `OTEL_EXPORTER_OTLP_METRICS_COMPRESSION` | `OTEL_EXPORTER_OTLP_LOGS_COMPRESSION` |
+
+For OTLP/HTTP, the SDK uses a signal-specific endpoint as written. Include the signal path in the value:
+
+```bash
+export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/traces"
+```
+
+## Transport variables
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `OTEL_EXPORTER_OTLP_TIMEOUT` | `10000` | Sets the export timeout in milliseconds |
+| `OTEL_EXPORTER_OTLP_COMPRESSION` | No value | Selects `gzip` or `none` |
+| `OTEL_EXPORTER_OTLP_INSECURE` | `false` | Controls transport security for a gRPC endpoint without a scheme |
+
+An `http://` or `https://` endpoint scheme takes precedence over `OTEL_EXPORTER_OTLP_INSECURE`. OTLP/HTTP uses the endpoint scheme.
+
+SigNoz Cloud does not require custom certificate variables. Self-hosted deployments with custom TLS can use these variables:
+
+| Variable | Purpose |
+|---|---|
+| `OTEL_EXPORTER_OTLP_CERTIFICATE` | Path to the trusted server certificate file |
+| `OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE` | Path to the client certificate file for mutual TLS |
+| `OTEL_EXPORTER_OTLP_CLIENT_KEY` | Path to the client private key file for mutual TLS |
+
+## Exporter selection
+
+| Variable | Default | Common values |
+|---|---|---|
+| `OTEL_TRACES_EXPORTER` | `otlp` | `otlp`, `zipkin`, `console`, `none` |
+| `OTEL_METRICS_EXPORTER` | `otlp` | `otlp`, `prometheus`, `console`, `none` |
+| `OTEL_LOGS_EXPORTER` | `otlp` | `otlp`, `console`, `none` |
+| `OTEL_SDK_DISABLED` | `false` | `true`, `false` |
+
+Use `none` to disable export for one signal. Use `console` for a short diagnostic test.
+
+<Admonition type="warning">
+The `console` exporter replaces OTLP export for that signal. After the diagnostic test, restore the value to `otlp`.
+</Admonition>
+
+## Sampling and propagation
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `OTEL_TRACES_SAMPLER` | `parentbased_always_on` | Selects the trace sampler |
+| `OTEL_TRACES_SAMPLER_ARG` | No value | Supplies an argument for the selected sampler |
+| `OTEL_PROPAGATORS` | `tracecontext,baggage` | Selects comma-separated context propagators |
+
+Common sampler values include:
+
+`always_on`, `always_off`, `traceidratio`, `parentbased_always_on`, `parentbased_always_off`, `parentbased_traceidratio`
+
+For ratio samplers, set `OTEL_TRACES_SAMPLER_ARG` to a number from 0 through 1. This example samples 10 percent of traces:
+
+```bash
+export OTEL_TRACES_SAMPLER="parentbased_traceidratio"
+export OTEL_TRACES_SAMPLER_ARG="0.1"
+```
+
+Common propagator values include:
+
+`tracecontext`, `baggage`, `b3`, `b3multi`, `xray`, `none`
+
+Each pair of communicating services must share a propagation format. Otherwise, the receiving service starts a separate trace.
+
+## Batch and metric export variables
+
+All durations in this section use milliseconds.
+
+### Traces
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `OTEL_BSP_SCHEDULE_DELAY` | `5000` | Sets the delay between batch exports |
+| `OTEL_BSP_EXPORT_TIMEOUT` | `30000` | Sets the time limit for one batch export |
+| `OTEL_BSP_MAX_QUEUE_SIZE` | `2048` | Sets the maximum queued span count |
+| `OTEL_BSP_MAX_EXPORT_BATCH_SIZE` | `512` | Sets the maximum spans in one batch |
+
+### Logs
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `OTEL_BLRP_SCHEDULE_DELAY` | `1000` | Sets the delay between batch exports |
+| `OTEL_BLRP_EXPORT_TIMEOUT` | `30000` | Sets the time limit for one batch export |
+| `OTEL_BLRP_MAX_QUEUE_SIZE` | `2048` | Sets the maximum queued log-record count |
+| `OTEL_BLRP_MAX_EXPORT_BATCH_SIZE` | `512` | Sets the maximum log records in one batch |
+
+The maximum batch size must not exceed the queue size.
+
+### Metrics
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `OTEL_METRIC_EXPORT_INTERVAL` | `60000` | Sets the interval between export attempts |
+| `OTEL_METRIC_EXPORT_TIMEOUT` | `30000` | Sets the time limit for one export attempt |
+
+A shorter export interval shows new metrics sooner and increases the number of export requests.
+
+These variables change the exported metric data model and which measurements become exemplars:
+
+- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`: Uses `cumulative` by default. It also accepts `delta` and `lowmemory`.
+- `OTEL_EXPORTER_OTLP_METRICS_DEFAULT_HISTOGRAM_AGGREGATION`: Uses `explicit_bucket_histogram` by default. It also accepts `base2_exponential_bucket_histogram`.
+- `OTEL_METRICS_EXEMPLAR_FILTER`: Selects which measurements attach exemplars. Uses `trace_based` by default. It also accepts `always_on` and `always_off`.
+
+```bash
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE="delta"
+```
+
+SigNoz recommends `delta` for `Counter`, `Async Counter`, and `Histogram` instruments. A synchronous instrument that records nothing during an export interval then sends no data point for that interval, which lowers billable samples. `UpDownCounter` and `Async UpDownCounter` stay cumulative regardless of this setting. `Gauge` and `Async Gauge` have no aggregation temporality, so this setting does not affect them. See [Use delta temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for the full cost breakdown.
+
+<Admonition type="warning">
+Before you switch a metric to delta, move any PromQL panel or alert on that metric to the Query Builder. PromQL does not read delta series: a PromQL query on that metric keeps running but stops receiving new samples. Query Builder panels that compute rates or totals can also show incorrect values while cumulative and delta points from before and after the switch overlap. See the [metrics temporality FAQ](https://signoz.io/docs/metrics-management/troubleshooting/faqs/) for temporality mismatch behavior.
+</Admonition>
+
+## Attribute, span, and log record limits
+
+The SDK truncates long attribute values and drops items that exceed count limits. Support for each limit varies by language.
+
+| Variable | Default |
+|---|---|
+| `OTEL_ATTRIBUTE_COUNT_LIMIT` | `128` |
+| `OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT` | No limit |
+| `OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT` | `128` |
+| `OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT` | No limit |
+| `OTEL_SPAN_EVENT_COUNT_LIMIT` | `128` |
+| `OTEL_SPAN_LINK_COUNT_LIMIT` | `128` |
+| `OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT` | `128` |
+| `OTEL_LINK_ATTRIBUTE_COUNT_LIMIT` | `128` |
+| `OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT` | `128` |
+| `OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT` | No limit |
+
+SigNoz Cloud rejects export requests larger than 16 MB. Self-hosted SigNoz sets its payload limit in the collector configuration; see [payload size](https://signoz.io/docs/ingestion/self-hosted/overview/#payload-size). If an export request exceeds the limit, reduce the batch size or attribute value length.
+
+## Configuration precedence
+
+OpenTelemetry defines these precedence rules:
+
+- A signal-specific OTLP variable takes precedence over its general OTLP variable.
+- `OTEL_SERVICE_NAME` takes precedence over `service.name` in `OTEL_RESOURCE_ATTRIBUTES`.
+- An empty environment variable has the same effect as an unset variable.
+
+The OpenTelemetry specification does not define universal precedence between programmatic and environment configuration. Review the behavior of your SDK.
+
+Some SDKs support declarative configuration through `OTEL_CONFIG_FILE`. If the file does not reference a variable for substitution, the SDK ignores that variable.
+
+`OTEL_EXPERIMENTAL_CONFIG_FILE` is the deprecated name for `OTEL_CONFIG_FILE`. Declarative configuration support remains limited across language SDKs.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Exports fail with 404 Not Found
+
+**Cause:** The general OTLP/HTTP endpoint includes a signal path. The SDK appended the path again.
+
+**Resolution:** Remove the path from `OTEL_EXPORTER_OTLP_ENDPOINT`:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+```
+
+Use a signal path with a signal-specific endpoint.
+
+### Exports fail with 401 or 403
+
+**Cause:** The ingestion key header is missing or has an incorrect format.
+
+**Resolution:** Set the SigNoz Cloud ingestion header:
+
+```bash
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Use the key value without a `Bearer` prefix.
+
+### The service appears as unknown_service
+
+**Cause:** The application process did not receive `OTEL_SERVICE_NAME`.
+
+**Resolution:** Export `OTEL_SERVICE_NAME` in the same process environment that starts the application. Then restart the application.
+
+### Exports time out or connections reset
+
+**Cause:** The protocol does not match the self-hosted port, or the request exceeds a transport limit.
+
+**Resolution:** Pair `http/protobuf` with port 4318 or `grpc` with port 4317. SigNoz Cloud uses port 443 for both protocols.
+
+If the network is slow, increase `OTEL_EXPORTER_OTLP_TIMEOUT`. If requests are large, enable `gzip` and reduce the batch size.
+
+### A variable has no effect
+
+**Cause:** The SDK does not support the variable, or another configuration source takes precedence.
+
+**Resolution:** Review the <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/spec-compliance-matrix.md" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry compliance matrix</a>. Then review the configuration rules for your SDK.
+
+### Inspect SDK export errors
+
+If your SDK supports `OTEL_LOG_LEVEL`, set it to `debug`:
+
+```bash
+export OTEL_LOG_LEVEL="debug"
+```
+
+Read the application logs for the target endpoint and export errors. After the test, restore your previous log level.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Official OpenTelemetry references
+</ToggleHeading>
+
+Use these official sources:
+
+- <a href="https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/" target="_blank" rel="noopener noreferrer nofollow">Environment Variable Specification</a>
+- <a href="https://opentelemetry.io/docs/specs/otel/protocol/exporter/" target="_blank" rel="noopener noreferrer nofollow">OTLP Exporter Specification</a>
+- <a href="https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/" target="_blank" rel="noopener noreferrer nofollow">OTLP Exporter Configuration</a>
+- <a href="https://opentelemetry.io/docs/specs/otel/metrics/sdk_exporters/otlp/" target="_blank" rel="noopener noreferrer nofollow">OTLP Metrics Exporter Specification</a>
+- <a href="https://opentelemetry.io/docs/specs/otel/resource/sdk/" target="_blank" rel="noopener noreferrer nofollow">Resource SDK Specification</a>
+- <a href="https://opentelemetry.io/docs/specs/semconv/resource/service/" target="_blank" rel="noopener noreferrer nofollow">Service Semantic Conventions</a>
+- <a href="https://opentelemetry.io/docs/languages/sdk-configuration/declarative-configuration/" target="_blank" rel="noopener noreferrer nofollow">Declarative Configuration</a>
+- <a href="https://opentelemetry.io/docs/specs/otel/configuration/supplementary-guidelines/" target="_blank" rel="noopener noreferrer nofollow">Configuration Supplementary Guidelines</a>
+
+</details>
+
+## Next Steps
+
+- [Instrument your application](https://signoz.io/docs/instrumentation/) to start sending traces, metrics, and logs.
+- [Configure SigNoz Cloud ingestion](https://signoz.io/docs/ingestion/signoz-cloud/overview/) for region, endpoint, and authentication details.
+- [Configure self-hosted ingestion](https://signoz.io/docs/ingestion/self-hosted/overview/) for endpoint and port details on your deployment.
+- [Compare Cloud and self-hosted ingestion](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/) to adapt a guide written for one environment to the other.
+
+## Get Help
+
+<GetHelp />
