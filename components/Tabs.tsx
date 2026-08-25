@@ -16,6 +16,28 @@ interface TabsProps {
   segmented?: boolean
 }
 
+// Segmented button bar look for DS secondary tabs, shared with
+// TroubleshootingWizard's SegmentedControl. Pairs with styles.segmented.
+export const segmentedTabVars = (size: 'default' | 'small' = 'default'): React.CSSProperties =>
+  ({
+    '--tab-list-wrapper-secondary-padding-left': '0px',
+    '--tab-trigger-secondary-padding': `var(--spacing-5, 10px) ${
+      size === 'small' ? 'var(--spacing-6, 12px)' : 'var(--spacing-12, 24px)'
+    }`,
+    '--tab-trigger-secondary-font-size': 'var(--periscope-font-size-small, 11px)',
+    '--tab-trigger-secondary-gap': 'var(--spacing-3, 6px)',
+    /* Bar border lives on the wrapper (Tabs.module.css); no per-cell borders */
+    '--tab-trigger-secondary-border-width': '0px',
+    /* Border-radius rounds the active cell bg even at 0 border width */
+    '--tab-trigger-secondary-border-radius': '0px',
+    '--tab-trigger-secondary-bg': 'transparent',
+    '--tab-trigger-secondary-active-bg': 'var(--l3-background-60)',
+    '--tab-text-color': 'var(--l2-foreground)',
+    /* DS fallbacks for hover/active text are broken (missing inner var()) */
+    '--tab-hover-text-color': 'var(--l1-foreground-hover)',
+    '--tab-active-text-color': 'var(--l1-foreground-hover)',
+  }) as React.CSSProperties
+
 const Tabs = ({
   children,
   entityName,
@@ -84,20 +106,7 @@ const Tabs = ({
   const dsVariant = variant === 'pill' ? 'primary' : 'secondary'
   const isSegmented = segmented && variant !== 'pill'
 
-  const segmentedVars = isSegmented
-    ? ({
-        '--tab-trigger-secondary-padding': 'var(--spacing-5, 10px) var(--spacing-12, 24px)',
-        '--tab-trigger-secondary-font-size': 'var(--periscope-font-size-small, 11px)',
-        '--tab-trigger-secondary-gap': 'var(--spacing-3, 6px)',
-        '--tab-trigger-secondary-border-width': '0px',
-        '--tab-trigger-secondary-border-radius': '0px',
-        '--tab-trigger-secondary-bg': 'transparent',
-        '--tab-trigger-secondary-active-bg': 'var(--l3-background-60)',
-        '--tab-text-color': 'var(--l2-foreground)',
-        '--tab-hover-text-color': 'var(--l1-foreground-hover)',
-        '--tab-active-text-color': 'var(--l1-foreground-hover)',
-      } as React.CSSProperties)
-    : {}
+  const segmentedVars = isSegmented ? segmentedTabVars() : {}
 
   const visibleChildren = validChildren.filter((child) => {
     if (hideSelfHostTab && (child.props.value as string).startsWith('self-host')) {
