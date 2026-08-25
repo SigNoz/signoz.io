@@ -1,0 +1,211 @@
+---
+published_date: 2026-08-24
+title: Qwen Code Observability and Monitoring with OpenTelemetry
+meta_title: Qwen Code CLI OpenTelemetry Monitoring
+description: Monitor Qwen Code CLI with OpenTelemetry and SigNoz. Trace every agent turn, model call, and tool execution, and track token spend across your team.
+doc_type: howto
+---
+
+## What is Qwen Code Observability?
+
+<a href="https://github.com/QwenLM/qwen-code" target="_blank" rel="noopener noreferrer nofollow">Qwen Code</a> is Alibaba's open-source terminal coding agent. It ships its own <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> exporter, so instrumenting it is a matter of configuration: there is no library to install and no collector to run. Once enabled it emits all three signals, with traces covering every agent turn, model call, and tool execution, metrics covering token usage and runtime health, and structured log events for each session.
+
+With full Qwen Code observability in SigNoz, you can see how many tokens your team is spending and on which models, how much of each prompt is served from cache, how many round trips a single request actually takes, which tools the agent reaches for, and how much you are paying for background work nobody asked for.
+
+## Prerequisites
+
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
+- Qwen Code 0.21.15 or later, installed with `npm install -g @qwen-code/qwen-code`
+- Node.js 20 or later
+- A configured model provider, such as a DashScope API key or any OpenAI-compatible endpoint
+
+## Monitor Qwen Code with OpenTelemetry
+
+Telemetry is built into the CLI and turned off by default. Enabling it takes one settings block and one environment variable.
+
+**Step 1:** Enable telemetry in `.qwen/settings.json`
+
+Create the file in your project directory, or in `~/.qwen/settings.json` to apply it to every project.
+
+```json
+{
+  "telemetry": {
+    "enabled": true,
+    "otlpProtocol": "http",
+    "otlpEndpoint": "https://ingest.<region>.signoz.cloud:443",
+    "metrics": { "includeSessionId": true }
+  }
+}
+```
+
+**Step 2:** Set the ingestion key and service name
+
+```bash
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME=qwen-code
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning" title="The ingestion key has no settings key, so the environment variable is the only route" defaultCollapsed="true">
+`settings.json` has no field for OTLP headers. `OTEL_EXPORTER_OTLP_HEADERS` is the only way to authenticate, and Qwen Code does read it. Set it in the shell that launches the CLI, or export it from your shell profile.
+</Admonition>
+
+**Step 3:** Run the agent
+
+```bash
+qwen "list the files in this directory and summarise the project"
+```
+
+Spans are batched, so allow a few seconds after the turn finishes before looking in SigNoz.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## View Qwen Code Traces in SigNoz
+
+Open the Traces explorer and filter on `service.name = 'qwen-code'`. Each turn arrives as its own trace.
+
+<Figure
+  src="/img/docs/llm/qwen-code/qwen-code-traces.webp"
+  alt="Qwen Code traces in the SigNoz traces explorer"
+  caption="Interaction, model call, tool, and hook spans in the traces explorer"
+/>
+
+Open any `qwen-code.interaction` span to see the full turn. The waterfall shows each model call with the raw HTTP request underneath it, and each tool alongside the hook that fired for it.
+
+<Figure
+  src="/img/docs/llm/qwen-code/qwen-code-detailed-traces.webp"
+  alt="A Qwen Code turn expanded in the SigNoz trace detail view"
+  caption="One turn: 16 spans across model calls and tool executions, with the interaction attributes on the right"
+/>
+
+Note that the trace above reports three errors even though the root span status is `Ok`. All three are hook spans, and the warning below explains why that is expected.
+
+Qwen Code emits six span names, and the hierarchy matters when you write queries:
+
+```
+qwen-code.interaction                 root, one per user turn
+├── qwen-code.llm_request             the model call
+│   └── POST                (CLIENT)  auto-instrumented HTTP to the provider
+└── qwen-code.tool
+    ├── qwen-code.tool.execution      child of qwen-code.tool, not a sibling
+    └── qwen-code.hook                fires per tool call
+```
+
+| Span | What it covers |
+|---|---|
+| `qwen-code.interaction` | One user turn, the root span |
+| `qwen-code.llm_request` | One model call, with tokens, finish reason, and time to first chunk |
+| `POST` | The raw HTTP request to the provider, with status code |
+| `qwen-code.tool` | One tool call, with the tool name and outcome |
+| `qwen-code.tool.execution` | The execution phase of that same tool call |
+| `qwen-code.hook` | The hook runner, invoked per tool call |
+
+<Admonition type="warning" title="Every hook span reports an error, even on a healthy install" defaultCollapsed="true">
+With no hooks configured, every `qwen-code.hook` span carries `status_message = "hook runner returned no output without error detail"` and `error.type = hook_error`. This is the hook runner reporting an empty result and it is harmless, but on a normal workload these are the large majority of all error spans. A panel or alert built on `has_error = true` alone will read close to 100% failure on a perfectly healthy setup. Add `name != 'qwen-code.hook'` to every error query.
+</Admonition>
+
+<Admonition type="warning" title="Do not count tool calls across both tool span names" defaultCollapsed="true">
+`qwen-code.tool.execution` is a child of `qwen-code.tool`, and both carry `gen_ai.tool.name`. Counting tool calls across both span names double counts every call. Use `name = 'qwen-code.tool'` on its own.
+</Admonition>
+
+## Attributes Worth Knowing
+
+`qwen-code.llm_request` carries the token counts and model metadata. A few names differ from what you may expect from other agents:
+
+- **There is no `gen_ai.usage.total_tokens`.** Sum `gen_ai.usage.input_tokens` and `gen_ai.usage.output_tokens` instead.
+- **`gen_ai.usage.cache_read.input_tokens`** holds cached input tokens, and the segment is dotted rather than underscored.
+- **`gen_ai.response.finish_reasons` is a real array**, so values render as `["stop"]` and `["tool_calls"]` rather than as plain strings.
+- **Reasoning tokens are `thoughts_token_count`**, not a `gen_ai.*` name. On current builds it reports zero.
+- **`success` on `qwen-code.tool`** filters correctly when you quote the value (`success = 'false'`) but does not group reliably, so build success-versus-failure breakdowns from two filtered queries rather than a `groupBy`.
+
+`session.id`, `gen_ai.conversation.id`, and `qwen-code.prompt_id` correlate spans across a whole session.
+
+## Background Subagents Spend Tokens You Did Not Ask For
+
+Qwen Code runs background subagents, such as the auto-memory extractor and the dreamer, that make their own model calls. On a measured sample of 80 model calls, 18 of them, or 22%, came from background subagents rather than from a user prompt. A single "What is 2+2?" prompt triggered a subagent that consumed 7,004 input tokens on its own.
+
+None of this is visible in the terminal. `llm_request.context` separates the two cleanly: `interaction` for calls made for a user turn, `standalone` for background work. `subagent_name` names the subagent on the calls that have one. Group token sums by `llm_request.context` to see what background work actually costs you.
+
+## Metrics and Logs
+
+Alongside traces, Qwen Code exports a full metric set including `qwen-code.token.usage`, `qwen-code.api.request.count`, `qwen-code.api.request.latency`, `qwen-code.tool.call.count`, `qwen-code.session.count`, `qwen-code.file.operation.count`, `qwen-code.cpu.usage`, and `qwen-code.memory.usage`. Histograms arrive split into `.bucket`, `.count`, `.sum`, `.min`, and `.max` series.
+
+It also emits structured log events per session, including `session.start`, `qwen-code.user_prompt`, `qwen-code.api_request`, `qwen-code.api_response`, `qwen-code.subagent_execution`, and `session.end`.
+
+<Admonition type="warning" title="logPrompts writes your prompt text to your backend" defaultCollapsed="true">
+Setting `"logPrompts": true` in the telemetry block attaches prompt content to the log events. That means anything in the context window, including source code and file contents, is stored in SigNoz. Leave it off unless you specifically need prompt text and have weighed where that content ends up.
+</Admonition>
+
+## Qwen Code Observability Dashboard
+
+The [Qwen Code dashboard](https://signoz.io/docs/dashboards/dashboard-templates/qwen-code-dashboard/) gives you token spend and cache efficiency, turn and session volume, model latency and time to first chunk, tool activity, and the user-driven versus background split out of the box.
+
+<Figure
+  src="/img/docs/llm/qwen-code/qwen-code-dashboard.webp"
+  alt="Qwen Code dashboard in SigNoz"
+  caption="The Qwen Code dashboard template"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting Qwen Code Observability
+
+</ToggleHeading>
+
+### No data in SigNoz
+
+An expired or wrong ingestion key fails silently. The CLI answers normally and exits successfully while the exporter receives a 401, so nothing in the terminal tells you anything is wrong. Test the key directly:
+
+```bash
+curl -i -X POST "https://ingest.<region>.signoz.cloud/v1/traces" \
+  -H "content-type: application/json" \
+  -H "signoz-ingestion-key: <your-ingestion-key>" \
+  -d '{"resourceSpans":[]}'
+```
+
+A working key returns `200` with `{"partialSuccess":{}}`. An expired one returns `401` with `Expired key`.
+
+### Telemetry is not being sent at all
+
+Confirm the settings file the CLI actually loaded. A `.qwen/settings.json` in a different project directory has no effect on the run you are debugging. Check that `telemetry.enabled` is `true` and that `otlpEndpoint` carries no path: the exporter appends `/v1/traces` itself.
+
+### Everything looks like it is failing
+
+Check whether the errors are `qwen-code.hook` spans. Those report an error by design with no hooks configured and are usually the large majority of error spans. Filter them out with `name != 'qwen-code.hook'`.
+
+### Tool call counts look twice as high as expected
+
+`qwen-code.tool.execution` is a child of `qwen-code.tool` and both carry `gen_ai.tool.name`. Scope tool queries to `name = 'qwen-code.tool'`.
+
+### Token totals come out empty
+
+There is no `gen_ai.usage.total_tokens` attribute on Qwen Code spans. Sum `gen_ai.usage.input_tokens` and `gen_ai.usage.output_tokens` instead.
+
+### Grouping by `success` returns nothing
+
+Filter it with a quoted value instead, and use two filtered queries for a success-versus-failure split.
+
+</details>
+
+## Related integrations
+
+Instrument the other AI coding agents your team runs, using the same OpenTelemetry pipeline:
+
+- [Monitor Claude Code with OpenTelemetry](https://signoz.io/docs/claude-code-monitoring/) - token usage, cost, session activity, and tool decisions
+- [Grok Build observability with OpenTelemetry](https://signoz.io/docs/grok-build-observability/) - another agent with a native exporter and no library to install
+- [DeepSeek Harness observability with OpenTelemetry](https://signoz.io/docs/deepseek-harness-observability/) - an agent that instruments through a plugin instead
+- [Monitor OpenAI Codex with OpenTelemetry](https://signoz.io/docs/codex-monitoring/) - trace Codex runs from the IDE extension and the CLI
+- [Monitor GitHub Copilot with OpenTelemetry](https://signoz.io/docs/github-copilot-monitoring/) - trace Copilot chat requests, models, and token spend
+
+Looking for the Qwen model API rather than the CLI agent? See [Qwen observability](https://signoz.io/docs/qwen-observability/).
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.
