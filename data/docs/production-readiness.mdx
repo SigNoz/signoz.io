@@ -1,28 +1,73 @@
 ---
-date: 2026-06-29
-tags : [SigNoz Cloud]
-title: Best Practices to follow to run SigNoz in production
-description: Production readiness checklist for SigNoz covering cluster setup, scaling, TLS, sampling, and operational best practices for running SigNoz reliably.
+date: 2026-08-25
+tags: [Self-Host]
+title: Production Readiness Checklist for Self-Hosted SigNoz
+description: Run self-hosted SigNoz in production. Isolate the cluster, set retention, secure with TLS, scale the OpenTelemetry Collector, and control ingestion volume.
+doc_type: howto
 ---
 
-<SigNozCloud />
+## Overview
 
-1. Create a separate cluster for running SigNoz. This will help in the isolation of application and APM environments and hence, reduce the impact radius of operational issues.
+This checklist covers the operational work of running self-hosted SigNoz in production. Each section is independent, so you can apply them in any order.
 
-2. If you are running in k8s, use [k8s-infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) to collect telemetry (logs, metrics, traces).
-    
-3. Configure TTL for disk and use move to s3 for reduced costs. Perf of s3 is 2-3x slower than EBS. Configure retention for each of metrics, traces and logs. See [Retention Period | SigNoz](https://signoz.io/docs/userguide/retention-period/)
-    
-4. Setup alerts on important APM metrics
+<Admonition type="note">
+SigNoz Cloud manages cluster isolation, scaling, retention, and TLS for you. This page applies to self-hosted deployments.
+</Admonition>
 
-5. Harness the power of distributed tracing data by creating dashboards using Clickhouse queries. You can run group by and aggregates on tags(attributeMap) and events of a span. Also, filtering by more specific conditions should be possible. Let us know if you would like us to help write a few queries to plot a chart using the traces data. Same also, applies for the logs data.
+## Isolate the SigNoz deployment
 
-6. Secure signoz and otel-collector using TLS ingress. See [Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager | SigNoz](https://signoz.io/docs/tutorial/setting-up-tls-for-signoz/). To secure collector receivers and exporters at the component level, see [Enable TLS for OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/tls-configuration/).
-    
-7. Horizontally scale `otel-collector` which works on the push model.
+Run SigNoz on a cluster separate from the applications it monitors. This separation limits the impact radius. An application incident cannot take down the tooling you need to debug that incident.
 
-8. Use higher batch size in `otel-collector` when ingesting more than 10K events/s. The default batch size is 10K rows. Batch size upto 50K should work well.
-    
-9. Use sampling to reduce the amount of data sent to SigNoz. See [opentelemetry-collector-contrib/processor/probabilisticsamplerprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/probabilisticsamplerprocessor)
-    
+On Kubernetes, collect logs, metrics, and traces with [k8s-infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
 
+## Configure retention and storage
+
+Set a retention period for each signal separately. Metrics, traces, and logs each have their own setting. See [Retention Period](https://signoz.io/docs/userguide/retention-period/).
+
+To keep telemetry beyond your retention window for compliance or audit, add the `awss3` exporter alongside your existing `otlp` exporter. This fans newly ingested data out to both destinations. It does not move data already in ClickHouse, and the S3 copy is not queryable from the SigNoz UI, so reduce your retention separately to lower storage cost. See [Infinite Retention using AWS S3](https://signoz.io/docs/tutorial/infinite-retention-aws-s3/).
+
+## Secure SigNoz and the Collector
+
+Put SigNoz and the OpenTelemetry Collector behind a TLS ingress. See [Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager](https://signoz.io/docs/tutorial/setting-up-tls-for-signoz/).
+
+To enable TLS on individual Collector receivers and exporters, see [Enable TLS for OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/tls-configuration/).
+
+## Scale the OpenTelemetry Collector
+
+The Collector works on a push model, so scale it horizontally. Add replicas as ingestion volume grows.
+
+Above 10,000 events per second, raise the batch size. Update the `batch` processor in your existing `otel-collector-config.yaml`:
+
+```yaml:otel-collector-config.yaml
+processors:
+  batch:
+    send_batch_size: 50000
+```
+
+<Admonition type="note">
+The SigNoz `k8s-infra` and OpenTelemetry Operator configurations ship with `send_batch_size: 10000`. The upstream OpenTelemetry Collector default is `8192`. Values up to `50000` work well at high ingestion volume.
+</Admonition>
+
+## Control ingestion volume
+
+High ingestion volume increases ClickHouse storage and slows queries. Find which signal and service drives the volume first, then apply the matching fix.
+
+- [Cost Control](https://signoz.io/docs/cost-control/overview/): The full optimization flow, from analysis to validation.
+- [Optimize Metrics](https://signoz.io/docs/cost-control/optimize-metrics/): Drop unused metrics and aggregate high-cardinality labels.
+- [Optimize Traces](https://signoz.io/docs/cost-control/optimize-traces/): Reduce trace volume with head-based or tail-based sampling.
+- [Optimize Logs](https://signoz.io/docs/cost-control/optimize-logs/): Filter verbose log records at the Collector.
+
+## Set up dashboards and alerts
+
+Configure alerts on your key APM metrics: request rate, error rate, and latency.
+
+Build dashboards from your trace and log data with ClickHouse queries. You can group by and aggregate on span attributes and span events, and filter on specific conditions. See [ClickHouse queries for building dashboards and alerts](https://signoz.io/docs/operate/clickhouse/clickhouse-queries/).
+
+## Next Steps
+
+- [SigNoz Resources Planning](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/): Size each SigNoz component for your expected volume.
+- [Upgrade Guides](https://signoz.io/docs/operate/upgrade/): Keep your deployment current.
+
+## Get Help
+
+<GetHelp />
