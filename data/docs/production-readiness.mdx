@@ -24,7 +24,9 @@ On Kubernetes, collect logs, metrics, and traces with [k8s-infra](https://signoz
 
 Set a retention period for each signal separately. Metrics, traces, and logs each have their own setting. See [Retention Period](https://signoz.io/docs/userguide/retention-period/).
 
-To keep telemetry beyond your retention window for compliance or audit, add the `awss3` exporter alongside your existing `otlp` exporter. This fans newly ingested data out to both destinations. It does not move data already in ClickHouse, and the S3 copy is not queryable from the SigNoz UI, so reduce your retention separately to lower storage cost. See [Infinite Retention using AWS S3](https://signoz.io/docs/tutorial/infinite-retention-aws-s3/).
+To keep telemetry beyond your retention window for compliance or audit, add the `awss3` exporter to your Collector. Append it to the pipeline's existing `exporters` list instead of replacing that list. The exporter already in the list differs by deployment: the k8s-infra chart renders `otlphttp` when `presets.otlphttpExporter.enabled` is set, and the SigNoz backend Collector uses its ClickHouse exporters.
+
+This fans newly ingested data out to both destinations. It does not move data already in ClickHouse, and the S3 copy is not queryable from the SigNoz UI, so reduce your retention separately to lower storage cost. See [Infinite Retention using AWS S3](https://signoz.io/docs/tutorial/infinite-retention-aws-s3/).
 
 ## Secure SigNoz and the Collector
 

@@ -26,7 +26,7 @@ Editing the quick filters in Meter Explorer is restricted to the **Admin** role.
 | --- | --- | --- |
 | `service.name` | One service | None |
 | `deployment.environment` | One environment | Set the attribute on your telemetry |
-| `host.name` | One host | None |
+| `host.name` | One host | [Configure the resourcedetection processor](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/#configure-the-resourcedetection-processor) |
 | `signoz.workspace.key.id` | One ingestion key | Create an ingestion key per team (SigNoz Cloud) |
 
 Start with `service.name`. Your instrumentation already sets it, so you can group by it right away.
@@ -81,10 +81,12 @@ See [Filter Logs and Traces by Ingestion Key](https://signoz.io/docs/ingestion/s
 
 Attribution tells you who spent the money. Ingestion limits stop a team from spending it again.
 
-Each key takes a limit per signal, in one of two forms:
+Each key takes a limit per signal. You can set either form, or both together on the same signal:
 
 - **Daily** limits cap total volume over a 24-hour period. Use these to give each team a fixed budget.
 - **Per-second** limits cap the sustained ingestion rate. Use these so one spike cannot exhaust a team's daily budget in minutes.
+
+Setting both gives a team a fixed daily budget and burst protection at once. Setting only a daily limit leaves bursts unchecked.
 
 See [Ingestion Limits](https://signoz.io/docs/cost-control/ingestion-limits/) for the configuration steps.
 
