@@ -1,0 +1,248 @@
+---
+date: 2026-08-25
+title: OpenAI Agents SDK Observability & Monitoring with OpenTelemetry
+meta_title: OpenAI Agents SDK OpenTelemetry Monitoring
+description: Monitor OpenAI Agents SDK apps with OpenTelemetry and SigNoz. Trace agent runs, model calls, tool executions and handoffs, and track token usage and errors.
+doc_type: howto
+---
+
+The <a href="https://github.com/openai/openai-agents-python" target="_blank" rel="noopener noreferrer nofollow">OpenAI Agents SDK</a> already traces itself. Every `Runner.run()` produces a trace, and each agent invocation, model call, tool execution, handoff, and guardrail becomes a nested span. By default those spans go to OpenAI's own Traces dashboard.
+
+This guide bridges that built-in tracing to OpenTelemetry so the same spans land in SigNoz as standard `gen_ai.*` telemetry, sitting in the same trace as the web handler, database query, and downstream service around them.
+
+## What is OpenAI Agents SDK Observability?
+
+OpenAI Agents SDK observability is the practice of collecting traces from agent applications so you can see what each run did: which agents ran, which models they called, how many tokens they consumed, which tools they invoked, and where they failed.
+
+With full OpenAI Agents SDK observability in SigNoz, you can trace a complete agent run end to end, attribute token spend to a model, watch tool call volume for loops that do not terminate, and correlate an agent failure with the rest of your application.
+
+## Prerequisites
+
+- A [SigNoz Cloud](https://signoz.io/teams/) account and an [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Python 3.9 or later
+- An OpenAI API key
+- An application built on the `openai-agents` SDK
+
+## Monitor OpenAI Agents SDK with OpenTelemetry
+
+The instrumentation is a bridge rather than a monkey patch. It registers a `TracingProcessor` on the Agents SDK's own trace provider and translates each SDK span into an OpenTelemetry span, which is then exported over OTLP.
+
+**Step 1:** Install the SDK, the OpenTelemetry SDK, the OTLP exporter, and the instrumentation.
+
+```bash
+pip install openai-agents \
+            opentelemetry-sdk \
+            opentelemetry-exporter-otlp-proto-http \
+            opentelemetry-instrumentation-openai-agents-v2
+```
+
+**Step 2:** Configure the exporter through environment variables.
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+export OPENAI_API_KEY="<your-openai-api-key>"
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<your-openai-api-key>`: Your OpenAI API key from the <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer nofollow">OpenAI dashboard</a>.
+
+**Step 3:** Wire up the instrumentation before your first agent run.
+
+```python
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+
+from agents import set_trace_processors
+
+resource = Resource.create({
+    "service.name": "<service_name>",
+    "deployment.environment": "production",
+})
+
+provider = TracerProvider(resource=resource)
+provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+trace.set_tracer_provider(provider)
+
+# Send traces to SigNoz only, not also to OpenAI's Traces dashboard.
+set_trace_processors([])
+
+OpenAIAgentsInstrumentor().instrument(tracer_provider=provider)
+```
+
+**Verify these values:**
+
+- `<service_name>`: The name your application appears under in SigNoz, for example `support-agents`.
+
+<Admonition type="warning" title="Why set_trace_processors([]) matters">
+The instrumentor appends its processor to whatever is already registered. Without this line the SDK's default exporter stays active and every span is sent to OpenAI's Traces dashboard as well as to SigNoz.
+
+Do not reach for `OPENAI_AGENTS_DISABLE_TRACING=1` to stop that. The OpenTelemetry bridge rides on top of the SDK's tracing, so disabling tracing switches off the SigNoz export too and you will see no spans at all.
+</Admonition>
+
+**Step 4:** Run your agent.
+
+```python
+import asyncio
+from agents import Agent, RunConfig, Runner, function_tool
+
+
+@function_tool
+def get_weather(city: str) -> str:
+    """Return the current weather for a city."""
+    return {"tokyo": "18C, light rain", "paris": "24C, clear"}.get(city.lower(), "unknown")
+
+
+agent = Agent(
+    name="weather-assistant",
+    instructions="You are a concise weather assistant. Answer in one sentence.",
+    model="gpt-4o-mini",
+    tools=[get_weather],
+)
+
+run_config = RunConfig(tracing={"include_task_and_turn_spans": False})
+
+
+async def main():
+    result = await Runner.run(agent, "What's the weather in Tokyo?", run_config=run_config)
+    print(result.final_output)
+
+    provider.force_flush()
+    provider.shutdown()
+
+
+asyncio.run(main())
+```
+
+<Admonition type="info" title="Two settings worth keeping">
+`include_task_and_turn_spans: False` suppresses the SDK's task and turn spans. The instrumentation maps eight of the SDK's span types, and `TaskSpanData` and `TurnSpanData` are not among them, so leaving them on inserts a span named `unknown` at every level of the trace tree. Drop this setting once the instrumentation adds support.
+
+`force_flush()` before exit ships buffered spans. Short-lived scripts otherwise exit before the batch interval elapses and the spans are lost.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+Each run emits spans carrying `gen_ai.operation.name`, `gen_ai.request.model`, `gen_ai.usage.input_tokens`, and `gen_ai.usage.output_tokens`. Allow a few seconds for them to appear in SigNoz.
+
+## View OpenAI Agents SDK Traces in SigNoz
+
+Open the [Traces explorer](https://signoz.io/docs/userguide/traces/) and filter on your `service.name`. Agent runs appear as `Agent workflow` root spans, with `invoke_agent`, `chat`, and `execute_tool` spans nested beneath them.
+
+<Figure
+  src="/img/docs/llm/openai-agents-sdk/openai-agents-sdk-traces.webp"
+  alt="OpenAI Agents SDK spans in the SigNoz Traces explorer"
+  caption="Agent, model call, and tool execution spans from the OpenAI Agents SDK"
+/>
+
+Click a root span to open the full run. The waterfall shows the agent turn, the model calls inside it, and each tool execution, with the `gen_ai.*` attributes on the right.
+
+<Figure
+  src="/img/docs/llm/openai-agents-sdk/openai-agents-sdk-detailed-traces.webp"
+  alt="Detailed view of an OpenAI Agents SDK trace in SigNoz"
+  caption="A single agent run: the agent turn, its model calls, and a tool execution"
+/>
+
+The span tree an agent run produces looks like this:
+
+```
+Agent workflow                 (Server, root)   one per Runner.run()
+└─ invoke_agent <agent>        (Client)         carries the real agent name
+   ├─ chat <model>             (Client)         carries the token counts
+   ├─ execute_tool <tool>      (Internal)
+   ├─ agent_handoff            (Internal)
+   └─ guardrail_check          (Internal)
+```
+
+Two placement details are worth knowing before you write your own queries. Token counts appear only on `chat` spans. The real agent name appears only on `invoke_agent` spans, because `gen_ai.agent.name` is the literal default string `OpenAI Agent` on chat, tool, handoff, and guardrail spans.
+
+## OpenAI Agents SDK Observability Dashboard
+
+SigNoz ships a prebuilt dashboard for the OpenAI Agents SDK covering agent runs, token usage by model, latency percentiles, tool activity, handoffs, guardrails, and errors. See the [OpenAI Agents SDK dashboard](https://signoz.io/docs/dashboards/dashboard-templates/openai-agents-sdk-dashboard/) for the panel reference and the import link.
+
+<Figure
+  src="/img/docs/llm/openai-agents-sdk/openai-agents-sdk-dashboard.webp"
+  alt="OpenAI Agents SDK dashboard in SigNoz"
+  caption="The OpenAI Agents SDK dashboard template"
+/>
+
+## Capturing prompts and completions
+
+Prompt and completion content is not recorded by default. To opt in:
+
+```bash
+export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT="true"
+```
+
+Content then lands on `gen_ai.input.messages`, `gen_ai.output.messages`, and `gen_ai.system_instructions`. Prompts frequently contain user data, so enable this deliberately and check what your retention policy implies first.
+
+## Troubleshooting OpenAI Agents SDK Observability
+
+<details>
+<summary><ToggleHeading>No spans reach SigNoz</ToggleHeading></summary>
+
+Confirm `provider.force_flush()` runs before the process exits. Check that `set_trace_processors([])` and `.instrument()` both run before the first `Runner.run()`. Confirm `OTEL_EXPORTER_OTLP_PROTOCOL` is `http/protobuf`, which matches the HTTP exporter installed in Step 1.
+
+</details>
+
+<details>
+<summary><ToggleHeading>Running with opentelemetry-instrument produces nothing</ToggleHeading></summary>
+
+The package registers an `opentelemetry_instrumentor` entry point, so `opentelemetry-instrument` loads it and the bridge does appear on the SDK's processor list. It still exports no spans, because the tracer captured at load time is not the one the auto-instrumentation later configures. Use the explicit setup in Step 3 instead.
+
+</details>
+
+<details>
+<summary><ToggleHeading>Spans named unknown appear throughout the trace</ToggleHeading></summary>
+
+Set `include_task_and_turn_spans: False` on your `RunConfig` as shown in Step 4. The SDK's task and turn span types are not yet mapped by the instrumentation and fall through to the literal name `unknown`.
+
+</details>
+
+<details>
+<summary><ToggleHeading>Traces still appear in OpenAI's dashboard</ToggleHeading></summary>
+
+The `set_trace_processors([])` call is missing, or it runs after `.instrument()` rather than before it.
+
+</details>
+
+<details>
+<summary><ToggleHeading>No metrics appear</ToggleHeading></summary>
+
+This instrumentation emits traces only and declares no metric support, so there is no `gen_ai.client.token.usage` histogram. Aggregate the span attributes instead, which is what the dashboard template does.
+
+</details>
+
+<details>
+<summary><ToggleHeading>Overriding of current TracerProvider is not allowed</ToggleHeading></summary>
+
+A global tracer provider was already set, usually by a second module running the same setup. Configure the provider exactly once at startup.
+
+</details>
+
+## Setup OpenTelemetry Collector (Optional)
+
+<details>
+<summary><ToggleHeading>Route traces through an OpenTelemetry Collector</ToggleHeading></summary>
+
+The <a href="https://opentelemetry.io/docs/collector/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collector</a> is a vendor-neutral proxy that receives, processes, and exports telemetry. Sending through a Collector lets you batch and retry centrally, strip or enrich attributes before they leave your network, and fan out to more than one backend without changing application code.
+
+To use one, point `OTEL_EXPORTER_OTLP_ENDPOINT` at your Collector instead of at SigNoz, and configure the Collector's OTLP exporter to forward to SigNoz. See [Install OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) for setup.
+
+</details>
+
+## Additional resources
+
+- [Set up alerts](https://signoz.io/docs/alerts/) on error rate and latency once data is flowing
+- [Query and filter traces](https://signoz.io/docs/userguide/traces/) in the Traces explorer
+- [Correlate logs with traces](https://signoz.io/docs/userguide/logs_query_builder/) for full request context
+- [LLM Observability overview](https://signoz.io/docs/llm-observability/) for the wider `gen_ai` conventions
