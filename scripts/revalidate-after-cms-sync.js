@@ -95,7 +95,7 @@ try {
 const FOLDER_TO_URL_PREFIX = {
   opentelemetry: 'opentelemetry',
   faqs: 'faqs',
-  'case-study': 'case-study',
+  'case-study': 'customers',
   comparisons: 'comparisons',
   guides: 'guides',
   blog: 'blog',
@@ -226,7 +226,13 @@ function buildPayload({
     )
   }
 
-  const allPaths = uniqueStrings([...cmsUrls, ...listiclePaths])
+  const customersPagePaths = []
+  if (cmsUrls.some((u) => u.startsWith('/customers/'))) {
+    customersPagePaths.push('/customers')
+    console.log('📣 Customer stories changed: revalidating /customers.')
+  }
+
+  const allPaths = uniqueStrings([...cmsUrls, ...listiclePaths, ...customersPagePaths])
 
   if (allPaths.length > BULK_THRESHOLD) {
     console.log(
@@ -277,6 +283,9 @@ function buildPayload({
     if (membershipUrls.some((u) => u.startsWith(prefix))) {
       extraTags.push(listTag)
     }
+  }
+  if (cmsUrls.some((u) => u.startsWith('/customers/'))) {
+    extraTags.push('case-studies-list')
   }
 
   return {

@@ -3,16 +3,17 @@ import StartUpsLayout from './StartUpsLayout'
 
 import { Metadata } from 'next'
 
+const startupsDescription =
+  'Eligible startups get SigNoz Cloud for $19/month for the first 12 months. This includes $19 of telemetry usage; additional usage follows published SigNoz Cloud rates.'
+
 export const metadata: Metadata = {
   title: {
     absolute: "SigNoz for Startups | Observability That Doesn't Burn Your Budget",
   },
-  description:
-    'Special pricing for startups: $19/month for the first 12 months (regularly $49) so lean teams get full-stack observability without overspending.',
+  description: startupsDescription,
   openGraph: {
     title: "SigNoz for Startups | Observability That Doesn't Burn Your Budget",
-    description:
-      'Special pricing for startups: $19/month for the first 12 months (regularly $49) so lean teams get full-stack observability without overspending.',
+    description: startupsDescription,
     url: 'https://signoz.io/startups/',
     siteName: 'SigNoz',
     locale: 'en_US',
@@ -21,8 +22,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: "SigNoz for Startups | Observability That Doesn't Burn Your Budget",
-    description:
-      'Special pricing for startups: $19/month for the first 12 months (regularly $49) so lean teams get full-stack observability without overspending.',
+    description: startupsDescription,
     creator: '@SigNozHQ',
   },
   alternates: {

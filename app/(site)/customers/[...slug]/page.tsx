@@ -9,7 +9,14 @@ import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
-import { getAuthorKeys } from '@/utils/contentHelpers'
+import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
+import { getCachedAuthors } from '@/utils/cmsAuthors'
+import JsonLdScript from '@/components/JsonLdScript'
+import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
+
+async function getCustomerStoryContent(path: string, deploymentStatus: string) {
+  return getContentBySlug('case-studies', path, deploymentStatus)
+}
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -19,27 +26,25 @@ export async function generateMetadata(props: {
 }): Promise<Metadata> {
   const params = await props.params
   try {
-    // Handle root case
     if (!params.slug || params.slug.length === 0) {
       return {
-        title: 'Case Studies - SigNoz',
+        title: 'Customer Stories - SigNoz',
         description: 'Customer case studies and success stories with SigNoz',
         openGraph: {
-          title: 'Case Studies - SigNoz',
+          title: 'Customer Stories - SigNoz',
           description: 'Customer case studies and success stories with SigNoz',
           type: 'website',
         },
       }
     }
 
-    // Convert slug array to path
     const path = params.slug.join('/')
 
     const isProduction = process.env.VERCEL_ENV === 'production'
     const deploymentStatus = isProduction ? 'live' : 'staging'
 
     try {
-      const content = await getContentBySlug('case-studies', path, deploymentStatus)
+      const content = await getCustomerStoryContent(path, deploymentStatus)
 
       if (!content) {
         throw new Error(`Case study content not found for path: ${path}`)
@@ -50,13 +55,16 @@ export async function generateMetadata(props: {
       return {
         title: seoTitle,
         description: content?.description || content?.title,
+        alternates: {
+          canonical: `${siteMetadata.siteUrl}/customers/${path}/`,
+        },
         openGraph: {
           title: seoTitle,
           description: content?.description || content?.title,
           siteName: siteMetadata.title,
           locale: 'en_US',
           type: 'article',
-          url: './',
+          url: `${siteMetadata.siteUrl}/customers/${path}/`,
         },
         twitter: {
           card: 'summary_large_image',
@@ -65,7 +73,6 @@ export async function generateMetadata(props: {
         },
       }
     } catch (error) {
-      // Content not found, return 404 metadata
       return {
         title: 'Page Not Found',
         description: 'The requested case study could not be found.',
@@ -93,13 +100,12 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const params = await props.params
   const path = params.slug.join('/')
 
-  // Fetch content from the repository with error handling
   let content: MDXContent
   try {
     const isProduction = process.env.VERCEL_ENV === 'production'
     const deploymentStatus = isProduction ? 'live' : 'staging'
 
-    const response = await getContentBySlug('case-studies', path, deploymentStatus)
+    const response = await getCustomerStoryContent(path, deploymentStatus)
     if (!response) {
       console.error(`Invalid response for path: ${path}`)
       notFound()
@@ -115,11 +121,17 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     notFound()
   }
 
-  // Generate computed fields
   const readingTimeData = readingTime(content?.content || '')
   const toc = generateTOC(content?.content || '')
 
-  // Compile MDX content with all plugins
+  const authorDirectory = await getCachedAuthors()
+  const authorKeys = getAuthorKeys(content)
+  const authorList = authorKeys.length > 0 ? authorKeys : ['default']
+  const authorDetails = authorList.map((author) => {
+    const a = authorDirectory[author]
+    return a || { name: author }
+  })
+
   let compiledContent
   try {
     const { content: mdxContent } = await compileMDX({
@@ -133,23 +145,34 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     notFound()
   }
 
-  // Prepare content for CaseStudyLayout
   const mainContent: CoreContent<MDXContent> = {
     title: content?.title,
     slug: path,
-    path: content?.path || `/case-study/${path}`,
+    path: `/customers/${path}`,
     type: 'CaseStudy',
     readingTime: readingTimeData,
-    filePath: `/case-study/${path}`,
+    filePath: `/customers/${path}`,
     toc: toc,
     image: content.image,
-    authors: getAuthorKeys(content),
+    authors: authorList,
+    tags: getTagValues(content),
   }
+
+  const breadcrumbs = getSectionArticleBreadcrumbs('customers', content.title, path)
+  const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
   return (
     <>
-      <CaseStudyLayout content={mainContent} toc={toc}>
-        <div className="prose prose-slate max-w-none dark:prose-invert">{compiledContent}</div>
+      <JsonLdScript data={breadcrumbJsonLd} />
+      <CaseStudyLayout
+        content={mainContent}
+        authorDetails={authorDetails}
+        authors={authorList}
+        toc={toc}
+        authorDirectory={authorDirectory}
+        breadcrumbs={breadcrumbs}
+      >
+        {compiledContent}
       </CaseStudyLayout>
     </>
   )

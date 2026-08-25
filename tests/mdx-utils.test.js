@@ -245,7 +245,7 @@ test('transformDoc related_articles maps content_type prefixes including docs an
     [
       'https://signoz.io/docs/sibling/',
       'https://signoz.io/faqs/what-is-signoz/',
-      'https://signoz.io/case-study/acme/',
+      'https://signoz.io/customers/acme/',
       'https://signoz.io/opentelemetry/otel-intro/',
     ]
   )

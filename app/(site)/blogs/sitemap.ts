@@ -27,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let caseStudyRoutes: MetadataRoute.Sitemap = []
   if (caseStudies) {
     caseStudyRoutes = caseStudies.data.map((caseStudy) => ({
-      url: `${siteUrl}/case-study${caseStudy.path}/`,
+      url: `${siteUrl}/customers${caseStudy.path}/`,
       lastModified: resolveLatestDate(caseStudy),
     }))
   }

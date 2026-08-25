@@ -126,7 +126,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
           <div className="flex-1 border-t border-dashed border-gray-500"></div>
           <div>
             <p className="mb-1">
-              Starts at <span className="line-through">$199</span> $49/month
+              Starts at <span className="line-through">$199</span> $49/month, including $49 of usage
             </p>
             <p className="mb-0 text-xs opacity-75"></p>
           </div>
@@ -226,7 +226,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
             >
               80% on your Datadog bill
             </TrackingLink>{' '}
-            with SigNoz.
+            with SigNoz Cloud.
           </p>
         </div>
       </div>
