@@ -19,17 +19,54 @@ const regionTableMdx = `
 <RegionTable />
 `
 
+const previewMdx = [inlineInProseMdx, inlineInConfigInstructionsMdx, regionTableMdx].join('\n')
+
 const meta = {
   title: 'MDX Components/Code/Region',
   component: Region,
   parameters: {
     mdxUsage: inlineInProseMdx,
+    chromatic: { disableSnapshot: true },
   },
 } satisfies Meta<typeof Region>
 
 export default meta
 
 type Story = StoryObj<typeof meta>
+
+export const Preview: Story = {
+  parameters: {
+    mdxUsage: previewMdx,
+    chromatic: { disableSnapshot: false },
+  },
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <p>
+        Your ingestion endpoint is{' '}
+        <code>
+          ingest.
+          <Region />
+          .signoz.cloud:443
+        </code>
+        . The region segment substitutes the workspace region selected via the <code>
+          ?region=
+        </code>{' '}
+        query param (default: <code>us</code>).
+      </p>
+      <p>
+        Set the OTLP endpoint for the <Region /> region before starting your service:
+      </p>
+      <p>
+        <code>
+          OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.
+          <Region />
+          .signoz.cloud:443
+        </code>
+      </p>
+      <RegionTable />
+    </div>
+  ),
+}
 
 export const InlineInProse: Story = {
   parameters: { mdxUsage: inlineInProseMdx },
@@ -67,10 +104,6 @@ export const InlineInConfigInstructions: Story = {
   ),
 }
 
-// <RegionTable /> lists every SigNoz Cloud region with its cloud provider,
-// cloud region, and ingestion endpoint (with a hover-to-reveal copy button
-// per endpoint). Used in docs/ingestion/signoz-cloud/overview.mdx. Data comes
-// from the same RegionContext fetch (stubbed us/eu/in in Storybook).
 export const Table: Story = {
   name: 'RegionTable',
   parameters: { mdxUsage: regionTableMdx },

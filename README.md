@@ -53,6 +53,17 @@
 
 - We use Husky for pre-commit checks. See [contributing/repo-workflow.md#git-hooks-and-checks](contributing/repo-workflow.md#git-hooks-and-checks).
 
+### Storybook
+
+Every component available to MDX authors (everything registered in `components/MDXComponents.tsx`) is documented in Storybook, with live examples and a copy-pasteable MDX snippet per example.
+
+```bash
+yarn storybook          # dev server at http://localhost:6006
+yarn build-storybook    # static build
+```
+
+Visual regressions are caught by Chromatic - see [VISUAL_TESTING.md](VISUAL_TESTING.md). When adding or changing a component, follow the story conventions in `.agents/skills/signoz-storybook-stories/SKILL.md`.
+
 # Contributing
 
 Looking to contribute a blog, docs page, or site change? Start with [CONTRIBUTING.md](CONTRIBUTING.md), then use the task-specific playbooks under [contributing/](contributing/).

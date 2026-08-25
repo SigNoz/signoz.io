@@ -96,12 +96,15 @@ ${kubernetesCommand}
 </CodeTabs>
 `
 
+const previewMdx = [installCommandsMdx, exporterProtocolsMdx, defaultOnSecondTabMdx].join('\n')
+
 const meta = {
   title: 'MDX Components/Code/CodeTabs',
   component: CodeTabs,
   parameters: {
     layout: 'padded',
     mdxUsage: installCommandsMdx,
+    chromatic: { disableSnapshot: true },
   },
   args: {
     children: null,
@@ -111,6 +114,55 @@ const meta = {
 export default meta
 
 type Story = StoryObj<typeof meta>
+
+export const Preview: Story = {
+  parameters: {
+    mdxUsage: previewMdx,
+    chromatic: { disableSnapshot: false },
+  },
+  loaders: [
+    async () => ({
+      npm: await markdownToHast(npmInstall),
+      yarn: await markdownToHast(yarnInstall),
+      pnpm: await markdownToHast(pnpmInstall),
+      grpc: await markdownToHast(grpcExporter),
+      http: await markdownToHast(httpExporter),
+      docker: await markdownToHast(dockerCommand),
+      kubernetes: await markdownToHast(kubernetesCommand),
+    }),
+  ],
+  render: (_args, { loaded }) => (
+    <div className="flex flex-col gap-6">
+      <CodeTabs>
+        <CodeTab value="npm" label="npm" default>
+          {renderHast(loaded.npm)}
+        </CodeTab>
+        <CodeTab value="yarn" label="yarn">
+          {renderHast(loaded.yarn)}
+        </CodeTab>
+        <CodeTab value="pnpm" label="pnpm">
+          {renderHast(loaded.pnpm)}
+        </CodeTab>
+      </CodeTabs>
+      <CodeTabs>
+        <CodeTab value="grpc" label="OTLP gRPC" default>
+          {renderHast(loaded.grpc)}
+        </CodeTab>
+        <CodeTab value="http" label="OTLP HTTP">
+          {renderHast(loaded.http)}
+        </CodeTab>
+      </CodeTabs>
+      <CodeTabs>
+        <CodeTab value="docker" label="Docker">
+          {renderHast(loaded.docker)}
+        </CodeTab>
+        <CodeTab value="kubernetes" label="Kubernetes" default>
+          {renderHast(loaded.kubernetes)}
+        </CodeTab>
+      </CodeTabs>
+    </div>
+  ),
+}
 
 export const InstallCommands: Story = {
   parameters: { mdxUsage: installCommandsMdx },
@@ -156,7 +208,6 @@ export const ExporterProtocols: Story = {
   ),
 }
 
-// `default` on any tab (not just the first) picks the initially active one.
 export const DefaultOnSecondTab: Story = {
   parameters: { mdxUsage: defaultOnSecondTabMdx },
   loaders: [

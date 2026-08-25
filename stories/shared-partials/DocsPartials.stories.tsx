@@ -18,6 +18,7 @@ import UpgradeInfo from '@/components/shared/UpgradeInfo'
 const meta = {
   title: 'MDX Components/Shared Partials/Docs Partials',
   parameters: {
+    chromatic: { disableSnapshot: true },
     mdxUsage: `
 {/* Self-contained docs partial. Renders a full prewritten section, no props */}
 <HostingDecision />
@@ -28,6 +29,38 @@ const meta = {
 export default meta
 
 type Story = StoryObj<typeof meta>
+
+export const Preview: Story = {
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    mdxUsage: `
+{/* Self-contained docs partials. Each renders a full prewritten section, no props */}
+<RetentionInfo />
+
+<SigNozCloud />
+
+<UpgradeInfo />
+
+<GetHelp />
+
+<MetricsDefinition />
+
+{/* The remaining partials — HostingDecision, CommonPrerequisites, K8sInstall,
+K8sOtelDemo, K8sNextSteps, MultiNodePart1, MultiNodePart2, PrereqsInstrument,
+TraefikMetrics, CHClientWithOutput — are each a long section; browse them as
+individual stories in this file. */}
+`,
+  },
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <RetentionInfo />
+      <SigNozCloud />
+      <UpgradeInfo />
+      <GetHelp />
+      <MetricsDefinition />
+    </div>
+  ),
+}
 
 export const Hosting: Story = {
   name: 'HostingDecision',

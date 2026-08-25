@@ -9,6 +9,7 @@ import UsersAnalogy from '@/components/HighCardinalityData/UsersAnalogy'
 const meta = {
   title: 'MDX Components/Interactive/High Cardinality',
   parameters: {
+    chromatic: { disableSnapshot: true },
     mdxUsage: `
 {/* Interactive graphic from the high-cardinality-data blog post. Prop-less */}
 <CardinalityExplosion />
@@ -19,6 +20,36 @@ const meta = {
 export default meta
 
 type Story = StoryObj<typeof meta>
+
+export const Preview: Story = {
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    mdxUsage: `
+{/* Interactive graphics from the high-cardinality-data blog post. All prop-less */}
+<CardinalityExplosion />
+
+<MemoryGauge />
+
+<QueryRace />
+
+<SamplingAggregation />
+
+<UsersAnalogy />
+
+<DatabaseTable />
+`,
+  },
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <CardinalityExplosion />
+      <MemoryGauge />
+      <QueryRace />
+      <SamplingAggregation />
+      <UsersAnalogy />
+      <DatabaseTable />
+    </div>
+  ),
+}
 
 export const Explosion: Story = {
   name: 'CardinalityExplosion',

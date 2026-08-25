@@ -85,7 +85,6 @@ function openMdxPanel(
   actions: Element,
   code: string
 ): boolean {
-  // Mutually exclusive with the native source panel.
   const hideCode = [...actions.querySelectorAll<HTMLElement>('button')].find(
     (b) => b.textContent?.trim() === 'Hide code'
   )
@@ -101,7 +100,6 @@ function openMdxPanel(
     </ThemeProvider>
   )
   button.textContent = 'Hide MDX'
-  // If Show code opens while we are open, close ourselves.
   const showCode = [...actions.querySelectorAll<HTMLElement>('button')].find((b) =>
     /show code/i.test(b.textContent ?? '')
   )

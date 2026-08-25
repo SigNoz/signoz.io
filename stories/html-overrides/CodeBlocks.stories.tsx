@@ -50,8 +50,27 @@ const inlineCodeMarkdown =
 
 const BASIC_NOTE =
   '{/* Fenced code blocks are markdown, not JSX. The language enables syntax highlighting */}'
+const TITLED_NOTE = '{/* :filename adds a title bar; {4} highlights line 4 */}'
+const DIFF_NOTE = '{/* The diff language renders +/- lines as additions and removals */}'
+const MINIMAP_NOTE = '{/* minimap adds a scroll minimap for long blocks */}'
+const COLLAPSIBLE_NOTE = '{/* collapse={5} folds the block after the first 5 lines */}'
+const REGION_NOTE = "{/* <region> is substituted with the reader's selected SigNoz Cloud region */}"
+const INLINE_NOTE =
+  '{/* Inline code spans are plain backticks; <region> is substituted there too */}'
 
 const withNote = (markdown: string, note: string) => `\n${note}\n${markdown}\n`
+
+const PREVIEW_BLOCKS = [
+  [basicMarkdown, BASIC_NOTE],
+  [titledWithLineHighlightMarkdown, TITLED_NOTE],
+  [diffMarkdown, DIFF_NOTE],
+  [minimapMarkdown, MINIMAP_NOTE],
+  [collapsibleMarkdown, COLLAPSIBLE_NOTE],
+  [regionAwareMarkdown, REGION_NOTE],
+  [inlineCodeMarkdown, INLINE_NOTE],
+] as const
+
+const previewMdx = PREVIEW_BLOCKS.map(([markdown, note]) => withNote(markdown, note)).join('\n')
 
 const meta = {
   title: 'MDX Components/HTML Overrides/Code Blocks (pre, code)',
@@ -59,6 +78,7 @@ const meta = {
   parameters: {
     layout: 'padded',
     mdxUsage: withNote(basicMarkdown, BASIC_NOTE),
+    chromatic: { disableSnapshot: true },
   },
 } satisfies Meta<typeof RegionAwarePre>
 
@@ -72,34 +92,38 @@ const fixtureStory = (markdown: string, note: string): Story => ({
   render: (_args, { loaded }) => <>{renderHast(loaded.tree)}</>,
 })
 
+export const Preview: Story = {
+  parameters: {
+    mdxUsage: previewMdx,
+    chromatic: { disableSnapshot: false },
+  },
+  loaders: [
+    async () => ({
+      trees: await Promise.all(PREVIEW_BLOCKS.map(([markdown]) => markdownToHast(markdown))),
+    }),
+  ],
+  render: (_args, { loaded }) => (
+    <div className="flex flex-col gap-6">
+      {loaded.trees.map((tree, index) => (
+        <div key={PREVIEW_BLOCKS[index][1]}>{renderHast(tree)}</div>
+      ))}
+    </div>
+  ),
+}
+
 export const Basic: Story = fixtureStory(basicMarkdown, BASIC_NOTE)
 
 export const TitledWithLineHighlight: Story = fixtureStory(
   titledWithLineHighlightMarkdown,
-  '{/* :filename adds a title bar; {4} highlights line 4 */}'
+  TITLED_NOTE
 )
 
-export const Diff: Story = fixtureStory(
-  diffMarkdown,
-  '{/* The diff language renders +/- lines as additions and removals */}'
-)
+export const Diff: Story = fixtureStory(diffMarkdown, DIFF_NOTE)
 
-export const Minimap: Story = fixtureStory(
-  minimapMarkdown,
-  '{/* minimap adds a scroll minimap for long blocks */}'
-)
+export const Minimap: Story = fixtureStory(minimapMarkdown, MINIMAP_NOTE)
 
-export const Collapsible: Story = fixtureStory(
-  collapsibleMarkdown,
-  '{/* collapse={5} folds the block after the first 5 lines */}'
-)
+export const Collapsible: Story = fixtureStory(collapsibleMarkdown, COLLAPSIBLE_NOTE)
 
-export const RegionAware: Story = fixtureStory(
-  regionAwareMarkdown,
-  "{/* <region> is substituted with the reader's selected SigNoz Cloud region */}"
-)
+export const RegionAware: Story = fixtureStory(regionAwareMarkdown, REGION_NOTE)
 
-export const InlineCode: Story = fixtureStory(
-  inlineCodeMarkdown,
-  '{/* Inline code spans are plain backticks; <region> is substituted there too */}'
-)
+export const InlineCode: Story = fixtureStory(inlineCodeMarkdown, INLINE_NOTE)

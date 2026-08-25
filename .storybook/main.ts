@@ -18,6 +18,7 @@ const config: StorybookConfig = {
       },
     },
     '@storybook/addon-themes',
+    '@storybook/addon-a11y',
     '@chromatic-com/storybook',
   ],
   framework: {
@@ -37,8 +38,7 @@ const config: StorybookConfig = {
   },
   viteFinal: async (viteConfig) => {
     viteConfig.plugins = viteConfig.plugins ?? []
-    // constants/allowedImageDomains.js must stay CJS (next.config.js requires
-    // it), but Vite serves project sources as ESM. Wrap just that file.
+    // Must stay CJS for next.config.js; Vite serves project sources as ESM.
     viteConfig.plugins.push({
       name: 'signoz-cjs-constants-shim',
       transform(code: string, id: string) {

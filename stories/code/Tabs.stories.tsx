@@ -103,11 +103,14 @@ ${autoContent}
 </Tabs>
 `
 
+const previewMdx = [languageTabsMdx, pillVariantMdx, defaultOnSecondTabMdx].join('\n')
+
 const meta = {
   title: 'MDX Components/Code/Tabs',
   component: Tabs,
   parameters: {
     mdxUsage: languageTabsMdx,
+    chromatic: { disableSnapshot: true },
   },
   args: {
     children: null,
@@ -124,9 +127,55 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-// Mirrors `<Tabs entityName="language">` from data/docs. The selected tab is
-// written to a ?language= query param. Note: clicking a tab rewrites the
-// Storybook iframe URL via history.replaceState (harmless at runtime).
+export const Preview: Story = {
+  parameters: {
+    mdxUsage: previewMdx,
+    chromatic: { disableSnapshot: false },
+  },
+  loaders: [
+    async () => ({
+      python: await markdownToHast(pythonContent),
+      javascript: await markdownToHast(javascriptContent),
+      java: await markdownToHast(javaContent),
+      cloud: await markdownToHast(cloudContent),
+      selfHost: await markdownToHast(selfHostContent),
+      manual: await markdownToHast(manualContent),
+      auto: await markdownToHast(autoContent),
+    }),
+  ],
+  render: (_args, { loaded }) => (
+    <div className="flex flex-col gap-6">
+      <Tabs entityName="language">
+        <TabItem value="python" label="Python" default>
+          {renderHast(loaded.python)}
+        </TabItem>
+        <TabItem value="javascript" label="JavaScript">
+          {renderHast(loaded.javascript)}
+        </TabItem>
+        <TabItem value="java" label="Java">
+          {renderHast(loaded.java)}
+        </TabItem>
+      </Tabs>
+      <Tabs variant="pill">
+        <TabItem value="cloud" label="SigNoz Cloud" default>
+          {renderHast(loaded.cloud)}
+        </TabItem>
+        <TabItem value="self-host" label="Self-Host">
+          {renderHast(loaded.selfHost)}
+        </TabItem>
+      </Tabs>
+      <Tabs>
+        <TabItem value="manual" label="Manual">
+          {renderHast(loaded.manual)}
+        </TabItem>
+        <TabItem value="auto" label="Automatic" default>
+          {renderHast(loaded.auto)}
+        </TabItem>
+      </Tabs>
+    </div>
+  ),
+}
+
 export const LanguageTabs: Story = {
   parameters: { mdxUsage: languageTabsMdx },
   loaders: [
@@ -171,8 +220,6 @@ export const PillVariant: Story = {
   ),
 }
 
-// `default` on any TabItem picks the initially active tab; without
-// `entityName` the selection is purely local state (no URL sync).
 export const DefaultOnSecondTab: Story = {
   parameters: { mdxUsage: defaultOnSecondTabMdx },
   loaders: [

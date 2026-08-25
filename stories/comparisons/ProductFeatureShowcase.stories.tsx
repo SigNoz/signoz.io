@@ -6,6 +6,7 @@ const meta = {
   component: ProductFeatureShowcase,
   parameters: {
     docsProse: false,
+    chromatic: { disableSnapshot: true },
     mdxUsage: `
 {/* Feature-comparison showcase card used in Datadog-alternative posts */}
 <ProductFeatureShowcase />
@@ -16,6 +17,21 @@ const meta = {
 export default meta
 
 type Story = StoryObj<typeof meta>
+
+export const Preview: Story = {
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    mdxUsage: `
+{/* Feature-comparison showcase card used in Datadog-alternative posts. Prop-less */}
+<ProductFeatureShowcase />
+`,
+  },
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <ProductFeatureShowcase />
+    </div>
+  ),
+}
 
 export const Default: Story = {
   parameters: {

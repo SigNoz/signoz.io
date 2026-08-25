@@ -32,11 +32,16 @@ const wideTableMarkdown = [
   '| Go | `go.opentelemetry.io/otel` | Manual only | Stable | Stable | Beta | W3C TraceContext | OTLP over gRPC |',
 ].join('\n')
 
+const previewMarkdown = [collectorReceiversMarkdown, withLinksMarkdown, wideTableMarkdown].join(
+  '\n\n'
+)
+
 const meta = {
   title: 'MDX Components/HTML Overrides/Table',
   component: TableWrapper,
   parameters: {
     mdxUsage: withNote(collectorReceiversMarkdown),
+    chromatic: { disableSnapshot: true },
   },
   args: {
     children: null,
@@ -52,6 +57,27 @@ const fixtureStory = (markdown: string): Story => ({
   loaders: [async () => ({ tree: await markdownToHast(markdown) })],
   render: (_args, { loaded }) => <>{renderHast(loaded.tree)}</>,
 })
+
+export const Preview: Story = {
+  parameters: {
+    mdxUsage: withNote(previewMarkdown),
+    chromatic: { disableSnapshot: false },
+  },
+  loaders: [
+    async () => ({
+      receivers: await markdownToHast(collectorReceiversMarkdown),
+      withLinks: await markdownToHast(withLinksMarkdown),
+      wide: await markdownToHast(wideTableMarkdown),
+    }),
+  ],
+  render: (_args, { loaded }) => (
+    <div className="flex flex-col gap-6">
+      {renderHast(loaded.receivers)}
+      {renderHast(loaded.withLinks)}
+      {renderHast(loaded.wide)}
+    </div>
+  ),
+}
 
 export const CollectorReceivers: Story = fixtureStory(collectorReceiversMarkdown)
 
