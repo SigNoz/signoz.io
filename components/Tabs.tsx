@@ -13,9 +13,16 @@ interface TabsProps {
   entityName?: string
   variant?: 'default' | 'pill'
   className?: string
+  segmented?: boolean
 }
 
-const Tabs = ({ children, entityName, variant = 'default', className }: TabsProps) => {
+const Tabs = ({
+  children,
+  entityName,
+  variant = 'default',
+  className,
+  segmented = false,
+}: TabsProps) => {
   const searchParams = useSearchParamsState()
   const pathname = usePathname()
 
@@ -74,8 +81,23 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
   const isOnboarding = isDocsOnboardingPathname(pathname)
   const hideSelfHostTab = isOnboarding && entityName === 'plans'
 
-  // Site `default` → DS secondary (underline); site `pill` → DS primary (segmented)
   const dsVariant = variant === 'pill' ? 'primary' : 'secondary'
+  const isSegmented = segmented && variant !== 'pill'
+
+  const segmentedVars = isSegmented
+    ? ({
+        '--tab-trigger-secondary-padding': 'var(--spacing-5, 10px) var(--spacing-12, 24px)',
+        '--tab-trigger-secondary-font-size': 'var(--periscope-font-size-small, 11px)',
+        '--tab-trigger-secondary-gap': 'var(--spacing-3, 6px)',
+        '--tab-trigger-secondary-border-width': '0px',
+        '--tab-trigger-secondary-border-radius': '0px',
+        '--tab-trigger-secondary-bg': 'transparent',
+        '--tab-trigger-secondary-active-bg': 'var(--l3-background-60)',
+        '--tab-text-color': 'var(--l2-foreground)',
+        '--tab-hover-text-color': 'var(--l1-foreground-hover)',
+        '--tab-active-text-color': 'var(--l1-foreground-hover)',
+      } as React.CSSProperties)
+    : {}
 
   const visibleChildren = validChildren.filter((child) => {
     if (hideSelfHostTab && (child.props.value as string).startsWith('self-host')) {
@@ -86,7 +108,9 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
 
   return (
     <TabsRoot
-      className={`${styles.root} ${className || 'w-full'} [&>div:first-child]:overflow-x-auto`}
+      className={`${styles.root} ${isSegmented ? styles.segmented : ''} ${
+        className || 'w-full'
+      } [&>div:first-child]:overflow-x-auto`}
       data-tabs-root=""
       value={activeTab ?? undefined}
       onValueChange={handleTabChange}
@@ -94,8 +118,9 @@ const Tabs = ({ children, entityName, variant = 'default', className }: TabsProp
       style={
         {
           '--tab-list-wrapper-secondary-padding-left': '0px',
-          /* Docs-only: short left gutter stub (faded in Tabs.module.css) */
+          /* Short left gutter stub (faded in Tabs.module.css) */
           '--tab-border-spacer-min-width': 'var(--spacing-5)',
+          ...segmentedVars,
         } as React.CSSProperties
       }
     >
