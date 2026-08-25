@@ -13,19 +13,6 @@ const meta = {
     mdxUsage: `
 {/* GetStartedSigNoz: standard end-of-article CTA, no props */}
 <GetStartedSigNoz />
-
-{/* GetStartedInfrastructureMonitoring: default or showcase variant */}
-<GetStartedInfrastructureMonitoring variant="showcase" />
-
-{/* PricingCTA: pricing banner; add concise for the compact version */}
-<PricingCTA />
-<PricingCTA concise />
-
-{/* InlineCTA: short in-article callout with a message */}
-<InlineCTA message="Logs, metrics, traces, and alerts: one OpenTelemetry-native platform. 50+ integrations, set up in minutes." />
-
-{/* SignUps: newsletter signup block, no props */}
-<SignUps />
 `,
   },
 } satisfies Meta<typeof GetStartedSigNoz>
@@ -36,10 +23,25 @@ type Story = StoryObj<typeof meta>
 
 export const GetStartedSigNozStory: Story = {
   name: 'GetStartedSigNoz',
+  parameters: {
+    mdxUsage: `
+{/* GetStartedSigNoz: standard end-of-article CTA, no props */}
+<GetStartedSigNoz />
+`,
+  },
 }
 
 export const GetStartedInfrastructureMonitoringStory: Story = {
   name: 'GetStartedInfrastructureMonitoring',
+  parameters: {
+    mdxUsage: `
+{/* Default variant */}
+<GetStartedInfrastructureMonitoring />
+
+{/* Showcase variant */}
+<GetStartedInfrastructureMonitoring variant="showcase" />
+`,
+  },
   render: () => (
     <div className="flex flex-col gap-8">
       <GetStartedInfrastructureMonitoring />
@@ -50,6 +52,15 @@ export const GetStartedInfrastructureMonitoringStory: Story = {
 
 export const PricingCTAStory: Story = {
   name: 'PricingCTA',
+  parameters: {
+    mdxUsage: `
+{/* Full pricing banner */}
+<PricingCTA />
+
+{/* Compact version */}
+<PricingCTA concise />
+`,
+  },
   render: () => (
     <div className="flex flex-col gap-8">
       <PricingCTA />
@@ -60,7 +71,16 @@ export const PricingCTAStory: Story = {
 
 export const InlineCTAStory: Story = {
   name: 'InlineCTA',
-  parameters: { docsProse: true },
+  parameters: {
+    docsProse: true,
+    mdxUsage: `
+SigNoz correlates traces, logs, and metrics out of the box, so a failed health check leads straight to the slow query behind it.
+
+<InlineCTA message="See traces, logs, and metrics for the same error in one view. Pricing scales with data volume, not host count." />
+
+Because SigNoz is OpenTelemetry-native, the instrumentation you add today keeps working if your stack changes tomorrow.
+`,
+  },
   render: () => (
     <>
       <p>
@@ -78,5 +98,11 @@ export const InlineCTAStory: Story = {
 
 export const SignUpsStory: Story = {
   name: 'SignUps',
+  parameters: {
+    mdxUsage: `
+{/* SignUps: newsletter signup block, no props */}
+<SignUps />
+`,
+  },
   render: () => <SignUps />,
 }

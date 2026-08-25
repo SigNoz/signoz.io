@@ -55,10 +55,15 @@ window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
   return realFetch(input, init)
 }
 
-// "Show MDX" canvas action: renders the meta's mdxUsage snippet with the same
-// Source block the docs pages use, mounted into the same bordered preview
-// block as the native Show code panel. Only one of the two is open at a time.
 type MdxPanelHost = Element & { __mdxRoot?: Root }
+
+function resolveCanvas(button: HTMLElement | null) {
+  const actions = button?.closest('.sbdocs-preview-actions') ?? undefined
+  const previewBlock = actions?.closest('.sb-anchor')?.querySelector('.sbdocs-preview') ?? undefined
+  const code =
+    previewBlock?.querySelector('[data-mdx-usage]')?.getAttribute('data-mdx-usage') ?? undefined
+  return { code, actions, previewBlock }
+}
 
 function closeMdxPanel(previewBlock: Element, button?: HTMLElement | null): boolean {
   const panel = previewBlock.querySelector<MdxPanelHost>(':scope > .mdx-usage-panel')
@@ -119,12 +124,8 @@ const preview: Preview = {
           {
             title: 'Show MDX',
             onClick: () => {
-              const code = (window as Window & { __mdxUsage?: string }).__mdxUsage
               const button = document.activeElement as HTMLElement | null
-              const actions = button?.closest('.sbdocs-preview-actions')
-              // Same slot the native Show code panel expands into: inside the
-              // bordered .sbdocs-preview block, right under the story.
-              const previewBlock = actions?.closest('.sb-anchor')?.querySelector('.sbdocs-preview')
+              const { code, actions, previewBlock } = resolveCanvas(button)
               if (!code || !button || !actions || !previewBlock) return
               closeMdxPanel(previewBlock, button) ||
                 openMdxPanel(previewBlock, button, actions, code)
@@ -133,7 +134,7 @@ const preview: Preview = {
           {
             title: 'Copy MDX',
             onClick: () => {
-              const code = (window as Window & { __mdxUsage?: string }).__mdxUsage
+              const { code } = resolveCanvas(document.activeElement as HTMLElement | null)
               if (code) navigator.clipboard.writeText(code.trim())
             },
           },
@@ -165,19 +166,22 @@ const preview: Preview = {
       defaultTheme: 'dark',
     }),
     (Story, context) => {
-      ;(window as Window & { __mdxUsage?: string }).__mdxUsage = context.parameters.mdxUsage
       const prose = context.parameters.docsProse !== false
+      const mdxUsage = context.parameters.mdxUsage as string | undefined
       return (
         <TooltipProviderWrapper>
           <RegionProvider>
             {prose ? (
-              <div className="mx-auto box-border w-full max-w-[760px] px-4">
+              <div
+                data-mdx-usage={mdxUsage}
+                className="mx-auto box-border w-full max-w-[760px] px-4"
+              >
                 <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
                   <Story />
                 </article>
               </div>
             ) : (
-              <div className="p-6">
+              <div data-mdx-usage={mdxUsage} className="p-6">
                 <Story />
               </div>
             )}

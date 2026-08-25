@@ -8,9 +8,6 @@ const meta = {
   parameters: {
     mdxUsage: `
 <Listicle name="apm-instrumentation" />
-
-{/* Optional: pre-select a section tab */}
-<Listicle name="integrations" defaultSection="all" />
 `,
   },
 } satisfies Meta<typeof Listicle>
@@ -19,11 +16,17 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-const listicleStory = (props: ComponentProps<typeof Listicle>): Story => ({
-  args: props,
-  loaders: [async () => ({ view: await Listicle(props) })],
-  render: (_args, { loaded }) => <>{loaded.view}</>,
-})
+const listicleStory = (props: ComponentProps<typeof Listicle>): Story => {
+  const attrs = Object.entries(props)
+    .map(([key, value]) => ` ${key}="${value}"`)
+    .join('')
+  return {
+    args: props,
+    parameters: { mdxUsage: `\n<Listicle${attrs} />\n` },
+    loaders: [async () => ({ view: await Listicle(props) })],
+    render: (_args, { loaded }) => <>{loaded.view}</>,
+  }
+}
 
 export const Sectioned: Story = listicleStory({ name: 'apm-instrumentation' })
 

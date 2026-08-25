@@ -10,18 +10,8 @@ const meta = {
   title: 'MDX Components/Interactive/High Cardinality',
   parameters: {
     mdxUsage: `
-{/* Interactive graphics from the high-cardinality-data blog post. All prop-less */}
-<UsersAnalogy />
-
-<DatabaseTable />
-
+{/* Interactive graphic from the high-cardinality-data blog post. Prop-less */}
 <CardinalityExplosion />
-
-<QueryRace />
-
-<MemoryGauge />
-
-<SamplingAggregation />
 `,
   },
 } satisfies Meta
@@ -32,30 +22,60 @@ type Story = StoryObj<typeof meta>
 
 export const Explosion: Story = {
   name: 'CardinalityExplosion',
+  parameters: {
+    mdxUsage: `
+<CardinalityExplosion />
+`,
+  },
   render: () => <CardinalityExplosion />,
 }
 
 export const Gauge: Story = {
   name: 'MemoryGauge',
+  parameters: {
+    mdxUsage: `
+<MemoryGauge />
+`,
+  },
   render: () => <MemoryGauge />,
 }
 
 export const Race: Story = {
   name: 'QueryRace',
+  parameters: {
+    mdxUsage: `
+<QueryRace />
+`,
+  },
   render: () => <QueryRace />,
 }
 
 export const Sampling: Story = {
   name: 'SamplingAggregation',
+  parameters: {
+    mdxUsage: `
+<SamplingAggregation />
+`,
+  },
   render: () => <SamplingAggregation />,
 }
 
 export const Analogy: Story = {
   name: 'UsersAnalogy',
+  parameters: {
+    mdxUsage: `
+<UsersAnalogy />
+`,
+  },
   render: () => <UsersAnalogy />,
 }
 
 export const Table: Story = {
   name: 'DatabaseTable',
+  parameters: {
+    mdxUsage: `
+<DatabaseTable />
+`,
+  },
   render: () => <DatabaseTable />,
 }

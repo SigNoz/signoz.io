@@ -19,10 +19,21 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  parameters: {
+    mdxUsage: `
+<YouTube id="sKQrv7RM3YY" mute="false" />
+`,
+  },
+}
 
 export const InkeepMonitoring: Story = {
   args: {
     id: 'gBQG_qhLVg4',
+  },
+  parameters: {
+    mdxUsage: `
+<YouTube id="gBQG_qhLVg4" mute="false" />
+`,
   },
 }

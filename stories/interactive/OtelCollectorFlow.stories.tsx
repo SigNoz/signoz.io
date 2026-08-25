@@ -18,4 +18,12 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  parameters: {
+    mdxUsage: `
+The animation below shows the flow of data through the Collector.
+
+<OtelCollectorFlow />
+`,
+  },
+}

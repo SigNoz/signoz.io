@@ -14,20 +14,8 @@ const meta = {
   totalParts="4"
   previousTitle="Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry"
   previousHref="/blog/opentelemetry-nextjs-web-vitals"
-  nextTitle="Deploying and Scaling OpenTelemetry in Production NextJS Apps"
-  nextHref="/blog/opentelemetry-nextjs-production"
-/>
-
-{/* Same props, placed at the end of the post */}
-<ArticleSeriesBottom
-  seriesName="OpenTelemetry NextJS Tutorial"
-  seriesOverviewHref="/blog/opentelemetry-nextjs"
-  currentPart="3"
-  totalParts="4"
-  previousTitle="Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry"
-  previousHref="/blog/opentelemetry-nextjs-web-vitals"
-  nextTitle="Deploying and Scaling OpenTelemetry in Production NextJS Apps"
-  nextHref="/blog/opentelemetry-nextjs-production"
+  nextTitle="Structured Logging in NextJS with OpenTelemetry"
+  nextHref="/blog/opentelemetry-nextjs-logging"
 />
 `,
   },
@@ -45,6 +33,21 @@ const SERIES = {
 
 export const TopMiddlePart: Story = {
   name: 'ArticleSeriesTop (middle part)',
+  parameters: {
+    mdxUsage: `
+{/* Top of the post, right after frontmatter */}
+<ArticleSeriesTop
+  seriesName="OpenTelemetry NextJS Tutorial"
+  seriesOverviewHref="/blog/opentelemetry-nextjs"
+  currentPart="3"
+  totalParts="4"
+  previousTitle="Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry"
+  previousHref="/blog/opentelemetry-nextjs-web-vitals"
+  nextTitle="Structured Logging in NextJS with OpenTelemetry"
+  nextHref="/blog/opentelemetry-nextjs-logging"
+/>
+`,
+  },
   render: () => (
     <ArticleSeriesTop
       {...SERIES}
@@ -59,6 +62,19 @@ export const TopMiddlePart: Story = {
 
 export const TopFirstPart: Story = {
   name: 'ArticleSeriesTop (first part)',
+  parameters: {
+    mdxUsage: `
+{/* First part of the series: omit the previous props */}
+<ArticleSeriesTop
+  seriesName="OpenTelemetry NextJS Tutorial"
+  seriesOverviewHref="/blog/opentelemetry-nextjs"
+  currentPart="1"
+  totalParts="4"
+  nextTitle="Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry"
+  nextHref="/blog/opentelemetry-nextjs-web-vitals"
+/>
+`,
+  },
   render: () => (
     <ArticleSeriesTop
       {...SERIES}
@@ -71,6 +87,21 @@ export const TopFirstPart: Story = {
 
 export const BottomMiddlePart: Story = {
   name: 'ArticleSeriesBottom (middle part)',
+  parameters: {
+    mdxUsage: `
+{/* End of the post, same props as ArticleSeriesTop */}
+<ArticleSeriesBottom
+  seriesName="OpenTelemetry NextJS Tutorial"
+  seriesOverviewHref="/blog/opentelemetry-nextjs"
+  currentPart="3"
+  totalParts="4"
+  previousTitle="Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry"
+  previousHref="/blog/opentelemetry-nextjs-web-vitals"
+  nextTitle="Structured Logging in NextJS with OpenTelemetry"
+  nextHref="/blog/opentelemetry-nextjs-logging"
+/>
+`,
+  },
   render: () => (
     <ArticleSeriesBottom
       {...SERIES}
@@ -85,6 +116,19 @@ export const BottomMiddlePart: Story = {
 
 export const BottomLastPart: Story = {
   name: 'ArticleSeriesBottom (last part)',
+  parameters: {
+    mdxUsage: `
+{/* Last part of the series: omit the next props */}
+<ArticleSeriesBottom
+  seriesName="OpenTelemetry NextJS Tutorial"
+  seriesOverviewHref="/blog/opentelemetry-nextjs"
+  currentPart="4"
+  totalParts="4"
+  previousTitle="Structured Logging in NextJS with OpenTelemetry"
+  previousHref="/blog/opentelemetry-nextjs-logging"
+/>
+`,
+  },
   render: () => (
     <ArticleSeriesBottom
       {...SERIES}

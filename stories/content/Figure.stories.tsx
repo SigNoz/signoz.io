@@ -8,22 +8,10 @@ const meta = {
   parameters: {
     mdxUsage: `
 <Figure
-  src="/img/docs/alerts/alerts-metrics-based-1.webp"
-  alt="Using Query Builder to define the metric to monitor"
-  caption="Using Query Builder to define the metric to monitor"
+  src="/img/docs/alert-rules.webp"
+  alt="Alert rules list in SigNoz showing rule name, severity, and firing state"
+  caption="Alert rules in SigNoz. Click the image to zoom"
 />
-
-{/* Optional: link + sourceText append a source attribution to the caption */}
-<Figure
-  src="/img/docs/alerts-query-builder.webp"
-  alt="Query builder while creating a metrics-based alert in SigNoz"
-  caption="Building an alert query on p99 latency."
-  link="https://signoz.io/docs/alerts/"
-  sourceText="SigNoz Alerts docs"
-/>
-
-{/* NextImage is also registered in MDX for raw next/image rendering */}
-<NextImage src="/img/docs/alerts-query-builder.webp" alt="Alert query builder" width={1200} height={675} />
 `,
   },
   args: {
@@ -37,7 +25,17 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  parameters: {
+    mdxUsage: `
+<Figure
+  src="/img/docs/alert-rules.webp"
+  alt="Alert rules list in SigNoz showing rule name, severity, and firing state"
+  caption="Alert rules in SigNoz. Click the image to zoom"
+/>
+`,
+  },
+}
 
 export const WithSourceAttribution: Story = {
   args: {
@@ -46,6 +44,17 @@ export const WithSourceAttribution: Story = {
     caption: 'Building an alert query on p99 latency.',
     link: 'https://signoz.io/docs/alerts/',
     sourceText: 'SigNoz Alerts docs',
+  },
+  parameters: {
+    mdxUsage: `
+<Figure
+  src="/img/docs/alerts-query-builder.webp"
+  alt="Query builder while creating a metrics-based alert in SigNoz"
+  caption="Building an alert query on p99 latency."
+  link="https://signoz.io/docs/alerts/"
+  sourceText="SigNoz Alerts docs"
+/>
+`,
   },
 }
 
@@ -57,6 +66,16 @@ export const CaptionAsLink: Story = {
     caption: 'Read more about Apdex scores in SigNoz',
     link: 'https://signoz.io/docs/userguide/metrics/',
   },
+  parameters: {
+    mdxUsage: `
+<Figure
+  src="/img/docs/apdex-score.webp"
+  alt="Apdex score panel on the SigNoz service overview page"
+  caption="Read more about Apdex scores in SigNoz"
+  link="https://signoz.io/docs/userguide/metrics/"
+/>
+`,
+  },
 }
 
 export const CustomDimensions: Story = {
@@ -67,13 +86,32 @@ export const CustomDimensions: Story = {
     width: 72,
     height: 72,
   },
+  parameters: {
+    mdxUsage: `
+<Figure
+  src="/img/docs/cursor-icon.webp"
+  alt="Cursor editor icon"
+  caption="Small fixed-size image (72x72)"
+  width="72"
+  height="72"
+/>
+`,
+  },
 }
 
-// Raw markdown images (`![alt](src)`) in docs render through next/image
-// directly, without the Figure wrapper. The framework serves public/ assets,
-// so real /img/... paths work.
 export const NextImageDirect: Story = {
   name: 'NextImage',
+  parameters: {
+    mdxUsage: `
+<NextImage
+  src="/img/docs/alerts-query-builder.webp"
+  alt="Query builder while creating a metrics-based alert in SigNoz"
+  width={1200}
+  height={675}
+  className="rounded-md"
+/>
+`,
+  },
   render: () => (
     <NextImage
       src="/img/docs/alerts-query-builder.webp"

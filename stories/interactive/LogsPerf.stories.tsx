@@ -16,4 +16,11 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  parameters: {
+    mdxUsage: `
+{/* Logs performance benchmark graphic used across logging blog posts */}
+<LogsPerf />
+`,
+  },
+}

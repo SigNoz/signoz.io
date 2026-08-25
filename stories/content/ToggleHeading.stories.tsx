@@ -17,16 +17,7 @@ const meta = {
 
 - Confirm the flow actually ran. An idle Langflow instance emits nothing.
 - Verify \`TRACELOOP_API_KEY\` is set to a non-empty value. This switches the tracer on.
-
-</details>
-
-{/* Add the open attribute to render expanded by default */}
-<details open>
-<ToggleHeading>
-## Setup OpenTelemetry Collector (Optional)
-</ToggleHeading>
-
-Body content goes here.
+- OpenTelemetry batches data before sending, so wait 10-30 seconds after running a flow.
 
 </details>
 `,
@@ -53,24 +44,42 @@ const toggleStory = (headingMarkdown: string, body: ReactNode, open?: boolean): 
   ),
 })
 
-export const Collapsed: Story = toggleStory(
-  '## Troubleshooting Langflow Observability',
-  <>
-    <h3>No traces in SigNoz</h3>
-    <ul>
-      <li>Confirm the flow actually ran. An idle Langflow instance emits nothing.</li>
-      <li>
-        Verify <code>TRACELOOP_API_KEY</code> is set to a non-empty value. This switches the tracer
-        on.
-      </li>
-      <li>
-        OpenTelemetry batches data before sending, so wait 10-30 seconds after running a flow.
-      </li>
-    </ul>
-  </>
-)
+export const Collapsed: Story = {
+  ...toggleStory(
+    '## Troubleshooting Langflow Observability',
+    <>
+      <h3>No traces in SigNoz</h3>
+      <ul>
+        <li>Confirm the flow actually ran. An idle Langflow instance emits nothing.</li>
+        <li>
+          Verify <code>TRACELOOP_API_KEY</code> is set to a non-empty value. This switches the
+          tracer on.
+        </li>
+        <li>
+          OpenTelemetry batches data before sending, so wait 10-30 seconds after running a flow.
+        </li>
+      </ul>
+    </>
+  ),
+  parameters: {
+    mdxUsage: `
+<details>
+<ToggleHeading>
+## Troubleshooting Langflow Observability
+</ToggleHeading>
 
-export const DefaultOpen: Story = toggleStory(
+### No traces in SigNoz
+
+- Confirm the flow actually ran. An idle Langflow instance emits nothing.
+- Verify \`TRACELOOP_API_KEY\` is set to a non-empty value. This switches the tracer on.
+- OpenTelemetry batches data before sending, so wait 10-30 seconds after running a flow.
+
+</details>
+`,
+  },
+}
+
+const defaultOpenStory = toggleStory(
   '## Setup OpenTelemetry Collector (Optional)',
   <>
     <h3>What is the OpenTelemetry Collector?</h3>
@@ -86,3 +95,22 @@ export const DefaultOpen: Story = toggleStory(
   </>,
   true
 )
+
+export const DefaultOpen: Story = {
+  ...defaultOpenStory,
+  parameters: {
+    mdxUsage: `
+{/* Add the open attribute to render expanded by default */}
+<details open>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along. See the [collector setup guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) for details.
+
+</details>
+`,
+  },
+}

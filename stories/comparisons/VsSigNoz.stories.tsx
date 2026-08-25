@@ -3,19 +3,13 @@ import DatadogVsSigNoz from '@/components/DatadogVsSigNoz/DatadogVsSigNoz'
 import GrafanaVsSigNoz from '@/components/GrafanaVsSigNoz/GrafanaVsSigNoz'
 import NewRelicVsSigNoz from '@/components/NewRelicVsSigNoz/NewRelicVsSigNoz'
 
-// Migration CTA banners dropped into comparison blog posts. All three are
-// prop-less marketing cards, so they render outside the docs prose wrapper.
 const meta = {
   title: 'MDX Components/Comparisons/Vs SigNoz',
   parameters: {
     docsProse: false,
     mdxUsage: `
-{/* Migration CTA banners for comparison posts. All prop-less, pick the one matching the competitor */}
+{/* Migration CTA banner for comparison posts. Prop-less, pick the one matching the competitor */}
 <DatadogVsSigNoz />
-
-<GrafanaVsSigNoz />
-
-<NewRelicVsSigNoz />
 `,
   },
 } satisfies Meta
@@ -26,15 +20,30 @@ type Story = StoryObj<typeof meta>
 
 export const Datadog: Story = {
   name: 'DatadogVsSigNoz',
+  parameters: {
+    mdxUsage: `
+<DatadogVsSigNoz />
+`,
+  },
   render: () => <DatadogVsSigNoz />,
 }
 
 export const Grafana: Story = {
   name: 'GrafanaVsSigNoz',
+  parameters: {
+    mdxUsage: `
+<GrafanaVsSigNoz />
+`,
+  },
   render: () => <GrafanaVsSigNoz />,
 }
 
 export const NewRelic: Story = {
   name: 'NewRelicVsSigNoz',
+  parameters: {
+    mdxUsage: `
+<NewRelicVsSigNoz />
+`,
+  },
   render: () => <NewRelicVsSigNoz />,
 }

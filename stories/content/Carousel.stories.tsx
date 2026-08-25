@@ -21,9 +21,29 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const CommaSeparatedString: Story = {}
+export const CommaSeparatedString: Story = {
+  parameters: {
+    mdxUsage: `
+{/* The MDX-registered name is NextCarousel; items is a comma-separated list of image paths */}
+<NextCarousel items="/img/blog/2024/05/kafka-monitoring/kafka-latency-1.png,/img/blog/2024/05/kafka-monitoring/kafka-latency-2.png,/img/blog/2024/05/kafka-monitoring/kafka-latency-3.png" />
+`,
+  },
+}
 
 export const ArrayOfImages: Story = {
+  parameters: {
+    mdxUsage: `
+{/* items also accepts an array of image paths */}
+<NextCarousel
+  items={[
+    '/img/blog/2024/05/kafka-monitoring/consumer-lag-1.png',
+    '/img/blog/2024/05/kafka-monitoring/consumer-lag-2.png',
+    '/img/blog/2024/05/kafka-monitoring/consumer-lag-3.png',
+    '/img/blog/2024/05/kafka-monitoring/consumer-lag-4.png',
+  ]}
+/>
+`,
+  },
   args: {
     items: [
       '/img/blog/2024/05/kafka-monitoring/consumer-lag-1.png',
@@ -37,4 +57,10 @@ export const ArrayOfImages: Story = {
 // Empty input renders nothing (the component returns null).
 export const Empty: Story = {
   args: { items: '' },
+  parameters: {
+    mdxUsage: `
+{/* An empty items list renders nothing at all */}
+<NextCarousel items="" />
+`,
+  },
 }

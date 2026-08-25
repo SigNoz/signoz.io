@@ -17,4 +17,11 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  parameters: {
+    mdxUsage: `
+{/* Feature-comparison showcase card used in Datadog-alternative posts */}
+<ProductFeatureShowcase />
+`,
+  },
+}

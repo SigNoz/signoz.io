@@ -19,22 +19,8 @@ const meta = {
   title: 'MDX Components/Shared Partials/Docs Partials',
   parameters: {
     mdxUsage: `
-{/* Self-contained docs partials. Each renders a full prewritten section, no props */}
+{/* Self-contained docs partial. Renders a full prewritten section, no props */}
 <HostingDecision />
-<CommonPrerequisites />
-<K8sInstall />
-<K8sOtelDemo />
-<K8sNextSteps />
-<RetentionInfo />
-<SigNozCloud />
-<UpgradeInfo />
-<GetHelp />
-<MultiNodePart1 />
-<MultiNodePart2 />
-<PrereqsInstrument />
-<TraefikMetrics />
-<MetricsDefinition />
-<CHClientWithOutput />
 `,
   },
 } satisfies Meta
@@ -45,75 +31,150 @@ type Story = StoryObj<typeof meta>
 
 export const Hosting: Story = {
   name: 'HostingDecision',
+  parameters: {
+    mdxUsage: `
+<HostingDecision />
+`,
+  },
   render: () => <HostingDecision />,
 }
 
 export const Prerequisites: Story = {
   name: 'CommonPrerequisites',
+  parameters: {
+    mdxUsage: `
+<CommonPrerequisites />
+`,
+  },
   render: () => <CommonPrerequisites />,
 }
 
 export const KubernetesInstall: Story = {
   name: 'K8sInstall',
+  parameters: {
+    mdxUsage: `
+<K8sInstall />
+`,
+  },
   render: () => <K8sInstall />,
 }
 
 export const KubernetesOtelDemo: Story = {
   name: 'K8sOtelDemo',
+  parameters: {
+    mdxUsage: `
+<K8sOtelDemo />
+`,
+  },
   render: () => <K8sOtelDemo />,
 }
 
 export const KubernetesNextSteps: Story = {
   name: 'K8sNextSteps',
+  parameters: {
+    mdxUsage: `
+<K8sNextSteps />
+`,
+  },
   render: () => <K8sNextSteps />,
 }
 
 export const Retention: Story = {
   name: 'RetentionInfo',
+  parameters: {
+    mdxUsage: `
+<RetentionInfo />
+`,
+  },
   render: () => <RetentionInfo />,
 }
 
 export const Cloud: Story = {
   name: 'SigNozCloud',
+  parameters: {
+    mdxUsage: `
+<SigNozCloud />
+`,
+  },
   render: () => <SigNozCloud />,
 }
 
 export const Upgrade: Story = {
   name: 'UpgradeInfo',
+  parameters: {
+    mdxUsage: `
+<UpgradeInfo />
+`,
+  },
   render: () => <UpgradeInfo />,
 }
 
 export const Help: Story = {
   name: 'GetHelp',
+  parameters: {
+    mdxUsage: `
+<GetHelp />
+`,
+  },
   render: () => <GetHelp />,
 }
 
 export const MultiNodeStep1: Story = {
   name: 'MultiNodePart1',
+  parameters: {
+    mdxUsage: `
+<MultiNodePart1 />
+`,
+  },
   render: () => <MultiNodePart1 />,
 }
 
 export const MultiNodeStep2: Story = {
   name: 'MultiNodePart2',
+  parameters: {
+    mdxUsage: `
+<MultiNodePart2 />
+`,
+  },
   render: () => <MultiNodePart2 />,
 }
 
 export const InstrumentPrereqs: Story = {
   name: 'PrereqsInstrument',
+  parameters: {
+    mdxUsage: `
+<PrereqsInstrument />
+`,
+  },
   render: () => <PrereqsInstrument />,
 }
 
 export const Traefik: Story = {
   name: 'TraefikMetrics',
+  parameters: {
+    mdxUsage: `
+<TraefikMetrics />
+`,
+  },
   render: () => <TraefikMetrics />,
 }
 
 export const Metrics: Story = {
   name: 'MetricsDefinition',
+  parameters: {
+    mdxUsage: `
+<MetricsDefinition />
+`,
+  },
   render: () => <MetricsDefinition />,
 }
 
 export const ClickHouseClient: Story = {
   name: 'CHClientWithOutput',
+  parameters: {
+    mdxUsage: `
+<CHClientWithOutput />
+`,
+  },
   render: () => <CHClientWithOutput />,
 }

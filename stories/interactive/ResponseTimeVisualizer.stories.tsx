@@ -18,4 +18,13 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  parameters: {
+    mdxUsage: `
+Rapidly click the client below to send requests and watch how P50, P95, P99, and
+average metrics respond differently:
+
+<ResponseTimeVisualizer />
+`,
+  },
+}
