@@ -266,56 +266,47 @@ export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT="true"
 
 Content then lands on `gen_ai.input.messages`, `gen_ai.output.messages`, and `gen_ai.system_instructions`. Prompts frequently contain user data, so enable this deliberately and check what your retention policy implies first.
 
+<details>
+<ToggleHeading>
+
 ## Troubleshooting OpenAI Agents SDK Observability
 
-<details>
-<summary><ToggleHeading>No spans reach SigNoz</ToggleHeading></summary>
+</ToggleHeading>
+
+### No spans reach SigNoz
 
 Confirm `provider.force_flush()` runs before the process exits. Check that `set_trace_processors([])` and `.instrument()` both run before the first `Runner.run()`. Confirm `OTEL_EXPORTER_OTLP_PROTOCOL` is `http/protobuf`, which matches the HTTP exporter installed in Step 1.
 
-</details>
-
-<details>
-<summary><ToggleHeading>Running with opentelemetry-instrument produces nothing</ToggleHeading></summary>
+### Running with opentelemetry-instrument produces nothing
 
 Almost always a missing `opentelemetry-distro`. Without it, `opentelemetry-instrument` still loads the instrumentation and the bridge appears on the SDK's processor list, but no tracer provider or exporter is ever configured, so nothing leaves the process. Confirm the package is installed as shown in Step 1 of the No Code tab.
 
 To check quickly, print `type(opentelemetry.trace.get_tracer_provider())` at the top of your application. A `ProxyTracerProvider` means nothing was configured, while a `TracerProvider` means the distro is doing its job.
 
-</details>
-
-<details>
-<summary><ToggleHeading>Spans named unknown appear throughout the trace</ToggleHeading></summary>
+### Spans named unknown appear throughout the trace
 
 The SDK's task and turn span types are not yet mapped by the instrumentation and fall through to the literal name `unknown`. Suppress them with `include_task_and_turn_spans: False` on your `RunConfig`, as shown in the Code tab. They cannot be suppressed on the no-code path, because that setting has to be passed in code.
 
-</details>
-
-<details>
-<summary><ToggleHeading>Traces still appear in OpenAI's dashboard</ToggleHeading></summary>
+### Traces still appear in OpenAI's dashboard
 
 The `set_trace_processors([])` call is missing, or it runs after `.instrument()` rather than before it.
 
-</details>
-
-<details>
-<summary><ToggleHeading>No metrics appear</ToggleHeading></summary>
+### No metrics appear
 
 This instrumentation emits traces only and declares no metric support, so there is no `gen_ai.client.token.usage` histogram. Aggregate the span attributes instead, which is what the dashboard template does.
 
-</details>
-
-<details>
-<summary><ToggleHeading>Overriding of current TracerProvider is not allowed</ToggleHeading></summary>
+### Overriding of current TracerProvider is not allowed
 
 A global tracer provider was already set, usually by a second module running the same setup. Configure the provider exactly once at startup.
 
 </details>
 
+<details>
+<ToggleHeading>
+
 ## Setup OpenTelemetry Collector (Optional)
 
-<details>
-<summary><ToggleHeading>Route traces through an OpenTelemetry Collector</ToggleHeading></summary>
+</ToggleHeading>
 
 The <a href="https://opentelemetry.io/docs/collector/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collector</a> is a vendor-neutral proxy that receives, processes, and exports telemetry. Sending through a Collector lets you batch and retry centrally, strip or enrich attributes before they leave your network, and fan out to more than one backend without changing application code.
 
