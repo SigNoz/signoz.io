@@ -1,0 +1,98 @@
+---
+published_date: 2026-08-24
+title: Qwen Code Dashboard
+meta_title: Qwen Code CLI Usage Dashboard
+description: Monitor Qwen Code CLI with token spend, prompt cache hit rate, model latency, tool activity, and background subagent cost from OpenTelemetry traces.
+doc_type: explanation
+---
+
+<Admonition type="note" title="Send telemetry first">
+To use this dashboard, you need to set up the data source and send telemetry to SigNoz. Follow the [Qwen Code Observability](https://signoz.io/docs/qwen-code-observability/) guide to get started.
+</Admonition>
+
+This dashboard provides comprehensive monitoring of Qwen Code CLI usage and performance, offering visibility into token spend and prompt cache efficiency, turn and session volume, model latency and time to first chunk, tool activity and failures, and how much of your token budget goes to background subagents nobody asked for.
+
+Panels read the traces and metrics Qwen Code exports natively, so nothing beyond the CLI's own telemetry configuration is required. Queries filter on the span name, which is what separates the six spans the CLI emits: `qwen-code.interaction` for a turn, `qwen-code.llm_request` for a model call, `POST` for the raw provider request, `qwen-code.tool` and `qwen-code.tool.execution` for a tool call, and `qwen-code.hook` for the hook runner. A multi-select `service_name` variable scopes every panel, so one dashboard covers as many teams or machines as report under different service names.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/qwen-code-dashboard.webp"
+  alt="Qwen Code Dashboard"
+  caption="Qwen Code Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/qwen-code/qwen-code-dashboard.json"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the telemetry the CLI emits to help you:
+
+- **Monitor Token Spend**: Track input, cached, and output tokens to understand workload and cost
+- **Measure Cache Efficiency**: Watch how much of each prompt is served from the prompt cache as sessions grow
+- **Separate Background Cost**: See what share of your tokens goes to subagents the user never invoked
+- **Understand Agent Behavior**: See how many model calls and tool calls a single turn actually takes
+- **Compare Model Usage**: See which models carry the workload and catch unexpected fallbacks
+- **Track Reliability**: Watch genuine errors without hook noise drowning them out
+- **Find Slow Tools**: Break tool latency down per tool to find the step that stalls a turn
+
+## Panels Included
+
+| Panel | Description |
+|---|---|
+| Sessions | Distinct CLI sessions, to tell one-shot invocations from long working sessions |
+| Agent Turns | Every prompt-and-response cycle the agent completed |
+| Model Calls | One count per model call, showing how many round trips a turn takes |
+| Tool Calls | Every tool the agent executed |
+| Total Tokens | Input plus output tokens across every model call |
+| Prompt Cache Hit Rate | Share of input tokens served from the prompt cache |
+| Cached Input Tokens | Input tokens read from cache instead of reprocessed |
+| Failed Tool Calls | Tool calls that reported failure |
+
+### Token Usage
+
+- **Token Usage Over Time**: Input, cached input, and output tokens over time. Cached input is a subset of input rather than an additional charge, so the two lines track each other. Output stays low and flat on almost any agent workload, because most model calls are short decisions about which tool to run next.
+- **Tokens by Model**: Token spend per model, useful for tracking migration between model versions and spotting which model actually carries the workload.
+- **User-Driven vs Background Tokens**: `llm_request.context` splits calls made for a user turn (`interaction`) from background work the user never requested (`standalone`). Background spend never appears in the terminal, so this is usually the first place a surprise on the bill shows up.
+- **Tokens by Background Subagent**: Which background subagent is spending the tokens, such as the auto-memory extractor and the dreamer. Read it with the panel above: when the standalone slice grows, this says which subagent grew it.
+- **Token Usage by Type (metric)**: The same spend read from the `qwen-code.token.usage` counter instead of from spans, split into input, cache, output, and thought.
+
+### Model and Latency
+
+- **Model Call Latency**: p50, p95, and p99 duration of model calls. This tracks answer length more than provider health, so a rising p99 usually means longer responses.
+- **Time to First Chunk**: How long the model takes to start streaming. Unlike total latency this is independent of answer length, so it is the honest measure of provider responsiveness and the one developers actually feel.
+- **Model Calls Over Time**: Requests per model over time, worth watching for the moment the agent falls back to a different model than the one you configured.
+- **Finish Reasons**: Why each model call stopped. `tool_calls` running level with or above `stop` is the normal shape for an agent, because only the last call of a turn ends with a finished answer.
+
+### Tools
+
+- **Tool Calls by Name**: Which tools the agent reaches for, over time. Heavy `run_shell_command` and `edit` means it is changing things, heavy `read_file` and `grep_search` means it is still exploring.
+- **Tool Success vs Failure**: Split of tool calls by outcome. Failures here are usually environmental, a missing file or a command that exits non-zero, rather than model problems.
+- **Tool Latency (p95)**: Slowest tools by p95 execution time. Shell commands dominate and matter even when they never fail, because the model sits idle while they run.
+
+### Errors, Hooks and Runtime
+
+- **Real Errors Over Time**: Errored spans with hook spans excluded, so genuine failures are visible.
+- **Hook Runner Health**: Hook spans on their own, since they report an error by design. Watch this for a change in shape rather than for any non-zero value.
+- **CLI CPU Usage**: Peak CPU percentage reported by the agent process, useful for catching a runaway tool or a file watcher that never settles.
+- **Recent Real Errors**: Individual failing spans with their status message, linked through to the full trace.
+
+<Admonition type="info" title="Why the error panels exclude hook spans" defaultCollapsed="true">
+With no hooks configured, every `qwen-code.hook` span reports `hook runner returned no output without error detail`. On a measured workload these were 93% of all error spans on a completely healthy install.
+
+Both error panels therefore filter `name != 'qwen-code.hook'`, and hook volume gets its own panel instead. If you remove that filter, the error panels will read close to 100% failure and tell you nothing.
+</Admonition>
+
+<Admonition type="info" title="Why tool and token panels are scoped the way they are" defaultCollapsed="true">
+Two scoping decisions here will silently produce wrong numbers if you change them.
+
+Tool panels count `qwen-code.tool` only. `qwen-code.tool.execution` is its child and carries the same `gen_ai.tool.name`, so counting across both double counts every tool call.
+
+Token panels sum `gen_ai.usage.input_tokens` and `gen_ai.usage.output_tokens` rather than reading a total, because Qwen Code emits no `gen_ai.usage.total_tokens` attribute. Note also that `gen_ai.usage.cache_read.input_tokens` is dotted rather than underscored.
+</Admonition>
+
+<Admonition type="info" title="Why Tool Success vs Failure uses two queries" defaultCollapsed="true">
+The `success` attribute filters correctly when the value is quoted (`success = 'true'`) but does not group reliably, so a `groupBy` on it returns empty. The panel is built from two filtered queries instead, one per outcome.
+</Admonition>

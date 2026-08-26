@@ -259,7 +259,7 @@ export default function AgentNativeObservabilitySection() {
   return (
     <section
       ref={sectionRef}
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 overflow-hidden bg-signoz_ink-500 px-5 py-16 sm:px-6 md:py-24 lg:px-20 lg:py-32 wide:px-0"
+      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 overflow-hidden bg-signoz_ink-500 px-5 py-16 sm:px-6 md:py-24 lg:px-20 lg:py-32 wide:px-0"
       data-homepage-agent-native-observability
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_58%_at_24%_42%,rgba(78,116,248,0.09),transparent_64%),radial-gradient(ellipse_72%_54%_at_82%_52%,rgba(35,196,248,0.055),transparent_66%),linear-gradient(180deg,rgba(22,25,34,0.08),rgba(11,12,14,0.42)_50%,rgba(11,12,14,0.1))] [mask-image:linear-gradient(180deg,transparent_0%,black_16%,black_82%,transparent_100%)]" />
@@ -275,14 +275,14 @@ export default function AgentNativeObservabilitySection() {
           <h2 className="m-0 max-w-[540px] text-[32px] font-medium leading-[1.08] tracking-[-0.65px] text-signoz_vanilla-100 sm:text-[40px] sm:leading-[1.04] sm:tracking-[-1.1px] md:text-[58px] md:tracking-[-1.65px]">
             Agent-native observability,
             <br />
-            <span className="text-signoz_vanilla-400">inside your IDE and SigNoz.</span>
+            <span className="text-signoz_vanilla-400">inside your IDE and SigNoz Cloud.</span>
           </h2>
 
           <div className="max-w-[560px] md:pt-2">
             <p className="text-signoz_vanilla-300/82 m-0 text-base leading-7 tracking-[-0.15px] sm:text-[19px] sm:leading-9 sm:tracking-[-0.28px]">
               Use the SigNoz MCP server to bring telemetry into coding agents, or use Noz, your AI
-              teammate inside SigNoz, to investigate incidents, tune alerts, and build dashboards
-              with the same production context your team sees.
+              teammate inside SigNoz Cloud, to investigate incidents, tune alerts, and build
+              dashboards with the same production context your team sees.
             </p>
             <TrackingLink
               className="group mt-6 inline-flex items-center gap-2 text-sm font-medium text-signoz_robin-400 transition-colors hover:text-signoz_robin-300 sm:mt-9"

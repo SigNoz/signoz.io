@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-08-03
 title: Qwen Observability & Monitoring with OpenTelemetry
 description: Setup Qwen observability with OpenTelemetry and SigNoz. Track traces, logs, and metrics for your Qwen LLM applications with unified dashboards.
 doc_type: howto
@@ -64,7 +64,7 @@ This sets the minimum log level for the root logger to DEBUG, which ensures that
 
 ### Step 4: Create an example Qwen application
 
-```python:main.py
+```python:main.py defaultCollapsed
 import os
 from openai import OpenAI
 
@@ -178,7 +178,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ### Step 3: Set up Metrics
 
-```python
+```python defaultCollapsed
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
@@ -219,7 +219,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ### Step 4: Set up Logs
 
-```python
+```python defaultCollapsed
 import logging
 from opentelemetry.sdk.resources import Resource
 from opentelemetry._logs import set_logger_provider
@@ -266,7 +266,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
    Ensure you have completed the steps above (traces, logs, and metrics configuration) before running this code. All OpenTelemetry instrumentation must be initialized first.
 </Admonition>
 
-```python:main.py
+```python:main.py defaultCollapsed
 import os
 from openai import OpenAI
 
@@ -410,9 +410,14 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 </details>
 
-Additional resources:
-- Set up [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
-- Learn more about [querying traces](https://signoz.io/docs/userguide/traces/)
-- Explore [log correlation](https://signoz.io/docs/userguide/logs_query_builder/)
+## Related integrations
 
+Send telemetry from the rest of your model providers to the same backend:
 
+- [Groq observability with OpenTelemetry](https://signoz.io/docs/groq-observability/) - trace Groq inference calls and measure time to first token
+- [Monitor the OpenAI API with OpenTelemetry](https://signoz.io/docs/openai-monitoring/) - track token usage, model latency, and error rates across every call
+- [Monitor the Anthropic API with OpenTelemetry](https://signoz.io/docs/anthropic-monitoring/) - trace Claude requests and break down input, output, and cache token usage
+- [CrewAI observability with OpenTelemetry](https://signoz.io/docs/crewai-observability/) - trace crews, agents, tasks, and tool calls end to end
+- [Monitor Baseten with OpenTelemetry](https://signoz.io/docs/baseten-monitoring/) - trace model deployments and inference calls running on Baseten
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

@@ -1,10 +1,11 @@
 import { MetadataRoute } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { fetchAllCMSContent } from 'utils/cmsContent'
+import { CMS_SITEMAP_SECTIONS } from '@/utils/sitemapRoutes'
 import { compareSitemapEntries, toSitemapDateOnly } from 'utils/sitemapXml'
 import { resolveLatestDate } from '@/utils/dateUtils'
 
-export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
+export const revalidate = 86400
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = siteMetadata.siteUrl
@@ -26,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let caseStudyRoutes: MetadataRoute.Sitemap = []
   if (caseStudies) {
     caseStudyRoutes = caseStudies.data.map((caseStudy) => ({
-      url: `${siteUrl}/case-study${caseStudy.path}/`,
+      url: `${siteUrl}/customers${caseStudy.path}/`,
       lastModified: resolveLatestDate(caseStudy),
     }))
   }
@@ -71,12 +72,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }))
   }
 
-  const staticRoutes = ['blog', 'guides', 'faqs', 'case-study', 'opentelemetry', 'comparisons'].map(
-    (route) => ({
-      url: `${siteUrl}/${route}/`,
-      changeFrequency: 'weekly' as const,
-    })
-  )
+  const staticRoutes = CMS_SITEMAP_SECTIONS.map(({ section }) => ({
+    url: `${siteUrl}/${section}/`,
+    changeFrequency: 'weekly' as const,
+  }))
 
   const allRoutes: MetadataRoute.Sitemap = [
     ...staticRoutes,

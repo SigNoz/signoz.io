@@ -37,7 +37,7 @@ const ALL_FEATURES_DATA = {
   HEADER: [
     { heading: '', desc: '' },
     {
-      heading: 'Community Edition',
+      heading: 'Self Hosted SigNoz (Community)',
       desc: 'Install & manage yourself',
       action: (
         <TrackingLink
@@ -54,8 +54,8 @@ const ALL_FEATURES_DATA = {
       ),
     },
     {
-      heading: 'Teams',
-      desc: 'Cloud ⎯ starts at $49/mo',
+      heading: 'SigNoz Cloud (Teams)',
+      desc: 'Starts at $49/mo',
       action: (
         <TrackingLink
           href={'/teams/'}
@@ -71,8 +71,8 @@ const ALL_FEATURES_DATA = {
       ),
     },
     {
-      heading: 'Enterprise',
-      desc: 'Cloud / Self-Hosted',
+      heading: 'SigNoz Enterprise',
+      desc: 'Cloud, BYOC, or Self-Hosted',
       action: (
         <TrackingLink
           href={'/contact-us/?source=pricing'}
@@ -698,6 +698,15 @@ const ALL_FEATURES_DATA = {
   ],
 }
 
+function cellToMarkdown(node: React.ReactNode): string {
+  if (React.isValidElement(node)) {
+    if (node.type === CheckSolid) return '✓'
+    if (node.type === CrossSolid) return '✗'
+  }
+  // Empty string defers to the rendered cell text (e.g. "COMING SOON", "ADD ON").
+  return ''
+}
+
 function toPricingSections(): ComparisonSection[] {
   return ALL_FEATURES_DATA.ROWS.map((section) => ({
     title: section.section,
@@ -708,10 +717,16 @@ function toPricingSections(): ComparisonSection[] {
           {f.feature}
         </h4>
       ),
+      markdownFeature: f.feature,
       cells: {
         community: f.inCommunity,
         teams: f.inTeams,
         enterprise: f.inEnterprise,
+      },
+      markdownCells: {
+        community: cellToMarkdown(f.inCommunity),
+        teams: cellToMarkdown(f.inTeams),
+        enterprise: cellToMarkdown(f.inEnterprise),
       },
     })),
   }))
@@ -744,7 +759,10 @@ const ExploreAllFeatures: React.FC = () => {
     <>
       <div className="mx-auto mb-10 mt-6" id="all-features">
         {/* Header - Using CSS sticky positioning for smoother scrolling */}
-        <div className="sticky top-[74px] z-20 bg-[#0f1013] before:absolute before:inset-x-0 before:-top-10 before:h-10 before:bg-[#0f1013] before:content-['']">
+        <div
+          className="sticky top-[74px] z-20 bg-[#0f1013] before:absolute before:inset-x-0 before:-top-10 before:h-10 before:bg-[#0f1013] before:content-['']"
+          data-markdown-ignore
+        >
           <div className="mb-20 mt-12 sm:my-12">
             <div className="grid grid-cols-1">
               <div className="mx-6 flex justify-center">
@@ -800,6 +818,7 @@ const ExploreAllFeatures: React.FC = () => {
           stickyBg="bg-[#0f1013]"
           featureCellClassName="col-span-3 md:col-span-1"
           featureSectionClassName="col-span-3 pl-6 pr-2 md:col-span-1"
+          markdownColumnLabels={['Feature', 'Community Edition', 'Teams', 'Enterprise']}
         />
 
         {/* Bottom rounded corner for Teams column */}

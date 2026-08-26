@@ -3,7 +3,11 @@ const assert = require('node:assert/strict')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
 const { renderDocMarkdownForAgents } = loadTsModule('utils/docs/renderDocMarkdownForAgents.ts')
-const { MORE_DOCS_POINTER } = loadTsModule('utils/docs/buildMarkdownDocument.ts')
+const { MORE_DOCS_POINTER, LLMS_TXT_DIRECTIVE } = loadTsModule(
+  'utils/docs/buildMarkdownDocument.ts'
+)
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 const createDoc = (overrides = {}) => ({
   _id: 'doc-1',
@@ -33,6 +37,17 @@ test('renderDocMarkdownForAgents includes metadata and shared footer once', asyn
   assert.match(markdown, /Raw body\./)
   assert.equal((markdown.match(new RegExp(MORE_DOCS_POINTER, 'g')) || []).length, 1)
   assert.match(markdown, new RegExp(`${MORE_DOCS_POINTER}$`))
+})
+
+test('renderDocMarkdownForAgents places the llms.txt directive once, after the description', async () => {
+  const markdown = await renderDocMarkdownForAgents(createDoc())
+
+  const matches = markdown.match(new RegExp(escapeRegExp(LLMS_TXT_DIRECTIVE), 'g')) || []
+  assert.equal(matches.length, 1)
+  assert.equal(
+    markdown.startsWith(`# Test Doc\n\nTest description.\n\n${LLMS_TXT_DIRECTIVE}\n\nTags: logs`),
+    true
+  )
 })
 
 test('renderDocMarkdownForAgents avoids duplicating the leading title heading', async () => {

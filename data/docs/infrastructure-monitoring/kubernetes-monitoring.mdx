@@ -1,0 +1,86 @@
+---
+date: 2026-08-03
+title: Kubernetes Monitoring - Pods, Nodes & Workloads
+description: Monitor Kubernetes pods, nodes, and workloads in SigNoz with resource utilization and correlated traces, logs, and events for every cluster resource type.
+doc_type: explanation
+hide_table_of_contents: true
+---
+
+The Kubernetes Monitoring interface provides real-time visibility into your Kubernetes cluster. The left sidebar lets you switch between different resource types, and each list uses color-coded progress bars to highlight resource utilization.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-list.webp"
+  alt="Kubernetes Pods View showing pod list with CPU and memory progress bars"
+  caption="Kubernetes Cluster Overview: Pods View"
+  className="box-shadowed-image"
+/>
+
+## Monitoring Views
+
+The sidebar on the left lists all available resource types. Click any to switch views:
+
+- **[Pods](https://signoz.io/docs/infrastructure-monitoring/kubernetes/pods/)** *(Default)*: CPU and memory utilization with request/limit percentages per pod
+- **[Containers](https://signoz.io/docs/infrastructure-monitoring/kubernetes/containers/)**: Per-container CPU, memory, restarts, and health inside each pod
+- **[Nodes](https://signoz.io/docs/infrastructure-monitoring/kubernetes/nodes/)**: CPU and memory usage vs allocatable capacity per node
+- **[Namespaces](https://signoz.io/docs/infrastructure-monitoring/kubernetes/namespaces/)**: Resource usage aggregated per namespace
+- **[Clusters](https://signoz.io/docs/infrastructure-monitoring/kubernetes/clusters/)**: Resource allocation and capacity across clusters
+- **[Deployments](https://signoz.io/docs/infrastructure-monitoring/kubernetes/deployments/)**: Availability, CPU, and memory across deployment pods
+- **[Jobs](https://signoz.io/docs/infrastructure-monitoring/kubernetes/jobs/)**: Active, successful, and failed pod counts with resource usage
+- **[DaemonSets](https://signoz.io/docs/infrastructure-monitoring/kubernetes/daemonsets/)**: Available vs desired nodes with resource usage
+- **[StatefulSets](https://signoz.io/docs/infrastructure-monitoring/kubernetes/statefulsets/)**: Available vs desired pods with resource utilization
+- **[Volumes](https://signoz.io/docs/infrastructure-monitoring/kubernetes/volumes/)**: PersistentVolumeClaim usage, capacity, and inodes
+
+## Common Controls
+
+All Kubernetes views share these controls:
+
+### Quick Filters Sidebar
+
+The left sidebar provides filter checkboxes for narrowing results. Available filters vary by view but commonly include:
+- **Pod**, **Namespace**, **Node**, **Cluster**
+- **Deployment**, **StatefulSet**, **DaemonSet**, **Job**
+- **Environment**
+
+Each filter section is expandable, supports search, and allows multi-select with "Only" toggle and "Clear All" options.
+
+### Search Filter
+
+The search bar at the top lets you query entities by any attribute using the query builder.
+
+### Group By
+
+Use the **Group By** dropdown to group entities by an attribute such as `k8s.node.name`, `k8s.namespace.name`, `k8s.deployment.name`, or `k8s.cluster.name`. When a group is selected, the table displays group header rows that you can expand to see individual entities within each group.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-group-by.webp"
+  alt="Kubernetes Pods grouped by k8s.node.name showing group header rows"
+  caption="Pods grouped by k8s.node.name"
+  className="box-shadowed-image"
+/>
+
+### Columns Selector
+
+Click the columns icon in the toolbar to open the **Columns** panel. It shows the currently added columns and lets you add or remove columns to customize the table view.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-columns-selector.webp"
+  alt="Columns selector panel showing added and available columns"
+  caption="Columns selector for customizing table columns"
+  className="box-shadowed-image"
+/>
+
+### Detail Page
+
+Click any entity name to open its detail page. Most entities have four tabs: **Metrics**, **Logs**, **Traces**, and **Events**, so you can correlate infrastructure performance with application behavior. Volumes is the exception: its detail page shows only the Metrics tab.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-nodes-view.webp"
+  alt="Kubernetes Nodes View showing node list and sidebar with all resource types"
+  caption="Nodes View with sidebar navigation"
+  className="box-shadowed-image"
+/>
+
+## Next steps
+
+- [Setup Kubernetes Metrics](https://signoz.io/docs/infrastructure-monitoring/user-guides/k8s-metrics/): Configure the kubeletstats and k8scluster receivers to start collecting data.
+- [Telemetry Data Requirements](https://signoz.io/docs/infrastructure-monitoring/reference/telemetry-data-requirements/): Required resource attributes and metrics.

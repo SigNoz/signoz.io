@@ -1,5 +1,5 @@
 ---
-date: 2026-07-21
+date: 2026-08-03
 title: DSPy Observability & Monitoring with OpenTelemetry
 description: Set up DSPy observability with OpenTelemetry and SigNoz. Trace module, chain, and tool calls, model requests, latency, and errors from your DSPy programs.
 doc_type: howto
@@ -10,6 +10,8 @@ doc_type: howto
 DSPy observability gives you real-time visibility into your DSPy programs by collecting traces using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. The <a href="https://pypi.org/project/openinference-instrumentation-dspy/" target="_blank" rel="noopener noreferrer nofollow">OpenInference DSPy instrumentation</a> automatically captures every DSPy module call (`Predict`, `ChainOfThought`, `ReAct`, custom `Module` pipelines) and the underlying language model request as spans, tagged with DSPy-native attributes such as `openinference.span.kind` (CHAIN, LLM, TOOL), `llm.model_name`, and `llm.provider`.
 
 With full DSPy monitoring in SigNoz, you can trace every program run end to end, break down module and tool activity, compare model usage and latency, set alerts on latency and errors, and continuously improve the reliability of your DSPy applications.
+
+<YouTube id="pPnIX6p5xT8" mute="false" />
 
 ## Prerequisites
 
@@ -100,7 +102,7 @@ pip install \
 
 Create a `telemetry.py` module that sets up the tracer provider, wires the OTLP/HTTP exporter to SigNoz, and turns on the DSPy instrumentation:
 
-```python
+```python defaultCollapsed
 from openinference.instrumentation.dspy import DSPyInstrumentor
 from opentelemetry import trace as trace_api
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -239,7 +241,14 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 
 </details>
 
-Additional resources:
-- Set up [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
-- Learn more about [querying traces](https://signoz.io/docs/userguide/traces/)
-- Explore [log correlation](https://signoz.io/docs/userguide/logs_query_builder/)
+## Related integrations
+
+Trace the rest of your LLM application and retrieval stack:
+
+- [Vercel AI SDK observability with OpenTelemetry](https://signoz.io/docs/vercel-ai-sdk-observability/) - trace generateText, streamText, and tool calls inside Next.js
+- [LangChain and LangGraph observability with OpenTelemetry](https://signoz.io/docs/langchain-observability/) - trace chains, agents, graph nodes, and tool calls
+- [LlamaIndex observability with OpenTelemetry](https://signoz.io/docs/llamaindex-observability/) - trace RAG queries, retrievers, and index operations
+- [Langflow observability with OpenTelemetry](https://signoz.io/docs/langflow-observability/) - trace Langflow flows, components, and model calls
+- [Monitor Inkeep with OpenTelemetry](https://signoz.io/docs/inkeep-monitoring/) - trace Inkeep assistant queries and the retrieval behind them
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

@@ -52,9 +52,7 @@ export default function EnterpriseCard() {
               <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="text-signoz_vanilla-400">
-                    A dedicated environment on SigNoz cloud
-                  </span>
+                  <span className="text-signoz_vanilla-400">SigNoz Cloud: Dedicated</span>
                 </div>
                 <span className="ml-3 mt-1 flex items-center gap-2 text-sm italic text-signoz_vanilla-400">
                   <Info className="text-signoz_vanilla-500" size={14} />
@@ -65,12 +63,15 @@ export default function EnterpriseCard() {
             <li className="flex items-start gap-2">
               <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
               <span className="text-signoz_vanilla-400">
-                Bring your own cloud(managed by SigNoz in your cloud)
+                SigNoz Cloud: BYOC, managed by SigNoz in your cloud account
               </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-              <span className="text-signoz_vanilla-400">Self-host with support contract</span>
+              <span className="text-signoz_vanilla-400">
+                Self-Hosted SigNoz: enterprise support. Your team operates infrastructure, storage,
+                scaling, upgrades, and backups.
+              </span>
             </li>
           </ul>
 
@@ -85,7 +86,7 @@ export default function EnterpriseCard() {
             <li className="flex items-start gap-2">
               <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
               <span className="text-signoz_vanilla-400">
-                HIPAA, BAA agreement and other certifications
+                HIPAA and BAA options for eligible SigNoz Cloud contracts
               </span>
             </li>
             <li className="flex items-start gap-2">

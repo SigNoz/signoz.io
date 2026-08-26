@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Badge } from '@signozhq/badge'
+import { Badge } from '@signozhq/ui/badge'
 import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { tagDefinitions } from '@/constants/tagDefinitions'
 

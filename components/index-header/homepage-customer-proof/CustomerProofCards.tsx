@@ -4,7 +4,10 @@ import { ArrowUpRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import { cn } from 'app/lib/utils'
 
-import { cardClassName, clickLocation } from './HomepageCustomerProof.constants'
+import {
+  cardClassName,
+  clickLocation as defaultClickLocation,
+} from './HomepageCustomerProof.constants'
 import type {
   FeaturedQuoteCardProps,
   LogoCardProps,
@@ -19,6 +22,7 @@ function ProofLink({
   children,
   className,
   clickName,
+  clickLocation = defaultClickLocation,
   clickText,
   href,
   isClone,
@@ -32,6 +36,7 @@ function ProofLink({
       clickName={clickName}
       clickText={clickText}
       clickLocation={clickLocation}
+      eventAttributes={{ target: href }}
       target="_blank"
       rel={isExternal ? 'noopener noreferrer nofollow' : 'noopener noreferrer'}
       tabIndex={isClone ? -1 : undefined}
@@ -122,7 +127,7 @@ function LogoMark({ context = 'card', decorative = false, logo }: LogoMarkProps)
   )
 }
 
-export function LogoCard({ className, href, isClone, logo }: LogoCardProps) {
+export function LogoCard({ className, clickLocation, href, isClone, logo }: LogoCardProps) {
   const content = (
     <>
       <div className="flex items-center justify-center">
@@ -148,6 +153,7 @@ export function LogoCard({ className, href, isClone, logo }: LogoCardProps) {
       ariaLabel={`Read the ${logo.name} customer story`}
       className={classes}
       clickName="Customer Logo Link"
+      clickLocation={clickLocation}
       clickText={logo.name}
       href={href}
       isClone={isClone}
@@ -160,6 +166,7 @@ export function LogoCard({ className, href, isClone, logo }: LogoCardProps) {
 export function QuoteCard({
   attribution,
   className,
+  clickLocation,
   href,
   isClone,
   logo,
@@ -179,6 +186,7 @@ export function QuoteCard({
         className
       )}
       clickName="Customer Quote Link"
+      clickLocation={clickLocation}
       clickText={theme}
       href={href}
       isClone={isClone}
@@ -228,6 +236,7 @@ export function QuoteCard({
 export function FeaturedQuoteCard({
   attribution,
   className,
+  clickLocation,
   href,
   isClone,
   logo,
@@ -246,6 +255,7 @@ export function FeaturedQuoteCard({
         className
       )}
       clickName="Customer Quote Link"
+      clickLocation={clickLocation}
       clickText={theme}
       href={href}
       isClone={isClone}

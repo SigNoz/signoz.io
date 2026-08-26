@@ -24,7 +24,7 @@ const relatedArticleRoutePrefix: Record<string, string> = {
   blog: 'blog',
   faq: 'faqs',
   opentelemetry: 'opentelemetry',
-  case_study: 'case-study',
+  case_study: 'customers',
 }
 
 function getRelatedArticleDoc(entry: MDXContent): { doc: MDXContent; contentType: string } | null {
@@ -104,8 +104,8 @@ export async function generateMetadata(props: {
           siteName: siteMetadata.title,
           locale: 'en_US',
           type: 'article',
-          publishedTime: content?.date,
-          modifiedTime: content?.updatedAt,
+          publishedTime: new Date(resolveLatestDate(content) || Date.now()).toISOString(),
+          modifiedTime: new Date(resolveLatestDate(content) || Date.now()).toISOString(),
           url: content?.path || './',
           authors: authorNames.length > 0 ? authorNames : ['SigNoz Team'],
         },

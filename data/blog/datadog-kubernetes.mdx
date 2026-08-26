@@ -156,7 +156,7 @@ Five situations any team running Kubernetes hits sooner or later, and what each 
 
 ### Adding a new service
 
-A new Deployment on the Datadog path needs the same block from the manifest snippet above (seven `DD_*` env vars and three `tags.datadoghq.com/*` labels), plus `ddtrace` and DogStatsD in the application code. On the SigNoz path, the same Deployment needs three standard OpenTelemetry env vars and nothing in the application code.
+A new Deployment on the Datadog path needs the same block from the manifest snippet above (seven `DD_*` env vars and three `tags.datadoghq.com/*` labels), plus `ddtrace` and DogStatsD in the application code. On the SigNoz Cloud path, the same Deployment needs three standard OpenTelemetry env vars and nothing in the application code.
 
 <KeyPointCallout title="WHAT AN OTEL DEPLOYMENT LOOKS LIKE" defaultCollapsed="true">
 
@@ -180,13 +180,13 @@ Three env vars, vendor-neutral. The same Deployment works against any OTLP backe
 
 ### A custom metric with a high-cardinality tag
 
-Both products will record `bookings_total{user_id="..."}` but the difference is on the invoice. Datadog counts every unique combination of metric name and tag values as a billable custom metric, while SigNoz prices by sample volume regardless of tag count. 
+Both products will record `bookings_total{user_id="..."}` but the difference is on the invoice. Datadog counts every unique combination of metric name and tag values as a billable custom metric, while SigNoz Cloud prices by sample volume regardless of tag count.
 
-A metric tagged with `user_id` on a cluster with 100,000 distinct users produces 100,000 billable series on Datadog. On SigNoz, the same data costs the same as the metric without the tag.
+A metric tagged with `user_id` on a cluster with 100,000 distinct users produces 100,000 billable series on Datadog. On SigNoz Cloud, the same data costs the same as the metric without the tag.
 
 ### A cluster that autoscales
 
-On Datadog, scaling from 20 nodes to 200 multiplies the per-host APM and Infrastructure Monitoring charges by ten, even when telemetry volume does not change. On SigNoz, the bill follows data volume, so horizontal scaling stays cheap.
+On Datadog, scaling from 20 nodes to 200 multiplies the per-host APM and Infrastructure Monitoring charges by ten, even when telemetry volume does not change. On SigNoz Cloud, the bill follows data volume, so horizontal scaling stays cheap.
 
 ### Migrating to a different observability backend
 
@@ -249,7 +249,7 @@ The OpenTelemetry community has many backends. [SigNoz Cloud](https://signoz.io/
 
 ### Familiar UI for Datadog users
 
-SigNoz Cloud's primitives map closely to Datadog's: service maps, trace waterfalls, the log explorer, and Kubernetes resource views. Engineers who already know Datadog can usually find their way around SigNoz in hours, not weeks.
+SigNoz Cloud's primitives map closely to Datadog's: service maps, trace waterfalls, the log explorer, and [Kubernetes resource views](https://signoz.io/kubernetes-monitoring/). Engineers who already know Datadog can usually find their way around SigNoz in hours, not weeks.
 
 <Figure
   src="/img/blog/2026/06/datadog-kubernetes-signoz-trace-view.png"

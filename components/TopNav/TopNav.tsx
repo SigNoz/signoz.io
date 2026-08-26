@@ -70,16 +70,29 @@ export default function TopNav() {
   }
 
   return (
-    <div className="fixed left-0 right-0 z-[50]">
-      <header className="header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
+    <div
+      className={cn(
+        'fixed left-0 right-0 z-[50]',
+        (mobileMenuOpen || docsSidebar.isOpen) && 'z-[1200]'
+      )}
+    >
+      <header
+        className={cn(
+          'header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100',
+          (mobileMenuOpen || docsSidebar.isOpen) && '!bg-[var(--l1-background)]'
+        )}
+      >
         <nav
-          className="mx-auto flex w-full max-w-8xl justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
+          className={cn(
+            'mx-auto flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100',
+            !isDocsBasePath && 'max-w-8xl'
+          )}
           aria-label="Global"
         >
-          <div className="flex justify-start gap-x-6">
+          <div className="flex items-center justify-start">
             <TrackingLink
               href="/"
-              className="-m-1.5 flex items-center gap-2 p-1.5"
+              className={cn('-m-1.5 flex items-center p-1.5', isDocsBasePath ? 'gap-1.5' : 'gap-2')}
               clickType="Nav Click"
               clickName="SigNoz Logo"
               clickText="SigNoz"
@@ -96,11 +109,13 @@ export default function TopNav() {
               />
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </TrackingLink>
-
             {!isLoginRoute && (
               <NavDropdownProvider>
                 <div
-                  className={`hidden items-center gap-x-3 min-[840px]:flex ${visibility.showProduct ? 'ml-6' : ''}`}
+                  className={cn(
+                    'hidden items-center gap-x-3 min-[840px]:flex',
+                    isDocsBasePath ? 'ml-7' : visibility.showProduct ? 'ml-6' : ''
+                  )}
                 >
                   {visibility.showProduct && <ProductDropdown />}
                   {visibility.showUseCases && <UseCasesDropdown />}
@@ -128,6 +143,19 @@ export default function TopNav() {
                       clickLocation="Top Navbar"
                     >
                       Pricing
+                    </TrackingLink>
+                  )}
+                  {visibility.showCustomers && (
+                    <TrackingLink
+                      href="/customers/"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
+                      clickType="Nav Click"
+                      clickName="Customers Link"
+                      clickText="Customers"
+                      clickLocation="Top Navbar"
+                      prefetch={false}
+                    >
+                      Customers
                     </TrackingLink>
                   )}
                 </div>
@@ -202,7 +230,7 @@ export default function TopNav() {
 
             <button
               type="button"
-              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 min-[1280px]:hidden"
+              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 min-[1320px]:hidden"
               onClick={() => {
                 if (mobileMenuOpen) {
                   setMobileMenuOpen(false)

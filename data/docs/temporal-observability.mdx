@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-08-03
 tags: [SigNoz Cloud, Self-Host]
 title: Temporal Observability & Monitoring with OpenTelemetry
 description: Set up Temporal observability and monitoring with OpenTelemetry and SigNoz. Trace workflows, agent execution, and debug performance issues in real time.
@@ -11,6 +11,8 @@ doc_type: howto
 Temporal observability gives you real-time visibility into your workflow executions and AI agent patterns by collecting traces, logs, and metrics using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. This guide shows you how to instrument your Temporal-based applications and send telemetry to SigNoz, so you can monitor workflow activity, debug agent execution, and optimize performance end-to-end.
 
 With full Temporal observability in SigNoz, you can correlate traces, logs, and metrics in a single dashboard, set up alerts for workflow failures or high latency, and analyze agent execution patterns over time to continuously improve reliability and efficiency.
+
+<YouTube id="0EUxin5g0sk" mute="false" />
 
 ## Prerequisites
 
@@ -78,7 +80,7 @@ TEMPORAL_TLS=true
 
 ### Step 4: Create an example Temporal agent workflow
 
-```python:main.py
+```python:main.py minimap defaultCollapsed
 from __future__ import annotations
 from dotenv import load_dotenv
 import asyncio
@@ -220,7 +222,7 @@ from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 
 ### Step 3: Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
 
-```python
+```python defaultCollapsed
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -257,7 +259,7 @@ OpenAIAgentsInstrumentor().instrument()
 
 ### Step 4: Setup Logs
 
-```python
+```python defaultCollapsed
 import logging
 from opentelemetry.sdk.resources import Resource
 from opentelemetry._logs import set_logger_provider
@@ -296,7 +298,7 @@ logger = logging.getLogger(__name__)
 
 ### Step 5: Setup Metrics
 
-```python
+```python defaultCollapsed
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
@@ -367,7 +369,7 @@ TEMPORAL_TLS=true
   Ensure you have completed the steps above (traces, logs, and metrics configuration) before running this code. All OpenTelemetry instrumentation must be initialized first.
 </Admonition>
 
-```python:main.py
+```python:main.py minimap defaultCollapsed
 from __future__ import annotations
 from dotenv import load_dotenv
 import asyncio
@@ -538,9 +540,14 @@ The [Temporal dashboard template](https://signoz.io/docs/dashboards/dashboard-te
   caption="Temporal Dashboard Template"
 />
 
-Additional resources:
-- Set up [alerts](https://signoz.io/docs/alerts/) for high latency or error rates
-- Learn more about [querying traces](https://signoz.io/docs/userguide/traces/)
-- Explore [log correlation](https://signoz.io/docs/userguide/logs_query_builder/)
+## Related integrations
 
+Trace the agents and applications running on top of this infrastructure:
 
+- [Monitor Firecrawl with OpenTelemetry](https://signoz.io/docs/firecrawl-monitoring/) - trace scrape, crawl, search, and map calls alongside credit usage
+- [LiveKit observability with OpenTelemetry](https://signoz.io/docs/livekit-observability/) - trace voice agent sessions, turn latency, and STT and TTS calls
+- [OpenCode observability with OpenTelemetry](https://signoz.io/docs/opencode-observability/) - trace OpenCode sessions, tool calls, and per-message cost
+- [Monitor Pipecat voice agents with OpenTelemetry](https://signoz.io/docs/pipecat-monitoring/) - trace pipeline latency across the STT, LLM, and TTS stages
+- [AutoGen observability with OpenTelemetry](https://signoz.io/docs/autogen-observability/) - trace multi-agent conversations, group chats, and tool execution
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

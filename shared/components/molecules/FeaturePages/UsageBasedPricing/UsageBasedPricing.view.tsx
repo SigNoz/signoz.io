@@ -12,7 +12,7 @@ const UsageBasedPricing: React.FC<{
   sectionDescription?: string | React.ReactNode
 }> = ({
   show,
-  sectionTitle = 'Pricing you can trust',
+  sectionTitle = 'SigNoz Cloud pricing you can trust',
   sectionDescription = "Tired of Datadog's unpredictable bills or New Relic's user-based pricing?\nWe're here for you.",
 }) => {
   return (

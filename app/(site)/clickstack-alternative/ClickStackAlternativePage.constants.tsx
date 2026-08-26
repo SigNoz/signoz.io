@@ -183,13 +183,13 @@ export const COMPARISON_GRID_DATA: ComparisonCategory[] = [
         feature: 'Deployment Options',
         signoz: {
           type: 'text',
-          content: 'Open source + Cloud (GA) — Self-hosted, BYOC, managed cloud',
+          content: 'SigNoz Cloud (GA), BYOC, and Self-Hosted SigNoz',
         },
         clickstack: { type: 'text', content: 'Open source + Cloud (Beta)' },
       },
       {
         feature: 'Serverless Scaling',
-        signoz: { type: 'check', label: 'Platform handles scaling automatically' },
+        signoz: { type: 'check', label: 'SigNoz Cloud handles scaling automatically' },
         clickstack: {
           type: 'text',
           content: 'Manual upgrade required before sending data. No GA version available',

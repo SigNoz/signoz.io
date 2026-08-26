@@ -25,7 +25,7 @@ Use this playbook for the shared workflow across docs, blogs, site code, and rev
 - When staged changes include docs (`data/docs/**/*.mdx`), pre-commit also runs `yarn check:docs-metadata`.
 - When staged changes include code or content files (`components/`, `app/`, `constants/`, `hooks/`, `utils/`, `data/**/*.mdx`), pre-commit runs `node scripts/check-stale-urls.js --staged` to catch stale/redirected URLs and missing trailing slashes.
 - When staged changes include CMS-migrated content (`data/(docs|faqs|case-study|opentelemetry|comparisons|guides|blog)/**`), pre-commit runs `node scripts/check-cms-assets.js` to validate referenced assets exist in `data-assets/`.
-- When staged changes include dated content (`data/(blog|guides|comparisons|faqs|opentelemetry|case-study)/**`), pre-commit runs `node scripts/check-date-deprecation.js` to validate date-field combinations. It blocks on invalid combinations and warns on the deprecated `date` field.
+- When staged changes include dated content (`data/(blog|guides|comparisons|faqs|opentelemetry|case-study)/**`), pre-commit runs `node scripts/check-date-deprecation.js` to validate date-field combinations. It blocks on invalid combinations.
 
 ### Fixing Hook Failures
 

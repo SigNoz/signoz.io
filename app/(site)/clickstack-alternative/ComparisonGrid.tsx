@@ -1,7 +1,7 @@
 import { Check, X, Clock, Flame, Cloud, Server } from 'lucide-react'
 import type { CellValue, ComparisonCategory } from './ClickStackAlternativePage.types'
 import TrackingLink from '@/components/TrackingLink'
-import FeatureComparisonGrid from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
+import FeatureComparisonGridWithOcclusion from '@/shared/components/molecules/FeaturePages/FeatureComparisonGridWithOcclusion'
 import type { ComparisonSection } from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
 
 const BADGE_ICONS = {
@@ -45,14 +45,34 @@ function renderCell(value: CellValue) {
   }
 }
 
+function cellToMarkdown(value: CellValue): string {
+  switch (value.type) {
+    case 'check':
+      return value.label ? `✓ ${value.label}` : '✓'
+    case 'cross':
+      return value.label ? `✗ ${value.label}` : '✗'
+    case 'dash':
+      return '—'
+    case 'text':
+      return typeof value.content === 'string' ? value.content : ''
+    case 'badge':
+      return value.label
+  }
+}
+
 function toSections(data: ComparisonCategory[]): ComparisonSection[] {
   return data.map((cat) => ({
     title: cat.category,
     rows: cat.rows.map((row) => ({
       feature: <span className="text-sm leading-6 text-[#adb4c2]">{row.feature}</span>,
+      markdownFeature: row.feature,
       cells: {
         signoz: renderCell(row.signoz),
         clickstack: renderCell(row.clickstack),
+      },
+      markdownCells: {
+        signoz: cellToMarkdown(row.signoz),
+        clickstack: cellToMarkdown(row.clickstack),
       },
     })),
   }))
@@ -65,6 +85,7 @@ const COLUMNS = [
     key: 'signoz',
     cellClassName: 'relative px-3 py-3',
     sectionCellClassName: 'relative',
+    occludeStickyText: true,
   },
   {
     key: 'clickstack',
@@ -81,11 +102,11 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
       <div className="relative min-w-[40rem] md:min-w-0">
         <div className="pointer-events-none absolute inset-y-0 right-48 z-0 w-48 rounded-lg bg-gradient-to-b from-signoz_ink-300 from-[73%] to-transparent opacity-80" />
 
-        <div className="sticky top-28 z-[9]">
+        <div className="sticky top-28 z-[9]" data-markdown-ignore>
           <div className={`grid ${GRID_CLASS}`}>
             <div className="bg-signoz_ink-500" />
             <div className="relative flex flex-col items-start gap-2.5 bg-[#14161a] px-3 py-4">
-              <span className="text-base font-medium leading-7 text-[#eceef2]">SigNoz</span>
+              <span className="text-base font-medium leading-7 text-[#eceef2]">SigNoz Cloud</span>
               <TrackingLink
                 href="/teams/"
                 clickType="Primary CTA"
@@ -105,7 +126,7 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
         </div>
 
         {/* Shared grid body */}
-        <FeatureComparisonGrid
+        <FeatureComparisonGridWithOcclusion
           columns={COLUMNS}
           sections={sections}
           gridClassName={GRID_CLASS}
@@ -116,6 +137,7 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
           separator="border"
           featureCellClassName="pl-6 py-3"
           featureSectionClassName="pl-6 bg-signoz_ink-500"
+          markdownColumnLabels={['Feature', 'SigNoz', 'ClickStack']}
         />
       </div>
     </div>

@@ -137,6 +137,101 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/case-study/',
+          destination: '/customers/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/blip/',
+          destination: '/customers/blip/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/brainfish/',
+          destination: '/customers/brainfish/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/cedana/',
+          destination: '/customers/cedana/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/instasafe/',
+          destination: '/customers/instasafe/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/kernel/',
+          destination: '/customers/kernel/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/kiwi/',
+          destination: '/customers/kiwi/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/linkcy/',
+          destination: '/customers/linkcy/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/mailmodo/',
+          destination: '/customers/mailmodo/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/observability-for-small-teams-and-solopreneurs/',
+          destination: '/customers/observability-for-small-teams-and-solopreneurs/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/outplay/',
+          destination: '/customers/outplay/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/shaped/',
+          destination: '/customers/shaped/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/tableflow/',
+          destination: '/customers/tableflow/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/thehindu/',
+          destination: '/customers/thehindu/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/wombo/',
+          destination: '/customers/wombo/',
+          permanent: true,
+        },
+        {
+          source: '/case-study/:path*',
+          destination: '/customers/:path*/',
+          permanent: true,
+        },
+        {
+          source: '/blog/alien-intelligence-ai-sre-workflow-signoz/',
+          destination: '/customers/alien-intelligence-ai-sre-workflow-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/blog/inkeep-ai-agent-monitoring/',
+          destination: '/customers/inkeep-ai-agent-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/msi-signoz-mcp-full-stack-debugging/',
+          destination: '/customers/msi-signoz-mcp-full-stack-debugging/',
+          permanent: true,
+        },
+        {
           source: '/docs/product-features/saved-view',
           destination: '/docs/metrics-management/metrics-explorer/#saved-views-in-metrics-explorer',
           permanent: true,
@@ -854,6 +949,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/opentelemetry-nextjs-use-cases/',
+          destination: '/blog/opentelemetry-nextjs-production/',
+          permanent: true,
+        },
+        {
           source: '/blog/tags/',
           destination: '/tags/',
           permanent: true,
@@ -1044,7 +1144,37 @@ module.exports = () => {
         },
         {
           source: '/blog/open-source-log-management/',
-          destination: '/blog/best-open-source-log-management-tools',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/blog/best-open-source-log-management-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/blog/log-monitoring-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/log-analysis-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/best-frontend-cloud-logging-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/log-aggregation-tools/',
+          destination: '/blog/best-log-management-tools/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/best-error-logging-tools-for-software-development/',
+          destination: '/blog/best-log-management-tools/',
           permanent: true,
         },
         {
@@ -1054,7 +1184,7 @@ module.exports = () => {
         },
         {
           source: '/observability-user-stories/',
-          destination: '/case-study/',
+          destination: '/customers/',
           permanent: true,
         },
         {
@@ -1983,12 +2113,37 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/hostmetrics/',
-          destination: '/docs/infrastructure-monitoring/hostmetrics/',
+          destination: '/docs/infrastructure-monitoring/user-guides/hostmetrics/',
           permanent: true,
         },
         {
           source: '/docs/userguide/k8s-metrics/',
-          destination: '/docs/infrastructure-monitoring/k8s-metrics/',
+          destination: '/docs/infrastructure-monitoring/user-guides/k8s-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/hostmetrics/',
+          destination: '/docs/infrastructure-monitoring/user-guides/hostmetrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/k8s-metrics/',
+          destination: '/docs/infrastructure-monitoring/user-guides/k8s-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/cert-manager/',
+          destination: '/docs/infrastructure-monitoring/user-guides/cert-manager/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/',
+          destination: '/docs/infrastructure-monitoring/reference/telemetry-data-requirements/',
+          permanent: true,
+        },
+        {
+          source: '/docs/infrastructure-monitoring/user-guides/understanding-cpu-metrics/',
+          destination: '/docs/infrastructure-monitoring/reference/understanding-cpu-metrics/',
           permanent: true,
         },
         {
@@ -2164,7 +2319,7 @@ module.exports = () => {
         },
         {
           source: '/autoinstrumented-tracing-nodejs',
-          destination: '/opentelemetry/autoinstrumented-tracing-nodejs/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
         {
@@ -2365,7 +2520,7 @@ module.exports = () => {
         },
         {
           source: '/log-analysis-tools',
-          destination: '/comparisons/log-analysis-tools/',
+          destination: '/blog/best-log-management-tools/',
           permanent: true,
         },
         {
@@ -2460,7 +2615,7 @@ module.exports = () => {
         },
         {
           source: '/log-aggregation-tools',
-          destination: '/comparisons/log-aggregation-tools/',
+          destination: '/blog/best-log-management-tools/',
           permanent: true,
         },
         {
@@ -2601,7 +2756,7 @@ module.exports = () => {
         },
         {
           source: '/collector-nodejs',
-          destination: '/opentelemetry/collector-nodejs/',
+          destination: '/blog/otel-collector-docker/',
           permanent: true,
         },
         {
@@ -2616,7 +2771,7 @@ module.exports = () => {
         },
         {
           source: '/correlating-traces-logs-metrics-nodejs',
-          destination: '/opentelemetry/correlating-traces-logs-metrics-nodejs/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
         {
@@ -2626,7 +2781,7 @@ module.exports = () => {
         },
         {
           source: '/metrics-nodejs',
-          destination: '/opentelemetry/metrics-nodejs/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
         {
@@ -2646,7 +2801,7 @@ module.exports = () => {
         },
         {
           source: '/nodejs-clone-application',
-          destination: '/opentelemetry/nodejs-clone-application/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
         {
@@ -2656,7 +2811,7 @@ module.exports = () => {
         },
         {
           source: '/nodejs-tutorial-overview',
-          destination: '/opentelemetry/nodejs-tutorial-overview/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
         {
@@ -2707,7 +2862,7 @@ module.exports = () => {
         },
         {
           source: '/nodejs-docker-setup',
-          destination: '/opentelemetry/nodejs-docker-setup/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
         {
@@ -2727,7 +2882,7 @@ module.exports = () => {
         },
         {
           source: '/logging-nodejs',
-          destination: '/opentelemetry/logging-nodejs/',
+          destination: '/guides/pino-logger-nodejs-logging-library/',
           permanent: true,
         },
         {
@@ -2802,8 +2957,12 @@ module.exports = () => {
         },
         {
           source: '/challenges-in-choosing-a-monitoring-tool-for-fintech-companies-in-india',
-          destination:
-            '/blog/challenges-in-choosing-a-monitoring-tool-for-fintech-companies-in-india/',
+          destination: '/blog/open-source-apm-tools/',
+          permanent: true,
+        },
+        {
+          source: '/blog/challenges-in-choosing-a-monitoring-tool-for-fintech-companies-in-india/',
+          destination: '/blog/open-source-apm-tools/',
           permanent: true,
         },
         {
@@ -2906,6 +3065,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/apm-tools/',
+          destination: '/blog/open-source-apm-tools/',
+          permanent: true,
+        },
+        {
           source: '/how-signozs-integration-with-opentelemetry-simplifies-instrumentation/',
           destination:
             '/faqs/how-signozs-integration-with-opentelemetry-simplifies-instrumentation/',
@@ -2928,7 +3092,7 @@ module.exports = () => {
         },
         {
           source: '/observability-user-stories',
-          destination: '/case-study/',
+          destination: '/customers/',
           permanent: true,
         },
         {
@@ -3021,6 +3185,76 @@ module.exports = () => {
         {
           source: '/docs/cost-meter/alert-setup-guides',
           destination: '/docs/cost-meter/alerts/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/gcp/collect-logs/',
+          destination: '/docs/integrations/gcp/collect-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/gcp/collect-logs',
+          destination: '/docs/integrations/gcp/collect-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/blog/llm-observability/',
+          destination: '/docs/llm-observability/',
+          permanent: true,
+        },
+        {
+          source: '/blog/new-relic-alternatives/',
+          destination: '/blog/open-source-newrelic-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/nodejs-tutorial-overview/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/nodejs-docker-setup/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/nodejs-clone-application/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/metrics-nodejs/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/autoinstrumented-tracing-nodejs/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/collector-nodejs/',
+          destination: '/blog/otel-collector-docker/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/correlating-traces-logs-metrics-nodejs/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/logging-nodejs/',
+          destination: '/guides/pino-logger-nodejs-logging-library/',
+          permanent: true,
+        },
+        {
+          source: '/blog/nodejs-opensource-application-monitoring/',
+          destination: '/opentelemetry/custom-metrics-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/blog/nodejs-performance-monitoring/',
+          destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
       ])

@@ -1,5 +1,5 @@
 ---
-date: 2026-08-07
+date: 2026-08-26
 title: Ingestion Overview for SigNoz Cloud
 meta_title: SigNoz Cloud Ingestion Overview - Endpoints & Setup
 tags: [SigNoz Cloud]
@@ -52,16 +52,22 @@ Based on your SigNoz Cloud environment, you must configure your applications to 
 
 Configuration typically involves setting the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable. Refer to the SigNoz [instrumentation docs](/docs/instrumentation/) for language-specific details.
 
-If you are using the signal agnostic environment variable (`OTEL_EXPORTER_OTLP_ENDPOINT`), you can simply set `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443` and the exporter should append the appropriate path for the signal type (such as v1/traces or v1/metrics). Similarly, if you are using OTLP/GRPC, setting the variable `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443` (replace with your endpoint from the above table).
+If you are using the signal-agnostic environment variable, set `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443` (replace `<region>` with your region's endpoint from the table above). The exporter appends the appropriate path for each signal type (such as `v1/traces` or `v1/metrics`). This works for both OTLP/HTTP and OTLP/gRPC.
 
 ### OpenTelemetry Collector Configuration
 
-Configure the OpenTelemetry [exporter](https://opentelemetry.io/docs/specs/otel/protocol/exporter/) in your collector configuration file to point to the appropriate SigNoz endpoint.
+Configure the OpenTelemetry [exporter](https://opentelemetry.io/docs/specs/otel/protocol/exporter/) in your collector configuration file to point to the appropriate SigNoz endpoint. Use either the `otlp` (gRPC) or `otlphttp` exporter; the two expect different endpoint formats.
 
 ```yaml
 exporters:
-  <otlp|otlphttp>:
-    endpoint: <endpoint>
+  # OTLP/gRPC
+  otlp:
+    endpoint: 'ingest.<region>.signoz.cloud:443'
+    tls:
+      insecure: false
+  # OTLP/HTTP
+  otlphttp:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
 ```
 
 <Admonition type="warning" title="Deprecation Notice">

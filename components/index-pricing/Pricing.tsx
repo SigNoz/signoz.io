@@ -18,7 +18,7 @@ const pricingValueProps = [
     Icon: Database,
     title: 'No user-based pricing',
     description:
-      'Bring engineering, support, and on-call teams into SigNoz without seat limits or seat math.',
+      'Bring engineering, support, and on-call teams into SigNoz Cloud without seat limits or seat math.',
   },
   {
     Icon: LineChart,
@@ -149,7 +149,7 @@ function MigrationCta() {
 export default function Pricing() {
   return (
     <section
-      className="relative left-1/2 mx-auto w-[calc(100dvw-8px)] max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-20 lg:py-20 wide:max-w-8xl wide:px-0"
+      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-20 lg:py-20 wide:max-w-8xl wide:px-0"
       data-homepage-floating-cta="View pricing"
       data-homepage-floating-href="/pricing/"
     >
@@ -194,7 +194,7 @@ export default function Pricing() {
             <p className="m-0 max-w-xs text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl md:text-5xl">
               Switch to
               <br />
-              SigNoz
+              SigNoz Cloud
             </p>
             <MigrationCta />
           </div>

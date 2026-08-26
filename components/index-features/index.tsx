@@ -49,6 +49,7 @@ const sections = [
     // buttonText: 'Explore',
     logo: <BarChart2Icon aria-hidden="true" />,
     img: featureGraphic1,
+    imgAlt: 'Data sources sending telemetry to SigNoz Cloud',
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 1128,
     imgHeight: 360,
@@ -60,6 +61,7 @@ const sections = [
     buttonLink: '/application-performance-monitoring/',
     logo: <BarChart2Icon aria-hidden="true" />,
     img: featureGraphic2,
+    imgAlt: 'Application performance monitoring in SigNoz Cloud',
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 320,
@@ -71,6 +73,7 @@ const sections = [
     buttonLink: '/distributed-tracing/',
     logo: <DraftingCompassIcon aria-hidden="true" />,
     img: featureGraphic3,
+    imgAlt: 'Distributed trace visualization in SigNoz Cloud',
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 320,
@@ -82,6 +85,7 @@ const sections = [
     buttonLink: '/log-management/',
     logo: <LogsIcon aria-hidden="true" />,
     img: featureGraphic4,
+    imgAlt: 'Log management interface in SigNoz Cloud',
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 320,
@@ -93,6 +97,7 @@ const sections = [
     buttonLink: '/metrics-and-dashboards/',
     logo: <LayoutGridIcon aria-hidden="true" />,
     img: featureGraphic6,
+    imgAlt: 'Metrics and dashboards in SigNoz Cloud',
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 320,
@@ -104,6 +109,7 @@ const sections = [
     buttonLink: '/llm-observability/',
     logo: <LlmObservabilityIcon aria-hidden="true" />,
     img: featureGraphic8,
+    imgAlt: 'LLM observability in SigNoz Cloud',
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 320,
@@ -115,6 +121,7 @@ const sections = [
     buttonLink: '/alerts-management/',
     logo: <ConciergeBellIcon aria-hidden="true" />,
     img: featureGraphic5,
+    imgAlt: 'Alert management in SigNoz Cloud',
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 320,
@@ -137,8 +144,10 @@ export const SigNozFeatures = ({ className }: { className?: string }) => {
                 The one-stop observability tool
               </div>
               <p className="m-0 mt-3 text-base font-medium text-signoz_sienna-300">
-                SigNoz is an open-source Datadog or New Relic alternative for logs, metrics, traces,
-                dashboards, alerts, and more.
+                SigNoz Cloud is a managed Datadog or New Relic alternative for logs, metrics,
+                traces, dashboards, alerts, and more.
+                <br />
+                Run it on your own infrastructure with Self-Hosted SigNoz.
               </p>
             </div>
 
@@ -204,6 +213,7 @@ export const SigNozFeatures = ({ className }: { className?: string }) => {
             buttonLink={section.buttonLink}
             logo={section.logo}
             img={section.img}
+            imgAlt={section.imgAlt}
             imgClassName={section.imgClassName}
             imgWidth={section.imgWidth}
             imgHeight={section.imgHeight}

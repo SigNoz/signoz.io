@@ -1,5 +1,5 @@
 ---
-date: 2026-08-07
+date: 2026-08-26
 title: Metrics Management FAQs
 description: Frequently asked questions about metrics management and troubleshooting in SigNoz
 doc_type: reference
@@ -7,38 +7,25 @@ doc_type: reference
 
 ### Q. How to view metrics?
 
-You can explore all ingested metrics in the [Metrics Explorer](/docs/metrics-management/metrics-explorer/).
+You can explore all ingested metrics in the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
 Or you can also [Add a panel](https://signoz.io/docs/userguide/manage-dashboards/#add-a-panel-to-a-dashboard) in a Dashboard to view the metrics in dropdown.
 
 ### Why I can't see my metric 'x'?
 
-When you can't see specific metrics in SigNoz, this is often caused by a temporality mismatch. This occurs when a single metric sends data with different temporalities (delta and cumulative), causing the query builder to produce unpredictable results or lose access to previous metrics.
+First look for the metric in [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
 
 <Admonition type="info">
 This covers one specific metric going missing. If no metrics are showing up in SigNoz at all, see [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) instead.
 </Admonition>
 
-<details>
+- If the metric is present, the filter or the time range in your panel is wrong. Correct the filter, then widen the time range.
+- If the metric is not present, widen the time range in Metrics Explorer and look again.
+- If the metric is absent even for a wide time range, SigNoz received no data points for it. Make sure that your SDK or collector exports the metric, as described in the [send metrics guides](https://signoz.io/docs/metrics-management/send-metrics/). Then look for the metric in Metrics Explorer again.
 
-<summary> Show resolution steps </summary>
+**Mixed temporality:**
 
-**To resolve this issue:**
+A Counter metric can send all cumulative points, all delta points, or both together. Both appear together after you switch the temporality, and also when different time series of the same metric use different temporality. The Query Builder queries all three cases, so your older cumulative data stays queryable after a switch. PromQL does not read delta series, so move PromQL panels and alerts on that metric to the Query Builder first.
 
-1. **Keep temporality unchanged** - Ensure your metrics maintain consistent temporality throughout their lifecycle
-2. **Contact support for immediate resolution** - If you're experiencing this issue, the SigNoz team can quickly restore access to your metrics from their side
-3. **Consider using ClickHouse queries as a workaround** - Direct ClickHouse queries can bypass temporality issues since they either ignore temporality information or make assumptions about it
-
-**Important considerations when using ClickHouse queries:**
-
-- While ClickHouse queries can work around temporality issues, you'll miss out on performance optimizations
-- SigNoz uses pre-aggregated tables to accelerate queries over extended time periods, which automatically redirect based on queried time ranges through the query builder
-- ClickHouse queries don't benefit from these pre-aggregated tables because they have different structures and columns
-- When metrics contain mixed temporalities, you'll need to write complex queries that merge delta and cumulative values to retrieve complete data
-
-**Best practice:**
-
-Maintain consistent temporality in your metrics to avoid these issues and ensure optimal performance through the query builder interface.
+Metrics Explorer shows one temporality in the metric details, even when the metric carries both. This affects the display only, not your query results.
 
 For more information about metric temporality, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
-
-</details> 

@@ -1,0 +1,356 @@
+---
+date: 2026-08-20
+title: Monitor Go AWS Lambda Traces with OpenTelemetry SDK
+description: Learn how to instrument a Go AWS Lambda function with the OpenTelemetry Go SDK and send traces to SigNoz for end-to-end serverless tracing.
+doc_type: howto
+---
+
+## Overview
+
+This guide shows you how to instrument a Go AWS Lambda function with the OpenTelemetry Go SDK and send its traces to SigNoz.
+
+OpenTelemetry publishes auto-instrumentation Lambda layers for Python, Node.js, Java, and Ruby. Go has no such layer, because a Go function compiles to a binary that no agent can attach to at startup. You add the instrumentation to your code with the `otellambda` package.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- Go 1.25 or later.
+- A Go Lambda function that uses the `provided.al2023` or `provided.al2` runtime.
+- An AWS account with permission to update the function code and its environment variables.
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Send traces to SigNoz
+
+### Step 1: Install the OpenTelemetry packages
+
+Run this command in your project directory:
+
+```bash
+go get \
+  go.opentelemetry.io/otel \
+  go.opentelemetry.io/otel/sdk \
+  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp \
+  go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-lambda-go/otellambda \
+  go.opentelemetry.io/contrib/detectors/aws/lambda \
+  github.com/aws/aws-lambda-go
+```
+
+```text
+Tested with:
+- Go 1.26.5
+- OpenTelemetry Go SDK v1.45.0
+- go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-lambda-go/otellambda v0.70.0
+- github.com/aws/aws-lambda-go v1.54.0
+```
+
+### Step 2: Create the tracer provider
+
+Create a file named `tracing.go` in your project. This file builds a `TracerProvider` that exports spans over OTLP/HTTP.
+
+```go:tracing.go minimap defaultCollapsed
+package main
+
+import (
+	"context"
+
+	lambdadetector "go.opentelemetry.io/contrib/detectors/aws/lambda"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/propagation"
+	sdkresource "go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+)
+
+func initTracer(ctx context.Context) (*sdktrace.TracerProvider, error) {
+	// Reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS
+	// from the environment, so the endpoint stays out of your code.
+	exporter, err := otlptracehttp.New(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// The Lambda detector adds the function name, version, and region.
+	// WithFromEnv reads OTEL_SERVICE_NAME and OTEL_RESOURCE_ATTRIBUTES.
+	res, err := sdkresource.New(ctx,
+		sdkresource.WithDetectors(lambdadetector.NewResourceDetector()),
+		sdkresource.WithFromEnv(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(res),
+	)
+
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
+
+	return tp, nil
+}
+```
+
+### Step 3: Wrap your handler
+
+Create the tracer provider in `main`. Then pass your handler through `otellambda.InstrumentHandler`. The wrapper creates one span for each invocation, and adds the request ID and the function ARN to that span.
+
+```go:main.go minimap defaultCollapsed
+package main
+
+import (
+	"context"
+	"log"
+
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-lambda-go/otellambda"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+)
+
+func handleRequest(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// Start child spans from ctx to attach them to the invocation span.
+	_, span := otel.Tracer("go-lambda").Start(ctx, "process-request")
+	defer span.End()
+
+	span.SetAttributes(attribute.String("url.path", req.Path))
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: 200,
+		Body:       "Hello from an instrumented Lambda function",
+	}, nil
+}
+
+func main() {
+	tp, err := initTracer(context.Background())
+	if err != nil {
+		log.Fatalf("tracer setup failed: %v", err)
+	}
+
+	lambda.Start(otellambda.InstrumentHandler(handleRequest,
+		otellambda.WithTracerProvider(tp),
+		otellambda.WithFlusher(tp),
+	))
+}
+```
+
+<Admonition type="warning" title="WithFlusher is required">
+`otellambda` calls the configured flusher after your handler returns, and the default flusher does nothing. If you omit `otellambda.WithFlusher(tp)`, Lambda freezes the execution environment while spans wait in the batch queue. Those traces never reach SigNoz.
+</Admonition>
+
+### Step 4: Set the environment variables
+
+In the **Configuration** tab of your function, open **Environment variables** and add the following:
+
+```ini
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+OTEL_SERVICE_NAME=<service-name>
+OTEL_RESOURCE_ATTRIBUTES=deployment.environment=<environment>
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: The name that identifies this function in SigNoz, such as `checkout-api`.
+- `<environment>`: The environment of the function, such as `production` or `staging`.
+
+<Admonition type="note">
+Go needs no `AWS_LAMBDA_EXEC_WRAPPER` variable. That variable starts the auto-instrumentation agent for the other runtimes, and Go has no agent.
+</Admonition>
+
+### Step 5: Build and deploy the function
+
+The `provided.al2023` and `provided.al2` runtimes run a binary named `bootstrap`. Build the binary for the architecture of your function.
+
+<Tabs entityName="architecture">
+<TabItem value="arm64" label="arm64" default>
+```bash
+GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o bootstrap .
+zip function.zip bootstrap
+```
+</TabItem>
+<TabItem value="x86_64" label="x86_64">
+```bash
+GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap .
+zip function.zip bootstrap
+```
+</TabItem>
+</Tabs>
+
+The `lambda.norpc` build tag removes the unused RPC server and makes the binary smaller.
+
+Upload `function.zip` in the **Code** tab of your function. Then invoke the function once.
+
+## Validate
+
+1. Open SigNoz and go to **Traces** in the left navigation menu.
+2. Filter on your `service.name`, then click **Refresh**. Spans from your function appear within a few seconds.
+
+<Figure
+  src="/img/docs/aws-monitoring/lambda/traces/go-lambda-traces-list.webp"
+  alt="SigNoz Traces Explorer list view showing spans from a Go Lambda function, filtered by service name"
+  caption="Spans from an instrumented Go Lambda function in the Traces Explorer"
+/>
+
+3. Switch to **Trace View** and open a trace. The root span covers the whole invocation, and the child spans that you create appear below that span.
+4. Open the **Services** page. Your function appears under the `service.name` value that you set in Step 4.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No traces reach SigNoz
+
+- Likely cause: `otellambda.WithFlusher(tp)` is missing, so Lambda freezes before the batch exporter sends the spans.
+- Fix: Add `otellambda.WithFlusher(tp)` to the `otellambda.InstrumentHandler` call in Step 3.
+- Verify: Invoke the function again. The trace appears in the **Traces** page.
+
+### The function logs a context deadline exceeded error
+
+- Likely cause: The Lambda timeout is shorter than the time that the span export needs.
+- Fix: Increase the function timeout to 10 seconds or more.
+- Verify: The CloudWatch logs for the next invocation show no export error.
+
+### The function logs a 401 or 403 response from SigNoz
+
+- Likely cause: `OTEL_EXPORTER_OTLP_HEADERS` holds a wrong ingestion key, or the region in the endpoint does not match the key.
+- Fix: Copy the key again from **Settings → Ingestion Settings**, and make sure that the region in `OTEL_EXPORTER_OTLP_ENDPOINT` is the region of that workspace.
+- Verify: The next invocation writes no export error to the CloudWatch logs.
+
+### The span is much shorter than the Lambda duration
+
+- Likely cause: This is expected. `otellambda` ends the invocation span before it flushes, so the export never appears inside the span. A handler that runs for 155 ms can report a 223 ms billed duration, and the gap is the flush.
+- Fix: None needed for correctness. To shrink the gap, move the export off the response path with the Collector layer described below.
+- Verify: Compare the root span duration in SigNoz against `Billed Duration` in the CloudWatch `REPORT` line.
+
+### Failed requests do not raise the error rate
+
+- Likely cause: SigNoz derives the service-level error rate from the entry-point span, which is the one `otellambda` creates. Setting an error on a span you started inside the handler does not change the invocation span.
+- Fix: Capture the invocation span with `trace.SpanFromContext(ctx)` at the top of your handler, before you start your own spans. Then call `RecordError` and `SetStatus(codes.Error, ...)` on it as well as on your own span.
+- Verify: The **Services** page shows a non-zero error rate, and the root span in the trace view is marked as an error.
+
+### Each invocation starts a separate trace
+
+- Likely cause: `otellambda` reads no trace context from the Lambda event. This is its default behavior.
+- Fix: Pass `otellambda.WithEventToCarrier` a function that returns the `traceparent` header of the event as a `propagation.MapCarrier`. If your callers send AWS X-Ray headers instead, use <a href="https://github.com/open-telemetry/opentelemetry-go-contrib/tree/main/instrumentation/github.com/aws/aws-lambda-go/otellambda/xrayconfig" target="_blank" rel="noopener noreferrer nofollow">xrayconfig</a>, which reads `X-Amzn-Trace-Id`.
+- Verify: The trace of the caller and the span of the function share one trace ID in SigNoz.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Remove the export latency with the OTel Collector layer (Optional)
+</ToggleHeading>
+
+The setup above sends spans from your function straight to SigNoz. The flush at the end of each invocation waits for that network call. This wait adds latency to your function's response.
+
+The cost is measurable. On a function in `ap-southeast-1` exporting to SigNoz Cloud, the billed duration ran about 68 ms longer than the handler itself. Routing through the collector layer cut that to about 31 ms, because the function now writes to `localhost` instead of crossing the internet. Your own numbers depend on the distance between your AWS region and your SigNoz region.
+
+To take the export off that path, add the OpenTelemetry Collector as a Lambda extension layer. Your function then exports to `localhost`, and the collector forwards the spans to SigNoz in the background.
+
+### Add the collector layer
+
+1. Open your Lambda function in the AWS console.
+2. Go to **Layers** → **Add a layer** → **Specify an ARN**.
+3. Paste the ARN that matches the region and the architecture of your function:
+
+```
+arn:aws:lambda:<aws-region>:184161586896:layer:opentelemetry-collector-<arch>-<version>:<layer-version>
+```
+
+Replace `<arch>` with `arm64` or `amd64`. Find `<version>` and `<layer-version>` on the <a href="https://github.com/open-telemetry/opentelemetry-lambda/releases" target="_blank" rel="noopener noreferrer nofollow">opentelemetry-lambda releases page</a>. The account `184161586896` is the official account that the OpenTelemetry community uses to publish these layers.
+
+### Add the collector configuration
+
+Add a file named `collector.yaml` to the root of your deployment archive. Lambda makes this file available at `/var/task/collector.yaml`.
+
+```yaml:collector.yaml defaultCollapsed
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 'localhost:4318'
+
+processors:
+  batch:
+  decouple:
+
+exporters:
+  otlp_http:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
+    headers:
+      signoz-ingestion-key: '${env:SIGNOZ_INGESTION_KEY}'
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch, decouple]
+      exporters: [otlp_http]
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `${env:SIGNOZ_INGESTION_KEY}`: Leave this as written. The collector reads the key from an environment variable at startup, so your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) stays out of a file that ships inside the deployment archive. You set the variable in the next step.
+
+<Admonition type="note">
+`otlp_http` requires Collector v0.144.0 or later, which every current Lambda layer release bundles. The older `otlphttp` name still works as an alias, but the collector logs `"otlphttp" alias is deprecated; use "otlp_http" instead` on every cold start. Use `otlphttp` only if you pin a layer older than v0.144.0, and change both the exporter key and the pipeline.
+</Admonition>
+
+The `decouple` processor lets the function return before the export finishes. Without this processor, the collector holds the invocation open until SigNoz answers.
+
+<Admonition type="warning">
+`decouple` buffers the last invocation's spans until the next invocation or until the function shuts down. If you send a single request and see no trace, invoke the function once more. On a low-traffic function, expect the most recent trace to lag.
+</Admonition>
+
+The collector runs in the same sandbox as your function and needs its own memory. In our test, `Max Memory Used` rose from 35 MB to 99 MB when the layer was added. Give the function at least 512 MB.
+
+### Point the function at the collector
+
+Set these three environment variables on the function:
+
+```ini
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+OPENTELEMETRY_COLLECTOR_CONFIG_URI=/var/task/collector.yaml
+SIGNOZ_INGESTION_KEY=<your-ingestion-key>
+```
+
+**Verify these values:**
+
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). The collector reads this variable, not the Go SDK.
+
+Then remove `OTEL_EXPORTER_OTLP_HEADERS`, because the collector now sends the key. Keep `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` on the function.
+
+Rebuild the archive with `collector.yaml` next to `bootstrap`. Then upload the archive:
+
+```bash
+zip function.zip bootstrap collector.yaml
+```
+
+Your Go code needs no change. Traces continue to appear in the **Traces** page in SigNoz.
+
+</details>
+
+## Next steps
+
+- [Collect Lambda logs](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs-otel-extension/) with the same collector extension layer.
+- [Collect Lambda metrics](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/) such as invocations, errors, and duration.
+- [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to move between signals during triage.
+- [Add manual spans](https://signoz.io/docs/instrumentation/manual-instrumentation/golang/manual-instrumentation/) around the database and HTTP calls inside your handler.
+- [Set up alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) on the latency and the error rate of the function.
+- [Monitor AWS Lambda MicroVMs](https://signoz.io/docs/aws-monitoring/lambda-microvms/) if you run Firecracker sandboxes rather than functions.
+
+## Get Help
+
+<GetHelp />

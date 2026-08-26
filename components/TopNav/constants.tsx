@@ -263,6 +263,12 @@ export const resourcesDropdownItems = {
       description: 'Explore dashboard templates for your use cases',
       name: 'Dashboard Templates',
     },
+    {
+      key: 'changelog',
+      url: '/changelog/',
+      description: 'Learn about latest product developments',
+      name: 'Changelog',
+    },
   ] as ResourceItem[],
 }
 
@@ -274,6 +280,7 @@ export const NAV_BREAKPOINTS = {
   RESOURCES: 1120,
   PRICING: 1200,
   GITHUB_STARS: 1280,
+  CUSTOMERS: 1320,
 } as const
 
 export const POPOVER_CONTENT_CLASS =

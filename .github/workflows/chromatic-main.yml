@@ -1,0 +1,48 @@
+name: 'Chromatic (main)'
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  chromatic:
+    name: Run Chromatic
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'update-visual-testing')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --non-interactive
+
+      - name: Run Chromatic
+        uses: chromaui/action@latest
+        env:
+          CHROMATIC_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          CHROMATIC_BRANCH: main
+          CHROMATIC_SLUG: ${{ github.repository }}
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          autoAcceptChanges: main
+          onlyChanged: true

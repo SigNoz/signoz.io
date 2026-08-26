@@ -23,14 +23,14 @@ const Header: React.FC = () => {
         }
         description={
           <span className="text-base">
-            Get actionable insights across pods, nodes, namespaces, workloads, and the services
-            running inside them. All unified across logs, traces, and metrics in consolidated
-            OTel-native architecture.
+            SigNoz Cloud gives you actionable insights across pods, nodes, namespaces, workloads,
+            and the services running inside them. All unified across logs, traces, and metrics in a
+            consolidated OTel-native architecture.
           </span>
         }
         buttons={HEADER_BUTTONS}
         heroImage="/img/website/hero-tabs/infrastructure.webp"
-        heroImageAlt="SigNoz Kubernetes Infrastructure Monitoring"
+        heroImageAlt="SigNoz Cloud Kubernetes Infrastructure Monitoring"
         sectionLayoutClassName="!mt-0 !border-x-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
         className="mt-0"
         align="left"
@@ -77,7 +77,7 @@ const BottomCTA: React.FC = () => {
           </Button>
           <Button asChild variant="secondary" rounded="full" className="!w-fit items-center gap-2">
             <TrackingLink
-              href="/docs/infrastructure-monitoring/k8s-metrics/"
+              href="/docs/infrastructure-monitoring/user-guides/k8s-metrics/"
               clickType="Secondary CTA"
               clickName="Read the Docs"
               clickLocation="Kubernetes Monitoring Page Bottom CTA"
