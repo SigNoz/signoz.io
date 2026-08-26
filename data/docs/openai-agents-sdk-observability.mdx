@@ -27,13 +27,101 @@ With full OpenAI Agents SDK observability in SigNoz, you can trace a complete ag
 
 The instrumentation is a bridge rather than a monkey patch. It registers a `TracingProcessor` on the Agents SDK's own trace provider and translates each SDK span into an OpenTelemetry span, which is then exported over OTLP.
 
-**Step 1:** Install the SDK, the OpenTelemetry SDK, the OTLP exporter, and the instrumentation.
+<Tabs entityName="instrumentation">
+<TabItem value="No Code" label="No Code(Recommended)" default>
+
+No-code auto-instrumentation is recommended for quick setup with minimal code changes. It suits an existing agent application you would rather not modify.
+
+**Step 1:** Install the necessary packages in your Python environment.
 
 ```bash
-pip install openai-agents \
-            opentelemetry-sdk \
-            opentelemetry-exporter-otlp-proto-http \
-            opentelemetry-instrumentation-openai-agents-v2
+pip install \
+  openai-agents \
+  opentelemetry-distro \
+  opentelemetry-exporter-otlp \
+  opentelemetry-instrumentation-openai-agents-v2
+```
+
+`opentelemetry-distro` is what configures the tracer provider and exporter at startup. Without it `opentelemetry-instrument` loads the instrumentation but exports nothing.
+
+**Step 2:** Add automatic instrumentation.
+
+```bash
+opentelemetry-bootstrap --action=install
+```
+
+**Step 3:** Run an example. No OpenTelemetry code is required in your application.
+
+```python
+import asyncio
+from agents import Agent, Runner, function_tool
+
+
+@function_tool
+def get_weather(city: str) -> str:
+    """Return the current weather for a city."""
+    return {"tokyo": "18C, light rain", "paris": "24C, clear"}.get(city.lower(), "unknown")
+
+
+agent = Agent(
+    name="weather-assistant",
+    instructions="You are a concise weather assistant. Answer in one sentence.",
+    model="gpt-4o-mini",
+    tools=[get_weather],
+)
+
+
+async def main():
+    result = await Runner.run(agent, "What's the weather in Tokyo?")
+    print(result.final_output)
+
+
+asyncio.run(main())
+```
+
+<Admonition type="info" title="Set your OpenAI API key first">
+Export `OPENAI_API_KEY` with your key from the <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer nofollow">OpenAI dashboard</a> before running this code.
+</Admonition>
+
+**Step 4:** Run your application with auto-instrumentation.
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>" \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
+opentelemetry-instrument python main.py
+```
+
+**Verify these values:**
+
+- `<service_name>`: The name your application appears under in SigNoz, for example `support-agents`.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="info" title="Two things this path cannot control">
+Spans are sent to OpenAI's own Traces dashboard as well as to SigNoz, because the SDK's default exporter stays registered alongside the bridge. Switch to the Code tab to send to SigNoz only.
+
+The SDK's task and turn spans arrive named `unknown`, because suppressing them needs a `RunConfig` passed in code. They are harmless but they add a row at every level of the trace tree.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+</TabItem>
+<TabItem value="Code" label="Code">
+
+The code path gives you control over both things the no-code path cannot set: where spans go, and whether the SDK's task and turn spans are emitted.
+
+**Step 1:** Install the necessary packages in your Python environment.
+
+```bash
+pip install \
+  openai-agents \
+  opentelemetry-sdk \
+  opentelemetry-exporter-otlp-proto-http \
+  opentelemetry-instrumentation-openai-agents-v2
 ```
 
 **Step 2:** Configure the exporter through environment variables.
@@ -77,10 +165,6 @@ set_trace_processors([])
 
 OpenAIAgentsInstrumentor().instrument(tracer_provider=provider)
 ```
-
-**Verify these values:**
-
-- `<service_name>`: The name your application appears under in SigNoz, for example `support-agents`.
 
 <Admonition type="warning" title="Why set_trace_processors([]) matters">
 The instrumentor appends its processor to whatever is already registered. Without this line the SDK's default exporter stays active and every span is sent to OpenAI's Traces dashboard as well as to SigNoz.
@@ -131,6 +215,9 @@ asyncio.run(main())
 <Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
+
+</TabItem>
+</Tabs>
 
 Each run emits spans carrying `gen_ai.operation.name`, `gen_ai.request.model`, `gen_ai.usage.input_tokens`, and `gen_ai.usage.output_tokens`. Allow a few seconds for them to appear in SigNoz.
 
@@ -197,14 +284,16 @@ Confirm `provider.force_flush()` runs before the process exits. Check that `set_
 <details>
 <summary><ToggleHeading>Running with opentelemetry-instrument produces nothing</ToggleHeading></summary>
 
-The package registers an `opentelemetry_instrumentor` entry point, so `opentelemetry-instrument` loads it and the bridge does appear on the SDK's processor list. It still exports no spans, because the tracer captured at load time is not the one the auto-instrumentation later configures. Use the explicit setup in Step 3 instead.
+Almost always a missing `opentelemetry-distro`. Without it, `opentelemetry-instrument` still loads the instrumentation and the bridge appears on the SDK's processor list, but no tracer provider or exporter is ever configured, so nothing leaves the process. Confirm the package is installed as shown in Step 1 of the No Code tab.
+
+To check quickly, print `type(opentelemetry.trace.get_tracer_provider())` at the top of your application. A `ProxyTracerProvider` means nothing was configured, while a `TracerProvider` means the distro is doing its job.
 
 </details>
 
 <details>
 <summary><ToggleHeading>Spans named unknown appear throughout the trace</ToggleHeading></summary>
 
-Set `include_task_and_turn_spans: False` on your `RunConfig` as shown in Step 4. The SDK's task and turn span types are not yet mapped by the instrumentation and fall through to the literal name `unknown`.
+The SDK's task and turn span types are not yet mapped by the instrumentation and fall through to the literal name `unknown`. Suppress them with `include_task_and_turn_spans: False` on your `RunConfig`, as shown in the Code tab. They cannot be suppressed on the no-code path, because that setting has to be passed in code.
 
 </details>
 
