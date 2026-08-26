@@ -1,5 +1,5 @@
 ---
-date: 2026-08-07
+date: 2026-08-26
 title: Debug Missing Traces, Logs, and Metrics in SigNoz
 description: Debug why your traces, logs, or metrics are not showing up in SigNoz, from SDK instrumentation to the OpenTelemetry Collector and the ingestion endpoint.
 doc_type: howto
@@ -73,7 +73,7 @@ For PHP-specific setup problems, see [PHP troubleshooting](https://signoz.io/doc
 </TabItem>
 <TabItem value="go" label="Go">
 
-The Go SDK has no auto-instrumentation agent and does not read `OTEL_*_EXPORTER`. Add a stdout exporter in code, either with the <a href="https://pkg.go.dev/go.opentelemetry.io/contrib/exporters/autoexport" target="_blank" rel="noopener noreferrer nofollow">`autoexport`</a> contrib module (which then honors `OTEL_TRACES_EXPORTER=console`) or by wiring `stdouttrace`, `stdoutmetric`, or `stdoutlog` directly.
+The Go SDK has no production-ready auto-instrumentation agent (the eBPF-based <a href="https://github.com/open-telemetry/opentelemetry-go-instrumentation" target="_blank" rel="noopener noreferrer nofollow">opentelemetry-go-instrumentation</a> project is still experimental) and does not read `OTEL_*_EXPORTER`. Add a stdout exporter in code, either with the <a href="https://pkg.go.dev/go.opentelemetry.io/contrib/exporters/autoexport" target="_blank" rel="noopener noreferrer nofollow">`autoexport`</a> contrib module (which then honors `OTEL_TRACES_EXPORTER=console`) or by wiring `stdouttrace`, `stdoutmetric`, or `stdoutlog` directly.
 
 For Go-specific setup problems, see [Go troubleshooting](https://signoz.io/docs/instrumentation/opentelemetry-golang/#troubleshooting).
 
@@ -137,19 +137,24 @@ For Java-specific issues, see [Java troubleshooting](https://signoz.io/docs/inst
 </TabItem>
 <TabItem value="python" label="Python">
 
-For zero-code instrumentation, set the log level to `debug`:
+The SDK's exporters log through Python's standard `logging` module, so set it to `DEBUG` to see their output. `OTEL_PYTHON_LOG_LEVEL` alone does not do this: it only takes effect when `OTEL_PYTHON_LOG_CORRELATION=true` is also set, and it controls log-correlation formatting, not exporter diagnostics.
 
-```bash
-export OTEL_PYTHON_LOG_LEVEL=debug
-opentelemetry-instrument python your_app.py
-```
-
-For manual SDK setup, configure Python's standard `logging` module instead:
+For manual SDK setup, add this before your instrumentation code runs:
 
 ```python
 import logging
 logging.basicConfig(level=logging.DEBUG)
 ```
+
+For zero-code instrumentation, add the same line to the top of your entry-point script. `opentelemetry-instrument` initializes the SDK before your script's own code runs, so this will not catch an error during that initial setup, but it is in place before the exporter's later export attempts, which is what surfaces connection and authentication errors:
+
+```bash
+opentelemetry-instrument python your_app.py
+```
+
+<Admonition type="tip">
+For zero-code debugging without touching application code at all, set `OTEL_PYTHON_LOG_CORRELATION=true` alongside `OTEL_PYTHON_LOG_LEVEL=debug`. This runs `logging.basicConfig()` before the SDK initializes, so it also catches setup-phase failures. The tradeoff: it also injects `otelTraceID`/`otelSpanID`/`otelServiceName` into every log line's format for as long as it stays set.
+</Admonition>
 
 Re-run your app and read the exporter output. See the <a href="https://opentelemetry.io/docs/zero-code/python/configuration/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Python configuration docs</a> and [Python troubleshooting](https://signoz.io/docs/instrumentation/opentelemetry-python/#troubleshooting).
 
@@ -165,6 +170,7 @@ import (
     "log"
 )
 
+stdr.SetVerbosity(8) // stdr defaults to verbosity 0 (errors only); the SDK logs debug detail at V(8)
 otel.SetLogger(stdr.New(log.Default()))
 ```
 
@@ -202,7 +208,7 @@ How you verify this depends on your topology.
 
 Test that the endpoint is reachable from the machine running your application.
 
-<Tabs entityName="deployment">
+<Tabs entityName="plans">
 <TabItem value="cloud" label="SigNoz Cloud" default>
 
 ```bash
@@ -237,7 +243,7 @@ Two links need verifying: application → Collector, and Collector → SigNoz.
 
 This `debug` exporter is a Collector pipeline component, different from the SDK's `OTEL_LOG_LEVEL=debug` in [Step 2](#step-2-is-your-telemetry-being-exported): Step 2 shows whether your *application* is exporting, while this shows what the *Collector* receives. Add it to the relevant pipeline in your existing `otel-collector-config.yaml` rather than replacing the whole file:
 
-```yaml:otel-collector-config.yaml
+```yaml:otel-collector-config.yaml minimap defaultCollapsed
 receivers:
   otlp:                                                # data coming IN from your app
     protocols:
@@ -245,6 +251,9 @@ receivers:
         endpoint: 0.0.0.0:4317                         # OTLP/gRPC: your app sends here
       http:
         endpoint: 0.0.0.0:4318                         # OTLP/HTTP: your app sends here
+
+processors:
+  batch:                                               # keep any processors your pipeline already has;
 
 exporters:
   debug:
@@ -258,7 +267,8 @@ exporters:
     # endpoint: http://<signoz-host>:4318
 
 # The service section wires components into pipelines.
-# REQUIRED: a receiver or exporter does nothing until it is listed here.
+# REQUIRED: a receiver, processor, or exporter does nothing until it is listed here.
+# Keep your pipeline's existing receivers and processors; just add debug to exporters.
 service:
   pipelines:
     traces:
@@ -274,6 +284,11 @@ service:
       processors: [batch]
       exporters: [debug, otlphttp]
 ```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 <Admonition type="warning">
 Configuring a receiver or exporter is not enough on its own: the Collector runs a component only once it is wired into a pipeline under `service.pipelines`. If you define the `otlphttp` and `debug` exporters but do not list them in the relevant pipeline's `exporters`, nothing is sent and no data reaches SigNoz. See the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
