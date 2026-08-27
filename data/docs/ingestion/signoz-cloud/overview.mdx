@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-08-25
 title: Ingestion Overview for SigNoz Cloud
 meta_title: SigNoz Cloud Ingestion Overview - Endpoints & Setup
 tags: [SigNoz Cloud]
@@ -48,9 +48,11 @@ Based on your SigNoz Cloud environment, you must configure your applications to 
 
 ### Language SDK Configuration
 
-Configuration typically involves setting the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable. Refer to the SigNoz [instrumentation docs](/docs/instrumentation/) for language-specific details.
+Set the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable for most language SDKs. Review the [OpenTelemetry environment variables reference](https://signoz.io/docs/ingestion/opentelemetry-environment-variables/) for endpoint, protocol, and precedence rules.
 
-If you are using the signal-agnostic environment variable, set `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443` (replace `<region>` with your region's endpoint from the table above). The exporter appends the appropriate path for each signal type (such as `v1/traces` or `v1/metrics`). This works for both OTLP/HTTP and OTLP/gRPC.
+Set the signal-agnostic variable to `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443`. OTLP/HTTP exporters append the signal path. OTLP/gRPC exporters use the value as a target.
+
+Use the SigNoz [instrumentation docs](https://signoz.io/docs/instrumentation/) for language-specific instructions.
 
 ### OpenTelemetry Collector Configuration
 
@@ -81,7 +83,7 @@ All endpoints are protected by header based key authentication. The header `sign
 
 ### Language SDK Configuration
 
-The mechanism to configure headers will vary, but OpenTelemetry language SDKs generally support setting the `OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<key>` environment variable. Refer to the SigNoz [instrumentation docs](/docs/instrumentation/) for language-specific details.
+OpenTelemetry language SDKs can use `OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<key>`. Review the [environment variables reference](https://signoz.io/docs/ingestion/opentelemetry-environment-variables/#otel_exporter_otlp_headers) for header formats and signal-specific overrides.
 
 ### OpenTelemetry Collector Configuration
 
@@ -116,7 +118,7 @@ The following ways of authentication are deprecated:
 
 ### Language SDK Configuration
 
-- OpenTelemetry SDKs generally support setting the following environment variables (see [OpenTelemetry docs](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) for more info):
+- Review the [OpenTelemetry environment variables reference](https://signoz.io/docs/ingestion/opentelemetry-environment-variables/) for defaults and supported values:
 
   - `OTEL_BSP_*` for spans
   - `OTEL_METRIC_EXPORT_*` for metrics
