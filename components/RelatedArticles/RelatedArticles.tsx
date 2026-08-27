@@ -16,11 +16,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ title, publishedOn, url }) =>
       className="flex flex-col rounded-sm dark:border-gray-900 dark:bg-signoz_ink-400 max-md:ml-0 max-md:w-full"
       prefetch={false}
     >
-      <img
-        className="h-24 w-full object-cover"
-        src="/img/hexagonal-pattern.webp"
-        alt=""
-      />
+      <img className="h-24 w-full object-cover" src="/img/hexagonal-pattern.webp" alt="" />
 
       <article className="mx-auto flex w-full grow flex-col rounded px-4 py-8  max-md:mt-6">
         <h3 className="truncate text-sm font-medium leading-6 text-signoz_ink-300 dark:text-neutral-100">
@@ -42,7 +38,7 @@ const RelatedArticles: React.FC<{
   return (
     <div className="related-articles my-8 flex flex-col">
       {relatedArticles && Array.isArray(relatedArticles) && relatedArticles.length > 0 && (
-        <h2 className="w-full text-sm font-semibold uppercase leading-5 tracking-wide text-white max-md:max-w-full">
+        <h2 className="w-full text-sm font-semibold uppercase leading-5 tracking-wide text-[var(--l1-foreground)] max-md:max-w-full">
           Related Articles
         </h2>
       )}
