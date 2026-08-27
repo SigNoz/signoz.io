@@ -55,6 +55,7 @@ const LLM_STARTER_ROUTE_MATCHERS: Array<(route: string) => boolean> = [
   (route) => route === '/docs/migration/migrate-from-opentelemetry-to-signoz',
   (route) => route === '/docs/migration/migrate-from-signoz-self-host-to-signoz-cloud',
   (route) => /^\/docs\/instrumentation(?:\/|$)/.test(route),
+  (route) => route === '/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing',
   (route) => /^\/docs\/traces-management(?:\/|$)/.test(route),
   (route) => /^\/docs\/metrics-management(?:\/|$)/.test(route),
   (route) => /^\/docs\/logs-management(?:\/|$)/.test(route),
