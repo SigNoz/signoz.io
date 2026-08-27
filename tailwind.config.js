@@ -265,12 +265,19 @@ module.exports = {
       typography: ({ theme }) => ({
         DEFAULT: {
           css: {
+            color: 'var(--l1-foreground)',
             a: {
-              color: theme('colors.primary.500'),
+              color: 'var(--accent-primary)',
               '&:hover': {
                 color: `${theme('colors.primary.600')}`,
               },
-              code: { color: theme('colors.primary.400') },
+              code: { color: 'var(--callout-primary-title)' },
+            },
+            strong: {
+              color: 'var(--l1-foreground)',
+            },
+            'h1,h2,h3,h4,h5,h6': {
+              color: 'var(--l1-foreground)',
             },
             'h1,h2': {
               fontWeight: '700',
@@ -280,21 +287,40 @@ module.exports = {
               fontWeight: '600',
             },
             code: {
-              color: theme('colors.indigo.500'),
+              // Theme-aware robin (robin-600 light / robin-400 dark). --accent-primary
+              // is theme-invariant and lands at 3.86:1 on the light code chip.
+              color: 'var(--callout-primary-title)',
+            },
+            blockquote: {
+              color: 'var(--l1-foreground)',
+              borderLeftColor: 'var(--l2-border)',
+            },
+            hr: {
+              borderColor: 'var(--l2-border)',
+            },
+            figcaption: {
+              color: 'var(--l2-foreground)',
+            },
+            'ol > li::marker': {
+              color: 'var(--l2-foreground)',
+            },
+            'ul > li::marker': {
+              color: 'var(--l3-foreground)',
+            },
+            thead: {
+              borderBottomColor: 'var(--l2-border)',
+            },
+            'tbody tr': {
+              borderBottomColor: 'var(--l2-border)',
             },
           },
         },
         invert: {
           css: {
             a: {
-              color: theme('colors.primary.500'),
               '&:hover': {
                 color: `${theme('colors.primary.400')}`,
               },
-              code: { color: theme('colors.primary.400') },
-            },
-            'h1,h2,h3,h4,h5,h6': {
-              color: theme('colors.gray.100'),
             },
           },
         },
