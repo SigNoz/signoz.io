@@ -8,7 +8,7 @@ doc_type: howto
 
 ## Overview
 
-Volume control lets you reduce the stored volume and cardinality of a metric by aggregating away attributes you don't need. You pick a metric and the attributes to keep (or drop). SigNoz then mathematically aggregates all series that differ only in the dropped attributes into a single series, at storage. The remaining attributes stay fully queryable, and the aggregated values stay correct: counter rates account for restarts and resets, and gauges keep their min, max, and averages.
+Volume control lets you reduce the stored volume and <Tooltip text="cardinality" content="The number of unique time series a metric actually produces: one series for each distinct combination of its identifying attributes." link="https://signoz.io/docs/glossary/#cardinality" /> of a metric by aggregating away attributes you don't need. You pick a metric and the attributes to keep (or drop); SigNoz then mathematically aggregates all series that differ only in the dropped attributes into a single series, at storage. The remaining attributes stay fully queryable, and the aggregated values stay correct: counter rates account for restarts and resets, and gauges keep their min, max, and averages.
 
 This is different from dropping labels with a collector processor, which does not reduce cost and silently corrupts your data. See [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/) for why, and [why the collector can't do this](#why-you-cant-do-this-in-your-collector) below.
 
@@ -23,7 +23,7 @@ Use volume control when a metric's cardinality comes from an attribute you never
 Common attributes worth aggregating away:
 
 - `service.instance.id`, `host.name`, `container.id`: per-instance identity on services behind a load balancer
-- `k8s.pod.name`, `k8s.pod.uid`: pod identity that churns on every rollout, creating new series each time
+- `k8s.pod.name`, `k8s.pod.uid`: pod identity that <Tooltip text="churns" content="The replacement of time series by new ones over time." link="https://signoz.io/docs/glossary/#churn" /> on every rollout, creating new series each time
 
 ## Managing Rules
 
