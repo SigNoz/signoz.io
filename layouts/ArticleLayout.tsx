@@ -145,7 +145,7 @@ export default function ArticleLayout({
               relatedArticles.length > 0 && (
                 <div className="mt-12 border-t border-[var(--l2-border)] pt-10">
                   <div className="mb-6">
-                    <p className="mb-1 text-xs font-medium uppercase tracking-[0.2em] text-[var(--callout-primary-title)]">
+                    <p className="mb-1 text-xs font-medium uppercase tracking-[0.2em] text-[color-mix(in_srgb,var(--accent-primary)_80%,var(--l1-foreground))]">
                       Keep Reading
                     </p>
                     <h2 className="text-xl font-semibold text-[var(--l1-foreground)]">
@@ -165,7 +165,7 @@ export default function ArticleLayout({
                         className="group flex flex-col justify-between rounded-xl border border-[var(--l2-border)] bg-[color-mix(in_srgb,var(--l2-background)_50%,transparent)] p-5 transition-all duration-200 hover:border-[color-mix(in_srgb,var(--accent-primary)_60%,transparent)] hover:bg-[var(--l2-background)]"
                       >
                         <div>
-                          <p className="mb-3 text-[11px] font-medium uppercase tracking-widest text-[color-mix(in_srgb,var(--callout-primary-title)_70%,transparent)]">
+                          <p className="mb-3 text-[11px] font-medium uppercase tracking-widest text-[color-mix(in_srgb,var(--accent-primary)_80%,var(--l1-foreground))]">
                             {new Date(article.publishedOn || article.date).toLocaleDateString(
                               'en-US',
                               { month: 'short', year: 'numeric' }
@@ -175,7 +175,7 @@ export default function ArticleLayout({
                             {article.title}
                           </h3>
                         </div>
-                        <div className="mt-4 flex items-center gap-1 text-xs text-[color-mix(in_srgb,var(--callout-primary-title)_60%,transparent)] transition-all duration-200 group-hover:gap-2 group-hover:text-[var(--callout-primary-title)]">
+                        <div className="mt-4 flex items-center gap-1 text-xs text-[color-mix(in_srgb,var(--accent-primary)_80%,var(--l1-foreground))] transition-all duration-200 group-hover:gap-2 group-hover:text-[color-mix(in_srgb,var(--accent-primary)_80%,var(--l1-foreground))]">
                           <span>Read article</span>
                           <ArrowRight size={12} />
                         </div>
