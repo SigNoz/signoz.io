@@ -15,7 +15,7 @@ Cardinality is still the primary cost driver, and the reason is arithmetic rathe
 total samples = active time series × export frequency
 ```
 
-Every active series emits one sample per export interval, whether or not its value changed. So one series exporting every 30 seconds produces about 86,400 samples per month (about $0.0086). At the more common 60-second interval, about 43,200, or half that. Scale it up and 100,000 active series at a 30-second interval is roughly 8.6 billion samples per month, about $864.
+Every <Tooltip text="active series" content="A time series that is currently receiving data points." link="https://signoz.io/docs/glossary/#active-series" /> emits one sample per export interval, whether or not its value changed. So one series exporting every 30 seconds produces about 86,400 samples per month (about $0.0086). At the more common 60-second interval, about 43,200, or half that. Scale it up and 100,000 active series at a 30-second interval is roughly 8.6 billion samples per month, about $864.
 
 That gives you exactly two levers: **reduce the number of active series**, or **export less often**. When this page says "reduce cardinality", it means reduce the series count so that fewer samples arrive on each interval.
 
@@ -24,7 +24,7 @@ Two consequences worth knowing up front:
 - **Churn is free.** A series replaced by a new one (a rollout giving each replacement pod a new `k8s.pod.uid`) sends the same number of samples. SigNoz does not bill per series, so churn adds no cost.
 - **Dropping labels alone saves nothing.** The same samples still arrive. Attributes have to be *aggregated away* so that the series collapse. See [Volume control](https://signoz.io/docs/metrics-management/volume-control/).
 
-Histograms and summaries are the exceptions to "one data point, one sample". A classic histogram data point costs one sample per bucket (including the `+Inf` bucket), plus `.count`, which is always present, plus `.sum`, `.min`, and `.max` only when the SDK emits them. A summary data point costs one sample per quantile, plus `.count` and `.sum`.
+<Tooltip text="Histograms" content="A metric that aggregates many observations client-side into buckets, plus a count and optional sum, min, and max." link="https://signoz.io/docs/glossary/#histogram" /> and summaries are the exceptions to "one data point, one sample". A classic histogram data point costs one sample per bucket (including the `+Inf` bucket), plus `.count`, which is always present, plus `.sum`, `.min`, and `.max` only when the SDK emits them. A summary data point costs one sample per quantile, plus `.count` and `.sum`.
 
 ## How Attributes Affect Billing
 
