@@ -103,10 +103,6 @@ For example, a request counter that sees 100 requests in the first minute, 150 i
 
 Following a single request across every service, database call, and queue hop it touches, by stitching [spans](#span) into a [trace](#trace). See [Distributed tracing](https://signoz.io/docs/apm-and-distributed-tracing/querying-traces/).
 
-### Distro
-
-A distribution: a wrapper around an upstream OpenTelemetry repository with defaults or customizations applied, so it works out of the box for a particular platform or vendor.
-
 ### Dropping labels
 
 Removing attributes from a metric at the Collector so they are never stored. Dropping labels alone does not reduce [samples](#sample), since the same data points still arrive, unless the series are also aggregated away. See [Dropping metric labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/).
@@ -127,7 +123,7 @@ In SigNoz, exponential histograms are supported on self-hosted only, not on SigN
 
 ### Exporter
 
-The component that emits telemetry to a consumer: an SDK exporter sending [OTLP](#otlp) to a [Collector](#collector), or a Collector exporter sending data to SigNoz. Exporters can be push- or pull-based.
+The component that emits telemetry to a consumer: an SDK exporter sending [OTLP](#otlp) to a [Collector](#collector), or a Collector exporter sending data to SigNoz. Most exporters push data to their destination as it is ready. A few work the other way round and expose an endpoint that a scraper collects from, which is how the Collector's Prometheus exporter works.
 
 ## F
 
@@ -143,7 +139,9 @@ A visualization of a [trace](#trace) that shows each [span](#span) as a horizont
 
 ### Gauge
 
-A metric that represents a value sampled at a point in time: memory in use, queue depth, temperature. Gauges are not summed across time; the value simply is what it was when read. One gauge data point is one [sample](#sample).
+A metric that reports a value read at a single moment, such as memory in use, queue depth, or CPU temperature. Gauges are never added up across time; each reading replaces the previous one.
+
+For example, a gauge tracking memory in use might export 512 MB, then 480 MB, then 530 MB. The service is using 530 MB at the end, not 1,522 MB, because the numbers describe the same thing at three different moments rather than three separate events to total. Compare a [counter](#counter), where adding the values is exactly the point. One gauge data point is one [sample](#sample).
 
 ### Golden signals
 
