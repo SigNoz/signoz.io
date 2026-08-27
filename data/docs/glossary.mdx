@@ -1,5 +1,5 @@
 ---
-date: 2026-08-25
+date: 2026-08-27
 title: Glossary of Observability and OpenTelemetry Terms
 description: Definitions of OpenTelemetry, observability, and SigNoz terms, from span and resource to sample, cardinality, and identifying attributes.
 doc_type: reference
@@ -97,7 +97,7 @@ The basic unit of metric information: a set of [attributes](#attribute), a value
 
 A metric [temporality](#temporality) in which each successive data point advances the start timestamp and reports only the change since the previous export. Data points cover (T₀, T₁], (T₁, T₂], (T₂, T₃], and so on.
 
-For example, the same counter that sees 100 requests in the first minute, 150 in the second, and none in the third exports `100`, then `150`, then nothing at all. Synchronous instruments that recorded nothing during an interval export no data point, so idle series produce no [samples](#sample). Set it with `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta`. Note that [PromQL](#promql) cannot read delta series. See [Use delta temporality](https://signoz.io/docs/metrics-management/reducing-costs/).
+For example, a request counter that sees 100 requests in the first minute, 150 in the second, and none in the third exports `100`, then `150`, then nothing at all. Synchronous instruments that recorded nothing during an interval export no data point, so idle series produce no [samples](#sample). Set it with `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta`. Note that [PromQL](#promql) cannot read delta series. See [Use delta temporality](https://signoz.io/docs/metrics-management/reducing-costs/).
 
 ### Distributed tracing
 
@@ -116,6 +116,12 @@ Removing attributes from a metric at the Collector so they are never stored. Dro
 ### Exemplar
 
 A pointer from an aggregated metric data point back to a specific [trace](#trace) that contributed to it, letting you jump from a latency spike on a chart to a slow request that caused it.
+
+### Exponential histogram
+
+A [histogram](#histogram) whose [bucket](#bucket) boundaries are computed from a `scale` parameter rather than listed explicitly. Boundaries sit at integer powers of `base = 2^(2^-scale)`, so a higher scale gives finer resolution, and a separate zero bucket counts values whose absolute value falls at or below a zero threshold.
+
+Because the buckets adapt to the data, an exponential histogram covers a wide range of values with small relative error and far fewer buckets than an explicit-bucket histogram, and nobody has to guess boundaries up front. In SigNoz, exponential histogram samples are stored separately from scalar samples, and [volume control](https://signoz.io/docs/metrics-management/volume-control/) rules are not supported on them. See [Metric types and aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
 
 ### Exporter
 
@@ -149,7 +155,7 @@ Deciding whether to keep a [trace](#trace) at its start, before any spans comple
 
 ### Histogram
 
-A metric that aggregates many observations client-side into [buckets](#bucket), plus a count, sum, and optional min and max. This is the standard way to measure latency distributions. Histograms are the most volume-intensive metric type, because every bucket is its own [time series](#time-series). An **exponential histogram** uses exponentially-scaled bucket boundaries instead of explicit ones, covering a wide range with fewer buckets.
+A metric that aggregates many observations client-side into [buckets](#bucket), plus a count, sum, and optional min and max. This is the standard way to measure latency distributions. Histograms are the most volume-intensive metric type, because every bucket is its own [time series](#time-series). The buckets here are configured explicitly; compare [exponential histogram](#exponential-histogram), where they are computed instead.
 
 ## I
 
@@ -207,7 +213,7 @@ Non-identifying attributes are effectively free in SigNoz, since metrics are not
 
 ### Notification channel
 
-The destination an [alert rule](#alert-rule) sends to when it fires. SigNoz supports Slack, email, PagerDuty, Opsgenie, Microsoft Teams, Google Chat, Jira, incident.io, Rootly, Zenduty, and generic webhooks. A channel is set up once and can then be picked by any alert rule. See [Setup notifications](https://signoz.io/docs/setup-alerts-notification/).
+The destination an [alert rule](#alert-rule) sends to when it fires. A channel is set up once and can then be picked by any alert rule. See [Setup notifications](https://signoz.io/docs/setup-alerts-notification/) for the channels SigNoz supports.
 
 ## O
 
