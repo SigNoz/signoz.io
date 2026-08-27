@@ -29,6 +29,22 @@ const GAP = 8
 // Keep the tooltip below the sticky top navigation, which is about 64px tall.
 const NAV_SAFE_TOP = 72
 
+// Find the nearest ancestor that clips its content (the docs content column uses
+// `overflow-clip`). The tooltip itself is portalled out, so this is used only to
+// keep the card horizontally inside the reading column instead of sprawling over
+// the sidebar or table of contents.
+function getClipAncestor(element: HTMLElement | null): HTMLElement | null {
+  let node = element?.parentElement ?? null
+  while (node && node !== document.body) {
+    const style = getComputedStyle(node)
+    if ([style.overflow, style.overflowX, style.overflowY].some((value) => value !== 'visible')) {
+      return node
+    }
+    node = node.parentElement
+  }
+  return null
+}
+
 interface Position {
   top: number
   left: number
@@ -87,12 +103,17 @@ export default function Tooltip({
       const height = tooltip.offsetHeight
       const width = tooltip.offsetWidth || TOOLTIP_WIDTH
 
+      // Clamp horizontally to the reading column so the portalled card never
+      // sprawls over the sidebar or table of contents. The docs body is an
+      // `<article>`; fall back to the nearest clipping ancestor, then the viewport.
+      const column = trigger.closest('article') ?? getClipAncestor(trigger)
+      const clipRect = column
+        ? column.getBoundingClientRect()
+        : { left: 0, right: window.innerWidth }
       const centerX = triggerRect.left + triggerRect.width / 2
-      const maxLeft = window.innerWidth - width - EDGE_PADDING
-      const left = Math.min(
-        Math.max(centerX - width / 2, EDGE_PADDING),
-        Math.max(maxLeft, EDGE_PADDING)
-      )
+      const minLeft = clipRect.left + EDGE_PADDING
+      const maxLeft = clipRect.right - width - EDGE_PADDING
+      const left = Math.min(Math.max(centerX - width / 2, minLeft), Math.max(maxLeft, minLeft))
 
       const spaceAbove = triggerRect.top - NAV_SAFE_TOP
       const placement: 'top' | 'bottom' = height + GAP > spaceAbove ? 'bottom' : 'top'
@@ -109,7 +130,6 @@ export default function Tooltip({
       window.removeEventListener('resize', place)
     }
     // Re-measuring depends only on visibility; content is stable per instance.
-     
   }, [isVisible])
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
