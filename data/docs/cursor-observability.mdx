@@ -129,10 +129,14 @@ The [Cursor IDE dashboard](https://signoz.io/docs/dashboards/dashboard-templates
   caption="The Cursor IDE dashboard template, showing token spend, latency, tool activity, and failures."
 />
 
+<details>
+<ToggleHeading>
+
 ## Troubleshooting Cursor IDE Observability
 
-<details>
-<summary><ToggleHeading>No spans arrive at all</ToggleHeading></summary>
+</ToggleHeading>
+
+### No spans arrive at all
 
 Check delivery locally before assuming the export is broken:
 
@@ -144,31 +148,19 @@ A `last_success_at_ns` newer than `last_failure_at_ns` means export is working a
 
 If there is no success timestamp, confirm Cursor was fully restarted after Step 2, and that **Customize > Hooks** lists the registered events.
 
-</details>
-
-<details>
-<summary><ToggleHeading>Spans arrive but every token panel is empty</ToggleHeading></summary>
+### Spans arrive but every token panel is empty
 
 `afterAgentResponse` is not registered. Re-run Step 3 and confirm it prints `events registered: 16`, then restart Cursor. A restart is required whenever the registered event set changes.
 
-</details>
-
-<details>
-<summary><ToggleHeading>Traces show a "missing span" placeholder</ToggleHeading></summary>
+### Traces show a "missing span" placeholder
 
 This is expected. The runner parents each turn to a session span that it never emits, so SigNoz shows the turn under a missing parent. The turn and its children are complete and every query works normally.
 
-</details>
-
-<details>
-<summary><ToggleHeading>Repository shows as N/A on some spans</ToggleHeading></summary>
+### Repository shows as N/A on some spans
 
 The runner resolves repository context once per session and does not always succeed, so `vcs.repository.name` can be absent even when the workspace is a git repository. Those spans are missing attribution rather than running outside a repository, which matters if you group token spend by repository.
 
-</details>
-
-<details>
-<summary><ToggleHeading>Nothing is emitted from the Cursor CLI</ToggleHeading></summary>
+### Nothing is emitted from the Cursor CLI
 
 This cannot be fixed by configuration. The Cursor CLI omits the `beforeSubmitPrompt`, `afterAgentResponse`, and `stop` hooks in non-interactive mode, and the runner builds a turn's spans only when `Stop` arrives. Use the Cursor IDE, or query Cursor's Admin API for team-level token and cost totals without per-tool detail.
 
@@ -176,13 +168,11 @@ This cannot be fixed by configuration. The Cursor CLI omits the `beforeSubmitPro
 
 ## Related integrations
 
-- [Claude Code monitoring](https://signoz.io/docs/claude-code-monitoring/)
-- [Codex monitoring](https://signoz.io/docs/codex-monitoring/)
-- [OpenCode observability](https://signoz.io/docs/opencode-observability/)
-- [GitHub Copilot monitoring](https://signoz.io/docs/github-copilot-monitoring/)
+Instrument the other AI coding agents your team runs, using the same OpenTelemetry pipeline:
 
-Additional resources:
+- [Monitor Claude Code with OpenTelemetry](https://signoz.io/docs/claude-code-monitoring/)
+- [Monitor OpenAI Codex with OpenTelemetry](https://signoz.io/docs/codex-monitoring/)
+- [OpenCode observability with OpenTelemetry](https://signoz.io/docs/opencode-observability/)
+- [Monitor GitHub Copilot with OpenTelemetry](https://signoz.io/docs/github-copilot-monitoring/)
 
-- Set up [alerts](https://signoz.io/docs/alerts/) on tool failure rate or token spend.
-- Learn how to [query traces](https://signoz.io/docs/userguide/traces/) in SigNoz.
-- Read the [LLM observability overview](https://signoz.io/docs/llm-observability/) for the wider `gen_ai.*` conventions.
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.
