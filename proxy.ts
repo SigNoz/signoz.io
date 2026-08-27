@@ -18,9 +18,11 @@ import {
 import {
   AGENT_MARKDOWN_SELF_FETCH_HEADER,
   buildContentMarkdownRewritePath,
+  buildCuratedMarkdownRewritePath,
   buildPageMarkdownRewritePath,
   servesMarkdownAlternate,
   shouldRewriteContentToMarkdown,
+  shouldRewriteCuratedPageToMarkdown,
   shouldRewritePageToMarkdown,
 } from '@/utils/agentMarkdownRouting'
 
@@ -128,6 +130,10 @@ export function proxy(req: NextRequest) {
     !isAgentMarkdownSelfFetch &&
     isReadRequest &&
     shouldRewriteContentToMarkdown(pathname, prefersMarkdown)
+  const curatedMarkdownRewrite =
+    !isAgentMarkdownSelfFetch &&
+    isReadRequest &&
+    shouldRewriteCuratedPageToMarkdown(pathname, prefersMarkdown)
   const pageMarkdownRewrite =
     !isAgentMarkdownSelfFetch &&
     isReadRequest &&
@@ -137,11 +143,13 @@ export function proxy(req: NextRequest) {
     ? buildDocsMarkdownRewritePath(pathname)
     : apiRefYamlRewrite
       ? buildApiReferenceOpenAPISpecRewritePath(pathname)
-      : contentMarkdownRewrite
-        ? buildContentMarkdownRewritePath(pathname)
-        : pageMarkdownRewrite
-          ? buildPageMarkdownRewritePath(pathname)
-          : null
+      : curatedMarkdownRewrite
+        ? buildCuratedMarkdownRewritePath(pathname)
+        : contentMarkdownRewrite
+          ? buildContentMarkdownRewritePath(pathname)
+          : pageMarkdownRewrite
+            ? buildPageMarkdownRewritePath(pathname)
+            : null
 
   if (markdownRewritePath) {
     const rewriteUrl = req.nextUrl.clone()

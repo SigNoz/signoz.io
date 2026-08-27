@@ -9,9 +9,11 @@
  * - CMS/MDX-backed content sections (blog, comparisons, guides, opentelemetry,
  *   faqs, customers) rewrite to /api/content-markdown/<section>/<slug>, which
  *   renders the raw MDX source through the agent markdown renderer.
- * - Every other page (pricing, feature pages, alternatives, home, ...) rewrites
- *   to /api/page-markdown/<path>, which converts the page's own server-rendered
+ * - Every other page (feature pages, alternatives, home, ...) rewrites to
+ *   /api/page-markdown/<path>, which converts the page's own server-rendered
  *   HTML to markdown.
+ * - A few pages whose HTML converts poorly (currently /pricing) ship a
+ *   hand-authored markdown twin route and are rewritten to it instead.
  *
  * Keep this module dependency-free so tests can load it via loadTsModule.
  */
@@ -101,7 +103,16 @@ const PAGE_MARKDOWN_EXCLUDED_PREFIXES = [
 
 // Real .md resources served by their own routes; the suffix is part of the
 // path, not a markdown-alternate marker.
-const MARKDOWN_ROUTE_PATHS = new Set(['/skill.md'])
+const MARKDOWN_ROUTE_PATHS = new Set(['/skill.md', '/pricing.md'])
+
+/**
+ * Pages whose HTML converts poorly to markdown (interactive widgets, sliders,
+ * calculators) and that ship a hand-authored markdown twin route instead. Both
+ * `/<page>.md` and `Accept: text/markdown` on `/<page>` serve the twin.
+ */
+const CURATED_MARKDOWN_TWINS: Record<string, string> = {
+  '/pricing': '/pricing.md',
+}
 
 /**
  * File-like paths (e.g. /llms.txt, /sitemap.xml, /favicon.ico) are real
@@ -120,6 +131,18 @@ const isFileLikePath = (pathname: string): boolean => {
   return lastSegment.includes('.')
 }
 
+/** True when the page has a hand-authored markdown twin route. */
+export const hasCuratedMarkdownTwin = (pathname: string): boolean =>
+  stripMarkdownExtension(pathname) in CURATED_MARKDOWN_TWINS
+
+export const shouldRewriteCuratedPageToMarkdown = (
+  pathname: string,
+  prefersMarkdown: boolean
+): boolean => prefersMarkdown && !hasMarkdownExtension(pathname) && hasCuratedMarkdownTwin(pathname)
+
+export const buildCuratedMarkdownRewritePath = (pathname: string): string =>
+  CURATED_MARKDOWN_TWINS[stripMarkdownExtension(pathname)]
+
 export const shouldRewritePageToMarkdown = (
   pathname: string,
   prefersMarkdown: boolean
@@ -131,6 +154,11 @@ export const shouldRewritePageToMarkdown = (
   const normalized = stripTrailingSlashes(pathname)
 
   if (MARKDOWN_ROUTE_PATHS.has(normalized)) {
+    return false
+  }
+
+  // Curated twins are served by their own route, not the generic pipeline.
+  if (hasCuratedMarkdownTwin(pathname)) {
     return false
   }
 
@@ -160,4 +188,6 @@ export const buildPageMarkdownRewritePath = (pathname: string): string => {
  * responses must vary on the Accept header.
  */
 export const servesMarkdownAlternate = (pathname: string): boolean =>
-  shouldRewriteContentToMarkdown(pathname, true) || shouldRewritePageToMarkdown(pathname, true)
+  shouldRewriteContentToMarkdown(pathname, true) ||
+  shouldRewritePageToMarkdown(pathname, true) ||
+  shouldRewriteCuratedPageToMarkdown(pathname, true)

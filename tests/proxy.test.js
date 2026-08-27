@@ -192,7 +192,7 @@ test('does not re-enter content markdown routing for agent self-fetches', () => 
 })
 
 test('rewrites .md page URLs to the page markdown API', () => {
-  assert.equal(rewriteTarget(run('/pricing.md')), '/api/page-markdown/pricing')
+  assert.equal(rewriteTarget(run('/alerts-management.md')), '/api/page-markdown/alerts-management')
   assert.equal(
     rewriteTarget(run('/product-comparison/signoz-vs-datadog.md')),
     '/api/page-markdown/product-comparison/signoz-vs-datadog'
@@ -212,8 +212,23 @@ test('rewrites the home page and section indexes via the page pipeline', () => {
 })
 
 test('page markdown rewrites require markdown intent', () => {
+  assert.equal(isPassthrough(run('/alerts-management')), true)
+  assert.equal(isPassthrough(run('/alerts-management', { headers: { accept: 'text/html' } })), true)
+})
+
+test('serves the curated markdown twin for /pricing', () => {
+  // /pricing.md is a real route, so it passes through to its own handler.
+  assert.equal(isPassthrough(run('/pricing.md')), true)
+  assert.equal(
+    rewriteTarget(run('/pricing', { headers: { accept: 'text/markdown' } })),
+    '/pricing.md'
+  )
   assert.equal(isPassthrough(run('/pricing')), true)
   assert.equal(isPassthrough(run('/pricing', { headers: { accept: 'text/html' } })), true)
+  assert.notEqual(
+    rewriteTarget(run('/pricing', { headers: { accept: 'text/markdown' } })),
+    '/api/page-markdown/pricing'
+  )
 })
 
 test('page markdown rewrites skip excluded prefixes', () => {
@@ -233,12 +248,17 @@ test('page markdown rewrites skip file-like paths', () => {
 })
 
 test('page markdown rewrites only apply to GET and HEAD requests', () => {
-  assert.equal(rewriteTarget(run('/pricing.md', { method: 'HEAD' })), '/api/page-markdown/pricing')
-  assert.equal(isPassthrough(run('/pricing.md', { method: 'POST' })), true)
+  assert.equal(
+    rewriteTarget(run('/alerts-management.md', { method: 'HEAD' })),
+    '/api/page-markdown/alerts-management'
+  )
+  assert.equal(isPassthrough(run('/alerts-management.md', { method: 'POST' })), true)
 })
 
 test('does not re-enter page markdown routing for agent self-fetches', () => {
-  const res = run('/pricing.md', { headers: { [AGENT_MARKDOWN_SELF_FETCH_HEADER]: '1' } })
+  const res = run('/alerts-management.md', {
+    headers: { [AGENT_MARKDOWN_SELF_FETCH_HEADER]: '1' },
+  })
   assert.equal(isPassthrough(res), true)
 })
 
@@ -247,7 +267,10 @@ test('markdown rewrites preserve the query string', () => {
     rewriteTarget(run('/blog/some-post.md?utm_source=x')),
     '/api/content-markdown/blog/some-post?utm_source=x'
   )
-  assert.equal(rewriteTarget(run('/pricing.md?a=1')), '/api/page-markdown/pricing?a=1')
+  assert.equal(
+    rewriteTarget(run('/alerts-management.md?a=1')),
+    '/api/page-markdown/alerts-management?a=1'
+  )
 })
 
 test('content sections take precedence over the generic page pipeline', () => {
@@ -255,8 +278,8 @@ test('content sections take precedence over the generic page pipeline', () => {
 })
 
 test('sets the markdown rewrite debug header outside production', () => {
-  assert.equal(run('/pricing.md').headers.get('x-markdown-rewrite'), 'true')
-  assert.equal(run('/pricing').headers.get('x-markdown-rewrite'), null)
+  assert.equal(run('/alerts-management.md').headers.get('x-markdown-rewrite'), 'true')
+  assert.equal(run('/alerts-management').headers.get('x-markdown-rewrite'), null)
 })
 
 test('adds Vary: Accept on every URL that serves a markdown alternate, even for HTML requests', () => {
@@ -276,7 +299,10 @@ test('does not add Vary: Accept on paths without a markdown alternate', () => {
 
 test('preserves the request pathname for not-found suggestions on passthrough and rewrite', () => {
   assert.equal(run('/nonexistent-page').headers.get(NOT_FOUND_PATHNAME_HEADER), '/nonexistent-page')
-  assert.equal(run('/pricing.md').headers.get(NOT_FOUND_PATHNAME_HEADER), '/pricing.md')
+  assert.equal(
+    run('/alerts-management.md').headers.get(NOT_FOUND_PATHNAME_HEADER),
+    '/alerts-management.md'
+  )
 })
 
 test('flags bot requests with bot headers', () => {
