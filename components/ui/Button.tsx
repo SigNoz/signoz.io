@@ -15,8 +15,7 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          'bg-signoz_robin-500 text-white hover:bg-signoz_robin-600 active:bg-signoz_robin-700',
+        default: 'bg-[var(--accent-primary)] text-[var(--base-white)] hover:bg-signoz_robin-600',
         outline:
           'border border-signoz_robin-500 bg-transparent text-signoz_robin-500 hover:bg-signoz_robin-500/10',
         secondary:
@@ -49,9 +48,9 @@ export const buttonVariants = cva(
 // -----------------------------------------------------------------------------
 const LEGACY_VARIANT_TO_STYLES_MAP = {
   legacyPrimary:
-    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-signoz_robin-500 text-center font-medium leading-5 !text-white !no-underline outline-none hover:!text-white',
+    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-[var(--accent-primary)] text-center font-medium leading-5 !text-[var(--base-white)] !no-underline outline-none hover:!text-[var(--base-white)]',
   legacySecondary:
-    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 button-background text-center font-medium leading-5 !text-white !no-underline outline-none hover:!text-white',
+    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-[var(--l2-background)] text-center font-medium leading-5 !text-[var(--l1-foreground)] !no-underline outline-none hover:!text-[var(--l1-foreground)]',
 } as const
 
 type ButtonElementType = React.ElementType
