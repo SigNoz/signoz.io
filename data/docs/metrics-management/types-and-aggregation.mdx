@@ -1,5 +1,5 @@
 ---
-date: 2026-08-10
+date: 2026-08-27
 title: Metric Types and Aggregation
 description: Learn about the different metric types (Counter, Gauge, Histogram, Exponential Histogram) supported by SigNoz and how temporal and spatial aggregation works for each type.
 doc_type: explanation
@@ -22,7 +22,7 @@ SigNoz supports the following types of metrics:
 <Admonition type="info">
 Exponential histograms are supported only in self-hosted SigNoz (not SigNoz Cloud). To enable them in your OTel Collector configuration:
 1. Set `enable_exp_hist: true` in both the `clickhousemetricswrite` and `signozclickhousemetrics` exporters in your collector config.
-2. Ensure your metrics use delta temporality. Although OpenTelemetry supports both delta and cumulative temporality for exponential histograms, SigNoz currently only supports delta, so cumulative temporality metrics will not work.
+2. Ensure your metrics use delta temporality. Although OpenTelemetry supports both delta and cumulative temporality for exponential histograms, SigNoz supports only delta. Querying an exponential histogram recorded with cumulative temporality fails with an HTTP `501` error: `only 'delta' exponential histograms are supported`.
 For background, see <a href="https://github.com/SigNoz/signoz-otel-collector/issues/625#issuecomment-2994987941" target="_blank" rel="noopener noreferrer nofollow">the collector issue notes</a>.
 </Admonition>
 
