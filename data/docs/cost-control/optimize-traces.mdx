@@ -1,5 +1,5 @@
 ---
-date: 2026-08-14
+date: 2026-08-25
 title: Reduce Trace Volume with Sampling Strategies
 description: Reduce trace ingestion volume in SigNoz using head-based sampling, tail-based sampling policies, and pre-filtering that removes low-value spans.
 doc_type: howto
@@ -42,7 +42,7 @@ Tail sampling buffers the complete trace in Collector memory before making a sam
 
 A typical cost-saving policy set keeps every error trace, keeps every slow trace above a latency threshold, and applies a low-percentage sample to everything else. Policies are OR-ed: a trace is kept if it matches any policy. Add this to your existing `otel-collector-config.yaml` and enable `tail_sampling` in the `traces` pipeline:
 
-```yaml
+```yaml:otel-collector-config.yaml
 processors:
   tail_sampling:
     decision_wait: 10s
@@ -71,9 +71,9 @@ Dropping a span at the Collector does not automatically remove custom metrics ge
 
 Two common drop patterns based on what you found in Trace Explorer:
 
-**By span operation name** (the `name` field surfaced in Step 4 of the analysis guide):
+**By span operation name** (the `name` field surfaced in [Option B: Historical Traces](https://signoz.io/docs/cost-control/understand-ingestion-volume/#option-b-historical-traces)):
 
-```yaml
+```yaml:otel-collector-config.yaml
 processors:
   filter/drop_noise:
     error_mode: ignore
@@ -89,7 +89,7 @@ The filter processor evaluates each span independently. If a matched span is a p
 
 **By URL path attribute** (for HTTP spans where the operation name alone is too broad):
 
-```yaml
+```yaml:otel-collector-config.yaml
 processors:
   filter/drop_noise:
     error_mode: ignore
@@ -101,7 +101,7 @@ processors:
 
 Both patterns can be combined in a single `filter/drop_noise` processor block. Pipeline ordering is critical: `filter/drop_noise` must execute before `tail_sampling`:
 
-```yaml
+```yaml:otel-collector-config.yaml
 service:
   pipelines:
     traces:
@@ -119,11 +119,13 @@ The Cost Meter Dashboard uses `signoz.meter.*` metrics which aggregate hourly. C
 To confirm the volume reduction:
 
 1. Navigate to **Traces**, swap to the **Table** tab. Filter by your target service, group by `name` (span operation name), and sort by count. Verify the high-volume operations you targeted have reduced.
-2. Check the **Cost Meter Dashboard** after an hour, filtered by your target service, to confirm the span GB trend has dropped.
+2. Check the [Cost Meter Dashboard](https://signoz.io/docs/cost-meter/cost-meter-dashboard/) after an hour, filtered by your target service, to confirm the span GB trend has dropped.
 
 ## Next Steps
 
 - Configure [Cost Meter Alert](https://signoz.io/docs/cost-meter/alerts/) to be notified when trace volume crosses your expected threshold.
+- Set a hard cap with [Ingestion Limits](https://signoz.io/docs/cost-control/ingestion-limits/) so the volume you just removed cannot creep back.
+- Return to [Cost Control](https://signoz.io/docs/cost-control/overview/) to optimize the other signals.
 
 ## Get Help
 

@@ -1,180 +1,45 @@
 ---
-date: 2026-08-07
-
+date: 2026-08-27
 title: C++ OpenTelemetry Instrumentation Guide
-description: Setup OpenTelemetry instrumentation in your C++ application using Bazel. Send distributed traces to SigNoz for real-time observability and debugging.
-hide_table_of_contents: true
+description: Instrument your C++ application with OpenTelemetry and send traces to SigNoz. Configure the OTLP HTTP exporter with CMake or Bazel and validate spans.
+doc_type: howto
 ---
 
+This guide shows you how to instrument your C++ application with OpenTelemetry and send traces to SigNoz. You build the `opentelemetry-cpp` SDK into your project with CMake or Bazel, then initialize a tracer that exports over OTLP/HTTP.
 
-{/*
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
 
-This documentation contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your C++ application. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Swift application.
+## Prerequisites
 
+- A C++ compiler with C++14 or later support
+- <a href="https://cmake.org/" target="_blank" rel="noopener noreferrer nofollow">CMake</a> 3.16 or later, or <a href="https://bazel.build/" target="_blank" rel="noopener noreferrer nofollow">Bazel</a>, to build your project
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- Your application code
 
-Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
+## Send traces to SigNoz
 
-There are three major steps to using OpenTelemetry:
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
 
-- Instrumenting your C++ application with OpenTelemetry
-- Configuring the exporter to send data to SigNoz
-- Validating the configuration to ensure that data is being sent as expected.
+### Step 1. Set environment variables
 
-In this tutorial, we will instrument a C++ application for traces and send it to SigNoz.
-
-*/}
-
-This document contains instructions on how to set up OpenTelemetry instrumentation in your C++ applications and view your application traces in SigNoz.
-
-## Requirements
-
-- [Bazel](https://bazel.build/)
-
-## Send Traces to SigNoz
-
-Based on your application environment, you can choose the setup below to send traces to SigNoz.
-
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-### Send traces to SigNoz Cloud via OTel Collector binary
-
-**Step 1 : Install OTel Collector**
-
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) in your VM.
-
-**Step 2 : Build opentelemetry-cpp locally**
-
-To configure your C++ application to send traces to OpenTelemetry you need to install [opentelemetry-cpp](https://github.com/open-telemetry/opentelemetry-cpp.git) and add it as dependency in your project.
-
-Build `opentelemetry-cpp` locally using Bezel, following these steps:
-
-- Clone the `opentelemetry-cpp` source code.
+The OTLP exporter reads its destination from the environment, so your source code holds no endpoint. Set these variables before you run your application:
 
 ```bash
-git clone https://github.com/open-telemetry/opentelemetry-cpp.git
-```
-
-- Navigate to the repository cloned above, download the dependencies and build the source code:
-
-```bash
-cd opentelemetry-cpp
-bazel build //...
-```
-
-- Once Bazel tests are built, run them with `bazel test //...` command
-
-```bash
-bazel test //...
-```
-
-**Step 3 : Instrument your application with OpenTelemetry**
-
-Add the following to `BUILD` file:
-
-```bash
-cc_binary(
-    name = "<name>",
-    srcs = [
-        "<file_name>.cc",
-    ],
-    tags = [
-        "examples",
-        "otlp",
-        "otlp_http",
-    ],
-    deps = [
-        "//api",
-        "//exporters/otlp:otlp_http_exporter",
-        "//sdk/src/trace",
-    ],
-)
-```
-
-Add the following content to `main.cpp`:
-
-```cpp minimap defaultCollapsed
-#include <memory>
-#include <string>
-#include <utility>
-
-#include "opentelemetry/exporters/otlp/otlp_environment.h"
-#include "opentelemetry/exporters/otlp/otlp_http.h"
-#include "opentelemetry/exporters/otlp/otlp_http_exporter_factory.h"
-#include "opentelemetry/exporters/otlp/otlp_http_exporter_options.h"
-#include "opentelemetry/sdk/common/global_log_handler.h"
-#include "opentelemetry/sdk/resource/resource.h"
-#include "opentelemetry/sdk/trace/processor.h"
-#include "opentelemetry/sdk/trace/recordable.h"
-#include "opentelemetry/sdk/trace/simple_processor_factory.h"
-#include "opentelemetry/sdk/trace/tracer_provider.h"
-#include "opentelemetry/sdk/trace/tracer_provider_factory.h"
-#include "opentelemetry/trace/provider.h"
-#include "opentelemetry/trace/span_id.h"
-#include "opentelemetry/trace/tracer_provider.h"
-
-namespace trace        = opentelemetry::trace;
-namespace trace_sdk    = opentelemetry::sdk::trace;
-namespace otlp         = opentelemetry::exporter::otlp;
-namespace resource_sdk = opentelemetry::sdk::resource;
-
-namespace internal_log = opentelemetry::sdk::common::internal_log;
-
-namespace
-{
-opentelemetry::exporter::otlp::OtlpHttpExporterOptions opts;
-
-std::shared_ptr<opentelemetry::sdk::trace::TracerProvider> provider;
-
-void InitTracer()
-{
-  auto exporter  = otlp::OtlpHttpExporterFactory::Create(opts);
-  auto processor = trace_sdk::SimpleSpanProcessorFactory::Create(std::move(exporter));
-  // Resource::Create reads OTEL_SERVICE_NAME and OTEL_RESOURCE_ATTRIBUTES from the environment
-  auto resource  = resource_sdk::Resource::Create({});
-  provider       = trace_sdk::TracerProviderFactory::Create(std::move(processor), resource);
-  std::shared_ptr<opentelemetry::trace::TracerProvider> api_provider = provider;
-  trace::Provider::SetTracerProvider(api_provider);
-}
-
-void CleanupTracer()
-{
-  // We call ForceFlush to prevent to cancel running exportings, It's optional.
-  if (provider)
-  {
-    provider->ForceFlush();
-  }
-
-  provider.reset();
-  std::shared_ptr<opentelemetry::trace::TracerProvider> none;
-  trace::Provider::SetTracerProvider(none);
-}
-}  // namespace
-
-int main()
-{
-  InitTracer();
-
-  foo_library();
-
-  CleanupTracer();
-}
-```
-
-This code sets up OpenTelemetry tracing in your C++ application, initializes a tracer with an OTLP HTTP exporter, processes spans, and sends trace data to a SigNoz.
-
-**Step 4: Set environment variables**
-
-Set service identity before running your application:
-
-```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_SERVICE_NAME="<service-name>"
 export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ```
 
-Verify these values:
+**Verify these values:**
 
-- `<service-name>`: A descriptive name for your service (e.g., `my-cpp-app`).
-- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A descriptive name for your service (for example, `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (for example, `1.4.2` or `a01dbef8`)
 
 <Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
 Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
@@ -183,181 +48,479 @@ Set `service.version` to a per-build value, not a static string. SigNoz detects 
 - **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
 - **Kubernetes**: inject from your Helm chart image tag or CI variable
 </Admonition>
-
-**Step 5: Run app**
-
-Execute your application by issuing the run command:
-
-```bash
-bazel run <name>
-```
-
-`<name>` refers to the name of the binary target for your application, which you define in the `BUILD` file.
 
 </TabItem>
-<TabItem value='self-host' label='Self-Host'>
-### Send Traces to Self-Hosted SigNoz via Otel Collector
+<TabItem value="docker" label="Docker">
 
+### Step 1. Set environment variables in your Dockerfile
 
-**Step 1 : Install OTel Collector**
+Add the environment variables to the image that runs your compiled binary:
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) in your VM.
-
-**Step 2 : Build opentelemetry-cpp locally**
-
-To configure your C++ application to send traces to OpenTelemetry you need to install [opentelemetry-cpp](https://github.com/open-telemetry/opentelemetry-cpp.git) and add it as dependency in your project.
-
-Build `opentelemetry-cpp` locally using Bezel, following these steps:
-
-- Clone the `opentelemetry-cpp` source code.
-
-```bash
-git clone https://github.com/open-telemetry/opentelemetry-cpp.git
+```dockerfile
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ```
 
-- Navigate to the repository cloned above, download the dependencies and build the source code:
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<service-name>`: A descriptive name for your service (for example, `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (for example, `1.4.2` or `a01dbef8`)
+
+<Admonition type="warning">
+The ingestion key is missing from this list on purpose. An `ENV` line stores it in the image configuration, where anyone who can pull or inspect the image can read it. Step 4 passes the key at runtime instead.
+</Admonition>
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+### Step 1. Set environment variables
+
+Create a Secret that holds the ingestion header:
 
 ```bash
+kubectl create secret generic signoz-ingestion \
+  --from-literal=otlp-headers="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Then add these environment variables to your deployment manifest:
+
+```yaml
+env:
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  valueFrom:
+    secretKeyRef:
+      name: signoz-ingestion
+      key: otlp-headers
+- name: OTEL_SERVICE_NAME
+  value: '<service-name>'
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.version=<service-version>'
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A descriptive name for your service (for example, `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (for example, `1.4.2` or `a01dbef8`)
+
+The manifest carries no credential, so you can commit it. Only the Secret holds the key.
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+### Step 1. Set environment variables (PowerShell)
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME="<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A descriptive name for your service (for example, `payment-service`)
+- `<service-version>` (optional): Your release version, image tag, or git SHA (for example, `1.4.2` or `a01dbef8`)
+
+These variables apply to the current PowerShell session. Use `[Environment]::SetEnvironmentVariable` or your service manager to keep them after the session ends.
+
+</TabItem>
+
+</Tabs>
+
+### Step 2. Add the opentelemetry-cpp dependency
+
+`opentelemetry-cpp` ships the OTLP HTTP exporter as an opt-in build target. Enable it when you build the SDK.
+
+<Tabs entityName="build-system">
+<TabItem value="cmake" label="CMake" default>
+
+The OTLP HTTP exporter links against Protobuf and libcurl. Install both from your package manager before you build the SDK. On Debian or Ubuntu:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y libprotobuf-dev protobuf-compiler libabsl-dev libcurl4-openssl-dev
+```
+
+<Admonition type="warning">
+Do not let CMake fetch Protobuf. Without an installed Protobuf, CMake builds one from source, and the installed SDK then exports CMake targets that reference `utf8_range`. Your own `find_package` call fails at that point.
+</Admonition>
+
+Build and install the SDK with the OTLP HTTP exporter enabled:
+
+```bash
+git clone --depth 1 --branch v1.28.0 https://github.com/open-telemetry/opentelemetry-cpp.git
 cd opentelemetry-cpp
-bazel build //...
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DWITH_OTLP_HTTP=ON -DBUILD_TESTING=OFF -DWITH_BENCHMARK=OFF
+cmake --build build --target all --config Release
+cmake --install build --config Release --prefix <install-root>
 ```
 
-- Once Bazel tests are built, run them with `bazel test //...` command
+Set `<install-root>` to the directory that receives the headers and libraries, such as `/usr/local`.
 
-```bash
-bazel test //...
+<Admonition type="info">
+Single-config generators such as Make and Ninja use `CMAKE_BUILD_TYPE`. Multi-config generators such as Visual Studio ignore it and read `--config` instead. The commands above pass both, so they work on either.
+</Admonition>
+
+Then link the SDK into your own target:
+
+```cmake:CMakeLists.txt
+cmake_minimum_required(VERSION 3.16)
+project(my-cpp-app CXX)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(opentelemetry-cpp CONFIG REQUIRED COMPONENTS api sdk exporters_otlp_http)
+
+add_executable(my-cpp-app main.cc)
+target_link_libraries(my-cpp-app
+  PRIVATE
+    opentelemetry-cpp::api
+    opentelemetry-cpp::trace
+    opentelemetry-cpp::otlp_http_exporter
+)
 ```
 
-**Step 3 : Instrument your application with OpenTelemetry**
+<Admonition type="info">
+The `COMPONENTS` argument to `find_package` requires `opentelemetry-cpp` **v1.21.0 or newer**. On older versions, drop `COMPONENTS` and link `${OPENTELEMETRY_CPP_LIBRARIES}` instead.
+</Admonition>
 
-Add the following to `BUILD` file:
+If you installed to a non-standard prefix, point CMake at it when you configure your project:
 
 ```bash
+cmake -B build -DCMAKE_PREFIX_PATH=<install-root>
+```
+
+</TabItem>
+<TabItem value="bazel" label="Bazel">
+
+Declare both dependencies in `MODULE.bazel`. The `repo_name` value becomes the label prefix for the SDK targets, and the OpenTelemetry examples use `io_opentelemetry_cpp`:
+
+```python:MODULE.bazel
+bazel_dep(name = "rules_cc", version = "0.2.22")
+
+bazel_dep(
+    name = "opentelemetry-cpp",
+    version = "1.28.0",
+    repo_name = "io_opentelemetry_cpp",
+)
+```
+
+Then load `cc_binary` from `rules_cc`, and depend on the API, the trace SDK, and the OTLP HTTP exporter:
+
+```python:BUILD
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+
 cc_binary(
-    name = "<name>",
-    srcs = [
-        "<file_name>.cc",
-    ],
-    tags = [
-        "examples",
-        "otlp",
-        "otlp_http",
-    ],
+    name = "my-cpp-app",
+    srcs = ["main.cc"],
     deps = [
-        "//api",
-        "//exporters/otlp:otlp_http_exporter",
-        "//sdk/src/trace",
+        "@io_opentelemetry_cpp//api",
+        "@io_opentelemetry_cpp//exporters/otlp:otlp_http_exporter",
+        "@io_opentelemetry_cpp//sdk/src/trace",
     ],
 )
 ```
 
-Add the following content to `main.cpp`:
-
-```cpp minimap defaultCollapsed
-#include <memory>
-#include <string>
-#include <utility>
-
-#include "opentelemetry/exporters/otlp/otlp_environment.h"
-#include "opentelemetry/exporters/otlp/otlp_http.h"
-#include "opentelemetry/exporters/otlp/otlp_http_exporter_factory.h"
-#include "opentelemetry/exporters/otlp/otlp_http_exporter_options.h"
-#include "opentelemetry/sdk/common/global_log_handler.h"
-#include "opentelemetry/sdk/resource/resource.h"
-#include "opentelemetry/sdk/trace/processor.h"
-#include "opentelemetry/sdk/trace/recordable.h"
-#include "opentelemetry/sdk/trace/simple_processor_factory.h"
-#include "opentelemetry/sdk/trace/tracer_provider.h"
-#include "opentelemetry/sdk/trace/tracer_provider_factory.h"
-#include "opentelemetry/trace/provider.h"
-#include "opentelemetry/trace/span_id.h"
-#include "opentelemetry/trace/tracer_provider.h"
-
-namespace trace        = opentelemetry::trace;
-namespace trace_sdk    = opentelemetry::sdk::trace;
-namespace otlp         = opentelemetry::exporter::otlp;
-namespace resource_sdk = opentelemetry::sdk::resource;
-
-namespace internal_log = opentelemetry::sdk::common::internal_log;
-
-namespace
-{
-opentelemetry::exporter::otlp::OtlpHttpExporterOptions opts;
-
-std::shared_ptr<opentelemetry::sdk::trace::TracerProvider> provider;
-
-void InitTracer()
-{
-  auto exporter  = otlp::OtlpHttpExporterFactory::Create(opts);
-  auto processor = trace_sdk::SimpleSpanProcessorFactory::Create(std::move(exporter));
-  // Resource::Create reads OTEL_SERVICE_NAME and OTEL_RESOURCE_ATTRIBUTES from the environment
-  auto resource  = resource_sdk::Resource::Create({});
-  provider       = trace_sdk::TracerProviderFactory::Create(std::move(processor), resource);
-  std::shared_ptr<opentelemetry::trace::TracerProvider> api_provider = provider;
-  trace::Provider::SetTracerProvider(api_provider);
-}
-
-void CleanupTracer()
-{
-  // We call ForceFlush to prevent to cancel running exportings, It's optional.
-  if (provider)
-  {
-    provider->ForceFlush();
-  }
-
-  provider.reset();
-  std::shared_ptr<opentelemetry::trace::TracerProvider> none;
-  trace::Provider::SetTracerProvider(none);
-}
-}  // namespace
-
-int main()
-{
-  InitTracer();
-
-  foo_library();
-
-  CleanupTracer();
-}
-```
-
-This code sets up OpenTelemetry tracing in your C++ application, initializes a tracer with an OTLP HTTP exporter, processes spans, and sends trace data to a SigNoz.
-
-**Step 4: Set environment variables**
-
-Set service identity before running your application:
-
-```bash
-export OTEL_SERVICE_NAME="<service-name>"
-export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
-```
-
-Verify these values:
-
-- `<service-name>`: A descriptive name for your service (e.g., `my-cpp-app`).
-- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
-
-<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
-Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
-- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
-- **GitHub Actions**: `service.version=${{ github.sha }}`
-- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
-- **Kubernetes**: inject from your Helm chart image tag or CI variable
+<Admonition type="warning">
+Bazel 9 removed the built-in `cc_binary` rule, so the `load` line is required there. It also works on Bazel 8.
 </Admonition>
 
-**Step 5: Run app**
-
-Execute your application by issuing the run command:
-
-```bash
-bazel run <name>
-```
-
-`<name>` refers to the name of the binary target for your application, which you define in the `BUILD` file.
+<Admonition type="warning">
+Use the `@io_opentelemetry_cpp//` prefix on every SDK label. A bare label such as `//api` points at your own workspace and fails to build.
+</Admonition>
 
 </TabItem>
 </Tabs>
 
+### Step 3. Initialize the tracer
+
+Create `main.cc`. `InitTracer` connects the OTLP HTTP exporter to a batch span processor, then registers the result as the global tracer provider. No SigNoz values appear in the code. The exporter and the resource read them from the environment variables you set in Step 1:
+
+```cpp:main.cc minimap defaultCollapsed
+#include <memory>
+#include <utility>
+
+#include "opentelemetry/exporters/otlp/otlp_http_exporter_factory.h"
+#include "opentelemetry/exporters/otlp/otlp_http_exporter_options.h"
+#include "opentelemetry/sdk/resource/resource.h"
+#include "opentelemetry/sdk/trace/batch_span_processor_factory.h"
+#include "opentelemetry/sdk/trace/batch_span_processor_options.h"
+#include "opentelemetry/sdk/trace/provider.h"
+#include "opentelemetry/sdk/trace/tracer_provider.h"
+#include "opentelemetry/sdk/trace/tracer_provider_factory.h"
+#include "opentelemetry/trace/provider.h"
+#include "opentelemetry/trace/scope.h"
+#include "opentelemetry/trace/tracer_provider.h"
+
+namespace trace        = opentelemetry::trace;
+namespace trace_sdk    = opentelemetry::sdk::trace;
+namespace otlp         = opentelemetry::exporter::otlp;
+namespace resource_sdk = opentelemetry::sdk::resource;
+
+namespace
+{
+std::shared_ptr<trace_sdk::TracerProvider> provider;
+
+void InitTracer()
+{
+  // Reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS.
+  // With OTEL_EXPORTER_OTLP_ENDPOINT set, the exporter appends /v1/traces.
+  otlp::OtlpHttpExporterOptions exporter_options;
+  auto exporter = otlp::OtlpHttpExporterFactory::Create(exporter_options);
+
+  // Batch spans instead of sending one HTTP request per span.
+  trace_sdk::BatchSpanProcessorOptions processor_options;
+  auto processor =
+      trace_sdk::BatchSpanProcessorFactory::Create(std::move(exporter), processor_options);
+
+  // Reads OTEL_SERVICE_NAME and OTEL_RESOURCE_ATTRIBUTES.
+  auto resource = resource_sdk::Resource::Create({});
+
+  provider = trace_sdk::TracerProviderFactory::Create(std::move(processor), resource);
+  std::shared_ptr<trace::TracerProvider> api_provider = provider;
+  trace_sdk::Provider::SetTracerProvider(api_provider);
+}
+
+void CleanupTracer()
+{
+  // Flush spans still queued in the batch processor before the process exits.
+  if (provider)
+  {
+    provider->ForceFlush();
+  }
+
+  provider.reset();
+  std::shared_ptr<trace::TracerProvider> none;
+  trace_sdk::Provider::SetTracerProvider(none);
+}
+}  // namespace
+
+int main()
+{
+  InitTracer();
+
+  auto tracer = trace::Provider::GetTracerProvider()->GetTracer("my-cpp-app");
+  {
+    // Scope ends the span when the block exits.
+    auto scope = trace::Scope(tracer->StartSpan("startup"));
+
+    // Call your application code here. Any span started while this scope is
+    // active becomes a child of "startup".
+  }
+
+  CleanupTracer();
+  return 0;
+}
+```
+
+Call `InitTracer` once at startup, and call `CleanupTracer` before `main` returns. If you skip the cleanup, the SDK discards the spans still in the batch queue.
+
+<Admonition type="info" title="Where do spans come from?">
+`opentelemetry-cpp` has no auto-instrumentation, so you start every span yourself. To add attributes, record errors, and propagate context across services, see the OpenTelemetry <a href="https://opentelemetry.io/docs/languages/cpp/instrumentation/" target="_blank" rel="noopener noreferrer nofollow">C++ instrumentation reference</a>.
+</Admonition>
+
+### Step 4. Run your application
+
+Run it where you set the variables in Step 1.
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+<Tabs entityName="build-system">
+<TabItem value="cmake" label="CMake" default>
+
+```bash
+cmake -B build
+cmake --build build
+./build/my-cpp-app
+```
+
+</TabItem>
+<TabItem value="bazel" label="Bazel">
+
+```bash
+bazel run //:my-cpp-app
+```
+
+Replace `my-cpp-app` with the `name` of the `cc_binary` target you defined in your `BUILD` file.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Build the image, then pass the ingestion key at runtime:
+
+```bash
+docker build -t my-cpp-app .
+docker run --rm -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" my-cpp-app
+```
+
+**Verify these values:**
+
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Your `Dockerfile` needs a `CMD` that starts the compiled binary, such as `CMD ["./build/my-cpp-app"]`.
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+Apply the manifest, then restart the workload so the new environment reaches your pods:
+
+```bash
+kubectl apply -f <your-manifest>.yaml
+kubectl rollout restart deployment/<deployment-name>
+kubectl rollout status deployment/<deployment-name>
+```
+
+**Verify these values:**
+
+- `<your-manifest>`: The manifest you edited in Step 1
+- `<deployment-name>`: The Deployment that runs your C++ binary
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+<Tabs entityName="build-system">
+<TabItem value="cmake" label="CMake" default>
+
+Pass `--config Release` so the build and the executable path agree:
+
+```powershell
+cmake -B build
+cmake --build build --config Release
+.\build\Release\my-cpp-app.exe
+```
+
+</TabItem>
+<TabItem value="bazel" label="Bazel">
+
+```powershell
+bazel run //:my-cpp-app
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+Run your instrumented application, then verify that traces reach SigNoz:
+
+1. Run your application so it executes the code path that starts a span.
+2. Open SigNoz and navigate to **Traces**.
+3. Click **Refresh** and filter by the `service.name` you set in `OTEL_SERVICE_NAME`.
+4. Click any trace to see its spans, timing, and attributes.
+
+<Figure
+    src="/img/docs/instrumentation/cpp/sample-traces.webp"
+    alt="SigNoz Traces Explorer listing spans from an instrumented C++ service"
+    caption="Spans from an instrumented C++ application, filtered by service name"
+/>
+
+Spans leave in batches, so wait a few seconds after the run before you look for them.
+
+<details>
+<ToggleHeading>
+
 ## Troubleshooting
 
-Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
+</ToggleHeading>
+
+### Why don't traces appear in SigNoz?
+
+Verify that the environment variables reached the process:
+
+```bash
+echo $OTEL_EXPORTER_OTLP_ENDPOINT
+echo $OTEL_SERVICE_NAME
+```
+
+When `OTEL_EXPORTER_OTLP_ENDPOINT` is empty, the exporter uses its default of `http://localhost:4318/v1/traces`. Spans then go to a local Collector that can be absent.
+
+Then test the connection to the endpoint:
+
+```bash
+curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
+```
+
+For a full walkthrough covering SDK diagnostics, Collector connectivity, and common ingestion errors (also for logs and metrics), see [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/).
+
+### Why does `find_package` fail on `utf8_range::utf8_validity`?
+
+The SDK was built against a Protobuf that CMake fetched and built itself, so the installed CMake config points at targets that were never installed. Install Protobuf from your package manager, then rebuild and reinstall the SDK.
+
+### Why does the CMake build fail on `benchmark::benchmark`?
+
+`WITH_BENCHMARK` is on by default and does not follow `BUILD_TESTING`. With only `-DBUILD_TESTING=OFF`, CMake still creates the benchmark targets but never imports Google Benchmark. Pass `-DWITH_BENCHMARK=OFF` as well, as shown in Step 2.
+
+### Why does the build fail on the OTLP exporter headers?
+
+`opentelemetry-cpp` does not build the OTLP HTTP exporter by default. For CMake, rebuild the SDK with `-DWITH_OTLP_HTTP=ON`. For Bazel, verify that your target depends on `@io_opentelemetry_cpp//exporters/otlp:otlp_http_exporter`.
+
+### Why does Bazel report that `cc_binary` was removed?
+
+Bazel 9 removed the built-in C++ rules. Add `rules_cc` to `MODULE.bazel`, then load `cc_binary` at the top of your `BUILD` file, as shown in Step 2.
+
+### Why does Bazel report that `//api` does not exist?
+
+A label that begins with `//` points at your own workspace. Prefix every SDK label with the repository name, as in `@io_opentelemetry_cpp//api`.
+
+### Why do spans go missing when the process exits?
+
+The batch span processor queues spans and exports them on a timer. Call `provider->ForceFlush()` through `CleanupTracer` before `main` returns, as shown in Step 3.
+
+### Why does the service show as `unknown_service`?
+
+The process started without `OTEL_SERVICE_NAME`. `Resource::Create` then uses `unknown_service` as the service name, or `unknown_service:<binary>` when it can read the executable name.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+The Collector sits between your application and SigNoz. Your application sends spans to the Collector, and the Collector forwards them to SigNoz.
+
+### Why use it?
+
+- **Cleaning up data**: Filter out noisy spans, or remove sensitive attributes before they leave your servers.
+- **Keeping your app lightweight**: Move batching, retries, and compression out of your process.
+- **Adding context**: Tag spans with host, Kubernetes, or cloud metadata that the application does not know.
+- **Future flexibility**: Fan out to more than one backend without a rebuild of your binary.
+
+To send this setup through a Collector, point `OTEL_EXPORTER_OTLP_ENDPOINT` at the Collector's OTLP/HTTP address. The default address is `http://localhost:4318`. Remove `OTEL_EXPORTER_OTLP_HEADERS`, because the Collector holds the ingestion key.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Next steps
+
+- [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to accelerate triage across signals
+- [Set up alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your C++ application
+- [Create dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize application health
+- Add spans, attributes, and error records with the OpenTelemetry <a href="https://opentelemetry.io/docs/languages/cpp/instrumentation/" target="_blank" rel="noopener noreferrer nofollow">C++ instrumentation reference</a>
+
+## Get Help
+
+<GetHelp />

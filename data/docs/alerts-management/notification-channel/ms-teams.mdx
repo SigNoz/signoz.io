@@ -1,113 +1,198 @@
 ---
-date: 2026-05-12
-
-title: Configure Microsoft Teams Channel
-description: Configure Microsoft Teams as a notification channel in SigNoz to receive alerts in your teams' channels.
+date: 2026-08-23
+title: Microsoft Teams Alerts - Configure a Notification Channel
+description: Learn how to send SigNoz alerts to Microsoft Teams. Create a Workflow webhook, configure the notification channel, and test alert delivery.
 doc_type: howto
 ---
 
-## Prerequisite
+## Overview
 
-Before configuring Ms Teams as a notification channel in SigNoz, ensure that you have:
-- **Incoming Webhook**: Follow the steps outlined in the <a href="https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook" target="_blank" rel="noopener noreferrer nofollow">Microsoft Teams documentation</a> to create an incoming webhook and obtain the necessary webhook URL.
-- **SigNoz Version**: <a href="https://github.com/SigNoz/signoz/releases/tag/v0.26.0" target="_blank" rel="noopener noreferrer nofollow">v0.26.0</a> or later.
+A Microsoft Teams notification channel sends SigNoz alerts to a channel through a Workflow webhook. You can reuse this notification channel in multiple alert rules.
 
-## Accessing Alert Channels
+<Admonition type="warning">
+Microsoft retired Office 365 Connectors in Microsoft Teams in May 2026. Connector-based Incoming Webhook URLs no longer work.
 
-To manage your alert channels in SigNoz:
-
-- Navigate to `Settings > Account Settings > Notification Channels` tab within SigNoz. This tab displays a list of configured alert channels.
-
-![alert-channels](/img/docs/alert-channels.webp)
-
-## Creating a new Notification channel
-
-- Navigate to `Settings > Account Settings > Notification Channels` and click on `New Channel`.
-- Enter a **Name** for the channel and select Ms Teams as the channel type.
-- **Webhook URL**: Paste the Incoming Webhook URL obtained from Microsoft Teams.
-
-<Admonition>
-You can use <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a> for customizing the title and description.
+Create a webhook with the Microsoft Teams **Workflows** app. See <a href="https://devblogs.microsoft.com/microsoft365dev/retirement-of-office-365-connectors-within-microsoft-teams/" target="_blank" rel="noopener noreferrer nofollow">Microsoft's connector retirement notice</a>.
 </Admonition>
 
-![new-notification-channel](/img/docs/ms-teams-new-channel.webp)
+## Prerequisites
 
+Before you configure Microsoft Teams as a notification channel, you need:
 
-**Test Configuration**: 
-Verify the configuration by clicking the Test button. This sends a test alert to Microsoft Teams, ensuring that SigNoz alert manager can communicate with your MS Teams setup.
+- Permission to create a workflow for the target Microsoft Teams channel.
+- SigNoz Self-Hosted <a href="https://github.com/SigNoz/signoz/releases/tag/v0.76.0" target="_blank" rel="noopener noreferrer nofollow">v0.76.0</a> or later. SigNoz Cloud supports Workflow webhooks.
 
-## Editing a Notification channel 
+## Create a Workflow Webhook
 
-To edit an existing MS Teams notification channel:
-- Navigate to the channel settings in SigNoz.
-- You can edit the MS Teams webhook URL and other parameters. However, note that the channel name and type are not editable after creation.
+1. Open the **Workflows** app in Microsoft Teams.
+2. Search for the **Send webhook alerts to a channel** template.
+3. Select the template.
+4. If Teams requests authentication, authenticate your Microsoft account.
+5. Select the target **Team** and **Channel**.
+6. Click **Save** to create the workflow.
+7. Copy the webhook URL from the workflow details page.
 
+Microsoft gives more setup details in <a href="https://support.microsoft.com/en-us/workflows/send-messages-in-teams-using-incoming-webhooks" target="_blank" rel="noopener noreferrer nofollow">send messages in Teams using incoming webhooks</a>.
 
-## Receive Alert in MS Teams
-Once configured correctly, alerts from SigNoz will appear in Microsoft Teams whenever monitored metrics cross the thresholds specified in your alert rules. This setup ensures that you are promptly alerted to any issues in your applications or infrastructure components.
+<Admonition type="tip">
+Add a co-owner to production workflows. A workflow can stop after the owner leaves and no co-owner remains.
 
-![alert-in-ms-teams](/img/docs/alert-in-ms-teams.webp)
-
-<Admonition>
-MS Teams notifications do not support annotations.
-Related logs and annotation details are excluded to prevent message rejection.
+See <a href="https://learn.microsoft.com/en-us/troubleshoot/power-platform/power-automate/flow-management/manage-orphan-flow-when-owner-leaves-org" target="_blank" rel="noopener noreferrer nofollow">manage orphaned flows in Power Automate</a>.
 </Admonition>
 
-## Turn-off Resolved alerts
+## Access Notification Channels
 
-The resolve alerts toggle is switched on by default. To turn-off receiveing the Resolved alerts for your Notification Channel, follow these steps:
-- Navigate to `Settings > Account Settings > Notification Channels` 
-- Click on `Edit` button for a particular alert.
-- Toggle off the **Send resolved alerts** button and hit `Save`.
+Navigate to `Settings > Notification Channels` in SigNoz. SigNoz lists configured notification channels on this page.
 
-<Figure src="/img/docs/alerts/resolved-alerts.webp" alt="Turn off receiveing resolved alerts notifications." caption="Turn off receiveing resolved alerts notifications." />
+You can reach the same page from the **Notification Channels** tab on the `Alerts` page.
 
-## Configure programmatically
+<Figure
+  src="/img/docs/alert-channels.webp"
+  alt="Notification Channels page in SigNoz with configured alert channels."
+  caption="The Notification Channels page lists all configured channels."
+/>
 
-You can also configure the MS Teams notification channel programmatically using the SigNoz API.
+## Create a Notification Channel
 
-**API Endpoint:** `POST /api/v1/channels`
+1. Navigate to `Settings > Notification Channels` and click **+ New Alert Channel**.
+2. Enter a channel **Name**.
+3. Select **Microsoft Teams** as the **Type**.
+4. Paste the Workflow webhook URL into **Webhook URL**.
+5. Leave **Title** and **Description** empty. SigNoz then sends the default alert message.
+6. If you want a custom message, enter your own **Title** and **Description** templates.
+7. Keep **Send resolved alerts** on to receive a notification when an alert resolves.
 
-To create a new MS Teams notification channel, send a `POST` request to the `/api/v1/channels` endpoint with the following `curl` command. Replace `YOUR_API_KEY` with an API key from **Settings → Service Accounts** — see [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) to create one.
+The **Title** and **Description** fields support <a href="https://prometheus.io/docs/alerting/latest/notifications/" target="_blank" rel="noopener noreferrer nofollow">Go templates</a>. Microsoft Teams renders the message as an Adaptive Card, which supports a small subset of Markdown: `**bold**`, `_italic_`, lists, and `[label](url)` links. Headers, tables, and images do not render.
+
+<Admonition type="info">
+The default message shows the labels and the annotations of each alert. It leaves out the `summary`, `related_logs`, and `related_traces` annotations. To show these values in Microsoft Teams, add them to a custom **Description** template.
+</Admonition>
+
+<Figure
+  src="/img/docs/ms-teams-new-channel.webp"
+  alt="Microsoft Teams notification channel form with a Power Automate Workflow webhook URL, and Title and Description templates."
+  caption="A Microsoft Teams notification channel that uses a Workflow webhook URL and custom templates."
+/>
+
+## Validate
+
+1. Click **Test** on the notification channel form. SigNoz sends a test alert to the Workflow webhook.
+2. Open the target channel in Microsoft Teams. Make sure that a test alert appears.
+3. Return to SigNoz.
+4. Click **Save**.
+
+If the test fails, see [Troubleshooting](#troubleshooting).
+
+## Migrate From an Office 365 Connector
+
+If an existing notification channel uses an Office 365 Connector URL, replace it with a Workflow webhook URL:
+
+1. Create a Workflow webhook for the same Microsoft Teams channel.
+2. Navigate to `Settings > Notification Channels` in SigNoz.
+3. Click **Edit** for the Microsoft Teams notification channel.
+4. Replace the old **Webhook URL** with the Workflow webhook URL.
+5. Click **Test**. Make sure that the test alert appears in Microsoft Teams.
+6. Click **Save**.
+
+## Receive Alerts in Microsoft Teams
+
+Add the notification channel to an alert rule. SigNoz sends a message when the alert fires or resolves.
+
+<Figure
+  src="/img/docs/alert-in-ms-teams.webp"
+  alt="A SigNoz alert message in a Microsoft Teams channel."
+  caption="A SigNoz alert in the configured Microsoft Teams channel."
+/>
+
+## Turn Off Resolved Alerts
+
+The **Send resolved alerts** toggle is on by default. To stop resolved notifications:
+
+1. Navigate to `Settings > Notification Channels`.
+2. Click **Edit** for the Microsoft Teams notification channel.
+3. Toggle off **Send resolved alerts**.
+4. Click **Save**.
+
+<Figure
+  src="/img/docs/alerts/resolved-alerts.webp"
+  alt="Send resolved alerts toggle in the notification channel form."
+  caption="Turn off Send resolved alerts to stop resolved notifications."
+/>
+
+## Configure With the API
+
+You can create a Microsoft Teams notification channel with the SigNoz API.
+
+**API endpoint:** `POST /api/v1/channels`
+
+Send a `POST` request with the following `curl` command:
 
 ```bash
-curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
-  -H 'SIGNOZ-API-KEY: YOUR_API_KEY' \
+curl '<your-signoz-url>/api/v1/channels' \
+  -H 'SIGNOZ-API-KEY: <your-api-key>' \
   -H 'Content-Type: application/json' \
   --data-raw '{
-    "name": "Prod Critical Alerts - MSTeams",
+    "name": "Prod Critical Alerts - Microsoft Teams",
     "msteamsv2_configs": [
         {
             "send_resolved": true,
-            "webhook_url": "https://examplewebhhook.com",
-            "title": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}\n {{- if gt (len .CommonLabels) (len .GroupLabels) -}}\n {{\" \"}}(\n {{- with .CommonLabels.Remove .GroupLabels.Names }}\n {{- range $index, $label := .SortedPairs -}}\n {{ if $index }}, {{ end }}\n {{- $label.Name }}=\"{{ $label.Value -}}\"\n {{- end }}\n {{- end -}}\n )\n {{- end }}",
-            "text": "{{ range .Alerts -}}\n *Alert:* {{ .Labels.alertname }}{{ if .Labels.severity }} - {{ .Labels.severity }}{{ end }}\n\n *Summary:* {{ .Annotations.summary }}\n *Description:* {{ .Annotations.description }}\n *RelatedLogs:* {{ if gt (len .Annotations.related_logs) 0 -}} View in <{{ .Annotations.related_logs }}|logs explorer> {{- end}}\n *RelatedTraces:* {{ if gt (len .Annotations.related_traces) 0 -}} View in <{{ .Annotations.related_traces }}|traces explorer> {{- end}}\n\n *Details:*\n {{ range .Labels.SortedPairs }} • *{{ .Name }}:* {{ .Value }}\n {{ end }}\n {{ end }}"
+            "webhook_url": "<your-teams-workflow-webhook-url>",
+            "title": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}{{ if .CommonLabels.job }} for {{ .CommonLabels.job }}{{ end }}\n {{- if gt (len .CommonLabels) (len .GroupLabels) -}}\n {{\" \"}}(\n {{- with .CommonLabels.Remove .GroupLabels.Names }}\n {{- range $index, $label := .SortedPairs -}}\n {{ if $index }}, {{ end }}\n {{- $label.Name }}=\"{{ $label.Value -}}\"\n {{- end }}\n {{- end -}}\n )\n {{- end }}",
+            "text": "{{ range .Alerts -}}\n**Alert:** {{ .Labels.alertname }}{{ if .Labels.severity }} - {{ .Labels.severity }}{{ end }}\n\n{{ if .Annotations.summary -}}\n**Summary:** {{ .Annotations.summary }}\n\n{{ end -}}\n{{ if .Annotations.description -}}\n**Description:** {{ .Annotations.description }}\n\n{{ end -}}\n{{ if .Annotations.related_logs -}}\n**Related logs:** [View in logs explorer]({{ .Annotations.related_logs }})\n\n{{ end -}}\n{{ if .Annotations.related_traces -}}\n**Related traces:** [View in traces explorer]({{ .Annotations.related_traces }})\n\n{{ end -}}\n**Details:**\n\n{{ range .Labels.SortedPairs }}- **{{ .Name }}:** {{ .Value }}\r{{ end }}\n{{ end }}"
         }
     ]
 }'
 ```
 
-**Request Body Attributes:**
+**Verify these values:**
+
+- `<your-signoz-url>`: Your SigNoz base URL.
+- `<your-api-key>`: An API key from **Settings > Service Accounts**. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/).
+- `<your-teams-workflow-webhook-url>`: The URL that you copied from the Microsoft Teams workflow.
+
+**Request body attributes:**
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
-| `name` | `string` | The name of the receiver/channel. **Required**; must be unique in all the config. |
-| `msteamsv2_configs` | `array` | List of MS Teams V2 configurations. |
-| `msteamsv2_configs[].send_resolved` | `boolean` | Whether to send notifications when an alert is resolved. |
-| `msteamsv2_configs[].webhook_url` | `string` | The MS Teams Incoming Webhook URL. **Mandatory**. Must be a valid URL. |
-| `msteamsv2_configs[].title` | `string` | Templated title of the message. Go templates are supported. |
-| `msteamsv2_configs[].text` | `string` | Templated text of the message. Go templates are supported. |
+| `name` | `string` | The unique name of the notification channel. **Required**. |
+| `msteamsv2_configs` | `array` | A list of Microsoft Teams Workflow configurations. |
+| `msteamsv2_configs[].send_resolved` | `boolean` | Sends a notification when an alert resolves. |
+| `msteamsv2_configs[].webhook_url` | `string` | The Microsoft Teams Workflow webhook URL. **Required**. |
+| `msteamsv2_configs[].title` | `string` | The message title template. You can use Go templates. |
+| `msteamsv2_configs[].text` | `string` | The message body template. You can use Go templates. |
 
-
+<details>
+<ToggleHeading>
 ## Troubleshooting
-If you encounter issues with the Microsoft Teams integration:
+</ToggleHeading>
 
-- **Check the Webhook URL**: Ensure that the webhook URL entered in SigNoz matches the one provided by Microsoft Teams.
-- **Verify MS Teams Configuration**: Confirm that the incoming webhook in Microsoft Teams is correctly set up and active.
-- **Test Connectivity**: Use the Test button in SigNoz to check connectivity with Microsoft Teams. If the test fails, review your network settings and webhook URL.
+### The test returns an error
 
-<Admonition type="tip">
+- Make sure that **Webhook URL** contains the complete URL from the workflow details page.
+- Make sure that you used a Workflow webhook URL. Office 365 Connector URLs no longer work.
+- Open the workflow in Microsoft Teams.
+- Make sure that Microsoft Teams marks the workflow as enabled.
+- If SigNoz cannot reach the URL, examine the network and proxy rules for outbound HTTPS requests.
 
-If you encounter any unexpected challenges during the use of this integration, please contact SigNoz Support at support@signoz.io
+### The workflow does not post messages
 
-</Admonition>
+- Open the workflow run history.
+- Examine the failed run.
+- Make sure that the workflow still has a valid owner and connection.
+- If the workflow has no valid owner, ask a Power Platform administrator to assign one.
+
+### The test works, but alert notifications do not arrive
+
+Make sure that the alert rule routes notifications to this Microsoft Teams channel. See [Routing Policies](https://signoz.io/docs/alerts-management/routing-policy/).
+
+If the problem continues, contact SigNoz Support at <a href="mailto:support@signoz.io" target="_blank" rel="noopener noreferrer nofollow">support@signoz.io</a>.
+</details>
+
+## Next Steps
+
+- Create an alert rule and route it to this channel: [Manage Alerts](https://signoz.io/docs/userguide/alerts-management/)
+- Configure another notification channel: [Notification Channels](https://signoz.io/docs/setup-alerts-notification/)
+
+## Get Help
+
+<GetHelp />

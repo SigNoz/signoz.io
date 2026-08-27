@@ -1,5 +1,5 @@
 ---
-date: 2026-07-14
+date: 2026-08-25
 title: Metric Volume Control - Reduce Cardinality and Cost
 description: Reduce metric cardinality and cost by aggregating away high-cardinality attributes at storage with per-metric volume control rules.
 tags: [SigNoz Cloud]
@@ -8,7 +8,7 @@ doc_type: howto
 
 ## Overview
 
-Volume control lets you reduce the stored volume and cardinality of a metric by aggregating away attributes you don't need. You pick a metric and the attributes to keep (or drop); SigNoz then mathematically aggregates all series that differ only in the dropped attributes into a single series, at storage. The remaining attributes stay fully queryable, and the aggregated values stay correct: counter rates account for restarts and resets, and gauges keep their min, max, and averages.
+Volume control lets you reduce the stored volume and cardinality of a metric by aggregating away attributes you don't need. You pick a metric and the attributes to keep (or drop). SigNoz then mathematically aggregates all series that differ only in the dropped attributes into a single series, at storage. The remaining attributes stay fully queryable, and the aggregated values stay correct: counter rates account for restarts and resets, and gauges keep their min, max, and averages.
 
 This is different from dropping labels with a collector processor, which does not reduce cost and silently corrupts your data. See [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/) for why, and [why the collector can't do this](#why-you-cant-do-this-in-your-collector) below.
 
@@ -18,7 +18,7 @@ Volume control is currently a private preview feature on SigNoz Cloud.
 
 ## When to Use It
 
-Use volume control when a metric's cardinality comes from an attribute you never query by. The classic case is per-instance identity on aggregate views: 100 instances of a service each export `http.server.requests.count` broken down by route, method, and status. If your dashboards and alerts only ever look at route/method/status, the `service.instance.id` dimension multiplies your stored series by 100 for no benefit. A rule that aggregates away `service.instance.id` collapses those series while keeping every number you actually chart correct.
+Use volume control when a metric's cardinality comes from an attribute you never query by. The classic case is per-instance identity on aggregate views: 100 instances of a service each export `http.server.requests.count` broken down by route, method, and status. If your dashboards and alerts only ever look at route/method/status, the `service.instance.id` dimension multiplies your stored series by 100 for no benefit. A rule that aggregates away `service.instance.id` collapses those series while keeping every number you chart correct.
 
 Common attributes worth aggregating away:
 
@@ -47,7 +47,7 @@ Volume control lives in **Metrics Explorer**:
 
 ### Create a Rule
 
-Creating and editing rules requires the **Admin** role; other users can view rules but not change them.
+Creating and editing rules requires the **Admin** role. Other users can view rules but not change them.
 
 1. Open the metric in **Metrics Explorer** and go to the **Volume control** section in the metric details.
 2. Select **Set up volume control** (or **Edit** if it already exists) to open the **Manage attributes** drawer.
@@ -82,28 +82,28 @@ Rules take effect about **10 minutes** after saving. Until then the rule shows a
 
 ### Edit or Remove a Rule
 
-Editing follows the same flow. Change the mode or attribute list and save; the new configuration also takes about 10 minutes to apply. To remove a rule, use **Remove rule** in the drawer or set the mode to **Allow all attributes**.
+Editing follows the same flow. Change the mode or attribute list and save. The new configuration also takes about 10 minutes to apply. To remove a rule, use **Remove rule** in the drawer or set the mode to **Allow all attributes**.
 
 Rule changes are forward-looking:
 
 - Data written **before** a rule took effect keeps its full fidelity.
 - Data aggregated **while** a rule was active stays aggregated. Removing the rule does not restore the dropped attributes for that period.
-- Queries that span a rule change are stitched automatically; you don't need to adjust them.
+- Queries that span a rule change are stitched automatically. You do not need to adjust them.
 
 ## What Happens to Your Data
 
 Once a rule is active:
 
 - **The most recent 24 hours always stay at full fidelity.** Every attribute remains queryable in this window regardless of rules, and alerts always evaluate against this full-fidelity data. This is deliberate: alerting stays reliable no matter what rules exist, and when something is on fire you can debug it immediately at full detail, without pausing rules or thinking about cost. Volume control only changes how *history* is stored, where the aggregate trend is what matters.
-- **Beyond that window, ruled metrics are stored as 60-second aggregates** per surviving attribute combination. Gauges keep last/min/max values and the sums and counts needed for averages; counters and histograms are stored as reset-aware per-minute increases, so rates stay exact.
-- **Aggregated data trails real time by a few minutes** (typically 2–4), because aggregation runs on a schedule. This only matters for the aggregated copy — the full-fidelity window is as fresh as normal ingestion.
+- **Beyond that window, ruled metrics are stored as 60-second aggregates** per surviving attribute combination. Gauges keep last/min/max values and the sums and counts needed for averages. Counters and histograms are stored as reset-aware per-minute increases, so rates stay exact.
+- **Aggregated data trails real time by a few minutes** (typically 2–4), because aggregation runs on a schedule. This only matters for the aggregated copy. The full-fidelity window is as fresh as normal ingestion.
 
-See [Understanding Aggregated Metric Data](https://signoz.io/docs/metrics-management/aggregated-metric-data/) for exactly what is preserved, what is lost, and why numbers can differ from what an alert saw — read it before writing rules for metrics that back important dashboards.
+See [Understanding Aggregated Metric Data](https://signoz.io/docs/metrics-management/aggregated-metric-data/) for exactly what is preserved, what is lost, and why numbers can differ from what an alert saw. Read it before writing rules for metrics that back important dashboards.
 
 ## Rule Constraints
 
 - **One rule per metric.** A rule targets the metric name.
-- **Protected attributes can't be aggregated away.** `le`, `quantile`, `__name__`, `__temporality__`, and `deployment.environment` are always retained; rules that try to drop them are rejected.
+- **Protected attributes can't be aggregated away.** `le`, `quantile`, `__name__`, `__temporality__`, and `deployment.environment` are always retained. Rules that try to drop them are rejected.
 - **Exponential histograms are not supported** yet. Rules on exponential-histogram metrics are rejected.
 - **Aggregation resolution is fixed at 60 seconds.** Finer resolutions (30s/15s) may come later.
 
@@ -119,6 +119,7 @@ Volume control aggregates at storage, where all sources' data is available toget
 
 ## Related Reading
 
-- [Understanding Aggregated Metric Data](https://signoz.io/docs/metrics-management/aggregated-metric-data/):  what aggregation preserves and what it trades away
+- [Cost Control](https://signoz.io/docs/cost-control/optimize-metrics/): find which metrics drive your sample volume, then verify the reduction
+- [Understanding Aggregated Metric Data](https://signoz.io/docs/metrics-management/aggregated-metric-data/): what aggregation preserves and what it trades away
 - [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/): why dropping labels in the collector doesn't reduce cost
 - [Understanding Metrics Billing and Reducing Costs](https://signoz.io/docs/metrics-management/reducing-costs/): the full cost-reduction toolbox
