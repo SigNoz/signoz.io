@@ -1,20 +1,10 @@
-'use client'
-
-import { ReactNode, useRef, useState, useEffect } from 'react'
-import SectionContainer from '@/components/SectionContainer'
-import ScrollTopAndComment from '@/components/ScrollTopAndComment'
-import FAQHeader from '@/components/FAQHeader/FAQHeader'
-import RelatedArticles from '@/components/RelatedArticles/RelatedArticles'
-import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
-import GetStartedSigNoz from '@/components/GetStartedSigNoz/GetStartedSigNoz'
+import { ReactNode } from 'react'
+import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import { RegionProvider } from '@/components/Region/RegionContext'
 import type { AuthorDetail } from '../types/transformedContent'
+import type { BreadcrumbCrumb } from '@/utils/breadcrumbTypes'
 
-export interface tocItemProps {
-  url: string
-  depth: number
-  value: string
-}
+export interface tocItemProps extends TocItemProps {}
 
 export interface RelatedArticleProps {
   title: string
@@ -38,108 +28,37 @@ interface LayoutProps {
   toc: tocItemProps[]
   relatedArticles?: RelatedArticleProps[]
   tags: string[]
+  breadcrumbs?: BreadcrumbCrumb[]
 }
 
 export default function FAQLayout({
   content,
+  authorDetails,
   authors,
   children,
   toc,
   tags,
   relatedArticles,
+  breadcrumbs,
 }: LayoutProps) {
-  const { slug, date, title, readingTime } = content
-  const mainRef = useRef<HTMLElement | null>(null)
-  const [isTocVisible, setIsTocVisible] = useState(true)
-  const lastScrollY = useRef(0)
-  const scrollDirection = useRef<'up' | 'down'>('up')
-
-  console.log(content, tags, authors)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      const viewportHeight = window.innerHeight
-      const scrollThreshold = viewportHeight * 0.3 // 30% of viewport height
-
-      // Determine scroll direction
-      if (currentScrollY > lastScrollY.current) {
-        scrollDirection.current = 'down'
-      } else if (currentScrollY < lastScrollY.current) {
-        scrollDirection.current = 'up'
-      }
-
-      // Update TOC visibility based on scroll position and direction
-      if (scrollDirection.current === 'down' && currentScrollY > scrollThreshold) {
-        setIsTocVisible(false)
-      } else if (scrollDirection.current === 'up') {
-        setIsTocVisible(true)
-      }
-
-      lastScrollY.current = currentScrollY
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  // ArticleLayout reads tags and relatedArticles off `content`, while the FAQ
+  // route passes them as separate props.
+  const articleContent = { ...content, tags, relatedArticles }
 
   return (
-    <main ref={mainRef}>
-      <RegionProvider>
-        <ProgressBar target={mainRef} />
-        <div className="container mx-auto">
-          <SectionContainer>
-            <ScrollTopAndComment />
-
-            <FAQHeader
-              title={title}
-              tags={tags}
-              authors={authors}
-              publishedDate={date}
-              readingTime={readingTime.text}
-              key={slug}
-            />
-            <div className="container mx-auto flex h-full flex-row-reverse gap-4 overflow-clip">
-              <div
-                className={`sticky top-[88px] ml-4 box-border flex h-[calc(100vh-156px)] w-1/4 flex-col gap-1 overflow-y-auto p-4 pl-8 transition-opacity duration-1000 max-lg:hidden ${
-                  isTocVisible ? 'opacity-100' : 'opacity-30'
-                } hover:opacity-100`}
-              >
-                {toc.map((tocItem: tocItemProps) => {
-                  return (
-                    <div
-                      className="min-h-6 w-full text-[13px] font-medium leading-normal"
-                      key={tocItem.url}
-                    >
-                      <a
-                        data-level={tocItem.depth}
-                        href={tocItem.url}
-                        className="line-clamp-2 inline-block w-full"
-                      >
-                        {tocItem.value}
-                      </a>
-                    </div>
-                  )
-                })}
-              </div>
-
-              <div className="box-border w-3/4 overflow-y-auto pr-4 max-lg:w-full">
-                <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
-                  {children}
-                </article>
-                <div className="my-8">
-                  <div className="transform rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 px-8 pb-4 pt-8 shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
-                    <GetStartedSigNoz />
-                  </div>
-                </div>
-              </div>
-            </div>
-            {relatedArticles && Array.isArray(relatedArticles) && (
-              <RelatedArticles relatedArticles={relatedArticles} />
-            )}
-          </SectionContainer>
-        </div>
-      </RegionProvider>
-    </main>
+    <RegionProvider>
+      <ArticleLayout
+        content={articleContent as unknown as React.ComponentProps<typeof ArticleLayout>['content']}
+        authorDetails={authorDetails}
+        authors={authors}
+        toc={toc}
+        contentType="faq"
+        showNewsletter={true}
+        showRelatedArticles={true}
+        breadcrumbs={breadcrumbs}
+      >
+        {children}
+      </ArticleLayout>
+    </RegionProvider>
   )
 }
