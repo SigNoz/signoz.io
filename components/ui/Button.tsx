@@ -15,7 +15,8 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-[var(--accent-primary)] text-[var(--base-white)] hover:bg-signoz_robin-600',
+        default:
+          'bg-[var(--accent-primary)] text-[var(--base-white)] hover:bg-[color-mix(in_srgb,var(--accent-primary)_80%,var(--base-black))] active:bg-[color-mix(in_srgb,var(--accent-primary)_65%,var(--base-black))]',
         outline:
           'border border-signoz_robin-500 bg-transparent text-signoz_robin-500 hover:bg-signoz_robin-500/10',
         secondary:

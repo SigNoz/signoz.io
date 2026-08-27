@@ -175,7 +175,7 @@ export default function ArticleLayout({
                             {article.title}
                           </h3>
                         </div>
-                        <div className="mt-4 flex items-center gap-1 text-xs text-[color-mix(in_srgb,var(--accent-primary)_80%,var(--l1-foreground))] transition-all duration-200 group-hover:gap-2 group-hover:text-[color-mix(in_srgb,var(--accent-primary)_80%,var(--l1-foreground))]">
+                        <div className="mt-4 flex items-center gap-1 text-xs text-[color-mix(in_srgb,var(--accent-primary)_80%,var(--l1-foreground))] transition-all duration-200 group-hover:gap-2 group-hover:text-[color-mix(in_srgb,var(--accent-primary)_60%,var(--l1-foreground))]">
                           <span>Read article</span>
                           <ArrowRight size={12} />
                         </div>

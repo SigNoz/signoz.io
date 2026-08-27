@@ -13,17 +13,17 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ title, publishedOn, url }) =>
     <Link
       href={url}
       target="_blank"
-      className="flex flex-col rounded-sm dark:border-gray-900 dark:bg-signoz_ink-400 max-md:ml-0 max-md:w-full"
+      className="flex flex-col rounded-sm bg-[var(--l2-background)] max-md:ml-0 max-md:w-full"
       prefetch={false}
     >
       <img className="h-24 w-full object-cover" src="/img/hexagonal-pattern.webp" alt="" />
 
       <article className="mx-auto flex w-full grow flex-col rounded px-4 py-8  max-md:mt-6">
-        <h3 className="truncate text-sm font-medium leading-6 text-signoz_ink-300 dark:text-neutral-100">
+        <h3 className="truncate text-sm font-medium leading-6 text-[var(--l1-foreground)]">
           {title}
         </h3>
         <div className="mt-3 flex gap-2 text-xs font-medium uppercase leading-5 tracking-wide">
-          <div className="justify-center rounded-full bg-slate-500 bg-opacity-10 px-2.5 py-1 text-xs dark:bg-stone-300 dark:text-slate-950">
+          <div className="justify-center rounded-full bg-[var(--l3-background)] px-2.5 py-1 text-xs text-[var(--l2-foreground)]">
             {publishedOn}
           </div>
         </div>
