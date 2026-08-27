@@ -1,0 +1,388 @@
+---
+date: 2026-08-25
+title: Podman Container Metrics - Monitor with OpenTelemetry
+description: Collect Podman container CPU, memory, network, and block I/O metrics with the OpenTelemetry Collector and send them to SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+This guide sends Podman container metrics to SigNoz with the OpenTelemetry Collector. The `podman_stats` receiver polls the Podman API socket and reports CPU, memory, network, and block I/O stats for each running container.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- Podman 3.3.1 or newer.
+- A Linux host. The receiver does not support Windows.
+- The OpenTelemetry Collector **contrib** distribution ([install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/)).
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Step 1: Enable the Podman API socket
+
+Podman does not start its API socket by default. Enable the socket before you configure the receiver.
+
+<Tabs entityName="mode">
+<TabItem value="rootless" label="Rootless" default>
+
+Run these commands as the user that owns your containers:
+
+```bash
+systemctl --user enable --now podman.socket
+loginctl enable-linger $(whoami)
+```
+
+The socket path is `/run/user/<uid>/podman/podman.sock`. The `loginctl` command keeps the socket up after you log out.
+
+Confirm the socket is active, then get your numeric user ID for the next step:
+
+```bash
+systemctl --user is-active podman.socket
+id -u
+```
+
+The first command prints `active`.
+
+</TabItem>
+<TabItem value="rootful" label="Rootful">
+
+```bash
+sudo systemctl enable --now podman.socket
+```
+
+The socket path is `/run/podman/podman.sock`.
+
+Confirm the socket is active:
+
+```bash
+systemctl is-active podman.socket
+```
+
+This command prints `active`.
+
+</TabItem>
+</Tabs>
+
+## Step 2: Configure the receiver
+
+Append the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/podmanreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">`podman_stats` receiver</a> to the `receivers` section of your existing Collector config. Do not replace the whole file.
+
+<Tabs entityName="mode">
+<TabItem value="rootless" label="Rootless" default>
+
+```yaml:config.yaml {2-4}
+receivers:
+  podman_stats:
+    endpoint: unix:///run/user/<uid>/podman/podman.sock
+    collection_interval: 10s
+```
+
+**Verify these values:**
+
+- `<uid>`: The numeric user ID from Step 1.
+
+</TabItem>
+<TabItem value="rootful" label="Rootful">
+
+```yaml:config.yaml {2-4}
+receivers:
+  podman_stats:
+    endpoint: unix:///run/podman/podman.sock
+    collection_interval: 10s
+```
+
+</TabItem>
+</Tabs>
+
+Every metric of the receiver is on by default, so you do not need to enable them one by one. For `timeout`, `initial_delay`, `api_version`, and the SSH options, see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/podmanreceiver/README.md#configuration" target="_blank" rel="noopener noreferrer nofollow">official receiver documentation</a>.
+
+Add a `resource` processor to the `processors` section. It sets a service name, which gives you one filter for every metric from this host:
+
+```yaml:config.yaml {2-6}
+processors:
+  resource:
+    attributes:
+      - key: service.name
+        value: <service-name>
+        action: upsert
+```
+
+**Verify these values:**
+
+- `<service-name>`: A name that identifies this host in SigNoz, for example `podman-metrics`.
+
+The install guide also configures a `resourcedetection` processor, which tags the metrics with the host name. Leave it in place.
+
+## Step 3: Give the Collector access to the socket
+
+The Podman socket is readable only by its owner. The DEB and RPM packages run the Collector as the `otelcol-contrib` user, which owns neither socket. Do this step, or the receiver fails to start and stops the whole Collector:
+
+```
+Error: cannot start pipelines: failed to start "podman_stats" receiver: dial unix /run/podman/podman.sock: connect: permission denied
+```
+
+<Tabs entityName="mode">
+<TabItem value="rootless" label="Rootless" default>
+
+The rootless socket lives under `/run/user/<uid>`, which the packaged system service cannot reach. Run the Collector as the user that owns the socket instead.
+
+Log in as that user and save this unit as `~/.config/systemd/user/otelcol-contrib.service`:
+
+```ini:~/.config/systemd/user/otelcol-contrib.service
+[Unit]
+Description=OpenTelemetry Collector
+
+[Service]
+ExecStart=/usr/bin/otelcol-contrib --config /etc/otelcol-contrib/config.yaml
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+```
+
+The DEB and RPM packages install the binary at `/usr/bin/otelcol-contrib` and the config at `/etc/otelcol-contrib/config.yaml`. Both are readable by any user, so this unit needs no root access. Keep editing the config with `sudo`, as in the steps above.
+
+Stop the packaged system service, so the two do not both run:
+
+```bash
+sudo systemctl disable --now otelcol-contrib
+```
+
+Then enable it as the same user:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now otelcol-contrib
+```
+
+The `loginctl enable-linger` command from Step 1 keeps this service up after you log out. Check the service with `systemctl --user status otelcol-contrib`.
+
+To also read the Collector logs, add this user to the `systemd-journal` group, then log in again:
+
+```bash
+sudo usermod -aG systemd-journal <your-username>
+```
+
+Read the logs with `journalctl --user-unit otelcol-contrib`. Without this group, `journalctl` reports that it opened no journal files.
+
+</TabItem>
+<TabItem value="rootful" label="Rootful">
+
+The rootful socket is owned by `root`. Override the service user with a systemd drop-in:
+
+```bash
+sudo mkdir -p /etc/systemd/system/otelcol-contrib.service.d
+sudo tee /etc/systemd/system/otelcol-contrib.service.d/override.conf > /dev/null <<'EOF'
+[Service]
+User=root
+Group=root
+EOF
+sudo systemctl daemon-reload
+```
+
+</TabItem>
+</Tabs>
+
+## Step 4: Send the metrics to SigNoz
+
+The install guide already configures an `otlphttp` exporter that sends data to SigNoz. Add one only if your `exporters` section has none:
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+```yaml:config.yaml {2-6}
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
+
+```yaml:config.yaml {2-4}
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp:
+    endpoint: http://<signoz-instance>:4318
+```
+
+**Verify these values:**
+
+- `<signoz-instance>`: The IP address or domain name of the machine that hosts SigNoz.
+
+</TabItem>
+</Tabs>
+
+Add `podman_stats` and `resource` to the `metrics` pipeline, and keep the entries that are already there:
+
+```yaml:config.yaml {4,5}
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics, podman_stats]
+      processors: [batch, resourcedetection, resource]
+      exporters: [otlphttp]
+```
+
+The names in these lists must match the keys you declared. If you renamed a component to `resource_detection` or `otlp_http`, use that name here too.
+
+Restart the Collector to apply the config:
+
+<Tabs entityName="mode">
+<TabItem value="rootless" label="Rootless" default>
+
+```bash
+systemctl --user restart otelcol-contrib
+```
+
+</TabItem>
+<TabItem value="rootful" label="Rootful">
+
+```bash
+sudo systemctl restart otelcol-contrib
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+1. Open [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) in SigNoz and go to the **Summary** tab.
+2. Filter by `service.name` with the name you set in Step 2, for example `podman-metrics`.
+3. Run the query. The `container.*` metrics appear within a minute of the restart, each with its type, unit, and sample count.
+
+<Figure
+  src="/img/docs/metrics/podman/metrics-explorer-list.webp"
+  alt="Podman container metrics listed in the SigNoz Metrics Explorer, with type, unit, and sample count for each metric"
+  caption="Podman container metrics in Metrics Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Metrics collected
+
+</ToggleHeading>
+
+| Metric | Type |
+|---|---|
+| `container.cpu.percent` | gauge |
+| `container.cpu.usage.total` | sum |
+| `container.cpu.usage.system` | sum |
+| `container.memory.percent` | gauge |
+| `container.memory.usage.total` | sum |
+| `container.memory.usage.limit` | sum |
+| `container.network.io.usage.rx_bytes` | sum |
+| `container.network.io.usage.tx_bytes` | sum |
+| `container.blockio.io_service_bytes_recursive.read` | sum |
+| `container.blockio.io_service_bytes_recursive.write` | sum |
+
+The receiver tags every metric with the `container.id`, `container.name`, `container.image.name`, and `container.runtime` resource attributes.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Limitations
+
+</ToggleHeading>
+
+- The `podman_stats` receiver is at **Alpha** stability, and each of its metrics is marked `development`. Config and metric names can change between releases.
+- The receiver does not support Windows.
+- The receiver reports stats only for running containers. Stopped containers produce no metrics.
+- On Podman 5.x, the two network metrics and `container.cpu.usage.system` report `0`, and `container.cpu.usage.percpu` is not emitted. Use `podman stats` for those values.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Collector cannot connect to the socket
+
+**Symptom:** The Collector logs show a connection error on the socket path.
+
+**Likely cause:** The Podman socket is not active, or the path in the config is wrong.
+
+**Fix:** Check the socket state, then correct the `endpoint` value:
+
+```bash
+systemctl --user status podman.socket   # rootless
+sudo systemctl status podman.socket     # rootful
+```
+
+**Verify:** Restart the Collector. The connection error stops.
+
+### Permission denied on the Podman socket
+
+**Symptom:** The Collector exits at startup with this error:
+
+```
+Error: cannot start pipelines: failed to start "podman_stats" receiver: dial unix /run/podman/podman.sock: connect: permission denied
+```
+
+**Likely cause:** The Collector runs as a different user than the owner of the socket. The DEB and RPM packages run it as `otelcol-contrib`, and each socket is readable only by its owner.
+
+**Fix:** Do [Step 3](#step-3-give-the-collector-access-to-the-socket). Confirm the owner of the socket first:
+
+```bash
+ls -l /run/user/$(id -u)/podman/podman.sock   # rootless
+sudo ls -l /run/podman/podman.sock            # rootful
+```
+
+**Verify:** Restart the Collector. It reports `active`, and the error stops. For rootless Podman, run `systemctl --user is-active otelcol-contrib`. For rootful Podman, run `systemctl is-active otelcol-contrib`.
+
+### API version is too old
+
+**Symptom:** The Collector logs report an unsupported Podman API version.
+
+**Likely cause:** Your Podman build is older than 3.3.1, the API version the receiver requests by default.
+
+**Fix:** Upgrade Podman to 3.3.1 or newer. If you cannot upgrade, pin the API version your build supports, for example:
+
+```yaml:config.yaml {4}
+receivers:
+  podman_stats:
+    endpoint: unix:///run/podman/podman.sock
+    api_version: 3.2.0
+```
+
+**Verify:** Restart the Collector. The receiver starts without the version error.
+
+### No metrics arrive in SigNoz
+
+**Symptom:** The Collector runs without errors, but no `container.*` metric appears in SigNoz.
+
+**Likely cause:** The receiver or the exporter is not enabled in the `metrics` pipeline, or no container is running.
+
+**Fix:** Confirm that `podman ps` lists at least one running container. Then confirm that the `metrics` pipeline lists `podman_stats` under `receivers` and `otlphttp` under `exporters`. To see whether the Collector reads any data, add a [debug exporter](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#debug-exporter).
+
+**Verify:** The debug output lists `container.*` metrics. Remove the debug exporter after the check.
+
+</details>
+
+## Next steps
+
+- Import the [Podman Container Metrics dashboard](https://signoz.io/docs/dashboards/dashboard-templates/podman-container-metrics/).
+- [Create a custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#create-a-custom-dashboard) for your Podman containers.
+- [Set up alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) on container CPU or memory usage.
+- Full metric list: <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/podmanreceiver/documentation.md" target="_blank" rel="noopener noreferrer nofollow">official receiver documentation</a>.
+- [Collector configuration best practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
+
+## Get Help
+
+<GetHelp />
