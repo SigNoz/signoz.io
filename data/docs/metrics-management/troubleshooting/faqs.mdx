@@ -1,5 +1,5 @@
 ---
-date: 2026-08-26
+date: 2026-08-27
 title: Metrics Management FAQs
 description: Frequently asked questions about metrics management and troubleshooting in SigNoz
 doc_type: reference
@@ -29,3 +29,14 @@ A Counter metric can send all cumulative points, all delta points, or both toget
 Metrics Explorer shows one temporality in the metric details, even when the metric carries both. This affects the display only, not your query results.
 
 For more information about metric temporality, see [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
+
+### Q. My percentile query on an exponential histogram fails with `only 'delta' exponential histograms are supported`
+
+This HTTP `501` error means the exponential histogram metric was recorded with **cumulative** temporality. SigNoz supports only **delta** temporality for exponential histograms, so cumulative series cannot be queried. (Earlier versions returned incorrect values for these queries instead of failing.)
+
+To fix it, configure your instrument to export delta temporality:
+
+- For an application SDK, set the delta temporality preference. See [Use Delta Temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality) for the per-language configuration.
+- Regular (non-exponential) histograms support both temporalities, so percentile queries on them are unaffected.
+
+After the instrument starts emitting delta data points, re-run the query. See [Metric Types and Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics) for the full temporality support table.
