@@ -97,7 +97,7 @@ The basic unit of metric information: a set of [attributes](#attribute), a value
 
 A metric [temporality](#temporality) in which each successive data point advances the start timestamp and reports only the change since the previous export. Data points cover (T₀, T₁], (T₁, T₂], (T₂, T₃], and so on.
 
-For example, a request counter that sees 100 requests in the first minute, 150 in the second, and none in the third exports `100`, then `150`, then nothing at all. Synchronous instruments that recorded nothing during an interval export no data point, so idle series produce no [samples](#sample). Set it with `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta`. Note that [PromQL](#promql) cannot read delta series. See [Use delta temporality](https://signoz.io/docs/metrics-management/reducing-costs/).
+For example, a request counter that sees 100 requests in the first minute, 150 in the second, and none in the third exports `100`, then `150`, then nothing at all. Synchronous instruments that recorded nothing during an interval export no data point, so idle series produce no [samples](#sample). Set it with `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta`. Note that [PromQL](#promql) cannot read delta series. See [Use delta temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
 
 ### Distributed tracing
 
@@ -121,7 +121,9 @@ A pointer from an aggregated metric data point back to a specific [trace](#trace
 
 A [histogram](#histogram) whose [bucket](#bucket) boundaries are computed from a `scale` parameter rather than listed explicitly. Boundaries sit at integer powers of `base = 2^(2^-scale)`, so a higher scale gives finer resolution, and a separate zero bucket counts values whose absolute value falls at or below a zero threshold.
 
-Because the buckets adapt to the data, an exponential histogram covers a wide range of values with small relative error and far fewer buckets than an explicit-bucket histogram, and nobody has to guess boundaries up front. In SigNoz, exponential histogram samples are stored separately from scalar samples, and [volume control](https://signoz.io/docs/metrics-management/volume-control/) rules are not supported on them. See [Metric types and aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
+Because the buckets adapt to the data, an exponential histogram covers a wide range of values with small relative error and far fewer buckets than an explicit-bucket histogram, and nobody has to guess boundaries up front.
+
+In SigNoz, exponential histograms are supported on self-hosted only, not on SigNoz Cloud, and they must be sent with [delta temporality](#delta-temporality): cumulative exponential histograms are not read. See [Metric types and aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
 
 ### Exporter
 
