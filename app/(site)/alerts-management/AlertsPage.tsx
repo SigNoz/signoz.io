@@ -144,9 +144,7 @@ const AlertsManagement: React.FC = () => {
         <StopAlertFatigueBanner />
       </SectionLayout>
 
-      <UsageBasedPricing
-        show={['traces', 'metrics', 'logs']}
-      />
+      <UsageBasedPricing show={['traces', 'metrics', 'logs']} />
       <SigNozStats />
       <Divider />
       <CustomerStoriesSection />

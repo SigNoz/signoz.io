@@ -67,20 +67,20 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
       <div className="flex w-[280px] shrink-0 flex-col gap-y-6 border-l border-signoz_slate-400 bg-[hsl(240_5.88%_10%)] p-6 sm:w-[300px] lg:w-[320px]">
         <div className="flex flex-col gap-y-4">
           <TrackingLink
-            href="/case-study/"
+            href="/customers/"
             className={`flex flex-row items-center gap-1 ${SECTION_HEADING_CLASS} hover:text-[#fff]`}
             clickType="Nav Click"
-            clickName="Customer Stories Link"
-            clickText="Customer Stories"
+            clickName="Customers Link"
+            clickText="Customers"
             clickLocation="Top Navbar"
             onClick={onClose}
             prefetch={false}
           >
-            <span>Customer Stories</span> <ArrowRight size={14} />
+            <span>Customers</span> <ArrowRight size={14} />
           </TrackingLink>
           <div>
             <TrackingLink
-              href="/case-study/kernel/"
+              href="/customers/kernel/"
               className="group flex h-auto w-full min-w-0 items-center gap-3"
               clickType="Nav Click"
               clickName="Customer Stories Link"

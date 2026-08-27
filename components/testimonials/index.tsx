@@ -67,7 +67,8 @@ export const Testimonials = ({ page, className }: { page: string; className?: st
         review: (
           <>
             <p>
-              Recentlly moved metrics and logging to SigNoz. Gotta say, absolutely loving the tool.{' '}
+              Recentlly moved metrics and logging to SigNoz. Gotta say, absolutely loving the
+              tool.{' '}
             </p>
           </>
         ),
@@ -255,7 +256,7 @@ export const Testimonials = ({ page, className }: { page: string; className?: st
         </div>
         <div className="z-10 mx-auto flex w-full justify-center shadow-[-4px_-40px_80px_146px_rgba(11,12,14,0.8)]">
           <TrackingLink
-            href="/case-study/"
+            href="/customers/"
             id={customerStoriesId}
             clickType="Secondary CTA"
             clickName="Customer Stories Link"

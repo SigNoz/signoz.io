@@ -297,7 +297,10 @@ const singleContentPopulateByCollection: Record<string, Record<string, unknown>>
     ...commonContentPopulate,
     tags: '*',
   },
-  'case-studies': commonContentPopulate,
+  'case-studies': {
+    ...commonContentPopulate,
+    tags: '*',
+  },
   comparisons: {
     ...commonContentPopulate,
     tags: '*',

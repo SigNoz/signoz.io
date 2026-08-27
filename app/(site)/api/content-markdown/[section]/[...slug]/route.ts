@@ -26,7 +26,7 @@ const CONTENT_FETCHERS: Record<
   guides: (slug) => fetchGuideBySlug(slug),
   opentelemetry: (slug) => getContentBySlug('opentelemetries', slug),
   faqs: (slug) => getContentBySlug('faqs', slug),
-  'case-study': (slug) => getContentBySlug('case-studies', slug),
+  customers: (slug) => getContentBySlug('case-studies', slug),
 }
 
 const isContentMarkdownSection = (value: string): value is ContentMarkdownSection =>
