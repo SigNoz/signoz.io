@@ -1,4 +1,5 @@
 import React from 'react'
+import { Info } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import {
   CheckSolid,
@@ -8,6 +9,7 @@ import {
   ServerSolid,
 } from '@/components/homepage-icons/icons'
 import Line from '@/components/ui/Line'
+import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import FeatureComparisonGrid from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
 import type { ComparisonSection } from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
 
@@ -589,13 +591,33 @@ const ALL_FEATURES_DATA = {
           ),
         },
         {
-          feature: 'Finer RBAC with custom roles',
+          feature: 'Fine-grained RBAC',
           inCommunity: <CrossSolid />,
           inTeams: <CrossSolid />,
           inEnterprise: (
-            <div className="flex items-center">
-              <ClockSolid height="15" width="15" />
-              <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
+            <div className="flex items-center gap-1.5">
+              <CheckSolid />
+              <span className="text-[8px] text-signoz_vanilla-400 sm:text-xs">BETA</span>
+              <Tooltip
+                content={
+                  <div className="max-w-xs">
+                    <p className="mb-1 font-medium text-signoz_vanilla-100">Beta availability:</p>
+                    <p className="m-0 text-sm text-signoz_vanilla-400">
+                      Fine-grained RBAC is available in beta for Enterprise plans. It currently
+                      supports selected resources, with more being added gradually.
+                    </p>
+                  </div>
+                }
+                contentClassName="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
+              >
+                <button
+                  type="button"
+                  aria-label="Fine-grained RBAC beta details"
+                  className="inline-flex cursor-pointer items-center text-signoz_robin-400"
+                >
+                  <Info size={14} />
+                </button>
+              </Tooltip>
             </div>
           ),
         },
