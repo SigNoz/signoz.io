@@ -24,7 +24,7 @@ Two consequences worth knowing up front:
 - **Churn is free.** A series replaced by a new one (a rollout giving each replacement pod a new `k8s.pod.uid`) sends the same number of samples. SigNoz does not bill per series, so churn adds no cost.
 - **Dropping labels alone saves nothing.** The same samples still arrive. Attributes have to be *aggregated away* so that the series collapse. See [Volume control](https://signoz.io/docs/metrics-management/volume-control/).
 
-Histograms are the exception to "one data point, one sample": a classic histogram data point costs (number of buckets × 1) + 4 samples, the extra four being `.sum`, `.count`, `.min`, and `.max`.
+Histograms and summaries are the exceptions to "one data point, one sample". A classic histogram data point costs one sample per bucket (including the `+Inf` bucket), plus `.count`, which is always present, plus `.sum`, `.min`, and `.max` only when the SDK emits them. A summary data point costs one sample per quantile, plus `.count` and `.sum`.
 
 ## How Attributes Affect Billing
 
