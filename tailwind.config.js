@@ -271,7 +271,9 @@ module.exports = {
               '&:hover': {
                 color: `${theme('colors.primary.600')}`,
               },
-              code: { color: 'var(--callout-primary-title)' },
+              code: {
+                color: 'color-mix(in srgb, var(--accent-primary) 80%, var(--l1-foreground))',
+              },
             },
             strong: {
               color: 'var(--l1-foreground)',
@@ -287,9 +289,10 @@ module.exports = {
               fontWeight: '600',
             },
             code: {
-              // Theme-aware robin (robin-600 light / robin-400 dark). --accent-primary
-              // is theme-invariant and lands at 3.86:1 on the light code chip.
-              color: 'var(--callout-primary-title)',
+              // --accent-primary alone is theme-invariant and lands at 3.86:1 on the
+              // light code chip. Mixing it toward --l1-foreground (which does flip)
+              // keeps the accent hue while adapting lightness: 5.09:1 light, 5.97:1 dark.
+              color: 'color-mix(in srgb, var(--accent-primary) 80%, var(--l1-foreground))',
             },
             blockquote: {
               color: 'var(--l1-foreground)',
