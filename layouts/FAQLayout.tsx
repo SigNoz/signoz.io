@@ -28,6 +28,7 @@ interface LayoutProps {
   toc: tocItemProps[]
   relatedArticles?: RelatedArticleProps[]
   tags: string[]
+  authorDirectory?: Record<string, { name?: string; url?: string; image_url?: string }>
   breadcrumbs?: BreadcrumbCrumb[]
 }
 
@@ -39,6 +40,7 @@ export default function FAQLayout({
   toc,
   tags,
   relatedArticles,
+  authorDirectory,
   breadcrumbs,
 }: LayoutProps) {
   // ArticleLayout reads tags and relatedArticles off `content`, while the FAQ
@@ -55,6 +57,7 @@ export default function FAQLayout({
         contentType="faq"
         showNewsletter={true}
         showRelatedArticles={true}
+        authorDirectory={authorDirectory}
         breadcrumbs={breadcrumbs}
       >
         {children}

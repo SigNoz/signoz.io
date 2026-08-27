@@ -1,6 +1,7 @@
 import { components } from '@/components/MDXComponents'
 import FAQLayout, { RelatedArticleProps } from '@/layouts/FAQLayout'
 import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
+import JsonLdScript from '@/components/JsonLdScript'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
@@ -228,20 +229,15 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
+      <JsonLdScript data={structuredData} />
+      <JsonLdScript data={breadcrumbJsonLd} />
 
       <FAQLayout
         breadcrumbs={breadcrumbs}
         content={mainContent}
         authorDetails={authorDetails}
-        authors={authorNames}
+        authors={authorList}
+        authorDirectory={authorDirectory}
         toc={toc}
         tags={tags}
         relatedArticles={relatedArticles}
