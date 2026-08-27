@@ -140,11 +140,27 @@ test('api-reference OpenAPI rewrite requires both a bot UA and markdown Accept',
   )
 })
 
-test('api-reference OpenAPI rewrite skips the index and non-version segments', () => {
+test('api-reference OpenAPI rewrite skips non-version segments', () => {
   const headers = { 'user-agent': BOT_UA, accept: 'text/markdown' }
-  assert.equal(isPassthrough(run('/api-reference', { headers })), true)
   assert.equal(isPassthrough(run('/api-reference/not-a-version', { headers })), true)
   assert.equal(isPassthrough(run('/api-reference/latest/logs', { headers })), true)
+})
+
+test('markdown requests for the api-reference index serve the spec-derived twin', () => {
+  // No bot UA required: the .md twin is a page representation, not the raw spec.
+  const headers = { accept: 'text/markdown' }
+  assert.equal(rewriteTarget(run('/api-reference', { headers })), '/api-reference.md')
+  // NextURL re-applies the trailingSlash config to the rewritten path.
+  assert.match(rewriteTarget(run('/api-reference/', { headers })), /^\/api-reference\.md\/?$/)
+  assert.equal(isPassthrough(run('/api-reference')), true)
+})
+
+test('/api-reference.md is served by its own route, not the page markdown API', () => {
+  assert.equal(isPassthrough(run('/api-reference.md')), true)
+  assert.equal(
+    isPassthrough(run('/api-reference.md', { headers: { accept: 'text/markdown' } })),
+    true
+  )
 })
 
 test('rewrites .md content-section URLs to the content markdown API', () => {
@@ -219,7 +235,11 @@ test('page markdown rewrites require markdown intent', () => {
 test('page markdown rewrites skip excluded prefixes', () => {
   const headers = { accept: 'text/markdown' }
   assert.equal(isPassthrough(run('/docs-onboarding/introduction', { headers })), true)
-  assert.equal(isPassthrough(run('/api-reference', { headers })), true)
+  // /api-reference has its own markdown twin; it must never hit the page pipeline.
+  assert.notEqual(
+    rewriteTarget(run('/api-reference', { headers })),
+    '/api/page-markdown/api-reference'
+  )
   // /api/* is excluded by the matcher in production; the predicate must also hold.
   assert.equal(isPassthrough(run('/api/page-markdown/pricing', { headers })), true)
 })

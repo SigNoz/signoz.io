@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server'
 import siteMetadata from '@/data/siteMetadata'
 import {
   AGENT_MARKDOWN_SELF_FETCH_HEADER,
@@ -6,18 +5,11 @@ import {
 } from '@/utils/agentMarkdownRouting'
 import { slugFromParams } from '@/utils/docs/markdownRouting'
 import { renderPageHtmlToAgentMarkdown } from '@/utils/pageHtmlToMarkdown'
-import { agentResponse } from '@/utils/agentResponseHeaders'
+import { agentResponse, agentNotFoundResponse } from '@/utils/agentResponseHeaders'
 
 export const dynamicParams = true
 
-const notFoundResponse = () =>
-  new NextResponse('Not Found', {
-    status: 404,
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'no-store',
-    },
-  })
+const notFoundResponse = agentNotFoundResponse
 
 const isLocalHost = (host: string): boolean =>
   host === 'localhost' || host === '127.0.0.1' || host.startsWith('localhost:')
@@ -62,7 +54,7 @@ export async function GET(request: Request, props: { params: Promise<{ path?: st
 
   // Direct calls bypass the proxy: only serve paths the proxy would rewrite.
   if (!shouldRewritePageToMarkdown(pathname, true)) {
-    return notFoundResponse()
+    return notFoundResponse(pathname)
   }
 
   const origin = resolveSelfOrigin(request)
@@ -82,7 +74,7 @@ export async function GET(request: Request, props: { params: Promise<{ path?: st
     })
   } catch (error) {
     console.error(`Page markdown self-fetch failed for "${pathname}":`, error)
-    return notFoundResponse()
+    return notFoundResponse(pathname)
   }
 
   const finalHost = new URL(htmlResponse.url || targetUrl).host
@@ -93,7 +85,7 @@ export async function GET(request: Request, props: { params: Promise<{ path?: st
     finalHost !== new URL(origin).host ||
     !contentType.includes('text/html')
   ) {
-    return notFoundResponse()
+    return notFoundResponse(pathname)
   }
 
   const markdown = await renderPageHtmlToAgentMarkdown(await htmlResponse.text(), {
@@ -101,7 +93,7 @@ export async function GET(request: Request, props: { params: Promise<{ path?: st
   })
 
   if (!markdown) {
-    return notFoundResponse()
+    return notFoundResponse(pathname)
   }
 
   return agentResponse(markdown, { varyAccept: true })

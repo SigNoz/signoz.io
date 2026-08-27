@@ -12,7 +12,10 @@ import { buildDocsOnboardingPath, isDocsPathname } from '@/utils/docs/onboarding
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import {
+  API_REFERENCE_MARKDOWN_PATH,
   buildApiReferenceOpenAPISpecRewritePath,
+  isApiReferenceIndexPath,
+  shouldRewriteApiReferenceIndexToMarkdown,
   shouldRewriteApiReferenceToOpenAPISpec,
 } from '@/utils/apiReferenceMarkdownRouting'
 import {
@@ -124,6 +127,10 @@ export function proxy(req: NextRequest) {
   const docsMarkdownRewrite =
     !isAgentMarkdownSelfFetch && shouldRewriteDocsToMarkdown(pathname, prefersMarkdown)
   const apiRefYamlRewrite = shouldRewriteApiReferenceToOpenAPISpec(pathname, prefersMarkdown, isBot)
+  const apiRefIndexMarkdownRewrite = shouldRewriteApiReferenceIndexToMarkdown(
+    pathname,
+    prefersMarkdown
+  )
   const contentMarkdownRewrite =
     !isAgentMarkdownSelfFetch &&
     isReadRequest &&
@@ -137,11 +144,13 @@ export function proxy(req: NextRequest) {
     ? buildDocsMarkdownRewritePath(pathname)
     : apiRefYamlRewrite
       ? buildApiReferenceOpenAPISpecRewritePath(pathname)
-      : contentMarkdownRewrite
-        ? buildContentMarkdownRewritePath(pathname)
-        : pageMarkdownRewrite
-          ? buildPageMarkdownRewritePath(pathname)
-          : null
+      : apiRefIndexMarkdownRewrite
+        ? API_REFERENCE_MARKDOWN_PATH
+        : contentMarkdownRewrite
+          ? buildContentMarkdownRewritePath(pathname)
+          : pageMarkdownRewrite
+            ? buildPageMarkdownRewritePath(pathname)
+            : null
 
   if (markdownRewritePath) {
     const rewriteUrl = req.nextUrl.clone()
@@ -158,7 +167,11 @@ export function proxy(req: NextRequest) {
 
   // URLs that serve both HTML and markdown representations must vary CDN/proxy
   // caches on the Accept header so one representation never poisons the other.
-  if (isDocsPathname(pathname) || servesMarkdownAlternate(pathname)) {
+  if (
+    isDocsPathname(pathname) ||
+    servesMarkdownAlternate(pathname) ||
+    isApiReferenceIndexPath(pathname)
+  ) {
     res.headers.append('Vary', 'Accept')
   }
 

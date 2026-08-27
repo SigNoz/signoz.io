@@ -53,7 +53,7 @@ test('llms.txt emits the exact introduction entry from issue #1173', async () =>
 test('every ## section contains at least one parseable markdown link', async () => {
   const sections = sectionsOf(await getBody())
 
-  assert.deepEqual([...sections.keys()], ['Starter docs', 'Agent tooling', 'Optional'])
+  assert.deepEqual([...sections.keys()], ['Starter docs', 'Agent tooling', 'API', 'Optional'])
   sections.forEach((lines, name) => {
     const links = lines.filter((line) => MARKDOWN_LINK_LINE.test(line))
     assert.equal(links.length > 0, true, `section "${name}" has no parseable markdown link`)
@@ -77,7 +77,7 @@ test('emitted links use trailing slashes except file-extension URLs', async () =
   assert.equal(urls.length > 0, true)
   urls.forEach((url) => {
     assert.equal(
-      url.endsWith('/') || url.endsWith('.md') || url.endsWith('.txt'),
+      ['/', '.md', '.txt', '.json', '.yaml'].some((suffix) => url.endsWith(suffix)),
       true,
       `link would redirect (trailingSlash): ${url}`
     )
