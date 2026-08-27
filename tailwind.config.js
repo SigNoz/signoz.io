@@ -13,6 +13,8 @@ module.exports = {
     './data/**/*.mdx',
     './node_modules/@signozhq/pagination/dist/**/*.{js,ts,jsx,tsx}',
     './shared/components/**/**/*.{js,ts,tsx}',
+    './stories/**/*.{js,ts,jsx,tsx,mdx}',
+    './.storybook/**/*.{ts,tsx}',
   ],
   darkMode: 'class',
   theme: {
