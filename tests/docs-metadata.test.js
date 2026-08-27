@@ -1,6 +1,10 @@
 const { describe, it, beforeEach, afterEach } = require('node:test')
 const assert = require('node:assert')
-const { extractFrontmatter, validateMetadata } = require('../scripts/check-docs-metadata')
+const {
+  extractFrontmatter,
+  resolveDateSkipReason,
+  validateMetadata,
+} = require('../scripts/check-docs-metadata')
 const fs = require('fs')
 const path = require('path')
 const os = require('os')
@@ -570,6 +574,119 @@ tags: ["test"]
       const { errors } = validateMetadata(filePath)
 
       assert.ok(errors.some((e) => e.includes('date must not be combined')))
+    })
+  })
+
+  describe('skipDateEnforcement', () => {
+    function oldDatedDoc() {
+      const oldDate = new Date()
+      oldDate.setDate(oldDate.getDate() - 30)
+      const oldDateStr = oldDate.toISOString().split('T')[0]
+
+      return `---
+title: Existing Title
+published_date: 2024-01-15
+updated_date: ${oldDateStr}
+description: Existing description
+tags: ["test"]
+---
+
+# Content
+`
+    }
+
+    it('should skip the date recency error when skipDateEnforcement is set', () => {
+      const filePath = createTestFile('skip-date.mdx', oldDatedDoc())
+      const { errors } = validateMetadata(filePath, { skipDateEnforcement: true })
+
+      assert.strictEqual(errors.length, 0)
+    })
+
+    it('should still report the date recency error without skipDateEnforcement', () => {
+      const filePath = createTestFile('no-skip-date.mdx', oldDatedDoc())
+      const { errors } = validateMetadata(filePath)
+
+      assert.ok(errors.some((e) => e.includes('cannot be more than 7 days in the past')))
+    })
+
+    it('should still report missing required fields when skipDateEnforcement is set', () => {
+      const content = `---
+published_date: 2024-01-15
+---
+
+# Content
+`
+      const filePath = createTestFile('skip-date-missing-fields.mdx', content)
+      const { errors } = validateMetadata(filePath, { skipDateEnforcement: true })
+
+      assert.ok(errors.some((e) => e.includes('missing title')))
+      assert.ok(errors.some((e) => e.includes('missing description')))
+    })
+
+    it('should still report an invalid date format when skipDateEnforcement is set', () => {
+      const content = `---
+title: Existing Title
+published_date: 15-01-2024
+description: Existing description
+---
+
+# Content
+`
+      const filePath = createTestFile('skip-date-bad-format.mdx', content)
+      const { errors } = validateMetadata(filePath, { skipDateEnforcement: true })
+
+      assert.ok(errors.some((e) => e.includes('invalid published_date format')))
+    })
+  })
+
+  describe('resolveDateSkipReason', () => {
+    const savedEnv = {}
+    const managedKeys = ['SKIP_DATE_CHECK', 'PR_TITLE']
+
+    beforeEach(() => {
+      for (const key of managedKeys) {
+        savedEnv[key] = process.env[key]
+        delete process.env[key]
+      }
+    })
+
+    afterEach(() => {
+      for (const key of managedKeys) {
+        if (savedEnv[key] === undefined) {
+          delete process.env[key]
+        } else {
+          process.env[key] = savedEnv[key]
+        }
+      }
+    })
+
+    it('should return null when nothing asks for a skip', () => {
+      assert.strictEqual(resolveDateSkipReason({ isPreCommit: true }), null)
+    })
+
+    it('should skip when SKIP_DATE_CHECK is truthy', () => {
+      process.env.SKIP_DATE_CHECK = '1'
+      assert.ok(resolveDateSkipReason({ isPreCommit: true }).includes('SKIP_DATE_CHECK'))
+
+      process.env.SKIP_DATE_CHECK = 'true'
+      assert.ok(resolveDateSkipReason({ isPreCommit: true }).includes('SKIP_DATE_CHECK'))
+    })
+
+    it('should not skip when SKIP_DATE_CHECK is false', () => {
+      // The label lookup in the workflow yields the string "false"
+      process.env.SKIP_DATE_CHECK = 'false'
+      assert.strictEqual(resolveDateSkipReason({ isPreCommit: true }), null)
+    })
+
+    it('should skip when the pull request title holds the marker', () => {
+      process.env.PR_TITLE = 'chore(docs): fix a broken link [skip-date]'
+      const reason = resolveDateSkipReason({ isPreCommit: true })
+
+      assert.ok(reason.includes('pull request title'))
+    })
+
+    it('should not read commit messages during a pre-commit run', () => {
+      assert.strictEqual(resolveDateSkipReason({ comparisonRef: 'HEAD', isPreCommit: true }), null)
     })
   })
 })
