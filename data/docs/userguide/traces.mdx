@@ -1,5 +1,5 @@
 ---
-date: 2026-07-27
+date: 2026-08-27
 title: Trace Explorer
 description: Understand the Trace Explorer in SigNoz — views, filtering, trace matching, and how to save and act on your results.
 doc_type: explanation
@@ -68,12 +68,28 @@ You can increase the number of spans displayed up to 200/page using the dropdown
 
 ### Traces View
 
-The Traces View focuses on root spans — the starting span of each trace. Each row represents a single trace, showing the root service name, root operation name, root duration, number of spans, and Trace ID. Traces are sorted by descending root duration, which helps identify the longest running traces. You can increase the number of traces displayed up to 200/page using the dropdown on the top right.
+The Traces View focuses on root spans, the starting span of each trace. Each row represents a single trace, showing the root service name, root operation name, root duration, number of spans, and Trace ID. Traces are sorted by descending root duration, which helps identify the longest running traces. You can increase the number of traces displayed up to 200/page using the dropdown on the top right.
+
+The Traces View uses the same table renderer as the [List View](#list-view), so both tabs share the same column behavior:
+
+- **Resize columns:** drag a column's edge to adjust its width.
+- **Reorder columns:** drag a column header left or right to rearrange them.
+- **Persisted layout:** column order and widths are saved and restored when you return to the tab, including after a page refresh or in a new session. The Traces View and List View store their layouts separately, so a change in one tab does not affect the other.
+- **Trace ID link:** the **Trace ID** column renders as a link. Click a Trace ID to open that trace's detail page.
+- **Status badges:** HTTP method and status columns render as colored status badge cells. Standard OpenTelemetry attribute names are recognized in both tabs, including `http.method`, `http.request.method`, `http.status_code`, and `http.response.status_code`.
 
 <Figure
-  src="/img/docs/product-features/trace-explorer/trace-explorer-traces-view-3.webp"
-  alt="Traces per page dropdown in Traces View"
-  caption="Traces View — root duration and number of traces per page"
+  src="/img/docs/product-features/trace-explorer/trace-explorer-traces-view-table.webp"
+  alt="Traces View table with draggable, resizable columns and Trace ID links"
+  caption="Traces View — drag column headers to reorder, drag column edges to resize, and click a Trace ID to open the trace detail page"
+/>
+
+The toolbar row above the table (the Root Spans note, the download button, and the **Previous** / **Next** pagination controls) stays visible at all times, including while results load and when a query returns no traces.
+
+<Figure
+  src="/img/docs/product-features/trace-explorer/trace-explorer-traces-view-empty-toolbar.webp"
+  alt="Traces View toolbar and pagination controls remaining visible when a query returns no results"
+  caption="The toolbar and pagination controls stay visible even when a query returns no results"
 />
 
 ### Time Series View
