@@ -939,6 +939,31 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/distributed-tracing-jaeger/',
+          destination: '/blog/jaeger-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/guides/how-to-implement-jaeger/',
+          destination: '/blog/jaeger-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/guides/can-jaeger-show-metrics/',
+          destination: '/blog/jaeger-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-database-does-jaeger-use/',
+          destination: '/blog/jaeger-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/blog/jaeger-microservices/',
+          destination: '/blog/jaeger-tracing/',
+          permanent: true,
+        },
+        {
           source: '/blog/opentelemetry-exporters/',
           destination: '/guides/opentelemetry-collector-vs-exporter/',
           permanent: true,
