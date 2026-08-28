@@ -84,8 +84,6 @@ The file holds your ingestion key, so restrict it with `chmod 600 ~/.local/share
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
-Content capture is off by default and worth leaving that way. `IDE_OTEL_CAPTURE_TEXT`, `IDE_OTEL_CAPTURE_CONVERSATION_CONTENT`, and `IDE_OTEL_CAPTURE_TOOL_INPUT_CONTENT` all default to `false`, so prompts and tool arguments are recorded as lengths and SHA-256 hashes rather than content. Tool names, token counts, durations, model names, and repository info are always collected.
-
 ## View Cursor IDE Traces in SigNoz
 
 Allow a few minutes after your first prompt, then open the [Traces explorer](https://signoz.io/docs/userguide/traces/) and filter on `service.name = 'ide-agent'`.
@@ -114,6 +112,30 @@ A turn produces a `gen_ai.client.generation` span with one `gen_ai.client.hook.*
 - **`service.name` is always `ide-agent`.** The runner hardcodes it for every agent it supports, so group by `gen_ai.client.name` (`cursor`) when you run more than one agent.
 
 Every span also carries `gen_ai.request.model`, `gen_ai.client.session_id`, `gen_ai.client.generation_id`, and, when the runner resolves it, `vcs.repository.name` and `vcs.ref.head.name`.
+
+## View Cursor IDE Logs in SigNoz
+
+The runner emits logs alongside the traces, one record per tool call, shell execution, and MCP call. Open the [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/) and filter with `service.name = 'ide-agent'` to see the event stream.
+
+<Figure
+  src="/img/docs/llm/cursor/cursor-logs.webp"
+  alt="Cursor IDE agent logs in the SigNoz Logs Explorer"
+  caption="Each tool call and shell execution produces a log record, with the command inline in the body."
+/>
+
+Logs carry detail the spans do not. Open a record to see it in the attributes.
+
+<Figure
+  src="/img/docs/llm/cursor/cursor-log-detail.webp"
+  alt="An expanded Cursor IDE shell execution log record showing its attributes"
+  caption="A shell log record: gen_ai.client.command holds the full command and gen_ai.client.shell.stdout holds its output."
+/>
+
+Useful attributes include `gen_ai.client.command` and `gen_ai.client.shell.stdout` for shell executions, `gen_ai.client.tool_name` and `gen_ai.client.duration_ms` for tool calls, and `gen_ai.client.hook.event` to separate the event types. Every record also carries `trace_id` and `span_id`, so a log line links back to the exact span in the turn's waterfall.
+
+<Admonition type="warning" title="Shell commands and output are recorded in full">
+Span attributes record tool input as a length and a SHA-256 hash, but the log records do not. `IDE_OTEL_MCP_LOG_PAYLOAD` defaults to `true`, so shell commands and their stdout arrive in clear text. Set it to `false` in `otel_config.json` if that is not appropriate for your workspace.
+</Admonition>
 
 ## Cursor IDE Observability Dashboard
 
