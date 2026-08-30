@@ -1,6 +1,7 @@
 import React from 'react'
 import { ArrowLeft, ArrowRight, List } from 'lucide-react'
 import Link from 'next/link'
+import { Typography } from '@signozhq/ui/typography'
 import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { cn } from '../../app/lib/utils'
 
@@ -22,6 +23,9 @@ type ArticleSeriesTopProps = {
   nextHref?: string
   className?: string
 }
+
+const navIconClassName =
+  'flex h-8 w-8 items-center justify-center rounded-md bg-[var(--l2-background)] no-underline transition-all hover:bg-[var(--l2-background-hover)] hover:text-[var(--accent-primary)]'
 
 export default function ArticleSeriesTop({
   seriesName,
@@ -48,40 +52,38 @@ export default function ArticleSeriesTop({
   return (
     <div
       className={cn(
-        'mb-8 flex items-center justify-between border-b border-gray-200 pb-3 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-400',
+        'mb-8 flex items-center justify-between border-b border-[var(--l2-border)] pb-3 text-sm text-[var(--l2-foreground)]',
         className
       )}
     >
-      {/* Left: Series Name + View All Link */}
       {seriesOverviewHref ? (
         <Link
           href={seriesOverviewHref}
-          className="group inline-flex items-center font-medium no-underline transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+          className="group inline-flex items-center font-medium no-underline transition-colors hover:text-[var(--accent-primary)]"
           prefetch={false}
         >
           <List className="mr-2 h-4 w-4 opacity-90 transition-opacity group-hover:opacity-100" />
-          <span className="text-blue-600 opacity-90 transition-opacity group-hover:opacity-100 dark:text-blue-400">
+          <span className="text-[var(--accent-primary)] opacity-90 transition-opacity group-hover:opacity-100">
             {seriesName}
           </span>
         </Link>
       ) : (
-        <span className="inline-flex items-center font-medium text-blue-600 dark:text-blue-400">
+        <Typography.Text className="inline-flex items-center font-medium text-[var(--accent-primary)]">
           {seriesName}
-        </span>
+        </Typography.Text>
       )}
 
-      {/* Right: Prev/Current Position/Next */}
       <div className="flex items-center space-x-4">
         {showPrevious && prevLink ? (
           <Tooltip
-            contentClassName="text-signoz_vanilla-100 text-sm"
+            contentClassName="text-[var(--l1-foreground)] text-sm"
             content={`Previous: ${prevLink.title}`}
             delayDuration={150}
             side="top"
           >
             <Link
               href={prevLink.href}
-              className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 no-underline transition-all hover:bg-gray-200 hover:text-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+              className={navIconClassName}
               aria-label={`Previous article: ${prevLink.title}`}
               prefetch={false}
             >
@@ -92,15 +94,15 @@ export default function ArticleSeriesTop({
           <div className="h-8 w-8" aria-hidden="true" />
         )}
 
-        <span className="whitespace-nowrap text-gray-500 dark:text-gray-500">
+        <Typography.Text color="muted" className="whitespace-nowrap">
           Part {part} of {total}
-        </span>
+        </Typography.Text>
 
         {showNext && nextLink ? (
           <Tooltip content={`Next: ${nextLink.title}`} delayDuration={150} side="top">
             <Link
               href={nextLink.href}
-              className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 no-underline transition-all hover:bg-gray-200 hover:text-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+              className={navIconClassName}
               aria-label={`Next article: ${nextLink.title}`}
               prefetch={false}
             >
