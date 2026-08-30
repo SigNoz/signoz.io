@@ -1,16 +1,17 @@
 'use client'
 
 import React from 'react'
+import { Typography } from '@signozhq/ui/typography'
 import { useRegion } from './RegionContext'
 
 const Region = () => {
   const { region } = useRegion()
 
   if (region) {
-    return <>{region}</>
+    return <Typography.Text as="span">{region}</Typography.Text>
   }
 
-  return <>&lt;region&gt;</>
+  return <Typography.Text as="span">&lt;region&gt;</Typography.Text>
 }
 
 export default Region

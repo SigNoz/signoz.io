@@ -1,6 +1,6 @@
 import React from 'react'
+import { Button } from '@signozhq/ui/button'
 import TrackingLink from '../TrackingLink'
-import Button from '@/components/ui/Button'
 
 interface MDXButtonProps {
   href: string
@@ -23,24 +23,23 @@ const MDXButton = ({
   type = 'primary',
   className = 'inline-block no-underline',
 }: MDXButtonProps) => {
-  const buttonVariant = type === 'primary' ? 'legacyPrimary' : 'legacySecondary'
   return (
     <div className="mt-6 self-center">
-      <TrackingLink
-        href={href}
-        clickType={clickType}
-        clickName={clickName || String(children)}
-        clickLocation={clickLocation || ''}
-        clickText={clickText || String(children)}
-        className={className}
-      >
-        <Button as="span" variant={buttonVariant}>
+      <Button asChild variant="solid" color={type === 'primary' ? 'primary' : 'secondary'}>
+        <TrackingLink
+          href={href}
+          clickType={clickType}
+          clickName={clickName || String(children)}
+          clickLocation={clickLocation || ''}
+          clickText={clickText || String(children)}
+          className={className}
+        >
           <span className="flex items-center gap-2">
             {children}
             &rarr;
           </span>
-        </Button>
-      </TrackingLink>
+        </TrackingLink>
+      </Button>
     </div>
   )
 }

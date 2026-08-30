@@ -1,13 +1,16 @@
+import { Typography } from '@signozhq/ui/typography'
 import { RegionAwareCode, RegionAwarePre } from '@/components/Region/RegionAwareComponents'
 
 export default function CHClientWithOutput() {
   return (
     <>
-      <p>Inside the bash shell, run the following to create clickhouse client:</p>
+      <Typography.Text as="p">
+        Inside the bash shell, run the following to create clickhouse client:
+      </Typography.Text>
       <RegionAwarePre>
         <RegionAwareCode className="language-bash">{`clickhouse client`}</RegionAwareCode>
       </RegionAwarePre>
-      <p>Output should be similar to this:</p>
+      <Typography.Text as="p">Output should be similar to this:</Typography.Text>
       <RegionAwarePre>
         <RegionAwareCode className="language-output">
           {`ClickHouse client version 22.4.5.9 (official build).
