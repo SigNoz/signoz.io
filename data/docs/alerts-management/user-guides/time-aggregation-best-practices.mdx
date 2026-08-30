@@ -1,5 +1,5 @@
 ---
-date: 2026-05-12
+date: 2026-08-30
 title: Time Aggregation Best Practices
 description: Best practices for Time Aggregation
 doc_type: explanation
@@ -98,4 +98,18 @@ The `running_diff` function calculates `R(t) - R(t-previous)`, allowing you to d
   alt="RabbitMQ sustained uptrend detection using running_diff on individual queries"
   caption="Detecting sustained uptrends in RabbitMQ using running_diff on individual queries A and B"
 />
+
+### Detecting Metric Stagnation
+
+The inverse of uptrend detection: alert when a metric that should keep increasing has stopped changing. For example, a heartbeat metric that reports a Unix timestamp should increment on every reading. If `running_diff` returns 0 across every evaluation, the metric is stale.
+
+1. **Create the query:**
+   - Select your gauge metric (e.g., `last_heartbeat_timestamp`).
+   - Set time aggregation to **Latest** (appropriate for gauge metrics that report a point-in-time value).
+   - Add the `running_diff` function.
+
+2. **Set up the alert condition:**
+   - Alert when the result **= 0** with match type **All the time** over your chosen rolling window.
+
+When every `running_diff` value in the window equals 0, no consecutive pair of readings showed a change, meaning the metric has stagnated. This pattern works entirely in the Query Builder with no need for raw ClickHouse queries.
 
