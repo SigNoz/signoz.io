@@ -1,32 +1,32 @@
 'use client'
 
 import React from 'react'
-import Button from '@/components/ui/Button'
+import { Button } from '@signozhq/ui/button'
+import { Typography } from '@signozhq/ui/typography'
 import { Scale } from 'lucide-react'
+import Link from 'next/link'
 
 export default function DatadogVsSigNoz() {
   return (
     <div className="my-8 w-full">
-      <div className="transform rounded-xl bg-gradient-to-r from-blue-900/90 to-purple-900/90 p-8 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+      <div className="transform rounded-xl border border-[var(--l2-border)] bg-[var(--l2-background)] p-8 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-[var(--accent-primary)] hover:shadow-xl">
         <div className="space-y-4">
-          <h3 className="my-0 text-2xl font-bold text-white">
-            Cut Your Observability Spend by 80%—Here's How
-          </h3>
-          <p className="text-gray-300">
+          <Typography.Title level={3} className="my-0 text-[var(--l1-foreground)]">
+            Cut Your Observability Spend by 80%—Here&apos;s How
+          </Typography.Title>
+          <Typography.Text className="text-[var(--l2-foreground)]">
             Switch from Datadog seamlessly with our automated migration tool, comparable features
             and up to <b>80% cost savings</b>.
-          </p>
+          </Typography.Text>
           <div className="flex flex-col gap-4 sm:flex-row">
-            <Button
-              href="/datadog-alternative/"
-              variant="legacyPrimary"
-              className="flex items-center gap-2"
-            >
-              <Scale className="h-4 w-4" />
-              Compare SigNoz vs. Datadog
+            <Button asChild variant="solid" color="primary">
+              <Link href="/datadog-alternative/" className="flex items-center gap-2">
+                <Scale className="h-4 w-4" />
+                Compare SigNoz vs. Datadog
+              </Link>
             </Button>
-            <Button href="/datadog-migration-tool/" variant="legacySecondary">
-              Try our Datadog Migration Tool &rarr;
+            <Button asChild variant="outlined" color="secondary">
+              <Link href="/datadog-migration-tool/">Try our Datadog Migration Tool &rarr;</Link>
             </Button>
           </div>
         </div>
