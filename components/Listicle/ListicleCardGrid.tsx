@@ -26,7 +26,7 @@ function renderIcon(spec?: IconSpec): React.ReactNode {
 
   return (
     <span
-      className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white"
+      className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-[var(--l1-foreground-hover)]"
       style={{ backgroundColor: spec.color }}
     >
       {spec.badge}
@@ -48,27 +48,40 @@ export default function ListicleCardGrid({
       {(title || description) && (
         <div className="mb-6 text-left">
           {title && (
-            <h2 className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">{title}</h2>
+            <h2 className="mb-2 text-2xl font-semibold text-[var(--l1-foreground)]">{title}</h2>
           )}
-          {description && <p className="text-base text-signoz_vanilla-400">{description}</p>}
+          {description && <p className="text-base text-[var(--l2-foreground)]">{description}</p>}
         </div>
       )}
 
-      <ul className={`grid gap-4 ${gridCols} list-none p-0`}>
+      <ul className={`grid list-none gap-4 p-0 ${gridCols}`}>
         {items.map((item, index) => (
           <li key={`${item.href}-${item.name}-${index}`} className="h-full w-full">
             <TrackingLink
               href={item.href}
-              className="flex h-full w-full flex-col items-center justify-center rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 text-center no-underline transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
+              className="flex h-full w-full flex-col items-start border border-dashed border-[var(--l1-border)] p-4 no-underline transition-colors hover:bg-[var(--l1-background-hover)]"
               clickType="Nav Click"
               clickName={item.clickName || item.name}
               clickText={item.name}
               clickLocation={sectionName}
             >
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-md">
-                {renderIcon(item.icon)}
+              {item.icon ? (
+                <div className="mb-3 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden">
+                  {renderIcon(item.icon)}
+                </div>
+              ) : null}
+              <div
+                className={`flex w-full flex-col items-start ${item.description ? 'mt-auto gap-3' : ''}`}
+              >
+                <span className="text-base font-semibold leading-none text-[var(--l1-foreground-hover)]">
+                  {item.name}
+                </span>
+                {item.description && (
+                  <p className="m-0 text-[13px] leading-5 tracking-[-0.065px] text-[var(--l2-foreground)]">
+                    {item.description}
+                  </p>
+                )}
               </div>
-              <span className="text-sm font-medium text-signoz_vanilla-100">{item.name}</span>
             </TrackingLink>
           </li>
         ))}
@@ -78,7 +91,7 @@ export default function ListicleCardGrid({
         <div className="mt-6 text-sm">
           <TrackingLink
             href={viewAllHref}
-            className="inline-flex items-center text-signoz_robin-500 no-underline transition-colors hover:text-signoz_robin-400"
+            className="inline-flex items-center text-[var(--accent-primary)] no-underline transition-colors hover:text-[var(--accent-primary-hover)]"
             clickType="Nav Click"
             clickName={`View All ${title || ''} Link`}
             clickText={viewAllText}
