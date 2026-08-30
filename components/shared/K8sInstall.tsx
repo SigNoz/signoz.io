@@ -1,21 +1,23 @@
+import { Typography } from '@signozhq/ui/typography'
 import { RegionAwareCode, RegionAwarePre } from '@/components/Region/RegionAwareComponents'
 import RetentionInfo from '@/components/shared/RetentionInfo'
 
 export default function K8sInstall() {
   return (
     <>
-      <h3>Helm Installation</h3>
-      <p>
+      <Typography.Title level={3}>Helm Installation</Typography.Title>
+      <Typography.Text as="p">
         The SigNoz Helm{' '}
         <a
           href="https://github.com/SigNoz/charts"
           target="_blank"
           rel="noopener noreferrer nofollow"
+          className="text-[var(--accent-primary)] hover:underline"
         >
           chart
         </a>{' '}
         will install the following components into your Kubernetes cluster:
-      </p>
+      </Typography.Text>
       <ul>
         <li>SigNoz</li>
         <li>SigNoz Collector</li>
@@ -24,16 +26,16 @@ export default function K8sInstall() {
       </ul>
       <ol>
         <li>
-          <p>Find a storage class to use in your cluster:</p>
+          <Typography.Text as="p">Find a storage class to use in your cluster:</Typography.Text>
           <RegionAwarePre>
             <RegionAwareCode className="language-bash">{`kubectl get storageclass`}</RegionAwareCode>
           </RegionAwarePre>
         </li>
         <li>
-          <p>
+          <Typography.Text as="p">
             Create a <code>values.yaml</code> file that will contain the configuration for the
             chart. Here is a minimal example to get started:
-          </p>
+          </Typography.Text>
           <RegionAwarePre>
             <RegionAwareCode className="language-yaml">{`global:
   storageClass: <storage-class>
@@ -41,20 +43,21 @@ export default function K8sInstall() {
 clickhouse:
   installCustomStorageClass: true`}</RegionAwareCode>
           </RegionAwarePre>
-          <p>
+          <Typography.Text as="p">
             You can find an exhaustive list of the parameters{' '}
             <a
               href="https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration"
               target="_blank"
               rel="noopener noreferrer nofollow"
+              className="text-[var(--accent-primary)] hover:underline"
             >
               here
             </a>
             .
-          </p>
+          </Typography.Text>
         </li>
         <li>
-          <p>Install SigNoz:</p>
+          <Typography.Text as="p">Install SigNoz:</Typography.Text>
           <RegionAwarePre>
             <RegionAwareCode className="language-bash">{`helm repo add signoz https://charts.signoz.io
 helm repo update
@@ -66,25 +69,29 @@ helm install signoz signoz/signoz \\
           </RegionAwarePre>
         </li>
       </ol>
-      <h3>Test the installation</h3>
+      <Typography.Title level={3}>Test the installation</Typography.Title>
       <ol>
         <li>
-          <p>
+          <Typography.Text as="p">
             In another terminal, port-forward signoz on its http port. (By default, signoz exposes
             its http server on port 8080.)
-          </p>
+          </Typography.Text>
           <RegionAwarePre>
             <RegionAwareCode className="language-bash">{`kubectl port-forward -n <namespace> svc/signoz 8080:8080`}</RegionAwareCode>
           </RegionAwarePre>
         </li>
         <li>
-          <p>Run the following command to check the health of signoz:</p>
+          <Typography.Text as="p">
+            Run the following command to check the health of signoz:
+          </Typography.Text>
           <RegionAwarePre>
             <RegionAwareCode className="language-bash">{`curl -X GET http://localhost:8080/api/v1/health`}</RegionAwareCode>
           </RegionAwarePre>
         </li>
         <li>
-          <p>If the installation is successful, you should see the following output:</p>
+          <Typography.Text as="p">
+            If the installation is successful, you should see the following output:
+          </Typography.Text>
           <RegionAwarePre>
             <RegionAwareCode className="language-bash">{`{"status":"ok"}`}</RegionAwareCode>
           </RegionAwarePre>
