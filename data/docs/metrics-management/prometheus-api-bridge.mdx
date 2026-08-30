@@ -1,0 +1,125 @@
+---
+date: 2026-08-30
+title: SigNoz as a Prometheus Data Source for Kubernetes Tools
+description: Use self-hosted SigNoz as a Prometheus data source for Grafana, KEDA, Headlamp, Ray, OpenCost, Argo Rollouts, HPA, and VPA without running Prometheus.
+doc_type: howto
+tags: [Self-Host]
+---
+
+## Overview
+
+Grafana, KEDA, Headlamp, Ray, OpenCost, Argo Rollouts, and the Kubernetes autoscalers (HPA, VPA) all want a Prometheus server URL. Once your metrics are in SigNoz, that URL is often the only reason a Prometheus server is still running.
+
+<a href="https://github.com/simonepri/prometheus-api-bridge" target="_blank" rel="noopener noreferrer nofollow">Prometheus API Bridge</a> is an open source, stateless service that answers those tools from SigNoz instead.
+
+<Admonition type="info">
+  This is a community integration, not an official SigNoz product. Refer to the <a href="https://github.com/simonepri/prometheus-api-bridge" target="_blank" rel="noopener noreferrer nofollow">upstream repository</a> for issues, the full configuration reference, and updates.
+</Admonition>
+
+<Admonition type="info" title="Self-hosted SigNoz only">
+The bridge depends on the Prometheus-compatible query endpoints that self-hosted SigNoz serves. It has not been tested against SigNoz Cloud.
+</Admonition>
+
+## Architecture
+
+KEDA, the Kubernetes autoscalers, and the other tools this guide covers all speak the same Prometheus HTTP API. They run PromQL queries, list metric and label names for autocomplete, and look up series to map metrics onto Kubernetes resources. Of that API, SigNoz serves only two query endpoints, `/api/v1/query` and `/api/v1/query_range`, which is not enough for these tools to work. The bridge implements the rest on top of them, forwards PromQL unchanged, and authenticates to SigNoz with your API key so clients only need a standard bearer token.
+
+<Figure
+  src="/img/docs/prometheus-api-bridge-arch.svg"
+  alt="Architecture: workloads send metrics through the OTel Collector to SigNoz, while Prometheus-only tools query SigNoz through the bridge"
+  caption="Ingestion is unchanged. The bridge only serves the query path."
+/>
+
+## Prerequisites
+
+1. A [self-hosted SigNoz](https://signoz.io/docs/install/self-host/) installation reachable from the Kubernetes cluster where the bridge will run.
+2. A read-only [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) API key for SigNoz.
+3. Helm 3.8 or newer, required for OCI chart support.
+
+## Install the Bridge
+
+### Step 1: Create the Namespace and Secrets
+
+The chart never creates Secrets, and the pods stay in `CreateContainerConfigError` until both exist. This guide uses the `observability` namespace throughout.
+
+```sh
+kubectl create namespace observability
+kubectl -n observability create secret generic prometheus-api-bridge-signoz \
+  --from-literal=api-key="$SIGNOZ_API_KEY"
+kubectl -n observability create secret generic prometheus-api-bridge-auth \
+  --from-literal=token="$BRIDGE_BEARER_TOKEN"
+```
+
+### Step 2: Install the Chart
+
+```yaml:values.yaml
+backend:
+  type: signoz
+  signoz:
+    url: <signoz-url>
+    apiKeySecret:
+      name: prometheus-api-bridge-signoz
+      key: api-key
+server:
+  auth:
+    bearerTokenSecret:
+      name: prometheus-api-bridge-auth
+      key: token
+```
+
+```sh
+helm upgrade --install prometheus-api-bridge \
+  oci://ghcr.io/simonepri/charts/prometheus-api-bridge \
+  --version <bridge-version> \
+  --namespace observability \
+  --values values.yaml
+```
+
+**Verify these values:**
+
+- `<signoz-url>`: The base URL of your SigNoz installation, for example `https://signoz.example.com` or its in-cluster query service URL.
+- `<bridge-version>`: The latest version on the <a href="https://github.com/simonepri/prometheus-api-bridge/releases" target="_blank" rel="noopener noreferrer nofollow">project releases page</a>.
+
+The chart requires a bearer token by default and only allows a `ClusterIP` Service. Ingress, TLS, unauthenticated mode, and NetworkPolicy options are covered in the <a href="https://github.com/simonepri/prometheus-api-bridge/blob/main/src/chart/values.yaml" target="_blank" rel="noopener noreferrer nofollow">chart values reference</a>.
+
+## Validate
+
+Port-forward the Service and ask the bridge which labels SigNoz knows about:
+
+```sh
+kubectl -n observability port-forward service/prometheus-api-bridge 9090:9090
+curl -fsSG http://localhost:9090/api/v1/labels \
+  --header "Authorization: Bearer $BRIDGE_BEARER_TOKEN"
+```
+
+A list of label names means the token was accepted and SigNoz answered. An empty `data` array means the bridge is reachable but SigNoz returned nothing, so check that metrics are arriving before wiring up any tools.
+
+<Admonition type="warning">
+`/-/ready` returns 200 as soon as the process is up. It does not test your SigNoz URL or API key, so do not treat it as proof the bridge is working.
+</Admonition>
+
+Tools in the cluster can now use this URL wherever they expect a Prometheus server:
+
+```
+http://prometheus-api-bridge.observability.svc:9090
+```
+
+## Connect Your Tools
+
+Give each tool that URL wherever it expects a Prometheus server, like KEDA's `serverAddress` or the Prometheus Adapter's `prometheus.url`. A few tools need more than a URL. The project's <a href="https://github.com/simonepri/prometheus-api-bridge#verified-integrations" target="_blank" rel="noopener noreferrer nofollow">verified integrations table</a> is the up-to-date list of tested tools, and each entry links the exact Helm values and manifests it is tested with.
+
+<Admonition type="warning" title="Several of these tools cannot send a bearer token">
+None of the project's end-to-end fixtures use one. They run the bridge with `server.auth.allowUnauthenticated=true` and an empty `server.auth.bearerTokenSecret.name`, restricted by a NetworkPolicy. Clearing the token name is required, because the chart refuses to start unauthenticated while a token name is still set. It does not add the NetworkPolicy for you.
+</Admonition>
+
+The bridge only returns metrics that are already in SigNoz. If a tool asks for metrics you do not collect yet, the chart's <a href="https://github.com/simonepri/prometheus-api-bridge/blob/main/src/chart/values.yaml" target="_blank" rel="noopener noreferrer nofollow">collection settings</a> can extend your existing Collector or install a dedicated one.
+
+## Next Steps
+
+- Moving off Prometheus or Grafana? [Migrate your metrics first](https://signoz.io/docs/migration/migrate-from-grafana/metrics/), then point your tools at the bridge.
+- Building your own integration? Query SigNoz directly with the [Metrics API](https://signoz.io/docs/metrics-management/query-range-api/).
+- Supported endpoints, every chart value, and the tested SigNoz version live in the <a href="https://github.com/simonepri/prometheus-api-bridge" target="_blank" rel="noopener noreferrer nofollow">project repository</a>.
+
+## Get Help
+
+<GetHelp />
