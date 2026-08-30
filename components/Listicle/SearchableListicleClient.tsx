@@ -1,6 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { Input } from '@signozhq/ui/input'
+import { Typography } from '@signozhq/ui/typography'
 import ListicleCardGrid from './ListicleCardGrid'
 import type { ListicleItem } from './types'
 
@@ -30,15 +32,14 @@ export default function SearchableListicleClient({
   return (
     <div className="space-y-6">
       <div className="relative mx-auto mb-8 max-w-md">
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-          <img src="/img/icons/listicle/lucide-search-gray.svg" alt="" className="h-5 w-5" />
-        </div>
-        <input
+        <Input
           type="text"
           placeholder={searchPlaceholder}
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
-          className="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 leading-5 placeholder-gray-500 focus:border-blue-500 focus:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 sm:text-sm"
+          prefix={
+            <img src="/img/icons/listicle/lucide-search-gray.svg" alt="" className="h-5 w-5" />
+          }
         />
       </div>
 
@@ -50,9 +51,9 @@ export default function SearchableListicleClient({
           gridCols={gridCols}
         />
       ) : (
-        <div className="py-8 text-center text-gray-500">
+        <Typography.Text color="muted" className="py-8 text-center">
           No results found matching &ldquo;{searchQuery}&rdquo;
-        </div>
+        </Typography.Text>
       )}
     </div>
   )
