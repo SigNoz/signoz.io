@@ -1,11 +1,11 @@
 ---
-date: 2026-06-17
+date: 2026-08-27
 title: Python OpenTelemetry Instrumentation Guide
 description: Learn how to instrument your Python app with OpenTelemetry and send traces to SigNoz. Auto-instrument Django, Flask, FastAPI, and more.
 doc_type: howto
 ---
 
-This guide shows you how to instrument your Python application with OpenTelemetry and send traces to SigNoz. The auto-instrumentation approach works with Django, Flask, FastAPI, Falcon, Celery, and most Python libraries out of the box.
+This guide shows you how to instrument your Python application with OpenTelemetry and send traces to SigNoz. The <Tooltip text="auto-instrumentation" content="Instrumentation attached at runtime without modifying source code: a Java agent, a Python opentelemetry-instrument wrapper, an OTel operator injecting a sidecar." link="https://signoz.io/docs/glossary/#zero-code-instrumentation" /> approach works with Django, Flask, FastAPI, Falcon, Celery, and most Python libraries out of the box.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -622,7 +622,7 @@ curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
 OTEL_TRACES_EXPORTER=console opentelemetry-instrument <your_run_command>
 ```
 
-If you see JSON span output in your terminal but traces don't appear in SigNoz, the usual causes are missing context propagation or an exporter misconfiguration (endpoint, auth, or network). If no output appears, the instrumentation isn't capturing your requests. Our deeper walkthrough on [troubleshooting Python OpenTelemetry tracing](https://signoz.io/blog/troubleshooting-python-with-opentelemetry-tracing/) covers these failure modes step by step.
+If you see JSON span output in your terminal but traces don't appear in SigNoz, the usual causes are missing context propagation or an exporter misconfiguration (endpoint, auth, or network). If no output appears, the instrumentation isn't capturing your requests. Our deeper walkthrough on [troubleshooting Python OpenTelemetry tracing](https://signoz.io/blog/troubleshooting-python-with-opentelemetry-tracing/) covers these failure modes step by step, and [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) covers the same checks for logs and metrics too.
 
 ### Why do multi-worker servers (Uvicorn, Gunicorn) drop spans?
 

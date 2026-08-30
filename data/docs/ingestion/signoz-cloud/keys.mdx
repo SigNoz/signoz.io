@@ -1,5 +1,5 @@
 ---
-date: 2026-08-10
+date: 2026-08-26
 title: Ingestion Keys
 meta_title: Ingestion Keys - Create & Manage API Tokens
 tags: [SigNoz Cloud]
@@ -15,7 +15,7 @@ You don't need ingestion keys for self-hosted/community edition of SigNoz. Inges
 
 Ingestion Keys are secure tokens used to authenticate your telemetry Ingestion requests. These keys are unique to your account and should be kept confidential.
 
-Ingestion keys are **write-only** — they can only send telemetry data (traces, logs, metrics) into your account. They cannot be used to query, read, or delete any data. This is in contrast to **API keys**, which allow querying and reading data from your account and should never be exposed in client-side code.
+Ingestion keys are **write-only**. They can only send telemetry data (traces, logs, metrics) into your account. They cannot be used to query, read, or delete any data. This is in contrast to **API keys**, which allow querying and reading data from your account and should never be exposed in client-side code.
 
 All ingestion key and limit operations described on this page can also be performed programmatically via the <a href="https://signoz.io/api-reference/#/operations/CreateIngestionKey" target="_blank" rel="noopener noreferrer nofollow">SigNoz API</a>.
 
@@ -58,7 +58,7 @@ Limits and Restrictions:
 - Key names must be unique within your account.
 
 ## Modify Ingestion Keys
-To modify an existing SigNoz Ingestion key, navigate to Settings > Ingestion Settings and click the edit icon next to the relevant key. Please note that only the expiry date and tags can be modified.
+To modify an existing SigNoz Ingestion key, navigate to Settings > Ingestion Settings and click the edit icon next to the relevant key. Only the expiry date and tags can be modified.
 
 ## Remove Ingestion Keys
 To remove a SigNoz Ingestion key, go to **Settings > Ingestion Settings**. Users with the appropriate permissions can click the Trash icon next to the key they wish to remove. A confirmation prompt will appear before the key is deleted. Please be aware that this action is irreversible and will immediately revoke the Ingestion key.
@@ -78,11 +78,13 @@ SigNoz offers the flexibility to set limits on your Ingestion keys. To add a lim
 </figure>
 
 <Admonition type="warning">
-When an ingestion key reaches its configured limit for a signal, data ingestion for that signal is stopped and any incoming data is dropped until the limit resets. This can result in gaps in your logs, traces, or metrics. To avoid unexpected data loss, you can set up alerts to be notified when an ingestion key is nearing its daily quota — see [Meter Alerts](https://signoz.io/docs/cost-meter/alerts/) for details.
+When an ingestion key reaches its configured limit for a signal, data ingestion for that signal is stopped and any incoming data is dropped until the limit resets. This can result in gaps in your logs, traces, or metrics. To avoid unexpected data loss, you can set up alerts to be notified when an ingestion key is nearing its daily quota. See [Meter Alerts](https://signoz.io/docs/cost-meter/alerts/) for details.
 </Admonition>
 
+If you're missing data entirely rather than seeing gaps, see [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/) to narrow down the cause.
+
 ## Modify a Limit
-To modify an existing limit, navigate to the Ingestion key and click the edit option corresponding to the limit in question. It's important to note that modifying a limit does not reset the accumulated values. For example, if the initial limit was 20GB/day and you've used 15GB before increasing the limit to 25GB/day, the usage count will continue from 15GB.
+To modify an existing limit, navigate to the Ingestion key and click the edit option corresponding to the limit in question. Modifying a limit does not reset the accumulated values. For example, if the initial limit was 20GB/day and you've used 15GB before increasing the limit to 25GB/day, the usage count will continue from 15GB.
 
 ## Remove a Limit
 To remove a limit, navigate to the Ingestion key and click the delete option next to the relevant limit. Deleting a limit will reset all accumulated values. For instance, if the limit was set to 20GB/day and you've used 15GB before deleting the limit, the counter will be reset to 0. Any new limit created thereafter will start from 0.
@@ -121,3 +123,12 @@ To find the ID of a specific ingestion key:
 1. Go to **Settings** > **Ingestion Settings**
 2. The key ID is displayed in the ingestion keys list
 3. You can copy the key ID for use in filters
+
+## Next Steps
+
+- [Ingestion Limits](https://signoz.io/docs/cost-control/ingestion-limits/): cap a key's daily or per-second volume
+- [Cost Control](https://signoz.io/docs/cost-control/overview/): find what drives your ingestion volume and reduce it
+
+## Get Help
+
+<GetHelp />

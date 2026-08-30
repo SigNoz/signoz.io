@@ -1,5 +1,5 @@
 ---
-date: 2026-06-29
+date: 2026-08-25
 title: OpenTelemetry Collector Configuration
 meta_title: OpenTelemetry Collector Configuration
 description: "Configure the OpenTelemetry Collector: receivers, processors, exporters, extensions, and service pipelines for collecting and exporting telemetry."
@@ -72,7 +72,7 @@ service:
 
 ### 1. Receivers
 
-Receivers define how telemetry data enters the OTel Collector. Receivers can collect telemetry data from one or more sources and they can be pull or push based. Each receiver listens on a network endpoint, or scrapes metrics from targets.
+<Tooltip text="Receivers" content="A Collector pipeline component that defines how telemetry enters the Collector: an OTLP endpoint, a Prometheus scrape, a log file tail." link="https://signoz.io/docs/glossary/#receiver" /> define how telemetry data enters the OTel Collector. Receivers can collect telemetry data from one or more sources and they can be pull or push based. Each receiver listens on a network endpoint, or scrapes metrics from targets.
 
 #### OTLP Receiver
 
@@ -159,7 +159,7 @@ The forward slash separator is required. Writing `httpcheckcritical` (without th
 
 ### 2. Processors
 
-Processors are used to transform, filter, or enrich telemetry data between receivers and exporters.
+<Tooltip text="Processors" content="A Collector pipeline component that sits between receiving and exporting, transforming data in flight: batching, filtering, adding resource attributes, tail sampling." link="https://signoz.io/docs/glossary/#processor" /> are used to transform, filter, or enrich telemetry data between receivers and exporters.
 
 #### Batch Processor
 
@@ -175,7 +175,7 @@ processors:
 
 #### Memory Limiter
 
-This processor prevents out-of-memory (OOM) errors by continuously checking and limiting the memory usage of the collector.
+This processor prevents out-of-memory (OOM) errors by continuously checking and limiting the memory usage of the <Tooltip text="collector" content="The OpenTelemetry Collector, a vendor-agnostic binary that receives, processes, and exports telemetry." link="https://signoz.io/docs/glossary/#collector" />.
 
 ```yaml
 processors:
@@ -338,7 +338,7 @@ The `timeout` defines how long the processor waits for detection to complete. Se
 
 ### 3. Exporters
 
-Exporters send processed telemetry data to observability backends. You can configure multiple exporters to send data to various backends.
+<Tooltip text="Exporters" content="The component that emits telemetry to a consumer: an SDK exporter sending OTLP to a Collector, or a Collector exporter sending data to SigNoz." link="https://signoz.io/docs/glossary/#exporter" /> send processed telemetry data to observability backends. You can configure multiple exporters to send data to various backends.
 
 #### OTLP gRPC Exporter
 

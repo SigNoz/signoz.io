@@ -1,5 +1,5 @@
 ---
-date: 2026-05-18
+date: 2026-08-25
 title: Tail Sampling
 description: Sample traces at the collector after all spans arrive, using policies based on status, latency, span name, and more.
 doc_type: howto
@@ -12,7 +12,7 @@ Tail sampling evaluates a complete trace before deciding whether to keep or drop
 Use tail sampling when your sampling decision depends on trace-level data (error status, total duration, a specific span name) that isn't available until the trace completes.
 
 <Admonition type="warning" title="Impact on APM metrics">
-  SigNoz computes APM metrics (`signoz_calls_total`, `signoz_latency_sum`, and related RED metrics) from ingested trace data. When you enable tail-based sampling, those metrics cover only the sampled traces, so absolute values like total request counts undercount real traffic. Latency trends and error spikes stay reliable. SigNoz is aware of this gap and plans to address it in a future release.
+  SigNoz computes <Tooltip text="APM" content="Application Performance Monitoring." link="https://signoz.io/docs/glossary/#apm" /> metrics (`signoz_calls_total`, `signoz_latency_sum`, and related RED metrics) from ingested trace data. When you enable tail-based sampling, those metrics cover only the sampled traces, so absolute values like total request counts undercount real traffic. Latency trends and error spikes stay reliable. SigNoz is aware of this gap and plans to address it in a future release.
 </Admonition>
 
 ## Prerequisites
@@ -64,11 +64,11 @@ service:
 | Option                              | Default | Description                                                                   |
 | ----------------------------------- | ------- | ----------------------------------------------------------------------------- |
 | `decision_wait`                     | `30s`   | Wait time before evaluating a trace                                           |
-| `decision_wait_after_root_received` | `0s`    | Additional wait after root span arrives; `0s` disables root-span acceleration |
+| `decision_wait_after_root_received` | `0s`    | Additional wait after root span arrives. `0s` disables root-span acceleration |
 | `num_traces`                        | `50000` | Maximum traces buffered in memory                                             |
 | `expected_new_traces_per_sec`       | `0`     | Hint for pre-allocating memory                                                |
 | `sample_on_first_match`             | `false` | Short-circuit policy evaluation as soon as any policy matches, without evaluating remaining policies |
-| `maximum_trace_size_bytes`          | `0`     | Drop traces exceeding this size (bytes); `0` disables the limit                                      |
+| `maximum_trace_size_bytes`          | `0`     | Drop traces exceeding this size (bytes). `0` disables the limit                                      |
 
 ## Policies
 
@@ -77,10 +77,10 @@ Each policy defines a condition for keeping a trace. Policies are OR-ed: a trace
 <Admonition type="tip" title="Recommended policy order">
   Place `drop` policies first. With `sample_on_first_match: true`, the processor short-circuits evaluation as soon as a policy matches. Putting `drop` policies first means the processor drops noisy traces (health checks, probes) before running the remaining policies:
 
-  1. **Drop** — health checks, probes, known-noise spans
-  2. **Keep** — errors and slow traces
-  3. **Probabilistic fallback** — sample remaining traffic at a fixed rate
-  4. **Service-specific overrides** — different rates per service if needed
+  1. **Drop**: health checks, probes, known-noise spans
+  2. **Keep**: errors and slow traces
+  3. **Probabilistic fallback**: sample remaining traffic at a fixed rate
+  4. **Service-specific overrides**: different rates per service if needed
 </Admonition>
 
 ### Drop health-check and probe traces
@@ -241,7 +241,7 @@ processors:
         type: status_code
         status_code:
           status_codes: [ERROR]
-      # Policy 2: AND — all three sub-policies must match
+      # Policy 2: AND requires all three sub-policies to match
       - name: low-sample-probes
         type: and
         and:
@@ -283,13 +283,13 @@ After restarting the collector, confirm sampling is working:
 
 ### Memory pressure
 
-The processor holds all spans for each trace in memory until a decision is made. If trace volume exceeds `num_traces`, the oldest traces are evicted before evaluation — they are dropped without sampling.
+The processor holds all spans for each trace in memory until a decision is made. If trace volume exceeds `num_traces`, the oldest traces are evicted before evaluation. They are dropped without sampling.
 
 Monitor `otelcol_processor_tail_sampling_sampling_trace_dropped_too_early` for early drops. If this metric rises, increase `num_traces` or reduce `decision_wait`. Both changes increase memory usage. Set `maximum_trace_size_bytes` to drop oversized traces before they exhaust the buffer.
 
 ### Late-arriving spans
 
-A span arriving after its trace's sampling decision is made inherits the existing decision. If the decision has already been evicted from memory and no decision cache is configured, the late span triggers a new evaluation cycle — which can produce a different decision for that span.
+A span arriving after its trace's sampling decision is made inherits the existing decision. If the decision has already been evicted from memory and no decision cache is configured, the late span triggers a new evaluation cycle, which can produce a different decision for that span.
 
 Configure `decision_cache` (`sampled_cache_size` and `non_sampled_cache_size`) to persist decisions beyond the in-memory buffer. Set cache sizes well above `num_traces` to reduce the chance of a late span missing its cached decision.
 
@@ -311,7 +311,7 @@ All spans for a single trace must arrive at the same collector instance. Without
 ### Traces missing after enabling tail sampling
 
 1. Verify the processor is in the traces pipeline, not logs or metrics.
-2. Check `decision_wait` — if too short, spans may not have arrived before evaluation. Start with `10s` and increase if traces are long-running.
+2. Check `decision_wait`. If it is too short, spans may not have arrived before evaluation. Start with `10s` and increase if traces are long-running.
 3. Confirm `otelcol-contrib` is running, not the core distribution.
 
 ### High memory usage on the collector
@@ -322,14 +322,15 @@ All spans for a single trace must arrive at the same collector instance. Without
 
 ### Sampling decisions seem inconsistent
 
-1. Check for late-arriving spans — compare span arrival times against `decision_wait`.
+1. Check for late-arriving spans. Compare span arrival times against `decision_wait`.
 2. If running multiple collectors, verify trace-ID routing is working (load balancing exporter).
-3. Review your policies — `drop` overrides any `sample` decision regardless of policy order. If a `drop` policy matches, the trace is dropped even if another policy would have sampled it.
+3. Review your policies. A `drop` policy overrides any `sample` decision regardless of policy order. If a `drop` policy matches, the trace is dropped even if another policy would have sampled it.
 
 </details>
 
 ## Next Steps
 
+- [Cost Control](https://signoz.io/docs/cost-control/optimize-traces/): find which span operations drive your volume, then verify the reduction
 - [Control Traces Volume](https://signoz.io/docs/traces-management/guides/drop-spans/): drop individual spans, attributes, or use the filter processor alongside tail sampling
 - [PII Scrubbing in Traces](https://signoz.io/docs/traces-management/guides/pii-scrubbing/): remove sensitive attribute values before traces reach SigNoz
 
