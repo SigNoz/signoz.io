@@ -1,7 +1,7 @@
 ---
-date: 2026-05-15
-description: Learn how to invite team members in SigNoz, assign roles, send invites, and manage pending invitations.
-title: Invite Team Member
+date: 2026-08-09
+description: Learn how to invite team members in SigNoz, assign one or more roles per invitee, send invites, and manage pending invitations.
+title: Invite Team Members and Assign Multiple Roles in IAM
 doc_type: howto
 ---
 
@@ -26,8 +26,13 @@ For SigNoz Self-Host users, invite emails are sent only after SMTP is configured
 ## Step 2: Invite a team member
 
 - On the **Members** page, click **Invite member**.
-- Enter the teammate's email address and choose the role you want to assign.
-- Send the invitation.
+- Enter the teammate's email address in the **Email address** field.
+- In the **Roles** column, open the dropdown and select one or more roles. Selected roles appear as tags in the dropdown, and you can deselect an individual role without clearing the rest.
+- Add another row for each additional teammate, then send the invitation.
+
+<Admonition type="info">
+You can assign multiple roles to a single invitee in one invite action. Each row requires at least one role before the invite can be sent. The dropdown lists every role defined in your organization, including built-in roles and any [custom roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/) you have created.
+</Admonition>
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/invite-team-member/invite-team-member-step2.webp" alt="Members page with Invite member button in SigNoz"/>
@@ -36,9 +41,29 @@ For SigNoz Self-Host users, invite emails are sent only after SMTP is configured
 
 ### Roles and access levels
 
+The built-in roles map to these access levels:
+
 - **Admin**: Can invite users, manage workspace settings, and access data.
 - **Editor**: Can view and edit telemetry data and dashboards.
 - **Viewer**: Has read-only access.
+
+Assign several roles to one invitee when they need combined access, for example a Viewer role plus a scoped custom role for API keys.
+
+### Validate emails before sending
+
+- Each row validates the email address as you type. An invalid entry shows **Invalid email address** inline so you can fix it before submitting.
+- If any row has an invalid or missing email, or no role selected, a callout at the top of the form blocks submission until you resolve it.
+
+### When some invites fail
+
+A bulk invite can partially succeed, for example when one email already belongs to an existing member. When that happens:
+
+- The successful invites are sent, and the form stays open so you can fix and retry the rest. It no longer shows a blocking error modal.
+- Each failed row surfaces its error details inline.
+- On the **Members** page, a **Some invites failed** warning toast appears.
+- In the onboarding flow, a **Some invites failed. Check the errors above.** warning notification appears.
+
+Correct the flagged rows and resend to invite the remaining teammates.
 
 ## Step 3: Track pending invites
 
