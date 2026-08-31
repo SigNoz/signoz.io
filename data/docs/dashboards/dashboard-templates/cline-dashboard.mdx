@@ -1,0 +1,79 @@
+---
+date: 2026-08-31
+title: Cline Dashboard
+meta_title: Cline Usage Dashboard
+description: "Monitor Cline usage in SigNoz: token spend and cost by model, prompt-cache effectiveness, request latency, tool mix, and provider API errors."
+doc_type: explanation
+---
+
+<Admonition type="note" title="Send telemetry first">
+To use this dashboard, you need to set up the data source and send telemetry to SigNoz. Follow the [Cline Monitoring](https://signoz.io/docs/cline-monitoring/) guide to get started.
+</Admonition>
+
+Cline's account page tells you what you spent in total. This dashboard tells you where it went: which model, which developer, how much of every request was context resent rather than new work, and what the agent actually did to earn the bill. It covers token spend and cost per model, prompt-cache effectiveness, request latency and time to first token, the mix of tools the agent reaches for, and every provider API error with its message.
+
+Panels read the events and metrics the Cline VS Code extension exports itself, so nothing beyond the setup in the guide is required. Queries filter on `service.name = 'cline'` and on the event name, which Cline puts in the log **body** rather than in an attribute: `body = 'task.tokens'` carries token counts and cost, `body = 'task.tool_used'` carries tool calls, and `body = 'task.provider_api_error'` carries failures. A Model variable scopes the token, cost, and latency panels.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/cline-dashboard.webp"
+  alt="Cline Dashboard"
+  caption="Cline Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/cline/cline-dashboard.json"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the telemetry the Cline extension emits to help you:
+
+- **Attribute Cost**: Break spend down per model, so a low-volume premium model that outspends a busy cheap one is visible
+- **Measure Cache Effectiveness**: Compare cache reads against input tokens to see whether you are paying repeatedly for the same context
+- **Track Token Spend**: Watch input, output, and cached tokens over time to separate context bloat from real workload growth
+- **See What the Agent Did**: Get the per-tool breakdown, including how often a human had to approve a call
+- **Measure Perceived Latency**: Watch time to first token, which is what a developer actually feels, alongside full request duration
+- **Diagnose Failures**: Read the individual provider errors behind the count, with error class, failure phase, and task ID
+
+## Panels Included
+
+The Overview section summarizes activity in the selected time range:
+
+| Panel | Description |
+|---|---|
+| Input Tokens | Total prompt tokens. Mostly resent context, so read it next to Cache Read Tokens. |
+| Output Tokens | Total generated tokens, typically one to two orders of magnitude below input. |
+| Cache Read Tokens | Tokens served from the provider cache. Reported separately from input, not included in it. |
+| Total Cost (USD) | Summed `totalCost`. Reads 0 on Cline's bundled free provider. |
+| Tasks Started | Count of tasks, not prompts or tool calls. Divide input tokens by this for average context size. |
+| Tool Calls | Every tool invocation, successful or not. Several times higher than tasks is the normal shape. |
+| Conversation Turns | Model round trips, useful against Tasks Started to see turns per task. |
+| Provider API Errors | Failures reaching the model. Turns red at one or more. |
+
+**Tokens and Cost**
+
+- **Token Usage Over Time**: Input against output per interval. The gap is the point: output stays near flat while input swings, because context resend dominates spend.
+- **Input Tokens by Model**: Prompt-token volume split per model. Usually shows a different ranking than request count does.
+- **Cost Over Time by Model**: Spend per interval per model. Worth reading against the previous panel, since a premium model can outspend a high-volume cheap one.
+- **Cache Read vs Write Tokens**: Prompt-cache effectiveness. High read with low write is the shape you want. Sustained writes with few reads means context changes faster than the cache pays for itself.
+
+**Latency**
+
+- **API Duration (p50 / p95 / p99)**: Full model request duration. A low steady p50 against a p99 pinned near the top is characteristic of agent traffic, where a few long generations dominate.
+- **Time To First Token (p95)**: How long before the model starts streaming, split per model. Reasoning-heavy models sit visibly higher here even when total duration is comparable.
+
+**Agent Activity and Errors**
+
+- **Event Mix**: Share of each event type. Tool use leading, then conversation turns and token events, is the normal shape. A gap between `task.created` and `task.initialization` points at tasks failing during startup.
+- **Tool Usage**: Calls per tool, split by success and by auto-approval. The auto-approval split shows how much the agent is being gated by a human.
+- **Recent Provider API Errors**: The individual failures behind the count. `failurePhase` separates requests rejected before the call from those that died mid-stream, which is the fastest way to tell a quota problem from a network one.
+
+<Admonition type="info" title="Why the latency panels can be empty at first" defaultCollapsed="true">
+The two latency panels are the only ones that read metrics rather than events. An OpenTelemetry meter exports an instrument only after its first recording, so a short evaluation session produces a single datapoint that already holds its final value and percentiles cannot be computed from it. Every other panel on this dashboard is exact from the first task. Give the agent a few days of normal use before reading the latency section.
+</Admonition>
+
+<Admonition type="info" title="Why Total Cost can read zero" defaultCollapsed="true">
+Cline computes cost on the client from its own per-model price table rather than reading a figure back from the provider, so a model that is free to you produces a correct `totalCost` of 0. Configure a directly priced provider in Cline's settings to populate the cost panels.
+</Admonition>

@@ -1,0 +1,203 @@
+---
+date: 2026-08-31
+title: "Cline Monitoring with OpenTelemetry: Tokens and Cost"
+meta_title: Cline OpenTelemetry Monitoring
+description: Monitor Cline in VS Code with OpenTelemetry and SigNoz. Track token usage, cost per model, cache hit rates, tool calls, latency, and provider API errors.
+doc_type: howto
+---
+
+## What is Cline Monitoring?
+
+<a href="https://cline.bot" target="_blank" rel="noopener noreferrer nofollow">Cline</a> is an open-source AI coding agent for VS Code that plans and executes multi-step work: it reads files, edits code, runs shell commands, and calls MCP servers on your behalf. Cline's own account page shows what you spent in total. What it does not show is where the spend went: which model, which repository, which developer, and how much of every request was context resent rather than new work.
+
+Cline ships an <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> exporter inside the VS Code extension, so this needs no plugin or wrapper. It emits events and metrics under the service name `cline`. With Cline monitoring in SigNoz you can see token spend and cost broken down by model and by developer, how effective the prompt cache is, which tools the agent reaches for and which fail, request latency and time to first token, and every provider API error with its message.
+
+## Prerequisites
+
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
+- VS Code with the <a href="https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev" target="_blank" rel="noopener noreferrer nofollow">Cline extension</a> installed (v4.1.16 or later)
+- A model provider configured in Cline
+
+## Monitor Cline with OpenTelemetry
+
+Cline reads its exporter configuration from `CLINE_OTEL_*` environment variables at extension activation, so the whole setup is environment variables plus a restart. No Cline account tier is required.
+
+**Step 1:** Export the configuration in a shell.
+
+```bash
+# Required. The default bundle emits no task events or metrics at all.
+export CLINE_BUNDLE_OVERRIDE=legacy
+
+export CLINE_OTEL_TELEMETRY_ENABLED=true
+export CLINE_OTEL_METRICS_EXPORTER=otlp
+export CLINE_OTEL_LOGS_EXPORTER=otlp
+export CLINE_OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export CLINE_OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export CLINE_OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning" title="Set the protocol to http/protobuf, not grpc">
+Cline's gRPC exporter is built with your authentication headers passed as `headers` rather than as gRPC metadata, so the OpenTelemetry SDK ignores them and every export is rejected with `16 UNAUTHENTICATED: Invalid or missing key`. Because gRPC is the documented default, this is the most common way the setup fails. Use `http/protobuf` against any backend that requires authentication.
+</Admonition>
+
+<Admonition type="warning" title="CLINE_BUNDLE_OVERRIDE is required, not optional">
+The extension ships two internal bundles. On the default `next` bundle, task execution runs through an SDK layer whose telemetry never reaches the extension's OpenTelemetry provider, so no task events and no metrics are produced. Without `CLINE_BUNDLE_OVERRIDE=legacy` you will see a handful of extension lifecycle events arrive successfully and nothing else, which reads like a working pipeline with no usage.
+</Admonition>
+
+**Step 2:** Launch VS Code from that same shell.
+
+```bash
+code
+```
+
+The extension host inherits the environment of the VS Code process, so launching from Finder, the Dock, or a Start menu shortcut picks up nothing. To make the configuration permanent, put the exports in your shell profile and always start VS Code from a terminal, or set them through your MDM or workspace tooling.
+
+**Step 3:** Send a prompt in Cline that uses a tool, such as asking it to read a file and edit it.
+
+Cline reads the configuration once at activation, so any change to these variables needs a full restart of VS Code rather than a window reload.
+
+<Admonition type="info" title="Optional: tighten the batching while you test" defaultCollapsed="true">
+Logs batch every 5 seconds and metrics export every 60 seconds by default, which makes a first test feel unresponsive. For a quicker feedback loop set `CLINE_OTEL_LOG_BATCH_TIMEOUT=2000` and `CLINE_OTEL_METRIC_EXPORT_INTERVAL=10000`, and set `TEL_DEBUG_DIAGNOSTICS=true` to print every export attempt to the Cline output channel.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## View Cline Events in SigNoz
+
+Cline exports events over the OpenTelemetry logs protocol rather than as traces. Allow a few seconds after your first prompt, then open the [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/) and filter on `service.name = 'cline'`.
+
+<Figure
+  src="/img/docs/llm/cline/cline-events.webp"
+  alt="Cline events in the SigNoz Logs Explorer filtered to the cline service"
+  caption="A single Cline session produces task, tool, terminal, and lifecycle events, with the event name in the log body."
+/>
+
+Opening a record shows its attributes. A `task.tokens` event carries the token counts and the computed cost for one model request.
+
+<Figure
+  src="/img/docs/llm/cline/cline-event-details.webp"
+  alt="An expanded Cline task.tokens event showing token counts, cost, and model attributes"
+  caption="One task.tokens event: input, output and cache-read tokens, the computed cost, and the model that served the request."
+/>
+
+## Attributes Worth Knowing
+
+The event name arrives as the **log body**, not as an attribute, so queries filter with `body = 'task.tokens'` rather than on a name field. Four more details decide whether your queries are correct.
+
+- **`ulid` is the task correlation key.** Every event produced by one task shares it. Cline emits no traces, so there is no trace or span ID to group on and `ulid` is the only way to reconstruct a task.
+- **Cache reads are counted separately from input.** `cacheReadTokens` is not included in `tokensIn`. Adding the two together double counts the context.
+- **The model key is not consistent.** `task.tokens` and `task.conversation_turn` use `model`, while `task.tool_used` uses `modelId`. A filter written for the token events silently drops every tool event.
+- **Absent values arrive as the string `"undefined"`.** `requestId`, `errorStatus`, and `isNativeToolCall` use the literal text rather than being omitted, so exclude that string explicitly when filtering.
+
+The events worth building on are `task.tokens` (`tokensIn`, `tokensOut`, `cacheReadTokens`, `cacheWriteTokens`, `totalCost`, `model`, `provider`), `task.tool_used` (`tool`, `success`, `autoApproved`), `task.conversation_turn` (`mode`, `source`), and `task.provider_api_error` (`errorType`, `errorClass`, `errorMessage`, `failurePhase`).
+
+## Track Token Usage and Cost
+
+Cost is the reason most teams instrument a coding agent, and Cline reports it per model request on the `task.tokens` event. Two things about that number are worth knowing before you build on it.
+
+**Cost is computed on the client.** Cline multiplies token counts by its own per-model price table rather than reading a figure back from the provider. That means `totalCost` reads `0` for a model that is free to you, including Cline's own bundled provider, and the zero is arithmetically correct rather than a broken export. Configure a directly priced provider under **Settings > API Provider** to get meaningful cost.
+
+**Most of your input tokens are resent context.** Cline replays the system prompt and workspace context on every turn, so a one-word prompt can carry eight thousand input tokens. Read `cacheReadTokens` next to `tokensIn`: a cache-read figure close to the input total means the provider cache is absorbing that repetition, and a low one means you are paying full price for it every turn.
+
+Both aggregate cleanly straight from the events, so a token or cost panel is accurate from the very first task:
+
+```
+service.name = 'cline' AND body = 'task.tokens'
+```
+
+<Admonition type="warning" title="Metrics need sustained traffic, events do not">
+Cline also publishes `cline.*` metrics, including `cline.api.duration.seconds` and `cline.api.ttft.seconds`, which are the only source for request latency and time to first token. An OpenTelemetry meter exports an instrument only after its first recording, so a short session produces one datapoint that already holds its final value and percentiles cannot be computed from it. Read tokens and cost from the events, which are exact immediately, and expect the latency panels to fill in once the agent is in daily use.
+</Admonition>
+
+## Cline Monitoring Dashboard
+
+The [Cline dashboard](https://signoz.io/docs/dashboards/dashboard-templates/cline-dashboard/) turns these events and metrics into token spend by model, cost over time, prompt-cache effectiveness, tool mix and failures, latency, and provider API errors.
+
+<Figure
+  src="/img/docs/llm/cline/cline-dashboard.webp"
+  alt="Cline monitoring dashboard in SigNoz showing token, cost, latency and tool panels"
+  caption="The Cline dashboard template, showing token and cost totals, spend by model, latency, and tool activity."
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting Cline Monitoring
+
+</ToggleHeading>
+
+### Every export fails with UNAUTHENTICATED
+
+The protocol is set to `grpc`. Cline passes your headers to the gRPC exporter in a field the OpenTelemetry SDK does not read for gRPC, so the ingestion key never leaves the machine. Set `CLINE_OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf` and restart VS Code.
+
+### Telemetry is enabled but nothing arrives
+
+Confirm the value is exactly `true`. `CLINE_OTEL_TELEMETRY_ENABLED=1` does not work on this path, even though `1` is accepted elsewhere in the extension, because the runtime configuration compares against the string `true`.
+
+Then confirm VS Code inherited the environment. Launching from the Dock or Finder gives the extension host an environment without your exports. Start VS Code with `code` from the shell where you set them.
+
+### Lifecycle events arrive but no task, token, or tool events
+
+`CLINE_BUNDLE_OVERRIDE=legacy` is missing. Lifecycle events such as `user.extension_activated` are emitted on a path that both bundles share, so a partially working export is the expected symptom. Set the variable and restart VS Code.
+
+### The diagnostic log always says count=0
+
+Ignore it. With `TEL_DEBUG_DIAGNOSTICS=true`, every successful export prints `count=0` regardless of how many records it carried. Verify in SigNoz instead of trusting that number.
+
+### Exports intermittently return Unauthorized
+
+A share of batches can be rejected under sustained load with a key that succeeds on the requests either side of them. Records in a rejected batch are lost, so treat a missing event as possibly dropped rather than never emitted.
+
+### Nothing is emitted from the Cline CLI
+
+This cannot be fixed by configuration. The OpenTelemetry exporter exists only in the VS Code extension, and the Cline CLI contains no OTLP support at all. Use the extension to collect telemetry.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** - Filter out noisy events you don't care about, or remove sensitive info before it leaves your machines.
+- **Keeping your app lightweight** - Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** - The Collector can tag your data with useful info like which team or environment it came from.
+- **Future flexibility** - Want to send data to multiple backends later? The Collector makes that easy without changing your setup.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+<Admonition type="warning" title="Signed-in sessions attach developer identity to every event">
+Once a user signs in to Cline, every event carries `user_name` and `user_id` in clear text, along with `distinct_id`. That is what makes per-developer cost attribution possible, and it also means personal identifiers reach your telemetry backend. Filter or redact them in a [logs pipeline](https://signoz.io/docs/logs-pipelines/introduction/) if that is not appropriate for your organisation.
+</Admonition>
+
+## Related integrations
+
+Instrument the other AI coding agents your team runs, using the same OpenTelemetry pipeline:
+
+- [Monitor Claude Code with OpenTelemetry](https://signoz.io/docs/claude-code-monitoring/)
+- [Monitor OpenAI Codex with OpenTelemetry](https://signoz.io/docs/codex-monitoring/)
+- [Cursor IDE observability with OpenTelemetry](https://signoz.io/docs/cursor-observability/)
+- [OpenCode observability with OpenTelemetry](https://signoz.io/docs/opencode-observability/)
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.
