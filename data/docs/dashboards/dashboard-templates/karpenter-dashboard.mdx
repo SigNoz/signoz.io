@@ -1,7 +1,7 @@
 ---
 date: 2026-08-31
 title: Karpenter Metrics Dashboard for Kubernetes Autoscaling
-description: Monitor Karpenter node autoprovisioning in SigNoz including provisioning latency, disruption and consolidation, scheduling, cloud provider health, and NodePool cost.
+description: Monitor Karpenter node autoprovisioning in SigNoz including provisioning latency, disruption, scheduling, cloud provider health, and NodePool cost.
 doc_type: explanation
 ---
 
@@ -105,7 +105,7 @@ Use these filter variables:
 - **Only the leader replica emits most metrics.** Karpenter runs two replicas with leader election. No panel groups by pod, so each one stays correct whichever replica holds the lease.
 - **Some panels are deliberately unfiltered.** `karpenter_nodes_*` and `karpenter_pods_state` cover every node and pod in the cluster, not only Karpenter's. Unmanaged nodes carry an empty `nodepool` and `capacity_type`, so filtering those panels would silently drop them.
 - **Counter panels use `increase`, which needs two datapoints.** Karpenter's labeled counters do not exist until their first increment, so a first-ever event on a new cluster does not register. Later events do.
-- **The instance type catalog metrics are excluded.** `karpenter_cloudprovider_instance_type_offering_available` and `_price_estimate` emit one series per instance type, zone, and capacity type in the region, and do not scale with cluster size. See the [cardinality guidance](https://signoz.io/docs/metrics-management/opentelemetry-karpenter-metrics/) in the setup guide.
+- **The instance type catalog metrics are excluded.** `karpenter_cloudprovider_instance_type_offering_available` and `_price_estimate` emit one series per instance type, zone, and capacity type in the region, and do not scale with cluster size. See the [cardinality guidance](https://signoz.io/docs/metrics-management/opentelemetry-karpenter-metrics/#key-metrics) in the setup guide.
 
 ## Related Dashboards
 
