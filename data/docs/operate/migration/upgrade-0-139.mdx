@@ -1,0 +1,92 @@
+---
+date: 2026-08-20
+title: Upgrade to v0.139.0 and Migrate Service Account Role API
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
+description: Upgrade self-hosted SigNoz to v0.139.0. The deprecated service account role write endpoints are removed; migrate API callers to /api/v1/service_account_roles.
+doc_type: howto
+---
+
+SigNoz v0.139.0 removes the two deprecated service account role write endpoints. Assigning and revoking a service account role now happen only through `/api/v1/service_account_roles`. This is an API-only change with no UI impact. If you never scripted against the removed paths, upgrade as usual and no action is needed.
+
+<Admonition type="warning" title="The nested service account role write endpoints are removed">
+`POST /api/v1/service_accounts/{id}/roles` and `DELETE /api/v1/service_accounts/{id}/roles/{rid}` no longer exist in v0.139.0. Calls to either path now fail. Move any script or automation that assigns or revokes service account roles to `/api/v1/service_account_roles` before you upgrade. Reading a service account's roles with `GET /api/v1/service_accounts/{id}/roles` is unchanged.
+</Admonition>
+
+## What changes for API callers
+
+Both write operations move from the nested `/api/v1/service_accounts/{id}/roles` path to the standalone `/api/v1/service_account_roles` collection. The service account and role are now passed in the request body or as the assignment ID instead of in the URL.
+
+| Operation | Removed endpoint | Use instead |
+|---|---|---|
+| Assign a role to a service account | `POST /api/v1/service_accounts/{id}/roles` | `POST /api/v1/service_account_roles` |
+| Revoke a service account role | `DELETE /api/v1/service_accounts/{id}/roles/{rid}` | `DELETE /api/v1/service_account_roles/{id}` |
+| List a service account's roles | `GET /api/v1/service_accounts/{id}/roles` | Unchanged, still supported |
+
+### Assign a role
+
+Send the service account and role in the request body instead of the URL:
+
+```bash
+curl -X POST 'https://<your-signoz-host>/api/v1/service_account_roles' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer <api-key>' \
+  -d '{"serviceAccountId": "<service-account-id>", "roleId": "<role-id>"}'
+```
+
+The response returns the new role assignment's `id` under the top-level `data` field.
+
+### Revoke a role
+
+Delete the role assignment by its `id`, which you can read from `GET /api/v1/service_accounts/{id}/roles`:
+
+```bash
+curl -X DELETE 'https://<your-signoz-host>/api/v1/service_account_roles/<assignment-id>' \
+  -H 'Authorization: Bearer <api-key>'
+```
+
+For the full request and response schema, see the service account endpoints in the [SigNoz API reference](https://signoz.io/api-reference/).
+
+## Upgrade self-hosted SigNoz
+
+<Tabs entityName="installer">
+<TabItem value="foundry" label="Foundry" default>
+
+Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundryctl</a> to pick up the v0.139.0 defaults, then re-apply your existing `casting.yaml`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+foundryctl cast -f casting.yaml
+```
+
+If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting.yaml</a> pins image versions, the new defaults will not override them (your config wins), so bump the SigNoz image pin to v0.139.0 yourself.
+
+</TabItem>
+<TabItem value="helm" label="Kubernetes (Helm chart)">
+
+Update the <a href="https://github.com/SigNoz/charts" target="_blank" rel="noopener noreferrer nofollow">chart</a> and upgrade. Replace `<namespace>` and `<release-name>` with your own values:
+
+```bash
+helm repo update
+helm -n <namespace> upgrade <release-name> signoz/signoz
+```
+
+`helm upgrade` takes the newest chart; add `--version 0.139.0` to pin the v0.139.0 chart.
+
+</TabItem>
+</Tabs>
+
+For Docker or binary deployments, follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/) and set the target version to v0.139.0. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops before you move to v0.139.0.
+
+## Verify the upgrade
+
+1. Pods and containers are healthy (`kubectl get pods -n <namespace>`, `docker compose ps`, or `systemctl status 'signoz-*'`).
+2. SigNoz reports v0.139.0 under **Settings**.
+3. If you migrated a script, run it once and confirm the role assignment and revocation succeed against `/api/v1/service_account_roles`.
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- <a href="https://github.com/SigNoz/signoz/issues" target="_blank" rel="noopener noreferrer nofollow">GitHub Issues</a>
+- [Community Slack](https://signoz.io/slack/)
+</content>
+</invoke>
