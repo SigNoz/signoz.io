@@ -3282,6 +3282,31 @@ module.exports = () => {
           destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
+        {
+          source: '/blog/opentelemetry-browser-instrumentation/',
+          destination: '/blog/opentelemetry-react/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-express/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/guides/react-monitoring/',
+          destination: '/blog/opentelemetry-react/',
+          permanent: true,
+        },
+        {
+          source: '/blog/angular-graphql/',
+          destination: '/blog/opentelemetry-angular/',
+          permanent: true,
+        },
+        {
+          source: '/blog/monitoring-graphql/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-graphql/',
+          permanent: true,
+        },
       ])
     },
     webpack: (config, options) => {
