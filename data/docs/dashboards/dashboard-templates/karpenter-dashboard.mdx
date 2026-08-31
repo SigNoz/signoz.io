@@ -1,0 +1,114 @@
+---
+date: 2026-08-31
+title: Karpenter Metrics Dashboard for Kubernetes Autoscaling
+description: Monitor Karpenter node autoprovisioning in SigNoz including provisioning latency, disruption and consolidation, scheduling, cloud provider health, and NodePool cost.
+doc_type: explanation
+---
+
+Use this dashboard to monitor Karpenter across fleet size and utilization, provisioning and scheduling, disruption and consolidation, controller and cloud provider health, Spot interruption, and NodePool capacity and cost.
+
+Karpenter exposes native `karpenter_*` metrics on the controller metrics endpoint, and the OpenTelemetry Collector scrapes them for this dashboard.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow the [Send Karpenter Metrics to SigNoz](https://signoz.io/docs/metrics-management/opentelemetry-karpenter-metrics/) guide.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/karpenter-dashboard.webp"
+  alt="Karpenter Metrics Dashboard"
+  caption="Karpenter Metrics Dashboard"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/karpenter/karpenter-dashboard.json"
+  dashboardName="Karpenter"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Confirm fleet state**: See how many nodes Karpenter tracks, how many it owns against the rest of the cluster, whether its view of the cluster is synced, and which build is running.
+- **Watch provisioning**: Track node and NodeClaim creation by NodePool and zone, scheduler queue depth, and how long pods wait to bind and start.
+- **Find unschedulable work**: Monitor pods Karpenter cannot place, and pending pods grouped by their effective zone constraint.
+- **Follow disruption**: Track disruption decisions by reason and NodePool, nodes eligible for disruption, budget consumption, and drain and termination activity.
+- **Check controller health**: Watch cloud provider call latency, call rate, error rate by method, and how long cluster state stays unsynced.
+- **Handle Spot interruption**: Track interruption messages by type and how long they sit on the queue before Karpenter processes them.
+- **Review capacity and cost**: Compare NodePool usage against configured limits, pod requests against allocatable, system overhead, and Karpenter's hourly cost estimate.
+
+## Metrics Included
+
+### Fleet Overview
+
+- **Nodes in Cluster State**: Nodes Karpenter tracks.
+- **Cluster State Synced**: `1` when Karpenter's view matches the API server.
+- **Karpenter-Managed Nodes**: Nodes Karpenter provisioned.
+- **Unschedulable Pods**: Pods Karpenter cannot place.
+- **Cluster Utilization by Resource**: Pod requests as a percentage of allocatable.
+- **Allocatable CPU: Karpenter-Managed vs Unmanaged**: Capacity split by the `managed` label.
+- **Karpenter Build Info**: Running version, Go version, and architecture.
+
+### Provisioning & Scheduling
+
+- **Nodes Created** and **NodeClaims Created**: Provisioning activity by NodePool, zone, and reason.
+- **Scheduler Queue Depth**: Pods waiting for a scheduling decision.
+- **Unschedulable Pods Over Time**: Unschedulable count by controller.
+- **Pending Pods by Effective Zone**: Pending pods by zone constraint.
+- **Pod Bound Duration**: p50, p95, and p99 time from pod creation to binding.
+- **Pod Provisioning Startup Duration (p95)**: Time from Karpenter deciding a pod can schedule until it runs.
+- **Longest Pod Unbound Wait by Namespace**: Age of the oldest unbound pod per namespace.
+- **Pods by Phase**: Pod counts by phase.
+
+### Disruption & Consolidation
+
+- **Disruption Decisions by Decision & Reason** and **by NodePool**: Voluntary disruption actions taken.
+- **Nodes Eligible for Disruption by Reason**: Nodes currently eligible, by reason.
+- **Allowed Disruptions by NodePool & Reason** and **Nodes Consuming Disruption Budget**: Budget headroom and usage.
+- **Nodes Drained** and **Nodes Terminated**: Drain and termination counts by NodePool and zone.
+- **NodeClaims Disrupted by Reason** and **NodeClaims Terminated**: NodeClaim-level disruption and removal.
+- **Disruption Decision Evaluation Duration**: p50 and p95 time to evaluate a disruption decision.
+- **Consolidation Timeouts**: Times the consolidation algorithm hit its timeout.
+- **NodeClaim Termination Duration (p95)**: Time to fully terminate a NodeClaim.
+
+### Controller & Cloud Provider Health
+
+- **CloudProvider Error Rate by Method & Error**: Failed cloud API calls.
+- **CloudProvider Call Latency by Method**: p50 and p95 latency per cloud API method.
+- **CloudProvider Call Rate by Method**: Call throughput per method.
+- **Cluster State Unsynced Time**: How long Karpenter's state has been out of sync.
+- **Scheduling Simulation Duration by Controller**: p50 and p95 scheduling simulation time.
+
+### Spot Interruption
+
+- **Interruption Messages Received by Type**: Spot interruption and instance health notices by message type.
+- **Interruption Message Queue Duration (p95)**: Time a message waits on the SQS queue before Karpenter handles it.
+
+### Capacity & Cost
+
+- **NodePool Usage as % of Limit**: Provisioned resources against configured NodePool limits.
+- **NodePool Hourly Cost Estimate**: Karpenter's current hourly cost estimate for a NodePool. This is not a billing source.
+- **CPU Requests as % of Allocatable**: Pod requests against allocatable, split by `managed`.
+- **Node System Overhead**: Resources reserved for system overhead.
+- **Oldest Karpenter Node Age by NodePool**: Age of the longest-lived Karpenter node.
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **nodepool**: Filter by Karpenter NodePool name.
+- **capacity_type**: Filter by `on-demand`, `spot`, or `reserved`.
+- **zone**: Filter by availability zone.
+
+## Notes
+
+- **The Spot Interruption panels need an interruption queue.** They stay empty unless you set `settings.interruptionQueue` to an SQS queue name when installing Karpenter.
+- **Only the leader replica emits most metrics.** Karpenter runs two replicas with leader election. No panel groups by pod, so each one stays correct whichever replica holds the lease.
+- **Some panels are deliberately unfiltered.** `karpenter_nodes_*` and `karpenter_pods_state` cover every node and pod in the cluster, not only Karpenter's. Unmanaged nodes carry an empty `nodepool` and `capacity_type`, so filtering those panels would silently drop them.
+- **Counter panels use `increase`, which needs two datapoints.** Karpenter's labeled counters do not exist until their first increment, so a first-ever event on a new cluster does not register. Later events do.
+- **The instance type catalog metrics are excluded.** `karpenter_cloudprovider_instance_type_offering_available` and `_price_estimate` emit one series per instance type, zone, and capacity type in the region, and do not scale with cluster size. See the [cardinality guidance](https://signoz.io/docs/metrics-management/opentelemetry-karpenter-metrics/) in the setup guide.
+
+## Related Dashboards
+
+- [Cert-Manager](https://signoz.io/docs/dashboards/dashboard-templates/cert-manager-dashboard/)
+- [KEDA](https://signoz.io/docs/dashboards/dashboard-templates/keda/)
+- [Hostmetrics and Kubernetes](https://signoz.io/docs/dashboards/dashboard-templates/hostmetrics-k8s/)

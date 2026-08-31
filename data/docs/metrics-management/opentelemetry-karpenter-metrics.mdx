@@ -1,0 +1,272 @@
+---
+date: 2026-08-31
+title: Send Karpenter Metrics to SigNoz with OpenTelemetry
+description: Scrape Karpenter Prometheus metrics with the OpenTelemetry Collector and monitor node provisioning, disruption, and pod scheduling in SigNoz.
+doc_type: howto
+---
+
+<a href="https://karpenter.sh/" target="_blank" rel="noopener noreferrer nofollow">Karpenter</a> provisions Kubernetes nodes on demand. When pods cannot be scheduled, Karpenter calls the cloud provider API to launch right-sized instances, then consolidates and terminates nodes as demand drops. The controller exposes Prometheus metrics that cover the full node lifecycle: provisioning latency, disruption decisions, scheduling queue depth, and cloud provider errors.
+
+Use this guide to scrape those metrics with the OpenTelemetry Collector and send them to SigNoz.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- Karpenter v1.x installed on your Kubernetes cluster (the default namespace is `kube-system`)
+- OpenTelemetry Collector deployed in the same cluster. See [OpenTelemetry Collector on Kubernetes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/get-started/) to get started
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## How Karpenter Exposes Metrics
+
+The Karpenter controller serves Prometheus-format metrics on port **8080** at `/metrics`. The endpoint is always on, so you do not need a feature flag or a Helm value to enable it. The Helm chart names the container port `http-metrics` and sets the `METRICS_PORT` environment variable from `controller.metrics.port`.
+
+All metric names use the `karpenter_` prefix.
+
+<Admonition type="warning" title="Karpenter runs two replicas by default">
+Karpenter uses leader election. Only the leader replica runs the controllers that populate most metrics, so the standby exports a small fraction of the series.
+
+Scrape each pod as a separate target with `kubernetes_sd_configs`. A scrape job pointed at the Karpenter Service DNS name hits a random replica each time. Your graphs then alternate between real values and gaps.
+</Admonition>
+
+## Send Karpenter Metrics to SigNoz
+
+### Step 1. Configure the OpenTelemetry Collector
+
+Merge the following into your existing Collector config. It adds a Prometheus scrape job that discovers Karpenter pods by their `http-metrics` port and an OTLP exporter that points to SigNoz.
+
+```yaml:otel-collector-config.yaml minimap defaultCollapsed
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'karpenter'
+          scrape_interval: 30s
+          kubernetes_sd_configs:
+            - role: pod
+              namespaces:
+                names:
+                  - kube-system
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_container_port_name]
+              action: keep
+              regex: http-metrics
+            - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+              action: keep
+              regex: karpenter
+            - source_labels: [__meta_kubernetes_pod_name]
+              target_label: pod
+
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
+    headers:
+      signoz-ingestion-key: '<your-ingestion-key>'
+
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      exporters: [otlphttp]
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+The two `keep` rules narrow discovery to Karpenter. The first keeps pods that expose a container port named `http-metrics`. The second matches the `app.kubernetes.io/name: karpenter` label that the Helm chart sets. If you installed Karpenter into a namespace other than `kube-system`, change the `names` list to match.
+
+<Admonition type="info">
+The Collector needs `ClusterRole` permissions for Kubernetes pod discovery. The [OpenTelemetry Collector on Kubernetes](https://signoz.io/docs/opentelemetry-collection-agents/k8s/get-started/) guide covers the required RBAC setup.
+</Admonition>
+
+### Step 2. Restart the Collector
+
+Find your Collector deployment, then restart it:
+
+```bash
+kubectl get deployment -n <collector-namespace>
+kubectl rollout restart deployment/<collector-deployment> -n <collector-namespace>
+```
+
+The name depends on how you installed the Collector. The OpenTelemetry Helm chart names it `<release-name>-opentelemetry-collector`, and the SigNoz `k8s-infra` chart uses its own names. Read the name from the command above rather than assuming it.
+
+## Validate
+
+After the Collector restarts:
+
+1. Go to **Metrics** > **[Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/)**.
+2. Filter by `service.name = 'karpenter'`. The Collector sets `service.name` from the scrape `job_name`, so this returns every Karpenter metric.
+3. Check for `karpenter_build_info`. Both replicas export it, so it confirms scraping works.
+4. Check for `karpenter_nodes_allocatable`. Only the leader exports it, so it confirms the leader is scraped too.
+
+Metrics appear within one scrape interval, 30 seconds with the config above.
+
+<Figure
+  src="/img/docs/metrics/karpenter/sample-metrics.webp"
+  alt="Karpenter metrics in SigNoz Metrics Explorer filtered by service.name"
+  caption="Karpenter metrics in Metrics Explorer. The Time series column shows each metric's series count."
+/>
+
+<details>
+<ToggleHeading>
+## Key Metrics
+</ToggleHeading>
+
+Karpenter groups its metrics by the stage of the node lifecycle they describe. The tables below list the metrics most teams start with. For the full list, see the <a href="https://karpenter.sh/docs/reference/metrics/" target="_blank" rel="noopener noreferrer nofollow">Karpenter metrics reference</a>.
+
+Histograms and summaries both arrive in SigNoz split into three names with dotted suffixes. Search for the suffixed name rather than the bare name below. Histograms use `.bucket`, `.count`, and `.sum`, as in `karpenter_scheduler_scheduling_duration_seconds.bucket`. Summaries use `.quantile`, `.count`, and `.sum`, as in `karpenter_pods_startup_duration_seconds.quantile`. The Type column in each table tells you which applies.
+
+### Node and NodeClaim lifecycle
+
+| Metric | Type | What it tells you |
+|---|---|---|
+| `karpenter_nodeclaims_created_total` | Counter | NodeClaims Karpenter requested, by `reason` and `nodepool` |
+| `karpenter_nodeclaims_terminated_total` | Counter | NodeClaims removed, by `nodepool`, `capacity_type`, and `zone` |
+| `karpenter_nodes_created_total` | Counter | Nodes that joined the cluster, by `nodepool` and `zone` |
+| `karpenter_nodes_terminated_total` | Counter | Nodes removed, by `nodepool` and `zone` |
+| `karpenter_nodes_termination_duration_seconds` | Summary | Time from a delete request to finalizer removal |
+| `karpenter_nodes_allocatable` | Gauge | Allocatable resources per node, by `resource_type` and `managed` |
+| `karpenter_cluster_utilization_percent` | Gauge | Pod requests as a percentage of allocatable, by `resource_type` |
+
+The `karpenter_nodes_*` gauges cover every node in the cluster, not only the nodes Karpenter created. The `managed` label separates them. Nodes that Karpenter does not manage carry an empty `nodepool` and an empty `capacity_type`. A query that filters on either label drops them without warning. Group by `managed` when you want the split, and leave those labels unfiltered when you want the whole cluster.
+
+### Pod scheduling
+
+| Metric | Type | What it tells you |
+|---|---|---|
+| `karpenter_scheduler_unschedulable_pods_count` | Gauge | Pods Karpenter cannot place right now |
+| `karpenter_scheduler_queue_depth` | Gauge | Pods waiting for a scheduling decision |
+| `karpenter_scheduler_scheduling_duration_seconds` | Histogram | Time each scheduling simulation takes |
+| `karpenter_pods_startup_duration_seconds` | Summary | Time from pod creation until the pod runs |
+| `karpenter_pods_unstarted_time_seconds` | Gauge | Age of pods that have not started yet |
+
+### Disruption and consolidation
+
+| Metric | Type | What it tells you |
+|---|---|---|
+| `karpenter_voluntary_disruption_decisions_total` | Counter | Disruption actions taken, by `decision` and `reason` |
+| `karpenter_voluntary_disruption_eligible_nodes` | Gauge | Nodes currently eligible for disruption, by `reason` |
+| `karpenter_nodeclaims_disrupted_total` | Counter | NodeClaims disrupted, by `reason` and `termination_mode` |
+| `karpenter_nodepools_allowed_disruptions` | Gauge | Concurrent disruptions a NodePool budget permits |
+| `karpenter_nodes_drained_total` | Counter | Nodes drained before termination, by `nodepool` |
+
+Karpenter also exposes `karpenter_consolidation_moves_total` and `karpenter_consolidation_score`, both alpha. They count balanced consolidation moves, so they stay absent when Karpenter only deletes empty nodes.
+
+The `reason` label is not cased consistently across these metrics. `karpenter_nodepools_allowed_disruptions` emits `Empty` and `Underutilized`, while `karpenter_voluntary_disruption_eligible_nodes` and the decision counters emit `empty` and `underutilized`. Match both spellings in any query or alert that spans the two.
+
+### Controller health and cloud provider
+
+| Metric | Type | What it tells you |
+|---|---|---|
+| `karpenter_cluster_state_synced` | Gauge | `1` when Karpenter's view matches the API server, `0` otherwise |
+| `karpenter_cluster_state_unsynced_time_seconds` | Gauge | How long state has been out of sync |
+| `karpenter_cloudprovider_errors_total` | Counter | Cloud API failures, by `method` and `error` |
+| `karpenter_cloudprovider_duration_seconds` | Histogram | Latency of cloud API calls, by `method` |
+| `karpenter_nodepools_limit` / `karpenter_nodepools_usage` | Gauge | Configured NodePool limits and current usage |
+
+<Admonition type="tip" title="AWS interruption metrics">
+The AWS provider adds `karpenter_interruption_received_messages_total`, `karpenter_interruption_deleted_messages_total`, and `karpenter_interruption_message_queue_duration_seconds`. These track Spot interruption and instance health notices. They only appear when you set `settings.interruptionQueue` to an SQS queue name during install.
+</Admonition>
+
+<Admonition type="warning" title="Most of the series come from the instance type catalog">
+Two metrics dominate Karpenter's output, and neither one scales with your cluster:
+
+- `karpenter_cloudprovider_instance_type_offering_available`
+- `karpenter_cloudprovider_instance_type_offering_price_estimate`
+
+Both carry `instance_type`, `capacity_type`, and `zone` labels, so Karpenter emits one series per offering in the region's EC2 catalog. That is every instance type the region sells, multiplied by the zones and capacity types in scope. Together they usually outweigh every other Karpenter metric combined. The count depends on the region, not on your cluster, so a single-node cluster pays the same as a large one.
+
+`karpenter_cloudprovider_instance_type_cpu_cores` and `karpenter_cloudprovider_instance_type_memory_bytes` add one more series per instance type each.
+
+Keep them if you chart instance pricing or availability. Otherwise drop them at the Collector by adding `metric_relabel_configs` to the existing `karpenter` job in `receivers.prometheus.config.scrape_configs`:
+
+```yaml:otel-collector-config.yaml
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'karpenter_cloudprovider_instance_type_.*'
+        action: drop
+```
+
+`karpenter_pods_state` is the other metric worth watching. It carries a label for every pod name, namespace, owner, node, zone, and instance type, and emits one series per pod. That makes it grow with pod count and churn rather than with the EC2 catalog, so drop it once pod counts make it expensive.
+
+See [Metrics volume control](https://signoz.io/docs/metrics-management/volume-control/) for more ways to reduce metric volume.
+</Admonition>
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### No `karpenter_` metrics in SigNoz
+
+Confirm that the Collector discovered the pods. Check the Collector logs for scrape errors and permission failures:
+
+```bash
+kubectl logs deployment/<collector-deployment> -n <collector-namespace>
+```
+
+A `cannot list resource "pods"` message means the Collector service account lacks the RBAC rules for pod discovery.
+
+### Pods discovered but nothing scraped
+
+Verify that the Karpenter pods expose the `http-metrics` port:
+
+```bash
+kubectl get pods -n kube-system -l app.kubernetes.io/name=karpenter \
+  -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[*].ports[*].name}{"\n"}{end}'
+```
+
+Each pod should list `http-metrics`. If your install overrides `controller.metrics.port`, the port number changes but the name stays the same.
+
+Confirm the endpoint answers from inside the cluster:
+
+```bash
+kubectl port-forward -n kube-system svc/karpenter 8080:8080 &
+curl -s http://localhost:8080/metrics | grep karpenter_build_info
+```
+
+### Only `karpenter_build_info` and Go runtime metrics appear
+
+You scraped the standby replica. The leader runs the controllers that populate the lifecycle, scheduling, and disruption metrics, so the gap between the two is large.
+
+Note that `kubectl port-forward` against `svc/karpenter` picks one pod and stays with it, so it reaches the standby about half the time. To scrape the leader on purpose, read the holder of the leader election lease first:
+
+```bash
+LEADER=$(kubectl get lease -n kube-system karpenter-leader-election \
+  -o jsonpath='{.spec.holderIdentity}' | sed 's/_.*//')
+echo "leader: ${LEADER}"
+
+kubectl port-forward -n kube-system "pod/${LEADER}" 8080:8080 &
+curl -s http://localhost:8080/metrics | grep -c '^karpenter_'
+```
+
+The leader returns a large count. If the count is very small, the scrape job is pointed at the Service DNS name rather than using `kubernetes_sd_configs`.
+
+If only one pod exists, the leader is the only replica and its metrics are already complete.
+
+### Provisioning metrics stay at zero
+
+`karpenter_nodes_created_total` and the disruption counters increment only when Karpenter acts. A cluster with enough spare capacity produces no provisioning events. To generate them, deploy a workload that requests more resources than the current nodes can satisfy, then watch the counter climb.
+
+### Metrics arrive late
+
+The example config scrapes every 30 seconds. Lower `scrape_interval` for faster feedback. A shorter interval also increases the number of data points you ingest.
+
+</details>
+
+## Next Steps
+
+- **Import the Karpenter dashboard**: Get all of these metrics charted across fleet, provisioning, disruption, controller health, and cost. See [Karpenter Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/karpenter-dashboard/).
+- **Set alerts**: Alert on `karpenter_cluster_state_synced` dropping to `0`, on a rising `karpenter_cloudprovider_errors_total`, or on `karpenter_scheduler_unschedulable_pods_count` staying above zero. See [Metric-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/).
+- **Monitor the nodes Karpenter creates**: Karpenter metrics cover provisioning decisions, not what runs on the nodes. Pair this guide with [Kubernetes infrastructure monitoring](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/).
+
+## Get Help
+
+<GetHelp />
