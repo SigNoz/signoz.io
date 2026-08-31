@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { useLogEvent } from '../../hooks/useLogEvent'
 import { getPageType } from '../../utils/getPageType'
 import { detectBotClientSide } from '../../utils/logEvent'
-import { getOrCreatePostHogSessionId } from '../../utils/userClient'
+import { getOrCreateAnalyticsSessionId } from '../../utils/userClient'
 
 const FLAGGED_TIMEZONES = (process.env.NEXT_PUBLIC_PAGEVIEW_FLAGGED_TIMEZONES || '')
   .split(',')
@@ -27,15 +27,15 @@ type TrackedPage = {
   pageReferrer?: string
   sessionId?: string
   startedAt: number
-  maxContentPercentage?: number
+  maxScrollDepthPercentage?: number
   left: boolean
 }
 
-const clampPercentage = (value: number) => Math.max(0, Math.min(1, value))
+const clampRatio = (value: number) => Math.max(0, Math.min(1, value))
 
-const roundPercentage = (value: number) => Math.round(value * 10000) / 10000
+const roundPercentage = (value: number) => Math.round(value * 100) / 100
 
-const getCurrentContentPercentage = () => {
+const getCurrentScrollDepthPercentage = () => {
   if (typeof window === 'undefined' || typeof document === 'undefined') return undefined
 
   const documentElement = document.documentElement
@@ -53,7 +53,7 @@ const getCurrentContentPercentage = () => {
   if (!viewportHeight || !scrollHeight) return undefined
 
   const viewportBottom = Math.min(scrollHeight, scrollTop + viewportHeight)
-  return roundPercentage(clampPercentage(viewportBottom / scrollHeight))
+  return roundPercentage(clampRatio(viewportBottom / scrollHeight) * 100)
 }
 
 export default function PageViewTracker() {
@@ -64,18 +64,21 @@ export default function PageViewTracker() {
   const previousPageUrl = useRef<string | null>(null)
   const currentPage = useRef<TrackedPage | null>(null)
 
-  const updateMaxContentPercentage = useCallback((page: TrackedPage) => {
-    const currentContentPercentage = getCurrentContentPercentage()
-    if (currentContentPercentage === undefined) return
+  const updateMaxScrollDepthPercentage = useCallback((page: TrackedPage) => {
+    const currentScrollDepthPercentage = getCurrentScrollDepthPercentage()
+    if (currentScrollDepthPercentage === undefined) return
 
-    page.maxContentPercentage = Math.max(page.maxContentPercentage || 0, currentContentPercentage)
+    page.maxScrollDepthPercentage = Math.max(
+      page.maxScrollDepthPercentage || 0,
+      currentScrollDepthPercentage
+    )
   }, [])
 
   const sendPageLeave = useCallback(
     (page: TrackedPage) => {
       if (page.left) return
       page.left = true
-      updateMaxContentPercentage(page)
+      updateMaxScrollDepthPercentage(page)
 
       const durationSeconds = Math.max(0, (Date.now() - page.startedAt) / 1000)
 
@@ -90,18 +93,16 @@ export default function PageViewTracker() {
             pageTitle: page.pageTitle,
             pageReferrer: page.pageReferrer,
             $session_id: page.sessionId,
-            $prev_pageview_duration: durationSeconds,
-            $prev_pageview_pathname: page.pathname,
-            $prev_pageview_max_content_percentage: page.maxContentPercentage,
+            pageDurationSeconds: durationSeconds,
+            scrollDepthPercentage: page.maxScrollDepthPercentage,
           },
         },
         {
-          sendToTunnel: false,
           transport: 'beacon',
         }
       )
     },
-    [logEvent, updateMaxContentPercentage]
+    [logEvent, updateMaxScrollDepthPercentage]
   )
 
   useEffect(() => {
@@ -111,7 +112,7 @@ export default function PageViewTracker() {
       animationFrameId = null
 
       if (currentPage.current) {
-        updateMaxContentPercentage(currentPage.current)
+        updateMaxScrollDepthPercentage(currentPage.current)
       }
     }
 
@@ -150,7 +151,7 @@ export default function PageViewTracker() {
       window.removeEventListener('scroll', requestContentPercentageUpdate)
       window.removeEventListener('resize', requestContentPercentageUpdate)
     }
-  }, [sendPageLeave, updateMaxContentPercentage])
+  }, [sendPageLeave, updateMaxScrollDepthPercentage])
 
   useEffect(() => {
     // Combine pathname and searchParams for a complete URL identifier
@@ -170,7 +171,7 @@ export default function PageViewTracker() {
     const pageType = getPageType(pathname || '') // Ensure pathname is defined
     const botDetection = detectBotClientSide()
     const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent : ''
-    const sessionId = getOrCreatePostHogSessionId()
+    const sessionId = getOrCreateAnalyticsSessionId()
     const pageUrl =
       typeof window !== 'undefined' ? `${window.location.origin}${currentUrl}` : currentUrl
     const pageTitle = typeof document !== 'undefined' ? document.title : undefined
@@ -244,7 +245,7 @@ export default function PageViewTracker() {
       pageReferrer,
       sessionId,
       startedAt: Date.now(),
-      maxContentPercentage: getCurrentContentPercentage(),
+      maxScrollDepthPercentage: getCurrentScrollDepthPercentage(),
       left: false,
     }
 

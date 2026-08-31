@@ -4,9 +4,11 @@ import { ANONYMOUS_ID_COOKIE, ANONYMOUS_ID_KEY, COOKIE_EXPIRY_DAYS } from '@/con
 
 const LEGACY_ANONYMOUS_ID_KEY = 'app_anonymous_id'
 const USER_ID_KEY = 'app_user_id'
-const POSTHOG_SESSION_ID_KEY = 'app_posthog_session_id'
-const POSTHOG_SESSION_LAST_ACTIVITY_KEY = 'app_posthog_session_last_activity'
-const POSTHOG_SESSION_TIMEOUT_MS = 30 * 60 * 1000
+const ANALYTICS_SESSION_ID_KEY = 'app_analytics_session_id'
+const ANALYTICS_SESSION_LAST_ACTIVITY_KEY = 'app_analytics_session_last_activity'
+const LEGACY_POSTHOG_SESSION_ID_KEY = 'app_posthog_session_id'
+const LEGACY_POSTHOG_SESSION_LAST_ACTIVITY_KEY = 'app_posthog_session_last_activity'
+const ANALYTICS_SESSION_TIMEOUT_MS = 30 * 60 * 1000
 
 export const getOrCreateAnonymousId = (): string | undefined => {
   if (typeof window === 'undefined') return undefined
@@ -42,22 +44,29 @@ export const getUserId = (): string | undefined => {
   }
 }
 
-export const getOrCreatePostHogSessionId = (): string | undefined => {
+export const getOrCreateAnalyticsSessionId = (): string | undefined => {
   if (typeof window === 'undefined') return undefined
 
   try {
     const now = Date.now()
-    const existingSessionId = localStorage.getItem(POSTHOG_SESSION_ID_KEY)
-    const lastActivity = Number(localStorage.getItem(POSTHOG_SESSION_LAST_ACTIVITY_KEY))
+    const existingSessionId =
+      localStorage.getItem(ANALYTICS_SESSION_ID_KEY) ||
+      localStorage.getItem(LEGACY_POSTHOG_SESSION_ID_KEY)
+    const lastActivity = Number(
+      localStorage.getItem(ANALYTICS_SESSION_LAST_ACTIVITY_KEY) ||
+        localStorage.getItem(LEGACY_POSTHOG_SESSION_LAST_ACTIVITY_KEY)
+    )
     const hasActiveSession =
       existingSessionId &&
       Number.isFinite(lastActivity) &&
-      now - lastActivity <= POSTHOG_SESSION_TIMEOUT_MS
+      now - lastActivity <= ANALYTICS_SESSION_TIMEOUT_MS
 
     const sessionId = hasActiveSession ? existingSessionId : uuidv7()
 
-    localStorage.setItem(POSTHOG_SESSION_ID_KEY, sessionId)
-    localStorage.setItem(POSTHOG_SESSION_LAST_ACTIVITY_KEY, String(now))
+    localStorage.setItem(ANALYTICS_SESSION_ID_KEY, sessionId)
+    localStorage.setItem(ANALYTICS_SESSION_LAST_ACTIVITY_KEY, String(now))
+    localStorage.removeItem(LEGACY_POSTHOG_SESSION_ID_KEY)
+    localStorage.removeItem(LEGACY_POSTHOG_SESSION_LAST_ACTIVITY_KEY)
 
     return sessionId
   } catch {
