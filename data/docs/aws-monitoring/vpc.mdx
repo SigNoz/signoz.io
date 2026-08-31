@@ -83,35 +83,39 @@ Follow these steps to create the lambda function:
 
 **Step 1:** Go to your AWS console and search for AWS Lambda, go to **Functions** and click on **Create Function**. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image"  src="/img/docs/elb/elb-logs-lambda_1.webp" alt="AWS Lambda Console showing Create function button"/>
-    <figcaption><i>Create Lambda function from AWS Console</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_1.webp"
+  alt="AWS Lambda Console showing Create function button"
+  caption="Create Lambda function from AWS Console"
+/>
 
 
 **Step 2:** Choose the `Author from scratch` checkbox and proceed to fill in the function name. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/vpc-docs/create_function.webp" alt="Lambda function creation form with Author from scratch option selected"/>
-    <figcaption><i>Choose the Author from scratch and fill up other details</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/vpc-docs/create_function.webp"
+  alt="Lambda function creation form with Author from scratch option selected"
+  caption="Choose the Author from scratch and fill up other details"
+/>
 
 
 
 **Step 3:** Choose `Python 3.x` as the Runtime version, `x86_64` as Architecture (preferably), and keep other settings as default. Select `Create a new role with basic Lambda permissions`for now, we’ll requiring more permissions down the lane. So for now, select this option. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_3.webp" alt="Lambda runtime and permissions configuration options"/>
-    <figcaption><i>Choose Create a new role here</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_3.webp"
+  alt="Lambda runtime and permissions configuration options"
+  caption="Choose Create a new role here"
+/>
 
 
 **Step 4:** Once you are done configuring the lambda function, your Lambda function is created.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/vpc-docs/lambda_function.webp" alt="Newly created Lambda function overview page"/>
-    <figcaption><i>Your barebones Lambda function is created now</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/vpc-docs/lambda_function.webp"
+  alt="Newly created Lambda function overview page"
+  caption="Your barebones Lambda function is created now"
+/>
 
 
 
@@ -121,26 +125,29 @@ As said in Step 3 previously, we need extra permissions in order to access the S
 
 **Step 1:** Scroll down from your Lambda page, you’ll see a few tabs there. Go to `Configurations` and select `Permissions` from the left sidebar. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/vpc-docs/execution_role.webp" alt="Lambda function Configuration tab showing Permissions section"/>
-    <figcaption><i>Choosing execution role from Configurations tab</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/vpc-docs/execution_role.webp"
+  alt="Lambda function Configuration tab showing Permissions section"
+  caption="Choosing execution role from Configurations tab"
+/>
 
 
 **Step 2:** Click on the `Execution Role name` link just under Role name, it will take us to AWS IAM page. Here we will add policies to get full S3 access. Once here, click on the `Add permissions` button and select `Attach policies` from the drop down list. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/vpc-docs/add_policy.webp" alt="IAM page showing Add permissions dropdown with Attach policies option"/>
-    <figcaption><i>Attach policies to your Lambda function</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/vpc-docs/add_policy.webp"
+  alt="IAM page showing Add permissions dropdown with Attach policies option"
+  caption="Attach policies to your Lambda function"
+/>
 
 
 **Step 3:** Search “S3” and you’ll a policy named `AmazonS3FullAccess`select that and proceed. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_7.webp" alt="IAM Attach policies page with AmazonS3FullAccess policy selected"/>
-    <figcaption><i>Policies you'll need to run your Lambda function</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_7.webp"
+  alt="IAM Attach policies page with AmazonS3FullAccess policy selected"
+  caption="Policies you'll need to run your Lambda function"
+/>
 
 
 <Admonition type="warning" >
@@ -167,20 +174,22 @@ To setup the trigger, follow these steps:
 
 **Step 1:** Click on the `+ Add trigger` button from the Lambda console. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/vpc-docs/add_trigger.webp" alt="Lambda function console showing Add trigger button"/>
-    <figcaption><i>Add a trigger to the function.</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/vpc-docs/add_trigger.webp"
+  alt="Lambda function console showing Add trigger button"
+  caption="Add a trigger to the function."
+/>
 
 
 **Step 2:** Select `S3` from the first drop down of AWS services list. Pick your S3 bucket for the second field. 
 
 **Step 3:** For the Event types field, you can select any number of options you wish. The trigger will occur depending upon what option(s) you choose here. By default, the `All object create events` will be selected. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/vpc-docs/add_trigger_2.webp" alt="S3 trigger configuration showing event type selection dropdown"/>
-    <figcaption><i>Choose event types from the drop down menu</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/vpc-docs/add_trigger_2.webp"
+  alt="S3 trigger configuration showing event type selection dropdown"
+  caption="Choose event types from the drop down menu"
+/>
 
 
 Verify the settings and click on `Add` button at bottom right to add this trigger.
@@ -210,36 +219,40 @@ zip -r dependencies.zip ../python
 
 **Step 2:** To upload your zip file, go to AWS Lambda > Layers and click on `Create Layer`. [Not inside your specific Lambda function, just the landing page of AWS Lambda]. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-layer_3.webp" alt="AWS Lambda Layers page with Create Layer button"/>
-    <figcaption><i>Creating a new Layer</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/elb/elb-logs-layer_3.webp"
+  alt="AWS Lambda Layers page with Create Layer button"
+  caption="Creating a new Layer"
+/>
 
 
 **Step 3:** You’ll be redirected to Layer configurations page, here, give a name to your layer, an optional description, select `Upload a .zip file` , click on `Upload` and locate the requirements.zip file. 
 
 **Step 4:** Select your desired architecture and pick `Python 3.x` as your runtime. Hit `Create`. Your layer has now been created. Now lets connect it to our Lambda function which we created to send logs to SigNoz. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-layer_4.webp" alt="Layer configuration page with upload zip file option"/>
-    <figcaption><i>Uploading the requirements.zip file to later add it as a layer </i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/elb/elb-logs-layer_4.webp"
+  alt="Layer configuration page with upload zip file option"
+  caption="Uploading the requirements.zip file to later add it as a layer"
+/>
 
 
 **Step 5:** Go to your Lambda function, scroll down to Layers section and on the right of it, you’ll find a button that says `Add a layer` to click on. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-layer_5.webp" alt="Lambda function Layers section with Add a layer button"/>
-    <figcaption><i>Add a layer to your Lambda function</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/elb/elb-logs-layer_5.webp"
+  alt="Lambda function Layers section with Add a layer button"
+  caption="Add a layer to your Lambda function"
+/>
 
 
 **Step 6:** Pick `Custom layers` from the checkbox and select your custom layer from the given drop down below and then click on the button `Add`. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-layer_6.webp" alt="Add layer dialog showing Custom layers option and layer selection dropdown"/>
-    <figcaption><i>Choose your layer name</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/elb/elb-logs-layer_6.webp"
+  alt="Add layer dialog showing Custom layers option and layer selection dropdown"
+  caption="Choose your layer name"
+/>
 
 
 Congratulations, the `requests` module has been successfully integrated into your code area. By adding this layer, you have resolved the `request module not found error` that would have otherwise occurred.
@@ -448,37 +461,41 @@ To extend the timeout duration, follow these steps:
 By adjusting the timeout setting, you ensure that your Lambda function has sufficient time to complete the data transfer process without encountering timeouts. This proactive measure enhances the reliability and effectiveness of your deployed solution.
 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-timeout_increase.webp" alt="Lambda function General Configuration showing timeout setting"/>
-    <figcaption><i>Configuring execution timeout of Lambda function</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/elb/elb-logs-timeout_increase.webp"
+  alt="Lambda function General Configuration showing timeout setting"
+  caption="Configuring execution timeout of Lambda function"
+/>
 
 
 Once you've finished adjusting the timeout setting, navigate to the code editor for your Lambda function. Locate the 'test' button, and from the dropdown menu, select the option labeled 'Configure test events.' Create a new test case by specifying it as an S3 PUT event, then save your configuration.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_test_event.webp" alt="Lambda test event configuration dialog with S3 PUT event template"/>
-    <figcaption><i>Creating Sample event</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_test_event.webp"
+  alt="Lambda test event configuration dialog with S3 PUT event template"
+  caption="Creating Sample event"
+/>
 
 You're now prepared to proceed. Whenever you make alterations to the code and wish to evaluate them, follow these steps: Deploy the code first (equivalent to pressing 'Save'), and once it's fully deployed, proceed to click on the 'Test' button.
 
 Below is an image showing the process of transmitting VPC logs to the SigNoz endpoint.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_10.webp" alt="Lambda function code editor showing the VPC log forwarding code"/>
-    <figcaption><i>Visual representation of code in Lambda function</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_10.webp"
+  alt="Lambda function code editor showing the VPC log forwarding code"
+  caption="Visual representation of code in Lambda function"
+/>
 
 
 ### Test Case and Output
 
 If the logs are sent successfully, here's how they'll be transmitted. The following output displays the JSON-formatted data as we've printed it to visualize the sent information.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_output.webp" alt="Lambda function execution output showing successful log transmission"/>
-    <figcaption><i>Visual representation of code output of Lambda function</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_output.webp"
+  alt="Lambda function execution output showing successful log transmission"
+  caption="Visual representation of code output of Lambda function"
+/>
 
 
 ## Validate
@@ -489,10 +506,11 @@ To verify that your VPC Flow Logs are being sent correctly to SigNoz:
 2. You should see your VPC logs appearing in the logs list.
 3. Click on any log line to view its detailed information and verify the parsed fields like `srcaddr`, `dstaddr`, `action`, etc.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_12.webp" alt="SigNoz Logs Explorer showing VPC Flow Logs with parsed network traffic fields"/>
-    <figcaption><i>A sample VPC Flow Log line in SigNoz Logs Explorer</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_12.webp"
+  alt="SigNoz Logs Explorer showing VPC Flow Logs with parsed network traffic fields"
+  caption="A sample VPC Flow Log line in SigNoz Logs Explorer"
+/>
 
 ## Next Steps
 
