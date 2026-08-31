@@ -3257,7 +3257,6 @@ module.exports = () => {
           destination: '/opentelemetry/nodejs/',
           permanent: true,
         },
-        // August 2026 OTel JavaScript cluster pruning
         {
           source: '/blog/opentelemetry-browser-instrumentation/',
           destination: '/blog/opentelemetry-react/',
