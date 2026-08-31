@@ -10,6 +10,9 @@ const {
   buildContentMarkdownRewritePath,
   shouldRewritePageToMarkdown,
   buildPageMarkdownRewritePath,
+  hasCuratedMarkdownTwin,
+  shouldRewriteCuratedPageToMarkdown,
+  buildCuratedMarkdownRewritePath,
   servesMarkdownAlternate,
 } = loadTsModule('utils/agentMarkdownRouting.ts')
 
@@ -74,9 +77,9 @@ test('buildContentMarkdownRewritePath maps to the internal content route', () =>
 })
 
 test('shouldRewritePageToMarkdown covers generic pages via .md or Accept', () => {
-  assert.equal(shouldRewritePageToMarkdown('/pricing.md', false), true)
-  assert.equal(shouldRewritePageToMarkdown('/pricing', true), true)
-  assert.equal(shouldRewritePageToMarkdown('/pricing', false), false)
+  assert.equal(shouldRewritePageToMarkdown('/alerts-management.md', false), true)
+  assert.equal(shouldRewritePageToMarkdown('/alerts-management', true), true)
+  assert.equal(shouldRewritePageToMarkdown('/alerts-management', false), false)
   assert.equal(shouldRewritePageToMarkdown('/', true), true)
   assert.equal(shouldRewritePageToMarkdown('/application-performance-monitoring.md', false), true)
   assert.equal(shouldRewritePageToMarkdown('/product-comparison/signoz-vs-datadog.md', false), true)
@@ -121,13 +124,40 @@ test('shouldRewritePageToMarkdown leaves markdown sitemap routes alone', () => {
 })
 
 test('buildPageMarkdownRewritePath maps paths to the internal page route', () => {
-  assert.equal(buildPageMarkdownRewritePath('/pricing.md'), '/api/page-markdown/pricing')
-  assert.equal(buildPageMarkdownRewritePath('/pricing/'), '/api/page-markdown/pricing')
+  assert.equal(
+    buildPageMarkdownRewritePath('/alerts-management.md'),
+    '/api/page-markdown/alerts-management'
+  )
+  assert.equal(
+    buildPageMarkdownRewritePath('/alerts-management/'),
+    '/api/page-markdown/alerts-management'
+  )
   assert.equal(buildPageMarkdownRewritePath('/'), '/api/page-markdown')
   assert.equal(
     buildPageMarkdownRewritePath('/product-comparison/signoz-vs-datadog.md'),
     '/api/page-markdown/product-comparison/signoz-vs-datadog'
   )
+})
+
+test('curated markdown twins bypass the generic page pipeline', () => {
+  assert.equal(hasCuratedMarkdownTwin('/pricing'), true)
+  assert.equal(hasCuratedMarkdownTwin('/pricing/'), true)
+  assert.equal(hasCuratedMarkdownTwin('/pricing.md'), true)
+  assert.equal(hasCuratedMarkdownTwin('/alerts-management'), false)
+
+  // /pricing.md is a real route; only Accept-negotiated /pricing is rewritten.
+  assert.equal(shouldRewriteCuratedPageToMarkdown('/pricing', true), true)
+  assert.equal(shouldRewriteCuratedPageToMarkdown('/pricing/', true), true)
+  assert.equal(shouldRewriteCuratedPageToMarkdown('/pricing', false), false)
+  assert.equal(shouldRewriteCuratedPageToMarkdown('/pricing.md', true), false)
+  assert.equal(shouldRewriteCuratedPageToMarkdown('/alerts-management', true), false)
+
+  assert.equal(buildCuratedMarkdownRewritePath('/pricing'), '/pricing.md')
+  assert.equal(buildCuratedMarkdownRewritePath('/pricing/'), '/pricing.md')
+
+  assert.equal(shouldRewritePageToMarkdown('/pricing', true), false)
+  assert.equal(shouldRewritePageToMarkdown('/pricing.md', false), false)
+  assert.equal(shouldRewritePageToMarkdown('/pricing.md', true), false)
 })
 
 test('servesMarkdownAlternate flags URLs with a markdown representation', () => {
