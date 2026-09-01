@@ -16,10 +16,10 @@ export default function GetStartedInfrastructureMonitoring({
     return (
       <div className="my-6 w-full">
         <div className="space-y-4">
-          <h3 className="my-0 text-lg font-medium text-gray-700">
+          <h3 className="my-0 text-lg font-medium text-[var(--l1-foreground)]">
             Set Up Infrastructure Monitoring in SigNoz
           </h3>
-          <p className="text-gray-600">
+          <p className="text-[var(--l2-foreground)]">
             Monitor your infrastructure health and performance with our comprehensive solution. Get
             started in minutes with our guided setup process.
           </p>
@@ -48,28 +48,34 @@ export default function GetStartedInfrastructureMonitoring({
           <div className="max-w-3xl self-center">
             <div className="hidden max-w-3xl items-start space-x-4 md:flex">
               <div className="flex flex-col text-left">
-                <div className="mb-1 text-sm font-medium text-gray-300">1. Choose Data Source</div>
-                <div className="text-sm text-gray-500">Host or K8s</div>
+                <div className="mb-1 text-sm font-medium text-[var(--l1-foreground)]">
+                  1. Choose Data Source
+                </div>
+                <div className="text-sm text-[var(--l3-foreground)]">Host or K8s</div>
               </div>
               <div className="mt-4 flex items-center">
-                <ArrowRight className="h-5 w-5 text-gray-400" />
+                <ArrowRight className="h-5 w-5 text-[var(--l3-foreground)]" />
               </div>
               <div className="flex flex-col text-left">
-                <div className="mb-1 text-sm font-medium text-gray-300">
+                <div className="mb-1 text-sm font-medium text-[var(--l1-foreground)]">
                   2. Configure OTel Collector
                 </div>
-                <div className="text-sm text-gray-500">with our templates</div>
+                <div className="text-sm text-[var(--l3-foreground)]">with our templates</div>
               </div>
               <div className="mt-4 flex items-center">
-                <ArrowRight className="h-5 w-5 text-gray-400" />
+                <ArrowRight className="h-5 w-5 text-[var(--l3-foreground)]" />
               </div>
               <div className="flex flex-col text-left">
-                <div className="mb-1 text-sm font-medium text-gray-300">3. Visualize your data</div>
-                <div className="text-sm text-gray-500">in comprehensive dashboards</div>
+                <div className="mb-1 text-sm font-medium text-[var(--l1-foreground)]">
+                  3. Visualize your data
+                </div>
+                <div className="text-sm text-[var(--l3-foreground)]">
+                  in comprehensive dashboards
+                </div>
               </div>
             </div>
             <div className="md:hidden">
-              <p className="text-gray-300">
+              <p className="text-[var(--l2-foreground)]">
                 Start monitoring your infrastructure in 3 simple steps: First, choose your
                 infrastructure data source (Host or Kubernetes). Then, configure OpenTelemetry
                 Collector with our templates. Finally, visualize your infrastructure data in our
@@ -92,36 +98,38 @@ export default function GetStartedInfrastructureMonitoring({
 
   return (
     <div className="my-6 w-full">
-      <div className="rounded-lg bg-gradient-to-r from-gray-900/90 to-gray-800/90 p-6 shadow-md backdrop-blur-sm transition-all duration-300 ease-in-out hover:shadow-lg">
+      <div className="rounded-lg border border-[var(--l1-border)] bg-gradient-to-r from-[var(--l2-background)] to-[var(--l3-background-60)] p-6 shadow-md backdrop-blur-sm transition-all duration-300 ease-in-out hover:shadow-lg dark:border-transparent dark:from-gray-900/90 dark:to-gray-800/90">
         <div className="space-y-4">
-          <h3 className="my-0 text-lg font-medium text-gray-400">
+          <h3 className="my-0 text-lg font-medium text-[var(--l2-foreground)]">
             Set Up Infrastructure Monitoring in SigNoz with our <strong>Guided Onboarding</strong>
           </h3>
 
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-700 text-sm font-medium">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--l3-background)] text-sm font-medium text-[var(--l1-foreground)]">
                 1
               </div>
-              <span className="text-sm text-gray-300">
+              <span className="text-sm text-[var(--l2-foreground)]">
                 Choose your infrastructure data source (Host or Kubernetes)
               </span>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-700 text-sm font-medium">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--l3-background)] text-sm font-medium text-[var(--l1-foreground)]">
                 2
               </div>
-              <span className="text-sm text-gray-300">
+              <span className="text-sm text-[var(--l2-foreground)]">
                 Configure OpenTelemetry Collector with our templates
               </span>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-700 text-sm font-medium">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--l3-background)] text-sm font-medium text-[var(--l1-foreground)]">
                 3
               </div>
-              <span className="text-sm text-gray-300">Visualize your infrastructure data</span>
+              <span className="text-sm text-[var(--l2-foreground)]">
+                Visualize your infrastructure data
+              </span>
             </div>
           </div>
 
