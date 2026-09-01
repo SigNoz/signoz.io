@@ -82,7 +82,9 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
 
   return (
     <div className="flex flex-col gap-3 px-4 md:px-8 lg:px-0">
-      <h1 className={`text-3xl font-semibold text-signoz_vanilla-100 ${Styles['header-title']}`}>
+      <h1
+        className={`text-3xl font-semibold text-[var(--l1-foreground)] ${Styles['header-title']}`}
+      >
         Changelog
       </h1>
       <div
@@ -94,11 +96,11 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
         >
           Subscribe for updates
         </button>
-        <span className="block h-1 w-1 rounded-full bg-signoz_slate-200"></span>
+        <span className="block h-1 w-1 rounded-full bg-[var(--l3-foreground)]"></span>
         <Link
           href="https://www.linkedin.com/company/signozio"
           target="_blank"
-          className="text-base text-signoz_vanilla-400 hover:text-signoz_vanilla-100"
+          className="text-base text-[var(--l2-foreground)] hover:text-[var(--l1-foreground)]"
         >
           Follow us on LinkedIn
         </Link>
@@ -108,8 +110,8 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
           {Object.values(DeploymentType).map((type) => (
             <button
               key={type}
-              className={`flex items-center gap-1.5 rounded-full border border-signoz_slate-400 bg-signoz_ink-500 py-1 pl-3 pr-2 text-xs text-signoz_vanilla-100 transition-colors hover:bg-signoz_ink-300 active:bg-signoz_slate-400 ${
-                currentDeploymentType === type ? 'bg-signoz_slate-400' : ''
+              className={`flex items-center gap-1.5 rounded-full border border-[var(--l2-border)] bg-[var(--l1-background)] py-1 pl-3 pr-2 text-xs text-[var(--l1-foreground)] transition-colors hover:bg-[var(--l2-background-hover)] active:bg-[var(--l3-background-hover)] ${
+                currentDeploymentType === type ? 'bg-[var(--l3-background)]' : ''
               }`}
               onClick={() => handleDeploymentTypeChange(type)}
             >
@@ -128,18 +130,18 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
         backdrop="blur"
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        panelClassName="overflow-hidden rounded-lg bg-signoz_ink-400 p-0"
+        panelClassName="overflow-hidden rounded-lg bg-[var(--l2-background)] p-0"
       >
         <div className="flex flex-col">
           <p
-            className={`p-4 text-sm text-signoz_vanilla-100 ${Styles['subscription-modal-header']}`}
+            className={`p-4 text-sm text-[var(--l1-foreground)] ${Styles['subscription-modal-header']}`}
           >
             Get notified when we ship something new
           </p>
-          <span className="block h-px w-full bg-signoz_slate-500"></span>
+          <span className="block h-px w-full bg-[var(--l2-border)]"></span>
           <div className="px-4 pb-4 pt-3">
             <form className="flex flex-col gap-2" onSubmit={handleEmailSubmit}>
-              <label htmlFor="email" className="text-sm text-signoz_vanilla-100">
+              <label htmlFor="email" className="text-sm text-[var(--l1-foreground)]">
                 Enter your email
               </label>
               <div className="flex">
@@ -152,12 +154,12 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
                   value={email}
                   onChange={handleEmailChange}
                   placeholder="Eg. johndoe@example.com"
-                  className="w-full rounded-l-sm border border-r-0 border-solid border-signoz_slate-400 bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300"
+                  className="w-full rounded-l-sm border border-r-0 border-solid border-[var(--l2-border)] bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300"
                 />
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex w-32 items-center justify-center gap-1 rounded-r-sm bg-signoz_robin-500 px-4 text-xs text-signoz_vanilla-100 active:bg-signoz_robin-600"
+                  className="flex w-32 items-center justify-center gap-1 rounded-r-sm bg-signoz_robin-500 px-4 text-xs text-[var(--l1-foreground)] active:bg-signoz_robin-600"
                 >
                   {isSubmitting ? (
                     <Loader2 size={16} className="animate-spin" />
