@@ -179,8 +179,10 @@ export function proxy(req: NextRequest) {
 
   // Advertise the markdown representation so clients can discover it without
   // parsing the page. A markdown response is the alternate, so it gets none.
+  // Parameterized URLs get none either: the markdown pipeline renders the
+  // pathname only, so the twin would not represent the requested resource.
   const markdownAlternatePath =
-    markdownRewritePath || isAgentMarkdownSelfFetch
+    markdownRewritePath || isAgentMarkdownSelfFetch || req.nextUrl.search !== ''
       ? null
       : shouldRewriteDocsToMarkdown(pathname, true)
         ? buildDocsMarkdownAlternatePath(pathname)

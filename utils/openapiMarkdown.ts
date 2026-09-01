@@ -98,7 +98,10 @@ const renderSecuritySchemes = (document: OpenAPIDocument): string[] => {
 export function buildApiReferenceMarkdown(spec: LatestOpenAPISpec): string {
   const { document, version } = spec
   const byTag = collectOperationsByTag(document)
-  const operationCount = [...byTag.values()].reduce((total, ops) => total + ops.length, 0)
+  // Multi-tagged operations appear in every group they are tagged with, so the
+  // headline total counts unique method/route pairs instead of grouped entries.
+  const operationCount = new Set([...byTag.values()].flat().map((op) => `${op.method} ${op.route}`))
+    .size
   const pathCount = Object.keys(document.paths || {}).length
   const title = asString(document.info?.title) || 'SigNoz'
   const description = asString(document.info?.description)
@@ -120,7 +123,7 @@ export function buildApiReferenceMarkdown(spec: LatestOpenAPISpec): string {
     `- Machine-readable spec: [openapi.json](${siteMetadata.siteUrl}/openapi.json) — YAML at [openapi.yaml](${siteMetadata.siteUrl}/openapi.yaml)`,
     `- Spec release: \`${version}\`${openapiVersion ? ` (OpenAPI ${openapiVersion})` : ''}`,
     `- Interactive reference: ${siteMetadata.siteUrl}/api-reference/`,
-    `- Per-release specs: ${siteMetadata.siteUrl}/api-reference/<release>/ (append \`.md\`, or send \`Accept: text/markdown\`, for the raw spec)`,
+    `- Per-release specs: ${siteMetadata.siteUrl}/api/api-reference-openapi/<release> (a release tag, e.g. \`${version}\`, or \`latest\`)`,
     `- Documentation: ${siteMetadata.siteUrl}/docs/introduction/`,
     '',
     '## Authentication',

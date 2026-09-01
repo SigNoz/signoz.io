@@ -349,6 +349,19 @@ test('omits the Link header on markdown responses and on paths without a twin', 
   assert.equal(run('/').headers.get('link'), null)
 })
 
+test('omits the Link header on parameterized URLs', () => {
+  // The markdown pipeline renders the pathname only, so /changelog.md would be
+  // page 1 regardless of ?page — not an alternate of the requested resource.
+  assert.equal(run('/changelog/?page=2').headers.get('link'), null)
+  assert.equal(run('/pricing/?deploymentType=cloud').headers.get('link'), null)
+  assert.equal(run('/docs/introduction/?foo=bar').headers.get('link'), null)
+
+  assert.equal(
+    run('/pricing/').headers.get('link'),
+    '<https://signoz.io/pricing.md>; rel="alternate"; type="text/markdown"'
+  )
+})
+
 test('omits the Link header on the internal page-markdown self-fetch', () => {
   const res = run('/pricing', {
     headers: { [AGENT_MARKDOWN_SELF_FETCH_HEADER]: '1' },
