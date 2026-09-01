@@ -110,7 +110,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
           {Object.values(DeploymentType).map((type) => (
             <button
               key={type}
-              className={`flex items-center gap-1.5 rounded-full border border-[var(--l2-border)] bg-[var(--l1-background)] py-1 pl-3 pr-2 text-xs text-[var(--l1-foreground)] transition-colors hover:bg-[var(--l2-background-hover)] active:bg-[var(--l3-background-hover)] ${
+              className={`flex items-center gap-1.5 rounded-full border border-[var(--l2-border)] bg-[var(--l2-background)] py-1 pl-3 pr-2 text-xs text-[var(--l1-foreground)] transition-colors hover:bg-[var(--l2-background-hover)] active:bg-[var(--l3-background-hover)] ${
                 currentDeploymentType === type ? 'bg-[var(--l3-background)]' : ''
               }`}
               onClick={() => handleDeploymentTypeChange(type)}

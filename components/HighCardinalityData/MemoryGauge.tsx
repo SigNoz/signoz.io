@@ -77,7 +77,7 @@ export default function MemoryGauge() {
         {/* Right: The RAM Tank */}
         <div className="relative flex w-full flex-col items-center md:block md:w-auto">
           {/* Tank Container */}
-          <div className="relative h-64 w-24 overflow-hidden rounded-lg border-2 border-[var(--l1-border)] bg-[var(--l2-background)] md:w-32">
+          <div className="relative h-64 w-24 overflow-hidden rounded-lg border-2 border-[var(--l2-border)] bg-[var(--l2-background)] md:w-32">
             {/* Fluid */}
             <div
               className={`absolute bottom-0 left-0 right-0 transition-all duration-300 ease-out ${isOOM ? 'bg-red-600' : 'bg-blue-600'}`}
@@ -107,7 +107,7 @@ export default function MemoryGauge() {
       </div>
 
       {/* Full Width Slider Control */}
-      <div className="rounded-xl border border-[var(--l1-border)] bg-[var(--l2-background)] p-4 md:p-8">
+      <div className="rounded-xl border border-[var(--l2-border)] bg-[var(--l2-background)] p-4 md:p-8">
         <div className="mb-4 flex items-end justify-between">
           <label className="text-sm font-bold uppercase tracking-wider text-[var(--l2-foreground)]">
             Scale Users (Cardinality)

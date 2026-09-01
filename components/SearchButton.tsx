@@ -230,7 +230,7 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
         <Search className="h-3.5 w-3.5 text-[var(--l3-foreground)] transition group-hover:text-[var(--l1-foreground-hover)]" />
         <span className="hidden text-xs sm:inline">Search docs...</span>
         {!disableShortcut && (
-          <span className="ml-1.5 hidden items-center gap-1 rounded-md border border-[var(--l2-border)] bg-[var(--l1-background-60)] px-1 py-[1px] text-[10px] font-medium text-[var(--l3-foreground)] sm:flex">
+          <span className="ml-1.5 hidden items-center gap-1 rounded-md border border-[var(--l1-border)] bg-[var(--l1-background-60)] px-1 py-[1px] text-[10px] font-medium text-[var(--l3-foreground)] sm:flex">
             <Command className="h-2.5 w-2.5" />K
           </span>
         )}

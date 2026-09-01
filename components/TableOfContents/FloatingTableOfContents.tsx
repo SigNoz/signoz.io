@@ -110,7 +110,7 @@ const FloatingTableOfContents: React.FC = () => {
     >
       {/* Menu Items */}
       <div
-        className={`absolute bottom-16 left-0 min-w-[240px] rounded-lg bg-[color-mix(in_srgb,var(--l3-background)_95%,transparent)] p-3 shadow-xl ring-1 ring-[var(--l2-border)] backdrop-blur-sm transition-all duration-300 ${
+        className={`absolute bottom-16 left-0 min-w-[240px] rounded-lg bg-[color-mix(in_srgb,var(--l3-background)_95%,transparent)] p-3 shadow-xl ring-1 ring-[var(--l3-border)] backdrop-blur-sm transition-all duration-300 ${
           isOpen
             ? 'pointer-events-auto translate-y-0 opacity-100'
             : 'pointer-events-none translate-y-4 opacity-0'
@@ -154,7 +154,7 @@ const FloatingTableOfContents: React.FC = () => {
       {/* Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 rounded-full bg-[color-mix(in_srgb,var(--l3-background)_90%,transparent)] px-4 py-2 text-[var(--l1-foreground)] shadow-lg ring-1 ring-[var(--l2-border)] backdrop-blur-sm transition-all duration-300 hover:bg-[var(--l3-background-hover)] ${
+        className={`flex items-center gap-2 rounded-full bg-[color-mix(in_srgb,var(--l3-background)_90%,transparent)] px-4 py-2 text-[var(--l1-foreground)] shadow-lg ring-1 ring-[var(--l3-border)] backdrop-blur-sm transition-all duration-300 hover:bg-[var(--l3-background-hover)] ${
           isOpen ? 'bg-[var(--l3-background-hover)]' : ''
         }`}
       >

@@ -21,7 +21,9 @@ function renderIcon(spec?: IconSpec): React.ReactNode {
   }
 
   if (typeof spec === 'string') {
-    return <img src={spec} alt="" className="h-7 w-7 object-contain" loading="lazy" />
+    return (
+      <img src={spec} alt="" className="no-theme-invert h-7 w-7 object-contain" loading="lazy" />
+    )
   }
 
   return (
@@ -59,13 +61,13 @@ export default function ListicleCardGrid({
           <li key={`${item.href}-${item.name}-${index}`} className="h-full w-full">
             <TrackingLink
               href={item.href}
-              className="flex h-full w-full flex-col items-center justify-center rounded-lg border border-[var(--l1-border)] bg-[var(--l2-background)] p-4 text-center no-underline transition-all hover:border-[var(--accent-primary)] hover:bg-[var(--l2-background-hover)]"
+              className="flex h-full w-full flex-col items-center justify-center rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] p-4 text-center no-underline transition-all hover:border-[var(--accent-primary)] hover:bg-[var(--l2-background-hover)]"
               clickType="Nav Click"
               clickName={item.clickName || item.name}
               clickText={item.name}
               clickLocation={sectionName}
             >
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-md">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-signoz_ink-300 dark:bg-transparent">
                 {renderIcon(item.icon)}
               </div>
               <span className="text-sm font-medium text-[var(--l1-foreground)]">{item.name}</span>

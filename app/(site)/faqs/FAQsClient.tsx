@@ -87,7 +87,7 @@ export default function FAQsClient({ faqs }: FAQsClientProps) {
               <li key={faq.path}>
                 <Link
                   href={`/faqs${faq.path}`}
-                  className="block transform rounded-lg border border-[var(--l1-border)] bg-[var(--l2-background)] p-4 shadow-md transition duration-500 hover:shadow-lg sm:p-6"
+                  className="block transform rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] p-4 shadow-md transition duration-500 hover:shadow-lg sm:p-6"
                 >
                   <article>
                     <div>

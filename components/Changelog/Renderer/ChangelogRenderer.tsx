@@ -70,7 +70,7 @@ const ChangelogRenderer: React.FC<ChangelogRendererProps> = ({ changelog }) => {
         <Link
           target="_blank"
           href={`https://github.com/signoz/signoz/releases/tag/${changelog.version}`}
-          className="inline-flex w-fit items-center gap-1.5 rounded-full border border-[var(--l2-border)] bg-[var(--l1-background)] px-2 py-1 text-xs !text-[var(--l1-foreground)] !no-underline  transition-colors hover:bg-[var(--l2-background-hover)] active:bg-[var(--l3-background-hover)]"
+          className="inline-flex w-fit items-center gap-1.5 rounded-full border border-[var(--l2-border)] bg-[var(--l2-background)] px-2 py-1 text-xs !text-[var(--l1-foreground)] !no-underline  transition-colors hover:bg-[var(--l2-background-hover)] active:bg-[var(--l3-background-hover)]"
         >
           {changelog.version}
         </Link>

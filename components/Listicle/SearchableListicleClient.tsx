@@ -38,7 +38,7 @@ export default function SearchableListicleClient({
           placeholder={searchPlaceholder}
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
-          className="block w-full rounded-lg border border-[var(--l1-border)] bg-[var(--l2-background)] py-2 pl-10 pr-3 leading-5 text-[var(--l1-foreground)] placeholder-[var(--l3-foreground)] focus:border-[var(--accent-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] sm:text-sm"
+          className="block w-full rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] py-2 pl-10 pr-3 leading-5 text-[var(--l1-foreground)] placeholder-[var(--l3-foreground)] focus:border-[var(--accent-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] sm:text-sm"
         />
       </div>
 

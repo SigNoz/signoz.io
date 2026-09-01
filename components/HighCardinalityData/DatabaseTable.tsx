@@ -84,7 +84,7 @@ export default function DatabaseTable() {
 
   return (
     <div className="mx-auto my-12 w-full max-w-4xl font-mono text-sm">
-      <div className="overflow-hidden rounded-lg border border-[var(--l1-border)] bg-[var(--l2-background)] shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] shadow-sm">
         <div className="overflow-x-auto">
           {/* Table Header */}
           <div className="grid min-w-[600px] grid-cols-5 border-b border-[var(--l2-border)] bg-[var(--l3-background)]">

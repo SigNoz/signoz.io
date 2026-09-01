@@ -9,7 +9,7 @@ interface InterlinkCardProps {
 export default function InterlinkCard({ href, title, className = '' }: InterlinkCardProps) {
   return (
     <div
-      className={`mb-6 rounded-lg border border-[var(--l1-border)] bg-[var(--l2-background)] p-4 ${className}`}
+      className={`mb-6 rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] p-4 ${className}`}
     >
       <Link
         href={href}

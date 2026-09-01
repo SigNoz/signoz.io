@@ -142,7 +142,7 @@ export default function ProductFeatureShowcase() {
               alt={feature.image.alt}
               caption={feature.image.caption}
               className="h-48 w-full object-cover md:h-56"
-              figureClassName="m-0 flex flex-col gap-2 overflow-hidden rounded-lg border border-[var(--l2-border)] bg-[var(--l3-background-60)] shadow-sm"
+              figureClassName="m-0 flex flex-col gap-2 overflow-hidden rounded-lg border border-[var(--l3-border)] bg-[var(--l3-background-60)] shadow-sm"
               captionClassName="px-4 pb-4 text-xs italic text-[var(--l2-foreground)]"
             />
             <Link

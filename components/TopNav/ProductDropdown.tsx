@@ -89,7 +89,10 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
               onClick={onClose}
               prefetch={false}
             >
-              <KernelLogo className="h-auto w-12 shrink-0" aria-hidden="true" />
+              <KernelLogo
+                className="h-auto w-12 shrink-0 [&_path]:fill-[var(--l1-foreground)]"
+                aria-hidden="true"
+              />
               <div className="line-clamp-2 min-w-0 flex-1 text-sm text-[var(--l2-foreground)] group-hover:text-[var(--l1-foreground-hover)]">
                 How Kernel Reduced Browser Acquisition Latency from 140ms to 30ms with SigNoz MCP
               </div>

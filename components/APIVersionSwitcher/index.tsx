@@ -133,7 +133,7 @@ export default function APIVersionSwitcher({
         <SelectValue placeholder="Version" />
       </SelectTrigger>
       <SelectContent
-        className="border border-[var(--l2-border)] bg-[var(--l3-background)] text-[var(--l1-foreground)]"
+        className="border border-[var(--l3-border)] bg-[var(--l3-background)] text-[var(--l1-foreground)]"
         position="popper"
         align="start"
         side="bottom"

@@ -47,7 +47,7 @@ export default function ArticleSeriesBottom({
   return (
     <div
       className={cn(
-        'overflow-hidden rounded-lg border border-[var(--l1-border)] bg-[var(--l2-background)] text-[var(--l1-foreground)] shadow-sm',
+        'overflow-hidden rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] text-[var(--l1-foreground)] shadow-sm',
         className
       )}
     >
@@ -82,7 +82,7 @@ export default function ArticleSeriesBottom({
       )}
 
       {/* Footer for Previous & Full Series */}
-      <div className="flex items-center justify-between border-t border-[var(--l1-border)] bg-[var(--l3-background-60)] px-4 py-3 text-sm sm:px-6">
+      <div className="flex items-center justify-between border-t border-[var(--l3-border)] bg-[var(--l3-background-60)] px-4 py-3 text-sm sm:px-6">
         {showPrevious && prevLink ? (
           <Link
             href={prevLink.href}
