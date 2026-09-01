@@ -48,6 +48,7 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'CodeTab',
   'CodeTabs',
   'ToggleHeading',
+  'Tooltip',
   'TroubleshootingWizard',
 ] as const
 export const REVIEWED_FALLBACK_AGENT_MDX_COMPONENT_NAMES = [
@@ -432,6 +433,20 @@ const createKnownComponentStubs = (
     )
   },
   ToggleHeading: (props) => React.createElement('div', null, props.children),
+  // Hovering means nothing in plain text, so keep the term inline as a link to its
+  // definition. Must stay inline (not a block) or the surrounding sentence splits apart.
+  Tooltip: (props) => {
+    const text = getStringProp(props, 'text')
+    const link = getStringProp(props, 'link')
+
+    if (!text) {
+      return React.createElement(React.Fragment, null)
+    }
+
+    return link
+      ? React.createElement('a', { href: link }, text)
+      : React.createElement('span', null, text)
+  },
   TroubleshootingWizard: createTroubleshootingWizardStub(),
   RegionTable: () => {
     return React.createElement(

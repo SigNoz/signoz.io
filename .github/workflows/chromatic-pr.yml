@@ -4,36 +4,30 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'components/**'
-      - 'shared/**'
-      - 'stories/**'
-      - '.storybook/**'
-      - 'css/**'
-      - 'utils/mdx/**'
-      - 'tailwind.config.js'
-      - 'postcss.config.js'
-      - 'package.json'
-      - 'yarn.lock'
-      - 'chromatic.config.json'
-      - '.github/workflows/chromatic-pr.yml'
+    types: [opened, synchronize, reopened, labeled]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event.action != 'labeled' }}
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   chromatic:
     name: Run Chromatic
     runs-on: ubuntu-latest
+    if: >-
+      contains(github.event.pull_request.labels.*.name, 'run-visual-testing') &&
+      (github.event.action != 'labeled' || github.event.label.name != 'update-visual-testing') &&
+      github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -49,4 +43,9 @@ jobs:
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           onlyChanged: true
-          exitOnceUploaded: true
+
+      - name: Mark PR as visually tested
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr edit "$PR_NUMBER" --add-label update-visual-testing --remove-label run-visual-testing

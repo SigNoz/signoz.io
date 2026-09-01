@@ -939,6 +939,31 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/distributed-tracing-jaeger/',
+          destination: '/blog/jaeger-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/guides/how-to-implement-jaeger/',
+          destination: '/blog/jaeger-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/guides/can-jaeger-show-metrics/',
+          destination: '/blog/jaeger-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-database-does-jaeger-use/',
+          destination: '/blog/jaeger-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/blog/jaeger-microservices/',
+          destination: '/blog/jaeger-tracing/',
+          permanent: true,
+        },
+        {
           source: '/blog/opentelemetry-exporters/',
           destination: '/guides/opentelemetry-collector-vs-exporter/',
           permanent: true,
@@ -2343,6 +2368,134 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/guides/how-to-install-prometheus-and-grafana-on-kubernetes/',
+          destination: '/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/kubernetes-deployments/',
+          destination: '/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source:
+            '/guides/kubernetes-hpa-unable-to-get-metrics-for-resource-memory-no-metrics-returned-from-resource-metrics-api/',
+          destination: '/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/kubernetes-operator/',
+          destination: '/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/kubernetes-security-best-practices/',
+          destination: '/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/kubernetes-sidecar/',
+          destination: '/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/kubernetes-alternatives/',
+          destination: '/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/kubectl-logs/',
+          destination: '/blog/kubectl-logs-tail/',
+          permanent: true,
+        },
+        {
+          source: '/blog/kubernetes-audit-logs/',
+          destination: '/blog/kubectl-logs-tail/',
+          permanent: true,
+        },
+        {
+          source: '/blog/kubernetes-events-monitoring/',
+          destination: '/blog/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/does-kubernetes-use-prometheus/',
+          destination: '/blog/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source:
+            '/guides/how-to-calculate-containers-cpu-usage-in-kubernetes-with-prometheus-as-monitoring/',
+          destination: '/blog/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/how-to-monitor-custom-kubernetes-pod-metrics-using-prometheus/',
+          destination: '/blog/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/kubernetes-monitoring-best-practices/',
+          destination: '/blog/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/kubernetes-monitoring-prometheus/',
+          destination: '/blog/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/blog/kubernetes-logging/',
+          destination: '/blog/opentelemetry-kubernetes/',
+          permanent: true,
+        },
+        {
+          source: '/guides/kubernetes-observability/',
+          destination: '/blog/opentelemetry-kubernetes/',
+          permanent: true,
+        },
+        {
+          source: '/blog/kubernetes-observability/',
+          destination: '/blog/opentelemetry-kubernetes/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-kubernetes-cluster-metrics-monitoring/',
+          destination: '/blog/opentelemetry-kubernetes/',
+          permanent: true,
+        },
+        {
+          source: '/blog/kubernetes-metrics-server/',
+          destination: '/guides/kube-state-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/guides/how-to-get-number-of-pods-running-in-prometheus/',
+          destination: '/guides/kube-state-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/guides/prometheus-queries-to-get-cpu-and-memory-usage-in-kubernetes-pods/',
+          destination: '/guides/kube-state-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/blog/using-signoz-to-monitor-your-kubernetes-cluster/',
+          destination: '/kubernetes-monitoring/',
+          permanent: true,
+        },
+        {
+          source: '/guides/kubernetes-pod/',
+          destination:
+            '/guides/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile/',
+          permanent: true,
+        },
+        {
+          source: '/guides/kubernetes-cronjobs/',
+          destination: '/guides/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus/',
+          permanent: true,
+        },
+        {
           source: '/firebase-alternatives',
           destination: '/comparisons/firebase-alternatives/',
           permanent: true,
@@ -2359,7 +2512,7 @@ module.exports = () => {
         },
         {
           source: '/kubernetes-alternatives',
-          destination: '/comparisons/kubernetes-alternatives/',
+          destination: '/kubernetes-monitoring/',
           permanent: true,
         },
         {
@@ -3260,6 +3413,31 @@ module.exports = () => {
         {
           source: '/blog/nodejs-performance-monitoring/',
           destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-browser-instrumentation/',
+          destination: '/blog/opentelemetry-react/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-express/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/guides/react-monitoring/',
+          destination: '/blog/opentelemetry-react/',
+          permanent: true,
+        },
+        {
+          source: '/blog/angular-graphql/',
+          destination: '/blog/opentelemetry-angular/',
+          permanent: true,
+        },
+        {
+          source: '/blog/monitoring-graphql/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-graphql/',
           permanent: true,
         },
       ])

@@ -1,11 +1,10 @@
 import { components } from '@/components/MDXComponents'
 import FAQLayout, { RelatedArticleProps } from '@/layouts/FAQLayout'
+import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/breadcrumbSchema'
+import JsonLdScript from '@/components/JsonLdScript'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { SidebarIcons } from '@/components/sidebar-icons/icons'
-import Button from '@/components/ui/Button'
 import { getAuthorDirectory, getContentBySlug } from '@/utils/contentRepository'
 import { MDXContent } from '@/utils/strapi'
 import { generateStructuredData } from '@/utils/structuredData'
@@ -197,6 +196,8 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   const authorList = getAuthorKeys(content)
   const authorNames = authorList.map((author) => authorDirectory[author]?.name || author)
   const tags = getTagValues(content)
+  const breadcrumbs = getSectionArticleBreadcrumbs('faqs', content.title, path)
+  const breadcrumbJsonLd = buildBreadcrumbSchema(breadcrumbs)
 
   // Prepare content for FAQLayout
   const mainContent = {
@@ -228,24 +229,15 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
-
-      <div className="container mx-auto">
-        <Button variant={'ghost'} isButton={true} className="ml-3.5 mt-10 hover:bg-transparent">
-          <Link href={`/faqs/`} className="flex items-center">
-            <SidebarIcons.ArrowLeft />
-            <span className="pl-1.5 text-sm">Back to FAQs</span>
-          </Link>
-        </Button>
-      </div>
+      <JsonLdScript data={structuredData} />
+      <JsonLdScript data={breadcrumbJsonLd} />
 
       <FAQLayout
+        breadcrumbs={breadcrumbs}
         content={mainContent}
         authorDetails={authorDetails}
-        authors={authorNames}
+        authors={authorList}
+        authorDirectory={authorDirectory}
         toc={toc}
         tags={tags}
         relatedArticles={relatedArticles}
