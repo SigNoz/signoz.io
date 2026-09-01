@@ -43,11 +43,11 @@ export CLINE_OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-ke
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-<Admonition type="warning" title="Set the protocol to http/protobuf, not grpc">
+<Admonition type="warning" title="Set the protocol to http/protobuf, not grpc" defaultCollapsed="true">
 Cline's gRPC exporter is built with your authentication headers passed as `headers` rather than as gRPC metadata, so the OpenTelemetry SDK ignores them and every export is rejected with `16 UNAUTHENTICATED: Invalid or missing key`. Because gRPC is the documented default, this is the most common way the setup fails. Use `http/protobuf` against any backend that requires authentication.
 </Admonition>
 
-<Admonition type="warning" title="CLINE_BUNDLE_OVERRIDE is required, not optional">
+<Admonition type="warning" title="CLINE_BUNDLE_OVERRIDE is required, not optional" defaultCollapsed="true">
 The extension ships two internal bundles. On the default `next` bundle, task execution runs through an SDK layer whose telemetry never reaches the extension's OpenTelemetry provider, so no task events and no metrics are produced. Without `CLINE_BUNDLE_OVERRIDE=legacy` you will see a handful of extension lifecycle events arrive successfully and nothing else, which reads like a working pipeline with no usage.
 </Admonition>
 
@@ -63,7 +63,7 @@ The extension host inherits the environment of the VS Code process, so launching
 
 Cline reads the configuration once at activation, so any change to these variables needs a full restart of VS Code rather than a window reload.
 
-<Admonition type="info" title="Optional: tighten the batching while you test" defaultCollapsed="true">
+<Admonition type="info" title="Tighten the batching while you test" defaultCollapsed="true">
 Logs batch every 5 seconds and metrics export every 60 seconds by default, which makes a first test feel unresponsive. For a quicker feedback loop set `CLINE_OTEL_LOG_BATCH_TIMEOUT=2000` and `CLINE_OTEL_METRIC_EXPORT_INTERVAL=10000`, and set `TEL_DEBUG_DIAGNOSTICS=true` to print every export attempt to the Cline output channel.
 </Admonition>
 
@@ -71,7 +71,7 @@ Logs batch every 5 seconds and metrics export every 60 seconds by default, which
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
-## View Cline Events in SigNoz
+## View Cline Logs in SigNoz
 
 Cline exports events over the OpenTelemetry logs protocol rather than as traces. Allow a few seconds after your first prompt, then open the [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/) and filter on `service.name = 'cline'`.
 
@@ -113,10 +113,6 @@ Both aggregate cleanly straight from the events, so a token or cost panel is acc
 ```
 service.name = 'cline' AND body = 'task.tokens'
 ```
-
-<Admonition type="warning" title="Metrics need sustained traffic, events do not">
-Cline also publishes `cline.*` metrics, including `cline.api.duration.seconds` and `cline.api.ttft.seconds`, which are the only source for request latency and time to first token. An OpenTelemetry meter exports an instrument only after its first recording, so a short session produces one datapoint that already holds its final value and percentiles cannot be computed from it. Read tokens and cost from the events, which are exact immediately, and expect the latency panels to fill in once the agent is in daily use.
-</Admonition>
 
 ## Cline Monitoring Dashboard
 
@@ -186,10 +182,6 @@ See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetr
 For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
 
 </details>
-
-<Admonition type="warning" title="Signed-in sessions attach developer identity to every event">
-Once a user signs in to Cline, every event carries `user_name` and `user_id` in clear text, along with `distinct_id`. That is what makes per-developer cost attribution possible, and it also means personal identifiers reach your telemetry backend. Filter or redact them in a [logs pipeline](https://signoz.io/docs/logs-pipelines/introduction/) if that is not appropriate for your organisation.
-</Admonition>
 
 ## Related integrations
 
