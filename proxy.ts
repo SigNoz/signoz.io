@@ -11,6 +11,7 @@ import {
 import { buildDocsOnboardingPath, isDocsPathname } from '@/utils/docs/onboardingPath'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import { QUERY_PARAMS } from '@/constants/queryParams'
+import { prefersMarkdownFromAccept } from '@/utils/acceptNegotiation'
 import {
   buildApiReferenceOpenAPISpecRewritePath,
   shouldRewriteApiReferenceToOpenAPISpec,
@@ -57,7 +58,7 @@ export function proxy(req: NextRequest) {
   const acceptHeader = req.headers.get('accept') || ''
   const contentTypeHeader = req.headers.get('content-type') || ''
 
-  const prefersMarkdown = acceptHeader.toLowerCase().includes('text/markdown')
+  const prefersMarkdown = prefersMarkdownFromAccept(acceptHeader)
 
   // Get request details
   const pathname = req.nextUrl.pathname
