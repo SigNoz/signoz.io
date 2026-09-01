@@ -28,6 +28,25 @@ const INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER = process.env.NODE_ENV !== 'producti
 
 const GROWTHBOOK_ANONYMOUS_ID_HEADER = 'x-gb-anonymous-id'
 
+/**
+ * Markdown-negotiated requests are ~91% of production traffic (~11M/day), and
+ * the largest client does not identify itself as a known bot — so gating agent
+ * telemetry on `isBot` alone misses almost all of it. Log those requests too,
+ * but sample them: unsampled they would be ~340M analytics events/month.
+ *
+ * `isBot` requests stay unsampled so existing reports are unaffected. Every
+ * event carries `custom_log_sample_rate` so sampled rows can be weighted.
+ */
+const parsedMarkdownLogSampleRate = Number.parseFloat(
+  process.env.AGENT_MARKDOWN_LOG_SAMPLE_RATE ?? ''
+)
+const MARKDOWN_LOG_SAMPLE_RATE =
+  Number.isFinite(parsedMarkdownLogSampleRate) &&
+  parsedMarkdownLogSampleRate >= 0 &&
+  parsedMarkdownLogSampleRate <= 1
+    ? parsedMarkdownLogSampleRate
+    : 0.01
+
 // Extract OS from user agent (server-side version)
 const getOSFromUserAgent = (userAgent: string): string => {
   if (!userAgent) return 'unknown'
@@ -82,8 +101,12 @@ export function proxy(req: NextRequest) {
   const requestHeaders = new Headers(req.headers)
   requestHeaders.set(GROWTHBOOK_ANONYMOUS_ID_HEADER, growthBookAnonymousId)
 
-  // Log bot requests
-  if (isBot) {
+  // Log bot requests, plus a sample of markdown-negotiated requests from
+  // clients that bot detection does not recognize.
+  const isSampledMarkdownRequest =
+    !isBot && prefersMarkdown && Math.random() < MARKDOWN_LOG_SAMPLE_RATE
+
+  if (isBot || isSampledMarkdownRequest) {
     // Use waitUntil to ensure logging completes before function termination
     waitUntil(
       logEventServerSide({
@@ -97,13 +120,14 @@ export function proxy(req: NextRequest) {
           custom_referrer: referer,
           custom_ip: ip,
           custom_source: 'server',
-          custom_is_bot: true,
+          custom_is_bot: isBot,
           custom_request_method: req.method,
           custom_has_javascript: false,
           custom_vercel_ip: vercelIp,
           custom_accept_header: acceptHeader,
           custom_content_type_header: contentTypeHeader,
           custom_prefers_markdown: prefersMarkdown,
+          custom_log_sample_rate: isSampledMarkdownRequest ? MARKDOWN_LOG_SAMPLE_RATE : 1,
         },
         anonymousId: growthBookAnonymousId,
       })
