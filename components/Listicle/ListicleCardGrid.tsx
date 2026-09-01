@@ -26,7 +26,7 @@ function renderIcon(spec?: IconSpec): React.ReactNode {
 
   return (
     <span
-      className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white"
+      className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-[var(--base-white)]"
       style={{ backgroundColor: spec.color }}
     >
       {spec.badge}
@@ -48,9 +48,9 @@ export default function ListicleCardGrid({
       {(title || description) && (
         <div className="mb-6 text-left">
           {title && (
-            <h2 className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">{title}</h2>
+            <h2 className="mb-2 text-2xl font-semibold text-[var(--l1-foreground)]">{title}</h2>
           )}
-          {description && <p className="text-base text-signoz_vanilla-400">{description}</p>}
+          {description && <p className="text-base text-[var(--l2-foreground)]">{description}</p>}
         </div>
       )}
 
@@ -59,7 +59,7 @@ export default function ListicleCardGrid({
           <li key={`${item.href}-${item.name}-${index}`} className="h-full w-full">
             <TrackingLink
               href={item.href}
-              className="flex h-full w-full flex-col items-center justify-center rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 text-center no-underline transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
+              className="flex h-full w-full flex-col items-center justify-center rounded-lg border border-[var(--l1-border)] bg-[var(--l2-background)] p-4 text-center no-underline transition-all hover:border-[var(--accent-primary)] hover:bg-[var(--l2-background-hover)]"
               clickType="Nav Click"
               clickName={item.clickName || item.name}
               clickText={item.name}
@@ -68,7 +68,7 @@ export default function ListicleCardGrid({
               <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-md">
                 {renderIcon(item.icon)}
               </div>
-              <span className="text-sm font-medium text-signoz_vanilla-100">{item.name}</span>
+              <span className="text-sm font-medium text-[var(--l1-foreground)]">{item.name}</span>
             </TrackingLink>
           </li>
         ))}
@@ -78,7 +78,7 @@ export default function ListicleCardGrid({
         <div className="mt-6 text-sm">
           <TrackingLink
             href={viewAllHref}
-            className="inline-flex items-center text-signoz_robin-500 no-underline transition-colors hover:text-signoz_robin-400"
+            className="inline-flex items-center text-[var(--accent-primary)] no-underline transition-colors hover:text-[var(--accent-primary-hover)]"
             clickType="Nav Click"
             clickName={`View All ${title || ''} Link`}
             clickText={viewAllText}
