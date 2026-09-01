@@ -125,7 +125,9 @@ export const expandTabsInHast = (tree: HastRoot): HastRoot => {
 }
 
 const cloneAndCleanArticle = (articleEl: HTMLElement): HTMLElement => {
-  return articleEl.cloneNode(true) as HTMLElement
+  const clone = articleEl.cloneNode(true) as HTMLElement
+  clone.querySelectorAll('[data-markdown-ignore]').forEach((el) => el.remove())
+  return clone
 }
 
 export const buildCopyMarkdownDocument = (
