@@ -222,16 +222,16 @@ export default function OpenTelemetrySidebarClient({
       />
     ) : null
 
+  // The docs-style sidenav rail (width, border, background) is owned by the
+  // hub shell; this renders only the nav itself.
   const desktopSidebar =
     showSidebar && filteredNav.length ? (
-      <div className="box-border hidden w-full min-w-0 max-w-none max-lg:static max-lg:h-auto max-lg:max-h-none lg:block lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:self-stretch lg:border-r lg:border-[var(--l1-border)]">
-        <Sidebar
-          items={filteredNav}
-          activeRoute={normalizedRouteMemo}
-          persistExpansionKey={languagesCategoryKey}
-          languageSelector={languageSelector}
-        />
-      </div>
+      <Sidebar
+        items={filteredNav}
+        activeRoute={normalizedRouteMemo}
+        persistExpansionKey={languagesCategoryKey}
+        languageSelector={languageSelector}
+      />
     ) : null
 
   const triggerButton =

@@ -18,13 +18,6 @@ export const TOC_SECTION_LABEL_CLASS =
 export const ARTICLE_TOC_RAIL_CLASS =
   'sticky top-[48px] box-border hidden max-h-[calc(100vh-48px)] w-80 min-w-80 max-w-80 flex-[0_0_320px] flex-col self-start overflow-hidden px-4 py-4 lg:flex'
 
-/** Left nav rail for otel hub — stretch column like docs, sticky nav inside. */
-export const ARTICLE_SIDENAV_STICKY_CLASS =
-  'docs-sidebar sticky top-[48px] flex max-h-[calc(100vh-48px)] w-full flex-col overflow-hidden py-4 text-[var(--l1-foreground)]'
-
-export const ARTICLE_SIDENAV_SCROLL_CLASS =
-  'min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
-
 export function useTocScrollFade(dependencyKey?: unknown) {
   const tocItemsRef = useRef<HTMLDivElement | null>(null)
   const [scrollFade, setScrollFade] = useState({ top: false, bottom: false })

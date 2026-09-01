@@ -1,16 +1,18 @@
 'use client'
 
 import Link from 'next/link'
-import { ChevronDown, ChevronRight, FileText } from 'lucide-react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
+import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { SITE_BASE_URL } from '@/components/Link'
+import { useTocScrollFade } from '@/components/TableOfContents/tocScrollFade'
 import {
-  ARTICLE_SIDENAV_SCROLL_CLASS,
-  ARTICLE_SIDENAV_STICKY_CLASS,
-  useTocScrollFade,
-} from '@/components/TableOfContents/tocScrollFade'
+  DOC_SIDENAV_NAV_CLASSES,
+  DOC_SIDENAV_PINNED_CLASSES,
+  DOC_SIDENAV_SCROLL_BASE_CLASSES,
+} from '@/components/DocsTOC/docLayoutClasses'
 import { categoryContainsRoute, normalizeRoute } from './navigation'
 import type { SidebarItem } from './types'
 
@@ -139,26 +141,34 @@ export function Sidebar({
     })
   }
 
-  const renderItems = (nodes: SidebarItem[], trail: string[]) => (
-    <ul className="list-none space-y-1 p-0">
+  // Item styling mirrors the docs sidenav (DocsSidebar.tsx renderDoc/renderCategory).
+  const renderItems = (nodes: SidebarItem[], trail: string[], nested = false) => (
+    <ul className={nested ? 'ml-3 list-none space-y-0 p-0 pl-1' : 'list-none space-y-0 p-0'}>
       {nodes.map((node) => {
         if (node.type === 'doc') {
           const isActive = normalizeRoute(node.route) === activeRoute
           return (
-            <li key={node.route} className="group mx-2 my-1 transition-all duration-200">
+            <li key={node.route} className="group mx-2 my-0.5 transition-all duration-200">
               <Link
                 href={`${SITE_BASE_URL}${node.route}`}
                 target="_self"
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
+                className={`flex w-full items-center gap-1 rounded px-3 py-2 text-sm transition-all duration-200 ${
                   isActive
-                    ? 'bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)] text-[var(--accent-primary)] shadow-sm'
+                    ? 'bg-[var(--l1-background-hover)] text-[var(--l1-foreground-hover)]'
                     : 'text-[var(--l2-foreground)] hover:bg-[var(--l1-background-hover)] hover:text-[var(--l1-foreground-hover)]'
                 }`}
                 onClick={onNavigate}
                 ref={isActive ? activeItemRef : undefined}
               >
-                <FileText className="flex-shrink-0 opacity-60 group-hover:opacity-100" size={14} />
-                <span className="truncate">{node.label}</span>
+                <Tooltip
+                  content={node.label}
+                  side="right"
+                  delayDuration={500}
+                  sideOffset={12}
+                  contentClassName="max-w-[260px]"
+                >
+                  <span className="min-w-0 flex-1 truncate">{node.label}</span>
+                </Tooltip>
               </Link>
             </li>
           )
@@ -169,29 +179,31 @@ export function Sidebar({
         const containsActive = categoryContainsRoute(node, activeRoute)
 
         return (
-          <li key={key} className="group mx-2 my-1">
+          <li key={key} className="group mx-2 my-0.5">
             <div
-              className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+              className={`flex cursor-pointer items-center gap-1 rounded px-3 py-2 text-sm transition-all duration-200 ${
                 containsActive
-                  ? 'bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)] text-[var(--accent-primary)]'
-                  : isExpanded
-                    ? 'bg-[var(--l2-background-60)] text-[var(--l1-foreground)] hover:bg-[var(--l1-background-hover)] hover:text-[var(--l1-foreground-hover)]'
-                    : 'text-[var(--l1-foreground)] hover:bg-[var(--l1-background-hover)] hover:text-[var(--l1-foreground-hover)]'
+                  ? 'bg-[var(--l1-background-hover)] text-[var(--l1-foreground-hover)]'
+                  : 'text-[var(--l2-foreground)] hover:bg-[var(--l1-background-hover)] hover:text-[var(--l1-foreground-hover)]'
               }`}
               onClick={() => toggle(key)}
             >
-              <div className="flex-shrink-0 opacity-60 group-hover:opacity-100">
-                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+              <div className="flex-shrink-0 text-[var(--l2-foreground)]">
+                {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
               </div>
-              <span className="truncate">{node.label}</span>
+              <Tooltip
+                content={node.label}
+                side="right"
+                delayDuration={500}
+                sideOffset={12}
+                contentClassName="max-w-[260px]"
+              >
+                <span className="min-w-0 flex-1 truncate">{node.label}</span>
+              </Tooltip>
             </div>
             {node.items.length > 0 && (
-              <div
-                className={`border-l border-[var(--l2-border)] pl-3 ${
-                  isExpanded ? 'mt-1' : 'h-0 overflow-hidden'
-                }`}
-              >
-                {renderItems(node.items, [...trail, node.label])}
+              <div className={isExpanded ? 'mt-0.5' : 'h-0 overflow-hidden'}>
+                {renderItems(node.items, [...trail, node.label], true)}
               </div>
             )}
           </li>
@@ -201,13 +213,13 @@ export function Sidebar({
   )
 
   return (
-    <nav className={ARTICLE_SIDENAV_STICKY_CLASS}>
-      {languageSelector && (
-        <div className="relative z-10 shrink-0 bg-[var(--l1-background)] shadow-[0_8px_16px_-6px_color-mix(in_srgb,var(--base-black)_55%,transparent)]">
-          {languageSelector}
-        </div>
-      )}
-      <div ref={containerRef} className={ARTICLE_SIDENAV_SCROLL_CLASS} style={scrollFadeStyle}>
+    <nav className={DOC_SIDENAV_NAV_CLASSES}>
+      {languageSelector && <div className={DOC_SIDENAV_PINNED_CLASSES}>{languageSelector}</div>}
+      <div
+        ref={containerRef}
+        className={`${DOC_SIDENAV_SCROLL_BASE_CLASSES} ${languageSelector ? 'pb-3 pt-1' : 'py-3'}`}
+        style={scrollFadeStyle}
+      >
         {renderItems(items, [])}
       </div>
     </nav>

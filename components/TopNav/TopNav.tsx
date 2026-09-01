@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
+
+import { isHubShellRoute } from '@/utils/opentelemetryHub'
 import SigNozLogo from '@/public/img/SigNozLogo-orange.svg'
 import SearchButtonDeferred from '../SearchButtonDeferred'
 import GitHubStars from '../GithubStars/GithubStars'
@@ -32,6 +34,7 @@ export default function TopNav() {
 
   const docsSidebar = useMobileDocsSidebar()
   const isDocsBasePath = pathname.startsWith('/docs')
+  const isShellLayoutPath = isDocsBasePath || isHubShellRoute(pathname)
   const visibility = useNavVisibility()
 
   useEffect(() => {
@@ -85,14 +88,17 @@ export default function TopNav() {
         <nav
           className={cn(
             'mx-auto flex w-full justify-between text-[var(--l1-foreground)]',
-            !isDocsBasePath && 'max-w-8xl'
+            !isShellLayoutPath && 'max-w-8xl'
           )}
           aria-label="Global"
         >
           <div className="flex items-center justify-start">
             <TrackingLink
               href="/"
-              className={cn('-m-1.5 flex items-center p-1.5', isDocsBasePath ? 'gap-1.5' : 'gap-2')}
+              className={cn(
+                '-m-1.5 flex items-center p-1.5',
+                isShellLayoutPath ? 'gap-1.5' : 'gap-2'
+              )}
               clickType="Nav Click"
               clickName="SigNoz Logo"
               clickText="SigNoz"
@@ -114,7 +120,7 @@ export default function TopNav() {
                 <div
                   className={cn(
                     'hidden items-center gap-x-3 min-[840px]:flex',
-                    isDocsBasePath ? 'ml-7' : visibility.showProduct ? 'ml-6' : ''
+                    isShellLayoutPath ? 'ml-7' : visibility.showProduct ? 'ml-6' : ''
                   )}
                 >
                   {visibility.showProduct && <ProductDropdown />}

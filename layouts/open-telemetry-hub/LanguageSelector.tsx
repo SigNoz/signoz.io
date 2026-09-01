@@ -7,6 +7,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { normalizeLanguage } from './navigation'
 import type { LanguageOption } from './types'
 import { LanguageIcon } from './LanguageIcon'
+import { useSelectScrollUnlock } from '@/hooks/useSelectScrollUnlock'
 
 interface LanguageSelectorProps {
   options: LanguageOption[]
@@ -64,6 +65,7 @@ export function LanguageSelector({
   onChange,
   onClose,
 }: LanguageSelectorProps) {
+  useSelectScrollUnlock(isOpen)
   const normalizedSelected = normalizeLanguage(selectedLanguage)
   const selectedOption = options.find((opt) => normalizeLanguage(opt.value) === normalizedSelected)
 
