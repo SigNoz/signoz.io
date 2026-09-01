@@ -42,14 +42,13 @@ export default function Tooltip({
       onBlur={hideTooltip}
     >
       {/* Trigger Text */}
-      {/* Trigger Text */}
       {link ? (
         <>
           <a
             href={link}
             target="_blank"
             rel="noopener"
-            className="cursor-pointer border-b border-dashed border-zinc-500 no-underline decoration-zinc-500 transition-colors hover:border-zinc-200 hover:text-zinc-100"
+            className="cursor-pointer border-b border-dashed border-[var(--l3-foreground)] no-underline decoration-[var(--l3-foreground)] transition-colors hover:border-[var(--l1-foreground)] hover:text-[var(--l1-foreground)]"
           >
             {text}
           </a>
@@ -57,7 +56,7 @@ export default function Tooltip({
         </>
       ) : (
         <>
-          <span className="cursor-help border-b border-dashed border-zinc-500 decoration-zinc-500 transition-colors hover:border-zinc-200 hover:text-zinc-100">
+          <span className="cursor-help border-b border-dashed border-[var(--l3-foreground)] decoration-[var(--l3-foreground)] transition-colors hover:border-[var(--l1-foreground)] hover:text-[var(--l1-foreground)]">
             {text}
           </span>
           <span>&nbsp;</span>
@@ -67,11 +66,11 @@ export default function Tooltip({
       {/* Tooltip Popup */}
       {isVisible && (
         <div
-          className="animate-in fade-in slide-in-from-bottom-1 absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-lg border border-zinc-700 bg-zinc-800 p-4 text-sm text-zinc-100 shadow-xl duration-200"
+          className="animate-in fade-in slide-in-from-bottom-1 absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] p-4 text-sm text-[var(--l1-foreground)] shadow-[0_6px_12px_0_color-mix(in_srgb,var(--base-black)_20%,transparent)] duration-200"
           role="tooltip"
         >
           {/* Arrow */}
-          <div className="absolute left-1/2 top-full -mt-2 -translate-x-1/2 border-4 border-transparent border-t-zinc-800" />
+          <div className="absolute left-1/2 top-full -mt-2 -translate-x-1/2 border-4 border-transparent border-t-[var(--l2-background)]" />
 
           <p className="mb-2 mt-0 font-medium leading-relaxed">{content}</p>
 
@@ -80,7 +79,7 @@ export default function Tooltip({
               href={link}
               target="_blank"
               rel="noopener"
-              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-blue-300 transition-colors hover:text-blue-200"
+              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--accent-primary)] transition-colors hover:text-[var(--accent-primary-hover)]"
             >
               {linkText}
             </a>
