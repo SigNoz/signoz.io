@@ -20,7 +20,7 @@ export const ARTICLE_TOC_RAIL_CLASS =
 
 /** Left nav rail for otel hub — stretch column like docs, sticky nav inside. */
 export const ARTICLE_SIDENAV_STICKY_CLASS =
-  'docs-sidebar sticky top-[48px] flex max-h-[calc(100vh-48px)] w-full flex-col overflow-hidden py-4 text-white'
+  'docs-sidebar sticky top-[48px] flex max-h-[calc(100vh-48px)] w-full flex-col overflow-hidden py-4 text-[var(--l1-foreground)]'
 
 export const ARTICLE_SIDENAV_SCROLL_CLASS =
   'min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'

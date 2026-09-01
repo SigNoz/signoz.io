@@ -224,7 +224,7 @@ export default function OpenTelemetrySidebarClient({
 
   const desktopSidebar =
     showSidebar && filteredNav.length ? (
-      <div className="box-border hidden w-full min-w-0 max-w-none max-lg:static max-lg:h-auto max-lg:max-h-none lg:block lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:self-stretch lg:border-r lg:border-signoz_slate-500">
+      <div className="box-border hidden w-full min-w-0 max-w-none max-lg:static max-lg:h-auto max-lg:max-h-none lg:block lg:w-80 lg:min-w-[320px] lg:max-w-[320px] lg:self-stretch lg:border-r lg:border-[var(--l1-border)]">
         <Sidebar
           items={filteredNav}
           activeRoute={normalizedRouteMemo}
@@ -239,7 +239,7 @@ export default function OpenTelemetrySidebarClient({
       ? createPortal(
           <button
             type="button"
-            className="my-6 flex w-full items-center justify-end gap-2 rounded-lg border border-signoz_ink-300 bg-signoz_ink-500/60 px-3 py-3 text-sm text-white shadow-sm transition-colors hover:border-signoz_robin-500"
+            className="my-6 flex w-full items-center justify-end gap-2 rounded-lg border border-[var(--l1-border)] bg-[var(--l2-background-60)] px-3 py-3 text-sm text-[var(--l1-foreground)] shadow-sm transition-colors hover:border-[var(--accent-primary)]"
             onClick={() => setIsMobileNavOpen(true)}
           >
             <Menu size={16} />
@@ -260,12 +260,12 @@ export default function OpenTelemetrySidebarClient({
                 aria-label="Close navigation overlay"
               />
 
-              <div className="absolute inset-y-0 right-0 w-[90%] max-w-sm overflow-y-auto border-l border-signoz_ink-300 bg-signoz_ink-500 shadow-2xl">
-                <div className="flex items-center justify-between border-b border-signoz_ink-300 px-4 py-3">
-                  <div className="text-sm font-semibold text-white">Guide</div>
+              <div className="absolute inset-y-0 right-0 w-[90%] max-w-sm overflow-y-auto border-l border-[var(--l1-border)] bg-[var(--l1-background)] shadow-2xl">
+                <div className="flex items-center justify-between border-b border-[var(--l1-border)] px-4 py-3">
+                  <div className="text-sm font-semibold text-[var(--l1-foreground)]">Guide</div>
                   <button
                     type="button"
-                    className="rounded-full p-2 text-gray-300 transition-colors hover:bg-signoz_ink-400/50 hover:text-white"
+                    className="rounded-full p-2 text-[var(--l2-foreground)] transition-colors hover:bg-[var(--l2-background-hover)] hover:text-[var(--l1-foreground)]"
                     onClick={() => setIsMobileNavOpen(false)}
                     aria-label="Close navigation"
                   >

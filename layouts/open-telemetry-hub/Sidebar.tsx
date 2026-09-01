@@ -151,8 +151,8 @@ export function Sidebar({
                 target="_self"
                 className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
                   isActive
-                    ? 'bg-blue-500/10 text-blue-400 shadow-sm'
-                    : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
+                    ? 'bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)] text-[var(--accent-primary)] shadow-sm'
+                    : 'text-[var(--l2-foreground)] hover:bg-[var(--l1-background-hover)] hover:text-[var(--l1-foreground-hover)]'
                 }`}
                 onClick={onNavigate}
                 ref={isActive ? activeItemRef : undefined}
@@ -173,10 +173,10 @@ export function Sidebar({
             <div
               className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
                 containsActive
-                  ? 'bg-blue-500/10 text-blue-400'
+                  ? 'bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)] text-[var(--accent-primary)]'
                   : isExpanded
-                    ? 'bg-gray-800/30 text-gray-200 hover:bg-gray-800/50 hover:text-white'
-                    : 'text-gray-200 hover:bg-gray-800/50 hover:text-white'
+                    ? 'bg-[var(--l2-background-60)] text-[var(--l1-foreground)] hover:bg-[var(--l1-background-hover)] hover:text-[var(--l1-foreground-hover)]'
+                    : 'text-[var(--l1-foreground)] hover:bg-[var(--l1-background-hover)] hover:text-[var(--l1-foreground-hover)]'
               }`}
               onClick={() => toggle(key)}
             >
@@ -187,7 +187,7 @@ export function Sidebar({
             </div>
             {node.items.length > 0 && (
               <div
-                className={`border-l border-gray-700/50 pl-3 ${
+                className={`border-l border-[var(--l2-border)] pl-3 ${
                   isExpanded ? 'mt-1' : 'h-0 overflow-hidden'
                 }`}
               >
@@ -202,8 +202,12 @@ export function Sidebar({
 
   return (
     <nav className={ARTICLE_SIDENAV_STICKY_CLASS}>
+      {languageSelector && (
+        <div className="relative z-10 shrink-0 bg-[var(--l1-background)] shadow-[0_8px_16px_-6px_color-mix(in_srgb,var(--base-black)_55%,transparent)]">
+          {languageSelector}
+        </div>
+      )}
       <div ref={containerRef} className={ARTICLE_SIDENAV_SCROLL_CLASS} style={scrollFadeStyle}>
-        {languageSelector}
         {renderItems(items, [])}
       </div>
     </nav>
