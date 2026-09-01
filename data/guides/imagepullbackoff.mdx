@@ -1,0 +1,535 @@
+---
+title: "Kubernetes ImagePullBackOff: Common Causes and Fixes"
+meta_title: "Kubernetes ImagePullBackOff: Common Causes and Fixes"
+date: 2026-09-01
+tags: [kubernetes, troubleshooting]
+authors: [saurabh_patil]
+description: "ImagePullBackOff means Kubernetes cannot pull a container image. Diagnose seven common causes using real Pod events, fixes, and recovery verification."
+keywords: [imagepullbackoff, kubernetes imagepullbackoff, errimagepull, imagepullpolicy, kubectl imagepullbackoff]
+related_articles:
+  - '/blog/opentelemetry-vs-jaeger/'
+  - '/blog/distributed-tracing-span/'
+  - '/comparisons/jaeger-alternatives/'
+---
+
+The Kubernetes `ImagePullBackOff` error means a Pod cannot start because Kubernetes failed to download the container image specified in its manifest. It appears after an initial `ErrImagePull` failure. Kubernetes then retries the image pull with progressively longer delays, up to five minutes between attempts.
+
+To find the cause, run `kubectl describe pod` and read the error under the container state and Pod events. Fix the problem identified in that message, then verify that Kubernetes successfully pulls the image, starts the container, and reports the Pod as ready. Restarting or recreating the Pod only triggers another attempt and does not resolve the underlying problem.
+
+In this guide, we used a reproducible setup to simulate seven common causes of `ImagePullBackOff`. For each case, we troubleshot the actual Kubernetes error, applied the appropriate fix, and verified the result. These seven cases are not exhaustive. If your error differs, you can still follow the investigation pattern used in this guide to identify the cause and determine the appropriate resolution.
+
+## How to diagnose ImagePullBackOff
+
+Follow the steps below to find the error causing `ImagePullBackOff`.
+
+### Step 1: Describe the affected Pod
+
+```bash
+kubectl describe pod <pod-name> -n <namespace>
+```
+
+### Step 2: Read the container message
+
+Under **Containers**, find `State: Waiting`, then read the `Reason` and `Message`. The message may contain an HTTP code or another specific error.
+
+### Step 3: Check the Pod events
+
+At the bottom of the output, find the `Failed` event immediately before `BackOff`. Do not stop at `Back-off pulling image`, since that only describes the retry.
+
+To view the complete event history chronologically, run:
+
+```bash
+kubectl get events -n <namespace> \
+  --field-selector involvedObject.kind=Pod,involvedObject.name=<pod-name> \
+  --sort-by='.metadata.creationTimestamp'
+```
+
+Look for specific signals such as `401 Unauthorized`, `404 Not Found`, `429 Too Many Requests`, `no such host`, or an `x509` certificate error.
+
+### Step 4: Follow the matching troubleshooting path
+
+Use the error message or HTTP code to identify the corresponding cause and resolution. The current status may alternate between `ErrImagePull` and `ImagePullBackOff`, but the event history preserves the original failure.
+
+Match the error message or HTTP code from your Pod events with the table below, then click the matching error to jump to its reproduced example, troubleshooting steps, fix, and recovery verification.
+
+## ImagePullBackOff Common Causes & Fixes at a Glance
+
+| Cause | Error code or event signal | How to fix it |
+| --- | --- | --- |
+| [Incorrect image, tag, or digest](#cause-1-incorrect-image-tag-or-digest) | `HTTP 404 Not Found` or `manifest unknown` | Correct the image reference |
+| [Registry authentication failure](#cause-2-registry-authentication-failure) | `HTTP 401 Unauthorized`, `HTTP 403 Forbidden` or `pull access denied` | Fix credentials or registry permissions |
+| [Registry rate limit or outage](#cause-3-registry-rate-limit-or-outage) | `HTTP 429 Too Many Requests` | Authenticate, retry or use a registry mirror |
+| [DNS or network failure](#cause-4-dns-or-network-failure) | `no such host` or `i/o timeout` | Restore registry connectivity from the node |
+| [TLS certificate failure](#cause-5-tls-certificate-failure) | `x509 certificate error` | Fix the certificate or node CA trust |
+| [Platform mismatch](#cause-6-platform-mismatch) | `no matching manifest` | Use an image built for the node platform |
+| [Node storage or runtime failure](#cause-7-image-download-or-runtime-failure) | `no space left` or `failed to pull and unpack image` | Restore storage or repair the runtime |
+
+## Reproducible ImagePullBackOff test setup
+
+We reproduced the seven failures in a disposable Kubernetes environment using separate manifests for each scenario. The complete setup, Kubernetes manifests, expected results, and cleanup instructions are available in the [Kubernetes Demo repository](https://github.com/SigNoz/examples/tree/main/kubernetes/imagepullbackoff-demo/). You can clone it by running following command:
+
+```bash:Command 
+git clone --depth 1 --filter=blob:none --sparse https://github.com/SigNoz/examples.git signoz-examples \
+  && cd signoz-examples \
+  && git sparse-checkout set kubernetes/imagepullbackoff-demo \
+  && cd kubernetes/imagepullbackoff-demo
+```
+
+You do not need to run the lab to use this guide. Each section below includes the configuration that caused the failure, the actual Kubernetes error, the resolution, and the events used to verify recovery.
+
+## Cause 1: Incorrect image, tag, or digest
+
+An incorrect image reference is one of the most common causes of `ImagePullBackOff`. Kubernetes cannot pull an image when the repository does not exist, the tag is misspelled or unpublished, or the referenced digest is unavailable.
+
+To reproduce this failure, the [missing-tag test manifest](https://github.com/SigNoz/examples/blob/main/kubernetes/imagepullbackoff-demo/manifests/failures/01-missing-tag.yaml#L13) sets the container image to an NGINX tag that does not exist:
+
+```yaml:01-missing-tag.yaml
+containers:
+  - name: web
+    image: nginx:1.999-does-not-exist
+    imagePullPolicy: Always
+```
+
+Apply the manifest:
+
+```shell:Command
+kubectl apply -f manifests/failures/01-missing-tag.yaml
+```
+
+After the image pull fails, check the Pod status:
+
+```shell:Command
+kubectl get pod missing-tag -n imagepullbackoff-lab
+```
+
+```shell:Output
+NAME          READY   STATUS             RESTARTS
+missing-tag   0/1     ImagePullBackOff   0
+```
+
+To diagnose the failure, describe the Pod:
+
+```shell:Command
+kubectl describe pod missing-tag -n imagepullbackoff-lab
+```
+
+Under `Containers`, confirm that the container is waiting with the reason `ImagePullBackOff`. Then scroll to `Events` and find the `Failed` pull event immediately before `BackOff`. In this example, the registry reports `manifest unknown`.
+
+To view the Pod events chronologically, run:
+
+```shell:Command
+kubectl get events -n imagepullbackoff-lab \
+  --field-selector involvedObject.kind=Pod,involvedObject.name=missing-tag \
+  --sort-by='.metadata.creationTimestamp'
+```
+
+<Figure
+  src="/img/guides/2026/09/imagepullbackoff-demo-01.webp"
+  alt="Kubernetes Pod events showing manifest unknown followed by ImagePullBackOff"
+  caption="The requested NGINX tag does not exist, so the image pull fails with manifest unknown."
+/>
+
+To fix the issue, confirm that the repository and tag exist in the registry, then correct the `image` field in the workload manifest. If the workload uses a digest, verify that the digest still exists and belongs to the intended repository. Avoid guessing a nearby tag, since it may contain a different application build.
+
+After deploying the corrected image reference, verify the Pod status.
+
+## Cause 2: Registry authentication failure
+
+A registry authentication failure causes `ImagePullBackOff` when Kubernetes cannot retrieve valid credentials or the supplied identity cannot pull the private image.
+
+For the authentication test, the [registry-authentication manifest](https://github.com/SigNoz/examples/blob/main/kubernetes/imagepullbackoff-demo/manifests/failures/02-registry-authentication.yaml#L11-L15) pulls from a private local registry and references an `imagePullSecret` that has not been created:
+
+
+```yaml:02-registry-authentication.yaml
+imagePullSecrets:
+  - name: registry-credentials
+containers:
+  - name: web
+    image: host.minikube.internal:5050/private/nginx:1.27-alpine
+    imagePullPolicy: Always
+```
+
+Apply the manifest:
+
+```shell:Command
+kubectl apply -f manifests/failures/02-registry-authentication.yaml
+```
+
+After the image pull fails, check the Pod status:
+
+```shell:Command
+kubectl get pod registry-authentication -n imagepullbackoff-lab
+```
+
+```shell:Output
+NAME                      READY   STATUS             RESTARTS
+registry-authentication   0/1     ImagePullBackOff   0
+```
+
+To diagnose the failure, describe the Pod:
+
+```shell:Command
+kubectl describe pod registry-authentication -n imagepullbackoff-lab
+```
+
+Under `Containers`, confirm that the container is waiting with the reason `ImagePullBackOff`. In `Events`, the missing Secret produces `FailedToRetrieveImagePullSecret`, followed by a failed pull reporting `no basic auth credentials`.
+
+To view the Pod events chronologically, run:
+
+```shell:Command
+kubectl get events -n imagepullbackoff-lab \
+  --field-selector involvedObject.kind=Pod,involvedObject.name=registry-authentication \
+  --sort-by='.metadata.creationTimestamp'
+```
+
+<Figure
+  src="/img/guides/2026/09/imagepullbackoff-demo-02.webp"
+  alt="Kubernetes Pod events showing a missing pull Secret and no basic auth credentials"
+  caption="The kubelet cannot retrieve the pull Secret, and the private registry rejects the unauthenticated request."
+/>
+
+To fix the issue, create the pull Secret in the same namespace as the Pod. The registry hostname in `--docker-server` must exactly match the hostname in the image reference, and the supplied account must have pull permission for that repository:
+
+```shell:Command
+kubectl create secret docker-registry registry-credentials \
+  --docker-server=host.minikube.internal:5050 \
+  --docker-username=demo \
+  --docker-password=imagepullbackoff \
+  -n imagepullbackoff-lab
+```
+
+The kubelet retries the pull after the Secret becomes available. Verify the Pod status.
+
+## Cause 3: Registry rate limit or outage
+
+A registry can reject image pulls when a client exceeds its quota or when the registry is unavailable. Rate-limited requests commonly return `HTTP 429 Too Many Requests`.
+
+To reproduce a rate limit consistently, the [registry-rate-limit manifest](https://github.com/SigNoz/examples/blob/main/kubernetes/imagepullbackoff-demo/manifests/failures/03-registry-rate-limit.yaml#L13) pulls from a local registry fixture that returns `HTTP 429 Too Many Requests`:
+
+
+```yaml:03-registry-rate-limit.yaml
+containers:
+  - name: app
+    image: host.minikube.internal:5001/rate-limited/app:latest
+    imagePullPolicy: Always
+```
+
+Apply the manifest:
+
+```shell:Command
+kubectl apply -f manifests/failures/03-registry-rate-limit.yaml
+```
+
+After the image pull fails, check the Pod status:
+
+```shell:Command
+kubectl get pod registry-rate-limit -n imagepullbackoff-lab
+```
+
+```shell:Output
+NAME                  READY   STATUS             RESTARTS
+registry-rate-limit   0/1     ImagePullBackOff   0
+```
+
+To diagnose the failure, describe the Pod:
+
+```shell:Command
+kubectl describe pod registry-rate-limit -n imagepullbackoff-lab
+```
+
+Under `Containers`, confirm that the container is waiting with the reason `ImagePullBackOff`. In `Events`, the failed pull reports `toomanyrequests: image pull rate limit exceeded`.
+
+To view the Pod events chronologically, run:
+
+```shell:Command
+kubectl get events -n imagepullbackoff-lab \
+  --field-selector involvedObject.kind=Pod,involvedObject.name=registry-rate-limit \
+  --sort-by='.metadata.creationTimestamp'
+```
+
+<Figure
+  src="/img/guides/2026/09/imagepullbackoff-demo-03.webp"
+  alt="Kubernetes Pod events showing a registry image pull rate limit error"
+  caption="The registry returns a rate-limit response, and Kubernetes backs off before retrying the pull."
+/>
+
+For an anonymous pull, add registry credentials through `imagePullSecrets`, so the request uses the authenticated quota. If authenticated pulls are also limited, check the registry's quota and reset window, reduce repeated `imagePullPolicy: Always` pulls, or serve the image from an internal mirror. For an outage, restore the registry rather than changing a valid image reference.
+
+After the registry accepts the pull, verify the Pod status.
+
+## Cause 4: DNS or network failure
+
+A DNS or network failure causes `ImagePullBackOff` when the node cannot resolve the registry hostname or establish a connection to it.
+
+For the DNS test, the [registry-dns manifest](https://github.com/SigNoz/examples/blob/main/kubernetes/imagepullbackoff-demo/manifests/failures/04-registry-dns.yaml#L13) points the image reference to a registry hostname that does not resolve:
+
+```yaml:04-registry-dns.yaml
+containers:
+  - name: app
+    image: registry.invalid/signoz/demo:latest
+    imagePullPolicy: Always
+```
+
+Apply the manifest:
+
+```shell:Command
+kubectl apply -f manifests/failures/04-registry-dns.yaml
+```
+
+After the image pull fails, check the Pod status:
+
+```shell:Command
+kubectl get pod registry-dns -n imagepullbackoff-lab
+```
+
+```shell:Output
+NAME           READY   STATUS             RESTARTS
+registry-dns   0/1     ImagePullBackOff   0
+```
+
+To diagnose the failure, describe the Pod:
+
+```shell:Command
+kubectl describe pod registry-dns -n imagepullbackoff-lab
+```
+
+Under `Containers`, confirm that the container is waiting with the reason `ImagePullBackOff`. In `Events`, the failed pull reports `lookup registry.invalid: no such host`.
+
+To view the Pod events chronologically, run:
+
+```shell:Command
+kubectl get events -n imagepullbackoff-lab \
+  --field-selector involvedObject.kind=Pod,involvedObject.name=registry-dns \
+  --sort-by='.metadata.creationTimestamp'
+```
+
+<Figure
+  src="/img/guides/2026/09/imagepullbackoff-demo-04.webp"
+  alt="Kubernetes Pod events showing a registry DNS lookup failure"
+  caption="The node cannot resolve the registry hostname, so the image pull fails before reaching a registry."
+/>
+
+To fix the issue, correct a misspelled registry hostname in the image reference. If the hostname is valid, restore DNS resolution and outbound registry access from the affected worker node, including any required proxy, firewall, or private-DNS configuration. Testing only from your workstation or an application container does not confirm that the node's container runtime can reach the registry.
+
+After the node can resolve and reach the registry, verify the Pod status.
+
+## Cause 5: TLS certificate failure
+
+A TLS certificate failure causes `ImagePullBackOff` when the node cannot verify the certificate presented by the registry.
+
+For the certificate test, the [tls-certificate manifest](https://github.com/SigNoz/examples/blob/main/kubernetes/imagepullbackoff-demo/manifests/failures/05-tls-certificate.yaml#L13) pulls from an HTTPS registry endpoint whose self-signed certificate is not trusted by the node:
+
+```yaml:05-tls-certificate.yaml
+containers:
+  - name: app
+    image: self-signed.badssl.com/demo/app:latest
+    imagePullPolicy: Always
+```
+
+Apply the manifest:
+
+```shell:Command
+kubectl apply -f manifests/failures/05-tls-certificate.yaml
+```
+
+After the image pull fails, check the Pod status:
+
+```shell:Command
+kubectl get pod tls-certificate -n imagepullbackoff-lab
+```
+
+```shell:Output
+NAME              READY   STATUS             RESTARTS
+tls-certificate   0/1     ImagePullBackOff   0
+```
+
+To diagnose the failure, describe the Pod:
+
+```shell:Command
+kubectl describe pod tls-certificate -n imagepullbackoff-lab
+```
+
+Under `Containers`, confirm that the container is waiting with the reason `ImagePullBackOff`. In `Events`, the failed pull reports `x509: certificate signed by unknown authority`.
+
+To view the Pod events chronologically, run:
+
+```shell:Command
+kubectl get events -n imagepullbackoff-lab \
+  --field-selector involvedObject.kind=Pod,involvedObject.name=tls-certificate \
+  --sort-by='.metadata.creationTimestamp'
+```
+
+<Figure
+  src="/img/guides/2026/09/imagepullbackoff-demo-05.webp"
+  alt="Kubernetes Pod events showing an x509 certificate verification failure"
+  caption="The node does not trust the registry certificate, so TLS verification prevents the image pull."
+/>
+
+To fix the issue, install a certificate whose hostname and validity period match the registry and ensure the server presents the complete certificate chain. For a registry signed by a private CA, add that CA to the container runtime's trust store on every node that may run the Pod, then restart the affected runtime service according to your node operating system.
+
+After the node trusts the registry certificate, check the Pod status.
+
+## Cause 6: Platform mismatch
+
+A platform mismatch causes `ImagePullBackOff` when the registry has no image manifest for the node's operating system or CPU architecture.
+
+For the platform test, the [platform-mismatch manifest](https://github.com/SigNoz/examples/blob/main/kubernetes/imagepullbackoff-demo/manifests/failures/06-platform-mismatch.yaml#L13) requests an image index that contains only an `s390x` image, while the test node uses `arm64`:
+
+```yaml:06-platform-mismatch.yaml
+containers:
+  - name: app
+    image: host.minikube.internal:5001/platform-mismatch/app:latest
+    imagePullPolicy: Always
+```
+
+Apply the manifest:
+
+```shell:Command
+kubectl apply -f manifests/failures/06-platform-mismatch.yaml
+```
+
+After the image pull fails, check the Pod status:
+
+```shell:Command
+kubectl get pod platform-mismatch -n imagepullbackoff-lab
+```
+
+```shell:Output
+NAME                READY   STATUS             RESTARTS
+platform-mismatch   0/1     ImagePullBackOff   0
+```
+
+To diagnose the failure, describe the Pod:
+
+```shell:Command
+kubectl describe pod platform-mismatch -n imagepullbackoff-lab
+```
+
+Under `Containers`, confirm that the container is waiting with the reason `ImagePullBackOff`. In `Events`, the failed pull reports `no matching manifest for linux/arm64/v8`.
+
+To view the Pod events chronologically, run:
+
+```shell:Command
+kubectl get events -n imagepullbackoff-lab \
+  --field-selector involvedObject.kind=Pod,involvedObject.name=platform-mismatch \
+  --sort-by='.metadata.creationTimestamp'
+```
+
+<Figure
+  src="/img/guides/2026/09/imagepullbackoff-demo-06.webp"
+  alt="Kubernetes Pod events showing no matching manifest for the node platform"
+  caption="The image index has no manifest for the arm64 node, so the runtime cannot select an image."
+/>
+
+To fix the issue, first compare the node's operating system and architecture with the platforms published in the image index:
+
+```shell:Command
+kubectl get nodes -L kubernetes.io/os,kubernetes.io/arch
+docker buildx imagetools inspect <registry>/<image>:<tag>
+```
+
+For a third-party image, select a tag whose image index includes the required platform. If you own the image, confirm that your Buildx builder supports the target platforms, then build and push the missing variants under one tag:
+
+```shell:Command
+docker buildx inspect --bootstrap
+
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --tag <registry>/<image>:<tag> \
+  --push .
+
+docker buildx imagetools inspect <registry>/<image>:<tag>
+```
+
+Update the workload's `image` field to the new tag or digest after confirming that the image index lists the node's platform. If the application is intentionally built for only one architecture, schedule it on compatible nodes instead:
+
+```yaml
+spec:
+  nodeSelector:
+    kubernetes.io/arch: s390x
+```
+
+Use a node selector only when the cluster has matching nodes and the application has been tested on that architecture. Otherwise, the Pod will remain `Pending` because Kubernetes cannot find a compatible node.
+
+After deploying an image that supports the node platform, verify the Pod status:
+
+```shell:Command
+kubectl get pod platform-mismatch -n imagepullbackoff-lab
+```
+
+```shell:Output
+NAME                READY   STATUS    RESTARTS
+platform-mismatch   1/1     Running   0
+```
+
+## Cause 7: Image download or runtime failure
+
+An image download or runtime failure causes `ImagePullBackOff` when the runtime cannot verify, store, or unpack the image content returned by the registry.
+
+For the runtime verification test, the [runtime-unpack-failure manifest](https://github.com/SigNoz/examples/blob/main/kubernetes/imagepullbackoff-demo/manifests/failures/07-runtime-unpack-failure.yaml#L13) pulls a layer whose content does not match the digest declared by the registry fixture:
+
+```yaml:07-runtime-unpack-failure.yaml
+containers:
+  - name: app
+    image: host.minikube.internal:5001/runtime-failure/app:latest
+    imagePullPolicy: Always
+```
+
+Apply the manifest:
+
+```shell:Command
+kubectl apply -f manifests/failures/07-runtime-unpack-failure.yaml
+```
+
+After the image pull fails, check the Pod status:
+
+```shell:Command
+kubectl get pod runtime-unpack-failure -n imagepullbackoff-lab
+```
+
+```shell:Output
+NAME                     READY   STATUS             RESTARTS
+runtime-unpack-failure   0/1     ImagePullBackOff   0
+```
+
+To diagnose the failure, describe the Pod:
+
+```shell:Command
+kubectl describe pod runtime-unpack-failure -n imagepullbackoff-lab
+```
+
+Under `Containers`, confirm that the container is waiting with the reason `ImagePullBackOff`. In `Events`, the failed pull reports `filesystem layer verification failed` for the declared digest.
+
+To view the Pod events chronologically, run:
+
+```shell:Command
+kubectl get events -n imagepullbackoff-lab \
+  --field-selector involvedObject.kind=Pod,involvedObject.name=runtime-unpack-failure \
+  --sort-by='.metadata.creationTimestamp'
+```
+
+<Figure
+  src="/img/guides/2026/09/imagepullbackoff-demo-07.webp"
+  alt="Kubernetes Pod events showing filesystem layer verification failure"
+  caption="The downloaded layer does not match its declared digest, so the runtime rejects the image."
+/>
+
+To fix a digest-verification error, remove the corrupted artifact from the registry and publish the image again without reusing the broken digest. If events report insufficient space or an unpack error instead, check image-filesystem capacity and the container runtime logs on the affected node before changing the workload. A failure isolated to one node usually points to that node's storage or runtime; the same digest failing across nodes points to the registry artifact.
+
+After repairing the artifact, storage, or runtime condition named in the event, check the Pod status.
+
+## Kubernetes troubleshooting with SigNoz Cloud
+
+[SigNoz Cloud](https://signoz.io/teams/) brings Kubernetes metrics, logs, traces, and events into one OpenTelemetry-native observability platform. Teams can monitor the health of their clusters and investigate application, workload, and infrastructure problems without analyzing each telemetry signal in isolation.
+
+Using [Kubernetes monitoring in SigNoz Cloud](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/), you can:
+
+- Monitor Pods, containers, nodes, namespaces, clusters, deployments, Jobs, DaemonSets, StatefulSets, and volumes from dedicated resource views.
+- Move between the Metrics, Logs, Traces, and Events tabs available for most Kubernetes resources while keeping the investigation scoped to that resource.
+- Filter and group resources by attributes such as namespace, node, deployment, environment, or cluster to determine how widely a problem is occurring.
+- Compare CPU and memory usage with requests, limits, allocatable capacity, restart counts, readiness, and workload availability.
+- Investigate multiple Kubernetes clusters from the same platform when each cluster reports a unique `k8s.cluster.name`.
+
+To connect a cluster, install the [SigNoz K8s-Infra collection agent](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/). The Helm chart deploys OpenTelemetry Collectors that send Kubernetes infrastructure telemetry to SigNoz Cloud.
+
+<InlineCTA message="Troubleshoot Kubernetes with SigNoz Cloud. Correlate metrics, logs, traces, and events across your clusters without managing the observability backend." />
