@@ -36,9 +36,22 @@ const stripTrailingSlashes = (pathname: string): string => pathname.replace(/\/+
 export const hasMarkdownExtension = (pathname: string): boolean =>
   stripTrailingSlashes(pathname).endsWith('.md')
 
+/**
+ * Agents derive markdown URLs from the rendered page's `index.html` form,
+ * producing `/blog/some-post/index.html.md`, `.../index.md` or a bare
+ * `.../.md`. Collapse those directory-index shapes onto the flat path the
+ * content actually lives at. Mirrors `stripDirectoryIndexSuffix` in
+ * `utils/docs/markdownRouting.ts` for the docs pipeline.
+ */
+const stripDirectoryIndexSuffix = (pathname: string): string =>
+  pathname.replace(/\/index(?:\.html?)?$/, '') || '/'
+
 const stripMarkdownExtension = (pathname: string): string => {
   const normalized = stripTrailingSlashes(pathname)
-  return normalized.endsWith('.md') ? normalized.slice(0, -'.md'.length) : normalized
+  const withoutExtension = normalized.endsWith('.md')
+    ? normalized.slice(0, -'.md'.length)
+    : normalized
+  return stripTrailingSlashes(stripDirectoryIndexSuffix(withoutExtension))
 }
 
 const isPathWithinPrefix = (pathname: string, prefix: string): boolean =>
@@ -101,7 +114,7 @@ const PAGE_MARKDOWN_EXCLUDED_PREFIXES = [
 
 // Real .md resources served by their own routes; the suffix is part of the
 // path, not a markdown-alternate marker.
-const MARKDOWN_ROUTE_PATHS = new Set(['/skill.md'])
+const MARKDOWN_ROUTE_PATHS = new Set(['/skill.md', '/agents.md'])
 
 /**
  * File-like paths (e.g. /llms.txt, /sitemap.xml, /favicon.ico) are real

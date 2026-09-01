@@ -1,6 +1,19 @@
+/**
+ * Agents routinely derive markdown URLs from the rendered page's `index.html`
+ * form, producing `/docs/install/docker/index.html.md`, `.../index.md` or a
+ * bare `.../.md`. The content lives at the flat slug, so collapse those
+ * directory-index shapes instead of 404-ing on a page that exists.
+ *
+ * No docs slug is named `index` or ends in `/index`, so the suffix-anchored
+ * match cannot swallow a real page (e.g. `llamaindex-observability` is safe).
+ */
+export const stripDirectoryIndexSuffix = (slug: string): string =>
+  slug.replace(/\/index(?:\.html?)?$/, '').replace(/\/+$/, '')
+
 export const normalizeDocsSlugFromPathname = (pathname: string): string => {
   const withoutPrefix = pathname.replace(/^\/docs\/?/, '')
-  return withoutPrefix.replace(/\/+$/, '').replace(/\.md$/, '')
+  const withoutMarkdownExtension = withoutPrefix.replace(/\/+$/, '').replace(/\.md$/, '')
+  return stripDirectoryIndexSuffix(withoutMarkdownExtension)
 }
 
 // Agents commonly fetch docs by appending `.md` to the page URL
