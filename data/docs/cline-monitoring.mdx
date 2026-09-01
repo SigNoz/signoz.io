@@ -111,8 +111,6 @@ Alongside the events, Cline publishes a `cline.*` metric family under the same s
 
 Every metric carries `model`, `provider`, `extension_variant`, and `ulid`, so the same per-model and per-task breakdowns available on the events work here too. Each histogram arrives in SigNoz as five series (`.bucket`, `.count`, `.sum`, `.min`, `.max`), so search for `cline.api.ttft.seconds.bucket` rather than the base name when building a percentile panel.
 
-Latency is the one thing available only here: `cline.api.duration.seconds` and `cline.api.ttft.seconds` have no equivalent in the events. The counters need sustained use before they read correctly, because an OpenTelemetry meter exports an instrument only after its first recording and a single short session produces one datapoint that already holds its final value. Token and cost figures are exact from the first task if you read them from the events instead.
-
 <Admonition type="info" title="Cline does not emit traces" defaultCollapsed="true">
 The extension bundles the OpenTelemetry logs and metrics SDKs only, with no trace SDK or trace exporter, so there is no waterfall view and no trace or span ID on any record. Use the `ulid` attribute to group every event belonging to one task.
 </Admonition>
