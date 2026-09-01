@@ -91,7 +91,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
         className={`${Styles['subscribe-cta-container']} flex flex-wrap items-center gap-x-4 gap-y-2`}
       >
         <button
-          className="text-base text-signoz_robin-400 hover:text-signoz_robin-200"
+          className="text-base text-[var(--accent-primary)] hover:text-[var(--accent-primary-hover)]"
           onClick={handleSubscribeClick}
         >
           Subscribe for updates

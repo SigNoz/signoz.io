@@ -27,6 +27,8 @@ interface GridLayoutProps {
 const PAGE_NUMBER_STYLES =
   'pt-px pb-px px-2 h-6 w-6 justify-center items-center flex flex-col rounded-sm'
 
+const PAGE_NUMBER_LINK_STYLES = `${PAGE_NUMBER_STYLES} transition-colors hover:bg-[var(--l3-background-hover)]`
+
 export function Pagination({
   totalPages,
   currentPage,
@@ -70,20 +72,26 @@ export function Pagination({
           )}
 
           {currentPage !== 1 ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}`}>
+            <Link className={PAGE_NUMBER_LINK_STYLES} href={`/${pageRoute}`}>
               1
             </Link>
           ) : null}
           {currentPage - 2 > 1 ? <div className="h-px w-8 bg-[var(--l3-border)]"></div> : null}
 
           {shouldRenderTwoPrevPages ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage - 2}`}>
+            <Link
+              className={PAGE_NUMBER_LINK_STYLES}
+              href={`/${pageRoute}/page/${currentPage - 2}`}
+            >
               {currentPage - 2}
             </Link>
           ) : null}
 
           {shouldRenderPrevPage ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage - 1}`}>
+            <Link
+              className={PAGE_NUMBER_LINK_STYLES}
+              href={`/${pageRoute}/page/${currentPage - 1}`}
+            >
               {currentPage - 1}
             </Link>
           ) : null}
@@ -96,13 +104,19 @@ export function Pagination({
           </Link>
 
           {shouldRenderNextPage ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage + 1}`}>
+            <Link
+              className={PAGE_NUMBER_LINK_STYLES}
+              href={`/${pageRoute}/page/${currentPage + 1}`}
+            >
               {currentPage + 1}
             </Link>
           ) : null}
 
           {shouldRenderTwoNextPages ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage + 2}`}>
+            <Link
+              className={PAGE_NUMBER_LINK_STYLES}
+              href={`/${pageRoute}/page/${currentPage + 2}`}
+            >
               {currentPage + 2}
             </Link>
           ) : null}
@@ -111,7 +125,7 @@ export function Pagination({
             <div className="h-px w-8 bg-[var(--l3-border)]"></div>
           ) : null}
           {currentPage !== totalPages ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${totalPages}`}>
+            <Link className={PAGE_NUMBER_LINK_STYLES} href={`/${pageRoute}/page/${totalPages}`}>
               {totalPages}
             </Link>
           ) : null}
