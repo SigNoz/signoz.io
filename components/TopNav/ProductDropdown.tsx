@@ -17,7 +17,7 @@ export default function ProductDropdown() {
         unstyled
         type="button"
         ref={triggerRef}
-        className="truncate rounded-full px-2.5 py-1 text-sm outline-none transition-colors hover:bg-signoz_robin-200/20"
+        className="truncate rounded-full px-2.5 py-1 text-sm outline-none transition-colors hover:bg-[color-mix(in_srgb,var(--accent-primary)_15%,transparent)]"
         onClick={() => (isOpen ? close() : open())}
       >
         <div className="flex items-center">
@@ -56,7 +56,7 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
                   <span className="text-sm">{item.name}</span>{' '}
                   <ArrowRight size={14} className="shrink-0 opacity-0 group-hover:opacity-100" />
                 </div>
-                <div className="line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400 group-hover:text-[#FFF]">
+                <div className="line-clamp-2 max-w-[274px] text-xs text-[var(--l2-foreground)] group-hover:text-[var(--l1-foreground-hover)]">
                   {item.description}
                 </div>
               </div>
@@ -64,11 +64,11 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
           ))}
         </div>
       </div>
-      <div className="flex w-[280px] shrink-0 flex-col gap-y-6 border-l border-signoz_slate-400 bg-[hsl(240_5.88%_10%)] p-6 sm:w-[300px] lg:w-[320px]">
+      <div className="flex w-[280px] shrink-0 flex-col gap-y-6 border-l border-[var(--l2-border)] bg-[var(--l2-background)] p-6 sm:w-[300px] lg:w-[320px]">
         <div className="flex flex-col gap-y-4">
           <TrackingLink
             href="/customers/"
-            className={`flex flex-row items-center gap-1 ${SECTION_HEADING_CLASS} hover:text-[#fff]`}
+            className={`flex flex-row items-center gap-1 ${SECTION_HEADING_CLASS} hover:text-[var(--l1-foreground-hover)]`}
             clickType="Nav Click"
             clickName="Customers Link"
             clickText="Customers"
@@ -90,7 +90,7 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
               prefetch={false}
             >
               <KernelLogo className="h-auto w-12 shrink-0" aria-hidden="true" />
-              <div className="line-clamp-2 min-w-0 flex-1 text-sm text-signoz_vanilla-400 group-hover:text-[#fff]">
+              <div className="line-clamp-2 min-w-0 flex-1 text-sm text-[var(--l2-foreground)] group-hover:text-[var(--l1-foreground-hover)]">
                 How Kernel Reduced Browser Acquisition Latency from 140ms to 30ms with SigNoz MCP
               </div>
             </TrackingLink>
@@ -100,12 +100,12 @@ export function ProductDropdownContent({ onClose }: { onClose: () => void }) {
           <div className={SECTION_HEADING_CLASS}>
             <span>Compare SigNoz</span>
           </div>
-          <div className="flex flex-col gap-1 text-sm text-signoz_vanilla-400">
+          <div className="flex flex-col gap-1 text-sm text-[var(--l2-foreground)]">
             {comparisonItems.map((item) => (
               <TrackingLink
                 key={item.key}
                 href={item.url}
-                className="group flex flex-row items-center gap-1 hover:text-[#fff]"
+                className="group flex flex-row items-center gap-1 hover:text-[var(--l1-foreground-hover)]"
                 clickType="Nav Click"
                 clickName={`${item.name} Comparison Link`}
                 clickText={item.name}

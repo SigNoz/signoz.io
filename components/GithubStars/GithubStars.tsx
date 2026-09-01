@@ -56,15 +56,15 @@ const GitHubStars: React.FC<GitHubStarsProps> = ({ location = 'Top Navbar' }) =>
       clickName="GitHub Repository"
       clickText={stars === null ? 'GitHub Icon' : `${displayedStarsText} Stars`}
       clickLocation={location}
-      className="inline-flex h-8 items-center gap-2 rounded-full bg-signoz_slate-500 pl-2 pr-2.5 text-signoz_ink-300 transition-colors hover:bg-slate-700/50"
+      className="inline-flex h-8 items-center gap-2 rounded-full bg-[var(--l3-background)] pl-2 pr-2.5 transition-colors hover:bg-[var(--l3-background-hover)]"
     >
       <div className="github-icon box-border rounded-full p-1">
-        <Github className="fill-signoz_vanilla-100" width={16} />
+        <Github className="fill-[var(--l1-foreground)]" width={16} />
       </div>
       {stars === null ? (
-        <div className="h-4 w-[33px] animate-pulse rounded bg-signoz_slate-400" />
+        <div className="h-4 w-[33px] animate-pulse rounded bg-[var(--l2-border)]" />
       ) : (
-        <div className="text-right text-xs font-medium tabular-nums text-signoz_vanilla-100">
+        <div className="text-right text-xs font-medium tabular-nums text-[var(--l1-foreground)]">
           {displayedStarsText}
         </div>
       )}
