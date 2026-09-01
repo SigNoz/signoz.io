@@ -1,5 +1,5 @@
 ---
-date: 2026-08-20
+date: 2026-08-31
 title: Send your AWS Lambda Traces to SigNoz
 meta_title: AWS Lambda Traces - OpenTelemetry Auto-Instrumentation
 description: Learn to send Lambda traces using OpenTelemetry auto-instrumentation layers for Python, Node.js, Java, and Ruby to track serverless performance.
@@ -14,21 +14,21 @@ does not have. Run an OpenTelemetry Collector inside the MicroVM image instead. 
 [Monitor AWS Lambda MicroVMs](https://signoz.io/docs/aws-monitoring/lambda-microvms/).
 </Admonition>
 
-This documentation provides a detailed walkthrough on how to set up an AWS Lambda function to collect AWS Lambda traces 
-using OpenTelemetry auto-instrumentation. This will enable you to automatically sends your Lambda traces to SigNoz, 
-enabling you to trace the activities of your Lambda function.
+Add an OpenTelemetry auto-instrumentation layer to your Lambda function to send traces to SigNoz.
+The layer records each invocation and the outbound calls that it instruments. Your function code
+does not change.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+</Admonition>
 
 ## Prerequisites
 
 - AWS account with full access to AWS Lambda.
 
-## AWS Lambda Auto-Instrumentation for Tracing
+## Send traces to SigNoz
 
-### Creating a Lambda Function
+### Step 1: Create a Lambda function
 
 Firstly, create a Lambda function in the language of your choice.
 
@@ -103,50 +103,34 @@ Upload the `auto-instrument-tracing-lambda.zip` file. Now, you can test the lamb
 </TabItem>
 <TabItem value="nodejs" label="NodeJS" default>
 
-On your machine, create a folder say `auto-instrument-tracing-lambda`. In the folder, create a file `index.js` and put the following code in it.
+On your machine, create a folder say `auto-instrument-tracing-lambda`. In the folder, create a file `index.mjs` and put the following code in it.
 
-```javascript:index.js defaultCollapsed minimap
-const https = import('https');
+```javascript:index.mjs defaultCollapsed
+import https from 'node:https'
 
-export const handler = (event) => {
-    const url = 'https://api.restful-api.dev/objects?id=3&id=5';  // URL to be fetched
+const url = 'https://api.restful-api.dev/objects?id=3&id=5'
 
-    try {
-        const response = https.get(url, (res) => {
-            let data = '';
+// node:https, not fetch. The layer enables the `http` instrumentation by
+// default, and `undici`, which powers global fetch, is off by default.
+function get(target) {
+  return new Promise((resolve, reject) => {
+    https
+      .get(target, (res) => {
+        let data = ''
+        res.on('data', (chunk) => (data += chunk))
+        res.on('end', () => resolve(data))
+      })
+      .on('error', reject)
+  })
+}
 
-            res.on('data', (chunk) => {
-                data += chunk;
-            });
-
-            res.on('end', () => {
-                return {
-                    statusCode: 200,
-                    body: data
-                };
-            });
-        });
-
-        response.on('error', (err) => {
-            return {
-                statusCode: 500,
-                body: JSON.stringify({ error: err.message })
-            };
-        });
-    } catch (err) {
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: err.message })
-        };
-    }
-};
+export const handler = async () => {
+  const data = await get(url)
+  return { statusCode: 200, body: data }
+}
 ```
 
-Install the npm package `https` using the command:
-
-```bash
-npm install https
-```
+The function uses only the Node.js standard library, so it needs no dependencies.
 
 Zip the nodejs package using the command:
 
@@ -282,113 +266,103 @@ Also, edit the **Runtime Settings** to edit the **Handler** to be `org.example.M
 
 </TabItem>
 <TabItem value="ruby" label="Ruby" default>
-On your machine, create a folder for the project say, `auto-instrumentation-tracing`, and run the command:
-```bash
-$ bundle init
-```
+On your machine, create a folder for the project say, `auto-instrumentation-tracing`.
 
-Open the `Gemfile` file in the `auto-instrumentation-tracing/bundle` directory, and add the gems for `net/http` and `uri` in it. The contents of the `Gemfile` will look as follows:
-
-```ruby
-source "https://rubygems.org"
-gem "net/http"
-gem "uri"
-```
-
-Run the following command to install the gems specified in your `Gemfile`.
-
-```bash
-$ bundle config set --local path 'auto-instrumentation-tracing/bundle' && bundle install
-```
-
-Create the `lambda_function.rb` file that will contain the code for the function:
+Create the `lambda_function.rb` file that will contain the code for the function. It uses `net/http`
+and `json` from the Ruby standard library, so the project needs no gems and no `Gemfile`:
 
 ```ruby:lambda_function.rb defaultCollapsed
 require 'net/http'
 require 'uri'
 require 'json'
 
-def handler(event)
-  url = URI.parse('https://api.restful-api.dev/objects?id=3&id=5')  # URL to be fetched
+API_URL = 'https://api.restful-api.dev/objects?id=3&id=5'.freeze
 
-  begin
-    response = Net::HTTP.get_response(url)
+module LambdaFunction
+  class Handler
+    def self.process(event:, context:)
+      response = Net::HTTP.get_response(URI.parse(API_URL))
+      objects = JSON.parse(response.body)
 
-    {
-      statusCode: response.code.to_i,
-      body: response.body
-    }
-  rescue => e
-    {
-      statusCode: 500,
-      body: { error: e.message }.to_json
-    }
+      {
+        statusCode: 200,
+        body: JSON.generate({ count: objects.length })
+      }
+    end
   end
 end
-
-# Example invocation for local testing
-puts handler({})
 ```
+
+Set the function handler to `lambda_function.LambdaFunction::Handler.process`.
 
 Zip the contents of the folder with the following command:
 
 ```bash
-$ zip -r auto-instrumentation-tracing.zip lambda_function.rb auto-instrumentation-tracing
+$ zip auto-instrumentation-tracing.zip lambda_function.rb
 ```
 
 In the **Code** tab on the Lambda function page, click on **Upload from** button and choose **.zip** from the dropdown. 
-Upload the `auto-instrument-tracing-lambda.zip` file. Now, you can test the lambda function.
+Upload the `auto-instrumentation-tracing.zip` file. Now, you can test the lambda function.
 
 </TabItem>
 </Tabs>
 
-### Adding Language-specific Auto-instrumentation Layer
+### Step 2: Add the auto-instrumentation layer
 
 The language-specific auto-instrumentation lambda layers automatically instrument your Lambda function code with 
 OpenTelemetry auto-instrumentation package for your specific language. Each language and region has its own layer ARN.
 
 If your Lambda is already instrumented with an OpenTelemetry SDK, you can skip this step.
 
+If your function is packaged as a container image, layers do not apply. Unpack the layer into the
+image instead, as shown in
+[Instrument AWS Lambda Container Images](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-container-image/).
+
 In order to auto-instrument your Lambda function, follow the steps:
 
 1. Go to the Lambda function you want to auto-instrument.
 2. In the **Layers** section, click on **Add a layer**.
 3. In the **Choose a layer** section, select **Specify an ARN** option.
-4. Choose the correct ARN based on the language, ensure you replace the `<region>` with your region (ex. `us-east-1`):
+4. Choose the correct ARN based on the language, ensure you replace the `<aws-region>` with your AWS region (for example `us-east-1`):
 
 <Tabs entityName="language">
 <TabItem value="python" label="Python" default>
 ```
-arn:aws:lambda:<region>:184161586896:layer:opentelemetry-python-0_11_0:1
+arn:aws:lambda:<aws-region>:184161586896:layer:opentelemetry-python-0_21_0:1
 ```
 </TabItem>
 <TabItem value="nodejs" label="NodeJS" default>
 ```
-arn:aws:lambda:<region>:184161586896:layer:opentelemetry-nodejs-0_11_0:1
+arn:aws:lambda:<aws-region>:184161586896:layer:opentelemetry-nodejs-0_23_0:1
 ```
 </TabItem>
 <TabItem value="java" label="Java" default>
 ```
-arn:aws:lambda:<region>:184161586896:layer:opentelemetry-javaagent-0_10_0:1
+arn:aws:lambda:<aws-region>:184161586896:layer:opentelemetry-javaagent-0_21_0:1
 ```
 </TabItem>
 <TabItem value="ruby" label="Ruby" default>
 ```
-arn:aws:lambda:<region>:184161586896:layer:opentelemetry-ruby-0_4_0:1
+arn:aws:lambda:<aws-region>:184161586896:layer:opentelemetry-ruby-0_14_0:1
 ```
 </TabItem>
 </Tabs>
 
 The latest releases of the layers can be found in the [OpenTelemetry Lambda Layers GitHub repository](https://github.com/open-telemetry/opentelemetry-lambda/releases).
 
-5. Navigate to the **Configuration** tab within your function, and select **Environment variables** from the left navigation menu.
+### Step 3: Set the environment variables
 
-6. Add the following environment variables.
+These variables tell the runtime to load the wrapper, and tell the SDK where to send spans. The SDK
+exports to SigNoz directly, so no Collector is needed.
+
+1. Navigate to the **Configuration** tab within your function, and select **Environment variables** from the left navigation menu.
+2. Add the following environment variables.
 
 <Tabs entityName="language">
 <TabItem value="python" label="Python" default>
 ```ini
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-instrument
 OTEL_PROPAGATORS=tracecontext
 OTEL_TRACES_SAMPLER=always_on
@@ -396,7 +370,8 @@ OTEL_TRACES_SAMPLER=always_on
 </TabItem>
 <TabItem value="nodejs" label="NodeJS" default>
 ```ini
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
 OTEL_PROPAGATORS=tracecontext
 OTEL_TRACES_SAMPLER=always_on
@@ -404,7 +379,9 @@ OTEL_TRACES_SAMPLER=always_on
 </TabItem>
 <TabItem value="java" label="Java" default>
 ```ini
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
 OTEL_PROPAGATORS=tracecontext
 OTEL_TRACES_SAMPLER=always_on
@@ -412,43 +389,122 @@ OTEL_TRACES_SAMPLER=always_on
 </TabItem>
 <TabItem value="ruby" label="Ruby" default>
 ```ini
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
 OTEL_PROPAGATORS=tracecontext
 OTEL_TRACES_SAMPLER=always_on
 ```
+
+<Admonition type="warning" title="Ruby needs runtime 3.3 or 3.4, on x86_64">
+Layer `0.14.0` supports the `ruby3.3` and `ruby3.4` runtimes only. On `ruby3.2` or older the layer
+does not load.
+</Admonition>
+
+<Admonition type="warning" title="Run Ruby functions on x86_64">
+The Ruby layer bundles `google-protobuf` as a compiled `x86_64-linux` gem, and the OTLP exporter
+needs it. On arm64 the function fails during initialization with
+`Could not find 'google-protobuf'`.
+</Admonition>
+
+<Admonition type="info" title="The Ruby layer records the invocation span only">
+The layer sets `OTEL_RUBY_INSTRUMENTATION_NET_HTTP_ENABLED=false`, so you get the invocation span
+without client spans for `Net::HTTP` calls. Leave it off. If you turn it on, the layer also traces
+the Ruby runtime's poll of the Lambda Runtime API. That poll becomes a parentless root span. Its
+duration is idle time, so it inflates the latency on the Services page.
+</Admonition>
 </TabItem>
 </Tabs>
 
-### Adding OpenTelemetry Collector Lambda Layer
+**Verify these values:**
 
-The collector Lambda layer allows you to forward traces from your Lambda function to SigNoz without impacting response 
-times due to exporter latency.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-In order to install the OpenTelemetry Collector Lambda layer, follow these steps:
+<RegionTable />
+
+## Validate
+
+1. Invoke the function once from the AWS console, or with `aws lambda invoke`.
+2. Open SigNoz and go to **Traces** in the left navigation menu.
+3. Filter on your `service.name`, then click **Refresh**. Spans from your function appear within a few seconds.
+
+<Figure
+  src="/img/docs/aws-monitoring/lambda/traces/autoinstrumented-trace.webp"
+  alt="SigNoz Traces Explorer showing spans from an auto-instrumented AWS Lambda function"
+  caption="Spans from an auto-instrumented Lambda function in the Traces Explorer"
+/>
+
+Each invocation produces one server span for the invocation itself, plus a client span for every
+outbound call that the layer instruments.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No traces reach SigNoz
+
+- Likely cause: the wrapper never ran, so the SDK never loaded.
+- Fix: Make sure that `AWS_LAMBDA_EXEC_WRAPPER` matches your language, and that the layer is attached to the function.
+- Verify: Set `OTEL_LOG_LEVEL=debug` on the function, invoke it again, and read the export errors in CloudWatch.
+
+### SigNoz returns a 401 or a 403
+
+- Likely cause: the ingestion key is wrong, or it belongs to a different region than the endpoint.
+- Fix: Copy the key again from **Settings → Ingestion Settings** in SigNoz, and make sure that the region in `OTEL_EXPORTER_OTLP_ENDPOINT` matches the key.
+- Verify: Invoke the function again. The export errors stop.
+
+### The function fails to update with a layer error
+
+- Likely cause: the layer ARN names a region that does not match the function.
+- Fix: Edit the layer ARN so that its region matches the region of the function. A layer is regional.
+- Verify: Save the configuration again. The update succeeds.
+
+### The invocation span appears without any child spans
+
+- Likely cause: the library that you called is not on the layer's instrumentation list.
+- Fix: Read the language README in the <a href="https://github.com/open-telemetry/opentelemetry-lambda" target="_blank" rel="noopener noreferrer nofollow">opentelemetry-lambda repository</a> for the instrumentations that ship in your layer. Some are off by default.
+- Verify: Invoke the function again. The client span appears under the invocation span.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Export through the OTel Collector layer (Optional)
+</ToggleHeading>
+
+The setup above exports from the function process straight to SigNoz. The Collector extension layer
+gives you a place to batch, filter, and enrich telemetry before it leaves the function.
+
+The Collector does not always lower latency. It adds a local hop and its own startup time. When your
+AWS region is close to your SigNoz region, direct export is often faster. When the two are far
+apart, the Collector helps more. Measure your function with and without the layer before you keep
+it.
+
+To install the OpenTelemetry Collector Lambda layer, follow these steps:
 
 1. Go to the Lambda function.
 2. In the **Layers** section, click on **Add a layer**.
 3. In the **Choose a layer** section, select **Specify an ARN** option.
-4. Choose the correct ARN based on your function architecture, ensure you replace the `<region>` with your region (ex. `us-east-1`):
+4. Choose the correct ARN based on your function architecture, ensure you replace the `<aws-region>` with your AWS region (for example `us-east-1`):
 
 <Tabs entityName="architecture">
 <TabItem value="x86_64" label="x86_64" default>
 ```
-arn:aws:lambda:<region>:184161586896:layer:opentelemetry-collector-amd64-0_12_0:1
+arn:aws:lambda:<aws-region>:184161586896:layer:opentelemetry-collector-amd64-0_23_0:1
 ```
 </TabItem>
 <TabItem value="arm64" label="arm64" default>
 ```
-arn:aws:lambda:<region>:184161586896:layer:opentelemetry-collector-arm64-0_12_0:1
+arn:aws:lambda:<aws-region>:184161586896:layer:opentelemetry-collector-arm64-0_23_0:1
 ```
 </TabItem>
 </Tabs>
 
-5. Add the followwing `collector.yaml` file to your project to configure the collector to send the traces to SigNoz:
+5. Add the following `collector.yaml` file to the root of your deployment archive. Lambda unpacks it to `/var/task/collector.yaml`:
 
-```yaml:collector.yaml defaultCollapsed minimap
-# collector.yaml
+```yaml:collector.yaml minimap defaultCollapsed
 receivers:
   otlp:
     protocols:
@@ -456,38 +512,45 @@ receivers:
         endpoint: 'localhost:4317'
       http:
         endpoint: 'localhost:4318'
- 
+
 processors:
   batch: {}
   resource/env:
-        attributes:
-        - key: deployment.environment
-          value: prod # can be dev, prod, staging etc. based on your environment
-          action: upsert
+    attributes:
+      - key: deployment.environment
+        value: prod # can be dev, prod, staging etc. based on your environment
+        action: upsert
 
 exporters:
-  otlp:
-    endpoint: "ingest.{region}.signoz.cloud:443"
-    tls:
-      insecure: false
+  # Collector layer 0.23.0 bundles Collector v0.157.0.
+  # On Collector v0.143.0 and older, use "otlphttp" instead.
+  otlp_http:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
     headers:
-      "signoz-ingestion-key": "<your-ingestion-key>"
- 
+      # Read from the function environment, so the key stays out of the
+      # deployment archive.
+      signoz-ingestion-key: '${env:SIGNOZ_INGESTION_KEY}'
+
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch, resource/env]
-      exporters: [otlp]
+      exporters: [otlp_http]
+    # The layers export metrics to the same endpoint. Without this pipeline
+    # the function logs a 404 on every invocation.
+    metrics:
+      receivers: [otlp]
+      processors: [batch, resource/env]
+      exporters: [otlp_http]
 ```
 
-Depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
+**Verify these values:**
 
-| Region	| Endpoint |
-| --- | --- |
-| US | ingest.us.signoz.cloud:443 |
-| IN | ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<RegionTable />
 
 6. Navigate to the **Configuration** tab within your function, and select **Environment variables** from the left navigation menu.
 
@@ -497,22 +560,38 @@ Depending on the choice of your region for SigNoz cloud, the otlp endpoint will 
 OPENTELEMETRY_COLLECTOR_CONFIG_URI=/var/task/collector.yaml
 ```
 
-### Visualize the traces in SigNoz
+The function must now export to the Collector on localhost instead of to SigNoz. Replace the
+endpoint from Step 3, and keep the ingestion key on the function, where `collector.yaml` reads it:
 
-Go to the SigNoz Cloud URL and head over to the **Traces** from the left navigation menu.
+```ini noLineNumbers
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+SIGNOZ_INGESTION_KEY=<your-ingestion-key>
+```
 
-You should be able to see the trace details appearing on the **List View** and the **Traces** tab.
+Remove `OTEL_EXPORTER_OTLP_HEADERS`. The Collector adds the key now, so the function no longer
+needs it.
 
-<Figure
-  src="/img/docs/aws-monitoring/lambda/traces/autoinstrumented-trace.webp"
-  alt="AWS Lambda Auto-Instrumented Trace"
-  caption="AWS Lambda Auto-Instrumented Trace"
-/>
+#### Troubleshooting the Collector
 
-## Related Resources
+**The Collector never starts.** `OPENTELEMETRY_COLLECTOR_CONFIG_URI` points at a path that does not
+exist. Keep `collector.yaml` at the root of the deployment archive, which Lambda unpacks to
+`/var/task/collector.yaml`. On the next cold start the Collector logs
+`Using config URI from environment variable` with your path.
 
-- <a href="https://signoz.io/docs/integrations/aws/lambda/" rel="noopener noreferrer">One-Click AWS Integration for Lambda</a>
-- <a href="https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/" rel="noopener noreferrer">Collect Lambda Metrics</a>
-- <a href="https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/" rel="noopener noreferrer">Collect Lambda Logs (S3)</a>
-- <a href="https://signoz.io/docs/aws-monitoring/lambda/lambda-logs-otel-extension/" rel="noopener noreferrer">Collect Lambda Logs via OTel Extension Layer</a>
-- <a href="https://signoz.io/docs/aws-monitoring/lambda-microvms/" rel="noopener noreferrer">Monitor AWS Lambda MicroVMs</a>
+**The function logs `Failed to export metrics batch code: 404`.** The layers export metrics as well
+as traces, and `collector.yaml` has no metrics pipeline. Add the metrics pipeline shown above.
+
+</details>
+
+## Next steps
+
+- [Instrument a container image function](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-container-image/), which cannot use layers.
+- [Instrument a Go Lambda function](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-golang/), which has no auto-instrumentation layer.
+- [Collect Lambda logs](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs-otel-extension/) with the same Collector extension layer.
+- [Collect Lambda metrics](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/) such as invocations, errors, and duration.
+- [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to move between signals during triage.
+- [Set up alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) on the latency and the error rate of the function.
+
+## Get Help
+
+<GetHelp />
