@@ -85,7 +85,7 @@ export default function Figure({
     return (
       <figure className={figureClassName}>
         <div className="hidden dark:block">
-          <ClientZoom>{renderImage(src, cn('rounded-md', className), true)}</ClientZoom>
+          <ClientZoom>{renderImage(src, cn('rounded-md', className), false)}</ClientZoom>
         </div>
         <div className="dark:hidden" data-markdown-ignore="">
           <ClientZoom>
