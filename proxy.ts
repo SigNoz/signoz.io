@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { NOT_FOUND_PATHNAME_HEADER } from '@/components/not-found/constants'
 import { detectBotFromUserAgent, logEventServerSide } from './utils/logEvent'
 import {
+  buildDocsMarkdownAlternatePath,
   buildDocsMarkdownRewritePath,
   shouldRewriteDocsToMarkdown,
 } from '@/utils/docs/markdownRouting'
@@ -21,6 +22,7 @@ import {
 import {
   AGENT_MARKDOWN_SELF_FETCH_HEADER,
   buildContentMarkdownRewritePath,
+  buildMarkdownAlternatePath,
   buildPageMarkdownRewritePath,
   servesMarkdownAlternate,
   shouldRewriteContentToMarkdown,
@@ -173,6 +175,27 @@ export function proxy(req: NextRequest) {
     isApiReferenceIndexPath(pathname)
   ) {
     res.headers.append('Vary', 'Accept')
+  }
+
+  // Advertise the markdown representation so clients can discover it without
+  // parsing the page. A markdown response is the alternate, so it gets none.
+  const markdownAlternatePath =
+    markdownRewritePath || isAgentMarkdownSelfFetch
+      ? null
+      : shouldRewriteDocsToMarkdown(pathname, true)
+        ? buildDocsMarkdownAlternatePath(pathname)
+        : isApiReferenceIndexPath(pathname)
+          ? API_REFERENCE_MARKDOWN_PATH
+          : servesMarkdownAlternate(pathname)
+            ? buildMarkdownAlternatePath(pathname)
+            : null
+
+  if (markdownAlternatePath) {
+    const alternateUrl = new URL(markdownAlternatePath, req.nextUrl.origin)
+    res.headers.append(
+      'Link',
+      `<${alternateUrl.toString()}>; rel="alternate"; type="text/markdown"`
+    )
   }
 
   // Preserve request path for server-rendered global not-found suggestions.

@@ -161,3 +161,17 @@ export const buildPageMarkdownRewritePath = (pathname: string): string => {
  */
 export const servesMarkdownAlternate = (pathname: string): boolean =>
   shouldRewriteContentToMarkdown(pathname, true) || shouldRewritePageToMarkdown(pathname, true)
+
+/**
+ * Public `.md` URL of a non-docs page. `/` is skipped: its derived form is
+ * `/.md`, so the home page negotiates on Accept only.
+ */
+export const buildMarkdownAlternatePath = (pathname: string): string | null => {
+  const normalized = stripTrailingSlashes(pathname)
+
+  if (normalized === '/' || hasMarkdownExtension(normalized)) {
+    return null
+  }
+
+  return `${normalized}.md`
+}

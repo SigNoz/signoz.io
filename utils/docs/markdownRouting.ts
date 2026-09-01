@@ -34,6 +34,16 @@ export const buildDocsMarkdownRewritePath = (pathname: string): string => {
 }
 
 /**
+ * Public `.md` URL of a docs page, not the internal `/api/docs-markdown/*`
+ * rewrite target. `/docs` renders the introduction page, and `/docs.md` is not
+ * a docs path, so the root maps to `/docs/introduction.md`.
+ */
+export const buildDocsMarkdownAlternatePath = (pathname: string): string => {
+  const docsSlug = normalizeDocsSlugFromPathname(pathname)
+  return docsSlug ? `/docs/${docsSlug}.md` : '/docs/introduction.md'
+}
+
+/**
  * Normalize catch-all `[...slug]` params into a docs path.
  * Decodes per segment so a single encoded segment like `ai%2Fsignoz-mcp-server`
  * becomes `ai/signoz-mcp-server` (decodeURI leaves `%2F` intact).
