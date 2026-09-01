@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-09-01
 title: "Kubernetes Containers Monitoring: CPU, Memory, and Health"
 description: Monitor Kubernetes container CPU, memory, restarts, and readiness in SigNoz, with request/limit utilization and correlated logs and traces.
 doc_type: explanation
@@ -83,7 +83,9 @@ Each row follows one container across its restarts, so a container's history sta
 - Working Set Size: the container's anonymous and active file-backed pages, excluding reclaimable inactive file cache. This is the memory that cannot be freed under pressure, so it is the value the kubelet uses for OOM and node-eviction decisions, and the same number `kubectl top` reports. It reads lower than total memory usage, which is why the **Mem Req Usage (%)** and **Mem Limit Usage (%)** columns can look higher than this value suggests.
 - Use it as the container's real memory footprint for capacity planning, and watch it against the memory limit as the truest OOM signal. When the working set approaches the limit, an OOM kill is imminent.
 
-Additional columns available via the Columns selector: **Namespace**, **Node**, **Cluster**, and **Deployment**.
+### Additional Columns
+
+- **Namespace** is shown by default; **Node**, **Cluster**, and **Deployment** are available from the **Columns** selector (**hidden by default**). They are derived from the resource attributes `k8s.namespace.name`, `k8s.node.name`, `k8s.cluster.name`, and `k8s.deployment.name` respectively, and let you filter and sort the container list by where each container is running.
 
 ## Container Detail Page
 
