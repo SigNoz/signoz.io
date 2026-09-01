@@ -37,7 +37,7 @@ export default function GetStartedInfrastructureMonitoring({
     return (
       <div className="my-6 w-full">
         <div className="flex flex-col">
-          <div className="m-0 rounded-lg object-cover shadow-lg">
+          <div className="m-0 rounded-lg">
             <Figure
               src="/img/unified-observability/unified-observability-infrastructure-monitoring.webp"
               alt="Infrastructure Monitoring Dashboard"
