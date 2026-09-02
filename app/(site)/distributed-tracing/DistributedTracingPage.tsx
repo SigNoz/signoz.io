@@ -50,8 +50,8 @@ const Header: React.FC = () => {
       }
       description={
         <>
-          Aggregate and analyze millions of spans with ClickHouse performance. Correlate <br />{' '}
-          traces with logs and metrics to find root cause in distributed systems.
+          Aggregate and analyze millions of spans with fast loads and smooth navigation. Correlate{' '}
+          <br /> traces with logs and metrics to find root cause in distributed systems.
         </>
       }
       buttons={DISTRIBUTED_TRACING_HEADER_BUTTONS}
@@ -103,7 +103,7 @@ const LogProcessingSection: React.FC = () => {
       <div className="flex flex-col items-center gap-8 md:flex-row">
         <div>
           <div className="mb-4 flex items-center gap-3">
-            <h3 className="m-0 text-xs font-medium uppercase text-signoz_vanilla-400">
+            <h3 className="m-0 text-xs font-medium uppercase text-[var(--l2-foreground)]">
               COLLECTOR AS AGENT
             </h3>
             <Badge color="vanilla" className="text-xs">
@@ -124,7 +124,7 @@ const LogProcessingSection: React.FC = () => {
       </div>
 
       <div>
-        <h3 className="mb-4 text-xs font-medium uppercase text-signoz_vanilla-400">
+        <h3 className="mb-4 text-xs font-medium uppercase text-[var(--l2-foreground)]">
           SUPPORTED PROTOCOLS
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -164,7 +164,7 @@ const LogProcessingSection: React.FC = () => {
         <div className="-my-10 flex flex-col px-6 py-8">
           <div className="flex min-h-72 flex-col justify-between">
             <div>
-              <Card className="[&>div]:border-1 bg-signoz_ink-400 [&>*]:p-4">
+              <Card className="[&>div]:border-1 bg-[var(--l2-background)] [&>*]:p-4">
                 <Tabs entityName="sources">
                   <TabItem
                     value="supported-sources"
@@ -207,8 +207,6 @@ const VisualQueryBuilder: React.FC = () => {
           height={10000}
           className="mb-8"
         />
-
-        {/* <HeroCards cards={FILTER_AND_ANALYZE_CARDS} layoutVariant={null} variant="combined" /> */}
       </FeatureShowcase>
       <HeroCards cards={FILTER_AND_ANALYZE_CARDS} layoutVariant={'no-border'} variant="combined" />
     </>
@@ -248,7 +246,6 @@ const DistributedTracing: React.FC = () => {
           className="!mx-auto px-6 pb-0 pt-6"
           contentClassName="mb-0"
         />
-        <Divider orientation="vertical" />
 
         <CarouselCards
           cards={CORRELATION_CAROUSEL_DATA}

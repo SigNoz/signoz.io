@@ -97,7 +97,7 @@ export const CARDS = [
     icon: <DatabaseZap />,
     title: 'High-Volume Ingestion',
     description:
-      'Sustain 20,000 spans per second intake. Battle-tested architecture handles enterprise scale without forced sampling.',
+      'Sustain 20,000 spans/sec and load unlimited spans, with no forced sampling. Battle-tested for AI-scale workloads.',
   },
   {
     icon: <ListTree />,
@@ -132,9 +132,9 @@ export const INSTRUMENT_SERVICES_PANEL = {
 export const FILTER_AND_ANALYZE_CARDS = [
   {
     icon: <Atom />,
-    title: 'Entry Points & Smart Filtering',
+    title: 'One-click filters and error highlighting',
     description:
-      'Toggle entry point spans to isolate where requests first enter each service, eliminating noise from internal downstream calls. Build complex AND/OR filter chains to pinpoint exact failure patterns across multiple services simultaneously.',
+      'Isolate errors, LLM calls, or spans by type (database, HTTP, functions) in one click. Red is reserved for errors, so Highlight Errors surfaces every failure instantly, even in a huge trace.',
   },
   {
     icon: <Atom />,
@@ -151,15 +151,15 @@ export const FILTER_AND_ANALYZE_CARDS = [
 ]
 
 export const MASSIVE_TRACES_SHOWCASE = {
-  title: 'Load traces with million spans without browser crashes',
+  title: 'Load million-span traces without browser crashes',
   description:
-    'Virtualized rendering and progressive loading handle traces with 1M+ spans without UI degradation. Synchronized flame graph and waterfall views update together as you navigate, with span events appearing as timeline indicators. Hierarchical flame graphs provide topology overview while detailed waterfall views show exact timing. Scroll and drill down with instant response times.',
+    'The SigNoz trace detail view loads unlimited spans and lets you navigate and filter high-volume traces with ease. Virtualized rendering and progressive loading ensure million-span traces load without UI degradation. This matters as agentic workflows and LLM calls increase spans per trace. The interface stays smooth, so you can zoom and scroll no matter the volume.',
 }
 
 export const TRACE_QUERY_BUILDER_SHOWCASE = {
-  title: 'Find and analyze traces with powerful queries',
+  title: 'Find and analyze traces faster',
   description:
-    'Filter traces by session ID, user ID, HTTP headers, or custom tags with auto-complete suggesting from your telemetry data as you type. Build complex queries visually, run aggregations like P95 latency calculations grouped by service or region, apply HAVING clauses to filter results, then dive deeper with trace operators to understand parent-child span relationships across your distributed system.',
+    'Powerful search and queries get you to the signal faster. Filter by session ID, user ID, HTTP headers, or custom tags like LLM model, with auto-complete as you type. Build queries visually and run aggregations like P95 latency by service or region. Go deeper with trace operators to map parent-child spans across your system.',
   button: {
     text: 'Read Documentation',
     href: '/docs/userguide/query-builder-v5/#multi-query-analysis-advanced-comparisons',
@@ -219,23 +219,23 @@ export const CONTROL_TRACES_VOLUME_PANEL = {
 export const CORRELATION_CAROUSEL_DATA: Array<CarouselCard> = [
   {
     id: 0,
-    title: 'Handle massive traces',
-    description: 'Smooth navigation through 1M+ spans.',
+    title: 'Flame graph with 100,000 spans in a single load',
+    description: 'Supports million-span traces with smooth navigation and zoom.',
     image: '/img/distributed-tracing/handle-massive-traces.png',
     isActive: true,
   },
   {
     id: 1,
-    title: 'Synchronized flame graph and waterfall',
-    description: 'Click one, see everywhere.',
-    image: '/img/distributed-tracing/synchronized-flame-graph-and-waterfall.png',
+    title: 'Unlimited spans in the waterfall',
+    description: 'The waterfall lists every span, and now loads faster.',
+    image: '/img/distributed-tracing/unlimited-spans-in-the-waterfall.webp',
     isActive: false,
   },
   {
     id: 2,
-    title: 'Span events on timeline',
-    description: 'Event indicators directly on timelines.',
-    image: '/img/distributed-tracing/span-events-on-timeline.png',
+    title: 'Synchronized flame graph and waterfall',
+    description: 'Select a span in one and the other follows.',
+    image: '/img/distributed-tracing/synchronized-flame-graph-and-waterfall.png',
     isActive: false,
   },
 ]
