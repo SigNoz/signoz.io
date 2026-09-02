@@ -1,6 +1,7 @@
 import React from 'react'
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '../TrackingLink'
+import ListicleIcon from './ListicleIcon'
 import type { IconSpec, ListicleItem } from './types'
 
 interface ListicleCardGridProps {
@@ -17,22 +18,22 @@ const DEFAULT_GRID_COLS = 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
 
 function renderIcon(spec?: IconSpec): React.ReactNode {
   if (!spec) {
-    return null
+    return <div className="mb-3 h-12 w-12" />
   }
 
   if (typeof spec === 'string') {
-    return (
-      <img src={spec} alt="" className="no-theme-invert h-7 w-7 object-contain" loading="lazy" />
-    )
+    return <ListicleIcon src={spec} />
   }
 
   return (
-    <span
-      className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-[var(--base-white)]"
-      style={{ backgroundColor: spec.color }}
-    >
-      {spec.badge}
-    </span>
+    <div className="mb-3 flex h-12 w-12 items-center justify-center">
+      <span
+        className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-[var(--base-white)]"
+        style={{ backgroundColor: spec.color }}
+      >
+        {spec.badge}
+      </span>
+    </div>
   )
 }
 
@@ -67,9 +68,7 @@ export default function ListicleCardGrid({
               clickText={item.name}
               clickLocation={sectionName}
             >
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-signoz_ink-300 dark:bg-transparent">
-                {renderIcon(item.icon)}
-              </div>
+              {renderIcon(item.icon)}
               <span className="text-sm font-medium text-[var(--l1-foreground)]">{item.name}</span>
             </TrackingLink>
           </li>
