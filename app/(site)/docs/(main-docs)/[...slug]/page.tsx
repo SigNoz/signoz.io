@@ -33,6 +33,8 @@ export async function generateMetadata(props: {
     description: post.description,
     alternates: {
       canonical: pageUrl,
+      // Every doc page also serves markdown at the same path plus `.md`.
+      types: { 'text/markdown': `${siteMetadata.siteUrl}/docs/${slug}.md` },
     },
     openGraph: {
       title: fullTitle,

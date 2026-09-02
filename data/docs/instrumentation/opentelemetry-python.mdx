@@ -7,8 +7,17 @@ doc_type: howto
 
 This guide shows you how to instrument your Python application with OpenTelemetry and send traces to SigNoz. The <Tooltip text="auto-instrumentation" content="Instrumentation attached at runtime without modifying source code: a Java agent, a Python opentelemetry-instrument wrapper, an OTel operator injecting a sidecar." link="https://signoz.io/docs/glossary/#zero-code-instrumentation" /> approach works with Django, Flask, FastAPI, Falcon, Celery, and most Python libraries out of the box.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
-  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="false">
+
+Every step below stays the same. Change only where the traces go: point the endpoint at your SigNoz host and drop the ingestion key header.
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+# Self-hosted SigNoz needs no ingestion key, so OTEL_EXPORTER_OTLP_HEADERS is not set.
+```
+
+Replace `localhost` with your SigNoz host if it runs elsewhere. For TLS, OTLP/gRPC on port 4317, and Collector setup, see [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+
 </KeyPointCallout>
 
 ## Prerequisites
@@ -593,6 +602,8 @@ With your application running, verify traces are being sent to SigNoz:
 2. In SigNoz, open the **Services** tab and click **Refresh**. Your application should appear.
 3. Go to the **Traces** tab to see your application's traces.
 
+To confirm this from a script or CI job instead of the UI, see [Confirm a service is sending spans](https://signoz.io/docs/apm-and-distributed-tracing/traces-api/#confirm-a-service-is-sending-spans).
+
 <details>
 <ToggleHeading>
 
@@ -634,6 +645,26 @@ Application servers that spawn multiple worker processes require special handlin
   ```
 - **Hypercorn/Unicorn** are not supported due to fork-safety issues. See the [Hypercorn/Unicorn tab](#framework-instrumentation) for details and workarounds.
 - **Gunicorn with `--preload`** or **uWSGI** need extra config. See [Running with Gunicorn or uWSGI](#running-with-gunicorn-or-uwsgi).
+
+### Why does force_flush() return True when nothing arrives?
+
+`force_flush()` reports whether the flush finished inside its timeout, not
+whether SigNoz accepted the batch. It returns `True` even when the export failed
+with `401 Unauthorized` from a wrong ingestion key, so it cannot be used as
+proof that data was delivered.
+
+To see the export result, enable exporter logging and look for a failure line:
+
+```bash
+export OTEL_LOG_LEVEL=debug
+```
+
+```output
+Failed to export span batch code: 401, reason: ...
+```
+
+Confirm delivery with the [Traces API check](#validate) instead of a flush
+return value.
 
 ### Hot reload breaks instrumentation
 

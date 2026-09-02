@@ -6,8 +6,17 @@ doc_type: howto
 ---
 This guide shows you how to instrument your Go application with OpenTelemetry and send traces to SigNoz. Instrument your Go services with the OpenTelemetry Go SDK and send traces to SigNoz Cloud or a self-hosted collector.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="false">
+
+Every step below stays the same. Change only where the traces go: point the endpoint at your SigNoz host and drop the ingestion key header.
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+# Self-hosted SigNoz needs no ingestion key, so OTEL_EXPORTER_OTLP_HEADERS is not set.
+```
+
+Replace `localhost` with your SigNoz host if it runs elsewhere. For TLS, OTLP/gRPC on port 4317, and Collector setup, see [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+
 </KeyPointCallout>
 
 ## Prerequisites
@@ -180,7 +189,6 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
 
 func initTracer(ctx context.Context) (func(context.Context) error, error) {
@@ -1380,6 +1388,8 @@ After running your instrumented application, verify traces appear in SigNoz:
 />
 
 4. Click on any trace to view detailed span information and timing.
+
+To confirm this from a script or CI job instead of the UI, see [Confirm a service is sending spans](https://signoz.io/docs/apm-and-distributed-tracing/traces-api/#confirm-a-service-is-sending-spans).
 
 <Figure
     src="/img/docs/instrumentation/golang/trace-individual.webp"

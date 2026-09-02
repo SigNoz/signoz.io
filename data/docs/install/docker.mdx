@@ -1,5 +1,5 @@
 ---
-date: 2026-07-14
+date: 2026-09-02
 title: Install SigNoz on Docker Standalone - Self-Host Guide
 tags : [Self-Hosted Community]
 description: Learn how to install SigNoz on Docker. Self-host guide for macOS, Linux, and Windows (WSL 2), from setup to verifying the install in the SigNoz UI.
@@ -121,7 +121,23 @@ c7550a1412d4   signoz/signoz:latest                  "./signoz server"        Ab
 
 Once all containers are running, point your browser to `http://<IP-ADDRESS>:8080/` to access the SigNoz UI (use `http://localhost:8080/` when SigNoz runs on your local machine).
 
-### Step 5: Enable the SigNoz MCP server (optional)
+### Step 5: Create your admin account
+
+A fresh deployment has no users yet, and the Services and Traces tabs stay empty until one exists. Open `http://localhost:8080/` and complete the first-run setup form to create the admin account.
+
+To check the state from a script:
+
+```bash
+curl -s http://localhost:8080/api/v1/version
+```
+
+```output
+{"setupCompleted":false,...}
+```
+
+`setupCompleted` turns `true` once the admin account exists. Until then, no telemetry is visible in the UI even when the collector is accepting data.
+
+### Step 6: Enable the SigNoz MCP server (optional)
 
 Foundry can also deploy the <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/mcp-server.md" target="_blank" rel="noopener noreferrer nofollow">SigNoz MCP server</a> alongside the stack so AI clients can query your telemetry. It is disabled by default.
 
