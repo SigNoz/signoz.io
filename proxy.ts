@@ -15,9 +15,11 @@ import { QUERY_PARAMS } from '@/constants/queryParams'
 import {
   API_REFERENCE_MARKDOWN_PATH,
   buildApiReferenceOpenAPISpecRewritePath,
+  buildApiReferenceVersionMarkdownRewritePath,
   isApiReferenceIndexPath,
   shouldRewriteApiReferenceIndexToMarkdown,
   shouldRewriteApiReferenceToOpenAPISpec,
+  shouldRewriteApiReferenceVersionToMarkdown,
 } from '@/utils/apiReferenceMarkdownRouting'
 import {
   AGENT_MARKDOWN_SELF_FETCH_HEADER,
@@ -128,7 +130,11 @@ export function proxy(req: NextRequest) {
 
   const docsMarkdownRewrite =
     !isAgentMarkdownSelfFetch && shouldRewriteDocsToMarkdown(pathname, prefersMarkdown)
-  const apiRefYamlRewrite = shouldRewriteApiReferenceToOpenAPISpec(pathname, prefersMarkdown, isBot)
+  const apiRefYamlRewrite = shouldRewriteApiReferenceToOpenAPISpec(pathname, acceptHeader)
+  const apiRefVersionMarkdownRewrite = shouldRewriteApiReferenceVersionToMarkdown(
+    pathname,
+    prefersMarkdown
+  )
   const apiRefIndexMarkdownRewrite = shouldRewriteApiReferenceIndexToMarkdown(
     pathname,
     prefersMarkdown
@@ -146,13 +152,15 @@ export function proxy(req: NextRequest) {
     ? buildDocsMarkdownRewritePath(pathname)
     : apiRefYamlRewrite
       ? buildApiReferenceOpenAPISpecRewritePath(pathname)
-      : apiRefIndexMarkdownRewrite
-        ? API_REFERENCE_MARKDOWN_PATH
-        : contentMarkdownRewrite
-          ? buildContentMarkdownRewritePath(pathname)
-          : pageMarkdownRewrite
-            ? buildPageMarkdownRewritePath(pathname)
-            : null
+      : apiRefVersionMarkdownRewrite
+        ? buildApiReferenceVersionMarkdownRewritePath(pathname)
+        : apiRefIndexMarkdownRewrite
+          ? API_REFERENCE_MARKDOWN_PATH
+          : contentMarkdownRewrite
+            ? buildContentMarkdownRewritePath(pathname)
+            : pageMarkdownRewrite
+              ? buildPageMarkdownRewritePath(pathname)
+              : null
 
   if (markdownRewritePath) {
     const rewriteUrl = req.nextUrl.clone()

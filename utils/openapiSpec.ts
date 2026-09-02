@@ -28,11 +28,11 @@ export const stampSpecVersion = (document: OpenAPIDocument, version: string): Op
   return { ...document, info }
 }
 
-/** Fetch and parse the spec for the newest published SigNoz release. */
-export async function getLatestOpenAPISpec(): Promise<LatestOpenAPISpec | null> {
-  const version = await resolveLatestVersion()
-  if (!version) return null
-
+/**
+ * Fetch and parse the spec for one published release. `version` is a release
+ * tag; callers resolve `latest` themselves.
+ */
+export async function getOpenAPISpecForVersion(version: string): Promise<LatestOpenAPISpec | null> {
   const yaml = await fetchOpenAPISpec(version)
   if (!yaml) return null
 
@@ -51,4 +51,12 @@ export async function getLatestOpenAPISpec(): Promise<LatestOpenAPISpec | null> 
     yaml,
     document: stampSpecVersion(parsed as OpenAPIDocument, version),
   }
+}
+
+/** Fetch and parse the spec for the newest published SigNoz release. */
+export async function getLatestOpenAPISpec(): Promise<LatestOpenAPISpec | null> {
+  const version = await resolveLatestVersion()
+  if (!version) return null
+
+  return getOpenAPISpecForVersion(version)
 }
