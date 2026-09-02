@@ -13,15 +13,15 @@ const SectionLayout: React.FC<SectionLayoutProps> = ({
       case 'no-border':
         return '!mx-auto'
       case 'bordered':
-        return '!mx-auto border border-dashed !border-b-0 !border-t-0 border-signoz_slate-400'
+        return '!mx-auto border border-dashed !border-b-0 !border-t-0 border-[var(--l2-border)]'
       case 'border-x':
-        return '!mx-auto border border-dashed border-signoz_slate-400'
+        return '!mx-auto border border-dashed border-[var(--l2-border)]'
       default:
-        return '!mx-auto border border-dashed !border-b-0 !border-t-0 border-signoz_slate-400'
+        return '!mx-auto border border-dashed !border-b-0 !border-t-0 border-[var(--l2-border)]'
     }
   }
 
-  const backgroundClass = withBackground ? 'bg-signoz_ink-500' : ''
+  const backgroundClass = withBackground ? 'bg-[var(--l1-background)]' : ''
 
   return (
     <div

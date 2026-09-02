@@ -20,9 +20,11 @@ const PanelContent: React.FC<{ panel: SplitSectionPanel }> = ({ panel }) => {
   return (
     <div className={cn('flex h-full w-full flex-col px-6', panel.className)}>
       <div className={cn('flex flex-col justify-between', panel.contentClassName)}>
-        <h2 className="mb-6 text-signoz_vanilla-100">{panel.title}</h2>
+        <h2 className="mb-6 text-[var(--l1-foreground)]">{panel.title}</h2>
         {panel.description && (
-          <div className="mb-8 leading-relaxed text-signoz_vanilla-400">{panel.description}</div>
+          <div className="mb-8 leading-relaxed text-[var(--l2-foreground)]">
+            {panel.description}
+          </div>
         )}
       </div>
 
@@ -57,7 +59,7 @@ const SplitSection: React.FC<SplitSectionProps> = ({
 
   if (withVerticalDivider) {
     return (
-      <div className={cn('bg-signoz_ink-500', className)}>
+      <div className={cn('bg-[var(--l1-background)]', className)}>
         <GridLayout variant="split" className="!gap-y-0">
           <div className="relative flex h-full w-full flex-col">
             {leftContent}
@@ -70,7 +72,7 @@ const SplitSection: React.FC<SplitSectionProps> = ({
   }
 
   return (
-    <div className={cn('bg-signoz_ink-500', className)}>
+    <div className={cn('bg-[var(--l1-background)]', className)}>
       <GridLayout variant="split">
         <div className="flex h-full w-full flex-col">{leftContent}</div>
         <div className="flex h-full w-full flex-col">{rightContent}</div>
