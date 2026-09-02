@@ -53,7 +53,10 @@ test('llms.txt emits the exact introduction entry from issue #1173', async () =>
 test('every ## section contains at least one parseable markdown link', async () => {
   const sections = sectionsOf(await getBody())
 
-  assert.deepEqual([...sections.keys()], ['Starter docs', 'Agent tooling', 'API', 'Optional'])
+  assert.deepEqual(
+    [...sections.keys()],
+    ['Starter docs', 'Agent tooling', 'API and access control', 'Optional']
+  )
   sections.forEach((lines, name) => {
     const links = lines.filter((line) => MARKDOWN_LINK_LINE.test(line))
     assert.equal(links.length > 0, true, `section "${name}" has no parseable markdown link`)
@@ -82,4 +85,32 @@ test('emitted links use trailing slashes except file-extension URLs', async () =
       `link would redirect (trailingSlash): ${url}`
     )
   })
+})
+
+test('API and access control section links the spec and the access-control docs', async () => {
+  const sections = sectionsOf(await getBody())
+  const lines = sections.get('API and access control').join('\n')
+
+  // The OpenAPI document already existed at this path but was referenced from
+  // nowhere agents look, so scanners reported "no OpenAPI specification found".
+  assert.match(lines, /https:\/\/signoz\.io\/openapi\.json/)
+  assert.match(lines, /https:\/\/signoz\.io\/api-reference\.md/)
+  assert.match(lines, /https:\/\/signoz\.io\/api-reference\//)
+
+  ;[
+    'iam/roles/',
+    'iam/service-accounts/',
+    'iam/user-guides/self-service-api-keys-for-viewers/',
+    'iam/user-guides/scope-telemetry-access-by-ingestion-key/',
+  ].forEach((route) => {
+    assert.equal(lines.includes(route), true, `missing access-control link: ${route}`)
+  })
+})
+
+test('access-control docs are not duplicated into Starter docs', async () => {
+  const sections = sectionsOf(await getBody())
+  const starters = sections.get('Starter docs').join('\n')
+
+  assert.equal(starters.includes('/iam/roles/'), false)
+  assert.equal(starters.includes('/iam/service-accounts/'), false)
 })
