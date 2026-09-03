@@ -279,14 +279,15 @@ func run() (err error) {
 	// Wrap with otelhttp middleware for automatic instrumentation
 	handler := otelhttp.NewHandler(mux, "my-service")
 
-	srv := &http.Server{Addr: ":8080", Handler: handler}
+	// 8089 rather than 8080: self-hosted SigNoz serves its UI on 8080
+	srv := &http.Server{Addr: ":8089", Handler: handler}
 
 	srvErr := make(chan error, 1)
 	go func() {
 		srvErr <- srv.ListenAndServe()
 	}()
 
-	log.Println("Server starting on :8080")
+	log.Println("Server starting on :8089")
 
 	select {
 	case err := <-srvErr:
@@ -581,8 +582,8 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         	// Wrap with otelhttp middleware to create spans automatically
         	handler := otelhttp.NewHandler(mux, "net-http-server")
 
-        	log.Println("Server starting on :8080")
-        	return serve(ctx, stop, &http.Server{Addr: ":8080", Handler: handler})
+        	log.Println("Server starting on :8089")
+        	return serve(ctx, stop, &http.Server{Addr: ":8089", Handler: handler})
         }
 
         // serve runs srv until it fails or ctx is cancelled, then shuts it down.
@@ -710,9 +711,9 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         		c.JSON(200, gin.H{"message": "Hello traced Gin!"})
         	})
 
-        	log.Println("Server starting on :8080")
+        	log.Println("Server starting on :8089")
         	// Use http.Server rather than r.Run so the server can be shut down cleanly.
-        	srv := &http.Server{Addr: ":8080", Handler: r}
+        	srv := &http.Server{Addr: ":8089", Handler: r}
 
         	srvErr := make(chan error, 1)
         	go func() {
@@ -839,10 +840,10 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         		return c.String(http.StatusOK, "Hello traced Echo!")
         	})
 
-        	log.Println("Server starting on :8080")
+        	log.Println("Server starting on :8089")
         	srvErr := make(chan error, 1)
         	go func() {
-        		srvErr <- e.Start(":8080")
+        		srvErr <- e.Start(":8089")
         	}()
 
         	select {
@@ -962,10 +963,10 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         		return c.SendString("Hello traced Fiber!")
         	})
 
-        	log.Println("Server starting on :8080")
+        	log.Println("Server starting on :8089")
         	srvErr := make(chan error, 1)
         	go func() {
-        		srvErr <- app.Listen(":8080")
+        		srvErr <- app.Listen(":8089")
         	}()
 
         	select {
@@ -1092,8 +1093,8 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         		w.Write([]byte("Hello traced Chi!"))
         	})
 
-        	log.Println("Server starting on :8080")
-        	srv := &http.Server{Addr: ":8080", Handler: r}
+        	log.Println("Server starting on :8089")
+        	srv := &http.Server{Addr: ":8089", Handler: r}
 
         	srvErr := make(chan error, 1)
         	go func() {
@@ -1218,8 +1219,8 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         		w.Write([]byte("Hello traced Gorilla!"))
         	})
 
-        	log.Println("Server starting on :8080")
-        	srv := &http.Server{Addr: ":8080", Handler: r}
+        	log.Println("Server starting on :8089")
+        	srv := &http.Server{Addr: ":8089", Handler: r}
 
         	srvErr := make(chan error, 1)
         	go func() {
