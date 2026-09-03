@@ -19,6 +19,7 @@ import {
   AGENT_MARKDOWN_SELF_FETCH_HEADER,
   buildContentMarkdownRewritePath,
   buildPageMarkdownRewritePath,
+  hasMarkdownExtension,
   servesMarkdownAlternate,
   shouldRewriteContentToMarkdown,
   shouldRewritePageToMarkdown,
@@ -62,6 +63,12 @@ export function proxy(req: NextRequest) {
   // Get request details
   const pathname = req.nextUrl.pathname
 
+  // Agents reach markdown two ways, and the Accept header is the rarer one.
+  // Logging only `prefersMarkdown` counts the `.md` suffix as an HTML request,
+  // so track both to make the markdown-vs-HTML split measurable.
+  const hasMarkdownSuffix = hasMarkdownExtension(pathname)
+  const wantsMarkdown = prefersMarkdown || hasMarkdownSuffix
+
   // Redirect legacy ?source=onboarding URLs to /docs-onboarding/ path
   const isLegacyOnboardingDocsRequest =
     isDocsPathname(pathname) &&
@@ -104,6 +111,8 @@ export function proxy(req: NextRequest) {
           custom_accept_header: acceptHeader,
           custom_content_type_header: contentTypeHeader,
           custom_prefers_markdown: prefersMarkdown,
+          custom_markdown_suffix: hasMarkdownSuffix,
+          custom_wants_markdown: wantsMarkdown,
         },
         anonymousId: growthBookAnonymousId,
       })
