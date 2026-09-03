@@ -114,28 +114,50 @@ test('does not re-enter docs markdown routing for agent self-fetches', () => {
   assert.equal(isPassthrough(res), true)
 })
 
-test('rewrites versioned api-reference pages to the OpenAPI spec for markdown-preferring bots', () => {
+test('markdown requests for a versioned api-reference serve the markdown twin', () => {
+  // Previously these answered `Accept: text/markdown` with raw YAML — the wrong
+  // media type for the request. The spec stays reachable via a YAML Accept and
+  // at /api/api-reference-openapi/<tag>.
   assert.equal(
     rewriteTarget(
       run('/api-reference/latest', { headers: { 'user-agent': BOT_UA, accept: 'text/markdown' } })
     ),
+    '/api/api-reference-markdown/latest'
+  )
+  assert.equal(
+    rewriteTarget(run('/api-reference/v1.2.3', { headers: { accept: 'text/markdown' } })),
+    '/api/api-reference-markdown/v1.2.3'
+  )
+})
+
+test('versioned api-reference .md URLs serve the markdown twin without any Accept header', () => {
+  assert.equal(rewriteTarget(run('/api-reference/v1.2.3.md')), '/api/api-reference-markdown/v1.2.3')
+  assert.equal(rewriteTarget(run('/api-reference/latest.md')), '/api/api-reference-markdown/latest')
+})
+
+test('the OpenAPI spec is served when the client asks for YAML, regardless of user-agent', () => {
+  // The rewrite used to require a bot UA, so a browser sending the same header
+  // got HTML. It now depends on the Accept header alone.
+  assert.equal(
+    rewriteTarget(run('/api-reference/latest', { headers: { accept: 'application/yaml' } })),
     '/api/api-reference-openapi/latest'
   )
   assert.equal(
     rewriteTarget(
-      run('/api-reference/v1.2.3', { headers: { 'user-agent': BOT_UA, accept: 'text/markdown' } })
+      run('/api-reference/v1.2.3', { headers: { 'user-agent': BOT_UA, accept: 'text/yaml' } })
     ),
     '/api/api-reference-openapi/v1.2.3'
   )
 })
 
-test('api-reference OpenAPI rewrite requires both a bot UA and markdown Accept', () => {
+test('plain HTML requests to a versioned api-reference pass through untouched', () => {
+  assert.equal(isPassthrough(run('/api-reference/latest')), true)
   assert.equal(
-    isPassthrough(run('/api-reference/latest', { headers: { accept: 'text/markdown' } })),
+    isPassthrough(run('/api-reference/latest', { headers: { 'user-agent': BOT_UA } })),
     true
   )
   assert.equal(
-    isPassthrough(run('/api-reference/latest', { headers: { 'user-agent': BOT_UA } })),
+    isPassthrough(run('/api-reference/latest', { headers: { accept: 'text/html' } })),
     true
   )
 })
