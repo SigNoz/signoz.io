@@ -4,6 +4,7 @@ import { buildIntroductionAgentMarkdown } from '@/utils/docs/buildIntroductionAg
 import { resolveDocsMarkdownSlug } from '@/utils/docs/markdownRouting'
 import { fetchDocBySlug } from '@/utils/cachedData'
 import { agentResponse } from '@/utils/agentResponseHeaders'
+import { resolveCanonicalDocsMarkdownPath } from '@/utils/docs/canonicalDocsMarkdownPath'
 
 export async function generateStaticParams() {
   return []
@@ -18,7 +19,7 @@ const notFoundResponse = () =>
     },
   })
 
-export async function GET(_: Request, props: { params: Promise<{ slug?: string[] }> }) {
+export async function GET(request: Request, props: { params: Promise<{ slug?: string[] }> }) {
   const params = await props.params
   const slug = resolveDocsMarkdownSlug(params.slug)
 
@@ -29,6 +30,13 @@ export async function GET(_: Request, props: { params: Promise<{ slug?: string[]
   const doc = await fetchDocBySlug(slug)
 
   if (!doc) {
+    // Legacy slugs redirect as HTML but reach this API unresolved, so mirror
+    // the HTML redirect instead of 404-ing a URL the site still serves.
+    const canonical = await resolveCanonicalDocsMarkdownPath(request, slug)
+    if (canonical) {
+      return Response.redirect(new URL(canonical, request.url), 308)
+    }
+
     return notFoundResponse()
   }
 
