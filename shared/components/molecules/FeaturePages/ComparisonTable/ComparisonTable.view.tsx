@@ -10,21 +10,21 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
   return (
     <div
       className={cn(
-        'overflow-x-auto border border-signoz_slate-400 bg-signoz_ink-500/50',
+        'overflow-x-auto border border-[var(--l2-border)] bg-[var(--l1-background-60)]',
         className
       )}
     >
       <table className="m-0 border-collapse text-left">
-        <tbody className="text-sm text-signoz_vanilla-300">
+        <tbody className="text-sm text-[var(--l1-foreground)]">
           <tr className="relative">
-            <td className="sticky left-[-1px] border-b border-r border-signoz_slate-400 bg-signoz_slate-400 px-6 py-4 text-left font-semibold text-signoz_vanilla-400">
+            <td className="sticky left-[-1px] border-b border-r border-[var(--l2-border)] bg-[var(--l3-background)] px-6 py-4 text-left font-semibold text-[var(--l2-foreground)]">
               Feature
             </td>
             {vendors.map((vendor) => (
               <th
                 key={vendor.key}
                 className={cn(
-                  'border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400',
+                  'border-b border-[var(--l2-border)] px-4 py-4 text-left font-semibold text-[var(--l2-foreground)]',
                   vendor.className
                 )}
               >
@@ -33,8 +33,8 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
             ))}
           </tr>
           {rows.map((row, index) => (
-            <tr key={index} className="transition-colors hover:bg-signoz_ink-400/30">
-              <td className="sticky left-[-1px] border-b border-r border-signoz_slate-400 bg-signoz_slate-400 px-6 py-4 text-sm text-signoz_robin-400">
+            <tr key={index} className="transition-colors hover:bg-[var(--l1-background-hover)]">
+              <td className="sticky left-[-1px] border-b border-r border-[var(--l2-border)] bg-[var(--l3-background)] px-6 py-4 text-sm text-signoz_robin-400">
                 {row.feature}
               </td>
               {vendors.map((vendor) => {
@@ -43,7 +43,7 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
                 return (
                   <td
                     key={vendor.key}
-                    className="border-b border-signoz_slate-400 px-4 py-4 text-left"
+                    className="border-b border-[var(--l2-border)] px-4 py-4 text-left"
                   >
                     <span className="flex items-center gap-2">
                       {cellData.supported !== undefined &&
