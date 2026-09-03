@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-03
 title: How to Manually Instrument .NET apps
 description: Learn how to add manual OpenTelemetry instrumentation in .NET. Create custom spans, add business attributes, and record errors using ActivitySource and Activity.
 tags: [SigNoz Cloud, Self-Host]
@@ -185,7 +185,89 @@ private int RollOnce()
 }
 ```
 
-## Step 6. Add events
+## Step 6. Propagate context
+
+`Activity.Current` is backed by an `AsyncLocal<Activity>`, so the active span follows your code across `await` and `Task.Run` without any work from you. Two things break that chain: a thread that started before the activity existed, and another service. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the concepts behind this step.
+
+### Inside your process
+
+To parent a span explicitly rather than relying on `Activity.Current`, pass an `ActivityContext` to `StartActivity`:
+
+```csharp:Services/BackgroundWorker.cs
+// Capture the context while the parent activity is still current
+var parentContext = Activity.Current?.Context ?? default;
+
+_backgroundQueue.Enqueue(() =>
+{
+    // The worker thread has no ambient activity, so pass the context in
+    using var activity = _instrumentation.ActivitySource.StartActivity(
+        "settle-order",
+        ActivityKind.Internal,
+        parentContext);
+
+    SettleOrder(orderId);
+});
+```
+
+### Across a service boundary
+
+`AddAspNetCoreInstrumentation()` and `AddHttpClientInstrumentation()` inject and extract for you. Write the calls yourself for any hop they do not cover, such as a message queue.
+
+On the publishing side, inject the current context into the message headers:
+
+```csharp:Publisher.cs
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
+
+public void PublishOrder(Order order)
+{
+    using var activity = _instrumentation.ActivitySource.StartActivity("publish-order", ActivityKind.Producer);
+
+    var message = new QueueMessage { Body = order, Headers = new Dictionary<string, string>() };
+    var contextToInject = activity?.Context ?? Activity.Current?.Context ?? default;
+
+    // Read the property here, not into a static field. The SDK replaces it
+    // during initialization, so a field captured earlier keeps the no-op.
+    Propagators.DefaultTextMapPropagator.Inject(
+        new PropagationContext(contextToInject, Baggage.Current),
+        message.Headers,
+        (headers, key, value) => headers[key] = value);
+
+    _queue.Send(message);
+}
+```
+
+On the consuming side, extract before you start the entry span:
+
+```csharp:Consumer.cs
+public void OnMessage(QueueMessage message)
+{
+    var parentContext = Propagators.DefaultTextMapPropagator.Extract(
+        default,
+        message.Headers,
+        (headers, key) => headers.TryGetValue(key, out var value)
+            ? new[] { value }
+            : Enumerable.Empty<string>());
+
+    Baggage.Current = parentContext.Baggage;
+
+    using var activity = _instrumentation.ActivitySource.StartActivity(
+        "process-order",
+        ActivityKind.Consumer,
+        parentContext.ActivityContext);
+
+    // process-order is now a child of publish-order in the publisher's trace
+    Handle(message.Body);
+}
+```
+
+<Admonition type="warning">
+`Propagators.DefaultTextMapPropagator` is a no-op until the SDK sets it, and only the SDK can. Before the tracer provider is built it is a `NoopTextMapPropagator`: `Inject` writes zero keys to the carrier and raises no error. Once `Sdk.CreateTracerProviderBuilder()` (or the host's `AddOpenTelemetry()`) has run it becomes a `CompositeTextMapPropagator` and starts writing `traceparent`.
+
+Read the property at the point of use, as above. The SDK swaps in a different propagator object rather than mutating the existing one, so a `static readonly` field initialized before startup holds the no-op forever and every later inject writes nothing.
+</Admonition>
+
+## Step 7. Add events
 
 Events mark specific moments within a span:
 
@@ -204,7 +286,7 @@ activity?.AddEvent(new ActivityEvent("PaymentCompleted", DateTimeOffset.UtcNow,
     }));
 ```
 
-## Step 7. Record errors
+## Step 8. Record errors
 
 Mark spans as failed and attach exception details:
 
@@ -232,7 +314,7 @@ public async Task<Result> RiskyOperationAsync()
 
 The `RecordException` method is an extension method from `OpenTelemetry.Trace` that adds the exception as an event with stack trace details.
 
-## Step 8. Access the current span
+## Step 9. Access the current span
 
 Get the active span from anywhere in your code:
 
@@ -286,6 +368,13 @@ dotnet add package OpenTelemetry.Exporter.Console
     .AddOtlpExporter(/* ... */));
 ```
 
+### Why does the downstream service start its own trace?
+
+- Make sure that the publisher runs `Inject` and that the message carries a `traceparent` entry.
+- Make sure that the consumer passes `parentContext.ActivityContext` to `StartActivity`.
+- Make sure that the tracer provider is built before the first `Inject` call. `Propagators.DefaultTextMapPropagator` stays a no-op until the SDK sets it.
+- Make sure that both services register the same propagator format. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/).
+
 ### Why are child spans not linked to parents?
 
 - Ensure you create child activities within the `using` block of the parent
@@ -297,3 +386,4 @@ dotnet add package OpenTelemetry.Exporter.Console
 ## Next steps
 
 - [Setup alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your traces to get notified on errors and latency
+- Read [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the wire format and the failure modes shared across languages
