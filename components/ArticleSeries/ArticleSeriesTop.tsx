@@ -48,7 +48,7 @@ export default function ArticleSeriesTop({
   return (
     <div
       className={cn(
-        'mb-8 flex items-center justify-between border-b border-gray-200 pb-3 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-400',
+        'mb-8 flex items-center justify-between border-b border-[var(--l1-border)] pb-3 text-sm text-[var(--l2-foreground)]',
         className
       )}
     >
@@ -56,16 +56,16 @@ export default function ArticleSeriesTop({
       {seriesOverviewHref ? (
         <Link
           href={seriesOverviewHref}
-          className="group inline-flex items-center font-medium no-underline transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+          className="group inline-flex items-center font-medium no-underline transition-colors hover:text-[var(--accent-primary-hover)]"
           prefetch={false}
         >
           <List className="mr-2 h-4 w-4 opacity-90 transition-opacity group-hover:opacity-100" />
-          <span className="text-blue-600 opacity-90 transition-opacity group-hover:opacity-100 dark:text-blue-400">
+          <span className="text-[var(--accent-primary)] opacity-90 transition-opacity group-hover:opacity-100">
             {seriesName}
           </span>
         </Link>
       ) : (
-        <span className="inline-flex items-center font-medium text-blue-600 dark:text-blue-400">
+        <span className="inline-flex items-center font-medium text-[var(--accent-primary)]">
           {seriesName}
         </span>
       )}
@@ -74,14 +74,14 @@ export default function ArticleSeriesTop({
       <div className="flex items-center space-x-4">
         {showPrevious && prevLink ? (
           <Tooltip
-            contentClassName="text-signoz_vanilla-100 text-sm"
+            contentClassName="text-sm"
             content={`Previous: ${prevLink.title}`}
             delayDuration={150}
             side="top"
           >
             <Link
               href={prevLink.href}
-              className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 no-underline transition-all hover:bg-gray-200 hover:text-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+              className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--l3-background)] no-underline transition-all hover:bg-[var(--l3-background-hover)] hover:text-[var(--accent-primary)]"
               aria-label={`Previous article: ${prevLink.title}`}
               prefetch={false}
             >
@@ -92,7 +92,7 @@ export default function ArticleSeriesTop({
           <div className="h-8 w-8" aria-hidden="true" />
         )}
 
-        <span className="whitespace-nowrap text-gray-500 dark:text-gray-500">
+        <span className="whitespace-nowrap text-[var(--l3-foreground)]">
           Part {part} of {total}
         </span>
 
@@ -100,7 +100,7 @@ export default function ArticleSeriesTop({
           <Tooltip content={`Next: ${nextLink.title}`} delayDuration={150} side="top">
             <Link
               href={nextLink.href}
-              className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 no-underline transition-all hover:bg-gray-200 hover:text-blue-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+              className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--l3-background)] no-underline transition-all hover:bg-[var(--l3-background-hover)] hover:text-[var(--accent-primary)]"
               aria-label={`Next article: ${nextLink.title}`}
               prefetch={false}
             >

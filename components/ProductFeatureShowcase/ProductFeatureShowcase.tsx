@@ -136,20 +136,18 @@ export default function ProductFeatureShowcase() {
             className="flex w-full flex-shrink-0 snap-start flex-col gap-4 md:w-8/12"
           >
             <h4 className="text-lg font-semibold">{feature.title}</h4>
-            <p className="text-sm text-signoz_slate-500 dark:text-signoz_vanilla-400">
-              {feature.description}
-            </p>
+            <p className="text-sm text-[var(--l2-foreground)]">{feature.description}</p>
             <Figure
               src={feature.image.src}
               alt={feature.image.alt}
               caption={feature.image.caption}
               className="h-48 w-full object-cover md:h-56"
-              figureClassName="m-0 flex flex-col gap-2 overflow-hidden rounded-lg border border-signoz_slate-200/60 bg-signoz_slate-100/60 shadow-sm dark:border-signoz_slate-500/40 dark:bg-signoz_ink-300/50"
-              captionClassName="px-4 pb-4 text-xs italic text-signoz_slate-500 dark:text-signoz_vanilla-400"
+              figureClassName="m-0 flex flex-col gap-2 overflow-hidden rounded-lg border border-[var(--l3-border)] bg-[var(--l3-background-60)] shadow-sm"
+              captionClassName="px-4 pb-4 text-xs italic text-[var(--l2-foreground)]"
             />
             <Link
               href={feature.href}
-              className="inline-flex items-center gap-1 text-sm font-medium text-signoz_robin-400 transition-colors hover:text-signoz_robin-500"
+              className="inline-flex items-center gap-1 text-sm font-medium text-[var(--accent-primary)] transition-colors hover:text-[var(--accent-primary-hover)]"
               prefetch={false}
             >
               {feature.ctaLabel}

@@ -14,7 +14,7 @@
 }
 
 .footnotes {
-  @apply mt-12 border-t border-gray-200 pt-8 dark:border-signoz_ink-500;
+  @apply mt-12 border-t border-[var(--l2-border)] pt-8;
 }
 
 .data-footnote-backref {
@@ -33,7 +33,7 @@
 
 @layer utilities {
   .bg-dot-pattern {
-    background: radial-gradient(circle, #ffffff 10%, transparent 5%);
+    background: radial-gradient(circle, var(--l1-foreground) 10%, transparent 5%);
     background-size: 12px 12px;
     opacity: 1;
   }
@@ -1280,7 +1280,7 @@ hr {
 }
 
 .header-bg {
-  background-color: rgba(11, 12, 14, 0.7);
+  background-color: color-mix(in srgb, var(--l1-background) 70%, transparent);
   padding-left: var(--ifm-spacing-horizontal);
   padding-right: var(--ifm-spacing-horizontal);
 }
@@ -1601,6 +1601,20 @@ a.no-underline {
   position: absolute;
   transition-property: transform;
   transform-origin: center center;
+}
+
+/* Dark CDN screenshots → approximate light UI when site is light.
+   Opt out with class "no-theme-invert" or Figure/Image themeInvert={false}. */
+html:not(.dark) .prose img:not(.no-theme-invert),
+html:not(.dark) [data-rmiz-modal-content] img:not(.no-theme-invert) {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Near-white listicle logos are remapped to ink in light mode. The SVG filter
+   (components/Listicle/ListicleIconFilter.tsx) runs in the compositor, so it
+   works on cross-origin CDN icons that canvas sampling cannot read. */
+html:not(.dark) .listicle-icon img {
+  filter: url(#listicle-icon-filter);
 }
 
 .flex-center {

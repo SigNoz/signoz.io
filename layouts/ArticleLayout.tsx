@@ -116,7 +116,7 @@ export default function ArticleLayout({
             <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
               <h1 className="text-3xl font-bold">{title}</h1>
               {(formattedUpdatedDate || readingTimeText) && (
-                <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
+                <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-[var(--l2-foreground)] lg:hidden">
                   {formattedUpdatedDate && <span>Last Updated: {formattedUpdatedDate}</span>}
                   {readingTimeText && <span>{readingTimeText}</span>}
                 </div>

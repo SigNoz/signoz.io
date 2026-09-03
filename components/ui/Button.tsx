@@ -18,12 +18,13 @@ export const buttonVariants = cva(
         default:
           'bg-[var(--accent-primary)] text-[var(--base-white)] hover:bg-[color-mix(in_srgb,var(--accent-primary)_80%,var(--base-black))] active:bg-[color-mix(in_srgb,var(--accent-primary)_65%,var(--base-black))]',
         outline:
-          'border border-signoz_robin-500 bg-transparent text-signoz_robin-500 hover:bg-signoz_robin-500/10',
+          'border border-[var(--accent-primary)] bg-transparent text-[var(--accent-primary)] hover:bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)]',
         secondary:
-          'bg-[var(--secondary-background)] text-[var(--l1-foreground)] hover:bg-[var(--l1-background-hover)]',
-        tertiary: 'bg-signoz_vanilla-200 text-signoz_ink-200 hover:bg-signoz_vanilla-300',
-        ghost: 'bg-transparent hover:bg-signoz_ink-400',
-        link: 'text-signoz_robin-500',
+          'bg-[var(--secondary-background)] text-[var(--secondary-foreground)] hover:bg-[var(--secondary-background-hover)]',
+        tertiary:
+          'bg-[var(--l1-foreground)] text-[var(--l1-background)] hover:bg-[color-mix(in_srgb,var(--l1-foreground)_90%,var(--l1-background))]',
+        ghost: 'bg-transparent hover:bg-[var(--ghost-background-hover)]',
+        link: 'text-[var(--accent-primary)]',
       },
       size: {
         default: 'h-10 px-4 py-2',
@@ -176,9 +177,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const splitIconClass =
       mappedVariant === 'default'
-        ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600'
+        ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-[var(--accent-primary)] !p-0 transition-colors duration-200 hover:!bg-[var(--accent-primary-hover)] active:!bg-[color-mix(in_srgb,var(--accent-primary)_80%,var(--base-black))]'
         : mappedVariant === 'secondary'
-          ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !p-0 transition-colors duration-200 hover:!bg-signoz_ink-300'
+          ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !p-0 transition-colors duration-200 hover:!bg-[var(--secondary-background-hover)]'
           : ''
     const shouldRenderSplitIcon = !unstyled && withIcon && Boolean(splitIconClass) && !asChild
     const resolvedClassName = unstyled
@@ -212,8 +213,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             </span>
             <span
               className={cn(
-                'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
-                mappedVariant === 'default' ? '!flex !bg-signoz_robin-400' : '!flex'
+                'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-[var(--base-white)]',
+                mappedVariant === 'default' ? '!flex !bg-[var(--accent-primary-hover)]' : '!flex'
               )}
               aria-hidden="true"
             >

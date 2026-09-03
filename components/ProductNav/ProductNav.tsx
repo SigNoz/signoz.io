@@ -56,10 +56,10 @@ export default function ProductNav() {
 
   return (
     <div className="fixed left-0 right-0 top-[56px] z-10">
-      <header className="header-bg mx-auto box-border h-[56px] w-full border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100">
+      <header className="header-bg mx-auto box-border h-[56px] w-full border-b border-[var(--l1-border)] text-[var(--l1-foreground)] backdrop-blur-[20px]">
         <div className="mx-auto h-fit max-w-8xl overflow-x-auto">
           <nav
-            className="mb-0 flex h-[55px] gap-3 pl-0 text-center text-sm font-medium text-signoz_vanilla-400 sm:gap-6"
+            className="mb-0 flex h-[55px] gap-3 pl-0 text-center text-sm font-medium text-[var(--l2-foreground)] sm:gap-6"
             aria-label="Product Navigation"
           >
             {navigationItems.map((item) => (
@@ -68,7 +68,7 @@ export default function ProductNav() {
                 href={item.href}
                 className={`inline-flex h-full shrink-0 items-center whitespace-nowrap rounded-t-lg px-1 py-1.5 pb-3.5 ${
                   activeTab === item.key
-                    ? 'border-b-2 border-signoz_robin-500 text-signoz_vanilla-100'
+                    ? 'border-b-2 border-[var(--accent-primary)] text-[var(--l1-foreground)]'
                     : ''
                 }`}
                 prefetch={false}

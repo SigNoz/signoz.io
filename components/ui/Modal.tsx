@@ -84,7 +84,7 @@ export function AppModal({
               <button
                 type="button"
                 aria-label="Close modal"
-                className="absolute right-1 top-1 z-10 select-none appearance-none rounded-full p-2 text-zinc-400 outline-none transition-[background-color,color] [-webkit-tap-highlight-color:transparent] hover:bg-zinc-700/40 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signoz_robin-500 active:bg-zinc-600/40"
+                className="absolute right-1 top-1 z-10 select-none appearance-none rounded-full p-2 text-[var(--l2-foreground)] outline-none transition-[background-color,color] [-webkit-tap-highlight-color:transparent] hover:bg-[var(--l2-background-hover)] focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-primary)] active:bg-[var(--l3-background-hover)]"
               >
                 <X className="h-5 w-5" strokeWidth={2} aria-hidden />
               </button>

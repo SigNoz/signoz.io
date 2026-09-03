@@ -53,7 +53,7 @@ export interface ComparisonItem {
   name: string
 }
 
-const PRODUCT_ICON_CLASS = 'h-4 w-4 shrink-0 pt-0.5 text-signoz_vanilla-100'
+const PRODUCT_ICON_CLASS = 'h-4 w-4 shrink-0 pt-0.5 text-[var(--l1-foreground)]'
 
 export const productDropdownItems: ProductItem[] = [
   {
@@ -284,7 +284,7 @@ export const NAV_BREAKPOINTS = {
 } as const
 
 export const POPOVER_CONTENT_CLASS =
-  "z-50 min-w-fit origin-top-left rounded-[4px] border border-signoz_slate-500 bg-[hsl(240_5.88%_10%)] p-0 shadow-[0_12px_48px_rgba(0,0,0,0.55)] outline-none will-change-transform before:absolute before:-top-[4px] before:left-0 before:right-0 before:h-[4px] before:content-[''] data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
+  "z-50 min-w-fit origin-top-left rounded-[4px] border border-[var(--l2-border)] bg-[var(--l2-background)] p-0 shadow-[0_12px_48px_color-mix(in_srgb,var(--base-black)_55%,transparent)] outline-none will-change-transform before:absolute before:-top-[4px] before:left-0 before:right-0 before:h-[4px] before:content-[''] data-[state=closed]:animate-nav-popover-out data-[state=open]:animate-nav-popover-in motion-reduce:animate-none"
 
 export const SECTION_HEADING_CLASS =
-  'text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-signoz_vanilla-100'
+  'text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[var(--l1-foreground)]'

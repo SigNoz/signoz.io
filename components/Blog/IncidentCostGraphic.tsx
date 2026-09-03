@@ -126,7 +126,7 @@ export default function IncidentCostGraphic() {
           x={W / 2}
           y={38}
           textAnchor="middle"
-          fill="#FFFFFF"
+          fill="var(--l1-foreground)"
           fontSize="28"
           fontWeight="700"
           fontFamily="'IBM Plex Sans', -apple-system, sans-serif"
@@ -137,7 +137,7 @@ export default function IncidentCostGraphic() {
           x={W / 2}
           y={68}
           textAnchor="middle"
-          fill="#888888"
+          fill="var(--l3-foreground)"
           fontSize="16"
           fontFamily="'IBM Plex Mono', monospace"
         >
@@ -159,7 +159,7 @@ export default function IncidentCostGraphic() {
                 x={centerX}
                 y={110}
                 textAnchor="middle"
-                fill="#FFFFFF"
+                fill="var(--l1-foreground)"
                 fontSize="19"
                 fontWeight="700"
                 fontFamily="'IBM Plex Sans', -apple-system, sans-serif"
@@ -170,7 +170,7 @@ export default function IncidentCostGraphic() {
                 x={centerX}
                 y={133}
                 textAnchor="middle"
-                fill="#777777"
+                fill="var(--l3-foreground)"
                 fontSize="14"
                 fontFamily="'IBM Plex Mono', monospace"
               >
@@ -184,7 +184,7 @@ export default function IncidentCostGraphic() {
                   y1={95}
                   x2={sectionX}
                   y2={barsBaseY + 30}
-                  stroke="#2A2A32"
+                  stroke="var(--l2-border)"
                   strokeWidth="1"
                 />
               )}
@@ -196,14 +196,14 @@ export default function IncidentCostGraphic() {
                 width={barW}
                 height={csKnownH}
                 rx="3"
-                fill="#3A3A44"
+                fill="var(--l3-background)"
               />
               <line
                 x1={csBarX}
                 y1={barsBaseY - csKnownH * 0.6}
                 x2={csBarX + barW}
                 y2={barsBaseY - csKnownH * 0.6}
-                stroke="#4A4A54"
+                stroke="var(--l3-border)"
                 strokeWidth="0.5"
               />
 
@@ -266,7 +266,7 @@ export default function IncidentCostGraphic() {
                 x={csBarX + barW / 2}
                 y={barsBaseY + 22}
                 textAnchor="middle"
-                fill="#AAAAAA"
+                fill="var(--l2-foreground)"
                 fontSize="13"
                 fontFamily="'IBM Plex Mono', monospace"
               >
@@ -303,7 +303,7 @@ export default function IncidentCostGraphic() {
                 x={szBarX + barW / 2}
                 y={barsBaseY + 22}
                 textAnchor="middle"
-                fill="#AAAAAA"
+                fill="var(--l2-foreground)"
                 fontSize="13"
                 fontFamily="'IBM Plex Mono', monospace"
               >
@@ -316,11 +316,11 @@ export default function IncidentCostGraphic() {
         {/* Legend */}
         <g transform={`translate(${W / 2 - 270}, ${barsBaseY + 52})`}>
           <g>
-            <rect x="0" y="0" width="14" height="14" rx="2" fill="#3A3A44" />
+            <rect x="0" y="0" width="14" height="14" rx="2" fill="var(--l3-background)" />
             <text
               x="22"
               y="12"
-              fill="#888888"
+              fill="var(--l3-foreground)"
               fontSize="14"
               fontFamily="'IBM Plex Mono', monospace"
             >
@@ -342,7 +342,7 @@ export default function IncidentCostGraphic() {
             <text
               x="22"
               y="12"
-              fill="#888888"
+              fill="var(--l3-foreground)"
               fontSize="14"
               fontFamily="'IBM Plex Mono', monospace"
             >
