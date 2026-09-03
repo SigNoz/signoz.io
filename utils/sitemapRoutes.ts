@@ -9,6 +9,7 @@
 import siteMetadata from '@/data/siteMetadata'
 
 export const PRODUCT_SITEMAP_ROUTES = [
+  'api-reference',
   'pricing',
   'pricing/metrics-cost-estimation',
   'teams',
