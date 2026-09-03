@@ -1610,6 +1610,13 @@ html:not(.dark) [data-rmiz-modal-content] img:not(.no-theme-invert) {
   filter: invert(1) hue-rotate(180deg);
 }
 
+/* Near-white listicle logos are remapped to ink in light mode. The SVG filter
+   (components/Listicle/ListicleIconFilter.tsx) runs in the compositor, so it
+   works on cross-origin CDN icons that canvas sampling cannot read. */
+html:not(.dark) .listicle-icon img {
+  filter: url(#listicle-icon-filter);
+}
+
 .flex-center {
   display: flex;
   justify-content: center;

@@ -2,6 +2,7 @@ import React from 'react'
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '../TrackingLink'
 import ListicleIcon from './ListicleIcon'
+import ListicleIconFilter from './ListicleIconFilter'
 import type { IconSpec, ListicleItem } from './types'
 
 interface ListicleCardGridProps {
@@ -48,6 +49,7 @@ export default function ListicleCardGrid({
 }: ListicleCardGridProps) {
   return (
     <div className="mx-auto mb-12 w-full max-w-7xl">
+      <ListicleIconFilter />
       {(title || description) && (
         <div className="mb-6 text-left">
           {title && (
