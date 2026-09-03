@@ -99,13 +99,18 @@ export async function resolveCanonicalDocsMarkdownPath(
 
     if (!response || !REDIRECT_STATUSES.has(response.status) || !location) break
 
-    let next: string
+    let target: URL
     try {
-      next = new URL(location, origin).pathname
+      target = new URL(location, origin)
     } catch {
       break
     }
 
+    // No /docs/ redirect leaves the origin today. If one ever does, send the
+    // client off-site rather than keeping the path and serving it as ours.
+    if (target.origin !== new URL(origin).origin) return target.toString()
+
+    const next = target.pathname
     if (seen.has(next)) break
     seen.add(next)
     current = next
