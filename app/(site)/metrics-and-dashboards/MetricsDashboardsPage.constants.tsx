@@ -1,5 +1,8 @@
 import Image from 'next/image'
 import { ArrowRight, BookOpen } from 'lucide-react'
+import fastIconUrl from '@/public/img/log-management/fast.svg?url'
+import blocksIconUrl from '@/public/img/features/metrics/blocks.svg?url'
+import signalsIconUrl from '@/public/img/log-management/signals.svg?url'
 import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 import { IconTitleDescriptionCardData } from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 import { SplitSectionPanel } from '@/shared/components/molecules/FeaturePages/SplitSection/SplitSection.types'
@@ -45,7 +48,7 @@ const cardIcon = (src: string, alt: string) => (
 
 export const WHY_METRICS_MONITORING_CARDS: IconTitleDescriptionCardData[] = [
   {
-    icon: cardIcon('/img/log-management/fast.svg', 'Easy-to-Use Query Builder'),
+    icon: cardIcon(fastIconUrl, 'Easy-to-Use Query Builder'),
     title: 'Easy-to-Use Query Builder with Advanced Capabilities',
     description:
       'SigNoz comes packed with a powerful query builder. Create queries on your metrics data quickly with an easy-to-use metrics query builder. The click-and-select query builder is made to write queries super easily without knowing any query language. You can combine multiple queries, apply functions, and add formulae to create really complex queries quickly.',
@@ -61,7 +64,7 @@ export const WHY_METRICS_MONITORING_CARDS: IconTitleDescriptionCardData[] = [
     },
   },
   {
-    icon: cardIcon('/img/features/metrics/blocks.svg', 'Integrations'),
+    icon: cardIcon(blocksIconUrl, 'Integrations'),
     title: 'Integrations for quick-start monitoring',
     description:
       'Use integrations to start monitoring popular technologies quickly. This enables you to create pre-built dashboards with important logs and metrics that can give you insights into performance. We currently have integrations for AWS services, Redis, MongoDB, Nginx, Clickhouse, Postgresql, and many more.',
@@ -77,7 +80,7 @@ export const WHY_METRICS_MONITORING_CARDS: IconTitleDescriptionCardData[] = [
     },
   },
   {
-    icon: cardIcon('/img/log-management/signals.svg', 'Delta and cumulative metrics'),
+    icon: cardIcon(signalsIconUrl, 'Delta and cumulative metrics'),
     title: 'Support for both delta and cumulative metrics',
     description: (
       <>

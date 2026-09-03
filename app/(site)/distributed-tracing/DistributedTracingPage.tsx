@@ -26,6 +26,7 @@ import {
 } from './DistributedTracingPage.constants'
 import TabItem from '@/components/TabItem'
 import Tabs from '@/components/Tabs'
+import opentelemetryIconUrl from '@/public/img/website/opentelemetry-icon-color.svg?url'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import IconGrid from '@/shared/components/molecules/FeaturePages/IconGrid'
 import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
@@ -113,7 +114,7 @@ const LogProcessingSection: React.FC = () => {
           </div>
           <div className="flex items-center gap-8">
             <Image
-              src="/img/website/opentelemetry-icon-color.svg"
+              src={opentelemetryIconUrl}
               alt="OpenTelemetry"
               className="h-8"
               width={32}

@@ -2,18 +2,20 @@ import SectionLayout from '../SectionLayout/SectionLayout.view'
 import { BookOpen, Mail } from 'lucide-react'
 import ButtonGroup from '../ButtonGroup/ButtonGroup.view'
 import StatsCard from '@/components/Card/card'
+import downloadIconUrl from '@/public/img/index_features/download.svg?url'
+import githubIconUrl from '@/public/img/index_features/github.svg?url'
 
 const SigNozStats = () => {
   const STATS_LIST = [
     {
       id: 1,
-      logo: '/img/index_features/download.svg',
+      logo: downloadIconUrl,
       name: 'OSS Downloads',
       value: '10 million+',
     },
     {
       id: 2,
-      logo: '/img/index_features/github.svg',
+      logo: githubIconUrl,
       name: 'GitHub Stars',
       value: '25k+',
     },
