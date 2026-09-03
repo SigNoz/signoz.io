@@ -1,5 +1,5 @@
 ---
-date: 2026-08-25
+date: 2026-08-30
 title: Migrate Metrics from Prometheus & Grafana to SigNoz
 description: Learn how to migrate metrics from Prometheus, Mimir, and Grafana Agent to SigNoz using the OpenTelemetry Collector, with receiver mappings and validation steps.
 doc_type: howto
@@ -151,6 +151,10 @@ For a complete list of all supported metric collection methods, see [Send Metric
 For new applications, we recommend using OpenTelemetry SDKs directly instead of Prometheus client libraries. This avoids the need for scraping and provides better context (<Tooltip text="exemplars" content="A pointer from an aggregated metric data point back to a specific trace that contributed to it, letting you jump from a latency spike on a chart to a slow request that caused it." link="https://signoz.io/docs/glossary/#exemplar" />).
 
 See [Instrumentation Guides](https://signoz.io/docs/instrumentation/) for your language.
+
+<Admonition type="info" title="Keep Prometheus-only tools">
+Tools that only support the Prometheus API, such as Grafana, KEDA, Headlamp, the Kubernetes autoscalers (HPA, VPA), Argo Rollouts, OpenCost, and Ray, do not need a Prometheus server after migration. On self-hosted SigNoz, follow [SigNoz as a Prometheus Data Source](https://signoz.io/docs/metrics-management/prometheus-api-bridge/) to serve the Prometheus read API directly from SigNoz.
+</Admonition>
 
 ## Validate
 
