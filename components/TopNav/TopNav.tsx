@@ -42,6 +42,7 @@ export default function TopNav() {
   const isSignupRoute = pathname === '/teams/'
   const isContactUsRoute = pathname === '/contact-us/'
   const isWordleRoute = pathname === '/todaysdevopswordle/'
+  const isLogAnalyzerRoute = pathname === '/log-analyzer/' || pathname === '/log-analyzer'
 
   useEffect(() => {
     const isListingOrPagination = (base: string) =>
@@ -65,7 +66,7 @@ export default function TopNav() {
   }, [pathname])
 
   // Hide TopNav on teams, contact-us page
-  if (isSignupRoute || isContactUsRoute || isWordleRoute) {
+  if (isSignupRoute || isContactUsRoute || isWordleRoute || isLogAnalyzerRoute) {
     return null
   }
 
