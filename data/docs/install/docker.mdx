@@ -1,5 +1,5 @@
 ---
-date: 2026-09-02
+date: 2026-09-03
 title: Install SigNoz on Docker Standalone - Self-Host Guide
 tags : [Self-Hosted Community]
 description: Learn how to install SigNoz on Docker. Self-host guide for macOS, Linux, and Windows (WSL 2), from setup to verifying the install in the SigNoz UI.
@@ -221,9 +221,12 @@ docker compose -f pours/deployment/compose.yaml logs -f signoz-signoz-0
 
 Increase the memory allocated to Docker. SigNoz needs at least 4GB.
 
-### clickhouse-keeper keeps restarting with exit code 139 on Windows
+### clickhouse-keeper keeps restarting with exit code 139
 
-Exit code 139 is a segmentation fault. ClickHouse Keeper segfaults under Docker Desktop's virtualization layer on Windows. Run the stack with native Docker Engine inside WSL 2 instead, as described in [Prerequisites](#prerequisites).
+Exit code 139 is a segmentation fault. Two causes account for most reports:
+
+- **Memory pressure**, on any host. Keeper segfaults rather than reporting an out-of-memory error when Docker runs short. Raise Docker's memory limit to at least 4GB and retry.
+- **Docker Desktop on Windows.** Keeper segfaults under its virtualization layer. Run the stack with native Docker Engine inside WSL 2 instead, as described in [Prerequisites](#prerequisites).
 
 </details>
 
