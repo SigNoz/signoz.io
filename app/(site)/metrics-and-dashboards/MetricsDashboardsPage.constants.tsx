@@ -143,7 +143,7 @@ export const METRICS_OVERVIEW_PANELS: SplitSectionPanel[] = [
     imageAlt: 'Advanced querying with ClickHouse Queries',
     button: {
       text: 'Learn More',
-      href: 'https://signoz.io/docs/userguide/writing-clickhouse-traces-query/',
+      href: 'https://signoz.io/docs/userguide/write-a-metrics-clickhouse-query/',
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'Metrics Dashboards ClickHouse Query Docs Button',
@@ -165,7 +165,7 @@ export const METRICS_OVERVIEW_PANELS: SplitSectionPanel[] = [
       'Accessing metrics data through our Metrics API allows you to manage and analyze it efficiently. This opens up many opportunities for integration with other tools, programmatic analysis of metrics data, and customized data handling.',
     button: {
       text: 'Learn More',
-      href: 'https://signoz.io/docs/traces-management/trace-api/overview/',
+      href: 'https://signoz.io/docs/metrics-management/query-range-api/',
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'Metrics Dashboards Metrics API Docs Button',

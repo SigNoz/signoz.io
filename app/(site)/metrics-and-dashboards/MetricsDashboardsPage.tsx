@@ -116,20 +116,17 @@ const AlignedSplitRow: React.FC<{ left: SplitSectionPanel; right: SplitSectionPa
 }
 
 const MetricsOverviewSections: React.FC = () => {
-  const rows: Array<[number, number]> = [
-    [0, 1],
-    [2, 3],
-    [4, 5],
-    [6, 7],
-    [8, 9],
-  ]
+  const rows: Array<[number, number]> = []
+  for (let i = 0; i < METRICS_OVERVIEW_PANELS.length; i += 2) {
+    rows.push([i, i + 1])
+  }
 
   return (
     <>
       {rows.map(([leftIndex, rightIndex], rowIndex) => {
         const left = METRICS_OVERVIEW_PANELS[leftIndex]
-        const right = METRICS_OVERVIEW_PANELS[rightIndex]
-        const alignImages = (left.button || right.button) && (left.image || right.image)
+        const right: SplitSectionPanel | undefined = METRICS_OVERVIEW_PANELS[rightIndex]
+        const alignImages = right && (left.button || right.button) && (left.image || right.image)
 
         return (
           <React.Fragment key={leftIndex}>
@@ -139,8 +136,8 @@ const MetricsOverviewSections: React.FC = () => {
             ) : (
               <SplitSection
                 left={{ ...left, className: 'py-10' }}
-                right={{ ...right, className: 'py-10' }}
-                withVerticalDivider
+                right={right ? { ...right, className: 'py-10' } : <div />}
+                withVerticalDivider={Boolean(right)}
               />
             )}
           </React.Fragment>
