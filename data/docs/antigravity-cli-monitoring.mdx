@@ -1,0 +1,442 @@
+---
+published_date: 2026-09-02
+title: Google Antigravity CLI Monitoring with OpenTelemetry
+meta_title: Antigravity CLI OpenTelemetry Monitoring
+description: Monitor Google Antigravity CLI with OpenTelemetry and SigNoz. Trace every tool call and agent loop, and track weekly quota burn from interactive sessions.
+doc_type: howto
+---
+
+## What is Antigravity CLI Observability?
+
+<a href="https://antigravity.google/" target="_blank" rel="noopener noreferrer nofollow">Antigravity CLI</a> is Google's terminal coding agent, the successor to Gemini CLI. Its agent loop plans and executes multi-step work: it reads and edits files, runs shell commands, calls MCP servers, and delegates to subagents. What it does not give you is any record of that work. Antigravity has no built-in OpenTelemetry exporter, and a request for one is still open at <a href="https://github.com/google-antigravity/antigravity-cli/issues/366" target="_blank" rel="noopener noreferrer nofollow">antigravity-cli#366</a>.
+
+This guide closes that gap using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>. Antigravity ships its own hooks system that fires on tool completion, on every pass of the agent loop, and when a turn ends. A small hook script turns those events into OTLP spans, and samples the weekly quota that Antigravity meters your usage against.
+
+With Antigravity CLI observability in SigNoz, you can see which tools the agent reaches for, how many passes of the agent loop each turn takes, why turns end, which models are actually serving your requests, and how fast you are burning through your weekly quota.
+
+## Prerequisites
+
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
+- Antigravity CLI (`agy`) on macOS or Linux
+- Python 3.11 or later
+
+## Monitor Antigravity CLI with OpenTelemetry
+
+Antigravity exposes five hook events. This setup registers the three passive ones (`PostToolUse`, `PostInvocation`, and `Stop`) and converts each into a span.
+
+**Step 1:** Install the exporter in its own environment so it does not touch your system Python.
+
+```bash
+python3 -m venv ~/.local/opt/agy-otel
+~/.local/opt/agy-otel/bin/pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
+```
+
+**Step 2:** Save the following code in `~/.local/opt/agy-otel/hook.py`.
+
+```python:hook.py defaultCollapsed
+#!/usr/bin/env python3
+"""Antigravity CLI hook -> OpenTelemetry span exporter.
+
+Registered per event in ~/.gemini/config/hooks.json. The event name is passed as
+argv[1] because Antigravity's hook payloads carry no event-type field.
+
+Only passive events are supported: PostToolUse, PostInvocation and Stop. PreToolUse
+is deliberately excluded because its `decision` field is required and every legal
+value changes permission behaviour, so a telemetry hook cannot observe it neutrally.
+"""
+import json, os, sys, time, hashlib
+
+PASSIVE_OUTPUT = {"PostToolUse": {}, "PostInvocation": {}, "Stop": {}}
+
+CONFIG_PATH = os.path.expanduser("~/.config/agy-otel/env")
+
+
+def load_config():
+    """Read OTLP settings from a config file.
+
+    Interactive `agy` sessions inherit whatever shell they were launched from, so
+    hooks cannot rely on exported env vars. Without this the SDK silently falls
+    back to localhost:4318 and every span is dropped with connection refused.
+    Real environment variables still win.
+    """
+    try:
+        with open(CONFIG_PATH) as fh:
+            for line in fh:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, val = line.split("=", 1)
+                os.environ.setdefault(key.strip(), val.strip())
+    except FileNotFoundError:
+        pass
+
+
+QUOTA_STAMP = os.path.expanduser("~/.config/agy-otel/.quota-last")
+QUOTA_MIN_INTERVAL = int(os.environ.get("AGY_OTEL_QUOTA_INTERVAL", "300"))
+
+
+def _quota_due():
+    """Rate-limit quota sampling: /usage costs ~5s and the value moves slowly."""
+    try:
+        if time.time() - os.path.getmtime(QUOTA_STAMP) < QUOTA_MIN_INTERVAL:
+            return False
+    except OSError:
+        pass
+    try:
+        os.makedirs(os.path.dirname(QUOTA_STAMP), exist_ok=True)
+        open(QUOTA_STAMP, "w").close()
+    except OSError:
+        pass
+    return True
+
+
+def emit_quota(meter):
+    """Sample `agy -p /usage` and record remaining quota per bucket.
+
+    Antigravity is a flat-rate subscription and never exposes per-token cost to
+    interactive sessions, so quota consumed is the usable spend signal. The
+    command starts no agent turn, spends no quota and fires no hooks, so it is
+    safe to call from inside a hook.
+    """
+    import json as _json
+    import subprocess
+    out = subprocess.run(["agy", "-p", "/usage", "--output-format", "json"],
+                         capture_output=True, text=True, timeout=60).stdout
+    data = _json.loads(out, strict=False).get("command", {}).get("data", {})
+    remaining = meter.create_gauge(
+        "agy.quota.remaining_fraction", unit="1",
+        description="Fraction of the Antigravity weekly quota still available")
+    reset_in = meter.create_gauge(
+        "agy.quota.seconds_to_reset", unit="s",
+        description="Seconds until the Antigravity quota window resets")
+    now = time.time()
+    for group in data.get("groups", []):
+        for bucket in group.get("buckets", []):
+            attrs = {
+                "agy.quota.group": group.get("name", ""),
+                "agy.quota.bucket": bucket.get("id", ""),
+                "agy.quota.window": bucket.get("window", ""),
+            }
+            frac = bucket.get("remaining_fraction")
+            if frac is not None:
+                remaining.set(float(frac), attrs)
+            reset = bucket.get("reset_time")
+            if reset:
+                try:
+                    from datetime import datetime, timezone
+                    ts = datetime.fromisoformat(reset.replace("Z", "+00:00"))
+                    reset_in.set(max(0.0, ts.timestamp() - now), attrs)
+                except Exception:
+                    pass
+
+
+def emit(event, payload):
+    # Imported here, not at module scope: the OpenTelemetry SDK costs ~200ms to
+    # import and only the detached child needs it, so the agent loop never waits.
+    from opentelemetry import trace
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.trace import (SpanKind, SpanContext, TraceFlags,
+                                     NonRecordingSpan, set_span_in_context)
+    from opentelemetry.sdk.metrics import MeterProvider
+    from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+    from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+    os.environ.setdefault("OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE", "delta")
+
+    conv = payload.get("conversationId") or "unknown"
+    resource = Resource.create({
+        "service.name": os.environ.get("OTEL_SERVICE_NAME", "antigravity-cli"),
+    })
+    provider = TracerProvider(resource=resource)
+    provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+    tracer = provider.get_tracer("antigravity-cli-hooks")
+
+    # Hooks are separate processes, so group a conversation's spans by deriving a
+    # stable trace id from conversationId. The root span is never emitted, so the
+    # trace shows a missing-root placeholder; that is expected.
+    digest = hashlib.sha256(conv.encode()).hexdigest()
+    ctx = set_span_in_context(NonRecordingSpan(SpanContext(
+        trace_id=int(digest[:32], 16),
+        span_id=int(digest[32:48], 16),
+        is_remote=True,
+        trace_flags=TraceFlags(TraceFlags.SAMPLED),
+    )))
+
+    tool = payload.get("toolName") or (payload.get("toolCall") or {}).get("name")
+    if event == "PostToolUse":
+        name = f"execute_tool {tool or 'unknown'}"
+        op = "execute_tool"
+    elif event == "Stop":
+        name, op = "agy stop", "invoke_agent"
+    else:
+        name, op = "agy invocation", "invoke_agent"
+
+    now = time.time()
+    span = tracer.start_span(name, context=ctx, kind=SpanKind.INTERNAL,
+                             start_time=int(now * 1e9))
+    span.set_attribute("gen_ai.operation.name", op)
+    span.set_attribute("gen_ai.provider.name", "gcp.gemini")
+    span.set_attribute("gen_ai.conversation.id", conv)
+    span.set_attribute("agy.hook.event", event)
+    if payload.get("modelName"):
+        span.set_attribute("gen_ai.request.model", payload["modelName"])
+    for key, attr in (("stepIdx", "agy.step.index"),
+                      ("invocationNum", "agy.invocation.num"),
+                      ("initialNumSteps", "agy.initial_num_steps"),
+                      ("executionNum", "agy.execution.num"),
+                      ("terminationReason", "agy.termination_reason"),
+                      ("fullyIdle", "agy.fully_idle")):
+        if payload.get(key) is not None:
+            span.set_attribute(attr, payload[key])
+    if tool:
+        span.set_attribute("gen_ai.tool.name", tool)
+    err = payload.get("error")
+    if err:
+        span.set_attribute("error.type", str(err)[:200])
+        span.set_status(trace.Status(trace.StatusCode.ERROR, str(err)[:200]))
+    span.end(end_time=int(now * 1e9))
+
+    provider.force_flush(2000)
+    provider.shutdown()
+
+    # Quota is the only spend signal available to interactive sessions.
+    if event == "Stop" and _quota_due():
+        try:
+            mp = MeterProvider(resource=resource, metric_readers=[
+                PeriodicExportingMetricReader(OTLPMetricExporter(), 60000)])
+            emit_quota(mp.get_meter("antigravity-cli-quota"))
+            mp.force_flush(5000)
+            mp.shutdown()
+        except Exception:
+            pass
+
+
+def main():
+    load_config()
+    event = sys.argv[1] if len(sys.argv) > 1 else "PostInvocation"
+    try:
+        raw = sys.stdin.read()
+        payload = json.loads(raw) if raw.strip() else {}
+    except Exception:
+        payload = {}
+    # Antigravity runs hooks synchronously and blocks the agent loop, and a
+    # foreground OTLP export costs 0.5-1s per tool call. Fork so the parent can
+    # answer immediately and the child ships the span in the background.
+    try:
+        if os.fork() == 0:
+            os.setsid()
+            if os.fork() == 0:
+                try:
+                    emit(event, payload)
+                finally:
+                    os._exit(0)
+            os._exit(0)
+        else:
+            os.wait()  # reap the short-lived intermediate child
+    except Exception:
+        pass  # never break the agent loop on a telemetry failure
+    # Passive response: must be valid JSON and must not alter agent behaviour.
+    print(json.dumps(PASSIVE_OUTPUT.get(event, {})))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+**Step 3:** Write the exporter configuration to `~/.config/agy-otel/env`.
+
+```bash
+mkdir -p ~/.config/agy-otel
+cat > ~/.config/agy-otel/env <<'EOF'
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+OTEL_SERVICE_NAME=antigravity-cli
+EOF
+chmod 600 ~/.config/agy-otel/env
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning" title="Do not rely on exported environment variables" defaultCollapsed="true">
+An interactive `agy` session inherits whatever shell launched it, so hooks rarely see the `OTEL_EXPORTER_OTLP_*` variables you export in your terminal. Without this config file the SDK falls back to `localhost:4318`, every span is dropped with connection refused, and the agent behaves normally, so nothing looks wrong. The file holds your ingestion key, which is why it is `chmod 600`.
+</Admonition>
+
+**Step 4:** Register the hooks in `~/.gemini/config/hooks.json`. Antigravity inherits Gemini CLI's configuration directory, so this path is correct despite the name.
+
+```json:hooks.json defaultCollapsed
+{
+  "signoz-otel": {
+    "enabled": true,
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.local/opt/agy-otel/bin/python ~/.local/opt/agy-otel/hook.py PostToolUse",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostInvocation": [
+      {
+        "type": "command",
+        "command": "~/.local/opt/agy-otel/bin/python ~/.local/opt/agy-otel/hook.py PostInvocation",
+        "timeout": 10
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "~/.local/opt/agy-otel/bin/python ~/.local/opt/agy-otel/hook.py Stop",
+        "timeout": 10
+      }
+    ]
+  }
+}
+```
+
+**Step 5:** Restart `agy`, then run a prompt that uses a tool.
+
+Antigravity reads `hooks.json` once at startup, so a running session will not pick up the change. Hooks also load only for trusted folders, so run `agy` from a directory you have trusted, otherwise the hooks are silently skipped.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## View Antigravity CLI Traces in SigNoz
+
+Allow a minute after your first prompt, then open the [Traces explorer](https://signoz.io/docs/userguide/traces/) and filter on `service.name = 'antigravity-cli'`.
+
+<Figure
+  src="/img/docs/llm/antigravity-cli/antigravity-cli-traces.webp"
+  alt="Antigravity CLI agent spans in the SigNoz Traces explorer"
+  caption="Each hook event arrives as its own span: tool executions, agent loop passes, and the end of the turn."
+/>
+
+Opening a conversation shows every pass of the agent loop with the tools that ran between them, and the span attributes on the right.
+
+<Figure
+  src="/img/docs/llm/antigravity-cli/antigravity-cli-detailed-traces.webp"
+  alt="A single Antigravity CLI conversation expanded in the SigNoz trace detail view"
+  caption="One conversation: alternating agent loop passes and tool calls, ending in a stop span."
+/>
+
+## Attributes Worth Knowing
+
+Every span carries `gen_ai.operation.name`, `gen_ai.provider.name`, `gen_ai.conversation.id`, `gen_ai.request.model`, and `agy.hook.event`. Four details decide whether your queries are correct.
+
+- **Spans have zero duration.** `PostToolUse` carries no timing, and `PreToolUse` cannot be registered safely, so these spans are point-in-time markers. You get tool frequency and sequence, not tool latency.
+- **`gen_ai.request.model` is what ran, not what you asked for.** Requesting `gemini-3.1-pro-high` surfaces as the internal id `gemini-pro-agent`, which does not appear in `agy models` at all.
+- **`agy.invocation.num` counts loop passes, not prompts.** One turn commonly issues six or more model requests, so this is the signal to watch for a runaway agent.
+- **A trace shows a missing root span.** Hooks run as separate processes, so the script derives a stable trace id from the conversation id and parents every span to a root it never emits. The conversation groups correctly and every query works.
+
+The `Stop` span adds `agy.termination_reason`, which is the closest thing Antigravity gives you to a failure signal. Values include `NO_TOOL_CALL` (the normal ending, where the model answered without calling a tool), `ERROR`, `USER_CANCELED`, `MAX_INVOCATIONS`, `MAX_FORCED_INVOCATIONS`, and `MAX_TOKEN_BUDGET_EXCEEDED`. The loop-cap reasons are the ones worth alerting on: they mean the agent hit its ceiling instead of finishing.
+
+It is the only failure signal you have. Antigravity does not treat a non-zero shell exit as a tool error: running `false` produces a tool step with an empty `error` field, the turn still reports `SUCCESS`, and `has_error` is never set on any of these spans. An error rate built on them reads zero and implies everything is healthy, so use `agy.termination_reason` instead.
+
+## Tracking Quota Instead of Tokens
+
+Antigravity is flat-rate and never exposes per-token counts to an interactive session, so quota is the spend signal. The `Stop` hook samples `agy -p "/usage"` and records two gauges:
+
+- `agy.quota.remaining_fraction`, the share of the weekly limit still available
+- `agy.quota.seconds_to_reset`, how long until the window rolls over
+
+Both carry `agy.quota.bucket`, `agy.quota.group`, and `agy.quota.window`. Gemini models are metered separately from Claude and GPT-OSS, so you get a `gemini-weekly` bucket and a `3p-weekly` bucket.
+
+Sampling is rate-limited to once every 300 seconds, tunable with `AGY_OTEL_QUOTA_INTERVAL`.
+
+## Antigravity CLI Monitoring Dashboard
+
+The [Antigravity CLI dashboard](https://signoz.io/docs/dashboards/dashboard-templates/antigravity-cli-dashboard/) turns these spans into quota burn-down, tool activity, agent loop volume, and turn outcomes.
+
+<Figure
+  src="/img/docs/llm/antigravity-cli/antigravity-cli-dashboard.webp"
+  alt="Antigravity CLI monitoring dashboard in SigNoz"
+  caption="The Antigravity CLI dashboard template."
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting Antigravity CLI Observability
+
+</ToggleHeading>
+
+### No spans arrive at all
+
+Confirm the hooks loaded. Antigravity logs this at startup:
+
+```bash
+grep -i "named hooks" ~/.gemini/antigravity-cli/cli.log
+```
+
+`loaded 1 named hooks from 1 hooks.json file(s)` means the file parsed. `loaded 0` means it did not, and a `failed to parse hooks.json` line above it will say why.
+
+If the hooks loaded but nothing reaches SigNoz, the exporter almost certainly cannot see its configuration. Run the hook by hand with a stripped environment, which is what an interactive session gives it:
+
+```bash
+echo '{"conversationId":"test","modelName":"test"}' | \
+  env -i HOME="$HOME" PATH=/usr/bin:/bin \
+  ~/.local/opt/agy-otel/bin/python ~/.local/opt/agy-otel/hook.py PostToolUse
+```
+
+It should print `{}` with no connection errors. Errors mentioning `localhost:4318` mean `~/.config/agy-otel/env` is missing or unreadable.
+
+### Hooks are registered but never fire
+
+Antigravity only loads hooks for trusted folders. Check that your working directory is listed:
+
+```bash
+cat ~/.gemini/antigravity-cli/settings.json
+```
+
+Add it under `trustedWorkspaces`, or start `agy` from a directory you have already trusted.
+
+### Every tool call is blocked
+
+A `PreToolUse` hook is registered somewhere and is not returning a valid decision. Remove it. A `PreToolUse` handler that returns an empty object denies every tool call, and the agent reports `tool call denied by pre-tool hook`.
+
+### Tools are auto-denied in headless runs
+
+Headless mode cannot prompt for permission, so any tool without an allow rule is denied. Antigravity gates by tool class, not just shell commands, so `write_file`, `read_url`, and `read_file` each need their own entry:
+
+```json
+{
+  "permissions": {
+    "allow": ["command(echo)", "write_file(*)", "read_url(*)", "read_file(*)"]
+  }
+}
+```
+
+This lives in `~/.gemini/antigravity-cli/settings.json`, not `~/.gemini/settings.json`. The wrong file fails silently.
+
+### Quota panels stay empty
+
+Quota is sampled only on the `Stop` event and at most once every 300 seconds. Complete a turn, wait a minute for ingestion, and confirm the stamp file was written:
+
+```bash
+ls -l ~/.config/agy-otel/.quota-last
+```
+
+</details>
+
+## Related integrations
+
+Instrument the other AI coding agents your team runs, using the same OpenTelemetry pipeline:
+
+- [Monitor Claude Code with OpenTelemetry](https://signoz.io/docs/claude-code-monitoring/)
+- [Monitor OpenAI Codex with OpenTelemetry](https://signoz.io/docs/codex-monitoring/)
+- [Cursor IDE observability with OpenTelemetry](https://signoz.io/docs/cursor-observability/)
+- [Qwen Code observability with OpenTelemetry](https://signoz.io/docs/qwen-code-observability/)
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.
