@@ -193,7 +193,7 @@ export const RELATED_LOGS_PANEL = {
   },
   image: '/img/distributed-tracing/see-related-logs-of-every-span.png',
   imageAlt: 'See related logs of every span',
-  imageClassName: '-mt-8',
+  imageClassName: 'theme-invert -mt-8',
   className: 'py-6',
 }
 
@@ -213,6 +213,7 @@ export const CONTROL_TRACES_VOLUME_PANEL = {
   },
   image: '/img/distributed-tracing/control-traces-volume.png',
   imageAlt: 'Control traces volume',
+  imageClassName: 'theme-invert',
   className: 'py-6',
 }
 

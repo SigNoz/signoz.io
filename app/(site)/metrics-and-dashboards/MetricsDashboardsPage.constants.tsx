@@ -40,7 +40,7 @@ export const METRICS_HERO_IMAGE = {
 }
 
 const cardIcon = (src: string, alt: string) => (
-  <Image src={src} alt={alt} width={24} height={24} className="h-5 w-5" />
+  <Image src={src} alt={alt} width={24} height={24} className="theme-invert h-5 w-5" />
 )
 
 export const WHY_METRICS_MONITORING_CARDS: IconTitleDescriptionCardData[] = [

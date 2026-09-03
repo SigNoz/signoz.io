@@ -43,6 +43,7 @@ import SplitSection from '@/shared/components/molecules/FeaturePages/SplitSectio
 const Header: React.FC = () => {
   return (
     <FeaturePageHeader
+      className="theme-invert-images"
       title={
         <>
           High-Performance Trace Analysis <br /> Powered by Columnar Storage
@@ -205,7 +206,7 @@ const VisualQueryBuilder: React.FC = () => {
           alt={TRACE_QUERY_BUILDER_IMAGE.alt}
           width={10000}
           height={10000}
-          className="mb-8"
+          className="theme-invert mb-8"
         />
       </FeatureShowcase>
       <HeroCards cards={FILTER_AND_ANALYZE_CARDS} layoutVariant={'no-border'} variant="combined" />
@@ -247,11 +248,13 @@ const DistributedTracing: React.FC = () => {
           contentClassName="mb-0"
         />
 
-        <CarouselCards
-          cards={CORRELATION_CAROUSEL_DATA}
-          buttonLink="/docs/traces-management/guides/correlate-traces-and-logs/"
-          buttonText="Read Documentation"
-        />
+        <div className="theme-invert-images">
+          <CarouselCards
+            cards={CORRELATION_CAROUSEL_DATA}
+            buttonLink="/docs/traces-management/guides/correlate-traces-and-logs/"
+            buttonText="Read Documentation"
+          />
+        </div>
         <Divider />
         <VisualQueryBuilder />
         <StorageSection />

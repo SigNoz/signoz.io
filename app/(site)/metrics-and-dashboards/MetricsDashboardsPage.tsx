@@ -29,6 +29,7 @@ import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 const Header: React.FC = () => {
   return (
     <FeaturePageHeader
+      className="theme-invert-images"
       title={
         <>
           Infrastructure monitoring, custom metrics & <br />
@@ -90,6 +91,7 @@ const AlignedRowImage: React.FC<{ panel: SplitSectionPanel; className: string }>
           width={1440}
           height={810}
           sizes="(max-width: 768px) 100vw, 50vw"
+          className="theme-invert"
         />
       )}
     </div>
@@ -135,8 +137,10 @@ const MetricsOverviewSections: React.FC = () => {
               <AlignedSplitRow left={left} right={right} />
             ) : (
               <SplitSection
-                left={{ ...left, className: 'py-10' }}
-                right={right ? { ...right, className: 'py-10' } : <div />}
+                left={{ ...left, className: 'py-10', imageClassName: 'theme-invert' }}
+                right={
+                  right ? { ...right, className: 'py-10', imageClassName: 'theme-invert' } : <div />
+                }
                 withVerticalDivider={Boolean(right)}
               />
             )}
@@ -215,7 +219,7 @@ const GetStartedBanner: React.FC = () => {
           alt={GET_STARTED_IMAGE.alt}
           width={10000}
           height={10000}
-          className="w-full rounded-lg md:w-3/5"
+          className="theme-invert w-full rounded-lg md:w-3/5"
         />
       </div>
     </SectionLayout>
