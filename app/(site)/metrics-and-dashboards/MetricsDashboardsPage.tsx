@@ -229,33 +229,33 @@ const GetStartedBanner: React.FC = () => {
 const MetricsDashboards: React.FC = () => {
   return (
     <FeaturePageLayout>
-      <Header />
-      <div className="relative mx-auto max-w-8xl">
+      <div className="mx-auto w-full md:w-[80vw]">
+        <Header />
         <TrustedByTeams page="MetricsDashboards" />
+
+        <SectionLayout variant="bordered" className="!px-0">
+          <SectionHeading>
+            Why use SigNoz Cloud for <br /> Metrics Monitoring?
+          </SectionHeading>
+          <Divider />
+          <IconTitleDescriptionCardGrid
+            cards={WHY_METRICS_MONITORING_CARDS}
+            variant="xl"
+            titleLevel="h3"
+          />
+          <Divider />
+          <SectionHeading>
+            SigNoz Cloud Metrics & <br /> Dashboards Overview
+          </SectionHeading>
+          <Divider />
+          <MetricsOverviewSections />
+          <Divider />
+        </SectionLayout>
+
+        <MetricsPricingSection />
+        <SigNozStats />
+        <GetStartedBanner />
       </div>
-
-      <SectionLayout variant="bordered" className="!px-0">
-        <SectionHeading>
-          Why use SigNoz Cloud for <br /> Metrics Monitoring?
-        </SectionHeading>
-        <Divider />
-        <IconTitleDescriptionCardGrid
-          cards={WHY_METRICS_MONITORING_CARDS}
-          variant="xl"
-          titleLevel="h3"
-        />
-        <Divider />
-        <SectionHeading>
-          SigNoz Cloud Metrics & <br /> Dashboards Overview
-        </SectionHeading>
-        <Divider />
-        <MetricsOverviewSections />
-        <Divider />
-      </SectionLayout>
-
-      <MetricsPricingSection />
-      <SigNozStats />
-      <GetStartedBanner />
     </FeaturePageLayout>
   )
 }
