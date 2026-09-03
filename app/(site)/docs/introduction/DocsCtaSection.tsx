@@ -52,9 +52,33 @@ export default function DocsCtaSection() {
                 className={`flex min-w-0 flex-col gap-2 ${index < CTA_STEPS.length - 1 ? 'pb-8' : ''}`}
               >
                 <p className="m-0 text-base font-medium leading-6 text-[var(--l1-foreground)]">
-                  {step.title}
+                  <TrackingLink
+                    href={step.href}
+                    clickType="Nav Click"
+                    clickName="CTA Step Link"
+                    clickText={step.title}
+                    clickLocation={SECTION_NAME}
+                    className="text-inherit no-underline hover:underline"
+                  >
+                    {step.title}
+                  </TrackingLink>
                 </p>
-                <p className="text-sm leading-5 text-[var(--l3-foreground)]">{step.subtitle}</p>
+                <p className="text-sm leading-5 text-[var(--l3-foreground)]">
+                  {step.subtitleHref ? (
+                    <TrackingLink
+                      href={step.subtitleHref}
+                      clickType="Nav Click"
+                      clickName="CTA Alternative Link"
+                      clickText={step.subtitle}
+                      clickLocation={SECTION_NAME}
+                      className="text-inherit no-underline hover:underline"
+                    >
+                      {step.subtitle}
+                    </TrackingLink>
+                  ) : (
+                    step.subtitle
+                  )}
+                </p>
               </div>
             </div>
           ))}
