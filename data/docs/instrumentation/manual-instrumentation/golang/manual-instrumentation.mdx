@@ -74,7 +74,7 @@ func processOrder(ctx context.Context, orderID string) error {
 }
 ```
 
-A goroutine that outlives the request needs a context you derive on purpose. The request context is cancelled once the handler returns, so background work that keeps using it starts from an already-cancelled context. `context.WithoutCancel` keeps the values, including the span, while dropping the cancellation and the deadline:
+A goroutine that outlives the request needs a context you derive on purpose. The request context is canceled once the handler returns, so background work that keeps using it starts from an already-canceled context. `context.WithoutCancel` keeps the values, including the span, while dropping the cancellation and the deadline:
 
 ```go:goroutine.go
 // Keeps the trace context, drops the request's cancellation. Go 1.21 and later.

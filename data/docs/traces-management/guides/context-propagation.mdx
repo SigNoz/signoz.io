@@ -44,7 +44,7 @@ Two operations move context over the network:
 - **Inject** writes the current context into a carrier the transport can carry, usually a map of HTTP headers.
 - **Extract** reads that carrier on the receiving side and returns a context. You make it current, then start the entry span inside it.
 
-Set the span kind at the same time. Mark the caller `Client` and the receiver `Server`, so SigNoz can build the service map and APM metrics.
+Set the span kind at the same time. Mark a request and response hop `Client` on the caller and `Server` on the receiver. Mark a message queue hop `Producer` on the publisher and `Consumer` on the reader. SigNoz uses these to build the service map and APM metrics.
 
 A <Tooltip text="propagator" content="The component that serializes and deserializes trace context into and out of carriers such as HTTP headers, enabling context propagation." link="https://signoz.io/docs/glossary/#propagator" /> owns both operations and decides the wire format. Both services have to agree on that format. A service writing B3 headers to a service reading W3C Trace Context produces an empty extraction and a fresh trace on every hop.
 

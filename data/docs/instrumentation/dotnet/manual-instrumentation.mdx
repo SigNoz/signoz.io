@@ -239,7 +239,9 @@ public void PublishOrder(Order order)
 
 On the consuming side, extract before you start the entry span:
 
-```csharp:Consumer.cs
+```csharp:Consumer.cs defaultCollapsed
+using System.Linq;
+
 public void OnMessage(QueueMessage message)
 {
     var parentContext = Propagators.DefaultTextMapPropagator.Extract(
@@ -264,7 +266,7 @@ public void OnMessage(QueueMessage message)
 <Admonition type="warning">
 `Propagators.DefaultTextMapPropagator` is a no-op until the SDK sets it, and only the SDK can. Before the tracer provider is built it is a `NoopTextMapPropagator`: `Inject` writes zero keys to the carrier and raises no error. Once `Sdk.CreateTracerProviderBuilder()` (or the host's `AddOpenTelemetry()`) has run it becomes a `CompositeTextMapPropagator` and starts writing `traceparent`.
 
-Read the property at the point of use, as above. The SDK swaps in a different propagator object rather than mutating the existing one, so a `static readonly` field initialized before startup holds the no-op forever and every later inject writes nothing.
+Read the property at the point of use, as above. The SDK swaps in a different propagator object rather than mutating the existing one. A `static readonly` field initialized before startup therefore holds the no-op forever, and every later inject writes nothing.
 </Admonition>
 
 ## Step 7. Add events

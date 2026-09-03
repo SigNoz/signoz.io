@@ -145,7 +145,7 @@ tokio::spawn(
 ```
 
 <Admonition type="warning">
-Do not call `cx.attach()` inside a spawned task that awaits. `attach` returns a `ContextGuard` that is deliberately `!Send`, so holding it across an `await` makes the future `!Send` and `tokio::spawn` rejects it at compile time with "future cannot be sent between threads safely". `with_context` attaches the context around each poll instead, so no guard is held across the await.
+Do not call `cx.attach()` inside a spawned task that awaits. `attach` returns a `ContextGuard` that is deliberately `!Send`. Holding it across an `await` makes the future `!Send`, and `tokio::spawn` then rejects it at compile time with "future cannot be sent between threads safely". `with_context` attaches the context around each poll instead, so no guard is held across the await.
 </Admonition>
 
 ### Across a service boundary
