@@ -45,7 +45,7 @@ const GrafanaVsSigNozFloatingCard: React.FC = () => {
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 hidden w-64 transform rounded-lg bg-gradient-to-r from-blue-900/90 to-purple-900/90 p-4 shadow-lg backdrop-blur-sm transition-all duration-500 ease-in-out hover:-translate-y-1 hover:shadow-xl lg:block ${
+      className={`fixed bottom-6 right-6 z-50 hidden w-64 transform rounded-lg border border-[color-mix(in_srgb,var(--accent-primary)_25%,transparent)] bg-gradient-to-r from-[color-mix(in_srgb,var(--accent-primary)_12%,var(--l2-background))] to-[color-mix(in_srgb,var(--accent-sakura)_10%,var(--l2-background))] p-4 shadow-lg backdrop-blur-sm transition-all duration-500 ease-in-out hover:-translate-y-1 hover:shadow-xl dark:border-transparent dark:from-blue-900/90 dark:to-purple-900/90 lg:block ${
         isVisible && !isClosed
           ? 'translate-y-0 opacity-100'
           : 'pointer-events-none translate-y-8 opacity-0'
@@ -53,14 +53,16 @@ const GrafanaVsSigNozFloatingCard: React.FC = () => {
     >
       <button
         onClick={handleClose}
-        className="absolute right-2 top-2 text-gray-400 hover:text-white"
+        className="absolute right-2 top-2 text-[var(--l3-foreground)] hover:text-[var(--l1-foreground)] dark:text-gray-400 dark:hover:text-[var(--base-white)]"
         aria-label="Close"
       >
         <X size={14} />
       </button>
 
-      <h3 className="mb-2 text-lg font-bold text-white">Save up to 45% on your Grafana bill</h3>
-      <p className="mb-3 text-xs text-gray-300">
+      <h3 className="mb-2 text-lg font-bold text-[var(--l1-foreground)] dark:text-[var(--base-white)]">
+        Save up to 45% on your Grafana bill
+      </h3>
+      <p className="mb-3 text-xs text-[var(--l2-foreground)] dark:text-gray-300">
         Tired of juggling multiple tools for observability? SigNoz gives you logs, metrics and
         traces in a single unified platform.
       </p>

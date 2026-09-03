@@ -24,7 +24,7 @@ function renderMedia(media: Media) {
         alt={media.alternativeText || 'Media'}
         width={800}
         height={420}
-        className="my-3 h-auto w-full overflow-hidden rounded border border-signoz_slate-400"
+        className="my-3 h-auto w-full overflow-hidden rounded border border-[var(--l2-border)]"
       />
     )
   }
@@ -35,7 +35,7 @@ function renderMedia(media: Media) {
         controls
         controlsList="nodownload noplaybackrate"
         loop
-        className="my-3 h-auto w-full rounded border border-signoz_slate-400"
+        className="my-3 h-auto w-full rounded border border-[var(--l2-border)]"
       >
         <source src={media.url} type={media.mime} />
         Your browser does not support the video tag.
@@ -70,13 +70,13 @@ const ChangelogRenderer: React.FC<ChangelogRendererProps> = ({ changelog }) => {
         <Link
           target="_blank"
           href={`https://github.com/signoz/signoz/releases/tag/${changelog.version}`}
-          className="inline-flex w-fit items-center gap-1.5 rounded-full border border-signoz_slate-400 bg-signoz_ink-500 px-2 py-1 text-xs !text-signoz_vanilla-100 !no-underline  transition-colors hover:bg-signoz_ink-300 active:bg-signoz_slate-400"
+          className="inline-flex w-fit items-center gap-1.5 rounded-full border border-[var(--l2-border)] bg-[var(--l2-background)] px-2 py-1 text-xs !text-[var(--l1-foreground)] !no-underline  transition-colors hover:bg-[var(--l2-background-hover)] active:bg-[var(--l3-background-hover)]"
         >
           {changelog.version}
         </Link>
-        <span className="text-sm text-signoz_vanilla-400">{formattedDate}</span>
+        <span className="text-sm text-[var(--l2-foreground)]">{formattedDate}</span>
       </div>
-      <div className="absolute -bottom-16 left-0 top-1.5 hidden w-px bg-signoz_slate-400 lg:block">
+      <div className="absolute -bottom-16 left-0 top-1.5 hidden w-px bg-[var(--l3-border)] lg:block">
         <div className="absolute left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-signoz_robin-500" />
       </div>
       <div className="flex flex-col gap-7">

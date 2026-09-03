@@ -59,7 +59,7 @@ const MCPInstallButton: React.FC<MCPInstallButtonProps> = ({ client, children, i
   const renderInstallLink = (href: string, label: React.ReactNode) => (
     <a
       href={href}
-      className="not-prose inline-flex items-center justify-center gap-2 rounded-md border border-black/10 bg-white px-3.5 py-1.5 text-sm font-semibold leading-none text-gray-900 no-underline shadow-sm transition-colors hover:bg-zinc-100 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+      className="not-prose inline-flex items-center justify-center gap-2 rounded-md border border-[var(--l2-border)] bg-[var(--l2-background)] px-3.5 py-1.5 text-sm font-semibold leading-none text-[var(--l1-foreground)] no-underline shadow-sm transition-colors hover:bg-[var(--l2-background-hover)] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-primary)] dark:border-black/10 dark:bg-white dark:text-gray-900 dark:hover:bg-zinc-100"
     >
       {icon && ICON_SRCS[icon] && (
         <img
@@ -67,7 +67,7 @@ const MCPInstallButton: React.FC<MCPInstallButtonProps> = ({ client, children, i
           alt=""
           width={18}
           height={18}
-          className="not-prose m-0 block shrink-0 rounded-sm p-0"
+          className="not-prose no-theme-invert m-0 block shrink-0 rounded-sm p-0"
         />
       )}
       <span className="leading-none">{label}</span>

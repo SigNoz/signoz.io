@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
+
+import { isHubShellRoute } from '@/utils/opentelemetryHub'
 import SigNozLogo from '@/public/img/SigNozLogo-orange.svg'
 import SearchButtonDeferred from '../SearchButtonDeferred'
 import GitHubStars from '../GithubStars/GithubStars'
@@ -32,6 +34,7 @@ export default function TopNav() {
 
   const docsSidebar = useMobileDocsSidebar()
   const isDocsBasePath = pathname.startsWith('/docs')
+  const isShellLayoutPath = isDocsBasePath || isHubShellRoute(pathname)
   const visibility = useNavVisibility()
 
   useEffect(() => {
@@ -78,21 +81,24 @@ export default function TopNav() {
     >
       <header
         className={cn(
-          'header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100',
+          'header-bg relative z-10 mx-auto box-border flex h-[56px] w-full items-center border-b border-[var(--l1-border)] text-[var(--l1-foreground)] backdrop-blur-[20px]',
           (mobileMenuOpen || docsSidebar.isOpen) && '!bg-[var(--l1-background)]'
         )}
       >
         <nav
           className={cn(
-            'mx-auto flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100',
-            !isDocsBasePath && 'max-w-8xl'
+            'mx-auto flex w-full justify-between text-[var(--l1-foreground)]',
+            !isShellLayoutPath && 'max-w-8xl'
           )}
           aria-label="Global"
         >
           <div className="flex items-center justify-start">
             <TrackingLink
               href="/"
-              className={cn('-m-1.5 flex items-center p-1.5', isDocsBasePath ? 'gap-1.5' : 'gap-2')}
+              className={cn(
+                '-m-1.5 flex items-center p-1.5',
+                isShellLayoutPath ? 'gap-1.5' : 'gap-2'
+              )}
               clickType="Nav Click"
               clickName="SigNoz Logo"
               clickText="SigNoz"
@@ -114,7 +120,7 @@ export default function TopNav() {
                 <div
                   className={cn(
                     'hidden items-center gap-x-3 min-[840px]:flex',
-                    isDocsBasePath ? 'ml-7' : visibility.showProduct ? 'ml-6' : ''
+                    isShellLayoutPath ? 'ml-7' : visibility.showProduct ? 'ml-6' : ''
                   )}
                 >
                   {visibility.showProduct && <ProductDropdown />}
@@ -122,7 +128,7 @@ export default function TopNav() {
                   {visibility.showDocs && (
                     <TrackingLink
                       href="/docs/introduction/"
-                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-[color-mix(in_srgb,var(--accent-primary)_15%,transparent)]"
                       clickType="Nav Click"
                       clickName="Docs Link"
                       clickText="Docs"
@@ -136,7 +142,7 @@ export default function TopNav() {
                   {visibility.showPricing && (
                     <TrackingLink
                       href="/pricing/"
-                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-[color-mix(in_srgb,var(--accent-primary)_15%,transparent)]"
                       clickType="Nav Click"
                       clickName="Pricing Link"
                       clickText="Pricing"
@@ -148,7 +154,7 @@ export default function TopNav() {
                   {visibility.showCustomers && (
                     <TrackingLink
                       href="/customers/"
-                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-signoz_robin-200/20"
+                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-[color-mix(in_srgb,var(--accent-primary)_15%,transparent)]"
                       clickType="Nav Click"
                       clickName="Customers Link"
                       clickText="Customers"
@@ -174,7 +180,7 @@ export default function TopNav() {
                     <TrackingButton
                       variant="secondary"
                       rounded="default"
-                      className="box-border flex h-8 items-center rounded-md bg-signoz_slate-500 px-3 text-sm font-normal text-signoz_vanilla-100 no-underline outline-none hover:bg-slate-700/50 hover:text-white"
+                      className="box-border flex h-8 items-center rounded-md bg-[var(--l3-background)] px-3 text-sm font-normal text-[var(--l1-foreground)] no-underline outline-none hover:bg-[var(--l3-background-hover)] hover:text-[var(--l1-foreground-hover)]"
                       clickType="Secondary CTA"
                       clickName="Sign In Button"
                       clickText="Sign In"
@@ -195,8 +201,8 @@ export default function TopNav() {
                         variant="default"
                         rounded="full"
                         className={cn(
-                          'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600',
-                          'start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-white hover:text-white'
+                          'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-[var(--accent-primary)] !p-0 transition-colors duration-200 hover:!bg-[var(--accent-primary-hover)] active:!bg-[color-mix(in_srgb,var(--accent-primary)_80%,var(--base-black))]',
+                          'start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-[var(--base-white)] hover:text-[var(--base-white)]'
                         )}
                       >
                         <span id="btn-get-started-website-navbar">
@@ -211,8 +217,8 @@ export default function TopNav() {
                           </span>
                           <span
                             className={cn(
-                              'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
-                              '!flex !bg-signoz_robin-400'
+                              'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-[var(--base-white)]',
+                              '!flex !bg-[var(--accent-primary-hover)]'
                             )}
                             aria-hidden="true"
                           >

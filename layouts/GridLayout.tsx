@@ -27,6 +27,8 @@ interface GridLayoutProps {
 const PAGE_NUMBER_STYLES =
   'pt-px pb-px px-2 h-6 w-6 justify-center items-center flex flex-col rounded-sm'
 
+const PAGE_NUMBER_LINK_STYLES = `${PAGE_NUMBER_STYLES} transition-colors hover:bg-[var(--l3-background-hover)]`
+
 export function Pagination({
   totalPages,
   currentPage,
@@ -48,8 +50,9 @@ export function Pagination({
   return (
     <div className="flex items-center justify-between space-y-2 pb-8 pt-6 md:space-y-5">
       <nav className="flex w-full items-center justify-between">
-        <span className="font-mono text-sm font-normal text-signoz_vanilla-100">
-          {startPost} ⎯ {endPost} <span className="text-signoz_vanilla-400">of {totalPosts}</span>
+        <span className="font-mono text-sm font-normal text-[var(--l1-foreground)]">
+          {startPost} ⎯ {endPost}{' '}
+          <span className="text-[var(--l2-foreground)]">of {totalPosts}</span>
         </span>
         <div className="flex items-center gap-2.5 font-mono">
           {prevPage ? (
@@ -58,7 +61,7 @@ export function Pagination({
                 currentPage - 1 === 1 ? `/${pageRoute}` : `/${pageRoute}/page/${currentPage - 1}`
               }
               rel="prev"
-              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+              className="text-[var(--l2-foreground)] hover:text-[var(--l1-foreground)]"
             >
               <ChevronLeft size={16} />
             </Link>
@@ -69,48 +72,60 @@ export function Pagination({
           )}
 
           {currentPage !== 1 ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}`}>
+            <Link className={PAGE_NUMBER_LINK_STYLES} href={`/${pageRoute}`}>
               1
             </Link>
           ) : null}
-          {currentPage - 2 > 1 ? <div className="h-px w-8 bg-signoz_vanilla-400"></div> : null}
+          {currentPage - 2 > 1 ? <div className="h-px w-8 bg-[var(--l3-border)]"></div> : null}
 
           {shouldRenderTwoPrevPages ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage - 2}`}>
+            <Link
+              className={PAGE_NUMBER_LINK_STYLES}
+              href={`/${pageRoute}/page/${currentPage - 2}`}
+            >
               {currentPage - 2}
             </Link>
           ) : null}
 
           {shouldRenderPrevPage ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage - 1}`}>
+            <Link
+              className={PAGE_NUMBER_LINK_STYLES}
+              href={`/${pageRoute}/page/${currentPage - 1}`}
+            >
               {currentPage - 1}
             </Link>
           ) : null}
 
           <Link
             href={`/${pageRoute}/page/${currentPage}`}
-            className={`${PAGE_NUMBER_STYLES} bg-signoz_robin-500 text-black`}
+            className={`${PAGE_NUMBER_STYLES} bg-[var(--accent-primary)] text-black`}
           >
             {currentPage}
           </Link>
 
           {shouldRenderNextPage ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage + 1}`}>
+            <Link
+              className={PAGE_NUMBER_LINK_STYLES}
+              href={`/${pageRoute}/page/${currentPage + 1}`}
+            >
               {currentPage + 1}
             </Link>
           ) : null}
 
           {shouldRenderTwoNextPages ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${currentPage + 2}`}>
+            <Link
+              className={PAGE_NUMBER_LINK_STYLES}
+              href={`/${pageRoute}/page/${currentPage + 2}`}
+            >
               {currentPage + 2}
             </Link>
           ) : null}
 
           {totalPages - 2 > currentPage ? (
-            <div className="h-px w-8 bg-signoz_vanilla-400"></div>
+            <div className="h-px w-8 bg-[var(--l3-border)]"></div>
           ) : null}
           {currentPage !== totalPages ? (
-            <Link className={PAGE_NUMBER_STYLES} href={`/${pageRoute}/page/${totalPages}`}>
+            <Link className={PAGE_NUMBER_LINK_STYLES} href={`/${pageRoute}/page/${totalPages}`}>
               {totalPages}
             </Link>
           ) : null}
@@ -119,7 +134,7 @@ export function Pagination({
             <Link
               href={`/${pageRoute}/page/${currentPage + 1}`}
               rel="next"
-              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+              className="text-[var(--l2-foreground)] hover:text-[var(--l1-foreground)]"
             >
               <ChevronRight size={16} />
             </Link>
@@ -167,7 +182,7 @@ export default function GridLayout({
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
           <div className="my-8 flex flex-col">
             <div
-              className={`w-full text-sm font-semibold uppercase leading-5 tracking-wide max-md:max-w-full ${isDarkMode ? 'text-signoz_slate-100' : 'text-signoz_slate-300'}`}
+              className={`w-full text-sm font-semibold uppercase leading-5 tracking-wide text-[var(--l2-foreground)] max-md:max-w-full`}
             >
               All posts
             </div>

@@ -48,21 +48,22 @@ export default function DatabaseTable() {
       key: 'method',
       label: 'method',
       cardinality: 'Low (~5)',
-      color: 'bg-blue-900/20 text-blue-300',
+      color: 'bg-[var(--callout-primary-background)] text-[var(--callout-primary-title)]',
       type: 'low',
     },
     {
       key: 'status',
       label: 'status',
       cardinality: 'Low (~50)',
-      color: 'bg-green-900/20 text-green-300',
+      color: 'bg-[var(--callout-success-background)] text-[var(--callout-success-title)]',
       type: 'low',
     },
     {
       key: 'region',
       label: 'region',
       cardinality: 'Low (~20)',
-      color: 'bg-purple-900/20 text-purple-300',
+      color:
+        'bg-[color-mix(in_srgb,#a855f7_12%,transparent)] text-[color-mix(in_srgb,#a855f7_55%,var(--l1-foreground))]',
       type: 'low',
     },
     {
@@ -76,30 +77,30 @@ export default function DatabaseTable() {
       key: 'request_id',
       label: 'request_id',
       cardinality: 'Max (Unlimited)',
-      color: 'bg-red-900/20 text-red-300',
+      color: 'bg-[var(--callout-error-background)] text-[var(--callout-error-title)]',
       type: 'high',
     },
   ]
 
   return (
     <div className="mx-auto my-12 w-full max-w-4xl font-mono text-sm">
-      <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900 shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] shadow-sm">
         <div className="overflow-x-auto">
           {/* Table Header */}
-          <div className="grid min-w-[600px] grid-cols-5 border-b border-zinc-700 bg-zinc-800">
+          <div className="grid min-w-[600px] grid-cols-5 border-b border-[var(--l2-border)] bg-[var(--l3-background)]">
             {columns.map((col) => (
               <div
                 key={col.key}
-                className={`cursor-help border-r border-zinc-700 p-4 transition-colors last:border-0
-                ${hoveredCol === col.key ? col.color : 'hover:bg-zinc-700'}
+                className={`cursor-help border-r border-[var(--l2-border)] p-4 transition-colors last:border-0
+                ${hoveredCol === col.key ? col.color : 'hover:bg-[var(--l3-background-hover)]'}
               `}
                 onMouseEnter={() => setHoveredCol(col.key)}
                 onMouseLeave={() => setHoveredCol(null)}
               >
-                <div className="mb-1 font-bold text-zinc-100">{col.label}</div>
+                <div className="mb-1 font-bold text-[var(--l1-foreground)]">{col.label}</div>
                 <div
                   className={`inline-block rounded-full px-2 py-0.5 font-sans text-xs font-medium
-                ${col.type === 'high' ? 'bg-orange-900/30 text-orange-300' : 'bg-zinc-700 text-zinc-400'}
+                ${col.type === 'high' ? 'bg-[var(--callout-warning-background)] text-[var(--callout-warning-title)]' : 'bg-[var(--l3-background)] text-[var(--l3-foreground)]'}
               `}
                 >
                   {col.type === 'high' ? 'High Card.' : 'Low Card.'}
@@ -109,16 +110,16 @@ export default function DatabaseTable() {
           </div>
 
           {/* Table Body */}
-          <div className="divide-y divide-zinc-700">
+          <div className="divide-y divide-[var(--l2-border)]">
             {DATA.map((row, i) => (
               <div
                 key={i}
-                className="grid min-w-[600px] grid-cols-5 transition-colors hover:bg-zinc-800/50"
+                className="grid min-w-[600px] grid-cols-5 transition-colors hover:bg-[var(--l3-background-60)]"
               >
                 {columns.map((col) => (
                   <div
                     key={col.key}
-                    className={`truncate border-r border-zinc-700 p-4 text-zinc-400 last:border-0
+                    className={`truncate border-r border-[var(--l2-border)] p-4 text-[var(--l3-foreground)] last:border-0
                     ${hoveredCol === col.key ? 'bg-opacity-30 ' + col.color.split(' ')[0] : ''}
                     ${col.type === 'high' && hoveredCol === col.key ? 'font-semibold' : ''}
                   `}
@@ -130,9 +131,9 @@ export default function DatabaseTable() {
               </div>
             ))}
             {/* ... row */}
-            <div className="grid min-w-[600px] grid-cols-5 bg-zinc-800/30 italic text-zinc-600">
+            <div className="grid min-w-[600px] grid-cols-5 bg-[var(--l3-background-60)] italic text-[var(--l3-foreground)]">
               {columns.map((col) => (
-                <div key={col.key} className="border-r border-zinc-700 p-4 last:border-0">
+                <div key={col.key} className="border-r border-[var(--l2-border)] p-4 last:border-0">
                   ...
                 </div>
               ))}
@@ -153,7 +154,7 @@ export default function DatabaseTable() {
             {columns.find((c) => c.key === hoveredCol)?.cardinality} unique values
           </span>
         ) : (
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-[var(--l3-foreground)]">
             Hover over headers to see cardinality estimates
           </span>
         )}

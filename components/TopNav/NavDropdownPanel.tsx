@@ -100,7 +100,7 @@ export default function NavDropdownPanel() {
           <div className="absolute -top-1 left-0 right-0 h-1" />
 
           <div
-            className="origin-top-left rounded-[4px] border border-signoz_slate-500 bg-[hsl(240_5.88%_10%)] shadow-[0_12px_48px_rgba(0,0,0,0.55)]"
+            className="origin-top-left rounded-[4px] border border-[var(--l2-border)] bg-[var(--l2-background)] shadow-[0_12px_48px_color-mix(in_srgb,var(--base-black)_55%,transparent)]"
             style={{
               opacity: isVisible ? 1 : 0,
               transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(-4px) scale(0.96)',

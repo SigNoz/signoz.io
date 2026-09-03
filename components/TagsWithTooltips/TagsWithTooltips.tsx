@@ -25,7 +25,7 @@ const TagsWithTooltips: React.FC<TagsWithTooltipsProps> = ({ tags, className = '
             key={tag}
             content={tooltipContent}
             side="right"
-            contentClassName="max-w-96 break-words rounded-none border-signoz_slate-400 bg-signoz_ink-200 text-xs text-signoz_vanilla-100"
+            contentClassName="max-w-96 break-words rounded-none border-[var(--l2-border)] bg-[var(--l2-background)] text-xs text-[var(--l1-foreground)]"
           >
             <div className="inline-flex items-center justify-center">
               <Badge color="vanilla" className="cursor-pointer transition-colors">

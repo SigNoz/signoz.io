@@ -55,7 +55,7 @@ export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuP
             </TrackingLink>
           </div>
           <div className="mt-6 flow-root">
-            <div className="-my-6 divide-y divide-gray-500/10">
+            <div className="-my-6 divide-y divide-[var(--l1-border)]">
               <MainMenuContent
                 isSignupRoute={isSignupRoute}
                 onClose={closeMobileMenu}
@@ -70,7 +70,7 @@ export default function MobileMenu({ open, onClose, isSignupRoute }: MobileMenuP
 }
 
 const MOBILE_LINK_CLASS =
-  '-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200'
+  '-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-[var(--l2-background-hover)]'
 
 function MainMenuContent({
   isSignupRoute,
@@ -127,7 +127,7 @@ function MainMenuContent({
       >
         Pricing
       </TrackingLink>
-      <div className="-mx-3 inline-block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200">
+      <div className="-mx-3 inline-block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-[var(--l2-background-hover)]">
         <GitHubStars location="Mobile Menu" />
       </div>
 
@@ -152,7 +152,7 @@ function MainMenuContent({
             clickType="Primary CTA"
             clickName="Sign Up Button"
             clickText="Get Started - Free"
-            className="block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+            className="block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-[var(--l2-background-hover)]"
             clickLocation="Mobile Menu"
             onClick={onClose}
           >
@@ -160,8 +160,8 @@ function MainMenuContent({
               asChild
               variant="default"
               className={cn(
-                'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600',
-                'start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white'
+                'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-[var(--accent-primary)] !p-0 transition-colors duration-200 hover:!bg-[var(--accent-primary-hover)] active:!bg-[color-mix(in_srgb,var(--accent-primary)_80%,var(--base-black))]',
+                'start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-[var(--base-white)] no-underline outline-none hover:text-[var(--base-white)]'
               )}
               id="btn-get-started-website-navbar"
             >
@@ -177,8 +177,8 @@ function MainMenuContent({
                 </span>
                 <span
                   className={cn(
-                    'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
-                    '!flex !bg-signoz_robin-400'
+                    'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-[var(--base-white)]',
+                    '!flex !bg-[var(--accent-primary-hover)]'
                   )}
                   aria-hidden="true"
                 >
