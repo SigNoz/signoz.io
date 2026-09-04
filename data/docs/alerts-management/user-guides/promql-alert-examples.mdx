@@ -1,0 +1,223 @@
+---
+date: 2026-08-18
+title: PromQL Alert Examples - Sample Queries to Monitor Metrics
+description: Sample PromQL queries for SigNoz metric alerts, covering service health, latency percentiles, error ratios, Kubernetes usage, queue lag, and forecasts.
+doc_type: reference
+---
+
+Every query on this page goes into the **PromQL** tab of a metric alert. Copy one, replace the metric and label values with your own, then set a threshold.
+
+## Where PromQL fits in an alert
+
+1. Go to **Alerts** in the left navigation and click **New Alert**.
+2. Select [**Metric based Alert**](https://signoz.io/docs/alerts-management/metrics-based-alerts/).
+3. Under **Define the Query**, open the **PromQL** tab and paste the query.
+4. Set the threshold, the match type, and the evaluation window under **Alert Configuration**.
+
+<Figure
+  src="/img/docs/alerts/promql-alert-query.webp"
+  width="3188"
+  height="1746"
+  alt="Alert form with the PromQL tab selected, a node CPU utilization query in the PromQL Query field, and a chart preview plotting three Kubernetes nodes against a dashed threshold line at 40 percent"
+  caption="The PromQL tab sits beside Query Builder and ClickHouse Query. One series per node, plotted against the threshold."
+/>
+
+SigNoz saves the rule as a PromQL rule. The rest of the form behaves the same as it does for a Query Builder alert: threshold tiers, match type, evaluation window, the **Alert when data stops coming** option, re-notification, and notification grouping. The labels your query returns become the alert labels, so the `by (...)` clause decides how many separate alerts the rule can produce.
+
+## When to use PromQL instead of the Query Builder
+
+| Use PromQL when | Reason |
+|---|---|
+| You combine two metrics whose label sets differ | `on`, `ignoring`, `group_left`, and `group_right` control the join. Query Builder formulas need matching group-by keys on both queries. |
+| You already have a Prometheus alerting rule | The expression works as written, apart from the quoting rules below. |
+| You need a function the Query Builder has no field for | `predict_linear`, `absent`, `clamp_max`, and the `*_over_time` family are query-only. |
+
+For a single metric with a threshold, the Query Builder is the better choice. It handles unit conversion on the threshold and reports missing data per group.
+
+## Rules that apply to every query here
+
+- **Quote any name that contains a dot, and put the metric name first inside the braces.** `rate({"http.server.request.duration.count"}[5m])` returns data. `rate(http_server_request_duration_count[5m])` returns nothing, because SigNoz stores the original dotted name. See the [PromQL UTF-8 syntax guide](https://signoz.io/docs/userguide/write-a-prom-query-with-new-format/).
+- **PromQL reads only metrics stored with cumulative or unspecified temporality.** A delta metric returns no series, and the rule stays in no-data. SigNoz span metrics such as `signoz_calls_total` and `signoz_latency.bucket` are delta in a default setup, so alert on those with the Query Builder instead. Open the metric in [**Metrics**](https://signoz.io/docs/metrics-management/metrics-explorer/) to read its temporality.
+- **Histogram parts use dot suffixes.** `.bucket`, `.count`, and `.sum`, not `_bucket`, `_count`, and `_sum`.
+- **Regex matchers are fully anchored.** `=~"5.."` matches a three-character value that starts with `5`. For a substring match, write `=~".*5.*"`.
+- Rule evaluation runs the query at a fixed 60-second resolution, so a `[5m]` selector covers five points.
+
+## Service health
+
+### A service stopped reporting
+
+`absent_over_time()` returns `1` when the selector matched no sample across its range, and returns nothing while data flows.
+
+```promql
+absent_over_time({"http.server.request.duration.count", "service.name"="checkout"}[10m])
+```
+
+Threshold **above 0**, match type **at least once**. The gap you accept is the range in the selector, not the evaluation window, so change `[10m]` to change how long a silence you tolerate.
+
+Do not use bare `absent()` here. The rule runs the query at 60-second steps, and `absent()` returns a sample only at steps where the selector was empty. One missed scrape produces a one-sample series, and every match type then sees a series where the condition holds throughout.
+
+Keep every label matcher an equality match. Both functions copy only equality matchers into their output, so a regex matcher leaves the alert with no service name in the message.
+
+This fires when no requests reach the service. A crashed service and an idle service look identical to it. To tell them apart, point the selector at a metric the process emits regardless of traffic, such as a runtime or JVM metric.
+
+### Request rate dropped to near zero
+
+```promql
+sum by ("service.name") (rate({"http.server.request.duration.count"}[5m]))
+```
+
+`rate()` returns requests per second, so read the normal rate in **Metrics** before you pick a number. A service that handles 40 requests a second and one that handles 0.1 need different thresholds. Set the threshold to a fraction of the normal rate, comparison **below**, match type **all the times**. Every other recipe here compares **above**, which is also the form default, so this one needs changing by hand.
+
+A service that stops emitting produces no series, and a threshold alone never fires on a missing series. **Alert when data stops coming** covers that only when the whole query goes silent. SigNoz asks whether the result holds any series at all, so this grouped query still counts as having data while one other service reports.
+
+For per-service detection, use the `absent_over_time` recipe above with a single service in the selector, or follow [No Data Alerts for Groups](https://signoz.io/docs/alerts-management/no-data-alerts-for-groups/).
+
+### Server error ratio above a percentage
+
+```promql
+100 * sum by ("service.name") (
+  rate({"http.server.request.duration.count", "http.response.status_code"=~"5.."}[5m])
+)
+/ on ("service.name")
+sum by ("service.name") (
+  rate({"http.server.request.duration.count"}[5m])
+)
+```
+
+Set the threshold to **above 1** for a 1% error budget, and set the y-axis unit to **Percent (0 - 100)**. The `on ("service.name")` clause pairs each numerator series with the matching denominator series. Without it, PromQL drops every series whose remaining labels differ.
+
+One failed request out of three puts a service at 33%, so a quiet service crosses any threshold you set. Filter those series out with a floor on the denominator:
+
+```promql
+100 * sum by ("service.name") (
+  rate({"http.server.request.duration.count", "http.response.status_code"=~"5.."}[5m])
+)
+/ on ("service.name")
+(
+  sum by ("service.name") (rate({"http.server.request.duration.count"}[5m])) > 0.5
+)
+```
+
+The floor counts requests per second, not requests per window. A floor of `0.5` drops any service under one request every two seconds. Set it below the normal rate of the quietest service you want covered. A floor above that rate mutes the alert for that service.
+
+## Latency
+
+### p99 latency for each service
+
+```promql
+histogram_quantile(0.99,
+  sum by (le, "service.name") (rate({"http.server.request.duration.bucket"}[5m]))
+)
+```
+
+`le` carries the bucket boundary and must stay in the `by (...)` clause. Drop it and `histogram_quantile` has nothing to interpolate over.
+
+The unit comes from the metric, not from the alert form. The instrument records `http.server.request.duration` in seconds, so a threshold of `1.2` means 1.2 seconds. Set the y-axis unit to **Seconds (s)** so the alert message reads the same way.
+
+### p95 latency for one endpoint
+
+```promql
+histogram_quantile(0.95,
+  sum by (le) (rate({"http.server.request.duration.bucket", "http.route"="/api/v1/search"}[5m]))
+)
+```
+
+## Infrastructure
+
+### Node CPU against allocatable capacity
+
+```promql
+100 * max by ("k8s.node.name") ({"k8s.node.cpu.usage"})
+/ on ("k8s.node.name")
+max by ("k8s.node.name") ({"k8s.node.allocatable_cpu"})
+```
+
+Both metrics report CPU in cores, so the ratio is the fraction of the node in use. `k8s.node.allocatable_cpu` needs `allocatable_types_to_report` on the `k8s_cluster` receiver. For the receiver settings and the equivalent Query Builder alert, see [Kubernetes CPU Alerts](https://signoz.io/docs/alerts-management/user-guides/k8s-cpu-usage-alert/).
+
+### Pod memory against its limit
+
+```promql
+max by ("k8s.namespace.name", "k8s.pod.name") ({"k8s.pod.memory_limit_utilization"})
+```
+
+The metric is already a ratio, so a threshold of `0.9` means 90% of the total container limits in the pod. Values above `1` do occur, so do not treat `1` as a ceiling. The receiver drops the metric for any pod where a container declares no memory limit.
+
+For per-container granularity, swap in `k8s.container.memory_limit_utilization` and add `k8s.container.name` to the `by (...)` clause.
+
+### Memory use will cross the limit in four hours
+
+```promql
+predict_linear({"process.memory.usage", "service.name"="checkout"}[6h], 4 * 3600)
+```
+
+`predict_linear` fits a straight line over the last six hours and projects it forward by the second argument, in seconds. Set the threshold to the container memory limit in bytes and the y-axis unit to **Bytes (B)**.
+
+Two samples in the range are enough for a fit. The query starts projecting minutes after a fresh install, and those early fits swing wildly. Six hours is the history you want, not a warm-up the query enforces. Use match type **all the times** so one wild projection does not page anyone.
+
+## Queues and dependencies
+
+### Kafka consumer group lag
+
+```promql
+max by (topic, partition, "deployment.environment") (kafka_log_end_offset)
+- on (topic, partition, "deployment.environment") group_right ()
+max by (group, topic, partition, "deployment.environment") (kafka_consumer_committed_offset)
+```
+
+`group_right ()` allows many rows on the right side for each matched key, which is what happens when several consumer groups read one partition. Leave plain label names unquoted and quote the dotted ones, in the same clause. Threshold **above 1000**, match type **all the times**.
+
+### Log processor queue near capacity
+
+```promql
+100 * max by ("service.name", "otel.component.name") ({"otel.sdk.processor.log.queue.size"})
+/ on ("service.name", "otel.component.name")
+max by ("service.name", "otel.component.name") ({"otel.sdk.processor.log.queue.capacity"})
+```
+
+A queue that stays near 100% drops telemetry. Threshold **above 80** with match type **all the times**.
+
+These are OpenTelemetry SDK metrics, so this watches the log processor inside an instrumented service rather than a Collector. `otel.component.name` identifies the processor instance and belongs in `by (...)` and `on (...)` on both sides. Drop it and a service with two processors pairs the size of one against the capacity of the other.
+
+For the Collector's own exporter queues, alert on `otelcol_exporter_queue_size` against `otelcol_exporter_queue_capacity` instead. See <a href="https://opentelemetry.io/docs/collector/internal-telemetry/" target="_blank" rel="noopener noreferrer nofollow">Collector internal telemetry</a>.
+
+## Alert settings that go with these queries
+
+| Setting | Recommendation |
+|---|---|
+| Match type | **At least once** for spikes such as an error ratio. **All the times** for sustained conditions such as saturation or a rate that collapsed. |
+| Evaluation window | How long the condition has to hold. The rule runs the query at 60-second steps across the window, so a 5-minute window yields about five results. Each one computes its own `[5m]` lookback, so the window and the selector range are independent. |
+| Alert when data stops coming | On for anything that means "a thing stopped". The time period next to it counts in minutes, so a value of `15` waits 15 evaluations at a `1m` frequency. |
+| Threshold value | Keep the number in the threshold field, not in the query. A comparison such as `> 0.9` inside the query filters series instead, and the alert message then has no threshold to report. |
+| Y-axis unit | Match the raw unit the query produces: seconds for OpenTelemetry duration histograms, a 0 to 1 ratio for Kubernetes utilization metrics, bytes for memory. |
+| Rate thresholds | `rate()` and `irate()` return a per-second value. A threshold of `1` on a request rate means one request per second, not one request per window. |
+| Notification grouping | Group by the same labels the query returns. Grouping by a label the query dropped merges every series into one notification. |
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### The chart preview is empty
+
+Work through these in order:
+
+1. Check the metric temporality in **Metrics**. A delta metric returns nothing through PromQL. Rebuild the alert with the Query Builder.
+2. Confirm the metric name sits first inside the braces, and quote it when it contains a dot.
+3. Confirm the histogram part uses a dot suffix, such as `.bucket`.
+4. Replace each regex matcher with an equality matcher. A matcher such as `=~"checkout"` fails on `checkout-api`, because SigNoz anchors the pattern.
+5. Remove the label matchers one at a time. A misspelled label value returns an empty result with no error.
+
+### The quantile is empty but the bucket metric has data
+
+`le` is missing from the `by (...)` clause, or a processing pipeline renamed it. Check the label list for the metric in **Metrics**.
+
+### The alert fires once for every pod that restarts
+
+A new pod is a new series, and two noisy points are enough to satisfy a match type of **at least once**. Switch to **all the times** so the condition has to hold across the whole window. Then group by a label that survives the restart, such as `k8s.deployment.name`, instead of `k8s.pod.name`.
+</details>
+
+## Next steps
+
+- [Metric-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) for every configuration field on the alert form
+- [PromQL UTF-8 syntax guide](https://signoz.io/docs/userguide/write-a-prom-query-with-new-format/) for the quoting rules and migration examples
+- [Alert notification channels](https://signoz.io/docs/setup-alerts-notification/) to route the alerts you create
