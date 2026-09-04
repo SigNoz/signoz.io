@@ -2,13 +2,11 @@ import React from 'react'
 import Image from 'next/image'
 import TrackingLink from '@/components/TrackingLink'
 
-export default function GetStartedSigNoz({ cloudFirst = false }: { cloudFirst?: boolean }) {
+export default function GetStartedSigNoz() {
   return (
     <div>
       <p>
-        {cloudFirst
-          ? 'Get started with fully managed SigNoz Cloud.'
-          : 'SigNoz Cloud is the easiest way to run SigNoz.'}{' '}
+        SigNoz Cloud is the easiest way to run SigNoz.{' '}
         <TrackingLink
           href="https://signoz.io/teams/"
           clickType="Nav Click"
@@ -52,7 +50,7 @@ export default function GetStartedSigNoz({ cloudFirst = false }: { cloudFirst?: 
           clickText="open-source SigNoz"
           className="font-medium text-[var(--accent-primary)] hover:underline"
         >
-          {cloudFirst ? 'self-hosted SigNoz' : 'open-source SigNoz'}
+          open-source SigNoz
         </TrackingLink>{' '}
         is loved by developers. Find the{' '}
         <TrackingLink

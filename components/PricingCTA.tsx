@@ -7,10 +7,9 @@ import { ArrowRight, CheckCircle } from 'lucide-react'
 
 interface PricingCTAProps {
   concise?: boolean
-  productName?: string
 }
 
-const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false, productName = 'SigNoz' }) => {
+const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false }) => {
   if (concise) {
     return (
       <div className="my-4 w-full">
@@ -20,13 +19,13 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false, productName = 
               Tired of Unpredictable Pricing with DataDog?
             </h3>
             <p className="text-sm text-[var(--l2-foreground)] dark:text-gray-300">
-              {productName} offers up to 9X ROI compared to DataDog with simple, transparent pricing:
+              SigNoz offers up to 9X ROI compared to DataDog with simple, transparent pricing:
             </p>
 
             <div className="relative">
               <Image
                 src="/img/graphics/homepage/feature-graphic-data-protection-2.webp"
-                alt={`${productName} Pricing Comparison`}
+                alt="SigNoz Pricing Comparison"
                 width={250}
                 height={140}
                 layout="responsive"
@@ -46,7 +45,7 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false, productName = 
                 className="inline-flex items-center justify-center rounded-md bg-[var(--accent-primary)] px-4 py-2 text-sm font-medium text-[var(--base-white)] no-underline transition duration-150 ease-in-out hover:bg-[var(--accent-primary-hover)]"
                 prefetch={false}
               >
-                Calculate Your Savings with {productName} Now <ArrowRight size={14} className="ml-1" />
+                Calculate Your Savings with SigNoz Now <ArrowRight size={14} className="ml-1" />
               </Link>
             </div>
           </div>
@@ -63,7 +62,7 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false, productName = 
             Tired of Unpredictable Pricing with DataDog?
           </h3>
           <p className="text-[var(--l2-foreground)] dark:text-gray-300">
-            {productName} offers up to 9X ROI compared to DataDog with simple, transparent pricing:
+            SigNoz offers up to 9X ROI compared to DataDog with simple, transparent pricing:
           </p>
 
           <div className="flex flex-col gap-6 md:flex-row">
@@ -93,7 +92,7 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false, productName = 
               <div className="relative">
                 <Image
                   src="/img/graphics/homepage/feature-graphic-data-protection-2.webp"
-                  alt={`${productName} Pricing Comparison`}
+                  alt="SigNoz Pricing Comparison"
                   width={350}
                   height={195}
                   layout="responsive"
@@ -115,7 +114,7 @@ const PricingCTA: React.FC<PricingCTAProps> = ({ concise = false, productName = 
               className="inline-flex items-center justify-center rounded-md bg-[var(--accent-primary)] px-6 py-2 text-base font-medium text-[var(--base-white)] no-underline transition duration-150 ease-in-out hover:bg-[var(--accent-primary-hover)]"
               prefetch={false}
             >
-              Calculate Your Savings with {productName} Now <ArrowRight size={16} className="ml-2" />
+              Calculate Your Savings with SigNoz Now <ArrowRight size={16} className="ml-2" />
             </Link>
           </div>
         </div>
