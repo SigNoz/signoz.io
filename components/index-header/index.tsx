@@ -3,107 +3,111 @@ import { ArrowRight, Calendar } from 'lucide-react'
 import Hero from '@/components/ui/Hero'
 import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
+import DitherCanvas from '@/components/DitherCanvas/DitherCanvas'
+import HalfBadge from '@/components/ui/ShimmerBadge/HalfBadge'
 import { VideoModalPlayer } from './VideoModalPlayer'
 import { HeroSectionPill } from './HeroSectionPill'
 import HeroCopyMotion from './HeroCopyMotion'
-import HomepageCustomerProof from './HomepageCustomerProof'
-import HomepageHeroShader from './HomepageHeroShader'
+import CustomerStoriesCard from './customer-stories/CustomerStoriesCard'
 import landingThumbnail from '@/public/img/landing/landing_thumbnail.webp'
 
 export function HomepageHeroRedesign() {
-  const primaryCTA = 'Get Started - Free'
+  const primaryCTA = 'Get Started — Free'
 
   return (
-    <header className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 overflow-hidden px-4 pt-24 sm:px-6 md:pt-40 lg:px-16 lg:pt-44 xl:px-20 xl:pt-[220px] wide:max-w-8xl wide:px-0">
-      <HomepageHeroShader />
-      <div className="relative z-10 mx-auto flex w-full max-w-8xl flex-col">
-        <HeroCopyMotion delay={0.04}>
-          <TrackingLink
-            href="/agent-native-observability/"
-            clickType="Secondary CTA"
-            clickName="Agent Native Observability Link"
-            clickText="New Agent Native Observability"
-            clickLocation="Hero Section"
-            className="group mb-6 inline-flex w-fit items-center gap-2 rounded-full bg-signoz_ink-500/55 px-2.5 py-1 text-sm font-normal leading-5 text-signoz_vanilla-400 ring-1 ring-white/10 backdrop-blur-sm transition-colors hover:bg-signoz_ink-400/80 hover:text-signoz_vanilla-100"
-          >
-            <span className="rounded-full border border-signoz_slate-100/80 bg-signoz_ink-500/80 px-2 py-0.5 text-xs text-signoz_vanilla-100">
-              New
-            </span>
-            Agent Native Observability
-            <ArrowRight
-              size={14}
-              className="transition-transform duration-200 group-hover:translate-x-1"
-            />
-          </TrackingLink>
-        </HeroCopyMotion>
-
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.75fr)] lg:items-start lg:gap-10 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.72fr)] xl:gap-16">
-          <HeroCopyMotion>
-            <h1 className="m-0 max-w-3xl text-left text-5xl font-medium leading-none tracking-[-1.408px] text-signoz_vanilla-100 sm:text-6xl lg:text-5xl xl:text-6xl xl:leading-none">
-              Observability for your
-              <br />
-              team and AI agents.
-              <br />
-              <span className="text-signoz_vanilla-400">Powered by open standards.</span>
-            </h1>
+    <header className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2">
+      <DitherCanvas
+        fade="bottom"
+        enableClick
+        desktopOnly
+        className="w-full px-4 pb-16 pt-24 sm:px-6 md:pt-40 lg:px-16 lg:pt-44 xl:px-20 xl:pt-[220px]"
+      >
+        <div className="mx-auto flex w-full max-w-8xl flex-col">
+          <HeroCopyMotion delay={0.04}>
+            <div className="mb-6">
+              <HalfBadge
+                badge="NEW"
+                href="/agent-native-observability/"
+                clickLocation="Hero Section"
+                clickName="Agent Native Observability Link"
+              >
+                Agent Native Observability
+              </HalfBadge>
+            </div>
           </HeroCopyMotion>
 
-          <div className="flex flex-col items-start md:pt-2">
-            <HeroCopyMotion delay={0.12}>
-              <p className="m-0 max-w-lg text-left text-lg font-normal leading-7 tracking-[-0.165px] text-signoz_vanilla-400 lg:max-w-sm lg:text-base xl:max-w-lg xl:text-lg">
-                SigNoz Cloud brings your traces, metrics, and logs into one OpenTelemetry-native
-                platform. Simple usage-based pricing, and the freedom to run on your infrastructure
-                with Self-Hosted SigNoz.
-              </p>
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.75fr)] lg:items-start lg:gap-10 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.72fr)] xl:gap-16">
+            <HeroCopyMotion>
+              <h1 className="m-0 max-w-3xl text-left text-5xl font-medium leading-none tracking-[-1.408px] text-[var(--l1-foreground)] sm:text-6xl lg:text-5xl xl:text-6xl xl:leading-none">
+                Observability for your
+                <br />
+                team and AI agents.
+                <br />
+                <span className="text-[var(--l2-foreground)]">Powered by open standards.</span>
+              </h1>
             </HeroCopyMotion>
 
-            <HeroCopyMotion className="w-full sm:w-auto" delay={0.2}>
-              <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4 xl:gap-6">
-                <TrackingLink
-                  href="/teams/"
-                  clickType="Primary CTA"
-                  clickName="Sign Up Button"
-                  clickText={primaryCTA}
-                  clickLocation="Hero Section"
-                  className="block w-full sm:w-auto"
-                >
-                  <Button
-                    as="span"
-                    className="!w-full sm:!w-auto sm:min-w-[184px]"
-                    id="btn-get-started-homepage-hero"
-                    variant="legacyPrimary"
-                    withIcon
+            <div className="flex flex-col items-start md:pt-2">
+              <HeroCopyMotion delay={0.12}>
+                <p className="m-0 max-w-lg text-left text-lg font-normal leading-7 tracking-[-0.165px] text-[var(--l2-foreground)] lg:max-w-sm lg:text-base xl:max-w-lg xl:text-lg">
+                  SigNoz Cloud brings your traces, metrics, and logs into one OpenTelemetry-native
+                  platform. Simple usage-based pricing, and the freedom to run on your
+                  infrastructure with Self-Hosted SigNoz.
+                </p>
+              </HeroCopyMotion>
+
+              <HeroCopyMotion className="w-full sm:w-auto" delay={0.2}>
+                <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                  <TrackingLink
+                    href="/teams/"
+                    clickType="Primary CTA"
+                    clickName="Sign Up Button"
+                    clickText={primaryCTA}
+                    clickLocation="Hero Section"
+                    className="block w-full no-underline sm:w-auto"
                   >
-                    {primaryCTA}
-                  </Button>
-                </TrackingLink>
-                <TrackingLink
-                  href="/contact-us/?source=homepage"
-                  clickType="Secondary CTA"
-                  clickName="Book a Demo Button"
-                  clickText="Book a Demo"
-                  clickLocation="Hero Section"
-                  className="block w-full sm:w-40"
-                  prefetch={false}
-                >
-                  <Button
-                    as="span"
-                    className="!w-full !bg-signoz_ink-500/85 !text-signoz_vanilla-100 ring-1 ring-white/10 backdrop-blur-sm hover:!bg-signoz_ink-300"
-                    variant="legacySecondary"
-                    withIcon
+                    <Button
+                      as="span"
+                      tactile
+                      variant="default"
+                      className="!flex w-full justify-center sm:min-w-[184px]"
+                      id="btn-get-started-homepage-hero"
+                    >
+                      {primaryCTA}
+                      <ArrowRight size={14} aria-hidden="true" />
+                    </Button>
+                  </TrackingLink>
+                  <TrackingLink
+                    href="/contact-us/?source=homepage"
+                    clickType="Secondary CTA"
+                    clickName="Book a Demo Button"
+                    clickText="Book a demo"
+                    clickLocation="Hero Section"
+                    className="block w-full no-underline sm:w-auto"
+                    prefetch={false}
                   >
-                    Book a Demo
-                  </Button>
-                </TrackingLink>
-              </div>
-            </HeroCopyMotion>
+                    <Button
+                      as="span"
+                      tactile
+                      variant="secondary"
+                      className="!flex w-full justify-center sm:w-40"
+                    >
+                      Book a demo
+                      <ArrowRight size={14} aria-hidden="true" />
+                    </Button>
+                  </TrackingLink>
+                </div>
+              </HeroCopyMotion>
+            </div>
           </div>
-        </div>
 
-        <HeroCopyMotion delay={0.28}>
-          <HomepageCustomerProof />
-        </HeroCopyMotion>
-      </div>
+          <HeroCopyMotion delay={0.28}>
+            <div className="mt-14 md:mt-16">
+              <CustomerStoriesCard />
+            </div>
+          </HeroCopyMotion>
+        </div>
+      </DitherCanvas>
     </header>
   )
 }
