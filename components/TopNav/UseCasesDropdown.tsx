@@ -5,6 +5,7 @@ import TrackingLink from '@/components/TrackingLink'
 import { Button } from '@/components/ui/Button'
 import { useCasesDropdownItemsSorted } from './constants'
 import { useNavDropdown } from './NavDropdownContext'
+import { NAV_PILL_CLASS } from './NavPill'
 
 export default function UseCasesDropdown() {
   const { isOpen, open, close, triggerRef } = useNavDropdown('usecases')
@@ -16,7 +17,7 @@ export default function UseCasesDropdown() {
         unstyled
         type="button"
         ref={triggerRef}
-        className="truncate rounded-full px-2.5 py-1 text-sm outline-none transition-colors hover:bg-[color-mix(in_srgb,var(--accent-primary)_15%,transparent)]"
+        className={NAV_PILL_CLASS}
         onClick={() => (isOpen ? close() : open())}
       >
         <div className="flex items-center">
