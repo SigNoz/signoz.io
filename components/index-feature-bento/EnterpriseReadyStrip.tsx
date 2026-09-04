@@ -1,3 +1,7 @@
+import { ArrowRight } from 'lucide-react'
+
+import TrackingLink from '@/components/TrackingLink'
+import Eyebrow from '@/components/homepage/Eyebrow'
 import HipaaLogo from '@/public/svgs/icons/hipaa.svg'
 import Soc2Logo from '@/public/svgs/icons/SOC-2.svg'
 
@@ -14,34 +18,38 @@ export default function EnterpriseReadyStrip() {
   ]
 
   return (
-    <div className="mt-14 border-y border-signoz_slate-400/35 md:mt-20">
+    <div className="rule-fade-x mt-14 border-y border-[var(--l2-border)] md:mt-20">
       <div className="grid gap-0 md:grid-cols-3">
-        <div className="flex items-center border-b border-signoz_slate-400/35 py-8 md:border-b-0 md:pr-8">
+        <div className="rule-fade-x flex items-center border-b border-[var(--l2-border)] py-8 md:border-b-0 md:pr-8">
           <div>
-            <p className="m-0 text-sm font-medium uppercase tracking-widest text-signoz_robin-400">
-              Enterprise ready
-            </p>
-            <h3 className="m-0 mt-3 max-w-xs text-2xl font-medium leading-tight tracking-tight text-signoz_vanilla-100 md:max-w-xs md:text-3xl">
+            <Eyebrow>Enterprise ready</Eyebrow>
+            <h3 className="m-0 mt-3 max-w-xs text-2xl font-medium leading-tight tracking-tight text-[var(--l1-foreground)] md:max-w-xs md:text-3xl">
               Built secure, from day one.
             </h3>
+            <TrackingLink
+              className="btn-tactile btn-tactile--secondary mt-6 no-underline"
+              clickLocation="Homepage Enterprise Ready Strip"
+              clickName="Trust Center Link"
+              clickText="Trust Center"
+              clickType="Secondary CTA"
+              href="https://trust.signoz.io/"
+              target="_blank"
+            >
+              Trust Center
+              <ArrowRight size={12} aria-hidden="true" />
+            </TrackingLink>
           </div>
         </div>
 
         {compliances.map(({ Logo, label }, index) => (
           <div
             key={label}
-            className={`flex min-h-44 flex-col justify-center gap-5 border-t border-signoz_slate-400/35 py-7 md:min-h-56 md:border-t-0 md:px-12 ${
-              index === 0 ? 'md:border-x' : ''
-            } border-signoz_slate-400/35`}
+            className="rule-fade-x md:vrule-solid flex min-h-44 flex-col justify-between gap-5 border-t border-[var(--l2-border)] py-7 md:min-h-56 md:border-t-0 md:px-12"
           >
-            <div className="h-14 overflow-visible">
-              <Logo className="h-14 w-auto origin-left scale-[1.55] opacity-80 md:scale-[1.85]" />
-            </div>
-            <div>
-              <p className="m-0 text-base font-medium leading-6 text-signoz_vanilla-400 md:text-lg md:leading-7">
-                {label} compliance
-              </p>
-            </div>
+            <Logo className="h-20 w-auto opacity-80 md:h-24" />
+            <p className="m-0 text-base font-medium leading-6 text-[var(--l2-foreground)] md:text-lg md:leading-7">
+              {label} compliance
+            </p>
           </div>
         ))}
       </div>
