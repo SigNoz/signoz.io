@@ -1,0 +1,264 @@
+.footer-effect {
+  --fx-row: 30px;
+  --fx-dash: 4px;
+  --fx-ease: cubic-bezier(0.16, 0.84, 0.44, 1);
+  --fx-line: color-mix(in srgb, var(--l1-foreground) 9%, transparent);
+  --fx-block-a: color-mix(in srgb, var(--bg-robin-500) 82%, transparent);
+  --fx-block-b: color-mix(in srgb, var(--bg-sakura-500) 78%, transparent);
+  --fx-block-c: color-mix(in srgb, var(--l1-foreground) 6%, transparent);
+  position: relative;
+  width: 100%;
+  height: 120px;
+  overflow: hidden;
+  border-top: 1px solid var(--l2-border);
+  background: var(--l1-background);
+}
+
+.footer-effect .fx {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.fx__rows {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--fx-line) 0 1px,
+    transparent 1px var(--fx-row)
+  );
+  mask-image: repeating-linear-gradient(
+    to right,
+    #000 0 var(--fx-dash),
+    transparent var(--fx-dash) calc(var(--fx-dash) * 2)
+  );
+}
+
+.fx__rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--fx-line) 0 var(--fx-dash),
+    transparent var(--fx-dash) calc(var(--fx-dash) * 2)
+  );
+}
+
+.fx__field {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.fx__block {
+  position: absolute;
+  height: var(--fx-row);
+  width: 0;
+  transform: translateZ(0);
+  transition: width var(--d, 520ms) var(--fx-ease) var(--delay, 0ms);
+  will-change: width;
+}
+
+.fx__block[data-tone='a'] {
+  background: var(--fx-block-a);
+}
+
+.fx__block[data-tone='b'] {
+  background: var(--fx-block-b);
+}
+
+.fx__block[data-tone='c'] {
+  background: var(--fx-block-c);
+}
+
+.fx.is-live .fx__block {
+  width: var(--w);
+}
+
+.footer-status-wrap {
+  position: relative;
+  /* Headroom so Noz never overlaps the logo above. */
+  padding-top: 34px;
+}
+
+.footer-status {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 9px 12px;
+  border: 1px solid var(--l2-border);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--l3-background) 82%, transparent);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--bg-base-black) 34%, transparent);
+  backdrop-filter: blur(12px);
+  font-size: 13px;
+  color: var(--l1-foreground);
+  text-decoration: none;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.footer-status:hover,
+.footer-status:focus-visible {
+  border-color: var(--l3-border);
+  background: color-mix(in srgb, var(--l3-background-hover) 92%, transparent);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--bg-base-black) 42%, transparent);
+  outline: none;
+}
+
+.footer-status__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bg-forest-500);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--bg-forest-500) 24%, transparent);
+  animation: footerStatusPulse 4.4s ease-in-out infinite;
+}
+
+@keyframes footerStatusPulse {
+  0%,
+  100% {
+    background-color: var(--bg-forest-500);
+    box-shadow: 0 0 4px color-mix(in srgb, var(--bg-forest-500) 24%, transparent);
+  }
+  50% {
+    background-color: var(--bg-forest-400);
+    box-shadow:
+      0 0 7px color-mix(in srgb, var(--bg-forest-400) 42%, transparent),
+      0 0 13px color-mix(in srgb, var(--bg-forest-500) 18%, transparent);
+  }
+}
+
+.footer-status-noz {
+  position: absolute;
+  right: 14px;
+  bottom: 27px;
+  z-index: 1;
+  width: 42px;
+  height: 42px;
+  opacity: 0;
+  transform: translateY(30px);
+  pointer-events: none;
+}
+
+.footer-status-noz svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.footer-status-noz.is-live {
+  animation: footerNozPeek 700ms cubic-bezier(0.34, 1.45, 0.5, 1) forwards;
+}
+
+.footer-status-noz__head {
+  transform-origin: 12px 16px;
+}
+
+.footer-status-noz.is-live .footer-status-noz__head {
+  animation: footerNozBob 500ms ease-in-out 650ms 2;
+}
+
+.footer-status-noz__pupil {
+  transition: transform 130ms ease-out;
+}
+
+.footer-status-noz__hands {
+  position: absolute;
+  right: 18px;
+  bottom: 34px;
+  z-index: 3;
+  display: block;
+  width: 34px;
+  height: 7px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.footer-status-noz.is-live ~ .footer-status-noz__hands {
+  animation: footerNozHands 700ms cubic-bezier(0.22, 1, 0.36, 1) 350ms forwards;
+}
+
+@keyframes footerNozPeek {
+  from {
+    opacity: 1;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes footerNozBob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-1px) rotate(-6deg);
+  }
+}
+
+@keyframes footerNozHands {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.footer-texture-bar {
+  display: block;
+  width: 100%;
+  height: 21px;
+  background-image: url('/svgs/footer/texture.svg');
+  background-position: -6px top;
+  background-repeat: repeat-x;
+  background-size: auto 21px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx__block {
+    transition: none;
+  }
+
+  .footer-status__dot {
+    animation: none;
+  }
+
+  .footer-status-noz.is-live {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .footer-status-noz.is-live .footer-status-noz__head {
+    animation: none;
+  }
+
+  .footer-status-noz.is-live ~ .footer-status-noz__hands {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
