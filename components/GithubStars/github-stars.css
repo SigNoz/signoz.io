@@ -1,0 +1,112 @@
+.github-stars-chip {
+  --star-fill: var(--bg-robin-400);
+  --star-stroke: var(--bg-robin-400);
+  --star-eye: var(--bg-base-white);
+  --star-glow-opacity: 0.12;
+  --star-glow-blur: 6px;
+}
+
+.dark .github-stars-chip {
+  --star-fill: var(--bg-amber-500);
+  --star-stroke: var(--bg-amber-500);
+  --star-eye: var(--bg-ink-500);
+  --star-glow-opacity: 0.2;
+  --star-glow-blur: 4px;
+}
+
+.github-stars-chip .icon-morph {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.github-stars-chip .icon-old,
+.github-stars-chip .icon-star {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 300ms ease,
+    filter 300ms ease;
+  transform-origin: center;
+}
+
+.github-stars-chip .icon-old {
+  transform: rotate(0deg) scale(1);
+  opacity: 1;
+  filter: blur(0px);
+}
+
+.github-stars-chip .icon-star {
+  transform: rotate(-120deg) scale(0.3);
+  opacity: 0;
+  filter: blur(4px);
+  isolation: isolate;
+}
+
+.github-stars-chip .icon-star::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--bg-cherry-500),
+    var(--bg-amber-500),
+    var(--bg-forest-500),
+    var(--bg-aqua-500),
+    var(--bg-cherry-500)
+  );
+  filter: blur(var(--star-glow-blur));
+  opacity: 0;
+  transform: scale(0.7);
+  transition:
+    opacity 250ms ease,
+    transform 350ms ease;
+  z-index: -1;
+}
+
+.github-stars-chip:hover .icon-old {
+  transform: rotate(120deg) scale(0.3);
+  opacity: 0;
+  filter: blur(4px);
+}
+
+.github-stars-chip:hover .icon-star {
+  transform: rotate(0deg) scale(1.15);
+  opacity: 1;
+  filter: blur(0px);
+}
+
+.github-stars-chip:hover .icon-star::before {
+  opacity: var(--star-glow-opacity);
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .github-stars-chip .icon-old,
+  .github-stars-chip .icon-star,
+  .github-stars-chip .icon-star::before {
+    transition: none;
+  }
+
+  .github-stars-chip:hover .icon-old {
+    transform: none;
+    opacity: 1;
+    filter: none;
+  }
+
+  .github-stars-chip:hover .icon-star {
+    opacity: 0;
+  }
+
+  .github-stars-chip:hover .icon-star::before {
+    opacity: 0;
+  }
+}
