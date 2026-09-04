@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect } from 'react'
 import { logEvent, LogEventPayload, LogEventOptions, detectBotClientSide } from '../utils/logEvent'
-import { getOrCreateAnonymousId, getOrCreatePostHogSessionId, getUserId } from '../utils/userClient'
+import {
+  getOrCreateAnonymousId,
+  getOrCreateAnalyticsSessionId,
+  getUserId,
+} from '../utils/userClient'
 import { extractGroupIdFromEmail } from '../utils/userShared'
 import {
   getOS,
@@ -74,7 +78,7 @@ export const useLogEvent = () => {
       const utmParams = getStoredUtmParams()
       const userIp = Cookies.get('user_ip')
       const vercelIp = Cookies.get('vercel_ip')
-      const postHogSessionId = getOrCreatePostHogSessionId()
+      const sessionId = getOrCreateAnalyticsSessionId()
       const providedAttributes = attributes || {}
 
       const enhancedAttributes = {
@@ -88,7 +92,7 @@ export const useLogEvent = () => {
         pageReferrer:
           providedAttributes.pageReferrer ||
           (typeof document !== 'undefined' ? document.referrer : undefined),
-        $session_id: providedAttributes.$session_id || postHogSessionId,
+        $session_id: providedAttributes.$session_id || sessionId,
         custom_ip: userIp || 'unknown',
         custom_vercel_ip: vercelIp || 'unknown',
         custom_os: getOS(),
