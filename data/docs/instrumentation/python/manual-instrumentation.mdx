@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-03
 title: How to add manual instrumentation in Python
 description: Learn how to add manual instrumentation in Python using OpenTelemetry. Create custom spans, set attributes, and capture business logic for deeper observability.
 
@@ -68,7 +68,101 @@ def do_work():
     # Span is created on function entry and ends on exit
 ```
 
-## Step 2. Add attributes and events
+## Step 2. Propagate context
+
+Python stores the active span in a `contextvars` context variable, so `start_as_current_span` links child spans for you inside a single call chain. Two things break that chain: a new thread, and another service. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the concepts behind this step.
+
+### Inside your process
+
+`start_as_current_span` sets the span as active. `start_span` creates the span without activating it, so anything nested under it becomes a sibling instead of a child:
+
+```python:in_process.py
+# validate_order's spans become children of process-order
+with tracer.start_as_current_span("process-order"):
+    validate_order(order_id)
+
+# validate_order's spans do NOT become children of process-order
+span = tracer.start_span("process-order")
+validate_order(order_id)
+span.end()
+```
+
+An `asyncio` task copies the current context when you create it, so spans inside a task nest correctly. A `threading.Thread` starts with an empty context, so you have to carry it across by hand:
+
+```python:threads.py
+from concurrent.futures import ThreadPoolExecutor
+from opentelemetry import context as otel_context
+
+def run_with_context(ctx, fn, *args):
+    token = otel_context.attach(ctx)
+    try:
+        return fn(*args)
+    finally:
+        otel_context.detach(token)
+
+with tracer.start_as_current_span("process-batch"):
+    ctx = otel_context.get_current()
+    with ThreadPoolExecutor() as pool:
+        pool.submit(run_with_context, ctx, handle_item, item)
+```
+
+### Across a service boundary
+
+Instrumentation libraries for Flask, Django, `requests`, and Celery inject and extract for you. Write the calls yourself for any hop they do not cover.
+
+Set the span kind on both ends. SigNoz reads `Client` and `Server` to build the service map and APM metrics.
+
+```python:propagate.py
+from opentelemetry import trace
+from opentelemetry.propagate import inject, extract
+
+# Outgoing: inject writes traceparent into the carrier
+def charge_card(payload):
+    with tracer.start_as_current_span("charge-card", kind=trace.SpanKind.CLIENT):
+        headers = {}
+        inject(headers)
+        return requests.post("https://payments.internal/charge", json=payload, headers=headers)
+
+# Incoming: extract returns a context to start the entry span in
+def handle_charge(request):
+    ctx = extract(request.headers)
+    with tracer.start_as_current_span(
+        "handle-charge", context=ctx, kind=trace.SpanKind.SERVER
+    ) as span:
+        # handle-charge is now a child of charge-card in the caller's trace
+        capture_payment(span)
+```
+
+<Admonition type="warning">
+Two details in Python fail without an error message.
+
+The first is argument order. `inject` and `extract` take the carrier first and the context as an optional keyword: `inject(carrier, context=None)` and `extract(carrier, context=None)`. Go, Java, and JavaScript put the context first, so a snippet ported from another language fails here.
+
+The second is header case. The default getter looks up the literal lowercase key `traceparent` with a plain `carrier.get(key)`. Flask and Django hand you a case-insensitive mapping, so `extract(request.headers)` works. A plain `dict` does not. A carrier that holds `Traceparent` returns an empty context and raises nothing.
+</Admonition>
+
+When you assemble the carrier from raw headers, lowercase the keys first:
+
+```python:normalize.py
+carrier = {k.lower(): v for k, v in raw_headers.items()}
+ctx = extract(carrier)
+```
+
+For a queue, put the carrier on the message and read it back in the consumer:
+
+```python:queue.py
+# Publisher
+carrier = {}
+inject(carrier)
+queue.publish(body=payload, headers=carrier)
+
+# Consumer
+ctx = extract(message.headers)
+with tracer.start_as_current_span("process-message", context=ctx):
+    handle(message)
+```
+
+## Step 3. Add attributes and events
 
 Attributes show up as key-value pairs in SigNoz so you can filter and aggregate spans. Events capture notable moments inside a span.
 
@@ -112,7 +206,7 @@ span.set_attribute(URL_FULL, "https://api.example.com/users")
 - Keep attribute keys consistent (use semantic conventions when possible).
 - Use events to mark retries, cache hits/misses, queue waits, and similar milestones.
 
-## Step 3. Record errors
+## Step 4. Record errors
 
 Flag failures on the span so they are easy to query in SigNoz.
 
@@ -137,7 +231,7 @@ def risky_operation():
 - Setting status to `StatusCode.ERROR` surfaces the span in SigNoz error views and alerts.
 - Re-raise the exception so calling code can respond appropriately.
 
-## Step 4. Add span links (optional)
+## Step 5. Add span links (optional)
 
 Links connect spans that are causally related but not in a parent-child relationship:
 
@@ -175,7 +269,7 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 
 ### Why don't I see my custom spans in SigNoz?
 
-- Confirm the tracer provider is initialized before your application code runs.
+- Make sure that the tracer provider is initialized before your application code runs.
 - Check sampler configuration. Using ratio-based sampling in dev may drop most manual spans.
 - Verify traffic hits the functions where you inserted spans.
 
@@ -191,6 +285,14 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 - Call `set_attribute` or `add_event` before the span ends. Post-end mutations are ignored.
 - When using `with` blocks, add attributes inside the block before it exits.
 
+### Why does the downstream service start its own trace?
+
+- Make sure that the caller runs `inject` and that the outgoing request carries a `traceparent` header.
+- Make sure that the receiver passes the context that `extract` returned into `start_as_current_span(..., context=ctx)`.
+- Check the argument order. `inject(carrier)` takes the carrier first, not the context.
+- Check the header case. The default getter is case-sensitive, so a carrier holding `Traceparent` rather than `traceparent` extracts nothing and reports no error.
+- Make sure that both services register the same propagator format. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/).
+
 ### Spans not connected across async operations?
 
 - For async code, use `trace.get_current_span()` within the async function.
@@ -202,3 +304,4 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 
 - [Send logs from Python](https://signoz.io/docs/logs-management/send-logs/python-logs/) using auto-instrumentation
 - Return to the [Python instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-python/) for framework-specific setup
+- Read [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the wire format and the failure modes shared across languages

@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-03
 title: How to add manual instrumentation in Java
 description: Learn how to add manual instrumentation in Java with OpenTelemetry. Create custom spans for business operations, payment flows, and domain-specific tracing.
 
@@ -138,7 +138,129 @@ public void processOrder(String orderId) {
 }
 ```
 
-## Step 2. Add attributes and events
+## Step 2. Propagate context
+
+Java keeps the active span in thread-local storage, so `makeCurrent()` covers everything that runs on the same thread. Two things break that chain: a thread pool, and another service. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the concepts behind this step.
+
+### Inside your process
+
+The active span follows your code as long as it stays on one thread. Hand work to an executor and the new thread starts with an empty context, so wrap the executor before you submit:
+
+```java:ThreadPool.java
+import io.opentelemetry.context.Context;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+ExecutorService executor = Executors.newFixedThreadPool(4);
+
+Span span = tracer.spanBuilder("process-batch").startSpan();
+try (Scope scope = span.makeCurrent()) {
+    // Child spans created in handleItem attach to process-batch.
+    // Await the task so process-batch still covers it when the span ends.
+    Future<?> task = Context.current().wrap(executor).submit(() -> handleItem(item));
+    task.get();
+
+    // Without wrap() the ambient context does not follow, and handleItem
+    // starts its own root span. Shown for comparison, do not copy this line.
+    // executor.submit(() -> handleItem(item));
+} finally {
+    span.end();
+}
+```
+
+`Context` also offers `wrapConsumer`, `wrapFunction`, `wrapSupplier`, and `wrapRunnable` for the same purpose.
+
+### Across a service boundary
+
+The Java agent injects and extracts for every library it instruments. Write the calls yourself for any hop it does not cover.
+
+Injection needs a `TextMapSetter` that knows how to write a key onto your carrier:
+
+```java:Inject.java defaultCollapsed
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.propagation.TextMapSetter;
+import java.net.URI;
+import java.net.http.HttpRequest;
+
+private static final TextMapSetter<HttpRequest.Builder> SETTER =
+    (carrier, key, value) -> carrier.setHeader(key, value);
+
+public void chargeCard(String paymentId) throws Exception {
+    Span span = tracer.spanBuilder("charge-card").startSpan();
+    try (Scope scope = span.makeCurrent()) {
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+            .uri(new URI("https://payments.internal/charge"))
+            .GET();
+
+        // Writes the traceparent header onto the builder
+        GlobalOpenTelemetry.getPropagators()
+            .getTextMapPropagator()
+            .inject(Context.current(), builder, SETTER);
+
+        client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+    } finally {
+        span.end();
+    }
+}
+```
+
+Extraction needs a `TextMapGetter` that can list the carrier's keys and read one:
+
+```java:Extract.java minimap defaultCollapsed
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.propagation.TextMapGetter;
+import java.util.Map;
+
+private static final TextMapGetter<Map<String, String>> GETTER =
+    new TextMapGetter<>() {
+        @Override
+        public Iterable<String> keys(Map<String, String> carrier) {
+            return carrier.keySet();
+        }
+
+        @Override
+        public String get(Map<String, String> carrier, String key) {
+            if (carrier == null) {
+                return null;
+            }
+            // HTTP header names are case-insensitive, so match them that way.
+            // A carrier holding "Traceparent" must still resolve "traceparent".
+            return carrier.entrySet().stream()
+                .filter(e -> e.getKey().equalsIgnoreCase(key))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
+        }
+    };
+
+public void handleCharge(Map<String, String> headers) {
+    Context extracted = GlobalOpenTelemetry.getPropagators()
+        .getTextMapPropagator()
+        .extract(Context.current(), headers, GETTER);
+
+    Span span = tracer.spanBuilder("handle-charge")
+        .setParent(extracted)
+        .setSpanKind(SpanKind.SERVER)
+        .startSpan();
+
+    try (Scope scope = span.makeCurrent()) {
+        // handle-charge is now a child of charge-card in the caller's trace
+        capturePayment();
+    } finally {
+        span.end();
+    }
+}
+```
+
+<Admonition type="warning">
+Pass the extracted context to `setParent`. A span builder with no explicit parent takes whatever is current on the thread. At an entry point that is usually nothing, so the span starts a fresh trace.
+</Admonition>
+
+## Step 3. Add attributes and events
 
 Attributes are key-value pairs that show up in SigNoz so you can filter and search traces. Events mark notable moments within a span.
 
@@ -191,7 +313,7 @@ Use events for:
 - State transitions
 - External API calls
 
-## Step 3. Record errors
+## Step 4. Record errors
 
 Flag failures so they surface in SigNoz error views and alerts:
 
@@ -239,7 +361,7 @@ public void someUtilityMethod(String customerId) {
 }
 ```
 
-## Step 4. Add span links (optional)
+## Step 5. Add span links (optional)
 
 Links connect spans that are causally related but not in a parent-child relationship. Common use cases:
 - Batch processing where one trigger creates multiple independent operations
@@ -323,6 +445,12 @@ try (Scope scope = parent.makeCurrent()) {
 }
 ```
 
+### Why does the downstream service start its own trace?
+
+- Make sure that the caller runs `inject` and that the outgoing request carries a `traceparent` header.
+- Make sure that the receiver calls `setParent(extracted)` on the span builder. Without it the entry span takes whatever is current on the thread and starts a new trace.
+- Make sure that both services register the same propagator format. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/).
+
 ### Attributes not showing up?
 
 - Set attributes before calling `span.end()`
@@ -343,3 +471,4 @@ Make sure:
 - [Java traces instrumentation guide](https://signoz.io/docs/instrumentation/java/opentelemetry-java/) for auto-instrumentation setup
 - [Collect Java application logs](https://signoz.io/docs/logs-management/send-logs/java-logs/) with OpenTelemetry
 - Check <a href="https://opentelemetry.io/docs/languages/java/api/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Java API reference</a> for advanced usage for manual instrumentation
+- Read [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the wire format and the failure modes shared across languages

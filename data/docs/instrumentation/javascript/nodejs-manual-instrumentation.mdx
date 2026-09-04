@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-03
 title: How to add manual instrumentation in Node.js
 description: Learn how to add manual instrumentation in Node.js with OpenTelemetry. Create custom spans for checkout flows, payments, and business-critical code paths.
 tags: [SigNoz Cloud, Self-Host]
@@ -79,7 +79,115 @@ Tips:
 - Use descriptive span names that match business steps (`checkout`, `fetch-user`).
 - Always call `span.end()` in a `finally` block.
 
-## Step 2. Add attributes and events
+## Step 2. Propagate context
+
+Node.js keeps the active span in an `AsyncLocalStorage` context that the SDK registers for you. `startActiveSpan` links child spans through `await` chains, promises, and callbacks. Two things break that chain: a span you start without activating, and another service. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the concepts behind this step.
+
+### Inside your process
+
+`startActiveSpan` activates the span for the duration of its callback. `startSpan` creates the span without activating it, so nothing nested inside becomes its child:
+
+```javascript:in_process.js
+// validateOrder's spans become children of process-order
+await tracer.startActiveSpan('process-order', async (span) => {
+  try {
+    await validateOrder(orderId)
+  } finally {
+    span.end()
+  }
+})
+
+// validateOrder's spans do NOT become children of process-order
+const span = tracer.startSpan('process-order')
+try {
+  await validateOrder(orderId)
+} finally {
+  span.end()
+}
+```
+
+To activate an existing span without the callback form, set it on a context and run your work inside `context.with()`:
+
+```javascript:context_with.js
+const { context, trace } = require('@opentelemetry/api')
+
+const span = tracer.startSpan('process-order')
+const ctx = trace.setSpan(context.active(), span)
+
+try {
+  await context.with(ctx, async () => {
+    // Child spans created here attach to process-order
+    await validateOrder(orderId)
+  })
+} finally {
+  span.end()
+}
+```
+
+### Across a service boundary
+
+`@opentelemetry/instrumentation-http` and the other instrumentation packages inject and extract for you. Write the calls yourself for any hop they do not cover.
+
+Set the span kind on both ends. SigNoz reads `Client` and `Server` to build the service map and APM metrics.
+
+```javascript:propagate.js minimap defaultCollapsed
+const { context, propagation, SpanKind } = require('@opentelemetry/api')
+
+// Outgoing: inject writes traceparent into the carrier
+async function chargeCard(payload) {
+  return tracer.startActiveSpan('charge-card', { kind: SpanKind.CLIENT }, async (span) => {
+    try {
+      const headers = { 'content-type': 'application/json' }
+      propagation.inject(context.active(), headers)
+
+      return await fetch('https://payments.internal/charge', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      })
+    } finally {
+      span.end()
+    }
+  })
+}
+
+// Incoming: extract returns a context to start the entry span in
+async function handleCharge(req) {
+  const activeContext = propagation.extract(context.active(), req.headers)
+
+  return tracer.startActiveSpan('handle-charge', { kind: SpanKind.SERVER }, activeContext, async (span) => {
+    try {
+      // handle-charge is now a child of charge-card in the caller's trace
+      await capturePayment(req.body)
+    } finally {
+      span.end()
+    }
+  })
+}
+```
+
+The third argument to `startActiveSpan` is the parent context. Leave it out and the entry span takes whatever is active. At the edge of your service that is nothing, so the span starts a fresh trace.
+
+For a queue, put the carrier on the message and read it back in the consumer:
+
+```javascript:queue.js
+// Publisher
+const carrier = {}
+propagation.inject(context.active(), carrier)
+await queue.send({ body: payload, attributes: carrier })
+
+// Consumer
+const ctx = propagation.extract(context.active(), message.attributes)
+await tracer.startActiveSpan('process-message', {}, ctx, async (span) => {
+  try {
+    await handle(message)
+  } finally {
+    span.end()
+  }
+})
+```
+
+## Step 3. Add attributes and events
 
 Attributes let you filter and aggregate spans in SigNoz. Events mark notable moments within a span.
 
@@ -126,7 +234,7 @@ if (span) {
 - Use semantic conventions when a standard attribute exists.
 - Add events for retries, cache hits/misses, queue waits.
 
-## Step 3. Record errors
+## Step 4. Record errors
 
 Mark failures so they show up in SigNoz error views:
 
@@ -154,7 +262,7 @@ async function riskyOperation() {
 - `SpanStatusCode.ERROR` flags the span in SigNoz error views and alerts.
 - Re-throw so calling code can handle the failure.
 
-## Step 4. Add span links (optional)
+## Step 5. Add span links (optional)
 
 Links connect causally related spans that aren't parent-child:
 
@@ -210,6 +318,12 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 - Values must be strings, booleans, numbers, or arrays of these.
 - Set attributes before `span.end()`. Post-end mutations are ignored.
 
+### Why does the downstream service start its own trace?
+
+- Make sure that the caller runs `propagation.inject` and that the outgoing request carries a `traceparent` header.
+- Make sure that the receiver passes the extracted context as the third argument to `startActiveSpan(name, options, ctx, fn)`.
+- Make sure that both services register the same propagator format. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/).
+
 ### Spans disconnected across async calls?
 
 - `startActiveSpan` handles async context in most cases.
@@ -222,5 +336,6 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 - [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) for faster debugging
 - Return to the [Node.js instrumentation guide](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/)
 - [Exclude HTTP endpoints](https://signoz.io/docs/instrumentation/javascript/nodejs-exclude-http-endpoints/) such as health checks, etc.
+- Read [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the wire format and the failure modes shared across languages
 
 <GetHelp />
