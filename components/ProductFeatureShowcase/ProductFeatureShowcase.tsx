@@ -78,19 +78,6 @@ const FEATURES: Feature[] = [
     },
   },
   {
-    title: 'Agent Native Observability',
-    description:
-      'Bring production telemetry into coding agents with the SigNoz MCP server, or investigate inside SigNoz Cloud with Noz.',
-    href: '/agent-native-observability/',
-    ctaLabel: 'Explore Agent Native Observability',
-    image: {
-      src: '/img/agent-native-observability/mcp-and-noz.webp',
-      alt: 'SigNoz MCP server in a coding agent next to the Noz AI assistant.',
-      caption:
-        'Use the SigNoz MCP server from a coding agent, or investigate telemetry with Noz in SigNoz Cloud.',
-    },
-  },
-  {
     title: 'Metrics & Dashboards',
     description:
       'Build PromQL-powered dashboards and visualize business and SRE metrics in one place.',
