@@ -35,19 +35,10 @@ const buildQueryString = (queryParams?: Record<string, string>) => {
   return serialized ? `?${serialized}` : ''
 }
 
-const sendBeaconRequest = (url: string, body: string) => {
-  if (typeof navigator === 'undefined' || typeof navigator.sendBeacon !== 'function') {
-    return false
-  }
-
-  return navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }))
-}
-
 const sendLogRequest = (url: string, body: string, transport?: LogEventOptions['transport']) => {
-  if (transport === 'beacon' && sendBeaconRequest(url, body)) {
-    return Promise.resolve()
-  }
-
+  // keepalive lets the request outlive page unload. navigator.sendBeacon cannot
+  // be used here: it forces credentials mode "include", which the cross-origin
+  // tunnel's wildcard CORS policy rejects.
   return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
