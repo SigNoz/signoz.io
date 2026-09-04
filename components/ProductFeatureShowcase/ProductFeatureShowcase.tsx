@@ -126,11 +126,61 @@ const FEATURES: Feature[] = [
   },
 ]
 
-export default function ProductFeatureShowcase() {
+// Keep this article's comparison copy separate from the shared default cards.
+const DATADOG_ALTERNATIVE_COPY: Record<string, Partial<Feature>> = {
+  'Distributed Tracing': {
+    description:
+      'Investigate million-span traces with flamegraphs, span filters, and percentiles that show whether a slow span is an outlier.',
+    href: 'https://signoz.io/docs/userguide/span-details/',
+  },
+  'Log Management': {
+    description:
+      'Use quick filters and saved views to search logs, then open related traces and infrastructure metrics. SigNoz Cloud manages the storage and compute as volume grows.',
+  },
+  'Infrastructure Monitoring': {
+    description:
+      'Monitor Kubernetes, Linux hosts, AWS, Azure, and GCP, then connect infrastructure health with application logs and traces.',
+  },
+  'Metrics & Dashboards': {
+    description:
+      'Build dashboards with the visual query builder, or use PromQL when needed. Saved views, pinned dashboards, and panel sections keep daily checks close at hand.',
+    image: {
+      src: '/img/features/metrics/metrics-query-builder.webp',
+      alt: 'SigNoz Cloud metrics explorer with visual query controls and a chart.',
+      caption: 'Use a shared query builder across signals, with PromQL available for metrics.',
+    },
+  },
+}
+
+const AGENT_NATIVE_FEATURE: Feature = {
+  title: 'Agent Native Observability',
+  description:
+    'Ask Noz to investigate in natural language, or connect your coding agent through the MCP server to give it production logs, metrics, and traces alongside your code.',
+  href: 'https://signoz.io/agent-native-observability/',
+  ctaLabel: 'Explore Agent Native Observability',
+  image: {
+    src: '/img/agent-native-observability/mcp-and-noz.webp',
+    alt: 'SigNoz Cloud agent-native observability with the MCP server and Noz.',
+    caption: 'Bring production context into the tools you already use to investigate and write code.',
+  },
+}
+
+export default function ProductFeatureShowcase({
+  datadogAlternative = false,
+}: {
+  datadogAlternative?: boolean
+}) {
+  const features = datadogAlternative
+    ? [
+        ...FEATURES.map((feature) => ({ ...feature, ...DATADOG_ALTERNATIVE_COPY[feature.title] })),
+        AGENT_NATIVE_FEATURE,
+      ]
+    : FEATURES
+
   return (
     <div className="relative w-full overflow-hidden">
       <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-4">
-        {FEATURES.map((feature) => (
+        {features.map((feature) => (
           <section
             key={feature.title}
             className="flex w-full flex-shrink-0 snap-start flex-col gap-4 md:w-8/12"

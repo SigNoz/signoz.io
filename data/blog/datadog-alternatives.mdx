@@ -16,7 +16,7 @@ related_articles:
   - '/blog/datadog-vs-prometheus'
 ---
 
-The rising costs and complexities of monitoring cloud infrastructure are pushing many organizations to explore [alternatives to Datadog](https://signoz.io/blog/datadog-alternatives/#signoz). With monthly bills sometimes reaching thousands of dollars and feature sets that can be overwhelming, teams are looking for practical, cost-effective solutions that better fit their needs. Whether you're managing a fast-growing startup or overseeing DevOps in a large enterprise, it's crucial to understand your options to make informed decisions about your monitoring stack.
+The rising costs and complexities of monitoring cloud infrastructure are pushing many organizations to explore [alternatives to Datadog](https://signoz.io/blog/datadog-alternatives/#signoz-cloud). If you're making that move, you need simpler billing without losing the ability to investigate an issue across logs, metrics, and traces. SigNoz Cloud brings these signals together in one OpenTelemetry-native product with usage-based pricing. In this article, we'll look at nine Datadog alternatives and what each offers for your monitoring needs.
 
 <InlineCTA message="Simple usage-based pricing — no per-host fees, no custom metrics surcharge. Start with SigNoz Cloud, self-host anytime with the same open-source codebase." />
 
@@ -70,11 +70,11 @@ A lot of users also pointed out how the sales team of Datadog relentlessly pursu
 
 Here are the [three main caveats of Datadog's pricing](https://signoz.io/blog/datadog-pricing/):
 
-- **Per-Host, High-Water Mark Billing:** You're billed for the entire month based on your peak sustained usage, not your average. This model penalizes common scaling events like handling peak-season traffic.
+- **Per-Host, High-Water Mark Billing:** On Datadog's high-watermark plan, you're billed based on peak usage after the top 1% of hourly readings are excluded, not your average. This model can make common scaling events like handling peak-season traffic expensive.
 
-- **Expensive Custom Metrics:** You're charged a premium for custom metrics based on the number of unique tags (cardinality), so costs can explode unexpectedly. This effectively creates a "tax" on modern standards like OpenTelemetry, as all its metrics are billed as custom.
+- **Expensive Custom Metrics:** You're charged a premium for custom metrics based on unique combinations of metric names and tag values (cardinality), so costs can explode unexpectedly. OpenTelemetry metrics outside supported integration allowances are billed as custom metrics.
 
-- **Dual-Cost Log Management:** You pay once to ingest logs and then pay a second, higher fee to index them for searching. This dual-charge model makes comprehensive logging prohibitively expensive, forcing a choice between visibility and cost.
+- **Dual-Cost Log Management:** You pay to ingest logs and separately to index them for searching, with indexing costs based on event count and retention. This dual-charge model can make comprehensive logging expensive, forcing a choice between visibility and cost.
 
 <KeyPointCallout title="Breaking down Datadog pricing">
 
@@ -86,7 +86,7 @@ In this article we will go through the best DataDog alternatives which you can c
 
 List of top DataDog alternatives:
 
-- [SigNoz](#signoz)
+- [SigNoz Cloud](#signoz-cloud)
 - [New Relic](#new-relic)
 - [Dynatrace](#dynatrace)
 - [Grafana](#grafana)
@@ -96,50 +96,54 @@ List of top DataDog alternatives:
 - [Sematext](#sematext)
 - [Sumo Logic](#sumo-logic)
 
-## SigNoz
+## SigNoz Cloud
 
-SigNoz Cloud is an excellent alternative to Datadog. It can be used as a drop-in replacement for Datadog, providing similar features like APM, distributed tracing, and log management. SigNoz Cloud is built on top of [OpenTelemetry](https://signoz.io/opentelemetry/) and leverages OTel data to its full potential. If you're tired of complex and unpredictable billing practices, or if you want to use OpenTelemetry, then SigNoz Cloud is the right choice. Here are some top reasons to choose SigNoz Cloud over Datadog.
+SigNoz Cloud is an excellent alternative to Datadog for APM, distributed tracing, log management, and metrics monitoring. It brings these signals into one product built on [OpenTelemetry](https://signoz.io/opentelemetry/), with usage-based pricing instead of separate host and user charges. If you're tired of complex and unpredictable billing practices, or if you want to use OpenTelemetry, then SigNoz Cloud is the right choice. Here are some top reasons to choose SigNoz Cloud over Datadog.
 
 ### OpenTelemetry Native - No vendor lock-in in your code
 
-SigNoz is built from the ground up to be OpenTelemetry native. This means we fully leverage OTel's semantic conventions, providing deeper, out-of-the-box insights. Unlike Datadog, **we don't charge you extra for "custom metrics" when you're using OpenTelemetry**. This fundamental difference means you can embrace open standards without the fear of a massive bill.
+SigNoz Cloud is built from the ground up to be OpenTelemetry native. You can filter by resource and span attributes, inspect span events and links, and follow a trace ID to the related logs. Instrumentation scope and metric metadata stay available when you need to understand where data came from. For example, you can start with a slow request, find the span responsible, and check its logs and host metrics without starting a separate investigation. **We don't charge you extra for "custom metrics" when you're using OpenTelemetry**.
+
+The same [visual query builder](https://signoz.io/docs/userguide/query-builder-v5/) works across logs, metrics, and traces, so you don't need to learn a different query language for each signal. Quick filters, autocomplete, and saved views help you return to an investigation. You can also scrape Prometheus endpoints with the [OpenTelemetry Collector](https://signoz.io/docs/metrics-management/send-metrics/) and use PromQL when you prefer it.
 
 We've also recently launched features that double down on our [OTel](https://signoz.io/opentelemetry/)-native approach, including:
 
 - **[LLM Observability](https://signoz.io/llm-observability/):** Monitor your LLM applications (OpenAI, Anthropic, LangChain) with out-of-the-box dashboards.
-- **[Trace Funnels](https://signoz.io/blog/tracing-funnels-observability-distributed-systems/):** Intelligently sample and analyze traces to focus on what's important.
+- **[Trace Funnels](https://signoz.io/docs/trace-funnels/overview/):** Measure completion rates and delays between steps in a request flow.
 - **[External API Monitoring](https://signoz.io/docs/apm-and-distributed-tracing/application-details/):** Gain visibility into the performance of third-party APIs your application depends on.
 - **[Out-of-the-box Messaging Queue Monitoring](https://signoz.io/blog/opentelemetry-powered-kafka-celery-monitoring/):** Effortlessly monitor popular queuing systems.
 
 ### Flexible Hosting Options for Every Stage of Growth
 
-We believe you shouldn't be locked into a single deployment model. SigNoz offers a range of options to meet your needs as you scale:
+We believe you shouldn't be locked into a single deployment model. You can choose managed SigNoz Cloud or self-hosted SigNoz to meet your needs as you scale:
 
 - **[SigNoz Cloud](https://signoz.io/docs/cloud/):** A fully-managed, scalable solution for teams that want to focus on their core business without the overhead of managing an observability platform.
-- **[Self-Hosted SigNoz Enterprise](https://signoz.io/enterprise/):** For organizations with strict data residency or privacy requirements, this self-hosted enterprise edition supports bring-your-own-cloud or on-premise deployment, dedicated support, and advanced security features.
-- **[Self-Hosted SigNoz Community Edition](https://signoz.io/docs/install/self-host/):** A self-hosted, open-source version for teams with the capability to manage their own infrastructure.
+- **[SigNoz Cloud: Dedicated Enterprise](https://signoz.io/enterprise/):** A dedicated environment managed by SigNoz, with enterprise support and security options.
+- **[SigNoz Cloud: Managed BYOC](https://signoz.io/enterprise/):** SigNoz runs the platform in your cloud account, so you can meet data residency requirements without operating it yourself.
+- **[Self-hosted SigNoz Enterprise](https://signoz.io/enterprise/):** Your team runs the platform in your own cloud or on-premise, including storage, scaling, upgrades, and backups, with enterprise support.
+- **[Self-hosted SigNoz Community Edition](https://signoz.io/docs/install/self-host/):** The MIT-licensed, open-source option for teams that want to manage their own infrastructure.
 
 ### Simple, Transparent, Usage-Based Pricing
 
-The SigNoz Cloud [pricing model](https://signoz.io/pricing/) is designed to be straightforward and predictable. We primarily charge based on the volume of data you send us. It’s as simple as \$0.3 per GB of ingested logs, \$0.3 per GB of ingested traces, and \$0.1 per mil samples.
+The SigNoz Cloud [pricing model](https://signoz.io/pricing/) is designed to be straightforward and predictable. Plans start at \$49/month, including \$49 of usage. Logs and traces cost \$0.30 per ingested GB with 15-day retention; metrics cost \$0.10 per million samples with one-month retention. You pay for usage above the included amount at these rates.
 
 There are no "weird" pricing levers like per-host charges that force you to alter your architecture. Our goal is a simple, scalable model that grows with you.
 
-With SigNoz, you get:
+With SigNoz Cloud, you get:
 
 - **No surprise bills:** Our pricing is easy to understand and forecast.
 - **Cost-effective at scale:** As your data volume grows, our pricing remains competitive.
 - **Freedom to architect your systems as you see fit:** We don't penalize you for using modern, dynamic infrastructure.
 
-Here's a feature overview of SigNoz:
+Here's a feature overview of SigNoz Cloud:
 
-<ProductFeatureShowcase />
+<ProductFeatureShowcase datadogAlternative />
 
 <DatadogVsSigNoz />
 
 ## New Relic
 
-<a href="https://newrelic.com/" rel="noopener noreferrer nofollow" target="_blank">**New Relic**</a> is one of the oldest companies in this domain and can be a solid DataDog alternative. If you opt for a full user plan, you can get access to all the tools New Relic provides in its observability stack.
+<a href="https://newrelic.com/" rel="noopener noreferrer nofollow" target="_blank">**New Relic**</a> is one of the oldest companies in this domain and can be a good DataDog alternative. If you opt for a full user plan, you can get access to all the tools New Relic provides in its observability stack.
 
 ### Key Features
 
@@ -157,7 +161,9 @@ Here's a feature overview of SigNoz:
   caption="New Relic Dashboard (Source: New Relic Docs)"
 />
 
-Standard offering includes plans for teams up to 5 full users. Their pricing depends on the amount of data ingested with 100 GB free data ingest and \$0.30 per extra GB. One issue with New Relic pricing is its user-based pricing. Apart from data ingestion, New Relic also charges based on the number of users using the product. New Relic's user pricing can go up to \$549/user. At scale, the cost of adding users can go up to 66% of the total bill.
+New Relic's <a href="https://newrelic.com/pricing" rel="noopener noreferrer nofollow" target="_blank">pricing</a> includes 100 GB of free data ingest each month. Beyond that, Original Data costs \$0.40/GB and Data Plus costs \$0.60/GB. It offers data-plus-users or data-plus-compute pricing; the Standard user-based edition supports up to five full-platform users. On the user-based model, adding engineers can increase the bill alongside data ingestion.
+
+If you're leaving Datadog with a production workload above the free allowance, compare the paid bill, not just the free tier. SigNoz Cloud has no per-user fees, so more engineers can investigate issues without adding seat costs. Use the same telemetry volume, team size, and retention in our [pricing comparison](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/) and [calculator](https://signoz.io/pricing/) to check the saving for your workload.
 
 ### Pros
 
@@ -170,9 +176,8 @@ Standard offering includes plans for teams up to 5 full users. Their pricing dep
 
 ### Cons
 
-- Complex user-based pricing model
-- High per-user costs (up to \$549/user)
-- User costs can reach 66% of total bill at scale
+- Separate data and user or compute charges to budget for
+- Adding full-platform users increases costs on the user-based model
 - Learning curve for new users
 - Limited customization options
 
@@ -184,14 +189,14 @@ Standard offering includes plans for teams up to 5 full users. Their pricing dep
 - Companies needing strong APM capabilities
 - Teams requiring extensive integration options
 
-For a detailed comparison, read more on [DataDog vs New Relic](https://signoz.io/blog/datadog-vs-newrelic/).
+Moving from Datadog does not have to mean rebuilding every dashboard by hand. The [migration guide](https://signoz.io/docs/migration/migrate-from-datadog-to-signoz/) and [dashboard converter](https://signoz.io/datadog-migration-tool/) help you move to SigNoz Cloud in stages; dashboard migration support is available for spends above \$999. For a detailed comparison of the two vendors, read [DataDog vs New Relic](https://signoz.io/blog/datadog-vs-newrelic/).
 
 ## Dynatrace
 
 <a href="https://www.dynatrace.com/" rel="noopener noreferrer nofollow" target="_blank">**Dynatrace**</a> is another strong contender among Datadog competitors, providing a broad spectrum of monitoring
-services aimed at large-scale enterprises. To use Dynatrace, you need to install a single agent per
-host which will collect all relevant metrics. Dynatrace calls this agent OneAgent and it can serve
-the following use-cases for monitoring:
+services aimed at large-scale enterprises. Its standard host-monitoring setup uses OneAgent to
+collect application and infrastructure telemetry. Dynatrace also supports OpenTelemetry ingestion.
+It can serve the following use-cases for monitoring:
 
 ### Key Features
 
@@ -203,7 +208,7 @@ the following use-cases for monitoring:
 - **User Experience Monitoring**: Track and analyze user interactions
 - **Cloud Automation**: Automated deployment and configuration
 
-Full-stack monitoring, the Dynatrace product aimed to provide observability for apps, is priced at \$69 per month for 8 GB per host if billed annually.
+Full-stack monitoring, the Dynatrace product aimed to provide observability for apps, is <a href="https://www.dynatrace.com/pricing/" rel="noopener noreferrer nofollow" target="_blank">priced at \$0.01 per memory-GiB-hour</a>. An 8 GiB host running for 730 hours would cost about \$58.40 for full-stack monitoring. Logs and other separately metered services add to that bill.
 
 <Figure
   src="/img/blog/2024/10/datadog-alternatives-image 5.webp"
@@ -222,7 +227,7 @@ Full-stack monitoring, the Dynatrace product aimed to provide observability for 
 
 ### Cons
 
-- Higher price point (\$69/month/8GB host)
+- Full-stack costs scale with host memory and running hours
 - Complex pricing structure
 - Steep learning curve
 - Enterprise focus may not suit smaller teams
@@ -240,9 +245,9 @@ For detailed comparison, please read [DataDog vs Dynatrace.](https://signoz.io/c
 
 ## Grafana
 
-Grafana is an open-source data visualization tool that you can use as a Datadog alternative. It offers a cloud service called Grafana Cloud, where you can send your logs, metrics, and traces for APM and overall observability.
+Grafana is an open-source data visualization tool that you can use as part of a Datadog alternative. Grafana Cloud is its managed service for logs, metrics, traces, APM, and infrastructure monitoring, so you do not have to operate the backends yourself.
 
-If you're looking to use Grafana as a Datadog alternative, then you'll use the core LGTM stack. It is particularly popular in cloud-native environments, offering a comprehensive solution for observability that covers logs, metrics, traces, and visualization.
+If you're looking to self-host a Grafana-based Datadog alternative, you'll typically use the core LGTM stack. It is particularly popular in cloud-native environments, covering logs, metrics, traces, and visualization. Grafana can also query external data sources.
 
 **The LGTM Stack Components**
 
@@ -252,6 +257,8 @@ Grafana's observability platform is built on the LGTM stack:
 - **Grafana**: A versatile visualization tool offering customizable dashboards to display and analyze data from various sources, including metrics, logs, and traces.
 - **Tempo**: A [**distributed tracing**](https://signoz.io/blog/distributed-tracing-in-microservices/) backend focused on scalability, storing and querying trace data, with easy integration into Grafana for visualization.
 - **Mimir**: A long-term, scalable storage system for [Prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/), ensuring high performance and availability for large-scale metric data.
+
+For teams using OpenTelemetry, the difference is also in how you explore the data. Grafana's backends use PromQL, LogQL, and TraceQL for metrics, logs, and traces. SigNoz Cloud gives you one visual query builder across all three, with resource attributes, span events, and span links available during an investigation. Grafana Cloud accepts OTLP but <a href="https://grafana.com/docs/grafana-cloud/observe-and-act/send-data/otlp/otlp-format-considerations/" rel="noopener noreferrer nofollow" target="_blank">maps OpenTelemetry metrics to its Prometheus representation</a>. SigNoz Cloud supports native OpenTelemetry metrics as well as Prometheus scraping through the Collector, with PromQL available when you need it.
 
 ### Key Features
 
@@ -277,12 +284,12 @@ Grafana's observability platform is built on the LGTM stack:
 
 ### Cons
 
-- **Managing multiple backend components can be complex**
+- **Managing multiple backend components can be complex when self-hosting**
 - Steeper learning curve for advanced features
 - Self-hosted deployment requires operational expertise
 - Enterprise features require paid subscription
 
-Read more about [Grafana vs Datadog](https://signoz.io/blog/datadog-vs-grafana/).
+Grafana Cloud's free tier can cover small workloads, but a production workload moving from Datadog may exceed those limits. Compare paid plans at the same telemetry volume and retention, including the engineers who need access. SigNoz Cloud's usage-based pricing makes it a cost-effective option to evaluate at that scale. Our [pricing comparison](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/) shows the assumptions, and the [Grafana migration guide](https://signoz.io/docs/migration/migrate-from-grafana-to-signoz/) covers the move. Read more about [Grafana vs Datadog](https://signoz.io/blog/datadog-vs-grafana/).
 
 ## LogicMonitor
 
@@ -320,8 +327,8 @@ With dynamic topology mapping, you can have an overview of your network devices 
 ### Pros
 
 - Comprehensive hybrid observability solution
-- Reduces alert noise by 90%
-- Improves MTTR by 46%
+- <a href="https://www.logicmonitor.com/platform" rel="noopener noreferrer nofollow" target="_blank">LogicMonitor reports</a> 90% less alert noise
+- LogicMonitor reports a 46% reduction in mean time to resolution (MTTR)
 - Easy deployment and automation
 - Strong AIOps capabilities
 
@@ -481,33 +488,29 @@ Sumo Logic is a cloud-based log management and analytics platform that helps org
 
 ## Choosing the Right Datadog Alternative
 
-If you're looking for a Datadog alternative, you might be frustrated with its billing practices. So it's important to choose a tool that has transparent and predictable pricing policies. For few users, Datadog is just too complex to use with all its bells and whistles.
-
-Monitoring and observability are critical components that you can't ignore for your applications in the production environment. As such, choosing the right tool which can empower you to take actions proactively is very important. Though DataDog is a good tool, it has its own challenges, including cost, unclear pricing policies, and complex UI.
+If you're looking for a Datadog alternative, start with the problems you want to solve: a bill that is hard to forecast, a complex interface, or too much work connecting logs, metrics, and traces. SigNoz Cloud addresses these with usage-based pricing and a shared query builder in one OpenTelemetry-native product.
 
 The above DataDog alternatives can be a good option to meet your monitoring needs. If one of those tools stands out, it might be worth checking out the more focused guides on [Dynatrace alternatives](https://signoz.io/blog/dynatrace-alternatives/), [Grafana alternatives](https://signoz.io/blog/grafana-alternatives/), and [Splunk alternatives](https://signoz.io/blog/splunk-alternatives/) for pricing, strengths, and migration tradeoffs.
 
-If you're moving out of Datadog, a good option can be to move out of closed SaaS vendors and shift towards open source solution. Many application owners are now shifting to OpenTelemetry for their observability data. While tools like Datadog and New Relic claim that they support OpenTelemetry, [their support is not first-class](https://signoz.io/blog/is-opentelemetry-a-first-class-citizen-in-your-dashboard-a-datadog-and-newrelic-comparison/). OpenTelemetry is an open-source collection of APIs, SDKs, and tools. It can be used to instrument, generate, collect, and export telemetry data (metrics, logs, and traces) to help you analyze your software's performance and behavior.
+For an [OpenTelemetry backend](https://signoz.io/blog/opentelemetry-backend/), SigNoz Cloud is a great choice. You can keep instrumentation based on open standards and use the resulting context to investigate issues across signals. Start a trial with one service, follow the [Datadog migration guide](https://signoz.io/docs/migration/migrate-from-datadog-to-signoz/), and compare the workflow and cost with your current setup.
 
-Using OpenTelemetry to generate telemetry data frees you from vendor lock-in as it gives you an option to export the data to a backend of your choice. For an [OpenTelemetry backend](https://signoz.io/blog/opentelemetry-backend/), SigNoz can be a great choice. It is built to support OpenTelemetry data natively.
+## Getting started with SigNoz Cloud
 
-## Getting started with SigNoz
-
-<GetStartedSigNoz />
+<GetStartedSigNoz cloudFirst />
 
 ## FAQs
 
 ### Who is Datadog's biggest competitor?
 
-Datadog's biggest competitors include SigNoz Cloud, New Relic, Dynatrace and Grafana. In all of these, the best choice depends on your specific needs. If you're looking for a drop-in Datadog replacement with the best-in-class OpenTelemetry support, then SigNoz Cloud is a great choice. If you want a comprehensive SaaS solution with extensive features, New Relic or Dynatrace might be better suited. Grafana is ideal for those who prefer an open-source visualization tool and are comfortable managing multiple components.
+Datadog's biggest competitors include SigNoz Cloud, New Relic, Dynatrace and Grafana. In all of these, the best choice depends on your specific needs. For APM, logs, metrics, and traces with OpenTelemetry-native workflows and usage-based pricing, SigNoz Cloud is a great choice. New Relic and Dynatrace also provide broad observability platforms. Grafana can be used with self-hosted backends or through the managed Grafana Cloud service.
 
 ### Is Datadog better than Splunk?
 
-Datadog and Splunk serve different purposes with some overlap. Datadog excels in cloud infrastructure monitoring and APM, while Splunk is renowned for log management and SIEM. The choice depends on your specific needs. For a comprehensive open-source alternative that integrates metrics, logs, and traces, consider Self-Hosted SigNoz.
+Datadog and Splunk serve different purposes with some overlap. Datadog excels in cloud infrastructure monitoring and APM, while Splunk is renowned for log management and SIEM. The choice depends on your specific needs. For a comprehensive open-source alternative that integrates metrics, logs, and traces, consider self-hosted SigNoz.
 
 ### How to replace Datadog?
 
-One way to replace Datadog can be to use OpenTelemetry. OpenTelemetry is an open-source standard for generating and collecting telemetry data (metrics, logs, and traces) from your applications. Datadog supports OpenTelemetry, though not as well as an OpenTelemetry-native tool like SigNoz. Once you replace Datadog agent with OpenTelemetry in your application code, it will be easy to move out of Datadog. You can slowly start migrating your data to any tool compatible with OpenTelemetry.
+You can replace Datadog in stages with SigNoz Cloud. Instrument one service with OpenTelemetry SDKs or auto-instrumentation, then configure the Collector to send its telemetry to SigNoz Cloud. The [dashboard migration tool](https://signoz.io/datadog-migration-tool/) converts Datadog dashboard JSON into SigNoz Cloud dashboards; review the converted queries and widgets against your data. Validate the signals, dashboards, and alerts before turning off the matching Datadog collection. Follow the [migration guide](https://signoz.io/docs/migration/migrate-from-datadog-to-signoz/) for the full process. Dashboard migration support is available for spends above \$999.
 
 ### What makes Datadog so good?
 
@@ -519,11 +522,11 @@ The primary weakness of Datadog is its complex SKU-based pricing, which can lead
 
 ### Can Grafana replace Datadog?
 
-Grafana can replace Datadog for many monitoring and visualization needs, especially when used with its LGTM stack (Loki, Grafana, Tempo, and Mimir). However, it might require more configuration and management effort compared to Datadog's all-in-one solution. For a simpler managed setup, consider SigNoz Cloud, which offers integrated observability without managing the backend.
+Grafana can replace Datadog for many monitoring and visualization needs when paired with backends such as Loki, Tempo, and Mimir. Self-hosting that stack requires configuration and ongoing operations; Grafana Cloud manages the backends for you. SigNoz Cloud is another managed option, with one query builder and connected logs, metrics, and traces in one product.
 
 ### Is Datadog SaaS only?
 
-Yes, Datadog is a SaaS-only platform, offering its services via the cloud, which simplifies deployment and scaling for users. For an open-source alternative that you can deploy on-premise or in your own cloud, consider Self-Hosted SigNoz.
+Yes, Datadog is a SaaS-only platform, offering its services via the cloud, which simplifies deployment and scaling for users. For an open-source alternative that you can deploy on-premise or in your own cloud, consider self-hosted SigNoz.
 
 ### Is Sentry better than Datadog?
 
@@ -531,13 +534,9 @@ Sentry and Datadog serve different purposes. Sentry focuses on error tracking an
 
 ### Is Datadog like Grafana?
 
-Datadog and Grafana both provide monitoring and visualization capabilities, but Datadog is an all-in-one SaaS solution, whereas Grafana is often part of an open-source stack requiring more setup and management.
+Datadog and Grafana both provide monitoring and visualization capabilities. Datadog is an all-in-one SaaS platform, while Grafana is a visualization tool used with data backends. You can operate a Grafana-based stack yourself or use the managed Grafana Cloud service.
 
-### What is the future outlook for Datadog?
-
-The future outlook for Datadog is mixed. While its growth is driven by the increasing adoption of cloud services and the need for observability solutions, its complex pricing and feature overload can be challenging for many users. For those seeking a more streamlined and cost-effective option, SigNoz offers a compelling alternative with its open-source approach and integrated observability features.
-
-<PricingCTA />
+<PricingCTA productName="SigNoz Cloud" />
 
 Read More:
 
