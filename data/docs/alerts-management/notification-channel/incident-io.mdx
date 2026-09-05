@@ -1,5 +1,5 @@
 ---
-date: 2026-08-21
+date: 2026-09-05
 doc_type: howto
 title: incident.io Notification Channel Setup for Alerts
 description: Set up incident.io as a notification channel in SigNoz to fire and resolve incident.io alerts automatically, and turn them into incidents with alert routes.
@@ -37,6 +37,10 @@ To create a new incident.io notification channel in SigNoz:
 | **Title** | Template for the alert title. Prefilled with a sensible default. |
 | **Description** | Template for the alert body. Markdown, rendered natively by incident.io. Prefilled with a default that includes the alert summary, description, and deep links back to SigNoz. |
 | **Additional metadata** | Optional key-value pairs added to every alert's metadata. See [Send metadata to incident.io](#send-metadata-to-incidentio). |
+
+<Admonition type="warning">
+Paste the **Alert source URL** exactly as incident.io shows it. SigNoz stores and sends it as-is, so it must have **no trailing slash** and **no leading or trailing whitespace**. A non-conforming value is rejected with `incidentio url must not end with a trailing slash` or `incidentio url must not have leading or trailing whitespace` rather than being trimmed.
+</Admonition>
 
 <Figure src="/img/docs/incident-io-channel-form.webp" alt="SigNoz incident.io channel form with URL, token, templates and additional metadata." caption="The incident.io channel form in SigNoz." />
 
@@ -138,7 +142,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 | :--- | :--- | :--- |
 | `name` | `string` | The name of the receiver/channel. **Required**; must be unique across the config. |
 | `incidentio_configs` | `array` | List of incident.io configurations. |
-| `incidentio_configs[].url` | `string` | The alert events URL, `https://api.incident.io/v2/alert_events/http/<source_config_id>`. **Required**. |
+| `incidentio_configs[].url` | `string` | The alert events URL, `https://api.incident.io/v2/alert_events/http/<source_config_id>`, sent exactly as configured (no trailing slash, no surrounding whitespace). **Required**. |
 | `incidentio_configs[].token` | `string` | The alert source's secret token. **Required**. A leading `Bearer ` prefix is stripped. |
 | `incidentio_configs[].send_resolved` | `boolean` | Whether to resolve the incident.io alert when the SigNoz alert resolves. |
 | `incidentio_configs[].title` | `string` | Templated alert title. Go templates are supported. A default is applied if omitted. |
@@ -151,6 +155,7 @@ If you encounter issues:
 
 - **401** → the token is wrong. Re-copy it from the alert source's setup page (with or without the `Bearer ` prefix; both work).
 - **404** → the URL is wrong, usually a bad or missing `<source_config_id>`. Re-copy the full alert events URL.
+- **Invalid Alert source URL** → the URL is rejected with `incidentio url must not end with a trailing slash` or `incidentio url must not have leading or trailing whitespace`. Remove the trailing slash or surrounding whitespace and re-paste the URL exactly as incident.io shows it.
 - **Test succeeded but no alert appears** → check the source's **Requests** tab in incident.io. Each event shows an outcome: `Alert ingested`, `No update to existing alert` (a repeat of an already-firing alert), or `No alert to resolve` (a resolve for an alert incident.io doesn't have; harmless).
 - **Metadata not visible on alerts** → metadata must be mapped to attributes on the incident.io source; see [Send metadata to incident.io](#send-metadata-to-incidentio).
 - **No incident created** → alerts only create incidents through an alert route; see [Alert routes and incidents](#alert-routes-and-incidents).
