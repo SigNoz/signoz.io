@@ -1,0 +1,292 @@
+---
+title: "How to Remove Docker Images? docker image rm"
+meta_title: "How to Remove Docker Images? docker image rm"
+date: 2026-09-03
+tags: [Docker, Image]
+authors: [saurabh_patil]
+description: "Remove Docker images with docker image rm. Use docker image prune for dangling images or add -a to delete all images unused by containers."
+keywords: [docker remove image, docker delete image, docker rmi, docker image prune, docker remove tag]
+related_articles:
+    - '/guides/docker-clear-logs'
+    - '/guides/docker-logs-tail'
+    - '/guides/docker-view-logs'
+---
+
+## TL;DR
+
+To remove a Docker image, list your images, then remove the required one:
+
+```bash
+docker image ls
+docker image rm <image_id_or_name>
+```
+
+If a container references the image, remove that container first:
+
+```bash
+docker stop <container_id>
+docker rm <container_id>
+docker image rm <image_id_or_name>
+```
+
+To remove all unused images:
+
+```bash
+docker image prune -a
+```
+---
+
+Docker images can quietly consume significant disk space. Every pull and build can add new images and layers, while outdated, dangling, or unused images remain on the host until you explicitly remove them. Over time, this buildup can exhaust storage and cause Docker builds or containers to fail.
+
+Removing that buildup requires choosing the command that matches the type of image you no longer need. You can use `docker image rm` to delete a specific image, `docker image prune` to clear dangling images, or `docker image prune -a` to remove every image not referenced by a container. If a container still references the image, you must remove the container before deleting the image.
+
+This guide discusses how to find and remove Docker images individually or in bulk, clean up dangling and unused images, resolve *"image is being used"* errors, and reclaim disk space without deleting resources you still need.
+
+## How to remove a specific Docker image
+
+To remove a specific image, you need its image ID or name and tag. You can get these details by running the `docker image ls` command. This command shows the repository name, tag, image ID, creation date, and size of each image.
+
+Find the image you no longer need, then pass its image ID to `docker image rm <image_id>`. For example, the following command removes the `alpine` using its image ID:
+
+```bash
+docker image rm 48b0309ca019
+```
+
+You can also remove an image by its name and tag. This form is often easier to read, especially when the image has a meaningful name:
+
+```bash
+docker image rm alpine:3.21
+```
+
+Including the tag is necessary because the same repository can have several versions on your machine, such as `alpine:1.26` and `alpine:latest`. Running the command with the image name and ID removes only the specified reference, not every version of alpine.
+
+<Figure
+  src="/img/guides/2026/09/docker-remove-specific-img.webp"
+  alt="Terminal listing alpine:3.21 and showing its successful removal with docker image rm"
+/>
+
+- `Untagged` means Docker removed a repository name, tag, or digest associated with the image. 
+- `Deleted` means it removed image data or layers that no other local image uses. The exact number of lines varies because images can share layers.
+
+The removal can fail if a container still references the image, the image ID has tags in multiple repositories, or Docker cannot safely remove a platform-specific variant. The following subsections show how to resolve each error.
+
+### Error: the image is used by a container
+
+Docker will not remove an image if an existing container still uses it. This applies to stopped containers as well as running ones.
+
+For example, trying to remove the `alpine:3.21` image while a container was using it returns a conflict error:
+
+<Figure
+  src="/img/guides/2026/09/docker-remove-specific-img-container-err-01.webp"
+  alt="Terminal showing Docker refusing to remove alpine:3.21 because container 5f7a4a23a592 references it"
+/>
+
+To find the containers created from that image, run:
+
+```bash
+docker ps -a --filter ancestor=alpine:3.21
+```
+
+This command lists both running and stopped containers that reference `alpine:3.21`:
+
+<Figure
+  src="/img/guides/2026/09/docker-remove-specific-img-container-err-02.webp"
+  alt="Terminal listing two running containers and one exited container created from alpine:3.21"
+/>
+
+If the container is running, stop it using its container ID, then remove it so it no longer references the image.
+
+```bash
+docker stop fbe6f36c981f
+docker rm fbe6f36c981f
+```
+
+Once the container is removed, run the image removal command again, and it will succeed this time. If several containers use the same image, you must stop and remove each one before deleting the image. Before removing them, make sure you no longer need the containers or any data stored inside them.
+
+If you intentionally want to remove the image reference without deleting the container, add `-f` or `--force`:
+
+```bash
+docker image rm -f alpine:3.21
+```
+
+When you use `--force`, Docker may remove only the image’s name and tag. Containers created from that image can continue using its underlying data, so the command may not immediately free disk space.
+
+### Error: image is referenced in multiple repositories
+
+A single image ID can have several repository names or tags. If you try to remove that image by its ID, Docker cannot determine which reference you intend to remove.
+
+For example, these two image names point to the same image ID. Trying to remove the shared image ID returns an error:
+
+<Figure
+  src="/img/guides/2026/09/docker-remove-specific-img-multitag-err-01.webp"
+  alt="Terminal showing alpine:3.21 and multi-tag-demo:latest sharing an image ID, followed by a multiple-repositories conflict"
+/>
+
+If you want to remove only one reference, provide its repository name and tag:
+
+```bash
+docker rmi multi-tag-demo:latest
+```
+
+Docker removes that tag while preserving the underlying image and its other references:
+
+<Figure
+  src="/img/guides/2026/09/docker-remove-specific-img-multitag-err-02.webp"
+  alt="Terminal showing multi-tag-demo:latest being untagged while alpine:3.21 remains available"
+/>
+
+To remove every tag associated with the image ID, use `-f`:
+
+```bash
+docker rmi -f 48b0309ca019
+```
+
+Use the force option carefully because it can remove references you intended to keep.
+
+### Error when removing a platform-specific image variant
+
+A multi-platform image can contain separate variants for architectures such as `linux/amd64` and `linux/arm64`. Docker lets you remove a particular cached variant with the `--platform` option:
+
+```bash
+docker image rm --platform=linux/arm64/v8 alpine:3.21
+```
+
+However, Docker blocks the operation when removing that content could affect every image that references the same variant:
+
+<Figure
+  src="/img/guides/2026/09/docker-remove-platform-specific-variant-err-01.webp"
+  alt="Terminal showing Docker blocking removal of the linux/arm64/v8 variant of alpine:3.21 without force"
+/>
+
+
+If you have checked those references and still want to remove the variant, add `--force`:
+
+```bash
+docker image rm \
+  --platform=linux/arm64/v8 \
+  --force \
+  alpine:3.21
+```
+
+This conflict applies specifically when using `--platform`. To remove the complete local image, including its cached platform variants, omit `--platform` and remove the image normally. The option requires Docker API 1.50 or later.
+
+## Remove multiple Docker images
+
+You do not need to run a separate command for every image you want to remove. The `docker image rm` command accepts multiple image IDs or image names separated by spaces.
+
+```bash
+docker image rm <image_id_1> <image_id_2> ... <image_id_n>
+```
+
+For example, to remove two images with one command, provide their repository names and tags:
+
+```bash
+docker image rm alpine:3.20 busybox:1.37
+```
+You can also remove multiple images using their image IDs:
+
+```bash
+docker image rm d9e853e87e55 9db7b59979c3
+```
+
+Both commands perform the same operation. Names and tags are usually easier to recognize, while image IDs are useful when an image has no tag.
+
+## Remove dangling images using (docker image prune)
+
+A dangling image is an image that no longer has a repository name or tag. These images commonly appear when you rebuild an image using the same tag, leaving the previous version without a name. They are displayed as `<none>:<none>` in the image list.
+
+To check for them, list all locally stored images:
+
+```bash
+docker image ls -a --filter dangling=true \
+  --format 'table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.Size}}'
+```
+
+You can remove dangling images individually by passing their image IDs to `docker image rm`. However, Docker also provides a command that removes all dangling images at once:
+
+```bash
+docker image prune
+```
+
+Docker shows which type of data it will remove and asks for confirmation:
+
+```text
+WARNING! This will remove all dangling images.
+Are you sure you want to continue? [y/N]
+```
+
+Type `y` and press Enter to continue.
+
+To skip the confirmation prompt, add the `--force` or `-f` option:
+
+```bash
+docker image prune -f
+```
+
+<KeyPointCallout>
+`--force` only disables the confirmation prompt. It does not force Docker to delete images used by containers.
+</KeyPointCallout>
+
+## Remove all unused Docker images using (docker image prune -a)
+
+Dangling images are only one type of unused image. Docker may also store tagged images that are no longer associated with any container. These images are not removed by the standard `docker image prune` command.
+
+To remove dangling images and unused tagged images, add the `-a` option:
+
+```bash
+docker image prune -a
+```
+
+Docker asks for confirmation before continuing. Review the warning carefully, then type `y` if you want to remove the listed types of images.
+
+To remove all unused images without a confirmation prompt, run:
+
+```bash
+docker image prune -a -f
+```
+
+An image counts as unused only when no container references it. Images associated with running or stopped containers are preserved. However, images removed by this command may need to be downloaded or rebuilt the next time you use them, so check what is stored on the machine before running it on a development or production host.
+
+## Remove all Docker images from the host
+
+If you want to reset Docker’s local image store, you can pass the IDs returned by `docker image ls -q` directly to `docker image rm`.
+
+```bash
+docker image rm $(docker image ls -q)
+```
+
+The inner command, `docker image ls -q`, returns only image IDs. The shell substitutes those IDs into the outer removal command.
+
+You can use the same approach to remove images from one repository without affecting the rest of the machine. For example, consider the following images:
+
+```text
+IMAGE                ID             DISK USAGE   CONTENT SIZE   EXTRA
+bulk-remove-demo:1   05d234d1354c       12.8MB            4MB
+bulk-remove-demo:2   23579e661d78       12.8MB            4MB
+```
+
+The following command selects both tags and removes them:
+
+```bash
+docker image rm $(docker image ls "bulk-remove-demo:*" -q)
+```
+
+The unfiltered command may fail for images that have multiple tags or are referenced by containers. You can force the removal of every image reference with:
+
+```bash
+docker image rm -f $(docker image ls -aq)
+```
+
+This command is destructive and should be used only when you intend to clear the entire local image collection. Force-removing an image does not remove its containers, and Docker may retain the underlying data while those containers exist.
+
+For routine cleanup, `docker image prune -a` is usually the better choice because it removes unused images while preserving images referenced by running or stopped containers. These command-substitution examples work in shells such as Bash and Zsh. PowerShell and Windows Command Prompt use different syntax.
+
+## Wrapping Up
+
+Use `docker image rm` when you know which image you want to delete. Use `docker image prune` for dangling images, and add `-a` when you also want to remove unused tagged images. Start with the narrowest command that solves the problem, especially on shared or production hosts.
+
+Cleanup handles the images already occupying space. For ongoing protection, monitor the filesystem that backs Docker’s storage and alert on `system.filesystem.usage` before it reaches capacity. The [OpenTelemetry Host Metrics Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) collects this metric together with CPU, memory, disk I/O, and network data.
+
+[SigNoz Cloud](https://signoz.io/teams/) gives you a host-level view of these metrics and lets you alert on rising filesystem usage. When an alert fires, you can inspect related infrastructure metrics, logs, and traces to determine whether the growth came from image churn, container logs, or another workload.
+
+<InlineCTA message="Catch Docker disk pressure before it breaks builds and containers. Monitor host metrics, set alerts, and correlate logs and traces with SigNoz Cloud." />
