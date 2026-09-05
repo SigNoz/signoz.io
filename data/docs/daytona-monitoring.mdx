@@ -1,0 +1,408 @@
+---
+published_date: 2026-09-05
+title: Daytona Sandbox Monitoring with OpenTelemetry & SigNoz
+meta_title: Daytona Sandbox OpenTelemetry Monitoring
+description: Monitor Daytona sandboxes with OpenTelemetry and SigNoz. Trace the agent work running inside a sandbox, time every SDK call, and track organization quota.
+doc_type: howto
+---
+
+## Overview
+
+<a href="https://www.daytona.io/" target="_blank" rel="noopener noreferrer nofollow">Daytona</a> runs AI-generated code in isolated sandboxes. Your agent creates a sandbox, executes code in it, reads files back, and tears it down. Two things go wrong in that loop, and each needs its own telemetry: the work inside the sandbox fails or hangs, and the sandbox lifecycle itself gets slow or errors out.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- A Daytona account and an API key with `write:sandboxes` permission
+- Python 3.10 or later, with the `daytona` SDK installed. The SDK requires 3.10.
+- A Daytona plan that allows per-sandbox network rules. Tier 1 and Tier 2 accounts cannot override the default egress policy, which blocks SigNoz. See <a href="https://www.daytona.io/docs/en/network-limits/" target="_blank" rel="noopener noreferrer nofollow">Network Limits</a>.
+
+## How it works
+
+Daytona exposes four OpenTelemetry paths. They do not overlap, so pick the ones that answer your question.
+
+| Path | What you get | What it costs you |
+|---|---|---|
+| App instrumentation inside the sandbox | Spans, logs, and custom metrics from the code your agent runs | Code you write and ship into the sandbox |
+| Daytona's built-in telemetry | Per-sandbox CPU, memory, and disk, plus toolbox API spans | One dashboard setting |
+| Organization quota metrics | CPU, memory, storage, and GPU used against your org quota | The same dashboard setting |
+| SDK tracing | Latency and failures for `create`, `start`, `stop`, `delete`, file, and process calls | One flag on the client |
+
+Start with the first path. It shows what your agent did inside the sandbox, which nothing else reconstructs. The rest are collapsed below; expand them when you need them. All four use <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and export to the same SigNoz endpoint.
+
+## Monitor Work Inside a Daytona Sandbox
+
+This path shows what your agent did: which steps ran, how long each took, what it logged, and where it failed.
+
+### Step 1: Allow SigNoz through the sandbox firewall
+
+Sandbox egress is deny-by-default. Package registries stay reachable and Daytona blocks the rest, so an OTLP exporter fails with a TLS reset until you allow the ingestion host. Pass `domain_allow_list` when you create the sandbox:
+
+```python:run_agent.py defaultCollapsed
+import asyncio
+
+from daytona import AsyncDaytona, DaytonaConfig, CreateSandboxFromSnapshotParams
+
+
+async def main():
+    async with AsyncDaytona(DaytonaConfig(api_key="<your-daytona-api-key>")) as daytona:
+        sandbox = await daytona.create(
+            CreateSandboxFromSnapshotParams(
+                domain_allow_list="ingest.<region>.signoz.cloud,pypi.org,files.pythonhosted.org,*.daytona.io",
+                env_vars={
+                    "OTEL_EXPORTER_OTLP_ENDPOINT": "https://ingest.<region>.signoz.cloud:443",
+                    "OTEL_EXPORTER_OTLP_HEADERS": "signoz-ingestion-key=<your-ingestion-key>",
+                    "OTEL_SERVICE_NAME": "<your-service-name>",
+                },
+            )
+        )
+        print("created", sandbox.id)
+
+
+asyncio.run(main())
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<your-daytona-api-key>`: Created under Daytona Dashboard, Keys.
+- `<your-service-name>`: What your sandbox telemetry appears under in SigNoz, and what you filter on in [Validate](#validate).
+
+The allow list takes at most 20 comma-separated domains and supports wildcards such as `*.example.com`. It is mutually exclusive with `networkBlockAll` and `networkAllowList`, so set only one of the three per sandbox. Setting a list also drops the default allowances, so include the registries your code installs from.
+
+<Admonition type="warning" title="Keep `*.daytona.io` in the allow list">
+The sandbox daemon exports its own telemetry to `otel-collector.app.daytona.io`, and Daytona forwards it from there to your endpoint. An allow list that omits `*.daytona.io` blocks the daemon's exporter, and every signal from [Daytona's built-in telemetry](#collect-daytonas-built-in-telemetry) disappears with no error anywhere. Your own spans keep arriving, which makes the gap easy to misread as a Daytona problem.
+</Admonition>
+
+The `env_vars` values reach every process in the sandbox, so the OpenTelemetry SDK picks up the endpoint and headers with no further configuration.
+
+### Step 2: Instrument the code that runs inside the sandbox
+
+This is ordinary OpenTelemetry setup apart from the resource attributes, which read environment variables Daytona injects into every sandbox. Use them to scope telemetry to one sandbox later.
+
+```python:sandbox_app.py minimap defaultCollapsed
+import logging
+import os
+
+from opentelemetry import metrics, trace
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+resource = Resource.create(
+    {
+        "service.name": os.environ.get("OTEL_SERVICE_NAME", "<your-service-name>"),
+        "daytona.sandbox.id": os.environ.get("DAYTONA_SANDBOX_ID", ""),
+        "daytona.organization.id": os.environ.get("DAYTONA_ORGANIZATION_ID", ""),
+        "daytona.region.id": os.environ.get("DAYTONA_REGION_ID", ""),
+        "daytona.snapshot": os.environ.get("DAYTONA_SANDBOX_SNAPSHOT", ""),
+    }
+)
+
+tracer_provider = TracerProvider(resource=resource)
+tracer_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+trace.set_tracer_provider(tracer_provider)
+
+logger_provider = LoggerProvider(resource=resource)
+logger_provider.add_log_record_processor(BatchLogRecordProcessor(OTLPLogExporter()))
+logging.getLogger().addHandler(LoggingHandler(logger_provider=logger_provider))
+logging.getLogger().setLevel(logging.INFO)
+
+reader = PeriodicExportingMetricReader(OTLPMetricExporter())
+meter_provider = MeterProvider(resource=resource, metric_readers=[reader])
+metrics.set_meter_provider(meter_provider)
+
+tracer = trace.get_tracer("agent-work")
+meter = metrics.get_meter("agent-work")
+tasks = meter.create_counter("sandbox.tasks.completed")
+log = logging.getLogger("sandbox-app")
+
+with tracer.start_as_current_span("agent.task") as span:
+    span.set_attribute("task.kind", "code-execution")
+    log.info("starting work")
+    with tracer.start_as_current_span("agent.step.compute"):
+        total = sum(i * i for i in range(200000))
+    log.info("compute finished with total %s", total)
+    tasks.add(1, {"task.kind": "code-execution"})
+
+tracer_provider.force_flush()
+logger_provider.force_flush()
+meter_provider.force_flush()
+```
+
+Flush all three providers before the process exits. Sandbox processes are short-lived, and an unflushed batch dies with the process.
+
+### Step 3: Upload the script, install the SDK, and run it
+
+```python:run_agent.py defaultCollapsed
+import asyncio
+
+from daytona import AsyncDaytona, DaytonaConfig, CreateSandboxFromSnapshotParams
+
+
+async def main():
+    async with AsyncDaytona(DaytonaConfig(api_key="<your-daytona-api-key>")) as daytona:
+        sandbox = await daytona.create(
+            CreateSandboxFromSnapshotParams(
+                domain_allow_list="ingest.<region>.signoz.cloud,pypi.org,files.pythonhosted.org,*.daytona.io",
+                env_vars={
+                    "OTEL_EXPORTER_OTLP_ENDPOINT": "https://ingest.<region>.signoz.cloud:443",
+                    "OTEL_EXPORTER_OTLP_HEADERS": "signoz-ingestion-key=<your-ingestion-key>",
+                    "OTEL_SERVICE_NAME": "<your-service-name>",
+                },
+            )
+        )
+
+        with open("sandbox_app.py", "rb") as f:
+            await sandbox.fs.upload_file(f.read(), "/home/daytona/sandbox_app.py")
+
+        await sandbox.process.exec(
+            "pip install --quiet opentelemetry-sdk opentelemetry-exporter-otlp-proto-http"
+        )
+
+        result = await sandbox.process.exec("python3 /home/daytona/sandbox_app.py")
+        print(result.exit_code, result.result)
+
+
+asyncio.run(main())
+```
+
+To skip the install on every run, bake the OpenTelemetry packages into a <a href="https://www.daytona.io/docs/en/snapshots/" target="_blank" rel="noopener noreferrer nofollow">snapshot</a> and create sandboxes from it.
+
+<details>
+<ToggleHeading>
+## Trace Daytona SDK Operations
+</ToggleHeading>
+
+SDK tracing covers the other half: how long Daytona itself takes to create, start, stop, and delete sandboxes, and which of those calls fail. It runs in your application process, not in the sandbox, so the firewall rules above do not apply.
+
+Set `otel_enabled` on the client and point the standard OpenTelemetry variables at SigNoz:
+
+```bash
+export DAYTONA_API_KEY="<your-daytona-api-key>"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+```python:sdk_tracing.py
+import asyncio
+
+from daytona import AsyncDaytona, DaytonaConfig
+
+
+async def main():
+    # The API key is read from DAYTONA_API_KEY, exported above.
+    async with AsyncDaytona(DaytonaConfig(otel_enabled=True)) as daytona:
+        sandbox = await daytona.create()
+        await sandbox.process.code_run('print("hello")')
+        await daytona.delete(sandbox)
+    # Traces flush when the context manager exits
+
+
+asyncio.run(main())
+```
+
+Set `DAYTONA_OTEL_ENABLED=true` instead of the constructor argument if you would rather keep it in the environment. Daytona also ships TypeScript, Ruby, Go, and Java SDKs with the same flag; see <a href="https://www.daytona.io/docs/en/observability/otel-collection/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collection</a>.
+
+The Python SDK bundles only the OTLP HTTP exporter, so `http/protobuf` is the only protocol. Do not set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc`.
+
+Spans flush when you close the client. The async client exposes `close()` and works as a context manager. The synchronous `Daytona` client has neither, so its spans flush only at interpreter shutdown.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Collect Daytona's Built-in Telemetry
+</ToggleHeading>
+
+One dashboard setting turns on everything Daytona instruments itself: per-sandbox resource metrics, toolbox API spans, and organization quota metrics. You write no code for any of it.
+
+1. Open the <a href="https://app.daytona.io/dashboard/settings" target="_blank" rel="noopener noreferrer nofollow">Daytona Dashboard</a> and go to the **OpenTelemetry** section. Only organization owners see it.
+2. Set **OTLP Endpoint** to `https://ingest.<region>.signoz.cloud/`. Leave the port off, and keep the trailing slash. Daytona appends the signal path itself.
+3. Add a header with key `signoz-ingestion-key` and your ingestion key as the value.
+4. Save. Daytona takes up to five minutes to apply the change.
+
+<Figure
+  src="/img/docs/llm/daytona/daytona-otel-config.webp"
+  alt="Daytona Dashboard OpenTelemetry settings with the SigNoz OTLP endpoint and ingestion key header"
+  caption="The OTLP endpoint and the signoz-ingestion-key header in Daytona's OpenTelemetry settings."
+/>
+
+<Admonition type="warning" title="This disables Daytona's built-in telemetry views">
+Once you configure an external endpoint, Daytona's own telemetry API returns `403 Telemetry endpoints are disabled when Analytics API is configured`, and the Logs, Traces, and Metrics tabs in Sandbox Details stop serving data. Daytona hands the telemetry to you instead of keeping it, which is the trade you are making.
+</Admonition>
+
+Sandboxes must also be able to reach `*.daytona.io`, as described in [Step 1](#step-1-allow-signoz-through-the-sandbox-firewall). Without it the per-sandbox signals below never leave the sandbox.
+
+### Per-sandbox metrics
+
+The daemon reports every sandbox under `service.name = sandbox-<sandbox-id>`, with the sandbox id repeated in `service.instance.id` and the daemon build in `service.version`. Ten gauges arrive:
+
+| Metric | Unit | Description |
+|---|---|---|
+| `daytona.sandbox.cpu.utilization` | percent | CPU used as a share of the limit |
+| `daytona.sandbox.cpu.limit` | cores | CPU cores the sandbox may use |
+| `daytona.sandbox.memory.utilization` | percent | Memory used as a share of the limit |
+| `daytona.sandbox.memory.usage` | bytes | Memory in use |
+| `daytona.sandbox.memory.limit` | bytes | Memory ceiling |
+| `daytona.sandbox.memory.cache` | bytes | Page cache |
+| `daytona.sandbox.filesystem.utilization` | percent | Disk used as a share of the total |
+| `daytona.sandbox.filesystem.usage` | bytes | Disk in use |
+| `daytona.sandbox.filesystem.available` | bytes | Disk free |
+| `daytona.sandbox.filesystem.total` | bytes | Disk size |
+
+Each carries `daytona_organization_id`, `daytona_region_id`, and `daytona_snapshot` as resource attributes. Note the underscores: Daytona's own telemetry uses snake_case, while attributes you set in your own code follow whatever convention you choose.
+
+### Toolbox API spans
+
+The daemon traces the API your SDK calls into, as server spans named for the route: `POST /process/execute` when you run a command, `POST /files/bulk-upload` when you upload a file. They carry `http.route`, `url.path`, and `client.address`, and give you the sandbox-side duration of work your SDK spans only see from the outside.
+
+### Organization quota metrics
+
+Pushed every 60 seconds, covering consumption against your plan limits across every sandbox. The [Daytona dashboard template](https://signoz.io/docs/dashboards/dashboard-templates/daytona-dashboard/) charts all of these already:
+
+| Metric | Unit | Description |
+|---|---|---|
+| `daytona.sandbox.used_cpu` | `{cpu}` | CPU cores consumed by active sandboxes |
+| `daytona.sandbox.total_cpu` | `{cpu}` | CPU quota for the organization |
+| `daytona.sandbox.used_ram` | `GiBy` | Memory consumed by active sandboxes |
+| `daytona.sandbox.total_ram` | `GiBy` | Memory quota for the organization |
+| `daytona.sandbox.used_storage` | `GiBy` | Disk consumed by sandboxes |
+| `daytona.sandbox.total_storage` | `GiBy` | Disk quota for the organization |
+| `daytona.sandbox.used_gpu` | `{gpu}` | GPU consumed by active sandboxes |
+| `daytona.sandbox.total_gpu` | `{gpu}` | GPU quota for the organization |
+
+Each carries `organization.id` as a resource attribute, plus `region.id` and `sandbox.class` as data point attributes. `sandbox.class` separates `container` from `windows` sandboxes, which Daytona meters against the same quota, so a headline usage number without it hides the split.
+
+</details>
+
+## Validate
+
+Wait a minute after your first run, then check each signal.
+
+**Traces:** Open the [Traces explorer](https://signoz.io/docs/userguide/traces/) and filter on `service.name = '<your-service-name>'`.
+
+**Logs:** Open the [Logs explorer](https://signoz.io/docs/userguide/logs_query_builder/) and filter on the same service name.
+
+**Metrics:** Open the [Metrics explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) and search for `sandbox.tasks.completed`. Search `daytona.sandbox` for the eighteen gauges Daytona itself sends, which appear once you finish [Collect Daytona's Built-in Telemetry](#collect-daytonas-built-in-telemetry).
+
+**Daytona's own signals:** Filter either explorer on `service.name` starting with `sandbox-` to confirm the daemon is reporting. Metrics and toolbox API spans arrive within about a minute of the sandbox starting.
+
+<Figure
+  src="/img/docs/llm/daytona/daytona-sdk-traces.webp"
+  alt="Daytona SDK spans in the SigNoz Traces explorer filtered by service.name daytona-python-sdk"
+  caption="SDK spans for one sandbox lifecycle. Daytona.list and AsyncSandbox.start appear together here, which is the sync and async naming split in practice."
+/>
+
+<Figure
+  src="/img/docs/llm/daytona/daytona-sandbox-logs.webp"
+  alt="A Daytona sandbox log record in SigNoz showing daytona resource attributes and a trace ID"
+  caption="One expanded log record from inside a sandbox, with its resource attributes and trace ID."
+/>
+
+<Figure
+  src="/img/docs/llm/daytona/daytona-sandbox-metrics.webp"
+  alt="The sandbox.tasks.completed metric and the daytona.sandbox quota gauges in the SigNoz Metrics explorer"
+  caption="The metric list after both paths are set up, with sandbox.tasks.completed selected."
+/>
+
+<details>
+<ToggleHeading>
+## Attribute and Span Reference
+</ToggleHeading>
+
+- **SDK spans carry no `daytona.*` attributes.** They carry no sandbox id, organization id, or region. The sandbox id appears only inside `http_url`, for example `https://proxy.app-eu.daytona.io/toolbox/<sandbox-id>/process/code-run`, so grouping SDK spans by sandbox means parsing that URL. Per-sandbox attribution comes from the telemetry you emit inside the sandbox.
+- **`OTEL_SERVICE_NAME` does not apply to SDK tracing.** The SDK sets `service.name` to `daytona-python-sdk` and `service.version` to the SDK version, no matter what you set. Every application using the SDK reports under that one name, so you cannot split SDK traffic per app through the service name.
+- **Span names include the client class.** The async client emits `AsyncDaytona.create` and `AsyncSandbox.stop`. The synchronous client drops the `Async` prefix from every span name. A filter written for one client returns nothing for the other.
+- **`daytona.snapshot` is a registry digest.** It resolves to a value such as `cr.app.daytona.io/sbox/daytona-<sha>:daytona`, not the friendly `daytonaio/sandbox:0.8.0` name you passed at creation.
+
+The async client emits internal spans for `AsyncDaytona.create`, `get`, `list`, `list.fetch_page`, `start`, `stop`, and `delete`; `AsyncSandbox.start`, `stop`, `delete`, `refresh_data`, `wait_for_sandbox_start`, and `wait_for_sandbox_stop`; `AsyncProcess.code_run`; and `AsyncFileSystem.upload_file` and `upload_files`. Outbound HTTP calls appear as client spans named for the method alone: `GET`, `POST`, `DELETE`.
+
+Sandboxes expose `DAYTONA_SANDBOX_ID`, `DAYTONA_ORGANIZATION_ID`, `DAYTONA_REGION_ID`, and `DAYTONA_SANDBOX_SNAPSHOT` to every process. Use them for resource attributes, as the sandbox script above does.
+
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Connection reset when exporting from inside a sandbox
+
+Symptom: the exporter retries and gives up, with `Connection reset by peer` or `OpenSSL SSL_connect: Connection reset by peer`.
+
+Likely cause: sandbox egress is deny-by-default and the SigNoz ingestion host is not allowed. Package registries work, which makes the block look selective.
+
+Fix: create the sandbox with `domain_allow_list` including `ingest.<region>.signoz.cloud`, as in Step 1. Tier 1 and Tier 2 accounts cannot set this, so upgrade the plan or export through a host that is already reachable.
+
+Verify: from inside the sandbox, `curl -s -o /dev/null -w '%{http_code}' https://ingest.<region>.signoz.cloud` returns `404`. That means TLS completed and egress is open. `000` means the connection is still blocked.
+
+### No SDK spans arrive
+
+Symptom: sandbox operations succeed, but no `daytona-python-sdk` service appears in SigNoz.
+
+Likely cause: tracing is off, or the process exited before spans flushed.
+
+Fix: confirm `otel_enabled=True` or `DAYTONA_OTEL_ENABLED=true`, and close the client. Use `async with AsyncDaytona(...)` or call `await daytona.close()`.
+
+Verify: `service.name = 'daytona-python-sdk'` returns spans in the Traces explorer.
+
+### Sandbox CPU, memory, and filesystem metrics never arrive
+
+Symptom: organization gauges arrive and your own spans arrive, but nothing under `service.name = 'sandbox-<sandbox-id>'`. Nothing reports an error.
+
+Likely cause: the sandbox cannot reach `otel-collector.app.daytona.io`. A `domain_allow_list` that omits `*.daytona.io` blocks the daemon's exporter while leaving your own exporter working, so the failure is invisible from inside your code.
+
+Fix: add `*.daytona.io` to `domain_allow_list` and create a new sandbox. Existing sandboxes keep the rules they were created with.
+
+Verify: from inside the sandbox, `curl -s -o /dev/null -w '%{http_code}' https://otel-collector.app.daytona.io` returns `404`. `000` means the daemon is still firewalled.
+
+### Organization metrics are missing
+
+Symptom: no `daytona.sandbox.used_cpu` after saving the configuration.
+
+Likely cause: the push interval has not elapsed, or the header is wrong.
+
+Fix: Daytona takes up to five minutes to apply an endpoint change, then pushes on a 60-second interval. Wait out both with at least one sandbox running, and confirm the header key is exactly `signoz-ingestion-key`.
+
+Verify: search for `daytona.sandbox` in the Metrics explorer.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Limitations
+</ToggleHeading>
+
+- **Sandbox stdout and stderr are not exported.** Daytona documents application logs as part of sandbox telemetry, but the only log records that arrive are the daemon's own startup diagnostics, four per sandbox. Anything your process prints stays in the sandbox, so route it through the OpenTelemetry logs SDK as [Step 2](#step-2-instrument-the-code-that-runs-inside-the-sandbox) does.
+- **`otelEndpointOverride` on sandbox creation has no effect.** The API accepts the field and returns `200`, then reports the sandbox with `otelEndpointOverride: null`.
+- **The documented `otel-config` API call does not work with an API key.** `PUT /api/organizations/<org>/otel-config` returns `403 Invalid authentication context` for a `dtn_` key regardless of its permissions. Use the Dashboard.
+- **A long-lived WebSocket span distorts SDK latency.** The SDK opens a connection to `wss://app.daytona.io/api/socket.io/` that lives as long as the client. It appears as a root span lasting the whole session and dominates p99 for the `daytona-python-sdk` service. Exclude it when measuring operation latency.
+- **SDK operations are separate traces.** Each call roots its own trace rather than nesting under a session, so there is no single trace covering create through delete. Correlate with your own parent span if you need that view.
+
+</details>
+
+## Next Steps
+
+- [Import the Daytona dashboard](https://signoz.io/docs/dashboards/dashboard-templates/daytona-dashboard/) for per-sandbox resources, quota headroom, and SDK latency, or [build your own](https://signoz.io/docs/userguide/manage-dashboards/) over `sandbox.tasks.completed`.
+- [Set a metrics-based alert](https://signoz.io/docs/alerts-management/metrics-based-alerts/) on `daytona.sandbox.used_cpu` against `daytona.sandbox.total_cpu` to catch quota exhaustion before sandbox creation starts failing.
+- [Add a log-based alert](https://signoz.io/docs/alerts-management/log-based-alerts/) on errors your sandbox code logs, scoped by `daytona.sandbox.id`.
+- [Explore the traces](https://signoz.io/docs/userguide/traces/) to find which agent step is slowest across sandboxes.
+- Instrument the model calls your sandbox code makes, so agent steps and LLM spans land in one trace. Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/).
+
+## Get Help
+
+<GetHelp />
