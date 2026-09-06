@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-03
 
 title: Java & Spring Boot OpenTelemetry Setup Guide
 description: Learn how to instrument Java and Spring Boot apps with the OpenTelemetry Java agent. Auto-instrument JDBC, HTTP clients, and queues for real-time tracing.
@@ -9,7 +9,16 @@ doc_type: howto
 This guide walks you through instrumenting your Java or Spring Boot application with OpenTelemetry and sending traces to SigNoz. The Java agent handles most popular libraries and frameworks automatically—Spring, JDBC, HTTP clients, message queues, and more.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+
+Every step below stays the same. Change only where the traces go: point the endpoint at your SigNoz host and drop the ingestion key header.
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+# Self-hosted SigNoz needs no ingestion key, so OTEL_EXPORTER_OTLP_HEADERS is not set.
+```
+
+Replace `localhost` with your SigNoz host if it runs elsewhere. For TLS, OTLP/gRPC on port 4317, and Collector setup, see [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+
 </KeyPointCallout>
 
 ## Prerequisites
@@ -315,13 +324,13 @@ Set `service.version` to a per-build value, not a static string. SigNoz detects 
 
 ```bash
 docker build -t my-java-app .
-docker run -p 8080:8080 my-java-app
+docker run -p 8089:8080 my-java-app
 ```
 
 Or pass environment variables at runtime:
 
 ```bash
-docker run -p 8080:8080 \
+docker run -p 8089:8080 \
   -e OTEL_RESOURCE_ATTRIBUTES="service.name=my-service" \
   -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<key>" \
@@ -340,6 +349,8 @@ With your application running, verify traces are being sent to SigNoz:
 1. Make a few requests to your application endpoints.
 2. In SigNoz, open the **Services** tab and click **Refresh**. Your application should appear.
 3. Go to the **Traces** tab to see your application's traces.
+
+To confirm this from a script or CI job instead of the UI, see [Confirm a service is sending spans](https://signoz.io/docs/apm-and-distributed-tracing/traces-api/#confirm-a-service-is-sending-spans).
 
 <details>
 <ToggleHeading>

@@ -1,5 +1,5 @@
 ---
-date: 2026-08-26
+date: 2026-09-03
 title: Ingestion Overview for SigNoz Cloud
 meta_title: SigNoz Cloud Ingestion Overview - Endpoints & Setup
 tags: [SigNoz Cloud]
@@ -105,6 +105,17 @@ The following ways of authentication are deprecated:
 * Using the `signoz-access-token` header for basic authentication. 
 * Using the `authorization` header with the value set `Bearer <key>` to your Ingestion key. 
 </Admonition>
+
+### What the ingestion key does not cover
+
+The ingestion key authenticates writes to the ingestion endpoint. It cannot read data back, so it does not work against the query API, and it is not the credential for the SigNoz UI.
+
+To read data programmatically you need two more things:
+
+- **Your workspace URL**, which is your workspace name plus your region: `https://<workspace>.<region>.signoz.cloud`. The region alone (for example `in.signoz.cloud`) is not a workspace and returns an error.
+- **An API key**, generated from a [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) and sent as the `SIGNOZ-API-KEY` header.
+
+See the [Traces API](https://signoz.io/docs/apm-and-distributed-tracing/traces-api/) for querying spans and the [API reference](https://signoz.io/api-reference/) for every endpoint.
 
 ## Important Considerations
 

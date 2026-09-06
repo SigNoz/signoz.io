@@ -55,6 +55,13 @@ const LLM_STARTER_ROUTE_MATCHERS: Array<(route: string) => boolean> = [
   (route) => route === '/docs/migration/migrate-from-opentelemetry-to-signoz',
   (route) => route === '/docs/migration/migrate-from-signoz-self-host-to-signoz-cloud',
   (route) => /^\/docs\/instrumentation(?:\/|$)/.test(route),
+  // Each matcher contributes only its first match, so the prefix above yields
+  // the overview page alone. Agents arriving via llms.txt ask for a language,
+  // so name the core four explicitly.
+  (route) => route === '/docs/instrumentation/opentelemetry-python',
+  (route) => route === '/docs/instrumentation/javascript/opentelemetry-nodejs',
+  (route) => route === '/docs/instrumentation/opentelemetry-golang',
+  (route) => route === '/docs/instrumentation/java/opentelemetry-java',
   (route) => route === '/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing',
   (route) => /^\/docs\/traces-management(?:\/|$)/.test(route),
   (route) => /^\/docs\/metrics-management(?:\/|$)/.test(route),
@@ -220,7 +227,7 @@ async function getDocsDescriptionLookup(): Promise<Map<string, string>> {
   return lookup
 }
 
-export async function getLlmStarterLinks(limit = 30): Promise<LlmStarterLink[]> {
+export async function getLlmStarterLinks(limit = 34): Promise<LlmStarterLink[]> {
   const routes = await getDocsRouteList()
   const descriptions = await getDocsDescriptionLookup()
   const starters: LlmStarterLink[] = []

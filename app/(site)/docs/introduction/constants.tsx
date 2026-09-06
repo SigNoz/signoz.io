@@ -290,14 +290,19 @@ export const INTRO_SECTIONS: IntroSectionData[] = [
 export const CTA_STEPS = [
   {
     title: 'Sign-up to SigNoz Cloud',
+    href: '/teams/',
     subtitle: 'Or self-host SigNoz',
+    subtitleHref: '/docs/install/self-host/',
   },
   {
     title: 'Instrument your application',
+    href: '/docs/instrumentation/',
     subtitle: 'Or instruct your agent to do it for you',
+    subtitleHref: '/docs/ai/agent-skills/',
   },
   {
     title: 'Explore your data',
+    href: '/docs/apm-and-distributed-tracing/application-details/',
     subtitle: 'Or set up extensive o11y at SigNoz.',
   },
 ]

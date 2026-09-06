@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-03
 title: Go OpenTelemetry Instrumentation Guide
 description: Learn how to instrument your Go application with the OpenTelemetry Go SDK and send traces to SigNoz Cloud or self-hosted for distributed tracing.
 doc_type: howto
@@ -7,7 +7,16 @@ doc_type: howto
 This guide shows you how to instrument your Go application with OpenTelemetry and send traces to SigNoz. Instrument your Go services with the OpenTelemetry Go SDK and send traces to SigNoz Cloud or a self-hosted collector.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+
+Every step below stays the same. Change only where the traces go: point the endpoint at your SigNoz host and drop the ingestion key header.
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+# Self-hosted SigNoz needs no ingestion key, so OTEL_EXPORTER_OTLP_HEADERS is not set.
+```
+
+Replace `localhost` with your SigNoz host if it runs elsewhere. For TLS, OTLP/gRPC on port 4317, and Collector setup, see [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+
 </KeyPointCallout>
 
 ## Prerequisites
@@ -180,7 +189,6 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
 
 func initTracer(ctx context.Context) (func(context.Context) error, error) {
@@ -271,14 +279,15 @@ func run() (err error) {
 	// Wrap with otelhttp middleware for automatic instrumentation
 	handler := otelhttp.NewHandler(mux, "my-service")
 
-	srv := &http.Server{Addr: ":8080", Handler: handler}
+	// 8089 rather than 8080: self-hosted SigNoz serves its UI on 8080
+	srv := &http.Server{Addr: ":8089", Handler: handler}
 
 	srvErr := make(chan error, 1)
 	go func() {
 		srvErr <- srv.ListenAndServe()
 	}()
 
-	log.Println("Server starting on :8080")
+	log.Println("Server starting on :8089")
 
 	select {
 	case err := <-srvErr:
@@ -573,8 +582,8 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         	// Wrap with otelhttp middleware to create spans automatically
         	handler := otelhttp.NewHandler(mux, "net-http-server")
 
-        	log.Println("Server starting on :8080")
-        	return serve(ctx, stop, &http.Server{Addr: ":8080", Handler: handler})
+        	log.Println("Server starting on :8089")
+        	return serve(ctx, stop, &http.Server{Addr: ":8089", Handler: handler})
         }
 
         // serve runs srv until it fails or ctx is cancelled, then shuts it down.
@@ -702,9 +711,9 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         		c.JSON(200, gin.H{"message": "Hello traced Gin!"})
         	})
 
-        	log.Println("Server starting on :8080")
+        	log.Println("Server starting on :8089")
         	// Use http.Server rather than r.Run so the server can be shut down cleanly.
-        	srv := &http.Server{Addr: ":8080", Handler: r}
+        	srv := &http.Server{Addr: ":8089", Handler: r}
 
         	srvErr := make(chan error, 1)
         	go func() {
@@ -831,10 +840,10 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         		return c.String(http.StatusOK, "Hello traced Echo!")
         	})
 
-        	log.Println("Server starting on :8080")
+        	log.Println("Server starting on :8089")
         	srvErr := make(chan error, 1)
         	go func() {
-        		srvErr <- e.Start(":8080")
+        		srvErr <- e.Start(":8089")
         	}()
 
         	select {
@@ -954,10 +963,10 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         		return c.SendString("Hello traced Fiber!")
         	})
 
-        	log.Println("Server starting on :8080")
+        	log.Println("Server starting on :8089")
         	srvErr := make(chan error, 1)
         	go func() {
-        		srvErr <- app.Listen(":8080")
+        		srvErr <- app.Listen(":8089")
         	}()
 
         	select {
@@ -1084,8 +1093,8 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         		w.Write([]byte("Hello traced Chi!"))
         	})
 
-        	log.Println("Server starting on :8080")
-        	srv := &http.Server{Addr: ":8080", Handler: r}
+        	log.Println("Server starting on :8089")
+        	srv := &http.Server{Addr: ":8089", Handler: r}
 
         	srvErr := make(chan error, 1)
         	go func() {
@@ -1210,8 +1219,8 @@ For framework-specific setups, our guides on [instrumenting a Gin application](h
         		w.Write([]byte("Hello traced Gorilla!"))
         	})
 
-        	log.Println("Server starting on :8080")
-        	srv := &http.Server{Addr: ":8080", Handler: r}
+        	log.Println("Server starting on :8089")
+        	srv := &http.Server{Addr: ":8089", Handler: r}
 
         	srvErr := make(chan error, 1)
         	go func() {
@@ -1380,6 +1389,8 @@ After running your instrumented application, verify traces appear in SigNoz:
 />
 
 4. Click on any trace to view detailed span information and timing.
+
+To confirm this from a script or CI job instead of the UI, see [Confirm a service is sending spans](https://signoz.io/docs/apm-and-distributed-tracing/traces-api/#confirm-a-service-is-sending-spans).
 
 <Figure
     src="/img/docs/instrumentation/golang/trace-individual.webp"

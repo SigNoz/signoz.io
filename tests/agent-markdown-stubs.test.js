@@ -122,13 +122,20 @@ test('HostingDecision stub matches the banner CTA destinations', async () => {
   assert.doesNotMatch(html, /\/docs\/install\//)
 })
 
-test('RegionTable stub renders a placeholder for the endpoint table', async () => {
+test('RegionTable stub renders the region rows, not a pointer to the rendered page', async () => {
   const doc = createDoc('<RegionTable />')
   const components = await buildAgentMdxComponentsForDoc(doc)
   const html = renderToStaticMarkup(React.createElement(components.RegionTable))
 
-  assert.match(html, /region and endpoint reference/)
+  // Every region and its ingestion host must be readable without a browser.
+  for (const region of ['us', 'eu', 'in']) {
+    assert.match(html, new RegExp(`https://ingest\\.${region}\\.signoz\\.cloud`))
+  }
+  assert.match(html, /asia-south1/)
+  assert.match(html, /Ingestion Endpoint/)
   assert.doesNotMatch(html, /Component: RegionTable/)
+  // The old stub pointed at data the HTML did not contain either.
+  assert.doesNotMatch(html, /available in the rendered docs/)
 })
 
 test('DashboardActions stub renders both schema versions with their URLs', async () => {

@@ -6,17 +6,7 @@ import { useBrowserSearch } from '@/hooks/useBrowserSearch'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import { parseCopiedRegion } from './regionCopy'
 import { RegionCopyReminder, RegionCopyReminderState } from './RegionCopyReminder'
-
-interface Cluster {
-  cloud_provider: string
-  cloud_region: string
-}
-
-interface RegionData {
-  name: string
-  dns: string
-  clusters: Cluster[]
-}
+import { FALLBACK_REGIONS, type RegionData } from './regions'
 
 interface RegionResponse {
   status: string
@@ -39,43 +29,10 @@ interface RegionContextType {
   notifyRegionCopy: (copiedText: string) => void
 }
 
-const FALLBACK_REGIONS: RegionData[] = [
-  {
-    name: 'us',
-    dns: 'us.signoz.cloud',
-    clusters: [
-      {
-        cloud_provider: 'gcp',
-        cloud_region: 'us-central1',
-      },
-    ],
-  },
-  {
-    name: 'eu',
-    dns: 'eu.signoz.cloud',
-    clusters: [
-      {
-        cloud_provider: 'gcp',
-        cloud_region: 'europe-central2',
-      },
-    ],
-  },
-  {
-    name: 'in',
-    dns: 'in.signoz.cloud',
-    clusters: [
-      {
-        cloud_provider: 'gcp',
-        cloud_region: 'asia-south1',
-      },
-    ],
-  },
-]
-
 const RegionContext = createContext<RegionContextType | undefined>(undefined)
 
 export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [regions, setRegions] = useState<RegionData[]>([])
+  const [regions, setRegions] = useState<RegionData[]>(FALLBACK_REGIONS)
   const [region, setRegionState] = useState<string | null>(null)
   const [cloudRegion, setCloudRegionState] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)

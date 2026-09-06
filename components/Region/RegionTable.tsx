@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { useRegion } from './RegionContext'
+import { regionTableRows } from './regions'
 import { Copy, CheckCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { AppTooltip } from '@/components/ui/AppTooltip'
@@ -72,7 +73,10 @@ const CopyCell = ({ text }: { text: string }) => {
 const RegionTable = () => {
   const { regions, isLoading } = useRegion()
 
-  if (isLoading) {
+  // The context seeds the built-in regions, so the skeleton only applies if
+  // there is genuinely nothing to draw. Gating on isLoading alone would leave
+  // the server-rendered HTML without a single region value in it.
+  if (isLoading && regions.length === 0) {
     return (
       <div className="w-full overflow-x-auto">
         <div className="h-32 w-full animate-pulse rounded bg-[var(--l3-background)]" />
@@ -80,15 +84,7 @@ const RegionTable = () => {
     )
   }
 
-  // Flatten the data for the table
-  const tableData = regions.flatMap((region) =>
-    region.clusters.map((cluster) => ({
-      name: region.name,
-      cloudRegion: cluster.cloud_region,
-      provider: cluster.cloud_provider,
-      dns: `https://ingest.${region.dns}`,
-    }))
-  )
+  const tableData = regionTableRows(regions)
 
   return (
     <div className="my-8 w-full overflow-x-auto">

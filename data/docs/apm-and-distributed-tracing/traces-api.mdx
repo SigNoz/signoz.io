@@ -1,5 +1,5 @@
 ---
-date: 2026-05-12
+date: 2026-09-03
 title: Traces API
 description: Use the SigNoz Traces API to search and aggregate trace data programmatically.
 doc_type: reference
@@ -22,6 +22,50 @@ Generate an API key using a [Service Account](https://signoz.io/docs/manage/admi
 ```bash
 SIGNOZ-API-KEY: {YOUR_API_KEY}
 ```
+
+## Confirm a service is sending spans
+
+Use this when you need to verify instrumentation without opening the UI, for example from a script or a CI job. It asks for one span from a service in the last 15 minutes.
+
+```bash defaultCollapsed
+SIGNOZ_URL="https://<workspace>.<region>.signoz.cloud"
+SIGNOZ_API_KEY="<your-api-key>"
+SERVICE_NAME="<service-name>"
+
+END=$(( $(date +%s) * 1000 ))
+START=$(( END - 900000 ))
+
+curl -s -X POST "$SIGNOZ_URL/api/v5/query_range" \
+  -H "SIGNOZ-API-KEY: $SIGNOZ_API_KEY" \
+  -H 'Content-Type: application/json' \
+  -d "{
+    \"start\": $START,
+    \"end\": $END,
+    \"requestType\": \"raw\",
+    \"compositeQuery\": {
+      \"queries\": [{
+        \"type\": \"builder_query\",
+        \"spec\": {
+          \"name\": \"A\",
+          \"signal\": \"traces\",
+          \"filter\": { \"expression\": \"service.name = '$SERVICE_NAME'\" },
+          \"limit\": 1
+        }
+      }]
+    }
+  }"
+```
+
+**Verify these values:**
+
+- `<workspace>`: Your workspace name, the first label of the URL you sign in to.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-api-key>`: An API key from a [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/). The ingestion key does not work here, because it authenticates writes only.
+- `<service-name>`: The value of `OTEL_SERVICE_NAME` in the application you instrumented.
+
+A non-empty result set means spans for that service reached SigNoz. An empty result means they did not, which is a different problem from an export error. See [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/).
+
+Note that the host is your workspace URL, not the ingestion endpoint.
 
 ## Operations
 
