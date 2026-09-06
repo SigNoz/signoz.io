@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { NOT_FOUND_PATHNAME_HEADER } from '@/components/not-found/constants'
 import { detectBotFromUserAgent, logEventServerSide } from './utils/logEvent'
 import {
+  buildDocsMarkdownAlternatePath,
   buildDocsMarkdownRewritePath,
   shouldRewriteDocsToMarkdown,
 } from '@/utils/docs/markdownRouting'
@@ -12,12 +13,16 @@ import { buildDocsOnboardingPath, isDocsPathname } from '@/utils/docs/onboarding
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import {
+  API_REFERENCE_MARKDOWN_PATH,
   buildApiReferenceOpenAPISpecRewritePath,
+  isApiReferenceIndexPath,
+  shouldRewriteApiReferenceIndexToMarkdown,
   shouldRewriteApiReferenceToOpenAPISpec,
 } from '@/utils/apiReferenceMarkdownRouting'
 import {
   AGENT_MARKDOWN_SELF_FETCH_HEADER,
   buildContentMarkdownRewritePath,
+  buildMarkdownAlternatePath,
   buildPageMarkdownRewritePath,
   servesMarkdownAlternate,
   shouldRewriteContentToMarkdown,
@@ -124,6 +129,10 @@ export function proxy(req: NextRequest) {
   const docsMarkdownRewrite =
     !isAgentMarkdownSelfFetch && shouldRewriteDocsToMarkdown(pathname, prefersMarkdown)
   const apiRefYamlRewrite = shouldRewriteApiReferenceToOpenAPISpec(pathname, prefersMarkdown, isBot)
+  const apiRefIndexMarkdownRewrite = shouldRewriteApiReferenceIndexToMarkdown(
+    pathname,
+    prefersMarkdown
+  )
   const contentMarkdownRewrite =
     !isAgentMarkdownSelfFetch &&
     isReadRequest &&
@@ -137,11 +146,13 @@ export function proxy(req: NextRequest) {
     ? buildDocsMarkdownRewritePath(pathname)
     : apiRefYamlRewrite
       ? buildApiReferenceOpenAPISpecRewritePath(pathname)
-      : contentMarkdownRewrite
-        ? buildContentMarkdownRewritePath(pathname)
-        : pageMarkdownRewrite
-          ? buildPageMarkdownRewritePath(pathname)
-          : null
+      : apiRefIndexMarkdownRewrite
+        ? API_REFERENCE_MARKDOWN_PATH
+        : contentMarkdownRewrite
+          ? buildContentMarkdownRewritePath(pathname)
+          : pageMarkdownRewrite
+            ? buildPageMarkdownRewritePath(pathname)
+            : null
 
   if (markdownRewritePath) {
     const rewriteUrl = req.nextUrl.clone()
@@ -158,8 +169,35 @@ export function proxy(req: NextRequest) {
 
   // URLs that serve both HTML and markdown representations must vary CDN/proxy
   // caches on the Accept header so one representation never poisons the other.
-  if (isDocsPathname(pathname) || servesMarkdownAlternate(pathname)) {
+  if (
+    isDocsPathname(pathname) ||
+    servesMarkdownAlternate(pathname) ||
+    isApiReferenceIndexPath(pathname)
+  ) {
     res.headers.append('Vary', 'Accept')
+  }
+
+  // Advertise the markdown representation so clients can discover it without
+  // parsing the page. A markdown response is the alternate, so it gets none.
+  // Parameterized URLs get none either: the markdown pipeline renders the
+  // pathname only, so the twin would not represent the requested resource.
+  const markdownAlternatePath =
+    markdownRewritePath || isAgentMarkdownSelfFetch || req.nextUrl.search !== ''
+      ? null
+      : shouldRewriteDocsToMarkdown(pathname, true)
+        ? buildDocsMarkdownAlternatePath(pathname)
+        : isApiReferenceIndexPath(pathname)
+          ? API_REFERENCE_MARKDOWN_PATH
+          : servesMarkdownAlternate(pathname)
+            ? buildMarkdownAlternatePath(pathname)
+            : null
+
+  if (markdownAlternatePath) {
+    const alternateUrl = new URL(markdownAlternatePath, req.nextUrl.origin)
+    res.headers.append(
+      'Link',
+      `<${alternateUrl.toString()}>; rel="alternate"; type="text/markdown"`
+    )
   }
 
   // Preserve request path for server-rendered global not-found suggestions.

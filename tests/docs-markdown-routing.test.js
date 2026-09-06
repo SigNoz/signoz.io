@@ -7,6 +7,7 @@ const {
   hasDocsMarkdownExtension,
   normalizeDocsSlugFromPathname,
   buildDocsMarkdownRewritePath,
+  buildDocsMarkdownAlternatePath,
   resolveDocsMarkdownSlug,
   slugFromParams,
 } = loadTsModule('utils/docs/markdownRouting.ts')
@@ -97,4 +98,15 @@ test('slugFromParams decodes catch-all segments without defaulting', async () =>
   assert.equal(slugFromParams(['install', 'docker']), 'install/docker')
   // Malformed percent-encoding should not throw
   assert.equal(slugFromParams(['foo%zz']), 'foo%zz')
+})
+
+test('buildDocsMarkdownAlternatePath returns the public .md URL, not the rewrite target', () => {
+  assert.equal(
+    buildDocsMarkdownAlternatePath('/docs/instrumentation/opentelemetry-python'),
+    '/docs/instrumentation/opentelemetry-python.md'
+  )
+  assert.equal(buildDocsMarkdownAlternatePath('/docs/introduction/'), '/docs/introduction.md')
+  // Docs root renders the introduction page.
+  assert.equal(buildDocsMarkdownAlternatePath('/docs'), '/docs/introduction.md')
+  assert.equal(buildDocsMarkdownAlternatePath('/docs/'), '/docs/introduction.md')
 })
