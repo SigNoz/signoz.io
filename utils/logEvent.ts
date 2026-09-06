@@ -14,25 +14,7 @@ export type LogEventPayload = {
 
 export type LogEventOptions = {
   queryParams?: Record<string, string>
-  sendToTunnel?: boolean
   transport?: 'fetch' | 'beacon'
-}
-
-const SITE_LOG_ENDPOINT = process.env.NEXT_PUBLIC_SITE_LOG_ENDPOINT || '/log'
-
-const POSTHOG_EVENT_NAMES = new Set([
-  'Website Page View',
-  'Website Page Leave',
-  'Website Click',
-  'Website Form Submitted',
-  'HubSpot Form Submitted',
-  'User Signed Up',
-  'User Associated with Company',
-  'experiment_viewed',
-])
-
-const shouldSendToPostHog = (payload: LogEventPayload) => {
-  return POSTHOG_EVENT_NAMES.has(payload.eventName)
 }
 
 const buildQueryString = (queryParams?: Record<string, string>) => {
@@ -53,19 +35,10 @@ const buildQueryString = (queryParams?: Record<string, string>) => {
   return serialized ? `?${serialized}` : ''
 }
 
-const sendBeaconRequest = (url: string, body: string) => {
-  if (typeof navigator === 'undefined' || typeof navigator.sendBeacon !== 'function') {
-    return false
-  }
-
-  return navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }))
-}
-
 const sendLogRequest = (url: string, body: string, transport?: LogEventOptions['transport']) => {
-  if (transport === 'beacon' && sendBeaconRequest(url, body)) {
-    return Promise.resolve()
-  }
-
+  // keepalive lets the request outlive page unload. navigator.sendBeacon cannot
+  // be used here: it forces credentials mode "include", which the cross-origin
+  // tunnel's wildcard CORS policy rejects.
   return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -78,29 +51,19 @@ export const logEvent = async (payload: LogEventPayload, options?: LogEventOptio
   const endpoint = process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT
 
   try {
+    if (!endpoint) {
+      console.warn('No tunnel endpoint configured for client-side logging')
+      return
+    }
+
     const queryString = buildQueryString(options?.queryParams)
     const timestampedPayload = {
       ...payload,
       timestamp: payload.timestamp || new Date().toISOString(),
     }
-
-    const requests: Promise<Response | void>[] = []
-
     const body = JSON.stringify(timestampedPayload)
 
-    if (options?.sendToTunnel !== false) {
-      if (endpoint) {
-        requests.push(sendLogRequest(`${endpoint}/log${queryString}`, body, options?.transport))
-      } else {
-        console.warn('No tunnel endpoint configured for client-side logging')
-      }
-    }
-
-    if (shouldSendToPostHog(payload)) {
-      requests.push(sendLogRequest(SITE_LOG_ENDPOINT, body, options?.transport))
-    }
-
-    await Promise.allSettled(requests)
+    await sendLogRequest(`${endpoint}/log${queryString}`, body, options?.transport)
   } catch (err) {
     console.error('Error logging event:', err)
   }
