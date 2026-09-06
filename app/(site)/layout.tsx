@@ -1,6 +1,7 @@
 import SectionContainer from '@/components/SectionContainer'
 import MainFooter from '@/components/mainFooter'
 import TopNav from '@/components/TopNav/TopNav'
+import SitePageFrame from '@/components/SitePageFrame'
 import { TooltipProviderWrapper } from '@/components/TooltipProviderWrapper'
 import { MobileDocsSidebarProvider } from '@/components/DocsSidebar/MobileDocsSidebarContext'
 
@@ -16,7 +17,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
               appending <code>.md</code> to documentation URLs.
             </div>
             <TopNav />
-            <main className="mb-auto mt-[48px] bg-[var(--l1-background)]">{children}</main>
+            <SitePageFrame>{children}</SitePageFrame>
             <MainFooter />
           </div>
         </SectionContainer>
