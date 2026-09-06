@@ -1,0 +1,512 @@
+---
+published_date: 2026-09-06
+title: Monitor Modal Functions and Sandboxes with OpenTelemetry
+meta_title: Modal Functions and Sandboxes OpenTelemetry Monitoring
+description: Monitor Modal with OpenTelemetry and SigNoz. Export Function and Sandbox logs, container metrics, and trace every sandbox an agent creates.
+doc_type: howto
+---
+
+## Overview
+
+<a href="https://modal.com" target="_blank" rel="noopener noreferrer nofollow">Modal</a> runs Python functions and Sandboxes on demand. A Sandbox is a container that Modal creates at runtime to execute untrusted or AI-generated code. Your agent creates a Sandbox, runs commands in it, reads the output, and terminates it.
+
+Two things go wrong in that loop, and each needs its own telemetry. The code inside the Sandbox fails or hangs, and the Sandbox itself starts slowly or runs out of memory.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Modal pushes to your endpoint from its own network, so two extra requirements apply:
+
+1. Your collector must accept connections from the internet.
+2. Your collector must serve HTTPS with a valid certificate. Modal rejects plain HTTP and self-signed certificates. Put a reverse proxy such as Caddy in front of port 4318 to terminate TLS.
+
+Set the push URL to the base URL of your collector, for example `https://signoz.example.com`. For endpoint and authentication differences, see [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- A SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- A <a href="https://modal.com/signup" target="_blank" rel="noopener noreferrer nofollow">Modal account</a>, with permission to edit workspace settings
+- The `modal` CLI, installed with `pip install modal` and authenticated with `modal setup`
+
+## How it works
+
+Modal offers three OpenTelemetry paths. They do not overlap, so pick the ones that answer your question.
+
+| Path | What you get | What it costs you |
+|---|---|---|
+| Modal OpenTelemetry integration | Function logs, Sandbox logs, and container metrics for the whole workspace | One workspace setting |
+| Tracing in the caller | Latency and failures for every `Sandbox.create` and every command you run | Code in the application that drives the Sandboxes |
+| Tracing inside the Sandbox | Spans and logs from the code your agent runs | Packages and a Secret in the Sandbox image |
+
+Start with the integration. It needs no code changes, and it covers every Function and every Sandbox in the workspace. It sends no traces, so add the second path when you need to know which command an agent ran, how long it took, and whether it failed.
+
+## Monitoring Modal
+
+<Tabs entityName="instrumentation">
+<TabItem value="No Code" label="No Code (Recommended)" default>
+
+The Modal OpenTelemetry integration sends Function logs, Sandbox logs, and container metrics to any backend that accepts OTLP over HTTP. You give Modal two things: the base URL of your SigNoz endpoint, and a Modal Secret that holds the authentication header.
+
+### Step 1: Create the Modal Secret
+
+Modal builds the request headers from a Secret. Each key starts with `OTEL_HEADER_`, and the rest of the key is the header name. Use the `authorization` header, which SigNoz accepts with the ingestion key as its value:
+
+```bash
+modal secret create signoz-otel \
+  OTEL_HEADER_authorization=<your-ingestion-key>
+```
+
+You can create the same Secret from the <a href="https://modal.com/secrets" target="_blank" rel="noopener noreferrer nofollow">Modal Secrets page</a> with the **OpenTelemetry** template.
+
+**Verify these values:**
+
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning" title="Why not the signoz-ingestion-key header?">
+Modal accepts only letters, numbers, and underscores in a Secret key name, in the CLI and in the dashboard. The usual SigNoz header `signoz-ingestion-key` contains hyphens, so `OTEL_HEADER_signoz-ingestion-key` fails with this error:
+
+```
+Secret key name 'OTEL_HEADER_signoz-ingestion-key' is invalid for environment
+variables. Only letters, numbers, and underscores are allowed.
+```
+
+Modal does not convert underscores back to hyphens, so `OTEL_HEADER_signoz_ingestion_key` reaches SigNoz as an unknown header and returns 401. The `authorization` header has no hyphen, and SigNoz authenticates it against the same ingestion key.
+</Admonition>
+
+### Step 2: Point Modal at your SigNoz endpoint
+
+1. Go to the <a href="https://modal.com/settings/metrics" target="_blank" rel="noopener noreferrer nofollow">Modal metrics settings page</a>.
+2. Set the OpenTelemetry push URL to `https://ingest.<region>.signoz.cloud`.
+3. Select the `signoz-otel` Secret that you created in Step 1.
+4. Save the changes.
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+
+<Figure
+  src="/img/docs/integrations/modal/modal-otel-config.webp"
+  alt="Modal OpenTelemetry integration settings with the SigNoz push URL and the signoz-otel credentials secret"
+  caption="The push URL and the credentials Secret on Modal's OpenTelemetry integration settings."
+/>
+
+<Admonition type="warning">
+Enter the base URL only. Modal appends the signal path itself, and it posts logs to `https://ingest.<region>.signoz.cloud/v1/logs`. A push URL that already ends in `/v1/logs` breaks the export.
+</Admonition>
+
+### Step 3: Test the connection
+
+Click **Send Test** on the metrics settings page. Modal sends one log line to your endpoint and reports the result.
+
+Open **Logs** in SigNoz and search for `Hello from Modal!`. The test log arrives with `service.name = modal.test_logs`. If you see it, the push URL and the ingestion key both work.
+
+Modal starts the export when you save the integration. Modal does not backfill older logs.
+
+</TabItem>
+<TabItem value="OpenTelemetry SDK" label="OpenTelemetry SDK">
+
+The integration tells you that a Sandbox ran. It does not tell you which command an agent executed, how long each step took, or which run failed. Add the OpenTelemetry SDK to the code that drives the Sandboxes to get that.
+
+This path instruments the caller, which is the script or service that calls `Sandbox.create`. The Sandbox itself needs no changes.
+
+### Step 1: Install the packages
+
+```bash
+pip install modal opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
+```
+
+### Step 2: Configure the exporter
+
+The exporter reads its endpoint and headers from the environment:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+### Step 3: Wrap the Sandbox calls in spans
+
+Create one span for the Sandbox and one span for each command it runs. Record the exit code, and mark the span as an error when the command fails:
+
+```python:agent.py minimap defaultCollapsed
+import modal
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.trace import Status, StatusCode
+
+provider = TracerProvider(
+    resource=Resource.create({"service.name": "modal-sandbox-runner"})
+)
+provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+trace.set_tracer_provider(provider)
+tracer = trace.get_tracer("modal.sandbox")
+
+
+def run_in_sandbox(app, command):
+    with tracer.start_as_current_span("sandbox.create") as span:
+        sandbox = modal.Sandbox.create(app=app, timeout=120)
+        span.set_attribute("modal.sandbox.id", sandbox.object_id)
+
+    try:
+        with tracer.start_as_current_span("sandbox.exec") as span:
+            span.set_attribute("modal.sandbox.id", sandbox.object_id)
+            span.set_attribute("modal.sandbox.command", " ".join(command))
+            process = sandbox.exec(*command)
+            output = process.stdout.read()
+            process.wait()
+            span.set_attribute("modal.sandbox.exit_code", process.returncode)
+            if process.returncode != 0:
+                span.set_status(
+                    Status(StatusCode.ERROR, f"exit code {process.returncode}")
+                )
+            return output
+    finally:
+        sandbox.terminate()
+
+
+if __name__ == "__main__":
+    app = modal.App.lookup("agent-sandboxes", create_if_missing=True)
+    with tracer.start_as_current_span("agent.run"):
+        print(run_in_sandbox(app, ["python", "-c", "print('hello')"]))
+        print(run_in_sandbox(app, ["python", "-c", "raise SystemExit(3)"]))
+    provider.shutdown()
+```
+
+`sandbox.object_id` is the Sandbox ID, such as `sb-QHSNZOpAvp2kkGxd9gVaG0`. The logs carry the same ID in their `sandbox_id` attribute, so this one attribute joins a trace to the output of that Sandbox.
+
+<Admonition type="warning" title="The create span does not measure startup">
+`Sandbox.create` returns as soon as Modal registers the Sandbox, before the container is scheduled and started. The `sandbox.create` span therefore times the create call, not the startup, and on a cold start the scheduling and startup time lands in the first `sandbox.exec` span instead. In testing, `sandbox.create` took under a second while a `sandbox.exec` running `print('hello')` took nearly three.
+
+To time startup on its own, give the Sandbox a <a href="https://modal.com/docs/guide/sandboxes#readiness-probes" target="_blank" rel="noopener noreferrer nofollow">readiness probe</a> and wait for it inside the span:
+
+```python
+with tracer.start_as_current_span("sandbox.create") as span:
+    sandbox = modal.Sandbox.create(
+        "python3", "-m", "http.server", "8080",
+        app=app,
+        readiness_probe=modal.Probe.with_tcp(8080),
+        timeout=120,
+    )
+    span.set_attribute("modal.sandbox.id", sandbox.object_id)
+    sandbox.wait_until_ready(timeout=120)
+```
+
+`wait_until_ready` needs a `readiness_probe`, and it raises if the Sandbox never becomes ready.
+</Admonition>
+
+Run the script:
+
+```bash
+python agent.py
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+Run a Modal Function or start a Sandbox first, so that Modal has telemetry to send.
+
+For the integration:
+
+1. Open **Logs** in SigNoz and filter on `service.name = modal.function-logs`. Your Function and Sandbox output arrives within a minute.
+2. Open **Metrics** in SigNoz and search for `modal.`. Query `modal.cpu.utilization` and group by `object_type` to see Functions and Sandboxes side by side.
+
+<Figure
+  src="/img/docs/integrations/modal/modal-logs.webp"
+  alt="Modal Function logs in the SigNoz Logs explorer, with one record expanded to show its app_name, container_id and function attributes"
+  caption="Modal logs in SigNoz. Every record carries the app, container, and workspace it came from."
+/>
+
+<Figure
+  src="/img/docs/integrations/modal/modal-metrics.webp"
+  alt="Modal container metrics listed in the SigNoz Metrics explorer, filtered to metric names containing modal"
+  caption="The modal.* metrics in the SigNoz Metrics explorer."
+/>
+
+For the SDK:
+
+1. Open **Traces** in SigNoz and filter on `service.name = modal-sandbox-runner`.
+2. Open the `agent.run` trace. It holds a `sandbox.create` span and a `sandbox.exec` span for each run.
+3. The second `sandbox.exec` span is red, with the status message `exit code 3`.
+4. Copy a `modal.sandbox.id` value and search **Logs** for `sandbox_id = '<that value>'` to read what the Sandbox printed.
+
+<Figure
+  src="/img/docs/integrations/modal/modal-traces.webp"
+  alt="SigNoz Traces explorer filtered to service.name modal-sandbox-runner, listing the agent.run span with two sandbox.create and two sandbox.exec spans and their durations"
+  caption="One agent.run trace in SigNoz, with a sandbox.create and a sandbox.exec span for each run."
+/>
+
+<Figure
+  src="/img/docs/integrations/modal/modal-trace-detail.webp"
+  alt="Flame graph and waterfall of the agent.run trace in SigNoz, five spans with the failing sandbox.exec span in red"
+  caption="The same trace opened up. The failed command shows as a red sandbox.exec span."
+/>
+
+<details>
+<ToggleHeading>
+## Run the Caller as a Modal Function
+</ToggleHeading>
+
+When the code that creates Sandboxes runs on Modal itself, pass the exporter settings through a Secret:
+
+```bash
+modal secret create signoz-otlp \
+  OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+  "OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>"
+```
+
+The Secret key restriction applies only to key names. Both names here are plain, and the hyphens in `signoz-ingestion-key` sit inside the value, which Modal accepts.
+
+Attach the Secret and install the packages in the image:
+
+```python
+image = modal.Image.debian_slim().pip_install(
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-otlp-proto-http",
+)
+
+@app.function(image=image, secrets=[modal.Secret.from_name("signoz-otlp")])
+def run_agent():
+    ...
+```
+
+<Admonition type="info" title="Do you need to flush spans before the container exits?" defaultCollapsed="true">
+A `BatchSpanProcessor` holds spans in memory and exports them on a timer, so a container that dies first can lose them.
+
+Modal stops a container gracefully in the common cases, which gives the SDK a chance to export. Spans buffered with a 60 second batch delay still reached SigNoz after a normal return, and after Modal cancelled the input on its timeout.
+
+Call `provider.force_flush()` in a <a href="https://modal.com/docs/guide/lifecycle-functions" target="_blank" rel="noopener noreferrer nofollow">`@modal.exit()`</a> handler to cover the rest. The handler gets 30 seconds, which is long enough for a flush.
+
+A flush at exit only helps when the process shuts down gracefully. `SIGKILL` runs no handler at all, so nothing you write can save the buffer. If the kernel out-of-memory killer takes your process, the buffered spans are gone. Raise the memory limit on the Function, or shorten `schedule_delay_millis` so less sits in the buffer at any moment.
+</Admonition>
+
+</details>
+
+<details>
+<ToggleHeading>
+## Trace the Code Inside a Sandbox
+</ToggleHeading>
+
+The spans in the caller time the Sandbox from outside. To see what the code inside it did, install the packages in the Sandbox image and pass the same Secret to `Sandbox.create`:
+
+```python
+image = modal.Image.debian_slim().pip_install(
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-otlp-proto-http",
+)
+
+sandbox = modal.Sandbox.create(
+    app=app,
+    image=image,
+    secrets=[modal.Secret.from_name("signoz-otlp")],
+    timeout=180,
+)
+```
+
+The code inside then configures a `TracerProvider` the same way the caller does, and calls `provider.force_flush()` before it finishes.
+
+<Admonition type="warning" title="Network restrictions block the exporter">
+A Sandbox reaches any public address by default, so the exporter works. If you restrict the network, allow the SigNoz endpoint as well:
+
+```python
+sandbox = modal.Sandbox.create(
+    app=app,
+    image=image,
+    secrets=[modal.Secret.from_name("signoz-otlp")],
+    outbound_domain_allowlist=["ingest.<region>.signoz.cloud"],
+)
+```
+
+With `block_network=True` the export fails, and the Sandbox prints this on stderr:
+
+```
+Failed to resolve 'ingest.<region>.signoz.cloud' ([Errno -3] Temporary failure
+in name resolution)
+```
+
+The command itself still exits 0, and `force_flush()` still returns `True`, so watch for the stderr message rather than the exit code.
+</Admonition>
+
+</details>
+
+<details>
+<ToggleHeading>
+## Attribute and Metric Reference
+</ToggleHeading>
+
+### Logs
+
+Function output and Sandbox output both arrive under `service.name = modal.function-logs`. The test log is the only exception, and it uses `service.name = modal.test_logs`.
+
+Every log record carries `app_id`, `app_name`, `container_id`, `environment`, `file_descriptor`, `level`, `workspace`, and `workspace_id`. The rest depend on what produced the log:
+
+| Attribute | Present on |
+|---|---|
+| `function_name`, `function_id`, `function_call_id`, `input_id` | Function logs |
+| `sandbox_id` | Sandbox logs |
+
+To read Sandbox output only, filter on `sandbox_id EXISTS`. To read one Sandbox, filter on the ID that `Sandbox.create` returned, for example `sandbox_id = 'sb-QHSNZOpAvp2kkGxd9gVaG0'`.
+
+`file_descriptor` is `1` for stdout and `2` for stderr. Modal sends both with `severity_text = INFO`, so use `file_descriptor = '2'` to find error output.
+
+### Metrics
+
+| Metric | What it measures |
+|---|---|
+| `modal.cpu.utilization` | CPU use of the container, where 1 means one full core |
+| `modal.memory.usage` | Memory use of the container, in bytes |
+| `modal.container.running` | 1 while the container runs |
+| `modal.container.terminations` | Count of container terminations |
+| `modal.gpu.compute.utilization` | GPU compute use, as a fraction between 0 and 1 |
+| `modal.gpu.memory.usage` | GPU memory use, in bytes |
+| `modal.gpu.clock` | GPU SM clock frequency, in MHz |
+| `modal.gpu.power.usage` | GPU power draw, in watts |
+| `modal.gpu.temperature` | GPU temperature, in degrees Celsius |
+| `modal.input_events.elapsed_time_us` | Time to handle one input, in microseconds |
+| `modal.input_events.input_queue_time_us` | Time an input waited in the queue, in microseconds |
+| `modal.input_events.coldstart_time_us` | Cold start time, in microseconds |
+| `modal.input_events.successes` | Count of inputs that succeeded |
+| `modal.input_events.total_inputs` | Count of inputs received |
+| `modal.function.pending_inputs` | Inputs that wait for a container |
+| `modal.function.running_inputs` | Inputs that a container handles now |
+
+Divide `modal.input_events.successes` by `modal.input_events.total_inputs` to get a success rate for a Function.
+
+Most metrics carry `app_id`, `app_name`, `container_id`, `environment_id`, `environment_name`, `object_type`, `workspace_id`, and `workspace_name`.
+
+`modal.container.terminations` is the exception. It drops `function_name`, `function_id`, and `environment_id`, and it adds `object_id` and `reason`. `reason` is `finished` when the container ended on its own and `USER_CANCELLED` when you stopped it, so group on it to separate normal exits from ones you caused. A filter on `function_name` returns nothing for this metric.
+
+`object_type` tells you what the container was doing. It takes three values:
+
+| Value | Container |
+|---|---|
+| `function` | Runs one of your Functions |
+| `sandbox` | Runs a Sandbox |
+| `image` | Builds an image, before any of your code runs |
+
+Functions and Sandboxes both report the container metrics. Only Functions report the `modal.input_events.*` and `modal.function.*` metrics, because Sandboxes take no inputs.
+
+<Admonition type="warning" title="function_name is spelled two ways">
+The container metrics and the `modal.input_events.*` metrics qualify the name with its module, as in `agent_worker.run`. The `modal.function.*` metrics use the bare name, as in `run`. You cannot join the two families on `function_name`, so filter each with the spelling that family uses.
+
+Sandboxes leave `function_name` and `function_id` empty on every metric.
+</Admonition>
+
+Every container reports the `modal.gpu.*` metrics, and the containers without a GPU report zero. Filter on a Function you know uses a GPU before you average these, or the idle containers drag the number down.
+
+`modal.cpu.utilization` counts cores rather than a share of the container. A value of 1 means one full core, so a container with several cores goes above 1, and a chart in percent shows more than 100.
+
+<Admonition type="info" title="Querying the input_events histograms" defaultCollapsed="true">
+The three `modal.input_events.*_time_us` metrics are delta histograms, so SigNoz stores each one as five separate series: `.bucket`, `.count`, `.sum`, `.min`, and `.max`. A search for the bare name returns nothing.
+
+Percentiles do not work on these metrics. Modal emits the histograms with a single `+Inf` bucket and no boundaries, so a p95 or p99 query returns no data.
+
+Use the other series instead:
+
+- Mean: divide the increase in `.sum` by the increase in `.count`.
+- Worst case: `.max`.
+- Best case: `.min`.
+- Volume: `.count`, which counts the cold starts or the inputs.
+</Admonition>
+
+<Admonition type="info" title="Attribute names differ between logs and metrics" defaultCollapsed="true">
+Modal names the same two fields differently in each signal. Logs use `environment` and `workspace`. Metrics use `environment_name` and `workspace_name`. A filter that works on logs fails on metrics, and the reverse.
+</Admonition>
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Modal reports 401 Unauthorized
+
+Modal shows an error like this one:
+
+```
+Bad Request: Failed to send logs to OTEL: HTTPStatusError("Client error
+'401 Unauthorized' for url 'https://ingest.<region>.signoz.cloud/v1/logs'")
+```
+
+- Likely cause: the Secret key is not `OTEL_HEADER_authorization`, or the ingestion key is wrong.
+- Fix: create the Secret again with the key `OTEL_HEADER_authorization`. Modal sends the header exactly as you name it, and SigNoz rejects any other header name.
+- Verify: click **Send Test** again, then search SigNoz Logs for `modal.test_logs`.
+
+### Modal rejects the Secret key name
+
+Modal shows this error when you save the Secret:
+
+```
+Secret key name 'OTEL_HEADER_signoz-ingestion-key' is invalid for environment
+variables. Only letters, numbers, and underscores are allowed.
+```
+
+- Likely cause: the header name contains a hyphen.
+- Fix: use `OTEL_HEADER_authorization`. See Step 1.
+- Verify: run `modal secret list` and confirm that `signoz-otel` appears.
+
+### The test log arrives but Function logs do not
+
+- Likely cause: nothing ran in Modal after you saved the integration.
+- Fix: run a Function or start a Sandbox. Modal exports only what runs after you turn the integration on.
+- Verify: filter SigNoz Logs on `service.name = modal.function-logs`.
+
+### A metric name returns no data
+
+- Likely cause: the metric is a histogram, or the object type does not report it.
+- Fix: for the `modal.input_events.*_time_us` metrics, add `.count`, `.sum`, `.min`, `.max`, or `.bucket` to the name. For `modal.input_events.*` and `modal.function.*`, make sure that a Function ran, because Sandboxes do not report them.
+- Verify: query `modal.container.running` grouped by `object_type`, which both Functions and Sandboxes report.
+
+### A filter on function_name returns nothing
+
+- Likely cause: the two metric families spell the name differently.
+- Fix: use the module-qualified name such as `modal_load.worker` for the container and `modal.input_events.*` metrics, and the bare name such as `worker` for the `modal.function.*` metrics.
+- Verify: query the metric grouped by `function_name` with no filter, and read the spelling off the result.
+
+### No traces arrive from the caller
+
+- Likely cause: the exporter has no endpoint, or the header name is wrong.
+- Fix: make sure that `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` are set in the environment that runs the code. The header name here is `signoz-ingestion-key`, not `authorization`.
+- Verify: filter SigNoz Traces on `service.name = modal-sandbox-runner`.
+
+### Audit logs do not appear
+
+- Likely cause: Modal restricts audit logs to the Enterprise plan.
+- Fix: contact Modal to enable audit logs for your workspace. Function logs, Sandbox logs, and container metrics work on every plan.
+- Verify: open the audit logs page in your Modal settings.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Limitations
+</ToggleHeading>
+
+- **No traces from Modal**: the integration sends logs and container metrics. Every span in SigNoz comes from code you instrument.
+- **Sandboxes report fewer metrics**: Sandboxes emit the container metrics, and nothing from `modal.input_events.*` or `modal.function.*`.
+- **No backfill**: the export covers what runs after you save the integration.
+- **Hyphens are not allowed in Secret key names**, which rules out the `signoz-ingestion-key` header. Use `authorization`.
+- **Modal's own collector is in beta**: Modal can route custom spans and metrics through `otlp-collector.modal.local`, but you must ask Modal to enable it for your workspace. Exporting straight to SigNoz needs no such request.
+
+</details>
+
+## Next Steps
+
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) on the error output of your Functions and Sandboxes.
+- [Set up metrics-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) on cold start time or on GPU memory use.
+- [Import the Modal dashboard](https://signoz.io/docs/dashboards/dashboard-templates/modal-dashboard/) for throughput, cold starts, backlog, CPU, memory, and GPU in one view.
+- [Instrument the rest of your Python code](https://signoz.io/docs/instrumentation/opentelemetry-python/) so the work around your Sandbox calls appears in the same trace.
+
+## Get Help
+
+<GetHelp />
