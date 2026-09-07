@@ -41,6 +41,7 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'HostingDecision',
   'KeyPointCallout',
   'Listicle',
+  'ListicleDirectory',
   'MCPInstallButton',
   'RegionTable',
   'TabItem',
@@ -291,6 +292,21 @@ const createTroubleshootingWizardStub = (): ComponentType<StubProps> => {
   return TroubleshootingWizardStub
 }
 
+const createListicleItemListStub = (listicleConfigs: Map<string, ListicleConfig>) =>
+  createItemListStub(
+    (props) => {
+      const name = getStringProp(props, 'name')
+      const config = name ? (listicleConfigs.get(name) ?? null) : null
+      if (!config) return []
+      return getListicleItems(config, { sectionId: getStringProp(props, 'defaultSection') })
+    },
+    (props) => {
+      const name = getStringProp(props, 'name')
+      const config = name ? (listicleConfigs.get(name) ?? null) : null
+      return config?.markdownTitle || 'Listicle'
+    }
+  )
+
 const createKnownComponentStubs = (
   listicleConfigs: Map<string, ListicleConfig>
 ): Record<KnownAgentMdxComponentName, ComponentType<StubProps>> => ({
@@ -456,19 +472,8 @@ const createKnownComponentStubs = (
     )
   },
   HostingDecision: createItemListStub([...HOSTING_DECISION_ITEMS], 'Hosting Options'),
-  Listicle: createItemListStub(
-    (props) => {
-      const name = getStringProp(props, 'name')
-      const config = name ? (listicleConfigs.get(name) ?? null) : null
-      if (!config) return []
-      return getListicleItems(config, { sectionId: getStringProp(props, 'defaultSection') })
-    },
-    (props) => {
-      const name = getStringProp(props, 'name')
-      const config = name ? (listicleConfigs.get(name) ?? null) : null
-      return config?.markdownTitle || 'Listicle'
-    }
-  ),
+  Listicle: createListicleItemListStub(listicleConfigs),
+  ListicleDirectory: createListicleItemListStub(listicleConfigs),
 })
 
 export const extractMdxComponentNames = (rawMdx: string): string[] => {
@@ -494,7 +499,7 @@ export const extractMdxComponentNames = (rawMdx: string): string[] => {
   return Array.from(names)
 }
 
-const LISTICLE_NAME_PATTERN = /<Listicle\s[^>]*name=["']([^"']+)["']/g
+const LISTICLE_NAME_PATTERN = /<Listicle(?:Directory)?\s[^>]*name=["']([^"']+)["']/g
 
 const extractListicleNames = (rawMdx: string): string[] => {
   const names = new Set<string>()
