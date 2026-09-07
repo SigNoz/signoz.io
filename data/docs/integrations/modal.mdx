@@ -122,12 +122,16 @@ The exporter reads its endpoint and headers from the environment:
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<your-service-name>"
 ```
 
 **Verify these values:**
 
 - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<your-service-name>`: The name this code appears under in SigNoz, such as `modal-sandbox-runner`.
+
+The Python SDK reads all three, so the code below passes no endpoint, header, or service name of its own.
 
 ### Step 3: Wrap the Sandbox calls in spans
 
@@ -137,14 +141,12 @@ Create one span for the Sandbox and one span for each command it runs. Record th
 import modal
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace import Status, StatusCode
 
-provider = TracerProvider(
-    resource=Resource.create({"service.name": "modal-sandbox-runner"})
-)
+# The endpoint, headers, and service name all come from the environment
+provider = TracerProvider()
 provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
 trace.set_tracer_provider(provider)
 tracer = trace.get_tracer("modal.sandbox")
@@ -234,7 +236,7 @@ For the integration:
 
 For the SDK:
 
-1. Open **Traces** in SigNoz and filter on `service.name = modal-sandbox-runner`.
+1. Open **Traces** in SigNoz and filter on the `service.name` you set in `OTEL_SERVICE_NAME`. The screenshots below use `modal-sandbox-runner`.
 2. Open the `agent.run` trace. It holds a `sandbox.create` span and a `sandbox.exec` span for each run.
 3. The second `sandbox.exec` span is red, with the status message `exit code 3`.
 4. Copy a `modal.sandbox.id` value and search **Logs** for `sandbox_id = '<that value>'` to read what the Sandbox printed.
@@ -261,10 +263,11 @@ When the code that creates Sandboxes runs on Modal itself, pass the exporter set
 ```bash
 modal secret create signoz-otlp \
   OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
-  "OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>"
+  "OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>" \
+  OTEL_SERVICE_NAME=<your-service-name>
 ```
 
-The Secret key restriction applies only to key names. Both names here are plain, and the hyphens in `signoz-ingestion-key` sit inside the value, which Modal accepts.
+The Secret key restriction applies only to key names. All three names here are plain, and the hyphens in `signoz-ingestion-key` sit inside the value, which Modal accepts.
 
 Attach the Secret and install the packages in the image:
 
@@ -477,7 +480,13 @@ variables. Only letters, numbers, and underscores are allowed.
 
 - Likely cause: the exporter has no endpoint, or the header name is wrong.
 - Fix: make sure that `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` are set in the environment that runs the code. The header name here is `signoz-ingestion-key`, not `authorization`.
-- Verify: filter SigNoz Traces on `service.name = modal-sandbox-runner`.
+- Verify: filter SigNoz Traces on the `service.name` you set.
+
+### Traces arrive under the name unknown_service
+
+- Likely cause: `OTEL_SERVICE_NAME` is not set in the environment that runs the code.
+- Fix: export it, or pass the name in code with `TracerProvider(resource=Resource.create({"service.name": "<your-service-name>"}))`. A name passed in code wins over the environment variable.
+- Verify: filter SigNoz Traces on your service name and confirm that `unknown_service` stops appearing.
 
 ### Audit logs do not appear
 
