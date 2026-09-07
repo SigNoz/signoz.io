@@ -291,6 +291,171 @@ test('flags markdown-preferring bots with x-prefers-markdown', () => {
   assert.equal(res.headers.get('x-prefers-markdown'), 'true')
 })
 
+test('logs Website Page View via tunnel for human markdown rewrites', async () => {
+  const originalFetch = global.fetch
+  const originalTunnel = process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT
+  process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT = 'https://tunnel.example.com'
+
+  let pageViewRequest = null
+  let resolveFetch
+  const fetchCalled = new Promise((resolve) => {
+    resolveFetch = resolve
+  })
+
+  global.fetch = async (url, init) => {
+    if (String(url).includes('tunnel.example.com/log')) {
+      pageViewRequest = { body: JSON.parse(init.body) }
+      resolveFetch()
+    }
+    return { ok: true }
+  }
+
+  try {
+    run('/pricing.md', { headers: { 'user-agent': HUMAN_UA } })
+    await Promise.race([
+      fetchCalled,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('fetch timeout')), 1000)),
+    ])
+
+    assert.ok(pageViewRequest)
+    assert.equal(pageViewRequest.body.eventName, 'Website Page View')
+    assert.equal(pageViewRequest.body.attributes.pageLocation, '/pricing.md')
+    assert.equal(pageViewRequest.body.attributes.custom_prefers_markdown, true)
+    assert.equal(pageViewRequest.body.attributes.custom_content_type, 'text/markdown')
+    assert.equal(pageViewRequest.body.attributes.custom_source, 'server')
+  } finally {
+    global.fetch = originalFetch
+    if (originalTunnel === undefined) {
+      delete process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT
+    } else {
+      process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT = originalTunnel
+    }
+  }
+})
+
+test('logs Bot Page Request with custom_prefers_markdown for .md suffix via tunnel', async () => {
+  const originalFetch = global.fetch
+  const originalTunnel = process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT
+  process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT = 'https://tunnel.example.com'
+
+  let botRequest = null
+  let resolveFetch
+  const fetchCalled = new Promise((resolve) => {
+    resolveFetch = resolve
+  })
+
+  global.fetch = async (url, init) => {
+    if (String(url).includes('tunnel.example.com/log')) {
+      botRequest = { body: JSON.parse(init.body) }
+      resolveFetch()
+    }
+    return { ok: true }
+  }
+
+  try {
+    run('/pricing.md', { headers: { 'user-agent': 'curl/8.0' } })
+    await Promise.race([
+      fetchCalled,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('fetch timeout')), 1000)),
+    ])
+
+    assert.equal(botRequest.body.eventName, 'Bot Page Request')
+    assert.equal(botRequest.body.attributes.custom_prefers_markdown, true)
+    assert.equal(botRequest.body.attributes.pageLocation, '/pricing.md')
+  } finally {
+    global.fetch = originalFetch
+    if (originalTunnel === undefined) {
+      delete process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT
+    } else {
+      process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT = originalTunnel
+    }
+  }
+})
+
+/** Capture tunnel /log payloads emitted while fn runs. */
+const captureTunnelEvents = async (fn) => {
+  const originalFetch = global.fetch
+  const originalTunnel = process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT
+  process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT = 'https://tunnel.example.com'
+
+  const events = []
+  global.fetch = async (url, init) => {
+    if (String(url).includes('tunnel.example.com/log')) {
+      events.push(JSON.parse(init.body))
+    }
+    return { ok: true }
+  }
+
+  try {
+    fn()
+    // give queued waitUntil logging a moment to flush before asserting
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    return events
+  } finally {
+    global.fetch = originalFetch
+    if (originalTunnel === undefined) {
+      delete process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT
+    } else {
+      process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT = originalTunnel
+    }
+  }
+}
+
+test('does not log server page views for browser HTML requests', async () => {
+  const events = await captureTunnelEvents(() => {
+    run('/pricing', { headers: { 'user-agent': HUMAN_UA } })
+    run('/docs/introduction', { headers: { 'user-agent': HUMAN_UA } })
+  })
+
+  assert.deepEqual(events, [])
+})
+
+test('logs a server page view for browser docs .md requests alongside the rewrite', async () => {
+  let res
+  const events = await captureTunnelEvents(() => {
+    res = run('/docs/introduction.md', { headers: { 'user-agent': HUMAN_UA } })
+  })
+
+  assert.equal(rewriteTarget(res), '/api/docs-markdown/introduction')
+  assert.equal(events.length, 1)
+  assert.equal(events[0].eventName, 'Website Page View')
+  assert.equal(events[0].attributes.pageLocation, '/docs/introduction.md')
+  assert.equal(events[0].attributes.pageType, 'Docs Page')
+  assert.equal(events[0].attributes.custom_prefers_markdown, true)
+})
+
+test('logs a server page view for browser Accept: text/markdown requests', async () => {
+  const events = await captureTunnelEvents(() => {
+    run('/blog/some-post', {
+      headers: { 'user-agent': HUMAN_UA, accept: 'text/markdown' },
+    })
+  })
+
+  assert.equal(events.length, 1)
+  assert.equal(events[0].eventName, 'Website Page View')
+  assert.equal(events[0].attributes.pageLocation, '/blog/some-post')
+  assert.equal(events[0].attributes.pageType, 'Blog Page')
+  assert.equal(events[0].attributes.custom_source, 'server')
+})
+
+test('does not log a server page view for HEAD markdown requests', async () => {
+  const events = await captureTunnelEvents(() => {
+    run('/pricing.md', { method: 'HEAD', headers: { 'user-agent': HUMAN_UA } })
+  })
+
+  assert.deepEqual(events, [])
+})
+
+test('bot requests without markdown intent log custom_prefers_markdown false', async () => {
+  const events = await captureTunnelEvents(() => {
+    run('/pricing', { headers: { 'user-agent': 'curl/8.0' } })
+  })
+
+  assert.equal(events.length, 1)
+  assert.equal(events[0].eventName, 'Bot Page Request')
+  assert.equal(events[0].attributes.custom_prefers_markdown, false)
+})
+
 test('does not set bot headers for regular browser requests', () => {
   const res = run('/pricing', { headers: { 'user-agent': HUMAN_UA } })
   assert.equal(res.headers.get('x-bot-detected'), null)
