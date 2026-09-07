@@ -8,9 +8,7 @@ doc_type: howto
 
 ## Overview
 
-<a href="https://e2b.dev/" target="_blank" rel="noopener noreferrer nofollow">E2B</a> runs AI-generated code in an isolated Linux microVM. Your agent creates a sandbox, runs code in it, reads the output, and kills it. A sandbox is ephemeral, so the execution that failed is gone before you can open a terminal.
-
-The E2B SDK gives you part of this for free. It sends its calls through `pyqwest`, an HTTP client that depends on `opentelemetry-api` and emits its own spans and metrics. Configure an OpenTelemetry SDK in your process and those spans start arriving, with no instrumentation package to install. They describe HTTP requests rather than sandboxes: the span name is the HTTP method, the sandbox id sits inside `url.full`, and nothing records how your code exited. The wrapper in Step 3 adds that meaning, and it gives the free spans a parent.
+<a href="https://e2b.dev/" target="_blank" rel="noopener noreferrer nofollow">E2B</a> runs AI-generated code in an isolated Linux microVM. Your agent creates a sandbox, runs code in it, reads the output, and kills it. Two things go wrong in that loop, and each needs its own telemetry: the code inside the sandbox fails or hangs, and the sandbox lifecycle itself turns slow or errors out. A sandbox is ephemeral, so the execution that failed is gone before you can open a terminal, and nothing records how it exited until you instrument it. This page covers both halves. You end up with the execution that failed and the reason, the share of request latency that came from E2B rather than your own code, and the sandboxes that stayed alive long enough to matter on a per-second bill.
 
 <Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -34,7 +32,7 @@ E2B produces telemetry through five paths. They do not overlap, so pick the ones
 | Sandbox lifecycle events | Create, update, and kill events as log records | A poller over the events API, or a webhook receiver |
 | E2B OTel telemetry export | `e2b.*` metrics and `service_name: e2b` logs, with no code at all | An Enterprise plan and an onboarding request |
 
-Start with the first path. It covers every sandbox your application creates, including the ones whose code a model wrote. The rest are collapsed below. All five use <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and export to the same SigNoz endpoint.
+Start with the first path. It covers every sandbox your application creates, including the ones whose code a model wrote. The SDK also reports some HTTP telemetry by itself, with no code and no instrumentation package, which [What the SDK Emits on Its Own](#what-the-sdk-emits-on-its-own) covers. The rest are collapsed below. All five use <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and export to the same SigNoz endpoint.
 
 E2B sandboxes have outbound internet access by default, so you need no firewall rule before an exporter reaches SigNoz. If you set `allow_internet_access=False` or a `network` deny rule, read [The sandbox cannot reach SigNoz](#the-sandbox-cannot-reach-signoz) first.
 
@@ -70,7 +68,7 @@ export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 
 Create the providers once, at startup:
 
-```python:telemetry.py minimap defaultCollapsed
+```python:telemetry.py
 import atexit
 
 from opentelemetry import trace
@@ -168,7 +166,7 @@ Do not put `execution.logs.stdout` or the command output on a span. Output is un
 
 ### Step 4: Run your orchestrator
 
-```python:run_agent.py defaultCollapsed
+```python:run_agent.py
 from traced_sandbox import traced_command, traced_run_code, traced_sandbox
 
 with traced_sandbox(timeout=120) as sandbox:
@@ -208,8 +206,8 @@ Each trace also holds client spans named `POST` and `DELETE` that you did not cr
 
 <Figure
   src="/img/docs/llm/e2b/e2b-trace-detail.webp"
-  alt="A SigNoz trace showing an e2b sandbox session root span with run_code and commands.run children, and the span details panel listing the e2b attributes"
-  caption="One sandbox session end to end. The selected run_code span failed, and its panel carries e2b.sandbox.id, e2b.execution.error.name, and e2b.execution.error.value."
+  alt="A SigNoz trace showing an e2b sandbox session root span with run_code and commands.run children, and the span details panel listing the e2b attributes for a ZeroDivisionError"
+  caption="The run_agent.py session above, end to end. The selected run_code span is the 1 / 0 execution, and its panel carries e2b.sandbox.id alongside e2b.execution.error.name and e2b.execution.error.value."
 />
 
 <details>
