@@ -125,6 +125,16 @@ function appRouteExists(route, appRoutes) {
   return dynamicPatterns.some((re) => re.test(route))
 }
 
+// Returns true if filePath existed in the repo at the given git ref.
+function existedAtRef(ref, filePath) {
+  try {
+    execSync(`git cat-file -e ${ref}:"${filePath}"`, { stdio: 'ignore' })
+    return true
+  } catch {
+    return false
+  }
+}
+
 function collectDocMoves(baseRef) {
   let mergeBase
   try {
@@ -193,6 +203,13 @@ function collectDocMoves(baseRef) {
     console.error(error.message)
     process.exit(1)
   }
+
+  // A doc added and then renamed/deleted in the same PR never had a live URL, so it needs
+  // no redirect. Only paths that existed at the merge base do.
+  const staleRenames = [...renameMap.keys()].filter((p) => !existedAtRef(mergeBase, p))
+  staleRenames.forEach((p) => renameMap.delete(p))
+  const staleDeletions = [...deletedSet].filter((p) => !existedAtRef(mergeBase, p))
+  staleDeletions.forEach((p) => deletedSet.delete(p))
 
   const renames = Array.from(renameMap.entries()).map(([oldPath, newPath]) => ({
     oldPath,

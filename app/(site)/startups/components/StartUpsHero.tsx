@@ -25,7 +25,7 @@ export default function StartUpsHero({ startUpsData }: StartUpsHeroProps) {
           {/* Left column: text content */}
           <div className="max-w-xl">
             <h1 className="mb-6 text-4xl font-bold md:text-5xl">
-              <span className="text-gradient">{startUpsData.TITLE}</span>
+              <span className="text-gradient">{startUpsData.HERO_TITLE}</span>
             </h1>
             <h2 className="mb-8 text-xl text-signoz_vanilla-100 md:text-2xl">
               {startUpsData.DESC}
@@ -49,7 +49,7 @@ export default function StartUpsHero({ startUpsData }: StartUpsHeroProps) {
                 </div>
               </div>
               <div className="mt-2 text-sm text-signoz_vanilla-100/80">
-                Includes Data Sent till $19USD
+                Includes $19 of SigNoz Cloud telemetry usage for the first 12 months
               </div>
             </div>
 

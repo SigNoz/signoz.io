@@ -16,14 +16,15 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-signoz_robin-500 text-white hover:bg-signoz_robin-600 active:bg-signoz_robin-700',
+          'bg-[var(--accent-primary)] text-[var(--base-white)] hover:bg-[color-mix(in_srgb,var(--accent-primary)_80%,var(--base-black))] active:bg-[color-mix(in_srgb,var(--accent-primary)_65%,var(--base-black))]',
         outline:
-          'border border-signoz_robin-500 bg-transparent text-signoz_robin-500 hover:bg-signoz_robin-500/10',
+          'border border-[var(--accent-primary)] bg-transparent text-[var(--accent-primary)] hover:bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)]',
         secondary:
-          'bg-signoz_ink-400 button-background text-signoz_vanilla-300 hover:bg-signoz_ink-300', // TODO: the bg color doesn't match any variable in tailwind, check design guidelines
-        tertiary: 'bg-signoz_vanilla-200 text-signoz_ink-200 hover:bg-signoz_vanilla-300',
-        ghost: 'bg-transparent hover:bg-signoz_ink-400',
-        link: 'text-signoz_robin-500',
+          'bg-[var(--secondary-background)] text-[var(--secondary-foreground)] hover:bg-[var(--secondary-background-hover)]',
+        tertiary:
+          'bg-[var(--l1-foreground)] text-[var(--l1-background)] hover:bg-[color-mix(in_srgb,var(--l1-foreground)_90%,var(--l1-background))]',
+        ghost: 'bg-transparent hover:bg-[var(--ghost-background-hover)]',
+        link: 'text-[var(--accent-primary)]',
       },
       size: {
         default: 'h-10 px-4 py-2',
@@ -49,9 +50,9 @@ export const buttonVariants = cva(
 // -----------------------------------------------------------------------------
 const LEGACY_VARIANT_TO_STYLES_MAP = {
   legacyPrimary:
-    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-signoz_robin-500 text-center font-medium leading-5 !text-white !no-underline outline-none hover:!text-white',
+    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-[var(--accent-primary)] text-center font-medium leading-5 !text-[var(--base-white)] !no-underline outline-none hover:!text-[var(--base-white)]',
   legacySecondary:
-    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 button-background text-center font-medium leading-5 !text-white !no-underline outline-none hover:!text-white',
+    'h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-[var(--l2-background)] text-center font-medium leading-5 !text-[var(--l1-foreground)] !no-underline outline-none hover:!text-[var(--l1-foreground)]',
 } as const
 
 type ButtonElementType = React.ElementType
@@ -176,9 +177,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const splitIconClass =
       mappedVariant === 'default'
-        ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-signoz_robin-500 !p-0 transition-colors duration-200 hover:!bg-signoz_robin-400 active:!bg-signoz_robin-600'
+        ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-[var(--accent-primary)] !p-0 transition-colors duration-200 hover:!bg-[var(--accent-primary-hover)] active:!bg-[color-mix(in_srgb,var(--accent-primary)_80%,var(--base-black))]'
         : mappedVariant === 'secondary'
-          ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !p-0 transition-colors duration-200 hover:!bg-signoz_ink-300'
+          ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !p-0 transition-colors duration-200 hover:!bg-[var(--secondary-background-hover)]'
           : ''
     const shouldRenderSplitIcon = !unstyled && withIcon && Boolean(splitIconClass) && !asChild
     const resolvedClassName = unstyled
@@ -212,8 +213,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             </span>
             <span
               className={cn(
-                'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-white',
-                mappedVariant === 'default' ? '!flex !bg-signoz_robin-400' : '!flex'
+                'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-[var(--base-white)]',
+                mappedVariant === 'default' ? '!flex !bg-[var(--accent-primary-hover)]' : '!flex'
               )}
               aria-hidden="true"
             >

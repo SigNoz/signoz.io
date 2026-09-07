@@ -66,7 +66,7 @@ export const CMS_SITEMAP_SECTIONS = [
   { section: 'blog', label: 'Blog' },
   { section: 'guides', label: 'Guides' },
   { section: 'faqs', label: 'FAQs' },
-  { section: 'case-study', label: 'Case Studies' },
+  { section: 'customers', label: 'Case Studies' },
   { section: 'opentelemetry', label: 'OpenTelemetry' },
   { section: 'comparisons', label: 'Comparisons' },
 ] as const
@@ -143,7 +143,7 @@ export const buildCmsContentSitemapMarkdown = (content: CmsContentForSitemap): s
     blog: content.blogs,
     guides: content.guides,
     faqs: content.faqs,
-    'case-study': content.caseStudies,
+    customers: content.caseStudies,
     opentelemetry: content.opentelemetries,
     comparisons: content.comparisons,
   }

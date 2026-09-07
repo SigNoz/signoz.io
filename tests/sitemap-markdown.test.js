@@ -86,7 +86,7 @@ test('buildCmsContentSitemapMarkdown groups sections and filters excluded blogs'
 
   // Section index links survive even when a collection is missing or empty.
   assert.equal(markdown.includes('- [FAQs](https://signoz.io/faqs/)'), true)
-  assert.equal(markdown.includes('- [Case Studies](https://signoz.io/case-study/)'), true)
+  assert.equal(markdown.includes('- [Case Studies](https://signoz.io/customers/)'), true)
 })
 
 test('sitemap route constants stay non-empty and slash-free at the edges', () => {

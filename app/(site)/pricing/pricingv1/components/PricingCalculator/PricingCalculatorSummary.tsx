@@ -46,7 +46,7 @@ export const PricingCalculatorSummary: React.FC<PricingCalculatorSummaryProps> =
             className="inline-flex items-center justify-center rounded-md bg-signoz_ink-400 px-5 py-2.5 text-sm text-white transition-colors hover:bg-signoz_ink-300"
             rel="noreferrer"
           >
-            SigNoz saves you up to 80% on datadog bills.
+            SigNoz Cloud saves you up to 80% on Datadog bills.
             <ArrowUpRight size={18} className="ml-1 inline" />
           </a>
         </div>

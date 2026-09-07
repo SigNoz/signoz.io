@@ -1,5 +1,5 @@
 ---
-date: 2026-08-14
+date: 2026-08-25
 title: Reduce Metric Sample Volume and Cardinality
 description: Drop unused metrics, aggregate high-cardinality labels, and tune temporality and collection interval to reduce metric sample volume in SigNoz.
 doc_type: howto
@@ -100,16 +100,52 @@ Sample count scales directly with how often each time series is emitted. A metri
 export OTEL_METRIC_EXPORT_INTERVAL=60000  # raise this if your service currently overrides it lower
 ```
 
-**Collector receivers** (for example `hostmetrics`): the receiver's own default `collection_interval` is `1m`. If your config explicitly sets a shorter interval, raise it:
+**Collector receivers:** check the interval your deployment actually ships. It is often shorter than the receiver's upstream default, so a config that sets nothing is not necessarily running at the default.
 
-```yaml
+The SigNoz `k8s-infra` Helm chart sets every infrastructure preset to `30s`. Whether that is more or less than the receiver's own default depends on the receiver:
+
+| Preset | Chart default | Upstream receiver default |
+| --- | --- | --- |
+| `presets.hostMetrics.collectionInterval` | `30s` | `1m` (`hostmetrics`) |
+| `presets.kubeletMetrics.collectionInterval` | `30s` | `10s` (`kubeletstats`) |
+| `presets.clusterMetrics.collectionInterval` | `30s` | `10s` (`k8scluster`) |
+
+Host metrics are the case that costs you: the chart halves the interval, so it produces twice the samples of an unconfigured Collector. For kubelet and cluster metrics the chart is already three times cheaper than the upstream default.
+
+To halve infrastructure metric volume, raise all three to `60s` in your `override-values.yaml`:
+
+```yaml:override-values.yaml
+presets:
+  hostMetrics:
+    collectionInterval: 60s
+  kubeletMetrics:
+    collectionInterval: 60s
+  clusterMetrics:
+    collectionInterval: 60s
+```
+
+Apply the updated values to your existing release:
+
+```bash
+helm upgrade <release-name> signoz/k8s-infra -n <namespace> -f override-values.yaml
+```
+
+Verify these values:
+
+- `<release-name>`: Your existing `k8s-infra` Helm release name
+- `<namespace>`: The namespace where `k8s-infra` is installed
+
+If you run the Collector directly rather than through the chart, set the interval on the receiver:
+
+```yaml:otel-collector-config.yaml
 receivers:
+  # On Collector v0.151.0 and newer, use "host_metrics" to avoid a deprecation warning.
   hostmetrics:
-    collection_interval: 60s # raise this if your config currently sets a shorter interval
+    collection_interval: 60s
 ```
 
 <Admonition type="warning">
-Increasing the interval reduces the resolution of rate-based queries (for example `rate()` over a short window) and delays how quickly a spike shows up on dashboards or triggers an alert. Do not raise the interval on metrics feeding low-latency alerts.
+Moving the chart presets from `30s` to `60s` roughly halves the samples those receivers produce, and it coarsens the resolution of your node metrics by the same factor. A CPU or memory spike shorter than one minute can fall between two scrapes. Rate-based queries (for example `rate()` over a short window) lose precision, and alerts on node metrics take longer to fire. Keep the shorter interval on any metric that feeds a low-latency alert.
 </Admonition>
 
 ## Validate Your Changes
@@ -121,12 +157,14 @@ The Cost Meter Dashboard uses `signoz.meter.*` metrics which aggregate hourly. C
 To confirm the volume reduction:
 
 1. Navigate to **Metrics**. In the list view, verify that unused metrics you dropped no longer appear, or that the time series count for your target metric has reduced.
-2. Check the **Cost Meter Dashboard** after an hour to confirm the `datapoint.count` trend has dropped.
+2. Check the [Cost Meter Dashboard](https://signoz.io/docs/cost-meter/cost-meter-dashboard/) after an hour to confirm the `datapoint.count` trend has dropped.
 
 ## Next Steps
 
 - Configure [Cost Meter Alert](https://signoz.io/docs/cost-meter/alerts/) to be notified when ingestion volume crosses your expected threshold.
 - Read [Understanding Metrics Billing and Reducing Costs](https://signoz.io/docs/metrics-management/reducing-costs/) for how cardinality maps to your bill and additional cost-driver examples.
+- Set a hard cap with [Ingestion Limits](https://signoz.io/docs/cost-control/ingestion-limits/) so the volume you just removed cannot creep back.
+- Return to [Cost Control](https://signoz.io/docs/cost-control/overview/) to optimize the other signals.
 
 ## Get Help
 

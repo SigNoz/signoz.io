@@ -1,7 +1,7 @@
 import React from 'react'
 
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
-import { ARTICLE_TOC_RAIL_CLASS } from '@/components/TableOfContents/tocScrollFade'
+import { DOC_TOC_CLASSES } from '@/components/DocsTOC/docLayoutClasses'
 import ArticleMetaDetailsCard from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
 import OpenTelemetryTocClient from './open-telemetry-hub/OpenTelemetryTocClient'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
@@ -80,15 +80,15 @@ export default function OpenTelemetryHubContent({
   return (
     <>
       <div
-        className={`box-border w-full min-w-0 max-w-full flex-1 lg:px-4 ${!showSidebar ? 'mx-auto max-w-ot-narrow' : ''}`}
+        className={`box-border min-w-0 flex-[1_1_auto] ${!showSidebar ? 'mx-auto max-w-ot-narrow' : ''}`}
       >
         {(showSidebar || hasToc) && <div id={MOBILE_TRIGGER_ID} className="mb-4 lg:hidden" />}
 
         {breadcrumbs && <Breadcrumb crumbs={breadcrumbs} />}
-        <article className="prose prose-slate w-full min-w-0 max-w-full break-words px-3 py-6 dark:prose-invert">
+        <article className="prose prose-slate w-full min-w-0 max-w-full break-words py-6 dark:prose-invert">
           <h1 className="text-3xl font-bold">{title}</h1>
           {(formattedUpdatedDate || readingTimeText) && (
-            <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
+            <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-[var(--l2-foreground)] lg:hidden">
               {formattedUpdatedDate && <span>Last Updated: {formattedUpdatedDate}</span>}
               {readingTimeText && <span>{readingTimeText}</span>}
             </div>
@@ -112,7 +112,7 @@ export default function OpenTelemetryHubContent({
       </div>
 
       {(hasMetaInfo || hasToc) && (
-        <aside className={ARTICLE_TOC_RAIL_CLASS} aria-label="On this page navigation">
+        <aside className={DOC_TOC_CLASSES} aria-label="On this page navigation">
           <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden">
             {metaInfoCard && <div className="shrink-0">{metaInfoCard}</div>}
             {hasToc && <OpenTelemetryTocClient toc={toc} />}

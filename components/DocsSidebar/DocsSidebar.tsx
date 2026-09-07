@@ -12,6 +12,11 @@ import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import { useBrowserSearch } from '@/hooks/useBrowserSearch'
 import NewBadge from './NewBadge'
 import SidebarRegionSelector from './SidebarRegionSelector'
+import {
+  DOC_SIDENAV_NAV_CLASSES,
+  DOC_SIDENAV_PINNED_CLASSES,
+  DOC_SIDENAV_SCROLL_BASE_CLASSES,
+} from '@/components/DocsTOC/docLayoutClasses'
 
 interface DocsSidebarProps {
   onNavItemClick?: () => void
@@ -184,7 +189,13 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
               <MetronomeIcon size={12} />
             </div>
           )}
-          <Tooltip content={doc.label} side="right" delayDuration={500} sideOffset={12}>
+          <Tooltip
+            content={doc.label}
+            side="right"
+            delayDuration={500}
+            sideOffset={12}
+            contentClassName="max-w-[260px]"
+          >
             <span className="min-w-0 flex-1 truncate">{doc.label}</span>
           </Tooltip>
           {doc.published_date && <NewBadge publishedDate={doc.published_date} />}
@@ -216,7 +227,13 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
             <div className="flex-shrink-0 text-[var(--l2-foreground)]">
               {category.isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
             </div>
-            <Tooltip content={category.label} side="right" delayDuration={500} sideOffset={12}>
+            <Tooltip
+              content={category.label}
+              side="right"
+              delayDuration={500}
+              sideOffset={12}
+              contentClassName="max-w-[260px]"
+            >
               <span className="min-w-0 flex-1 truncate">{category.label}</span>
             </Tooltip>
           </div>
@@ -230,6 +247,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
                   side="right"
                   delayDuration={500}
                   sideOffset={12}
+                  contentClassName="max-w-[260px]"
                 >
                   <h4
                     className={`truncate text-xs text-[var(--l2-foreground)] ${
@@ -276,15 +294,15 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick, showRegionSel
   if (!isClient) return null
 
   return (
-    <nav className="docs-sidebar sticky top-[56px] flex h-[calc(100vh-56px)] w-full flex-col overflow-hidden text-[var(--l1-foreground)]">
+    <nav className={DOC_SIDENAV_NAV_CLASSES}>
       {showRegionSelector && (
-        <div className="relative z-10 shrink-0 bg-[var(--l1-background)] shadow-[0_8px_16px_-6px_color-mix(in_srgb,var(--base-black)_55%,transparent)]">
+        <div className={DOC_SIDENAV_PINNED_CLASSES}>
           <SidebarRegionSelector />
         </div>
       )}
       <div
         ref={sidebarRef}
-        className={`docs-sidebar-scroll min-h-0 flex-1 overflow-y-auto ${showRegionSelector ? 'pb-3 pt-1' : 'py-3'}`}
+        className={`${DOC_SIDENAV_SCROLL_BASE_CLASSES} ${showRegionSelector ? 'pb-3 pt-1' : 'py-3'}`}
       >
         <ul className="list-none space-y-0 p-0">{sideNav.map(renderItem)}</ul>
       </div>

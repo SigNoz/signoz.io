@@ -118,7 +118,7 @@ export default function Enterprise() {
                 </p>
                 <p className="text-md flex flex-row items-center gap-2 font-normal">
                   <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
-                  Finer RBAC and ingestion controls
+                  Fine-grained RBAC
                 </p>
               </div>
             </div>

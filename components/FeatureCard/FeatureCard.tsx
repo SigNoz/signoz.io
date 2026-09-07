@@ -14,10 +14,10 @@ type CardProps = {
 const FeatureCard: React.FC<CardProps> = ({ title, img, description, buttonText, buttonLink }) => {
   return (
     <div
-      className={`col-span-2 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-9 sm:col-span-1`}
+      className={`col-span-2 border !border-b-0 !border-r-0 border-dashed border-[var(--l2-border)] bg-[var(--l1-background)] p-9 sm:col-span-1`}
     >
       <div className="items-left mb-4 flex flex-col gap-6">
-        <p className="text-3xl font-semibold text-signoz_vanilla-100">{title}</p>
+        <p className="text-3xl font-semibold text-[var(--l1-foreground)]">{title}</p>
         {img ? (
           <img
             src={img}
@@ -25,7 +25,7 @@ const FeatureCard: React.FC<CardProps> = ({ title, img, description, buttonText,
             className="card-background h-auto w-auto border-none"
           />
         ) : null}
-        <p className="mb-3 mt-2 text-base font-normal leading-9 text-signoz_vanilla-400">
+        <p className="mb-3 mt-2 text-base font-normal leading-9 text-[var(--l2-foreground)]">
           {description}
         </p>
       </div>

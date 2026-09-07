@@ -1,0 +1,76 @@
+---
+date: 2026-08-26
+title: Podman Container Metrics Dashboard - Monitor Hosts
+description: Monitor Podman container CPU, memory, and block I/O in SigNoz with per-host and per-container filters, using the OpenTelemetry podman_stats receiver.
+doc_type: explanation
+---
+
+Use this dashboard to monitor the containers on your Podman hosts across CPU, memory, and block I/O.
+
+Every panel filters on `container.runtime = 'podman'`, so the dashboard stays correct on a host that also runs Docker.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow the [Podman Container Metrics](https://signoz.io/docs/metrics-management/opentelemetry-podman-metrics/) guide.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/podman-container-metrics-dashboard.webp"
+  alt="Podman Container Metrics dashboard in SigNoz, showing container CPU, memory, network, and block I/O panels"
+  caption="Podman Container Metrics Dashboard"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/container-metrics/podman/podman-metrics-by-host.json"
+  dashboardName="Podman Container Metrics"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Size up the host**: See how many containers report, and the average CPU and memory across them.
+- **Compare containers**: Rank CPU and memory use per container to find the heaviest workload.
+- **Spot memory pressure**: Compare the memory use of each container against its limit, before the kernel stops the container.
+- **Track disk activity**: Watch block I/O read and write rates per container.
+
+## Metrics Included
+
+### Overview
+
+- **Containers Reporting**: Number of containers currently sending metrics.
+- **Avg CPU %** and **Avg Memory %**: Mean CPU and memory use across containers.
+- **Total Memory Used**: Combined memory use of all containers.
+- **Containers**: Table of every container with its image, CPU, memory, and memory used.
+
+### CPU
+
+- **CPU Percent**: CPU use per container (`container.cpu.percent`).
+- **CPU Cores Used**: CPU cores consumed per container, from `container.cpu.usage.total`.
+
+### Memory
+
+- **Memory Percent**: Memory use against the container limit (`container.memory.percent`).
+- **Memory Usage**: Memory consumed per container (`container.memory.usage.total`).
+- **Memory Usage vs Limit**: Memory use against the configured limit (`container.memory.usage.limit`). A container with no limit reports the host memory as its limit.
+- **Memory Share by Container**: The share of total memory use for each container.
+
+### Block I/O
+
+- **Block I/O Read** and **Block I/O Write**: Bytes read from and written to disk per container.
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **host.name**: Filter to the containers on one Podman host.
+- **container.name**: Filter to a single container.
+
+## Limitations
+
+The dashboard also ships **System CPU Cores Used**, **Network Bytes Received**, and **Network Bytes Sent**. On Podman 5.x these three panels stay empty, because the `podman_stats` receiver reports no value for the metrics behind them. Use `podman stats` for network traffic until the receiver is fixed. See [Limitations](https://signoz.io/docs/metrics-management/opentelemetry-podman-metrics/#limitations) in the setup guide.
+
+## Related Dashboards
+
+- [Docker Container Metrics](https://signoz.io/docs/dashboards/dashboard-templates/docker-container-metrics/)
+- [Host Metrics](https://signoz.io/docs/dashboards/dashboard-templates/hostmetrics-dashboards/)
+- [Kubernetes Pod Metrics - Detailed](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed/)

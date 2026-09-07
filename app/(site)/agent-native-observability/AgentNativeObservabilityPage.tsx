@@ -123,7 +123,7 @@ const TrustedByTeams: React.FC = () => {
           asChild
         >
           <TrackingLink
-            href="/case-study/"
+            href="/customers/"
             clickType="Secondary CTA"
             clickName="Agent Native Page Customer Stories Button"
             clickLocation="Agent Native Observability Page Logos"

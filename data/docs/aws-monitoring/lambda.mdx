@@ -1,5 +1,5 @@
 ---
-date: 2026-08-11
+date: 2026-08-20
 title: AWS Lambda
 meta_title: Monitor AWS Lambda - Logs, Metrics & Traces
 description: Discover how to collect Lambda logs, metrics, and traces using OpenTelemetry layers for complete serverless function observability.
@@ -24,6 +24,7 @@ SigNoz supports multiple ways to monitor AWS Lambda. This page helps you choose 
 | **Traces** (Go)                            | [Go Manual Instrumentation](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-golang/)            | Go has no auto-instrumentation layer, so it uses the OTel Go SDK    |
 | **Metrics** (manual, low cost)             | [CloudWatch Exporter](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/)                        | Scrapes CloudWatch metrics with minimal AWS cost                   |
 | **Logs & Metrics** (fastest setup, Cloud only) | [One-Click Integration](https://signoz.io/docs/integrations/aws/lambda/)                                   | Auto-discovery, pre-built dashboards, ~5 minute setup              |
+| **All signals** (Lambda MicroVMs)          | [Embedded OTel Collector](https://signoz.io/docs/aws-monitoring/lambda-microvms/)                           | MicroVMs are long-lived VMs, so they run a Collector inside the image |
 
 ## Logs: OTel Extension vs S3
 
@@ -136,6 +137,14 @@ Scrape Lambda metrics (Invocations, Errors, Duration, Throttles) from CloudWatch
 - ❌ Requires running a CloudWatch Exporter instance
 
 → [Metrics Guide](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/)
+
+## Lambda MicroVMs
+
+<a href="https://aws.amazon.com/lambda/lambda-microvms/" target="_blank" rel="noopener noreferrer nofollow">Lambda MicroVMs</a> are a separate compute primitive. Despite the name, a MicroVM behaves like a long-lived VM, closer to Fargate or EC2 than to a function, and runs for up to 8 hours.
+
+None of the methods above apply. Layers and extensions are built around the invocation lifecycle, which a MicroVM does not have. Instead you bake an OpenTelemetry Collector into the MicroVM image, where it runs alongside your application and exports metrics, traces, and logs directly to SigNoz.
+
+→ [Monitor AWS Lambda MicroVMs](https://signoz.io/docs/aws-monitoring/lambda-microvms/)
 
 ## One-Click vs Manual
 

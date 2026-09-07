@@ -157,9 +157,7 @@ const UpgradePathTool: React.FC<UpgradePathToolProps> = ({ docMetaBySlug, compil
           <div className="absolute left-0 right-0 top-0 mx-auto h-[300px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:h-[450px] sm:bg-[center_-500px] md:h-[956px]" />
           <div className="relative mx-auto flex w-full max-w-7xl flex-col items-center gap-8 px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-gradient mb-2 font-bold">
-                Self-Hosted SigNoz Upgrade Path Tool
-              </h1>
+              <h1 className="text-gradient mb-2 font-bold">Self-Hosted SigNoz Upgrade Path Tool</h1>
               <span className="text-signoz_vanilla-400">
                 Plan version upgrades for Self-Hosted SigNoz. SigNoz Cloud upgrades are managed by
                 SigNoz and require no action in this tool.

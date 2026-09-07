@@ -18,12 +18,12 @@ export default function LoginActions() {
         clickText="Need help? Contact support"
         clickLocation="Top Navbar"
       >
-        Need help? <span className="text-signoz_robin-500">Contact support</span>
+        Need help? <span className="text-[var(--accent-primary)]">Contact support</span>
       </TrackingLink>
 
       <TrackingButton
         id="btn-get-started-website-navbar"
-        className="flex h-8 min-w-24 items-center justify-center gap-1.5 truncate rounded-sm border border-signoz_slate-300 bg-signoz_slate-500 px-4 py-2 pl-2 pr-2.5 text-center text-xs font-normal not-italic leading-5  text-signoz_vanilla-400 no-underline outline-none hover:text-white"
+        className="flex h-8 min-w-24 items-center justify-center gap-1.5 truncate rounded-sm border border-[var(--l3-border)] bg-[var(--l3-background)] px-4 py-2 pl-2 pr-2.5 text-center text-xs font-normal not-italic leading-5 text-[var(--l2-foreground)] no-underline outline-none hover:text-[var(--l1-foreground-hover)]"
         clickType="Primary CTA"
         clickName="Signup Button"
         clickText="Signup"
@@ -34,7 +34,7 @@ export default function LoginActions() {
       </TrackingButton>
 
       <TrackingButton
-        className="flex h-8 min-w-24 items-center justify-center gap-2 truncate rounded-sm border border-signoz_slate-300 bg-signoz_slate-500 px-4 py-2 pl-4 pr-3 text-center text-xs font-normal not-italic leading-5 text-signoz_vanilla-400 no-underline outline-none hover:text-white"
+        className="flex h-8 min-w-24 items-center justify-center gap-2 truncate rounded-sm border border-[var(--l3-border)] bg-[var(--l3-background)] px-4 py-2 pl-4 pr-3 text-center text-xs font-normal not-italic leading-5 text-[var(--l2-foreground)] no-underline outline-none hover:text-[var(--l1-foreground-hover)]"
         clickType="Secondary CTA"
         clickName="Docs Button"
         clickText="Docs"

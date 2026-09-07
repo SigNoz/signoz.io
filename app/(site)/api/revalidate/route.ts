@@ -113,6 +113,7 @@ export async function POST(request: NextRequest) {
       revalidateTag('docs-list', 'max')
       revalidateTag('docs-side-nav', 'max')
       revalidateTag('listicles', 'max')
+      revalidateTag('case-studies-list', 'max')
 
       revalidateFeedRoutesForTags(Object.keys(LIST_TAG_DEPENDENT_PATHS), results)
 
@@ -216,6 +217,7 @@ export async function GET(request: NextRequest) {
       revalidateTag('docs-list', 'max')
       revalidateTag('docs-side-nav', 'max')
       revalidateTag('listicles', 'max')
+      revalidateTag('case-studies-list', 'max')
 
       revalidateFeedRoutesForTags(Object.keys(LIST_TAG_DEPENDENT_PATHS), results)
 

@@ -9,9 +9,8 @@ keywords: [Prometheus,cassandra,cortex,Application Monitoring]
 related_articles:
   - '/guides/managed-prometheus'
   - '/blog/out-of-box-application-monitoring-prometheus'
-  - '/guides/kubernetes-monitoring-prometheus'
+  - '/blog/kubernetes-monitoring'
   - '/comparisons/prometheus-alternatives'
-  - '/guides/does-kubernetes-use-prometheus'
   - '/guides/how-do-i-monitor-api-in-prometheus'
 ---
 
@@ -24,7 +23,7 @@ In this blog, we explain how we enable high availability Prometheus using Cortex
 ## Why need Cortex?
 
 - Long term storage backend for Prometheus - by default Prometheus saves data to local disk and retains for 15 days. Cortex connects to DBs to store data for longer time range. DBs that can be easily integrated are Cassandra, BigTable and DynamoDB
-- Enabling HA Prometheus - Usually folks run a singe Prometheus per cluster. If that node is down or Prometheus gets killed, you will find gaps in your graph till the time k8s recreates [Prometheus pod](https://signoz.io/guides/prometheus-queries-to-get-cpu-and-memory-usage-in-kubernetes-pods/). With Cortex, you can run multiple instances of Prometheus in your cluster and Cortex will de-duplicate metrics for you.
+- Enabling HA Prometheus - Usually folks run a singe Prometheus per cluster. If that node is down or Prometheus gets killed, you will find gaps in your graph till the time k8s recreates [Prometheus pod](https://signoz.io/guides/kube-state-metrics/). With Cortex, you can run multiple instances of Prometheus in your cluster and Cortex will de-duplicate metrics for you.
 - Single pane of view for multi-cluster Prometheus - When you have multiple Prometheuses across multiple clusters, provisioning 1 Grafana dashboard for each cluster will quickly become a pain. Also, aggregating metrics over multiple clusters won't be possible. Cortex enables this by letting Prometheuses in each cluster write their metrics to single DB and provide a label for your cluster. A Grafana dashboard built on top of the shared DB will enable queries to any of the clusters.
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)

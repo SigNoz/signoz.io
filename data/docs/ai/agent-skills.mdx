@@ -1,5 +1,5 @@
 ---
-date: 2026-08-21
+date: 2026-08-22
 title: Agent Skills & Plugin
 meta_title: SigNoz Agent Skills & Plugin - AI Coding Agent Setup
 description: Install the SigNoz plugin and Agent Skills so AI agents like Claude Code, Codex, Cursor, and Gemini can query data, build dashboards, manage alerts, and explore SigNoz docs.
@@ -12,7 +12,7 @@ When you ask your AI agent something like "why did this alert fire," "create a d
 
 SigNoz ships these skills two ways:
 
-- **The SigNoz plugin** - the recommended path. One install bundles every skill plus the MCP server registration, so your agent can both reason about SigNoz *and* act on your data. Available for Claude Code, Codex, Cursor, Gemini CLI, Devin CLI, Grok Build, and Antigravity CLI.
+- **The SigNoz plugin** - the recommended path. One install bundles every skill plus the MCP server registration, so your agent can both reason about SigNoz *and* act on your data. Available for Claude Code, Codex, Cursor, VS Code/GitHub Copilot, Gemini CLI, Devin CLI, Grok Build, and Antigravity CLI.
 - **Individual skills via skills.sh** - install one or more skill files on their own, for any skills.sh-compatible agent.
 
 ## Install the plugin
@@ -82,6 +82,22 @@ The plugin is not yet on the public Cursor Marketplace, so install it through a 
 4. Reload Cursor, then open MCP settings and complete authentication for the `signoz` server if prompted.
 
 To change the region or endpoint later, run `/signoz-mcp-setup` again with the correct region or URL and reload Cursor.
+
+</TabItem>
+<TabItem value="vscode-copilot" label="VS Code / GitHub Copilot">
+
+These steps install the SigNoz plugin for GitHub Copilot in VS Code.
+
+1. Open GitHub Copilot Chat in VS Code and confirm that you are signed in.
+2. Open the Command Palette and run **Chat: Install Plugin From Source**.
+3. Enter `https://github.com/SigNoz/agent-skills`, then select `signoz` if prompted.
+4. Return to Copilot Chat, select **Agent** mode, and run the setup skill with your SigNoz Cloud region (`us`, `us2`, `eu`, `eu2`, `in`, or `in2`) or a self-hosted HTTP MCP URL:
+
+   ```bash
+   /signoz:signoz-mcp-setup <region-or-mcp-url>
+   ```
+
+5. Approve the `signoz` MCP server if prompted, then complete authentication. Self-hosted endpoints need no OAuth unless the server runs with `OAUTH_ENABLED=true`.
 
 </TabItem>
 <TabItem value="gemini-cli" label="Gemini CLI">

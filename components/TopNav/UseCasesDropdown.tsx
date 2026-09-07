@@ -16,7 +16,7 @@ export default function UseCasesDropdown() {
         unstyled
         type="button"
         ref={triggerRef}
-        className="truncate rounded-full px-2.5 py-1 text-sm outline-none transition-colors hover:bg-signoz_robin-200/20"
+        className="truncate rounded-full px-2.5 py-1 text-sm outline-none transition-colors hover:bg-[color-mix(in_srgb,var(--accent-primary)_15%,transparent)]"
         onClick={() => (isOpen ? close() : open())}
       >
         <div className="flex items-center">
@@ -53,7 +53,7 @@ export function UseCasesDropdownContent({ onClose }: { onClose: () => void }) {
                 <span className="text-sm">{item.name}</span>{' '}
                 <ArrowRight size={14} className="shrink-0 opacity-0 group-hover:opacity-100" />
               </div>
-              <div className="line-clamp-2 max-w-[274px] text-xs text-signoz_vanilla-400 group-hover:text-[#FFF]">
+              <div className="line-clamp-2 max-w-[274px] text-xs text-[var(--l2-foreground)] group-hover:text-[var(--l1-foreground-hover)]">
                 {item.description}
               </div>
             </div>

@@ -1,5 +1,5 @@
 import React from 'react'
-import MetricsDashboards from './MetricsDashboards'
+import MetricsDashboards from './MetricsDashboardsPage'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
