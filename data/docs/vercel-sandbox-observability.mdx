@@ -1,0 +1,502 @@
+---
+date: 2026-09-07
+title: Vercel Sandbox Observability & Monitoring with OpenTelemetry
+description: Instrument Vercel Sandbox with OpenTelemetry and send traces and sandbox output to SigNoz to debug agent code execution and track sandbox cost.
+doc_type: howto
+---
+
+## Overview
+
+<a href="https://vercel.com/docs/sandbox" target="_blank" rel="noopener noreferrer nofollow">Vercel Sandbox</a> runs untrusted or agent-generated code in an isolated Linux microVM. Your application creates a sandbox, runs commands in it, reads the output, and stops it. A sandbox is ephemeral, so the command that failed is gone before you can open a terminal.
+
+Vercel Drains do not close that gap. The log drain sources are `static`, `lambda`, `edge`, `build`, `external`, `firewall`, and `redirect`, and trace drains carry deployment traffic. Nothing that happens in a sandbox reaches SigNoz until you report it.
+
+<Admonition type="tip">
+  **Sending other Vercel telemetry?** Drains cover your deployments. Install the [SigNoz integration on the Vercel Marketplace](https://signoz.io/docs/integrations/vercel/) for a one-click setup, or [configure the drains yourself](https://signoz.io/docs/userguide/vercel-to-signoz/). For the model calls your agent makes, see [Vercel AI SDK Observability](https://signoz.io/docs/vercel-ai-sdk-observability/). This page covers the sandboxes.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- Node.js 22 or later
+- A Vercel project linked to your working directory. Run `vercel link`, then `vercel env pull` to write credentials to `.env.local`. See the <a href="https://vercel.com/docs/sandbox/quickstart" target="_blank" rel="noopener noreferrer nofollow">Vercel Sandbox quickstart</a>.
+
+## How it works
+
+Vercel Sandbox emits no telemetry of its own. Two paths produce it, and they answer different questions.
+
+| Path | What you get | What it costs you |
+|---|---|---|
+| Instrument the application that creates sandboxes | One trace per session, a span per command, command output as correlated logs, and the billed CPU and transfer | A wrapper around `Sandbox.create` and `runCommand` |
+| Instrument the code that runs inside the sandbox | Spans from the generated code, joined to the same trace | An OpenTelemetry SDK shipped into the sandbox and a firewall allow rule |
+
+Start with the first path. It covers every sandbox your application creates, including the ones whose code you never wrote. The second path is collapsed below. Both use <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and export to the same SigNoz endpoint.
+
+The Vercel dashboard reports Active CPU, provisioned memory, data transfer, and running sandboxes under its own Observability tab. Those numbers are pull-only, and none of them name the command that ran or how it exited.
+
+## Monitor Vercel Sandbox from Your Application
+
+This path shows what each sandbox did: which commands ran, how long each took, what they printed, and where they failed.
+
+### Step 1: Install the packages
+
+```bash
+npm install @vercel/sandbox @opentelemetry/api @opentelemetry/api-logs \
+  @opentelemetry/sdk-node @opentelemetry/sdk-logs \
+  @opentelemetry/exporter-trace-otlp-http @opentelemetry/exporter-logs-otlp-http
+
+npm install --save-dev tsx typescript @types/node
+```
+
+### Step 2: Configure the OpenTelemetry SDK
+
+Append the SigNoz settings to `.env.local`, the file that `vercel env pull` created.
+
+```bash:.env.local
+OTEL_SERVICE_NAME=<your-service-name>
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+```
+
+**Verify these values:**
+
+- `<your-service-name>`: What your sandbox telemetry appears under in SigNoz, and what you filter on in [Validate](#validate).
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+Create `instrumentation.ts`. The exporters read the endpoint and the headers from the environment, so they take no arguments. Each one appends its own path, `/v1/traces` and `/v1/logs`, to the endpoint.
+
+```ts:instrumentation.ts
+import { NodeSDK } from '@opentelemetry/sdk-node'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http'
+import { BatchLogRecordProcessor } from '@opentelemetry/sdk-logs'
+
+export const sdk = new NodeSDK({
+  traceExporter: new OTLPTraceExporter(),
+  logRecordProcessors: [
+    new BatchLogRecordProcessor({ exporter: new OTLPLogExporter() }),
+  ],
+})
+
+sdk.start()
+```
+
+`BatchLogRecordProcessor` takes an options object in `@opentelemetry/sdk-logs` 0.222.0 and later. Passing the exporter as a positional argument fails at shutdown with `TypeError: Cannot read properties of undefined (reading 'shutdown')`.
+
+### Step 3: Add the traced sandbox helpers
+
+Create `sandbox-otel.ts`. It contains two functions:
+
+- `withSandbox` opens one span for the sandbox session. It records the configuration when the sandbox starts, and the billed usage when the sandbox stops.
+- `runTracedCommand` opens a child span for one command. It streams the output of the command to SigNoz as logs, and records the exit code.
+
+```ts:sandbox-otel.ts minimap defaultCollapsed
+import { Sandbox } from '@vercel/sandbox'
+import { SpanStatusCode, trace } from '@opentelemetry/api'
+import { logs, SeverityNumber } from '@opentelemetry/api-logs'
+
+const tracer = trace.getTracer('vercel-sandbox')
+const logger = logs.getLogger('vercel-sandbox')
+
+type CreateOptions = Parameters<typeof Sandbox.create>[0]
+
+export async function withSandbox<T>(
+  options: CreateOptions,
+  fn: (sandbox: Sandbox) => Promise<T>
+): Promise<T> {
+  return tracer.startActiveSpan('sandbox session', async (span) => {
+    let sandbox: Sandbox | undefined
+    try {
+      sandbox = await Sandbox.create(options)
+      span.setAttributes({
+        'vercel.sandbox.name': sandbox.name,
+        'vercel.sandbox.session_id': sandbox.currentSession().sessionId,
+        'vercel.sandbox.region': sandbox.region,
+        'vercel.sandbox.vcpus': sandbox.vcpus,
+        'vercel.sandbox.memory_mb': sandbox.memory,
+        'vercel.sandbox.persistent': sandbox.persistent,
+      })
+      return await fn(sandbox)
+    } catch (error) {
+      span.recordException(error as Error)
+      span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) })
+      throw error
+    } finally {
+      try {
+        if (sandbox) {
+          const session = await sandbox.stop()
+          span.setAttributes({
+            'vercel.sandbox.active_cpu_ms': session.activeCpuDurationMs,
+            'vercel.sandbox.egress_bytes': session.networkTransfer?.egress,
+            'vercel.sandbox.ingress_bytes': session.networkTransfer?.ingress,
+            'vercel.sandbox.snapshot_id': session.snapshot?.id,
+          })
+        }
+      } catch (stopError) {
+        span.recordException(stopError as Error)
+      } finally {
+        span.end()
+      }
+    }
+  })
+}
+
+export async function runTracedCommand(
+  sandbox: Sandbox,
+  cmd: string,
+  args: string[] = []
+) {
+  return tracer.startActiveSpan(`sandbox exec ${cmd}`, async (span) => {
+    span.setAttributes({
+      'vercel.sandbox.name': sandbox.name,
+      'vercel.sandbox.command': [cmd, ...args].join(' '),
+    })
+
+    try {
+      const command = await sandbox.runCommand({ cmd, args, detached: true })
+      span.setAttribute('vercel.sandbox.command_id', command.cmdId)
+
+      for await (const line of command.logs()) {
+        logger.emit({
+          severityNumber:
+            line.stream === 'stderr' ? SeverityNumber.WARN : SeverityNumber.INFO,
+          severityText: line.stream === 'stderr' ? 'WARN' : 'INFO',
+          body: line.data.trimEnd(),
+          attributes: {
+            'vercel.sandbox.name': sandbox.name,
+            'vercel.sandbox.command_id': command.cmdId,
+            'vercel.sandbox.stream': line.stream,
+          },
+        })
+      }
+
+      const result = await command.wait()
+      span.setAttributes({
+        'vercel.sandbox.exit_code': result.exitCode,
+        'vercel.sandbox.command_duration_ms': result.durationMs,
+      })
+      if (result.exitCode !== 0) {
+        span.setStatus({ code: SpanStatusCode.ERROR })
+        span.setAttribute('error.type', `exit_code_${result.exitCode}`)
+      }
+      return result
+    } catch (error) {
+      span.recordException(error as Error)
+      span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) })
+      throw error
+    } finally {
+      span.end()
+    }
+  })
+}
+```
+
+Two details make the correlation work:
+
+- `runTracedCommand` starts the command with `detached: true`. The command runs while `command.logs()` streams its output line by line. `command.wait()` then returns the exit code.
+- `logger.emit()` reads the active OpenTelemetry context, so each log record carries the trace ID and the span ID of the command span. SigNoz links the log to the span without extra configuration.
+
+`span.end()` sits in its own nested `finally`. OpenTelemetry hands a span to the exporter when the span ends, so a span that never ends is never exported, not even by `sdk.shutdown()`. Without the nested block, a `sandbox.stop()` that rejects would skip `span.end()` and lose the whole session span, including any exception recorded on it. Catching the stop error also keeps it from replacing the error your workload threw.
+
+### Step 4: Run your orchestrator
+
+Create `index.ts`. Import `instrumentation.js` first so the SDK starts before the Vercel SDK loads.
+
+```ts:index.ts
+import { sdk } from './instrumentation.js'
+import { runTracedCommand, withSandbox } from './sandbox-otel.js'
+
+async function main() {
+  await withSandbox({ persistent: false, timeout: 120_000 }, async (sandbox) => {
+    await runTracedCommand(sandbox, 'node', ['--version'])
+    await runTracedCommand(sandbox, 'python3', ['-c', 'print(sum(range(100)))'])
+    await runTracedCommand(sandbox, 'ls', ['/does-not-exist'])
+  })
+}
+
+main()
+  .catch((error) => {
+    console.error(error)
+    process.exitCode = 1
+  })
+  .finally(async () => {
+    await sdk.shutdown()
+  })
+```
+
+Run the script with the credentials from `.env.local`:
+
+```bash
+npx tsx --env-file=.env.local index.ts
+```
+
+Load the environment with `--env-file` and not with a `dotenv` call in `index.ts`. JavaScript evaluates imports before the body of the module, so the exporters read the environment before a `dotenv` call can set it.
+
+`await sdk.shutdown()` flushes the last batch. Without it, a short script exits before the exporter sends the final spans and logs.
+
+## Validate
+
+Open [Traces](https://signoz.io/docs/userguide/traces/) in SigNoz and filter on `service.name = '<your-service-name>'`. One run produces one trace:
+
+- A root span named `sandbox session`, carrying the sandbox name, region, vCPUs, and the billed CPU and transfer.
+- A child span for each command, named `sandbox exec node`, `sandbox exec python3`, and `sandbox exec ls`.
+- The `sandbox exec ls` span with an error status and `vercel.sandbox.exit_code = 2`.
+
+<Figure
+  src="/img/docs/llm/vercel-sandbox/vercel-sandbox-traces.webp"
+  alt="The SigNoz Traces explorer filtered on service.name sandbox-orchestrator, listing the sandbox session and sandbox exec spans"
+  caption="One row per span after two runs. Each sandbox session span is the root of its own trace."
+/>
+
+Open the `sandbox session` span. Its attributes carry the sandbox configuration and, because the sandbox has stopped, the billed usage.
+
+<Figure
+  src="/img/docs/llm/vercel-sandbox/vercel-sandbox-span-attributes.webp"
+  alt="Span details for a sandbox session span in SigNoz showing the vercel.sandbox attributes including active_cpu_ms, egress_bytes and session_id"
+  caption="The session span after stop. active_cpu_ms, egress_bytes, and ingress_bytes are the billed figures. snapshot_id is absent here because the sandbox is not persistent."
+/>
+
+<details>
+<ToggleHeading>
+## Trace the Code Inside a Sandbox
+</ToggleHeading>
+
+The steps above trace the sandbox from outside. To see spans from the generated code itself, run an OpenTelemetry SDK inside the sandbox. Pass the trace context in through an environment variable.
+
+OpenTelemetry defines `TRACEPARENT` as the carrier for context between processes. See <a href="https://opentelemetry.io/docs/specs/otel/context/env-carriers/" target="_blank" rel="noopener noreferrer nofollow">Environment Variables as Context Propagation Carriers</a>. The JavaScript SDK does not read the variable for you, so the workload extracts it.
+
+### Step 1: Write the workload script
+
+```js:child.cjs
+const { context, propagation, trace } = require('@opentelemetry/api')
+const { NodeSDK } = require('@opentelemetry/sdk-node')
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
+
+const sdk = new NodeSDK({ traceExporter: new OTLPTraceExporter() })
+sdk.start()
+
+const parent = propagation.extract(context.active(), {
+  traceparent: process.env.TRACEPARENT,
+})
+
+const tracer = trace.getTracer('workload')
+context.with(parent, () => {
+  const span = tracer.startSpan('generated code')
+  span.setAttribute('workload.rows', 42)
+  span.end()
+})
+
+sdk.shutdown()
+```
+
+The workload takes the same three environment variables as the orchestrator. The orchestrator passes them in through `runCommand`.
+
+Use `NodeSDK` here and not a bare `NodeTracerProvider`. Only `NodeSDK` runs the resource detectors that read `OTEL_SERVICE_NAME`. A bare provider reports every span under `service.name = unknown_service:node`.
+
+### Step 2: Run it from the orchestrator
+
+Install the dependencies while egress is open, restrict egress to SigNoz, then run the workload.
+
+```ts:in-sandbox.ts minimap defaultCollapsed
+import { sdk } from './instrumentation.js'
+import { context, propagation } from '@opentelemetry/api'
+import { readFileSync } from 'node:fs'
+import { runTracedCommand, withSandbox } from './sandbox-otel.js'
+
+const INGEST_HOST = new URL(process.env.OTEL_EXPORTER_OTLP_ENDPOINT!).hostname
+
+async function main() {
+  await withSandbox({ persistent: false, timeout: 300_000 }, async (sandbox) => {
+    await sandbox.writeFiles([
+      { path: 'child.cjs', content: readFileSync('child.cjs') },
+    ])
+
+    await runTracedCommand(sandbox, 'npm', [
+      'install',
+      '--no-package-lock',
+      '@opentelemetry/api',
+      '@opentelemetry/sdk-node',
+      '@opentelemetry/exporter-trace-otlp-http',
+    ])
+
+    await sandbox.update({ networkPolicy: { allow: [INGEST_HOST] } })
+
+    const carrier: Record<string, string> = {}
+    propagation.inject(context.active(), carrier)
+
+    await sandbox.runCommand({
+      cmd: 'node',
+      args: ['child.cjs'],
+      env: {
+        TRACEPARENT: carrier.traceparent,
+        OTEL_SERVICE_NAME: '<your-service-name>-workload',
+        OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT!,
+        OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS!,
+      },
+    })
+  })
+}
+
+main()
+  .catch((error) => {
+    console.error(error)
+    process.exitCode = 1
+  })
+  .finally(async () => {
+    await sdk.shutdown()
+  })
+```
+
+The `generated code` span now appears in the same trace as `sandbox session`, under the service `<your-service-name>-workload`.
+
+<Figure
+  src="/img/docs/llm/vercel-sandbox/vercel-sandbox-distributed-trace.webp"
+  alt="A SigNoz trace containing spans from both the orchestrator service and the workload service running inside the Vercel Sandbox"
+  caption="One trace, two services. is_remote is yes and parent_span_id points at the session span, which is the TRACEPARENT handoff. The resource shows the microVM host name and /vercel/child.cjs."
+/>
+
+<Admonition type="warning" title="The egress firewall blocks the exporter">
+A <a href="https://vercel.com/docs/sandbox/concepts/firewall" target="_blank" rel="noopener noreferrer nofollow">sandbox network policy</a> that does not list your ingestion host drops the telemetry. Add `ingest.<region>.signoz.cloud` to the allow list of every policy that runs instrumented code.
+</Admonition>
+
+</details>
+
+<details>
+<ToggleHeading>
+## Run the Sandbox as an AI Agent Tool
+</ToggleHeading>
+
+When a model calls the sandbox as a tool, add the GenAI attributes to the session span so it joins the rest of your LLM traces:
+
+```ts
+span.setAttributes({
+  'gen_ai.operation.name': 'execute_tool',
+  'gen_ai.tool.name': 'vercel_sandbox',
+  'gen_ai.tool.call.id': toolCall.id,
+})
+```
+
+Name the span `execute_tool vercel_sandbox` to follow the convention. These attributes are at development stability in the <a href="https://github.com/open-telemetry/semantic-conventions-genai" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry GenAI semantic conventions</a>, so expect them to change.
+
+For the model side of the same trace, see [Vercel AI SDK Observability](https://signoz.io/docs/vercel-ai-sdk-observability/).
+
+</details>
+
+<details>
+<ToggleHeading>
+## Attribute Reference
+</ToggleHeading>
+
+OpenTelemetry has no semantic conventions for sandboxes, so `vercel.sandbox.*` is a custom namespace. Keep the names stable across your services so that dashboards and alerts keep working.
+
+### Session span
+
+| Attribute | Description |
+|---|---|
+| `vercel.sandbox.name` | Sandbox name, unique within the Vercel project |
+| `vercel.sandbox.session_id` | ID of the running session |
+| `vercel.sandbox.region` | Region the sandbox runs in, such as `iad1` |
+| `vercel.sandbox.vcpus` | Number of virtual CPUs |
+| `vercel.sandbox.memory_mb` | Memory in MB |
+| `vercel.sandbox.persistent` | Whether the filesystem is snapshotted on stop |
+| `vercel.sandbox.active_cpu_ms` | Billed CPU time, reported after the sandbox stops |
+| `vercel.sandbox.egress_bytes` | Billed outbound transfer, reported after the sandbox stops |
+| `vercel.sandbox.ingress_bytes` | Inbound transfer, reported after the sandbox stops |
+| `vercel.sandbox.snapshot_id` | Snapshot written on stop, for persistent sandboxes only |
+
+### Command span
+
+| Attribute | Description |
+|---|---|
+| `vercel.sandbox.name` | Sandbox the command ran in |
+| `vercel.sandbox.command` | Command line that ran |
+| `vercel.sandbox.command_id` | Vercel command ID |
+| `vercel.sandbox.command_duration_ms` | Process run time reported by Vercel. It excludes the API round trip, so it is much smaller than the span duration. |
+| `vercel.sandbox.exit_code` | Exit code of the command |
+| `error.type` | Set to `exit_code_<n>` when the command fails |
+
+### Log records
+
+| Attribute | Description |
+|---|---|
+| `vercel.sandbox.name` | Sandbox that produced the line |
+| `vercel.sandbox.command_id` | Command that produced the line |
+| `vercel.sandbox.stream` | `stdout` or `stderr` |
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### OTLPExporterError: Unauthorized
+
+The response body is `{"code":16,"message":"rpc error: code = NotFound desc = No key found in request"}`.
+
+- Likely cause: `OTEL_EXPORTER_OTLP_HEADERS` was empty when the exporters were constructed. A `dotenv` call in `index.ts` runs after the imports are evaluated.
+- Fix: Start the script with `npx tsx --env-file=.env.local index.ts`.
+- Verify: Run again. The command completes without an exporter error.
+
+### No spans reach SigNoz, and the script prints no error
+
+- Likely cause: The process exited before the exporter flushed its batch.
+- Fix: Call `await sdk.shutdown()` in the `finally` block of your entry point.
+- Verify: Filter Traces on `service.name = '<your-service-name>'`. The trace appears within a minute.
+
+### TypeError: Cannot read properties of undefined (reading 'shutdown')
+
+- Likely cause: `BatchLogRecordProcessor` received the exporter as a positional argument.
+- Fix: Pass an options object: `new BatchLogRecordProcessor({ exporter })`.
+- Verify: Run again. The script exits with code 0.
+
+### Spans arrive under service.name unknown_service:node
+
+- Likely cause: The tracer provider does not read `OTEL_SERVICE_NAME`. A bare `NodeTracerProvider` skips the resource detectors that read it.
+- Fix: Start the SDK with `NodeSDK`, as `instrumentation.ts` and `child.cjs` do.
+- Verify: Filter Traces on your own service name. The spans appear under it.
+
+### The sandbox cannot resolve the SigNoz ingestion host
+
+The command inside the sandbox fails with `Could not resolve host: ingest.<region>.signoz.cloud`.
+
+- Likely cause: The sandbox network policy does not allow your SigNoz ingestion host.
+- Fix: Add the host to the allow list, for example `await sandbox.update({ networkPolicy: { allow: ['ingest.<region>.signoz.cloud'] } })`.
+- Verify: Run `curl` against the endpoint inside the sandbox. It returns HTTP 200.
+
+### vercel.sandbox.snapshot_id is missing
+
+- Likely cause: You created the sandbox with `persistent: false`, so Vercel wrote no snapshot on stop.
+- Fix: No action is needed. Remove `persistent: false` if you want the filesystem to survive between sessions.
+- Verify: Stop a persistent sandbox. The attribute holds a snapshot ID.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Limitations
+</ToggleHeading>
+
+- **Usage counters arrive only on stop.** `activeCpuDurationMs` and the transfer counters are reported once the VM stops. A sandbox that Vercel stops at its timeout reports them on the next read, not on the span you already closed.
+- **One trace covers one session, not one sandbox.** Vercel bills each session separately, and a persistent sandbox that you resume many times produces one trace per session. See <a href="https://vercel.com/docs/sandbox/pricing" target="_blank" rel="noopener noreferrer nofollow">Vercel Sandbox pricing and quotas</a>.
+- **Sessions expire.** The default timeout is 5 minutes. The maximum is 45 minutes on Hobby and 24 hours on Pro and Enterprise. Extend a running session with `sandbox.extendTimeout()`.
+- **The Vercel dashboard numbers stay separate.** Active CPU and memory in the Vercel Observability tab have no push export, so SigNoz cannot reconcile them against the spans.
+
+</details>
+
+## Next Steps
+
+- [Set a trace-based alert](https://signoz.io/docs/alerts-management/trace-based-alerts/) on `sandbox exec` spans with a non-zero `vercel.sandbox.exit_code`, so a failing agent command pages you.
+- [Build a dashboard](https://signoz.io/docs/userguide/manage-dashboards/) over `vercel.sandbox.active_cpu_ms` and `vercel.sandbox.egress_bytes` to attribute sandbox cost per sandbox name.
+- [Explore the traces](https://signoz.io/docs/userguide/traces/) to find which command is slowest across sandboxes.
+- Send the telemetry of your Vercel deployments with the [SigNoz integration for Vercel](https://signoz.io/docs/integrations/vercel/).
+- Instrument the model calls that generate the code with [Vercel AI SDK Observability](https://signoz.io/docs/vercel-ai-sdk-observability/), or browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/).
+
+## Get Help
+
+<GetHelp />
