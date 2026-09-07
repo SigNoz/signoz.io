@@ -34,38 +34,31 @@ describe('logEvent', () => {
     expect(body.timestamp).toBeTruthy()
   })
 
-  it('sends page-leave events as keepalive fetches, never via sendBeacon', async () => {
+  it('sends beacon-transport events to the tunnel via sendBeacon', async () => {
     const sendBeacon = vi.fn().mockReturnValue(true)
     vi.stubGlobal('navigator', { sendBeacon })
 
     await logEvent(
       {
-        eventName: 'Website Page Leave',
+        eventName: 'Website Page View',
         eventType: 'track',
-        attributes: {
-          $session_id: 'session-1',
-          pageDurationSeconds: 12.5,
-          scrollDepthPercentage: 80,
-        },
+        attributes: { $session_id: 'session-1' },
       },
       { transport: 'beacon' }
     )
 
-    // sendBeacon forces credentials mode "include", which the cross-origin
-    // tunnel's wildcard CORS policy rejects.
-    expect(sendBeacon).not.toHaveBeenCalled()
-    expect(fetch).toHaveBeenCalledTimes(1)
+    expect(sendBeacon).toHaveBeenCalledTimes(1)
+    expect(sendBeacon).toHaveBeenCalledWith('https://tunnel.example.com/log', expect.any(Blob))
+    expect(fetch).not.toHaveBeenCalled()
+  })
 
-    const [url, request] = vi.mocked(fetch).mock.calls[0]
-    expect(url).toBe('https://tunnel.example.com/log')
-    expect(request).toMatchObject({ method: 'POST', keepalive: true })
+  it('sends nothing when sendToTunnel is false', async () => {
+    await logEvent(
+      { eventName: 'Website Page Leave', eventType: 'track' },
+      { sendToTunnel: false, transport: 'beacon' }
+    )
 
-    const body = JSON.parse(request?.body as string)
-    expect(body.attributes).toMatchObject({
-      $session_id: 'session-1',
-      pageDurationSeconds: 12.5,
-      scrollDepthPercentage: 80,
-    })
+    expect(fetch).not.toHaveBeenCalled()
   })
 
   it('does not send anywhere when no tunnel endpoint is configured', async () => {
