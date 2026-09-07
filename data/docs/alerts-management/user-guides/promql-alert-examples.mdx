@@ -1,5 +1,5 @@
 ---
-date: 2026-08-18
+date: 2026-09-07
 title: PromQL Alert Examples - Sample Queries to Monitor Metrics
 description: Sample PromQL queries for SigNoz metric alerts, covering service health, latency percentiles, error ratios, Kubernetes usage, queue lag, and forecasts.
 doc_type: reference
@@ -28,11 +28,11 @@ SigNoz saves the rule as a PromQL rule. The rest of the form behaves the same as
 
 | Use PromQL when | Reason |
 |---|---|
-| You combine two metrics whose label sets differ | `on`, `ignoring`, `group_left`, and `group_right` control the join. Query Builder formulas need matching group-by keys on both queries. |
+| You combine two metrics whose label sets differ | `on`, `ignoring`, `group_left`, and `group_right` control the join. A Query Builder formula needs the group-by keys of the two queries to match, or one set to be a subset of the other. |
 | You already have a Prometheus alerting rule | The expression works as written, apart from the quoting rules below. |
-| You need a function the Query Builder has no field for | `predict_linear`, `absent`, `clamp_max`, and the `*_over_time` family are query-only. |
+| You need a function the Query Builder has no field for, such as `predict_linear` | Forecasting from a linear fit is query-only. Time aggregation already covers the `*_over_time` family, **Functions** covers `clamp_min` and `clamp_max`, and **Alert when data stops coming** covers `absent`. |
 
-For a single metric with a threshold, the Query Builder is the better choice. It handles unit conversion on the threshold and reports missing data per group.
+The Query Builder covers most alerts, including alerts that combine several metrics in a formula. It also converts the threshold unit for you and reports missing data per group. Use PromQL for the cases above.
 
 ## Rules that apply to every query here
 
@@ -78,13 +78,13 @@ For per-service detection, use the `absent_over_time` recipe above with a single
 100 * sum by ("service.name") (
   rate({"http.server.request.duration.count", "http.response.status_code"=~"5.."}[5m])
 )
-/ on ("service.name")
+/
 sum by ("service.name") (
   rate({"http.server.request.duration.count"}[5m])
 )
 ```
 
-Set the threshold to **above 1** for a 1% error budget, and set the y-axis unit to **Percent (0 - 100)**. The `on ("service.name")` clause pairs each numerator series with the matching denominator series. Without it, PromQL drops every series whose remaining labels differ.
+Set the threshold to **above 1** for a 1% error budget, and set the y-axis unit to **Percent (0 - 100)**. Both sides group by `service.name` alone, so `/` pairs each numerator series with its own denominator. Add an `on (...)` clause only when the two sides carry different labels, to name the labels that have to match.
 
 One failed request out of three puts a service at 33%, so a quiet service crosses any threshold you set. Filter those series out with a floor on the denominator:
 
@@ -92,7 +92,7 @@ One failed request out of three puts a service at 33%, so a quiet service crosse
 100 * sum by ("service.name") (
   rate({"http.server.request.duration.count", "http.response.status_code"=~"5.."}[5m])
 )
-/ on ("service.name")
+/
 (
   sum by ("service.name") (rate({"http.server.request.duration.count"}[5m])) > 0.5
 )
@@ -128,7 +128,7 @@ histogram_quantile(0.95,
 
 ```promql
 100 * max by ("k8s.node.name") ({"k8s.node.cpu.usage"})
-/ on ("k8s.node.name")
+/
 max by ("k8s.node.name") ({"k8s.node.allocatable_cpu"})
 ```
 
@@ -170,13 +170,13 @@ max by (group, topic, partition, "deployment.environment") (kafka_consumer_commi
 
 ```promql
 100 * max by ("service.name", "otel.component.name") ({"otel.sdk.processor.log.queue.size"})
-/ on ("service.name", "otel.component.name")
+/
 max by ("service.name", "otel.component.name") ({"otel.sdk.processor.log.queue.capacity"})
 ```
 
 A queue that stays near 100% drops telemetry. Threshold **above 80** with match type **all the times**.
 
-These are OpenTelemetry SDK metrics, so this watches the log processor inside an instrumented service rather than a Collector. `otel.component.name` identifies the processor instance and belongs in `by (...)` and `on (...)` on both sides. Drop it and a service with two processors pairs the size of one against the capacity of the other.
+These are OpenTelemetry SDK metrics, so this watches the log processor inside an instrumented service rather than a Collector. `otel.component.name` identifies the processor instance and belongs in the `by (...)` clause on both sides. Drop it and a service with two processors pairs the size of one against the capacity of the other.
 
 For the Collector's own exporter queues, alert on `otelcol_exporter_queue_size` against `otelcol_exporter_queue_capacity` instead. See <a href="https://opentelemetry.io/docs/collector/internal-telemetry/" target="_blank" rel="noopener noreferrer nofollow">Collector internal telemetry</a>.
 
