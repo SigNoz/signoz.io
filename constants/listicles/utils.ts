@@ -18,6 +18,7 @@ export interface ListicleRenderSection {
   id: string
   label: string
   title: string
+  description?: string
   sectionName: string
   gridCols?: string
   items: ListicleItem[]
@@ -42,6 +43,7 @@ const toRenderSection = (section: SectionConfig): ListicleRenderSection => ({
   id: section.id,
   label: section.label,
   title: section.title,
+  description: section.description,
   sectionName: section.sectionName,
   gridCols: section.gridCols,
   items: toItems(section.items),
