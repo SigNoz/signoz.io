@@ -1,7 +1,7 @@
-'use client'
+import { ArrowRight } from 'lucide-react'
 
-import Button from '@/components/ui/Button'
 import TrackingLink from '@/components/TrackingLink'
+import Eyebrow from '@/components/homepage/Eyebrow'
 
 type GetStartedOption = {
   description: string
@@ -21,29 +21,27 @@ const getStartedOptions: GetStartedOption[] = [
     title: 'Enterprise',
     description: 'For larger orgs that need data residency, compliance, and support.',
     priceLabel: 'Starts from',
-    price: '$4000/month',
+    price: '$4,000/month',
   },
 ]
 
 function GetStartedColumn({ option, index }: { option: GetStartedOption; index: number }) {
   return (
-    <article
-      className={`flex min-h-48 flex-col justify-between border-t border-signoz_slate-400/35 py-7 md:min-h-56 md:border-t-0 md:px-12 md:py-8 ${
-        index === 0 ? 'md:border-x' : ''
-      }`}
-    >
+    <article className="rule-fade-x md:vrule-solid flex min-h-48 flex-col justify-between border-t border-[var(--l2-border)] py-7 md:min-h-56 md:border-t-0 md:px-12 md:py-8">
       <div className="max-w-sm">
-        <h3 className="m-0 text-sm leading-5 text-signoz_vanilla-400">{option.title}</h3>
-        <p className="m-0 mt-3 text-lg font-medium leading-7 tracking-normal text-signoz_vanilla-100 md:text-xl md:leading-8">
+        <h3 className="m-0 text-sm font-medium uppercase leading-5 tracking-widest text-[var(--l2-foreground)]">
+          {option.title}
+        </h3>
+        <p className="m-0 mt-3 text-lg font-medium leading-7 tracking-normal text-[var(--l1-foreground)] md:text-xl md:leading-8">
           {option.description}
         </p>
       </div>
 
       <div>
-        <p className="m-0 text-xs font-medium uppercase tracking-widest text-signoz_robin-400">
+        <p className="m-0 text-xs font-medium uppercase tracking-widest text-[var(--l2-foreground)]">
           {option.priceLabel}
         </p>
-        <p className="m-0 mt-2 text-2xl font-medium leading-none tracking-tight text-signoz_vanilla-100 md:text-2xl">
+        <p className="m-0 mt-2 text-2xl font-medium leading-none tracking-tight text-[var(--l1-foreground)] md:text-2xl">
           {option.price}
         </p>
       </div>
@@ -58,25 +56,25 @@ export default function HomepageGetStarted() {
       data-homepage-floating-cta="Get started"
       data-homepage-floating-href="/teams/"
     >
-      <div className="mx-auto max-w-8xl border-y border-signoz_slate-400/35">
+      <div className="rule-fade-x mx-auto max-w-8xl border-y border-[var(--l2-border)]">
         <div className="grid gap-0 md:grid-cols-3">
-          <div className="flex min-h-48 flex-col items-start justify-between border-b border-signoz_slate-400/35 py-7 md:min-h-56 md:border-b-0 md:py-8 md:pr-8">
+          <div className="rule-fade-x flex min-h-48 flex-col items-start justify-between border-b border-[var(--l2-border)] py-7 md:min-h-56 md:border-b-0 md:py-8 md:pr-8">
             <div>
-              <h2 className="m-0 max-w-xs text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl md:text-5xl">
-                Get started with SigNoz Cloud.
+              <Eyebrow>Built for scale</Eyebrow>
+              <h2 className="m-0 mt-3 max-w-xs text-3xl font-medium leading-none tracking-tight text-[var(--l1-foreground)] sm:text-4xl md:text-5xl">
+                Get Started with SigNoz Cloud
               </h2>
             </div>
             <TrackingLink
-              href="/pricing/"
+              href="/teams/"
               clickType="Primary CTA"
-              clickName="Compare Plans Button"
-              clickText="Compare plans"
+              clickName="Get Started Button"
+              clickText="Get Started"
               clickLocation="Homepage Get Started Section"
-              className="block w-fit"
+              className="btn-tactile btn-tactile--primary mt-6 no-underline"
             >
-              <Button as="span" variant="legacyPrimary" withIcon>
-                Compare plans
-              </Button>
+              Get Started
+              <ArrowRight size={12} aria-hidden="true" />
             </TrackingLink>
           </div>
 

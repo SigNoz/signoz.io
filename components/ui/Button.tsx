@@ -6,6 +6,8 @@ import { ArrowUpRight } from 'lucide-react'
 
 import { cn } from 'app/lib/utils'
 
+import './tactile-button.css'
+
 // -----------------------------------------------------------------------------
 // Variants
 // -----------------------------------------------------------------------------
@@ -105,6 +107,7 @@ export interface ButtonProps
    * Opt-in split icon treatment used by the homepage redesign CTAs.
    */
   withIcon?: boolean
+  tactile?: boolean
 }
 
 type ButtonComponent = React.ForwardRefExoticComponent<
@@ -131,6 +134,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       type,
       unstyled = false,
       withIcon = false,
+      tactile = false,
       ...props
     },
     ref
@@ -182,17 +186,24 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           ? 'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !p-0 transition-colors duration-200 hover:!bg-[var(--secondary-background-hover)]'
           : ''
     const shouldRenderSplitIcon = !unstyled && withIcon && Boolean(splitIconClass) && !asChild
+    const isTactile = tactile && (mappedVariant === 'default' || mappedVariant === 'secondary')
     const resolvedClassName = unstyled
       ? className
-      : hasLegacyButtonVariant
-        ? [legacyButtonClassName, shouldRenderSplitIcon && splitIconClass, className]
-            .filter(Boolean)
-            .join(' ')
-        : cn(
-            buttonVariants({ variant: mappedVariant, size, rounded: mappedRounded }),
-            shouldRenderSplitIcon && splitIconClass,
+      : isTactile
+        ? cn(
+            'btn-tactile disabled:cursor-not-allowed disabled:opacity-50',
+            mappedVariant === 'default' ? 'btn-tactile--primary' : 'btn-tactile--secondary',
             className
           )
+        : hasLegacyButtonVariant
+          ? [legacyButtonClassName, shouldRenderSplitIcon && splitIconClass, className]
+              .filter(Boolean)
+              .join(' ')
+          : cn(
+              buttonVariants({ variant: mappedVariant, size, rounded: mappedRounded }),
+              shouldRenderSplitIcon && splitIconClass,
+              className
+            )
 
     return (
       <Comp

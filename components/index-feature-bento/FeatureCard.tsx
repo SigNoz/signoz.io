@@ -1,42 +1,94 @@
 'use client'
 
+import { useRef } from 'react'
+import Image from 'next/image'
 import { ArrowUpRight } from 'lucide-react'
 
 import TrackingLink from '@/components/TrackingLink'
 
 import type { BentoFeature } from './FeatureBentoData'
 import { FeatureVisual } from './FeatureBentoVisuals'
+import { featureBentoAssets } from './featureBentoAssets'
 
 export default function FeatureCard({ feature }: { feature: BentoFeature }) {
+  const cardRef = useRef<HTMLDivElement>(null)
+  const asset = featureBentoAssets[feature.product] ?? null
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    const card = cardRef.current
+    if (!card) return
+    const rect = card.getBoundingClientRect()
+    card.style.setProperty('--mx', `${event.clientX - rect.left}px`)
+    card.style.setProperty('--my', `${event.clientY - rect.top}px`)
+  }
+
   return (
     <div
-      className={`group relative flex min-h-[430px] w-[82dvw] max-w-md shrink-0 snap-start flex-col overflow-hidden rounded-md border border-signoz_slate-400/25 bg-signoz_ink-500 transition-[transform,border-color,box-shadow] duration-300 ease-out will-change-transform focus-within:z-20 hover:z-20 hover:scale-[1.012] hover:border-signoz_slate-400/40 hover:shadow-[0_24px_80px_rgba(0,0,0,0.38)] md:min-h-0 md:w-auto md:max-w-none ${feature.layout}`}
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      className={`group relative flex min-h-[340px] flex-col overflow-hidden rounded-md border border-[var(--l2-border)] bg-[var(--l2-background)] transition-[border-color] duration-200 focus-within:z-20 hover:z-20 hover:border-[color-mix(in_srgb,var(--l1-foreground)_16%,transparent)] ${feature.layout}`}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(255,255,255,0.06),transparent_30%),linear-gradient(180deg,rgba(11,12,14,0.12),rgba(11,12,14,0.82)_78%)]" />
-      <div className="relative z-10 p-5 sm:p-6 wide:p-7">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[2] opacity-0 transition-opacity duration-150 group-hover:opacity-70"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at center, color-mix(in srgb, var(--l2-foreground) 34%, transparent) 0.8px, transparent 1.1px)',
+          backgroundSize: '22px 22px',
+          maskImage:
+            'radial-gradient(170px circle at var(--mx, 50%) var(--my, 50%), #000 0%, transparent 100%)',
+          WebkitMaskImage:
+            'radial-gradient(170px circle at var(--mx, 50%) var(--my, 50%), #000 0%, transparent 100%)',
+        }}
+      />
+
+      <div className="relative z-[3] max-w-3xl p-5 pr-12 sm:p-6 sm:pr-14 wide:p-7">
+        <h3 className="m-0 text-xl font-normal leading-relaxed tracking-tight text-[var(--l2-foreground)] wide:text-2xl">
+          <span className="text-[var(--l1-foreground)]">{feature.product}</span> {feature.outcome}
+        </h3>
+      </div>
+
+      <div className="relative z-[1] mt-auto min-h-[120px] flex-1 overflow-hidden border-t border-[var(--l2-border)]">
+        {asset ? (
+          <>
+            <Image
+              src={asset.src}
+              alt={asset.alt}
+              fill
+              className="object-cover object-top"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 z-[2]"
+              style={{
+                background: 'linear-gradient(to bottom, transparent 25%, var(--l2-background) 96%)',
+              }}
+            />
+          </>
+        ) : (
+          <FeatureVisual visual={feature.visual} />
+        )}
+      </div>
+
+      {feature.href && (
         <TrackingLink
           aria-label={`${feature.product} ${feature.outcome}`}
-          className="group/link relative block max-w-3xl rounded pr-9 no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-signoz_robin-500/70"
+          className="absolute inset-0 z-[5] rounded-md no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary-background)]"
           clickLocation="Homepage Feature Bento"
           clickName={`${feature.product} Feature Card`}
           clickText={`${feature.product} ${feature.outcome}`}
           clickType="Feature Link"
           href={feature.href}
         >
-          <h3 className="m-0 text-2xl font-light leading-tight tracking-tight text-signoz_vanilla-100 md:text-xl wide:text-2xl">
-            <span className="text-signoz_vanilla-100 transition-colors group-hover:text-signoz_robin-100">
-              {feature.product}
-            </span>{' '}
-            <span className="text-signoz_vanilla-400/70">{feature.outcome}</span>
-          </h3>
-          <ArrowUpRight
+          <span
             aria-hidden="true"
-            className="absolute right-0 top-1 h-5 w-5 text-signoz_robin-400 opacity-75 transition-[opacity,transform,color] duration-200 group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5 group-hover/link:text-signoz_robin-300 group-hover/link:opacity-100"
-            strokeWidth={2}
-          />
+            className="absolute bottom-4 right-4 z-[6] grid h-10 w-10 place-items-center rounded-full border border-[color-mix(in_srgb,var(--l1-foreground)_8%,transparent)] bg-[var(--l3-background)] text-[var(--l1-foreground)] opacity-100 transition-[opacity,background-color] duration-150 group-hover:bg-[var(--l3-background-hover)] md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+          >
+            <ArrowUpRight size={16} strokeWidth={2} />
+          </span>
         </TrackingLink>
-      </div>
-      <FeatureVisual visual={feature.visual} />
+      )}
     </div>
   )
 }

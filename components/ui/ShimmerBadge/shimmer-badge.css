@@ -1,0 +1,117 @@
+.shimmer-badge {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  padding: 0 11px;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 999px;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--candy-light) 0 8px,
+    var(--candy-dark) 8px 16px
+  );
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--candy-ink);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shimmer-badge--right-soft {
+  border-radius: 999px 20px 20px 999px;
+}
+
+.shimmer-badge--clickable {
+  cursor: pointer;
+  box-shadow: 0 3px 0 0 var(--candy-shadow);
+  margin-bottom: 3px;
+  transition:
+    box-shadow 60ms ease,
+    margin 60ms ease;
+}
+
+.shimmer-badge--clickable:active {
+  box-shadow: 0 0 0 0 var(--candy-shadow);
+  margin-top: 3px;
+  margin-bottom: 0;
+}
+
+.shimmer-badge__label {
+  position: relative;
+  z-index: 2;
+}
+
+.shimmer-badge__shine {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  transform: translateX(-160%);
+  background: linear-gradient(
+    115deg,
+    transparent 36%,
+    rgba(255, 255, 255, 0.4) 40%,
+    rgba(255, 255, 255, 0.4) 47%,
+    transparent 51%,
+    transparent 56%,
+    rgba(255, 255, 255, 0.4) 58%,
+    rgba(255, 255, 255, 0.4) 60%,
+    transparent 64%
+  );
+}
+
+.shimmer-badge--animate .shimmer-badge__shine {
+  animation: shimmer-badge-sweep 0.7s ease-out;
+}
+
+@keyframes shimmer-badge-sweep {
+  from {
+    transform: translateX(-160%);
+  }
+  to {
+    transform: translateX(160%);
+  }
+}
+
+.shimmer-badge--green {
+  --candy-light: var(--bg-forest-400);
+  --candy-dark: var(--bg-forest-600);
+  --candy-shadow: var(--bg-forest-700);
+  --candy-ink: var(--bg-ink-400);
+}
+
+.shimmer-badge--blue {
+  --candy-light: var(--bg-robin-400);
+  --candy-dark: var(--bg-robin-600);
+  --candy-shadow: var(--bg-robin-700);
+  --candy-ink: var(--bg-base-white);
+}
+
+.shimmer-badge--pink {
+  --candy-light: var(--bg-sakura-400);
+  --candy-dark: var(--bg-sakura-600);
+  --candy-shadow: var(--bg-sakura-700);
+  --candy-ink: var(--bg-base-white);
+}
+
+.shimmer-badge--yellow {
+  --candy-light: var(--bg-amber-300);
+  --candy-dark: var(--bg-amber-600);
+  --candy-shadow: var(--bg-amber-700);
+  --candy-ink: var(--bg-ink-400);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer-badge--animate .shimmer-badge__shine {
+    animation: none;
+  }
+
+  .shimmer-badge--clickable {
+    transition: none;
+  }
+}

@@ -1,366 +1,286 @@
 'use client'
 
-import { Activity, Bot, Cable, SearchCode, ServerCog, type LucideIcon } from 'lucide-react'
-import Image, { type StaticImageData } from 'next/image'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowRight } from 'lucide-react'
+import Image from 'next/image'
+import { useEffect, useRef, useState } from 'react'
 
-import GrainientCardBackground from './GrainientCardBackground'
+import TrackingLink from '@/components/TrackingLink'
 
-type WhySigNozItem = {
-  alt: string
-  description: string
-  icon: LucideIcon
-  image: StaticImageData | string
-  imageClassName?: string
-  imageFit?: 'contain' | 'cover'
-  mobileImageClassName?: string
-  overlayImage?: string
-  title: string
-}
+import { WHY_SIGNOZ_STAGES, WHY_SIGNOZ_STEPS } from './whySignozStages'
 
-type WhySigNozItemMeasurement = {
+const FOCUS_RATIO = 0.5
+
+type StepBounds = {
   center: number
-}
-
-const MIN_REVEAL_PROGRESS = 0.32
-
-const items: WhySigNozItem[] = [
-  {
-    title: 'Debug faster with correlated signals',
-    description:
-      'Move from a latency spike to the related logs, traces, metrics, and spans without stitching together separate tools.',
-    icon: Activity,
-    image: '/img/graphics/homepage/correlation.svg',
-    imageClassName: 'object-bottom',
-    imageFit: 'contain',
-    alt: 'SigNoz Cloud view showing correlated telemetry for root cause debugging',
-  },
-  {
-    title: 'Instrument once with OpenTelemetry',
-    description:
-      'Use open standards instead of vendor SDKs, so instrumentation stays portable as your stack changes.',
-    icon: Cable,
-    image: '/img/graphics/homepage/opentelemetry.svg',
-    imageClassName: 'object-center',
-    alt: 'OpenTelemetry instrumentation flowing into SigNoz Cloud',
-  },
-  {
-    title: 'Query telemetry on a columnar store',
-    description:
-      'Use query builder, PromQL, and ClickHouse SQL on a fast columnar datastore built for high-cardinality observability data.',
-    icon: SearchCode,
-    image: '/img/graphics/homepage/columnar2.svg',
-    imageClassName: 'object-left',
-    imageFit: 'cover',
-    alt: 'Flexible query controls backed by a columnar datastore in SigNoz Cloud',
-  },
-  {
-    title: 'Give AI agents telemetry they understand',
-    description:
-      'One OpenTelemetry-native source gives agents a known schema for traces, logs, metrics, and services, so they can debug with less translation.',
-    icon: Bot,
-    image: '/img/graphics/homepage/agent-chat.svg',
-    imageClassName: 'object-center',
-    alt: 'Agent telemetry context for AI-assisted observability workflows',
-  },
-  {
-    title: 'Flexible deployment options',
-    description:
-      'Use SigNoz Cloud as a managed service, or run Self-Hosted SigNoz on infrastructure you control.',
-    icon: ServerCog,
-    image: '/img/graphics/homepage/flexible-deploy.svg',
-    imageClassName: 'object-center',
-    imageFit: 'contain',
-    mobileImageClassName: 'mx-auto h-80 w-full object-contain sm:h-96',
-    alt: 'SigNoz Cloud and Self-Hosted SigNoz deployment options',
-  },
-]
-
-function getItemClasses(index: number, activeIndex: number) {
-  if (index === activeIndex) {
-    return 'blur-0'
-  }
-
-  return 'blur-[0.6px]'
-}
-
-function clamp(value: number, min = 0, max = 1) {
-  return Math.min(Math.max(value, min), max)
-}
-
-function easeOutCubic(value: number) {
-  const normalizedValue = clamp(value)
-
-  return 1 - Math.pow(1 - normalizedValue, 3)
-}
-
-function isWhitespaceToken(token: string) {
-  return /^\s+$/.test(token)
-}
-
-function getRevealWordMetadata(text: string) {
-  const tokens = text.split(/(\s+)/).filter(Boolean)
-  const wordIndices: number[] = []
-  let wordCount = 0
-
-  tokens.forEach((token) => {
-    if (isWhitespaceToken(token)) {
-      wordIndices.push(-1)
-      return
-    }
-
-    wordIndices.push(wordCount)
-    wordCount += 1
-  })
-
-  return { tokens, wordCount, wordIndices }
-}
-
-function RevealWords({ progress, text }: { progress: number; text: string }) {
-  const { tokens, wordCount, wordIndices } = useMemo(() => getRevealWordMetadata(text), [text])
-
-  return (
-    <span aria-hidden="true">
-      {tokens.map((token, tokenIndex) => {
-        if (isWhitespaceToken(token)) {
-          return token
-        }
-
-        const wordIndex = wordIndices[tokenIndex]
-
-        const revealStart = wordCount <= 1 ? 0 : (wordIndex / (wordCount - 1)) * 0.72
-        const revealProgress = easeOutCubic((progress - revealStart) / 0.24)
-        const opacity = MIN_REVEAL_PROGRESS + revealProgress * (1 - MIN_REVEAL_PROGRESS)
-
-        return (
-          <span
-            className="transition-opacity duration-300 ease-out"
-            key={`${token}-${tokenIndex}`}
-            style={{ opacity }}
-          >
-            {token}
-          </span>
-        )
-      })}
-    </span>
-  )
-}
-
-function WhySignozImage({
-  className,
-  fill = false,
-  item,
-  loading,
-  priority,
-}: {
-  className?: string
-  fill?: boolean
-  item: WhySigNozItem
-  loading?: 'eager' | 'lazy'
-  priority?: boolean
-}) {
-  const imageClassName = className ?? item.imageClassName ?? 'object-[60%_center]'
-  const objectFitClassName = item.imageFit === 'contain' ? 'object-contain' : 'object-cover'
-
-  if (!item.overlayImage) {
-    if (fill) {
-      return (
-        <Image
-          alt=""
-          className={`${objectFitClassName} ${imageClassName}`}
-          fill
-          priority={priority}
-          src={item.image}
-        />
-      )
-    }
-
-    return (
-      <Image
-        alt={item.alt}
-        className={item.mobileImageClassName ?? 'h-auto w-full'}
-        height={430}
-        loading={loading}
-        src={item.image}
-        width={760}
-      />
-    )
-  }
-
-  return (
-    <div className={fill ? 'relative h-full w-full' : 'relative aspect-[760/640] w-full'}>
-      <Image
-        alt={fill ? '' : item.alt}
-        className="absolute left-0 top-0 h-auto w-[88%]"
-        height={302}
-        loading={fill ? undefined : loading}
-        priority={priority}
-        src={item.image}
-        width={528}
-      />
-      <Image
-        alt=""
-        aria-hidden="true"
-        className="absolute bottom-[2%] right-0 h-auto w-[74%]"
-        height={302}
-        priority={priority}
-        src={item.overlayImage}
-        width={528}
-      />
-    </div>
-  )
+  end: number
+  start: number
 }
 
 export default function WhySignoz() {
   const [activeIndex, setActiveIndex] = useState(0)
-  const [itemRevealProgresses, setItemRevealProgresses] = useState<number[]>(() =>
-    items.map((_, index) => (index === 0 ? 1 : 0))
-  )
+  const [reducedMotion, setReducedMotion] = useState(false)
+  const sectionRef = useRef<HTMLElement | null>(null)
+  const listRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Array<HTMLDivElement | null>>([])
-  const frameRef = useRef<number | null>(null)
 
   useEffect(() => {
-    let itemMeasurements: Array<WhySigNozItemMeasurement | null> = []
+    const section = sectionRef.current
+    const list = listRef.current
+    if (!section || !list) return
 
-    const measureItems = () => {
-      itemMeasurements = itemRefs.current.map((item) => {
+    const desktopQuery = window.matchMedia('(min-width: 1024px)')
+    const reducedQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+    let bounds: Array<StepBounds | null> = []
+    let frameId: number | null = null
+    let engaged = false
+    let visible = false
+
+    const measure = () => {
+      const centers = itemRefs.current.map((item) => {
         if (!item) return null
-
         const rect = item.getBoundingClientRect()
-
         return {
-          center: rect.top + window.scrollY + rect.height * 0.5,
+          center: rect.top + window.scrollY + rect.height / 2,
+          half: rect.height / 2,
+        }
+      })
+
+      bounds = centers.map((measurement, index) => {
+        if (!measurement) return null
+        const previous = centers[index - 1]
+        const next = centers[index + 1]
+        return {
+          center: measurement.center,
+          start: previous
+            ? (previous.center + measurement.center) / 2
+            : measurement.center - measurement.half,
+          end: next
+            ? (measurement.center + next.center) / 2
+            : measurement.center + measurement.half,
         }
       })
     }
 
-    const updateActiveItem = () => {
-      const focusLine = window.scrollY + window.innerHeight * 0.5
-      const focusBand = Math.max(window.innerHeight * 0.48, 420)
+    const update = () => {
+      frameId = null
+      if (!engaged) return
+
+      const focusLine = window.scrollY + window.innerHeight * FOCUS_RATIO
       let nextIndex = 0
       let nearestDistance = Number.POSITIVE_INFINITY
-      const nextRevealProgresses = items.map(() => 0)
 
-      itemMeasurements.forEach((measurement, index) => {
-        if (!measurement) return
-
-        const distance = Math.abs(measurement.center - focusLine)
-        const focusAmount = Math.max(0, 1 - distance / focusBand)
-
-        nextRevealProgresses[index] = easeOutCubic(Math.min(focusAmount * 1.18, 1))
-
+      bounds.forEach((stepBounds, index) => {
+        if (!stepBounds) return
+        const distance = Math.abs(stepBounds.center - focusLine)
         if (distance < nearestDistance) {
           nearestDistance = distance
           nextIndex = index
         }
       })
 
+      const active = bounds[nextIndex]
+      const progress =
+        active && active.end > active.start
+          ? Math.min(Math.max((focusLine - active.start) / (active.end - active.start), 0), 1)
+          : 0
+
+      list.style.setProperty('--why-stage-progress', progress.toFixed(4))
       setActiveIndex(nextIndex)
-      nextRevealProgresses[nextIndex] = Math.max(nextRevealProgresses[nextIndex], 0.72)
-      setItemRevealProgresses(nextRevealProgresses)
-      frameRef.current = null
     }
 
-    const requestActiveUpdate = () => {
-      if (frameRef.current !== null) return
-
-      frameRef.current = window.requestAnimationFrame(updateActiveItem)
+    const requestUpdate = () => {
+      if (frameId === null && engaged) frameId = window.requestAnimationFrame(update)
     }
 
-    const refreshMeasurements = () => {
-      measureItems()
-      requestActiveUpdate()
+    const handleResize = () => {
+      if (!engaged) return
+      measure()
+      requestUpdate()
     }
 
-    const resizeObserver =
-      'ResizeObserver' in window ? new ResizeObserver(refreshMeasurements) : undefined
+    const engage = () => {
+      if (engaged) return
+      engaged = true
+      measure()
+      requestUpdate()
+      window.addEventListener('scroll', requestUpdate, { passive: true })
+      window.addEventListener('resize', handleResize)
+    }
 
-    measureItems()
-    updateActiveItem()
-    itemRefs.current.forEach((item) => {
-      if (item) resizeObserver?.observe(item)
-    })
-    resizeObserver?.observe(document.body)
-    window.addEventListener('scroll', requestActiveUpdate, { passive: true })
-    window.addEventListener('resize', refreshMeasurements)
+    const disengage = () => {
+      if (!engaged) return
+      engaged = false
+      window.removeEventListener('scroll', requestUpdate)
+      window.removeEventListener('resize', handleResize)
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId)
+        frameId = null
+      }
+    }
+
+    const sync = () => {
+      setReducedMotion(reducedQuery.matches)
+      if (visible && desktopQuery.matches && !reducedQuery.matches) engage()
+      else disengage()
+    }
+
+    const intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        visible = entries.some((entry) => entry.isIntersecting)
+        sync()
+      },
+      { rootMargin: '25% 0px' }
+    )
+    intersectionObserver.observe(section)
+
+    const resizeObserver = 'ResizeObserver' in window ? new ResizeObserver(handleResize) : undefined
+    resizeObserver?.observe(list)
+
+    desktopQuery.addEventListener('change', sync)
+    reducedQuery.addEventListener('change', sync)
 
     return () => {
-      window.removeEventListener('scroll', requestActiveUpdate)
-      window.removeEventListener('resize', refreshMeasurements)
+      disengage()
+      intersectionObserver.disconnect()
       resizeObserver?.disconnect()
-
-      if (frameRef.current !== null) {
-        window.cancelAnimationFrame(frameRef.current)
-      }
+      desktopQuery.removeEventListener('change', sync)
+      reducedQuery.removeEventListener('change', sync)
     }
   }, [])
 
+  const scrollToStep = (index: number) => {
+    const item = itemRefs.current[index]
+    if (!item) return
+    const rect = item.getBoundingClientRect()
+    window.scrollTo({
+      top: rect.top + window.scrollY + rect.height / 2 - window.innerHeight * FOCUS_RATIO,
+      behavior: reducedMotion ? 'auto' : 'smooth',
+    })
+  }
+
+  const displayIndex = reducedMotion ? 0 : activeIndex
+
   return (
     <section
-      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 overflow-clip bg-signoz_ink-500 px-5 py-16 text-signoz_vanilla-100 sm:px-6 md:py-24 lg:px-20 lg:py-28 wide:max-w-8xl wide:px-0"
+      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 overflow-clip bg-[var(--background)] px-5 py-16 text-[var(--l1-foreground)] sm:px-6 md:py-24 lg:px-20 lg:py-28 wide:max-w-8xl wide:px-0"
       data-homepage-floating-cta="Start sending telemetry in 20 minutes"
       data-homepage-floating-href="/docs/install/"
+      ref={sectionRef}
     >
       <div className="relative z-10 mx-auto grid max-w-8xl gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(430px,1fr)] lg:gap-20">
         <div className="min-w-0">
           <div className="sticky top-28 isolate z-20 pb-8 pt-2">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -top-40 bottom-0 left-1/2 z-0 w-[160dvw] -translate-x-1/2 bg-signoz_ink-500"
+              className="pointer-events-none absolute -top-40 bottom-0 left-1/2 z-0 w-[160dvw] -translate-x-1/2 bg-[var(--background)]"
             />
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 top-full z-0 h-40 w-[160dvw] -translate-x-1/2 bg-gradient-to-b from-signoz_ink-500 to-transparent"
+              className="pointer-events-none absolute left-1/2 top-full z-0 h-40 w-[160dvw] -translate-x-1/2 bg-gradient-to-b from-[var(--background)] to-transparent"
             />
-            <h2 className="relative z-10 m-0 max-w-lg text-3xl font-medium leading-none text-signoz_vanilla-100 sm:text-4xl sm:leading-none md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-6xl">
+            <h2 className="relative z-10 m-0 max-w-lg text-3xl font-medium leading-none text-[var(--l1-foreground)] sm:text-4xl sm:leading-none md:text-5xl lg:text-4xl xl:text-5xl 2xl:text-6xl">
               <span className="xl:whitespace-nowrap">Fast Troubleshooting.</span>
               <br />
-              <span className="text-signoz_vanilla-400 xl:whitespace-nowrap">
+              <span className="text-[var(--l3-foreground)] xl:whitespace-nowrap">
                 No Context Switching.
               </span>
             </h2>
-            <div className="relative z-10 mt-9 h-px w-full bg-signoz_slate-100" />
+            <div className="relative z-10 mt-9 h-px w-full bg-[var(--l2-border)]" />
           </div>
 
-          <div className="pb-0 pt-14 lg:pb-[24dvh] lg:pt-0">
-            {items.map((item, index) => {
-              const Icon = item.icon
+          <div className="pb-0 pt-10 lg:pb-[24dvh] lg:pt-0" ref={listRef}>
+            {WHY_SIGNOZ_STEPS.map((step, index) => {
+              const Icon = step.icon
               const isActive = index === activeIndex
-              const revealProgress = itemRevealProgresses[index] ?? (isActive ? 1 : 0)
+              const expanded = isActive || reducedMotion
+              const revealClass = `grid grid-rows-[1fr] transition-[grid-template-rows,opacity] duration-500 ease-out ${
+                expanded ? 'lg:grid-rows-[1fr] lg:opacity-100' : 'lg:grid-rows-[0fr] lg:opacity-0'
+              }`
 
               return (
                 <div
-                  aria-current={index === activeIndex ? 'step' : undefined}
-                  className={`grid min-h-44 grid-cols-[40px_minmax(0,1fr)] gap-6 border-b border-signoz_slate-100 py-8 transition-[filter] duration-500 ease-out lg:min-h-72 lg:auto-rows-max lg:content-end lg:py-14 ${getItemClasses(
-                    index,
-                    activeIndex
-                  )}`}
-                  key={item.title}
+                  aria-current={isActive ? 'step' : undefined}
+                  className="group relative py-8 transition-[padding] duration-500 ease-out lg:py-10"
+                  key={step.key}
                   ref={(node) => {
                     itemRefs.current[index] = node
                   }}
                 >
                   <div
-                    className="pt-1 text-signoz_robin-300 transition-opacity duration-300 ease-out"
-                    style={{ opacity: MIN_REVEAL_PROGRESS + revealProgress * 0.68 }}
-                  >
-                    <Icon aria-hidden="true" className="h-6 w-6" strokeWidth={1.7} />
-                  </div>
-                  <div>
-                    <h3 className="m-0 text-2xl font-semibold leading-7 text-signoz_vanilla-100">
-                      <span className="sr-only">{item.title}</span>
-                      <RevealWords progress={revealProgress} text={item.title} />
-                    </h3>
-                    <p className="m-0 mt-3 max-w-lg text-base font-medium leading-7 text-signoz_vanilla-300">
-                      <span className="sr-only">{item.description}</span>
-                      <RevealWords
-                        progress={Math.max(0, revealProgress - 0.12) / 0.88}
-                        text={item.description}
+                    aria-hidden="true"
+                    className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-[var(--l2-border)] to-transparent"
+                  />
+                  <div
+                    aria-hidden="true"
+                    className={`absolute left-0 top-0 hidden h-px bg-gradient-to-r from-transparent via-[var(--l3-foreground)] to-[var(--l1-foreground)] transition-opacity duration-300 lg:block ${
+                      isActive && !reducedMotion ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    style={{
+                      width: isActive ? 'calc(var(--why-stage-progress, 0) * 100%)' : '0%',
+                    }}
+                  />
+
+                  <div className={revealClass}>
+                    <div className="min-h-0 overflow-hidden">
+                      <Icon
+                        aria-hidden="true"
+                        className="mb-5 h-6 w-6 text-[var(--l1-foreground)]"
+                        strokeWidth={1.6}
                       />
-                    </p>
+                    </div>
                   </div>
-                  <div className="col-span-2 mt-5 overflow-hidden rounded-md border border-signoz_slate-100 bg-signoz_slate-400 shadow-xl lg:hidden">
-                    <WhySignozImage item={item} loading={index === 0 ? 'eager' : 'lazy'} />
+
+                  <h3 className="m-0 text-lg font-medium leading-6">
+                    <button
+                      className={`m-0 cursor-pointer border-0 bg-transparent p-0 text-left text-lg font-medium leading-6 transition-colors duration-300 ${
+                        expanded
+                          ? 'text-[var(--l1-foreground)]'
+                          : 'text-[var(--l1-foreground)] lg:text-[var(--l3-foreground)] lg:group-hover:text-[var(--l1-foreground)]'
+                      }`}
+                      onClick={() => scrollToStep(index)}
+                      type="button"
+                    >
+                      {step.title}
+                    </button>
+                  </h3>
+                  <p
+                    className={`m-0 mt-2.5 max-w-md text-sm leading-6 text-[var(--l2-foreground)] transition-opacity duration-300 ${
+                      expanded ? '' : 'lg:opacity-50'
+                    }`}
+                  >
+                    {step.description}
+                  </p>
+
+                  {step.cta ? (
+                    <div className={`${revealClass} ${expanded ? 'lg:delay-75' : ''}`}>
+                      <div className="min-h-0 overflow-hidden">
+                        <div className="pt-5">
+                          <TrackingLink
+                            className="btn-tactile btn-tactile--secondary no-underline"
+                            clickLocation="Homepage Why SigNoz"
+                            clickName={step.cta.clickName}
+                            clickText={step.cta.label}
+                            clickType="Secondary CTA"
+                            href={step.cta.href}
+                          >
+                            {step.cta.label}
+                            <ArrowRight aria-hidden="true" size={12} />
+                          </TrackingLink>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-6 overflow-hidden rounded-md border border-[var(--l1-border)] bg-[var(--l2-background)] lg:hidden">
+                    <Image
+                      alt={step.alt}
+                      className="h-auto w-full"
+                      height={430}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      src={step.image}
+                      width={760}
+                    />
                   </div>
                 </div>
               )
@@ -372,29 +292,38 @@ export default function WhySignoz() {
           <div className="sticky top-24 flex h-[calc(100dvh-124px)] max-h-[760px] min-h-96 items-center">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 top-1/2 h-[70%] w-[84%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-[radial-gradient(ellipse_at_center,rgba(190,198,207,0.12)_0%,rgba(86,95,104,0.08)_42%,rgba(8,9,10,0)_72%)] blur-2xl"
-            />
-            <div className="relative aspect-[0.92] w-full overflow-hidden rounded-2xl bg-[#010409] shadow-[0_32px_90px_rgba(0,0,0,0.52)]">
-              <div className="absolute inset-0 overflow-hidden">
-                {items.map((item, index) => (
+              className="relative h-full w-full overflow-hidden rounded-xl border border-[var(--l1-border)] bg-[var(--l1-background)]"
+              data-markdown-ignore
+            >
+              <div className="pointer-events-none absolute inset-0 opacity-60 [background-image:radial-gradient(circle,var(--l2-border)_1px,transparent_1px)] [background-size:22px_22px]" />
+
+              {WHY_SIGNOZ_STAGES.map((stage, index) => {
+                const isStageActive = index === displayIndex
+
+                return (
                   <div
-                    aria-hidden={index !== activeIndex}
-                    className="absolute inset-x-0 h-full transition-[top] duration-700 ease-out"
-                    key={item.title}
-                    style={{ top: `${(index - activeIndex) * 100}%` }}
+                    className={`absolute inset-0 flex flex-col justify-end p-6 pb-10 transition-[opacity,transform] duration-700 ease-out motion-reduce:transition-none ${
+                      isStageActive
+                        ? 'translate-y-0 opacity-100'
+                        : 'pointer-events-none translate-y-6 opacity-0'
+                    }`}
+                    key={stage.key}
                   >
-                    {index === 0 && activeIndex === 0 ? (
-                      <>
-                        <GrainientCardBackground className="absolute inset-0 opacity-70" />
-                        <div className="absolute inset-0 bg-signoz_ink-500/35" />
-                      </>
-                    ) : null}
-                    <div className="relative z-10 h-full">
-                      <WhySignozImage fill item={item} priority={index === 0} />
-                    </div>
+                    {stage.image ? (
+                      <div className="relative h-full w-full">
+                        <Image
+                          alt=""
+                          className="object-contain object-bottom"
+                          fill
+                          src={stage.image}
+                        />
+                      </div>
+                    ) : (
+                      <stage.Visual isActive={isStageActive} />
+                    )}
                   </div>
-                ))}
-              </div>
+                )
+              })}
             </div>
           </div>
         </div>

@@ -5,6 +5,75 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes hero-copy-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(18px);
+  }
+  45% {
+    opacity: 0.85;
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@layer utilities {
+  /* Section rules that fade toward their ends; pairs with border-* utilities. */
+  .rule-fade-x {
+    border-image: linear-gradient(
+        to right,
+        transparent,
+        var(--l2-border) 8%,
+        var(--l2-border) 92%,
+        transparent
+      )
+      1;
+  }
+
+  .rule-fade-y {
+    border-image: linear-gradient(
+        to bottom,
+        transparent,
+        var(--l2-border) 8%,
+        var(--l2-border) 92%,
+        transparent
+      )
+      1;
+  }
+
+  /* Hero copy entrance; CSS-only so the LCP text paints before hydration. */
+  .hero-copy-in {
+    animation: hero-copy-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--hero-copy-delay, 0s);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-copy-in {
+      animation: none;
+    }
+  }
+
+  /* Vertical column divider on the element's left edge. */
+  .vrule-solid {
+    position: relative;
+  }
+
+  .vrule-solid::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--l2-border);
+  }
+}
+
 .task-list-item::before {
   @apply hidden;
 }

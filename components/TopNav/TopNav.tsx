@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Menu, X, ArrowRight } from 'lucide-react'
-import { usePathname, useRouter } from 'next/navigation'
+import { Menu, X } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 import { isHubShellRoute } from '@/utils/opentelemetryHub'
 import SigNozLogo from '@/public/img/SigNozLogo-orange.svg'
@@ -10,8 +10,8 @@ import SearchButtonDeferred from '../SearchButtonDeferred'
 import GitHubStars from '../GithubStars/GithubStars'
 import Tabs from '@/components/ResourceCenter/Tabs'
 import TrackingLink from '@/components/TrackingLink'
-import TrackingButton from '@/components/TrackingButton'
-import { Button } from '@/components/ui/Button'
+import NavCtaButtons from './NavCtaButtons'
+import { NAV_PILL_CLASS } from './NavPill'
 import { cn } from 'app/lib/utils'
 import { TABS, TAB_PATHNAMES } from './constants'
 import { useNavVisibility } from './useNavVisibility'
@@ -26,7 +26,6 @@ import { useMobileDocsSidebar } from '@/components/DocsSidebar/MobileDocsSidebar
 
 export default function TopNav() {
   const pathname = usePathname()
-  const router = useRouter()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeTab, setActiveTab] = useState(TABS.GUIDES)
@@ -128,7 +127,7 @@ export default function TopNav() {
                   {visibility.showDocs && (
                     <TrackingLink
                       href="/docs/introduction/"
-                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-[color-mix(in_srgb,var(--accent-primary)_15%,transparent)]"
+                      className={NAV_PILL_CLASS}
                       clickType="Nav Click"
                       clickName="Docs Link"
                       clickText="Docs"
@@ -142,7 +141,7 @@ export default function TopNav() {
                   {visibility.showPricing && (
                     <TrackingLink
                       href="/pricing/"
-                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-[color-mix(in_srgb,var(--accent-primary)_15%,transparent)]"
+                      className={NAV_PILL_CLASS}
                       clickType="Nav Click"
                       clickName="Pricing Link"
                       clickText="Pricing"
@@ -154,7 +153,7 @@ export default function TopNav() {
                   {visibility.showCustomers && (
                     <TrackingLink
                       href="/customers/"
-                      className="flex items-center truncate rounded-full px-2.5 py-1 text-sm font-normal transition-colors hover:bg-[color-mix(in_srgb,var(--accent-primary)_15%,transparent)]"
+                      className={NAV_PILL_CLASS}
                       clickType="Nav Click"
                       clickName="Customers Link"
                       clickText="Customers"
@@ -175,60 +174,7 @@ export default function TopNav() {
               <>
                 <SearchButtonDeferred />
                 {visibility.showGithubStars && <GitHubStars location="Top Navbar" />}
-                {visibility.showSignInGetStarted && (
-                  <>
-                    <TrackingButton
-                      variant="secondary"
-                      rounded="default"
-                      className="box-border flex h-8 items-center rounded-md bg-[var(--l3-background)] px-3 text-sm font-normal text-[var(--l1-foreground)] no-underline outline-none hover:bg-[var(--l3-background-hover)] hover:text-[var(--l1-foreground-hover)]"
-                      clickType="Secondary CTA"
-                      clickName="Sign In Button"
-                      clickText="Sign In"
-                      clickLocation="Top Navbar"
-                      onClick={() => router.push('/login')}
-                    >
-                      Sign In
-                    </TrackingButton>
-                    <TrackingLink
-                      href="/teams/"
-                      clickType="Primary CTA"
-                      clickName="Sign Up Button"
-                      clickText="Get Started - Free"
-                      clickLocation="Top Navbar"
-                    >
-                      <Button
-                        asChild
-                        variant="default"
-                        rounded="full"
-                        className={cn(
-                          'homepage-button !flex !h-8 !gap-0 !overflow-hidden !rounded !bg-[var(--accent-primary)] !p-0 transition-colors duration-200 hover:!bg-[var(--accent-primary-hover)] active:!bg-[color-mix(in_srgb,var(--accent-primary)_80%,var(--base-black))]',
-                          'start-free-trial-btn h-8 gap-1.5 px-4 text-sm font-medium text-[var(--base-white)] hover:text-[var(--base-white)]'
-                        )}
-                      >
-                        <span id="btn-get-started-website-navbar">
-                          <span
-                            className={cn(
-                              'homepage-button__label flex !h-full min-w-0 !flex-1 items-center justify-center gap-1.5 !whitespace-nowrap !px-3',
-                              '[&_svg:not(.animate-spin)]:hidden'
-                            )}
-                          >
-                            Get Started - Free
-                            <ArrowRight size={14} />
-                          </span>
-                          <span
-                            className={cn(
-                              'homepage-button__icon hidden !h-full !w-8 !shrink-0 !items-center !justify-center !rounded !text-[var(--base-white)]',
-                              '!flex !bg-[var(--accent-primary-hover)]'
-                            )}
-                            aria-hidden="true"
-                          >
-                            <ArrowRight size={16} strokeWidth={2.5} />
-                          </span>
-                        </span>
-                      </Button>
-                    </TrackingLink>
-                  </>
-                )}
+                {visibility.showSignInGetStarted && <NavCtaButtons location="Top Navbar" />}
               </>
             )}
 

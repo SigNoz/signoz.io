@@ -205,6 +205,14 @@ type HomepageHeroVariant =
 type HomepageHeroFeatureValue = HomepageHeroVariant | boolean
 
 async function getHomepageHeroVariant(): Promise<HomepageHeroVariant> {
+  const forcedVariant = process.env.HOMEPAGE_HERO_VARIANT
+  if (
+    forcedVariant === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT ||
+    forcedVariant === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.CONTROL
+  ) {
+    return forcedVariant
+  }
+
   const defaultVariant: HomepageHeroVariant =
     process.env.NODE_ENV === 'development'
       ? EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
@@ -239,7 +247,7 @@ export default async function Page() {
   return (
     <>
       <JsonLdScript data={homepageStructuredData} />
-      <div className="relative mt-[-56px] bg-signoz_ink-500 ">
+      <div className="relative mt-[-56px] bg-[var(--l1-background)]">
         {isControlVariant ? (
           <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
         ) : null}
