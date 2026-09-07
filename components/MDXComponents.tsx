@@ -25,6 +25,7 @@ import InterlinkCard from './InterlinkCard/InterlinkCard'
 import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonitoring/GetStartedInfrastructureMonitoring'
 import Listicle from './Listicle/Listicle'
 import ListicleDirectory from './ListicleDirectory/ListicleDirectory'
+import DocsCtaCard from './DocsCtaCard/DocsCtaCard'
 import MDXButton from './MDXButton/MDXButton'
 import HostingDecision from './shared/HostingDecision'
 import CommonPrerequisites from './shared/CommonPrerequisites'
@@ -118,6 +119,7 @@ export const components = {
   GetStartedInfrastructureMonitoring,
   Listicle,
   ListicleDirectory,
+  DocsCtaCard,
   MDXButton,
   HostingDecision,
   ArticleSeriesBottom,

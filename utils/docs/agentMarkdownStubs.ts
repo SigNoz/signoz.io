@@ -36,6 +36,7 @@ export const KNOWN_AGENT_MDX_COMPONENT_NAMES = [
   'Admonition',
   'DashboardActions',
   'DocCard',
+  'DocsCtaCard',
   'DocCardContainer',
   'Figure',
   'HostingDecision',
@@ -471,6 +472,8 @@ const createKnownComponentStubs = (
       'SigNoz Cloud region and endpoint reference is available in the rendered docs.'
     )
   },
+  // Marketing CTA: no informational value for agents reading the docs as markdown.
+  DocsCtaCard: () => React.createElement(React.Fragment, null),
   HostingDecision: createItemListStub([...HOSTING_DECISION_ITEMS], 'Hosting Options'),
   Listicle: createListicleItemListStub(listicleConfigs),
   ListicleDirectory: createListicleItemListStub(listicleConfigs),
