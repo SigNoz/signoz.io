@@ -11,6 +11,14 @@ test('detectBotFromUserAgent identifies known AI assistant user agents as bots',
   assert.equal(detectBotFromUserAgent('OpenAI-Codex').isBot, true)
 })
 
+test('detectBotFromUserAgent identifies headless Chrome as a bot', async () => {
+  const result = detectBotFromUserAgent(
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/126.0.0.0 Safari/537.36'
+  )
+  assert.equal(result.isBot, true)
+  assert.equal(result.botType, 'headlesschrome')
+})
+
 test('detectBotFromUserAgent does not flag regular browser or empty user agents', async () => {
   assert.equal(
     detectBotFromUserAgent(
