@@ -272,7 +272,7 @@ OpenTelemetry defines `TRACEPARENT` as the carrier for context between processes
 
 ### Step 1: Write the workload script
 
-```js:child.cjs
+```js:child.cjs defaultCollapsed
 const { context, propagation, trace } = require('@opentelemetry/api')
 const { NodeSDK } = require('@opentelemetry/sdk-node')
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
@@ -280,21 +280,32 @@ const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
 const sdk = new NodeSDK({ traceExporter: new OTLPTraceExporter() })
 sdk.start()
 
-const parent = propagation.extract(context.active(), {
-  traceparent: process.env.TRACEPARENT,
-})
+async function main() {
+  const parent = propagation.extract(context.active(), {
+    traceparent: process.env.TRACEPARENT,
+  })
 
-const tracer = trace.getTracer('workload')
-context.with(parent, () => {
-  const span = tracer.startSpan('generated code')
-  span.setAttribute('workload.rows', 42)
-  span.end()
-})
+  const tracer = trace.getTracer('workload')
+  context.with(parent, () => {
+    const span = tracer.startSpan('generated code')
+    span.setAttribute('workload.rows', 42)
+    span.end()
+  })
+}
 
-sdk.shutdown()
+main()
+  .catch((error) => {
+    console.error(error)
+    process.exitCode = 1
+  })
+  .finally(async () => {
+    await sdk.shutdown()
+  })
 ```
 
 The workload takes the same three environment variables as the orchestrator. The orchestrator passes them in through `runCommand`.
+
+The flush rule from [Step 4](#step-4-run-your-orchestrator) applies here too. A `.cjs` file cannot use top-level `await`, so the shutdown goes in the `finally` of a `main()` chain. Calling `sdk.shutdown()` on its own leaves the promise unhandled, which turns an export failure into an unhandled rejection instead of a logged error.
 
 Use `NodeSDK` here and not a bare `NodeTracerProvider`. Only `NodeSDK` runs the resource detectors that read `OTEL_SERVICE_NAME`. A bare provider reports every span under `service.name = unknown_service:node`.
 
