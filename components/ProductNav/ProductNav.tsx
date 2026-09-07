@@ -57,7 +57,7 @@ export default function ProductNav() {
   return (
     <div className="fixed left-0 right-0 top-[56px] z-10">
       <header className="header-bg mx-auto box-border h-[56px] w-full border-b border-[var(--l1-border)] text-[var(--l1-foreground)] backdrop-blur-[20px]">
-        <div className="mx-auto h-fit max-w-8xl overflow-x-auto">
+        <div className="mx-auto h-fit max-w-8xl overflow-x-auto xl:max-[1728px]:max-w-[80dvw]">
           <nav
             className="mb-0 flex h-[55px] gap-3 pl-0 text-center text-sm font-medium text-[var(--l2-foreground)] sm:gap-6"
             aria-label="Product Navigation"

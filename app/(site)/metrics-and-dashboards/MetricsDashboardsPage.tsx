@@ -230,7 +230,7 @@ const GetStartedBanner: React.FC = () => {
 const MetricsDashboards: React.FC = () => {
   return (
     <FeaturePageLayout>
-      <div className="mx-auto w-full md:w-[80vw]">
+      <div className="mx-auto w-full">
         <Header />
         <TrustedByTeams page="MetricsDashboards" />
 
