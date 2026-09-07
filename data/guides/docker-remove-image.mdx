@@ -1,7 +1,7 @@
 ---
 title: "How to Remove Docker Images? docker image rm"
 meta_title: "How to Remove Docker Images? docker image rm"
-date: 2026-09-03
+date: 2026-09-07
 tags: [Docker, Image]
 authors: [saurabh_patil]
 description: "Remove Docker images with docker image rm. Use docker image prune for dangling images or add -a to delete all images unused by containers."
@@ -72,7 +72,7 @@ The removal can fail if a container still references the image, the image ID has
 
 ### Error: the image is used by a container
 
-Docker will not remove an image if an existing container still uses it. This applies to stopped containers as well as running ones.
+Docker will not remove an image if an existing container still uses it. This applies to stopped containers as well as running ones. See the [Docker container lifecycle](https://signoz.io/blog/docker-container-lifecycle/) for the differences between stopping and removing a container.
 
 For example, trying to remove the `alpine:3.21` image while a container was using it returns a conflict error:
 
@@ -284,6 +284,8 @@ For routine cleanup, `docker image prune -a` is usually the better choice becaus
 ## Wrapping Up
 
 Use `docker image rm` when you know which image you want to delete. Use `docker image prune` for dangling images, and add `-a` when you also want to remove unused tagged images. Start with the narrowest command that solves the problem, especially on shared or production hosts.
+
+If disk space is still low after image cleanup, check whether container logs are responsible and follow the guide to [clear Docker logs](https://signoz.io/guides/docker-clear-logs/).
 
 Cleanup handles the images already occupying space. For ongoing protection, monitor the filesystem that backs Docker’s storage and alert on `system.filesystem.usage` before it reaches capacity. The [OpenTelemetry Host Metrics Receiver](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/) collects this metric together with CPU, memory, disk I/O, and network data.
 
