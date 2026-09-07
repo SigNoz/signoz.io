@@ -83,7 +83,7 @@ The `env_vars` values reach every process in the sandbox, so the OpenTelemetry S
 
 ### Step 2: Instrument the code that runs inside the sandbox
 
-This is ordinary OpenTelemetry setup apart from the resource attributes, which read environment variables Daytona injects into every sandbox. Use them to scope telemetry to one sandbox later.
+This is ordinary OpenTelemetry setup apart from the resource attributes, which read environment variables Daytona injects into every sandbox. Use them to scope telemetry to one sandbox later. The service name needs no line of its own, because `Resource.create()` reads `OTEL_SERVICE_NAME` from the environment you set in Step 1.
 
 ```python:sandbox_app.py minimap defaultCollapsed
 import logging
@@ -101,9 +101,10 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
+# service.name is not set here: Resource.create() runs OpenTelemetry's
+# environment detector, which picks up the OTEL_SERVICE_NAME set in Step 1.
 resource = Resource.create(
     {
-        "service.name": os.environ.get("OTEL_SERVICE_NAME", "<your-service-name>"),
         "daytona.sandbox.id": os.environ.get("DAYTONA_SANDBOX_ID", ""),
         "daytona.organization.id": os.environ.get("DAYTONA_ORGANIZATION_ID", ""),
         "daytona.region.id": os.environ.get("DAYTONA_REGION_ID", ""),
