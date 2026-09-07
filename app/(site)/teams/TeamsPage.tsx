@@ -201,9 +201,9 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
   return (
     <div className="mx-auto w-full max-w-md">
       <div className="mb-8">
-        <h1 className="mb-2 text-2xl font-medium text-white">Get started with SigNoz</h1>
+        <h1 className="mb-2 text-2xl font-medium text-white">Get started with SigNoz Cloud</h1>
         <p className="text-sm text-signoz_vanilla-100/70">
-          Experience SigNoz with 30-day free trial. No credit card required.
+          Create a managed SigNoz Cloud workspace with a 30-day free trial. No credit card required.
         </p>
       </div>
 

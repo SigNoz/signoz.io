@@ -36,8 +36,9 @@ const Header: React.FC = () => {
       }
       description={
         <>
-          Automatically detect external API calls using OpenTelemetry semantic conventions. <br />{' '}
-          Click any metric to view the service making the call or the underlying trace.
+          SigNoz Cloud automatically detects external API calls using OpenTelemetry semantic
+          conventions. <br /> Click any metric to view the service making the call or the underlying
+          trace.
         </>
       }
       buttons={EXTERNAL_APIS_HEADER_BUTTONS}

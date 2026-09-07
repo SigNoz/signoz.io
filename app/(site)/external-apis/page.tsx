@@ -7,17 +7,17 @@ export const metadata: Metadata = {
     absolute: 'External APIs - Monitor External API Calls Powered by OpenTelemetry | SigNoz',
   },
   openGraph: {
-    title: 'External APIs - Monitor External API Calls Powered by OpenTelemetry | SigNoz',
+    title: 'External APIs - Monitor External API Calls Powered by OpenTelemetry | SigNoz Cloud',
     description:
-      'Monitor External API calls with SigNoz. Automatically detect domains, endpoints, latency and error rates using OpenTelemetry for complete service correlation.',
+      'Monitor external API calls with SigNoz Cloud. Automatically detect domains, endpoints, latency, and error rates using OpenTelemetry for complete service correlation.',
     images: '/img/platform/ExternalApisMeta.webp',
   },
   description:
-    'Monitor External API calls with SigNoz. Automatically detect domains, endpoints, latency and error rates using OpenTelemetry for complete service correlation.',
+    'Monitor external API calls with SigNoz Cloud. Automatically detect domains, endpoints, latency, and error rates using OpenTelemetry for complete service correlation.',
   twitter: {
-    title: 'External APIs - Monitor External API Calls Powered by OpenTelemetry | SigNoz',
+    title: 'External APIs - Monitor External API Calls Powered by OpenTelemetry | SigNoz Cloud',
     description:
-      'Monitor External API calls with SigNoz. Automatically detect domains, endpoints, latency and error rates using OpenTelemetry for complete service correlation.',
+      'Monitor external API calls with SigNoz Cloud. Automatically detect domains, endpoints, latency, and error rates using OpenTelemetry for complete service correlation.',
     images: '/img/platform/ExternalApisMeta.webp',
   },
 }

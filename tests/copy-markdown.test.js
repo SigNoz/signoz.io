@@ -6,7 +6,11 @@ const { buildCopyMarkdownDocument, expandTabsInHast } = loadTsModule(
   'utils/docs/buildCopyMarkdownFromRendered.ts'
 )
 const { hastToMarkdown } = loadTsModule('utils/docs/markdownCore.ts')
-const { MORE_DOCS_POINTER } = loadTsModule('utils/docs/buildMarkdownDocument.ts')
+const { MORE_DOCS_POINTER, LLMS_TXT_DIRECTIVE } = loadTsModule(
+  'utils/docs/buildMarkdownDocument.ts'
+)
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 test('expandTabsInHast expands rendered tabs into markdown sections', async () => {
   const { unified } = await import('unified')
@@ -85,4 +89,15 @@ test('buildCopyMarkdownDocument includes tag definitions and more docs footer', 
   assert.match(markdown, /^# Docs Title$/m)
   assert.match(markdown, /^Tag definitions:$/m)
   assert.match(markdown, new RegExp(`${MORE_DOCS_POINTER}$`))
+})
+
+test('buildCopyMarkdownDocument emits the llms.txt directive exactly once, near the top', () => {
+  const markdown = buildCopyMarkdownDocument('Body content.', {
+    title: 'Docs Title',
+    tags: ['Self-Host'],
+  })
+
+  const matches = markdown.match(new RegExp(escapeRegExp(LLMS_TXT_DIRECTIVE), 'g')) || []
+  assert.equal(matches.length, 1)
+  assert.equal(markdown.indexOf(LLMS_TXT_DIRECTIVE) < markdown.indexOf('Body content.'), true)
 })

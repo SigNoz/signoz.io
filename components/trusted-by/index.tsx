@@ -95,7 +95,7 @@ export const TrustedByTeams = ({ page, className, variant = 'default' }: Trusted
         >
           <div className="mb-5 flex flex-col items-center text-center">
             <TrackingLink
-              href="/case-study/"
+              href="/customers/"
               id={customerStoriesId}
               clickType="Secondary CTA"
               clickName="Customer Stories Link"

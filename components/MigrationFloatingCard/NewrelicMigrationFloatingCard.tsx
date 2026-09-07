@@ -62,7 +62,7 @@ const NewrelicMigrationFloatingCard: React.FC = () => {
       <h3 className="mb-2 text-lg font-bold text-white">Save up to 67% on your New Relic bill</h3>
       <p className="mb-3 text-xs text-gray-300">
         We provide migration support if your monthly New Relic bill is over $1000. Get started with
-        SigNoz quickly.
+        SigNoz Cloud quickly.
       </p>
       <div className="flex flex-col gap-2">
         <Button

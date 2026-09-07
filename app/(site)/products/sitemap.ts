@@ -1,36 +1,9 @@
 import { MetadataRoute } from 'next'
-import siteMetadata from '@/data/siteMetadata'
+import { PRODUCT_SITEMAP_ROUTES, routeUrl } from '@/utils/sitemapRoutes'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = siteMetadata.siteUrl
-
-  const staticRoutes = [
-    'pricing',
-    'pricing/metrics-cost-estimation',
-    'teams',
-    'why-signoz',
-    'observability-for-ai-native-companies',
-    'log-management',
-    'llm-observability',
-    'external-apis',
-    'distributed-tracing',
-    'metrics-and-dashboards',
-    'exceptions-monitoring',
-    'alerts-management',
-    'application-performance-monitoring',
-    'trace-funnels',
-    'datadog-migration-tool',
-    'datadog-pricing-calculator',
-    'upgrade-path',
-    'unified-observability',
-    'agent-native-observability',
-    'kubernetes-monitoring',
-    'azure-monitoring',
-    'google-cloud-monitoring',
-  ].map((route) => ({
-    url: `${siteUrl}/${route}/`,
+  return PRODUCT_SITEMAP_ROUTES.map((route) => ({
+    url: routeUrl(route),
     changeFrequency: 'weekly' as const,
   }))
-
-  return [...staticRoutes]
 }

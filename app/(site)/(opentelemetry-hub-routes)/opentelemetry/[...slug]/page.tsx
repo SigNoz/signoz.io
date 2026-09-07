@@ -1,16 +1,12 @@
 import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
-import PostSimple from '@/layouts/PostSimple'
-import PostLayout from '@/layouts/PostLayout'
-import PostBanner from '@/layouts/PostBanner'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import OpenTelemetryHubContent from '@/layouts/OpenTelemetryHubLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
-import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import { getHubContextForRoute } from '@/utils/opentelemetryHub'
 import { getAuthorDirectory, getContentBySlug } from '@/utils/contentRepository'
 import { MDXContent } from '@/utils/strapi'
@@ -23,14 +19,6 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
 import { resolveLatestDate } from '@/utils/dateUtils'
-
-const defaultLayout = 'OpenTelemetryLayout'
-const layouts = {
-  PostSimple,
-  PostLayout,
-  PostBanner,
-  OpenTelemetryLayout,
-}
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -250,16 +238,11 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
     )
   }
 
-  const layoutName = content.layout || defaultLayout
-  const shouldRenderLayoutFeedback = layoutName !== 'OpenTelemetryLayout'
-  // @ts-ignore
-  const Layout = layouts[layoutName]
-
   return (
     <>
       {jsonLd && <JsonLdScript data={jsonLd} />}
       <JsonLdScript data={breadcrumbJsonLd} />
-      <Layout
+      <OpenTelemetryLayout
         content={mainContent}
         authorDetails={authorDetails as any}
         authors={layoutAuthorList}
@@ -270,8 +253,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
         <div className="prose max-w-none dark:prose-invert prose-headings:scroll-mt-16">
           {compiledContent}
         </div>
-        {shouldRenderLayoutFeedback && <PageFeedback />}
-      </Layout>
+      </OpenTelemetryLayout>
     </>
   )
 }

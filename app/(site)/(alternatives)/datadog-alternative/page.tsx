@@ -5,11 +5,11 @@ import siteMetadata from '@/data/siteMetadata'
 export const metadata: Metadata = {
   title: 'Modern Datadog Alternative',
   description:
-    'SigNoz is the modern Datadog alternative. Built on OpenTelemetry, it delivers affordable, full-stack observability across logs, metrics, and traces.',
+    'Compare Datadog with SigNoz Cloud, an OpenTelemetry-native managed platform for logs, metrics, and traces with usage-based pricing.',
   openGraph: {
     title: 'Modern Datadog Alternative | SigNoz',
     description:
-      'SigNoz is the modern Datadog alternative. Built on OpenTelemetry, it delivers affordable, full-stack observability across logs, metrics, and traces.',
+      'Compare Datadog with SigNoz Cloud, an OpenTelemetry-native managed platform for logs, metrics, and traces with usage-based pricing.',
     images: [
       {
         url: '/img/product-comparisons/signoz-vs-datadog/messaging-queue-monitoring-otel.webp',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Modern Datadog Alternative | SigNoz',
     description:
-      'SigNoz is the modern Datadog alternative. Built on OpenTelemetry, it delivers affordable, full-stack observability across logs, metrics, and traces.',
+      'Compare Datadog with SigNoz Cloud, an OpenTelemetry-native managed platform for logs, metrics, and traces with usage-based pricing.',
     images: ['/img/product-comparisons/signoz-vs-datadog/messaging-queue-monitoring-otel.webp'],
     site: siteMetadata.twitter,
   } as const,

@@ -2,7 +2,7 @@ const URL_PREFIX_TO_COLLECTION: { prefix: string; collectionName: string }[] = [
   { prefix: '/blog/', collectionName: 'blogs' },
   { prefix: '/opentelemetry/', collectionName: 'opentelemetries' },
   { prefix: '/faqs/', collectionName: 'faqs' },
-  { prefix: '/case-study/', collectionName: 'case-studies' },
+  { prefix: '/customers/', collectionName: 'case-studies' },
   { prefix: '/comparisons/', collectionName: 'comparisons' },
   { prefix: '/guides/', collectionName: 'guides' },
   { prefix: '/docs/', collectionName: 'docs' },

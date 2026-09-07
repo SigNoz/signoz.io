@@ -23,6 +23,7 @@ export function useNavVisibility() {
   }, [])
 
   return {
+    showCustomers: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.CUSTOMERS,
     showGithubStars: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.GITHUB_STARS,
     showPricing: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.PRICING,
     showResources: windowWidth === null || windowWidth >= NAV_BREAKPOINTS.RESOURCES,

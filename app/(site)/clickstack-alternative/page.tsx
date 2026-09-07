@@ -11,15 +11,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'ClickStack/HyperDX Alternative | SigNoz',
     description:
-      "SigNoz gives you interactive dashboards, anomaly detection-based alerting, and PromQL support. You're billed on how much data you ingest, not how often you query it.",
+      'Compare ClickStack/HyperDX with SigNoz Cloud for dashboards, alerting, query support, and usage-based pricing.',
     images: '/img/platform/ClickStackAlternativeMeta.webp',
   },
   description:
-    "SigNoz gives you interactive dashboards, anomaly detection-based alerting, and PromQL support. You're billed on how much data you ingest, not how often you query it.",
+    'Compare ClickStack/HyperDX with SigNoz Cloud for dashboards, alerting, query support, and usage-based pricing.',
   twitter: {
     title: 'ClickStack/HyperDX Alternative | SigNoz',
     description:
-      "SigNoz gives you interactive dashboards, anomaly detection-based alerting, and PromQL support. You're billed on how much data you ingest, not how often you query it.",
+      'Compare ClickStack/HyperDX with SigNoz Cloud for dashboards, alerting, query support, and usage-based pricing.',
     images: '/img/platform/ClickStackAlternativeMeta.webp',
   },
 }

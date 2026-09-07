@@ -1,5 +1,5 @@
 ---
-date: 2026-08-10
+date: 2026-08-25
 title: Metric Types and Aggregation
 description: Learn about the different metric types (Counter, Gauge, Histogram, Exponential Histogram) supported by SigNoz and how temporal and spatial aggregation works for each type.
 doc_type: explanation
@@ -22,7 +22,7 @@ SigNoz supports the following types of metrics:
 <Admonition type="info">
 Exponential histograms are supported only in self-hosted SigNoz (not SigNoz Cloud). To enable them in your OTel Collector configuration:
 1. Set `enable_exp_hist: true` in both the `clickhousemetricswrite` and `signozclickhousemetrics` exporters in your collector config.
-2. Ensure your metrics use delta temporality. Although OpenTelemetry supports both delta and cumulative temporality for exponential histograms, SigNoz currently only supports delta, so cumulative temporality metrics will not work.
+2. Ensure your metrics use <Tooltip text="delta temporality" content="A metric temporality in which each successive data point advances the start timestamp and reports only the change since the previous export." link="https://signoz.io/docs/glossary/#delta-temporality" />. Although OpenTelemetry supports both delta and <Tooltip text="cumulative temporality" content="A metric temporality in which each successive data point repeats the same start timestamp and reports a running total." link="https://signoz.io/docs/glossary/#cumulative-temporality" /> for exponential histograms, SigNoz currently only supports delta, so cumulative temporality metrics will not work.
 For background, see <a href="https://github.com/SigNoz/signoz-otel-collector/issues/625#issuecomment-2994987941" target="_blank" rel="noopener noreferrer nofollow">the collector issue notes</a>.
 </Admonition>
 
@@ -45,10 +45,10 @@ A table representing the different types of metrics and their temporality suppor
 
 The Gauge metric type does not have a temporality, as it represents a single value at a point in time.
 
-SigNoz records the temporality of every data point. A Counter metric can send all cumulative points, all delta points, or both together. Both appear together after you switch the temporality, and also when different time series of the same metric use different temporality. The Query Builder queries all three cases, so your older cumulative data stays queryable after a switch.
+SigNoz records the temporality of every <Tooltip text="data point" content="The basic unit of metric information: a set of attributes, a value (or values, for a histogram), and one or two timestamps." link="https://signoz.io/docs/glossary/#data-point" />. A Counter metric can send all cumulative points, all delta points, or both together. Both appear together after you switch the temporality, and also when different time series of the same metric use different temporality. The Query Builder queries all three cases, so your older cumulative data stays queryable after a switch.
 
 <Admonition type="warning">
-PromQL does not read delta series. A PromQL panel or alert on a metric that you switch to delta keeps running and receives no new samples. Move those queries to the Query Builder before you change the temporality.
+PromQL does not read delta series. A PromQL panel or alert on a metric that you switch to delta keeps running and receives no new <Tooltip text="samples" content="One float value at one timestamp in one time series, and the unit SigNoz bills metrics on, at $0.10 per million samples ingested." link="https://signoz.io/docs/glossary/#sample" />. Move those queries to the Query Builder before you change the temporality.
 </Admonition>
 
 <Admonition type="tip">
@@ -326,7 +326,7 @@ This step is the same as the Cumulative Counter.
 
 ## Histogram & Exponential Histogram
 
-The aggregation of Histogram metrics is similar to that of Counter metrics. The difference is that Histogram metrics store the distribution of a set of values. There is no configuration required for temporal aggregation as the values get aggregated into buckets based on the histogram configuration. The result of the temporal aggregation is a single aggregated histogram for each interval within the time series.
+The aggregation of Histogram metrics is similar to that of Counter metrics. The difference is that Histogram metrics store the distribution of a set of values. There is no configuration required for temporal aggregation as the values get aggregated into <Tooltip text="buckets" content="One value range of a histogram, holding a count of the observations that fell inside it." link="https://signoz.io/docs/glossary/#bucket" /> based on the histogram configuration. The result of the temporal aggregation is a single aggregated histogram for each interval within the time series.
 
 The spatial aggregation step aggregates the values across multiple time series. The result of this step is a single numerical value indicating the percentile value for each interval for a group of time series. The grouping is done based on the group tags specified in the query. If no group tags are specified, all time series are considered as a single group.
 

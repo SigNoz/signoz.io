@@ -35,13 +35,13 @@ const SearchButtonPreview = ({
     onMouseEnter={onHydrate}
     onClick={onClick}
     className={cn(
-      'group flex shrink-0 items-center gap-1.5 rounded-full bg-signoz_slate-500 px-3 py-1 text-xs text-slate-300 transition',
-      'hover:bg-slate-700/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+      'group flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--l3-background)] px-3 py-1 text-xs text-[var(--l2-foreground)] transition',
+      'hover:bg-[var(--l3-background-hover)] hover:text-[var(--l1-foreground-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--l3-border)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--l1-background)]',
       'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80 dark:focus-visible:ring-slate-600'
     )}
     aria-label="Open docs search"
   >
-    <Search className="h-3.5 w-3.5 text-slate-400 transition group-hover:text-white" />
+    <Search className="h-3.5 w-3.5 text-[var(--l3-foreground)] transition group-hover:text-[var(--l1-foreground-hover)]" />
     <span className="hidden text-xs sm:inline">Search docs...</span>
     {!disableShortcut && (
       <span className="ml-1.5 hidden items-center gap-1 rounded-md border border-slate-700 bg-slate-900/60 px-1 py-[1px] text-[10px] font-medium text-slate-400 sm:flex">

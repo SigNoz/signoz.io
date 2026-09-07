@@ -3,6 +3,9 @@ import { normalizeWhitespace } from './markdownCore'
 
 export const MORE_DOCS_POINTER = 'More docs: /docs/sitemap.md'
 
+export const LLMS_TXT_DIRECTIVE =
+  '> For the complete documentation index, see [llms.txt](https://signoz.io/llms.txt). Markdown versions are also available by appending `.md` to documentation URLs.'
+
 export type BuildMarkdownDocumentOptions = {
   title: string
   includeTitle?: boolean
@@ -54,6 +57,8 @@ export const buildMarkdownDocument = ({
   if (description) {
     sections.push(description)
   }
+
+  sections.push(LLMS_TXT_DIRECTIVE)
 
   const tagSection = buildTagSection(tags, includeTagDefinitions)
   if (tagSection) {

@@ -112,7 +112,10 @@ export default function Hero() {
           <div className="absolute inset-0" style={{ backgroundImage: HERO_OVERLAY_GRADIENT }} />
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 z-10 hidden h-[141px] flex-col items-center justify-end px-4 pb-8 md:flex">
+        <div
+          className="absolute inset-x-0 bottom-0 z-10 hidden h-[141px] flex-col items-center justify-end px-4 pb-8 md:flex"
+          data-markdown-ignore
+        >
           <div className="flex w-full max-w-[590px] flex-col items-center">
             <SearchBar
               placeholder={SEARCH_PLACEHOLDERS}

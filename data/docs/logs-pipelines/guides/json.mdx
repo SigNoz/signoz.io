@@ -217,30 +217,18 @@ Press the **"Create"** button to create the pipeline.
 Each added attribute increases the size of your log records in the database. So it is often desirable to parse only a few fields of interest out of the JSON body into their own log attributes.  To achieve this, we will first use a JSON parsing processor to parse the log body into a temporary attribute, then we will move the desired fields from the temporary attribute into their own log attributes, and finally remove the temporary log attribute.
 
 - Expand the new Pipeline to add processors to it.
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/pipelines/newly-created-json-parsing-pipeline.png"
-    alt="Creating a Pipeline adds it to the end of the Pipelines List. It can be expanded by clicking the highlighted icon."
-  />
-  <figcaption>
-    <i>
-      Creating a Pipeline adds it to the end of the Pipelines List. It can be expanded by clicking the highlighted icon.
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/logs/pipelines/newly-created-json-parsing-pipeline.png"
+  alt="Creating a Pipeline adds it to the end of the Pipelines List. It can be expanded by clicking the highlighted icon."
+  caption="Creating a Pipeline adds it to the end of the Pipelines List. It can be expanded by clicking the highlighted icon."
+/>
 
 - Click the **Add Processor** Button to bring up the Dialog for adding a new processor.
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/pipelines/json-pipeline-add-processor-button.png"
-    alt="Expanding a pipeline shows the Add Processor button"
-  />
-  <figcaption>
-    <i>
-      Expanding a pipeline shows the Add Processor button
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/logs/pipelines/json-pipeline-add-processor-button.png"
+  alt="Expanding a pipeline shows the Add Processor button"
+  caption="Expanding a pipeline shows the Add Processor button"
+/>
 
 - Select `Json Parser` in the **Select Processor Type** field.
 - Use the **Name of Json Parser Processor** field to set a short descriptive name for the processor.
@@ -273,17 +261,11 @@ Each added attribute increases the size of your log records in the database. So 
     - **From**: Path to the parsed JSON field (e.g., `attributes.temp_parsed_body.country`)
     - **To**: Attribute where the field should be stored (e.g., `attributes.country`)
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/pipelines/add-move-processor-for-country.png"
-    alt="Add Move Processor Dialog"
-  />
-  <figcaption>
-    <i>
-      Add Move Processor Dialog
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/logs/pipelines/add-move-processor-for-country.png"
+  alt="Add Move Processor Dialog"
+  caption="Add Move Processor Dialog"
+/>
 
 - Press the **Create** button to finish adding the processor.
 - Repeat these steps to create a **Move** processor for moving each desired JSON field into its own log attribute.
@@ -296,79 +278,49 @@ Each added attribute increases the size of your log records in the database. So 
     - Use the **Name of Remove Processor** field to set a short descriptive name for the processor.
     - Set **Field** input to path of the attribute we used for storing parsed JSON body temporarily. For example `attributes.temp_parsed_body`
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/pipelines/json-parser-remove-temp-attribute.png"
-    alt="Remove Processor Dialog"
-  />
-  <figcaption>
-    <i>
-      Remove Processor Dialog
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/logs/pipelines/json-parser-remove-temp-attribute.png"
+  alt="Remove Processor Dialog"
+  caption="Remove Processor Dialog"
+/>
 
 - Press the **Create** button to finish adding the processor.
 
 ### Step 6: Preview and Validate Pipeline Processing
 
 At this point you should have the pipeline ready with all necessary processors.
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/pipelines/json-parsing-pipeline-expanded.png"
-    alt="Expanded Pipeline with Processors for parsing desired fields out of JSON body into their own log attributes"
-  />
-  <figcaption>
-    <i>
-      Expanded Pipeline with Processors for parsing desired fields out of JSON body into their own log attributes
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/logs/pipelines/json-parsing-pipeline-expanded.png"
+  alt="Expanded Pipeline with Processors for parsing desired fields out of JSON body into their own log attributes"
+  caption="Expanded Pipeline with Processors for parsing desired fields out of JSON body into their own log attributes"
+/>
 
 Before you save and deploy the pipeline, it is best to simulate processing on some sample logs to validate that the pipeline will work as expected.  Click the "eye" icon in the actions column for the pipeline to bring up the Pipeline Preview Dialog.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/pipelines/json-parsing-pipeline-preview-init.png"
-    alt="Pipeline Preview with Sample Logs"
-  />
-  <figcaption>
-    <i>
-      Pipeline Preview with Sample Logs
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/logs/pipelines/json-parsing-pipeline-preview-init.png"
+  alt="Pipeline Preview with Sample Logs"
+  caption="Pipeline Preview with Sample Logs"
+/>
 
 The preview Dialog will start out with sample logs queried from the database. You can adjust the sample logs search duration if there are no recent samples available.  To simulate pipeline processing, press the **Simulate Processing** button in the bottom section of the Pipeline Preview Dialog.  This will simulate pipeline processing on the sample logs and show the output.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/pipelines/json-parsing-pipeline-preview.png"
-    alt="Pipeline Preview with Processed Output"
-  />
-  <figcaption>
-    <i>
-      Pipeline Preview with Processed Output
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/logs/pipelines/json-parsing-pipeline-preview.png"
+  alt="Pipeline Preview with Processed Output"
+  caption="Pipeline Preview with Processed Output"
+/>
 
 You can click on the *expand icon* on the right end of each processed log to open the detailed view for that log. Expand some of the processed logs to verify that your desired log attributes were extracted as expected.  If you see any issues, you can close the preview, edit your processors as needed and preview again to verify. Iterate on your pipeline and processor config until it all works just the way you want it.
 
 ### Step 7: Save Pipelines and Verify
 
 Once you have previewed your pipeline and verified that it will work as expected, press the **Save Configuration** button at the bottom of the pipelines list to save pipelines. This will store the latest state of your pipelines and will deploy them for pre-processing.
-<figure data-zoomable align="center">
-  <img
-    src="/img/logs/pipelines/save-json-parsing-pipeline.png"
-    alt="Save Configuration Button"
-  />
-  <figcaption>
-    <i>
-      Save Configuration Button
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/logs/pipelines/save-json-parsing-pipeline.png"
+  alt="Save Configuration Button"
+  caption="Save Configuration Button"
+/>
 
 You can track the deployment status of your pipelines using the **Change History** tab at the top of the pipelines page.
 <figure data-zoomable align="center">

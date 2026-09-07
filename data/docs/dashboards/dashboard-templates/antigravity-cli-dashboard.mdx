@@ -1,0 +1,63 @@
+---
+published_date: 2026-09-02
+title: Antigravity CLI Dashboard
+meta_title: Antigravity CLI Usage Dashboard
+description: "Monitor Google Antigravity CLI in SigNoz: weekly quota burn, tool activity, agent loop volume, and why turns end across your development team."
+doc_type: explanation
+---
+
+<Admonition type="note" title="Send telemetry first">
+To use this dashboard, you need to set up the data source and send telemetry to SigNoz. Follow the [Antigravity CLI Monitoring](https://signoz.io/docs/antigravity-cli-monitoring/) guide to get started.
+</Admonition>
+
+Antigravity CLI gives you no record of what its agent did, and no per-token cost for interactive sessions. This dashboard reconstructs both from the hook telemetry: which tools the agent ran, how many passes of the agent loop each turn took, why turns ended, and how fast the weekly quota is draining.
+
+Panels read the OTLP traces produced by Antigravity's hooks, so nothing beyond the setup in the guide is required. Every trace query filters on `agy.hook.event`, which separates the three events a turn emits: `PostToolUse` for completed tool calls, `PostInvocation` for each pass of the agent loop, and `Stop` for the end of a turn. Quota panels read the `agy.quota.*` gauges and are scoped to the `gemini-weekly` bucket. A multi-select Service variable scopes every panel, so one dashboard covers as many machines and CI runners as your team instruments.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/antigravity-cli-dashboard.webp"
+  alt="Antigravity CLI Dashboard"
+  caption="Antigravity CLI Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/antigravity-cli/antigravity-cli-dashboard.json"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the telemetry Antigravity's hooks emit to help you:
+
+- **Watch Quota Burn**: Follow the weekly limit down in real time, with the reset step visible on the curve
+- **Forecast Exhaustion**: Read burn rate against time remaining to see whether the allowance lasts the week
+- **See What the Agent Did**: Get the tool sequence that Antigravity records nowhere itself
+- **Spot Runaway Loops**: Watch agent loop passes per turn, the earliest signal of an agent that will not terminate
+- **Understand Why Turns End**: Separate normal completion from errors, cancellations, and loop-cap terminations
+- **Check Which Model Ran**: See the models actually serving requests, which is not always the model you asked for
+- **Attribute Work**: Break activity down per machine or CI runner through the Service variable
+
+## Panels Included
+
+The Quota and Spend section is the closest thing to a cost view that Antigravity permits:
+
+| Panel | Description |
+|---|---|
+| Gemini Quota Remaining | Weekly limit still available over time. The slope is your burn rate, and the vertical step is the weekly reset. |
+| Current Gemini Quota | Latest remaining share for the Gemini bucket, as a percentage. |
+| Time to Gemini Quota Reset | How long until the window rolls over. Read alongside the burn-down to judge whether the allowance lasts. |
+
+**Interactive Activity**
+
+- **Tool Calls Over Time**: Completed tool calls per interval, by tool. Read and search tools dominating is the normal shape for a coding agent.
+- **Top Tools**: Call volume and distinct conversations per tool. Frequency only, since hook spans carry no duration.
+- **Agent Loop Invocations**: Passes of the agent loop per interval. A single turn commonly produces six or more, so a sustained climb here means turns are getting harder, not that usage grew.
+- **Requests by Model**: Share of model requests per model, counted from loop passes rather than turns.
+- **Conversations**: Distinct conversations in the selected range.
+
+**Turn Outcomes**
+
+- **Why Turns Ended**: Distribution of `agy.termination_reason`. `NO_TOOL_CALL` is the normal ending; `MAX_INVOCATIONS` and `MAX_TOKEN_BUDGET_EXCEEDED` mean the agent hit a ceiling instead of finishing.
+- **Turns Completed Over Time**: Completed turns per interval, split by model.
+- **Recent Turn Endings**: The individual turns behind the distribution, with termination reason, model, and conversation id for pivoting into the trace.

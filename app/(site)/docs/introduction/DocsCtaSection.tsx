@@ -11,7 +11,10 @@ const SECTION_NAME = 'Docs CTA Section'
 export default function DocsCtaSection() {
   return (
     <DitherCanvas enableClick={false} className="w-full">
-      <div className="flex w-full min-w-0 flex-col items-start justify-between gap-8 px-4 py-16 lg:flex-row lg:gap-12">
+      <div
+        className="flex w-full min-w-0 flex-col items-start justify-between gap-8 px-4 py-16 lg:flex-row lg:gap-12"
+        data-markdown-ignore
+      >
         <div className="flex w-full min-w-0 flex-col gap-4 pl-0 lg:w-1/2 lg:pl-12">
           <h2 className="m-0 text-2xl font-semibold leading-9 text-[var(--l1-foreground)]">
             Slow is the new Downtime

@@ -2,13 +2,13 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 
 export const metadata: Metadata = {
-  title: 'SigNoz Upgrade Path Tool',
+  title: 'Self-Hosted SigNoz Upgrade Path Tool',
   description:
-    'Plan your SigNoz upgrade with confidence. Our interactive tool generates a safe, step-by-step upgrade path between any two versions, highlighting mandatory stops, breaking changes, and relevant guides to ensure a smooth transition.',
+    'Plan version upgrades for Self-Hosted SigNoz. SigNoz Cloud upgrades are managed by SigNoz and require no action in this tool.',
   openGraph: {
-    title: 'SigNoz Upgrade Path Tool | SigNoz',
+    title: 'Self-Hosted SigNoz Upgrade Path Tool | SigNoz',
     description:
-      'Plan your SigNoz upgrade with confidence. Our interactive tool generates a safe, step-by-step upgrade path between any two versions, highlighting mandatory stops, breaking changes, and relevant guides to ensure a smooth transition.',
+      'Plan version upgrades for Self-Hosted SigNoz. SigNoz Cloud upgrades are managed by SigNoz and require no action in this tool.',
     siteName: siteMetadata.title,
     locale: 'en_US',
     type: 'website',
@@ -16,9 +16,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SigNoz Upgrade Path Tool | SigNoz',
+    title: 'Self-Hosted SigNoz Upgrade Path Tool | SigNoz',
     description:
-      'Plan your SigNoz upgrade with confidence. Our interactive tool generates a safe, step-by-step upgrade path between any two versions, highlighting mandatory stops, breaking changes, and relevant guides to ensure a smooth transition.',
+      'Plan version upgrades for Self-Hosted SigNoz. SigNoz Cloud upgrades are managed by SigNoz and require no action in this tool.',
     site: siteMetadata.x,
   },
   keywords: [

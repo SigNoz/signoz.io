@@ -1,0 +1,76 @@
+---
+published_date: 2026-08-27
+title: Cursor IDE Dashboard
+meta_title: Cursor IDE Usage Dashboard
+description: "Monitor Cursor IDE usage in SigNoz: token spend by model, turn and tool latency, tool mix, and tool failures across your development team."
+doc_type: explanation
+---
+
+<Admonition type="note" title="Send telemetry first">
+To use this dashboard, you need to set up the data source and send telemetry to SigNoz. Follow the [Cursor IDE Observability](https://signoz.io/docs/cursor-observability/) guide to get started.
+</Admonition>
+
+Cursor's own usage console tells you what your team spent. This dashboard tells you what the agent did to spend it: which tools it ran, how long each took, which ones failed, and how long a turn takes end to end. It covers token spend by model, turn and tool latency, the mix of tools the agent reaches for, and tool failure rate with the individual failures behind it.
+
+Panels read the OTLP traces produced by Cursor's agent hooks, so nothing beyond the setup in the guide is required. Queries filter on `service.name = 'ide-agent'` and on `gen_ai.client.hook.event`, which is what separates the events a turn emits: `afterAgentResponse` carries token counts, `PostToolUse` carries completed tool calls, and `PostToolUseFailure` carries failures. Agent, Repository, and Model variables scope every panel, so one dashboard covers as many repositories and models as your team works across.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/cursor-dashboard.webp"
+  alt="Cursor IDE Dashboard"
+  caption="Cursor IDE Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/cursor/cursor-dashboard.json"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the telemetry Cursor's agent hooks emit to help you:
+
+- **Monitor Token Spend**: Track input and output tokens per turn to understand workload and cost
+- **Compare Model Usage**: See which models carry the workload, grouped at span level because Cursor switches models mid-session
+- **See What the Agent Did**: Get the per-turn tool sequence that the vendor console does not show
+- **Measure Turn Latency**: Watch p50, p95, and p99 of a complete agent turn rather than a single model call
+- **Find Slow Tools**: Break latency down per tool to find the step that stalls a turn
+- **Track Reliability**: Watch tool failure rate and read the individual failures behind it
+- **Attribute Work**: Break spend down per repository and branch
+
+## Panels Included
+
+The Overview section summarizes activity in the selected time range:
+
+| Panel | Description |
+|---|---|
+| Input Tokens | Total input tokens across every turn. Input drives spend here, not output. |
+| Output Tokens | Total generated tokens, typically one to two orders of magnitude below input. |
+| Agent Turns | Count of prompts answered, one per `gen_ai.client.generation` span. |
+| Tool Failure Rate | Failed tool calls over all completed tool calls. Turns red above 10 percent. |
+
+**Tokens**
+
+- **Input Tokens Over Time**: Input tokens per interval. Sustained growth without a matching rise in turns points at context bloat rather than more work.
+- **Output Tokens Over Time**: Output tokens per interval. Charted separately because a shared axis with input flattens output to nothing.
+- **Tokens by Model**: Turns and token split per model, grouped at span level so a session that switches models is attributed correctly.
+
+**Latency**
+
+- **Turn Duration**: p50, p95, and p99 of a complete turn. A widening p99 against a flat p50 usually means a few very long agent loops.
+- **Tool Latency p95 by Tool**: p95 per tool. Shell sitting above the rest is the normal shape, since it waits on real commands.
+
+**Tools**
+
+- **Tool Call Distribution**: Share of completed calls per tool. Search and read tools dominating is the normal shape for a coding agent.
+- **Tool Calls Over Time**: Completed calls per interval by tool, useful for spotting a window where one tool suddenly dominates.
+- **Tool Performance**: Call volume with average and p95 latency per tool. A low average with a high p95 means the tool occasionally blocks the agent.
+
+**Errors**
+
+- **Tool Failures Over Time**: Failures by tool. A sustained line for one tool is usually a broken path rather than transient errors.
+- **Recent Tool Failures**: The individual failed calls behind the rate, with tool, model, duration, and repository.
+
+<Admonition type="info" title="Why some rows show N/A for repository" defaultCollapsed="true">
+The hook runner resolves repository context once per session and does not always succeed, so `vcs.repository.name` can be absent even when the workspace is a git repository. Those spans are missing attribution rather than running outside a repository, which is worth knowing before you read the per-repository breakdown as complete.
+</Admonition>

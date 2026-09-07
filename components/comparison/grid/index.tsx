@@ -18,23 +18,25 @@ const ComparisonGridDesktop = (props) => {
   const { data, otherHeading } = props
   return (
     <div className="container">
-      <div className={styles.tableGrid}>
+      <div className={styles.tableGrid} data-md-table={`Feature|SigNoz Cloud|${otherHeading}`}>
         {/* header */}
         <div className={styles.tableHeader}></div>
-        <div className={styles.tableHeader}>SigNoz</div>
+        <div className={styles.tableHeader}>SigNoz Cloud</div>
         <div className={styles.tableHeader}>{otherHeading}</div>
         {/* data */}
         {data.map((row) => {
           return (
             <>
-              <div className={styles.tableMetric}>{row.sideHeader}</div>
-              <div className={styles.tableMetricAvailability}>
+              <div className={styles.tableMetric} data-md-cell="">
+                {row.sideHeader}
+              </div>
+              <div className={styles.tableMetricAvailability} data-md-cell="">
                 {row.isAvailableInSignoz ? '✅' : '❌'}
                 {row.signozExtraDetail && (
                   <small className={styles.tableMetricDesc}>{row.signozExtraDetail}</small>
                 )}
               </div>
-              <div className={styles.tableMetricAvailability}>
+              <div className={styles.tableMetricAvailability} data-md-cell="">
                 {row.isAvailableInOther ? '✅' : '❌'}
                 {row.otherExtraDetail && (
                   <small className={styles.tableMetricDesc}>{row.otherExtraDetail}</small>
@@ -50,8 +52,9 @@ const ComparisonGridDesktop = (props) => {
 
 const ComparisonGridMobile = (props) => {
   const { data, otherHeading } = props
+  // Duplicate of the desktop grid; the desktop version carries the markdown table.
   return (
-    <div className="container">
+    <div className="container" data-markdown-ignore>
       <div className={styles.tableGridMobile}>
         {data.map((cell, index) => {
           return (
@@ -60,7 +63,7 @@ const ComparisonGridMobile = (props) => {
               <div>
                 <div className={styles.tableGridCompareCell}>
                   <span className={styles.tableGridProdCell}>
-                    Signoz
+                    SigNoz Cloud
                     {cell.signozExtraDetail && (
                       <small className={styles.tableMetricDesc}>{cell.signozExtraDetail}</small>
                     )}

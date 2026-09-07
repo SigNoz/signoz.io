@@ -15,7 +15,7 @@ export default function CTASection() {
               </h2>
 
               <p className="mb-8 text-gray-300">
-                Start using SigNoz to monitor your applications without breaking the bank.
+                Start using SigNoz Cloud to monitor your applications without breaking the bank.
               </p>
 
               <div className="flex flex-col gap-4 sm:flex-row">

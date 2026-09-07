@@ -2,6 +2,10 @@
 
 import { ReactNode, useRef, useEffect } from 'react'
 import SectionContainer from '@/components/SectionContainer'
+import {
+  DOC_CONTENT_CENTER_CLASSES,
+  DOC_CONTENT_COLUMN_CLASSES,
+} from '@/components/DocsTOC/docLayoutClasses'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import React from 'react'
 
@@ -43,10 +47,8 @@ export default function DocLayout({ children }: LayoutProps) {
       <SectionContainer>
         <ProgressBar target={mainRef} />
 
-        <div className="flex min-w-0 flex-[1_1_auto] justify-center overflow-clip">
-          <div className="box-border w-full max-w-[1200px] px-4 py-6 [&_details+details]:mt-8">
-            {children}
-          </div>
+        <div className={DOC_CONTENT_CENTER_CLASSES}>
+          <div className={DOC_CONTENT_COLUMN_CLASSES}>{children}</div>
         </div>
       </SectionContainer>
     </main>

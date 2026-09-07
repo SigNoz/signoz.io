@@ -198,9 +198,9 @@ const InstrumentationSupport = () => {
             <div className="border-signoz_accent-500/50 my-3 border-l-2 pl-4">
               <p className="m-0 text-sm text-signoz_vanilla-400">
                 <span className="text-signoz_accent-300 font-medium">OpenTelemetry Native</span> —
-                SigNoz supports any language or framework that OpenTelemetry supports. From Rust to
-                Elixir, from mobile apps to serverless functions - if it can emit OTLP data, SigNoz
-                can monitor it.
+                SigNoz Cloud supports any language or framework that OpenTelemetry supports. From
+                Rust to Elixir, from mobile apps to serverless functions - if it can emit OTLP data,
+                SigNoz Cloud can monitor it.
               </p>
             </div>
 

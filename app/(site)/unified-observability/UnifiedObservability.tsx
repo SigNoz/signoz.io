@@ -229,17 +229,17 @@ const UnifiedObservability = () => {
           </div>
         </section>
 
-        {/* SigNoz Platform Section */}
+        {/* SigNoz Cloud Platform Section */}
         <section className="container mx-auto py-16">
           <h2 className="mb-8 text-left text-2xl font-bold lg:text-3xl">
-            SigNoz: Unified Observability Platform Powered by OpenTelemetry
+            SigNoz Cloud: Unified Observability Platform Powered by OpenTelemetry
           </h2>
           <div className="relative mb-4 flex flex-wrap items-center gap-8">
             <div className="flex-1 text-gray-300">
               <p className="text-lg">
                 Unified observability is more than just monitoring—it's about gaining a
                 comprehensive understanding of your entire system's health, performance, and
-                behavior in real-time. SigNoz brings together metrics, traces, and logs into a
+                behavior in real-time. SigNoz Cloud brings together metrics, traces, and logs into a
                 single, cohesive platform, enabling you to:
               </p>
               <div className="my-4 space-y-3">
@@ -268,13 +268,13 @@ const UnifiedObservability = () => {
               <figure>
                 <Image
                   src="/img/unified-observability/unified-observability-unified-setup.webp"
-                  alt="SigNoz Platform"
+                  alt="SigNoz Cloud unified observability platform"
                   width={800}
                   height={533}
                   className="h-auto w-full rounded-xl shadow-2xl"
                 />
                 <figcaption className="mb-4 mt-2 px-4 text-center text-sm text-gray-400 sm:px-8">
-                  SigNoz unified observability platform bringing metrics, traces and logs together
+                  SigNoz Cloud brings metrics, traces, and logs together in one platform
                 </figcaption>
               </figure>
             </div>
@@ -312,7 +312,7 @@ const UnifiedObservability = () => {
           {/* Features Carousel */}
           <section className="mx-auto pt-12">
             <h3 className="mb-8 text-left text-xl font-bold lg:text-2xl">
-              Why Choose SigNoz as Your Unified Observability Platform?
+              Why Choose SigNoz Cloud as Your Unified Observability Platform?
             </h3>
             <div className="relative overflow-x-auto">
               <div className="flex gap-8">
@@ -339,7 +339,7 @@ const UnifiedObservability = () => {
                   {
                     title: 'Flexible Deployment',
                     description:
-                      'Choose between self-hosted deployment for complete control or cloud offering for convenience',
+                      'Start with managed SigNoz Cloud, or use Self-Hosted SigNoz when you want to operate it yourself',
                   },
                 ].map((feature, index) => (
                   <motion.div
@@ -412,22 +412,22 @@ const UnifiedObservability = () => {
             </div>
           </div>
 
-          {/* How SigNoz Transforms */}
+          {/* How SigNoz Cloud Transforms */}
           <section className="container mx-auto my-8 rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 px-12 py-12">
             <h3 className="mb-8 text-left text-xl font-bold lg:text-2xl">
-              How SigNoz transforms this chaos into clarity
+              How SigNoz Cloud transforms this chaos into clarity
             </h3>
             <div className="flex justify-center">
               <figure>
                 <Image
                   src="/img/unified-observability/unified-observability-unified-observabilty-with-signoz.webp"
-                  alt="Unified Observability with SigNoz"
+                  alt="Unified Observability with SigNoz Cloud"
                   width={820}
                   height={540}
                   className="rounded-xl shadow-2xl"
                 />
                 <figcaption className="mb-8 mt-2 text-center text-sm text-gray-400">
-                  SigNoz provides a unified view of your entire system's observability data
+                  SigNoz Cloud provides a unified view of your entire system's observability data
                 </figcaption>
               </figure>
             </div>
@@ -821,7 +821,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-apm.webp"
-                      alt="Application Performance Monitoring in SigNoz"
+                      alt="Application Performance Monitoring in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -834,7 +834,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-logs.webp"
-                      alt="Logs Management in SigNoz"
+                      alt="Logs Management in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -847,7 +847,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-traces.webp"
-                      alt="Distributed Tracing in SigNoz"
+                      alt="Distributed Tracing in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -860,7 +860,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-infrastructure-monitoring.webp"
-                      alt="Infrastructure Monitoring in SigNoz"
+                      alt="Infrastructure Monitoring in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -873,7 +873,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-metrics-and-dashboards.webp"
-                      alt="Metrics and Dashboards in SigNoz"
+                      alt="Metrics and Dashboards in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -886,7 +886,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-alerts.webp"
-                      alt="Alerts in SigNoz"
+                      alt="Alerts in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -899,7 +899,7 @@ const UnifiedObservability = () => {
                   <div className="h-screen pt-[100px]">
                     <Image
                       src="/img/unified-observability/unified-observability-exceptions.webp"
-                      alt="Exceptions Monitoring in SigNoz"
+                      alt="Exceptions Monitoring in SigNoz Cloud"
                       width={800}
                       height={533}
                       className="rounded-xl shadow-2xl"
@@ -939,7 +939,7 @@ const UnifiedObservability = () => {
           </div>
           <p className="mb-0 mt-8 text-lg">
             Take the first step toward comprehensive observability by signing up for a free trial of
-            SigNoz today.
+            SigNoz Cloud today.
           </p>
           <div className="mt-4">
             <Link href="/teams/" className="block max-w-md">

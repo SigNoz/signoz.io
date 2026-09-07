@@ -1,8 +1,6 @@
-import { NextResponse } from 'next/server'
 import { getDocsRouteTree, type DocsRouteTreeItem } from '@/utils/docs/agentDiscovery'
 import siteMetadata from '@/data/siteMetadata'
-
-const CACHE_CONTROL_HEADER = 'public, s-maxage=3600, stale-while-revalidate=86400'
+import { agentResponse } from '@/utils/agentResponseHeaders'
 
 const formatSitemapRoute = (route: string): string => {
   // Preserve fragment/query routes as-is (e.g. /docs/page#section).
@@ -37,10 +35,5 @@ export async function GET() {
     '',
   ].join('\n')
 
-  return new NextResponse(markdown, {
-    headers: {
-      'Content-Type': 'text/markdown; charset=utf-8',
-      'Cache-Control': CACHE_CONTROL_HEADER,
-    },
-  })
+  return agentResponse(markdown)
 }

@@ -63,7 +63,7 @@ export default function HomepageGetStarted() {
           <div className="flex min-h-48 flex-col items-start justify-between border-b border-signoz_slate-400/35 py-7 md:min-h-56 md:border-b-0 md:py-8 md:pr-8">
             <div>
               <h2 className="m-0 max-w-xs text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl md:text-5xl">
-                Get started with SigNoz.
+                Get started with SigNoz Cloud.
               </h2>
             </div>
             <TrackingLink

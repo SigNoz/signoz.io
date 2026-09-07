@@ -12,14 +12,16 @@ const REASONS = [
     title: 'Single tool for observability',
     desc: 'No need of using disparate tools for observability. Get everything in a single platform. ',
     figure: featureGraphicSingleTool,
+    imgAlt: 'Unified observability workflow in SigNoz',
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 302,
   },
   {
     title: 'Flexible deployment options',
-    desc: 'You can self-host SigNoz or use our cloud services, or use both depending on your use-cases.',
+    desc: 'Use SigNoz Cloud as a managed service, or run Self-Hosted SigNoz on infrastructure you control.',
     figure: featureGraphicFlexibleDeployment,
+    imgAlt: 'SigNoz Cloud and Self-Hosted SigNoz deployment options',
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 302,
@@ -28,6 +30,7 @@ const REASONS = [
     title: 'Columnar database',
     desc: 'SigNoz uses ClickHouse (used by likes of Uber & Cloudflare) as datastore - an extremely fast and highly optimized storage for observability data.',
     figure: featureGraphicColumnarDb,
+    imgAlt: 'Columnar database architecture used by SigNoz',
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 302,
@@ -36,6 +39,7 @@ const REASONS = [
     title: 'Flexible Querying',
     desc: 'DIY Query builder, PromQL, and ClickHouse queries to fulfill all your use-cases around querying observability data.',
     figure: featureGraphicFlexibleQuerying,
+    imgAlt: 'Query options available in SigNoz',
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 528,
     imgHeight: 302,
@@ -44,6 +48,7 @@ const REASONS = [
     title: 'Correlated Signals',
     desc: 'Correlated logs, metrics and traces for much richer context while debugging.',
     figure: featureGraphicCorrelation,
+    imgAlt: 'Correlated logs, metrics, and traces in SigNoz',
     imgClassName: 'w-full !bg-transparent',
     imgWidth: 1128,
     imgHeight: 337,
@@ -75,6 +80,7 @@ const BuildForDevelopers = ({ className }: { className?: string }) => {
                   title={section.title}
                   description={section.desc}
                   img={section.figure}
+                  imgAlt={section.imgAlt}
                   imgClassName={section.imgClassName}
                   imgWidth={section.imgWidth}
                   imgHeight={section.imgHeight}

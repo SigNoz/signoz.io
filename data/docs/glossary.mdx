@@ -1,0 +1,410 @@
+---
+date: 2026-08-27
+title: Glossary of Observability and OpenTelemetry Terms
+description: Definitions of OpenTelemetry, observability, and SigNoz terms, from span and resource to sample, cardinality, and identifying attributes.
+doc_type: reference
+---
+
+This glossary defines the terms you'll meet across SigNoz docs, OpenTelemetry specifications, and observability practice. Definitions are short by design; each one links to the doc that goes deeper.
+
+If you're here to reason about **metrics volume and cost**, read these five in order: [sample](#sample), [time series](#time-series), [cardinality](#cardinality), [identifying attribute](#identifying-attribute), and [non-identifying attribute](#non-identifying-attribute). Together they explain why cardinality drives your metrics bill even though SigNoz bills per sample ingested.
+
+[A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [Z](#z)
+
+## A
+
+### Active series
+
+A [time series](#time-series) that is currently receiving [data points](#data-point). Active series count is the main driver of metrics volume: each active series contributes one [sample](#sample) per export interval, so total samples ≈ active series × number of exports in the period. A single series exporting every 30 seconds produces about 86,400 samples per month (about \$0.0086 at \$0.10 per million). At a 60-second interval, about 43,200. See [Understanding Metrics Billing and Reducing Costs](https://signoz.io/docs/metrics-management/reducing-costs/).
+
+### Aggregated metric data
+
+Metric data stored at coarser granularity after a [volume control](https://signoz.io/docs/metrics-management/volume-control/) rule aggregates some attributes away. The most recent 24 hours always stay full fidelity, and alerts always evaluate on full-fidelity data. See [Understanding Aggregated Metric Data](https://signoz.io/docs/metrics-management/aggregated-metric-data/).
+
+### Aggregation
+
+Combining many measurements into exact or estimated statistics over a time window: sum, count, average, percentile. In the SDK, the [instrument](#instrument) you record to decides which aggregation applies, and a [view](#view) can override it before anything leaves the process. See [Aggregation and grouping](https://signoz.io/docs/querying/aggregation-grouping/).
+
+### Alert rule
+
+A saved condition evaluated on a query at a fixed interval, which fires notifications to a [notification channel](#notification-channel) when it is met. See [Alerts](https://signoz.io/docs/alerts/).
+
+### APM
+
+Application Performance Monitoring. Tracks a service's latency, error rate, throughput, and dependencies. In SigNoz, APM metrics are derived automatically from [spans](#span), so instrumenting traces gives you application metrics for free. See [Application details](https://signoz.io/docs/apm-and-distributed-tracing/application-details/).
+
+### Attribute
+
+A key-value pair that describes the entity producing telemetry. Attributes attach to [spans](#span), [log records](#log-record), metric [data points](#data-point), and [resources](#resource). In metrics, attributes are what produce [cardinality](#cardinality).
+
+## B
+
+### Bucket
+
+One value range of a [histogram](#histogram), holding a count of the observations that fell inside it. In OTLP, a histogram carries explicit bucket boundaries plus one count per bucket, and an implicit `+Inf` bucket catches everything above the last boundary.
+
+For example, a request-duration histogram with boundaries at 5, 10, 25, and 100 milliseconds has five buckets, and a 12 ms request lands in the one spanning 10 ms to 25 ms. In Prometheus form, and so in [PromQL](#promql), each bucket becomes its own series labelled `le` ("less than or equal to"), and those counts are cumulative: `le="25"` counts every request of 25 ms or faster, and `le="+Inf"` counts them all. This is the label you group by when computing percentiles: see the [PromQL guide](https://signoz.io/docs/userguide/write-a-prom-query-with-new-format/).
+
+Each bucket is stored as its own [time series](#time-series), so bucket count drives a histogram's volume: a classic histogram stores one series per bucket, plus `.count` (always present), plus `.sum`, `.min`, and `.max` when the SDK emits them.
+
+## C
+
+### Cardinality
+
+The number of unique [time series](#time-series) a metric actually produces: one series for each distinct combination of its [identifying attributes](#identifying-attribute), including [resource attributes](#resource-attribute).
+
+Multiplying out the distinct values of each attribute gives an **upper bound**, not the real figure, because only combinations that actually occur become series. A metric with 10 `http.route` values across 50 pods tops out at 10 × 50 = 500 series. But if 40 of those pods serve just 1 route each and the remaining 10 serve all 10, the real cardinality is (40 × 1) + (10 × 10) = 140. Read the true per-metric count from [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) instead of multiplying attribute values.
+
+Cardinality is the primary cost driver for metrics. SigNoz does not bill per series; cardinality matters because every series emits a [sample](#sample) on every export interval. See [Understanding Metrics Billing and Reducing Costs](https://signoz.io/docs/metrics-management/reducing-costs/).
+
+### Churn
+
+The replacement of [time series](#time-series) by new ones over time. For example, a rollout replaces pods, and each replacement Pod carries a new `k8s.pod.uid`, so its series are new ones. The UID is the dependable signal here: a Deployment's replacement pod also gets a newly generated name, but a StatefulSet's reuses the same ordinal name (`web-0`) while still taking a new UID. A container restarting inside an existing pod changes neither, so it adds no series. Churn raises the total number of series stored over a period, but not the number active at any one moment, so it does not increase [samples](#sample) per interval. In SigNoz, churn costs nothing extra.
+
+### Collector
+
+The OpenTelemetry Collector, a vendor-agnostic binary that receives, processes, and exports telemetry. Its pipelines are built from [receivers](#receiver), [processors](#processor), and [exporters](#exporter). Running a Collector is the standard place to enrich, filter, batch, or sample data before it reaches SigNoz. See [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+
+### Context propagation
+
+The mechanism that carries trace context across process and service boundaries, so spans emitted by different services join into one [trace](#trace). Usually done by injecting and extracting HTTP headers via a [propagator](#propagator).
+
+### Cost Meter
+
+The SigNoz feature that reports ingestion volume and cost per signal at hourly granularity, so you can attribute spend to services, teams, or attributes. See [Cost Meter](https://signoz.io/docs/cost-meter/overview/).
+
+### Counter
+
+A monotonic [sum](#sum): it only ever increases, like an odometer. Use one for running totals such as requests served or bytes sent. Because the value only climbs, a process restart drops it back to zero, so queries have to treat that fall as a reset rather than as negative traffic. Compare [up-down counter](#up-down-counter).
+
+### Cumulative temporality
+
+A metric [temporality](#temporality) in which each successive data point repeats the same start timestamp and reports a running total. Data points cover (T₀, T₁], (T₀, T₂], (T₀, T₃], and so on. This is the OpenTelemetry SDK default.
+
+For example, a request counter that sees 100 requests in the first minute, 150 in the second, and none in the third exports `100`, then `250`, then `250` again. That third point repeats the total even though nothing happened, which is why idle series still cost [samples](#sample). Compare [delta temporality](#delta-temporality).
+
+## D
+
+### Dashboard
+
+A saved collection of panels querying logs, metrics, and traces. See [Dashboards](https://signoz.io/docs/dashboards/overview/).
+
+### Data point
+
+The basic unit of metric information: a set of [attributes](#attribute), a value (or values, for a [histogram](#histogram)), and one or two timestamps. One data point belongs to exactly one [time series](#time-series). For billing purposes, a gauge or sum data point is one [sample](#sample); a histogram data point is many.
+
+### Delta temporality
+
+A metric [temporality](#temporality) in which each successive data point advances the start timestamp and reports only the change since the previous export. Data points cover (T₀, T₁], (T₁, T₂], (T₂, T₃], and so on.
+
+For example, a request counter that sees 100 requests in the first minute, 150 in the second, and none in the third exports `100`, then `150`, then nothing at all. Synchronous instruments that recorded nothing during an interval export no data point, so idle series produce no [samples](#sample). Set it with `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta`. Note that [PromQL](#promql) cannot read delta series. See [Use delta temporality](https://signoz.io/docs/metrics-management/reducing-costs/#1-use-delta-temporality).
+
+### Distributed tracing
+
+Following a single request across every service, database call, and queue hop it touches, by stitching [spans](#span) into a [trace](#trace). See [Distributed tracing](https://signoz.io/docs/apm-and-distributed-tracing/querying-traces/).
+
+### Dropping labels
+
+Removing attributes from a metric at the Collector so they are never stored. Dropping labels alone does not reduce [samples](#sample), since the same data points still arrive, unless the series are also aggregated away. See [Dropping metric labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/).
+
+## E
+
+### Exemplar
+
+A pointer from an aggregated metric data point back to a specific [trace](#trace) that contributed to it, letting you jump from a latency spike on a chart to a slow request that caused it.
+
+### Exponential histogram
+
+A [histogram](#histogram) whose [bucket](#bucket) boundaries are computed from a `scale` parameter rather than listed explicitly. Boundaries sit at integer powers of `base = 2^(2^-scale)`, so a higher scale gives finer resolution, and a separate zero bucket counts values whose absolute value falls at or below a zero threshold.
+
+Because the buckets adapt to the data, an exponential histogram covers a wide range of values with small relative error and far fewer buckets than an explicit-bucket histogram, and nobody has to guess boundaries up front.
+
+In SigNoz, exponential histograms are supported on self-hosted only, not on SigNoz Cloud, and they must be sent with [delta temporality](#delta-temporality): cumulative exponential histograms are not read. See [Metric types and aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
+
+### Exporter
+
+The component that emits telemetry to a consumer: an SDK exporter sending [OTLP](#otlp) to a [Collector](#collector), or a Collector exporter sending data to SigNoz. Most exporters push data to their destination as it is ready. A few work the other way round and expose an endpoint that a scraper collects from, which is how the Collector's Prometheus exporter works.
+
+## F
+
+### Fingerprint
+
+The hash SigNoz computes at ingest over the metric name, [temporality](#temporality), [resource attributes](#resource-attribute), the [instrumentation scope](#scope) identity (name, version, schema URL, and attributes), and data point attributes. Each [time series](#time-series) of a metric has exactly one fingerprint and each fingerprint identifies exactly one series, so counting distinct fingerprints over a time range gives that metric's series count for the range. Samples are stored as `(fingerprint, timestamp, value)`, while the full label set is stored once per series. Queries join the two and aggregate over any label set. Fingerprints are a storage and aggregation concept. Nothing in your bill counts fingerprints.
+
+### Flamegraph
+
+A visualization of a [trace](#trace) that shows each [span](#span) as a horizontal bar positioned by start time and sized by duration, making the critical path and the slowest child operations obvious.
+
+## G
+
+### Gauge
+
+A metric that reports a value read at a single moment, such as memory in use, queue depth, or CPU temperature. Gauges are never added up across time; each reading replaces the previous one.
+
+For example, a gauge tracking memory in use might export 512 MB, then 480 MB, then 530 MB. The service is using 530 MB at the end, not 1,522 MB, because the numbers describe the same thing at three different moments rather than three separate events to total. Compare a [counter](#counter), where adding the values is exactly the point. One gauge data point is one [sample](#sample).
+
+### Golden signals
+
+The four signals Google's SRE practice recommends monitoring for any user-facing system: latency, traffic, errors, and saturation. Compare [RED metrics](#red-metrics).
+
+## H
+
+### Head sampling
+
+Deciding whether to keep a [trace](#trace) at its start, before any spans complete, typically a fixed percentage of traces. Cheap and simple, but blind to what the trace turned out to contain. Compare [tail sampling](#tail-sampling).
+
+### Histogram
+
+A metric that aggregates many observations client-side into [buckets](#bucket), plus a count and optional sum, min, and max. This is the standard way to measure latency distributions. Histograms are the most volume-intensive metric type, because every bucket is its own [time series](#time-series). The buckets here are configured explicitly; compare [exponential histogram](#exponential-histogram), where they are computed instead.
+
+## I
+
+### Identifying attribute
+
+An [attribute](#attribute) whose values split otherwise-identical label sets into more [time series](#time-series). Adding one multiplies [cardinality](#cardinality) by up to its number of distinct values, and therefore multiplies [samples](#sample).
+
+Start with a metric that has a single label set `X`. Add `http.route` with 10 distinct values, and `X` becomes 10 label sets: 10 series, and 10 data points per export interval instead of one. `http.route`, `http.response.status_code`, and `host.name` are all identifying in this sense.
+
+Teams sometimes call this concept a "unique label set" (see [unique label set](#unique-label-set)). OpenTelemetry does not yet publish a canonical list of identifying attributes, though the project is moving toward distinguishing them. Compare [non-identifying attribute](#non-identifying-attribute).
+
+### Ingestion key
+
+The credential a Collector or SDK uses to send data to a SigNoz Cloud workspace. See [Ingestion keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+### Instrument
+
+The named object an application uses to record measurements: a [counter](#counter), an up-down counter, a [gauge](#gauge), or a [histogram](#histogram). An instrument is defined by its name, kind, and optional unit and description, and is created from a [meter](#meter). **Synchronous** instruments record inline with application code; **asynchronous** (observable) instruments are collected once per export via a callback.
+
+### Instrumentation
+
+The code that produces telemetry. **Manual** instrumentation is written by hand with the OpenTelemetry API; **library** instrumentation ships with or wraps a framework; [zero-code instrumentation](#zero-code-instrumentation) attaches at runtime with no source changes. See [Instrumentation](https://signoz.io/docs/instrumentation/).
+
+## L
+
+### Label
+
+A metric [attribute](#attribute). Label is the Prometheus term, used interchangeably in metrics contexts. A metric's **label set** is the specific combination of label values that identifies one [time series](#time-series).
+
+### Log record
+
+A timestamped record of an event, with a severity and optional [attributes](#attribute). When emitted inside an active span, a log record carries the trace and span ID, which is what lets SigNoz link logs to traces. See [Logs](https://signoz.io/docs/logs-management/overview/).
+
+### Logs pipeline
+
+A SigNoz-side processing chain that parses, transforms, or enriches log records after ingestion: extracting JSON fields, promoting attributes, redacting values. See [Logs pipelines](https://signoz.io/docs/logs-pipelines/introduction/).
+
+## M
+
+### Meter
+
+The object that creates metric [instruments](#instrument), obtained from a meter provider. Roughly the metrics equivalent of a [tracer](#tracer).
+
+### Metric
+
+A numeric measurement recorded over time: a request count, a latency distribution, a memory reading. Metrics are cheap to store at scale and ideal for dashboards and alerting, at the cost of losing per-request detail. See [Metrics](https://signoz.io/docs/metrics-management/overview/).
+
+## N
+
+### Non-identifying attribute
+
+An [attribute](#attribute) whose value is already determined by attributes present on the series, so adding it creates no new [time series](#time-series) and no additional [samples](#sample). `host.type` is non-identifying when `host.id` is already there: each host has exactly one type, so the label set count is unchanged.
+
+Non-identifying attributes are effectively free in SigNoz, since metrics are not billed per label or by label size. EC2 tags added by the AWS resource detector behave this way: they become part of series identity, but because each instance already has its own series, they add no series and no cost. Compare [identifying attribute](#identifying-attribute).
+
+### Notification channel
+
+The destination an [alert rule](#alert-rule) sends to when it fires. A channel is set up once and can then be picked by any alert rule. See [Setup notifications](https://signoz.io/docs/setup-alerts-notification/) for the channels SigNoz supports.
+
+## O
+
+### Observability
+
+The ability to answer questions about a system's internal state from the telemetry it emits, including questions you did not anticipate when you instrumented it. That last clause is what distinguishes it from monitoring, which answers known questions about known failure modes. Often abbreviated **o11y**.
+
+### OpenTelemetry
+
+The vendor-neutral CNCF project that defines APIs, SDKs, a wire protocol ([OTLP](#otlp)), and [semantic conventions](#semantic-conventions) for traces, metrics, logs, and (in Alpha) profiles. Instrumenting with OpenTelemetry means your telemetry is not tied to any one backend. Often abbreviated **OTel**. See [What is OpenTelemetry](https://signoz.io/docs/overview/what-is-opentelemetry-and-why-it-matters/).
+
+### OTLP
+
+The OpenTelemetry Protocol, the wire format for sending traces, metrics, logs, and (in Alpha) profiles, over gRPC or HTTP. It is the protocol SigNoz ingests natively.
+
+## P
+
+### Processor
+
+A [Collector](#collector) pipeline component that sits between receiving and exporting, transforming data in flight: batching, filtering, adding resource attributes, [tail sampling](#tail-sampling).
+
+### PromQL
+
+The Prometheus query language, supported in SigNoz for metrics. PromQL assumes cumulative counters and cannot read [delta temporality](#delta-temporality) series. See [Prometheus metrics](https://signoz.io/docs/userguide/prometheus-metrics/).
+
+### Propagator
+
+The component that serializes and deserializes trace context into and out of carriers such as HTTP headers, enabling [context propagation](#context-propagation). The default is W3C Trace Context (`traceparent`).
+
+## Q
+
+### Query Builder
+
+The visual query interface in SigNoz for building filters, aggregations, and groupings over logs, metrics, and traces without writing query language by hand. See [Query Builder](https://signoz.io/docs/userguide/query-builder-v5/).
+
+## R
+
+### RED metrics
+
+Rate, Errors, and Duration: the three request-level metrics worth tracking for every service. SigNoz derives them from [spans](#span) automatically. Compare [golden signals](#golden-signals).
+
+### Receiver
+
+A [Collector](#collector) pipeline component that defines how telemetry enters the Collector: an OTLP endpoint, a Prometheus scrape, a log file tail. Receivers can be push- or pull-based.
+
+### Resource
+
+The entity that produced the telemetry (a service instance, host, container, or pod), described by a set of [resource attributes](#resource-attribute). Every span, metric, and log record carries exactly one resource.
+
+### Resource attribute
+
+An [attribute](#attribute) on a [resource](#resource), such as `service.name`, `host.name`, or `k8s.pod.name`. Resource attributes are not treated specially for metric identity: they are part of the [fingerprint](#fingerprint) exactly like data point attributes, and they can be [identifying](#identifying-attribute) or [non-identifying](#non-identifying-attribute) in the same way.
+
+### Retention
+
+How long ingested data stays queryable, configured per signal. Longer retention raises the per-unit price of ingestion. Metrics are \$0.10 per million samples at one month, rising to \$0.18 at thirteen months. See [Retention period](https://signoz.io/docs/userguide/retention-period/) and [Pricing](https://signoz.io/pricing/).
+
+## S
+
+### Sample
+
+One float value at one timestamp in one [time series](#time-series), and the unit SigNoz bills metrics on, at **$0.10 per million samples ingested**. There is no charge per series, per unique metric, or per label.
+
+- A [gauge](#gauge) or [sum](#sum) data point is 1 sample.
+- A [histogram](#histogram) data point is one sample per [bucket](#bucket) (including `+Inf`), plus `.count` (always present), plus `.sum`, `.min`, and `.max` when the SDK emits them.
+- A summary data point is one sample per quantile, plus `.count` and `.sum`.
+
+Total samples = [active series](#active-series) × export frequency, which is why [cardinality](#cardinality) and export interval are the two levers that actually move your metrics bill. This uses the number of series genuinely active, not the product of your attributes' distinct values, which is only an upper bound. Lengthening the export interval from 30s to 60s halves the volume. For scale: 100,000 active series at a 30-second interval is about 8.6 billion samples per month, or roughly $864. See [Understanding Metrics Billing and Reducing Costs](https://signoz.io/docs/metrics-management/reducing-costs/) and [Pricing](https://signoz.io/pricing/).
+
+### Sampling
+
+Keeping only a portion of telemetry to control volume and cost. See [head sampling](#head-sampling) and [tail sampling](#tail-sampling).
+
+### Scope
+
+The instrumentation scope: the name and version of the library or module that emitted the telemetry. Scope is how you tell "spans from our HTTP client instrumentation" from "spans we wrote by hand". Scope attributes are part of a metric's [fingerprint](#fingerprint).
+
+### Semantic conventions
+
+OpenTelemetry's standard names and values for attributes and metrics: `http.request.method`, `db.system.name`, `service.name`. Following them is what makes telemetry from different languages and libraries comparable, and what lets SigNoz build views that work without configuration.
+
+### Service
+
+A named unit of an application that produces telemetry, identified by the `service.name` resource attribute. It is the primary grouping in APM views, so getting `service.name` right matters more than almost any other attribute.
+
+### Signal
+
+One of the telemetry types OpenTelemetry defines. SigNoz works with traces, metrics, and logs. OpenTelemetry also defines profiles as a fourth signal, currently in Alpha (see the <a href="https://opentelemetry.io/docs/specs/otel/profiles/" target="_blank" rel="noopener noreferrer nofollow">Profiles specification</a>).
+
+### SLI
+
+Service Level Indicator: the measured quantity in a reliability target, such as the fraction of requests served under 300 ms.
+
+### Span
+
+A single operation within a [trace](#trace): an HTTP handler, a database query, or a queue publish. A span has a name, start and end timestamps, [attributes](#attribute), a [status](#span-status), and a parent, which is what gives a trace its tree structure. See [Span details](https://signoz.io/docs/userguide/span-details/).
+
+### Span event
+
+A timestamped annotation on a [span](#span), used for things that happen at a moment rather than over a duration: a retry, a cache miss, a recorded exception.
+
+### Span link
+
+A pointer from one [span](#span) to another causally related span in a different trace. The standard use is batch processing, where one job span links to each of the many traces that produced its inputs. See [Span links](https://signoz.io/docs/traces-management/guides/span-links/).
+
+### Span status
+
+The outcome of the operation a [span](#span) represents: `Unset`, `Ok`, or `Error`. Span status is what error rate is computed from, so setting it correctly on caught exceptions matters.
+
+### Sum
+
+A metric that reports an additive value, with a [temporality](#temporality) and a monotonic flag. That flag splits sums into two kinds: see [counter](#counter) and [up-down counter](#up-down-counter). See [Metric types and aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/).
+
+## T
+
+### Tail sampling
+
+Deciding whether to keep a [trace](#trace) after all its spans have arrived, so the decision can depend on what happened. For example, keep every trace with an error or over 2 seconds, and sample the rest at 5%. Requires a Collector that sees the whole trace. See [Tail sampling](https://signoz.io/docs/traces-management/guides/tail-sampling/).
+
+### Temporality
+
+Whether a metric's data points report a running total or only the change since the last export. See [cumulative temporality](#cumulative-temporality) and [delta temporality](#delta-temporality). Temporality applies only to [sums](#sum) and [histograms](#histogram). It is meaningless for a [gauge](#gauge), which reports the value read at a moment, so gauge data points carry no temporality at all. Temporality is part of a metric's [fingerprint](#fingerprint), so the same metric sent with both temporalities produces separate series. See [Temporality of metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/#temporality-of-metrics).
+
+### Time series
+
+A single stream of [samples](#sample) over time, identified by a metric name, [temporality](#temporality), [resource attributes](#resource-attribute), the [instrumentation scope](#scope) identity (name, version, schema URL, and attributes), and data point attributes. In other words, by one specific label set.
+
+In SigNoz, series are real for storage and querying: each is identified by a [fingerprint](#fingerprint), the label set is stored once per series, and Metrics Explorer reports per-metric series counts. Series are **not** a billing unit. SigNoz bills [samples](#sample) ingested, unlike vendors that charge per time series or per custom metric. See [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
+
+### Trace
+
+The full record of one request's path through a system: a tree of [spans](#span) connected by parent-child relationships, sharing a [trace ID](#trace-id).
+
+### Trace funnel
+
+A SigNoz feature for measuring how many traces complete a defined sequence of steps and where they drop off. See [Trace funnels](https://signoz.io/docs/trace-funnels/overview/).
+
+### Trace ID
+
+The 16-byte identifier shared by every [span](#span) in a [trace](#trace). Each span additionally has an 8-byte span ID; together with trace flags they form the span context that [propagators](#propagator) carry between services.
+
+### Tracer
+
+The object that creates [spans](#span), obtained from a tracer provider and named after the [scope](#scope) doing the instrumenting.
+
+## U
+
+### Unique label set
+
+An informal name for what uniquely identifies a [time series](#time-series): the specific combination of label values that distinguishes it from every other series of the same metric. Adding an [identifying attribute](#identifying-attribute) increases the number of unique label sets; adding a [non-identifying attribute](#non-identifying-attribute) does not.
+
+### Unit
+
+The unit of measurement declared on an [instrument](#instrument), written in UCUM notation: `ms`, `By`, `1`. Units are part of a metric's metadata and drive axis formatting.
+
+### Up-down counter
+
+A non-monotonic [sum](#sum): it can rise or fall, like queue length or the count of open connections. Unlike a [counter](#counter), a decrease is a real measurement rather than a reset, so no reset handling applies. Compare [gauge](#gauge), which reports a value read at one moment instead of accumulating changes.
+
+## V
+
+### View
+
+An SDK-side rule that customizes what the SDK exports: renaming a metric stream, changing its aggregation or histogram buckets, dropping attributes, or ignoring an instrument entirely. Views are the earliest and cheapest place to cut [cardinality](#cardinality), because dropped attributes are never emitted at all.
+
+## Z
+
+### Zero-code instrumentation
+
+Instrumentation attached at runtime without modifying source code: a Java agent, a Python `opentelemetry-instrument` wrapper, an OTel operator injecting a sidecar. Also called auto-instrumentation. See [Instrumentation](https://signoz.io/docs/instrumentation/).
+
+## Related
+
+<DocCardContainer>
+
+<DocCard
+    title="Understanding Metrics Billing and Reducing Costs"
+    description="How samples, cardinality, and export frequency determine your metrics bill"
+    href="https://signoz.io/docs/metrics-management/reducing-costs/"
+/>
+
+<DocCard
+    title="What is OpenTelemetry?"
+    description="Why OpenTelemetry exists and what it standardizes"
+    href="https://signoz.io/docs/overview/what-is-opentelemetry-and-why-it-matters/"
+/>
+
+<DocCard
+    title="Cost Meter"
+    description="Monitor ingestion volume and spend per signal"
+    href="https://signoz.io/docs/cost-meter/overview/"
+/>
+
+</DocCardContainer>

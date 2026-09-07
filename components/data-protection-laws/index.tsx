@@ -20,21 +20,22 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
                   &nbsp;Store your data in the US, EU or India region depending on your needs.
                 </li>
                 <li className="max-w-full text-sm font-normal leading-9 text-signoz_vanilla-400 sm:w-[35rem] md:max-w-[min(35rem,100%)] md:text-base">
-                  &nbsp;You can self-host SigNoz or opt for our managed self-hosted offerings to
-                  have complete adherence to data privacy and regulation laws.
+                  &nbsp;Choose Self-Hosted SigNoz when you need to run the observability stack on
+                  your own infrastructure, or ask about managed enterprise deployment options.
                 </li>
               </ul>
             ) : (
               <div className="mb-10 text-base font-normal leading-9 text-signoz_vanilla-400">
                 No need to send data outside your region. We have data centers in US, EU and India
-                to comply with data privacy regulations. You can also host SigNoz in your own cloud.
+                to comply with data privacy regulations. You can also run Self Hosted SigNoz in your
+                own cloud.
               </div>
             )}
           </div>
           <Image
             className="w-full"
             src={featureGraphicDataProtection}
-            alt="Map showing SigNoz cloud regions in the United States, European Union, and India"
+            alt="Map showing SigNoz Cloud regions in the United States, European Union, and India"
             width={720}
             height={400}
           />
@@ -61,7 +62,7 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
                 className="inline-block"
                 clickType="Secondary CTA"
                 clickName="Self-Host Link"
-                clickText="Self-Host SigNoz"
+                clickText="Install Self-Hosted SigNoz"
                 clickLocation="Data Protection Section"
               >
                 <Button
@@ -70,7 +71,7 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
                   id="btn-self-host-signoz-homepage"
                 >
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  Self-Host SigNoz
+                  Install Self-Hosted SigNoz
                 </Button>
               </TrackingLink>
               <TrackingLink

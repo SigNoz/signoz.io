@@ -32,6 +32,8 @@ const SECTION_CONFIG: Record<string, BreadcrumbCrumb> = {
   guides: { name: 'Guides', url: `${BASE_URL}/guides/` },
   comparisons: { name: 'Comparisons', url: `${BASE_URL}/comparisons/` },
   opentelemetry: { name: 'OpenTelemetry', url: `${BASE_URL}/opentelemetry/` },
+  customers: { name: 'Customers', url: `${BASE_URL}/customers/` },
+  faqs: { name: 'FAQs', url: `${BASE_URL}/faqs/` },
 }
 
 const HOME_CRUMB: BreadcrumbCrumb = { name: 'SigNoz', url: `${BASE_URL}/` }
@@ -148,7 +150,10 @@ export function buildBreadcrumbSchema(crumbs: BreadcrumbCrumb[]): BreadcrumbList
   }
 }
 
-export async function getDocsBreadcrumbs(slug: string, pageTitle: string): Promise<BreadcrumbCrumb[]> {
+export async function getDocsBreadcrumbs(
+  slug: string,
+  pageTitle: string
+): Promise<BreadcrumbCrumb[]> {
   const targetRoute = normalizeDocsRoute(`/docs/${slug}`)
   const map = await getAncestryMap()
 
@@ -173,12 +178,15 @@ export async function getDocsBreadcrumbs(slug: string, pageTitle: string): Promi
   return crumbs
 }
 
-export async function generateDocsBreadcrumb(slug: string, pageTitle: string): Promise<BreadcrumbListSchema> {
+export async function generateDocsBreadcrumb(
+  slug: string,
+  pageTitle: string
+): Promise<BreadcrumbListSchema> {
   return buildBreadcrumbSchema(await getDocsBreadcrumbs(slug, pageTitle))
 }
 
 export function getSectionArticleBreadcrumbs(
-  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry' | 'customers' | 'faqs',
   title: string,
   slug: string
 ): BreadcrumbCrumb[] {
@@ -191,7 +199,7 @@ export function getSectionArticleBreadcrumbs(
 }
 
 export function generateSectionArticleBreadcrumb(
-  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry' | 'customers' | 'faqs',
   title: string,
   slug: string
 ): BreadcrumbListSchema {
@@ -199,7 +207,7 @@ export function generateSectionArticleBreadcrumb(
 }
 
 export function generateSectionHubBreadcrumb(
-  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry' | 'customers' | 'faqs',
   page?: string
 ): BreadcrumbListSchema {
   const config = SECTION_CONFIG[section]

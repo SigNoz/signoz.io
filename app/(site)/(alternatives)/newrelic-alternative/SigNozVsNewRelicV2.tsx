@@ -38,17 +38,17 @@ import TrackingLink from '@/components/TrackingLink'
 const data = [
   {
     name: 'Small engineering team',
-    SigNoz: 1078,
+    'SigNoz Cloud': 1078,
     NewRelic: 3511,
   },
   {
     name: 'Midsize engineering team',
-    SigNoz: 4903,
+    'SigNoz Cloud': 4903,
     NewRelic: 14823,
   },
   {
     name: 'Large engineering team',
-    SigNoz: 9412,
+    'SigNoz Cloud': 9412,
     NewRelic: 29152,
   },
 ]
@@ -56,7 +56,9 @@ const data = [
 const ValueComparisonChart = () => {
   return (
     <div className="w-full rounded-lg bg-gray-900 p-6">
-      <h4 className="mb-4 text-xl text-white">Get up to 67% more value for money with SigNoz</h4>
+      <h4 className="mb-4 text-xl text-white">
+        Get up to 67% more value for money with SigNoz Cloud
+      </h4>
       <div className="h-96">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -94,9 +96,9 @@ const ValueComparisonChart = () => {
               wrapperStyle={{
                 color: '#fff',
               }}
-              itemSorter={(item) => (item.dataKey === 'SigNoz' ? 0 : 1)}
+              itemSorter={(item) => (item.dataKey === 'SigNoz Cloud' ? 0 : 1)}
             />
-            <Bar dataKey="SigNoz" fill="#ff7f50" />
+            <Bar dataKey="SigNoz Cloud" fill="#ff7f50" />
             <Bar dataKey="NewRelic" fill="#9333ea" />
           </BarChart>
         </ResponsiveContainer>
@@ -120,7 +122,7 @@ const SigNozVsNewRelicV2 = () => {
             className="mb-10 w-full lg:mb-0 lg:w-2/5"
           >
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.35em] text-blue-200">
-              SigNoz vs New Relic
+              SigNoz Cloud vs New Relic
             </p>
             <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.2] text-transparent lg:text-6xl lg:leading-[1.2]">
               New Relic Alternative
@@ -201,7 +203,7 @@ const SigNozVsNewRelicV2 = () => {
           >
             <Link href="#why-choose-signoz" className="flex items-center hover:text-gray-300">
               <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
-              Why do Engineering Teams Choose SigNoz over New Relic?
+              Why do Engineering Teams Choose SigNoz Cloud over New Relic?
             </Link>
           </h2>
 
@@ -213,7 +215,7 @@ const SigNozVsNewRelicV2 = () => {
               of open-source standards.
               <br />
               <br />
-              Top reasons why developers prefer SigNoz over New Relic:
+              Top reasons why developers prefer SigNoz Cloud over New Relic:
             </p>
           </div>
 
@@ -309,7 +311,7 @@ const SigNozVsNewRelicV2 = () => {
                   New Relic charges for data ingest and user seats. New Relic's user seat pricing
                   can go up to $418.8 per full-platform user. User-based pricing is outdated. You
                   never know which engineer might need to access the monitoring tool for debugging.
-                  At SigNoz, we don't charge based on user seats.
+                  SigNoz Cloud does not charge based on user seats.
                 </p>
               </div>
             </div>
@@ -362,7 +364,7 @@ const SigNozVsNewRelicV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           New Relic
@@ -679,7 +681,7 @@ const SigNozVsNewRelicV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           New Relic
@@ -924,7 +926,7 @@ const SigNozVsNewRelicV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           New Relic
@@ -1160,7 +1162,7 @@ const SigNozVsNewRelicV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           New Relic
@@ -1385,7 +1387,7 @@ const SigNozVsNewRelicV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           New Relic
@@ -1531,7 +1533,7 @@ const SigNozVsNewRelicV2 = () => {
                           Feature
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
-                          SigNoz
+                          SigNoz Cloud
                         </th>
                         <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
                           New Relic
@@ -1646,7 +1648,7 @@ const SigNozVsNewRelicV2 = () => {
 
           <p className="mb-6 text-[1.1rem] text-gray-300">
             For 20 APM hosts, 50 million indexed spans, 50 infra hosts, and 2500 GB logs data,
-            SigNoz can save 67% of your New Relic bill.
+            SigNoz Cloud can save 67% of your New Relic bill.
             <br />
             <br />
             New Relic's{' '}
@@ -1690,13 +1692,13 @@ const SigNozVsNewRelicV2 = () => {
         {/* Migration Section */}
         <section className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 px-4 py-12 sm:px-6">
           <h2 className="mb-8 text-left text-xl font-bold lg:text-2xl">
-            Migrate from New Relic - Save up to 67% on your New Relic bill
+            Migrate from New Relic to SigNoz Cloud - Save up to 67% on your New Relic bill
           </h2>
           <div className="text-gray-300">
             <p className="mb-6 text-[1.1rem] text-gray-300">
-              We provide support for migrating from New Relic to SigNoz if your monthly billing in
-              New Relic is greater than 1000 USD. Request a migration from one of our experts and
-              get started with SigNoz quickly.
+              We provide support for migrating from New Relic to SigNoz Cloud if your monthly
+              billing in New Relic is greater than 1000 USD. Request a migration from one of our
+              experts and get started with SigNoz Cloud quickly.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link href="/product-comparison/migrate-from-newrelic/" className="block max-w-md">

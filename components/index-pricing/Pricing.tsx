@@ -18,7 +18,7 @@ const pricingValueProps = [
     Icon: Database,
     title: 'No user-based pricing',
     description:
-      'Bring engineering, support, and on-call teams into SigNoz without seat limits or seat math.',
+      'Bring engineering, support, and on-call teams into SigNoz Cloud without seat limits or seat math.',
   },
   {
     Icon: LineChart,
@@ -194,7 +194,7 @@ export default function Pricing() {
             <p className="m-0 max-w-xs text-3xl font-medium leading-none tracking-tight text-signoz_vanilla-100 sm:text-4xl md:text-5xl">
               Switch to
               <br />
-              SigNoz
+              SigNoz Cloud
             </p>
             <MigrationCta />
           </div>

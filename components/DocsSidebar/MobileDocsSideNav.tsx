@@ -16,7 +16,7 @@ export default function MobileDocsSideNav() {
   if (!isOpen) return null
 
   return (
-    <div className="md:hidden">
+    <div className="md:hidden" data-markdown-ignore>
       <div
         className="fixed inset-0 top-[56px] z-[1100] bg-[var(--l1-background)]"
         onClick={() => close()}
