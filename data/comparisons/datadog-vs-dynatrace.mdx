@@ -44,7 +44,7 @@ Here's a comparison of the main features between Datadog and Dynatrace.
 
 ✅ - Available &nbsp;&nbsp;&nbsp;&nbsp;❌ - Not Available
 
-Note: Both platforms support OpenTelemetry, though Dynatrace offers more seamless integration with its AI-powered insights, while Datadog prioritizes its proprietary agents but supports [OTel](https://signoz.io/opentelemetry/) protocols.
+Note: Both platforms accept OpenTelemetry logs, metrics, and traces, but their setup paths differ. Dynatrace provides native OTLP endpoints and Collector or ActiveGate options. Datadog prioritizes its proprietary Agent, while also supporting OTLP through the Agent, DDOT, the OpenTelemetry Collector, and direct OTLP ingest.
 
 For other matchups, [Datadog vs New Relic](https://signoz.io/blog/datadog-vs-newrelic/) and [Datadog vs CloudWatch](https://signoz.io/blog/datadog-vs-cloudwatch/) weigh Datadog against other platforms, and [Splunk vs Dynatrace](https://signoz.io/comparisons/splunk-vs-dynatrace/) covers Dynatrace on the log side.
 
@@ -194,7 +194,7 @@ One major differentiator with Datadog is the fact that in Dynatrace I could navi
 
 On clicking the Python app, I was taken to a detailed view where it not only showed the application metrics but also showed how it was connected to the MongoDB process. I found this rather interesting.
 
-## Application Monitoring: Datadog is simpler to start with
+## Application Monitoring: OpenTelemetry setup was simpler in Datadog in this test
 
 ### Datadog
 
@@ -230,9 +230,9 @@ Although everything had a separate panel, it was detailed enough to check all th
 
 After checking the infrastructure and process metrics, I wanted to look at the application metrics, along with Logs and Traces. I once again found myself lost in the UI, trying to figure out where to go next. After searching for a while, I came across the documentation for setting up application metrics.
 
-Dynatrace offers two options for instrumentation — using the OneAgent module for Python or using OpenTelemetry. The former required changes to code, and that's not something I was looking for. Hence, I opted for the OpenTelemetry route.
+Dynatrace offers two options for Python instrumentation: OneAgent or OpenTelemetry. Current Dynatrace documentation states that OneAgent can automatically inject into supported Python processes. For this test, I used the OpenTelemetry route.
 
-Next, it was time for me to set up the required configuration. Going through the documentation, I had to figure out the OLTP endpoint, and the access token. Generating the access token was tricky as you have to know the access scopes required. I had to go to another document to find it.
+Next, it was time for me to set up the required configuration. Going through the documentation, I had to find the OTLP endpoint and the access token. Generating the access token was tricky because I had to know the required access scopes. I had to go to another document to find them.
 
 With these in place, I had to install the python packages for opentelemetry. After that, I had to restart the Python app with the `opentelemetry-instrument` command.
 
@@ -316,68 +316,21 @@ One of the key differentiators between these platforms is their approach to arti
 
 ### Dynatrace Davis AI
 
-Dynatrace's Davis AI is widely recognized as the industry leader in AIOps. It provides:
-- **Automated Root Cause Analysis**: Davis AI automatically identifies the root cause of issues without manual investigation
-- **Predictive Problem Detection**: Identifies anomalies before they impact users
-- **Auto-remediation**: Can automatically fix known issues based on predefined playbooks
-- **Natural Language Insights**: Explains complex issues in plain English
+Dynatrace Intelligence, which includes Davis AI capabilities, uses baselines, topology, and dependency context to detect anomalies and group related alerts into problems. Its problem view can show the affected services and a probable root cause. Teams can connect these problems to workflows for notifications or predefined remediation steps.
 
 ### Datadog Watchdog
 
-Datadog's Watchdog takes a different approach:
-- **Anomaly Detection**: Identifies unusual patterns across metrics and logs
-- **Alert Correlation**: Groups related alerts to reduce noise
-- **Suggested Dashboards**: Recommends relevant dashboards during incidents
-- **Manual Investigation Required**: Provides clues but requires more manual analysis
+Datadog Watchdog also detects unusual behavior and provides investigation context. It creates proactive alerts and insights, and it can run a preliminary root-cause analysis for supported APM anomalies. It also shows the potential user and service impact of an issue.
 
-The key difference: Dynatrace aims for full automation while Datadog provides powerful tools for manual investigation. Choose based on whether you prefer AI-driven decisions or human-in-the-loop control.
-
-## Real Cost Comparison
-
-After testing both platforms, I wanted to understand the actual costs organizations face in production. The pricing models are quite different, and this can significantly impact your total cost of ownership.
-
-### Typical Enterprise Scenario (100 hosts, 50TB logs/month)
-
-Let me break down what you might expect to pay:
-
-**Datadog Costs:**
-- [Infrastructure Monitoring](https://signoz.io/guides/infrastructure-monitoring/): \$15/host = \$1,500/month
-- APM: \$40/host = \$4,000/month  
-- Log Management: \$0.10/GB ingested = \$5,000/month
-- Custom Metrics: Often adds 30-50% to your bill
-- **Estimated Total: ~\$13,000-15,000/month**
-
-**Dynatrace Costs:**
-- Full-Stack Monitoring: \$58/host = \$5,800/month
-- Includes APM, logs, RUM, and infrastructure
-- No separate charges for custom metrics
-- **Total: ~$5,800/month**
-
-For a detailed breakdown of Datadog's pricing complexities and hidden costs, check out this comprehensive guide: [Datadog Pricing Main Caveats Explained](https://signoz.io/blog/datadog-pricing/).
-
-### What to Watch Out For
-
-**With Datadog:**
-- Custom metrics can explode costs (each tag combination creates a new metric)
-- 99th percentile billing means brief spikes can affect your entire month's bill
-- Log ingestion and indexing are charged separately
-- Each module (APM, Infrastructure, Logs) has its own pricing
-
-**With Dynatrace:**
-- Higher base price per host compared to individual Datadog modules
-- Less flexibility if you only need specific features
-- Additional training might be needed due to the steeper learning curve
+The main difference is the operating model. Dynatrace puts more emphasis on topology-based problem analysis and enterprise workflow automation. Watchdog works inside the broader Datadog platform to detect issues and speed up the first part of an investigation. Neither product removes the need to validate the evidence or configure the response workflow.
 
 ## Pricing
 
+After testing both platforms, I wanted to understand the actual costs organizations face in production. The pricing models are quite different, and this can significantly impact your total cost of ownership.
+
 ### Datadog
 
-Datadog has two major pricing options:
-
-- Pay As You Go
-- Create Your Own Plan
-
-You have to manually take into account the price of every single component that you will be monitoring. While it might be intuitive if you have a very limited set of applications, this becomes complicated once that number increases.
+Datadog prices many products and capabilities as separate modules. Depending on the products you select, the bill can include hosts, containers, indexed spans, ingested or indexed logs, retention, and other usage units. This gives teams control over what they buy, but it also means that an estimate must include each required module. See the <a href="https://www.datadoghq.com/pricing/list/" target="_blank" rel="noopener noreferrer nofollow">current Datadog pricing list</a> and our [Datadog pricing guide](https://signoz.io/blog/datadog-pricing/) for the units to check.
 
 <Figure
   src="/img/blog/2024/03/datadog-vs-dynatrace-pricing-dd.webp"
@@ -387,7 +340,7 @@ You have to manually take into account the price of every single component that 
 
 ### Dynatrace
 
-For Dynatrace, there is the option of opting for full-stack monitoring. But do note that not everything is covered under this, and you might need to opt additional things, or go for a custom plan by talking to the sales team.
+Dynatrace now presents the Dynatrace Platform Subscription as a consumption-based model with an annual commitment. Different capabilities consume that commitment at different rates. A cost model must therefore include the amount of data and the capabilities that the team will use. See the <a href="https://docs.dynatrace.com/docs/license" target="_blank" rel="noopener noreferrer nofollow">current Dynatrace licensing documentation</a> for the active units and rates.
 
 <Figure
   src="/img/blog/2024/03/datadog-vs-dynatrace-pricing-dt.webp"
@@ -407,10 +360,10 @@ Datadog also has a lot of explainer videos on YouTube that might help you set th
 After using both tools and analyzing real-world experiences, here's the bottom line:
 
 **Dynatrace wins on**:
-- Total cost of ownership (3x cheaper at scale)
-- AI-powered automation (Davis AI is superior)
-- Unified platform approach
-- Enterprise readiness
+- Topology-based problem analysis
+- Automated enterprise workflows
+- A connected view of hosts, processes, services, and dependencies
+- Enterprise deployment and governance needs
 
 **Datadog wins on**:
 - Developer experience and ease of use
@@ -418,7 +371,7 @@ After using both tools and analyzing real-world experiences, here's the bottom l
 - Dashboard flexibility
 - Community and documentation
 
-There's no universal "best" choice - it depends on your priorities. If you want powerful automation and have complex enterprise needs, Dynatrace is likely better. If you prefer control, customization, and have a modern cloud-native stack, Datadog might be your choice.
+There's no universal "best" choice. Dynatrace can be a better fit when topology-based analysis and automated enterprise workflows are the main requirements. Datadog can be a better fit when onboarding, integrations, dashboards, and developer experience are more important.
 
 Remember: Both are expensive enterprise tools. If you're looking for a cost-effective managed alternative, consider [SigNoz Cloud](https://signoz.io/docs/introduction/). If you need to run the platform on your own infrastructure, consider Self-Hosted SigNoz.
 
@@ -434,26 +387,24 @@ The challenge with both Datadog and Dynatrace is their complex pricing models an
   caption="SigNoz provides a unified observability platform"
 />
 
-SigNoz is a unified observability platform that provides:
+### Migration and OpenTelemetry
 
-- **Full-stack observability**: Metrics, traces, and logs in a single platform
-- **[OpenTelemetry](https://signoz.io/opentelemetry/)-native**: Built on open standards, avoiding vendor lock-in
-- **Transparent pricing**: No custom metrics charges or hidden fees
-- **ClickHouse powered**: Handles high-volume data efficiently
-- **Advanced features**: [Distributed tracing](https://signoz.io/blog/distributed-tracing/), service maps, custom dashboards
+Teams that migrate from Datadog can use the [Datadog migration guides](https://signoz.io/docs/migration/migrate-from-datadog-to-signoz/) for data, dashboards, and alerts. The guides include an automated tool that converts Datadog dashboard JSON into a SigNoz dashboard that teams can review and refine. Enterprise plans also include guided migration support.
 
-Key advantages over Datadog and Dynatrace:
-- **No per-host pricing**: Scale without worrying about host count
-- **Predictable costs**: Simple usage-based pricing
-- **Open-source option**: Use Self-Hosted SigNoz for complete control
-- **No vendor lock-in**: Easy migration with OpenTelemetry
+SigNoz is built on OpenTelemetry, so teams can move instrumentation and telemetry transport away from proprietary agents in stages. SigNoz keeps OpenTelemetry resource and span attributes, span events, links, trace IDs, and other context available for investigation. For Prometheus workloads, the OpenTelemetry Collector can scrape Prometheus endpoints, and SigNoz can query Prometheus metrics with PromQL.
 
-Teams report 70-90% cost savings compared to Datadog while maintaining full observability capabilities.
+### Cost and Deployment Choice
+
+SigNoz Cloud uses telemetry volume and retention instead of per-host or per-user prices. It does not add a separate price for custom metrics. Compare the same data volume, retention, and users in the [SigNoz pricing calculator](https://signoz.io/pricing/) before you estimate savings.
+
+Deployment options include managed SigNoz Cloud, dedicated Enterprise Cloud, managed BYOC, Enterprise Self-Hosted, and the open-source Community Edition. This range is useful when data residency, isolation, or infrastructure control is a requirement.
+
+### Daily Investigation Workflows
+
+The product brings logs, metrics, traces, exceptions, infrastructure data, dashboards, and alerts into one interface. The common workflow is to start with one signal and move to related telemetry without changing tools. A single query builder provides a consistent way to query logs, metrics, and traces. Features such as query history, quick filters, saved views, autocomplete, dashboard variables, and alert history support repeated investigations. [Noz](https://signoz.io/docs/ai/noz/) and the [SigNoz MCP Server](https://signoz.io/docs/ai/signoz-mcp-server/) add natural-language and agent-led investigation paths. Enterprise plans also add RBAC and SSO options.
+
+This is a good fit for teams that need correlated log analysis, detailed distributed tracing, and infrastructure monitoring for Kubernetes, AWS, Azure, GCP, and Linux hosts. SigNoz Cloud removes the need to operate the ClickHouse storage layer for high-volume logs. For tracing, SigNoz supports span aggregation and shows inline span percentiles.
 
 ## Getting Started with SigNoz
 
-You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
-
-Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).  
-
-Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+The easiest way to start is [SigNoz Cloud](https://signoz.io/teams/), which has a 30-day trial. Teams that need isolation or control over data location can use dedicated Enterprise Cloud, managed BYOC, or [Enterprise Self-Hosted](https://signoz.io/contact-us/). Teams that want to operate the platform themselves can use the [open-source Community Edition](https://signoz.io/docs/install/self-host/).
