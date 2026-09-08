@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ArrowRight } from 'lucide-react'
 
 import { CUSTOMER_STORY_LOGOS, type CustomerStoryLogo } from './customerStories.constants'
@@ -33,8 +34,12 @@ export default function CustomerCarousel() {
   const trackRef = useRef<HTMLDivElement>(null)
   const pillRef = useRef<HTMLDivElement>(null)
   const pillTextRef = useRef<HTMLSpanElement>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
 
   useEffect(() => {
+    if (!mounted) return
     const wrapper = wrapperRef.current
     const track = trackRef.current
     const pill = pillRef.current
@@ -128,6 +133,8 @@ export default function CustomerCarousel() {
       pillText.textContent = card.dataset.caseStudy ? 'Read case study' : 'See all customers'
       pillX = mouseX
       pillY = mouseY
+      pill.style.left = `${pillX}px`
+      pill.style.top = `${pillY}px`
       pill.classList.add('visible')
     }
 
@@ -182,7 +189,7 @@ export default function CustomerCarousel() {
         card.removeEventListener('mouseleave', onLeave)
       })
     }
-  }, [])
+  }, [mounted])
 
   return (
     <div className="customer-stories__carousel">
@@ -206,10 +213,14 @@ export default function CustomerCarousel() {
           <div className="edge-fade" />
         </div>
       </div>
-      <div className="cursor-pill" ref={pillRef} aria-hidden="true">
-        <span ref={pillTextRef} />
-        <ArrowRight size={10} />
-      </div>
+      {mounted &&
+        createPortal(
+          <div className="customer-stories-cursor-pill" ref={pillRef} aria-hidden="true">
+            <span ref={pillTextRef} />
+            <ArrowRight size={10} />
+          </div>,
+          document.body
+        )}
     </div>
   )
 }

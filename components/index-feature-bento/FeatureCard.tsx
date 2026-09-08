@@ -55,7 +55,9 @@ export default function FeatureCard({ feature }: { feature: BentoFeature }) {
               src={asset.src}
               alt={asset.alt}
               fill
-              className="object-cover object-top"
+              className={
+                asset.fit === 'contain' ? 'object-contain object-top' : 'object-cover object-top'
+              }
               sizes="(max-width: 768px) 100vw, 50vw"
             />
             <div
