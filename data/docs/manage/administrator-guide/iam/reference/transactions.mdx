@@ -1,5 +1,5 @@
 ---
-date: 2026-07-30
+date: 2026-09-08
 title: Transactions Reference
 description: Complete reference of transactions for each resource in SigNoz covering relations, selector formats, and managed role access.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -19,7 +19,7 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers roles, service accounts, API keys, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
+This page currently covers roles, service accounts, API keys, the subscription (billing) resource, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
 </Admonition>
 
 ## Resources
@@ -65,6 +65,24 @@ This page currently covers roles, service accounts, API keys, and telemetry reso
 | `read` | View API key metadata (name, expiration, last used). | signoz-admin |
 | `update` | Modify API key metadata (for example, change the expiration date). | signoz-admin |
 | `delete` | Permanently revoke an API key. | signoz-admin |
+
+### Subscription
+
+**Resource:** `metaresource` · **Kind:** `subscription` · **Selector:** organization-wide (wildcard only)
+
+The subscription resource governs the **Settings > Billing** page and its actions. Each relation controls one part of that page. All users can open the Billing page, but the usage data and each action are gated by the relations below.
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `read` | View the usage graph, usage breakdown table, and CSV download on the Billing page. Without it, these are replaced by a "not authorized" callout. | signoz-admin |
+| `create` | Start a checkout session to upgrade the plan (the **Upgrade Plan** button, and the credit-card and chat actions on the Support page). | signoz-admin |
+| `update` | Open the Stripe billing portal (the **Manage Billing** button). Enforced together with `list`. | signoz-admin |
+| `list` | Read the subscription state the billing portal needs. Enforced together with `update` for **Manage Billing**. | signoz-admin |
+| `delete` | Cancel the subscription (the **Cancel subscription** action on the Billing page). | signoz-admin |
+
+<Admonition type="info">
+Only the built-in **signoz-admin** role receives subscription transactions by default; a database migration backfills them on upgrade. Users in the **signoz-editor** and **signoz-viewer** roles can open the Billing page but see the usage data and every action disabled (with an authorization tooltip) until an admin grants the relevant relations through a custom role. Delete has no dedicated API route; it gates the **Cancel subscription** action in the UI, and cancellation is completed through the Stripe billing portal.
+</Admonition>
 
 ### Logs
 
@@ -137,3 +155,4 @@ Some operations require transactions on multiple resources. Both transactions mu
 | Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
 | Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
 | Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |
+| Open the billing portal (Manage Billing) | `subscription:list` AND `subscription:update` |

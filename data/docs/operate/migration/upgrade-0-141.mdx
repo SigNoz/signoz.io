@@ -1,0 +1,79 @@
+---
+date: 2026-09-08
+title: Upgrade SigNoz to v0.141.0 and Migrate Billing to Subscriptions
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
+description: Upgrade self-hosted SigNoz to v0.141.0. The legacy billing endpoints are removed for the new subscription API, and SIGNOZ_LICENSE_API_KEY is no longer read.
+doc_type: howto
+---
+
+SigNoz v0.141.0 replaces the legacy billing endpoints with a unified `/api/v1/subscriptions` resource and removes the `SIGNOZ_LICENSE_API_KEY` environment variable. No action is needed if you only use billing through the SigNoz UI. If you call the billing endpoints from scripts or set `SIGNOZ_LICENSE_API_KEY` in your deployment, read the breaking changes below before you upgrade.
+
+<Admonition type="warning" title="The legacy billing endpoints are removed">
+`POST /api/v1/checkout`, `GET /api/v1/billing`, and `POST /api/v1/portal` are removed in v0.141.0. Any script or integration that calls them fails with `404 Not Found` after the upgrade. Move to the [subscription endpoints](#migrate-to-the-subscription-endpoints) first.
+</Admonition>
+
+## Upgrade self-hosted SigNoz
+
+### Step 1: Remove `SIGNOZ_LICENSE_API_KEY`
+
+SigNoz no longer reads the `SIGNOZ_LICENSE_API_KEY` environment variable. If you set it in your deployment configuration (Helm values, Docker Compose, `.env`, or a systemd unit), remove it. Leaving it set has no effect, but cleaning it up keeps your configuration accurate.
+
+### Step 2: Upgrade SigNoz
+
+<Tabs entityName="installer">
+<TabItem value="foundry" label="Foundry" default>
+
+Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundryctl</a> to pick up the v0.141.0 defaults, then re-apply your existing `casting.yaml`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+foundryctl cast -f casting.yaml
+```
+
+If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting.yaml</a> pins image versions, the new defaults will not override them (your config wins), so bump the SigNoz image pin to v0.141.0 yourself.
+
+</TabItem>
+<TabItem value="helm" label="Kubernetes (Helm chart)">
+
+Update the <a href="https://github.com/SigNoz/charts" target="_blank" rel="noopener noreferrer nofollow">chart</a> and upgrade. Replace `<namespace>` and `<release-name>` with your own values:
+
+```bash
+helm repo update
+helm -n <namespace> upgrade <release-name> signoz/signoz
+```
+
+`helm upgrade` takes the newest chart; add `--version 0.141.0` to pin the v0.141.0 chart.
+
+</TabItem>
+</Tabs>
+
+For Docker or binary deployments, follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/) and set the target version to v0.141.0. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops before you move to v0.141.0.
+
+### Step 3: Verify the upgrade
+
+1. Pods and containers are healthy (`kubectl get pods -n <namespace>`, `docker compose ps`, or `systemctl status 'signoz-*'`).
+2. SigNoz reports v0.141.0 under **Settings**.
+3. If you use SigNoz Cloud or Enterprise billing, open **Settings > Billing** and confirm the page loads.
+
+## Migrate to the subscription endpoints
+
+The three legacy billing routes are replaced one-for-one by the `/api/v1/subscriptions` resource. Update any scripts to the new endpoints:
+
+| Removed endpoint | Replacement | Notes |
+|------------------|-------------|-------|
+| `POST /api/v1/checkout` | `POST /api/v1/subscriptions` | Starts a Stripe checkout session and returns a `redirectURL`. Returns `409 Conflict` if checkout is already complete. |
+| `POST /api/v1/portal` | `PUT /api/v1/subscriptions` | Opens the Stripe billing portal and returns a `redirectURL`. The HTTP method changes from `POST` to `PUT`, and the success status changes from `201` to `200`. |
+| `GET /api/v1/billing` | `GET /api/v1/subscriptions` | Returns the current subscription status, billing period, discount, and a day-wise usage breakdown (per signal type, unit, and tier pricing). |
+
+<Admonition type="info" title="Enterprise-only and admin-only">
+The subscription endpoints require the admin scope and are available only in Enterprise deployments. Community deployments return an explicit `subscription_unsupported` error (not a `404`) for all three. Access is governed by the new subscription resource in fine-grained access control. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/#subscription) for the relations that gate each action.
+</Admonition>
+
+For the full request and response schema, see the subscription endpoints in the [SigNoz API reference](https://signoz.io/api-reference/).
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- <a href="https://github.com/SigNoz/signoz/issues" target="_blank" rel="noopener noreferrer nofollow">GitHub Issues</a>
+- [Community Slack](https://signoz.io/slack/)
+
