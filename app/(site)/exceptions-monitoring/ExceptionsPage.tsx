@@ -3,16 +3,15 @@
 import React from 'react'
 import Image from 'next/image'
 import {
-  APM_HEADER_BUTTONS,
-  APM_HERO_IMAGE,
-  APM_OVERVIEW_PANELS,
-  APM_PRICING_CARDS,
-  APM_USE_CASES,
   CHECK_PRICING_BUTTON,
+  EXCEPTIONS_HEADER_BUTTONS,
+  EXCEPTIONS_HERO_IMAGE,
+  EXCEPTIONS_OVERVIEW_PANELS,
+  EXCEPTIONS_PRICING_CARDS,
   GET_STARTED_BUTTONS,
   GET_STARTED_IMAGE,
-  WHY_APM_CARDS,
-} from './ApmPage.constants'
+  WHY_EXCEPTIONS_CARDS,
+} from './ExceptionsPage.constants'
 import { TrustedByTeams } from '@/components/trusted-by'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import SectionHeading from '@/shared/components/molecules/FeaturePages/SectionHeading'
@@ -34,43 +33,25 @@ const Header: React.FC = () => {
       className="theme-invert-images"
       title={
         <>
-          Application Performance Monitoring <br />
-          Powered by OpenTelemetry
+          Record Exceptions Automatically and <br />
+          See detailed Stack Traces
         </>
       }
       description={
         <>
-          SigNoz Cloud APM comes with out-of-box charts for key application metrics powered by
-          OpenTelemetry.
-          <br className="hidden lg:inline" /> Get latency, requests per second, error percentage,
-          apdex & other key metrics
-          <br className="hidden lg:inline" /> to understand your application performance.
+          Monitor exceptions automatically in Python, Java, Ruby, and Javascript.
+          <br className="hidden lg:inline" />
+          For other languages, just drop in a few lines of code and start monitoring exceptions.
         </>
       }
-      buttons={APM_HEADER_BUTTONS}
-      heroImage={APM_HERO_IMAGE.src}
-      heroImageAlt={APM_HERO_IMAGE.alt}
+      buttons={EXCEPTIONS_HEADER_BUTTONS}
+      heroImage={EXCEPTIONS_HERO_IMAGE.src}
+      heroImageAlt={EXCEPTIONS_HERO_IMAGE.alt}
     />
   )
 }
 
-const ApmUseCasesSection: React.FC = () => {
-  return (
-    <StickyTitleSection
-      title={
-        <>
-          Use SigNoz Cloud
-          <br /> APM for...
-        </>
-      }
-      className="!border-t-1"
-    >
-      <InfoCardList cards={APM_USE_CASES} />
-    </StickyTitleSection>
-  )
-}
-
-const ApmPricingSection: React.FC = () => {
+const ExceptionsPricingSection: React.FC = () => {
   return (
     <StickyTitleSection
       title={
@@ -82,14 +63,14 @@ const ApmPricingSection: React.FC = () => {
       className="!border-b-1 !border-t-1"
     >
       <div className="text-2xl font-semibold text-[var(--l1-foreground)]">
-        Pricing you can trust
+        SigNoz Cloud pricing you can trust
       </div>
       <p className="text-base font-normal text-[var(--l2-foreground)]">
         Tired of Datadog’s unpredictable bills or New Relic’s user-based pricing?
         <br />
         We’re here for you.
       </p>
-      <InfoCardList cards={APM_PRICING_CARDS} />
+      <InfoCardList cards={EXCEPTIONS_PRICING_CARDS} />
       <ButtonGroup buttons={[CHECK_PRICING_BUTTON]} className="mt-5 md:!justify-start" />
     </StickyTitleSection>
   )
@@ -120,30 +101,29 @@ const GetStartedBanner: React.FC = () => {
 }
 
 // Main Component
-const ApmPage: React.FC = () => {
+const ExceptionsPage: React.FC = () => {
   return (
     <FeaturePageLayout>
       <div className="mx-auto w-full">
         <Header />
-        <TrustedByTeams page="apm" />
+        <TrustedByTeams page="Exceptions" />
 
         <SectionLayout variant="bordered" className="!px-0">
           <SectionHeading>
-            Why use SigNoz Cloud for <br /> Application Performance Monitoring?
+            Exceptions In <br /> SigNoz Cloud
           </SectionHeading>
           <Divider />
-          <IconTitleDescriptionCardGrid cards={WHY_APM_CARDS} variant="xl" titleLevel="h3" />
+          <IconTitleDescriptionCardGrid cards={WHY_EXCEPTIONS_CARDS} variant="xl" titleLevel="h3" />
           <Divider />
           <SectionHeading>
-            SigNoz Cloud Application Performance <br /> Monitoring Overview
+            Exceptions Monitoring <br /> Overview
           </SectionHeading>
           <Divider />
-          <SplitSectionRows panels={APM_OVERVIEW_PANELS} imageClassName="theme-invert" />
+          <SplitSectionRows panels={EXCEPTIONS_OVERVIEW_PANELS} imageClassName="theme-invert" />
           <Divider />
         </SectionLayout>
 
-        <ApmUseCasesSection />
-        <ApmPricingSection />
+        <ExceptionsPricingSection />
         <SigNozStats />
         <Divider />
         <GetStartedBanner />
@@ -152,4 +132,4 @@ const ApmPage: React.FC = () => {
   )
 }
 
-export default ApmPage
+export default ExceptionsPage

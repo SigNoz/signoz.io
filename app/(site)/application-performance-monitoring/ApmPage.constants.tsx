@@ -17,7 +17,7 @@ export const APM_HEADER_BUTTONS: ButtonGroupButton[] = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
-      clickName: 'APM Hero Get Started',
+      clickName: 'Get Started Button',
       clickLocation: 'APM Hero',
       clickText: 'Get Started - Free',
     },
@@ -30,7 +30,7 @@ export const APM_HEADER_BUTTONS: ButtonGroupButton[] = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'APM Hero Docs',
+      clickName: 'Docs Link',
       clickLocation: 'APM Hero',
       clickText: 'Read Documentation',
     },
@@ -69,7 +69,7 @@ export const WHY_APM_CARDS: IconTitleDescriptionCardData[] = [
       href: 'https://signoz.io/docs/instrumentation/',
       tracking: {
         clickType: 'Secondary CTA',
-        clickName: 'APM Instrumentation Docs Button',
+        clickName: 'Docs Link',
         clickLocation: 'APM Why SigNoz Section',
         clickText: 'Instrument your application',
       },
@@ -89,7 +89,7 @@ export const APM_OVERVIEW_PANELS: SplitSectionPanel[] = [
       href: 'https://signoz.io/docs/instrumentation/',
       tracking: {
         clickType: 'Secondary CTA',
-        clickName: 'APM Languages Docs Button',
+        clickName: 'Docs Link',
         clickLocation: 'APM Overview Section',
         clickText: 'Learn More',
       },
@@ -120,7 +120,7 @@ export const APM_OVERVIEW_PANELS: SplitSectionPanel[] = [
       href: 'https://signoz.io/docs/userguide/metrics/#what-are-application-metrics',
       tracking: {
         clickType: 'Secondary CTA',
-        clickName: 'APM Apdex Docs Button',
+        clickName: 'Docs Link',
         clickLocation: 'APM Overview Section',
         clickText: 'Learn More',
       },
@@ -137,7 +137,7 @@ export const APM_OVERVIEW_PANELS: SplitSectionPanel[] = [
       href: 'https://signoz.io/docs/userguide/metrics/#database-calls-in-signoz',
       tracking: {
         clickType: 'Secondary CTA',
-        clickName: 'APM Database Call Metrics Docs Button',
+        clickName: 'Docs Link',
         clickLocation: 'APM Overview Section',
         clickText: 'Learn More',
       },
@@ -154,7 +154,7 @@ export const APM_OVERVIEW_PANELS: SplitSectionPanel[] = [
       href: 'https://signoz.io/docs/application-monitoring/api-monitoring/#key-operations-section-in-service-page',
       tracking: {
         clickType: 'Secondary CTA',
-        clickName: 'APM Top Endpoints Docs Button',
+        clickName: 'Docs Link',
         clickLocation: 'APM Overview Section',
         clickText: 'Learn More',
       },
@@ -171,7 +171,7 @@ export const APM_OVERVIEW_PANELS: SplitSectionPanel[] = [
       href: 'https://signoz.io/docs/userguide/metrics/#external-calls-in-signoz',
       tracking: {
         clickType: 'Secondary CTA',
-        clickName: 'APM External Call Metrics Docs Button',
+        clickName: 'Docs Link',
         clickLocation: 'APM Overview Section',
         clickText: 'Learn More',
       },
@@ -244,7 +244,7 @@ export const CHECK_PRICING_BUTTON: ButtonGroupButton = {
   icon: <ArrowRight size={14} />,
   tracking: {
     clickType: 'Primary CTA',
-    clickName: 'APM Check Pricing',
+    clickName: 'Check Pricing Button',
     clickLocation: 'APM Pricing Section',
     clickText: 'Check Pricing',
   },
@@ -259,7 +259,7 @@ export const GET_STARTED_BUTTONS: ButtonGroupButton[] = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
-      clickName: 'APM Bottom Get Started',
+      clickName: 'Get Started Button',
       clickLocation: 'APM Bottom Banner',
       clickText: 'Get Started - Free',
     },
@@ -272,7 +272,7 @@ export const GET_STARTED_BUTTONS: ButtonGroupButton[] = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'APM Bottom Docs',
+      clickName: 'Docs Link',
       clickLocation: 'APM Bottom Banner',
       clickText: 'Read Documentation',
     },
