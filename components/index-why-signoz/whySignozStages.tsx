@@ -40,6 +40,11 @@ export const WHY_SIGNOZ_STEPS: WhySignozStep[] = [
     icon: Cable,
     image: '/img/graphics/homepage/opentelemetry.svg',
     alt: 'OpenTelemetry instrumentation flowing into SigNoz Cloud',
+    cta: {
+      href: '/docs/instrumentation/overview/',
+      label: 'Read the setup guide',
+      clickName: 'Setup Guide Link',
+    },
   },
   {
     key: 'columnar-store',
@@ -58,6 +63,11 @@ export const WHY_SIGNOZ_STEPS: WhySignozStep[] = [
     icon: Bot,
     image: '/img/graphics/homepage/agent-chat.svg',
     alt: 'Agent telemetry context for AI-assisted observability workflows',
+    cta: {
+      href: '/docs/ai/signoz-mcp-server/',
+      label: 'Connect an agent',
+      clickName: 'Connect Agent Link',
+    },
   },
 ]
 
@@ -396,7 +406,7 @@ function CorrelatedSignalsStage() {
         } 38 ${activeCube.x} 44 V72`
 
   return (
-    <div className="flex h-full w-full flex-col justify-end">
+    <div className="flex h-full w-full flex-col justify-start">
       <div className="mx-auto w-full max-w-[430px]">
         <div className="overflow-hidden rounded-md border border-[var(--l2-border)] bg-[var(--l1-background)]">
           <StageCardHeader meta="p99 · 30m" tag={svc.tag} tagAccent={svc.accent} title={service} />
@@ -594,7 +604,7 @@ function OtelPipelineStage() {
   ]
 
   return (
-    <div className="flex h-full w-full flex-col justify-end">
+    <div className="flex h-full w-full flex-col justify-start">
       <svg className="mx-auto block w-full max-w-[430px]" viewBox="0 0 430 316">
         {sources.map((source) => (
           <g key={source.x}>
@@ -698,7 +708,7 @@ function ColumnarStoreStage() {
   const hitCount = STORE_ROWS.filter(isHit).length
 
   return (
-    <div className="flex h-full w-full flex-col justify-end">
+    <div className="flex h-full w-full flex-col justify-start">
       <div className="mx-auto w-full max-w-[430px] rounded-md border border-[var(--l2-border)] bg-[var(--l1-background)]">
         <StageCardHeader
           meta="distributed"
@@ -870,7 +880,7 @@ function AgentTelemetryStage({ isActive }: WhySignozStageVisualProps) {
   const [replies, setReplies] = useState<string[]>([])
 
   return (
-    <div className="flex h-full w-full flex-col justify-end">
+    <div className="flex h-full w-full flex-col justify-start">
       <div className="relative mx-auto w-full max-w-[430px]">
         <NozPeek isActive={isActive} />
         <div className="relative overflow-hidden rounded-md border border-[var(--l2-border)] bg-[var(--l1-background)]">
