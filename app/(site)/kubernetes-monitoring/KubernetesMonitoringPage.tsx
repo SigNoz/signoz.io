@@ -97,7 +97,7 @@ const KubernetesMonitoringPage: React.FC = () => {
   return (
     <FeaturePageLayout showProductNav={false} fullWidth>
       <Header />
-      <div className="relative mx-auto max-w-8xl">
+      <div className="relative mx-auto max-w-8xl xl:max-[1728px]:max-w-[80dvw]">
         <SectionLayout variant="bordered" className="!px-0">
           <FeatureSections />
           <Divider />
