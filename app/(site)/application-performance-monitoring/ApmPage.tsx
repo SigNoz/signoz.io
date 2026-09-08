@@ -1,0 +1,237 @@
+'use client'
+
+import React from 'react'
+import Image from 'next/image'
+import {
+  APM_HEADER_BUTTONS,
+  APM_HERO_IMAGE,
+  APM_OVERVIEW_PANELS,
+  APM_PRICING_CARDS,
+  APM_USE_CASES,
+  CHECK_PRICING_BUTTON,
+  GET_STARTED_BUTTONS,
+  GET_STARTED_IMAGE,
+  WHY_APM_CARDS,
+} from './ApmPage.constants'
+import { TrustedByTeams } from '@/components/trusted-by'
+import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
+import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
+import IconTitleDescriptionCardGrid from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
+import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
+import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
+import Divider from '@/shared/components/molecules/FeaturePages/Divider'
+import SplitSection from '@/shared/components/molecules/FeaturePages/SplitSection'
+import { SplitSectionPanel } from '@/shared/components/molecules/FeaturePages/SplitSection/SplitSection.types'
+import CTABanner from '@/shared/components/molecules/FeaturePages/CTABanner'
+import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
+
+// Main Component Sections
+const Header: React.FC = () => {
+  return (
+    <FeaturePageHeader
+      className="theme-invert-images"
+      title={
+        <>
+          Application Performance Monitoring <br />
+          Powered by OpenTelemetry
+        </>
+      }
+      description={
+        <>
+          SigNoz Cloud APM comes with out-of-box charts for key application metrics powered by
+          OpenTelemetry.
+          <br className="hidden lg:inline" /> Get latency, requests per second, error percentage,
+          apdex & other key metrics
+          <br className="hidden lg:inline" /> to understand your application performance.
+        </>
+      }
+      buttons={APM_HEADER_BUTTONS}
+      heroImage={APM_HERO_IMAGE.src}
+      heroImageAlt={APM_HERO_IMAGE.alt}
+    />
+  )
+}
+
+const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <div className="bg-heading-dot-grid">
+      <div className="flex flex-col items-center justify-center py-28 text-center">
+        <h2 className="m-0 max-w-4xl text-4xl font-semibold leading-[3.25rem] text-[var(--callout-sienna-title)] lg:text-[44px]">
+          {children}
+        </h2>
+      </div>
+    </div>
+  )
+}
+
+const ApmOverviewSections: React.FC = () => {
+  const rows: Array<[number, number]> = []
+  for (let i = 0; i < APM_OVERVIEW_PANELS.length; i += 2) {
+    rows.push([i, i + 1])
+  }
+
+  return (
+    <>
+      {rows.map(([leftIndex, rightIndex], rowIndex) => {
+        const left = APM_OVERVIEW_PANELS[leftIndex]
+        const right: SplitSectionPanel | undefined = APM_OVERVIEW_PANELS[rightIndex]
+
+        return (
+          <React.Fragment key={leftIndex}>
+            {rowIndex > 0 && <Divider />}
+            <SplitSection
+              alignImages
+              left={{ ...left, imageClassName: 'theme-invert' }}
+              right={right ? { ...right, imageClassName: 'theme-invert' } : <div />}
+              withVerticalDivider={Boolean(right)}
+            />
+          </React.Fragment>
+        )
+      })}
+    </>
+  )
+}
+
+const InfoCardList: React.FC<{ cards: Array<{ title: string; description: string }> }> = ({
+  cards,
+}) => {
+  return (
+    <div className="flex w-full flex-col gap-4">
+      {cards.map((card) => (
+        <div
+          key={card.title}
+          className="rounded-md border border-[var(--l2-border)] bg-[var(--l2-background)] p-4"
+        >
+          <h3 className="mb-2 text-base font-medium text-[var(--l1-foreground)]">{card.title}</h3>
+          <p className="mb-0 text-sm font-normal text-[var(--l2-foreground)]">{card.description}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+const StickyTitleSection: React.FC<{
+  title: React.ReactNode
+  children: React.ReactNode
+  className?: string
+}> = ({ title, children, className }) => {
+  return (
+    <SectionLayout
+      variant="bordered"
+      className={`border-dashed border-[var(--l2-border)] !px-0 ${className ?? ''}`}
+    >
+      <div className="flex flex-col sm:flex-row">
+        <div className="!w-[100%] flex-1 md:!w-[300px]">
+          <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-[var(--l1-foreground)] sm:text-4xl md:px-0 md:pl-12">
+            {title}
+          </p>
+        </div>
+        <div className="flex-[2_2_0%]">
+          <div className="border-l border-dashed border-[var(--l2-border)] bg-transparent p-0">
+            <div className="flex flex-col gap-2 px-10 py-10">{children}</div>
+          </div>
+        </div>
+      </div>
+    </SectionLayout>
+  )
+}
+
+const ApmUseCasesSection: React.FC = () => {
+  return (
+    <StickyTitleSection
+      title={
+        <>
+          Use SigNoz Cloud
+          <br /> APM for...
+        </>
+      }
+      className="!border-t-1"
+    >
+      <InfoCardList cards={APM_USE_CASES} />
+    </StickyTitleSection>
+  )
+}
+
+const ApmPricingSection: React.FC = () => {
+  return (
+    <StickyTitleSection
+      title={
+        <>
+          Simple
+          <br /> usage-based <br /> pricing
+        </>
+      }
+      className="!border-b-1 !border-t-1"
+    >
+      <div className="text-2xl font-semibold text-[var(--l1-foreground)]">
+        Pricing you can trust
+      </div>
+      <p className="text-base font-normal text-[var(--l2-foreground)]">
+        Tired of Datadog’s unpredictable bills or New Relic’s user-based pricing?
+        <br />
+        We’re here for you.
+      </p>
+      <InfoCardList cards={APM_PRICING_CARDS} />
+      <ButtonGroup buttons={[CHECK_PRICING_BUTTON]} className="mt-5 md:!justify-start" />
+    </StickyTitleSection>
+  )
+}
+
+const GetStartedBanner: React.FC = () => {
+  return (
+    <SectionLayout variant="bordered" className="!px-0">
+      <CTABanner
+        title={
+          <>
+            Get started with <br /> SigNoz Cloud today
+          </>
+        }
+        buttons={GET_STARTED_BUTTONS}
+      />
+      <div className="flex items-center justify-center px-6 pb-16">
+        <Image
+          src={GET_STARTED_IMAGE.src}
+          alt={GET_STARTED_IMAGE.alt}
+          width={10000}
+          height={10000}
+          className="theme-invert w-full rounded-lg md:w-3/5"
+        />
+      </div>
+    </SectionLayout>
+  )
+}
+
+// Main Component
+const ApmPage: React.FC = () => {
+  return (
+    <FeaturePageLayout>
+      <div className="mx-auto w-full">
+        <Header />
+        <TrustedByTeams page="apm" />
+
+        <SectionLayout variant="bordered" className="!px-0">
+          <SectionHeading>
+            Why use SigNoz Cloud for <br /> Application Performance Monitoring?
+          </SectionHeading>
+          <Divider />
+          <IconTitleDescriptionCardGrid cards={WHY_APM_CARDS} variant="xl" titleLevel="h3" />
+          <Divider />
+          <SectionHeading>
+            SigNoz Cloud Application Performance <br /> Monitoring Overview
+          </SectionHeading>
+          <Divider />
+          <ApmOverviewSections />
+          <Divider />
+        </SectionLayout>
+
+        <ApmUseCasesSection />
+        <ApmPricingSection />
+        <SigNozStats />
+        <Divider />
+        <GetStartedBanner />
+      </div>
+    </FeaturePageLayout>
+  )
+}
+
+export default ApmPage
