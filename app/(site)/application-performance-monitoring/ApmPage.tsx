@@ -15,13 +15,15 @@ import {
 } from './ApmPage.constants'
 import { TrustedByTeams } from '@/components/trusted-by'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
+import SectionHeading from '@/shared/components/molecules/FeaturePages/SectionHeading'
 import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/FeaturePageHeader'
 import IconTitleDescriptionCardGrid from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
-import SplitSection from '@/shared/components/molecules/FeaturePages/SplitSection'
-import { SplitSectionPanel } from '@/shared/components/molecules/FeaturePages/SplitSection/SplitSection.types'
+import SplitSectionRows from '@/shared/components/molecules/FeaturePages/SplitSectionRows'
+import InfoCardList from '@/shared/components/molecules/FeaturePages/InfoCardList'
+import StickyTitleSection from '@/shared/components/molecules/FeaturePages/StickyTitleSection'
 import CTABanner from '@/shared/components/molecules/FeaturePages/CTABanner'
 import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 
@@ -49,90 +51,6 @@ const Header: React.FC = () => {
       heroImage={APM_HERO_IMAGE.src}
       heroImageAlt={APM_HERO_IMAGE.alt}
     />
-  )
-}
-
-const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return (
-    <div className="bg-heading-dot-grid">
-      <div className="flex flex-col items-center justify-center py-28 text-center">
-        <h2 className="m-0 max-w-4xl text-4xl font-semibold leading-[3.25rem] text-[var(--callout-sienna-title)] lg:text-[44px]">
-          {children}
-        </h2>
-      </div>
-    </div>
-  )
-}
-
-const ApmOverviewSections: React.FC = () => {
-  const rows: Array<[number, number]> = []
-  for (let i = 0; i < APM_OVERVIEW_PANELS.length; i += 2) {
-    rows.push([i, i + 1])
-  }
-
-  return (
-    <>
-      {rows.map(([leftIndex, rightIndex], rowIndex) => {
-        const left = APM_OVERVIEW_PANELS[leftIndex]
-        const right: SplitSectionPanel | undefined = APM_OVERVIEW_PANELS[rightIndex]
-
-        return (
-          <React.Fragment key={leftIndex}>
-            {rowIndex > 0 && <Divider />}
-            <SplitSection
-              alignImages
-              left={{ ...left, imageClassName: 'theme-invert' }}
-              right={right ? { ...right, imageClassName: 'theme-invert' } : <div />}
-              withVerticalDivider={Boolean(right)}
-            />
-          </React.Fragment>
-        )
-      })}
-    </>
-  )
-}
-
-const InfoCardList: React.FC<{ cards: Array<{ title: string; description: string }> }> = ({
-  cards,
-}) => {
-  return (
-    <div className="flex w-full flex-col gap-4">
-      {cards.map((card) => (
-        <div
-          key={card.title}
-          className="rounded-md border border-[var(--l2-border)] bg-[var(--l2-background)] p-4"
-        >
-          <h3 className="mb-2 text-base font-medium text-[var(--l1-foreground)]">{card.title}</h3>
-          <p className="mb-0 text-sm font-normal text-[var(--l2-foreground)]">{card.description}</p>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-const StickyTitleSection: React.FC<{
-  title: React.ReactNode
-  children: React.ReactNode
-  className?: string
-}> = ({ title, children, className }) => {
-  return (
-    <SectionLayout
-      variant="bordered"
-      className={`border-dashed border-[var(--l2-border)] !px-0 ${className ?? ''}`}
-    >
-      <div className="flex flex-col sm:flex-row">
-        <div className="!w-[100%] flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-[var(--l1-foreground)] sm:text-4xl md:px-0 md:pl-12">
-            {title}
-          </p>
-        </div>
-        <div className="flex-[2_2_0%]">
-          <div className="border-l border-dashed border-[var(--l2-border)] bg-transparent p-0">
-            <div className="flex flex-col gap-2 px-10 py-10">{children}</div>
-          </div>
-        </div>
-      </div>
-    </SectionLayout>
   )
 }
 
@@ -220,7 +138,7 @@ const ApmPage: React.FC = () => {
             SigNoz Cloud Application Performance <br /> Monitoring Overview
           </SectionHeading>
           <Divider />
-          <ApmOverviewSections />
+          <SplitSectionRows panels={APM_OVERVIEW_PANELS} imageClassName="theme-invert" />
           <Divider />
         </SectionLayout>
 
