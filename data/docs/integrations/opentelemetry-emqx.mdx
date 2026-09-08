@@ -1,0 +1,439 @@
+---
+date: 2026-09-07
+title: Monitor EMQX with OpenTelemetry Metrics, Traces, Logs
+description: Send EMQX broker metrics, traces, and logs to SigNoz with the built-in OpenTelemetry exporter. Configuration only, with no SDK and no extra agent.
+doc_type: howto
+---
+
+## Overview
+
+EMQX ships an OpenTelemetry exporter inside the broker. Point it at SigNoz and every node pushes telemetry over OTLP. You install no SDK and expose no scrape target.
+
+All three signals arrive under one service name, `emqx` by default. Set `OTEL_SERVICE_NAME` to change it.
+
+You collect three signals here:
+
+- **Metrics:** connection, session, subscription, packet, and message counters, plus BEAM VM gauges for CPU, memory, and run queue.
+- **Traces:** per-message spans that follow a publish from the broker to each subscriber. The spans join the publisher's trace when the client sends a `traceparent`.
+- **Logs:** broker log events shaped to the OpenTelemetry log data model.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. Update the OTLP endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted). Your endpoint must accept OTLP over gRPC.
+</Admonition>
+
+## Prerequisites
+
+Ensure you have:
+
+- EMQX **6.0** or later. Earlier releases cannot attach the ingestion key, so route those through a [Collector](#export-through-an-opentelemetry-collector).
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- Outbound network access from every EMQX node to your SigNoz ingestion endpoint on port 443
+- MQTT **5.0** publishers, if you want broker spans joined to your application's traces
+
+<Admonition type="info" title="Which EMQX builds include the exporter?" defaultCollapsed="true">
+
+| Release                            | Exporter | Ingestion key header |
+| ---------------------------------- | -------- | -------------------- |
+| EMQX 6.0 and later                 | Yes      | Yes                  |
+| EMQX 5.9 and 5.10                  | Yes      | No                   |
+| EMQX Enterprise 5.x                | Yes      | No                   |
+| EMQX open source 5.8.3 to 5.8.9    | No       | No                   |
+| EMQX open source 5.8.2 and earlier | Yes      | No                   |
+
+On builds from 5.8.3 to 5.8.9, `emqx_opentelemetry` is packaged as an enterprise-only application, so the `opentelemetry` configuration key does not exist at all. Releases before 6.0 export OTLP but cannot attach an ingestion key, so they reach SigNoz Cloud only through a Collector.
+
+EMQX merged its open source and enterprise editions into a single distribution in 5.9, licensed under BSL 1.1. Non-production use and single-node production use are free. Clustered production needs a commercial license. See the EMQX <a href="https://www.emqx.com/en/content/license-faq" target="_blank" rel="noopener noreferrer nofollow">license FAQ</a>.
+
+On a build without the exporter, scrape the Prometheus endpoint instead, described in [Troubleshooting](#troubleshooting).
+
+</Admonition>
+
+## Send EMQX Telemetry to SigNoz
+
+### Step 1: Configure the exporter and start EMQX
+
+EMQX exports over OTLP/gRPC only. Every snippet below uses the gRPC endpoint on port **443**, not the OTLP/HTTP endpoint used elsewhere in these docs.
+
+<Admonition type="info" title="Prefer the Dashboard?" defaultCollapsed="true">
+  The same settings live under **Management → Monitoring → Integration** in the EMQX Dashboard, which writes them to `cluster.hocon`. Values in `emqx.conf` and environment variables override `cluster.hocon`. If you place a setting in either one, you cannot change it from the Dashboard later. EMQX applies this precedence order: `base.hocon`, then `cluster.hocon`, then `emqx.conf`, then environment variables.
+</Admonition>
+
+Pick where EMQX runs:
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+<Admonition type="info" title="Installing EMQX 6.x on Debian or Ubuntu" defaultCollapsed="true">
+
+EMQX publishes 6.x from a different repository than the one its generic install script configures. The script at `assets.emqx.com/scripts/install-emqx-deb.sh` sets up the `emqx/emqx` repository, which stops at 5.8.9 and has no exporter. Use the 6.x repository and package name instead:
+
+```bash
+curl -s https://packagecloud.io/install/repositories/emqx/emqx-enterprise5/script.deb.sh | sudo bash
+sudo apt-get install emqx-enterprise
+```
+
+The package is `emqx-enterprise`, not `emqx`. The script can write a distribution codename that EMQX does not publish for yet. Replace it with a supported one such as `noble`, in the generated file under `/etc/apt/sources.list.d/`.
+
+</Admonition>
+
+Append the block below to `/etc/emqx/emqx.conf`. Leave your existing `node` and `cluster` sections in place:
+
+```hocon:/etc/emqx/emqx.conf
+opentelemetry {
+  exporter {
+    endpoint = "https://ingest.<region>.signoz.cloud:443"
+    ssl_options {
+      enable = true
+      verify = verify_peer
+      cacertfile = "/etc/ssl/certs/ca-certificates.crt"
+    }
+    headers { "signoz-ingestion-key" = "<your-ingestion-key>" }
+  }
+  metrics { enable = true, interval = "10s" }
+  traces { enable = true, filter { trace_all = true } }
+  logs { enable = true, level = warning }
+}
+```
+
+**Verify these values:**
+
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Quote the header name. `signoz-ingestion-key` contains hyphens, which HOCON reads as part of a longer path unless the key is wrapped in double quotes.
+
+`verify = verify_peer` makes EMQX validate the SigNoz certificate. Without it the exporter encrypts the connection but accepts any certificate, because `ssl_options.verify` defaults to `verify_none`. Point `cacertfile` at your system trust store: `/etc/ssl/certs/ca-certificates.crt` on Debian and Ubuntu, `/etc/pki/tls/certs/ca-bundle.crt` on RHEL and Fedora. EMQX ships its own `cacert.pem` demo CA, which cannot verify a public certificate.
+
+The service name is not a HOCON key. To change it from the default `emqx`, set `OTEL_SERVICE_NAME` in the environment file that the EMQX unit reads, such as `/etc/emqx/emqx.env`:
+
+```ini:/etc/emqx/emqx.env
+OTEL_SERVICE_NAME=<service-name>
+```
+
+Restart the broker, then watch its log:
+
+```bash
+sudo systemctl restart emqx
+sudo journalctl -u emqx -f
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Every EMQX setting has an environment variable equivalent, so a container needs no configuration file. Add these variables to the EMQX service:
+
+```yaml:docker-compose.yaml
+services:
+  emqx:
+    image: emqx/emqx:6.3.0
+    environment:
+      OTEL_SERVICE_NAME: "<service-name>"
+      EMQX_OPENTELEMETRY__EXPORTER__ENDPOINT: "https://ingest.<region>.signoz.cloud:443"
+      EMQX_OPENTELEMETRY__EXPORTER__SSL_OPTIONS__ENABLE: "true"
+      EMQX_OPENTELEMETRY__EXPORTER__SSL_OPTIONS__VERIFY: "verify_peer"
+      EMQX_OPENTELEMETRY__EXPORTER__SSL_OPTIONS__CACERTFILE: "/etc/ssl/certs/ca-certificates.crt"
+      EMQX_OPENTELEMETRY__EXPORTER__HEADERS: '{"signoz-ingestion-key" = "<your-ingestion-key>"}'
+      EMQX_OPENTELEMETRY__METRICS__ENABLE: "true"
+      EMQX_OPENTELEMETRY__METRICS__INTERVAL: "10s"
+      EMQX_OPENTELEMETRY__TRACES__ENABLE: "true"
+      EMQX_OPENTELEMETRY__TRACES__FILTER__TRACE_ALL: "true"
+      EMQX_OPENTELEMETRY__LOGS__ENABLE: "true"
+```
+
+**Verify these values:**
+
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: the name this broker reports as, such as **emqx-prod**. Drop the line to keep the default, `emqx`.
+
+The `HEADERS` value is a HOCON map, so it keeps its braces and quotes inside the environment variable. For production, source the key from a Docker secret rather than a literal in the Compose file.
+
+Recreate the container, then watch its log:
+
+```bash
+docker compose up -d
+docker compose logs -f emqx
+```
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+The <a href="https://github.com/emqx/emqx-operator" target="_blank" rel="noopener noreferrer nofollow">EMQX Operator</a> takes the same HOCON through `.spec.config.data`, which merges with the broker's existing configuration. This manifest uses `apps.emqx.io/v2`, the storage version on current operators. Operator 2.3 also still serves the deprecated `apps.emqx.io/v2beta1`, and older operators serve only that.
+
+Keep the ingestion key out of the manifest. Store it in a Secret and inject the header as an environment variable. An environment variable overrides the configuration file.
+
+Create the Secret:
+
+```bash
+kubectl create secret generic emqx-signoz -n <emqx-namespace> \
+  --from-literal=EMQX_OPENTELEMETRY__EXPORTER__HEADERS='{"signoz-ingestion-key" = "<your-ingestion-key>"}'
+```
+
+Then add the exporter configuration and the Secret reference to your EMQX resource:
+
+```yaml:emqx.yaml minimap defaultCollapsed
+apiVersion: apps.emqx.io/v2
+kind: EMQX
+metadata:
+  name: emqx
+spec:
+  image: emqx/emqx:6.3.0
+  config:
+    mode: Merge
+    data: |
+      opentelemetry {
+        exporter {
+          endpoint = "https://ingest.<region>.signoz.cloud:443"
+          ssl_options {
+            enable = true
+            verify = verify_peer
+            cacertfile = "/etc/ssl/certs/ca-certificates.crt"
+          }
+        }
+        metrics { enable = true, interval = "10s" }
+        traces { enable = true, filter { trace_all = true } }
+        logs { enable = true, level = warning }
+      }
+  coreTemplate:
+    spec:
+      replicas: 1
+      env:
+        - name: OTEL_SERVICE_NAME
+          value: "<service-name>"
+      envFrom:
+        - secretRef:
+            name: emqx-signoz
+```
+
+**Verify these values:**
+
+- `<region>`: your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<emqx-namespace>`: the namespace running EMQX
+- `<service-name>`: the name this broker reports as, such as **emqx-prod**. Drop the `env` block to keep the default, `emqx`.
+
+<Admonition type="info" title="Why replicas is set to 1">
+  The operator defaults to two core replicas. EMQX refuses to start a second node without a commercial license, so the extra pod fails with `SINGLE_NODE_LICENSE`. The operator then waits for that pod and never scales down. Raise the count only when you hold a cluster license.
+</Admonition>
+
+If your cluster runs replicant nodes, repeat both the `env` and `envFrom` blocks under `.spec.replicantTemplate.spec`. A replicant that gets only `envFrom` authenticates but reports the default service name, which drops it out of the `service.name` filter. Then apply the manifest and watch a core pod's log:
+
+```bash
+kubectl apply -f emqx.yaml
+kubectl logs -n <emqx-namespace> <emqx-pod-name> -f
+```
+
+Set `<emqx-pod-name>` to a core pod, such as `emqx-core-0`.
+
+</TabItem>
+</Tabs>
+
+A connected exporter writes no log lines of its own. Repeated `[grpc_client] connect to ... failed` or `opentelemetry_exporter failed to export` lines mean the broker cannot reach the endpoint. Expect a few during startup, before EMQX resolves the endpoint and retries.
+
+### Step 2: Produce MQTT traffic
+
+Counters stay at zero until clients connect. No spans exist until a client publishes a message. Generate a message with <a href="https://mqttx.app/cli" target="_blank" rel="noopener noreferrer nofollow">MQTTX CLI</a>, or use any client you already have.
+
+Subscribe in one terminal:
+
+```bash
+mqttx sub -h <emqx-host> -p 1883 -t 't/trace/test' -q 1
+```
+
+Set `<emqx-host>` to the host or service name that serves the MQTT listener on port 1883.
+
+Publish in another terminal. Pass a `traceparent` so that the broker joins your existing trace:
+
+```bash
+mqttx pub -h <emqx-host> -p 1883 -t 't/trace/test' -q 1 -m 'hello' \
+  -up "traceparent: 00-cce3a024ca134a7cb4b41e048e8d98de-cef47eaa4ebc3fae-01"
+```
+
+EMQX exports spans in batches. The default interval is 5 seconds.
+
+## Validate
+
+Every signal arrives with the resource attribute **service.name = `<service-name>`**, and **service.instance.id** holds the node name. Filter on both in **Metrics**, **Traces**, and **Logs**.
+
+**Verify these values:**
+
+- `<service-name>`: the value of `OTEL_SERVICE_NAME`, or `emqx` when you leave it unset
+
+The **Metrics** Summary tab lists every metric the broker exports.
+
+<Figure
+  src="/img/docs/integrations/emqx/emqx-metrics.webp"
+  alt="EMQX metrics listed in the SigNoz Metrics Summary tab"
+  caption="EMQX metrics in SigNoz, filtered by service.name = emqx"
+/>
+
+Each published message produces one `process_message` span, plus one `send_published_message` span for every subscriber. When the publisher sends a `traceparent`, the spans join your application's trace.
+
+<Figure
+  src="/img/docs/integrations/emqx/emqx-traces.webp"
+  alt="EMQX broker spans in the SigNoz Traces Explorer"
+  caption="process_message and send_published_message spans in SigNoz, filtered by service.name = emqx"
+/>
+
+Restart a node or force an authentication failure to produce a fresh log entry.
+
+<Figure
+  src="/img/docs/integrations/emqx/emqx-logs.webp"
+  alt="EMQX broker logs in the SigNoz Logs Explorer"
+  caption="EMQX broker startup logs in SigNoz, filtered by service.name = emqx"
+/>
+
+<Admonition type="warning">
+  EMQX writes the raw enum name into `severity_text`, so records arrive as `SEVERITY_NUMBER_WARN` and `SEVERITY_NUMBER_ERROR` rather than `WARN` and `ERROR`. Filter on `severity_number` instead, or match the value SigNoz shows on an existing record.
+</Admonition>
+
+<details>
+<ToggleHeading>
+
+## Data Collected
+
+</ToggleHeading>
+
+### Metrics
+
+EMQX 6.3.0 exports 142 metrics. Names are dotted and carry no `emqx` prefix, so scope every query by `service.name` to avoid mixing them with metrics from other sources.
+
+| Family                            | Examples                                                                                 | What it covers                                     |
+| --------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Connections and sessions          | `connections.count`, `live_connections.count`, `sessions.count`, `channels.count`          | Connected clients and live sessions per node       |
+| Messages                          | `messages.received`, `messages.sent`, `messages.delivered`, `messages.acked`               | Broker throughput by direction and QoS             |
+| Packets                           | `packets.received`, `packets.publish.received`, `packets.connect`, `packets.puback.missed` | MQTT packet counters, including protocol errors    |
+| Dropped messages                  | `messages.dropped.no_subscribers`, `delivery.dropped.queue_full`, `delivery.dropped.expired` | Why the broker discarded a message                 |
+| Subscriptions and routing         | `subscriptions.count`, `subscriptions.shared.count`, `topics.count`, `retained.count`      | Size of the subscription and topic tables          |
+| Authentication and authorization  | `authentication.success`, `authentication.failure`, `authorization.deny`, `client.banned`  | Client access outcomes                             |
+| Node runtime                      | `cpu.use`, `run.queue`, `used.memory`, `total.memory`, `node.running`                      | BEAM VM pressure and cluster membership            |
+
+Some gauges are cluster-wide and arrive with the same value from every node: `topics.count`, `routes.count`, `retained.count`, `subscriptions.shared.count`, `durable_subscriptions.count`, `cluster_sessions.count`, and `node.running`. Take the maximum across nodes for these, not the sum. Counts such as `connections.count`, `sessions.count`, and `subscriptions.count` are node-local, so sum those.
+
+### Spans
+
+| Span                     | When EMQX records it                                                                                                  | Attributes                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `process_message`        | Starts when EMQX parses a PUBLISH packet. Ends when EMQX dispatches the message locally or forwards it to other nodes. One per message. | `messaging.destination.name`, `messaging.client_id` |
+| `send_published_message` | Starts when the connection process of a subscriber takes the message. Ends when the packet reaches the socket. One per subscriber. | `messaging.destination.name`, `messaging.client_id` |
+
+### Logs
+
+Log records carry the same resource attributes as the other two signals, plus Erlang context such as `pid`, `file`, `line`, and `mfa`. Bodies are strings for plain messages and structured maps for EMQX's own event reports.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Nothing arrives in SigNoz
+
+- Read the broker log for `[grpc_client] connect to ... failed` or `opentelemetry_exporter failed to export`.
+- Make sure that the endpoint scheme matches your intent. EMQX turns TLS on by itself for an `https://` endpoint, but it does not verify the server certificate unless you set `verify = verify_peer`.
+- Make sure that the ingestion key header name is quoted. Without quotes, HOCON reads `signoz-ingestion-key` as a nested path and the header breaks.
+- Make sure that the node can reach the endpoint: `curl -v https://ingest.<region>.signoz.cloud:443`.
+- Make sure that at least one signal is enabled. All three default to `enable = false`.
+
+### TLS handshake fails after you enable verification
+
+The log shows `failed to export` with `{tls_alert,{unknown_ca,...}}`. EMQX cannot build a trust chain to the SigNoz certificate.
+
+- Make sure that `cacertfile` points at your system trust store, not at EMQX's bundled `cacert.pem`. The bundled file is a demo CA and verifies nothing public.
+- Make sure that the path exists inside the container or host that runs EMQX.
+- Leave `server_name_indication` unset. A value that does not match the endpoint host fails the same way.
+
+### EMQX rejects the opentelemetry configuration
+
+The build has no exporter. Run `emqx ctl status` and compare the version against the table in [Prerequisites](#prerequisites). Open source builds from 5.8.3 to 5.8.9 exclude the exporter.
+
+Collect metrics through the Prometheus endpoint instead. On these builds `prometheus.enable_basic_auth` defaults to `false`, so the endpoint answers unauthenticated scrapes. Add this receiver to your [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) configuration. Reference it from a metrics pipeline:
+
+```yaml:config.yaml
+receivers:
+  prometheus/emqx:
+    config:
+      scrape_configs:
+        - job_name: emqx
+          scrape_interval: 30s
+          metrics_path: /api/v5/prometheus/stats
+          static_configs:
+            - targets: ["<emqx-host>:18083"]
+```
+
+EMQX names these metrics `emqx_*`, so they do not match the names in [Data Collected](#data-collected). This path carries no traces and no logs.
+
+Port 18083 also serves the EMQX Dashboard, so keep it off the public network and reachable only from the Collector.
+
+### No logs appear
+
+`opentelemetry.logs.level` cannot be more verbose than the broker's own handlers. If `log.console.level` is `warning`, the broker exports only warnings and above, even when you set the OpenTelemetry level to `info`. Raise both levels, or leave the default.
+
+Keep `logs.level = warning` in production. At `info`, EMQX exports Erlang supervisor progress reports, which are large and constant.
+
+### Filtering on severity returns nothing
+
+`severity_text` holds values such as `SEVERITY_NUMBER_WARN`, not `WARN`. Filter on `severity_number`, or copy the exact value from a record in the Logs Explorer.
+
+### Some published messages produce no spans
+
+Trace context travels in MQTT user properties, which exist only in MQTT 5.0. A 3.1.1 publisher sends no `traceparent`, so EMQX skips the message. Set `traces.filter.trace_all = true` to trace it anyway. EMQX then generates a fresh trace ID.
+
+### Metric names collide with other services
+
+`cpu.use`, `run.queue`, `used.memory`, and similar names carry no vendor prefix. Filter by `service.name = <service-name>`, or rename them in a Collector with the `metricstransform` processor.
+
+A distinct `OTEL_SERVICE_NAME` per cluster keeps two EMQX deployments apart in the same workspace.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Export through an OpenTelemetry Collector
+
+</ToggleHeading>
+
+Send EMQX telemetry to a Collector first for any of these reasons:
+
+- You run EMQX 5.x, whose exporter cannot attach the SigNoz ingestion key. The Collector adds it.
+- You want to filter or rename metrics before they reach SigNoz.
+- You want to send the data to more than one backend.
+- The broker cannot connect to your SigNoz instance directly.
+
+Point EMQX at the gRPC port of the Collector, where `<collector-host>` is the host that runs it. Remove the TLS and header settings, because the Collector now holds the ingestion key:
+
+```hocon:/etc/emqx/emqx.conf
+opentelemetry {
+  exporter { endpoint = "http://<collector-host>:4317" }
+  metrics { enable = true, interval = "10s" }
+  traces { enable = true, filter { trace_all = true } }
+  logs { enable = true, level = warning }
+}
+```
+
+Then add an OTLP receiver to your existing Collector configuration. Reference it from your metrics, traces, and logs pipelines:
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+```
+
+</details>
+
+## Next Steps
+
+- Import the [EMQX dashboard](https://signoz.io/docs/dashboards/dashboard-templates/emqx-dashboard/).
+- Query broker throughput and connection counts in the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
+- Create [metric-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) for dropped messages, connection drops, or node memory.
+- Create [log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) for authentication failures and broker errors.
+
+## Get Help
+
+<GetHelp />

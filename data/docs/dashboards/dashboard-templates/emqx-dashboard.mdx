@@ -1,0 +1,101 @@
+---
+date: 2026-09-08
+title: EMQX MQTT Broker Dashboard for Connections and Messages
+description: Monitor EMQX broker health in SigNoz including cluster and connections, message throughput, message loss, subscriptions, authentication, and Erlang VM runtime.
+doc_type: explanation
+---
+
+Use this dashboard to monitor your EMQX brokers. It covers cluster and connection health, message throughput, message loss, subscriptions and routing, access control, and Erlang VM runtime.
+
+EMQX exports these metrics from inside the broker over OTLP. The names are dotted and carry no `emqx` prefix, which separates them from the `emqx_*` names on EMQX's Prometheus scrape endpoint.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow the [Monitor EMQX with OpenTelemetry](https://signoz.io/docs/integrations/opentelemetry-emqx/) guide.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/emqx-dashboard.webp"
+  alt="EMQX MQTT Broker Dashboard"
+  caption="EMQX MQTT Broker Dashboard"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/emqx/emqx-dashboard.json"
+  dashboardName="EMQX"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Confirm cluster health**: See cluster size, stopped nodes, and current connections and sessions per node.
+- **Track connection churn**: Watch connect attempts against successful connects and disconnects, and follow session creation, resumption, takeover, and termination.
+- **Measure throughput**: Track message and packet rates in and out, bytes on the wire, and the QoS mix on both the receive and send paths.
+- **Find message loss**: Separate messages the broker never routed from deliveries it failed to complete, and read the drop reason.
+- **Inspect subscriptions and routing**: Track topics, subscriptions, routes, and retained messages, plus subscribe and unsubscribe rates.
+- **Review access control**: Watch authentication success and failure, authorization allow and deny, cache hit rates, and banned or flapping clients.
+- **Watch broker runtime**: Track CPU use, the Erlang run queue, and memory used against total per node.
+
+## Metrics Included
+
+### Cluster & Connections
+
+- **Cluster Size** and **Nodes Stopped**: Nodes in the cluster as each node reports it (`node.running`, `node.stopped`). A standalone broker reports 1.
+- **Connections** and **Sessions**: Current client connections and sessions (`connections.count`, `sessions.count`).
+- **Connections by Node**: Total and live connections per node (`connections.count`, `live_connections.count`).
+- **Sessions and Channels by Node**: Sessions, cluster sessions, and channels per node.
+- **Connection Churn**: Connect attempts, successful connects, and disconnects (`client.connect`, `client.connected`, `client.disconnected`).
+- **Session Lifecycle**: Sessions created, resumed, taken over, discarded, and terminated.
+- **Connections: Current vs Peak**: Current values against the high-water marks (`connections.max`, `sessions.max`).
+
+### Message Throughput
+
+- **Message Rate In / Out**: Messages received and sent (`messages.received`, `messages.sent`).
+- **Delivery and Acknowledgement Rate**: Messages delivered to subscribers and acknowledged.
+- **Bytes In / Out** and **MQTT Packets In / Out**: Wire volume and packet counts.
+- **Received / Sent Messages by QoS**: QoS 0, 1, and 2 split on both paths.
+- **Publish, Forward and Store**: Published, retained, forwarded, persisted, and delayed messages.
+- **Rule Engine**: Rules matched and actions executed.
+
+### Message Loss
+
+- **Messages Dropped** and **Deliveries Dropped**: Messages the broker never routed, and deliveries it failed to complete.
+- **Message Drops by Reason**: No subscribers, expired, quota exceeded, and receive maximum.
+- **Delivery Drops by Reason**: Queue full, too large, expired, no local, filtered, and QoS 0 message.
+- **Packet Errors**: CONNACK and PUBLISH errors, including authorization errors.
+- **Missed QoS Acknowledgements**: Missed PUBACK, PUBREC, PUBREL, and PUBCOMP packets.
+
+### Subscriptions & Routing
+
+- **Topics**, **Subscriptions**, **Routes**, and **Retained Messages**: Current table sizes.
+- **Subscriptions and Subscribers**: Subscriptions, subscribers, subscription options, shared and durable subscriptions.
+- **Subscribe / Unsubscribe Rate**: Client subscribe and unsubscribe rates.
+- **Subscribe Packets and Errors**: SUBSCRIBE, SUBACK, UNSUBSCRIBE, and UNSUBACK packets, plus subscribe errors.
+
+### Authentication & Authorization
+
+- **Authentication Outcomes**: Success, failure, and anonymous success (`authentication.success`, `authentication.failure`).
+- **Authorization Outcomes**: Allow, deny, superuser, and no match.
+- **Authorization Cache**: Cache hits and misses.
+- **Banned and Flapping Clients**: Banned clients and flapping detected by client ID, peer host, and username.
+- **CONNACK Outcomes**: Authenticate and authorize counts against CONNACK errors.
+
+### Node Runtime
+
+- **CPU Use by Node**: Broker CPU use (`cpu.use`).
+- **Erlang Run Queue by Node**: Scheduler run queue length (`run.queue`).
+- **Memory Used vs Total by Node** and **Memory Utilization by Node**: Memory consumption and percentage.
+- **Process Mailbox Sizes by Node**: Broker pool and Mnesia transaction manager mailbox sizes.
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **service.name**: Filter by broker service name. EMQX reports `emqx` unless you set `OTEL_SERVICE_NAME`.
+- **service.instance.id**: Filter by EMQX node name, such as `emqx@10.0.1.7`.
+
+## Related Dashboards
+
+- [RabbitMQ](https://signoz.io/docs/dashboards/dashboard-templates/rabbitmq/)
+- [Kafka](https://signoz.io/docs/dashboards/dashboard-templates/kafka-dashboard/)
+- [Hostmetrics](https://signoz.io/docs/dashboards/dashboard-templates/hostmetrics-dashboards/)
