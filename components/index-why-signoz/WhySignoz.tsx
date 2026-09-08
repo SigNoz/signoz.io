@@ -20,6 +20,7 @@ export default function WhySignoz() {
   const driverRef = useRef<HTMLDivElement | null>(null)
   const worldRef = useRef<HTMLDivElement | null>(null)
   const viewportRef = useRef<HTMLDivElement | null>(null)
+  const travelerRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Array<HTMLDivElement | null>>([])
   const activeRef = useRef(0)
 
@@ -69,8 +70,24 @@ export default function WhySignoz() {
       })
     }
 
+    const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1)
+
     const apply = (g: number) => {
-      world.style.transform = `translate3d(0, ${(-worldY(g)).toFixed(1)}px, 0)`
+      const cameraY = worldY(g)
+      world.style.transform = `translate3d(0, ${(-cameraY).toFixed(1)}px, 0)`
+
+      const traveler = travelerRef.current
+      if (traveler) {
+        const stageThree = clamp01((g - 2) / 0.35)
+        const travelerIn = clamp01((g - 0.38) / 0.08)
+        const travelerOut = clamp01((3.04 - g) / 0.08)
+        const y = cameraY + stageHeight * 0.58 + g * 18
+        const x = -36 * stageThree
+        traveler.style.setProperty('--rider-close', `${(-10 * stageThree).toFixed(1)}px`)
+        traveler.style.opacity = Math.min(travelerIn, travelerOut).toFixed(3)
+        traveler.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`
+      }
+
       setStep(g)
     }
 
@@ -312,6 +329,89 @@ export default function WhySignoz() {
                         )}
                       </div>
                     ))}
+
+                    <div className="noz-traveler" ref={travelerRef}>
+                      <div className="noz-traveler-inner">
+                        <div className="olly-rider olly-rider--large">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src="/img/graphics/homepage/olly.svg" alt="" />
+                          <svg
+                            className="rider-cube"
+                            viewBox="0 0 94 80"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <g className="rider-emanation rider-emanation--left">
+                              <polygon points="-22,36 23,58 23,90 -22,68" />
+                              <polygon points="-43,47 2,69 2,101 -43,79" />
+                            </g>
+                            <g className="rider-emanation rider-emanation--right">
+                              <polygon points="71,58 116,36 116,68 71,90" />
+                              <polygon points="92,69 137,47 137,79 92,101" />
+                            </g>
+                            <polygon
+                              points="47,2 92,24 47,46 2,24"
+                              fill="var(--bg-neutral-dark-800)"
+                              stroke="var(--bg-neutral-dark-500)"
+                            />
+                            <polygon
+                              points="2,24 47,46 47,78 2,56"
+                              fill="var(--bg-neutral-dark-1000)"
+                              stroke="var(--bg-neutral-dark-700)"
+                            />
+                            <polygon
+                              points="47,46 92,24 92,56 47,78"
+                              fill="var(--bg-neutral-dark-950)"
+                              stroke="var(--bg-neutral-dark-600)"
+                            />
+                            <polygon
+                              points="47,9 78,24 47,39 16,24"
+                              fill="var(--bg-neutral-dark-700)"
+                              stroke="var(--bg-neutral-dark-500)"
+                            />
+                          </svg>
+                        </div>
+                        <div className="olly-rider olly-rider--small">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src="/img/graphics/homepage/olly.svg" alt="" />
+                          <svg
+                            className="rider-cube"
+                            viewBox="0 0 94 80"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <g className="rider-emanation rider-emanation--left">
+                              <polygon points="-22,36 23,58 23,90 -22,68" />
+                              <polygon points="-43,47 2,69 2,101 -43,79" />
+                            </g>
+                            <g className="rider-emanation rider-emanation--right">
+                              <polygon points="71,58 116,36 116,68 71,90" />
+                              <polygon points="92,69 137,47 137,79 92,101" />
+                            </g>
+                            <polygon
+                              points="47,2 92,24 47,46 2,24"
+                              fill="var(--bg-neutral-dark-800)"
+                              stroke="var(--bg-neutral-dark-500)"
+                            />
+                            <polygon
+                              points="2,24 47,46 47,78 2,56"
+                              fill="var(--bg-neutral-dark-1000)"
+                              stroke="var(--bg-neutral-dark-700)"
+                            />
+                            <polygon
+                              points="47,46 92,24 92,56 47,78"
+                              fill="var(--bg-neutral-dark-950)"
+                              stroke="var(--bg-neutral-dark-600)"
+                            />
+                            <polygon
+                              points="47,9 78,24 47,39 16,24"
+                              fill="var(--bg-neutral-dark-700)"
+                              stroke="var(--bg-neutral-dark-500)"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="pointer-events-none absolute inset-x-0 top-0 z-[6] h-14 bg-gradient-to-b from-[var(--l1-background)] to-transparent" />

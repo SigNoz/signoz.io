@@ -68,3 +68,159 @@
     transition-delay: 0.06s;
   }
 }
+
+.noz-traveler {
+  --rider-close: 0px;
+  position: absolute;
+  left: 24px;
+  top: -64px;
+  width: 142px;
+  height: 142px;
+  z-index: 4;
+  pointer-events: auto;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.noz-traveler-inner {
+  animation: nozFloat 2.8s ease-in-out infinite;
+}
+
+.olly-rider {
+  position: absolute;
+  width: 94px;
+  height: 126px;
+  pointer-events: auto;
+}
+
+.olly-rider--large {
+  left: 0;
+  top: 0;
+}
+
+.olly-rider--small {
+  left: calc(74px + var(--rider-close));
+  bottom: -140px;
+  width: 68px;
+  height: 92px;
+}
+
+.olly-rider .rider-cube {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.rider-emanation polygon {
+  fill: color-mix(in srgb, var(--bg-robin-500) 5%, transparent);
+  stroke: color-mix(in srgb, var(--bg-robin-400) 56%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.olly-rider:hover .rider-emanation--left polygon {
+  animation: riderEmanateLeft 1.25s cubic-bezier(0.23, 1, 0.32, 1) infinite;
+}
+
+.olly-rider:hover .rider-emanation--right polygon {
+  animation: riderEmanateRight 1.25s cubic-bezier(0.23, 1, 0.32, 1) infinite;
+}
+
+.olly-rider:hover .rider-emanation polygon:nth-child(2) {
+  animation-delay: 0.36s;
+}
+
+.olly-rider img {
+  position: absolute;
+  left: 50%;
+  bottom: 54px;
+  z-index: 2;
+  width: 36px;
+  height: auto;
+  transform: translateX(-50%) rotate(3deg);
+  transform-origin: 50% 100%;
+}
+
+.olly-rider--small img {
+  bottom: 40px;
+  width: 27px;
+}
+
+.olly-rider--small:hover img {
+  animation: smallOllyJump 0.72s cubic-bezier(0.3, 1.45, 0.5, 1);
+}
+
+@keyframes nozFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes riderEmanateLeft {
+  0% {
+    opacity: 0;
+    transform: translate(16px, -8px) scale(0.72);
+  }
+  30% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes riderEmanateRight {
+  0% {
+    opacity: 0;
+    transform: translate(-16px, -8px) scale(0.72);
+  }
+  30% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes smallOllyJump {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0) rotate(3deg) scaleY(1);
+  }
+  18% {
+    transform: translateX(-50%) translateY(2px) rotate(3deg) scaleY(0.94);
+  }
+  45% {
+    transform: translateX(-50%) translateY(-12px) rotate(-2deg) scaleY(1.04);
+  }
+  68% {
+    transform: translateX(-50%) translateY(1px) rotate(4deg) scaleY(0.98);
+  }
+  82% {
+    transform: translateX(-50%) translateY(-3px) rotate(1deg) scaleY(1.01);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noz-traveler-inner {
+    animation: none;
+  }
+
+  .olly-rider:hover .rider-emanation polygon,
+  .olly-rider--small:hover img {
+    animation: none;
+  }
+}
