@@ -121,6 +121,7 @@ import SplitSection from '@/shared/components/molecules/FeaturePages/SplitSectio
 - `left` (SplitSectionPanel | ReactNode): Left column content
 - `right` (SplitSectionPanel | ReactNode): Right column content
 - `withVerticalDivider?` (boolean, default: `false`): Show a vertical `<Divider>` between panels
+- `alignImages?` (boolean, default: `false`): Requires both sides to be panel configs. Text blocks share the first grid row so both images start on the same horizontal line, even when one panel has a button or a longer description
 - `className?` (string): Override wrapper classes (default: `bg-signoz_ink-500`)
 
 **SplitSectionPanel config object:**

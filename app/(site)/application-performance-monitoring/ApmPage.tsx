@@ -22,7 +22,6 @@ import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/Featur
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
 import SplitSection from '@/shared/components/molecules/FeaturePages/SplitSection'
 import { SplitSectionPanel } from '@/shared/components/molecules/FeaturePages/SplitSection/SplitSection.types'
-import FeatureButton from '@/shared/components/molecules/FeaturePages/FeatureButton'
 import CTABanner from '@/shared/components/molecules/FeaturePages/CTABanner'
 import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 
@@ -65,60 +64,6 @@ const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) =
   )
 }
 
-const AlignedRowText: React.FC<{ panel: SplitSectionPanel; className: string }> = ({
-  panel,
-  className,
-}) => {
-  return (
-    <div className={`flex flex-col px-6 pt-10 ${className}`}>
-      <h2 className="mb-6 text-[var(--l1-foreground)]">{panel.title}</h2>
-      <div className="mb-8 leading-relaxed text-[var(--l2-foreground)]">{panel.description}</div>
-      {panel.button && (
-        <FeatureButton button={panel.button} className="mb-8 flex w-fit items-center gap-2" />
-      )}
-    </div>
-  )
-}
-
-const AlignedRowImage: React.FC<{ panel: SplitSectionPanel; className: string }> = ({
-  panel,
-  className,
-}) => {
-  return (
-    <div className={`px-6 pb-10 ${className}`}>
-      {panel.image && (
-        <Image
-          src={panel.image}
-          alt={panel.imageAlt || ''}
-          width={1440}
-          height={810}
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="theme-invert"
-        />
-      )}
-    </div>
-  )
-}
-
-// Text blocks share the first grid row, so both images start on the same horizontal line
-// even when one panel has a button or a longer description.
-const AlignedSplitRow: React.FC<{ left: SplitSectionPanel; right: SplitSectionPanel }> = ({
-  left,
-  right,
-}) => {
-  return (
-    <div className="relative">
-      <div className="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-[auto_1fr]">
-        <AlignedRowText panel={left} className="order-1 lg:col-start-1 lg:row-start-1" />
-        <AlignedRowImage panel={left} className="order-2 lg:col-start-1 lg:row-start-2" />
-        <AlignedRowText panel={right} className="order-3 lg:col-start-2 lg:row-start-1" />
-        <AlignedRowImage panel={right} className="order-4 lg:col-start-2 lg:row-start-2" />
-      </div>
-      <Divider orientation="vertical" className="absolute left-1/2 top-0 hidden lg:block" />
-    </div>
-  )
-}
-
 const ApmOverviewSections: React.FC = () => {
   const rows: Array<[number, number]> = []
   for (let i = 0; i < APM_OVERVIEW_PANELS.length; i += 2) {
@@ -130,22 +75,16 @@ const ApmOverviewSections: React.FC = () => {
       {rows.map(([leftIndex, rightIndex], rowIndex) => {
         const left = APM_OVERVIEW_PANELS[leftIndex]
         const right: SplitSectionPanel | undefined = APM_OVERVIEW_PANELS[rightIndex]
-        const alignImages = right && (left.button || right.button) && (left.image || right.image)
 
         return (
           <React.Fragment key={leftIndex}>
             {rowIndex > 0 && <Divider />}
-            {alignImages ? (
-              <AlignedSplitRow left={left} right={right} />
-            ) : (
-              <SplitSection
-                left={{ ...left, className: 'py-10', imageClassName: 'theme-invert' }}
-                right={
-                  right ? { ...right, className: 'py-10', imageClassName: 'theme-invert' } : <div />
-                }
-                withVerticalDivider={Boolean(right)}
-              />
-            )}
+            <SplitSection
+              alignImages
+              left={{ ...left, imageClassName: 'theme-invert' }}
+              right={right ? { ...right, imageClassName: 'theme-invert' } : <div />}
+              withVerticalDivider={Boolean(right)}
+            />
           </React.Fragment>
         )
       })}
