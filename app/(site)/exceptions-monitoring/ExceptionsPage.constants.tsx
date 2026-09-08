@@ -15,7 +15,7 @@ export const EXCEPTIONS_HEADER_BUTTONS: ButtonGroupButton[] = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
-      clickName: 'Exceptions Hero Get Started',
+      clickName: 'Get Started Button',
       clickLocation: 'Exceptions Hero',
       clickText: 'Get Started - Free',
     },
@@ -28,7 +28,7 @@ export const EXCEPTIONS_HEADER_BUTTONS: ButtonGroupButton[] = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Exceptions Hero Docs',
+      clickName: 'Docs Link',
       clickLocation: 'Exceptions Hero',
       clickText: 'Read Documentation',
     },
@@ -67,7 +67,7 @@ export const WHY_EXCEPTIONS_CARDS: IconTitleDescriptionCardData[] = [
       href: 'https://signoz.io/docs/userguide/exceptions/',
       tracking: {
         clickType: 'Secondary CTA',
-        clickName: 'Exceptions To Traces Docs Button',
+        clickName: 'Docs Link',
         clickLocation: 'Exceptions Why SigNoz Section',
         clickText: 'Learn More',
       },
@@ -85,7 +85,7 @@ export const EXCEPTIONS_OVERVIEW_PANELS: SplitSectionPanel[] = [
       href: 'https://signoz.io/docs/userguide/exceptions/',
       tracking: {
         clickType: 'Secondary CTA',
-        clickName: 'Exceptions Record Automatically Docs Button',
+        clickName: 'Docs Link',
         clickLocation: 'Exceptions Overview Section',
         clickText: 'Learn More',
       },
@@ -144,7 +144,7 @@ export const CHECK_PRICING_BUTTON: ButtonGroupButton = {
   icon: <ArrowRight size={14} />,
   tracking: {
     clickType: 'Primary CTA',
-    clickName: 'Exceptions Check Pricing',
+    clickName: 'Check Pricing Button',
     clickLocation: 'Exceptions Pricing Section',
     clickText: 'Check Pricing',
   },
@@ -159,7 +159,7 @@ export const GET_STARTED_BUTTONS: ButtonGroupButton[] = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
-      clickName: 'Exceptions Bottom Get Started',
+      clickName: 'Get Started Button',
       clickLocation: 'Exceptions Bottom Banner',
       clickText: 'Get Started - Free',
     },
@@ -172,7 +172,7 @@ export const GET_STARTED_BUTTONS: ButtonGroupButton[] = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Exceptions Bottom Docs',
+      clickName: 'Docs Link',
       clickLocation: 'Exceptions Bottom Banner',
       clickText: 'Read Documentation',
     },
