@@ -12,4 +12,6 @@ export type ComparisonTableProps<VendorKey extends string> = {
   vendors: { key: VendorKey; label: string | React.ReactNode; className?: string }[]
   rows: ComparisonTableRow<VendorKey>[]
   className?: string
+  tableClassName?: string
+  featureColumnLabel?: string
 }

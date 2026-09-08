@@ -6,6 +6,8 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
   vendors,
   rows,
   className = '',
+  tableClassName = '',
+  featureColumnLabel = 'Feature',
 }) => {
   return (
     <div
@@ -14,11 +16,11 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
         className
       )}
     >
-      <table className="m-0 border-collapse text-left">
+      <table className={cn('m-0 border-collapse text-left', tableClassName)}>
         <tbody className="text-sm text-[var(--l1-foreground)]">
           <tr className="relative">
             <td className="sticky left-[-1px] border-b border-r border-[var(--l2-border)] bg-[var(--l3-background)] px-6 py-4 text-left font-semibold text-[var(--l2-foreground)]">
-              Feature
+              {featureColumnLabel}
             </td>
             {vendors.map((vendor) => (
               <th
