@@ -54,7 +54,7 @@ const Header: React.FC = () => {
 
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="bg-[url('/img/background_blur/Frame_1862.webp')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
+    <div className="bg-heading-dot-grid">
       <div className="flex flex-col items-center justify-center py-28 text-center">
         <h2 className="m-0 max-w-4xl text-4xl font-semibold leading-[3.25rem] text-[var(--callout-sienna-title)] lg:text-[44px]">
           {children}
