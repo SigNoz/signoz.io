@@ -196,6 +196,58 @@ export const CTA_BUTTONS = [
 ]
 ```
 
+### SectionHeading
+
+Centered `h2` heading block with the `bg-heading-dot-grid` dot-grid backdrop. Use for the big "Why use SigNoz Cloud for X?" / "X Overview" headings between sections.
+
+```tsx
+import SectionHeading from '@/shared/components/molecules/FeaturePages/SectionHeading'
+
+<SectionHeading>
+  Why use SigNoz Cloud for <br /> Application Performance Monitoring?
+</SectionHeading>
+```
+
+**Props:** `children` (ReactNode), `className?` (string)
+
+### SplitSectionRows
+
+Renders a `SplitSectionPanel[]` as rows of two `SplitSection`s (`alignImages` + vertical divider), with a horizontal `Divider` between rows. Use for "Overview" sections listing many feature panels.
+
+```tsx
+import SplitSectionRows from '@/shared/components/molecules/FeaturePages/SplitSectionRows'
+
+<SplitSectionRows panels={OVERVIEW_PANELS} imageClassName="theme-invert" />
+```
+
+**Props:** `panels` (SplitSectionPanel[]), `imageClassName?` (string, applied to every panel image)
+
+### StickyTitleSection
+
+Two-column section with a sticky left-rail title and free-form right-column content. Use for "Use SigNoz for..." lists and hand-rolled pricing sections.
+
+```tsx
+import StickyTitleSection from '@/shared/components/molecules/FeaturePages/StickyTitleSection'
+
+<StickyTitleSection title={<>Simple<br /> usage-based <br /> pricing</>} className="!border-b-1 !border-t-1">
+  <InfoCardList cards={PRICING_CARDS} />
+</StickyTitleSection>
+```
+
+**Props:** `title` (ReactNode), `children` (ReactNode), `className?` (string, merged into the wrapping bordered `SectionLayout`)
+
+### InfoCardList
+
+Vertical stack of small bordered title+description cards. Pairs with `StickyTitleSection`.
+
+```tsx
+import InfoCardList from '@/shared/components/molecules/FeaturePages/InfoCardList'
+
+<InfoCardList cards={[{ title: '...', description: '...' }]} />
+```
+
+**Props:** `cards` (`{ title: string; description: string }[]`)
+
 ### Divider
 
 Replaces inline `border-t-1 border-dashed border-signoz_slate-400` divs. Use between sections inside a `SectionLayout`.
