@@ -381,7 +381,7 @@ const AgentNativeObservabilityPage: React.FC = () => {
   return (
     <FeaturePageLayout showProductNav={false} fullWidth>
       <Header />
-      <div className="relative mx-auto max-w-8xl">
+      <div className="relative mx-auto max-w-8xl xl:max-[1728px]:max-w-[80dvw]">
         <TrustedByTeams />
         <InContextObservability />
 
