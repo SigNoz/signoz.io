@@ -291,7 +291,7 @@ test('flags markdown-preferring bots with x-prefers-markdown', () => {
   assert.equal(res.headers.get('x-prefers-markdown'), 'true')
 })
 
-test('logs Website Page View via tunnel for human markdown rewrites', async () => {
+test('logs Bot Page Request via tunnel for human markdown rewrites', async () => {
   const originalFetch = global.fetch
   const originalTunnel = process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT
   process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT = 'https://tunnel.example.com'
@@ -318,7 +318,7 @@ test('logs Website Page View via tunnel for human markdown rewrites', async () =
     ])
 
     assert.ok(pageViewRequest)
-    assert.equal(pageViewRequest.body.eventName, 'Website Page View')
+    assert.equal(pageViewRequest.body.eventName, 'Bot Page Request')
     assert.equal(pageViewRequest.body.attributes.pageLocation, '/pricing.md')
     assert.equal(pageViewRequest.body.attributes.custom_prefers_markdown, true)
     assert.equal(pageViewRequest.body.attributes.custom_content_type, 'text/markdown')
@@ -410,7 +410,7 @@ test('does not log server page views for browser HTML requests', async () => {
   assert.deepEqual(events, [])
 })
 
-test('logs a server page view for browser docs .md requests alongside the rewrite', async () => {
+test('logs a server Bot Page Request for browser docs .md requests alongside the rewrite', async () => {
   let res
   const events = await captureTunnelEvents(() => {
     res = run('/docs/introduction.md', { headers: { 'user-agent': HUMAN_UA } })
@@ -418,13 +418,13 @@ test('logs a server page view for browser docs .md requests alongside the rewrit
 
   assert.equal(rewriteTarget(res), '/api/docs-markdown/introduction')
   assert.equal(events.length, 1)
-  assert.equal(events[0].eventName, 'Website Page View')
+  assert.equal(events[0].eventName, 'Bot Page Request')
   assert.equal(events[0].attributes.pageLocation, '/docs/introduction.md')
   assert.equal(events[0].attributes.pageType, 'Docs Page')
   assert.equal(events[0].attributes.custom_prefers_markdown, true)
 })
 
-test('logs a server page view for browser Accept: text/markdown requests', async () => {
+test('logs a server Bot Page Request for browser Accept: text/markdown requests', async () => {
   const events = await captureTunnelEvents(() => {
     run('/blog/some-post', {
       headers: { 'user-agent': HUMAN_UA, accept: 'text/markdown' },
@@ -432,7 +432,7 @@ test('logs a server page view for browser Accept: text/markdown requests', async
   })
 
   assert.equal(events.length, 1)
-  assert.equal(events[0].eventName, 'Website Page View')
+  assert.equal(events[0].eventName, 'Bot Page Request')
   assert.equal(events[0].attributes.pageLocation, '/blog/some-post')
   assert.equal(events[0].attributes.pageType, 'Blog Page')
   assert.equal(events[0].attributes.custom_source, 'server')

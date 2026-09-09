@@ -167,13 +167,13 @@ export function proxy(req: NextRequest) {
       res.headers.set('x-markdown-rewrite', 'true')
     }
 
-    // Markdown responses run no client JS, so log the page view server-side.
+    // Markdown responses run no client JS, so log the page view server-side as a Bot Page Request.
     if (!isBot && !isExcludedFromAnalytics && req.method === 'GET') {
       const pageTypePath = pathname.replace(/\/+$/, '').replace(/\.md$/, '') || '/'
 
       waitUntil(
         logEventServerSide({
-          eventName: 'Website Page View',
+          eventName: 'Bot Page Request',
           eventType: 'track',
           attributes: {
             pageLocation: pathname,
