@@ -2,6 +2,7 @@ import type { ListicleConfig } from '@/components/Listicle/types'
 
 import apmQuickStart from './apm-quick-start.json'
 import apmInstrumentation from './apm-instrumentation.json'
+import auroraDashboards from './aurora-dashboards.json'
 import apmDashboards from './apm-dashboards.json'
 import awsMonitoring from './aws-monitoring.json'
 import awsOneClick from './aws-one-click.json'
@@ -30,6 +31,7 @@ import webVitals from './web-vitals.json'
 export const listicleConfigs: Record<string, ListicleConfig> = {
   'apm-quick-start': apmQuickStart as unknown as ListicleConfig,
   'apm-instrumentation': apmInstrumentation as unknown as ListicleConfig,
+  'aurora-dashboards': auroraDashboards as unknown as ListicleConfig,
   'apm-dashboards': apmDashboards as unknown as ListicleConfig,
   'aws-monitoring': awsMonitoring as unknown as ListicleConfig,
   'aws-one-click': awsOneClick as unknown as ListicleConfig,

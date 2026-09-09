@@ -1,0 +1,41 @@
+---
+date: 2026-09-09
+title: Amazon Aurora Dashboards - Monitor Clusters and Queries
+description: Monitor Amazon Aurora PostgreSQL and Aurora MySQL in SigNoz with CloudWatch cluster metrics and engine metrics from the OpenTelemetry Collector.
+doc_type: explanation
+---
+
+Amazon Aurora runs a database cluster rather than a single server. One cluster holds a writer instance, zero or more reader instances, and one shared storage volume. Monitoring it well takes two sources, so there are two dashboards per engine.
+
+CloudWatch reports what the cluster and its instances are doing: capacity, replica lag, memory, storage I/O, and volume growth. The database engine reports what the queries are doing: buffers, locks, row activity, and table sizes. Neither source covers the other, so run both.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import these dashboards. Follow [Monitor Amazon Aurora](https://signoz.io/docs/integrations/aws-rds-aurora/), which covers both collection paths.
+</Admonition>
+
+## Available Amazon Aurora Dashboards
+
+<Listicle name="aurora-dashboards" />
+
+## Choosing Between Them
+
+| Question | Dashboard |
+|---|---|
+| Is the cluster sized right, and how far behind are the readers? | CloudWatch |
+| How much storage is the cluster volume using? | CloudWatch |
+| Which queries are scanning instead of seeking? | Engine Metrics |
+| Is autovacuum keeping up, or is the buffer pool too small? | Engine Metrics |
+
+Instance metrics on the CloudWatch dashboards group by `DBInstanceIdentifier`, so the writer and each reader appear as separate series. Storage volume and serverless capacity are cluster-scoped and exist only under `DBClusterIdentifier`.
+
+## Limitations
+
+Replication metrics do not work on Aurora on either engine. Aurora replicates through its shared storage volume, so `pg_stat_replication` and `SHOW REPLICA STATUS` both return no rows, and the receivers' replication metrics never populate. Use **Aurora Replica Lag** on the CloudWatch dashboards instead.
+
+Several standard Amazon RDS metrics do not exist on Aurora and appear on none of these dashboards: `FreeStorageSpace`, `ReplicaLag`, `BinLogDiskUsage`, `BurstBalance`, and `CheckpointLag`. Aurora reports `VolumeBytesUsed` in place of `FreeStorageSpace`.
+
+## Next Steps
+
+- [Set up Aurora monitoring](https://signoz.io/docs/integrations/aws-rds-aurora/) for metrics and logs.
+- [Set up alerts](https://signoz.io/docs/alerts/) on replica lag, connection count, and volume growth.
+- [Trace slow queries](https://signoz.io/docs/apm-and-distributed-tracing/database-calls/) back to the application code that ran them.
