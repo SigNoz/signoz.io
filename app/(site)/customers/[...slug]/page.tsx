@@ -4,6 +4,7 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import { getContentBySlug } from '@/utils/contentRepository'
+import { buildMetadataImages } from '@/utils/metadataImages'
 import { MDXContent } from '@/utils/strapi'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
@@ -52,16 +53,7 @@ export async function generateMetadata(props: {
 
       const seoTitle = content?.meta_title || content?.title
 
-      let imageList = [siteMetadata.socialBanner]
-      if (content.image) {
-        imageList = typeof content.image === 'string' ? [content.image] : content.image
-      }
-
-      const ogImages = imageList.map((img) => {
-        return {
-          url: img.includes('http') ? img : siteMetadata.siteUrl + img,
-        }
-      })
+      const { imageList, ogImages } = buildMetadataImages(content.image)
 
       return {
         title: seoTitle,
