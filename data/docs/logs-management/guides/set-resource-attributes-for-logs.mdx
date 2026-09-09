@@ -1,5 +1,5 @@
 ---
-date: 2026-08-25
+date: 2026-09-10
 title: Guide to add Resource Attributes
 description: Learn how to add resource attributes to your logs to enable better filtering, grouping, and correlation of logs in SigNoz.
 doc_type: howto
@@ -46,7 +46,7 @@ The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/b
 ```yaml
 processors:
   resourcedetection:
-    detectors: [env, host, system, docker, k8snode]
+    detectors: [env, system, docker]
     system:
       hostname_sources: ['os']
     timeout: 5s
@@ -59,7 +59,7 @@ service:
       exporters: [otlp]
 ```
 
-This processor automatically adds resource attributes by detecting information from the environment, host system, Docker containers, and Kubernetes nodes. The `timeout` parameter controls how long the processor waits for detection to complete.
+This processor adds resource attributes that it detects from the environment, host system, and Docker containers. On Kubernetes, add the `k8snode` detector, which needs the `K8S_NODE_NAME` environment variable and RBAC read access to nodes. On Collector v0.154.0 and newer, use `k8s_api` to avoid a deprecation warning. The `timeout` parameter controls how long the processor waits for detection to complete.
 
 ## Setting Resource Attributes at the SDK Level
 
