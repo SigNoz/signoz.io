@@ -1,5 +1,5 @@
 ---
-date: 2026-08-20
+date: 2026-08-31
 title: AWS Lambda
 meta_title: Monitor AWS Lambda - Logs, Metrics & Traces
 description: Discover how to collect Lambda logs, metrics, and traces using OpenTelemetry layers for complete serverless function observability.
@@ -22,6 +22,7 @@ SigNoz supports multiple ways to monitor AWS Lambda. This page helps you choose 
 | **Logs** (from existing S3 pipelines)      | [S3 Lambda Forwarder](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/)                           | Reuses existing S3 log storage, no changes to Lambda functions     |
 | **Traces** (auto-instrumentation)          | [OTel Lambda Layers](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/)                          | Language-specific layers capture traces without code changes       |
 | **Traces** (Go)                            | [Go Manual Instrumentation](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-golang/)            | Go has no auto-instrumentation layer, so it uses the OTel Go SDK    |
+| **Traces** (container image functions)     | [Container Image Instrumentation](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-container-image/) | Layers do not attach to container images, so you unpack the layer into the image |
 | **Metrics** (manual, low cost)             | [CloudWatch Exporter](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/)                        | Scrapes CloudWatch metrics with minimal AWS cost                   |
 | **Logs & Metrics** (fastest setup, Cloud only) | [One-Click Integration](https://signoz.io/docs/integrations/aws/lambda/)                                   | Auto-discovery, pre-built dashboards, ~5 minute setup              |
 | **All signals** (Lambda MicroVMs)          | [Embedded OTel Collector](https://signoz.io/docs/aws-monitoring/lambda-microvms/)                           | MicroVMs are long-lived VMs, so they run a Collector inside the image |
@@ -95,13 +96,13 @@ Add language-specific OTel layers to your Lambda function to automatically captu
 <Figure
   src="/img/docs/aws-monitoring/lambda/lambda-traces-flow.svg"
   caption="OTel auto-instrumentation flow for Lambda traces"
-  alt="Architecture diagram showing Lambda function with OTel auto-instrumentation layer sending traces through OTel Collector layer to SigNoz"
+  alt="Architecture diagram showing a Lambda function with the OTel auto-instrumentation layer exporting traces to SigNoz"
 />
 
 **Benefits:**
 - ✅ No code changes — instrumentation happens via Lambda layers
 - ✅ Automatically captures invocation spans and outbound HTTP calls
-- ✅ Forwards traces through a separate OTel Collector layer — function response time is not blocked
+- ✅ Exports straight to SigNoz, with an optional OTel Collector layer for batching and enrichment
 
 **Trade-offs:**
 - ❌ Adds cold start latency from layer initialization
@@ -122,6 +123,24 @@ A Go function compiles to a binary, so OpenTelemetry publishes no auto-instrumen
 - ❌ Custom spans and caller trace context need explicit wiring
 
 → [Go Lambda Tracing Guide](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-golang/)
+
+### Traces for container image functions
+
+A function with the `Image` package type cannot use Lambda layers. Unpack the OpenTelemetry
+layer into the image during the Docker build instead, then set the SigNoz endpoint and ingestion key
+on the function.
+
+**Benefits:**
+- ✅ The instrumentation version is pinned in the Dockerfile, next to your code
+
+**Trade-offs:**
+- ❌ Every layer upgrade needs an image rebuild and push
+
+**Supported languages:** Python, Node.js, Java
+
+Package Ruby functions as a .zip archive instead.
+
+→ [Container Image Instrumentation Guide](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-container-image/)
 
 ## Metrics: CloudWatch Exporter
 

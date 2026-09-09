@@ -3,7 +3,11 @@ import type { NextRequest } from 'next/server'
 import { waitUntil, ipAddress } from '@vercel/functions'
 import { v4 as uuidv4 } from 'uuid'
 import { NOT_FOUND_PATHNAME_HEADER } from '@/components/not-found/constants'
-import { detectBotFromUserAgent, logEventServerSide } from './utils/logEvent'
+import {
+  detectBotFromUserAgent,
+  isAnalyticsExcludedUserAgent,
+  logEventServerSide,
+} from './utils/logEvent'
 import { getPageType } from '@/utils/getPageType'
 import {
   buildDocsMarkdownRewritePath,
@@ -56,6 +60,7 @@ export function proxy(req: NextRequest) {
   // Get user agent and detect bot
   const userAgent = req.headers.get('user-agent') || ''
   const { isBot, botType } = detectBotFromUserAgent(userAgent)
+  const isExcludedFromAnalytics = isAnalyticsExcludedUserAgent(userAgent)
 
   const acceptHeader = req.headers.get('accept') || ''
   const contentTypeHeader = req.headers.get('content-type') || ''
@@ -90,7 +95,7 @@ export function proxy(req: NextRequest) {
   requestHeaders.set(GROWTHBOOK_ANONYMOUS_ID_HEADER, growthBookAnonymousId)
 
   // Log bot requests
-  if (isBot) {
+  if (isBot && !isExcludedFromAnalytics) {
     // Use waitUntil to ensure logging completes before function termination
     waitUntil(
       logEventServerSide({
@@ -162,13 +167,13 @@ export function proxy(req: NextRequest) {
       res.headers.set('x-markdown-rewrite', 'true')
     }
 
-    // Markdown responses run no client JS, so log the page view server-side.
-    if (!isBot && req.method === 'GET') {
+    // Markdown responses run no client JS, so log the page view server-side as a Bot Page Request.
+    if (!isBot && !isExcludedFromAnalytics && req.method === 'GET') {
       const pageTypePath = pathname.replace(/\/+$/, '').replace(/\.md$/, '') || '/'
 
       waitUntil(
         logEventServerSide({
-          eventName: 'Website Page View',
+          eventName: 'Bot Page Request',
           eventType: 'track',
           attributes: {
             pageLocation: pathname,
