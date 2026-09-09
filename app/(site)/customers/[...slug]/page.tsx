@@ -52,6 +52,17 @@ export async function generateMetadata(props: {
 
       const seoTitle = content?.meta_title || content?.title
 
+      let imageList = [siteMetadata.socialBanner]
+      if (content.image) {
+        imageList = typeof content.image === 'string' ? [content.image] : content.image
+      }
+
+      const ogImages = imageList.map((img) => {
+        return {
+          url: img.includes('http') ? img : siteMetadata.siteUrl + img,
+        }
+      })
+
       return {
         title: seoTitle,
         description: content?.description || content?.title,
@@ -65,11 +76,13 @@ export async function generateMetadata(props: {
           locale: 'en_US',
           type: 'article',
           url: `${siteMetadata.siteUrl}/customers/${path}/`,
+          images: ogImages,
         },
         twitter: {
           card: 'summary_large_image',
           title: seoTitle,
           description: content?.description || content?.title,
+          images: imageList,
         },
       }
     } catch (error) {
