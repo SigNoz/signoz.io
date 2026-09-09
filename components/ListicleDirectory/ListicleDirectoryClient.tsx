@@ -69,7 +69,9 @@ export default function ListicleDirectoryClient({
       return sections
         .map((section) => ({
           ...section,
-          items: section.items.filter((item) => item.name.toLowerCase().includes(normalizedQuery)),
+          items: section.items.filter((item) =>
+            `${item.name} ${item.description ?? ''}`.toLowerCase().includes(normalizedQuery)
+          ),
         }))
         .filter((section) => section.items.length > 0)
     }
