@@ -15,6 +15,7 @@ import { buildBreadcrumbSchema, getSectionArticleBreadcrumbs } from '@/utils/bre
 import { fetchBlogBySlug } from '@/utils/cachedData'
 import { getCachedAuthors } from '@/utils/cmsAuthors'
 import { resolveLatestDate } from '@/utils/dateUtils'
+import { buildMetadataImages } from '@/utils/metadataImages'
 import { mdxOptions } from '@/utils/mdxUtils'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 const defaultLayout = 'BlogLayout'
@@ -48,16 +49,7 @@ export async function generateMetadata(props: {
   const publishedAt = new Date(resolveLatestDate(post) || Date.now()).toISOString()
   const modifiedAt = new Date(resolveLatestDate(post) || Date.now()).toISOString()
   const authors = authorDetails.map((author) => author.name)
-  let imageList = [siteMetadata.socialBanner]
-  if (post.image) {
-    imageList = typeof post.image === 'string' ? [post.image] : post.image
-  }
-
-  const ogImages = imageList.map((img) => {
-    return {
-      url: img.includes('http') ? img : siteMetadata.siteUrl + img,
-    }
-  })
+  const { imageList, ogImages } = buildMetadataImages(post.image)
 
   const seoTitle = post.meta_title || post.title
 
