@@ -28,9 +28,9 @@ SigNoz saves the rule as a PromQL rule. The rest of the form behaves the same as
 
 | Use PromQL when | Reason |
 |---|---|
-| You combine two metrics whose label sets differ | `on`, `ignoring`, `group_left`, and `group_right` control the join. A Query Builder formula needs the group-by keys of the two queries to match, or one set to be a subset of the other. |
+| You need explicit control over label matching in a join | `on (...)` selects the matching labels, and `group_left (label)` includes a label from the right side in a many-to-one join. |
 | You already have a Prometheus alerting rule | The expression works as written, apart from the quoting rules below. |
-| You need a function the Query Builder has no field for, such as `predict_linear` | Forecasting from a linear fit is query-only. Time aggregation already covers the `*_over_time` family, **Functions** covers `clamp_min` and `clamp_max`, and **Alert when data stops coming** covers `absent`. |
+| You need forecasting with `predict_linear` | Query Builder does not expose an equivalent forecasting function. |
 
 The Query Builder covers most alerts, including alerts that combine several metrics in a formula. It also converts the threshold unit for you and reports missing data per group. Use PromQL for the cases above.
 
@@ -40,7 +40,7 @@ The Query Builder covers most alerts, including alerts that combine several metr
 - **PromQL reads only metrics stored with cumulative or unspecified temporality.** A delta metric returns no series, and the rule stays in no-data. SigNoz span metrics such as `signoz_calls_total` and `signoz_latency.bucket` are delta in a default setup, so alert on those with the Query Builder instead. Open the metric in [**Metrics**](https://signoz.io/docs/metrics-management/metrics-explorer/) to read its temporality.
 - **Histogram parts use dot suffixes.** `.bucket`, `.count`, and `.sum`, not `_bucket`, `_count`, and `_sum`.
 - **Regex matchers are fully anchored.** `=~"5.."` matches a three-character value that starts with `5`. For a substring match, write `=~".*5.*"`.
-- Rule evaluation runs the query at a fixed 60-second resolution, so a `[5m]` selector covers five points.
+- Rule evaluation runs the query at fixed 60-second steps across the alert evaluation window. A range selector such as `[5m]` is a separate lookback: at each step, the function reads the preceding five minutes of samples.
 
 ## Service health
 
@@ -70,7 +70,7 @@ sum by ("service.name") (rate({"http.server.request.duration.count"}[5m]))
 
 A service that stops emitting produces no series, and a threshold alone never fires on a missing series. **Alert when data stops coming** covers that only when the whole query goes silent. SigNoz asks whether the result holds any series at all, so this grouped query still counts as having data while one other service reports.
 
-For per-service detection, use the `absent_over_time` recipe above with a single service in the selector, or follow [No Data Alerts for Groups](https://signoz.io/docs/alerts-management/no-data-alerts-for-groups/).
+`absent_over_time` can detect one named service when the selector includes an equality matcher such as `"service.name"="checkout"`. It cannot identify a missing service from a selector that matches several services because any remaining series makes the function return no result. Create one rule per expected service, or follow [No Data Alerts for Groups](https://signoz.io/docs/alerts-management/no-data-alerts-for-groups/).
 
 ### Server error ratio above a percentage
 
@@ -101,6 +101,8 @@ One failed request out of three puts a service at 33%, so a quiet service crosse
 The floor counts requests per second, not requests per window. A floor of `0.5` drops any service under one request every two seconds. Set it below the normal rate of the quietest service you want covered. A floor above that rate mutes the alert for that service.
 
 ## Latency
+
+Use the Query Builder for the p95 and p99 examples below. It computes these percentiles in ClickHouse. Use PromQL for a quantile the Query Builder does not offer, such as `histogram_quantile(0.73, ...)`.
 
 ### p99 latency for each service
 
