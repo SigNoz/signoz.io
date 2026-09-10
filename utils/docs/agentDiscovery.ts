@@ -63,6 +63,16 @@ const LLM_STARTER_ROUTE_MATCHERS: Array<(route: string) => boolean> = [
   (route) => /^\/docs\/dashboards(?:\/|$)/.test(route),
   (route) => /^\/docs\/manage\/administrator-guide(?:\/|$)/.test(route),
   (route) => /^\/docs\/migration(?:\/|$)/.test(route),
+  // Access control: agents asking "how do I authenticate against the API?"
+  // had no path to these from /llms.txt, so the docs existed but were
+  // undiscoverable. They render as their own llms.txt section.
+  (route) => route === '/docs/manage/administrator-guide/iam/roles',
+  (route) => route === '/docs/manage/administrator-guide/iam/service-accounts',
+  (route) =>
+    route === '/docs/manage/administrator-guide/iam/user-guides/self-service-api-keys-for-viewers',
+  (route) =>
+    route ===
+    '/docs/manage/administrator-guide/iam/user-guides/scope-telemetry-access-by-ingestion-key',
 ]
 
 const normalizeDocsRoute = (route?: string): string | null => {
@@ -210,7 +220,7 @@ async function getDocsDescriptionLookup(): Promise<Map<string, string>> {
   return lookup
 }
 
-export async function getLlmStarterLinks(limit = 24): Promise<LlmStarterLink[]> {
+export async function getLlmStarterLinks(limit = 30): Promise<LlmStarterLink[]> {
   const routes = await getDocsRouteList()
   const descriptions = await getDocsDescriptionLookup()
   const starters: LlmStarterLink[] = []

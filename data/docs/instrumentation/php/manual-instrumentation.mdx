@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-03
 title: How to add manual instrumentation in PHP
 description: Learn how to add manual OpenTelemetry instrumentation in PHP. Create custom spans, nested traces, and attach business-specific attributes for SigNoz observability.
 doc_type: howto
@@ -112,7 +112,114 @@ function processCheckout(string $cartId): void
 
 Always detach scopes to prevent context leaks.
 
-## Step 4. Add attributes
+## Step 4. Propagate context
+
+PHP keeps the active span in a context store the runtime manages. `$span->activate()` puts your span there and hands back a `Scope` you have to detach. Two things break that chain: a scope you forget to detach, and another service. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the concepts behind this step.
+
+### Inside your process
+
+A span becomes the parent of later spans only after you activate it. Detaching the scope restores whatever was current before:
+
+```php:in-process.php defaultCollapsed
+<?php
+
+use OpenTelemetry\API\Trace\Span;
+
+$parent = $tracer->spanBuilder('process-order')->startSpan();
+$scope = $parent->activate();
+
+try {
+    // Child of process-order, because process-order is active
+    $child = $tracer->spanBuilder('validate-cart')->startSpan();
+    $child->end();
+
+    // Read the active span anywhere below this point
+    Span::getCurrent()->setAttribute('order.id', $orderId);
+} finally {
+    $scope->detach();
+    $parent->end();
+}
+
+// Back to the previous context. A span started here is NOT a child of process-order.
+$sibling = $tracer->spanBuilder('audit-order')->startSpan();
+$sibling->end();
+```
+
+Skip the `detach()` and every later span in the request attaches to a span that already ended.
+
+### Across a service boundary
+
+Auto-instrumentation handles the frameworks and clients it covers. Write the calls yourself for any hop it does not.
+
+```php:propagate.php defaultCollapsed
+<?php
+
+use OpenTelemetry\API\Globals;
+
+// Outgoing: inject writes traceparent into the carrier
+function chargeCard(array $payload): void
+{
+    $tracer = Globals::tracerProvider()->getTracer('checkout-service');
+
+    $span = $tracer->spanBuilder('charge-card')->startSpan();
+    $scope = $span->activate();
+
+    try {
+        $carrier = [];
+        Globals::propagator()->inject($carrier);
+
+        // $carrier is now ['traceparent' => '00-<trace-id>-<span-id>-01']
+        $client->post('https://payments.internal/charge', [
+            'headers' => $carrier,
+            'json' => $payload,
+        ]);
+    } finally {
+        $scope->detach();
+        $span->end();
+    }
+}
+```
+
+On the receiving side, extract and pass the result to `setParent`:
+
+```php:extract.php defaultCollapsed
+<?php
+
+use OpenTelemetry\API\Globals;
+use OpenTelemetry\API\Trace\SpanKind;
+
+function handleCharge(ServerRequestInterface $request): void
+{
+    $tracer = Globals::tracerProvider()->getTracer('payment-service');
+
+    $context = Globals::propagator()->extract($request->getHeaders());
+
+    $span = $tracer->spanBuilder('handle-charge')
+        ->setParent($context)
+        ->setSpanKind(SpanKind::KIND_SERVER)
+        ->startSpan();
+
+    $scope = $span->activate();
+
+    try {
+        // handle-charge is now a child of charge-card in the caller's trace
+        capturePayment($request);
+    } finally {
+        $scope->detach();
+        $span->end();
+    }
+}
+```
+
+<Admonition type="info">
+`Globals::propagator()` returns the propagator your configuration selected, so these manual hops honor `OTEL_PROPAGATORS` and match what auto-instrumentation sends. It falls back to a no-op propagator when nothing registered one. In that state `inject` writes no keys and `extract` returns an empty context, both without an error. Setting `OTEL_PHP_AUTOLOAD_ENABLED=true` as the [PHP instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-php/) describes registers it for you.
+</Admonition>
+
+<Admonition type="warning">
+Pass the extracted context to `setParent`. A span builder with no explicit parent takes whatever is current. At the edge of your service that is nothing, so the span starts a fresh trace.
+</Admonition>
+
+## Step 5. Add attributes
 
 Attributes show up as key-value pairs in SigNoz for filtering and aggregation:
 
@@ -142,7 +249,7 @@ function handlePayment(float $amount, string $currency): void
 
 Use [semantic conventions](https://opentelemetry.io/docs/specs/semconv/) for common attributes when possible.
 
-## Step 5. Add events
+## Step 6. Add events
 
 Events capture notable moments within a span:
 
@@ -176,7 +283,7 @@ function processJob(string $jobId): void
 
 Use events to mark retries, cache hits/misses, queue waits, and similar milestones.
 
-## Step 6. Record errors
+## Step 7. Record errors
 
 Flag failures so they're easy to query in SigNoz:
 
@@ -210,7 +317,7 @@ function riskyOperation(): void
 - `recordException()` attaches exception details including stack trace.
 - Setting status to `STATUS_ERROR` surfaces the span in SigNoz error views and alerts.
 
-## Step 7. Add span links
+## Step 8. Add span links
 
 Link spans representing causally-related but not parent-child operations:
 
@@ -261,13 +368,19 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 - Ensure the OpenTelemetry extension is loaded: `php --ri opentelemetry`
 - Verify environment variables are set correctly (`OTEL_PHP_AUTOLOAD_ENABLED=true`, `OTEL_EXPORTER_OTLP_ENDPOINT`, etc.).
 - Check that `span->end()` is being called—spans without `end()` won't export.
-- Confirm the SDK is properly initialized before your application code runs.
+- Make sure that the SDK is properly initialized before your application code runs.
 
 ### Why are child spans not linked to parent spans?
 
 - Make sure you call `activate()` on the parent span before creating children.
 - Always `detach()` the scope when done to prevent context leaks.
 - Verify you're using the same tracer provider instance throughout.
+
+### Why does the downstream service start its own trace?
+
+- Make sure that the caller runs `inject` and that the outgoing request carries a `traceparent` header.
+- Make sure that the receiver calls `setParent($context)` on the span builder. Without it the entry span takes whatever is current and starts a new trace.
+- Make sure that both services register the same propagator format. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/).
 
 ### Why don't attributes or events appear on the span?
 
@@ -282,3 +395,4 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 - [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for your PHP application
 - [Create dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize your custom spans
 - Explore [supported PHP instrumentation libraries](https://packagist.org/search/?query=open-telemetry&tags=instrumentation) for automatic instrumentation of frameworks and libraries
+- Read [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the wire format and the failure modes shared across languages

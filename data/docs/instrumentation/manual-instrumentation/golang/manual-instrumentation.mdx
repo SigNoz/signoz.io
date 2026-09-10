@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-03
 title: How to add manual instrumentation in Go
 description: Learn how to add manual instrumentation in Go applications using OpenTelemetry. Create custom spans, attach attributes, and trace business logic for deeper observability.
 
@@ -51,7 +51,118 @@ Tips:
 - Start spans with descriptive names that match business steps (`checkout`, `fetch-user`, etc.).
 - Always end the span, preferably with `defer`.
 
-## Step 2. Add attributes and events
+## Step 2. Propagate context
+
+Go keeps no ambient trace state. A span finds its parent only through the `context.Context` you hand it, which is why Go breaks traces more readily than Java or Python. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the concepts behind this step.
+
+### Inside your process
+
+Pass the `ctx` that `tracer.Start` returns into every function you want nested under that span:
+
+```go:in-process.go
+func processOrder(ctx context.Context, orderID string) error {
+	ctx, span := tracer.Start(ctx, "process-order")
+	defer span.End()
+
+	// Child of process-order.
+	validateOrder(ctx, orderID)
+
+	// Root span of a brand new trace. The link to process-order is gone.
+	validateOrder(context.Background(), orderID)
+
+	return nil
+}
+```
+
+A goroutine that outlives the request needs a context you derive on purpose. The request context is canceled once the handler returns, so background work that keeps using it starts from an already-canceled context. `context.WithoutCancel` keeps the values, including the span, while dropping the cancellation and the deadline:
+
+```go:goroutine.go
+// Keeps the trace context, drops the request's cancellation. Go 1.21 and later.
+bgCtx := context.WithoutCancel(ctx)
+
+go func() {
+	_, span := tracer.Start(bgCtx, "settle-order")
+	defer span.End()
+	// Background work here.
+}()
+```
+
+### Across a service boundary
+
+Instrumentation libraries such as `otelhttp` inject and extract for you. Write the calls yourself for any hop they do not cover.
+
+Set the span kind on both ends. SigNoz reads `Client` and `Server` to build the service map and APM metrics.
+
+On the way out, inject the context into the outgoing headers:
+
+```go:inject.go minimap defaultCollapsed
+import (
+	"context"
+	"io"
+	"net/http"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
+)
+
+func chargeCard(ctx context.Context, body io.Reader) error {
+	ctx, span := tracer.Start(ctx, "charge-card", trace.WithSpanKind(trace.SpanKindClient))
+	defer span.End()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://payments.internal/charge", body)
+	if err != nil {
+		return err
+	}
+
+	// Writes the traceparent header onto req.
+	otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(req.Header))
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Drain the body so the connection can be reused.
+	_, err = io.Copy(io.Discard, resp.Body)
+	return err
+}
+```
+
+On the way in, extract before you start the entry span:
+
+```go:extract.go
+func handleCharge(w http.ResponseWriter, r *http.Request) {
+	// Returns a context carrying the caller's span, or r.Context() unchanged
+	// when no traceparent header is present.
+	ctx := otel.GetTextMapPropagator().Extract(r.Context(), propagation.HeaderCarrier(r.Header))
+
+	ctx, span := tracer.Start(ctx, "handle-charge", trace.WithSpanKind(trace.SpanKindServer))
+	defer span.End()
+
+	// handle-charge is now a child of charge-card in the caller's trace.
+	capturePayment(ctx)
+}
+```
+
+For a carrier that is not `http.Header`, such as queue message metadata, use `propagation.MapCarrier`:
+
+```go:queue.go
+// Publisher
+carrier := propagation.MapCarrier{}
+otel.GetTextMapPropagator().Inject(ctx, carrier)
+msg.Metadata = carrier // map[string]string
+
+// Consumer
+ctx := otel.GetTextMapPropagator().Extract(context.Background(), propagation.MapCarrier(msg.Metadata))
+```
+
+<Admonition type="info">
+`Inject` and `Extract` do nothing unless you registered a propagator with `otel.SetTextMapPropagator`. The [Go instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-golang/) sets up `propagation.TraceContext{}` and `propagation.Baggage{}` in `initTracer`.
+</Admonition>
+
+## Step 3. Add attributes and events
 
 Attributes show up as key-value pairs in SigNoz so you can filter and aggregate spans. Events capture notable moments inside a span.
 
@@ -80,7 +191,7 @@ func handlePayment(ctx context.Context, amount float64) {
 - Keep attribute keys consistent (use semantic conventions when possible).
 - Use events to mark retries, cache hits/misses, queue waits, and similar milestones.
 
-## Step 3. Record errors
+## Step 4. Record errors
 
 Flag failures on the span so they are easy to query in SigNoz.
 
@@ -136,6 +247,12 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 - Ensure you pass the `ctx` returned by `tracer.Start` (or `trace.SpanFromContext`) into downstream functions.
 - HTTP/database client calls must receive the propagated context as well, otherwise traces break across boundaries.
 
+### Why does the downstream service start its own trace?
+
+- Make sure that the caller runs `Inject` on the outgoing request and that the request carries a `traceparent` header.
+- Make sure that the receiver runs `Extract` and passes the returned context into `tracer.Start`, rather than `r.Context()` or `context.Background()`.
+- Make sure that both services register the same propagator format. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/).
+
 ### Why don't attributes or events appear on the span?
 
 - Attribute keys must be strings and values must use the correct helper (`attribute.String`, `attribute.Float64`, etc.).
@@ -149,3 +266,4 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 - Send logs from your Go application using popular logging libraries: [Logrus](https://signoz.io/docs/logs-management/send-logs/logrus-to-signoz/), [Zap](https://signoz.io/docs/logs-management/send-logs/zap-to-signoz/), or [Zerolog](https://signoz.io/docs/logs-management/send-logs/zerolog-to-signoz/)
 - [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to accelerate triage across signals
 - Add instrumentation to common Go frameworks via the [Go instrumentation library catalog](https://signoz.io/docs/instrumentation/opentelemetry-golang/#library-instrumentation)
+- Read [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the wire format and the failure modes shared across languages

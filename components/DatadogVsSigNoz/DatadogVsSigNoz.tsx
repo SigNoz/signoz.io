@@ -7,12 +7,12 @@ import { Scale } from 'lucide-react'
 export default function DatadogVsSigNoz() {
   return (
     <div className="my-8 w-full">
-      <div className="transform rounded-xl bg-gradient-to-r from-blue-900/90 to-purple-900/90 p-8 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+      <div className="transform rounded-xl border border-[color-mix(in_srgb,var(--accent-primary)_25%,transparent)] bg-gradient-to-r from-[color-mix(in_srgb,var(--accent-primary)_12%,var(--l2-background))] to-[color-mix(in_srgb,var(--accent-sakura)_10%,var(--l2-background))] p-8 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl dark:border-transparent dark:from-blue-900/90 dark:to-purple-900/90">
         <div className="space-y-4">
-          <h3 className="my-0 text-2xl font-bold text-white">
+          <h3 className="my-0 text-2xl font-bold text-[var(--l1-foreground)] dark:text-[var(--base-white)]">
             Cut Your Observability Spend by 80%—Here's How
           </h3>
-          <p className="text-gray-300">
+          <p className="text-[var(--l2-foreground)] dark:text-gray-300">
             Switch from Datadog seamlessly with our automated migration tool, comparable features
             and up to <b>80% cost savings</b>.
           </p>

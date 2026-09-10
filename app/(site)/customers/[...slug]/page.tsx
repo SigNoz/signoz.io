@@ -4,6 +4,7 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import { getContentBySlug } from '@/utils/contentRepository'
+import { buildMetadataImages } from '@/utils/metadataImages'
 import { MDXContent } from '@/utils/strapi'
 import { compileMDX, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import readingTime from 'reading-time'
@@ -52,6 +53,8 @@ export async function generateMetadata(props: {
 
       const seoTitle = content?.meta_title || content?.title
 
+      const { imageList, ogImages } = buildMetadataImages(content.image)
+
       return {
         title: seoTitle,
         description: content?.description || content?.title,
@@ -65,11 +68,13 @@ export async function generateMetadata(props: {
           locale: 'en_US',
           type: 'article',
           url: `${siteMetadata.siteUrl}/customers/${path}/`,
+          images: ogImages,
         },
         twitter: {
           card: 'summary_large_image',
           title: seoTitle,
           description: content?.description || content?.title,
+          images: imageList,
         },
       }
     } catch (error) {

@@ -18,8 +18,8 @@ const [compareHostingOption, getStartedHostingOption] = HOSTING_DECISION_ITEMS
 
 const HostingBanner = () => {
   return (
-    <div className="my-4  rounded-lg bg-signoz_ink-300 p-4 ">
-      <div className="mb-3 text-sm text-zinc-300">
+    <div className="my-4 rounded-lg bg-[var(--l2-background)] p-4">
+      <div className="mb-3 text-sm text-[var(--l2-foreground)]">
         Choose SigNoz Cloud for ease, or self-host for control—with the freedom to switch as your
         needs grow.
       </div>
@@ -32,7 +32,7 @@ const HostingBanner = () => {
             clickName={compareHostingOption.clickName}
             clickLocation="Hosting Decision Card"
             clickText={compareHostingOption.name}
-            className="group inline-flex items-center gap-1 text-sm font-medium text-zinc-400 no-underline hover:text-zinc-300"
+            className="group inline-flex items-center gap-1 text-sm font-medium text-[var(--l2-foreground)] no-underline hover:text-[var(--l1-foreground)]"
           >
             <Button variant="legacySecondary" className="!h-8 !px-3 !py-1">
               {compareHostingOption.name}{' '}

@@ -38,7 +38,9 @@ beforeEach(() => {
 const getTabButtons = () => screen.queryAllByRole('tab')
 const getTabButton = (name: string) => screen.queryByRole('tab', { name })
 const getTabPanels = () =>
-  document.querySelectorAll<HTMLDivElement>('[data-tabs-root] > .mt-4 > [data-tab-value]')
+  document.querySelectorAll<HTMLDivElement>(
+    '[data-tabs-root] > [data-tab-panels] > [data-tab-value]'
+  )
 
 const activateTab = (name: string) => {
   fireEvent.mouseDown(getTabButton(name)!)
@@ -330,7 +332,9 @@ describe('nested tabs do not reset parent plans tab', () => {
     render(<NestedTabs />)
 
     const parentRoot = document.querySelectorAll('[data-tabs-root]')[0]
-    const parentPanels = parentRoot.querySelectorAll(':scope > .mt-4 > [data-tab-value]')
+    const parentPanels = parentRoot.querySelectorAll(
+      ':scope > [data-tab-panels] > [data-tab-value]'
+    )
     const cloudPanel = Array.from(parentPanels).find(
       (p) => p.getAttribute('data-tab-value') === 'cloud'
     )
@@ -342,7 +346,9 @@ describe('nested tabs do not reset parent plans tab', () => {
     expect(selfHostPanel).not.toHaveAttribute('hidden')
 
     const nestedRoot = document.querySelectorAll('[data-tabs-root]')[1]
-    const nestedPanels = nestedRoot.querySelectorAll(':scope > .mt-4 > [data-tab-value]')
+    const nestedPanels = nestedRoot.querySelectorAll(
+      ':scope > [data-tab-panels] > [data-tab-value]'
+    )
     const yarnPanel = Array.from(nestedPanels).find(
       (p) => p.getAttribute('data-tab-value') === 'yarn'
     )

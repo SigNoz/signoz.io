@@ -12,14 +12,14 @@ const CustomerStoriesSection: React.FC<CustomerStoriesSectionProps> = ({
   showFeaturedCaseStudy = true,
 }) => {
   const sectionClassName = showOverlay
-    ? 'relative mx-auto max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-blur-ellipse-388'
-    : 'relative mx-auto max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400'
+    ? 'relative mx-auto max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-[var(--l2-border)] bg-blur-ellipse-388'
+    : 'relative mx-auto max-w-8xl overflow-hidden border !border-b-0 !border-t-0 border-dashed border-[var(--l2-border)]'
 
   return (
     <>
       <section className={sectionClassName}>
         {showOverlay && (
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[var(--l1-background-60)] via-[color-mix(in_srgb,var(--l1-background),transparent_75%)] to-[color-mix(in_srgb,var(--l1-background),transparent_10%)]" />
         )}
 
         {showFeaturedCaseStudy && (
@@ -27,7 +27,7 @@ const CustomerStoriesSection: React.FC<CustomerStoriesSectionProps> = ({
             <div className="container pb-16">
               <div className="flex flex-col gap-6 py-32">
                 <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-                  <div className="flex flex-col items-center gap-12 text-2xl font-medium text-signoz_sienna-100">
+                  <div className="flex flex-col items-center gap-12 text-2xl font-medium text-[var(--callout-sienna-title)]">
                     <Image
                       src="/img/case_study/logos/shaped-logo.svg"
                       alt="Shaped"
@@ -37,7 +37,7 @@ const CustomerStoriesSection: React.FC<CustomerStoriesSectionProps> = ({
                     Every single time we have an issue, SigNoz is always the first place to check.
                     It was super straightforward to migrate - just updating the exporter
                     configuration, basically three lines of code.
-                    <span className="text-sm text-signoz_vanilla-400">
+                    <span className="text-sm text-[var(--l2-foreground)]">
                       <span className="font-semibold">Karl Lyons</span> <br /> Senior SRE, Shaped
                     </span>
                   </div>
@@ -55,7 +55,7 @@ const CustomerStoriesSection: React.FC<CustomerStoriesSectionProps> = ({
           <div
             className={
               showOverlay
-                ? 'z-5 relative -mt-[25rem] flex h-[25rem] items-end justify-center bg-gradient-to-t from-signoz_ink-500 to-transparent py-6 max-md:py-16'
+                ? 'z-5 relative -mt-[25rem] flex h-[25rem] items-end justify-center bg-gradient-to-t from-[var(--l1-background)] to-transparent py-6 max-md:py-16'
                 : 'flex items-center justify-center py-6 max-md:py-16'
             }
           >

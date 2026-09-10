@@ -18,7 +18,7 @@ interface RegionCopyReminderProps {
 
 const AUTO_DISMISS_MS = 6000
 
-const codeClass = 'rounded bg-signoz_slate-400 px-1 py-0.5 text-xs font-semibold'
+const codeClass = 'rounded bg-[var(--l3-background)] px-1 py-0.5 text-xs font-semibold'
 
 /**
  * Transient reminder shown after a region-specific endpoint / MCP URL is copied
@@ -45,8 +45,8 @@ export const RegionCopyReminder = ({ reminder, onClose }: RegionCopyReminderProp
       className={cn(
         'animate-in fade-in slide-in-from-top-2 duration-200',
         'fixed left-1/2 top-5 z-[200] w-[380px] max-w-[calc(100vw-2rem)] -translate-x-1/2',
-        'rounded-lg border border-signoz_robin-500 bg-signoz_ink-400 px-4 py-3',
-        'text-sm leading-relaxed text-signoz_vanilla-100 shadow-[0_8px_30px_rgba(0,0,0,0.45)]'
+        'rounded-lg border border-[var(--accent-primary)] bg-[var(--l2-background)] px-4 py-3',
+        'text-sm leading-relaxed text-[var(--l1-foreground)] shadow-[0_8px_30px_color-mix(in_srgb,var(--base-black)_45%,transparent)]'
       )}
     >
       {isPlaceholder ? (
@@ -63,7 +63,7 @@ export const RegionCopyReminder = ({ reminder, onClose }: RegionCopyReminderProp
       <Link
         href={REGION_HELP_HREF}
         prefetch={false}
-        className="mt-2 inline-block text-xs font-medium text-signoz_robin-400 hover:underline"
+        className="mt-2 inline-block text-xs font-medium text-[var(--accent-primary)] hover:underline"
       >
         How do I find my workspace region? →
       </Link>

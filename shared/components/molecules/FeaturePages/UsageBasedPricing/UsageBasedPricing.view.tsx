@@ -18,20 +18,24 @@ const UsageBasedPricing: React.FC<{
   return (
     <SectionLayout
       variant="bordered"
-      className="!border-b-1 !border-t-1 border-dashed border-signoz_slate-400 !px-0"
+      className="!border-b-1 !border-t-1 border-dashed border-[var(--l2-border)] !px-0"
     >
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl md:px-0 md:pl-12">
+          <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-[var(--l1-foreground)] sm:text-4xl md:px-0 md:pl-12">
             Simple
             <br /> usage-based <br /> pricing
           </p>
         </div>
         <div className="flex-[2_2_0%]">
-          <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+          <div className="border-l border-dashed border-[var(--l2-border)] bg-transparent p-0">
             <div className="flex flex-col gap-2 px-10 py-10">
-              <div className="text-2xl font-semibold text-signoz_vanilla-100">{sectionTitle}</div>
-              <p className="text-base font-normal text-signoz_vanilla-400">{sectionDescription}</p>
+              <div className="text-2xl font-semibold text-[var(--l1-foreground)]">
+                {sectionTitle}
+              </div>
+              <p className="text-base font-normal text-[var(--l2-foreground)]">
+                {sectionDescription}
+              </p>
               <div className="[&>div]:border-0 [&>div]:bg-transparent">
                 <PricingCalculator
                   show={show}

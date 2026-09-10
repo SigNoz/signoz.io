@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-03
 title: How to add manual instrumentation in Rust
 description: Learn how to add manual OpenTelemetry instrumentation in Rust. Create custom spans, nested traces, and attach attributes for better debugging in SigNoz.
 
@@ -93,7 +93,95 @@ pub fn checkout(cart_id: &str) {
 
 Child spans created within the parent's `in_span` closure automatically inherit the trace context.
 
-## Step 4. Add attributes
+## Step 4. Propagate context
+
+Rust holds the active span in a `Context` stored per thread. `in_span` makes its span current for the duration of the closure, so anything you call inside nests correctly. Two things break that chain: a spawned task, and another service. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the concepts behind this step.
+
+### Inside your process
+
+Outside an `in_span` closure, build the context yourself and attach it. `attach` consumes the context and returns a `ContextGuard` that restores the previous context when it drops:
+
+```rust:src/in_process.rs
+use opentelemetry::trace::{Span, TraceContextExt, Tracer};
+use opentelemetry::{global, Context};
+
+let tracer = global::tracer("order-service");
+
+let span = tracer.start("process-order");
+let cx = Context::current_with_span(span);
+let _guard = cx.clone().attach();
+
+// Child of process-order, because the guard is still alive
+tracer.in_span("validate-cart", |_cx| validate_cart(cart_id));
+
+// Or parent a span explicitly, with no guard involved
+let child = tracer.start_with_context("charge-card", &cx);
+
+drop(_guard);
+cx.span().end(); // see the note below
+```
+
+<Admonition type="warning">
+Dropping the `ContextGuard` only restores the previous context. It does not end the span. A span you hand to `Context::current_with_span` lives as long as the `Context` that holds it. It ends when that value drops, which can happen after you shut the provider down. A span that ends after shutdown never reaches SigNoz.
+
+End it yourself with `cx.span().end()` before shutdown. Calling `.end()` on a `BoxedSpan` also needs the `Span` trait in scope, so import `opentelemetry::trace::Span`. The `in_span` closure form has neither problem: it ends its span when the closure returns.
+</Admonition>
+
+A spawned task can run on a different thread, so the context does not follow it. Capture the context before you spawn, then wrap the future with `FutureExt::with_context`:
+
+```rust:src/spawn.rs
+use opentelemetry::trace::FutureExt;
+use opentelemetry::Context;
+
+let cx = Context::current();
+
+tokio::spawn(
+    async move {
+        // Spans started here attach to the caller's span
+        settle_order().await;
+    }
+    .with_context(cx),
+);
+```
+
+<Admonition type="warning">
+Do not call `cx.attach()` inside a spawned task that awaits. `attach` returns a `ContextGuard` that is deliberately `!Send`. Holding it across an `await` makes the future `!Send`, and `tokio::spawn` then rejects it at compile time with "future cannot be sent between threads safely". `with_context` attaches the context around each poll instead, so no guard is held across the await.
+</Admonition>
+
+### Across a service boundary
+
+`HashMap<String, String>` implements both `Injector` and `Extractor`, so it works as a carrier out of the box:
+
+Set the span kind on both ends. SigNoz reads `Client` and `Server` to build the service map and APM metrics.
+
+```rust:src/propagate.rs
+use opentelemetry::trace::{SpanKind, TraceContextExt, Tracer};
+use opentelemetry::{global, Context};
+use std::collections::HashMap;
+
+// Outgoing: inject writes traceparent into the carrier
+let mut carrier = HashMap::<String, String>::new();
+global::get_text_map_propagator(|propagator| {
+    propagator.inject_context(&Context::current(), &mut carrier);
+});
+// carrier is now {"traceparent": "00-<trace-id>-<span-id>-01"}
+
+// Incoming: extract returns a context to parent the entry span on
+let parent_cx = global::get_text_map_propagator(|propagator| propagator.extract(&carrier));
+let span = tracer
+    .span_builder("handle-charge")
+    .with_kind(SpanKind::Server)
+    .start_with_context(&tracer, &parent_cx);
+let _guard = Context::current_with_span(span).attach();
+```
+
+The <a href="https://docs.rs/opentelemetry-http/latest/opentelemetry_http/" target="_blank" rel="noopener noreferrer nofollow">`opentelemetry-http`</a> crate provides `HeaderInjector` and `HeaderExtractor`. Use them with `reqwest` and other `http` crate clients to pass a `HeaderMap` straight through, with no copy into a map.
+
+<Admonition type="info">
+`inject_context` and `extract` do nothing unless you registered a propagator with `global::set_text_map_propagator`. Set `opentelemetry_sdk::propagation::TraceContextPropagator::new()` during startup, alongside your tracer provider.
+</Admonition>
+
+## Step 5. Add attributes
 
 Attributes are key-value pairs that provide context for filtering and analysis in SigNoz:
 
@@ -117,7 +205,7 @@ Supported attribute value types:
 - `bool`
 - Arrays of the above types
 
-## Step 5. Add events
+## Step 6. Add events
 
 Events mark notable moments within a span, like retries, cache hits, or state transitions:
 
@@ -151,7 +239,7 @@ pub fn fetch_from_cache(cx: &opentelemetry::Context, key: &str) -> Option<String
 }
 ```
 
-## Step 6. Record errors
+## Step 7. Record errors
 
 Flag failures on the span so they surface in SigNoz error views and alerts:
 
@@ -194,7 +282,7 @@ pub fn record_exception(cx: &opentelemetry::Context, error: &dyn std::error::Err
 }
 ```
 
-## Step 7. Span links (optional)
+## Step 8. Span links (optional)
 
 Use <Tooltip text="span links" content="A pointer from one span to another causally related span in a different trace." link="https://signoz.io/docs/glossary/#span-link" /> to connect causally related traces, such as batch processing where one span triggers multiple independent operations:
 
@@ -243,7 +331,7 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 
 ### Why don't I see my custom spans in SigNoz?
 
-- Confirm the tracer provider is initialized before creating spans.
+- Make sure that the tracer provider is initialized before creating spans.
 - Verify `global::set_tracer_provider()` is called at application startup.
 - Check that `tracer_provider.shutdown()` is called before the application exits to flush buffered spans.
 
@@ -251,6 +339,13 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 
 - Ensure child spans are created within the parent's `in_span` closure.
 - If creating spans manually, pass the context explicitly using `with_parent()`.
+
+### Why does the downstream service start its own trace?
+
+- Make sure that the caller runs `inject_context` and that the outgoing request carries a `traceparent` header.
+- Make sure that the receiver passes the extracted context to `start_with_context`, not `start`.
+- Make sure that you registered a propagator with `global::set_text_map_propagator` during startup. Without it, inject and extract are no-ops.
+- Make sure that both services register the same propagator format. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/).
 
 ### Why don't attributes appear on spans?
 
@@ -269,3 +364,4 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 ## Next steps
 
 - [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for error rates in your Rust application
+- Read [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the wire format and the failure modes shared across languages

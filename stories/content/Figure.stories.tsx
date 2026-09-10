@@ -49,11 +49,33 @@ const nextImageMdx = `
 />
 `
 
+const themeInvertOptOutMdx = `
+<Figure
+  src="/img/docs/cursor-icon.webp"
+  alt="Cursor editor icon"
+  caption="Logo kept as-is in light mode via themeInvert={false}"
+  themeInvert={false}
+  width="72"
+  height="72"
+/>
+`
+
+const lightDarkPairMdx = `
+<Figure
+  src="/img/docs/alert-rules.webp"
+  lightSrc="/img/docs/apdex-score.webp"
+  alt="Alert rules list in SigNoz"
+  caption="Dedicated light-mode screenshot via lightSrc (no invert applied)"
+/>
+`
+
 const previewMdx = [
   defaultMdx,
   sourceAttributionMdx,
   captionAsLinkMdx,
   customDimensionsMdx,
+  themeInvertOptOutMdx,
+  lightDarkPairMdx,
   nextImageMdx,
 ].join('\n')
 
@@ -107,6 +129,20 @@ export const Preview: Story = {
         width={72}
         height={72}
       />
+      <Figure
+        src="/img/docs/cursor-icon.webp"
+        alt="Cursor editor icon"
+        caption="Logo kept as-is in light mode via themeInvert={false}"
+        themeInvert={false}
+        width={72}
+        height={72}
+      />
+      <Figure
+        src="/img/docs/alert-rules.webp"
+        lightSrc="/img/docs/apdex-score.webp"
+        alt="Alert rules list in SigNoz"
+        caption="Dedicated light-mode screenshot via lightSrc (no invert applied)"
+      />
       <NextImage
         src="/img/docs/alerts-query-builder.webp"
         alt="Query builder while creating a metrics-based alert in SigNoz"
@@ -159,6 +195,32 @@ export const CustomDimensions: Story = {
   },
   parameters: {
     mdxUsage: customDimensionsMdx,
+  },
+}
+
+export const ThemeInvertOptOut: Story = {
+  args: {
+    src: '/img/docs/cursor-icon.webp',
+    alt: 'Cursor editor icon',
+    caption: 'Logo kept as-is in light mode via themeInvert={false}',
+    themeInvert: false,
+    width: 72,
+    height: 72,
+  },
+  parameters: {
+    mdxUsage: themeInvertOptOutMdx,
+  },
+}
+
+export const LightDarkPair: Story = {
+  args: {
+    src: '/img/docs/alert-rules.webp',
+    lightSrc: '/img/docs/apdex-score.webp',
+    alt: 'Alert rules list in SigNoz',
+    caption: 'Dedicated light-mode screenshot via lightSrc (no invert applied)',
+  },
+  parameters: {
+    mdxUsage: lightDarkPairMdx,
   },
 }
 

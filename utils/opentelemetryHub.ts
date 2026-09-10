@@ -224,6 +224,11 @@ export function resolveHubRoute(route: string): string {
   return ROUTE_ALIASES[norm] ?? norm
 }
 
+/** True for routes rendered inside the OTel hub shell (docs-style sidebar layout). */
+export function isHubShellRoute(route: string): boolean {
+  return getHubContextForRoute(route) !== null
+}
+
 export function getHubContextForRoute(route: string) {
   const normalized = resolveHubRoute(route)
   const { lookup, paths } = getHubIndex()

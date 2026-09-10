@@ -37,16 +37,16 @@ export default function FAQsClient({ faqs }: FAQsClientProps) {
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-signoz_ink-500">
+    <div className="relative min-h-screen w-full bg-[var(--l1-background)]">
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
       <div className="absolute left-0 right-0 top-0 mx-auto h-[300px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:h-[450px] sm:bg-[center_-500px] md:h-[956px]" />
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-col items-center px-4 py-8 sm:px-6 sm:py-12 md:py-24 lg:px-8">
         <div className="w-full space-y-4 sm:space-y-6">
-          <h1 className="text-center text-2xl font-bold leading-tight tracking-tight text-signoz_vanilla-100 sm:text-3xl md:text-4xl lg:text-5xl">
+          <h1 className="text-center text-2xl font-bold leading-tight tracking-tight text-[var(--l1-foreground)] sm:text-3xl md:text-4xl lg:text-5xl">
             Frequently Asked Questions
           </h1>
-          <p className="mx-auto max-w-2xl text-center text-base leading-relaxed text-signoz_vanilla-400 sm:text-lg">
+          <p className="mx-auto max-w-2xl text-center text-base leading-relaxed text-[var(--l2-foreground)] sm:text-lg">
             Find answers to common questions about SigNoz's features, capabilities, and
             implementation
           </p>
@@ -59,9 +59,9 @@ export default function FAQsClient({ faqs }: FAQsClientProps) {
                   onClick={() => toggleTag(tag)}
                   className={`rounded-full px-2 py-1 text-xs font-medium transition-colors sm:px-3 sm:text-sm ${
                     selectedTags.includes(tag)
-                      ? 'bg-primary-500 text-signoz_vanilla-100'
-                      : 'bg-signoz_ink-400 text-signoz_vanilla-400 hover:bg-signoz_ink-300'
-                  } border border-signoz_slate-400`}
+                      ? 'bg-[var(--primary-background)] text-[var(--primary-foreground)]'
+                      : 'bg-[var(--l2-background)] text-[var(--l2-foreground)] hover:bg-[var(--l2-background-hover)]'
+                  } border border-[var(--l2-border)]`}
                 >
                   {tag}
                 </Button>
@@ -87,18 +87,18 @@ export default function FAQsClient({ faqs }: FAQsClientProps) {
               <li key={faq.path}>
                 <Link
                   href={`/faqs${faq.path}`}
-                  className="block transform rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 shadow-md transition duration-500 hover:shadow-lg sm:p-6"
+                  className="block transform rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] p-4 shadow-md transition duration-500 hover:shadow-lg sm:p-6"
                 >
                   <article>
                     <div>
-                      <h2 className="mb-2 text-lg font-bold leading-snug tracking-tight text-signoz_vanilla-100 sm:mb-3 sm:text-xl">
+                      <h2 className="mb-2 text-lg font-bold leading-snug tracking-tight text-[var(--l1-foreground)] sm:mb-3 sm:text-xl">
                         {faq.title}
                       </h2>
-                      <p className="prose mb-3 line-clamp-3 max-w-none text-sm text-signoz_vanilla-400 sm:text-base">
+                      <p className="prose mb-3 line-clamp-3 max-w-none text-sm text-[var(--l2-foreground)] sm:text-base">
                         {faq.description}
                       </p>
                     </div>
-                    <div className="text-sm font-medium leading-6 text-primary-500 hover:text-primary-400 sm:text-base">
+                    <div className="text-sm font-medium leading-6 text-[var(--accent-primary)] hover:text-[var(--accent-primary-hover)] sm:text-base">
                       Read more &rarr;
                     </div>
                   </article>

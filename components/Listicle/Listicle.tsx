@@ -91,7 +91,9 @@ function SectionedPattern({
 export default async function Listicle({ name, defaultSection }: ListicleProps) {
   const config = await getListicleConfig(name)
   if (!config) {
-    return <div className="py-4 text-red-500">Unknown listicle: &ldquo;{name}&rdquo;</div>
+    return (
+      <div className="py-4 text-[var(--accent-cherry)]">Unknown listicle: &ldquo;{name}&rdquo;</div>
+    )
   }
 
   switch (config.pattern) {
