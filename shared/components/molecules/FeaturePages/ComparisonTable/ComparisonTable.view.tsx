@@ -2,8 +2,7 @@ import { ComparisonCell, ComparisonTableProps } from './ComparisonTable.types'
 import { Check, TriangleAlert, X } from 'lucide-react'
 import { cn } from 'app/lib/utils'
 
-const STRIPED_FEATURE_CELL_BG =
-  'bg-[var(--l1-background)] bg-[image:linear-gradient(var(--l2-background-60),var(--l2-background-60))]'
+const STRIPED_FEATURE_CELL_BG = 'bg-[var(--l2-background-60)]'
 
 const StripedCellContent: React.FC<{ cell: ComparisonCell }> = ({ cell }) => {
   return (
