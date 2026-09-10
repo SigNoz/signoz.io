@@ -1,10 +1,8 @@
 ---
-date: 2026-05-12
+date: 2026-09-07
 title: Time Aggregation Best Practices
 description: Best practices for Time Aggregation
 doc_type: explanation
-
-
 ---
 
 Time aggregation determines how multiple data points within a collection/aggregation interval are combined before evaluation.
@@ -13,6 +11,7 @@ Time aggregation determines how multiple data points within a collection/aggrega
 
 | Aggregation | Use Case | Example |
 |------------|----------|---------|
+| **Latest** | Point-in-time value of a gauge | Last reported heartbeat timestamp |
 | **Max** | Peak values, worst-case scenarios | Container restarts, max CPU spike |
 | **Min** | Minimum thresholds, availability | Minimum available memory |
 | **Avg** | General trends, smoothed metrics | Average response time |
@@ -69,7 +68,7 @@ Evaluation: at least once
 Reason: Detects any occurrence of error spikes and evaluates system reliability
 ```
 
-## Detecting Continuous Uptrends in Derived Metrics
+## Detecting Trends with Running Diff
 
 You can detect continuous uptrends in derived metrics by using the `running_diff` function on individual queries rather than on formulas. This is useful for scenarios like monitoring RabbitMQ message queue trends where you want to alert on sustained increases rather than temporary spikes.
 
@@ -99,3 +98,27 @@ The `running_diff` function calculates `R(t) - R(t-previous)`, allowing you to d
   caption="Detecting sustained uptrends in RabbitMQ using running_diff on individual queries A and B"
 />
 
+### Detecting Metric Stagnation
+
+Use `running_diff` for the inverse case too, when a metric that must keep increasing stops changing. A heartbeat metric that reports a Unix timestamp works this way, because each reading carries a later timestamp than the reading before it.
+
+1. **Create the query:**
+   - Select your gauge metric, for example `app.heartbeat.timestamp`.
+   - Set time aggregation to **Latest**, which suits a gauge that reports a point-in-time value.
+   - Filter the query to one source, or group by the attribute that identifies the source, such as `host.name`.
+   - Add the `running_diff` function.
+
+2. **Set up the alert condition:**
+   - Alert when the result is **Equal to** `0`, with match type **All the Time** over your chosen rolling window.
+
+Space aggregation combines every matching series into one value. If you skip the filter and the group-by, the sources that still report keep that combined value moving, and you never see the frozen one.
+
+When every `running_diff` value in the window equals 0, no consecutive pair of readings changed.
+
+`running_diff` subtracts the previous point from each point, and it drops the first point, so it returns one value fewer than the points it receives. For a query that uses `running_diff`, SigNoz reads one step before the start of your window, so the earlier point can come from that step. Make sure that the window and that extra step together hold two aggregated points. Otherwise the query returns no value, and the alert cannot fire.
+
+<Admonition type="info">
+This alert catches a metric that keeps reporting a frozen value. It does not catch a source that stops emitting. The **All the Time** match evaluates only the samples that exist, so a window with no samples returns no value.
+
+To cover a source that can go down, add a no-data check that matches how you scoped the query. **Alert when data stops coming** fires when the whole query returns no data, which suits a query you filtered to one source. If you grouped by a source attribute, that toggle stays quiet while any other group reports, so follow [No Data Alerts for Groups](https://signoz.io/docs/alerts-management/no-data-alerts-for-groups/) instead. For how each match type reads a sparse metric, see [Understanding Alert Evaluation Patterns](https://signoz.io/docs/alerts-management/user-guides/understanding-alert-evaluation-patterns/).
+</Admonition>
