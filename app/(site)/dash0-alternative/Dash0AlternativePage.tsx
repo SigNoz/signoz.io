@@ -1,7 +1,9 @@
 'use client'
 
+import { Quote } from 'lucide-react'
 import DitherCanvas from '@/components/DitherCanvas/DitherCanvas'
 import Figure from '@/components/Figure/Figure'
+import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
@@ -115,20 +117,16 @@ const WhyEngineersChoose: React.FC = () => {
 
 const QuotesSection: React.FC = () => {
   return (
-    <section className={`${CONTENT_CONTAINER} py-8 md:py-12`}>
-      <div className="grid gap-5 md:grid-cols-3">
-        {DASH0_QUOTES.map((item) => (
-          <figure
-            key={item.company}
-            className="m-0 flex flex-col justify-between gap-6 rounded-md border border-dashed border-[var(--l2-border)] bg-[var(--l1-background-60)] p-6"
-          >
-            <blockquote className="m-0 border-none p-0 text-[17px] font-normal not-italic leading-relaxed text-[var(--l1-foreground)]">
-              {item.quote}
-            </blockquote>
-            <figcaption className="text-sm text-[var(--l2-foreground)]">{item.company}</figcaption>
-          </figure>
-        ))}
-      </div>
+    <section className="w-full">
+      <HeroCards
+        layoutVariant="full-width"
+        className="!mt-0 !px-0"
+        cards={DASH0_QUOTES.map((item) => ({
+          icon: <Quote size={24} className="text-[var(--l1-foreground)]" />,
+          title: item.company,
+          description: item.quote,
+        }))}
+      />
     </section>
   )
 }
