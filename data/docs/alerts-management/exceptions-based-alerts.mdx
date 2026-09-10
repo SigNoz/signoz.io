@@ -1,13 +1,13 @@
 ---
-date: 2026-05-20
-title: Exceptions based alerts
-description: Configure exceptions-based alerts in SigNoz using ClickHouse queries to monitor application errors and exception patterns.
+date: 2026-08-22
+title: Exceptions-Based Alerts - Monitor Errors by Type or Message
+description: Learn how to configure exceptions-based alerts in SigNoz with ClickHouse queries for any exception, specific types, messages, and services.
 doc_type: reference
 ---
 
-An Exceptions-based alert in SigNoz allows you to define conditions based on exception data, triggering alerts when these conditions are met. You can define your exception query using **Query Builder** or **ClickHouse queries**.
+An Exceptions-based alert in SigNoz allows you to define conditions based on exception data, triggering alerts when these conditions are met. SigNoz reads exceptions from the `exception` span events of your traces and keeps them in a separate errors table. To learn what SigNoz records and how it groups the data, read [Errors and Exceptions](https://signoz.io/docs/userguide/exceptions/).
 
-This page covers the configuration options available for Exceptions-based alerts — from defining the exception query to setting conditions and notification preferences.
+Write the query for this alert as a **ClickHouse query**. The traces Query Builder does not give you the exception type, the exception message, or the stack trace, because these fields belong to span events. The Query Builder tab still works for span-level conditions, such as the count of failed spans of a service.
 
 At the top of the alert creation page, you can set:
 
@@ -15,7 +15,7 @@ At the top of the alert creation page, you can set:
 - **Labels**: Add static labels or tags for categorization. Labels should be added in key-value pairs. First enter key (avoid space in key) and set value.
 
 ## Step 1: Define the Metric Using ClickHouse Query
-In this step, you define the ClickHouse query to retrieve the exception data and set conditions for triggering the alert. For help writing ClickHouse queries, see [Writing ClickHouse Traces Queries](https://signoz.io/docs/userguide/writing-clickhouse-traces-query/#dashboard-panel-examples). The following elements are available:
+Define the ClickHouse query that retrieves exception data and drives the alert condition. For help writing ClickHouse queries, see [Writing ClickHouse Traces Queries](https://signoz.io/docs/userguide/writing-clickhouse-traces-query/). Use these fields:
 
 - **ClickHouse Query**: A field to write a ClickHouse SQL query that selects and aggregates exception data. The query should define the exception type, time range, and other necessary conditions.
 
@@ -27,10 +27,42 @@ In this step, you define the ClickHouse query to retrieve the exception data and
   caption="Using ClickHouse Query to define metrics"
 />
 
+Query the table `signoz_traces.distributed_signoz_error_index_v2`. It holds one row for each exception occurrence. The [Error Events Table](https://signoz.io/docs/userguide/writing-clickhouse-traces-query/#error-events-table--distributed_signoz_error_index_v2) section of that page lists every column.
+
+### Required Columns and Variables
+
+The rule engine reads two column aliases from the result:
+
+- `interval`: the start of each time bucket. Build it with `toStartOfInterval(timestamp, toIntervalMinute(1))`.
+- `value`: the number that the alert condition compares.
+
+Put the reserved variables `$start_datetime` and `$end_datetime` on the `timestamp` column, so that each evaluation reads only its own window.
+
+Every other column of the result becomes a label on the alert. Step 3 uses these labels in the notification message.
+
+The table also holds an `exceptionEscaped` column. OpenTelemetry deprecated the `exception.escaped` attribute that fills it, so do not filter on that column in a new alert. See [Errors and Exceptions](https://signoz.io/docs/userguide/exceptions/#what-counts-as-an-exception).
+
+### Choose How to Group the Exceptions
+
+The columns that you group by decide how many separate alerts one rule produces:
+
+| Goal | Group by | Result |
+| --- | --- | --- |
+| One alert for each exception | `serviceName`, `exceptionType`, `exceptionMessage` | Each distinct exception gets its own alert. |
+| One alert for each exception type | `serviceName`, `exceptionType` | All messages of one type share one alert. |
+| One alert for each exception message | `serviceName`, `exceptionMessage` | All types with the same message share one alert. |
+| One alert for each service | `serviceName` | All exceptions of the service share one alert. |
+
+SigNoz identifies an alert by its label set, so two different label sets produce two alerts. Group by `exceptionMessage` and you get one alert for each distinct message. If your messages embed request IDs or values, expect a flood.
+
+<Admonition type="warning">
+Do not select a column whose value changes between evaluations while the group stays the same. The label set changes with it, and SigNoz reports a new alert for each change. `exceptionStacktrace` is the usual offender, so read [Add the stack trace to the message](#add-the-stack-trace-to-the-message) before you select it.
+</Admonition>
+
 
 ## Step 2: Define Alert Conditions
 
-In this step, you define the specific conditions for triggering the alert, as well as the frequency of checking those conditions.
+Define the conditions that trigger the alert and how often SigNoz checks those conditions.
 The condition configuration of an alert in SigNoz consists of these core parts:
 
 ### Query
@@ -55,23 +87,23 @@ The condition configuration of an alert in SigNoz consists of these core parts:
    | Match Type | Description | Example Use Case |
    | --- | --- | --- |
    | `at least once` | Trigger if condition matches even once in the window | Detect spikes or brief failures |
-   | `all the times` | Trigger only if condition matches at all points in the window | Ensure stable violations before alerting |
+   | `all the times` | Trigger if condition matches at all points in the window | Ensure stable violations before alerting |
    | `on average` | Evaluate the **average** value in the window | Average latency `Above 500ms` |
    | `in total` | Evaluate the total sum over the window | Total errors `Above 100` |
-   | `last` | Only the last data point is evaluated | Used when only latest status matters |
+   | `last` | Evaluate the last data point | Use when the latest status matters |
 
 ### Evaluation Window
 
    Specifies the time window and mode for evaluating the condition. You can choose between two modes:
 
    - **Rolling**: Monitors data over a fixed time period that moves forward continuously. For example, a 5-minute rolling window with 1-minute evaluation cadence checks continuously: 14:01:00–14:06:00, 14:02:00–14:07:00, etc.
-   - **Cumulative**: Monitors data accumulated since a fixed starting point. The window grows over time, keeping all historical data from the start. For example, an hourly cumulative window for error count alerts when errors exceed 100 — starting at the top of the hour, it tracks: 20 errors by :15, 55 by :30, 105 by :45 (alert fires).
+   - **Cumulative**: Monitors data accumulated since a fixed starting point. The window grows over time, keeping all historical data from the start. For example, an hourly cumulative window for error count alerts when errors exceed 100 starts at the top of the hour and tracks: 20 errors by :15, 55 by :30, 105 by :45 (alert fires).
 
    Both modes support preset timeframes (Last 5 minutes, Last 10 minutes, Last 15 minutes, Last 30 minutes, Last 1 hour, Last 2 hours, Last 4 hours) as well as a **Custom** time range for specific requirements.
 
 ### Threshold
 
-   This is the value you are comparing the query result against.
+   Enter the value SigNoz compares the query result against.
 
    e.g. If you choose `Condition = Above` and set `Threshold = 500`, the alert will fire when the query result exceeds 500.
 
@@ -107,7 +139,7 @@ Under the **Advanced Options** section, you can configure:
 
 
 ## Step 3: Notification Settings
-In this step, you configure how alert notifications are delivered:
+Configure how SigNoz delivers alert notifications:
 
 ### Notification Message
 Custom message content for alert notifications. Use template variables to include dynamic information. The default template includes the current value and threshold.
@@ -118,10 +150,33 @@ You can incorporate result attributes in the alert message to make notifications
 
 **Example**: If you have a query that has the attribute `service.name` in the group by clause then to use it in the notification message, you will use `$service.name`.
 
+For an Exceptions-based alert, each column of the ClickHouse query becomes an attribute under its own name. A query that returns `serviceName`, `exceptionType`, and `exceptionMessage` lets you write:
+
+```
+*$exceptionType* in `$serviceName`
+Message: $exceptionMessage
+Occurrences in the window: {{$value}}
+```
+
 Using <a href="https://api.slack.com/reference/surfaces/formatting#advanced" target="_blank" rel="noopener noreferrer nofollow">advanced Slack formatting</a> is supported if you are using Slack as a notification channel.
 
+#### Add the Stack Trace to the Message
+
+Wrap the column twice so the stack trace works as a label:
+
+```sql
+substring(argMax(exceptionStacktrace, timestamp), 1, 500) AS exceptionStacktrace
+```
+
+- `argMax(exceptionStacktrace, timestamp)` picks the stack trace of the most recent occurrence in the window. The `any` function picks an arbitrary one instead, and its value can change on every evaluation.
+- `substring(..., 1, 500)` cuts the length. A full stack trace can exceed the message size limit of your notification channel.
+
+The value still changes when a newer occurrence carries a different stack trace, and SigNoz then reports a new alert. For a noisy exception, leave `exceptionStacktrace` out of the query and read the stack trace in the [Exceptions](https://signoz.io/docs/userguide/exceptions/) view instead.
+
 ### Group alerts by
-Combine alerts with the same field values into a single notification. Select fields to group by (optional). When empty, all matching alerts are combined into one notification.
+Combine alerts with the same field values into a single notification. Select fields to group by (optional). If empty, SigNoz combines all matching alerts into one notification.
+
+This field reads its options from the group-by keys of the Query Builder. An Exceptions-based alert written as a ClickHouse query has none, so the field stays disabled and reads "No grouping fields available". Every firing alert of the rule then arrives in one notification. Control the volume with the `GROUP BY` clause of the query and with separate rules instead.
 
 ### Repeat Notifications
 Configure repeat notifications to retrigger alerts at specified intervals if they remain unresolved. To enable:
@@ -150,33 +205,187 @@ Click the **Test Notification** button at the bottom of the page to send a test 
 
 ## Examples
 
-### 1. Alert when exception of type `ConnectionError` occurs
+Use these queries in the **ClickHouse Query** field when creating an Exceptions-based alert. Each query returns:
 
-#### Here's a video tutorial for creating this alert:
+- `value`: the number the alert condition evaluates
+- `interval`: the time bucket for time-series evaluation
+- one or more group-by columns, such as `serviceName` or `exceptionType`, that you can use in legends and notifications
+
+### Alert when any exception occurs
+
+Use this when any application exception, in any service, should notify a team.
+
+```sql
+SELECT
+    count() AS value,
+    toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
+    serviceName
+FROM signoz_traces.distributed_signoz_error_index_v2
+WHERE timestamp BETWEEN $start_datetime AND $end_datetime
+GROUP BY serviceName, interval;
+```
+
+- **Condition**: Above, **Threshold** `0`
+- **Match type**: `at least once`
+
+### Alert on each exception separately
+
+Use this query when every distinct exception needs its own notification. The group by follows the grouping of the [Exceptions](https://signoz.io/docs/userguide/exceptions/) view, so one alert covers one row of that list.
+
+```sql
+SELECT
+    count() AS value,
+    toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
+    serviceName,
+    exceptionType,
+    exceptionMessage,
+    substring(argMax(exceptionStacktrace, timestamp), 1, 500) AS exceptionStacktrace
+FROM signoz_traces.distributed_signoz_error_index_v2
+WHERE timestamp BETWEEN $start_datetime AND $end_datetime
+GROUP BY serviceName, exceptionType, exceptionMessage, interval;
+```
+
+- **Condition**: Above, **Threshold** `0`
+- **Match type**: `at least once`
+- **Notification message**:
+
+  ```
+  *$exceptionType* in `$serviceName`
+  Message: $exceptionMessage
+  Stack trace: $exceptionStacktrace
+  ```
+
+This is the noisiest recipe here: a service with many distinct messages produces one notification for each message. The `exceptionStacktrace` column adds the instability that [Add the stack trace to the message](#add-the-stack-trace-to-the-message) describes. Drop that column when you want a stable alert for a recurring exception.
+
+### Alert when a specific exception type occurs
+
+Page the owning team for a known exception class.
+
+#### Video tutorial
 
 <YouTube id="YWaIfNqNlgc" mute="false" />
 
-- **ClickHouse Query**: Counts occurrences of 'ConnectionError' exceptions within one-minute intervals, grouped by service name.
-The ClickHouse Query would look like:
-
 ```sql
-    SELECT
-        count() as value,
-        toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
-        serviceName
-    FROM signoz_traces.distributed_signoz_error_index_v2
-    WHERE exceptionType !='ConnectionError'
-    AND timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
-    GROUP BY serviceName, interval;
+SELECT
+    count() AS value,
+    toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
+    serviceName
+FROM signoz_traces.distributed_signoz_error_index_v2
+WHERE exceptionType = 'ConnectionError'
+  AND timestamp BETWEEN $start_datetime AND $end_datetime
+GROUP BY serviceName, interval;
 ```
 
-- **Alert Threshold**: Set to **0**
-- **Alert Name**: "Exceptions Alert"
-- **Severity**: "Warning"
-- **Notification Channels**: signoz-slack-alerts (Slack channel)
+- **Condition**: Above, **Threshold** `0`
+- **Match type**: `at least once`
 
 <Figure
   src="/img/docs/product-features/alerts/alerts-exceptions-based.gif"
   alt="A gif of Exceptions Based alerts example in SigNoz"
   caption="Exceptions Based Alert Example"
 />
+
+### Alert on each exception type separately
+
+Use this query when all messages of one exception type belong to the same problem, and you want one rule to cover every type. Each type of each service gets its own alert.
+
+```sql
+SELECT
+    count() AS value,
+    toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
+    serviceName,
+    exceptionType
+FROM signoz_traces.distributed_signoz_error_index_v2
+WHERE timestamp BETWEEN $start_datetime AND $end_datetime
+GROUP BY serviceName, exceptionType, interval;
+```
+
+- **Condition**: Above, **Threshold** `0`
+- **Match type**: `at least once`
+- **Notification message**:
+
+  ```
+  *$exceptionType* in `$serviceName`
+  Occurrences in the window: {{$value}}
+  ```
+
+### Alert on exceptions of the same message
+
+Group by `exceptionMessage` when the message identifies the problem better than the type. A wrapper type such as `RuntimeError` or `Exception` covers many unrelated failures, and the message separates them. Each message of each service gets its own alert.
+
+```sql
+SELECT
+    count() AS value,
+    toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
+    serviceName,
+    exceptionMessage
+FROM signoz_traces.distributed_signoz_error_index_v2
+WHERE exceptionMessage LIKE '%timeout%'
+  AND timestamp BETWEEN $start_datetime AND $end_datetime
+GROUP BY serviceName, exceptionMessage, interval;
+```
+
+- **Condition**: Above, **Threshold** `0`
+- **Match type**: `at least once`
+- **Notification message**:
+
+  ```
+  `$serviceName`: $exceptionMessage
+  Occurrences in the window: {{$value}}
+  ```
+
+The `LIKE` filter narrows the alert to one family of messages. Remove it to cover every message, and expect one alert for each distinct message in every service.
+
+### Alert when exception volume spikes for a service
+
+Some services emit a normal level of exceptions. Alert on a spike when the count rises past that baseline. Replace `<your-service>` with the service name shown in SigNoz.
+
+```sql
+SELECT
+    count() AS value,
+    toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
+    serviceName
+FROM signoz_traces.distributed_signoz_error_index_v2
+WHERE serviceName = '<your-service>'
+  AND timestamp BETWEEN $start_datetime AND $end_datetime
+GROUP BY serviceName, interval;
+```
+
+- **Condition**: Above, **Threshold** set to the largest normal exception count for the service
+- **Match type**: `on average` over a 5-minute window for sustained spikes, or `at least once` for urgent exceptions
+
+### Alert on exceptions in one environment
+
+Read `deployment.environment` from `resourceTagsMap` when only one environment should page a team. Replace `<environment>` with a value such as `prod` or `staging`.
+
+```sql
+SELECT
+    count() AS value,
+    toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
+    serviceName,
+    resourceTagsMap['deployment.environment'] AS environment
+FROM signoz_traces.distributed_signoz_error_index_v2
+WHERE resourceTagsMap['deployment.environment'] = '<environment>'
+  AND timestamp BETWEEN $start_datetime AND $end_datetime
+GROUP BY serviceName, environment, interval;
+```
+
+- **Condition**: Above, **Threshold** `0`
+- **Match type**: `at least once`
+- **Notification message**:
+
+  ```
+  Exceptions in `$serviceName` on $environment
+  Occurrences in the window: {{$value}}
+  ```
+
+## Next Steps
+
+- Browse and group the exceptions themselves in the [Exceptions view](https://signoz.io/docs/userguide/exceptions/).
+- Route these alerts to Slack, PagerDuty, or email with a [notification channel](https://signoz.io/docs/alerts-management/notification-channel/slack/).
+- Review fired alerts over time in [alert history](https://signoz.io/docs/alerts-management/alerts-history/).
+- Find recipes for metrics, logs, and traces in [Alert Examples for Common Use Cases](https://signoz.io/docs/alerts-management/user-guides/example-alerts/).
+
+## Get Help
+
+<GetHelp />
