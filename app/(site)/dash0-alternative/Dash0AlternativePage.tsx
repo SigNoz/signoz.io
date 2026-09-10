@@ -27,7 +27,7 @@ import {
 import UsageBasedPricing from 'shared/components/molecules/FeaturePages/UsageBasedPricing'
 
 const CONTENT_CONTAINER = 'w-full px-6 md:px-8'
-const SECTION_CONTAINER = `${CONTENT_CONTAINER} py-14 md:py-24`
+const SECTION_CONTAINER = `${CONTENT_CONTAINER} py-10 md:py-14`
 
 const Header: React.FC = () => {
   return (
