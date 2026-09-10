@@ -1,7 +1,7 @@
 'use client'
 
-import Image from 'next/image'
 import DitherCanvas from '@/components/DitherCanvas/DitherCanvas'
+import Figure from '@/components/Figure/Figure'
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
@@ -26,16 +26,12 @@ import UsageBasedPricing from 'shared/components/molecules/FeaturePages/UsageBas
 
 const CONTENT_CONTAINER = 'w-full px-6 md:px-8'
 const SECTION_CONTAINER = `${CONTENT_CONTAINER} py-14 md:py-24`
-const TABLE_CLASS_NAME = 'rounded-md'
-// `table` display class overrides the global `table { display: block }` rule in css/tailwind.css
-const TABLE_INNER_CLASS_NAME = 'table w-full table-fixed min-w-[640px]'
 
 const Header: React.FC = () => {
   return (
     <DitherCanvas enableClick>
       <header className="relative pb-14 pt-14 md:pb-20 md:pt-24">
         <div className={`${CONTENT_CONTAINER} flex flex-col items-start gap-4`}>
-          {/* DitherCanvas background is always dark, so hero text stays fixed light */}
           <p className="m-0 font-mono text-[11px] uppercase tracking-[0.14em] text-signoz_vanilla-400">
             {DASH0_HERO.eyebrow}
           </p>
@@ -106,7 +102,7 @@ const WhyEngineersChoose: React.FC = () => {
               <h4 className="m-0 text-lg font-semibold leading-snug text-[var(--l1-foreground)] md:text-[19px]">
                 {reason.title}
               </h4>
-              <p className="mb-0 mt-2 text-base leading-relaxed text-[var(--l2-foreground)]">
+              <p className="mb-0 mt-2 max-w-3xl text-base leading-relaxed text-[var(--l2-foreground)]">
                 {reason.body}
               </p>
             </div>
@@ -119,7 +115,7 @@ const WhyEngineersChoose: React.FC = () => {
 
 const QuotesSection: React.FC = () => {
   return (
-    <section className={SECTION_CONTAINER}>
+    <section className={`${CONTENT_CONTAINER} py-8 md:py-12`}>
       <div className="grid gap-5 md:grid-cols-3">
         {DASH0_QUOTES.map((item) => (
           <figure
@@ -147,14 +143,16 @@ const ScreenshotPair: React.FC<{
           <p className="m-0 font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--l2-foreground)]">
             {shot.label}
           </p>
-          <div className="flex flex-1 items-center overflow-hidden rounded-lg border border-[var(--l1-border)] bg-[var(--l1-background)]">
-            <Image
+          <div className="overflow-hidden rounded border border-[var(--l2-border)]">
+            <Figure
               src={shot.src}
               alt={shot.alt}
+              caption=""
               width={shot.width}
               height={shot.height}
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="w-full object-contain"
+              className="theme-invert m-0 w-full rounded-none object-contain"
+              figureClassName="m-0"
+              captionClassName="hidden"
             />
           </div>
         </div>
@@ -177,11 +175,11 @@ const ComparisonBlock: React.FC<{ block: Dash0ComparisonBlock }> = ({ block }) =
         </p>
       )}
       <ComparisonTable
+        variant="striped"
         vendors={DASH0_VENDORS}
         rows={block.rows}
         featureColumnLabel="Capability"
-        className={`${block.tableLabel ? 'mt-2' : 'mt-6'} ${TABLE_CLASS_NAME}`}
-        tableClassName={TABLE_INNER_CLASS_NAME}
+        className={block.tableLabel ? 'mt-2' : 'mt-6'}
       />
     </div>
   )

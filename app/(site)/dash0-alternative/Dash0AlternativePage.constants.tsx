@@ -1,9 +1,7 @@
+import { Badge } from '@signozhq/ui/badge'
 import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 import { ButtonGroupButton } from '@/shared/components/molecules/FeaturePages/ButtonGroup/ButtonGroup.types'
-import {
-  ComparisonCell,
-  ComparisonTableRow,
-} from '@/shared/components/molecules/FeaturePages/ComparisonTable'
+import { ComparisonTableRow } from '@/shared/components/molecules/FeaturePages/ComparisonTable'
 
 export type Dash0VendorKey = 'signoz' | 'dash0'
 
@@ -24,10 +22,6 @@ export type Dash0ComparisonBlock = {
   rows: ComparisonTableRow<Dash0VendorKey>[]
 }
 
-const yes = (text = 'Yes'): ComparisonCell => ({ supported: true, text })
-const no = (text = 'No'): ComparisonCell => ({ supported: false, text })
-const txt = (text: React.ReactNode): ComparisonCell => ({ text })
-
 const capability = (label: string, description?: string): React.ReactNode =>
   description ? (
     <span>
@@ -41,7 +35,7 @@ const capability = (label: string, description?: string): React.ReactNode =>
   )
 
 export const DASH0_VENDORS: { key: Dash0VendorKey; label: string }[] = [
-  { key: 'signoz', label: 'SigNoz' },
+  { key: 'signoz', label: 'SigNoz Cloud' },
   { key: 'dash0', label: 'Dash0' },
 ]
 
@@ -78,7 +72,7 @@ export const DASH0_TLDR = {
     {
       label: 'Choose Dash0 if',
       highlight: false,
-      body: 'You want broader workflows and a simpler, more guided platform. Dash0 is well-suited for less complex systems and teams that also need Synthetic Monitoring and RUM.',
+      body: "You want a simpler, more guided platform and don't need as much depth. Dash0 is well-suited for less complex systems and teams that also need Synthetic Monitoring and RUM.",
     },
   ],
 }
@@ -144,14 +138,72 @@ export const DASH0_COMPARISON_BLOCKS: Dash0ComparisonBlock[] = [
       </>
     ),
     rows: [
-      { feature: 'RED', vendors: { signoz: yes(), dash0: yes() } },
-      { feature: 'Key operations', vendors: { signoz: yes(), dash0: yes() } },
-      { feature: 'Service map', vendors: { signoz: yes(), dash0: yes('Yes (interactive)') } },
-      { feature: 'Dedicated view for DB call metrics', vendors: { signoz: yes(), dash0: no() } },
-      { feature: 'Dedicated view for external metrics', vendors: { signoz: yes(), dash0: no() } },
-      { feature: 'Apdex', vendors: { signoz: yes(), dash0: no() } },
-      { feature: 'Exceptions', vendors: { signoz: yes(), dash0: no() } },
-      { feature: 'Dependency map', vendors: { signoz: no(), dash0: yes() } },
+      {
+        feature: 'RED',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: true, text: 'Yes' },
+        },
+      },
+      {
+        feature: 'Key operations',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: true, text: 'Yes' },
+        },
+      },
+      {
+        feature: 'Service map',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: {
+            supported: true,
+            text: (
+              <>
+                Yes{' '}
+                <Badge color="vanilla" className="text-xs">
+                  interactive
+                </Badge>
+              </>
+            ),
+          },
+        },
+      },
+      {
+        feature: 'Dedicated view for DB call metrics',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
+      },
+      {
+        feature: 'Dedicated view for external metrics',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
+      },
+      {
+        feature: 'Apdex',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
+      },
+      {
+        feature: 'Exceptions',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
+      },
+      {
+        feature: 'Dependency map',
+        vendors: {
+          signoz: { supported: false, text: 'No' },
+          dash0: { supported: true, text: 'Yes' },
+        },
+      },
     ],
   },
   {
@@ -165,17 +217,55 @@ export const DASH0_COMPARISON_BLOCKS: Dash0ComparisonBlock[] = [
       </>
     ),
     rows: [
-      { feature: 'Log body parsed into columns', vendors: { signoz: yes(), dash0: no() } },
       {
-        feature: 'Free-text search',
-        vendors: { signoz: txt('Across body and all attributes'), dash0: txt('Body only') },
+        feature: 'Log body parsed into columns',
+        vendors: {
+          signoz: {
+            supported: true,
+            text: 'Yes, via log pipelines with control over fields and types',
+          },
+          dash0: {
+            supported: true,
+            text: 'Yes, automatic via AI extraction, with no control over fields. Not applied to JSON logs',
+          },
+        },
       },
-      { feature: 'Log pipelines', vendors: { signoz: yes(), dash0: no() } },
-      { feature: 'Log patterns', vendors: { signoz: no(), dash0: yes() } },
-      { feature: 'Triage', vendors: { signoz: no(), dash0: yes() } },
+      {
+        feature: 'Log pipelines',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
+      },
+      {
+        feature: 'Log patterns',
+        vendors: {
+          signoz: { supported: false, text: 'No' },
+          dash0: { supported: true, text: 'Yes' },
+        },
+      },
+      {
+        feature: 'Triage',
+        vendors: {
+          signoz: { supported: false, text: 'No' },
+          dash0: { supported: true, text: 'Yes' },
+        },
+      },
       {
         feature: 'Noise filtering',
-        vendors: { signoz: txt('Log pipelines (manual)'), dash0: txt('Spam filter') },
+        vendors: {
+          signoz: {
+            text: (
+              <>
+                Log pipelines{' '}
+                <Badge color="vanilla" className="text-xs">
+                  manual
+                </Badge>
+              </>
+            ),
+          },
+          dash0: { text: 'Spam filter' },
+        },
       },
     ],
   },
@@ -210,53 +300,68 @@ export const DASH0_COMPARISON_BLOCKS: Dash0ComparisonBlock[] = [
       {
         feature: 'Flamegraph view in Trace Explorer',
         vendors: {
-          signoz: txt(
-            'Supports million-span traces. Renders 100k in a single load. Samples above that.'
-          ),
-          dash0: txt('Capped at 2,000 spans'),
+          signoz: {
+            text: 'Supports million-span traces. Renders 100k in a single load. Samples above that',
+          },
+          dash0: { text: 'Capped at 2,000 spans' },
         },
       },
       {
         feature: 'Waterfall view in Trace Explorer',
         vendors: {
-          signoz: txt('Shows unlimited spans. No sampling.'),
-          dash0: txt('Capped at 2,000 spans'),
+          signoz: { text: 'Shows unlimited spans. No sampling' },
+          dash0: { text: 'Capped at 2,000 spans' },
         },
       },
       {
         feature: capability(
           'One-click error highlighting',
-          'An exclusive toggle in the trace view to highlight only error spans.'
+          'An exclusive toggle in the trace view to highlight only error spans'
         ),
-        vendors: { signoz: yes(), dash0: no() },
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
       },
       {
         feature: capability(
           'One-click filters',
-          'Dedicated filter buttons to highlight database, function, HTTP, jobs, and LLM spans.'
+          'Dedicated filter buttons to highlight database, function, HTTP, jobs, and LLM spans'
         ),
-        vendors: { signoz: yes(), dash0: no() },
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
       },
       {
         feature: capability(
           'In-trace search',
-          'A search bar in the trace view that lets you search spans based on any span attribute.'
+          'A search bar in the trace view that lets you search spans based on any span attribute'
         ),
-        vendors: { signoz: yes(), dash0: no() },
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
       },
       {
         feature: capability(
           'Trace Funnel',
-          'Visibility into the step-by-step progression of spans through a distributed system.'
+          'Visibility into the step-by-step progression of spans through a distributed system'
         ),
-        vendors: { signoz: yes(), dash0: no() },
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
       },
       {
         feature: capability(
           'Trace Match',
-          'Combine multiple span queries to find spans based on their relationships within a trace.'
+          'Combine multiple span queries to find spans based on their relationships within a trace'
         ),
-        vendors: { signoz: yes(), dash0: no() },
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
       },
     ],
   },
@@ -291,35 +396,77 @@ export const DASH0_COMPARISON_BLOCKS: Dash0ComparisonBlock[] = [
       {
         feature: 'SQL',
         vendors: {
-          signoz: yes(),
-          dash0: txt('Limited. No visual builder. No dashboards or alerts.'),
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { text: 'Limited. No visual builder. No dashboards or alerts' },
         },
       },
-      { feature: 'PromQL', vendors: { signoz: yes(), dash0: yes() } },
+      {
+        feature: 'PromQL',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: true, text: 'Yes' },
+        },
+      },
       {
         feature: 'Visual builder',
-        vendors: { signoz: yes('Yes (SQL-native)'), dash0: yes('Yes (PromQL-native)') },
+        vendors: {
+          signoz: {
+            supported: true,
+            text: (
+              <>
+                Yes{' '}
+                <Badge color="vanilla" className="text-xs">
+                  SQL-native
+                </Badge>
+              </>
+            ),
+          },
+          dash0: {
+            supported: true,
+            text: (
+              <>
+                Yes{' '}
+                <Badge color="vanilla" className="text-xs">
+                  PromQL-native
+                </Badge>
+              </>
+            ),
+          },
+        },
       },
       {
         feature: 'Aggregations',
         vendors: {
-          signoz: txt('On any attribute'),
-          dash0: txt('Limited to pre-defined metrics catalog'),
+          signoz: { text: 'On any attribute' },
+          dash0: { text: 'Limited to pre-defined metrics catalog' },
         },
       },
       {
         feature: 'Query configurations',
         vendors: {
-          signoz: txt('Having, OR, Limit, Group by all in visual builder'),
-          dash0: txt('Limited. For more knobs need to write PromQL'),
+          signoz: { text: 'Having, OR, Limit, Group by all in visual builder' },
+          dash0: { text: 'Limited. For more knobs need to write PromQL' },
         },
       },
       {
         feature: capability(
           'Multiple query formulas',
-          'A formula option in the visual builder to build a query using multiple query outputs.'
+          'A formula option in the visual builder to build a query using multiple query outputs'
         ),
-        vendors: { signoz: yes(), dash0: no('No (requires PromQL)') },
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: {
+            supported: false,
+            text: (
+              <>
+                No{' '}
+                <Badge color="vanilla" className="text-xs">
+                  requires PromQL
+                </Badge>
+              </>
+            ),
+          },
+        },
       },
     ],
   },
@@ -353,41 +500,74 @@ export const DASH0_COMPARISON_BLOCKS: Dash0ComparisonBlock[] = [
       {
         feature: 'Panel types',
         vendors: {
-          signoz: txt('Bar, histogram, list, number, pie, table, timeseries'),
-          dash0: txt(
-            'Dependency, heatmap, treemap, gauge, geo, hierarchy, issues timeline, log table, markdown, pie, stat, timeseries'
-          ),
+          signoz: { text: 'Bar, histogram, list, number, pie, table, timeseries' },
+          dash0: {
+            text: 'Dependency, heatmap, treemap, gauge, geo, hierarchy, issues timeline, log table, markdown, pie, stat, timeseries',
+          },
         },
       },
-      { feature: 'Perses schema', vendors: { signoz: yes(), dash0: yes() } },
+      {
+        feature: 'Perses schema',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: true, text: 'Yes' },
+        },
+      },
       {
         feature: 'Dashboard or alert as code',
-        vendors: { signoz: txt('Kubernetes, Terraform'), dash0: txt('Kubernetes, Terraform, CLI') },
+        vendors: {
+          signoz: { text: 'Kubernetes, Terraform' },
+          dash0: { text: 'Kubernetes, Terraform, CLI' },
+        },
       },
       {
         feature: capability(
           'Dashboard custom view in Dashboard Manager',
-          'Create a view from a filtered group of dashboards, for example, by service or team.'
+          'Create a view from a filtered group of dashboards, for example, by service or team'
         ),
-        vendors: { signoz: yes(), dash0: no() },
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
       },
       {
         feature: capability(
           'DSL query search in Dashboard Manager',
-          'Find dashboards easily across a large collection of dashboards.'
+          'Find dashboards easily across a large collection of dashboards'
         ),
-        vendors: { signoz: yes(), dash0: no() },
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
       },
-      { feature: 'SLO with target and error budget', vendors: { signoz: no(), dash0: yes() } },
+      {
+        feature: 'SLO with target and error budget',
+        vendors: {
+          signoz: { supported: false, text: 'No' },
+          dash0: { supported: true, text: 'Yes' },
+        },
+      },
       {
         feature: 'Rule-level configuration',
         vendors: {
-          signoz: txt('Routing policies, absent-data alerts, and planned maintenance'),
-          dash0: txt('Limited'),
+          signoz: { text: 'Routing policies, absent-data alerts, and planned maintenance' },
+          dash0: { text: 'Limited' },
         },
       },
-      { feature: 'Anomaly detection', vendors: { signoz: yes(), dash0: no() } },
-      { feature: 'Exception alerts', vendors: { signoz: yes(), dash0: no() } },
+      {
+        feature: 'Anomaly detection',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
+      },
+      {
+        feature: 'Exception alerts',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
+      },
     ],
   },
   {
@@ -401,24 +581,45 @@ export const DASH0_COMPARISON_BLOCKS: Dash0ComparisonBlock[] = [
       </>
     ),
     rows: [
-      { feature: 'AI agent', vendors: { signoz: yes('Yes. NozAI'), dash0: yes('Yes. Agent0') } },
-      { feature: 'MCP', vendors: { signoz: yes(), dash0: yes() } },
+      {
+        feature: 'AI agent',
+        vendors: {
+          signoz: { supported: true, text: 'Yes. NozAI' },
+          dash0: { supported: true, text: 'Yes. Agent0' },
+        },
+      },
+      {
+        feature: 'MCP',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: true, text: 'Yes' },
+        },
+      },
       {
         feature: 'AI automations',
-        vendors: { signoz: txt('Not built-in. Can set up via MCP'), dash0: txt('Built-in') },
+        vendors: {
+          signoz: { text: 'Not built-in. Can set up via MCP' },
+          dash0: { text: 'Built-in' },
+        },
       },
       {
         feature: 'Codebase as context',
         vendors: {
-          signoz: yes('Yes. SigNoz is open source, so agents can read the codebase as context.'),
-          dash0: no('No. Dash0 is not open source, so agents cannot read the codebase.'),
+          signoz: {
+            supported: true,
+            text: 'Yes. SigNoz is open source, so agents can read the codebase as context',
+          },
+          dash0: {
+            supported: false,
+            text: 'No. Dash0 is not open source, so agents cannot read the codebase',
+          },
         },
       },
     ],
   },
   {
     id: 'deployment',
-    title: 'Deployment & access',
+    title: 'Deployment & Access',
     description: (
       <>
         <strong>SigNoz offers more flexibility in deployment options and access control.</strong>{' '}
@@ -428,18 +629,30 @@ export const DASH0_COMPARISON_BLOCKS: Dash0ComparisonBlock[] = [
     rows: [
       {
         feature: 'Deployment',
-        vendors: { signoz: txt('Cloud, self-hosted, open source'), dash0: txt('Cloud only') },
+        vendors: {
+          signoz: { text: 'Cloud, self-hosted, open source' },
+          dash0: { text: 'Cloud only' },
+        },
       },
       {
         feature: 'Organization roles',
-        vendors: { signoz: txt('Admin, Editor, Viewer, Anonymous'), dash0: txt('Member, Admin') },
+        vendors: {
+          signoz: { text: 'Admin, Editor, Viewer, Anonymous' },
+          dash0: { text: 'Member, Admin' },
+        },
       },
-      { feature: 'Custom roles', vendors: { signoz: yes(), dash0: no() } },
+      {
+        feature: 'Custom roles',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
+      },
     ],
   },
   {
     id: 'cost',
-    title: 'Cost visibility & control',
+    title: 'Cost Visibility & Control',
     description: (
       <>
         <strong>
@@ -450,26 +663,47 @@ export const DASH0_COMPARISON_BLOCKS: Dash0ComparisonBlock[] = [
       </>
     ),
     rows: [
-      { feature: 'Ingestion limits or caps', vendors: { signoz: yes(), dash0: yes() } },
+      {
+        feature: 'Ingestion limits or caps',
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: true, text: 'Yes' },
+        },
+      },
       {
         feature: capability(
           'Cost Meter',
-          'A dedicated pre-built view with real-time visibility into data ingestion.'
+          'A dedicated pre-built view with real-time visibility into data ingestion'
         ),
-        vendors: { signoz: yes(), dash0: no() },
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: false, text: 'No' },
+        },
       },
       {
         feature: 'Customized cost dashboards and alerts',
-        vendors: { signoz: yes(), dash0: yes() },
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: true, text: 'Yes' },
+        },
       },
       {
         feature: capability(
           'Cardinality visibility',
-          'Shows which metrics take up the most space in your total sample volume.'
+          'Shows which metrics take up the most space in your total sample volume'
         ),
-        vendors: { signoz: yes(), dash0: yes() },
+        vendors: {
+          signoz: { supported: true, text: 'Yes' },
+          dash0: { supported: true, text: 'Yes' },
+        },
       },
-      { feature: 'Cost Forecast view', vendors: { signoz: no(), dash0: yes() } },
+      {
+        feature: 'Cost Forecast view',
+        vendors: {
+          signoz: { supported: false, text: 'No' },
+          dash0: { supported: true, text: 'Yes' },
+        },
+      },
     ],
   },
 ]
@@ -485,7 +719,7 @@ export const DASH0_VERDICT = {
 
 export const DASH0_VERDICT_BUTTONS: ButtonGroupButton[] = [
   {
-    text: 'Signup for 30-day free trial',
+    text: 'Sign up for 30-day free trial',
     href: '/teams/',
     variant: 'default' as const,
     className: BUTTON_CLASS_NAME,
@@ -493,7 +727,7 @@ export const DASH0_VERDICT_BUTTONS: ButtonGroupButton[] = [
       clickType: 'Primary CTA',
       clickName: 'Dash0 Alternative Verdict Signup',
       clickLocation: 'Dash0 Alternative Verdict',
-      clickText: 'Signup for 30-day free trial',
+      clickText: 'Sign up for 30-day free trial',
     },
   },
 ]
