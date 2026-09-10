@@ -97,7 +97,10 @@ const WhyEngineersChoose: React.FC = () => {
               index === DASH0_REASONS.length - 1 ? 'border-b' : ''
             }`}
           >
-            <div className="pt-1 font-mono text-sm text-[var(--l2-foreground)]">
+            <div
+              className="pt-1 font-mono text-sm text-[var(--l2-foreground)]"
+              data-markdown-ignore=""
+            >
               {String(index + 1).padStart(2, '0')}
             </div>
             <div>
