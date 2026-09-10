@@ -1,5 +1,5 @@
 ---
-date: 2026-07-07
+date: 2026-09-10
 title: Configuration
 description: Learn how to configure SigNoz
 doc_type: reference
@@ -102,3 +102,50 @@ SIGNOZ_QUERIER_MAX__CONCURRENT__QUERIES=8
 </Admonition>
 
 See the [example configuration file](https://github.com/SigNoz/signoz/blob/main/conf/example.yaml) for the full `querier` section and other available options.
+
+## API Server TLS/HTTPS
+
+The API server can terminate TLS directly and serve HTTPS. This is a native alternative to terminating TLS at a reverse proxy (nginx, Traefik, or a cloud load balancer) when SigNoz is [served on an external URL](https://signoz.io/docs/manage/administrator-guide/configuration/serving-on-external-url/). TLS is disabled by default, so existing deployments need no change.
+
+<Admonition type="info">
+Available in SigNoz v0.142.0 and later.
+</Admonition>
+
+Configure it under the `apiserver.tls` section:
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `apiserver.tls.enabled` | Serve HTTPS instead of HTTP. | `false` |
+| `apiserver.tls.cert_file` | Full path to the certificate file. Required when `enabled` is `true`. | none |
+| `apiserver.tls.key_file` | Full path to the private key file. Required when `enabled` is `true`. | none |
+| `apiserver.tls.min_version` | Minimum accepted TLS version, `"1.2"` or `"1.3"`. | `"1.2"` |
+
+```yaml
+apiserver:
+  tls:
+    enabled: true
+    cert_file: /path/to/server.crt
+    key_file: /path/to/server.key
+    min_version: "1.2"
+```
+
+Or through the equivalent environment variables:
+
+```bash
+SIGNOZ_APISERVER_TLS_ENABLED=true
+SIGNOZ_APISERVER_TLS_CERT__FILE=/path/to/server.crt
+SIGNOZ_APISERVER_TLS_KEY__FILE=/path/to/server.key
+SIGNOZ_APISERVER_TLS_MIN__VERSION=1.2
+```
+
+Both `cert_file` and `key_file` must be PEM-encoded and readable by the SigNoz process.
+
+<Admonition type="warning">
+When `apiserver.tls.enabled` is `true`, the server refuses to start if:
+
+- `cert_file` or `key_file` is missing: `tls::cert_file and tls::key_file are required when tls is enabled`.
+- `min_version` is any value other than `"1.2"` or `"1.3"`: `invalid tls version, must be "1.2" or "1.3"`.
+- The certificate and key cannot be loaded from the given paths: `cannot load tls::cert_file and tls::key_file`.
+</Admonition>
+
+Once TLS is active, plain HTTP requests sent to the server return `HTTP 400 Bad Request`. Update health probes, ingestion endpoints, and any clients to use `https://` after enabling TLS.
