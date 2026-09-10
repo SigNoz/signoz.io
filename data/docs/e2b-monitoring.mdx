@@ -1,0 +1,719 @@
+---
+published_date: 2026-09-07
+title: E2B Sandbox Monitoring & Tracing with OpenTelemetry
+meta_title: E2B Sandbox OpenTelemetry Monitoring
+description: Monitor E2B sandboxes with OpenTelemetry and SigNoz. Trace every sandbox session and code execution, join in-sandbox spans, and track CPU, memory, and disk.
+doc_type: howto
+---
+
+## Overview
+
+<a href="https://e2b.dev/" target="_blank" rel="noopener noreferrer nofollow">E2B</a> runs AI-generated code in an isolated Linux microVM. Your agent creates a sandbox, runs code in it, reads the output, and kills it. Two things go wrong in that loop, and each needs its own telemetry: the code inside the sandbox fails or hangs, and the sandbox lifecycle itself turns slow or errors out. A sandbox is ephemeral, so the execution that failed is gone before you can open a terminal, and nothing records how it exited until you instrument it. This page covers both halves. You end up with the execution that failed and the reason, the share of request latency that came from E2B rather than your own code, and the sandboxes that stayed alive long enough to matter on a per-second bill.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- Python 3.10 or later. The `e2b` SDK requires 3.10.
+- An E2B API key from the <a href="https://e2b.dev/dashboard" target="_blank" rel="noopener noreferrer nofollow">E2B Dashboard</a>. Every path on this page except the last one works on the free Hobby plan.
+
+## How it works
+
+E2B produces telemetry through five paths. They do not overlap, so pick the ones that answer your question.
+
+| Path | What you get | What it costs you |
+|---|---|---|
+| Instrument the application that creates sandboxes | One trace per session, a span per execution, exit codes, and errors | A wrapper around `Sandbox.create`, `run_code`, and `commands.run` |
+| Instrument the code that runs inside the sandbox | Spans and logs from the generated code, joined to the same trace | An OpenTelemetry SDK shipped into the sandbox |
+| Sandbox resource metrics | CPU, memory, and disk per sandbox | A poller over `get_metrics()` |
+| Sandbox lifecycle events | Create, update, and kill events as log records | A poller over the events API, or a webhook receiver |
+| E2B OTel telemetry export | `e2b.*` metrics and `service_name: e2b` logs, with no code at all | An Enterprise plan and an onboarding request |
+
+Start with the first path. It covers every sandbox your application creates, including the ones whose code a model wrote. The SDK also reports some HTTP telemetry by itself, with no code and no instrumentation package, which [What the SDK Emits on Its Own](#what-the-sdk-emits-on-its-own) covers. The rest are collapsed below. All five use <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and export to the same SigNoz endpoint.
+
+E2B sandboxes have outbound internet access by default, so you need no firewall rule before an exporter reaches SigNoz. If you set `allow_internet_access=False` or a `network` deny rule, read [The sandbox cannot reach SigNoz](#the-sandbox-cannot-reach-signoz) first.
+
+## Monitor E2B Sandboxes from Your Application
+
+This path shows what each sandbox did: which executions ran, how long each took, how they exited, and where they failed.
+
+### Step 1: Install the packages
+
+```bash
+pip install e2b-code-interpreter opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
+```
+
+`e2b-code-interpreter` wraps the base `e2b` SDK and adds `run_code`. If your agent only runs shell commands, install `e2b` instead, drop the `traced_run_code` helper below, and import `Sandbox` from `e2b` rather than from `e2b_code_interpreter`. The `e2b` package does not contain the `e2b_code_interpreter` module, so the import fails otherwise.
+
+### Step 2: Configure the OpenTelemetry SDK
+
+Point the standard OpenTelemetry variables at SigNoz. The exporter reads all three, so no endpoint appears in your code.
+
+```bash
+export E2B_API_KEY="<your-e2b-api-key>"
+export OTEL_SERVICE_NAME="<your-service-name>"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<your-e2b-api-key>`: Created under <a href="https://e2b.dev/dashboard?tab=keys" target="_blank" rel="noopener noreferrer nofollow">E2B Dashboard, Keys</a>.
+- `<your-service-name>`: What your application appears under in SigNoz, and what you filter on in [Validate](#validate).
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+Create the providers once, at startup:
+
+```python:telemetry.py
+import atexit
+
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+# service.name is not set here. Resource.create() runs the environment
+# detector, which reads the OTEL_SERVICE_NAME exported above.
+tracer_provider = TracerProvider(resource=Resource.create())
+tracer_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+trace.set_tracer_provider(tracer_provider)
+
+# Orchestrators are often short-lived. An unflushed batch dies with the process.
+atexit.register(tracer_provider.shutdown)
+
+tracer = trace.get_tracer("e2b-orchestrator")
+```
+
+The exporter defaults to OTLP over HTTP on the endpoint above. Do not set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc`, because the HTTP exporter is the only one this package installs.
+
+### Step 3: Add the traced sandbox helpers
+
+`pyqwest` already times each HTTP call the SDK makes. These helpers add what it cannot know: which sandbox the call belongs to, whether the code raised, and how the command exited. They also open a parent span, so the `pyqwest` spans stop rooting their own traces and nest under the session instead.
+
+OpenTelemetry has no semantic conventions for sandboxes, so `e2b.*` is a custom namespace. Keep the names stable across your services so that dashboards and alerts keep working.
+
+```python:traced_sandbox.py minimap defaultCollapsed
+from contextlib import contextmanager
+
+from e2b import CommandExitException
+from e2b_code_interpreter import Sandbox
+from opentelemetry.trace import Status, StatusCode
+
+from telemetry import tracer
+
+
+@contextmanager
+def traced_sandbox(template=None, timeout=300, **kwargs):
+    """Create a sandbox, trace its whole life, and always kill it."""
+    with tracer.start_as_current_span("e2b sandbox session") as span:
+        span.set_attribute("e2b.sandbox.timeout", timeout)
+        if template:
+            span.set_attribute("e2b.template.id", template)
+
+        sandbox = Sandbox.create(template=template, timeout=timeout, **kwargs)
+        span.set_attribute("e2b.sandbox.id", sandbox.sandbox_id)
+        try:
+            yield sandbox
+        finally:
+            sandbox.kill()
+
+
+def traced_run_code(sandbox, code, **kwargs):
+    """Run code in a sandbox and record how it finished."""
+    with tracer.start_as_current_span("e2b run_code") as span:
+        span.set_attribute("e2b.sandbox.id", sandbox.sandbox_id)
+        span.set_attribute("e2b.execution.code_bytes", len(code.encode()))
+
+        execution = sandbox.run_code(code, **kwargs)
+
+        span.set_attribute("e2b.execution.results", len(execution.results))
+        if execution.error:
+            span.set_attribute("e2b.execution.error.name", execution.error.name)
+            span.set_attribute("e2b.execution.error.value", execution.error.value)
+            span.set_status(Status(StatusCode.ERROR, execution.error.name))
+        return execution
+
+
+def traced_command(sandbox, cmd, **kwargs):
+    """Run a shell command in a sandbox and record its exit code."""
+    with tracer.start_as_current_span("e2b commands.run") as span:
+        span.set_attribute("e2b.sandbox.id", sandbox.sandbox_id)
+        span.set_attribute("e2b.command", cmd)
+        try:
+            result = sandbox.commands.run(cmd, **kwargs)
+        except CommandExitException as exc:
+            # commands.run raises on a non-zero exit code. The exception is
+            # also a CommandResult, so it carries the exit code and the output.
+            # start_as_current_span records the exception and sets the error
+            # status on the way out, so only the exit code needs recording.
+            span.set_attribute("e2b.command.exit_code", exc.exit_code)
+            raise
+
+        span.set_attribute("e2b.command.exit_code", result.exit_code)
+        return result
+```
+
+The two helpers handle failure differently, because the SDK does. `run_code` returns an `Execution` with `error` set when the code raises, so the helper reads `execution.error` and never sees an exception. `commands.run` raises `CommandExitException` on any non-zero exit code instead of returning, so the helper catches it, records the exit code, and re-raises. Code that tests `result.exit_code != 0` after `commands.run` never runs.
+
+The `finally` block matters. A sandbox that is not killed keeps running until its timeout expires, and E2B bills it for that whole time.
+
+Do not put `execution.logs.stdout` or the command output on a span. Output is unbounded, and a span attribute is the wrong place for it. [Trace the Code Inside a Sandbox](#trace-the-code-inside-a-sandbox) sends it as log records instead.
+
+### Step 4: Run your orchestrator
+
+```python:run_agent.py
+from traced_sandbox import traced_command, traced_run_code, traced_sandbox
+
+with traced_sandbox(timeout=120) as sandbox:
+    execution = traced_run_code(sandbox, "print(sum(i * i for i in range(200000)))")
+    print(execution.logs.stdout)
+
+    result = traced_command(sandbox, "pip install --quiet pandas")
+    print(result.exit_code)
+
+    failing = traced_run_code(sandbox, "1 / 0")
+    print(failing.error.name)
+```
+
+```bash
+python run_agent.py
+```
+
+One trace appears per sandbox, with the session span as its root and one child span per execution. The last execution divides by zero on purpose, so that the first trace you look at contains an error span.
+
+## Validate
+
+Wait a minute after your first run, then check each signal.
+
+**Traces:** Open the [Traces explorer](https://signoz.io/docs/userguide/traces/) and filter on `service.name = '<your-service-name>'`. Look for the `e2b sandbox session` root span.
+
+**Errors:** Filter the same view on `status.code = 'Error'`. The `e2b run_code` span for `1 / 0` carries `e2b.execution.error.name = 'ZeroDivisionError'`.
+
+**One sandbox:** Filter on `e2b.sandbox.id` to isolate every span from a single sandbox.
+
+Each trace also holds client spans named `POST` and `DELETE` that you did not create. Those come from `pyqwest`, and [What the SDK Emits on Its Own](#what-the-sdk-emits-on-its-own) covers them.
+
+<Figure
+  src="/img/docs/llm/e2b/e2b-traces.webp"
+  alt="The SigNoz Traces explorer filtered on service.name = e2b-orchestrator-demo, listing e2b sandbox session, e2b run_code, and e2b commands.run spans"
+  caption="Spans from one orchestrator, filtered by service name. The POST and DELETE rows are the pyqwest spans the SDK emits by itself."
+/>
+
+<Figure
+  src="/img/docs/llm/e2b/e2b-trace-detail.webp"
+  alt="A SigNoz trace showing an e2b sandbox session root span with run_code and commands.run children, and the span details panel listing the e2b attributes for a ZeroDivisionError"
+  caption="The run_agent.py session above, end to end. The selected run_code span is the 1 / 0 execution, and its panel carries e2b.sandbox.id alongside e2b.execution.error.name and e2b.execution.error.value."
+/>
+
+<details>
+<ToggleHeading>
+## What the SDK Emits on Its Own
+</ToggleHeading>
+
+`e2b` depends on `pyqwest`, and `pyqwest` depends on `opentelemetry-api`. Once your process has a tracer provider and a meter provider, `pyqwest` reports through them. You install no instrumentation package, and you write no code.
+
+### Spans
+
+Every HTTP call the SDK makes produces a client span under the instrumentation scope `pyqwest`. The span name is the HTTP method alone.
+
+| Attribute | Example |
+|---|---|
+| `http.request.method` | `POST` |
+| `server.address` | `api.e2b.app` |
+| `server.port` | `443` |
+| `url.full` | `https://api.e2b.app/sandboxes/<sandbox-id>` |
+| `http.response.status_code` | `201` |
+| `network.protocol.name` | `http` |
+| `network.protocol.version` | `2` |
+
+Sandbox creation appears as `POST https://api.e2b.app/sandboxes`, and `kill()` as `DELETE https://api.e2b.app/sandboxes/<sandbox-id>`. Code execution goes to the sandbox host instead, as `POST https://<port>-<sandbox-id>.e2b.app/execute`, and `commands.run` as `POST https://sandbox.e2b.app/process.Process/Start`.
+
+The sandbox id appears only inside `url.full`, so grouping these spans by sandbox means parsing that URL. Without an active span of your own, each one roots a separate trace.
+
+### Metrics
+
+`pyqwest` reports seven metrics under the same scope. Two describe the HTTP client, and five describe the Rust runtime underneath it.
+
+| Metric | Type |
+|---|---|
+| `http.client.request.duration` | Histogram |
+| `http.client.active_requests` | Sum |
+| `rust.async_runtime.alive_tasks.count` | Sum |
+| `rust.async_runtime.blocking_threads.count` | Sum |
+| `rust.async_runtime.task_queue.size` | Sum |
+| `rust.async_runtime.worker_busy_duration` | Sum |
+| `rust.async_runtime.workers.count` | Sum |
+
+`http.client.request.duration` gives you E2B API latency for free, split by host and status code. Chart it next to your session spans to separate a slow sandbox from a slow E2B API.
+
+These names belong to `pyqwest`, not to E2B. Any other library in your process that uses `pyqwest` reports into the same metrics.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Trace the Code Inside a Sandbox
+</ToggleHeading>
+
+The spans above measure a sandbox from the outside. They cannot say which line of the generated code was slow. This path instruments the code that runs inside the sandbox and joins it to the same trace.
+
+### Step 1: Write the workload script
+
+The script reads the endpoint from the environment, so it holds no credentials of its own. `E2B_SANDBOX_ID` and `E2B_TEMPLATE_ID` are set by E2B in every sandbox, and become resource attributes.
+
+```python:sandbox_app.py minimap defaultCollapsed
+import logging
+import os
+
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+
+resource = Resource.create(
+    {
+        "e2b.sandbox.id": os.environ.get("E2B_SANDBOX_ID", ""),
+        "e2b.template.id": os.environ.get("E2B_TEMPLATE_ID", ""),
+    }
+)
+
+tracer_provider = TracerProvider(resource=resource)
+tracer_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+trace.set_tracer_provider(tracer_provider)
+
+logger_provider = LoggerProvider(resource=resource)
+logger_provider.add_log_record_processor(BatchLogRecordProcessor(OTLPLogExporter()))
+logging.getLogger().addHandler(LoggingHandler(logger_provider=logger_provider))
+logging.getLogger().setLevel(logging.INFO)
+
+# The parent context arrives as an environment variable. The OpenTelemetry SDK
+# does not read TRACEPARENT on its own, so extract it here.
+parent = TraceContextTextMapPropagator().extract(
+    {"traceparent": os.environ.get("TRACEPARENT", "")}
+)
+
+tracer = trace.get_tracer("sandbox-workload")
+log = logging.getLogger("sandbox-workload")
+
+with tracer.start_as_current_span("workload", context=parent) as span:
+    log.info("starting work")
+    with tracer.start_as_current_span("workload.compute"):
+        total = sum(i * i for i in range(200000))
+    log.info("compute finished with total %s", total)
+    span.set_attribute("workload.total", total)
+
+tracer_provider.force_flush()
+logger_provider.force_flush()
+```
+
+Flush both providers before the process exits. Sandbox processes are short-lived, and an unflushed batch dies with the process.
+
+### Step 2: Ship the script and pass the parent context down
+
+Inject the current span context into a carrier, then hand it to the sandbox as an environment variable.
+
+```python:run_traced_workload.py minimap defaultCollapsed
+import os
+
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+
+from telemetry import tracer
+from traced_sandbox import traced_command, traced_sandbox
+
+with traced_sandbox(timeout=300) as sandbox:
+    with open("sandbox_app.py", "rb") as f:
+        sandbox.files.write("/home/user/sandbox_app.py", f.read())
+
+    traced_command(
+        sandbox,
+        "pip install --quiet opentelemetry-sdk opentelemetry-exporter-otlp-proto-http",
+    )
+
+    carrier = {}
+    TraceContextTextMapPropagator().inject(carrier)
+
+    traced_command(
+        sandbox,
+        "python3 /home/user/sandbox_app.py",
+        envs={
+            "TRACEPARENT": carrier["traceparent"],
+            "OTEL_SERVICE_NAME": "<your-sandbox-service-name>",
+            # Forward the two variables Step 2 already exported, so the
+            # endpoint and the ingestion key are defined in exactly one place.
+            "OTEL_EXPORTER_OTLP_ENDPOINT": os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"],
+            "OTEL_EXPORTER_OTLP_HEADERS": os.environ["OTEL_EXPORTER_OTLP_HEADERS"],
+        },
+    )
+```
+
+Inject the carrier inside `traced_sandbox`, not before it. A carrier built outside the session span carries the wrong parent, and the sandbox spans then root their own trace.
+
+Give the sandbox its own `OTEL_SERVICE_NAME`. The spans share a trace with your orchestrator but describe a different process, and a separate service name keeps the two apart in the service list.
+
+Forwarding `OTEL_EXPORTER_OTLP_HEADERS` puts the ingestion key in the environment of the sandbox. Anything running there can read it. Use a key scoped to sandbox traffic, and rotate it like any other shared secret.
+
+To skip the install on every run, bake the OpenTelemetry packages into a <a href="https://docs.e2b.dev/template/quickstart" target="_blank" rel="noopener noreferrer nofollow">custom template</a> and create sandboxes from it.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Collect Sandbox Resource Metrics
+</ToggleHeading>
+
+E2B samples CPU, memory, and disk inside every sandbox every 5 seconds. `get_metrics()` returns that history as a list. Nothing pushes it anywhere, so poll it and record the newest sample as OpenTelemetry gauges.
+
+```python:sandbox_metrics.py minimap defaultCollapsed
+import time
+
+from opentelemetry import metrics
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.sdk.resources import Resource
+
+reader = PeriodicExportingMetricReader(OTLPMetricExporter())
+meter_provider = MeterProvider(resource=Resource.create(), metric_readers=[reader])
+metrics.set_meter_provider(meter_provider)
+meter = metrics.get_meter("e2b-orchestrator")
+
+# Sandboxes to report on, keyed by sandbox id. Add on create, remove on kill.
+tracked = {}
+
+# Every gauge below runs its own callback, and they all fire within the same
+# collection. Without this cache that is one get_metrics() call per gauge, so
+# six per sandbox per collection. The TTL is long enough to cover one
+# collection and shorter than any sane export interval, so each collection
+# still reads fresh values.
+_CACHE_TTL_SECONDS = 2.0
+_cache = {}
+
+
+def _latest(sandbox_id, sandbox):
+    now = time.monotonic()
+    cached = _cache.get(sandbox_id)
+    if cached is not None and now - cached[0] < _CACHE_TTL_SECONDS:
+        return cached[1]
+
+    samples = sandbox.get_metrics()
+    sample = samples[-1] if samples else None
+    _cache[sandbox_id] = (now, sample)
+    return sample
+
+
+def _observe(field, scale=1):
+    def callback(options):
+        for sandbox_id, sandbox in list(tracked.items()):
+            sample = _latest(sandbox_id, sandbox)
+            if sample is None:
+                continue
+            yield metrics.Observation(
+                getattr(sample, field) * scale,
+                {"e2b.sandbox.id": sandbox_id},
+            )
+
+    return callback
+
+
+meter.create_observable_gauge(
+    "e2b.sandbox.cpu.used_pct", callbacks=[_observe("cpu_used_pct")], unit="%"
+)
+meter.create_observable_gauge(
+    "e2b.sandbox.cpu.count", callbacks=[_observe("cpu_count")], unit="{cpu}"
+)
+meter.create_observable_gauge(
+    "e2b.sandbox.memory.used", callbacks=[_observe("mem_used")], unit="By"
+)
+meter.create_observable_gauge(
+    "e2b.sandbox.memory.total", callbacks=[_observe("mem_total")], unit="By"
+)
+meter.create_observable_gauge(
+    "e2b.sandbox.disk.used", callbacks=[_observe("disk_used")], unit="By"
+)
+meter.create_observable_gauge(
+    "e2b.sandbox.disk.total", callbacks=[_observe("disk_total")], unit="By"
+)
+```
+
+Register a sandbox in `tracked` after `Sandbox.create`, and before `kill` remove it from both `tracked` and `_cache`, next to the two calls in `traced_sandbox`. A sandbox left in `_cache` holds its last sample until the process exits.
+
+The default export interval is 60 seconds, and each collection makes one API call per tracked sandbox, because the six gauges share the cached snapshot. Lower `OTEL_METRIC_EXPORT_INTERVAL` for finer resolution, and watch the request volume when you track many sandboxes at once.
+
+The gauge records only the newest sample. The OpenTelemetry metrics API stamps each value with its collection time, so the older samples in the list cannot keep their own timestamps. Read them with `Sandbox.get_metrics(sandbox_id, start=..., end=...)` when you need the full history after a run.
+
+`get_metrics()` returns an empty list for the first second or two after a sandbox starts, before E2B collects the first sample. The callback above skips that case instead of reporting a zero.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Record Sandbox Lifecycle Events
+</ToggleHeading>
+
+The events API reports when sandboxes are created, updated, snapshotted, paused, resumed, and killed across your whole project, including the sandboxes your own code did not create. E2B keeps these events for 7 days.
+
+```python:lifecycle_events.py minimap defaultCollapsed
+import os
+import time
+
+import requests
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.sdk.resources import Resource
+import logging
+
+logger_provider = LoggerProvider(resource=Resource.create())
+logger_provider.add_log_record_processor(BatchLogRecordProcessor(OTLPLogExporter()))
+log = logging.getLogger("e2b-lifecycle")
+log.addHandler(LoggingHandler(logger_provider=logger_provider))
+log.setLevel(logging.INFO)
+
+seen = set()
+
+
+def poll_once():
+    response = requests.get(
+        "https://api.e2b.app/events/sandboxes",
+        params={"limit": 100},
+        headers={"X-API-Key": os.environ["E2B_API_KEY"]},
+        timeout=30,
+    )
+    response.raise_for_status()
+
+    for event in response.json():
+        if event["id"] in seen:
+            continue
+        seen.add(event["id"])
+        log.info(
+            event["type"],
+            extra={
+                "e2b.sandbox.id": event["sandboxId"],
+                "e2b.template.id": event["sandboxTemplateId"],
+                "e2b.event.type": event["type"],
+                "e2b.event.timestamp": event["timestamp"],
+            },
+        )
+
+
+while True:
+    poll_once()
+    logger_provider.force_flush()
+    time.sleep(30)
+```
+
+The API returns the newest events first and repeats them on every call, so track the event `id` and skip the ones you already sent. The `seen` set above is in memory. Persist it if the poller restarts often, or you record the same event twice.
+
+Filter the response with `types=sandbox.lifecycle.created&types=sandbox.lifecycle.killed` when you only want a subset. A single call returns at most 100 events, so a project that churns thousands of sandboxes needs a shorter interval or the `offset` parameter.
+
+Sandbox lifecycle webhooks push the same events instead. Use them when you already run an HTTP endpoint, because they remove the polling loop and the deduplication. See <a href="https://docs.e2b.dev/sandbox/lifecycle-events-webhooks" target="_blank" rel="noopener noreferrer nofollow">Sandbox lifecycle webhooks</a>.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Run the Sandbox as an AI Agent Tool
+</ToggleHeading>
+
+When a model calls the sandbox as a tool, add the GenAI attributes to the session span so that it joins the rest of your LLM traces:
+
+```python
+span.set_attributes(
+    {
+        "gen_ai.operation.name": "execute_tool",
+        "gen_ai.tool.name": "e2b_sandbox",
+        "gen_ai.tool.type": "extension",
+        "gen_ai.tool.call.id": tool_call.id,
+    }
+)
+```
+
+Name the span `execute_tool e2b_sandbox` to follow the convention. These attributes are at development stability in the <a href="https://github.com/open-telemetry/semantic-conventions-genai" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry GenAI semantic conventions</a>, so expect them to change.
+
+E2B ships templates for several coding agents, including Claude Code and Codex. When you run one of those inside a sandbox, the agent exports its own telemetry. Pass its variables through `envs` at creation and read [Monitor Claude Code](https://signoz.io/docs/claude-code-monitoring/) or [Monitor Codex](https://signoz.io/docs/codex-monitoring/) for the rest.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Export E2B Telemetry Directly (Enterprise)
+</ToggleHeading>
+
+E2B can push its own metrics and logs to any OTLP HTTP endpoint. This path needs no code, and it reports the sandboxes your application never sees. It is available on the Enterprise plan only.
+
+Give E2B these values during onboarding:
+
+- OTLP HTTP endpoint: `https://ingest.<region>.signoz.cloud`
+- Header: `signoz-ingestion-key` set to your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+E2B sends OTLP over HTTP and protobuf, and appends `/v1/metrics` and `/v1/logs` itself. Metrics arrive under the `e2b.*` namespace and mirror the sandbox resource usage shown in the E2B dashboard. Logs arrive with `service_name: e2b` and carry sandbox lifecycle events.
+
+Delivery is best effort. E2B retries when it can, and drops metrics or logs when the endpoint stays unreachable.
+
+To request it, contact <a href="mailto:enterprise@e2b.dev">enterprise@e2b.dev</a>. For BYOC deployments, E2B can configure the export from your own environment.
+
+Do not run this path and [Collect Sandbox Resource Metrics](#collect-sandbox-resource-metrics) at the same time without checking the names. Both report sandbox CPU, memory, and disk under the `e2b.` prefix, from different collection points, and a chart that mixes them double counts.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Attribute Reference
+</ToggleHeading>
+
+OpenTelemetry has no semantic conventions for sandboxes. Everything below is a custom namespace that this page defines.
+
+### Session span
+
+Name: `e2b sandbox session`. Kind: internal. Covers create through kill.
+
+| Attribute | Type | Description |
+|---|---|---|
+| `e2b.sandbox.id` | string | Sandbox id returned by `Sandbox.create` |
+| `e2b.template.id` | string | Template the sandbox was created from |
+| `e2b.sandbox.timeout` | int | Timeout in seconds passed at creation |
+
+### Execution spans
+
+Names: `e2b run_code` and `e2b commands.run`. Kind: internal. One per call.
+
+| Attribute | Type | Description |
+|---|---|---|
+| `e2b.sandbox.id` | string | Sandbox the execution ran in |
+| `e2b.execution.code_bytes` | int | Size of the code sent to `run_code` |
+| `e2b.execution.results` | int | Number of results returned |
+| `e2b.execution.error.name` | string | Exception class raised inside the sandbox |
+| `e2b.execution.error.value` | string | Exception message |
+| `e2b.command` | string | Shell command passed to `commands.run` |
+| `e2b.command.exit_code` | int | Exit code of the command, read from `CommandExitException` when it is not zero |
+
+### Environment variables inside a sandbox
+
+E2B sets these in every sandbox, and the workload script reads them as resource attributes.
+
+| Variable | Description |
+|---|---|
+| `E2B_SANDBOX` | Set to `true` in every sandbox process |
+| `E2B_SANDBOX_ID` | Id of the current sandbox |
+| `E2B_TEMPLATE_ID` | Template the sandbox was created from |
+
+The E2B CLI does not see these as environment variables. They are files under `/run/e2b/`.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No spans reach SigNoz, and the script prints no error
+
+Symptom: the sandbox runs, the code returns output, and no service appears in SigNoz.
+
+Likely cause: the process exited before the batch processor flushed.
+
+Fix: call `tracer_provider.shutdown()` at exit, as `telemetry.py` does with `atexit`.
+
+Verify: `service.name = '<your-service-name>'` returns spans in the Traces explorer.
+
+### OTLPExporterError: Unauthorized
+
+Symptom: the exporter logs `Unauthorized` and retries.
+
+Likely cause: the ingestion key is wrong, or the header name is not exactly `signoz-ingestion-key`.
+
+Fix: re-copy the key from SigNoz Ingestion Settings. Make sure that `OTEL_EXPORTER_OTLP_HEADERS` holds no quotes and no spaces around the `=`.
+
+Verify: `curl -s -o /dev/null -w '%{http_code}' -H "signoz-ingestion-key: <your-ingestion-key>" https://ingest.<region>.signoz.cloud/v1/traces` returns `405`, not `401`.
+
+### Spans arrive under service.name unknown_service
+
+Symptom: traces appear, under a service named `unknown_service` or `unknown_service:python`.
+
+Likely cause: `OTEL_SERVICE_NAME` was not set in the environment that started the process.
+
+Fix: export it before you run, as in Step 2, or pass `Resource.create({"service.name": "<your-service-name>"})`.
+
+Verify: the service list shows your name instead.
+
+### The sandbox cannot reach SigNoz
+
+Symptom: your orchestrator spans arrive, and nothing from inside the sandbox does.
+
+Likely cause: the sandbox was created with `allow_internet_access=False`, or with a `network` rule that denies outbound traffic.
+
+Fix: create the sandbox with internet access, which is the default, or add the ingestion host to the network allow rules. Existing sandboxes keep the rules they were created with, so create a new one after the change.
+
+Verify: from inside the sandbox, `curl -s -o /dev/null -w '%{http_code}' https://ingest.<region>.signoz.cloud` returns an HTTP status. `000` means the connection is still blocked.
+
+### Sandbox spans root their own trace
+
+Symptom: the in-sandbox spans arrive, and they do not appear under the session span.
+
+Likely cause: you injected the carrier outside the session span, or `TRACEPARENT` never reached the command.
+
+Fix: inject the carrier inside the `with traced_sandbox(...)` block, and pass it in the `envs` of the command that runs the script.
+
+Verify: `echo $TRACEPARENT` inside the sandbox prints a `00-` prefixed value.
+
+### get_metrics returns an empty list
+
+Symptom: the metric callback yields nothing for a sandbox that is running.
+
+Likely cause: the first sample is not collected yet.
+
+Fix: wait. E2B collects a sample every 5 seconds, and the first one takes a second or more after the sandbox starts.
+
+Verify: `e2b sandbox metrics <sandbox-id>` on the command line prints rows.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Limitations
+</ToggleHeading>
+
+- **The spans the SDK emits describe HTTP calls, not sandboxes.** `pyqwest` names each span after the HTTP method and records no sandbox id, template id, or exit code. The sandbox id appears only inside `url.full`.
+- **Do not install `opentelemetry-instrumentation-httpx`.** The SDK sends its calls through `pyqwest` and `connectrpc` rather than `httpx`, so that package adds nothing. `pyqwest` already covers the transport.
+- **`pyqwest` spans root their own traces.** With no active span in your process, every SDK call starts a separate trace. The session span in Step 3 is what groups them.
+- **Sandbox output is not exported.** `execution.logs.stdout` and the output of `commands.run` stay in your process unless you send them yourself. Route them through the OpenTelemetry logs SDK, as [Trace the Code Inside a Sandbox](#trace-the-code-inside-a-sandbox) does.
+- **Resource metrics lose their original timestamps.** `get_metrics()` returns a 5 second history, and the OpenTelemetry metrics API stamps each value with the collection time. Only the newest sample is faithful.
+- **`commands.run` raises instead of returning a failed result.** A non-zero exit code produces `CommandExitException`, which subclasses both `SandboxException` and `CommandResult`. Catch it to read `exit_code`, `stdout`, and `stderr`.
+- **Lifecycle events expire after 7 days.** Poll inside that window. Events older than the retention period are gone from the API.
+- **Direct export needs an Enterprise plan.** Everything else on this page works on the free Hobby plan, which allows 20 concurrent sandboxes and a 1 hour session.
+
+</details>
+
+## Next Steps
+
+- [Set a trace-based alert](https://signoz.io/docs/alerts-management/trace-based-alerts/) on `e2b commands.run` spans with a non-zero `e2b.command.exit_code`, so a failing agent command pages you.
+- [Build a dashboard](https://signoz.io/docs/userguide/manage-dashboards/) over `e2b.sandbox.memory.used` against `e2b.sandbox.memory.total` to find sandboxes that run out of memory.
+- [Add a log-based alert](https://signoz.io/docs/alerts-management/log-based-alerts/) on `sandbox.lifecycle.killed` events to catch sandboxes that die before their work finishes.
+- [Explore the traces](https://signoz.io/docs/userguide/traces/) to find which execution is slowest across sandboxes.
+- Instrument the model calls that generate the code, so agent steps and LLM spans land in one trace.
+
+## Related integrations
+
+E2B runs these agents and frameworks inside its sandboxes. Instrument them so the work inside a sandbox and the model calls that drove it land in one trace:
+
+- [Monitor Claude Code with OpenTelemetry](https://signoz.io/docs/claude-code-monitoring/) - track session token usage, cost per task, and API performance
+- [Monitor OpenAI Codex with OpenTelemetry](https://signoz.io/docs/codex-monitoring/) - track Codex CLI sessions, token spend, and command-level traces
+- [Monitor Agno agents with OpenTelemetry](https://signoz.io/docs/agno-monitoring/) - trace agent runs, tool calls, and model requests
+- [CrewAI observability with OpenTelemetry](https://signoz.io/docs/crewai-observability/) - trace crews, tasks, and the tools each agent calls
+- [Mastra observability with OpenTelemetry](https://signoz.io/docs/mastra-observability/) - trace workflows, steps, and agent tool use
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.
+
+## Get Help
+
+<GetHelp />
