@@ -62,11 +62,13 @@ const normalizeSectionId = (config: ListicleConfig, sectionId?: string | null): 
 export const getListicleConfig = async (name: string): Promise<ListicleConfig | null> => {
   try {
     const { getListicleConfigFromCms } = await import('@/utils/listicles')
-    return await getListicleConfigFromCms(name)
+    const config = await getListicleConfigFromCms(name)
+    if (config) return config
+    console.warn(`CMS returned no listicle for "${name}", using local fallback`)
   } catch (err) {
     console.warn(`CMS listicle fetch failed for "${name}", using local fallback:`, err)
-    return listicleConfigs[name] || null
   }
+  return listicleConfigs[name] || null
 }
 
 export const getListicleSectionItems = (
