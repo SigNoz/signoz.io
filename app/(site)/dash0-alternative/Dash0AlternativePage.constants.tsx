@@ -54,7 +54,7 @@ export const DASH0_HERO_BUTTONS: ButtonGroupButton[] = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
-      clickName: 'Dash0 Alternative Hero Get Started',
+      clickName: 'Sign Up Button',
       clickLocation: 'Dash0 Alternative Hero',
       clickText: 'Get Started - Free',
     },
@@ -725,7 +725,7 @@ export const DASH0_VERDICT_BUTTONS: ButtonGroupButton[] = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
-      clickName: 'Dash0 Alternative Verdict Signup',
+      clickName: 'Sign Up Button',
       clickLocation: 'Dash0 Alternative Verdict',
       clickText: 'Sign up for 30-day free trial',
     },
@@ -748,7 +748,7 @@ export const DASH0_FINAL_CTA_BUTTONS: ButtonGroupButton[] = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
-      clickName: 'Dash0 Alternative Bottom Banner Start Trial',
+      clickName: 'Sign Up Button',
       clickLocation: 'Dash0 Alternative Bottom Banner',
       clickText: 'Start free trial',
     },
@@ -760,7 +760,7 @@ export const DASH0_FINAL_CTA_BUTTONS: ButtonGroupButton[] = [
     className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
-      clickName: 'Dash0 Alternative Bottom Banner Migration Support',
+      clickName: 'Contact Us Button',
       clickLocation: 'Dash0 Alternative Bottom Banner',
       clickText: 'Request migration support',
     },

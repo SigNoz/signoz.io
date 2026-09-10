@@ -9,6 +9,7 @@ import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLay
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
 import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 import ComparisonTable from '@/shared/components/molecules/FeaturePages/ComparisonTable'
+import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
 import {
   DASH0_COMPARISON_BLOCKS,
   DASH0_COMPARISON_HEADING,
@@ -24,7 +25,6 @@ import {
   DASH0_VERDICT_BUTTONS,
   Dash0ComparisonBlock,
 } from './Dash0AlternativePage.constants'
-import UsageBasedPricing from 'shared/components/molecules/FeaturePages/UsageBasedPricing'
 
 const CONTENT_CONTAINER = 'w-full px-6 md:px-8'
 const SECTION_CONTAINER = `${CONTENT_CONTAINER} py-10 md:py-14`
