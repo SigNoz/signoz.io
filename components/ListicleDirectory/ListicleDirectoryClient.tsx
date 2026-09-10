@@ -61,6 +61,7 @@ export default function ListicleDirectoryClient({
     setActiveSection(id)
     setQuery('')
     window.history.replaceState(null, '', `#${id}`)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const normalizedQuery = query.trim().toLowerCase()
