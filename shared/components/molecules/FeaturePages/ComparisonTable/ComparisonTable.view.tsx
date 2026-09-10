@@ -46,13 +46,13 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
         )}
       >
         <tbody className="text-sm text-[var(--l1-foreground)]">
-          <tr className={cn(!striped && 'relative')}>
+          <tr className={cn(striped ? 'border-0 bg-transparent' : 'relative')}>
             <td
               className={cn(
-                'sticky left-[-1px] border-b border-r border-[var(--l2-border)] px-6 py-4 text-left font-semibold text-[var(--l2-foreground)]',
+                'sticky left-[-1px] border-r border-[var(--l2-border)] px-6 py-4 text-left font-semibold text-[var(--l2-foreground)]',
                 striped
-                  ? cn('w-[34%] align-top', STRIPED_FEATURE_CELL_BG)
-                  : 'bg-[var(--l3-background)]'
+                  ? cn('w-[34%] border-y-0 border-l-0 align-top', STRIPED_FEATURE_CELL_BG)
+                  : 'border-b bg-[var(--l3-background)]'
               )}
             >
               {featureColumnLabel}
@@ -61,9 +61,9 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
               <th
                 key={vendor.key}
                 className={cn(
-                  'border-b border-[var(--l2-border)] px-4 py-4 text-left font-semibold text-[var(--l2-foreground)]',
-                  striped && 'align-top',
-                  striped && index < vendors.length - 1 && 'border-r',
+                  'border-[var(--l2-border)] px-4 py-4 text-left font-semibold text-[var(--l2-foreground)]',
+                  striped ? 'border-y-0 border-l-0 bg-transparent align-top' : 'border-b',
+                  striped && (index < vendors.length - 1 ? 'border-r' : 'border-r-0'),
                   vendor.className
                 )}
               >
@@ -76,7 +76,7 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
               key={index}
               className={cn(
                 striped
-                  ? 'even:bg-[color-mix(in_srgb,var(--l3-background)_30%,transparent)]'
+                  ? 'border-0 bg-transparent even:bg-[color-mix(in_srgb,var(--l3-background)_30%,transparent)]'
                   : 'transition-colors hover:bg-[var(--l1-background-hover)]'
               )}
             >
@@ -84,7 +84,10 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
                 className={cn(
                   'sticky left-[-1px] border-r border-[var(--l2-border)] px-6 py-4 text-sm',
                   striped
-                    ? cn('align-top text-[var(--l1-foreground)]', STRIPED_FEATURE_CELL_BG)
+                    ? cn(
+                        'border-y-0 border-l-0 align-top text-[var(--l1-foreground)]',
+                        STRIPED_FEATURE_CELL_BG
+                      )
                     : 'border-b bg-[var(--l3-background)] text-signoz_robin-400'
                 )}
               >
@@ -99,7 +102,10 @@ const ComparisonTable: React.FC<ComparisonTableProps<string>> = ({
                     className={cn(
                       'border-[var(--l2-border)] px-4 py-4 text-left',
                       striped
-                        ? cn('align-top', vendorIndex < vendors.length - 1 && 'border-r')
+                        ? cn(
+                            'border-y-0 border-l-0 align-top',
+                            vendorIndex < vendors.length - 1 ? 'border-r' : 'border-r-0'
+                          )
                         : 'border-b'
                     )}
                   >
