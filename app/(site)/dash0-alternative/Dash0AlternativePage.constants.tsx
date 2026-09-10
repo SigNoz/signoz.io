@@ -109,17 +109,17 @@ export const DASH0_REASONS: { title: string; body: React.ReactNode }[] = [
 export const DASH0_QUOTES: { quote: string; company: string }[] = [
   {
     quote:
-      '"The platform provides us the pipelines where you can write those logics again and gives you that flexibility of making those changes here and there."',
+      'The platform provides us the pipelines where you can write those logics again and gives you that flexibility of making those changes here and there.',
     company: 'HyperVerge',
   },
   {
     quote:
-      '"Dash0 queries everything through PromQL over generated metrics, so log-attribute computation and pivoting between telemetry types are hard or impossible"',
+      'Dash0 queries everything through PromQL over generated metrics, so log-attribute computation and pivoting between telemetry types are hard or impossible',
     company: 'IG Group',
   },
   {
     quote:
-      '"The reason we are looking into SigNoz is that we have 80-plus microservices and we have multi-tenant architecture."',
+      'The reason we are looking into SigNoz is that we have 80-plus microservices and we have multi-tenant architecture.',
     company: 'Bluecode',
   },
 ]
