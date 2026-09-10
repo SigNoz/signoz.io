@@ -1,0 +1,59 @@
+---
+date: 2026-08-13
+title: Upgrade SigNoz to v0.138.0 with v1 Infra APIs Removed
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
+description: Upgrade self-hosted SigNoz to v0.138.0. All v1 infrastructure monitoring API endpoints are removed; move any direct API callers to the v2 paths first.
+doc_type: howto
+---
+
+SigNoz v0.138.0 permanently removes the v1 infrastructure monitoring API endpoints. The product UI is unaffected: it already runs entirely on the `/api/v2/infra_monitoring/*` paths, so infrastructure monitoring in SigNoz keeps working exactly as before. This change only affects code that calls the v1 endpoints directly.
+
+<Admonition type="warning" title="The v1 infra monitoring endpoints stop responding in v0.138.0">
+All v1 infra monitoring list, attribute-key, and attribute-value endpoints (`/api/v1/hosts`, `/api/v1/pods`, `/api/v1/nodes`, `/api/v1/namespaces`, `/api/v1/clusters`, `/api/v1/deployments`, `/api/v1/daemonsets`, `/api/v1/statefulsets`, `/api/v1/jobs`, `/api/v1/pvcs`, `/api/v1/processes`, and `/api/v1/infra_onboarding/k8s/status`) are removed and return an error after this upgrade. There is no deprecation window. If you call these endpoints from scripts or integrations, [migrate them to the v2 endpoints](#migrate-api-callers-to-the-v2-infra-monitoring-apis) before you upgrade.
+</Admonition>
+
+## Who needs to act
+
+| If you | Then |
+| --- | --- |
+| Use infrastructure monitoring only through the UI | Nothing: the UI already uses the v2 APIs |
+| Call `/api/v1/hosts`, `/api/v1/pods`, or any other v1 infra endpoint from scripts or integrations | [Move them to the v2 endpoints](#migrate-api-callers-to-the-v2-infra-monitoring-apis) **before upgrading** |
+| Call `/api/v1/processes/list` | No v2 replacement exists. See [Removed with no replacement](#removed-with-no-replacement) |
+
+## Upgrade self-hosted SigNoz
+
+The upgrade itself is a standard version bump with no data migration. Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/) to move to v0.138.0, then confirm the version under **Settings**.
+
+## Migrate API callers to the v2 infra monitoring APIs
+
+Each v1 entity exposed three sub-routes (`/list`, `/attribute_keys`, `/attribute_values`). The v2 API replaces the `/list` route with a single `POST` endpoint per entity under `/api/v2/infra_monitoring/`. The per-entity `attribute_keys` and `attribute_values` routes are superseded by the generic fields and autocomplete APIs, which the infra pages already use.
+
+| v1 endpoint (removed) | v2 endpoint |
+| --- | --- |
+| `POST /api/v1/hosts/list` | `POST /api/v2/infra_monitoring/hosts` |
+| `POST /api/v1/pods/list` | `POST /api/v2/infra_monitoring/pods` |
+| `POST /api/v1/nodes/list` | `POST /api/v2/infra_monitoring/nodes` |
+| `POST /api/v1/namespaces/list` | `POST /api/v2/infra_monitoring/namespaces` |
+| `POST /api/v1/clusters/list` | `POST /api/v2/infra_monitoring/clusters` |
+| `POST /api/v1/deployments/list` | `POST /api/v2/infra_monitoring/deployments` |
+| `POST /api/v1/daemonsets/list` | `POST /api/v2/infra_monitoring/daemonsets` |
+| `POST /api/v1/statefulsets/list` | `POST /api/v2/infra_monitoring/statefulsets` |
+| `POST /api/v1/jobs/list` | `POST /api/v2/infra_monitoring/jobs` |
+| `POST /api/v1/pvcs/list` | `POST /api/v2/infra_monitoring/pvcs` |
+| `GET /api/v1/infra_onboarding/k8s/status` | `GET /api/v2/infra_monitoring/checks` |
+
+The v2 request and response payloads differ from v1. See the **Infrastructure Monitoring** section of the <a href="https://signoz.io/api-reference/" target="_blank" rel="noopener noreferrer nofollow">API reference</a> for the exact request schema, filters, and response fields of each endpoint.
+
+## Removed with no replacement
+
+`/api/v1/processes/list` is removed and has no v2 equivalent. It was never surfaced in the SigNoz UI and was only reachable through direct API calls, so there is no migration path. If you depend on process data, query it through the [Query Builder](https://signoz.io/docs/userguide/query-builder-v5/) or metrics explorer instead.
+
+The Kubernetes onboarding status check (`GET /api/v1/infra_onboarding/k8s/status`) is replaced by the v2 checks endpoint (`GET /api/v2/infra_monitoring/checks`), which reports whether the metrics and attributes required by each infra monitoring section are being received.
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- [GitHub Issues](https://github.com/SigNoz/signoz/issues)
+- [Community Slack](https://signoz.io/slack/)
+</content>
+</invoke>
