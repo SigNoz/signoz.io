@@ -209,6 +209,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
                 <FooterPillLink href="/product-comparison/signoz-vs-dynatrace/">
                   SigNoz Cloud vs Dynatrace
                 </FooterPillLink>
+                <FooterPillLink href="/dash0-alternative/">SigNoz Cloud vs Dash0</FooterPillLink>
                 <FooterPillLink href="https://signoz.io/careers/" newTab>
                   Careers
                   <ArrowUpRight size={16} />
