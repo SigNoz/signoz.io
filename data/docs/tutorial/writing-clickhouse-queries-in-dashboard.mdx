@@ -1,11 +1,15 @@
 ---
-date: 2026-06-27
+date: 2026-08-07
 title: ClickHouse queries for building dashboards and alerts
 description: Example clickhouse queries to run analytics on observability data
 doc_type: reference
 ---
 
 SigNoz gives you the ability to write powerful ClickHouse queries to plot charts. You can run SQL queries supported by ClickHouse to extract immense value out of your distributed tracing data or logs data. 
+
+<Admonition type="info">
+SigNoz validates custom ClickHouse queries and blocks functions that read data outside your observability tables, such as `dict*` accessors and `file()`. See <a href="https://signoz.io/docs/operate/clickhouse/clickhouse-queries/#query-validation-and-restrictions" target="_blank" rel="noopener noreferrer nofollow">Query Validation and Restrictions</a> for the full list.
+</Admonition>
 
 <Admonition type="info">
 The distributed tables in ClickHouse have been named by prefixing `distributed_` to existing single shard table names. If you want to use ClickHouse queries in dashboard or alerts, you should use the distributed table names. Eg, `signoz_index_v3` now corresponds to the table of a single shard. To query all the shards, query against `distributed_signoz_index_v3`. 
