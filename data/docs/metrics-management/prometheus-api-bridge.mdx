@@ -1,6 +1,6 @@
 ---
-date: 2026-08-30
-title: SigNoz as a Prometheus Data Source for Kubernetes Tools
+date: 2026-09-10
+title: Use SigNoz as a Prometheus Data Source for Kubernetes
 description: Use self-hosted SigNoz as a Prometheus data source for Grafana, KEDA, Headlamp, Ray, OpenCost, Argo Rollouts, HPA, and VPA without running Prometheus.
 doc_type: howto
 tags: [Self-Host]
@@ -33,14 +33,30 @@ KEDA, the Kubernetes autoscalers, and the other tools this guide covers all spea
 ## Prerequisites
 
 1. A [self-hosted SigNoz](https://signoz.io/docs/install/self-host/) installation reachable from the Kubernetes cluster where the bridge will run.
-2. A read-only [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) API key for SigNoz.
+2. A [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) API key for SigNoz with the `SigNoz-Viewer` role, which grants read-only access.
 3. Helm 3.8 or newer, required for OCI chart support.
+
+Tested with <a href="https://github.com/simonepri/prometheus-api-bridge/releases/tag/v0.2.0" target="_blank" rel="noopener noreferrer nofollow">Prometheus API Bridge v0.2.0</a> and <a href="https://github.com/SigNoz/signoz/releases/tag/v0.141.1" target="_blank" rel="noopener noreferrer nofollow">SigNoz v0.141.1</a>.
 
 ## Install the Bridge
 
 ### Step 1: Create the Namespace and Secrets
 
-The chart never creates Secrets, and the pods stay in `CreateContainerConfigError` until both exist. This guide uses the `observability` namespace throughout.
+The bridge reads two credentials from Kubernetes Secrets. The chart never creates them, and the pods stay in `CreateContainerConfigError` until both exist. This guide uses the `observability` namespace throughout.
+
+Set both values in your shell first. The bridge rejects an empty Secret at startup, so a variable that is not set here produces a crash loop later instead of an authentication error.
+
+```sh
+export SIGNOZ_API_KEY="<your-signoz-api-key>"
+export BRIDGE_BEARER_TOKEN="$(openssl rand -hex 32)"
+```
+
+**Verify these values:**
+
+- `<your-signoz-api-key>`: The service account API key from the prerequisites.
+- `BRIDGE_BEARER_TOKEN`: A new random token that Prometheus clients send to the bridge. It is unrelated to your SigNoz key.
+
+Now create the namespace and the two Secrets:
 
 ```sh
 kubectl create namespace observability
@@ -84,15 +100,31 @@ The chart requires a bearer token by default and only allows a `ClusterIP` Servi
 
 ## Validate
 
-Port-forward the Service and ask the bridge which labels SigNoz knows about:
+Forward the Service port to your machine. This command holds the terminal open, so leave it running:
 
 ```sh
 kubectl -n observability port-forward service/prometheus-api-bridge 9090:9090
-curl -fsSG http://localhost:9090/api/v1/labels \
+```
+
+In a second terminal, ask the bridge which labels SigNoz reports for one metric that you already collect:
+
+```sh
+curl -sSG --fail-with-body http://localhost:9090/api/v1/labels \
+  --data-urlencode 'match[]={__name__="<metric-name>"}' \
   --header "Authorization: Bearer $BRIDGE_BEARER_TOKEN"
 ```
 
-A list of label names means the token was accepted and SigNoz answered. An empty `data` array means the bridge is reachable but SigNoz returned nothing, so check that metrics are arriving before wiring up any tools.
+**Verify these values:**
+
+- `<metric-name>`: Any metric that is already in SigNoz, for example `k8s.pod.memory.usage`. Find one under **Metrics** in the SigNoz UI.
+
+SigNoz metric names contain dots, and PromQL does not accept a dot in a bare metric selector. Always wrap the name as `{__name__="..."}`. A bare `k8s.pod.memory.usage` fails with `backend query failed`.
+
+A list of label names means the bridge accepted the token and SigNoz answered. An empty `data` array means the bridge is reachable but SigNoz holds no data for that metric, so make sure that metrics are arriving before you connect any tools.
+
+<Admonition type="warning" title="Always scope a discovery request with match[]">
+Without `match[]`, the bridge expands the request to every metric over the last hour at a 15-second step. That is 241 samples for each series, so the request crosses the chart default `maxSamples` limit of 100000 at about 415 active series. It then fails with a limit error even when your credentials and your ingestion are healthy. A shorter time range does not help, because the step scales with the range.
+</Admonition>
 
 <Admonition type="warning">
 `/-/ready` returns 200 as soon as the process is up. It does not test your SigNoz URL or API key, so do not treat it as proof the bridge is working.
@@ -109,10 +141,18 @@ http://prometheus-api-bridge.observability.svc:9090
 Give each tool that URL wherever it expects a Prometheus server, like KEDA's `serverAddress` or the Prometheus Adapter's `prometheus.url`. A few tools need more than a URL. The project's <a href="https://github.com/simonepri/prometheus-api-bridge#verified-integrations" target="_blank" rel="noopener noreferrer nofollow">verified integrations table</a> is the up-to-date list of tested tools, and each entry links the exact Helm values and manifests it is tested with.
 
 <Admonition type="warning" title="Several of these tools cannot send a bearer token">
-None of the project's end-to-end fixtures use one. They run the bridge with `server.auth.allowUnauthenticated=true` and an empty `server.auth.bearerTokenSecret.name`, restricted by a NetworkPolicy. Clearing the token name is required, because the chart refuses to start unauthenticated while a token name is still set. It does not add the NetworkPolicy for you.
+The project's end-to-end fixtures run the bridge without one. They set `server.auth.allowUnauthenticated=true` and clear `server.auth.bearerTokenSecret.name`.
+
+You must do both. The flag alone only lifts the chart check that otherwise requires a token name. The chart still injects the token whenever a name is set, so a name that stays in place keeps the bridge returning 401 to a tool that cannot send the header.
+
+On a real cluster, the project recommends that you restrict the bridge with `networkPolicy.ingress` or an equivalent network control. The chart does not add one for you, because `networkPolicy.enabled` defaults to `false`.
 </Admonition>
 
-The bridge only returns metrics that are already in SigNoz. If a tool asks for metrics you do not collect yet, the chart's <a href="https://github.com/simonepri/prometheus-api-bridge/blob/main/src/chart/values.yaml" target="_blank" rel="noopener noreferrer nofollow">collection settings</a> can extend your existing Collector or install a dedicated one.
+The bridge returns metrics under the names that SigNoz stores, and those names depend on how you collect them. OpenTelemetry receivers store dotted names such as `k8s.pod.memory.usage`. A Prometheus scrape stores underscore names such as `up`.
+
+Prometheus-only tools ask for the canonical Prometheus names, such as `container_cpu_usage_seconds_total`, `kube_pod_status_phase`, and `node_cpu_seconds_total`. An OpenTelemetry-native pipeline does not produce those names. The tool then gets an empty result while the bridge and your ingestion are both healthy.
+
+To add the Prometheus-named copies, turn on the chart's <a href="https://github.com/simonepri/prometheus-api-bridge/blob/main/src/chart/values.yaml" target="_blank" rel="noopener noreferrer nofollow">collection settings</a>. They scrape cAdvisor, the kubelet, and kube-state-metrics, then send the result to SigNoz. Set `collection.mode` to `existing` to extend a Collector that you already run, or to `standalone` to install a dedicated one.
 
 ## Next Steps
 
