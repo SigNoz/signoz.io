@@ -1,0 +1,100 @@
+.noz-input-wrap {
+  position: relative;
+}
+
+.noz-input-peek {
+  position: absolute;
+  right: 18px;
+  top: -34px;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  opacity: 0;
+  transform: translateY(30px);
+  pointer-events: none;
+}
+
+.noz-input-peek svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.noz-input-peek.is-live {
+  animation: nozInputPeek 700ms cubic-bezier(0.34, 1.45, 0.5, 1) 350ms forwards;
+}
+
+.noz-input-peek__head {
+  transform-origin: 12px 16px;
+}
+
+.noz-input-peek.is-live .noz-input-peek__head {
+  animation: nozInputBob 500ms ease-in-out 1300ms 2;
+}
+
+.noz-input-peek__pupil {
+  transition: transform 130ms ease-out;
+}
+
+.noz-input-peek__hands {
+  position: absolute;
+  right: 22px;
+  top: -4px;
+  z-index: 3;
+  display: block;
+  width: 32px;
+  height: 7px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.noz-input-wrap.is-live .noz-input-peek__hands {
+  animation: nozInputHands 700ms cubic-bezier(0.22, 1, 0.36, 1) 700ms forwards;
+}
+
+@keyframes nozInputPeek {
+  from {
+    opacity: 1;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nozInputBob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-1px) rotate(-6deg);
+  }
+}
+
+@keyframes nozInputHands {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noz-input-peek.is-live,
+  .noz-input-peek.is-live .noz-input-peek__head,
+  .noz-input-wrap.is-live .noz-input-peek__hands {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

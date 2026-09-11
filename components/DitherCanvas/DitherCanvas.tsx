@@ -1,15 +1,38 @@
 'use client'
 
-import { useRef, useEffect, type ReactNode } from 'react'
+import { useRef, useEffect, useSyncExternalStore, type ReactNode } from 'react'
 import { cn } from '../../app/lib/utils'
 import { themeRgb } from '@/utils/cssColor'
+
+type DitherFade = 'none' | 'left' | 'bottom'
 
 interface DitherCanvasProps {
   children?: ReactNode
   className?: string
+  /** Fade the dither out toward an edge. Supersedes `fadeToLeft`. */
+  fade?: DitherFade
+  /** @deprecated use `fade="left"` */
   fadeToLeft?: boolean
   enableClick?: boolean
+  /** Skip the WebGL work below the `md` breakpoint (DOM stays identical). */
+  desktopOnly?: boolean
   id?: string
+}
+
+const DESKTOP_MEDIA_QUERY = '(min-width: 768px)'
+
+function subscribeToDesktopViewport(onStoreChange: () => void) {
+  const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY)
+  mediaQuery.addEventListener('change', onStoreChange)
+  return () => mediaQuery.removeEventListener('change', onStoreChange)
+}
+
+function getDesktopViewportSnapshot() {
+  return window.matchMedia(DESKTOP_MEDIA_QUERY).matches
+}
+
+function getServerViewportSnapshot() {
+  return false
 }
 
 const VERT = `#version 300 es
@@ -98,7 +121,11 @@ void main() {
   float bayer = Bayer8(fc / PX) - 0.5;
   float bw = step(0.5, feed + bayer);
 
-  if (uFade > 0.5) {
+  // uFade: 0 = none, 1 = fade out toward the left edge, 2 = toward the bottom edge
+  if (uFade > 1.5) {
+    float ny = gl_FragCoord.y / uRes.y;
+    bw *= smoothstep(0.0, 0.35, ny);
+  } else if (uFade > 0.5) {
     float nx = gl_FragCoord.x / uRes.x;
     bw *= smoothstep(0.0, 0.55, nx);
   }
@@ -155,15 +182,25 @@ const MAX_CLICKS = 10
 export default function DitherCanvas({
   children,
   className,
+  fade,
   fadeToLeft = false,
   enableClick = true,
+  desktopOnly = false,
   id,
 }: DitherCanvasProps) {
+  const fadeMode: DitherFade = fade ?? (fadeToLeft ? 'left' : 'none')
   const rootRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const clickRef = useRef<((clientX: number, clientY: number) => void) | null>(null)
+  const isDesktop = useSyncExternalStore(
+    subscribeToDesktopViewport,
+    getDesktopViewportSnapshot,
+    getServerViewportSnapshot
+  )
+  const glEnabled = !desktopOnly || isDesktop
 
   useEffect(() => {
+    if (!glEnabled) return
     const root = rootRef.current
     const canvas = canvasRef.current
     if (!root || !canvas) return
@@ -198,7 +235,7 @@ export default function DitherCanvas({
       )
     }
 
-    gl.uniform1f(uFade, fadeToLeft ? 1.0 : 0.0)
+    gl.uniform1f(uFade, fadeMode === 'bottom' ? 2.0 : fadeMode === 'left' ? 1.0 : 0.0)
     for (let i = 0; i < MAX_CLICKS; i++) {
       gl.uniform2f(uClickPosLocs[i], -1, -1)
       gl.uniform1f(uClickTLocs[i], 0)
@@ -239,9 +276,11 @@ export default function DitherCanvas({
       attributeFilter: ['class', 'data-theme'],
     })
 
-    let rafId: number
+    let rafId = 0
+    let running = false
     const start = performance.now()
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let io: IntersectionObserver | undefined
 
     if (prefersReducedMotion) {
       gl.uniform1f(uTime, 0)
@@ -253,11 +292,36 @@ export default function DitherCanvas({
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
         rafId = requestAnimationFrame(render)
       }
+      const startLoop = () => {
+        if (running) return
+        running = true
+        rafId = requestAnimationFrame(render)
+      }
+      const stopLoop = () => {
+        running = false
+        cancelAnimationFrame(rafId)
+      }
+
       render()
+      cancelAnimationFrame(rafId)
+
+      if ('IntersectionObserver' in window) {
+        io = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting) startLoop()
+            else stopLoop()
+          },
+          { rootMargin: '120px' }
+        )
+        io.observe(root)
+      } else {
+        startLoop()
+      }
     }
 
     return () => {
-      if (!prefersReducedMotion) cancelAnimationFrame(rafId)
+      cancelAnimationFrame(rafId)
+      io?.disconnect()
       ro.disconnect()
       themeObserver.disconnect()
       clickRef.current = null
@@ -266,7 +330,7 @@ export default function DitherCanvas({
       gl.deleteShader(fs)
       gl.deleteBuffer(buf)
     }
-  }, [fadeToLeft])
+  }, [fadeMode, glEnabled])
 
   const handlePointerDown = enableClick
     ? (e: React.PointerEvent) => clickRef.current?.(e.clientX, e.clientY)
@@ -284,12 +348,20 @@ export default function DitherCanvas({
         className="pointer-events-none absolute inset-0 z-0"
         style={{ width: '100%', height: '100%' }}
       />
-      {fadeToLeft && (
+      {fadeMode === 'left' && (
         <div
           className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-[45%]"
           style={{
             background:
               'linear-gradient(to right, var(--l1-background) 0%, var(--l1-background) 10%, transparent 100%)',
+          }}
+        />
+      )}
+      {fadeMode === 'bottom' && (
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[35%]"
+          style={{
+            background: 'linear-gradient(to top, var(--l1-background) 0%, transparent 100%)',
           }}
         />
       )}
