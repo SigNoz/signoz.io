@@ -69,12 +69,13 @@ export function HomepageHeroRedesign() {
                     <Button
                       as="span"
                       tactile
+                      size="lg"
                       variant="default"
-                      className="!flex w-full justify-center sm:min-w-[184px]"
+                      className="!flex w-full justify-center sm:min-w-[196px]"
                       id="btn-get-started-homepage-hero"
                     >
                       {primaryCTA}
-                      <ArrowRight size={14} aria-hidden="true" />
+                      <ArrowRight size={16} aria-hidden="true" />
                     </Button>
                   </TrackingLink>
                   <TrackingLink
@@ -89,11 +90,12 @@ export function HomepageHeroRedesign() {
                     <Button
                       as="span"
                       tactile
+                      size="lg"
                       variant="secondary"
-                      className="!flex w-full justify-center sm:w-40"
+                      className="!flex w-full justify-center sm:w-44"
                     >
                       Book a demo
-                      <ArrowRight size={14} aria-hidden="true" />
+                      <ArrowRight size={16} aria-hidden="true" />
                     </Button>
                   </TrackingLink>
                 </div>

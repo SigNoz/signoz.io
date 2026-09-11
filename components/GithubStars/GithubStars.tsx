@@ -57,7 +57,7 @@ const GitHubStars: React.FC<GitHubStarsProps> = ({ location = 'Top Navbar' }) =>
       clickName="GitHub Repository"
       clickText={stars === null ? 'GitHub Icon' : `${formatted} Stars`}
       clickLocation={location}
-      className="github-stars-chip inline-flex h-8 items-center gap-2 rounded-md bg-[var(--l3-background)] pl-2.5 pr-2.5 transition-colors hover:bg-[var(--l3-background-hover)]"
+      className="github-stars-chip inline-flex h-8 items-center gap-2 rounded-[3px] bg-transparent pl-2.5 pr-2.5 transition-colors hover:bg-[var(--l3-background-hover)]"
     >
       <span className="icon-morph">
         <span className="icon-old">

@@ -25,11 +25,15 @@ export default function CustomerStoriesCard() {
             clickName="See All Customers Button"
             clickText={CUSTOMER_STORIES_CTA.buttonLabel}
             clickLocation="Hero Customer Stories"
-            className="btn-tactile btn-tactile--secondary no-underline"
+            className="voice__cta-link no-underline"
+            aria-label={CUSTOMER_STORIES_CTA.buttonLabel}
           >
-            {CUSTOMER_STORIES_CTA.buttonLabel}
-            <ArrowRight size={12} aria-hidden="true" />
+            <span className="sr-only">{CUSTOMER_STORIES_CTA.buttonLabel}</span>
           </TrackingLink>
+          <span className="btn-tactile btn-tactile--secondary voice__cta-button" aria-hidden="true">
+            {CUSTOMER_STORIES_CTA.buttonLabel}
+            <ArrowRight size={12} />
+          </span>
         </aside>
       </div>
     </section>

@@ -69,6 +69,137 @@
   }
 }
 
+.why-world .why-b-otel {
+  opacity: var(--b-otel, 1);
+  transform: translateY(calc((1 - var(--b-otel, 1)) * 22px));
+}
+
+.why-world .why-b-link1 {
+  opacity: var(--b-link1, 1);
+}
+
+.why-world .why-b-tab {
+  opacity: var(--b-tab, 1);
+}
+
+.why-world .why-b-store {
+  opacity: var(--b-store, 1);
+  transform: translateY(calc((1 - var(--b-store, 1)) * 26px));
+}
+
+.why-world .why-b-rows {
+  opacity: var(--b-rows, 1);
+}
+
+.why-world .why-b-search {
+  opacity: var(--b-search, 1);
+}
+
+.why-world .why-b-type {
+  clip-path: inset(-2px calc((1 - var(--b-type, 1)) * 100%) -2px 0);
+}
+
+.why-world .why-b-cond {
+  opacity: var(--b-cond, 1);
+}
+
+.why-world .why-b-agent {
+  opacity: var(--b-agent, 1);
+  transform: translateY(calc((1 - var(--b-agent, 1)) * 26px));
+}
+
+.why-wires {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.why-wire {
+  --t: 1;
+  position: absolute;
+  left: 50%;
+  width: 1px;
+  margin-left: -0.5px;
+}
+
+.why-wire::before,
+.why-wire::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.why-wire::before {
+  background: color-mix(in srgb, var(--l1-foreground) 30%, transparent);
+  transform: scaleY(var(--t));
+  transform-origin: top;
+}
+
+.why-wire::after {
+  background: repeating-linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--l1-foreground) 62%, transparent) 0 4px,
+    transparent 4px 9px
+  );
+  opacity: clamp(0, calc(var(--t) * 3 - 1.4), 1);
+  animation: whyWireFlow 1.9s linear infinite;
+}
+
+.why-wire--glow::before {
+  background: color-mix(in srgb, var(--bg-robin-400) 45%, transparent);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--bg-robin-400) 35%, transparent);
+}
+
+.why-wire--glow::after {
+  background: repeating-linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--bg-robin-300) 80%, transparent) 0 4px,
+    transparent 4px 9px
+  );
+}
+
+@keyframes whyWireFlow {
+  to {
+    background-position-y: -54px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .why-wire::after {
+    animation: none;
+  }
+}
+
+.why-world .why-pulse-ring {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.why-world.pulse-on .why-pulse-ring {
+  opacity: 1;
+  animation: whyPulseRing 2s ease-in-out infinite;
+}
+
+@keyframes whyPulseRing {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.why-world:not(.s-glow) .why-store-hit {
+  background: transparent !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .why-world.pulse-on .why-pulse-ring {
+    animation: none;
+  }
+}
+
 .noz-traveler {
   --rider-close: 0px;
   position: absolute;

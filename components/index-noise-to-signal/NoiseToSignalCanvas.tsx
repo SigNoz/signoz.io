@@ -1,7 +1,6 @@
 'use client'
 
-import { Pause, Play } from 'lucide-react'
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useSyncExternalStore } from 'react'
 import { themeRgb } from '@/utils/cssColor'
 import styles from './NoiseToSignal.module.css'
 
@@ -42,11 +41,11 @@ const TRACES: Trace[] = [
   { speed: 0.018, amp: 30, offset: 100, token: '--bg-cherry-500' },
   { speed: 0.009, amp: 50, offset: 200, token: '--bg-amber-500' },
   { speed: 0.024, amp: 20, offset: 50, token: '--bg-cherry-500' },
-  { speed: 0.015, amp: 35, offset: 150, token: '--bg-forest-500' },
+  { speed: 0.015, amp: 35, offset: 150, token: '--bg-robin-500' },
 ]
 
 const PILL_MESSAGES: { text: string; token: ThemeToken }[] = [
-  { text: 'All systems stable', token: '--bg-forest-500' },
+  { text: 'All systems stable', token: '--bg-robin-500' },
   { text: 'Threshold recovered', token: '--bg-robin-500' },
   { text: 'Anomaly detected', token: '--bg-amber-500' },
   { text: 'Mayday', token: '--bg-cherry-500' },
@@ -77,18 +76,11 @@ export default function NoiseToSignalCanvas() {
   const overlayRef = useRef<HTMLDivElement>(null)
   const pausedRef = useRef(false)
   const syncRunRef = useRef<(() => void) | null>(null)
-  const [paused, setPaused] = useState(false)
   const prefersReducedMotion = useSyncExternalStore(
     subscribeToReducedMotion,
     getReducedMotionSnapshot,
     getServerReducedMotionSnapshot
   )
-
-  useEffect(() => {
-    pausedRef.current = paused
-    overlayRef.current?.classList.toggle(styles.overlayPaused, paused)
-    syncRunRef.current?.()
-  }, [paused])
 
   useEffect(() => {
     if (!stageRef.current || !canvasRef.current || !overlayRef.current) return
@@ -130,7 +122,7 @@ export default function NoiseToSignalCanvas() {
       if (w === 0 || h === 0) return
       width = w
       height = h
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const dpr = window.devicePixelRatio || 1
       canvas.width = Math.round(w * dpr)
       canvas.height = Math.round(h * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
@@ -272,8 +264,8 @@ export default function NoiseToSignalCanvas() {
 
       ctx.beginPath()
       ctx.setLineDash([4, 5])
-      ctx.strokeStyle = rgba(foreground, 0.12)
-      ctx.lineWidth = 1
+      ctx.strokeStyle = rgba(foreground, 0.2)
+      ctx.lineWidth = 2
       ctx.moveTo(cx, 0)
       ctx.lineTo(cx, height)
       ctx.stroke()
@@ -444,34 +436,14 @@ export default function NoiseToSignalCanvas() {
   }, [prefersReducedMotion])
 
   return (
-    <div className="grid aspect-[16/9] max-h-[70vh] w-full grid-rows-[2rem_minmax(0,1fr)_2.5rem]">
-      <div className="border-b border-[var(--l2-border)]" aria-hidden data-markdown-ignore />
-      <div
-        ref={stageRef}
-        className="relative min-h-0 overflow-hidden"
-        aria-hidden
-        data-markdown-ignore
-      >
-        <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
-        <div ref={overlayRef} className={styles.overlay} />
-      </div>
-      <div className="flex items-center justify-end border-t border-[var(--l2-border)] px-3">
-        {!prefersReducedMotion && (
-          <button
-            type="button"
-            onClick={() => setPaused((prev) => !prev)}
-            aria-pressed={paused}
-            aria-label="Pause animation"
-            className="inline-flex h-7 w-7 items-center justify-center rounded text-[var(--l3-foreground)] transition-colors hover:text-[var(--l1-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary-background)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--l1-background)]"
-          >
-            {paused ? (
-              <Play className="h-3.5 w-3.5" aria-hidden />
-            ) : (
-              <Pause className="h-3.5 w-3.5" aria-hidden />
-            )}
-          </button>
-        )}
-      </div>
+    <div
+      ref={stageRef}
+      className="relative h-[420px] w-full overflow-hidden xl:h-[460px]"
+      aria-hidden
+      data-markdown-ignore
+    >
+      <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
+      <div ref={overlayRef} className={styles.overlay} />
     </div>
   )
 }

@@ -26,7 +26,7 @@ export default function FeatureCard({ feature }: { feature: BentoFeature }) {
     <div
       ref={cardRef}
       onMouseMove={handleMouseMove}
-      className={`group relative flex min-h-[340px] flex-col overflow-hidden rounded-md border border-[var(--l2-border)] bg-[var(--l2-background)] transition-[border-color] duration-200 focus-within:z-20 hover:z-20 hover:border-[color-mix(in_srgb,var(--l1-foreground)_16%,transparent)] ${feature.layout}`}
+      className={`group relative flex min-h-[340px] flex-col overflow-hidden rounded-md border border-[var(--l2-border)] bg-[var(--l1-background)] transition-[border-color] duration-200 focus-within:z-20 hover:z-20 hover:border-[color-mix(in_srgb,var(--l1-foreground)_16%,transparent)] ${feature.layout}`}
     >
       <div
         aria-hidden="true"
@@ -48,26 +48,16 @@ export default function FeatureCard({ feature }: { feature: BentoFeature }) {
         </h3>
       </div>
 
-      <div className="relative z-[1] mt-auto min-h-[120px] flex-1 overflow-hidden border-t border-[var(--l2-border)]">
+      <div className="relative z-[1] mt-auto min-h-[120px] flex-1 overflow-hidden">
         {asset ? (
-          <>
-            <Image
-              src={asset.src}
-              alt={asset.alt}
-              fill
-              className={
-                asset.fit === 'contain' ? 'object-contain object-top' : 'object-cover object-top'
-              }
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 z-[2]"
-              style={{
-                background: 'linear-gradient(to bottom, transparent 25%, var(--l2-background) 96%)',
-              }}
-            />
-          </>
+          <Image
+            src={asset.src}
+            alt={asset.alt}
+            fill
+            className={asset.fit === 'contain' ? 'object-contain' : 'object-cover'}
+            style={{ objectPosition: asset.objectPosition ?? 'top' }}
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
         ) : (
           <FeatureVisual visual={feature.visual} />
         )}

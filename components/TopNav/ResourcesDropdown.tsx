@@ -53,7 +53,7 @@ function ResourceSection({
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-y-4 p-6">
       <div className={SECTION_HEADING_CLASS}>{title}</div>
-      <div className="grid grid-cols-1 gap-x-3 gap-y-5">
+      <div className="grid grid-cols-1 gap-x-3 gap-y-4">
         {items.map((item) => (
           <TrackingLink
             href={item.url}
@@ -68,7 +68,7 @@ function ResourceSection({
           >
             <div>
               <div className="flex flex-row items-center gap-1">
-                <span>{item.name}</span>{' '}
+                <span className="text-sm">{item.name}</span>{' '}
                 <ArrowRight size={14} className="opacity-0 group-hover:opacity-100" />
               </div>
               <div className="line-clamp-2 max-w-[274px] text-xs text-[var(--l2-foreground)] group-hover:text-[var(--l1-foreground-hover)]">

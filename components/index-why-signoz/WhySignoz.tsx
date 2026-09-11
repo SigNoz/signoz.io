@@ -10,9 +10,31 @@ import { WHY_SIGNOZ_STAGES, WHY_SIGNOZ_STEPS } from './whySignozStages'
 import './why-signoz.css'
 
 const STEPS = WHY_SIGNOZ_STEPS.length
-const PARK = 0.55
+const PARK = 0.8
 
 const smoothstep = (t: number) => t * t * (3 - 2 * t)
+
+const BEATS: Record<string, [number, number]> = {
+  otel: [1.04, 1.3],
+  link1: [1.34, 1.76],
+  tab: [1.52, 1.78],
+  link2: [1.92, 2.1],
+  store: [2.02, 2.3],
+  rows: [2.1, 2.38],
+  search: [2.26, 2.44],
+  type: [2.58, 2.82],
+  cond: [2.84, 2.95],
+  link3: [3.06, 3.46],
+  agent: [3.18, 3.58],
+}
+
+const TOGGLES: { cls: string; on: (g: number) => boolean }[] = [
+  { cls: 'pulse-on', on: (g) => g > 1.42 && g < 2.62 },
+  { cls: 's-pill', on: (g) => g > 2.46 },
+  { cls: 's-glow', on: (g) => g > 2.52 },
+  { cls: 's-cond', on: (g) => g > 2.88 },
+  { cls: 'agent-peek', on: (g) => g > 3.18 },
+]
 
 export default function WhySignoz() {
   const [activeIndex, setActiveIndex] = useState(0)
@@ -21,6 +43,7 @@ export default function WhySignoz() {
   const worldRef = useRef<HTMLDivElement | null>(null)
   const viewportRef = useRef<HTMLDivElement | null>(null)
   const travelerRef = useRef<HTMLDivElement | null>(null)
+  const wiresRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Array<HTMLDivElement | null>>([])
   const activeRef = useRef(0)
 
@@ -72,9 +95,30 @@ export default function WhySignoz() {
 
     const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1)
 
+    const lastVar: Record<string, string> = {}
+    const lastCls: Record<string, boolean> = {}
+    const setVars = (g: number) => {
+      for (const key in BEATS) {
+        const [from, to] = BEATS[key]
+        const value = clamp01((g - from) / (to - from)).toFixed(3)
+        if (lastVar[key] !== value) {
+          lastVar[key] = value
+          world.style.setProperty(`--b-${key}`, value)
+        }
+      }
+      for (const toggle of TOGGLES) {
+        const on = toggle.on(g)
+        if (lastCls[toggle.cls] !== on) {
+          lastCls[toggle.cls] = on
+          world.classList.toggle(toggle.cls, on)
+        }
+      }
+    }
+
     const apply = (g: number) => {
       const cameraY = worldY(g)
       world.style.transform = `translate3d(0, ${(-cameraY).toFixed(1)}px, 0)`
+      setVars(g)
 
       const traveler = travelerRef.current
       if (traveler) {
@@ -123,7 +167,26 @@ export default function WhySignoz() {
     const measure = () => {
       stageHeight = viewport.clientHeight || 700
       driver.style.setProperty('--stage-h', `${stageHeight}px`)
+      layoutWires()
       apply(gCurrent)
+    }
+
+    const layoutWires = () => {
+      const wires = wiresRef.current
+      if (!wires) return
+      const anchors = Array.from(world.querySelectorAll<HTMLElement>('[data-why-anchor]'))
+      const segments = Array.from(wires.children) as HTMLElement[]
+      if (anchors.length < 2) return
+      const worldRect = world.getBoundingClientRect()
+      segments.forEach((segment, index) => {
+        const from = anchors[index]
+        const to = anchors[index + 1]
+        if (!from || !to) return
+        const top = from.getBoundingClientRect().bottom - worldRect.top - 2
+        const bottom = to.getBoundingClientRect().top - worldRect.top + 2
+        segment.style.top = `${top.toFixed(1)}px`
+        segment.style.height = `${Math.max(bottom - top, 0).toFixed(1)}px`
+      })
     }
 
     const engage = () => {
@@ -307,9 +370,24 @@ export default function WhySignoz() {
                   <div className="pointer-events-none absolute inset-0 opacity-60 [background-image:radial-gradient(circle,var(--l2-border)_1px,transparent_1px)] [background-size:22px_22px]" />
 
                   <div
-                    className="absolute inset-x-0 top-0 will-change-transform [backface-visibility:hidden]"
+                    className="why-world absolute inset-x-0 top-0 will-change-transform [backface-visibility:hidden]"
                     ref={worldRef}
                   >
+                    <div aria-hidden="true" className="why-wires" ref={wiresRef}>
+                      <div
+                        className="why-wire"
+                        style={{ '--t': 'var(--b-link1, 1)' } as React.CSSProperties}
+                      />
+                      <div
+                        className="why-wire"
+                        style={{ '--t': 'var(--b-link2, 1)' } as React.CSSProperties}
+                      />
+                      <div
+                        className="why-wire why-wire--glow"
+                        style={{ '--t': 'var(--b-link3, 1)' } as React.CSSProperties}
+                      />
+                    </div>
+
                     {WHY_SIGNOZ_STAGES.map((stage, index) => (
                       <div
                         className="flex h-[var(--stage-h,700px)] flex-col justify-start p-6 pt-8"

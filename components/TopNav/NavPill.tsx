@@ -4,7 +4,7 @@ import TrackingLink from '@/components/TrackingLink'
 import { cn } from 'app/lib/utils'
 
 export const NAV_PILL_CLASS =
-  'flex items-center truncate rounded-md px-2.5 py-1 text-sm font-normal outline-none transition-colors hover:bg-[var(--l3-background)] hover:text-[var(--l1-foreground)]'
+  'flex items-center truncate rounded-[4px] px-2.5 py-1 text-sm font-normal outline-none transition-colors hover:bg-[var(--l3-background)] hover:text-[var(--l1-foreground)]'
 
 interface NavPillLinkProps {
   href: string

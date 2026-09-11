@@ -12,12 +12,17 @@ export interface FeatureBentoAsset {
   src: StaticImageData | string
   alt: string
   fit?: 'cover' | 'contain'
+  objectPosition?: string
 }
 
 // Asset slots for the bento cards; `null` falls back to the animated visual.
 export const featureBentoAssets: Record<string, FeatureBentoAsset | null> = {
   'APM.': { src: apmStage, alt: 'SigNoz APM service dashboards with latency and error charts' },
-  'Logs.': { src: logsStage, alt: 'SigNoz log stream with highlighted request logs' },
+  'Logs.': {
+    src: logsStage,
+    alt: 'SigNoz log stream with highlighted request logs',
+    objectPosition: 'left top',
+  },
   'Tracing.': { src: tracingStage, alt: 'SigNoz trace tree with span durations' },
   'Alerts.': {
     src: alertsStage,
@@ -25,7 +30,12 @@ export const featureBentoAssets: Record<string, FeatureBentoAsset | null> = {
     fit: 'contain',
   },
   'LLM Observability.': { src: llmStage, alt: 'Supported LLM provider logos', fit: 'contain' },
-  'Infra Monitoring.': { src: infraStage, alt: 'CPU and memory usage charts' },
+  'Infra Monitoring.': {
+    src: infraStage,
+    alt: 'CPU and memory usage charts',
+    fit: 'contain',
+    objectPosition: 'left top',
+  },
   'Dashboards.': {
     src: dashboardsStage,
     alt: 'SigNoz dashboard panels for latency and pod metrics',

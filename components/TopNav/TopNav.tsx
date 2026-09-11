@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 
-import { isHubShellRoute } from '@/utils/opentelemetryHub'
 import SigNozLogo from '@/public/img/SigNozLogo-orange.svg'
 import SearchButtonDeferred from '../SearchButtonDeferred'
 import GitHubStars from '../GithubStars/GithubStars'
@@ -33,7 +32,6 @@ export default function TopNav() {
 
   const docsSidebar = useMobileDocsSidebar()
   const isDocsBasePath = pathname.startsWith('/docs')
-  const isShellLayoutPath = isDocsBasePath || isHubShellRoute(pathname)
   const visibility = useNavVisibility()
 
   useEffect(() => {
@@ -85,19 +83,13 @@ export default function TopNav() {
         )}
       >
         <nav
-          className={cn(
-            'mx-auto flex w-full justify-between text-[var(--l1-foreground)]',
-            !isShellLayoutPath && 'max-w-8xl'
-          )}
+          className="mx-auto flex w-full justify-between text-[var(--l1-foreground)]"
           aria-label="Global"
         >
           <div className="flex items-center justify-start">
             <TrackingLink
               href="/"
-              className={cn(
-                '-m-1.5 flex items-center p-1.5',
-                isShellLayoutPath ? 'gap-1.5' : 'gap-2'
-              )}
+              className="-m-1.5 flex items-center gap-2 p-1.5"
               clickType="Nav Click"
               clickName="SigNoz Logo"
               clickText="SigNoz"
@@ -116,12 +108,7 @@ export default function TopNav() {
             </TrackingLink>
             {!isLoginRoute && (
               <NavDropdownProvider>
-                <div
-                  className={cn(
-                    'hidden items-center gap-x-3 min-[840px]:flex',
-                    isShellLayoutPath ? 'ml-7' : visibility.showProduct ? 'ml-6' : ''
-                  )}
-                >
+                <div className="ml-6 hidden items-center gap-x-3 min-[840px]:flex">
                   {visibility.showProduct && <ProductDropdown />}
                   {visibility.showUseCases && <UseCasesDropdown />}
                   {visibility.showDocs && (
@@ -173,7 +160,12 @@ export default function TopNav() {
             {!isLoginRoute && (
               <>
                 <SearchButtonDeferred />
-                {visibility.showGithubStars && <GitHubStars location="Top Navbar" />}
+                {visibility.showGithubStars && (
+                  <>
+                    <span aria-hidden="true" className="h-4 w-px shrink-0 bg-[var(--l2-border)]" />
+                    <GitHubStars location="Top Navbar" />
+                  </>
+                )}
                 {visibility.showSignInGetStarted && <NavCtaButtons location="Top Navbar" />}
               </>
             )}

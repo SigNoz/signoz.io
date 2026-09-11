@@ -1,9 +1,9 @@
 import { ArrowRight } from 'lucide-react'
-import type { ReactNode } from 'react'
 
 import TrackingLink from '@/components/TrackingLink'
 import { HOMEPAGE_INTEGRATION_ICONS } from '@/constants/homepageIntegrationIcons'
 import AgentTerminal from './AgentTerminal'
+import AnimatedDotGrid from './AnimatedDotGrid'
 import NozChatPanel from './NozChatPanel'
 
 const agentIntegrations = [
@@ -13,42 +13,6 @@ const agentIntegrations = [
   { label: 'OpenCode', iconSrc: HOMEPAGE_INTEGRATION_ICONS.opencode },
 ]
 
-const DOT_GRID = { cols: 16, rows: 2, spacing: 7, highlighted: 5 }
-
-function FrozenDotGrid() {
-  const { cols, rows, spacing, highlighted } = DOT_GRID
-  const width = (cols - 1) * spacing + 6
-  const height = (rows - 1) * spacing + 8
-  const dots: ReactNode[] = []
-
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      dots.push(
-        <circle
-          key={`${row}-${col}`}
-          cx={3 + col * spacing}
-          cy={4 + row * spacing}
-          r={1.6}
-          fill={col < highlighted ? 'var(--bg-robin-500)' : 'var(--l3-background-hover)'}
-        />
-      )
-    }
-  }
-
-  return (
-    <svg
-      aria-hidden="true"
-      data-markdown-ignore
-      className="shrink-0"
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-    >
-      {dots}
-    </svg>
-  )
-}
-
 function AgentIntegrationIcons() {
   return (
     <div className="flex items-center gap-1.5">
@@ -56,12 +20,12 @@ function AgentIntegrationIcons() {
         <span
           key={agent.label}
           aria-label={agent.label}
-          className="group relative flex size-5 items-center justify-center transition-transform duration-200 hover:z-10 hover:-translate-y-1 hover:scale-125 sm:size-6"
+          className="flex size-6 items-center justify-center rounded-[4px] border border-[var(--l2-border)] bg-[var(--l2-background)] sm:size-7"
           role="img"
           title={agent.label}
         >
           <span
-            className="size-full rounded-sm bg-contain bg-center bg-no-repeat drop-shadow-[0_8px_18px_rgba(0,0,0,0.45)]"
+            className="size-4 bg-contain bg-center bg-no-repeat sm:size-[18px]"
             style={{ backgroundImage: `url("${agent.iconSrc}")` }}
           />
         </span>
@@ -112,7 +76,7 @@ export default function AgentNativeObservabilitySection() {
         </div>
 
         <div className="mt-14 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mt-20 lg:pr-[440px]">
-          <FrozenDotGrid />
+          <AnimatedDotGrid />
           <span className="text-sm text-[var(--l2-foreground)] sm:text-base">
             Work with your agents
           </span>
@@ -120,9 +84,9 @@ export default function AgentNativeObservabilitySection() {
           <span className="text-sm text-[var(--l3-foreground)] sm:text-base">and more…</span>
         </div>
 
-        <div aria-hidden="true" data-markdown-ignore className="relative mt-6 lg:pb-12">
+        <div aria-hidden="true" data-markdown-ignore className="relative mt-6 lg:pb-16">
           <AgentTerminal className="h-[440px] w-full md:h-[560px] lg:h-[600px] lg:w-[74%]" />
-          <NozChatPanel className="mx-auto mt-6 h-[540px] w-full max-w-[420px] lg:absolute lg:-top-14 lg:right-0 lg:z-10 lg:mx-0 lg:mt-0 lg:h-[660px] lg:w-[388px] xl:w-[430px]" />
+          <NozChatPanel className="mx-auto mt-6 h-[540px] w-full max-w-[420px] lg:absolute lg:-top-14 lg:right-0 lg:z-10 lg:mx-0 lg:mt-0 lg:h-[700px] lg:w-[388px] xl:w-[430px]" />
         </div>
       </div>
     </section>

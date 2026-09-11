@@ -30,14 +30,14 @@ export default function HalfBadge({
       <ShimmerBadge tone={tone} shape="right-soft">
         {badge}
       </ShimmerBadge>
-      <span className="inline-flex h-[22px] items-center gap-1.5 rounded-[20px_999px_999px_20px] bg-[var(--l3-background)] py-0 pl-3 pr-3.5 text-xs font-medium text-[var(--l2-foreground)]">
+      <span className="inline-flex h-[22px] items-center gap-1.5 rounded-[0_999px_999px_0] bg-[var(--l3-background)] py-0 pl-3 pr-3.5 text-xs font-medium text-[var(--l2-foreground)]">
         {children}
         {href ? <ArrowRight size={12} aria-hidden="true" /> : null}
       </span>
     </>
   )
 
-  const containerClass = cn('inline-flex items-center gap-1', className)
+  const containerClass = cn('inline-flex items-stretch gap-0', className)
 
   if (href) {
     return (

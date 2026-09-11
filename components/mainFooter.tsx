@@ -228,7 +228,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
             <div className={colClass}>
               <div
                 className={cn(
-                  'flex flex-col items-end',
+                  'flex h-full flex-col items-end',
                   stackEarly ? 'max-lg:mt-10 max-lg:items-start' : 'max-md:mt-10 max-md:items-start'
                 )}
               >
@@ -250,9 +250,6 @@ function Footer({ inDocsShell = false }: FooterProps) {
                     />
                     <div className="font-satoshi-bold font-medium">SigNoz</div>
                   </Link>
-                </div>
-                <div className={cn('mt-5 flex justify-end', stackStartClass)}>
-                  <FooterStatus />
                 </div>
                 <div
                   className={cn(
@@ -329,6 +326,9 @@ function Footer({ inDocsShell = false }: FooterProps) {
                     loading="lazy"
                     onClick={() => window.open('https://trust.signoz.io/', '_blank')}
                   />
+                </div>
+                <div className={cn('mt-auto flex justify-end pt-10', stackStartClass)}>
+                  <FooterStatus />
                 </div>
               </div>
             </div>

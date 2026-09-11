@@ -47,7 +47,7 @@ function FeatureQuoteCard({ quote }: { quote: FeatureQuote }) {
       style={{ background: tone.card }}
     >
       <blockquote
-        className="m-0 max-w-xl text-2xl font-medium leading-snug tracking-tight sm:text-3xl"
+        className="m-0 max-w-xl border-none p-0 text-2xl font-medium leading-snug tracking-tight sm:text-3xl"
         style={{ color: tone.ink }}
       >
         {quote.quote}
@@ -70,13 +70,7 @@ function FeatureQuoteCard({ quote }: { quote: FeatureQuote }) {
             {quote.role.charAt(0)}
           </span>
         )}
-        <span
-          className="border-l pl-3"
-          style={{
-            borderColor: 'color-mix(in srgb, currentColor 25%, transparent)',
-            color: tone.ink,
-          }}
-        >
+        <span style={{ color: tone.ink }}>
           <span className="block text-sm font-semibold">{quote.name}</span>
           <span className="block text-xs" style={{ color: tone.sub }}>
             {quote.role}
@@ -91,7 +85,7 @@ export default function CustomersAndBlog() {
   return (
     <section
       id="customers"
-      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-20 lg:py-20 wide:max-w-8xl wide:px-0"
+      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 px-5 pb-10 pt-14 sm:px-6 sm:pb-12 sm:pt-16 lg:px-20 lg:pb-14 lg:pt-20 wide:max-w-8xl wide:px-0"
     >
       <div className="mx-auto max-w-8xl">
         <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
@@ -127,7 +121,7 @@ export default function CustomersAndBlog() {
           {HOMEPAGE_BLOG_CARDS.map((card, index) => (
             <TrackingLink
               key={`${card.title}-${index}`}
-              className="md:vrule-solid group flex flex-col no-underline md:px-8 md:pb-6 md:first:pl-0 md:first:before:hidden md:last:pr-0"
+              className="md:vrule-solid group flex flex-col no-underline md:px-8 md:first:pl-0 md:first:before:hidden md:last:pr-0"
               clickLocation="Homepage Blog Cards"
               clickName="Homepage Blog Card"
               clickText={card.title}
@@ -152,7 +146,7 @@ export default function CustomersAndBlog() {
                   </span>
                 )}
               </span>
-              <span className="mt-5 block text-lg font-medium leading-7 text-[var(--l1-foreground)] transition-colors group-hover:text-[var(--bg-robin-300)]">
+              <span className="mt-5 block flex-1 text-lg font-medium leading-7 text-[var(--l1-foreground)] transition-colors group-hover:text-[var(--bg-robin-300)]">
                 {card.title}
               </span>
               <span className="btn-tactile btn-tactile--secondary mt-4 w-fit">
@@ -163,7 +157,7 @@ export default function CustomersAndBlog() {
           ))}
         </div>
 
-        <div className="mt-12">
+        <div className="mt-8">
           <TextureDivider />
         </div>
       </div>

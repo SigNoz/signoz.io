@@ -193,6 +193,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ? cn(
             'btn-tactile disabled:cursor-not-allowed disabled:opacity-50',
             mappedVariant === 'default' ? 'btn-tactile--primary' : 'btn-tactile--secondary',
+            size === 'lg' && 'btn-tactile--lg',
             className
           )
         : hasLegacyButtonVariant

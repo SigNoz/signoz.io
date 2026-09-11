@@ -407,7 +407,7 @@ function CorrelatedSignalsStage() {
 
   return (
     <div className="flex h-full w-full flex-col justify-start">
-      <div className="mx-auto w-full max-w-[430px]">
+      <div className="mx-auto w-full max-w-[430px]" data-why-anchor>
         <div className="overflow-hidden rounded-md border border-[var(--l2-border)] bg-[var(--l1-background)]">
           <StageCardHeader meta="p99 · 30m" tag={svc.tag} tagAccent={svc.accent} title={service} />
 
@@ -605,10 +605,11 @@ function OtelPipelineStage() {
 
   return (
     <div className="flex h-full w-full flex-col justify-start">
-      <svg className="mx-auto block w-full max-w-[430px]" viewBox="0 0 430 316">
+      <svg className="mx-auto block w-full max-w-[430px]" data-why-anchor viewBox="0 0 430 316">
         {sources.map((source) => (
           <g key={source.x}>
             <path
+              className="why-b-link1"
               d={
                 source.x === 215
                   ? 'M215 96 V174'
@@ -626,45 +627,49 @@ function OtelPipelineStage() {
           </g>
         ))}
 
-        <g className="animate-pulse motion-reduce:animate-none">
-          <path
-            d={diamond(215, 238, 74, 37)}
-            fill="none"
-            stroke="var(--l3-border)"
-            strokeWidth="1"
-          />
-          <path
-            d={diamond(215, 238, 98, 49)}
-            fill="none"
-            stroke="var(--l3-border)"
-            strokeDasharray="4 5"
-            strokeWidth="1"
-          />
+        <g className="why-b-otel">
+          <g className="why-pulse-ring">
+            <path
+              d={diamond(215, 238, 74, 37)}
+              fill="none"
+              stroke="var(--l3-border)"
+              strokeWidth="1"
+            />
+            <path
+              d={diamond(215, 238, 98, 49)}
+              fill="none"
+              stroke="var(--l3-border)"
+              strokeDasharray="4 5"
+              strokeWidth="1"
+            />
+          </g>
+
+          <IsoCube accent={ACCENT.neutral} cx={215} cy={200} h={22} s={38} w={44} />
+
+          <g className="why-b-tab">
+            <line stroke="var(--l3-border)" x1={261} x2={292} y1={219} y2={219} />
+            <rect
+              fill="var(--l2-background)"
+              height={22}
+              rx={3}
+              stroke="var(--l2-border)"
+              width={110}
+              x={292}
+              y={208}
+            />
+            <circle cx={303} cy={219} fill={ACCENT.neutral} r={2.6} />
+            <text
+              className="font-mono"
+              fill="var(--l2-foreground)"
+              fontSize="10"
+              letterSpacing="0.06em"
+              x={311}
+              y={222.5}
+            >
+              opentelemetry
+            </text>
+          </g>
         </g>
-
-        <IsoCube accent={ACCENT.neutral} cx={215} cy={200} h={22} s={38} w={44} />
-
-        <line stroke="var(--l3-border)" x1={261} x2={292} y1={219} y2={219} />
-        <rect
-          fill="var(--l2-background)"
-          height={22}
-          rx={3}
-          stroke="var(--l2-border)"
-          width={110}
-          x={292}
-          y={208}
-        />
-        <circle cx={303} cy={219} fill={ACCENT.neutral} r={2.6} />
-        <text
-          className="font-mono"
-          fill="var(--l2-foreground)"
-          fontSize="10"
-          letterSpacing="0.06em"
-          x={311}
-          y={222.5}
-        >
-          opentelemetry
-        </text>
       </svg>
     </div>
   )
@@ -709,7 +714,10 @@ function ColumnarStoreStage() {
 
   return (
     <div className="flex h-full w-full flex-col justify-start">
-      <div className="mx-auto w-full max-w-[430px] rounded-md border border-[var(--l2-border)] bg-[var(--l1-background)]">
+      <div
+        className="why-b-store mx-auto w-full max-w-[430px] rounded-md border border-[var(--l2-border)] bg-[var(--l1-background)]"
+        data-why-anchor
+      >
         <StageCardHeader
           meta="distributed"
           tag="columnar"
@@ -717,7 +725,7 @@ function ColumnarStoreStage() {
           title="signoz_signals"
         />
 
-        <div className="mx-3 mt-3 flex items-stretch overflow-hidden rounded border border-[var(--l3-border)] bg-[var(--l2-background)]">
+        <div className="why-b-search mx-3 mt-3 flex items-stretch overflow-hidden rounded border border-[var(--l3-border)] bg-[var(--l2-background)]">
           <button
             className="inline-flex cursor-pointer items-center gap-1.5 border-0 border-r border-solid border-r-[var(--l3-border)] bg-[var(--l3-background)] px-2.5 py-2 font-mono text-[10px] uppercase tracking-widest text-[var(--l2-foreground)] transition-colors duration-200 hover:text-[var(--l1-foreground)]"
             onClick={() =>
@@ -729,7 +737,7 @@ function ColumnarStoreStage() {
             <Database aria-hidden="true" size={12} />
             {pill}
           </button>
-          <span className="flex items-center gap-0 self-center whitespace-pre pl-2.5 font-mono text-[12px]">
+          <span className="why-b-type flex items-center gap-0 self-center whitespace-pre pl-2.5 font-mono text-[12px]">
             <span className="text-[var(--l2-foreground)]">service</span>
             <span className="text-[var(--bg-robin-400)]">.name</span>
             <span className="text-[var(--l2-foreground)]"> = </span>
@@ -737,7 +745,7 @@ function ColumnarStoreStage() {
           </span>
         </div>
 
-        <div className="mt-3 border-t border-[var(--l2-border)]">
+        <div className="why-b-rows mt-3 border-t border-[var(--l2-border)]">
           <div className="grid grid-cols-[76px_1fr_60px_64px] border-b border-[var(--l2-border)] font-mono text-[8.5px] uppercase tracking-wider text-[var(--l3-foreground)] opacity-70">
             {['timestamp', 'service.name', 'signal', 'value'].map((head) => (
               <span
@@ -753,7 +761,7 @@ function ColumnarStoreStage() {
             return (
               <div
                 className={`grid grid-cols-[76px_1fr_60px_64px] font-mono text-[10px] text-[var(--l3-foreground)] transition-colors duration-200 hover:bg-[var(--l2-background)] ${
-                  hit ? '' : 'opacity-70'
+                  hit ? 'why-store-hit' : 'opacity-70'
                 }`}
                 key={`${row[0]}-${index}`}
                 style={
@@ -881,7 +889,7 @@ function AgentTelemetryStage({ isActive }: WhySignozStageVisualProps) {
 
   return (
     <div className="flex h-full w-full flex-col justify-start">
-      <div className="relative mx-auto w-full max-w-[430px]">
+      <div className="why-b-agent relative mx-auto w-full max-w-[430px]" data-why-anchor>
         <NozPeek isActive={isActive} />
         <div className="relative overflow-hidden rounded-md border border-[var(--l2-border)] bg-[var(--l1-background)]">
           <StageCardHeader
