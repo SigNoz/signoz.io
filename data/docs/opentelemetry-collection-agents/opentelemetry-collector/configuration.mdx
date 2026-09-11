@@ -1,5 +1,5 @@
 ---
-date: 2026-08-25
+date: 2026-09-10
 title: OpenTelemetry Collector Configuration
 meta_title: OpenTelemetry Collector Configuration
 description: "Configure the OpenTelemetry Collector: receivers, processors, exporters, extensions, and service pipelines for collecting and exporting telemetry."
@@ -314,7 +314,8 @@ The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/b
 ```yaml
 processors:
   resourcedetection:
-    detectors: [env, host, system, docker, k8snode]
+    # Drop "docker" if this host does not run Docker. The detector then only logs warnings.
+    detectors: [env, system, docker]
 
 service:
   pipelines:
@@ -332,7 +333,7 @@ service:
       exporters: [otlp]
 ```
 
-This example automatically adds resource attributes from the environment, host system, Docker containers, and Kubernetes nodes to traces, logs, and metrics. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md#supported-detectors" target="_blank" rel="noopener noreferrer nofollow">complete list of supported detectors</a>.
+This example adds resource attributes from the environment, host system, and Docker containers to traces, logs, and metrics. On Kubernetes, add the `k8snode` detector, which needs the `K8S_NODE_NAME` environment variable and RBAC read access to nodes. On Collector v0.154.0 and newer, use `k8s_api` to avoid a deprecation warning. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md#supported-detectors" target="_blank" rel="noopener noreferrer nofollow">complete list of supported detectors</a>.
 
 The `timeout` defines how long the processor waits for detection to complete. See [Setting resource attributes for logs using the resource detection processor](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-detection-processor) for more details.
 
