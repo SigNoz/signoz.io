@@ -128,7 +128,7 @@ export default function CustomersAndBlog() {
               clickType="Blog Link"
               href={card.href}
             >
-              <span className="relative block aspect-[16/10] w-full overflow-hidden rounded-md border border-[var(--l2-border)] bg-[var(--l2-background)]">
+              <span className="relative block aspect-[16/10] w-full overflow-hidden rounded-md border border-[var(--l2-border)] bg-[var(--l2-background)] md:aspect-auto md:h-[220px]">
                 {card.imageSrc ? (
                   <Image
                     src={card.imageSrc}
