@@ -1,5 +1,5 @@
 ---
-date: 2026-06-27
+date: 2026-08-03
 title: ClickHouse queries for building dashboards and alerts
 description: Example clickhouse queries to run analytics on observability data
 doc_type: reference
@@ -122,6 +122,41 @@ Eg: If your `keyname` is `status` of `dataType` `string` and `type` `attribute`,
 
 <Admonition>
 In the above example, if `status` is an selected field, then it can be referenced as `attribute_string_status`
+</Admonition>
+
+### Fill chart gaps with a dense axis
+
+When a series is sparse, intervals with no matching rows drop out of the result and leave gaps in the chart. Generate a complete axis with a row-generator table function, then `LEFT JOIN` your sparse data onto it so every interval returns a row (falling back to `0` where there is no data).
+
+SigNoz accepts these ClickHouse row-generator table functions in dashboard and alert queries. They compute their rows from their arguments alone and read no data:
+
+- `numbers(N)` and `numbers_mt(N)`: a sequence of integers, `0` to `N-1`. `numbers_mt` uses multiple threads.
+- `zeros(N)` and `zeros_mt(N)`: `N` rows of a zero-valued `UInt8`, when you need a fixed-length row set and not the value.
+- `generateSeries(start, end[, step])` and `generate_series(start, end[, step])`: an arithmetic sequence of integers. `generate_series` is the PostgreSQL-compatible alias.
+
+The example below plots log count per minute over the last 30 minutes with no missing buckets. `numbers(30)` supplies one row per minute, and the per-minute counts join onto it:
+
+```sql
+WITH toStartOfInterval(now() - INTERVAL 30 MINUTE, INTERVAL 1 MINUTE) AS start_ts
+SELECT
+    start_ts + toIntervalMinute(n.number) AS interval,
+    toFloat64(coalesce(sparse.value, 0)) AS value
+FROM numbers(30) AS n
+LEFT JOIN
+(
+    SELECT
+        toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS interval,
+        count() AS value
+    FROM signoz_logs.distributed_logs_v2
+    WHERE timestamp > toUnixTimestamp64Nano(now64() - INTERVAL 30 MINUTE)
+    AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
+    GROUP BY interval
+) AS sparse ON sparse.interval = start_ts + toIntervalMinute(n.number)
+ORDER BY interval ASC;
+```
+
+<Admonition>
+Only the six row-generator table functions above are supported. Other table functions such as `url()`, `file()`, `remote()`, and `executable()` read external data and are not usable in ClickHouse SQL queries.
 </Admonition>
 
 
