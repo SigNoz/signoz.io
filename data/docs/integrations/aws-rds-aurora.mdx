@@ -1,0 +1,1214 @@
+---
+date: 2026-09-08
+title: Monitor Amazon Aurora Metrics and Logs with SigNoz
+description: Collect Amazon Aurora cluster metrics, instance metrics, PostgreSQL and MySQL engine metrics, and database logs with the OpenTelemetry Collector.
+doc_type: howto
+---
+
+## Overview
+
+Amazon Aurora runs a database cluster. One cluster contains a writer instance,
+zero or more reader instances, and one shared storage volume.
+This changes what you monitor and where the data comes from.
+
+This page sets up three sources of telemetry for one Aurora cluster:
+
+1. CloudWatch metrics for the cluster and for each instance.
+2. Engine metrics read directly from PostgreSQL or MySQL.
+3. Database logs from CloudWatch Logs.
+
+Aurora is not the same as Amazon RDS for the purpose of monitoring. Some Amazon
+RDS metrics do not exist on Aurora, and some Aurora metrics exist only at the
+cluster level. If you monitor Amazon RDS instead, use
+[AWS RDS PostgreSQL](https://signoz.io/docs/integrations/aws-rds-postgres/) or
+[AWS RDS MySQL](https://signoz.io/docs/integrations/aws-rds-mysql/).
+
+<Admonition type="tip">
+**SigNoz Cloud users**: The [One-Click AWS Integration](https://signoz.io/docs/integrations/aws/rds/) collects a fixed set of Amazon RDS instance metrics. The steps here add the Aurora cluster metrics and the engine metrics on top of that.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+Ensure you have:
+
+- An Aurora cluster running Aurora PostgreSQL or Aurora MySQL
+- An [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) that can reach the Aurora endpoints on port 5432 (PostgreSQL) or 3306 (MySQL)
+- AWS credentials with the `cloudwatch:ListMetrics`, `cloudwatch:GetMetricStatistics`, `cloudwatch:GetMetricData`, `logs:DescribeLogGroups`, and `logs:FilterLogEvents` permissions
+- A Java runtime (JRE 11 or newer) on the host that runs the CloudWatch Exporter. The exporter also ships as a <a href="https://github.com/prometheus/cloudwatch_exporter#docker-images" target="_blank" rel="noopener noreferrer nofollow">Docker image</a>, which needs no local Java install
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- The Amazon RDS certificate bundle on the Collector host, which the database receivers use to verify the server certificate. Aurora presents a certificate signed by an Amazon RDS CA, and those CAs are not in the system trust store:
+
+  ```bash
+  curl -sSL -o /etc/ssl/certs/rds-combined-ca-bundle.pem \
+    https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+  ```
+
+## Set Up Telemetry
+
+Work through the steps in order. Step 1 decides which endpoint the later steps
+point at. Steps 2, 3, and 4 are independent, so you can set up only the signals
+you want.
+
+### Step 1: Choose the endpoint to monitor
+
+Aurora gives you three kinds of endpoint. The one you pick decides what the
+engine metrics describe.
+
+| Endpoint | Points to | Behavior |
+|---|---|---|
+| Cluster endpoint | The current writer | Moves to the new writer after a failover |
+| Reader endpoint | Any reader | Sends each new connection to a different reader |
+| Instance endpoint | One named instance | Always the same instance |
+
+Use the **instance endpoints** for engine metrics, and add one receiver for each
+instance. The reader endpoint opens each connection on a different instance, so
+the metrics from one receiver describe different instances over time.
+
+The examples below assume one writer and one reader. Aurora allows up to 15
+readers, and a cluster can have none at all. Repeat the reader receiver and the
+`<reader-instance-id>` entry once per reader, or drop both when the cluster has
+no reader.
+
+Use the **cluster endpoint** only when you want the writer alone, and you accept
+that the target moves after a failover.
+
+To list the cluster and reader endpoints, run the following command:
+
+```bash
+aws rds describe-db-clusters --db-cluster-identifier <cluster-name> \
+  --query 'DBClusters[0].[Endpoint,ReaderEndpoint]' --output text
+```
+
+To list the instance endpoints, which the engine metrics in Step 3 use, run the
+following command:
+
+```bash
+aws rds describe-db-instances \
+  --query "DBInstances[?DBClusterIdentifier=='<cluster-name>'].[DBInstanceIdentifier,Endpoint.Address]" \
+  --output text
+```
+
+**Verify these values:**
+
+- `<cluster-name>`: The identifier of your Aurora DB cluster.
+
+### Step 2: Collect CloudWatch metrics
+
+CloudWatch publishes Aurora metrics under two different dimensions, and you need
+both. Instance metrics such as `CPUUtilization` use `DBInstanceIdentifier`.
+Volume and capacity metrics use `DBClusterIdentifier`, and they do not appear
+under `DBInstanceIdentifier` at all.
+
+#### Download the CloudWatch Exporter
+
+```bash
+curl -sLSO https://github.com/prometheus/cloudwatch_exporter/releases/download/v0.18.0/cloudwatch_exporter-0.18.0-jar-with-dependencies.jar
+```
+
+#### Create the exporter configuration
+
+The metric list is different for each engine. Select your engine below.
+
+<Tabs entityName="engine">
+<TabItem value="aurora-postgresql" label="Aurora PostgreSQL" default>
+
+Save the following as `aurora-postgres-metrics.yaml`:
+
+```yaml:aurora-postgres-metrics.yaml minimap defaultCollapsed
+---
+region: us-east-1
+# CloudWatch reports Aurora metrics about a minute behind. The exporter default
+# of delay_seconds: 600 would make every panel read 10 to 20 minutes stale.
+period_seconds: 60
+range_seconds: 600
+delay_seconds: 120
+# Stamp points at scrape time so the 5-minute Volume* series draw a continuous line.
+set_timestamp: false
+metrics:
+ # Instance-scoped metrics.
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ACUUtilization
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: AuroraReplicaLag
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: BufferCacheHitRatio
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: CPUUtilization
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: CommitLatency
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DatabaseConnections
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: Deadlocks
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DiskQueueDepth
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: EngineUptime
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: FreeableMemory
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: MaximumUsedTransactionIDs
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: NetworkReceiveThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: NetworkTransmitThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: OldestReplicationSlotLag
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadIOPS
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadLatency
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReplicationSlotDiskUsage
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: SwapUsage
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: TransactionLogsDiskUsage
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: WriteIOPS
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: WriteLatency
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: WriteThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ # Cluster-scoped metrics. These do not exist under DBInstanceIdentifier.
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ServerlessDatabaseCapacity
+   aws_dimensions: [DBClusterIdentifier]
+   aws_dimension_select:
+     DBClusterIdentifier: [<cluster-name>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: VolumeBytesUsed
+   aws_dimensions: [DBClusterIdentifier]
+   aws_dimension_select:
+     DBClusterIdentifier: [<cluster-name>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: VolumeReadIOPs
+   aws_dimensions: [DBClusterIdentifier]
+   aws_dimension_select:
+     DBClusterIdentifier: [<cluster-name>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: VolumeWriteIOPs
+   aws_dimensions: [DBClusterIdentifier]
+   aws_dimension_select:
+     DBClusterIdentifier: [<cluster-name>]
+   aws_statistics: [Average]
+
+ # Writer and reader totals, separated by the Role dimension.
+ - aws_namespace: AWS/RDS
+   aws_metric_name: CommitThroughput
+   aws_dimensions: [DBClusterIdentifier, Role]
+   aws_dimension_select:
+     DBClusterIdentifier: [<cluster-name>]
+   aws_statistics: [Average]
+```
+
+</TabItem>
+<TabItem value="aurora-mysql" label="Aurora MySQL">
+
+Save the following as `aurora-mysql-metrics.yaml`:
+
+```yaml:aurora-mysql-metrics.yaml minimap defaultCollapsed
+---
+region: us-east-1
+# CloudWatch reports Aurora metrics about a minute behind. The exporter default
+# of delay_seconds: 600 would make every panel read 10 to 20 minutes stale.
+period_seconds: 60
+range_seconds: 600
+delay_seconds: 120
+# Stamp points at scrape time so the 5-minute Volume* series draw a continuous line.
+set_timestamp: false
+metrics:
+ # Instance-scoped metrics.
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ACUUtilization
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ActiveTransactions
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: AuroraBinlogReplicaLag
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: AuroraReplicaLag
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: BlockedTransactions
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: BufferCacheHitRatio
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: CPUUtilization
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: CommitLatency
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DDLLatency
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DMLLatency
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DMLThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DatabaseConnections
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: Deadlocks
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DiskQueueDepth
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: EngineUptime
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: FreeableMemory
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: InsertLatency
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: LoginFailures
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: NetworkReceiveThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: NetworkTransmitThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: Queries
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadIOPS
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadLatency
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: RollbackSegmentHistoryListLength
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: SelectLatency
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: SelectThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: SumBinaryLogSize
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: SwapUsage
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: WriteIOPS
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: WriteLatency
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: WriteThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_dimension_select:
+     DBInstanceIdentifier: [<writer-instance-id>, <reader-instance-id>]
+   aws_statistics: [Average]
+
+ # Cluster-scoped metrics. These do not exist under DBInstanceIdentifier.
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ServerlessDatabaseCapacity
+   aws_dimensions: [DBClusterIdentifier]
+   aws_dimension_select:
+     DBClusterIdentifier: [<cluster-name>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: VolumeBytesUsed
+   aws_dimensions: [DBClusterIdentifier]
+   aws_dimension_select:
+     DBClusterIdentifier: [<cluster-name>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: VolumeReadIOPs
+   aws_dimensions: [DBClusterIdentifier]
+   aws_dimension_select:
+     DBClusterIdentifier: [<cluster-name>]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: VolumeWriteIOPs
+   aws_dimensions: [DBClusterIdentifier]
+   aws_dimension_select:
+     DBClusterIdentifier: [<cluster-name>]
+   aws_statistics: [Average]
+
+ # Writer and reader totals, separated by the Role dimension.
+ - aws_namespace: AWS/RDS
+   aws_metric_name: CommitThroughput
+   aws_dimensions: [DBClusterIdentifier, Role]
+   aws_dimension_select:
+     DBClusterIdentifier: [<cluster-name>]
+   aws_statistics: [Average]
+```
+
+</TabItem>
+</Tabs>
+
+**Verify these values:**
+
+- `region`: The AWS region of your Aurora cluster.
+- `<cluster-name>`: The identifier of your Aurora DB cluster.
+- `<writer-instance-id>` and `<reader-instance-id>`: The instance identifiers in the cluster. Run `aws rds describe-db-clusters --db-cluster-identifier <cluster-name> --query 'DBClusters[0].DBClusterMembers'` to list them. List every instance in the cluster here, not just two.
+
+<Admonition type="info">
+`aws_dimension_select` limits the exporter to the instances that you name. Without it, the exporter returns every Amazon RDS instance in the AWS account.
+</Admonition>
+
+This list covers every metric the [Amazon Aurora dashboards](https://signoz.io/docs/dashboards/dashboard-templates/aurora-dashboards/) read, so import one after this step and every panel has data. To add a metric of your own, copy an entry and change `aws_metric_name`. Use `DBInstanceIdentifier` for per-instance metrics, and `DBClusterIdentifier` for volume and capacity metrics. The
+<a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraMonitoring.Metrics.html" target="_blank" rel="noopener noreferrer nofollow">Amazon Aurora metrics reference</a> lists which scope each metric uses.
+
+#### Run the exporter
+
+```bash
+java -jar cloudwatch_exporter-0.18.0-jar-with-dependencies.jar 9106 <exporter-config>.yaml
+```
+
+**Verify these values:**
+
+- `<exporter-config>`: `aurora-postgres-metrics` for Aurora PostgreSQL, or `aurora-mysql-metrics` for Aurora MySQL.
+
+Open `http://localhost:9106/metrics` and make sure that the `aws_rds_*` metrics
+appear.
+
+#### Send the metrics to SigNoz
+
+Create `aurora-cloudwatch-collection.yaml`:
+
+```yaml:aurora-cloudwatch-collection.yaml defaultCollapsed
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'aurora-cloudwatch-metrics'
+          scrape_timeout: 120s
+          scrape_interval: 300s
+          static_configs:
+            - targets: ['0.0.0.0:9106']
+
+processors:
+  batch:
+    timeout: 10s
+
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_grpc" to avoid a deprecation warning.
+  otlp/signoz:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    metrics/aurora-cloudwatch:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlp/signoz]
+```
+
+Set the environment variables, then add the file to your Collector run command
+with `--config aurora-cloudwatch-collection.yaml`:
+
+```bash
+export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="info">
+The Prometheus receiver spreads the first scrape randomly inside `scrape_interval`. With a 300s interval, the first data points can take up to five minutes to arrive.
+</Admonition>
+
+<details>
+<ToggleHeading>
+#### Alternative: collect CloudWatch metrics without Java
+</ToggleHeading>
+
+The `awscloudwatch` receiver reads CloudWatch metrics directly, so you do not
+need the CloudWatch Exporter. This path has two costs. It needs Collector
+**v0.153.0 or newer**, and it writes the CloudWatch dimensions into one nested
+`Dimensions` attribute instead of separate attributes. In SigNoz you cannot then
+group by `DBInstanceIdentifier` as its own field, and the dashboards for Amazon
+RDS do not match these metric names.
+
+```yaml:aurora-native-cloudwatch.yaml minimap defaultCollapsed
+receivers:
+  # On Collector v0.156.0 and newer, use "aws_cloudwatch" to avoid a deprecation warning.
+  awscloudwatch:
+    region: us-east-1
+    metrics:
+      collection_interval: 1m
+      period: 60s
+      delay: 10m
+      queries:
+        - namespace: AWS/RDS
+          metric_name: CPUUtilization
+          dimensions:
+            DBInstanceIdentifier: <writer-instance-id>
+          stats: [Average]
+        - namespace: AWS/RDS
+          metric_name: VolumeBytesUsed
+          dimensions:
+            DBClusterIdentifier: <cluster-name>
+          stats: [Average]
+
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_grpc" to avoid a deprecation warning.
+  otlp/signoz:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    metrics/aurora-cloudwatch:
+      receivers: [awscloudwatch]
+      exporters: [otlp/signoz]
+```
+
+This replaces the `prometheus` receiver from Step 2. Use one path or the other,
+not both, or every CloudWatch metric arrives twice under two different names.
+
+Use `queries` and name each metric. The `discovery` option collects every
+aggregation that CloudWatch publishes, which includes account-wide totals, so
+one value arrives several times and the ingested volume grows.
+
+Metric names follow the pattern `amazonaws.com/AWS/RDS/<MetricName>`. A query
+with `stats` produces a gauge. A query without `stats` produces a summary.
+
+</details>
+
+### Step 3: Collect engine metrics
+
+CloudWatch reports what the instance does. The database engine reports what the
+queries do. Select your engine below.
+
+<Tabs entityName="engine">
+<TabItem value="aurora-postgresql" label="Aurora PostgreSQL" default>
+
+#### Create a monitoring user
+
+Connect to the cluster endpoint as the master user and run the following:
+
+```sql
+CREATE ROLE monitor LOGIN PASSWORD '<monitor-password>';
+GRANT pg_monitor TO monitor;
+GRANT CONNECT ON DATABASE <database-name> TO monitor;
+```
+
+Aurora PostgreSQL loads `pg_stat_statements` by default, so you do not have to
+change a parameter group and you do not have to reboot. Create the extension in
+every database that the receiver reads, and include the `postgres` database:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+```
+
+<Admonition type="warning">
+The receiver always connects to the `postgres` database for server-level queries. If you create the extension only in your application database, the Collector logs `pq: relation "pg_stat_statements" does not exist`.
+</Admonition>
+
+#### Configure the receiver
+
+Create `aurora-postgres-collection.yaml`:
+
+```yaml:aurora-postgres-collection.yaml minimap defaultCollapsed
+receivers:
+  postgresql/writer:
+    endpoint: ${env:AURORA_WRITER_ENDPOINT}:5432
+    username: monitor
+    password: ${env:AURORA_MONITOR_PASSWORD}
+    collection_interval: 60s
+    # Aurora keeps an internal rdsadmin database that no customer credential can
+    # open. Without this line the Collector logs a connection error on every scrape.
+    exclude_databases: [rdsadmin]
+    tls:
+      insecure: false
+      ca_file: /etc/ssl/certs/rds-combined-ca-bundle.pem
+    metrics:
+      postgresql.database.locks:
+        enabled: true
+      postgresql.deadlocks:
+        enabled: true
+
+  postgresql/reader:
+    endpoint: ${env:AURORA_READER_ENDPOINT}:5432
+    username: monitor
+    password: ${env:AURORA_MONITOR_PASSWORD}
+    collection_interval: 60s
+    exclude_databases: [rdsadmin]
+    tls:
+      insecure: false
+      ca_file: /etc/ssl/certs/rds-combined-ca-bundle.pem
+
+processors:
+  batch:
+    timeout: 10s
+
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_grpc" to avoid a deprecation warning.
+  otlp/signoz:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    metrics/aurora-postgres:
+      receivers: [postgresql/writer, postgresql/reader]
+      processors: [batch]
+      exporters: [otlp/signoz]
+```
+
+Set the environment variables, then add the file to your Collector run command:
+
+```bash
+export AURORA_WRITER_ENDPOINT="<writer-instance-endpoint>"
+export AURORA_READER_ENDPOINT="<reader-instance-endpoint>"
+export AURORA_MONITOR_PASSWORD="<monitor-password>"
+export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<writer-instance-endpoint>` and `<reader-instance-endpoint>`: The instance endpoints from Step 1.
+- `<monitor-password>`: The password that you set for the `monitor` role.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<details>
+<ToggleHeading>
+#### Optional: connect with IAM authentication instead of a password
+</ToggleHeading>
+
+The `aws_iam_db_auth` extension creates a short-lived AWS Identity and Access
+Management (IAM) token for each connection, so no database password is stored in
+the configuration. This needs Collector **v0.159.0 or newer**, and the extension
+is alpha.
+
+Turn on IAM database authentication on the cluster, then create the role:
+
+```sql
+CREATE ROLE iam_monitor LOGIN;
+GRANT rds_iam TO iam_monitor;
+GRANT pg_monitor TO iam_monitor;
+```
+
+```yaml:aurora-postgres-iam.yaml
+extensions:
+  aws_iam_db_auth:
+    region: us-east-1
+
+receivers:
+  postgresql/writer:
+    endpoint: ${env:AURORA_WRITER_ENDPOINT}:5432
+    username: iam_monitor
+    # db_auth and password cannot both be set.
+    db_auth: aws_iam_db_auth
+    collection_interval: 60s
+    exclude_databases: [rdsadmin]
+    tls:
+      insecure: false
+      ca_file: /etc/ssl/certs/rds-combined-ca-bundle.pem
+
+service:
+  extensions: [aws_iam_db_auth]
+```
+
+The AWS credentials of the Collector need the `rds-db:connect` permission for
+this database user.
+
+</details>
+
+</TabItem>
+<TabItem value="aurora-mysql" label="Aurora MySQL">
+
+#### Turn on performance_schema
+
+Aurora MySQL sets `performance_schema` to `OFF` by default. Without it the
+receiver still returns most metrics, and it reports no error, but the statement
+metrics are missing.
+
+`performance_schema` is a static instance-level parameter, so it needs a DB
+parameter group and a reboot:
+
+```bash
+aws rds create-db-parameter-group --db-parameter-group-name <parameter-group-name> \
+  --db-parameter-group-family aurora-mysql8.0 --description "Aurora monitoring"
+
+aws rds modify-db-parameter-group --db-parameter-group-name <parameter-group-name> \
+  --parameters "ParameterName=performance_schema,ParameterValue=1,ApplyMethod=pending-reboot"
+
+aws rds modify-db-instance --db-instance-identifier <instance-id> \
+  --db-parameter-group-name <parameter-group-name> --apply-immediately
+
+aws rds reboot-db-instance --db-instance-identifier <instance-id>
+```
+
+Repeat the last two commands for every instance in the cluster. The reboot
+restarts the database, so run it in a maintenance window.
+
+#### Create a monitoring user
+
+```sql
+CREATE USER 'monitor'@'%' IDENTIFIED BY '<monitor-password>';
+GRANT PROCESS, REPLICATION CLIENT ON *.* TO 'monitor'@'%';
+GRANT SELECT ON performance_schema.* TO 'monitor'@'%';
+```
+
+#### Configure the receiver
+
+Create `aurora-mysql-collection.yaml`:
+
+```yaml:aurora-mysql-collection.yaml minimap defaultCollapsed
+receivers:
+  mysql/writer:
+    endpoint: ${env:AURORA_WRITER_ENDPOINT}:3306
+    username: monitor
+    password: ${env:AURORA_MONITOR_PASSWORD}
+    collection_interval: 60s
+    # The mysql receiver disables TLS when this block is absent, so set it
+    # explicitly. Aurora presents an Amazon RDS CA certificate.
+    tls:
+      insecure: false
+      ca_file: /etc/ssl/certs/rds-combined-ca-bundle.pem
+    statement_events:
+      digest_text_limit: 120
+      time_limit: 24h
+      limit: 250
+    metrics:
+      mysql.commands:
+        enabled: true
+      mysql.connection.count:
+        enabled: true
+      mysql.connection.errors:
+        enabled: true
+      mysql.query.count:
+        enabled: true
+      mysql.query.slow.count:
+        enabled: true
+      # Needs performance_schema. Remove if you left it OFF.
+      mysql.statement_event.count:
+        enabled: true
+      mysql.statement_event.wait.time:
+        enabled: true
+
+  mysql/reader:
+    endpoint: ${env:AURORA_READER_ENDPOINT}:3306
+    username: monitor
+    password: ${env:AURORA_MONITOR_PASSWORD}
+    collection_interval: 60s
+    tls:
+      insecure: false
+      ca_file: /etc/ssl/certs/rds-combined-ca-bundle.pem
+
+processors:
+  batch:
+    timeout: 10s
+
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_grpc" to avoid a deprecation warning.
+  otlp/signoz:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    metrics/aurora-mysql:
+      receivers: [mysql/writer, mysql/reader]
+      processors: [batch]
+      exporters: [otlp/signoz]
+```
+
+Set the environment variables, then add the file to your Collector run command:
+
+```bash
+export AURORA_WRITER_ENDPOINT="<writer-instance-endpoint>"
+export AURORA_READER_ENDPOINT="<reader-instance-endpoint>"
+export AURORA_MONITOR_PASSWORD="<monitor-password>"
+export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<writer-instance-endpoint>` and `<reader-instance-endpoint>`: The instance endpoints from Step 1.
+- `<monitor-password>`: The password that you set for the `monitor` user.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="info">
+The `mysql` receiver does not support IAM database authentication yet. The `db_auth` option is available for the `postgresql` receiver only.
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+### Step 4: Collect Aurora logs
+
+Aurora writes one CloudWatch log group for each log type, and one log stream for
+each instance inside it. The names follow the pattern
+`/aws/rds/cluster/<cluster-name>/<log-type>`.
+
+Turn on the log exports for the cluster:
+
+```bash
+aws rds modify-db-cluster --db-cluster-identifier <cluster-name> \
+  --cloudwatch-logs-export-configuration '{"EnableLogTypes":["postgresql"]}'
+```
+
+For Aurora MySQL, use `["error","slowquery","general"]` instead, and set the
+`source` value below to `aurora_mysql` so the two engines stay separable in the
+Logs Explorer.
+
+<Admonition type="info">
+AWS creates each log group only when the engine writes that log type for the first time. If the `/slowquery` log group is missing, no query was slow enough yet. The export is still active.
+</Admonition>
+
+Create `aurora-logs-collection.yaml`:
+
+```yaml:aurora-logs-collection.yaml minimap defaultCollapsed
+receivers:
+  # On Collector v0.156.0 and newer, use "aws_cloudwatch" to avoid a deprecation warning.
+  awscloudwatch/aurora_logs:
+    region: us-east-1
+    logs:
+      poll_interval: 1m
+      groups:
+        named:
+          /aws/rds/cluster/<cluster-name>/postgresql:
+
+processors:
+  attributes/add_source:
+    actions:
+      - key: source
+        value: "aurora_postgres"
+        action: insert
+  batch:
+    send_batch_size: 10000
+    timeout: 10s
+
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_grpc" to avoid a deprecation warning.
+  otlp/signoz:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    logs/aurora:
+      receivers: [awscloudwatch/aurora_logs]
+      processors: [attributes/add_source, batch]
+      exporters: [otlp/signoz]
+```
+
+Set the environment variables, then add the file to your Collector run command
+with `--config aurora-logs-collection.yaml`:
+
+```bash
+export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<cluster-name>`: The identifier of your Aurora DB cluster.
+- `region`: The AWS region of your Aurora cluster.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+The log bodies arrive as raw engine text. To split them into fields that you can
+filter on, add a [log pipeline](https://signoz.io/docs/logs-pipelines/introduction/).
+
+## Validate
+
+1. Open **Metrics** in SigNoz and search for `aws_rds_`. The CloudWatch metrics
+  appear with the `dbinstance_identifier` and `dbcluster_identifier` attributes.
+2. Group a metric such as `aws_rds_cpuutilization_average` by
+  `dbinstance_identifier`. Each instance in the cluster appears as its own series.
+3. Search for `postgresql.` or `mysql.` to see the engine metrics.
+
+<Figure
+  src="/img/docs/integrations/aws-rds-aurora/aurora-validate-metrics.webp"
+  alt="Aurora CloudWatch metrics listed in the SigNoz Metrics Explorer"
+  caption="Aurora CloudWatch metrics in the Metrics Explorer"
+/>
+
+4. Open **Logs** and filter on `source = aurora_postgres` to see the database logs.
+
+<Figure
+  src="/img/docs/integrations/aws-rds-aurora/aurora-validate-logs.webp"
+  alt="Aurora PostgreSQL logs in the SigNoz Logs Explorer"
+  caption="Aurora PostgreSQL logs in the Logs Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### The Collector logs a connection error for the rdsadmin database
+
+The full error is:
+
+```
+pq: pg_hba.conf rejects connection for host "<ip>", user "monitor", database "rdsadmin", SSL encryption (28000)
+```
+
+Aurora PostgreSQL keeps an internal `rdsadmin` database that no customer
+credential can open, and the receiver tries it like any other database. Add
+`exclude_databases: [rdsadmin]` to the receiver and restart the Collector.
+
+### The Collector reports that pg_stat_statements does not exist
+
+The full error is:
+
+```
+pq: relation "pg_stat_statements" does not exist
+```
+
+The extension is missing in one of the databases that the receiver reads. Run
+`CREATE EXTENSION IF NOT EXISTS pg_stat_statements;` in each database, including
+the `postgres` database.
+
+### The volume metrics are empty on a new cluster
+
+`VolumeBytesUsed`, `VolumeReadIOPs`, and `VolumeWriteIOPs` can take about an hour
+to appear after you create a cluster. Wait, then reload the dashboard.
+
+### The statement metrics are missing on Aurora MySQL
+
+`performance_schema` is `OFF`. The receiver reports no error in this case. Turn
+the parameter on as described in Step 3, and reboot the instance.
+
+### The Collector does not start after you add the awscloudwatch metrics block
+
+The full error is:
+
+```
+'metrics' has invalid keys: metrics
+```
+
+Your Collector is older than v0.153.0, which is the first release with
+CloudWatch metrics support in this receiver. Upgrade the Collector, or use the
+CloudWatch Exporter path in Step 2.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Limitations
+</ToggleHeading>
+
+- Replication metrics do not work on Aurora. Aurora replicates through the shared
+  storage volume. It does not use PostgreSQL streaming replication or MySQL
+  binary log replication. On Aurora PostgreSQL, `pg_stat_replication` returns no rows.
+  On Aurora MySQL, `SHOW REPLICA STATUS` returns no rows, so
+  `mysql.replica.time_behind_source` and `mysql.replica.sql_delay` report nothing.
+  Use the `AuroraReplicaLag` CloudWatch metric instead.
+- These Amazon RDS metrics do not exist on Aurora: `FreeStorageSpace`,
+  `ReplicaLag`, `BinLogDiskUsage`, `BurstBalance`, and `CheckpointLag`. Aurora
+  uses a shared storage volume, so it reports `VolumeBytesUsed` instead of
+  `FreeStorageSpace`. The exporter returns no data for these metrics and reports
+  no error.
+- Aurora Serverless v2 does not publish `FreeLocalStorage`.
+- `ResultSetCacheHitRatio` exists on Aurora MySQL version 2 only.
+- The `pg_monitor` role is enough for metrics. Query plan collection also needs
+  `SELECT` on the tables in the query.
+
+</details>
+
+## Next Steps
+
+- [Import the Amazon Aurora dashboards](https://signoz.io/docs/dashboards/dashboard-templates/aurora-dashboards/), two per engine: one for the CloudWatch metrics from Step 2, and one for the engine metrics from Step 3.
+- [Set up alerts](https://signoz.io/docs/alerts/) on replica lag, connection count, and volume growth.
+- [Parse the Aurora logs](https://signoz.io/docs/logs-pipelines/introduction/) into structured fields with Logs Pipelines.
+- [Trace slow queries](https://signoz.io/docs/apm-and-distributed-tracing/database-calls/) back to the application code that ran them.
+
+## Get Help
+
+<GetHelp />

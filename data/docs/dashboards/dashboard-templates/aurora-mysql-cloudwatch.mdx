@@ -1,0 +1,113 @@
+---
+date: 2026-09-09
+title: Amazon Aurora MySQL CloudWatch Dashboard - Monitor Health
+description: Monitor Aurora MySQL cluster and instance health in SigNoz including capacity, replica lag, statement latency, locking, storage I/O, and cluster volume.
+doc_type: explanation
+---
+
+Use this dashboard to monitor an Aurora MySQL cluster across serverless capacity, replica lag, memory and cache, statement workload, transactions and locking, instance storage I/O, cluster volume growth, and binary log replication.
+
+Amazon Aurora publishes cluster and instance metrics to the `AWS/RDS` CloudWatch namespace. The Prometheus CloudWatch Exporter reads them, and the OpenTelemetry Collector `prometheus` receiver scrapes the exporter.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow [Step 2 of Monitor Amazon Aurora](https://signoz.io/docs/integrations/aws-rds-aurora/#step-2-collect-cloudwatch-metrics), which covers the exporter configuration and the Collector pipeline.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/aurora-mysql-cloudwatch.webp"
+  alt="Amazon Aurora MySQL CloudWatch Dashboard"
+  caption="Amazon Aurora MySQL CloudWatch Dashboard"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/aurora/mysql/overview.json"
+  dashboardName="Amazon Aurora MySQL CloudWatch"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Separate the writer from the readers**: Instance panels group by `DBInstanceIdentifier`, so each instance is its own series, and Commit Throughput splits by the `Role` dimension into WRITER and READER.
+- **Size a Serverless v2 cluster**: Track provisioned Aurora Capacity Units against the utilization of the configured maximum.
+- **Split latency by statement class**: SELECT, DML, and DDL latency come from the engine counters, so a rise points at server-side work.
+- **Diagnose locking**: Read blocked transactions, deadlocks, and the rollback segment history list together.
+- **Watch storage growth and billed I/O**: Cluster volume size and billed read and write operations are cluster-scoped. They have no per-instance series.
+- **Track binary log replication**: Monitor replica lag and retained binary log size when this cluster replicates from another source.
+
+## Metrics Included
+
+### Cluster & Capacity
+
+- **Serverless Database Capacity**: Aurora Capacity Units provisioned for the cluster (`ServerlessDatabaseCapacity`). Serverless v2 only.
+- **ACU Utilization**: Share of the instance maximum ACU setting in use (`ACUUtilization`).
+- **CPU Utilization**: CPU used by the database engine on each instance (`CPUUtilization`).
+- **Database Connections**: Client connections open on each instance (`DatabaseConnections`).
+- **Aurora Replica Lag**: Lag between a reader and the writer (`AuroraReplicaLag`). Reported by reader instances only.
+- **Engine Uptime**: Time since the engine last started (`EngineUptime`). A drop marks a restart or failover.
+
+### Memory & Cache
+
+- **Freeable Memory**: RAM available on each instance (`FreeableMemory`).
+- **Buffer Cache Hit Ratio**: Share of requests served from the buffer cache (`BufferCacheHitRatio`).
+- **Swap Usage**: Swap space used on the instance (`SwapUsage`).
+
+### Query Workload
+
+- **Statement Latency**: Average time per statement class (`SelectLatency`, `DMLLatency`, `DDLLatency`, `InsertLatency`, `CommitLatency`).
+- **Statement Throughput**: Statements per second in total and split by class (`Queries`, `SelectThroughput`, `DMLThroughput`).
+- **Commit Throughput**: Commits per second split by writer and reader role (`CommitThroughput`).
+
+### Transactions & Locking
+
+- **Active Transactions**: Transactions open per second in InnoDB (`ActiveTransactions`).
+- **Blocked Transactions**: Transactions per second blocked waiting on a lock (`BlockedTransactions`).
+- **Deadlocks**: Deadlocks per second detected by InnoDB (`Deadlocks`).
+- **Rollback Segment History List Length**: Undo records kept for long-running transactions (`RollbackSegmentHistoryListLength`). Steady growth means purge is blocked.
+- **Login Failures**: Failed login attempts per second (`LoginFailures`).
+
+### Instance Storage I/O
+
+- **Instance IOPS**: Read and write operations per second on local storage (`ReadIOPS`, `WriteIOPS`).
+- **Instance I/O Latency**: Average time per read and write operation (`ReadLatency`, `WriteLatency`).
+- **Instance I/O Throughput**: Bytes read and written per second (`ReadThroughput`, `WriteThroughput`).
+- **Disk Queue Depth**: Outstanding I/O requests waiting on the disk (`DiskQueueDepth`).
+- **Network Throughput**: Client network traffic to and from the instance (`NetworkReceiveThroughput`, `NetworkTransmitThroughput`).
+
+### Cluster Storage Volume
+
+- **Volume Bytes Used**: Storage consumed by the cluster volume (`VolumeBytesUsed`).
+- **Volume Read I/O Operations (5 min)** and **Volume Write I/O Operations (5 min)**: Billed operations against the cluster volume (`VolumeReadIOPs`, `VolumeWriteIOPs`). CloudWatch reports these as a count per 5-minute interval rather than a rate, so divide by 300 for operations per second.
+
+### Binary Log Replication
+
+- **Aurora Binlog Replica Lag**: Lag when this cluster replicates from another source over binary logging (`AuroraBinlogReplicaLag`).
+- **Binary Log Size**: Total size of retained binary logs (`SumBinaryLogSize`).
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **dbcluster_identifier**: Filter the cluster-scoped panels, meaning storage volume and serverless capacity.
+- **dbinstance_identifier**: Filter the per-instance panels. `AWS/RDS` carries no engine dimension, so this lists every Aurora instance in the account. Select a cluster first to narrow it.
+
+## Panels That Read Empty
+
+Some panels stay empty until the matching condition exists, which is expected rather than a misconfiguration:
+
+- **Cluster Storage Volume** panels take about an hour to appear on a newly created cluster, and CloudWatch emits them at 5-minute intervals.
+- **Aurora Replica Lag** has no series for the writer, because Aurora reports it on reader instances only.
+- **Binary Log Replication** panels populate only while binlog replication is configured against an external source. A cluster that replicates only through its shared storage volume reports nothing here.
+- **Login Failures** and **Deadlocks** read zero on a healthy cluster.
+
+## Next Steps
+
+- [Collect Aurora engine metrics](https://signoz.io/docs/dashboards/dashboard-templates/aurora-mysql-engine-metrics/) to see InnoDB and buffer pool activity alongside this dashboard.
+- [Set up alerts](https://signoz.io/docs/alerts/) on replica lag, blocked transactions, and volume growth.
+- [Set up a notification channel](https://signoz.io/docs/setup-alerts-notification/) for Slack, PagerDuty, or email.
+
+## Related Dashboards
+
+- [Amazon Aurora MySQL Engine Metrics](https://signoz.io/docs/dashboards/dashboard-templates/aurora-mysql-engine-metrics/)
+- [Amazon Aurora PostgreSQL CloudWatch](https://signoz.io/docs/dashboards/dashboard-templates/aurora-postgresql-cloudwatch/)
+- [MySQL](https://signoz.io/docs/dashboards/dashboard-templates/mysql/)
