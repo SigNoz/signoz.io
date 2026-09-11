@@ -30,10 +30,6 @@ Muse Spark is reached over an OpenAI compatible endpoint, so `opentelemetry-inst
    opentelemetry-bootstrap --action=install
    ```
 
-   <Admonition type="warning" title="Install httpx explicitly, even if you never import it">
-   The OpenAI Python SDK v3 ships its own HTTP client under the module name `httpx2`, while `opentelemetry-instrumentation-openai-v2` still imports from `httpx`. Without `httpx` installed, that import fails, the instrumentor is skipped silently, and your calls arrive in SigNoz as generic `POST` spans with no `gen_ai.*` attributes and no error explaining why.
-   </Admonition>
-
 2. **Step 2:** Point the OpenAI client at the Meta Model API. Only the base URL and the key change.
 
    ```python
@@ -50,10 +46,6 @@ Muse Spark is reached over an OpenAI compatible endpoint, so `opentelemetry-inst
        messages=[{"role": "user", "content": "Summarize this incident report."}],
    )
    ```
-
-   <Admonition type="warning" title="Set max_tokens generously">
-   On Muse Spark, `max_tokens` caps reasoning and visible output together, and reasoning routinely consumes 90 to 98 percent of the budget. A value that would be comfortable on a non reasoning model returns `content: null` with `finish_reason: length`. On a streaming call an exhausted budget is worse: no content chunks arrive and no usage record is sent at all, so the call vanishes from your token metrics entirely.
-   </Admonition>
 
 3. **Step 3:** Configure the exporter.
 
@@ -82,17 +74,13 @@ Muse Spark is reached over an OpenAI compatible endpoint, so `opentelemetry-inst
    opentelemetry-instrument python your_app.py
    ```
 
-Each call now emits a `chat <model>` span carrying `gen_ai.request.model`, `gen_ai.response.finish_reasons`, and input and output token counts. Allow a few seconds for the first spans to appear.
-
-<Admonition type="note" title="Only Chat Completions is traced">
-The Meta Model API also exposes a Responses API and an Anthropic compatible Messages API. `client.responses.create()` works and returns usage, but the current instrumentation produces no span for it at all. Use Chat Completions if you want the calls traced.
-</Admonition>
+Each call emits a `chat <model>` span with model, finish reason, and token counts. Only Chat Completions is traced; the Responses API produces no span.
 
 ## Capture Reasoning Tokens, Cache Reads, and Cost
 
-The stock instrumentation records input and output tokens but drops three values that Muse Spark depends on. Reasoning tokens are never read from `completion_tokens_details`. Cached input tokens are dropped as well, and because cached input is roughly 8x cheaper on the standard tier, cost computed from spans alone overstates real spend by three to five times on any workload that reuses a prompt. Time to first chunk is defined in the OpenTelemetry package but never emitted.
+The stock instrumentation drops reasoning tokens, cached input tokens, and time to first chunk. Cached input is roughly 8x cheaper on the standard tier, so cost derived from spans alone overstates real spend by three to five times.
 
-Wrap your calls in a span that records them from the response object. This also sets `gen_ai.provider.name` to `meta`, which is what separates Muse Spark from other providers reached through the same OpenAI compatible SDK, and what stops the wrapper span and the SDK span from double counting your requests.
+Wrap your calls in a span that reads them off the response. Setting `gen_ai.provider.name` to `meta` separates Muse Spark from other providers on the same SDK and stops the wrapper and SDK spans double counting requests.
 
 ```python
 import time
@@ -190,47 +178,49 @@ Import the [Muse Spark dashboard](https://signoz.io/docs/dashboards/dashboard-te
   caption="The Meta Muse Spark dashboard template in SigNoz"
 />
 
+<details>
+<ToggleHeading>
+
 ## Troubleshooting Meta Muse Spark Monitoring
 
-<details>
-<summary><ToggleHeading>No traces appear in SigNoz</ToggleHeading></summary>
+</ToggleHeading>
 
-Confirm the application was launched with `opentelemetry-instrument`. Check that `OTEL_EXPORTER_OTLP_ENDPOINT` carries your real region and that the ingestion key header is set. To see what is being produced locally, set `OTEL_TRACES_EXPORTER=console` and run again.
+### No traces appear in SigNoz
 
-</details>
+Confirm the application was launched with `opentelemetry-instrument`, and that `OTEL_EXPORTER_OTLP_ENDPOINT` carries your region and the ingestion key header is set. Set `OTEL_TRACES_EXPORTER=console` to see what is produced locally.
 
-<details>
-<summary><ToggleHeading>Spans named POST with no gen_ai attributes</ToggleHeading></summary>
+### Spans named POST with no gen_ai attributes
 
-The OpenAI instrumentor was skipped because `httpx` is not installed. Run `pip install httpx` and restart the application.
+The instrumentor was skipped because `httpx` is not installed. Run `pip install httpx` and restart.
 
-</details>
+### Responses come back empty
 
-<details>
-<summary><ToggleHeading>Responses come back empty</ToggleHeading></summary>
+`gen_ai.response.finish_reasons` is `length`, meaning `max_tokens` was consumed by reasoning before any visible output. Raise the budget.
 
-Check `gen_ai.response.finish_reasons` on the span. A value of `length` means `max_tokens` was consumed by reasoning before any visible output was produced. Raise the budget rather than retrying.
+### Errors cannot be told apart
 
-</details>
-
-<details>
-<summary><ToggleHeading>Errors cannot be told apart</ToggleHeading></summary>
-
-The instrumentation sets no `error.type` attribute, so a 401, a 404, and a 400 are indistinguishable by attribute. Error spans also drop their usage attributes. Read the span status message to see the provider error string, which carries the code and type.
+The instrumentation sets no `error.type`, and error spans carry no usage attributes. Read the span status message for the provider error string.
 
 </details>
+
+<details>
+<ToggleHeading>
 
 ## Setup OpenTelemetry Collector (Optional)
 
-<details>
-<summary><ToggleHeading>Route telemetry through a Collector</ToggleHeading></summary>
+</ToggleHeading>
 
-If you already run an [OpenTelemetry Collector](https://signoz.io/docs/collection-agents/), point the application at it instead of at SigNoz directly by setting `OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318`, and configure the Collector's OTLP exporter with your SigNoz endpoint and ingestion key.
+If you already run an [OpenTelemetry Collector](https://signoz.io/docs/collection-agents/), point the application at it with `OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318` and configure the Collector's OTLP exporter with your SigNoz endpoint and ingestion key.
 
 </details>
 
-Additional resources:
+## Related integrations
 
-- [Create alerts on trace data](https://signoz.io/docs/alerts-management/trace-based-alerts/)
-- [Query and filter traces](https://signoz.io/docs/userguide/query-builder-v5/)
-- [Correlate logs and traces](https://signoz.io/docs/userguide/correlate-logs-and-traces/)
+Instrument the other model APIs your team calls, using the same OpenTelemetry pipeline:
+
+- [Monitor the OpenAI API with OpenTelemetry](https://signoz.io/docs/openai-monitoring/) - track token usage, model latency, and error rates across every call
+- [Anthropic monitoring with OpenTelemetry](https://signoz.io/docs/anthropic-monitoring/) - trace Claude API calls, usage trends, and failures
+- [Mistral AI observability with OpenTelemetry](https://signoz.io/docs/mistral-observability/) - monitor model performance, traces, and token spend
+- [DeepSeek monitoring with OpenTelemetry](https://signoz.io/docs/deepseek-monitoring/) - track latency, error rates, and token usage
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.
