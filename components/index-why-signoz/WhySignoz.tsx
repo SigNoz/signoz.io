@@ -6,52 +6,23 @@ import { useEffect, useRef, useState } from 'react'
 
 import TrackingLink from '@/components/TrackingLink'
 
-import { WHY_SIGNOZ_STAGES, WHY_SIGNOZ_STEPS } from './whySignozStages'
+import WhySignozProtoWorld, { type WhySignozWorldHandle } from './WhySignozProtoWorld'
+import { WHY_SIGNOZ_STEPS } from './whySignozStages'
 import './why-signoz.css'
 
 const STEPS = WHY_SIGNOZ_STEPS.length
-const PARK = 0.8
-
-const smoothstep = (t: number) => t * t * (3 - 2 * t)
-
-const BEATS: Record<string, [number, number]> = {
-  otel: [1.04, 1.3],
-  link1: [1.34, 1.76],
-  tab: [1.52, 1.78],
-  link2: [1.92, 2.1],
-  store: [2.02, 2.3],
-  rows: [2.1, 2.38],
-  search: [2.26, 2.44],
-  type: [2.58, 2.82],
-  cond: [2.84, 2.95],
-  link3: [3.06, 3.46],
-  agent: [3.18, 3.58],
-}
-
-const TOGGLES: { cls: string; on: (g: number) => boolean }[] = [
-  { cls: 'pulse-on', on: (g) => g > 1.42 && g < 2.62 },
-  { cls: 's-pill', on: (g) => g > 2.46 },
-  { cls: 's-glow', on: (g) => g > 2.52 },
-  { cls: 's-cond', on: (g) => g > 2.88 },
-  { cls: 'agent-peek', on: (g) => g > 3.18 },
-]
 
 export default function WhySignoz() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [reducedMotion, setReducedMotion] = useState(false)
   const driverRef = useRef<HTMLDivElement | null>(null)
-  const worldRef = useRef<HTMLDivElement | null>(null)
-  const viewportRef = useRef<HTMLDivElement | null>(null)
-  const travelerRef = useRef<HTMLDivElement | null>(null)
-  const wiresRef = useRef<HTMLDivElement | null>(null)
+  const worldRef = useRef<WhySignozWorldHandle | null>(null)
   const itemRefs = useRef<Array<HTMLDivElement | null>>([])
   const activeRef = useRef(0)
 
   useEffect(() => {
     const driver = driverRef.current
-    const world = worldRef.current
-    const viewport = viewportRef.current
-    if (!driver || !world || !viewport) return
+    if (!driver) return
 
     const desktopQuery = window.matchMedia('(min-width: 1024px)')
     const reducedQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -60,17 +31,9 @@ export default function WhySignoz() {
     let visible = false
     let raf = 0
     let queued = false
-    let stageHeight = viewport.clientHeight || 700
     let gTarget = 0
     let gCurrent = 0
     const lastFill: string[] = []
-
-    const worldY = (g: number) => {
-      const idx = Math.min(STEPS - 1, Math.floor(g))
-      const local = Math.min(Math.max(g - idx, 0), 1)
-      const glide = local <= PARK ? 0 : smoothstep((local - PARK) / (1 - PARK))
-      return Math.min(idx + glide, STEPS - 1) * stageHeight
-    }
 
     const setStep = (g: number) => {
       const idx = Math.min(STEPS - 1, Math.floor(g))
@@ -93,45 +56,8 @@ export default function WhySignoz() {
       })
     }
 
-    const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1)
-
-    const lastVar: Record<string, string> = {}
-    const lastCls: Record<string, boolean> = {}
-    const setVars = (g: number) => {
-      for (const key in BEATS) {
-        const [from, to] = BEATS[key]
-        const value = clamp01((g - from) / (to - from)).toFixed(3)
-        if (lastVar[key] !== value) {
-          lastVar[key] = value
-          world.style.setProperty(`--b-${key}`, value)
-        }
-      }
-      for (const toggle of TOGGLES) {
-        const on = toggle.on(g)
-        if (lastCls[toggle.cls] !== on) {
-          lastCls[toggle.cls] = on
-          world.classList.toggle(toggle.cls, on)
-        }
-      }
-    }
-
     const apply = (g: number) => {
-      const cameraY = worldY(g)
-      world.style.transform = `translate3d(0, ${(-cameraY).toFixed(1)}px, 0)`
-      setVars(g)
-
-      const traveler = travelerRef.current
-      if (traveler) {
-        const stageThree = clamp01((g - 2) / 0.35)
-        const travelerIn = clamp01((g - 0.38) / 0.08)
-        const travelerOut = clamp01((3.04 - g) / 0.08)
-        const y = cameraY + stageHeight * 0.58 + g * 18
-        const x = -36 * stageThree
-        traveler.style.setProperty('--rider-close', `${(-10 * stageThree).toFixed(1)}px`)
-        traveler.style.opacity = Math.min(travelerIn, travelerOut).toFixed(3)
-        traveler.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`
-      }
-
+      worldRef.current?.update(g)
       setStep(g)
     }
 
@@ -164,45 +90,24 @@ export default function WhySignoz() {
       })
     }
 
-    const measure = () => {
-      stageHeight = viewport.clientHeight || 700
-      driver.style.setProperty('--stage-h', `${stageHeight}px`)
-      layoutWires()
-      apply(gCurrent)
-    }
-
-    const layoutWires = () => {
-      const wires = wiresRef.current
-      if (!wires) return
-      const anchors = Array.from(world.querySelectorAll<HTMLElement>('[data-why-anchor]'))
-      const segments = Array.from(wires.children) as HTMLElement[]
-      if (anchors.length < 2) return
-      const worldRect = world.getBoundingClientRect()
-      segments.forEach((segment, index) => {
-        const from = anchors[index]
-        const to = anchors[index + 1]
-        if (!from || !to) return
-        const top = from.getBoundingClientRect().bottom - worldRect.top - 2
-        const bottom = to.getBoundingClientRect().top - worldRect.top + 2
-        segment.style.top = `${top.toFixed(1)}px`
-        segment.style.height = `${Math.max(bottom - top, 0).toFixed(1)}px`
-      })
+    const onResize = () => {
+      worldRef.current?.relayout()
+      onScroll()
     }
 
     const engage = () => {
       if (engaged) return
       engaged = true
-      measure()
       onScroll()
       window.addEventListener('scroll', onScroll, { passive: true })
-      window.addEventListener('resize', measure)
+      window.addEventListener('resize', onResize)
     }
 
     const disengage = () => {
       if (!engaged) return
       engaged = false
       window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', measure)
+      window.removeEventListener('resize', onResize)
       if (raf) {
         cancelAnimationFrame(raf)
         raf = 0
@@ -224,16 +129,12 @@ export default function WhySignoz() {
     )
     io.observe(driver)
 
-    const ro = 'ResizeObserver' in window ? new ResizeObserver(measure) : undefined
-    ro?.observe(viewport)
-
     desktopQuery.addEventListener('change', sync)
     reducedQuery.addEventListener('change', sync)
 
     return () => {
       disengage()
       io.disconnect()
-      ro?.disconnect()
       desktopQuery.removeEventListener('change', sync)
       reducedQuery.removeEventListener('change', sync)
     }
@@ -361,141 +262,7 @@ export default function WhySignoz() {
             </div>
 
             <div className="hidden min-w-0 justify-center lg:motion-safe:flex">
-              <div
-                aria-hidden="true"
-                className="relative flex h-[min(88vh,780px)] w-full max-w-[640px] flex-col overflow-hidden rounded-md border border-[var(--l1-border)] bg-[var(--l1-background)]"
-                data-markdown-ignore
-              >
-                <div className="relative flex-1 overflow-hidden [contain:paint]" ref={viewportRef}>
-                  <div className="pointer-events-none absolute inset-0 opacity-60 [background-image:radial-gradient(circle,var(--l2-border)_1px,transparent_1px)] [background-size:22px_22px]" />
-
-                  <div
-                    className="why-world absolute inset-x-0 top-0 will-change-transform [backface-visibility:hidden]"
-                    ref={worldRef}
-                  >
-                    <div aria-hidden="true" className="why-wires" ref={wiresRef}>
-                      <div
-                        className="why-wire"
-                        style={{ '--t': 'var(--b-link1, 1)' } as React.CSSProperties}
-                      />
-                      <div
-                        className="why-wire"
-                        style={{ '--t': 'var(--b-link2, 1)' } as React.CSSProperties}
-                      />
-                      <div
-                        className="why-wire why-wire--glow"
-                        style={{ '--t': 'var(--b-link3, 1)' } as React.CSSProperties}
-                      />
-                    </div>
-
-                    {WHY_SIGNOZ_STAGES.map((stage, index) => (
-                      <div
-                        className="flex h-[var(--stage-h,700px)] flex-col justify-start p-6 pt-8"
-                        key={stage.key}
-                      >
-                        {stage.image ? (
-                          <div className="relative h-full w-full">
-                            <Image
-                              alt=""
-                              className="object-contain object-bottom"
-                              fill
-                              src={stage.image}
-                            />
-                          </div>
-                        ) : (
-                          <stage.Visual isActive={index === displayIndex} />
-                        )}
-                      </div>
-                    ))}
-
-                    <div className="noz-traveler" ref={travelerRef}>
-                      <div className="noz-traveler-inner">
-                        <div className="olly-rider olly-rider--large">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src="/img/graphics/homepage/olly.svg" alt="" />
-                          <svg
-                            className="rider-cube"
-                            viewBox="0 0 94 80"
-                            fill="none"
-                            aria-hidden="true"
-                          >
-                            <g className="rider-emanation rider-emanation--left">
-                              <polygon points="-22,36 23,58 23,90 -22,68" />
-                              <polygon points="-43,47 2,69 2,101 -43,79" />
-                            </g>
-                            <g className="rider-emanation rider-emanation--right">
-                              <polygon points="71,58 116,36 116,68 71,90" />
-                              <polygon points="92,69 137,47 137,79 92,101" />
-                            </g>
-                            <polygon
-                              points="47,2 92,24 47,46 2,24"
-                              fill="var(--bg-neutral-dark-800)"
-                              stroke="var(--bg-neutral-dark-500)"
-                            />
-                            <polygon
-                              points="2,24 47,46 47,78 2,56"
-                              fill="var(--bg-neutral-dark-1000)"
-                              stroke="var(--bg-neutral-dark-700)"
-                            />
-                            <polygon
-                              points="47,46 92,24 92,56 47,78"
-                              fill="var(--bg-neutral-dark-950)"
-                              stroke="var(--bg-neutral-dark-600)"
-                            />
-                            <polygon
-                              points="47,9 78,24 47,39 16,24"
-                              fill="var(--bg-neutral-dark-700)"
-                              stroke="var(--bg-neutral-dark-500)"
-                            />
-                          </svg>
-                        </div>
-                        <div className="olly-rider olly-rider--small">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src="/img/graphics/homepage/olly.svg" alt="" />
-                          <svg
-                            className="rider-cube"
-                            viewBox="0 0 94 80"
-                            fill="none"
-                            aria-hidden="true"
-                          >
-                            <g className="rider-emanation rider-emanation--left">
-                              <polygon points="-22,36 23,58 23,90 -22,68" />
-                              <polygon points="-43,47 2,69 2,101 -43,79" />
-                            </g>
-                            <g className="rider-emanation rider-emanation--right">
-                              <polygon points="71,58 116,36 116,68 71,90" />
-                              <polygon points="92,69 137,47 137,79 92,101" />
-                            </g>
-                            <polygon
-                              points="47,2 92,24 47,46 2,24"
-                              fill="var(--bg-neutral-dark-800)"
-                              stroke="var(--bg-neutral-dark-500)"
-                            />
-                            <polygon
-                              points="2,24 47,46 47,78 2,56"
-                              fill="var(--bg-neutral-dark-1000)"
-                              stroke="var(--bg-neutral-dark-700)"
-                            />
-                            <polygon
-                              points="47,46 92,24 92,56 47,78"
-                              fill="var(--bg-neutral-dark-950)"
-                              stroke="var(--bg-neutral-dark-600)"
-                            />
-                            <polygon
-                              points="47,9 78,24 47,39 16,24"
-                              fill="var(--bg-neutral-dark-700)"
-                              stroke="var(--bg-neutral-dark-500)"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pointer-events-none absolute inset-x-0 top-0 z-[6] h-14 bg-gradient-to-b from-[var(--l1-background)] to-transparent" />
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-14 bg-gradient-to-t from-[var(--l1-background)] to-transparent" />
-                </div>
-              </div>
+              <WhySignozProtoWorld ref={worldRef} />
             </div>
           </div>
         </div>
