@@ -37,7 +37,8 @@ export const DOC_CONTENT_CENTER_CLASSES =
   'flex min-w-0 flex-[1_1_auto] justify-center overflow-clip'
 
 export const DOC_CONTENT_COLUMN_CLASSES =
-  'box-border w-full max-w-[1200px] px-4 py-6 [&_details+details]:mt-8'
+  'box-border w-full max-w-[1200px] px-4 py-6 [&_details+details]:mt-8 [&:has([data-docs-full-width-page])]:max-w-none'
 
 /** Row holding the article column and the right TOC rail. */
-export const DOC_CONTENT_ROW_CLASSES = 'mx-auto flex h-full w-full max-w-ot-hub items-start gap-4'
+export const DOC_CONTENT_ROW_CLASSES =
+  'mx-auto flex h-full w-full max-w-ot-hub items-start gap-4 [&:has([data-docs-full-width-page])]:max-w-none'

@@ -109,6 +109,37 @@ test('Listicle stubs use the configured markdown title', async () => {
   assert.doesNotMatch(html, /<h2>Listicle<\/h2>/)
 })
 
+test('ListicleDirectory stubs render the integrations item list', async () => {
+  const doc = createDoc('<ListicleDirectory name="integrations" defaultSection="all" />')
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.ListicleDirectory, {
+      name: 'integrations',
+      defaultSection: 'all',
+    })
+  )
+
+  assert.match(html, /Integrations Guides/)
+  assert.match(html, /PostgreSQL/)
+  assert.match(html, /\/docs\/integrations\/redis/)
+  assert.match(html, /One-Click AWS Integrations/)
+})
+
+test('ListicleDirectory stubs respect the selected default section', async () => {
+  const doc = createDoc('<ListicleDirectory name="integrations" defaultSection="databases" />')
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.ListicleDirectory, {
+      name: 'integrations',
+      defaultSection: 'databases',
+    })
+  )
+
+  assert.match(html, /Redis/)
+  assert.match(html, /MongoDB/)
+  assert.doesNotMatch(html, /One-Click AWS Integrations/)
+})
+
 test('HostingDecision stub matches the banner CTA destinations', async () => {
   const doc = createDoc('<HostingDecision />')
   const components = await buildAgentMdxComponentsForDoc(doc)
