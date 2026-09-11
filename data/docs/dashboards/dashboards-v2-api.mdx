@@ -1,5 +1,5 @@
 ---
-date: 2026-07-29
+date: 2026-08-04
 title: "Dashboards V2 API - Schema, Endpoints & PATCH Updates"
 description: "Migrate to the redesigned SigNoz Dashboards experience and learn the V2 Dashboards API: schema, endpoints, pagination, the query DSL, and partial PATCH updates."
 doc_type: howto
@@ -162,6 +162,34 @@ The visual query builder sets `reduceTo` for you, so this only affects requests 
 ```
 
 Existing V1 dashboards do not need edits: their scalar metric queries have `reduceTo` derived automatically during migration (rate and increase map to `sum`, percentile aggregations map to `avg`, other gauge aggregations map to `last`).
+
+### Required spec fields
+
+Every create (`POST`), update (`PUT`), and partial-update (`PATCH`) request must send three `spec` fields: `variables`, `panels`, and `layouts`. Each is required and non-nullable. Omit one, or send `null`, and the request is rejected with `400 Bad Request` and the error code `dashboard_invalid_input`. Send the empty collection when a dashboard has none:
+
+- `variables`: an array. Use `[]` for a dashboard with no variables.
+- `panels`: an object. Use `{}` for a dashboard with no panels.
+- `layouts`: an array. Use `[]` for a dashboard with no layout entries.
+
+The minimum valid spec is therefore:
+
+```json
+{
+    "variables": [],
+    "panels": {},
+    "layouts": []
+}
+```
+
+A bare `{}` spec is no longer accepted at the API layer. Each missing field returns its own message:
+
+```
+spec.variables: is required and must not be null; use [] for a dashboard with no variables
+spec.panels: is required and must not be null; use {} for a dashboard with no panels
+spec.layouts: is required and must not be null; use [] for a dashboard with no layouts
+```
+
+This only affects specs you build programmatically. Existing dashboards need no edits: a one-time migration on startup back-fills any stored dashboard missing these fields with the empty collection, so dashboards created through the UI are unaffected.
 
 Users can now personally pin any dashboard, so there's a special List API to get dashboards that takes pins into account:
 
