@@ -1,0 +1,87 @@
+---
+date: 2026-09-12
+title: Go OpenTelemetry Instrumentation Options Overview
+description: Compare the OpenTelemetry SDK, compile-time, and eBPF instrumentation for Go, then pick the setup that fits your application and send traces to SigNoz.
+doc_type: explanation
+---
+
+Go has three ways to send traces to SigNoz. You can add the OpenTelemetry SDK to your code, you can build the instrumentation into your binary, or you can attach an eBPF agent to the running process. This page compares them so you can pick one and start.
+
+<Figure
+  src="/img/docs/instrumentation/golang/go-zero-code-attach-points.svg"
+  alt="The OpenTelemetry SDK attaches to source code, otelc attaches during go build, and the eBPF agent attaches to the running process"
+  caption="The three options differ in where they attach: your code, your build, or your running process"
+/>
+
+## Compare the options
+
+| | [OpenTelemetry SDK](https://signoz.io/docs/instrumentation/opentelemetry-golang/) | [Compile-time](https://signoz.io/docs/instrumentation/golang/compile-time-instrumentation/) | [eBPF](https://signoz.io/docs/instrumentation/golang/ebpf-instrumentation/) |
+|---|---|---|---|
+| How it works | You initialize the SDK and wrap libraries in your code | `otelc` injects the instrumentation during `go build` | A separate agent attaches probes to the running process |
+| Code change | Yes | No | No |
+| Rebuild | Yes | Yes | No |
+| Elevated privileges | No | No | Yes, root and a privileged container |
+| Operating system | Any | Any | Linux only |
+| Library coverage | Every library with a contrib package | 13 common libraries | 4 libraries |
+| Custom spans | Yes | Through the OpenTelemetry API | Through the global tracer provider |
+| Signals | Traces, metrics, and logs | Traces and Go runtime metrics | Traces |
+| Project status | Stable | Stable since v1.0.0 | Work in progress |
+
+## Choose your approach
+
+Start with the [OpenTelemetry SDK](https://signoz.io/docs/instrumentation/opentelemetry-golang/) when you own the code and want full control. You choose which libraries to instrument, you add spans around your own business logic, and you send all three signals. This path costs you a few lines of setup code.
+
+Reach for [compile-time instrumentation](https://signoz.io/docs/instrumentation/golang/compile-time-instrumentation/) when you want traces without touching the source. You add `otelc` to the build command, and the tool instruments the libraries it recognizes. Use it when a team owns many services and you want the same coverage in all of them.
+
+Choose [eBPF instrumentation](https://signoz.io/docs/instrumentation/golang/ebpf-instrumentation/) only when you cannot rebuild the binary. A vendor binary or a frozen release artifact fits this case. The agent needs a privileged container, it runs on Linux only, and the OpenTelemetry project still labels it as work in progress.
+
+<Admonition type="info" title="There is a fourth option for mixed environments">
+[OpenTelemetry eBPF Instrumentation (OBI)](https://signoz.io/docs/instrumentation/opentelemetry-ebpf/) reads HTTP, HTTPS, and gRPC traffic in the kernel, for services written in any language. Use it when you want one agent across a fleet of services you did not write. It reports request rate, errors, and latency, but it cannot see inside your application.
+</Admonition>
+
+## Start here
+
+<DocCardContainer>
+
+<DocCard
+    title="OpenTelemetry SDK"
+    description="Instrument your Go code with the OpenTelemetry SDK and send traces, metrics, and logs"
+    href="https://signoz.io/docs/instrumentation/opentelemetry-golang/"
+/>
+
+<DocCard
+    title="Compile-time instrumentation"
+    description="Build the instrumentation into your binary with otelc, without a code change"
+    href="https://signoz.io/docs/instrumentation/golang/compile-time-instrumentation/"
+/>
+
+<DocCard
+    title="eBPF instrumentation"
+    description="Attach an agent to a running Go binary that you cannot rebuild"
+    href="https://signoz.io/docs/instrumentation/golang/ebpf-instrumentation/"
+/>
+
+<DocCard
+    title="Manual instrumentation"
+    description="Add custom spans, attributes, and events around your own business logic"
+    href="https://signoz.io/docs/instrumentation/manual-instrumentation/golang/manual-instrumentation/"
+/>
+
+</DocCardContainer>
+
+## Combine the approaches
+
+Both zero-code options carry the spans you write yourself.
+
+- With compile-time instrumentation, the OpenTelemetry API works as usual. Create spans with `otel.Tracer(...)` and they join the injected traces. See [Manual instrumentation in Go](https://signoz.io/docs/instrumentation/manual-instrumentation/golang/manual-instrumentation/).
+- With the eBPF agent, set `OTEL_GO_AUTO_GLOBAL=true`. The agent then exports the spans your application sends to the OpenTelemetry global tracer provider.
+
+## Next steps
+
+- Send logs from your Go application with [Logrus](https://signoz.io/docs/logs-management/send-logs/logrus-to-signoz/), [Zap](https://signoz.io/docs/logs-management/send-logs/zap-to-signoz/), or [Zerolog](https://signoz.io/docs/logs-management/send-logs/zerolog-to-signoz/).
+- [Create a dashboard](https://signoz.io/docs/dashboards/dashboard-templates/go-runtime-metrics/) from the Go runtime metrics.
+- Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/).
+
+## Get Help
+
+<GetHelp />
