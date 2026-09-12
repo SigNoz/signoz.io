@@ -1,0 +1,81 @@
+---
+
+title: Text Panel - Add Markdown Notes to SigNoz Dashboards
+date: 2026-09-12
+description: Learn how to use the Text panel in SigNoz dashboards to add Markdown notes, banners, task lists, and variables without writing a query.
+doc_type: reference
+---
+
+## Text
+
+The Text panel renders authored Markdown content, with no data source or query. Use it to add rich notes, formatted instructions, task lists, and colored banners next to the data panels on a dashboard.
+
+Text panels are available on V2 dashboards on both SigNoz Cloud and self-hosted, with no feature flag.
+
+### Add a Text panel
+
+1. Open a V2 dashboard and select **New Panel**.
+2. In the panel type picker, choose **Text**. Unlike the data panels, Text does not ask for a signal, metric, or query.
+3. The panel editor opens with a Markdown editor pane on the left and a live preview pane on the right. The preview updates as you type, indicated by the **Preview updates as you type** hint.
+4. Write your Markdown, then save the panel.
+
+When the panel body is empty or contains only whitespace, the rendered panel shows an empty state: **Nothing written yet / Add Markdown to this panel to show content.**
+
+### Use variables in the body
+
+Reference dashboard variables inside the Markdown body using any of these four syntaxes:
+
+- `{{var}}`
+- `{{.var}}`
+- `[[var]]`
+- `$var`
+
+The `$var` form also accepts dotted names such as `$service.name`. A variable name that is not defined on the dashboard renders as literal text, so a stray token never breaks the panel.
+
+When you rename a variable that a Text panel references, the [variable impact dialog](https://signoz.io/docs/userguide/manage-variables/#rename-impact-review) lists **Markdown body** as an affected usage and rewrites the panel body to the new name along with the rest of the included changes.
+
+<Admonition type="info">
+Variable interpolation needs the dashboard's variable runtime. On [public dashboards](https://signoz.io/docs/dashboards/public-sharing/), variable tokens render as literal text because public views have no variable runtime.
+</Admonition>
+
+### Panel appearance
+
+The **Panel appearance** section controls how the Markdown body sits inside the panel card.
+
+- **Horizontal alignment** — `Left`, `Center`, or `Right`.
+- **Vertical alignment** — `Top`, `Middle`, or `Bottom`.
+- **Background** — choose one of:
+    - **Transparent** — removes the card border and title bar background entirely, so the panel blends into the dashboard grid.
+    - **Default** — the standard panel surface.
+    - A named color preset: **Robin**, **Purple**, **Sakura**, **Cherry**, **Amber**, **Forest**, **Sienna**, or **Slate**. Each preset adapts to light and dark themes.
+    - **Custom** — pick any hex color.
+
+<Admonition type="warning">
+When a custom background color does not have enough contrast against the text, SigNoz shows a WCAG contrast ratio warning beneath the color picker (the ratio must be at least 4.5:1). Pick a darker or lighter color until the warning clears to keep the text legible.
+</Admonition>
+
+### Panel header
+
+Enable **Hide header** in the **Panel Details** section to remove the title strip from the panel. Hovering a headerless panel reveals a drag handle pill and a floating actions menu, so you can still move and manage it.
+
+### Scroll for more
+
+When the Markdown content is taller than the panel's visible height, a **Scroll for more** pill with chevron icons appears at the bottom edge. Click it to smoothly scroll the panel to the end.
+
+### Interactive task lists
+
+Markdown checkbox items (`- [ ]` and `- [x]`) are interactive in the rendered panel. Toggling a checkbox writes back to the panel spec immediately. Hovering a checkbox shows the tooltip **Toggling this updates the panel spec.**
+
+Toggling is disabled in read-only contexts, such as the View modal and public dashboards.
+
+### View modal
+
+Opening the **View** modal for a Text panel (from the panel's **⋯** menu) shows the Markdown editor pane alongside the live preview, instead of the query and chart toolbar used by data panels. Select **Switch to Edit Mode** in the modal header to open the full panel editor.
+
+### Public dashboards
+
+On [public (shared) dashboards](https://signoz.io/docs/dashboards/public-sharing/), Text panels render the Markdown body in read-only mode. Variable tokens appear as literal text because public dashboards have no variable runtime, and the **Hide header** setting is respected.
+
+### Get Help
+
+<GetHelp />
