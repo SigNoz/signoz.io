@@ -11,6 +11,7 @@ const {
   shouldRewritePageToMarkdown,
   buildPageMarkdownRewritePath,
   servesMarkdownAlternate,
+  buildMarkdownAlternatePath,
 } = loadTsModule('utils/agentMarkdownRouting.ts')
 
 test('hasMarkdownExtension detects .md-suffixed paths with and without trailing slash', () => {
@@ -143,4 +144,20 @@ test('CONTENT_MARKDOWN_SECTIONS covers all CMS-backed sections', () => {
     [...CONTENT_MARKDOWN_SECTIONS].sort(),
     ['blog', 'customers', 'comparisons', 'faqs', 'guides', 'opentelemetry'].sort()
   )
+})
+
+test('buildMarkdownAlternatePath returns the public .md URL agents would guess', () => {
+  assert.equal(buildMarkdownAlternatePath('/pricing'), '/pricing.md')
+  assert.equal(buildMarkdownAlternatePath('/pricing/'), '/pricing.md')
+  assert.equal(buildMarkdownAlternatePath('/blog/some-post'), '/blog/some-post.md')
+  assert.equal(
+    buildMarkdownAlternatePath('/product-comparison/signoz-vs-datadog'),
+    '/product-comparison/signoz-vs-datadog.md'
+  )
+})
+
+test('buildMarkdownAlternatePath skips markdown URLs and the home page', () => {
+  assert.equal(buildMarkdownAlternatePath('/pricing.md'), null)
+  assert.equal(buildMarkdownAlternatePath('/blog/some-post.md/'), null)
+  assert.equal(buildMarkdownAlternatePath('/'), null)
 })

@@ -2,8 +2,13 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const { loadTsModule } = require('./helpers/loadTsModule')
 
-const { AGENT_CACHE_CONTROL, AGENT_CDN_CACHE_CONTROL, computeWeakEtag, agentResponse } =
-  loadTsModule('utils/agentResponseHeaders.ts')
+const {
+  AGENT_CACHE_CONTROL,
+  AGENT_CDN_CACHE_CONTROL,
+  computeWeakEtag,
+  agentResponse,
+  agentNotFoundResponse,
+} = loadTsModule('utils/agentResponseHeaders.ts')
 
 test('agentResponse sets client-visible and CDN cache headers', async () => {
   const response = agentResponse('body')
@@ -52,4 +57,26 @@ test('agentResponse honors a custom content type', () => {
   const response = agentResponse('body', { contentType: 'text/plain; charset=utf-8' })
 
   assert.equal(response.headers.get('Content-Type'), 'text/plain; charset=utf-8')
+})
+
+test('agentNotFoundResponse answers a miss with a recoverable markdown body', async () => {
+  const response = agentNotFoundResponse('/does-not-exist')
+  const body = await response.text()
+
+  assert.equal(response.status, 404)
+  assert.equal(response.headers.get('Content-Type'), 'text/markdown; charset=utf-8')
+  assert.equal(response.headers.get('Cache-Control'), 'no-store')
+  assert.equal(response.headers.get('X-Robots-Tag'), 'noindex')
+  assert.match(body.split('\n')[0], /^# 404 Not Found$/)
+  assert.match(body, /`\/does-not-exist`/)
+  assert.match(body, /https:\/\/signoz\.io\/llms\.txt/)
+  assert.match(body, /https:\/\/signoz\.io\/sitemap\.xml/)
+  assert.match(body, /https:\/\/signoz\.io\/docs\/introduction\//)
+})
+
+test('agentNotFoundResponse works without a pathname', async () => {
+  const body = await agentNotFoundResponse().text()
+
+  assert.match(body, /^# 404 Not Found/)
+  assert.equal(body.includes('undefined'), false)
 })
