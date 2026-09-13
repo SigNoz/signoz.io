@@ -166,7 +166,7 @@ res, err := resource.Merge(
 
 Pass `res` to the tracer, meter, and logger providers with their `WithResource` option.
 
-The `semconv` import path must name a package that ships inside your `go.opentelemetry.io/otel` version. `semconv/v1.40.0` is present from v1.43.0 onward. Check the <a href="https://github.com/open-telemetry/opentelemetry-go/tree/main/semconv" target="_blank" rel="noopener noreferrer nofollow">semconv directory</a> at your version tag before you pick a newer path.
+The `semconv` import path must name a package that ships inside your `go.opentelemetry.io/otel` version. `semconv/v1.40.0` is present from v1.42.0 onward. Check the <a href="https://github.com/open-telemetry/opentelemetry-go/tree/main/semconv" target="_blank" rel="noopener noreferrer nofollow">semconv directory</a> at your version tag before you pick a newer path.
 
 `resource.NewSchemaless` keeps the schema URL of `resource.Default()`. If you use `resource.NewWithAttributes` with a schema URL that does not match, `resource.Merge` returns `ErrSchemaURLConflict` and drops the schema URL. Handle the error in both cases.
 
@@ -348,13 +348,16 @@ processors:
         action: insert
 ```
 
-Then add `resource/ownership` to the `processors` list of each pipeline that needs it. Edit the list your file already has. Do not replace it, because a pipeline often already runs `memory_limiter`, `resourcedetection`, a filter, or `batch`, and removing any of those changes what the Collector sends:
+Then add `resource/ownership` to the `processors` list of each pipeline that needs it. Edit the list your file already has. Do not replace it, because a pipeline often already runs `memory_limiter`, `resourcedetection`, or a filter, and removing any of those changes what the Collector sends.
+
+Order inside the list matters. Keep `memory_limiter` first. Add `resource/ownership` after it. If the pipeline ends with `batch`, keep `batch` last.
+
+The example below shows a pipeline that already had three processors. Your list will differ:
 
 ```yaml:otel-collector-config.yaml
 service:
   pipelines:
     traces:
-      # Keep every entry this list already has. Add resource/ownership before batch.
       processors: [memory_limiter, resourcedetection, resource/ownership, batch]
 ```
 
