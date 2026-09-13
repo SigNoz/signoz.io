@@ -1,5 +1,5 @@
 ---
-date: 2026-06-11
+date: 2026-08-22
 tags: [Self-Host]
 title: Standard Upgrade Guide for SigNoz
 description: Learn how to upgrade SigNoz Instance
@@ -13,6 +13,131 @@ This guide covers how to upgrade your SigNoz instance across different deploymen
 - Backup your existing SigNoz configuration and data before upgrading
 - Ensure you have appropriate permissions to perform the upgrade
 - Review the [release notes](https://github.com/SigNoz/signoz/releases) for any breaking changes
+
+
+## Upgrade with Foundry
+
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
+</Admonition>
+
+Foundry upgrades a Docker Compose, Docker Swarm, Kubernetes, or systemd deployment through the same loop. Update `foundryctl`, check your upgrade path, set the target version in `casting.yaml`, then re-run `foundryctl cast`.
+
+<Admonition type="info" title="Render, Coolify, and Railway castings">
+`cast` cannot deploy to these platforms. It regenerates the deployment files under `pours/` and prints the steps to apply them, so finish the upgrade on the platform itself.
+</Admonition>
+
+### Step 1: Update foundryctl
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+```
+
+`foundryctl` carries no SigNoz version of its own, so this step only picks up new casting features and compatibility checks. Your `casting.yaml` decides which SigNoz version gets deployed.
+
+### Step 2: Check your upgrade path
+
+Some releases are mandatory stops that carry their own steps, and skipping one breaks schema or dashboard migrations. Run your current version through the [Upgrade Path Tool](https://signoz.io/upgrade-path/) and note every stop it lists.
+
+Upgrade to one stop at a time, in the order the tool returns. Read that release's guide, then run Step 3 and Step 4 with the stop as your target version. Repeat until you reach the version you want.
+
+### Step 3: Set the target version in casting.yaml
+
+Pin the SigNoz and collector images to the release you want. An unpinned component defaults to the `latest` tag, which makes an upgrade hard to repeat and hard to roll back.
+
+```yaml
+spec:
+  signoz:
+    spec:
+      image: signoz/signoz:v0.138.0
+  ingester:
+    spec:
+      image: signoz/signoz-otel-collector:v0.144.9
+```
+
+SigNoz and the SigNoz OTel Collector use separate version series, so the two tags do not match. Take each tag from its own releases page: <a href="https://github.com/SigNoz/signoz/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz releases</a> and <a href="https://github.com/SigNoz/signoz-otel-collector/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz OTel Collector releases</a>. If you also pin ClickHouse, keep it on a version the collector supports. Foundry checks the combination and stops with the required version when it does not match.
+
+For a `mode: systemd` deployment, image tags do not apply. Foundry runs the binaries already installed on the host, so Step 4 replaces those instead.
+
+### Step 4: Apply the casting
+
+<Tabs entityName="environment">
+<TabItem value="containers" label="Docker, Swarm, and Kubernetes" default>
+
+```bash
+foundryctl cast -f casting.yaml
+```
+
+`cast` re-checks your tools, regenerates the files under `pours/`, and rolls out the new version:
+
+- Docker Compose: `docker compose up -d` against the regenerated Compose file
+- Docker Swarm: `docker stack deploy`
+- Kubernetes with Helm: `helm upgrade` on your existing release
+
+The telemetry-store migrator runs as part of the rollout, so schema migrations need no separate step.
+
+<Admonition type="warning" title="On Docker Compose with unpinned images? Pull first">
+On Docker Compose, `cast` runs `docker compose up -d` without a pull, and Compose reuses an image tag that already exists on the host. A `latest` tag you pulled earlier therefore keeps serving the old build. Pull the images first, then cast:
+
+```bash
+docker compose -f pours/deployment/compose.yaml pull
+foundryctl cast -f casting.yaml
+```
+</Admonition>
+
+</TabItem>
+<TabItem value="systemd" label="Linux (systemd)">
+
+`cast` starts units, but it never stops or restarts a unit that is already running. An upgrade therefore stops the services first and re-runs the migrations by hand.
+
+1. **Stop the services that run the old binaries:**
+   ```bash
+   sudo systemctl stop signoz-signoz.service signoz-ingester.service
+   ```
+
+2. **Extract the new archives over the existing directories.** Use your own target versions, and your own paths if the casting annotations point elsewhere.
+   ```bash
+   ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+   curl -fsSL "https://github.com/SigNoz/signoz/releases/download/v0.138.0/signoz_linux_${ARCH}.tar.gz" \
+     | sudo tar -xz --strip-components=1 -C /opt/signoz
+   curl -fsSL "https://github.com/SigNoz/signoz-otel-collector/releases/download/v0.144.9/signoz-otel-collector_linux_${ARCH}.tar.gz" \
+     | sudo tar -xz --strip-components=1 -C /opt/ingester
+   ```
+
+   Extract each archive in full. The `signoz` binary loads the UI and the email templates relative to itself, so `bin/`, `web/`, `templates/`, and `conf/` must stay together.
+
+3. **Re-run the schema migrations with the new collector:**
+   ```bash
+   sudo systemctl restart signoz-telemetrystore-migrator.service
+   ```
+
+   The migrator unit is a `oneshot` that stays active after it exits, so a plain start is a no-op and the migrations for the new version would be skipped.
+
+4. **Apply the casting:**
+   ```bash
+   sudo foundryctl cast -f casting.yaml
+   ```
+
+   `cast` regenerates the units under `pours/`, reloads systemd, and starts the services you stopped in step 1.
+
+</TabItem>
+</Tabs>
+
+### Step 5: Verify the upgrade
+
+1. **Confirm the migrations finished.** Use the command for your deployment mode:
+   - Docker Compose: `docker compose -f pours/deployment/compose.yaml ps -a signoz-telemetrystore-migrator`, which should have exited with code `0`
+   - Docker Swarm: `docker service ps <stack>_signoz-telemetrystore-migrator`, where `<stack>` is the `metadata.name` in your casting (`signoz` by default)
+   - Kubernetes: `kubectl get jobs -n <namespace>`, where the migrator Job should read as completed
+   - systemd: `systemctl status signoz-telemetrystore-migrator.service`, which should read `active (exited)`
+
+   On a failure, read that migrator's logs before you go on. The collector refuses to start against a half-migrated schema.
+
+2. **Check that the components are healthy.** Use the command for your deployment mode: `docker ps`, `docker service ls`, `kubectl get pods -n <namespace>`, or `systemctl status 'signoz-*'`.
+
+3. **Confirm the new version.** Open the SigNoz UI and check the version under **Settings**.
+
+4. **Confirm telemetry is flowing again.** Open the [Logs explorer](https://signoz.io/docs/logs-management/querying-logs/) and the [Traces explorer](https://signoz.io/docs/userguide/traces/), and check that both show data from after the upgrade. Components can be healthy and on the new version while the export pipeline is still broken, so confirm that data is arriving and not only that the services are up.
 
 
 ## Kubernetes Deployment
@@ -58,6 +183,12 @@ For more details, see the [Helm upgrade documentation](https://helm.sh/docs/helm
 
 ## Docker Standalone
 
+<Admonition type="warning" title="The bundled Docker Compose files are deprecated">
+The install script (`install.sh`) and the Docker Compose files under `deploy/` in the SigNoz repository are deprecated as of <a href="https://github.com/SigNoz/signoz/releases/tag/v0.130.0" target="_blank" rel="noopener noreferrer nofollow">SigNoz v0.130.0</a>, and are no longer maintained or distributed. The steps in this section apply only to a deployment that already runs from those files.
+
+To move that deployment to Foundry without losing data, follow the <a href="https://github.com/SigNoz/signoz/blob/main/deploy/MIGRATION.md" target="_blank" rel="noopener noreferrer nofollow">migration guide</a>, then upgrade with [Upgrade with Foundry](#upgrade-with-foundry).
+</Admonition>
+
 ### Upgrade to Latest Version
 
 1. **Switch to main branch:**
@@ -95,6 +226,12 @@ To upgrade to a specific version (e.g., v0.6.2):
 
 
 ## Docker Swarm Cluster
+
+<Admonition type="warning" title="The bundled Docker Compose files are deprecated">
+The install script (`install.sh`) and the Docker Compose files under `deploy/` in the SigNoz repository are deprecated as of <a href="https://github.com/SigNoz/signoz/releases/tag/v0.130.0" target="_blank" rel="noopener noreferrer nofollow">SigNoz v0.130.0</a>, and are no longer maintained or distributed. The steps in this section apply only to a swarm stack that already runs from a hand-maintained `docker-compose.yaml`.
+
+Foundry generates and deploys the swarm stack for you. See [Upgrade with Foundry](#upgrade-with-foundry) for the upgrade loop, and [Install SigNoz on Docker Swarm](https://signoz.io/docs/install/docker-swarm/) for the move to Foundry.
+</Admonition>
 
 ### Manual Image Update
 
