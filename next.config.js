@@ -3435,6 +3435,11 @@ module.exports = () => {
           destination: '/docs/instrumentation/javascript/opentelemetry-graphql/',
           permanent: true,
         },
+        {
+          source: '/blog/opentelemetry-collector-prometheus-receiver/',
+          destination: '/docs/userguide/prometheus-metrics/',
+          permanent: true,
+        },
       ])
     },
     webpack: (config, options) => {
