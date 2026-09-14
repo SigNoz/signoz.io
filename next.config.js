@@ -2919,7 +2919,7 @@ module.exports = () => {
         },
         {
           source: '/does-signoz-work-well-with-existing-prometheus-setups/',
-          destination: '/faqs/does-signoz-work-well-with-existing-prometheus-setups/',
+          destination: '/docs/userguide/prometheus-metrics/',
           permanent: true,
         },
         {
@@ -3155,7 +3155,7 @@ module.exports = () => {
         },
         {
           source: '/does-signoz-work-well-with-existing-prometheus-setups',
-          destination: '/faqs/does-signoz-work-well-with-existing-prometheus-setups/',
+          destination: '/docs/userguide/prometheus-metrics/',
           permanent: true,
         },
         {
@@ -3438,6 +3438,16 @@ module.exports = () => {
         {
           source: '/blog/opentelemetry-collector-prometheus-receiver/',
           destination: '/docs/userguide/prometheus-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/faqs/does-signoz-work-well-with-existing-prometheus-setups/',
+          destination: '/docs/userguide/prometheus-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-are-the-benefits-of-prometheus/',
+          destination: '/guides/what-is-the-advantage-of-prometheus/',
           permanent: true,
         },
       ])
