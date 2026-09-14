@@ -3465,6 +3465,11 @@ module.exports = () => {
           destination: '/guides/promql-cheat-sheet/',
           permanent: true,
         },
+        {
+          source: '/guides/prometheus-monitoring-101/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
+          permanent: true,
+        },
       ])
     },
     webpack: (config, options) => {
