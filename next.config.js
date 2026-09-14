@@ -3120,7 +3120,7 @@ module.exports = () => {
         },
         {
           source: '/out-of-box-application-monitoring-prometheus',
-          destination: '/blog/out-of-box-application-monitoring-prometheus/',
+          destination: '/blog/opentelemetry-vs-prometheus/',
           permanent: true,
         },
         {
@@ -3447,7 +3447,22 @@ module.exports = () => {
         },
         {
           source: '/guides/what-are-the-benefits-of-prometheus/',
-          destination: '/guides/what-is-the-advantage-of-prometheus/',
+          destination: '/comparisons/prometheus-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/blog/out-of-box-application-monitoring-prometheus/',
+          destination: '/blog/opentelemetry-vs-prometheus/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-is-the-advantage-of-prometheus/',
+          destination: '/comparisons/prometheus-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/blog/prometheus-query/',
+          destination: '/guides/promql-cheat-sheet/',
           permanent: true,
         },
       ])
