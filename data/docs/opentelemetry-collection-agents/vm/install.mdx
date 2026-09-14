@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-09-10
 title: Install the OpenTelemetry Collector on a Virtual Machine
 meta_title: Install OpenTelemetry Collector on a VM
 description: Install the OpenTelemetry Collector binary on your virtual machine to collect telemetry data.
@@ -79,6 +79,7 @@ receivers:
         mute_process_name_error: true
         mute_process_exe_error: true
         mute_process_io_error: true
+        mute_process_user_error: true
       processes: {}
 processors:
   batch:
@@ -86,7 +87,8 @@ processors:
     timeout: 10s
   # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
   resourcedetection:
-    detectors: [env, host, system, docker, k8snode]
+    # Drop "docker" if this host does not run Docker. The detector then only logs warnings.
+    detectors: [env, system, docker]
 exporters:
   otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
@@ -199,6 +201,7 @@ receivers:
         mute_process_name_error: true
         mute_process_exe_error: true
         mute_process_io_error: true
+        mute_process_user_error: true
       processes: {}
 processors:
   batch:
@@ -206,7 +209,8 @@ processors:
     timeout: 10s
   # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
   resourcedetection:
-    detectors: [env, host, system, docker, k8snode]
+    # Drop "docker" if this host does not run Docker. The detector then only logs warnings.
+    detectors: [env, system, docker]
 exporters:
   otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
@@ -315,6 +319,7 @@ receivers:
         mute_process_name_error: true
         mute_process_exe_error: true
         mute_process_io_error: true
+        mute_process_user_error: true
       processes: {}
 processors:
   batch:
@@ -322,7 +327,8 @@ processors:
     timeout: 10s
   # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
   resourcedetection:
-    detectors: [env, host, system, docker, k8snode]
+    # Drop "docker" if this host does not run Docker. The detector then only logs warnings.
+    detectors: [env, system, docker]
 exporters:
   otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
@@ -424,6 +430,7 @@ receivers:
         mute_process_name_error: true
         mute_process_exe_error: true
         mute_process_io_error: true
+        mute_process_user_error: true
       processes: {}
 processors:
   batch:
@@ -431,7 +438,8 @@ processors:
     timeout: 10s
   # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
   resourcedetection:
-    detectors: [env, host, system, docker, k8snode]
+    # Drop "docker" if this host does not run Docker. The detector then only logs warnings.
+    detectors: [env, system, docker]
 exporters:
   otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
@@ -520,6 +528,7 @@ receivers:
         mute_process_name_error: true
         mute_process_exe_error: true
         mute_process_io_error: true
+        mute_process_user_error: true
       processes: {}
 processors:
   batch:
@@ -527,7 +536,8 @@ processors:
     timeout: 10s
   # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
   resourcedetection:
-    detectors: [env, host, system, docker, k8snode]
+    # Drop "docker" if this host does not run Docker. The detector then only logs warnings.
+    detectors: [env, system, docker]
 exporters:
   otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
@@ -625,6 +635,7 @@ receivers:
         mute_process_name_error: true
         mute_process_exe_error: true
         mute_process_io_error: true
+        mute_process_user_error: true
       processes: {}
 processors:
   batch:
@@ -632,7 +643,8 @@ processors:
     timeout: 10s
   # Ref: https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor
   resourcedetection:
-    detectors: [env, host, system, docker, k8snode]
+    # Drop "docker" if this host does not run Docker. The detector then only logs warnings.
+    detectors: [env, system, docker]
 exporters:
   otlphttp:
     endpoint: https://ingest.<region>.signoz.cloud:443
