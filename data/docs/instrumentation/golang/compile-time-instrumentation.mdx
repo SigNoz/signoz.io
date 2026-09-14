@@ -1,0 +1,327 @@
+---
+date: 2026-09-12
+title: Go Compile-Time OpenTelemetry Instrumentation Guide
+description: Instrument Go applications at build time with OpenTelemetry otelc and send traces and Go runtime metrics to SigNoz without any code change.
+doc_type: howto
+---
+
+## Overview
+
+OpenTelemetry Go compile-time instrumentation adds tracing to your application during `go build`. The tool is called `otelc`. It rewrites the build, not your source code, so you keep your code free of OpenTelemetry calls. The instrumented binary exports traces and Go runtime metrics to SigNoz over OTLP.
+
+<Admonition type="tip">
+Use this page when you can rebuild the application. If you cannot rebuild it, use [Go eBPF instrumentation](https://signoz.io/docs/instrumentation/golang/ebpf-instrumentation/) instead. If you want to decide which spans exist and what they carry, use the [OpenTelemetry SDK](https://signoz.io/docs/instrumentation/opentelemetry-golang/). The [Go instrumentation overview](https://signoz.io/docs/instrumentation/golang/overview/) compares all three.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud -> Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- Go 1.25 or later.
+- An application that uses at least one [supported library](#supported-libraries).
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
+
+## How it works
+
+`otelc` wraps the Go toolchain. It reads your dependency graph, finds the libraries it has rules for, and injects hook code into those packages as the compiler runs. Your files on disk never change, so the repository shows no diff.
+
+<Figure
+  src="/img/docs/instrumentation/golang/go-compile-time-flow.svg"
+  alt="otelc wraps go build, injects hooks into matched libraries, and produces an instrumented binary that exports OTLP to SigNoz"
+  caption="otelc changes the build, so the binary carries the instrumentation and your repository stays clean"
+/>
+
+The build also injects the OpenTelemetry SDK setup. The binary reads the standard `OTEL_*` environment variables at startup and exports OTLP to SigNoz on its own. It needs no agent and no extra privileges.
+
+## Send traces to SigNoz
+
+### Step 1. Install otelc
+
+Install the tool with `go install`:
+
+```bash noLineNumbers
+go install go.opentelemetry.io/otelc/tool/cmd/otelc@v1.1.0
+```
+
+Confirm that the tool is on your path:
+
+```bash noLineNumbers
+otelc version
+```
+
+### Step 2. Build your application with otelc
+
+Put `otelc` in front of your normal build command.
+
+<Tabs entityName="setup">
+<TabItem value="command-line" label="Command line" default>
+
+```bash noLineNumbers
+otelc go build -o myapp .
+```
+
+If a Makefile or a CI pipeline owns the build command, keep `go build` and plug `otelc` in through `GOFLAGS`:
+
+```bash
+otelc setup
+export GOFLAGS="${GOFLAGS} '-toolexec=otelc toolexec'"
+go build -o myapp .
+```
+
+Run `otelc setup` once in the module directory, and again after the dependencies change. It writes the matched rules to `.otelc-build/`, which the build reads.
+
+</TabItem>
+
+<TabItem value="docker" label="Dockerfile">
+
+Install `otelc` in the build stage and build the binary with it:
+
+```dockerfile:Dockerfile
+FROM golang:1.25 AS build
+WORKDIR /src
+RUN go install go.opentelemetry.io/otelc/tool/cmd/otelc@v1.1.0
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN otelc go build -o /out/myapp .
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=build /out/myapp /usr/local/bin/myapp
+ENTRYPOINT ["/usr/local/bin/myapp"]
+```
+
+The runtime image must contain root certificates. Without them, the export to SigNoz Cloud fails with a TLS error.
+
+</TabItem>
+</Tabs>
+
+The build prints one line for each instrumentation that it applies. The binary behaves like the one you built before.
+
+### Step 3. Set the environment variables and run
+
+The instrumented binary reads the standard OpenTelemetry environment variables at startup. It needs no other configuration.
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+```bash
+export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
+
+./myapp
+```
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+```yaml:docker-compose.yaml
+services:
+  myapp:
+    image: <your-image>
+    environment:
+      OTEL_SERVICE_NAME: "<service-name>"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "https://ingest.<region>.signoz.cloud:443"
+      OTEL_EXPORTER_OTLP_HEADERS: "signoz-ingestion-key=<your-ingestion-key>"
+      OTEL_RESOURCE_ATTRIBUTES: "service.version=<service-version>"
+```
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+Store the ingestion key in a Secret:
+
+```bash
+kubectl create secret generic signoz-ingestion \
+  --from-literal=otlp-headers="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Add the environment variables to your Deployment:
+
+```yaml:deployment.yaml
+    spec:
+      containers:
+        - name: myapp
+          image: <your-image>
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: "<service-name>"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "https://ingest.<region>.signoz.cloud:443"
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              valueFrom:
+                secretKeyRef:
+                  name: signoz-ingestion
+                  key: otlp-headers
+```
+
+The instrumented binary needs no extra privileges and no sidecar.
+
+</TabItem>
+</Tabs>
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: The name your service gets in SigNoz, for example `payment-service`.
+- `<service-version>` (optional): Your release version, image tag, or git commit, for example `1.4.2`.
+
+At startup the application logs these lines:
+
+```text noLineNumbers
+trace provider initialized with auto-export
+OpenTelemetry initialized
+runtime metrics enabled
+```
+
+## Validate
+
+Send a few requests to your application, then open SigNoz.
+
+Open **Services**. Your service appears with request rate, error rate, and latency within a minute or two.
+
+Open **Traces** and filter by your service name. Each request produces one server span, one client span for an outbound HTTP call, and one span for each database call.
+
+<Figure
+  src="/img/docs/instrumentation/golang/otelc-traces-explorer.webp"
+  alt="Spans from a Go service instrumented with otelc, listed in the SigNoz Traces Explorer"
+  caption="HTTP and database spans from a Go binary built with otelc"
+/>
+
+Open one trace and select a database span. The span carries the query text, the database system, and the address of the database server.
+
+<Figure
+  src="/img/docs/instrumentation/golang/otelc-trace-detail.webp"
+  alt="Trace detail for a Go service instrumented with otelc, with the database span selected"
+  caption="A SELECT span with db.query.text and server.address, captured without a code change"
+/>
+
+Open **Metrics** and search for `go.`. The Go runtime metrics, such as `go.goroutine.count` and `go.memory.used`, arrive with the same service name.
+
+## Supported libraries
+
+`otelc` instruments these libraries. Your application gets spans for the libraries it uses.
+
+| Library | Spans |
+|---|---|
+| `net/http` (client and server) | HTTP |
+| `google.golang.org/grpc` (client and server) | RPC |
+| `database/sql` | Database client |
+| `github.com/gin-gonic/gin` | HTTP server |
+| `github.com/redis/go-redis/v9` | Database client |
+| `go.mongodb.org/mongo-driver` | Database client |
+| `github.com/segmentio/kafka-go` | Messaging |
+| `github.com/aws/aws-sdk-go-v2` | AWS client |
+| `github.com/linode/linodego/v2` | HTTP client |
+| `k8s.io/client-go` | Kubernetes resource |
+| `github.com/openai/openai-go`, `github.com/anthropics/anthropic-sdk-go` | GenAI |
+| `log`, `log/slog`, `github.com/sirupsen/logrus` | Trace and span ID in log records |
+
+This table matches v1.1.0, the version this guide installs. Later releases add more libraries, so check the <a href="https://github.com/open-telemetry/opentelemetry-go-compile-instrumentation/blob/v1.1.0/docs/getting-started.md#supported-libraries" target="_blank" rel="noopener noreferrer nofollow">supported libraries for v1.1.0</a> against the version you install.
+
+<Admonition type="warning" title="Database spans carry the SQL statement">
+`otelc` records the query text in `db.query.text` on every `database/sql` span, and no option turns that single attribute off. If your queries build values into the statement instead of using placeholders, customer data or secrets reach SigNoz.
+
+Before you run this in production, do one of the following:
+
+- Use parameterized queries, so the statement holds `$1` instead of the value.
+- Turn off database instrumentation at runtime with `OTEL_GO_DISABLED_INSTRUMENTATIONS=database`.
+- [Scrub the attribute in the Collector](https://signoz.io/docs/traces-management/guides/drop-spans/) before the spans leave your network.
+</Admonition>
+
+<Admonition type="info" title="Your library is not on the list?">
+`otelc` only instruments the libraries it has rules for. For anything else, wrap the calls yourself with the [OpenTelemetry SDK](https://signoz.io/docs/instrumentation/opentelemetry-golang/), or add [manual spans](https://signoz.io/docs/instrumentation/manual-instrumentation/golang/manual-instrumentation/) around your own code. Both work alongside the injected instrumentation.
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Turn instrumentations on or off
+</ToggleHeading>
+
+The binary contains every instrumentation that matched your dependencies. You can select a subset at runtime without a rebuild:
+
+```bash noLineNumbers
+# Run only net/http and gRPC instrumentation.
+OTEL_GO_ENABLED_INSTRUMENTATIONS=nethttp,grpc ./myapp
+
+# Run everything except net/http.
+OTEL_GO_DISABLED_INSTRUMENTATIONS=nethttp ./myapp
+```
+
+Names are lowercase. The allowlist applies first, then the denylist removes entries from it.
+
+To control what the build puts into the binary, declare the instrumentations in an `otel.instrumentation.go` file. See the <a href="https://github.com/open-telemetry/opentelemetry-go-compile-instrumentation/blob/main/docs/external-configuration.md" target="_blank" rel="noopener noreferrer nofollow">external configuration guide</a>.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
+
+### The application logs `x509: certificate signed by unknown authority`
+
+- Cause: The container image has no root certificates, so it cannot open a TLS connection to SigNoz Cloud.
+- Fix: Install `ca-certificates` in the runtime image, or copy the certificates from the build stage.
+- Verify: The export errors stop and traces arrive in SigNoz.
+
+### The build succeeds but no spans arrive
+
+- Cause: The application uses no supported library, or the build did not run through `otelc`.
+- Fix: Check the build output for the injected instrumentations. Make sure that the command starts with `otelc go build`, or that `GOFLAGS` carries `-toolexec=otelc toolexec`.
+- Verify: The application logs `OpenTelemetry initialized` at startup.
+
+### Spans exist but a library is missing
+
+- Cause: The instrumentation is turned off, or the library is not supported.
+- Fix: Unset `OTEL_GO_ENABLED_INSTRUMENTATIONS` and `OTEL_GO_DISABLED_INSTRUMENTATIONS`, then compare your library against the [supported list](#supported-libraries).
+- Verify: The missing spans appear in the trace detail view.
+
+### Spans have no Kubernetes attributes
+
+- Cause: The application does not know its pod, namespace, or node.
+- Fix: Send the data through the SigNoz [Kubernetes Collector](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview/), which adds the `k8s.*` attributes. You can also set them yourself with the downward API in `OTEL_RESOURCE_ATTRIBUTES`.
+- Verify: Spans carry `k8s.pod.name` and `k8s.namespace.name`.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+Use the OpenTelemetry Collector when you need to process, filter, or route telemetry before it reaches SigNoz. Follow the [Switch to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) guide for setup instructions.
+
+Then point the application at the Collector:
+
+```bash noLineNumbers
+OTEL_EXPORTER_OTLP_ENDPOINT="http://<collector-host>:4318"
+```
+
+</details>
+
+## Limitations
+
+- The tool instruments a fixed list of libraries. Custom frameworks and your own code get no spans.
+- You must rebuild and redeploy the application to add or remove instrumentation at build time.
+- v1.1.0 exports traces and Go runtime metrics. It records no HTTP or database metrics, so SigNoz derives rate, error, and latency from the spans.
+
+## Next steps
+
+- Add [manual spans](https://signoz.io/docs/instrumentation/manual-instrumentation/golang/manual-instrumentation/) for your own business logic. The OpenTelemetry API works alongside the injected instrumentation.
+- [Create dashboards](https://signoz.io/docs/dashboards/dashboard-templates/go-runtime-metrics/) from the Go runtime metrics.
+- [Set up alerts](https://signoz.io/docs/userguide/alerts-management/) on error rate and latency.
+
+## Get Help
+
+<GetHelp />
