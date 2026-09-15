@@ -1,0 +1,75 @@
+---
+date: 2026-09-14
+title: Meta Muse Code Dashboard
+meta_title: Muse Code CLI Usage Dashboard
+description: "Monitor Meta Muse Code in SigNoz: turns and sessions, token usage and prompt cache efficiency, model and turn latency, and tool activity with failures."
+doc_type: explanation
+---
+
+<Admonition type="note" title="Send telemetry first">
+To use this dashboard, you need to set up the data source and send telemetry to SigNoz. Follow the [Meta Muse Code Monitoring](https://signoz.io/docs/muse-code-monitoring/) guide to get started.
+</Admonition>
+
+A coding agent turns one prompt into many model calls and many tool executions, so the numbers that matter are not the ones a single API dashboard shows. This dashboard reports the agent's own units of work: sessions, turns, the model calls inside a turn, and the tools those calls invoke. It covers token spend and prompt cache efficiency, model and turn latency side by side, and tool volume, duration and failures.
+
+Every panel filters through a multi-select `service_name` variable rather than pinning one service. Teams commonly split Muse Code telemetry by repository or by team by setting a different `service_name` in each `config.json`, and the picker lets you read one of them or combine them. Model-call panels filter on `gen_ai.operation.name = 'chat'` rather than on the span name, because the span name carries the model id. Tool panels filter on `gen_ai.tool.name EXISTS`.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/muse-code-dashboard.webp"
+  alt="Meta Muse Code Dashboard"
+  caption="Meta Muse Code Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/muse-code/muse-code-dashboard.json"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the telemetry your instrumented Muse Code sessions emit to help you:
+
+- **Measure Work in Agent Units**: Read turns rather than API calls, because a turn is the thing a developer actually asked for
+- **See Tool Loop Depth**: Compare model calls against turns, a ratio that tells you how many round trips the agent needed per request
+- **Maximise Cache Savings**: Watch the cache read ratio, which is the single biggest lever on cost since input dominates spend for a coding agent
+- **Account for Reasoning**: Track reasoning tokens, which bill as output but never appear in the reply and are therefore invisible in a transcript
+- **Separate Agent Overhead from Model Time**: Read turn duration against model call latency, where the gap is the agent's own tool and orchestration time
+- **Catch Failing Tools**: Track tool failures over time, which surface as an agent that quietly takes longer rather than as an error
+
+## Panels Included
+
+The Overview section summarizes activity in the selected time range:
+
+| Panel | What it shows |
+|---|---|
+| Sessions | Muse Code TUI sessions observed |
+| Turns | User prompts carried through to a reply |
+| Model Calls | Completed model calls, normally several per turn |
+| Tool Calls | Tool executions across all sessions |
+| Input Tokens | Total input, dominated by context replay |
+| Output Tokens | Total output, excluding reasoning tokens |
+
+The Tokens and Cache section explains where spend goes:
+
+- **Token Usage Over Time**: Input, output, cache read and reasoning on one axis. Input dwarfs the rest, which is the expected shape
+- **Cache Read Ratio (%)**: Share of input served from prompt cache. A ratio that stays low all day usually means prompts are being rebuilt in a way that defeats the cache
+- **Input Tokens by Model**: Which model id is consuming the context, worth watching after a default model change
+- **Reasoning Tokens Over Time**: Reasoning spend, which rises and falls with the configured reasoning effort
+
+The Latency section separates model time from agent time:
+
+- **Model Call Latency**: p50, p95 and p99 for a single model call. Spikes at p99 are usually long reasoning rather than network trouble
+- **Turn Duration**: p50, p95 and p99 for a whole turn. It sits well above model call latency because a turn contains several calls plus the tool time between them
+
+The Tool Activity section covers what the agent actually did:
+
+- **Tool Calls by Tool**: Execution count per tool. Read and search tools dominating is the normal shape for a coding agent
+- **Tool Duration p95 by Tool**: p95 per tool. Subagent spawning sits far above the rest by construction, since it runs a whole child agent
+- **Tool Outcomes**: Success against failure. A few percent failing is healthy, for example a search that matches nothing
+- **Tool Failures Over Time**: Failures on their own axis, where a sustained step usually means the agent is retrying something it can no longer do
+
+The Model Behaviour section shows how the agent is being driven:
+
+- **Model Calls by Finish Reason**: `tool_calls` dominating over `stop` is the normal shape, because every tool round trip ends a call with `tool_calls` and only the final answer ends with `stop`
+- **Model Calls by Reasoning Effort**: Distribution of configured effort, which explains movement in the reasoning token and latency panels
