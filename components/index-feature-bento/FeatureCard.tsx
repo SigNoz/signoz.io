@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { ArrowUpRight } from 'lucide-react'
 
@@ -10,16 +10,32 @@ import type { BentoFeature } from './FeatureBentoData'
 import { FeatureVisual } from './FeatureBentoVisuals'
 import { featureBentoAssets } from './featureBentoAssets'
 
+const SPOT_SIZE = 340
+const DOT_GRID = 22
+
 export default function FeatureCard({ feature }: { feature: BentoFeature }) {
   const cardRef = useRef<HTMLDivElement>(null)
+  const spotRef = useRef<HTMLDivElement>(null)
+  const pointer = useRef({ x: 0, y: 0 })
+  const frame = useRef(0)
   const asset = featureBentoAssets[feature.product] ?? null
 
+  useEffect(() => () => cancelAnimationFrame(frame.current), [])
+
   const handleMouseMove = (event: React.MouseEvent) => {
-    const card = cardRef.current
-    if (!card) return
-    const rect = card.getBoundingClientRect()
-    card.style.setProperty('--mx', `${event.clientX - rect.left}px`)
-    card.style.setProperty('--my', `${event.clientY - rect.top}px`)
+    pointer.current = { x: event.clientX, y: event.clientY }
+    if (frame.current) return
+    frame.current = requestAnimationFrame(() => {
+      frame.current = 0
+      const card = cardRef.current
+      const spot = spotRef.current
+      if (!card || !spot) return
+      const rect = card.getBoundingClientRect()
+      const left = pointer.current.x - rect.left - SPOT_SIZE / 2
+      const top = pointer.current.y - rect.top - SPOT_SIZE / 2
+      spot.style.transform = `translate3d(${left}px, ${top}px, 0)`
+      spot.style.backgroundPosition = `${-(((left % DOT_GRID) + DOT_GRID) % DOT_GRID)}px ${-(((top % DOT_GRID) + DOT_GRID) % DOT_GRID)}px`
+    })
   }
 
   return (
@@ -30,17 +46,23 @@ export default function FeatureCard({ feature }: { feature: BentoFeature }) {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[2] opacity-0 transition-opacity duration-150 group-hover:opacity-70"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at center, color-mix(in srgb, var(--l2-foreground) 34%, transparent) 0.8px, transparent 1.1px)',
-          backgroundSize: '22px 22px',
-          maskImage:
-            'radial-gradient(170px circle at var(--mx, 50%) var(--my, 50%), #000 0%, transparent 100%)',
-          WebkitMaskImage:
-            'radial-gradient(170px circle at var(--mx, 50%) var(--my, 50%), #000 0%, transparent 100%)',
-        }}
-      />
+        className="pointer-events-none absolute inset-0 z-[2] overflow-hidden opacity-0 transition-opacity duration-150 group-hover:opacity-70"
+      >
+        <div
+          ref={spotRef}
+          className="absolute left-0 top-0 will-change-transform"
+          style={{
+            width: SPOT_SIZE,
+            height: SPOT_SIZE,
+            transform: 'translate3d(-9999px, -9999px, 0)',
+            backgroundImage:
+              'radial-gradient(circle at center, color-mix(in srgb, var(--l2-foreground) 34%, transparent) 0.8px, transparent 1.1px)',
+            backgroundSize: `${DOT_GRID}px ${DOT_GRID}px`,
+            maskImage: 'radial-gradient(closest-side, #000 0%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(closest-side, #000 0%, transparent 100%)',
+          }}
+        />
+      </div>
 
       <div className="relative z-[3] max-w-3xl p-5 pr-12 sm:p-6 sm:pr-14 wide:p-7">
         <h3 className="m-0 text-xl font-normal leading-relaxed tracking-tight text-[var(--l2-foreground)] wide:text-2xl">
