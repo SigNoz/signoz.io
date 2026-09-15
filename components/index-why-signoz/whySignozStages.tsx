@@ -12,11 +12,9 @@ import {
 } from 'react'
 
 export type WhySignozStep = {
-  alt: string
   cta?: { href: string; label: string }
   description: string
   icon: LucideIcon
-  image: string
   key: string
   title: string
 }
@@ -29,8 +27,6 @@ export const WHY_SIGNOZ_STEPS: WhySignozStep[] = [
       'Move from a latency spike to the related logs, traces, metrics, and spans without stitching together separate tools.',
     icon: Activity,
     cta: { href: '/docs/introduction/', label: 'Open a trace' },
-    image: '/img/graphics/homepage/correlation.svg',
-    alt: 'SigNoz Cloud view showing correlated telemetry for root cause debugging',
   },
   {
     key: 'opentelemetry',
@@ -38,8 +34,6 @@ export const WHY_SIGNOZ_STEPS: WhySignozStep[] = [
     description:
       'Use open standards instead of vendor SDKs, so instrumentation stays portable as your stack changes.',
     icon: Cable,
-    image: '/img/graphics/homepage/opentelemetry.svg',
-    alt: 'OpenTelemetry instrumentation flowing into SigNoz Cloud',
     cta: {
       href: '/docs/instrumentation/overview/',
       label: 'Read the setup guide',
@@ -51,8 +45,6 @@ export const WHY_SIGNOZ_STEPS: WhySignozStep[] = [
     description:
       'Use query builder, PromQL, and ClickHouse SQL on a fast columnar datastore built for high-cardinality observability data.',
     icon: SearchCode,
-    image: '/img/graphics/homepage/columnar2.svg',
-    alt: 'Flexible query controls backed by a columnar datastore in SigNoz Cloud',
     cta: {
       href: '/docs/userguide/query-builder-v5/',
       label: 'Open query builder',
@@ -64,8 +56,6 @@ export const WHY_SIGNOZ_STEPS: WhySignozStep[] = [
     description:
       'One OpenTelemetry-native source gives agents a known schema for traces, logs, metrics, and services, so they can debug with less translation.',
     icon: Bot,
-    image: '/img/graphics/homepage/agent-chat.svg',
-    alt: 'Agent telemetry context for AI-assisted observability workflows',
     cta: {
       href: '/docs/ai/signoz-mcp-server/',
       label: 'Connect an agent',

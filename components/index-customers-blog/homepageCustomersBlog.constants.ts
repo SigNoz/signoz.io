@@ -1,4 +1,9 @@
+import oracleLogo from '@/public/svgs/customer-logos/oracle.svg?url'
+import shapedLogo from '@/public/img/case_study/logos/shaped-logo.svg?url'
+
 // Placeholder content — swap `HOMEPAGE_BLOG_CARDS` for a CMS fetch later.
+
+const asUrl = (asset: string | { src: string }) => (typeof asset === 'string' ? asset : asset.src)
 
 export interface FeatureQuote {
   quote: string
@@ -14,14 +19,14 @@ export const HOMEPAGE_FEATURE_QUOTES: FeatureQuote[] = [
       'We’ve transitioned from Grafana to SigNoz, offering a simplified, unified monitoring, logging, and alerting experience.',
     name: 'Mark Nelson',
     role: 'Oracle',
-    logoSrc: '/svgs/customer-logos/oracle.svg',
+    logoSrc: asUrl(oracleLogo),
     tone: 'lavender',
   },
   {
     quote: 'Every single time we have an issue, SigNoz is always the first place to check.',
     name: 'Karl Lyons',
     role: 'Shaped',
-    logoSrc: '/img/case_study/logos/shaped-logo.svg',
+    logoSrc: asUrl(shapedLogo),
     tone: 'citrus',
   },
 ]
