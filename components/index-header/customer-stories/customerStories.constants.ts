@@ -1,6 +1,7 @@
 export interface CustomerStoryLogo {
   name: string
-  logoSrc: string
+  logoSrc?: string
+  sprite?: string
   mono?: boolean
   width?: number
   showName?: boolean
@@ -13,9 +14,7 @@ export interface CustomerStoryQuote {
   caseStudyHref: string | null
 }
 
-const LOGO_PATH = '/img/customers/home'
 const LIVE_LOGO_IMG = '/img/homepage/customer-logos'
-const LIVE_LOGO_SVG = '/svgs/customer-logos'
 
 export const CUSTOMER_STORY_LOGOS: CustomerStoryLogo[] = [
   {
@@ -25,41 +24,41 @@ export const CUSTOMER_STORY_LOGOS: CustomerStoryLogo[] = [
   },
   { name: 'Ariso', logoSrc: `${LIVE_LOGO_IMG}/ariso.webp`, showName: true },
   { name: 'Armur AI', logoSrc: `${LIVE_LOGO_IMG}/armur-ai.webp`, showName: true },
-  { name: 'Auvik', logoSrc: `${LIVE_LOGO_SVG}/auvik.svg`, width: 105 },
-  { name: 'Black Forest Labs', logoSrc: '/svgs/icons/blackforestlabs.svg', width: 150 },
-  { name: 'Blaxel', logoSrc: `${LOGO_PATH}/blaxel.svg` },
-  { name: 'Cisco', logoSrc: `${LIVE_LOGO_SVG}/cisco.svg`, showName: true },
-  { name: 'Eltropy', logoSrc: `${LOGO_PATH}/eltropy.svg`, width: 120 },
+  { name: 'Auvik', sprite: 'auvik', width: 105 },
+  { name: 'Black Forest Labs', sprite: 'blackforestlabs', width: 150 },
+  { name: 'Blaxel', sprite: 'blaxel' },
+  { name: 'Cisco', sprite: 'cisco', showName: true },
+  { name: 'Eltropy', sprite: 'eltropy', width: 120 },
   { name: 'FiscalNote', logoSrc: `${LIVE_LOGO_IMG}/fiscalnote.webp`, showName: true },
-  { name: 'Flutterwave', logoSrc: `${LIVE_LOGO_SVG}/flutterwave.svg`, mono: true, width: 125 },
-  { name: 'Formance', logoSrc: `${LOGO_PATH}/formance.svg` },
-  { name: 'Formstack', logoSrc: `${LIVE_LOGO_SVG}/formstack.svg`, width: 170 },
+  { name: 'Flutterwave', sprite: 'flutterwave', mono: true, width: 125 },
+  { name: 'Formance', sprite: 'formance' },
+  { name: 'Formstack', sprite: 'formstack', width: 170 },
   { name: 'Harmonic Inc.', logoSrc: `${LIVE_LOGO_IMG}/harmonic.webp`, showName: true },
-  { name: 'Harmonic.ai', logoSrc: `${LIVE_LOGO_SVG}/harmonic-ai.svg`, width: 130 },
-  { name: 'Hedra', logoSrc: '/svgs/icons/hedra.svg', width: 110 },
-  { name: 'Inkeep', logoSrc: '/svgs/icons/inkeep.svg', width: 120 },
-  { name: 'Kernel', logoSrc: '/svgs/icons/kernel.svg', width: 110 },
-  { name: 'Kiwi', logoSrc: `${LOGO_PATH}/kiwi.svg` },
-  { name: 'Kognitos', logoSrc: '/svgs/icons/kognitos.svg', width: 190 },
-  { name: 'Lenskart', logoSrc: `${LIVE_LOGO_SVG}/lenskart.svg`, mono: true, width: 125 },
-  { name: 'LG Electronics', logoSrc: `${LIVE_LOGO_SVG}/lg-electronics.svg`, width: 120 },
+  { name: 'Harmonic.ai', sprite: 'harmonic-ai', width: 130 },
+  { name: 'Hedra', sprite: 'hedra', width: 110 },
+  { name: 'Inkeep', sprite: 'inkeep', width: 120 },
+  { name: 'Kernel', sprite: 'kernel', width: 110 },
+  { name: 'Kiwi', sprite: 'kiwi' },
+  { name: 'Kognitos', sprite: 'kognitos', width: 190 },
+  { name: 'Lenskart', sprite: 'lenskart', mono: true, width: 125 },
+  { name: 'LG Electronics', sprite: 'lg-electronics', width: 120 },
   { name: 'Moneyhub', logoSrc: `${LIVE_LOGO_IMG}/moneyhub.webp`, showName: true },
-  { name: 'Oracle', logoSrc: `${LIVE_LOGO_SVG}/oracle.svg`, width: 115 },
+  { name: 'Oracle', sprite: 'oracle', width: 115 },
   { name: 'Racing & Sports', logoSrc: `${LIVE_LOGO_IMG}/racing-and-sports.webp`, showName: true },
-  { name: 'Rattle', logoSrc: `${LOGO_PATH}/rattle.svg` },
-  { name: 'Sail Research', logoSrc: `${LIVE_LOGO_SVG}/sail-research.svg`, mono: true, width: 115 },
-  { name: 'Salient', logoSrc: '/svgs/icons/salient.svg', width: 110 },
-  { name: 'Samsung', logoSrc: `${LOGO_PATH}/samsung.svg` },
-  { name: 'Sarvam AI', logoSrc: `${LOGO_PATH}/sarvam.svg` },
-  { name: 'Shaped', logoSrc: `${LOGO_PATH}/shaped.svg` },
-  { name: 'StructureFlow', logoSrc: `${LIVE_LOGO_SVG}/structureflow.svg`, width: 190 },
-  { name: 'Tavus', logoSrc: `${LOGO_PATH}/tavus.svg` },
+  { name: 'Rattle', sprite: 'rattle' },
+  { name: 'Sail Research', sprite: 'sail-research', mono: true, width: 115 },
+  { name: 'Salient', sprite: 'salient', width: 110 },
+  { name: 'Samsung', sprite: 'samsung' },
+  { name: 'Sarvam AI', sprite: 'sarvam' },
+  { name: 'Shaped', sprite: 'shaped' },
+  { name: 'StructureFlow', sprite: 'structureflow', width: 190 },
+  { name: 'Tavus', sprite: 'tavus' },
   {
     name: 'The Website Engineer',
     logoSrc: `${LIVE_LOGO_IMG}/website-engineer.webp`,
     showName: true,
   },
-  { name: 'Xata', logoSrc: `${LIVE_LOGO_SVG}/xata.svg`, showName: true },
+  { name: 'Xata', sprite: 'xata', showName: true },
 ]
 
 export const CUSTOMER_STORY_QUOTES: CustomerStoryQuote[] = [

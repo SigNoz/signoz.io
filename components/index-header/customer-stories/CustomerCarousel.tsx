@@ -12,9 +12,36 @@ import styles from './customer-stories.module.css'
 
 const SCROLL_SPEED = 42
 
+const SPRITE = '/svgs/customer-logos/sprite.svg'
+
 interface CardProps {
   customer: CustomerStoryLogo
   isClone?: boolean
+}
+
+function LogoMark({ customer, isClone }: { customer: CustomerStoryLogo; isClone: boolean }) {
+  const markClass = cn(styles.logo, customer.width && styles.wordmark, customer.mono && styles.mono)
+  if (customer.sprite) {
+    return (
+      <svg
+        className={markClass}
+        style={customer.width ? { width: customer.width } : undefined}
+        aria-hidden="true"
+      >
+        <use href={`${SPRITE}#${customer.sprite}`} />
+      </svg>
+    )
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={customer.logoSrc}
+      alt={isClone ? '' : customer.name}
+      className={markClass}
+      style={customer.width ? { width: customer.width } : undefined}
+      draggable={false}
+    />
+  )
 }
 
 function CustomerCard({ customer, isClone = false }: CardProps) {
@@ -33,23 +60,23 @@ function CustomerCard({ customer, isClone = false }: CardProps) {
     >
       {customer.showName ? (
         <span className={styles.cardLabel}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={customer.logoSrc} alt="" className={styles.cardIcon} draggable={false} />
+          {customer.sprite ? (
+            <svg className={cn(styles.logo, styles.cardIcon)} aria-hidden="true">
+              <use href={`${SPRITE}#${customer.sprite}`} />
+            </svg>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={customer.logoSrc}
+              alt=""
+              className={cn(styles.logo, styles.cardIcon)}
+              draggable={false}
+            />
+          )}
           <span>{customer.name}</span>
         </span>
       ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={customer.logoSrc}
-          alt={isClone ? '' : customer.name}
-          className={
-            [customer.width ? styles.wordmark : '', customer.mono ? styles.mono : '']
-              .filter(Boolean)
-              .join(' ') || undefined
-          }
-          style={customer.width ? { width: customer.width } : undefined}
-          draggable={false}
-        />
+        <LogoMark customer={customer} isClone={isClone} />
       )}
     </TrackingLink>
   )
