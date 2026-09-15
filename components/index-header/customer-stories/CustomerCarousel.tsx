@@ -62,7 +62,10 @@ function CustomerCard({ customer, isClone = false }: CardProps) {
       {customer.showName ? (
         <span className={styles.cardLabel}>
           {customer.sprite ? (
-            <svg className={cn(styles.logo, styles.cardIcon)} aria-hidden="true">
+            <svg
+              className={cn(styles.logo, styles.cardIcon, customer.mono && styles.mono)}
+              aria-hidden="true"
+            >
               <use href={`${SPRITE}#${customer.sprite}`} />
             </svg>
           ) : (

@@ -27,7 +27,7 @@ export const CUSTOMER_STORY_LOGOS: CustomerStoryLogo[] = [
   { name: 'Auvik', sprite: 'auvik', width: 105 },
   { name: 'Black Forest Labs', sprite: 'blackforestlabs', width: 150 },
   { name: 'Blaxel', sprite: 'blaxel' },
-  { name: 'Cisco', sprite: 'cisco', showName: true },
+  { name: 'Cisco', sprite: 'cisco', mono: true, showName: true },
   { name: 'Eltropy', sprite: 'eltropy', width: 120 },
   { name: 'FiscalNote', sprite: 'fiscalnote', showName: true },
   { name: 'Flutterwave', sprite: 'flutterwave', mono: true, width: 125 },
