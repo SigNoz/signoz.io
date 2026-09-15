@@ -2919,7 +2919,7 @@ module.exports = () => {
         },
         {
           source: '/does-signoz-work-well-with-existing-prometheus-setups/',
-          destination: '/faqs/does-signoz-work-well-with-existing-prometheus-setups/',
+          destination: '/docs/userguide/prometheus-metrics/',
           permanent: true,
         },
         {
@@ -3120,7 +3120,7 @@ module.exports = () => {
         },
         {
           source: '/out-of-box-application-monitoring-prometheus',
-          destination: '/blog/out-of-box-application-monitoring-prometheus/',
+          destination: '/blog/opentelemetry-vs-prometheus/',
           permanent: true,
         },
         {
@@ -3155,7 +3155,7 @@ module.exports = () => {
         },
         {
           source: '/does-signoz-work-well-with-existing-prometheus-setups',
-          destination: '/faqs/does-signoz-work-well-with-existing-prometheus-setups/',
+          destination: '/docs/userguide/prometheus-metrics/',
           permanent: true,
         },
         {
@@ -3433,6 +3433,41 @@ module.exports = () => {
         {
           source: '/blog/monitoring-graphql/',
           destination: '/docs/instrumentation/javascript/opentelemetry-graphql/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-collector-prometheus-receiver/',
+          destination: '/docs/userguide/prometheus-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/faqs/does-signoz-work-well-with-existing-prometheus-setups/',
+          destination: '/docs/userguide/prometheus-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-are-the-benefits-of-prometheus/',
+          destination: '/comparisons/prometheus-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/blog/out-of-box-application-monitoring-prometheus/',
+          destination: '/blog/opentelemetry-vs-prometheus/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-is-the-advantage-of-prometheus/',
+          destination: '/comparisons/prometheus-alternatives/',
+          permanent: true,
+        },
+        {
+          source: '/blog/prometheus-query/',
+          destination: '/guides/promql-cheat-sheet/',
+          permanent: true,
+        },
+        {
+          source: '/guides/prometheus-monitoring-101/',
+          destination: '/guides/what-is-prometheus-for-monitoring/',
           permanent: true,
         },
       ])

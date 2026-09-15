@@ -53,6 +53,7 @@ export const ALTERNATIVES_SITEMAP_ROUTES = [
   'newrelic-alternative',
   'clickstack-alternative',
   'cloudwatch-alternative',
+  'dash0-alternative',
   'product-comparison',
   'product-comparison/datadog-savings',
   'product-comparison/migrate-from-datadog',

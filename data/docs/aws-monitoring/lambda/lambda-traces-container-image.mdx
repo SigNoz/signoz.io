@@ -1,0 +1,418 @@
+---
+date: 2026-08-31
+title: Instrument AWS Lambda Container Images with OpenTelemetry
+meta_title: AWS Lambda Container Images - OpenTelemetry Instrumentation
+description: Bake OpenTelemetry auto-instrumentation into an AWS Lambda container image and send traces to SigNoz, because Lambda layers do not attach to images.
+doc_type: howto
+---
+
+## Overview
+
+A Lambda function packaged as a container image cannot use Lambda layers. To instrument such a
+function, unpack the OpenTelemetry layer into the image when you build it.
+
+This guide covers Python, Node.js, and Java. Each setup has two parts:
+
+- The instrumentation goes in the image.
+- The endpoint and the ingestion key go in the function configuration.
+
+<Admonition type="warning" title="Packaging your function as a .zip file?">
+This page is only for functions with the `Image` package type. If you upload a .zip archive, attach
+the published layer ARNs instead. See
+[Send your AWS Lambda Traces to SigNoz](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/).
+</Admonition>
+
+<Admonition type="info" title="Looking for Ruby?">
+The Ruby layer does not work in a container image. With the layer defaults it exports no spans, and
+enabling `OTEL_RUBY_INSTRUMENTATION_NET_HTTP_ENABLED` adds idle-time spans that inflate the latency
+on the Services page. Package Ruby functions as a .zip archive instead, as shown in
+[Send your AWS Lambda Traces to SigNoz](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/).
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Update the endpoint and remove the ingestion key header as shown in
+[Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- A Lambda function packaged as a container image, built on an <a href="https://gallery.ecr.aws/lambda/" target="_blank" rel="noopener noreferrer nofollow">AWS base image for Lambda</a>.
+- Docker 25.0.0 or later, with the <a href="https://github.com/docker/buildx" target="_blank" rel="noopener noreferrer nofollow">buildx plugin</a>.
+- AWS CLI version 2, with permission to push to Amazon ECR and to update the function.
+- An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
+
+## Send traces to SigNoz
+
+### Step 1: Add the OpenTelemetry layer to your image
+
+The OpenTelemetry Lambda project publishes each layer as a zip file on GitHub. Unpack that zip into
+`/opt` in a build stage, then copy `/opt` into your function image.
+
+<Tabs entityName="language">
+<TabItem value="python" label="Python" default>
+
+```dockerfile:Dockerfile
+# Stage 1: unpack the OpenTelemetry Lambda layer
+FROM public.ecr.aws/docker/library/alpine:3 AS otel
+RUN apk add --no-cache curl unzip \
+    && curl -fsSL -o /tmp/layer.zip \
+       https://github.com/open-telemetry/opentelemetry-lambda/releases/download/layer-python%2F0.21.0/opentelemetry-python-layer.zip \
+    && unzip /tmp/layer.zip -d /opt \
+    && chmod -R 755 /opt
+
+# Stage 2: your function image
+FROM public.ecr.aws/lambda/python:3.13
+
+COPY --from=otel /opt /opt
+ENV AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-instrument
+ENV OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+
+COPY requirements.txt ${LAMBDA_TASK_ROOT}/
+RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements.txt
+COPY app.py ${LAMBDA_TASK_ROOT}/
+
+CMD [ "app.lambda_handler" ]
+```
+
+</TabItem>
+<TabItem value="nodejs" label="Node.js">
+
+```dockerfile:Dockerfile
+# Stage 1: unpack the OpenTelemetry Lambda layer
+FROM public.ecr.aws/docker/library/alpine:3 AS otel
+RUN apk add --no-cache curl unzip \
+    && curl -fsSL -o /tmp/layer.zip \
+       https://github.com/open-telemetry/opentelemetry-lambda/releases/download/layer-nodejs%2F0.23.0/opentelemetry-nodejs-layer.zip \
+    && unzip /tmp/layer.zip -d /opt \
+    && chmod -R 755 /opt
+
+# Stage 2: your function image
+FROM public.ecr.aws/lambda/nodejs:22
+
+COPY --from=otel /opt /opt
+ENV AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
+ENV OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+
+COPY package.json package-lock.json ${LAMBDA_TASK_ROOT}/
+RUN npm ci --omit=dev
+COPY index.mjs ${LAMBDA_TASK_ROOT}/
+
+CMD [ "index.handler" ]
+```
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+```dockerfile:Dockerfile defaultCollapsed
+# Stage 1: unpack the OpenTelemetry Lambda layer
+FROM public.ecr.aws/docker/library/alpine:3 AS otel
+RUN apk add --no-cache curl unzip \
+    && curl -fsSL -o /tmp/layer.zip \
+       https://github.com/open-telemetry/opentelemetry-lambda/releases/download/layer-javaagent%2F0.21.0/opentelemetry-javawrapper-layer.zip \
+    && unzip /tmp/layer.zip -d /opt \
+    && chmod -R 755 /opt
+
+# Stage 2: your function image
+FROM public.ecr.aws/lambda/java:21
+
+# Copy every wrapper script, then select one with AWS_LAMBDA_EXEC_WRAPPER
+COPY --from=otel /opt/otel-handler /opt/otel-proxy-handler /opt/otel-sqs-handler /opt/otel-stream-handler /opt/
+# Put the layer JARs in the task root, which is on the function classpath
+COPY --from=otel /opt/java/lib/ ${LAMBDA_TASK_ROOT}/lib/
+ENV AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
+ENV OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+
+COPY target/classes ${LAMBDA_TASK_ROOT}
+COPY target/dependency/ ${LAMBDA_TASK_ROOT}/lib/
+
+CMD [ "com.example.App::handleRequest" ]
+```
+
+Add `aws-lambda-java-events` to your project dependencies. The layer wraps your
+handler with a class that reads trace headers off the event, and that class needs the AWS event
+types on the classpath:
+
+```xml:pom.xml noLineNumbers
+<dependency>
+  <groupId>com.amazonaws</groupId>
+  <artifactId>aws-lambda-java-events</artifactId>
+  <version>3.11.1</version>
+</dependency>
+```
+
+`/opt/otel-handler` suits a plain `RequestHandler`. If your function has a different trigger, set
+`AWS_LAMBDA_EXEC_WRAPPER` to the matching wrapper instead:
+
+| Trigger or handler type | Wrapper |
+|---|---|
+| `RequestHandler` | `/opt/otel-handler` |
+| `RequestHandler` behind API Gateway | `/opt/otel-proxy-handler` |
+| SQS | `/opt/otel-sqs-handler` |
+| `RequestStreamHandler` | `/opt/otel-stream-handler` |
+
+The proxy and stream wrappers add HTTP context propagation, so a trace from the caller continues
+into the function.
+
+Build the classes and collect the runtime dependencies before you build the image:
+
+```bash noLineNumbers
+mvn compile dependency:copy-dependencies -DincludeScope=runtime
+```
+
+<Admonition type="info" title="The Java layer instruments the AWS SDK only">
+The downloadable Java artifact is the wrapper build. It records the invocation span and
+auto-instruments the AWS SDK. It does not instrument other libraries. For broader coverage, add the
+<a href="https://opentelemetry.io/docs/zero-code/java/agent/getting-started/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Java agent</a>
+JAR to the image and set `JAVA_TOOL_OPTIONS=-javaagent:/path/to/opentelemetry-javaagent.jar` instead.
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+Two `ENV` lines control the instrumentation:
+
+- `AWS_LAMBDA_EXEC_WRAPPER` points at the wrapper script from the layer. The AWS base image entrypoint runs this script before the runtime starts, so OpenTelemetry loads before your handler does.
+- `OTEL_EXPORTER_OTLP_PROTOCOL` selects OTLP over HTTP. Java needs this, because the Java SDK defaults to gRPC. The other layers already default to HTTP, so the line is harmless there.
+
+<Admonition type="info" title="Pin the layer version">
+The URLs above point at fixed releases. Read the
+<a href="https://github.com/open-telemetry/opentelemetry-lambda/releases" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Lambda releases</a>
+page for newer versions, and rebuild the image when you move to one.
+</Admonition>
+
+### Step 2: Point the function at SigNoz
+
+Do not put the ingestion key in the image. Anyone who can pull the image can read its layers. Set
+the endpoint on the function instead:
+
+```bash
+aws lambda update-function-configuration \
+  --function-name <function-name> \
+  --environment "Variables={\
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443,\
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>,\
+OTEL_SERVICE_NAME=<service-name>,\
+OTEL_TRACES_SAMPLER=always_on}"
+```
+
+**Verify these values:**
+
+- `<function-name>`: The name of your Lambda function.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: The name this function gets in SigNoz. If you omit it, the layer uses the function name.
+
+`OTEL_TRACES_SAMPLER=always_on` records every invocation. The default sampler honors the caller's
+decision, which drops spans when an upstream service samples them out.
+
+<Admonition type="warning" title="This command replaces every environment variable">
+`update-function-configuration --environment` overwrites the whole map. If the function already has
+environment variables, read them first with `aws lambda get-function-configuration` and include them
+in the command.
+</Admonition>
+
+### Step 3: Build and push the image
+
+Build for the architecture of the function. The `--provenance=false` option keeps the image
+compatible with Lambda, and `--load` writes the result into your local image store so that
+`docker tag` can find it.
+
+```bash
+docker buildx build --platform linux/amd64 --provenance=false --load -t <image-name>:latest .
+
+aws ecr get-login-password --region <aws-region> \
+  | docker login --username AWS --password-stdin <account-id>.dkr.ecr.<aws-region>.amazonaws.com
+
+docker tag <image-name>:latest <account-id>.dkr.ecr.<aws-region>.amazonaws.com/<repository>:latest
+docker push <account-id>.dkr.ecr.<aws-region>.amazonaws.com/<repository>:latest
+
+aws lambda update-function-code \
+  --function-name <function-name> \
+  --image-uri <account-id>.dkr.ecr.<aws-region>.amazonaws.com/<repository>:latest
+```
+
+**Verify these values:**
+
+- `<aws-region>`: The AWS region of the ECR repository and the function. Both must be in the same region.
+- `<account-id>`: Your 12-digit AWS account ID.
+- `<repository>`: The name of your ECR repository.
+
+If the function runs on Graviton, build with `--platform linux/arm64` instead.
+
+## Validate
+
+1. Invoke the function once, either from the AWS console or with `aws lambda invoke`.
+2. Open **Traces** in the SigNoz left navigation menu.
+3. Filter on `service.name` with the value you set in `OTEL_SERVICE_NAME`.
+
+<Figure
+  src="/img/docs/aws-monitoring/lambda/traces/container-image-traces-list.webp"
+  alt="SigNoz Traces Explorer listing spans from a Lambda container image function"
+  caption="Spans from a container image function in the Traces Explorer"
+/>
+
+Each invocation produces one server span for the invocation itself, plus a client span for every
+outbound call the layer instruments. Open a trace to see the full tree.
+
+<Figure
+  src="/img/docs/aws-monitoring/lambda/traces/container-image-trace-detail.webp"
+  alt="Trace detail view showing the Lambda invocation span with a nested outbound HTTP client span"
+  caption="The invocation span, with the outbound HTTP call captured by the layer"
+/>
+
+If you see only the invocation span, the layer loaded and the export works. The library that you
+called is not on the layer's instrumentation list.
+
+<Admonition type="info" title="Test the image before you deploy it" defaultCollapsed="true">
+The AWS base images include the Lambda Runtime Interface Emulator, so you can invoke the image on
+your machine:
+
+```bash noLineNumbers
+docker run -p 9000:8080 <image-name>:latest
+```
+
+Then post an event to it from a second terminal:
+
+```bash noLineNumbers
+curl "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
+```
+
+Set `OTEL_EXPORTER_OTLP_ENDPOINT` on the container to reach SigNoz, or to a local Collector, and read
+the export errors with `docker logs`.
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### No traces reach SigNoz
+
+- Likely cause: the wrapper never ran, or the export is failing silently.
+- Fix: Make sure that `AWS_LAMBDA_EXEC_WRAPPER` matches the wrapper path for your language, and that the ingestion key is set on the function.
+- Verify: Set `OTEL_LOG_LEVEL=debug` on the function, invoke it again, and read the export errors in the CloudWatch logs.
+
+### The function fails with `Runtime.InvalidEntrypoint`
+
+- Likely cause: the image overrides the entrypoint that the AWS base image provides.
+- Fix: Keep the handler in `CMD` and do not add your own `ENTRYPOINT`. The base image entrypoint takes exactly one argument, the handler.
+- Verify: Invoke the function again. It reaches your handler code.
+
+### Deploying the image fails with `image manifest ... is not supported`
+
+- Likely cause: Buildx attached provenance attestations to the image, and Lambda rejects those.
+- Fix: Rebuild with `--provenance=false`. If your deployment tool runs the build, set the same option there.
+- Verify: Deploy again. Lambda accepts the image.
+
+### Java throws `NoClassDefFoundError` on the first invocation
+
+- Likely cause: If the error names `APIGatewayProxyRequestEvent`, the `aws-lambda-java-events` dependency is missing. If it names an OpenTelemetry class, the layer JARs are not on the classpath.
+- Fix: Add `aws-lambda-java-events` to `pom.xml`, as shown in Step 1. For the layer JARs, make sure that the Dockerfile copies `/opt/java/lib/` into `${LAMBDA_TASK_ROOT}/lib/` and that a later `COPY` does not overwrite that directory.
+- Verify: Invoke the function again. The invocation span appears in SigNoz.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Export through the OTel Collector layer (Optional)
+</ToggleHeading>
+
+The setup above sends spans from the function process straight to SigNoz. To batch, filter, or
+enrich telemetry before it leaves the function environment, run the OpenTelemetry Collector as a
+Lambda extension instead.
+
+### Add the Collector layer to the image
+
+Unpack the Collector layer in a third build stage:
+
+```dockerfile:Dockerfile
+# Stage 3: unpack the OpenTelemetry Collector layer
+FROM public.ecr.aws/docker/library/alpine:3 AS otelcol
+RUN apk add --no-cache curl unzip \
+    && curl -fsSL -o /tmp/collector.zip \
+       https://github.com/open-telemetry/opentelemetry-lambda/releases/download/layer-collector/0.23.0/opentelemetry-collector-layer-amd64.zip \
+    && unzip /tmp/collector.zip -d /opt \
+    && chmod -R 755 /opt
+```
+
+Then add these lines to the stage that builds your function image, next to the `COPY --from=otel`
+line from Step 1:
+
+```dockerfile:Dockerfile
+COPY --from=otelcol /opt/extensions /opt/extensions
+COPY collector.yaml /opt/collector-config/config.yaml
+ENV OPENTELEMETRY_COLLECTOR_CONFIG_URI=/opt/collector-config/config.yaml
+```
+
+For an arm64 function, download `opentelemetry-collector-layer-arm64.zip` instead. The Collector
+layer is architecture-specific, so it must match the platform you build the image for.
+
+### Add the Collector configuration
+
+Add a file named `collector.yaml` next to your Dockerfile. The `COPY` above places it where the
+extension reads it:
+
+```yaml:collector.yaml minimap defaultCollapsed
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 'localhost:4318'
+
+processors:
+  batch:
+  # decouple must be last. It lets the function return before the export
+  # to SigNoz finishes.
+  decouple:
+
+exporters:
+  # Collector layer 0.23.0 bundles Collector v0.157.0.
+  # On Collector v0.143.0 and older, use "otlphttp" instead.
+  otlp_http:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
+    headers:
+      # The image is readable by anyone who can pull it, so read the key from
+      # the function environment instead of writing it into this file.
+      signoz-ingestion-key: '${env:SIGNOZ_INGESTION_KEY}'
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch, decouple]
+      exporters: [otlp_http]
+    # The layers export metrics to the same endpoint. Without this pipeline
+    # the function logs a 404 on every invocation.
+    metrics:
+      receivers: [otlp]
+      processors: [batch, decouple]
+      exporters: [otlp_http]
+```
+
+### Point the function at the Collector
+
+The function must now export to the Collector on localhost. Replace the endpoint from Step 2, and
+keep the ingestion key on the function, where `collector.yaml` reads it:
+
+```ini noLineNumbers
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+SIGNOZ_INGESTION_KEY=<your-ingestion-key>
+```
+
+Remove `OTEL_EXPORTER_OTLP_HEADERS`. The Collector adds the key now, so the function no longer
+needs it.
+
+</details>
+
+## Next steps
+
+- [Send Lambda traces from .zip functions](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/) with the published layer ARNs.
+- [Instrument a Go Lambda function](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces-golang/), which has no auto-instrumentation layer.
+- [Collect Lambda logs](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs-otel-extension/) with the Collector extension layer.
+- [Collect Lambda metrics](https://signoz.io/docs/aws-monitoring/lambda/lambda-metrics/) such as invocations, errors, and duration.
+- [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to move between signals during triage.
+- [Set up alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) on the latency and the error rate of the function.
+
+## Get Help
+
+<GetHelp />

@@ -17,6 +17,18 @@ export type LogEventOptions = {
   transport?: 'fetch' | 'beacon'
 }
 
+export const isAnalyticsExcludedUserAgent = (userAgent: string): boolean => {
+  const excludedPatterns = process.env.ANALYTICS_EXCLUDED_USER_AGENTS
+  if (!excludedPatterns || !userAgent) return false
+
+  const ua = userAgent.toLowerCase()
+  return excludedPatterns
+    .split(',')
+    .map((pattern) => pattern.trim().toLowerCase())
+    .filter(Boolean)
+    .some((pattern) => ua.includes(pattern))
+}
+
 const buildQueryString = (queryParams?: Record<string, string>) => {
   if (!queryParams) return ''
 

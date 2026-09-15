@@ -1,23 +1,32 @@
 ---
-date: 2026-09-03
+date: 2026-09-12
 title: How to add manual instrumentation in Go
 description: Learn how to add manual instrumentation in Go applications using OpenTelemetry. Create custom spans, attach attributes, and trace business logic for deeper observability.
 
 doc_type: howto
 ---
 
-Manual instrumentation gives you fine-grained control when automatic instrumentation alone cannot express important business operations. Use it to capture steps that matter for debugging, to attach business-specific attributes, or to guarantee that failures surface with the right context in SigNoz.
+## Overview
 
-<KeyPointCallout title="Works for both SigNoz Cloud and Self-Hosted" defaultCollapsed="true">
-  Manual instrumentation steps are identical across deployments—only your OTLP endpoint and ingestion key differ.
-</KeyPointCallout>
+Automatic instrumentation traces the libraries your application calls. Manual instrumentation traces your own code. Use it to time a checkout step, attach an order ID to a span, or record a failure with the context that explains it.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  The steps on this page are identical for both deployments. Only the OTLP endpoint and the ingestion key differ, as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
 
 ## Prerequisites
 
-- Finish the core Go setup in the [OpenTelemetry Go instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-golang/) so exporters, tracer provider, and propagators are configured.
+- A tracer provider and an exporter must already run in your application. If you use the SDK, finish the core setup in the [OpenTelemetry Go instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-golang/).
 - Propagate `context.Context` through handlers and business logic. Manual spans derive from these contexts so traces stay connected.
 - Tested with <a href="https://go.dev/doc/go1.25" target="_blank" rel="noopener noreferrer nofollow">Go 1.25.1</a> and OpenTelemetry Go SDK <a href="https://pkg.go.dev/go.opentelemetry.io/otel/sdk@v1.38.0" target="_blank" rel="noopener noreferrer nofollow">v1.38.0</a>.
-## Step 1. Create manual spans
+
+<Admonition type="info" title="Already using zero-code instrumentation?" defaultCollapsed="true">
+Manual spans work alongside it. With [compile-time instrumentation](https://signoz.io/docs/instrumentation/golang/compile-time-instrumentation/), the injected SDK picks up the spans you create here. With the [eBPF agent](https://signoz.io/docs/instrumentation/golang/ebpf-instrumentation/), set `OTEL_GO_AUTO_GLOBAL=true` so the agent exports them too.
+</Admonition>
+
+## Add manual instrumentation
+
+### Step 1. Create manual spans
 
 Use the SDK tracer to wrap important work inside custom spans:
 
@@ -49,13 +58,13 @@ Tips:
 
 - Reuse tracer instances instead of creating a new one for each request.
 - Start spans with descriptive names that match business steps (`checkout`, `fetch-user`, etc.).
-- Always end the span, preferably with `defer`.
+- End every span. `defer span.End()` is the safest place for it.
 
-## Step 2. Propagate context
+### Step 2. Propagate context
 
-Go keeps no ambient trace state. A span finds its parent only through the `context.Context` you hand it, which is why Go breaks traces more readily than Java or Python. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the concepts behind this step.
+Go keeps no ambient trace state. A span finds its parent only through the `context.Context` you hand it, so Go breaks traces more often than Java or Python. See [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the concepts behind this step.
 
-### Inside your process
+#### Inside your process
 
 Pass the `ctx` that `tracer.Start` returns into every function you want nested under that span:
 
@@ -87,7 +96,7 @@ go func() {
 }()
 ```
 
-### Across a service boundary
+#### Across a service boundary
 
 Instrumentation libraries such as `otelhttp` inject and extract for you. Write the calls yourself for any hop they do not cover.
 
@@ -162,7 +171,7 @@ ctx := otel.GetTextMapPropagator().Extract(context.Background(), propagation.Map
 `Inject` and `Extract` do nothing unless you registered a propagator with `otel.SetTextMapPropagator`. The [Go instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-golang/) sets up `propagation.TraceContext{}` and `propagation.Baggage{}` in `initTracer`.
 </Admonition>
 
-## Step 3. Add attributes and events
+### Step 3. Add attributes and events
 
 Attributes show up as key-value pairs in SigNoz so you can filter and aggregate spans. Events capture notable moments inside a span.
 
@@ -191,7 +200,7 @@ func handlePayment(ctx context.Context, amount float64) {
 - Keep attribute keys consistent (use semantic conventions when possible).
 - Use events to mark retries, cache hits/misses, queue waits, and similar milestones.
 
-## Step 4. Record errors
+### Step 4. Record errors
 
 Flag failures on the span so they are easy to query in SigNoz.
 
@@ -257,7 +266,7 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 
 - Attribute keys must be strings and values must use the correct helper (`attribute.String`, `attribute.Float64`, etc.).
 - Call `span.AddEvent` or `span.SetAttributes` before `span.End()`. Post-end mutations are ignored.
-- Avoid reusing finished spans—always create a new span for each invocation.
+- Avoid reusing finished spans. Always create a new span for each invocation.
 
 </details>
 
@@ -267,3 +276,7 @@ Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and m
 - [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to accelerate triage across signals
 - Add instrumentation to common Go frameworks via the [Go instrumentation library catalog](https://signoz.io/docs/instrumentation/opentelemetry-golang/#library-instrumentation)
 - Read [Context Propagation](https://signoz.io/docs/traces-management/guides/context-propagation/) for the wire format and the failure modes shared across languages
+
+## Get Help
+
+<GetHelp />

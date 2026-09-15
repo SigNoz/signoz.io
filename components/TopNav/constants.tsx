@@ -144,6 +144,11 @@ export const comparisonItems: ComparisonItem[] = [
     url: '/clickstack-alternative/',
     name: 'SigNoz vs ClickStack',
   },
+  {
+    key: 'dash0-alternative',
+    url: '/dash0-alternative/',
+    name: 'SigNoz vs Dash0',
+  },
 ]
 
 export const useCasesDropdownItems: ProductItem[] = [

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { logEvent } from './logEvent'
+import { isAnalyticsExcludedUserAgent, logEvent } from './logEvent'
 
 describe('logEvent', () => {
   beforeEach(() => {
@@ -76,5 +76,34 @@ describe('logEvent', () => {
 
     expect(fetch).not.toHaveBeenCalled()
     expect(warn).toHaveBeenCalled()
+  })
+})
+
+describe('isAnalyticsExcludedUserAgent', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('excludes user agents containing a configured substring, case-insensitively', () => {
+    vi.stubEnv('ANALYTICS_EXCLUDED_USER_AGENTS', 'acme-crawler')
+
+    expect(isAnalyticsExcludedUserAgent('Acme-Crawler/1.2.0')).toBe(true)
+    expect(isAnalyticsExcludedUserAgent('node-fetch acme-crawler')).toBe(true)
+    expect(isAnalyticsExcludedUserAgent('Mozilla/5.0 (Macintosh)')).toBe(false)
+  })
+
+  it('supports a comma-separated list and ignores surrounding whitespace', () => {
+    vi.stubEnv('ANALYTICS_EXCLUDED_USER_AGENTS', 'acme-crawler, sample-probe ,,')
+
+    expect(isAnalyticsExcludedUserAgent('Sample-Probe/0.1')).toBe(true)
+    expect(isAnalyticsExcludedUserAgent('acme-crawler')).toBe(true)
+    expect(isAnalyticsExcludedUserAgent('curl/8.0')).toBe(false)
+  })
+
+  it('excludes nothing when the env var is unset or the user agent is empty', () => {
+    expect(isAnalyticsExcludedUserAgent('acme-crawler')).toBe(false)
+
+    vi.stubEnv('ANALYTICS_EXCLUDED_USER_AGENTS', 'acme-crawler')
+    expect(isAnalyticsExcludedUserAgent('')).toBe(false)
   })
 })

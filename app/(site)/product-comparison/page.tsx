@@ -89,6 +89,18 @@ const comparisons = [
       </>
     ),
   },
+  {
+    id: 5,
+    title: 'SigNoz Cloud vs Dash0',
+    url: '/dash0-alternative/',
+    desc: (
+      <>
+        Both are OpenTelemetry-native. SigNoz Cloud offers deeper investigations and more control.
+        Dash0 offers more convenience and broader workflows. SigNoz Cloud stands out for its
+        stronger query engine, while Dash0 is limited by its PromQL-first approach.
+      </>
+    ),
+  },
 ]
 
 export default function ProductComparisons() {

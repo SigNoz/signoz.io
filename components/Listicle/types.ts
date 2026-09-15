@@ -4,6 +4,7 @@ export interface ListicleItem {
   name: string
   href: string
   clickName?: string
+  description?: string
   icon?: IconSpec
 }
 
@@ -19,6 +20,7 @@ export interface SectionConfig {
   id: string
   label: string
   title: string
+  description?: string
   sectionName: string
   gridCols?: string
   items?: ListicleItem[]
