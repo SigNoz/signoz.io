@@ -1,5 +1,5 @@
 ---
-date: 2026-08-25
+date: 2026-09-13
 title: Metric Types and Aggregation
 description: Learn about the different metric types (Counter, Gauge, Histogram, Exponential Histogram) supported by SigNoz and how temporal and spatial aggregation works for each type.
 doc_type: explanation
@@ -11,13 +11,13 @@ This page describes the different types of metrics that SigNoz supports and how 
 
 SigNoz supports the following types of metrics:
 
-- **Counter**: A counter is a metric that represents a single numerical value that monotonically increases over time. A counter resets to zero when the process restarts. Counters are used to track the number of events that occur in a system. For example, the number of requests received by a server.
+- **Counter**: A <Tooltip text="counter" content="A monotonic sum: it only ever increases, like an odometer." link="https://signoz.io/docs/glossary/#counter" /> is a metric that represents a single numerical value that monotonically increases over time. A counter resets to zero when the process restarts. Counters are used to track the number of events that occur in a system. For example, the number of requests received by a server.
 
-- **Gauge**: A gauge is a metric that represents a single numerical value that can arbitrarily go up and down. Gauges are typically used for measured values like temperatures or current memory usage.
+- **Gauge**: A <Tooltip text="gauge" content="A metric that reports a value read at a single moment, such as memory in use, queue depth, or CPU temperature." link="https://signoz.io/docs/glossary/#gauge" /> is a metric that represents a single numerical value that can arbitrarily go up and down. Gauges are typically used for measured values like temperatures or current memory usage.
 
-- **Histogram**: A histogram is a metric that represents the distribution of a set of values. Histograms are used to track the distribution of values over time. For example, the response time of a web service.
+- **Histogram**: A <Tooltip text="histogram" content="A metric that aggregates many observations client-side into buckets, plus a count and optional sum, min, and max." link="https://signoz.io/docs/glossary/#histogram" /> is a metric that represents the distribution of a set of values. Histograms are used to track the distribution of values over time. For example, the response time of a web service.
 
-- **Exponential Histogram**: An exponential histogram is a metric that represents the distribution of a set of values on a logarithmic scale. Exponential histograms are used to track the distribution of values that span several orders of magnitude. For example, the latency of a network request.
+- **Exponential Histogram**: An <Tooltip text="exponential histogram" content="A histogram whose bucket boundaries are computed from a scale parameter rather than listed explicitly." link="https://signoz.io/docs/glossary/#exponential-histogram" /> is a metric that represents the distribution of a set of values on a logarithmic scale. Exponential histograms are used to track the distribution of values that span several orders of magnitude. For example, the latency of a network request.
 
 <Admonition type="info">
 Exponential histograms are supported only in self-hosted SigNoz (not SigNoz Cloud). To enable them in your OTel Collector configuration:
@@ -28,11 +28,11 @@ For background, see <a href="https://github.com/SigNoz/signoz-otel-collector/iss
 
 ### Temporality of Metrics
 
-The temporality of a metric determines how the measurement is reported over time. SigNoz supports the following types of temporality:
+The <Tooltip text="temporality" content="Whether a metric's data points report a running total or only the change since the last export." link="https://signoz.io/docs/glossary/#temporality" /> of a metric determines how the measurement is reported over time. SigNoz supports the following types of temporality:
 
-- **Cumulative** metrics store the accumulated value of the metric since the start of the process — for example, an odometer in a vehicle.
+- **Cumulative**: A <Tooltip text="cumulative" content="A metric temporality in which each successive data point repeats the same start timestamp and reports a running total." link="https://signoz.io/docs/glossary/#cumulative-temporality" /> metric stores the accumulated value of the metric since the start of the process. For example, an odometer in a vehicle.
 
-- **Delta** metrics store the change in the value of the metric since the last time it was reported — for example, the number of requests received by a server. Each time the metric is reported, the value is reset to zero.
+- **Delta**: A <Tooltip text="delta" content="A metric temporality in which each successive data point advances the start timestamp and reports only the change since the previous export." link="https://signoz.io/docs/glossary/#delta-temporality" /> metric stores the change in the value of the metric since the last time it was reported. For example, the number of requests received by a server. Each time the metric is reported, the value is reset to zero.
 
 A table representing the different types of metrics and their temporality support in SigNoz is shown below:
 
@@ -59,9 +59,9 @@ We recommend exporting metrics with **delta** temporality. It reduces ingestion 
 
 The aggregation of metrics is a two-step process:
 
-- **Temporal Aggregation**: Temporal aggregation is the process of aggregating the measurements over a specific period within the same time series.
+- **Temporal Aggregation**: <Tooltip text="Temporal aggregation" content="Combining the data points inside one time series into one value for each interval." link="https://signoz.io/docs/glossary/#temporal-aggregation" /> is the process of aggregating the measurements over a specific period within the same time series.
 
-- **Spatial Aggregation**: Spatial aggregation is the process of aggregating the measurements across multiple time series after temporal aggregation.
+- **Spatial Aggregation**: <Tooltip text="Spatial aggregation" content="Combining the values of several time series into one value for each interval, after temporal aggregation." link="https://signoz.io/docs/glossary/#spatial-aggregation" /> is the process of aggregating the measurements across multiple time series after temporal aggregation.
 
 A table representing the different types of metrics and their temporal and spatial aggregation supported by SigNoz is shown below:
 
