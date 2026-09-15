@@ -14,10 +14,6 @@ That is exactly what makes it hard to reason about without telemetry. Cost is dr
 
 This guide walks you through exporting Muse Code telemetry to SigNoz using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>, so you can observe sessions, turns, model calls, token and prompt cache usage, and tool activity.
 
-<Admonition type="info" title="Why this guide uses hooks rather than the built-in exporter">
-Muse Code ships an OpenTelemetry exporter, but its `telemetry.auth` setting accepts only `bearer` or `none` and offers no field for supplying your own credential, so it cannot send the `signoz-ingestion-key` header SigNoz Cloud requires. This guide uses Muse Code's hook system instead, which runs your own script and can therefore set any header it needs.
-</Admonition>
-
 ## Prerequisites
 
 - A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key, or a [self-hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
@@ -26,9 +22,14 @@ Muse Code ships an OpenTelemetry exporter, but its `telemetry.auth` setting acce
 
 ## Monitor Meta Muse Code with OpenTelemetry
 
-Muse Code runs a hook command at each point in its lifecycle and passes the event to that command as JSON on stdin. The script below turns those events into OpenTelemetry spans and posts them to SigNoz over OTLP/HTTP. No SDK is required, because SigNoz accepts OTLP/HTTP JSON directly.
+Muse Code ships its own OpenTelemetry exporter, but it cannot send the `signoz-ingestion-key` header that SigNoz Cloud requires, so this guide uses the hook system instead. Muse Code runs a hook command at each point in its lifecycle and passes the event to that command as JSON on stdin. The script below turns those events into OpenTelemetry spans and posts them to SigNoz over OTLP/HTTP. No SDK is required, because SigNoz accepts OTLP/HTTP JSON directly.
 
 **Step 1:** Create the hook script at `~/.local/share/muse-otel/muse_otel_hook.py`.
+
+<details>
+<ToggleHeading>
+**Show the hook script (about 150 lines)**
+</ToggleHeading>
 
 ```python
 #!/usr/bin/env python3
@@ -203,6 +204,8 @@ if __name__ == "__main__":
     sys.exit(0)
 ```
 
+</details>
+
 Make it executable:
 
 ```bash
@@ -229,11 +232,16 @@ chmod 600 ~/.local/share/muse-otel/config.json
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `service_name`: What the agent appears as in SigNoz. Set a different value per team or per repository if you want to compare them.
 
-<Admonition type="warning" title="Configuration must live in a file, not in environment variables">
+<Admonition type="warning" title="Configuration must live in a file, not in environment variables" defaultCollapsed="true">
 Muse Code runs hooks with a scrubbed environment. Only `HOME`, `PATH`, `PWD`, `SHELL`, `TERM`, `USER` and a few others survive, so anything you export in your shell is invisible to the hook. The `managed_hooks_env_vars` setting does not help either, because it applies only to enterprise-managed hooks. Keep the endpoint and key in `config.json`.
 </Admonition>
 
 **Step 3:** Register the hooks in `~/.config/muse/settings.json`.
+
+<details>
+<ToggleHeading>
+**Show the hooks block for settings.json**
+</ToggleHeading>
 
 ```json
 {
@@ -251,6 +259,8 @@ Muse Code runs hooks with a scrubbed environment. Only `HOME`, `PATH`, `PWD`, `S
   }
 }
 ```
+
+</details>
 
 Hooks belong in `settings.json`. A project-level `.muse/hooks.json` is silently ignored.
 
