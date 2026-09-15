@@ -1,0 +1,349 @@
+---
+date: 2026-09-14
+title: Meta Muse Code Monitoring with OpenTelemetry and SigNoz
+meta_title: "Muse Code CLI Agent Observability"
+description: Set up Meta Muse Code monitoring with OpenTelemetry and SigNoz. Trace agent turns, model calls, token usage, prompt cache hits, and tool activity.
+doc_type: howto
+---
+
+## What is Meta Muse Code Monitoring?
+
+<a href="https://www.meta.ai/" target="_blank" rel="noopener noreferrer nofollow">Meta Muse Code</a> is Meta's terminal coding agent, powered by the Muse Spark model family. It runs from your shell, reads and edits files, runs commands, and spawns subagents, which means a single prompt can turn into a dozen model calls and as many tool executions before you see a reply.
+
+That is exactly what makes it hard to reason about without telemetry. Cost is driven by context replay rather than by how much anyone typed, latency is dominated by reasoning the user never sees, and a failing tool shows up as an agent that quietly takes longer.
+
+This guide walks you through exporting Muse Code telemetry to SigNoz using <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a>, so you can observe sessions, turns, model calls, token and prompt cache usage, and tool activity.
+
+<Admonition type="info" title="Why this guide uses hooks rather than the built-in exporter">
+Muse Code ships an OpenTelemetry exporter, but its `telemetry.auth` setting accepts only `bearer` or `none` and offers no field for supplying your own credential, so it cannot send the `signoz-ingestion-key` header SigNoz Cloud requires. This guide uses Muse Code's hook system instead, which runs your own script and can therefore set any header it needs.
+</Admonition>
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key, or a [self-hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- Muse Code installed and signed in. Run `muse --version` to confirm
+- Python 3.9 or newer, already present on macOS and most Linux distributions
+
+## Monitor Meta Muse Code with OpenTelemetry
+
+Muse Code runs a hook command at each point in its lifecycle and passes the event to that command as JSON on stdin. The script below turns those events into OpenTelemetry spans and posts them to SigNoz over OTLP/HTTP. No SDK is required, because SigNoz accepts OTLP/HTTP JSON directly.
+
+**Step 1:** Create the hook script at `~/.local/share/muse-otel/muse_otel_hook.py`.
+
+```python
+#!/usr/bin/env python3
+"""Export Meta Muse Code hook events to SigNoz as OpenTelemetry spans."""
+import hashlib, json, os, pathlib, sys, time, urllib.request
+
+STATE = pathlib.Path(os.path.expanduser("~/.local/state/muse-otel"))
+CFG_PATHS = [pathlib.Path(__file__).resolve().parent / "config.json",
+             pathlib.Path(os.path.expanduser("~/.config/muse-otel/config.json"))]
+
+
+def config():
+    for p in CFG_PATHS:
+        try:
+            return json.loads(p.read_text())
+        except Exception:
+            continue
+    return {}
+
+
+CFG = config()
+ENDPOINT = CFG.get("endpoint", "https://ingest.<region>.signoz.cloud:443")
+KEY = CFG.get("ingestion_key")
+SERVICE = CFG.get("service_name", "muse-code")
+
+
+def h16(*parts):
+    return hashlib.sha256("|".join(str(p) for p in parts).encode()).hexdigest()[:16]
+
+
+def attrs(d):
+    out = []
+    for k, v in d.items():
+        if v is None:
+            continue
+        if isinstance(v, bool):
+            val = {"boolValue": v}
+        elif isinstance(v, int):
+            val = {"intValue": str(v)}
+        elif isinstance(v, (list, tuple)):
+            val = {"arrayValue": {"values": [{"stringValue": str(x)} for x in v]}}
+        else:
+            val = {"stringValue": str(v)}
+        out.append({"key": k, "value": val})
+    return out
+
+
+def post(spans, ev):
+    if not (KEY and spans):
+        return
+    payload = {"resourceSpans": [{
+        "resource": {"attributes": attrs({"service.name": SERVICE, "surface": "tui"})},
+        "scopeSpans": [{"scope": {"name": "muse-otel-hook"}, "spans": spans}]}]}
+    if os.fork() != 0:            # return immediately, never block the agent
+        return
+    os.setsid()
+    if os.fork() != 0:
+        os._exit(0)
+    try:
+        req = urllib.request.Request(
+            ENDPOINT.rstrip("/") + "/v1/traces", data=json.dumps(payload).encode(),
+            headers={"content-type": "application/json", "signoz-ingestion-key": KEY})
+        urllib.request.urlopen(req, timeout=10).read()
+    except Exception:
+        pass
+    os._exit(0)
+
+
+def mark(sess, key):
+    d = STATE / str(sess)
+    d.mkdir(parents=True, exist_ok=True)
+    (d / key).write_text(json.dumps({"t": time.time_ns()}))
+
+
+def take(sess, key):
+    p = STATE / str(sess) / key
+    try:
+        v = json.loads(p.read_text())
+        p.unlink(missing_ok=True)
+        return v
+    except Exception:
+        return None
+
+
+def span(name, tid, sid, parent, start, end, a, kind=1, err=False):
+    s = {"traceId": tid, "spanId": sid, "name": name, "kind": kind,
+         "startTimeUnixNano": str(int(start)), "endTimeUnixNano": str(int(end)),
+         "attributes": attrs(a), "status": {"code": 2 if err else 1}}
+    if parent:
+        s["parentSpanId"] = parent
+    return s
+
+
+def main():
+    ev = json.loads(sys.stdin.read())
+    name, sess, turn = ev.get("hook_event_name"), ev.get("session_id"), ev.get("turn_id")
+    tid = (str(turn).replace("-", "") if turn else hashlib.sha256(
+        str(sess).encode()).hexdigest()[:32])
+    root, now = h16("turn", turn or sess), time.time_ns()
+    tkey = "turn_" + h16(turn or sess)
+    base = {"session.id": sess, "turn.id": turn, "muse.model": ev.get("model")}
+    have_root = (STATE / str(sess) / tkey).exists()
+
+    if name == "UserPromptSubmit":
+        mark(sess, tkey)
+    elif name == "PreLLMCall":
+        mark(sess, "llm_" + h16(ev.get("request_id"), ev.get("attempt")))
+    elif name == "PreToolUse":
+        mark(sess, "tool_" + h16(ev.get("tool_use_id")))
+
+    elif name == "PostLLMCall":
+        st = take(sess, "llm_" + h16(ev.get("request_id"), ev.get("attempt")))
+        u, status = ev.get("usage") or {}, str(ev.get("status") or "")
+        sid = h16("llm", ev.get("request_id"))
+        tp = (ev.get("options") or {}).get("meta.traceparent")
+        if isinstance(tp, str) and tp.count("-") == 3:      # reuse Muse's own ids
+            _, tp_trace, tp_span, _ = tp.split("-")
+            tid, sid = tp_trace, tp_span
+        fr = [ev["finish_reason"]] if ev.get("finish_reason") else (
+            ["stop"] if status == "success" else None)
+        post([span("chat " + str(ev.get("model")), tid, sid,
+                   root if have_root else None, (st or {}).get("t", now - 1), now,
+                   {**base, "gen_ai.operation.name": "chat",
+                    "gen_ai.request.model": ev.get("model"),
+                    "gen_ai.provider.name": ev.get("model_provider"),
+                    "gen_ai.response.id": ev.get("response_id"),
+                    "gen_ai.response.finish_reasons": fr,
+                    "gen_ai.usage.input_tokens": u.get("input_tokens"),
+                    "gen_ai.usage.output_tokens": u.get("output_tokens"),
+                    "gen_ai.usage.cache_read.input_tokens": u.get("cache_read_tokens"),
+                    "gen_ai.usage.reasoning.output_tokens": u.get("reasoning_tokens"),
+                    "gen_ai.request.reasoning_effort":
+                        (ev.get("options") or {}).get("meta.reasoning.effort"),
+                    "muse.llm.status": status, "muse.llm.attempt": ev.get("attempt")},
+                   kind=3, err=bool(ev.get("error")))], ev)
+
+    elif name in ("PostToolUse", "PostToolUseFailure"):
+        st = take(sess, "tool_" + h16(ev.get("tool_use_id")))
+        failed = name == "PostToolUseFailure"
+        post([span("execute_tool " + str(ev.get("tool_name")), tid,
+                   h16("tool", ev.get("tool_use_id")), root if have_root else None,
+                   (st or {}).get("t", now - 1), now,
+                   {**base, "gen_ai.tool.name": ev.get("tool_name"),
+                    "gen_ai.tool.call.id": ev.get("tool_use_id"),
+                    "muse.tool.status": "failed" if failed else "success"},
+                   err=failed)], ev)
+
+    elif name in ("Stop", "StopFailure"):
+        st = take(sess, tkey)
+        post([span("turn", tid, root, None, (st or {}).get("t", now - 1), now,
+                   {**base, "muse.turn.outcome":
+                       "failed" if name == "StopFailure" else "completed"},
+                   err=name == "StopFailure")], ev)
+
+    elif name == "SessionStart":
+        mark(sess, "session")
+    elif name == "SessionEnd":
+        st = take(sess, "session")
+        post([span("muse session", hashlib.sha256(
+            ("session:" + str(sess)).encode()).hexdigest()[:32], h16("sess", sess),
+            None, (st or {}).get("t", now - 1), now,
+            {**base, "muse.session.end_reason": ev.get("reason")})], ev)
+
+    print("{}")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception:
+        print("{}")          # a telemetry fault must never block the agent
+    sys.exit(0)
+```
+
+Make it executable:
+
+```bash
+chmod +x ~/.local/share/muse-otel/muse_otel_hook.py
+```
+
+**Step 2:** Create `~/.local/share/muse-otel/config.json` next to the script.
+
+```json
+{
+  "endpoint": "https://ingest.<region>.signoz.cloud:443",
+  "ingestion_key": "<your-ingestion-key>",
+  "service_name": "muse-code"
+}
+```
+
+```bash
+chmod 600 ~/.local/share/muse-otel/config.json
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `service_name`: What the agent appears as in SigNoz. Set a different value per team or per repository if you want to compare them.
+
+<Admonition type="warning" title="Configuration must live in a file, not in environment variables">
+Muse Code runs hooks with a scrubbed environment. Only `HOME`, `PATH`, `PWD`, `SHELL`, `TERM`, `USER` and a few others survive, so anything you export in your shell is invisible to the hook. The `managed_hooks_env_vars` setting does not help either, because it applies only to enterprise-managed hooks. Keep the endpoint and key in `config.json`.
+</Admonition>
+
+**Step 3:** Register the hooks in `~/.config/muse/settings.json`.
+
+```json
+{
+  "schema_version": 1,
+  "hooks": {
+    "SessionStart":       [{ "hooks": [{ "type": "command", "command": "~/.local/share/muse-otel/muse_otel_hook.py" }] }],
+    "UserPromptSubmit":   [{ "hooks": [{ "type": "command", "command": "~/.local/share/muse-otel/muse_otel_hook.py" }] }],
+    "PreLLMCall":         [{ "hooks": [{ "type": "command", "command": "~/.local/share/muse-otel/muse_otel_hook.py" }] }],
+    "PostLLMCall":        [{ "hooks": [{ "type": "command", "command": "~/.local/share/muse-otel/muse_otel_hook.py" }] }],
+    "PreToolUse":         [{ "hooks": [{ "type": "command", "command": "~/.local/share/muse-otel/muse_otel_hook.py" }] }],
+    "PostToolUse":        [{ "hooks": [{ "type": "command", "command": "~/.local/share/muse-otel/muse_otel_hook.py" }] }],
+    "PostToolUseFailure": [{ "hooks": [{ "type": "command", "command": "~/.local/share/muse-otel/muse_otel_hook.py" }] }],
+    "Stop":               [{ "hooks": [{ "type": "command", "command": "~/.local/share/muse-otel/muse_otel_hook.py" }] }],
+    "SessionEnd":         [{ "hooks": [{ "type": "command", "command": "~/.local/share/muse-otel/muse_otel_hook.py" }] }]
+  }
+}
+```
+
+Hooks belong in `settings.json`. A project-level `.muse/hooks.json` is silently ignored.
+
+**Step 4:** Start Muse Code and run a prompt.
+
+```bash
+muse
+```
+
+Each turn emits a `turn` span with `chat {model}` and `execute_tool {tool}` children. Because the script reuses the `meta.traceparent` that Muse Code already attaches to every model call, the trace id matches the agent's own turn id and your spans line up with its internal trace context. Allow a few seconds for the data to appear.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Point `endpoint` at your collector, for example `http://localhost:4318`, and drop the `ingestion_key` field as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## View Meta Muse Code Traces in SigNoz
+
+Once configured, Muse Code emits traces on every turn. In SigNoz, look for the service name you set in `config.json`.
+
+Muse Code traces are available in SigNoz under the Traces tab:
+
+<Figure
+  src="/img/docs/llm/muse-code/muse-code-traces.webp"
+  alt="Meta Muse Code Trace View"
+  caption="Meta Muse Code Trace View"
+/>
+
+Clicking a trace opens the waterfall for one turn, with the model calls and tool executions that made it up, plus the `gen_ai.*` and `muse.*` attributes on each span.
+
+<Figure
+  src="/img/docs/llm/muse-code/muse-code-detailed-traces.webp"
+  alt="Meta Muse Code Detailed Trace View"
+  caption="Meta Muse Code Detailed Trace View"
+/>
+
+## Meta Muse Code Monitoring Dashboard
+
+You can also check out our custom [Meta Muse Code dashboard](https://signoz.io/docs/dashboards/dashboard-templates/muse-code-dashboard/) which provides specialized visualizations for monitoring your Muse Code usage. The dashboard includes pre-built charts for token usage, prompt cache efficiency, latency, and tool activity, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/muse-code/muse-code-dashboard.webp"
+  alt="Meta Muse Code Dashboard"
+  caption="Meta Muse Code Dashboard Template"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting Meta Muse Code Monitoring
+</ToggleHeading>
+
+### No spans appear in SigNoz
+
+Confirm the hooks are actually firing. Muse Code records every hook run in its own diagnostic log:
+
+```bash
+grep hook.execution.terminal ~/.local/share/muse/local-tracing/bootstrap/*.log | tail
+```
+
+A `status="completed"` line for each event means the hook ran. If there are no lines at all, re-check the `hooks` block in `~/.config/muse/settings.json`.
+
+### Hooks run but nothing reaches SigNoz
+
+This is almost always the configuration file. The hook cannot read environment variables, so verify the file exists next to the script and parses:
+
+```bash
+python3 -c "import json;print(json.load(open('$HOME/.local/share/muse-otel/config.json'))['service_name'])"
+```
+
+### Muse Code reports a malformed settings file
+
+Muse Code validates `settings.json` on startup and names the offending line. `schema_version` must be `1`, and every matcher group must declare a `hooks` array.
+
+### Spans arrive but the agent feels slower
+
+The script forks before sending, so the hook returns immediately. If you removed the fork, each event would block the agent for the duration of an HTTPS round trip.
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+The [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) is a vendor-neutral service that receives, processes, and exports telemetry. It is optional here, because the hook sends directly to SigNoz.
+
+### Why use it?
+
+Run one if you want to enrich Muse Code spans with host or environment attributes, batch across many developer machines, or route the same telemetry to more than one backend. Point `endpoint` in `config.json` at the collector and configure an OTLP exporter to SigNoz.
+</details>
+
+## Related integrations
+
+- [Meta Muse Spark Monitoring](https://signoz.io/docs/muse-spark-monitoring/) for the Model API behind Muse Code
+- [Setting up alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) on agent latency and tool failures
+- [Querying traces](https://signoz.io/docs/userguide/query-builder-v5/) to slice usage by model, tool, or session
