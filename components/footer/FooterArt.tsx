@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 
-import './footer-fx.css'
+import styles from './footer-fx.module.css'
 
 const CFG = {
   row: 30,
@@ -52,7 +52,7 @@ function makeBlock(fieldW: number): BlockSpec {
 
 function paint(spec: BlockSpec, host: HTMLElement): HTMLSpanElement {
   const el = document.createElement('span')
-  el.className = 'fx__block'
+  el.className = styles.fxBlock
   el.dataset.tone = spec.tone
   el.style.left = `${spec.left}px`
   el.style.top = `${spec.top}px`
@@ -80,12 +80,12 @@ export default function FooterArt() {
     const recycleTimers = new Set<ReturnType<typeof setTimeout>>()
 
     const buildRails = () => {
-      fx.querySelectorAll('.fx__rail').forEach((rail) => rail.remove())
+      fx.querySelectorAll(`.${styles.fxRail}`).forEach((rail) => rail.remove())
       const width = fx.clientWidth
       const fractions = [0.02, 0.25, 0.5, 0.75, 0.98]
       fractions.forEach((fraction) => {
         const rail = document.createElement('span')
-        rail.className = 'fx__rail'
+        rail.className = styles.fxRail
         rail.style.left = `${Math.round(width * fraction)}px`
         fx.appendChild(rail)
       })
@@ -147,7 +147,7 @@ export default function FooterArt() {
     }
 
     const start = () => {
-      fx.classList.add('is-live')
+      fx.classList.add(styles.isLive)
       if (reduced.matches) return
 
       ambientTimer = setInterval(() => {
@@ -194,10 +194,10 @@ export default function FooterArt() {
   }, [])
 
   return (
-    <div ref={rootRef} className="footer-effect" aria-hidden="true" data-markdown-ignore>
-      <div ref={fxRef} className="fx">
-        <div className="fx__rows" />
-        <div ref={fieldRef} className="fx__field" />
+    <div ref={rootRef} className={styles.effect} aria-hidden="true" data-markdown-ignore>
+      <div ref={fxRef} className={styles.fx}>
+        <div className={styles.fxRows} />
+        <div ref={fieldRef} className={styles.fxField} />
       </div>
     </div>
   )

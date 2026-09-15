@@ -7,6 +7,8 @@ import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 
 import { CUSTOMER_STORY_LOGOS, type CustomerStoryLogo } from './customerStories.constants'
+import { cn } from 'app/lib/utils'
+import styles from './customer-stories.module.css'
 
 const SCROLL_SPEED = 42
 
@@ -18,7 +20,7 @@ interface CardProps {
 function CustomerCard({ customer, isClone = false }: CardProps) {
   return (
     <TrackingLink
-      className="customer-card"
+      className={styles.card}
       href="/customers/"
       clickType="Customer Proof"
       clickName="Customer Logo Link"
@@ -30,9 +32,9 @@ function CustomerCard({ customer, isClone = false }: CardProps) {
       tabIndex={isClone ? -1 : undefined}
     >
       {customer.showName ? (
-        <span className="customer-card__label">
+        <span className={styles.cardLabel}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={customer.logoSrc} alt="" className="customer-card__icon" draggable={false} />
+          <img src={customer.logoSrc} alt="" className={styles.cardIcon} draggable={false} />
           <span>{customer.name}</span>
         </span>
       ) : (
@@ -41,7 +43,7 @@ function CustomerCard({ customer, isClone = false }: CardProps) {
           src={customer.logoSrc}
           alt={isClone ? '' : customer.name}
           className={
-            [customer.width ? 'wordmark' : '', customer.mono ? 'mono' : '']
+            [customer.width ? styles.wordmark : '', customer.mono ? styles.mono : '']
               .filter(Boolean)
               .join(' ') || undefined
           }
@@ -131,27 +133,28 @@ export default function CustomerCarousel() {
       rafId = requestAnimationFrame(tick)
     }
 
-    const startLoop = () => {
-      if (running) return
-      running = true
-      lastTime = 0
-      rafId = requestAnimationFrame(tick)
-    }
-    const stopLoop = () => {
-      running = false
-      cancelAnimationFrame(rafId)
-    }
-
     const onMouseMove = (event: MouseEvent) => {
       mouseX = event.clientX
       mouseY = event.clientY
     }
-    document.addEventListener('mousemove', onMouseMove)
+
+    const startLoop = () => {
+      if (running) return
+      running = true
+      lastTime = 0
+      document.addEventListener('mousemove', onMouseMove)
+      rafId = requestAnimationFrame(tick)
+    }
+    const stopLoop = () => {
+      running = false
+      document.removeEventListener('mousemove', onMouseMove)
+      cancelAnimationFrame(rafId)
+    }
 
     const onEnter = (event: Event) => {
       const card = event.currentTarget as HTMLElement
-      card.classList.add('active')
-      track.classList.add('has-hover')
+      card.classList.add(styles.active)
+      track.classList.add(styles.hasHover)
       targetSpeed = 0
       activeCard = card
       pillText.textContent = 'See customers'
@@ -159,16 +162,16 @@ export default function CustomerCarousel() {
       pillY = mouseY
       pill.style.left = `${pillX}px`
       pill.style.top = `${pillY}px`
-      pill.classList.add('visible')
+      pill.classList.add(styles.pillVisible)
     }
 
     const onLeave = (event: Event) => {
       const mouseEvent = event as MouseEvent
       const card = event.currentTarget as HTMLElement
       const related = mouseEvent.relatedTarget as HTMLElement | null
-      const nextCard = related?.closest?.('.customer-card') as HTMLElement | null
+      const nextCard = related?.closest?.(`.${styles.card}`) as HTMLElement | null
 
-      card.classList.remove('active')
+      card.classList.remove(styles.active)
       card.style.transform = ''
 
       if (nextCard && nextCard !== card) {
@@ -179,11 +182,11 @@ export default function CustomerCarousel() {
 
       activeCard = null
       targetSpeed = SCROLL_SPEED
-      track.classList.remove('has-hover')
-      pill.classList.remove('visible')
+      track.classList.remove(styles.hasHover)
+      pill.classList.remove(styles.pillVisible)
     }
 
-    const cards = Array.from(track.querySelectorAll('.customer-card'))
+    const cards = Array.from(track.querySelectorAll(`.${styles.card}`))
     cards.forEach((card) => {
       card.addEventListener('mouseenter', onEnter)
       card.addEventListener('mouseleave', onLeave)
@@ -216,9 +219,9 @@ export default function CustomerCarousel() {
   }, [mounted])
 
   return (
-    <div className="customer-stories__carousel">
-      <div className="customer-stories__wrapper" ref={wrapperRef}>
-        <div className="customer-stories__track" ref={trackRef}>
+    <div className={styles.carousel}>
+      <div className={styles.wrapper} ref={wrapperRef}>
+        <div className={styles.track} ref={trackRef}>
           {CUSTOMER_STORY_LOGOS.map((customer) => (
             <CustomerCard key={customer.name} customer={customer} />
           ))}
@@ -228,18 +231,18 @@ export default function CustomerCarousel() {
             ))
           )}
         </div>
-        <div className="customer-stories__edge customer-stories__edge--left" aria-hidden="true">
-          <div className="edge-blur" />
-          <div className="edge-fade" />
+        <div className={cn(styles.edge, styles.edgeLeft)} aria-hidden="true">
+          <div className={styles.edgeBlur} />
+          <div className={styles.edgeFade} />
         </div>
-        <div className="customer-stories__edge customer-stories__edge--right" aria-hidden="true">
-          <div className="edge-blur" />
-          <div className="edge-fade" />
+        <div className={cn(styles.edge, styles.edgeRight)} aria-hidden="true">
+          <div className={styles.edgeBlur} />
+          <div className={styles.edgeFade} />
         </div>
       </div>
       {mounted &&
         createPortal(
-          <div className="customer-stories-cursor-pill" ref={pillRef} aria-hidden="true">
+          <div className={styles.cursorPill} ref={pillRef} aria-hidden="true">
             <span ref={pillTextRef} />
             <ArrowRight size={10} />
           </div>,

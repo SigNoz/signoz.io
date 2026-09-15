@@ -4,9 +4,16 @@ import React, { useEffect, useState } from 'react'
 
 import { cn } from 'app/lib/utils'
 
-import './shimmer-badge.css'
+import styles from './shimmer-badge.module.css'
 
 export type ShimmerBadgeTone = 'green' | 'blue' | 'pink' | 'yellow'
+
+const TONE_CLASS: Record<ShimmerBadgeTone, string> = {
+  green: styles.green,
+  blue: styles.blue,
+  pink: styles.pink,
+  yellow: styles.yellow,
+}
 
 interface ShimmerBadgeProps {
   children: React.ReactNode
@@ -43,20 +50,20 @@ export default function ShimmerBadge({
       onClick={onClick}
       onMouseEnter={() => setAnimating(true)}
       className={cn(
-        'shimmer-badge',
-        `shimmer-badge--${tone}`,
-        shape === 'right-soft' && 'shimmer-badge--right-soft',
-        clickable && 'shimmer-badge--clickable',
-        animating && 'shimmer-badge--animate',
+        styles.badge,
+        TONE_CLASS[tone],
+        shape === 'right-soft' && styles.rightSoft,
+        clickable && styles.clickable,
+        animating && styles.animate,
         className
       )}
     >
       <span
-        className="shimmer-badge__shine"
+        className={styles.shine}
         onAnimationEnd={() => setAnimating(false)}
         aria-hidden="true"
       />
-      <span className="shimmer-badge__label">{children}</span>
+      <span className={styles.label}>{children}</span>
     </Comp>
   )
 }

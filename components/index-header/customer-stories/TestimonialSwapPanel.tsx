@@ -6,6 +6,8 @@ import { ArrowRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 
 import { type CustomerStoryQuote } from './customerStories.constants'
+import { cn } from 'app/lib/utils'
+import styles from './customer-stories.module.css'
 
 const SWAP_EVERY = 6200
 const LEAVE_MS = 620
@@ -82,12 +84,12 @@ export default function TestimonialSwapPanel({
   const handleMouseLeave = () => {
     hoveredRef.current = false
     if (contentRef.current) contentRef.current.style.transform = ''
-    panelRef.current?.classList.remove('active')
+    panelRef.current?.classList.remove(styles.active)
   }
 
   const handleMouseEnter = () => {
     hoveredRef.current = true
-    panelRef.current?.classList.add('active')
+    panelRef.current?.classList.add(styles.active)
   }
 
   const href = quote.caseStudyHref ?? '/customers/'
@@ -101,20 +103,22 @@ export default function TestimonialSwapPanel({
   return (
     <figure
       ref={panelRef}
-      className="voice voice--testimonial group"
+      className={cn(styles.voice, styles.voiceTestimonial, 'group')}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseMove={handleMouseMove}
     >
       <div
-        className={`voice__body ${phase === 'leaving' ? 'is-leaving' : ''} ${
-          phase === 'arriving' ? 'is-arriving' : ''
-        }`}
+        className={cn(
+          styles.voiceBody,
+          phase === 'leaving' && styles.isLeaving,
+          phase === 'arriving' && styles.isArriving
+        )}
       >
-        <div className="voice__content" ref={contentRef}>
-          <blockquote className="voice__quote">“{quote.text}”</blockquote>
-          <figcaption className="voice__source">
-            {quote.name}, <span className="voice__org">{quote.org}</span>
+        <div className={styles.voiceContent} ref={contentRef}>
+          <blockquote className={styles.voiceQuote}>“{quote.text}”</blockquote>
+          <figcaption className={styles.voiceSource}>
+            {quote.name}, <span className={styles.voiceOrg}>{quote.org}</span>
           </figcaption>
         </div>
       </div>

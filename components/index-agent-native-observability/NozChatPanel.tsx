@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
 
 import { cn } from 'app/lib/utils'
 
-import './noz-input-peek.css'
+import styles from './noz-input-peek.module.css'
 
 const SUGGESTED_QUESTIONS = [
   'Why is my cache failing?',
@@ -15,12 +15,15 @@ const SUGGESTED_QUESTIONS = [
 
 function NozInputPeek() {
   const wrapRef = useRef<HTMLDivElement>(null)
+  const nozRef = useRef<HTMLDivElement>(null)
+  const eyeRef = useRef<SVGCircleElement>(null)
+  const pupilRef = useRef<SVGGElement>(null)
 
   useEffect(() => {
     const wrap = wrapRef.current
     if (!wrap) return
 
-    const noz = wrap.querySelector<HTMLElement>('.noz-input-peek')
+    const noz = nozRef.current
     if (!noz) return
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -28,8 +31,8 @@ function NozInputPeek() {
     let raf = 0
 
     const reveal = () => {
-      wrap.classList.add('is-live')
-      noz.classList.add('is-live')
+      wrap.classList.add(styles.isLive)
+      noz.classList.add(styles.isLive)
       window.setTimeout(
         () => {
           ready = true
@@ -58,8 +61,8 @@ function NozInputPeek() {
       if (!ready || reduced || raf) return
       raf = requestAnimationFrame(() => {
         raf = 0
-        const eye = noz.querySelector('.noz-input-peek__eye')
-        const pupil = noz.querySelector<SVGGElement>('.noz-input-peek__pupil')
+        const eye = eyeRef.current
+        const pupil = pupilRef.current
         if (!eye || !pupil) return
         const rect = eye.getBoundingClientRect()
         const deltaX = event.clientX - (rect.left + rect.width / 2)
@@ -83,8 +86,8 @@ function NozInputPeek() {
   }, [])
 
   return (
-    <div ref={wrapRef} className="noz-input-wrap mt-2 shrink-0">
-      <div className="noz-input-peek" aria-hidden="true" data-markdown-ignore>
+    <div ref={wrapRef} className={cn(styles.wrap, 'mt-2 shrink-0')}>
+      <div ref={nozRef} className={styles.peek} aria-hidden="true" data-markdown-ignore>
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect
             x="4.36"
@@ -94,9 +97,9 @@ function NozInputPeek() {
             rx="1.76"
             fill="var(--bg-cherry-500)"
           />
-          <g className="noz-input-peek__head">
-            <circle className="noz-input-peek__eye" cx="12.02" cy="14.49" r="3.88" fill="#F5F5F5" />
-            <g className="noz-input-peek__pupil">
+          <g className={styles.head}>
+            <circle ref={eyeRef} cx="12.02" cy="14.49" r="3.88" fill="#F5F5F5" />
+            <g ref={pupilRef} className={styles.pupil}>
               <path
                 d="M12.02 12.8c0 .93-.75 1.69-1.68 1.69-.31 0-.59-.08-.84-.22-.03.28 0 .58.08.87.36 1.35 1.75 2.15 3.1 1.79 1.35-.36 2.15-1.75 1.79-3.1-.32-1.2-1.47-1.97-2.67-1.86.14.24.22.53.22.83Z"
                 fill="#0A0C10"
@@ -109,7 +112,7 @@ function NozInputPeek() {
           </g>
         </svg>
       </div>
-      <svg className="noz-input-peek__hands" viewBox="0 0 34 7" fill="none" aria-hidden="true">
+      <svg className={styles.hands} viewBox="0 0 34 7" fill="none" aria-hidden="true">
         <rect width="3.53" height="6.17" rx="1.47" fill="var(--bg-cherry-500)" />
         <rect x="30.47" width="3.53" height="6.17" rx="1.47" fill="var(--bg-cherry-500)" />
       </svg>

@@ -3,11 +3,13 @@
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 
-import './footer-fx.css'
+import styles from './footer-fx.module.css'
 
 export default function FooterStatus() {
   const wrapRef = useRef<HTMLDivElement>(null)
   const nozRef = useRef<HTMLDivElement>(null)
+  const eyeRef = useRef<SVGCircleElement>(null)
+  const pupilRef = useRef<SVGGElement>(null)
 
   useEffect(() => {
     const noz = nozRef.current
@@ -18,7 +20,7 @@ export default function FooterStatus() {
     let raf = 0
 
     const reveal = () => {
-      noz.classList.add('is-live')
+      noz.classList.add(styles.isLive)
       window.setTimeout(
         () => {
           ready = true
@@ -47,8 +49,8 @@ export default function FooterStatus() {
       if (!ready || reduced || raf) return
       raf = requestAnimationFrame(() => {
         raf = 0
-        const eye = noz.querySelector('.footer-status-noz__eye')
-        const pupil = noz.querySelector<SVGGElement>('.footer-status-noz__pupil')
+        const eye = eyeRef.current
+        const pupil = pupilRef.current
         if (!eye || !pupil) return
         const rect = eye.getBoundingClientRect()
         const deltaX = event.clientX - (rect.left + rect.width / 2)
@@ -72,8 +74,8 @@ export default function FooterStatus() {
   }, [])
 
   return (
-    <div ref={wrapRef} className="footer-status-wrap">
-      <div ref={nozRef} className="footer-status-noz" aria-hidden="true" data-markdown-ignore>
+    <div ref={wrapRef} className={styles.statusWrap}>
+      <div ref={nozRef} className={styles.noz} aria-hidden="true" data-markdown-ignore>
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -88,15 +90,9 @@ export default function FooterStatus() {
             rx="1.76"
             fill="var(--bg-cherry-500)"
           />
-          <g className="footer-status-noz__head">
-            <circle
-              className="footer-status-noz__eye"
-              cx="12.02"
-              cy="14.49"
-              r="3.88"
-              fill="#F5F5F5"
-            />
-            <g className="footer-status-noz__pupil">
+          <g className={styles.nozHead}>
+            <circle ref={eyeRef} cx="12.02" cy="14.49" r="3.88" fill="#F5F5F5" />
+            <g ref={pupilRef} className={styles.nozPupil}>
               <path
                 d="M12.02 12.8c0 .93-.75 1.69-1.68 1.69-.31 0-.59-.08-.84-.22-.03.28 0 .58.08.87.36 1.35 1.75 2.15 3.1 1.79 1.35-.36 2.15-1.75 1.79-3.1-.32-1.2-1.47-1.97-2.67-1.86.14.24.22.53.22.83Z"
                 fill="#0A0C10"
@@ -109,7 +105,7 @@ export default function FooterStatus() {
           </g>
         </svg>
       </div>
-      <svg className="footer-status-noz__hands" viewBox="0 0 34 7" fill="none" aria-hidden="true">
+      <svg className={styles.nozHands} viewBox="0 0 34 7" fill="none" aria-hidden="true">
         <rect width="3.53" height="6.17" rx="1.47" fill="var(--bg-cherry-500)" />
         <rect x="30.47" width="3.53" height="6.17" rx="1.47" fill="var(--bg-cherry-500)" />
       </svg>
@@ -117,9 +113,9 @@ export default function FooterStatus() {
         href="https://status.signoz.io/"
         target="_blank"
         prefetch={false}
-        className="footer-status"
+        className={styles.status}
       >
-        <span className="footer-status__dot" aria-hidden="true" />
+        <span className={styles.statusDot} aria-hidden="true" />
         All systems operational
       </Link>
     </div>

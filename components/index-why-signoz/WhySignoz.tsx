@@ -7,7 +7,9 @@ import TrackingLink from '@/components/TrackingLink'
 
 import WhySignozProtoWorld, { type WhySignozWorldHandle } from './WhySignozProtoWorld'
 import { WHY_SIGNOZ_STEPS } from './whySignozStages'
-import './why-signoz.css'
+import styles from './why-signoz.module.css'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 const STEPS = WHY_SIGNOZ_STEPS.length
 
@@ -45,8 +47,8 @@ export default function WhySignoz() {
 
       itemRefs.current.forEach((el, n) => {
         if (!el) return
-        el.classList.toggle('is-active', n === idx)
-        el.classList.toggle('is-done', n < idx)
+        el.classList.toggle(styles.isActive, n === idx)
+        el.classList.toggle(styles.isDone, n < idx)
         const fill = n === idx ? `${(local * 100).toFixed(1)}%` : n < idx ? '100%' : '0%'
         if (lastFill[n] !== fill) {
           lastFill[n] = fill
@@ -178,7 +180,7 @@ export default function WhySignoz() {
           ref={driverRef}
         >
           <div className="lg:motion-safe:sticky lg:motion-safe:top-14 lg:motion-safe:grid lg:motion-safe:h-[calc(100vh-56px)] lg:motion-safe:min-h-[620px] lg:motion-safe:grid-cols-2 lg:motion-safe:items-center lg:motion-safe:gap-16">
-            <div className="why-rail relative flex min-w-0 flex-col lg:motion-safe:h-[min(88vh,780px)] lg:motion-safe:justify-start">
+            <div className="relative flex min-w-0 flex-col lg:motion-safe:h-[min(88vh,780px)] lg:motion-safe:justify-start">
               {WHY_SIGNOZ_STEPS.map((step, index) => {
                 const Icon = step.icon
                 const isActive = index === displayIndex
@@ -186,8 +188,8 @@ export default function WhySignoz() {
                 return (
                   <div
                     aria-current={isActive ? 'step' : undefined}
-                    className={`why-item group relative py-8 lg:motion-safe:py-6 ${
-                      isActive ? 'is-active' : index < displayIndex ? 'is-done' : ''
+                    className={`${styles.item} group relative py-8 lg:motion-safe:py-6 ${
+                      isActive ? styles.isActive : index < displayIndex ? styles.isDone : ''
                     }`}
                     key={step.key}
                     ref={(node) => {
@@ -200,10 +202,10 @@ export default function WhySignoz() {
                     />
                     <div
                       aria-hidden="true"
-                      className="why-item-progress absolute left-0 top-0 hidden h-px bg-gradient-to-r from-transparent via-[color-mix(in_srgb,var(--l1-foreground)_20%,transparent)] to-[var(--l1-foreground)] lg:motion-safe:block"
+                      className={`${styles.itemProgress} absolute left-0 top-0 hidden h-px bg-gradient-to-r from-transparent via-[color-mix(in_srgb,var(--l1-foreground)_20%,transparent)] to-[var(--l1-foreground)] lg:motion-safe:block`}
                     />
 
-                    <div className="why-reveal hidden lg:motion-safe:grid">
+                    <div className={`${styles.reveal} hidden lg:motion-safe:grid`}>
                       <div className="min-h-0 overflow-hidden">
                         <Icon
                           aria-hidden="true"
@@ -215,7 +217,7 @@ export default function WhySignoz() {
 
                     <h3 className="m-0 text-[17px] font-medium leading-6">
                       <button
-                        className="why-item-title m-0 cursor-default border-0 bg-transparent p-0 text-left text-[17px] font-medium leading-6 transition-colors duration-300 lg:motion-safe:cursor-pointer"
+                        className={`${styles.itemTitle} m-0 cursor-default border-0 bg-transparent p-0 text-left text-[17px] font-medium leading-6 transition-colors duration-300 lg:motion-safe:cursor-pointer`}
                         onClick={() => scrollToStep(index)}
                         tabIndex={-1}
                         type="button"
@@ -223,16 +225,21 @@ export default function WhySignoz() {
                         {step.title}
                       </button>
                     </h3>
-                    <p className="why-item-desc m-0 mt-2 max-w-md text-sm leading-6 transition-colors duration-300">
+                    <p
+                      className={`${styles.itemDesc} m-0 mt-2 max-w-md text-sm leading-6 transition-colors duration-300`}
+                    >
                       {step.description}
                     </p>
 
                     {step.cta ? (
-                      <div className="why-reveal why-reveal--cta grid">
+                      <div className={`${styles.reveal} ${styles.revealCta} grid`}>
                         <div className="min-h-0 overflow-hidden">
                           <div className="pt-5">
                             <TrackingLink
-                              className="btn-tactile btn-tactile--secondary no-underline"
+                              className={cn(
+                                buttonVariants({ variant: 'tactileSecondary' }),
+                                'no-underline'
+                              )}
                               clickLocation="Homepage Why SigNoz"
                               clickName="Docs Link"
                               clickText={step.cta.label}

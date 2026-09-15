@@ -3,7 +3,7 @@ import TrackingLink from '@/components/TrackingLink'
 import React from 'react'
 
 import { useGithubStars } from './useGithubStars'
-import './github-stars.css'
+import styles from './github-stars.module.css'
 
 interface GitHubStarsProps {
   location?: string
@@ -57,13 +57,13 @@ const GitHubStars: React.FC<GitHubStarsProps> = ({ location = 'Top Navbar' }) =>
       clickName="GitHub Repository"
       clickText={stars === null ? 'GitHub Icon' : `${formatted} Stars`}
       clickLocation={location}
-      className="github-stars-chip inline-flex h-8 items-center gap-2 rounded-[3px] bg-transparent pl-2.5 pr-2.5 transition-colors hover:bg-[var(--l3-background-hover)]"
+      className={`${styles.chip} inline-flex h-8 items-center gap-2 rounded-[3px] bg-transparent pl-2.5 pr-2.5 transition-colors hover:bg-[var(--l3-background-hover)]`}
     >
-      <span className="icon-morph">
-        <span className="icon-old">
+      <span className={styles.iconMorph}>
+        <span className={styles.iconOld}>
           <Github className="fill-[var(--l1-foreground)]" width={16} />
         </span>
-        <span className="icon-star">
+        <span className={styles.iconStar}>
           <SmileyStarIcon />
         </span>
       </span>

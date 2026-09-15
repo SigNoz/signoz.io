@@ -11,6 +11,7 @@ import AskAIRow from '@/components/AskAIRow/AskAIRow'
 import FooterArt from '@/components/footer/FooterArt'
 import FooterStatus from '@/components/footer/FooterStatus'
 import './footer/footer-pill-links.css'
+import footerFx from './footer/footer-fx.module.css'
 
 type FooterPillLinkProps = {
   href: string
@@ -343,7 +344,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
           </div>
         </div>
       </div>
-      <div className="footer-texture-bar w-full" aria-hidden="true" data-markdown-ignore />
+      <div className={`${footerFx.textureBar} w-full`} aria-hidden="true" data-markdown-ignore />
       <div
         className={cn(
           'flex w-full min-w-0 items-center border-t border-solid border-[var(--l1-border)] px-4 pt-6',
