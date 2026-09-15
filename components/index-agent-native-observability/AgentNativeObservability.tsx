@@ -15,17 +15,18 @@ const agentIntegrations = [
 
 function AgentIntegrationIcons() {
   return (
-    <div className="flex items-center gap-1.5">
-      {agentIntegrations.map((agent) => (
+    <div className="flex items-center">
+      {agentIntegrations.map((agent, index) => (
         <span
           key={agent.label}
           aria-label={agent.label}
-          className="flex size-6 items-center justify-center rounded-[4px] border border-[var(--l2-border)] bg-[var(--l2-background)] sm:size-7"
+          className="relative flex size-6 items-center justify-center rounded-full border border-[var(--l2-border)] bg-[var(--l2-background)] first:ml-0 sm:size-7 [&:not(:first-child)]:-ml-2"
           role="img"
+          style={{ zIndex: index + 1 }}
           title={agent.label}
         >
           <span
-            className="size-4 bg-contain bg-center bg-no-repeat sm:size-[18px]"
+            className="size-3.5 bg-contain bg-center bg-no-repeat sm:size-4"
             style={{ backgroundImage: `url("${agent.iconSrc}")` }}
           />
         </span>
@@ -85,7 +86,7 @@ export default function AgentNativeObservabilitySection() {
         </div>
 
         <div aria-hidden="true" data-markdown-ignore className="relative mt-6 lg:pb-16">
-          <AgentTerminal className="h-[440px] w-full md:h-[560px] lg:h-[600px] lg:w-[74%]" />
+          <AgentTerminal className="hidden w-full md:flex md:h-[560px] lg:h-[600px] lg:w-[74%]" />
           <NozChatPanel className="mx-auto mt-6 h-[540px] w-full max-w-[420px] lg:absolute lg:-top-14 lg:right-0 lg:z-10 lg:mx-0 lg:mt-0 lg:h-[700px] lg:w-[388px] xl:w-[430px]" />
         </div>
       </div>

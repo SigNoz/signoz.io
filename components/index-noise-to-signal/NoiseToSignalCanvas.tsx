@@ -252,12 +252,12 @@ export default function NoiseToSignalCanvas() {
       ctx.setLineDash([3, 5])
       ctx.beginPath()
       for (let y = 0; y < height; y += GRID_STEP) {
-        ctx.moveTo(0, y)
-        ctx.lineTo(width, y)
+        ctx.moveTo(0, y + 0.5)
+        ctx.lineTo(width, y + 0.5)
       }
       for (let x = 0; x < width; x += GRID_STEP) {
-        ctx.moveTo(x, 0)
-        ctx.lineTo(x, height)
+        ctx.moveTo(x + 0.5, 0)
+        ctx.lineTo(x + 0.5, height)
       }
       ctx.stroke()
       ctx.setLineDash([])

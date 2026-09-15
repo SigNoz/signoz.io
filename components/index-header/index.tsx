@@ -38,9 +38,8 @@ export function HomepageHeroRedesign() {
 
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.75fr)] lg:items-start lg:gap-10 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.72fr)] xl:gap-16">
             <HeroCopyMotion>
-              <h1 className="m-0 max-w-3xl text-left text-5xl font-medium leading-none tracking-[-1.408px] text-[var(--l1-foreground)] sm:text-6xl lg:text-5xl xl:text-6xl xl:leading-none">
-                Observability for your
-                <br />
+              <h1 className="m-0 max-w-3xl text-left text-[2.625rem] font-medium leading-none tracking-[-1.408px] text-[var(--l1-foreground)] sm:text-6xl lg:text-5xl xl:text-6xl xl:leading-none">
+                Observability for your <br className="hidden sm:inline" />
                 team and AI agents.
                 <br />
                 <span className="text-[var(--l2-foreground)]">Powered by open standards.</span>

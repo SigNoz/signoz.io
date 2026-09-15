@@ -225,13 +225,13 @@ export default function DitherCanvas({
     const syncColors = () => {
       const bg = themeRgb(root, '--l1-background')
       const l3 = themeRgb(root, '--l3-background')
-      // l3/background-30 over l1/background
+      // l3/background-55 over l1/background
       gl.uniform3f(uBg, bg.r / 255, bg.g / 255, bg.b / 255)
       gl.uniform3f(
         uPx,
-        (bg.r * 0.7 + l3.r * 0.3) / 255,
-        (bg.g * 0.7 + l3.g * 0.3) / 255,
-        (bg.b * 0.7 + l3.b * 0.3) / 255
+        (bg.r * 0.45 + l3.r * 0.55) / 255,
+        (bg.g * 0.45 + l3.g * 0.55) / 255,
+        (bg.b * 0.45 + l3.b * 0.55) / 255
       )
     }
 

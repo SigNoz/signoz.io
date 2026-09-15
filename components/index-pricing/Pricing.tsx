@@ -89,7 +89,7 @@ export default function Pricing() {
           }}
         />
 
-        <div className="rule-fade-x relative border-y border-[var(--l2-border)]">
+        <div className="rule-fade-x relative border-b border-[var(--l2-border)] md:border-t">
           <div className="grid md:grid-cols-3">
             {pricingValueProps.map(({ description, Icon, title }) => (
               <PricingValueColumn key={title} description={description} Icon={Icon} title={title} />

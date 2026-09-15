@@ -41,7 +41,7 @@ function FaqItem({ answer, link, question }: HomepageFaqItem) {
     >
       <button
         aria-expanded={isOpen}
-        className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left sm:gap-6 sm:px-6 sm:py-6 md:px-8"
+        className="flex w-full items-start justify-between gap-4 px-5 py-5 text-left sm:gap-6 sm:px-6 sm:py-6 md:px-8"
         onClick={() => {
           logEvent({
             eventName: 'Website Click',
@@ -60,11 +60,13 @@ function FaqItem({ answer, link, question }: HomepageFaqItem) {
         <span className="text-base font-medium leading-6 tracking-normal text-[var(--l1-foreground)] sm:text-lg sm:leading-7">
           {question}
         </span>
-        <ChevronDown
-          className={`h-5 w-5 shrink-0 text-[var(--l2-foreground)] transition-transform duration-200 motion-reduce:transition-none ${
-            isOpen ? 'rotate-180' : ''
-          }`}
-        />
+        <span className="flex h-6 shrink-0 items-center sm:h-7" aria-hidden="true">
+          <ChevronDown
+            className={`h-5 w-5 text-[var(--l2-foreground)] transition-transform duration-200 motion-reduce:transition-none ${
+              isOpen ? 'rotate-180' : ''
+            }`}
+          />
+        </span>
       </button>
 
       <div
@@ -85,7 +87,7 @@ function FaqItem({ answer, link, question }: HomepageFaqItem) {
 export default function Faq() {
   return (
     <section
-      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 px-5 py-16 sm:px-6 sm:py-24 lg:px-20 lg:py-32 wide:max-w-8xl wide:px-0"
+      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 px-5 py-14 sm:px-6 sm:py-16 lg:px-20 lg:py-20 wide:max-w-8xl wide:px-0"
       data-homepage-floating-stop="true"
     >
       <div className="mx-auto grid max-w-8xl gap-10 lg:grid-cols-3 lg:gap-12">

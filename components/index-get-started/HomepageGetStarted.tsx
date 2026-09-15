@@ -27,7 +27,7 @@ const getStartedOptions: GetStartedOption[] = [
 
 function GetStartedColumn({ option, index }: { option: GetStartedOption; index: number }) {
   return (
-    <article className="rule-fade-x md:vrule-solid flex min-h-48 flex-col justify-between border-t border-[var(--l2-border)] py-7 md:min-h-56 md:border-t-0 md:px-12 md:py-8">
+    <article className="rule-fade-x md:vrule-solid flex min-h-48 flex-col justify-between gap-6 border-t border-[var(--l2-border)] py-7 md:min-h-56 md:border-t-0 md:px-12 md:py-8">
       <div className="max-w-sm">
         <h3 className="m-0 text-sm font-medium uppercase leading-5 tracking-widest text-[var(--l2-foreground)]">
           {option.title}
@@ -52,7 +52,7 @@ function GetStartedColumn({ option, index }: { option: GetStartedOption; index: 
 export default function HomepageGetStarted() {
   return (
     <section
-      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 px-5 py-12 sm:px-6 sm:py-16 lg:px-20 lg:py-20 wide:max-w-8xl wide:px-0"
+      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 px-5 pb-0 pt-12 sm:px-6 sm:pt-16 lg:px-20 lg:pt-20 wide:max-w-8xl wide:px-0"
       data-homepage-floating-cta="Get started"
       data-homepage-floating-href="/teams/"
     >

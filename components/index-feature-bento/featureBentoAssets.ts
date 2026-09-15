@@ -21,7 +21,7 @@ export const featureBentoAssets: Record<string, FeatureBentoAsset | null> = {
   'Logs.': {
     src: logsStage,
     alt: 'SigNoz log stream with highlighted request logs',
-    objectPosition: 'left top',
+    objectPosition: 'left bottom',
   },
   'Tracing.': { src: tracingStage, alt: 'SigNoz trace tree with span durations' },
   'Alerts.': {
@@ -34,7 +34,7 @@ export const featureBentoAssets: Record<string, FeatureBentoAsset | null> = {
     src: infraStage,
     alt: 'CPU and memory usage charts',
     fit: 'contain',
-    objectPosition: 'left top',
+    objectPosition: 'left bottom',
   },
   'Dashboards.': {
     src: dashboardsStage,

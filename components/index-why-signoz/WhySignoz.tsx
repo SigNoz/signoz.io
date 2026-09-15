@@ -1,7 +1,6 @@
 'use client'
 
 import { ArrowRight } from 'lucide-react'
-import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
 import TrackingLink from '@/components/TrackingLink'
@@ -143,10 +142,15 @@ export default function WhySignoz() {
   const scrollToStep = (index: number) => {
     const driver = driverRef.current
     if (!driver) return
+    const scrollDriven =
+      window.matchMedia('(min-width: 1024px)').matches &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!scrollDriven) return
+    const driverTop = driver.getBoundingClientRect().top + window.scrollY
     const span = driver.offsetHeight - window.innerHeight
     window.scrollTo({
-      top: driver.offsetTop + ((index + 0.42) / STEPS) * span,
-      behavior: reducedMotion ? 'auto' : 'smooth',
+      top: driverTop + ((index + 0.42) / STEPS) * span,
+      behavior: 'smooth',
     })
   }
 
@@ -173,7 +177,7 @@ export default function WhySignoz() {
           className="relative mt-10 lg:motion-safe:mt-0 lg:motion-safe:h-[512vh]"
           ref={driverRef}
         >
-          <div className="lg:motion-safe:sticky lg:motion-safe:top-0 lg:motion-safe:grid lg:motion-safe:h-screen lg:motion-safe:min-h-[660px] lg:motion-safe:grid-cols-2 lg:motion-safe:items-center lg:motion-safe:gap-16">
+          <div className="lg:motion-safe:sticky lg:motion-safe:top-14 lg:motion-safe:grid lg:motion-safe:h-[calc(100vh-56px)] lg:motion-safe:min-h-[620px] lg:motion-safe:grid-cols-2 lg:motion-safe:items-center lg:motion-safe:gap-16">
             <div className="why-rail relative flex min-w-0 flex-col lg:motion-safe:h-[min(88vh,780px)] lg:motion-safe:justify-start">
               {WHY_SIGNOZ_STEPS.map((step, index) => {
                 const Icon = step.icon
@@ -211,8 +215,9 @@ export default function WhySignoz() {
 
                     <h3 className="m-0 text-[17px] font-medium leading-6">
                       <button
-                        className="why-item-title m-0 cursor-pointer border-0 bg-transparent p-0 text-left text-[17px] font-medium leading-6 transition-colors duration-300"
+                        className="why-item-title m-0 cursor-default border-0 bg-transparent p-0 text-left text-[17px] font-medium leading-6 transition-colors duration-300 lg:motion-safe:cursor-pointer"
                         onClick={() => scrollToStep(index)}
+                        tabIndex={-1}
                         type="button"
                       >
                         {step.title}
@@ -241,17 +246,6 @@ export default function WhySignoz() {
                         </div>
                       </div>
                     ) : null}
-
-                    <div className="mt-6 overflow-hidden rounded-md border border-[var(--l1-border)] bg-[var(--l2-background)] lg:motion-safe:hidden">
-                      <Image
-                        alt={step.alt}
-                        className="h-auto w-full"
-                        height={430}
-                        loading={index === 0 ? 'eager' : 'lazy'}
-                        src={step.image}
-                        width={760}
-                      />
-                    </div>
                   </div>
                 )
               })}

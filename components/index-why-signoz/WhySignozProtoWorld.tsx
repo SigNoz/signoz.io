@@ -1010,7 +1010,7 @@ const WhySignozProtoWorld = forwardRef<WhySignozWorldHandle>(function WhySignozP
               </div>
               <div className="olly-rider olly-rider--small">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/img/graphics/homepage/olly.svg" alt="" />
+                <img src="/img/graphics/homepage/noz-back.svg" alt="" />
                 {riderCube}
               </div>
             </div>

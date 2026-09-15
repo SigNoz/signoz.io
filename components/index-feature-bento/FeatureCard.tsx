@@ -55,8 +55,9 @@ export default function FeatureCard({ feature }: { feature: BentoFeature }) {
             alt={asset.alt}
             fill
             className={asset.fit === 'contain' ? 'object-contain' : 'object-cover'}
-            style={{ objectPosition: asset.objectPosition ?? 'top' }}
-            sizes="(max-width: 768px) 100vw, 50vw"
+            style={{ objectPosition: asset.objectPosition ?? 'bottom' }}
+            sizes="(max-width: 768px) 100vw, 70vw"
+            quality={95}
           />
         ) : (
           <FeatureVisual visual={feature.visual} />

@@ -125,12 +125,12 @@ function MainMenuContent({
       >
         Pricing
       </TrackingLink>
-      <div className="-mx-3 inline-block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-[var(--l2-background-hover)]">
+      <div className="-mx-3 inline-block rounded-lg px-0.5 py-2 text-base font-semibold leading-7 hover:bg-[var(--l2-background-hover)]">
         <GitHubStars location="Mobile Menu" />
       </div>
 
       {!isSignupRoute && (
-        <NavCtaButtons location="Mobile Menu" className="mt-2 px-3" onNavigate={onClose} />
+        <NavCtaButtons location="Mobile Menu" className="mt-2" onNavigate={onClose} />
       )}
     </div>
   )

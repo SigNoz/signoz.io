@@ -54,6 +54,11 @@ export const WHY_SIGNOZ_STEPS: WhySignozStep[] = [
     icon: SearchCode,
     image: '/img/graphics/homepage/columnar2.svg',
     alt: 'Flexible query controls backed by a columnar datastore in SigNoz Cloud',
+    cta: {
+      href: '/docs/userguide/query-builder-v5/',
+      label: 'Open query builder',
+      clickName: 'Query Builder Link',
+    },
   },
   {
     key: 'agent-telemetry',

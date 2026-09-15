@@ -200,7 +200,7 @@ function TableBlock({
   visibleRows: number
 }) {
   return (
-    <div className="agent-terminal-line my-3 max-w-full overflow-hidden rounded-[3px] border border-[var(--l3-border)] bg-[var(--l2-background)]">
+    <div className="agent-terminal-line my-3 w-fit max-w-full overflow-hidden rounded-[3px] border border-[var(--l3-border)] bg-[var(--l2-background)]">
       <div className="overflow-x-auto">
         <table className="w-full border-separate border-spacing-0 text-[11.5px] leading-[1.6] [font-variant-numeric:tabular-nums] md:text-[12.5px]">
           <thead>
@@ -599,7 +599,6 @@ export default function AgentTerminal({ className = '' }: { className?: string }
             'repeating-linear-gradient(45deg, color-mix(in srgb, var(--l2-foreground) 12%, transparent) 0 1px, transparent 1px 7px)',
         }}
       >
-        <div className="w-3 shrink-0 border-b border-[var(--l2-border)]" />
         {TERMINAL_SESSIONS.map((tab, index) => {
           const isSelected = index === sessionIndex
 
@@ -613,7 +612,7 @@ export default function AgentTerminal({ className = '' }: { className?: string }
                 '-ml-px inline-flex shrink-0 items-center justify-center gap-2 border px-3.5 font-mono text-[11px] tracking-[0.01em] transition-colors first-of-type:ml-0 sm:min-w-[124px] sm:px-4 sm:text-[12px]',
                 isSelected
                   ? 'border-[var(--l2-border)] border-b-transparent border-t-transparent bg-[var(--l1-background)] py-3 text-[var(--l1-foreground-hover)]'
-                  : 'mt-1 border-[var(--l2-border)] bg-[var(--l2-background)] py-2.5 text-[var(--l2-foreground)] hover:text-[var(--l1-foreground-hover)]'
+                  : 'border-[var(--l2-border)] border-t-transparent bg-[var(--l2-background)] py-3 text-[var(--l2-foreground)] hover:text-[var(--l1-foreground-hover)]'
               )}
             >
               <span

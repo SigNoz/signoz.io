@@ -2,6 +2,7 @@
 
 import { ArrowRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useScramble } from 'use-scramble'
 
 import TrackingLink from '@/components/TrackingLink'
 
@@ -11,6 +12,16 @@ export default function MigrationCta() {
   const ctaRef = useRef<HTMLDivElement | null>(null)
   const [activeSourceIndex, setActiveSourceIndex] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
+
+  const { ref: scrambleRef } = useScramble({
+    text: migrationSources[activeSourceIndex],
+    speed: 0.7,
+    tick: 1,
+    step: 1,
+    scramble: 5,
+    seed: 2,
+    overdrive: false,
+  })
 
   useEffect(() => {
     const element = ctaRef.current
@@ -54,9 +65,11 @@ export default function MigrationCta() {
         href="/docs/migration/migrate-to-signoz/"
       >
         Migrate from
-        <span className="inline-block min-w-20 text-left transition-opacity duration-200">
-          {migrationSources[activeSourceIndex]}
-        </span>
+        <span
+          ref={scrambleRef}
+          className="-ml-0.5 inline-block min-w-20 text-left"
+          aria-label={migrationSources[activeSourceIndex]}
+        />
         <ArrowRight size={12} aria-hidden="true" />
       </TrackingLink>
       <TrackingLink

@@ -151,7 +151,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
             <div className={colClass}>
               <div
                 className={cn(
-                  'flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)]',
+                  'flex grow flex-col self-stretch pb-2.5 text-sm tracking-wide text-[var(--l2-foreground)]',
                   stackMtClass
                 )}
               >
@@ -192,7 +192,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
             <div className={colClass}>
               <div
                 className={cn(
-                  'flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)]',
+                  'flex grow flex-col self-stretch pb-2.5 text-sm tracking-wide text-[var(--l2-foreground)]',
                   stackMtClass
                 )}
               >
@@ -228,7 +228,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
             <div className={colClass}>
               <div
                 className={cn(
-                  'flex h-full flex-col items-end',
+                  'relative flex h-full flex-col items-end',
                   stackEarly ? 'max-lg:mt-10 max-lg:items-start' : 'max-md:mt-10 max-md:items-start'
                 )}
               >
@@ -327,7 +327,15 @@ function Footer({ inDocsShell = false }: FooterProps) {
                     onClick={() => window.open('https://trust.signoz.io/', '_blank')}
                   />
                 </div>
-                <div className={cn('mt-auto flex justify-end pt-10', stackStartClass)}>
+                <div
+                  className={cn(
+                    'flex w-full justify-end',
+                    stackEarly
+                      ? 'mt-8 lg:absolute lg:bottom-0 lg:right-0 lg:mt-0'
+                      : 'mt-8 md:absolute md:bottom-0 md:right-0 md:mt-0',
+                    stackStartClass
+                  )}
+                >
                   <FooterStatus />
                 </div>
               </div>
