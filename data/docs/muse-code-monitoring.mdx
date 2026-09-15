@@ -26,12 +26,7 @@ Muse Code ships its own OpenTelemetry exporter, but it cannot send the `signoz-i
 
 **Step 1:** Create the hook script at `~/.local/share/muse-otel/muse_otel_hook.py`.
 
-<details>
-<ToggleHeading>
-**Show the hook script (about 150 lines)**
-</ToggleHeading>
-
-```python
+```python defaultCollapsed
 #!/usr/bin/env python3
 """Export Meta Muse Code hook events to SigNoz as OpenTelemetry spans."""
 import hashlib, json, os, pathlib, sys, time, urllib.request
@@ -203,9 +198,6 @@ if __name__ == "__main__":
         print("{}")          # a telemetry fault must never block the agent
     sys.exit(0)
 ```
-
-</details>
-
 Make it executable:
 
 ```bash
@@ -238,12 +230,7 @@ Muse Code runs hooks with a scrubbed environment. Only `HOME`, `PATH`, `PWD`, `S
 
 **Step 3:** Register the hooks in `~/.config/muse/settings.json`.
 
-<details>
-<ToggleHeading>
-**Show the hooks block for settings.json**
-</ToggleHeading>
-
-```json
+```json collapse={8} defaultCollapsed
 {
   "schema_version": 1,
   "hooks": {
@@ -259,9 +246,6 @@ Muse Code runs hooks with a scrubbed environment. Only `HOME`, `PATH`, `PWD`, `S
   }
 }
 ```
-
-</details>
-
 Hooks belong in `settings.json`. A project-level `.muse/hooks.json` is silently ignored.
 
 **Step 4:** Start Muse Code and run a prompt.
