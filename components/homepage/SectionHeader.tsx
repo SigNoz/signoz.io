@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { ArrowRight } from 'lucide-react'
 
 import TrackingLink from '@/components/TrackingLink'
+import { buttonVariants } from '@/components/ui/Button'
 import { cn } from 'app/lib/utils'
 
 import Eyebrow from './Eyebrow'
@@ -63,8 +64,10 @@ export default function SectionHeader({
           {cta && (
             <TrackingLink
               className={cn(
-                'btn-tactile mt-6 no-underline',
-                cta.variant === 'primary' ? 'btn-tactile--primary' : 'btn-tactile--secondary'
+                buttonVariants({
+                  variant: cta.variant === 'primary' ? 'tactilePrimary' : 'tactileSecondary',
+                }),
+                'mt-6 no-underline'
               )}
               clickLocation={cta.clickLocation}
               clickName={cta.clickName}

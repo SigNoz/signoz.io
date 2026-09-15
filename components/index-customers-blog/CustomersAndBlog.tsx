@@ -9,6 +9,8 @@ import {
   HOMEPAGE_FEATURE_QUOTES,
   type FeatureQuote,
 } from './homepageCustomersBlog.constants'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 function TextureDivider() {
   return (
@@ -109,7 +111,10 @@ export default function CustomersAndBlog() {
               {HOMEPAGE_CUSTOMERS_STRIP.tail}
             </p>
             <TrackingLink
-              className="btn-tactile btn-tactile--secondary shrink-0 no-underline"
+              className={cn(
+                buttonVariants({ variant: 'tactileSecondary' }),
+                'shrink-0 no-underline'
+              )}
               clickLocation="Homepage Customers Section"
               clickName="Customer Stories Link"
               clickText={HOMEPAGE_CUSTOMERS_STRIP.ctaLabel}
@@ -154,7 +159,7 @@ export default function CustomersAndBlog() {
               <span className="mt-5 block flex-1 text-lg font-medium leading-7 text-[var(--l1-foreground)] transition-colors group-hover:text-[var(--bg-robin-300)]">
                 {card.title}
               </span>
-              <span className="btn-tactile btn-tactile--secondary mt-4 w-fit">
+              <span className={cn(buttonVariants({ variant: 'tactileSecondary' }), 'mt-4 w-fit')}>
                 Read more
                 <ArrowRight size={12} aria-hidden="true" />
               </span>

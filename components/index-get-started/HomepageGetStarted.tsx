@@ -2,6 +2,8 @@ import { ArrowRight } from 'lucide-react'
 
 import TrackingLink from '@/components/TrackingLink'
 import Eyebrow from '@/components/homepage/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 type GetStartedOption = {
   description: string
@@ -71,7 +73,7 @@ export default function HomepageGetStarted() {
               clickName="Get Started Button"
               clickText="Get Started"
               clickLocation="Homepage Get Started Section"
-              className="btn-tactile btn-tactile--primary mt-6 no-underline"
+              className={cn(buttonVariants({ variant: 'tactilePrimary' }), 'mt-6 no-underline')}
             >
               Get Started
               <ArrowRight size={12} aria-hidden="true" />

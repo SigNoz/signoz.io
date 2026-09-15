@@ -5,6 +5,8 @@ import { HOMEPAGE_INTEGRATION_ICONS } from '@/constants/homepageIntegrationIcons
 import AgentTerminal from './AgentTerminal'
 import AnimatedDotGrid from './AnimatedDotGrid'
 import NozChatPanel from './NozChatPanel'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 const agentIntegrations = [
   { label: 'OpenAI', iconSrc: HOMEPAGE_INTEGRATION_ICONS.openai },
@@ -63,7 +65,10 @@ export default function AgentNativeObservabilitySection() {
               dashboards with the same production context your team sees.
             </p>
             <TrackingLink
-              className="btn-tactile btn-tactile--secondary mt-6 inline-flex no-underline sm:mt-9"
+              className={cn(
+                buttonVariants({ variant: 'tactileSecondary' }),
+                'mt-6 no-underline sm:mt-9'
+              )}
               clickLocation="Homepage Agent Native Observability Section"
               clickName="Explore MCP and Noz Link"
               clickText="Explore MCP and Noz"

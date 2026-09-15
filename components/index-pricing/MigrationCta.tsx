@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useScramble } from 'use-scramble'
 
 import TrackingLink from '@/components/TrackingLink'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 const migrationSources = ['Datadog', 'Grafana', 'New Relic', 'CloudWatch', 'ELK']
 
@@ -57,7 +59,7 @@ export default function MigrationCta() {
   return (
     <div ref={ctaRef} className="mt-6 flex flex-wrap items-center gap-3">
       <TrackingLink
-        className="btn-tactile btn-tactile--primary no-underline"
+        className={cn(buttonVariants({ variant: 'tactilePrimary' }), 'no-underline')}
         clickLocation="Homepage Pricing Section"
         clickName="Migration CTA"
         clickText={`Migrate from ${migrationSources[activeSourceIndex]}`}
@@ -73,7 +75,7 @@ export default function MigrationCta() {
         <ArrowRight size={12} aria-hidden="true" />
       </TrackingLink>
       <TrackingLink
-        className="btn-tactile btn-tactile--secondary no-underline"
+        className={cn(buttonVariants({ variant: 'tactileSecondary' }), 'no-underline')}
         clickLocation="Homepage Pricing Section"
         clickName="Book a Demo Button"
         clickText="Book a demo"

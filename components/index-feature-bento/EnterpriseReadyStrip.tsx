@@ -4,6 +4,8 @@ import TrackingLink from '@/components/TrackingLink'
 import Eyebrow from '@/components/homepage/Eyebrow'
 import HipaaLogo from '@/public/svgs/icons/hipaa.svg'
 import Soc2Logo from '@/public/svgs/icons/SOC-2.svg'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 export default function EnterpriseReadyStrip() {
   const compliances = [
@@ -27,7 +29,7 @@ export default function EnterpriseReadyStrip() {
               Built secure, from day one.
             </h3>
             <TrackingLink
-              className="btn-tactile btn-tactile--secondary mt-6 no-underline"
+              className={cn(buttonVariants({ variant: 'tactileSecondary' }), 'mt-6 no-underline')}
               clickLocation="Homepage Enterprise Ready Strip"
               clickName="Trust Center Link"
               clickText="Trust Center"

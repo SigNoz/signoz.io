@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { ArrowRight } from 'lucide-react'
 
-import Button from '@/components/ui/Button'
+import Button, { buttonVariants } from '@/components/ui/Button'
 import TrackingButton from '@/components/TrackingButton'
 import TrackingLink from '@/components/TrackingLink'
 import { cn } from 'app/lib/utils'
@@ -20,7 +20,7 @@ export default function NavCtaButtons({ location, className, onNavigate }: NavCt
   return (
     <div className={cn('flex items-center gap-2', className)}>
       <TrackingButton
-        className="btn-tactile btn-tactile--secondary no-underline"
+        className={cn(buttonVariants({ variant: 'tactileSecondary' }), 'no-underline')}
         clickType="Secondary CTA"
         clickName="Sign In Button"
         clickText="Sign In"

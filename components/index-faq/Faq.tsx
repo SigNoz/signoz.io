@@ -7,6 +7,8 @@ import { useState } from 'react'
 import TrackingLink from '@/components/TrackingLink'
 import { useLogEvent } from '@/hooks/useLogEvent'
 import { type HomepageFaqItem, homepageFaqItems } from './faqContent'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 function renderAnswer({ answer, link }: Pick<HomepageFaqItem, 'answer' | 'link'>): ReactNode {
   if (!link) return answer
@@ -102,7 +104,7 @@ export default function Faq() {
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <TrackingLink
-              className="btn-tactile btn-tactile--primary no-underline"
+              className={cn(buttonVariants({ variant: 'tactilePrimary' }), 'no-underline')}
               clickLocation="Homepage FAQ Section"
               clickName="Contact Us Button"
               clickText="Contact Us"
@@ -113,7 +115,7 @@ export default function Faq() {
               <ArrowRight size={12} aria-hidden="true" />
             </TrackingLink>
             <TrackingLink
-              className="btn-tactile btn-tactile--secondary no-underline"
+              className={cn(buttonVariants({ variant: 'tactileSecondary' }), 'no-underline')}
               clickLocation="Homepage FAQ Section"
               clickName="Docs Link"
               clickText="Read the Docs"
