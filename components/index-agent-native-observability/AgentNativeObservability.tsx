@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react'
+import Image from 'next/image'
 
 import TrackingLink from '@/components/TrackingLink'
 import { HOMEPAGE_INTEGRATION_ICONS } from '@/constants/homepageIntegrationIcons'
@@ -21,15 +22,16 @@ function AgentIntegrationIcons() {
       {agentIntegrations.map((agent, index) => (
         <span
           key={agent.label}
-          aria-label={agent.label}
           className="relative flex size-6 items-center justify-center rounded-full border border-[var(--l2-border)] bg-[var(--l2-background)] first:ml-0 sm:size-7 [&:not(:first-child)]:-ml-2"
-          role="img"
           style={{ zIndex: index + 1 }}
           title={agent.label}
         >
-          <span
-            className="size-3.5 bg-contain bg-center bg-no-repeat sm:size-4"
-            style={{ backgroundImage: `url("${agent.iconSrc}")` }}
+          <Image
+            src={agent.iconSrc}
+            alt={agent.label}
+            width={16}
+            height={16}
+            className="size-3.5 object-contain sm:size-4"
           />
         </span>
       ))}
