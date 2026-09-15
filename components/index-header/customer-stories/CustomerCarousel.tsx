@@ -17,14 +17,31 @@ function CustomerCard({ customer, isClone = false }: CardProps) {
   return (
     <a
       className="customer-card"
-      href={customer.caseStudyHref ?? '/customers/'}
+      href="/customers/"
       aria-label={customer.name}
       aria-hidden={isClone || undefined}
       tabIndex={isClone ? -1 : undefined}
-      data-case-study={customer.caseStudyHref ?? ''}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={customer.logoSrc} alt={isClone ? '' : customer.name} draggable={false} />
+      {customer.showName ? (
+        <span className="customer-card__label">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={customer.logoSrc} alt="" className="customer-card__icon" draggable={false} />
+          <span>{customer.name}</span>
+        </span>
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={customer.logoSrc}
+          alt={isClone ? '' : customer.name}
+          className={
+            [customer.width ? 'wordmark' : '', customer.mono ? 'mono' : '']
+              .filter(Boolean)
+              .join(' ') || undefined
+          }
+          style={customer.width ? { width: customer.width } : undefined}
+          draggable={false}
+        />
+      )}
     </a>
   )
 }
@@ -130,7 +147,7 @@ export default function CustomerCarousel() {
       track.classList.add('has-hover')
       targetSpeed = 0
       activeCard = card
-      pillText.textContent = card.dataset.caseStudy ? 'Read case study' : 'See all customers'
+      pillText.textContent = 'See customers'
       pillX = mouseX
       pillY = mouseY
       pill.style.left = `${pillX}px`

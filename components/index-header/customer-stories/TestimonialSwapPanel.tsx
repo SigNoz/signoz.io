@@ -89,7 +89,12 @@ export default function TestimonialSwapPanel({
   }
 
   const href = quote.caseStudyHref ?? '/customers/'
-  const label = quote.caseStudyHref ? 'Read case study' : 'See all customers'
+  const isExternal = href.startsWith('http')
+  const label = !quote.caseStudyHref
+    ? 'See all customers'
+    : isExternal
+      ? 'View source'
+      : 'Read case study'
 
   return (
     <figure
@@ -113,6 +118,8 @@ export default function TestimonialSwapPanel({
       </div>
       <a
         href={href}
+        target={isExternal ? '_blank' : undefined}
+        rel={isExternal ? 'noopener noreferrer nofollow' : undefined}
         className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--l1-foreground)_10%,transparent)] bg-[var(--l2-background)] px-2.5 py-1.5 text-xs font-medium text-[var(--l1-foreground)] no-underline opacity-0 transition-opacity duration-200 focus-visible:opacity-100 group-hover:opacity-100"
         aria-label={`${label}: ${quote.name}, ${quote.org}`}
       >

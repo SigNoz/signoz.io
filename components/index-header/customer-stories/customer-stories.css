@@ -84,6 +84,52 @@ html:not(.dark) .customer-card img {
   filter: invert(1) hue-rotate(180deg);
 }
 
+/* Tightly cropped wordmark SVGs: cap ink height to match the padded placeholder marks. */
+.customer-card img.wordmark {
+  height: 30px;
+}
+
+/* Colored marks normalized to the monochrome treatment. */
+.customer-card img.mono {
+  filter: brightness(0) invert(1);
+}
+
+html:not(.dark) .customer-card img.mono {
+  filter: brightness(0);
+}
+
+/* Icon-style logos render as a small square mark plus the company name. */
+.customer-card__label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.85;
+  color: var(--l1-foreground);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.customer-card.active .customer-card__label {
+  opacity: 1;
+}
+
+.customer-card img.customer-card__icon {
+  width: 32px;
+  height: 32px;
+  max-width: none;
+  border-radius: 7px;
+  outline: 1px solid color-mix(in srgb, var(--l1-foreground) 10%, transparent);
+  outline-offset: -1px;
+  opacity: 1;
+}
+
+html:not(.dark) .customer-card img.customer-card__icon {
+  filter: none;
+}
+
 .customer-stories__track.has-hover .customer-card {
   opacity: 0.2;
 }
@@ -338,6 +384,21 @@ html:not(.dark) .customer-card img {
   .customer-card img {
     max-width: 158px;
     height: 54px;
+  }
+
+  .customer-card img.wordmark {
+    height: 24px;
+  }
+
+  .customer-card__label {
+    gap: 8px;
+    font-size: 12px;
+    white-space: normal;
+  }
+
+  .customer-card img.customer-card__icon {
+    width: 28px;
+    height: 28px;
   }
 
   .customer-stories__voices {
