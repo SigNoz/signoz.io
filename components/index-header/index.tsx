@@ -23,7 +23,7 @@ export function HomepageHeroRedesign() {
         className="w-full px-4 pb-16 pt-24 sm:px-6 md:pt-40 lg:px-16 lg:pt-44 xl:px-20 xl:pt-[220px]"
       >
         <div className="mx-auto flex w-full max-w-8xl flex-col">
-          <HeroCopyMotion delay={0.04}>
+          <HeroCopyMotion delay={0.03}>
             <div className="mb-6">
               <HalfBadge
                 badge="NEW"
@@ -47,7 +47,7 @@ export function HomepageHeroRedesign() {
             </HeroCopyMotion>
 
             <div className="flex flex-col items-start md:pt-2">
-              <HeroCopyMotion delay={0.12}>
+              <HeroCopyMotion delay={0.08}>
                 <p className="m-0 max-w-lg text-left text-lg font-normal leading-7 tracking-[-0.165px] text-[var(--l2-foreground)] lg:max-w-sm lg:text-base xl:max-w-lg xl:text-lg">
                   SigNoz Cloud brings your traces, metrics, and logs into one OpenTelemetry-native
                   platform. Simple usage-based pricing, and the freedom to run on your
@@ -55,7 +55,7 @@ export function HomepageHeroRedesign() {
                 </p>
               </HeroCopyMotion>
 
-              <HeroCopyMotion className="w-full sm:w-auto" delay={0.2}>
+              <HeroCopyMotion className="w-full sm:w-auto" delay={0.12}>
                 <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                   <TrackingLink
                     href="/teams/"
