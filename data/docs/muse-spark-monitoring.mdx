@@ -1,0 +1,226 @@
+---
+date: 2026-09-09
+title: Meta Muse Spark Monitoring with OpenTelemetry
+meta_title: Muse Spark API Monitoring with OpenTelemetry
+description: Monitor Meta Muse Spark with OpenTelemetry and SigNoz. Track reasoning tokens, prompt cache hits, and true cost per call across the Meta Model API.
+doc_type: howto
+---
+
+## What is Meta Muse Spark Monitoring?
+
+Meta Muse Spark is a reasoning model family served through the Meta Model API. Because the API is OpenAI compatible, you instrument it with the standard OpenTelemetry OpenAI instrumentation rather than a provider specific library, which gives you request traces, model and token usage, latency, and errors.
+
+With full Muse Spark monitoring in SigNoz, you can attribute spend to a model and a tier, watch how much of every response is spent on reasoning the caller never sees, measure the wait before the first visible token, and catch the truncated responses that a plain error rate misses.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key, or a [self-hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- Python 3.9 or later
+- A Meta Model API key from the <a href="https://developer.meta.com/ai/" target="_blank" rel="noopener noreferrer nofollow">Meta AI developer site</a>
+- Network access to `api.meta.ai` and to SigNoz
+
+## Monitor Meta Muse Spark with OpenTelemetry
+
+Muse Spark is reached over an OpenAI compatible endpoint, so `opentelemetry-instrument` can trace it with no changes to your application code.
+
+1. **Step 1:** Install the SDK, the OpenTelemetry distro, and the exporter, then let bootstrap add the matching instrumentation.
+
+   ```bash
+   pip install openai httpx opentelemetry-distro opentelemetry-exporter-otlp
+   opentelemetry-bootstrap --action=install
+   ```
+
+2. **Step 2:** Point the OpenAI client at the Meta Model API. Only the base URL and the key change.
+
+   ```python
+   from openai import OpenAI
+
+   client = OpenAI(
+       api_key="<your-meta-model-api-key>",
+       base_url="https://api.meta.ai/v1",
+   )
+
+   response = client.chat.completions.create(
+       model="muse-spark-1.3",
+       max_tokens=4096,
+       messages=[{"role": "user", "content": "Summarize this incident report."}],
+   )
+   ```
+
+3. **Step 3:** Configure the exporter.
+
+   ```bash
+   export OTEL_SERVICE_NAME=<service_name>
+   export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+   export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+   export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+   export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=SPAN_AND_EVENT
+   ```
+
+   **Verify these values:**
+
+   - `<service_name>`: A name for your application, for example `muse-chat-api`.
+   - `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+   - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+   - `<your-meta-model-api-key>`: Your Meta Model API key.
+
+   <Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+   Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+   </Admonition>
+
+4. **Step 4:** Run your application under the agent.
+
+   ```bash
+   opentelemetry-instrument python your_app.py
+   ```
+
+Each call emits a `chat <model>` span with model, finish reason, and token counts. Only Chat Completions is traced; the Responses API produces no span.
+
+## Capture Reasoning Tokens, Cache Reads, and Cost
+
+The stock instrumentation drops reasoning tokens, cached input tokens, and time to first chunk. Cached input is roughly 8x cheaper on the standard tier, so cost derived from spans alone overstates real spend by three to five times.
+
+Wrap your calls in a span that reads them off the response. Setting `gen_ai.provider.name` to `meta` separates Muse Spark from other providers on the same SDK and stops the wrapper and SDK spans double counting requests.
+
+```python minimap defaultCollapsed
+import time
+from contextlib import contextmanager
+
+from opentelemetry import trace
+
+tracer = trace.get_tracer("muse-spark")
+
+# USD per token: (input, cached input, output)
+PRICES = {
+    "muse-spark-1.3": (1.25e-6, 0.15e-6, 4.25e-6),
+    "muse-spark-1.3-contributor": (0.10e-6, 0.002e-6, 0.20e-6),
+}
+
+
+@contextmanager
+def muse_call(model):
+    with tracer.start_as_current_span(f"muse.chat {model}") as span:
+        span.set_attribute("gen_ai.operation.name", "chat")
+        span.set_attribute("gen_ai.provider.name", "meta")
+        span.set_attribute("gen_ai.request.model", model)
+        span.set_attribute("server.address", "api.meta.ai")
+
+        call = {}
+        started = time.monotonic()
+        yield call
+
+        response = call.get("response")
+        if response is None or response.usage is None:
+            return
+
+        usage = response.usage
+        cached = getattr(usage.prompt_tokens_details, "cached_tokens", 0) or 0
+        reasoning = getattr(usage.completion_tokens_details, "reasoning_tokens", 0) or 0
+        fresh = usage.prompt_tokens - cached
+
+        input_price, cached_price, output_price = PRICES[model]
+        cost = (fresh * input_price) + (cached * cached_price) + (usage.completion_tokens * output_price)
+
+        span.set_attribute("gen_ai.usage.input_tokens", usage.prompt_tokens)
+        span.set_attribute("gen_ai.usage.output_tokens", usage.completion_tokens)
+        span.set_attribute("gen_ai.usage.cache_read.input_tokens", cached)
+        span.set_attribute("gen_ai.usage.reasoning.output_tokens", reasoning)
+        span.set_attribute("gen_ai.cost.total_cost", round(cost, 8))
+        span.set_attribute(
+            "gen_ai.response.finish_reasons",
+            [choice.finish_reason for choice in response.choices],
+        )
+        if call.get("first_chunk_at") is not None:
+            span.set_attribute(
+                "gen_ai.response.time_to_first_chunk",
+                round(call["first_chunk_at"] - started, 3),
+            )
+```
+
+Use it around each request:
+
+```python
+with muse_call("muse-spark-1.3") as call:
+    call["response"] = client.chat.completions.create(
+        model="muse-spark-1.3",
+        max_tokens=4096,
+        messages=[{"role": "user", "content": "Summarize this incident report."}],
+    )
+```
+
+For a streaming call, record `call["first_chunk_at"] = time.monotonic()` when the first content chunk arrives, and set `stream_options={"include_usage": True}` so the usage record is sent.
+
+## View Meta Muse Spark Traces in SigNoz
+
+Filter the Traces explorer on `gen_ai.provider.name = 'meta'` to see only Muse Spark calls.
+
+<Figure
+  src="/img/docs/llm/muse-spark/muse-spark-traces.webp"
+  alt="Muse Spark traces in the SigNoz Traces explorer"
+  caption="Muse Spark calls listed in the SigNoz Traces explorer"
+/>
+
+Opening a trace shows the wrapper span with the SDK span nested under it, and the full attribute set on the right.
+
+<Figure
+  src="/img/docs/llm/muse-spark/muse-spark-detailed-traces.webp"
+  alt="Muse Spark trace detail showing the span waterfall and gen_ai attributes"
+  caption="A single Muse Spark call, with reasoning tokens, cache reads, cost, and time to first chunk"
+/>
+
+## Meta Muse Spark Monitoring Dashboard
+
+Import the [Muse Spark dashboard](https://signoz.io/docs/dashboards/dashboard-templates/muse-spark-dashboard/) to get cost, token, latency, and reliability panels without building them yourself.
+
+<Figure
+  src="/img/docs/llm/muse-spark/muse-spark-dashboard.webp"
+  alt="Meta Muse Spark monitoring dashboard in SigNoz"
+  caption="The Meta Muse Spark dashboard template in SigNoz"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting Meta Muse Spark Monitoring
+
+</ToggleHeading>
+
+### No traces appear in SigNoz
+
+Confirm the application was launched with `opentelemetry-instrument`, and that `OTEL_EXPORTER_OTLP_ENDPOINT` carries your region and the ingestion key header is set. Set `OTEL_TRACES_EXPORTER=console` to see what is produced locally.
+
+### Spans named POST with no gen_ai attributes
+
+The instrumentor was skipped because `httpx` is not installed. Run `pip install httpx` and restart.
+
+### Responses come back empty
+
+`gen_ai.response.finish_reasons` is `length`, meaning `max_tokens` was consumed by reasoning before any visible output. Raise the budget.
+
+### Errors cannot be told apart
+
+The instrumentation sets no `error.type`, and error spans carry no usage attributes. Read the span status message for the provider error string.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+If you already run an [OpenTelemetry Collector](https://signoz.io/docs/collection-agents/), point the application at it with `OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318` and configure the Collector's OTLP exporter with your SigNoz endpoint and ingestion key.
+
+</details>
+
+## Related integrations
+
+Instrument the other model APIs your team calls, using the same OpenTelemetry pipeline:
+
+- [Monitor the OpenAI API with OpenTelemetry](https://signoz.io/docs/openai-monitoring/) - track token usage, model latency, and error rates across every call
+- [Anthropic monitoring with OpenTelemetry](https://signoz.io/docs/anthropic-monitoring/) - trace Claude API calls, usage trends, and failures
+- [Mistral AI observability with OpenTelemetry](https://signoz.io/docs/mistral-observability/) - monitor model performance, traces, and token spend
+- [DeepSeek monitoring with OpenTelemetry](https://signoz.io/docs/deepseek-monitoring/) - track latency, error rates, and token usage
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.

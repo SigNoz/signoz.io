@@ -67,13 +67,16 @@ const DocContent: React.FC<{
             <h1 className="mt-2 text-3xl leading-tight">{title}</h1>
           </div>
           {!isIntroductionPage && post.body?.raw && (
-            <OpenInAI
-              getMarkdownContent={getMarkdownContent}
-              pageUrl={pathname}
-              className="shrink-0"
-              copyLabel="Copy markdown"
-              docSlug={post.slug}
-            />
+            <div className="flex shrink-0 items-center gap-2">
+              <div data-listicle-directory-search-slot="" className="empty:hidden" />
+              <OpenInAI
+                getMarkdownContent={getMarkdownContent}
+                pageUrl={pathname}
+                className="shrink-0"
+                copyLabel="Copy markdown"
+                docSlug={post.slug}
+              />
+            </div>
           )}
         </div>
         {!isOnboarding && post.docTags && post.docTags.length > 0 && (

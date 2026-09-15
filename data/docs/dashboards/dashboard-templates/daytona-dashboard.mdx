@@ -1,0 +1,79 @@
+---
+published_date: 2026-09-05
+title: Daytona Sandbox Dashboard for Resource and Quota Metrics
+description: Monitor Daytona sandboxes in SigNoz including per-sandbox CPU, memory and disk, organization quota by region, toolbox API activity, and SDK latency.
+doc_type: explanation
+---
+
+Use this dashboard to monitor your Daytona sandboxes across per-sandbox resource usage, organization quota consumption, toolbox API activity, and the latency and failures of the SDK calls that create and drive sandboxes.
+
+Daytona instruments itself and pushes `daytona.sandbox.*` gauges to your OTLP endpoint, and the Daytona SDK emits traces for every sandbox operation. This dashboard reads both, so nothing here depends on code you write inside the sandbox. The two are enabled separately: the resource and quota panels need Daytona's OpenTelemetry setting, and the SDK Control Plane panels need tracing switched on in your own application.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow the [Daytona Sandbox Monitoring](https://signoz.io/docs/daytona-monitoring/) guide.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/daytona-dashboard.webp"
+  alt="Daytona Sandbox Dashboard"
+  caption="Daytona Sandbox Dashboard"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/daytona/daytona-dashboard.json"
+  dashboardName="Daytona"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Spot a starved sandbox**: See CPU, memory, and disk against each sandbox's own limits, which organization totals hide because one pinned sandbox barely moves an org-wide number.
+- **Track quota headroom**: Watch CPU, memory, storage, and GPU against the organization quota, so you learn about exhaustion before sandbox creation starts failing.
+- **Split quota by region and class**: Quota is granted per region and per sandbox class, so a healthy total can still hide one capped region.
+- **Measure sandbox lifecycle cost**: Track how long `create`, `start`, `stop`, and `delete` take, and which of them fail.
+- **Separate transit from work**: Compare toolbox API spans measured inside the sandbox against SDK spans measured from your application.
+
+## Metrics Included
+
+### Organization Quota
+
+- **CPU / Memory / Storage / GPU Quota Used (Peak)**: Peak consumption as a share of quota over the selected range. Peak rather than current, because a sandbox deleted before the range ends still tells you the ceiling was approached. These tiles divide peak usage by peak quota, so read the trend panel instead if your quota changed during the range. The GPU tile is blank for organizations with no GPU quota.
+- **Quota Utilisation Over Time**: CPU, memory, and storage as a percentage of quota (`daytona.sandbox.used_*` against `daytona.sandbox.total_*`).
+
+### Per-Sandbox Resources
+
+- **Sandbox Resource Summary**: Latest CPU limit, CPU percent, memory limit, memory percent, disk free, and disk percent for every sandbox.
+- **Sandbox CPU / Memory / Disk Utilisation**: `daytona.sandbox.cpu.utilization`, `memory.utilization`, and `filesystem.utilization`, one series per sandbox.
+- **Sandbox Memory: Usage vs Limit**: `memory.usage` and `memory.limit` with `memory.cache` shown separately, since cache counts towards usage but is reclaimable.
+- **Sandbox Disk: Usage vs Total**: `filesystem.usage` against `filesystem.total`.
+
+### Capacity by Region and Sandbox Class
+
+- **CPU / Memory / Storage / GPU Used vs Quota**: Used and total for each resource, grouped by `region.id` and `sandbox.class`.
+
+### Toolbox API
+
+- **Toolbox API Calls**: Server spans the sandbox daemon records for command runs (`POST /process/execute`) and file transfers (`POST /files/bulk-upload`).
+- **Toolbox API Latency (p95)**: The same calls timed inside the sandbox.
+
+### SDK Control Plane
+
+- **SDK Operations Over Time** and **SDK Operation Latency (p95)**: Volume and latency per SDK operation. The synchronous and asynchronous clients emit the same operations with and without an `Async` prefix, so both appear as separate series.
+- **Control Plane HTTP Calls** and **HTTP Latency**: Requests to the Daytona API by method and status, with percentiles. The long-lived socket.io websocket span is excluded, since it stays open for the whole client session and would otherwise dominate every percentile.
+- **SDK Operations**: A table of every operation with call count, p50, p95, and p99.
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **Organization**: Filter quota panels by Daytona organization.
+- **Region**: Filter by region, for example `eu` or `us`.
+- **Sandbox Class**: Filter by sandbox class, for example `container` or `windows`.
+- **Service**: The service emitting SDK traces. The Daytona Python SDK reports `daytona-python-sdk` and does not let you change it.
+
+## Related Dashboards
+
+- [Claude Code](https://signoz.io/docs/dashboards/dashboard-templates/claude-code-dashboard/)
+- [OpenAI Agents SDK](https://signoz.io/docs/dashboards/dashboard-templates/openai-agents-sdk-dashboard/)
+- [APM Metrics](https://signoz.io/docs/dashboards/dashboard-templates/apm-metrics/)

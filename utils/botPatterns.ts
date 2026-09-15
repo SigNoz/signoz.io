@@ -115,6 +115,9 @@ export const BOT_USER_AGENT_PATTERNS = [
   /slackbot/i,
   /embedly/i,
 
+  // Headless Browsers
+  /headlesschrome/i,
+
   // Common HTTP Libraries
   /go-http-client/i,
   /java\//i,
