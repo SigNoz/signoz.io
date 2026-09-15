@@ -9,10 +9,11 @@ import TrackingLink from '@/components/TrackingLink'
 import { CUSTOMER_STORY_LOGOS, type CustomerStoryLogo } from './customerStories.constants'
 import { cn } from 'app/lib/utils'
 import styles from './customer-stories.module.css'
+import spriteAsset from '@/public/svgs/customer-logos/sprite.svg?url'
 
 const SCROLL_SPEED = 42
 
-const SPRITE = '/svgs/customer-logos/sprite.svg'
+const SPRITE = typeof spriteAsset === 'string' ? spriteAsset : (spriteAsset as { src: string }).src
 
 interface CardProps {
   customer: CustomerStoryLogo
