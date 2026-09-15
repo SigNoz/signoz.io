@@ -2,7 +2,7 @@ import { ArrowRight } from 'lucide-react'
 
 import TrackingLink from '@/components/TrackingLink'
 import { HOMEPAGE_INTEGRATION_ICONS } from '@/constants/homepageIntegrationIcons'
-import AgentTerminal from './AgentTerminal'
+import AgentTerminal from './agent-terminal'
 import AnimatedDotGrid from './AnimatedDotGrid'
 import NozChatPanel from './NozChatPanel'
 import { buttonVariants } from '@/components/ui/Button'
