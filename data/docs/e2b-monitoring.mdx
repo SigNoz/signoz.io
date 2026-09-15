@@ -1,5 +1,5 @@
 ---
-published_date: 2026-09-07
+published_date: 2026-09-15
 title: E2B Sandbox Monitoring & Tracing with OpenTelemetry
 meta_title: E2B Sandbox OpenTelemetry Monitoring
 description: Monitor E2B sandboxes with OpenTelemetry and SigNoz. Trace every sandbox session and code execution, join in-sandbox spans, and track CPU, memory, and disk.
@@ -32,7 +32,7 @@ E2B produces telemetry through five paths. They do not overlap, so pick the ones
 | Sandbox lifecycle events | Create, update, and kill events as log records | A poller over the events API, or a webhook receiver |
 | E2B OTel telemetry export | `e2b.*` metrics and `service_name: e2b` logs, with no code at all | An Enterprise plan and an onboarding request |
 
-Start with the first path. It covers every sandbox your application creates, including the ones whose code a model wrote. The SDK also reports some HTTP telemetry by itself, with no code and no instrumentation package, which [What the SDK Emits on Its Own](#what-the-sdk-emits-on-its-own) covers. The rest are collapsed below. All five use <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and export to the same SigNoz endpoint.
+Start with the first path. It covers every sandbox your application creates, including the ones whose code a model wrote. The SDK also reports some HTTP telemetry by itself, with no code and no instrumentation package, which [What the SDK Emits on Its Own](#what-the-sdk-emits-on-its-own) covers. The rest sit under [Optional Setups](#optional-setups). All five use <a href="https://opentelemetry.io/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry</a> and export to the same SigNoz endpoint.
 
 E2B sandboxes have outbound internet access by default, so you need no firewall rule before an exporter reaches SigNoz. If you set `allow_internet_access=False` or a `network` deny rule, read [The sandbox cannot reach SigNoz](#the-sandbox-cannot-reach-signoz) first.
 
@@ -257,12 +257,19 @@ These names belong to `pyqwest`, not to E2B. Any other library in your process t
 
 <details>
 <ToggleHeading>
-## Trace the Code Inside a Sandbox
+## Optional Setups
+</ToggleHeading>
+
+Five optional paths, each independent of the others. Open the one that answers your question, and skip the rest.
+
+<details>
+<ToggleHeading>
+### Trace the Code Inside a Sandbox
 </ToggleHeading>
 
 The spans above measure a sandbox from the outside. They cannot say which line of the generated code was slow. This path instruments the code that runs inside the sandbox and joins it to the same trace.
 
-### Step 1: Write the workload script
+#### Step 1: Write the workload script
 
 The script reads the endpoint from the environment, so it holds no credentials of its own. `E2B_SANDBOX_ID` and `E2B_TEMPLATE_ID` are set by E2B in every sandbox, and become resource attributes.
 
@@ -318,7 +325,7 @@ logger_provider.force_flush()
 
 Flush both providers before the process exits. Sandbox processes are short-lived, and an unflushed batch dies with the process.
 
-### Step 2: Ship the script and pass the parent context down
+#### Step 2: Ship the script and pass the parent context down
 
 Inject the current span context into a carrier, then hand it to the sandbox as an environment variable.
 
@@ -368,7 +375,7 @@ To skip the install on every run, bake the OpenTelemetry packages into a <a href
 
 <details>
 <ToggleHeading>
-## Collect Sandbox Resource Metrics
+### Collect Sandbox Resource Metrics
 </ToggleHeading>
 
 E2B samples CPU, memory, and disk inside every sandbox every 5 seconds. `get_metrics()` returns that history as a list. Nothing pushes it anywhere, so poll it and record the newest sample as OpenTelemetry gauges.
@@ -457,7 +464,7 @@ The gauge records only the newest sample. The OpenTelemetry metrics API stamps e
 
 <details>
 <ToggleHeading>
-## Record Sandbox Lifecycle Events
+### Record Sandbox Lifecycle Events
 </ToggleHeading>
 
 The events API reports when sandboxes are created, updated, snapshotted, paused, resumed, and killed across your whole project, including the sandboxes your own code did not create. E2B keeps these events for 7 days.
@@ -522,7 +529,7 @@ Sandbox lifecycle webhooks push the same events instead. Use them when you alrea
 
 <details>
 <ToggleHeading>
-## Run the Sandbox as an AI Agent Tool
+### Run the Sandbox as an AI Agent Tool
 </ToggleHeading>
 
 When a model calls the sandbox as a tool, add the GenAI attributes to the session span so that it joins the rest of your LLM traces:
@@ -546,7 +553,7 @@ E2B ships templates for several coding agents, including Claude Code and Codex. 
 
 <details>
 <ToggleHeading>
-## Export E2B Telemetry Directly (Enterprise)
+### Export E2B Telemetry Directly (Enterprise)
 </ToggleHeading>
 
 E2B can push its own metrics and logs to any OTLP HTTP endpoint. This path needs no code, and it reports the sandboxes your application never sees. It is available on the Enterprise plan only.
@@ -563,6 +570,8 @@ Delivery is best effort. E2B retries when it can, and drops metrics or logs when
 To request it, contact <a href="mailto:enterprise@e2b.dev">enterprise@e2b.dev</a>. For BYOC deployments, E2B can configure the export from your own environment.
 
 Do not run this path and [Collect Sandbox Resource Metrics](#collect-sandbox-resource-metrics) at the same time without checking the names. Both report sandbox CPU, memory, and disk under the `e2b.` prefix, from different collection points, and a chart that mixes them double counts.
+
+</details>
 
 </details>
 
