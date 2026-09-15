@@ -42,15 +42,15 @@ export default function FeatureCard({ feature }: { feature: BentoFeature }) {
     <div
       ref={cardRef}
       onMouseMove={handleMouseMove}
-      className={`group relative flex min-h-[340px] flex-col overflow-hidden rounded-md border border-[var(--l2-border)] bg-[var(--l1-background)] transition-[border-color] duration-200 focus-within:z-20 hover:z-20 hover:border-[color-mix(in_srgb,var(--l1-foreground)_16%,transparent)] ${feature.layout}`}
+      className={`group relative flex min-h-[340px] flex-col overflow-hidden rounded-md border border-[var(--l2-border)] bg-[var(--l1-background)] transition-[border-color] duration-200 hover:border-[color-mix(in_srgb,var(--l1-foreground)_16%,transparent)] ${feature.layout}`}
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[2] overflow-hidden opacity-0 transition-opacity duration-150 group-hover:opacity-70"
+        className="pointer-events-none absolute inset-0 z-[2] overflow-hidden"
       >
         <div
           ref={spotRef}
-          className="absolute left-0 top-0 will-change-transform"
+          className="absolute left-0 top-0 opacity-0 transition-opacity duration-150 will-change-transform group-hover:opacity-70"
           style={{
             width: SPOT_SIZE,
             height: SPOT_SIZE,
@@ -70,7 +70,7 @@ export default function FeatureCard({ feature }: { feature: BentoFeature }) {
         </h3>
       </div>
 
-      <div className="relative z-[1] mt-auto min-h-[120px] flex-1 overflow-hidden">
+      <div className="relative z-[1] mt-auto min-h-[120px] flex-1 transform-gpu overflow-hidden">
         {asset ? (
           <Image
             src={asset.src}
