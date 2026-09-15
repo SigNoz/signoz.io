@@ -213,11 +213,10 @@ const DocsTOC: React.FC<DocsTOCProps> = ({
 
       activateTabsForElement(el)
 
-      // Open every ancestor details so nested toggles reveal the heading
-      let details = el.closest('details')
-      while (details) {
+      // Open parent details if closed
+      const details = el.closest('details')
+      if (details && !details.open) {
         details.open = true
-        details = details.parentElement?.closest('details') ?? null
       }
 
       const scrollBehavior = options.behavior ?? 'smooth'
