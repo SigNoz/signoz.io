@@ -1,0 +1,143 @@
+---
+title: How ELSA uses SigNoz MCP to debug AI microservices with coding agents
+description: ELSA uses SigNoz Cloud and SigNoz MCP to bring logs, traces, deployment checks, and customer-complaint context into agent-driven debugging workflows for its AI microservices.
+image: /img/case_study/elsa-blog-cover-image.webp
+authors: [mahak_kaur]
+company: ELSA
+person: Tibor Dumitriu
+role: Head of Research Engineering
+logo: /img/case_study/logos/elsa-logo-white.webp
+logo_alt: ELSA
+tags:
+  - AI & agent workflows
+  - Tracing & performance
+date: 2026-09-15
+---
+
+[ELSA](https://elsaspeak.com/en)'s product has always depended on machine learning. Long before LLMs became the center of AI product roadmaps, ELSA was already using models to help people improve their English pronunciation. Over time, that original pronunciation-scoring system grew into a broader AI language-learning experience, with generated lesson paths, role play, coaches, bots, speech recognition, text-to-speech, scoring services, and LLM-backed workflows.
+
+That evolution changed the operational shape of the backend.
+
+What had started as a more focused system became a large ecosystem of AI microservices. [Tibor Dumitriu](https://www.linkedin.com/in/tibor-dumitriu), Head of Research Engineering at ELSA, described the scale this creates in practical terms: the team supports about 40,000 users a day, and sometimes expects 2,000 to 10,000 users using the app at the same time.
+
+"So that creates an avalanche of calls in our microservices," he said.
+
+To understand how ELSA works through that complexity, we spoke with three engineers close to its AI-service workflows: Tibor, who leads the team responsible for many of those AI microservices; [Nicholas Parslow](https://pt.linkedin.com/in/nparslow), a speech researcher working on audio systems like text-to-speech, speech recognition, and scoring; and [Sergio Valentim](https://pt.linkedin.com/in/sergio-valentim), a backend engineer focused on observability, APIs, and deployments.
+
+Their workflows point to the same larger shift. SigNoz Cloud is not only a place ELSA engineers open when something breaks. It is becoming the telemetry layer their coding agents can query when a symptom needs to become evidence.
+
+## Vague symptoms need precise evidence
+
+In ELSA's environment, a production issue does not always arrive as a clean error message. A user might not report that a specific service returned malformed output. They might say that after using a menu, they waited too long, got bored, or did not like the response.
+
+That kind of signal is real, but it is not always shaped like an alert.
+
+The useful answer can live across logs, traces, timings, known errors, new errors, customer complaints, and code. ELSA uses SigNoz Cloud for logging, tracing, and dashboards across its services, so engineers can investigate errors, monitor releases, understand latency, and follow requests across microservices.
+
+Tracing had already become important inside that environment. Tibor said the team had put in "a large effort" to introduce trace parenting and trace IDs across services. That work made SigNoz Cloud especially useful for debugging. "SigNoz Cloud is very, very nice showing the tracing," he said. "That's one of the really best things that I like."
+
+<YouTube id="70G2SgUFLsI" mute="false" />
+
+But the same scale that made tracing useful also made investigations dense. With so many microservices involved, a single view could become overwhelming, which made it even more important to help engineers and agents narrow down the right evidence.
+
+The pressure is especially clear in the audio systems Nicholas works on. A single user-facing flow can move through text-to-speech, speech recognition, and scoring services before the user sees the result. Trace IDs exist, but they are not uniformly applied across every service, and some identifiers have evolved differently for historical reasons.
+
+That makes manual investigation slower. An engineer has to find the relevant log, choose the right time window, look across related services, ignore unrelated noise, and decide whether nearby logs actually belong to the same issue.
+
+## Debugging started with less copying and pasting
+
+Before SigNoz MCP, a debugging workflow could involve finding one or two examples in SigNoz Cloud, copying logs into a coding agent, and then manually searching for more context when the agent needed it.
+
+SigNoz MCP changed where that first pass starts. Instead of ferrying logs between tools, ELSA engineers can ask a coding agent to inspect related logs through SigNoz Cloud.
+
+<YouTube id="dQOKuRLSWfs" mute="false" />
+
+"What's been quite good," Nicholas said, is that through MCP the agent can "look up logs in a similar window of time" across other services. "This it can do a lot faster than I can do it."
+
+That does not remove judgment from the process. Nicholas still reviews the result, especially when trace IDs are missing and the agent is correlating logs by timing. He described the output as useful most of the time, but not something to trust blindly.
+
+Still, the shape of the work changed. The agent can gather more of the surrounding context directly, so the engineer spends less time feeding it examples and more time reviewing whether the pattern is real.
+
+"It might cut out like twenty minutes in debugging something," Nicholas said. The bigger gain is that he can set the investigation running, work on something else, and come back to a first pass with less back-and-forth.
+
+## The same pattern moved into releases
+
+The same shift shows up in deployment checks.
+
+ELSA deploys production one region at a time. After a region is deployed, Sergio's internal coding-agent workflow uses SigNoz MCP to check the release. It looks at logs, P99 latency, and error rate for a short window after deployment. If the workflow sees a new error log, a higher-than-usual frequency, or a concerning deviation, it flags Sergio before the rollout continues.
+
+"After one region is triggered," Sergio said, "then the SigNoz MCP kicks in and checks the logs and the P99 and the error rate for that deployment."
+
+<YouTube id="mHkuMYU42DI" mute="false" />
+
+Before this workflow, the release process was largely manual. ELSA had a written process, but the observability part still meant going into SigNoz Cloud, checking logs, checking latency, looking for errors, and deciding whether the deployment could move forward.
+
+"It was honestly fully manual," Sergio said. "I was doing everything by hand."
+
+The new workflow did not begin as a polished automation. It started with the existing release process, documentation, and a recorded walkthrough. Sergio used that material to build a coding-agent skill, then refined it over several releases.
+
+The result is a guarded automation rather than a fully hands-off deployment system. If the agent flags something, Sergio still decides whether to re-trigger, roll back, warn the owning team, or wait for a hotfix. In the beginning, he watched the automation and the logs side by side. Over time, as the workflow caught real issues, he became more comfortable letting it run.
+
+For routine releases, the time saving is meaningful. Sergio estimated that deployments could take at least 30 minutes, and sometimes 1.5 to 2 hours when issues required back-and-forth with other developers. For a 45-minute deployment, he estimated that observability automation saves about 20 minutes.
+
+The important detail is not just the time saved. It is that release health became a repeatable checkpoint. The workflow asks the same basic questions every time: are there new errors, did error rate change, did P99 move, and is this region safe enough to continue?
+
+## Customer complaints became engineering reports
+
+Tibor's team pushed the same idea into a more automated workflow: connecting customer complaints to the logs that might explain them.
+
+At ELSA, some customer complaints arrive through internal team channels with useful metadata: timing, application context, region, and the complaint text itself. But the complaint is still written in human language. It may describe slowness, a strange AI response, a malformed result, or an experience that felt wrong.
+
+"Sometimes it was very difficult to correlate customer complaints with logs," Tibor said.
+
+<YouTube id="RaJeSmGCz-o" mute="false" />
+
+To reduce that gap, Tibor built an internal agentic workflow that listens for these complaints, extracts metadata, identifies the likely services and time window, queries SigNoz Cloud, filters the logs, and produces a report. A short version goes back into the team channel. A larger version is stored in an internal reporting layer so the team can review it later.
+
+The workflow did not simply send all logs to a model. That would be too noisy and too expensive. Tibor described cases where a query could return tens of thousands of logs, sometimes close to 100,000. At that scale, dumping everything into an AI context window is not useful.
+
+"Just throwing there one million tokens out of logs, it's not a solution," he said.
+
+Instead, the system filters first. It uses metadata and rules to narrow the logs to a manageable subset, then uses prompting to reason over whether the complaint correlates with AI-service behavior. In practice, only a small number of complaints are directly relevant to the AI services, but those are the ones Tibor's team wants surfaced quickly.
+
+The same system also produces trend reports. Every day, it compares the last 24 hours of logs with a prior period and highlights what changed: new error types, errors that disappeared, latency changes, or patterns worth sending to a service owner.
+
+This helps with a problem that engineers know well: not every error is new, and not every noisy log is urgent. Teams build intuition over time about which errors are harmless, which are technical debt, and which deserve investigation. Tibor's goal was to make more of that context visible automatically.
+
+Now, instead of relying on someone to remember whether a log pattern is new, the workflow can surface that context directly to the team.
+
+## The engineer still makes the call
+
+Even with these workflows, ELSA's engineers still use the SigNoz Cloud UI. The reports link back to the relevant SigNoz Cloud view, dashboard, or logs, so engineers can verify the evidence directly.
+
+That verification loop matters. Tibor was explicit that these workflows are still non-deterministic. They reduce manual scanning, but they do not remove the need for an engineer to check whether the result is real.
+
+For Nicholas, that means reviewing whether the agent connected the right logs. For Sergio, it means deciding whether a release should continue. For Tibor, it means tuning prompts, improving filters, and deciding when an agent-generated report is actionable.
+
+That is the pattern ELSA has found useful: SigNoz Cloud provides the production evidence, MCP and APIs make that evidence accessible to agents, and engineers remain responsible for the final judgment.
+
+## What changed for ELSA
+
+Across these workflows, SigNoz Cloud sits in the same place: close to the production data, close enough for engineers to verify, and accessible enough for agents to gather context.
+
+For individual debugging, that means less copying and pasting logs between tools.
+
+For deployments, it means release checks can run consistently after each region.
+
+For customer complaints, it means vague feedback can be compared against logs, traces, timing, and service metadata before an engineer spends hours manually searching.
+
+Tibor estimated that post-deployment monitoring alone used to take around half an hour per service. With multiple deployments per day, that could add up to roughly a person-day of log monitoring per week. The agentic workflow does not eliminate engineering work, but it changes where that work starts.
+
+<YouTube id="Bfn0Zy0adkM" mute="false" />
+
+Instead of beginning with a blank search box and a vague complaint, the team starts with a focused report, linked back to the underlying SigNoz Cloud evidence.
+
+That is the practical shift: not AI replacing observability, and not agents replacing engineers. It is production telemetry becoming easier for agents to gather, compare, and summarize, while the human stays close enough to decide what matters.
+
+If your team is already using coding agents, the next question is whether those agents can see what your production systems are doing. [SigNoz Cloud](https://signoz.io/teams/) gives teams a hosted observability platform, and [SigNoz MCP](https://signoz.io/docs/ai/signoz-mcp-server/) brings that telemetry into agent workflows.
+
+---
+
+**SigNoz Cloud** is the easiest way to get started. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)
