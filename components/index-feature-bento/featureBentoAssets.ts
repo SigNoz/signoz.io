@@ -1,12 +1,12 @@
 import type { StaticImageData } from 'next/image'
 
-import apmStage from '@/public/img/graphics/homepage/bento/apm.webp'
-import logsStage from '@/public/img/graphics/homepage/bento/logs.webp'
-import tracingStage from '@/public/img/graphics/homepage/bento/tracing.webp'
-import alertsStage from '@/public/img/graphics/homepage/bento/alerts.webp'
-import llmStage from '@/public/img/graphics/homepage/bento/llm-observability.webp'
-import infraStage from '@/public/img/graphics/homepage/bento/infra-monitoring.webp'
-import dashboardsStage from '@/public/img/graphics/homepage/bento/dashboards.webp'
+import apmStage from '@/public/img/graphics/homepage/bento/apm.svg?url'
+import logsStage from '@/public/img/graphics/homepage/bento/logs.svg?url'
+import tracingStage from '@/public/img/graphics/homepage/bento/tracing.svg?url'
+import alertsStage from '@/public/img/graphics/homepage/bento/alerts.svg?url'
+import llmStage from '@/public/img/graphics/homepage/bento/llm-observability.svg?url'
+import infraStage from '@/public/img/graphics/homepage/bento/infra-monitoring.svg?url'
+import dashboardsStage from '@/public/img/graphics/homepage/bento/dashboards.svg?url'
 
 export interface FeatureBentoAsset {
   src: StaticImageData | string
