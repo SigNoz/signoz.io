@@ -14,14 +14,14 @@ export const HOMEPAGE_FEATURE_QUOTES: FeatureQuote[] = [
       'We’ve transitioned from Grafana to SigNoz, offering a simplified, unified monitoring, logging, and alerting experience.',
     name: 'Mark Nelson',
     role: 'Oracle',
-    logoSrc: null,
+    logoSrc: '/svgs/customer-logos/oracle.svg',
     tone: 'lavender',
   },
   {
     quote: 'Every single time we have an issue, SigNoz is always the first place to check.',
     name: 'Karl Lyons',
     role: 'Shaped',
-    logoSrc: null,
+    logoSrc: '/img/case_study/logos/shaped-logo.svg',
     tone: 'citrus',
   },
 ]
@@ -39,20 +39,20 @@ export const HOMEPAGE_BLOG_CARDS: HomepageBlogCard[] = [
     imageSrc: '/img/blog/2026/07/shaped-kathleen-blog-cover.webp',
   },
   {
-    title: 'Using SigNoz MCP for Incident Response',
-    href: '/blog/signoz-mcp-incident-response/',
-    imageSrc: '/img/blog/2026/05/mcp-blog-cover-5.webp',
+    title: 'Building observability for the AI era: agent-native and AI-scale telemetry',
+    href: '/blog/observability-for-the-ai-era/',
+    imageSrc: '/img/blog/2026/08/AI-era.webp',
   },
   {
-    title: 'Using SigNoz MCP for the Development and Release Lifecycle',
-    href: '/blog/signoz-mcp-development-release-lifecycle/',
-    imageSrc: '/img/blog/2026/04/mcp-blog-cover-1.webp',
+    title: 'Introducing the new trace detail view',
+    href: '/blog/new-trace-detail-view/',
+    imageSrc: '/img/blog/2026/08/new-trace-details.webp',
   },
 ]
 
 export const HOMEPAGE_CUSTOMERS_STRIP = {
-  lead: 'SigNoz powers over',
-  count: '1,000',
+  lead: 'SigNoz powers',
+  count: '10,000+',
   tail: 'engineering teams. From ambitious start-ups to major enterprises.',
   ctaLabel: 'Customer Stories',
   ctaHref: '/customers/',

@@ -18,7 +18,7 @@ export default function EnterpriseReadyStrip() {
   ]
 
   return (
-    <div className="rule-fade-x mt-14 border-y border-[var(--l2-border)] md:mt-20">
+    <div className="rule-fade-x mt-14 border-b border-[var(--l2-border)] md:mt-20 md:border-t">
       <div className="grid gap-0 md:grid-cols-3">
         <div className="rule-fade-x flex items-center border-b border-[var(--l2-border)] py-8 md:border-b-0 md:pr-8">
           <div>

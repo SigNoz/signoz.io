@@ -83,7 +83,7 @@ function NozInputPeek() {
   }, [])
 
   return (
-    <div ref={wrapRef} className="noz-input-wrap m-4 mt-2 shrink-0">
+    <div ref={wrapRef} className="noz-input-wrap mt-2 shrink-0">
       <div className="noz-input-peek" aria-hidden="true" data-markdown-ignore>
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect
@@ -113,7 +113,7 @@ function NozInputPeek() {
         <rect width="3.53" height="6.17" rx="1.47" fill="var(--bg-cherry-500)" />
         <rect x="30.47" width="3.53" height="6.17" rx="1.47" fill="var(--bg-cherry-500)" />
       </svg>
-      <div className="relative z-[2] rounded-lg border border-[var(--l2-border)] bg-[var(--l1-background)] px-3 pb-2.5 pt-3">
+      <div className="relative z-[2] border-t border-[var(--l2-border)] bg-[var(--l1-background)] px-3 pb-2.5 pt-3">
         <span className="text-sm text-[var(--l3-foreground)]">Ask Noz…</span>
         <div className="mt-7 flex items-center justify-between">
           <span className="-ml-1.5 flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[13px] text-[var(--l2-foreground)] transition-colors hover:bg-[var(--l3-background)] hover:text-[var(--l1-foreground)]">

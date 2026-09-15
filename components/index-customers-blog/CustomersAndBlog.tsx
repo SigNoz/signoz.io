@@ -56,10 +56,11 @@ function FeatureQuoteCard({ quote }: { quote: FeatureQuote }) {
         {quote.logoSrc ? (
           <Image
             src={quote.logoSrc}
-            alt=""
-            width={40}
-            height={40}
-            className="h-10 w-10 rounded-full object-contain"
+            alt={`${quote.role} logo`}
+            width={120}
+            height={32}
+            className="h-6 w-auto max-w-[120px] object-contain opacity-80"
+            style={{ filter: 'brightness(0)' }}
           />
         ) : (
           <span
@@ -70,6 +71,10 @@ function FeatureQuoteCard({ quote }: { quote: FeatureQuote }) {
             {quote.role.charAt(0)}
           </span>
         )}
+        <span
+          aria-hidden="true"
+          className="h-8 w-px shrink-0 bg-[color-mix(in_srgb,var(--l3-background)_30%,transparent)]"
+        />
         <span style={{ color: tone.ink }}>
           <span className="block text-sm font-semibold">{quote.name}</span>
           <span className="block text-xs" style={{ color: tone.sub }}>

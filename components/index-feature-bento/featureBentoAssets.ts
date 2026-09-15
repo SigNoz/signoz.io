@@ -13,6 +13,8 @@ export interface FeatureBentoAsset {
   alt: string
   fit?: 'cover' | 'contain'
   objectPosition?: string
+  /** Overrides fit/objectPosition entirely when set. */
+  className?: string
 }
 
 // Asset slots for the bento cards; `null` falls back to the animated visual.
@@ -33,12 +35,11 @@ export const featureBentoAssets: Record<string, FeatureBentoAsset | null> = {
   'Infra Monitoring.': {
     src: infraStage,
     alt: 'CPU and memory usage charts',
-    fit: 'contain',
-    objectPosition: 'left bottom',
+    className: 'object-cover object-[center_bottom] md:object-contain md:object-[left_bottom]',
   },
   'Dashboards.': {
     src: dashboardsStage,
     alt: 'SigNoz dashboard panels for latency and pod metrics',
-    fit: 'contain',
+    className: 'object-cover object-[left_bottom] md:object-contain md:object-bottom',
   },
 }
