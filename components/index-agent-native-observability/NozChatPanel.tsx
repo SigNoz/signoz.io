@@ -138,11 +138,10 @@ function NozInputPeek() {
 export default function NozChatPanel({ className = '' }: { className?: string }) {
   return (
     <div
-      className={cn('rounded-[18px] p-px shadow-[0_34px_120px_rgba(0,0,0,0.58)]', className)}
-      style={{
-        background:
-          'linear-gradient(135deg, color-mix(in srgb, var(--base-white) 16%, transparent), color-mix(in srgb, var(--base-white) 4%, transparent) 42%, color-mix(in srgb, var(--base-white) 9%, transparent))',
-      }}
+      className={cn(
+        'rounded-[18px] border border-[var(--l2-border)] shadow-[0_34px_120px_rgba(0,0,0,0.58)]',
+        className
+      )}
     >
       <div className="flex h-full flex-col overflow-hidden rounded-[17px] bg-[var(--l1-background)]">
         <div className="flex shrink-0 items-center justify-between px-4 pt-3">

@@ -55,7 +55,7 @@ function PricingValueColumn({
   title: string
 }) {
   return (
-    <article className="rule-fade-x md:vrule-solid flex min-h-44 flex-col justify-between gap-10 border-t border-[var(--l2-border)] py-7 first:border-t-0 md:min-h-56 md:border-t-0 md:px-10 md:py-8 md:first:before:hidden lg:px-12">
+    <article className="rule-fade-x md:vrule-solid flex min-h-44 flex-col justify-between gap-10 border-t border-[var(--l2-border)] py-7 first:border-t-0 md:min-h-56 md:border-t-0 md:px-10 md:py-8 md:first:pl-0 md:first:before:hidden lg:px-12 lg:first:pl-0">
       <Icon className="h-5 w-5 shrink-0 text-[var(--l2-foreground)]" aria-hidden="true" />
       <div>
         <p className="m-0 text-lg font-medium leading-7 tracking-normal text-[var(--l1-foreground)] md:text-xl md:leading-8">
