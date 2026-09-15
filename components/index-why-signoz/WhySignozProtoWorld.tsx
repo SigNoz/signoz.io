@@ -3,6 +3,11 @@
 import { Bot, Database } from 'lucide-react'
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 
+import Image from 'next/image'
+
+import ollyArt from '@/public/img/graphics/homepage/olly.svg?url'
+import nozBackArt from '@/public/img/graphics/homepage/noz-back.svg?url'
+
 import './why-signoz-proto.css'
 import {
   COL,
@@ -849,13 +854,11 @@ const WhySignozProtoWorld = forwardRef<WhySignozWorldHandle>(function WhySignozP
           <div className="noz-traveler" aria-hidden="true">
             <div className="noz-traveler-inner">
               <div className="olly-rider olly-rider--large">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/img/graphics/homepage/olly.svg" alt="" />
+                <Image src={ollyArt} alt="" width={29} height={48} />
                 {riderCube}
               </div>
               <div className="olly-rider olly-rider--small">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/img/graphics/homepage/noz-back.svg" alt="" />
+                <Image src={nozBackArt} alt="" width={161} height={244} />
                 {riderCube}
               </div>
             </div>
