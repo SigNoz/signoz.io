@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ArrowRight } from 'lucide-react'
 
+import TrackingLink from '@/components/TrackingLink'
+
 import { CUSTOMER_STORY_LOGOS, type CustomerStoryLogo } from './customerStories.constants'
 
 const SCROLL_SPEED = 42
@@ -15,9 +17,14 @@ interface CardProps {
 
 function CustomerCard({ customer, isClone = false }: CardProps) {
   return (
-    <a
+    <TrackingLink
       className="customer-card"
       href="/customers/"
+      clickType="Customer Proof"
+      clickName="Customer Logo Link"
+      clickText={customer.name}
+      clickLocation="Hero Customer Stories"
+      eventAttributes={{ target: '/customers/', customer: customer.name }}
       aria-label={customer.name}
       aria-hidden={isClone || undefined}
       tabIndex={isClone ? -1 : undefined}
@@ -42,7 +49,7 @@ function CustomerCard({ customer, isClone = false }: CardProps) {
           draggable={false}
         />
       )}
-    </a>
+    </TrackingLink>
   )
 }
 

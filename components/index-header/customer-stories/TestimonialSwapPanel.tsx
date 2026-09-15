@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 
+import TrackingLink from '@/components/TrackingLink'
+
 import { type CustomerStoryQuote } from './customerStories.constants'
 
 const SWAP_EVERY = 6200
@@ -116,16 +118,21 @@ export default function TestimonialSwapPanel({
           </figcaption>
         </div>
       </div>
-      <a
+      <TrackingLink
         href={href}
         target={isExternal ? '_blank' : undefined}
         rel={isExternal ? 'noopener noreferrer nofollow' : undefined}
+        clickType="Customer Proof"
+        clickName="Customer Quote Link"
+        clickText={label}
+        clickLocation="Hero Customer Stories"
+        eventAttributes={{ target: href, customer: quote.org }}
         className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--l1-foreground)_10%,transparent)] bg-[var(--l2-background)] px-2.5 py-1.5 text-xs font-medium text-[var(--l1-foreground)] no-underline opacity-0 transition-opacity duration-200 focus-visible:opacity-100 group-hover:opacity-100"
         aria-label={`${label}: ${quote.name}, ${quote.org}`}
       >
         {label}
         <ArrowRight size={10} aria-hidden="true" />
-      </a>
+      </TrackingLink>
     </figure>
   )
 }

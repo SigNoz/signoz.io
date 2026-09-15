@@ -22,7 +22,7 @@ export default function CustomerStoriesCard() {
           <TrackingLink
             href={CUSTOMER_STORIES_CTA.href}
             clickType="Secondary CTA"
-            clickName="See All Customers Button"
+            clickName="Customer Stories Link"
             clickText={CUSTOMER_STORIES_CTA.buttonLabel}
             clickLocation="Hero Customer Stories"
             className="voice__cta-link no-underline"

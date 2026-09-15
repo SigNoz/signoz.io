@@ -13,7 +13,7 @@ import {
 
 export type WhySignozStep = {
   alt: string
-  cta?: { href: string; label: string; clickName: string }
+  cta?: { href: string; label: string }
   description: string
   icon: LucideIcon
   image: string
@@ -28,7 +28,7 @@ export const WHY_SIGNOZ_STEPS: WhySignozStep[] = [
     description:
       'Move from a latency spike to the related logs, traces, metrics, and spans without stitching together separate tools.',
     icon: Activity,
-    cta: { href: '/docs/introduction/', label: 'Open a trace', clickName: 'Open Trace Link' },
+    cta: { href: '/docs/introduction/', label: 'Open a trace' },
     image: '/img/graphics/homepage/correlation.svg',
     alt: 'SigNoz Cloud view showing correlated telemetry for root cause debugging',
   },
@@ -43,7 +43,6 @@ export const WHY_SIGNOZ_STEPS: WhySignozStep[] = [
     cta: {
       href: '/docs/instrumentation/overview/',
       label: 'Read the setup guide',
-      clickName: 'Setup Guide Link',
     },
   },
   {
@@ -57,7 +56,6 @@ export const WHY_SIGNOZ_STEPS: WhySignozStep[] = [
     cta: {
       href: '/docs/userguide/query-builder-v5/',
       label: 'Open query builder',
-      clickName: 'Query Builder Link',
     },
   },
   {
@@ -71,7 +69,6 @@ export const WHY_SIGNOZ_STEPS: WhySignozStep[] = [
     cta: {
       href: '/docs/ai/signoz-mcp-server/',
       label: 'Connect an agent',
-      clickName: 'Connect Agent Link',
     },
   },
 ]

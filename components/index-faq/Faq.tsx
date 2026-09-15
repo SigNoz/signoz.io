@@ -115,7 +115,7 @@ export default function Faq() {
             <TrackingLink
               className="btn-tactile btn-tactile--secondary no-underline"
               clickLocation="Homepage FAQ Section"
-              clickName="Read the Docs Button"
+              clickName="Docs Link"
               clickText="Read the Docs"
               clickType="Secondary CTA"
               href="/docs/introduction/"

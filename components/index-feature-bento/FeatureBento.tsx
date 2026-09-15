@@ -26,7 +26,7 @@ export default function FeatureBento() {
             label: 'Explore Docs',
             href: '/docs/introduction/',
             clickLocation: 'Homepage Feature Bento',
-            clickName: 'Explore Docs Link',
+            clickName: 'Docs Link',
           }}
         />
 

@@ -43,9 +43,9 @@ export default function HalfBadge({
     return (
       <TrackingLink
         href={href}
-        clickType="Nav Click"
+        clickType="Secondary CTA"
         clickName={clickName}
-        clickText={badge}
+        clickText={typeof children === 'string' ? `${badge} ${children}` : badge}
         clickLocation={clickLocation}
         className={cn(containerClass, 'no-underline')}
       >

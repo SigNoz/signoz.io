@@ -234,7 +234,7 @@ export default function WhySignoz() {
                             <TrackingLink
                               className="btn-tactile btn-tactile--secondary no-underline"
                               clickLocation="Homepage Why SigNoz"
-                              clickName={step.cta.clickName}
+                              clickName="Docs Link"
                               clickText={step.cta.label}
                               clickType="Secondary CTA"
                               href={step.cta.href}

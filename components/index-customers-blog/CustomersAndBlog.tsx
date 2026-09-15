@@ -111,7 +111,7 @@ export default function CustomersAndBlog() {
             <TrackingLink
               className="btn-tactile btn-tactile--secondary shrink-0 no-underline"
               clickLocation="Homepage Customers Section"
-              clickName="Customer Stories Button"
+              clickName="Customer Stories Link"
               clickText={HOMEPAGE_CUSTOMERS_STRIP.ctaLabel}
               clickType="Secondary CTA"
               href={HOMEPAGE_CUSTOMERS_STRIP.ctaHref}
@@ -128,7 +128,7 @@ export default function CustomersAndBlog() {
               key={`${card.title}-${index}`}
               className="md:vrule-solid group flex flex-col no-underline md:px-8 md:first:pl-0 md:first:before:hidden md:last:pr-0"
               clickLocation="Homepage Blog Cards"
-              clickName="Homepage Blog Card"
+              clickName="Blog Link"
               clickText={card.title}
               clickType="Blog Link"
               href={card.href}
