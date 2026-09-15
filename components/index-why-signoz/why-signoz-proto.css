@@ -71,28 +71,38 @@
 .why-proto .grid-bg {
   position: absolute;
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
   opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.why-proto .grid-bg-spot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 380px;
+  height: 380px;
+  transform: translate3d(-9999px, -9999px, 0);
+  will-change: transform;
   background-image: radial-gradient(
     circle at center,
     color-mix(in srgb, var(--bg-neutral-dark-100) 36%, transparent) 0.8px,
     transparent 1.1px
   );
   background-size: 22px 22px;
-  background-position: 1px 1px;
   -webkit-mask-image: radial-gradient(
-    190px circle at var(--pointer-x) var(--pointer-y),
+    closest-side,
     var(--base-black) 0%,
     color-mix(in srgb, var(--base-black) 82%, transparent) 48%,
     transparent 100%
   );
   mask-image: radial-gradient(
-    190px circle at var(--pointer-x) var(--pointer-y),
+    closest-side,
     var(--base-black) 0%,
     color-mix(in srgb, var(--base-black) 82%, transparent) 48%,
     transparent 100%
   );
-  transition: opacity 0.3s ease;
 }
 .why-proto.frame:not(.pointer-active) .grid-bg {
   opacity: 0.2;
@@ -863,7 +873,7 @@
   width: 142px;
   height: 142px;
   z-index: 4;
-  pointer-events: auto;
+  pointer-events: none;
   opacity: 0;
   will-change: transform, opacity;
 }

@@ -876,10 +876,24 @@ const WhySignozProtoWorld = forwardRef<WhySignozWorldHandle>(function WhySignozP
       trailContext.globalAlpha = 1
       if (trailPoints.length) trailRaf = requestAnimationFrame(paintTrail)
     }
+    const gridSpot = q<HTMLElement>('.grid-bg-spot')
+    const GRID_SPOT = 380
+    const GRID_STEP = 22
+    let gridRaf = 0
+    let gridPointer = { x: 0, y: 0 }
+    const paintGridSpot = () => {
+      gridRaf = 0
+      if (!gridSpot) return
+      const rect = gridSpot.parentElement!.getBoundingClientRect()
+      const left = gridPointer.x - rect.left - GRID_SPOT / 2
+      const top = gridPointer.y - rect.top - GRID_SPOT / 2
+      gridSpot.style.transform = `translate3d(${left}px, ${top}px, 0)`
+      gridSpot.style.backgroundPosition = `${(((1 - left) % GRID_STEP) + GRID_STEP) % GRID_STEP}px ${(((1 - top) % GRID_STEP) + GRID_STEP) % GRID_STEP}px`
+    }
     const onPointerMove = (e: PointerEvent) => {
       const rect = frame.getBoundingClientRect()
-      frame.style.setProperty('--pointer-x', e.clientX - rect.left + 'px')
-      frame.style.setProperty('--pointer-y', e.clientY - rect.top + 'px')
+      gridPointer = { x: e.clientX, y: e.clientY }
+      if (!gridRaf) gridRaf = requestAnimationFrame(paintGridSpot)
       frame.classList.add('pointer-active')
       if (!reduced) {
         trailPoints.push({
@@ -940,6 +954,7 @@ const WhySignozProtoWorld = forwardRef<WhySignozWorldHandle>(function WhySignozP
       apiRef.current = { update: () => {}, relayout: () => {} }
       ro?.disconnect()
       cancelAnimationFrame(trailRaf)
+      cancelAnimationFrame(gridRaf)
       timeouts.forEach((id) => window.clearTimeout(id))
       document.removeEventListener('pointermove', onDocPointerMove)
       frame.removeEventListener('pointermove', onPointerMove)
@@ -995,7 +1010,9 @@ const WhySignozProtoWorld = forwardRef<WhySignozWorldHandle>(function WhySignozP
       aria-label="Preview of an observability workspace assembling itself"
     >
       <div className="viewport">
-        <div className="grid-bg" aria-hidden="true" />
+        <div className="grid-bg" aria-hidden="true">
+          <div className="grid-bg-spot" />
+        </div>
         <canvas className="pointer-trail" aria-hidden="true" />
 
         <div className="world">
