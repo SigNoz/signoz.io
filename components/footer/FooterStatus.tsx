@@ -1,7 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
+
+import { usePeekReveal } from '@/hooks/usePeekReveal'
 
 import styles from './footer-fx.module.css'
 
@@ -11,67 +13,15 @@ export default function FooterStatus() {
   const eyeRef = useRef<SVGCircleElement>(null)
   const pupilRef = useRef<SVGGElement>(null)
 
-  useEffect(() => {
-    const noz = nozRef.current
-    if (!noz) return
-
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    let ready = false
-    let raf = 0
-
-    const reveal = () => {
-      noz.classList.add(styles.isLive)
-      window.setTimeout(
-        () => {
-          ready = true
-        },
-        reduced ? 0 : 1200
-      )
-    }
-
-    let io: IntersectionObserver | undefined
-    if ('IntersectionObserver' in window) {
-      io = new IntersectionObserver(
-        (entries) => {
-          if (entries[0]?.isIntersecting) {
-            reveal()
-            io?.disconnect()
-          }
-        },
-        { threshold: 0.35 }
-      )
-      io.observe(noz)
-    } else {
-      reveal()
-    }
-
-    const onMouseMove = (event: MouseEvent) => {
-      if (!ready || reduced || raf) return
-      raf = requestAnimationFrame(() => {
-        raf = 0
-        const eye = eyeRef.current
-        const pupil = pupilRef.current
-        if (!eye || !pupil) return
-        const rect = eye.getBoundingClientRect()
-        const deltaX = event.clientX - (rect.left + rect.width / 2)
-        const deltaY = event.clientY - (rect.top + rect.height / 2)
-        const distance = Math.hypot(deltaX, deltaY) || 1
-        const magnitude = Math.min(1, distance / 160) * 1.25
-        pupil.style.transform = `translate(${((deltaX / distance) * magnitude).toFixed(3)}px, ${(
-          (deltaY / distance) *
-          magnitude
-        ).toFixed(3)}px)`
-      })
-    }
-
-    window.addEventListener('mousemove', onMouseMove)
-
-    return () => {
-      io?.disconnect()
-      cancelAnimationFrame(raf)
-      window.removeEventListener('mousemove', onMouseMove)
-    }
-  }, [])
+  usePeekReveal({
+    observeRef: nozRef,
+    liveRefs: [nozRef],
+    liveClass: styles.isLive,
+    readyDelayMs: 1200,
+    threshold: 0.35,
+    eyeRef,
+    pupilRef,
+  })
 
   return (
     <div ref={wrapRef} className={styles.statusWrap}>

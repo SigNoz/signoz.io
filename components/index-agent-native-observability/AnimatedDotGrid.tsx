@@ -64,14 +64,20 @@ export default function AnimatedDotGrid() {
       raf = requestAnimationFrame(loop)
     }
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        visible = Boolean(entries[0]?.isIntersecting)
-        if (visible) start()
-      },
-      { rootMargin: '80px' }
-    )
-    io.observe(svg)
+    let io: IntersectionObserver | undefined
+    if ('IntersectionObserver' in window) {
+      io = new IntersectionObserver(
+        (entries) => {
+          visible = Boolean(entries[0]?.isIntersecting)
+          if (visible) start()
+        },
+        { rootMargin: '80px' }
+      )
+      io.observe(svg)
+    } else {
+      visible = true
+      start()
+    }
 
     const onVisibility = () => {
       if (!document.hidden) start()
@@ -79,7 +85,7 @@ export default function AnimatedDotGrid() {
     document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
-      io.disconnect()
+      io?.disconnect()
       document.removeEventListener('visibilitychange', onVisibility)
       cancelAnimationFrame(raf)
     }

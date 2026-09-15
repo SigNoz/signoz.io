@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react'
 
+import { onceVisible } from '@/hooks/usePeekReveal'
+
 import styles from './footer-fx.module.css'
 
 const CFG = {
@@ -161,21 +163,10 @@ export default function FooterArt() {
 
     build()
 
-    let io: IntersectionObserver | undefined
-    if ('IntersectionObserver' in window) {
-      io = new IntersectionObserver(
-        (entries) => {
-          if (entries[0]?.isIntersecting) {
-            start()
-            io?.disconnect()
-          }
-        },
-        { rootMargin: '0px 0px -12% 0px', threshold: 0.01 }
-      )
-      io.observe(root)
-    } else {
-      start()
-    }
+    const disconnect = onceVisible(root, start, {
+      rootMargin: '0px 0px -12% 0px',
+      threshold: 0.01,
+    })
 
     let resizeTimer: ReturnType<typeof setTimeout> | undefined
     const onResize = () => {
@@ -185,7 +176,7 @@ export default function FooterArt() {
     window.addEventListener('resize', onResize)
 
     return () => {
-      io?.disconnect()
+      disconnect()
       if (ambientTimer) clearInterval(ambientTimer)
       recycleTimers.forEach((timer) => clearTimeout(timer))
       clearTimeout(resizeTimer)
