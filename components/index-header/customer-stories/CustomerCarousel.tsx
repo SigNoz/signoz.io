@@ -1,0 +1,284 @@
+'use client'
+
+import React, { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { ArrowRight } from 'lucide-react'
+
+import TrackingLink from '@/components/TrackingLink'
+
+import { CUSTOMER_STORY_LOGOS, type CustomerStoryLogo } from './customerStories.constants'
+import { cn } from 'app/lib/utils'
+import styles from './customer-stories.module.css'
+import spriteAsset from '@/public/svgs/customer-logos/sprite.svg?url'
+
+const SCROLL_SPEED = 42
+
+const SPRITE = typeof spriteAsset === 'string' ? spriteAsset : (spriteAsset as { src: string }).src
+
+interface CardProps {
+  customer: CustomerStoryLogo
+  isClone?: boolean
+}
+
+function LogoMark({ customer, isClone }: { customer: CustomerStoryLogo; isClone: boolean }) {
+  const markClass = cn(styles.logo, customer.width && styles.wordmark, customer.mono && styles.mono)
+  if (customer.sprite) {
+    return (
+      <svg
+        className={markClass}
+        style={customer.width ? { width: customer.width } : undefined}
+        aria-hidden="true"
+      >
+        <use href={`${SPRITE}#${customer.sprite}`} />
+      </svg>
+    )
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={customer.logoSrc}
+      alt={isClone ? '' : customer.name}
+      className={markClass}
+      style={customer.width ? { width: customer.width } : undefined}
+      draggable={false}
+    />
+  )
+}
+
+function CustomerCard({ customer, isClone = false }: CardProps) {
+  return (
+    <TrackingLink
+      className={styles.card}
+      href="/customers/"
+      clickType="Customer Proof"
+      clickName="Customer Logo Link"
+      clickText={customer.name}
+      clickLocation="Hero Customer Stories"
+      eventAttributes={{ target: '/customers/', customer: customer.name }}
+      aria-label={customer.name}
+      aria-hidden={isClone || undefined}
+      tabIndex={isClone ? -1 : undefined}
+    >
+      {customer.showName ? (
+        <span className={styles.cardLabel}>
+          {customer.sprite ? (
+            <svg
+              className={cn(styles.logo, styles.cardIcon, customer.mono && styles.mono)}
+              aria-hidden="true"
+            >
+              <use href={`${SPRITE}#${customer.sprite}`} />
+            </svg>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={customer.logoSrc}
+              alt=""
+              className={cn(styles.logo, styles.cardIcon)}
+              draggable={false}
+            />
+          )}
+          <span>{customer.name}</span>
+        </span>
+      ) : (
+        <LogoMark customer={customer} isClone={isClone} />
+      )}
+    </TrackingLink>
+  )
+}
+
+export default function CustomerCarousel() {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const pillRef = useRef<HTMLDivElement>(null)
+  const pillTextRef = useRef<HTMLSpanElement>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
+
+  useEffect(() => {
+    if (!mounted) return
+    const wrapper = wrapperRef.current
+    const track = trackRef.current
+    const pill = pillRef.current
+    const pillText = pillTextRef.current
+    if (!wrapper || !track || !pill || !pillText) return
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduceMotion) return
+
+    let oneSetWidth = 0
+    const setSize = CUSTOMER_STORY_LOGOS.length
+
+    const measureSet = () => {
+      const gap = parseFloat(window.getComputedStyle(track).gap) || 0
+      let width = 0
+      for (let i = 0; i < setSize && i < track.children.length; i += 1) {
+        width += (track.children[i] as HTMLElement).offsetWidth
+      }
+      oneSetWidth = width + gap * setSize
+    }
+
+    measureSet()
+    window.addEventListener('resize', measureSet)
+
+    let offset = 0
+    let currentSpeed = SCROLL_SPEED
+    let targetSpeed = SCROLL_SPEED
+    let lastTime = 0
+    let rafId = 0
+    let running = false
+
+    let mouseX = 0
+    let mouseY = 0
+    let pillX = 0
+    let pillY = 0
+    let activeCard: HTMLElement | null = null
+
+    const tick = (now: number) => {
+      if (!lastTime) lastTime = now
+      const elapsed = Math.min((now - lastTime) / 1000, 0.1)
+      lastTime = now
+      currentSpeed += (targetSpeed - currentSpeed) * (1 - Math.pow(0.96, elapsed * 60))
+      if (Math.abs(currentSpeed) < 0.05 && targetSpeed === 0) currentSpeed = 0
+      offset -= currentSpeed * elapsed
+
+      if (oneSetWidth > 0) {
+        if (offset <= -oneSetWidth) offset += oneSetWidth
+        if (offset > 0) offset -= oneSetWidth
+      }
+
+      track.style.transform = `translate3d(${Math.round(offset * 100) / 100}px, 0, 0)`
+
+      if (activeCard) {
+        pillX += (mouseX - pillX) * 0.18
+        pillY += (mouseY - pillY) * 0.18
+        pill.style.left = `${pillX}px`
+        pill.style.top = `${pillY}px`
+
+        const rect = activeCard.getBoundingClientRect()
+        const deltaX = (mouseX - (rect.left + rect.width / 2)) / (rect.width / 2)
+        const deltaY = (mouseY - (rect.top + rect.height / 2)) / (rect.height / 2)
+        activeCard.style.transform = `perspective(700px) rotateY(${deltaX * 5}deg) rotateX(${-deltaY * 5}deg) scale(1.025)`
+      }
+
+      rafId = requestAnimationFrame(tick)
+    }
+
+    const onMouseMove = (event: MouseEvent) => {
+      mouseX = event.clientX
+      mouseY = event.clientY
+    }
+
+    const startLoop = () => {
+      if (running) return
+      running = true
+      lastTime = 0
+      document.addEventListener('mousemove', onMouseMove)
+      rafId = requestAnimationFrame(tick)
+    }
+    const stopLoop = () => {
+      running = false
+      document.removeEventListener('mousemove', onMouseMove)
+      cancelAnimationFrame(rafId)
+    }
+
+    const onEnter = (event: Event) => {
+      const card = event.currentTarget as HTMLElement
+      card.classList.add(styles.active)
+      track.classList.add(styles.hasHover)
+      targetSpeed = 0
+      activeCard = card
+      pillText.textContent = 'See customers'
+      pillX = mouseX
+      pillY = mouseY
+      pill.style.left = `${pillX}px`
+      pill.style.top = `${pillY}px`
+      pill.classList.add(styles.pillVisible)
+    }
+
+    const onLeave = (event: Event) => {
+      const mouseEvent = event as MouseEvent
+      const card = event.currentTarget as HTMLElement
+      const related = mouseEvent.relatedTarget as HTMLElement | null
+      const nextCard = related?.closest?.(`.${styles.card}`) as HTMLElement | null
+
+      card.classList.remove(styles.active)
+      card.style.transform = ''
+
+      if (nextCard && nextCard !== card) {
+        activeCard = null
+        targetSpeed = 0
+        return
+      }
+
+      activeCard = null
+      targetSpeed = SCROLL_SPEED
+      track.classList.remove(styles.hasHover)
+      pill.classList.remove(styles.pillVisible)
+    }
+
+    const cards = Array.from(track.querySelectorAll(`.${styles.card}`))
+    cards.forEach((card) => {
+      card.addEventListener('mouseenter', onEnter)
+      card.addEventListener('mouseleave', onLeave)
+    })
+
+    let io: IntersectionObserver | undefined
+    if ('IntersectionObserver' in window) {
+      io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) startLoop()
+          else stopLoop()
+        },
+        { rootMargin: '120px' }
+      )
+      io.observe(wrapper)
+    } else {
+      startLoop()
+    }
+
+    return () => {
+      stopLoop()
+      io?.disconnect()
+      window.removeEventListener('resize', measureSet)
+      document.removeEventListener('mousemove', onMouseMove)
+      cards.forEach((card) => {
+        card.removeEventListener('mouseenter', onEnter)
+        card.removeEventListener('mouseleave', onLeave)
+      })
+    }
+  }, [mounted])
+
+  return (
+    <div className={styles.carousel}>
+      <div className={styles.wrapper} ref={wrapperRef}>
+        <div className={styles.track} ref={trackRef}>
+          {CUSTOMER_STORY_LOGOS.map((customer) => (
+            <CustomerCard key={customer.name} customer={customer} />
+          ))}
+          {[1, 2].map((clone) =>
+            CUSTOMER_STORY_LOGOS.map((customer) => (
+              <CustomerCard key={`${customer.name}-clone-${clone}`} customer={customer} isClone />
+            ))
+          )}
+        </div>
+        <div className={cn(styles.edge, styles.edgeLeft)} aria-hidden="true">
+          <div className={styles.edgeBlur} />
+          <div className={styles.edgeFade} />
+        </div>
+        <div className={cn(styles.edge, styles.edgeRight)} aria-hidden="true">
+          <div className={styles.edgeBlur} />
+          <div className={styles.edgeFade} />
+        </div>
+      </div>
+      {mounted &&
+        createPortal(
+          <div className={styles.cursorPill} ref={pillRef} aria-hidden="true">
+            <span ref={pillTextRef} />
+            <ArrowRight size={10} />
+          </div>,
+          document.body
+        )}
+    </div>
+  )
+}

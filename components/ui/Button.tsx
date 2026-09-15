@@ -6,10 +6,23 @@ import { ArrowUpRight } from 'lucide-react'
 
 import { cn } from 'app/lib/utils'
 
+import './tactile-button.css'
+
 // -----------------------------------------------------------------------------
 // Variants
 // -----------------------------------------------------------------------------
 // Button variants use the shadcn/ui pattern with custom SigNoz palette tokens.
+// Tactile press mechanics: --bh height, --bpd press depth, --bbi bottom inset shadow.
+const tactileBase = [
+  'btn-tactile-noise relative cursor-pointer select-none border-none leading-none tracking-[-0.005em]',
+  '[--bh:32px] [--bpd:1px] [--bbi-rest:-1.5px] [--bbi:var(--bbi-rest)]',
+  'active:h-[calc(var(--bh)_-_var(--bpd))] active:translate-y-[var(--bpd)] active:[--bbi:-0.5px]',
+  'transition-[background-color,box-shadow,height,transform] duration-100 ease-[ease]',
+  'focus-visible:ring-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary-background)]',
+  '[&_svg]:transition-transform [&_svg]:duration-150 hover:[&_svg]:translate-x-0.5',
+  'motion-reduce:transition-[background-color] motion-reduce:active:h-[var(--bh)] motion-reduce:active:translate-y-0 motion-reduce:active:[--bbi:var(--bbi-rest)] motion-reduce:[&_svg]:transition-none motion-reduce:hover:[&_svg]:translate-x-0',
+].join(' ')
+
 export const buttonVariants = cva(
   'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ring-offset-background',
   {
@@ -25,6 +38,16 @@ export const buttonVariants = cva(
           'bg-[var(--l1-foreground)] text-[var(--l1-background)] hover:bg-[color-mix(in_srgb,var(--l1-foreground)_90%,var(--l1-background))]',
         ghost: 'bg-transparent hover:bg-[var(--ghost-background-hover)]',
         link: 'text-[var(--accent-primary)]',
+        tactilePrimary: cn(
+          tactileBase,
+          'bg-[var(--primary-background)] text-[var(--primary-foreground,var(--bg-base-white))] hover:bg-[var(--bg-robin-600)] hover:text-[var(--primary-foreground,var(--bg-base-white))]',
+          'shadow-[inset_0_var(--bbi)_0_color-mix(in_srgb,var(--bg-base-black)_20%,transparent),inset_0_1px_0_color-mix(in_srgb,var(--bg-base-white)_14%,transparent),0_1px_3px_color-mix(in_srgb,var(--primary-background)_28%,transparent),0_0_0_0.5px_color-mix(in_srgb,var(--primary-background)_45%,transparent)]'
+        ),
+        tactileSecondary: cn(
+          tactileBase,
+          'bg-[var(--l3-background)] text-[var(--l1-foreground)] hover:bg-[var(--bg-neutral-light-900)] hover:text-[var(--l1-foreground)] dark:hover:bg-[var(--bg-neutral-dark-700)]',
+          'shadow-[inset_0_var(--bbi)_0_color-mix(in_srgb,var(--bg-base-black)_18%,transparent),inset_0_1px_0_color-mix(in_srgb,var(--bg-base-white)_10%,transparent),0_1px_2px_color-mix(in_srgb,var(--bg-base-black)_7%,transparent),0_0_0_0.5px_color-mix(in_srgb,var(--bg-base-black)_7%,transparent)]'
+        ),
       },
       size: {
         default: 'h-10 px-4 py-2',
@@ -37,6 +60,19 @@ export const buttonVariants = cva(
         full: 'rounded-full',
       },
     },
+    compoundVariants: [
+      {
+        variant: ['tactilePrimary', 'tactileSecondary'],
+        size: 'default',
+        class: 'h-[var(--bh)] gap-[7px] rounded-[3px] px-[13px] py-0 text-[13px] font-normal',
+      },
+      {
+        variant: ['tactilePrimary', 'tactileSecondary'],
+        size: 'lg',
+        class:
+          'h-[var(--bh)] gap-2 rounded-[3px] px-5 py-0 text-sm font-medium [--bh:44px] [--bpd:1.5px] [--bbi-rest:-2px]',
+      },
+    ],
     defaultVariants: {
       variant: 'default',
       size: 'default',
@@ -105,6 +141,7 @@ export interface ButtonProps
    * Opt-in split icon treatment used by the homepage redesign CTAs.
    */
   withIcon?: boolean
+  tactile?: boolean
 }
 
 type ButtonComponent = React.ForwardRefExoticComponent<
@@ -131,6 +168,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       type,
       unstyled = false,
       withIcon = false,
+      tactile = false,
       ...props
     },
     ref
@@ -155,6 +193,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     if (outlined) mappedVariant = 'outline'
     if (!mappedVariant && !isButton && !hasLegacyButtonVariant) mappedVariant = 'link'
     if (!mappedVariant) mappedVariant = 'default'
+    if (tactile && mappedVariant === 'default') mappedVariant = 'tactilePrimary'
+    if (tactile && mappedVariant === 'secondary') mappedVariant = 'tactileSecondary'
     const mappedRounded = rounded
 
     // Decide which element to render

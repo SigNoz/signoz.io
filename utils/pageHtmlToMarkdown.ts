@@ -164,6 +164,41 @@ const pruneChrome = (node: { children?: HastContent[] }, atRoot = true) => {
   }
 }
 
+const isWhitespaceText = (node: HastContent): boolean => node.type === 'text' && !node.value.trim()
+
+// Containers whose only content is two or more links (CTA rows, logo strips)
+// would otherwise stringify as one run-on line; give each link its own line.
+const separateLinkGroups = (node: { children?: HastContent[] }) => {
+  if (!Array.isArray(node.children)) return
+
+  const meaningful = node.children.filter((child) => !isWhitespaceText(child))
+  const anchors = meaningful.filter(
+    (child) => isHastElement(child) && child.tagName === 'a'
+  ) as HastElement[]
+
+  if (anchors.length >= 2 && anchors.length === meaningful.length) {
+    node.children = anchors.map((anchor) => {
+      // Icon-only links (e.g. sprite logos) stringify empty; fall back to
+      // their accessible name.
+      const label = anchor.properties?.ariaLabel
+      if (typeof label === 'string' && label && !getTextContent(anchor as HastContent).trim()) {
+        anchor.children = [...(anchor.children || []), { type: 'text', value: label }]
+      }
+      return {
+        type: 'element',
+        tagName: 'p',
+        properties: {},
+        children: [anchor],
+      }
+    })
+    return
+  }
+
+  for (const child of node.children) {
+    if (isHastElement(child)) separateLinkGroups(child)
+  }
+}
+
 const findFirstElement = (
   node: { children?: HastContent[] },
   tagName: string
@@ -229,6 +264,7 @@ export async function renderPageHtmlToAgentMarkdown(
     findFirstElement(document, 'main') || findFirstElement(document, 'body') || document
 
   pruneChrome(contentRoot as { children?: HastContent[] })
+  separateLinkGroups(contentRoot as { children?: HastContent[] })
   transformAnnotatedTables(contentRoot as { children?: HastContent[] })
 
   const bodyHast: HastRoot = {
