@@ -1,5 +1,5 @@
 ---
-date: 2026-07-30
+date: 2026-09-16
 title: Transactions Reference
 description: Complete reference of transactions for each resource in SigNoz covering relations, selector formats, and managed role access.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -19,7 +19,7 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers roles, service accounts, API keys, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
+This page currently covers roles, service accounts, API keys, dashboards, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as alerts and pipelines will be documented as they become available for fine-grained access control.
 </Admonition>
 
 ## Resources
@@ -66,6 +66,26 @@ This page currently covers roles, service accounts, API keys, and telemetry reso
 | `update` | Modify API key metadata (for example, change the expiration date). | signoz-admin |
 | `delete` | Permanently revoke an API key. | signoz-admin |
 
+### Dashboard
+
+**Resource:** `metaresource` · **Kind:** `dashboard` · **Selector:** dashboard ID (the UUID in the dashboard URL, `/dashboard/<dashboard-id>`)
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Create a dashboard, import one from JSON, or clone an existing one. | signoz-admin, signoz-editor |
+| `list` | Open the dashboards list, and manage the saved views and pins on it. | signoz-admin, signoz-editor, signoz-viewer |
+| `read` | Open a dashboard, view its panels, and view its public sharing configuration. | signoz-admin, signoz-editor, signoz-viewer |
+| `update` | Edit a dashboard's panels, sections, variables and settings, lock or unlock it, and publish or unpublish its public link. | signoz-admin, signoz-editor |
+| `delete` | Delete a dashboard. | signoz-admin, signoz-editor |
+
+`create` and `list` cover the workspace rather than an instance, so both can only be granted as **All** or **None**. `read`, `update`, and `delete` accept **Only selected**, with the dashboard ID as the selector.
+
+The list is not filtered by `read`. A principal holding `list` sees every dashboard in the workspace, and a dashboard they cannot `read` reports the denial when they open it. Scope `read` to restrict a dashboard's contents, not its presence in the list.
+
+<Admonition type="info">
+Publishing a dashboard requires `update` on it. Readers who open the resulting public link are anonymous and are authorized against the `public-dashboard` resource, which is not configurable in custom roles. See [Public Sharing](https://signoz.io/docs/dashboards/public-sharing/).
+</Admonition>
+
 ### Logs
 
 **Resource:** `telemetryresource` · **Kind:** `logs` · **Selector:** telemetry selector (see [Telemetry Selectors](#telemetry-selectors))
@@ -100,7 +120,7 @@ This page currently covers roles, service accounts, API keys, and telemetry reso
 
 ## Selectors
 
-Roles, service accounts, and API keys are scoped by instance names or IDs, shown in each resource's metadata line above. Telemetry resources (logs, traces, metrics, meter metrics) support only the `read` relation and use a query-scoped selector format instead.
+Roles, service accounts, API keys, and dashboards are scoped by instance names or IDs, shown in each resource's metadata line above. Telemetry resources (logs, traces, metrics, meter metrics) support only the `read` relation and use a query-scoped selector format instead.
 
 ### Telemetry Selectors
 
@@ -133,6 +153,7 @@ Some operations require transactions on multiple resources. Both transactions mu
 
 | Operation | Transactions Required |
 |-----------|----------------------|
+| Clone a dashboard | `dashboard:read` on the source dashboard AND `dashboard:create` |
 | Assign a role to a service account | `serviceaccount:attach` AND `role:attach` |
 | Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
 | Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
