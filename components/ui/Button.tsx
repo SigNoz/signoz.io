@@ -16,11 +16,11 @@ import './tactile-button.css'
 const tactileBase = [
   'btn-tactile-noise relative cursor-pointer select-none border-none leading-none tracking-[-0.005em]',
   '[--bh:32px] [--bpd:1px] [--bbi-rest:-1.5px] [--bbi:var(--bbi-rest)]',
-  'active:h-[calc(var(--bh)_-_var(--bpd))] active:translate-y-[var(--bpd)] active:[--bbi:-0.5px]',
-  'transition-[background-color,box-shadow,height,transform] duration-100 ease-[ease]',
+  'active:translate-y-[var(--bpd)] active:[--bbi:-0.5px]',
+  'transition-[background-color,box-shadow,transform] duration-100 ease-[ease]',
   'focus-visible:ring-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary-background)]',
   '[&_svg]:transition-transform [&_svg]:duration-150 hover:[&_svg]:translate-x-0.5',
-  'motion-reduce:transition-[background-color] motion-reduce:active:h-[var(--bh)] motion-reduce:active:translate-y-0 motion-reduce:active:[--bbi:var(--bbi-rest)] motion-reduce:[&_svg]:transition-none motion-reduce:hover:[&_svg]:translate-x-0',
+  'motion-reduce:transition-[background-color] motion-reduce:active:translate-y-0 motion-reduce:active:[--bbi:var(--bbi-rest)] motion-reduce:[&_svg]:transition-none motion-reduce:hover:[&_svg]:translate-x-0',
 ].join(' ')
 
 export const buttonVariants = cva(
