@@ -72,19 +72,27 @@ export default function FeatureCard({ feature }: { feature: BentoFeature }) {
 
       <div className="relative z-[1] mt-auto min-h-[120px] flex-1 transform-gpu overflow-hidden">
         {asset ? (
-          <Image
-            src={asset.src}
-            alt={asset.alt}
-            fill
-            className={
-              asset.className ?? (asset.fit === 'contain' ? 'object-contain' : 'object-cover')
-            }
-            style={
-              asset.className ? undefined : { objectPosition: asset.objectPosition ?? 'bottom' }
-            }
-            sizes="(max-width: 768px) 100vw, 70vw"
-            quality={95}
-          />
+          <>
+            <Image
+              src={asset.src}
+              alt={asset.alt}
+              fill
+              className={
+                asset.className ?? (asset.fit === 'contain' ? 'object-contain' : 'object-cover')
+              }
+              style={
+                asset.className ? undefined : { objectPosition: asset.objectPosition ?? 'bottom' }
+              }
+              sizes="(max-width: 768px) 100vw, 70vw"
+              quality={95}
+            />
+            {asset.fadeTop && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[linear-gradient(to_bottom,var(--l1-background)_16px,transparent)]"
+              />
+            )}
+          </>
         ) : (
           <FeatureVisual visual={feature.visual} />
         )}
