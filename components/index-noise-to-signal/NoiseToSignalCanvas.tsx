@@ -251,7 +251,7 @@ export default function NoiseToSignalCanvas() {
       ctx.strokeStyle = rgba(foreground, 0.07)
       ctx.setLineDash([3, 5])
       ctx.beginPath()
-      for (let y = 0; y < height; y += GRID_STEP) {
+      for (let y = GRID_STEP; y < height; y += GRID_STEP) {
         ctx.moveTo(0, y + 0.5)
         ctx.lineTo(width, y + 0.5)
       }

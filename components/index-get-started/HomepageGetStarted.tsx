@@ -58,7 +58,7 @@ export default function HomepageGetStarted() {
       data-homepage-floating-cta="Get started"
       data-homepage-floating-href="/teams/"
     >
-      <div className="relative left-1/2 w-dvw max-w-none -translate-x-1/2 border-y border-[var(--l2-border)] px-5 sm:px-6 md:border-b-0 lg:px-20 wide:px-0">
+      <div className="relative left-1/2 w-dvw max-w-none -translate-x-1/2 border-y border-[var(--l2-border)] px-5 sm:px-6 lg:px-20 wide:px-0">
         <div className="mx-auto grid max-w-8xl gap-0 md:grid-cols-3">
           <div className="rule-fade-x flex min-h-48 flex-col items-start justify-between border-b border-[var(--l2-border)] py-7 md:min-h-56 md:border-b-0 md:py-8 md:pr-8">
             <div>
