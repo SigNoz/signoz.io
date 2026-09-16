@@ -15,6 +15,8 @@ export interface FeatureBentoAsset {
   objectPosition?: string
   /** Overrides fit/objectPosition entirely when set. */
   className?: string
+  /** Fades the top of the artwork into the card where it gets cut off vertically. */
+  fadeTop?: boolean
 }
 
 // Asset slots for the bento cards; `null` falls back to the animated visual.
@@ -36,6 +38,7 @@ export const featureBentoAssets: Record<string, FeatureBentoAsset | null> = {
     src: infraStage,
     alt: 'CPU and memory usage charts',
     className: 'object-cover object-[center_bottom] md:object-contain md:object-[left_bottom]',
+    fadeTop: true,
   },
   'Dashboards.': {
     src: dashboardsStage,

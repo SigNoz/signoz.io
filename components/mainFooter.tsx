@@ -106,7 +106,10 @@ function Footer({ inDocsShell = false }: FooterProps) {
 
   return (
     <div
-      className="z-[10] flex min-w-0 shrink-0 flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px]"
+      className={cn(
+        'z-[10] flex min-w-0 shrink-0 flex-col justify-center bg-[var(--l1-background-60)] backdrop-blur-[10px]',
+        inDocsShell && 'border-t border-solid border-[var(--l1-border)]'
+      )}
       data-markdown-ignore
     >
       {!inDocsShell && <FooterArt />}
