@@ -3,9 +3,15 @@ import DecimalClient from '@/components/Decimal/DecimalClient'
 
 import siteMetadata from '@/data/siteMetadata'
 import JsonLdScript from '@/components/JsonLdScript'
-import { ExperimentTracker } from '@/components/ExperimentTracker'
-import { EXPERIMENTS } from '@/constants/experiments'
-import { getFeatureValue } from '@/utils/growthbookServer'
+import { HomepageHeroRedesign } from '@/components/index-header'
+import Faq from '@/components/index-faq/Faq'
+import AgentNativeObservabilitySection from '@/components/index-agent-native-observability/AgentNativeObservability'
+import FeatureBento from '@/components/index-feature-bento/FeatureBento'
+import WhySignoz from '@/components/index-why-signoz/WhySignoz'
+import NoiseToSignal from '@/components/index-noise-to-signal/NoiseToSignal'
+import Pricing from '@/components/index-pricing/Pricing'
+import HomepageGetStarted from '@/components/index-get-started/HomepageGetStarted'
+import CustomersAndBlog from '@/components/index-customers-blog/CustomersAndBlog'
 import { homepageFaqItems } from '@/components/index-faq/faqContent'
 import { STRUCTURED_DATA_IDS } from '@/utils/structuredData'
 
@@ -170,95 +176,34 @@ const faqPageSchema = {
   })),
 }
 
-const videoSchema = {
-  '@type': 'VideoObject',
-  '@id': `${siteUrl}/#video`,
-  name: 'SigNoz Overview - Open Source Observability Platform',
-  description: 'Learn how SigNoz helps monitor metrics, logs, and traces in one platform.',
-  thumbnailUrl: `${siteUrl}/img/landing/landing_thumbnail.webp`,
-  uploadDate: '2024-05-09T00:00:00-07:00',
-  duration: 'PT1M54S',
-  contentUrl: 'https://vimeo.com/944340217',
-  embedUrl: 'https://player.vimeo.com/video/944340217',
-  publisher: {
-    '@id': STRUCTURED_DATA_IDS.organization,
-  },
+const homepageStructuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    organizationSchema,
+    websiteSchema,
+    webpageSchema,
+    signozCloudSchema,
+    selfHostedSignozSchema,
+    faqPageSchema,
+  ],
 }
 
-function getHomepageStructuredData(includeFaq: boolean) {
-  return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      organizationSchema,
-      websiteSchema,
-      webpageSchema,
-      signozCloudSchema,
-      selfHostedSignozSchema,
-      ...(includeFaq ? [faqPageSchema] : []),
-      videoSchema,
-    ],
-  }
-}
-
-type HomepageHeroVariant =
-  (typeof EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants)[keyof typeof EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants]
-type HomepageHeroFeatureValue = HomepageHeroVariant | boolean
-
-async function getHomepageHeroVariant(): Promise<HomepageHeroVariant> {
-  const forcedVariant = process.env.HOMEPAGE_HERO_VARIANT
-  if (
-    forcedVariant === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT ||
-    forcedVariant === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.CONTROL
-  ) {
-    return forcedVariant
-  }
-
-  const defaultVariant: HomepageHeroVariant =
-    process.env.NODE_ENV === 'development'
-      ? EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
-      : EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.defaultVariant
-  const featureValue = await getFeatureValue<HomepageHeroFeatureValue>(
-    EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.flagName,
-    defaultVariant
-  )
-
-  if (featureValue === true) return EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
-  if (featureValue === false) return EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.CONTROL
-
-  if (
-    featureValue === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT ||
-    featureValue === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.CONTROL
-  ) {
-    return featureValue
-  }
-
-  return defaultVariant
-}
-
-export default async function Page() {
-  const variant = await getHomepageHeroVariant()
-  const { default: Homepage } =
-    variant === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.VARIANT
-      ? await import('./HomepageRedesign')
-      : await import('./HomepageControl')
-  const isControlVariant = variant === EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.variants.CONTROL
-  const homepageStructuredData = getHomepageStructuredData(!isControlVariant)
-
+export default function Page() {
   return (
     <>
       <JsonLdScript data={homepageStructuredData} />
       <div className="relative mt-[-56px] bg-[var(--l1-background)]">
-        {isControlVariant ? (
-          <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
-        ) : null}
         <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
         <main className="relative z-[1] mx-auto max-w-8xl xl:max-[1728px]:max-w-[80dvw]">
-          <ExperimentTracker
-            experimentId={EXPERIMENTS.HOMEPAGE_HERO_REDESIGN.id}
-            variantId={variant}
-          >
-            <Homepage />
-          </ExperimentTracker>
+          <HomepageHeroRedesign />
+          <FeatureBento />
+          <AgentNativeObservabilitySection />
+          <WhySignoz />
+          <HomepageGetStarted />
+          <NoiseToSignal />
+          <Pricing />
+          <CustomersAndBlog />
+          <Faq />
         </main>
         <DecimalClient />
       </div>
