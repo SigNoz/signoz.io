@@ -1,5 +1,5 @@
 ---
-date: 2026-07-30
+date: 2026-09-16
 title: Transactions Reference
 description: Complete reference of transactions for each resource in SigNoz covering relations, selector formats, and managed role access.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -19,7 +19,7 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers roles, service accounts, API keys, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
+This page currently covers roles, service accounts, API keys, telemetry resources (logs, traces, metrics, meter metrics), and quick filters. Transactions for other observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
 </Admonition>
 
 ## Resources
@@ -97,6 +97,18 @@ This page currently covers roles, service accounts, API keys, and telemetry reso
 | Relation | Description | Managed Role Access |
 |----------|-------------|---------------------|
 | `read` | Query usage metering data for the workspace. | signoz-admin, signoz-editor, signoz-viewer |
+
+### Quick Filters
+
+**Resource:** `metaresource` · **Kind:** `quick-filter` · **Selector:** quick filter ID (use `*` for all quick filters)
+
+Controls the quick filters panel in the Logs, Traces, Exceptions, API Monitoring, and Meter explorers. Quick filters on the infrastructure pages are not gated by these transactions.
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `list` | List the quick filter configurations in the workspace. | signoz-admin, signoz-editor, signoz-viewer |
+| `read` | View the quick filters panel in the explorers. Without it, the panel shows a permission-denied callout. | signoz-admin, signoz-editor, signoz-viewer |
+| `update` | Edit quick filters (add, remove, or reorder them) from the settings panel. Requires `read` as well. | signoz-admin |
 
 ## Selectors
 
