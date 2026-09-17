@@ -1,5 +1,5 @@
 ---
-date: 2026-08-19
+date: 2026-09-03
 doc_type: howto
 title: 'Jira Cloud: Create and Manage Issues from Alerts'
 description: Set up Jira Cloud as a notification channel in SigNoz to open, update, and resolve Jira issues automatically as alerts fire and resolve.
@@ -93,6 +93,7 @@ The **Advanced Options** section is optional. The required fields alone give a f
 - **Priority**: an issue priority that exists in the project's scheme (e.g. `High`). Leave empty to use the project default.
 - **Labels**: extra labels to add to created issues. SigNoz always adds its own deduplication label as well (see [Receive Alerts in Jira](#receive-alerts-in-jira)).
 - **Resolve transition** / **Reopen transition**: name overrides for the workflow transitions. Auto-detected by default. Only set these if your project has more than one "done" transition and you want to force a specific one by name.
+- **Won't-fix resolution**: the exact name of a Jira resolution, e.g. `Won't Do`. If an issue was resolved with this resolution, a re-firing alert opens a **new** issue instead of reopening the old one. Leave empty to always reopen (see [Won't-fix resolution](#wont-fix-resolution)).
 - **Reopen window**: how long after resolution a re-firing alert reopens the same issue (see [Issue lifecycle and transitions](#issue-lifecycle-and-transitions)).
 
 <Admonition>
@@ -150,6 +151,21 @@ The **Reopen window** controls how long after resolution a re-firing alert reope
 - **After** the window, a re-fire opens a **new** issue instead.
 
 Enter it as a duration using the units `m` (minutes), `h` (hours), `d` (days), `w` (weeks), or `y` (years), e.g. `30m`, `72h`, or `3d`. The **minimum is 1m** and the **default is 3d**.
+
+### Won't-fix resolution
+
+Some issues are closed as "won't fix" and should stay closed even if the alert fires again. The **Won't-fix resolution** field (in Advanced Options) names a Jira resolution that opts an issue out of reopening:
+
+- If an issue was resolved with this resolution, a re-firing alert **opens a new issue** rather than reopening the closed one.
+- Leave the field **empty** to keep the default behavior, where a re-fire always reopens the existing issue.
+
+Enter the resolution name exactly as it appears in your Jira project's resolution scheme. The match is **case-sensitive**, so `Won't Do` and `won't do` are not equivalent. Resolution names are configurable per Jira instance, so the placeholder example `Won't Do` may not exist in your project.
+
+<Admonition>
+The Won't-fix resolution takes precedence over the **Reopen window**. When an issue's resolution matches, the reopen-window check is bypassed entirely and a new issue is always created, regardless of how recently the issue was resolved.
+</Admonition>
+
+This field was previously available only through the [API](#configure-programmatically). Editing a channel in the UI now preserves any `wont_fix_resolution` set through the API; earlier, saving from the UI silently cleared it.
 
 ## Customizing the message
 
@@ -230,6 +246,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 | `jira_configs[].labels` | `array` | Optional extra labels. A deduplication label is always added automatically. |
 | `jira_configs[].resolve_transition` | `string` | Optional name override for the resolve (→ done) transition. Auto-detected if omitted. |
 | `jira_configs[].reopen_transition` | `string` | Optional name override for the reopen transition. Auto-detected if omitted. |
+| `jira_configs[].wont_fix_resolution` | `string` | Optional resolution name (e.g. `Won't Do`). An issue resolved with this resolution is never reopened; a re-fire opens a new issue. Case-sensitive exact match. |
 | `jira_configs[].reopen_duration` | `string` | Reopen window as a duration (e.g. `72h`, `3d`). Minimum `1m`, default `3d`. |
 | `jira_configs[].custom_fields` | `object` | Optional Jira custom field values (field id → value). API only (not available in the UI). |
 
