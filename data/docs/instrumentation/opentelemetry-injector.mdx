@@ -1,0 +1,351 @@
+---
+date: 2026-09-17
+title: OpenTelemetry Injector - Zero-Code Setup on Linux
+description: Use the OpenTelemetry Injector to instrument Java, Node.js, .NET, and Python applications on a Linux host and send traces, metrics, and logs to SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+The OpenTelemetry Injector instruments Java, Node.js, .NET, and Python applications on a Linux host with no code change. You install a system package, and `LD_PRELOAD` loads its shared library into every new process. The library sets the variables that start the OpenTelemetry agent. Use it when one host runs services in several languages, so the SigNoz endpoint and ingestion key live in one file.
+
+<Admonition type="tip" title="Running one service, or another language?" defaultCollapsed="true">
+- For a single application, the per-language guide is simpler: [Java](https://signoz.io/docs/instrumentation/java/opentelemetry-java/), [Node.js](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/), [.NET](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/), and [Python](https://signoz.io/docs/instrumentation/opentelemetry-python/).
+- The injector covers no other runtime. Go, PHP, Rust, and C++ need the [language guides](https://signoz.io/docs/instrumentation/overview/) or [eBPF instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-ebpf/).
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Use the same steps for self-hosted SigNoz. Point the export endpoint at your OpenTelemetry Collector or SigNoz instance and remove the ingestion key header, as shown in [Cloud -> Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- A Linux host that runs Debian, Ubuntu, RHEL, Fedora, or Amazon Linux, on amd64 or arm64.
+- Root access on that host. The injector writes to `/etc/ld.so.preload` and reads configuration from `/etc/opentelemetry/`.
+- An application that runs on Java, Node.js, .NET 8 or later, or Python.
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
+
+## How it works
+
+The injector library runs at the start of every new process on the host.
+
+<Figure
+  src="/img/docs/instrumentation/otel-injector/injector-flow.svg"
+  alt="A new process runs exec, the dynamic linker loads libotelinject.so from /etc/ld.so.preload, the injector calls setenv to set the variable for that runtime, and the OpenTelemetry agent exports OTLP to SigNoz"
+  caption="The injector sets the startup variable for the runtime, and the agent exports the data"
+/>
+
+For each process, the injector does the following:
+
+1. It reads which C library the process uses, either glibc or musl. A statically linked binary never loads the injector, because the dynamic linker does not run for it.
+2. It reads the agent paths from `/etc/opentelemetry/injector/injector.conf` and the drop-in files in `conf.d/`. Each language package installs one drop-in file.
+3. It sets the variables that start the agent, and adds the variables from `default_env.conf`, which holds your SigNoz endpoint and key.
+
+The injector opens no network connection. Each agent exports its own telemetry to the endpoint you configure.
+
+You get traces and metrics from every language. Logs arrive only when the application logs through a framework that the agent instruments: Logback or Log4j for Java, Winston, Pino, or Bunyan for Node.js, `ILogger` for .NET, and the `logging` module for Python. `System.out.println` and `console.log` send no logs.
+
+## Send data to SigNoz
+
+### Step 1. Install the packages
+
+Add the package repository and install the metapackage. The metapackage installs the injector and the agents for all four languages.
+
+<Admonition type="warning" title="The packages are new and the repository URLs will change">
+The OpenTelemetry Packaging project publishes these packages. The current release is `v0.0.3`. The project hosts the APT and YUM repositories on GitHub Pages and calls this <a href="https://github.com/open-telemetry/opentelemetry-packaging#installing" target="_blank" rel="noopener noreferrer nofollow">an interim solution</a>. The repository URLs will change when the packages move to permanent infrastructure. Test the injector on a non-production host first.
+</Admonition>
+
+<Tabs entityName="os">
+
+<TabItem value="debian" label="Debian and Ubuntu" default>
+
+```bash
+echo "deb [trusted=yes] https://open-telemetry.github.io/opentelemetry-packaging/debian stable main" | sudo tee /etc/apt/sources.list.d/opentelemetry.list
+sudo apt update
+sudo apt install opentelemetry
+```
+
+</TabItem>
+
+<TabItem value="rhel" label="RHEL, Fedora, and Amazon Linux">
+
+```bash
+cat <<EOF | sudo tee /etc/yum.repos.d/opentelemetry.repo
+[opentelemetry]
+name=OpenTelemetry Auto-Instrumentation System Packages
+baseurl=https://open-telemetry.github.io/opentelemetry-packaging/rpm/packages
+enabled=1
+gpgcheck=0
+EOF
+
+sudo dnf install opentelemetry
+```
+
+</TabItem>
+
+</Tabs>
+
+The `opentelemetry-injector` package adds `/usr/lib/opentelemetry/injector/libotelinject.so` to `/etc/ld.so.preload` during installation. You do not have to edit that file. The install prints this line when it succeeds:
+
+```text noLineNumbers
+OpenTelemetry Injector installed successfully.
+```
+
+<Admonition type="tip" title="Install one language only">
+To install the agent for a single language, name the injector package and the agent package instead of the metapackage. Replace `apt` with `dnf` on RHEL and derivatives.
+
+```bash noLineNumbers
+sudo apt install opentelemetry-injector opentelemetry-java-autoinstrumentation
+```
+
+The other agent packages are `opentelemetry-nodejs-autoinstrumentation`, `opentelemetry-dotnet-autoinstrumentation`, and `opentelemetry-python-autoinstrumentation`.
+</Admonition>
+
+### Step 2. Point the agents at SigNoz
+
+The file `/etc/opentelemetry/injector/default_env.conf` holds the environment variables that every agent on the host receives. By default the agents export to `localhost`, so you must set your SigNoz endpoint here.
+
+Append the three variables below:
+
+```bash
+cat <<'EOF' | sudo tee -a /etc/opentelemetry/injector/default_env.conf
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+EOF
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+The injector passes only the variables that start with `OTEL_`. It drops every other line in this file.
+
+<Admonition type="warning" title="Your ingestion key sits in a world-readable file">
+The package installs `default_env.conf` with mode `0644`, so any user on the host can read your ingestion key. The injector reads the file as the application user, so mode `0600` breaks every service that does not run as root. It logs an `error.AccessDenied` failure at debug level, and the agent then exports to `localhost` and sends nothing.
+
+Set mode `0640` and give the file to a group, then run your services as a user in that group. To keep the key off the application hosts, send the telemetry through a local [Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) instead.
+</Admonition>
+
+### Step 3. Name each service
+
+The injector reads `OTEL_INJECTOR_SERVICE_NAME` from the environment of the process and writes it to the `service.name` attribute. Set this variable per service. If you set one name in `default_env.conf`, every process on the host reports under that single name in SigNoz.
+
+For a service that systemd starts, add the variable to a unit override. Replace `<unit-name>` with the systemd unit, for example `payments`, and `<service-name>` with the name you want in SigNoz:
+
+```bash noLineNumbers
+sudo systemctl edit <unit-name>
+```
+
+Add these two lines in the editor that opens, then save the file:
+
+```ini noLineNumbers
+[Service]
+Environment=OTEL_INJECTOR_SERVICE_NAME=<service-name>
+```
+
+### Step 4. Restart the applications
+
+The injector acts on new processes only. Restart each application that you want to instrument:
+
+```bash noLineNumbers
+sudo systemctl restart <unit-name>
+```
+
+Processes that were already running keep their old environment until you restart them.
+
+## Validate
+
+Send a few requests to your application, then open SigNoz.
+
+Open **Services**. Your service appears with request rate, error rate, and latency within a minute or two.
+
+Open **Traces** and filter by your service name. Incoming HTTP requests appear as server spans, and calls to databases and other services appear as child spans.
+
+<Figure
+  src="/img/docs/instrumentation/otel-injector/traces-explorer.webp"
+  alt="SigNoz Traces Explorer filtered on service.name CONTAINS 'otel-injector', listing GET /ping, GET /call, and outbound GET spans from four services"
+  caption="Spans from four services in four languages, all instrumented by the injector on one host"
+/>
+
+Open **Metrics** and filter on one service. The agent reports HTTP duration and count, and the runtime metrics for its language.
+
+<Figure
+  src="/img/docs/instrumentation/otel-injector/metrics-explorer.webp"
+  alt="SigNoz Metrics Explorer filtered on one injector-instrumented service, listing HTTP client and server duration histograms"
+  caption="HTTP duration histograms from a service that carries no OpenTelemetry code"
+/>
+
+Open **Logs** and filter by your service name. A log line from an instrumented framework carries the trace ID and the span ID of the request. You can move from the log to its trace.
+
+<Figure
+  src="/img/docs/instrumentation/otel-injector/logs-explorer.webp"
+  alt="SigNoz Logs Explorer showing log records from injector-instrumented services, with the detail panel showing a populated trace ID and span ID"
+  caption="A log record with its trace ID, span ID, and host resource attributes"
+/>
+
+To confirm that the injector is active on the host, open a new shell and run:
+
+```bash noLineNumbers
+java -version
+```
+
+The first line of the output names the agent that the injector added:
+
+```text noLineNumbers
+Picked up JAVA_TOOL_OPTIONS: -javaagent:/usr/lib/opentelemetry/java/opentelemetry-javaagent.jar
+```
+
+<Admonition type="info" title="/proc/<pid>/environ does not show the injected variables">
+The injector calls `setenv` inside the process after the process starts. `/proc/<pid>/environ` holds the environment that the process received at start, so the injected variables never appear there. To see the decisions that the injector made for one process, start it with `OTEL_INJECTOR_LOG_LEVEL=debug` instead.
+</Admonition>
+
+<details>
+<ToggleHeading>
+## Choose which processes the injector instruments
+</ToggleHeading>
+
+By default the injector instruments every process on the host, and not only the services that you care about. Build tools and helper processes send data too. A `dotnet build` on the host, for example, makes the Roslyn compiler server appear in SigNoz as a service named `VBCSCompiler`. Narrow the set before you run the injector on a busy host.
+
+Four settings in `/etc/opentelemetry/injector/injector.conf` control which processes the injector acts on. Each one takes a comma-separated list of glob patterns:
+
+- `include_paths`: Instrument only the executables whose path matches.
+- `exclude_paths`: Skip the executables whose path matches.
+- `include_with_arguments`: Instrument only the processes whose command line matches.
+- `exclude_with_arguments`: Skip the processes whose command line matches.
+
+The rules combine as follows. Patterns inside one setting are alternatives, so one match is enough. Different settings all apply, so a process must satisfy each setting that you configure. An exclusion always wins over an inclusion.
+
+A pattern matches the resolved path of the executable, not the path that you typed. On Debian, `/usr/bin/java` is a symbolic link, so the pattern `/usr/bin/java` matches nothing. Run `readlink -f` on the command first and use the path that it prints:
+
+```bash noLineNumbers
+readlink -f /usr/bin/java
+```
+
+This example instruments the programs under `/app`, skips the ones under `/app/system`, and skips any Java process that already loads an agent:
+
+```text:/etc/opentelemetry/injector/injector.conf noLineNumbers
+include_paths=/app/*
+exclude_paths=/app/system/*
+exclude_with_arguments=-javaagent:*
+```
+
+To turn off one language, set `auto_instrumentation_disabled` in the same file. Valid values are `dotnet`, `jvm`, `nodejs`, `python`, and `ruby`. The value `*` turns off all of them:
+
+```text noLineNumbers
+auto_instrumentation_disabled=dotnet,python
+```
+
+To turn the injector off for a single program, set `OTEL_INJECTOR_DISABLED=true` in the environment of that program. The injector then changes no environment variable for it.
+
+Set this variable in the systemd unit of the program, or in a shell that the injector has not touched. The injector also runs for your shell, so an interactive shell already exports `JAVA_TOOL_OPTIONS`, `NODE_OPTIONS`, and `PYTHONPATH`. A child process inherits those values. A command such as `OTEL_INJECTOR_DISABLED=true java -jar app.jar` therefore still starts the agent, because the shell passed the variables down before the injector ran.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Add resource attributes
+</ToggleHeading>
+
+The injector reads a set of `OTEL_INJECTOR_*` variables from the process environment and adds them to `OTEL_RESOURCE_ATTRIBUTES`. Set them the same way you set `OTEL_INJECTOR_SERVICE_NAME`, per process:
+
+| Variable | Resource attribute |
+|---|---|
+| `OTEL_INJECTOR_SERVICE_NAME` | `service.name` |
+| `OTEL_INJECTOR_SERVICE_VERSION` | `service.version` |
+| `OTEL_INJECTOR_SERVICE_NAMESPACE` | `service.namespace` |
+| `OTEL_INJECTOR_RESOURCE_ATTRIBUTES` | The key-value pairs you supply, added as they are |
+
+If `OTEL_RESOURCE_ATTRIBUTES` already holds a key, the injector keeps the existing value.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+Turn on the injector log first. Set `OTEL_INJECTOR_LOG_LEVEL=debug` in the environment of the application, then restart it. The injector writes its log to the standard error stream of the instrumented process. Read the log of the application to see it. The injector keeps no log file of its own. Valid levels are `debug`, `info`, `warn`, `error`, and `none`. The default is `error`.
+
+Still no data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers agent diagnostics, Collector connectivity, and the common ingestion errors.
+
+### No process is instrumented
+
+- Cause: The library is not in `/etc/ld.so.preload`, or the file is not readable by other users.
+- Fix: Run `cat /etc/ld.so.preload` and make sure that it holds the line `/usr/lib/opentelemetry/injector/libotelinject.so`. Run `ls -l /etc/ld.so.preload` and make sure that the mode is `0644`. The dynamic linker ignores the file for a non-root process when other users cannot read it.
+- Verify: A restarted Java process shows a `-javaagent` flag in `/proc/<pid>/environ`.
+
+### Every service reports under the same name
+
+- Cause: `OTEL_SERVICE_NAME` or `OTEL_INJECTOR_SERVICE_NAME` is set in `default_env.conf`, so all processes share one name.
+- Fix: Remove the name from `default_env.conf` and set `OTEL_INJECTOR_SERVICE_NAME` in each systemd unit instead.
+- Verify: Each service appears under its own name in the SigNoz **Services** list.
+
+### A .NET application sends nothing
+
+- Cause: The application targets .NET 7 or earlier, or its `*.deps.json` file already references `OpenTelemetry*` packages.
+- Fix: Move the application to .NET 8 or later. If the application already carries the OpenTelemetry SDK, keep the SDK and let the injector stand down. .NET accepts one agent only.
+- Verify: The injector debug log records the runtime version that it read from `*.runtimeconfig.json`.
+
+### A Go, Rust, or C++ application sends nothing
+
+- Cause: The injector supports Java, Node.js, .NET, and Python only. A statically linked binary, such as a Go binary built without cgo, never loads the injector at all. The dynamic linker that reads `/etc/ld.so.preload` does not run for it.
+- Fix: Use [eBPF instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-ebpf/) for these languages, or the matching [language guide](https://signoz.io/docs/instrumentation/overview/).
+- Verify: Spans from the service appear in SigNoz after you set up the other method.
+
+### Spans appear twice
+
+- Cause: The application starts its own agent, and the injector adds a second one.
+- Fix: Add `exclude_with_arguments=-javaagent:*` to `/etc/opentelemetry/injector/injector.conf`, or set `OTEL_INJECTOR_DISABLED=true` for that program.
+- Verify: A trace in SigNoz holds one span per operation.
+
+### A Python application sends nothing and prints a dependency conflict
+
+The agent writes a line like this to the standard error stream of the Python process:
+
+```text noLineNumbers
+[opentelemetry-python-autoinstrumentation] WARN: cannot auto-instrument Python process: dependency conflicts: {'asgiref': {'version_required': '==3.12.1', 'version_found': '3.6.0'}}
+```
+
+- Cause: The Python agent pins exact versions of its own dependencies. A package that the operating system installed holds a different version, so the agent stops instead of breaking the application. The system Python on Debian 12 hits this with `asgiref`.
+- Fix: Run the application in a virtual environment that does not carry the conflicting package. The agent instruments a virtual environment correctly, because it prepends its own directory to `PYTHONPATH`. If you cannot use a virtual environment, turn off Python injection with `auto_instrumentation_disabled=python` in `/etc/opentelemetry/injector/injector.conf` and follow the [Python guide](https://signoz.io/docs/instrumentation/opentelemetry-python/) instead.
+- Verify: The warning stops, and the service appears in the SigNoz **Services** list.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+Run an OpenTelemetry Collector on the host when you want to process, filter, or route telemetry before it reaches SigNoz. The Collector also gives every service on the host one egress point and one copy of the ingestion key. Follow the [Switch to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) guide for setup instructions.
+
+Then point the agents at the local Collector in `/etc/opentelemetry/injector/default_env.conf`:
+
+```bash noLineNumbers
+OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318
+OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+```
+
+Write the address as `127.0.0.1`. Node.js resolves `localhost` to the IPv6 address `::1` first. A Collector that listens on `127.0.0.1` only rejects that connection. The Node.js agent then fails with `connect ECONNREFUSED ::1:4318`, while the Java agent on the same host keeps working.
+
+</details>
+
+## Limitations
+
+- The injector runs on Linux only, on Debian and RHEL derivatives.
+- It instruments Java, Node.js, .NET 8 or later, and Python. The upstream library also supports Ruby, but the package repository ships no Ruby agent.
+- It needs root to install, and it changes `/etc/ld.so.preload`, a file that affects every process on the host.
+- It acts on new processes only. A running process keeps its environment until you restart it.
+- The packages are at version `v0.0.3`, and the upstream project calls the current repository URLs interim.
+
+## Next steps
+
+- [Set up alerts](https://signoz.io/docs/userguide/alerts-management/) on error rate and latency for the services you now see.
+- Read the [instrumentation overview](https://signoz.io/docs/instrumentation/overview/) to compare the injector with the language SDKs.
+- Use [eBPF instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-ebpf/) for the services that the injector does not cover.
+
+## Get Help
+
+<GetHelp />
