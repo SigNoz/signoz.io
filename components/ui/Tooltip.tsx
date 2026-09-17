@@ -1,6 +1,13 @@
 'use client'
 
-import React, { useState } from 'react'
+import * as PopoverPrimitive from '@radix-ui/react-popover'
+import React, { useRef, useState } from 'react'
+
+const OPEN_DELAY_MS = 200
+const CLOSE_DELAY_MS = 200
+
+const TRIGGER_CLASS_NAME =
+  'border-b border-dashed border-[var(--l3-foreground)] decoration-[var(--l3-foreground)] transition-colors hover:border-[var(--l1-foreground)] hover:text-[var(--l1-foreground)]'
 
 interface TooltipProps {
   /** The text to underline and trigger the tooltip */
@@ -19,73 +26,114 @@ export default function Tooltip({
   link,
   linkText = 'Explore more →',
 }: TooltipProps) {
-  const [isVisible, setIsVisible] = useState(false)
-  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const [open, setOpen] = useState(false)
+  const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // hover/focus opens must not steal focus into the card; click/keyboard opens should
+  const openedPassively = useRef(false)
 
-  const showTooltip = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    setIsVisible(true)
+  const cancelOpen = () => {
+    if (openTimer.current) clearTimeout(openTimer.current)
+  }
+  const cancelClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
   }
 
-  const hideTooltip = () => {
-    timeoutRef.current = setTimeout(() => {
-      setIsVisible(false)
-    }, 300)
+  const openPassively = (delay: number) => {
+    cancelClose()
+    cancelOpen()
+    openTimer.current = setTimeout(() => {
+      openedPassively.current = true
+      setOpen(true)
+    }, delay)
+  }
+
+  const scheduleClose = () => {
+    cancelOpen()
+    cancelClose()
+    closeTimer.current = setTimeout(() => setOpen(false), CLOSE_DELAY_MS)
+  }
+
+  const hoverHandlers = {
+    onPointerEnter: (event: React.PointerEvent) => {
+      if (event.pointerType !== 'touch') openPassively(OPEN_DELAY_MS)
+    },
+    onPointerLeave: (event: React.PointerEvent) => {
+      if (event.pointerType !== 'touch') scheduleClose()
+    },
   }
 
   return (
-    <span
-      className="relative inline-block"
-      onMouseEnter={showTooltip}
-      onMouseLeave={hideTooltip}
-      onFocus={showTooltip}
-      onBlur={hideTooltip}
-    >
-      {/* Trigger Text */}
-      {link ? (
-        <>
-          <a
-            href={link}
-            target="_blank"
-            rel="noopener"
-            className="cursor-pointer border-b border-dashed border-[var(--l3-foreground)] no-underline decoration-[var(--l3-foreground)] transition-colors hover:border-[var(--l1-foreground)] hover:text-[var(--l1-foreground)]"
-          >
-            {text}
-          </a>
-          <span>&nbsp;</span>
-        </>
-      ) : (
-        <>
-          <span className="cursor-help border-b border-dashed border-[var(--l3-foreground)] decoration-[var(--l3-foreground)] transition-colors hover:border-[var(--l1-foreground)] hover:text-[var(--l1-foreground)]">
-            {text}
-          </span>
-          <span>&nbsp;</span>
-        </>
-      )}
-
-      {/* Tooltip Popup */}
-      {isVisible && (
-        <div
-          className="animate-in fade-in slide-in-from-bottom-1 absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] p-4 text-sm text-[var(--l1-foreground)] shadow-[0_6px_12px_0_color-mix(in_srgb,var(--base-black)_20%,transparent)] duration-200"
-          role="tooltip"
-        >
-          {/* Arrow */}
-          <div className="absolute left-1/2 top-full -mt-2 -translate-x-1/2 border-4 border-transparent border-t-[var(--l2-background)]" />
-
-          <p className="mb-2 mt-0 font-medium leading-relaxed">{content}</p>
-
-          {link && (
+    <>
+      <PopoverPrimitive.Root
+        open={open}
+        onOpenChange={(next) => {
+          openedPassively.current = false
+          cancelOpen()
+          cancelClose()
+          setOpen(next)
+        }}
+      >
+        {link ? (
+          // Anchor, not Trigger: the term navigates on click; the card is a hover/focus preview
+          <PopoverPrimitive.Anchor asChild>
             <a
               href={link}
               target="_blank"
               rel="noopener"
-              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--accent-primary)] transition-colors hover:text-[var(--accent-primary-hover)]"
+              data-glossary-definition={content}
+              className={`cursor-pointer no-underline ${TRIGGER_CLASS_NAME}`}
+              {...hoverHandlers}
+              onFocus={() => openPassively(0)}
+              onBlur={scheduleClose}
             >
-              {linkText}
+              {text}
             </a>
-          )}
-        </div>
-      )}
-    </span>
+          </PopoverPrimitive.Anchor>
+        ) : (
+          <PopoverPrimitive.Trigger asChild>
+            <button
+              type="button"
+              data-glossary-definition={content}
+              className={`inline cursor-help appearance-none border-0 bg-transparent p-0 text-inherit [font:inherit] ${TRIGGER_CLASS_NAME}`}
+              {...hoverHandlers}
+            >
+              {text}
+            </button>
+          </PopoverPrimitive.Trigger>
+        )}
+        <PopoverPrimitive.Portal>
+          <PopoverPrimitive.Content
+            side="top"
+            sideOffset={8}
+            avoidCollisions
+            collisionPadding={8}
+            onOpenAutoFocus={(event) => {
+              if (openedPassively.current) event.preventDefault()
+            }}
+            onPointerEnter={cancelClose}
+            onPointerLeave={(event) => {
+              if (event.pointerType !== 'touch') scheduleClose()
+            }}
+            className="z-[200] w-64 rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] p-4 text-left text-sm text-[var(--l1-foreground)] shadow-[0_6px_12px_0_color-mix(in_srgb,var(--base-black)_20%,transparent)] outline-none"
+          >
+            <p className="mb-2 mt-0 font-medium leading-relaxed">{content}</p>
+
+            {link && (
+              <a
+                href={link}
+                target="_blank"
+                rel="noopener"
+                className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--accent-primary)] transition-colors hover:text-[var(--accent-primary-hover)]"
+              >
+                {linkText}
+              </a>
+            )}
+            <PopoverPrimitive.Arrow className="fill-[var(--l2-background)]" width={10} height={5} />
+          </PopoverPrimitive.Content>
+        </PopoverPrimitive.Portal>
+      </PopoverPrimitive.Root>
+      <span>&nbsp;</span>
+    </>
   )
 }
