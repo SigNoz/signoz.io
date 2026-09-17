@@ -1,0 +1,204 @@
+---
+title: Text Panel Type - Add Markdown Notes to Dashboards
+date: 2026-09-15
+description: Learn how to use the Text panel type in SigNoz dashboards to add Markdown notes, runbooks, section headers, and on-call checklists.
+doc_type: reference
+---
+
+## Text
+
+The Text panel renders Markdown you write, in place, on the dashboard. It runs no query, so there is no query builder, no signal to pick, no dependence on the dashboard's time range, and nothing to load. It shows the body you authored.
+
+Use it for the parts of a dashboard that explain the charts rather than draw them:
+
+- Section headers that say what the panels below mean.
+- Runbook or on-call steps next to the panels they apply to ("if p99 > 2s, do this").
+- Links out to a service's repo, RCA doc, Slack channel, or another dashboard.
+- A checklist an on-call engineer ticks off during an incident. Ticks are saved to the dashboard, see [Task lists](#task-lists).
+- Ownership and "last reviewed" notes, or caveats about the data.
+
+<Figure
+  src="/img/docs/dashboards/panel-types/text-panel-dashboard.webp"
+  alt="A dashboard using three Text panels: a transparent section title with its header hidden, a colored runbook, and an incident checklist with two boxes ticked"
+  caption="Three Text panels on one dashboard: a transparent section title, a colored runbook, and an incident checklist."
+/>
+
+<Admonition type="info">
+The Text panel is available only in the new dashboards experience. Dashboards on the older schema have no equivalent panel type.
+</Admonition>
+
+## Add a Text panel
+
+1. On a dashboard, click **New Panel** and pick **Text**.
+2. Write your Markdown in the editor. The preview above it updates as you type, so there is no **Run** step.
+3. Set the title, alignment, background, and header options in the right-hand configuration pane.
+4. Click **Save changes**.
+
+<Figure
+  src="/img/docs/dashboards/panel-types/text-panel-picker.webp"
+  alt="The New Panel dialog with the Text panel type highlighted"
+  caption="Pick Text in the New Panel dialog."
+/>
+
+You can also switch an existing panel to Text (and back) from **Visualization → Panel Type** in the configuration pane, the same as any other panel type.
+
+## The Markdown editor
+
+<Figure
+  src="/img/docs/dashboards/panel-types/text-panel-editor.webp"
+  alt="The Text panel editor with the rendered preview on top, the Markdown source below it, and the configuration pane on the right"
+  caption="The preview sits above the Markdown source. Drag the divider between them to give either one more room."
+/>
+
+The toolbar has buttons for **Heading**, **Bold**, **Italic**, **Bulleted list**, **Numbered list**, **Link**, **Code**, and **Table**. Each one wraps or inserts around the current selection.
+
+The status bar shows the cursor position and a character count. The editor counts the body against a 16,000 character limit, since the Markdown is stored inline in the dashboard JSON.
+
+Pressing `Tab` moves focus out of the editor instead of indenting, which keeps the panel editor navigable by keyboard.
+
+### Markdown syntax help
+
+The **?** button next to **Insert variable** opens a cheat sheet of the supported syntax.
+
+Its first entry is the one authors trip over most: two consecutive lines join into a single paragraph. Leave a blank line to start a new paragraph, or end a line with two spaces to force a line break.
+
+## Supported Markdown
+
+The panel supports CommonMark plus GitHub Flavored Markdown (GFM).
+
+| Feature | Notes |
+| --- | --- |
+| Headings `#` to `######` | |
+| Bold, italic, strikethrough | |
+| Bulleted and numbered lists | |
+| Task lists `- [ ]` and `- [x]` | Clickable on the dashboard, see [Task lists](#task-lists) |
+| Links `[label](url)` | Open in a new tab with `noopener noreferrer nofollow` |
+| Images | Written with the standard `!` + `[alt]` + `(url)` image syntax |
+| Inline code and fenced code blocks | Syntax highlighted, with a copy button |
+| Blockquotes | |
+| Tables | A wide table scrolls inside its own box instead of widening the panel |
+| Horizontal rules | |
+
+Fenced code blocks are highlighted for `bash` (`sh`, `shell`), `css`, `diff`, `docker` (`dockerfile`), `go`, `java`, `javascript` (`js`), `json`, `markup` (`html`, `xml`), `python` (`py`), `rust`, `sql`, `typescript` (`ts`), and `yaml` (`yml`). A fence with no language, or one the panel does not recognize, renders as plain monospace rather than an error.
+
+Every fenced code block gets a copy button, which appears when you hover the block.
+
+<Figure
+  src="/img/docs/dashboards/panel-types/text-panel-code-copy.webp"
+  alt="A fenced bash code block inside a Text panel with the copy button visible at its right edge"
+  caption="Hover a code block to reveal its copy button."
+/>
+
+<Admonition type="warning" title="Raw HTML is not rendered">
+The panel shows raw HTML as literal text. Writing `<br>` or `<img src="...">` prints those tags instead of acting on them. This is deliberate: a Text panel body can be read anonymously on a [publicly shared dashboard](https://signoz.io/docs/dashboards/public-sharing/), so there is no path for injected HTML. Use Markdown syntax instead, including the standard image syntax for images.
+</Admonition>
+
+## Dashboard variables
+
+Variables are substituted into the body before it renders, so a Text panel can say "Runbook for `$service` in `$environment`" and follow the dashboard's current selection.
+
+<Figure
+  src="/img/docs/dashboards/panel-types/text-panel-insert-variable.webp"
+  alt="The Insert variable menu listing $service and $environment, each tagged with its variable type"
+  caption="Insert variable lists the dashboard's variables with their type. It is disabled when the dashboard has none."
+/>
+
+All four variable syntaxes work: `$name`, `{{name}}`, `{{.name}}`, and `[[name]]`. `$name` is the canonical form and the one **Insert variable** writes.
+
+A few details worth knowing:
+
+- `$name` matches dotted names such as `$service.name`. A trailing period is treated as prose, so `$service.` renders the value followed by a period.
+- Macros prefixed with `$__`, such as `$__step_interval`, are not substituted.
+- A multi-value variable joins its values with `, `.
+- An undefined variable is left as literal text, the same as in queries.
+- The substituted value becomes Markdown content, never markup, so a value coming from telemetry cannot inject formatting or links.
+
+Text panels are included in the dashboard's variable usage view, so deleting or renaming a variable flags the Text panels that mention it.
+
+## Behavior on the dashboard
+
+### Task lists
+
+Task list checkboxes are clickable on the dashboard itself and in the panel's View modal. Ticking one rewrites the saved Markdown and persists it to the dashboard. The tick applies instantly and rolls back with an error if the save fails.
+
+<Admonition type="info">
+Ticks are shared state, not per-viewer. Two people looking at the same checklist see each other's ticks. Only users who can edit the dashboard can tick a box; for everyone else, including viewers of a publicly shared dashboard, the checkboxes are read-only.
+</Admonition>
+
+### Panel actions
+
+<Figure
+  src="/img/docs/dashboards/panel-types/text-panel-actions.webp"
+  alt="The Text panel actions menu showing View, Edit panel, Clone, and Delete panel"
+  caption="The actions available on a Text panel."
+/>
+
+Download (CSV, PNG, SVG), Create alert, Search, and Drilldown are deliberately absent. There is no data behind the panel, and the body is already in its readable form.
+
+### Other details
+
+- A "Scroll for more" pill appears at the bottom when the body is taller than the panel.
+- An empty body shows "Nothing written yet. Add Markdown to this panel to show content."
+- Malformed Markdown never errors. It renders as literal text.
+
+## Panel options
+
+A Text panel shows only the options that mean something without data. There are no thresholds, legend, axes, units, decimals, or context links.
+
+<Figure
+  src="/img/docs/dashboards/panel-types/text-panel-appearance.webp"
+  alt="The Text panel configuration pane showing Title, Description, Hide header, Visualization, and Panel appearance with alignment controls and the background swatch row"
+  caption="The configuration pane for a Text panel."
+/>
+
+### Panel Details
+
+- **Title** and **Description**, as on any panel.
+- **Hide header** drops the title strip. With the header hidden, the drag handle and actions menu appear on hover instead. Pair it with a transparent background for a bare section title.
+
+### Visualization
+
+- **Panel Type** switches this panel to another type.
+
+### Panel appearance
+
+- **Horizontal alignment**: `Left` (default), `Center`, or `Right`.
+- **Vertical alignment**: `Top` (default), `Middle`, or `Bottom`.
+- **Background**: a row of swatches.
+  - **Transparent** removes the card, border, and title bar, so the text sits directly on the dashboard. Good for section headers.
+  - **Default panel** is the normal panel surface.
+  - Eight presets: Robin, Purple, Sakura, Cherry, Amber, Forest, Sienna, and Slate. Each preset pairs a surface color with a text color, defined separately for light and dark mode, and every pair clears a 4.5:1 contrast ratio. A panel saved in dark mode shows the same preset in its light colors in light mode, with no re-save.
+  - **Custom** takes any hex color (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`). The text color is chosen automatically for contrast against whatever you pick.
+
+## JSON reference
+
+The panel plugin kind is `signoz/TextPanel`.
+
+```json
+{
+  "kind": "signoz/TextPanel",
+  "spec": {
+    "mode": "markdown",
+    "text": "## Checkout runbook\n\nOwner: @payments\n\n- [ ] Check $service error rate\n- [ ] Page the on-call",
+    "presentation": {
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "background": "#24356E"
+    },
+    "headerOptions": { "hide": false }
+  }
+}
+```
+
+| Field | Type | Values and default |
+| --- | --- | --- |
+| `mode` | enum | `markdown` is the only value today |
+| `text` | string | The Markdown body |
+| `presentation.textAlign` | enum | `left` (default), `center`, `right` |
+| `presentation.verticalAlign` | enum | `top` (default), `center` (shown as Middle), `bottom` |
+| `presentation.background` | string, optional | A hex color. `#00000000` is transparent, and omitting the field uses the default panel surface. The server validates that the value is a hex color. |
+| `headerOptions.hide` | boolean | `false`, meaning the header is shown |
+
+### Get Help
+
+<GetHelp />
