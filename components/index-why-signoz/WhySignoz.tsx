@@ -160,7 +160,7 @@ export default function WhySignoz() {
 
   return (
     <section
-      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 overflow-clip bg-[var(--background)] px-5 py-16 text-[var(--l1-foreground)] sm:px-6 md:py-24 lg:px-20 lg:py-28 wide:max-w-8xl wide:px-0"
+      className="relative left-1/2 mx-auto w-dvw max-w-none -translate-x-1/2 overflow-clip bg-[var(--l1-background)] px-5 py-16 text-[var(--l1-foreground)] sm:px-6 md:py-24 lg:px-20 lg:py-28 wide:max-w-8xl wide:px-0"
       data-homepage-floating-cta="Start sending telemetry in 20 minutes"
       data-homepage-floating-href="/docs/install/"
     >
