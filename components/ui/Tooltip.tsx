@@ -87,7 +87,7 @@ export default function Tooltip({
             onBlur={scheduleClose}
           >
             {text}
-            <InfoCircle className="glossary-info-icon" size={12} aria-hidden />
+            <InfoCircle className="glossary-info-icon" size={14} aria-hidden />
           </a>
         </PopoverPrimitive.Anchor>
       ) : (
@@ -99,7 +99,7 @@ export default function Tooltip({
             {...hoverHandlers}
           >
             {text}
-            <InfoCircle className="glossary-info-icon" size={12} aria-hidden />
+            <InfoCircle className="glossary-info-icon" size={14} aria-hidden />
           </button>
         </PopoverPrimitive.Trigger>
       )}
