@@ -1,0 +1,96 @@
+---
+date: 2026-09-03
+title: Upgrade SigNoz to v0.140.0 and Migrate to the v4 License API
+tags: [Self-Hosted Enterprise]
+description: Upgrade self-hosted SigNoz to v0.140.0. Migration 120 grants admin roles the new license permissions, and the license API moves from v3 to v4.
+doc_type: howto
+---
+
+SigNoz v0.140.0 puts license management behind fine-grained access control and adds a `/api/v4/licenses` API. Viewing the license key now requires the `license:read` permission, a database migration grants that permission to admin roles automatically, and the `/api/v3/licenses` endpoints are deprecated. If you use SigNoz only through the UI as an admin, nothing changes. If you read the license key from the API or from a non-admin account, review the changes below.
+
+<Admonition type="info" title="Viewing the license key now requires license:read">
+The license key on **Settings > General** and **Settings > My Settings**, and the usage data on the **Billing** page, are now gated by the `license:read` permission. Migration 120 grants it to admin roles on startup, so admins keep access. Users on the signoz-editor and signoz-viewer roles (or custom roles without the grant) see a "not authorized" message in place of the key, and the Billing usage section does not load. To restore access for a custom role, add the `license:read` relation to it. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/).
+</Admonition>
+
+<Admonition type="info" title="The v3 license endpoints are deprecated">
+`POST /api/v3/licenses` and `PUT /api/v3/licenses` keep working in v0.140.0, but they are deprecated. Move new integrations to the [v4 endpoints](#the-new-v4-license-api). The v4 responses drop the license key from `GET /api/v4/licenses/active`, so scripts that read the key must switch to `GET /api/v4/licenses/{id}` with the `license:read` permission.
+</Admonition>
+
+## Upgrade self-hosted SigNoz
+
+### Step 1: Back up your data
+
+Role assignments and license records live in the SigNoz Metastore alongside dashboards and alerts. Back up the Metastore (SQLite or Postgres) before you start. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops before you move to v0.140.0.
+
+### Step 2: Upgrade SigNoz
+
+Migration 120 runs once, automatically, when the server starts on the new version. It grants the built-in Admin role the five license relations (`create`, `list`, `read`, `update`, `delete`) for every organization. No manual step is required.
+
+<Tabs entityName="installer">
+<TabItem value="foundry" label="Foundry" default>
+
+Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundryctl</a> to pick up the v0.140.0 defaults, then re-apply your existing `casting.yaml`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+foundryctl cast -f casting.yaml
+```
+
+If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting.yaml</a> pins image versions, the new defaults will not override them (your config wins), so bump the SigNoz image pin to v0.140.0 yourself.
+
+</TabItem>
+<TabItem value="helm" label="Kubernetes (Helm chart)">
+
+Update the <a href="https://github.com/SigNoz/charts" target="_blank" rel="noopener noreferrer nofollow">chart</a> and upgrade. Replace `<namespace>` and `<release-name>` with your own values:
+
+```bash
+helm repo update
+helm -n <namespace> upgrade <release-name> signoz/signoz
+```
+
+`helm upgrade` takes the newest chart; add `--version 0.140.0` to pin the v0.140.0 chart.
+
+</TabItem>
+</Tabs>
+
+For Docker or binary deployments, follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/) and set the target version to v0.140.0.
+
+### Step 3: Verify the upgrade
+
+1. Pods and containers are healthy (`kubectl get pods -n <namespace>`, `docker compose ps`, or `systemctl status 'signoz-*'`).
+2. SigNoz reports v0.140.0 under **Settings**.
+3. Open **Settings > General** as an admin and confirm the masked license key and its copy button are visible.
+4. Open **Settings > Organization > Roles**, edit any admin role, and confirm the **Licenses** resource card shows the `create`, `list`, `read`, `update`, and `delete` relations.
+
+## What changes for API callers
+
+### The v4 license API
+
+v0.140.0 adds six endpoints under `/api/v4/licenses`. Each write and read of a specific license is scoped by a `license` permission:
+
+| Endpoint | Purpose | Required permission |
+|----------|---------|---------------------|
+| `POST /api/v4/licenses` | Activate a license by key. Returns `201 Created` with the new license ID. | `license:create` |
+| `GET /api/v4/licenses` | List all licenses for the organization. | `license:list` |
+| `GET /api/v4/licenses/active` | Get the active license metadata. The license key is **not** included. | Open access (no permission required) |
+| `GET /api/v4/licenses/{id}` | Get a specific license, including its license key. | `license:read` |
+| `PUT /api/v4/licenses/{id}` | Refresh the active license from the SigNoz licensing server. | `license:update` |
+| `DELETE /api/v4/licenses/{id}` | Delete a self-hosted license. Licenses managed by SigNoz Cloud are rejected. | `license:delete` |
+
+For the full request and response schema, see the Licenses endpoints in the [SigNoz API reference](https://signoz.io/api-reference/).
+
+### Response format changes
+
+The v4 responses differ from v3 in three ways:
+
+- **Fields are camelCase.** For example, `valid_from` becomes `validFrom`, `free_until` becomes `freeUntil`, `event_queue` becomes `eventQueue`, and `created_at` / `updated_at` become `createdAt` / `updatedAt`.
+- **Enum values are lowercase.** License state, status, and platform values are lowercase (for example, `ACTIVATED` becomes `activated`, `CLOUD` becomes `cloud`, and `EVALUATION_EXPIRED` becomes `evaluation_expired`).
+- **The license key is absent from the active-license response.** `GET /api/v4/licenses/active` no longer returns the key. To read the key, call `GET /api/v4/licenses/{id}` with the `license:read` permission.
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- <a href="https://github.com/SigNoz/signoz/issues" target="_blank" rel="noopener noreferrer nofollow">GitHub Issues</a>
+- [Community Slack](https://signoz.io/slack/)
+</content>
+</invoke>

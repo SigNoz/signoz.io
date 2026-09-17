@@ -1,5 +1,5 @@
 ---
-date: 2026-07-30
+date: 2026-09-03
 title: Transactions Reference
 description: Complete reference of transactions for each resource in SigNoz covering relations, selector formats, and managed role access.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -19,7 +19,7 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers roles, service accounts, API keys, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
+This page currently covers roles, service accounts, API keys, licenses, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as dashboards, alerts, and pipelines will be documented as they become available for fine-grained access control.
 </Admonition>
 
 ## Resources
@@ -65,6 +65,22 @@ This page currently covers roles, service accounts, API keys, and telemetry reso
 | `read` | View API key metadata (name, expiration, last used). | signoz-admin |
 | `update` | Modify API key metadata (for example, change the expiration date). | signoz-admin |
 | `delete` | Permanently revoke an API key. | signoz-admin |
+
+### License
+
+**Resource:** `metaresource` · **Kind:** `license` · **Selector:** license ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Activate a license by key. | signoz-admin |
+| `list` | List all licenses in the organization. | signoz-admin |
+| `read` | View a license's details, including the license key shown in Settings. | signoz-admin |
+| `update` | Refresh the active license from the SigNoz licensing server. | signoz-admin |
+| `delete` | Delete a self-hosted license. | signoz-admin |
+
+<Admonition type="info">
+`license:read` controls where the license key is exposed in the UI. Users with `license:read` see the masked license key and its copy button on the **Settings > General** and **Settings > My Settings** pages, and can load usage data on the **Billing** page. Users without it see a "not authorized" message in place of the key, and the Billing usage section does not load. On upgrade to v0.140.0, existing admin roles receive all five license relations automatically (see the [v0.140.0 upgrade guide](https://signoz.io/docs/operate/migration/upgrade-0-140/)); the signoz-editor and signoz-viewer managed roles do not receive license relations by default.
+</Admonition>
 
 ### Logs
 
