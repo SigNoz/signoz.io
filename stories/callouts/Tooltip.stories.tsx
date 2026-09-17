@@ -62,17 +62,16 @@ export const Preview: Story = {
     <div className="flex flex-col gap-4">
       <p>
         To understand cardinality explosion, you first need to understand how{' '}
-        <Tooltip {...DEFINITION_ARGS} />
-        work in time-series databases like Prometheus. Hover the underlined term to see the
-        definition.
+        <Tooltip {...DEFINITION_ARGS} /> work in time-series databases like Prometheus. Hover the
+        underlined term to see the definition.
       </p>
       <p>
-        Each trace is a tree of <Tooltip {...WITH_LINK_ARGS} />
-        that shows how a request moved through your services.
+        Each trace is a tree of <Tooltip {...WITH_LINK_ARGS} /> that shows how a request moved
+        through your services.
       </p>
       <p>
-        High-throughput services often enable tail-based <Tooltip {...CUSTOM_LINK_TEXT_ARGS} />
-        in the OpenTelemetry Collector to keep costs predictable.
+        High-throughput services often enable tail-based <Tooltip {...CUSTOM_LINK_TEXT_ARGS} /> in
+        the OpenTelemetry Collector to keep costs predictable.
       </p>
     </div>
   ),
@@ -82,7 +81,7 @@ export const Definition: Story = {
   parameters: { mdxUsage: definitionMdx },
   render: (args) => (
     <p>
-      To understand cardinality explosion, you first need to understand how <Tooltip {...args} />
+      To understand cardinality explosion, you first need to understand how <Tooltip {...args} />{' '}
       work in time-series databases like Prometheus. Hover the underlined term to see the
       definition.
     </p>
@@ -94,8 +93,8 @@ export const WithLink: Story = {
   args: WITH_LINK_ARGS,
   render: (args) => (
     <p>
-      Each trace is a tree of <Tooltip {...args} />
-      that shows how a request moved through your services.
+      Each trace is a tree of <Tooltip {...args} /> that shows how a request moved through your
+      services.
     </p>
   ),
 }
@@ -105,8 +104,8 @@ export const CustomLinkText: Story = {
   args: CUSTOM_LINK_TEXT_ARGS,
   render: (args) => (
     <p>
-      High-throughput services often enable tail-based <Tooltip {...args} />
-      in the OpenTelemetry Collector to keep costs predictable.
+      High-throughput services often enable tail-based <Tooltip {...args} /> in the OpenTelemetry
+      Collector to keep costs predictable.
     </p>
   ),
 }
