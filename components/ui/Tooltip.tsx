@@ -1,7 +1,7 @@
 'use client'
 
 import * as PopoverPrimitive from '@radix-ui/react-popover'
-import { SolidInfoCircle } from '@signozhq/icons'
+import { Info as InfoCircle } from 'lucide-react'
 import React, { useRef, useState } from 'react'
 
 const OPEN_DELAY_MS = 200
@@ -87,7 +87,7 @@ export default function Tooltip({
             onBlur={scheduleClose}
           >
             {text}
-            <SolidInfoCircle className="glossary-info-icon" size={12} aria-hidden />
+            <InfoCircle className="glossary-info-icon" size={12} aria-hidden />
           </a>
         </PopoverPrimitive.Anchor>
       ) : (
@@ -99,7 +99,7 @@ export default function Tooltip({
             {...hoverHandlers}
           >
             {text}
-            <SolidInfoCircle className="glossary-info-icon" size={12} aria-hidden />
+            <InfoCircle className="glossary-info-icon" size={12} aria-hidden />
           </button>
         </PopoverPrimitive.Trigger>
       )}
