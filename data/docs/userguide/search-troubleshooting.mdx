@@ -1,5 +1,5 @@
 ---
-date: 2026-07-27
+date: 2026-08-17
 title: Search Query Troubleshooting Guide
 description: Diagnose and fix common SigNoz search query errors including syntax errors, ambiguous fields, missing keys, and function-related issues with clear examples.
 doc_type: howto
@@ -82,6 +82,10 @@ searching for AND operator
 ### Q. I'm getting `key '<fieldname>' not found` — why can't it find my field?
 
 A. The field you referenced does not exist in the selected signal. This is usually a typo, a missing `body.` prefix, or using a field that belongs to a different signal type.
+
+<Admonition type="info">
+This error no longer applies to **logs** or **traces**. A logs or traces query that references a key missing from field metadata runs against the raw data and returns a warning instead of failing. See [Querying Logs](https://signoz.io/docs/logs-management/querying-logs/#missing-attribute-keys) and [Querying Traces](https://signoz.io/docs/apm-and-distributed-tracing/querying-traces/#missing-attribute-keys). This entry applies to metrics and other signals, which still return `key not found`. If a logs or traces query returns no rows, a typo in the key name is still a likely cause, so check the fixes below.
+</Admonition>
 
 <details>
 
