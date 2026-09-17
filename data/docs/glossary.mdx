@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-14
 title: Glossary of Observability and OpenTelemetry Terms
 description: Definitions of OpenTelemetry, observability, and SigNoz terms, from span and resource to sample, cardinality, and identifying attributes.
 doc_type: reference
@@ -9,7 +9,7 @@ This glossary defines the terms you'll meet across SigNoz docs, OpenTelemetry sp
 
 If you're here to reason about **metrics volume and cost**, read these five in order: [sample](#sample), [time series](#time-series), [cardinality](#cardinality), [identifying attribute](#identifying-attribute), and [non-identifying attribute](#non-identifying-attribute). Together they explain why cardinality drives your metrics bill even though SigNoz bills per sample ingested.
 
-[A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [Z](#z)
+[A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [Z](#z)
 
 ## A
 
@@ -29,13 +29,21 @@ Combining many measurements into exact or estimated statistics over a time windo
 
 A saved condition evaluated on a query at a fixed interval, which fires notifications to a [notification channel](#notification-channel) when it is met. See [Alerts](https://signoz.io/docs/alerts/).
 
+### API key
+
+A credential for programmatic access to SigNoz through its API. Each key belongs to a service account, and the key can do whatever that account's roles allow. An account can hold several roles and takes the union of the transactions they grant, from querying telemetry and [dashboards](#dashboard) to creating and changing [alert rules](#alert-rule) and [notification channels](#notification-channel). An [ingestion key](#ingestion-key) only writes telemetry in, so the two do not substitute for each other. Never put an API key in client-side code. SigNoz shows a key's value once, at creation. See [Service accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/).
+
 ### APM
 
 Application Performance Monitoring. Tracks a service's latency, error rate, throughput, and dependencies. In SigNoz, APM metrics are derived automatically from [spans](#span), so instrumenting traces gives you application metrics for free. See [Application details](https://signoz.io/docs/apm-and-distributed-tracing/application-details/).
 
 ### Attribute
 
-A key-value pair that describes the entity producing telemetry. Attributes attach to [spans](#span), [log records](#log-record), metric [data points](#data-point), and [resources](#resource). In metrics, attributes are what produce [cardinality](#cardinality).
+A key-value pair that annotates one piece of telemetry. On a [span](#span), attributes describe the operation the span records, such as `http.route` or `db.system.name`. Attributes attach to spans, [log records](#log-record), and metric [data points](#data-point). A [resource attribute](#resource-attribute) is the other case: it describes the process or host that produced the telemetry. In metrics, attributes are what produce [cardinality](#cardinality).
+
+### Auto-instrumentation
+
+Another name for [zero-code instrumentation](#zero-code-instrumentation). SigNoz docs use both names for the same thing: an agent or a startup hook instruments the libraries you already use, so you write no instrumentation code.
 
 ## B
 
@@ -88,6 +96,10 @@ For example, a request counter that sees 100 requests in the first minute, 150 i
 ### Dashboard
 
 A saved collection of panels querying logs, metrics, and traces. See [Dashboards](https://signoz.io/docs/dashboards/overview/).
+
+### Dashboard variable
+
+A named input on a [dashboard](#dashboard) that queries reference as `$name`, so one dashboard serves many services or namespaces. SigNoz has four types: Dynamic, Textbox, Custom, and Query. See [Manage variables](https://signoz.io/docs/userguide/manage-variables/).
 
 ### Data point
 
@@ -167,6 +179,10 @@ Start with a metric that has a single label set `X`. Add `http.route` with 10 di
 
 Teams sometimes call this concept a "unique label set" (see [unique label set](#unique-label-set)). OpenTelemetry does not yet publish a canonical list of identifying attributes, though the project is moving toward distinguishing them. Compare [non-identifying attribute](#non-identifying-attribute).
 
+### Ingestion endpoint
+
+The URL a [Collector](#collector) or [SDK](#sdk) sends telemetry to. On SigNoz Cloud it is `https://ingest.<region>.signoz.cloud:443`, where `<region>` is your [region](#region). Port 443 carries both OTLP/HTTP and OTLP/gRPC, instead of the 4318 and 4317 that most OpenTelemetry setups use. Find yours under Settings > Ingestion. See [Endpoint](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+
 ### Ingestion key
 
 The credential a Collector or SDK uses to send data to a SigNoz Cloud workspace. See [Ingestion keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
@@ -189,6 +205,10 @@ A metric [attribute](#attribute). Label is the Prometheus term, used interchange
 
 A timestamped record of an event, with a severity and optional [attributes](#attribute). When emitted inside an active span, a log record carries the trace and span ID, which is what lets SigNoz link logs to traces. See [Logs](https://signoz.io/docs/logs-management/overview/).
 
+### Logs Explorer
+
+The page where you search and filter [log records](#log-record): a list of raw records, a [time series](#time-series) chart of their counts, and a table. The [Query Builder](#query-builder) drives all three. Live View tails new records as they arrive, and you can keep a query as a [saved view](#saved-view). See [Logs Explorer](https://signoz.io/docs/userguide/logs_query_builder/).
+
 ### Logs pipeline
 
 A SigNoz-side processing chain that parses, transforms, or enriches log records after ingestion: extracting JSON fields, promoting attributes, redacting values. See [Logs pipelines](https://signoz.io/docs/logs-pipelines/introduction/).
@@ -202,6 +222,10 @@ The object that creates metric [instruments](#instrument), obtained from a meter
 ### Metric
 
 A numeric measurement recorded over time: a request count, a latency distribution, a memory reading. Metrics are cheap to store at scale and ideal for dashboards and alerting, at the cost of losing per-request detail. See [Metrics](https://signoz.io/docs/metrics-management/overview/).
+
+### Metrics Explorer
+
+The page where you browse every metric in the [workspace](#workspace) and read what each one costs. A treemap ranks metrics by [time series](#time-series) or by [samples](#sample), and opening one shows its counts, [attributes](#attribute), and metadata. Read a metric's real [cardinality](#cardinality) here, instead of multiplying attribute values. See [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
 
 ## N
 
@@ -231,6 +255,14 @@ The OpenTelemetry Protocol, the wire format for sending traces, metrics, logs, a
 
 ## P
 
+### Panel
+
+One chart or table on a [dashboard](#dashboard), with its own query. SigNoz has seven panel types: time series, bar, histogram, list, pie, table, and value. See [Panel types](https://signoz.io/docs/dashboards/panel-types/).
+
+### Pipeline
+
+One path through a [Collector](#collector) for one [signal](#signal): a set of [receivers](#receiver), then [processors](#processor), then [exporters](#exporter), which you declare under `service.pipelines`. The Collector runs only the components a pipeline names, so a component you configure but never list stays off. Processors run in the order you list them. A [logs pipeline](#logs-pipeline) is something else: it runs inside SigNoz, on data that has already arrived. See [Collector configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
 ### Processor
 
 A [Collector](#collector) pipeline component that sits between receiving and exporting, transforming data in flight: batching, filtering, adding resource attributes, [tail sampling](#tail-sampling).
@@ -258,6 +290,10 @@ Rate, Errors, and Duration: the three request-level metrics worth tracking for e
 ### Receiver
 
 A [Collector](#collector) pipeline component that defines how telemetry enters the Collector: an OTLP endpoint, a Prometheus scrape, a log file tail. Receivers can be push- or pull-based.
+
+### Region
+
+The SigNoz Cloud deployment that holds a [workspace](#workspace). Your region determines which [ingestion endpoint](#ingestion-endpoint), API, and MCP hostnames you use. SigNoz docs write it as the literal `<region>` token. The region selector at the top right of a docs page rewrites every snippet on the page. See [Endpoint](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 
 ### Resource
 
@@ -287,9 +323,17 @@ Total samples = [active series](#active-series) × export frequency, which is wh
 
 Keeping only a portion of telemetry to control volume and cost. See [head sampling](#head-sampling) and [tail sampling](#tail-sampling).
 
+### Saved view
+
+A named query and filter set in an Explorer, so you can return to an investigation without rebuilding it. Everyone in the organization sees the same saved views, and the Editor and Admin roles can change or delete them. See [Managing saved views](https://signoz.io/docs/userguide/logs_query_builder/#managing-saved-views).
+
 ### Scope
 
 The instrumentation scope: the name and version of the library or module that emitted the telemetry. Scope is how you tell "spans from our HTTP client instrumentation" from "spans we wrote by hand". Scope attributes are part of a metric's [fingerprint](#fingerprint).
+
+### SDK
+
+The OpenTelemetry implementation behind the API, and the layer that samples, batches, and exports. Your code calls the API, and the two ship separately: without an installed SDK, the API is a no-op and emits nothing. The `OTEL_*` environment variables configure the language SDK. See [OpenTelemetry environment variables](https://signoz.io/docs/ingestion/opentelemetry-environment-variables/).
 
 ### Semantic conventions
 
@@ -311,17 +355,25 @@ Service Level Indicator: the measured quantity in a reliability target, such as 
 
 A single operation within a [trace](#trace): an HTTP handler, a database query, or a queue publish. A span has a name, start and end timestamps, [attributes](#attribute), a [status](#span-status), and a parent, which is what gives a trace its tree structure. See [Span details](https://signoz.io/docs/userguide/span-details/).
 
+### Span context
+
+The part of a [span](#span) that crosses process boundaries: the [trace ID](#trace-id), the span ID, trace flags, and trace state. It is immutable. A [propagator](#propagator) injects and extracts it, which is how a span started in another service joins the same [trace](#trace). See [Context propagation](https://signoz.io/docs/traces-management/guides/context-propagation/).
+
 ### Span event
 
 A timestamped annotation on a [span](#span), used for things that happen at a moment rather than over a duration: a retry, a cache miss, a recorded exception.
 
 ### Span link
 
-A pointer from one [span](#span) to another causally related span in a different trace. The standard use is batch processing, where one job span links to each of the many traces that produced its inputs. See [Span links](https://signoz.io/docs/traces-management/guides/span-links/).
+A pointer from one [span](#span) to another causally related span, in the same trace or a different one. The standard use is batch processing, where one job span links to each of the many traces that produced its inputs. See [Span links](https://signoz.io/docs/traces-management/guides/span-links/).
 
 ### Span status
 
 The outcome of the operation a [span](#span) represents: `Unset`, `Ok`, or `Error`. Span status is what error rate is computed from, so setting it correctly on caught exceptions matters.
+
+### Spatial aggregation
+
+The second step of a metric query: combining the values of several [time series](#time-series) into one value for each interval, grouped by the attributes you select. The SigNoz alert builder calls this space aggregation. It runs after [temporal aggregation](#temporal-aggregation). SigNoz supports Sum, Avg, Min, and Max for [counters](#counter) and [gauges](#gauge), and the P50 to P99 percentiles for [histograms](#histogram) and [exponential histograms](#exponential-histogram). See [Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation).
 
 ### Sum
 
@@ -332,6 +384,10 @@ A metric that reports an additive value, with a [temporality](#temporality) and 
 ### Tail sampling
 
 Deciding whether to keep a [trace](#trace) after all its spans have arrived, so the decision can depend on what happened. For example, keep every trace with an error or over 2 seconds, and sample the rest at 5%. Requires a Collector that sees the whole trace. See [Tail sampling](https://signoz.io/docs/traces-management/guides/tail-sampling/).
+
+### Temporal aggregation
+
+The first step of a metric query: combining the [data points](#data-point) inside one [time series](#time-series) into one value for each interval. The interval comes from the time range of the query. The SigNoz alert builder calls this time aggregation. SigNoz supports Increase and Rate for [counters](#counter), and Latest, Sum, Avg, Min, Max, Count, and Count Distinct for [gauges](#gauge). For [histograms](#histogram), temporal aggregation is automatic and offers no function to choose: SigNoz merges the points in each interval into one histogram, using the [bucket](#bucket) boundaries the metric already carries. Compare [spatial aggregation](#spatial-aggregation). See [Aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation).
 
 ### Temporality
 
@@ -346,6 +402,10 @@ In SigNoz, series are real for storage and querying: each is identified by a [fi
 ### Trace
 
 The full record of one request's path through a system: a tree of [spans](#span) connected by parent-child relationships, sharing a [trace ID](#trace-id).
+
+### Trace Explorer
+
+The page where you search [spans](#span) by service, duration, and [attributes](#attribute). You read the results as a list, as whole [traces](#trace), as a time series, or as a table. Quick filters narrow the search from the side, and you can keep one as a [saved view](#saved-view). See [Trace Explorer](https://signoz.io/docs/userguide/traces/).
 
 ### Trace funnel
 
@@ -378,6 +438,12 @@ A non-monotonic [sum](#sum): it can rise or fall, like queue length or the count
 ### View
 
 An SDK-side rule that customizes what the SDK exports: renaming a metric stream, changing its aggregation or histogram buckets, dropping attributes, or ignoring an instrument entirely. Views are the earliest and cheapest place to cut [cardinality](#cardinality), because dropped attributes are never emitted at all.
+
+## W
+
+### Workspace
+
+One SigNoz Cloud account and everything inside it: telemetry, users, [ingestion keys](#ingestion-key), and settings. A workspace sits in one [region](#region) and has its own subdomain, which an Admin can rename. See [Edit your workspace URL](https://signoz.io/docs/manage/administrator-guide/workspace-url/).
 
 ## Z
 
