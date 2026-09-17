@@ -1,6 +1,6 @@
 ---
 date: 2026-09-16
-title: Restrict Dashboard Access with Custom Roles
+title: Restrict Dashboard Access in SigNoz with Custom Roles
 description: Grant read or edit access to specific dashboards in SigNoz using a custom role with dashboard transactions scoped by dashboard ID.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
 doc_type: tutorial
@@ -45,7 +45,7 @@ Panels run queries, so the role also needs telemetry `read` for the signals its 
 
 **JSON mode**: Paste the following:
 
-```json defaultCollapsed
+```json minimap defaultCollapsed
 [
   {
     "objectGroup": {
@@ -113,9 +113,9 @@ Sign in as a user holding only the scoped role and open the dashboards list:
 
 ## What the Role Can and Cannot Do
 
-- **The list shows everything.** `list` is not filtered by `read`, so the list still shows every dashboard in the workspace. A row the role cannot read stays clickable and reports the denial when it is opened. Use `read` to restrict a dashboard's contents, not its presence in the list.
+- **The list shows everything.** `list` is not filtered by `read`, so the list still shows every dashboard in the workspace. A row the role cannot read stays clickable and reports the denial when it is opened. `read` controls what a dashboard shows; the rows come from `list`.
 - **Saved views and pins follow `list`.** Anyone holding `list` can create, rename, and delete the saved views on the dashboards page, and pin dashboards for themselves.
-- **Denied controls are disabled, not hidden.** Editing, locking, publishing, and deleting each state the transaction they need on hover, so a user can tell what to ask for.
+- **Denied controls stay visible and disabled.** Editing, locking, publishing, and deleting each state the transaction they need on hover, so a user can tell what to ask for.
 - **New dashboard is independent of `list`.** The button stays enabled for a role that holds `create` without `list`.
 - **Public links are anonymous.** Anyone with a published link opens the dashboard without signing in, whatever the `dashboard` transactions say. Publishing and unpublishing require `update`.
 
