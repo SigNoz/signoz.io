@@ -1,6 +1,6 @@
 ---
 date: 2026-09-17
-title: OpenTelemetry Injector - Zero-Code Setup on Linux
+title: OpenTelemetry Injector - Zero-Code Setup Guide for Linux
 description: Use the OpenTelemetry Injector to instrument Java, Node.js, .NET, and Python applications on a Linux host and send traces, metrics, and logs to SigNoz.
 doc_type: howto
 ---
@@ -22,7 +22,11 @@ The OpenTelemetry Injector instruments Java, Node.js, .NET, and Python applicati
 
 - A Linux host that runs Debian, Ubuntu, RHEL, Fedora, or Amazon Linux, on amd64 or arm64.
 - Root access on that host. The injector writes to `/etc/ld.so.preload` and reads configuration from `/etc/opentelemetry/`.
-- An application that runs on Java, Node.js, .NET 8 or later, or Python.
+- An application that runs on one of these runtimes:
+  - Java
+  - Node.js 20.6 or later. Node.js 18.19 and later 18 releases also work. Node.js 19, and Node.js 20.0 to 20.5, do not.
+  - .NET 8 or later
+  - Python 3.10 or later
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
 
 ## How it works
@@ -177,7 +181,7 @@ Open **Metrics** and filter on one service. The agent reports HTTP duration and 
   caption="HTTP duration histograms from a service that carries no OpenTelemetry code"
 />
 
-Open **Logs** and filter by your service name. A log line from an instrumented framework carries the trace ID and the span ID of the request. You can move from the log to its trace.
+Open **Logs** and filter by your service name. Only an application that logs through an instrumented framework sends logs here. Each record carries the trace ID and the span ID of the request, so you can move from the log to its trace.
 
 <Figure
   src="/img/docs/instrumentation/otel-injector/logs-explorer.webp"
@@ -185,13 +189,21 @@ Open **Logs** and filter by your service name. A log line from an instrumented f
   caption="A log record with its trace ID, span ID, and host resource attributes"
 />
 
-To confirm that the injector is active on the host, open a new shell and run:
+To confirm that the injector acted on one process, start that process with the injector log turned up:
 
 ```bash noLineNumbers
-java -version
+OTEL_INJECTOR_LOG_LEVEL=debug <your start command>
 ```
 
-The first line of the output names the agent that the injector added:
+The injector prints one line for each variable it sets, in every language:
+
+```text noLineNumbers
+[otel-injector] [12345] setting "JAVA_TOOL_OPTIONS"="-javaagent:/usr/lib/opentelemetry/java/opentelemetry-javaagent.jar"
+[otel-injector] [12345] setting "NODE_OPTIONS"="--require /usr/lib/opentelemetry/nodejs/register.js"
+[otel-injector] [12345] setting "PYTHONPATH"="/usr/lib/opentelemetry/python/glibc"
+```
+
+A Java application also names the agent on its first line of output:
 
 ```text noLineNumbers
 Picked up JAVA_TOOL_OPTIONS: -javaagent:/usr/lib/opentelemetry/java/opentelemetry-javaagent.jar
@@ -274,7 +286,7 @@ Still no data in SigNoz? Work through [Debug missing traces, logs, and metrics](
 
 - Cause: The library is not in `/etc/ld.so.preload`, or the file is not readable by other users.
 - Fix: Run `cat /etc/ld.so.preload` and make sure that it holds the line `/usr/lib/opentelemetry/injector/libotelinject.so`. Run `ls -l /etc/ld.so.preload` and make sure that the mode is `0644`. The dynamic linker ignores the file for a non-root process when other users cannot read it.
-- Verify: A restarted Java process shows a `-javaagent` flag in `/proc/<pid>/environ`.
+- Verify: Restart the service with `OTEL_INJECTOR_LOG_LEVEL=debug`. The injector prints a `setting "..."` line for the variable of your runtime.
 
 ### Every service reports under the same name
 
@@ -335,7 +347,7 @@ Write the address as `127.0.0.1`. Node.js resolves `localhost` to the IPv6 addre
 ## Limitations
 
 - The injector runs on Linux only, on Debian and RHEL derivatives.
-- It instruments Java, Node.js, .NET 8 or later, and Python. The upstream library also supports Ruby, but the package repository ships no Ruby agent.
+- It instruments Java, Node.js 20.6 or later, .NET 8 or later, and Python 3.10 or later. Node.js 18.19 and later 18 releases also work. The upstream library also supports Ruby, but the package repository ships no Ruby agent.
 - It needs root to install, and it changes `/etc/ld.so.preload`, a file that affects every process on the host.
 - It acts on new processes only. A running process keeps its environment until you restart it.
 - The packages are at version `v0.0.3`, and the upstream project calls the current repository URLs interim.
