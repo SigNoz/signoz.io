@@ -18,6 +18,8 @@ Run before finishing. Setup commands (`yarn install`, `yarn dev`) are in `README
 - Docs changes (`data/docs/**`, docs images, docs nav, redirects/scripts):
   - `yarn check:docs-metadata` + `yarn test:docs-metadata`
   - `yarn check:doc-redirects` + `yarn test:doc-redirects`
+- CMS-synced content changes (`data/{docs,blog,guides,comparisons,opentelemetry,faqs,case-study}/**` or `scripts/cms-sync/schemas/**`):
+  - `yarn check:cms-frontmatter` + `yarn test:cms-frontmatter`
 - Site code changes (`app/**`, `components/**`, `hooks/**`, `utils/**`, etc.):
   - `yarn check:stale-urls` + `yarn test:stale-urls`
   - `yarn lint` (auto-fixes)
