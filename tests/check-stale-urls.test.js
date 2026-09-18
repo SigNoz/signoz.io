@@ -218,6 +218,115 @@ test('stripFencedCodeBlocks removes fenced blocks', () => {
   assert.ok(result.includes('after'))
 })
 
+test('extractUrls picks up frontmatter related_articles entries with context', () => {
+  const { extractUrls } = loadScript()
+  const content = [
+    '---',
+    'title: Post',
+    'related_articles:',
+    "  - '/blog/renamed-post'",
+    '  - "/docs/some/guide"',
+    '  - /comparisons/a-vs-b',
+    'tags:',
+    '  - OpenTelemetry',
+    '---',
+    'Body [link](/docs/install/).',
+  ].join('\n')
+  const results = extractUrls(content, 'data/blog/test.mdx')
+  const related = results.filter((r) => r.context === 'related_articles')
+  assert.equal(related.length, 3)
+  assert.deepEqual(
+    related.map((r) => [r.url, r.line]),
+    [
+      ['/blog/renamed-post', 4],
+      ['/docs/some/guide', 5],
+      ['/comparisons/a-vs-b', 6],
+    ]
+  )
+  const body = results.filter((r) => !r.context)
+  assert.equal(body.length, 1)
+  assert.equal(body[0].url, '/docs/install/')
+})
+
+test('extractUrls ignores list items outside frontmatter or under other keys', () => {
+  const { extractUrls } = loadScript()
+  const content = ['No frontmatter here.', 'related_articles:', '  - /blog/not-frontmatter'].join(
+    '\n'
+  )
+  const results = extractUrls(content, 'data/blog/test.mdx')
+  assert.equal(results.filter((r) => r.context === 'related_articles').length, 0)
+})
+
+test('checkUrl rewrites stale related_articles entry to destination without trailing slash', async () => {
+  const { checkUrl, buildRedirectMap, readRedirects } = loadScript()
+  const restoreCwd = enterFixture('stale-urls')
+  try {
+    const redirectMap = buildRedirectMap(await readRedirects())
+    const issues = checkUrl('/blog/renamed-post', redirectMap, 'related_articles')
+    assert.equal(issues.length, 1)
+    assert.equal(issues[0].type, 'stale')
+    assert.equal(issues[0].suggestion, '/blog/current-post')
+  } finally {
+    restoreCwd()
+  }
+})
+
+test('checkUrl reports unresolvable when redirect target is not an article and source is gone', async () => {
+  const { checkUrl, buildRedirectMap, readRedirects } = loadScript()
+  const restoreCwd = enterFixture('stale-urls')
+  try {
+    const redirectMap = buildRedirectMap(await readRedirects())
+    const issues = checkUrl('/blog/retired-post', redirectMap, 'related_articles')
+    assert.equal(issues.length, 1)
+    assert.equal(issues[0].type, 'related-unresolvable')
+  } finally {
+    restoreCwd()
+  }
+})
+
+test('checkUrl leaves related entry alone when source article still exists and redirect target is not an article', async () => {
+  const { checkUrl, buildRedirectMap, readRedirects } = loadScript()
+  const restoreCwd = enterFixture('stale-urls')
+  try {
+    const redirectMap = buildRedirectMap(await readRedirects())
+    const issues = checkUrl('/blog/shadowed-post', redirectMap, 'related_articles')
+    assert.equal(issues.length, 0)
+  } finally {
+    restoreCwd()
+  }
+})
+
+test('checkUrl applies no trailing-slash rules to related_articles entries', () => {
+  const { checkUrl } = loadScript()
+  assert.equal(checkUrl('/blog/some-post', new Map(), 'related_articles').length, 0)
+  assert.equal(checkUrl('/blog/some-post/', new Map(), 'related_articles').length, 0)
+})
+
+test('computeReplacement rewrites related entries only for article-resolvable redirects', async () => {
+  const { computeReplacement, buildRedirectMap, readRedirects } = loadScript()
+  const restoreCwd = enterFixture('stale-urls')
+  try {
+    const redirectMap = buildRedirectMap(await readRedirects())
+    assert.equal(
+      computeReplacement('/blog/renamed-post', redirectMap, 'related_articles'),
+      '/blog/current-post'
+    )
+    assert.equal(
+      computeReplacement('/blog/renamed-post/', redirectMap, 'related_articles'),
+      '/blog/current-post'
+    )
+    // Trailing slash alone is not an issue for related entries
+    assert.equal(computeReplacement('/blog/current-post/', redirectMap, 'related_articles'), null)
+    // Not auto-fixable: destination is not an article
+    assert.equal(computeReplacement('/blog/retired-post', redirectMap, 'related_articles'), null)
+    assert.equal(computeReplacement('/blog/shadowed-post', redirectMap, 'related_articles'), null)
+    // Body context still gets trailing-slash form
+    assert.equal(computeReplacement('/blog/renamed-post', redirectMap), '/blog/current-post/')
+  } finally {
+    restoreCwd()
+  }
+})
+
 test('isExemptFromTrailingSlash works correctly', () => {
   const { isExemptFromTrailingSlash } = loadScript()
   assert.equal(isExemptFromTrailingSlash('/'), true)

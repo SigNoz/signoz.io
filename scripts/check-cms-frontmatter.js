@@ -127,6 +127,19 @@ function validateRelatedArticles(value, rootDir, addError) {
   }
 }
 
+// Shared with check-stale-urls.js: does a related_articles entry resolve to a
+// local content file the CMS sync can attach?
+function isResolvableRelatedArticle(urlPath, rootDir = process.cwd()) {
+  const parsed = parseRelatedArticleUrl(urlPath)
+  if (!parsed || !RELATED_ARTICLE_TYPE_MAP[parsed.prefix]) return false
+  const folder = PREFIX_TO_DATA_FOLDER[parsed.prefix] || parsed.prefix
+  const slug = parsed.path.replace(/^\//, '')
+  return (
+    fs.existsSync(path.join(rootDir, 'data', folder, `${slug}.mdx`)) ||
+    fs.existsSync(path.join(rootDir, 'data', folder, `${slug}.md`))
+  )
+}
+
 function validateFrontmatter(folderName, frontmatter, rootDir = process.cwd()) {
   const schema = COLLECTION_SCHEMAS[folderName]
   if (!schema) {
@@ -328,6 +341,7 @@ module.exports = {
   validateFileContent,
   getAllowedKeys,
   isValidDate,
+  isResolvableRelatedArticle,
   getAllFiles,
   main,
 }
