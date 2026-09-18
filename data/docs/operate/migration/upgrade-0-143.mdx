@@ -1,0 +1,52 @@
+---
+date: 2026-09-18
+title: Upgrade SigNoz to v0.143.0 and Set the JWT Secret
+description: Upgrade self-hosted SigNoz to v0.143.0. Deployments using the JWT token provider must set SIGNOZ_TOKENIZER_JWT_SECRET or the server refuses to start.
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
+doc_type: howto
+---
+
+SigNoz v0.143.0 enforces a non-empty JWT secret when the JWT token provider is configured. If you run `tokenizer.provider: jwt`, set `SIGNOZ_TOKENIZER_JWT_SECRET` before you upgrade or the server will not start. Deployments on the default `opaque` provider are unaffected and need no changes.
+
+<Admonition type="warning" title="JWT deployments without a secret will fail to start">
+Before v0.143.0, a `jwt` provider with an empty secret logged a security warning and kept running. As of v0.143.0, SigNoz validates the config at startup and exits with:
+```bash
+jwt::secret must be set when provider is jwt
+```
+If your deployment relied on the empty-secret fallback, set `SIGNOZ_TOKENIZER_JWT_SECRET` to a strong random value before upgrading. See [Configure the JWT Secret](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/).
+</Admonition>
+
+## Who is affected
+
+- **Using `tokenizer.provider: jwt`:** Set a non-empty `SIGNOZ_TOKENIZER_JWT_SECRET` (or the deprecated `SIGNOZ_JWT_SECRET`) before upgrading.
+- **Using the default `opaque` provider:** No action needed. The new validation does not apply.
+
+If you are unsure which provider you run, check your config for `tokenizer.provider` or the `SIGNOZ_TOKENIZER_PROVIDER` environment variable. When it is unset, SigNoz uses `opaque`.
+
+## Upgrade self-hosted SigNoz
+
+### Step 1: Set the JWT secret (JWT provider only)
+
+If you run the JWT provider, set a strong secret in your environment configuration:
+
+```bash
+SIGNOZ_TOKENIZER_JWT_SECRET=<your-random-secret>
+```
+
+Generate one with `openssl rand -hex 32`. Prefer `SIGNOZ_TOKENIZER_JWT_SECRET` over the deprecated `SIGNOZ_JWT_SECRET`. For details, see [Configure the JWT Secret](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/).
+
+### Step 2: Upgrade SigNoz
+
+Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/) and set the target version to v0.143.0. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops.
+
+### Step 3: Verify the upgrade
+
+1. Pods and containers are healthy (`kubectl get pods -n <namespace>`, `docker compose ps`, or `systemctl status 'signoz-*'`).
+2. SigNoz reports v0.143.0 under **Settings**.
+3. You can sign in, confirming session tokens are signed with your secret.
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- <a href="https://github.com/SigNoz/signoz/issues" target="_blank" rel="noopener noreferrer nofollow">GitHub Issues</a>
+- [Community Slack](https://signoz.io/slack/)
