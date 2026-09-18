@@ -18,15 +18,11 @@ const matter = require('gray-matter')
 const { COLLECTION_SCHEMAS, RELATED_ARTICLE_TYPE_MAP } = require('./cms-sync/schemas')
 const { parseRelatedArticleUrl } = require('./cms-sync/relation-resolver')
 
-const SYNC_FOLDERS = [
-  'faqs',
-  'case-study',
-  'opentelemetry',
-  'comparisons',
-  'guides',
-  'blog',
-  'docs',
-]
+// Content collections synced from data/<folder>/ MDX: their manifests carry a
+// derived `path` field, unlike the support schemas (authors, tags, keywords).
+const SYNC_FOLDERS = Object.keys(COLLECTION_SCHEMAS).filter((folder) =>
+  COLLECTION_SCHEMAS[folder].fields.includes('path')
+)
 
 const SYNCED_PATTERN = new RegExp(`^data/(${SYNC_FOLDERS.join('|')})/.*\\.mdx?$`)
 
@@ -337,6 +333,7 @@ function main() {
 }
 
 module.exports = {
+  SYNC_FOLDERS,
   validateFrontmatter,
   validateFileContent,
   getAllowedKeys,

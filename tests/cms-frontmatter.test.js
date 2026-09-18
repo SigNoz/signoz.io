@@ -5,6 +5,7 @@ const os = require('os')
 const path = require('path')
 
 const {
+  SYNC_FOLDERS,
   validateFrontmatter,
   validateFileContent,
   getAllowedKeys,
@@ -278,16 +279,20 @@ describe('validateFileContent', () => {
 })
 
 describe('schema manifests', () => {
-  test('every synced folder schema declares required title and description', () => {
-    for (const folder of [
-      'docs',
+  test('SYNC_FOLDERS derives every synced content folder from the manifests', () => {
+    assert.deepStrictEqual([...SYNC_FOLDERS].sort(), [
       'blog',
-      'guides',
-      'comparisons',
-      'opentelemetry',
-      'faqs',
       'case-study',
-    ]) {
+      'comparisons',
+      'docs',
+      'faqs',
+      'guides',
+      'opentelemetry',
+    ])
+  })
+
+  test('every synced folder schema declares required title and description', () => {
+    for (const folder of SYNC_FOLDERS) {
       const schema = COLLECTION_SCHEMAS[folder]
       assert.ok(schema, `missing schema for ${folder}`)
       assert.ok(schema.required.includes('title'), `${folder} must require title`)
