@@ -60,3 +60,41 @@ export function agentResponse(body: string, options: AgentResponseOptions = {}):
 
   return new Response(body, { status: 200, headers })
 }
+
+/**
+ * Agent-facing 404 body. Plain "Not Found" text tells an agent nothing about
+ * where to go next, so every markdown endpoint answers a miss with a short
+ * markdown document pointing at the discovery surfaces instead.
+ */
+export function buildAgentNotFoundMarkdown(pathname?: string): string {
+  const target = pathname ? `\`${pathname}\`` : 'That path'
+
+  return [
+    '# 404 Not Found',
+    '',
+    `${target} does not exist on signoz.io.`,
+    '',
+    'Where to look next:',
+    '',
+    '- [llms.txt](https://signoz.io/llms.txt): index of the docs, markdown endpoints, and agent tooling.',
+    '- [Docs](https://signoz.io/docs/introduction/): documentation home.',
+    '- [Docs sitemap (markdown)](https://signoz.io/docs/sitemap.md): every documentation page.',
+    '- [sitemap.xml](https://signoz.io/sitemap.xml): every indexable URL on the site.',
+    '- [openapi.json](https://signoz.io/openapi.json): OpenAPI specification for the SigNoz API.',
+    '',
+    'Append `.md` to any signoz.io page URL, or send `Accept: text/markdown`, to read the markdown representation of that page.',
+    '',
+  ].join('\n')
+}
+
+/** 404 with a markdown body so agents can recover instead of dead-ending. */
+export function agentNotFoundResponse(pathname?: string): Response {
+  return new Response(buildAgentNotFoundMarkdown(pathname), {
+    status: 404,
+    headers: {
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Robots-Tag': 'noindex',
+    },
+  })
+}

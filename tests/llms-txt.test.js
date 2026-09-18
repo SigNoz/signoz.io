@@ -80,7 +80,7 @@ test('emitted links use trailing slashes except file-extension URLs', async () =
   assert.equal(urls.length > 0, true)
   urls.forEach((url) => {
     assert.equal(
-      url.endsWith('/') || url.endsWith('.md') || url.endsWith('.txt'),
+      ['/', '.md', '.txt', '.json', '.yaml'].some((suffix) => url.endsWith(suffix)),
       true,
       `link would redirect (trailingSlash): ${url}`
     )
@@ -91,9 +91,11 @@ test('API and access control section links the spec and the access-control docs'
   const sections = sectionsOf(await getBody())
   const lines = sections.get('API and access control').join('\n')
 
-  // The OpenAPI document already existed at this path but was referenced from
+  // The OpenAPI document already existed on the site but was referenced from
   // nowhere agents look, so scanners reported "no OpenAPI specification found".
-  assert.match(lines, /https:\/\/signoz\.io\/api\/api-reference-openapi\/latest\//)
+  assert.match(lines, /https:\/\/signoz\.io\/openapi\.json/)
+  assert.match(lines, /https:\/\/signoz\.io\/openapi\.yaml/)
+  assert.match(lines, /https:\/\/signoz\.io\/api-reference\.md/)
   assert.match(lines, /https:\/\/signoz\.io\/api-reference\//)
 
   ;[
