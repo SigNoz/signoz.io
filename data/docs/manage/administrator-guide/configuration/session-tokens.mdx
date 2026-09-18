@@ -1,0 +1,80 @@
+---
+date: 2026-09-18
+tags: [Self-Host]
+title: Configure Session Token Providers in Self-Hosted SigNoz
+description: Configure the SigNoz session token provider. Choose the revocable opaque provider or stateless JWT, and tune session lifetime, rotation, and limits.
+doc_type: reference
+---
+
+SigNoz issues a session token when a user signs in and checks it on every request. The `tokenizer` config block selects which provider mints those tokens and controls how long sessions live, how often tokens rotate, and how many concurrent sessions a user can hold.
+
+## Providers
+
+SigNoz ships two providers. Set the active one with `tokenizer.provider`.
+
+- **`opaque`** (default): tokens are random strings stored server-side in the SigNoz Metastore (the same SQL database SigNoz already uses). Because the server holds the record, it can revoke an individual session immediately, and it can cap concurrent sessions per user. No extra infrastructure is required.
+- **`jwt`**: tokens are self-contained, signed JSON Web Tokens. They are stateless and cannot be revoked before they expire. Choose this only if you specifically need stateless tokens.
+
+<Admonition type="warning" title="Opaque is the default since v0.143.0">
+Before v0.143.0 the implicit default was `jwt`. A deployment that never set `tokenizer.provider` switches to `opaque` on upgrade, which invalidates all active sessions and logs everyone out. To keep the JWT provider, set `tokenizer.provider: jwt` before you upgrade. See [Upgrade to v0.143.0](https://signoz.io/docs/operate/migration/upgrade-0-143/).
+</Admonition>
+
+## Configuration
+
+Set these under `tokenizer` in your SigNoz config file. Every key also has an environment-variable equivalent, formed by upper-casing the path and joining with underscores (for example `tokenizer.opaque.token.max_per_user` becomes `SIGNOZ_TOKENIZER_OPAQUE_TOKEN_MAX_PER_USER`).
+
+```yaml:conf/example.yaml defaultCollapsed
+tokenizer:
+  # Specifies the tokenizer provider to use.
+  provider: opaque
+  lifetime:
+    # The duration for which a user can be idle before being required to authenticate.
+    idle: 168h
+    # The duration for which a user can remain logged in before being asked to login.
+    max: 720h
+  rotation:
+    # The interval to rotate tokens in.
+    interval: 30m
+    # The duration for which the previous token pair remains valid after a token pair is rotated.
+    duration: 60s
+  jwt:
+    # The secret to sign the JWT tokens.
+    secret: secret
+  opaque:
+    gc:
+      # The interval to perform garbage collection.
+      interval: 1h
+    token:
+      # The maximum number of tokens a user can have. This limits the number of concurrent sessions a user can have.
+      max_per_user: 5
+```
+
+### Reference
+
+| Key | Default | Applies to | Description |
+|---|---|---|---|
+| `provider` | `opaque` | both | Active provider: `opaque` or `jwt`. |
+| `lifetime.idle` | `168h` (7 days) | both | How long a session can stay idle before the user must sign in again. |
+| `lifetime.max` | `720h` (30 days) | both | Maximum session lifetime, regardless of activity. |
+| `rotation.interval` | `30m` | both | How often a token is rotated. |
+| `rotation.duration` | `60s` | both | Grace window during which the previous token stays valid after rotation, so in-flight requests are not rejected. |
+| `jwt.secret` | *(empty)* | `jwt` | Secret used to sign and verify JWT tokens. Required when `provider: jwt`. See [JWT Secret Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/). |
+| `opaque.gc.interval` | `1h` | `opaque` | How often expired opaque tokens are garbage-collected from the Metastore. |
+| `opaque.token.max_per_user` | `5` | `opaque` | Maximum concurrent sessions per user. Signing in past the limit invalidates the oldest session. |
+
+Lifetime and rotation apply to both providers. Garbage collection and the per-user session limit apply only to the opaque provider, because they need the server-side token records. These limits govern interactive user sessions; they do not apply to [API keys](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/).
+
+### Validation rules
+
+SigNoz refuses to start if the tokenizer config breaks any of these constraints:
+
+- `lifetime.idle` and `lifetime.max` must not be negative.
+- `rotation.interval` must be smaller than `lifetime.idle`.
+- `lifetime.idle` must be smaller than `lifetime.max`.
+- `rotation.duration` must be smaller than `rotation.interval`.
+
+## Next steps
+
+- [Upgrade to v0.143.0](https://signoz.io/docs/operate/migration/upgrade-0-143/): the breaking change that made `opaque` the default.
+- [JWT Secret Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/): set the signing secret when you use the JWT provider.
+- [Authentication and Login](https://signoz.io/docs/userguide/authentication/): how sign-in, roles, and sessions fit together.
