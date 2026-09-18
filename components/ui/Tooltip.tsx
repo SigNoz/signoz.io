@@ -1,13 +1,13 @@
 'use client'
 
 import * as PopoverPrimitive from '@radix-ui/react-popover'
+import { Info as InfoCircle } from 'lucide-react'
 import React, { useRef, useState } from 'react'
 
 const OPEN_DELAY_MS = 200
 const CLOSE_DELAY_MS = 200
 
-const TRIGGER_CLASS_NAME =
-  'border-b border-dashed border-[var(--l3-foreground)] decoration-[var(--l3-foreground)] transition-colors hover:border-[var(--l1-foreground)] hover:text-[var(--l1-foreground)]'
+const TRIGGER_CLASS_NAME = 'content-link'
 
 interface TooltipProps {
   /** The text to underline and trigger the tooltip */
@@ -64,76 +64,79 @@ export default function Tooltip({
   }
 
   return (
-    <>
-      <PopoverPrimitive.Root
-        open={open}
-        onOpenChange={(next) => {
-          openedPassively.current = false
-          cancelOpen()
-          cancelClose()
-          setOpen(next)
-        }}
-      >
-        {link ? (
-          // Anchor, not Trigger: the term navigates on click; the card is a hover/focus preview
-          <PopoverPrimitive.Anchor asChild>
+    <PopoverPrimitive.Root
+      open={open}
+      onOpenChange={(next) => {
+        openedPassively.current = false
+        cancelOpen()
+        cancelClose()
+        setOpen(next)
+      }}
+    >
+      {link ? (
+        // Anchor, not Trigger: the term navigates on click; the card is a hover/focus preview
+        <PopoverPrimitive.Anchor asChild>
+          <a
+            href={link}
+            target="_blank"
+            rel="noopener"
+            data-glossary-definition={content}
+            className={`cursor-pointer ${TRIGGER_CLASS_NAME}`}
+            {...hoverHandlers}
+            onFocus={() => openPassively(0)}
+            onBlur={scheduleClose}
+          >
+            {text}
+            <InfoCircle className="glossary-info-icon" size={14} aria-hidden />
+          </a>
+        </PopoverPrimitive.Anchor>
+      ) : (
+        <PopoverPrimitive.Trigger asChild>
+          <button
+            type="button"
+            data-glossary-definition={content}
+            className={`inline cursor-help appearance-none border-0 bg-transparent [font:inherit] ${TRIGGER_CLASS_NAME}`}
+            {...hoverHandlers}
+          >
+            {text}
+            <InfoCircle className="glossary-info-icon" size={14} aria-hidden />
+          </button>
+        </PopoverPrimitive.Trigger>
+      )}
+      <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Content
+          side="top"
+          sideOffset={4}
+          avoidCollisions
+          collisionPadding={8}
+          onOpenAutoFocus={(event) => {
+            if (openedPassively.current) event.preventDefault()
+          }}
+          onPointerEnter={cancelClose}
+          onPointerLeave={(event) => {
+            if (event.pointerType !== 'touch') scheduleClose()
+          }}
+          className="z-[200] w-max max-w-[min(26.25rem,calc(100vw-2rem))] rounded border border-[var(--l3-border)] bg-[var(--popover)] p-4 text-left text-sm text-[var(--popover-foreground)] shadow-[0_6px_12px_0_color-mix(in_srgb,var(--base-black)_20%,transparent)] outline-none dark:border-[var(--l2-border)]"
+        >
+          <p className="mb-2 mt-0 font-medium leading-relaxed">{content}</p>
+
+          {link && (
             <a
               href={link}
               target="_blank"
               rel="noopener"
-              data-glossary-definition={content}
-              className={`cursor-pointer no-underline ${TRIGGER_CLASS_NAME}`}
-              {...hoverHandlers}
-              onFocus={() => openPassively(0)}
-              onBlur={scheduleClose}
+              className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--accent-primary)] transition-colors hover:text-[var(--accent-primary-hover)]"
             >
-              {text}
+              {linkText}
             </a>
-          </PopoverPrimitive.Anchor>
-        ) : (
-          <PopoverPrimitive.Trigger asChild>
-            <button
-              type="button"
-              data-glossary-definition={content}
-              className={`inline cursor-help appearance-none border-0 bg-transparent p-0 text-inherit [font:inherit] ${TRIGGER_CLASS_NAME}`}
-              {...hoverHandlers}
-            >
-              {text}
-            </button>
-          </PopoverPrimitive.Trigger>
-        )}
-        <PopoverPrimitive.Portal>
-          <PopoverPrimitive.Content
-            side="top"
-            sideOffset={8}
-            avoidCollisions
-            collisionPadding={8}
-            onOpenAutoFocus={(event) => {
-              if (openedPassively.current) event.preventDefault()
-            }}
-            onPointerEnter={cancelClose}
-            onPointerLeave={(event) => {
-              if (event.pointerType !== 'touch') scheduleClose()
-            }}
-            className="z-[200] w-64 rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] p-4 text-left text-sm text-[var(--l1-foreground)] shadow-[0_6px_12px_0_color-mix(in_srgb,var(--base-black)_20%,transparent)] outline-none"
-          >
-            <p className="mb-2 mt-0 font-medium leading-relaxed">{content}</p>
-
-            {link && (
-              <a
-                href={link}
-                target="_blank"
-                rel="noopener"
-                className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--accent-primary)] transition-colors hover:text-[var(--accent-primary-hover)]"
-              >
-                {linkText}
-              </a>
-            )}
-            <PopoverPrimitive.Arrow className="fill-[var(--l2-background)]" width={10} height={5} />
-          </PopoverPrimitive.Content>
-        </PopoverPrimitive.Portal>
-      </PopoverPrimitive.Root>
-      <span>&nbsp;</span>
-    </>
+          )}
+          <PopoverPrimitive.Arrow
+            className="fill-[var(--popover)] [filter:drop-shadow(0_1px_0_var(--l3-border))] dark:[filter:drop-shadow(0_1px_0_var(--l2-border))]"
+            width={10}
+            height={5}
+          />
+        </PopoverPrimitive.Content>
+      </PopoverPrimitive.Portal>
+    </PopoverPrimitive.Root>
   )
 }

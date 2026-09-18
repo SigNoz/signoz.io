@@ -107,10 +107,10 @@ test('appendGlossaryDefinitionsInHast surfaces tooltip definitions in brackets',
 
   const hast = unified().use(rehypeParse, { fragment: true }).parse(`
     <p>Each trace is a tree of
-      <a href="https://signoz.io/docs/glossary/#span" data-glossary-definition="A span represents a single unit of work in a trace.">spans</a>
-      <span>&nbsp;</span>that shows the request path. High-cardinality
-      <button data-glossary-definition="A label is a key-value pair attached to a metric.">labels</button>
-      <span>&nbsp;</span>multiply time series. Plain <span>text</span> stays untouched.</p>
+      <a href="https://signoz.io/docs/glossary/#span" data-glossary-definition="A span represents a single unit of work in a trace.">spans<svg class="signoz-icon glossary-info-icon" aria-hidden="true"></svg></a>
+      that shows the request path. High-cardinality
+      <button data-glossary-definition="A label is a key-value pair attached to a metric.">labels<svg class="signoz-icon glossary-info-icon" aria-hidden="true"></svg></button>
+      multiply time series. Plain <span>text</span> stays untouched.</p>
   `)
 
   const markdown = await hastToMarkdown(appendGlossaryDefinitionsInHast(hast), {

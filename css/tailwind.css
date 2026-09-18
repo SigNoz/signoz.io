@@ -5,6 +5,50 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Inline content links; mirrored by the typography `a` config in tailwind.config.js.
+   background-size fill instead of the footer's ::before pill so wrapped links keep it. */
+.content-link {
+  margin: 0 -3px;
+  padding: 0 3px;
+  border-radius: 2px;
+  color: var(--bg-robin-400);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--bg-robin-400) 60%, transparent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  background-image: linear-gradient(var(--bg-robin-400), var(--bg-robin-400));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition:
+    color 80ms cubic-bezier(0.2, 0.6, 0.2, 1),
+    background-size 80ms cubic-bezier(0.2, 0.6, 0.2, 1),
+    text-decoration-color 80ms cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+.content-link:hover,
+.content-link:focus-visible {
+  background-size: 100% 100%;
+  color: var(--l1-background);
+  text-decoration-color: transparent;
+}
+
+.content-link .glossary-info-icon {
+  display: inline-block;
+  margin-left: 3px;
+  vertical-align: calc(-0.09em - 2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content-link,
+  .prose a {
+    transition: none;
+  }
+}
+
 @keyframes hero-copy-in {
   0% {
     opacity: 0;
