@@ -21,7 +21,7 @@ The **OpenTelemetry Protocol (OTLP)** solves this by decoupling **how** telemetr
 
 The OpenTelemetry Protocol is the data-delivery protocol defined by the [OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) project. While OpenTelemetry aims to standardize how telemetry data is generated, OTLP defines precisely how that data is serialized and transmitted.
 
-It acts as the universal language between clients (applications) and servers ([OTel collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/) or OpenTelemetry-native observability backends like [SigNoz](https://signoz.io/)). When configured with exporters, your applications emit a clean, unified stream of data that any compatible backend can ingest without additional processing.
+OTLP acts as the universal language between clients (applications) and servers ([OTel collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/) or OpenTelemetry-native observability backends like [SigNoz](https://signoz.io/)). When configured with exporters, your applications emit a clean, unified stream of data that any compatible backend can ingest without additional processing.
 
 ### Why was OTLP Needed?
 
@@ -43,17 +43,15 @@ In the observability landscape, **data is sacred**, and data consistency is an e
 
 <Figure src="/img/blog/2026/01/what-is-otlp-flow.webp" alt="OTLP maintains performance and reliability under load with smart data transmission principles." caption="OTLP maintains performance and reliability under load with smart data transmission principles." />
 
-These design decisions enable OTLP to be performant and reliable across observability pipelines of all sizes, and to remain flexible to change as the observability landscape evolves.
-
 ### Protobuf: for Speed & Stability
 
-<a href="https://protobuf.dev/" rel="noopener noreferrer nofollow" target="_blank">Protobuf</a> is Google’s platform and language agnostic data serialization format, commonly used for structured data transmission between services.
+<a href="https://protobuf.dev/" rel="noopener noreferrer nofollow" target="_blank">Protobuf</a> is Google’s platform- and language-agnostic data serialization format, commonly used for structured data transmission between services.
 
 Protobuf encodes messages in a compact binary format, reducing payload size and improving data transfer times. It also enforces strict schema compatibility rules, enabling services to <a href="https://protobuf.dev/overview/#updating-defs" rel="noopener noreferrer nofollow" target="_blank">maintain compatibility</a> as message definitions evolve over time.
 
-OTLP leverages these features to efficiently transfer binary messages that are faster to process than text-based formats like JSON. On receiving these messages, server nodes spend less CPU cycles parsing the byte stream compared to JSON text messages.
+OTLP leverages these features to transfer compact binary messages that are significantly faster to serialize, transmit, and parse than text-based formats like JSON.
 
-Core OpenTelemetry libraries also enjoy the flexibility to iterate quickly on smaller changes, without being blocked by the protocol versioning. Similarly, minor <a href="https://github.com/open-telemetry/opentelemetry-java/discussions/6802#discussioncomment-11006580" rel="noopener noreferrer nofollow" target="_blank">changes to OTLP do not force dependency updates</a>, allowing libraries to develop at their own pace.
+Because Protobuf handles schema evolution gracefully, OTel libraries can iterate independently as <a href="https://github.com/open-telemetry/opentelemetry-java/discussions/6802#discussioncomment-11006580" rel="noopener noreferrer nofollow" target="_blank">minor OTLP changes don't force downstream dependency updates</a>.
 
 <KeyPointCallout title="JSON Compatibility">
 
@@ -65,7 +63,7 @@ While Protobuf is the preferred (and the default) message schema, OTLP also supp
 
 If “data is sacred”, then “fire and forget” is not an option.
 
-OTLP uses a **strict request-response model** where it works on a simple handshake principle — the client sends a request, and the server must explicitly parse, queue and acknowledge it before the transaction is considered complete. In case of transmission failures, the client retries the request to prevent any intermittent data loss.
+OTLP uses a **strict request-response model**: the client sends a request, and the server must explicitly parse, queue, and acknowledge it before the transaction is considered complete. In case of transmission failures, the client retries the request to prevent any intermittent data loss.
 
 Critically, OTLP limits this guarantee to one hop at a time between a pair of nodes, such as an instrumented app and an OTLP-compatible backend (be it an OTel Collector instance or an observability backend itself).<br />
 To achieve end-to-end reliability across the entire [observability pipeline](https://signoz.io/blog/opentelemetry-deployment-patterns/), OTLP chains these acknowledgement hops together, creating a continuous delivery path across the pipeline.
@@ -80,7 +78,7 @@ OTLP servers can return one of three response types, with each response affectin
 
 ### Smart Batching and Data Organization
 
-Network calls are expensive, and opening a new connection for sending one telemetry data point can critically slow down observability pipelines. OTLP groups data into batches to reduce this overhead. Not only that, it organizes the data to solve a massive pain point in legacy systems: data redundancy.
+Network calls are expensive; sending a single data point per request would quickly bottleneck any data transmission pipeline. OTLP groups telemetry into batches to reduce this overhead, and organizes it hierarchically to eliminate metadata redundancy, which has been a persistent problem in legacy systems.
 
 In older systems, metadata was often “flat”, where it was added to each individual data point. If you sent 100 log entries from your checkout service, each log entry would likely repeat the string `service.name = checkout`. This is a massive waste of bandwidth and storage.
 
@@ -92,15 +90,13 @@ OTLP solves this by structuring data hierarchically, preventing metadata duplica
 
 ### Built-in Backpressure and Flow Control
 
-**Backpressure** occurs when a consumer cannot keep up with a producer, and forces the producer to slow down or block, to prevent crashes. 
+High-throughput OTLP clients can easily overwhelm the servers consuming their data. To handle this, OTLP integrates **backpressure** signalling directly into the protocol — a mechanism that lets overloaded servers tell clients to slow down, rather than silently dropping data or crashing.
 
-High-throughput OTLP clients can easily overwhelm the servers consuming their data. To handle these scenarios elegantly, OTLP integrates backpressure signalling directly into the protocol.
-
-When a server is unable to deal with incoming data, rather than crashing silently, it responds with a specific signal (eg., HTTP 429 `Too Many Requests` response or `RESOURCE_EXHAUSTED` in gRPC). Crucially, it also includes a `Retry-After` header for HTTP, status codes and metadata for gRPC, that tells the client exactly how many seconds it should wait before trying again. This simple mechanism helps avoid the “thundering herd” problem, where clients continue retrying requests without delay, overwhelming the server completely.
+In practice, an overloaded server responds with a specific status code — HTTP 429 `Too Many Requests` or gRPC `RESOURCE_EXHAUSTED` — along with a `Retry-After` header (HTTP) or metadata (gRPC) that tells the client exactly how long to wait. This prevents the “thundering herd” problem, where clients retry failing requests without delay and overwhelm the receiving server completely.
 
 <Figure src="/img/blog/2026/01/what-is-otlp-backpressure.webp" alt="OTLP nodes use backpressure signalling to avoid system failures" caption="OTLP nodes use backpressure signalling to avoid system failures" />
 
-Finally, OTLP supports `gzip` compression to support high-demand scenarios. This enables clients to significantly reduce network bandwidth by minimizing payload size, in exchange for some CPU cost (for compressing-decompressing the messages).
+OTLP also supports `gzip` compression, allowing clients to significantly reduce payload size at the cost of some CPU overhead for compression and decompression.
 
 ## Transport Protocols: gRPC and HTTP
 
@@ -108,9 +104,11 @@ OTLP supports data transmission over two protocols: **gRPC** and **HTTP**. Both 
 
 ### OTLP/gRPC: The Performant Default
 
-By default, OTLP transmits data over gRPC on port 4317. It is the preferred medium for data transfer because of its efficiency.
+By default, OTLP transmits data over gRPC, which is the preferred transport for its efficiency, on port 4317. Do check the language-specific documentation for each application or service you instrument, as the defaults can vary per <a href="https://opentelemetry.io/docs/languages/#status-and-releases" target="_blank" rel="noopener noreferrer nofollow" >OpenTelemetry SDK implementation</a>.
 
-gRPC, running on top of HTTP/2, leverages **multiplexing-** instead of opening a new TCP connection for each request, it allows multiple data streams (traces, logs, and metrics) to share the same TCP connection. This significantly reduces network overhead and CPU cost associated with managing connection handshakes, making it ideal for high-throughput environments.
+
+gRPC runs on top of HTTP/2 and leverages **multiplexing**, which, instead of opening a new TCP connection for each request, allows multiple data streams (traces, logs, and metrics, in this case) to share a single TCP connection.<br />
+This makes it ideal for application systems requiring high-throughput data transmission by cutting the overhead of connection handshakes and enabling efficient reuse of network resources.
 
 ### OTLP/HTTP: Universal Fallback
 
