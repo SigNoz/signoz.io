@@ -41,6 +41,20 @@ else
   echo 'husky (pre-commit): skipping CMS asset check (no migrated content changes staged)'
 fi
 
+# Validate frontmatter of CMS-synced content
+if printf '%s\n' "$STAGED_FILES" | grep -E '^data/(docs|faqs|case-study|opentelemetry|comparisons|guides|blog)/.*\.mdx?$' >/dev/null; then
+  echo 'husky (pre-commit): validating CMS content frontmatter'
+  node scripts/check-cms-frontmatter.js --staged
+else
+  echo 'husky (pre-commit): skipping CMS frontmatter check (no synced content staged)'
+fi
+
+# Run CMS frontmatter tests when the validator or schemas change
+if printf '%s\n' "$STAGED_FILES" | grep -E '^(scripts/check-cms-frontmatter\.js|tests/cms-frontmatter\.test\.js|scripts/cms-sync/schemas/)' >/dev/null; then
+  echo 'husky (pre-commit): running CMS frontmatter tests'
+  yarn test:cms-frontmatter
+fi
+
 # Run CMS sync tests
 if printf '%s\n' "$STAGED_FILES" | grep -E '^(scripts/cms-sync/|scripts/sync-content-to-strapi\.js|scripts/check-cms-assets\.js)' >/dev/null; then
   echo 'husky (pre-commit): running CMS sync tests'
