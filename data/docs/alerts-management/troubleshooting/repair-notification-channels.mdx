@@ -1,0 +1,135 @@
+---
+date: 2026-09-19
+title: Repair Notification Channels After v1 to v2 Migration
+description: Diagnose and repair SigNoz notification channels that fail to load in the v2 API after migration, using the admin-only channel repair endpoint.
+doc_type: howto
+---
+
+## Problem Description
+
+Some notification channels created through the deprecated v1 channels API cannot be read by the v2 notification channels API. In the SigNoz UI or through `GET /api/v2/notification_channels`, an affected channel fails to load or is missing from the list.
+
+This happens because the v1 API stored channel shapes that v2 does not model: a record with no stored notifier type, a single record carrying several notifier configurations, or a notifier kind (for example Telegram) that v2 does not support.
+
+The repair endpoint diagnoses one such channel and applies the fitting fix. It is an API-only administrative utility, available on all deployments with no feature flag. There is no UI surface.
+
+## Prerequisites
+
+- The **SigNoz Admin** role. Editor and Viewer receive `403 Forbidden`.
+- An API key or session token. See [Manage API keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- The `id` of the affected channel. If a channel is missing from the v2 list, find its id through the v1 channels API or your Metastore.
+
+## Diagnose a channel (dry run)
+
+Send the request without `apply=true`. The endpoint reports what defect it found and what action it would take, and writes nothing.
+
+```bash
+curl -X POST "https://<your-signoz-host>/api/v2/notification_channels/<channel-id>/repair" \
+  -H "SIGNOZ-API-KEY: <your-api-key>"
+```
+
+**Verify these values:**
+
+- `<your-signoz-host>`: Your SigNoz host, for example `app.us.signoz.cloud` (Cloud) or your self-hosted address.
+- `<channel-id>`: The UUID of the channel to inspect.
+
+A dry-run report for a channel carrying both a Slack and a webhook configuration:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "0198e2b1-2c3d-4e5f-8a9b-1c2d3e4f5a6b",
+    "defect": "multiple_notifiers",
+    "detail": "carries 2 notifier configurations",
+    "action": "split",
+    "channels": [
+      { "id": "0198e2b1-2c3d-4e5f-8a9b-1c2d3e4f5a6b", "displayName": "team-oncall", "kind": "slack" },
+      { "id": "0198e2c4-7f8a-4b1c-9d2e-3f4a5b6c7d8e", "displayName": "team-oncall (2)", "kind": "webhook" }
+    ],
+    "applied": false
+  }
+}
+```
+
+`applied` is `false`, so nothing changed. `channels` previews the channels that would exist once the action runs.
+
+## Understand the report
+
+The response always includes a `defect` and the `action` that repairs it.
+
+| `defect` | What it means | `action` |
+|---|---|---|
+| `none` | The channel is readable. Nothing to fix. | `none` |
+| `missing_type` | The stored notifier type is empty. | `retype` |
+| `multiple_notifiers` | One record carries several notifier configurations. | `split` |
+| `unsupported_notifier` | The notifier kind is not modelled by v2 (for example Telegram). | `delete` |
+| `unrepresentable` | The stored data cannot be decoded into any v2 channel, and no automatic action fixes it. | `none` |
+
+Other fields:
+
+- `detail`: A human-readable description of the defect.
+- `channels`: The channel(s) that exist after the action. The channel itself for `none` and `retype`, every part for `split`, and empty for `delete`.
+- `blockers`: Reasons an action was not, or would not be, applied. See [When a delete is blocked](#when-a-delete-is-blocked).
+- `applied`: Whether the response reflects a change that was written.
+
+## Apply a repair
+
+Once the dry run shows the action you expect, add `?apply=true` to execute it. The response confirms `applied: true`.
+
+```bash
+curl -X POST "https://<your-signoz-host>/api/v2/notification_channels/<channel-id>/repair?apply=true" \
+  -H "SIGNOZ-API-KEY: <your-api-key>"
+```
+
+## Repair actions in detail
+
+### retype
+
+Fixes a `missing_type` channel by deriving the notifier type from the stored data. The data is left untouched and the channel keeps its id. After the repair it loads through the v2 API.
+
+### split
+
+Fixes a `multiple_notifiers` channel by writing one channel per notifier configuration. The first notifier keeps the original channel's id and name, so existing references stay valid. Each additional channel is a new record named after the original with a suffix, for example `team-oncall (2)`, `team-oncall (3)`.
+
+<Admonition type="info" title="Routing policies are updated automatically">
+Every routing policy that referenced the original channel is updated to also include every new channel produced by the split, so alerts that fanned out to the combined channel still reach all of its destinations.
+</Admonition>
+
+### delete
+
+Fixes an `unsupported_notifier` channel by removing it, because v2 has no way to represent the notifier. Migrate any alerts that relied on it to a [supported notification channel](https://signoz.io/docs/alerts-management/notification-channel/slack/) first.
+
+#### When a delete is blocked
+
+A delete is refused while any [routing policy](https://signoz.io/docs/alerts-management/routing-policy/) still names the channel. The dry run and the apply request both list the offending policies in `blockers` and leave the channel in place:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "0198e2d0-1a2b-4c3d-9e4f-5a6b7c8d9e0f",
+    "defect": "unsupported_notifier",
+    "detail": "notifier \"telegram\" is not modelled by v2",
+    "action": "delete",
+    "blockers": ["used by routing policy \"critical-alerts\""],
+    "channels": null,
+    "applied": false
+  }
+}
+```
+
+Remove the channel from each listed routing policy, then run the repair again with `apply=true`.
+
+## Unrepresentable channels
+
+A channel reported as `unrepresentable` has an `action` of `none`: the repair endpoint cannot fix it automatically. Inspect the `detail` field for the decode error, then delete the channel through the v1 channels API and recreate it with the [v2 notification channels](https://signoz.io/docs/alerts-management/notification-channel/slack/) if it is still needed.
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `403 Forbidden` | The caller is not a SigNoz Admin. | Use an Admin API key or session. |
+| `404 Not Found` | No channel exists with that id. | Confirm the `id` against the v1 channels API or the Metastore. |
+| `defect: none` on a channel you expected to be broken | The channel is already readable by v2. | No action needed. |
+| Delete request returns `applied: false` with `blockers` | A routing policy still references the channel. | Update those policies, then retry with `apply=true`. |
