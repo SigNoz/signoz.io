@@ -123,13 +123,15 @@ docker compose logs -f
 <TabItem value="k8s" label="Kubernetes">
 
 ```bash
-kubectl rollout restart deployment/otel-collector -n <collector-namespace>
-kubectl logs -f deployment/otel-collector -n <collector-namespace>
+kubectl rollout restart deployment/<release>-k8s-infra-otel-deployment -n <collector-namespace>
+kubectl logs -f deployment/<release>-k8s-infra-otel-deployment -n <collector-namespace>
 ```
 
-Replace `<collector-namespace>` with the namespace that runs the Collector. Use
-`daemonset/` or `statefulset/` in place of `deployment/` if the Collector runs as
-one of those.
+The SigNoz K8s Infra chart installs two Collectors. Add the scrape job to the
+Deployment, which handles cluster-wide scraping, rather than to the per-node
+`<release>-k8s-infra-otel-agent` DaemonSet. Replace `<release>` with your Helm
+release name and `<collector-namespace>` with the namespace that runs it. If you
+run your own Collector under a different name, use that name instead.
 
 <Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
   For more information on installing and configuring the Collector, see [Install the SigNoz K8s Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
@@ -138,11 +140,12 @@ one of those.
 </TabItem>
 <TabItem value="windows" label="Windows">
 
-The MSI installs the Collector as a Windows service. Run this in PowerShell:
+The MSI installs the Collector as a Windows service named `otelcol-contrib`, with
+`OpenTelemetry Collector` as its display name. Run this in PowerShell:
 
 ```powershell
-Restart-Service -Name "OpenTelemetry Collector"
-Get-EventLog -LogName Application -Source "OpenTelemetry Collector" -Newest 20
+Restart-Service -Name otelcol-contrib
+Get-EventLog -LogName Application -Source otelcol-contrib -Newest 20
 ```
 
 <Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
