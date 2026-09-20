@@ -1,8 +1,8 @@
 ---
-date: 2026-08-22
+date: 2026-09-19
 tags: [Self-Host]
-title: Standard Upgrade Guide for SigNoz
-description: Learn how to upgrade SigNoz Instance
+title: Upgrade SigNoz - Standard Upgrade Guide for Self-Hosted
+description: Learn how to upgrade a self-hosted SigNoz deployment with Foundry, Helm, Docker, or Docker Swarm, and confirm that telemetry flows after the upgrade.
 doc_type: howto
 ---
 
@@ -23,10 +23,6 @@ Foundry is an open-source CLI that runs your self-hosted observability stack as 
 
 Foundry upgrades a Docker Compose, Docker Swarm, Kubernetes, or systemd deployment through the same loop. Update `foundryctl`, check your upgrade path, set the target version in `casting.yaml`, then re-run `foundryctl cast`.
 
-<Admonition type="info" title="Render, Coolify, and Railway castings">
-`cast` cannot deploy to these platforms. It regenerates the deployment files under `pours/` and prints the steps to apply them, so finish the upgrade on the platform itself.
-</Admonition>
-
 ### Step 1: Update foundryctl
 
 ```bash
@@ -43,7 +39,7 @@ Upgrade to one stop at a time, in the order the tool returns. Read that release'
 
 ### Step 3: Set the target version in casting.yaml
 
-Pin the SigNoz and collector images to the release you want. An unpinned component defaults to the `latest` tag, which makes an upgrade hard to repeat and hard to roll back.
+Pin the SigNoz and collector images to the release you want. An unpinned component defaults to the `latest` tag.
 
 ```yaml
 spec:
@@ -57,12 +53,18 @@ spec:
 
 SigNoz and the SigNoz OTel Collector use separate version series, so the two tags do not match. Take each tag from its own releases page: <a href="https://github.com/SigNoz/signoz/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz releases</a> and <a href="https://github.com/SigNoz/signoz-otel-collector/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz OTel Collector releases</a>. If you also pin ClickHouse, keep it on a version the collector supports. Foundry checks the combination and stops with the required version when it does not match.
 
-For a `mode: systemd` deployment, image tags do not apply. Foundry runs the binaries already installed on the host, so Step 4 replaces those instead.
-
 ### Step 4: Apply the casting
 
 <Tabs entityName="environment">
-<TabItem value="containers" label="Docker, Swarm, and Kubernetes" default>
+<TabItem value="docker" label="Docker and Docker Swarm" default>
+
+<Admonition type="warning" title="On Docker Compose with unpinned images? Pull first">
+On Docker Compose, `cast` runs `docker compose up -d` without a pull, and Compose reuses an image tag that already exists on the host. A `latest` tag you pulled earlier therefore keeps serving the old build. Pull the images first:
+
+```bash
+docker compose -f pours/deployment/compose.yaml pull
+```
+</Admonition>
 
 ```bash
 foundryctl cast -f casting.yaml
@@ -72,21 +74,20 @@ foundryctl cast -f casting.yaml
 
 - Docker Compose: `docker compose up -d` against the regenerated Compose file
 - Docker Swarm: `docker stack deploy`
-- Kubernetes with Helm: `helm upgrade` on your existing release
 
-The telemetry-store migrator runs as part of the rollout, so schema migrations need no separate step.
-
-<Admonition type="warning" title="On Docker Compose with unpinned images? Pull first">
-On Docker Compose, `cast` runs `docker compose up -d` without a pull, and Compose reuses an image tag that already exists on the host. A `latest` tag you pulled earlier therefore keeps serving the old build. Pull the images first, then cast:
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
 
 ```bash
-docker compose -f pours/deployment/compose.yaml pull
 foundryctl cast -f casting.yaml
 ```
-</Admonition>
+
+`cast` re-checks your tools, regenerates the files under `pours/`, and runs `helm upgrade` on your existing Helm release.
 
 </TabItem>
 <TabItem value="systemd" label="Linux (systemd)">
+
+For a `mode: systemd` deployment, image tags do not apply. Foundry runs the binaries already installed on the host, so the steps below replace those binaries instead.
 
 `cast` starts units, but it never stops or restarts a unit that is already running. An upgrade therefore stops the services first and re-runs the migrations by hand.
 
@@ -94,6 +95,8 @@ foundryctl cast -f casting.yaml
    ```bash
    sudo systemctl stop signoz-signoz.service signoz-ingester.service
    ```
+
+   Each unit name starts with the `metadata.name` in your casting, which is `signoz` by default.
 
 2. **Extract the new archives over the existing directories.** Use your own target versions, and your own paths if the casting annotations point elsewhere.
    ```bash
@@ -104,7 +107,7 @@ foundryctl cast -f casting.yaml
      | sudo tar -xz --strip-components=1 -C /opt/ingester
    ```
 
-   Extract each archive in full. The `signoz` binary loads the UI and the email templates relative to itself, so `bin/`, `web/`, `templates/`, and `conf/` must stay together.
+   Extract each archive in full. Foundry points the SigNoz unit at `/opt/signoz/web` and `/opt/signoz/templates`, which are the directories next to `bin/`. If you replace only the binary, SigNoz keeps serving the UI and the email templates of the old release.
 
 3. **Re-run the schema migrations with the new collector:**
    ```bash
