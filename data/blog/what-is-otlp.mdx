@@ -23,7 +23,7 @@ Before OTLP arrived, the observability landscape was fragmented because differen
 
 Further, engineers also found themselves **vendor-locked**. Because the application code used vendor-specific instrumentation agents, switching providers required weeks of effort. **The prevailing mindset was just to make it work** with the current toolset, rather than trying to improve it.
 
-The daily routine of using these tools was equally frustrating. Since telemetry data was sent to isolated, signal-specific platforms — one for tracing, another for logs, and so on — debugging a single incident required constant context switching. Anyone who has debugged a high-pressure production issue knows how difficult tracking moving parts is. Imagine doing that with minimal context on cause-and-effect!
+The daily routine of using these tools was equally frustrating. Since telemetry data was sent to isolated, signal-specific platforms, one for tracing, another for logs, and so on, debugging a single incident required constant context switching. Anyone who has debugged a high-pressure production issue knows how difficult tracking moving parts is. Imagine doing that with minimal context on cause-and-effect!
 
 OTLP’s unified standard gives teams the flexibility to use a single backend for all their observability needs. With the vendor lock-in barrier removed, observability tools must compete on features rather than data format compatibility. Because every OTLP-compatible backend receives the same standardized data, teams can correlate traces, metrics, and logs across their entire stack — a holistic view that was nearly impossible with fragmented tooling.
 
@@ -31,7 +31,7 @@ OTLP’s unified standard gives teams the flexibility to use a single backend fo
 
 ## How OTLP Works Behind the Scenes
 
-In the observability landscape, **data is sacred** — there is little room for data loss or malformed payloads. Data loss over just 500ms can prevent engineers from understanding and fixing issues in complex distributed systems. [OpenTelemetry](https://signoz.io/blog/opentelemetry-architecture/) designed the OTLP format around four principles to ensure this:
+In the observability landscape, **data is sacred**; there is little room for data loss or malformed payloads. Data loss over just 500ms can prevent engineers from understanding and fixing issues in complex distributed systems. [OpenTelemetry](https://signoz.io/blog/opentelemetry-architecture/) designed the OTLP format around four principles to ensure this:
 
 1. **Hierarchical data organization** that eliminates metadata redundancy across batches
 2. **Efficient encoding** via Protobuf for compact, schema-safe payloads
@@ -91,7 +91,7 @@ The Resource → Scope → Data hierarchy described above plays a key role here.
 
 ### Built-in Backpressure and Flow Control
 
-High-throughput OTLP clients can easily overwhelm the servers consuming their data. To handle this, OTLP integrates **backpressure** signalling directly into the protocol — a mechanism that lets overloaded servers tell clients to slow down, rather than silently dropping data or crashing.
+High-throughput OTLP clients can easily overwhelm the servers consuming their data. To handle this, OTLP integrates **backpressure** signalling directly into the protocol; this mechanism that lets overloaded servers tell clients to slow down, rather than silently dropping data or crashing.
 
 In practice, an overloaded server responds with a specific status code — HTTP 429 `Too Many Requests` or gRPC `RESOURCE_EXHAUSTED` — along with a `Retry-After` header (HTTP) or metadata (gRPC) that tells the client exactly how long to wait. This prevents the “thundering herd” problem, where clients retry failing requests without delay and overwhelm the receiving server completely.
 
@@ -101,7 +101,7 @@ OTLP also supports `gzip` compression, allowing clients to significantly reduce 
 
 ## Transport Protocols: gRPC and HTTP
 
-OTLP supports data transmission over two protocols: **gRPC** and **HTTP**. Both transports use the same underlying OpenTelemetry format — a shared Protobuf schema that keeps your data consistent and corruption-free regardless of which transport you choose.
+OTLP supports data transmission over two protocols: **gRPC** and **HTTP**. Both transports use the same shared Protobuf schema that keeps telemetry data from your applications consistent and corruption-free regardless of which transport you choose.
 
 ### OTLP/gRPC: The Performant Default
 
