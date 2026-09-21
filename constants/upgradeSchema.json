@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0",
-  "pathHead": "v0.135.0",
+  "pathHead": "v0.143.0",
   "general": {
     "upgradeSummary": [
       "This tool provides the mandatory sequential path to upgrade your instance safely.",
@@ -28,9 +28,35 @@
     "troubleshootingUrl": "https://signoz.io/docs/user-guide/troubleshooting/"
   },
   "releases": {
-    "v0.135.0": {
+    "v0.143.0": {
       "isMandatoryStop": true,
       "nextMandatoryStop": null,
+      "releaseDate": "2026-09-21",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0-143",
+      "instructions": [
+        "Upgrade signoz-otel-collector to v0.144.11 together with SigNoz. SigNoz v0.143.0 requires it.",
+        "The collector traces pipeline needs the signozspanmapper and signozllmpricing processors. The default config from Foundry and the Helm chart carries both. If you maintain your own collector config or override the traces processors list, add both before or with the upgrade.",
+        "Login sessions move to opaque tokens by default. Every user signs in again once. To keep JWT sessions, set SIGNOZ_TOKENIZER_PROVIDER=jwt and SIGNOZ_TOKENIZER_JWT_SECRET before you upgrade."
+      ],
+      "deprecations": [],
+      "warnings": [
+        {
+          "title": "Every user signs in again once",
+          "details": "Sessions issued before the upgrade are not valid afterwards. Plan the upgrade for a time when a forced sign-in is acceptable."
+        },
+        {
+          "title": "Custom collector configs need the two new processors",
+          "details": "A traces pipeline without signozspanmapper and signozllmpricing keeps running, but AI observability stays off until both entries are added."
+        },
+        {
+          "title": "Docker Swarm needs a stack removal",
+          "details": "Swarm configs are immutable, so the changed collector config cannot be applied in place. Remove the stack, then cast again. Services are down in between and data on named volumes is kept."
+        }
+      ]
+    },
+    "v0.135.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.143.0",
       "releaseDate": "2026-07-27",
       "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0-135",
       "instructions": [

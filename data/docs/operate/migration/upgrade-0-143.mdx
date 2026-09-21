@@ -1,0 +1,151 @@
+---
+date: 2026-09-21
+title: Upgrade SigNoz to v0.143.0 with AI Observability Processors
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
+description: Upgrade self-hosted SigNoz to v0.143.0. Add two AI observability trace processors to your collector and plan for every user to sign in again once.
+doc_type: howto
+---
+
+SigNoz v0.143.0 prepares the OTel collector for AI observability and moves login sessions to opaque tokens. Two things follow for self-hosted upgrades: the collector must run signoz-otel-collector v0.144.11 with two new processors in its traces pipeline, and every user signs in again once.
+
+<Admonition type="warning" title="Every user signs in again once">
+The default session provider changes from JWT to opaque tokens. Sessions issued before the upgrade are not valid afterwards, so every user is signed out once and logs back in. If you want to keep JWT sessions, see [Keep the JWT session provider](#keep-the-jwt-session-provider) before you upgrade, because JWT without a secret now refuses to start.
+</Admonition>
+
+<Admonition type="info" title="The collector config needs two new processors">
+SigNoz now manages the `signozspanmapper` and `signozllmpricing` processors in your collector over OpAMP. It writes their contents, but it does not add them to the traces pipeline. If you run the default collector config from Foundry or the Helm chart, the new defaults carry them. If you maintain your own collector config, [add them yourself](#add-the-ai-observability-processors-to-a-custom-collector-config).
+</Admonition>
+
+## Who needs to act
+
+| If you | Then |
+| --- | --- |
+| Run the default collector config | Nothing beyond the upgrade. Sign in again afterwards |
+| Override the collector config or its traces pipeline | [Add the two processors](#add-the-ai-observability-processors-to-a-custom-collector-config) before or with the upgrade |
+| Pin the collector image below v0.144.11 | Move it to v0.144.11, or stay on SigNoz v0.142 until you can |
+| Set `SIGNOZ_TOKENIZER_PROVIDER=jwt` explicitly | Set `SIGNOZ_TOKENIZER_JWT_SECRET` too, or SigNoz will not start |
+
+## Upgrade self-hosted SigNoz
+
+### Step 1: Back up your data
+
+Pricing rules and attribute mappings live in the SigNoz Metastore (SQLite or Postgres) alongside dashboards and alerts. Back up the Metastore before you start. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops before you move to v0.143.0.
+
+### Step 2: Upgrade SigNoz and the collector
+
+Upgrade both together. SigNoz v0.143.0 requires signoz-otel-collector v0.144.11.
+
+<Tabs entityName="installer">
+<TabItem value="foundry" label="Foundry" default>
+
+Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundryctl</a> to pick up the v0.143.0 collector config, then re-apply your existing `casting.yaml`.
+
+<Admonition type="warning" title="Update the images before you run cast">
+`cast` applies the regenerated files but does not pull images. If your casting uses floating tags such as `latest`, refresh `signoz/signoz` and `signoz/signoz-otel-collector` on the host first so the restarted containers run v0.143.0 and v0.144.11. Otherwise the collector restarts on the old image with the new config.
+</Admonition>
+
+<Tabs entityName="foundry-platform">
+<TabItem value="foundry-standard" label="Compose, Kubernetes, systemd, ECS" default>
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+foundryctl cast -f casting.yaml
+```
+
+`cast` regenerates the collector config with the two processors when the ingester image is `latest` or v0.144.11 and later, and keeps the previous config for an older pin. If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting.yaml</a> pins image versions, bump SigNoz to v0.143.0 and the collector to v0.144.11 yourself; `cast` refuses SigNoz v0.143.0 paired with a collector below v0.144.11.
+
+If your casting sets `spec.config` on the ingester with its own traces `processors` list, that list replaces the generated one. [Add the two processors](#add-the-ai-observability-processors-to-a-custom-collector-config) to it.
+
+</TabItem>
+<TabItem value="foundry-swarm" label="Docker Swarm">
+
+Swarm configs are immutable. `cast` cannot update the changed collector config in place, so `docker stack deploy` fails on the existing stack. Remove the stack first, then cast:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+docker stack rm <stack-name>
+foundryctl cast -f casting.yaml
+```
+
+The stack is named after `metadata.name` in your `casting.yaml`, which is `signoz` in the shipped example.
+
+All services are down between `docker stack rm` and `foundryctl cast`. `docker stack rm` removes the services and the networks, so data on named volumes is kept.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="helm" label="Kubernetes (Helm chart)">
+
+Update the <a href="https://github.com/SigNoz/charts" target="_blank" rel="noopener noreferrer nofollow">chart</a> and upgrade. Replace `<namespace>` and `<release-name>` with your own values:
+
+```bash
+helm repo update
+helm -n <namespace> upgrade <release-name> signoz/signoz -f <your-values.yaml>
+```
+
+`helm upgrade` takes the newest chart; add `--version 0.143.0` to pin the v0.143.0 chart. The chart's default `otelCollector.config` carries both processors. Helm replaces lists instead of merging them, so if your values file sets `otelCollector.config.service.pipelines.traces.processors`, [add the two processors](#add-the-ai-observability-processors-to-a-custom-collector-config) to your list.
+
+</TabItem>
+</Tabs>
+
+### Step 3: Verify the upgrade
+
+1. SigNoz and the collector are healthy (`kubectl get pods -n <namespace>`, `docker compose ps`, `docker stack ps <stack-name>`, or `systemctl status 'signoz-*'`).
+2. SigNoz reports v0.143.0 under **Settings**.
+3. The collector log shows no `unknown type` error for `signozspanmapper` or `signozllmpricing`.
+
+## Add the AI observability processors to a custom collector config
+
+Add both processors under `processors`, exactly as below. SigNoz fills `groups` and `default_pricing.rules` over OpAMP, so leave them empty here.
+
+```yaml
+processors:
+  signozspanmapper:
+    groups: []
+  signozllmpricing:
+    attrs:
+      model: gen_ai.request.model
+      in: gen_ai.usage.input_tokens
+      out: gen_ai.usage.output_tokens
+      cache_read: gen_ai.usage.cache_read.input_tokens
+      cache_write: gen_ai.usage.cache_creation.input_tokens
+    default_pricing:
+      rules: []
+    output_attrs:
+      in: signoz.gen_ai.usage.input_tokens.cost
+      out: signoz.gen_ai.usage.output_tokens.cost
+      cache_read: signoz.gen_ai.usage.cache_read.input_tokens.cost
+      cache_write: signoz.gen_ai.usage.cache_write.input_tokens.cost
+      total: signoz.gen_ai.usage.tokens.cost
+```
+
+Then add both to the traces pipeline, after `signozspanmetrics/delta` and before `batch`:
+
+```yaml
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [signozspanmetrics/delta, signozspanmapper, signozllmpricing, batch]
+      exporters: [clickhousetraces, metadataexporter, signozmeter]
+```
+
+A collector with the processors defined but missing from the pipeline starts fine; token costs and attribute mapping stay off until the pipeline entries are in place.
+
+## Keep the JWT session provider
+
+SigNoz v0.143.0 issues opaque session tokens by default. To keep JWT sessions, set both variables on the SigNoz container before you upgrade:
+
+```bash
+SIGNOZ_TOKENIZER_PROVIDER=jwt
+SIGNOZ_TOKENIZER_JWT_SECRET=<a long random secret>
+```
+
+SigNoz refuses to start with the `jwt` provider and an empty secret. If your deployment sets `SIGNOZ_JWT_SECRET`, rename it to `SIGNOZ_TOKENIZER_JWT_SECRET`. See [Configure the JWT Secret](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/) for details.
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- <a href="https://github.com/SigNoz/signoz/issues" target="_blank" rel="noopener noreferrer nofollow">GitHub Issues</a>
+- [Community Slack](https://signoz.io/slack/)
