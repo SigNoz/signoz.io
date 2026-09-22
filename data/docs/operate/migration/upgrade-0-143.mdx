@@ -12,7 +12,7 @@ SigNoz v0.143.0 prepares the OTel collector for AI observability and moves login
 The default session provider changes from JWT to opaque tokens. Sessions issued before the upgrade are not valid afterwards, so every user is signed out once and logs back in. If you set a JWT secret today and want to keep JWT sessions, see [Keep the JWT session provider](#keep-the-jwt-session-provider) before you upgrade. The secret alone no longer selects JWT.
 </Admonition>
 
-<Admonition type="info" title="The collector config needs two new processors">
+<Admonition type="info" title="AI observability needs two new collector processors">
 SigNoz now manages the `signozspanmapper` and `signozllmpricing` processors in your collector over OpAMP. It writes their contents, but it does not add them to the traces pipeline. If you run the default collector config from Foundry or the Helm chart, the new defaults carry them. If you maintain your own collector config, [add them yourself](#add-the-ai-observability-processors-to-a-custom-collector-config).
 </Admonition>
 
@@ -52,7 +52,7 @@ curl -fsSL https://signoz.io/foundry.sh | bash
 foundryctl cast -f casting.yaml
 ```
 
-`cast` regenerates the collector config with the two processors when the ingester image is `latest` or v0.144.11 and later, and keeps the previous config for an older pin. If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting.yaml</a> pins image versions, bump SigNoz to v0.143.0 and the collector to v0.144.11 yourself; `cast` refuses SigNoz v0.143.0 paired with a collector below v0.144.11.
+`cast` regenerates the collector config with the two processors when the ingester image is `latest` or a version that ships them, and keeps the previous config for an older pin. If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting.yaml</a> pins image versions, bump SigNoz to v0.143.0 and the collector to v0.144.11 yourself; `cast` refuses SigNoz v0.143.0 paired with a collector that cannot load the processors and tells you to move to v0.144.11.
 
 If your casting sets `spec.config` on the ingester with its own traces `processors` list, that list replaces the generated one. [Add the two processors](#add-the-ai-observability-processors-to-a-custom-collector-config) to it.
 
