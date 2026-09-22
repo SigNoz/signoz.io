@@ -1,5 +1,5 @@
 ---
-date: 2026-09-21
+date: 2026-09-22
 title: Upgrade SigNoz to v0.143.0 with OTel Collector v0.144.11
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
 description: Upgrade self-hosted SigNoz to v0.143.0. Add two AI observability trace processors to your collector and plan for every user to sign in again once.
@@ -164,6 +164,14 @@ jwt::secret must be set when provider is jwt, without a JWT secret, user session
 ```
 
 If you still use `SIGNOZ_JWT_SECRET`, rename it to `SIGNOZ_TOKENIZER_JWT_SECRET`. See [Configure the JWT Secret](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/) for details.
+
+## V1 dashboard routes are deleted
+
+v0.143.0 finishes the dashboard V1 API shutdown that began in v0.135.0. The routes are now deleted rather than returning `501`, so calls return `404 Not Found`. This affects API consumers, automation scripts, and MCP integrations only. There are no UI changes.
+
+- **V1 dashboard CRUD routes now return `404`.** The six routes (`GET`/`POST /api/v1/dashboards`, `GET`/`PUT`/`DELETE /api/v1/dashboards/{id}`, and `PUT /api/v1/dashboards/{id}/lock`) returned `501 Not Implemented` from v0.135.0. They are deleted in v0.143.0. Move to the matching `/api/v2/dashboards` routes. See the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/#migrating-from-the-v1-dashboard-apis) for the full mapping.
+- **V1 public dashboard routes are removed with no prior `501`.** `GET /api/v1/public/dashboards/{id}` and `GET /api/v1/public/dashboards/{id}/widgets/{idx}/query_range` were still functional before this release and now return `404`. Use `GET /api/v2/public/dashboards/{id}` and `GET /api/v2/public/dashboards/{id}/panels/{key}/query_range`. The share-config route `/api/v1/dashboards/{id}/public` is unaffected.
+- **The V2 Metrics Explorer dashboards route is removed.** `GET /api/v2/metrics/dashboards`, which returned the dashboards associated with a metric name, now returns `404`. Use `GET /api/v3/metrics/dashboards`.
 
 ## Getting help
 
