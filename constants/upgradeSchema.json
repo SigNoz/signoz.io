@@ -36,13 +36,13 @@
       "instructions": [
         "Upgrade signoz-otel-collector to v0.144.11 together with SigNoz. SigNoz v0.143.0 requires it.",
         "The collector traces pipeline needs the signozspanmapper and signozllmpricing processors. The default config from Foundry and the Helm chart carries both. If you maintain your own collector config or override the traces processors list, add both before or with the upgrade.",
-        "Login sessions move to opaque tokens by default and every user signs in again once. Before v0.143.0 JWT was the default, so a secret alone was enough. To stay on JWT, set SIGNOZ_TOKENIZER_PROVIDER=jwt next to SIGNOZ_TOKENIZER_JWT_SECRET before you upgrade."
+        "Login sessions move to opaque tokens by default and every user signs in again once. To keep JWT sessions, set both SIGNOZ_TOKENIZER_PROVIDER=jwt and SIGNOZ_TOKENIZER_JWT_SECRET before you upgrade; the secret is required."
       ],
       "deprecations": [],
       "warnings": [
         {
-          "title": "Every user signs in again once",
-          "details": "Sessions issued before the upgrade are not valid afterwards. Plan the upgrade for a time when a forced sign-in is acceptable."
+          "title": "JWT is no longer the default in v0.143.0",
+          "details": "Before v0.143.0 JWT was the default, so a secret alone was enough. To keep JWT sessions, set both SIGNOZ_TOKENIZER_PROVIDER=jwt and SIGNOZ_TOKENIZER_JWT_SECRET; with the jwt provider and no secret, SigNoz refuses to start. Every user signs in again once after the switch."
         },
         {
           "title": "Custom collector configs need the two new processors",
