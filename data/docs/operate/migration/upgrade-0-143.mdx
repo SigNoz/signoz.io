@@ -1,0 +1,90 @@
+---
+date: 2026-09-22
+title: Upgrade SigNoz to v0.143.0 and Migrate AI Attributes
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
+description: Upgrade self-hosted SigNoz to v0.143.0. AI Observability renames the LLM cost and finish-reason span attributes; fix your dashboards, alerts, and queries.
+doc_type: howto
+---
+
+SigNoz v0.143.0 turns on AI Observability processing by default and renames the span attributes it attaches to your LLM and GenAI traces. The SigNoz cost attributes now follow the SigNoz GenAI semantic conventions, and the response finish-reason attribute becomes plural. Any dashboard panel, alert condition, or saved query that still references an old attribute name returns no data after the upgrade.
+
+<Admonition type="warning" title="Renamed attributes break existing references">
+Dashboards, alerts, and saved queries that filter, group by, or aggregate on the old `_signoz.gen_ai.*` cost attributes or on `gen_ai.response.finish_reason` (singular) silently return no data until you point them at the new names. There is no automatic migration or compatibility shim for these references. Update them using the [mapping table](#renamed-span-attributes) below. This also applies to SigNoz Cloud, where the rename has already taken effect server-side.
+</Admonition>
+
+If you do not query the SigNoz cost attributes or the finish-reason attribute directly, no action is needed: the built-in **AI Observability Overview** dashboard already uses the new names.
+
+## What changes in v0.143.0
+
+- **AI Observability is on by default.** The LLM pricing and span-mapper processors now run for every organization with no feature flag or opt-in step. New GenAI spans are enriched with cost and mapped attributes automatically.
+- **Cost attributes follow SigNoz GenAI semantic conventions.** The five per-span cost attributes are renamed (see below). These are SigNoz-derived attributes (`signoz.gen_ai.*`), not part of the upstream OpenTelemetry GenAI semantic conventions.
+- **The finish-reason attribute is plural.** `gen_ai.response.finish_reason` becomes `gen_ai.response.finish_reasons`, matching the OpenTelemetry GenAI convention where the value is an array (for example `["stop"]`).
+- **`gen_ai.operation.name` is no longer back-filled from `llm.request.type`.** Spans that only had `gen_ai.operation.name` because it was copied from `llm.request.type` now show no value for it unless your instrumentation emits a native `gen_ai.operation.name`.
+- **Tool spans are classified more precisely.** A span is treated as a tool call only when it carries `tool.name`, an `ai.toolCall.*` attribute, `tool_call_args`, or `tool_response`. The earlier, broader match tagged some LLM spans as tool spans, so previously mislabeled spans are reclassified in AI monitoring views.
+
+### Renamed span attributes
+
+| Purpose | Old attribute | New attribute |
+| --- | --- | --- |
+| Total LLM cost | `_signoz.gen_ai.total_cost` | `signoz.gen_ai.usage.tokens.cost` |
+| Input token cost | `_signoz.gen_ai.cost_input` | `signoz.gen_ai.usage.input_tokens.cost` |
+| Output token cost | `_signoz.gen_ai.cost_output` | `signoz.gen_ai.usage.output_tokens.cost` |
+| Cache-read token cost | `_signoz.gen_ai.cost_cache_read` | `signoz.gen_ai.usage.cache_read.input_tokens.cost` |
+| Cache-write token cost | `_signoz.gen_ai.cost_cache_write` | `signoz.gen_ai.usage.cache_write.input_tokens.cost` |
+| Response finish reason | `gen_ai.response.finish_reason` | `gen_ai.response.finish_reasons` |
+
+## Upgrade self-hosted SigNoz
+
+### Step 1: Upgrade SigNoz
+
+If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops before you move to v0.143.0.
+
+<Tabs entityName="installer">
+<TabItem value="foundry" label="Foundry" default>
+
+Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundryctl</a> to pick up the v0.143.0 defaults, then re-apply your existing `casting.yaml`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+foundryctl cast -f casting.yaml
+```
+
+If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting.yaml</a> pins image versions, the new defaults will not override them (your config wins), so bump the SigNoz image pin to v0.143.0 yourself.
+
+</TabItem>
+<TabItem value="helm" label="Kubernetes (Helm chart)">
+
+Update the <a href="https://github.com/SigNoz/charts" target="_blank" rel="noopener noreferrer nofollow">chart</a> and upgrade. Replace `<namespace>` and `<release-name>` with your own values:
+
+```bash
+helm repo update
+helm -n <namespace> upgrade <release-name> signoz/signoz
+```
+
+`helm upgrade` takes the newest chart; add `--version 0.143.0` to pin the v0.143.0 chart.
+
+</TabItem>
+</Tabs>
+
+For Docker or binary deployments, follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/) and set the target version to v0.143.0.
+
+### Step 2: Update dashboards, alerts, and saved queries
+
+Only references to the [renamed attributes](#renamed-span-attributes) need changing. The enrichment runs on new spans, so historical spans keep their old attribute values; queries that must span the rename should filter on both names during the transition.
+
+1. **Dashboards.** Open each panel that queries a renamed attribute, replace the old name in the query, group-by, and filter fields with the new name, then save the dashboard.
+2. **Alerts.** Edit each alert whose condition references a renamed attribute, swap in the new name, and save. Re-check the alert preview to confirm it returns data.
+3. **Saved views and queries.** Re-open any saved view or query in the Logs or Traces explorer that uses a renamed attribute, update the attribute, and save the view again.
+
+### Step 3: Verify the upgrade
+
+1. Pods and containers are healthy (`kubectl get pods -n <namespace>`, `docker compose ps`, or `systemctl status 'signoz-*'`).
+2. SigNoz reports v0.143.0 under **Settings**.
+3. Open the built-in **AI Observability Overview** dashboard and confirm its cost, token, and finish-reason panels populate.
+4. Open the dashboards, alerts, and saved queries you updated in Step 2 and confirm each returns data.
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- <a href="https://github.com/SigNoz/signoz/issues" target="_blank" rel="noopener noreferrer nofollow">GitHub Issues</a>
+- [Community Slack](https://signoz.io/slack/)
