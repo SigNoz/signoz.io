@@ -1,4 +1,7 @@
+const path = require('path')
 const { getAllowedImageDomains } = require('./constants/allowedImageDomains')
+
+const reactRouterDomCompat = './components/OpenAPISpec/reactRouterDomCompat.ts'
 
 /**
  * Generate /docs-onboarding/* versions of all /docs/* redirects.
@@ -87,11 +90,9 @@ module.exports = () => {
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     trailingSlash: true,
     turbopack: {
-      // react-router-dom@7 (forced via resolutions for CVE fixes) removed the
-      // server.js entry that @stoplight/elements-core imports StaticRouter from;
-      // the same export now lives on the package root.
       resolveAlias: {
-        'react-router-dom/server.js': 'react-router-dom',
+        'react-router-dom': reactRouterDomCompat,
+        'react-router-dom/server.js': reactRouterDomCompat,
       },
       rules: {
         '*.svg': {
@@ -3514,10 +3515,9 @@ module.exports = () => {
         },
       })
 
-      // react-router-dom@7 (forced via resolutions for CVE fixes) removed the
-      // server.js entry that @stoplight/elements-core imports StaticRouter from;
-      // the same export now lives on the package root.
-      config.resolve.alias['react-router-dom/server.js'] = 'react-router-dom'
+      const compat = path.join(__dirname, reactRouterDomCompat)
+      config.resolve.alias['react-router-dom$'] = compat
+      config.resolve.alias['react-router-dom/server.js'] = compat
 
       return config
     },
