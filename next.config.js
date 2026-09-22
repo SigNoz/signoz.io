@@ -137,6 +137,16 @@ module.exports = () => {
     async redirects() {
       return withDocsOnboardingRedirects([
         {
+          source: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-android/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-android/',
+          permanent: true,
+        },
+        {
           source: '/case-study/',
           destination: '/customers/',
           permanent: true,
