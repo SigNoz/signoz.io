@@ -87,6 +87,12 @@ module.exports = () => {
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     trailingSlash: true,
     turbopack: {
+      // react-router-dom@7 (forced via resolutions for CVE fixes) removed the
+      // server.js entry that @stoplight/elements-core imports StaticRouter from;
+      // the same export now lives on the package root.
+      resolveAlias: {
+        'react-router-dom/server.js': 'react-router-dom',
+      },
       rules: {
         '*.svg': {
           loaders: ['@svgr/webpack'],
@@ -3507,6 +3513,11 @@ module.exports = () => {
           fullySpecified: false,
         },
       })
+
+      // react-router-dom@7 (forced via resolutions for CVE fixes) removed the
+      // server.js entry that @stoplight/elements-core imports StaticRouter from;
+      // the same export now lives on the package root.
+      config.resolve.alias['react-router-dom/server.js'] = 'react-router-dom'
 
       return config
     },

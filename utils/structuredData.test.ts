@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { generateStructuredData, STRUCTURED_DATA_IDS } from './structuredData'
+import type { MDXContent } from './strapi'
 
 const content = {
   title: 'Example article',
@@ -8,7 +9,7 @@ const content = {
   content: 'Example article body',
   published_date: '2026-08-01',
   updated_date: '2026-08-02',
-}
+} as unknown as MDXContent
 
 describe('structured data entity references', () => {
   it('locks the four shared entity IDs and does not define a generic software ID', () => {
