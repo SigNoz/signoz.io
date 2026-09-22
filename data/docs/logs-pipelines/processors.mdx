@@ -18,20 +18,6 @@ Field paths (Parse From, Parse To, From, To, Field) must start with `body`, `att
 
 </Admonition>
 
-If the original value also exists in the body or an attribute, point the processor there instead, for example `attributes.level`. Severity matching is case insensitive, so `info` and `INFO` map to the same level.
-
-If `severity_text` is the only copy, normalize it at the collector before ingestion, for example with a <a href="https://opentelemetry.io/docs/collector/transforming-telemetry/" target="_blank" rel="noopener noreferrer nofollow">transform processor</a>:
-
-```yaml
-processors:
-  transform:
-    error_mode: ignore
-    log_statements:
-      - context: log
-        statements:
-          - set(severity_text, ConvertCase(severity_text, "upper"))
-```
-
 ## Regex
 
 The Regex processor can be used to extract information out of text
@@ -157,6 +143,20 @@ Severity level values are case insensitive.<br/>
 As a special case, 2xx, 3xx, 4xx and 5xx can be used to map number ranges to severity levels. This can be useful for mapping HTTP status codes. For example `5xx` can be used to parse numbers between 500-599 into level `ERROR`.
 
 </Admonition>
+
+`severity_text` and `severity_number` are top-level fields, so **Parse Severity Value From** can't point at them directly (see the field path warning above). If the same value also exists in an attribute, parse from that attribute instead. Otherwise, copy `severity_text` into an attribute at the collector first, then parse from the copy:
+
+```yaml
+processors:
+  transform:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - set(attributes["level"], severity_text)
+```
+
+Set **Parse Severity Value From** to `attributes.level`.
 
 You can follow [Parse Log Severity Levels](https://signoz.io/docs/logs-pipelines/guides/severity-parsing/) guide for more details.
 
