@@ -11,6 +11,24 @@ LLM observability is the practice of collecting traces, metrics, and logs from a
 
 SigNoz approaches this with OpenTelemetry rather than a proprietary agent. Your application emits `gen_ai.*` spans and metrics through standard OpenTelemetry libraries, exports them over OTLP, and SigNoz stores and queries them next to the rest of your application telemetry. The integrations below cover 55 model providers, agent frameworks, and gateways.
 
+## Client-Side and Server-Side Telemetry
+
+Client-side telemetry comes from the application that calls a model. It is what
+the rest of this page describes: `gen_ai.*` spans and metrics from an
+instrumentation library, exported over OTLP.
+
+Server-side telemetry comes from an inference server you run yourself, such as
+[vLLM](https://signoz.io/docs/vllm-observability/) or
+[SGLang](https://signoz.io/docs/sglang-observability/). These servers do not emit
+`gen_ai.*`. They expose their own metrics in Prometheus format, which an
+OpenTelemetry Collector scrapes. Those metrics carry what the calling application
+cannot see: tokens per second off the GPU, key-value cache pressure, and queue
+depth.
+
+A client-side span shows that a call was slow. Server-side metrics show whether it
+was slow because the queue was deep, the cache was full, or the output was long.
+Teams that host their own models collect both.
+
 ## Supported Integrations
 
 <Listicle name="llm-monitoring" />
@@ -140,6 +158,12 @@ Useful LLM alerts fire on user-visible degradation and on spend, not on token co
 
 **Agent iteration counts.** For agent workloads, alert when tool calls per request exceed your expected ceiling. This is the clearest early signal of a runaway loop, and it shows up in cost before it shows up in complaints.
 
+**Queue depth and cache pressure, for self-hosted servers.** A waiting queue that
+stays above zero means the server is at capacity, and time to first token climbs
+next. Alert on it before latency degrades. Key-value cache usage approaching 1 is
+the other early signal, because the scheduler starts preempting and re-running
+requests once it runs out.
+
 **No data.** If an LLM endpoint stops emitting spans entirely, that is either a broken deployment or broken instrumentation. Both are worth paging on. See [alerts on absent data](https://signoz.io/docs/alerts-management/no-data-alerts-for-groups/).
 
 ## FAQ
@@ -167,6 +191,14 @@ The conventions record token counts, not currency, because prices change and var
 **Does this work with agent frameworks and not just direct API calls?**
 
 Yes. Frameworks such as LangChain, LlamaIndex, CrewAI, and AutoGen have dedicated instrumentation that emits spans for chains, agent steps, and tool executions rather than only the underlying model call. The integration list above covers them.
+
+**I self-host a model server. Why do I see no `gen_ai.*` metrics?**
+
+Because `gen_ai.*` comes from the application that calls the model, not from the
+server that runs it. vLLM and SGLang expose their own `vllm:*` and `sglang:*`
+metrics in Prometheus format instead. Scrape them with the OpenTelemetry Collector,
+and instrument your calling application separately if you also want `gen_ai.*`
+spans. See [Client-Side and Server-Side Telemetry](#client-side-and-server-side-telemetry).
 
 **Can I correlate LLM traces with the rest of my application?**
 
