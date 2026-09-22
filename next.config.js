@@ -1,4 +1,7 @@
+const path = require('path')
 const { getAllowedImageDomains } = require('./constants/allowedImageDomains')
+
+const reactRouterDomCompat = './components/OpenAPISpec/reactRouterDomCompat.ts'
 
 /**
  * Generate /docs-onboarding/* versions of all /docs/* redirects.
@@ -87,6 +90,10 @@ module.exports = () => {
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     trailingSlash: true,
     turbopack: {
+      resolveAlias: {
+        'react-router-dom': reactRouterDomCompat,
+        'react-router-dom/server.js': reactRouterDomCompat,
+      },
       rules: {
         '*.svg': {
           loaders: ['@svgr/webpack'],
@@ -3507,6 +3514,10 @@ module.exports = () => {
           fullySpecified: false,
         },
       })
+
+      const compat = path.join(__dirname, reactRouterDomCompat)
+      config.resolve.alias['react-router-dom$'] = compat
+      config.resolve.alias['react-router-dom/server.js'] = compat
 
       return config
     },
