@@ -1,0 +1,328 @@
+---
+date: 2026-09-20
+title: vLLM Monitoring and Observability with OpenTelemetry
+description: Monitor vLLM with OpenTelemetry and SigNoz. Track token throughput, time to first token, KV cache usage, and request traces from your server.
+doc_type: howto
+---
+
+## Overview
+
+vLLM is an inference server that you run yourself. It serves models over an
+OpenAI-compatible API. It reports its own health in two ways: Prometheus metrics
+on an HTTP endpoint, and OpenTelemetry traces for each request. This guide sends
+both to SigNoz.
+
+The metrics answer questions that only the server can answer. How many tokens per
+second is the GPU producing? How full is the key-value cache, the memory pool that
+holds attention state for active requests? How many requests wait in the queue?
+
+<Admonition type="info" title="This is server-side telemetry">
+  The `gen_ai.*` spans described in [LLM observability](https://signoz.io/docs/llm-observability/)
+  come from the application that calls a model. vLLM reports what the server
+  itself is doing. The two are complementary, and most teams collect both.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. Update the endpoint and remove the ingestion key
+  header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- A vLLM server that you can restart
+- An OpenTelemetry Collector that can reach the vLLM host. See [Install the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/)
+- An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Send vLLM metrics to SigNoz
+
+### Step 1: Confirm the metrics endpoint
+
+vLLM serves Prometheus metrics at `/metrics` on the same port as the API, and it
+needs no flag to turn them on. Confirm the endpoint responds:
+
+```bash noLineNumbers
+curl -s http://localhost:8000/metrics | head
+```
+
+If you changed the port, use that port instead of `8000`.
+
+### Step 2: Add a scrape job to the Collector
+
+Append this scrape job to your existing `otel-collector-config.yaml`. Do not
+replace the whole file.
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: vllm
+          scrape_interval: 30s
+          static_configs:
+            - targets: ['<vllm-host>:8000']
+          metric_relabel_configs:
+            # Drop the Prometheus _created timestamp series, which carry no signal.
+            - source_labels: [__name__]
+              regex: '.*_created'
+              action: drop
+```
+
+**Verify these values:**
+
+- `<vllm-host>`: The hostname or IP address of the machine that runs vLLM.
+
+Keep the `metric_relabel_configs` block. vLLM exposes a `_created` series next to
+every counter and histogram, recording when the metric was first observed. On a
+default server these are 111 of the 405 exposed series. Dropping them removes
+about a quarter of the ingested data and loses no signal.
+
+Then add the receiver to your metrics pipeline:
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus] # append prometheus to your existing receivers list
+      processors: [batch]
+      exporters: [otlphttp]
+```
+
+### Step 3: Restart the Collector
+
+Restart the Collector so that it loads the new scrape job, then watch its logs for
+scrape errors.
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+```bash
+sudo systemctl restart otelcol-contrib
+sudo journalctl -u otelcol-contrib -f
+```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on VM](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
+</Admonition>
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+```bash
+docker compose up -d
+docker compose logs -f
+```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on Docker](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
+</Admonition>
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+```bash
+kubectl rollout restart deployment/<release>-k8s-infra-otel-deployment -n <collector-namespace>
+kubectl logs -f deployment/<release>-k8s-infra-otel-deployment -n <collector-namespace>
+```
+
+The SigNoz K8s Infra chart installs two Collectors. Add the scrape job to the
+Deployment, which handles cluster-wide scraping, rather than to the per-node
+`<release>-k8s-infra-otel-agent` DaemonSet. Replace `<release>` with your Helm
+release name and `<collector-namespace>` with the namespace that runs it. If you
+run your own Collector under a different name, use that name instead.
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install the SigNoz K8s Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+</Admonition>
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+The MSI installs the Collector as a Windows service named `otelcol-contrib`, with
+`OpenTelemetry Collector` as its display name. Run this in PowerShell:
+
+```powershell
+Restart-Service -Name otelcol-contrib
+Get-EventLog -LogName Application -Source otelcol-contrib -Newest 20
+```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on VM](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+Send a request to vLLM so that the server has something to report.
+
+<details>
+<ToggleHeading>
+
+## Export Request Traces (Optional)
+
+</ToggleHeading>
+
+Metrics tell you how the server behaves as a whole. Traces show where time went
+inside a single request. Traces go straight from vLLM to SigNoz and do not pass
+through the Collector, so the scrape job above is unaffected.
+
+Set three environment variables, then add one flag to the launch command:
+
+```bash
+export OTEL_SERVICE_NAME=vllm
+export OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf
+export OTEL_EXPORTER_OTLP_TRACES_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+
+vllm serve <your-model> \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --otlp-traces-endpoint https://ingest.<region>.signoz.cloud:443/v1/traces
+```
+
+**Verify these values:**
+
+- `<your-model>`: The model you serve, for example `Qwen/Qwen2.5-7B-Instruct`.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+You must set the protocol and header variables. vLLM sends no authentication
+header of its own, and it defaults to gRPC.
+
+<Admonition type="warning" title="The gRPC exporter cannot reach SigNoz Cloud">
+  vLLM creates its gRPC exporter with `insecure=True`, which disables TLS. SigNoz
+  Cloud requires TLS, so traces sent over gRPC will fail. Use `http/protobuf` as
+  shown above. gRPC works only against a Collector that you run without TLS on your
+  own network.
+</Admonition>
+
+Restart the server after you change the launch command.
+
+</details>
+
+## Validate
+
+Open **Metrics** > **Metrics Explorer** and filter with `service.name = 'vllm'`.
+The Prometheus receiver takes that value from the `job_name` in your scrape job.
+Metrics appear within one scrape interval.
+
+<Figure
+  src="/img/docs/llm/vllm/metrics-explorer.webp"
+  alt="vLLM metrics in the SigNoz Metrics Explorer"
+  caption="vLLM metrics in the Metrics Explorer, filtered by service.name"
+/>
+
+If you enabled traces, open **Traces** and filter on the value you set for
+`OTEL_SERVICE_NAME`. Each request produces one span named `llm_request`.
+
+<Figure
+  src="/img/docs/llm/vllm/traces-explorer.webp"
+  alt="vLLM request spans in the SigNoz Traces Explorer"
+  caption="vLLM llm_request spans in the Traces Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Metrics Reference
+
+</ToggleHeading>
+
+| Metric | Type | What it tells you |
+|---|---|---|
+| `vllm:generation_tokens_total` | Counter | Output tokens produced. Apply a rate to get tokens per second. |
+| `vllm:prompt_tokens_total` | Counter | Prefill tokens processed. |
+| `vllm:prompt_tokens_cached_total` | Counter | Prompt tokens served from cache rather than recomputed. |
+| `vllm:time_to_first_token_seconds` | Histogram | Delay before the first output token. Drives how fast a streaming response feels. |
+| `vllm:inter_token_latency_seconds` | Histogram | Delay between output tokens after the first one. |
+| `vllm:e2e_request_latency_seconds` | Histogram | Total request duration. |
+| `vllm:request_queue_time_seconds` | Histogram | Time a request spent waiting before it ran. |
+| `vllm:num_requests_running` | Gauge | Requests in the current execution batch. |
+| `vllm:num_requests_waiting` | Gauge | Requests waiting to start. A number above zero means the server is saturated. |
+| `vllm:kv_cache_usage_perc` | Gauge | Fraction of the key-value cache in use, from 0 to 1. |
+| `vllm:prefix_cache_queries_total` | Counter | Prompt tokens looked up in the prefix cache. |
+| `vllm:prefix_cache_hits_total` | Counter | Prompt tokens found in the prefix cache. |
+| `vllm:num_preemptions_total` | Counter | Requests the scheduler preempted and re-ran. |
+
+Every metric carries `model_name` and `engine` labels. Group by `model_name` when
+one server hosts several models.
+
+vLLM has no ready-made throughput gauge, so read tokens per second as a rate over
+`vllm:generation_tokens_total`. It also has no prefix cache hit rate metric.
+Divide `vllm:prefix_cache_hits_total` by `vllm:prefix_cache_queries_total` to get
+one.
+
+<Admonition type="info" title="Histograms arrive with a suffix">
+  The Collector splits each Prometheus histogram into three metrics. Query
+  `vllm:time_to_first_token_seconds.bucket` for percentiles, and the matching
+  `.count` and `.sum` metrics for rate and average. The base name alone returns
+  nothing.
+</Admonition>
+
+<Admonition type="warning" title="One histogram is named like a counter">
+  `vllm:iteration_tokens_total` is a histogram of tokens per engine step, despite
+  the `_total` suffix. Query it as `vllm:iteration_tokens_total.bucket`.
+</Admonition>
+
+Metric names vary between vLLM releases. The names above come from v0.29.0. For
+the full list, see the <a href="https://docs.vllm.ai/en/latest/usage/metrics.html" target="_blank" rel="noopener noreferrer nofollow">vLLM metrics reference</a>.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### The metrics endpoint returns 404
+
+Likely cause: the request went to the wrong port, or the server runs behind a
+proxy that does not forward `/metrics`.
+
+Fix: use the port vLLM serves the API on, which is `8000` by default.
+
+Verify: `curl -s http://localhost:8000/metrics | head` prints lines that start
+with `# HELP`.
+
+### The Collector logs a connection refused error
+
+Likely cause: vLLM is bound to `127.0.0.1`, so nothing outside the host can reach
+it.
+
+Fix: start the server with `--host 0.0.0.0`, and open port `8000` to the Collector
+host in your firewall.
+
+Verify: run `curl -s http://<vllm-host>:8000/metrics | head` from the machine that
+runs the Collector.
+
+### Metrics arrive but every value is zero
+
+Likely cause: the server has served no requests since it started. Counters and
+gauges stay at zero until traffic arrives.
+
+Fix: send a request to the server.
+
+Verify: `vllm:prompt_tokens_total` rises in Metrics Explorer.
+
+### Traces do not appear
+
+Likely cause: the server is still exporting over gRPC, which cannot reach SigNoz
+Cloud.
+
+Fix: set `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf` and
+`OTEL_EXPORTER_OTLP_TRACES_HEADERS` in the environment of the vLLM process, then
+restart it.
+
+Verify: spans named `llm_request` appear in the Traces explorer.
+
+</details>
+
+## Next steps
+
+- [vLLM dashboard template](https://signoz.io/docs/dashboards/dashboard-templates/vllm-dashboard/)
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) on queue depth and time to first token
+- [LLM observability](https://signoz.io/docs/llm-observability/) for tracing the application that calls this server
+
+## Get Help
+
+<GetHelp />
