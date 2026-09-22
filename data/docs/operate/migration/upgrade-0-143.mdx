@@ -9,7 +9,7 @@ doc_type: howto
 SigNoz v0.143.0 prepares the OTel collector for AI observability and moves login sessions to opaque tokens. Two things follow for self-hosted upgrades: the collector must run signoz-otel-collector v0.144.11 with two new processors in its traces pipeline, and every user signs in again once.
 
 <Admonition type="warning" title="Every user signs in again once">
-The default session provider changes from JWT to opaque tokens. Sessions issued before the upgrade are not valid afterwards, so every user is signed out once and logs back in. If you set a JWT secret today and want to keep JWT sessions, see [Keep the JWT session provider](#keep-the-jwt-session-provider) before you upgrade. The secret alone no longer selects JWT.
+The default session provider changes from JWT to opaque tokens. Sessions issued before the upgrade are not valid afterwards, so every user is signed out once and logs back in. If you set a JWT secret today and want to keep JWT sessions, see [Keep the JWT session provider](#keep-the-jwt-session-provider) before you upgrade. Before v0.143.0 JWT was the default, so a secret alone was enough; now the provider must be set too.
 </Admonition>
 
 <Admonition type="info" title="AI observability needs two new collector processors">
@@ -23,7 +23,7 @@ SigNoz now manages the `signozspanmapper` and `signozllmpricing` processors in y
 | Run the default collector config | Nothing beyond the upgrade. Sign in again afterwards |
 | Override the collector config or its traces pipeline | [Add the two processors](#add-the-ai-observability-processors-to-a-custom-collector-config) before or with the upgrade |
 | Pin the collector image below v0.144.11 | Move it to v0.144.11, or stay on SigNoz v0.142 until you can |
-| Set `SIGNOZ_TOKENIZER_JWT_SECRET` or `SIGNOZ_JWT_SECRET` today | Your sessions move to opaque anyway and the secret is ignored. To stay on JWT, add `SIGNOZ_TOKENIZER_PROVIDER=jwt` before you upgrade. See [Keep the JWT session provider](#keep-the-jwt-session-provider) |
+| Set `SIGNOZ_TOKENIZER_JWT_SECRET` or `SIGNOZ_JWT_SECRET` today | Your sessions move to opaque and the secret is ignored. To stay on JWT, add `SIGNOZ_TOKENIZER_PROVIDER=jwt` before you upgrade. See [Keep the JWT session provider](#keep-the-jwt-session-provider) |
 
 ## Upgrade self-hosted SigNoz
 
@@ -135,7 +135,7 @@ A collector with the processors defined but missing from the pipeline starts fin
 
 ## Keep the JWT session provider
 
-SigNoz v0.143.0 issues opaque session tokens by default. A JWT secret on its own no longer keeps you on JWT. To stay on it, set the provider next to your secret before you upgrade:
+SigNoz v0.143.0 issues opaque session tokens by default. Before v0.143.0 JWT was the default, so a secret alone was enough. To stay on JWT, set the provider next to your secret before you upgrade:
 
 ```bash
 SIGNOZ_TOKENIZER_PROVIDER=jwt
