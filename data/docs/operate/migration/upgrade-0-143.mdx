@@ -1,6 +1,6 @@
 ---
 date: 2026-09-21
-title: Upgrade SigNoz to v0.143.0 with AI Observability Processors
+title: Upgrade SigNoz to v0.143.0 with OTel Collector v0.144.11
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
 description: Upgrade self-hosted SigNoz to v0.143.0. Add two AI observability trace processors to your collector and plan for every user to sign in again once.
 doc_type: howto
@@ -8,11 +8,11 @@ doc_type: howto
 
 SigNoz v0.143.0 prepares the OTel collector for AI observability and moves login sessions to opaque tokens. Two things follow for self-hosted upgrades: the collector must run signoz-otel-collector v0.144.11 with two new processors in its traces pipeline, and every user signs in again once.
 
-<Admonition type="warning" title="Every user signs in again once">
+<Admonition type="warning" title="Every user signs in again once" defaultCollapsed="true">
 The default session provider changes from JWT to opaque tokens. Sessions issued before the upgrade are not valid afterwards, so every user is signed out once and logs back in. If you set a JWT secret today and want to keep JWT sessions, see [Keep the JWT session provider](#keep-the-jwt-session-provider) before you upgrade. Before v0.143.0 JWT was the default, so a secret alone was enough; now the provider must be set too.
 </Admonition>
 
-<Admonition type="info" title="AI observability needs two new collector processors">
+<Admonition type="info" title="AI observability needs two new collector processors" defaultCollapsed="true">
 SigNoz now manages the `signozspanmapper` and `signozllmpricing` processors in your collector over OpAMP. It writes their contents, but it does not add them to the traces pipeline. If you run the default collector config from Foundry or the Helm chart, the new defaults carry them. If you maintain your own collector config, [add them yourself](#add-the-ai-observability-processors-to-a-custom-collector-config).
 </Admonition>
 
@@ -22,7 +22,7 @@ SigNoz now manages the `signozspanmapper` and `signozllmpricing` processors in y
 | --- | --- |
 | Run the default collector config | Nothing beyond the upgrade. Sign in again afterwards |
 | Override the collector config or its traces pipeline | [Add the two processors](#add-the-ai-observability-processors-to-a-custom-collector-config) before or with the upgrade |
-| Pin the collector image below v0.144.11 | Move it to v0.144.11, or stay on SigNoz v0.142 until you can |
+| Pin the collector image below v0.144.11 | Move it to v0.144.11, or stay on SigNoz v0.142.x until you can |
 | Set `SIGNOZ_TOKENIZER_JWT_SECRET` or `SIGNOZ_JWT_SECRET` today | Your sessions move to opaque and the secret is ignored. To stay on JWT, add `SIGNOZ_TOKENIZER_PROVIDER=jwt` before you upgrade. See [Keep the JWT session provider](#keep-the-jwt-session-provider) |
 
 ## Upgrade self-hosted SigNoz
@@ -40,7 +40,7 @@ Upgrade both together. SigNoz v0.143.0 requires signoz-otel-collector v0.144.11.
 
 Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundryctl</a> to pick up the v0.143.0 collector config, then re-apply your existing `casting.yaml`.
 
-<Admonition type="warning" title="Update the images before you run cast">
+<Admonition type="warning" title="Update the images before you run cast" defaultCollapsed="true">
 `cast` applies the regenerated files but does not pull images. If your casting uses floating tags such as `latest`, refresh `signoz/signoz` and `signoz/signoz-otel-collector` on the host first so the restarted containers run v0.143.0 and v0.144.11. Otherwise the collector restarts on the old image with the new config.
 </Admonition>
 
