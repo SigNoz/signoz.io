@@ -1,5 +1,5 @@
 ---
-date: 2026-05-04
+date: 2026-09-22
 title: Log Processors
 description: Complete list of log processors available in Signoz.
 doc_type: reference
@@ -11,6 +11,26 @@ processor in the pipeline one by one.
 
 The following log transformation processors are available for
 defining pipelines.
+
+<Admonition type="warning" title="Field paths must start with body, attributes, or resource">
+
+Field paths (Parse From, Parse To, From, To, Field) must start with `body`, `attributes`, or `resource`. Top-level fields like `severity_text`, `severity_number`, and `timestamp` are not valid here, even though the UI offers them as options. Using one fails with `value should have prefix of body, attributes, resource`.
+
+</Admonition>
+
+If the original value also exists in the body or an attribute, point the processor there instead, for example `attributes.level`. Severity matching is case insensitive, so `info` and `INFO` map to the same level.
+
+If `severity_text` is the only copy, normalize it at the collector before ingestion, for example with a <a href="https://opentelemetry.io/docs/collector/transforming-telemetry/" target="_blank" rel="noopener noreferrer nofollow">transform processor</a>:
+
+```yaml
+processors:
+  transform:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - set(severity_text, ConvertCase(severity_text, "upper"))
+```
 
 ## Regex
 
