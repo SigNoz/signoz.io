@@ -1,0 +1,342 @@
+---
+date: 2026-09-17
+title: SGLang Monitoring and Observability with OpenTelemetry
+description: Monitor SGLang with OpenTelemetry and SigNoz. Track token throughput, time to first token, KV cache usage, and request traces from your server.
+doc_type: howto
+---
+
+## Overview
+
+SGLang is an inference server that you run yourself. It serves models over an
+OpenAI-compatible API. It reports its own health in two ways: Prometheus metrics
+on an HTTP endpoint, and OpenTelemetry traces for each request. This guide sends
+both to SigNoz.
+
+The metrics answer questions that only the server can answer. How many tokens per
+second is the GPU producing? How full is the key-value cache, the memory pool that
+holds attention state for active requests? How many requests wait in the queue?
+
+<Admonition type="info" title="This is server-side telemetry">
+  The `gen_ai.*` spans described in [LLM observability](https://signoz.io/docs/llm-observability/)
+  come from the application that calls a model. SGLang reports what the server
+  itself is doing. The two are complementary, and most teams collect both.
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+  Most steps are identical. Update the endpoint and remove the ingestion key
+  header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- An SGLang server that you can restart
+- An OpenTelemetry Collector that can reach the SGLang host. See [Install the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/)
+- An instance of SigNoz ([Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Send SGLang metrics to SigNoz
+
+### Step 1: Start SGLang with metrics enabled
+
+SGLang does not expose metrics by default. Add `--enable-metrics` to the launch
+command:
+
+```bash
+python -m sglang.launch_server \
+  --model-path <your-model> \
+  --host 0.0.0.0 \
+  --port 30000 \
+  --enable-metrics
+```
+
+**Verify these values:**
+
+- `<your-model>`: The model you serve, for example `Qwen/Qwen2.5-7B-Instruct`.
+
+SGLang serves metrics at `/metrics` on the same port as the API. Confirm the endpoint
+responds before you move on:
+
+```bash noLineNumbers
+curl -s http://localhost:30000/metrics | head
+```
+
+### Step 2: Add a scrape job to the Collector
+
+Append this scrape job to your existing `otel-collector-config.yaml`. Do not
+replace the whole file.
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: sglang
+          scrape_interval: 30s
+          static_configs:
+            - targets: ['<sglang-host>:30000']
+```
+
+**Verify these values:**
+
+- `<sglang-host>`: The hostname or IP address of the machine that runs SGLang.
+
+Then add the receiver to your metrics pipeline:
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus] # append prometheus to your existing receivers list
+      processors: [batch]
+      exporters: [otlphttp]
+```
+
+### Step 3: Restart the Collector
+
+Restart the Collector so that it loads the new scrape job, then watch its logs for
+scrape errors.
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+```bash
+sudo systemctl restart otelcol-contrib
+sudo journalctl -u otelcol-contrib -f
+```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on VM](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
+</Admonition>
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+```bash
+docker compose up -d
+docker compose logs -f
+```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on Docker](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/).
+</Admonition>
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+```bash
+kubectl rollout restart deployment/<release>-k8s-infra-otel-deployment -n <collector-namespace>
+kubectl logs -f deployment/<release>-k8s-infra-otel-deployment -n <collector-namespace>
+```
+
+The SigNoz K8s Infra chart installs two Collectors. Add the scrape job to the
+Deployment, which handles cluster-wide scraping, rather than to the per-node
+`<release>-k8s-infra-otel-agent` DaemonSet. Replace `<release>` with your Helm
+release name and `<collector-namespace>` with the namespace that runs it. If you
+run your own Collector under a different name, use that name instead.
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install the SigNoz K8s Infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+</Admonition>
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+The MSI installs the Collector as a Windows service named `otelcol-contrib`, with
+`OpenTelemetry Collector` as its display name. Run this in PowerShell:
+
+```powershell
+Restart-Service -Name otelcol-contrib
+Get-EventLog -LogName Application -Source otelcol-contrib -Newest 20
+```
+
+<Admonition type="info" title="Set up the OpenTelemetry Collector" defaultCollapsed="true">
+  For more information on installing and configuring the Collector, see [Install OpenTelemetry Collector on VM](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/).
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+Send a request to SGLang so that the server has something to report.
+
+<details>
+<ToggleHeading>
+
+## Export Request Traces (Optional)
+
+</ToggleHeading>
+
+Metrics tell you how the server behaves as a whole. Traces show where time went
+inside a single request. Traces go straight from SGLang to SigNoz and do not pass
+through the Collector, so the scrape job above is unaffected.
+
+Set two environment variables, then add two flags to the launch command from
+Step 1:
+
+```bash
+export OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf
+export OTEL_EXPORTER_OTLP_TRACES_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+
+python -m sglang.launch_server \
+  --model-path <your-model> \
+  --host 0.0.0.0 \
+  --port 30000 \
+  --enable-metrics \
+  --enable-trace \
+  --otlp-traces-endpoint https://ingest.<region>.signoz.cloud:443/v1/traces
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+You must set both environment variables. SGLang sends no authentication header of
+its own, and it defaults to gRPC.
+
+<Admonition type="warning" title="The gRPC exporter cannot reach SigNoz Cloud">
+  SGLang creates its gRPC exporter with `insecure=True`, which disables TLS. SigNoz
+  Cloud requires TLS, so traces sent over gRPC will fail. Use `http/protobuf` as
+  shown above. gRPC works only against a Collector that you run without TLS on your
+  own network.
+</Admonition>
+
+<Admonition type="warning" title="Span names contain the request ID">
+  SGLang names each root span after the request that produced it, for example
+  `Req b70a51cd`. Every request therefore creates a new operation name. The
+  service page in SigNoz shows `overflow_operation` once the list exceeds its
+  limit. The traces themselves are unaffected, and you can still filter and group
+  them by duration, status, and resource attributes.
+</Admonition>
+
+Restart SGLang after you change the launch command.
+
+</details>
+
+## Validate
+
+Open **Metrics** > **Metrics Explorer** and filter with `service.name = 'sglang'`.
+The Prometheus receiver takes that value from the `job_name` in your scrape job.
+Metrics appear within one scrape interval.
+
+<Figure
+  src="/img/docs/llm/sglang/metrics-explorer.webp"
+  alt="SGLang metrics in the SigNoz Metrics Explorer"
+  caption="SGLang metrics in the Metrics Explorer, filtered by service.name"
+/>
+
+If you enabled traces, open **Traces** and filter with the same
+`service.name = 'sglang'`. SGLang sets that name itself and ignores
+`OTEL_SERVICE_NAME`, so every SGLang server reports as `sglang`.
+
+<Figure
+  src="/img/docs/llm/sglang/traces-explorer.webp"
+  alt="SGLang spans in the SigNoz Traces Explorer"
+  caption="SGLang decode spans in the Traces Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Metrics Reference
+
+</ToggleHeading>
+
+| Metric | Type | What it tells you |
+|---|---|---|
+| `sglang:gen_throughput` | Gauge | Output tokens generated per second. This is the tokens-per-second figure. |
+| `sglang:prompt_tokens_total` | Counter | Prefill tokens processed. |
+| `sglang:generation_tokens_total` | Counter | Output tokens produced. |
+| `sglang:time_to_first_token_seconds` | Histogram | Delay before the first output token. Drives how fast a streaming response feels. |
+| `sglang:inter_token_latency_seconds` | Histogram | Delay between output tokens after the first one. |
+| `sglang:e2e_request_latency_seconds` | Histogram | Total request duration. |
+| `sglang:num_running_reqs` | Gauge | Requests the server is decoding right now. |
+| `sglang:num_queue_reqs` | Gauge | Requests waiting to start. A number above zero means the server is saturated. |
+| `sglang:token_usage` | Gauge | Fraction of the key-value cache pool in use, from 0 to 1. |
+| `sglang:cache_hit_rate` | Gauge | Fraction of prefill tokens served from the prefix cache. |
+
+Every metric carries `model_name`, `engine_type`, `tp_rank`, `pp_rank`, and
+`moe_ep_rank` labels. The token counters add `is_streaming`. Group by `model_name`
+when one server hosts several models.
+
+On a server that uses tensor parallelism, only rank 0 records request metrics by
+default, so a sum across ranks counts each request once. The
+`--enable-metrics-for-all-schedulers` flag makes every rank record separately,
+which doubles those sums unless you filter on `tp_rank`. Add `tp_rank = '0'` to
+your own queries against the scheduler gauges. The dashboard template already
+does this.
+
+SGLang also splits the queue gauges when you run it with
+`--enable-priority-scheduling`. It reports the total under `priority = ''` and a
+breakdown under `priority = '<int>'`, so summing every series counts each request
+twice. Filter on `priority = ''` for totals. This filter also works on servers
+that run without priority scheduling, where the label is absent.
+
+<Admonition type="info" title="Histograms arrive with a suffix">
+  The Collector splits each Prometheus histogram into three metrics. Query
+  `sglang:time_to_first_token_seconds.bucket` for percentiles, and the matching
+  `.count` and `.sum` metrics for rate and average. The base name alone returns
+  nothing.
+</Admonition>
+
+Metric names vary between SGLang releases. The names above come from v0.5.19. For
+the full list, see the <a href="https://docs.sglang.io/references/production_metrics" target="_blank" rel="noopener noreferrer nofollow">SGLang production metrics reference</a>.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### The metrics endpoint returns 404
+
+Likely cause: the server started without `--enable-metrics`.
+
+Fix: add the flag and restart SGLang.
+
+Verify: `curl -s http://localhost:30000/metrics | head` prints lines that start
+with `# HELP`.
+
+### The Collector logs a connection refused error
+
+Likely cause: SGLang is bound to `127.0.0.1`, so nothing outside the host can
+reach it.
+
+Fix: start the server with `--host 0.0.0.0`, and open port `30000` to the
+Collector host in your firewall.
+
+Verify: run `curl -s http://<sglang-host>:30000/metrics | head` from the machine
+that runs the Collector.
+
+### Metrics arrive but every value is zero
+
+Likely cause: the server has served no requests since it started. Counters and
+gauges stay at zero until traffic arrives.
+
+Fix: send a request to the server.
+
+Verify: `sglang:prompt_tokens_total` rises in Metrics Explorer.
+
+### Traces do not appear
+
+Likely cause: the server is still exporting over gRPC, which cannot reach SigNoz
+Cloud.
+
+Fix: set `OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf` and
+`OTEL_EXPORTER_OTLP_TRACES_HEADERS` in the environment of the SGLang process, then
+restart it.
+
+Verify: spans with `service.name = sglang` appear in the Traces explorer.
+
+</details>
+
+## Next steps
+
+- [SGLang dashboard template](https://signoz.io/docs/dashboards/dashboard-templates/sglang-dashboard/)
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) on queue depth and time to first token
+- [LLM observability](https://signoz.io/docs/llm-observability/) for tracing the application that calls this server
+
+## Get Help
+
+<GetHelp />
