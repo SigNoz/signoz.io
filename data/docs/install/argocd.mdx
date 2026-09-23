@@ -59,6 +59,8 @@ The chart installs SigNoz, the SigNoz OpenTelemetry Collector, ClickHouse, and Z
 
 ### Apply the Application
 
+The YAML file is the declarative source of truth. The CLI and UI tabs create the same Application without it, so use them when you prefer an imperative setup.
+
 <Tabs entityName="method">
 
 <TabItem label="kubectl" value="kubectl">
@@ -155,11 +157,11 @@ Go to `http://localhost:8080`. SigNoz asks you to create an admin account on the
 To make sure that the API answers, run:
 
 ```bash
-curl http://localhost:8080/api/v1/health
+curl -X GET http://localhost:8080/api/v1/health
 ```
 
 ```json
-{ "status": "ok" }
+{"status":"ok"}
 ```
 
 <Figure
@@ -170,7 +172,7 @@ curl http://localhost:8080/api/v1/health
 
 ## Customize the installation
 
-Put your chart values under `spec.source.helm.valuesObject` in the Application. Argo CD passes them to Helm on the next sync.
+Add a `helm.valuesObject` block under the existing `spec.source` in the Application. Do not replace the file. Argo CD passes the values to Helm on the next sync.
 
 ```yaml:signoz-application.yaml
 spec:
@@ -201,7 +203,7 @@ For the full list of values, see the <a href="https://github.com/SigNoz/charts/b
 
 ### Keep values in a Git repository
 
-To manage values as files, declare two sources. Argo CD reads the chart from the SigNoz repository and the values file from your own repository. A single-source Application cannot do this, because `helm.valueFiles` resolves only inside the source that holds the chart.
+To manage values as files, declare two sources in the Application you already created. Argo CD reads the chart from the SigNoz repository and the values file from your own repository. A single-source Application cannot do this, because `helm.valueFiles` resolves only inside the source that holds the chart.
 
 ```yaml:signoz-application.yaml
 spec:
@@ -219,6 +221,8 @@ spec:
 
 **Verify these values:**
 
+- `<your-org>` and `<your-repo>`: The organization and name of your own Git repository, the one Argo CD reads the values file from.
+- `targetRevision: main`: The branch of your repository that holds the values file.
 - `ref: values`: Names the second source. The `$values` prefix in `valueFiles` points at it.
 - `$values/signoz/values.yaml`: The path to your values file inside your own repository.
 
@@ -226,7 +230,7 @@ Replace `spec.source` with `spec.sources` when you use this form. See the <a hre
 
 ### Sync automatically
 
-Add an `automated` sync policy so that Argo CD applies every change without a manual sync:
+Add an `automated` sync policy under the existing `spec:` so that Argo CD applies every change without a manual sync. Do not replace the file.
 
 ```yaml:signoz-application.yaml
 spec:
