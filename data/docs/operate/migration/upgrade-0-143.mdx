@@ -1,5 +1,5 @@
 ---
-date: 2026-09-21
+date: 2026-09-23
 title: Upgrade SigNoz to v0.143.0 with OTel Collector v0.144.11
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
 description: Upgrade self-hosted SigNoz to v0.143.0. Add two AI observability trace processors to your collector and plan for every user to sign in again once.
@@ -7,6 +7,47 @@ doc_type: howto
 ---
 
 SigNoz v0.143.0 prepares the OTel collector for AI observability and moves login sessions to opaque tokens. Two things follow for self-hosted upgrades: the collector must run signoz-otel-collector v0.144.11 with two new processors in its traces pipeline, and every user signs in again once.
+
+<Admonition type="info" title="What changed in v0.143" defaultCollapsed="true">
+**Sessions**
+
+The default session provider is now opaque tokens. JWT stays available by setting the provider and a secret.
+
+**AI Observability**
+
+You can now monitor your LLM and agent workloads in SigNoz. This release includes:
+
+- **Overview**: tokens, cost, latency and errors across models, providers and agents.
+- **Explorer**: query AI spans by model, provider, agent and tool, and filter by rolled-up totals such as tokens and cost.
+- **Attribute mapping**: normalizes span attributes from different AI frameworks into the OpenTelemetry `gen_ai.*` keys, so one set of queries works across all of them.
+- **Pricing**: set per-model prices and get cost on every LLM span.
+
+**What changes for you**
+
+Attribute mapping moves input and output messages from framework-specific attributes like `input.value` or `gen_ai.prompt` into the standard `gen_ai.input.messages` and `gen_ai.output.messages`. These are the biggest attributes on an LLM span, so we don't keep the original alongside the copy.
+
+Keys that are moved:
+
+- Into `gen_ai.input.messages`: `gen_ai.prompt`, `ai.prompt.messages`, `input.value`
+- Into `gen_ai.output.messages`: `gen_ai.completion`, `ai.response.toolCalls`, `ai.response.text`, `output.value`, `final_result`
+
+If your queries, saved views or alerts use the old keys, switch them to the standard ones. Spans that already use the standard keys are not affected.
+
+Want to keep the original key too? Go to **AI Observability**, **Attribute Mapping** and change the operation from move to copy.
+
+**Coming next**
+
+- Trace detail with conversation threads
+- Dashboards, alerts and saved views built on AI explorer queries
+
+For the full release scope, see the <a href="https://github.com/SigNoz/signoz/releases/tag/v0.143.0" target="_blank" rel="noopener noreferrer nofollow">v0.143.0 release notes</a>.
+</Admonition>
+
+## Who needs to act
+
+<Admonition type="info" title="AI observability needs two new collector processors" defaultCollapsed="true">
+SigNoz now manages the `signozspanmapper` and `signozllmpricing` processors in your collector over OpAMP. It writes their contents, but it does not add them to the traces pipeline. If you run the default collector config from Foundry or the Helm chart, the new defaults carry them. If you maintain your own collector config, [add them yourself](#add-the-ai-observability-processors-to-a-custom-collector-config).
+</Admonition>
 
 <Admonition type="warning" title="JWT is no longer the default in v0.143.0" defaultCollapsed="true">
 
@@ -26,12 +67,6 @@ jwt::secret must be set when provider is jwt, without a JWT secret, user session
 Users sign in again once after the switch. See [Keep the JWT session provider](#keep-the-jwt-session-provider) and the <a href="https://github.com/SigNoz/signoz/releases/tag/v0.143.0" target="_blank" rel="noopener noreferrer nofollow">v0.143.0 release notes</a>.
 
 </Admonition>
-
-<Admonition type="info" title="AI observability needs two new collector processors" defaultCollapsed="true">
-SigNoz now manages the `signozspanmapper` and `signozllmpricing` processors in your collector over OpAMP. It writes their contents, but it does not add them to the traces pipeline. If you run the default collector config from Foundry or the Helm chart, the new defaults carry them. If you maintain your own collector config, [add them yourself](#add-the-ai-observability-processors-to-a-custom-collector-config).
-</Admonition>
-
-## Who needs to act
 
 | If you | Then |
 | --- | --- |
@@ -60,7 +95,7 @@ Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-starte
 </Admonition>
 
 <Tabs entityName="foundry-platform">
-<TabItem value="foundry-standard" label="Compose, Kubernetes, systemd, ECS" default>
+<TabItem value="foundry-standard" label="Compose, Kubernetes, ECS" default>
 
 ```bash
 curl -fsSL https://signoz.io/foundry.sh | bash
@@ -85,6 +120,33 @@ foundryctl cast -f casting.yaml
 The stack is named after `metadata.name` in your `casting.yaml`, which is `signoz` in the shipped example.
 
 All services are down between `docker stack rm` and `foundryctl cast`. `docker stack rm` removes the services and the networks, so data on named volumes is kept.
+
+</TabItem>
+<TabItem value="foundry-systemd" label="systemd">
+
+Foundry does not download binaries. Replace the SigNoz and collector binaries at the paths your casting states, then cast:
+
+```bash
+ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+
+# defaults; your casting may set foundry.signoz.io/signoz-binary-path and foundry.signoz.io/ingester-binary-path
+# extract the full SigNoz tarball: bin/, web/, templates/ and conf/ have to stay together
+curl -fsSL "https://github.com/SigNoz/signoz/releases/download/v0.143.0/signoz_linux_${ARCH}.tar.gz" \
+  | sudo tar -xz --strip-components=1 -C /opt/signoz
+
+curl -fsSL "https://github.com/SigNoz/signoz-otel-collector/releases/download/v0.144.11/signoz-otel-collector_linux_${ARCH}.tar.gz" \
+  | sudo tar -xz --strip-components=1 -C /opt/ingester
+
+sudo foundryctl cast -f casting.yaml
+```
+
+`cast` regenerates the collector config, runs the migrations and reloads the units, but does not restart running services. Restart both so they pick up the new binaries and config:
+
+```bash
+sudo systemctl restart <name>-signoz.service <name>-ingester.service
+```
+
+`<name>` is `metadata.name` in your `casting.yaml`, which is `signoz` in the shipped example.
 
 </TabItem>
 </Tabs>
