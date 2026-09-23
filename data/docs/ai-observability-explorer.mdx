@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-09-23
 title: AI Observability Explorer - Query LLM & AI Trace Data
 description: Explore LLM and AI trace data in SigNoz with the AI Observability Explorer. Query spans, traces, time series, and tables, then export results to a dashboard.
 doc_type: howto
@@ -10,7 +10,7 @@ The **Explorer** is the query tab of the [AI Observability](https://signoz.io/do
 Use this page to open the Explorer, run and refine queries, customize the results table, and export a query to a dashboard.
 
 <Admonition type="info">
-The Explorer lives inside the AI Observability section, which is gated behind the `enable_ai_observability` feature flag and is disabled by default. If the flag is not enabled for your organization, the **AI Observability** entry does not appear in the side navigation. See the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites) for how to enable it.
+The Explorer is part of the AI Observability section, which is available to every user and labeled **Beta** in the side navigation. See the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites) for prerequisites.
 </Admonition>
 
 ## Open the Explorer
@@ -33,6 +33,16 @@ The toolbar at the top of the Explorer controls query execution and the layout:
 ## Quick filters sidebar
 
 A collapsible sidebar on the left surfaces common trace-signal attributes so you can filter results without editing the query builder directly. Selecting values narrows the query, and the active view refreshes to match. Use the toolbar filter toggle to hide the sidebar for a full-width layout.
+
+The Explorer ships with seven pre-configured quick filter fields, provisioned automatically for every organization:
+
+- `gen_ai.operation.name`
+- `gen_ai.provider.name`
+- `gen_ai.request.model`
+- `gen_ai.tool.name`
+- `gen_ai.agent.name`
+- `deployment.environment`
+- `service.name`
 
 ## Explorer views
 
@@ -59,13 +69,29 @@ The List view table is fully customizable:
 
 ### Trace view
 
-The Trace view groups spans into traces and shows **root spans only**. Its columns are fixed and cannot be changed:
+The Trace view groups spans into traces and shows one row per root span. Two header controls shape the table:
 
-- Service name
-- Operation name
-- Duration
-- Span count
-- Trace ID
+- **Order by**: sort the traces by any AI trace field. The default is **Last Activity Time** (descending). You can switch to fields such as token counts, estimated cost, or call counts.
+- **Options**: open the column picker to show, hide, and reorder columns. Your selection is saved in the browser and persists across sessions.
+
+The **Trace ID** column is always visible and cannot be hidden or moved, since it links each row to its trace. Every other column is optional.
+
+When you have not customized the picker, the table shows: Service Name, Root Span Name, Trace Duration, Span Count, Trace ID, LLM Call Count, Total Tokens, and Estimated Total Cost.
+
+The column picker exposes the AI-specific fields SigNoz fetches for your trace data, so the exact list depends on what your account has instrumented. Commonly available columns include:
+
+- **Service Name**
+- **Root Span Name**: name of the trace's root span.
+- **Trace Duration**: end-to-end duration of the full trace.
+- **Span Count**
+- **Start Time** and **End Time**
+- **Error Count**
+- **Input** and **Output**: the root span's input and output payloads.
+- **LLM Call Count**: number of LLM calls in the trace.
+- **Tool Call Count** and **Distinct Tool Count**
+- **Input Tokens**, **Output Tokens**, and **Total Tokens**
+- **Estimated Total Cost**
+- **Max LLM Duration**: duration of the slowest LLM call in the trace.
 
 <Admonition type="info">
 The Trace view shows only root spans. To inspect the full span tree for a trace, open the trace from its trace ID.
