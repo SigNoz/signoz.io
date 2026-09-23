@@ -42,7 +42,9 @@ export async function fetchOpenAPISpec(version: string): Promise<string | null> 
   const parts = parseSemverTag(version)
   if (!parts) return null
 
-  const url = GITHUB_SPEC_RAW_URL_TEMPLATE.replace('{version}', version)
+  // TEMP (testing of the x-stability pill): serve the spec from the
+  // `nv/api-stability` branch for every requested version. Revert before merging.
+  const url = GITHUB_SPEC_RAW_URL_TEMPLATE.replace('{version}', 'nv/api-stability')
   try {
     const res = await fetch(url, {
       headers: {
