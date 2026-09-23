@@ -1,0 +1,242 @@
+---
+date: 2026-09-23
+title: Microsoft Agent Framework Observability with OpenTelemetry
+meta_title: Microsoft Agent Framework OpenTelemetry Monitoring
+description: Monitor Microsoft Agent Framework apps with OpenTelemetry and SigNoz. Trace agents, model calls, tools, and workflows, and track token usage and errors.
+doc_type: howto
+---
+
+<a href="https://github.com/microsoft/agent-framework" target="_blank" rel="noopener noreferrer nofollow">Microsoft Agent Framework</a> ships with OpenTelemetry instrumentation built in. Every agent run, model call, tool execution, and workflow step becomes a span that follows the OpenTelemetry GenAI semantic conventions, so there is no separate instrumentation package to install.
+
+This guide turns that instrumentation on and exports it to SigNoz, where agent traces sit alongside the rest of your application telemetry.
+
+## What is Microsoft Agent Framework Observability?
+
+Microsoft Agent Framework observability is the practice of collecting traces from agent applications so you can see what each run did: which agents ran, which models they called, how many tokens they consumed, which tools they invoked, how workflows moved work between agents, and where they failed.
+
+With full Microsoft Agent Framework observability in SigNoz, you can follow a request from a workflow down to a single tool call, attribute token spend to an agent or a model, catch tools that fail while the agent quietly recovers, and correlate an agent failure with the rest of your application.
+
+## Prerequisites
+
+- A [SigNoz Cloud](https://signoz.io/teams/) account and an [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Python 3.10 or later
+- An OpenAI API key, or credentials for another chat client the framework supports
+- An application built on Microsoft Agent Framework for Python
+
+## Monitor Microsoft Agent Framework with OpenTelemetry
+
+The framework's `agent_framework.observability` module creates the tracer, meter, and logger providers and the OTLP exporters for you. A single call to `configure_otel_providers()` at startup reads the standard `OTEL_*` environment variables and starts exporting.
+
+**Step 1:** Install the framework, the chat client you use, and the OTLP/HTTP exporter.
+
+```bash
+pip install \
+  agent-framework-core \
+  agent-framework-openai \
+  opentelemetry-exporter-otlp-proto-http
+```
+
+The `agent-framework` meta-package also works, but it pulls in every integration the framework offers. The two packages above are all an OpenAI-backed agent needs.
+
+**Step 2:** Configure the exporter through environment variables.
+
+```bash
+export OTEL_SERVICE_NAME="<service_name>"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+export OPENAI_API_KEY="<your-openai-api-key>"
+```
+
+**Verify these values:**
+
+- `<service_name>`: The name your application appears under in SigNoz, for example `travel-agent`.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<your-openai-api-key>`: Your OpenAI API key from the <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer nofollow">OpenAI dashboard</a>.
+
+<Admonition type="warning" title="Set the protocol explicitly">
+The framework defaults to gRPC when `OTEL_EXPORTER_OTLP_PROTOCOL` is unset, and the gRPC exporter is not installed in Step 1. Without `http/protobuf`, `configure_otel_providers()` raises an `ImportError` asking for `opentelemetry-exporter-otlp-proto-grpc`.
+</Admonition>
+
+**Step 3:** Call `configure_otel_providers()` once at startup, before your first agent run.
+
+```python
+import asyncio
+import random
+from typing import Annotated
+
+from agent_framework import Agent, tool
+from agent_framework.observability import configure_otel_providers
+from agent_framework.openai import OpenAIChatClient
+
+configure_otel_providers()
+
+
+@tool
+def get_weather(city: Annotated[str, "City name"]) -> str:
+    """Get the current weather for a city."""
+    return f"{random.choice(['sunny', 'cloudy', 'rainy'])}, {random.randint(8, 30)}C in {city}"
+
+
+@tool
+def get_flight_price(
+    origin: Annotated[str, "Origin city"], destination: Annotated[str, "Destination city"]
+) -> str:
+    """Get the cheapest round-trip flight price between two cities."""
+    return f"${random.randint(180, 900)} round trip from {origin} to {destination}"
+
+
+async def main() -> None:
+    agent = Agent(
+        client=OpenAIChatClient(model="gpt-4o-mini"),
+        name="TravelAgent",
+        instructions="You are a travel assistant. Use the tools, then give a one-line recommendation.",
+        tools=[get_weather, get_flight_price],
+    )
+    result = await agent.run("Seattle or Denver this weekend? Check weather and flights from San Francisco.")
+    print(result.text)
+
+
+asyncio.run(main())
+```
+
+<Admonition type="info" title="Loading settings from a .env file?">
+Call `load_dotenv()` before `configure_otel_providers()`. The providers read the environment once, when they are created, so variables loaded afterwards are ignored.
+</Admonition>
+
+**Step 4:** Run your application.
+
+```bash
+python main.py
+```
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+Each run emits spans carrying `gen_ai.operation.name`, `gen_ai.agent.name`, `gen_ai.request.model`, `gen_ai.usage.input_tokens`, and `gen_ai.usage.output_tokens`. Allow a few seconds for them to appear in SigNoz.
+
+## View Microsoft Agent Framework Traces in SigNoz
+
+Open the [Traces explorer](https://signoz.io/docs/userguide/traces/) and filter on your `service.name`. Each agent run appears as an `invoke_agent <agent>` span with its `chat` and `execute_tool` spans beside it.
+
+<Figure
+  src="/img/docs/llm/microsoft-agent-framework/microsoft-agent-framework-traces.webp"
+  alt="Microsoft Agent Framework spans in the SigNoz Traces explorer"
+  caption="Agent, model call, and tool execution spans from Microsoft Agent Framework"
+/>
+
+Click an `invoke_agent` span to open the full run. The waterfall shows the first model call requesting tools, the tools running in parallel, and the model call that writes the answer, with the `gen_ai.*` attributes on the right.
+
+<Figure
+  src="/img/docs/llm/microsoft-agent-framework/microsoft-agent-framework-detailed-traces.webp"
+  alt="Detailed view of a Microsoft Agent Framework trace in SigNoz"
+  caption="A single agent run: two model calls and three parallel tool executions"
+/>
+
+The span tree an agent run produces looks like this:
+
+```
+invoke_agent <agent>          one per agent.run(), carries the agent name
+├─ chat <model>               one per model call, carries the token counts
+├─ execute_tool <tool>        one per tool call
+└─ chat <model>
+```
+
+Workflows built with `SequentialBuilder`, `ConcurrentBuilder`, or `HandoffBuilder` add a layer above that:
+
+```
+workflow.run                  one per workflow run, carries workflow.name
+├─ executor.process <id>      one per step, including built-in steps
+│  └─ invoke_agent <agent>
+├─ edge_group.process <type>
+└─ message.send
+```
+
+Two placement details matter when you write your own queries:
+
+- **Tokens appear twice.** Each `invoke_agent` span repeats the summed token counts of its `chat` spans, so a query that sums `gen_ai.usage.*` across every span doubles the real figure. Sum on `chat` spans for totals, and use `invoke_agent` spans only for per-agent breakdowns.
+- **Tool errors stay on the tool span.** A tool that raises marks its `execute_tool` span as an error, but the agent recovers and its `invoke_agent` span stays clean. A failed model call does propagate, to the `invoke_agent` span and, inside a workflow, up to `workflow.run`.
+
+## Capturing prompts and completions
+
+Prompt, completion, and tool argument content is not recorded by default. To opt in:
+
+```bash
+export ENABLE_SENSITIVE_DATA="true"
+```
+
+Content then lands on `gen_ai.input.messages`, `gen_ai.output.messages`, and the `gen_ai.tool.call.*` attributes, and each message is also exported as a log record linked to its span. Prompts frequently contain user data, so enable this deliberately and check what your retention policy implies first.
+
+## Microsoft Agent Framework Observability Dashboard
+
+SigNoz ships a prebuilt dashboard for Microsoft Agent Framework covering agent runs, token usage by model and agent, latency percentiles, tool activity, workflows, and errors. See the [Microsoft Agent Framework dashboard](https://signoz.io/docs/dashboards/dashboard-templates/microsoft-agent-framework-dashboard/) for the panel reference and the import link.
+
+<Figure
+  src="/img/docs/llm/microsoft-agent-framework/microsoft-agent-framework-dashboard.webp"
+  alt="Microsoft Agent Framework dashboard in SigNoz"
+  caption="The Microsoft Agent Framework dashboard template"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting Microsoft Agent Framework Observability
+
+</ToggleHeading>
+
+### ImportError for opentelemetry-exporter-otlp-proto-grpc
+
+`OTEL_EXPORTER_OTLP_PROTOCOL` is unset, so the framework fell back to gRPC. Set it to `http/protobuf` to use the HTTP exporter installed in Step 1.
+
+### No spans reach SigNoz
+
+Check that `configure_otel_providers()` runs before the first agent run, and after any `load_dotenv()` call. Confirm the endpoint has no `/v1/traces` suffix, since the exporter appends the signal path itself.
+
+### Spans appear under the service name agent_framework
+
+`OTEL_SERVICE_NAME` was not set when the providers were created. Set it before `configure_otel_providers()` runs, or pass it directly with `configure_otel_providers(service_name="<service_name>")`.
+
+### Token totals look twice as high as the provider bill
+
+The query sums usage across both `invoke_agent` and `chat` spans. Filter on `gen_ai.operation.name = 'chat'` for totals.
+
+### A tool fails but the agent shows no error
+
+That is expected. The agent receives the tool error, recovers, and answers, so only the `execute_tool` span is marked as an error. Track tool failures on `execute_tool` spans directly.
+
+### Token metrics read close to zero
+
+The framework also exports `gen_ai.client.token.usage` and `gen_ai.client.operation.duration` metrics with cumulative temporality. A short-lived script starts fresh series on every run, so rate and increase queries undercount them. Aggregate the span attributes instead, which is what the dashboard template does.
+
+### Handoff workflow raises a ValueError at build time
+
+Every agent in a `HandoffBuilder` workflow needs `require_per_service_call_history_persistence=True` set when it is constructed. This is a framework requirement rather than a telemetry one, but it blocks the workflow before any spans are emitted.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+The <a href="https://opentelemetry.io/docs/collector/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collector</a> is a vendor-neutral proxy that receives, processes, and exports telemetry. Sending through a Collector lets you batch and retry centrally, strip or enrich attributes before they leave your network, and fan out to more than one backend without changing application code.
+
+To use one, point `OTEL_EXPORTER_OTLP_ENDPOINT` at your Collector instead of at SigNoz, and configure the Collector's OTLP exporter to forward to SigNoz. See [Install OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) for setup.
+
+</details>
+
+## Related integrations
+
+Microsoft Agent Framework is the successor to Semantic Kernel and AutoGen. If you still run either of them, or build agents on another framework, instrument them with the same OpenTelemetry pipeline:
+
+- [Semantic Kernel observability with OpenTelemetry](https://signoz.io/docs/semantic-kernel-observability/) - kernel functions, planners, and model calls
+- [AutoGen observability with OpenTelemetry](https://signoz.io/docs/autogen-observability/) - conversational multi-agent runs and per-agent token usage
+- [OpenAI Agents SDK observability with OpenTelemetry](https://signoz.io/docs/openai-agents-sdk-observability/) - agent runs, handoffs, and guardrails
+- [Azure OpenAI monitoring with OpenTelemetry](https://signoz.io/docs/azure-openai-monitoring/) - model calls to Azure OpenAI deployments
+- [Google ADK observability with OpenTelemetry](https://signoz.io/docs/google-adk-observability/) - another framework that emits `gen_ai.*` spans natively
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.
