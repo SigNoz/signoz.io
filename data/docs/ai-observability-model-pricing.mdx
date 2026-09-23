@@ -1,0 +1,74 @@
+---
+date: 2026-09-23
+title: AI Observability Model Pricing - Set LLM Token Costs
+description: Manage LLM model pricing rules in SigNoz AI Observability. Search, filter, and set per-million token costs, and price unrecognized models.
+doc_type: howto
+---
+
+**Model pricing** is the settings tab of the [AI Observability](https://signoz.io/docs/ai-observability/) section where you manage the per-model rates SigNoz uses to turn token counts into cost. Each rule maps a model to input and output prices, so the cost panels in the Overview dashboard and the Explorer stay accurate as you add or change models.
+
+Use this page to browse existing pricing rules, edit a rule, and price models that SigNoz has seen in your spans but does not yet have a rate for.
+
+<Admonition type="info">
+Model pricing lives inside the AI Observability section, which is gated behind the `enable_ai_observability` feature flag and is disabled by default. If the flag is not enabled for your organization, the **AI Observability** entry does not appear in the side navigation. See the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites) for how to enable it.
+</Admonition>
+
+## Open Model pricing
+
+1. Open the AI Observability section from the side navigation **More** menu.
+2. In the tab bar at the top, select **Model pricing**.
+3. SigNoz opens the page at `/ai-observability/configuration`.
+
+The page has two tabs: **Model Costs** lists the pricing rules already in effect, and **Unpriced models** lists models seen in spans that still need a rate.
+
+## Model Costs tab
+
+The **Model Costs** tab is a paginated table of pricing rules. It shows 20 rules per page and reports the total count above the table.
+
+| Column | What it shows |
+| --- | --- |
+| **Model** | The billing model ID the rule applies to. |
+| **Provider** | The provider the model belongs to (for example, OpenAI or Anthropic). |
+| **Input / 1M** | Price per one million input tokens, in USD. |
+| **Output / 1M** | Price per one million output tokens, in USD. |
+| **Extra buckets** | Count of additional price buckets configured beyond input and output, such as cached input tokens. |
+| **Source** | Whether the rate is a built-in default (**Auto**) or a **User override**. |
+| **Last seen** | Relative time since the model last appeared in a span (for example, "2 hours ago"). A dash means it has not been seen. |
+
+### Search and filter
+
+- **Search** by model or provider using the box above the table. The placeholder reads *Search by model or provider*, and results update as you type.
+- **Filter by source** with the source dropdown: **All sources**, **User override**, or **Auto**.
+
+Search, source filter, and the current page are stored in the URL, so a filtered view is bookmarkable and shareable. Copy the URL to hand a teammate the exact same table state.
+
+## Set or edit a pricing rule
+
+Select a row in the **Model Costs** table to open the cost drawer, where you can review and change the rule:
+
+- **Billing Model ID**: the identifier the rule matches on.
+- **Provider**: the provider the model belongs to.
+- **Patterns**: the model-name patterns that map incoming spans to this billing model.
+- **Source**: keep the built-in **Auto** rate or switch to a **User override** to set your own prices.
+- **Pricing (per 1M tokens, USD)**: the input, output, and any additional token-bucket prices.
+
+Rules backed by a built-in rate are read-only until you switch the source to **User override**.
+
+## Unpriced models tab
+
+The **Unpriced models** tab lists models SigNoz has seen in spans but has no rate for. A badge on the tab shows how many are pending. Each row shows the model name (from spans), its provider, and a span count.
+
+To price a model, use the **Map to billing model** dropdown on its row:
+
+- Pick an existing billing model to map the unpriced model onto its rate.
+- To define a new rate, select **Create a new pricing model** from the sticky footer at the bottom of the dropdown. This opens the cost drawer prefilled with the model name so you can set its prices.
+
+## Time range
+
+Model pricing is time-agnostic: it manages configuration, not query results, so the global date/time selector is hidden on this route. Pricing rules apply to all queries regardless of the selected time range.
+
+## Related
+
+- [AI Observability overview](https://signoz.io/docs/ai-observability/): the read-only dashboard and the attributes it needs.
+- [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/): query the underlying LLM and AI trace data.
+- [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
