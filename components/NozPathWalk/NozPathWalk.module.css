@@ -1,0 +1,174 @@
+.track {
+  position: relative;
+}
+
+/*
+ * The three fixed layers. They sit above page content, as in the prototype, but
+ * below the site header (which is `fixed z-[50]`) so noz walks under the nav
+ * rather than over it.
+ */
+.layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sceneLayer {
+  z-index: 20;
+  width: 100%;
+  height: 100%;
+}
+
+.badgeLayer {
+  z-index: 22;
+}
+
+.nozLayer {
+  z-index: 24;
+}
+
+.badge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 7px 14px;
+  border: 1px solid color-mix(in srgb, var(--l1-foreground) 28%, transparent);
+  border-radius: 999px;
+  background: var(--l3-background);
+  color: var(--l1-foreground);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  opacity: 0;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+  animation: noz-badge-breathe 3.4s ease-in-out infinite;
+}
+
+@keyframes noz-badge-breathe {
+  0%,
+  100% {
+    border-color: color-mix(in srgb, var(--l1-foreground) 22%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--l1-foreground) 16%, transparent);
+  }
+
+  50% {
+    border-color: color-mix(in srgb, var(--l1-foreground) 46%, transparent);
+    box-shadow:
+      0 0 26px color-mix(in srgb, var(--l1-foreground) 42%, transparent),
+      inset 0 0 2px color-mix(in srgb, var(--l1-foreground) 35%, transparent);
+  }
+}
+
+.noz {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 48px;
+  height: 48px;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0;
+  outline: none;
+  pointer-events: auto;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.noz:focus-visible {
+  border-radius: 4px;
+  outline: 1px dashed color-mix(in srgb, var(--l1-foreground) 30%, transparent);
+  outline-offset: 4px;
+}
+
+.noz svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.armLift {
+  transform: rotate(0deg);
+  transform-origin: 4.18383px 13.4752px;
+  transition: transform 0.55s cubic-bezier(0.34, 1.7, 0.5, 1);
+  will-change: transform;
+}
+
+.armWiggle {
+  transform: rotate(0deg);
+  transform-origin: 4.18383px 13.4752px;
+  will-change: transform;
+}
+
+.head {
+  transform: rotate(0deg);
+  transform-origin: 12.02px 18.37px;
+  transition: transform 0.5s cubic-bezier(0.34, 1.7, 0.5, 1);
+  will-change: transform;
+}
+
+.noz:hover .armLift,
+.noz:focus-visible .armLift,
+.noz.waving .armLift {
+  transform: rotate(145deg) scale(1, 1.7);
+}
+
+.noz:hover .armWiggle,
+.noz:focus-visible .armWiggle,
+.noz.waving .armWiggle {
+  animation: noz-wave-wiggle 0.7s ease-in-out 0.2s infinite;
+}
+
+.noz:hover .head,
+.noz:focus-visible .head,
+.noz.waving .head {
+  transform: rotate(9deg);
+}
+
+@keyframes noz-wave-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(20deg);
+  }
+
+  75% {
+    transform: rotate(-20deg);
+  }
+}
+
+.skyline {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  touch-action: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge {
+    animation: none;
+    box-shadow: 0 0 18px color-mix(in srgb, var(--l1-foreground) 30%, transparent);
+  }
+
+  .armLift,
+  .armWiggle,
+  .head {
+    transition: none;
+    animation: none !important;
+  }
+}
