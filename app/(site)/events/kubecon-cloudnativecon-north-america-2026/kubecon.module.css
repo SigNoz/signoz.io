@@ -1,0 +1,59 @@
+/* Marquee: one track, duplicated once, translated by exactly half its width. */
+.marquee {
+  overflow: hidden;
+}
+
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  animation: kubecon-marquee 26s linear infinite;
+}
+
+.marqueeSlow {
+  animation-duration: 38s;
+}
+
+@keyframes kubecon-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.marqueeGrid {
+  flex: none;
+  width: 56px;
+  height: 18px;
+  background-image:
+    repeating-linear-gradient(to right, currentColor 0 1px, transparent 1px 100%),
+    repeating-linear-gradient(to bottom, currentColor 0 1px, transparent 1px 100%);
+  background-size:
+    9px 100%,
+    100% 6px;
+  box-shadow: inset -1px -1px 0 0 currentColor;
+  opacity: 0.85;
+}
+
+.hatchRule {
+  height: 20px;
+  background-image: repeating-linear-gradient(115deg, var(--l2-border) 0 1px, transparent 1px 6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marqueeTrack {
+    animation: none;
+  }
+}
+
+/*
+ * FloatingRingsScene caps its illustration at 260px square; the KubeCon art is
+ * a tall isometric stack, so give it room to keep the Figma proportions.
+ */
+.ctaRings :global(.floating-rings-img) {
+  max-width: min(100%, 248px);
+  max-height: min(100%, 420px);
+}
