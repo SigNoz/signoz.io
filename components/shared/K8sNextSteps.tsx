@@ -13,6 +13,11 @@ export default function K8sNextSteps() {
           Use OpenTelemetry Operator for automatic instrumentation
         </CustomLink>
       </li>
+      <li>
+        <CustomLink href="https://signoz.io/docs/manage/signoz-operator/overview/">
+          Manage dashboards and alerts as Kubernetes resources with the SigNoz Operator
+        </CustomLink>
+      </li>
     </ul>
   )
 }

@@ -1,0 +1,318 @@
+---
+date: 2026-09-24
+title: SigNoz Operator - Manage Dashboards & Alerts in Kubernetes
+description: Install the SigNoz Operator on Kubernetes and manage SigNoz dashboards, alert rules, users, and roles as custom resources with drift correction.
+doc_type: howto
+---
+
+## Overview
+
+The SigNoz Operator lets you manage the contents of a SigNoz instance from Kubernetes. You declare dashboards, alert rules, users, roles, and other SigNoz objects as Kubernetes custom resources. You keep the resources in Git with your service code and apply them with `kubectl apply`, Argo CD, or Flux, the same way you apply your other manifests.
+
+The operator does not install SigNoz. To install SigNoz on Kubernetes, use <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> or the [SigNoz Helm chart](https://signoz.io/docs/install/kubernetes/).
+
+## Prerequisites
+
+- A Kubernetes cluster and `kubectl` access to it with permission to install CRDs (CustomResourceDefinitions).
+- Helm 3, if you install with Helm.
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
+- An API key for a [SigNoz service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/). The operator can do only what the [roles](https://signoz.io/docs/manage/administrator-guide/iam/roles/) of that service account allow. Give the service account a role that can manage every kind you plan to declare.
+
+## How It Works
+
+<Figure
+  src="/img/docs/signoz-operator/signoz-operator-architecture.svg"
+  alt="The operator reads custom resources and a ProviderConfig in the cluster, then calls the SigNoz API"
+  caption="The operator reads custom resources and a ProviderConfig, then writes to SigNoz through its API"
+/>
+
+Each managed resource names a `ProviderConfig`. A `ProviderConfig` holds the URL of a SigNoz instance and a reference to the Secret with the API key. The operator reads both and creates the object through the SigNoz API.
+
+After that, the operator compares the object in SigNoz with the manifest at a fixed interval. If someone changes the object outside Kubernetes, for example in the SigNoz UI, the operator reverts the change. When you delete the custom resource, the operator deletes the object in SigNoz.
+
+The operator calls the SigNoz API over HTTP or HTTPS, as set in the endpoint URL. Use HTTPS, because the operator sends the API key in a request header. The SigNoz instance can run in the same cluster, in a different cluster, or outside Kubernetes. One operator can manage SigNoz Cloud and self-hosted instances at the same time.
+
+## Manage SigNoz Resources with the Operator
+
+### Step 1. Install the Operator
+
+Both methods install the CRDs, the RBAC (role-based access control) rules, and the operator into the `signoz-operator-system` namespace.
+
+<Tabs entityName="method">
+<TabItem value="helm" label="Helm" default>
+
+Add the SigNoz Helm repository and install the <a href="https://github.com/SigNoz/charts/tree/main/charts/signoz-operator" target="_blank" rel="noopener noreferrer nofollow">signoz-operator chart</a>:
+
+```bash
+helm repo add signoz https://charts.signoz.io
+helm repo update
+helm install signoz-operator signoz/signoz-operator \
+  --namespace signoz-operator-system --create-namespace
+```
+
+</TabItem>
+<TabItem value="kubectl" label="kubectl">
+
+Apply the manifest that ships with each <a href="https://github.com/SigNoz/signoz-operator/releases" target="_blank" rel="noopener noreferrer nofollow">operator release</a>:
+
+```bash
+kubectl apply -f https://github.com/SigNoz/signoz-operator/releases/latest/download/signoz-operator.yaml
+```
+
+If you install CRDs with a separate process, use `signoz-operator.crds.yaml` from the same release. It holds only the CRDs.
+
+</TabItem>
+</Tabs>
+
+Wait for the operator to start:
+
+```bash
+kubectl -n signoz-operator-system rollout status deployment/signoz-operator
+```
+
+The command prints `deployment "signoz-operator" successfully rolled out` when the operator is running.
+
+### Step 2. Connect the Operator to SigNoz
+
+Run the commands in this step and the next one in the namespace where you plan to create your SigNoz resources. The commands use your current namespace. To use a different one, add `-n <namespace>`.
+
+Create a Secret that holds the API key:
+
+```bash
+kubectl create secret generic signoz-api --from-literal=token=<your-signoz-api-key>
+```
+
+<Admonition type="warning">
+Do not commit the API key to Git in a Secret manifest. To manage the Secret with GitOps, encrypt it or sync it from a secret store with a tool such as <a href="https://github.com/getsops/sops" target="_blank" rel="noopener noreferrer nofollow">SOPS</a>, <a href="https://github.com/bitnami-labs/sealed-secrets" target="_blank" rel="noopener noreferrer nofollow">Sealed Secrets</a>, or <a href="https://external-secrets.io" target="_blank" rel="noopener noreferrer nofollow">External Secrets Operator</a>.
+</Admonition>
+
+Save this manifest as `signoz-provider.yaml`. It creates a `ProviderConfig` named `prod` that reads the key from the Secret:
+
+```yaml:signoz-provider.yaml
+apiVersion: resources.signoz.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: prod
+spec:
+  endpoint:
+    value: <your-signoz-url>
+  auth:
+    header:
+      # The header name defaults to SIGNOZ-API-KEY
+      valueFrom:
+        secretKeyRef:
+          name: signoz-api
+          key: token
+```
+
+**Verify these values:**
+
+- `<your-signoz-api-key>`: The key of your SigNoz [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/).
+- `<your-signoz-url>`: The URL that you use to open SigNoz in a browser, for example `https://<your-workspace>.<region>.signoz.cloud` for SigNoz Cloud. For a self-hosted instance, use the URL at which the operator can reach SigNoz.
+
+Apply the manifest:
+
+```bash
+kubectl apply -f signoz-provider.yaml
+```
+
+The operator reads the Secret from the namespace of the `ProviderConfig`. Keep the Secret and the `ProviderConfig` in the same namespace.
+
+### Step 3. Create a Dashboard
+
+Every managed kind shares the same fields at the root of `spec`. The SigNoz object goes under `spec.objectTemplate`, as typed fields or as JSON.
+
+Save one of these manifests as `service-overview.yaml`:
+
+<Tabs entityName="format">
+<TabItem value="typed" label="Typed fields" default>
+
+The API server validates these fields when you apply the manifest.
+
+```yaml:service-overview.yaml defaultCollapsed
+apiVersion: resources.signoz.io/v1alpha1
+kind: Dashboard
+metadata:
+  name: service-overview
+spec:
+  providerConfigRef:
+    name: prod
+  interval: 5m
+  objectTemplate:
+    spec:
+      name: service-overview
+      schemaVersion: v6
+      tags:
+        - key: team
+          value: platform
+      spec:
+        display:
+          name: Service overview
+          description: Golden signals for the demo service
+        panels: {}
+        layouts: []
+        variables: []
+```
+
+</TabItem>
+<TabItem value="json" label="JSON">
+
+Use this form to paste dashboard JSON. The operator sends the JSON to SigNoz without changes, so the JSON must include `name` and `"schemaVersion": "v6"`. A dashboard that you download from the JSON editor in the SigNoz UI has only `spec`, `tags`, and `image`. Add the two fields before you paste it.
+
+```yaml:service-overview.yaml defaultCollapsed
+apiVersion: resources.signoz.io/v1alpha1
+kind: Dashboard
+metadata:
+  name: service-overview
+spec:
+  providerConfigRef:
+    name: prod
+  interval: 5m
+  objectTemplate:
+    jsonSpec: |
+      {
+        "name": "service-overview",
+        "schemaVersion": "v6",
+        "tags": [{"key": "team", "value": "platform"}],
+        "spec": {
+          "display": {
+            "name": "Service overview",
+            "description": "Golden signals for the demo service"
+          },
+          "panels": {},
+          "layouts": [],
+          "variables": []
+        }
+      }
+```
+
+</TabItem>
+</Tabs>
+
+- `providerConfigRef.name` names the `ProviderConfig` from Step 2.
+- `interval` sets how often the operator compares the dashboard in SigNoz with this manifest.
+
+Apply the manifest:
+
+```bash
+kubectl apply -f service-overview.yaml
+```
+
+The <a href="https://github.com/SigNoz/signoz-operator/tree/main/config/samples" target="_blank" rel="noopener noreferrer nofollow">samples directory</a> of the operator repository has one sample manifest for each kind. For the list of kinds and the fields that all kinds share, see the [SigNoz Operator reference](https://signoz.io/docs/manage/signoz-operator/reference/).
+
+## Validate
+
+1. Make sure that the `ProviderConfig` is ready:
+
+   ```bash
+   kubectl get providerconfig prod -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+   ```
+
+   The command prints `True` when the operator can read the endpoint and the API key.
+
+2. Make sure that the dashboard is ready:
+
+   ```bash
+   kubectl get dashboards
+   ```
+
+   ```text noLineNumbers
+   NAME               READY   REASON    ID                                     AGE
+   service-overview   True    Created   0198c0e1-4f2a-7c9e-b3d5-6a1f8e2d4c07   12s
+   ```
+
+   `READY` is `True` and `ID` shows the ID that SigNoz gave the dashboard. `REASON` can also show `Updated` or `Synced`.
+
+3. In SigNoz, open **Dashboards**. The **Service overview** dashboard is in the list with the `team:platform` tag. The creator is the service account of the operator.
+
+   <Figure
+     src="/img/docs/signoz-operator/signoz-operator-dashboard-list.webp"
+     alt="SigNoz dashboards list showing the Service overview dashboard with the team:platform tag, created by the operator service account"
+     caption="The dashboard that the operator created, in the SigNoz dashboards list"
+   />
+
+In scripts and CI pipelines, wait on the `Ready` condition. It summarizes all other conditions:
+
+```bash
+kubectl wait --for=condition=Ready dashboard/service-overview --timeout=2m
+```
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+</ToggleHeading>
+
+### The resource shows `Unauthorized`
+
+SigNoz rejected the API key with a 401 or 403 response.
+
+1. Make sure that the Secret holds the complete key and that nobody revoked the key in SigNoz.
+2. Make sure that the service account has a role that allows the action on this kind.
+3. Wait for the next retry. The operator retries at `retryInterval` and picks up a changed Secret without a restart.
+
+### The resource shows `ProviderConfigNotReady`
+
+The operator cannot read the endpoint or the API key from the `ProviderConfig`. Run this command and read the `reason` and `message` of the `Ready` condition:
+
+```bash
+kubectl describe providerconfig prod
+```
+
+A reason such as `SecretNotFound` or `KeyNotFound` means that the Secret or the key in it is missing from the namespace of the `ProviderConfig`.
+
+### The resource shows `BackendUnreachable`
+
+The operator cannot connect to the endpoint. Make sure that the endpoint URL is correct and that the operator pod can reach it. For a self-hosted instance with a private CA, [trust the CA in the `ProviderConfig`](https://signoz.io/docs/manage/signoz-operator/configuration/#trust-a-private-ca-for-a-self-hosted-instance).
+
+### The resource shows `Rejected` or `InvalidSpec`
+
+SigNoz rejected the body with a 400 response, or the `jsonSpec` is not valid JSON. The operator does not retry this failure. Run `kubectl describe` on the resource, fix the field named in the message, and apply the manifest again.
+
+### The `ProviderConfig` is ready but resources fail
+
+`Ready=True` on a `ProviderConfig` means only that the operator can read the endpoint and the key. The operator does not send a test request to SigNoz. Read the conditions on the failing resource to see what SigNoz returned.
+
+### A namespace stays in `Terminating`
+
+When you delete a namespace, Kubernetes can delete the Secret and the `ProviderConfig` before the managed resources. The operator then cannot reach SigNoz to delete the objects, and the resources keep the `resources.signoz.io/finalizer` finalizer. The resources show `ProviderConfigNotReady`.
+
+To prevent this, delete the managed resources first and wait until they are gone. Then delete the namespace:
+
+```bash
+kubectl delete -n <namespace> --all \
+  dashboards.resources.signoz.io,rules.resources.signoz.io,savedviews.resources.signoz.io,plannedmaintenances.resources.signoz.io,routepolicies.resources.signoz.io,users.resources.signoz.io,roles.resources.signoz.io,serviceaccounts.resources.signoz.io,authdomains.resources.signoz.io
+kubectl delete namespace <namespace>
+```
+
+The first command waits until the operator deletes each object in SigNoz.
+
+If the namespace is already stuck, remove the finalizer from each resource. Then delete the objects in SigNoz yourself, because the operator did not delete them:
+
+```bash
+kubectl patch <kind>.resources.signoz.io <name> -n <namespace> --type merge -p '{"metadata":{"finalizers":null}}'
+```
+
+### Changes in the SigNoz UI disappear
+
+The operator reverts changes that you make in the SigNoz UI at the next `interval`. Edit the manifest instead. To pause the operator for one resource, set `spec.suspend: true`.
+
+</details>
+
+## Limitations
+
+- The operator is in alpha, and the `v1alpha1` API can change.
+- If a SigNoz object with the same identity already exists, the operator adopts it. For example, a `Dashboard` adopts a dashboard with the same `name`, and a `User` adopts a user with the same email. With the default `reclaimPolicy: Delete`, the operator deletes that object in SigNoz when you delete the custom resource. To keep adopted objects, set `reclaimPolicy: Orphan`.
+- A resource in the `Terminal` state stays there until you edit the resource, change its `ProviderConfig` or Secret, or restart the operator. If you fix the cause only in SigNoz, the resource stays `Terminal`.
+
+## Next Steps
+
+- To change how the operator connects to SigNoz, see [Configure the SigNoz Operator](https://signoz.io/docs/manage/signoz-operator/configuration/).
+- To look up kinds, spec fields, status conditions, and operator flags, see the [SigNoz Operator reference](https://signoz.io/docs/manage/signoz-operator/reference/).
+- Download an existing dashboard from the [JSON editor](https://signoz.io/docs/userguide/manage-dashboards/#edit-a-dashboard-as-json), add `name` and `schemaVersion`, and manage it with `jsonSpec`.
+- Read about [alert types](https://signoz.io/docs/alerts-management/alert-types/) before you declare `Rule` resources.
+- To manage dashboards with Terraform instead, see the [Terraform provider for dashboards](https://signoz.io/docs/dashboards/terraform-provider-signoz/).
+
+## Get Help
+
+<GetHelp />
