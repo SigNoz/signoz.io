@@ -10,15 +10,29 @@ import styles from './customer-stories.module.css'
 import { buttonVariants } from '@/components/ui/Button'
 import { cn } from 'app/lib/utils'
 
-export default function CustomerStoriesCard() {
+interface CustomerStoriesCardProps {
+  /** Analytics attribution, so placements outside the homepage hero are distinguishable. */
+  clickLocation?: string
+}
+
+export default function CustomerStoriesCard({
+  clickLocation = 'Hero Customer Stories',
+}: CustomerStoriesCardProps = {}) {
   const half = Math.ceil(CUSTOMER_STORY_QUOTES.length / 2)
 
   return (
     <section className={styles.root} aria-label="Customers and testimonials">
-      <CustomerCarousel />
+      <CustomerCarousel clickLocation={clickLocation} />
       <div className={styles.voices}>
-        <TestimonialSwapPanel quotes={CUSTOMER_STORY_QUOTES.slice(0, half)} />
-        <TestimonialSwapPanel quotes={CUSTOMER_STORY_QUOTES.slice(half)} staggerMs={1500} />
+        <TestimonialSwapPanel
+          quotes={CUSTOMER_STORY_QUOTES.slice(0, half)}
+          clickLocation={clickLocation}
+        />
+        <TestimonialSwapPanel
+          quotes={CUSTOMER_STORY_QUOTES.slice(half)}
+          staggerMs={1500}
+          clickLocation={clickLocation}
+        />
         <aside className={cn(styles.voice, styles.voiceCta)}>
           <p className={styles.voiceCtaTitle}>{CUSTOMER_STORIES_CTA.title}</p>
           <TrackingLink
@@ -26,7 +40,7 @@ export default function CustomerStoriesCard() {
             clickType="Secondary CTA"
             clickName="Customer Stories Link"
             clickText={CUSTOMER_STORIES_CTA.buttonLabel}
-            clickLocation="Hero Customer Stories"
+            clickLocation={clickLocation}
             className={cn(styles.voiceCtaLink, 'no-underline')}
             aria-label={CUSTOMER_STORIES_CTA.buttonLabel}
           >
