@@ -22,6 +22,7 @@ import {
   routeFromAnchors,
   sampleAtArc,
   scaleScrollMap,
+  type PathLayout,
 } from './engine/path'
 import { clamp, smooth } from './engine/math'
 import { ConfettiBurst, buildSceneItems, drawScene, type SceneItems } from './engine/scene'
@@ -199,7 +200,7 @@ export function useNozPathWalk({
 
       const maxScroll = Math.max(1, state.trackHeight - state.viewportHeight)
       const markedEnd = endMarkerY()
-      let layoutResult
+      let layoutResult: PathLayout
 
       if (markedEnd == null) {
         // No end marker: solve for the end that finishes `tail` px before the track does.
