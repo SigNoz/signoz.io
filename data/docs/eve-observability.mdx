@@ -1,0 +1,217 @@
+---
+date: 2026-09-23
+title: Vercel Eve Observability with OpenTelemetry and SigNoz
+meta_title: Vercel Eve OpenTelemetry Monitoring
+description: Monitor Vercel eve agents with OpenTelemetry and SigNoz. Trace turns, model calls, tools, and subagents from eve dev, and track token usage and failures.
+doc_type: howto
+---
+
+<a href="https://github.com/vercel/eve" target="_blank" rel="noopener noreferrer nofollow">eve</a> is Vercel's filesystem-first framework for building agents. It traces every turn with OpenTelemetry, so each model call, tool execution, and subagent dispatch becomes a span with no instrumentation package to add.
+
+This guide sends those traces from the interactive `eve dev` terminal UI to SigNoz.
+
+## What is Eve Observability?
+
+Eve observability is the practice of collecting traces from eve agents so you can see what each turn did: which model steps it took, how many tokens it consumed, which tools and subagents it called, and whether it completed, failed, or was cancelled.
+
+With full eve observability in SigNoz, you can follow a conversation turn by turn, attribute token spend to an agent or a model, catch tools that fail while the agent quietly recovers, and alert on turns that fail after exhausting their model retries.
+
+## Prerequisites
+
+- A [SigNoz Cloud](https://signoz.io/teams/) account and an [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Node.js 24 or later
+- An eve project. Create one with `npx eve@latest init my-agent`
+- A model credential connected in the eve terminal UI, such as an OpenAI API key
+
+## Monitor Eve with OpenTelemetry
+
+eve loads every file in `agent/instrumentation/` at startup. A file that exports `otelIntegration()` adds an OpenTelemetry destination, so sending traces to SigNoz takes one file.
+
+**Step 1:** Install the OTLP exporter from `@vercel/otel`.
+
+```bash
+npm install @vercel/otel
+```
+
+**Step 2:** Add the SigNoz settings to `.env.local` in the project root. `eve dev` loads this file automatically.
+
+```bash
+OTEL_SERVICE_NAME=<service_name>
+SIGNOZ_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+SIGNOZ_INGESTION_KEY=<your-ingestion-key>
+```
+
+**Verify these values:**
+
+- `<service_name>`: The name your agent appears under in SigNoz, for example `support-agent`.
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+**Step 3:** Create `agent/instrumentation/signoz.ts`.
+
+```ts
+import { OTLPHttpProtoTraceExporter } from "@vercel/otel";
+import { otelIntegration } from "eve/instrumentation/otel";
+
+const AGENT_SPANS = /^(invoke_agent|agent\.step|agent\.action|chat|execute_tool)( |$)/;
+
+export default otelIntegration({
+  // Keep eve's agent spans and drop the durable-workflow runtime spans.
+  exportPolicy: { span: ({ name }) => ({ emit: AGENT_SPANS.test(name) }) },
+  traceExporter: new OTLPHttpProtoTraceExporter({
+    url: `${process.env.SIGNOZ_OTLP_ENDPOINT}/v1/traces`,
+    headers: { "signoz-ingestion-key": process.env.SIGNOZ_INGESTION_KEY! },
+  }),
+});
+```
+
+<Admonition type="info" title="Why filter spans?">
+eve runs each turn on a durable workflow runtime that emits its own `workflow.*`, `step.*`, and `queue.*` spans, many of them as separate traces. They account for roughly 97% of the spans a turn produces and say nothing about the agent. The `exportPolicy` keeps the five agent span types, which cuts a simple tool-calling turn from nearly 200 spans to under 10. Remove it if you need to debug the workflow runtime itself.
+</Admonition>
+
+**Step 4:** Start the terminal UI and send a message.
+
+```bash
+npm run dev
+```
+
+Each turn is exported when it finishes. Allow up to 30 seconds for it to appear in SigNoz.
+
+<Admonition type="info" title="Filtering by environment?" defaultCollapsed="true">
+eve does not set `deployment.environment`, which the dashboard template's environment picker reads. Add it with `agent/instrumentation/otel.ts`:
+
+```ts
+import { otel } from "eve/instrumentation/otel";
+
+export default otel({
+  resource: { "deployment.environment": process.env.VERCEL_ENV ?? "development" },
+});
+```
+</Admonition>
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## View Eve Traces in SigNoz
+
+Open the [Traces explorer](https://signoz.io/docs/userguide/traces/) and filter on your `service.name`. Each turn appears as an `invoke_agent <agent>` span with its `agent.step`, `chat`, `agent.action`, and `execute_tool` spans.
+
+<Figure
+  src="/img/docs/llm/eve/eve-traces.webp"
+  alt="eve agent spans in the SigNoz Traces explorer"
+  caption="Turn, model step, model call, and tool spans from an eve agent"
+/>
+
+Click an `invoke_agent` span to open the turn. The waterfall shows the first model step requesting a tool, the tool running, and the second step writing the answer. Select a `chat` span to see the model, token counts, and conversation id on the right.
+
+<Figure
+  src="/img/docs/llm/eve/eve-detailed-traces.webp"
+  alt="Detailed view of an eve turn in SigNoz"
+  caption="A single turn: two model steps and one tool call"
+/>
+
+The span tree a turn produces looks like this:
+
+```
+invoke_agent <agent>          one trace per turn, carries agent.turn.outcome
+└─ agent.step                 one per model step
+   ├─ chat <model>            carries gen_ai.request.model and gen_ai.usage.*
+   └─ agent.action            one per tool or subagent call
+      └─ execute_tool <tool>
+```
+
+A few placement details matter when you write your own queries:
+
+- **Tokens appear three times.** `invoke_agent`, `agent.step`, and `chat` spans all carry the same usage totals. Sum `gen_ai.usage.*` on `chat` spans for totals, and use `invoke_agent` only for per-agent breakdowns.
+- **Read turn outcomes from `agent.turn.outcome`.** When a user presses Escape, the `invoke_agent` span stays unset with `agent.turn.outcome = cancelled`, while its child spans are marked as errors with `TurnCancelledError`. A `has_error` filter therefore counts cancellations as failures.
+- **Tool errors stay on the tool.** A tool that throws marks its `execute_tool` and `agent.action` spans as errors, but the model recovers and the turn completes. A model call that fails after its retries does fail the turn.
+- **Subagents are separate traces.** A subagent turn is its own `invoke_agent` trace, linked to its caller and sharing the caller's `gen_ai.conversation.id`. Its tokens are not rolled into the caller's turn.
+- **Provider-executed tools have no tool span.** Tools the model provider runs itself, such as OpenAI web search, appear as `agent.action` spans without an `execute_tool` child.
+
+## Capturing prompts and completions
+
+eve records prompts, completions, and tool arguments on spans by default in `eve dev`, and in production only when the channel's audience is public. Content lands on `gen_ai.input.messages` and `gen_ai.output.messages`, and each `chat` span repeats the full conversation history.
+
+To stop recording content, set a `tracePolicy` in `agent/instrumentation/otel.ts`. Spans, timings, and token counts are still exported.
+
+```ts
+import { otel } from "eve/instrumentation/otel";
+
+export default otel({
+  tracePolicy: () => ({ emit: true, recordInputs: false, recordOutputs: false }),
+});
+```
+
+The policy applies to every OpenTelemetry destination, not only SigNoz. If you also set `deployment.environment`, put `resource` and `tracePolicy` in the same `otel()` call, since eve allows only one.
+
+## Eve Observability Dashboard
+
+SigNoz ships a prebuilt dashboard for eve covering turns, conversations, token usage by model and agent, latency, tools, subagents, turn outcomes, and errors. See the [Eve dashboard](https://signoz.io/docs/dashboards/dashboard-templates/eve-dashboard/) for the panel reference and the import link.
+
+<Figure
+  src="/img/docs/llm/eve/eve-dashboard.webp"
+  alt="Eve dashboard in SigNoz"
+  caption="The Eve dashboard template"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting Eve Observability
+
+</ToggleHeading>
+
+### No spans reach SigNoz
+
+Check that the file lives in `agent/instrumentation/` and that `@vercel/otel` is installed. Unlike the standard `OTEL_EXPORTER_OTLP_ENDPOINT` variable, the `@vercel/otel` exporter takes the full signal URL, so the `url` must end in `/v1/traces`. If you start the agent with something other than `eve dev`, load `.env.local` yourself.
+
+### Every turn fails with "fetch failed" or "Lost the connection to the running turn"
+
+An earlier `eve dev` process is still running, usually after a terminal was closed without quitting the UI. Stop every `eve dev` process and start it again. A message sent while the status line still reads "Starting agent…" can fail the same way, so wait for it to clear.
+
+### Hundreds of spans per turn
+
+The `exportPolicy` from Step 3 is missing, so the workflow runtime spans are exported too. Add it back to keep only the agent spans.
+
+### A bundler warning about eval in @vercel/otel
+
+The terminal UI's stderr panel shows a warning about direct `eval` use inside `@vercel/otel` when the agent builds. It does not affect exporting.
+
+### Token totals look three times higher than the provider bill
+
+The query sums usage across `invoke_agent`, `agent.step`, and `chat` spans. Filter on `gen_ai.operation.name = 'chat'` for totals.
+
+### Turns fail after switching models with /model
+
+`/model` rewrites `agent/agent.ts` to an AI Gateway model string, which routes calls through Vercel AI Gateway. Without Gateway credentials, every model call fails after three retries. Connect a Vercel account or AI Gateway key in the UI, or restore the provider helper, such as `openai("gpt-5.6-sol")`, in `agent/agent.ts`.
+
+### No cost attribute on spans
+
+eve reports cost only for calls served through Vercel AI Gateway. Calls made through a provider helper such as `openai()` carry token counts but no cost, so compute cost from tokens and your model rates.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+The <a href="https://opentelemetry.io/docs/collector/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collector</a> is a vendor-neutral proxy that receives, processes, and exports telemetry. Sending through a Collector lets you batch and retry centrally, strip or enrich attributes before they leave your network, and fan out to more than one backend without changing application code.
+
+To use one, point `SIGNOZ_OTLP_ENDPOINT` at your Collector's OTLP/HTTP receiver instead of at SigNoz, and configure the Collector's OTLP exporter to forward to SigNoz. See [Install OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) for setup.
+
+</details>
+
+## Related integrations
+
+If you build agents with other parts of the Vercel stack, or on another TypeScript framework, instrument them with the same OpenTelemetry pipeline:
+
+- [Vercel AI SDK observability with OpenTelemetry](https://signoz.io/docs/vercel-ai-sdk-observability/) - model calls and tool use in apps built directly on the AI SDK
+- [Vercel Sandbox observability with OpenTelemetry](https://signoz.io/docs/vercel-sandbox-observability/) - sandboxed code execution
+- [Mastra observability with OpenTelemetry](https://signoz.io/docs/mastra-observability/) - another TypeScript agent framework
+- [OpenAI Agents SDK observability with OpenTelemetry](https://signoz.io/docs/openai-agents-sdk-observability/) - agent runs, handoffs, and guardrails
+
+Browse [all LLM observability integrations](https://signoz.io/docs/llm-observability/) to instrument the rest of your stack.
