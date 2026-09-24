@@ -15,7 +15,7 @@ export default function K8sNextSteps() {
       </li>
       <li>
         <CustomLink href="https://signoz.io/docs/manage/signoz-operator/overview/">
-          Manage dashboards and alerts as Kubernetes resources with the SigNoz Operator
+          Manage SigNoz resources as Kubernetes custom resources with the SigNoz Operator
         </CustomLink>
       </li>
     </ul>
