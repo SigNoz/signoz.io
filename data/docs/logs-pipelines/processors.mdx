@@ -1,5 +1,5 @@
 ---
-date: 2026-05-04
+date: 2026-09-22
 title: Log Processors
 description: Complete list of log processors available in Signoz.
 doc_type: reference
@@ -11,6 +11,12 @@ processor in the pipeline one by one.
 
 The following log transformation processors are available for
 defining pipelines.
+
+<Admonition type="warning" title="Field paths must start with body, attributes, or resource">
+
+Field paths (Parse From, Parse To, From, To, Field) must start with `body`, `attributes`, or `resource`. Top-level fields like `severity_text`, `severity_number`, and `timestamp` are not valid here, even though the UI offers them as options. Using one fails with `value should have prefix of body, attributes, resource`.
+
+</Admonition>
 
 ## Regex
 
@@ -137,6 +143,20 @@ Severity level values are case insensitive.<br/>
 As a special case, 2xx, 3xx, 4xx and 5xx can be used to map number ranges to severity levels. This can be useful for mapping HTTP status codes. For example `5xx` can be used to parse numbers between 500-599 into level `ERROR`.
 
 </Admonition>
+
+`severity_text` and `severity_number` are top-level fields, so **Parse Severity Value From** can't point at them directly (see the field path warning above). If the same value also exists in an attribute, parse from that attribute instead. Otherwise, copy `severity_text` into an attribute at the collector first, then parse from the copy:
+
+```yaml
+processors:
+  transform:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - set(attributes["level"], severity_text)
+```
+
+Set **Parse Severity Value From** to `attributes.level`.
 
 You can follow [Parse Log Severity Levels](https://signoz.io/docs/logs-pipelines/guides/severity-parsing/) guide for more details.
 
