@@ -1,0 +1,75 @@
+---
+date: 2026-09-23
+title: AI Observability Attribute Mapping - Remap LLM Spans
+description: Remap source span and resource attributes to SigNoz GenAI fields in AI Observability. Group rules by condition, then test them against sample spans.
+doc_type: howto
+---
+
+**Attribute Mapping** is the settings tab of the [AI Observability](https://signoz.io/docs/ai-observability/) section where you tell SigNoz how to read GenAI data off spans that do not follow the OpenTelemetry GenAI semantic conventions. A mapping copies a source attribute (or resource key) onto the target field the AI Observability dashboards and Explorer expect, so cost, token, and latency panels populate even when your instrumentation uses non-standard attribute names.
+
+Use this page to browse the mapping table, edit a group and its conditions, and test your mappings against a sample span before saving.
+
+<Admonition type="info">
+Attribute Mapping is part of the AI Observability section, which is available to every user and labeled **Beta** in the side navigation. See the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites) for prerequisites.
+</Admonition>
+
+## Open Attribute Mapping
+
+1. Open the AI Observability section from the side navigation **More** menu.
+2. In the tab bar at the top, select **Attribute Mapping**.
+3. SigNoz opens the page at `/ai-observability/attribute-mapping`.
+
+The page has two tabs: **Attribute Mappings** holds the mapping table, and **Test** lets you run a sample span through your mappings.
+
+## Attribute Mappings tab
+
+Mappings are organized into groups. A group scopes a set of mappings to spans that match its conditions. The **Attribute Mappings** tab renders every group and its mappings in a single unified table.
+
+- **Group rows** span the full width as collapsible banners. Each group row shows the group name and a condition-count badge (for example, "· 2 conditions"). Expand a row to reveal the mappings it contains.
+- **Mapping rows** sit under their group and share one set of column headers:
+
+| Column | What it shows |
+| --- | --- |
+| **Target** | The GenAI field the mapping writes to. |
+| **Sources** | The source attribute or resource keys the value is read from, tried in order. |
+| **Actions** | Edit or delete the mapping. |
+
+A group's condition keys are not listed inline in the table. Hover the condition-count badge to see them, or open the group to edit them in the group drawer.
+
+### Save and discard changes
+
+The tab has no separate description header. Edits stay local until you save them. When you have unsaved changes, an **Unsaved changes** label appears in the tab bar next to two actions:
+
+- **Save changes**: persist every pending edit.
+- **Discard**: drop pending edits and revert to the saved state.
+
+These actions appear only when there are unsaved changes and you have permission to manage mappings.
+
+## Edit a group and its conditions
+
+Open a group's edit action to change it in a drawer:
+
+- **Group Name**: a label for the group.
+- **Enabled**: toggle whether the group runs.
+- **Condition · span attribute keys**: run the group when a span attribute key contains any of these.
+- **Condition · resource keys**: or when a resource key contains any of these.
+
+Leave both condition lists empty to run the group on every span.
+
+## Test tab
+
+Use the **Test** tab to confirm a span produces the mapped fields before you rely on it:
+
+1. Paste a span as JSON into the editor. Use a span envelope with `attributes` and `resource` objects, or paste a bare attributes object.
+2. Select **Run Test**.
+3. Review the mapped result in the results panel. Select **Reset to Default Span** to restore the sample template.
+
+<Admonition type="info">
+The Test tab sends only the `attributes` and `resource` objects from your JSON. Any other top-level keys a real span carries (such as `name`, `spanId`, or `kind`) are stripped before the request, so you can paste a full span export without editing it down first.
+</Admonition>
+
+## Related
+
+- [AI Observability overview](https://signoz.io/docs/ai-observability/): the read-only dashboard and the attributes it needs.
+- [AI Observability Model pricing](https://signoz.io/docs/ai-observability-model-pricing/): set the per-model rates that turn tokens into cost.
+- [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
