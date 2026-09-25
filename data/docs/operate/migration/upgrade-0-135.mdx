@@ -1,5 +1,5 @@
 ---
-date: 2026-07-29
+date: 2026-08-04
 title: Upgrade SigNoz to v0.135.0 with Dashboards V2 Schema
 tags: [Self-Hosted Community, Self-Hosted Enterprise]
 description: Upgrade self-hosted SigNoz to v0.135.0. Dashboards convert to the V2 schema automatically, and the retired V1 dashboard APIs need script and Terraform changes.
@@ -108,6 +108,10 @@ The public sharing routes (`/api/v1/dashboards/{id}/public` and `/api/v1/public/
 One compatibility shim remains, on create only: `POST /api/v2/dashboards` still accepts a V1 payload (a body carrying `version` and no `schemaVersion`) and converts it to V2, so import flows and existing create automation keep working during the rollout window. This shim will be removed in a few releases (<a href="https://github.com/SigNoz/signoz/issues/12177" target="_blank" rel="noopener noreferrer nofollow">signoz#12177</a>). `PUT /api/v2/dashboards/{id}` does **not** accept V1 payloads; it requires `schemaVersion: "v6"`.
 
 The V2 APIs also add a `PATCH` endpoint for partial updates, split lock and unlock endpoints, a pin-aware per-user listing, and pagination, sorting, and a query DSL on the list endpoint. The payload changes shape too, from flat JSON to a Perses `spec` tree. See the [Dashboards V2 API guide](https://signoz.io/docs/dashboards/dashboards-v2-api/) for the full endpoint list, schema, and `PATCH` examples.
+
+<Admonition type="warning" title="The minimum dashboard spec expanded">
+`spec.variables`, `spec.panels`, and `spec.layouts` are now required and non-nullable on every create, update, and patch. A script that sent a bare `{}` spec, or omitted any of the three, is rejected with `400 Bad Request` and error code `dashboard_invalid_input`. Send the empty collection for each instead: `{"variables": [], "panels": {}, "layouts": []}`. Stored dashboards missing these fields are back-filled automatically during the upgrade, so only scripts that build specs from scratch need changes. See [Required spec fields](https://signoz.io/docs/dashboards/dashboards-v2-api/#required-spec-fields).
+</Admonition>
 
 ## Upgrade the SigNoz MCP server
 
