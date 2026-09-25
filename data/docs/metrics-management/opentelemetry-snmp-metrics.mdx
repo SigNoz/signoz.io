@@ -1,0 +1,459 @@
+---
+date: 2026-09-25
+title: Monitor SNMP Network Devices with OpenTelemetry Collector
+description: Collect SNMP metrics from firewalls, routers, and switches with the OpenTelemetry Collector snmp receiver, map OIDs to metrics, and view them in SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+Use the OpenTelemetry (OTel) Collector to collect metrics from SNMP-enabled network devices, such as firewalls, routers, and switches, and send them to SigNoz.
+
+The Collector's <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/snmpreceiver" target="_blank" rel="noopener noreferrer nofollow">snmp receiver</a> polls each device on a fixed interval. It reads the Object Identifiers (OIDs) you list and converts each value into a metric. The receiver has no built-in metric set, so you decide which OIDs to collect and how to name them.
+
+The example config in this guide collects device uptime and per-interface traffic, errors, and link status. These OIDs come from the standard SNMPv2-MIB and IF-MIB, which most network devices support.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- SNMP enabled on each device, with an access rule that allows queries from the Collector host's IP address.
+- The SNMP community string (SNMPv2c) or user credentials (SNMPv3) configured on the device.
+- The OpenTelemetry Collector **contrib** distribution ([install guide](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/)). The SigNoz Collector also includes the snmp receiver.
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/)).
+
+## How SNMP polling works
+
+The receiver pulls data: the Collector sends a request to each device on every `collection_interval`. The Collector host needs a network path to each device it polls.
+
+If your devices sit in a network segment that your current Collector cannot reach, run a second Collector inside that segment. That Collector polls the devices inside the segment and forwards the metrics to SigNoz over OTLP, so one outbound connection crosses the network boundary:
+
+```
+Devices → Collector in the same segment → SigNoz (OTLP over HTTPS)
+```
+
+Open these paths:
+
+- UDP 161 from the Collector host to each device.
+- HTTPS 443 from the Collector host to SigNoz Cloud, or port 4318 to your self-hosted SigNoz.
+
+<Admonition type="info">
+  The snmp receiver is at `alpha` stability upstream. Its configuration format can change between Collector releases.
+</Admonition>
+
+## Send SNMP metrics to SigNoz
+
+### Step 1: Check that the device responds
+
+Before you change the Collector config, run a query from the Collector host to confirm that it can reach the device. This example uses `snmpget` from the Net-SNMP tools and reads the device name:
+
+```bash
+snmpget -v2c -c <community-string> <device-ip> 1.3.6.1.2.1.1.5.0
+```
+
+If the shell reports `snmpget: command not found`, install the Net-SNMP client tools: `sudo apt install snmp` on Debian or Ubuntu, or `sudo dnf install net-snmp-utils` on RHEL or Fedora.
+
+For SNMPv3, pass the user and credentials instead of a community string:
+
+```bash
+snmpget -v3 -u <snmp-user> -l authPriv -a SHA -A <auth-password> -x AES -X <privacy-password> <device-ip> 1.3.6.1.2.1.1.5.0
+```
+
+A working device returns its name:
+
+```
+SNMPv2-MIB::sysName.0 = STRING: fw-edge-01
+```
+
+If the command prints `Timeout: No Response`, fix access before you continue. See [Troubleshooting](#troubleshooting).
+
+### Step 2: Configure the snmp receiver
+
+Add this receiver to the `receivers` section of your existing Collector config. Do not replace the whole file. It polls one device with SNMPv2c every 60 seconds:
+
+```yaml:config.yaml minimap defaultCollapsed
+receivers:
+  snmp:
+    endpoint: udp://<device-ip>:161
+    version: v2c
+    community: ${env:SNMP_COMMUNITY}
+    collection_interval: 60s
+
+    resource_attributes:
+      device.name:
+        scalar_oid: "1.3.6.1.2.1.1.5.0" # SNMPv2-MIB::sysName
+
+    attributes:
+      interface.name:
+        oid: "1.3.6.1.2.1.31.1.1.1.1" # IF-MIB::ifName
+      direction:
+        enum: [receive, transmit]
+
+    metrics:
+      snmp.system.uptime:
+        description: Time since the device's network management agent last restarted.
+        unit: cs
+        gauge:
+          value_type: int
+        scalar_oids:
+          - oid: "1.3.6.1.2.1.1.3.0" # SNMPv2-MIB::sysUpTime
+            resource_attributes: [device.name]
+
+      snmp.interface.io:
+        description: Bytes received and transmitted on each interface.
+        unit: By
+        sum:
+          aggregation: cumulative
+          monotonic: true
+          value_type: int
+        column_oids:
+          - oid: "1.3.6.1.2.1.31.1.1.1.6" # IF-MIB::ifHCInOctets
+            resource_attributes: [device.name]
+            attributes:
+              - name: interface.name
+              - name: direction
+                value: receive
+          - oid: "1.3.6.1.2.1.31.1.1.1.10" # IF-MIB::ifHCOutOctets
+            resource_attributes: [device.name]
+            attributes:
+              - name: interface.name
+              - name: direction
+                value: transmit
+
+      snmp.interface.errors:
+        description: Packets that could not be received or transmitted because of errors.
+        unit: "{packet}"
+        sum:
+          aggregation: cumulative
+          monotonic: true
+          value_type: int
+        column_oids:
+          - oid: "1.3.6.1.2.1.2.2.1.14" # IF-MIB::ifInErrors
+            resource_attributes: [device.name]
+            attributes:
+              - name: interface.name
+              - name: direction
+                value: receive
+          - oid: "1.3.6.1.2.1.2.2.1.20" # IF-MIB::ifOutErrors
+            resource_attributes: [device.name]
+            attributes:
+              - name: interface.name
+              - name: direction
+                value: transmit
+
+      snmp.interface.oper_status:
+        description: Operational state of each interface. 1 is up, 2 is down.
+        unit: "1"
+        gauge:
+          value_type: int
+        column_oids:
+          - oid: "1.3.6.1.2.1.2.2.1.8" # IF-MIB::ifOperStatus
+            resource_attributes: [device.name]
+            attributes:
+              - name: interface.name
+```
+
+**Verify these values:**
+
+- `<device-ip>`: The IP address or hostname of the device. Keep port `161` unless the device's SNMP agent listens on a different port.
+- `SNMP_COMMUNITY`: An environment variable that holds the device's read-only community string. You set it in Step 3. The `${env:SNMP_COMMUNITY}` reference keeps the secret out of the config file.
+
+Keep the `device.name` resource attribute, even for a single device. The receiver does not add the device address to the metrics, so without `device.name` you cannot tell devices apart in SigNoz.
+
+To poll several devices, use SNMPv3, or collect other OIDs, see [Customize the setup](#customize-the-setup).
+
+### Step 3: Enable the receiver and restart the Collector
+
+The install guide already configures an `otlphttp` exporter that sends data to SigNoz. Add one only if your config has no `otlphttp` exporter:
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+```yaml:config.yaml
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
+
+```yaml:config.yaml
+exporters:
+  # On Collector v0.144.0 and newer, use "otlp_http" to avoid a deprecation warning.
+  otlphttp:
+    endpoint: http://<signoz-instance>:4318
+```
+
+**Verify these values:**
+
+- `<signoz-instance>`: The IP address or domain name of the machine that hosts SigNoz.
+
+</TabItem>
+</Tabs>
+
+Add a `resource` processor to the `processors` section. It sets a service name, which gives you one filter for every SNMP metric:
+
+```yaml:config.yaml
+processors:
+  resource/snmp:
+    attributes:
+      - key: service.name
+        value: <service-name>
+        action: upsert
+```
+
+**Verify these values:**
+
+- `<service-name>`: A name that identifies your SNMP devices in SigNoz, for example `snmp-devices`.
+
+Add a dedicated `metrics/snmp` pipeline under `service.pipelines`:
+
+```yaml:config.yaml
+service:
+  pipelines:
+    metrics/snmp:
+      receivers: [snmp]
+      processors: [resource/snmp, batch]
+      exporters: [otlphttp]
+```
+
+The names in these lists must match the keys you declared. If you renamed the exporter to `otlp_http`, use that name here too.
+
+The dedicated pipeline leaves out the `resourcedetection` processor. That processor tags each metric with the Collector host's `host.name`, which would label firewall metrics with the wrong host.
+
+Set the community string and restart the Collector. On a systemd install from the VM guide, add the variable to the Collector's environment file and restart the service:
+
+```bash
+echo 'SNMP_COMMUNITY=<community-string>' | sudo tee -a /etc/otelcol-contrib/otelcol-contrib.conf
+sudo systemctl restart otelcol-contrib
+```
+
+## Validate
+
+1. In [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/), search for `snmp.interface.io`.
+2. Filter by `device.name`, set the time aggregation to **Rate**, and group by `interface.name` and `direction`. Each interface appears as a receive and a transmit series, in bytes per second.
+
+<Figure
+  src="/img/docs/metrics/snmp/metrics-explorer-interface-io.webp"
+  alt="SigNoz Metrics Explorer charting the snmp.interface.io rate for one device, filtered by device.name and grouped by interface.name and direction"
+  caption="Interface traffic for one SNMP device in Metrics Explorer"
+/>
+
+## Metrics collected
+
+| Metric | Type | Unit | Attributes |
+|---|---|---|---|
+| `snmp.system.uptime` | gauge | `cs` | none |
+| `snmp.interface.io` | sum | `By` | `interface.name`, `direction` |
+| `snmp.interface.errors` | sum | `{packet}` | `interface.name`, `direction` |
+| `snmp.interface.oper_status` | gauge | `1` | `interface.name` |
+
+Every metric carries the `device.name` resource attribute, read from the device's `sysName`, and the `service.name` you set in Step 3. The `cs` unit is hundredths of a second. The source OID for each metric is in the comments of the Step 2 config.
+
+
+## Customize the setup
+
+Expand the section that matches your setup.
+
+<details>
+<ToggleHeading>
+
+### Poll more than one device
+
+</ToggleHeading>
+
+One receiver instance polls one device. Name the first receiver `snmp/fw-01` and give it a YAML anchor. Each additional device reuses the anchor and overrides the endpoint:
+
+```yaml:config.yaml
+receivers:
+  snmp/fw-01: &snmp_defaults
+    endpoint: udp://<device-1-ip>:161
+    version: v2c
+    community: ${env:SNMP_COMMUNITY}
+    collection_interval: 60s
+    # resource_attributes, attributes, and metrics from Step 2
+
+  snmp/fw-02:
+    <<: *snmp_defaults
+    endpoint: udp://<device-2-ip>:161
+
+service:
+  pipelines:
+    metrics/snmp:
+      receivers: [snmp/fw-01, snmp/fw-02]
+      processors: [resource/snmp, batch]
+      exporters: [otlphttp]
+```
+
+Each device reports its own `sysName` as `device.name`. If devices use different community strings, set `community` on each receiver.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+### Use SNMPv3
+
+</ToggleHeading>
+
+SNMPv2c sends the community string in plain text. SNMPv3 adds authentication and encryption. To use it, replace the connection fields at the top of the receiver config from Step 2. Keep `resource_attributes`, `attributes`, and `metrics` unchanged:
+
+```yaml:config.yaml
+receivers:
+  snmp:
+    endpoint: udp://<device-ip>:161
+    version: v3
+    user: <snmp-user>
+    security_level: auth_priv
+    auth_type: SHA
+    auth_password: ${env:SNMP_AUTH_PASSWORD}
+    privacy_type: AES
+    privacy_password: ${env:SNMP_PRIVACY_PASSWORD}
+    collection_interval: 60s
+```
+
+**Verify these values:**
+
+- `<snmp-user>`: The SNMPv3 user configured on the device.
+- `auth_type`: Match the device's authentication protocol. The receiver accepts `MD5`, `SHA`, `SHA224`, `SHA256`, `SHA384`, and `SHA512`.
+- `privacy_type`: Match the device's encryption protocol. The receiver accepts `DES`, `AES`, `AES192`, `AES256`, `AES192c`, and `AES256c`.
+- `SNMP_AUTH_PASSWORD` and `SNMP_PRIVACY_PASSWORD`: Set these environment variables on the Collector host, the same way as `SNMP_COMMUNITY` in Step 3.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+### Collect other OIDs
+
+</ToggleHeading>
+
+The receiver config has three blocks:
+
+- `resource_attributes` identify the device. `device.name` reads `sysName`, a scalar OID. A scalar OID returns a single value and ends in `.0`.
+- `attributes` split a metric into series. `interface.name` reads `ifName`, a column OID. A column OID returns one value per row of an SNMP table, here one row per interface. `direction` is an `enum` attribute with fixed values that you set on each OID.
+- `metrics` map OIDs to metrics. Use `gauge` for values that go up and down, such as link status. Use `sum` with `monotonic: true` for counters that only grow, such as bytes transmitted.
+
+A metric that reads a column OID needs an attribute that also reads a column OID, such as `interface.name`. Without it, the Collector exits at startup. See [Troubleshooting](#troubleshooting).
+
+For interface traffic, prefer the 64-bit `ifHCInOctets` and `ifHCOutOctets`. The 32-bit versions, `ifInOctets` and `ifOutOctets`, wrap to zero after about 4.3 GB, which takes under a minute on a saturated 1 Gbps link.
+
+To collect a vendor-specific value, such as CPU usage or session count on a firewall, find its OID in your vendor's MIB documentation. Then add an entry under `metrics` in the same shape as Step 2. The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/snmpreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">receiver README</a> lists every field.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### `request timeout` in the Collector logs
+
+**Symptom:** The Collector logs `Error scraping metrics` with a message like:
+
+```
+problem with SNMP GET for OIDs '[.1.3.6.1.2.1.1.3.0]': request timeout (after 0 retries)
+```
+
+**Likely cause:** The device drops the request. Devices do not reply to bad credentials, so a blocked network path and wrong credentials produce the same timeout. For SNMPv2c, that means a wrong community string. For SNMPv3, it means a wrong `user`, password, `auth_type`, or `privacy_type`.
+
+**Fix:** Run the `snmpget` command from [Step 1](#step-1-check-that-the-device-responds) on the Collector host, with the same credentials as the receiver config. If it times out, check the credentials, the device's SNMP access rule for the Collector IP, and any firewall between the Collector and UDP port 161.
+
+**Verify:** `snmpget` returns the device name, and the timeout errors stop after the next collection interval.
+
+### Collector does not start: `column_oid must either have an indexed resource_attribute`
+
+**Symptom:** The Collector exits at startup with this error:
+
+```
+Error: invalid configuration: receivers::snmp: metric 'snmp.interface.oper_status' column_oid must either have an indexed resource_attribute or an indexed_value_prefix/oid attribute
+```
+
+**Likely cause:** A metric reads a column OID but has no attribute that tells the rows apart.
+
+**Fix:** Add an attribute that reads a column OID, such as `interface.name`, to that `column_oids` entry.
+
+**Verify:** The Collector starts without the error.
+
+### One metric is missing
+
+**Symptom:** The Collector logs a message like:
+
+```
+problem with getting scalar data: data for OID '.1.3.6.1.4.1.99999.1.0' not found
+```
+
+**Likely cause:** The device does not support that OID. The receiver still exports every other metric.
+
+**Fix:** Check the OID in your vendor's MIB documentation, or run `snmpwalk -v2c -c <community-string> <device-ip> <oid>` to see what the device returns.
+
+**Verify:** The error stops and the metric appears in Metrics Explorer.
+
+### Metrics from several devices look merged
+
+**Symptom:** Metrics Explorer shows one series per interface where you expect one per device and interface.
+
+**Likely cause:** The receiver config has no `device.name` resource attribute, so metrics from different devices have identical labels.
+
+**Fix:** Add the `device.name` resource attribute from Step 2 and list it under `resource_attributes` on every OID.
+
+**Verify:** Metrics Explorer shows one `device.name` value per device.
+
+### `Invalid or missing key` in the Collector logs
+
+**Symptom:** The Collector logs `Exporting failed. Dropping data.` with this error:
+
+```
+responded with HTTP Status Code 401, Message=rpc error: code = Unauthenticated desc = Invalid or missing key
+```
+
+**Likely cause:** The `signoz-ingestion-key` header is missing, or the key belongs to a different SigNoz workspace.
+
+**Fix:** Copy an [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) from the workspace you want the metrics in, and set it in the exporter from Step 3.
+
+**Verify:** The 401 errors stop, and `snmp.*` metrics appear in Metrics Explorer.
+
+### No metrics arrive in SigNoz
+
+**Symptom:** The Collector runs without errors, but no `snmp.*` metric appears in SigNoz.
+
+**Likely cause:** The `metrics/snmp` pipeline is missing, or it does not list `snmp` under `receivers` and your SigNoz exporter under `exporters`.
+
+**Fix:** Check the `service.pipelines` section against Step 3. To see whether the Collector reads any data, add a [debug exporter](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#debug-exporter) to the pipeline.
+
+**Verify:** The debug output lists `snmp.*` metrics. Remove the debug exporter after the check.
+
+</details>
+
+## Limitations
+
+- The receiver is at `alpha` stability upstream. Config fields can change between releases.
+- The receiver only polls. It does not receive SNMP traps.
+- The receiver has no default metrics. You map every OID by hand.
+- Device identity comes only from the resource attributes you configure.
+
+
+## Next steps
+
+- [Create a metrics-based alert](https://signoz.io/docs/alerts-management/metrics-based-alerts/) that fires when `snmp.interface.oper_status` equals `2`.
+- [Create a custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#create-a-custom-dashboard) for interface traffic and errors per device.
+- [Collect syslog from the same devices](https://signoz.io/docs/userguide/collecting_syslogs/) to see firewall logs next to their metrics.
+- Full receiver config reference: <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/snmpreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">snmp receiver README</a>.
+- [Collector configuration best practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
+
+## Get Help
+
+<GetHelp />
