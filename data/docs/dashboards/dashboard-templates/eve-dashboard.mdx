@@ -1,0 +1,83 @@
+---
+date: 2026-09-23
+title: Vercel Eve Dashboard
+meta_title: Vercel Eve OpenTelemetry Dashboard
+description: Monitor Vercel eve agents in SigNoz. Track turns, token usage by model and agent, latency, tools, subagents, turn outcomes, and errors from eve traces.
+doc_type: explanation
+---
+
+<Admonition type="info" title="Instrument your agent first">
+  Before using this dashboard, add a SigNoz destination to your eve agent and start sending traces. See the [Eve observability guide](https://signoz.io/docs/eve-observability/) for complete setup instructions.
+</Admonition>
+
+This dashboard provides a comprehensive view of agents built on eve, Vercel's agent framework, using trace data. It is built on the `invoke_agent`, `agent.step`, `chat`, `agent.action`, and `execute_tool` spans eve emits, along with their `gen_ai.*` and `agent.*` attributes, and covers turns, conversations, token usage per model and per agent, latency, tools, subagents, turn outcomes, and errors.
+
+Every panel is scoped through two template variables, `$service_name` and `$environment`. Select the services you want rather than leaving the service picker on ALL, which applies no filter at all and mixes in every other service in the workspace. eve does not set `deployment.environment` on its own, so leave the environment picker on ALL unless you added it as shown in the guide.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/eve-dashboard.webp"
+  alt="Eve Dashboard"
+  caption="Eve Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/eve/eve-dashboard.json"
+  dashboardName="Eve"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the trace data eve emits to help you:
+
+- **Track Token Usage**: Break down input, output, and cache-read tokens per model and per agent, without the triple counting that summing every span produces.
+- **Compare Models**: See call volume and token totals for every served model, and whether calls go through a provider helper or Vercel AI Gateway.
+- **Monitor Latency**: Watch p50, p95, and p99 for model calls, p95 turn latency per agent, and the number of model steps each turn takes.
+- **Understand Agent Activity**: Count turns and conversations, and see failed and cancelled turns per agent, including subagents.
+- **Watch Tools and Subagents**: Track calls and failures per tool, plus provider-executed tools and subagent calls that only appear as actions.
+- **Catch Errors Early**: Separate turn, tool, and model failure rates, see errors by type over time, and read the failure text on recent errored spans.
+
+## Panels Included
+
+### Overview (Top Row)
+
+| Panel | Type | What It Shows |
+|-------|------|---------------|
+| **Turns** | Value | Count of `invoke_agent` spans, one per turn, including subagent turns |
+| **Conversations** | Value | Distinct `gen_ai.conversation.id` values |
+| **LLM Calls** | Value | Count of spans where `gen_ai.operation.name` is `chat` |
+| **Input Tokens** | Value | Sum of `gen_ai.usage.input_tokens` across `chat` spans |
+| **Output Tokens** | Value | Sum of `gen_ai.usage.output_tokens` across `chat` spans |
+| **Turn Failure Rate** | Value | Share of turns where `agent.turn.outcome` is `failed` |
+
+Token panels read `chat` spans only. eve reports the same usage on `chat`, `agent.step`, and `invoke_agent` spans, so a query that sums every span reports three times the real figure. Turn Failure Rate reads `agent.turn.outcome` rather than span status, because a cancelled turn marks its child spans as errors while the turn itself is not a failure.
+
+### Tokens and Models
+
+- **Token Usage Over Time**: Input, output, and cache-read tokens over time. Input dominates because every step resends the conversation and tool results. Cache reads are a subset of input and cover most of it on long sessions, so a widening gap between the two lines is worth checking.
+- **LLM Calls by Model**: Call volume grouped by `gen_ai.response.model`, which carries the dated snapshot the provider served, so a silent model upgrade shows up as a new series.
+- **Tokens by Model**: Calls, input, output, and cache-read tokens per served model and `gen_ai.provider.name`. The provider reads `openai.responses` for eve's `openai()` helper and `gateway` for AI Gateway model strings.
+- **Tokens by Agent**: Turns and token totals per agent, read from `invoke_agent` spans. Subagents appear as their own rows because their usage is not rolled into the caller's turn.
+
+### Latency
+
+- **LLM Call Latency**: p50, p95, and p99 of `chat` span duration. A p99 that spikes while p50 stays flat usually means rate-limit retries on a few calls rather than a slower model.
+- **Turn Latency (p95)**: p95 end-to-end turn duration per agent, including every model step, tool call, and subagent dispatch. Compare each agent to its own baseline.
+- **Model Steps per Turn**: Average `agent.step` spans per turn. Each tool round trip adds a step, so a line drifting upward means agents need more tool calls to answer.
+- **Finish Reasons**: Why each model call ended. A near-even split between `tool-calls` and `stop` is the normal shape for tool-using agents. A growing `length` slice means responses are being cut off at the token limit.
+
+### Agents, Tools and Subagents
+
+- **Agents**: Turns, failed turns, cancelled turns, and average latency per agent. Cancelled turns come from a user pressing Escape, so a high count points at slow answers rather than broken code.
+- **Tools**: Calls, failures, and average latency per authored tool, from `execute_tool` spans. A tool failure does not fail the turn, so this table is where a flaky backend shows up.
+- **Tool Calls Over Time**: Tool invocations per tool. A sustained climb on one tool without a matching rise in Turns is the usual early sign of an agent looping on a tool instead of answering.
+- **Actions by Kind**: Every action the model took, from `agent.action` spans, split into tool calls and subagent calls. Provider-executed tools such as OpenAI web search have no `execute_tool` span, so this is the only panel that counts them.
+
+### Outcomes and Errors
+
+- **Turn Outcomes**: Turns over time by outcome: completed, failed, and cancelled. Failures and cancellations should stay a thin band under completed.
+- **Errors by Type**: Errored agent spans by `error.type` and operation. A model failure appears as `AI_RetryError` on both `chat` and `agent.step`, and a failed tool as `Error` on `execute_tool` plus `ACTION_RESULT_FAILED` on its `agent.action`, so read the chart per operation rather than summing it.
+- **Tool Error Rate**: Share of authored tool executions that threw. The agent usually recovers and still answers, which is why this rate needs its own panel.
+- **LLM Error Rate**: Share of model calls that failed after retries. Cancellations are excluded, because eve marks a cancelled call with `TurnCancelledError`.
+- **Recent Errors**: The latest errored agent spans with their error class, message, and service. A failed tool shows as an `execute_tool` row followed by its `agent.action`, and a model failure as a `chat` row followed by its `agent.step`.
