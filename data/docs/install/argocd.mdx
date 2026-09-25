@@ -1,43 +1,36 @@
 ---
-date: 2026-06-11
-tags : [Self-Host]
-title: Deploying with ArgoCD
-description: Learn how to install SigNoz using ArgoCD for GitOps based deployment
+date: 2026-09-23
+title: Deploying SigNoz with Argo CD - GitOps on Kubernetes
+description: Learn how to deploy SigNoz on Kubernetes with Argo CD. Define the Helm chart as an Application, and let Argo CD sync and upgrade the stack for you.
+doc_type: howto
+tags: [Self-Host]
 ---
-
 
 <HostingDecision />
 
+This guide explains how to deploy SigNoz on Kubernetes with <a href="https://argo-cd.readthedocs.io/en/stable/" target="_blank" rel="noopener noreferrer nofollow">Argo CD</a>. You declare the SigNoz Helm chart as an Argo CD Application. Argo CD renders the chart and applies it to the cluster.
+
+<Admonition type="info" title="Why Argo CD?" defaultCollapsed="true">
+Argo CD is a GitOps tool. GitOps means that a declarative manifest holds the desired state of the cluster, and a controller makes the cluster match it. This approach gives you:
+
+- One Application resource that describes the whole SigNoz installation
+- Upgrades and rollbacks through a change to that resource
+- Automatic correction when someone edits the live resources by hand
+</Admonition>
+
+## Prerequisites
 
 <CommonPrerequisites />
-- ArgoCD running in your cluster, you can follow the [ArgoCD documentation][1] for installing ArgoCD.
+- Argo CD running in your cluster. See the <a href="https://argo-cd.readthedocs.io/en/stable/getting_started/" target="_blank" rel="noopener noreferrer nofollow">Argo CD getting started guide</a>.
+- The `argocd` CLI on your machine, or access to the Argo CD web UI.
 
-## Installation Steps
+## Installation steps
 
-### Create a namespace for SigNoz
+### Create the Argo CD Application
 
-```bash
-kubectl create namespace signoz
-```
+The Application resource points Argo CD at the SigNoz Helm chart. Create a file named `signoz-application.yaml`:
 
-### Create an ArgoCD Application
-
-We will be using the SigNoz Helm [chart](https://github.com/SigNoz/charts), which will install the following components into your Kubernetes cluster:
-
-- SigNoz
-- SigNoz Collector
-- Clickhouse
-- Zookeeper
-
-ArgoCD allows to install application by using the helm charts through the UI, or in the declarative GitOps way. For detailed instructions on using helm charts with ArgoCD, please refer to the documentation [documentation][4]
-<Tabs entityName="method">
-
-<TabItem label="Apply the argo application with kubectl" value="kubectl">
-
-
-Create a file named `signoz-application.yaml` with the following content:
-
-```yaml
+```yaml:signoz-application.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -47,14 +40,30 @@ spec:
   project: default
   source:
     repoURL: https://charts.signoz.io
-    targetRevision: 0.116.2
     chart: signoz
+    targetRevision: 0.142.1
   destination:
     server: https://kubernetes.default.svc
     namespace: signoz
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
 ```
 
-### Apply the ArgoCD Application
+**Verify these values:**
+
+- `targetRevision`: The SigNoz chart version. Find the current version in the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>.
+- `destination.namespace`: The namespace for SigNoz. The `CreateNamespace=true` option creates it on the first sync, so you do not have to create it yourself.
+
+The chart installs SigNoz, the SigNoz OpenTelemetry Collector, ClickHouse, and ZooKeeper.
+
+### Apply the Application
+
+The YAML file is the declarative source of truth. The CLI and UI tabs create the same Application without it, so use them when you prefer an imperative setup.
+
+<Tabs entityName="method">
+
+<TabItem label="kubectl" value="kubectl">
 
 ```bash
 kubectl apply -f signoz-application.yaml
@@ -62,69 +71,169 @@ kubectl apply -f signoz-application.yaml
 
 </TabItem>
 
-<TabItem label="ArgoCD UI" value="ui">
+<TabItem label="Argo CD CLI" value="cli">
 
-Follow the [docs][2] for creating an application from the ArgoCD UI.
+```bash
+argocd app create signoz \
+  --repo https://charts.signoz.io \
+  --helm-chart signoz \
+  --revision 0.142.1 \
+  --dest-server https://kubernetes.default.svc \
+  --dest-namespace signoz \
+  --sync-option CreateNamespace=true
+```
+
 </TabItem>
 
-<TabItem label="ArgoCD CLI" value="cli">
+<TabItem label="Argo CD UI" value="ui">
 
-Follow the [docs][3] for creating an application from the ArgoCD CLI.
+Follow the <a href="https://argo-cd.readthedocs.io/en/stable/getting_started/#creating-apps-via-ui" target="_blank" rel="noopener noreferrer nofollow">Argo CD documentation for creating an application from the UI</a>. Use `https://charts.signoz.io` as the repository URL, `signoz` as the chart, and the chart version as the revision. Set the destination namespace to `signoz`.
+
+Under **SYNC OPTIONS**, select **AUTO-CREATE NAMESPACE**. Argo CD does not create the destination namespace without it, and the first sync fails.
 
 </TabItem>
 
 </Tabs>
 
-<Figure
-  src="/img/docs/argocd-dashboard.webp"
-  alt="ArgoCD dashboard for signoz application"
-  caption="ArgoCD dashboard for signoz application"
-/>
-## Configuration
+### Sync the Application
 
-### Customizing the Installation
+The Application above uses the default manual sync policy, so Argo CD does not install the chart until you sync it:
 
-You can customize the SigNoz installation by creating a values file and referencing it in your ArgoCD Application. Here's an example of a values file (`signoz-values.yaml`):
-
-```yaml
-signoz:
-  name: "signoz"
-  replicaCount: 1
-  image:
-    registry: docker.io
-    repository: signoz/signoz
-    tag: v0.116.1
-    pullPolicy: IfNotPresent
-  service:
-    type: ClusterIP
-    port: 8080
-    internalPort: 8085
-    opampPort: 4320
-  additionalArgs:
-    - --use-logs-new-schema=true
-    - --use-trace-new-schema=true
+```bash
+argocd app sync signoz
 ```
 
-Then update your ArgoCD Application to use these values:
+In the UI, open the `signoz` application and click **SYNC**, then **SYNCHRONIZE**.
 
-```yaml defaultCollapsed
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: signoz
-  namespace: argocd
+The first sync downloads the container images for SigNoz, ClickHouse, and ZooKeeper. On a slow connection this takes several minutes. To sync on every change instead, see [Sync automatically](#sync-automatically).
+
+## Validate
+
+Make sure that the Application reports `Synced` and `Healthy`. In the UI, the application page shows this under **APP HEALTH** and **SYNC STATUS**. With the CLI, run:
+
+```bash
+argocd app get signoz
+```
+
+```text
+Name:               argocd/signoz
+Project:            default
+Server:             https://kubernetes.default.svc
+Namespace:          signoz
+Source:
+- Repo:             https://charts.signoz.io
+  Target:           0.142.1
+Sync Policy:        Manual
+Sync Status:        Synced to 0.142.1
+Health Status:      Healthy
+```
+
+Make sure that the pods run:
+
+```bash
+kubectl get pods -n signoz
+```
+
+```text
+NAME                                          READY   STATUS      RESTARTS   AGE
+chi-signoz-clickhouse-cluster-0-0-0           1/1     Running     0          3m
+signoz-0                                      1/1     Running     0          3m
+signoz-clickhouse-operator-5c76779b95-cft7h   2/2     Running     0          3m
+signoz-otel-collector-947685648-9n9z6         1/1     Running     0          3m
+signoz-telemetrystore-migrator-dzhzc          0/1     Completed   0          3m
+signoz-zookeeper-0                            1/1     Running     0          3m
+```
+
+The `signoz-telemetrystore-migrator` pod runs the schema migration once and then reports `Completed`. Kubernetes removes the pod later, so the list does not always show it.
+
+Open the SigNoz UI on your machine:
+
+```bash
+kubectl port-forward -n signoz svc/signoz 8080:8080
+```
+
+Go to `http://localhost:8080`. SigNoz asks you to create an admin account on the first visit.
+
+To make sure that the API answers, run:
+
+```bash
+curl -X GET http://localhost:8080/api/v1/health
+```
+
+```json
+{"status":"ok"}
+```
+
+<Figure
+  src="/img/docs/argocd-dashboard.webp"
+  alt="Argo CD dashboard for the signoz application"
+  caption="Argo CD dashboard for the signoz application"
+/>
+
+## Customize the installation
+
+Add a `helm.valuesObject` block under the existing `spec.source` in the Application. Do not replace the file. Argo CD passes the values to Helm on the next sync.
+
+```yaml:signoz-application.yaml
 spec:
-  project: default
   source:
     repoURL: https://charts.signoz.io
-    targetRevision: 0.116.2
     chart: signoz
+    targetRevision: 0.142.1
     helm:
-      valueFiles:
-        - signoz-values.yaml
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: signoz
+      valuesObject:
+        clickhouse:
+          persistence:
+            size: 100Gi
+        signoz:
+          ingress:
+            enabled: true
+            className: nginx
+            hosts:
+              - host: signoz.example.com
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    port: 8080
+```
+
+The chart creates the Ingress for you. Do not write a separate Ingress manifest.
+
+For the full list of values, see the <a href="https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml" target="_blank" rel="noopener noreferrer nofollow">chart values file</a>.
+
+### Keep values in a Git repository
+
+To manage values as files, declare two sources in the Application you already created. Argo CD reads the chart from the SigNoz repository and the values file from your own repository. A single-source Application cannot do this, because `helm.valueFiles` resolves only inside the source that holds the chart.
+
+```yaml:signoz-application.yaml
+spec:
+  sources:
+    - repoURL: https://charts.signoz.io
+      chart: signoz
+      targetRevision: 0.142.1
+      helm:
+        valueFiles:
+          - $values/signoz/values.yaml
+    - repoURL: https://github.com/<your-org>/<your-repo>
+      targetRevision: main
+      ref: values
+```
+
+**Verify these values:**
+
+- `<your-org>` and `<your-repo>`: The organization and name of your own Git repository, the one Argo CD reads the values file from.
+- `targetRevision: main`: The branch of your repository that holds the values file.
+- `ref: values`: Names the second source. The `$values` prefix in `valueFiles` points at it.
+- `$values/signoz/values.yaml`: The path to your values file inside your own repository.
+
+Replace `spec.source` with `spec.sources` when you use this form. See the <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#helm-value-files-from-external-git-repository" target="_blank" rel="noopener noreferrer nofollow">Argo CD documentation for Helm value files from an external Git repository</a>.
+
+### Sync automatically
+
+Add an `automated` sync policy under the existing `spec:` so that Argo CD applies every change without a manual sync. Do not replace the file.
+
+```yaml:signoz-application.yaml
+spec:
   syncPolicy:
     automated:
       prune: true
@@ -133,16 +242,80 @@ spec:
       - CreateNamespace=true
 ```
 
-### Automation from the CI Pipelines
+`prune` removes resources that the chart no longer defines. `selfHeal` reverts manual edits to the live resources.
 
-If you prefer to manage your Helm values through a Git repository, you can configure ArgoCD to sync from your GitHub repo instead, and deploy from the CI, please refer to this [documentation][5]
+## Upgrade SigNoz
+
+To move to a new chart version, edit `targetRevision` in the Application:
+
+```yaml
+spec:
+  source:
+    chart: signoz
+    targetRevision: <new-chart-version>
+```
+
+Replace `<new-chart-version>` with the version you want, for example `0.142.1`. Find the published versions in the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>.
+
+Apply the change, then sync:
+
+```bash
+kubectl apply -f signoz-application.yaml
+argocd app sync signoz
+```
+
+With an automated sync policy, Argo CD upgrades the release on its own.
+
+To roll back, set `targetRevision` to the previous version and apply the Application again. The `argocd app rollback` command is an alternative, but it works only with a manual sync policy. With an automated sync policy it stops with this error:
+
+```text
+rollback cannot be initiated when auto-sync is enabled
+```
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### The Application stays OutOfSync
+
+The default sync policy is manual, so Argo CD renders the chart but does not apply it. Sync it:
+
+```bash
+argocd app sync signoz
+```
+
+### ComparisonError about a connection to port 8081
+
+Argo CD reports this when the `argocd-repo-server` pod is not ready:
+
+```text
+ComparisonError  Failed to load target state: failed to generate manifest for source 1 of 1:
+rpc error: code = Unavailable desc = connection error: dial tcp 10.97.5.137:8081: connect: connection refused
+```
+
+Wait for the Argo CD pods, then refresh the Application:
+
+```bash
+kubectl -n argocd wait --for=condition=Ready pod --all --timeout=10m
+argocd app get signoz --refresh
+```
+
+### A pod stays in Pending
+
+The cluster does not have enough CPU, memory, or storage. SigNoz needs 4 CPU cores and 8 GB of memory at a minimum. The cluster also needs a default StorageClass for the persistent volumes.
+
+```bash
+kubectl describe pod -n signoz <pod-name>
+```
+
+### Values in valueFiles have no effect
+
+Argo CD resolves `helm.valueFiles` paths inside the repository named by `repoURL`, not on your machine. A chart repository such as `https://charts.signoz.io` holds no values files of yours. Use `helm.valuesObject` instead, or declare two sources as shown in [Keep values in a Git repository](#keep-values-in-a-git-repository).
+
+</details>
+
 ## Next Steps
 
 <K8sNextSteps />
-
----
-[1]: https://argo-cd.readthedocs.io/en/stable/getting_started/
-[2]: https://argo-cd.readthedocs.io/en/stable/getting_started/#creating-apps-via-ui
-[3]: https://argo-cd.readthedocs.io/en/stable/getting_started/#creating-apps-via-cli
-[4]: https://argo-cd.readthedocs.io/en/stable/user-guide/helm/
-[5]: https://argo-cd.readthedocs.io/en/stable/user-guide/ci_automation/
