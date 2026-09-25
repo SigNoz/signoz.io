@@ -1,0 +1,527 @@
+---
+date: 2026-09-22
+title: Android - Send Traces, Logs, and Metrics with OpenTelemetry
+description: Learn how to instrument an Android app with the OpenTelemetry Android agent and send traces, logs, and metrics to SigNoz. Covers setup, validation, and limits.
+doc_type: howto
+---
+
+## Overview
+
+The OpenTelemetry Android agent instruments your app and sends traces, logs, and metrics to SigNoz. You configure one endpoint, and all three signals use it.
+
+Once the agent starts, it collects these on its own:
+
+- Spans for activity and fragment lifecycle events.
+- Events on the logs signal for crashes, ANRs, network changes, slow frames, and session starts.
+
+You then add your own telemetry through the OpenTelemetry API. Records that your app emits inside a span arrive with a trace ID and a span ID already set. SigNoz links each of those log lines to the trace that produced it.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. Update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted). Plain HTTP also needs a network security configuration. See [CLEARTEXT communication not permitted](#cleartext-communication-not-permitted) in Troubleshooting.
+</Admonition>
+
+## Prerequisites
+
+- An Android app that builds with Android Gradle Plugin (AGP) 9.1.0 or later.
+- `compileSdk` 37 or later. The agent depends on `androidx.core:core:1.19.0`, which requires both this AGP version and this SDK level.
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+<Admonition type="info" title="Installing SDK platform 37 from the command line" defaultCollapsed="true">
+Install `platforms;android-37.0` from the canary channel. The identifier `platforms;android-37` does not exist, and `sdkmanager` rejects it with `Failed to find package`.
+
+```bash noLineNumbers
+sdkmanager --channel=3 --install "platforms;android-37.0" "build-tools;37.0.0"
+```
+</Admonition>
+
+## Set up the agent
+
+### Step 1: Add the dependencies
+
+Add the Byte Buddy plugin to your root build file. Byte Buddy rewrites bytecode at build time, and the `android-log` instrumentation in the Logs section needs it.
+
+AGP 9 includes Kotlin support, so do not apply the `org.jetbrains.kotlin.android` plugin. AGP 9.4.1 ships Kotlin 2.2.0, but the agent needs 2.4.10, so pin the Kotlin Gradle plugin on the buildscript classpath:
+
+```kotlin:build.gradle.kts
+buildscript {
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.10")
+    }
+}
+
+plugins {
+    id("com.android.application") version "9.4.1" apply false
+    id("net.bytebuddy.byte-buddy-gradle-plugin") version "1.18.14" apply false
+}
+```
+
+Apply both plugins in your module build file and add the agent:
+
+```kotlin:app/build.gradle.kts
+plugins {
+    id("com.android.application")
+    id("net.bytebuddy.byte-buddy-gradle-plugin")
+}
+
+dependencies {
+    implementation(platform("io.opentelemetry.android:opentelemetry-android-bom:1.7.0-alpha"))
+    implementation("io.opentelemetry.android:android-agent")
+}
+```
+
+The bill of materials (BOM) sets the version for every other OpenTelemetry Android dependency, so you omit versions elsewhere.
+
+<Admonition type="info" title="Java apps need two more dependencies" defaultCollapsed="true">
+`android-agent` keeps the `core` module and the OTLP exporters off the compile classpath. Kotlin apps use the configuration DSL and never touch them. A Java app builds the exporters itself, so add both:
+
+```kotlin:app/build.gradle.kts
+dependencies {
+    implementation("io.opentelemetry.android:core")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+}
+```
+
+Without them the build fails with `package io.opentelemetry.exporter.otlp.http.trace does not exist`.
+</Admonition>
+
+If your `minSdk` is below 26, turn on core library desugaring in the same file. Desugaring lets an older Android version run newer Java APIs:
+
+```kotlin:app/build.gradle.kts
+android {
+    compileSdk = 37
+
+    defaultConfig {
+        minSdk = 23
+    }
+
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+}
+```
+
+The agent also needs this property so that desugaring runs correctly below API 26:
+
+```properties:gradle.properties
+android.useFullClasspathForDexingTransform=true
+```
+
+### Step 2: Start the agent
+
+Create an `Application` class and start the agent in `onCreate()`, as early as you can after `super.onCreate()`.
+
+<Tabs entityName="language">
+<TabItem value="kotlin" label="Kotlin" default>
+
+```kotlin:app/src/main/java/com/example/shop/ShopApplication.kt defaultCollapsed
+package com.example.shop
+
+import android.app.Application
+import io.opentelemetry.android.OpenTelemetryRum
+import io.opentelemetry.android.agent.OpenTelemetryRumInitializer
+
+class ShopApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        rum = OpenTelemetryRumInitializer.initialize(
+            context = this,
+            configuration = {
+                httpExport {
+                    baseUrl = "https://ingest.<region>.signoz.cloud:443"
+                    baseHeaders = mapOf("signoz-ingestion-key" to "<your-ingestion-key>")
+                }
+                resource {
+                    put("service.name", "<service_name>")
+                    put("service.version", "<service_version>")
+                }
+            },
+        )
+    }
+
+    companion object {
+        var rum: OpenTelemetryRum? = null
+    }
+}
+```
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+The configuration DSL is Kotlin only. From Java, use the builder in the `core` module and construct the three exporters yourself.
+
+```java:app/src/main/java/com/example/shop/ShopApplication.java minimap defaultCollapsed
+package com.example.shop;
+
+import android.app.Application;
+
+import io.opentelemetry.android.AndroidResource;
+import io.opentelemetry.android.OpenTelemetryRum;
+import io.opentelemetry.android.RumBuilder;
+import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporter;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
+import io.opentelemetry.sdk.resources.Resource;
+
+public class ShopApplication extends Application {
+
+    public static OpenTelemetryRum rum;
+
+    private static final String BASE_URL = "https://ingest.<region>.signoz.cloud:443";
+    private static final String KEY = "<your-ingestion-key>";
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        Resource resource = AndroidResource.createDefault(this).toBuilder()
+                .put("service.name", "<service_name>")
+                .put("service.version", "<service_version>")
+                .build();
+
+        rum = RumBuilder.builder(this)
+                .setResource(resource)
+                .addSpanExporterCustomizer(prev -> OtlpHttpSpanExporter.builder()
+                        .setEndpoint(BASE_URL + "/v1/traces")
+                        .addHeader("signoz-ingestion-key", KEY)
+                        .build())
+                .addLogRecordExporterCustomizer(prev -> OtlpHttpLogRecordExporter.builder()
+                        .setEndpoint(BASE_URL + "/v1/logs")
+                        .addHeader("signoz-ingestion-key", KEY)
+                        .build())
+                .addMetricExporterCustomizer(prev -> OtlpHttpMetricExporter.builder()
+                        .setEndpoint(BASE_URL + "/v1/metrics")
+                        .addHeader("signoz-ingestion-key", KEY)
+                        .build())
+                .build();
+    }
+}
+```
+
+This builder differs from the Kotlin DSL in two ways. It installs no session provider, so `session.id` arrives empty, and it leaves disk buffering off. Call `setSessionProvider` for sessions, and pass an `OtelRumConfig` with `setDiskBufferingConfig(DiskBufferingConfig.create(enabled = true))` to `RumBuilder.builder` for buffering.
+
+</TabItem>
+</Tabs>
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: The name of your app in SigNoz, for example `android-otel-demo`. If you omit the resource attributes, the agent uses your app label, which can contain spaces.
+- `<service_version>`: Your release version, for example `2.4.0`. SigNoz records a deployment every time this value changes.
+
+In the Kotlin form, set `baseUrl` to the host and port only. The agent appends `/v1/traces`, `/v1/logs`, and `/v1/metrics` itself. A `baseUrl` that already ends in a signal path produces a 404. The Java form sets each full URL, as shown above.
+
+Register the class in your manifest and grant internet access:
+
+```xml:app/src/main/AndroidManifest.xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application android:name=".ShopApplication">
+        <!-- your activities -->
+    </application>
+</manifest>
+```
+
+Build and run the app. The agent reports on its own from here, and you add your own telemetry with the OpenTelemetry API.
+
+<Admonition type="info">
+The examples that follow use Kotlin. The OpenTelemetry API is the same from Java, so only the syntax differs.
+</Admonition>
+
+## Traces
+
+The agent creates spans for activity and fragment lifecycle events without any code from you. An app launch produces an `AppStart` span with `Created`, `Paused`, and `Stopped` spans under it.
+
+HTTP client spans are not part of the agent. To trace OkHttp or `HttpURLConnection` calls, and to propagate trace context to your backend, add the matching instrumentation:
+
+```kotlin:app/build.gradle.kts
+dependencies {
+    implementation("io.opentelemetry.android.instrumentation:okhttp3-library")
+    byteBuddy("io.opentelemetry.android.instrumentation:okhttp3-agent:1.7.0-alpha")
+}
+```
+
+To time your own work, get a tracer from the agent and create spans:
+
+```kotlin:app/src/main/java/com/example/shop/CheckoutViewModel.kt
+val tracer = ShopApplication.rum!!.openTelemetry.getTracer("com.example.shop.checkout")
+
+val parent = tracer.spanBuilder("checkout").startSpan()
+try {
+    parent.makeCurrent().use {
+        val child = tracer.spanBuilder("authorize-payment").startSpan()
+        try {
+            child.makeCurrent().use {
+                child.setAttribute("payment.method", "card")
+            }
+        } finally {
+            child.end()
+        }
+    }
+} finally {
+    parent.end()
+}
+```
+
+Any log record emitted while a span is current carries that span's trace ID and span ID.
+
+## Logs
+
+### Capture existing android.util.Log calls
+
+The `android-log` instrumentation rewrites every `android.util.Log` call in your app into an OpenTelemetry log record. Add both artifacts to your module build file:
+
+```kotlin:app/build.gradle.kts
+dependencies {
+    implementation("io.opentelemetry.android.instrumentation:android-log-library")
+    byteBuddy("io.opentelemetry.android.instrumentation:android-log-agent:1.7.0-alpha")
+}
+```
+
+The `byteBuddy` line must carry an explicit version. The BOM constrains the `implementation` configuration only. Without a version the build fails with `Could not find io.opentelemetry.android.instrumentation:android-log-agent:.` and an empty version after the colon.
+
+You write no other code. Your existing calls now produce records:
+
+```kotlin:app/src/main/java/com/example/shop/CheckoutViewModel.kt noLineNumbers
+Log.i("PaymentGateway", "initiating payment intent pi_3Q8xR2")
+Log.e("PaymentGateway", "payment authorization failed", exception)
+```
+
+Each record carries the log tag as the `android.log.tag` attribute. The overloads that accept a `Throwable` also set `exception.type` and `exception.stacktrace`. The severity maps as follows:
+
+| Call | Severity | Number |
+|---|---|---|
+| `Log.v` | TRACE | 1 |
+| `Log.d` | DEBUG | 5 |
+| `Log.i` | INFO | 9 |
+| `Log.w` | WARN | 13 |
+| `Log.e` | ERROR | 17 |
+| `Log.wtf` | UNDEFINED | 0 |
+
+<Admonition type="warning" title="This instrumentation has no severity floor">
+Version 1.7.0-alpha exports every call, including `Log.v` and `Log.d`. A debug-heavy app sends far more records than you want to store. Review your debug logging before you ship this to production, and use [drop rules](https://signoz.io/docs/logs-management/guides/drop-logs/) in SigNoz to filter what you do not need.
+</Admonition>
+
+### Send your own log records
+
+Use the OpenTelemetry logs API when you want a record with your own body and attributes:
+
+```kotlin:app/src/main/java/com/example/shop/CheckoutViewModel.kt
+ShopApplication.rum
+    ?.openTelemetry
+    ?.logsBridge
+    ?.loggerBuilder("com.example.shop.checkout")
+    ?.build()
+    ?.logRecordBuilder()
+    ?.setSeverity(Severity.INFO)
+    ?.setBody("order placed")
+    ?.setAttribute(stringKey("order.id"), "ord_7742")
+    ?.setAttribute(longKey("cart.item_count"), 3)
+    ?.emit()
+```
+
+The string you pass to `loggerBuilder` becomes the scope name in SigNoz. Use it to separate your own records from the ones the agent produces.
+
+## Metrics
+
+The agent exports metrics every 60 seconds, but no bundled instrumentation records any. Your app produces every metric it sends:
+
+```kotlin:app/src/main/java/com/example/shop/CheckoutViewModel.kt
+val meter = ShopApplication.rum!!.openTelemetry.meterProvider.get("com.example.shop.checkout")
+
+val orders = meter.counterBuilder("shop.orders.placed")
+    .setDescription("Orders placed from the Android app")
+    .setUnit("{order}")
+    .build()
+orders.add(1, Attributes.of(stringKey("payment.method"), "card"))
+
+val duration = meter.histogramBuilder("shop.checkout.duration")
+    .setUnit("s")
+    .build()
+duration.record(0.842, Attributes.of(stringKey("checkout.step"), "payment"))
+```
+
+SigNoz stores a histogram as several metrics. `shop.checkout.duration` arrives as `shop.checkout.duration.bucket`, `.count`, `.min`, `.max`, and `.sum`.
+
+## Validate
+
+Give the app a minute after launch. The Kotlin DSL buffers telemetry on disk by default and reads a buffer file only after it is about 33 seconds old. Metrics wait for the 60 second export interval.
+
+Filter on your service in each explorer, for example `service.name = 'android-otel-demo'`.
+
+Open **Traces Explorer** and open a trace.
+
+<Figure
+  src="/img/docs/mobile-instrumentation/android-trace-detail.webp"
+  alt="A checkout trace in SigNoz, showing the flame graph and the waterfall with a failed child span"
+  caption="The agent adds the lifecycle spans. The checkout tree and the failed receipt sync come from the app."
+/>
+
+Open **Logs Explorer**, then open one record to see the attributes the agent adds for you.
+
+<Figure
+  src="/img/docs/mobile-instrumentation/android-logs-explorer.webp"
+  alt="Android app logs in the SigNoz Logs Explorer, with one record expanded to show its attributes and resource"
+  caption="Each record carries the log tag, the screen name, and the session ID. Records emitted inside a span also carry the trace ID and span ID."
+/>
+
+Open **Metrics** and search for the metric you recorded.
+
+<Figure
+  src="/img/docs/mobile-instrumentation/android-metrics-explorer.webp"
+  alt="The Metrics Explorer in SigNoz listing the histogram metrics sent by the Android app"
+  caption="One histogram becomes five metrics in SigNoz, each with its own type and unit."
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
+
+Read the exporter errors on the device first. They name the cause:
+
+```bash noLineNumbers
+adb logcat -s HttpExporter:W
+```
+
+### Nothing arrives and the host cannot be resolved
+
+The exporter reports `UnknownHostException` or `EAI_NODATA` for the ingestion host.
+
+- Likely cause: A Private DNS profile, a VPN, or a content blocker resolves the host to `127.0.0.1` or to nothing. Hostnames that start with `ingest.` appear on common tracker blocklists.
+- Fix: Allow `*.signoz.cloud` in that profile, or turn the profile off while you test.
+- Verify: Run `adb shell ping -c 1 ingest.<region>.signoz.cloud` and make sure that it returns a public address. Restart the app afterwards, because the process caches the failed lookup.
+
+### The exporter reports 401 Unauthenticated
+
+The response body reads `Invalid or missing key` or `No key found in request`.
+
+- Likely cause: The ingestion key is wrong, or the header did not reach SigNoz. The header name must be exactly `signoz-ingestion-key`.
+- Fix: Copy the key again from [ingestion settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/) and make sure that it matches the region in your endpoint. A key issued for one region does not work in another.
+- Verify: Send a record with `curl` using the same key and make sure that the response is `HTTP 200`.
+
+### No telemetry of any kind arrives
+
+Not a single span, log, or metric reaches SigNoz, and `adb logcat -s HttpExporter:W` prints nothing.
+
+- Likely cause: The agent never started. An exception inside `onCreate` leaves the app running with no telemetry, because nothing else depends on the agent.
+- Fix: Wrap the call in `runCatching` and log the failure, so a broken configuration is visible instead of silent.
+- Verify: Run `adb logcat -s OpenTelemetryRum:*` and make sure that the agent reports its startup.
+
+### Your Log calls produce no records
+
+Traces arrive, and records from the logs API arrive, but nothing shows up for `android.util.Log`.
+
+- Likely cause: The `byteBuddy` dependency is missing. Without it, nothing rewrites your `Log` calls. The build still succeeds and prints no warning.
+- Fix: Add `byteBuddy("io.opentelemetry.android.instrumentation:android-log-agent:1.7.0-alpha")` to the module build file, with the explicit version.
+- Verify: Dump the call sites and make sure that they point at `AndroidLogSubstitutions`:
+
+```bash noLineNumbers
+dexdump -d app/build/outputs/apk/debug/app-debug.apk | grep -F -c 'AndroidLogSubstitutions;.substitutionFor'
+```
+
+Match the `;.` separator literally. `AndroidLogSubstitutions` ships inside `android-log-library`, so both `strings | grep AndroidLogSubstitutions` and a looser pattern match its own method table and report a non-zero count even when no call site was rewritten.
+
+### CLEARTEXT communication not permitted
+
+The exporter reports `java.net.UnknownServiceException: CLEARTEXT communication to 10.0.2.2 not permitted by network security policy`.
+
+- Likely cause: Android blocks plain HTTP by default. A self-hosted endpoint on `http://` hits this.
+- Fix: Add a network security configuration that permits cleartext for your collector host, then point the manifest at it.
+- Verify: Run the app again. The exception does not return.
+
+```xml:app/src/main/res/xml/network_security_config.xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>
+```
+
+```xml:app/src/main/AndroidManifest.xml
+<application
+    android:name=".ShopApplication"
+    android:networkSecurityConfig="@xml/network_security_config">
+```
+
+Use an IP address rather than `localhost`. Some devices do not resolve `localhost` and fail with `UnknownHostException`. The emulator reaches the host machine on `10.0.2.2`. For a physical device on USB, run `adb reverse tcp:4318 tcp:4318` and use `127.0.0.1`.
+
+### Logs arrive but metrics do not
+
+- Likely cause: Your Collector has no metrics pipeline. It accepts the data on the OTLP receiver and then drops it, which looks the same as the app never exporting.
+- Fix: Add a `metrics` pipeline to the Collector configuration.
+- Verify: Run the app for two minutes and make sure that the metric appears in SigNoz.
+
+### Rows appear with an empty Body column
+
+- Likely cause: The agent reports sessions, startup, and crashes as OpenTelemetry events. An event carries its name and attributes rather than a body, so the Body column is blank.
+- Fix: No fix is needed. Add `scope_name` as a column to identify them. Values such as `otel.session` and `otel.initialization.events` come from the agent.
+- Verify: The rows show a scope name and attributes.
+
+### Debug logs still arrive from a release build
+
+Your release build carries an `-assumenosideeffects` rule for `Log.v` and `Log.d`, but DEBUG records keep reaching SigNoz.
+
+- Likely cause: Byte Buddy rewrites the call sites before R8 runs, so by then they point at `AndroidLogSubstitutions`, not `android.util.Log`. The rule no longer matches them, and both the record and the logcat line survive.
+- Fix: Guard the calls in your own code, or drop the unwanted records with [drop rules](https://signoz.io/docs/logs-management/guides/drop-logs/) in SigNoz.
+- Verify: Run the release build and confirm that DEBUG no longer appears for your service.
+
+<Admonition type="info" title="Reading exporter errors in a release build">
+R8 obfuscates the logger tag, so `adb logcat -s HttpExporter:W` matches nothing. Filter on the message instead:
+
+```bash noLineNumbers
+adb logcat | grep "Failed to export"
+```
+</Admonition>
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+Use the OpenTelemetry Collector when you need to process, filter, or route telemetry before it reaches SigNoz. Follow the [Switch to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) guide for setup instructions.
+
+Point the agent at your Collector instead of SigNoz, and drop the ingestion key. The Collector holds the key and forwards the data:
+
+```kotlin:app/src/main/java/com/example/shop/ShopApplication.kt
+httpExport {
+    baseUrl = "http://<collector-host>:4318"
+}
+```
+
+A Collector on plain HTTP also needs the network security configuration shown in [CLEARTEXT communication not permitted](#cleartext-communication-not-permitted).
+
+</details>
+
+## Limitations
+
+These apply to version 1.7.0-alpha of the agent.
+
+- No bundled instrumentation records a metric. Every metric comes from your own code.
+- Disk buffering writes to the cache directory of the app. Android can delete that directory at any time, so buffered telemetry can be lost before it is exported.
+- The `android-log` instrumentation covers `android.util.Log` only. It does not cover Timber, `println`, or other logging libraries. Route those through the OpenTelemetry logs API.
+
+## Next steps
+
+- Run the finished sample app for <a href="https://github.com/SigNoz/mobile-monitoring-sample-apps/tree/main/android-kotlin" target="_blank" rel="noopener noreferrer nofollow">Kotlin</a> or <a href="https://github.com/SigNoz/mobile-monitoring-sample-apps/tree/main/android-java" target="_blank" rel="noopener noreferrer nofollow">Java</a> to see the whole setup working before you change your own app.
+- Open a slow screen in the [Trace Explorer](https://signoz.io/docs/userguide/traces/) and read its logs from the same trace, which the agent links for you.
+- [Set up alerts](https://signoz.io/docs/alerts/) on checkout latency, crash volume, or the error logs this page produces.
+- Build a [dashboard](https://signoz.io/docs/dashboards/dashboard-templates/overview/) for the metrics your app records, such as order counts and checkout duration.
+
+## Get Help
+
+<GetHelp />
