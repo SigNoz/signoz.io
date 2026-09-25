@@ -39,10 +39,6 @@ Open these paths:
 - UDP 161 from the Collector host to each device.
 - HTTPS 443 from the Collector host to SigNoz Cloud, or port 4318 to your self-hosted SigNoz.
 
-<Admonition type="info">
-  The snmp receiver is at `alpha` stability upstream. Its configuration format can change between Collector releases.
-</Admonition>
-
 ## Send SNMP metrics to SigNoz
 
 ### Step 1: Check that the device responds
@@ -66,6 +62,12 @@ A working device returns its name:
 ```
 SNMPv2-MIB::sysName.0 = STRING: fw-edge-01
 ```
+
+**Verify these values:**
+
+- `<community-string>`: The device's read-only SNMPv2c community string.
+- `<device-ip>`: The IP address or hostname of the device.
+- `<snmp-user>`, `<auth-password>`, and `<privacy-password>`: The SNMPv3 user and passwords configured on the device.
 
 If the command prints `Timeout: No Response`, fix access before you continue. See [Troubleshooting](#troubleshooting).
 
@@ -232,12 +234,23 @@ The names in these lists must match the keys you declared. If you renamed the ex
 
 The dedicated pipeline leaves out the `resourcedetection` processor. That processor tags each metric with the Collector host's `host.name`, which would label firewall metrics with the wrong host.
 
-Set the community string and restart the Collector. On a systemd install from the VM guide, add the variable to the Collector's environment file and restart the service:
+Set the community string and restart the Collector. On a systemd install from the VM guide, open the Collector's environment file:
 
 ```bash
-echo 'SNMP_COMMUNITY=<community-string>' | sudo tee -a /etc/otelcol-contrib/otelcol-contrib.conf
+sudoedit /etc/otelcol-contrib/otelcol-contrib.conf
+```
+
+Add this line, replacing `<community-string>` with the device's read-only community string, then restart the service:
+
+```ini:/etc/otelcol-contrib/otelcol-contrib.conf
+SNMP_COMMUNITY=<community-string>
+```
+
+```bash
 sudo systemctl restart otelcol-contrib
 ```
+
+On Docker or Kubernetes, set `SNMP_COMMUNITY` as an environment variable on the Collector container instead.
 
 ## Validate
 
@@ -260,7 +273,6 @@ sudo systemctl restart otelcol-contrib
 | `snmp.interface.oper_status` | gauge | `1` | `interface.name` |
 
 Every metric carries the `device.name` resource attribute, read from the device's `sysName`, and the `service.name` you set in Step 3. The `cs` unit is hundredths of a second. The source OID for each metric is in the comments of the Step 2 config.
-
 
 ## Customize the setup
 
@@ -296,7 +308,7 @@ service:
       exporters: [otlphttp]
 ```
 
-Each device reports its own `sysName` as `device.name`. If devices use different community strings, set `community` on each receiver.
+Replace `<device-1-ip>` and `<device-2-ip>` with the address of each device. Each device reports its own `sysName` as `device.name`. If devices use different community strings, set `community` on each receiver.
 
 </details>
 
@@ -444,7 +456,6 @@ responded with HTTP Status Code 401, Message=rpc error: code = Unauthenticated d
 - The receiver only polls. It does not receive SNMP traps.
 - The receiver has no default metrics. You map every OID by hand.
 - Device identity comes only from the resource attributes you configure.
-
 
 ## Next steps
 
