@@ -1,5 +1,5 @@
 ---
-date: 2026-08-03
+date: 2026-09-26
 title: ECS EC2 Collection Agent - Configure
 description: View metrics and logs for your ECS infrastructure
 ---
@@ -206,6 +206,24 @@ In case of JSON task definition, you can add the following lines.
 
 
 ```
+
+### 4. Add ECS Task Attributes from your Application
+
+The daemon collector runs in its own ECS task, so it cannot tell which task your
+telemetry came from. To tag your application's traces, metrics, and logs with its
+own task (for example `aws.ecs.task.family` and `aws.ecs.task.arn`), enable the
+AWS ECS resource detector in your OpenTelemetry SDK, such as
+[`go.opentelemetry.io/contrib/detectors/aws/ecs`](https://pkg.go.dev/go.opentelemetry.io/contrib/detectors/aws/ecs)
+for Go or `awsEcsDetector` from
+[`@opentelemetry/resource-detector-aws`](https://www.npmjs.com/package/@opentelemetry/resource-detector-aws)
+for Node.js. Each application container reads its own ECS task metadata, so the
+attributes match the task it runs in.
+
+<Admonition type="warning">
+Set the full set of ECS attributes from the detector rather than a few by hand.
+The collector keeps attributes your application already sends and only fills in
+missing ones, so a partial set can mix your task's values with the collector's.
+</Admonition>
 
 ## Next Steps
 
