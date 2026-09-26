@@ -1,0 +1,98 @@
+---
+date: 2026-08-27
+title: AI Observability Explorer - Query LLM & AI Trace Data
+description: Explore LLM and AI trace data in SigNoz with the AI Observability Explorer. Query spans, traces, time series, and tables, then export results to a dashboard.
+doc_type: howto
+---
+
+The **Explorer** is the query tab of the [AI Observability](https://signoz.io/docs/ai-observability/) section. While the Overview tab shows a fixed, read-only dashboard, the Explorer lets you query the underlying LLM and AI trace data directly and switch between four views: list, trace, time series, and aggregated table.
+
+Use this page to open the Explorer, run and refine queries, customize the results table, and export a query to a dashboard.
+
+<Admonition type="info">
+The Explorer lives inside the AI Observability section, which is gated behind the `enable_ai_observability` feature flag and is disabled by default. If the flag is not enabled for your organization, the **AI Observability** entry does not appear in the side navigation. See the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites) for how to enable it.
+</Admonition>
+
+## Open the Explorer
+
+1. Open the AI Observability section from the side navigation **More** menu.
+2. In the tab bar at the top, select **Explorer**. It sits between **Overview** and **Model pricing**.
+3. SigNoz opens the Explorer at `/ai-observability/explorer`.
+
+The Explorer is available to all user roles (Admin, Editor, and Viewer).
+
+## Query toolbar
+
+The toolbar at the top of the Explorer controls query execution and the layout:
+
+- **Run Query**: execute the current query and load results into the active view.
+- **Cancel Query**: abort a query that is still running. Results reset until you run again.
+- **Auto-refresh**: toggle periodic re-runs so the active view stays current without manual re-runs.
+- **Filter panel toggle**: collapse or expand the quick filters sidebar to reclaim horizontal space.
+
+## Quick filters sidebar
+
+A collapsible sidebar on the left surfaces common trace-signal attributes so you can filter results without editing the query builder directly. Selecting values narrows the query, and the active view refreshes to match. Use the toolbar filter toggle to hide the sidebar for a full-width layout.
+
+## Explorer views
+
+Switch views from the toolbar. Each view renders the same query differently.
+
+### List view
+
+The default view. It displays individual spans in a paginated table ordered by timestamp. The default columns are:
+
+- Service name
+- Operation name
+- Duration
+- HTTP method
+- Response status code
+- Timestamp
+
+These are standard trace columns, so they apply to any instrumented service, not only LLM spans.
+
+The List view table is fully customizable:
+
+- **Add or remove columns** with the column selector.
+- **Reorder columns** by dragging a column into a new position.
+- **Resize columns** by dragging a column edge.
+
+### Trace view
+
+The Trace view groups spans into traces and shows **root spans only**. Its columns are fixed and cannot be changed:
+
+- Service name
+- Operation name
+- Duration
+- Span count
+- Trace ID
+
+<Admonition type="info">
+The Trace view shows only root spans. To inspect the full span tree for a trace, open the trace from its trace ID.
+</Admonition>
+
+### Timeseries view
+
+The Timeseries view renders a time-series chart of trace metrics. The Y-axis unit is selected automatically based on the aggregated attribute (milliseconds for duration attributes, `short` for everything else) and you can override it manually from the chart's unit control.
+
+### Table view
+
+The Table view displays aggregated query results in a grid. Use its export menu to download the aggregated results as CSV.
+
+## Export a query to a dashboard
+
+You can turn any Explorer query into a dashboard panel:
+
+1. Build and run the query you want to keep.
+2. Open the Explorer options menu and select the export to dashboard action.
+3. Choose an existing dashboard or create a new one. SigNoz adds the query as a new panel and opens it in the dashboard editor.
+
+## AI Assistant page actions
+
+When the AI Assistant feature is licensed and enabled for your account, the Explorer exposes additional page-level actions that the assistant can trigger: **run query**, **add filter**, and **change view**. On accounts without the AI Assistant license these actions are inactive.
+
+## Related
+
+- [AI Observability overview](https://signoz.io/docs/ai-observability/): the read-only dashboard and the attributes it needs.
+- [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
+- [Dashboards](https://signoz.io/docs/dashboards/): build custom panels from exported queries.
