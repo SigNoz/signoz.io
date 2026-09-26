@@ -1,0 +1,133 @@
+---
+title: How Eltropy unified observability across 25+ backend applications with SigNoz Cloud
+description: Eltropy standardized on OpenTelemetry and SigNoz Cloud to unify telemetry across more than 25 backend applications and bring trusted production context into support and agent-assisted incident workflows.
+image: /img/case_study/eltropy-blog-cover.webp
+authors: [mahak_kaur]
+company: Eltropy
+person: Piyush Ranjan
+role: Director of Engineering
+logo: /img/case_study/logos/eltropy-logo.webp
+logo_alt: Eltropy
+tags:
+  - AI & agent workflows
+  - Tracing & performance
+date: 2026-09-24
+---
+
+[Eltropy](https://eltropy.com/) provides an agentic AI and conversations platform for more than 750 community financial institutions. Credit unions and community banks use it to connect with members across text, chat, video, voice, and AI-assisted workflows, often through integrations with the core systems behind those interactions.
+
+A member journey can move through Eltropy's application services, an AI voice experience, and an external financial system before an answer comes back. As Eltropy grew from roughly 10 to more than 25 backend applications, its engineers needed to follow those journeys across asynchronous boundaries and give support teams enough context to investigate customer issues.
+
+We spoke with [Shivakumar Karajagi](https://www.linkedin.com/in/shivakumar-karajagi), Senior Director of Engineering; [Piyush Ranjan](https://www.linkedin.com/in/piyush19jan), Director of Engineering; and [Prajwal A](https://www.linkedin.com/in/prajwal-a-468549196), Senior DevOps Engineer. Their story follows a clear progression: build observability into the application framework, consolidate telemetry in SigNoz Cloud, and make that evidence available to engineering, support, and AI agents.
+
+At that scale, observability is tied directly to customer experience. A failure in an integration or downstream service can interrupt a live interaction between a financial institution and a member. An alert may identify a threshold crossing, but diagnosis can require the related trace, logs from several services, the asynchronous request path, and the code behind the behavior.
+
+"Having complete insight into what's happening in the system in real time is not an afterthought anymore," Piyush said.
+
+## Observability started in the application framework
+
+During a rewrite of its Go application framework, Eltropy made observability part of the foundation rather than something attached later.
+
+"Observability is a first-class citizen in the codebase and the framework, not something that I can add on top of it," Piyush said.
+
+Eltropy used OpenTelemetry spans, traces, and logs, with request context propagated through synchronous and asynchronous services. That context made it possible to follow a transaction across service boundaries instead of relying on isolated log lines.
+
+"When we built OpenTelemetry into our foundational framework, we had about 10 to 12 backend applications," Piyush said. "We now have about 25 to 26, and no one has had to ask, 'Do I need to do anything specifically for instrumentation?'"
+
+New services inherited the same approach. Eltropy then looked for an observability platform that matched it: OpenTelemetry-native, usable across teams, and controllable as telemetry volumes grew.
+
+## Why Eltropy chose SigNoz Cloud
+
+Eltropy had been using ELK alongside a self-hosted Kloudfuse deployment. When the team evaluated a managed alternative, it ran parallel proofs of concept with Datadog, Sumo Logic, and SigNoz Cloud and gave developers access to each platform.
+
+The evaluation focused on how each platform would fit Eltropy's existing OpenTelemetry architecture and its teams' day-to-day workflows. Prajwal highlighted log search, the connection between traces and related logs, and the usability of the platform. Shivakumar emphasized native OpenTelemetry support, collector-side sampling and filtering, vendor neutrality, and the ease of creating dashboards and alerts.
+
+"We already standardized our SDKs on OpenTelemetry," Shiva said. "We didn't want to instrument twice or get locked into some kind of proprietary agent."
+
+The hands-on evaluation reinforced that fit. "SigNoz provided the capabilities we needed and was user-friendly," Prajwal said.
+
+<YouTube id="vFZ73S40_hU" mute="false" />
+
+Eltropy tested SigNoz Open Source before moving to [SigNoz Cloud](https://signoz.io/teams/). Consolidating the signals gave different teams one shared source of operational evidence.
+
+"It's important to have unified logs, metrics, and traces in one place," Shiva said. "Engineers get complete visibility without tool switching."
+
+The same standard also simplified an acquired workload. After [Eltropy acquired Lexop](https://eltropy.com/press/eltropy-acquires-lexop-to-modernize-loan-repayment-and-collections/) in January 2025, it moved a Ruby on Rails application from Datadog-specific instrumentation to OpenTelemetry and SigNoz Cloud.
+
+"We had a Ruby on Rails application that was previously using Datadog and its own Datadog-specific libraries," Piyush said. "Given that the majority of my applications are on OpenTelemetry and SigNoz Cloud, why should I not migrate that?"
+
+<YouTube id="Ytcu0973oEo" mute="false" />
+
+The team studied how OpenTelemetry worked with Ruby and instrumented the application for its architecture. This was one example of Eltropy applying its existing standard, not a separate migration program at the center of its observability strategy.
+
+## Controlling telemetry without changing every application
+
+Eltropy placed OpenTelemetry Collectors between its applications and SigNoz Cloud. Application teams could emit useful detail while DevOps controlled sampling and filtering without repeatedly changing application code.
+
+Piyush described the separation simply: "The application doesn't know what my observability platform is, and the observability platform doesn't know what my application is."
+
+Teams reviewed which telemetry helped with dashboards and investigations. They removed repetitive informational logs, unused metrics, and data that added volume without improving diagnosis. When an incident required more detail, DevOps could adjust the collector configuration.
+
+"We cut trace volume by almost 80% and log volume by 70%, purely by tuning what we sent," Shiva said. "SigNoz Cloud helped us cut the noise."
+
+Usage and retention visibility in SigNoz Cloud gave the team another way to understand how changes affected cost as the system grew.
+
+## One source of evidence across teams
+
+The consolidated telemetry became useful beyond DevOps.
+
+"SigNoz Cloud has become the go-to tool for most of our teams," Shiva said. "Engineering uses it for day-to-day instrumentation and debugging, SRE and DevOps use it to standardize dashboards and cut alert noise, product teams monitor customer-facing workflows, and support uses the alerting layer."
+
+Support engineers do not necessarily live inside the codebase. DevOps initially helped them create dashboards and learn which attributes to search. As they became familiar with the platform, they could investigate alerts and customer issues with less help.
+
+This shared evidence later became the foundation for agent-assisted triage. [SigNoz MCP](https://signoz.io/docs/ai/signoz-mcp-server/) did not introduce a new source of truth; it gave agents a way to work with the telemetry Eltropy's teams already used.
+
+<YouTube id="Ry6vM_XkaPk" mute="false" />
+
+## Bringing incident context into an agent workflow
+
+In development and QA, Eltropy's engineers connect AI-enabled development environments to non-production telemetry through SigNoz MCP. When a change behaves unexpectedly, an agent can retrieve the relevant traces and logs without the engineer leaving the code.
+
+Prajwal said the team had initially planned to build this connection through traditional APIs. SigNoz MCP gave it a more direct way to make traces and logs available to the DevOps agent.
+
+"Earlier, we planned to do all of this through APIs, and that was too much for us," Prajwal said. "Once SigNoz introduced MCP, we could plug those capabilities into our agent tools."
+
+Once that connection was in place, MCP moved from an integration capability into the team's day-to-day debugging workflow.
+
+"If I have to debug anything or triage anything, MCP is where they first go," Piyush said.
+
+<YouTube id="ICFzmA51xtI" mute="false" />
+
+The DevOps team is also rolling out an incident workflow. A selected critical alert can trigger an agent with access to SigNoz Cloud telemetry through SigNoz MCP, along with relevant code and infrastructure context. The agent retrieves traces and logs, follows the service path, compares that evidence with the codebase, and returns a summary for the responding engineer. A support case can begin the same way using a trace ID.
+
+This remains a team-by-team rollout rather than a fully autonomous incident-response system. The clearest automated path is for selected critical incidents; other cases use the agent on demand.
+
+One overnight incident showed Prajwal what the workflow could change. After a code change, an application entered a deadlock-like state around a messaging connection. Support and engineering had investigated for about two hours without isolating the cause. Prajwal gave the context to the DevOps agent, which inspected SigNoz Cloud logs and traces through SigNoz MCP and compared them with the codebase.
+
+According to Prajwal, it returned the diagnosis in two prompts and roughly three to four minutes.
+
+"The investigation time dropped from hours to minutes," he said.
+
+<YouTube id="NK7ssO99iIQ" mute="false" />
+
+The telemetry showed what the application had done, while the codebase showed where that behavior could originate. Prajwal provided the incident context and reviewed the result.
+
+## The engineer still makes the decision
+
+Eltropy's experience also shows the prerequisite for agent-assisted observability: the agent can only work with the evidence it receives.
+
+"MCP cannot fix incorrect logging frameworks or incorrect tracing frameworks," Piyush said. "If you don't have the data coming in correctly, it's not going to help."
+
+An agent can gather logs, follow traces, compare them with code, and suggest a likely cause. An engineer still decides whether the evidence is complete and whether the response should be a configuration change, rollback, patch, or further investigation.
+
+Dashboards remain useful for historical trends and shared visibility. Agents are changing the just-in-time investigation that starts when something breaks. For Eltropy, that workflow rests on the same foundation it built for its engineers and support teams: consistent OpenTelemetry instrumentation, controlled telemetry, and correlated logs and traces in SigNoz Cloud.
+
+<YouTube id="Nw_LgKXa53s" mute="false" />
+
+That is the broader lesson from Eltropy's journey. AI can shorten the path from an alert to relevant evidence, but only after a team has made that evidence trustworthy and useful to the people operating the system.
+
+---
+
+**SigNoz Cloud** is the easiest way to get started. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)
