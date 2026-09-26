@@ -1,0 +1,114 @@
+---
+date: 2026-09-21
+title: Area Chart Panel Type - Stacked Area Visualizations
+description: Learn how to use the Area Chart panel type in SigNoz dashboards, including fill opacity, fill mode, and None, Normal, and Percent stacking.
+doc_type: reference
+---
+
+## Area Chart
+
+An Area chart is a line chart with the region below the line filled in. It shows trends over time like a Timeseries chart, while the filled area emphasizes the magnitude of each series and, when stacked, how each series contributes to a total.
+
+### Data Formats
+
+#### Supported signals
+
+- Logs
+- Traces
+- Metrics
+
+This panel type supports any time series data from logs, traces, or metrics, built with the Query Builder, ClickHouse SQL, or PromQL.
+
+### Add an Area Chart panel
+
+1. Open a dashboard and select **+ Add Panel** (or edit an existing panel).
+2. In the panel type switcher, choose **Area Chart**.
+3. Add a query, then **Save** the panel. The panel renders with a filled area below each line.
+
+### Configuration
+
+#### Visualization
+
+- **Panel Time Preference** — Override the global dashboard time range for this panel. Set to `Global Time` to use the dashboard's time picker, or choose a fixed time range.
+- **Stack series** — Combine series so they stack on top of each other. Choose one of:
+  - **None** — Draw each series independently, overlapping where they share values.
+  - **Normal** — Stack series so each is drawn above the one below it, showing the cumulative total.
+  - **Percent** — Rescale each time column so all series together total 100%. See [Percent stacking](#percent-stacking).
+- **Fill Gaps** — Fill gaps in the result data with zero. Useful when you want to interpret missing data as zero, which is more appropriate for sparse data. For example, if the result of a query for 10 minutes is `{t1: 12, t3: 21, t5: 42, t7: 29}`, enabling `Fill Gaps` produces `{t1: 12, t2: 0, t3: 21, t4: 0, t5: 42, t6: 0, t7: 29, t8: 0, t9: 0, t10: 0}`.
+
+#### Chart Appearance
+
+Control how the line and its fill are drawn:
+
+- **Line style** — `Solid` or `Dashed`.
+- **Line interpolation** — `Linear`, `Spline` (a smoothed curve), `Step before`, or `Step after`.
+- **Fill mode** — `Solid` for a flat fill under the line, or `Gradient` for a fill that fades out. Area Chart is always filled, so there is no `None` option.
+- **Fill Opacity** — Set the transparency of the filled area from 0% to 100%, with a live numeric readout. Lower values make overlapping series easier to read.
+- **Show points** — Draw a marker at each individual data point in addition to the line. Off by default.
+
+#### Disconnect values
+
+Use **Disconnect values** to decide how the line handles gaps in a series, meaning intervals that have no data point:
+
+- **Never** — Connect the line across every gap so the series stays continuous. This is the default.
+- **Threshold** — Disconnect the line when a gap is longer than a duration you set, which keeps genuine outages visible instead of drawing a line over them.
+
+When you switch to **Threshold**, a **Threshold value** input appears. It is seeded from the query's step interval, so it reflects the resolution the panel actually queries at. The input accepts durations in seconds (`s`), minutes (`m`), hours (`h`), days (`d`), and weeks (`w`), including compound values such as `1h30m`. It validates as you type and shows an error inline.
+
+#### Formatting & Units
+
+- **Y Axis Unit** — The unit of the y-axis (for example, `Milliseconds (ms)`, `Bytes`, `Percent`). The default is `None`.
+- **Decimal Precision** — Number of decimal places to display. The default is `2 decimals`.
+
+<Admonition type="info">
+When you create a new panel, the **Y Axis Unit** is pre-filled with the unit of the selected metric, so the axis matches how the metric was reported. If you choose a unit that is incompatible with the unit the metric was sent with, a warning icon appears on the unit selector. Hover the icon to see a tooltip explaining the mismatch and the unit the metric was sent with.
+</Admonition>
+
+#### Axes
+
+- **Soft Min / Soft Max** — Adjust the y-axis scale for better visualization. When set, the y-axis range uses these values instead of auto-adjusting based on the data.
+- **Y Axis Scale** — Choose between `Linear` and `Logarithmic` scale for the y-axis.
+
+#### Legend
+
+- **Position** — Set the legend position (`Bottom` or `Right`).
+- **Legend Colors** — Customize colors for individual series in the legend.
+
+#### Alerts
+
+Link existing alert rules to this panel or create new alerts directly from the panel configuration.
+
+#### Context Links
+
+Add context links to enable click-through navigation from the panel to other dashboards, external URLs, or filtered views. See [Interactivity](https://signoz.io/docs/dashboards/interactivity/) for details.
+
+#### Thresholds
+
+Thresholds draw a line on the y-axis to highlight a value. Threshold edits preview live as you type, and thresholds carry over when you change the panel's visualization type. See [Panel editor behavior](https://signoz.io/docs/userguide/manage-dashboards/#panel-editor-behavior). Thresholds also seed the condition when you [create an alert from the panel](https://signoz.io/docs/dashboards/interactivity/#operator-and-value-from-thresholds).
+
+### Percent stacking
+
+Set **Stack series** to **Percent** to compare each series' share of the total over time. Each time column is rescaled so all series together add up to 100%. The y-axis switches to percentage tick labels (0%, 50%, 100%) and is pinned to a soft 0 to 100 range, so the axis always tops at exactly 100.
+
+Tooltips always show the original raw value for each series, not the cumulative or normalized value. This holds for `Normal` and `Percent` stacking, so you can read the actual measurement while still seeing the stacked shape.
+
+<Admonition type="info">
+Percent stacking is exposed through the Area Chart panel. Bar Chart panels support on/off stacking, and both panels show raw values in the tooltip when stacked.
+</Admonition>
+
+### Switch panel type
+
+Stacking is preserved when you switch an Area Chart to a [Bar Chart](https://signoz.io/docs/dashboards/panel-types/bar/) and back:
+
+- Bar's stacked on/off maps to Area's `Normal` and `None`.
+- Area's `Percent` has no bar equivalent, so it collapses to Bar's stacked-on.
+
+This keeps your stacking intent intact across the type change.
+
+### Panel actions
+
+Area Chart supports drilldown, view, edit, clone, create alert, and PNG or SVG export, matching the Bar Chart and Timeseries panel action sets.
+
+### Get Help
+
+<GetHelp />
