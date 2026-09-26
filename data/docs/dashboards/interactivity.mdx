@@ -1,5 +1,5 @@
 ---
-date: 2026-08-25
+date: 2026-09-15
 title: Interactivity in dashboards
 description: Learn how interactive dashboards in SigNoz help you drill down, correlate signals, and troubleshoot faster using context menus, cross filtering, cross-panel sync, and navigation to Logs and Traces.
 
@@ -340,12 +340,45 @@ When a receiver tooltip appears, it lists only the series that match the source'
 
 #### Interaction with the legend
 
-You can toggle individual series on and off through the chart legend. Hidden series are treated as if they do not exist for tooltip matching:
+Hiding a series through the chart legend (see [Work with the chart legend](#work-with-the-chart-legend)) also affects tooltip matching. Hidden series are treated as if they do not exist:
 
 - If you hide a series in the receiver chart, it will not be considered when looking for a match.
 - If every matching series in the receiver is hidden, the receiver tooltip disappears entirely the next time you move the cursor on the source.
 
 This makes it easy to focus comparison on a specific subset by hiding the rest.
+
+## Work with the chart legend
+
+The legend below (or beside) a chart lets you control which series are drawn and read a series' full name. Each legend row has a square **marker** showing the series colour and its label. The marker is filled when the series is visible and hollow (transparent) when it is hidden.
+
+These controls apply to every chart that uses the shared chart legend: dashboard panels (Time Series, Bar, and Pie), the [alert chart preview](https://signoz.io/docs/alerts-management/metrics-based-alerts/), and infrastructure monitoring panels. The Logs and Traces explorers use a separate legend and are not affected.
+
+### Show and hide series
+
+Clicking is context-aware, so a single click does the most likely thing for what is currently on screen:
+
+- **Click a row when all series are visible** to isolate that series (show only it and hide the rest).
+- **Click the isolated row** (the only visible series) to restore every hidden series.
+- **Click a row in any other state** to toggle just that series on or off.
+
+The square **marker** is a separate target: clicking it always toggles that one series, regardless of how many are visible. At least one series must stay visible, so the marker is disabled on the last remaining series and a panel can never be emptied.
+
+### Row hover actions
+
+Hovering a legend row reveals inline actions on the right of the row:
+
+- **Only** isolates that series. On a visible row while other series are hidden, the button instead reads **All** and restores every hidden series.
+- The **copy** button copies the series' full, untruncated name to your clipboard, which is useful when a long label is cut off in the row.
+
+Hovering a row also highlights the series on the chart: its line thickens and the other series dim, so you can pick it out without hiding anything. The highlight clears when you move the pointer off the row.
+
+### Series count
+
+When the legend is positioned to the right of the chart, its toolbar shows a **Showing N of M series** readout of how many series are currently visible out of the total loaded, alongside the series search box.
+
+<Admonition type="info">
+Chart tooltips use the same square marker and monospace text as the legend rows, so series line up visually between the tooltip and the legend.
+</Admonition>
 
 ## Create an alert from a panel
 
