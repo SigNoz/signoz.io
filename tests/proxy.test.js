@@ -114,37 +114,87 @@ test('does not re-enter docs markdown routing for agent self-fetches', () => {
   assert.equal(isPassthrough(res), true)
 })
 
-test('rewrites versioned api-reference pages to the OpenAPI spec for markdown-preferring bots', () => {
+test('markdown requests for the api-reference index serve the spec-derived twin', () => {
+  const headers = { accept: 'text/markdown' }
+  assert.equal(rewriteTarget(run('/api-reference', { headers })), '/api-reference.md')
+  // NextURL re-applies the trailingSlash config to the rewritten path.
+  assert.match(rewriteTarget(run('/api-reference/', { headers })), /^\/api-reference\.md\/?$/)
+  assert.equal(isPassthrough(run('/api-reference')), true)
+})
+
+test('markdown requests for a versioned api-reference serve the markdown twin', () => {
+  // Previously these answered `Accept: text/markdown` with raw YAML — the wrong
+  // media type for the request — and only for bot user-agents. The spec stays
+  // reachable via a YAML Accept and at /api/api-reference-openapi/<tag>.
   assert.equal(
     rewriteTarget(
       run('/api-reference/latest', { headers: { 'user-agent': BOT_UA, accept: 'text/markdown' } })
     ),
+    '/api/api-reference-markdown/latest'
+  )
+  assert.equal(
+    rewriteTarget(run('/api-reference/v1.2.3', { headers: { accept: 'text/markdown' } })),
+    '/api/api-reference-markdown/v1.2.3'
+  )
+})
+
+test('versioned api-reference .md URLs serve the markdown twin without any Accept header', () => {
+  assert.equal(rewriteTarget(run('/api-reference/v1.2.3.md')), '/api/api-reference-markdown/v1.2.3')
+  assert.equal(rewriteTarget(run('/api-reference/latest.md')), '/api/api-reference-markdown/latest')
+})
+
+test('the OpenAPI spec is served when the client asks for YAML, regardless of user-agent', () => {
+  assert.equal(
+    rewriteTarget(run('/api-reference/latest', { headers: { accept: 'application/yaml' } })),
     '/api/api-reference-openapi/latest'
   )
   assert.equal(
     rewriteTarget(
-      run('/api-reference/v1.2.3', { headers: { 'user-agent': BOT_UA, accept: 'text/markdown' } })
+      run('/api-reference/v1.2.3', { headers: { 'user-agent': BOT_UA, accept: 'text/yaml' } })
     ),
     '/api/api-reference-openapi/v1.2.3'
   )
 })
 
-test('api-reference OpenAPI rewrite requires both a bot UA and markdown Accept', () => {
+test('an explicit .md extension wins over a YAML Accept header', () => {
   assert.equal(
-    isPassthrough(run('/api-reference/latest', { headers: { accept: 'text/markdown' } })),
-    true
+    rewriteTarget(run('/api-reference/v1.2.3.md', { headers: { accept: 'application/yaml' } })),
+    '/api/api-reference-markdown/v1.2.3'
   )
+})
+
+test('plain HTML requests to a versioned api-reference pass through untouched', () => {
+  assert.equal(isPassthrough(run('/api-reference/latest')), true)
   assert.equal(
     isPassthrough(run('/api-reference/latest', { headers: { 'user-agent': BOT_UA } })),
     true
   )
+  assert.equal(
+    isPassthrough(run('/api-reference/latest', { headers: { accept: 'text/html' } })),
+    true
+  )
 })
 
-test('api-reference OpenAPI rewrite skips the index and non-version segments', () => {
-  const headers = { 'user-agent': BOT_UA, accept: 'text/markdown' }
-  assert.equal(isPassthrough(run('/api-reference', { headers })), true)
+test('api-reference rewrites skip non-version segments and nested paths', () => {
+  const headers = { accept: 'text/markdown' }
   assert.equal(isPassthrough(run('/api-reference/not-a-version', { headers })), true)
   assert.equal(isPassthrough(run('/api-reference/latest/logs', { headers })), true)
+})
+
+test('api-reference markdown rewrites only apply to GET and HEAD requests', () => {
+  assert.equal(
+    rewriteTarget(run('/api-reference/v1.2.3.md', { method: 'HEAD' })),
+    '/api/api-reference-markdown/v1.2.3'
+  )
+  assert.equal(isPassthrough(run('/api-reference/v1.2.3.md', { method: 'POST' })), true)
+})
+
+test('/api-reference.md is served by its own route, not the page markdown API', () => {
+  assert.equal(isPassthrough(run('/api-reference.md')), true)
+  assert.equal(
+    isPassthrough(run('/api-reference.md', { headers: { accept: 'text/markdown' } })),
+    true
+  )
 })
 
 test('rewrites .md content-section URLs to the content markdown API', () => {
@@ -219,7 +269,11 @@ test('page markdown rewrites require markdown intent', () => {
 test('page markdown rewrites skip excluded prefixes', () => {
   const headers = { accept: 'text/markdown' }
   assert.equal(isPassthrough(run('/docs-onboarding/introduction', { headers })), true)
-  assert.equal(isPassthrough(run('/api-reference', { headers })), true)
+  // /api-reference has its own markdown twin; it must never hit the page pipeline.
+  assert.notEqual(
+    rewriteTarget(run('/api-reference', { headers })),
+    '/api/page-markdown/api-reference'
+  )
   // /api/* is excluded by the matcher in production; the predicate must also hold.
   assert.equal(isPassthrough(run('/api/page-markdown/pricing', { headers })), true)
 })
@@ -265,13 +319,101 @@ test('adds Vary: Accept on every URL that serves a markdown alternate, even for 
   assert.equal(run('/blog/some-post').headers.get('vary'), 'Accept')
   assert.equal(run('/pricing').headers.get('vary'), 'Accept')
   assert.equal(run('/').headers.get('vary'), 'Accept')
+  // api-reference negotiates markdown (index + versions) and YAML (versions).
+  assert.equal(run('/api-reference').headers.get('vary'), 'Accept')
+  assert.equal(run('/api-reference/latest').headers.get('vary'), 'Accept')
+  assert.equal(run('/api-reference/v1.2.3').headers.get('vary'), 'Accept')
 })
 
 test('does not add Vary: Accept on paths without a markdown alternate', () => {
   assert.equal(run('/llms.txt').headers.get('vary'), null)
   assert.equal(run('/sitemap.xml').headers.get('vary'), null)
-  assert.equal(run('/api-reference/latest').headers.get('vary'), null)
+  assert.equal(run('/api-reference/not-a-version').headers.get('vary'), null)
   assert.equal(run('/docs-onboarding/introduction').headers.get('vary'), null)
+})
+
+test('advertises the markdown twin in a Link header on HTML responses', () => {
+  const link = (url) => run(url).headers.get('link')
+
+  assert.equal(
+    link('/docs/instrumentation/opentelemetry-python'),
+    '<https://signoz.io/docs/instrumentation/opentelemetry-python.md>; rel="alternate"; type="text/markdown"'
+  )
+  assert.equal(
+    link('/docs/introduction/'),
+    '<https://signoz.io/docs/introduction.md>; rel="alternate"; type="text/markdown"'
+  )
+  assert.equal(
+    link('/blog/some-post'),
+    '<https://signoz.io/blog/some-post.md>; rel="alternate"; type="text/markdown"'
+  )
+  assert.equal(
+    link('/pricing'),
+    '<https://signoz.io/pricing.md>; rel="alternate"; type="text/markdown"'
+  )
+})
+
+test('Link header maps the docs root to the introduction markdown twin', () => {
+  assert.equal(
+    run('/docs').headers.get('link'),
+    '<https://signoz.io/docs/introduction.md>; rel="alternate"; type="text/markdown"'
+  )
+})
+
+test('Link header covers the api-reference index and versioned pages', () => {
+  assert.equal(
+    run('/api-reference').headers.get('link'),
+    '<https://signoz.io/api-reference.md>; rel="alternate"; type="text/markdown"'
+  )
+  assert.equal(
+    run('/api-reference/v1.2.3').headers.get('link'),
+    '<https://signoz.io/api-reference/v1.2.3.md>; rel="alternate"; type="text/markdown"'
+  )
+  assert.equal(
+    run('/api-reference/latest/').headers.get('link'),
+    '<https://signoz.io/api-reference/latest.md>; rel="alternate"; type="text/markdown"'
+  )
+})
+
+test('omits the Link header on markdown responses and on paths without a twin', () => {
+  // The response is the alternate.
+  assert.equal(run('/pricing.md').headers.get('link'), null)
+  assert.equal(run('/docs/introduction.md').headers.get('link'), null)
+  assert.equal(
+    run('/docs/introduction', { headers: { accept: 'text/markdown' } }).headers.get('link'),
+    null
+  )
+  assert.equal(run('/api-reference.md').headers.get('link'), null)
+  assert.equal(run('/api-reference/v1.2.3.md').headers.get('link'), null)
+
+  // No markdown representation.
+  assert.equal(run('/llms.txt').headers.get('link'), null)
+  assert.equal(run('/sitemap.xml').headers.get('link'), null)
+  assert.equal(run('/docs/sitemap.md').headers.get('link'), null)
+  assert.equal(run('/docs-onboarding/introduction').headers.get('link'), null)
+
+  // Home page negotiates on Accept only.
+  assert.equal(run('/').headers.get('link'), null)
+})
+
+test('omits the Link header on parameterized URLs', () => {
+  // The markdown pipeline renders the pathname only, so /changelog.md would be
+  // page 1 regardless of ?page — not an alternate of the requested resource.
+  assert.equal(run('/changelog/?page=2').headers.get('link'), null)
+  assert.equal(run('/pricing/?deploymentType=cloud').headers.get('link'), null)
+  assert.equal(run('/docs/introduction/?foo=bar').headers.get('link'), null)
+
+  assert.equal(
+    run('/pricing/').headers.get('link'),
+    '<https://signoz.io/pricing.md>; rel="alternate"; type="text/markdown"'
+  )
+})
+
+test('omits the Link header on the internal page-markdown self-fetch', () => {
+  const res = run('/pricing', {
+    headers: { [AGENT_MARKDOWN_SELF_FETCH_HEADER]: '1' },
+  })
+  assert.equal(res.headers.get('link'), null)
 })
 
 test('preserves the request pathname for not-found suggestions on passthrough and rewrite', () => {
