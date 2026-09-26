@@ -1,5 +1,5 @@
 ---
-date: 2026-08-19
+date: 2026-09-05
 doc_type: howto
 title: 'Jira Cloud: Create and Manage Issues from Alerts'
 description: Set up Jira Cloud as a notification channel in SigNoz to open, update, and resolve Jira issues automatically as alerts fire and resolve.
@@ -13,7 +13,7 @@ This page covers creating and managing Jira **issues** (work items) from alerts.
 
 Before configuring Jira Cloud as a notification channel in SigNoz, ensure that you have:
 
-- **A Jira Cloud site**: your site URL in the form `https://<your-site>.atlassian.net`. SigNoz appends the REST API path internally.
+- **A Jira Cloud site**: your site URL in the exact canonical form `https://<your-site>.atlassian.net`, with no trailing slash. SigNoz appends the REST API path internally.
 - **Authentication**: an Atlassian **email + API token**. We recommend a **service account** so issues aren't reported under a personal name and the channel doesn't break when someone leaves. See [Use a service account](#use-a-service-account-recommended). SigNoz authenticates with the email + token (basic auth).
 - **A project key and an issue type**: e.g. project `OPS` and issue type `Task`. The issue type must exist in that project. Types vary per project, so `Bug` or `Incident` may not be available everywhere.
 - **Permissions**: the account needs permission to **create** issues in the project (and to **transition** them, if you use resolve/reopen).
@@ -87,6 +87,10 @@ To create a new Jira notification channel:
 - **Issue type**: an issue type that exists in the project (defaults to `Task`).
 - **Summary (issue title)** and **Description**: prefilled with default templates that control the created issue's title and body. You can edit them (see [Customizing the message](#customizing-the-message)).
 - **Send resolved alerts**: on by default. When on, SigNoz transitions the issue to a "done" status and comments on it when the alert resolves.
+
+<Admonition type="warning">
+Enter the **Site URL** in exact canonical form (`https://your-domain.atlassian.net`). SigNoz stores and sends it as-is, so it must have **no trailing slash** and **no leading or trailing whitespace**. A value like `https://your-domain.atlassian.net/` is rejected instead of being trimmed. If the format is wrong, saving fails with `jira site must not end with a trailing slash` or `jira site must not have leading or trailing whitespace`.
+</Admonition>
 
 The **Advanced Options** section is optional. The required fields alone give a fully working channel:
 
@@ -218,7 +222,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 | :--- | :--- | :--- |
 | `name` | `string` | The name of the receiver/channel. **Required**; must be unique across the config. |
 | `jira_configs` | `array` | List of Jira configurations. |
-| `jira_configs[].site` | `string` | Jira Cloud base URL, `https://<site>.atlassian.net`. **Required**. |
+| `jira_configs[].site` | `string` | Jira Cloud base URL, `https://<site>.atlassian.net`, in exact canonical form (no trailing slash, no surrounding whitespace). **Required**. |
 | `jira_configs[].project` | `string` | Project key, e.g. `OPS`. **Required**. |
 | `jira_configs[].issue_type` | `string` | An issue type that exists in the project, e.g. `Task`. **Required**. |
 | `jira_configs[].http_config.basic_auth.username` | `string` | Atlassian account email. **Required**. |
@@ -241,7 +245,7 @@ If you encounter issues:
 - **401 / 403 with a service account** → confirm you used the service account's `…@serviceaccount.atlassian.com` email, added the account to the project, and gave the token the `read:jira-work` and `write:jira-work` scopes.
 - **400 on create** → a field required by that project's issue type is missing, or the project / issue type / priority is invalid. Check the project's create screen.
 - **"can't find transition"** → only relevant when a transition-name override is set and doesn't match the workflow. Clear the override to fall back to auto-detection.
-- **Invalid Site URL** → the URL must be an `https` URL on an `atlassian.net` domain.
+- **Invalid Site URL** → the URL must be an `https` URL on an `atlassian.net` domain, in exact canonical form: no trailing slash and no surrounding whitespace (e.g. `https://your-domain.atlassian.net`, not `https://your-domain.atlassian.net/`). Non-conforming values are rejected with `jira site must not end with a trailing slash` or `jira site must not have leading or trailing whitespace`.
 - **Invalid Reopen window** → use a duration like `30m`, `72h`, or `3d` (minimum `1m`).
 - **Test the setup**: use the **Test** button in SigNoz to create an issue end-to-end. If it fails, the error identifies the misconfigured field.
 
