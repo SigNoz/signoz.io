@@ -1,0 +1,118 @@
+---
+title: Complete guide to OpenTelemetry Tracing (with code examples)
+meta_title: "Complete guide to OpenTelemetry Tracing"
+published_date: 2025-10-08
+updated_date: 2026-09-25
+tags: [OpenTelemetry, Distributed Tracing]
+authors: [ankit_anand, dhruv_ahuja]
+description: "Distributed tracing tracks requests across microservices. Learn how OpenTelemetry implements tracing — spans, context propagation, sampling, and the production pipeline."
+image: /img/blog/2021/09/opentelemetry_tracing-min.webp
+keywords: [opentelemetry,distributed tracing,opentelemetry tracing,traces,spans,context propagation,sampling,otlp]
+related_articles:
+  - '/blog/what-is-distributed-tracing-in-opentelemetry'
+  - '/blog/opentelemetry-spans'
+  - '/blog/what-is-otlp'
+  - '/blog/opentelemetry-auto-instrumentation'
+  - '/blog/opentelemetry-collector-complete-guide'
+---
+
+When a user clicks "Add to Cart" on an e-commerce site, that single action can fan out across a dozen services: a frontend gateway, an auth service, a cart service, an inventory check, a database write. If any step is slow or fails, the user sees a spinner or an error. Often, you see nothing, because each service logs in isolation. You know *something* broke, but not *where* or *why*.
+
+Distributed tracing solves this by recording the full journey of a request as it moves through your system. Every service the request touches produces a timestamped record of the work it performed: how long it took, whether it succeeded, and what it called next. These records are stitched together into a single **trace**: an end-to-end map of everything that happened to fulfill that request, across every service boundary.
+
+[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) is the open-source, vendor-neutral standard for generating and collecting this trace data. Maintained by the <a href="https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">Cloud Native Computing Foundation</a>, it provides the APIs, SDKs, and tooling to instrument applications in virtually any language without coupling your code to a specific observability backend.
+
+This guide covers how OpenTelemetry's tracing signal works from the inside: the data model, context propagation, instrumentation (auto and manual), the production pipeline, and common pitfalls.
+
+
+## How OpenTelemetry Tracing Works
+
+### Traces and Spans
+
+A **trace** represents the complete path of a single request through a distributed system. It is identified by a globally unique **TraceID** (a 16-byte identifier) that every service involved in handling that request shares.
+
+A trace is composed of **spans**. Each span represents a single, named, timed operation, such as an HTTP request being handled, a database query executing, a message being published to a queue. A span captures when the operation started, when it ended, whether it succeeded, and the metadata that makes debugging possible. Every span carries its own unique **SpanID** (an 8-byte identifier).
+
+Together, traces and spans give you something that logs alone cannot: a causal, time-ordered view of everything that happened to a request, across every process it touched. For a deeper look at the relationship between these identifiers, see [Trace ID vs. Span ID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/).
+
+### The Span Data Model
+
+The real diagnostic power of a span lies in the structured data it carries. Each span records the following fields:
+
+- **Name:** A human-readable string that identifies the class of operation — `POST /api/checkout`, `SELECT orders`, `payment.authorize`. Backends use span names to group and aggregate similar operations, so the name must be low-cardinality.
+
+- **Kind:** Defines the span's role in a distributed interaction. There are five kinds:
+  - `SERVER`: handling an inbound request (e.g., HTTP server, gRPC handler). Duration measures server-side processing time.
+  - `CLIENT`: making an outbound request (e.g., HTTP client call, database query). Duration measures the full round-trip including network latency.
+  - `PRODUCER`: sending an asynchronous message (e.g., Kafka publish). In high-throughput environments, these spans often end before the consumer begins processing the message.
+  - `CONSUMER`: processing an asynchronous message. The span covers the time from receiving the message to completing its handling.
+  - `INTERNAL`: an in-process operation that does not cross a service boundary. Use it for instrumenting important business logic.
+
+- **Status:** Marks the outcome of the operation. `Unset` is the default, meaning no status was explicitly recorded. `Ok` explicitly confirms success. `Error` marks a failure, and this is what backends use to calculate error rates and trigger alerts.
+
+- **Attributes:** Key-value pairs that add queryable, structured metadata to a span. While the span name should be generic, attributes should carry the specifics: `http.request.method = POST`, `http.response.status_code = 500`, `user.id = abc-123`.
+
+OpenTelemetry defines <a href="https://opentelemetry.io/docs/concepts/semantic-conventions/" rel="noopener noreferrer nofollow" target="_blank">Semantic Conventions</a>, which are standardized attribute names for common operations. Observability backends utilize these standards to better understand and correlate events, and to provide richer out-of-the-box analysis.
+
+- **Events:** Timestamped log messages attached to a span, marking specific moments during execution. The most common use case is recording exceptions: when an error occurs, you capture the exception type, message, and stack trace as an event on the active span.
+
+- **Links:** References to spans in *other* traces. Unlike parent-child relationships, links describe causal connections that don't fit into a single trace tree — for example, a batch job that processes messages from multiple producers.
+
+For a comprehensive deep-dive into span internals, see [Understanding OpenTelemetry Spans in Detail](https://signoz.io/blog/opentelemetry-spans/).
+
+<KeyPointCallout title="Keep Span Names Low-Cardinality">
+
+Span names should represent a *class* of operations, not a specific instance. [Observability backends](https://signoz.io/blog/opentelemetry-backend/) aggregate data by span name to compute metrics like average latency and error rate. If every name is unique, these aggregations become useless and storage costs spike.
+
+**Good:** `GET /api/products`, `db.query`, `payment.authorize`<br />
+**Bad:** `GET /api/products/12345`, `SELECT * FROM users WHERE id=987`
+
+Put the variable data (IDs, query parameters, user-specific values) in **attributes**, not in the name.
+
+</KeyPointCallout>
+
+
+### Trace Structure: Parents, Children, and Root Spans
+
+Spans don't exist in isolation — they form a tree that reflects the execution flow of the request. When one operation calls another, the calling span becomes the **parent** and the called span becomes the **child**. The child stores the parent's SpanID as its `ParentSpanID`, creating an explicit link.
+
+This hierarchy is what allows tracing backends to render the waterfall (or Gantt chart) view that makes distributed tracing visually powerful. You can see at a glance which operations triggered which others, how they overlap in time, and where latency accumulated.
+
+The first span in a trace, the one with no parent, is called the **root span**. It represents the entry point of the request (typically an incoming HTTP call at the edge) and its duration is what the end user actually experienced.
+
+<Figure 
+  src="/img/blog/2025/09/otel-spans.webp" 
+  alt="Span hierarchy showing parent-child relationships in a trace" 
+  caption="Spans in a trace form a tree: the root span represents the entry point, and child spans represent downstream operations" 
+/>
+
+
+### Context Propagation
+
+A trace that stops at a service boundary is useless. The entire point is continuity across processes, and that requires **context propagation**.
+
+When a service creates a span for an outgoing request, the OpenTelemetry SDK serializes the current trace context (the TraceID, the active SpanID, and trace flags like sampling status) into the request's headers. The downstream service extracts this context, and any spans it creates automatically become children of the calling span. This is how a single logical trace spans multiple processes without any manual wiring.
+
+The standard format for this is the <a href="https://www.w3.org/TR/trace-context/" rel="noopener noreferrer nofollow" target="_blank">W3C Trace Context</a> specification, which defines two headers:
+
+- **`traceparent`** — carries the version, trace ID, parent span ID, and trace flags. Example: `00-5b8efff798038103d269b633813fc60c-eee19b7ec3c1b174-01`
+- **`tracestate`** — carries optional vendor-specific or application-specific data.
+
+Within a single process, context propagation is handled differently depending on the language. In Python and Java, the SDK stores the active span in thread-local storage and manages it automatically. Other languages might choose to handle this based on the language's capabilities and design patterns.<br />
+Regardless of the mechanism, the result is the same: when you create a new span, the SDK knows which span is currently active and sets the parent-child relationship accordingly.
+
+For most common protocols (HTTP, gRPC, messaging systems), OpenTelemetry's instrumentation libraries handle injection and extraction automatically. You don't write propagation code by hand unless you are working with a custom transport, or utilizing OpenTelemetry in languages [like Rust](https://signoz.io/blog/opentelemetry-rust/).
+
+### The API and SDK Split
+
+OpenTelemetry separates the **<a href="https://opentelemetry.io/docs/specs/otel/trace/api/" rel="noopener noreferrer nofollow" target="_blank">Trace API</a>** (the interface your code calls) from the **<a href="https://opentelemetry.io/docs/specs/otel/trace/sdk/" rel="noopener noreferrer nofollow" target="_blank">Trace SDK</a>** (the implementation that actually records and exports spans). This is a deliberate design choice with a practical consequence: the API is "no-op" by default.
+
+If no SDK is installed, every API call succeeds silently and produces no telemetry. This means library authors can instrument their code against the OpenTelemetry API without imposing any observability dependency on their users. The end user decides whether to activate tracing by installing and configuring an SDK — or not. It is this separation that makes OpenTelemetry safe to embed in shared libraries. For a more detailed comparison of these two layers, see [OpenTelemetry API vs SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/).
+
+### OTLP: The Wire Format
+
+Once spans are recorded by the SDK, they need to be transmitted to an observability backend. The native protocol for this is [**OTLP** (OpenTelemetry Protocol)](https://signoz.io/blog/what-is-otlp/): a high-performance, vendor-neutral format designed for the three primary telemetry signals (traces, metrics, and logs).
+
+OTLP organizes data in a three-tiered hierarchy of `Resource → Scope → Data` that eliminates metadata redundancy across batches. It supports transmission over both gRPC (the default, on port 4317) and HTTP (on port 4318), with <a href="https://protobuf.dev/" rel="noopener noreferrer nofollow" target="_blank">Protobuf</a> encoding for compact, schema-safe payloads.
+
+Because OTLP is an open standard, any compatible observability backend can ingest your traces without translation or data loss. This is what makes OpenTelemetry genuinely vendor-neutral — you instrument once, and the choice of backend is a configuration change.
