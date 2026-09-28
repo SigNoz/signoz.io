@@ -27,12 +27,11 @@ export default function NozPathWalk({
   lanes,
   tuning,
   className,
-  nozLabel = 'Noz, the SigNoz mascot — hover to make him wave',
 }: NozPathWalkProps) {
   const trackRef = useRef<HTMLDivElement>(null)
   const sceneCanvasRef = useRef<HTMLCanvasElement>(null)
   const badgeLayerRef = useRef<HTMLDivElement>(null)
-  const nozButtonRef = useRef<HTMLButtonElement>(null)
+  const nozButtonRef = useRef<HTMLDivElement>(null)
   const spriteRef = useRef<NozSpriteHandle>(null)
   const [skylineCanvas, setSkylineCanvas] = useState<HTMLCanvasElement | null>(null)
 
@@ -79,8 +78,8 @@ export default function NozPathWalk({
           </div>
         ))}
       </div>
-      <div className={cn(styles.layer, styles.nozLayer)}>
-        <NozSprite ref={spriteRef} buttonRef={nozButtonRef} label={nozLabel} />
+      <div className={cn(styles.layer, styles.nozLayer)} aria-hidden="true">
+        <NozSprite ref={spriteRef} buttonRef={nozButtonRef} />
       </div>
     </NozPathWalkContext.Provider>
   )

@@ -54,10 +54,3 @@ export interface WalkState {
   time: number
   opacity: number
 }
-
-export interface ScenePalette {
-  skylineDot: [number, number, number]
-  pathDot: string
-  pellets: string[]
-  confetti: string[]
-}

@@ -44,5 +44,4 @@ export interface NozPathWalkProps {
   lanes?: number[]
   tuning?: Partial<NozPathWalkTuning>
   className?: string
-  nozLabel?: string
 }

@@ -6,19 +6,18 @@ import styles from './NozPathWalk.module.css'
 export type NozSpriteHandle = Omit<NozSpriteRefs, 'button'>
 
 interface NozSpriteProps {
-  label: string
-  buttonRef: React.Ref<HTMLButtonElement>
+  buttonRef: React.Ref<HTMLDivElement>
 }
 
 const BODY = 'var(--bg-cherry-500)'
 
 /**
  * The mascot, same artwork as {@link ../NozPeek/NozPeekIcon}. The walk cycle
- * drives the outer groups imperatively; the wave on hover and focus is pure CSS,
- * so it still works before the engine has started.
+ * drives the outer groups imperatively; the wave on hover is pure CSS, so it
+ * still works before the engine has started.
  */
 const NozSprite = forwardRef<NozSpriteHandle, NozSpriteProps>(function NozSprite(
-  { label, buttonRef },
+  { buttonRef },
   ref
 ) {
   const root = useRef<SVGGElement>(null)
@@ -40,7 +39,7 @@ const NozSprite = forwardRef<NozSpriteHandle, NozSpriteProps>(function NozSprite
   }))
 
   return (
-    <button type="button" ref={buttonRef} className={styles.noz} aria-label={label}>
+    <div ref={buttonRef} className={styles.noz}>
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <g ref={root}>
           <g ref={body}>
@@ -116,7 +115,7 @@ const NozSprite = forwardRef<NozSpriteHandle, NozSpriteProps>(function NozSprite
           </g>
         </g>
       </svg>
-    </button>
+    </div>
   )
 })
 

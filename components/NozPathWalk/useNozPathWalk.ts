@@ -35,7 +35,7 @@ interface UseNozPathWalkArgs {
   trackRef: RefObject<HTMLDivElement | null>
   sceneCanvasRef: RefObject<HTMLCanvasElement | null>
   badgeLayerRef: RefObject<HTMLDivElement | null>
-  nozButtonRef: RefObject<HTMLButtonElement | null>
+  nozButtonRef: RefObject<HTMLDivElement | null>
   spriteRef: RefObject<NozSpriteHandle | null>
   skylineCanvas: HTMLCanvasElement | null
   skylineSrc: string
@@ -58,7 +58,12 @@ export function useNozPathWalk({
   tuning: tuningOverrides,
   wavingClassName,
 }: UseNozPathWalkArgs) {
+  const lanesKey = JSON.stringify(lanes)
+  const tuningKey = JSON.stringify(tuningOverrides ?? null)
+
   useEffect(() => {
+    const routeLanes = JSON.parse(lanesKey) as number[]
+    const tuningFromProps = JSON.parse(tuningKey) as Partial<NozPathWalkTuning> | null
     const track = trackRef.current
     const sceneCanvas = sceneCanvasRef.current
     const badgeLayer = badgeLayerRef.current
@@ -69,7 +74,7 @@ export function useNozPathWalk({
     const sceneCtx = sceneCanvas.getContext('2d')
     if (!sceneCtx) return
 
-    const tuning: NozPathWalkTuning = { ...DEFAULT_TUNING, ...tuningOverrides }
+    const tuning: NozPathWalkTuning = { ...DEFAULT_TUNING, ...tuningFromProps }
     const palette = readTokenPalette(track)
 
     const skyline = new SkylineField(
@@ -186,7 +191,7 @@ export function useNozPathWalk({
       const anchors = anchorTops(ANCHOR_ATTRIBUTE)
       const build = (endY: number) =>
         buildPath({
-          vertices: routeFromAnchors(anchors, PATH_START_Y, endY, lanes),
+          vertices: routeFromAnchors(anchors, PATH_START_Y, endY, routeLanes),
           corridorWidth,
           corridorLeft,
           startY: PATH_START_Y,
@@ -437,8 +442,8 @@ export function useNozPathWalk({
     skylineCanvas,
     skylineSrc,
     badgeCount,
-    lanes,
-    tuningOverrides,
+    lanesKey,
+    tuningKey,
     wavingClassName,
   ])
 }
