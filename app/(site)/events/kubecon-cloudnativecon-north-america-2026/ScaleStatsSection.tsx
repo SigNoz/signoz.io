@@ -5,7 +5,7 @@ import { SCALE } from './KubeconPage.constants'
 
 export default function ScaleStatsSection() {
   return (
-    <section className="border-0 border-y border-solid border-[var(--l2-border)] py-0">
+    <section className="rule-fade-x border-0 border-y border-solid border-[var(--l2-border)] py-0">
       <SectionLayout variant="no-border" className="!px-0">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[minmax(0,291fr)_repeat(3,minmax(0,357fr))]">
           <div className="flex flex-col justify-between gap-8 py-6 pr-4 xl:pr-12">

@@ -1,5 +1,7 @@
 import Image from 'next/image'
-import { ArrowRight, CircleCheck } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+
+import { CircleCheckSolid } from '@/components/homepage-icons/icons'
 
 import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
@@ -66,7 +68,7 @@ export default function KernelSpotlightSection() {
                 className={
                   index === 0
                     ? 'pb-6'
-                    : 'border-0 border-t border-solid border-[var(--l2-border)] py-6'
+                    : 'rule-fade-x border-0 border-t border-solid border-[var(--l2-border)] py-6'
                 }
               >
                 <h3 className="m-0 text-base font-medium leading-6 text-[var(--l1-foreground)]">
@@ -78,18 +80,16 @@ export default function KernelSpotlightSection() {
               </div>
             ))}
 
-            <div className="border-0 border-t border-solid border-[var(--l2-border)] pt-6">
+            <div className="rule-fade-x border-0 border-t border-solid border-[var(--l2-border)] pt-6">
               <h3 className="m-0 text-base font-medium leading-6 text-[var(--l1-foreground)]">
                 {SPOTLIGHT.impact.title}
               </h3>
 
               <ul className="m-0 mt-4 flex list-none flex-col gap-4 p-0">
                 <li className="flex items-center gap-2 text-sm leading-6">
-                  <CircleCheck
-                    size={16}
-                    aria-hidden="true"
-                    className="shrink-0 text-[var(--accent-primary)]"
-                  />
+                  <span className="shrink-0" aria-hidden="true">
+                    <CircleCheckSolid size={16} />
+                  </span>
                   <span className="text-[var(--l1-foreground)]">
                     {SPOTLIGHT.impact.latency.from}
                   </span>
@@ -106,11 +106,9 @@ export default function KernelSpotlightSection() {
 
                 {SPOTLIGHT.impact.items.map((item) => (
                   <li key={item.title} className="flex gap-2">
-                    <CircleCheck
-                      size={16}
-                      aria-hidden="true"
-                      className="mt-1 shrink-0 text-[var(--accent-primary)]"
-                    />
+                    <span className="mt-0.5 shrink-0" aria-hidden="true">
+                      <CircleCheckSolid size={16} />
+                    </span>
                     <span>
                       <span className="block text-sm leading-6 text-[var(--l1-foreground)]">
                         {item.title}
