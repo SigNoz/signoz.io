@@ -55,7 +55,6 @@ export default function FAQLayout({
         authors={authors}
         toc={toc}
         contentType="faq"
-        showNewsletter={true}
         showRelatedArticles={true}
         authorDirectory={authorDirectory}
         breadcrumbs={breadcrumbs}
