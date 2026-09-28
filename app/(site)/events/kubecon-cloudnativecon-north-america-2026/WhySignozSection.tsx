@@ -11,7 +11,7 @@ import styles from './kubecon.module.css'
 export default function WhySignozSection() {
   return (
     <section className="relative pb-16 pt-20 lg:pb-24">
-      <SectionLayout variant="no-border" className="px-4 md:px-10">
+      <SectionLayout variant="no-border" className="!px-0">
         <h2 className="m-0 max-w-[57.2rem] text-3xl font-medium leading-tight tracking-[-0.02em] text-[var(--l1-foreground)] sm:text-[2.375rem]">
           {WHY_SIGNOZ.title}
         </h2>

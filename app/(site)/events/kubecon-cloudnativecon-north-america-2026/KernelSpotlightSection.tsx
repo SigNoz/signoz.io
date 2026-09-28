@@ -16,7 +16,7 @@ const QUOTE_SUB = '#5a6070'
 export default function KernelSpotlightSection() {
   return (
     <section className="pt-16 lg:pt-20">
-      <SectionLayout variant="no-border" className="px-4 md:px-10">
+      <SectionLayout variant="no-border" className="!px-0">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,870fr)_minmax(0,482fr)] lg:gap-8">
           <div>
             <h2 className="m-0 text-2xl font-medium leading-tight tracking-[-0.02em] sm:text-3xl">

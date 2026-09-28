@@ -22,28 +22,24 @@ export default function KubeconPage() {
     <>
       <BoothMarquee className="mt-2" />
 
-      <div className="mx-auto w-full max-w-8xl">
-        <NozPathWalk badges={NOZ_BADGES} skylineSrc={SKYLINE.src} skylineAlt={SKYLINE.alt}>
-          <div className="border-x border-dashed border-[var(--l2-border)]">
+      <div className="mx-auto w-full px-4 sm:px-6 lg:px-16 xl:px-20">
+        <div className="mx-auto w-full max-w-8xl">
+          <NozPathWalk badges={NOZ_BADGES} skylineSrc={SKYLINE.src} skylineAlt={SKYLINE.alt}>
             <HeroSection />
-          </div>
 
-          <SectionLayout variant="no-border" className="relative z-30 !px-0">
-            <div data-noz-anchor>
-              <CustomerStoriesCard
-                clickLocation="KubeCon NA 2026 Customer Stories"
-                carouselSpeed={26}
-                swapEvery={9000}
-              />
-            </div>
-          </SectionLayout>
+            <SectionLayout variant="no-border" className="relative z-30 !px-0">
+              <div data-noz-anchor>
+                <CustomerStoriesCard
+                  clickLocation="KubeCon NA 2026 Customer Stories"
+                  carouselSpeed={26}
+                  swapEvery={9000}
+                />
+              </div>
+            </SectionLayout>
 
-          <div className="border-x border-dashed border-[var(--l2-border)]">
             <WhySignozSection />
-          </div>
-        </NozPathWalk>
+          </NozPathWalk>
 
-        <div className="border-x border-dashed border-[var(--l2-border)]">
           <ScaleStatsSection />
           <KernelSpotlightSection />
 

@@ -11,7 +11,7 @@ import { WORTH_A_READ } from './KubeconPage.constants'
 export default function WorthAReadSection() {
   return (
     <section className="pt-16 lg:pt-20">
-      <SectionLayout variant="no-border" className="px-4 md:px-10">
+      <SectionLayout variant="no-border" className="!px-0">
         <h2 className="m-0 text-2xl font-medium leading-tight tracking-[-0.02em] text-[var(--l1-foreground)] sm:text-3xl">
           {WORTH_A_READ.title}
         </h2>

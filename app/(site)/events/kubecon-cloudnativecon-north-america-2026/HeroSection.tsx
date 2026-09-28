@@ -12,7 +12,7 @@ export default function HeroSection() {
 
       <SectionLayout
         variant="no-border"
-        className="relative z-[1] px-4 pb-16 pt-16 md:px-10 lg:min-h-[40.5rem] lg:pb-6 lg:pt-[6.75rem]"
+        className="relative z-[1] !px-0 pb-16 pt-16 lg:min-h-[40.5rem] lg:pb-6 lg:pt-[6.75rem]"
       >
         <div className="max-w-[52.5rem]">
           <h1 className="m-0 text-3xl font-medium leading-tight tracking-[-0.02em] sm:text-4xl lg:text-[3rem] lg:leading-[3.75rem]">
