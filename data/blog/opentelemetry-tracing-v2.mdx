@@ -52,6 +52,12 @@ The real diagnostic power of a span lies in the structured data it carries. Each
 
 - **Attributes:** Key-value pairs that add queryable, structured metadata to a span. While the span name should be generic, attributes should carry the specifics: `http.request.method = POST`, `http.response.status_code = 500`, `user.id = abc-123`.
 
+<Figure 
+  src="/img/blog/2026/09/span-attributes.webp" 
+  alt="OpenTelemetry spans represent unit-level operations within requests; high cardinality attributes drive investigations by detailing particulars of each operation" 
+  caption="OpenTelemetry spans represent unit-level operations within requests; high cardinality attributes drive investigations by detailing particulars of each operation"
+/>
+
 OpenTelemetry defines <a href="https://opentelemetry.io/docs/concepts/semantic-conventions/" rel="noopener noreferrer nofollow" target="_blank">Semantic Conventions</a>, which are standardized attribute names for common operations. Observability backends utilize these standards to better understand and correlate events, and to provide richer out-of-the-box analysis.
 
 - **Events:** Timestamped log messages attached to a span, marking specific moments during execution. The most common use case is recording exceptions: when an error occurs, you capture the exception type, message, and stack trace as an event on the active span.
@@ -105,9 +111,11 @@ For most common protocols (HTTP, gRPC, messaging systems), OpenTelemetry's instr
 
 ### The API and SDK Split
 
-OpenTelemetry separates the **<a href="https://opentelemetry.io/docs/specs/otel/trace/api/" rel="noopener noreferrer nofollow" target="_blank">Trace API</a>** (the interface your code calls) from the **<a href="https://opentelemetry.io/docs/specs/otel/trace/sdk/" rel="noopener noreferrer nofollow" target="_blank">Trace SDK</a>** (the implementation that actually records and exports spans). This is a deliberate design choice with a practical consequence: the API is "no-op" by default.
+OpenTelemetry splits its tracing surface into two layers: the **<a href="https://opentelemetry.io/docs/specs/otel/trace/api/" rel="noopener noreferrer nofollow" target="_blank">Trace API</a>**, which your application code calls to create spans and propagate context, and the **<a href="https://opentelemetry.io/docs/specs/otel/trace/sdk/" rel="noopener noreferrer nofollow" target="_blank">Trace SDK</a>**, which does the actual work of recording, processing, and exporting those spans.
 
-If no SDK is installed, every API call succeeds silently and produces no telemetry. This means library authors can instrument their code against the OpenTelemetry API without imposing any observability dependency on their users. The end user decides whether to activate tracing by installing and configuring an SDK — or not. It is this separation that makes OpenTelemetry safe to embed in shared libraries. For a more detailed comparison of these two layers, see [OpenTelemetry API vs SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/).
+The separation exists for a specific reason. Without an SDK present, every API call quietly returns a valid but empty result. This means that the cod de doesn't emit any spans, doesn't export any data and introduces no additional overhead. This makes the API safe to depend on in shared libraries and frameworks, as the library can instrument itself without forcing its users to run any particular observability stack.
+
+Whether tracing is actually active becomes a decision for the application owner, made at deployment time by installing and configuring the SDK. For a more detailed comparison of these two layers, see [OpenTelemetry API vs SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/).
 
 ### OTLP: The Wire Format
 
