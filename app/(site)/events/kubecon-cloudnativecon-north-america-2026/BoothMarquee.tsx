@@ -37,8 +37,8 @@ export default function BoothMarquee({ variant = 'banner', className }: BoothMar
       className={cn(
         styles.marquee,
         isBanner
-          ? 'h-14 bg-[var(--bg-sakura-500)] text-[var(--bg-neutral-dark-1000)]'
-          : 'h-8 bg-[var(--bg-robin-500)] text-[var(--bg-neutral-light-1000)]',
+          ? 'flex h-11 items-center bg-[var(--bg-sakura-500)] text-[var(--bg-neutral-dark-1000)]'
+          : 'flex h-8 items-center bg-[var(--bg-robin-500)] text-[var(--bg-neutral-light-1000)]',
         className
       )}
     >

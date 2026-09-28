@@ -13,25 +13,36 @@ import { cn } from 'app/lib/utils'
 interface CustomerStoriesCardProps {
   /** Analytics attribution, so placements outside the homepage hero are distinguishable. */
   clickLocation?: string
+  openSides?: boolean
+  carouselSpeed?: number
+  swapEvery?: number
 }
 
 export default function CustomerStoriesCard({
   clickLocation = 'Hero Customer Stories',
+  openSides = false,
+  carouselSpeed,
+  swapEvery,
 }: CustomerStoriesCardProps = {}) {
   const half = Math.ceil(CUSTOMER_STORY_QUOTES.length / 2)
 
   return (
-    <section className={styles.root} aria-label="Customers and testimonials">
-      <CustomerCarousel clickLocation={clickLocation} />
+    <section
+      className={cn(styles.root, openSides && styles.rootOpenSides)}
+      aria-label="Customers and testimonials"
+    >
+      <CustomerCarousel clickLocation={clickLocation} speed={carouselSpeed} />
       <div className={styles.voices}>
         <TestimonialSwapPanel
           quotes={CUSTOMER_STORY_QUOTES.slice(0, half)}
           clickLocation={clickLocation}
+          swapEvery={swapEvery}
         />
         <TestimonialSwapPanel
           quotes={CUSTOMER_STORY_QUOTES.slice(half)}
           staggerMs={1500}
           clickLocation={clickLocation}
+          swapEvery={swapEvery}
         />
         <aside className={cn(styles.voice, styles.voiceCta)}>
           <p className={styles.voiceCtaTitle}>{CUSTOMER_STORIES_CTA.title}</p>

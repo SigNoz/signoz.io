@@ -195,7 +195,7 @@ export const WORTH_A_READ = {
       description:
         'SigNoz lets teams aggregate arbitrary attributes, query nested JSON, work with OpenTelemetry data as-is, automate workflows through APIs, and create alerts around customer impact.',
       href: '/blog/why-engineering-first-teams-choose-signoz/',
-      image: null,
+      image: '/img/signoz-meta-image.webp',
     },
     {
       title: 'Bringing Agent-Native Observability to SigNoz',
@@ -219,8 +219,8 @@ export const CLOSING_CTA = {
   titleTrail: '@ Booth 198',
   description:
     'Talk to the SigNoz team about your current observability architecture, OpenTelemetry rollout, telemetry costs, or AI-native engineering workflows.',
-  image: '/img/events/kubecon-cloudnativecon-north-america-2026/kubecon-booth-illustration.webp',
-  imageAlt: 'Isometric illustration of the SigNoz booth',
+  image: '/img/docs-introduction/explore-illustration.webp',
+  imageAlt: 'Isometric illustration of a layered observability landscape',
   buttons: [
     {
       text: 'Get Started ⎯ Free',

@@ -22,6 +22,7 @@ export interface NozPathWalkTuning {
   horizontalScrollRatio: number
   /** Walk speed multiplier while catching back up to mid-viewport. */
   catchUpSpeed: number
+  scrollStretch: number
   /** Scroll easing factor per frame. */
   scrollEasing: number
   /** Corridor width as a fraction of the viewport, and its centre. */

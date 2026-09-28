@@ -203,7 +203,6 @@ export function useNozPathWalk({
       let layoutResult: PathLayout
 
       if (markedEnd == null) {
-        // No end marker: solve for the end that finishes `tail` px before the track does.
         const target = maxScroll - tuning.tail
         let endY = Math.max(
           state.viewportHeight,
@@ -215,15 +214,14 @@ export function useNozPathWalk({
           layoutResult = build(endY)
         }
       } else {
-        // Pin the geometry to the marked block, then fit scroll so he arrives
-        // when that block is near mid-viewport, with room left for the finale.
         const endY = clamp(markedEnd, state.viewportHeight * 0.5, state.trackHeight - 1)
         layoutResult = build(endY)
         const ideal = Math.max(1, endY - state.viewportHeight / 2)
         const latest = Math.max(1, maxScroll - tuning.tail)
+        const paced = Math.min(latest, ideal * tuning.scrollStretch)
         layoutResult = {
           path: layoutResult.path,
-          scrollMap: scaleScrollMap(layoutResult.scrollMap, Math.min(ideal, latest)),
+          scrollMap: scaleScrollMap(layoutResult.scrollMap, paced),
         }
       }
 

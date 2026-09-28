@@ -2,6 +2,7 @@ import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 
 import { WHY_SIGNOZ } from './KubeconPage.constants'
+import styles from './kubecon.module.css'
 
 /**
  * The four values noz collects as badges on his way down the page — keep this
@@ -21,11 +22,7 @@ export default function WhySignozSection() {
               key={item.title}
               data-noz-anchor
               data-noz-badge-anchor
-              className={
-                index === 0
-                  ? 'pb-8'
-                  : 'border-0 border-t border-solid border-[var(--l2-border)] py-8'
-              }
+              className={index === 0 ? 'pb-8' : `py-8 ${styles.fadeRule}`}
             >
               <h3 className="m-0 text-[1.1875rem] font-medium leading-8 text-[var(--l1-foreground)]">
                 {item.title}

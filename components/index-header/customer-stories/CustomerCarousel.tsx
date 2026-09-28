@@ -91,8 +91,10 @@ function CustomerCard({ customer, clickLocation, isClone = false }: CardProps) {
 
 export default function CustomerCarousel({
   clickLocation = DEFAULT_CLICK_LOCATION,
+  speed = SCROLL_SPEED,
 }: {
   clickLocation?: string
+  speed?: number
 }) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
@@ -129,8 +131,8 @@ export default function CustomerCarousel({
     window.addEventListener('resize', measureSet)
 
     let offset = 0
-    let currentSpeed = SCROLL_SPEED
-    let targetSpeed = SCROLL_SPEED
+    let currentSpeed = speed
+    let targetSpeed = speed
     let lastTime = 0
     let rafId = 0
     let running = false
@@ -219,7 +221,7 @@ export default function CustomerCarousel({
       }
 
       activeCard = null
-      targetSpeed = SCROLL_SPEED
+      targetSpeed = speed
       track.classList.remove(styles.hasHover)
       pill.classList.remove(styles.pillVisible)
     }
@@ -254,7 +256,7 @@ export default function CustomerCarousel({
         card.removeEventListener('mouseleave', onLeave)
       })
     }
-  }, [mounted])
+  }, [mounted, speed])
 
   return (
     <div className={styles.carousel}>

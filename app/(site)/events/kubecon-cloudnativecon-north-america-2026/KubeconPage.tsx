@@ -16,14 +16,11 @@ import styles from './kubecon.module.css'
  * Noz walks from the top of the hero to the Schedule a demo button, collecting one
  * badge per value. Below that the sections run full width, so the walk stops
  * there rather than drawing over them.
- *
- * The dashed side rails frame the page, but they stop around the customer
- * stories block so they don't double up on that card's own border.
  */
 export default function KubeconPage() {
   return (
     <>
-      <BoothMarquee />
+      <BoothMarquee className="mt-2" />
 
       <div className="mx-auto w-full max-w-8xl">
         <NozPathWalk badges={NOZ_BADGES} skylineSrc={SKYLINE.src} skylineAlt={SKYLINE.alt}>
@@ -31,9 +28,13 @@ export default function KubeconPage() {
             <HeroSection />
           </div>
 
-          <SectionLayout variant="no-border" className="!px-0">
+          <SectionLayout variant="no-border" className="relative z-30 !px-0">
             <div data-noz-anchor>
-              <CustomerStoriesCard clickLocation="KubeCon NA 2026 Customer Stories" />
+              <CustomerStoriesCard
+                clickLocation="KubeCon NA 2026 Customer Stories"
+                carouselSpeed={26}
+                swapEvery={9000}
+              />
             </div>
           </SectionLayout>
 

@@ -17,6 +17,7 @@ interface TestimonialSwapPanelProps {
   startIndex?: number
   staggerMs?: number
   clickLocation?: string
+  swapEvery?: number
 }
 
 type Phase = 'idle' | 'leaving' | 'arriving'
@@ -26,6 +27,7 @@ export default function TestimonialSwapPanel({
   startIndex = 0,
   staggerMs = 0,
   clickLocation = 'Hero Customer Stories',
+  swapEvery = SWAP_EVERY,
 }: TestimonialSwapPanelProps) {
   const [index, setIndex] = useState(startIndex)
   const [phase, setPhase] = useState<Phase>('idle')
@@ -60,7 +62,7 @@ export default function TestimonialSwapPanel({
     }
 
     const startTimer = setTimeout(() => {
-      interval = setInterval(swap, SWAP_EVERY)
+      interval = setInterval(swap, swapEvery)
     }, staggerMs)
 
     return () => {
@@ -69,7 +71,7 @@ export default function TestimonialSwapPanel({
       clearTimeout(arriveTimer)
       if (interval) clearInterval(interval)
     }
-  }, [quotes.length, staggerMs])
+  }, [quotes.length, staggerMs, swapEvery])
 
   const quote = quotes[index % quotes.length]
 

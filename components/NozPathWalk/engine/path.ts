@@ -251,7 +251,6 @@ export function routeFromAnchors(
 ): Point[] {
   const span = endY - startY || 1
   const minFraction = minJogGap / span
-  // Pixel margins, so a block near the end of the walk still gets its own turn.
   const startCut = 24 / span
   const endCut = 16 / span
   const fractions: number[] = []

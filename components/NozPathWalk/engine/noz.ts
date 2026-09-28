@@ -22,7 +22,7 @@ export interface BadgeHandle {
 }
 
 /** Path distance covered per full stride cycle. */
-const STRIDE = 22
+const STRIDE = 46
 
 export function poseNoz(refs: NozSpriteRefs, point: PathSample, state: WalkState, size: number) {
   const { jump, tau } = state
