@@ -5,11 +5,15 @@ description: Manage LLM model pricing rules in SigNoz AI Observability. Search, 
 doc_type: howto
 ---
 
-Use the **Model pricing** tab of [AI Observability](https://signoz.io/docs/ai-observability/) to set the price for each model. SigNoz uses these prices to turn token counts into cost, in USD per one million tokens. SigNoz Cloud includes default prices for common models. In self-hosted SigNoz, add a pricing rule for each of your models. The UI calls a pricing rule a pricing model. Only Admins can add, edit, map, or delete pricing rules. For prerequisites, see the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites).
+Use the **Model pricing** tab of [AI Observability](https://signoz.io/docs/ai-observability/) to set the price for each model. SigNoz uses these prices to calculate the cost of each span in USD. For prerequisites, see the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites).
 
 To open the tab, select **More** > **AI Observability** in the side navigation, then select the **Model pricing** tab.
 
+The tab has two parts: **Model Costs** lists your pricing rules, and **Unpriced models** lists models that no rule prices.
+
 ## Model Costs tab
+
+SigNoz Cloud includes default prices for common models. In self-hosted SigNoz, add a pricing rule for each of your models.
 
 | Column | What it shows |
 | --- | --- |
@@ -32,6 +36,8 @@ To find a rule, type a model name or a provider name in the **Search by model or
 To share the filtered table, copy the page URL.
 
 ## Add a pricing rule
+
+Only Admins can add, edit, map, or delete pricing rules.
 
 1. On the **Model Costs** tab, select **Add model cost**.
 2. In **Billing Model ID**, type an ID for the rule, for example `openai:gpt-4o`. You cannot change the ID or the **Provider** after you save.
@@ -60,7 +66,7 @@ To delete a rule, open the menu (⋮) on its row. Select **Delete**, then confir
 
 ## Price an unpriced model
 
-The **Unpriced models** tab lists models that SigNoz found in spans from the last hour but that match no pricing rule. SigNoz cannot calculate cost for spans from these models.
+The **Unpriced models** tab lists models that SigNoz found in spans from the last hour but that match no pricing rule. SigNoz cannot calculate cost for spans from these models. In this tab, the UI calls a pricing rule a pricing model.
 
 To price a model:
 
@@ -78,10 +84,10 @@ A price change applies only to spans that SigNoz receives after the change, and 
 
 ## Validate
 
-1. Send a new LLM span for the model from your application.
+1. After the new price takes effect, send a new LLM span for the model from your application.
 2. In the [Explorer](https://signoz.io/docs/ai-observability-explorer/) **List View**, run a filter on the model, for example `gen_ai.request.model = 'gpt-4o'`.
 3. Select a span. The span opens in Trace Details.
-4. In the span attributes, make sure that `signoz.gen_ai.usage.tokens.cost` has a value above zero.
+4. In the span attributes, make sure that `signoz.gen_ai.usage.tokens.cost` exists. If it is missing, no rule matches the model name, so check the patterns of the rule. A value of `0` means the price or the token count is zero.
 
 ## Next steps
 
