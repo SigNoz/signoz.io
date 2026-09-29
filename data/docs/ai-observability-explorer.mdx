@@ -5,37 +5,24 @@ description: Explore LLM and AI trace data in SigNoz with the AI Observability E
 doc_type: howto
 ---
 
-The **Explorer** is the query tab of [AI Observability](https://signoz.io/docs/ai-observability/). The **Overview** tab shows a fixed dashboard. In the Explorer, you write your own queries on LLM and AI trace data and pick one of four views for the results.
+Use the **Explorer** tab of [AI Observability](https://signoz.io/docs/ai-observability/) to query your LLM and agent traces when the **Overview** dashboard does not answer your question. For prerequisites, see the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites).
 
-Use this page to run a query, filter it, pick a view, and open a trace.
-
-<Admonition type="info">
-AI Observability is available to every user and carries a **Beta** label in the side navigation. For prerequisites, see the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites).
-</Admonition>
-
-## Open the Explorer
-
-1. In the side navigation, open the **More** menu and select **AI Observability**.
-2. In the tab bar at the top, select **Explorer**.
-
-All roles (Admin, Editor, and Viewer) can use the Explorer.
+To open the tab, select **More** > **AI Observability** in the side navigation, then select the **Explorer** tab.
 
 ## Run a query
+
+Fields with the `trace.` prefix hold trace totals, such as `trace.total_tokens`, `trace.estimated_total_cost`, and `trace.llm_call_count`. You can filter and aggregate on them. The Trace Explorer does not have these fields.
 
 1. Type a filter in the filter bar, for example `trace.total_tokens > 1000`.
 2. Select **Run Query**, or press Cmd+Enter (Ctrl+Enter on Windows and Linux).
 
-Fields with the `trace.` prefix hold the totals of a trace, such as `trace.total_tokens`, `trace.estimated_total_cost`, and `trace.llm_call_count`. You can filter and aggregate on these fields, which the Trace Explorer does not have.
-
-The filter bar suggests only keys and values from GenAI spans. After you add a filter, the next suggestions show only values that match your current filters. For the filter syntax and the aggregation options, see [Query Builder](https://signoz.io/docs/userguide/query-builder-v5/).
-
-While a query runs, the **Run Query** button changes to **Cancel**. If you select **Cancel**, the view is empty until you run the query again.
+The filter bar suggests only keys and values from GenAI spans that match your current filters. For the filter syntax and the aggregation options, see [Query Builder](https://signoz.io/docs/userguide/query-builder-v5/).
 
 To run the query again at an interval, turn on auto-refresh in the time picker.
 
 ## Quick filters
 
-Use the quick filters panel on the left to filter by common fields without typing a query. The panel has seven fields:
+Use the quick filters panel on the left to filter without typing a query:
 
 - `deployment.environment`
 - `gen_ai.operation.name`
@@ -45,26 +32,22 @@ Use the quick filters panel on the left to filter by common fields without typin
 - `gen_ai.tool.name`
 - `gen_ai.agent.name`
 
-Each field lists **RELATED** values first. These values match the filters that you already applied. **ALL VALUES** lists the rest. When you select a value, the query changes and the active view shows the new results. To hide the panel, use the control at the top of the panel. To show it again, select **Show Filters** in the toolbar.
+Each field lists **RELATED** values (values that match your current filters) first, then **ALL VALUES**. If you hide the panel, select **Show Filters** in the toolbar to show it again.
 
 ## Views
 
-The toolbar has four views: **Trace View**, **List View**, **Time Series**, and **Table**. All views use the same query. The Explorer opens in **Trace View**.
+All views use the same query. The Explorer opens in **Trace View**. Column changes are saved in your browser only.
 
-For trace totals, the views use different spans:
+`trace.*` totals depend on the view:
 
-- **Trace View** uses all the spans of each trace, also the spans outside the selected time range.
-- **List View**, **Time Series**, and **Table** use only the spans of each trace inside the selected time range. For example, with the filter `trace.total_tokens > 100`, SigNoz adds up the tokens of the spans of that trace in the time range.
+- **Trace View** counts every span of the trace, including spans outside the selected time range.
+- **List View**, **Time Series**, and **Table** count only spans inside the selected time range. For example, `trace.total_tokens` adds up only the tokens of those spans.
 
 ### Trace View
 
-**Trace View** shows one row for each AI trace, with totals for the trace such as tokens, cost, and call counts. To open the full trace, select a row. To open it in a new tab, hold Cmd (Ctrl on Windows and Linux) and select the row.
+**Trace View** shows one row for each AI trace, which is a trace with at least one LLM, tool, or agent span. Each row shows totals such as tokens, cost, and call counts. By default, the table shows the trace fields that exist in your data. Trace View columns and **Order by** show these fields without the `trace.` prefix.
 
-The trace opens in [Trace Details](https://signoz.io/docs/userguide/span-details/). To show only the LLM spans of the trace, select the **LLM** [quick filter](https://signoz.io/docs/userguide/span-details/#quick-filters) at the top of that page.
-
-The columns come from the trace fields that SigNoz finds for your data. By default, the table shows each of these fields that exists, in this order:
-
-`trace_id`, `service.name`, `root_span_name`, `estimated_total_cost`, `trace_duration_nano`, `span_count`, `total_tokens`, `input_tokens`, `output_tokens`, `distinct_tool_count`, `llm_call_count`, `tool_call_count`, `start_time`, `end_time`, `error_count`, `input`, `output`, `max_llm_duration_nano`
+Select a row to open the trace in [Trace Details](https://signoz.io/docs/userguide/span-details/). To open it in a new tab, hold Cmd (Ctrl on Windows and Linux) and select the row. To show only the LLM spans of the trace, select the **LLM** [quick filter](https://signoz.io/docs/userguide/span-details/#quick-filters) in Trace Details.
 
 <Figure
   src="/img/docs/ai/ai-observability/explorer-trace-view.webp"
@@ -77,7 +60,7 @@ Use the two controls above the table:
 - **Order by**: sort the traces by a trace field, in ascending or descending order. The default is `last_activity_time (desc)`. You can sort by fields that the table does not show as columns, such as `last_activity_time`.
 - **Options**: open the **Edit columns** drawer to show, hide, or reorder columns.
 
-You cannot hide or remove the `trace_id` column, but you can drag it to a different position. Your browser saves your column selection, so the selection applies only in that browser.
+The `trace_id` column always shows, but you can drag it to a new position.
 
 <Figure
   src="/img/docs/ai/ai-observability/explorer-edit-columns.webp"
@@ -87,21 +70,13 @@ You cannot hide or remove the `trace_id` column, but you can drag it to a differ
 
 ### List View
 
-**List View** shows one row for each span. The default columns are `timestamp`, `service.name`, `name`, `duration_nano`, `http_method`, and `response_status_code`. The newest spans are at the top.
+**List View** shows one row for each span, with the newest spans at the top. Select a row to open the trace of that span. The default columns are `timestamp`, `service.name`, `name`, `duration_nano`, `http_method`, and `response_status_code`.
 
-To change the columns:
-
-- To remove a column, open the column actions in its header and select **Remove column**.
-- To reorder a column, drag its header.
-- To resize a column, drag the edge of its header.
-
-The `timestamp` column stays first. Your browser saves your column changes. To open the trace of a span, select its row.
+Drag a column header to reorder the column. Drag its edge to resize the column. To remove the column, open its header menu and select **Remove column**. The `timestamp` column stays first.
 
 ### Time Series
 
-**Time Series** shows the query results as a chart over time. If every query aggregates the span duration, the Y-axis unit is milliseconds. Otherwise, the unit is a plain number. To change the unit, use the unit control of the chart. You can also export the chart data.
-
-To see exact cost values, use the **Table** view.
+**Time Series** shows the query results as a chart over time. The Y-axis shows milliseconds when every query aggregates span duration, and a plain number otherwise. To change the unit, use the **Y-axis unit** selector above the chart. To export the chart data, select the download icon at the top right of the chart. To see exact cost values, use the **Table** view.
 
 <Figure
   src="/img/docs/ai/ai-observability/explorer-time-series.webp"
@@ -111,7 +86,7 @@ To see exact cost values, use the **Table** view.
 
 ### Table
 
-**Table** shows the aggregated results of the query in a grid. To download the results, select the download icon, select **csv** or **jsonl** as the format, and then select **Export**.
+**Table** shows the aggregated results of the query in a grid. To download the results, select the download icon. Choose **csv** or **jsonl**. Select **Export**.
 
 ## Common tasks
 
@@ -120,13 +95,14 @@ To see exact cost values, use the **Table** view.
 | Find the most expensive traces | In **Trace View**, set **Order by** to `estimated_total_cost (desc)`. |
 | Find failed tool calls | In **List View**, run the filter `gen_ai.tool.name EXISTS AND has_error = true`. |
 | Chart token usage by model | In **Time Series**, set the aggregation to `sum(gen_ai.usage.input_tokens)` and group by `gen_ai.request.model`. |
-| Compare cost by model | In **Table**, set the aggregation to `sum(signoz.gen_ai.usage.tokens.cost)` and group by `gen_ai.request.model`. The **Cost over time** panel on the [Overview dashboard](https://signoz.io/docs/ai-observability/) charts the same query. |
+| Compare cost by model | In **Table**, set the aggregation to `sum(signoz.gen_ai.usage.tokens.cost)` and group by `gen_ai.request.model`. |
 
-## Related
+## Next steps
 
-- [AI Observability overview](https://signoz.io/docs/ai-observability/): the Overview dashboard and the attributes that it needs.
+- [AI Observability overview](https://signoz.io/docs/ai-observability/): see cost, tokens, latency, and tool calls on one dashboard.
 - [Trace Details](https://signoz.io/docs/userguide/span-details/): inspect the spans of one trace.
-- [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/): map non-standard attributes to GenAI names.
+- [Model pricing](https://signoz.io/docs/ai-observability-model-pricing/): set the price for each model.
+- [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/): map other attribute names to the GenAI names.
 - [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
 
 ## Get Help

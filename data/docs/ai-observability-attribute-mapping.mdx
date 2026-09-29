@@ -5,39 +5,22 @@ description: Remap source span and resource attributes to SigNoz GenAI fields in
 doc_type: howto
 ---
 
-**Attribute Mapping** is the settings tab of [AI Observability](https://signoz.io/docs/ai-observability/) where you tell SigNoz how to read LLM data from spans that do not follow the <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry GenAI semantic conventions</a>. A mapping writes the value of a source attribute to a target attribute, for example `gen_ai.usage.input_tokens`. SigNoz includes default mappings for common LLM libraries, and you can add your own. The AI Observability panels then show data for your spans.
+The AI Observability panels expect LLM, agent, and tool attributes to use the <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry GenAI</a> names. If your instrumentation library uses other names, map them in the **Attribute Mapping** tab of [AI Observability](https://signoz.io/docs/ai-observability/). SigNoz includes default mappings for common LLM libraries, and you can add your own. Only Admins can add, edit, or delete mappings. For prerequisites, see the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites).
 
-Use this page to add mappings, group them by condition, and test them against a sample span before you save.
-
-<Admonition type="info">
-AI Observability is available to every user and carries a **Beta** label in the side navigation. Any user can view mappings. Only Admins can add, edit, or delete them. For prerequisites, see the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites).
-</Admonition>
-
-## Open Attribute Mapping
-
-1. In the side navigation, open the **More** menu and select **AI Observability**.
-2. In the tab bar at the top, select **Attribute Mapping**.
-
-The page has two tabs. **Attribute Mappings** shows the mapping table. **Test** runs a sample span through your mappings.
+To open the tab, select **More** > **AI Observability** in the side navigation, then select the **Attribute Mapping** tab.
 
 ## How groups and mappings work
 
 A group holds a set of mappings and the conditions that decide which spans the group runs on. A group runs on a span when a span attribute key or a resource key contains the text of one of its conditions. For example, the default `gen_ai.llm` group has the condition `model`, so it runs on spans with keys such as `llm.model_name` or `ai.model.id`.
 
-A mapping names one target attribute and one or more source attributes. For each span, SigNoz takes the first source attribute that exists on the span and writes its value to the target attribute. If the span already has the target attribute, SigNoz does not change it. For example, the default mapping for `gen_ai.request.model` reads `llm.model_name`, then `llm.request.model`, then `ai.model.id`.
+A mapping names one target attribute and one or more source attributes. For each span, SigNoz takes the first source attribute that exists on the span and writes its value to the target attribute. If the span already has the target attribute, SigNoz does not change it. For example, the default mapping for `gen_ai.request.model` starts with `llm.model_name`, then `llm.request.model`, then `ai.model.id`.
 
 Each source has an operation:
 
-- **Copy** keeps the source attribute on the span. New sources use **Copy**.
+- **Copy** (default) keeps the source attribute on the span.
 - **Move** removes the source attribute after SigNoz writes the target.
 
-The **Attribute Mappings** tab shows each group as a row that you can expand. The group row shows the group name, the number of conditions, and an **Enabled** switch. To see the condition keys, hold the pointer over the condition count. When you expand a group, you see its mappings in these columns:
-
-| Column | What it shows |
-| --- | --- |
-| **Target** | The attribute that the mapping writes, and whether it is a span attribute or a resource attribute. |
-| **Sources** | The source attributes, in priority order. |
-| **Actions** | An **Enabled** switch, and a menu (⋮) to edit or delete the mapping. |
+To see the condition keys of a group, hover over its condition count. To edit or delete a mapping, open its menu (⋮).
 
 <Figure
   src="/img/docs/ai/ai-observability/attribute-mappings.webp"
@@ -49,17 +32,13 @@ The **Attribute Mappings** tab shows each group as a row that you can expand. Th
 
 SigNoz creates three default groups: `gen_ai.llm`, `gen_ai.agent`, and `gen_ai.tool`. They map the attributes of common LLM libraries, such as OpenInference and the Vercel AI SDK, to the GenAI names.
 
-In a default group, you can turn the group, its mappings, its sources, and its conditions on or off. You can also add your own conditions, mappings, and sources. You cannot rename or delete a default group or a default mapping, and you cannot change the key or the operation of a default source.
+In a default group, you can turn the group and its mappings on or off. You can also add your own conditions, mappings, and sources. You cannot rename or delete a default group or a default mapping, and you cannot change the key or the operation of a default source.
 
 ## Add a group
 
 1. On the **Attribute Mappings** tab, select **Add a new group**.
 2. In **Group Name**, type a name for the group.
-3. Set the conditions for the group:
-   - In **Condition · span attribute keys**, add the span attribute keys that select spans for this group.
-   - In **Condition · resource keys**, add the resource keys that select spans for this group.
-
-   The group runs on a span when a key contains the text of a condition from either list. A group without a condition does not run.
+3. Add at least one condition in **Condition · span attribute keys** or **Condition · resource keys**. SigNoz does not save a group without one.
 4. Select **Create group**.
 
 To edit a group later, open the menu (⋮) on the group row and select **Edit**.
@@ -69,8 +48,11 @@ To edit a group later, open the menu (⋮) on the group row and select **Edit**.
 1. Expand the group and select **Add mapping**.
 2. In **Target attribute**, type the attribute to write, for example `gen_ai.usage.input_tokens`. You cannot change the target attribute after you create the mapping.
 3. In **Write target to**, select **Span attribute** or **Resource**.
-4. In **Source attributes**, add the attribute that your instrumentation sends. For each source, select **Attribute** or **Resource**, and select **Copy** or **Move**. To add a fallback, select **Add another source**. SigNoz tries the sources from top to bottom. To change the order, drag a source.
-5. Select **Create mapping**.
+4. In **Source attributes**, add the attribute that your instrumentation sends.
+5. Select **Attribute** or **Resource** for the source.
+6. Select **Copy** or **Move** for the source.
+7. If you need a fallback, select **Add another source**. Drag the sources into priority order.
+8. Select **Create mapping**.
 
 <Figure
   src="/img/docs/ai/ai-observability/mapping-drawer.webp"
@@ -78,20 +60,11 @@ To edit a group later, open the menu (⋮) on the group row and select **Edit**.
   caption="The mapping drawer, with sources in priority order"
 />
 
-## Save your changes
-
-SigNoz does not apply a new group, a new mapping, or an edit until you save it. When you have unsaved changes, the tab bar shows **Unsaved changes** and two buttons:
-
-- Select **Save changes** to apply all the changes.
-- Select **Discard** to remove all the changes, and then select **Discard changes** to confirm.
-
-SigNoz applies mappings when it receives a span. A saved mapping changes new spans only. Spans that SigNoz already stored do not change.
-
 ## Test your mappings
 
-Before you save, use the **Test** tab to make sure that a span gets the target attributes that you expect. The test uses your current groups and mappings, including unsaved changes.
+Before you save, use the **Test** tab to check that a sample span gets the attributes that you expect. The test uses your current groups and mappings, including unsaved changes.
 
-1. Paste a span as JSON into the editor. The span can have `attributes` and `resource` objects, or it can be one attributes object.
+1. Paste a span as JSON into the editor. The span can have `attributes` and `resource` objects, or it can be one attributes object. You can paste a full span export. The test ignores top-level keys other than `attributes` and `resource`, such as `name`, `spanId`, or `kind`.
 2. Select **Run Test**.
 3. In the result panel, look at **Resulting attributes** and **Resulting resource**. A badge shows each attribute that a mapping populated, remapped, or moved out.
 
@@ -101,12 +74,29 @@ Before you save, use the **Test** tab to make sure that a span gets the target a
   caption="A test run on the default sample span"
 />
 
-The test sends only the `attributes` and `resource` objects. It removes other top-level keys, such as `name`, `spanId`, or `kind`. You can paste a full span export without changes. To restore the sample span, select **Reset to Default Span**.
+To restore the sample span, select **Reset to Default Span**.
 
-## Related
+## Save your changes
 
-- [AI Observability overview](https://signoz.io/docs/ai-observability/): the read-only dashboard and the attributes it needs.
-- [AI Observability Model pricing](https://signoz.io/docs/ai-observability-model-pricing/): set the price per model that turns token counts into cost.
+SigNoz does not apply a new group, a new mapping, or an edit until you save it. When you have unsaved changes, the tab bar shows **Unsaved changes** and two buttons:
+
+- Select **Save changes** to apply all the changes.
+- Select **Discard** to remove all the changes. To confirm, select **Discard changes**.
+
+Saved mappings apply only to spans that SigNoz receives after you save. Stored spans do not change.
+
+## Validate
+
+1. Send a new span from your application.
+2. In the [Explorer](https://signoz.io/docs/ai-observability-explorer/) **List View**, run a filter on the target attribute, for example `gen_ai.request.model EXISTS`.
+3. Select a span. The span opens in Trace Details.
+4. In the span attributes, make sure that the target attribute has the value of the source attribute.
+
+## Next steps
+
+- [AI Observability overview](https://signoz.io/docs/ai-observability/): see cost, tokens, latency, and tool calls on one dashboard.
+- [Explorer](https://signoz.io/docs/ai-observability-explorer/): query your LLM and agent traces.
+- [Model pricing](https://signoz.io/docs/ai-observability-model-pricing/): set the price for each model.
 - [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
 
 ## Get Help
