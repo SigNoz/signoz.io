@@ -157,7 +157,7 @@ opentelemetry-instrument python app.py
 
 <KeyPointCallout>
 
-The code snippet above assumes you're directly exporting traces to an OpenTelemetry backend like SigNoz Cloud.
+The code snippet above assumes you're directly exporting traces to an OpenTelemetry backend like [SigNoz Cloud](https://signoz.io/teams/).
 
 To export to a local Collector instance, set the `OTEL_EXPORTER_OTLP_ENDPOINT` [environment variable](https://signoz.io/blog/otel-environment-variables/) to:
 
@@ -320,3 +320,79 @@ Not every function needs a span. Over-instrumentation clutters your traces with 
 Skip internal utility functions, data transformations, and in-memory computations unless you have a specific latency concern.
 
 A good rule of thumb to keep in mind is: **a trace with 10 meaningful spans tells you more than one with 200 trivial ones**.
+
+
+## The Production Tracing Pipeline
+
+The previous section showed how to generate spans from your application code. In production, those spans need to travel from your services to an observability backend reliably, efficiently, and without impacting application performance. This is where a production-grade observability pipeline becomes necessary.
+
+### The OpenTelemetry Collector
+
+While it is possible to export spans directly from your application to a backend, most production deployments place an [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) between the two. The Collector is a standalone process that receives, processes, and exports telemetry data.
+
+Why not export directly? A few reasons:
+
+- **Decoupling**: Your application does not need to know about your backend's endpoint, authentication, or retry logic. It sends spans to a local Collector, and the Collector handles the rest.
+- **Processing**: You can filter, transform, enrich, and sample spans before they leave your infrastructure.
+- **Reliability**: The Collector can buffer spans during backend outages and retry failed exports, preventing data loss without blocking your application.
+- **Fan-out**: A single Collector can forward spans to multiple backends simultaneously.
+
+The Collector processes data through a three-stage pipeline:
+
+1. **Receivers** accept incoming telemetry. The most common is the OTLP receiver, which listens on ports 4317 (gRPC) and 4318 (HTTP). You can also configure receivers for legacy formats like Jaeger or Zipkin.
+
+2. **Processors** transform data in flight. Common processing steps include batching spans for efficient export, adding or removing attributes, filtering out noisy spans (like health check endpoints), and applying sampling policies.
+
+3. **Exporters** send processed data to its final destination. The OTLP exporter is the standard choice for OpenTelemetry-native backends like SigNoz. You can configure multiple exporters to send the same data to different backends simultaneously.
+
+### Sampling: Controlling Volume and Cost
+
+A high-traffic service can generate millions of spans per minute. Storing every single one is expensive and rarely necessary, since the vast majority represent normal, successful requests. Sampling lets you keep the traces that matter while controlling costs.
+
+There are two fundamental approaches:
+
+**Head-based sampling** makes the decision at the root of the trace, before any child spans are created. All downstream services inherit this decision, so a trace is either fully captured or entirely dropped. It is simple and stateless, but it is also blind: it cannot know at the time of the decision whether the trace will end up containing an error or being unusually slow.
+
+**Tail-based sampling** defers the decision until the complete trace has been assembled. This means you can write rules like "keep all traces with errors" or "keep all traces slower than 2 seconds" while sampling everything else. The tradeoff is complexity: it requires a stateful component (typically the Collector) to buffer complete traces before deciding, which adds memory overhead and operational surface area.
+
+For most teams, starting with head-based sampling at the SDK level and graduating to tail-based sampling at the Collector as volume grows is a practical path. For a detailed breakdown of strategies and configuration examples, see [our guide on sampling strategies](https://signoz.io/blog/saving-money-with-sampling-strategies/).
+
+### Configuring the SDK for Export
+
+While the `opentelemetry-instrument` CLI handles most configuration through environment variables, you can also configure the SDK programmatically when you need more control:
+
+```python
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+
+resource = Resource.create({
+    "service.name": "cart-service",
+    "service.version": "1.4.2",
+    "deployment.environment.name": "production",
+})
+
+provider = TracerProvider(resource=resource)
+provider.add_span_processor(
+    BatchSpanProcessor(OTLPSpanExporter(endpoint="https://ingest.<region>.signoz.cloud:443"))
+)
+trace.set_tracer_provider(provider)
+```
+
+The `BatchSpanProcessor` is critical here: it queues completed spans in memory and sends them in batches rather than making a network call for every individual span. This keeps export overhead low and predictable, and is the recommended choice in production.
+
+### Environment Variables
+
+OpenTelemetry SDKs are designed to be configured through [environment variables](https://signoz.io/blog/otel-environment-variables/) so that you can change tracing behavior without modifying code or redeploying. The most commonly used variables include:
+
+| Variable | Purpose | Example |
+|---|---|---|
+| `OTEL_SERVICE_NAME` | Identifies your service in traces | `cart-service` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Where to send telemetry | `https://ingest.<region>.signoz.cloud:443` |
+| `OTEL_TRACES_SAMPLER` | Which sampler to use | `parentbased_traceidratio` |
+| `OTEL_TRACES_SAMPLER_ARG` | Sampler configuration | `0.1` (10% sampling) |
+| `OTEL_RESOURCE_ATTRIBUTES` | Additional resource metadata | `deployment.environment=prod` |
+
+This convention means the same application image can run in development (with 100% sampling to a local Collector) and production (with 10% sampling to a remote backend) by changing environment variables at deploy time, with no code changes.
