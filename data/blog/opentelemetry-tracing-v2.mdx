@@ -104,7 +104,7 @@ The standard format for this is the <a href="https://www.w3.org/TR/trace-context
 - **`traceparent`** — carries the version, trace ID, parent span ID, and trace flags. Example: `00-5b8efff798038103d269b633813fc60c-eee19b7ec3c1b174-01`
 - **`tracestate`** — carries optional vendor-specific or application-specific data.
 
-Within a single process, context propagation is handled differently depending on the language. In Python and Java, the SDK stores the active span in thread-local storage and manages it automatically. Other languages might choose to handle this based on the language's capabilities and design patterns.<br />
+Within a single process, context propagation is handled differently depending on the language.Python's SDK uses context variables (`contextvars`), which also propagate automatically across `asyncio` tasks. Other languages handle this based on their own capabilities and design patterns.<br />
 Regardless of the mechanism, the result is the same: when you create a new span, the SDK knows which span is currently active and sets the parent-child relationship accordingly.
 
 For most common protocols (HTTP, gRPC, messaging systems), OpenTelemetry's instrumentation libraries handle injection and extraction automatically. You don't write propagation code by hand unless you are working with a custom transport, or utilizing OpenTelemetry in languages [like Rust](https://signoz.io/blog/opentelemetry-rust/).
@@ -398,7 +398,7 @@ OpenTelemetry SDKs are designed to be configured through [environment variables]
 | `OTEL_TRACES_SAMPLER` | Which sampler to use | `parentbased_traceidratio` |
 | `OTEL_TRACES_SAMPLER_ARG` | Sampler configuration | `0.1` (10% sampling) |
 | `OTEL_EXPORTER_OTLP_HEADERS` | Auth headers for the backend (unneeded if using local Collector) | `signoz-ingestion-key=<key>` |
-| `OTEL_RESOURCE_ATTRIBUTES` | Additional resource metadata | `deployment.environment=prod` |
+| `OTEL_RESOURCE_ATTRIBUTES` | Additional resource metadata | `deployment.environment.name=prod` |
 
 This convention means the same application image can run in development (with 100% sampling to a local Collector) and production (with 10% sampling to a remote backend) by changing environment variables at deploy time, with no code changes.
 
@@ -409,30 +409,9 @@ Tracing is straightforward to set up but easy to get wrong in subtle ways. The i
 
 ### Broken or Disconnected Traces
 
-The most common problem is traces that appear fragmented: spans exist, but they show up as separate root spans instead of forming a connected tree. This usually points to a context propagation failure.
+The most common problem is traces that appear fragmented: spans exist, but they show up as separate root spans instead of forming a connected tree. This usually points to a context propagation failure, and the usual culprit is initializing the OpenTelemetry SDK too late.
 
-**SDK initialized too late.** If the OpenTelemetry SDK is configured after your application has already imported and initialized HTTP or database libraries, the instrumentation hooks miss their window. The libraries start handling requests before the SDK can wrap them, so spans are created without trace context. Always initialize the SDK before importing your application code and frameworks.
-
-**Dropped context in async code.** In Python's `asyncio`, spawning a new task without passing the current context creates spans that are detached from the parent trace. The same applies to thread pools and background workers. When dispatching work asynchronously, explicitly capture and pass the context:
-
-```python
-import asyncio
-from opentelemetry import context
-
-async def handle_request():
-    with tracer.start_as_current_span("handle_request"):
-        ctx = context.get_current()
-        await asyncio.gather(
-            asyncio.create_task(process_step_a(ctx)),
-            asyncio.create_task(process_step_b(ctx)),
-        )
-
-async def process_step_a(ctx):
-    context.attach(ctx)
-    with tracer.start_as_current_span("step_a"):
-        # This span is now correctly parented
-        ...
-```
+If the SDK is configured after your application has already imported and initialized its HTTP or database libraries, the instrumentation hooks miss their window. The libraries start handling requests before the SDK can wrap them, so spans are created without trace context. The fix is to always initialize the SDK before importing your application code and frameworks.
 
 ### Missing Spans
 
