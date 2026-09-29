@@ -63,7 +63,7 @@ const BottomCTA: React.FC = () => {
       </h2>
       <div className="flex flex-col items-center justify-center gap-4">
         <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
-          <Button asChild variant="default" rounded="full" className="!w-fit items-center gap-2">
+          <Button asChild variant="default" className="!w-fit items-center gap-2">
             <TrackingLink
               href="/teams/"
               clickType="Primary CTA"
@@ -75,7 +75,7 @@ const BottomCTA: React.FC = () => {
               <ArrowRight size={14} />
             </TrackingLink>
           </Button>
-          <Button asChild variant="secondary" rounded="full" className="!w-fit items-center gap-2">
+          <Button asChild variant="secondary" className="!w-fit items-center gap-2">
             <TrackingLink
               href="/docs/infrastructure-monitoring/user-guides/k8s-metrics/"
               clickType="Secondary CTA"

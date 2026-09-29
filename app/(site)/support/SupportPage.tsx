@@ -159,12 +159,7 @@ const ComparisonTable = () => {
                     </span>
                   )}
                   {tier.cta && (
-                    <Button
-                      asChild
-                      variant={tier.cta.variant}
-                      rounded="full"
-                      className="flex h-8 !w-fit items-center justify-center gap-2 text-xs font-medium"
-                    >
+                    <Button asChild variant={tier.cta.variant} size="sm" className="!w-fit">
                       <TrackingLink
                         href={tier.cta.href}
                         clickType={tier.cta.tracking.clickType}
@@ -429,7 +424,6 @@ const DevelopersLoveSigNoz = () => (
                 key={button.text}
                 asChild
                 variant={button.variant}
-                rounded="full"
                 className="flex !w-fit items-center gap-2 text-sm"
               >
                 <TrackingLink
