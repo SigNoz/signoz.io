@@ -1,11 +1,11 @@
 import type { ButtonGroupButton } from '@/shared/components/molecules/FeaturePages/ButtonGroup/ButtonGroup.types'
 
 /**
- * The page uses the same tactile buttons as the homepage. `lg` is the 44px
- * hero/CTA size; the default 32px size covers the inline section buttons.
+ * `lg` is the 44px hero/CTA size; `sm` is the 32px size used for the inline
+ * section buttons.
  */
-export const BUTTON_LG = { size: 'lg', rounded: 'default' } as const
-export const BUTTON_SM = { size: 'default', rounded: 'default' } as const
+export const BUTTON_LG = { size: 'lg' } as const
+export const BUTTON_SM = { size: 'sm' } as const
 
 const TRACKING_LOCATION = 'KubeCon NA 2026'
 
@@ -33,7 +33,7 @@ export const HERO = {
     {
       text: 'Schedule a slot',
       href: EVENT.scheduleUrl,
-      variant: 'tactilePrimary',
+      variant: 'default',
       ...BUTTON_LG,
       tracking: {
         clickType: 'Primary CTA',
@@ -44,7 +44,7 @@ export const HERO = {
     {
       text: 'Get started ⎯ free',
       href: EVENT.signupUrl,
-      variant: 'tactileSecondary',
+      variant: 'secondary',
       ...BUTTON_LG,
       tracking: {
         clickType: 'Secondary CTA',
@@ -83,7 +83,7 @@ export const WHY_SIGNOZ = {
     {
       text: 'Schedule a demo',
       href: EVENT.demoUrl,
-      variant: 'tactileSecondary',
+      variant: 'secondary',
       ...BUTTON_LG,
       tracking: {
         clickType: 'Secondary CTA',
@@ -104,7 +104,7 @@ export const SCALE = {
     {
       text: 'Get Started',
       href: EVENT.signupUrl,
-      variant: 'tactilePrimary',
+      variant: 'default',
       ...BUTTON_SM,
       tracking: {
         clickType: 'Primary CTA',
@@ -175,7 +175,7 @@ export const SPOTLIGHT = {
     {
       text: 'Read the Kernel story',
       href: '/customers/kernel/',
-      variant: 'tactileSecondary',
+      variant: 'secondary',
       ...BUTTON_SM,
       tracking: {
         clickType: 'Secondary CTA',
@@ -225,7 +225,7 @@ export const CLOSING_CTA = {
     {
       text: 'Get Started ⎯ Free',
       href: EVENT.signupUrl,
-      variant: 'tactilePrimary',
+      variant: 'default',
       ...BUTTON_LG,
       tracking: {
         clickType: 'Primary CTA',
@@ -236,7 +236,7 @@ export const CLOSING_CTA = {
     {
       text: 'Schedule a demo',
       href: EVENT.demoUrl,
-      variant: 'tactileSecondary',
+      variant: 'secondary',
       ...BUTTON_LG,
       tracking: {
         clickType: 'Secondary CTA',
