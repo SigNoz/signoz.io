@@ -73,7 +73,7 @@ export default function HomepageGetStarted() {
               clickName="Get Started Button"
               clickText="Get Started"
               clickLocation="Homepage Get Started Section"
-              className={cn(buttonVariants({ variant: 'tactilePrimary' }), 'mt-6 no-underline')}
+              className={cn(buttonVariants({ variant: 'default', size: 'sm' }), 'mt-6')}
             >
               Get Started
               <ArrowRight size={12} aria-hidden="true" />
