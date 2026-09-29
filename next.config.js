@@ -1950,12 +1950,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source:
-            '/guides/upstream-connect-error-or-disconnect-reset-before-headers-reset-reason-connection-failure-spring-boot-and-java-11/',
-          destination: '/guides/upstream-connect-error/',
-          permanent: true,
-        },
-        {
           source: '/docs/tutorial/writing-clickhouse-queries-in-dashboard/',
           destination: '/docs/userguide/writing-clickhouse-traces-query/',
           permanent: true,
@@ -2508,18 +2502,8 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/firebase-alternatives',
-          destination: '/comparisons/firebase-alternatives/',
-          permanent: true,
-        },
-        {
           source: '/appdynamics-competitors',
           destination: '/comparisons/appdynamics-competitors/',
-          permanent: true,
-        },
-        {
-          source: '/heroku-alternatives',
-          destination: '/comparisons/heroku-alternatives/',
           permanent: true,
         },
         {
@@ -2536,11 +2520,6 @@ module.exports = () => {
           source:
             '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/data/clickhouse',
           destination: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker/',
-          permanent: true,
-        },
-        {
-          source: '/azure-alternatives',
-          destination: '/comparisons/azure-alternatives/',
           permanent: true,
         },
         {
@@ -2586,11 +2565,6 @@ module.exports = () => {
         {
           source: '/docs/infrastructure-monitoring/',
           destination: '/docs/infrastructure-monitoring/overview/',
-          permanent: true,
-        },
-        {
-          source: '/platform-engineering-vs-DevOps',
-          destination: '/comparisons/platform-engineering-vs-DevOps/',
           permanent: true,
         },
         {
@@ -2679,11 +2653,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/platform-engineering-tools',
-          destination: '/comparisons/platform-engineering-tools/',
-          permanent: true,
-        },
-        {
           source: '/datadog-vs-appdynamics',
           destination: '/comparisons/datadog-vs-appdynamics/',
           permanent: true,
@@ -2691,11 +2660,6 @@ module.exports = () => {
         {
           source: '/log-analysis-tools',
           destination: '/blog/best-log-management-tools/',
-          permanent: true,
-        },
-        {
-          source: '/docker-alternatives',
-          destination: '/comparisons/docker-alternatives/',
           permanent: true,
         },
         {
@@ -2734,11 +2698,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/aws-alternatives',
-          destination: '/comparisons/aws-alternatives/',
-          permanent: true,
-        },
-        {
           source: '/newrelic-vs-prometheus',
           destination: '/comparisons/newrelic-vs-prometheus/',
           permanent: true,
@@ -2746,11 +2705,6 @@ module.exports = () => {
         {
           source: '/prometheus-alternatives',
           destination: '/comparisons/prometheus-alternatives/',
-          permanent: true,
-        },
-        {
-          source: '/digitalocean-alternatives',
-          destination: '/comparisons/digitalocean-alternatives/',
           permanent: true,
         },
         {
@@ -3217,16 +3171,6 @@ module.exports = () => {
             '/how-signozs-advanced-filtering-and-aggregation-capabilities-improve-root-cause-analysis/',
           destination:
             '/faqs/how-signozs-advanced-filtering-and-aggregation-capabilities-improve-root-cause-analysis/',
-          permanent: true,
-        },
-        {
-          source: '/cloud-infrastructure',
-          destination: '/blog/cloud-infrastructure/',
-          permanent: true,
-        },
-        {
-          source: '/what-is-platform-engineering',
-          destination: '/blog/what-is-platform-engineering/',
           permanent: true,
         },
         {
