@@ -40,6 +40,7 @@ export default function NavCtaButtons({ location, className, onNavigate }: NavCt
         clickLocation={location}
         onClick={onNavigate}
       >
+        {/* start-free-trial-btn carries no styles; it is a GTM click selector. */}
         <Button asChild variant="default" size="sm" className="start-free-trial-btn">
           <span id={location === 'Top Navbar' ? 'btn-get-started-website-navbar' : undefined}>
             Get Started

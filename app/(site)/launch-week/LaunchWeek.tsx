@@ -14,6 +14,12 @@ import { useDisclosure } from '@/hooks/useDisclosure'
 import { Card } from '@/components/ui/Card'
 import { cn } from 'app/lib/utils'
 
+const DAY_LINK_CLASS = cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'w-full sm:mb-0')
+const DAY_VIDEO_BUTTON_CLASS = cn(
+  buttonVariants({ variant: 'secondary', size: 'sm' }),
+  'mb-2 w-full sm:mb-0'
+)
+
 const MainSection: React.FC = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const [videoId, setVideoId] = useState<string>('')
@@ -84,10 +90,7 @@ const MainSection: React.FC = () => {
                   href="https://www.linkedin.com/events/interactivedashboards-signozlau7367550250590404608/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
-                  className={cn(
-                    buttonVariants({ variant: 'secondary', size: 'sm' }),
-                    'w-full sm:mb-0'
-                  )}
+                  className={DAY_LINK_CLASS}
                 >
                   <Linkedin className="h-4 w-4" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -97,10 +100,7 @@ const MainSection: React.FC = () => {
                 <button
                   type="button"
                   id="btn-watch-youtube-video"
-                  className={cn(
-                    buttonVariants({ variant: 'secondary', size: 'sm' }),
-                    'mb-2 w-full sm:mb-0'
-                  )}
+                  className={DAY_VIDEO_BUTTON_CLASS}
                   onClick={() => handleOpenModal('oLfLFH00T3U')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
@@ -156,10 +156,7 @@ const MainSection: React.FC = () => {
                   href="https://www.linkedin.com/events/querybuilderv5-signozlaunchweek7368361520373620736/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
-                  className={cn(
-                    buttonVariants({ variant: 'secondary', size: 'sm' }),
-                    'w-full sm:mb-0'
-                  )}
+                  className={DAY_LINK_CLASS}
                 >
                   <Linkedin className="h-4 w-4" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -169,10 +166,7 @@ const MainSection: React.FC = () => {
                 <button
                   type="button"
                   id="btn-watch-youtube-video"
-                  className={cn(
-                    buttonVariants({ variant: 'secondary', size: 'sm' }),
-                    'mb-2 w-full sm:mb-0'
-                  )}
+                  className={DAY_VIDEO_BUTTON_CLASS}
                   onClick={() => handleOpenModal('a6GtE_Fah-g')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
@@ -217,10 +211,7 @@ const MainSection: React.FC = () => {
                   href="https://www.linkedin.com/events/ossimprovements-signozlaunchwee7368855069955457024/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
-                  className={cn(
-                    buttonVariants({ variant: 'secondary', size: 'sm' }),
-                    'w-full sm:mb-0'
-                  )}
+                  className={DAY_LINK_CLASS}
                 >
                   <Linkedin className="h-4 w-4" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -230,10 +221,7 @@ const MainSection: React.FC = () => {
                 <button
                   type="button"
                   id="btn-watch-youtube-video"
-                  className={cn(
-                    buttonVariants({ variant: 'secondary', size: 'sm' }),
-                    'mb-2 w-full sm:mb-0'
-                  )}
+                  className={DAY_VIDEO_BUTTON_CLASS}
                   onClick={() => handleOpenModal('MC--XaSxbdY')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
@@ -278,10 +266,7 @@ const MainSection: React.FC = () => {
                   href="https://www.linkedin.com/events/traceoperators-signozlaunchweek7369027260701429761/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
-                  className={cn(
-                    buttonVariants({ variant: 'secondary', size: 'sm' }),
-                    'w-full sm:mb-0'
-                  )}
+                  className={DAY_LINK_CLASS}
                 >
                   <Linkedin className="h-4 w-4" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -291,10 +276,7 @@ const MainSection: React.FC = () => {
                 <button
                   type="button"
                   id="btn-watch-youtube-video"
-                  className={cn(
-                    buttonVariants({ variant: 'secondary', size: 'sm' }),
-                    'mb-2 w-full sm:mb-0'
-                  )}
+                  className={DAY_VIDEO_BUTTON_CLASS}
                   onClick={() => handleOpenModal('aSGBmAMqUHs')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
@@ -339,10 +321,7 @@ const MainSection: React.FC = () => {
                   href="https://www.linkedin.com/events/costcontrol-signozlaunchweek5-07370073117991432192/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
-                  className={cn(
-                    buttonVariants({ variant: 'secondary', size: 'sm' }),
-                    'w-full sm:mb-0'
-                  )}
+                  className={DAY_LINK_CLASS}
                 >
                   <Linkedin className="h-4 w-4" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -352,10 +331,7 @@ const MainSection: React.FC = () => {
                 <button
                   type="button"
                   id="btn-watch-youtube-video"
-                  className={cn(
-                    buttonVariants({ variant: 'secondary', size: 'sm' }),
-                    'mb-2 w-full sm:mb-0'
-                  )}
+                  className={DAY_VIDEO_BUTTON_CLASS}
                   onClick={() => handleOpenModal('X_qVjWB9TvY')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
