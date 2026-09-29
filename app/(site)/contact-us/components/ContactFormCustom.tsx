@@ -10,6 +10,7 @@ import {
 import { flattenSubmissionValues } from '@/utils/hubspotTracking'
 import { Check, CheckCircle, Loader2 } from 'lucide-react'
 import { contactUsData } from '../data'
+import Button from '@/components/ui/Button'
 
 const { FORM_ID, FORM_NAME, SUBMIT_URL } = contactUsData
 
@@ -262,14 +263,10 @@ export default function ContactFormCustom() {
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="flex h-[44px] w-full items-center justify-center gap-2 rounded-md bg-signoz_robin-500 text-sm font-semibold text-white transition hover:bg-signoz_robin-500/90 disabled:opacity-60"
-      >
+      <Button type="submit" disabled={loading} variant="default" size="lg" className="w-full">
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {loading ? 'Submitting…' : 'Book a Demo'}
-      </button>
+      </Button>
     </form>
   )
 }
