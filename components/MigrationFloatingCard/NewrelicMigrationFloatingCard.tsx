@@ -68,16 +68,18 @@ const NewrelicMigrationFloatingCard: React.FC = () => {
         <Button
           id="newrelic-migration-card-try-signoz-button"
           href="/teams/"
-          variant="legacyPrimary"
-          className="flex w-full items-center justify-center gap-1 text-xs font-bold"
+          variant="default"
+          size="sm"
+          className="w-full"
         >
           Try SigNoz - Free <ArrowRight className="h-3 w-3" />
         </Button>
         <Button
           id="newrelic-migration-card-request-migration-support-button"
           href="/product-comparison/migrate-from-newrelic/"
-          variant="legacySecondary"
-          className="flex w-full items-center justify-center gap-1 text-xs font-bold"
+          variant="secondary"
+          size="sm"
+          className="w-full"
         >
           Request Migration Support <ArrowRight className="h-3 w-3" />
         </Button>

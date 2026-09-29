@@ -1,16 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import GetStartedOpenTelemetryButton from '@/components/GetStartedOpenTelemetryButton/GetStartedOpenTelemetryButton'
 import MCPInstallButton from '@/components/MCPInstallButton/MCPInstallButton'
 import MDXButton from '@/components/MDXButton/MDXButton'
 
 const buttonMdx = `
-{/* Button: generic UI button. Wrap it in an anchor to link out, the way
-    docs and blog posts do; the inner button element keeps prose from
-    underlining the label. */}
-<a href="https://signoz.io/teams/">
-  <Button variant="default">Get Started - Free</Button>
-</a>
+{/* Button: pass href to render an anchor; variant is "default" or "secondary" */}
+<Button href="https://signoz.io/teams/">Get Started - Free</Button>
+
+<Button href="https://signoz.io/docs/" variant="secondary" size="sm">Read the docs</Button>
 `
 
 const mdxButtonMdx = `
@@ -52,9 +51,7 @@ const meta = {
   component: Button,
   parameters: {
     mdxUsage: `
-<a href="https://signoz.io/teams/">
-  <Button variant="default">Get Started - Free</Button>
-</a>
+<Button href="https://signoz.io/teams/">Get Started - Free</Button>
 `,
     chromatic: { disableSnapshot: true },
   },
@@ -63,25 +60,12 @@ const meta = {
   },
   argTypes: {
     variant: {
-      control: 'select',
-      options: [
-        'default',
-        'outline',
-        'secondary',
-        'tertiary',
-        'ghost',
-        'link',
-        'legacyPrimary',
-        'legacySecondary',
-      ],
+      control: 'radio',
+      options: ['default', 'secondary'],
     },
     size: {
       control: 'select',
-      options: ['default', 'sm', 'lg', 'icon'],
-    },
-    rounded: {
-      control: 'radio',
-      options: ['default', 'full'],
+      options: ['sm', 'default', 'lg', 'icon'],
     },
   },
 } satisfies Meta<typeof Button>
@@ -97,9 +81,7 @@ export const Preview: Story = {
   },
   render: () => (
     <div className="flex flex-col gap-6">
-      <a href="https://signoz.io/teams/">
-        <Button variant="default">Get Started - Free</Button>
-      </a>
+      <Button href="https://signoz.io/teams/">Get Started - Free</Button>
       <MDXButton
         href="https://signoz.io/teams/"
         clickName="Start Free Trial CTA"
@@ -134,10 +116,47 @@ export const Base: Story = {
   parameters: {
     mdxUsage: buttonMdx,
   },
-  render: (args) => (
-    <a href="https://signoz.io/teams/">
-      <Button {...args} />
-    </a>
+  render: (args) => <Button href="https://signoz.io/teams/" {...args} />,
+}
+
+/**
+ * The full ladder. Heights must measure 32 / 40 / 44px — this is the story that
+ * catches a regression in the tactile size compounds.
+ */
+export const SizesAndVariants: Story = {
+  name: 'Sizes & variants',
+  parameters: {
+    mdxUsage: buttonMdx,
+    chromatic: { disableSnapshot: false },
+  },
+  render: () => (
+    <div className="flex flex-col gap-6">
+      {(['sm', 'default', 'lg'] as const).map((size) => (
+        <div key={size} className="flex items-center gap-3">
+          <span className="w-20 font-mono text-xs text-[var(--l2-foreground)]">{size}</span>
+          <Button variant="default" size={size}>
+            Get Started
+            <ArrowRight size={14} aria-hidden="true" />
+          </Button>
+          <Button variant="secondary" size={size}>
+            Book a demo
+            <ArrowRight size={14} aria-hidden="true" />
+          </Button>
+          <Button variant="default" size={size} disabled>
+            Disabled
+          </Button>
+        </div>
+      ))}
+      <div className="flex items-center gap-3">
+        <span className="w-20 font-mono text-xs text-[var(--l2-foreground)]">icon</span>
+        <Button variant="default" size="icon" aria-label="Next">
+          <ArrowRight size={16} aria-hidden="true" />
+        </Button>
+        <Button variant="secondary" size="icon" aria-label="Next">
+          <ArrowRight size={16} aria-hidden="true" />
+        </Button>
+      </div>
+    </div>
   ),
 }
 

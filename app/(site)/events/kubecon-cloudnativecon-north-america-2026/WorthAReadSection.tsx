@@ -57,7 +57,7 @@ export default function WorthAReadSection() {
                 clickText={article.title}
                 clickLocation="KubeCon NA 2026 Worth a Read"
                 className={cn(
-                  buttonVariants({ variant: 'tactileSecondary' }),
+                  buttonVariants({ variant: 'secondary', size: 'sm' }),
                   'w-fit no-underline'
                 )}
               >

@@ -45,17 +45,17 @@ const COMPARISON_DATA = {
     ),
     BILL_FOR_COMPARISON: {
       path: '/comparisons/dynatrace-savings/',
-      className: 'button--primary',
+      variant: 'default',
       isVisible: false,
     },
     TRY_SIGNOZ_CLOUD: {
       path: '/teams/',
-      className: 'button--primary',
+      variant: 'default',
       isVisible: true,
     },
     SELF_HOST: {
       path: '/docs/install/',
-      className: 'button--outline button--secondary',
+      variant: 'secondary',
       isVisible: true,
     },
   },

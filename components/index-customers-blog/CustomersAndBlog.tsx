@@ -112,7 +112,7 @@ export default function CustomersAndBlog() {
             </p>
             <TrackingLink
               className={cn(
-                buttonVariants({ variant: 'tactileSecondary' }),
+                buttonVariants({ variant: 'secondary', size: 'sm' }),
                 'shrink-0 no-underline'
               )}
               clickLocation="Homepage Customers Section"
@@ -159,7 +159,9 @@ export default function CustomersAndBlog() {
               <span className="mt-5 block flex-1 text-lg font-medium leading-7 text-[var(--l1-foreground)] transition-colors group-hover:text-[var(--bg-robin-300)]">
                 {card.title}
               </span>
-              <span className={cn(buttonVariants({ variant: 'tactileSecondary' }), 'mt-4 w-fit')}>
+              <span
+                className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'mt-4 w-fit')}
+              >
                 Read more
                 <ArrowRight size={12} aria-hidden="true" />
               </span>

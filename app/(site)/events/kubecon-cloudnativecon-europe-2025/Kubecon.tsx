@@ -2,9 +2,15 @@
 'use client'
 
 import * as React from 'react'
-import Button from '@/components/ui/Button'
+import Button, { buttonVariants } from '@/components/ui/Button'
 import Link from 'next/link'
 import { ArrowRight, BookOpen, Calendar, Handshake, MapPin, Megaphone } from 'lucide-react'
+import { cn } from 'app/lib/utils'
+
+const REGISTER_BUTTON_CLASS = cn(
+  buttonVariants({ variant: 'secondary', size: 'sm' }),
+  'mb-6 w-full sm:mb-0 sm:max-w-fit'
+)
 
 const MainSection: React.FC = () => {
   return (
@@ -65,7 +71,7 @@ const MainSection: React.FC = () => {
                   href="https://colocatedeventseu2025.sched.com/event/1u5eV"
                   target="_blank"
                   id="btn-register-event"
-                  className="button-background mb-6 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0 sm:max-w-fit"
+                  className={REGISTER_BUTTON_CLASS}
                 >
                   <Megaphone size={16} />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -147,7 +153,7 @@ const MainSection: React.FC = () => {
                   href="https://colocatedeventseu2025.sched.com/event/1u5gj/bridging-the-cloud-native-opentelemetry-education-gap-shivay-lamba-couchbase-shivanshu-raj-shrivastava-signoz"
                   target="_blank"
                   id="btn-register-event"
-                  className="button-background mb-6 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0 sm:max-w-fit"
+                  className={REGISTER_BUTTON_CLASS}
                 >
                   <Megaphone size={16} />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -230,7 +236,7 @@ const MainSection: React.FC = () => {
                   href="https://kccnceu2025.sched.com/event/1txCq?iframe=no"
                   target="_blank"
                   id="btn-register-event"
-                  className="button-background mb-6 flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0 sm:max-w-fit"
+                  className={REGISTER_BUTTON_CLASS}
                 >
                   <Megaphone size={16} />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -300,15 +306,15 @@ const GetStarted = ({ page }) => {
                 <br /> Metrics and Traces in a single pane
               </p>
               <div className="mb-10 flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                <Button variant="legacyPrimary" id={getStartedId}>
-                  <Link href="/teams/" className="flex-center">
+                <Button asChild variant="default">
+                  <Link href="/teams/" id={getStartedId}>
                     Get Started - Free
                     <ArrowRight size={14} />
                   </Link>
                 </Button>
 
-                <Button variant="legacySecondary" id={readDocumentationId}>
-                  <Link href="/docs/introduction/" className="flex-center">
+                <Button asChild variant="secondary">
+                  <Link href="/docs/introduction/" id={readDocumentationId}>
                     <BookOpen size={14} />
                     Read Documentation
                   </Link>

@@ -237,7 +237,7 @@ export default function WhySignoz() {
                           <div className="pt-5">
                             <TrackingLink
                               className={cn(
-                                buttonVariants({ variant: 'tactileSecondary' }),
+                                buttonVariants({ variant: 'secondary', size: 'sm' }),
                                 'no-underline'
                               )}
                               clickLocation="Homepage Why SigNoz"

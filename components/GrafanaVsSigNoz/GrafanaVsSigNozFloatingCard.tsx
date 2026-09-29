@@ -70,8 +70,9 @@ const GrafanaVsSigNozFloatingCard: React.FC = () => {
         <Button
           id="grafana-vs-signoz-compare-button"
           href="/grafana-alternative/"
-          variant="legacyPrimary"
-          className="flex w-full items-center justify-center gap-1 text-xs font-bold"
+          variant="default"
+          size="sm"
+          className="w-full"
         >
           <Scale className="h-4 w-4" />
           Compare SigNoz vs. Grafana
@@ -79,8 +80,9 @@ const GrafanaVsSigNozFloatingCard: React.FC = () => {
         <Button
           id="grafana-vs-signoz-try-signoz-button"
           href="/teams/"
-          variant="legacySecondary"
-          className="flex w-full items-center justify-center gap-1 text-xs font-bold"
+          variant="secondary"
+          size="sm"
+          className="w-full"
         >
           Try SigNoz for Free <ArrowRight className="h-3 w-3" />
         </Button>

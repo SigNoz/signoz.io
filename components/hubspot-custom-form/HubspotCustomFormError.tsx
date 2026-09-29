@@ -3,6 +3,7 @@
 import React from 'react'
 import type { FormTheme } from './types'
 import { themeStyles } from './types'
+import { buttonVariants } from '@/components/ui/Button'
 
 type HubspotCustomFormErrorProps = {
   message?: string
@@ -30,7 +31,7 @@ export default function HubspotCustomFormError({
           <button
             type="button"
             onClick={onRetry}
-            className="rounded-md bg-signoz_robin-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-signoz_robin-500/90"
+            className={buttonVariants({ variant: 'default', size: 'sm' })}
           >
             Retry
           </button>

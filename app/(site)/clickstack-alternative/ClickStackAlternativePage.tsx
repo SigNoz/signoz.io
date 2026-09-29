@@ -25,7 +25,6 @@ import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 import Link from 'next/link'
 import CTABanner from '@/shared/components/molecules/FeaturePages/CTABanner'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -33,7 +32,6 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'ClickStack Alternative Hero Start Trial',
@@ -45,7 +43,6 @@ const Header: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/',
       variant: 'secondary' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'ClickStack Alternative Hero Docs',
@@ -119,7 +116,7 @@ const CostComparison: React.FC = () => {
                   ClickStack's <br className="hidden md:block" /> billing{' '}
                   <br className="hidden md:block" /> complexity
                 </h2>
-                <Button asChild variant="secondary" rounded="full">
+                <Button asChild variant="secondary">
                   <TrackingLink
                     href="/blog/clickstack-managed-pricing-compute-costs/"
                     clickType="Secondary CTA"
@@ -243,7 +240,6 @@ const BetterChoiceBanner: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'ClickStack Alternative Better Choice Banner Start Trial',
@@ -255,7 +251,6 @@ const BetterChoiceBanner: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/introduction/',
       variant: 'secondary' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'ClickStack Alternative Better Choice Banner Read Documentation',

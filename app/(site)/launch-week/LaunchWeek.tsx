@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { useState } from 'react'
 import type { Metadata } from 'next'
-import Button from '@/components/ui/Button'
+import Button, { buttonVariants } from '@/components/ui/Button'
 import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import CountdownTimer from '@/components/Timer'
@@ -12,6 +12,13 @@ import Youtube from '@/components/VideoPlayer/VideoPlayer'
 import { AppModal as Modal } from '@/components/ui/Modal'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import { Card } from '@/components/ui/Card'
+import { cn } from 'app/lib/utils'
+
+const DAY_LINK_CLASS = cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'w-full sm:mb-0')
+const DAY_VIDEO_BUTTON_CLASS = cn(
+  buttonVariants({ variant: 'secondary', size: 'sm' }),
+  'mb-2 w-full sm:mb-0'
+)
 
 const MainSection: React.FC = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -83,23 +90,24 @@ const MainSection: React.FC = () => {
                   href="https://www.linkedin.com/events/interactivedashboards-signozlau7367550250590404608/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
-                  className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
+                  className={DAY_LINK_CLASS}
                 >
                   <Linkedin className="h-4 w-4" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
                     LinkedIn Live
                   </span>
                 </Link>
-                <div
+                <button
+                  type="button"
                   id="btn-watch-youtube-video"
-                  className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
+                  className={DAY_VIDEO_BUTTON_CLASS}
                   onClick={() => handleOpenModal('oLfLFH00T3U')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
                     Watch the video
                   </span>
-                </div>
+                </button>
               </div>
             </div>
             <Link
@@ -148,23 +156,24 @@ const MainSection: React.FC = () => {
                   href="https://www.linkedin.com/events/querybuilderv5-signozlaunchweek7368361520373620736/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
-                  className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
+                  className={DAY_LINK_CLASS}
                 >
                   <Linkedin className="h-4 w-4" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
                     LinkedIn Live
                   </span>
                 </Link>
-                <div
+                <button
+                  type="button"
                   id="btn-watch-youtube-video"
-                  className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
+                  className={DAY_VIDEO_BUTTON_CLASS}
                   onClick={() => handleOpenModal('a6GtE_Fah-g')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
                     Watch the video
                   </span>
-                </div>
+                </button>
               </div>
             </div>
             <Link
@@ -202,23 +211,24 @@ const MainSection: React.FC = () => {
                   href="https://www.linkedin.com/events/ossimprovements-signozlaunchwee7368855069955457024/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
-                  className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
+                  className={DAY_LINK_CLASS}
                 >
                   <Linkedin className="h-4 w-4" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
                     LinkedIn Live
                   </span>
                 </Link>
-                <div
+                <button
+                  type="button"
                   id="btn-watch-youtube-video"
-                  className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
+                  className={DAY_VIDEO_BUTTON_CLASS}
                   onClick={() => handleOpenModal('MC--XaSxbdY')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
                     Watch the video
                   </span>
-                </div>
+                </button>
               </div>
             </div>
             <Link
@@ -256,23 +266,24 @@ const MainSection: React.FC = () => {
                   href="https://www.linkedin.com/events/traceoperators-signozlaunchweek7369027260701429761/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
-                  className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
+                  className={DAY_LINK_CLASS}
                 >
                   <Linkedin className="h-4 w-4" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
                     LinkedIn Live
                   </span>
                 </Link>
-                <div
+                <button
+                  type="button"
                   id="btn-watch-youtube-video"
-                  className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
+                  className={DAY_VIDEO_BUTTON_CLASS}
                   onClick={() => handleOpenModal('aSGBmAMqUHs')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
                     Watch the video
                   </span>
-                </div>
+                </button>
               </div>
             </div>
             <Link
@@ -310,23 +321,24 @@ const MainSection: React.FC = () => {
                   href="https://www.linkedin.com/events/costcontrol-signozlaunchweek5-07370073117991432192/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
-                  className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
+                  className={DAY_LINK_CLASS}
                 >
                   <Linkedin className="h-4 w-4" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
                     LinkedIn Live
                   </span>
                 </Link>
-                <div
+                <button
+                  type="button"
                   id="btn-watch-youtube-video"
-                  className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
+                  className={DAY_VIDEO_BUTTON_CLASS}
                   onClick={() => handleOpenModal('X_qVjWB9TvY')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
                     Watch the video
                   </span>
-                </div>
+                </button>
               </div>
             </div>
             <Link
@@ -416,15 +428,15 @@ const GetStarted = ({ page }) => {
                 Get started with <br /> SigNoz Cloud today
               </p>
               <div className="mb-10 flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                <Button variant="legacyPrimary" id={getStartedId}>
-                  <Link href="/teams/" className="flex-center">
+                <Button asChild variant="default">
+                  <Link href="/teams/" id={getStartedId}>
                     Get Started - Free
                     <ArrowRight size={14} />
                   </Link>
                 </Button>
 
-                <Button variant="legacySecondary" id={readDocumentationId}>
-                  <Link href="/docs/introduction/" className="flex-center">
+                <Button asChild variant="secondary">
+                  <Link href="/docs/introduction/" id={readDocumentationId}>
                     <BookOpen size={14} />
                     Read Documentation
                   </Link>
