@@ -22,8 +22,10 @@ All roles (Admin, Editor, and Viewer) can use the Explorer.
 
 ## Run a query
 
-1. Type a filter in the filter bar, for example `gen_ai.request.model = 'gpt-4o'`.
+1. Type a filter in the filter bar, for example `trace.total_tokens > 1000`.
 2. Select **Run Query**, or press Cmd+Enter (Ctrl+Enter on Windows and Linux).
+
+Fields with the `trace.` prefix hold the totals of a trace, such as `trace.total_tokens`, `trace.estimated_total_cost`, and `trace.llm_call_count`. You can filter and aggregate on these fields, which the Trace Explorer does not have.
 
 The filter bar suggests only keys and values from GenAI spans. After you add a filter, the next suggestions show only values that match your current filters. For the filter syntax and the aggregation options, see [Query Builder](https://signoz.io/docs/userguide/query-builder-v5/).
 
@@ -48,6 +50,11 @@ Each field lists **RELATED** values first. These values match the filters that y
 ## Views
 
 The toolbar has four views: **Trace View**, **List View**, **Time Series**, and **Table**. All views use the same query. The Explorer opens in **Trace View**.
+
+For trace totals, the views use different spans:
+
+- **Trace View** uses all the spans of each trace, also the spans outside the selected time range.
+- **List View**, **Time Series**, and **Table** use only the spans of each trace inside the selected time range. For example, with the filter `trace.total_tokens > 100`, SigNoz adds up the tokens of the spans of that trace in the time range.
 
 ### Trace View
 
