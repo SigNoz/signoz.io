@@ -16,6 +16,8 @@ interface TestimonialSwapPanelProps {
   quotes: CustomerStoryQuote[]
   startIndex?: number
   staggerMs?: number
+  clickLocation?: string
+  swapEvery?: number
 }
 
 type Phase = 'idle' | 'leaving' | 'arriving'
@@ -24,6 +26,8 @@ export default function TestimonialSwapPanel({
   quotes,
   startIndex = 0,
   staggerMs = 0,
+  clickLocation = 'Hero Customer Stories',
+  swapEvery = SWAP_EVERY,
 }: TestimonialSwapPanelProps) {
   const [index, setIndex] = useState(startIndex)
   const [phase, setPhase] = useState<Phase>('idle')
@@ -58,7 +62,7 @@ export default function TestimonialSwapPanel({
     }
 
     const startTimer = setTimeout(() => {
-      interval = setInterval(swap, SWAP_EVERY)
+      interval = setInterval(swap, swapEvery)
     }, staggerMs)
 
     return () => {
@@ -67,7 +71,7 @@ export default function TestimonialSwapPanel({
       clearTimeout(arriveTimer)
       if (interval) clearInterval(interval)
     }
-  }, [quotes.length, staggerMs])
+  }, [quotes.length, staggerMs, swapEvery])
 
   const quote = quotes[index % quotes.length]
 
@@ -129,7 +133,7 @@ export default function TestimonialSwapPanel({
         clickType="Customer Proof"
         clickName="Customer Quote Link"
         clickText={label}
-        clickLocation="Hero Customer Stories"
+        clickLocation={clickLocation}
         eventAttributes={{ target: href, customer: quote.org }}
         className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--l1-foreground)_10%,transparent)] bg-[var(--l2-background)] px-2.5 py-1.5 text-xs font-medium text-[var(--l1-foreground)] no-underline opacity-0 transition-opacity duration-200 focus-visible:opacity-100 group-hover:opacity-100"
         aria-label={`${label}: ${quote.name}, ${quote.org}`}

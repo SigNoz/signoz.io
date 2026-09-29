@@ -1,92 +1,51 @@
 ---
-date: 2026-08-27
-
+date: 2026-09-21
 title: Elixir OpenTelemetry Instrumentation Guide
-description: Instrument your Elixir Phoenix and Ecto application with OpenTelemetry. Send traces to SigNoz Cloud or self-hosted with Cowboy and Phoenix auto-instrumentation.
-hide_table_of_contents: true
+meta_title: Elixir OpenTelemetry Instrumentation - Trace Phoenix & Ecto
+description: Instrument your Elixir and Phoenix application with OpenTelemetry and send traces to SigNoz. Covers Phoenix, Ecto, Bandit, Cowboy, Oban, and HTTP clients.
+doc_type: howto
 ---
 
+This guide shows you how to instrument an Elixir application with OpenTelemetry and send traces to SigNoz. The OpenTelemetry Erlang libraries attach to `telemetry` events, so Phoenix, Ecto, Bandit, Cowboy, Oban, and other libraries produce spans after you start their handlers.
 
-This document contains OpenTelemetry instrumentation instructions for Elixir Phoenix + Ecto framework.
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
 
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-## Send Traces to SigNoz Cloud
+## Prerequisites
 
-Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
+- Elixir 1.17 or newer on Erlang/OTP 27 or newer
+- Phoenix 1.7 or newer if you use Phoenix. The `opentelemetry_phoenix` 2.x line needs it.
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+## Send traces to SigNoz
 
 <Tabs entityName="environment">
 <TabItem value="vm" label="VM" default>
+<Admonition type="info" title="What classifies as VM?" defaultCollapsed="true">
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
 
-From VMs, there are two ways to send data to SigNoz Cloud.
+Use this section if you run your Elixir release or `mix` server directly on a server or VM without containers.
+</Admonition>
 
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+### Step 1. Set environment variables
 
-### Send traces directly to SigNoz Cloud
+Set these environment variables in the shell that starts your application:
 
-**Step 1. Add dependencies**
-
-Install dependencies related to OpenTelemetry by adding them to `mix.exs` file
-
-```elixir
-    {:opentelemetry_exporter, "~> 1.6"},
-    {:opentelemetry_api, "~> 1.2"},
-    {:opentelemetry, "~> 1.3"},
-    {:opentelemetry_semantic_conventions, "~> 0.2"},
-    {:opentelemetry_cowboy, "~> 0.2.1"},
-    {:opentelemetry_phoenix, "~> 1.1"},
-    {:opentelemetry_ecto, "~> 1.1"}
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ```
 
-In your application start, usually the `application.ex` file, setup the telemetry handlers
+**Verify these values:**
 
-```elixir
-    :opentelemetry_cowboy.setup()
-    OpentelemetryPhoenix.setup(adapter: :cowboy2)
-    OpentelemetryEcto.setup([:your_app_name, :repo])
-```
-
-`:your_app_name` is the OTP application name atom from your `mix.exs` (e.g., `:my_app`).
-
-As an example, this is how you can setup the handlers in your `application.ex` file for an application called `demo`:
-
-```elixir
-# application.ex
-@impl true
-def start(_type, _args) do
-  :opentelemetry_cowboy.setup()
-  OpentelemetryPhoenix.setup(adapter: :cowboy2)
-  OpentelemetryEcto.setup([:demo, :repo])
-
-end
-```
-
-**Step 2. Configure Application**
-
-You need to configure your application to send telemetry data by adding the following config to your `runtime.exs` file:
-
-```elixir
-config :opentelemetry, :resource, service: %{name: "<service-name>", version: "<service-version>"}
-
-config :opentelemetry, :processors,
-  otel_batch_processor: %{
-    exporter: {
-      :opentelemetry_exporter,
-      %{
-        endpoints: ["https://ingest.<region>.signoz.cloud:443"],
-        headers: [
-          {"signoz-ingestion-key", "<your-ingestion-key>"}
-        ]
-      }
-    }
-  }
-```
-
-Verify these values:
-
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `my-phoenix-app`).
 - `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
 
@@ -97,125 +56,71 @@ Set `service.version` to a per-build value, not a static string. SigNoz detects 
 - **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
 - **Kubernetes**: inject from your Helm chart image tag or CI variable
 </Admonition>
-
-### Send traces via OTel Collector binary
-
-**Step 1.** Install OTel Collector binary<br></br>
-
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
-
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) in your VM.
-
-**Step 2. Add dependencies**
-
-Install dependencies related to OpenTelemetry by adding them to `mix.exs` file
-
-```elixir
-    {:opentelemetry_exporter, "~> 1.6"},
-    {:opentelemetry_api, "~> 1.2"},
-    {:opentelemetry, "~> 1.3"},
-    {:opentelemetry_semantic_conventions, "~> 0.2"},
-    {:opentelemetry_cowboy, "~> 0.2.1"},
-    {:opentelemetry_phoenix, "~> 1.1"},
-    {:opentelemetry_ecto, "~> 1.1"}
-```
-
-In your application start, usually the `application.ex` file, setup the telemetry handlers
-
-```elixir
-    :opentelemetry_cowboy.setup()
-    OpentelemetryPhoenix.setup(adapter: :cowboy2)
-    OpentelemetryEcto.setup([:your_app_name, :repo])
-```
-
-As an example, this is how you can setup the handlers in your `application.ex` file for an application called `demo`:
-
-```elixir
-# application.ex
-@impl true
-def start(_type, _args) do
-  :opentelemetry_cowboy.setup()
-  OpentelemetryPhoenix.setup(adapter: :cowboy2)
-  OpentelemetryEcto.setup([:demo, :repo])
-
-end
-```
-
-**Step 3. Configure Application**
-
-You need to configure your application to send telemetry data by adding the following config to your `runtime.exs` file:
-
-```elixir
-config :opentelemetry, :resource, service: %{name: "<service-name>", version: "<service-version>"}
-
-config :opentelemetry, :processors,
-    otel_batch_processor: %{
-      exporter:
-      {:opentelemetry_exporter,
-      %{endpoints: ["http://localhost:4318"]}
-      }
-  }
-```
-
-Verify these values:
-
-- `<service-name>`: A descriptive name for your service (e.g., `my-phoenix-app`).
-- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
-
-<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
-Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
-- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
-- **GitHub Actions**: `service.version=${{ github.sha }}`
-- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
-- **Kubernetes**: inject from your Helm chart image tag or CI variable
-</Admonition>
-
 </TabItem>
 
 <TabItem value="k8s" label="Kubernetes">
 
-For Elixir (Phoenix + Ecto) application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+### Step 1. Set environment variables
 
-**Step 1. Add dependencies**
+Add these environment variables to your deployment manifest:
 
-Install dependencies related to OpenTelemetry by adding them to `mix.exs` file
-
-```elixir
-    {:opentelemetry_exporter, "~> 1.6"},
-    {:opentelemetry_api, "~> 1.2"},
-    {:opentelemetry, "~> 1.3"},
-    {:opentelemetry_semantic_conventions, "~> 0.2"},
-    {:opentelemetry_cowboy, "~> 0.2.1"},
-    {:opentelemetry_phoenix, "~> 1.1"},
-    {:opentelemetry_ecto, "~> 1.1"}
+```yaml
+env:
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_SERVICE_NAME
+  value: '<service-name>'
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.version=<service-version>'
 ```
 
-In your application start, usually the `application.ex` file, setup the telemetry handlers
+**Verify these values:**
 
-```elixir
-    :opentelemetry_cowboy.setup()
-    OpentelemetryPhoenix.setup(adapter: :cowboy2)
-    OpentelemetryEcto.setup([:your_app_name, :repo])
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `my-phoenix-app`).
+- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
+
+Store the ingestion key in a Kubernetes Secret and reference it with `valueFrom.secretKeyRef` instead of writing it into the manifest.
+
+<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
+Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
+- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
+- **GitHub Actions**: `service.version=${{ github.sha }}`
+- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
+- **Kubernetes**: inject from your Helm chart image tag or CI variable
+</Admonition>
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+### Step 1. Set environment variables
+
+Add the environment variables to your Dockerfile:
+
+```dockerfile:Dockerfile
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>"
 ```
 
-**Step 2. Configure Application**
+Or pass them at run time with `docker run`:
 
-You need to configure your application to send telemetry data by adding the following config to your `runtime.exs` file:
-
-```elixir
-config :opentelemetry, :resource, service: %{name: "<service-name>", version: "<service-version>"}
-
-config :opentelemetry, :processors,
-    otel_batch_processor: %{
-      exporter:
-      {:opentelemetry_exporter,
-      %{endpoints: ["http://localhost:4318"]}
-      }
-  }
+```bash
+docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+    -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_SERVICE_NAME="<service-name>" \
+    -e OTEL_RESOURCE_ATTRIBUTES="service.version=<service-version>" \
+    your-image:latest
 ```
 
-Verify these values:
+**Verify these values:**
 
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `my-phoenix-app`).
 - `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
 
@@ -226,80 +131,23 @@ Set `service.version` to a per-build value, not a static string. SigNoz detects 
 - **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
 - **Kubernetes**: inject from your Helm chart image tag or CI variable
 </Admonition>
-
 </TabItem>
 
 <TabItem value="windows" label="Windows">
 
-From Windows, there are two ways to send data to SigNoz Cloud.
+### Step 1. Set environment variables (PowerShell)
 
-- Send traces directly to SigNoz Cloud
-- Send traces via OTel Collector binary (recommended)
-
-### Send traces directly to SigNoz Cloud
-
-**Step 1. Add dependencies**
-
-Install dependencies related to OpenTelemetry by adding them to `mix.exs` file
-
-```elixir
-    {:opentelemetry_exporter, "~> 1.6"},
-    {:opentelemetry_api, "~> 1.2"},
-    {:opentelemetry, "~> 1.3"},
-    {:opentelemetry_semantic_conventions, "~> 0.2"},
-    {:opentelemetry_cowboy, "~> 0.2.1"},
-    {:opentelemetry_phoenix, "~> 1.1"},
-    {:opentelemetry_ecto, "~> 1.1"}
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.version=<service-version>"
 ```
 
-In your application start, usually the `application.ex` file, setup the telemetry handlers
+**Verify these values:**
 
-```elixir
-    :opentelemetry_cowboy.setup()
-    OpentelemetryPhoenix.setup(adapter: :cowboy2)
-    OpentelemetryEcto.setup([:your_app_name, :repo])
-```
-
-`:your_app_name` is the OTP application name atom from your `mix.exs` (e.g., `:my_app`).
-
-As an example, this is how you can setup the handlers in your `application.ex` file for an application called `demo`:
-
-```elixir
-# application.ex
-@impl true
-def start(_type, _args) do
-  :opentelemetry_cowboy.setup()
-  OpentelemetryPhoenix.setup(adapter: :cowboy2)
-  OpentelemetryEcto.setup([:demo, :repo])
-
-end
-```
-
-**Step 2. Configure Application**
-
-You need to configure your application to send telemetry data by adding the following config to your `runtime.exs` file:
-
-```elixir
-config :opentelemetry, :resource, service: %{name: "<service-name>", version: "<service-version>"}
-
-config :opentelemetry, :processors,
-  otel_batch_processor: %{
-    exporter: {
-      :opentelemetry_exporter,
-      %{
-        endpoints: ["https://ingest.<region>.signoz.cloud:443"],
-        headers: [
-          {"signoz-ingestion-key", "<your-ingestion-key>"}
-        ]
-      }
-    }
-  }
-```
-
-Verify these values:
-
-- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `my-phoenix-app`).
 - `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
 
@@ -310,156 +158,350 @@ Set `service.version` to a per-build value, not a static string. SigNoz detects 
 - **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
 - **Kubernetes**: inject from your Helm chart image tag or CI variable
 </Admonition>
-
----
-### Send traces via OTel Collector binary
-
-**Step 1.** Install OTel Collector binary<br></br>
-
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
-
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/opentelemetry-collection-agents/vm/install/) in your VM.
-
-**Step 2. Add dependencies**
-
-Install dependencies related to OpenTelemetry by adding them to `mix.exs` file
-
-```elixir
-    {:opentelemetry_exporter, "~> 1.6"},
-    {:opentelemetry_api, "~> 1.2"},
-    {:opentelemetry, "~> 1.3"},
-    {:opentelemetry_semantic_conventions, "~> 0.2"},
-    {:opentelemetry_cowboy, "~> 0.2.1"},
-    {:opentelemetry_phoenix, "~> 1.1"},
-    {:opentelemetry_ecto, "~> 1.1"}
-```
-
-In your application start, usually the `application.ex` file, setup the telemetry handlers
-
-```elixir
-    :opentelemetry_cowboy.setup()
-    OpentelemetryPhoenix.setup(adapter: :cowboy2)
-    OpentelemetryEcto.setup([:your_app_name, :repo])
-```
-
-As an example, this is how you can setup the handlers in your `application.ex` file for an application called `demo`:
-
-```elixir
-# application.ex
-@impl true
-def start(_type, _args) do
-  :opentelemetry_cowboy.setup()
-  OpentelemetryPhoenix.setup(adapter: :cowboy2)
-  OpentelemetryEcto.setup([:demo, :repo])
-
-end
-```
-
-**Step 3. Configure Application**
-
-You need to configure your application to send telemetry data by adding the following config to your `runtime.exs` file:
-
-```elixir
-config :opentelemetry, :resource, service: %{name: "<service-name>", version: "<service-version>"}
-
-config :opentelemetry, :processors,
-    otel_batch_processor: %{
-      exporter:
-      {:opentelemetry_exporter,
-      %{endpoints: ["http://localhost:4318"]}
-      }
-  }
-```
-
-Verify these values:
-
-- `<service-name>`: A descriptive name for your service (e.g., `my-phoenix-app`).
-- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
-
-<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
-Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
-- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
-- **GitHub Actions**: `service.version=${{ github.sha }}`
-- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
-- **Kubernetes**: inject from your Helm chart image tag or CI variable
-</Admonition>
-
-</TabItem>
-
-</Tabs>
-</TabItem>
-<TabItem value='self-host' label='Self-Host'>
-## Send Traces to Self-Hosted SigNoz
-
-We'll focus on instrumenting one of the most common combos of the Elixir world: `Phoenix + Ecto`.
-
-### Step 1: Add dependencies
-
-The first step to instrument your Elixir application with OpenTelemetry is to add the required dependencies to your `mix.exs` file and fetch them with `mix deps.get`
-
-```elixir
-{:opentelemetry, "~> 1.0.3"},
-{:opentelemetry_exporter, "~> 1.0.3"},
-{:opentelemetry_phoenix, "~> 1.0.0"},
-{:opentelemetry_ecto, "~> 1.0.0"}
-```
-
-### Step 2: Configure Elixir application
-
-Then we need to configure our application to export telemetry data. There are two things that you need to set:
-
-- `<service-name>`: Your application or service name for identification in SigNoz.
-- `OTEL Collector endpoint`<br></br>
-The OTEL collector comes bundled with SigNoz installation. Since we installed SigNoz on our local machine, the endpoint is `http://localhost:4318`.
-
-```elixir
-config :opentelemetry, :resource, service: %{name: "<service-name>", version: "<service-version>"}
-
-config :opentelemetry, :processors,
-  otel_batch_processor: %{
-    exporter: {
-      :opentelemetry_exporter,
-      %{endpoints: ["http://localhost:4318"]}
-    }
-  }
-```
-
-Verify these values:
-
-- `<service-name>`: A descriptive name for your service (e.g., `my-phoenix-app`).
-- `<service-version>` (optional): Your release version, image tag, or git SHA (e.g., `1.4.2`, `a01dbef8`).
-
-<Admonition type="tip" title="Recommended: Set service.version for Deployment Markers">
-Set `service.version` to a per-build value, not a static string. SigNoz detects a deployment each time this value changes. Common sources:
-- **Bash / shell**: `service.version=$(git rev-parse --short HEAD)`
-- **GitHub Actions**: `service.version=${{ github.sha }}`
-- **GitLab CI**: `service.version=$CI_COMMIT_SHORT_SHA`
-- **Kubernetes**: inject from your Helm chart image tag or CI variable
-</Admonition>
-
-### Step 3: Initialize telemetry handlers
-
-As it is documented in the `opentelemetry_phoenix` and `opentelemetry_ecto` [hexdocs.pm](http://hexdocs.pm) pages, we need to initialize both telemetry handlers.
-
-```elixir
-OpentelemetryPhoenix.setup()
-OpentelemetryEcto.setup([:your_app_name, :repo])
-```
-
-`:your_app_name` should be replaced by your OTP application name atom and congratulations, you have instrumented your application with OpenTelemetry.
 </TabItem>
 </Tabs>
 
-{/* ## Sample Examples */}
+### Step 2. Add OpenTelemetry dependencies
 
-{/* <!---
-Add sample apps for both Cloud and Self-Host
----> */}
+Add these packages to the `deps` list in `mix.exs`:
 
-{/* Here's a [tutorial](https://signoz.io/blog/opentelemetry-elixir/) with step by step guide on how to install SigNoz and start monitoring a sample Elixir app. 
+```elixir:mix.exs
+defp deps do
+  [
+    # ... your existing dependencies
+    {:opentelemetry_exporter, "~> 1.11"},
+    {:opentelemetry, "~> 1.7"},
+    {:opentelemetry_api, "~> 1.5"},
+    {:opentelemetry_phoenix, "~> 2.0"},
+    {:opentelemetry_bandit, "~> 0.3"},
+    {:opentelemetry_ecto, "~> 1.2"}
+  ]
+end
+```
 
-Thanks to our community member [Ricardo](https://github.com/ricardoccpaiva) for creating this guide. */}
+Fetch them:
 
+```bash
+mix deps.get
+```
+
+The packages do different jobs:
+
+- `opentelemetry_exporter` sends spans to SigNoz over OTLP.
+- `opentelemetry` is the SDK, and `opentelemetry_api` is the API you call for custom spans.
+- `opentelemetry_phoenix` creates a span for each Phoenix request.
+- `opentelemetry_bandit` covers the full request lifecycle for the Bandit web server, which is the default in Phoenix 1.8. Use `{:opentelemetry_cowboy, "~> 1.0"}` instead if your endpoint still runs Cowboy.
+- `opentelemetry_ecto` creates a span for each Ecto query.
+
+<Admonition type="warning" title="List the exporter first">
+Keep `:opentelemetry_exporter` above `:opentelemetry` in the `deps` list. The exporter must start before the SDK, and Mix starts applications in dependency order. If you build a release, also set the start order in `mix.exs`:
+
+```elixir:mix.exs
+def project do
+  [
+    app: :my_app,
+    releases: [
+      my_app: [
+        applications: [opentelemetry_exporter: :permanent, opentelemetry: :temporary]
+      ]
+    ]
+  ]
+end
+```
+</Admonition>
+
+### Step 3. Start the instrumentation handlers
+
+Each library ships a `setup/0` or `setup/1` function that attaches its `telemetry` handlers. Call them at the top of `start/2`, before the supervisor starts:
+
+```elixir:lib/my_app/application.ex {8-10}
+defmodule MyApp.Application do
+  @moduledoc false
+
+  use Application
+
+  @impl true
+  def start(_type, _args) do
+    OpentelemetryBandit.setup()
+    OpentelemetryPhoenix.setup(adapter: :bandit)
+    OpentelemetryEcto.setup([:my_app, :repo])
+
+    children = [
+      MyApp.Repo,
+      MyAppWeb.Endpoint
+    ]
+
+    opts = [strategy: :one_for_one, name: MyApp.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+end
+```
+
+**Verify these values:**
+
+- `adapter:` is `:bandit` for Phoenix 1.8 and for any endpoint that uses `Bandit.PhoenixAdapter`. Use `:cowboy2` with `:opentelemetry_cowboy.setup()` if your endpoint runs Cowboy.
+- `[:my_app, :repo]` is the telemetry prefix of your Ecto repo. It is your OTP application name and repo module in lowercase atoms, so `MyApp.Repo` in the `:my_app` application becomes `[:my_app, :repo]`.
+
+`opentelemetry_phoenix` reads `Plug.Telemetry` events, so your endpoint must have this plug. Phoenix generates it by default:
+
+```elixir:lib/my_app_web/endpoint.ex
+plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
+```
+
+### Step 4. Run your application
+
+Start your application the way you normally do:
+
+```bash
+mix phx.server
+```
+
+Send a few requests to your application so it produces spans.
+
+## Library instrumentation
+
+Add the package for the library you want to trace, then call its setup function next to the ones in Step 3.
+
+<Tabs variant="pill" entityName="library">
+<TabItem value="web" label="Web servers" default>
+
+Phoenix reports only the part of the request that it handles. Add the web server package as well, or requests that fail at the socket level never produce a span.
+
+**Bandit**, the default web server in Phoenix 1.8:
+
+```elixir:mix.exs
+{:opentelemetry_bandit, "~> 0.3"}
+```
+
+```elixir:lib/my_app/application.ex
+OpentelemetryBandit.setup()
+OpentelemetryPhoenix.setup(adapter: :bandit)
+```
+
+**Cowboy**, the default in Phoenix 1.7 and earlier:
+
+```elixir:mix.exs
+{:opentelemetry_cowboy, "~> 1.0"}
+```
+
+```elixir:lib/my_app/application.ex
+:opentelemetry_cowboy.setup()
+OpentelemetryPhoenix.setup(adapter: :cowboy2)
+```
+
+To find your adapter, look for the `adapter:` key under your endpoint configuration in `config/config.exs`.
+
+</TabItem>
+
+<TabItem value="ecto" label="Ecto">
+
+`opentelemetry_ecto` creates a span for each query, with the source table and the database system as attributes.
+
+```elixir:mix.exs
+{:opentelemetry_ecto, "~> 1.2"}
+```
+
+```elixir:lib/my_app/application.ex
+OpentelemetryEcto.setup([:my_app, :repo])
+```
+
+The argument is the telemetry prefix of the repo. For `MyApp.Repo` the prefix is `[:my_app, :repo]`. Call `setup/2` once for each repo if your application has more than one.
+
+The query text is off by default, because a query can carry personal data. To record it, set `db_statement`:
+
+```elixir:lib/my_app/application.ex
+OpentelemetryEcto.setup([:my_app, :repo], db_statement: :enabled)
+```
+
+`db_statement` also accepts a function of one argument. The function receives the query and returns the text to record, which lets you strip values before they leave your servers.
+
+</TabItem>
+
+<TabItem value="oban" label="Oban">
+
+`opentelemetry_oban` creates a span for each job that Oban runs, and links the job span to the request that inserted the job.
+
+```elixir:mix.exs
+{:opentelemetry_oban, "~> 1.2"}
+```
+
+```elixir:lib/my_app/application.ex
+OpentelemetryOban.setup()
+```
+
+Insert jobs through `OpentelemetryOban.insert` instead of `Oban.insert`, so the trace context travels with the job:
+
+```elixir
+OpentelemetryOban.insert(MyApp.Workers.SendEmail.new(%{user_id: 1}))
+```
+
+</TabItem>
+
+<TabItem value="http-clients" label="HTTP clients">
+
+An HTTP client package creates a client span for each outgoing call. Turn on trace header propagation as well, and the trace continues into the service you call.
+
+**Req**:
+
+```elixir:mix.exs
+{:opentelemetry_req, "~> 1.0"}
+```
+
+```elixir
+req =
+  Req.new(url: "https://example.com")
+  |> OpentelemetryReq.attach(propagate_trace_headers: true)
+
+Req.get!(req)
+```
+
+`propagate_trace_headers` is `false` by default, so set it to send the `traceparent` header with the request.
+
+**Tesla**:
+
+```elixir:mix.exs
+{:opentelemetry_tesla, "~> 2.5"}
+```
+
+Add the middleware to your Tesla client. Place it before `Tesla.Middleware.PathParams`, so the span name keeps the parameterized path (`/users/:id`) instead of the resolved one (`/users/123`):
+
+```elixir
+client =
+  Tesla.client([
+    {Tesla.Middleware.BaseUrl, "https://example.com"},
+    Tesla.Middleware.OpenTelemetry,
+    Tesla.Middleware.PathParams
+  ])
+
+Tesla.get(client, "/users/:id", opts: [path_params: [id: "123"]])
+```
+
+</TabItem>
+
+<TabItem value="other" label="Other libraries">
+
+The OpenTelemetry Erlang contrib repository ships handlers for more libraries. Each one follows the same pattern: add the package, then call its setup function in `start/2`.
+
+| Library | Package |
+| --- | --- |
+| Absinthe (GraphQL) | `opentelemetry_absinthe` |
+| Broadway | `opentelemetry_broadway` |
+| Commanded | `opentelemetry_commanded` |
+| Dataloader | `opentelemetry_dataloader` |
+| Nebulex | `opentelemetry_nebulex` |
+| Redix | `opentelemetry_redix` |
+| Xandra (Cassandra) | `opentelemetry_xandra` |
+
+See the <a href="https://github.com/open-telemetry/opentelemetry-erlang-contrib/tree/main/instrumentation" target="_blank" rel="noopener noreferrer nofollow">instrumentation directory</a> for the current list and the options each package accepts.
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+After you run your instrumented application, check that traces reach SigNoz:
+
+1. Send a few requests to your application.
+2. Open SigNoz and go to **Traces**.
+3. Select **Refresh** and look for entries with the `service.name` you set.
+4. Select a trace to see the request span, and the Ecto spans below it.
+
+<Figure
+    src="/img/docs/instrumentation/elixir/traces-explorer.webp"
+    alt="SigNoz Traces Explorer listing Phoenix request spans and Ecto query spans from an instrumented Elixir service"
+    caption="Phoenix request spans and their Ecto query spans, filtered by service name"
+/>
+
+Spans leave in batches, so wait a few seconds after the requests before you look for them.
+
+<details>
+<ToggleHeading>
 ## Troubleshooting
+</ToggleHeading>
 
-Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
+### Why don't traces appear in SigNoz?
+
+Confirm the environment variables reach the running application. The OpenTelemetry Erlang libraries read them at start, so a variable that you set after the application starts has no effect. Print them in `iex`:
+
+```elixir
+System.get_env("OTEL_EXPORTER_OTLP_ENDPOINT")
+System.get_env("OTEL_SERVICE_NAME")
+```
+
+Turn on the console exporter in development to see the spans that your application creates:
+
+```elixir:config/dev.exs
+config :opentelemetry, traces_exporter: {:otel_exporter_stdout, []}
+```
+
+If spans print here but do not reach SigNoz, look at the exporter configuration and the network path.
+
+For a full walkthrough covering SDK diagnostics, Collector connectivity, and common ingestion errors (also for logs and metrics), see [Debug missing traces, logs, and metrics in SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/).
+
+### Why do I see no Phoenix request spans?
+
+Check three things in order:
+
+1. Your endpoint has `plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]`. `opentelemetry_phoenix` produces nothing without it.
+2. The `adapter:` value matches your web server. `:bandit` and `:cowboy2` listen to different telemetry events.
+3. `OpentelemetryPhoenix.setup/1` runs in `start/2`, above the call to `Supervisor.start_link/2`.
+
+### Why do requests show a Phoenix span but no Ecto spans?
+
+The telemetry prefix in `OpentelemetryEcto.setup/1` must match your repo. For `MyApp.Repo` in the `:my_app` application, the prefix is `[:my_app, :repo]`. A prefix that does not match attaches a handler to events that never fire, and the call still returns `:ok`.
+
+### Why do exports fail with `connection refused` or a TLS error?
+
+- Confirm the endpoint uses `https` and port `443` for SigNoz Cloud.
+- Confirm the host that runs your application allows outbound HTTPS to `ingest.<region>.signoz.cloud`.
+- Check the ingestion key. A wrong key returns an HTTP 401 from the endpoint, which the exporter logs as an export failure.
+
+```bash
+curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
+```
+
+### Why does the SDK fail to start with an exporter error?
+
+`:opentelemetry_exporter` must start before `:opentelemetry`. List it first in the `deps` function in `mix.exs`. For a release, set the application order under `releases:` as shown in Step 2.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+To send through a Collector, point the endpoint at it and drop the ingestion key header. The Collector holds the key instead:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+export OTEL_SERVICE_NAME="<service-name>"
+```
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Next steps
+
+- For a hands-on walkthrough, our [Elixir OpenTelemetry tutorial](https://signoz.io/blog/opentelemetry-elixir/) sets up a Phoenix and Ecto application step by step.
+- Need custom spans or attributes of your own? See the <a href="https://opentelemetry.io/docs/languages/erlang/instrumentation/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Erlang and Elixir instrumentation guide</a>.
+- [Set up alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your Elixir service.
+- [Create dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize your metrics.
+
+## Get Help
+
+<GetHelp />

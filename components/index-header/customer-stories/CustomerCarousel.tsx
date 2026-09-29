@@ -15,8 +15,11 @@ const SCROLL_SPEED = 42
 
 const SPRITE = typeof spriteAsset === 'string' ? spriteAsset : (spriteAsset as { src: string }).src
 
+const DEFAULT_CLICK_LOCATION = 'Hero Customer Stories'
+
 interface CardProps {
   customer: CustomerStoryLogo
+  clickLocation: string
   isClone?: boolean
 }
 
@@ -45,7 +48,7 @@ function LogoMark({ customer, isClone }: { customer: CustomerStoryLogo; isClone:
   )
 }
 
-function CustomerCard({ customer, isClone = false }: CardProps) {
+function CustomerCard({ customer, clickLocation, isClone = false }: CardProps) {
   return (
     <TrackingLink
       className={styles.card}
@@ -53,7 +56,7 @@ function CustomerCard({ customer, isClone = false }: CardProps) {
       clickType="Customer Proof"
       clickName="Customer Logo Link"
       clickText={customer.name}
-      clickLocation="Hero Customer Stories"
+      clickLocation={clickLocation}
       eventAttributes={{ target: '/customers/', customer: customer.name }}
       aria-label={customer.name}
       aria-hidden={isClone || undefined}
@@ -86,7 +89,13 @@ function CustomerCard({ customer, isClone = false }: CardProps) {
   )
 }
 
-export default function CustomerCarousel() {
+export default function CustomerCarousel({
+  clickLocation = DEFAULT_CLICK_LOCATION,
+  speed = SCROLL_SPEED,
+}: {
+  clickLocation?: string
+  speed?: number
+}) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const pillRef = useRef<HTMLDivElement>(null)
@@ -122,8 +131,8 @@ export default function CustomerCarousel() {
     window.addEventListener('resize', measureSet)
 
     let offset = 0
-    let currentSpeed = SCROLL_SPEED
-    let targetSpeed = SCROLL_SPEED
+    let currentSpeed = speed
+    let targetSpeed = speed
     let lastTime = 0
     let rafId = 0
     let running = false
@@ -212,7 +221,7 @@ export default function CustomerCarousel() {
       }
 
       activeCard = null
-      targetSpeed = SCROLL_SPEED
+      targetSpeed = speed
       track.classList.remove(styles.hasHover)
       pill.classList.remove(styles.pillVisible)
     }
@@ -247,18 +256,23 @@ export default function CustomerCarousel() {
         card.removeEventListener('mouseleave', onLeave)
       })
     }
-  }, [mounted])
+  }, [mounted, speed])
 
   return (
     <div className={styles.carousel}>
       <div className={styles.wrapper} ref={wrapperRef}>
         <div className={styles.track} ref={trackRef}>
           {CUSTOMER_STORY_LOGOS.map((customer) => (
-            <CustomerCard key={customer.name} customer={customer} />
+            <CustomerCard key={customer.name} customer={customer} clickLocation={clickLocation} />
           ))}
           {[1, 2].map((clone) =>
             CUSTOMER_STORY_LOGOS.map((customer) => (
-              <CustomerCard key={`${customer.name}-clone-${clone}`} customer={customer} isClone />
+              <CustomerCard
+                key={`${customer.name}-clone-${clone}`}
+                customer={customer}
+                clickLocation={clickLocation}
+                isClone
+              />
             ))
           )}
         </div>

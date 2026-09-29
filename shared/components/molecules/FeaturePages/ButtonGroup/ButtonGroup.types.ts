@@ -1,6 +1,12 @@
+export type ButtonGroupVariant =
+  'default' | 'secondary' | 'ghost' | 'tactilePrimary' | 'tactileSecondary'
+
 export interface ButtonGroupButtonBase {
   text: string
-  variant: 'default' | 'secondary' | 'ghost'
+  variant: ButtonGroupVariant
+  size?: 'default' | 'sm' | 'lg'
+  /** Defaults to the pill shape; pass 'default' for the squarer corner radius. */
+  rounded?: 'default' | 'full'
   icon?: React.ReactNode
   className?: string
   tracking?: {

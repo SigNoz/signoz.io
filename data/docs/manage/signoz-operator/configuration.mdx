@@ -1,0 +1,151 @@
+---
+date: 2026-09-24
+title: Configure the SigNoz Operator - Auth, TLS & Namespaces
+description: Configure SigNoz Operator connections to share one API key across namespaces, send custom auth headers, trust a private CA, and manage several instances.
+doc_type: howto
+---
+
+## Overview
+
+A `ProviderConfig` connects the SigNoz Operator to a SigNoz instance. The default `ProviderConfig` from the overview sends the API key in the `SIGNOZ-API-KEY` header to one instance. Change it only if you need a shared connection, a different header, a private CA, or more than one instance.
+
+## Prerequisites
+
+- The [SigNoz Operator](https://signoz.io/docs/manage/signoz-operator/overview/) installed in your cluster.
+- Your SigNoz URL and a [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) API key.
+
+## Share One SigNoz Connection Across Namespaces
+
+A `ProviderConfig` applies to one namespace. A `ClusterProviderConfig` has the same `spec`, but resources in every namespace can use it. The operator reads its Secret from the operator namespace, `signoz-operator-system`.
+
+Create the Secret in the operator namespace:
+
+```bash
+kubectl create secret generic signoz-api -n signoz-operator-system --from-literal=token=<your-signoz-api-key>
+```
+
+<Admonition type="warning">
+Do not commit the API key to Git in a Secret manifest. To manage the Secret with GitOps, encrypt it or sync it from a secret store with a tool such as <a href="https://github.com/getsops/sops" target="_blank" rel="noopener noreferrer nofollow">SOPS</a>, <a href="https://github.com/bitnami-labs/sealed-secrets" target="_blank" rel="noopener noreferrer nofollow">Sealed Secrets</a>, or <a href="https://external-secrets.io" target="_blank" rel="noopener noreferrer nofollow">External Secrets Operator</a>.
+</Admonition>
+
+Save this manifest as `signoz-cluster-provider.yaml`:
+
+```yaml:signoz-cluster-provider.yaml
+apiVersion: resources.signoz.io/v1alpha1
+kind: ClusterProviderConfig
+metadata:
+  name: org-signoz
+spec:
+  endpoint:
+    value: <your-signoz-url>
+  auth:
+    header:
+      valueFrom:
+        secretKeyRef:
+          name: signoz-api
+          key: token
+```
+
+**Verify these values:**
+
+- `<your-signoz-api-key>`: The key of your SigNoz [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/).
+- `<your-signoz-url>`: The URL that you use to open SigNoz in a browser, for example `https://<your-workspace>.<region>.signoz.cloud` for SigNoz Cloud.
+
+Apply the manifest:
+
+```bash
+kubectl apply -f signoz-cluster-provider.yaml
+```
+
+A resource in any namespace uses the `ClusterProviderConfig` with this reference:
+
+```yaml
+spec:
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: org-signoz
+```
+
+<Admonition type="warning">
+Resources in every namespace that name a `ClusterProviderConfig` use the same API key. Give that key only the roles that all of those namespaces need.
+</Admonition>
+
+## Send the API Key in a Different Header
+
+By default, the operator sends the key in the `SIGNOZ-API-KEY` header. If a gateway in front of SigNoz expects a different header, set `auth.header.name`. To send `Authorization: Bearer <token>`, also set `auth.header.scheme`. The Secret holds only the token:
+
+```yaml
+spec:
+  auth:
+    header:
+      name: Authorization
+      scheme: Bearer
+      valueFrom:
+        secretKeyRef:
+          name: signoz-api
+          key: token
+```
+
+## Keep the Endpoint in the Secret
+
+To keep the endpoint out of the manifest, read it from the same Secret as the API key:
+
+```yaml
+spec:
+  endpoint:
+    valueFrom:
+      secretKeyRef:
+        name: signoz-conn
+        key: endpoint
+  auth:
+    header:
+      valueFrom:
+        secretKeyRef:
+          name: signoz-conn
+          key: token
+```
+
+Both `endpoint` and `auth.header` also accept `configMapKeyRef` in place of `secretKeyRef`.
+
+## Trust a Private CA for a Self-Hosted Instance
+
+If your self-hosted SigNoz uses a certificate from a private CA (certificate authority), put the CA bundle in a Secret and reference it in `tls.caSecretRef`:
+
+```yaml
+spec:
+  tls:
+    caSecretRef:
+      name: signoz-ca
+      key: ca.crt
+```
+
+Put the CA Secret in the same namespace as the `ProviderConfig`. For a `ClusterProviderConfig`, put it in the operator namespace, `signoz-operator-system`.
+
+## Manage More Than One SigNoz Instance
+
+Create one `ProviderConfig` for each instance, for example `staging` and `prod`. Each resource selects its instance with `spec.providerConfigRef.name`:
+
+```yaml
+spec:
+  providerConfigRef:
+    name: staging
+```
+
+## Validate
+
+After you apply a changed `ProviderConfig` or `ClusterProviderConfig`, make sure that it is ready:
+
+```bash
+kubectl get providerconfig prod -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+```
+
+For a `ClusterProviderConfig`, replace `providerconfig prod` with `clusterproviderconfig org-signoz`. The command prints `True` when the operator can read the endpoint and the API key. Then make sure that the resources that use it show `READY` as `True` in `kubectl get`.
+
+## Next Steps
+
+- For every field of `ProviderConfig`, see the [SigNoz Operator reference](https://signoz.io/docs/manage/signoz-operator/reference/#providerconfig-fields).
+- If a resource does not become ready, see [Troubleshooting](https://signoz.io/docs/manage/signoz-operator/overview/#troubleshooting).
+
+## Get Help
+
+<GetHelp />
