@@ -3,9 +3,12 @@
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
 import { useLogEvent } from 'hooks/useLogEvent'
-import Button, { ButtonProps } from '@/components/ui/Button'
+import { buttonVariants } from '@/components/ui/Button'
 
-interface TrackingButtonProps extends Omit<ButtonProps, 'onClick'> {
+interface TrackingButtonProps extends Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  'onClick'
+> {
   children: ReactNode
   clickType: string
   clickName: string
@@ -15,7 +18,8 @@ interface TrackingButtonProps extends Omit<ButtonProps, 'onClick'> {
 }
 
 /**
- * A wrapper around Button component that tracks clicks using Mixpanel
+ * A button that tracks clicks using Mixpanel. Styling is the caller's job —
+ * pass `buttonVariants({ ... })` if you want the shared button look.
  */
 export default function TrackingButton({
   children,
@@ -23,19 +27,14 @@ export default function TrackingButton({
   clickName,
   clickLocation,
   clickText,
-  className,
   onClick,
   type = 'button',
-  disabled,
-  id,
-  title,
   ...rest
 }: TrackingButtonProps) {
   const pathname = usePathname()
   const logEvent = useLogEvent()
 
   const handleClick = () => {
-    // Log the click event
     logEvent({
       eventName: 'Website Click',
       eventType: 'track',
@@ -48,24 +47,14 @@ export default function TrackingButton({
       },
     })
 
-    // Call the original onClick handler if provided
     if (onClick) {
       onClick()
     }
   }
 
   return (
-    <Button
-      unstyled
-      className={className}
-      onClick={handleClick}
-      type={type}
-      disabled={disabled}
-      id={id}
-      title={title}
-      {...rest}
-    >
+    <button onClick={handleClick} type={type} {...rest}>
       {children}
-    </Button>
+    </button>
   )
 }
