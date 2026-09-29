@@ -152,6 +152,7 @@ Then run your application through the `opentelemetry-instrument` wrapper:
 OTEL_SERVICE_NAME=cart-service \
 OTEL_TRACES_EXPORTER=otlp \
 OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
 opentelemetry-instrument python app.py
 ```
 
@@ -376,7 +377,10 @@ resource = Resource.create({
 
 provider = TracerProvider(resource=resource)
 provider.add_span_processor(
-    BatchSpanProcessor(OTLPSpanExporter(endpoint="https://ingest.<region>.signoz.cloud:443"))
+    BatchSpanProcessor(OTLPSpanExporter(
+        endpoint="https://ingest.<region>.signoz.cloud:443",
+        headers={"signoz-ingestion-key": "<your-ingestion-key>"},
+    ))
 )
 trace.set_tracer_provider(provider)
 ```
@@ -393,6 +397,7 @@ OpenTelemetry SDKs are designed to be configured through [environment variables]
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Where to send telemetry | `https://ingest.<region>.signoz.cloud:443` |
 | `OTEL_TRACES_SAMPLER` | Which sampler to use | `parentbased_traceidratio` |
 | `OTEL_TRACES_SAMPLER_ARG` | Sampler configuration | `0.1` (10% sampling) |
+| `OTEL_EXPORTER_OTLP_HEADERS` | Auth headers for the backend (unneeded if using local Collector) | `signoz-ingestion-key=<key>` |
 | `OTEL_RESOURCE_ATTRIBUTES` | Additional resource metadata | `deployment.environment=prod` |
 
 This convention means the same application image can run in development (with 100% sampling to a local Collector) and production (with 10% sampling to a remote backend) by changing environment variables at deploy time, with no code changes.
