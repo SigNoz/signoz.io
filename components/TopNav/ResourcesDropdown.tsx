@@ -2,7 +2,6 @@
 
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
-import { Button } from '@/components/ui/Button'
 import { resourcesDropdownItems, ResourceItem, SECTION_HEADING_CLASS } from './constants'
 import { useNavDropdown } from './NavDropdownContext'
 import { NAV_PILL_CLASS } from './NavPill'
@@ -12,9 +11,7 @@ export default function ResourcesDropdown() {
 
   return (
     <div onPointerEnter={open} onPointerLeave={close} className="flex items-center">
-      <Button
-        isButton
-        unstyled
+      <button
         type="button"
         ref={triggerRef}
         className={NAV_PILL_CLASS}
@@ -27,7 +24,7 @@ export default function ResourcesDropdown() {
             className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
           />
         </div>
-      </Button>
+      </button>
     </div>
   )
 }

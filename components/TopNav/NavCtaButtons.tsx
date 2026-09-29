@@ -20,7 +20,7 @@ export default function NavCtaButtons({ location, className, onNavigate }: NavCt
   return (
     <div className={cn('flex items-center gap-2', className)}>
       <TrackingButton
-        className={cn(buttonVariants({ variant: 'tactileSecondary' }), 'no-underline')}
+        className={buttonVariants({ variant: 'secondary', size: 'sm' })}
         clickType="Secondary CTA"
         clickName="Sign In Button"
         clickText="Sign In"
@@ -40,7 +40,7 @@ export default function NavCtaButtons({ location, className, onNavigate }: NavCt
         clickLocation={location}
         onClick={onNavigate}
       >
-        <Button asChild variant="default" tactile className="start-free-trial-btn no-underline">
+        <Button asChild variant="default" size="sm" className="start-free-trial-btn">
           <span id={location === 'Top Navbar' ? 'btn-get-started-website-navbar' : undefined}>
             Get Started
             <ArrowRight size={14} aria-hidden="true" />
