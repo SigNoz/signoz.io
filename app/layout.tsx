@@ -12,6 +12,7 @@ import { AnonymousIdSetter } from './anonymous-id-setter'
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
+  variable: '--font-inter',
 })
 
 // Restore Next 14 implicit fetch caching — Next 15 defaults to no-cache.
@@ -62,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang={siteMetadata.language}
-      className={`dark ${inter.className}`}
+      className={`dark ${inter.className} ${inter.variable}`}
       data-theme="default"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
