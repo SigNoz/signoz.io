@@ -55,7 +55,12 @@ export default function StabilityBadge({
           {label}
         </button>
       ) : (
-        <span role="note" aria-label={`${copy.label}: ${copy.description}`} className={className}>
+        <span
+          role="note"
+          aria-label={`${copy.label}: ${copy.description}`}
+          tabIndex={0}
+          className={className}
+        >
           {label}
         </span>
       )}

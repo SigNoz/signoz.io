@@ -4,9 +4,9 @@ import { parseSemverTag } from '@/utils/semverTags'
 import {
   fetchOpenAPISpec,
   fetchAvailableAPIVersions,
-  getStabilityIndex,
   resolveLatestVersion,
 } from '@/utils/apiReference'
+import { parseStabilityIndex } from '@/utils/apiReferenceStability'
 import siteMetadata from '@/data/siteMetadata'
 import OpenAPISpec from '@/components/OpenAPISpec'
 import APIVersionSwitcher from '@/components/APIVersionSwitcher'
@@ -64,14 +64,14 @@ export default async function APIReferencePage(props: PageProps) {
 
   if (!parseSemverTag(version)) notFound()
 
-  const [specContent, versionInfos, stability] = await Promise.all([
+  const [specContent, versionInfos] = await Promise.all([
     fetchOpenAPISpec(version),
     fetchAvailableAPIVersions(),
-    getStabilityIndex(version),
   ])
 
   if (!specContent) notFound()
 
+  const stability = parseStabilityIndex(specContent)
   const availableVersions = versionInfos.map((v) => v.version)
 
   return (

@@ -12,8 +12,6 @@ import {
   API_VERSIONS_CACHE_TAG,
 } from '@/constants/apiReference'
 import { githubFetchHeaders } from '@/utils/github'
-import { parseStabilityIndex } from '@/utils/apiReferenceStability'
-import { EMPTY_STABILITY_INDEX, type StabilityIndex } from '@/constants/apiReferenceStability'
 
 const GITHUB_API_URL = 'https://api.github.com/repos/SigNoz/signoz/releases'
 const PER_PAGE = 100
@@ -129,15 +127,4 @@ export async function fetchAvailableAPIVersions(): Promise<APIVersionInfo[]> {
 export async function resolveLatestVersion(): Promise<string | null> {
   const versions = await fetchAvailableAPIVersions()
   return versions.length > 0 ? versions[0].version : null
-}
-
-export async function getStabilityIndex(version: string): Promise<StabilityIndex> {
-  'use cache'
-  cacheLife({ revalidate: API_SPEC_REVALIDATE_SECONDS })
-  cacheTag(API_VERSIONS_CACHE_TAG)
-
-  const spec = await fetchOpenAPISpec(version)
-  if (!spec) return EMPTY_STABILITY_INDEX
-
-  return parseStabilityIndex(spec)
 }
