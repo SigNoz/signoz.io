@@ -113,7 +113,7 @@ For most common protocols (HTTP, gRPC, messaging systems), OpenTelemetry's instr
 
 OpenTelemetry splits its tracing surface into two layers: the **<a href="https://opentelemetry.io/docs/specs/otel/trace/api/" rel="noopener noreferrer nofollow" target="_blank">Trace API</a>**, which your application code calls to create spans and propagate context, and the **<a href="https://opentelemetry.io/docs/specs/otel/trace/sdk/" rel="noopener noreferrer nofollow" target="_blank">Trace SDK</a>**, which does the actual work of recording, processing, and exporting those spans.
 
-The separation exists for a specific reason. Without an SDK present, every API call quietly returns a valid but empty result. This means that the cod de doesn't emit any spans, doesn't export any data and introduces no additional overhead. This makes the API safe to depend on in shared libraries and frameworks, as the library can instrument itself without forcing its users to run any particular observability stack.
+The separation exists for a specific reason. Without an SDK present, every API call quietly returns a valid but empty result. This means that the code doesn't emit any spans, doesn't export any data and introduces no additional overhead. This makes the API safe to depend on in shared libraries and frameworks, as the library can instrument itself without forcing its users to run any particular observability stack.
 
 Whether tracing is actually active becomes a decision for the application owner, made at deployment time by installing and configuring the SDK. For a more detailed comparison of these two layers, see [OpenTelemetry API vs SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/).
 
@@ -124,3 +124,199 @@ Once spans are recorded by the SDK, they need to be transmitted to an observabil
 OTLP organizes data in a three-tiered hierarchy of `Resource → Scope → Data` that eliminates metadata redundancy across batches. It supports transmission over both gRPC (the default, on port 4317) and HTTP (on port 4318), with <a href="https://protobuf.dev/" rel="noopener noreferrer nofollow" target="_blank">Protobuf</a> encoding for compact, schema-safe payloads.
 
 Because OTLP is an open standard, any compatible observability backend can ingest your traces without translation or data loss. This is what makes OpenTelemetry genuinely vendor-neutral — you instrument once, and the choice of backend is a configuration change.
+
+
+## Generating Traces from your Applications
+
+Understanding the data model is step one. The next step is generating trace data from your applications. OpenTelemetry provides two complementary approaches: auto-instrumentation, which covers common libraries and frameworks with minimal setup, and manual instrumentation, which lets you trace the business logic that only you know about.
+
+### Auto-Instrumentation
+
+For web services in most popular programming languages, auto-instrumentation is the fastest path to useful traces. It works by <a href="https://github.com/open-telemetry/opentelemetry-python-contrib/tree/270d4b024ed8a8e3ce271641ebf7db651a3298c4/instrumentation" rel="noopener noreferrer nofollow" target="_blank">wrapping well-known libraries</a> (Flask, Django, Requests, SQLAlchemy, Redis, and others) so that they automatically produce spans for every HTTP request, database query, and outbound call your application handles.
+
+There are two ways to enable it:
+
+**Option 1: Zero-code with the `opentelemetry-instrument` CLI**
+
+Install the base packages and let the bootstrap command detect your installed libraries:
+
+```bash
+pip install opentelemetry-distro opentelemetry-exporter-otlp
+
+opentelemetry-bootstrap -a install
+```
+
+Then run your application through the `opentelemetry-instrument` wrapper:
+
+```bash
+OTEL_SERVICE_NAME=cart-service \
+OTEL_TRACES_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+opentelemetry-instrument python app.py
+```
+
+<KeyPointCallout>
+
+The code snippet above assumes you're directly exporting traces to an OpenTelemetry backend like SigNoz Cloud.
+
+To export to a local Collector instance, set the `OTEL_EXPORTER_OTLP_ENDPOINT` [environment variable](https://signoz.io/blog/otel-environment-variables/) to:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 \
+```
+
+</KeyPointCallout>
+
+With this setup, every inbound HTTP request, every outbound HTTP call, and every database query produces a span automatically. No application code changes are required.
+
+**Option 2: Programmatic setup**
+
+If you need finer control over which libraries are instrumented, you can configure it explicitly in code:
+
+```python
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+
+FlaskInstrumentor().instrument()      # All Flask routes → SERVER spans
+RequestsInstrumentor().instrument()   # All outbound HTTP calls → CLIENT spans
+SQLAlchemyInstrumentor().instrument() # All SQL queries → CLIENT spans
+```
+
+Every Python instrumentation object has an [`uninstrument` method](https://github.com/open-telemetry/opentelemetry-python-contrib/blob/1346d1b8ed57a11389579621546abccebc96eaa0/opentelemetry-instrumentation/src/opentelemetry/instrumentation/instrumentor.py#L119). You can disable spans for specific libraries to reduce noise or potentially manage costs.
+
+```python
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+
+SQLAlchemyInstrumentor().uninstrument() # Performs the uninstrumentation flow
+```
+
+Both approaches produce the same result: spans that capture timing, status codes, and relevant attributes for every instrumented operation. The CLI approach is simpler for getting started, while the programmatic approach gives you control over instrumentation ordering and configuration.
+
+### Manual Instrumentation
+
+Auto-instrumentation handles the infrastructure layer (HTTP, databases, messaging) but it knows nothing about your business logic. If you need to trace domain-specific operations like payment processing, order validation, or inventory reservation, you instrument those manually using the Trace API.
+
+The foundation is a **Tracer**, which you obtain once from the global OpenTelemetry instance:
+
+```python
+from opentelemetry import trace
+
+tracer = trace.get_tracer("cart-service")
+```
+
+**Creating a span**
+
+The simplest way to create a span in Python is with `start_as_current_span`, used as a context manager. The span starts when the block is entered and ends automatically when the block exits, even if an exception is raised:
+
+```python
+def process_checkout(order_id: str, user_id: str):
+    with tracer.start_as_current_span("checkout.process") as span:
+        span.set_attribute("order.id", order_id)
+        span.set_attribute("user.id", user_id)
+
+        validate_order(order_id)
+        charge_payment(order_id)
+        confirm_order(order_id)
+```
+
+**Adding attributes**
+
+Attributes are how you attach the specifics that make a span useful for debugging. Use them for identifiers, status codes, and business context that you will want to filter and query later:
+
+```python
+span.set_attribute("order.id", order_id)
+span.set_attribute("payment.provider", "stripe")
+span.set_attribute("payment.amount_cents", 4999)
+span.set_attribute("customer.tier", "premium")
+```
+
+Where possible, follow OpenTelemetry's Semantic Conventions for standardized attribute names. For custom business attributes, use a consistent namespace (like `order.*` or `payment.*`) to keep things organized.
+
+**Recording events**
+
+Events mark specific moments within a span's lifetime. They are useful for logging state transitions or capturing detail that does not warrant a separate span:
+
+```python
+with tracer.start_as_current_span("checkout.process") as span:
+    validate_order(order_id)
+    span.add_event("order.validated", {"validation.result": "passed"})
+
+    charge_payment(order_id)
+    span.add_event("payment.charged", {
+        "payment.provider": "stripe",
+        "payment.amount_cents": 4999,
+    })
+```
+
+**Nested spans and automatic parenting**
+
+When you create a span inside the scope of another span, the SDK automatically sets up the parent-child relationship. You do not need to pass span references between functions:
+
+```python
+def process_checkout(order_id: str):
+    with tracer.start_as_current_span("checkout.process"):
+        validate_order(order_id)    # creates a child span
+        charge_payment(order_id)    # creates another child span
+
+def validate_order(order_id: str):
+    with tracer.start_as_current_span("checkout.validate") as span:
+        span.set_attribute("order.id", order_id)
+        # validation logic...
+
+def charge_payment(order_id: str):
+    with tracer.start_as_current_span("payment.charge") as span:
+        span.set_attribute("order.id", order_id)
+        span.set_attribute("payment.provider", "stripe")
+        # payment logic...
+```
+
+The resulting trace tree looks like this:
+
+```
+checkout.process (350ms)
+├── checkout.validate (45ms)
+└── payment.charge (280ms)
+```
+
+**Recording errors**
+
+When an operation fails, you should capture both the exception detail and the span status. `record_exception` adds the stack trace as an event on the span, while `set_status` marks the span as failed so backends can aggregate error rates:
+
+```python
+from opentelemetry.trace import StatusCode
+
+def charge_payment(order_id: str):
+    with tracer.start_as_current_span("payment.charge") as span:
+        span.set_attribute("order.id", order_id)
+        try:
+            result = payment_gateway.charge(order_id)
+            span.set_status(StatusCode.OK)
+            return result
+        except PaymentError as e:
+            span.record_exception(e)
+            span.set_status(StatusCode.ERROR, str(e))
+            raise
+```
+
+Note that `record_exception` does not set the span status by itself. You need both calls: one to capture the exception details as an event, and one to mark the span as failed.
+
+<KeyPointCallout title="Always Use Context Managers for Spans">
+
+Python's `with` statement guarantees that `span.end()` is called even if the code inside raises an exception. If you create spans without a context manager (using `tracer.start_span()` directly), you must call `span.end()` in a `finally` block. An unended span stays in memory and is never exported.
+
+</KeyPointCallout>
+
+
+### Choosing What to Instrument
+
+Not every function needs a span. Over-instrumentation clutters your traces with noise and adds measurable overhead in high-throughput services. Focus manual instrumentation on operations where timing and metadata provide actionable insight:
+
+- **Service entry points**: incoming HTTP handlers, gRPC methods, message consumers. Auto-instrumentation typically covers these already, so verify before duplicating.
+- **Outbound calls**: HTTP requests to other services, database queries, cache lookups. Also often covered by auto-instrumentation.
+- **Business-critical operations**: payment processing, order validation, inventory checks, permission evaluations. These are the operations where failures and latency directly impact users, and they are invisible to auto-instrumentation.
+- **Long-running or expensive operations**: batch jobs, report generation, file processing. Spans here help you understand where time is actually being spent.
+
+Skip internal utility functions, data transformations, and in-memory computations unless you have a specific latency concern.
+
+A good rule of thumb to keep in mind is: **a trace with 10 meaningful spans tells you more than one with 200 trivial ones**.
