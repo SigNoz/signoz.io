@@ -54,7 +54,7 @@ const Card: React.FC<CardProps> = ({
   className = '',
 }) => {
   const logoSizeClassnames =
-    logoSize === 24 ? 'w-6 h-6 fill-signoz_vanilla-400' : 'w-4 h-4 fill-signoz_vanilla-400'
+    logoSize === 24 ? 'w-6 h-6 fill-[var(--l2-foreground)]' : 'w-4 h-4 fill-[var(--l2-foreground)]'
 
   const subTitleSizeClassnames =
     subTitleSize === 2 ? 'text-2xl font-semibold' : 'text-base font-semibold'
@@ -83,7 +83,7 @@ const Card: React.FC<CardProps> = ({
   return (
     <div
       className={cn(
-        'col-span-2 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-9 sm:col-span-1',
+        'col-span-2 border !border-b-0 !border-r-0 border-dashed border-[var(--l2-border)] bg-[var(--l1-background)] p-9 sm:col-span-1',
         className
       )}
     >
@@ -100,22 +100,24 @@ const Card: React.FC<CardProps> = ({
             />
           )
         ) : null}
-        <span className="text-sm font-medium uppercase tracking-[0.05em] text-signoz_vanilla-400">
+        <span className="text-sm font-medium uppercase tracking-[0.05em] text-[var(--l2-foreground)]">
           {iconTag}
         </span>
-        <span className="text-2xl font-semibold text-signoz_vanilla-100">{title}</span>
+        <span className="text-2xl font-semibold text-[var(--l1-foreground)]">{title}</span>
       </div>
 
       <div>
-        <span className="font-mono text-2xl font-normal text-signoz_slate-50">{number}</span>
+        <span className="font-mono text-2xl font-normal text-[var(--l2-foreground)]">{number}</span>
         {subTitle ? (
-          <p className={`${subTitleSizeClassnames} m-0 pt-4 text-signoz_vanilla-100`}>{subTitle}</p>
+          <p className={`${subTitleSizeClassnames} m-0 pt-4 text-[var(--l1-foreground)]`}>
+            {subTitle}
+          </p>
         ) : null}
       </div>
 
       <div>
         {text ? (
-          <span className="my-3 block max-w-md text-xl font-semibold leading-9 text-signoz_vanilla-400">
+          <span className="my-3 block max-w-md text-xl font-semibold leading-9 text-[var(--l2-foreground)]">
             {text}
           </span>
         ) : null}
@@ -123,7 +125,7 @@ const Card: React.FC<CardProps> = ({
 
       <div>
         {stats ? (
-          <p className="mb-2 block pt-4 font-mono text-[32px] font-semibold leading-10 text-signoz_vanilla-100">
+          <p className="mb-2 block pt-4 font-mono text-[32px] font-semibold leading-10 text-[var(--l1-foreground)]">
             {stats}
           </p>
         ) : null}
@@ -132,7 +134,7 @@ const Card: React.FC<CardProps> = ({
       {descriptionArray.map((desc, index) => (
         <p
           key={index}
-          className="mb-3 mt-2 text-base font-normal leading-9 text-signoz_vanilla-400"
+          className="mb-3 mt-2 text-base font-normal leading-9 text-[var(--l2-foreground)]"
         >
           {desc}
         </p>

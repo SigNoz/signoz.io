@@ -4,7 +4,7 @@ import TrackingLink from '@/components/TrackingLink'
 
 export default function GetStartedSigNoz() {
   return (
-    <div className="get-started-signoz">
+    <div>
       <p>
         SigNoz Cloud is the easiest way to run SigNoz.{' '}
         <TrackingLink
@@ -13,7 +13,7 @@ export default function GetStartedSigNoz() {
           clickName="Sign Up Link"
           clickLocation="Get Started SigNoz Card"
           clickText="Sign up"
-          className="font-medium text-blue-600 hover:underline"
+          className="font-medium text-[var(--accent-primary)] hover:underline"
         >
           Sign up
         </TrackingLink>{' '}
@@ -48,7 +48,7 @@ export default function GetStartedSigNoz() {
           clickName="GitHub Repository Link"
           clickLocation="Get Started SigNoz Card"
           clickText="open-source SigNoz"
-          className="font-medium text-blue-600 hover:underline"
+          className="font-medium text-[var(--accent-primary)] hover:underline"
         >
           open-source SigNoz
         </TrackingLink>{' '}
@@ -59,7 +59,7 @@ export default function GetStartedSigNoz() {
           clickName="Docs Link"
           clickLocation="Get Started SigNoz Card"
           clickText="instructions"
-          className="font-medium text-blue-600 hover:underline"
+          className="font-medium text-[var(--accent-primary)] hover:underline"
         >
           instructions
         </TrackingLink>{' '}

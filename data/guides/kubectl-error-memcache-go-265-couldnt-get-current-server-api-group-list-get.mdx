@@ -7,11 +7,8 @@ authors: [bhavya_sachdeva]
 description: Learn how to fix the kubectl error "[memcache.go -265] couldn't get current server API group list - Get". This guide provides step-by-step troubleshooting tips for Kubernetes users.
 keywords: [kubectl error, API group list, Kubernetes troubleshooting, memcache.go:265, kubectl debugging, Kubernetes API server, SigNoz]
 related_articles:
-  - '/guides/kubernetes-hpa-unable-to-get-metrics-for-resource-memory-no-metrics-returned-from-resource-metrics-api'
-  - '/blog/kubectl-logs'
-  - '/guides/kubernetes-monitoring-best-practices'
-  - '/blog/using-signoz-to-monitor-your-kubernetes-cluster'
-  - '/guides/kubernetes-monitoring-prometheus'
+  - '/blog/kubectl-logs-tail'
+  - '/blog/kubernetes-monitoring'
   - '/guides/rabbit-mq-error-while-waiting-for-mnesia-tables'
 ---
 
@@ -72,7 +69,7 @@ To pinpoint the exact cause of the error, use these debugging techniques:
 
        
 
-1. Analyze server logs: Review the Kubernetes API server logs for any error messages or warnings related to API group list retrieval. You can find logs in `/var/log/kubernetes/kube-apiserver.log` on the control plane locally or integrate SigNoz to view the [pod logs.](https://signoz.io/blog/kubernetes-logging/)
+1. Analyze server logs: Review the Kubernetes API server logs for any error messages or warnings related to API group list retrieval. You can find logs in `/var/log/kubernetes/kube-apiserver.log` on the control plane locally or integrate SigNoz to view the [pod logs.](https://signoz.io/blog/opentelemetry-kubernetes/)
 2. Check network connectivity: Sometimes there is an issue with network connectivity. Verify that your local machine can reach the API server using the below command. Use this command `curl -k https://<api-server-endpoint>` to test whether your local machine can reach the Kubernetes API server. If the connection fails, it suggests a network issue, such as a misconfigured firewall or DNS problem.  `curl` command fails to connect, you might need to check your firewall settings to ensure that traffic to the API server's port (typically 6443) is allowed. Alternatively, verify that your DNS configuration correctly resolves the API server's hostname.You will see in the below section how to fix this network issue. Sometimes you need to change the endpoints if they are configured in the wrong way.
 
 <Figure src="/img/guides/2024/09/kubectl-error-memcache-go-265-couldnt-get-current-server-api-group-list-get-Screenshot_2024-08-29_at_10.00.10_AM.webp" alt="Network connectivity" caption="Network connectivity" />

@@ -69,6 +69,20 @@ test('extractAssetPaths', async (t) => {
     assert.equal(result.length, 6)
   })
 
+  await t.test('extracts lightSrc alongside src on the same tag', () => {
+    const content = '<Figure src="/img/dark.png" lightSrc="/img/light.png" alt="x" />'
+    const result = extractAssetPaths(content, {})
+    assert.ok(result.includes('/img/dark.png'))
+    assert.ok(result.includes('/img/light.png'))
+  })
+
+  await t.test('ignores http URLs in lightSrc', () => {
+    const content = '<Figure src="/img/dark.png" lightSrc="https://example.com/light.png" />'
+    const result = extractAssetPaths(content, {})
+    assert.equal(result.length, 1)
+    assert.ok(result.includes('/img/dark.png'))
+  })
+
   await t.test('extracts frontmatter asset paths', () => {
     const frontmatter = {
       image: '/img/cover.webp',
@@ -116,6 +130,18 @@ test('replaceAssetPaths', async (t) => {
       'https://cdn.example.com'
     )
     assert.ok(result.includes('https://cdn.example.com/img/hero.webp'))
+  })
+
+  await t.test('replaces lightSrc attribute paths without touching src', () => {
+    const content = '<Figure src="/img/dark.png" lightSrc="/img/light.png" />'
+    const { content: result } = replaceAssetPaths(
+      content,
+      {},
+      ['/img/light.png'],
+      'https://cdn.example.com'
+    )
+    assert.ok(result.includes('lightSrc="https://cdn.example.com/img/light.png"'))
+    assert.ok(result.includes('src="/img/dark.png"'))
   })
 
   await t.test('replaces frontmatter asset paths', () => {

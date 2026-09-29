@@ -60,7 +60,7 @@ const CarouselCards: React.FC<{
                 className={`transform cursor-pointer transition-all duration-500 ease-in-out ${
                   activeIndex === index
                     ? 'border-signoz_robin-500/10 bg-signoz_robin-500/10 shadow-lg'
-                    : 'border-signoz_slate-400 bg-signoz_ink-400 hover:bg-signoz_ink-300'
+                    : 'border-[var(--l2-border)] bg-[var(--l2-background)] hover:bg-[var(--l1-background-hover)]'
                 } relative overflow-hidden rounded-lg border p-4`}
               >
                 <div className="flex h-fit gap-2">
@@ -74,14 +74,18 @@ const CarouselCards: React.FC<{
                   <div>
                     <h3
                       className={`mb-2 text-sm font-semibold transition-colors duration-300 ${
-                        activeIndex === index ? 'text-signoz_robin-600' : 'text-signoz_vanilla-100'
+                        activeIndex === index
+                          ? 'text-signoz_robin-600'
+                          : 'text-[var(--l1-foreground)]'
                       }`}
                     >
                       {item.title}
                     </h3>
                     <p
                       className={`m-0 text-xs transition-colors duration-300 ${
-                        activeIndex === index ? 'text-signoz_robin-200' : 'text-signoz_vanilla-100'
+                        activeIndex === index
+                          ? 'text-signoz_robin-200'
+                          : 'text-[var(--l1-foreground)]'
                       }`}
                     >
                       {item.description}

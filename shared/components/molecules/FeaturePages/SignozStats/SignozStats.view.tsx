@@ -2,18 +2,20 @@ import SectionLayout from '../SectionLayout/SectionLayout.view'
 import { BookOpen, Mail } from 'lucide-react'
 import ButtonGroup from '../ButtonGroup/ButtonGroup.view'
 import StatsCard from '@/components/Card/card'
+import downloadIconUrl from '@/public/img/index_features/download.svg?url'
+import githubIconUrl from '@/public/img/index_features/github.svg?url'
 
 const SigNozStats = () => {
   const STATS_LIST = [
     {
       id: 1,
-      logo: '/img/index_features/download.svg',
+      logo: downloadIconUrl,
       name: 'OSS Downloads',
       value: '10 million+',
     },
     {
       id: 2,
-      logo: '/img/index_features/github.svg',
+      logo: githubIconUrl,
       name: 'GitHub Stars',
       value: '25k+',
     },
@@ -23,9 +25,9 @@ const SigNozStats = () => {
     title,
     description,
   }) => (
-    <div className="rounded-md border border-signoz_slate-500 bg-signoz_ink-400 p-4">
-      <h3 className="mb-2 text-base font-medium text-signoz_vanilla-100">{title}</h3>
-      <p className="mb-0 text-sm font-normal text-signoz_vanilla-400">{description}</p>
+    <div className="rounded-md border border-[var(--l2-border)] bg-[var(--l2-background)] p-4">
+      <h3 className="mb-2 text-base font-medium text-[var(--l1-foreground)]">{title}</h3>
+      <p className="mb-0 text-sm font-normal text-[var(--l2-foreground)]">{description}</p>
     </div>
   )
 
@@ -65,8 +67,8 @@ const SigNozStats = () => {
 
   return (
     <SectionLayout variant="bordered" className="flex flex-col !px-0 md:flex-row">
-      <div className="flex-1 border-b border-dashed border-signoz_slate-400 md:border-b-0">
-        <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-4xl">
+      <div className="flex-1 border-b border-dashed border-[var(--l2-border)] md:border-b-0">
+        <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-[var(--l1-foreground)] sm:text-4xl">
           Developers <br />
           Love
           <br />
@@ -75,12 +77,12 @@ const SigNozStats = () => {
       </div>
 
       <div className="flex min-w-0 flex-[2_2_0%] flex-col">
-        <div className="border-l border-dashed border-signoz_slate-400 bg-transparent p-0">
+        <div className="border-l border-dashed border-[var(--l2-border)] bg-transparent p-0">
           <div className="p-10 md:p-6">
-            <h2 className="text-2xl font-bold text-signoz_vanilla-100">
+            <h2 className="text-2xl font-bold text-[var(--l1-foreground)]">
               Your data stays where you want
             </h2>
-            <p className="text-base text-signoz_vanilla-400">
+            <p className="text-base text-[var(--l2-foreground)]">
               Keep your data in the US, EU, or India with SigNoz Cloud, or run Self-Hosted SigNoz.
             </p>
             <div className="flex w-full flex-col gap-4">
@@ -89,7 +91,7 @@ const SigNozStats = () => {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-1 text-left md:grid-cols-2 [&>div]:!border-r [&>div]:border-l-0 [&>div]:border-signoz_slate-400">
+          <div className="grid grid-cols-1 text-left md:grid-cols-2 [&>div]:!border-r [&>div]:border-l-0 [&>div]:border-[var(--l2-border)]">
             {STATS_LIST.map((stat, index) => (
               <StatsCard
                 logo={stat.logo}
@@ -100,7 +102,7 @@ const SigNozStats = () => {
               />
             ))}
           </div>
-          <div className="border-t border-dashed border-signoz_slate-400 py-6 md:pl-10">
+          <div className="border-t border-dashed border-[var(--l2-border)] py-6 md:pl-10">
             <ButtonGroup
               buttons={communityButtons}
               className="flex-col flex-wrap gap-3 sm:flex-row"

@@ -129,6 +129,7 @@ const Tabs = ({
           '--tab-list-wrapper-secondary-padding-left': '0px',
           /* Short left gutter stub (faded in Tabs.module.css) */
           '--tab-border-spacer-min-width': 'var(--spacing-5)',
+          '--tab-gap': 'var(--spacing-6, 12px)',
           ...segmentedVars,
         } as React.CSSProperties
       }
@@ -150,7 +151,7 @@ const Tabs = ({
           )
         })}
       </TabsList>
-      <div className="mt-4">
+      <div data-tab-panels="" className="[&>[data-tab-value]>*:first-child]:mt-0">
         {visibleChildren.map((child) => {
           const isActive = child.props.value === activeTab
           return (

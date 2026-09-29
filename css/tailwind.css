@@ -5,6 +5,115 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Inline content links; mirrored by the typography `a` config in tailwind.config.js.
+   background-size fill instead of the footer's ::before pill so wrapped links keep it. */
+.content-link {
+  margin: 0 -3px;
+  padding: 0 3px;
+  border-radius: 2px;
+  color: var(--bg-robin-400);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--bg-robin-400) 60%, transparent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  background-image: linear-gradient(var(--bg-robin-400), var(--bg-robin-400));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition:
+    color 80ms cubic-bezier(0.2, 0.6, 0.2, 1),
+    background-size 80ms cubic-bezier(0.2, 0.6, 0.2, 1),
+    text-decoration-color 80ms cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+.content-link:hover,
+.content-link:focus-visible {
+  background-size: 100% 100%;
+  color: var(--l1-background);
+  text-decoration-color: transparent;
+}
+
+.content-link .glossary-info-icon {
+  display: inline-block;
+  margin-left: 3px;
+  vertical-align: calc(-0.09em - 2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content-link,
+  .prose a {
+    transition: none;
+  }
+}
+
+@keyframes hero-copy-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@layer utilities {
+  /* Section rules that fade toward their ends; pairs with border-* utilities. */
+  .rule-fade-x {
+    border-image: linear-gradient(
+        to right,
+        transparent,
+        var(--l2-border) 8%,
+        var(--l2-border) 92%,
+        transparent
+      )
+      1;
+  }
+
+  .rule-fade-y {
+    border-image: linear-gradient(
+        to bottom,
+        transparent,
+        var(--l2-border) 8%,
+        var(--l2-border) 92%,
+        transparent
+      )
+      1;
+  }
+
+  /* Hero copy entrance; CSS-only so the LCP text paints before hydration. */
+  .hero-copy-in {
+    animation: hero-copy-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--hero-copy-delay, 0s);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-copy-in {
+      animation: none;
+    }
+  }
+
+  /* Vertical column divider on the element's left edge. */
+  .vrule-solid {
+    position: relative;
+  }
+
+  .vrule-solid::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--l2-border);
+  }
+}
+
 .task-list-item::before {
   @apply hidden;
 }
@@ -14,7 +123,7 @@
 }
 
 .footnotes {
-  @apply mt-12 border-t border-gray-200 pt-8 dark:border-signoz_ink-500;
+  @apply mt-12 border-t border-[var(--l2-border)] pt-8;
 }
 
 .data-footnote-backref {
@@ -33,7 +142,7 @@
 
 @layer utilities {
   .bg-dot-pattern {
-    background: radial-gradient(circle, #ffffff 10%, transparent 5%);
+    background: radial-gradient(circle, var(--l1-foreground) 10%, transparent 5%);
     background-size: 12px 12px;
     opacity: 1;
   }
@@ -49,6 +158,31 @@
       rgba(11, 12, 14, 0.1) 0%,
       rgba(11, 12, 14, 0) 56.77%
     );
+  }
+
+  /* Frame_1862.webp — faint dot grid behind section headings: white dots at ~6% opacity on a
+     56×40px grid over a 3872×1048 canvas, rendered at 65% width ≈ 12×8px spacing */
+  .bg-heading-dot-grid {
+    position: relative;
+    isolation: isolate;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 65%;
+      aspect-ratio: 3872 / 1048;
+      z-index: -1;
+      pointer-events: none;
+      background-image: radial-gradient(
+        circle,
+        color-mix(in srgb, var(--l1-foreground) 6%, transparent) 1px,
+        transparent 1px
+      );
+      background-size: 12px 8px;
+    }
   }
 
   /* Perlin_noise.webp — horizontal dark vignette, transparent center oval */
@@ -508,7 +642,7 @@ pre.p-0 {
   --ifm-table-stripe-background: rgba(0, 0, 0, 0.03);
 
   --ifm-table-border-width: 1px;
-  --ifm-table-border-color: var(--ifm-color-emphasis-300);
+  --ifm-table-border-color: var(--l2-border);
 
   --ifm-table-head-background: inherit;
   --ifm-table-head-color: inherit;
@@ -1280,7 +1414,7 @@ hr {
 }
 
 .header-bg {
-  background-color: rgba(11, 12, 14, 0.7);
+  background-color: color-mix(in srgb, var(--l1-background) 70%, transparent);
   padding-left: var(--ifm-spacing-horizontal);
   padding-right: var(--ifm-spacing-horizontal);
 }
@@ -1601,6 +1735,25 @@ a.no-underline {
   position: absolute;
   transition-property: transform;
   transform-origin: center center;
+}
+
+/* Dark CDN screenshots → approximate light UI when site is light.
+   Opt out with class "no-theme-invert" or Figure/Image themeInvert={false}. */
+html:not(.dark) .prose img:not(.no-theme-invert),
+html:not(.dark) [data-rmiz-modal-content] img:not(.no-theme-invert) {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html:not(.dark) img.theme-invert,
+html:not(.dark) .theme-invert-images img:not(.no-theme-invert) {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Near-white listicle logos are remapped to ink in light mode. The SVG filter
+   (components/Listicle/ListicleIconFilter.tsx) runs in the compositor, so it
+   works on cross-origin CDN icons that canvas sampling cannot read. */
+html:not(.dark) .listicle-icon img {
+  filter: url(#listicle-icon-filter);
 }
 
 .flex-center {

@@ -172,7 +172,7 @@ export const FEATURE_CARDS = [
         </p>
         <Button asChild variant="secondary" rounded="full" className="mt-4">
           <TrackingLink
-            href="/guides/kubernetes-monitoring-best-practices/"
+            href="/blog/kubernetes-monitoring/"
             clickType="Secondary CTA"
             clickName="Read More"
             clickLocation="Kubernetes Monitoring Page"

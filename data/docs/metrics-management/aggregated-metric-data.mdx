@@ -1,5 +1,5 @@
 ---
-date: 2026-07-14
+date: 2026-08-25
 title: Understanding Aggregated Metric Data - What Changes and Why
 description: What happens when a metric is stored as aggregated data, what volume control rules preserve, what they trade away, and why values can differ from what an alert saw.
 tags: [SigNoz Cloud]
@@ -8,7 +8,7 @@ doc_type: explanation
 
 ## Overview
 
-When a metric has a [volume control](https://signoz.io/docs/metrics-management/volume-control/) rule, some of its attributes are aggregated away to reduce stored cardinality and cost, and queries over older time ranges render from that aggregated data. The data you're looking at is mathematically correct, but it's stored at a coarser granularity than the original. For some questions, that changes the answer.
+When a metric has a [volume control](https://signoz.io/docs/metrics-management/volume-control/) rule, some of its attributes are aggregated away to reduce stored <Tooltip text="cardinality" content="The number of unique time series a metric actually produces: one series for each distinct combination of its identifying attributes." link="https://signoz.io/docs/glossary/#cardinality" /> and cost, and queries over older time ranges render from that aggregated data. The data you're looking at is mathematically correct, but it's stored at a coarser granularity than the original. For some questions, that changes the answer.
 
 This page explains exactly what is preserved, what is lost, and why a query can return different values than it did when the data was fresh.
 
@@ -73,7 +73,7 @@ Once an attribute is aggregated away for a time range, for that range you can no
 - **Count series above a threshold.** Only the count of contributing series per window survives, not their individual values.
 - **See sub-minute detail.** A 15-second spike keeps its magnitude (it's the window max) but loses its exact timing and shape. Rates finer than 60 seconds are no longer meaningful.
 
-Everything expressible over the surviving attributes at 60-second resolution (including exact counter rates and increases) remains correct.
+Everything expressible over the surviving attributes at 60-second resolution (including exact <Tooltip text="counter" content="A monotonic sum: it only ever increases, like an odometer." link="https://signoz.io/docs/glossary/#counter" /> rates and increases) remains correct.
 
 ## Why an Alert's Numbers May Not Reproduce Later
 

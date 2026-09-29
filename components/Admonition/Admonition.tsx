@@ -45,6 +45,10 @@ const SHARED_CODEBLOCK_CHROME = [
   '[&_[data-sz-codeblock]_code]:!rounded-none [&_[data-sz-codeblock]_code]:!bg-transparent [&_[data-sz-codeblock]_code]:!p-0 [&_[data-sz-codeblock]_code]:!text-inherit',
 ].join(' ')
 
+// Callout links keep their tone-colored style: block the prose link pill fill and underline
+// weight from leaking in.
+const SHARED_LINK_GUARD = '[&_a]:!bg-none [&_a]:!decoration-auto'
+
 type ToneTokenClasses = {
   light: string
   dark: string
@@ -68,6 +72,7 @@ const makeTone = ({
     dark,
     code,
     link,
+    SHARED_LINK_GUARD,
     SHARED_CODE_CHROME,
     codeSurface,
     SHARED_CODEBLOCK_CHROME,
@@ -81,7 +86,7 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
       '[--admonition-title:var(--callout-primary-title)] [--admonition-icon:var(--callout-primary-icon)] [--admonition-description:var(--callout-primary-description)]',
     dark: 'dark:[--admonition-title:var(--text-robin-100)] dark:[--admonition-icon:var(--text-robin-100)] dark:[--admonition-description:var(--text-robin-300)]',
     code: '[--admonition-code:var(--text-robin-700)] dark:[--admonition-code:var(--text-robin-200)]',
-    link: '[&_a]:!text-[var(--accent-primary)] [&_a]:underline [&_a]:decoration-[var(--accent-primary)] [&_a]:underline-offset-2',
+    link: '[&_a]:!text-[var(--accent-primary)] [&_a]:underline [&_a]:!decoration-[var(--accent-primary)] [&_a]:underline-offset-2',
     codeSurface:
       '[&_code]:!bg-[var(--callout-primary-background)] [&_code]:!text-[var(--admonition-code)]',
     listMarker: '[&_ul]:marker:text-[var(--accent-primary)]',
@@ -91,7 +96,7 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
       '[--admonition-title:var(--callout-success-title)] [--admonition-icon:var(--callout-success-icon)] [--admonition-description:var(--callout-success-description)]',
     dark: 'dark:[--admonition-title:var(--text-forest-100)] dark:[--admonition-icon:var(--text-forest-100)] dark:[--admonition-description:var(--text-forest-300)]',
     code: '[--admonition-code:var(--text-forest-700)] dark:[--admonition-code:var(--text-forest-200)]',
-    link: '[&_a]:!text-[var(--accent-forest)] [&_a]:underline [&_a]:decoration-[var(--accent-forest)] [&_a]:underline-offset-2',
+    link: '[&_a]:!text-[var(--accent-forest)] [&_a]:underline [&_a]:!decoration-[var(--accent-forest)] [&_a]:underline-offset-2',
     codeSurface:
       '[&_code]:!bg-[var(--callout-success-background)] [&_code]:!text-[var(--admonition-code)]',
     listMarker: '[&_ul]:marker:text-[var(--accent-forest)]',
@@ -101,7 +106,7 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
       '[--admonition-title:var(--callout-warning-title)] [--admonition-icon:var(--callout-warning-icon)] [--admonition-description:var(--callout-warning-description)]',
     dark: 'dark:[--admonition-title:var(--text-amber-100)] dark:[--admonition-icon:var(--text-amber-100)] dark:[--admonition-description:var(--text-amber-300)]',
     code: '[--admonition-code:var(--text-amber-800)] dark:[--admonition-code:var(--text-amber-200)]',
-    link: '[&_a]:!text-[var(--accent-amber)] [&_a]:underline [&_a]:decoration-[var(--accent-amber)] [&_a]:underline-offset-2',
+    link: '[&_a]:!text-[var(--accent-amber)] [&_a]:underline [&_a]:!decoration-[var(--accent-amber)] [&_a]:underline-offset-2',
     codeSurface:
       '[&_code]:!bg-[var(--callout-warning-background)] [&_code]:!text-[var(--admonition-code)]',
     listMarker: '[&_ul]:marker:text-[var(--accent-amber)]',
@@ -111,7 +116,7 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
       '[--admonition-title:var(--callout-error-title)] [--admonition-icon:var(--callout-error-icon)] [--admonition-description:var(--callout-error-description)]',
     dark: 'dark:[--admonition-title:var(--text-cherry-100)] dark:[--admonition-icon:var(--text-cherry-100)] dark:[--admonition-description:var(--text-cherry-300)]',
     code: '[--admonition-code:var(--text-cherry-700)] dark:[--admonition-code:var(--text-cherry-200)]',
-    link: '[&_a]:!text-[var(--accent-cherry)] [&_a]:underline [&_a]:decoration-[var(--accent-cherry)] [&_a]:underline-offset-2',
+    link: '[&_a]:!text-[var(--accent-cherry)] [&_a]:underline [&_a]:!decoration-[var(--accent-cherry)] [&_a]:underline-offset-2',
     codeSurface:
       '[&_code]:!bg-[var(--callout-error-background)] [&_code]:!text-[var(--admonition-code)]',
     listMarker: '[&_ul]:marker:text-[var(--accent-cherry)]',
@@ -121,7 +126,7 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
       '[--admonition-title:var(--callout-aqua-title)] [--admonition-icon:var(--callout-aqua-icon)] [--admonition-description:var(--callout-aqua-description)]',
     dark: 'dark:[--admonition-title:var(--callout-aqua-title)] dark:[--admonition-icon:var(--callout-aqua-icon)] dark:[--admonition-description:var(--callout-aqua-description)]',
     code: '[--admonition-code:var(--text-aqua-700)] dark:[--admonition-code:var(--text-aqua-200)]',
-    link: '[&_a]:!text-[var(--accent-aqua)] [&_a]:underline [&_a]:decoration-[var(--accent-aqua)] [&_a]:underline-offset-2',
+    link: '[&_a]:!text-[var(--accent-aqua)] [&_a]:underline [&_a]:!decoration-[var(--accent-aqua)] [&_a]:underline-offset-2',
     codeSurface:
       '[&_code]:!bg-[var(--callout-aqua-background)] [&_code]:!text-[var(--admonition-code)]',
     listMarker: '[&_ul]:marker:text-[var(--accent-aqua)]',
@@ -131,7 +136,7 @@ const TONE_STYLES: Record<CalloutColor, ToneStyles> = {
       '[--admonition-title:var(--text-sakura-600)] [--admonition-icon:var(--text-sakura-600)] [--admonition-description:var(--text-sakura-600)]',
     dark: 'dark:[--admonition-title:var(--text-sakura-100)] dark:[--admonition-icon:var(--text-sakura-100)] dark:[--admonition-description:var(--text-sakura-300)]',
     code: '[--admonition-code:var(--text-sakura-700)] dark:[--admonition-code:var(--text-sakura-200)]',
-    link: '[&_a]:!text-[var(--accent-sakura)] [&_a]:underline [&_a]:decoration-[var(--accent-sakura)] [&_a]:underline-offset-2',
+    link: '[&_a]:!text-[var(--accent-sakura)] [&_a]:underline [&_a]:!decoration-[var(--accent-sakura)] [&_a]:underline-offset-2',
     codeSurface:
       '[&_code]:!bg-[color-mix(in_srgb,var(--accent-sakura)_10%,transparent)] [&_code]:!text-[var(--admonition-code)]',
     listMarker: '[&_ul]:marker:text-[var(--accent-sakura)]',

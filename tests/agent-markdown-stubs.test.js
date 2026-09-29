@@ -109,6 +109,37 @@ test('Listicle stubs use the configured markdown title', async () => {
   assert.doesNotMatch(html, /<h2>Listicle<\/h2>/)
 })
 
+test('ListicleDirectory stubs render the integrations item list', async () => {
+  const doc = createDoc('<ListicleDirectory name="integrations" defaultSection="all" />')
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.ListicleDirectory, {
+      name: 'integrations',
+      defaultSection: 'all',
+    })
+  )
+
+  assert.match(html, /Integrations Guides/)
+  assert.match(html, /PostgreSQL/)
+  assert.match(html, /\/docs\/integrations\/redis/)
+  assert.match(html, /One-Click AWS Integrations/)
+})
+
+test('ListicleDirectory stubs respect the selected default section', async () => {
+  const doc = createDoc('<ListicleDirectory name="integrations" defaultSection="databases" />')
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.ListicleDirectory, {
+      name: 'integrations',
+      defaultSection: 'databases',
+    })
+  )
+
+  assert.match(html, /Redis/)
+  assert.match(html, /MongoDB/)
+  assert.doesNotMatch(html, /One-Click AWS Integrations/)
+})
+
 test('HostingDecision stub matches the banner CTA destinations', async () => {
   const doc = createDoc('<HostingDecision />')
   const components = await buildAgentMdxComponentsForDoc(doc)
@@ -193,4 +224,45 @@ test('MCPInstallButton stub renders child text with client context', async () =>
   assert.match(html, /Add to Cursor/)
   assert.match(html, /Add to Cursor \(US\)/)
   assert.match(html, /cursor:\/\/anysphere\.cursor-deeplink\/mcp\/install/)
+})
+
+test('Tooltip stub renders the linked term with its definition in brackets', async () => {
+  const doc = createDoc(
+    '<Tooltip text="spans" content="A span represents a single unit of work in a trace." link="https://signoz.io/docs/glossary/#span" />'
+  )
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.Tooltip, {
+      text: 'spans',
+      content: 'A span represents a single unit of work in a trace.',
+      link: 'https://signoz.io/docs/glossary/#span',
+    })
+  )
+
+  assert.match(html, /<a href="https:\/\/signoz\.io\/docs\/glossary\/#span">spans<\/a>/)
+  assert.match(html, /\(A span represents a single unit of work in a trace\.\)/)
+})
+
+test('Tooltip stub renders the plain term with its definition in brackets', async () => {
+  const doc = createDoc(
+    '<Tooltip text="metrics" content="A metric is a measurement collected over time." />'
+  )
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(
+    React.createElement(components.Tooltip, {
+      text: 'metrics',
+      content: 'A metric is a measurement collected over time.',
+    })
+  )
+
+  assert.match(html, /metrics/)
+  assert.match(html, /\(A metric is a measurement collected over time\.\)/)
+})
+
+test('Tooltip stub keeps the term alone when no definition exists', async () => {
+  const doc = createDoc('<Tooltip text="metrics" />')
+  const components = await buildAgentMdxComponentsForDoc(doc)
+  const html = renderToStaticMarkup(React.createElement(components.Tooltip, { text: 'metrics' }))
+
+  assert.equal(html, '<span>metrics</span>')
 })
