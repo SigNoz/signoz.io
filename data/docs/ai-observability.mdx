@@ -1,103 +1,157 @@
 ---
-date: 2026-09-23
+date: 2026-09-29
 title: AI Observability - Monitor LLM Cost, Tokens, Latency
 description: Monitor LLM apps in SigNoz with the AI Observability dashboard. Track cost, token usage, latency, errors, TTFT, and tool calls by model and service.
 doc_type: howto
 ---
 
-AI Observability is a built-in section in SigNoz that gives you a single, read-only overview of your LLM and GenAI workloads. It reads OpenTelemetry GenAI attributes off your traces and renders cost, token usage, latency, error rate, time to first token (TTFT), and tool call metrics, all filterable by model, environment, and service.
+AI Observability is a section in SigNoz for LLM and agent workloads. It reads the OpenTelemetry GenAI attributes on your spans and shows cost, token usage, latency, errors, time to first token (TTFT), and tool calls.
 
-Use this page to understand what each panel shows and confirm your application emits the attributes the dashboard needs.
-
-## Overview
-
-The AI Observability **Overview** tab is a locked, read-only dashboard named "AI Observability Overview". You can filter and inspect it, but you cannot edit, rearrange, or clone its panels from this view. It is designed as a fixed starting point for LLM monitoring: instrument your app with the GenAI semantic conventions, and the panels populate automatically.
+Use this page to open AI Observability, read the **Overview** dashboard, and make sure that your spans carry the attributes that the dashboard needs.
 
 <Admonition type="info">
-AI Observability is available to every user on SigNoz Cloud and self-hosted, with no feature flag or setup step required. The section is still labeled **Beta** in the side navigation while it stabilizes.
+AI Observability is available to every user on SigNoz Cloud and self-hosted SigNoz. It carries a **Beta** label in the side navigation.
 </Admonition>
 
 ## Prerequisites
 
-- An LLM or agent application instrumented with OpenTelemetry so its spans carry the GenAI attributes listed in [Required attributes](#required-opentelemetry-attributes). See the [LLM Observability integrations](https://signoz.io/docs/llm-observability/) for framework-specific setup (OpenAI, Anthropic, LiteLLM, CrewAI, and more).
+- An LLM or agent application that sends traces to SigNoz with OpenTelemetry GenAI attributes. For setup steps for OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks, see [LLM Observability](https://signoz.io/docs/llm-observability/).
+- For cost panels, a pricing rule for each model. SigNoz includes default prices for common models. To add or change a price, see [Model pricing](https://signoz.io/docs/ai-observability-model-pricing/).
+- Self-hosted SigNoz with a custom collector configuration: add the `signozspanmapper` and `signozllmpricing` processors to the traces pipeline. See [Add the AI observability processors](https://signoz.io/docs/operate/migration/upgrade-0-143/#add-the-ai-observability-processors-to-a-custom-collector-config).
 
 ## Open AI Observability
 
-1. Open the side navigation and expand the **More** menu.
-2. Select **AI Observability** (Brain icon, marked with a **Beta** badge).
-3. SigNoz opens the **Overview** tab at `/ai-observability/overview`. The **AI Observability** item stays highlighted in the side nav while you are on any AI Observability page.
+1. In the side navigation, open the **More** menu.
+2. Select **AI Observability**.
 
-The navigation bar at the top of the section holds four tabs, in order: **Overview**, **Explorer**, **Model pricing**, and **Attribute Mapping**. Use **Overview** for the read-only dashboard and the [**Explorer**](https://signoz.io/docs/ai-observability-explorer/) to query the underlying LLM and AI trace data directly.
+SigNoz opens the **Overview** tab. The tab bar at the top has four tabs:
 
-## Summary stat cards
+- **Overview**: the dashboard that this page describes.
+- **Explorer**: query LLM and AI trace data. See [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/).
+- **Model pricing**: set the price for each model. See [Model pricing](https://signoz.io/docs/ai-observability-model-pricing/).
+- **Attribute Mapping**: map attributes from other instrumentation libraries to the GenAI names. See [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/).
 
-Five cards summarize the current state across the selected filters:
+## The Overview dashboard
 
-- **Total cost**: total LLM cost across all calls (from `gen_ai.usage.cost`).
-- **Total tokens**: sum of input and output tokens.
-- **Avg latency (p95)**: p95 latency of LLM spans.
-- **Error rate**: percentage of LLM calls that errored.
-- **TTFT (p95)**: p95 time to first token.
+The **Overview** tab shows the **AI Observability Overview** dashboard. SigNoz creates and updates this dashboard for you, so you cannot edit it. To start an alert from a panel, select **Create Alerts** in the menu of that panel.
 
-## Time series and table panels
+<Figure
+  src="/img/docs/ai/ai-observability/overview.webp"
+  alt="AI Observability Overview tab with the model, provider, environment, and service_name filters, six stat cards, and the Cost & tokens panels"
+  caption="The AI Observability Overview dashboard"
+/>
+
+A row of stat cards is at the top:
+
+| Card | What it shows |
+| --- | --- |
+| **Total cost** | The total LLM cost, in USD. |
+| **Total tokens** | Input tokens plus output tokens. |
+| **LLM calls** | The number of spans that have `gen_ai.request.model`. |
+| **LLM latency (p95)** | The p95 duration of LLM calls. |
+| **LLM error rate** | The percentage of LLM calls with an error status. |
+| **TTFT (p95)** | The p95 time to first token, in seconds. |
+
+Below the cards, the panels are in four sections.
+
+### Cost & tokens
 
 | Panel | What it shows |
 | --- | --- |
-| **Cost over time** | Cost broken down by model. |
-| **Token usage over time** | Input tokens versus output tokens. |
-| **LLM call latency over time** | p95 latency trend by model. |
-| **LLM call latency percentiles** | Table of p50, p90, p95, and p99 latency per model. |
-| **Error count** | Errors grouped by error type. |
-| **Time to first token** | p95 TTFT by model. |
-| **Top 10 span names** | The span names generating the most GenAI calls, by count. |
+| **Cost over time** | LLM cost by model. |
+| **Token usage over time** | Input, output, cache-read, and cache-write tokens. |
+| **Cost breakdown** | Cost split into input, output, cache-read, and cache-write token cost. |
+| **Cost per LLM call** | The average cost of one LLM call, by model. |
+| **Prompt cache hit ratio** | Cache-read tokens as a share of all input tokens. |
+| **Cost by service** | LLM cost and call count for each service. |
+| **Cost by provider** | LLM cost and call count for each provider. |
 
-## Tool call panels
+### Per-trace usage
 
-Three panels track the reliability of tool (function) calls, scoped to spans named `execute_tool`:
+An AI trace is a trace that has at least one LLM, tool, or agent span.
 
-- **Tool call rate**: tool calls per second.
-- **Tool error rate**: percentage of tool calls that errored.
-- **Tool duration (p50)**: median tool call duration.
+| Panel | What it shows |
+| --- | --- |
+| **AI traces over time** | The number of AI traces in each interval. |
+| **Calls per AI trace** | The average number of LLM calls and tool calls in a trace. |
+| **Cost per AI trace** | The average and p95 of the total LLM cost of a trace. |
+| **Tokens per AI trace** | The average and p95 of the total tokens of a trace. |
+
+### LLM latency & errors
+
+| Panel | What it shows |
+| --- | --- |
+| **LLM latency by model** | The p50, p90, p95, and p99 latency and the call count for each model. |
+| **LLM latency over time** | The p95 latency by model. |
+| **Slowest LLM call per trace** | The p50 and p95 of the longest LLM call in a trace. |
+| **Time to first token** | The p95 TTFT by model. |
+| **LLM errors over time** | LLM calls with an error status, by model. |
+| **Error rate by model** | Errored calls, total calls, and the error percentage for each model. |
+| **Finish reasons** | LLM calls by finish reason. If the share of `length` or `max_tokens` goes up, more responses are cut off. |
+
+### Tool calls
+
+<Figure
+  src="/img/docs/ai/ai-observability/overview-tool-calls.webp"
+  alt="Tool calls section of the AI Observability Overview with Tool call rate, Tool error rate, Tool duration, Top tools, and Top span names panels"
+  caption="The Tool calls section of the Overview dashboard"
+/>
+
+| Panel | What it shows |
+| --- | --- |
+| **Tool call rate** | Tool calls per second, by tool. |
+| **Tool error rate** | The percentage of tool calls with an error status. |
+| **Tool duration** | The p50 and p95 duration of tool calls. |
+| **Top tools** | The most called tools, with the error count and the median duration. |
+| **Top span names** | The most frequent GenAI span names. |
 
 ## Filter the dashboard
 
-A variable bar at the top of the Overview tab provides three multi-select dropdowns, each with an **All** option. Selecting values re-scopes every panel on the page.
+The variable bar at the top of the dashboard has four filters. Each filter lets you select more than one value, or **All**.
 
-| Filter | Source attribute |
+| Filter | Attribute |
 | --- | --- |
 | **model** | `gen_ai.request.model` |
+| **provider** | `gen_ai.provider.name` |
 | **environment** | `deployment.environment` (resource attribute) |
 | **service_name** | `service.name` (resource attribute) |
 
-## Required OpenTelemetry attributes
+The **model** and **provider** filters apply to the LLM and per-trace panels only. Tool spans do not carry a model, so the **Tool calls** panels and **Calls per AI trace** use only the **environment** and **service_name** filters.
 
-The dashboard reads these attributes off your GenAI spans. Panels that depend on an attribute stay empty until your instrumentation emits it. Most follow the <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry GenAI semantic conventions</a>; `gen_ai.usage.cost` is a SigNoz-derived cost attribute.
+## Required attributes
 
-| Attribute | Powers |
+The dashboard reads these attributes from your spans. A panel stays empty until your spans carry the attributes that it uses. Most names come from the <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry GenAI semantic conventions</a>.
+
+| Attribute | Used by |
 | --- | --- |
-| `gen_ai.request.model` | Model filter and all per-model breakdowns. |
-| `gen_ai.usage.cost` | Total cost, Cost over time. |
-| `gen_ai.usage.input_tokens` | Total tokens, Token usage over time (input). |
-| `gen_ai.usage.output_tokens` | Total tokens, Token usage over time (output). |
-| `gen_ai.server.ttft` | TTFT (p95) card, Time to first token. |
-| `gen_ai.error.type` | Error count. |
-| `gen_ai.system` | GenAI system identification. |
-| `deployment.environment` | Environment filter. |
-| `service.name` | Service name filter. |
+| `gen_ai.request.model` | All LLM panels and the **model** filter. SigNoz counts a span as an LLM call when it has this attribute. |
+| `gen_ai.provider.name` | **Cost by provider** and the **provider** filter. |
+| `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens` | Token panels and cost. |
+| `gen_ai.usage.cache_read.input_tokens`, `gen_ai.usage.cache_creation.input_tokens` | Cache token panels, cache cost, and **Prompt cache hit ratio**. |
+| `gen_ai.server.ttft` | **TTFT (p95)** and **Time to first token**. Streaming instrumentations, such as OpenLIT, send this attribute in seconds. |
+| `gen_ai.response.finish_reasons` | **Finish reasons**. |
+| `gen_ai.tool.name` | All **Tool calls** panels. SigNoz counts a span as a tool call when it has this attribute. |
+| `gen_ai.agent.name` | Marks agent spans for the **Per-trace usage** panels. |
+| `deployment.environment`, `service.name` | The **environment** and **service_name** filters, and **Cost by service**. |
 
-Tool call panels rely on spans named `execute_tool` carrying span status, so tool executions must be recorded as their own spans.
+Error panels use the error status of the span, not an attribute.
 
-## Other tabs
+You do not send the cost attributes. SigNoz calculates cost from the token counts and the model price when it receives a span, and it writes the result to `signoz.gen_ai.usage.tokens.cost` and to one cost attribute for each token type.
 
-Alongside **Overview**, the AI Observability section includes three more tabs:
-
-- **Explorer** at `/ai-observability/explorer`: a trace-backed query explorer for individual spans, traces, time series, and aggregated tables. See [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/).
-- **Model pricing** at `/ai-observability/configuration`.
-- **Attribute Mapping** at `/ai-observability/attribute-mapping`.
-
-Documentation for the Model pricing and Attribute Mapping tabs will follow as they stabilize.
+If your instrumentation uses other attribute names, map them to these names in [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/).
 
 ## Limitations
 
-- The AI Observability section replaces the earlier in-product `/llm-observability/*` routes. Those paths no longer resolve; update any saved links or bookmarks to `/ai-observability/*`.
-- The Overview dashboard is read-only. To build your own LLM dashboards, use the standard [Dashboards](https://signoz.io/docs/dashboards/) workflow.
+- You cannot edit or clone the Overview dashboard. To change a panel, build it in your own dashboard in [Dashboards](https://signoz.io/docs/userguide/manage-dashboards/).
+- The earlier in-product `/llm-observability/*` routes no longer exist. Change saved links to `/ai-observability/*`.
+
+## Related
+
+- [AI Observability Explorer](https://signoz.io/docs/ai-observability-explorer/): query LLM and AI trace data.
+- [Model pricing](https://signoz.io/docs/ai-observability-model-pricing/): set the price for each model.
+- [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/): map non-standard attributes to GenAI names.
+- [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
+
+## Get Help
+
+<GetHelp />

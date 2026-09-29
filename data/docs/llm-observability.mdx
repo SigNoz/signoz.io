@@ -1,6 +1,6 @@
 ---
 published_date: 2026-08-08
-updated_date: 2026-09-15
+updated_date: 2026-09-29
 title: LLM Observability Overview
 meta_title: "LLM Observability with OpenTelemetry"
 description: Learn what LLM observability is and how to instrument LLM apps with OpenTelemetry. Trace token usage, latency, cost, and tool calls in SigNoz.
@@ -186,7 +186,7 @@ Not yet. Every `gen_ai.*` attribute and metric is currently marked Development i
 
 **How do I track LLM cost if OpenTelemetry only records tokens?**
 
-The conventions record token counts, not currency, because prices change and vary by contract. Multiply token counts by your own per-model rates at query time in a dashboard, keeping the rate table in one place. Because `gen_ai.request.model` and `gen_ai.response.model` are on every span, the same query can break spend down by model, and joining against your own span attributes extends it to tenant or feature.
+The conventions record token counts, not currency, because prices change and vary by contract. SigNoz calculates the cost for you. When SigNoz receives an LLM span, it multiplies the token counts by the price of the model and writes the cost to the span. SigNoz includes default prices for common models, and you can set your own in [Model pricing](https://signoz.io/docs/ai-observability-model-pricing/). The [AI Observability](https://signoz.io/docs/ai-observability/) dashboard then breaks the cost down by model, provider, and service.
 
 **Does this work with agent frameworks and not just direct API calls?**
 
@@ -207,5 +207,6 @@ Yes, and this is the main practical argument for the OpenTelemetry approach. LLM
 ## Next Steps
 
 - Pick your provider or framework from the integration list above and follow its setup guide.
+- Open [AI Observability](https://signoz.io/docs/ai-observability/) in SigNoz to see cost, tokens, latency, and tool calls for your LLM spans.
 - Import a matching [dashboard template](https://signoz.io/docs/dashboards/dashboard-templates/overview/) to get token, latency, and error panels without building them.
 - Set up [alerts](https://signoz.io/docs/alerts/) on error rate and latency once data is flowing.
