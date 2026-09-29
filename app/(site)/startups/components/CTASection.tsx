@@ -23,7 +23,7 @@ export default function CTASection() {
 
                 <Link href="/teams/" prefetch={false}>
                   <Button
-                    variant="legacySecondary"
+                    variant="secondary"
                     className="rounded-md px-6 py-2 font-medium text-white hover:opacity-90 md:px-6 md:py-3"
                   >
                     Start your free trial
