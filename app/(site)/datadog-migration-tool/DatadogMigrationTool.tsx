@@ -29,8 +29,6 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
       <div className="flex items-center justify-center">
         <Button
           variant="default"
-          isButton
-          rounded="full"
           className="flex items-center gap-2"
           onClick={onOpen}
           data-modal-trigger="datadog-migration-modal"
