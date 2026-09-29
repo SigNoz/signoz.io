@@ -1,11 +1,11 @@
+import React from 'react'
+import LaunchWeek5 from './LaunchWeek5'
 import type { Metadata } from 'next'
 import Script from 'next/script'
 
-import MainSection from './LaunchWeek6'
-
-const title = 'Launch Week 6.0 | October 12 - 16 | 9 AM PT'
+const title = 'Launch Week 5.0 | September 8 - 12 | SigNoz'
 const description =
-  'Join Launch Week 6.0 for live walkthroughs of new SigNoz observability workflows, presented by the engineers who built them.'
+  'Watch Launch Week 5.0 sessions on interactive dashboards, Query Builder v5, OSS improvements, trace operators, and cost control.'
 
 export const metadata: Metadata = {
   title: {
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
-    url: 'https://signoz.io/launch-week-6/',
+    url: 'https://signoz.io/launch-week-5/',
     siteName: 'SigNoz',
     images: '/img/events/launch-week-5/launch-week-5-cover.webp',
     locale: 'en_US',
@@ -29,11 +29,11 @@ export const metadata: Metadata = {
   },
 }
 
-export default function LaunchWeek6Page() {
+export default function LaunchWeek5Page() {
   return (
     <>
       <Script id="luma-checkout" src="https://embed.lu.ma/checkout-button.js" />
-      <MainSection />
+      <LaunchWeek5 />
     </>
   )
 }
