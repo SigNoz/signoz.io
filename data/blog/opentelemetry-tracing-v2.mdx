@@ -1,8 +1,8 @@
 ---
-title: Complete guide to OpenTelemetry Tracing (with code examples)
-meta_title: "Complete guide to OpenTelemetry Tracing"
+title: The Practical Guide to OpenTelemetry Tracing (with Code Examples)
+meta_title: "The Practical Guide to OpenTelemetry Tracing"
 published_date: 2025-10-08
-updated_date: 2026-09-25
+updated_date: 2026-09-29
 tags: [OpenTelemetry, Distributed Tracing]
 authors: [ankit_anand, dhruv_ahuja]
 description: "Distributed tracing tracks requests across microservices. Learn how OpenTelemetry implements tracing — spans, context propagation, sampling, and the production pipeline."
@@ -396,3 +396,88 @@ OpenTelemetry SDKs are designed to be configured through [environment variables]
 | `OTEL_RESOURCE_ATTRIBUTES` | Additional resource metadata | `deployment.environment=prod` |
 
 This convention means the same application image can run in development (with 100% sampling to a local Collector) and production (with 10% sampling to a remote backend) by changing environment variables at deploy time, with no code changes.
+
+
+## Common Pitfalls
+
+Tracing is straightforward to set up but easy to get wrong in subtle ways. The issues below account for the majority of support questions in production tracing deployments.
+
+### Broken or Disconnected Traces
+
+The most common problem is traces that appear fragmented: spans exist, but they show up as separate root spans instead of forming a connected tree. This usually points to a context propagation failure.
+
+**SDK initialized too late.** If the OpenTelemetry SDK is configured after your application has already imported and initialized HTTP or database libraries, the instrumentation hooks miss their window. The libraries start handling requests before the SDK can wrap them, so spans are created without trace context. Always initialize the SDK before importing your application code and frameworks.
+
+**Dropped context in async code.** In Python's `asyncio`, spawning a new task without passing the current context creates spans that are detached from the parent trace. The same applies to thread pools and background workers. When dispatching work asynchronously, explicitly capture and pass the context:
+
+```python
+import asyncio
+from opentelemetry import context
+
+async def handle_request():
+    with tracer.start_as_current_span("handle_request"):
+        ctx = context.get_current()
+        await asyncio.gather(
+            asyncio.create_task(process_step_a(ctx)),
+            asyncio.create_task(process_step_b(ctx)),
+        )
+
+async def process_step_a(ctx):
+    context.attach(ctx)
+    with tracer.start_as_current_span("step_a"):
+        # This span is now correctly parented
+        ...
+```
+
+### Missing Spans
+
+Sometimes traces are connected but incomplete. Expected spans simply do not appear.
+
+**Instrumentation library not installed.** Auto-instrumentation only works for libraries that have a corresponding instrumentation package. If you use `psycopg2` for PostgreSQL but only installed the SQLAlchemy instrumentor, your raw `psycopg2` queries will not produce spans. Run `opentelemetry-bootstrap -a install` to detect and install all matching packages.
+
+**Aggressive sampling.** If your sampler is set to a low ratio (e.g., 1%), most traces are dropped before any spans are exported. During debugging, temporarily set `OTEL_TRACES_SAMPLER=always_on` to rule out sampling as the cause.
+
+**Export failures.** Spans are generated but never reach the backend due to network issues, incorrect endpoints, or authentication problems. Check your exporter logs. The `BatchSpanProcessor` logs warnings when exports fail, but these are easy to miss in noisy application logs.
+
+### High-Cardinality Span Names
+
+This was covered in the span data model section, but it is worth repeating because it is one of the most expensive mistakes in production. Span names that include variable data (user IDs, request parameters, timestamps) create an unbounded number of unique span groups in your backend. This degrades query performance, inflates storage costs, and breaks any dashboard or alert built on span name aggregations.
+
+The fix is always the same: keep the span name generic and move variable data into attributes.
+
+### Performance Overhead
+
+Tracing should not choke your application's performance. If the opposite is the case, then the cause is usually one of these:
+
+**Synchronous exporters.** If spans are exported inline with request processing rather than batched in the background, every span adds network latency to the critical path. Always use `BatchSpanProcessor` in production, never `SimpleSpanProcessor`.
+
+**Over-instrumentation.** Wrapping every internal function in a span generates noise without diagnostic value. Each span carries overhead for creation, context management, and export. Focus instrumentation on the operations listed in the "[Choosing What to Instrument](#choosing-what-to-instrument)" section.
+
+**Unbounded attribute sizes.** Attaching large payloads as span attributes (full request bodies, SQL result sets, serialized objects) inflates span size and can cause export failures. Keep attributes small and bounded.
+
+
+## Analyzing Traces with SigNoz
+
+Once your application is instrumented and spans are flowing, you need an observability backend to store, query, and visualize the data. [SigNoz Cloud](https://signoz.io/teams/) is built natively on OpenTelemetry, which means it ingests OTLP data directly and preserves the full trace data model without translation or flattening.
+
+### Trace Explorer
+
+SigNoz's Trace Explorer lets you run aggregated queries across your trace data, filtering by attributes like `service.name`, `http.method`, `status.code`, and any custom attributes you have added. This is where you go to answer questions like "what is the p99 latency for the checkout service this week?" or "which endpoints have the highest error rate?"
+
+<Figure
+  src="/img/blog/common/signoz-trace-explorer-query.webp"
+  alt="SigNoz Trace Explorer showing aggregated trace queries filtered by service and status"
+  caption="Run aggregated queries across traces, filtering by service, method, status, and custom attributes"
+/>
+
+### Flamegraphs and Gantt Charts
+
+For individual trace inspection, SigNoz renders each trace as a flamegraph and Gantt chart. You can see the full breakdown of a request: which spans executed, in what order, how long each took, and where latency accumulated. This is the view that makes the parent-child span hierarchy practically useful for debugging.
+
+<Figure
+  src="/img/blog/common/signoz-spans.webp"
+  alt="SigNoz flamegraph and Gantt chart showing span breakdown for a single trace"
+  caption="Inspect individual traces with flamegraphs and Gantt charts to pinpoint latency and errors"
+/>
+
+<GetStartedSigNoz />
