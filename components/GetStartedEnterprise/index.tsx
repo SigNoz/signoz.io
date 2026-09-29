@@ -19,32 +19,26 @@ export const GetStartedEnterprise = () => {
                 Sign up for <br /> SigNoz Enterprise
               </p>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                <Button variant="legacyPrimary" id={getStartedId} className="gap-2">
+                <Button variant="default" id={getStartedId} className="gap-2">
                   <Cloud size={16} />
-                  <Link
-                    href="/contact-us/?source=get-started-enterprise-cloud"
-                    className="flex-center gap-8"
-                  >
+                  <Link href="/contact-us/?source=get-started-enterprise-cloud" className="gap-8">
                     Enterprise Cloud
                   </Link>
                 </Button>
 
-                <Button variant="legacySecondary" id={selfHostedId} className="gap-2">
+                <Button variant="secondary" id={selfHostedId} className="gap-2">
                   <Server size={16} />
                   <Link
                     href="/contact-us/?source=get-started-enterprise-self-hosted"
-                    className="flex-center gap-8"
+                    className="gap-8"
                   >
                     Enterprise Self-Hosted
                   </Link>
                 </Button>
 
-                <Button variant="legacySecondary" id={byocId} className="gap-2">
+                <Button variant="secondary" id={byocId} className="gap-2">
                   <CloudUpload size={16} />
-                  <Link
-                    href="/contact-us/?source=get-started-enterprise-byoc"
-                    className="flex-center gap-8"
-                  >
+                  <Link href="/contact-us/?source=get-started-enterprise-byoc" className="gap-8">
                     Bring your own cloud
                   </Link>
                 </Button>
