@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     description,
     url: 'https://signoz.io/launch-week/',
     siteName: 'SigNoz',
-    images: '/img/events/launch-week-6/engg first.webp',
+    images: '/img/events/launch-week-6/engineering-first.webp',
     locale: 'en_US',
     type: 'website',
   },
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title,
     description,
-    images: '/img/events/launch-week-6/engg first.webp',
+    images: '/img/events/launch-week-6/engineering-first.webp',
   },
 }
 
