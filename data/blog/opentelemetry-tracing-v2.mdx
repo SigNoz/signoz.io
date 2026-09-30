@@ -16,13 +16,19 @@ related_articles:
   - '/blog/opentelemetry-collector-complete-guide'
 ---
 
-When a user clicks "Add to Cart" on an e-commerce site, that single action can fan out across a dozen services: a frontend gateway, an auth service, a cart service, an inventory check, a database write. If any step is slow or fails, the user sees a spinner or an error. Often, you see nothing, because each service logs in isolation. You know *something* broke, but not *where* or *why*.
+When a user clicks "Add to Cart" on an e-commerce site, that single action can fan out across a dozen services: a frontend gateway, an auth service, a cart service, an inventory check, or a database write. If any step slows down or fails outright, the user sees a spinner or an error.<br />
+You, the product owner, often see nothing because each service logs in isolation. You know *something* in your application system misbehaved, but **not the source of the problem nor its cause**.
 
 Distributed tracing solves this by recording the full journey of a request as it moves through your system. Every service the request touches produces a timestamped record of the work it performed: how long it took, whether it succeeded, and what it called next. These records are stitched together into a single **trace**: an end-to-end map of everything that happened to fulfill that request, across every service boundary.
 
-[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) is the open-source, vendor-neutral standard for generating and collecting this trace data. Maintained by the <a href="https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">Cloud Native Computing Foundation</a>, it provides the APIs, SDKs, and tooling to instrument applications in virtually any language without coupling your code to a specific observability backend.
+[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) is the open-source, vendor-neutral standard for generating and collecting this trace data. A <a href="https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">Cloud Native Computing Foundation</a> graduated project, it provides the APIs, SDKs, and tooling to instrument applications in virtually any language without coupling your code to a specific observability backend.
 
-This guide covers how OpenTelemetry's tracing signal works from the inside: the data model, context propagation, instrumentation (auto and manual), the production pipeline, and common pitfalls.
+This guide covers how OpenTelemetry's tracing signal works from the inside, explaining:
+- the OpenTelemetry span data model,
+- how OpenTelemetry traces are propagated across contexts,
+- how OpenTelemetry APIs and SDKs work,
+- what a production-grade tracing pipeline looks like, and,
+- some common pitfalls to be aware of.
 
 
 ## How OpenTelemetry Tracing Works
@@ -33,13 +39,13 @@ A **trace** represents the complete path of a single request through a distribut
 
 A trace is composed of **spans**. Each span represents a single, named, timed operation, such as an HTTP request being handled, a database query executing, a message being published to a queue. A span captures when the operation started, when it ended, whether it succeeded, and the metadata that makes debugging possible. Every span carries its own unique **SpanID** (an 8-byte identifier).
 
-Together, traces and spans give you something that logs alone cannot: a causal, time-ordered view of everything that happened to a request, across every process it touched. For a deeper look at the relationship between these identifiers, see [Trace ID vs. Span ID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/).
+Together, traces and spans give you something that logs alone cannot: a causal, time-ordered view of everything that happened to a request, across every process it touched.
 
 ### The Span Data Model
 
 The real diagnostic power of a span lies in the structured data it carries. Each span records the following fields:
 
-- **Name:** A human-readable string that identifies the class of operation — `POST /api/checkout`, `SELECT orders`, `payment.authorize`. Backends use span names to group and aggregate similar operations, so the name must be low-cardinality.
+- **Name:** A human-readable string that identifies the class of operation: `POST /api/checkout`, `SELECT orders`, `payment.authorize`. Backends use span names to group and aggregate similar operations, so the name must be low-cardinality.
 
 - **Kind:** Defines the span's role in a distributed interaction. There are five kinds:
   - `SERVER`: handling an inbound request (e.g., HTTP server, gRPC handler). Duration measures server-side processing time.
@@ -54,17 +60,15 @@ The real diagnostic power of a span lies in the structured data it carries. Each
 
 <Figure 
   src="/img/blog/2026/09/span-attributes.webp" 
-  alt="OpenTelemetry spans represent unit-level operations within requests; high cardinality attributes drive investigations by detailing particulars of each operation" 
-  caption="OpenTelemetry spans represent unit-level operations within requests; high cardinality attributes drive investigations by detailing particulars of each operation"
+  alt="OpenTelemetry spans represent unit-level operations within requests; high cardinality attributes drive investigations by detailing particulars of each operation." 
+  caption="OpenTelemetry spans represent unit-level operations within requests; high cardinality attributes drive investigations by detailing particulars of each operation."
 />
 
 OpenTelemetry defines <a href="https://opentelemetry.io/docs/concepts/semantic-conventions/" rel="noopener noreferrer nofollow" target="_blank">Semantic Conventions</a>, which are standardized attribute names for common operations. Observability backends utilize these standards to better understand and correlate events, and to provide richer out-of-the-box analysis.
 
-- **Events:** Timestamped log messages attached to a span, marking specific moments during execution. The most common use case is recording exceptions: when an error occurs, you capture the exception type, message, and stack trace as an event on the active span.
+- **Events:** Timestamped log messages attached to a span, marking specific moments during execution. A common use case is recording exceptions; when an error occurs, you capture the exception type, message, and, optionally the stack trace as an event on the active span.
 
-- **Links:** References to spans in *other* traces. Unlike parent-child relationships, links describe causal connections that don't fit into a single trace tree — for example, a batch job that processes messages from multiple producers.
-
-For a comprehensive deep-dive into span internals, see [Understanding OpenTelemetry Spans in Detail](https://signoz.io/blog/opentelemetry-spans/).
+- **Links:** References to spans in *other* traces. Unlike parent-child relationships, links describe causal connections that don't fit into a single trace tree. For example, a batch job that processes messages from multiple producers.
 
 <KeyPointCallout title="Keep Span Names Low-Cardinality">
 
@@ -449,9 +453,9 @@ Once your application is instrumented and spans are flowing, you need an observa
 SigNoz's Trace Explorer lets you run aggregated queries across your trace data, filtering by attributes like `service.name`, `http.method`, `status.code`, and any custom attributes you have added. This is where you go to answer questions like "what is the p99 latency for the checkout service this week?" or "which endpoints have the highest error rate?"
 
 <Figure
-  src="/img/blog/common/signoz-trace-explorer-query.webp"
-  alt="SigNoz Trace Explorer showing aggregated trace queries filtered by service and status"
-  caption="Run aggregated queries across traces, filtering by service, method, status, and custom attributes"
+  src="/img/blog/2026/04/otel-receivers-image-signoz-traces.webp"
+  alt="SigNoz Trace Explorer list view filtering spans by service, method, and status"
+  caption="The SigNoz Trace Explorer, filtering spans by service, method, status, and custom attributes"
 />
 
 ### Flamegraphs and Gantt Charts
