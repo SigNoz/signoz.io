@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useRegion } from './RegionContext'
 import { Copy, CheckCircle } from 'lucide-react'
-import Button from '@/components/ui/Button'
 import { AppTooltip } from '@/components/ui/AppTooltip'
 
 const CopyCell = ({ text }: { text: string }) => {
@@ -48,12 +47,10 @@ const CopyCell = ({ text }: { text: string }) => {
       <span className="font-mono text-sm">{text}</span>
       <AppTooltip content="Double-check this is your workspace region" side="top">
         <span className="inline-flex">
-          <Button
-            isButton
-            variant="ghost"
-            size="icon"
+          <button
+            type="button"
             onClick={handleCopy}
-            className="h-6 w-6 p-0 text-[var(--l3-foreground)] opacity-0 transition-opacity hover:bg-transparent hover:text-[var(--l1-foreground)] group-hover:opacity-100"
+            className="inline-flex h-6 w-6 items-center justify-center p-0 text-[var(--l3-foreground)] opacity-0 transition-opacity hover:bg-transparent hover:text-[var(--l1-foreground)] group-hover:opacity-100"
             title="Copy to clipboard"
             aria-label="Copy to clipboard"
           >
@@ -62,7 +59,7 @@ const CopyCell = ({ text }: { text: string }) => {
             ) : (
               <Copy className="h-4 w-4" />
             )}
-          </Button>
+          </button>
         </span>
       </AppTooltip>
     </div>

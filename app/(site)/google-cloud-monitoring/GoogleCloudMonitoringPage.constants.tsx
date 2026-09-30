@@ -1,6 +1,5 @@
 import { MonitorCog, Telescope, Microscope } from 'lucide-react'
 import BanknoteCheckIcon from '@/public/img/icons/banknote-check.svg'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 import section1Url from '@/public/img/google-cloud-monitoring/section-1.svg?url'
 import section2Url from '@/public/img/google-cloud-monitoring/section-2.svg?url'
 import section3Url from '@/public/img/google-cloud-monitoring/section-3.svg?url'
@@ -12,7 +11,6 @@ export const GCP_MONITORING_HEADER_BUTTONS = [
     text: 'Get Started Free',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -24,7 +22,6 @@ export const GCP_MONITORING_HEADER_BUTTONS = [
     text: 'Read the Docs',
     href: '/docs/gcp-monitoring/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Docs Link',
@@ -206,7 +203,6 @@ export const BOTTOM_CTA_BUTTONS = [
     text: 'Get Started Free',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -218,7 +214,6 @@ export const BOTTOM_CTA_BUTTONS = [
     text: 'Read Doc',
     href: '/docs/gcp-monitoring/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Docs Link',

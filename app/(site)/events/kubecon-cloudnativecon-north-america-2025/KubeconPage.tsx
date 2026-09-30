@@ -72,7 +72,6 @@ const KubeConPage: React.FC = () => {
                   <Button
                     variant="secondary"
                     href={talk.link}
-                    rounded="full"
                     className="flex w-fit items-center gap-2"
                   >
                     <ArrowRight className="h-5 w-5" />
@@ -96,7 +95,6 @@ const KubeConPage: React.FC = () => {
                   {talk.speakers}
                   <Button
                     variant="secondary"
-                    rounded="full"
                     className="flex w-fit items-center gap-2"
                     href={talk.link}
                   >

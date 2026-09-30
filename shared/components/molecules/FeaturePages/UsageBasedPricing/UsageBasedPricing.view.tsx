@@ -47,12 +47,7 @@ const UsageBasedPricing: React.FC<{
               <Card className="bg-transparent p-0 [&>div]:border-0">
                 <div className="flex items-center justify-between gap-4 rounded-lg bg-signoz_robin-500/10 p-4">
                   <span className="text-signoz_robin-400">Calculate your exact monthly bill</span>
-                  <Button
-                    variant="default"
-                    rounded="full"
-                    className="flex-center !w-fit"
-                    to="/pricing/"
-                  >
+                  <Button variant="default" className="!w-fit" href="/pricing/">
                     Check Pricing
                     <ArrowRight size={14} />
                   </Button>

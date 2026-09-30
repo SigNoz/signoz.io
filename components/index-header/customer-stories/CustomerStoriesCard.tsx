@@ -58,7 +58,10 @@ export default function CustomerStoriesCard({
             <span className="sr-only">{CUSTOMER_STORIES_CTA.buttonLabel}</span>
           </TrackingLink>
           <span
-            className={cn(buttonVariants({ variant: 'tactileSecondary' }), styles.voiceCtaButton)}
+            className={cn(
+              buttonVariants({ variant: 'secondary', size: 'sm' }),
+              styles.voiceCtaButton
+            )}
             aria-hidden="true"
           >
             {CUSTOMER_STORIES_CTA.buttonLabel}

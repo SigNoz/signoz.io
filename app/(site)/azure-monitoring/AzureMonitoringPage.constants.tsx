@@ -1,4 +1,3 @@
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 import section1Url from '@/public/img/azure-monitoring/section-1.svg?url'
 import section2Url from '@/public/img/azure-monitoring/section-2.svg?url'
 import section3Url from '@/public/img/azure-monitoring/section-3.svg?url'
@@ -8,7 +7,6 @@ export const AZURE_MONITORING_HEADER_BUTTONS = [
     text: 'Get Started Free',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -20,7 +18,6 @@ export const AZURE_MONITORING_HEADER_BUTTONS = [
     text: 'Read the Docs',
     href: '/docs/azure-monitoring/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Docs Link',
@@ -218,7 +215,6 @@ export const BOTTOM_CTA_BUTTONS = [
     text: 'Get Started Free',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -230,7 +226,6 @@ export const BOTTOM_CTA_BUTTONS = [
     text: 'Read the Docs',
     href: '/docs/azure-monitoring/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Docs Link',

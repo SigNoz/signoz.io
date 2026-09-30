@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 import type { Metadata } from 'next'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
   title: 'About us',
@@ -50,23 +51,20 @@ function aboutus() {
                       :)
                     </p>
                   </div>
-                  <div className="card__footer">
+                  <div className="card__footer flex gap-2">
                     <Link
-                      className="button button--secondary button--outline"
+                      className={buttonVariants({ variant: 'secondary', size: 'sm' })}
                       href={'https://twitter.com/pranay01'}
                     >
                       <div className=""> Twitter </div>
                     </Link>
 
                     <a
-                      className="button button--link"
-                      style={{ color: 'white' }}
+                      className="text-[var(--l1-foreground)] underline underline-offset-2"
                       href="mailto:pranay@signoz.io"
                     >
                       pranay at signoz dot io
                     </a>
-
-                    {/* <button className="button button--secondary button--outline button--link" href="https://twitter.com/pranay01">Twitter</button> */}
                   </div>
                 </div>
               </div>
@@ -96,17 +94,16 @@ function aboutus() {
                       days.{' '}
                     </p>
                   </div>
-                  <div className="card__footer">
+                  <div className="card__footer flex gap-2">
                     <Link
-                      className="button button--secondary button--outline text-white"
+                      className={buttonVariants({ variant: 'secondary', size: 'sm' })}
                       href={'https://twitter.com/ankitnayan'}
                     >
                       <div className=""> Twitter </div>
                     </Link>
 
                     <a
-                      className="button button--link"
-                      style={{ color: 'white' }}
+                      className="text-[var(--l1-foreground)] underline underline-offset-2"
                       href="mailto:pranay@signoz.io"
                     >
                       ankit at signoz dot io

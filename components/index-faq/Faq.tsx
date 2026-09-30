@@ -104,7 +104,7 @@ export default function Faq() {
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <TrackingLink
-              className={cn(buttonVariants({ variant: 'tactilePrimary' }), 'no-underline')}
+              className={buttonVariants({ variant: 'default', size: 'sm' })}
               clickLocation="Homepage FAQ Section"
               clickName="Contact Us Button"
               clickText="Contact Us"
@@ -115,7 +115,7 @@ export default function Faq() {
               <ArrowRight size={12} aria-hidden="true" />
             </TrackingLink>
             <TrackingLink
-              className={cn(buttonVariants({ variant: 'tactileSecondary' }), 'no-underline')}
+              className={buttonVariants({ variant: 'secondary', size: 'sm' })}
               clickLocation="Homepage FAQ Section"
               clickName="Docs Link"
               clickText="Read the Docs"
