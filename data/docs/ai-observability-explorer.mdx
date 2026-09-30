@@ -11,7 +11,18 @@ To open the tab, select **More** > **AI Observability** in the side navigation, 
 
 ## Run a query
 
-Fields with the `trace.` prefix hold trace totals, such as `trace.total_tokens`, `trace.estimated_total_cost`, and `trace.llm_call_count`. You can filter and aggregate on them. The Trace Explorer does not have these fields.
+The Explorer adds trace fields. Each trace field holds a total for the whole trace. You can use them in the filter, in aggregations, and in **Order by**. The Trace Explorer does not have these fields.
+
+| Field | Value for the trace |
+| --- | --- |
+| `trace.llm_call_count` | Number of LLM calls |
+| `trace.tool_call_count` | Number of tool calls |
+| `trace.distinct_tool_count` | Number of different tools called |
+| `trace.input_tokens` | Sum of input tokens |
+| `trace.output_tokens` | Sum of output tokens |
+| `trace.total_tokens` | Sum of input and output tokens |
+| `trace.estimated_total_cost` | Sum of the estimated cost of all LLM calls |
+| `trace.max_llm_duration_nano` | Duration of the slowest LLM call, in nanoseconds |
 
 1. Type a filter in the filter bar, for example `trace.total_tokens > 1000`.
 2. Select **Run Query**, or press Cmd+Enter (Ctrl+Enter on Windows and Linux).
@@ -20,27 +31,13 @@ The filter bar suggests only keys and values from GenAI spans that match your cu
 
 To run the query again at an interval, turn on auto-refresh in the time picker.
 
-## Quick filters
-
-Use the quick filters panel on the left to filter without typing a query:
-
-- `deployment.environment`
-- `gen_ai.operation.name`
-- `gen_ai.provider.name`
-- `gen_ai.request.model`
-- `service.name`
-- `gen_ai.tool.name`
-- `gen_ai.agent.name`
-
-Each field lists **RELATED** values (values that match your current filters) first, then **ALL VALUES**. If you hide the panel, select **Show Filters** in the toolbar to show it again.
-
 ## Views
 
 All views use the same query. The Explorer opens in **Trace View**. Column changes are saved in your browser only.
 
 `trace.*` totals depend on the view:
 
-- **Trace View** counts every span of the trace, including spans outside the selected time range.
+- **Trace View** adds up every span of the trace, even spans outside the selected time range.
 - **List View**, **Time Series**, and **Table** count only spans inside the selected time range. For example, `trace.total_tokens` adds up only the tokens of those spans.
 
 ### Trace View
