@@ -127,11 +127,16 @@ const Tabs = ({
     <div data-tab-panels="" className="[&>[data-tab-value]>*:first-child]:mt-0">
       {visibleChildren.map((child) => {
         const isActive = child.props.value === activeTab
+        const { value, label } = child.props
         return (
           <div
-            key={child.props.value as string}
-            data-tab-value={child.props.value}
+            key={value as string}
+            data-tab-value={value}
             hidden={!isActive}
+            role={useDropdown ? 'region' : undefined}
+            aria-label={
+              useDropdown ? (typeof label === 'string' ? label : (value as string)) : undefined
+            }
           >
             {child.props.children}
           </div>

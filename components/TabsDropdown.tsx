@@ -1,8 +1,12 @@
 'use client'
 
 import React from 'react'
-import { Check } from 'lucide-react'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@signozhq/ui/select'
+import { Select, SelectTrigger, SelectValue } from '@signozhq/ui/select'
+import {
+  styledSelectTriggerStyle,
+  StyledSelectContent,
+  StyledSelectItem,
+} from '@/components/ui/StyledSelect'
 import { useSelectScrollUnlock } from '@/hooks/useSelectScrollUnlock'
 
 export interface TabsDropdownItem {
@@ -19,39 +23,11 @@ interface TabsDropdownProps {
 }
 
 const triggerStyle = {
+  ...styledSelectTriggerStyle,
   '--select-trigger-height': '2.25rem',
   '--select-trigger-border-radius': 'var(--radius-1, 2px)',
-  '--select-trigger-border-color': 'var(--l2-border)',
   '--select-trigger-background-color': 'transparent',
-  '--select-trigger-box-shadow': 'none',
   '--select-trigger-padding': '0 var(--spacing-6, 12px)',
-  '--select-trigger-font-size': '0.8125rem',
-  '--select-trigger-outline-width': '0',
-  '--select-trigger-icon-size': '0.75rem',
-  color: 'var(--l1-foreground-hover)',
-} as React.CSSProperties
-
-const contentStyle = {
-  '--select-content-border-radius': 'var(--radius-1, 2px)',
-  '--select-content-border-color': 'var(--l2-border)',
-  '--select-content-background': 'var(--l2-background)',
-  '--select-content-box-shadow': '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
-  '--select-content-popper-width': 'var(--radix-select-trigger-width)',
-  '--select-content-popper-min-width': 'var(--radix-select-trigger-width)',
-  '--select-content-open-animation': 'none',
-  '--select-content-close-animation': 'none',
-  '--select-content-slide-up-animation': 'none',
-  '--select-content-slide-down-animation': 'none',
-  animation: 'none',
-  zIndex: 100,
-} as React.CSSProperties
-
-const itemStyle = {
-  '--select-item-padding': '0.5rem 2.25rem 0.5rem 0.75rem',
-  '--select-item-font-size': '0.8125rem',
-  '--select-item-border-radius': '0',
-  '--select-item-highlight-background': 'var(--l2-background-hover)',
-  '--select-item-highlight-color': 'var(--l1-foreground)',
 } as React.CSSProperties
 
 const TabsDropdown = ({
@@ -92,35 +68,17 @@ const TabsDropdown = ({
           >
             <SelectValue placeholder="Select an option">{activeLabel}</SelectValue>
           </SelectTrigger>
-          <SelectContent
-            className="max-h-[min(320px,var(--radix-select-content-available-height))] w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)] max-w-[var(--radix-select-trigger-width)]"
-            style={contentStyle}
-            position="popper"
-            side="bottom"
-            align="start"
-            sideOffset={4}
-          >
-            {items.map((item) => {
-              const isSelected = item.value === activeValue
-              return (
-                <SelectItem
-                  key={item.value}
-                  value={item.value}
-                  style={itemStyle}
-                  className="relative text-[var(--l3-foreground)] data-[highlighted]:bg-[var(--l2-background-hover)] data-[highlighted]:text-[var(--l1-foreground)] data-[selected=true]:text-[var(--l1-foreground)]"
-                >
-                  <span className="min-w-0 truncate">{item.label}</span>
-                  {isSelected && (
-                    <Check
-                      size={14}
-                      className="pointer-events-none absolute right-3 top-1/2 shrink-0 -translate-y-1/2 text-[var(--l1-foreground)]"
-                      aria-hidden
-                    />
-                  )}
-                </SelectItem>
-              )
-            })}
-          </SelectContent>
+          <StyledSelectContent className="max-h-[min(320px,var(--radix-select-content-available-height))]">
+            {items.map((item) => (
+              <StyledSelectItem
+                key={item.value}
+                value={item.value}
+                isSelected={item.value === activeValue}
+              >
+                <span className="min-w-0 truncate">{item.label}</span>
+              </StyledSelectItem>
+            ))}
+          </StyledSelectContent>
         </Select>
       </div>
     </div>

@@ -471,6 +471,25 @@ describe('dropdown mode at 6+ items', () => {
     })
   })
 
+  it('labels panels as regions so the combobox relationship is accessible', () => {
+    renderManyTabs(6, { entityName: 'framework-choice' })
+
+    FRAMEWORKS.slice(0, 6).forEach(([value, label]) => {
+      const panel = getPanel(value)
+      expect(panel).toHaveAttribute('role', 'region')
+      expect(panel).toHaveAttribute('aria-label', label)
+    })
+    expect(screen.getByRole('region', { name: 'React (Vite/CRA)' })).toBeTruthy()
+  })
+
+  it('does not add region roles in tab-bar mode', () => {
+    renderManyTabs(5, { entityName: 'framework-choice' })
+
+    FRAMEWORKS.slice(0, 5).forEach(([value]) => {
+      expect(getPanel(value)).not.toHaveAttribute('role')
+    })
+  })
+
   it('selecting an option switches the panel and syncs the URL', () => {
     renderManyTabs(7, { entityName: 'framework-choice' })
 
