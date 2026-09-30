@@ -1,7 +1,3 @@
-import { BookOpen } from 'lucide-react'
-
-const BUTTON_CLASS_NAME = 'flex h-full w-full items-center justify-center gap-1'
-
 export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
   {
     title: 'Keynote: Observability for engineering-first teams',
@@ -58,31 +54,3 @@ export const LAUNCH_WEEK_6_ANNOUNCEMENTS = [
     registrationUrl: 'https://luma.com/9zyc50cx',
   },
 ] as const
-
-export const LAUNCH_WEEK_CTA_BUTTONS = [
-  {
-    text: 'Get Started - Free',
-    href: '/teams/',
-    variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
-    tracking: {
-      clickType: 'Primary CTA',
-      clickName: 'Launch Week 6 Bottom Banner Start Trial',
-      clickLocation: 'Launch Week 6 Bottom Banner',
-      clickText: 'Get Started - Free',
-    },
-  },
-  {
-    text: 'Read Documentation',
-    href: '/docs/introduction/',
-    variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
-    icon: <BookOpen size={14} />,
-    tracking: {
-      clickType: 'Secondary CTA',
-      clickName: 'Launch Week 6 Bottom Banner Read Documentation',
-      clickLocation: 'Launch Week 6 Bottom Banner',
-      clickText: 'Read Documentation',
-    },
-  },
-]

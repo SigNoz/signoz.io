@@ -4,19 +4,20 @@ import * as React from 'react'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 
-import CTABanner from '@/shared/components/molecules/FeaturePages/CTABanner'
+import Button from '@/components/ui/Button'
+import GetStarted from '@/components/LaunchWeek/GetStarted'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 
-import { LAUNCH_WEEK_6_ANNOUNCEMENTS, LAUNCH_WEEK_CTA_BUTTONS } from './LaunchWeek.constants'
+import { LAUNCH_WEEK_6_ANNOUNCEMENTS } from './LaunchWeek.constants'
 
 const DIVIDER_CLASS_NAME = '!border-t-2 !border-signoz_slate-200/50'
 
 const LaunchWeek: React.FC = () => {
   return (
     <FeaturePageLayout showProductNav={false} showDotPattern={false}>
-      <div className="px-5 pb-16 pt-12 font-medium md:px-0">
+      <div className="px-5 font-medium md:px-0">
         <SectionLayout
           variant="border-x"
           withBackground
@@ -95,15 +96,20 @@ const LaunchWeek: React.FC = () => {
                       <div>{announcement.date}</div>
                       <div>{announcement.time}</div>
                     </div>
-                    <a
-                      href={announcement.registrationUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Button
+                      asChild
+                      variant="secondary"
                       id={`btn-register-launch-week-6-${index + 1}`}
-                      className="button-background hidden min-h-10 w-fit items-center justify-center rounded-full px-4 py-2 text-sm font-medium text-signoz_vanilla-100 no-underline transition-colors hover:bg-signoz_ink-300 hover:text-signoz_vanilla-100 md:inline-flex lg:mt-auto lg:w-full"
+                      className="!hidden md:!inline-flex lg:mt-auto lg:w-full"
                     >
-                      Register Now
-                    </a>
+                      <a
+                        href={announcement.registrationUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Register Now
+                      </a>
+                    </Button>
                   </div>
                   <a
                     href={announcement.registrationUrl}
@@ -145,15 +151,7 @@ const LaunchWeek: React.FC = () => {
               </React.Fragment>
             ))}
 
-            <CTABanner
-              title={
-                <>
-                  Get started with <br /> SigNoz Cloud today
-                </>
-              }
-              buttons={LAUNCH_WEEK_CTA_BUTTONS}
-              className="bg-transparent"
-            />
+            <GetStarted page="launch-week-6" />
           </div>
         </SectionLayout>
       </div>
