@@ -23,7 +23,7 @@ Each row follows one container across its restarts, so a container's history sta
 - This column is derived from the resource attribute `k8s.container.name`.
 - Name of the container as defined in the pod spec (the `name:` of a `spec.containers` entry). Together with the pod's UID (`k8s.pod.uid`) it forms the identity of each row: this pair is what keeps a container pinned to the same row across restarts, since the container name is stable where the container ID is not.
 - Each row is one pod UID, so two rows can share a container name and pod name when:
-  - The pods run in different namespaces or clusters. Add the **Cluster** column to tell them apart.
+  - The pods run in different namespaces or clusters. **Namespace** shows by default. Add the **Cluster** column for pods that differ only by cluster.
   - A controller recreated the pod under the same name. The old row keeps its last values, such as `Completed` and **Not Ready**, until it leaves the time range.
   - The pod is a static pod, such as `kube-apiserver`. The kubelet and the API server give it different UIDs, so one row shows usage with `-` in **Image:Tag**, **Status**, **Ready**, and **Restarts**, and the other shows those columns without usage.
 - Use it to tell which container within a pod you're looking at (for example, the app container vs. a logging sidecar), and as the click-through to that container's charts, logs, traces, and events.
