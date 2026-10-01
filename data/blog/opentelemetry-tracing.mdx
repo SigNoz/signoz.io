@@ -290,7 +290,18 @@ checkout.process (350ms)
 
 **Recording errors**
 
-When an operation fails, you should capture both the exception detail and the span status. `record_exception` adds the stack trace as an event on the span, while `set_status` marks the span as failed so backends can aggregate error rates:
+When an operation fails, the span should carry both the exception detail and an error status. `start_as_current_span` does most of this for you: if an exception propagates out of the `with` block, the SDK automatically records it as an exception event *and* sets the span status to `Error`. For the common case, where you let the error bubble up, you don't write any error-handling code at all:
+
+```python
+def charge_payment(order_id: str):
+    with tracer.start_as_current_span("payment.charge") as span:
+        span.set_attribute("order.id", order_id)
+        # If charge() raises, the span is automatically marked Error
+        # and the exception is recorded as an event on the span.
+        return payment_gateway.charge(order_id)
+```
+
+You only record the exception yourself when you **catch it without re-raising**, for example when you recover from the failure but still want it on the trace. In that case the exception never escapes the `with` block, so the SDK doesn't see it and you capture it manually:
 
 ```python
 from opentelemetry.trace import StatusCode
@@ -299,16 +310,14 @@ def charge_payment(order_id: str):
     with tracer.start_as_current_span("payment.charge") as span:
         span.set_attribute("order.id", order_id)
         try:
-            result = payment_gateway.charge(order_id)
-            span.set_status(StatusCode.OK)
-            return result
+            return payment_gateway.charge(order_id)
         except PaymentError as e:
-            span.record_exception(e)
-            span.set_status(StatusCode.ERROR, str(e))
-            raise
+            span.record_exception(e)                 # adds the event
+            span.set_status(StatusCode.ERROR, str(e)) # record_exception alone won't set status
+            return None                              # handled, not re-raised
 ```
 
-Note that `record_exception` does not set the span status by itself. You need both calls: one to capture the exception details as an event, and one to mark the span as failed.
+**Don't do both**: calling `record_exception` manually *and* letting the exception escape the `with` block records it twice, producing duplicate exception events on the same span.
 
 <KeyPointCallout title="Always Use Context Managers for Spans">
 
@@ -360,7 +369,7 @@ A high-traffic service can generate millions of spans per minute. Storing every 
 
 There are two fundamental approaches:
 
-**Head-based sampling** makes the decision at the root of the trace, before any child spans are created. All downstream services inherit this decision, so a trace is either fully captured or entirely dropped. It is simple and stateless, but it is also blind: it cannot know at the time of the decision whether the trace will end up containing an error or being unusually slow.
+**Head-based sampling** makes the decision at the root of the trace, before any child spans are created. With a parent-based sampler (the default in the SDKs), downstream services inherit this decision through the propagated context, so a trace is either fully captured or entirely dropped. It is simple and stateless, but it is also blind: it cannot know at the time of the decision whether the trace will end up containing an error or being unusually slow.
 
 **Tail-based sampling** defers the decision until the complete trace has been assembled. This means you can write rules like "keep all traces with errors" or "keep all traces slower than 2 seconds" while sampling everything else. The tradeoff is complexity: it requires a stateful component (typically the Collector) to buffer complete traces before deciding, which adds memory overhead and operational surface area.
 
