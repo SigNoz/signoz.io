@@ -2108,6 +2108,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/integrations/opentelemetry-hasura/',
+          destination: '/docs/integrations/outposts/hasura/',
+          permanent: true,
+        },
+        {
           source: '/docs/integrations/flyio/',
           destination: '/docs/integrations/outposts/flyio/',
           permanent: true,
