@@ -19,8 +19,10 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
   type MutableRefObject,
+  type ReactNode,
 } from 'react'
 import {
+  Configure,
   InstantSearch,
   Highlight,
   useHits,
@@ -61,6 +63,22 @@ type DocHit = {
     lvl3?: string | null
   }
 }
+
+type CeisiumHit = {
+  url: string
+  title: string
+  snippet: string
+}
+
+type CeisiumSearchState = {
+  status: 'idle' | 'loading' | 'success' | 'error'
+  results: CeisiumHit[]
+  error?: string
+}
+
+const CEISIUM_PROJECT_ID = 'prj_a99d649826d34067'
+const CEISIUM_SITE_PREFIX = 'https://signoz.io/'
+const CEISIUM_PUBLIC_SEARCH_KEY = process.env.NEXT_PUBLIC_CEISIUM_PUBLIC_SEARCH_KEY
 
 type SearchMode = 'search' | 'ask-ai'
 
@@ -188,18 +206,24 @@ const SearchButton = ({ disableShortcut = false, initiallyOpen = false }: Search
         return
       }
 
+      let targetUrl: URL
+      try {
+        targetUrl = new URL(itemUrl, window.location.origin)
+      } catch {
+        return
+      }
+
+      if (targetUrl.protocol !== 'https:' && targetUrl.protocol !== 'http:') {
+        return
+      }
+
       close()
 
       requestAnimationFrame(() => {
-        try {
-          const targetUrl = new URL(itemUrl, window.location.origin)
-          if (targetUrl.origin === window.location.origin) {
-            router.push(`${targetUrl.pathname}${targetUrl.hash}`)
-          } else {
-            window.location.assign(itemUrl)
-          }
-        } catch (error) {
-          window.location.assign(itemUrl)
+        if (targetUrl.origin === window.location.origin) {
+          router.push(`${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`)
+        } else {
+          window.location.assign(targetUrl.href)
         }
       })
     },
@@ -305,7 +329,7 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
         className={cn(
           // ! overrides needed: @signozhq/ui CSS modules beat normal Tailwind
           'overflow-visible !border-none !bg-transparent text-[var(--l1-foreground)] !shadow-none',
-          '!z-[80] !w-full !max-w-2xl'
+          CEISIUM_PUBLIC_SEARCH_KEY ? '!z-[80] !w-full !max-w-5xl' : '!z-[80] !w-full !max-w-2xl'
         )}
         onOpenAutoFocus={(event) => {
           event.preventDefault()
@@ -313,8 +337,14 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
         }}
       >
         <DialogTitle className="sr-only">Search docs</DialogTitle>
-        <div className="relative w-full max-w-2xl overflow-visible bg-transparent px-3 text-[var(--l1-foreground)] sm:px-4">
+        <div
+          className={cn(
+            'relative w-full overflow-visible bg-transparent px-3 text-[var(--l1-foreground)] sm:px-4',
+            CEISIUM_PUBLIC_SEARCH_KEY ? 'max-w-5xl' : 'max-w-2xl'
+          )}
+        >
           <InstantSearch indexName={indexName} searchClient={searchClient}>
+            {CEISIUM_PUBLIC_SEARCH_KEY ? <Configure hitsPerPage={8} /> : null}
             <SearchHeader
               mode={mode}
               onModeChange={setMode}
@@ -461,20 +491,116 @@ type SearchResultsProps = {
   onFocusInput: () => void
 }
 
+const useCeisiumSearch = (query: string): CeisiumSearchState => {
+  const [state, setState] = useState<CeisiumSearchState & { query: string }>({
+    query: '',
+    status: 'idle',
+    results: [],
+  })
+
+  useEffect(() => {
+    const searchQuery = query.trim()
+    if (!searchQuery || !CEISIUM_PUBLIC_SEARCH_KEY) {
+      return
+    }
+
+    const controller = new AbortController()
+    let cancelled = false
+
+    const timeout = window.setTimeout(async () => {
+      try {
+        const response = await fetch('https://api.ceisium.com/v1/search', {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            Authorization: `Bearer ${CEISIUM_PUBLIC_SEARCH_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            project_id: CEISIUM_PROJECT_ID,
+            query: searchQuery,
+            top_k: 8,
+            path_prefix: CEISIUM_SITE_PREFIX,
+          }),
+        })
+
+        if (!response.ok) {
+          const message =
+            response.status === 403
+              ? 'Origin or result path is not allowed for this key.'
+              : response.status === 429
+                ? 'Search rate limit reached. Try again soon.'
+                : `Search failed (HTTP ${response.status}).`
+          throw new Error(message)
+        }
+
+        const data: unknown = await response.json()
+        if (
+          !data ||
+          typeof data !== 'object' ||
+          !('results' in data) ||
+          !Array.isArray(data.results)
+        ) {
+          throw new Error('Search returned an invalid response.')
+        }
+
+        const results = data.results.filter(
+          (item: unknown): item is CeisiumHit =>
+            item !== null &&
+            typeof item === 'object' &&
+            'url' in item &&
+            typeof item.url === 'string' &&
+            'title' in item &&
+            typeof item.title === 'string' &&
+            'snippet' in item &&
+            typeof item.snippet === 'string'
+        )
+
+        if (!cancelled) {
+          setState({ query: searchQuery, status: 'success', results })
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setState({
+            query: searchQuery,
+            status: 'error',
+            results: [],
+            error: error instanceof Error ? error.message : 'Search failed.',
+          })
+        }
+      }
+    }, 250)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timeout)
+      controller.abort()
+    }
+  }, [query])
+
+  if (!query.trim() || !CEISIUM_PUBLIC_SEARCH_KEY) {
+    return { status: 'idle', results: [] }
+  }
+
+  return state.query === query.trim() ? state : { status: 'loading', results: [] }
+}
+
 const SearchResults = forwardRef<SearchResultsHandle, SearchResultsProps>(
   ({ onSelect, onClose, onFocusInput }, ref) => {
     const { hits } = useHits<DocHit>()
     const { status } = useInstantSearch()
     const { query } = useSearchBox()
+    const ceisium = useCeisiumSearch(query)
 
-    const renderEmptyState = status === 'loading' || status === 'stalled'
+    const algoliaLoading = status === 'loading' || status === 'stalled'
+    const totalHits = hits.length + ceisium.results.length
 
     const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
 
     useEffect(() => {
-      itemRefs.current = itemRefs.current.slice(0, hits.length)
-    }, [hits.length])
+      itemRefs.current = itemRefs.current.slice(0, totalHits)
+    }, [totalHits])
 
     useEffect(() => {
       setActiveIndex(null)
@@ -492,30 +618,30 @@ const SearchResults = forwardRef<SearchResultsHandle, SearchResultsProps>(
     }, [activeIndex])
 
     const focusFirstResult = useCallback(() => {
-      if (hits.length === 0) {
+      if (totalHits === 0) {
         return false
       }
 
       setActiveIndex(0)
       return true
-    }, [hits.length])
+    }, [totalHits])
 
     const focusLastResult = useCallback(() => {
-      if (hits.length === 0) {
+      if (totalHits === 0) {
         return false
       }
 
-      const lastIndex = hits.length - 1
+      const lastIndex = totalHits - 1
       setActiveIndex(lastIndex)
       return true
-    }, [hits.length])
+    }, [totalHits])
 
     const focusNextResult = useCallback(() => {
-      if (hits.length === 0) {
+      if (totalHits === 0) {
         return false
       }
 
-      const nextIndex = activeIndex == null ? 0 : Math.min(activeIndex + 1, hits.length - 1)
+      const nextIndex = activeIndex == null ? 0 : Math.min(activeIndex + 1, totalHits - 1)
 
       if (nextIndex === activeIndex) {
         return false
@@ -523,10 +649,10 @@ const SearchResults = forwardRef<SearchResultsHandle, SearchResultsProps>(
 
       setActiveIndex(nextIndex)
       return true
-    }, [activeIndex, hits.length])
+    }, [activeIndex, totalHits])
 
     const focusPreviousResult = useCallback(() => {
-      if (hits.length === 0) {
+      if (totalHits === 0) {
         onFocusInput()
         return false
       }
@@ -540,7 +666,7 @@ const SearchResults = forwardRef<SearchResultsHandle, SearchResultsProps>(
       const previousIndex = activeIndex - 1
       setActiveIndex(previousIndex)
       return true
-    }, [activeIndex, hits.length, onFocusInput])
+    }, [activeIndex, totalHits, onFocusInput])
 
     const clearActiveResult = useCallback(() => {
       setActiveIndex(null)
@@ -554,7 +680,7 @@ const SearchResults = forwardRef<SearchResultsHandle, SearchResultsProps>(
         focusNextResult,
         focusPreviousResult,
         clearActiveResult,
-        hasHits: () => hits.length > 0,
+        hasHits: () => totalHits > 0,
       }),
       [
         clearActiveResult,
@@ -562,127 +688,229 @@ const SearchResults = forwardRef<SearchResultsHandle, SearchResultsProps>(
         focusLastResult,
         focusNextResult,
         focusPreviousResult,
-        hits.length,
+        totalHits,
       ]
     )
 
+    if (!query) {
+      return null
+    }
+
     return (
-      <div className="max-h-[65vh] overflow-y-auto px-2 pb-2">
-        {renderEmptyState && (
-          <div className="mt-4 flex flex-col items-center justify-center gap-3 rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] px-6 py-10 text-center text-sm text-[var(--l2-foreground)]">
-            <Loader2 className="h-6 w-6 animate-spin text-primary-300" />
-            <p>Searching the SigNoz docs…</p>
-          </div>
-        )}
+      <div className={cn('grid gap-3 px-2 pb-2', CEISIUM_PUBLIC_SEARCH_KEY && 'lg:grid-cols-2')}>
+        <section className="min-w-0 overflow-hidden rounded-2xl bg-[var(--l2-background)] shadow-[0_20px_45px] shadow-black/40">
+          {CEISIUM_PUBLIC_SEARCH_KEY ? (
+            <h2 className="m-0 border-b border-[var(--l2-border)] px-5 py-3 text-sm font-semibold text-[var(--l1-foreground)]">
+              Algolia
+            </h2>
+          ) : null}
+          <div className="max-h-[60vh] overflow-y-auto">
+            {algoliaLoading ? (
+              <SearchStatus loading>Searching…</SearchStatus>
+            ) : hits.length === 0 ? (
+              <SearchStatus>No results found.</SearchStatus>
+            ) : (
+              <ul
+                className="my-0 divide-y divide-[var(--l2-border)] p-0 text-sm"
+                role="listbox"
+                aria-label="Algolia results"
+              >
+                {hits.map((hit, index) => {
+                  const titleAttribute = hit.title
+                    ? 'title'
+                    : hit.hierarchy?.lvl1
+                      ? 'hierarchy.lvl1'
+                      : hit.hierarchy?.lvl0
+                        ? 'hierarchy.lvl0'
+                        : undefined
 
-        {!renderEmptyState && !query && hits.length === 0 && null}
+                  const fallbackTitle =
+                    hit.title ||
+                    hit.hierarchy?.lvl1 ||
+                    hit.hierarchy?.lvl0 ||
+                    hit.hierarchy?.lvl2 ||
+                    hit.hierarchy?.lvl3 ||
+                    hit.content ||
+                    hit.url ||
+                    'Untitled result'
 
-        {!renderEmptyState && query && hits.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-[var(--l2-border)] bg-[var(--l2-background)] px-6 py-10 text-center text-sm text-[var(--l2-foreground)]">
-            <Clock3 className="h-6 w-6 text-[var(--l3-foreground)]" />
-            <p>No results found.</p>
-          </div>
-        )}
+                  const isActive = activeIndex === index
 
-        {!renderEmptyState && hits.length > 0 && (
-          <div className="mt-2 overflow-hidden rounded-2xl bg-[var(--l2-background)] shadow-[0_20px_45px] shadow-black/40">
-            <ul className="my-0 divide-y divide-[var(--l2-border)] p-0 text-sm" role="listbox">
-              {hits.map((hit, index) => {
-                const titleAttribute = hit.title
-                  ? 'title'
-                  : hit.hierarchy?.lvl1
-                    ? 'hierarchy.lvl1'
-                    : hit.hierarchy?.lvl0
-                      ? 'hierarchy.lvl0'
-                      : undefined
-
-                const fallbackTitle =
-                  hit.title ||
-                  hit.hierarchy?.lvl1 ||
-                  hit.hierarchy?.lvl0 ||
-                  hit.hierarchy?.lvl2 ||
-                  hit.hierarchy?.lvl3 ||
-                  hit.content ||
-                  hit.url ||
-                  'Untitled result'
-
-                const isActive = activeIndex === index
-
-                return (
-                  <li
-                    key={hit.objectID}
-                    className="border-b border-[var(--l2-border)]"
-                    role="presentation"
-                  >
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={isActive}
-                      ref={(node) => {
-                        itemRefs.current[index] = node
-                      }}
-                      onFocus={() => {
-                        if (activeIndex !== index) {
-                          setActiveIndex(index)
-                        }
-                      }}
-                      onClick={() => hit.url && onSelect(hit.url)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'ArrowDown') {
-                          event.preventDefault()
-                          focusNextResult()
-                        } else if (event.key === 'ArrowUp') {
-                          event.preventDefault()
-                          const moved = focusPreviousResult()
-                          if (!moved) {
-                            clearActiveResult()
-                          }
-                        } else if (event.key === 'Escape') {
-                          event.preventDefault()
-                          clearActiveResult()
-                          onFocusInput()
-                          onClose()
-                        }
-                      }}
-                      className={cn(
-                        'w-full px-8 py-6 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--l3-border)]',
-                        isActive
-                          ? 'bg-[color-mix(in_srgb,var(--l1-foreground)_10%,transparent)]'
-                          : 'hover:bg-[color-mix(in_srgb,var(--l1-foreground)_10%,transparent)]'
-                      )}
+                  return (
+                    <li
+                      key={hit.objectID}
+                      className="border-b border-[var(--l2-border)]"
+                      role="presentation"
                     >
-                      <p className="text-[15px] font-semibold leading-6 text-[var(--l1-foreground)]">
-                        {titleAttribute ? (
-                          <Highlight
-                            hit={hit}
-                            attribute={titleAttribute as any}
-                            classNames={{
-                              highlighted:
-                                'bg-[color-mix(in_srgb,var(--l1-foreground)_15%,transparent)] text-[var(--l1-foreground)] px-1 py-[2px] rounded-sm',
-                            }}
-                          />
-                        ) : (
-                          fallbackTitle
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={isActive}
+                        ref={(node) => {
+                          itemRefs.current[index] = node
+                        }}
+                        onFocus={() => {
+                          if (activeIndex !== index) {
+                            setActiveIndex(index)
+                          }
+                        }}
+                        onClick={() => hit.url && onSelect(hit.url)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'ArrowDown') {
+                            event.preventDefault()
+                            focusNextResult()
+                          } else if (event.key === 'ArrowUp') {
+                            event.preventDefault()
+                            const moved = focusPreviousResult()
+                            if (!moved) {
+                              clearActiveResult()
+                            }
+                          } else if (event.key === 'Escape') {
+                            event.preventDefault()
+                            clearActiveResult()
+                            onFocusInput()
+                            onClose()
+                          }
+                        }}
+                        className={cn(
+                          'w-full px-8 py-6 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--l3-border)]',
+                          isActive
+                            ? 'bg-[color-mix(in_srgb,var(--l1-foreground)_10%,transparent)]'
+                            : 'hover:bg-[color-mix(in_srgb,var(--l1-foreground)_10%,transparent)]'
                         )}
-                      </p>
-                      {hit.url && (
-                        <p className="mb-0 mt-2 text-[13px] text-[var(--l3-foreground)]">
-                          <Breadcrumbs url={hit.url} hierarchy={hit.hierarchy} />
+                      >
+                        <p className="text-[15px] font-semibold leading-6 text-[var(--l1-foreground)]">
+                          {titleAttribute ? (
+                            <Highlight
+                              hit={hit}
+                              attribute={titleAttribute as any}
+                              classNames={{
+                                highlighted:
+                                  'bg-[color-mix(in_srgb,var(--l1-foreground)_15%,transparent)] text-[var(--l1-foreground)] px-1 py-[2px] rounded-sm',
+                              }}
+                            />
+                          ) : (
+                            fallbackTitle
+                          )}
                         </p>
-                      )}
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
+                        {hit.content && (
+                          <p className="mb-0 mt-1 line-clamp-2 text-[13px] text-[var(--l2-foreground)]">
+                            {hit.content.length > 220
+                              ? `${hit.content.slice(0, 220).trimEnd()}…`
+                              : hit.content}
+                          </p>
+                        )}
+                        {hit.url && (
+                          <p className="mb-0 mt-2 text-[13px] text-[var(--l3-foreground)]">
+                            <Breadcrumbs url={hit.url} hierarchy={hit.hierarchy} />
+                          </p>
+                        )}
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
           </div>
-        )}
+        </section>
+
+        {CEISIUM_PUBLIC_SEARCH_KEY ? (
+          <section className="min-w-0 overflow-hidden rounded-2xl bg-[var(--l2-background)] shadow-[0_20px_45px] shadow-black/40">
+            <h2 className="m-0 border-b border-[var(--l2-border)] px-5 py-3 text-sm font-semibold text-[var(--l1-foreground)]">
+              Ceisium
+            </h2>
+            <div className="max-h-[60vh] overflow-y-auto">
+              {ceisium.status === 'loading' || ceisium.status === 'idle' ? (
+                <SearchStatus loading>Searching…</SearchStatus>
+              ) : ceisium.status === 'error' ? (
+                <SearchStatus>{ceisium.error}</SearchStatus>
+              ) : ceisium.results.length === 0 ? (
+                <SearchStatus>No results found.</SearchStatus>
+              ) : (
+                <ul
+                  className="my-0 divide-y divide-[var(--l2-border)] p-0 text-sm"
+                  role="listbox"
+                  aria-label="Ceisium results"
+                >
+                  {ceisium.results.map((hit, index) => {
+                    const resultIndex = hits.length + index
+                    const isActive = activeIndex === resultIndex
+
+                    return (
+                      <li key={`${hit.url}-${index}`} role="presentation">
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={isActive}
+                          ref={(node) => {
+                            itemRefs.current[resultIndex] = node
+                          }}
+                          onFocus={() => setActiveIndex(resultIndex)}
+                          onClick={() => onSelect(hit.url)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'ArrowDown') {
+                              event.preventDefault()
+                              focusNextResult()
+                            } else if (event.key === 'ArrowUp') {
+                              event.preventDefault()
+                              focusPreviousResult()
+                            } else if (event.key === 'Escape') {
+                              event.preventDefault()
+                              clearActiveResult()
+                              onFocusInput()
+                              onClose()
+                            }
+                          }}
+                          className={cn(
+                            'w-full px-6 py-5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--l3-border)]',
+                            isActive
+                              ? 'bg-[color-mix(in_srgb,var(--l1-foreground)_10%,transparent)]'
+                              : 'hover:bg-[color-mix(in_srgb,var(--l1-foreground)_10%,transparent)]'
+                          )}
+                        >
+                          <p className="m-0 text-[15px] font-semibold leading-6 text-[var(--l1-foreground)]">
+                            {hit.title}
+                          </p>
+                          {hit.snippet && (
+                            <p className="mb-0 mt-1 line-clamp-2 text-[13px] text-[var(--l2-foreground)]">
+                              {hit.snippet}
+                            </p>
+                          )}
+                          <p className="mb-0 mt-2 truncate text-[13px] text-[var(--l3-foreground)]">
+                            <Breadcrumbs url={hit.url} />
+                          </p>
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </div>
+          </section>
+        ) : null}
       </div>
     )
   }
 )
 
 SearchResults.displayName = 'SearchResults'
+
+const SearchStatus = ({
+  children,
+  loading = false,
+}: {
+  children: ReactNode
+  loading?: boolean
+}) => (
+  <div className="flex min-h-32 flex-col items-center justify-center gap-3 px-5 py-8 text-center text-sm text-[var(--l2-foreground)]">
+    {loading ? (
+      <Loader2 className="h-5 w-5 animate-spin" />
+    ) : (
+      <Clock3 className="h-5 w-5 text-[var(--l3-foreground)]" />
+    )}
+    <p className="m-0">{children}</p>
+  </div>
+)
 
 const Breadcrumbs = ({ url, hierarchy }: { url: string; hierarchy?: DocHit['hierarchy'] }) => {
   const hierarchySegments = [hierarchy?.lvl0, hierarchy?.lvl1, hierarchy?.lvl2, hierarchy?.lvl3]
