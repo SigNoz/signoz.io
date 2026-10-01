@@ -27,7 +27,7 @@ This guide covers how OpenTelemetry's tracing signal works from the inside, expl
 - the OpenTelemetry span data model,
 - how OpenTelemetry traces are propagated across contexts,
 - how OpenTelemetry APIs and SDKs work,
-- what a production-grade tracing pipeline looks like, and,
+- what a production-grade tracing pipeline looks like, and
 - some common pitfalls to be aware of.
 
 
@@ -54,7 +54,10 @@ The real diagnostic power of a span lies in the structured data it carries. Each
   - `CONSUMER`: processing an asynchronous message. The span covers the time from receiving the message to completing its handling.
   - `INTERNAL`: an in-process operation that does not cross a service boundary. Use it for instrumenting important business logic.
 
-- **Status:** Marks the outcome of the operation. `Unset` is the default, meaning no status was explicitly recorded. `Ok` explicitly confirms success. `Error` marks a failure, and this is what backends use to calculate error rates and trigger alerts.
+- **Status:** Marks the outcome of the operation. There are three status types:
+  - `Unset`: means no status was explicitly recorded. This is the default status.
+  - `Ok`: explicitly confirms success.
+  - `Error`: marks a failure. It is what backends use to calculate error rates and trigger alerts.
 
 - **Attributes:** Key-value pairs that add queryable, structured metadata to a span. While the span name should be generic, attributes should carry the specifics: `http.request.method = POST`, `http.response.status_code = 500`, `user.id = abc-123`.
 
@@ -66,7 +69,7 @@ The real diagnostic power of a span lies in the structured data it carries. Each
 
 OpenTelemetry defines <a href="https://opentelemetry.io/docs/concepts/semantic-conventions/" rel="noopener noreferrer nofollow" target="_blank">Semantic Conventions</a>, which are standardized attribute names for common operations. [OpenTelemetry backends](https://signoz.io/blog/opentelemetry-backend/) utilize these standards to better understand and correlate events, and to provide richer out-of-the-box analysis.
 
-- **Events:** Timestamped log messages attached to a span, marking specific moments during execution. A common use case is recording exceptions; when an error occurs, you capture the exception type, message, and, optionally the stack trace as an event on the active span.
+- **Events:** Timestamped log messages attached to a span, marking specific moments during execution. A common use case is recording exceptions; when an error occurs, you capture the exception type, message, and optionally the stack trace as an event on the active span.
 
 - **Links:** References to spans in *other* traces. Unlike parent-child relationships, links describe causal connections that don't fit into a single trace tree. For example, a batch job that processes messages from multiple producers.
 
@@ -105,13 +108,13 @@ When a service creates a span for an outgoing request, the OpenTelemetry SDK ser
 
 The standard format for this is the <a href="https://www.w3.org/TR/trace-context/" rel="noopener noreferrer nofollow" target="_blank">W3C Trace Context</a> specification, which defines two headers:
 
-- **`traceparent`** — carries the version, trace ID, parent span ID, and trace flags. Example: `00-5b8efff798038103d269b633813fc60c-eee19b7ec3c1b174-01`
-- **`tracestate`** — carries optional vendor-specific or application-specific data.
+- **`traceparent`** carries the version, trace ID, parent span ID, and trace flags. Example: `00-5b8efff798038103d269b633813fc60c-eee19b7ec3c1b174-01`
+- **`tracestate`** carries optional vendor-specific or application-specific data.
 
 Within a single process, context propagation is handled differently depending on the language. The Python SDK uses context variables (`contextvars`), which also propagate automatically across `asyncio` tasks. Other languages handle this based on their own capabilities and design patterns.<br />
 Regardless of the mechanism, the result is the same: when you create a new span, the SDK knows which span is currently active and sets the parent-child relationship accordingly.
 
-For most common protocols (HTTP, gRPC, messaging systems), OpenTelemetry's instrumentation libraries handle injection and extraction automatically. You don't write propagation code by hand unless you are working with a custom transport, or utilizing OpenTelemetry in languages [like Rust](https://signoz.io/blog/opentelemetry-rust/).
+For most common protocols (HTTP, gRPC, messaging systems), OpenTelemetry's instrumentation libraries handle injection and extraction automatically. You don't write propagation code by hand unless you are working with a custom transport, or utilizing [OpenTelemetry in languages like Rust](https://signoz.io/blog/opentelemetry-rust/).
 
 ### The API and SDK Split
 
@@ -123,7 +126,7 @@ This makes the API safe to depend on in shared libraries and frameworks, as the 
 
 Whether tracing is actually active becomes a decision for the application owner, made at deployment time by installing and configuring the SDK.
 
-We won't dive any deeper into the comparison here. If you're interesting in learning more, we have a detailed breakdown for [OpenTelemetry API vs SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/).
+We won't dive any deeper into the comparison here. If you're interested in learning more, we have a detailed breakdown for [OpenTelemetry API vs SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/).
 
 ### OTLP: The Wire Format
 
@@ -337,7 +340,7 @@ Not every function needs a span. Over-instrumentation clutters your traces with 
 
 Skip internal utility functions, data transformations, and in-memory computations unless you have a specific latency concern.
 
-A good rule of thumb to keep in mind is: **a trace with 10 meaningful spans tells you more than one with 200 trivial ones**.
+A good rule of thumb to keep in mind is that **a trace with 10 meaningful spans tells you more than one with 200 trivial ones**.
 
 
 ## The Production Tracing Pipeline
@@ -373,7 +376,7 @@ There are two fundamental approaches:
 
 **Tail-based sampling** defers the decision until the complete trace has been assembled. This means you can write rules like "keep all traces with errors" or "keep all traces slower than 2 seconds" while sampling everything else. The tradeoff is complexity: it requires a stateful component (typically the Collector) to buffer complete traces before deciding, which adds memory overhead and operational surface area.
 
-For most teams, starting with head-based sampling at the SDK level and graduating to tail-based sampling at the Collector as volume grows is a practical path. For detailed breakdown and configuration examples, see [our guide on sampling strategies](https://signoz.io/blog/saving-money-with-sampling-strategies/).
+For most teams, starting with head-based sampling at the SDK level and graduating to tail-based sampling at the Collector as volume grows is a practical path. For a detailed breakdown and configuration examples, see [our guide on sampling strategies](https://signoz.io/blog/saving-money-with-sampling-strategies/).
 
 ### Configuring the SDK for Export
 
@@ -414,7 +417,7 @@ OpenTelemetry SDKs are designed to be configured through [environment variables]
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Where to send telemetry | `https://ingest.<region>.signoz.cloud:443` |
 | `OTEL_TRACES_SAMPLER` | Which sampler to use | `parentbased_traceidratio` |
 | `OTEL_TRACES_SAMPLER_ARG` | Sampler configuration | `0.1` (10% sampling) |
-| `OTEL_EXPORTER_OTLP_HEADERS` | Auth headers for the backend (unneeded if using local Collector) | `signoz-ingestion-key=<key>` |
+| `OTEL_EXPORTER_OTLP_HEADERS` | Auth headers for the backend (unneeded if using a local Collector) | `signoz-ingestion-key=<key>` |
 | `OTEL_RESOURCE_ATTRIBUTES` | Additional resource metadata | `deployment.environment.name=production` |
 
 This convention means the same application image can run in development (with 100% sampling to a local Collector) and production (with 10% sampling to a remote backend) by changing environment variables at deploy time, with no code changes.
