@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server'
 import { renderDocMarkdownForAgents } from '@/utils/docs/renderDocMarkdownForAgents'
 import { slugFromParams } from '@/utils/docs/markdownRouting'
 import {
@@ -7,7 +6,7 @@ import {
 } from '@/utils/agentMarkdownRouting'
 import { fetchBlogBySlug, fetchComparisonBySlug, fetchGuideBySlug } from '@/utils/cachedData'
 import { getContentBySlug } from '@/utils/contentRepository'
-import { agentResponse } from '@/utils/agentResponseHeaders'
+import { agentResponse, agentNotFoundResponse } from '@/utils/agentResponseHeaders'
 
 type ContentRecord = {
   title?: unknown
@@ -36,14 +35,7 @@ export async function generateStaticParams() {
   return []
 }
 
-const notFoundResponse = () =>
-  new NextResponse('Not Found', {
-    status: 404,
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'no-store',
-    },
-  })
+const notFoundResponse = agentNotFoundResponse
 
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined
@@ -67,7 +59,7 @@ export async function GET(
   const rawMdx = asString(post?.content)
 
   if (!post || !rawMdx) {
-    return notFoundResponse()
+    return notFoundResponse(`/${params.section}/${slug}`)
   }
 
   const markdown = await renderDocMarkdownForAgents(
