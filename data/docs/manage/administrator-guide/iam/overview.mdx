@@ -1,5 +1,5 @@
 ---
-date: 2026-09-16
+date: 2026-10-01
 title: Authorization Overview
 description: Understand how role-based access control works in SigNoz — principals, transactions, roles, and how they connect.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -55,6 +55,8 @@ The following resources are currently available for fine-grained access control:
 | `role` | `role` | Managed and custom roles |
 | `serviceaccount` | `serviceaccount` | Non-human identities for programmatic API access |
 | `metaresource` | `factor-api-key` | Authentication keys for service accounts |
+| `user` | `user` | Members of the organization and their role assignments |
+| `metaresource` | `factor-password` | Password reset tokens for users |
 | `metaresource` | `dashboard` | Dashboards and their panels across the workspace |
 | `telemetryresource` | `logs` | Log data collected across the workspace |
 | `telemetryresource` | `traces` | Distributed tracing data collected across the workspace |
@@ -62,6 +64,12 @@ The following resources are currently available for fine-grained access control:
 | `telemetryresource` | `meter-metrics` | Usage metering data for the workspace |
 
 For the full transactions reference for each resource, see the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/).
+
+<Admonition type="info" title="Self-management and the root user">
+Admins can update their own profile and manage their own role assignments. Removing your own admin role takes effect immediately; another admin or the root admin can restore it.
+
+The root user is a protected identity. Attempts to update, delete, or create a password reset token for the root user return `501 Not Implemented`.
+</Admonition>
 
 ## Selectors
 
