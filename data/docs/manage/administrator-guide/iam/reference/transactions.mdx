@@ -1,5 +1,5 @@
 ---
-date: 2026-09-16
+date: 2026-10-01
 title: Transactions Reference
 description: Complete reference of transactions for each resource in SigNoz covering relations, selector formats, and managed role access.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -19,7 +19,7 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers roles, service accounts, API keys, dashboards, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as alerts and pipelines will be documented as they become available for fine-grained access control.
+This page currently covers roles, service accounts, API keys, users, password reset tokens, dashboards, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as alerts and pipelines will be documented as they become available for fine-grained access control.
 </Admonition>
 
 ## Resources
@@ -65,6 +65,40 @@ This page currently covers roles, service accounts, API keys, dashboards, and te
 | `read` | View API key metadata (name, expiration, last used). | signoz-admin |
 | `update` | Modify API key metadata (for example, change the expiration date). | signoz-admin |
 | `delete` | Permanently revoke an API key. | signoz-admin |
+
+### User
+
+**Resource:** `user` · **Kind:** `user` · **Selector:** user ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Invite a new user to the organization. | signoz-admin |
+| `list` | List all users in the organization. | signoz-admin |
+| `read` | View a user's details and their assigned roles. | signoz-admin |
+| `update` | Modify a user's profile (for example, display name or email). | signoz-admin |
+| `delete` | Remove a user from the organization. | signoz-admin |
+| `attach` | Create a relationship with the user — assign a role to it, or create a password reset token for it. | signoz-admin |
+| `detach` | Remove a relationship from the user — unassign a role from it. | signoz-admin |
+
+Granting these relations on a custom role delegates user management without the full `signoz-admin` role. For example, a helpdesk role can hold `user:create` and `factor-password:create` to invite users and trigger password resets, while leaving role and service account management to admins.
+
+<Admonition type="info">
+`create` and `list` cover the organization rather than a single user, so both can only be granted as **All** or **None**. `read`, `update`, `delete`, `attach`, and `detach` accept **Only selected**, with the user ID as the selector.
+</Admonition>
+
+<div id="factor-password" />
+
+### Password Reset Token
+
+**Resource:** `metaresource` · **Kind:** `factor-password` · **Selector:** user ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Create or regenerate a password reset token for a user. | signoz-admin |
+| `list` | Retrieve the password reset token for a user. | signoz-admin |
+| `read` | View password reset token metadata. | signoz-admin |
+
+Changing your own password does not use these relations. Any authenticated user can update their own password from account settings without admin privileges.
 
 ### Dashboard
 
@@ -158,3 +192,10 @@ Some operations require transactions on multiple resources. Both transactions mu
 | Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
 | Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
 | Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |
+| Invite a user with no roles | `user:create` |
+| Invite a user with one or more roles | `user:create` AND `user:attach` AND `role:attach` on each requested role |
+| Assign a role to a user | `user:attach` AND `role:attach` |
+| Remove a role from a user | `user:detach` AND `role:detach` |
+| Create a password reset token for a user | `factor-password:create` AND `user:attach` |
+
+Managing your own role assignments does not require the compound transactions above. Removing your own admin role takes effect immediately; another admin or the root admin can restore it.
