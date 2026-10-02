@@ -61,6 +61,19 @@ Without CMS access, a few things intentionally look different locally:
 
 These fallbacks are expected — don't try to fix them in a PR. `NEXT_PUBLIC_SIGNOZ_CMS_API_URL` and the other `.env.local` variables are used by the internal SigNoz team; external contributors don't need any of them.
 
+### Local Search Comparison
+
+To compare Algolia and Ceisium in the docs search dialog, add these public search settings to an ignored `.env.local` file and restart `yarn dev`:
+
+```text
+NEXT_PUBLIC_ALGOLIA_APP_ID=...
+NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=...
+NEXT_PUBLIC_ALGOLIA_INDEX_NAME=...
+NEXT_PUBLIC_CEISIUM_PUBLIC_SEARCH_KEY=...
+```
+
+The Ceisium key must be a Browser/public Search key for project `prj_a99d649826d34067`. Allow the local preview origin, such as `http://localhost:3000`, and the `https://signoz.io/` result prefix on that key. With no Ceisium key, the dialog uses Algolia alone.
+
 ### Git Hooks
 
 - We use Husky for pre-commit checks. See [contributing/repo-workflow.md#git-hooks-and-checks](contributing/repo-workflow.md#git-hooks-and-checks).
