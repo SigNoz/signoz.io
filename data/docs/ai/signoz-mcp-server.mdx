@@ -1,12 +1,12 @@
 ---
-date: 2026-08-17
+date: 2026-10-02
 title: SigNoz MCP Server
 meta_title: SigNoz MCP Server - AI Agent Integration Guide
 description: Connect Claude, Cursor, Copilot, and other AI agents to SigNoz via MCP for natural language access to metrics, logs, traces, and alerts.
 doc_type: howto
 ---
 
-The SigNoz MCP Server implements the <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer nofollow">Model Context Protocol (MCP)</a>, an open standard that lets AI agents interact with your SigNoz observability data. Query metrics, traces, logs, alerts, and dashboards through natural language.
+The SigNoz MCP Server implements the <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer nofollow">Model Context Protocol (MCP)</a>, an open standard that lets AI agents interact with your SigNoz observability data. Use natural language to query metrics, traces, and logs; investigate alerts; and manage dashboards, alert rules, saved views, and notification channels.
 
 The MCP server works best with the [SigNoz plugin](https://signoz.io/docs/ai/agent-skills/#install-the-plugin): one install adds the server registration and every Agent Skill, so your agent can query, build, and troubleshoot in SigNoz from the first prompt.
 
@@ -27,6 +27,8 @@ https://mcp.<region>.signoz.cloud/mcp
 <Admonition type="note">
 Make sure you select the correct region that matches your SigNoz Cloud account. Using the wrong region will result in authentication failures.
 </Admonition>
+
+**Verify these values:**
 
 - `<region>`: Your SigNoz Cloud region. Find your region under **Settings → Ingestion** in SigNoz, or see the [region reference](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 
@@ -50,6 +52,8 @@ Add this configuration to `.cursor/mcp.json`:
   }
 }
 ```
+
+**Verify these values:**
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
 
@@ -77,6 +81,8 @@ Add this configuration to `.vscode/mcp.json`:
 }
 ```
 
+**Verify these values:**
+
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
 
 Need help? See the <a href="https://code.visualstudio.com/docs/copilot/chat/mcp-servers" target="_blank" rel="noopener noreferrer nofollow">VS Code MCP docs ↗</a>
@@ -93,6 +99,8 @@ You can add SigNoz Cloud as a **custom connector** in Claude Desktop:
 3. Click **Add Custom Connector** or **Add Remote MCP Server**.
 4. Enter your SigNoz MCP URL: `https://mcp.<region>.signoz.cloud/mcp`
 
+**Verify these values:**
+
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
 
 When prompted, complete the authentication flow.
@@ -106,6 +114,8 @@ Run this command to add the SigNoz MCP server:
 ```bash
 claude mcp add --scope user --transport http signoz https://mcp.<region>.signoz.cloud/mcp
 ```
+
+**Verify these values:**
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
 
@@ -134,6 +144,8 @@ Or add this configuration to `config.toml`:
 [mcp_servers.signoz]
 url = "https://mcp.<region>.signoz.cloud/mcp"
 ```
+
+**Verify these values:**
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
 
@@ -168,6 +180,8 @@ Or add this configuration to `~/.gemini/settings.json`:
 }
 ```
 
+**Verify these values:**
+
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
 
 After installation, start Gemini CLI and authenticate:
@@ -192,6 +206,8 @@ Add this configuration to `~/.codeium/windsurf/mcp_config.json`:
   }
 }
 ```
+
+**Verify these values:**
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
 
@@ -219,6 +235,8 @@ Or manually add to `mcp_config.json`:
 }
 ```
 
+**Verify these values:**
+
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
 
 After saving the config, it will prompt you to complete the OAuth flow. To edit the config from within Antigravity, click the `...` menu at the top of the Agent pane → **MCP Servers** → **Manage MCP Servers** → **View raw config**.
@@ -243,6 +261,8 @@ Or add this configuration to `~/.grok/config.toml`:
 url = "https://mcp.<region>.signoz.cloud/mcp"
 enabled = true
 ```
+
+**Verify these values:**
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
 
@@ -308,6 +328,8 @@ If your MCP client doesn't support OAuth flows or stdio transport (for example, 
 }
 ```
 
+**Verify these values:**
+
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-api-key>`: API key from [SigNoz Service accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/)
 - `<your-signoz-instance-url>`: Your SigNoz Cloud instance URL
@@ -320,6 +342,8 @@ Keep your API key secure: never commit `mcp.json` to version control when it con
 <TabItem value="self-hosted" label="Self-Hosted">
 
 For self-hosted SigNoz, you run the MCP server locally. The server supports two transport modes: **Stdio** (local binary, launched by the client) and **HTTP** (standalone server the client connects to over the network).
+
+Use the latest SigNoz release with the latest MCP server. The MCP server targets the current SigNoz APIs; older SigNoz deployments may not support every tool.
 
 ### Fetch your API key
 
@@ -347,6 +371,9 @@ curl -L https://github.com/SigNoz/signoz-mcp-server/releases/latest/download/sig
 
 # Linux (amd64)
 curl -L https://github.com/SigNoz/signoz-mcp-server/releases/latest/download/signoz-mcp-server_linux_amd64.tar.gz | tar xz
+
+# Linux (arm64)
+curl -L https://github.com/SigNoz/signoz-mcp-server/releases/latest/download/signoz-mcp-server_linux_arm64.tar.gz | tar xz
 ```
 
 This extracts a `signoz-mcp-server` binary in the current directory. Move it somewhere on your `PATH` or note the absolute path for the config below.
@@ -377,12 +404,14 @@ Run in HTTP mode:
 docker run -p 8000:8000 \
   -e TRANSPORT_MODE=http \
   -e MCP_SERVER_PORT=8000 \
-  -e SIGNOZ_URL=<your-signoz-url> \
-  -e SIGNOZ_API_KEY=<your-api-key> \
+  -e SIGNOZ_URL="<your-signoz-url>" \
+  -e SIGNOZ_API_KEY="<your-api-key>" \
   signoz/signoz-mcp-server:latest
 ```
 
-- `<your-signoz-url>`: Your self-hosted SigNoz instance URL (e.g., `http://localhost:3301`)
+**Verify these values:**
+
+- `<your-signoz-url>`: The SigNoz API URL reachable from inside the MCP container. For containers on the same Docker network, use the SigNoz service name, such as `http://signoz:8080`, and attach the MCP container to that network with `--network`. On Docker Desktop, use `http://host.docker.internal:8080` to reach SigNoz on the host. `localhost` inside the MCP container refers to that container itself.
 - `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 <Admonition type="info">
@@ -402,6 +431,34 @@ The binary is at `./bin/signoz-mcp-server`.
 
 </TabItem>
 </Tabs>
+
+### Configure browser links
+
+<Admonition type="note">
+Set `global.external_url` on the **SigNoz server** to the URL users open in their browser. The MCP server reads this setting from SigNoz's `GET /api/v1/global/config` endpoint and uses it for resource links. This keeps the browser URL configured in one place.
+</Admonition>
+
+Set the environment variable on your SigNoz process or container, then restart SigNoz:
+
+```bash
+SIGNOZ_GLOBAL_EXTERNAL__URL=https://observe.example.com
+```
+
+Or add the setting to the configuration file your SigNoz server loads:
+
+```yaml
+global:
+  external_url: https://observe.example.com
+```
+
+**Verify these values:**
+
+- `https://observe.example.com`: Replace this with the browser-accessible URL of your SigNoz instance, including its path prefix if applicable.
+- `SIGNOZ_GLOBAL_EXTERNAL__URL`: There are **two underscores** before `URL`. Set it on SigNoz, not on the MCP server.
+
+Keep `SIGNOZ_URL` on the MCP server pointed at the API address it can reach, such as `http://signoz:8080`. The API address and browser address can differ. If your deployment uses a path prefix, include the prefix in both addresses as required by SigNoz and your proxy routing. Configure a backend path in `SIGNOZ_URL`: per-request URLs supplied through OAuth or `X-SigNoz-URL` currently support origins only.
+
+The MCP server caches the discovered browser URL for five minutes per authenticated backend client. If the setting is unset, links use the request's API URL. If discovery fails or returns an invalid URL, the MCP server logs a warning, temporarily uses the API URL, and retries discovery after one minute. Authentication and permission failures are returned to the client.
 
 ### Configure your MCP client
 
@@ -429,8 +486,10 @@ Add the following to `.cursor/mcp.json` in your project root, or use **Cursor �
 }
 ```
 
+**Verify these values:**
+
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
-- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-signoz-url>`: The SigNoz API URL reachable from the MCP server
 - `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 </TabItem>
@@ -439,8 +498,8 @@ Add the following to `.cursor/mcp.json` in your project root, or use **Cursor �
 1. Start the MCP server in HTTP mode:
 
 ```bash
-SIGNOZ_URL=<your-signoz-url> \
-SIGNOZ_API_KEY=<your-api-key> \
+SIGNOZ_URL="<your-signoz-url>" \
+SIGNOZ_API_KEY="<your-api-key>" \
 TRANSPORT_MODE=http \
 MCP_SERVER_PORT=8000 \
 LOG_LEVEL=info \
@@ -487,8 +546,10 @@ Open Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`) → **`MCP: Open User Conf
 }
 ```
 
+**Verify these values:**
+
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
-- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-signoz-url>`: The SigNoz API URL reachable from the MCP server
 - `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 Open Copilot Chat in **Agent mode** and confirm you trust the server.
@@ -539,8 +600,10 @@ Go to **Settings → Developer → Edit Config** and add to `claude_desktop_conf
 }
 ```
 
+**Verify these values:**
+
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
-- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-signoz-url>`: The SigNoz API URL reachable from the MCP server
 - `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 </TabItem>
@@ -549,8 +612,8 @@ Go to **Settings → Developer → Edit Config** and add to `claude_desktop_conf
 1. Start the MCP server in HTTP mode:
 
 ```bash
-SIGNOZ_URL=<your-signoz-url> \
-SIGNOZ_API_KEY=<your-api-key> \
+SIGNOZ_URL="<your-signoz-url>" \
+SIGNOZ_API_KEY="<your-api-key>" \
 TRANSPORT_MODE=http \
 MCP_SERVER_PORT=8000 \
 LOG_LEVEL=info \
@@ -585,8 +648,10 @@ claude mcp add --scope user signoz "<path-to-binary>/signoz-mcp-server" \
   -e LOG_LEVEL=info
 ```
 
+**Verify these values:**
+
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
-- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-signoz-url>`: The SigNoz API URL reachable from the MCP server
 - `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 <Admonition type="info">
@@ -620,8 +685,10 @@ codex mcp add signoz \
   -- "<path-to-binary>/signoz-mcp-server"
 ```
 
+**Verify these values:**
+
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
-- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-signoz-url>`: The SigNoz API URL reachable from the MCP server
 - `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 </TabItem>
@@ -680,8 +747,10 @@ Add this configuration to `~/.codeium/windsurf/mcp_config.json`
 }
 ```
 
+**Verify these values:**
+
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
-- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-signoz-url>`: The SigNoz API URL reachable from the MCP server
 - `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 </TabItem>
@@ -727,8 +796,10 @@ Add to `~/.gemini/settings.json`:
 }
 ```
 
+**Verify these values:**
+
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
-- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-signoz-url>`: The SigNoz API URL reachable from the MCP server
 - `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 </TabItem>
@@ -771,8 +842,10 @@ Open Zed settings (`Cmd+,`) and add:
 }
 ```
 
+**Verify these values:**
+
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
-- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-signoz-url>`: The SigNoz API URL reachable from the MCP server
 - `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 
@@ -800,8 +873,10 @@ Add to `mcp_config.json` (open via `...` menu → **MCP Servers** → **Manage M
 }
 ```
 
+**Verify these values:**
+
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
-- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-signoz-url>`: The SigNoz API URL reachable from the MCP server
 - `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 </TabItem>
@@ -833,13 +908,15 @@ Add the MCP server via CLI:
 
 ```bash
 grok mcp add signoz "<path-to-binary>/signoz-mcp-server" \
-  -e SIGNOZ_URL=<your-signoz-url> \
-  -e SIGNOZ_API_KEY=<your-api-key> \
+  -e SIGNOZ_URL="<your-signoz-url>" \
+  -e SIGNOZ_API_KEY="<your-api-key>" \
   -e LOG_LEVEL=info
 ```
 
+**Verify these values:**
+
 - `<path-to-binary>`: Absolute path to the `signoz-mcp-server` binary
-- `<your-signoz-url>`: Your SigNoz instance URL
+- `<your-signoz-url>`: The SigNoz API URL reachable from the MCP server
 - `<your-api-key>`: The API key from [Fetch your API key](#fetch-your-api-key)
 
 Stdio is the default transport, so no `-t` flag is needed. The server is written to `~/.grok/config.toml`; add `-s project` to write to `./.grok/config.toml` instead.
@@ -876,8 +953,8 @@ Environment variables for the self-hosted MCP server. SigNoz Cloud users do not 
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SIGNOZ_URL` | URL of your SigNoz instance | _(required for stdio; optional for http with OAuth)_ |
-| `SIGNOZ_API_KEY` | API key for authenticating with SigNoz | _(required for stdio; optional for http with OAuth)_ |
+| `SIGNOZ_URL` | SigNoz API URL reachable from the MCP server; browser links use SigNoz's `global.external_url` when configured | _(required for stdio; optional for http with per-request credentials)_ |
+| `SIGNOZ_API_KEY` | API key for authenticating with SigNoz | _(required for stdio; optional for http with per-request credentials)_ |
 | `TRANSPORT_MODE` | Transport protocol: `stdio` or `http` | `stdio` |
 | `MCP_SERVER_HOST` | Host/interface for the HTTP server. Empty listens on all interfaces; set `127.0.0.1` for loopback-only access | _(all interfaces)_ |
 | `MCP_SERVER_PORT` | Port for HTTP server (when `TRANSPORT_MODE=http`) | `8000` |
@@ -885,17 +962,41 @@ Environment variables for the self-hosted MCP server. SigNoz Cloud users do not 
 | `LOG_LEVEL` | Logging verbosity: `debug`, `info`, `warn`, `error` | `info` |
 | `CLIENT_CACHE_SIZE` | Maximum cached tenant clients in multi-tenant HTTP mode | `256` |
 | `CLIENT_CACHE_TTL_MINUTES` | Tenant-client cache lifetime in minutes | `30` |
-| `SIGNOZ_CUSTOM_HEADERS` | Extra HTTP headers added to every SigNoz API request, such as reverse-proxy auth headers. Format: `Key1:Value1,Key2:Value2` | _(optional)_ |
-| `SIGNOZ_INSTANCE_URL_ALLOWLIST` | Multi-tenant HTTP mode only: comma-separated allowlist of SigNoz backend hosts the server will proxy to. Empty allows any host | _(any host)_ |
-| `SIGNOZ_DOCS_REFRESH_INTERVAL` | Refresh interval for the embedded docs sitemap used by `signoz_search_docs` / `signoz_fetch_doc` (Go duration) | `6h` |
-| `SIGNOZ_DOCS_FULL_REFRESH_INTERVAL` | Full refresh interval for the embedded docs corpus (Go duration) | `24h` |
+| `SIGNOZ_CUSTOM_HEADERS` | Extra HTTP headers for requests to the configured `SIGNOZ_URL` backend, such as reverse-proxy auth headers. Format: `Key1:Value1,Key2:Value2` | _(optional)_ |
+| `SIGNOZ_INSTANCE_URL_ALLOWLIST` | Multi-tenant HTTP mode only: comma-separated allowed backend hosts. Empty adds no host restriction; the configured `SIGNOZ_URL` is exempt | _(no host restriction)_ |
+| `SIGNOZ_DOCS_REFRESH_INTERVAL` | Refresh interval for the embedded docs sitemap used by `signoz_search_docs` / `signoz_fetch_doc` (Go duration); `0` disables this refresh | `6h` |
+| `SIGNOZ_DOCS_FULL_REFRESH_INTERVAL` | Full refresh interval for the embedded docs corpus (Go duration); `0` disables this refresh | `24h` |
 | `OAUTH_ENABLED` | Enable OAuth 2.1 authentication (`true`/`false`) | `false` |
 | `OAUTH_TOKEN_SECRET` | Encryption key for OAuth tokens (min 32 bytes) | _(required when `OAUTH_ENABLED=true`)_ |
 | `OAUTH_ISSUER_URL` | Public URL of this MCP server | _(required when `OAUTH_ENABLED=true`)_ |
 | `OAUTH_ACCESS_TOKEN_TTL_MINUTES` | Access token lifetime in minutes | `60` |
 | `OAUTH_REFRESH_TOKEN_TTL_MINUTES` | Refresh token lifetime in minutes | `43200` (30d) |
 | `OAUTH_AUTH_CODE_TTL_SECONDS` | Authorization code lifetime in seconds | `600` (10min) |
+| `ANALYTICS_ENABLED` | Enable product analytics (`true`/`false`) | `false` |
+| `SEGMENT_KEY` | Segment write key, used only when analytics is enabled | _(optional)_ |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP gRPC endpoint for the MCP server's own traces and metrics; use `http://` for a plaintext collector | _(export disabled when unconfigured)_ |
+| `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` | Trace-specific OTLP gRPC endpoint; overrides the shared endpoint for traces | _(optional)_ |
+| `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` | Metrics-specific OTLP gRPC endpoint; overrides the shared endpoint for metrics | _(optional)_ |
+| `OTEL_TRACES_EXPORTER` | Set to `none` to disable internal trace export even with an endpoint configured | _(optional)_ |
+| `OTEL_METRICS_EXPORTER` | Set to `none` to disable internal metric export even with an endpoint configured | _(optional)_ |
 
+These OTLP settings instrument the MCP server itself. They do not configure telemetry ingestion from your applications. MCP server logs go to stderr as JSON; the server does not export them over OTLP.
+
+### Deploy HTTP mode
+
+The HTTP endpoint is `POST /mcp`. It is stateless: requests do not need session affinity or a persistent SSE connection. After authentication, `GET /mcp` returns `405 Method Not Allowed`; requests without credentials can return `401` first. Use an MCP client to test the connection.
+
+For a shared deployment, configure OAuth or supply `SIGNOZ-API-KEY` and `X-SigNoz-URL` headers per request. Avoid exposing a server configured with a shared API key to untrusted clients. For local use, set `MCP_SERVER_HOST=127.0.0.1` to listen only on loopback.
+
+HTTP mode exposes these unauthenticated probe endpoints:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/livez` | Liveness: returns `200` while the process is running |
+| `/readyz` | Readiness: returns `200` after the docs index is ready, otherwise `503` |
+| `/healthz` | Legacy health endpoint with the same readiness check as `/readyz` |
+
+Use `/livez` for Kubernetes liveness probes and `/readyz` for readiness probes.
 
 </TabItem>
 </Tabs>
@@ -907,6 +1008,7 @@ After connecting, verify the server is working:
 1. Open your AI agent.
 2. Ask: _"List all alerts"_ or _"Show me all available services"_.
 3. The agent should return structured results from your SigNoz instance.
+4. Ask for a dashboard or trace link and open the returned link. For self-hosted SigNoz, configure the [browser URL](#configure-browser-links) if the link contains an internal hostname.
 
 <details>
 <ToggleHeading>
@@ -916,7 +1018,7 @@ After connecting, verify the server is working:
 The MCP server exposes the following tools to your AI agent:
 
 <Admonition type="note">
-Some tools use newer SigNoz APIs. Dashboard tools (create/get/update/patch/list/delete/import) require SigNoz v0.135.0 or later because they use the v2 dashboards API. `signoz_check_metric_usage` needs v0.135.0 for dashboard usage; its alert usage works from v0.131.0. Alert-rule list/get/create/update/delete tools require v0.120.0 or later, and `signoz_get_alert_history` requires v0.118.0 or later. Notification-channel tools also use newer channels APIs. Older SigNoz deployments may return HTTP 404 from affected tools.
+Each MCP server release targets the latest SigNoz release. If a tool returns `404` from an older self-hosted instance, check the SigNoz and MCP server releases before troubleshooting its parameters.
 </Admonition>
 
 | Tool | Description |
@@ -933,20 +1035,20 @@ Some tools use newer SigNoz APIs. Dashboard tools (create/get/update/patch/list/
 | `signoz_list_alert_rules` | List configured alert rules, including inactive or disabled rules |
 | `signoz_get_alert` | Get an alert rule definition by ID |
 | `signoz_get_alert_history` | Get a rule's firing and state-transition history (cursor-paginated) |
-| `signoz_create_alert` | Create an alert rule using v2 schema validation |
+| `signoz_create_alert` | Create a threshold, anomaly, or absent-data alert rule |
 | `signoz_update_alert` | Update an existing alert rule |
 | `signoz_delete_alert` | Delete an alert rule |
 | `signoz_list_dashboards` | List all dashboards with summaries |
 | `signoz_get_dashboard` | Get full dashboard configuration |
 | `signoz_create_dashboard` | Create a new dashboard |
-| `signoz_update_dashboard` | Update an existing dashboard |
+| `signoz_update_dashboard` | Replace a dashboard with the complete edited definition from `signoz_get_dashboard` |
 | `signoz_patch_dashboard` | Apply a partial JSON Patch to a dashboard without resending the whole definition |
 | `signoz_delete_dashboard` | Delete a dashboard by UUID |
 | `signoz_list_dashboard_templates` | List the bundled SigNoz dashboard template catalog so the model can pick one |
 | `signoz_import_dashboard` | Create a dashboard from a curated SigNoz dashboard template by path |
 | `signoz_list_services` | List APM services with trace activity in a time range |
 | `signoz_get_service_top_operations` | Get top operations for a service |
-| `signoz_list_views` | List saved Explorer views for traces, logs, or metrics |
+| `signoz_list_views` | List saved views for Logs, Traces, Metrics, or Cost Meter |
 | `signoz_get_view` | Get a saved Explorer view by UUID |
 | `signoz_create_view` | Create a saved Explorer view |
 | `signoz_update_view` | Replace an existing saved Explorer view |
@@ -954,18 +1056,20 @@ Some tools use newer SigNoz APIs. Dashboard tools (create/get/update/patch/list/
 | `signoz_aggregate_logs` | Aggregate logs (count, avg, p99, etc.) with grouping |
 | `signoz_search_logs` | Search logs with flexible filtering |
 | `signoz_aggregate_traces` | Aggregate trace statistics with grouping |
-| `signoz_search_traces` | Search traces with flexible filtering |
+| `signoz_search_traces` | Search matching span rows with filtering, ordering, and pagination |
 | `signoz_get_trace_details` | Get full trace with all spans |
 | `signoz_execute_builder_query` | Run Query Builder v5 requests the dedicated tools cannot express, including multi-query requests, formulas, PromQL, and ClickHouse SQL |
 | `signoz_search_docs` | Search official SigNoz docs for product, setup, instrumentation, config, API, deployment, or troubleshooting questions |
 | `signoz_fetch_doc` | Fetch full markdown for one official SigNoz docs page or heading |
-| `signoz_list_notification_channels` | List notification channels |
-| `signoz_get_notification_channel` | Get a single notification channel by ID |
-| `signoz_create_notification_channel` | Create a notification channel and send a test notification |
-| `signoz_update_notification_channel` | Update a notification channel and send a test notification |
+| `signoz_list_notification_channels` | List channel summaries without provider configuration |
+| `signoz_get_notification_channel` | Get one channel's full configuration by ID |
+| `signoz_create_notification_channel` | Create a notification channel; optionally send a test notification |
+| `signoz_update_notification_channel` | Replace a notification channel's full configuration; optionally send a test notification |
 | `signoz_delete_notification_channel` | Delete a notification channel by ID |
 
 The server also exposes read-only MCP resources (`signoz://...` URIs) with schemas, query-builder guides, and payload examples that AI agents read before composing alert, dashboard, and view payloads.
+
+Agents should discover fields before filtering logs or traces, and reuse the current resource definition when making a replacement update. Notification-channel writes default to `test=false`; use `test=true` only when a test notification is requested. Tools that return `webUrl` provide a ready-to-open SigNoz link, so agents can return it directly.
 
 For detailed parameter reference and the full resource list, see the <a href="https://github.com/SigNoz/signoz-mcp-server?tab=readme-ov-file#available-tools" target="_blank" rel="noopener noreferrer nofollow">GitHub repository README</a>.
 
@@ -986,6 +1090,7 @@ For detailed parameter reference and the full resource list, see the <a href="ht
 - For SigNoz Cloud: ensure you are using the correct [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) in the MCP URL.
 - Confirm your API key is valid and has not expired.
 - For self-hosted HTTP mode where the client sends the key, use the `SIGNOZ-API-KEY: <your-api-key>` header.
+- `UNAUTHORIZED` means the credentials need attention. For `PERMISSION_DENIED`, check the service account's role and permissions for the requested operation.
 
 ### SigNoz Cloud connection issues
 
@@ -998,5 +1103,9 @@ For detailed parameter reference and the full resource list, see the <a href="ht
 - Ensure port `8000` is not already in use.
 - Check that `TRANSPORT_MODE=http` is set.
 - Review server logs for startup errors.
+
+### Resource links point to an internal address
+
+Configure `global.external_url` on the SigNoz server as described in [Configure browser links](#configure-browser-links), then restart SigNoz. The MCP server may keep a previously discovered URL for up to five minutes. Check MCP logs for global-config discovery warnings if links still fall back to `SIGNOZ_URL`.
 
 </details>
