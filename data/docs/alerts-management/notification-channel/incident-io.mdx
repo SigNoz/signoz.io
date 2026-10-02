@@ -1,5 +1,5 @@
 ---
-date: 2026-08-21
+date: 2026-09-30
 doc_type: howto
 title: incident.io Notification Channel Setup for Alerts
 description: Set up incident.io as a notification channel in SigNoz to fire and resolve incident.io alerts automatically, and turn them into incidents with alert routes.
@@ -31,7 +31,7 @@ To create a new incident.io notification channel in SigNoz:
 
 | Field | Description |
 | :--- | :--- |
-| **Alert source URL** | The alert events URL copied above. **Required**. |
+| **Alert source URL** | The alert events URL copied above. **Required**. Any non-empty URL is accepted, so you can also point this at a proxy or relay endpoint that forwards to incident.io. |
 | **Token** | The alert source's secret token. **Required**. Pasting it with a leading `Bearer ` prefix is fine; SigNoz strips it. |
 | **Send resolved alerts** | On by default. When on, SigNoz resolves the incident.io alert when the SigNoz alert resolves. |
 | **Title** | Template for the alert title. Prefilled with a sensible default. |
@@ -138,7 +138,7 @@ curl '<your-signoz-url>/api/v1/channels' \
 | :--- | :--- | :--- |
 | `name` | `string` | The name of the receiver/channel. **Required**; must be unique across the config. |
 | `incidentio_configs` | `array` | List of incident.io configurations. |
-| `incidentio_configs[].url` | `string` | The alert events URL, `https://api.incident.io/v2/alert_events/http/<source_config_id>`. **Required**. |
+| `incidentio_configs[].url` | `string` | The alert events URL, `https://api.incident.io/v2/alert_events/http/<source_config_id>`. **Required**; any non-empty URL is accepted, including a proxy or relay endpoint. |
 | `incidentio_configs[].token` | `string` | The alert source's secret token. **Required**. A leading `Bearer ` prefix is stripped. |
 | `incidentio_configs[].send_resolved` | `boolean` | Whether to resolve the incident.io alert when the SigNoz alert resolves. |
 | `incidentio_configs[].title` | `string` | Templated alert title. Go templates are supported. A default is applied if omitted. |
