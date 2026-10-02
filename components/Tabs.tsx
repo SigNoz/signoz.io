@@ -6,7 +6,10 @@ import { TabsRoot, TabsList, TabsTrigger } from '@signozhq/ui/tabs'
 import { useSearchParamsState } from '@/hooks/useSearchParamsState'
 import { isDocsOnboardingPathname } from '@/utils/docs/onboardingPath'
 import type { TabItemProps } from './TabItem'
+import TabsDropdown from './TabsDropdown'
 import styles from './Tabs.module.css'
+
+const DROPDOWN_THRESHOLD = 6
 
 interface TabsProps {
   children: React.ReactNode
@@ -14,6 +17,7 @@ interface TabsProps {
   variant?: 'default' | 'pill'
   className?: string
   segmented?: boolean
+  layout?: 'auto' | 'tabs' | 'dropdown'
 }
 
 // Segmented button bar look for DS secondary tabs, shared with
@@ -44,6 +48,7 @@ const Tabs = ({
   variant = 'default',
   className,
   segmented = false,
+  layout = 'auto',
 }: TabsProps) => {
   const searchParams = useSearchParamsState()
   const pathname = usePathname()
@@ -115,6 +120,64 @@ const Tabs = ({
     return true
   })
 
+  const useDropdown =
+    layout === 'dropdown' || (layout === 'auto' && visibleChildren.length >= DROPDOWN_THRESHOLD)
+
+  const panels = (
+    <div data-tab-panels="" className="[&>[data-tab-value]>*:first-child]:mt-0">
+      {visibleChildren.map((child) => {
+        const isActive = child.props.value === activeTab
+        const { value, label } = child.props
+        return (
+          <div
+            key={value as string}
+            data-tab-value={value}
+            hidden={!isActive}
+            role={useDropdown ? 'region' : undefined}
+            aria-label={
+              useDropdown ? (typeof label === 'string' ? label : (value as string)) : undefined
+            }
+          >
+            {child.props.children}
+          </div>
+        )
+      })}
+    </div>
+  )
+
+  if (useDropdown) {
+    const activeChild = visibleChildren.find((child) => child.props.value === activeTab)
+    return (
+      <div data-tabs-root="" className={className || 'w-full'}>
+        <TabsDropdown
+          items={visibleChildren.map((child) => ({
+            value: child.props.value as string,
+            label: child.props.label,
+          }))}
+          activeValue={activeTab}
+          activeLabel={activeChild?.props.label}
+          onChange={handleTabChange}
+          groupLabel={entityName ? entityName.replace(/-/g, ' ') : undefined}
+        />
+        {/* copy-markdown reads tab labels from these and DocsTOC deep-links click() them */}
+        <div hidden>
+          {visibleChildren.map((child) => (
+            <button
+              key={child.props.value as string}
+              type="button"
+              tabIndex={-1}
+              data-tab-value={child.props.value as string}
+              onClick={() => handleTabChange(child.props.value as string)}
+            >
+              {child.props.label}
+            </button>
+          ))}
+        </div>
+        {panels}
+      </div>
+    )
+  }
+
   return (
     <TabsRoot
       className={`${styles.root} ${isSegmented ? styles.segmented : ''} ${
@@ -151,20 +214,7 @@ const Tabs = ({
           )
         })}
       </TabsList>
-      <div data-tab-panels="" className="[&>[data-tab-value]>*:first-child]:mt-0">
-        {visibleChildren.map((child) => {
-          const isActive = child.props.value === activeTab
-          return (
-            <div
-              key={child.props.value as string}
-              data-tab-value={child.props.value}
-              hidden={!isActive}
-            >
-              {child.props.children}
-            </div>
-          )
-        })}
-      </div>
+      {panels}
     </TabsRoot>
   )
 }

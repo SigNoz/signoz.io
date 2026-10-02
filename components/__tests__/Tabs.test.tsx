@@ -29,6 +29,17 @@ vi.mock('@/hooks/useSearchParamsState', () => ({
   useSearchParamsState: () => mockSearchParams(),
 }))
 
+// Radix Select needs these in jsdom
+if (!Element.prototype.hasPointerCapture) {
+  Element.prototype.hasPointerCapture = () => false
+}
+if (!Element.prototype.releasePointerCapture) {
+  Element.prototype.releasePointerCapture = () => {}
+}
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {}
+}
+
 beforeEach(() => {
   mockPathname.mockReturnValue('/docs/install/')
   mockSearchParams.mockReturnValue(new URLSearchParams())
@@ -400,5 +411,177 @@ describe('environment tab switch preserves nested query params', () => {
       (p) => p.getAttribute('data-tab-value') === 'windows'
     )
     expect(windowsPanel).not.toHaveAttribute('hidden')
+  })
+})
+
+const FRAMEWORKS = [
+  ['react', 'React (Vite/CRA)'],
+  ['nextjs-app', 'Next.js (App Router)'],
+  ['nextjs-pages', 'Next.js (Pages Router)'],
+  ['nuxt', 'Nuxt.js'],
+  ['angular', 'Angular'],
+  ['vue', 'Vue.js'],
+  ['svelte', 'Svelte/SvelteKit'],
+] as const
+
+const renderManyTabs = (
+  count: number,
+  props: Partial<Omit<React.ComponentProps<typeof Tabs>, 'children'>> = {}
+) =>
+  render(
+    <Tabs {...props}>
+      {FRAMEWORKS.slice(0, count).map(([value, label], index) => (
+        <TabItem key={value} value={value} label={label} default={index === 0}>
+          {label} content
+        </TabItem>
+      ))}
+    </Tabs>
+  )
+
+const getCombobox = () => screen.queryByRole('combobox')
+const getMirrorButtons = () =>
+  document.querySelectorAll<HTMLButtonElement>('[data-tabs-root] button[data-tab-value]')
+const getPanel = (value: string) =>
+  Array.from(getTabPanels()).find((p) => p.getAttribute('data-tab-value') === value)
+
+describe('dropdown mode at 6+ items', () => {
+  it('renders a combobox and mirror buttons instead of a tab bar at 6 items', () => {
+    renderManyTabs(6, { entityName: 'framework-choice' })
+
+    expect(getTabButtons()).toHaveLength(0)
+    expect(getCombobox()).toBeTruthy()
+    expect(getMirrorButtons()).toHaveLength(6)
+  })
+
+  it('keeps the tab bar at 5 items', () => {
+    renderManyTabs(5, { entityName: 'framework-choice' })
+
+    expect(getTabButtons()).toHaveLength(5)
+    expect(getCombobox()).toBeNull()
+  })
+
+  it('keeps the panel contract: all panels present, only default visible', () => {
+    renderManyTabs(6, { entityName: 'framework-choice' })
+
+    const panels = getTabPanels()
+    expect(panels).toHaveLength(6)
+    expect(getPanel('react')).not.toHaveAttribute('hidden')
+    FRAMEWORKS.slice(1, 6).forEach(([value]) => {
+      expect(getPanel(value)).toHaveAttribute('hidden')
+    })
+  })
+
+  it('labels panels as regions so the combobox relationship is accessible', () => {
+    renderManyTabs(6, { entityName: 'framework-choice' })
+
+    FRAMEWORKS.slice(0, 6).forEach(([value, label]) => {
+      const panel = getPanel(value)
+      expect(panel).toHaveAttribute('role', 'region')
+      expect(panel).toHaveAttribute('aria-label', label)
+    })
+    expect(screen.getByRole('region', { name: 'React (Vite/CRA)' })).toBeTruthy()
+  })
+
+  it('does not add region roles in tab-bar mode', () => {
+    renderManyTabs(5, { entityName: 'framework-choice' })
+
+    FRAMEWORKS.slice(0, 5).forEach(([value]) => {
+      expect(getPanel(value)).not.toHaveAttribute('role')
+    })
+  })
+
+  it('selecting an option switches the panel and syncs the URL', () => {
+    renderManyTabs(7, { entityName: 'framework-choice' })
+
+    // jsdom has no real PointerEvent, so drive the Radix select via keyboard
+    fireEvent.keyDown(getCombobox()!, { key: 'ArrowDown' })
+    const option = screen.getByRole('option', { name: 'Svelte/SvelteKit' })
+    fireEvent.keyDown(option, { key: 'Enter' })
+
+    expect(getPanel('svelte')).not.toHaveAttribute('hidden')
+    expect(getPanel('react')).toHaveAttribute('hidden')
+    expect(window.location.search).toContain('framework-choice=svelte')
+  })
+
+  it('restores the selection from URL search params', () => {
+    mockSearchParams.mockReturnValue(new URLSearchParams('framework-choice=angular'))
+    renderManyTabs(7, { entityName: 'framework-choice' })
+
+    expect(getCombobox()).toHaveTextContent('Angular')
+    expect(getPanel('angular')).not.toHaveAttribute('hidden')
+    expect(getPanel('react')).toHaveAttribute('hidden')
+  })
+
+  it('programmatic mirror button click switches the panel and syncs the URL (DocsTOC path)', () => {
+    renderManyTabs(7, { entityName: 'framework-choice' })
+
+    const vueButton = document.querySelector<HTMLButtonElement>(
+      '[data-tabs-root] button[data-tab-value="vue"]'
+    )
+    fireEvent.click(vueButton!)
+
+    expect(getPanel('vue')).not.toHaveAttribute('hidden')
+    expect(window.location.search).toContain('framework-choice=vue')
+  })
+
+  it('works without entityName and leaves the URL untouched', () => {
+    renderManyTabs(6)
+
+    fireEvent.click(
+      document.querySelector<HTMLButtonElement>('[data-tabs-root] button[data-tab-value="vue"]')!
+    )
+
+    expect(getCombobox()).toBeTruthy()
+    expect(getPanel('vue')).not.toHaveAttribute('hidden')
+    expect(window.location.search).toBe('')
+  })
+})
+
+describe('dropdown threshold counts visible children after onboarding filtering', () => {
+  const plansItems = [
+    ['cloud', 'Cloud'],
+    ['aws', 'AWS'],
+    ['gcp', 'GCP'],
+    ['azure', 'Azure'],
+    ['oracle', 'Oracle'],
+    ['self-host', 'Self-Host'],
+    ['self-hosted', 'Self-Hosted'],
+  ].map(([value, label], index) => (
+    <TabItem key={value} value={value} label={label} default={index === 0}>
+      {label} content
+    </TabItem>
+  ))
+
+  it('7 items with 2 self-host variants stays a tab bar on onboarding routes', () => {
+    mockPathname.mockReturnValue('/docs-onboarding/install/')
+    render(<Tabs entityName="plans">{plansItems}</Tabs>)
+
+    expect(getCombobox()).toBeNull()
+    expect(getTabButtons()).toHaveLength(5)
+  })
+
+  it('the same 7 items become a dropdown on regular docs routes', () => {
+    render(<Tabs entityName="plans">{plansItems}</Tabs>)
+
+    expect(getCombobox()).toBeTruthy()
+    expect(getTabButtons()).toHaveLength(0)
+    expect(getMirrorButtons()).toHaveLength(7)
+  })
+})
+
+describe('layout escape hatch', () => {
+  it('layout="tabs" keeps the tab bar at 7 items', () => {
+    renderManyTabs(7, { entityName: 'framework-choice', layout: 'tabs' })
+
+    expect(getTabButtons()).toHaveLength(7)
+    expect(getCombobox()).toBeNull()
+  })
+
+  it('layout="dropdown" forces the dropdown at 2 items', () => {
+    renderManyTabs(2, { entityName: 'framework-choice', layout: 'dropdown' })
+
+    expect(getTabButtons()).toHaveLength(0)
+    expect(getCombobox()).toBeTruthy()
+    expect(getMirrorButtons()).toHaveLength(2)
   })
 })
