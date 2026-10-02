@@ -1,0 +1,37 @@
+---
+date: 2026-10-02
+
+title: Integrate with Pagerly (Prometheus Alertmanager Webhook)
+description: Integrate SigNoz with Pagerly to route alerts into Slack or Microsoft Teams for on-call and incident management.
+doc_type: howto
+---
+
+
+## Integration with Pagerly
+
+Pagerly is an on-call and incident management product for Slack and Microsoft Teams. SigNoz sends alerts to Pagerly through the existing **Webhook** channel using Pagerly's Prometheus / Alertmanager inbound integration. No dedicated Pagerly channel type is required in SigNoz.
+
+1. In Pagerly, go to [Inbound Integrations](https://workspace.pagerly.io/inbound) and click **Add Inbound Integration**.
+2. Enter a name, pick the team, choose **Prometheus**, and click **Add Integration**.
+3. Copy the webhook URL.
+4. In SigNoz, go to `Settings > Account Settings > Notification Channels > New Channel`, choose **Webhook**, and paste the URL. Leave the username and password empty.
+5. Click **Test**. An incident appears in the team's Slack or Teams channel.
+
+### How alerts map to Pagerly incidents
+
+| SigNoz alert field | Pagerly incident field |
+| :--- | :--- |
+| `labels.alertname` | Title |
+| `annotations.description` | Description |
+| `generatorURL` | Link back to SigNoz |
+| `status: firing` | Opens the incident |
+| `status: resolved` | Resolves the incident |
+
+## Configure programmatically
+
+Since this integration uses the Webhook channel, you can configure it programmatically using the same mechanism as described in the [Webhook](https://signoz.io/docs/alerts-management/notification-channel/webhook/#configure-programmatically) section.
+
+## Further reading
+
+- [Pagerly Prometheus / Alertmanager setup](https://docs.pagerly.io/incidents-and-users/prometheus)
+- [Add an inbound integration in Pagerly](https://docs.pagerly.io/incidents-and-users/add-incoming-integration)
