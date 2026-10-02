@@ -1,5 +1,5 @@
 ---
-date: 2026-09-25
+date: 2026-09-30
 title: Migrate the Notification Channel API from v1 to v2 Endpoints
 description: Migrate from the deprecated v1 notification channel API endpoints to the v2 replacements, including the new config schema, authorization, and list changes.
 doc_type: reference
@@ -31,6 +31,16 @@ The v2 endpoints have been under development since SigNoz `v0.141.0`. The releas
 | — | `POST /api/v2/notification_channels/{id}/repair` (new) |
 
 Channel IDs are unchanged. An ID that worked with v1 works with v2.
+
+## What the v1 API now rejects
+
+The v1 endpoints stay available for supported channels, but they no longer accept configurations that the v2 format cannot represent. These rules apply to `POST /api/v1/channels` and `PUT /api/v1/channels/{id}`, and a rejected request returns `400 Bad Request`:
+
+- **Unsupported channel types.** Only the kinds in the [config table](#the-config-for-each-kind) can be created. Types with no v2 equivalent, such as Telegram and Pushover, are rejected.
+- **More than one notifier per receiver.** A channel must carry exactly one notifier. Receivers that bundle several are rejected.
+- **Unsupported `http_config` options.** Only the auth fields that map to a v2 spec field are kept: basic auth (`username` and `password`) and a bearer token set through `http_config.authorization`. These options are rejected: `oauth2`, `bearer_token`, `bearer_token_file`, `http_headers`, `proxy_url`, `no_proxy`, `proxy_from_environment`, any `tls_config`, and disabling `follow_redirects` or `enable_http2`.
+
+An existing channel of an unsupported type keeps firing alerts, but it can no longer be edited through the v1 API. To change one, delete it and recreate it as a supported type.
 
 ## Authorization
 
@@ -67,6 +77,10 @@ The full schema is in the request payload of the [Create Notification Channel](h
 A channel carries two names. `name` is its immutable identifier, a DNS-1123 label. `displayName` is the free-text label shown in the UI and referenced by alert rules and routing policies. The v1 `name` is the v2 `displayName`; the v2 `name` is new. Set `generateName` to `true` to derive `name` from `displayName` with a random suffix, or omit `displayName` to have it default to `name`.
 
 Update and test requests carry only `config`.
+
+### Empty and omitted collections
+
+Empty arrays (`[]`) and empty objects (`{}`) in a create or update body are stored and returned as sent, not dropped. An optional collection field that you omit comes back as an explicit `null` in responses, rather than being absent from the body. This covers `fields` and `actions` (Slack), `labels` and `customFields` (Jira), `details` (OpsGenie and PagerDuty), `headers` (Email), and `metadata` (IncidentIO).
 
 ## Creating a notification channel
 
