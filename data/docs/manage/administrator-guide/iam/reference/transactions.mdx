@@ -1,5 +1,5 @@
 ---
-date: 2026-09-16
+date: 2026-10-02
 title: Transactions Reference
 description: Complete reference of transactions for each resource in SigNoz covering relations, selector formats, and managed role access.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -19,7 +19,7 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers roles, service accounts, API keys, dashboards, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as alerts and pipelines will be documented as they become available for fine-grained access control.
+This page currently covers roles, service accounts, API keys, dashboards, the subscription, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as alerts and pipelines will be documented as they become available for fine-grained access control.
 </Admonition>
 
 ## Resources
@@ -85,6 +85,19 @@ The list is not filtered by `read`. A principal holding `list` sees every dashbo
 <Admonition type="info">
 Publishing a dashboard requires `update` on it. Readers who open the resulting public link are anonymous and are authorized against the `public-dashboard` resource, which is not configurable in custom roles. See [Public Sharing](https://signoz.io/docs/dashboards/public-sharing/).
 </Admonition>
+
+### Subscription
+
+**Resource:** `metaresource` · **Kind:** `subscription` · **Selector:** `*` (a workspace has a single subscription)
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Upgrade the workspace to a paid plan. | signoz-admin |
+| `list` | List the workspace subscription. Required together with `update` to open **Manage billing**. | signoz-admin |
+| `read` | View the current plan and usage breakdown on the Billing page. | signoz-admin |
+| `update` | Open **Manage billing** and update payment details. Requires `list` as well. | signoz-admin |
+
+A workspace has a single subscription, so each relation can only be granted as **All** or **None**. Granting these relations on a custom role scopes billing access to that role without granting any other administrative access.
 
 ### Logs
 
@@ -158,3 +171,4 @@ Some operations require transactions on multiple resources. Both transactions mu
 | Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
 | Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
 | Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |
+| Open Manage billing | `subscription:list` AND `subscription:update` |
