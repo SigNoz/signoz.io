@@ -1,0 +1,350 @@
+---
+date: 2026-10-03
+title: Bun and ElysiaJS OpenTelemetry Instrumentation Guide
+description: Instrument a Bun app built with ElysiaJS using OpenTelemetry. Send request traces, HTTP metrics, and runtime metrics to SigNoz. Includes plain Bun.serve.
+doc_type: howto
+---
+
+## Overview
+
+This guide shows you how to instrument a <a href="https://bun.sh" target="_blank" rel="noopener noreferrer nofollow">Bun</a> application with OpenTelemetry and send traces and metrics to SigNoz. The main path uses <a href="https://elysiajs.com" target="_blank" rel="noopener noreferrer nofollow">ElysiaJS</a>, a web framework for Bun. The [Instrument Bun without Elysia](https://signoz.io/docs/instrumentation/opentelemetry-bun/#instrument-bun-without-elysia) section covers apps that use `Bun.serve` directly.
+
+<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Prerequisites
+
+- Bun installed
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- An Elysia app. To start from scratch, run `bun create elysia my-app`. The command creates the app entry file at `src/index.ts`.
+
+Tested with Bun v1.4.2, Elysia 1.4.30, and `@elysia/opentelemetry` 1.4.12.
+
+## Send telemetry from an Elysia app
+
+### Step 1. Install the packages
+
+Run this command in the root of your project:
+
+```bash
+bun add @elysia/opentelemetry \
+  @opentelemetry/sdk-trace-node \
+  @opentelemetry/sdk-metrics \
+  @opentelemetry/exporter-trace-otlp-proto \
+  @opentelemetry/exporter-metrics-otlp-proto \
+  @opentelemetry/instrumentation-runtime-node \
+  @opentelemetry/instrumentation-host-metrics
+```
+
+<Admonition type="warning" title="Use @elysia/opentelemetry, not @elysiajs/opentelemetry">
+The older `@elysiajs/opentelemetry` package, up to version 1.4.11, does not record the HTTP request metric. Use `@elysia/opentelemetry`.
+</Admonition>
+
+### Step 2. Add OpenTelemetry to your app
+
+Add the plugin to your Elysia app. The exporters send data over OTLP/HTTP and read the endpoint and the ingestion key from environment variables, which you set in the next step.
+
+```ts:src/index.ts defaultCollapsed
+import { Elysia } from 'elysia'
+import { opentelemetry } from '@elysia/opentelemetry'
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node'
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-proto'
+import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node'
+import { HostMetricsInstrumentation } from '@opentelemetry/instrumentation-host-metrics'
+
+const app = new Elysia()
+  .use(
+    opentelemetry({
+      serviceName: process.env.OTEL_SERVICE_NAME ?? 'bun-elysia-app',
+      spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
+      metricReader: new PeriodicExportingMetricReader({
+        exporter: new OTLPMetricExporter(),
+        exportIntervalMillis: 15000,
+      }),
+      instrumentations: [
+        new RuntimeNodeInstrumentation(),
+        new HostMetricsInstrumentation(),
+      ],
+    })
+  )
+  .get('/', () => 'Hello from Elysia')
+  .listen(3000)
+```
+
+Call `.use(opentelemetry(...))` before you add your routes. Elysia does not trace routes that you add before the plugin.
+
+### Step 3. Set environment variables and run
+
+<Tabs entityName="environment">
+<TabItem value="vm" label="VM" default>
+
+Set the variables in the shell that starts your app, then run it:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment.name=<environment>"
+
+bun run src/index.ts
+```
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+Add these variables to the container spec in your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "https://ingest.<region>.signoz.cloud:443"
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: "signoz-ingestion-key=<your-ingestion-key>"
+  - name: OTEL_SERVICE_NAME
+    value: "<service-name>"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "deployment.environment.name=<environment>"
+```
+
+To send a test request from your workstation, forward a local port to the deployment. Replace `<deployment-name>` with the name of your deployment:
+
+```bash
+kubectl port-forward deploy/<deployment-name> 3000:3000
+```
+
+Then run `curl http://localhost:3000/` in another terminal.
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Create a `Dockerfile` in your project root:
+
+```dockerfile:Dockerfile
+FROM oven/bun:1
+
+WORKDIR /app
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
+COPY . .
+
+CMD ["bun", "run", "src/index.ts"]
+```
+
+Build the image and pass the variables when you run it:
+
+```bash
+docker build -t bun-elysia-app .
+
+docker run \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+  -e OTEL_SERVICE_NAME="<service-name>" \
+  -e OTEL_RESOURCE_ATTRIBUTES="deployment.environment.name=<environment>" \
+  -p 3000:3000 \
+  bun-elysia-app
+```
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set the variables in PowerShell, then run your app:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "deployment.environment.name=<environment>"
+
+bun run src/index.ts
+```
+
+</TabItem>
+</Tabs>
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: The name that SigNoz shows for your service, for example `bun-elysia-app`.
+- `<environment>`: The deployment environment, for example `production`. SigNoz dashboards filter on it.
+
+Send a few requests to your app, for example `curl http://localhost:3000/`.
+
+<details>
+<ToggleHeading>
+
+## Instrument Bun without Elysia
+
+</ToggleHeading>
+
+`Bun.serve` is not auto-instrumented, so you create one span for each request in your `fetch` handler. You get traces and runtime metrics, but not `http.server.request.duration`, which comes from the Elysia plugin.
+
+Install the packages:
+
+```bash
+bun add @opentelemetry/api \
+  @opentelemetry/sdk-node \
+  @opentelemetry/sdk-metrics \
+  @opentelemetry/exporter-trace-otlp-proto \
+  @opentelemetry/exporter-metrics-otlp-proto \
+  @opentelemetry/instrumentation-runtime-node \
+  @opentelemetry/instrumentation-host-metrics
+```
+
+Create `index.ts` in your project root. It starts the SDK and wraps each request in a span. Set the same environment variables as in Step 3, then run `bun run index.ts`.
+
+```ts:index.ts minimap defaultCollapsed
+import { NodeSDK } from '@opentelemetry/sdk-node'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-proto'
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
+import { RuntimeNodeInstrumentation } from '@opentelemetry/instrumentation-runtime-node'
+import { HostMetricsInstrumentation } from '@opentelemetry/instrumentation-host-metrics'
+import { SpanKind, SpanStatusCode, context, propagation, trace } from '@opentelemetry/api'
+
+const sdk = new NodeSDK({
+  traceExporter: new OTLPTraceExporter(),
+  metricReader: new PeriodicExportingMetricReader({
+    exporter: new OTLPMetricExporter(),
+    exportIntervalMillis: 15000,
+  }),
+  instrumentations: [
+    new RuntimeNodeInstrumentation(),
+    new HostMetricsInstrumentation(),
+  ],
+})
+sdk.start()
+
+const tracer = trace.getTracer('bun-serve-app')
+
+Bun.serve({
+  port: 3000,
+  fetch(req) {
+    const url = new URL(req.url)
+    const parentContext = propagation.extract(context.active(), req.headers, {
+      get: (headers, key) => headers.get(key) ?? undefined,
+      keys: (headers) => [...headers.keys()],
+    })
+    return tracer.startActiveSpan(`${req.method} ${url.pathname}`, { kind: SpanKind.SERVER }, parentContext, (span) => {
+      span.setAttribute('http.request.method', req.method)
+      span.setAttribute('url.path', url.pathname)
+      try {
+        const res = new Response('Hello from Bun')
+        span.setAttribute('http.response.status_code', res.status)
+        return res
+      } catch (err) {
+        span.recordException(err as Error)
+        span.setStatus({ code: SpanStatusCode.ERROR })
+        span.setAttribute('http.response.status_code', 500)
+        return new Response('Internal Server Error', { status: 500 })
+      } finally {
+        span.end()
+      }
+    })
+  },
+})
+```
+
+The `propagation.extract` call reads the incoming `traceparent` header, so the span joins the trace of the calling service. For an `async` handler, make the callback `async` and call `span.end()` after you `await` the response. The span name uses the raw URL path, so routes with IDs create many span names. Use the route pattern from your router instead.
+
+</details>
+
+## Validate
+
+After you run your instrumented application, check that traces and metrics reach SigNoz:
+
+1. Send a few requests to your app.
+2. Open the **Services** tab and find the service name you set in `OTEL_SERVICE_NAME`.
+3. Open the **Metrics Explorer** and look for `http.server.request.duration` (Elysia only) and `v8js.memory.heap.used`.
+
+<Figure
+  src="/img/docs/instrumentation/bun/bun-elysia-traces.webp"
+  alt="SigNoz Traces Explorer list view with Elysia request spans named by method and route, and their Handle child spans"
+  caption="Elysia request spans in the Traces Explorer"
+/>
+
+<Figure
+  src="/img/docs/instrumentation/bun/bun-elysia-metrics.webp"
+  alt="SigNoz Metrics Explorer summary for a Bun service listing http.server.request.duration.bucket and runtime metrics"
+  caption="Bun and Elysia metrics in the Metrics Explorer"
+/>
+
+<details>
+<ToggleHeading>
+
+## Limitations
+
+</ToggleHeading>
+
+These limits apply to `@elysia/opentelemetry` version 1.4.12.
+
+- `http.server.request.duration` has no `http.route` attribute. Query traces to break down traffic by route.
+- `http.server.request.duration` records a duration much shorter than the real request time, because the plugin records it before your route handler finishes. Use the span duration in traces for latency.
+- Bun always reports `nodejs.eventloop.utilization` as `0`. The `nodejs.eventloop.delay.*` metrics work.
+- Bun does not report `process.memory.usage`. Use `v8js.memory.heap.used` for memory.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+Still no data? See [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/).
+
+### Traces appear but `http.server.request.duration` is missing
+
+- Likely cause: your project uses `@elysiajs/opentelemetry`, which has no HTTP metric, or the plugin has no `metricReader`. Without a `metricReader`, the app sends no metrics at all.
+- Fix: install `@elysia/opentelemetry` and pass `metricReader` to `opentelemetry()` as shown in Step 2.
+- Verify: after 15 to 30 seconds of traffic, search for `http.server.request.duration` in the Metrics Explorer.
+
+### Traces appear but no metrics
+
+- Likely cause: the app stopped before the first metric export. The app exports metrics every 15 seconds. Traces can arrive sooner.
+- Fix: keep the app running for at least 30 seconds.
+- Verify: `v8js.memory.heap.used` appears in the Metrics Explorer for your service.
+
+### Elysia routes have no spans
+
+- Likely cause: the `.use(opentelemetry(...))` call comes after the routes.
+- Fix: move `.use(opentelemetry(...))` before your `.get()` and `.post()` calls.
+- Verify: send a request to each route and open the traces in SigNoz.
+
+### No data at all
+
+- Likely cause: the ingestion key or the region in the endpoint is wrong. The app prints no error by default.
+- Fix: set `OTEL_LOG_LEVEL=info` and restart the app. An invalid key prints `Export failed with non-retryable error: OTLPExporterError: Unauthorized`. An invalid region prints `getaddrinfo ENOTFOUND`. Correct `OTEL_EXPORTER_OTLP_HEADERS` or `OTEL_EXPORTER_OTLP_ENDPOINT`.
+- Verify: the error no longer appears, and the service shows on the **Services** tab.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+To send telemetry through an OpenTelemetry Collector instead of directly to SigNoz Cloud, set `OTEL_EXPORTER_OTLP_ENDPOINT` to the OTLP/HTTP endpoint of your Collector, for example `http://localhost:4318`, and remove the `OTEL_EXPORTER_OTLP_HEADERS` variable.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for the steps.
+
+</details>
+
+## Next steps
+
+- [Use the Bun and ElysiaJS dashboard template](https://signoz.io/docs/dashboards/dashboard-templates/bun-elysia-dashboard/) to see request rate, errors, latency, and runtime health in one view.
+- [Explore your traces in SigNoz](https://signoz.io/docs/userguide/traces/)
+- [Set up alerts for your Bun service](https://signoz.io/docs/alerts/)
+
+## Get Help
+
+<GetHelp />

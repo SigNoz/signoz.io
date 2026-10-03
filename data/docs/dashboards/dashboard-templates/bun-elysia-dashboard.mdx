@@ -1,0 +1,103 @@
+---
+date: 2026-10-03
+title: Bun and ElysiaJS Dashboard - Monitor Traffic and Runtime
+description: Monitor Bun and ElysiaJS apps with a ready-made SigNoz dashboard for request rate, latency, errors, event loop delay, CPU, and heap memory.
+doc_type: explanation
+---
+
+This dashboard shows how a Bun application built with ElysiaJS handles traffic and how the Bun runtime behaves under that load. It covers request rate, latency, errors, and runtime health in one view.
+
+<Admonition type="note">
+To use this dashboard, you need to send traces and metrics from your Bun app to SigNoz. Follow the [Bun and ElysiaJS OpenTelemetry guide](https://signoz.io/docs/instrumentation/opentelemetry-bun/) to get started.
+</Admonition>
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/bun-elysia-dashboard.webp"
+  alt="Bun and ElysiaJS dashboard in SigNoz showing request rate, error rate, P95 latency, heap used, and traffic panels"
+  caption="Bun and ElysiaJS dashboard template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/bun-elysia/bun-elysia.json"
+  dashboardName="Bun and ElysiaJS"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard covers four areas of your Bun service:
+
+- **Traffic**: Request rate by method, status code, and route.
+- **Latency**: P50, P95, and P99 request duration, overall and by route.
+- **Errors**: The share of requests with a 5xx status, and the routes that cause them.
+- **Runtime health**: Event loop delay, CPU use, and heap memory.
+
+## Metrics Included
+
+### Overview
+
+- **Request Rate**: Average HTTP requests per second.
+- **Error Rate**: Share of requests that returned a 5xx status.
+- **P95 Latency**: 95th percentile request duration.
+- **Heap Used**: Current heap memory in use.
+
+### Traffic
+
+- **Request Rate by Method**: Requests per second for each HTTP method.
+- **Requests by Status Code**: Requests per second, stacked by status code.
+- **Request Rate by Route**: Requests per second for each matched route.
+- **Routes**: Request count, P95 latency, and average latency for each route.
+
+### Latency
+
+- **Latency Percentiles**: P50, P95, and P99 request duration.
+- **P95 Latency by Route**: 95th percentile request duration for each route.
+
+### Errors
+
+- **5xx Responses**: Server errors per second, by status code.
+- **Error Percentage**: Share of requests that returned a 5xx status, over time.
+- **4xx Responses**: Client errors per second, by status code.
+- **Errors by Route**: Error spans per second for each route.
+
+### Runtime
+
+- **Event Loop Delay**: P50, P90, and P99 event loop delay.
+- **Process CPU Utilization**: CPU used by the process, split by user and system time.
+- **Heap Used**: Heap memory in use over time.
+
+## Dashboard Variables
+
+This dashboard includes these variables for filtering:
+
+- **Service** (`service.name`): The Bun service to inspect.
+- **Environment** (`deployment.environment.name`): The deployment environment. Set it with `OTEL_RESOURCE_ATTRIBUTES` as shown in the setup guide.
+- **Route** (`http.route`): The Elysia route pattern. This variable applies to the panels that read from traces.
+
+<details>
+<ToggleHeading>
+
+## Where the Data Comes From
+
+</ToggleHeading>
+
+The dashboard reads from both metrics and traces.
+
+| Panels | Signal | Source |
+| --- | --- | --- |
+| Request rate, status codes, errors | Metrics | `http.server.request.duration` from the Elysia OpenTelemetry plugin |
+| Routes, latency, errors by route | Traces | Request spans from the Elysia OpenTelemetry plugin |
+| Event loop delay, CPU, heap | Metrics | Runtime and host metrics instrumentation |
+
+<Admonition type="note" title="Why latency and routes use traces">
+In `@elysia/opentelemetry` version 1.4.12, the `http.server.request.duration` metric has no `http.route` attribute. The plugin also records a duration shorter than the real request time. The dashboard reads route and latency data from traces to avoid both limits. See [Limitations](https://signoz.io/docs/instrumentation/opentelemetry-bun/#limitations) in the setup guide.
+</Admonition>
+
+</details>
+
+## Next Steps
+
+- [Set up alerts](https://signoz.io/docs/alerts/) on error rate or P95 latency for your Bun service.
+- [Explore your traces](https://signoz.io/docs/userguide/traces/) to find the cause of a slow or failing route.
+- [Create and customize dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to add panels that fit your service.
