@@ -1,5 +1,5 @@
 ---
-date: 2026-07-30
+date: 2026-09-23
 title: Manage Variables in SigNoz
 description: Learn how to create and use dashboard variables in SigNoz to build dynamic, reusable dashboards across services and infrastructure.
 doc_type: howto
@@ -89,9 +89,19 @@ The 'Related values' section shows only attribute values that exist within your 
 - **Related values**: Only spans found in the adservice
 - **All values**: Spans from all services
 
-This helps you quickly focus on relevant data within your selected context.
+This helps you quickly focus on relevant data within your selected context. The two sections appear only when a sibling dynamic variable has an active selection. Without one, the dropdown shows a single flat list with no section headings.
 
     ![Related values for service](/img/docs/dashboards/variables/service-related-values.png)
+
+#### Search a large value list
+
+When an attribute has more values than SigNoz can return in one response, the dropdown loads a first batch and marks the list as incomplete, so you know not every value is shown.
+
+To reach a value outside that first batch, type in the dropdown's search box. For an incomplete list, SigNoz sends the search term to the API and replaces the options with matching results, including values that were not in the initial batch. For a list returned in full, the search box filters the already-loaded values on the client.
+
+<Admonition type="info">
+If a dynamic variable shows an error with no **Retry** button, the variable query itself is invalid, for example an unknown attribute name or an unsupported signal type. Retrying would send the same request, so no retry is offered. Fix the field or source in the variable editor. A **Retry** button still appears for server-side errors, which can succeed on a second attempt.
+</Admonition>
 
 #### Note about **ALL**
 
