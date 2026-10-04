@@ -18,9 +18,10 @@ import { buildDocsOnboardingPath, isDocsPathname } from '@/utils/docs/onboarding
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import {
-  buildApiReferenceOpenAPISpecRewritePath,
-  shouldRewriteApiReferenceToOpenAPISpec,
+  isNegotiatedApiReferencePath,
+  resolveApiReferenceRewrite,
 } from '@/utils/apiReferenceMarkdownRouting'
+import { resolveMarkdownAlternatePath } from '@/utils/markdownAlternate'
 import {
   AGENT_MARKDOWN_SELF_FETCH_HEADER,
   buildContentMarkdownRewritePath,
@@ -34,6 +35,33 @@ import {
 const INCLUDE_MARKDOWN_REWRITE_DEBUG_HEADER = process.env.NODE_ENV !== 'production'
 
 const GROWTHBOOK_ANONYMOUS_ID_HEADER = 'x-gb-anonymous-id'
+
+// First matching pipeline wins: docs, then api-reference (which negotiates
+// markdown and YAML itself), then CMS content sections, then generic pages.
+const resolveMarkdownRewritePath = (
+  pathname: string,
+  acceptHeader: string,
+  prefersMarkdown: boolean
+): string | null => {
+  if (shouldRewriteDocsToMarkdown(pathname, prefersMarkdown)) {
+    return buildDocsMarkdownRewritePath(pathname)
+  }
+
+  const apiReferenceRewrite = resolveApiReferenceRewrite(pathname, acceptHeader)
+  if (apiReferenceRewrite) {
+    return apiReferenceRewrite
+  }
+
+  if (shouldRewriteContentToMarkdown(pathname, prefersMarkdown)) {
+    return buildContentMarkdownRewritePath(pathname)
+  }
+
+  if (shouldRewritePageToMarkdown(pathname, prefersMarkdown)) {
+    return buildPageMarkdownRewritePath(pathname)
+  }
+
+  return null
+}
 
 // Extract OS from user agent (server-side version)
 const getOSFromUserAgent = (userAgent: string): string => {
@@ -133,27 +161,10 @@ export function proxy(req: NextRequest) {
   const isAgentMarkdownSelfFetch = req.headers.get(AGENT_MARKDOWN_SELF_FETCH_HEADER) != null
   const isReadRequest = req.method === 'GET' || req.method === 'HEAD'
 
-  const docsMarkdownRewrite =
-    !isAgentMarkdownSelfFetch && shouldRewriteDocsToMarkdown(pathname, prefersMarkdown)
-  const apiRefYamlRewrite = shouldRewriteApiReferenceToOpenAPISpec(pathname, prefersMarkdown, isBot)
-  const contentMarkdownRewrite =
-    !isAgentMarkdownSelfFetch &&
-    isReadRequest &&
-    shouldRewriteContentToMarkdown(pathname, prefersMarkdown)
-  const pageMarkdownRewrite =
-    !isAgentMarkdownSelfFetch &&
-    isReadRequest &&
-    shouldRewritePageToMarkdown(pathname, prefersMarkdown)
-
-  const markdownRewritePath = docsMarkdownRewrite
-    ? buildDocsMarkdownRewritePath(pathname)
-    : apiRefYamlRewrite
-      ? buildApiReferenceOpenAPISpecRewritePath(pathname)
-      : contentMarkdownRewrite
-        ? buildContentMarkdownRewritePath(pathname)
-        : pageMarkdownRewrite
-          ? buildPageMarkdownRewritePath(pathname)
-          : null
+  const markdownRewritePath =
+    isReadRequest && !isAgentMarkdownSelfFetch
+      ? resolveMarkdownRewritePath(pathname, acceptHeader, prefersMarkdown)
+      : null
 
   if (markdownRewritePath) {
     const rewriteUrl = req.nextUrl.clone()
@@ -199,8 +210,32 @@ export function proxy(req: NextRequest) {
 
   // URLs that serve both HTML and markdown representations must vary CDN/proxy
   // caches on the Accept header so one representation never poisons the other.
-  if (isDocsPathname(pathname) || servesMarkdownAlternate(pathname)) {
+  if (
+    isDocsPathname(pathname) ||
+    servesMarkdownAlternate(pathname) ||
+    isNegotiatedApiReferencePath(pathname)
+  ) {
     res.headers.append('Vary', 'Accept')
+  }
+
+  // Advertise the markdown representation so clients can discover it without
+  // parsing the page. A markdown response is the alternate, so it gets none.
+  // Parameterized URLs get none either: the markdown pipeline renders the
+  // pathname only, so the twin would not represent the requested resource.
+  if (
+    isReadRequest &&
+    !markdownRewritePath &&
+    !isAgentMarkdownSelfFetch &&
+    req.nextUrl.search === ''
+  ) {
+    const markdownAlternatePath = resolveMarkdownAlternatePath(pathname)
+    if (markdownAlternatePath) {
+      const alternateUrl = new URL(markdownAlternatePath, req.nextUrl.origin)
+      res.headers.append(
+        'Link',
+        `<${alternateUrl.toString()}>; rel="alternate"; type="text/markdown"`
+      )
+    }
   }
 
   // Preserve request path for server-rendered global not-found suggestions.
