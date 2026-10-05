@@ -234,6 +234,31 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/distributed-tracing-golang/',
+          destination: '/docs/instrumentation/opentelemetry-golang/',
+          permanent: true,
+        },
+        {
+          source: '/blog/distributed-tracing/',
+          destination: '/blog/opentelemetry-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/blog/what-is-distributed-tracing-in-opentelemetry/',
+          destination: '/blog/opentelemetry-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/java-auto-instrumentation/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-java/',
+          destination: '/blog/opentelemetry-spring-boot/',
+          permanent: true,
+        },
+        {
           source: '/blog/alien-intelligence-ai-sre-workflow-signoz/',
           destination: '/customers/alien-intelligence-ai-sre-workflow-signoz/',
           permanent: true,
@@ -1012,7 +1037,7 @@ module.exports = () => {
         },
         {
           source: '/blog/opentelemetry-distributed-tracing-part-1/',
-          destination: '/blog/what-is-distributed-tracing-in-opentelemetry/',
+          destination: '/blog/opentelemetry-tracing/',
           permanent: true,
         },
         {
@@ -2950,7 +2975,7 @@ module.exports = () => {
         },
         {
           source: '/java-auto-instrumentation',
-          destination: '/opentelemetry/java-auto-instrumentation/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
           permanent: true,
         },
         {
