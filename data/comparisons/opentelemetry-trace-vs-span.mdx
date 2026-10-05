@@ -11,9 +11,7 @@ keywords: [opentelemetry, traces, spans, distributed tracing, observability, sig
 related_articles:
   - '/comparisons/opentelemetry-trace-id-vs-span-id'
   - '/blog/opentelemetry-tracing'
-  - '/blog/what-is-distributed-tracing-in-opentelemetry'
   - '/blog/opentelemetry-spans'
-  - '/blog/opentelemetry-context-propagation'
 ---
 
 Distributed systems have become increasingly complex, making monitoring and troubleshooting performance issues challenging. OpenTelemetry emerges as a powerful solution to this problem, offering standardized observability for cloud-native applications. At the heart of OpenTelemetry's tracing capabilities lie two fundamental concepts: traces and spans. Understanding the distinction between these elements is crucial for developers and operations teams seeking to implement robust observability in their systems.
@@ -118,7 +116,7 @@ A span is more appropriate for the first scenario, representing an operation wit
 
 ### SpanContext
 
-`SpanContext` is a data structure provided by tracing libraries like OpenTelemetry to carry key identifying details about a span across process boundaries. It usually holds the trace ID, span ID, and trace flags, allowing [distributed tracing](https://signoz.io/blog/distributed-tracing/) systems to connect spans across services. This structure includes all essential information to identify a span within a trace and must be propagated to child spans and across process boundaries, passing tracing identifiers and options from parent to child spans.
+`SpanContext` is a data structure provided by tracing libraries like OpenTelemetry to carry key identifying details about a span across process boundaries. It usually holds the trace ID, span ID, and trace flags, allowing [distributed tracing](https://signoz.io/blog/opentelemetry-tracing/) systems to connect spans across services. This structure includes all essential information to identify a span within a trace and must be propagated to child spans and across process boundaries, passing tracing identifiers and options from parent to child spans.
 
 - `TraceId`: This is the identifier for a trace, generated as 16 randomly created bytes, making it globally unique with a high probability. The `TraceId` groups all spans associated with a specific trace across all processes.
 - `SpanId`: This identifies a span and is generated as 8 randomly created bytes, ensuring global uniqueness with a high probability. When passed to a child Span, this identifier serves as the parent `SpanId`.
