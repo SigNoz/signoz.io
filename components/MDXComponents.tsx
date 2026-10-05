@@ -30,6 +30,7 @@ import MDXButton from './MDXButton/MDXButton'
 import HostingDecision from './shared/HostingDecision'
 import CommonPrerequisites from './shared/CommonPrerequisites'
 import K8sInstall from './shared/K8sInstall'
+import K8sFoundryInstall from './shared/K8sFoundryInstall'
 import K8sOtelDemo from './shared/K8sOtelDemo'
 import RetentionInfo from './shared/RetentionInfo'
 import SigNozCloud from './shared/SigNozCloud'
@@ -127,6 +128,7 @@ export const components = {
   DashboardActions,
   OtelCollectorFlow,
   K8sInstall,
+  K8sFoundryInstall,
   K8sOtelDemo,
   RetentionInfo,
   SigNozCloud,

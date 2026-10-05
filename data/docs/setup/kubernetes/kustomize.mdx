@@ -1,5 +1,5 @@
 ---
-date: 2026-05-01
+date: 2026-10-03
 title: Deploying to Kubernetes with Kustomize
 tags: [Self-Host]
 description: Learn how to deploy SigNoz on Kubernetes using Foundry and Kustomize. Foundry generates Kustomize manifests from your casting so you can deploy the full SigNoz stack without Helm.
@@ -43,6 +43,7 @@ For a complete guide on casting configuration, see <a href="https://github.com/S
 
 ```yaml
 apiVersion: v1alpha1
+kind: Installation
 metadata:
   name: signoz
 spec:
@@ -67,14 +68,16 @@ Foundry generates the manifests into `pours/deployment/` with the following stru
 pours/deployment/
 ├── kustomization.yaml          # Root kustomization
 ├── namespace.yaml              # SigNoz namespace
-├── clickhouse-operator/        # Altinity ClickHouse Operator
-│   ├── deployment.yaml
-│   ├── clusterrole.yaml
-│   ├── clusterrolebinding.yaml
-│   ├── configmap.yaml
-│   ├── service.yaml
-│   ├── serviceaccount.yaml
-│   └── kustomization.yaml
+├── operators/
+│   └── clickhouse-operator/    # Altinity ClickHouse Operator
+│       ├── deployment.yaml
+│       ├── clusterrole.yaml
+│       ├── clusterrolebinding.yaml
+│       ├── configmap.yaml
+│       ├── namespace.yaml
+│       ├── service.yaml
+│       ├── serviceaccount.yaml
+│       └── kustomization.yaml
 ├── telemetrystore/clickhouse/  # ClickHouse (time-series storage)
 │   ├── clickhouseinstallation.yaml
 │   ├── configmap.yaml
@@ -178,6 +181,7 @@ Each patch entry has:
 
 ```yaml minimap defaultCollapsed
 apiVersion: v1alpha1
+kind: Installation
 metadata:
   name: signoz
 spec:
@@ -283,6 +287,7 @@ Use a Foundry patch to inject a `patches` block into the root `kustomization.yam
 
 ```yaml defaultCollapsed
 apiVersion: v1alpha1
+kind: Installation
 metadata:
   name: signoz
 spec:

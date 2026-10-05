@@ -1,5 +1,5 @@
 ---
-date: 2024-06-06
+date: 2026-10-03
 tags : [Self-Host]
 title: Deploying to GCP
 description: Instructions to install SigNoz on GKE cluster
@@ -16,7 +16,14 @@ description: Instructions to install SigNoz on GKE cluster
 
 ## Install SigNoz
 
+<Tabs entityName="setup">
+<TabItem value="foundry" label="Foundry" default>
+<K8sFoundryInstall />
+</TabItem>
+<TabItem value="helm" label="Helm">
 <K8sInstall />
+</TabItem>
+</Tabs>
 
 
 ## Additional Notes on GKE Autopilot
@@ -24,6 +31,25 @@ description: Instructions to install SigNoz on GKE cluster
 - For GKE Autopilot, the default storage class is `gce-resizable` and the cloud is `gcp/autogke`.
 
 - GKE Autopilot automatically overriddes resource requests/limits. Therefore, it is important to ensure that the cluster has enough resource quota for the region where the cluster is deployed. Read more about it [here][3].
+
+<KeyPointCallout title="Set the Autopilot values with Foundry" defaultCollapsed="true">
+With Foundry, set the same values through a patch on the generated `values.yaml`:
+
+```yaml
+spec:
+  patches:
+    - target: deployment/values.yaml
+      operations:
+        - op: add
+          path: /global
+          value:
+            cloud: gcp/autogke
+            storageClass: gce-resizable
+        - op: add
+          path: /clickhouse/installCustomStorageClass
+          value: true
+```
+</KeyPointCallout>
 
 
 ## (Optional) Install OpenTelemetry Demo
