@@ -249,11 +249,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/blog/opentelemetry-context-propagation/',
-          destination: '/blog/opentelemetry-tracing/',
-          permanent: true,
-        },
-        {
           source: '/opentelemetry/java-auto-instrumentation/',
           destination: '/docs/instrumentation/java/opentelemetry-java/',
           permanent: true,
