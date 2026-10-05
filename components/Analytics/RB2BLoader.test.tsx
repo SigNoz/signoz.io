@@ -10,7 +10,7 @@ const SCRIPT_URL = 'https://ddwl4m2hdecbv.cloudfront.net/b/VN080HZ24Y6J/VN080HZ2
 
 beforeEach(() => {
   vi.useFakeTimers()
-  vi.stubEnv('NODE_ENV', 'production')
+  vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', 'production')
   mockPathname.mockReturnValue('/')
 })
 
@@ -74,8 +74,15 @@ describe('RB2BLoader', () => {
     vi.unstubAllGlobals()
   })
 
-  it('does not track local development visits', () => {
-    vi.stubEnv('NODE_ENV', 'development')
+  it('does not track preview deployments', () => {
+    vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', 'preview')
+    render(<RB2BLoader />)
+    vi.runAllTimers()
+    expect(document.getElementById('rb2b-script')).toBeNull()
+  })
+
+  it('does not track local builds without a Vercel environment', () => {
+    vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', undefined)
     render(<RB2BLoader />)
     vi.runAllTimers()
     expect(document.getElementById('rb2b-script')).toBeNull()

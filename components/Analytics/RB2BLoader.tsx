@@ -11,7 +11,7 @@ export default function RB2BLoader() {
   const pathname = usePathname()
 
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production' || !pathname) return
+    if (process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production' || !pathname) return
 
     let script: HTMLScriptElement | null = null
 
