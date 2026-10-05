@@ -1037,7 +1037,7 @@ module.exports = () => {
         },
         {
           source: '/blog/opentelemetry-distributed-tracing-part-1/',
-          destination: '/blog/what-is-distributed-tracing-in-opentelemetry/',
+          destination: '/blog/opentelemetry-tracing/',
           permanent: true,
         },
         {
@@ -2975,7 +2975,7 @@ module.exports = () => {
         },
         {
           source: '/java-auto-instrumentation',
-          destination: '/opentelemetry/java-auto-instrumentation/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
           permanent: true,
         },
         {
