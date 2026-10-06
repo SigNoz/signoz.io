@@ -2693,16 +2693,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/aws-vs-gcp-vs-azure',
-          destination: '/comparisons/aws-vs-gcp-vs-azure/',
-          permanent: true,
-        },
-        {
-          source: '/network-security-monitoring-tools',
-          destination: '/comparisons/network-security-monitoring-tools/',
-          permanent: true,
-        },
-        {
           source: '/cloud-monitoring-tools',
           destination: '/comparisons/cloud-monitoring-tools/',
           permanent: true,
