@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 import { ArrowRight } from 'lucide-react'
 
@@ -16,6 +16,22 @@ const SCROLL_SPEED = 42
 const SPRITE = typeof spriteAsset === 'string' ? spriteAsset : (spriteAsset as { src: string }).src
 
 const DEFAULT_CLICK_LOCATION = 'Hero Customer Stories'
+
+const MOBILE_MEDIA_QUERY = '(max-width: 767px)'
+
+function subscribeToMobileViewport(onStoreChange: () => void) {
+  const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY)
+  mediaQuery.addEventListener('change', onStoreChange)
+  return () => mediaQuery.removeEventListener('change', onStoreChange)
+}
+
+function getMobileViewportSnapshot() {
+  return window.matchMedia(MOBILE_MEDIA_QUERY).matches
+}
+
+function getServerMobileViewportSnapshot() {
+  return false
+}
 
 interface CardProps {
   customer: CustomerStoryLogo
@@ -101,6 +117,11 @@ export default function CustomerCarousel({
   const pillRef = useRef<HTMLDivElement>(null)
   const pillTextRef = useRef<HTMLSpanElement>(null)
   const [mounted, setMounted] = useState(false)
+  const isMobile = useSyncExternalStore(
+    subscribeToMobileViewport,
+    getMobileViewportSnapshot,
+    getServerMobileViewportSnapshot
+  )
 
   useEffect(() => setMounted(true), [])
 
@@ -108,9 +129,7 @@ export default function CustomerCarousel({
     if (!mounted) return
     const wrapper = wrapperRef.current
     const track = trackRef.current
-    const pill = pillRef.current
-    const pillText = pillTextRef.current
-    if (!wrapper || !track || !pill || !pillText) return
+    if (!wrapper || !track) return
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduceMotion) return
@@ -126,6 +145,42 @@ export default function CustomerCarousel({
       }
       oneSetWidth = width + gap * setSize
     }
+
+    if (isMobile) {
+      const applyMarqueeVars = () => {
+        measureSet()
+        track.style.setProperty('--marquee-distance', `${oneSetWidth}px`)
+        track.style.setProperty('--marquee-duration', `${oneSetWidth / speed}s`)
+      }
+
+      applyMarqueeVars()
+      window.addEventListener('resize', applyMarqueeVars)
+      track.classList.add(styles.cssMarquee)
+
+      let io: IntersectionObserver | undefined
+      if ('IntersectionObserver' in window) {
+        io = new IntersectionObserver(
+          ([entry]) => {
+            track.style.animationPlayState = entry.isIntersecting ? 'running' : 'paused'
+          },
+          { rootMargin: '120px' }
+        )
+        io.observe(wrapper)
+      }
+
+      return () => {
+        io?.disconnect()
+        window.removeEventListener('resize', applyMarqueeVars)
+        track.classList.remove(styles.cssMarquee)
+        track.style.removeProperty('--marquee-distance')
+        track.style.removeProperty('--marquee-duration')
+        track.style.animationPlayState = ''
+      }
+    }
+
+    const pill = pillRef.current
+    const pillText = pillTextRef.current
+    if (!pill || !pillText) return
 
     measureSet()
     window.addEventListener('resize', measureSet)
@@ -256,7 +311,7 @@ export default function CustomerCarousel({
         card.removeEventListener('mouseleave', onLeave)
       })
     }
-  }, [mounted, speed])
+  }, [mounted, speed, isMobile])
 
   return (
     <div className={styles.carousel}>
@@ -286,6 +341,7 @@ export default function CustomerCarousel({
         </div>
       </div>
       {mounted &&
+        !isMobile &&
         createPortal(
           <div className={styles.cursorPill} ref={pillRef} aria-hidden="true">
             <span ref={pillTextRef} />
