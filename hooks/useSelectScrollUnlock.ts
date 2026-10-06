@@ -6,9 +6,8 @@ const SCROLL_UNLOCK_EVENTS = ['wheel', 'touchmove'] as const
 /**
  * Radix Select always enables RemoveScroll (no modal={false}). That locks body
  * scroll and breaks position:sticky rails (sidebar/TOC jump off-screen). While
- * a docs-shell select menu is open (region selector, Tabs dropdown) we keep the
- * menu open (sticky sidebar keeps alignment) and defeat the lock so the page
- * can scroll. Dialog/Drawer lock is
+ * a sidenav select menu is open we keep the menu open (sticky sidebar keeps
+ * alignment) and defeat the lock so the page can scroll. Dialog/Drawer lock is
  * untouched — we only unlock when this attr is present (see global.css
  * [data-region-select-open]).
  */

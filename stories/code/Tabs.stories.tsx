@@ -185,26 +185,23 @@ ${content}
     )
     .join('\n')
 
-const dropdownManyTabsMdx = `
-{/* Groups with 6+ tabs render as a dropdown automatically; entityName still syncs to a ?framework-choice= query param */}
+const pillsManyTabsMdx = `
+{/* Groups with 6+ tabs render as wrapping filter pills automatically; entityName still syncs to a ?framework-choice= query param */}
 <Tabs entityName="framework-choice">
 ${tabItemsMdx(frameworkItems)}
 </Tabs>
 `
 
-const dropdownNoEntityNameMdx = `
-{/* Without entityName the dropdown selection is local only (no query param) */}
+const pillsNoEntityNameMdx = `
+{/* Without entityName the pill selection is local only (no query param) */}
 <Tabs>
 ${tabItemsMdx(collectorItems)}
 </Tabs>
 `
 
-const previewMdx = [
-  languageTabsMdx,
-  pillVariantMdx,
-  defaultOnSecondTabMdx,
-  dropdownManyTabsMdx,
-].join('\n')
+const previewMdx = [languageTabsMdx, pillVariantMdx, defaultOnSecondTabMdx, pillsManyTabsMdx].join(
+  '\n'
+)
 
 const meta = {
   title: 'MDX Components/Code/Tabs',
@@ -349,8 +346,8 @@ export const DefaultOnSecondTab: Story = {
   ),
 }
 
-export const DropdownManyTabs: Story = {
-  parameters: { mdxUsage: dropdownManyTabsMdx },
+export const PillsManyTabs: Story = {
+  parameters: { mdxUsage: pillsManyTabsMdx },
   loaders: [
     async () => ({
       frameworks: await Promise.all(frameworkItems.map((item) => markdownToHast(item.content))),
@@ -367,8 +364,8 @@ export const DropdownManyTabs: Story = {
   ),
 }
 
-export const DropdownNoEntityName: Story = {
-  parameters: { mdxUsage: dropdownNoEntityNameMdx },
+export const PillsNoEntityName: Story = {
+  parameters: { mdxUsage: pillsNoEntityNameMdx },
   loaders: [
     async () => ({
       collectors: await Promise.all(collectorItems.map((item) => markdownToHast(item.content))),

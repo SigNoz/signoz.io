@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import React from 'react'
 import Tabs from '../Tabs'
 
@@ -28,17 +28,6 @@ const mockSearchParams = vi.fn(() => new URLSearchParams())
 vi.mock('@/hooks/useSearchParamsState', () => ({
   useSearchParamsState: () => mockSearchParams(),
 }))
-
-// Radix Select needs these in jsdom
-if (!Element.prototype.hasPointerCapture) {
-  Element.prototype.hasPointerCapture = () => false
-}
-if (!Element.prototype.releasePointerCapture) {
-  Element.prototype.releasePointerCapture = () => {}
-}
-if (!Element.prototype.scrollIntoView) {
-  Element.prototype.scrollIntoView = () => {}
-}
 
 beforeEach(() => {
   mockPathname.mockReturnValue('/docs/install/')
@@ -438,26 +427,29 @@ const renderManyTabs = (
     </Tabs>
   )
 
-const getCombobox = () => screen.queryByRole('combobox')
-const getMirrorButtons = () =>
+const getPills = () =>
   document.querySelectorAll<HTMLButtonElement>('[data-tabs-root] button[data-tab-value]')
+const getPill = (value: string) =>
+  document.querySelector<HTMLButtonElement>(`[data-tabs-root] button[data-tab-value="${value}"]`)
 const getPanel = (value: string) =>
   Array.from(getTabPanels()).find((p) => p.getAttribute('data-tab-value') === value)
 
-describe('dropdown mode at 6+ items', () => {
-  it('renders a combobox and mirror buttons instead of a tab bar at 6 items', () => {
+describe('pills mode at 6+ items', () => {
+  it('renders wrapping pill buttons instead of a tab bar at 6 items', () => {
     renderManyTabs(6, { entityName: 'framework-choice' })
 
     expect(getTabButtons()).toHaveLength(0)
-    expect(getCombobox()).toBeTruthy()
-    expect(getMirrorButtons()).toHaveLength(6)
+    expect(getPills()).toHaveLength(6)
+    FRAMEWORKS.slice(0, 6).forEach(([value, label]) => {
+      expect(getPill(value)).toHaveTextContent(label)
+    })
   })
 
   it('keeps the tab bar at 5 items', () => {
     renderManyTabs(5, { entityName: 'framework-choice' })
 
     expect(getTabButtons()).toHaveLength(5)
-    expect(getCombobox()).toBeNull()
+    expect(document.querySelector('[data-tabs-root] [aria-pressed]')).toBeNull()
   })
 
   it('keeps the panel contract: all panels present, only default visible', () => {
@@ -471,9 +463,11 @@ describe('dropdown mode at 6+ items', () => {
     })
   })
 
-  it('labels panels as regions so the combobox relationship is accessible', () => {
+  it('marks the active pill and labels panels as regions', () => {
     renderManyTabs(6, { entityName: 'framework-choice' })
 
+    expect(getPill('react')).toHaveAttribute('aria-pressed', 'true')
+    expect(getPill('vue')).toHaveAttribute('aria-pressed', 'false')
     FRAMEWORKS.slice(0, 6).forEach(([value, label]) => {
       const panel = getPanel(value)
       expect(panel).toHaveAttribute('role', 'region')
@@ -490,16 +484,14 @@ describe('dropdown mode at 6+ items', () => {
     })
   })
 
-  it('selecting an option switches the panel and syncs the URL', () => {
+  it('clicking a pill switches the panel and syncs the URL', () => {
     renderManyTabs(7, { entityName: 'framework-choice' })
 
-    // jsdom has no real PointerEvent, so drive the Radix select via keyboard
-    fireEvent.keyDown(getCombobox()!, { key: 'ArrowDown' })
-    const option = screen.getByRole('option', { name: 'Svelte/SvelteKit' })
-    fireEvent.keyDown(option, { key: 'Enter' })
+    fireEvent.click(getPill('svelte')!)
 
     expect(getPanel('svelte')).not.toHaveAttribute('hidden')
     expect(getPanel('react')).toHaveAttribute('hidden')
+    expect(getPill('svelte')).toHaveAttribute('aria-pressed', 'true')
     expect(window.location.search).toContain('framework-choice=svelte')
   })
 
@@ -507,18 +499,17 @@ describe('dropdown mode at 6+ items', () => {
     mockSearchParams.mockReturnValue(new URLSearchParams('framework-choice=angular'))
     renderManyTabs(7, { entityName: 'framework-choice' })
 
-    expect(getCombobox()).toHaveTextContent('Angular')
+    expect(getPill('angular')).toHaveAttribute('aria-pressed', 'true')
     expect(getPanel('angular')).not.toHaveAttribute('hidden')
     expect(getPanel('react')).toHaveAttribute('hidden')
   })
 
-  it('programmatic mirror button click switches the panel and syncs the URL (DocsTOC path)', () => {
+  it('programmatic pill click switches the panel and syncs the URL (DocsTOC path)', () => {
     renderManyTabs(7, { entityName: 'framework-choice' })
 
-    const vueButton = document.querySelector<HTMLButtonElement>(
-      '[data-tabs-root] button[data-tab-value="vue"]'
-    )
-    fireEvent.click(vueButton!)
+    act(() => {
+      getPill('vue')!.click()
+    })
 
     expect(getPanel('vue')).not.toHaveAttribute('hidden')
     expect(window.location.search).toContain('framework-choice=vue')
@@ -527,17 +518,14 @@ describe('dropdown mode at 6+ items', () => {
   it('works without entityName and leaves the URL untouched', () => {
     renderManyTabs(6)
 
-    fireEvent.click(
-      document.querySelector<HTMLButtonElement>('[data-tabs-root] button[data-tab-value="vue"]')!
-    )
+    fireEvent.click(getPill('vue')!)
 
-    expect(getCombobox()).toBeTruthy()
     expect(getPanel('vue')).not.toHaveAttribute('hidden')
     expect(window.location.search).toBe('')
   })
 })
 
-describe('dropdown threshold counts visible children after onboarding filtering', () => {
+describe('pills threshold counts visible children after onboarding filtering', () => {
   const plansItems = [
     ['cloud', 'Cloud'],
     ['aws', 'AWS'],
@@ -556,16 +544,16 @@ describe('dropdown threshold counts visible children after onboarding filtering'
     mockPathname.mockReturnValue('/docs-onboarding/install/')
     render(<Tabs entityName="plans">{plansItems}</Tabs>)
 
-    expect(getCombobox()).toBeNull()
     expect(getTabButtons()).toHaveLength(5)
+    expect(document.querySelector('[data-tabs-root] [aria-pressed]')).toBeNull()
   })
 
-  it('the same 7 items become a dropdown on regular docs routes', () => {
+  it('the same 7 items become pills on regular docs routes', () => {
     render(<Tabs entityName="plans">{plansItems}</Tabs>)
 
-    expect(getCombobox()).toBeTruthy()
     expect(getTabButtons()).toHaveLength(0)
-    expect(getMirrorButtons()).toHaveLength(7)
+    expect(getPills()).toHaveLength(7)
+    expect(getPill('cloud')).toHaveAttribute('aria-pressed', 'true')
   })
 })
 
@@ -574,14 +562,13 @@ describe('layout escape hatch', () => {
     renderManyTabs(7, { entityName: 'framework-choice', layout: 'tabs' })
 
     expect(getTabButtons()).toHaveLength(7)
-    expect(getCombobox()).toBeNull()
+    expect(document.querySelector('[data-tabs-root] [aria-pressed]')).toBeNull()
   })
 
-  it('layout="dropdown" forces the dropdown at 2 items', () => {
-    renderManyTabs(2, { entityName: 'framework-choice', layout: 'dropdown' })
+  it('layout="pills" forces pills at 2 items', () => {
+    renderManyTabs(2, { entityName: 'framework-choice', layout: 'pills' })
 
     expect(getTabButtons()).toHaveLength(0)
-    expect(getCombobox()).toBeTruthy()
-    expect(getMirrorButtons()).toHaveLength(2)
+    expect(getPills()).toHaveLength(2)
   })
 })
