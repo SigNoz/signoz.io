@@ -23,11 +23,11 @@ export function HomepageHeroRedesign() {
             <div className="mb-6">
               <HalfBadge
                 badge="NEW"
-                href="/agent-native-observability/"
+                href="/launch-week/"
                 clickLocation="Hero Section"
-                clickName="Agent Native Observability Link"
+                clickName="Launch Week 6.0 Link"
               >
-                Agent Native Observability
+                SigNoz Launch Week 6.0
               </HalfBadge>
             </div>
           </HeroCopyMotion>

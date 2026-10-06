@@ -30,7 +30,7 @@ const defaultFrameAncestors =
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://app.getdecimal.ai https://static.reo.dev https://*.clarity.ms https://snap.licdn.com https://ddwl4m2hdecbv.cloudfront.net https://b-code.liadm.com https://a.usbrowserspeed.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
@@ -231,6 +231,31 @@ module.exports = () => {
         {
           source: '/case-study/:path*',
           destination: '/customers/:path*/',
+          permanent: true,
+        },
+        {
+          source: '/blog/distributed-tracing-golang/',
+          destination: '/docs/instrumentation/opentelemetry-golang/',
+          permanent: true,
+        },
+        {
+          source: '/blog/distributed-tracing/',
+          destination: '/blog/opentelemetry-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/blog/what-is-distributed-tracing-in-opentelemetry/',
+          destination: '/blog/opentelemetry-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/java-auto-instrumentation/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-java/',
+          destination: '/blog/opentelemetry-spring-boot/',
           permanent: true,
         },
         {
@@ -1012,7 +1037,7 @@ module.exports = () => {
         },
         {
           source: '/blog/opentelemetry-distributed-tracing-part-1/',
-          destination: '/blog/what-is-distributed-tracing-in-opentelemetry/',
+          destination: '/blog/opentelemetry-tracing/',
           permanent: true,
         },
         {
@@ -2108,6 +2133,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/integrations/opentelemetry-hasura/',
+          destination: '/docs/integrations/outposts/hasura/',
+          permanent: true,
+        },
+        {
           source: '/docs/integrations/flyio/',
           destination: '/docs/integrations/outposts/flyio/',
           permanent: true,
@@ -2663,16 +2693,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/aws-vs-gcp-vs-azure',
-          destination: '/comparisons/aws-vs-gcp-vs-azure/',
-          permanent: true,
-        },
-        {
-          source: '/network-security-monitoring-tools',
-          destination: '/comparisons/network-security-monitoring-tools/',
-          permanent: true,
-        },
-        {
           source: '/cloud-monitoring-tools',
           destination: '/comparisons/cloud-monitoring-tools/',
           permanent: true,
@@ -2945,7 +2965,7 @@ module.exports = () => {
         },
         {
           source: '/java-auto-instrumentation',
-          destination: '/opentelemetry/java-auto-instrumentation/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
           permanent: true,
         },
         {
