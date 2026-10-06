@@ -97,6 +97,23 @@ spec:
 
 - `<storage-class>`: A storage class name from the `kubectl get storageclass` output.
 
+On GKE Autopilot, use this patch instead. It selects the `gce-resizable` storage class and tells the chart it runs on Autopilot:
+
+```yaml
+spec:
+  patches:
+    - target: deployment/values.yaml
+      operations:
+        - op: add
+          path: /global
+          value:
+            cloud: gcp/autogke
+            storageClass: gce-resizable
+        - op: add
+          path: /clickhouse/installCustomStorageClass
+          value: true
+```
+
 ### Step 4: Deploy
 
 Run this from the directory that contains `casting.yaml`:
@@ -190,23 +207,6 @@ Every change follows the same loop: edit `casting.yaml`, then run `foundryctl ca
 
 - **Chart values** (resources, tolerations, persistence size): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against `deployment/values.yaml`, the same way as the storage class in Step 3. Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
 
-- **GKE Autopilot**: Autopilot overrides resource requests and limits, so check that the cluster has enough resource quota in its region (see the [Autopilot resource requests documentation][3]). Set the Autopilot storage class and cloud with a patch:
-
-  ```yaml
-  spec:
-    patches:
-      - target: deployment/values.yaml
-        operations:
-          - op: add
-            path: /global
-            value:
-              cloud: gcp/autogke
-              storageClass: gce-resizable
-          - op: add
-            path: /clickhouse/installCustomStorageClass
-            value: true
-  ```
-
 <details>
 
 <ToggleHeading>
@@ -275,6 +275,16 @@ global:
 **Verify these values:**
 
 - `<storage-class>`: A storage class name from the `kubectl get storageclass` output.
+
+On GKE Autopilot, use this `values.yaml` instead. It selects the `gce-resizable` storage class and tells the chart it runs on Autopilot:
+
+```yaml
+global:
+  cloud: gcp/autogke
+  storageClass: gce-resizable
+clickhouse:
+  installCustomStorageClass: true
+```
 
 Any other chart value goes in the same file. See the <a href="https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration" target="_blank" rel="noopener noreferrer nofollow">chart configuration reference</a>.
 
@@ -354,17 +364,6 @@ helm upgrade signoz signoz/signoz --namespace signoz -f values.yaml
 ```
 
 - **Chart values**: see the <a href="https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration" target="_blank" rel="noopener noreferrer nofollow">chart configuration reference</a> for every setting.
-
-- **GKE Autopilot**: Autopilot overrides resource requests and limits, so check that the cluster has enough resource quota in its region (see the [Autopilot resource requests documentation][3]). Add the Autopilot storage class and cloud to `values.yaml`:
-
-  ```yaml
-  global:
-    cloud: gcp/autogke
-    storageClass: gce-resizable
-  clickhouse:
-    installCustomStorageClass: true
-  ```
-
 - **Chart version**: add `--version <chart-version>` to `helm install` and `helm upgrade`. Versions are listed in the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>.
 
 **Verify these values:**

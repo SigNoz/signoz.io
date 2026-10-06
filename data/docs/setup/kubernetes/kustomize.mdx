@@ -73,7 +73,7 @@ kubectl get storageclass
 
 To use a specific one, add this to `casting.yaml`. It sets the storage class on all four volume claims: the two ClickHouse volumes, ClickHouse Keeper and PostgreSQL:
 
-```yaml defaultCollapsed
+```yaml
 spec:
   patches:
     - target: deployment/telemetrystore/clickhouse/clickhouseinstallation.yaml
@@ -261,7 +261,7 @@ Every change follows the same loop: edit `casting.yaml`, then run `foundryctl ca
       name: signoz-signoz
   ```
 
-  Run this from `my-deployment/`:
+  The root `pours/deployment/kustomization.yaml` leaves out the operator tier, so apply `pours/deployment/operators/clickhouse-operator` first on a fresh cluster, as in the Step 4 tip. Run this from `my-deployment/`:
 
   ```bash
   kubectl apply -k overlays/prod/
