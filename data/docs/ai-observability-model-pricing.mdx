@@ -13,7 +13,7 @@ The tab has two parts: **Model Costs** lists your pricing rules, and **Unpriced 
 
 ## Model Costs tab
 
-SigNoz Cloud includes default prices for common models. In self-hosted SigNoz, add a pricing rule for each of your models.
+SigNoz Cloud includes default prices for common models. In Self-Hosted SigNoz, add a pricing rule for each of your models, or [sync prices from OpenRouter](#sync-prices-from-openrouter-in-self-hosted-signoz).
 
 | Column | What it shows |
 | --- | --- |
@@ -22,7 +22,7 @@ SigNoz Cloud includes default prices for common models. In self-hosted SigNoz, a
 | **Input / 1M** | The price for one million input tokens, in USD. |
 | **Output / 1M** | The price for one million output tokens, in USD. |
 | **Extra buckets** | The prices for cached tokens (Cache Read, Cache Write), if the rule has them. |
-| **Source** | **Auto** for a default price from SigNoz Cloud (**Auto-populated** in the drawer), or **User override** for a price that an Admin set. |
+| **Source** | **Auto** for a default price from SigNoz Cloud or the [OpenRouter sync script](#sync-prices-from-openrouter-in-self-hosted-signoz) (**Auto-populated** in the drawer), or **User override** for a price that an Admin set. |
 | **Last seen** | The time since the rule was last updated or synced. |
 
 <Figure
@@ -60,7 +60,7 @@ To edit a rule, open the menu (⋮) at the end of its row and select **Edit**.
   caption="The Edit model cost drawer for a rule with default pricing"
 />
 
-You cannot change the prices of an **Auto-populated** rule. To set your own, change the source to **User override**. To go back to the default price, select **Auto-populated** again and confirm. SigNoz discards your custom prices.
+You cannot change the prices of an **Auto-populated** rule. To set your own, change the source to **User override**. To go back to the default price, select **Auto-populated** again and confirm. Your custom prices stay until the next price sync replaces them. See [When price changes take effect](#when-price-changes-take-effect).
 
 To delete a rule, open the menu (⋮) on its row. Select **Delete**, then confirm.
 
@@ -78,9 +78,154 @@ To set a new price instead, select **Create a new pricing model** at the bottom 
 
 When no model from the last hour is unpriced, the tab shows "All models in your traces are priced."
 
+## Sync prices from OpenRouter in Self-Hosted SigNoz
+
+Self-Hosted SigNoz has no default prices. To add prices for common models, run the script below. It reads current prices from the <a href="https://openrouter.ai/docs/api-reference/list-available-models" target="_blank" rel="noopener noreferrer nofollow">OpenRouter models API</a> and saves one **Auto** pricing rule for each model. It uses the same providers and model filters as the default prices in SigNoz Cloud.
+
+Before you start, install Python 3.8 or later, and create an API key for a [service account](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/) with the Admin role.
+
+1. Save the script as `sync_llm_prices.py`:
+
+```python:sync_llm_prices.py minimap defaultCollapsed
+"""Sync LLM model prices from OpenRouter into Self-Hosted SigNoz."""
+import fnmatch
+import json
+import re
+import urllib.request
+import uuid
+
+SIGNOZ_URL = "<signoz-url>"
+SIGNOZ_API_KEY = "<your-api-key>"
+PROVIDERS = {"openai", "anthropic", "google", "mistralai", "deepseek", "qwen", "x-ai", "meta-llama", "cohere", "amazon"}
+CACHE_MODES = {"openai": "subtract", "anthropic": "additive"}
+
+
+def price(pricing, key):
+    try:
+        return float(pricing[key]) * 1_000_000
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def source_id(model_id):
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"https://openrouter.ai/{model_id}"))
+
+
+def to_rule(model):
+    model_id = model["id"]
+    provider, _, name = model_id.partition("/")
+    if provider not in PROVIDERS or not name or ":" in model_id or model_id.startswith("~"):
+        return None
+    if provider == "qwen" and not re.search("max|plus|flash|turbo", name):
+        return None
+    pricing = model.get("pricing", {})
+    input_price, output_price = price(pricing, "prompt"), price(pricing, "completion")
+    if (input_price or 0) <= 0 or (output_price or 0) <= 0:
+        return None
+    rule_pricing = {"input": input_price, "output": output_price}
+    read, write = price(pricing, "input_cache_read"), price(pricing, "input_cache_write")
+    if read is not None or write is not None:
+        rule_pricing["cache"] = {"mode": CACHE_MODES.get(provider, "unknown"), "read": read or 0, "write": write or 0}
+    return {
+        "sourceId": source_id(model_id),
+        "modelName": name,
+        "provider": provider,
+        "modelPattern": [model_id, name],
+        "unit": "per_million_tokens",
+        "pricing": rule_pricing,
+        "enabled": True,
+    }
+
+
+def signoz(path, body=None):
+    request = urllib.request.Request(
+        f"{SIGNOZ_URL}{path}",
+        data=body and json.dumps(body).encode(),
+        headers={"SIGNOZ-API-KEY": SIGNOZ_API_KEY, "Content-Type": "application/json"},
+        method="PUT" if body else "GET",
+    )
+    with urllib.request.urlopen(request, timeout=60) as response:
+        return json.load(response) if not body else None
+
+
+existing = []
+while True:
+    page = signoz(f"/api/v1/llm_pricing_rules?limit=100&offset={len(existing)}")["data"]["items"]
+    existing += page
+    if len(page) < 100:
+        break
+override_patterns = [pattern for rule in existing if rule["isOverride"] and rule["enabled"] for pattern in rule["modelPattern"]]
+
+
+def matches(name, pattern):
+    # Same as the collector's path.Match: * and ? do not cross "/".
+    names, patterns = name.split("/"), pattern.split("/")
+    return len(names) == len(patterns) and all(map(fnmatch.fnmatchcase, names, patterns))
+
+
+def overridden(name):
+    return any(matches(name, pattern) for pattern in override_patterns)
+
+
+with urllib.request.urlopen("https://openrouter.ai/api/v1/models", timeout=60) as response:
+    models = json.load(response)["data"]
+rules = [rule for rule in map(to_rule, models) if rule]
+previous = {rule["sourceId"]: rule for rule in existing if rule.get("sourceId")}
+for rule in rules:
+    # Keep names that you mapped to this rule, and drop names that a User override rule prices.
+    mapped = previous.get(rule["sourceId"], {}).get("modelPattern", [])
+    names = rule["modelPattern"] + [name for name in mapped if name not in rule["modelPattern"]]
+    kept = [name for name in names if not overridden(name)]
+    rule["modelPattern"], rule["enabled"] = (kept, True) if kept else (names, False)
+
+# Disable rules from earlier runs for models that OpenRouter no longer lists or prices.
+synced = {rule["sourceId"] for rule in rules}
+fields = ("sourceId", "modelName", "provider", "modelPattern", "unit", "pricing")
+stale = [{**{field: rule[field] for field in fields}, "enabled": False}
+         for rule in existing
+         if not rule["isOverride"] and rule.get("sourceId") not in synced
+         and rule.get("sourceId") == source_id(f"{rule['provider']}/{rule['modelName']}")]
+
+enabled = sum(rule["enabled"] for rule in rules)
+print(f"Syncing {enabled} model prices to {SIGNOZ_URL}")
+print(f"Disabling {len(rules) + len(stale) - enabled} rules that User override rules cover or OpenRouter dropped")
+signoz("/api/v1/llm_pricing_rules", {"rules": rules + stale})
+print("Done")
+```
+
+**Verify these values:**
+
+- `<signoz-url>`: The URL of your SigNoz instance, for example `http://localhost:8080`.
+- `<your-api-key>`: The API key of a service account with the Admin role.
+
+To sync other providers, edit `PROVIDERS`. Each value is the prefix of an OpenRouter model ID, for example `openai` in `openai/gpt-4o`.
+
+2. Run the script:
+
+```bash
+python3 sync_llm_prices.py
+```
+
+The script prints the number of rules that it synced and disabled, then `Done`.
+
+3. On the **Model Costs** tab, filter by **Auto** to see the new rules.
+
+If an enabled **User override** rule prices a model name, the script removes that name from its own rule. It disables the rule when no names remain. If OpenRouter stops listing or pricing a model, the script disables that rule too. Each run updates the prices of the other rules that the script created and keeps the names that you mapped to them. To keep prices current, run the script once a day, for example with a cron job.
+
+The rules match OpenRouter model IDs, such as `claude-3.7-sonnet` and `anthropic/claude-3.7-sonnet`. If your spans use a different name, such as `claude-3-7-sonnet-20250219`, map it on the **Unpriced models** tab. See [Price an unpriced model](#price-an-unpriced-model).
+
 ## When price changes take effect
 
-A price change applies to spans that SigNoz receives after the change. If you reset a rule to the default SigNoz price, the reset can take up to 24 hours. Stored spans do not change.
+A price change applies to spans that SigNoz receives after the change. If you reset a rule to the default price on SigNoz Cloud, the reset can take up to 24 hours. In Self-Hosted SigNoz, the default price returns on the next run of the [sync script](#sync-prices-from-openrouter-in-self-hosted-signoz). Stored spans do not change.
+
+## Cost attributes on spans
+
+You do not send cost. When SigNoz receives a span, it calculates cost from the token counts and the price in the matching pricing rule. SigNoz writes the total to `signoz.gen_ai.usage.tokens.cost`, and one cost attribute for each token type:
+
+- `signoz.gen_ai.usage.input_tokens.cost`
+- `signoz.gen_ai.usage.output_tokens.cost`
+- `signoz.gen_ai.usage.cache_read.input_tokens.cost`
+- `signoz.gen_ai.usage.cache_write.input_tokens.cost`
 
 ## Validate
 
