@@ -1,9 +1,10 @@
 'use client'
 
 import { ArrowRight } from 'lucide-react'
-import { Suspense, lazy, useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 
 import TrackingLink from '@/components/TrackingLink'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 import type { WhySignozWorldHandle } from './WhySignozProtoWorld'
 import { WHY_SIGNOZ_STEPS } from './whySignozStages'
@@ -19,20 +20,6 @@ const WhySignozProtoWorldLazy = lazy(() => import('./WhySignozProtoWorld'))
 // Matches the `lg:motion-safe:flex` wrapper that shows the world.
 const WORLD_MEDIA_QUERY = '(min-width: 1024px) and (prefers-reduced-motion: no-preference)'
 
-function subscribeToWorldViewport(onStoreChange: () => void) {
-  const mediaQuery = window.matchMedia(WORLD_MEDIA_QUERY)
-  mediaQuery.addEventListener('change', onStoreChange)
-  return () => mediaQuery.removeEventListener('change', onStoreChange)
-}
-
-function getWorldViewportSnapshot() {
-  return window.matchMedia(WORLD_MEDIA_QUERY).matches
-}
-
-function getServerWorldViewportSnapshot() {
-  return false
-}
-
 // Matches the world root's sizing (why-signoz-proto.css) so the pinned stage doesn't reflow.
 function WorldPlaceholder() {
   return <div className="w-full max-w-[640px]" style={{ height: 'min(88vh, 780px)' }} aria-hidden />
@@ -41,11 +28,7 @@ function WorldPlaceholder() {
 export default function WhySignoz() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [reducedMotion, setReducedMotion] = useState(false)
-  const showWorld = useSyncExternalStore(
-    subscribeToWorldViewport,
-    getWorldViewportSnapshot,
-    getServerWorldViewportSnapshot
-  )
+  const showWorld = useMediaQuery(WORLD_MEDIA_QUERY)
   const driverRef = useRef<HTMLDivElement | null>(null)
   const worldRef = useRef<WhySignozWorldHandle | null>(null)
   const itemRefs = useRef<Array<HTMLDivElement | null>>([])

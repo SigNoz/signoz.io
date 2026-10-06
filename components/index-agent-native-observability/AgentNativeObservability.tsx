@@ -93,7 +93,7 @@ export default function AgentNativeObservabilitySection() {
         </div>
 
         <div aria-hidden="true" data-markdown-ignore className="relative mt-6 lg:pb-16">
-          <AgentTerminalGate className="hidden w-full md:flex md:h-[560px] lg:h-[600px] lg:w-[74%]" />
+          <AgentTerminalGate />
           <NozChatPanel className="mx-auto mt-6 h-[540px] w-full max-w-[420px] lg:absolute lg:-top-14 lg:right-0 lg:z-10 lg:mx-0 lg:mt-0 lg:h-[700px] lg:w-[388px] xl:w-[430px]" />
         </div>
       </div>

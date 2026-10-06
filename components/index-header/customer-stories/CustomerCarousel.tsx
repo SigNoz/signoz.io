@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ArrowRight } from 'lucide-react'
 
 import TrackingLink from '@/components/TrackingLink'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 import { CUSTOMER_STORY_LOGOS, type CustomerStoryLogo } from './customerStories.constants'
 import { cn } from 'app/lib/utils'
@@ -18,20 +19,6 @@ const SPRITE = typeof spriteAsset === 'string' ? spriteAsset : (spriteAsset as {
 const DEFAULT_CLICK_LOCATION = 'Hero Customer Stories'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 767px)'
-
-function subscribeToMobileViewport(onStoreChange: () => void) {
-  const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY)
-  mediaQuery.addEventListener('change', onStoreChange)
-  return () => mediaQuery.removeEventListener('change', onStoreChange)
-}
-
-function getMobileViewportSnapshot() {
-  return window.matchMedia(MOBILE_MEDIA_QUERY).matches
-}
-
-function getServerMobileViewportSnapshot() {
-  return false
-}
 
 interface CardProps {
   customer: CustomerStoryLogo
@@ -117,11 +104,7 @@ export default function CustomerCarousel({
   const pillRef = useRef<HTMLDivElement>(null)
   const pillTextRef = useRef<HTMLSpanElement>(null)
   const [mounted, setMounted] = useState(false)
-  const isMobile = useSyncExternalStore(
-    subscribeToMobileViewport,
-    getMobileViewportSnapshot,
-    getServerMobileViewportSnapshot
-  )
+  const isMobile = useMediaQuery(MOBILE_MEDIA_QUERY)
 
   useEffect(() => setMounted(true), [])
 
