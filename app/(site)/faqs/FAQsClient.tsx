@@ -1,6 +1,5 @@
 'use client'
 
-import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
@@ -53,9 +52,9 @@ export default function FAQsClient({ faqs }: FAQsClientProps) {
           <div className="mx-auto mt-6 w-full max-w-2xl px-4 sm:mt-8">
             <div className="flex flex-wrap items-center justify-center gap-2">
               {allTags.map((tag) => (
-                <Button
-                  isButton
+                <button
                   key={tag}
+                  type="button"
                   onClick={() => toggleTag(tag)}
                   className={`rounded-full px-2 py-1 text-xs font-medium transition-colors sm:px-3 sm:text-sm ${
                     selectedTags.includes(tag)
@@ -64,19 +63,17 @@ export default function FAQsClient({ faqs }: FAQsClientProps) {
                   } border border-[var(--l2-border)]`}
                 >
                   {tag}
-                </Button>
+                </button>
               ))}
             </div>
             {selectedTags.length > 0 && (
-              <Button
-                isButton
+              <button
                 type="button"
                 onClick={() => setSelectedTags([])}
-                variant="link"
                 className="mt-4 w-full justify-center text-xs font-medium text-primary-400 hover:text-primary-300 sm:text-sm"
               >
                 Clear filters
-              </Button>
+              </button>
             )}
           </div>
         </div>

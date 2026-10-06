@@ -50,7 +50,6 @@ export default function CustomersHero({ title, metrics, ctas }: CustomersHeroPro
             asChild
             className="!w-full items-center gap-2 sm:!w-auto sm:min-w-[176px]"
             key={cta.clickName}
-            rounded="full"
             variant={cta.variant}
           >
             <TrackingLink

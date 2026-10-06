@@ -3,6 +3,8 @@ import type { CellValue, ComparisonCategory } from './ClickStackAlternativePage.
 import TrackingLink from '@/components/TrackingLink'
 import FeatureComparisonGridWithOcclusion from '@/shared/components/molecules/FeaturePages/FeatureComparisonGridWithOcclusion'
 import type { ComparisonSection } from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 const BADGE_ICONS = {
   clock: Clock,
@@ -113,7 +115,10 @@ export default function ComparisonGrid({ data }: { data: ComparisonCategory[] })
                 clickName="Sign Up Button"
                 clickLocation="ClickStack Alternative Quick Evaluation"
                 clickText="Get Started"
-                className="flex h-8 w-40 items-center justify-center rounded-full border border-[#23262e] bg-[#4e74f8] text-xs font-medium tracking-wider text-[#eceef2] hover:bg-[#3d63e7]"
+                className={cn(
+                  buttonVariants({ variant: 'default', size: 'sm' }),
+                  'w-40 tracking-wider'
+                )}
               >
                 Get Started
               </TrackingLink>

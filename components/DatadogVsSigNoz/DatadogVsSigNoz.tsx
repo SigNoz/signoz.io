@@ -19,13 +19,13 @@ export default function DatadogVsSigNoz() {
           <div className="flex flex-col gap-4 sm:flex-row">
             <Button
               href="/datadog-alternative/"
-              variant="legacyPrimary"
+              variant="default"
               className="flex items-center gap-2"
             >
               <Scale className="h-4 w-4" />
               Compare SigNoz vs. Datadog
             </Button>
-            <Button href="/datadog-migration-tool/" variant="legacySecondary">
+            <Button href="/datadog-migration-tool/" variant="secondary">
               Try our Datadog Migration Tool &rarr;
             </Button>
           </div>

@@ -68,7 +68,7 @@ export default function AgentNativeObservabilitySection() {
             </p>
             <TrackingLink
               className={cn(
-                buttonVariants({ variant: 'tactileSecondary' }),
+                buttonVariants({ variant: 'secondary', size: 'sm' }),
                 'mt-6 no-underline sm:mt-9'
               )}
               clickLocation="Homepage Agent Native Observability Section"

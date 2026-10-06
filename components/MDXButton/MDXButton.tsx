@@ -1,4 +1,5 @@
 import React from 'react'
+import { ArrowRight } from 'lucide-react'
 import TrackingLink from '../TrackingLink'
 import Button from '@/components/ui/Button'
 
@@ -21,26 +22,23 @@ const MDXButton = ({
   clickText,
   children,
   type = 'primary',
-  className = 'inline-block no-underline',
+  className = 'w-fit',
 }: MDXButtonProps) => {
-  const buttonVariant = type === 'primary' ? 'legacyPrimary' : 'legacySecondary'
+  const buttonVariant = type === 'primary' ? 'default' : 'secondary'
   return (
     <div className="mt-6 self-center">
-      <TrackingLink
-        href={href}
-        clickType={clickType}
-        clickName={clickName || String(children)}
-        clickLocation={clickLocation || ''}
-        clickText={clickText || String(children)}
-        className={className}
-      >
-        <Button as="span" variant={buttonVariant}>
-          <span className="flex items-center gap-2">
-            {children}
-            &rarr;
-          </span>
-        </Button>
-      </TrackingLink>
+      <Button asChild variant={buttonVariant} className={className}>
+        <TrackingLink
+          href={href}
+          clickType={clickType}
+          clickName={clickName || String(children)}
+          clickLocation={clickLocation || ''}
+          clickText={clickText || String(children)}
+        >
+          {children}
+          <ArrowRight size={14} aria-hidden="true" />
+        </TrackingLink>
+      </Button>
     </div>
   )
 }

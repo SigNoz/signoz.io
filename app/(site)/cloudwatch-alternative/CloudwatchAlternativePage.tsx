@@ -21,7 +21,6 @@ import {
 } from './CloudwatchAlternativePage.constants'
 import TrackingLink from '@/components/TrackingLink'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -29,7 +28,6 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'Cloudwatch Alternative Hero Start Trial',
@@ -41,7 +39,6 @@ const Header: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/cloud/',
       variant: 'secondary' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'Cloudwatch Alternative Hero Docs',
@@ -152,7 +149,7 @@ const CostComparison: React.FC = () => {
                 CloudWatch's <br className="hidden md:block" /> billing{' '}
                 <br className="hidden md:block" /> complexity
               </h2>
-              <Button asChild variant="secondary" rounded="full">
+              <Button asChild variant="secondary">
                 <TrackingLink
                   href="https://aws.amazon.com/cloudwatch/pricing/"
                   clickType="Secondary CTA"
