@@ -1,5 +1,5 @@
 ---
-date: 2026-09-26
+date: 2026-10-06
 title: ECS EC2 Collection Agent - Configure
 description: View metrics and logs for your ECS infrastructure
 ---
@@ -50,13 +50,28 @@ We need to add an entrypoint to the application container to set the
 daemon service. Such that the application container can send data to the
 daemon container running in the same host.
 
+The AWS entrypoints below read the instance IP from IMDSv2. AWS recommends an
+IMDSv2 hop limit of `2` for containers. Account or launch settings can change the
+default, so run this command for each container instance in your cluster:
+
+```bash
+aws ec2 modify-instance-metadata-options \
+  --instance-id <instance-id> \
+  --http-put-response-hop-limit 2 \
+  --http-endpoint enabled
+```
+
+**Verify these values:**
+
+- `<instance-id>`: The Amazon EC2 instance ID (`i-...`) of each container instance. Find it on the **Instances** page of the <a href="https://console.aws.amazon.com/ec2/home#Instances:" target="_blank" rel="noopener noreferrer nofollow">EC2 console</a>.
+
 <Tabs entityName="launch-type">
 <TabItem value="ec2" label="EC2" default>
 **Method 1: Updating entrypoint in task definition**
 
 We need to obtain the endpoint or IP address of the instance on which the task
 is running. We can do this by querying the metadata service of the instance.
-For EC2, the metadata service is available at `169.254.169.254`.
+For EC2, the metadata service is available at `169.254.169.254` and needs an IMDSv2 session token.
 
 The `entryPoint` will look like:
 
@@ -66,7 +81,7 @@ The `entryPoint` will look like:
       "entryPoint": [
         "sh",
         "-c",
-        "export OTEL_EXPORTER_OTLP_ENDPOINT=\"http://$(curl http://169.254.169.254/latest/meta-data/local-ipv4):4317\"; <Application Startup Commands>"
+        "TOKEN=$(curl -s -X PUT http://169.254.169.254/latest/api/token -H \"X-aws-ec2-metadata-token-ttl-seconds: 21600\"); export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=\"http://$(curl -s -H \"X-aws-ec2-metadata-token: $TOKEN\" http://169.254.169.254/latest/meta-data/local-ipv4):4318\"; <Application Startup Commands>"
       ],
 			"command": [],
 			
@@ -74,6 +89,7 @@ The `entryPoint` will look like:
 ```
 
 - Replace `<Application Startup Commands>` with the commands to start your application.
+- The entrypoint sets OTLP/HTTP on port `4318`. To export over gRPC, set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` and use port `4317`.
 </TabItem>
 <TabItem value="external" label="External">
 **Method 1: Updating entrypoint in task definition**
@@ -91,7 +107,7 @@ The `entryPoint` will look like the following based on your network mode and clo
           "entryPoint": [
             "sh",
             "-c",
-            "export OTEL_EXPORTER_OTLP_ENDPOINT=\"http://172.17.0.1:4317\"; <Application Startup Commands>"
+            "export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=\"http://172.17.0.1:4318\"; <Application Startup Commands>"
           ],
     			"command": [],
     			
@@ -123,7 +139,7 @@ The `entryPoint` will look like the following based on your network mode and clo
           "entryPoint": [
             "sh",
             "-c",
-            "export OTEL_EXPORTER_OTLP_ENDPOINT=\"http://signoz-collector:4317\"; <Application Startup Commands>"
+            "export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=\"http://signoz-collector:4318\"; <Application Startup Commands>"
           ],
     			"command": [],
     			
@@ -138,7 +154,7 @@ The `entryPoint` will look like the following based on your network mode and clo
           "entryPoint": [
             "sh",
             "-c",
-            "export OTEL_EXPORTER_OTLP_ENDPOINT=\"http://$(curl http://169.254.169.254/latest/meta-data/local-ipv4):4317\"; <Application Startup Commands>"
+            "TOKEN=$(curl -s -X PUT http://169.254.169.254/latest/api/token -H \"X-aws-ec2-metadata-token-ttl-seconds: 21600\"); export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=\"http://$(curl -s -H \"X-aws-ec2-metadata-token: $TOKEN\" http://169.254.169.254/latest/meta-data/local-ipv4):4318\"; <Application Startup Commands>"
           ],
     			"command": [],
     			
@@ -153,7 +169,7 @@ The `entryPoint` will look like the following based on your network mode and clo
           "entryPoint": [
             "sh",
             "-c",
-    				'export OTEL_EXPORTER_OTLP_ENDPOINT="http://$(curl "http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/ip?recursive=true&alt=text" -H "Metadata-Flavor: Google"):4317"; <Application Startup Commands>'
+            'export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT="http://$(curl "http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/ip?recursive=true&alt=text" -H "Metadata-Flavor: Google"):4318"; <Application Startup Commands>'
           ],
     			"command": [],
     			
@@ -162,6 +178,7 @@ The `entryPoint` will look like the following based on your network mode and clo
 
 **NOTES:**
 - Replace `<Application Startup Commands>` with the commands to start your application.
+- The entrypoint sets OTLP/HTTP on port `4318`. To export over gRPC, set `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` and use port `4317`.
 - For more information about the metadata server, refer https://www.baeldung.com/linux/cloud-ip-meaning
 </TabItem>
 </Tabs>
@@ -210,19 +227,29 @@ In case of JSON task definition, you can add the following lines.
 ### 4. Add ECS Task Attributes from your Application
 
 The daemon collector runs in its own ECS task, so it cannot tell which task your
-telemetry came from. To tag your application's traces, metrics, and logs with its
-own task (for example `aws.ecs.task.family` and `aws.ecs.task.arn`), enable the
-AWS ECS resource detector in your OpenTelemetry SDK, such as
-[`go.opentelemetry.io/contrib/detectors/aws/ecs`](https://pkg.go.dev/go.opentelemetry.io/contrib/detectors/aws/ecs)
-for Go or `awsEcsDetector` from
-[`@opentelemetry/resource-detector-aws`](https://www.npmjs.com/package/@opentelemetry/resource-detector-aws)
-for Node.js. Each application container reads its own ECS task metadata, so the
-attributes match the task it runs in.
+telemetry came from. To add the ECS task of your application to its telemetry,
+enable the ECS resource detector in your OpenTelemetry SDK. The detector adds
+attributes such as `aws.ecs.task.family` and `aws.ecs.task.arn` to traces,
+metrics, and OTLP logs.
+
+- Go: pass `resource.WithFromEnv()` and `resource.WithDetectors(ecs.NewResourceDetector())` to `resource.New()`. Then pass the result to each provider with `WithResource(res)`. The detector is in <a href="https://pkg.go.dev/go.opentelemetry.io/contrib/detectors/aws/ecs" target="_blank" rel="noopener noreferrer nofollow">`go.opentelemetry.io/contrib/detectors/aws/ecs`</a>.
+- Node.js: set the `resourceDetectors` option of `NodeSDK` to `[envDetector, awsEcsDetector]`. `awsEcsDetector` is in <a href="https://www.npmjs.com/package/@opentelemetry/resource-detector-aws" target="_blank" rel="noopener noreferrer nofollow">`@opentelemetry/resource-detector-aws`</a>.
+- Python: pass `OTELResourceDetector()` and `AwsEcsResourceDetector()` to `get_aggregated_resources()`. Then pass the result as `resource=` to `TracerProvider`, `MeterProvider`, and `LoggerProvider`. `AwsEcsResourceDetector` is in <a href="https://pypi.org/project/opentelemetry-sdk-extension-aws/" target="_blank" rel="noopener noreferrer nofollow">`opentelemetry-sdk-extension-aws`</a>.
+- Java agent: set `OTEL_RESOURCE_PROVIDERS_AWS_ENABLED=true` in the container environment. See the <a href="https://opentelemetry.io/docs/zero-code/java/agent/configuration/" target="_blank" rel="noopener noreferrer nofollow">Java agent configuration</a>.
+
+The environment detectors in the Go, Node.js, and Python setups keep the
+`service.name` from step 3. Each application container reads its own ECS task
+metadata, so the attributes match the task it runs in. Logs that the collector
+reads from container output with `filelog` do not get these attributes.
+
+To make sure that the detector works, open a trace of your service in SigNoz.
+Its resource attributes show `aws.ecs.task.arn`.
 
 <Admonition type="warning">
-Set the full set of ECS attributes from the detector rather than a few by hand.
-The collector keeps attributes your application already sends and only fills in
-missing ones, so a partial set can mix your task's values with the collector's.
+If the `ecs` detector in your daemon configuration does not have the
+`resource_attributes` overrides from the [installation template](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/),
+add them. If you do not, the collector fills each ECS task attribute that your
+application does not send with the values of its own task.
 </Admonition>
 
 ## Next Steps

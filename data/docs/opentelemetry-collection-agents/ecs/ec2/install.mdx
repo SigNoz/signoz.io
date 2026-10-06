@@ -1,5 +1,5 @@
 ---
-date: 2026-09-26
+date: 2026-10-06
 title: ECS EC2 Collection Agent - Install
 description: View metrics and logs for your ECS infrastructure
 ---
@@ -433,8 +433,8 @@ receivers:
         endpoint: 0.0.0.0:4318
 
   # Collects ECS task and container metrics from the ECS Task Metadata Endpoint.
-  # As a daemon, this only covers the collector's own task. For per-task
-  # container metrics of your applications, use the ECS sidecar setup.
+  # In daemon mode, this receiver collects metrics only for the collector's own task.
+  # For container metrics of your application tasks, use the ECS sidecar setup.
   awsecscontainermetrics:
     collection_interval: 20s
 
@@ -466,17 +466,35 @@ receivers:
     operators:
       - id: container-parser
         type: container
-        # Docker log paths carry no Kubernetes metadata; skip path parsing.
+        # Docker log paths have no Kubernetes metadata. Skip path parsing.
         add_metadata_from_filepath: false
 
 processors:
-  # Detects host-level resource attributes (EC2 instance, region, account).
-  # The `ecs` detector is left out on purpose: it reads the collector's own task
-  # metadata, so in a daemon it would label every application's telemetry with
-  # the collector's task. Set ECS task attributes from the application instead.
+  # Detects host-level resource attributes (EC2 instance, ECS cluster, region, account).
+  # The `ecs` detector reads the collector's own task. The task and log attributes
+  # below are turned off so that your applications do not get the collector's task.
+  # Set ECS task attributes in the application instead.
   resourcedetection:
-    detectors: [env, ec2]
+    detectors: [env, ecs, ec2]
     override: false
+    ecs:
+      resource_attributes:
+        aws.ecs.task.arn:
+          enabled: false
+        aws.ecs.task.family:
+          enabled: false
+        aws.ecs.task.id:
+          enabled: false
+        aws.ecs.task.revision:
+          enabled: false
+        aws.log.group.arns:
+          enabled: false
+        aws.log.group.names:
+          enabled: false
+        aws.log.stream.arns:
+          enabled: false
+        aws.log.stream.names:
+          enabled: false
 
   # Batches telemetry to optimize network traffic.
   batch:
@@ -490,28 +508,24 @@ exporters:
     endpoint: 'https://ingest.<region>.signoz.cloud:443'
     headers:
       signoz-ingestion-key: '<your-ingestion-key>'
-  # Useful for debugging; prints telemetry to the collector's logs.
-  # Can be disabled by removing it from the pipelines below.
-  debug:
-    verbosity: basic
 
 service:
   extensions: [health_check]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [resourcedetection, batch]
       exporters: [otlphttp]
 
     metrics:
       receivers: [otlp, hostmetrics, awsecscontainermetrics]
       processors: [resourcedetection, batch]
-      exporters: [otlphttp, debug]
+      exporters: [otlphttp]
 
     logs:
       receivers: [otlp, filelog]
       processors: [resourcedetection, batch]
-      exporters: [otlphttp, debug]
+      exporters: [otlphttp]
 ```
 
 </TabItem>
@@ -536,8 +550,8 @@ receivers:
         endpoint: 0.0.0.0:4318
 
   # Collects ECS task and container metrics from the ECS Task Metadata Endpoint.
-  # As a daemon, this only covers the collector's own task. For per-task
-  # container metrics of your applications, use the ECS sidecar setup.
+  # In daemon mode, this receiver collects metrics only for the collector's own task.
+  # For container metrics of your application tasks, use the ECS sidecar setup.
   awsecscontainermetrics:
     collection_interval: 20s
 
@@ -569,17 +583,35 @@ receivers:
     operators:
       - id: container-parser
         type: container
-        # Docker log paths carry no Kubernetes metadata; skip path parsing.
+        # Docker log paths have no Kubernetes metadata. Skip path parsing.
         add_metadata_from_filepath: false
 
 processors:
-  # Detects host-level resource attributes (EC2 instance, region, account).
-  # The `ecs` detector is left out on purpose: it reads the collector's own task
-  # metadata, so in a daemon it would label every application's telemetry with
-  # the collector's task. Set ECS task attributes from the application instead.
+  # Detects host-level resource attributes (EC2 instance, ECS cluster, region, account).
+  # The `ecs` detector reads the collector's own task. The task and log attributes
+  # below are turned off so that your applications do not get the collector's task.
+  # Set ECS task attributes in the application instead.
   resourcedetection:
-    detectors: [env, ec2]
+    detectors: [env, ecs, ec2]
     override: false
+    ecs:
+      resource_attributes:
+        aws.ecs.task.arn:
+          enabled: false
+        aws.ecs.task.family:
+          enabled: false
+        aws.ecs.task.id:
+          enabled: false
+        aws.ecs.task.revision:
+          enabled: false
+        aws.log.group.arns:
+          enabled: false
+        aws.log.group.names:
+          enabled: false
+        aws.log.stream.arns:
+          enabled: false
+        aws.log.stream.names:
+          enabled: false
 
   # Batches telemetry to optimize network traffic.
   batch:
@@ -592,28 +624,24 @@ exporters:
   otlphttp:
     endpoint: 'http://<SIGNOZ_SELF_HOST_ENDPOINT>:4318'
 
-  # Useful for debugging; prints telemetry to the collector's logs.
-  # Can be disabled by removing it from the pipelines below.
-  debug:
-    verbosity: basic
 
 service:
   extensions: [health_check]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [resourcedetection, batch]
       exporters: [otlphttp]
 
     metrics:
       receivers: [otlp, hostmetrics, awsecscontainermetrics]
       processors: [resourcedetection, batch]
-      exporters: [otlphttp, debug]
+      exporters: [otlphttp]
 
     logs:
       receivers: [otlp, filelog]
       processors: [resourcedetection, batch]
-      exporters: [otlphttp, debug]
+      exporters: [otlphttp]
 ```
 
 </TabItem>
