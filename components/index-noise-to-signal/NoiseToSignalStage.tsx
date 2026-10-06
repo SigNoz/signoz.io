@@ -1,26 +1,12 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useSyncExternalStore } from 'react'
+
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 768px)'
 
 const NoiseToSignalCanvas = dynamic(() => import('./NoiseToSignalCanvas'), { ssr: false })
-
-// JS render guard: CSS hiding would leave the canvas and RAF loop mounted below `md`.
-function subscribeToDesktopViewport(onStoreChange: () => void) {
-  const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY)
-  mediaQuery.addEventListener('change', onStoreChange)
-  return () => mediaQuery.removeEventListener('change', onStoreChange)
-}
-
-function getDesktopViewportSnapshot() {
-  return window.matchMedia(DESKTOP_MEDIA_QUERY).matches
-}
-
-function getServerViewportSnapshot() {
-  return false
-}
 
 const NOISY_TRACES: { token: string; points: string }[] = [
   {
@@ -94,12 +80,9 @@ function NoiseToSignalPoster() {
   )
 }
 
+// JS render guard: CSS hiding would leave the canvas and RAF loop mounted below `md`.
 export default function NoiseToSignalStage() {
-  const isDesktop = useSyncExternalStore(
-    subscribeToDesktopViewport,
-    getDesktopViewportSnapshot,
-    getServerViewportSnapshot
-  )
+  const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY)
 
   if (!isDesktop) return <NoiseToSignalPoster />
 
