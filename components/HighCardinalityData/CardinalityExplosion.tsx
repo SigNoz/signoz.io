@@ -49,7 +49,7 @@ export default function CardinalityExplosion() {
       <div className="flex flex-col items-center gap-12 md:flex-row">
         {/* Left: Interactive Controls */}
         <div className="relative w-full flex-1">
-          <div className="absolute bottom-0 left-0 top-0 w-0.5 bg-gradient-to-b from-zinc-800 via-blue-900 to-red-900" />
+          <div className="absolute bottom-0 left-0 top-0 w-0.5 bg-gradient-to-b from-[var(--l3-border)] via-blue-900 to-red-900" />
 
           <div className="space-y-6 pl-3 md:pl-6">
             {LABELS.map((label, index) => {
@@ -67,16 +67,16 @@ export default function CardinalityExplosion() {
                           ? index === 3
                             ? 'border-red-500 bg-red-500'
                             : 'border-blue-600 bg-blue-600'
-                          : 'border-zinc-600 bg-black group-hover:border-zinc-400'
+                          : 'border-[var(--l3-border)] bg-[var(--l1-background)] group-hover:border-[var(--l3-foreground)]'
                       }`}
                     />
                     <div>
                       <div
-                        className={`font-mono text-sm ${isActive ? 'font-bold text-zinc-100' : 'text-zinc-300'}`}
+                        className={`font-mono text-sm ${isActive ? 'font-bold text-[var(--l1-foreground)]' : 'text-[var(--l2-foreground)]'}`}
                       >
                         {label.name}
                       </div>
-                      <div className="text-xs text-zinc-400">
+                      <div className="text-xs text-[var(--l3-foreground)]">
                         {formatNumber(label.cardinality)} values
                       </div>
                     </div>
@@ -93,42 +93,50 @@ export default function CardinalityExplosion() {
             {/* Animated Number */}
             <div
               className={`text-4xl font-extrabold tracking-tight transition-all duration-500 sm:text-5xl md:text-6xl ${
-                isOOM ? 'text-red-500' : activeLabels.size > 1 ? 'text-blue-500' : 'text-zinc-100'
+                isOOM
+                  ? 'text-red-500'
+                  : activeLabels.size > 1
+                    ? 'text-blue-500'
+                    : 'text-[var(--l1-foreground)]'
               }`}
             >
               {activeLabels.size === 0 ? '0' : formatNumber(totalCardinality)}
             </div>
 
-            <div className="mt-2 text-sm font-semibold uppercase tracking-widest text-zinc-400">
+            <div className="mt-2 text-sm font-semibold uppercase tracking-widest text-[var(--l3-foreground)]">
               Total Time Series
             </div>
 
             {/* Multiplier Visual */}
-            <div className="mt-6 flex flex-wrap justify-center gap-2 font-mono text-xs text-zinc-500 md:justify-start">
+            <div className="mt-6 flex flex-wrap justify-center gap-2 font-mono text-xs text-[var(--l3-foreground)] md:justify-start">
               {activeLabelsArray.map((l, i) => (
                 <span key={l.name} className="flex items-center">
-                  {i > 0 && <span className="mx-2 text-zinc-600">×</span>}
-                  <span className={l.name === 'user_id' ? 'font-bold text-red-400' : ''}>
+                  {i > 0 && <span className="mx-2 text-[var(--l3-foreground)]">×</span>}
+                  <span
+                    className={
+                      l.name === 'user_id' ? 'font-bold text-[var(--callout-error-title)]' : ''
+                    }
+                  >
                     {formatNumber(l.cardinality)}
                   </span>
                 </span>
               ))}
               {activeLabels.size > 0 && (
                 <>
-                  <span className="mx-2 text-zinc-600">=</span>
-                  <span className="font-bold text-zinc-100">?</span>
+                  <span className="mx-2 text-[var(--l3-foreground)]">=</span>
+                  <span className="font-bold text-[var(--l1-foreground)]">?</span>
                 </>
               )}
             </div>
 
             {isOOM && (
-              <div className="mt-6 text-left text-sm text-zinc-400">
-                <strong className="mb-1 block text-red-400">
+              <div className="mt-6 text-left text-sm text-[var(--l2-foreground)]">
+                <strong className="mb-1 block text-[var(--callout-error-title)]">
                   ⚠️ Cardinality Explosion Detected
                 </strong>
-                Adding a high-cardinality label like <code className="text-zinc-300">user_id</code>{' '}
-                multiplied your series count by 1 Million. This creates billions of unique
-                combinations.
+                Adding a high-cardinality label like{' '}
+                <code className="text-[var(--l2-foreground)]">user_id</code> multiplied your series
+                count by 1 Million. This creates billions of unique combinations.
               </div>
             )}
           </div>

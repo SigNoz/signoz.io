@@ -2,7 +2,7 @@
 title: SigNoz - Open-Source Alternative to DataDog
 meta_title: "Open-Source Datadog Alternative: SigNoz (2026)"
 published_date: 2024-01-29
-updated_date: 2026-06-22
+updated_date: 2026-09-01
 tags: [SigNoz, Open Source]
 authors: [ankit_anand]
 description: Looking for an open-source alternative to Datadog? SigNoz is an OpenTelemetry-native platform for logs, metrics, and traces, with no vendor lock-in.
@@ -15,32 +15,32 @@ related_articles:
   - '/blog/open-source-newrelic-alternative'
   - '/blog/community-update-18'
 ---
-If you’re looking for an open-source alternative to Datadog, Self-Hosted SigNoz provides an OpenTelemetry-native option that you run on your own infrastructure.
+If you’re looking for the best open-source alternative to Datadog, Self-Hosted SigNoz provides an OpenTelemetry-native observability platform that you can run on your own infrastructure.
 
-One reason for building the SigNoz open-source project was the lack of a robust, one-stop observability solution that provided an experience similar to SaaS tools such as Datadog. We also wanted a tool built on OpenTelemetry, with no proprietary agents in your application code, so that you never get locked in with a vendor.
+One reason for building the SigNoz open-source project was the lack of a robust, one-stop observability solution that provided a polished experience similar to SaaS tools such as Datadog. We also wanted a tool built on OpenTelemetry, with no proprietary agents in your application code, so that you never get locked in with a vendor.
 
 ![Cover Image](/img/blog/2024/11/signoz-os-dd-alternative.webp)
 
 <InlineCTA message="Start with SigNoz Cloud in minutes. Simple usage-based pricing, no surprise bills. Migrate to self-hosted anytime — same open-source codebase." />
 
-SigNoz is built on top of [OpenTelemetry](https://signoz.io/opentelemetry/)(OTel) from day 1, and leverages OTel data to its full potential. We have helped many users migrate from Datadog to SigNoz using our [automated migration tool](https://signoz.io/datadog-migration-tool/), and there are numerous reasons that teams want to migrate away from Datadog, or look for a better alternative.
+SigNoz has been built on [OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) from day one and uses OTel data across the product, enabling deep correlation and a faster debugging experience. Teams moving from Datadog can use our [dashboard migration tool](https://signoz.io/datadog-migration-tool/) to translate exported dashboards, then migrate their telemetry and workflows in stages.
 
 ## The issues with Datadog and why SigNoz
 
-The first and the most common issue of users with Datadog is its billing practices. Before we talk about the main issues with Datadog and how SigNoz can be a better fit, you may want to read our [Datadog vs Prometheus](https://signoz.io/blog/datadog-vs-prometheus/) write-up that explores the open-source metrics angle in detail.
+For many teams, the first problem with Datadog is unpredictable billing. That problem becomes harder to escape when instrumentation depends on a proprietary agent and there is no self-hosted deployment option. Let’s look at these issues in detail.
 
 ### Complex and Unpredictable billing practices
 
 The core of the confusion with Datadog's pricing lies in its multi-dimensional, usage-based model. You're not just paying for one thing; you're charged across various products, each with its own pricing metric. This can lead to unpredictable bills that are difficult to forecast and control. 
 
-Lot of users that migrated from Datadog to SigNoz have received surprised bills that they were not expecting.
+Many users who migrated from Datadog to SigNoz came to us after receiving bills they did not expect.
 
 <Figure src="/img/blog/2025/06/datadog-pricing-datadog-pricing-reddit-rant-dark.webp" alt="Surprise bills are one of the common complaints againts Datadog (Source: Reddit)" caption="Surprise bills are one of the common complaints againts Datadog (Source: Reddit)" />
 
-Host-based pricing, special pricing for custom metrics, and paying twice for logs (ingestion and indexing) are some of the [common issues](https://signoz.io/blog/datadog-pricing/) with Datadog billing. SigNoz Cloud uses simple, usage-based pricing. Some highlights:
+Host-based pricing, special pricing for custom metrics, and paying twice for logs through ingestion and indexing are some of the [common issues with Datadog billing](https://signoz.io/blog/datadog-pricing/). With Self-Hosted SigNoz Community Edition, there is no SigNoz license fee, per-host fee, or per-user fee; you pay for and operate the infrastructure. If you want a managed experience, SigNoz Cloud uses simple, usage-based pricing. Some highlights:
 
-- **Simple usage-based pricing:** \$0.3 per Gb for ingested logs or traces, \$0.1 per million samples for metrics. Use our [cost estimator](https://signoz.io/pricing/#estimate-your-monthly-bill) to estimate your monthly bill.
-- **No special pricing for custom metrics:** Datadog charges a premium for "custom metrics," which are any metrics not from a standard integration. This includes virtually all metrics you'd create for your own application, and critically, **all metrics sent via the open-source standard OpenTelemetry (OTel)** are billed as custom. We charge all metrics the same, in fact, custom application metrics are essential to setting up robust observability and you should be able to send as many as you might need without thinking about the cost.
+- **Simple usage-based pricing:** \$0.30 per GB for ingested logs or traces, \$0.10 per million samples for metrics. Use our [cost estimator](https://signoz.io/pricing/#estimate-your-monthly-bill) to estimate your monthly bill.
+- **No special pricing for custom metrics:** Datadog can bill metrics outside its standard integrations as custom metrics, with allowances and overages based on the plan or contract. SigNoz Cloud prices all metric samples the same way, so you do not have to classify application metrics by integration type before estimating cost.
 - **No host-based, no user-based pricing:** Monitor as many hosts as you like and add unlimited team members based on your requirements. Both of these make sense for modern architecture and modern engineering teams.
 
 <InterlinkCard title="Check out SigNoz pricing details" href="/pricing/" />
@@ -59,28 +59,31 @@ SigNoz is OpenTelemetry-native, designed to leverage the full power of [OTel](ht
 - [External API Monitoring](https://signoz.io/docs/apm-and-distributed-tracing/application-details/): Gain visibility into the performance of third-party APIs your application depends on.
 - [Out-of-the-box Messaging Queue Monitoring](https://signoz.io/blog/opentelemetry-powered-kafka-celery-monitoring/): Effortlessly monitor popular queuing systems.
 
-### No flexible deployment options
+## Why SigNoz is a better open-source Datadog alternative than Grafana
 
-Datadog is a closed SaaS software where the only option is to send data to Datadog cloud services. We believe in today’s world of data privacy and strict data governance laws, you should have flexibility in deployment options.
+Grafana is the other open-source option many teams consider when moving from Datadog. It started as a data visualization tool, and it remains excellent at that job. If you just want to build dashboards from different data sources, Grafana may be a good fit. But a team replacing Datadog usually needs an opinionated observability product that helps it ingest, explore, correlate, and troubleshoot telemetry without assembling the experience itself. (If you want to explore the wider landscape, see our roundup of the best [open-source APM tools](https://signoz.io/blog/open-source-apm-tools/).)
 
-Based on your company stage and requirements, you can choose between the following deployment options for using [SigNoz](https://signoz.io/docs/introduction/):
+Grafana is being marketed as an all-in-one observability tool, but its open-source stack combines separate projects: Prometheus or Mimir for metrics, Loki for logs, Tempo for traces, and Grafana for visualization. Each signal keeps its own storage and query layer.
 
-- [SigNoz Cloud](https://signoz.io/docs/cloud/): A fully-managed, scalable solution for teams that want to focus on their core business without the overhead of managing an observability platform.
-- [Self-Hosted SigNoz Enterprise](https://signoz.io/enterprise/): For organizations with strict data residency or privacy requirements, this self-hosted enterprise edition supports bring-your-own-cloud or on-premise deployment, dedicated support, and advanced security features.
-- [Self-Hosted SigNoz Community Edition](https://signoz.io/docs/install/self-host/): A self-hosted, open-source version for teams with the capability to manage their own infrastructure.
+**SigNoz stores logs, metrics, and traces in a single columnar datastore and exposes them through one product.**
 
-## Why only SigNoz, and why not any other open source tool?
+This matters during an investigation. Engineers can use the same Query Builder experience across signals instead of moving between PromQL for metrics, LogQL for logs, and TraceQL for traces. A shared datastore also reduces the operational overhead of self-hosting multiple backends and makes cross-signal correlation and complex aggregations easier.
 
-You might ask - is SigNoz the only open-source tool that you can consider as an Datadog alternative? Short answer, yes. The only other viable option apart from SigNoz is Grafana. But Grafana comes with its own challenges. (If you want to explore the wider landscape, check out our roundup of the best [open source APM tools](https://signoz.io/blog/open-source-apm-tools/) available.)
+SigNoz also exposes OpenTelemetry context inside the product. Engineers can query resource and span attributes, inspect instrumentation scope, span events, span links, and trace identifiers, and use metric metadata without treating OTLP as only an ingestion format. Grafana Cloud accepts OTLP, but stores metrics in Mimir, its Prometheus-compatible database, and maps OTLP metric names and resource attributes to the Prometheus data model. This means teams still work with Prometheus naming and label conventions for those metrics.
 
-Grafana originated as an data visualization tool and it does an amazing job at it. If you want to build dashboards from different data sources then Grafana might be a better option. But since you’re looking for a [Datadog alternative](https://signoz.io/blog/datadog-alternatives/), I assume you need more out-of-the-box opinionated observability tool which helps you get started with ease and helps you troubleshoot common issues with out-of-the-box modules.
+SigNoz also provides first-class infrastructure monitoring for Kubernetes and Linux hosts, plus cloud-service monitoring for AWS, Azure, and GCP. Teams can investigate application and infrastructure signals together.
 
-And that’s where SigNoz shines over Grafana. Though Grafana is being marketed as an all-in-one observability tool now, you need to keep in mind that Grafana’s [observability stack](https://signoz.io/guides/observability-stack/) is stitched together with multiple tools. 
+### Deployment flexibility as your needs change
 
-**Under the hood, Grafana is powered by multiple tools like Loki, Tempo, Mimir & Prometheus. While SigNoz is powered by a single columnar to serve logs, metrics, and traces in a single pane.** 
+Datadog is a closed SaaS product, so the only deployment option is to send data to Datadog Cloud. SigNoz lets you start with open source and move to a managed deployment as your requirements change, without changing observability products. You can choose from five deployment models:
 
-If you’re planning to self-host to replace Datadog, Self-Hosted SigNoz has less operational overhead than a multi-component Grafana stack. Because it uses a single datastore, the developer experience of correlating logs, metrics, and traces and running complex aggregations is simpler.
+- [SigNoz Cloud](https://signoz.io/teams/): A fully managed service for teams that do not want to operate the observability platform.
+- [Dedicated Enterprise Cloud](https://signoz.io/enterprise/): A dedicated environment managed by SigNoz for organizations that need stronger isolation and enterprise support.
+- [Managed BYOC](https://signoz.io/enterprise/): SigNoz operates the platform in your cloud account, so the data stays in your cloud environment.
+- [Enterprise Self-Hosted](https://signoz.io/enterprise/): Your team operates SigNoz in its own infrastructure with enterprise features and support from SigNoz.
+- [Self-Hosted Community Edition](https://signoz.io/docs/install/self-host/): The open-source, MIT-licensed option for teams that want to operate SigNoz themselves.
 
+If a team later moves from self-hosted to managed observability, SigNoz Cloud keeps the same product experience and uses telemetry-volume pricing without extra per-host, per-user, or custom metric charges. Grafana Cloud has free allowances, but after those allowances, each signal uses a different pricing unit: metrics are billed by active series, while logs and traces are billed by data volume. Some services also add host or user charges. As telemetry grows, teams leaving Datadog for cost reasons can quickly outgrow those free allowances in Grafana Cloud. In those cases, SigNoz Cloud can be easier to forecast and more cost-effective. See our detailed [SigNoz, Datadog, New Relic, and Grafana pricing comparison](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/).
 
 <InterlinkCard title="In-depth SigNoz vs Grafana" href="/grafana-alternative/" />
 
@@ -146,9 +149,9 @@ While troubleshooting with logs, you can investigate the related infrastructure 
   caption="Check Pod and Node metrics while troubleshooting with logs"
 />
 
-### Quick filers & Advanced Query Builder for all telemetry signals
+### Quick filters and an advanced Query Builder for all telemetry signals
 
-For all telemetry signals, there are quick filters to quickly filter out the data needed. We have built customized query builders for each signal to make your troublshooting work easier.
+SigNoz provides quick filters and a consistent Query Builder experience for logs, metrics, and traces. You can filter by telemetry attributes, build aggregations, and move across signals without learning a separate query language for each backend.
 
 For example, query builder for traces allows you to create queries for finding the p99 latency of services.
 
@@ -234,15 +237,27 @@ Building with LLMs? SigNoz provides end-to-end observability for your LLM applic
   caption="Monitor token usage, cost, and latency for your LLM applications"
 />
 
+### Agent Native Observability
+
+SigNoz also brings production context into AI-assisted debugging through [Agent Native Observability](https://signoz.io/agent-native-observability/). The [SigNoz MCP server](https://signoz.io/docs/ai/signoz-mcp-server/) lets coding agents such as Claude Code, Cursor, Codex, and Gemini query traces, logs, metrics, service topology, and deployment history from the development environment. Because the coding agent already has the codebase in context, it can relate production telemetry to the code behind an issue.
+
+[Noz](https://signoz.io/docs/ai/noz/) is the AI teammate built into SigNoz Cloud. Engineers can ask questions about their telemetry in natural language, let Noz investigate across signals, and use it to create dashboards, alerts, and views inside SigNoz.
+
+<Figure
+  src="/img/agent-native-observability/mcp-and-noz.webp"
+  alt="SigNoz MCP Server in a coding agent next to the Noz AI assistant"
+  caption="Use the SigNoz MCP Server from a coding agent, or investigate telemetry with Noz in SigNoz Cloud"
+/>
+
 ## Getting started with SigNoz
 
-As discussed earlier, you can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features. 
+As discussed earlier, you can choose among five SigNoz deployment models. The fastest way to get started is [SigNoz Cloud](https://signoz.io/teams/). You can start with a free trial and test it with your own telemetry.
 
-Those who have data privacy concerns and can’t send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+Organizations that need stronger isolation or data control can choose Dedicated Enterprise Cloud, Managed BYOC, or [Enterprise Self-Hosted](https://signoz.io/contact-us/).
 
-Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+Teams that want to manage an open-source deployment themselves can use our [Self-Hosted Community Edition](https://signoz.io/docs/install/self-host/).
 
-Hope we answered all your questions regarding choosing SigNoz as the Datadog alternative. Making the switch is simple with our [automated migration tool](https://signoz.io/datadog-migration-tool/) that converts your Datadog dashboards in minutes. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
+If you are migrating from Datadog, our [dashboard migration tool](https://signoz.io/datadog-migration-tool/) translates exported dashboard JSON into SigNoz dashboard definitions. Review imported queries, units, variables, and thresholds, and plan telemetry pipelines, alerts, integrations, permissions, and historical data as separate migration work. If you have more questions, use the SigNoz AI chatbot or join our [Slack community](https://signoz.io/slack/).
 
 
 

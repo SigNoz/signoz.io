@@ -33,6 +33,7 @@ const SECTION_CONFIG: Record<string, BreadcrumbCrumb> = {
   comparisons: { name: 'Comparisons', url: `${BASE_URL}/comparisons/` },
   opentelemetry: { name: 'OpenTelemetry', url: `${BASE_URL}/opentelemetry/` },
   customers: { name: 'Customers', url: `${BASE_URL}/customers/` },
+  faqs: { name: 'FAQs', url: `${BASE_URL}/faqs/` },
 }
 
 const HOME_CRUMB: BreadcrumbCrumb = { name: 'SigNoz', url: `${BASE_URL}/` }
@@ -185,7 +186,7 @@ export async function generateDocsBreadcrumb(
 }
 
 export function getSectionArticleBreadcrumbs(
-  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry' | 'customers',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry' | 'customers' | 'faqs',
   title: string,
   slug: string
 ): BreadcrumbCrumb[] {
@@ -198,7 +199,7 @@ export function getSectionArticleBreadcrumbs(
 }
 
 export function generateSectionArticleBreadcrumb(
-  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry' | 'customers',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry' | 'customers' | 'faqs',
   title: string,
   slug: string
 ): BreadcrumbListSchema {
@@ -206,7 +207,7 @@ export function generateSectionArticleBreadcrumb(
 }
 
 export function generateSectionHubBreadcrumb(
-  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry' | 'customers',
+  section: 'blog' | 'guides' | 'comparisons' | 'opentelemetry' | 'customers' | 'faqs',
   page?: string
 ): BreadcrumbListSchema {
   const config = SECTION_CONFIG[section]

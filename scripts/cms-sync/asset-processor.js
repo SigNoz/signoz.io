@@ -21,32 +21,35 @@ function extractAssetPaths(content, frontmatter) {
   }
 
   const componentTags = ['img', 'video', 'source', 'Image', 'Figure', 'Table', 'NextImage']
+  const srcAttributes = ['src', 'lightSrc']
 
   componentTags.forEach((tagName) => {
-    const tagRegex = new RegExp(
-      `<${tagName}[^>]*?\\s+src\\s*=\\s*["']([^"']+)["'][^>]*?(?:/>|>[\\s\\S]*?</${tagName}>)`,
-      'gi'
-    )
+    srcAttributes.forEach((attrName) => {
+      const tagRegex = new RegExp(
+        `<${tagName}[^>]*?\\s+${attrName}\\s*=\\s*["']([^"']+)["'][^>]*?(?:/>|>[\\s\\S]*?</${tagName}>)`,
+        'gi'
+      )
 
-    let match
-    while ((match = tagRegex.exec(bodyForScan)) !== null) {
-      const srcValue = match[1]
-      if (srcValue && !srcValue.startsWith('http') && !srcValue.startsWith('https')) {
-        paths.add(srcValue)
+      let match
+      while ((match = tagRegex.exec(bodyForScan)) !== null) {
+        const srcValue = match[1]
+        if (srcValue && !srcValue.startsWith('http') && !srcValue.startsWith('https')) {
+          paths.add(srcValue)
+        }
       }
-    }
 
-    const tagRegexNoQuotes = new RegExp(
-      `<${tagName}[^>]*?\\s+src\\s*=\\s*([^\\s>"']+)[^>]*?(?:/>|>[\\s\\S]*?</${tagName}>)`,
-      'gi'
-    )
+      const tagRegexNoQuotes = new RegExp(
+        `<${tagName}[^>]*?\\s+${attrName}\\s*=\\s*([^\\s>"']+)[^>]*?(?:/>|>[\\s\\S]*?</${tagName}>)`,
+        'gi'
+      )
 
-    while ((match = tagRegexNoQuotes.exec(bodyForScan)) !== null) {
-      const srcValue = match[1]
-      if (srcValue && !srcValue.startsWith('http') && !srcValue.startsWith('https')) {
-        paths.add(srcValue)
+      while ((match = tagRegexNoQuotes.exec(bodyForScan)) !== null) {
+        const srcValue = match[1]
+        if (srcValue && !srcValue.startsWith('http') && !srcValue.startsWith('https')) {
+          paths.add(srcValue)
+        }
       }
-    }
+    })
   })
 
   function checkValue(value) {
@@ -79,13 +82,16 @@ function replaceAssetPaths(content, frontmatter, assets, cdnUrl) {
     const fullCdnUrl = `${cdnUrl}/${cleanPath}`
     const escapedAssetPath = assetPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-    const attrPattern = new RegExp(`(src\\s*=\\s*["'])${escapedAssetPath}(["'])`, 'g')
+    const attrPattern = new RegExp(`((?:src|lightSrc)\\s*=\\s*["'])${escapedAssetPath}(["'])`, 'g')
     newContent = newContent.replace(attrPattern, `$1${fullCdnUrl}$2`)
 
     const mdPattern = new RegExp(`(!\\[.*?\\]\\()${escapedAssetPath}(\\))`, 'g')
     newContent = newContent.replace(mdPattern, `$1${fullCdnUrl}$2`)
 
-    const noQuotesPattern = new RegExp(`(src\\s*=\\s*)${escapedAssetPath}([\\s>])`, 'g')
+    const noQuotesPattern = new RegExp(
+      `((?:src|lightSrc)\\s*=\\s*)${escapedAssetPath}([\\s>])`,
+      'g'
+    )
     newContent = newContent.replace(noQuotesPattern, `$1${fullCdnUrl}$2`)
 
     Object.keys(newFrontmatter).forEach((key) => {

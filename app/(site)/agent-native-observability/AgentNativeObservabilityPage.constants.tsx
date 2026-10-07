@@ -27,7 +27,7 @@ export const FEATURE_CARDS = [
         <p className="mt-3 italic text-signoz_vanilla-300">
           &ldquo;Create a latency dashboard for my payment service&rdquo; → Done. Fully interactive.
         </p>
-        <Button asChild variant="secondary" rounded="full" className="mt-4">
+        <Button asChild variant="secondary" className="mt-4">
           <TrackingLink
             href="/blog/introducing-agent-native-observability/"
             clickType="Secondary CTA"
@@ -81,7 +81,7 @@ export const FEATURE_CARDS = [
           Connect to Kubernetes, Git, and Jira through your cloud provider CLI in your dev
           environment. Create issues, diagnose root cause, and ship a fix without leaving your env.
         </p>
-        <Button asChild variant="secondary" rounded="full" className="mt-4">
+        <Button asChild variant="secondary" className="mt-4">
           <TrackingLink
             href="/docs/ai/signoz-mcp-server/"
             clickType="Secondary CTA"
@@ -109,7 +109,7 @@ export const FEATURE_CARDS = [
           Then add your team's judgment. Put your runbooks, service topology, and escalation paths
           in a skills.md, share it in a GitHub repo, and the agent debugs the way your team does.
         </p>
-        <Button asChild variant="secondary" rounded="full" className="mt-4">
+        <Button asChild variant="secondary" className="mt-4">
           <TrackingLink
             href="/docs/ai/agent-skills/"
             clickType="Secondary CTA"
@@ -165,7 +165,7 @@ export const FEATURE_CARDS = [
           limited reasoning. With SigNoz MCP and coding agents, you work inside your environment,
           not around it.
         </p>
-        <Button asChild variant="secondary" rounded="full" className="mt-4">
+        <Button asChild variant="secondary" className="mt-4">
           <TrackingLink
             href="https://youtube.com/playlist?list=PL0N8FjJpzGl-pTr0H7UrX6rdLGsiVPolw&si=SvFwmnw-pjmj5zKD"
             target="_blank"

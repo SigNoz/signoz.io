@@ -21,7 +21,7 @@ const THEME_DEFAULT = {
   serverColor: '#EF4444',
   collectorBorder: '#fb7185', // rose-400
   stageBorder: '#fb7185',
-  stageText: '#fecdd3', // rose-200
+  stageText: 'color-mix(in srgb, #fb7185 50%, var(--l1-foreground))',
   backendBg: '#F59E0B',
   backendText: 'Observability Backend',
   normalized: '#22D3EE',
@@ -31,7 +31,7 @@ const THEME_SIGNOZ = {
   serverColor: '#FF6A2B',
   collectorBorder: '#4F46E5',
   stageBorder: '#4F46E5',
-  stageText: '#E5E7EB',
+  stageText: 'var(--l2-foreground)',
   backendBg: '#4F46E5',
   backendText: 'SigNoz',
   normalized: '#4F46E5',
@@ -125,17 +125,20 @@ export default function OtelCollectorFlow() {
   const [sigNozMode, setSigNozMode] = useState(false)
   const theme = useMemo(() => (sigNozMode ? THEME_SIGNOZ : THEME_DEFAULT), [sigNozMode])
 
-  const makeParticle = useCallback((stream: number): Particle => {
-    return {
-      id: nextId++,
-      t: 0,
-      stream,
-      shape: randomShape(),
-      color: theme.serverColor,
-      // Normalized speed (1 == full path in 1s). We choose ~0.22
-      speed: 0.22 + Math.random() * 0.03,
-    }
-  }, [theme.serverColor])
+  const makeParticle = useCallback(
+    (stream: number): Particle => {
+      return {
+        id: nextId++,
+        t: 0,
+        stream,
+        shape: randomShape(),
+        color: theme.serverColor,
+        // Normalized speed (1 == full path in 1s). We choose ~0.22
+        speed: 0.22 + Math.random() * 0.03,
+      }
+    },
+    [theme.serverColor]
+  )
 
   // spawn new particles periodically while running
   useEffect(() => {
@@ -299,16 +302,16 @@ export default function OtelCollectorFlow() {
   return (
     <div ref={wrapRef} className="not-prose my-8 w-full">
       <div className="mb-3 flex items-center justify-end gap-3">
-        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-200">
+        <label className="flex items-center gap-2 text-sm text-[var(--l2-foreground)]">
           SigNoz Mode
-          <span className="relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full bg-gray-300 transition dark:bg-gray-700">
+          <span className="relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full bg-[var(--l3-border)] transition">
             <input
               type="checkbox"
               className="peer absolute h-6 w-11 cursor-pointer opacity-0"
               checked={sigNozMode}
               onChange={(e) => setSigNozMode(e.target.checked)}
             />
-            <span className="pointer-events-none ml-1 inline-block h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5 peer-checked:bg-emerald-400" />
+            <span className="pointer-events-none ml-1 inline-block h-4 w-4 rounded-full bg-[var(--base-white)] transition peer-checked:translate-x-5 peer-checked:bg-emerald-400" />
           </span>
         </label>
       </div>
@@ -316,7 +319,7 @@ export default function OtelCollectorFlow() {
       {/* Scaled wrapper to avoid horizontal scroll */}
       <div style={{ width: BASE_W * scale, height: BASE_H * scale }}>
         <div
-          className="relative rounded-xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-[#0b0d12]"
+          className="relative rounded-xl border border-[var(--l1-border)] bg-[var(--l1-background)] p-8 shadow-sm dark:border-gray-800 dark:bg-[#0b0d12]"
           style={{
             width: layout.width,
             height: layout.height,

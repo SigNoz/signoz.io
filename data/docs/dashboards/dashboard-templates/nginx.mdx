@@ -1,23 +1,23 @@
 ---
-date: 2026-07-31
-
+date: 2026-10-07
 title: NGINX Dashboard
-description: Monitor comprehensive NGINX web server performance including request handling, connection management, and server states using OpenTelemetry metrics for optimal web server monitoring.
+description: Chart NGINX request and connection metrics from the OpenTelemetry Collector nginx receiver, with panels for request volume and connection states.
 doc_type: explanation
 ---
 
-This dashboard provides comprehensive monitoring of NGINX web server performance and connection management using OpenTelemetry metrics, offering detailed visibility into request processing, connection handling, and server state analysis for optimal NGINX performance monitoring.
+This dashboard charts the NGINX metrics that the OpenTelemetry Collector's `nginx` receiver scrapes from the `stub_status` page: request volume, accepted and handled connections, and current connections by state.
 
 <Admonition type="info">
-To use this dashboard, you need to set up the data source and send telemetry to SigNoz. Follow the [NGINX Metrics](https://signoz.io/docs/metrics-management/nginx-metrics/) guide to get started.
+To populate this dashboard, send NGINX metrics to SigNoz first. Follow the [NGINX metrics](https://signoz.io/docs/metrics-management/nginx-metrics/) guide.
 </Admonition>
 
 ## Dashboard Preview
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/dashboards/dashboard-templates/nginx.webp" alt="NGINX Dashboard"/>
-    <figcaption><i>NGINX Dashboard</i></figcaption>
-</figure>
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/nginx.webp"
+  alt="NGINX Dashboard"
+  caption="NGINX Dashboard"
+/>
 
 <DashboardActions
   dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/nginx/nginx.json"
@@ -27,42 +27,41 @@ To use this dashboard, you need to set up the data source and send telemetry to 
 
 ## What This Dashboard Monitors
 
-This dashboard tracks essential NGINX metrics using OpenTelemetry to help you:
+- **Request volume**: How many requests NGINX serves over the selected time range.
+- **Connection handling**: Whether NGINX handles every connection it accepts. A gap between accepted and handled connections points to a resource limit such as `worker_connections`.
+- **Connection states**: How many connections are active, reading, writing, or waiting (idle keep-alive).
 
-- **Monitor Request Processing**: Track incoming requests and request handling patterns
-- **Analyze Connection Management**: Monitor connection acceptance, handling, and current states
-- **Track Server Performance**: Monitor active connections and connection states
-- **Connection State Analysis**: Monitor writing, waiting, reading, and active connection states
-- **Performance Optimization**: Identify bottlenecks and optimize server configuration
-- **Server Health**: Monitor overall NGINX server health and throughput
+Use the `host.name` and `service.name` variables at the top of the dashboard to filter by NGINX host or service.
 
 ## Metrics Included
 
-### Overview Metrics (Value Panels)
-- **New requests**: Shows current count of new requests processed
-- **Accepted connections**: Shows current count of accepted connections
-- **Handled connections**: Shows current count of handled connections
-- **Active**: Shows current count of active connections
-- **Writing**: Shows current count of connections in writing state
-- **Waiting**: Shows current count of connections in waiting state
+### Value panels
 
-### Trend Analysis (Graphs)
-- **Current conns**: Shows current connections over time grouped by connection state (writing, active, reading, waiting)
-- **Requests**: Shows request count trends over time
-- **Accepted conns**: Shows accepted connections trends over time
-- **Handled conns**: Shows handled connections trends over time
+| Panel | Metric | Shows |
+| --- | --- | --- |
+| Total requests | `nginx.requests` | Requests served in the selected time range |
+| Accepted connections | `nginx.connections_accepted` | Connections accepted in the selected time range |
+| Handled connections | `nginx.connections_handled` | Connections handled in the selected time range |
+| Active | `nginx.connections_current` (`state = active`) | Latest count of active connections |
+| Writing | `nginx.connections_current` (`state = writing`) | Latest count of connections writing a response |
+| Waiting | `nginx.connections_current` (`state = waiting`) | Latest count of idle keep-alive connections |
 
-## OpenTelemetry Integration
+### Time series panels
 
-This dashboard uses OpenTelemetry metrics for NGINX monitoring, providing:
-
-- **Standardized metrics collection** using the OpenTelemetry NGINX receiver
-- **Consistent metric naming** following OpenTelemetry conventions
-- **Native integration** with OpenTelemetry-based observability stacks
-- **Scalable monitoring** across multiple NGINX instances
+| Panel | Metric | Shows |
+| --- | --- | --- |
+| Requests | `nginx.requests` | Requests per interval |
+| Accepted conns | `nginx.connections_accepted` | Accepted connections per interval |
+| Handled conns | `nginx.connections_handled` | Handled connections per interval |
+| Current conns | `nginx.connections_current` | Connections over time, one series per `state` |
 
 ## Related Dashboards
 
-- [Apache Web Server](/docs/dashboards/dashboard-templates/apache-web-server/)
-- [HAProxy Monitoring](/docs/dashboards/dashboard-templates/haproxy-monitoring/)
-- [Docker Container Metrics](/docs/dashboards/dashboard-templates/docker-container-metrics/)
+- [Apache Web Server](https://signoz.io/docs/dashboards/dashboard-templates/apache-web-server/)
+- [HAProxy Monitoring](https://signoz.io/docs/dashboards/dashboard-templates/haproxy-monitoring/)
+- [Docker Container Metrics](https://signoz.io/docs/dashboards/dashboard-templates/docker-container-metrics/)
+
+## Next Steps
+
+- [Trace NGINX requests](https://signoz.io/docs/instrumentation/opentelemetry-nginx/) for per-route latency and error rates
+- [Collect NGINX logs](https://signoz.io/docs/integrations/nginx/) for status codes and request paths

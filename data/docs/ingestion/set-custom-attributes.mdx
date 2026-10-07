@@ -1,0 +1,471 @@
+---
+date: 2026-09-13
+title: Set Custom Attributes in OpenTelemetry Traces, Logs, Metrics
+description: Learn how to add custom attributes and resource attributes to OpenTelemetry traces, logs, and metrics, so you can filter and group telemetry in SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+A single SigNoz workspace receives telemetry from many applications, teams, and environments. Custom attributes are the key-value pairs that tell that telemetry apart. Add an attribute such as `team.name` or `tenant.id`, and you can filter on it in the explorers, group charts by it, and use it as an alert condition.
+
+You can set an attribute in an environment variable, in your application code, or in the OpenTelemetry Collector. This guide covers all three, for traces, logs, and metrics.
+
+## Attributes and resource attributes
+
+OpenTelemetry has two kinds of attributes. Pick the kind you need before you write any configuration.
+
+| | Resource attribute | Attribute |
+| --- | --- | --- |
+| Describes | The process that produces the telemetry | One span, metric data point, or log record |
+| Value changes | Once per process, at startup | On every request or operation |
+| Applies to | Every span, metric, and log record from that process | Only the item you set it on |
+| Examples | `service.name`, `deployment.environment.name`, `host.name`, `team.name` | `http.request.method`, `db.query.text`, `tenant.id` |
+
+Use a resource attribute to answer "where did this come from". Use an attribute to answer "what happened in this operation".
+
+<Admonition type="info">
+Prefer the names in the <a href="https://opentelemetry.io/docs/specs/semconv/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry semantic conventions</a> when one exists. SigNoz builds service maps, APM charts, and infrastructure views from these standard names. Use your own names, such as `team.name` or `tenant.id`, only for concepts the conventions do not cover.
+</Admonition>
+
+## Prerequisites
+
+- An application that is instrumented with OpenTelemetry. See the [instrumentation guides](https://signoz.io/docs/instrumentation/overview/) for your language.
+- A SigNoz account, either [SigNoz Cloud](https://signoz.io/teams/) or a [self-hosted](https://signoz.io/docs/install/self-host/) deployment.
+- An OpenTelemetry Collector, if you plan to set attributes outside your application. See [Collector configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+## Choose where to set an attribute
+
+| Method | Use it when | Sets |
+| --- | --- | --- |
+| Environment variable | You want one value for the whole process and you do not want to change code | Resource attributes |
+| SDK code | The value comes from application configuration, or you use an attribute that changes per request | Resource attributes and attributes |
+| Collector | You cannot change the application, or you want one rule for many services | Resource attributes and attributes |
+
+Start with environment variables. They need no code change, and every OpenTelemetry SDK reads them.
+
+## Set resource attributes with environment variables
+
+Set these variables in the process that runs your application, then restart the application:
+
+```bash
+export OTEL_SERVICE_NAME="checkout"
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment.name=production,service.version=1.4.2,team.name=payments"
+```
+
+`OTEL_RESOURCE_ATTRIBUTES` takes comma-separated `key=value` pairs. Percent-encode any comma or equals sign inside a key or a value.
+
+`OTEL_SERVICE_NAME` sets the `service.name` resource attribute. If you set `service.name` in both variables, `OTEL_SERVICE_NAME` wins.
+
+<Admonition type="info" title="Use deployment.environment.name">
+OpenTelemetry deprecated `deployment.environment` and replaced it with `deployment.environment.name`. Use the new name in new configuration. See the <a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/deployment/" target="_blank" rel="noopener noreferrer nofollow">deployment attribute registry</a>.
+</Admonition>
+
+For the full list of variables that SigNoz supports, see [OpenTelemetry environment variables](https://signoz.io/docs/ingestion/opentelemetry-environment-variables/).
+
+## Set resource attributes in the SDK
+
+Set resource attributes in code when the value comes from application configuration. When the same key is also in `OTEL_RESOURCE_ATTRIBUTES`, the winner depends on the language. Each tab states the order.
+
+<Tabs entityName="language">
+<TabItem value="nodejs" label="Node.js" default>
+
+```javascript:instrumentation.js
+const { NodeSDK } = require('@opentelemetry/sdk-node')
+const { defaultResource, resourceFromAttributes } = require('@opentelemetry/resources')
+const {
+  ATTR_SERVICE_NAME,
+  ATTR_SERVICE_VERSION,
+} = require('@opentelemetry/semantic-conventions')
+
+const sdk = new NodeSDK({
+  resource: defaultResource().merge(
+    resourceFromAttributes({
+      [ATTR_SERVICE_NAME]: 'checkout',
+      [ATTR_SERVICE_VERSION]: '1.4.2',
+      'deployment.environment.name': 'production',
+      'team.name': 'payments',
+    })
+  ),
+})
+
+sdk.start()
+```
+
+`resourceFromAttributes` needs `@opentelemetry/resources` 2.0.0 or newer. On 1.x, the package exports a `Resource` class instead. The 1.x class and the `SemanticResourceAttributes` constants are both deprecated.
+
+`NodeSDK` replaces the default resource with the one you pass, so merge `defaultResource()` to keep `service.name` and the `telemetry.sdk.*` attributes.
+
+`NodeSDK` then merges the detected resources over your resource, and the default detectors read `OTEL_RESOURCE_ATTRIBUTES`. A key in that variable therefore overrides the same key in this code. Remove the key from the variable, or pass `resourceDetectors: []` to turn detection off.
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python:instrumentation.py
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry import trace
+
+resource = Resource.create({
+    "service.name": "checkout",
+    "service.version": "1.4.2",
+    "deployment.environment.name": "production",
+    "team.name": "payments",
+})
+
+trace.set_tracer_provider(TracerProvider(resource=resource))
+```
+
+Pass the same `resource` object to `LoggerProvider` and `MeterProvider`, so that logs and metrics carry the same attributes.
+
+`Resource.create` reads `OTEL_RESOURCE_ATTRIBUTES` first and applies the attributes you pass second, so the values here override the environment variable.
+
+The `ResourceAttributes` class in `opentelemetry-semantic-conventions` is deprecated since package version 1.25.0. Write the attribute names as plain strings, as shown above.
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+```java:OpenTelemetryConfig.java
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.ServiceAttributes;
+
+Resource resource = Resource.getDefault().toBuilder()
+    .put(ServiceAttributes.SERVICE_NAME, "checkout")
+    .put(ServiceAttributes.SERVICE_VERSION, "1.4.2")
+    .put("deployment.environment.name", "production")
+    .put("team.name", "payments")
+    .build();
+```
+
+Pass `resource` to `SdkTracerProvider`, `SdkMeterProvider`, and `SdkLoggerProvider`.
+
+This resource does not read `OTEL_RESOURCE_ATTRIBUTES`. Only the autoconfigure module and the Java agent read that variable.
+
+If you run the [Java agent](https://signoz.io/docs/instrumentation/java/opentelemetry-java/), the agent builds the resource for you. Use `OTEL_RESOURCE_ATTRIBUTES` instead of this code.
+
+</TabItem>
+<TabItem value="golang" label="Go">
+
+```go:main.go
+import (
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
+)
+
+res, err := resource.Merge(
+	resource.Default(),
+	resource.NewSchemaless(
+		semconv.ServiceName("checkout"),
+		semconv.ServiceVersion("1.4.2"),
+		semconv.DeploymentEnvironmentNameKey.String("production"),
+		attribute.String("team.name", "payments"),
+	),
+)
+```
+
+Pass `res` to the tracer, meter, and logger providers with their `WithResource` option.
+
+The `semconv` import path must name a package that ships inside your `go.opentelemetry.io/otel` version. `semconv/v1.40.0` is present from v1.42.0 onward. Check the <a href="https://github.com/open-telemetry/opentelemetry-go/tree/main/semconv" target="_blank" rel="noopener noreferrer nofollow">semconv directory</a> at your version tag before you pick a newer path.
+
+`resource.NewSchemaless` keeps the schema URL of `resource.Default()`. If you use `resource.NewWithAttributes` with a schema URL that does not match, `resource.Merge` returns `ErrSchemaURLConflict` and drops the schema URL. Handle the error in both cases.
+
+`resource.Default()` reads `OTEL_RESOURCE_ATTRIBUTES`, and `resource.Merge` gives the second resource priority. The values here therefore override the environment variable.
+
+</TabItem>
+<TabItem value="dotnet" label=".NET">
+
+```csharp:Program.cs
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName: "checkout", serviceVersion: "1.4.2")
+        .AddAttributes(new Dictionary<string, object>
+        {
+            ["deployment.environment.name"] = "production",
+            ["team.name"] = "payments",
+        }))
+    .WithTracing(tracing => tracing.AddOtlpExporter())
+    .WithMetrics(metrics => metrics.AddOtlpExporter());
+```
+
+`ConfigureResource` applies the resource to every signal that you register on the builder. The values here override the same key in `OTEL_RESOURCE_ATTRIBUTES`.
+
+</TabItem>
+</Tabs>
+
+## Add attributes to a single span, metric, or log record
+
+Use an attribute when the value changes per request, for example a tenant ID or a customer plan.
+
+### Span attributes
+
+Add the attribute to the span that the instrumentation already started:
+
+<Tabs entityName="language">
+<TabItem value="nodejs" label="Node.js" default>
+
+```javascript
+const { trace } = require('@opentelemetry/api')
+
+trace.getActiveSpan()?.setAttribute('tenant.id', tenantId)
+```
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python
+from opentelemetry import trace
+
+trace.get_current_span().set_attribute("tenant.id", tenant_id)
+```
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+```java
+import io.opentelemetry.api.trace.Span;
+
+Span.current().setAttribute("tenant.id", tenantId);
+```
+
+</TabItem>
+<TabItem value="golang" label="Go">
+
+```go
+import (
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
+)
+
+trace.SpanFromContext(ctx).SetAttributes(attribute.String("tenant.id", tenantID))
+```
+
+</TabItem>
+<TabItem value="dotnet" label=".NET">
+
+```csharp
+using System.Diagnostics;
+
+Activity.Current?.SetTag("tenant.id", tenantId);
+```
+
+</TabItem>
+</Tabs>
+
+### Metric attributes
+
+Pass the attributes when you record a measurement:
+
+<Tabs entityName="language">
+<TabItem value="nodejs" label="Node.js" default>
+
+```javascript
+orderCounter.add(1, { 'tenant.id': tenantId, 'order.type': orderType })
+```
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python
+order_counter.add(1, {"tenant.id": tenant_id, "order.type": order_type})
+```
+
+</TabItem>
+<TabItem value="java" label="Java">
+
+```java
+import io.opentelemetry.api.common.Attributes;
+
+orderCounter.add(1, Attributes.builder()
+    .put("tenant.id", tenantId)
+    .put("order.type", orderType)
+    .build());
+```
+
+</TabItem>
+<TabItem value="golang" label="Go">
+
+```go
+import (
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
+)
+
+orderCounter.Add(ctx, 1, metric.WithAttributes(
+	attribute.String("tenant.id", tenantID),
+	attribute.String("order.type", orderType),
+))
+```
+
+</TabItem>
+<TabItem value="dotnet" label=".NET">
+
+```csharp
+orderCounter.Add(1,
+    new KeyValuePair<string, object?>("tenant.id", tenantId),
+    new KeyValuePair<string, object?>("order.type", orderType));
+```
+
+</TabItem>
+</Tabs>
+
+<Admonition type="warning" title="Watch cardinality on metrics">
+Every unique combination of metric attributes creates a new time series. An attribute such as `user.id` or `request.id` creates one series per value, which raises cost and slows queries. Keep high-cardinality values on spans and logs. See [Attribute ingestion volume](https://signoz.io/docs/cost-control/attribute-ingestion-volume/).
+</Admonition>
+
+### Log record attributes
+
+OpenTelemetry log SDKs bridge the logging library that your application already uses, so log record attributes come from the fields that you already log:
+
+- Python: pass `extra={"tenant.id": tenant_id}` to the log call. The OpenTelemetry `LoggingHandler` copies every non-reserved field on the log record into attributes.
+- Java: put the value in the MDC, then capture it with `OTEL_INSTRUMENTATION_<FRAMEWORK>_APPENDER_EXPERIMENTAL_CAPTURE_MDC_ATTRIBUTES`. See [Java logs](https://signoz.io/docs/logs-management/send-logs/java-logs/).
+- Go: pass the key-value pairs to the `slog` call. The <a href="https://pkg.go.dev/go.opentelemetry.io/contrib/bridges/otelslog" target="_blank" rel="noopener noreferrer nofollow">otelslog</a> bridge copies them into log record attributes.
+
+For logs, resource attributes carry most of the filtering value. See [Guide to add Resource Attributes](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/) for the Collector and Kubernetes options.
+
+## Set attributes in the OpenTelemetry Collector
+
+Use the Collector when you cannot change the application, or when one rule applies to many services. Add the snippets below to your existing `otel-collector-config.yaml`. Do not replace the whole file.
+
+### Add resource attributes
+
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourceprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">resource processor</a> changes resource attributes:
+
+```yaml:otel-collector-config.yaml
+processors:
+  resource/ownership:
+    attributes:
+      - key: team.name
+        value: payments
+        action: upsert
+      - key: deployment.environment.name
+        value: production
+        action: insert
+```
+
+Then add `resource/ownership` to the `processors` list of each pipeline that needs it. Edit the list your file already has. Do not replace it, because a pipeline often already runs `memory_limiter`, `resourcedetection`, or a filter, and removing any of those changes what the Collector sends.
+
+Order inside the list matters. Keep `memory_limiter` first. Add `resource/ownership` after it. If the pipeline ends with `batch`, keep `batch` last.
+
+The example below shows a pipeline that already had three processors. Your list will differ:
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    traces:
+      processors: [memory_limiter, resourcedetection, resource/ownership, batch]
+```
+
+Repeat the edit for the `metrics` and `logs` pipelines. Leave the `receivers` and `exporters` of each pipeline unchanged.
+
+### Change span, metric, and log attributes
+
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/attributesprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">attributes processor</a> changes the attributes on individual spans, data points, and log records:
+
+```yaml:otel-collector-config.yaml
+processors:
+  attributes/cleanup:
+    actions:
+      - key: url.full
+        action: delete
+      - key: enduser.id
+        action: hash
+```
+
+Add `attributes/cleanup` to your pipelines in the same way as the resource processor.
+
+### Actions that both processors support
+
+| Action | Result |
+| --- | --- |
+| `insert` | Adds the key only when it does not exist |
+| `update` | Changes the value only when the key exists |
+| `upsert` | Adds the key, or changes it when it exists |
+| `delete` | Removes the key |
+| `hash` | Replaces the value with a hash of the value |
+| `extract` | Splits a value into new keys with a regular expression |
+
+Use `upsert` when you want one value everywhere. Use `insert` when a value that the application already sends must win.
+
+### Detect host and cloud attributes automatically
+
+The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md" target="_blank" rel="noopener noreferrer nofollow">resource detection processor</a> reads attributes from the environment, such as the host name, the cloud provider, and the Kubernetes node:
+
+```yaml:otel-collector-config.yaml
+processors:
+  # On Collector v0.153.0 and newer, use "resource_detection" to avoid a deprecation warning.
+  resourcedetection:
+    detectors: [env, system]
+    system:
+      hostname_sources: ['os']
+    timeout: 5s
+```
+
+Add a detector only for the platform that you run on. Each detector costs a lookup at startup, and `timeout` limits how long the Collector waits for all of them.
+
+### Make complex changes with OTTL
+
+The resource and attributes processors handle fixed keys and values. For conditional logic, string functions, or changes that read one field to build another, use the transform processor. See [OTTL in SigNoz](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/ottl/).
+
+## Validate
+
+Send traffic through your application, then check each signal in SigNoz:
+
+1. Open **Traces Explorer**. Add a filter on your attribute, for example `team.name = payments`. The attribute also appears in the attributes table of a single span.
+2. Open **Logs Explorer**. Add the same filter. Resource attributes appear in the `resources` section of a log record.
+3. Open **Metrics Explorer**. Open a metric from your application and group by your attribute.
+
+If the attribute appears in the filter list, SigNoz received it and you can use it in dashboards and alerts.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### The attribute does not appear in SigNoz
+
+- Likely cause: The application did not restart after the configuration change.
+- Fix: Restart the application. An SDK reads `OTEL_RESOURCE_ATTRIBUTES` once, at startup.
+- Verify: Open **Traces Explorer** and search for the attribute key in the filter list.
+
+### The attribute appears on one signal only
+
+- Likely cause: The resource is attached to one provider, or the Collector processor is in one pipeline.
+- Fix: Pass the same resource object to the tracer, meter, and logger providers. In the Collector, add the processor to the `traces`, `metrics`, and `logs` pipelines.
+- Verify: Filter on the attribute in all three explorers.
+
+### The value in code is not the value in SigNoz
+
+- Likely cause: Another layer sets the same key later. The Collector runs after the SDK, and `upsert` in the resource processor overwrites what the application sent.
+- Fix: Change the action to `insert`, or remove the key from the Collector configuration.
+- Verify: Open one span in **Traces Explorer** and read the value in the attributes table.
+
+### The service name is unknown_service
+
+- Likely cause: Nothing set `service.name`.
+- Fix: Set `OTEL_SERVICE_NAME`, or set `service.name` in the SDK resource.
+- Verify: Open **Services** and find your service name in the list.
+
+### A metric has too many time series
+
+- Likely cause: A metric attribute carries a high-cardinality value, such as a user ID or a URL with an ID in the path.
+- Fix: Remove that attribute from the metric, or delete it with the attributes processor. Keep the value on the span instead.
+- Verify: Check the metric in [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) and read its cardinality.
+
+</details>
+
+## Next steps
+
+- [Filter and group by your attributes](https://signoz.io/docs/userguide/query-builder-v5/) in the query builder.
+- [Create an alert](https://signoz.io/docs/alerts/) that uses an attribute as a condition.
+- [Remove resource attributes](https://signoz.io/docs/logs-management/guides/remove-resource-attributes/) that you do not need.
+- [Scrub personally identifiable information](https://signoz.io/docs/traces-management/guides/pii-scrubbing/) from attributes before it leaves your network.
+
+## Get Help
+
+<GetHelp />

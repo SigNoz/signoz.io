@@ -23,17 +23,21 @@ export default function SamplingAggregation() {
   return (
     <div className="mx-auto my-16 w-full max-w-3xl">
       {/* Minimal Tab Switcher */}
-      <div className="mb-8 flex justify-center border-b border-zinc-700">
+      <div className="mb-8 flex justify-center border-b border-[var(--l2-border)]">
         {(['raw', 'aggregated', 'sampled'] as const).map((m) => (
           <button
             key={m}
             onClick={() => setMode(m)}
             className={`relative px-3 pb-4 text-sm font-medium transition-all sm:px-6 ${
-              mode === m ? 'text-zinc-100' : 'text-zinc-500 hover:text-zinc-300'
+              mode === m
+                ? 'text-[var(--l1-foreground)]'
+                : 'text-[var(--l3-foreground)] hover:text-[var(--l2-foreground)]'
             }`}
           >
             {m.charAt(0).toUpperCase() + m.slice(1)} Data
-            {mode === m && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-100" />}
+            {mode === m && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--l1-foreground)]" />
+            )}
           </button>
         ))}
       </div>
@@ -47,7 +51,7 @@ export default function SamplingAggregation() {
               aggregatedPoints.map((p, i) => (
                 <div
                   key={i}
-                  className={`absolute flex transform items-center justify-center rounded-full text-xs font-bold text-white opacity-90 shadow-lg transition-all duration-500 ${p.color}`}
+                  className={`absolute flex transform items-center justify-center rounded-full text-xs font-bold text-[var(--base-white)] opacity-90 shadow-lg transition-all duration-500 ${p.color}`}
                   style={{
                     left: `${p.x}%`,
                     top: `${p.y}%`,
@@ -80,7 +84,7 @@ export default function SamplingAggregation() {
 
       {/* Contextual Caption */}
       <div className="mt-4 h-12 text-center">
-        <p className="animate-fade-in key-mode italic text-zinc-400 transition-all">
+        <p className="animate-fade-in key-mode italic text-[var(--l2-foreground)] transition-all">
           {mode === 'raw' && '150 raw events. Perfect detail, maximum storage cost.'}
           {mode === 'aggregated' &&
             '3 summary metrics. Cardinality reduced to near zero. Great for dashboards.'}

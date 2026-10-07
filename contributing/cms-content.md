@@ -16,17 +16,21 @@ The following content directories are managed through a CMS and synced to the re
 | `/customers` | `data/case-study` |
 | `/opentelemetry` | `data/opentelemetry` |
 
-## Environment Setup
+## Environment Setup (Internal Team Only)
 
-To preview CMS content locally (including author details and related articles), set the CMS API URL in `.env.local`:
+This step is optional and only available to the internal SigNoz team. External contributors should skip it — the site builds and runs without it, and the [local content overlay](#local-content-overlay-dev-mode) below covers previewing your changes. To preview live CMS data locally (author details, related articles), internal team members set the CMS API URL in `.env.local`:
 
 ```env
-NEXT_PUBLIC_SIGNOZ_CMS_API_URL=<ask the internal team for access>
+NEXT_PUBLIC_SIGNOZ_CMS_API_URL=<internal — ask a SigNoz team member>
 ```
 
-Without this variable the site still builds and runs, but pages that depend on CMS data render with fallback values. For example, author names fall back to the raw key string (e.g. `ankit-nayan` instead of "Ankit Nayan" with no image and URL) and related-article links may be empty.
+Without this variable, pages that depend on CMS data render with fallback values:
 
-To get CMS API access, ask a SigNoz team member.
+- Author names fall back to the raw key string (e.g. `ankit-nayan` instead of "Ankit Nayan", with no image or link).
+- Related-article sections may be empty.
+- The changelog and page-feedback widget are unavailable.
+
+These fallbacks are expected in external contributions — do not try to fix them in a PR.
 
 ## Local Content Overlay (Dev Mode)
 
@@ -36,7 +40,12 @@ When running `yarn dev`, the site enables a **local content overlay**:
 2. You can create or edit `.mdx` files locally and see changes immediately, even without CMS access.
 3. If a local file exists for a given content path, it is used. Otherwise the CMS version is fetched (when the env var is configured).
 
-This lets you author and preview content locally, then sync to the CMS when ready.
+This lets you author and preview content locally. Publishing is automatic: when the PR is merged to `main`, the Sync Content to Strapi CMS workflow pushes the content to the CMS. Fork PRs never sync directly — see [Contributing From a Fork](../README.md#contributing-from-a-fork-external-contributors) and the [CI checks](repo-workflow.md#ci-checks) for the full decision table.
+
+Two gotchas:
+
+- The overlay only applies in `yarn dev`. Production builds with the CMS URL configured read from the CMS.
+- The docs sidebar has no overlay: when the CMS URL is set, edits to `data/docs-side-nav/main.json` do not show locally because the sidenav prefers CMS data. Unset the URL to preview sidenav changes.
 
 ### Frontmatter
 

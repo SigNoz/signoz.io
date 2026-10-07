@@ -15,11 +15,12 @@ const GetStartedOpenTelemetryButton: React.FC<GetStartedOpenTelemetryButtonProps
   children = 'Get Started with OpenTelemetry',
 }) => {
   return (
-    <Link href={href} className="no-underline hover:no-underline">
-      <Button variant="legacyPrimary" className={`flex items-center gap-2 ${className}`}>
-        {children} <ArrowRight size={14} />
-      </Button>
-    </Link>
+    <Button asChild variant="default" className={className}>
+      <Link href={href}>
+        {children}
+        <ArrowRight size={14} />
+      </Link>
+    </Button>
   )
 }
 

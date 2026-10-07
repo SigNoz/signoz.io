@@ -137,10 +137,10 @@ describe('data/case-study frontmatter', () => {
         'date must be a date'
       )
 
-      // The CMS sync hard-fails when a frontmatter asset is missing from data-assets/
+      // MDX frontmatter assets live in data-assets/ (CDN-synced); the CMS sync
+      // hard-fails when one is missing there.
       const dataAssetPath = path.join(ROOT, 'data-assets', data.logo)
       assert.ok(fs.existsSync(dataAssetPath), `logo "${data.logo}" not found under data-assets/`)
-      assertSiteAssetExistsInPublic(data.logo, `${file} logo`)
     })
   }
 })

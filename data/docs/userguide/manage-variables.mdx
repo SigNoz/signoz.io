@@ -1,5 +1,5 @@
 ---
-date: 2026-07-30
+date: 2026-10-07
 title: Manage Variables in SigNoz
 description: Learn how to create and use dashboard variables in SigNoz to build dynamic, reusable dashboards across services and infrastructure.
 doc_type: howto
@@ -82,16 +82,30 @@ Dynamic variables automatically retrieve attribute values without requiring manu
 
 #### Dynamic variable dropdowns display values in two sections:
 
-1. **Related values**: Filtered based on other variables' current selections
-2. **All values**: Complete list regardless of other filters
+1. **Related Values**: Filtered based on other variables' current selections
+2. **All Values**: Complete list regardless of other filters
 
-The 'Related values' section shows only attribute values that exist within your current context. For example, with variables `service.name` and `name` (span name): when you select `service.name = adservice`, the `name` dropdown shows:
-- **Related values**: Only spans found in the adservice
-- **All values**: Spans from all services
+The **Related Values** section shows only attribute values that exist within your current context. For example, with a `service` variable on `service.name` and a `route` variable on `http.route`: when you select the checkout service, the `route` dropdown shows:
+- **Related Values**: Only routes that the checkout service serves
+- **All Values**: Routes from all services
 
-This helps you quickly focus on relevant data within your selected context.
+The two sections appear only when another dynamic variable has a selection and SigNoz finds related values. Otherwise, the dropdown shows one list without section headings.
 
-    ![Related values for service](/img/docs/dashboards/variables/service-related-values.png)
+<Figure
+  src="/img/docs/dashboards/variables/dynamic-variable-related-values.webp"
+  alt="Route variable dropdown with the checkout service selected, showing three routes under Related Values and all seven routes under All Values"
+  caption="Related Values for the route variable after you select a service."
+/>
+
+#### Search a large value list
+
+If an attribute has more values than SigNoz returns in one response, the dropdown shows only the first batch. At the bottom of the list, it shows **Don't see the value? Use search**.
+
+To find a value outside the first batch, type in the search box of the dropdown. SigNoz sends the search to the API and shows the matching values, including values that were not in the first batch. If the list is complete, the search box filters the values that are already loaded.
+
+<Admonition type="info">
+If the values request fails with a client error (HTTP 4xx), the dropdown shows the error without a retry icon, because the same request fails again. Fix the field or source of the variable. For a server error (HTTP 5xx), the dropdown shows a retry icon.
+</Admonition>
 
 #### Note about **ALL**
 

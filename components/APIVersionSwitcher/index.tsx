@@ -16,7 +16,7 @@ interface APIVersionSwitcherProps {
   availableVersions: string[]
 }
 
-// Coupled to Stoplight Elements' internal DOM structure (tested with @stoplight/elements ^8.5.0).
+// Coupled to Stoplight Elements' internal DOM structure (tested with @stoplight/elements ^9.0.11).
 // Locates the sidebar header row by navigating from the "powered by Stoplight" link upward.
 // If Stoplight updates their DOM layout, this selector may need adjustment.
 function findSidebarHeaderRow(apiRoot: HTMLElement): {
@@ -49,19 +49,14 @@ export default function APIVersionSwitcher({
   const router = useRouter()
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null)
 
-  const findAndAttach = useCallback(() => {
+  const attachPortalContainer = useCallback((): HTMLElement | null => {
     const apiRoot = document.querySelector<HTMLElement>('.sl-elements-api')
-    if (!apiRoot) return false
+    if (!apiRoot) return null
 
     // Desktop / drawer sidebar: header row next to API title (SigNoz)
     const desktop = findSidebarHeaderRow(apiRoot)
     if (desktop) {
       const { headerRow, heading } = desktop
-      const existing = headerRow.querySelector('.api-version-portal')
-      if (existing) {
-        setPortalContainer(existing as HTMLElement)
-        return true
-      }
 
       headerRow.style.display = 'flex'
       headerRow.style.alignItems = 'center'
@@ -78,18 +73,12 @@ export default function APIVersionSwitcher({
       wrapper.className = 'api-version-portal'
       wrapper.style.flexShrink = '0'
       heading.insertAdjacentElement('afterend', wrapper)
-      setPortalContainer(wrapper)
-      return true
+      return wrapper
     }
 
     // Responsive top bar: title centered — place version after title
     const mobileNav = findMobileNavHost()
     if (mobileNav) {
-      const existing = mobileNav.querySelector('.api-version-portal')
-      if (existing) {
-        setPortalContainer(existing as HTMLElement)
-        return true
-      }
       mobileNav.style.display = 'flex'
       mobileNav.style.alignItems = 'center'
       mobileNav.style.justifyContent = 'center'
@@ -100,27 +89,42 @@ export default function APIVersionSwitcher({
       wrapper.className = 'api-version-portal'
       wrapper.style.flexShrink = '0'
       mobileNav.appendChild(wrapper)
-      setPortalContainer(wrapper)
-      return true
+      return wrapper
     }
 
-    return false
+    return null
   }, [])
 
   useEffect(() => {
-    setPortalContainer(null)
-    document.querySelectorAll('.api-version-portal').forEach((el) => el.remove())
+    let frame = 0
+    let container: HTMLElement | null = null
 
-    if (findAndAttach()) return undefined
+    const ensureAttached = () => {
+      frame = 0
+      if (container?.isConnected) return
 
-    let attempts = 0
-    const MAX_ATTEMPTS = 50 // ~10 seconds
-    const interval = setInterval(() => {
-      if (findAndAttach() || ++attempts >= MAX_ATTEMPTS) clearInterval(interval)
-    }, 200)
+      // Switching versions makes Stoplight rebuild the sidebar, discarding the injected node.
+      // A one-shot attach lands on the outgoing DOM and disappears with it.
+      document.querySelectorAll('.api-version-portal').forEach((el) => el.remove())
+      container = attachPortalContainer()
+      setPortalContainer(container)
+    }
 
-    return () => clearInterval(interval)
-  }, [findAndAttach, currentVersion])
+    const observer = new MutationObserver(() => {
+      if (frame) return
+      frame = requestAnimationFrame(ensureAttached)
+    })
+
+    ensureAttached()
+    observer.observe(document.body, { childList: true, subtree: true })
+
+    return () => {
+      observer.disconnect()
+      if (frame) cancelAnimationFrame(frame)
+      document.querySelectorAll('.api-version-portal').forEach((el) => el.remove())
+      setPortalContainer(null)
+    }
+  }, [attachPortalContainer])
 
   const selectUI = (
     <Select
@@ -133,7 +137,7 @@ export default function APIVersionSwitcher({
         <SelectValue placeholder="Version" />
       </SelectTrigger>
       <SelectContent
-        className="border border-primary-600 bg-signoz_slate-400 text-white"
+        className="border border-[var(--l3-border)] bg-[var(--l3-background)] text-[var(--l1-foreground)]"
         position="popper"
         align="start"
         side="bottom"
@@ -143,7 +147,7 @@ export default function APIVersionSwitcher({
           <SelectItem
             key={v}
             value={v}
-            className="text-xs transition-colors duration-200 hover:bg-signoz_slate-500 focus:bg-signoz_slate-500"
+            className="text-xs transition-colors duration-200 hover:bg-[var(--l3-background-hover)] focus:bg-[var(--l3-background-hover)]"
           >
             {v}
           </SelectItem>

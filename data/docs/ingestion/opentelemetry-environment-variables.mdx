@@ -1,5 +1,5 @@
 ---
-date: 2026-08-25
+date: 2026-09-13
 title: "OpenTelemetry Environment Variables: Configure SDKs"
 description: Learn how common OpenTelemetry environment variables configure service identity, OTLP endpoints, headers, protocols, batching, and sampling for SigNoz.
 doc_type: reference
@@ -35,7 +35,7 @@ export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 After you set the variables, restart your application. SigNoz Cloud accepts OTLP/HTTP and OTLP/gRPC on port 443.
 
 <Admonition type="info">
-Self-hosted SigNoz does not require an ingestion key by default. Use your collector address and follow the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
+Self-Hosted SigNoz does not require an ingestion key by default. Use your collector address and follow the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
 </Admonition>
 
 ## Validate the configuration
@@ -76,6 +76,8 @@ export OTEL_RESOURCE_ATTRIBUTES="deployment.environment.name=production,service.
 The value contains comma-separated `key=value` pairs. Percent-encode commas and equals signs that occur inside a key or value.
 
 `OTEL_SERVICE_NAME` takes precedence over `service.name` in `OTEL_RESOURCE_ATTRIBUTES`.
+
+To set the same attributes in code or in the OpenTelemetry Collector instead, see [Set Custom Attributes in OpenTelemetry Traces, Logs, Metrics](https://signoz.io/docs/ingestion/set-custom-attributes/).
 
 <Admonition type="info">
 Use `deployment.environment.name` for the deployment environment. OpenTelemetry deprecated `deployment.environment` in favor of this attribute. See the <a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/deployment/" target="_blank" rel="noopener noreferrer nofollow">deployment attribute registry</a>.
@@ -283,7 +285,7 @@ The SDK truncates long attribute values and drops items that exceed count limits
 | `OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT` | `128` |
 | `OTEL_LOGRECORD_ATTRIBUTE_VALUE_LENGTH_LIMIT` | No limit |
 
-SigNoz Cloud rejects export requests larger than 16 MB. Self-hosted SigNoz sets its payload limit in the collector configuration; see [payload size](https://signoz.io/docs/ingestion/self-hosted/overview/#payload-size). If an export request exceeds the limit, reduce the batch size or attribute value length.
+SigNoz Cloud rejects export requests larger than 16 MB. Self-Hosted SigNoz sets its payload limit in the collector configuration; see [payload size](https://signoz.io/docs/ingestion/self-hosted/overview/#payload-size). If an export request exceeds the limit, reduce the batch size or attribute value length.
 
 ## Configuration precedence
 
@@ -381,6 +383,7 @@ Use these official sources:
 ## Next Steps
 
 - [Instrument your application](https://signoz.io/docs/instrumentation/) to start sending traces, metrics, and logs.
+- [Set custom attributes](https://signoz.io/docs/ingestion/set-custom-attributes/) in code or in the Collector when an environment variable is not enough.
 - [Configure SigNoz Cloud ingestion](https://signoz.io/docs/ingestion/signoz-cloud/overview/) for region, endpoint, and authentication details.
 - [Configure self-hosted ingestion](https://signoz.io/docs/ingestion/self-hosted/overview/) for endpoint and port details on your deployment.
 - [Compare Cloud and self-hosted ingestion](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/) to adapt a guide written for one environment to the other.

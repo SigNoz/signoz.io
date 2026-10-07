@@ -27,27 +27,30 @@ related_articles:
 
 **TL;DR: When to Choose Each**
 
-- **Choose Datadog if:** You need a single, managed (SaaS) platform that just works. Your team values speed, minimal setup, and broad integrations, and you have the budget to pay for this convenience.
-- **Choose Grafana if:** You prioritize cost control, customization, and open standards. Your team has the SRE/DevOps expertise to build, manage, and scale its own observability backends (like Prometheus and Loki) and you want to avoid vendor lock-in.
+- **Choose Datadog if:** You need a single, managed (SaaS) platform. Your team values speed, minimal setup, and broad integrations, and you have the budget to pay for this convenience.
+- **Choose Grafana if:** You prioritize dashboard customization, open standards, and flexibility. Grafana Cloud provides a managed option, while a self-managed Grafana stack gives you more infrastructure control if your team has the SRE/DevOps expertise to run it.
 - **Consider SigNoz Cloud if:** You want the integrated experience of Datadog with OpenTelemetry-native instrumentation and predictable usage-based pricing, without managing the Grafana stack yourself.
 
 ---
 
 When engineering teams evaluate observability tools, the "Datadog vs. Grafana" debate is one of the most common. The choice is difficult because they represent two fundamentally different philosophies.
 
-**Datadog** is a comprehensive, all-in-one, managed SaaS platform. It offers a "buy" solution where you get a unified experience for metrics, logs, and traces out of the box. **Grafana** is an open-source, highly flexible visualization layer. It is a "build" solution that requires you to assemble and manage your own observability stack, typically using tools like Prometheus, Loki, and Tempo as backends.
+**Datadog** is a comprehensive, all-in-one, managed SaaS platform. It is a "buy" solution that gives you a unified experience for metrics, logs, and traces out of the box.
 
-This article provides a practical comparison to help you decide which is right for you. We will focus on the real-world implications of each tool, including setup, maintenance, dashboarding, and the total cost of ownership (TCO).
+In this comparison, **Grafana** refers mainly to the self-managed LGTM stack built with Loki, Grafana, Tempo, and Mimir. It is a "build" solution that requires you to assemble and operate your own observability stack. Grafana also offers Grafana Cloud, a managed option that we cover where it changes the comparison.
+
+This article provides a practical comparison to help you decide which is right for you. We will focus on setup, maintenance, OpenTelemetry and Prometheus support, querying and dashboarding, and the total cost of ownership (TCO).
 
 ## Datadog vs. Grafana: Quick Comparison
 
 | Aspect              | Datadog                                                                                           | Grafana                                                                                                   |
 | ------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **Core Function**   | All-in-one, managed SaaS platform for metrics, logs, traces, APM, and more.                       | Open-source visualization and dashboarding tool.                                                          |
+| **Core Function**   | All-in-one, managed SaaS platform for metrics, logs, traces, APM, and more.                       | Grafana OSS is a visualization and query layer. It can connect to your own data sources, run with the self-managed LGTM stack, or use Grafana Cloud's managed observability backends. |
 | **Deployment**      | SaaS (Cloud) only.                                                                                | Self-hosted (Open Source) or managed (Grafana Cloud).                                                     |
-| **Data Collection** | A single agent collects all telemetry data (metrics, logs, traces).                               | **Does not collect data.** Requires separate backends (e.g., Prometheus, Loki, Tempo) and agents.         |
-| **Setup Effort**    | **Low.** Install one agent and enable integrations. Pre-built dashboards work instantly.          | **High (for self-hosted).** Must install, configure, and scale Grafana _plus_ all data sources.           |
-| **Maintenance**     | **Minimal.** Datadog handles all scaling, updates, and availability. You manage agents and costs. | **High (for self-hosted).** Your team is responsible for the entire stack.                                |
+| **Data Collection** | The Datadog Agent collects host and integration telemetry. Application traces require language-specific instrumentation. | Grafana queries connected data sources. Grafana Alloy can collect and route telemetry to Grafana Cloud, LGTM backends, or external systems. |
+| **OpenTelemetry & Prometheus** | Supports OTLP ingestion and can scrape Prometheus or OpenMetrics endpoints through the Datadog Agent. | Grafana Alloy combines OpenTelemetry Collector components with Prometheus pipelines and can send data to Grafana Cloud or a self-managed stack. |
+| **Setup Effort**    | **Low.** Install the Agent, add application instrumentation where needed, and enable integrations. | **High for self-managed LGTM.** You operate Grafana and its data backends. **Lower with Grafana Cloud,** where Grafana manages the backends. |
+| **Maintenance**     | **Minimal.** Datadog handles backend scaling, updates, and availability. You manage agents and costs. | **High for self-managed LGTM.** Your team operates the stack. **Lower with Grafana Cloud,** which manages the backends. |
 | **Dashboarding**    | Good pre-built dashboards, easy to use. Less flexible and customizable.                           | Extremely powerful and customizable. Can query and mix multiple data sources on a single panel.           |
 | **Pricing Model**   | Per-host, per-GB ingested/indexed. Can become very expensive at scale.                            | **Self-hosted:** Free software (TCO is infra + engineering). **Grafana Cloud:** Per-user and usage-based. |
 | **Ideal Use Case**  | Teams wanting a unified, plug-and-play solution with low operational overhead.                    | Teams wanting deep customization, cost control, and full data ownership.                                  |
@@ -56,14 +59,11 @@ Let's go through each of these aspects in detail below.
 
 ## Core Function & Architecture: Platform vs. Visualizer
 
-The most important distinction to understand is that Datadog and Grafana are not direct 1:1 competitors.
-
-At a high level, the two sit at different layers: Datadog is a managed, all-in-one observability platform with its own backend, while Grafana is an open-source visualization layer you point at your own data sources (Prometheus, Loki, and others).<br />
-Also, Grafana's collection now runs through Grafana Alloy, an [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) distribution. So the trade is a managed platform versus a DIY, datasource-agnostic stack you assemble and run yourself.
+The core difference is how the stack is assembled. Datadog provides the backend, query engine, dashboards, and alerting in one managed product. With Grafana, you combine Grafana with separate telemetry backends and collectors to build the stack you need.
 
 ### Datadog: The All-in-One Platform
 
-Datadog is a fully managed, end-to-end observability platform. When you use Datadog, you install its agent on your hosts, and that single agent handles collecting metrics, traces, and logs. This data is sent to Datadog's cloud, where it is stored, indexed, and made available for analysis in a single, unified interface.
+Datadog is a fully managed, end-to-end observability platform. The Datadog Agent collects host and integration telemetry, while language-specific instrumentation supplies application traces and other application data. This data is sent to Datadog's cloud, where it is stored, indexed, and made available for analysis in a single, unified interface.
 
 Datadog _is_ the backend. It provides the data storage, the query engine, the visualization layer, and the alerting system all in one product.
 
@@ -79,13 +79,7 @@ When you use open-source Grafana, you only get the dashboarding and visualizatio
 
 This collection of tools is often called the "Grafana Stack" or as **LGTM** (Loki, Grafana, Tempo, Mimir). In this model, Grafana acts as the unified "pane of glass" that sits on top of these separate, specialized backend systems. You are responsible for setting up, managing, and scaling each of these components.
 
-<Figure
-  src="/img/blog/2025/10/datadog-vs-grafana-CleanShot_2025-10-28_at_16.56.212x.webp"
-  alt="Two approaches to observability. Left: the Grafana stack (Alloy collector sending telemetry to Mimir/Loki/Tempo; Grafana queries these backends). Right: Datadog’s managed platform (Datadog Agent ships telemetry to the Datadog SaaS, viewed in the Datadog UI)."
-  caption="Two approaches to observability. Left: the Grafana stack (Alloy collector sending telemetry to Mimir/Loki/Tempo; Grafana queries these backends). Right: Datadog’s managed platform (Datadog Agent ships telemetry to the Datadog SaaS, viewed in the Datadog UI)."
-/>
-
-Therefore, the real comparison is **Datadog vs. the Grafana Stack**.
+Therefore, the real comparison is **Datadog vs. the self-managed Grafana LGTM stack and Grafana Cloud**.
 
 ## Setup and Operational Effort: Managed vs. DIY Stack
 
@@ -109,9 +103,9 @@ Setting up Grafana itself is easy (it's a single binary or Docker container). Th
 
 This "do-it-yourself" (DIY) approach gives you full control, but it carries a significant cost in engineering time for setup and ongoing maintenance. You are responsible for the uptime, scaling, and data management of your entire monitoring infrastructure.
 
-**Note:** <a href="https://grafana.com/products/cloud/" rel="noopener noreferrer nofollow" target="_blank">Grafana Cloud</a> (the managed SaaS offering) simplifies this by providing a managed backend (Mimir, Loki, Tempo), making its operational model much closer to Datadog's.
+**Note:** <a href="https://grafana.com/products/cloud/" rel="noopener noreferrer nofollow" target="_blank">Grafana Cloud</a> provides managed Mimir, Loki, and Tempo backends. You still configure collection and dashboards, but Grafana handles backend scaling, maintenance, and updates, making its operational model closer to Datadog's.
 
-## Dashboarding and Visualization
+## Querying and Dashboarding Experience
 
 This is Grafana's home turf. As one reddit member put it, "Grafana was built for dashboarding; Datadog only uses dashboards as a tool." (source: <a href="https://www.reddit.com/r/sre/comments/1iog3z7/comment/mcj7wbe/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button" rel="noopener noreferrer nofollow" target="_blank">reddit</a>)
 
@@ -121,12 +115,12 @@ This is Grafana's home turf. As one reddit member put it, "Grafana was built for
   caption="Grafana emphasizes flexible, highly customized dashboards (left), while Datadog emphasizes speed via a large integrations catalog with out-of-the-box dashboards (right)."
 />
 
-### Grafana: Unmatched Flexibility and Power
+### Grafana: Flexible, Multi-Source Dashboards
 
 Grafana is widely considered the industry leader for visualization. Its key strengths are:
 
-- **Customization:** You have precise, "absolute" control over every panel, graph, and dashboard.
-- **Multiple Data Sources:** Grafana's killer feature is its ability to combine data from _different_ sources onto a _single_ dashboard. You can have a graph from Prometheus, a log panel from Loki, and a table from a PostgreSQL database all side-by-side.
+- **Customization:** You have detailed control over panels, visualizations, and dashboard layouts.
+- **Multiple Data Sources:** Grafana can combine different data sources on a single dashboard. You can have a graph from Prometheus, a log panel from Loki, and a table from a PostgreSQL database side-by-side.
 - **Rich Plugin Ecosystem:** A large community provides plugins for different data sources and panel types.
 - **Community Dashboards:** There is a vast library of pre-built dashboards for common tools (like Node Exporter) that you can import and adapt.
 
@@ -136,7 +130,7 @@ The trade-off is a steeper learning curve. To build powerful dashboards, you mus
 
 Datadog's dashboarding is built for fast time-to-value and ease of use. Its strengths are:
 
-- **Pre-Built Dashboards:** With 1000+ integrations ("as of Oct 2025")., Datadog provides out-of-the-box dashboards that work instantly when you enable an integration.
+- **Pre-Built Dashboards:** Datadog provides out-of-the-box dashboards that reduce the setup work when you enable an integration.
 - **Ease of Use:** A drag-and-drop interface and point-and-click queries make it easy for anyone on the team to build useful visuals without learning a query language.
 - **Unified Data:** Because all data (metrics, traces, logs) is already in one platform, Datadog excels at seamlessly correlating between them. You can click a spike on a graph and jump directly to the relevant logs or traces from that time.
 
@@ -166,11 +160,13 @@ Grafana's cost model is more flexible:
 
 **Open Source (Self-Hosted):** The software is free. Your cost is the **Total Cost of Ownership (TCO)**, which includes the engineering salaries for maintenance and the server/storage costs for your backends (Prometheus, Loki, etc.). This can be very cost-effective at scale _if_ you have the in-house expertise.
 
-**Grafana Cloud:** This is the managed SaaS option. It has a generous free tier and paid plans based on data volume and users. This is a direct competitor to Datadog and is often more cost-predictable, as its pricing is simpler.
+**Grafana Cloud:** This is the managed SaaS option. It has a free tier and paid plans based on data volume and users. The final cost depends on telemetry volume, active users, retention, and the products you enable.
 
 **Grafana Enterprise:** A self-hosted version with premium features and support, sold as a subscription.
 
 Generally, a self-hosted Grafana stack is cheaper in direct licensing costs than Datadog, but the TCO in engineering time must not be ignored.
+
+Any direct cost comparison should use the same telemetry volume, users, retention period, and feature set. Our [pricing comparison of SigNoz Cloud, Datadog, New Relic, and Grafana Cloud](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/) shows how costs change for a defined workload.
 
 ## Scenarios: When to Choose Datadog vs. Grafana
 
@@ -183,34 +179,40 @@ Here are some practical scenarios to help you decide.
 - You have a predictable budget and are willing to pay a premium for a fully managed, "it-just-works" solution.
 - You value deep integrations with pre-built dashboards that work out of the box.
 
-**Choose Grafana if...**
+**Choose Grafana Cloud if...**
+
+- You want a managed service with strong dashboard customization.
+- You already use Prometheus or OpenTelemetry and do not want to operate the storage backends.
+- You need to visualize data from several different sources.
+
+**Choose a self-managed Grafana stack if...**
 
 - You are building a monitoring stack based on open-source tools like Prometheus and Loki.
-- You need to visualize data from many different, disparate sources (e.g., business data from a SQL database alongside system metrics from Prometheus).
+- You need to visualize data from different sources (e.g., business data from a SQL database alongside system metrics from Prometheus).
 - You have strict data-residency requirements that require a self-hosted solution.
 - You have in-house DevOps/SRE expertise to manage and scale a distributed monitoring stack.
 - You prioritize dashboard customization and cost control (via self-hosting) over convenience.
 
 ## The Third Option: A Unified, Open-Source Platform
 
-The choice between Datadog (expensive, proprietary) and the Grafana stack (complex, disjointed) is a common pain point. This is why we built **SigNoz**.
+The choice between Datadog (expensive, proprietary) and the Grafana stack (complex, disjointed) is a common pain point. This is why we built **SigNoz Cloud**.
 
-**SigNoz** is a full-stack, open-source observability platform that provides logs, metrics, and traces in a **single application**.
+**SigNoz Cloud** brings your traces, metrics, and logs into one OpenTelemetry-native platform with simple usage-based pricing, and the freedom to run on your infrastructure with Self-Hosted SigNoz.
 
-It is built to be a **true alternative to Datadog**, offering a unified user experience, while being open-source and built on open standards like OpenTelemetry.
+SigNoz Cloud is built to be a **true alternative to Datadog**, offering a unified user experience while being built on open standards like OpenTelemetry.
 
-Here’s how SigNoz compares:
+Here’s how SigNoz Cloud compares:
 
 - [**vs. Datadog:**](https://signoz.io/datadog-alternative/) SigNoz Cloud is a managed, **OpenTelemetry-native** platform that works with open standards without proprietary agents and uses a predictable, usage-based pricing model. Self-Hosted SigNoz provides the self-managed option for full data control.
-- [**vs. Grafana:**](https://signoz.io/grafana-alternative/) SigNoz is a **single, integrated application**. You don't need to assemble and maintain separate tools for metrics, logs, and traces. It uses a powerful columnar database (advanced columnar storage) for fast querying and aggregation, making it much easier to self-host and manage than the complex "Prometheus + Loki + Tempo + Grafana" stack.
+- [**vs. Grafana:**](https://signoz.io/grafana-alternative/) SigNoz Cloud provides one Query Builder for logs, metrics, and traces, preserves rich OpenTelemetry context, and lets you move between signals during an investigation. Grafana remains stronger for highly customized dashboards that combine many data sources. Self-Hosted SigNoz provides the self-managed option without assembling separate metrics, logs, and traces backends.
 
-SigNoz is designed for teams who want the integrated experience of Datadog but with the flexibility, open-source standards, and cost-efficiency of the Grafana ecosystem.
+SigNoz Cloud is designed for teams who want the integrated experience of Datadog but with the flexibility, open-source standards, and cost-efficiency of the Grafana ecosystem.
 
 If you're comparing this space more widely, [Kibana vs Grafana](https://signoz.io/blog/kibana-vs-grafana/) and [Grafana vs Splunk](https://signoz.io/blog/grafana-vs-splunk/) are useful, along with the [Datadog alternatives](https://signoz.io/blog/datadog-alternatives/) and [Grafana alternatives](https://signoz.io/blog/grafana-alternatives/) roundups. For more Grafana matchups, see [Prometheus vs Grafana](https://signoz.io/comparisons/prometheus-vs-grafana/), [OpenTelemetry vs Grafana](https://signoz.io/comparisons/opentelemetry-vs-grafana/), and [New Relic vs Grafana](https://signoz.io/comparisons/new-relic-vs-grafana/).
 
-## Getting Started with SigNoz
+## Getting Started with SigNoz Cloud
 
-You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+You can choose between various SigNoz deployment options. The easiest way to get started is [SigNoz Cloud](https://signoz.io/teams/). We offer a free trial account with access to all features.
 
 Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
 

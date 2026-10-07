@@ -12,6 +12,8 @@ import Line from '@/components/ui/Line'
 import { AppTooltip as Tooltip } from '@/components/ui/AppTooltip'
 import FeatureComparisonGrid from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
 import type { ComparisonSection } from '@/shared/components/molecules/FeaturePages/FeatureComparisonGrid'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 // Plan header type
 type PlanHeader = {
@@ -44,7 +46,10 @@ const ALL_FEATURES_DATA = {
       action: (
         <TrackingLink
           href={'/docs/introduction/'}
-          className="button-background flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
+          className={cn(
+            buttonVariants({ variant: 'secondary', size: 'sm' }),
+            'w-full truncate !text-[9px] sm:!text-sm'
+          )}
           clickType="Secondary CTA"
           clickName="Docs Link"
           clickText="Read Documentation"
@@ -61,7 +66,10 @@ const ALL_FEATURES_DATA = {
       action: (
         <TrackingLink
           href={'/teams/'}
-          className="flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full bg-signoz_robin-500 px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
+          className={cn(
+            buttonVariants({ variant: 'default', size: 'sm' }),
+            'w-full truncate !text-[9px] sm:!text-sm'
+          )}
           clickType="Primary CTA"
           clickName="Sign Up Button"
           clickText="Get Started - Free"
@@ -78,7 +86,10 @@ const ALL_FEATURES_DATA = {
       action: (
         <TrackingLink
           href={'/contact-us/?source=pricing'}
-          className="button-background flex h-8 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 text-center text-[9px] font-medium text-white sm:text-sm"
+          className={cn(
+            buttonVariants({ variant: 'secondary', size: 'sm' }),
+            'w-full !text-[9px] sm:!text-sm'
+          )}
           clickType="Secondary CTA"
           clickName="Enterprise Contact Button"
           clickText="Contact Us"
