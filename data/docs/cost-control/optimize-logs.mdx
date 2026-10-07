@@ -1,5 +1,5 @@
 ---
-date: 2026-08-14
+date: 2026-08-25
 title: Reduce Log Ingestion Volume in SigNoz
 description: Filter, deduplicate, and truncate verbose log records at the OpenTelemetry Collector edge to reduce the log ingestion volume SigNoz bills for.
 doc_type: howto
@@ -38,7 +38,7 @@ Full JSON payloads, stack traces, and verbose SQL statements are often worth kee
 
 Health check retries, connection errors, and heartbeat messages often emit the same log line hundreds of times within a short window. Use the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/logdedupprocessor" target="_blank" rel="noopener noreferrer nofollow">`logdedup` processor</a> to collapse these into a single entry instead of dropping them. It aggregates identical log records (matched on body, resource attributes, severity, and log attributes) over a configurable interval, and emits one consolidated entry carrying `log_count`, `first_observed_timestamp`, and `last_observed_timestamp`. Add it to your existing `otel-collector-config.yaml`:
 
-```yaml
+```yaml:otel-collector-config.yaml
 processors:
   logdedup:
     interval: 10s
@@ -49,7 +49,7 @@ processors:
 
 Then enable it in the `logs` pipeline:
 
-```yaml
+```yaml:otel-collector-config.yaml
 service:
   pipelines:
     logs:
@@ -58,7 +58,7 @@ service:
 
 Scope deduplication with `conditions` (OTTL expressions) instead of applying it to the whole pipeline, for example to only `DEBUG`/`INFO` severities:
 
-```yaml
+```yaml:otel-collector-config.yaml
 processors:
   logdedup:
     interval: 10s
@@ -79,11 +79,13 @@ The Cost Meter Dashboard uses `signoz.meter.*` metrics which aggregate hourly. C
 To confirm the volume reduction:
 
 1. Navigate to **Logs**, swap to the **Table** tab. Filter by your target service and group by `severity_text`. Verify the log counts for the severities you targeted have reduced.
-2. Wait 1 hour, then check the **Cost Meter Dashboard** filtered by your target service and confirm the log GB trend has dropped.
+2. Wait 1 hour, then check the [Cost Meter Dashboard](https://signoz.io/docs/cost-meter/cost-meter-dashboard/) filtered by your target service and confirm the log GB trend has dropped.
 
 ## Next Steps
 
 - Configure a [Cost Meter Alert](https://signoz.io/docs/cost-meter/alerts/) on `signoz.meter.log.size` to be notified when log volume crosses your expected threshold.
+- Set a hard cap with [Ingestion Limits](https://signoz.io/docs/cost-control/ingestion-limits/) so the volume you just removed cannot creep back.
+- Return to [Cost Control](https://signoz.io/docs/cost-control/overview/) to optimize the other signals.
 
 ## Get Help
 

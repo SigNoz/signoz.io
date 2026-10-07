@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from 'next/cache'
 import qs from 'qs'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { cmsFetch } from '@/utils/cmsFetch'
 
 const API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
 
@@ -33,7 +34,7 @@ async function fetchAuthorsFromCMS(): Promise<AuthorDirectory> {
       { encode: false, addQueryPrefix: true, arrayFormat: 'repeat' }
     )
 
-    const response = await fetch(`${API_URL}/api/authors${queryParams}`, {
+    const response = await cmsFetch(`/api/authors${queryParams}`, {
       cache: 'force-cache',
       next: { tags: ['authors-list'] },
       headers: { 'Content-Type': 'application/json' },

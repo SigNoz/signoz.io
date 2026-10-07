@@ -1,0 +1,148 @@
+---
+date: 2026-09-03
+title: Context Propagation - Connect Spans Across Services
+description: Learn how OpenTelemetry context propagation links spans inside a process and across services, and when to inject and extract trace context yourself.
+doc_type: explanation
+---
+
+A trace holds together because every span knows its parent. Context propagation moves that parent reference across two boundaries: from function to function inside one process, and from service to service over the network. Break either one and SigNoz shows two short traces where you expected a single request.
+
+<Figure
+  src="/img/docs/traces-management/context-propagation/context-propagation-flow.svg"
+  alt="A checkout service with three nested spans passes trace context over an HTTP boundary to a payments service, where the entry span becomes a child of the caller"
+  caption="Context crosses two boundaries: the runtime carries it between functions, a traceparent header carries it between services"
+  className="box-shadowed-image"
+/>
+
+## Overview
+
+OpenTelemetry keeps the active span in a `Context` object. The specification describes context as <a href="https://opentelemetry.io/docs/concepts/context-propagation/" target="_blank" rel="noopener noreferrer nofollow">an object that contains the information for the sending and receiving service, or execution unit, to correlate one signal with another</a>. When you start a span, the tracer reads the current context. It finds the span already sitting there and records that span's ID as the new span's parent.
+
+None of this reaches SigNoz as configuration. Propagation happens inside your application before a span is ever exported, so a trace arrives complete or arrives broken.
+
+Instrumentation libraries handle both boundaries for the frameworks and clients they cover. You do the work yourself at any hop they miss.
+
+## Inside a process
+
+How a child span finds its parent depends on what your language does with ambient state.
+
+| Language | Where the active span lives | What you have to do |
+| --- | --- | --- |
+| Go | An argument you pass by hand | Thread `ctx` through every call, including goroutines |
+| Rust | A thread-local `Context`, or an argument | Attach the context, and wrap a spawned future with `with_context` |
+| Java | Thread-local storage | Activate the span, close the scope, and wrap work you hand to a thread pool |
+| .NET | An `AsyncLocal`, so it follows `await` and `Task.Run` | Activate the span, and pass an `ActivityContext` to a thread that predates it |
+| Ruby, PHP | Context storage the runtime manages | Activate the span and detach the scope when the block ends |
+| Python, Node.js, Deno | `contextvars` and `AsyncLocalStorage` | Use the active-span helper instead of starting a detached span |
+
+Go is the only one with no ambient state at all: every function that starts a span needs the context its caller was holding. Rust keeps a thread-local current context, so `attach` works inside one thread, but a task moved to another thread needs the context carried across. The rest keep the active span in storage the runtime manages. That covers straight-line code, and where it stops differs: Java drops it at a thread pool, while .NET carries it through `await` and `Task.Run`.
+
+## Across a process boundary
+
+Two operations move context over the network:
+
+- **Inject** writes the current context into a carrier the transport can carry, usually a map of HTTP headers.
+- **Extract** reads that carrier on the receiving side and returns a context. You make it current, then start the entry span inside it.
+
+Set the span kind at the same time. Mark a request and response hop `Client` on the caller and `Server` on the receiver. Mark a message queue hop `Producer` on the publisher and `Consumer` on the reader. SigNoz uses these to build the service map and APM metrics.
+
+A <Tooltip text="propagator" content="The component that serializes and deserializes trace context into and out of carriers such as HTTP headers, enabling context propagation." link="https://signoz.io/docs/glossary/#propagator" /> owns both operations and decides the wire format. Both services have to agree on that format. A service writing B3 headers to a service reading W3C Trace Context produces an empty extraction and a fresh trace on every hop.
+
+## What the propagator puts on the wire
+
+The default propagator writes a `traceparent` header defined by the <a href="https://www.w3.org/TR/trace-context/" target="_blank" rel="noopener noreferrer nofollow">W3C Trace Context</a> specification:
+
+```text
+traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+```
+
+| Field | Example | What it carries |
+| --- | --- | --- |
+| version | `00` | The Trace Context version in use |
+| trace-id | `4bf92f3577b34da6a3ce929d0e0e4736` | 16 bytes, identical on every span in the trace |
+| parent-id | `00f067aa0ba902b7` | 8 bytes, the caller's span ID, which becomes the parent of the receiver's entry span |
+| trace-flags | `01` | 1 byte; the rightmost bit records whether the caller sampled the trace |
+
+Two more headers travel alongside it. `tracestate` holds vendor-specific key-value pairs and stays optional. `baggage` carries arbitrary key-value pairs you set yourself, such as a tenant ID. Keep secrets and personal data out of baggage, since downstream services and their logs receive whatever you put there.
+
+## When you propagate manually
+
+<Admonition type="info">
+Reach for an instrumentation library first. The OpenTelemetry <a href="https://opentelemetry.io/docs/languages/python/propagation/" target="_blank" rel="noopener noreferrer nofollow">Python</a>, <a href="https://opentelemetry.io/docs/languages/php/propagation/" target="_blank" rel="noopener noreferrer nofollow">PHP</a>, and <a href="https://opentelemetry.io/docs/languages/js/propagation/" target="_blank" rel="noopener noreferrer nofollow">JavaScript</a> guides all recommend it. The libraries are tested against real frameworks and already know the header names, the getter, and the setter.
+</Admonition>
+
+When no library covers the hop, write the inject and extract calls yourself:
+
+- A message queue or event bus with no instrumentation library. Put the trace context on the message when you publish it. Read it back in the consumer.
+- A custom or binary protocol that carries no HTTP headers.
+- A background worker, scheduled job, or thread pool that starts work after the request that scheduled it has returned.
+- An HTTP client your instrumentation does not wrap.
+
+## View a connected trace in SigNoz
+
+Open the [Trace Explorer](https://signoz.io/docs/userguide/traces/) and select a request that crosses a service boundary. The waterfall names the service on every row, so a connected trace shows the service change while the indentation continues.
+
+<Figure
+  src="/img/docs/traces-management/context-propagation/cross-service-trace-waterfall.webp"
+  alt="SigNoz trace waterfall showing process-order, validate-order, publish-order and charge-card in the checkout service, with handle-charge and capture-payment nested underneath in the payments service"
+  caption="One trace across two services: handle-charge runs in payments and sits under charge-card from checkout"
+/>
+
+`handle-charge` runs in `payments`, and it sits under `charge-card` from `checkout`. Both spans carry one trace ID, which is what propagation produced.
+
+Select a span to open **Span details**. The `parent_span_id` field holds the caller's span ID. The `is_remote` field reports `yes` for a parent that arrived from another process.
+
+<Figure
+  src="/img/docs/traces-management/context-propagation/span-details-parent-span-id.webp"
+  alt="SigNoz Span details panel for the handle-charge span, showing service payments, the trace ID, and a JSON view with is_remote set to yes and parent_span_id holding the caller's span ID"
+  caption="Span details for handle-charge: parent_span_id points at charge-card in the calling service, and is_remote confirms the parent came over the wire"
+/>
+
+## Spot a broken trace in SigNoz
+
+Open the [Trace Explorer](https://signoz.io/docs/userguide/traces/). A propagation failure leaves a recognizable shape:
+
+- The request you were following stops at the service boundary, and the downstream work sits in a separate trace under its own trace ID.
+- The downstream trace's root span is your own HTTP handler rather than the caller's span.
+- The upstream span covers the network call, but nothing inside it accounts for the time.
+
+Open the downstream trace and look at its root span. When a span that needs a parent is a root, the caller never injected or the receiver never extracted.
+
+## Propagate context in your language
+
+Each manual instrumentation guide covers the in-process rules for that language and shows a working inject and extract pair.
+
+| Language | Guide | Propagator entry point |
+| --- | --- | --- |
+| Go | [Manual instrumentation in Go](https://signoz.io/docs/instrumentation/manual-instrumentation/golang/manual-instrumentation/) | `otel.GetTextMapPropagator()` |
+| Python | [Manual instrumentation in Python](https://signoz.io/docs/instrumentation/python/manual-instrumentation/) | `opentelemetry.propagate.inject` and `extract` |
+| Java | [Manual instrumentation in Java](https://signoz.io/docs/instrumentation/java/manual-instrumentation/) | `ContextPropagators.getTextMapPropagator()` |
+| Node.js | [Manual instrumentation in Node.js](https://signoz.io/docs/instrumentation/javascript/nodejs-manual-instrumentation/) | `propagation.inject` and `propagation.extract` |
+| .NET | [Manual instrumentation in .NET](https://signoz.io/docs/instrumentation/dotnet/manual-instrumentation/) | `Propagators.DefaultTextMapPropagator` |
+| PHP | [Manual instrumentation in PHP](https://signoz.io/docs/instrumentation/php/manual-instrumentation/) | `Globals::propagator()` |
+| Rust | [Manual instrumentation in Rust](https://signoz.io/docs/instrumentation/rust/manual-instrumentation/) | `global::get_text_map_propagator()` |
+| Ruby | [Manual instrumentation in Ruby](https://signoz.io/docs/instrumentation/manual-instrumentation/ruby/manual-instrumentation/) | `OpenTelemetry.propagation` |
+| Deno | [Manual instrumentation in Deno](https://signoz.io/docs/instrumentation/manual-instrumentation/deno/manual-instrumentation/) | `propagation.inject` and `propagation.extract` |
+
+## Common mistakes
+
+Each of these breaks a trace without raising an error.
+
+| Mistake | What happens | Fix |
+| --- | --- | --- |
+| The two services register different propagators | One side writes `b3`, the other reads `traceparent`. Every extraction returns an empty context. | Register the same format on both sides, or register a composite propagator that accepts both. |
+| You inject before the SDK configures a propagator | In .NET, `Propagators.DefaultTextMapPropagator` stays a no-op until the SDK sets it. An early inject writes nothing. | Build the tracer provider first, then inject. |
+| You start the entry span from a fresh root context | The entry span becomes a root and opens a new trace. | Pass the context that `extract` returned, not `context.Background()`, `Context.root()`, or an empty carrier. |
+| Work crosses a boundary the runtime does not carry context across | A Java thread pool, a bare Python or Ruby thread, a Go goroutine, and a Rust task moved to another thread all start with no context, so the new span becomes a root. .NET is the exception: `Activity.Current` is an `AsyncLocal`, so it follows `await` and `Task.Run`. | Wrap the executor, capture the context before you spawn, or pass it in as an argument. |
+| A scope stays open | Java and PHP hand you a scope to close. Later spans attach to the wrong parent. | Call `detach()`, or use a try-with-resources block. |
+| The carrier's header names are the wrong case | Python and Ruby look up the literal lowercase `traceparent`. A carrier holding `Traceparent` extracts nothing. | Lowercase the keys when you build the carrier. PHP is case-insensitive, and Node lowercases incoming headers for you. |
+
+## Next steps
+
+- [Span Links](https://signoz.io/docs/traces-management/guides/span-links/) for work that crosses an async boundary and belongs in its own trace
+- [Correlate Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to carry the trace ID into your log lines
+- [Trace Details](https://signoz.io/docs/userguide/span-details/) for reading a trace once the spans connect
+
+## Get Help
+
+<GetHelp />

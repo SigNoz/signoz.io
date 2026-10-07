@@ -10,6 +10,9 @@ module.exports = {
         destination: '/datadog-alternative/',
         permanent: true,
       },
+      { source: '/blog/renamed-post/', destination: '/blog/current-post/', permanent: true },
+      { source: '/blog/retired-post/', destination: '/product-hub/', permanent: true },
+      { source: '/blog/shadowed-post/', destination: '/product-hub/', permanent: true },
     ]
   },
 }

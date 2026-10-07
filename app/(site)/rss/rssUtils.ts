@@ -5,6 +5,7 @@ import { fetchAllDocsForPage } from '@/utils/cachedData'
 import { fetchAllCMSContent } from '@/utils/cmsContent'
 import { mapRelationKeys, mapTaxonomyValues } from '@/utils/contentHelpers'
 import { resolveLatestDate } from '@/utils/dateUtils'
+import { INTRO_DESCRIPTION } from '@/utils/docs/agentDiscovery'
 
 const buildFaqSlug = (path = '') => {
   const cleanedPath = path.startsWith('/') ? path : `/${path}`
@@ -98,16 +99,23 @@ const buildDocSlug = (path = '') => {
   return normaliseSlug(`docs${cleanedPath}`)
 }
 
-const mapDocEntries = (docs: any[]) => {
-  if (!docs?.length) {
-    return []
-  }
+// /docs/introduction is a custom React page with no mdx source, so it is not
+// part of fetchAllDocsForPage(); keep it in the docs feed explicitly.
+const INTRODUCTION_DOC_ENTRY = {
+  title: 'Introduction to SigNoz - Open Source Observability Platform',
+  description: INTRO_DESCRIPTION,
+  slug: 'docs/introduction',
+  date: '2026-08-10',
+}
 
-  return docs.map((doc) => ({
+const mapDocEntries = (docs: any[]) => {
+  const mapped = (docs ?? []).map((doc) => ({
     ...doc,
     slug: buildDocSlug(doc.slug),
     date: resolveLatestDate(doc),
   }))
+
+  return [INTRODUCTION_DOC_ENTRY, ...mapped]
 }
 
 export const loadPublishedPosts = async () => {

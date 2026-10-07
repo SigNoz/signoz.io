@@ -1,17 +1,13 @@
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
-
 export const ALERTS_HEADER_BUTTONS = [
   {
     text: 'Start your free trial',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
   },
   {
     text: 'Read Documentation',
     href: '/docs/alerts/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
   },
 ]
 
@@ -100,12 +96,10 @@ export const STOP_ALERT_FATIGUE_BUTTONS = [
     text: 'Start your free trial',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
   },
   {
     text: 'Read Documentation',
     href: '/docs/alerts/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
   },
 ]

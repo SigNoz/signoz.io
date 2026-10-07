@@ -24,7 +24,7 @@ const Accordion = ({ topic, subtopics, onLinkClick }) => {
             <TrackingLink
               key={index}
               href={subtopic.url}
-              className="flex items-center gap-2 text-signoz_vanilla-300"
+              className="flex items-center gap-2 text-[var(--l2-foreground)]"
               clickType="Nav Click"
               clickName={`${subtopic.name} Link`}
               clickText={subtopic.name}
@@ -40,7 +40,7 @@ const Accordion = ({ topic, subtopics, onLinkClick }) => {
                 ))}
               <div className="flex flex-col">
                 <span className="font-medium">{subtopic.name}</span>
-                <span className="text-xs text-gray-500">{subtopic.description}</span>
+                <span className="text-xs text-[var(--l3-foreground)]">{subtopic.description}</span>
               </div>
             </TrackingLink>
           ))}

@@ -125,6 +125,16 @@ function appRouteExists(route, appRoutes) {
   return dynamicPatterns.some((re) => re.test(route))
 }
 
+// Returns true if filePath existed in the repo at the given git ref.
+function existedAtRef(ref, filePath) {
+  try {
+    execSync(`git cat-file -e ${ref}:"${filePath}"`, { stdio: 'ignore' })
+    return true
+  } catch {
+    return false
+  }
+}
+
 function collectDocMoves(baseRef) {
   let mergeBase
   try {
@@ -146,7 +156,7 @@ function collectDocMoves(baseRef) {
       return
     }
     const tokens = buffer.split('\0').filter(Boolean)
-    for (let i = 0; i < tokens.length; ) {
+    for (let i = 0; i < tokens.length;) {
       const status = tokens[i++]
       if (!status) {
         continue
@@ -194,6 +204,13 @@ function collectDocMoves(baseRef) {
     process.exit(1)
   }
 
+  // A doc added and then renamed/deleted in the same PR never had a live URL, so it needs
+  // no redirect. Only paths that existed at the merge base do.
+  const staleRenames = [...renameMap.keys()].filter((p) => !existedAtRef(mergeBase, p))
+  staleRenames.forEach((p) => renameMap.delete(p))
+  const staleDeletions = [...deletedSet].filter((p) => !existedAtRef(mergeBase, p))
+  staleDeletions.forEach((p) => deletedSet.delete(p))
+
   const renames = Array.from(renameMap.entries()).map(([oldPath, newPath]) => ({
     oldPath,
     newPath,
@@ -226,7 +243,11 @@ function main() {
   const failures = []
   const warnings = []
   const CHECK_APP_ROUTES = process.env.CHECK_APP_ROUTES === 'true'
-  const appRoutes = CHECK_APP_ROUTES ? collectAppRoutes() : null
+  const appRoutes = collectAppRoutes()
+  // Docs routes may be served by a dedicated static app page instead of an mdx
+  // file (e.g. /docs/introduction/). Dynamic patterns are excluded so the docs
+  // [...slug] catch-all cannot mask genuinely missing docs.
+  const docsRouteExists = (route) => docRouteExists(route) || appRoutes.staticRoutes.has(route)
 
   renames.forEach(({ oldPath, newPath }) => {
     const oldRoute = docPathToRoute(oldPath)
@@ -254,7 +275,7 @@ function main() {
     const dest = normalizeRoute(destination)
     if (!dest.startsWith('/')) return // external URL; skip
     if (dest.startsWith('/docs')) {
-      if (docRouteExists(dest)) return
+      if (docsRouteExists(dest)) return
       // Follow redirect chains for internal routes (up to 10 hops)
       const visited = new Set()
       let current = dest
@@ -267,7 +288,7 @@ function main() {
           break
         }
         visited.add(next)
-        if (next.startsWith('/docs') && docRouteExists(next)) {
+        if (next.startsWith('/docs') && docsRouteExists(next)) {
           resolved = true
           break
         }
@@ -292,6 +313,8 @@ function main() {
 
   deletions.forEach(({ path: filePath }) => {
     const docRoute = docPathToRoute(filePath)
+    // No redirect needed when the route is still served by a static app page.
+    if (appRoutes.staticRoutes.has(docRoute)) return
     const destination = redirectMap.get(docRoute)
     if (!destination) {
       failures.push(`Missing redirect for deleted doc '${docRoute}'`)

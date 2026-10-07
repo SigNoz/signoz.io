@@ -1,5 +1,5 @@
 ---
-date: 2026-08-05
+date: 2026-09-08
 title: Monitor AWS RDS with SigNoz
 meta_title: Monitor AWS RDS - Database Metrics & Logs
 description: Learn to track RDS database CPU, connections, IOPS, and logs using one-click or manual CloudWatch Exporter setup for optimal database performance.
@@ -9,6 +9,10 @@ doc_type: howto
 ## Overview
 
 Amazon RDS provides managed relational database services for PostgreSQL, MySQL, Oracle, SQL Server, and MariaDB. SigNoz helps you monitor RDS performance, query logs, and database health.
+
+<Admonition type="info" title="Monitoring Amazon Aurora?" defaultCollapsed="true">
+Aurora runs as a cluster and reports metrics for the cluster as well as for each instance. Follow [Monitor Amazon Aurora](https://signoz.io/docs/integrations/aws-rds-aurora/) to collect both, together with the Aurora engine metrics.
+</Admonition>
 
 ## Prerequisites
 
@@ -81,7 +85,7 @@ These guides cover:
 
 If your RDS logs are exported to S3, use a Lambda function to forward them to SigNoz.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -340,7 +344,7 @@ Below is the comprehensive code along with detailed comments for clarity:
 The below code assumes your log files are already in compressed form, if they are not, feel free to remove the decompressing of log files and match the file type you have for you logs (if not already `.log`).
 </Admonition>
 
-```python:lambda_function.py minimap
+```python:lambda_function.py minimap defaultCollapsed
 import json
 import gzip
 import boto3 
@@ -514,4 +518,5 @@ To verify that your RDS logs are being sent correctly to SigNoz:
 
 - [AWS RDS PostgreSQL Integration](https://signoz.io/docs/integrations/aws-rds-postgres/)
 - [AWS RDS MySQL Integration](https://signoz.io/docs/integrations/aws-rds-mysql/)
+- [Amazon Aurora Metrics and Logs](https://signoz.io/docs/integrations/aws-rds-aurora/)
 - [Send CloudWatch Logs to SigNoz](https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/)

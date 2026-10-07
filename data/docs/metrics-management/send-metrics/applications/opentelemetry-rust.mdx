@@ -1,5 +1,5 @@
 ---
-date: 2026-08-05
+date: 2026-08-27
 title: Send Metrics from Rust Application Using OpenTelemetry
 description: Learn how to instrument your Rust application with OpenTelemetry to send metrics to SigNoz
 
@@ -8,7 +8,7 @@ doc_type: howto
 
 This guide shows you how to instrument your Rust application with OpenTelemetry to send metrics to SigNoz. You will learn how to create custom metrics using counters, histograms, gauges, and observable instruments.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
     Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -143,7 +143,7 @@ The `http-proto` and `reqwest-client` features enable HTTP-based OTLP export. Fo
 
 Create a helper function to configure the OpenTelemetry Meter Provider. This provider is responsible for creating meters and exporting metrics.
 
-```rust:src/main.rs minimap
+```rust:src/main.rs minimap defaultCollapsed
 use opentelemetry::global;
 use opentelemetry::KeyValue;
 use opentelemetry_otlp::{MetricExporter, WithExportConfig, WithHttpConfig};
@@ -222,7 +222,7 @@ The Rust SDK does not support the `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFER
 
 Here is a complete example that tracks HTTP requests with a counter metric:
 
-```rust:src/main.rs minimap
+```rust:src/main.rs minimap defaultCollapsed
 use opentelemetry::global;
 use opentelemetry::metrics::Counter;
 use opentelemetry::KeyValue;
@@ -301,7 +301,7 @@ For fine-grained control over your telemetry, you can create custom metrics usin
 
 Synchronous instruments are used when you know the measurement value at the time of recording.
 
-```rust:src/main.rs minimap
+```rust:src/main.rs minimap defaultCollapsed
 use opentelemetry::global;
 use opentelemetry::metrics::{Counter, Histogram, UpDownCounter, Gauge};
 use opentelemetry::KeyValue;
@@ -406,7 +406,7 @@ Observable (asynchronous) instruments are used when the measurement value is com
 - **ObservableUpDownCounter**: Async up/down counter for bidirectional values
 - **ObservableGauge**: Async gauge for instantaneous readings
 
-```rust:src/main.rs minimap
+```rust:src/main.rs minimap defaultCollapsed
 use opentelemetry::global;
 use opentelemetry::KeyValue;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -501,7 +501,7 @@ Observable instruments are called by the SDK during metric collection. The callb
 
 Unlike languages with runtime environments (Go, Java, Python), **Rust does not have a built-in runtime metrics** package for memory usage, goroutine counts, or similar statistics. Below is a practical example of instrumenting an HTTP server with custom metrics.
 
-```rust:src/main.rs minimap
+```rust:src/main.rs minimap defaultCollapsed
 use opentelemetry::global;
 use opentelemetry::metrics::{Counter, Histogram, UpDownCounter};
 use opentelemetry::KeyValue;
@@ -633,7 +633,10 @@ When naming your custom metrics, follow the <a href="https://opentelemetry.io/do
 <details>
 <ToggleHeading>
 ## Troubleshooting
+
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### Metrics not appearing?
 

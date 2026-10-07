@@ -228,6 +228,64 @@ export const SELF_HOST_CARDS: CardData[] = [
   },
 ]
 
+export type IntroSectionData = {
+  clickLocation: string
+  title?: string
+  description?: string
+  guidesCount?: number
+  viewAllHref?: string
+  illustration?: string
+  illustrationAlt?: string
+  showTopBorder?: boolean
+  cards: CardData[]
+}
+
+export const INTRO_SECTIONS: IntroSectionData[] = [
+  {
+    clickLocation: 'Send Data Section',
+    showTopBorder: true,
+    cards: SEND_DATA_CARDS,
+  },
+  {
+    clickLocation: 'Explore SigNoz Section',
+    title: 'Explore the rest of SigNoz',
+    description: 'Once your data is flowing in — go deeper into what we offer.',
+    guidesCount: 12,
+    viewAllHref: '/docs/querying/overview/',
+    illustration: '/img/docs-introduction/explore-illustration.webp',
+    illustrationAlt: 'Explore SigNoz',
+    cards: EXPLORE_SIGNOZ_CARDS,
+  },
+  {
+    clickLocation: 'Migrate Section',
+    title: 'Migrate',
+    description: 'Seamlessly transition from your existing observability stack.',
+    guidesCount: 8,
+    viewAllHref: '/docs/migration/migrate-to-signoz/',
+    cards: MIGRATE_CARDS,
+  },
+  {
+    clickLocation: 'Security and Compliance Section',
+    title: 'Security & Compliance',
+    description: 'Secure your SigNoz deployment and ensure compliance.',
+    cards: SECURITY_CARDS,
+  },
+  {
+    clickLocation: 'Troubleshooting and Community Section',
+    title: 'Troubleshooting & Community',
+    description: 'Get help and connect with the SigNoz community.',
+    illustration: '/img/docs-introduction/explore-illustration.webp',
+    illustrationAlt: 'Troubleshooting and community',
+    cards: TROUBLESHOOTING_CARDS,
+  },
+  {
+    clickLocation: 'Self-Host Installation Section',
+    title: 'Self-Host SigNoz',
+    description: 'Select the installation method that works best for your environment',
+    cards: SELF_HOST_CARDS,
+  },
+]
+
 // CTA Section
 export const CTA_STEPS = [
   {

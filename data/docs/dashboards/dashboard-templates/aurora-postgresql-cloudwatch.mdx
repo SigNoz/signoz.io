@@ -1,0 +1,107 @@
+---
+date: 2026-09-09
+title: Amazon Aurora PostgreSQL CloudWatch Dashboard - Track Health
+description: Monitor Aurora PostgreSQL cluster and instance health in SigNoz including capacity, replica lag, memory, transactions, storage I/O, cluster volume, and WAL.
+doc_type: explanation
+---
+
+Use this dashboard to monitor an Aurora PostgreSQL cluster across serverless capacity, replica lag, memory and cache, transactions, instance storage I/O, cluster volume growth, and WAL activity.
+
+Amazon Aurora publishes cluster and instance metrics to the `AWS/RDS` CloudWatch namespace. The Prometheus CloudWatch Exporter reads them, and the OpenTelemetry Collector `prometheus` receiver scrapes the exporter.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow [Step 2 of Monitor Amazon Aurora](https://signoz.io/docs/integrations/aws-rds-aurora/#step-2-collect-cloudwatch-metrics), which covers the exporter configuration and the Collector pipeline.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/aurora-postgresql-cloudwatch.webp"
+  alt="Amazon Aurora PostgreSQL CloudWatch Dashboard"
+  caption="Amazon Aurora PostgreSQL CloudWatch Dashboard"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/aurora/postgresql/overview.json"
+  dashboardName="Amazon Aurora PostgreSQL CloudWatch"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Separate the writer from the readers**: Instance panels group by `DBInstanceIdentifier`, so each instance is its own series, and Commit Throughput splits by the `Role` dimension into WRITER and READER.
+- **Size a Serverless v2 cluster**: Track provisioned Aurora Capacity Units against the utilization of the configured maximum.
+- **Measure replica lag**: Watch how far each reader trails the writer over the shared storage volume.
+- **Spot memory pressure**: Read freeable memory, buffer cache hit ratio, and swap together.
+- **Watch storage growth and billed I/O**: Cluster volume size and billed read and write operations are cluster-scoped. They have no per-instance series.
+- **Stay ahead of transaction ID wraparound**: Track the age of the oldest unfrozen transaction ID.
+
+## Metrics Included
+
+### Cluster & Capacity
+
+- **Serverless Database Capacity**: Aurora Capacity Units provisioned for the cluster (`ServerlessDatabaseCapacity`). Serverless v2 only.
+- **ACU Utilization**: Share of the instance maximum ACU setting in use (`ACUUtilization`).
+- **CPU Utilization**: CPU used by the database engine on each instance (`CPUUtilization`).
+- **Database Connections**: Client connections open on each instance (`DatabaseConnections`).
+- **Aurora Replica Lag**: Lag between a reader and the writer (`AuroraReplicaLag`). Reported by reader instances only.
+- **Engine Uptime**: Time since the engine last started (`EngineUptime`). A drop marks a restart or failover.
+
+### Memory & Cache
+
+- **Freeable Memory**: RAM available on each instance (`FreeableMemory`).
+- **Buffer Cache Hit Ratio**: Share of requests served from the buffer cache (`BufferCacheHitRatio`).
+- **Swap Usage**: Swap space used on the instance (`SwapUsage`).
+
+### Transactions
+
+- **Commit Latency**: Average time to commit a transaction (`CommitLatency`).
+- **Commit Throughput**: Commits per second split by writer and reader role (`CommitThroughput`).
+- **Deadlocks**: Deadlocks per second detected by the engine (`Deadlocks`).
+- **Maximum Used Transaction IDs**: Age of the oldest unfrozen transaction ID (`MaximumUsedTransactionIDs`).
+
+### Instance Storage I/O
+
+- **Instance IOPS**: Read and write operations per second on local storage (`ReadIOPS`, `WriteIOPS`).
+- **Instance I/O Latency**: Average time per read and write operation (`ReadLatency`, `WriteLatency`).
+- **Instance I/O Throughput**: Bytes read and written per second (`ReadThroughput`, `WriteThroughput`).
+- **Disk Queue Depth**: Outstanding I/O requests waiting on the disk (`DiskQueueDepth`).
+- **Network Throughput**: Client network traffic to and from the instance (`NetworkReceiveThroughput`, `NetworkTransmitThroughput`). Storage traffic to the cluster volume is not counted here.
+
+### Cluster Storage Volume
+
+- **Volume Bytes Used**: Storage consumed by the cluster volume (`VolumeBytesUsed`).
+- **Volume Read I/O Operations (5 min)** and **Volume Write I/O Operations (5 min)**: Billed operations against the cluster volume (`VolumeReadIOPs`, `VolumeWriteIOPs`). CloudWatch reports these as a count per 5-minute interval rather than a rate, so divide by 300 for operations per second.
+
+### WAL & Replication Slots
+
+- **Transaction Logs Disk Usage**: Disk consumed by write-ahead logs (`TransactionLogsDiskUsage`).
+- **Replication Slot Disk Usage**: Disk held by replication slots (`ReplicationSlotDiskUsage`).
+- **Oldest Replication Slot Lag**: WAL retained for the furthest-behind replica or logical slot (`OldestReplicationSlotLag`).
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **dbcluster_identifier**: Filter the cluster-scoped panels, meaning storage volume and serverless capacity.
+- **dbinstance_identifier**: Filter the per-instance panels. `AWS/RDS` carries no engine dimension, so this lists every Aurora instance in the account. Select a cluster first to narrow it.
+
+## Panels That Read Empty
+
+Some panels stay empty until the matching condition exists, which is expected rather than a misconfiguration:
+
+- **Cluster Storage Volume** panels take about an hour to appear on a newly created cluster, and CloudWatch emits them at 5-minute intervals.
+- **Aurora Replica Lag** has no series for the writer, because Aurora reports it on reader instances only.
+- **Transaction Logs Disk Usage** reads `-1` while Aurora PostgreSQL uses log records rather than transaction logs, which is the case unless logical replication or AWS DMS is active.
+- **Replication Slot Disk Usage** and **Oldest Replication Slot Lag** read 0 on a cluster with no logical replication slots.
+
+## Next Steps
+
+- [Collect Aurora engine metrics](https://signoz.io/docs/dashboards/dashboard-templates/aurora-postgresql-engine-metrics/) to see query-level activity alongside this dashboard.
+- [Set up alerts](https://signoz.io/docs/alerts/) on replica lag, connection count, and volume growth.
+- [Set up a notification channel](https://signoz.io/docs/setup-alerts-notification/) for Slack, PagerDuty, or email.
+
+## Related Dashboards
+
+- [Amazon Aurora PostgreSQL Engine Metrics](https://signoz.io/docs/dashboards/dashboard-templates/aurora-postgresql-engine-metrics/)
+- [Amazon Aurora MySQL CloudWatch](https://signoz.io/docs/dashboards/dashboard-templates/aurora-mysql-cloudwatch/)
+- [PostgreSQL](https://signoz.io/docs/dashboards/dashboard-templates/postgresql/)

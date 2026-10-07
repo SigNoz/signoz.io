@@ -9,6 +9,7 @@ import type {
   IconSpec,
 } from '@/components/Listicle/types'
 import { CMS_REVALIDATE_INTERVAL } from '@/constants/cache'
+import { cmsFetch } from '@/utils/cmsFetch'
 import { hasCMSContentConfig, isLocalContentOverlayEnabled } from '@/utils/contentRepository'
 
 async function readLocalListicle(name: string): Promise<ListicleConfig | null> {
@@ -37,6 +38,7 @@ function transformItem(raw: Record<string, unknown>): ListicleItem {
     href: String(raw.href ?? ''),
   }
   if (raw.click_name != null) item.clickName = String(raw.click_name)
+  if (raw.description != null) item.description = String(raw.description)
   const icon = transformIcon(raw)
   if (icon != null) item.icon = icon
   return item
@@ -65,6 +67,7 @@ function transformSection(raw: Record<string, unknown>): SectionConfig {
     title: String(raw.title ?? ''),
     sectionName: String(raw.section_name ?? ''),
   }
+  if (raw.description != null) section.description = String(raw.description)
   if (raw.grid_cols != null) section.gridCols = String(raw.grid_cols)
   const items = transformItems(raw.items)
   if (items) section.items = items
@@ -125,7 +128,7 @@ async function fetchCmsListicle(name: string): Promise<ListicleConfig | null> {
     'populate[static_sections][populate][items]': '*',
   })
 
-  const res = await fetch(`${CMS_API_URL}/api/listicles?${params.toString()}`, {
+  const res = await cmsFetch(`/api/listicles?${params.toString()}`, {
     cache: 'force-cache',
     next: {
       tags: ['listicles', `listicle-${name}`],

@@ -28,6 +28,7 @@ export type ProofLinkProps = {
   className?: string
   clickName: string
   clickText: string
+  clickLocation?: string
   href: string
   isClone: boolean
 }
@@ -40,6 +41,7 @@ export type LogoMarkProps = {
 
 export type LogoCardProps = {
   className?: string
+  clickLocation?: string
   href?: string
   isClone: boolean
   logo: LogoSpec
@@ -48,6 +50,7 @@ export type LogoCardProps = {
 export type QuoteCardProps = {
   attribution: string
   className?: string
+  clickLocation?: string
   href: string
   isClone: boolean
   logo?: LogoSpec

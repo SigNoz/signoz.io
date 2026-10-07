@@ -10,6 +10,8 @@ import { AppModal as Modal } from '@/components/ui/Modal'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import { PricingRangeSlider } from '@/components/ui/PricingRangeSlider'
 import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 const formatNumber = (number: number) =>
   number.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })
@@ -75,7 +77,7 @@ const MetricsCostEstimation = () => {
               <div className="flex flex-col gap-7">
                 <div>
                   <div className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">
-                    Metrics price calculator
+                    Metrics Price Calculator for SigNoz Cloud
                   </div>
                   <div className="text-base font-normal text-signoz_vanilla-400">
                     We use a transparent and usage-based pricing model that helps you prevent costs
@@ -197,14 +199,14 @@ const MetricsCostEstimation = () => {
                 <div className="flex flex-col gap-4">
                   <Link
                     href="/teams/"
-                    className="flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-signoz_robin-500 px-4 text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
+                    className={cn(buttonVariants({ variant: 'default' }), 'w-full')}
                   >
                     Start your free 30-day trial
                     <ArrowRight size={14} />
                   </Link>
                   <Link
                     href="/docs/introduction/"
-                    className="button-background flex h-10 w-full items-center justify-center gap-1.5 rounded-full px-4 text-sm font-medium leading-5 text-white no-underline outline-none hover:text-white"
+                    className={cn(buttonVariants({ variant: 'secondary' }), 'w-full')}
                   >
                     Read the docs
                     <ArrowRight size={14} />

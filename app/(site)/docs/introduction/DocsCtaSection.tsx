@@ -1,8 +1,10 @@
 'use client'
 
 import React from 'react'
-import { ArrowRight } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 import { CTA_STEPS } from './constants'
 import DitherCanvas from '@/components/DitherCanvas/DitherCanvas'
 
@@ -11,7 +13,10 @@ const SECTION_NAME = 'Docs CTA Section'
 export default function DocsCtaSection() {
   return (
     <DitherCanvas enableClick={false} className="w-full">
-      <div className="flex w-full min-w-0 flex-col items-start justify-between gap-8 px-4 py-16 lg:flex-row lg:gap-12">
+      <div
+        className="flex w-full min-w-0 flex-col items-start justify-between gap-8 px-4 py-16 lg:flex-row lg:gap-12"
+        data-markdown-ignore
+      >
         <div className="flex w-full min-w-0 flex-col gap-4 pl-0 lg:w-1/2 lg:pl-12">
           <h2 className="m-0 text-2xl font-semibold leading-9 text-[var(--l1-foreground)]">
             Slow is the new Downtime
@@ -27,10 +32,13 @@ export default function DocsCtaSection() {
             clickName="Sign up for SigNoz Cloud CTA"
             clickText="Sign up for SigNoz Cloud"
             clickLocation={SECTION_NAME}
-            className="mx-auto flex h-8 w-fit max-w-full items-center gap-2 rounded-full bg-[var(--primary-background)] px-4 pr-3.5 text-sm font-medium text-[var(--primary-foreground)] transition-colors hover:bg-[var(--primary-background-hover)] lg:mx-0"
+            className={cn(
+              buttonVariants({ variant: 'default', size: 'sm' }),
+              'mx-auto w-fit max-w-full lg:mx-0'
+            )}
           >
             Sign up for SigNoz Cloud
-            <ArrowRight size={12} className="rotate-[-45deg]" />
+            <ArrowUpRight size={12} />
           </TrackingLink>
         </div>
 

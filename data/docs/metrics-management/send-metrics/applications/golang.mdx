@@ -1,5 +1,5 @@
 ---
-date: 2026-08-05
+date: 2026-08-27
 title: Send Metrics from Go application
 description: Learn how to instrument your Go application with OpenTelemetry to send metrics to SigNoz
 doc_type: howto
@@ -7,7 +7,7 @@ doc_type: howto
 
 This guide shows you how to instrument your Go application with OpenTelemetry to send metrics to SigNoz. You will learn how to collect runtime metrics, auto-instrument libraries, and create custom metrics.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
     Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -132,7 +132,7 @@ go.opentelemetry.io/otel/attribute
 
 Create a helper function to configure the OpenTelemetry Meter Provider. This provider is responsible for creating meters and exporting metrics. It automatically uses the environment variables configured in Step 1.
 
-```go:main.go minimap
+```go:main.go minimap defaultCollapsed
 package main
 
 import (
@@ -184,7 +184,7 @@ func initMeterProvider(ctx context.Context) (func(context.Context) error, error)
 
 Here's a complete example that tracks HTTP requests with a counter metric:
 
-```go:main.go minimap
+```go:main.go minimap defaultCollapsed
 package main
 
 import (
@@ -263,7 +263,7 @@ go get go.opentelemetry.io/contrib/instrumentation/runtime
 
 ### Usage
 
-```go:main.go
+```go:main.go defaultCollapsed minimap
 package main
 
 import (
@@ -343,7 +343,7 @@ go get go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
 
 ### Usage
 
-```go:main.go
+```go:main.go defaultCollapsed minimap
 package main
 
 import (
@@ -418,7 +418,7 @@ Create custom metrics to track business logic with all metric types: Counter, Up
 
 ### Usage
 
-```go:main.go minimap
+```go:main.go minimap defaultCollapsed
 package main
 
 import (
@@ -514,7 +514,10 @@ caption="Visualizing Go metrics in SigNoz"
 <details>
 <ToggleHeading>
 ## Troubleshooting
+
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### Metrics not appearing?
 

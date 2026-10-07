@@ -1,5 +1,5 @@
 ---
-date: 2026-03-26
+date: 2026-08-27
 title: Send logs from AWS Lambda Node.js functions to SigNoz
 description: Learn how to send structured logs and correlated traces from AWS Lambda Node.js functions to SigNoz using the OpenTelemetry SDK.
 doc_type: howto
@@ -19,7 +19,7 @@ This guide walks through instrumenting your AWS Lambda Node.js function to emit 
 - An AWS account with permissions to create and manage Lambda functions.
 - A SigNoz account (Cloud or Self-Hosted).
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -37,7 +37,7 @@ yarn add @opentelemetry/api @opentelemetry/api-logs
 
 Update your Lambda function code to initialize the logger provider and send logs.
 
-```javascript:index.js
+```javascript:index.js defaultCollapsed minimap
 const { trace } = require("@opentelemetry/api");
 const logsAPI = require("@opentelemetry/api-logs");
 
@@ -137,6 +137,8 @@ arn:aws:lambda:us-east-1:184161586896:layer:opentelemetry-nodejs-0_20_0:1
 ## Troubleshooting
 
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### Logs not appearing in SigNoz
 

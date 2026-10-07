@@ -563,11 +563,7 @@ const MobileEstimate = () => {
           <span className="text-base font-medium text-signoz_robin-400">
             Reach out to us for custom pricing and retention for high volume
           </span>
-          <Button
-            variant="legacyPrimary"
-            id="btn-contact-us-pricing-monthly-estimate"
-            className="w-full"
-          >
+          <Button asChild variant="default" className="w-full">
             <TrackingLink
               href={'/contact-us/?source=monthly-estimate-mobile'}
               clickType="Primary CTA"
@@ -586,7 +582,7 @@ const MobileEstimate = () => {
           <span className="text-base font-medium text-signoz_robin-400">
             Reach out to us for SigNoz's Start Up Program Discount
           </span>
-          <Button variant="legacySecondary" className="w-full">
+          <Button asChild variant="secondary" className="w-full">
             <TrackingLink
               href="/startups/"
               clickType="Secondary CTA"

@@ -4,7 +4,7 @@ export function Github(svgProps: SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className="fill-signoz_vanilla-400"
+      className="fill-[var(--l2-foreground)]"
       viewBox="0 0 496 512"
       {...svgProps}
     >
@@ -17,7 +17,7 @@ export function Slack(svgProps: SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className="fill-signoz_vanilla-400"
+      className="fill-[var(--l2-foreground)]"
       viewBox="0 0 448 512"
       {...svgProps}
     >
@@ -30,7 +30,7 @@ export function Twitter(svgProps: SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className="fill-signoz_vanilla-400"
+      className="fill-[var(--l2-foreground)]"
       x="0px"
       y="0px"
       width="100"
@@ -47,7 +47,7 @@ export function Linkedin(svgProps: SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className="fill-signoz_vanilla-400"
+      className="fill-[var(--l2-foreground)]"
       viewBox="0 0 448 512"
       {...svgProps}
     >
@@ -63,7 +63,7 @@ export function Youtube(svgProps: SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className="fill-signoz_vanilla-400"
+      className="fill-[var(--l2-foreground)]"
       viewBox="0 0 576 512"
       {...svgProps}
     >

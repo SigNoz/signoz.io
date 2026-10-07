@@ -13,7 +13,7 @@ import MainFooter from '@/components/mainFooter'
 export default function DocsShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-full w-full items-stretch">
-      <div className={DOC_SIDENAV_CLASSES}>
+      <div className={DOC_SIDENAV_CLASSES} data-markdown-ignore>
         <DocsSidebar />
       </div>
       <div className="flex min-w-0 flex-1 flex-col">

@@ -14,6 +14,8 @@ export type ComparisonSection = {
   rows: {
     feature: React.ReactNode
     cells: Record<string, React.ReactNode>
+    markdownFeature?: string
+    markdownCells?: Record<string, string>
   }[]
 }
 
@@ -30,6 +32,8 @@ export type FeatureComparisonGridProps = {
   featureCellClassName?: string
   featureSectionClassName?: string
   separator?: 'line' | 'border'
+  /** Column labels for agent markdown; when set, sections render as data-md-table grids. */
+  markdownColumnLabels?: string[]
   separatorClassName?: string
   rootRef?: React.Ref<HTMLDivElement>
 }
@@ -40,22 +44,24 @@ export default function FeatureComparisonGrid({
   gridClassName,
   sectionHeadingSize = 'lg',
   stickyOffset = 'top-[220px]',
-  stickyBg = 'bg-[#0f1013]',
+  stickyBg = 'bg-[var(--l2-background)]',
   stickyZIndex = 'z-10',
   overlay,
   className,
   featureCellClassName,
   featureSectionClassName,
   separator = 'line',
+  markdownColumnLabels,
   separatorClassName,
   rootRef,
 }: FeatureComparisonGridProps) {
+  const markdownTableHeader = markdownColumnLabels?.join('|')
   const usesTextOcclusion = columns.some((col) => col.occludeStickyText)
 
   const headingClass =
     sectionHeadingSize === 'lg'
       ? 'mb-3 mt-8 py-2 text-center text-sm font-medium sm:text-lg md:text-left'
-      : 'py-3 text-sm font-medium leading-6 text-white'
+      : 'py-3 text-sm font-medium leading-6 text-[var(--l1-foreground)]'
 
   const renderSeparator = (occludeId?: string) => {
     const occludeProps = occludeId ? { 'data-occlude-sticky-text': occludeId } : {}
@@ -100,11 +106,22 @@ export default function FeatureComparisonGrid({
           {renderSeparator(usesTextOcclusion ? `sep-${sectionIdx}-header` : undefined)}
 
           {/* Rows */}
-          <div className="grid grid-cols-1">
+          <div
+            className="grid grid-cols-1"
+            {...(markdownTableHeader ? { 'data-md-table': markdownTableHeader } : {})}
+          >
             {section.rows.map((row, rowIdx) => (
               <div key={rowIdx}>
-                <div className={`grid ${gridClassName}`}>
-                  <div className={featureCellClassName}>{row.feature}</div>
+                <div
+                  className={`grid ${gridClassName}`}
+                  {...(markdownTableHeader ? { 'data-md-row': '' } : {})}
+                >
+                  <div
+                    className={featureCellClassName}
+                    {...(markdownTableHeader ? { 'data-md-cell': row.markdownFeature ?? '' } : {})}
+                  >
+                    {row.feature}
+                  </div>
                   {columns.map((col) => (
                     <div
                       key={col.key}
@@ -112,6 +129,9 @@ export default function FeatureComparisonGrid({
                       data-occlude-sticky-text={
                         col.occludeStickyText ? `${sectionIdx}-${rowIdx}-${col.key}` : undefined
                       }
+                      {...(markdownTableHeader
+                        ? { 'data-md-cell': row.markdownCells?.[col.key] ?? '' }
+                        : {})}
                     >
                       {row.cells[col.key]}
                     </div>

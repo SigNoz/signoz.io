@@ -15,7 +15,7 @@ Monitoring Qwen in your AI applications with telemetry ensures full observabilit
 
 ## Prerequisites
 
-- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self-Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
 - For Python: `pip` installed for managing Python packages
 - An Alibaba Cloud Account, Model Studio account, and API key. You can get the API key from <a href="https://modelstudio.console.alibabacloud.com/?tab=playground#/api-key" target="_blank" rel="noopener noreferrer nofollow">Model Studio platform</a>
 
@@ -64,7 +64,7 @@ This sets the minimum log level for the root logger to DEBUG, which ensures that
 
 ### Step 4: Create an example Qwen application
 
-```python:main.py
+```python:main.py defaultCollapsed
 import os
 from openai import OpenAI
 
@@ -119,7 +119,7 @@ opentelemetry-instrument <your_run_command>
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - Replace `<your_run_command>` with the actual command you would use to run your application. In this case we would use: `python main.py`
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -172,13 +172,13 @@ OpenAIInstrumentor().instrument()
 - **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ### Step 3: Set up Metrics
 
-```python
+```python defaultCollapsed
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
@@ -208,7 +208,7 @@ HTTPXClientInstrumentor().instrument()
 - **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -219,7 +219,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ### Step 4: Set up Logs
 
-```python
+```python defaultCollapsed
 import logging
 from opentelemetry.sdk.resources import Resource
 from opentelemetry._logs import set_logger_provider
@@ -255,7 +255,7 @@ httpx_logger.addHandler(handler)
 - **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): `https://ingest.<region>.signoz.cloud:443/v1/logs`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -266,7 +266,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
    Ensure you have completed the steps above (traces, logs, and metrics configuration) before running this code. All OpenTelemetry instrumentation must be initialized first.
 </Admonition>
 
-```python:main.py
+```python:main.py defaultCollapsed
 import os
 from openai import OpenAI
 

@@ -1,5 +1,5 @@
 ---
-date: 2026-07-18
+date: 2026-08-27
 title: GraphQL OpenTelemetry Instrumentation Guide for Node.js
 description: Instrument your Node.js GraphQL server with OpenTelemetry and send traces to SigNoz. Works with Apollo Server, graphql-http, and graphql-js.
 doc_type: howto
@@ -9,7 +9,7 @@ Use this guide to instrument a Node.js GraphQL server with OpenTelemetry and sen
 
 Works with <a href="https://www.apollographql.com/docs/apollo-server/" target="_blank" rel="noopener noreferrer nofollow">Apollo Server</a>, <a href="https://github.com/graphql/graphql-http" target="_blank" rel="noopener noreferrer nofollow">graphql-http</a>, and any server built on <a href="https://github.com/graphql/graphql-js" target="_blank" rel="noopener noreferrer nofollow">graphql-js</a>.
 
-<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
   Use the same setup with two changes: update the endpoint and remove the ingestion key header. See [Cloud to Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
@@ -246,7 +246,7 @@ npm install --save @opentelemetry/instrumentation-graphql
 <Tabs entityName="language">
 <TabItem value="javascript" label="JavaScript" default>
 
-```js:tracing.js
+```js:tracing.js defaultCollapsed minimap
 'use strict'
 const { NodeSDK } = require('@opentelemetry/sdk-node');
 const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
@@ -285,7 +285,7 @@ sdk.start();
 </TabItem>
 <TabItem value="typescript" label="TypeScript">
 
-```ts:tracing.ts
+```ts:tracing.ts defaultCollapsed minimap
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql';
@@ -356,7 +356,10 @@ node -r ./tracing.js server.js
 <ToggleHeading>
 
 ## Troubleshooting
+
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### No GraphQL spans appearing
 

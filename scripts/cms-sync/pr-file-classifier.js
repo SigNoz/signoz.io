@@ -181,6 +181,7 @@ function classifyContentFiles({
   pathExistsInBase,
 }) {
   const changedFiles = []
+  const addedFiles = []
   const restoreFiles = []
   const deletedFiles = []
   const isClosed = eventAction === 'closed'
@@ -200,6 +201,9 @@ function classifyContentFiles({
 
     if (existsInHead) {
       changedFiles.push(filePath)
+      if (finalStatusByPath.get(filePath) === 'A') {
+        addedFiles.push(filePath)
+      }
     } else if (finalStatusByPath.get(filePath) === 'D') {
       deletedFiles.push(filePath)
     } else if (existsInBase) {
@@ -212,6 +216,7 @@ function classifyContentFiles({
   return {
     touchedFiles: uniqueSorted(touchedFiles),
     changedFiles: uniqueSorted(changedFiles),
+    addedFiles: uniqueSorted(addedFiles),
     restoreFiles: uniqueSorted(restoreFiles),
     deletedFiles: uniqueSorted(deletedFiles),
   }
@@ -232,12 +237,14 @@ function appendGithubOutput(flags) {
 function writeOutputs(outputDir, result) {
   fs.mkdirSync(outputDir, { recursive: true })
   writeJson(path.join(outputDir, 'content_changed_files.json'), result.changedFiles)
+  writeJson(path.join(outputDir, 'content_added_files.json'), result.addedFiles || [])
   writeJson(path.join(outputDir, 'content_restore_files.json'), result.restoreFiles)
   writeJson(path.join(outputDir, 'content_deleted_files.json'), result.deletedFiles)
   writeJson(path.join(outputDir, 'content_touched_files.json'), result.touchedFiles)
 
   const flags = {
     any_changed: result.changedFiles.length > 0,
+    any_added: (result.addedFiles || []).length > 0,
     any_restored: result.restoreFiles.length > 0,
     any_deleted: result.deletedFiles.length > 0,
     any_touched: result.touchedFiles.length > 0,

@@ -13,9 +13,7 @@ function FeaturedBlogs({ isDarkMode, posts }: FeaturedBlogsProps) {
   return (
     <div className="my-8 flex flex-col">
       <div
-        className={`w-full text-sm font-semibold uppercase leading-5 tracking-wide max-md:max-w-full ${
-          isDarkMode ? 'text-signoz_slate-100' : 'text-signoz_slate-300'
-        }`}
+        className={`w-full text-sm font-semibold uppercase leading-5 tracking-wide max-md:max-w-full ${'text-[var(--l2-foreground)]'}`}
       >
         featured blog posts
       </div>

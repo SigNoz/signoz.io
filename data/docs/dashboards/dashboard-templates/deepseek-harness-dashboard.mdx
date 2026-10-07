@@ -1,0 +1,85 @@
+---
+date: 2026-08-19
+title: DeepSeek Harness Dashboard
+meta_title: DeepSeek Harness OpenTelemetry Dashboard
+description: Monitor DeepSeek Harness with token spend and cache efficiency, turn and session volume, model latency, tool activity, and errors from OpenTelemetry traces.
+doc_type: explanation
+---
+
+<Admonition type="note" title="Send telemetry first">
+To use this dashboard, you need to set up the data source and send telemetry to SigNoz. Follow the [DeepSeek Harness Observability](https://signoz.io/docs/deepseek-harness-observability/) guide to get started.
+</Admonition>
+
+This dashboard provides comprehensive monitoring of DeepSeek Harness (`dsh`) usage patterns and performance, offering visibility into token spend and cache efficiency, turn and session volume, model latency, native and MCP tool activity, and where things fail.
+
+All panels read traces emitted by the `@loongsuite/dsh-plugin` plugin, which DeepSeek Harness needs because it ships no OpenTelemetry export in its core. Panels filter on `gen_ai.span.kind`, the attribute that separates the five span kinds the plugin emits: `ENTRY` for a turn, `AGENT` for the agent loop, `STEP` for a react round, `LLM` for a model call, and `TOOL` for a tool execution. A `service_name` variable scopes every panel, so one dashboard covers as many teams or machines as report under different service names.
+
+## Dashboard Preview
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/deepseek-harness-dashboard.webp"
+  alt="DeepSeek Harness Dashboard"
+  caption="DeepSeek Harness Dashboard Template"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/deepseek-harness/deepseek-harness-dashboard.json"
+/>
+
+## What This Dashboard Monitors
+
+This dashboard tracks the traces the plugin emits to help you:
+
+- **Monitor Token Spend**: Track input, output, and cached tokens to understand workload and cost
+- **Measure Cache Efficiency**: Watch how much of each prompt is served from cache as sessions grow
+- **Understand Agent Behavior**: See how many model calls and tool calls a single turn actually takes
+- **Compare Model Usage**: See which models carry the workload and track migration between versions
+- **Track Reliability**: Watch turn outcomes and error breakdown to catch failures early
+- **Find Slow Tools**: Break tool latency down per tool to find the step that stalls a turn
+
+## Panels Included
+
+| Panel | Description |
+|---|---|
+| Agent Turns | Every prompt-and-response cycle the harness completed |
+| Sessions | Distinct sessions, to tell one-shot invocations from long working sessions |
+| Model Calls | One count per model call, showing how many round trips a turn takes |
+| Tool Calls | Every tool executed, native and MCP together |
+| Total Tokens | Total token spend across every model call |
+| Cache Hit Rate | Share of input tokens served from cache |
+
+### Token Usage
+
+- **Token Usage Over Time**: Input, cached, and output tokens over time. Output stays low and flat on almost any real agent workload, because most model calls are short decisions about which tool to run next and only the final answer of a turn is long.
+- **Token Distribution by Model**: Token spend per model, useful for tracking migration between model versions and spotting which model carries the workload.
+
+### Agent Activity
+
+- **Activity Over Time**: Turns, model calls, tool calls, and subagent turns on one axis. The subagent line is worth watching on its own, because those turns are also counted in the turn total.
+- **Turn Outcomes**: How turns finished, from `dsh.turn.end_reason`. A rising `error` share points at the model provider rather than at tooling, since a failing tool does not end a turn.
+- **Model Finish Reasons**: Why each model call stopped. `tool_calls` dominating over `stop` is the normal shape for an agent, because only the last call of a turn ends with a finished answer.
+
+### Latency
+
+- **Model Call Latency**: p95 and p99 duration of model calls. This tracks output length more than anything else, so a rising p99 usually means longer answers rather than a slower provider.
+- **Time to First Token**: How long the model takes to start responding. Unlike total latency this is independent of answer length, so it is the honest measure of provider responsiveness.
+
+### Tools and Errors
+
+- **Tool Call Distribution**: Which tools the agent reaches for. Tools named `mcp__<server>__<tool>` come from an MCP server, and the name is the only thing that identifies them.
+- **Tool Performance**: Call count and latency per tool. Slow tools matter even when they never fail, because the model sits idle while they run.
+- **Errors Over Time**: Failed turns, model call errors, and reported tool errors together.
+
+### Sessions
+
+- **Session Details**: Token spend and model call count per session. Subagent sessions appear as their own rows, identifiable by a bare UUID where a top-level session id carries a `session-` prefix.
+
+<Admonition type="info" title="Why some panels are scoped to a single span kind" defaultCollapsed="true">
+Three panels here deliberately read one span kind, and changing that scope will silently produce wrong numbers.
+
+Token panels read `LLM` spans, because the `invoke_agent` span repeats the sum of its own model calls and an unscoped sum double counts exactly 2x. Cache Hit Rate reads `AGENT` spans, because `LLM` spans omit the cache attribute rather than setting it to zero on a miss, which drops cold calls out of the average and reads high. Model Finish Reasons reads `LLM` spans, because on `AGENT` spans the same attribute name holds the turn outcome instead.
+</Admonition>
+
+<Admonition type="info" title="Reported tool errors undercount" defaultCollapsed="true">
+Only tools that report failure explicitly, such as an MCP tool returning `isError`, mark their span as an error. A shell command exiting non-zero still records a successful span, so the Errors Over Time panel counts MCP failures and misses shell, file, and search failures. Nothing in the span carries a tool exit status.
+</Admonition>

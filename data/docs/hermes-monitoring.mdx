@@ -1,6 +1,7 @@
 ---
 date: 2026-08-03
 title: Hermes Monitoring and Observability with OpenTelemetry
+meta_title: "Hermes Agent Observability and Telemetry"
 description: Set up Hermes Agent monitoring with OpenTelemetry and SigNoz. Trace long-running agent sessions, skill execution, subagent runs, and model calls.
 doc_type: howto
 ---
@@ -19,7 +20,7 @@ With full Hermes monitoring in SigNoz, you can correlate traces, logs, and metri
 
 ## Prerequisites
 
-- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self-Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
 - A Hermes instance. Follow the <a href="https://hermes-agent.nousresearch.com/docs/getting-started/quickstart" target="_blank" rel="noopener noreferrer nofollow">Hermes quickstart guide</a> to get set up
 
 ## Instrument Hermes Monitoring with OpenTelemetry
@@ -93,7 +94,7 @@ OTEL_PROJECT_NAME=hermes-agent
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `OTEL_PROJECT_NAME` is the resource name you will see in SigNoz.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -108,7 +109,7 @@ ${EDITOR:-nano} ~/.hermes/plugins/hermes_otel/config.yaml
 
 Use this minimal config:
 
-```yaml
+```yaml defaultCollapsed
 # Enable the plugin.
 enabled: true
 
@@ -136,7 +137,7 @@ backends:
     logs: true
 ```
 
-Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (for example, `us`, `eu`, or `in`). If you use self-hosted SigNoz, replace the entire `endpoint:` value with your SigNoz OTLP HTTP traces endpoint.
+Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (for example, `us`, `eu`, or `in`). If you use Self-Hosted SigNoz, replace the entire `endpoint:` value with your SigNoz OTLP HTTP traces endpoint.
 
 <Admonition type="info">
 Using an explicit `backends:` entry makes the setup reproducible, enables all three signals (traces, metrics, and logs), and keeps secrets in `.env` via `ingestion_key_env` rather than hardcoding them in YAML.

@@ -1,5 +1,5 @@
 ---
-date: 2026-08-05
+date: 2026-08-27
 title: Send Metrics from Ruby Application Using OpenTelemetry
 description: Learn how to send metrics from Ruby applications (Rails, Sinatra, Sidekiq) to SigNoz using OpenTelemetry
 
@@ -12,7 +12,7 @@ This guide shows you how to send metrics from your Ruby application (Rails, Sina
 The OpenTelemetry Ruby Metrics SDK is currently in **Development** status (not yet stable). APIs may change in future releases. While it supports synchronous instruments (Counter, UpDownCounter, Histogram) and observable instruments, some features like cumulative temporality, metrics views, and exemplars are not yet implemented. See the <a href="https://github.com/open-telemetry/opentelemetry-ruby/tree/main/metrics_sdk" target="_blank" rel="noopener noreferrer nofollow">official SDK documentation</a> for current status.
 </Admonition>
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
     Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
@@ -381,7 +381,7 @@ gem 'get_process_mem'
 
 Create a helper module to collect common runtime metrics:
 
-```ruby:lib/runtime_metrics.rb minimap
+```ruby:lib/runtime_metrics.rb minimap defaultCollapsed
 require 'get_process_mem'
 
 module RuntimeMetrics
@@ -505,7 +505,10 @@ For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/d
 <details>
 <ToggleHeading>
 ## Troubleshooting
+
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### Metrics not appearing?
 

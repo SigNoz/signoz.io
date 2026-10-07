@@ -18,7 +18,7 @@ Instrumenting Azure OpenAi in your LLM applications with telemetry ensures full 
 
 - SigNoz setup (choose one):
   - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
-  - Self-hosted SigNoz instance
+  - Self-Hosted SigNoz instance
 - Internet access to send telemetry data to SigNoz Cloud
 - An [Microsoft Azure](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account/) account with an OpenAI resource deployed and working API Key
 - For Python: `pip` installed for managing Python packages and _(optional but recommended)_ a Python virtual environment to isolate dependencies
@@ -108,7 +108,7 @@ opentelemetry-instrument <your_run_command>
 - Replace `<your_run_command>` with the actual command you would use to run your application. For example: `python main.py`
 
 <Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 
 </Admonition>
 
@@ -191,7 +191,7 @@ trace.set_tracer_provider(provider)
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 <Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 
 </Admonition>
 
@@ -207,7 +207,7 @@ OpenAIInstrumentor().instrument(tracer_provider=provider)
 
 **Step 5**: Setup Logs
 
-```python
+```python defaultCollapsed
 import logging
 from opentelemetry.sdk.resources import Resource
 from opentelemetry._logs import set_logger_provider
@@ -239,13 +239,13 @@ logger = logging.getLogger(__name__)
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 <Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 
 </Admonition>
 
 **Step 6**: Setup Metrics
 
-```python
+```python defaultCollapsed
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
@@ -278,7 +278,7 @@ HTTPXClientInstrumentor().instrument()
 > 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. These are not Azure OpenAI-specific metrics. Azure OpenAI does not expose metrics as part of their SDK. If you want to add custom metrics to your Azure OpenAI application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
 
 <Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 
 </Admonition>
 
@@ -364,7 +364,7 @@ const { metrics } = require('@opentelemetry/api')
 
 **Step 3:** Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
 
-```javascript
+```javascript defaultCollapsed
 const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node')
 const { BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base')
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-otlp-http')
@@ -399,7 +399,7 @@ provider.register()
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 <Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 
 </Admonition>
 
@@ -422,7 +422,7 @@ registerInstrumentations({
 
 **Step 5**: Setup Logs
 
-```javascript
+```javascript defaultCollapsed
 const { LoggerProvider, BatchLogRecordProcessor } = require('@opentelemetry/sdk-logs')
 const { OTLPLogExporter } = require('@opentelemetry/exporter-otlp-http')
 const { Resource } = require('@opentelemetry/resources')
@@ -459,13 +459,13 @@ const logger = logs.getLogger('azure-openai-app')
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 <Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 
 </Admonition>
 
 **Step 6**: Setup Metrics
 
-```javascript minimap
+```javascript minimap defaultCollapsed
 const { MeterProvider, PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics')
 const { OTLPMetricExporter } = require('@opentelemetry/exporter-otlp-http')
 const { Resource } = require('@opentelemetry/resources')
@@ -521,13 +521,13 @@ hostMetrics.start()
 > 📌 Note: HostMetrics provides system-level metrics (CPU, memory, disk, network, etc.), and HttpInstrumentation provides outbound HTTP request metrics such as request duration. These are not Azure OpenAI-specific metrics. Azure OpenAI does not expose metrics as part of their SDK. If you want to add custom metrics to your Azure OpenAI application, see [JavaScript Custom Metrics](https://signoz.io/opentelemetry/custom-metrics-nodejs/).
 
 <Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Using Self-Hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 
 </Admonition>
 
 **Step 7:** Run an example
 
-```javascript
+```javascript defaultCollapsed
 const OpenAI = require('openai')
 
 const client = new OpenAI({
@@ -560,7 +560,7 @@ main()
 
 Your Azure OpenAI commands should now automatically emit traces, logs, and metrics.
 
-You should be able to view traces in Signoz Cloud under the traces tab:
+You should be able to view traces in SigNoz Cloud under the traces tab:
 
 <Figure
   src="/img/docs/llm/azure-openai/azure-traces.webp"
@@ -576,7 +576,7 @@ When you click on a trace in SigNoz, you'll see a detailed view of the trace, in
   caption="Azure OpenAI API Detailed Trace View"
 />
 
-You should be able to view logs in Signoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
+You should be able to view logs in SigNoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
 
 <figure data-zoomable align="center">
   <img src="/img/docs/llm/azure-openai/azure-related-logs.webp" alt="Related logs" width="300" />
@@ -599,7 +599,7 @@ When you click on any of these logs in SigNoz, you'll see a detailed view of the
   caption="Azure OpenAI API Detailed Logs View"
 />
 
-You should be able to see Azure OpenAI related metrics in Signoz Cloud under the metrics tab:
+You should be able to see Azure OpenAI related metrics in SigNoz Cloud under the metrics tab:
 
 <Figure
   src="/img/docs/llm/deepseek/deepseek-metrics.webp"

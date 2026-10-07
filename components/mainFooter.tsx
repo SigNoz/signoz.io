@@ -7,7 +7,11 @@ import Image from 'next/image'
 import { Github, Linkedin, Slack, Twitter, Youtube } from '@/components/social-icons/SolidIcons'
 import { usePathname } from 'next/navigation'
 import { cn } from 'app/lib/utils'
+import AskAIRow from '@/components/AskAIRow/AskAIRow'
+import FooterArt from '@/components/footer/FooterArt'
+import FooterStatus from '@/components/footer/FooterStatus'
 import './footer/footer-pill-links.css'
+import footerFx from './footer/footer-fx.module.css'
 
 type FooterPillLinkProps = {
   href: string
@@ -101,7 +105,14 @@ function Footer({ inDocsShell = false }: FooterProps) {
   const stackStartClass = stackEarly ? 'max-lg:justify-start' : 'max-md:justify-start'
 
   return (
-    <div className="z-[10] flex min-w-0 shrink-0 flex-col justify-center border-t border-solid border-[var(--l1-border)] bg-[var(--l1-background-60)] backdrop-blur-[10px]">
+    <div
+      className={cn(
+        'z-[10] flex min-w-0 shrink-0 flex-col justify-center bg-[var(--l1-background-60)] backdrop-blur-[10px]',
+        inDocsShell && 'border-t border-solid border-[var(--l1-border)]'
+      )}
+      data-markdown-ignore
+    >
+      {!inDocsShell && <FooterArt />}
       <div
         className={cn(
           'flex w-full min-w-0 items-center px-4 py-14 max-md:max-w-full',
@@ -144,7 +155,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
             <div className={colClass}>
               <div
                 className={cn(
-                  'flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)]',
+                  'flex grow flex-col self-stretch pb-2.5 text-sm tracking-wide text-[var(--l2-foreground)]',
                   stackMtClass
                 )}
               >
@@ -185,7 +196,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
             <div className={colClass}>
               <div
                 className={cn(
-                  'flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-[var(--l2-foreground)]',
+                  'flex grow flex-col self-stretch pb-2.5 text-sm tracking-wide text-[var(--l2-foreground)]',
                   stackMtClass
                 )}
               >
@@ -193,12 +204,19 @@ function Footer({ inDocsShell = false }: FooterProps) {
                   More
                 </div>
 
-                <FooterPillLink href="/datadog-alternative/">SigNoz vs Datadog</FooterPillLink>
-                <FooterPillLink href="/newrelic-alternative/">SigNoz vs New Relic</FooterPillLink>
-                <FooterPillLink href="/grafana-alternative/">SigNoz vs Grafana</FooterPillLink>
-                <FooterPillLink href="/product-comparison/signoz-vs-dynatrace/">
-                  SigNoz vs Dynatrace
+                <FooterPillLink href="/datadog-alternative/">
+                  SigNoz Cloud vs Datadog
                 </FooterPillLink>
+                <FooterPillLink href="/newrelic-alternative/">
+                  SigNoz Cloud vs New Relic
+                </FooterPillLink>
+                <FooterPillLink href="/grafana-alternative/">
+                  SigNoz Cloud vs Grafana
+                </FooterPillLink>
+                <FooterPillLink href="/product-comparison/signoz-vs-dynatrace/">
+                  SigNoz Cloud vs Dynatrace
+                </FooterPillLink>
+                <FooterPillLink href="/dash0-alternative/">SigNoz Cloud vs Dash0</FooterPillLink>
                 <FooterPillLink href="https://signoz.io/careers/" newTab>
                   Careers
                   <ArrowUpRight size={16} />
@@ -214,7 +232,7 @@ function Footer({ inDocsShell = false }: FooterProps) {
             <div className={colClass}>
               <div
                 className={cn(
-                  'flex flex-col items-end',
+                  'relative flex h-full flex-col items-end',
                   stackEarly ? 'max-lg:mt-10 max-lg:items-start' : 'max-md:mt-10 max-md:items-start'
                 )}
               >
@@ -235,20 +253,6 @@ function Footer({ inDocsShell = false }: FooterProps) {
                       loading="lazy"
                     />
                     <div className="font-satoshi-bold font-medium">SigNoz</div>
-                  </Link>
-                </div>
-                <div
-                  className={cn(
-                    'mt-5 flex items-center justify-end gap-2 rounded text-[13px] font-medium leading-none tracking-[-0.065px] text-[var(--callout-success-description)]',
-                    stackStartClass
-                  )}
-                >
-                  <span
-                    className="size-1.5 shrink-0 rounded-full bg-[var(--callout-success-description)]"
-                    aria-hidden
-                  />
-                  <Link href="https://status.signoz.io/" target="_blank" prefetch={false}>
-                    All systems operational
                   </Link>
                 </div>
                 <div
@@ -327,9 +331,32 @@ function Footer({ inDocsShell = false }: FooterProps) {
                     onClick={() => window.open('https://trust.signoz.io/', '_blank')}
                   />
                 </div>
+                <div
+                  className={cn(
+                    'flex w-full justify-end',
+                    stackEarly
+                      ? 'mt-8 lg:absolute lg:bottom-0 lg:right-0 lg:mt-0'
+                      : 'mt-8 md:absolute md:bottom-0 md:right-0 md:mt-0',
+                    stackStartClass
+                  )}
+                >
+                  <FooterStatus />
+                </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <div className={`${footerFx.textureBar} w-full`} aria-hidden="true" data-markdown-ignore />
+      <div
+        className={cn(
+          'flex w-full min-w-0 items-center border-t border-solid border-[var(--l1-border)] px-4 pt-6',
+          // Docs pages float the fixed NozPeek dock over the page bottom; leave room so the row stays clickable.
+          inDocsShell ? 'justify-start pb-24' : 'justify-center pb-6'
+        )}
+      >
+        <div className="w-full min-w-0 max-w-8xl">
+          <AskAIRow />
         </div>
       </div>
     </div>

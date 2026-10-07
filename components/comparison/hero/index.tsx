@@ -1,6 +1,8 @@
 import React from 'react'
 import styles from './styles.module.css'
 import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/Button'
+import { cn } from 'app/lib/utils'
 
 const Hero = (props) => {
   const { title, desc, billForComparison, trySigNozCloud, selfHost } = props
@@ -11,7 +13,7 @@ const Hero = (props) => {
       <div className={styles.ctaContainer}>
         {billForComparison.isVisible && (
           <Link
-            className={`button ${billForComparison.className} ${styles.ctaButton}`}
+            className={cn(buttonVariants({ variant: billForComparison.variant }), styles.ctaButton)}
             href={billForComparison.path}
             prefetch={false}
           >
@@ -19,17 +21,13 @@ const Hero = (props) => {
           </Link>
         )}
         {trySigNozCloud.isVisible && (
-          <Link
-            className={`button primary-gradient bg-signoz_vanilla-300 text-signoz_ink-300`}
-            href="/teams/"
-            prefetch={false}
-          >
+          <Link className={buttonVariants({ variant: 'default' })} href="/teams/" prefetch={false}>
             Get Started - Free
           </Link>
         )}
         {selfHost.isVisible && (
           <Link
-            className={`button ${selfHost.className} ${styles.ctaButton}`}
+            className={cn(buttonVariants({ variant: selfHost.variant }), styles.ctaButton)}
             href={selfHost.path}
             prefetch={false}
           >

@@ -1,0 +1,101 @@
+---
+date: 2026-09-29
+title: AI Observability Model Pricing - Set LLM Token Costs
+description: Manage LLM model pricing rules in SigNoz AI Observability. Search, filter, and set per-million token costs, and price unrecognized models.
+doc_type: howto
+---
+
+Use the **Model pricing** tab of [AI Observability](https://signoz.io/docs/ai-observability/) to set the price for each model. SigNoz uses these prices to calculate the cost of each span in USD. For prerequisites, see the [AI Observability overview](https://signoz.io/docs/ai-observability/#prerequisites).
+
+To open the tab, select **More** > **AI Observability** in the side navigation, then select the **Model pricing** tab.
+
+The tab has two parts: **Model Costs** lists your pricing rules, and **Unpriced models** lists models that no rule prices.
+
+## Model Costs tab
+
+SigNoz Cloud includes default prices for common models. In self-hosted SigNoz, add a pricing rule for each of your models.
+
+| Column | What it shows |
+| --- | --- |
+| **Model** | The billing model name and its ID, for example `openai:gpt-4o`. |
+| **Provider** | The provider of the model, for example OpenAI or Anthropic. |
+| **Input / 1M** | The price for one million input tokens, in USD. |
+| **Output / 1M** | The price for one million output tokens, in USD. |
+| **Extra buckets** | The prices for cached tokens (Cache Read, Cache Write), if the rule has them. |
+| **Source** | **Auto** for a default price from SigNoz Cloud (**Auto-populated** in the drawer), or **User override** for a price that an Admin set. |
+| **Last seen** | The time since the rule was last updated or synced. |
+
+<Figure
+  src="/img/docs/ai/ai-observability/model-costs.webp"
+  alt="Model Costs tab in AI Observability Model pricing, filtered by the search text claude, with the Add model cost button"
+  caption="The Model Costs tab, filtered by model name"
+/>
+
+To find a rule, type a model name or a provider name in the **Search by model or provider** box. To show only one type of rule, select **User override** or **Auto** in the source filter.
+
+To share the filtered table, copy the page URL.
+
+## Add a pricing rule
+
+Only Admins can add, edit, map, or delete pricing rules.
+
+1. On the **Model Costs** tab, select **Add model cost**.
+2. In **Billing Model ID**, type an ID for the rule, for example `openai:gpt-4o`. You cannot change the ID or the **Provider** after you save.
+3. Select the **Provider**.
+4. In **Model name patterns (prefix match)**, add the `gen_ai.request.model` values that this rule prices. To match every name that starts with a prefix, end the pattern with `*`, for example `gpt-4o*`. A pattern without `*` matches only that exact name.
+5. In **Pricing (per 1M tokens, USD)**, type the **Input Cost** and the **Output Cost**. If the provider charges a different cached-token price, select **Add pricing bucket**. Add a `cache_read` or `cache_write` price.
+6. If you added cache prices, select the **Cache mode** that matches the provider:
+   - **Subtract (OpenAI style)**: the input token count includes cached tokens. SigNoz subtracts the cache-read tokens from the input tokens and bills them at the `cache_read` price.
+   - **Additive (Anthropic style)**: the input token count excludes cached tokens. SigNoz bills input, `cache_read`, and `cache_write` tokens at their own prices.
+   - **Unknown** (default): SigNoz bills all input tokens at the input price and does not use the cache prices.
+7. Select **Save**.
+
+## Edit or delete a pricing rule
+
+To edit a rule, open the menu (⋮) at the end of its row and select **Edit**.
+
+<Figure
+  src="/img/docs/ai/ai-observability/model-cost-drawer.webp"
+  alt="Edit model cost drawer with Billing Model ID, Provider, Model name patterns, Source, and read-only pricing for an Auto-populated rule"
+  caption="The Edit model cost drawer for a rule with default pricing"
+/>
+
+You cannot change the prices of an **Auto-populated** rule. To set your own, change the source to **User override**. To go back to the default price, select **Auto-populated** again and confirm. SigNoz discards your custom prices.
+
+To delete a rule, open the menu (⋮) on its row. Select **Delete**, then confirm.
+
+## Price an unpriced model
+
+The **Unpriced models** tab lists models that SigNoz found in spans from the last hour but that match no pricing rule. SigNoz cannot calculate cost for spans from these models. In this tab, the UI calls a pricing rule a pricing model.
+
+To price a model:
+
+1. In the **Map to billing model** column of the model, open the **Select / Create a pricing model** dropdown.
+2. Select an existing rule.
+3. Select **Map model**. SigNoz adds the model name as a pattern on that rule.
+
+To set a new price instead, select **Create a new pricing model** at the bottom of the dropdown. The **Add model cost** drawer opens with the model name in **Billing Model ID**. Complete it as in [Add a pricing rule](#add-a-pricing-rule).
+
+When no model from the last hour is unpriced, the tab shows "All models in your traces are priced."
+
+## When price changes take effect
+
+A price change applies to spans that SigNoz receives after the change. If you reset a rule to the default SigNoz price, the reset can take up to 24 hours. Stored spans do not change.
+
+## Validate
+
+1. After the new price takes effect, send a new LLM span for the model from your application.
+2. In the [Explorer](https://signoz.io/docs/ai-observability-explorer/) **List View**, run a filter on the model, for example `gen_ai.request.model = 'gpt-4o'`.
+3. Select a span. The span opens in Trace Details.
+4. In the span attributes, make sure that `signoz.gen_ai.usage.tokens.cost` exists. If it is missing, no rule matches the model name, so check the patterns of the rule. A value of `0` means the price or the token count is zero.
+
+## Next steps
+
+- [AI Observability overview](https://signoz.io/docs/ai-observability/): see cost, tokens, latency, and tool calls on one dashboard.
+- [Explorer](https://signoz.io/docs/ai-observability-explorer/): query your LLM and agent traces.
+- [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/): map other attribute names to the GenAI names.
+- [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
+
+## Get Help
+
+<GetHelp />

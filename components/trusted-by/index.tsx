@@ -14,6 +14,7 @@ import KernelLogo from '@/public/svgs/icons/kernel.svg'
 import BlaxelLogo from '@/public/svgs/icons/blaxel.svg'
 import ShapedLogo from '@/public/img/case_study/logos/shaped-logo.svg'
 import { cn } from '../../app/lib/utils'
+import { buttonVariants } from '@/components/ui/Button'
 
 export const COMPANIES = [
   { Logo: NetAppLogo, imageDesc: 'netapp logo' },
@@ -95,13 +96,13 @@ export const TrustedByTeams = ({ page, className, variant = 'default' }: Trusted
         >
           <div className="mb-5 flex flex-col items-center text-center">
             <TrackingLink
-              href="/case-study/"
+              href="/customers/"
               id={customerStoriesId}
               clickType="Secondary CTA"
               clickName="Customer Stories Link"
               clickText="Read customer stories"
               clickLocation="Trusted By Section"
-              className="button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+              className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'z-[1] truncate')}
             >
               Read customer stories <ArrowRight size={14} />
             </TrackingLink>

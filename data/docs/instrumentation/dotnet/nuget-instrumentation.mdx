@@ -1,5 +1,5 @@
 ---
-date: 2026-05-14
+date: 2026-08-27
 title: How to Manually Instrument .NET Apps using NuGet
 description: Setup OpenTelemetry in .NET using NuGet packages and Program.cs configuration. Get full control over tracing for ASP.NET Core, HTTP, SQL, and gRPC.
 tags: [SigNoz Cloud, Self-Host]
@@ -8,14 +8,14 @@ doc_type: howto
 
 This guide shows you how to add OpenTelemetry to your .NET application by installing NuGet packages and configuring the SDK in your code. Use this approach when you need more control over instrumentation than zero-code provides, or when zero-code instrumentation isn't available for your deployment.
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed="true">
+<KeyPointCallout title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## Prerequisites
 
 - <a href="https://dotnet.microsoft.com/en-us/platform/support/policy#supported-versions" target="_blank" rel="noopener noreferrer nofollow">Supported .NET version</a> or <a href="https://opentelemetry.io/docs/zero-code/dotnet/#compatibility" target="_blank" rel="noopener noreferrer nofollow">.NET Framework 4.6.2+</a>.
-- A SigNoz Cloud account or self-hosted SigNoz instance
+- A SigNoz Cloud account or Self-Hosted SigNoz instance
 
 ## Step 1. Install OpenTelemetry packages
 
@@ -45,7 +45,7 @@ dotnet add package OpenTelemetry.Instrumentation.GrpcNetClient
 
 ## Step 2. Configure OpenTelemetry in Program.cs
 
-```csharp:Program.cs
+```csharp:Program.cs defaultCollapsed
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -177,7 +177,10 @@ builder.Services.AddOpenTelemetry()
 <details>
 <ToggleHeading>
 ## Troubleshooting
+
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### How do I debug locally?
 

@@ -1,6 +1,15 @@
 export const normalizeDocsSlugFromPathname = (pathname: string): string => {
   const withoutPrefix = pathname.replace(/^\/docs\/?/, '')
-  return withoutPrefix.replace(/\/+$/, '')
+  return withoutPrefix.replace(/\/+$/, '').replace(/\.md$/, '')
+}
+
+// Agents commonly fetch docs by appending `.md` to the page URL
+// (e.g. /docs/introduction.md) rather than sending an `Accept: text/markdown`
+// header. Treat that suffix as an explicit markdown request so those requests
+// resolve to markdown instead of 404-ing.
+export const hasDocsMarkdownExtension = (pathname: string): boolean => {
+  const normalized = pathname.replace(/\/+$/, '')
+  return normalized.startsWith('/docs/') && normalized.endsWith('.md')
 }
 
 export const shouldRewriteDocsToMarkdown = (
@@ -12,7 +21,11 @@ export const shouldRewriteDocsToMarkdown = (
   const isInternalMarkdownPath =
     pathname === '/api/docs-markdown' || pathname.startsWith('/api/docs-markdown/')
 
-  return isDocsPath && !isDocsSitemapPath && !isInternalMarkdownPath && prefersMarkdown
+  if (!isDocsPath || isDocsSitemapPath || isInternalMarkdownPath) {
+    return false
+  }
+
+  return prefersMarkdown || hasDocsMarkdownExtension(pathname)
 }
 
 export const buildDocsMarkdownRewritePath = (pathname: string): string => {
