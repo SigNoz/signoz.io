@@ -18,6 +18,206 @@ This guide explains how to install SigNoz on a Red Hat OpenShift cluster using t
 - A storage class with a provisioner supported on OpenShift. See the <a href="https://docs.redhat.com/en/documentation/red_hat_openshift_container_storage/4.6/html-single/managing_and_allocating_storage_resources/index" target="_blank" rel="noopener noreferrer nofollow">Red Hat storage documentation</a>.
 
 <Tabs entityName="setup">
+<TabItem value="helm" label="Helm" default>
+
+## Install SigNoz
+
+### Step 1: Create the SecurityContextConstraints
+
+OpenShift admits a pod only when an SCC allows what the pod needs. ClickHouse and ZooKeeper run with fixed user and group IDs and mount persistent volumes. Create a file named `signoz-scc.yaml` that allows this for their service accounts:
+
+```yaml defaultCollapsed
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: signoz-scc
+
+allowPrivilegedContainer: false
+runAsUser:
+  type: RunAsAny        # allow any container UID
+fsGroup:
+  type: RunAsAny        # allow any supplemental GID
+seLinuxContext:
+  type: RunAsAny        # no SELinux label constraints
+volumes:
+  - persistentVolumeClaim # mounted PVC
+  - emptyDir              # ephemeral scratch space
+  - configMap             # ConfigMap files
+  - projected             # combined CM/secret/etc.
+  - downwardAPI           # expose pod metadata
+
+readOnlyRootFilesystem: false
+allowHostDirVolumePlugin: false
+
+users:
+  # Bind the SCC to Required Service Accounts for SigNoz
+  - system:serviceaccount:signoz:signoz-clickhouse
+  - system:serviceaccount:signoz:default
+```
+
+**Verify these values:**
+
+- `signoz` after `system:serviceaccount:`: the namespace you pass to `helm install` in Step 4.
+- `signoz-clickhouse`: the service account of ClickHouse. Its prefix is the release name you pass to `helm install`, so with a different release name, replace the leading `signoz`.
+- `default`: the service account ZooKeeper runs under. Keep it as is.
+
+Apply it. Run this on the machine where you use `oc`:
+
+```bash
+oc apply -f signoz-scc.yaml
+```
+
+`kubectl apply -f signoz-scc.yaml` works the same way.
+
+### Step 2: Add the Helm repository
+
+Run this on the machine where you use `kubectl`:
+
+```bash
+helm repo add signoz https://charts.signoz.io
+helm repo update
+```
+
+### Step 3 (optional): Choose a storage class
+
+SigNoz keeps its data on persistent volumes. A storage class decides what kind of disk your cluster creates for them. Without this step, SigNoz uses your cluster's default storage class. On OpenShift, use a storage class whose provisioner is supported on your cluster; see the Red Hat storage documentation linked in Prerequisites. To see what your cluster offers:
+
+```bash
+kubectl get storageclass
+```
+
+To use a specific one, create a file named `values.yaml`:
+
+```yaml
+global:
+  storageClass: <storage-class>
+```
+
+**Verify these values:**
+
+- `<storage-class>`: A storage class name from the `kubectl get storageclass` output.
+
+Any other chart value goes in the same file. See the <a href="https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration" target="_blank" rel="noopener noreferrer nofollow">chart configuration reference</a>.
+
+### Step 4: Install the chart
+
+Run this from the directory that contains `values.yaml`:
+
+```bash
+helm install signoz signoz/signoz \
+   --namespace signoz --create-namespace \
+   --wait --timeout 1h \
+   -f values.yaml
+```
+
+Leave out `-f values.yaml` if you skipped Step 3. `--wait` makes the command return once every pod is ready.
+
+### Step 5: Verify the installation
+
+Check that the pods are running:
+
+```bash
+kubectl get pods -n signoz
+```
+
+The output should look similar to the following. Pod suffixes vary:
+
+```output
+NAME                                         READY   STATUS      RESTARTS   AGE
+chi-signoz-clickhouse-cluster-0-0-0          1/1     Running     0          3m
+signoz-0                                     1/1     Running     0          3m
+signoz-clickhouse-operator-7f8c9d6b5-q4w2z   2/2     Running     0          3m
+signoz-otel-collector-6d9c7b8f5c-k2x9p       1/1     Running     0          3m
+signoz-telemetrystore-migrator-x7h3k         0/1     Completed   0          2m
+signoz-zookeeper-0                           1/1     Running     0          3m
+```
+
+Once all pods are running, port-forward the SigNoz UI and open `http://localhost:8080/` in your browser:
+
+```bash
+kubectl port-forward -n signoz svc/signoz 8080:8080
+```
+
+In another terminal, check the health endpoint:
+
+```bash
+curl -X GET http://localhost:8080/api/v1/health
+```
+
+The response is:
+
+```output
+{"status":"ok"}
+```
+
+<RetentionInfo />
+
+## Send data to SigNoz
+
+Your applications send traces, metrics, and logs to the SigNoz collector. Inside the cluster, the collector listens at:
+
+```bash
+http://signoz-otel-collector.signoz.svc.cluster.local:4318
+```
+
+Use this address as the OTLP endpoint in your instrumentation, for example as the value of `OTEL_EXPORTER_OTLP_ENDPOINT`. For gRPC, use port `4317` instead.
+
+The second `signoz` in the address is the namespace. If you installed SigNoz into a different namespace, use that one.
+
+For applications outside the cluster, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
+
+## Customize the installation
+
+Every change follows the same loop: edit `values.yaml`, then upgrade the release:
+
+```bash
+helm upgrade signoz signoz/signoz --namespace signoz -f values.yaml
+```
+
+- **Chart values**: see the <a href="https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration" target="_blank" rel="noopener noreferrer nofollow">chart configuration reference</a> for every setting.
+- **Chart version**: add `--version <chart-version>` to `helm install` and `helm upgrade`. Versions are listed in the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>.
+
+**Verify these values:**
+
+- `<chart-version>`: A chart version from the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>, for example `0.144.0`.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### helm install times out
+
+`--wait` waits for every pod to become ready. When the command times out, list the pods with `kubectl get pods -n signoz` and follow the two items below.
+
+### Pods stay Pending
+
+Describe the pod to see why it is unscheduled:
+
+```bash
+kubectl describe pod -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with a pod name from the `kubectl get pods -n signoz` output.
+
+A pod that reports insufficient CPU or memory needs more node capacity. See [resource planning](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/).
+
+After the fix, `kubectl get pods -n signoz` shows the pod as `Running`.
+
+### A pod keeps restarting
+
+Check its logs:
+
+```bash
+kubectl logs -n signoz <pod-name>
+```
+
+To see the logs from before the last restart, add `--previous`.
+
+</details>
+
+</TabItem>
 <TabItem value="foundry" label="Foundry">
 
 ## Install SigNoz
@@ -248,206 +448,6 @@ Every change follows the same loop: edit `casting.yaml`, then run `foundryctl ca
 ### foundryctl fails
 
 Re-run the failing command with `--debug` for verbose logs.
-
-### Pods stay Pending
-
-Describe the pod to see why it is unscheduled:
-
-```bash
-kubectl describe pod -n signoz <pod-name>
-```
-
-Replace `<pod-name>` with a pod name from the `kubectl get pods -n signoz` output.
-
-A pod that reports insufficient CPU or memory needs more node capacity. See [resource planning](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/).
-
-After the fix, `kubectl get pods -n signoz` shows the pod as `Running`.
-
-### A pod keeps restarting
-
-Check its logs:
-
-```bash
-kubectl logs -n signoz <pod-name>
-```
-
-To see the logs from before the last restart, add `--previous`.
-
-</details>
-
-</TabItem>
-<TabItem value="helm" label="Helm" default>
-
-## Install SigNoz
-
-### Step 1: Create the SecurityContextConstraints
-
-OpenShift admits a pod only when an SCC allows what the pod needs. ClickHouse and ZooKeeper run with fixed user and group IDs and mount persistent volumes. Create a file named `signoz-scc.yaml` that allows this for their service accounts:
-
-```yaml defaultCollapsed
-apiVersion: security.openshift.io/v1
-kind: SecurityContextConstraints
-metadata:
-  name: signoz-scc
-
-allowPrivilegedContainer: false
-runAsUser:
-  type: RunAsAny        # allow any container UID
-fsGroup:
-  type: RunAsAny        # allow any supplemental GID
-seLinuxContext:
-  type: RunAsAny        # no SELinux label constraints
-volumes:
-  - persistentVolumeClaim # mounted PVC
-  - emptyDir              # ephemeral scratch space
-  - configMap             # ConfigMap files
-  - projected             # combined CM/secret/etc.
-  - downwardAPI           # expose pod metadata
-
-readOnlyRootFilesystem: false
-allowHostDirVolumePlugin: false
-
-users:
-  # Bind the SCC to Required Service Accounts for SigNoz
-  - system:serviceaccount:signoz:signoz-clickhouse
-  - system:serviceaccount:signoz:default
-```
-
-**Verify these values:**
-
-- `signoz` after `system:serviceaccount:`: the namespace you pass to `helm install` in Step 4.
-- `signoz-clickhouse`: the service account of ClickHouse. Its prefix is the release name you pass to `helm install`, so with a different release name, replace the leading `signoz`.
-- `default`: the service account ZooKeeper runs under. Keep it as is.
-
-Apply it. Run this on the machine where you use `oc`:
-
-```bash
-oc apply -f signoz-scc.yaml
-```
-
-`kubectl apply -f signoz-scc.yaml` works the same way.
-
-### Step 2: Add the Helm repository
-
-Run this on the machine where you use `kubectl`:
-
-```bash
-helm repo add signoz https://charts.signoz.io
-helm repo update
-```
-
-### Step 3 (optional): Choose a storage class
-
-SigNoz keeps its data on persistent volumes. A storage class decides what kind of disk your cluster creates for them. Without this step, SigNoz uses your cluster's default storage class. On OpenShift, use a storage class whose provisioner is supported on your cluster; see the Red Hat storage documentation linked in Prerequisites. To see what your cluster offers:
-
-```bash
-kubectl get storageclass
-```
-
-To use a specific one, create a file named `values.yaml`:
-
-```yaml
-global:
-  storageClass: <storage-class>
-```
-
-**Verify these values:**
-
-- `<storage-class>`: A storage class name from the `kubectl get storageclass` output.
-
-Any other chart value goes in the same file. See the <a href="https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration" target="_blank" rel="noopener noreferrer nofollow">chart configuration reference</a>.
-
-### Step 4: Install the chart
-
-Run this from the directory that contains `values.yaml`:
-
-```bash
-helm install signoz signoz/signoz \
-   --namespace signoz --create-namespace \
-   --wait --timeout 1h \
-   -f values.yaml
-```
-
-Leave out `-f values.yaml` if you skipped Step 3. `--wait` makes the command return once every pod is ready.
-
-### Step 5: Verify the installation
-
-Check that the pods are running:
-
-```bash
-kubectl get pods -n signoz
-```
-
-The output should look similar to the following. Pod suffixes vary:
-
-```output
-NAME                                         READY   STATUS      RESTARTS   AGE
-chi-signoz-clickhouse-cluster-0-0-0          1/1     Running     0          3m
-signoz-0                                     1/1     Running     0          3m
-signoz-clickhouse-operator-7f8c9d6b5-q4w2z   2/2     Running     0          3m
-signoz-otel-collector-6d9c7b8f5c-k2x9p       1/1     Running     0          3m
-signoz-telemetrystore-migrator-x7h3k         0/1     Completed   0          2m
-signoz-zookeeper-0                           1/1     Running     0          3m
-```
-
-Once all pods are running, port-forward the SigNoz UI and open `http://localhost:8080/` in your browser:
-
-```bash
-kubectl port-forward -n signoz svc/signoz 8080:8080
-```
-
-In another terminal, check the health endpoint:
-
-```bash
-curl -X GET http://localhost:8080/api/v1/health
-```
-
-The response is:
-
-```output
-{"status":"ok"}
-```
-
-<RetentionInfo />
-
-## Send data to SigNoz
-
-Your applications send traces, metrics, and logs to the SigNoz collector. Inside the cluster, the collector listens at:
-
-```bash
-http://signoz-otel-collector.signoz.svc.cluster.local:4318
-```
-
-Use this address as the OTLP endpoint in your instrumentation, for example as the value of `OTEL_EXPORTER_OTLP_ENDPOINT`. For gRPC, use port `4317` instead.
-
-The second `signoz` in the address is the namespace. If you installed SigNoz into a different namespace, use that one.
-
-For applications outside the cluster, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
-
-## Customize the installation
-
-Every change follows the same loop: edit `values.yaml`, then upgrade the release:
-
-```bash
-helm upgrade signoz signoz/signoz --namespace signoz -f values.yaml
-```
-
-- **Chart values**: see the <a href="https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration" target="_blank" rel="noopener noreferrer nofollow">chart configuration reference</a> for every setting.
-- **Chart version**: add `--version <chart-version>` to `helm install` and `helm upgrade`. Versions are listed in the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>.
-
-**Verify these values:**
-
-- `<chart-version>`: A chart version from the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>, for example `0.144.0`.
-
-<details>
-
-<ToggleHeading>
-## Troubleshooting
-</ToggleHeading>
-
-### helm install times out
-
-`--wait` waits for every pod to become ready. When the command times out, list the pods with `kubectl get pods -n signoz` and follow the two items below.
 
 ### Pods stay Pending
 

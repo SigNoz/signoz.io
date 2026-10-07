@@ -17,6 +17,159 @@ This guide explains how to install SigNoz on an Azure Kubernetes Service (AKS) c
 - Enough cluster capacity for SigNoz. For sizing, see [resource planning](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/).
 
 <Tabs entityName="setup">
+<TabItem value="helm" label="Helm" default>
+
+## Install SigNoz
+
+### Step 1: Add the Helm repository
+
+Run this on the machine where you use `kubectl`:
+
+```bash
+helm repo add signoz https://charts.signoz.io
+helm repo update
+```
+
+### Step 2 (optional): Choose a storage class
+
+SigNoz keeps its data on persistent volumes. A storage class decides what kind of disk your cluster creates for them. Without this step, SigNoz uses your cluster's default storage class. AKS clusters come with `managed-csi` for standard disks and `managed-csi-premium` for premium SSDs. To see what your cluster offers:
+
+```bash
+kubectl get storageclass
+```
+
+To use a specific one, create a file named `values.yaml`:
+
+```yaml
+global:
+  storageClass: <storage-class>
+```
+
+**Verify these values:**
+
+- `<storage-class>`: A storage class name from the `kubectl get storageclass` output, for example `managed-csi-premium`.
+
+Any other chart value goes in the same file. See the <a href="https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration" target="_blank" rel="noopener noreferrer nofollow">chart configuration reference</a>.
+
+### Step 3: Install the chart
+
+Run this from the directory that contains `values.yaml`:
+
+```bash
+helm install signoz signoz/signoz \
+   --namespace signoz --create-namespace \
+   --wait --timeout 1h \
+   -f values.yaml
+```
+
+Leave out `-f values.yaml` if you skipped Step 2. `--wait` makes the command return once every pod is ready.
+
+### Step 4: Verify the installation
+
+Check that the pods are running:
+
+```bash
+kubectl get pods -n signoz
+```
+
+The output should look similar to the following. Pod suffixes vary:
+
+```output
+NAME                                         READY   STATUS      RESTARTS   AGE
+chi-signoz-clickhouse-cluster-0-0-0          1/1     Running     0          3m
+signoz-0                                     1/1     Running     0          3m
+signoz-clickhouse-operator-7f8c9d6b5-q4w2z   2/2     Running     0          3m
+signoz-otel-collector-6d9c7b8f5c-k2x9p       1/1     Running     0          3m
+signoz-telemetrystore-migrator-x7h3k         0/1     Completed   0          2m
+signoz-zookeeper-0                           1/1     Running     0          3m
+```
+
+Once all pods are running, port-forward the SigNoz UI and open `http://localhost:8080/` in your browser:
+
+```bash
+kubectl port-forward -n signoz svc/signoz 8080:8080
+```
+
+In another terminal, check the health endpoint:
+
+```bash
+curl -X GET http://localhost:8080/api/v1/health
+```
+
+The response is:
+
+```output
+{"status":"ok"}
+```
+
+<RetentionInfo />
+
+## Send data to SigNoz
+
+Your applications send traces, metrics, and logs to the SigNoz collector. Inside the cluster, the collector listens at:
+
+```bash
+http://signoz-otel-collector.signoz.svc.cluster.local:4318
+```
+
+Use this address as the OTLP endpoint in your instrumentation, for example as the value of `OTEL_EXPORTER_OTLP_ENDPOINT`. For gRPC, use port `4317` instead.
+
+The second `signoz` in the address is the namespace. If you installed SigNoz into a different namespace, use that one.
+
+For applications outside the cluster, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
+
+## Customize the installation
+
+Every change follows the same loop: edit `values.yaml`, then upgrade the release:
+
+```bash
+helm upgrade signoz signoz/signoz --namespace signoz -f values.yaml
+```
+
+- **Chart values**: see the <a href="https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration" target="_blank" rel="noopener noreferrer nofollow">chart configuration reference</a> for every setting.
+- **Chart version**: add `--version <chart-version>` to `helm install` and `helm upgrade`. Versions are listed in the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>.
+
+**Verify these values:**
+
+- `<chart-version>`: A chart version from the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>, for example `0.144.0`.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### helm install times out
+
+`--wait` waits for every pod to become ready. When the command times out, list the pods with `kubectl get pods -n signoz` and follow the two items below.
+
+### Pods stay Pending
+
+Describe the pod to see why it is unscheduled:
+
+```bash
+kubectl describe pod -n signoz <pod-name>
+```
+
+Replace `<pod-name>` with a pod name from the `kubectl get pods -n signoz` output.
+
+A pod that reports insufficient CPU or memory needs more node capacity. See [resource planning](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/).
+
+After the fix, `kubectl get pods -n signoz` shows the pod as `Running`.
+
+### A pod keeps restarting
+
+Check its logs:
+
+```bash
+kubectl logs -n signoz <pod-name>
+```
+
+To see the logs from before the last restart, add `--previous`.
+
+</details>
+
+</TabItem>
 <TabItem value="foundry" label="Foundry">
 
 ## Install SigNoz
@@ -199,159 +352,6 @@ Every change follows the same loop: edit `casting.yaml`, then run `foundryctl ca
 ### foundryctl fails
 
 Re-run the failing command with `--debug` for verbose logs.
-
-### Pods stay Pending
-
-Describe the pod to see why it is unscheduled:
-
-```bash
-kubectl describe pod -n signoz <pod-name>
-```
-
-Replace `<pod-name>` with a pod name from the `kubectl get pods -n signoz` output.
-
-A pod that reports insufficient CPU or memory needs more node capacity. See [resource planning](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/).
-
-After the fix, `kubectl get pods -n signoz` shows the pod as `Running`.
-
-### A pod keeps restarting
-
-Check its logs:
-
-```bash
-kubectl logs -n signoz <pod-name>
-```
-
-To see the logs from before the last restart, add `--previous`.
-
-</details>
-
-</TabItem>
-<TabItem value="helm" label="Helm" default>
-
-## Install SigNoz
-
-### Step 1: Add the Helm repository
-
-Run this on the machine where you use `kubectl`:
-
-```bash
-helm repo add signoz https://charts.signoz.io
-helm repo update
-```
-
-### Step 2 (optional): Choose a storage class
-
-SigNoz keeps its data on persistent volumes. A storage class decides what kind of disk your cluster creates for them. Without this step, SigNoz uses your cluster's default storage class. AKS clusters come with `managed-csi` for standard disks and `managed-csi-premium` for premium SSDs. To see what your cluster offers:
-
-```bash
-kubectl get storageclass
-```
-
-To use a specific one, create a file named `values.yaml`:
-
-```yaml
-global:
-  storageClass: <storage-class>
-```
-
-**Verify these values:**
-
-- `<storage-class>`: A storage class name from the `kubectl get storageclass` output, for example `managed-csi-premium`.
-
-Any other chart value goes in the same file. See the <a href="https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration" target="_blank" rel="noopener noreferrer nofollow">chart configuration reference</a>.
-
-### Step 3: Install the chart
-
-Run this from the directory that contains `values.yaml`:
-
-```bash
-helm install signoz signoz/signoz \
-   --namespace signoz --create-namespace \
-   --wait --timeout 1h \
-   -f values.yaml
-```
-
-Leave out `-f values.yaml` if you skipped Step 2. `--wait` makes the command return once every pod is ready.
-
-### Step 4: Verify the installation
-
-Check that the pods are running:
-
-```bash
-kubectl get pods -n signoz
-```
-
-The output should look similar to the following. Pod suffixes vary:
-
-```output
-NAME                                         READY   STATUS      RESTARTS   AGE
-chi-signoz-clickhouse-cluster-0-0-0          1/1     Running     0          3m
-signoz-0                                     1/1     Running     0          3m
-signoz-clickhouse-operator-7f8c9d6b5-q4w2z   2/2     Running     0          3m
-signoz-otel-collector-6d9c7b8f5c-k2x9p       1/1     Running     0          3m
-signoz-telemetrystore-migrator-x7h3k         0/1     Completed   0          2m
-signoz-zookeeper-0                           1/1     Running     0          3m
-```
-
-Once all pods are running, port-forward the SigNoz UI and open `http://localhost:8080/` in your browser:
-
-```bash
-kubectl port-forward -n signoz svc/signoz 8080:8080
-```
-
-In another terminal, check the health endpoint:
-
-```bash
-curl -X GET http://localhost:8080/api/v1/health
-```
-
-The response is:
-
-```output
-{"status":"ok"}
-```
-
-<RetentionInfo />
-
-## Send data to SigNoz
-
-Your applications send traces, metrics, and logs to the SigNoz collector. Inside the cluster, the collector listens at:
-
-```bash
-http://signoz-otel-collector.signoz.svc.cluster.local:4318
-```
-
-Use this address as the OTLP endpoint in your instrumentation, for example as the value of `OTEL_EXPORTER_OTLP_ENDPOINT`. For gRPC, use port `4317` instead.
-
-The second `signoz` in the address is the namespace. If you installed SigNoz into a different namespace, use that one.
-
-For applications outside the cluster, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
-
-## Customize the installation
-
-Every change follows the same loop: edit `values.yaml`, then upgrade the release:
-
-```bash
-helm upgrade signoz signoz/signoz --namespace signoz -f values.yaml
-```
-
-- **Chart values**: see the <a href="https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration" target="_blank" rel="noopener noreferrer nofollow">chart configuration reference</a> for every setting.
-- **Chart version**: add `--version <chart-version>` to `helm install` and `helm upgrade`. Versions are listed in the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>.
-
-**Verify these values:**
-
-- `<chart-version>`: A chart version from the <a href="https://github.com/SigNoz/charts/releases" target="_blank" rel="noopener noreferrer nofollow">SigNoz charts releases</a>, for example `0.144.0`.
-
-<details>
-
-<ToggleHeading>
-## Troubleshooting
-</ToggleHeading>
-
-### helm install times out
-
-`--wait` waits for every pod to become ready. When the command times out, list the pods with `kubectl get pods -n signoz` and follow the two items below.
 
 ### Pods stay Pending
 
