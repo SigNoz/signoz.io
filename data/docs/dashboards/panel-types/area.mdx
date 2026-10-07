@@ -1,5 +1,5 @@
 ---
-date: 2026-09-21
+date: 2026-10-07
 title: Area Chart Panel Type - Stacked Area Visualizations
 description: Learn how to use the Area Chart panel type in SigNoz dashboards, including fill opacity, fill mode, and None, Normal, and Percent stacking.
 doc_type: reference
@@ -25,6 +25,18 @@ This panel type supports any time series data from logs, traces, or metrics, bui
 2. In the panel type switcher, choose **Area Chart**.
 3. Add a query, then **Save** the panel. The panel renders with a filled area below each line.
 
+<Figure
+  src="/img/docs/dashboards/panel-types/area-panel-picker.webp"
+  alt="New Panel type picker with Area Chart available as a selectable panel type"
+  caption="Choose Area Chart in the New Panel type picker."
+/>
+
+<Figure
+  src="/img/docs/dashboards/panel-types/area-normal-stacked.webp"
+  alt="Saved Area Chart panel showing stacked series with a filled area below each line"
+  caption="A saved Area Chart panel with the region below each line filled."
+/>
+
 ### Configuration
 
 #### Visualization
@@ -34,6 +46,13 @@ This panel type supports any time series data from logs, traces, or metrics, bui
   - **None** — Draw each series independently, overlapping where they share values.
   - **Normal** — Stack series so each is drawn above the one below it, showing the cumulative total.
   - **Percent** — Rescale each time column so all series together total 100%. See [Percent stacking](#percent-stacking).
+
+<Figure
+  src="/img/docs/dashboards/panel-types/area-stack-series.webp"
+  alt="Visualization section with the Stack series control offering None, Normal, and Percent options"
+  caption="The Stack series control in the Visualization section: None, Normal, or Percent."
+/>
+
 - **Fill Gaps** — Fill gaps in the result data with zero. Useful when you want to interpret missing data as zero, which is more appropriate for sparse data. For example, if the result of a query for 10 minutes is `{t1: 12, t3: 21, t5: 42, t7: 29}`, enabling `Fill Gaps` produces `{t1: 12, t2: 0, t3: 21, t4: 0, t5: 42, t6: 0, t7: 29, t8: 0, t9: 0, t10: 0}`.
 
 #### Chart Appearance
@@ -45,6 +64,12 @@ Control how the line and its fill are drawn:
 - **Fill mode** — `Solid` for a flat fill under the line, or `Gradient` for a fill that fades out. Area Chart is always filled, so there is no `None` option.
 - **Fill Opacity** — Set the transparency of the filled area from 0% to 100%, with a live numeric readout. Lower values make overlapping series easier to read.
 - **Show points** — Draw a marker at each individual data point in addition to the line. Off by default.
+
+<Figure
+  src="/img/docs/dashboards/panel-types/area-chart-appearance.webp"
+  alt="Chart Appearance section showing the Fill mode selector with Solid and Gradient and the Fill opacity slider"
+  caption="The Chart Appearance section: Fill mode (Solid or Gradient) and the Fill opacity slider."
+/>
 
 #### Disconnect values
 
@@ -90,7 +115,19 @@ Thresholds draw a line on the y-axis to highlight a value. Threshold edits previ
 
 Set **Stack series** to **Percent** to compare each series' share of the total over time. Each time column is rescaled so all series together add up to 100%. The y-axis switches to percentage tick labels (0%, 50%, 100%) and is pinned to a soft 0 to 100 range, so the axis always tops at exactly 100.
 
+<Figure
+  src="/img/docs/dashboards/panel-types/area-percent-stacked.webp"
+  alt="Percent-stacked Area Chart panel with a percentage y-axis topping at 100%"
+  caption="A percent-stacked Area panel: the y-axis shows percentage labels and tops at 100%."
+/>
+
 Tooltips always show the original raw value for each series, not the cumulative or normalized value. This holds for `Normal` and `Percent` stacking, so you can read the actual measurement while still seeing the stacked shape.
+
+<Figure
+  src="/img/docs/dashboards/panel-types/area-percent-tooltip.webp"
+  alt="Tooltip on a percent-stacked Area panel showing the raw pre-stack value for each series"
+  caption="Hovering a percent-stacked panel shows each series' raw pre-stack value in the tooltip."
+/>
 
 <Admonition type="info">
 Percent stacking is exposed through the Area Chart panel. Bar Chart panels support on/off stacking, and both panels show raw values in the tooltip when stacked.
@@ -104,6 +141,12 @@ Stacking is preserved when you switch an Area Chart to a [Bar Chart](https://sig
 - Area's `Percent` has no bar equivalent, so it collapses to Bar's stacked-on.
 
 This keeps your stacking intent intact across the type change.
+
+<Figure
+  src="/img/docs/dashboards/panel-types/area-switch-to-bar.webp"
+  alt="Panel switched from Area Chart to Bar Chart with the bars rendered stacked"
+  caption="Switching the panel type to Bar Chart preserves stacking — the bars render stacked."
+/>
 
 ### Panel actions
 
