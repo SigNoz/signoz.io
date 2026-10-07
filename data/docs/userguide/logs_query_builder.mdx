@@ -1,5 +1,5 @@
 ---
-date: 2026-08-24
+date: 2026-10-07
 title: Logs Explorer
 meta_title: "Logs Explorer: Query, Search & Analyze Logs Efficiently"
 description: Explore logs with SigNoz Logs Explorer. Query, search and analyze logs efficiently using powerful log explorer queries and real-time insights.
@@ -172,80 +172,81 @@ The Table View provides a tabular representation of different operations like th
 
 ## Log Details
 
-Click on any log line to open the **Log details** panel. This gives a comprehensive view of your log including the full body, attributes, and resource fields. The detail panel has four tabs — Overview, JSON, Context, and Metrics.
+Click a log line to open the **Log details** drawer. The top of the drawer shows the log body and a summary of the fields the log has among **Service**, **Severity**, **Namespace**, **Environment**, **Trace ID**, and **Span ID**. Click the trace ID to open the trace that produced the log.
 
-<Figure
-  src="/img/docs/logs-management/ui/logs-detail-view.webp"
-  alt="Log Details Panel in Logs Explorer"
-  caption="Log Details Panel in Logs Explorer"
-/>
+Press the up and down arrow keys, or use the arrows in the drawer header, to move to the previous or next log. The **⋯** menu in the header has **Copy log** and **Copy link to log**.
+
+The drawer has three tabs: **Overview**, **Context**, and **Metrics**.
 
 ### Overview
 
-The Overview tab has two sections:
+The Overview tab shows every field of the log as a tree: `timestamp`, `body`, `attributes`, `resource`, `scope`, the severity fields, and the trace and span IDs. Resource attributes such as `service.name` and `host.name` are grouped under `resource`.
 
-**Body**
+- Type in **Search for a field...** to find a field by name.
+- Click **JSON** to see the raw log as JSON, and **Pretty** to return to the tree. In the JSON view, **Wrap text** wraps long lines.
+- Click the copy icon to copy the log.
 
-Shows the complete body of the log. You can toggle **Wrap text** to switch between formatted and raw display.
-
-<Figure
-  src="/img/docs/logs-management/ui/logs-detail-body.webp"
-  alt="Log Body in Overview section of Log Details"
-  caption="Log Body in the Overview section showing body content with Wrap text toggle"
-/>
-
-**Attributes**
-
-Shows all log attributes in a tabular format with the attribute name and its value. You can search for specific attributes using the search bar.
+If an attribute holds a JSON string, the tree shows it as nested, expandable fields. For example, a `payload` attribute with `{"order": {"id": 8812}}` expands into `payload` → `order` → `id`.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-detail-search-attribute.webp"
-  alt="Search for an attribute in Log Details"
-  caption="Search for a specific attribute in the Log Details panel"
+  src="/img/docs/logs-management/ui/logs-detail-drawer-overview.webp"
+  alt="Log details drawer with the Service, Severity, Trace ID, and Span ID summary, and the Overview tab showing attributes, a payload attribute expanded into nested JSON fields, and resource attributes"
+  caption="The Overview tab, with a JSON string attribute shown as nested fields."
 />
-
-In the log details panel, hover over any attribute value to see quick action icons. These let you instantly filter for or against a value, group by the attribute, or replace the current filters — all without manually editing the query in log explorer.
-
-From the attribute values, you can:
-- **Filter for value** — add the attribute as an `IN` filter. For example, if the attribute is `container_id` and its value is `debian`, using Filter for Value will create a filter `container_id IN debian`. This will list the logs where the `container_id` attribute is `debian`.
-- **Filter out value** — add the attribute as a `NOT IN` filter. For example, if the attribute is `container_id` and its value is `debian`, using Filter out Value will create a filter `container_id NOT_IN debian`. This will list the logs where the `container_id` attribute is not `debian`.
-- **Group By Attribute** — add the attribute to Group By
-- **Replace filters with this value** — replace the current filter with this specific value
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-detail-overview-actions.webp"
-  alt="Quick actions on attribute values in Log Details"
-  caption="Quick actions on attribute values: Filter for value, Filter out value, Group By Attribute, Replace filters"
+  src="/img/docs/logs-management/ui/logs-detail-drawer-json.webp"
+  alt="Overview tab in JSON mode showing the raw log as numbered JSON lines, with the Wrap text toggle at the bottom"
+  caption="The Overview tab in JSON mode."
 />
 
-### JSON
+#### Field actions
 
-Displays the log in JSON format. You can toggle **Wrap text** to switch to raw format, and use **Copy Log** to copy your log in either JSON or raw form.
+Hover over a field and click **⋯** to act on its value without editing the query by hand:
+
+- **Copy Value**: Copy the value to your clipboard.
+- **Filter for value**: Add an `=` filter for the value. For example, `http.route = '/api/pay'` lists only logs for that route.
+- **Filter out value**: Add a `!=` filter for the value, which excludes those logs.
+- **Group by field**: Add the field to **Group By**.
+- **Replace filters with this value**: Replace the current filters with a filter for this value.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-detail-json.webp"
-  alt="JSON tab in Log Details panel"
-  caption="JSON tab showing the complete log in JSON format with Copy Log option"
+  src="/img/docs/logs-management/ui/logs-detail-field-actions.webp"
+  alt="Field actions menu on the http.route attribute with Copy Value, Filter for value, Filter out value, Group by field, and Replace filters with this value"
+  caption="Actions for an attribute value."
 />
+
+Some fields have fewer actions:
+
+- `body` and `trace_id` have no **Group by field**.
+- Fields nested inside a JSON string attribute, such as `payload.order.id`, have only **Copy Value**.
+
+#### Where the drawer opens
+
+The same drawer also opens from the **Logs** tab of [Kubernetes](https://signoz.io/docs/infrastructure-monitoring/kubernetes-monitoring/) and [host](https://signoz.io/docs/infrastructure-monitoring/host-monitoring/) detail pages, and from dashboard [List panels](https://signoz.io/docs/dashboards/panel-types/list/). The field actions depend on where you open it:
+
+- **Logs Explorer**: All actions.
+- **Infrastructure Monitoring**: **Copy Value**, **Filter for value**, and **Filter out value**. The filters narrow the logs on the tab.
+- **Dashboard List panels**: **Copy Value** only.
 
 ### Context
 
-Shows surrounding logs for the selected log entry — 10 logs before and 10 logs after by default. You can load more logs and filter by a particular attribute. This is useful for faster debugging by seeing what happened around a specific log event.
+The Context tab shows the logs around the selected log that have the same resource attributes, such as the same service and host. The selected log is highlighted. It loads 10 logs before and 10 logs after it. Click **Load more** at the top or bottom to load 10 more. Click the filter icon to narrow the surrounding logs with a filter.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-detail-context.webp"
-  alt="Context tab in Log Details panel"
-  caption="Context tab showing surrounding log entries for debugging"
+  src="/img/docs/logs-management/ui/logs-detail-drawer-context.webp"
+  alt="Context tab with the selected error log highlighted between earlier and later logs from the same service, and Load more buttons above and below"
+  caption="The Context tab with the selected log highlighted."
 />
 
 ### Metrics
 
-The Metrics tab shows infrastructure metrics (CPU usage, Memory usage, Pod CPU/Memory usage) for the node and pod associated with the selected log entry. This helps you correlate log events with resource utilization.
+The Metrics tab shows infrastructure metrics for the host or Kubernetes pod that produced the log, such as CPU, memory, disk, and network usage. Use it to check if a resource problem caused the log. For a log from a Kubernetes pod, the tab has **Node** and **Pod** views. The charts need host or Kubernetes metrics in SigNoz, matched through the `host.name` or `k8s.pod.name` resource attribute of the log.
 
 <Figure
-  src="/img/docs/logs-management/ui/logs-detail-metrics.webp"
-  alt="Metrics tab in Log Details panel"
-  caption="Metrics tab showing CPU and Memory usage for the associated node and pod"
+  src="/img/docs/logs-management/ui/logs-detail-drawer-metrics.webp"
+  alt="Metrics tab for a log from a Kubernetes pod with the Node view selected, showing Node CPU usage, Node memory usage, Node network IO receive and transmit, and Node filesystem usage charts"
+  caption="The Metrics tab for a log from a Kubernetes pod."
 />
 
 ## Create Dashboards and Alerts
