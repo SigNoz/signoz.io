@@ -1,5 +1,5 @@
 ---
-date: 2026-09-16
+date: 2026-09-22
 title: Transactions Reference
 description: Complete reference of transactions for each resource in SigNoz covering relations, selector formats, and managed role access.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -19,7 +19,7 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers roles, service accounts, API keys, dashboards, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as alerts and pipelines will be documented as they become available for fine-grained access control.
+This page currently covers roles, service accounts, API keys, dashboards, cloud integrations, auth domains, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as alerts and pipelines will be documented as they become available for fine-grained access control.
 </Admonition>
 
 ## Resources
@@ -84,6 +84,42 @@ The list is not filtered by `read`. A principal holding `list` sees every dashbo
 
 <Admonition type="info">
 Publishing a dashboard requires `update` on it. Readers who open the resulting public link are anonymous and are authorized against the `public-dashboard` resource, which is not configurable in custom roles. See [Public Sharing](https://signoz.io/docs/dashboards/public-sharing/).
+</Admonition>
+
+### Cloud Integration
+
+**Resource:** `metaresource` · **Kind:** `cloud-integration` · **Selector:** cloud integration account ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Connect a new cloud provider account. | signoz-admin |
+| `list` | List connected accounts for a cloud provider. | signoz-admin, signoz-editor, signoz-viewer |
+| `read` | View a connected account's details and its enabled services. | signoz-admin, signoz-editor, signoz-viewer |
+| `update` | Update a connected account, including its enabled services. | signoz-admin |
+| `delete` | Disconnect a connected account. | signoz-admin |
+
+`list` covers the workspace, so it can only be granted as **All** or **None**. `read`, `update`, and `delete` accept **Only selected**, with the account ID as the selector.
+
+<Admonition type="info">
+Editors and viewers can view connected cloud accounts and their services but cannot connect, update, or disconnect them. The cloud provider catalog endpoints (list available services and get a service definition without account context) require no authorization.
+</Admonition>
+
+### Auth Domain
+
+**Resource:** `metaresource` · **Kind:** `auth-domain` · **Selector:** auth domain ID
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `create` | Register a new authenticated domain and its SSO configuration. | signoz-admin |
+| `list` | List all authenticated domains. | signoz-admin |
+| `read` | View a domain's SSO configuration and role mapping. | signoz-admin |
+| `update` | Modify a domain's SSO configuration or role mapping. | signoz-admin |
+| `delete` | Remove an authenticated domain. | signoz-admin |
+| `attach` | Create a relationship with the domain. Used when a domain's role mapping assigns roles at SSO login. | signoz-admin |
+| `detach` | Remove a relationship from the domain. Used when replacing a domain's role mapping. | signoz-admin |
+
+<Admonition type="info">
+Auth domain transactions are enforced with fine-grained scopes on enterprise deployments. Community deployments keep the existing admin-only gate. Configuring a domain with a role mapping also requires transactions on the mapped roles (see [Compound Transactions](#compound-transactions)).
 </Admonition>
 
 ### Logs
@@ -158,3 +194,7 @@ Some operations require transactions on multiple resources. Both transactions mu
 | Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
 | Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
 | Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |
+| Create an auth domain with a role mapping | `auth-domain:create` AND `auth-domain:attach` AND `role:attach` on each mapped role |
+| Update an auth domain's role mapping | `auth-domain:update` AND `auth-domain:attach` AND `auth-domain:detach` AND `role:attach` on each new mapped role AND `role:detach` on each replaced role |
+
+An update replaces the full role mapping, so the caller must be able to detach the roles the stored mapping grants and attach the roles the new mapping grants. When a mapping has no explicit default role, SSO users fall back to `signoz-viewer`, so the caller needs `role:attach` on `signoz-viewer`. When the mapping trusts the IdP role attribute (`useRoleAttribute`), any role can be granted at login, so the caller needs `role:attach` on the wildcard role selector (`*`).
