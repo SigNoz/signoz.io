@@ -7,6 +7,7 @@ import FeaturePageHeader from '@/shared/components/molecules/FeaturePages/Featur
 import IconTitleDescriptionCardGrid from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 import FeaturePageLayout from '@/shared/components/molecules/FeaturePages/FeaturePageLayout'
 import CustomerStoriesSection from '@/shared/components/molecules/FeaturePages/CustomerStoriesSection'
+import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 import {
   HIGH_GROWTH_TEAMS_CARDS,
   NUMBERS_THAT_SPEAK_CARDS,
@@ -30,42 +31,32 @@ const CTAButtonGroup: React.FC<CTAButtonGroupProps> = ({
   bookDemoClickName,
   startTrialClickName,
 }) => (
-  <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
-    <Button
-      asChild
-      variant="default"
-      rounded="full"
-      className="flex-center flex !w-fit items-center gap-2"
-    >
-      <TrackingLink
-        href="/contact-us/?source=why-signoz"
-        clickType="Primary CTA"
-        clickName={bookDemoClickName}
-        clickLocation={clickLocation}
-        clickText="Book a demo"
-      >
-        Book a demo
-        <ArrowRight size={14} />
-      </TrackingLink>
-    </Button>
-    <Button
-      asChild
-      variant="secondary"
-      rounded="full"
-      className="flex-center flex !w-fit items-center gap-2"
-    >
-      <TrackingLink
-        href="/teams/"
-        clickType="Secondary CTA"
-        clickName={startTrialClickName}
-        clickLocation={clickLocation}
-        clickText="Get Started - Free"
-      >
-        Get Started - Free
-        <ArrowRight size={14} />
-      </TrackingLink>
-    </Button>
-  </div>
+  <ButtonGroup
+    buttons={[
+      {
+        text: 'Book a demo',
+        href: '/contact-us/?source=why-signoz',
+        variant: 'default',
+        tracking: {
+          clickType: 'Primary CTA',
+          clickName: bookDemoClickName,
+          clickLocation,
+          clickText: 'Book a demo',
+        },
+      },
+      {
+        text: 'Get Started - Free',
+        href: '/teams/',
+        variant: 'secondary',
+        tracking: {
+          clickType: 'Secondary CTA',
+          clickName: startTrialClickName,
+          clickLocation,
+          clickText: 'Get Started - Free',
+        },
+      },
+    ]}
+  />
 )
 
 const Header: React.FC = () => {
@@ -125,12 +116,7 @@ const TrustedByTeams: React.FC = () => {
         ))}
       </div>
       <div className="w-full text-center">
-        <Button
-          variant="secondary"
-          rounded="full"
-          className="mx-auto flex w-fit items-center gap-2"
-          asChild
-        >
+        <Button variant="secondary" className="mx-auto flex w-fit items-center gap-2" asChild>
           <TrackingLink
             href="/customers/"
             clickType="Secondary CTA"
@@ -297,12 +283,7 @@ const PricingToScale: React.FC = () => {
               clickLocation="Why SigNoz Page Pricing Cloud Section"
               clickText="View Pricing"
             >
-              <Button
-                isButton
-                variant="default"
-                rounded="full"
-                className="flex-center flex !w-fit items-center gap-2"
-              >
+              <Button variant="default" className="!w-fit">
                 View Pricing
                 <ArrowRight size={14} />
               </Button>
@@ -325,12 +306,7 @@ const PricingToScale: React.FC = () => {
               clickLocation="Why SigNoz Page Pricing Self Hosted Section"
               clickText="View Pricing"
             >
-              <Button
-                isButton
-                variant="default"
-                rounded="full"
-                className="flex-center flex !w-fit items-center gap-2"
-              >
+              <Button variant="default" className="!w-fit">
                 View Pricing
                 <ArrowRight size={14} />
               </Button>

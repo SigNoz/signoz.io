@@ -1,0 +1,32 @@
+name: CMS Frontmatter Guard
+
+on:
+  pull_request:
+    paths:
+      - 'data/**'
+      - 'scripts/check-cms-frontmatter.js'
+      - 'scripts/cms-sync/schemas/**'
+      - 'tests/cms-frontmatter.test.js'
+      - 'package.json'
+      - '.github/workflows/cms-frontmatter-guard.yml'
+
+jobs:
+  check-cms-frontmatter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --non-interactive
+
+      - name: Run frontmatter tests
+        run: yarn test:cms-frontmatter
+
+      - name: Validate CMS content frontmatter
+        run: yarn check:cms-frontmatter

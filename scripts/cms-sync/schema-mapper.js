@@ -60,7 +60,7 @@ function mapToStrapiPayload(
   const warnings = []
 
   // Check for missing required fields
-  const missingFields = schema.fields.filter(
+  const missingFields = (schema.required ?? schema.fields).filter(
     (field) => field !== 'deployment_status' && !(field in data)
   )
 
