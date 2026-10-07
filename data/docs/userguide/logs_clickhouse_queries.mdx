@@ -261,7 +261,10 @@ GROUP BY ts
 ORDER BY ts ASC;
 ```
 
-#### Count of log lines per minute where `severity_text = 'INFO'` ,  `method = 'GET'` , `service.name = 'demo'`. Here `method` is an attribute while `service.name` is a resource attribute.
+#### Count of log lines per minute filtered on an attribute and a resource attribute
+
+Filters: `severity_text = 'INFO'`, `method = 'GET'`, `service.name = 'demo'`. Here `method` is an attribute while `service.name` is a resource attribute.
+
 ```sql
 WITH __resource_filter AS (
     SELECT fingerprint FROM signoz_logs.distributed_logs_v2_resource 
@@ -283,7 +286,7 @@ GROUP BY ts
 ORDER BY ts ASC;
 ```
 
-#### Count of log lines per minute where `severity_text = 'INFO'` ,  `method = 'GET'` , `service.name = 'demo'`. Here `method` is an attribute while `service.name` is a resource attribute and `method` is [selected field](#selected-indexed-attributes).
+#### Count of log lines per minute using a selected field
 
 ```sql
 WITH __resource_filter AS (
@@ -306,6 +309,8 @@ GROUP BY ts
 ORDER BY ts ASC;
 ```
 
+Same filters as above (`severity_text = 'INFO'`, `method = 'GET'`, `service.name = 'demo'`), except `method` is a [selected field](#selected-indexed-attributes) here, so it's referenced as `attribute_string_method` instead of `attributes_string['method']`.
+
 ### Value
 
 For the value type panel, the overall query will be similar to timeseries, just that you will have to get the absolute value at the end.
@@ -313,7 +318,9 @@ You can reduce your end result to either average, latest, sum, min, or max.
 
 #### Examples
 
-#### Average count of log lines where `severity_text = 'INFO'` ,  `method = 'GET'` , `service.name = 'demo'`. Here `method` is an attribute while `service.name` is a resource attribute.
+#### Average count of log lines filtered on an attribute and a resource attribute
+
+Filters: `severity_text = 'INFO'`, `method = 'GET'`, `service.name = 'demo'`. Here `method` is an attribute while `service.name` is a resource attribute.
 
 ```sql defaultCollapsed
 WITH __resource_filter AS (
@@ -347,11 +354,14 @@ SELECT
 
 This is used when you want to view the timeseries data in a tabular format.
 
-The query is similar to timeseries query but instead of using time interval we use just use `now() as ts` in select.
+The query is similar to timeseries query but instead of using time interval we just use `now() as ts` in select.
 
 #### Examples
 
-#### Count of log lines where `severity_text = 'INFO'` ,  `method = 'GET'`  group by  `service.name`. Here `method` is an attribute while `service.name` is a resource attribute.
+#### Count of log lines grouped by a resource attribute
+
+Filters: `severity_text = 'INFO'`, `method = 'GET'`, grouped by `service.name`. Here `method` is an attribute while `service.name` is a resource attribute.
+
 ```sql
 WITH __resource_filter AS (
     SELECT fingerprint 

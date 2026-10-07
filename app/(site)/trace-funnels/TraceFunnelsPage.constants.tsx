@@ -1,12 +1,10 @@
 import { Atom } from 'lucide-react'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 export const TRACE_FUNNELS_HEADER_BUTTONS = [
   {
     text: 'Start your free trial',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Trace Funnels Hero Start Trial',
@@ -18,7 +16,6 @@ export const TRACE_FUNNELS_HEADER_BUTTONS = [
     text: 'Read Documentation',
     href: '/docs/trace-funnels/overview/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Trace Funnels Hero Docs',
@@ -99,7 +96,7 @@ export const ANALYZE_REQUEST_FLOW_CARDS = [
     icon: <Atom />,
     title: 'Error Clustering',
     description:
-      'View which step transitions generate how many errors and see the trace IDs causing failures at each transition point..',
+      'View which step transitions generate how many errors and see the trace IDs causing failures at each transition point.',
   },
   {
     icon: <Atom />,
@@ -122,7 +119,6 @@ export const STOP_LOSING_USERS_BUTTONS = [
     text: 'Start your free trial',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Trace Funnels Banner Start Trial',
@@ -134,7 +130,6 @@ export const STOP_LOSING_USERS_BUTTONS = [
     text: 'Read Documentation',
     href: '/docs/trace-funnels/overview/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Trace Funnels Banner Docs',

@@ -5,11 +5,11 @@ import { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Modern New Relic Alternative',
   description:
-    'SigNoz is the modern New Relic alternative with OpenTelemetry-native ingestion, unlimited basic seats, and predictable usage-based pricing.',
+    'Compare New Relic with SigNoz Cloud for OpenTelemetry-native ingestion, no per-user charges, and usage-based observability pricing.',
   openGraph: {
     title: 'Modern New Relic Alternative | SigNoz',
     description:
-      'SigNoz is the modern New Relic alternative with OpenTelemetry-native ingestion, unlimited basic seats, and predictable usage-based pricing.',
+      'Compare New Relic with SigNoz Cloud for OpenTelemetry-native ingestion, no per-user charges, and usage-based observability pricing.',
     images: [
       {
         url: '/img/product-comparisons/signoz-vs-datadog/messaging-queue-monitoring-otel.webp',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Modern New Relic Alternative | SigNoz',
     description:
-      'SigNoz is the modern New Relic alternative with OpenTelemetry-native ingestion, unlimited basic seats, and predictable usage-based pricing.',
+      'Compare New Relic with SigNoz Cloud for OpenTelemetry-native ingestion, no per-user charges, and usage-based observability pricing.',
     images: ['/img/product-comparisons/signoz-vs-datadog/messaging-queue-monitoring-otel.webp'],
     site: siteMetadata.twitter,
   } as const,

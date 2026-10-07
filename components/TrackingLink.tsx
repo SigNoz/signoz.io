@@ -13,6 +13,7 @@ interface TrackingLinkProps {
   clickName: string
   clickLocation: string
   clickText: string
+  eventAttributes?: Record<string, unknown>
   className?: string
   onClick?: () => void
   target?: string
@@ -46,6 +47,7 @@ export default function TrackingLink({
   clickName,
   clickLocation,
   clickText,
+  eventAttributes: additionalEventAttributes,
   className,
   onClick,
   target,
@@ -64,6 +66,7 @@ export default function TrackingLink({
   const handleClick = () => {
     // Create event attributes object with click data
     const eventAttributes: Record<string, any> = {
+      ...additionalEventAttributes,
       clickType,
       clickName,
       clickLocation,

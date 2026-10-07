@@ -1,0 +1,177 @@
+---
+title: "Why Engineering-First Teams Choose SigNoz for Observability"
+date: 2026-09-07
+tags: [Product, Observability, OpenTelemetry]
+authors: [pranay]
+description: "Engineering-first teams need observability that can answer unplanned questions, query structured telemetry directly, preserve OpenTelemetry semantics, and fit programmable workflows."
+keywords: [engineering-first teams, SigNoz Cloud, observability, OpenTelemetry, JSON logs, delta temporality, query builder]
+related_articles:
+  - '/customers/kernel/'
+  - '/blog/open-source-observability/'
+  - '/blog/observability-growth-vs-insurance/'
+---
+
+<h2 className="!mb-2">TL;DR</h2>
+
+- Engineering-first teams build products where latency, reliability, and infrastructure are part of the customer experience.
+- They need to ask questions that were not anticipated when telemetry was instrumented.
+- SigNoz lets teams aggregate arbitrary attributes, query nested JSON, work with OpenTelemetry data as-is, automate workflows through APIs, and create alerts around customer impact.
+
+Engineering-first teams do not treat observability as a dashboard that someone checks after an incident. It is part of how they build, ship, and operate the product.
+
+For these teams, technical performance is often what the customer is buying. A slow browser session, unreliable sandbox, delayed model response, or failed tool call is not an internal implementation detail. It is a product failure.
+
+This changes what teams need from an observability platform.
+
+## What makes a team engineering-first?
+
+An engineering-first team builds a product where infrastructure, reliability, latency, or system performance is a core differentiator.
+
+Kernel provides browser infrastructure for web automation. Blaxel provides infrastructure for running autonomous workloads. Black Forest Labs builds frontier visual models. Sail Research works on technically complex AI systems.
+
+These companies build different products, but their engineering teams face similar observability problems:
+
+- Their systems have several interacting layers.
+- Their telemetry is complex and changes quickly.
+- They care about dimensions such as tenant, session, model, region, sandbox, and operation.
+- They regularly need to investigate questions they did not predict in advance.
+- They want infrastructure tools that are open, programmable, and compatible with their existing engineering workflows.
+
+Basic dashboards are useful, but they are not enough for this operating model.
+
+## Ask questions you did not plan for
+
+Most observability setups start with a known set of metrics. Request count, error rate, CPU, memory, and latency cover the common cases.
+
+The difficult questions arrive later:
+
+- What is the p95 browser startup time for one region and browser version?
+- How many tokens did each model consume for successful requests?
+- Which tenants saw slow sandbox initialization after a deployment?
+- What is the total CPU time used by failed jobs?
+
+The data often already exists as attributes on spans or logs. The problem is that nobody created a metric for that exact question.
+
+SigNoz Query Builder supports aggregation operations like sum, average, min, max, percentiles, and rates over generic telemetry fields. Results can be grouped by other attributes. This turns existing spans and logs into a source for analysis without requiring a new metric and another deployment.
+
+For example, a browser infrastructure company can calculate average page-load time by customer for sessions that ended in an error. A sandbox provider can sum CPU-seconds by tenant to understand usage. A model company can compare p95 generation time by model version and region.
+
+This is particularly useful with high-cardinality dimensions. A team can investigate by customer or session without creating a metric series for every possible value in advance.
+
+<Figure
+  src="/img/blog/2026/09/query-aggregation.gif"
+  alt="Animation showing an existing span attribute being aggregated and grouped by tenant in SigNoz"
+  caption="Aggregate an existing span attribute and group it by tenant at query time."
+/>
+
+Read more in the [SigNoz Query Builder documentation](https://signoz.io/docs/userguide/query-builder-v5/).
+
+## Query JSON as data, not as a blob
+
+Engineering-first products generate a lot of structured logs. Agent steps, browser events, model responses, webhook payloads, and sandbox lifecycle events often arrive as nested JSON.
+
+A traditional logging pipeline requires teams to decide which fields matter before ingestion. Someone has to parse the payload, extract selected keys, update the pipeline when the schema changes, and wait for new data to arrive. The field that explains an incident is often the one that was not extracted.
+
+SigNoz can store JSON log bodies as native JSON and expose nested fields in the query experience. Teams can filter, group, and aggregate those fields without first flattening every value into a separate attribute.
+
+Consider a log body with an array of downstream requests. An engineer can filter for logs where any request has a status code of 500 or higher. SigNoz checks the elements inside the array rather than treating the body as an opaque string. You can also visually filter this from the [logs detail view](https://signoz.io/docs/logs-management/features/json-logs/)
+
+The result is less pipeline maintenance and better access to historical data. When a new field appears in a payload, teams can start investigating it without opening an instrumentation ticket first.
+
+<Figure
+  src="/img/blog/2026/09/json-logs-light.gif"
+  alt="Animation showing a JSON log being parsed once and queried by nested fields in SigNoz"
+  caption="A JSON log is parsed once at ingestion, making nested fields directly queryable."
+/>
+
+See the [Logs Explorer documentation](https://signoz.io/docs/userguide/logs_query_builder/) for filtering and search workflows.
+
+## OpenTelemetry-native should mean more than accepting OTLP
+
+Many observability products can ingest OpenTelemetry data. Engineering-first teams should also look at what happens after ingestion.
+
+Can the backend preserve OpenTelemetry attribute names? Does it understand the metric temporality produced by the SDK? Can the same resource and span context be used while querying logs, metrics, and traces?
+
+SigNoz works with OpenTelemetry-style dotted attributes such as `service.name`, `deployment.environment.name`, and `http.route`. Teams do not need to translate those names into a separate vendor-specific convention before querying them (like converting dot to _ format as some other vendors do)
+
+Metric temporality is another example. An OpenTelemetry counter can be cumulative or delta:
+
+- A cumulative point reports the total since the process started.
+- A delta point reports what happened since the previous collection interval.
+
+Delta temporality is useful for high-cardinality and short-lived workloads because the producing process does not need to retain every series for its entire lifetime. Converting delta counters into a cumulative-only model is stateful and moves additional work into the telemetry pipeline.
+
+SigNoz supports delta temporality, so teams can send the metric format their instrumentation produces instead of forcing every workload into a cumulative-only convention.
+
+<Figure
+  src="/img/blog/2026/09/delta-vs-cumulative.webp"
+  alt="Comparison of cumulative and delta reporting for the same OpenTelemetry counter"
+  caption="The same counter represented using cumulative and delta temporality."
+/>
+
+The [OpenTelemetry metrics data model](https://opentelemetry.io/docs/specs/otel/metrics/data-model/) explains the semantics and trade-offs of both forms.
+
+## Observability should be programmable
+
+Engineering-first teams automate infrastructure. They expect the same from observability.
+
+SigNoz publishes an [OpenAPI reference](https://signoz.io/api-reference/) and APIs for querying telemetry. The Metrics API, for example, supports range queries, temporal and spatial aggregations, attribute filters, grouping, and formulas.
+
+This enables workflows such as:
+
+- Querying telemetry from an internal tool.
+- Generating typed clients from an API contract.
+- Provisioning observability resources as part of service onboarding.
+- Building repeatable investigations around product-specific signals.
+- Integrating production context into existing engineering workflows.
+
+For queries that go beyond a visual builder, SigNoz also supports raw ClickHouse SQL in dashboards. Teams retain a straightforward path from common questions to highly custom analysis.
+
+Read the [SigNoz Metrics API documentation](https://signoz.io/docs/metrics-management/query-range-api/).
+
+## Alerts should match how the system is operated
+
+An alert is useful only when it reaches the right team, represents real customer impact, and avoids unnecessary noise.
+
+SigNoz supports alerts over metrics, logs, traces, anomalies, and exceptions. Teams can alert on signals such as p99 span latency, a log attribute condition, an unexpected change from a historical baseline, or telemetry that has stopped arriving.
+
+Alert routing policies can use service, environment, severity, Kubernetes labels, and custom attributes. Planned maintenance windows suppress notifications during known downtime while alert evaluation continues. Alert rules can also be managed through Terraform for repeatable, version-controlled configuration. We also recently shipped [SigNoz Operator](https://github.com/SigNoz/signoz-operator) to make managing alerts programmatically easier in Kubernetes.
+
+See the [SigNoz alerting documentation](https://signoz.io/docs/alerts/).
+
+## Kernel: observability for browser infrastructure
+
+[Kernel](https://signoz.io/customers/kernel/) runs browser infrastructure across control-plane APIs, microVMs, proxy providers, bare-metal services, and browser sessions. A failure can originate at any of these layers or in the external website being accessed.
+
+As Hiro Tamada, Founding Engineer at Kernel, explains:
+
+> “Our customers care a lot about reliability and latency, so we care about reliability and latency, too.”
+
+Kernel uses SigNoz for customer triage, incident response, post-launch monitoring, dashboards, alerts, and latency optimization.
+
+In one investigation, the team inspected traces for browser acquisition requests and found Temporal workflow I/O in the hot path. After adding Redis caching and removing Temporal from that path, Kernel reduced browser acquisition latency from 140 ms to 30 ms within a few weeks.
+
+In another incident, Kernel experienced a 17-minute API outage caused by requests being routed to dead pods. Telemetry in SigNoz helped the team establish that the API process was still alive and move the investigation toward the routing layer.
+
+
+<YouTube id="XnPd_0gEwoM" mute="false" />
+
+The point I am trying to demonstrate is not that every engineering-first team has Kernel's architecture. It is that observability needs to be up to the par when the failure surface is larger than a standard API and database application.
+
+## Is SigNoz a fit for your engineering team?
+
+SigNoz's technical depth is most useful when:
+
+- Reliability or latency is part of what customers buy.
+- Your system spans multiple services and infrastructure layers.
+- Your telemetry contains rich, custom, or high-cardinality attributes.
+- Engineers regularly need custom investigations.
+- You want to use OpenTelemetry without a proprietary instrumentation layer.
+- You need APIs, SQL, and infrastructure-as-code workflows alongside a visual interface.
+
+Not every team needs every capability covered here. A simple application with basic uptime and error-rate monitoring may never need nested JSON aggregation or delta temporality. But when observability is part of the engineering loop, those details stop being edge cases.
+
+And as more teams are becoming more engineering driven in the AI first world, we believe these would get more and more important.
+
+Seems like you?
+[Get started with SigNoz Cloud](https://signoz.io/teams/) or [run SigNoz yourself](https://signoz.io/docs/install/).

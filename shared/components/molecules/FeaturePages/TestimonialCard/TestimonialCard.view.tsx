@@ -12,16 +12,18 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
   className = '',
 }) => {
   return (
-    <Card className={`p-0 [&>*]:border-1 [&>*]:border-solid ${className}`}>
+    <Card
+      className={`[&>*]:border-1 bg-[var(--l2-background)] p-0 [&>*]:border-solid ${className}`}
+    >
       <div className="flex flex-col gap-4 p-6">
         <div className="flex items-center gap-4">
           <Image src={image} alt={name} width={48} height={48} className="rounded-full" />
           <div>
-            <h3 className="mb-0 font-medium text-signoz_vanilla-100">{name}</h3>
-            <p className="mb-0 text-sm text-signoz_vanilla-400">{role}</p>
+            <h3 className="mb-0 font-medium text-[var(--l1-foreground)]">{name}</h3>
+            <p className="mb-0 text-sm text-[var(--l2-foreground)]">{role}</p>
           </div>
         </div>
-        <p className="mb-0 text-signoz_vanilla-100">{testimonial}</p>
+        <p className="mb-0 text-[var(--l1-foreground)]">{testimonial}</p>
       </div>
     </Card>
   )

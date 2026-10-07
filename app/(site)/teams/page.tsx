@@ -6,17 +6,21 @@ import { Metadata } from 'next'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+const teamsDescription =
+  'Create a managed SigNoz Cloud workspace in the US, EU, or India. Get a 30-day trial with no credit card required.'
+
 export const metadata: Metadata = {
   title: {
     absolute: 'SigNoz | Teams',
   },
   openGraph: {
     title: 'SigNoz | Teams',
-    description:
-      ' Sign up for SigNoz cloud and get 30 days of free trial with access to all features.',
+    description: teamsDescription,
   },
-  description:
-    'Sign up for SigNoz cloud and get 30 days of free trial with access to all features.',
+  twitter: {
+    description: teamsDescription,
+  },
+  description: teamsDescription,
 }
 
 export default async function Teams({

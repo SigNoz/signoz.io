@@ -80,6 +80,43 @@ function getChangedDocFiles(baseRef) {
   return Array.from(changedFiles).filter(Boolean)
 }
 
+// Put in a PR title or commit message to skip the date recency rule
+const SKIP_DATE_MARKER = '[skip-date]'
+
+function isTruthyFlag(value) {
+  return ['1', 'true', 'yes'].includes(
+    String(value ?? '')
+      .trim()
+      .toLowerCase()
+  )
+}
+
+/**
+ * Skips the recency error and the git commit date warning for every changed doc.
+ * Required fields, date format, and field combinations stay enforced.
+ *
+ * @returns {string|null} The reason for the skip, or null when the rule stays active.
+ */
+function resolveDateSkipReason({ comparisonRef, isPreCommit } = {}) {
+  if (isTruthyFlag(process.env.SKIP_DATE_CHECK)) {
+    return 'SKIP_DATE_CHECK environment variable'
+  }
+
+  if ((process.env.PR_TITLE || '').toLowerCase().includes(SKIP_DATE_MARKER)) {
+    return `${SKIP_DATE_MARKER} in the pull request title`
+  }
+
+  // Pre-commit has no commit message yet, so only the env var works there
+  if (!isPreCommit && comparisonRef) {
+    const messages = tryRun(`git log --format=%B ${comparisonRef}..HEAD`)
+    if ((messages || '').toLowerCase().includes(SKIP_DATE_MARKER)) {
+      return `${SKIP_DATE_MARKER} in a commit message`
+    }
+  }
+
+  return null
+}
+
 function getGitAuthorDate(filePath) {
   try {
     const dateString = execSync(`git log -2 --pretty=format:%as -- ${filePath}`, {
@@ -218,7 +255,8 @@ function validateMetadata(filePath, options = {}) {
   }
 
   const fieldMap = parseFrontmatterFields(frontmatter)
-  const shouldEnforceRecentDate = !hasOnlyTitleAndDescriptionChanges(filePath, options)
+  const shouldEnforceRecentDate =
+    !options.skipDateEnforcement && !hasOnlyTitleAndDescriptionChanges(filePath, options)
 
   // Validate tags field (warning only)
   if (fieldMap.has('tags')) {
@@ -330,6 +368,19 @@ function validateMetadata(filePath, options = {}) {
   return { errors, warnings }
 }
 
+// Writes the run result to DOCS_METADATA_REPORT for the PR comment step; no-op when unset
+function writeReport(report) {
+  const reportPath = process.env.DOCS_METADATA_REPORT
+  if (!reportPath) return
+
+  try {
+    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2))
+  } catch (error) {
+    console.error(`Unable to write the metadata report to ${reportPath}`)
+    console.error(error.message)
+  }
+}
+
 function main() {
   const isPreCommit = process.env.HUSKY_PRE_COMMIT === 'true'
   const baseBranch = process.env.GITHUB_BASE_REF
@@ -344,7 +395,13 @@ function main() {
 
   if (changedFiles.length === 0) {
     console.log('No documentation files to check')
+    writeReport({ status: 'success', skipReason: null, invalidFiles: [], warningFiles: [] })
     return
+  }
+
+  const skipReason = resolveDateSkipReason({ comparisonRef, isPreCommit })
+  if (skipReason) {
+    console.log(`Date recency check skipped (${skipReason}). All other rules still apply.\n`)
   }
 
   console.log(`Checking ${changedFiles.length} documentation file(s) for required metadata...\n`)
@@ -354,7 +411,10 @@ function main() {
   let allValid = true
 
   for (const file of changedFiles) {
-    const { errors, warnings } = validateMetadata(file, { comparisonRef })
+    const { errors, warnings } = validateMetadata(file, {
+      comparisonRef,
+      skipDateEnforcement: Boolean(skipReason),
+    })
 
     if (errors.length > 0) {
       console.error(`❌ ${file}: ${errors.join('; ')}`)
@@ -383,6 +443,13 @@ function main() {
     console.warn('\nConsider adding tags to improve documentation discoverability.\n')
   }
 
+  writeReport({
+    status: allValid ? 'success' : 'failure',
+    skipReason,
+    invalidFiles,
+    warningFiles,
+  })
+
   if (!allValid) {
     console.error('Documentation metadata validation failed:')
     invalidFiles.forEach(({ file, issues }) => {
@@ -404,6 +471,10 @@ function main() {
     console.error('description: A brief description of this page for SEO')
     console.error('tags: ["SigNoz Cloud", "Self-Host"]')
     console.error('---\n')
+    console.error('To skip the date recency rule for a trivial change:')
+    console.error("  - Add the label 'skip-date-check' to the pull request")
+    console.error(`  - Or put ${SKIP_DATE_MARKER} in the pull request title or a commit message`)
+    console.error(`  - Or run the commit with SKIP_DATE_CHECK=1\n`)
     process.exit(1)
   }
 
@@ -414,8 +485,10 @@ module.exports = {
   getChangedDocFiles,
   getStagedDocFiles,
   extractFrontmatter,
+  resolveDateSkipReason,
   validateMetadata,
   main,
+  SKIP_DATE_MARKER,
 }
 
 if (require.main === module) {

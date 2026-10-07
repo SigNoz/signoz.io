@@ -9,17 +9,13 @@ description: Set up Kubernetes observability with OpenTelemetry. Deploy the Coll
 image: /img/blog/2025/07/k8s-observability-cover.webp
 keywords: [kubernetes observability, opentelemetry, kubernetes monitoring, kubernetes logging, kubernetes metrics, minikube, helm charts, daemonset, deployment, kubelet metrics, kubernetes events]
 related_articles:
-  - '/blog/opentelemetry-kubernetes-cluster-metrics-monitoring'
-  - '/blog/kubernetes-events-monitoring'
   - '/blog/kubernetes-monitoring'
-  - '/blog/using-signoz-to-monitor-your-kubernetes-cluster'
   - '/blog/opentelemetry-operator-complete-guide'
-  - '/blog/kubernetes-logging'
 ---
 
 Kubernetes provides a wealth of telemetry data from container metrics and application traces to cluster events and logs. OpenTelemetry [OTel] offers a vendor-neutral, end-to-end solution for collecting and exporting this telemetry in a standardised format.
 
-In this blog, we’ll walk through a [Kubernetes observability](https://signoz.io/guides/kubernetes-observability/) setup on Minikube using OpenTelemetry, but you can easily extend the setup to your Kubernetes setup as well. We’ll deploy an example instrumented application, then set up the OpenTelemetry Collector in two modes - DaemonSet and Deployment, using the official Helm charts. This two-pronged approach will capture both service-level metrics and traces, as well as cluster-level metrics and events, giving you full visibility into your Kubernetes environment.
+In this blog, we’ll walk through a Kubernetes observability setup on Minikube using OpenTelemetry, but you can easily extend the setup to your Kubernetes setup as well. We’ll deploy an example instrumented application, then set up the OpenTelemetry Collector in two modes - DaemonSet and Deployment, using the official Helm charts. This two-pronged approach will capture both service-level metrics and traces, as well as cluster-level metrics and events, giving you full visibility into your Kubernetes environment.
 
 This walkthrough aims to give you a solid practical foundation and a clear blueprint to instrument your own Kubernetes cluster using OpenTelemetry.
 
@@ -229,7 +225,7 @@ What *does* the cluster-level collector gather?
 
 In our setup, we will enable the Kubernetes Cluster Receiver, which fetches high-level metrics about the cluster, and the Kubernetes Objects [Events] Receiver, which listens for Kubernetes events. These components give us insight into the overall health and activity of the cluster.
 
-Running the collector as a Deployment gives you a single, cluster-wide instance that is well suited to gathering cluster-level signals such as node and pod metrics, resource quotas, and Kubernetes events. If you want to focus specifically on that layer, we cover collecting and visualising these signals end to end in our walkthrough on [monitoring Kubernetes cluster metrics with OpenTelemetry](https://signoz.io/blog/opentelemetry-kubernetes-cluster-metrics-monitoring/).
+Running the collector as a Deployment gives you a single, cluster-wide instance that is well suited to gathering cluster-level signals such as node and pod metrics, resource quotas, and Kubernetes events. The following setup shows how to collect and visualize these signals end to end with OpenTelemetry.
 
 To configure the Deployment-mode collector via Helm, we create otel-collector-deployment.yaml:
 

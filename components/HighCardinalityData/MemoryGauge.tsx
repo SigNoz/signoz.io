@@ -45,28 +45,28 @@ export default function MemoryGauge() {
         {/* Left: Stats */}
         <div className="flex-1 space-y-6 pb-4 md:space-y-8">
           <div>
-            <div className="mb-1 text-sm font-semibold uppercase tracking-wider text-zinc-300">
+            <div className="mb-1 text-sm font-semibold uppercase tracking-wider text-[var(--l2-foreground)]">
               Total Users
             </div>
-            <div className="text-3xl font-bold tabular-nums text-zinc-100 md:text-4xl">
+            <div className="text-3xl font-bold tabular-nums text-[var(--l1-foreground)] md:text-4xl">
               {users.toLocaleString()}
             </div>
           </div>
 
           <div>
-            <div className="mb-1 text-sm font-semibold uppercase tracking-wider text-zinc-300">
+            <div className="mb-1 text-sm font-semibold uppercase tracking-wider text-[var(--l2-foreground)]">
               Active Series
             </div>
             <div
-              className={`text-3xl font-bold tabular-nums transition-colors duration-300 md:text-4xl ${isOOM ? 'text-red-500' : 'text-zinc-100'}`}
+              className={`text-3xl font-bold tabular-nums transition-colors duration-300 md:text-4xl ${isOOM ? 'text-red-500' : 'text-[var(--l1-foreground)]'}`}
             >
               {totalSeries.toLocaleString()}
             </div>
-            <div className="mt-2 text-xs text-zinc-400">Users × Labels = Series</div>
+            <div className="mt-2 text-xs text-[var(--l3-foreground)]">Users × Labels = Series</div>
           </div>
 
           {isOOM && (
-            <div className="animate-pulse rounded-lg border border-red-900 bg-red-900/20 px-4 py-3 text-sm font-medium text-red-300">
+            <div className="animate-pulse rounded-lg border border-[var(--callout-error-border)] bg-[var(--callout-error-background)] px-4 py-3 text-sm font-medium text-[var(--callout-error-title)]">
               💥 <strong>OOM Killed!</strong>
               <br />
               Server ran out of memory and crashed.
@@ -77,7 +77,7 @@ export default function MemoryGauge() {
         {/* Right: The RAM Tank */}
         <div className="relative flex w-full flex-col items-center md:block md:w-auto">
           {/* Tank Container */}
-          <div className="relative h-64 w-24 overflow-hidden rounded-lg border-2 border-zinc-800 bg-zinc-900 md:w-32">
+          <div className="relative h-64 w-24 overflow-hidden rounded-lg border-2 border-[var(--l2-border)] bg-[var(--l2-background)] md:w-32">
             {/* Fluid */}
             <div
               className={`absolute bottom-0 left-0 right-0 transition-all duration-300 ease-out ${isOOM ? 'bg-red-600' : 'bg-blue-600'}`}
@@ -88,7 +88,7 @@ export default function MemoryGauge() {
             </div>
 
             {/* Markers */}
-            <div className="absolute bottom-0 right-0 top-0 flex w-8 flex-col justify-between border-l border-zinc-700/50 py-2 pr-1 text-right font-mono text-[10px] text-zinc-400">
+            <div className="absolute bottom-0 right-0 top-0 flex w-8 flex-col justify-between border-l border-[var(--l2-border)] py-2 pr-1 text-right font-mono text-[10px] text-[var(--l3-foreground)]">
               <span>16GB</span>
               <span>12GB</span>
               <span>8GB</span>
@@ -97,22 +97,22 @@ export default function MemoryGauge() {
             </div>
           </div>
 
-          <div className="mt-3 text-center font-mono font-bold text-zinc-300">
+          <div className="mt-3 text-center font-mono font-bold text-[var(--l2-foreground)]">
             {memoryGB >= 1 ? memoryGB.toFixed(1) + ' GB' : memoryMB.toFixed(0) + ' MB'}
           </div>
-          <div className="mt-1 text-center text-xs uppercase tracking-wider text-zinc-400">
+          <div className="mt-1 text-center text-xs uppercase tracking-wider text-[var(--l3-foreground)]">
             RAM Usage
           </div>
         </div>
       </div>
 
       {/* Full Width Slider Control */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 md:p-8">
+      <div className="rounded-xl border border-[var(--l2-border)] bg-[var(--l2-background)] p-4 md:p-8">
         <div className="mb-4 flex items-end justify-between">
-          <label className="text-sm font-bold uppercase tracking-wider text-zinc-300">
+          <label className="text-sm font-bold uppercase tracking-wider text-[var(--l2-foreground)]">
             Scale Users (Cardinality)
           </label>
-          <span className="font-mono text-xs text-zinc-400">1k → 900k Users</span>
+          <span className="font-mono text-xs text-[var(--l3-foreground)]">1k → 900k Users</span>
         </div>
 
         <div className="relative flex h-6 items-center">
@@ -131,7 +131,7 @@ export default function MemoryGauge() {
 
           {/* Thumb Visual */}
           <div
-            className="pointer-events-none absolute h-6 w-6 rounded-full border-2 border-zinc-600 bg-zinc-200 shadow-md transition-all duration-75"
+            className="pointer-events-none absolute h-6 w-6 rounded-full border-2 border-[var(--l3-border)] bg-[var(--l1-foreground)] shadow-md transition-all duration-75"
             style={{ left: `${sliderVal}%`, transform: 'translateX(-50%)' }}
           >
             <div
@@ -140,7 +140,7 @@ export default function MemoryGauge() {
           </div>
         </div>
 
-        <p className="mt-6 text-center text-sm italic text-zinc-300">
+        <p className="mt-6 text-center text-sm italic text-[var(--l2-foreground)]">
           Drag to increase users. Watch how RAM fills up linearly with the exploding series count.
         </p>
       </div>

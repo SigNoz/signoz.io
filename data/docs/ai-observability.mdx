@@ -1,0 +1,39 @@
+---
+date: 2026-09-29
+title: AI Observability - Monitor LLM Cost, Tokens, Latency
+description: Monitor LLM apps in SigNoz with the AI Observability dashboard. Track cost, token usage, latency, errors, TTFT, and tool calls by model and service.
+doc_type: explanation
+---
+
+Use AI Observability to see cost, token usage, latency, errors, time to first token (TTFT), and tool calls for your LLM and agent workloads. SigNoz reads these values from the OpenTelemetry GenAI attributes on your spans, and it calculates cost from your model prices.
+
+<Figure
+  src="/img/docs/ai/ai-observability/overview.webp"
+  alt="AI Observability Overview tab with the model, provider, environment, and service_name filters, six stat cards, and the Cost & tokens panels"
+  caption="The AI Observability Overview dashboard"
+/>
+
+## Prerequisites
+
+- An LLM or agent application that sends traces to SigNoz with OpenTelemetry GenAI attributes. For setup steps for OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks, see [LLM Observability](https://signoz.io/docs/llm-observability/). For the attributes that each panel needs, see [Telemetry Requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/).
+- A price for each model, for the cost panels. SigNoz Cloud includes default prices for common models. In self-hosted SigNoz, add a price for each model in [Model pricing](https://signoz.io/docs/ai-observability-model-pricing/).
+- If you run self-hosted SigNoz with a custom collector configuration, add the `signozspanmapper` and `signozllmpricing` processors to the traces pipeline. See [Add the AI observability processors](https://signoz.io/docs/operate/migration/upgrade-0-143/#add-the-ai-observability-processors-to-a-custom-collector-config).
+
+## Key capabilities
+
+To open AI Observability, select **More** > **AI Observability** in the side navigation.
+
+- **Overview**: a dashboard with stat cards and four sections: **Cost & tokens**, **Per-trace usage**, **LLM latency & errors**, and **Tool calls**. Filter it by model, provider, environment, and service. Each panel has an info icon that explains what it shows. You cannot edit or clone this dashboard. To create an alert from a panel, open the panel menu and select **Create Alerts**.
+- **[Explorer](https://signoz.io/docs/ai-observability-explorer/)**: query your LLM and agent traces, including trace totals such as `trace.total_tokens`.
+- **[Model pricing](https://signoz.io/docs/ai-observability-model-pricing/)**: set the price for each model.
+- **[Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/)**: map other attribute names to the GenAI names.
+
+## Next steps
+
+- [Telemetry Requirements](https://signoz.io/docs/ai-observability-telemetry-requirements/): check the attributes that each panel and filter needs.
+- [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
+- [Dashboards](https://signoz.io/docs/userguide/manage-dashboards/): build your own LLM panels.
+
+## Get Help
+
+<GetHelp />

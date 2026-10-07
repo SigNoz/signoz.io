@@ -20,7 +20,7 @@ const contentTypeRoutePrefix: Record<string, string> = {
   blog: 'blog',
   faq: 'faqs',
   opentelemetry: 'opentelemetry',
-  case_study: 'case-study',
+  case_study: 'customers',
 }
 
 const DEFAULT_DOC_TAGS = ['SigNoz Cloud', 'Self-Host']

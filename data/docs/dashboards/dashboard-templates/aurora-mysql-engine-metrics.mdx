@@ -1,0 +1,112 @@
+---
+date: 2026-09-09
+title: Amazon Aurora MySQL Engine Metrics Dashboard - Track Queries
+description: Monitor Aurora MySQL engine internals in SigNoz including threads, query workload, InnoDB buffer pool, row and table locks, redo logs, and temporary resources.
+doc_type: explanation
+---
+
+Use this dashboard to monitor what the MySQL engine reports about itself on an Aurora cluster: connections and threads, query workload, the InnoDB buffer pool, rows and locks, and InnoDB I/O, logs, and temporary resources.
+
+The OpenTelemetry Collector `mysql` receiver connects to the database and reads `SHOW GLOBAL STATUS` and the InnoDB tables directly. This is the query-level view that CloudWatch cannot provide.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow [Step 3 of Monitor Amazon Aurora](https://signoz.io/docs/integrations/aws-rds-aurora/#step-3-collect-engine-metrics), which covers the monitoring user and the receiver configuration.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/aurora-mysql-engine-metrics.webp"
+  alt="Amazon Aurora MySQL Engine Metrics Dashboard"
+  caption="Amazon Aurora MySQL Engine Metrics Dashboard"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/aurora/mysql/db-metrics.json"
+  dashboardName="Amazon Aurora MySQL Engine Metrics"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- **Size the thread cache**: Created climbing while connected stays flat means the thread cache is too small.
+- **Find queries without an index**: A large `read_rnd_next` share on Handlers, or `full` joins, means scans rather than seeks.
+- **Judge buffer pool fit**: Watch free pages trend toward zero and read operations rise as the working set outgrows memory.
+- **Diagnose lock contention**: Read row lock waits and accumulated wait time against table locks that had to wait.
+- **Catch spills to disk**: Rising `disk_tables` on Temporary Resources means queries are spilling out of memory.
+- **Spot restarts and failovers**: A drop on Uptime marks the instance restarting.
+
+## Metrics Included
+
+### Connections & Threads
+
+- **Threads**: Threads cached, connected, created, and running (`mysql.threads`).
+- **Connection Attempts**: Connection attempts per interval (`mysql.connection.count`).
+- **Connection Errors**: Connection errors per interval, by cause (`mysql.connection.errors`).
+- **Client Network I/O**: Bytes sent to and received from clients (`mysql.client.network.io`).
+
+### Query Workload
+
+- **Commands**: Statements executed per interval by command type (`mysql.commands`).
+- **Queries**: Statements executed per interval (`mysql.query.count`).
+- **Slow Queries**: Statements exceeding `long_query_time` (`mysql.query.slow.count`).
+- **Prepared Statements**: Prepared-statement commands per interval (`mysql.prepared_statements`).
+- **Handlers**: Storage-engine handler calls per interval (`mysql.handlers`).
+- **Joins**: Join plans per interval by type (`mysql.joins`). `full` and `full_range` are joins running without a usable index.
+- **Sorts**: Sort work per interval (`mysql.sorts`). Rising `merge_passes` means `sort_buffer_size` is too small.
+
+### InnoDB Buffer Pool
+
+- **Buffer Pool Usage**: Bytes held as clean and dirty pages (`mysql.buffer_pool.usage`).
+- **Buffer Pool Limit**: Configured `innodb_buffer_pool_size` (`mysql.buffer_pool.limit`). On Aurora the instance class or ACU range sets this.
+- **Buffer Pool Pages**: Pages by kind (`mysql.buffer_pool.pages`).
+- **Buffer Pool Data Pages**: Clean and dirty data pages (`mysql.buffer_pool.data_pages`).
+- **Buffer Pool Operations**: Operations per interval (`mysql.buffer_pool.operations`). `reads` are requests that missed the pool and went to storage.
+- **Buffer Pool Page Flushes**: Pages flushed per interval (`mysql.buffer_pool.page_flushes`).
+
+### Rows & Locks
+
+- **Row Operations**: Rows read, inserted, updated, and deleted per interval (`mysql.row_operations`).
+- **Row Locks**: Row-lock waits and accumulated wait time (`mysql.row_locks`).
+- **Table Locks**: Locks granted immediately against those that had to wait (`mysql.locks`).
+- **Page Operations**: InnoDB pages created, read, and written per interval (`mysql.page_operations`).
+
+### InnoDB I/O, Logs & Resources
+
+- **InnoDB I/O Operations**: Reads, writes, and fsyncs per interval (`mysql.operations`).
+- **Redo Log Operations**: Redo log writes, write requests, and waits (`mysql.log_operations`). Waits above zero mean the log buffer is too small.
+- **Doublewrite Buffer**: Doublewrite pages and write operations per interval (`mysql.double_writes`).
+- **Opened Resources**: Files, tables, and table definitions opened per interval (`mysql.opened_resources`). Sustained table opens mean `table_open_cache` is too small.
+- **Temporary Resources**: Temporary tables and files created per interval (`mysql.tmp_resources`).
+- **Uptime**: Time since the server started (`mysql.uptime`).
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **mysql_instance_endpoint**: Filter by the endpoint each receiver scrapes (`mysql.instance.endpoint`). Point one receiver at each instance endpoint so every instance is its own series.
+
+## Panels That Read Empty
+
+Some panels stay empty until the matching condition exists, which is expected rather than a misconfiguration:
+
+- **Connection Attempts**, **Connection Errors**, **Client Network I/O**, **Commands**, **Queries**, **Slow Queries**, and **Joins** are opt-in metrics. Enable them on the receiver as shown in the setup guide.
+- **Slow Queries** also needs `slow_query_log` enabled and a `long_query_time` your workload exceeds.
+- **Connection Errors** and **Row Locks** read zero on a healthy cluster.
+
+## Limitations
+
+Aurora MySQL has no binary log replication between cluster instances, so `SHOW REPLICA STATUS` returns no rows and the receiver's `mysql.replica.time_behind_source` and `mysql.replica.sql_delay` metrics never populate. No panel here uses them. Use **Aurora Replica Lag** on the [CloudWatch dashboard](https://signoz.io/docs/dashboards/dashboard-templates/aurora-mysql-cloudwatch/) instead.
+
+Statement-event metrics need `performance_schema`, which Aurora MySQL sets to `OFF` by default. Turning it on requires a DB parameter group and an instance reboot, so this dashboard does not depend on it.
+
+## Next Steps
+
+- [Add the CloudWatch dashboard](https://signoz.io/docs/dashboards/dashboard-templates/aurora-mysql-cloudwatch/) for cluster capacity, replica lag, and volume growth.
+- [Trace slow queries](https://signoz.io/docs/apm-and-distributed-tracing/database-calls/) back to the application code that ran them.
+- [Set up alerts](https://signoz.io/docs/alerts/) on slow query rate, row lock waits, and buffer pool pressure.
+
+## Related Dashboards
+
+- [Amazon Aurora MySQL CloudWatch](https://signoz.io/docs/dashboards/dashboard-templates/aurora-mysql-cloudwatch/)
+- [Amazon Aurora PostgreSQL Engine Metrics](https://signoz.io/docs/dashboards/dashboard-templates/aurora-postgresql-engine-metrics/)
+- [MySQL](https://signoz.io/docs/dashboards/dashboard-templates/mysql/)

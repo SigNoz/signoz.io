@@ -1,5 +1,5 @@
 ---
-date: 2026-07-01
+date: 2026-08-27
 title: Zero-Code eBPF Instrumentation with OpenTelemetry OBI
 description: Auto-instrument applications with eBPF using OpenTelemetry eBPF Instrumentation (OBI) and send RED metrics and traces to SigNoz with no code changes.
 doc_type: howto
@@ -17,8 +17,8 @@ OBI gives you:
 
 OBI observes traffic at the protocol and kernel level. You get request rates, latency, errors, and connection health for supported protocols. OBI does not read application-internal state, so use an SDK when you need custom business metrics or spans from inside your code. Pair OBI with the [language SDKs](https://signoz.io/docs/instrumentation/overview/) when you need both.
 
-<Admonition type="info" title="Using self-hosted SigNoz?" defaultCollapsed="true">
-  Use the same steps for self-hosted SigNoz. Point the export endpoint at your OTel Collector or SigNoz instance and drop the ingestion key header, as shown in [Cloud -> Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+<Admonition type="info" title="Using Self-Hosted SigNoz?" defaultCollapsed="true">
+  Use the same steps for Self-Hosted SigNoz. Point the export endpoint at your OTel Collector or SigNoz instance and drop the ingestion key header, as shown in [Cloud -> Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
 ## Prerequisites
@@ -254,7 +254,10 @@ Open **Traces** and filter by the service name to see spans for individual reque
 <details>
 <ToggleHeading>
 ## Troubleshooting
+
 </ToggleHeading>
+
+Still not seeing data in SigNoz? Work through [Debug missing traces, logs, and metrics](https://signoz.io/docs/ingestion/signoz-cloud/troubleshooting/data-not-appearing/), which covers SDK diagnostics, Collector connectivity, and the common ingestion errors for all three signals.
 
 ### No service or traces in SigNoz
 
@@ -345,6 +348,7 @@ OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 - [Create dashboards](https://signoz.io/docs/dashboards/dashboard-templates/overview/) from OBI's RED metrics.
 - [Set up alerts](https://signoz.io/docs/userguide/alerts-management/) on error rate and latency.
 - Add a [language SDK](https://signoz.io/docs/instrumentation/overview/) when you need custom spans or business metrics alongside eBPF data.
+- Use the [OpenTelemetry Injector](https://signoz.io/docs/instrumentation/opentelemetry-injector/) for Java, Node.js, .NET, and Python services on a Linux host. It starts the full language agent, which reports more than protocol-level probes.
 
 ## Get Help
 

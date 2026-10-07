@@ -25,7 +25,6 @@ import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 import Link from 'next/link'
 import CTABanner from '@/shared/components/molecules/FeaturePages/CTABanner'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -33,7 +32,6 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'ClickStack Alternative Hero Start Trial',
@@ -45,7 +43,6 @@ const Header: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/',
       variant: 'secondary' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'ClickStack Alternative Hero Docs',
@@ -60,9 +57,9 @@ const Header: React.FC = () => {
       title={'ClickStack/HyperDX Alternative'}
       description={
         <>
-          SigNoz gives you interactive dashboards, anomaly detection-based alerting, and PromQL{' '}
-          <br className="hidden md:block" /> support. You're billed on how much data you ingest, not
-          how often you query it.
+          SigNoz Cloud gives you interactive dashboards, anomaly detection-based alerting, and
+          PromQL <br className="hidden md:block" /> support. You're billed on how much data you
+          ingest, not how often you query it.
         </>
       }
       buttons={headerButtons}
@@ -106,8 +103,8 @@ const CostComparison: React.FC = () => {
           </h4>
           <div className="text-sm text-signoz_vanilla-400">
             ClickStack bills across 4 separate dimensions, only two of which have published rates.
-            SigNoz charges $0.30/GB for logs and traces, $0.10 per million metric samples. Querying
-            is free.
+            SigNoz Cloud charges $0.30/GB for logs and traces, $0.10 per million metric samples.
+            Querying is free.
           </div>
         </div>
         <div>
@@ -119,7 +116,7 @@ const CostComparison: React.FC = () => {
                   ClickStack's <br className="hidden md:block" /> billing{' '}
                   <br className="hidden md:block" /> complexity
                 </h2>
-                <Button asChild variant="secondary" rounded="full">
+                <Button asChild variant="secondary">
                   <TrackingLink
                     href="/blog/clickstack-managed-pricing-compute-costs/"
                     clickType="Secondary CTA"
@@ -243,7 +240,6 @@ const BetterChoiceBanner: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'ClickStack Alternative Better Choice Banner Start Trial',
@@ -255,7 +251,6 @@ const BetterChoiceBanner: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/introduction/',
       variant: 'secondary' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'ClickStack Alternative Better Choice Banner Read Documentation',
@@ -271,7 +266,7 @@ const BetterChoiceBanner: React.FC = () => {
         title={
           <>
             ClickStack or HyperDX? <br />
-            Either way, SigNoz is the better choice.
+            Either way, SigNoz Cloud is the better choice.
           </>
         }
         buttons={betterChoiceButtons}
@@ -288,8 +283,8 @@ const QueryYourData: React.FC = () => {
           Query Your Data, Any Way You Want
         </h2>
         <p className="mb-8 text-center leading-relaxed text-signoz_vanilla-100">
-          SigNoz supports PromQL, a visual query builder, and SQL across logs, traces, and metrics.{' '}
-          <br className="hidden md:block" />
+          SigNoz Cloud supports PromQL, a visual query builder, and SQL across logs, traces, and
+          metrics. <br className="hidden md:block" />
           ClickStack supports Lucene search and SQL only.
         </p>
       </div>
@@ -333,8 +328,8 @@ const ClickStackAlternativePage: React.FC = () => {
         sectionDescription={
           <>
             <p>
-              SigNoz eliminates query costs, dashboard fees, and API charges. Pay only for data
-              volume ingested.
+              SigNoz Cloud eliminates query costs, dashboard fees, and API charges. Pay only for
+              data volume ingested.
             </p>
             <p>
               Use the calculator below to estimate costs, then track actual usage with{' '}

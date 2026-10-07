@@ -32,7 +32,6 @@ export default function GuidesLayout({
         authors={authors}
         toc={toc}
         contentType="guide"
-        showNewsletter={true}
         showRelatedArticles={true}
         authorDirectory={authorDirectory}
         breadcrumbs={breadcrumbs}

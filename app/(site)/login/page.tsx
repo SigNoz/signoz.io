@@ -272,16 +272,13 @@ export default function Login() {
                   <Button
                     type="submit"
                     variant={'default'}
-                    rounded={'full'}
                     className="mb-3 w-full"
-                    isButton={true}
                     onClick={() => window.location.reload()}
                   >
                     <span className="text-xs leading-5">Refresh page</span>
                   </Button>
                   <Button
                     variant={'secondary'}
-                    rounded={'full'}
                     type="submit"
                     className="w-full"
                     href="mailto:cloud-support@signoz.io"
@@ -313,9 +310,7 @@ export default function Login() {
                       {workEmail && submitSuccess && (
                         <Button
                           variant={'secondary'}
-                          rounded={'default'}
                           size={'sm'}
-                          isButton={true}
                           type="button"
                           onClick={handleChangeEmail}
                           className="gap-2 text-[13px]"
@@ -392,10 +387,8 @@ export default function Login() {
 
                   {!submitSuccess && (
                     <Button
-                      isButton={true}
                       type="submit"
                       variant={'default'}
-                      rounded={'full'}
                       disabled={isSubmitting || !isValid}
                       className="mb-4 mt-6 w-full"
                     >
@@ -416,13 +409,7 @@ export default function Login() {
                 <div className="mt-4 text-sm text-signoz_vanilla-400">
                   No deployments are currently associated with this email. You can get started now
                   with a free trial account for 30 days.
-                  <Button
-                    isButton={true}
-                    rounded={'full'}
-                    variant={'default'}
-                    className="my-4 w-full"
-                    onClick={handleGetStarted}
-                  >
+                  <Button variant={'default'} className="my-4 w-full" onClick={handleGetStarted}>
                     <span className="flex items-center gap-1.5 px-px text-sm">
                       Get Started - Free
                       <ArrowRight size={16} />

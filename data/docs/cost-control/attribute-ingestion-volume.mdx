@@ -1,0 +1,114 @@
+---
+date: 2026-08-25
+title: Attribute Ingestion Volume by Team, Service, and Environment
+description: Split SigNoz ingestion volume across teams, services, and environments with Cost Meter labels and per-team ingestion keys, then cap each team's usage.
+doc_type: howto
+---
+
+## Overview
+
+Cost Meter metrics carry labels that record where each byte came from. You attribute ingestion volume by grouping on one of those labels.
+
+Use this guide when you know your total volume and need to know who is responsible for it.
+
+## Prerequisites
+
+- Read access to meter metrics. The Admin, Editor, and Viewer roles all have it by default. See [Transactions](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/).
+- Telemetry already flowing into SigNoz.
+
+<Admonition type="note">
+Editing the quick filters in Meter Explorer is restricted to the **Admin** role. Querying and grouping meter data is not.
+</Admonition>
+
+## Choose an attribution axis
+
+| Group by | Maps to | Setup required |
+| --- | --- | --- |
+| `service.name` | One service | None |
+| `deployment.environment` | One environment | Set the attribute on your telemetry |
+| `host.name` | One host | [Configure the resourcedetection processor](https://signoz.io/docs/infrastructure-monitoring/user-guides/hostmetrics/#configure-the-resourcedetection-processor) |
+| `signoz.workspace.key.id` | One ingestion key | Create an ingestion key per team (SigNoz Cloud) |
+
+Start with `service.name`. Your instrumentation already sets it, so you can group by it right away.
+
+Add `deployment.environment` once your telemetry carries it. It is not set by default: configure it as a resource attribute, for example through `OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production` on each service, or through `global.deploymentEnvironment` if you deploy with the [k8s-infra chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/). Until then it groups everything under one empty value.
+
+Use `signoz.workspace.key.id` when a team owns several services and you want one number per team.
+
+<Admonition type="tip">
+To separate environments, set the `deployment.environment` attribute rather than issuing an ingestion key per environment. The attribute needs no key management and works on both SigNoz Cloud and self-hosted deployments.
+</Admonition>
+
+## Attribute by service or environment
+
+Once the attribute you are grouping by is present on your telemetry, this path needs no further configuration.
+
+1. Open **Cost Meter > Meter Explorer**.
+2. Select the meter metric for the signal you want. For example, select `signoz.meter.log.size` for log volume in bytes.
+3. Group by `service.name` or `deployment.environment`.
+4. Set the time range to the period you want to attribute, such as the last billing month.
+
+The result is one series per service or environment. See the [Meter Explorer Query Guide](https://signoz.io/docs/cost-meter/meter-explorer-query-guide/) for the exact query syntax.
+
+<Admonition type="note">
+Metric volume is measured in datapoint count, not bytes. Use `signoz.meter.metric.datapoint.count` for metrics, `signoz.meter.log.size` for logs, and `signoz.meter.span.size` for traces.
+</Admonition>
+
+Save the query as a view so you do not rebuild it each month. Click **Save this view** at the bottom of the Explorer page.
+
+## Attribute by team with ingestion keys
+
+Use this path when your teams do not map one-to-one onto services. It applies to SigNoz Cloud only.
+
+1. Create one ingestion key per team. See [Add an Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/#add-an-ingestion-key).
+2. Tag each key with the team name so the key list stays readable.
+3. Configure each team's SDKs and Collectors to send with their own key.
+4. In Meter Explorer, group by `signoz.workspace.key.id`.
+
+<Admonition type="note">
+An account holds a maximum of 50 ingestion keys. Only Editors and Admins can manage them. Plan your key layout before you issue keys, because one key per team per environment consumes the budget faster than one key per team.
+</Admonition>
+
+To map a key ID back to a team, open **Settings > Ingestion Settings**. The list shows the ID next to each key name.
+
+## Trace a number back to the records
+
+`signoz.workspace.key.id` is a resource attribute on logs, traces, and metrics, not only a Cost Meter label. When a team's number looks wrong, filter the raw data by the same key ID and read the records behind it.
+
+See [Filter Logs and Traces by Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/#filter-logs-and-traces-by-ingestion-key) for the filter steps.
+
+## Cap each team's volume
+
+Attribution tells you who spent the money. Ingestion limits stop a team from spending it again.
+
+Each key takes a limit per signal. You can set either form, or both together on the same signal:
+
+- **Daily** limits cap total volume over a 24-hour period. Use these to give each team a fixed budget.
+- **Per-second** limits cap the sustained ingestion rate. Use these so one spike cannot exhaust a team's daily budget in minutes.
+
+Setting both gives a team a fixed daily budget and burst protection at once. Setting only a daily limit leaves bursts unchecked.
+
+See [Ingestion Limits](https://signoz.io/docs/cost-control/ingestion-limits/) for the configuration steps.
+
+<Admonition type="warning">
+Data dropped by an ingestion limit is permanently lost. It does not buffer or retry. Apply limits to development and staging keys first, and set a [Cost Meter alert](https://signoz.io/docs/cost-meter/alerts/) before you apply one to a production key.
+</Admonition>
+
+## Build a recurring report
+
+Meter data is retained for one year, so you can report on any month in that window.
+
+For a scheduled report, query the meter metrics through the API instead of the UI. The [Cost Meter API](https://signoz.io/docs/cost-meter/query-api/) guide includes a Python example that produces a 90-day cost report.
+
+<Admonition type="note">
+Meter queries have a minimum step interval of one hour, so a monthly report cannot resolve below hourly buckets. Queries that span 30 days or more read from a daily rollup table instead of the raw samples.
+</Admonition>
+
+## Next Steps
+
+- [Cost Control](https://signoz.io/docs/cost-control/overview/): Reduce the volume once you know where it comes from.
+- [Alert Configuration Guide](https://signoz.io/docs/cost-meter/alert-configuration-guide/): Alert when a service or key crosses a threshold.
+
+## Get Help
+
+<GetHelp />

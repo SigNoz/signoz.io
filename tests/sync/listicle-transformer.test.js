@@ -25,6 +25,19 @@ test('transformListicleItem', async (t) => {
     assert.equal(result.click_name, 'click_test')
   })
 
+  await t.test('passes description through', () => {
+    const result = transformListicleItem(
+      { name: 'Test', href: '/test', description: 'Monitor Test with SigNoz.' },
+      CDN
+    )
+    assert.equal(result.description, 'Monitor Test with SigNoz.')
+  })
+
+  await t.test('omits description when absent', () => {
+    const result = transformListicleItem({ name: 'Test', href: '/test' }, CDN)
+    assert.equal(result.description, undefined)
+  })
+
   await t.test('converts string icon to CDN URL', () => {
     const result = transformListicleItem(
       { name: 'Test', href: '/test', icon: '/icons/tool.svg' },
@@ -84,6 +97,20 @@ test('transformListicleSection', async (t) => {
     assert.equal(result.grid_cols, 2)
     assert.equal(result.items.length, 1)
     assert.equal(result.subsections.length, 1)
+  })
+
+  await t.test('passes section description through', () => {
+    const result = transformListicleSection(
+      {
+        id: 'sec1',
+        label: 'Section 1',
+        title: 'First Section',
+        description: 'Everything in the first section',
+        sectionName: 'first',
+      },
+      CDN
+    )
+    assert.equal(result.description, 'Everything in the first section')
   })
 })
 

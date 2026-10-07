@@ -21,7 +21,6 @@ import {
 } from './CloudwatchAlternativePage.constants'
 import TrackingLink from '@/components/TrackingLink'
 import Divider from '@/shared/components/molecules/FeaturePages/Divider'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 
 const Header: React.FC = () => {
   const headerButtons = [
@@ -29,7 +28,6 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'Cloudwatch Alternative Hero Start Trial',
@@ -41,7 +39,6 @@ const Header: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/cloud/',
       variant: 'secondary' as const,
-      className: BUTTON_CLASS_NAME,
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'Cloudwatch Alternative Hero Docs',
@@ -55,7 +52,7 @@ const Header: React.FC = () => {
     <FeaturePageHeader
       title={
         <>
-          <div className="mb-4 p-3 text-base font-semibold">SIGNOZ VS AWS CLOUDWATCH</div>
+          <div className="mb-4 p-3 text-base font-semibold">SIGNOZ CLOUD VS AWS CLOUDWATCH</div>
           <div className="text-5xl font-bold leading-none">
             AWS CloudWatch <br className="hidden md:block" /> Alternative
           </div>
@@ -63,7 +60,7 @@ const Header: React.FC = () => {
       }
       description={
         <>
-          Open-source observability with transparent pricing. Get logs, metrics, and traces in{' '}
+          SigNoz Cloud provides transparent pricing for logs, metrics, and traces in{' '}
           <br className="hidden md:block" /> one place without CloudWatch's fragmented consoles and
           12+ billing components.
         </>
@@ -138,9 +135,9 @@ const CostComparison: React.FC = () => {
         </h4>
         <div className="text-sm text-signoz_vanilla-400">
           CloudWatch bills across 12+ separate components for ingestion, storage, queries, metrics,
-          alarms, dashboards, and API access. SigNoz charges $0.30/GB for logs and traces, $0.10 per
-          million samples for metrics. Once data is ingested, query it unlimited times at no extra
-          charge.
+          alarms, dashboards, and API access. SigNoz Cloud charges $0.30/GB for logs and traces,
+          $0.10 per million samples for metrics. Once data is ingested, query it unlimited times at
+          no extra charge.
         </div>
       </div>
       <div>
@@ -152,7 +149,7 @@ const CostComparison: React.FC = () => {
                 CloudWatch's <br className="hidden md:block" /> billing{' '}
                 <br className="hidden md:block" /> complexity
               </h2>
-              <Button asChild variant="secondary" rounded="full">
+              <Button asChild variant="secondary">
                 <TrackingLink
                   href="https://aws.amazon.com/cloudwatch/pricing/"
                   clickType="Secondary CTA"
@@ -202,7 +199,7 @@ const ArchitectureAndApproach: React.FC = () => {
               <br className="hidden md:block" />
               across separate services (Metrics, Logs, X-Ray, Application Signals), each with its
               own <br className="hidden md:block" />
-              storage, console, and query language. SigNoz stores all telemetry in a single
+              storage, console, and query language. SigNoz Cloud stores all telemetry in a single
               ClickHouse <br className="hidden md:block" />
               database with a unified query interface.
             </div>
@@ -235,8 +232,8 @@ const CloudwatchAlternativePage: React.FC = () => {
         sectionDescription={
           <>
             <p>
-              SigNoz eliminates query costs, dashboard fees, and API charges. Pay only for data
-              volume ingested.
+              SigNoz Cloud eliminates query costs, dashboard fees, and API charges. Pay only for
+              data volume ingested.
             </p>
             <p>
               Use the calculator below to estimate costs, then track actual usage with Cost Meter to

@@ -1,5 +1,5 @@
 ---
-date: 2026-07-30
+date: 2026-09-16
 description: Learn how to create, edit, filter, and manage dashboards and panels in SigNoz, including list filters, row actions, tags, sections, and the panel editor.
 title: Manage Dashboards in SigNoz
 doc_type: howto
@@ -175,27 +175,31 @@ The org-wide member list is sourced from the organization members API. Availabil
 
 Selecting the built-in **Locked** view places `locked = true` directly into the visible query box as an editable constraint, rather than applying it as a hidden filter. You can see the constraint, edit it, or combine it with other filters like any search term.
 
-## Row Actions and Role Access on the Dashboards List
+## Row Actions and Access on the Dashboards List
 
-Every user sees the per-row actions menu on the dashboards list, but the actions it offers depend on their permission. Read-only actions are available to all roles, and edit actions are available only to users with edit permission (Editor, Author, and Admin roles).
+Every user sees the per-row actions menu, and each entry checks its own transactions on that dashboard. An action you cannot use stays visible but disabled, and hovering it names what is missing.
 
-**Read-only actions (all roles, including Viewer):**
+**Available to everyone who can open the list:**
 
 - **View**: open the dashboard.
 - **Open in New Tab**: open the dashboard in a new browser tab.
 - **Copy Link**: copy a direct link to the dashboard.
 
-**Edit actions (Editor, Author, and Admin roles):**
+**Checked against the dashboard:**
 
-- **Rename**: rename the dashboard.
-- **Add Tags** or **Edit Tags**: manage the dashboard's tags. See [Manage Dashboard Tags](#manage-dashboard-tags).
-- **Duplicate**: create a copy of the dashboard.
-- **Lock Dashboard** or **Unlock Dashboard**: prevent or re-allow edits.
-- **Delete**: permanently delete the dashboard.
+| Action | Transactions |
+|--------|--------------|
+| **Rename** | `read` and `update` on the dashboard |
+| **Add Tags** or **Edit Tags** (see [Manage Dashboard Tags](#manage-dashboard-tags)) | `read` and `update` on the dashboard |
+| **Duplicate** | `read` on the dashboard and `create` |
+| **Lock Dashboard** or **Unlock Dashboard** | `read` and `update` on the dashboard |
+| **Delete** | `delete` on the dashboard |
 
-Viewers keep the read-only actions, so they can still open, view, and share dashboards, but the edit actions stay hidden from them.
+The SigNoz-Editor and SigNoz-Admin roles hold all of these for every dashboard, and SigNoz-Viewer holds none of them. To grant them per dashboard, see [Restrict Dashboard Access](https://signoz.io/docs/manage/administrator-guide/iam/user-guides/restrict-dashboard-access/).
 
-On a locked dashboard, **Rename** and the tag actions are disabled, and hovering them explains why. Unlock the dashboard first to use them.
+The list itself needs `list`, which covers the whole workspace and is not filtered by `read`. A dashboard you cannot read still appears as a row, and opening it reports the denial.
+
+On a locked dashboard, **Rename** and the tag actions are disabled, and hovering them explains why. Unlock the dashboard first to use them. An integration dashboard can never be locked or unlocked.
 
 ## Manage Dashboard Tags
 
@@ -251,7 +255,7 @@ The dashboard toolbar at the top right holds four controls: **Actions**, **Confi
 
 - **Rename**: rename the dashboard without opening the configuration drawer.
 - **Clone dashboard**: create a copy of the dashboard. See [Clone a Dashboard](#clone-a-dashboard).
-- **Lock dashboard** or **Unlock dashboard**: prevent accidental edits. When locked, panels cannot be added, removed, resized, or rearranged. Available to the dashboard's author and to Admins.
+- **Lock dashboard** or **Unlock dashboard**: prevent accidental edits. When locked, panels cannot be added, removed, resized, or rearranged. Needs `read` and `update` on the dashboard, and the API accepts the change only from the dashboard's creator or a SigNoz-Admin. Integration and system dashboards can never be locked or unlocked.
 - **Full screen**: view the dashboard in full-screen mode for presentations or wall displays.
 
 **Layout**

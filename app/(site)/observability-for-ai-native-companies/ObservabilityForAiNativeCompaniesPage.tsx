@@ -30,7 +30,6 @@ const Header: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: 'flex-center',
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'Observability for AI Native Companies Hero Start Trial',
@@ -42,7 +41,6 @@ const Header: React.FC = () => {
       text: 'Explore SigNoz MCP',
       href: '/docs/ai/signoz-mcp-server/',
       variant: 'secondary' as const,
-      className: 'flex-center',
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'Observability for AI Native Companies Hero Docs',
@@ -63,9 +61,9 @@ const Header: React.FC = () => {
       }
       description={
         <>
-          Track token usage, latency, and costs alongside your microservices, databases, and GPU
-          clusters. <br className="hidden md:block" /> Handle high-cardinality data at scale with
-          usage-based pricing and span-level alerting for traces.
+          SigNoz Cloud tracks token usage, latency, and costs alongside your microservices,
+          databases, and GPU clusters. <br className="hidden md:block" /> Handle high-cardinality
+          data at scale with usage-based pricing and span-level alerting for traces.
         </>
       }
       buttons={headerButtons}
@@ -96,14 +94,9 @@ const TrustedByTeams: React.FC = () => {
         ))}
       </div>
       <div className="w-full text-center">
-        <Button
-          variant="secondary"
-          rounded="full"
-          className="mx-auto flex w-fit items-center gap-2"
-          asChild
-        >
+        <Button variant="secondary" className="mx-auto flex w-fit items-center gap-2" asChild>
           <TrackingLink
-            href="/case-study/"
+            href="/customers/"
             clickType="Secondary CTA"
             clickName="Observability for AI Native Companies Customer Stories Button"
             clickLocation="Observability for AI Native Companies Testimonials"
@@ -123,8 +116,8 @@ const CapabilitiesSection: React.FC = () => {
     <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
       <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
         <h2 className="my-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
-          Capabilities That Make SigNoz the <br className="hidden md:block" /> Default Choice for AI
-          Companies
+          Capabilities That Make SigNoz Cloud the <br className="hidden md:block" /> Default Choice
+          for AI Companies
         </h2>
         <SectionLayout variant="no-border" className="!mx-auto p-0">
           <div className="flex flex-col items-start justify-start gap-3 border-y border-dashed border-signoz_slate-400 p-8 text-left">
@@ -204,12 +197,12 @@ const CostComparison: React.FC = () => {
         </div>
         <div className="flex-[2_2_0%] border-l border-dashed border-signoz_slate-400 p-10">
           <h3 className="mb-4 text-xl font-semibold text-signoz_vanilla-100">
-            SigNoz vs Langfuse for 1 Billion Spans/Month
+            SigNoz Cloud vs Langfuse for 1 Billion Spans/Month
           </h3>
           <p className="mb-8 text-signoz_vanilla-400">
-            We charge based on data size while Langfuse charges per unit count. AI applications
-            generate more spans due to complex agent workflows and tool calls, making unit-based
-            pricing expensive at scale.
+            SigNoz Cloud charges based on data size while Langfuse charges per unit count. AI
+            applications generate more spans due to complex agent workflows and tool calls, making
+            unit-based pricing expensive at scale.
           </p>
 
           <div className="flex flex-col gap-4">
@@ -245,7 +238,7 @@ const HowSigNozCompares: React.FC = () => {
       <div className="container relative mx-auto flex max-w-4xl flex-col items-center gap-6 pb-16 text-center md:py-20">
         <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
           <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
-            How SigNoz Compares to <br /> LLM-Only Tools
+            How SigNoz Cloud Compares to <br /> LLM-Only Tools
           </h2>
           <SectionLayout variant="no-border" className="!mx-auto flex items-center justify-center">
             <ComparisonTable vendors={VENDORS} rows={LLM_COMPARISON_TABLE_ROWS} />
@@ -283,7 +276,6 @@ const StartMonitoring: React.FC = () => {
       text: 'Start your free trial',
       href: '/teams/',
       variant: 'default' as const,
-      className: 'flex-center',
       tracking: {
         clickType: 'Primary CTA',
         clickName: 'Observability for AI Native Companies Start Monitoring CTA Start Trial',
@@ -295,7 +287,6 @@ const StartMonitoring: React.FC = () => {
       text: 'Read Documentation',
       href: '/docs/llm-observability/',
       variant: 'secondary' as const,
-      className: 'flex-center',
       tracking: {
         clickType: 'Secondary CTA',
         clickName: 'Observability for AI Native Companies Start Monitoring CTA Docs',
@@ -336,8 +327,8 @@ const StartMonitoring: React.FC = () => {
             </div>
             <div className="flex flex-col items-center gap-6 text-justify text-signoz_vanilla-400 lg:items-start">
               Your existing application code remains completely untouched while traces start flowing
-              to SigNoz in real-time, giving you instant visibility into every aspect of your LLM
-              operations.
+              to SigNoz Cloud in real-time, giving you instant visibility into every aspect of your
+              LLM operations.
               <ButtonGroup buttons={startMonitoringButtons} />
             </div>
           </div>

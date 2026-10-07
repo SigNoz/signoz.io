@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 340" width="920" height="340"
+     font-family="Inter, ui-sans-serif, system-ui, sans-serif">
+  <defs>
+    <marker id="arr-b" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arr-g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#16a34a"/>
+    </marker>
+    <linearGradient id="signoz-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+    <filter id="glow-o" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#F97316" flood-opacity="0.4" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      @keyframes pulse-signoz {
+        0%,100% { filter: url(#glow-o); }
+        50%      { filter: none; }
+      }
+      .signoz-box { animation: pulse-signoz 3s ease-in-out infinite; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="920" height="340" fill="#f8fafc" rx="12"/>
+
+  <!-- Kubernetes cluster boundary -->
+  <rect x="16" y="16" width="672" height="308" rx="10" fill="white"
+        stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <text x="32" y="37" font-size="11" font-weight="600" letter-spacing="0.8" fill="#3b82f6">KUBERNETES CLUSTER</text>
+
+  <!-- SigNoz (outside cluster) -->
+  <rect x="738" y="118" width="162" height="80" rx="8" fill="url(#signoz-grad)" class="signoz-box"/>
+  <text x="819" y="148" text-anchor="middle" font-size="14" font-weight="700" fill="white">SigNoz</text>
+  <text x="819" y="166" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.85)">Self-hosted</text>
+  <text x="819" y="183" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.85)">PromQL query API</text>
+
+  <!-- ── TOP ROW: ingestion (one way) ── -->
+  <text x="48" y="62" font-size="9.5" font-weight="600" letter-spacing="0.8" fill="#94a3b8">INGESTION</text>
+
+  <!-- Workloads -->
+  <rect x="48" y="72" width="140" height="55" rx="7" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="118" y="97" text-anchor="middle" font-size="13" font-weight="600" fill="#1e40af">Workloads</text>
+  <text x="118" y="115" text-anchor="middle" font-size="10" fill="#2563eb">apps &amp; cluster</text>
+
+  <!-- OTel Collector -->
+  <rect x="260" y="72" width="168" height="55" rx="7" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="344" y="97" text-anchor="middle" font-size="13" font-weight="600" fill="#1e40af">OTel Collector</text>
+  <text x="344" y="115" text-anchor="middle" font-size="10" fill="#2563eb">collect &amp; scrape</text>
+
+  <!-- Arrow: Workloads → OTel Collector -->
+  <line x1="190" y1="99" x2="258" y2="99" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-b)"/>
+  <text x="224" y="90" text-anchor="middle" font-size="9" fill="#475569">metrics</text>
+
+  <!-- Arrow: OTel Collector → SigNoz -->
+  <path d="M428 90 Q 582 56 736 142" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-b)"/>
+  <text x="568" y="62" text-anchor="middle" font-size="9" fill="#475569">OTLP</text>
+
+  <!-- ── BOTTOM ROW: query path (request and response) ── -->
+  <text x="48" y="190" font-size="9.5" font-weight="600" letter-spacing="0.8" fill="#94a3b8">QUERY</text>
+
+  <!-- Prometheus-only tools -->
+  <rect x="48" y="200" width="290" height="70" rx="7" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="193" y="224" text-anchor="middle" font-size="13" font-weight="600" fill="#1e40af">Prometheus-only tools</text>
+  <text x="193" y="243" text-anchor="middle" font-size="9.5" fill="#2563eb">Grafana · KEDA · Headlamp · Ray · OpenCost</text>
+  <text x="193" y="258" text-anchor="middle" font-size="9.5" fill="#2563eb">HPA · VPA · Argo Rollouts · …</text>
+
+  <!-- Prometheus API Bridge -->
+  <rect x="418" y="200" width="222" height="70" rx="7" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="529" y="228" text-anchor="middle" font-size="12" font-weight="600" fill="#15803d">Prometheus API Bridge</text>
+  <text x="529" y="248" text-anchor="middle" font-size="9.5" fill="#16a34a">query · series · labels · metadata</text>
+
+  <!-- Request: tools → bridge -->
+  <line x1="340" y1="224" x2="416" y2="224" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-b)"/>
+  <text x="378" y="216" text-anchor="middle" font-size="9" fill="#475569">Prometheus API</text>
+
+  <!-- Response: bridge → tools -->
+  <line x1="416" y1="248" x2="340" y2="248" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr-g)"/>
+  <text x="378" y="264" text-anchor="middle" font-size="9" fill="#15803d">results</text>
+
+  <!-- Request: bridge → SigNoz -->
+  <path d="M640 216 Q 700 216 736 172" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+  <text x="664" y="200" text-anchor="middle" font-size="9" fill="#15803d">PromQL</text>
+
+  <!-- Response: SigNoz → bridge -->
+  <path d="M736 192 Q 694 250 642 252" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-g)"/>
+  <text x="660" y="266" text-anchor="middle" font-size="9" fill="#15803d">results</text>
+
+  <!-- ── ANIMATED DOTS (data flow) ── -->
+
+  <!-- 1. Workloads → OTel Collector -->
+  <circle r="4" fill="#3b82f6" opacity="0.85">
+    <animateMotion dur="1.4s" repeatCount="indefinite" begin="0s"
+      path="M190 99 L258 99"/>
+  </circle>
+
+  <!-- 2. OTel Collector → SigNoz -->
+  <circle r="4" fill="#3b82f6" opacity="0.85">
+    <animateMotion dur="2.4s" repeatCount="indefinite" begin="0.3s"
+      path="M428 90 Q 582 56 736 142"/>
+  </circle>
+
+  <!-- 3. Tools → Bridge (request) -->
+  <circle r="4" fill="#3b82f6" opacity="0.85">
+    <animateMotion dur="1.2s" repeatCount="indefinite" begin="0s"
+      path="M340 224 L416 224"/>
+  </circle>
+
+  <!-- 4. Bridge → SigNoz (request) -->
+  <circle r="4" fill="#16a34a" opacity="0.85">
+    <animateMotion dur="1.6s" repeatCount="indefinite" begin="1.2s"
+      path="M640 216 Q 700 216 736 172"/>
+  </circle>
+
+  <!-- 5. SigNoz → Bridge (response) -->
+  <circle r="4" fill="#16a34a" opacity="0.85">
+    <animateMotion dur="1.6s" repeatCount="indefinite" begin="2.8s"
+      path="M736 192 Q 694 250 642 252"/>
+  </circle>
+
+  <!-- 6. Bridge → Tools (response) -->
+  <circle r="4" fill="#16a34a" opacity="0.85">
+    <animateMotion dur="1.2s" repeatCount="indefinite" begin="4.4s"
+      path="M416 248 L340 248"/>
+  </circle>
+</svg>

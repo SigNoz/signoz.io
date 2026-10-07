@@ -7,17 +7,17 @@ export const metadata: Metadata = {
     absolute: 'AI Observability - Monitor LLM Apps & Microservices Together | SigNoz',
   },
   openGraph: {
-    title: 'AI Observability - Monitor LLM Apps & Microservices Together | SigNoz',
+    title: 'AI Observability - Monitor LLM Apps & Microservices Together | SigNoz Cloud',
     description:
-      'SigNoz AI Observability helps you monitor AI apps in minutes. Track latency, errors, token usage and costs with OpenTelemetry in one unified platform.',
+      'SigNoz Cloud AI Observability helps you monitor AI apps in minutes. Track latency, errors, token usage, and costs with OpenTelemetry in one unified platform.',
     images: '/img/platform/ObservabilityForAiNativeCompaniesMeta.webp',
   },
   description:
-    'SigNoz AI Observability helps you monitor AI apps in minutes. Track latency, errors, token usage and costs with OpenTelemetry in one unified platform.',
+    'SigNoz Cloud AI Observability helps you monitor AI apps in minutes. Track latency, errors, token usage, and costs with OpenTelemetry in one unified platform.',
   twitter: {
-    title: 'AI Observability - Monitor LLM Apps & Microservices Together | SigNoz',
+    title: 'AI Observability - Monitor LLM Apps & Microservices Together | SigNoz Cloud',
     description:
-      'SigNoz AI Observability helps you monitor AI apps in minutes. Track latency, errors, token usage and costs with OpenTelemetry in one unified platform.',
+      'SigNoz Cloud AI Observability helps you monitor AI apps in minutes. Track latency, errors, token usage, and costs with OpenTelemetry in one unified platform.',
     images: '/img/platform/ObservabilityForAiNativeCompaniesMeta.webp',
   },
 }

@@ -1,0 +1,122 @@
+---
+date: 2026-10-06
+title: Neon Postgres Dashboard - Monitor Connections, Cache, CPU
+description: Monitor Neon Postgres in SigNoz with a ready-made dashboard for connections, row activity, cache, PgBouncer pooling, replica lag, and compute use.
+doc_type: explanation
+---
+
+Use this dashboard to monitor your Neon projects across connections, database activity, the Local File Cache, connection pooling, read replica lag, and compute resources.
+
+Neon sends these metrics through its built-in OpenTelemetry integration. You do not need to run an OpenTelemetry Collector.
+
+<Admonition type="note">
+Set up the data source and send telemetry to SigNoz before you import this dashboard. Follow the [Neon OpenTelemetry integration](https://signoz.io/docs/integrations/opentelemetry-neondb/) guide.
+</Admonition>
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/neon-dashboard.webp"
+  alt="Neon Postgres Metrics Dashboard"
+  caption="Neon Postgres Metrics Dashboard"
+/>
+
+<DashboardActions
+  dashboardJsonV2Url="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/neon/neon-dashboard.json"
+  dashboardName="Neon Postgres"
+/>
+
+## Dashboard Coverage
+
+Use these panels to:
+
+- See database size, active connections, cache hit ratio, and CPU use.
+- Track Postgres connections by state and by compute.
+- Measure row changes per second, deadlocks, and database size.
+- Make sure that the Local File Cache holds your working set. The Local File Cache is a cache on each compute that keeps pages from Neon storage.
+- Watch the PgBouncer pool behind the pooled connection string: clients, server connections, wait time, throughput, and query duration.
+- Track replication delay on read replicas.
+- Compare CPU, load, memory, and swap on each compute.
+
+## Metrics Included
+
+### Overview
+
+- **Database Size**: Total size of all databases (`neon_db_total_size`).
+- **Active Connections**: Postgres connections that run a query (`neon_connection_counts`).
+- **Cache Hit Ratio**: Share of page reads that the Local File Cache serves (`neon_lfc_hits`, `neon_lfc_misses`).
+- **CPU Utilization**: Busy share of compute CPU time (`host_cpu_seconds_total`).
+
+### Connections
+
+- **Connections by State**: Postgres connections grouped by `pg_stat_activity` state.
+- **Connections by Compute**: Total Postgres connections on each compute.
+
+### Database Activity
+
+- **Row Operations**: Rows inserted, updated, and deleted per second (`neon_pg_stats_userdb`).
+- **Deadlocks**: Deadlocks per database in each 5-minute window.
+- **Size by Database** and **Total Database Size**: Size of each tracked database and of all databases.
+
+Neon collects `neon_pg_stats_userdb` only for its oldest non-system databases, up to a limit it does not publish. If your project has more databases than that limit, Row Operations, Deadlocks, and Size by Database leave out the newer ones, but Total Database Size includes all databases.
+
+### Local File Cache
+
+- **Cache Hit Ratio**: Cache hit ratio over time.
+- **Cache Operations**: Cache hits, misses, and writes per second.
+- **Cache Used vs Limit**: Cache in use on each compute, compared with the cache size limit (`neon_lfc_used_pages`, `neon_lfc_cache_size_limit`).
+- **Working Set Size**: Approximate size of the pages that queries touch in 5-minute, 15-minute, and 1-hour windows, compared with the cache size limit (`neon_lfc_approximate_working_set_size_windows`).
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/neon-dashboard-local-file-cache.webp"
+  alt="Local File Cache section of the Neon Postgres dashboard"
+  caption="Local File Cache section"
+/>
+
+### Connection Pooler (PgBouncer)
+
+- **Client Connections**: Active and waiting clients on the pooled connection string.
+- **Server Connections**: Active, idle, and used connections from PgBouncer to Postgres.
+- **Max Client Wait**: Longest time that a client waits for a server connection.
+- **Pooled Throughput**: Transactions and queries per second through PgBouncer.
+- **Average Query Duration**: Mean time for each pooled query.
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/neon-dashboard-pgbouncer.webp"
+  alt="Connection Pooler (PgBouncer) section of the Neon Postgres dashboard"
+  caption="Connection Pooler (PgBouncer) section"
+/>
+
+### Read Replicas
+
+- **Replication Delay (Bytes)** and **Replication Delay (Time)**: Replication lag on each read replica (`neon_replication_delay_bytes`, `neon_replication_delay_seconds`). If the project has no read replicas, these panels show no data.
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/neon-dashboard-read-replicas.webp"
+  alt="Read Replicas section of the Neon Postgres dashboard"
+  caption="Read Replicas section"
+/>
+
+### Compute
+
+- **CPU Utilization by Compute** and **Load Average (1m) by Compute**: CPU use and run-queue length on each compute.
+- **Memory Utilization by Compute** and **Swap Used by Compute**: Memory use and swap on each compute.
+
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/neon-dashboard-compute.webp"
+  alt="Compute section of the Neon Postgres dashboard"
+  caption="Compute section"
+/>
+
+## Dashboard Variables
+
+Use these filter variables:
+
+- **project_id**: Filter by Neon project.
+- **endpoint_id**: Filter by compute. Each read replica has its own compute endpoint.
+
+Neon sets `service.name` on metrics to fixed values, so the dashboard filters by `project_id` and `endpoint_id` instead.
+
+## Related Dashboards
+
+- [PostgreSQL](https://signoz.io/docs/dashboards/dashboard-templates/postgresql/)
+- [PgBouncer](https://signoz.io/docs/dashboards/dashboard-templates/pgbouncer-dashboard/)
+- [CloudNativePG](https://signoz.io/docs/dashboards/dashboard-templates/cloudnative-pg-dashboard/)

@@ -72,7 +72,7 @@ const Changelog = async (props: ChangelogProps) => {
   const pagination = changelogsResponse.pagination
 
   return (
-    <section className="h-auto w-full bg-signoz_ink-500">
+    <section className="h-auto w-full bg-[var(--l1-background)]">
       <div className="container relative mx-auto flex flex-col gap-7">
         <div className="bg-dot-pattern masked-dots absolute top-0 h-screen w-full" />
         <div className="z-10 flex w-full flex-col gap-7 py-16">

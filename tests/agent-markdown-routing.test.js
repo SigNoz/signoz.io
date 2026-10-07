@@ -37,8 +37,8 @@ test('parseContentMarkdownPath matches CMS content sections with a slug', () => 
     section: 'guides',
     slug: 'nested/slug',
   })
-  assert.deepEqual(parseContentMarkdownPath('/case-study/acme'), {
-    section: 'case-study',
+  assert.deepEqual(parseContentMarkdownPath('/customers/acme'), {
+    section: 'customers',
     slug: 'acme',
   })
 })
@@ -141,6 +141,6 @@ test('servesMarkdownAlternate flags URLs with a markdown representation', () => 
 test('CONTENT_MARKDOWN_SECTIONS covers all CMS-backed sections', () => {
   assert.deepEqual(
     [...CONTENT_MARKDOWN_SECTIONS].sort(),
-    ['blog', 'case-study', 'comparisons', 'faqs', 'guides', 'opentelemetry'].sort()
+    ['blog', 'customers', 'comparisons', 'faqs', 'guides', 'opentelemetry'].sort()
   )
 })

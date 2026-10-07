@@ -7,6 +7,7 @@ function transformListicleItem(item, cdnUrl) {
   }
 
   if (item.clickName) transformed.click_name = item.clickName
+  if (item.description) transformed.description = item.description
 
   if (item.icon) {
     if (typeof item.icon === 'string') {
@@ -45,6 +46,7 @@ function transformListicleSection(section, cdnUrl) {
     section_name: section.sectionName,
   }
 
+  if (section.description) transformed.description = section.description
   if (section.gridCols) transformed.grid_cols = section.gridCols
 
   if (section.items && section.items.length > 0) {

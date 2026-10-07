@@ -4,7 +4,7 @@ const siteMetadata = {
   author: 'SigNoz Inc',
   headerTitle: 'SigNoz',
   description:
-    'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
+    'SigNoz builds SigNoz Cloud, a managed OpenTelemetry-native observability platform, and Self-Hosted SigNoz, its open-source self-managed option.',
   language: 'en-us',
   theme: 'dark', // system, dark or light
   siteUrl: 'https://signoz.io',
@@ -20,11 +20,6 @@ const siteMetadata = {
   hackernews: 'https://www.ycombinator.com/companies/signoz',
   locale: 'en-US',
   analytics: {},
-  newsletter: {
-    // supports mailchimp, buttondown, convertkit, klaviyo, revue, emailoctopus
-    // Please add your .env file and modify it according to your selection
-    provider: 'buttondown',
-  },
   comments: {
     // If you want to use an analytics provider you have to add it to the
     // content security policy in the `next.config.js` file.

@@ -12,14 +12,10 @@ export const DECIMAL_WIDGET_ID = process.env.NEXT_PUBLIC_DECIMAL_WIDGET_ID
 export const DECIMAL_PUBLIC_CONFIG = process.env.NEXT_PUBLIC_DECIMAL_PUBLIC_CONFIG
 
 // Theme applied once the widget script loads (values from the Decimal dashboard).
-const DECIMAL_THEME = {
-  colorScheme: 'dark',
+// The widget renders outside the site's token cascade, so both palettes are
+// spelled out and re-applied whenever html.dark toggles.
+const DECIMAL_THEME_BASE = {
   primaryColor: 'rgb(255, 68, 32)',
-  backgroundColor: 'oklch(0.141 0.005 285.823)',
-  textColor: '#FAFAFA',
-  textColorSecondary: '#FFFFFF',
-  textColorMuted: '#A1A1AA',
-  borderColor: '#27272A',
   headerTitle: 'SigNoz Support',
   greeting: "👋 Hey! I'm SigNoz AI. Ask me about docs, pricing, or anything else!",
   suggestedMessages: [
@@ -28,6 +24,40 @@ const DECIMAL_THEME = {
     'How SigNoz pricing works?',
     'Migrate from Grafana or Datadog',
   ],
+}
+
+const DECIMAL_DARK_COLORS = {
+  colorScheme: 'dark',
+  backgroundColor: 'oklch(0.141 0.005 285.823)',
+  textColor: '#FAFAFA',
+  textColorSecondary: '#FFFFFF',
+  textColorMuted: '#A1A1AA',
+  borderColor: '#27272A',
+}
+
+const DECIMAL_LIGHT_COLORS = {
+  colorScheme: 'light',
+  backgroundColor: '#FFFFFF',
+  textColor: '#18181B',
+  textColorSecondary: '#09090B',
+  textColorMuted: '#52525B',
+  borderColor: '#E4E4E7',
+}
+
+function currentDecimalTheme(): Record<string, unknown> {
+  const isDark = document.documentElement.classList.contains('dark')
+  return { ...DECIMAL_THEME_BASE, ...(isDark ? DECIMAL_DARK_COLORS : DECIMAL_LIGHT_COLORS) }
+}
+
+let decimalThemeObserverInstalled = false
+
+function applyDecimalTheme(): void {
+  window.Decimal?.theme?.(currentDecimalTheme())
+  if (decimalThemeObserverInstalled) return
+  decimalThemeObserverInstalled = true
+  new MutationObserver(() => {
+    window.Decimal?.theme?.(currentDecimalTheme())
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
 }
 
 // Display mode controls how the chat opens:
@@ -62,7 +92,7 @@ export function ensureDecimalScript(): void {
   script.async = true
   script.onload = () => {
     // Apply SigNoz branding once the widget API is available.
-    window.Decimal?.theme?.(DECIMAL_THEME)
+    applyDecimalTheme()
   }
   document.head.appendChild(script)
 }
