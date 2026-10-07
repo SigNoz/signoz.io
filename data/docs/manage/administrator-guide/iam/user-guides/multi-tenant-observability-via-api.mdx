@@ -1,0 +1,228 @@
+---
+date: 2026-09-30
+title: "Multi-Tenant Observability: Serve Customer Data via API"
+description: Show each customer only their own logs, traces, and metrics in your product. Use one ingestion key, scoped role, and API key per tenant with the SigNoz API.
+tags: [SigNoz Cloud]
+doc_type: tutorial
+---
+
+## Overview
+
+Show each customer of your platform the telemetry of their own applications inside your product. Your backend queries SigNoz with one API key for each tenant (one customer of your platform). SigNoz rejects any query for the data of a different tenant.
+
+Your customers do not sign in to SigNoz, and your own platform telemetry never appears in a customer view.
+
+## Prerequisites
+
+- A [SigNoz Cloud workspace](https://signoz.io/teams/).
+- The `signoz-admin` role, because you create roles and service accounts.
+- A backend service in your product that can store secrets and make HTTP requests to SigNoz.
+
+## Setup
+
+### Step 1: Create an ingestion key for each tenant
+
+1. Create an [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for each tenant, for example `tenant-acme`.
+2. In **Settings > Ingestion Settings**, copy the key value and the key **ID**. Applications send data with the value. Roles and queries use the ID.
+3. Set the key value in the environment of each application of the tenant:
+
+```bash
+OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<tenant-ingestion-key>"
+```
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<tenant-ingestion-key>`: The key value of the tenant from this step.
+
+SigNoz Cloud adds the attribute `signoz.workspace.key.id` to all data. Its value is the ID of the key that sent the data, and an application cannot change it.
+
+Send the telemetry of your own platform with a different key. No tenant role can then read it.
+
+A tenant can have more than one key, for example for staging and production. Add each key ID to the role in Step 2, and filter with `signoz.workspace.key.id IN ('<key-id-1>', '<key-id-2>')`.
+
+### Step 2: Create a scoped role and a service account for each tenant
+
+1. Create a custom role that can read only the logs, traces, and metrics of the tenant key. Follow [Scope Telemetry Access by Ingestion Key](https://signoz.io/docs/manage/administrator-guide/iam/user-guides/scope-telemetry-access-by-ingestion-key/) with the key ID from Step 1.
+2. Create a service account for the tenant, for example `tenant-acme`. See [Service Accounts](https://signoz.io/docs/manage/administrator-guide/iam/service-accounts/).
+3. Assign only the scoped role to the service account.
+4. Create an API key for the service account. Store it in your secrets manager with the key ID of the tenant.
+
+<Admonition type="warning">
+Do not give the service account a managed role such as `signoz-viewer`. Roles add up, and a managed role can read the data of every tenant.
+</Admonition>
+
+To add new tenants without the SigNoz UI, you can script Step 1 and Step 2 with the <a href="https://signoz.io/api-reference/" target="_blank" rel="noopener noreferrer nofollow">SigNoz API</a>.
+
+### Step 3: Query the data of a tenant from your backend
+
+Send queries to `/api/v5/query_range` with the API key of the tenant. Each query must filter on the key ID of the tenant. This example counts the spans of each service of the tenant.
+
+```json:query.json
+{
+  "start": <start-unix-ms>,
+  "end": <end-unix-ms>,
+  "requestType": "scalar",
+  "compositeQuery": {
+    "queries": [
+      {
+        "type": "builder_query",
+        "spec": {
+          "name": "A",
+          "signal": "traces",
+          "aggregations": [{ "expression": "count()" }],
+          "filter": { "expression": "signoz.workspace.key.id = '<tenant-key-id>'" },
+          "groupBy": [{ "name": "service.name", "fieldContext": "resource" }]
+        }
+      }
+    ]
+  }
+}
+```
+
+```bash
+curl -X POST "https://<signoz-url>/api/v5/query_range" \
+  -H "Content-Type: application/json" \
+  -H "SIGNOZ-API-KEY: <tenant-api-key>" \
+  -d @query.json
+```
+
+**Verify these values:**
+
+- `<start-unix-ms>` and `<end-unix-ms>`: The time range in Unix milliseconds.
+- `<tenant-key-id>`: The ingestion key ID of the tenant from [Step 1](#step-1-create-an-ingestion-key-for-each-tenant).
+- `<signoz-url>`: The URL of your SigNoz workspace, for example `example.<region>.signoz.cloud`.
+- `<tenant-api-key>`: The service account API key of the tenant from [Step 2](#step-2-create-a-scoped-role-and-a-service-account-for-each-tenant).
+
+The response has one row for each service of the tenant. For more query examples, see the [Traces API](https://signoz.io/docs/traces-management/trace-api/overview/), [Logs API](https://signoz.io/docs/logs-management/logs-api/overview/), and [Metrics API](https://signoz.io/docs/metrics-management/query-range-api/).
+
+If a request has more than one query, for example a formula `A/B`, add the key filter to each query. If one query does not have it, SigNoz rejects the request.
+
+### Step 4: Serve the data to your UI
+
+Keep the SigNoz calls in your backend. For each request from your frontend, the backend does these steps:
+
+1. Find the tenant of the signed-in user.
+2. Get the key ID and the API key of that tenant from your secrets manager.
+3. Build the query with the key ID of the tenant in the filter. To reuse panels from a SigNoz dashboard, see [Use a SigNoz dashboard as panel templates](#use-a-signoz-dashboard-as-panel-templates).
+4. Call `/api/v5/query_range` and return the result to your frontend.
+
+<Admonition type="warning">
+Do not send a SigNoz API key to the browser. A user with the key can run any query that its role allows.
+</Admonition>
+
+If your backend sends a key ID that the tenant does not own, SigNoz rejects the query with `403`. No data of the other tenant leaves SigNoz.
+
+## Validate
+
+1. In SigNoz, open **Traces Explorer** and filter with `signoz.workspace.key.id = '<tenant-a-key-id>'`. The spans of tenant A appear.
+2. Send the query from Step 3 with the API key of tenant A and the key ID of tenant A. The response is `200`, and its rows match the services that you saw in step 1.
+3. Send the same query with the key ID of tenant B. The response is `403`:
+
+```json
+{
+  "status": "error",
+  "error": {
+    "type": "forbidden",
+    "code": "authz_forbidden",
+    "message": "service_account/<service-account-id> is not authorized to perform traces:read on resource \"builder_query/signoz.workspace.key.id/<tenant-b-key-id>\""
+  }
+}
+```
+
+<details>
+<ToggleHeading>
+## Use a SigNoz dashboard as panel templates
+</ToggleHeading>
+
+Design the panels once in a SigNoz dashboard. Your backend then runs the same panel queries for each tenant.
+
+1. In each panel, filter with a `$key` variable, for example `signoz.workspace.key.id IN $key`.
+2. Give the role of each tenant `read` access to the dashboard. See [Restrict Dashboard Access](https://signoz.io/docs/manage/administrator-guide/iam/user-guides/restrict-dashboard-access/).
+3. Get the dashboard with `GET /api/v2/dashboards/<dashboard-id>`. The query of a panel is at `data.spec.panels.<panel-id>.spec.queries[0]`.
+4. Build the `compositeQuery` from `spec.plugin` of that query:
+
+| `spec.plugin.kind` | `compositeQuery` |
+|---|---|
+| `signoz/BuilderQuery` | `{"queries": [{"type": "builder_query", "spec": <spec.plugin.spec>}]}` |
+| `signoz/CompositeQuery` | `<spec.plugin.spec>` as it is |
+| `signoz/PromQLQuery` or `signoz/ClickHouseSQL` | Not supported with a key-scoped role |
+
+5. Send the request to `/api/v5/query_range` with the key IDs of the tenant in `variables`:
+
+```json:panel-query.json
+{
+  "start": <start-unix-ms>,
+  "end": <end-unix-ms>,
+  "requestType": "<panel-query-kind>",
+  "variables": {
+    "key": { "type": "custom", "value": ["<tenant-key-id>"] }
+  },
+  "compositeQuery": <composite-query>
+}
+```
+
+**Verify these values:**
+
+- `<panel-query-kind>`: The value of `data.spec.panels.<panel-id>.spec.queries[0].kind`, for example `scalar`, `time_series`, or `raw`.
+- `<composite-query>`: The object that you built in step 4.
+- `<tenant-key-id>`: The ingestion key ID of the tenant. List more than one ID if the tenant has more than one key.
+
+SigNoz checks the role after it puts the variable values into the filter. A key ID that the role cannot read returns `403`.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### 403 on `builder_query/*`
+
+- Likely cause: A query has no `signoz.workspace.key.id` filter, or the filter uses `OR`.
+- Fix: Add `signoz.workspace.key.id = '<tenant-key-id>'` with `AND` to each query.
+- Verify: The request returns `200`.
+
+### 403 on `builder_query/signoz.workspace.key.id/$key`
+
+- Likely cause: The request has no value for `key` in `variables`.
+- Fix: Add `"variables": {"key": {"type": "custom", "value": ["<tenant-key-id>"]}}` to the request.
+- Verify: The request returns `200`.
+
+### 400 "unsupported signal"
+
+- Likely cause: The request wraps a `signoz/CompositeQuery` panel spec in a `builder_query`.
+- Fix: Send the spec as `compositeQuery` without the wrapper. See [Use a SigNoz dashboard as panel templates](#use-a-signoz-dashboard-as-panel-templates).
+- Verify: The request returns `200` with a result for each query and formula of the panel.
+
+### 403 on `promql/*` or `clickhouse_sql/*`
+
+- Likely cause: A key-scoped role can run only Query Builder queries.
+- Fix: Write the panel as a Query Builder query.
+- Verify: The request returns `200`.
+
+### 403 "only viewers/editors/admins can access this resource"
+
+- Likely cause: A key-scoped role can call the query endpoint only. It cannot call `/api/v1/fields/values` or other endpoints.
+- Fix: Store the values for your filter menus in your backend.
+
+</details>
+
+## Limitations
+
+- A key-scoped role can run Query Builder queries only. PromQL and ClickHouse SQL queries return `403`.
+- The role admits or rejects a query. It does not add the key filter for you, so your backend must add it to every query.
+- You need one ingestion key, one role, one service account, and one API key for each tenant.
+- This guide is for SigNoz Cloud only. Self-hosted SigNoz has no ingestion keys.
+
+## Next Steps
+
+- [Telemetry Access Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/telemetry/): how SigNoz accepts or rejects a query.
+- [Public Sharing in Dashboards](https://signoz.io/docs/dashboards/public-sharing/): share a dashboard with a link when you do not need tenant isolation.
+- [Set Custom Attributes](https://signoz.io/docs/ingestion/set-custom-attributes/): add attributes such as `team.name` to filter data inside one tenant.
+
+## Get Help
+
+<GetHelp />
