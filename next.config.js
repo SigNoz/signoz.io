@@ -1281,6 +1281,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/api-reference/',
+          destination: '/api-reference/',
+          permanent: true,
+        },
+        {
           source: '/users/',
           destination: '/workspace-setup/',
           permanent: false,

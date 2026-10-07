@@ -22,3 +22,24 @@ export function buildApiReferenceOpenAPISpecRewritePath(pathname: string): strin
   const version = normalized.slice('/api-reference/'.length)
   return `/api/api-reference-openapi/${encodeURIComponent(version)}`
 }
+
+export const API_REFERENCE_MARKDOWN_PATH = '/api-reference.md'
+
+const normalizePath = (pathname: string): string => pathname.replace(/\/+$/, '') || '/'
+
+/** The /api-reference index page, which has its own markdown twin route. */
+export function isApiReferenceIndexPath(pathname: string): boolean {
+  return normalizePath(pathname) === '/api-reference'
+}
+
+/**
+ * `/api-reference` renders the spec in an interactive viewer, so markdown
+ * requests are served the spec-derived index at /api-reference.md instead of
+ * the generic HTML-to-markdown pipeline.
+ */
+export function shouldRewriteApiReferenceIndexToMarkdown(
+  pathname: string,
+  prefersMarkdown: boolean
+): boolean {
+  return prefersMarkdown && isApiReferenceIndexPath(pathname)
+}
