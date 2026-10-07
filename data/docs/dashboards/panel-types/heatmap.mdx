@@ -1,0 +1,99 @@
+---
+title: Heatmap Panel Type - Visualize Metric Distributions
+date: 2026-10-07
+description: Use the Heatmap panel type in SigNoz dashboards to visualize histogram metric distributions over time with configurable buckets, color ramps, and axis scales.
+doc_type: reference
+---
+
+## Heatmap
+
+A Heatmap is a grid visualization that shows how a distribution changes over time. Each column is a time slice, each row is a value bucket, and the color intensity of a cell maps to how many observations fell in that bucket during that time window. Use it when a time series would hide the shape of the data, such as latency distributions from histogram metrics, where you want a density view instead of one line per percentile.
+
+### When to use a heatmap
+
+- You want to see the full distribution of a metric over time, not just an aggregate line.
+- You work with histogram metrics (for example, `signoz_latency_bucket`) and want to spot shifts, bimodal patterns, or outliers.
+- A time series panel with many series would be too noisy to read.
+
+For a single aggregated value or a small number of series over time, use the [Timeseries](https://signoz.io/docs/dashboards/panel-types/timeseries/) panel instead.
+
+### Data Formats
+
+#### Supported signals
+
+- Metrics
+
+<Admonition type="info">
+Heatmap panels support metrics only. When a Heatmap panel is active, the data source selector shows **Metrics** and does not offer logs or traces.
+</Admonition>
+
+### Configure the query
+
+Build the query in the query builder as you would for other panels, then set how observations are grouped into buckets.
+
+#### Bucket axis
+
+When a Heatmap panel is active, a **Bucket by** control appears in the query builder. It controls how buckets are distributed along the Y-axis:
+
+- **Logarithmic**: a scale slider from `-4` to `4` sets the log base. Use it when values span several orders of magnitude.
+- **Linear**: a maximum-value input with an optional explicit bucket count. Use it when values fall within a known, evenly spaced range.
+
+A live bounds preview strip shows the resulting bucket edges before you run the query, so you can confirm the distribution before loading data.
+
+When a formula is the active query, it carries its own Bucket axis configuration inline rather than as a separate add-on.
+
+<Admonition type="info">
+Switching an existing panel to Heatmap trims it to a single enabled query and removes all formulas. Switching back to another panel type restores the previous aggregation.
+</Admonition>
+
+### Chart Appearance
+
+Open the **Chart Appearance** section of the panel editor to control how observation counts map to colors. A live ramp preview reflects every setting in real time.
+
+#### Color ramp
+
+- **Palette**: choose from 10 named palettes: Ice, Moss, Rust, Graphite, Ember, Lagoon, Orchid, Verdant, Lava, and Beacon.
+- **Color scale**: map counts to colors with **Log**, **Square root**, or **Linear** scaling.
+- **Step count**: set 2 to 128 discrete color steps.
+- **Count range**: pin a minimum and maximum count to fix the ramp endpoints, so color stays comparable across time ranges.
+
+#### Opacity mode
+
+Opacity mode is an alternative to palettes. It ramps a single base color's transparency from zero to full opacity as the count increases. It includes preset fill swatches and a custom color picker.
+
+### Axes
+
+#### Y-axis scale
+
+In the **Axes** section of the panel editor, set the Y-axis scale:
+
+- **Auto**
+- **Linear**
+- **Log**
+- **Symmetric log**
+
+**Auto** chooses **Log** when all bucket values are positive and **Symmetric log** when buckets cross zero.
+
+### Tooltip and legend
+
+Hovering a cell shows a tooltip with:
+
+- The time range, prefixed with a date (for example, `09/02 05:30 → 14:30`).
+- The bucket range for that row.
+- The observation count for that cell.
+
+When the query is grouped, the tooltip adds a breakdown table with **Group** and **Contribution** columns. Shares below one percent display as `<1%`.
+
+You can pin the tooltip to keep it open while you inspect other cells. A **Pinned** badge appears in the tooltip header when it is pinned.
+
+All legend markers use the color from the top of the ramp rather than a per-group peak color. Single-group heatmaps show the legend.
+
+### Limitations
+
+- Heatmap panels support metrics only. Logs and traces are not available.
+- Heatmap panels do not support alerts.
+- Heatmap panels do not support drill-down or click-through navigation.
+
+### Get Help
+
+<GetHelp />
