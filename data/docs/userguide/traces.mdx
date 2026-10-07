@@ -1,5 +1,5 @@
 ---
-date: 2026-08-27
+date: 2026-10-07
 title: Trace Explorer
 description: Understand the Trace Explorer in SigNoz — views, filtering, trace matching, and how to save and act on your results.
 doc_type: explanation
@@ -40,7 +40,7 @@ Use the **All Spans / Root Spans / Entrypoint Spans** dropdown on the right to c
 
 **Customize Columns**
 
-Click the **Options** button on the right side of the toolbar to add or remove columns from the list. For example, you can add `service.name`, `http_method`, `response_status_code`, or `event_type` to display alongside each span.
+Click the **Options** button on the right side of the toolbar to add or remove columns from the list. For example, you can add `service.name`, `http_method`, `response_status_code`, or `event_type` to display alongside each span. HTTP method and status code columns show their values as badges. This includes `http.method`, `http.request.method`, `http.status_code`, and `http.response.status_code`.
 
 <Figure
   src="/img/docs/product-features/trace-explorer/trace-explorer-list-view-options.webp"
@@ -70,26 +70,20 @@ You can increase the number of spans displayed up to 200/page using the dropdown
 
 The Traces View focuses on root spans, the starting span of each trace. Each row represents a single trace, showing the root service name, root operation name, root duration, number of spans, and Trace ID. Traces are sorted by descending root duration, which helps identify the longest running traces. You can increase the number of traces displayed up to 200/page using the dropdown on the top right.
 
-The Traces View uses the same table renderer as the [List View](#list-view), so both tabs share the same column behavior:
+The Traces View uses the same table as the [List View](#list-view):
 
-- **Resize columns:** drag a column's edge to adjust its width.
-- **Reorder columns:** drag a column header left or right to rearrange them.
-- **Persisted layout:** column order and widths are saved and restored when you return to the tab, including after a page refresh or in a new session. The Traces View and List View store their layouts separately, so a change in one tab does not affect the other.
-- **Trace ID link:** the **Trace ID** column renders as a link. Click a Trace ID to open that trace's detail page.
-- **Status badges:** HTTP method and status columns render as colored status badge cells. Standard OpenTelemetry attribute names are recognized in both tabs, including `http.method`, `http.request.method`, `http.status_code`, and `http.response.status_code`.
+- Drag a column edge to resize the column.
+- Drag a column header to move the column.
+- Click a row or a Trace ID to open the trace details page. Cmd-click or Ctrl-click opens it in a new tab.
+
+SigNoz saves the column order and widths in your browser. The Traces View and the List View save their layouts separately.
+
+The toolbar above the table shows the Root Spans note, the download button, and the **Previous** and **Next** buttons. The toolbar stays visible while results load and when the query returns no traces.
 
 <Figure
   src="/img/docs/product-features/trace-explorer/trace-explorer-traces-view-table.webp"
-  alt="Traces View table with draggable, resizable columns and Trace ID links"
-  caption="Traces View — drag column headers to reorder, drag column edges to resize, and click a Trace ID to open the trace detail page"
-/>
-
-The toolbar row above the table (the Root Spans note, the download button, and the **Previous** / **Next** pagination controls) stays visible at all times, including while results load and when a query returns no traces.
-
-<Figure
-  src="/img/docs/product-features/trace-explorer/trace-explorer-traces-view-empty-toolbar.webp"
-  alt="Traces View toolbar and pagination controls remaining visible when a query returns no results"
-  caption="The toolbar and pagination controls stay visible even when a query returns no results"
+  alt="Traces View table with the toolbar, root service name, operation, duration, span count, and Trace ID columns"
+  caption="Traces View with one row per trace"
 />
 
 ### Time Series View
