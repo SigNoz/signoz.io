@@ -1,673 +1,373 @@
 ---
-date: 2026-06-11
-tags : [Self-Host]
-title: Deploying to ECS
-description: Learn how to install SigNoz on ECS
+date: 2026-10-07
+tags: [Self-Hosted Enterprise, Self-Hosted Community]
+title: Install SigNoz on Amazon ECS with EC2 - Self-Host Guide
+description: Learn how to install SigNoz on Amazon ECS with EC2 using Foundry. Self-host guide from cluster prerequisites to verifying the install in the SigNoz UI.
+doc_type: howto
 ---
 
 <HostingDecision />
 
-<KeyPointCallout title="Deploy with Foundry" defaultCollapsed="false">
-<a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a> can deploy SigNoz on ECS for you using <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/ecs/ec2/terraform" target="_blank" rel="noopener noreferrer nofollow">ECS Terraform casting</a> (a configuration file). You provide a casting, and Foundry generates the Terraform modules for your ECS deployment.
-</KeyPointCallout>
+This guide explains how to install SigNoz on an Amazon Elastic Container Service (ECS) cluster with the EC2 launch type, using Foundry to generate and apply the Terraform.
 
-Amazon ECS gives you a fully managed control plane for orchestrating containers, while EC2‑backed capacity providers let you tie an Auto Scaling Group (ASG) to the cluster so that your compute pool grows and shrinks with demand. Running SigNoz on this foundation combines open‑source observability with native AWS elasticity and cost control:
+## Prerequisites
 
-- **ECS (EC2 launch type)** — lets you use custom AMIs, instance sizes, or spot instances for heavier ClickHouse workloads.
+- An Amazon ECS cluster with registered EC2 container instances.
+- A VPC with private subnets that route outbound traffic through a NAT gateway.
+- A security group for the SigNoz tasks that allows traffic between them (the ports are listed below).
+- A durable volume mounted at `/var/lib/foundry` on the container instances. ClickHouse, ClickHouse Keeper and PostgreSQL store their data there. ECS can move a task to another instance, where it starts on that instance's copy of the directory; pin the stateful services with a placement constraint (see Step 2).
+- AWS CLI v2 and Terraform installed on the same machine, with AWS credentials.
+- Enough cluster capacity for SigNoz. For sizing, see [resource planning](https://signoz.io/docs/setup/capacity-planning/community/resources-planning/).
 
-- **Capacity provider** — automatically adds / removes EC2 instances as task demand fluctuates (no manual ASG tweaking).
+<Admonition type="info" title="Ports the SigNoz components use" defaultCollapsed="true">
+The components connect to each other on these ports.
 
-- **SigNoz components**:
-  - SigNoz
-  - SigNoz Collector
-  - Clickhouse
-  - Zookeeper
+| Component | Ports |
+| --- | --- |
+| ClickHouse Keeper | `9181` client, `9234` Raft |
+| ClickHouse | `9000` native, `8123` HTTP, `9009` interserver, `9363` metrics |
+| PostgreSQL | `5432` |
+| SigNoz | `8080` UI and API, `4320` OpAMP |
+| Ingester (OpenTelemetry Collector) | `4317` OTLP gRPC, `4318` OTLP HTTP |
+</Admonition>
 
+## Install SigNoz
 
-## 1. Prerequisites
+<Admonition type="info" title="What is Foundry?" defaultCollapsed="true">
+Foundry is an open-source CLI that runs your self-hosted observability stack as code. One declarative config provisions the infrastructure, installs the SigNoz backend, and sets up OpenTelemetry collection on bare metal, containers, or Kubernetes. Learn more about <a href="https://github.com/SigNoz/foundry" target="_blank" rel="noopener noreferrer nofollow">Foundry</a>.
+</Admonition>
 
-Before you begin, ensure you have the following in place:
+### Step 1: Install foundryctl
 
-- **[AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)** installed and configured with appropriate credentials and region.  
-- An **AWS account** with adequate service quotas for:
-  - [Amazon EBS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volumes.html) (block storage)
-  - [Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html) (compute instances)
-  - [IAM](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started.html) (identity & access management)  
-- **[Amazon ECS cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/create-cluster.html)** already created, with **Capacity Providers** enabled (EC2 + Auto Scaling Group)  
-  - Read more: [ECS Capacity Providers](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-capacity-providers.html)  
-- **IAM roles** for your tasks:
-  - **Task Execution Role** with the managed policy `AmazonECSTaskExecutionRolePolicy`  
-    - Docs: [Creating an ECS task execution IAM role](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html)  
-  - **Task Role** for SigNoz containers (attach only the permissions your services need)  
-- **SigNoz container images** (`signoz/*:<version>`) pushed to a registry reachable by ECS (e.g. [Amazon ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html) or Docker Hub)  
-- A **private S3 bucket** (optional) for storing custom ClickHouse configs or backups  
-- A **Custom AMI** or **[Launch Template](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-launch-templates.html)** (optional) if you need custom kernel settings or plan to use Spot instances  
-- *(Optional)* **[Amazon EFS](https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html)** or **EBS volumes** attached & mounted on your ECS instances for persistent data (ClickHouse, dashboards, configs)
-
-> **EBS sizing note**  SigNoz stores metrics/traces in ClickHouse—start with a **gp3** volume (20 GiB, 3 000 IOPS, 125 MiB/s) and monitor usage to scale as needed.
-
-
-## 2. Network Stack
-
-### 2.1. CloudFormation Template
-
-Save the JSON below as `sigz-network.json`.
-
-```jsonc minimap defaultCollapsed
-{
-  "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Network stack for SigNoz on ECS (generic)",
-  "Parameters": {
-    "VpcCidr":              {"Type": "String", "Description": "CIDR for the VPC (e.g., 10.0.0.0/16)"},
-    "PublicSubnet1Cidr":    {"Type": "String"},
-    "PublicSubnet2Cidr":    {"Type": "String"},
-    "PrivateSubnet1Cidr":   {"Type": "String"},
-    "PrivateSubnet2Cidr":   {"Type": "String"},
-    "AZ1": {"Type": "AWS::EC2::AvailabilityZone::Name"},
-    "AZ2": {"Type": "AWS::EC2::AvailabilityZone::Name"}
-  },
-  "Resources": {
-    "Vpc": {
-      "Type": "AWS::EC2::VPC",
-      "Properties": {
-        "CidrBlock": {"Ref": "VpcCidr"},
-        "EnableDnsSupport": true,
-        "EnableDnsHostnames": true,
-        "Tags": [{"Key": "Name", "Value": "sigz-vpc"}]
-      }
-    },
-
-    "InternetGateway": {"Type": "AWS::EC2::InternetGateway"},
-    "VPCGatewayAttachment": {
-      "Type": "AWS::EC2::VPCGatewayAttachment",
-      "Properties": {
-        "VpcId": {"Ref": "Vpc"},
-        "InternetGatewayId": {"Ref": "InternetGateway"}
-      }
-    },
-
-    "PublicSubnet1": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "VpcId": {"Ref": "Vpc"},
-        "CidrBlock": {"Ref": "PublicSubnet1Cidr"},
-        "AvailabilityZone": {"Ref": "AZ1"},
-        "MapPublicIpOnLaunch": true,
-        "Tags": [{"Key": "Name", "Value": "sigz-pub-1"}]
-      }
-    },
-    "PublicSubnet2": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "VpcId": {"Ref": "Vpc"},
-        "CidrBlock": {"Ref": "PublicSubnet2Cidr"},
-        "AvailabilityZone": {"Ref": "AZ2"},
-        "MapPublicIpOnLaunch": true,
-        "Tags": [{"Key": "Name", "Value": "sigz-pub-2"}]
-      }
-    },
-
-    "PrivateSubnet1": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "VpcId": {"Ref": "Vpc"},
-        "CidrBlock": {"Ref": "PrivateSubnet1Cidr"},
-        "AvailabilityZone": {"Ref": "AZ1"},
-        "Tags": [{"Key": "Name", "Value": "sigz-priv-1"}]
-      }
-    },
-    "PrivateSubnet2": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "VpcId": {"Ref": "Vpc"},
-        "CidrBlock": {"Ref": "PrivateSubnet2Cidr"},
-        "AvailabilityZone": {"Ref": "AZ2"},
-        "Tags": [{"Key": "Name", "Value": "sigz-priv-2"}]
-      }
-    },
-
-    "EIPNat": {"Type": "AWS::EC2::EIP", "Properties": {"Domain": "vpc"}},
-    "NatGateway": {
-      "Type": "AWS::EC2::NatGateway",
-      "Properties": {
-        "SubnetId": {"Ref": "PublicSubnet1"},
-        "AllocationId": {"Fn::GetAtt": ["EIPNat", "AllocationId"]},
-        "Tags": [{"Key": "Name", "Value": "sigz-nat"}]
-      }
-    },
-
-    "PublicRouteTable": {
-      "Type": "AWS::EC2::RouteTable",
-      "Properties": {"VpcId": {"Ref": "Vpc"}}
-    },
-    "PublicRoute": {
-      "Type": "AWS::EC2::Route",
-      "DependsOn": "VPCGatewayAttachment",
-      "Properties": {
-        "RouteTableId": {"Ref": "PublicRouteTable"},
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": {"Ref": "InternetGateway"}
-      }
-    },
-
-    "PrivateRouteTable": {"Type": "AWS::EC2::RouteTable", "Properties": {"VpcId": {"Ref": "Vpc"}}},
-    "PrivateRoute": {
-      "Type": "AWS::EC2::Route",
-      "Properties": {
-        "RouteTableId": {"Ref": "PrivateRouteTable"},
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "NatGatewayId": {"Ref": "NatGateway"}
-      }
-    },
-
-    "PubAssoc1": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {"SubnetId": {"Ref": "PublicSubnet1"}, "RouteTableId": {"Ref": "PublicRouteTable"}}
-    },
-    "PubAssoc2": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {"SubnetId": {"Ref": "PublicSubnet2"}, "RouteTableId": {"Ref": "PublicRouteTable"}}
-    },
-    "PrivAssoc1": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {"SubnetId": {"Ref": "PrivateSubnet1"}, "RouteTableId": {"Ref": "PrivateRouteTable"}}
-    },
-    "PrivAssoc2": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {"SubnetId": {"Ref": "PrivateSubnet2"}, "RouteTableId": {"Ref": "PrivateRouteTable"}}
-    }
-  },
-  "Outputs": {
-    "VpcId":            {"Value": {"Ref": "Vpc"}},
-    "PublicSubnetIds":  {"Value": {"Fn::Join": [",", [{"Ref": "PublicSubnet1"}, {"Ref": "PublicSubnet2"}]]}},
-    "PrivateSubnetIds": {"Value": {"Fn::Join": [",", [{"Ref": "PrivateSubnet1"}, {"Ref": "PrivateSubnet2"}]]}}
-  }
-}
-```
-
-### 2.2  Create the Stack
-
-<Tabs entityName="method">
-<TabItem label="CLI" value="cli">
+Run this on the machine where you use the AWS CLI:
 
 ```bash
-aws cloudformation deploy \
-  --template-file sigz-network.json \
-  --stack-name sigz-network \
-  --parameter-overrides \
-      VpcCidr=<VPC_CIDR> \
-      PublicSubnet1Cidr=<PUB1_CIDR> PublicSubnet2Cidr=<PUB2_CIDR> \
-      PrivateSubnet1Cidr=<PRIV1_CIDR> PrivateSubnet2Cidr=<PRIV2_CIDR> \
-      AZ1=<AZ1> AZ2=<AZ2> \
-  --capabilities CAPABILITY_NAMED_IAM
-```
-</TabItem>
-
-<TabItem label="Console" value="console">
-
-1. Navigate to **CloudFormation → Create stack**.
-2. Upload `sigz-network.json`, click **Next**.
-3. Fill in parameter values (CIDRs, AZs).
-4. Acknowledge IAM capabilities → **Create stack**.
-
-</TabItem>
-</Tabs>
-> **Note on EBS traffic**  Private subnets route outbound traffic through the NAT Gateway. Estimate \~5 GB/mo per ClickHouse backup when sizing NAT data‑processing costs.
-
-## 3  IAM Roles & Policies
-
-### 3.1  Trust Policy
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [{
-    "Effect": "Allow",
-    "Principal": {"Service": "ecs-tasks.amazonaws.com"},
-    "Action": "sts:AssumeRole"
-  }]
-}
+curl -fsSL https://signoz.io/foundry.sh | bash
 ```
 
-### 3.2  Execution Role (CLI)
+For manual install (Windows PowerShell, air-gapped, etc.) or PATH setup, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundry getting-started guide</a>.
+
+### Step 2: Create casting.yaml
+
+Create a file named `casting.yaml`. It describes the installation and names the AWS resources SigNoz runs on:
+
+```yaml
+apiVersion: v1alpha1
+kind: Installation
+metadata:
+  name: signoz
+  annotations:
+    foundry.signoz.io/ecs-region: <aws-region>
+    foundry.signoz.io/ecs-cluster-arn: <cluster-arn>
+    foundry.signoz.io/ecs-vpc-id: <vpc-id>
+    foundry.signoz.io/ecs-private-subnet-ids: <private-subnet-ids>
+    foundry.signoz.io/ecs-security-group-ids: <security-group-ids>
+spec:
+  deployment:
+    platform: ecs
+    mode: ec2
+    flavor: terraform
+```
+
+**Verify these values:**
+
+- `<aws-region>`: The AWS region of your ECS cluster, for example `us-east-1`.
+- `<cluster-arn>`: The ARN of your ECS cluster, for example `arn:aws:ecs:us-east-1:111122223333:cluster/observability`.
+- `<vpc-id>`: The ID of the VPC your container instances run in, for example `vpc-0a1b2c3d4e5f67890`.
+- `<private-subnet-ids>`: Comma-separated IDs of private subnets in the Availability Zones where your container instances run, for example `subnet-0a1b2c3d4e5f67890,subnet-0f9e8d7c6b5a43210`.
+- `<security-group-ids>`: Comma-separated IDs of the security groups for the SigNoz tasks, for example `sg-0a1b2c3d4e5f67890`.
+
+`metadata.name` prefixes every ECS service name and names the private DNS namespace the components use, `signoz-installation.local`.
+
+For all options, see the <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting file reference</a> and the <a href="https://github.com/SigNoz/foundry/tree/main/docs/examples/ecs/ec2/terraform" target="_blank" rel="noopener noreferrer nofollow">Amazon ECS example</a>.
+
+<Admonition type="info" title="Use your own IAM roles" defaultCollapsed="true">
+Foundry creates two IAM roles: `signoz-installation-iam-task` for the SigNoz tasks and `signoz-installation-iam-exec` for the ECS agent. To use an existing role for either one, add its annotation under `metadata.annotations`:
+
+```yaml
+metadata:
+  annotations:
+    foundry.signoz.io/ecs-task-role-arn: <task-role-arn>
+    foundry.signoz.io/ecs-task-execution-role-arn: <task-execution-role-arn>
+```
+
+**Verify these values:**
+
+- `<task-role-arn>`: The ARN of the role the SigNoz tasks assume. It must allow `appconfig:StartConfigurationSession` and `appconfig:GetLatestConfiguration`.
+- `<task-execution-role-arn>`: The ARN of the role the ECS agent uses to pull images and start the tasks. The role Foundry creates carries the AWS managed policy `AmazonECSTaskExecutionRolePolicy`.
+</Admonition>
+
+<Admonition type="info" title="Store Terraform state in S3" defaultCollapsed="true">
+Terraform state starts in `pours/deployment/terraform.tfstate`. To keep it in an S3 bucket, add this to `casting.yaml` before the first deploy:
+
+```yaml
+spec:
+  patches:
+    - target: deployment/backend.tf.json
+      operations:
+        - op: replace
+          path: /terraform/backend
+          value:
+            s3:
+              bucket: <state-bucket>
+              key: signoz/deployment.tfstate
+              region: <state-bucket-region>
+```
+
+**Verify these values:**
+
+- `<state-bucket>`: An existing S3 bucket. Your AWS credentials need `s3:ListBucket`, `s3:GetObject` and `s3:PutObject` on it.
+- `<state-bucket-region>`: The AWS region of that bucket, for example `us-east-1`.
+
+`key` is the path of the state file inside the bucket.
+</Admonition>
+
+<Admonition type="info" title="Pin the stateful services to their instances" defaultCollapsed="true">
+ClickHouse, ClickHouse Keeper and PostgreSQL keep their data under `/var/lib/foundry` on the instance that runs them. To keep each one on its instance, add placement constraints to `casting.yaml` before the first deploy:
+
+```yaml defaultCollapsed
+spec:
+  patches:
+    - target: deployment/telemetrykeeper.tf.json
+      operations:
+        - op: add
+          path: /resource/aws_ecs_service/telemetrykeeper_clickhousekeeper_0/placement_constraints
+          value:
+            - type: memberOf
+              expression: ec2InstanceId == <keeper-instance-id>
+    - target: deployment/telemetrystore.tf.json
+      operations:
+        - op: add
+          path: /resource/aws_ecs_service/telemetrystore_clickhouse_0_0/placement_constraints
+          value:
+            - type: memberOf
+              expression: ec2InstanceId == <clickhouse-instance-id>
+    - target: deployment/metastore.tf.json
+      operations:
+        - op: add
+          path: /resource/aws_ecs_service/metastore_postgres_0/placement_constraints
+          value:
+            - type: memberOf
+              expression: ec2InstanceId == <postgres-instance-id>
+```
+
+**Verify these values:**
+
+- `<keeper-instance-id>`: The ID of the container instance that runs ClickHouse Keeper, for example `i-0123456789abcdef0`.
+- `<clickhouse-instance-id>`: The ID of the container instance that runs ClickHouse, for example `i-0123456789abcdef1`.
+- `<postgres-instance-id>`: The ID of the container instance that runs PostgreSQL, for example `i-0123456789abcdef2`.
+
+With more shards or replicas, each node's service gets its own constraint: `telemetrykeeper_clickhousekeeper_<replica>`, `telemetrystore_clickhouse_<shard>_<replica>` and `metastore_postgres_<replica>`.
+</Admonition>
+
+### Step 3: Deploy
+
+Run this from the directory that contains `casting.yaml`:
 
 ```bash
-aws iam create-role --role-name <SigNozECSTaskExecutionRole> --assume-role-policy-document file://ecs-trust.json
-aws iam attach-role-policy --role-name <SigNozECSTaskExecutionRole> --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+foundryctl cast -f casting.yaml
 ```
 
-### 3.3  Task Role (least privilege)
+`cast` checks that Terraform is installed, writes the Terraform files to `pours/deployment/`, and runs these in that directory:
 
 ```bash
-aws iam create-role --role-name <SigNozTaskRole> --assume-role-policy-document file://ecs-trust.json
-# Add permissions only if SigNoz needs them.
+terraform init
+terraform plan -out=tfplan
+terraform apply tfplan
 ```
 
-**Console path**  `IAM → Roles → Create role → Trusted entity = ECS Task` → attach policies.
+Run the same command again after editing `casting.yaml` to apply the change.
 
+<Admonition type="tip" title="Only generate the files" defaultCollapsed="true">
+`foundryctl forge -f casting.yaml` writes `pours/deployment/` without deploying. Run the three Terraform commands above from that directory when you want to apply them.
+</Admonition>
 
-## 4  Launch Template, ASG, and Capacity Provider
+### Step 4: Verify the installation
 
-### 4.1  Launch Template
-
-Include **User‑data** that installs the ECS agent and joins the cluster.
+Check that each SigNoz service runs its task. Run this on the machine where you use the AWS CLI:
 
 ```bash
-aws ec2 create-launch-template \
-  --launch-template-name <SigNozLaunchTemplate> \
-  --version-description initial \
-  --launch-template-data '{
-      "ImageId": "<AMI_ID>",
-      "InstanceType": "t3.large",
-      "IamInstanceProfile": {"Arn": "arn:aws:iam::<ACCOUNT_ID>:instance-profile/<ECSInstanceProfile>"},
-      "UserData": "<BASE64-ENCODED-USERDATA>"
-    }'
+aws ecs describe-services --cluster <cluster-arn> --region <aws-region> \
+  --services signoz-telemetrykeeper-clickhousekeeper-0 signoz-telemetrystore-clickhouse-0-0 \
+    signoz-metastore-postgres-0 signoz-signoz-0 signoz-ingester \
+  --query 'services[].[serviceName,desiredCount,runningCount]' --output text
 ```
 
-*(Console: EC2 → Launch templates → **Create launch template**.)*
+**Verify these values:**
 
-### 4.2  Auto Scaling Group (ASG)
+- `<cluster-arn>`: The cluster ARN from `casting.yaml`.
+- `<aws-region>`: The region from `casting.yaml`.
+
+Each line shows the service name, the desired task count and the running task count. The output should look similar to the following:
+
+```output
+signoz-telemetrykeeper-clickhousekeeper-0    1    1
+signoz-telemetrystore-clickhouse-0-0         1    1
+signoz-metastore-postgres-0                  1    1
+signoz-signoz-0                              1    1
+signoz-ingester                              1    1
+```
+
+The counts can take a few minutes to match. If you changed shard or replica counts, `aws ecs list-services --cluster <cluster-arn> --region <aws-region>` lists every service name.
+
+The SigNoz UI listens on `signoz-0.signoz-installation.local:8080`, a name that resolves inside the VPC. Open it from a machine in the VPC, or put a load balancer in front of the `signoz-signoz-0` service as described in [Customize the installation](#customize-the-installation).
+
+To check the health endpoint, run this from a machine in the VPC:
 
 ```bash
-aws autoscaling create-auto-scaling-group \
-  --auto-scaling-group-name <SigNozASG> \
-  --launch-template LaunchTemplateName=<SigNozLaunchTemplate>,Version='$Latest' \
-  --vpc-zone-identifier "<PrivateSubnet1>,<PrivateSubnet2>" \
-  --desired-capacity 2 --min-size 2 --max-size 6
+curl -X GET http://signoz-0.signoz-installation.local:8080/api/v1/health
 ```
 
-### 4.3  Capacity Provider
+The response is:
+
+```output
+{"status":"ok"}
+```
+
+<RetentionInfo />
+
+## Send data to SigNoz
+
+Your applications send traces, metrics, and logs to the SigNoz ingester. Inside the VPC, the ingester listens at:
 
 ```bash
-aws ecs create-capacity-provider \
-  --name <SigNozCapProvider> \
-  --auto-scaling-group-provider '{"autoScalingGroupArn":"<ASG_ARN>","managedScaling":{"status":"ENABLED","targetCapacity":80}}'
-
-aws ecs put-cluster-capacity-providers \
-  --cluster <ECS_CLUSTER> \
-  --capacity-providers <SigNozCapProvider> \
-  --default-capacity-provider-strategy capacityProvider=<SigNozCapProvider>,weight=1,base=0
+http://ingester.signoz-installation.local:4318
 ```
 
-*(Console: ECS → Clusters → Capacity providers.)*
+Use this address as the OTLP endpoint in your instrumentation, for example as the value of `OTEL_EXPORTER_OTLP_ENDPOINT`. For gRPC, use port `4317` instead.
 
+The name resolves inside the VPC, and the security group must allow ports `4317` and `4318` from your applications. The `signoz` in `signoz-installation.local` is `metadata.name`. If you changed it, use yours.
 
-## 5  Task Definitions
+For applications outside the VPC, see the [self-hosted ingestion guide](https://signoz.io/docs/ingestion/self-hosted/overview/).
 
-Below is a single, all-in-one ECS task definition JSON that includes every SigNoz component in one task: 
-- init-clickhouse
-- clickhouse
-- zookeeper-1
-- SigNoz
-- Otel-collector
-- signoz-telemetrystore-migrator
+## Customize the installation
 
+Every change follows the same loop: edit `casting.yaml`, then run `foundryctl cast -f casting.yaml` again.
 
-Each section below shows one `containerDefinition` snippet. Replace all `<…>` placeholders with your own values.
+- **Component settings** (image, shards, replicas): set them in the component's `spec`. For example, to pin SigNoz to a specific release:
 
-### 1. init-clickhouse
+  ```yaml
+  spec:
+    signoz:
+      spec:
+        image: signoz/signoz:v0.144.0
+  ```
 
-```json defaultCollapsed
-{
-  "name": "init-clickhouse",
-  "image": "clickhouse/clickhouse-server:25.5.6",
-  "cpu": 256,
-  "memory": 256,
-  "memoryReservation": 256,
-  "essential": false,
-  "entryPoint": ["sh", "-c"],
-  "command": [
-    "version=\"v0.0.1\" && node_os=$(uname -s | tr '[:upper:]' '[:lower:]') && node_arch=$(uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \\
-     echo \"Fetching histogram-binary for ${node_os}/${node_arch}\" && cd /tmp && \\
-     wget -O histogram-quantile.tar.gz \"https://github.com/SigNoz/signoz/releases/download/histogram-quantile%2F${version}/histogram-quantile_${node_os}_${node_arch}.tar.gz\" && \\
-     tar -xvzf histogram-quantile.tar.gz && mv histogram-quantile /var/lib/clickhouse/user_scripts/histogramQuantile"
-  ],
-  "mountPoints": [
-    {
-      "sourceVolume": "signoz-clickhouse-zookeeper",
-      "containerPath": "/var/lib/clickhouse/user_scripts"
-    }
-  ],
-  "logConfiguration": {
-    "logDriver": "awslogs",
-    "options": {
-      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
-      "awslogs-region": "<AWS_REGION>",
-      "awslogs-stream-prefix": "init-clickhouse"
-    }
-  }
-}
+  ClickHouse takes shard and replica counts, and ClickHouse Keeper takes a replica count:
+
+  ```yaml
+  spec:
+    telemetrystore:
+      spec:
+        cluster:
+          shards: 2
+          replicas: 1
+    telemetrykeeper:
+      spec:
+        cluster:
+          replicas: 3
+  ```
+
+  Each node runs as its own ECS service. ClickHouse `replicas` counts the copies beside each shard, so this example runs four ClickHouse services, `signoz-telemetrystore-clickhouse-0-0` to `signoz-telemetrystore-clickhouse-1-1`, and three ClickHouse Keeper services. Keep the ClickHouse Keeper count odd.
+
+- **Platform settings** (CPU, memory): add <a href="https://github.com/SigNoz/foundry/blob/main/docs/concepts/patches.md" target="_blank" rel="noopener noreferrer nofollow">patches</a> under `spec.patches` against the component's file in `pours/deployment/`. For example, to give SigNoz 1024 CPU units:
+
+  ```yaml
+  spec:
+    patches:
+      - target: deployment/signoz.tf.json
+        operations:
+          - op: replace
+            path: /locals/containers_signoz_0/0/cpu
+            value: 1024
+  ```
+
+  Run `foundryctl forge -f casting.yaml` from the directory that contains `casting.yaml` and read the generated file to find the path you need. Each run regenerates the files under `pours/`, so keep every change in `casting.yaml`.
+
+- To reach the UI from outside the VPC, put an Application Load Balancer with an `ip` target group on port `8080` in front of the `signoz-signoz-0` service.
+
+<details>
+
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### foundryctl fails
+
+Re-run the failing command with `--debug` for verbose logs.
+
+### Terraform rejects a variable or a subnet
+
+The annotations become Terraform variables: `ecs-region` sets `aws_region`, `ecs-cluster-arn` sets `cluster_arn`, `ecs-vpc-id` sets `vpc_id`, `ecs-private-subnet-ids` sets `subnet_ids`, and `ecs-security-group-ids` sets `security_group_ids`. A missing or malformed annotation stops `terraform plan` with the variable's validation message, for example:
+
+```output
+subnet_ids must be a non-empty list of subnet IDs.
 ```
 
-### 2. config-fetcher
+A subnet that assigns public IP addresses on launch stops the plan with a message that names it, for example:
 
-```json defaultCollapsed
-{
-  "name": "config-fetcher",
-  "image": "amazon/aws-cli:2.27.32",
-  "cpu": 10,
-  "memory": 102,
-  "memoryReservation": 102,
-  "essential": false,
-  "entryPoint": ["aws"],
-  "command": [
-    "s3", "cp",
-    "s3://<YOUR_CONFIG_BUCKET>/common/clickhouse/config.xml",
-    "/etc/clickhouse-server/config.xml"
-  ],
-  "mountPoints": [
-    {
-      "sourceVolume": "signoz-clickhouse-zookeeper",
-      "containerPath": "/etc/clickhouse-server"
-    }
-  ],
-  "logConfiguration": {
-    "logDriver": "awslogs",
-    "options": {
-      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
-      "awslogs-region": "<AWS_REGION>",
-      "awslogs-stream-prefix": "config-fetcher"
-    }
-  }
-}
+```output
+subnet subnet-0a1b2c3d4e5f67890 assigns public IPs on launch; tasks on the EC2 launch type take no public IP, so state private subnets with a NAT route or VPC endpoints.
 ```
 
-### 3. clickhouse
+Fix the annotation in `casting.yaml` and run `foundryctl cast -f casting.yaml` again.
 
-```json minimap defaultCollapsed
-{
-  "name": "clickhouse",
-  "image": "clickhouse/clickhouse-server:25.5.6",
-  "cpu": 1024,
-  "memory": 512,
-  "memoryReservation": 512,
-  "essential": true,
-  "portMappings": [
-    { "containerPort": 9000, "hostPort": 9000, "protocol": "tcp" },
-    { "containerPort": 8123, "hostPort": 8123, "protocol": "tcp" },
-    { "containerPort": 9363, "hostPort": 9363, "protocol": "tcp" }
-  ],
-  "dependsOn": [
-    { "containerName": "init-clickhouse", "condition": "COMPLETE" },
-    { "containerName": "zookeeper-1",     "condition": "HEALTHY" },
-    { "containerName": "config-fetcher",   "condition": "COMPLETE" }
-  ],
-  "mountPoints": [
-    {
-      "sourceVolume": "signoz-clickhouse-zookeeper",
-      "containerPath": "/var/lib/clickhouse"
-    },
-    {
-      "sourceVolume": "signoz-clickhouse-zookeeper",
-      "containerPath": "/etc/clickhouse-server"
-    }
-  ],
-  "healthCheck": {
-    "command": ["CMD-SHELL", "wget --spider -q 0.0.0.0:8123/ping || exit 1"],
-    "interval": 30,
-    "timeout": 5,
-    "retries": 3,
-    "startPeriod": 30
-  },
-  "logConfiguration": {
-    "logDriver": "awslogs",
-    "options": {
-      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
-      "awslogs-region": "<AWS_REGION>",
-      "awslogs-stream-prefix": "clickhouse"
-    }
-  }
-}
-```
+### A service never reaches its desired count
 
-### 4. Zookeeper
-
-```json defaultCollapsed minimap
-{
-  "name": "zookeeper-1",
-  "image": "signoz/zookeeper:3.7.1",
-  "cpu": 512,
-  "memory": 512,
-  "memoryReservation": 512,
-  "essential": true,
-  "portMappings": [
-    { "containerPort": 2181, "hostPort": 2181, "protocol": "tcp" },
-    { "containerPort": 2888, "hostPort": 2888, "protocol": "tcp" },
-    { "containerPort": 3888, "hostPort": 3888, "protocol": "tcp" },
-    { "containerPort": 9141, "hostPort": 9141, "protocol": "tcp" }
-  ],
-  "environment": [
-    { "name": "ALLOW_ANONYMOUS_LOGIN",        "value": "yes" },
-    { "name": "ZOO_SERVER_ID",                "value": "1"   },
-    { "name": "ZOO_ENABLE_PROMETHEUS_METRICS","value": "yes" },
-    { "name": "ZOO_AUTOPURGE_INTERVAL",       "value": "1"   },
-    { "name": "ZOO_PROMETHEUS_METRICS_PORT_NUMBER","value":"9141"},
-    {"name": "ZOO_ADMIN_SERVER_PORT_NUMBER", "value":"3181"}
-  ],
-  "healthCheck": {
-    "command": ["CMD-SHELL","curl -s -m 2 http://localhost:3181/commands/ruok | grep error | grep null"],
-    "interval": 30,
-    "timeout": 5,
-    "retries": 3,
-    "startPeriod": 30
-  },
-  "logConfiguration": {
-    "logDriver": "awslogs",
-    "options": {
-      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
-      "awslogs-region": "<AWS_REGION>",
-      "awslogs-stream-prefix": "zookeeper"
-    }
-  }
-}
-```
-
-### 5. signoz
-
-```json defaultCollapsed minimap
-{
-  "name": "signoz",
-  "image": "signoz/signoz:latest",
-  "cpu": 512,
-  "memory": 512,
-  "memoryReservation": 256,
-  "essential": true,
-  "portMappings": [
-    { "containerPort": 8080, "hostPort": 8080, "protocol": "tcp" }
-  ],
-  "environment": [
-    { "name": "SIGNOZ_TELEMETRYSTORE_PROVIDER",            "value": "clickhouse" },
-    { "name": "SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN",      "value": "tcp://clickhouse:9000" },
-    { "name": "SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_CLUSTER",  "value": "cluster" },
-    { "name": "SIGNOZ_SQLSTORE_SQLITE_PATH",               "value": "/var/lib/signoz/signoz.db" },
-    { "name": "SIGNOZ_ALERTMANAGER_PROVIDER",              "value": "signoz" },
-    { "name": "SIGNOZ_EMAILING_ENABLED",                   "value": "false" },
-    { "name": "SIGNOZ_PROMETHEUS_ACTIVE__QUERY__TRACKER_ENABLED", "value": "false" }
-  ],
-  "mountPoints": [
-    { "sourceVolume": "signoz-sqlite", "containerPath": "/var/lib/signoz" }
-  ],
-  "healthCheck": {
-    "command": ["CMD","wget","--spider","-q","localhost:8080/api/v1/health"],
-    "interval": 30,
-    "timeout": 5,
-    "retries": 3,
-    "startPeriod": 0
-  },
-  "logConfiguration": {
-    "logDriver": "awslogs",
-    "options": {
-      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
-      "awslogs-region": "<AWS_REGION>",
-      "awslogs-stream-prefix": "signoz"
-    }
-  }
-}
-```
-
-### 6. otel-collector
-
-```json defaultCollapsed minimap
-{
-  "name": "otel-collector",
-  "image": "signoz/signoz-otel-collector:latest",
-  "cpu": 512,
-  "memory": 512,
-  "memoryReservation": 256,
-  "essential": false,
-  "portMappings": [
-    { "containerPort": 4317, "hostPort": 4317, "protocol": "tcp" },
-    { "containerPort": 4318, "hostPort": 4318, "protocol": "tcp" }
-  ],
-  "entryPoint": ["/bin/sh"],
-  "command": [
-    "-c",
-    "/signoz-otel-collector migrate sync check && /signoz-otel-collector --config=/etc/otel-collector-config.yaml --manager-config=/etc/manager-config.yaml --copy-path=/var/tmp/collector-config.yaml"
-  ],
-  "environment": [
-    { "name": "SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN",         "value": "tcp://clickhouse:9000" },
-    { "name": "SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER",     "value": "cluster" },
-    { "name": "SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION", "value": "true" },
-    { "name": "SIGNOZ_OTEL_COLLECTOR_TIMEOUT",                "value": "10m" },
-    { "name": "LOW_CARDINAL_EXCEPTION_GROUPING",              "value": "false" }
-  ],
-  "mountPoints": [
-    { "sourceVolume": "otel-config", "containerPath": "/etc" }
-  ],
-  "logConfiguration": {
-    "logDriver": "awslogs",
-    "options": {
-      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
-      "awslogs-region": "<AWS_REGION>",
-      "awslogs-stream-prefix": "otel-collector"
-    }
-  }
-}
-```
-
-### 7. signoz-telemetrystore-migrator
-
-```json defaultCollapsed
-{
-  "name": "signoz-telemetrystore-migrator",
-  "image": "signoz/signoz-otel-collector:latest",
-  "cpu": 128,
-  "memory": 256,
-  "memoryReservation": 128,
-  "essential": false,
-  "entryPoint": ["/bin/sh"],
-  "command": [
-    "-c",
-    "/signoz-otel-collector migrate bootstrap && /signoz-otel-collector migrate sync up && /signoz-otel-collector migrate async up"
-  ],
-  "environment": [
-    { "name": "SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_DSN",         "value": "tcp://clickhouse:9000" },
-    { "name": "SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_CLUSTER",     "value": "cluster" },
-    { "name": "SIGNOZ_OTEL_COLLECTOR_CLICKHOUSE_REPLICATION", "value": "true" },
-    { "name": "SIGNOZ_OTEL_COLLECTOR_TIMEOUT",                "value": "10m" }
-  ],
-  "dependsOn": [
-    { "containerName": "clickhouse", "condition": "HEALTHY" }
-  ],
-  "logConfiguration": {
-    "logDriver": "awslogs",
-    "options": {
-      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
-      "awslogs-region": "<AWS_REGION>",
-      "awslogs-stream-prefix": "signoz-telemetrystore-migrator"
-    }
-  }
-}
-```
-
-
-### 8. Volumes
-
-```json
- "volumes": [
-            {
-                "name": "signoz-clickhouse-zookeeper",
-                "configuredAtLaunch": true
-            }
-        ],
-```
-
-### 9. General Task Definitions config
-
-```json
-  "taskDefinition": {
-    "family": "signoz-full-stack",
-    "taskRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskRole",
-    "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskExecutionRole",
-    "networkMode": "awsvpc",
-    "requiresCompatibilities": ["EC2"],
-    "runtimePlatform": {
-      "cpuArchitecture": "X86_64",
-      "operatingSystemFamily": "LINUX"
-    },
-    "cpu": "1843",
-    "memory": "1536",
-    "containerDefinitions": {...},
-    "volumes": {...},
-  }
-
-
-```
-
-### 6.  Register the Task Definitions
+Read the service's recent events. Run this on the machine where you use the AWS CLI:
 
 ```bash
-aws ecs register-task-definition --cli-input-json file://clickhouse-zookeeper.json
-# repeat for other Task Definitions
+aws ecs describe-services --cluster <cluster-arn> --region <aws-region> \
+  --services <service-name> --query 'services[0].events[:5].message'
 ```
 
-## 7  Create ECS Services
+**Verify these values:**
 
-<Tabs entityName="method">
-<TabItem label="CLI" value="cli">
-Create one service per component, using the **capacity provider strategy**.
+- `<cluster-arn>`: The cluster ARN from `casting.yaml`.
+- `<aws-region>`: The region from `casting.yaml`.
+- `<service-name>`: A service name from Step 4, for example `signoz-signoz-0`.
+
+The events say why ECS could not place or start the task. Each SigNoz task takes its own elastic network interface on the instance, so small instance types fit only a few tasks. See <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-networking-awsvpc.html" target="_blank" rel="noopener noreferrer nofollow">task networking</a>.
+
+For tasks that started and then stopped, list them and read why they stopped:
 
 ```bash
-aws ecs create-service \
-  --cluster <ECS_CLUSTER> \
-  --service-name signoz-clickhouse-svc \
-  --task-definition signoz-clickhouse-zookeeper:<REV> \
-  --desired-count 1 \
-  --capacity-provider-strategy capacityProvider=<SigNozCapProvider>,weight=1,base=0 \
-  --network-configuration "awsvpcConfiguration={subnets=[<PrivateSubnet1>,<PrivateSubnet2>],securityGroups=[<SG_ID>],assignPublicIp=DISABLED}" \
-  --enable-execute-command \
-  --deployment-circuit-breaker enable=true,rollback=true
+aws ecs list-tasks --cluster <cluster-arn> --region <aws-region> \
+  --service-name <service-name> --desired-status STOPPED
+aws ecs describe-tasks --cluster <cluster-arn> --region <aws-region> \
+  --tasks <task-arn> --query 'tasks[].stoppedReason'
 ```
-</TabItem>
 
-<TabItem label="Console" value="console">
+**Verify these values:**
 
-1. ECS → Clusters → *Your cluster* → **Create service**.
-2. Launch type=*Capacity provider*.
-3. Choose `<SigNozCapProvider>`.
-4. Select task definition and desired count.
-5. Choose the private subnets & security group.
-6. Repeat for each component.
-</TabItem>
-</Tabs>
+- `<task-arn>`: A task ARN from the `list-tasks` output.
 
-## 8 Scaling & Capacity
+### Read container logs
 
-| Layer                       | Metric                                 | Action                                |
-| --------------------------- | -------------------------------------- | ------------------------------------- |
-| **Capacity Provider (ASG)** | Avg CPU > 70 %                         | scale‑out by +1 EC2 instance          |
-| **ECS Service**             | `CPUUtilization` / `MemoryUtilization` | adjust `desiredCount` (min 1 → max N) |
-| **ClickHouse EBS**          | IOPS / throughput saturation           | raise gp3 IOPS or volume size         |
-
-Managed Scaling on the capacity provider handles most scale‑out events automatically.
-
-
-## Cleanup Commands (CLI)
+The containers write their logs on the container instance with Docker's `json-file` log driver. Find the instance that runs a service's task. Run this on the machine where you use the AWS CLI:
 
 ```bash
-# Scale down all services
-aws ecs update-service --cluster <ECS_CLUSTER> --service <SERVICE> --desired-count 0
-# Delete services (after tasks stop)
-aws ecs delete-service --cluster <ECS_CLUSTER> --service <SERVICE> --force
-# Optionally delete capacity provider, cluster, ASG, and network stack
+TASK=$(aws ecs list-tasks --cluster <cluster-arn> --region <aws-region> --service-name <service-name> --query 'taskArns[0]' --output text)
+INSTANCE=$(aws ecs describe-tasks --cluster <cluster-arn> --region <aws-region> --tasks "$TASK" --query 'tasks[0].containerInstanceArn' --output text)
+aws ecs describe-container-instances --cluster <cluster-arn> --region <aws-region> --container-instances "$INSTANCE" --query 'containerInstances[0].ec2InstanceId' --output text
 ```
+
+**Verify these values:**
+
+- `<cluster-arn>`: The cluster ARN from `casting.yaml`.
+- `<aws-region>`: The region from `casting.yaml`.
+- `<service-name>`: A service name from Step 4, for example `signoz-signoz-0`.
+
+Connect to that instance (for example with AWS Systems Manager Session Manager) and run this. The main container of each task carries its service's name:
+
+```bash
+sudo docker logs $(sudo docker ps -q --filter label=com.amazonaws.ecs.container-name=<service-name>)
+```
+
+</details>
+
+## Next Steps
+
+- [Collect telemetry from your ECS EC2 cluster](https://signoz.io/docs/opentelemetry-collection-agents/ecs/ec2/install/)
+- [Instrument Your Application](https://signoz.io/docs/instrumentation/overview/)
+- <a href="https://github.com/SigNoz/opentelemetry-demo-lite" target="_blank" rel="noopener noreferrer nofollow">Send Sample Telemetry with OpenTelemetry Demo Lite</a>
