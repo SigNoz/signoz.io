@@ -1,5 +1,5 @@
 ---
-date: 2026-07-07
+date: 2026-10-07
 title: Configuration
 description: Learn how to configure SigNoz
 doc_type: reference
@@ -102,3 +102,53 @@ SIGNOZ_QUERIER_MAX__CONCURRENT__QUERIES=8
 </Admonition>
 
 See the [example configuration file](https://github.com/SigNoz/signoz/blob/main/conf/example.yaml) for the full `querier` section and other available options.
+
+## API Server TLS/HTTPS
+
+The SigNoz API server listens on port `8080` by default and serves the API and the SigNoz UI. It can serve HTTPS with your own certificate. Use this instead of TLS termination at a reverse proxy (nginx, Traefik, or a cloud load balancer) when you [serve SigNoz on an external URL](https://signoz.io/docs/manage/administrator-guide/configuration/serving-on-external-url/). TLS is disabled by default, so existing deployments need no change.
+
+<Admonition type="info">
+Available in SigNoz v0.142.0 and later.
+</Admonition>
+
+Configure it under the `apiserver.tls` section:
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `apiserver.tls.enabled` | Serve HTTPS instead of HTTP. | `false` |
+| `apiserver.tls.cert_file` | Full path to the PEM-encoded certificate file. Required when `enabled` is `true`. | none |
+| `apiserver.tls.key_file` | Full path to the PEM-encoded private key file. Required when `enabled` is `true`. | none |
+| `apiserver.tls.min_version` | Minimum accepted TLS version, `"1.2"` or `"1.3"`. | `"1.2"` |
+
+```yaml
+apiserver:
+  tls:
+    enabled: true
+    cert_file: <path-to-certificate>
+    key_file: <path-to-private-key>
+    min_version: "1.2"
+```
+
+Or through the equivalent environment variables:
+
+```bash
+SIGNOZ_APISERVER_TLS_ENABLED=true
+SIGNOZ_APISERVER_TLS_CERT__FILE=<path-to-certificate>
+SIGNOZ_APISERVER_TLS_KEY__FILE=<path-to-private-key>
+SIGNOZ_APISERVER_TLS_MIN__VERSION=1.2
+```
+
+**Verify these values:**
+
+- `<path-to-certificate>`: Path to the certificate file, for example `/etc/signoz/server.crt`. The SigNoz process must be able to read it.
+- `<path-to-private-key>`: Path to the private key file, for example `/etc/signoz/server.key`. The SigNoz process must be able to read it.
+
+When TLS is enabled, plain HTTP requests to the API server return `400 Bad Request`. Change health checks, browser bookmarks, and API clients to use `https://`.
+
+If the TLS configuration is not valid, SigNoz does not start and logs one of these errors:
+
+| Error | Cause |
+|-------|-------|
+| `tls::cert_file and tls::key_file are required when tls is enabled` | `cert_file` or `key_file` is empty. |
+| `invalid tls version "<value>", must be "1.2" or "1.3"` | `min_version` has a value other than `"1.2"` or `"1.3"`. |
+| `cannot load tls::cert_file and tls::key_file: <reason>` | SigNoz cannot read the files, the files are not PEM-encoded, or the key does not match the certificate. |
