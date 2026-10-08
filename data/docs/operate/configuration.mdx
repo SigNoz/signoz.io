@@ -1,104 +1,503 @@
 ---
-date: 2026-07-07
-title: Configuration
-description: Learn how to configure SigNoz
+date: 2026-08-13
+title: Configuration Reference - YAML Options and Env Variables
+description: Look up every self-hosted SigNoz configuration option with its default and environment variable, grouped by configuration file section.
 doc_type: reference
 tags: [Self-Host]
 ---
 
-SigNoz provides multiple methods to configure your installation. This document outlines the available configuration options and their usage. It also outlines some common use cases and how to achieve them.
+Self-hosted SigNoz reads its configuration from YAML files and environment variables. This page describes how configuration is loaded, then lists every documented option grouped by configuration section.
+
+Sections in the [Configuration reference](#configuration-reference) appear in the same order as <a href="https://github.com/SigNoz/signoz/blob/main/conf/example.yaml" target="_blank" rel="noopener noreferrer nofollow">conf/example.yaml</a>, which is the canonical option list in the SigNoz repository.
 
 <Admonition type="info">
-Follow [Issue#6805](https://github.com/SigNoz/signoz/issues/6805) on Github for an update on the implementation status of configuration options.
+The YAML configuration surface is still expanding, and a few internal sections carry no documented options. Follow <a href="https://github.com/SigNoz/signoz/issues/6805" target="_blank" rel="noopener noreferrer nofollow">Issue #6805</a> for implementation status.
 </Admonition>
 
-## Configuration Options
-### YAML Configuration Files (under development)
+## Commonly configured sections
 
-SigNoz accepts configuration through YAML files using the `--config` flag. You can specify multiple configuration files that will be merged during startup:
+| Section | Use it to |
+|---|---|
+| [`global`](#global) | Set the external URL SigNoz is served on and the ingestion endpoint. |
+| [`sqlstore`](#sqlstore) | Point SigNoz at SQLite or Postgres for its metadata database. |
+| [`telemetrystore`](#telemetrystore) | Configure the ClickHouse connection and per-query limits. |
+| [`querier`](#querier) | Tune query concurrency, result caching, and cache TTL. |
+| [`cache`](#cache) | Move query result caching from in-memory to Redis. |
+| [`alertmanager`](#alertmanager) | Control alert grouping, repeat intervals, and silence retention. |
+| [`emailing`](#emailing) | Enable SMTP so SigNoz can send invites and alert emails. |
+| [`user`](#user) | Provision a root user at deploy time and set password reset rules. |
+| [`tokenizer`](#tokenizer) | Set the JWT secret and session lifetimes. |
+
+Step-by-step walkthroughs for several of these live in [Configuration guides](#configuration-guides) at the bottom of this page.
+
+## How SigNoz loads configuration
+
+### Configuration files
+
+Pass one or more YAML files with the `--config` flag:
 
 ```bash
 signoz --config base.yaml --config override.yaml
 ```
- 
-#### Precedence Rules
 
-When multiple configuration files are specified:
-- Files are merged from right to left
-- Values in later files take precedence over earlier files
-- In the example above, settings in `override.yaml` will override any conflicting settings in `base.yaml`
+Files are merged in the order given, so a key set in `override.yaml` replaces the same key in `base.yaml`. A file only needs the keys you want to change, because built-in defaults apply to everything you omit.
 
-#### Available Options
+### Environment variables
 
-For a comprehensive list of all available configuration options, refer to our [example configuration file](https://github.com/SigNoz/signoz/blob/main/conf/example.yaml). The file is continuously updated with new options as they are added.
+Every option can also be set as an environment variable. Names are derived from the YAML path using three rules:
 
-### Environment Variables
+1. Prefix with `SIGNOZ_`.
+2. Uppercase the path and replace each dot (`.`) with a single underscore (`_`).
+3. Replace each underscore already present in a key name with a double underscore (`__`).
 
-All configuration options can be specified or overridden using environment variables. This provides flexibility for different deployment scenarios and container-based environments.
+Rule 3 is what keeps `sqlstore.max_open_conns` distinct from a nested path like `sqlstore.max.open.conns`:
 
-#### Naming Convention
+| YAML path | Environment variable |
+|---|---|
+| `web.enabled` | `SIGNOZ_WEB_ENABLED` |
+| `sqlstore.max_open_conns` | `SIGNOZ_SQLSTORE_MAX__OPEN__CONNS` |
+| `querier.max_concurrent_queries` | `SIGNOZ_QUERIER_MAX__CONCURRENT__QUERIES` |
+| `alertmanager.signoz.route.group_wait` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__WAIT` |
 
-Environment variables in SigNoz follow a specific naming convention to ensure consistency and prevent conflicts:
+The reference tables below spell out the environment variable for every option, so you do not have to apply these rules by hand.
 
-1. **SIGNOZ Prefix**
-   - All environment variables must start with `SIGNOZ_`
+### Precedence
 
-2. **YAML Path Translation**
-   - YAML configuration paths are converted to uppercase
-   - Dots (`.`) in YAML paths become underscores (`_`)
-   - Example:
-     ```yaml
-     web.enabled: true
-     ```
-     becomes:
-     ```bash
-     SIGNOZ_WEB_ENABLED=true
-     ```
+When the same option is set in more than one place, the last layer wins:
 
-3. **Handling Underscores**
-   - Original underscores in YAML keys are converted to double underscores (`__`)
-   - This prevents ambiguity between dots and underscores in the original configuration
-   - Example:
-     ```yaml
-     sqlstore.max_open_conns: 10
-     ```
-     becomes:
-     ```bash
-     SIGNOZ_SQLSTORE_MAX__OPEN__CONNS=10
-     ```
+1. Built-in defaults.
+2. The first `--config` file.
+3. Each later `--config` file, in the order passed.
+4. Environment variables.
 
-#### Examples
+Environment variables override every configuration file, which makes them convenient for per-environment overrides in Docker and Kubernetes deployments.
 
-| YAML Configuration | Environment Variable |
-|-------------------|---------------------|
-| `web.enabled: true` | `SIGNOZ_WEB_ENABLED=true` |
-| `sqlstore.max_open_conns: 10` | `SIGNOZ_SQLSTORE_MAX__OPEN__CONNS=10` |
+### Value formats
 
-Environment variables take precedence over values specified in configuration files.
+| Type | Format | Example |
+|---|---|---|
+| Duration | A Go duration string. Valid units are `ns`, `us`, `ms`, `s`, `m`, and `h`. | `168h`, `5m`, `10s` |
+| Boolean | `true` or `false`. | `true` |
+| List of strings | A YAML sequence, or a comma-separated string when set through an environment variable. | `SIGNOZ_IDENTN_APIKEY_HEADERS=SIGNOZ-API-KEY,X-Api-Key` |
+| List of URLs | A YAML sequence only. A comma-separated environment variable parses into a single malformed URL. Use a configuration file for options such as `global.allowed_origins`. | `allowed_origins: ["https://a.example.com", "https://b.example.com"]` |
+| Map | A YAML mapping. Environment variables cannot set map options: the value is read as a plain string, and the config decoder rejects it at startup. Use a configuration file for options such as `emailing.smtp.headers`. | `headers: {X-Scope-OrgID: signoz}` |
 
-## Querier Query Concurrency
+## Configuration reference
 
-The querier runs the ClickHouse queries that back each query-range request, such as a multi-panel dashboard load or an alert evaluation. Use `max_concurrent_queries` under the `querier` section to cap how many of those ClickHouse queries run in parallel for a single request. Running the sub-queries concurrently (up to this limit) instead of one at a time improves response latency for requests that issue many queries, such as dashboards with many panels or alert rules with many conditions.
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| `querier.max_concurrent_queries` | Maximum number of ClickHouse queries a single query-range request runs concurrently. | `8` |
-
-Set it in your configuration file:
+**Option** is the full dotted YAML path. To set an option in a file, expand the path into nested keys:
 
 ```yaml
+# querier.max_concurrent_queries: 8
 querier:
   max_concurrent_queries: 8
 ```
 
-Or through the equivalent environment variable:
+Options with a default of _unset_ have no value until you set one. Sections limited to licensed or in-progress deployments are marked **Enterprise** or **Experimental**.
 
-```bash
-SIGNOZ_QUERIER_MAX__CONCURRENT__QUERIES=8
-```
+### `global`
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `global.external_url` | URL at which the SigNoz API server is externally reachable. The path component (for example `/signoz` in `https://example.com/signoz`) becomes the base path for all API and web frontend routes. | _unset_ | `SIGNOZ_GLOBAL_EXTERNAL__URL` |
+| `global.ingestion_url` | URL at which the SigNoz backend receives traces, metrics, and logs from instrumented applications. | _unset_ | `SIGNOZ_GLOBAL_INGESTION__URL` |
+| `global.allowed_origins` | Origins (`scheme://host[:port]`, no path) allowed as login redirect targets. Include the origin the SigNoz UI is served on. When unset, redirect targets are not validated. Set this through a configuration file: a comma-separated environment variable parses into one malformed URL. | _unset_ | `SIGNOZ_GLOBAL_ALLOWED__ORIGINS` |
+| `global.mcp_url` | URL of the SigNoz MCP server. When unset, the MCP settings page is hidden in the frontend. | _unset_ | `SIGNOZ_GLOBAL_MCP__URL` |
+| `global.ai_assistant_url` | URL of the SigNoz AI Assistant server. When unset, the AI Assistant is hidden in the frontend. | _unset_ | `SIGNOZ_GLOBAL_AI__ASSISTANT__URL` |
+
+For a full walkthrough of `external_url` and reverse proxy setups, see [Serving SigNoz on an External URL](https://signoz.io/docs/manage/administrator-guide/configuration/serving-on-external-url/).
+
+### `version`
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `version.banner.enabled` | Whether to print the version banner on startup. | `true` | `SIGNOZ_VERSION_BANNER_ENABLED` |
+
+### `instrumentation`
+
+Controls the telemetry SigNoz emits about itself, plus its own log level.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `instrumentation.logs.level` | Log level for the SigNoz process. Accepts `debug`, `info`, `warn`, and `error`. | `info` | `SIGNOZ_INSTRUMENTATION_LOGS_LEVEL` |
+| `instrumentation.traces.enabled` | Whether SigNoz exports traces about its own operation. | `false` | `SIGNOZ_INSTRUMENTATION_TRACES_ENABLED` |
+| `instrumentation.traces.processors.batch.exporter.otlp.endpoint` | OTLP endpoint that self-traces are exported to. | `localhost:4317` | `SIGNOZ_INSTRUMENTATION_TRACES_PROCESSORS_BATCH_EXPORTER_OTLP_ENDPOINT` |
+| `instrumentation.metrics.enabled` | Whether SigNoz exposes metrics about its own operation. | `true` | `SIGNOZ_INSTRUMENTATION_METRICS_ENABLED` |
+| `instrumentation.metrics.readers.pull.exporter.prometheus.host` | Host the Prometheus scrape endpoint for self-metrics binds to. | `0.0.0.0` | `SIGNOZ_INSTRUMENTATION_METRICS_READERS_PULL_EXPORTER_PROMETHEUS_HOST` |
+| `instrumentation.metrics.readers.pull.exporter.prometheus.port` | Port the Prometheus scrape endpoint for self-metrics binds to. | `9090` | `SIGNOZ_INSTRUMENTATION_METRICS_READERS_PULL_EXPORTER_PROMETHEUS_PORT` |
+
+### `pprof`
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `pprof.enabled` | Whether to run the pprof profiling server. | `true` | `SIGNOZ_PPROF_ENABLED` |
+| `pprof.address` | Address the pprof server listens on. | `0.0.0.0:6060` | `SIGNOZ_PPROF_ADDRESS` |
+
+### `web`
+
+Serves the SigNoz frontend. Options under `web.settings` configure third-party frontend integrations and are used mainly by SigNoz-operated deployments.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `web.enabled` | Whether to serve the web frontend. | `true` | `SIGNOZ_WEB_ENABLED` |
+| `web.index` | Index file used as the single-page-app entrypoint. | `index.html` | `SIGNOZ_WEB_INDEX` |
+| `web.directory` | Directory containing the static frontend build. | `/etc/signoz/web` | `SIGNOZ_WEB_DIRECTORY` |
+| `web.settings.posthog.enabled` | Whether to enable PostHog in the frontend. | `false` | `SIGNOZ_WEB_SETTINGS_POSTHOG_ENABLED` |
+| `web.settings.posthog.key` | PostHog project API key. | _unset_ | `SIGNOZ_WEB_SETTINGS_POSTHOG_KEY` |
+| `web.settings.posthog.api_host` | PostHog API host. Falls back to `https://us.i.posthog.com` when empty. | _unset_ | `SIGNOZ_WEB_SETTINGS_POSTHOG_API__HOST` |
+| `web.settings.posthog.ui_host` | PostHog UI host. Set this when `api_host` points at a reverse proxy. | _unset_ | `SIGNOZ_WEB_SETTINGS_POSTHOG_UI__HOST` |
+| `web.settings.appcues.enabled` | Whether to enable Appcues in the frontend. | `false` | `SIGNOZ_WEB_SETTINGS_APPCUES_ENABLED` |
+| `web.settings.appcues.app_id` | Appcues account or app ID. | _unset_ | `SIGNOZ_WEB_SETTINGS_APPCUES_APP__ID` |
+| `web.settings.sentry.enabled` | Whether to enable Sentry in the frontend. | `false` | `SIGNOZ_WEB_SETTINGS_SENTRY_ENABLED` |
+| `web.settings.sentry.dsn` | Sentry DSN. | _unset_ | `SIGNOZ_WEB_SETTINGS_SENTRY_DSN` |
+| `web.settings.sentry.tunnel` | Sentry tunnel URL. | _unset_ | `SIGNOZ_WEB_SETTINGS_SENTRY_TUNNEL` |
+| `web.settings.pylon.enabled` | Whether to enable Pylon in the frontend. | `false` | `SIGNOZ_WEB_SETTINGS_PYLON_ENABLED` |
+| `web.settings.pylon.app_id` | Pylon app ID. | _unset_ | `SIGNOZ_WEB_SETTINGS_PYLON_APP__ID` |
+| `web.settings.pylon.identity_secret` | Pylon identity verification secret. | _unset_ | `SIGNOZ_WEB_SETTINGS_PYLON_IDENTITY__SECRET` |
+
+### `cache`
+
+Caches query results. Set `cache.provider` to `memory` or `redis`. Only the sub-section matching the selected provider is read.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `cache.provider` | Caching provider to use. Accepts `memory` or `redis`. | `memory` | `SIGNOZ_CACHE_PROVIDER` |
+| `cache.memory.num_counters` | Maximum number of items tracked by the in-memory cache. Set this to roughly 10x the expected number of entries. | `100000` | `SIGNOZ_CACHE_MEMORY_NUM__COUNTERS` |
+| `cache.memory.max_cost` | Total size in bytes allocated to the in-memory cache. The default is 64 MiB. | `67108864` | `SIGNOZ_CACHE_MEMORY_MAX__COST` |
+| `cache.redis.host` | Hostname or IP address of the Redis server. | `localhost` | `SIGNOZ_CACHE_REDIS_HOST` |
+| `cache.redis.port` | Port the Redis server listens on. | `6379` | `SIGNOZ_CACHE_REDIS_PORT` |
+| `cache.redis.password` | Password for authenticating with Redis, if required. | _unset_ | `SIGNOZ_CACHE_REDIS_PASSWORD` |
+| `cache.redis.db` | Redis database number to use. | `0` | `SIGNOZ_CACHE_REDIS_DB` |
+
+### `sqlstore`
+
+The relational database that stores SigNoz metadata such as dashboards, alert rules, and users. This is separate from the telemetry store.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `sqlstore.provider` | SQLStore provider to use. | `sqlite` | `SIGNOZ_SQLSTORE_PROVIDER` |
+| `sqlstore.max_open_conns` | Maximum number of open connections to the database. | `100` | `SIGNOZ_SQLSTORE_MAX__OPEN__CONNS` |
+| `sqlstore.max_conn_lifetime` | Maximum time a connection may be reused. When `0`, connections are never closed because of age. | `0` | `SIGNOZ_SQLSTORE_MAX__CONN__LIFETIME` |
+| `sqlstore.sqlite.path` | Path to the SQLite database file. | `/var/lib/signoz/signoz.db` | `SIGNOZ_SQLSTORE_SQLITE_PATH` |
+| `sqlstore.sqlite.mode` | SQLite journal mode. Accepts `delete` or `wal`. | `wal` | `SIGNOZ_SQLSTORE_SQLITE_MODE` |
+| `sqlstore.sqlite.busy_timeout` | How long SQLite waits for a lock before failing. | `10s` | `SIGNOZ_SQLSTORE_SQLITE_BUSY__TIMEOUT` |
+| `sqlstore.sqlite.transaction_mode` | Default transaction locking behavior. Accepts `deferred`, `immediate`, or `exclusive`. | `immediate` | `SIGNOZ_SQLSTORE_SQLITE_TRANSACTION__MODE` |
+| `sqlstore.postgres.dsn` | Postgres connection string, used when `sqlstore.provider` is `postgres`. | _unset_ | `SIGNOZ_SQLSTORE_POSTGRES_DSN` |
+
+For Postgres connection settings and migration steps, see [Configuring SigNoz to Use Relational Databases](https://signoz.io/docs/manage/administrator-guide/configuration/relational-database/).
+
+### `apiserver`
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `apiserver.timeout.default` | Default request timeout. | `60s` | `SIGNOZ_APISERVER_TIMEOUT_DEFAULT` |
+| `apiserver.timeout.max` | Maximum request timeout. | `600s` | `SIGNOZ_APISERVER_TIMEOUT_MAX` |
+| `apiserver.timeout.excluded_routes` | Routes exempt from request timeouts. Live tail endpoints are excluded by default because they hold connections open. | `/api/v1/logs/tail`, `/api/v3/logs/livetail` | `SIGNOZ_APISERVER_TIMEOUT_EXCLUDED__ROUTES` |
+| `apiserver.logging.excluded_routes` | Routes exempt from request and response logging. | `/api/v1/health`, `/api/v1/version`, `/` | `SIGNOZ_APISERVER_LOGGING_EXCLUDED__ROUTES` |
+
+### `querier`
+
+Runs the ClickHouse queries behind each query range request, such as a dashboard load or an alert evaluation.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `querier.cache_ttl` | How long cached query results stay valid. | `168h` | `SIGNOZ_QUERIER_CACHE__TTL` |
+| `querier.flux_interval` | Recent time window that is never cached, so in-flight data is always read fresh. | `5m` | `SIGNOZ_QUERIER_FLUX__INTERVAL` |
+| `querier.max_concurrent_queries` | Maximum number of ClickHouse queries a single query range request runs at once. Raise it to speed up dashboards with many panels, lower it to reduce peak load on ClickHouse. | `8` | `SIGNOZ_QUERIER_MAX__CONCURRENT__QUERIES` |
+| `querier.log_trace_id_window_padding` | When filtering logs by `trace_id`, padding added around the trace time range so slightly delayed log exports still match. Applies to logs only. Set to `0` to disable. | `5m` | `SIGNOZ_QUERIER_LOG__TRACE__ID__WINDOW__PADDING` |
+
+### `telemetrystore`
+
+The ClickHouse cluster that stores traces, metrics, and logs. Options under `telemetrystore.clickhouse.settings` are passed through as ClickHouse query settings. They default to `0` or empty, which means the ClickHouse server default applies.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `telemetrystore.max_idle_conns` | Maximum number of idle connections in the pool. | `50` | `SIGNOZ_TELEMETRYSTORE_MAX__IDLE__CONNS` |
+| `telemetrystore.max_open_conns` | Maximum number of open connections to ClickHouse. | `100` | `SIGNOZ_TELEMETRYSTORE_MAX__OPEN__CONNS` |
+| `telemetrystore.dial_timeout` | Maximum time to wait for a connection to be established. | `5s` | `SIGNOZ_TELEMETRYSTORE_DIAL__TIMEOUT` |
+| `telemetrystore.provider` | TelemetryStore provider to use. | `clickhouse` | `SIGNOZ_TELEMETRYSTORE_PROVIDER` |
+| `telemetrystore.clickhouse.dsn` | ClickHouse DSN. | `tcp://localhost:9000` | `SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN` |
+| `telemetrystore.clickhouse.cluster` | ClickHouse cluster name used in distributed DDL. | `cluster` | `SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_CLUSTER` |
+| `telemetrystore.clickhouse.settings.max_execution_time` | Maximum query execution time in seconds. | `0` | `SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_SETTINGS_MAX__EXECUTION__TIME` |
+| `telemetrystore.clickhouse.settings.max_execution_time_leaf` | Maximum execution time in seconds for leaf-node queries in a distributed query. | `0` | `SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_SETTINGS_MAX__EXECUTION__TIME__LEAF` |
+| `telemetrystore.clickhouse.settings.timeout_before_checking_execution_speed` | Seconds to wait before ClickHouse starts enforcing minimum execution speed. | `0` | `SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_SETTINGS_TIMEOUT__BEFORE__CHECKING__EXECUTION__SPEED` |
+| `telemetrystore.clickhouse.settings.max_bytes_to_read` | Maximum bytes a single query may read before it is aborted. | `0` | `SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_SETTINGS_MAX__BYTES__TO__READ` |
+| `telemetrystore.clickhouse.settings.max_result_rows` | Maximum number of rows a query may return. | `0` | `SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_SETTINGS_MAX__RESULT__ROWS` |
+| `telemetrystore.clickhouse.settings.ignore_data_skipping_indices` | Data skipping indices to ignore when planning queries. | _unset_ | `SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_SETTINGS_IGNORE__DATA__SKIPPING__INDICES` |
+| `telemetrystore.clickhouse.settings.secondary_indices_enable_bulk_filtering` | Whether to enable bulk filtering with secondary indices. | `false` | `SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_SETTINGS_SECONDARY__INDICES__ENABLE__BULK__FILTERING` |
+
+For what each pass-through setting does, see the <a href="https://clickhouse.com/docs/en/operations/settings/settings" target="_blank" rel="noopener noreferrer nofollow">ClickHouse settings reference</a>.
+
+### `prometheus`
+
+Backs PromQL query evaluation.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `prometheus.timeout` | Maximum time a PromQL query may run before it is aborted. | `2m` | `SIGNOZ_PROMETHEUS_TIMEOUT` |
+| `prometheus.lookback_delta` | Time since a series' last sample past which SigNoz treats it as stale. When unset, the Prometheus engine default (currently `5m`) applies. | _unset_ | `SIGNOZ_PROMETHEUS_LOOKBACK__DELTA` |
+| `prometheus.provider` | Storage provider backing PromQL evaluation. Accepts `clickhouse` or `clickhousev2`. | `clickhouse` | `SIGNOZ_PROMETHEUS_PROVIDER` |
+| `prometheus.active_query_tracker.enabled` | Whether to track active queries, which helps identify queries that were running during a crash. | `true` | `SIGNOZ_PROMETHEUS_ACTIVE__QUERY__TRACKER_ENABLED` |
+| `prometheus.active_query_tracker.path` | Path where the active query tracker writes its file. | _unset_ | `SIGNOZ_PROMETHEUS_ACTIVE__QUERY__TRACKER_PATH` |
+| `prometheus.active_query_tracker.max_concurrent` | Maximum number of concurrent PromQL queries. | `20` | `SIGNOZ_PROMETHEUS_ACTIVE__QUERY__TRACKER_MAX__CONCURRENT` |
+
+### `alertmanager`
+
+Groups and routes alert notifications. Options under `alertmanager.signoz.global` and `alertmanager.signoz.route` mirror their upstream Alertmanager equivalents.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `alertmanager.provider` | Alertmanager provider to use. | `signoz` | `SIGNOZ_ALERTMANAGER_PROVIDER` |
+| `alertmanager.signoz.poll_interval` | How often the running Alertmanager syncs with the config stored in the database. | `1m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_POLL__INTERVAL` |
+| `alertmanager.signoz.external_url` | URL at which Alertmanager is externally reachable. Used to build links back to Alertmanager in notifications. | `http://localhost:8080` | `SIGNOZ_ALERTMANAGER_SIGNOZ_EXTERNAL__URL` |
+| `alertmanager.signoz.templates` | Globs from which SigNoz notification templates are loaded. Upstream defaults (`default.tmpl`, `email.tmpl`) always load from embedded assets, so list only SigNoz templates here. | `/opt/signoz/conf/templates/alertmanager/*.gotmpl` | `SIGNOZ_ALERTMANAGER_SIGNOZ_TEMPLATES` |
+| `alertmanager.signoz.global.resolve_timeout` | Time after which an alert is declared resolved if it has not been updated. | `5m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_RESOLVE__TIMEOUT` |
+| `alertmanager.signoz.route.group_by` | Labels used to group alerts into a single notification. | `alertname` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__BY` |
+| `alertmanager.signoz.route.group_wait` | How long to wait for more alerts before sending the first notification for a new group. | `1m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__WAIT` |
+| `alertmanager.signoz.route.group_interval` | How long to wait before sending a notification about new alerts added to an existing group. | `1m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_GROUP__INTERVAL` |
+| `alertmanager.signoz.route.repeat_interval` | How long to wait before resending a notification for an alert that is still firing. | `1h` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ROUTE_REPEAT__INTERVAL` |
+| `alertmanager.signoz.alerts.gc_interval` | Interval between garbage collection of alerts. | `30m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_ALERTS_GC__INTERVAL` |
+| `alertmanager.signoz.silences.max` | Maximum number of silences, including expired ones. Zero or negative means no limit. | `0` | `SIGNOZ_ALERTMANAGER_SIGNOZ_SILENCES_MAX` |
+| `alertmanager.signoz.silences.max_size_bytes` | Maximum total size of silences in bytes. Zero or negative means no limit. | `0` | `SIGNOZ_ALERTMANAGER_SIGNOZ_SILENCES_MAX__SIZE__BYTES` |
+| `alertmanager.signoz.silences.maintenance_interval` | Interval between garbage collection and snapshotting of silences. | `15m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_SILENCES_MAINTENANCE__INTERVAL` |
+| `alertmanager.signoz.silences.retention` | How long silences are retained. | `120h` | `SIGNOZ_ALERTMANAGER_SIGNOZ_SILENCES_RETENTION` |
+| `alertmanager.signoz.nflog.maintenance_interval` | Interval between garbage collection and snapshotting of notification logs. | `15m` | `SIGNOZ_ALERTMANAGER_SIGNOZ_NFLOG_MAINTENANCE__INTERVAL` |
+| `alertmanager.signoz.nflog.retention` | How long notification logs are retained. | `120h` | `SIGNOZ_ALERTMANAGER_SIGNOZ_NFLOG_RETENTION` |
+
+The full set of upstream `global` fields is defined in the <a href="https://github.com/prometheus/alertmanager/blob/main/config/config.go" target="_blank" rel="noopener noreferrer nofollow">Alertmanager config source</a>. For a task-oriented walkthrough, see the [Alertmanager Configuration Guide](https://signoz.io/docs/manage/administrator-guide/configuration/alertmanager/).
+
+### `emailing`
+
+Sends invites, password resets, and alert emails over SMTP. Disabled by default.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `emailing.enabled` | Whether to enable outbound email. | `false` | `SIGNOZ_EMAILING_ENABLED` |
+| `emailing.templates.directory` | Directory containing the email templates. | `/opt/signoz/conf/templates/email` | `SIGNOZ_EMAILING_TEMPLATES_DIRECTORY` |
+| `emailing.templates.format.header.enabled` | Whether to render a header in outbound emails. | `false` | `SIGNOZ_EMAILING_TEMPLATES_FORMAT_HEADER_ENABLED` |
+| `emailing.templates.format.header.logo_url` | Logo URL shown in the email header. | _unset_ | `SIGNOZ_EMAILING_TEMPLATES_FORMAT_HEADER_LOGO__URL` |
+| `emailing.templates.format.help.enabled` | Whether to render a help section in outbound emails. | `false` | `SIGNOZ_EMAILING_TEMPLATES_FORMAT_HELP_ENABLED` |
+| `emailing.templates.format.help.email` | Support address shown in the email help section. | _unset_ | `SIGNOZ_EMAILING_TEMPLATES_FORMAT_HELP_EMAIL` |
+| `emailing.templates.format.footer.enabled` | Whether to render a footer in outbound emails. | `false` | `SIGNOZ_EMAILING_TEMPLATES_FORMAT_FOOTER_ENABLED` |
+| `emailing.smtp.address` | SMTP server address, including port. | `localhost:25` | `SIGNOZ_EMAILING_SMTP_ADDRESS` |
+| `emailing.smtp.from` | Address that outbound email is sent from. | _unset_ | `SIGNOZ_EMAILING_SMTP_FROM` |
+| `emailing.smtp.hello` | Hostname sent in the SMTP `HELO` or `EHLO` greeting. | _unset_ | `SIGNOZ_EMAILING_SMTP_HELLO` |
+| `emailing.smtp.headers` | Static headers added to every outbound email. | `{}` | `SIGNOZ_EMAILING_SMTP_HEADERS` |
+| `emailing.smtp.auth.username` | SMTP username. | _unset_ | `SIGNOZ_EMAILING_SMTP_AUTH_USERNAME` |
+| `emailing.smtp.auth.password` | SMTP password. | _unset_ | `SIGNOZ_EMAILING_SMTP_AUTH_PASSWORD` |
+| `emailing.smtp.auth.secret` | SMTP secret, used by CRAM-MD5 authentication. | _unset_ | `SIGNOZ_EMAILING_SMTP_AUTH_SECRET` |
+| `emailing.smtp.auth.identity` | SMTP identity, used by PLAIN authentication. | _unset_ | `SIGNOZ_EMAILING_SMTP_AUTH_IDENTITY` |
+| `emailing.smtp.tls.enabled` | Whether to connect over implicit TLS. Leave this `false` in most cases and rely on STARTTLS instead. | `false` | `SIGNOZ_EMAILING_SMTP_TLS_ENABLED` |
+| `emailing.smtp.tls.insecure_skip_verify` | Whether to skip TLS certificate verification. | `false` | `SIGNOZ_EMAILING_SMTP_TLS_INSECURE__SKIP__VERIFY` |
+| `emailing.smtp.tls.ca_file_path` | Path to the CA certificate file. | _unset_ | `SIGNOZ_EMAILING_SMTP_TLS_CA__FILE__PATH` |
+| `emailing.smtp.tls.key_file_path` | Path to the client key file. | _unset_ | `SIGNOZ_EMAILING_SMTP_TLS_KEY__FILE__PATH` |
+| `emailing.smtp.tls.cert_file_path` | Path to the client certificate file. | _unset_ | `SIGNOZ_EMAILING_SMTP_TLS_CERT__FILE__PATH` |
+
+For a worked example, see [Enable SMTP for Email Invitations](https://signoz.io/docs/manage/administrator-guide/configuration/smtp-email-invitations/).
+
+### `sharder`
+
+**Experimental.** Assigns an instance to an organization shard.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `sharder.provider` | Sharder provider to use. Accepts `noop` or `single`. | `noop` | `SIGNOZ_SHARDER_PROVIDER` |
+| `sharder.single.org_id` | Organization ID this instance belongs to, used by the `single` provider. | `org_id` | `SIGNOZ_SHARDER_SINGLE_ORG__ID` |
+
+### `analytics`
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `analytics.enabled` | Whether to enable product analytics. | `false` | `SIGNOZ_ANALYTICS_ENABLED` |
+| `analytics.segment.key` | Segment write key. | _unset_ | `SIGNOZ_ANALYTICS_SEGMENT_KEY` |
+
+### `statsreporter`
+
+Sends usage statistics to the SigNoz team. No telemetry data or sensitive data is collected.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `statsreporter.enabled` | Whether to report usage statistics. | `true` | `SIGNOZ_STATSREPORTER_ENABLED` |
+| `statsreporter.interval` | How often statistics are collected and sent. | `6h` | `SIGNOZ_STATSREPORTER_INTERVAL` |
+| `statsreporter.collect.identities` | Whether to include user identities and traits such as email addresses. | `true` | `SIGNOZ_STATSREPORTER_COLLECT_IDENTITIES` |
+
+### `gateway`
+
+**Enterprise.** Used only in licensed deployments.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `gateway.url` | URL of the gateway API. | `http://localhost:8080` | `SIGNOZ_GATEWAY_URL` |
+
+### `tokenizer`
+
+Issues and rotates the tokens behind user sessions.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `tokenizer.provider` | Tokenizer provider to use. Accepts `jwt` or `opaque`. | `jwt` | `SIGNOZ_TOKENIZER_PROVIDER` |
+| `tokenizer.lifetime.idle` | How long a user can stay idle before having to authenticate again. | `168h` | `SIGNOZ_TOKENIZER_LIFETIME_IDLE` |
+| `tokenizer.lifetime.max` | How long a user can stay logged in before having to log in again. | `720h` | `SIGNOZ_TOKENIZER_LIFETIME_MAX` |
+| `tokenizer.rotation.interval` | How often tokens are rotated. | `30m` | `SIGNOZ_TOKENIZER_ROTATION_INTERVAL` |
+| `tokenizer.rotation.duration` | How long the previous token pair stays valid after rotation. | `60s` | `SIGNOZ_TOKENIZER_ROTATION_DURATION` |
+| `tokenizer.jwt.secret` | Secret used to sign JWT tokens. | _unset_ | `SIGNOZ_TOKENIZER_JWT_SECRET` |
+| `tokenizer.opaque.gc.interval` | How often expired opaque tokens are garbage collected. | `1h` | `SIGNOZ_TOKENIZER_OPAQUE_GC_INTERVAL` |
+| `tokenizer.opaque.token.max_per_user` | Maximum opaque tokens per user, which caps concurrent sessions. | `5` | `SIGNOZ_TOKENIZER_OPAQUE_TOKEN_MAX__PER__USER` |
 
 <Admonition type="warning">
-`max_concurrent_queries` now caps every ClickHouse query in a request, not only the sub-queries triggered by a cache miss, and its default increased from `4` to `8`. If you run a resource-constrained ClickHouse cluster and previously relied on the old default of `4`, re-evaluate this limit after upgrading, since the same value now applies to a broader set of per-request queries.
+`tokenizer.jwt.secret` has no default value. Set it explicitly before exposing SigNoz outside a trusted network. See the [JWT Secret Configuration Guide](https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/).
 </Admonition>
 
-See the [example configuration file](https://github.com/SigNoz/signoz/blob/main/conf/example.yaml) for the full `querier` section and other available options.
+### `flagger`
+
+Overrides feature flags from the configuration file. Flags are grouped by value type under `flagger.config.<type>`, where `<type>` is one of `boolean`, `string`, `float`, `integer`, or `object`. Each entry maps a flag name to its value.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `flagger.config.boolean.use_span_metrics` | Whether to serve service metrics from span metrics. | `true` | `SIGNOZ_FLAGGER_CONFIG_BOOLEAN_USE__SPAN__METRICS` |
+| `flagger.config.boolean.kafka_span_eval` | Whether to enable Kafka span evaluation. | `false` | `SIGNOZ_FLAGGER_CONFIG_BOOLEAN_KAFKA__SPAN__EVAL` |
+
+### `user`
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `user.password.reset.allow_self` | Whether users can reset their own password. | `false` | `SIGNOZ_USER_PASSWORD_RESET_ALLOW__SELF` |
+| `user.password.reset.max_token_lifetime` | How long a password reset link stays valid. | `6h` | `SIGNOZ_USER_PASSWORD_RESET_MAX__TOKEN__LIFETIME` |
+| `user.password.invite.max_token_lifetime` | How long an invite stays valid. | `48h` | `SIGNOZ_USER_PASSWORD_INVITE_MAX__TOKEN__LIFETIME` |
+| `user.root.enabled` | Whether to provision a root user on startup from the email and password below. The root user cannot be deleted, updated, or have their password changed through the UI. | `false` | `SIGNOZ_USER_ROOT_ENABLED` |
+| `user.root.email` | Email address of the root user. | _unset_ | `SIGNOZ_USER_ROOT_EMAIL` |
+| `user.root.password` | Password of the root user. Must meet password requirements. | _unset_ | `SIGNOZ_USER_ROOT_PASSWORD` |
+| `user.root.org.name` | Name of the organization created or looked up for the root user. | `default` | `SIGNOZ_USER_ROOT_ORG_NAME` |
+| `user.root.org.id` | ID of the organization created or looked up for the root user. | `00000000-0000-0000-0000-000000000000` | `SIGNOZ_USER_ROOT_ORG_ID` |
+
+To provision an admin account at deploy time, see [Root User Configuration](https://signoz.io/docs/manage/administrator-guide/configuration/root-user/).
+
+### `identn`
+
+Resolves the identity of an incoming request. Each resolver can be toggled and given the headers it reads.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `identn.tokenizer.enabled` | Whether to resolve identity from session tokens. | `true` | `SIGNOZ_IDENTN_TOKENIZER_ENABLED` |
+| `identn.tokenizer.headers` | Headers the tokenizer resolver reads. | `Authorization`, `Sec-WebSocket-Protocol` | `SIGNOZ_IDENTN_TOKENIZER_HEADERS` |
+| `identn.apikey.enabled` | Whether to resolve identity from API keys. | `true` | `SIGNOZ_IDENTN_APIKEY_ENABLED` |
+| `identn.apikey.headers` | Headers the API key resolver reads. | `SIGNOZ-API-KEY` | `SIGNOZ_IDENTN_APIKEY_HEADERS` |
+| `identn.impersonation.enabled` | Whether every request impersonates the root user, which disables authentication. | `false` | `SIGNOZ_IDENTN_IMPERSONATION_ENABLED` |
+
+<Admonition type="warning">
+Enabling `identn.impersonation.enabled` removes authentication for all requests. Use it only on deployments already protected at the network layer. See [Impersonation Mode](https://signoz.io/docs/manage/administrator-guide/configuration/impersonation-mode/).
+</Admonition>
+
+### `serviceaccount`
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `serviceaccount.email.domain` | Email domain used for service account principals. | `signozserviceaccount.com` | `SIGNOZ_SERVICEACCOUNT_EMAIL_DOMAIN` |
+| `serviceaccount.analytics.enabled` | Whether to collect analytics for service accounts. | `true` | `SIGNOZ_SERVICEACCOUNT_ANALYTICS_ENABLED` |
+
+### `auditor`
+
+Records audit events. The community default is `noop`, which discards them. The `otlphttp` and `file` providers and their options apply to enterprise deployments.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `auditor.provider` | Auditor provider to use. `noop` discards all audit events. `otlphttp` and `file` require an enterprise license: `otlphttp` exports events over OTLP HTTP, `file` writes them to a local file. | `noop` | `SIGNOZ_AUDITOR_PROVIDER` |
+| `auditor.buffer_size` | Async channel capacity for audit events. Events are dropped when the buffer is full, so auditing never blocks requests. | `1000` | `SIGNOZ_AUDITOR_BUFFER__SIZE` |
+| `auditor.batch_size` | Maximum number of events per export batch. | `100` | `SIGNOZ_AUDITOR_BATCH__SIZE` |
+| `auditor.flush_interval` | Maximum time between export flushes. | `1s` | `SIGNOZ_AUDITOR_FLUSH__INTERVAL` |
+| `auditor.file.path` | Absolute path to the audit log file, used when `auditor.provider` is `file`. SigNoz opens the file in append mode and preserves existing contents across restarts. | _unset_ | `SIGNOZ_AUDITOR_FILE_PATH` |
+| `auditor.otlphttp.endpoint` | Target OTLP HTTP endpoint. | `http://localhost:4318/v1/logs` | `SIGNOZ_AUDITOR_OTLPHTTP_ENDPOINT` |
+| `auditor.otlphttp.insecure` | Whether to export over HTTP instead of HTTPS. | `false` | `SIGNOZ_AUDITOR_OTLPHTTP_INSECURE` |
+| `auditor.otlphttp.timeout` | Maximum duration for a single export attempt. | `10s` | `SIGNOZ_AUDITOR_OTLPHTTP_TIMEOUT` |
+| `auditor.otlphttp.headers` | Additional HTTP headers sent with every export request. | `{}` | `SIGNOZ_AUDITOR_OTLPHTTP_HEADERS` |
+| `auditor.otlphttp.retry.enabled` | Whether to retry transient export failures. | `true` | `SIGNOZ_AUDITOR_OTLPHTTP_RETRY_ENABLED` |
+| `auditor.otlphttp.retry.initial_interval` | Wait time before the first retry. | `5s` | `SIGNOZ_AUDITOR_OTLPHTTP_RETRY_INITIAL__INTERVAL` |
+| `auditor.otlphttp.retry.max_interval` | Upper bound on the backoff interval. | `30s` | `SIGNOZ_AUDITOR_OTLPHTTP_RETRY_MAX__INTERVAL` |
+| `auditor.otlphttp.retry.max_elapsed_time` | Total time spent retrying before the batch is dropped. | `60s` | `SIGNOZ_AUDITOR_OTLPHTTP_RETRY_MAX__ELAPSED__TIME` |
+
+### `cloudintegration`
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `cloudintegration.agent.version` | Version of the cloud integration agent. | `v0.0.8` | `SIGNOZ_CLOUDINTEGRATION_AGENT_VERSION` |
+
+### `traces`
+
+Controls how large traces are windowed and sampled in the trace detail views. Raising these limits shows more spans at once, at the cost of heavier queries and a heavier frontend.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `traces.waterfall.span_page_size` | Spans returned per request when a trace is too large to return at once. | `500` | `SIGNOZ_TRACES_WATERFALL_SPAN__PAGE__SIZE` |
+| `traces.waterfall.max_depth_to_auto_expand` | Maximum depth of descendants auto-expanded for the selected span. | `5` | `SIGNOZ_TRACES_WATERFALL_MAX__DEPTH__TO__AUTO__EXPAND` |
+| `traces.waterfall.max_limit_to_select_all_spans` | Span count below which all spans are returned without windowing. | `10000` | `SIGNOZ_TRACES_WATERFALL_MAX__LIMIT__TO__SELECT__ALL__SPANS` |
+| `traces.flamegraph.max_selected_levels` | Maximum breadth-first depth levels included in a windowed response. | `50` | `SIGNOZ_TRACES_FLAMEGRAPH_MAX__SELECTED__LEVELS` |
+| `traces.flamegraph.max_spans_per_level` | Spans per level before sampling is applied. | `100` | `SIGNOZ_TRACES_FLAMEGRAPH_MAX__SPANS__PER__LEVEL` |
+| `traces.flamegraph.sampling_top_latency_count` | Highest-latency spans always included when a level is sampled. | `5` | `SIGNOZ_TRACES_FLAMEGRAPH_SAMPLING__TOP__LATENCY__COUNT` |
+| `traces.flamegraph.sampling_bucket_count` | Timestamp buckets used for uniform sampling within a level. | `50` | `SIGNOZ_TRACES_FLAMEGRAPH_SAMPLING__BUCKET__COUNT` |
+| `traces.flamegraph.select_all_spans_limit` | Span count below which all spans are returned without windowing or sampling. | `100000` | `SIGNOZ_TRACES_FLAMEGRAPH_SELECT__ALL__SPANS__LIMIT` |
+
+### `authz`
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `authz.provider` | Authorization provider to use. | `openfga` | `SIGNOZ_AUTHZ_PROVIDER` |
+| `authz.openfga.max_tuples_per_write` | Maximum tuples allowed per OpenFGA write operation. | `300` | `SIGNOZ_AUTHZ_OPENFGA_MAX__TUPLES__PER__WRITE` |
+
+### `meterreporter`
+
+**Enterprise.** Reports metered usage in licensed deployments.
+
+| Option | Description | Default | Environment variable |
+|---|---|---|---|
+| `meterreporter.interval` | Interval between collection ticks. Must be between `10m` and `24h`. | `6h` | `SIGNOZ_METERREPORTER_INTERVAL` |
+| `meterreporter.backfill` | Whether to backfill sealed days starting from the license creation day. | `true` | `SIGNOZ_METERREPORTER_BACKFILL` |
+| `meterreporter.jitter` | Random jitter applied to the first collection and every subsequent cycle. Must be between `10m` and `interval`. Defaults to the smaller of `interval` and `2h` when unset. | `2h` | `SIGNOZ_METERREPORTER_JITTER` |
+
+## Configuration guides
+
+These pages walk through the most common configuration tasks end to end.
+
+<DocCardContainer>
+
+<DocCard
+    title="Serving on an External URL"
+    description="Serve SigNoz on a custom domain or base path behind a reverse proxy"
+    href="https://signoz.io/docs/manage/administrator-guide/configuration/serving-on-external-url/"
+/>
+
+<DocCard
+    title="Relational Databases"
+    description="Move the metadata store from SQLite to Postgres"
+    href="https://signoz.io/docs/manage/administrator-guide/configuration/relational-database/"
+/>
+
+<DocCard
+    title="SMTP for Email Invitations"
+    description="Configure an SMTP server so SigNoz can send invites and alert emails"
+    href="https://signoz.io/docs/manage/administrator-guide/configuration/smtp-email-invitations/"
+/>
+
+<DocCard
+    title="Alertmanager"
+    description="Set the Alertmanager SMTP server and external URL"
+    href="https://signoz.io/docs/manage/administrator-guide/configuration/alertmanager/"
+/>
+
+<DocCard
+    title="JWT Secret"
+    description="Replace the default JWT signing secret"
+    href="https://signoz.io/docs/manage/administrator-guide/configuration/jwt-secret/"
+/>
+
+<DocCard
+    title="Root User"
+    description="Provision an admin account at deploy time"
+    href="https://signoz.io/docs/manage/administrator-guide/configuration/root-user/"
+/>
+
+<DocCard
+    title="Impersonation Mode"
+    description="Run SigNoz without user authentication on network-protected deployments"
+    href="https://signoz.io/docs/manage/administrator-guide/configuration/impersonation-mode/"
+/>
+
+</DocCardContainer>
