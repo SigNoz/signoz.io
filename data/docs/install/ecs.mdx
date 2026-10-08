@@ -2,7 +2,7 @@
 date: 2026-10-08
 tags: [Self-Hosted Community]
 title: Install SigNoz on AWS ECS with Foundry - Self-Host Guide
-description: Learn how to self-host SigNoz on AWS ECS with Foundry. Provision infrastructure with Terraform or deploy to an existing EC2 cluster, then verify the install.
+description: Learn how to install SigNoz on AWS ECS with Foundry, on infrastructure it provisions or an existing EC2 cluster, from setup to verifying the install.
 doc_type: howto
 ---
 
@@ -158,39 +158,11 @@ Wait until the count reaches the number of instances before the next step:
 4
 ```
 
-### Step 4: Add SigNoz to casting.yaml
+### Step 4: Create the SigNoz casting
 
-Open `casting.yaml` and add the SigNoz installation below the infrastructure. The file now has two documents, separated by `---`:
+Create a separate `casting.yaml` for the SigNoz installation, or append it to the end of the one from Step 2 after a `---` line. It describes the installation and binds it to the infrastructure:
 
-```yaml minimap
-apiVersion: v1alpha1
-kind: Infrastructure
-metadata:
-  name: foundry
-  annotations:
-    foundry.signoz.io/ecs-region: <aws-region>
-spec:
-  deployment:
-    platform: aws
-    mode: ecs
-    flavor: terraform
-  resource:
-    spec:
-      config:
-        data:
-          resource.yaml: |
-            networking:
-              networkCIDR: 10.0.0.0/16
-              subnets:
-                private-a:
-                  type: private
-                  zone: <availability-zone>
-                  cidr: 10.0.0.0/19
-                public-a:
-                  type: public
-                  zone: <availability-zone>
-                  cidr: 10.0.96.0/22
----
+```yaml
 apiVersion: v1alpha1
 kind: Installation
 metadata:
@@ -208,8 +180,7 @@ spec:
 
 **Verify these values:**
 
-- `<aws-region>`: The AWS region from Step 2, the same in both documents.
-- `<availability-zone>`: The Availability Zone from Step 2.
+- `<aws-region>`: The AWS region from Step 2.
 
 <Admonition type="info" title="Use your own IAM roles" defaultCollapsed="true">
 Foundry creates two IAM roles: `signoz-installation-iam-task` for the SigNoz tasks and `signoz-installation-iam-exec` for the ECS agent. To use an existing role for either one, add its annotation under `metadata.annotations`:
@@ -262,18 +233,14 @@ Run this from the directory that contains `casting.yaml`:
 foundryctl cast -f casting.yaml
 ```
 
-This checks the infrastructure for changes, then installs SigNoz with Terraform in `pours/deployment/`. Run the same command again after editing `casting.yaml` to apply the change.
+This installs SigNoz with Terraform in `pours/deployment/`. Run the same command again after editing `casting.yaml` to apply the change.
 
 <Admonition type="tip" title="Run Terraform yourself" defaultCollapsed="true">
 To run Terraform directly, generate the files and apply them:
 
 ```bash
-foundryctl forge -f casting.yaml   # writes pours/infrastructure/ and pours/deployment/
-cd pours/infrastructure
-terraform init
-terraform plan -out=tfplan
-terraform apply tfplan
-cd ../deployment
+foundryctl forge -f casting.yaml   # writes pours/deployment/
+cd pours/deployment
 terraform init
 terraform plan -out=tfplan
 terraform apply tfplan
@@ -490,19 +457,27 @@ Connect to that instance (for example with AWS Systems Manager Session Manager) 
 sudo docker logs $(sudo docker ps -q --filter label=com.amazonaws.ecs.container-name=<service-name>)
 ```
 
-### Removing SigNoz or the infrastructure
+### terraform destroy fails with Instance cannot be destroyed
 
-Remove SigNoz first, then the infrastructure. Run this from the directory that contains `casting.yaml`:
+Destroying SigNoz in `pours/deployment/` stops with an error that names `aws_ec2_tag.claims`, similar to the following:
+
+```output
+Error: Instance cannot be destroyed
+
+Resource aws_ec2_tag.claims["vol-0a1b2c3d4e5f67890"] has lifecycle.prevent_destroy set, but the plan calls for this resource to be destroyed.
+```
+
+The claims record which data volume each stateful service owns, and they are protected from deletion. Remove them from the state, then destroy. Run this from the directory that contains `casting.yaml`:
 
 ```bash
 cd pours/deployment
 terraform state rm aws_ec2_tag.claims
 terraform destroy
-cd ../infrastructure
-terraform destroy
 ```
 
-Destroying the infrastructure deletes the data volumes and their data. Why the `state rm` step is needed is under <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/ecs/ec2/terraform/README.md#teardown" target="_blank" rel="noopener noreferrer nofollow">Teardown</a>.
+The claim tags stay on the volumes, so a later cast puts each service back on its own data. To remove the infrastructure too, run `terraform destroy` in `pours/infrastructure/` afterwards. That deletes the data volumes and their data.
+
+Lowering a shard or replica count can stop `foundryctl cast` with the same error. See <a href="https://github.com/SigNoz/foundry/blob/main/docs/examples/ecs/ec2/terraform/README.md#changing-the-installation" target="_blank" rel="noopener noreferrer nofollow">Changing the installation</a> instead.
 
 </details>
 
