@@ -1,24 +1,24 @@
 ---
-date: 2026-05-27
+date: 2026-10-08
 title: One-Click vs Manual AWS Integration
 meta_title: One-Click vs Manual AWS Integration
-description: Compare one-click and manual OpenTelemetry integration methods by setup time, cost, dashboards, and control to choose the right AWS monitoring approach.
+description: Compare one-click, self-managed metric stream, and manual OpenTelemetry AWS integrations by setup, cost, dashboards, and control to pick the right approach.
 doc_type: explanation
 ---
 
-SigNoz offers two ways to monitor your AWS infrastructure. This guide helps you choose the right approach.
+SigNoz offers three ways to monitor your AWS infrastructure. This guide helps you choose the right approach.
 
 ## Quick Comparison
 
-| Feature | One-Click Integration | Manual Setup (OpenTelemetry) |
-|---------|----------------------|------------------------------|
-| **Availability** | SigNoz Cloud only | Cloud & Self-Hosted |
-| **Setup Time** | ~5 minutes | 15-60 minutes per service |
-| **Pre-built Dashboards** | ✅ Included | ❌ Build your own |
-| **Auto-Discovery** | ✅ New resources detected automatically | ❌ Manual configuration |
-| **AWS Cost** | CloudWatch + Firehose charges | Minimal (OpenTelemetry based) |
-| **Granular Control** | Limited | Full control |
-| **Best For** | Quick start, managed experience | Cost optimization, self-hosted |
+| Feature | One-Click Integration | Self-Managed Metric Streams | Manual Setup (OpenTelemetry) |
+|---------|----------------------|-----------------------------|------------------------------|
+| **Availability** | SigNoz Cloud only | SigNoz Cloud only | Cloud & Self-Hosted |
+| **Setup Time** | ~5 minutes | One-time per account and region | 15-60 minutes per service |
+| **Pre-built Dashboards** | ✅ Included | ✅ Imported manually | ❌ Build your own |
+| **Auto-Discovery** | ✅ New resources detected automatically | ❌ Namespace and metric filters | ❌ Manual configuration |
+| **AWS Cost** | CloudWatch + Firehose charges | CloudWatch + Firehose charges | Minimal (OpenTelemetry based) |
+| **Granular Control** | Limited | Namespace and metric level | Full control |
+| **Best For** | Quick start, managed experience | Terraform-managed or IAM-restricted accounts | Cost optimization, self-hosted |
 
 ## One-Click Integration
 
@@ -58,6 +58,34 @@ One-Click integration incurs additional AWS charges beyond standard resource cos
 | CloudWatch Logs (if enabled) | ~$0.50 per GB ingested (region & tier dependent) |
 
 *Actual AWS bills depend heavily on number of metrics, resolution, enabled logs, and region. Use <a href="https://calculator.aws/" target="_blank" rel="noopener noreferrer nofollow">AWS Pricing Calculator</a> for exact estimates. <a href="https://aws.amazon.com/pricing/" target="_blank" rel="noopener noreferrer nofollow">View AWS pricing docs</a>.*
+
+## Self-Managed Metric Streams (Firehose)
+
+Instead of letting the CloudFormation stack provision them, you can create the CloudWatch metric stream and Kinesis Data Firehose delivery stream yourself and point them at SigNoz Cloud. Everything is standard AWS configuration, so it can be provisioned with Terraform.
+
+### Firehose Delivery Stream
+
+Create a delivery stream with **Direct PUT** as the source and **HTTP Endpoint** as the destination:
+
+- **HTTP endpoint URL**: `https://ingest.<region>.signoz.cloud/awsfirehose/cwmetrics`. The `/awsfirehose/cwmetrics` path is required.
+- **Access key**: your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- **Content encoding**: GZIP.
+- **S3 backup**: choose **Failed data only**. Because you own the Firehose IAM role, its S3 permissions can then be scoped to the backup bucket alone.
+
+**Verify these values:**
+
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+
+### CloudWatch Metric Stream
+
+Create the metric stream with **Custom setup with Firehose** and select the delivery stream above.
+
+- Set the output format to **JSON**. The `/awsfirehose/cwmetrics` endpoint requires JSON records.
+- Select the namespaces to stream, and optionally filter down to specific metrics within each namespace.
+
+### Dashboards
+
+Metrics ingested this way use the same `aws_` naming as the one-click integration (for example, `aws_RDS_CPUUtilization_max`), so the per-service pre-built dashboards work as-is. Import them manually as JSON from the <a href="https://github.com/SigNoz/dashboards" target="_blank" rel="noopener noreferrer nofollow">SigNoz dashboards repository</a>. Services without a pre-built dashboard need custom dashboards.
 
 ## Manual Setup (OpenTelemetry)
 
