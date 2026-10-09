@@ -1,9 +1,9 @@
-import React from "react";
-import styles from "./styles.module.css";
+import React from 'react'
+import styles from './styles.module.css'
 
 const ComparisonLayout = (props) => {
-  const { children } = props;
-  return <section className={styles.comparisonContainer}>{children}</section>;
-};
+  const { children } = props
+  return <section className={styles.comparisonContainer}>{children}</section>
+}
 
-export default ComparisonLayout;
+export default ComparisonLayout
