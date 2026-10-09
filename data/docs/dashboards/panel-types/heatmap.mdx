@@ -1,0 +1,101 @@
+---
+title: Heatmap Panel Type - Visualize Metric Distributions
+date: 2026-10-07
+description: Use the Heatmap panel type in SigNoz dashboards to visualize histogram metric distributions over time with configurable buckets, color ramps, and axis scales.
+doc_type: reference
+---
+
+## Heatmap
+
+A Heatmap shows how a distribution changes over time. Each column is a time interval, each row is a value bucket, and the color of a cell shows how many observations fell in that bucket during that interval. A latency heatmap shows the full spread of request durations, which a few percentile lines hide.
+
+<Figure
+  src="/img/docs/dashboards/panel-types/heatmap.webp"
+  alt="Heatmap of request duration over one hour, with most requests between 10 ms and 250 ms and a band of slow requests up to 2.5 s for about fifteen minutes"
+  caption="Request duration heatmap. The upper band shows a period of slow requests."
+/>
+
+### When to use a heatmap
+
+- You have a histogram metric, such as a request duration, and you want to see the whole distribution over time.
+- You want to find shifts, bimodal patterns, or outliers that an average or a percentile line hides.
+
+For a single aggregated value or a few series over time, use the [Time Series](https://signoz.io/docs/dashboards/panel-types/timeseries/) panel.
+
+### Data Formats
+
+#### Supported signals
+
+- Metrics
+
+Heatmap panels do not accept logs or traces. The panel draws one query, and the metric type sets where the buckets come from:
+
+- Histogram and exponential histogram metrics carry their own buckets. The panel uses them as rows.
+- Gauge and sum metrics have no buckets. The panel puts the values into buckets for you. Use **Bucket by** to change the spacing of the buckets.
+
+### Create a heatmap panel
+
+1. In your dashboard, click **New Panel** and select **Heatmap**.
+2. In the query builder, select a metric. For a histogram metric, keep the **Count** aggregation.
+3. Click **Run Query**. The panel shows one column per time interval and a color bar labeled **COUNT** under the chart.
+4. Click **Save changes**.
+
+When you switch an existing panel to Heatmap, the panel keeps only the first query and removes all formulas. A percentile aggregation changes to **Count**. If you switch back to the earlier panel type, the earlier query returns.
+
+### Bucket by
+
+The **Bucket by** add-on appears below the query for gauge and sum metrics. It does not appear for histogram metrics. If you do not set it, the query uses the finest log axis.
+
+- **Log**: The bounds are evenly spaced on a log axis, so every band has the same height on screen. **Scale** goes from `-4` (fewest, coarsest bands) to `4` (finest, the default). A scale of `0` gives one band for each doubling of the value.
+- **Linear**: The bounds are evenly spaced from 0 to **Max value**, which is required. **Buckets** sets the number of bands, from the default `60` up to `512`. All values above **Max value** go into one overflow band.
+
+The **Bounds** strip under the controls shows the first bucket edges before you run the query. When a formula is the drawn query, the formula has its own **Bucket by** controls.
+
+<Figure
+  src="/img/docs/dashboards/panel-types/heatmap-bucket-by.webp"
+  alt="Heatmap panel editor with a CPU utilization gauge grouped by pod, Bucket by set to Linear with Max value 100 and 20 buckets, and the Bounds preview strip"
+  caption="Bucket by set to Linear for a CPU utilization gauge."
+/>
+
+### Chart appearance
+
+The **Chart appearance** section sets how counts map to colors. The **Preview** at the top shows the result, for example `lava · log · 64 steps`.
+
+- **Color mode**: **Palette** uses a multi-color ramp. **Opacity** uses one **Base color** and makes cells with higher counts more opaque. Pick one of the preset colors or **Custom**.
+- **Palette**: ice, moss, rust, graphite, ember, lagoon, orchid, verdant, lava (default), or beacon.
+- **Color scale**: **Log** (default), **Sqrt**, or **Linear**. Log keeps low counts visible when a few cells have very high counts.
+- **Color steps**: 2 to 128 bands of color. The default is 64.
+- **Min count** and **Max count**: Fix the counts at the two ends of the ramp. Leave them empty to read the range from the data. Fixed values keep colors the same across time ranges.
+
+<Figure
+  src="/img/docs/dashboards/panel-types/heatmap-config.webp"
+  alt="Heatmap Chart appearance and Axes controls, showing the ramp preview, Color mode, the 10 palettes, Color scale, Color steps, Min count and Max count, and the Axes section with Y-axis scale set to Auto"
+  caption="Chart appearance and Axes controls for a Heatmap panel."
+/>
+
+### Formatting, axes, and legend
+
+- **Formatting & Units**: The unit and decimals apply to the bucket bounds on the Y-axis. Counts have no unit.
+- **Axes**: **Y-axis scale** is **Auto** (default), **Linear**, **Log**, or **Symmetric log**. Auto uses Log when all bucket bounds are positive and Symmetric log when the bounds cross zero.
+- **Legend**: Sets the legend position.
+
+### Tooltip
+
+When you hover over a cell, the tooltip shows the time interval of the column, the bucket range, and the count. The time interval starts with the date.
+
+- For a query with one group, the tooltip also lists the nearby buckets above and below the hovered one.
+- For a query with more than one visible group, the tooltip shows a **Group** and **Contribution** table instead. A share below one percent shows as `<1%`.
+
+To keep the tooltip open, hover over a cell and press `P`. A **Pinned** badge appears in its header. Press `P` or `Esc` to release it.
+
+### Limitations
+
+- Heatmap panels support metrics only.
+- You cannot create an alert from a Heatmap panel.
+- Heatmap panels do not support drill-down.
+- You can download a Heatmap panel as PNG or SVG, but not as CSV.
+- The query builder hides **Functions** and **Having** for Heatmap panels.
+
+### Get Help
+
+<GetHelp />
