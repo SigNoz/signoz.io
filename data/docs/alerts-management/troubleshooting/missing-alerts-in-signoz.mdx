@@ -1,5 +1,5 @@
 ---
-date: 2026-05-13
+date: 2026-10-03
 title: Missing Alerts in SigNoz
 description: Diagnose why alerts are not firing in SigNoz, covering evaluation pattern misconfiguration, threshold issues, and missing data points.
 doc_type: howto
@@ -72,6 +72,15 @@ Evaluation: All the time for 5 minutes
    alert_evaluation_window: 2m
    ```
 
+
+### Delayed Data Arrival
+
+**Problem:** A rule can only evaluate data that has already arrived in SigNoz and become queryable, so the notification is sent on the evaluation cycle after the data becomes visible, not at the time the event happened.
+
+**How to check:**
+
+1. Compare the apparent spike time on the chart with the actual data point. Charts over a long time range render at a coarser automatic aggregation interval, so the timestamp of an apparent spike can differ from the underlying data point. Zoom into a narrower time range to read the real time.
+2. Open the record that breached the threshold and compare its event timestamp with its observed timestamp, which the collection agent populates when it reads the record. The difference between the two shows when the record was received relative to when the event occurred, and the rule can only fire once the record is queryable in SigNoz.
 
 ### Incorrect Threshold Values
 
