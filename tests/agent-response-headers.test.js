@@ -48,6 +48,17 @@ test('agentResponse sets Vary: Accept only for negotiated URLs', () => {
   assert.equal(single.headers.get('Vary'), null)
 })
 
+test('agentResponse omits cache headers when the route is ISR-controlled', () => {
+  const isr = agentResponse('body', { cacheControlledByIsr: true, varyAccept: true })
+
+  assert.equal(isr.headers.get('Cache-Control'), null)
+  assert.equal(isr.headers.get('Vercel-CDN-Cache-Control'), null)
+  assert.equal(isr.headers.get('Content-Type'), 'text/markdown; charset=utf-8')
+  assert.equal(isr.headers.get('X-Robots-Tag'), 'noindex')
+  assert.equal(isr.headers.get('Vary'), 'Accept')
+  assert.equal(isr.headers.get('ETag'), computeWeakEtag('body'))
+})
+
 test('agentResponse honors a custom content type', () => {
   const response = agentResponse('body', { contentType: 'text/plain; charset=utf-8' })
 

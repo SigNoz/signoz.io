@@ -33,6 +33,12 @@ export type AgentResponseOptions = {
   noindex?: boolean
   /** Set on negotiated URLs that also serve HTML. */
   varyAccept?: boolean
+  /**
+   * ISR route handlers: omit both cache headers — a handler-set Cache-Control
+   * suppresses Next's ISR s-maxage header and demotes the response to the
+   * per-region, deploy-wiped edge cache.
+   */
+  cacheControlledByIsr?: boolean
 }
 
 /** Build a cacheable agent response with shared cache headers and a weak ETag. */
@@ -41,14 +47,18 @@ export function agentResponse(body: string, options: AgentResponseOptions = {}):
     contentType = 'text/markdown; charset=utf-8',
     noindex = true,
     varyAccept = false,
+    cacheControlledByIsr = false,
   } = options
 
   const headers = new Headers({
-    'Cache-Control': AGENT_CACHE_CONTROL,
-    'Vercel-CDN-Cache-Control': AGENT_CDN_CACHE_CONTROL,
     'Content-Type': contentType,
     ETag: computeWeakEtag(body),
   })
+
+  if (!cacheControlledByIsr) {
+    headers.set('Cache-Control', AGENT_CACHE_CONTROL)
+    headers.set('Vercel-CDN-Cache-Control', AGENT_CDN_CACHE_CONTROL)
+  }
 
   if (noindex) {
     headers.set('X-Robots-Tag', 'noindex')

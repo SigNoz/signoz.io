@@ -38,3 +38,9 @@ export function getStrapiDocumentCacheTags(info: CmsPathInfo): string[] {
   const { collectionName, contentKey } = info
   return [`${collectionName}-${contentKey}`, `mdx-content-${contentKey}`]
 }
+
+// ISR cache entries are keyed by the rewrite destination, not the public /docs/*.md URL.
+export function getMarkdownTwinRoutePaths(info: CmsPathInfo): string[] {
+  if (info.collectionName !== 'docs') return []
+  return [`/api/docs-markdown/${info.contentKey}`]
+}
