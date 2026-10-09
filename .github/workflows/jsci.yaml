@@ -1,0 +1,48 @@
+name: jsci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'push' }}
+
+permissions:
+  contents: read
+
+jobs:
+  fmt:
+    # Primus needs org secrets, which pull_request withholds from fork and dependabot
+    # PRs, so those skip the primus jobs.
+    if: &primus-gate |
+      github.event_name == 'push' ||
+      (! github.event.pull_request.head.repo.fork && github.event.pull_request.user.login != 'dependabot[bot]')
+    permissions:
+      contents: read
+      id-token: write
+    uses: signoz/primus.workflows/.github/workflows/js-fmt.yaml@main
+    secrets: inherit
+    with: &primus-inputs
+      PRIMUS_REF: main
+      NODE_VERSION: "24"
+      JS_SRC: .
+      JS_PKG_MANAGER: yarn
+  lint:
+    if: *primus-gate
+    permissions:
+      contents: read
+      id-token: write
+    uses: signoz/primus.workflows/.github/workflows/js-lint.yaml@main
+    secrets: inherit
+    with: *primus-inputs
+  type-check:
+    if: *primus-gate
+    permissions:
+      contents: read
+      id-token: write
+    uses: signoz/primus.workflows/.github/workflows/js-type-check.yaml@main
+    secrets: inherit
+    with: *primus-inputs

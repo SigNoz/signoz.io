@@ -17,10 +17,7 @@ const VimeoPlayer = ({ videoId }) => {
     }
   }, [videoId, isPlayerReady])
 
-  return (
-    <div ref={playerRef} className="embed-container w-full" />
-  )
+  return <div ref={playerRef} className="embed-container w-full" />
 }
 
 export default VimeoPlayer
-
