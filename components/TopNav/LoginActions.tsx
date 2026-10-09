@@ -4,6 +4,8 @@ import { BookOpenText, PenSquare } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
+import { cn } from 'app/lib/utils'
+import { buttonVariants } from '@/components/ui/Button'
 
 export default function LoginActions() {
   const router = useRouter()
@@ -23,7 +25,7 @@ export default function LoginActions() {
 
       <TrackingButton
         id="btn-get-started-website-navbar"
-        className="flex h-8 min-w-24 items-center justify-center gap-1.5 truncate rounded-sm border border-[var(--l3-border)] bg-[var(--l3-background)] px-4 py-2 pl-2 pr-2.5 text-center text-xs font-normal not-italic leading-5 text-[var(--l2-foreground)] no-underline outline-none hover:text-[var(--l1-foreground-hover)]"
+        className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'min-w-24 truncate')}
         clickType="Primary CTA"
         clickName="Signup Button"
         clickText="Signup"
@@ -34,7 +36,7 @@ export default function LoginActions() {
       </TrackingButton>
 
       <TrackingButton
-        className="flex h-8 min-w-24 items-center justify-center gap-2 truncate rounded-sm border border-[var(--l3-border)] bg-[var(--l3-background)] px-4 py-2 pl-4 pr-3 text-center text-xs font-normal not-italic leading-5 text-[var(--l2-foreground)] no-underline outline-none hover:text-[var(--l1-foreground-hover)]"
+        className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'min-w-24 truncate')}
         clickType="Secondary CTA"
         clickName="Docs Button"
         clickText="Docs"

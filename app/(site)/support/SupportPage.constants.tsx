@@ -1,4 +1,3 @@
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 import { ArrowRight } from 'lucide-react'
 import type {
   SupportTier,
@@ -17,7 +16,6 @@ export const SUPPORT_HEADER_BUTTONS = [
     text: 'Get Started',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -28,7 +26,6 @@ export const SUPPORT_HEADER_BUTTONS = [
     text: 'Talk to Sales',
     href: '/contact-us/?source=support',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Contact Us Button',
@@ -396,7 +393,6 @@ export const BOTTOM_CTA_BUTTONS = [
     text: 'Get Started',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Sign Up Button',
@@ -407,7 +403,6 @@ export const BOTTOM_CTA_BUTTONS = [
     text: 'Talk to Sales',
     href: '/contact-us/?source=support',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Contact Us Button',

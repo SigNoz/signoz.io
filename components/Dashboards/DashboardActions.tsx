@@ -205,24 +205,12 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
         )}
 
         <div className="flex flex-wrap gap-3">
-          <Button
-            variant="default"
-            rounded="default"
-            isButton={true}
-            onClick={handleDownload}
-            disabled={pending !== null}
-          >
+          <Button variant="default" size="sm" onClick={handleDownload} disabled={pending !== null}>
             <Download aria-hidden className="mr-1.5 h-3.5 w-3.5" />
             {pending === 'download' ? 'Downloading...' : `Download ${shortLabel} JSON`}
           </Button>
 
-          <Button
-            variant="tertiary"
-            rounded="default"
-            isButton={true}
-            onClick={handleCopy}
-            disabled={pending !== null}
-          >
+          <Button variant="secondary" size="sm" onClick={handleCopy} disabled={pending !== null}>
             {copied ? (
               <>
                 <Check aria-hidden className="mr-1.5 h-3.5 w-3.5" />

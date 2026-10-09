@@ -35,7 +35,6 @@ export default function NavDropdownPanel() {
       setIsVisible(false)
       // Keep mounted during close animation (150ms), then unmount
       const id = setTimeout(() => setShouldRender(false), 150)
-      prevActiveId.current = null
       return () => clearTimeout(id)
     }
 
@@ -100,20 +99,20 @@ export default function NavDropdownPanel() {
           <div className="absolute -top-1 left-0 right-0 h-1" />
 
           <div
-            className="origin-top-left rounded-[4px] border border-[var(--l2-border)] bg-[var(--l2-background)] shadow-[0_12px_48px_color-mix(in_srgb,var(--base-black)_55%,transparent)]"
+            className="origin-top-left overflow-hidden rounded-[4px] border border-[var(--l2-border)] bg-[var(--l2-background)] shadow-[0_12px_48px_color-mix(in_srgb,var(--base-black)_55%,transparent)]"
             style={{
               opacity: isVisible ? 1 : 0,
               transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(-4px) scale(0.96)',
               transition: 'opacity 150ms ease, transform 150ms ease',
             }}
           >
-            {(activeId === 'product' || prevActiveId.current === 'product') && (
+            {(activeId ?? prevActiveId.current) === 'product' && (
               <ProductDropdownContent onClose={closeImmediate} />
             )}
-            {(activeId === 'usecases' || prevActiveId.current === 'usecases') && (
+            {(activeId ?? prevActiveId.current) === 'usecases' && (
               <UseCasesDropdownContent onClose={closeImmediate} />
             )}
-            {(activeId === 'resources' || prevActiveId.current === 'resources') && (
+            {(activeId ?? prevActiveId.current) === 'resources' && (
               <ResourcesDropdownContent onClose={closeImmediate} />
             )}
           </div>

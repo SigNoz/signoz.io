@@ -43,9 +43,8 @@ const CarouselCards: React.FC<{
           {buttonLink && (
             <Button
               variant="secondary"
-              rounded="full"
               className="mb-8 flex w-fit items-center gap-2 md:mb-12"
-              to={buttonLink}
+              href={buttonLink}
             >
               {buttonText}
               <ArrowRight size={14} />

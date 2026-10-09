@@ -19,6 +19,7 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import { mdxOptions, generateTOC } from '@/utils/mdxUtils'
 import { getAuthorKeys, getTagValues } from '@/utils/contentHelpers'
 import { resolveLatestDate } from '@/utils/dateUtils'
+import { buildMetadataImages } from '@/utils/metadataImages'
 
 export const revalidate = 86400 // 1 day — see CMS_REVALIDATE_INTERVAL
 export const dynamicParams = true
@@ -48,15 +49,7 @@ export async function generateMetadata(props: {
       const publishedAt = new Date(resolveLatestDate(content) || Date.now()).toISOString()
       const modifiedAt = new Date(resolveLatestDate(content) || Date.now()).toISOString()
 
-      let imageList = [siteMetadata.socialBanner]
-      if (content.image) {
-        imageList = typeof content.image === 'string' ? [content.image] : content.image
-      }
-      const ogImages = imageList.map((img) => {
-        return {
-          url: img.includes('http') ? img : siteMetadata.siteUrl + img,
-        }
-      })
+      const { imageList, ogImages } = buildMetadataImages(content.image)
 
       const seoTitle = content.meta_title || content.title
 

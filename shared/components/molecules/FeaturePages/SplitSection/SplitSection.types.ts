@@ -16,5 +16,6 @@ export interface SplitSectionProps {
   left: SplitSectionPanel | React.ReactNode
   right: SplitSectionPanel | React.ReactNode
   withVerticalDivider?: boolean
+  alignImages?: boolean
   className?: string
 }
