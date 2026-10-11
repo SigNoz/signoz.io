@@ -1,5 +1,5 @@
 ---
-date: 2026-09-16
+date: 2026-10-01
 title: Roles
 description: Create and manage roles in SigNoz — managed roles, custom roles, and configuring transactions with the interactive or JSON editor.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -99,6 +99,31 @@ Each entry is a transaction group with an `objectGroup` (the resource and its se
 <Admonition type="info">
 If the JSON contains errors, switching back to Interactive mode prompts you to discard the invalid changes. Fix the errors first to keep your edits.
 </Admonition>
+
+### Example: delegate user management
+
+Custom roles can delegate user management without granting the full `signoz-admin` role. Grant relations on the `user` and `factor-password` resources to build roles such as a helpdesk role that can invite members and trigger password resets, while role and service account management stay with admins.
+
+```json
+[
+  {
+    "objectGroup": {
+      "resource": { "kind": "user", "type": "user" },
+      "selectors": ["*"]
+    },
+    "relation": "create"
+  },
+  {
+    "objectGroup": {
+      "resource": { "kind": "factor-password", "type": "metaresource" },
+      "selectors": ["*"]
+    },
+    "relation": "create"
+  }
+]
+```
+
+Inviting a user with no roles requires only `user:create`. Inviting a user with one or more roles additionally requires `user:attach` and `attach` on each requested role. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/#user) for the full relation list and compound-transaction requirements.
 
 ## View a Role
 

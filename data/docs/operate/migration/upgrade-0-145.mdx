@@ -1,0 +1,75 @@
+---
+date: 2026-10-01
+title: "Upgrade SigNoz to v0.145.0: User Management Access"
+tags: [Self-Hosted Community, Self-Hosted Enterprise]
+description: Upgrade self-hosted SigNoz to v0.145.0. User management moves to fine-grained authorization, admins can edit their own profile, and the root user is immutable.
+doc_type: howto
+---
+
+SigNoz v0.145.0 moves user management from a blanket admin check to fine-grained authorization (FGA). Custom roles can now be granted granular user-management permissions, admins can edit their own profile and roles, and the root user becomes immutable. A migration backfills the required authorization for existing admins automatically, so no action is needed to keep current access.
+
+<Admonition type="info" title="Existing admins keep full access automatically">
+Migration `132_add_user_tuples` runs once when the server starts on v0.145.0. It backfills the user and password reset token authorization for the built-in admin role in every existing organization. Existing admins retain full user-management access with no manual steps.
+</Admonition>
+
+## What changes
+
+- **User management uses FGA.** The `user` and `factor-password` resources are now authorized per relation. Custom roles can be granted any combination of list, view, create (invite), update, delete, and role assign/remove on users, plus create and list of password reset tokens. See the [Transactions Reference](https://signoz.io/docs/manage/administrator-guide/iam/reference/transactions/#user).
+- **Admins can manage themselves.** Updating your own profile and changing your own role assignments is now allowed. Removing your own admin role takes effect immediately; another admin or the root admin can restore it. Requests that relied on the previous `400 Bad Request` as a self-modification guard now succeed.
+- **The root user is immutable.** Attempts to update, delete, or create a password reset token for the root user return `501 Not Implemented` (previously `400 Bad Request`).
+- **Password change is self-service.** Changing your own password no longer requires admin privileges. See [Authentication](https://signoz.io/docs/userguide/authentication/#change-your-password).
+
+There is no feature flag. The behavior is live for all deployments after the upgrade.
+
+## Upgrade self-hosted SigNoz
+
+### Step 1: Back up your data
+
+User and role data lives in the SigNoz Metastore (SQLite or Postgres) alongside dashboards and alerts. Back up the Metastore before you start. If you are more than one release behind, check the [Upgrade Path Tool](https://signoz.io/upgrade-path/) for required stops before you move to v0.145.0.
+
+### Step 2: Upgrade SigNoz
+
+The authorization migration runs once, automatically, when the server starts on the new version.
+
+<Tabs entityName="installer">
+<TabItem value="foundry" label="Foundry" default>
+
+Upgrade <a href="https://github.com/SigNoz/foundry/blob/main/docs/getting-started.md" target="_blank" rel="noopener noreferrer nofollow">foundryctl</a> to pick up the v0.145.0 defaults, then re-apply your existing `casting.yaml`:
+
+```bash
+curl -fsSL https://signoz.io/foundry.sh | bash
+foundryctl cast -f casting.yaml
+```
+
+If your <a href="https://github.com/SigNoz/foundry/blob/main/docs/reference/casting-file.md" target="_blank" rel="noopener noreferrer nofollow">casting.yaml</a> pins image versions, the new defaults will not override them (your config wins), so bump the SigNoz image pin to v0.145.0 yourself.
+
+</TabItem>
+<TabItem value="helm" label="Kubernetes (Helm chart)">
+
+Update the <a href="https://github.com/SigNoz/charts" target="_blank" rel="noopener noreferrer nofollow">chart</a> and upgrade. Replace `<namespace>` and `<release-name>` with your own values:
+
+```bash
+helm repo update
+helm -n <namespace> upgrade <release-name> signoz/signoz
+```
+
+`helm upgrade` takes the newest chart; add `--version 0.145.0` to pin the v0.145.0 chart.
+
+</TabItem>
+</Tabs>
+
+For Docker or binary deployments, follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/) and set the target version to v0.145.0.
+
+### Step 3: Verify the upgrade
+
+1. Pods and containers are healthy (`kubectl get pods -n <namespace>`, `docker compose ps`, or `systemctl status 'signoz-*'`).
+2. SigNoz reports v0.145.0 under **Settings**.
+3. Open **Settings > Members** as an admin and confirm you can still invite, edit, and remove users.
+
+## Getting help
+
+- [SigNoz Documentation](https://signoz.io/docs/introduction/)
+- <a href="https://github.com/SigNoz/signoz/issues" target="_blank" rel="noopener noreferrer nofollow">GitHub Issues</a>
+- [Community Slack](https://signoz.io/slack/)
+</content>
+</invoke>
