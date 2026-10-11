@@ -1,5 +1,5 @@
 ---
-date: 2026-07-30
+date: 2026-10-08
 description: Information about Bar Chart
 doc_type: reference
 title: Bar Chart Panel Type
@@ -47,7 +47,7 @@ The following graph shows the requests per second (req/s) for a service over a p
 #### Formatting & Units
 
 - **Y Axis Unit** — The unit of the y-axis (for example, `Milliseconds (ms)`, `Bytes`, `Percent`). The default is `None`.
-- **Decimal Precision** — Number of decimal places to display. The default is `2 decimals`.
+- **Decimal precision** — Choose how many decimals to show from compact tiles: `0`, `1`, `2`, `3`, `4`, or `Full` (the raw value, unrounded). A live **Shows as** preview beneath the tiles displays a sample value (for example `1,234.5`) formatted at the selected precision. The default is `2`.
 
 <Admonition type="info">
 When you create a new panel, the **Y Axis Unit** is pre-filled with the unit of the selected metric, so the axis matches how the metric was reported. If you choose a unit that is incompatible with the unit the metric was sent with, a warning icon appears on the unit selector. Hover the icon to see a tooltip explaining the mismatch and the unit the metric was sent with.
@@ -55,13 +55,13 @@ When you create a new panel, the **Y Axis Unit** is pre-filled with the unit of 
 
 #### Axes
 
-- **Soft Min / Soft Max** — Adjust the y-axis scale for better visualization. When set, the y-axis range uses these values instead of auto-adjusting based on the data. Useful when you want to prevent small values from being magnified too much.
+- **Y-axis range** — Set the y-axis minimum and maximum in a single inline range field. Leave either side empty to let that bound auto-fit the data. This replaces the separate **Soft min** and **Soft max** fields. If you enter a minimum that is greater than the maximum, an error callout appears inline and the panel keeps the last valid range until you correct it.
 - **Y Axis Scale** — Choose between `Linear` and `Logarithmic` scale for the y-axis.
 
 #### Legend
 
-- **Position** — Set the legend position (`Bottom` or `Right`).
-- **Legend Colors** — Customize colors for individual series in the legend.
+- **Position** — Pick where the legend sits from a tile picker: **Below chart** (formerly "Bottom") or **Right of chart** (formerly "Right").
+- **Legend Colors** — Customize colors for individual series in the legend. Until you run the query, this shows "Run the query to set a color for each series".
 
 #### Alerts
 
@@ -73,12 +73,21 @@ Add context links to enable click-through navigation from the panel to other das
 
 #### Thresholds
 
-Thresholds are used to draw a line on the y-axis to highlight the value. The thresholds are defined as a list of tuples. Each tuple contains the value and the color. The color is optional and if not provided, the default color will be used.
+Thresholds draw a value marker on the chart to highlight a value. Each saved threshold appears as a summary row that states the rule at a glance, for example `> 500 ms · Red background`.
+
+Select **Add threshold** to open the threshold editor. It is titled **New threshold** when you add one and **Edit threshold** when you modify an existing threshold, and it offers:
+
+- **Operator** — Pick the comparison (above, below, equal, and so on) from compact tiles that show the math symbol (`>`, `<`, `=`, and so on).
+- **Value** and **Unit** — Set side by side in one row. The unit list matches the panel's units, and a mismatch with the panel unit shows a warning.
+- **Color** — Choose from a row of color swatches, or use the custom-color swatch at the end to enter any color.
+- **Apply color to** — A tile picker for how the color is used: `Background` or `Text`. A live preview on a sample number updates as you choose.
+
+Select **Save** to keep the threshold, or **Cancel** (formerly "Discard") to drop your edits and return to the list.
 
 <Figure
   src="/img/docs/dashboards/panel-types/bar-thresholds-v2.webp"
-  alt="Threshold configuration for bar chart"
-  caption="Configure thresholds with value, unit, and color."
+  alt="Threshold editor for a bar chart showing the operator tiles, the value and unit row, color swatches, and the Apply color to tile picker"
+  caption="The threshold editor: operator tiles, a value and unit row, color swatches, and Apply color to."
 />
 
 Threshold edits preview live as you type, and thresholds carry over when you change the panel's visualization type. See [Panel editor behavior](https://signoz.io/docs/userguide/manage-dashboards/#panel-editor-behavior).
