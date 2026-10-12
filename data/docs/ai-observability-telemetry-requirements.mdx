@@ -1,0 +1,51 @@
+---
+date: 2026-09-29
+title: AI Observability Telemetry Requirements - GenAI Attributes
+description: Check which OpenTelemetry GenAI span attributes the SigNoz AI Observability dashboard and filters need, how SigNoz counts calls, and where cost comes from.
+doc_type: reference
+---
+
+[AI Observability](https://signoz.io/docs/ai-observability/) reads these attributes from your spans. A panel stays empty until your spans carry the attributes that it uses. Most names come from the <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry GenAI semantic conventions</a>. If your instrumentation uses other names, map them in [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/).
+
+## Span attributes
+
+| Attribute | Used by |
+| --- | --- |
+| `gen_ai.request.model` | All LLM panels and the **model** filter. SigNoz counts a span with this attribute as an LLM call. |
+| `gen_ai.provider.name` | **Cost by provider** and the **provider** filter. |
+| `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens` | Token panels and cost. |
+| `gen_ai.usage.cache_read.input_tokens`, `gen_ai.usage.cache_creation.input_tokens` | Cache token panels, cache cost, and **Prompt cache hit ratio**. |
+| `gen_ai.server.ttft` | **TTFT (p95)** and **Time to first token**. Streaming instrumentations, such as OpenLIT, send this attribute in seconds. |
+| `gen_ai.response.finish_reasons` | **Finish reasons**. |
+| `gen_ai.tool.name` | All **Tool calls** panels. SigNoz counts a span with this attribute as a tool call. |
+| `gen_ai.agent.name` | Agent spans for the **Per-trace usage** panels. |
+
+An AI trace is a trace with at least one LLM, tool, or agent span. Error panels use the error status of the span, not an attribute.
+
+## Resource attributes
+
+| Attribute | Used by |
+| --- | --- |
+| `deployment.environment` | The **environment** filter. |
+| `service.name` | The **service_name** filter and **Cost by service**. |
+
+Tool spans do not carry a model. As a result, the **model** and **provider** filters do not affect the **Tool calls** panels or **Calls per AI trace**.
+
+## Cost attributes
+
+You do not send cost. When SigNoz receives a span, it calculates cost from the token counts and the price of the model in [Model pricing](https://signoz.io/docs/ai-observability-model-pricing/). SigNoz writes the total to `signoz.gen_ai.usage.tokens.cost`, and one cost attribute for each token type:
+
+- `signoz.gen_ai.usage.input_tokens.cost`
+- `signoz.gen_ai.usage.output_tokens.cost`
+- `signoz.gen_ai.usage.cache_read.input_tokens.cost`
+- `signoz.gen_ai.usage.cache_write.input_tokens.cost`
+
+## Next steps
+
+- [AI Observability overview](https://signoz.io/docs/ai-observability/): see cost, tokens, latency, and tool calls on one dashboard.
+- [Attribute Mapping](https://signoz.io/docs/ai-observability-attribute-mapping/): map other attribute names to the GenAI names.
+- [LLM Observability integrations](https://signoz.io/docs/llm-observability/): instrument OpenAI, Anthropic, LiteLLM, CrewAI, and other frameworks.
+
+## Get Help
+
+<GetHelp />

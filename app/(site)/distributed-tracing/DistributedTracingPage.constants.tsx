@@ -13,7 +13,6 @@ import {
 import { BiLogoPostgresql } from 'react-icons/bi'
 import { GrMysql } from 'react-icons/gr'
 import { CarouselCard } from '@/shared/components/molecules/FeaturePages/CarouselCards'
-import { BUTTON_CLASS_NAME } from '@/shared/components/molecules/FeaturePages/constants'
 import awsIconUrl from '@/public/img/icons/aws-icon.svg?url'
 import gcpIconUrl from '@/public/img/icons/gcp-icon.svg?url'
 import azureIconUrl from '@/public/img/icons/azure-icon.svg?url'
@@ -70,7 +69,6 @@ export const DISTRIBUTED_TRACING_HEADER_BUTTONS = [
     text: 'Start your free trial',
     href: '/teams/',
     variant: 'default' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Primary CTA',
       clickName: 'Distributed Tracing Hero Start Trial',
@@ -82,7 +80,6 @@ export const DISTRIBUTED_TRACING_HEADER_BUTTONS = [
     text: 'Read Documentation',
     href: '/docs/instrumentation/overview/',
     variant: 'secondary' as const,
-    className: BUTTON_CLASS_NAME,
     tracking: {
       clickType: 'Secondary CTA',
       clickName: 'Distributed Tracing Hero Docs',

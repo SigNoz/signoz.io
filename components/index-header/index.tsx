@@ -23,11 +23,11 @@ export function HomepageHeroRedesign() {
             <div className="mb-6">
               <HalfBadge
                 badge="NEW"
-                href="/agent-native-observability/"
+                href="/launch-week/"
                 clickLocation="Hero Section"
-                clickName="Agent Native Observability Link"
+                clickName="Launch Week 6.0 Link"
               >
-                Agent Native Observability
+                SigNoz Launch Week 6.0
               </HalfBadge>
             </div>
           </HeroCopyMotion>
@@ -53,46 +53,42 @@ export function HomepageHeroRedesign() {
 
               <HeroCopyMotion className="w-full sm:w-auto" delay={0.12}>
                 <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-                  <TrackingLink
-                    href="/teams/"
-                    clickType="Primary CTA"
-                    clickName="Sign Up Button"
-                    clickText={primaryCTA}
-                    clickLocation="Hero Section"
-                    className="block w-full no-underline sm:w-auto"
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="default"
+                    className="!flex w-full justify-center sm:min-w-[196px]"
+                    id="btn-get-started-homepage-hero"
                   >
-                    <Button
-                      as="span"
-                      tactile
-                      size="lg"
-                      variant="default"
-                      className="!flex w-full justify-center sm:min-w-[196px]"
-                      id="btn-get-started-homepage-hero"
+                    <TrackingLink
+                      href="/teams/"
+                      clickType="Primary CTA"
+                      clickName="Sign Up Button"
+                      clickText={primaryCTA}
+                      clickLocation="Hero Section"
                     >
                       {primaryCTA}
                       <ArrowRight size={16} aria-hidden="true" />
-                    </Button>
-                  </TrackingLink>
-                  <TrackingLink
-                    href="/contact-us/?source=homepage"
-                    clickType="Secondary CTA"
-                    clickName="Book a Demo Button"
-                    clickText="Book a demo"
-                    clickLocation="Hero Section"
-                    className="block w-full no-underline sm:w-auto"
-                    prefetch={false}
+                    </TrackingLink>
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="secondary"
+                    className="!flex w-full justify-center sm:w-44"
                   >
-                    <Button
-                      as="span"
-                      tactile
-                      size="lg"
-                      variant="secondary"
-                      className="!flex w-full justify-center sm:w-44"
+                    <TrackingLink
+                      href="/contact-us/?source=homepage"
+                      clickType="Secondary CTA"
+                      clickName="Book a Demo Button"
+                      clickText="Book a demo"
+                      clickLocation="Hero Section"
+                      prefetch={false}
                     >
                       Book a demo
                       <ArrowRight size={16} aria-hidden="true" />
-                    </Button>
-                  </TrackingLink>
+                    </TrackingLink>
+                  </Button>
                 </div>
               </HeroCopyMotion>
             </div>

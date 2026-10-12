@@ -119,7 +119,7 @@ const AWSSignupContent = () => {
           Your AWS Marketplace subscription has been successfully connected to your SigNoz Cloud
           account.
         </p>
-        <Button to="/" variant="default" rounded="default">
+        <Button href="/" variant="default">
           Home
         </Button>
       </div>
@@ -150,9 +150,8 @@ const AWSSignupContent = () => {
                 their license key.
               </p>
               <Button
-                to="/teams/"
+                href="/teams/"
                 variant="secondary"
-                rounded="default"
                 className="h-auto max-w-full whitespace-normal py-2"
                 onClick={() => {
                   logEvent({
@@ -220,13 +219,7 @@ const AWSSignupContent = () => {
                 </div>
               )}
 
-              <Button
-                variant="default"
-                rounded="default"
-                onClick={handleActivate}
-                disabled={loading}
-                isButton
-              >
+              <Button variant="default" onClick={handleActivate} disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -273,9 +266,8 @@ const Instructions = () => {
               that you want to bill through AWS Marketplace, proceed to step 2.
             </p>
             <Button
-              to="/teams/"
+              href="/teams/"
               variant="default"
-              rounded="default"
               onClick={() => {
                 logEvent({
                   eventName: 'Website Click',

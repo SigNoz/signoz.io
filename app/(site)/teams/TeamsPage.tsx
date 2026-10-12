@@ -9,6 +9,7 @@ import { useSignupForm } from '@/hooks/useSignupForm'
 import { REGIONS } from '@/constants/regions'
 import { TRUST_BAR_LOGOS } from '@/constants/trustBarLogos'
 import { FocusedNavbar } from '@/components/FocusedNavbar/FocusedNavbar'
+import Button from '@/components/ui/Button'
 
 const VALUE_PROPS = [
   {
@@ -295,11 +296,13 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
           {errors?.workEmail && <div className="mt-1 text-xs text-red-400">{errors.workEmail}</div>}
         </div>
 
-        <button
+        <Button
           disabled={isSubmitting}
           onClick={handleSubmit}
           type="submit"
-          className={`flex w-full items-center justify-center rounded-md bg-signoz_robin-500 py-3 font-medium transition-colors hover:bg-signoz_robin-600 ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+          variant="default"
+          size="lg"
+          className="w-full"
         >
           {isSubmitting ? (
             <div className="flex items-center gap-2 text-sm">
@@ -312,7 +315,7 @@ const SignupFormIsolated: React.FC<SignupFormIsolatedProps> = ({
               <ArrowRight className="h-4 w-4" />
             </span>
           )}
-        </button>
+        </Button>
 
         <p className="text-center text-xs text-signoz_vanilla-100/50">
           By signing up, you agree to our{' '}

@@ -59,7 +59,7 @@ export default function MigrationCta() {
   return (
     <div ref={ctaRef} className="mt-6 flex flex-wrap items-center gap-3">
       <TrackingLink
-        className={cn(buttonVariants({ variant: 'tactilePrimary' }), 'no-underline')}
+        className={buttonVariants({ variant: 'default', size: 'sm' })}
         clickLocation="Homepage Pricing Section"
         clickName="Migration CTA"
         clickText={`Migrate from ${migrationSources[activeSourceIndex]}`}
@@ -75,7 +75,7 @@ export default function MigrationCta() {
         <ArrowRight size={12} aria-hidden="true" />
       </TrackingLink>
       <TrackingLink
-        className={cn(buttonVariants({ variant: 'tactileSecondary' }), 'no-underline')}
+        className={buttonVariants({ variant: 'secondary', size: 'sm' })}
         clickLocation="Homepage Pricing Section"
         clickName="Book a Demo Button"
         clickText="Book a demo"

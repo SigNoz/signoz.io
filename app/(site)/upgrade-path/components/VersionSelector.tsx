@@ -113,10 +113,8 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
 
         <div className="flex items-center justify-center">
           <Button
-            isButton={true}
             onClick={onCalculatePath}
             disabled={!currentVersion || !targetVersion || Boolean(isLoading)}
-            rounded="full"
           >
             Calculate Upgrade Path
           </Button>

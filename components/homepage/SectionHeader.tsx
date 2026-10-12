@@ -65,7 +65,8 @@ export default function SectionHeader({
             <TrackingLink
               className={cn(
                 buttonVariants({
-                  variant: cta.variant === 'primary' ? 'tactilePrimary' : 'tactileSecondary',
+                  variant: cta.variant === 'primary' ? 'default' : 'secondary',
+                  size: 'sm',
                 }),
                 'mt-6 no-underline'
               )}

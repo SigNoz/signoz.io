@@ -40,10 +40,10 @@ const HeroSection = () => {
             <p className="font-mono text-signoz_vanilla-300">{hero.subtitle}</p>
             <p className="font-mono text-signoz_vanilla-300">{hero.description}</p>
             <div className="flex flex-row gap-2">
-              <Button variant="default" rounded="full" href={hero.ctaLink}>
+              <Button variant="default" href={hero.ctaLink}>
                 {hero.ctaText}
               </Button>
-              <Button variant="secondary" rounded="full" href={hero.ctaLinkSecondary}>
+              <Button variant="secondary" href={hero.ctaLinkSecondary}>
                 {hero.ctaTextSecondary}
               </Button>
             </div>

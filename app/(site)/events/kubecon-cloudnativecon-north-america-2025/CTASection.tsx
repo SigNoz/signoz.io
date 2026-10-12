@@ -25,14 +25,14 @@ const CTASection = () => {
                 />
               </div>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                <Button to="/teams/" variant={'default'} rounded={'full'}>
-                  <span className="flex-center">
+                <Button href="/teams/" variant={'default'}>
+                  <span>
                     Sign up for SigNoz
                     <ArrowRight size={14} />
                   </span>
                 </Button>
-                <Button to="/docs/introduction/" variant="secondary" rounded={'full'}>
-                  <span className="flex-center">
+                <Button href="/docs/introduction/" variant="secondary">
+                  <span>
                     <BookOpen size={14} />
                     Read Documentation
                   </span>

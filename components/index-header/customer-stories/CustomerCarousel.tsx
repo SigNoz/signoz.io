@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { ArrowRight } from 'lucide-react'
 
 import TrackingLink from '@/components/TrackingLink'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 import { CUSTOMER_STORY_LOGOS, type CustomerStoryLogo } from './customerStories.constants'
 import { cn } from 'app/lib/utils'
@@ -15,8 +16,13 @@ const SCROLL_SPEED = 42
 
 const SPRITE = typeof spriteAsset === 'string' ? spriteAsset : (spriteAsset as { src: string }).src
 
+const DEFAULT_CLICK_LOCATION = 'Hero Customer Stories'
+
+const MOBILE_MEDIA_QUERY = '(max-width: 767px)'
+
 interface CardProps {
   customer: CustomerStoryLogo
+  clickLocation: string
   isClone?: boolean
 }
 
@@ -45,7 +51,7 @@ function LogoMark({ customer, isClone }: { customer: CustomerStoryLogo; isClone:
   )
 }
 
-function CustomerCard({ customer, isClone = false }: CardProps) {
+function CustomerCard({ customer, clickLocation, isClone = false }: CardProps) {
   return (
     <TrackingLink
       className={styles.card}
@@ -53,7 +59,7 @@ function CustomerCard({ customer, isClone = false }: CardProps) {
       clickType="Customer Proof"
       clickName="Customer Logo Link"
       clickText={customer.name}
-      clickLocation="Hero Customer Stories"
+      clickLocation={clickLocation}
       eventAttributes={{ target: '/customers/', customer: customer.name }}
       aria-label={customer.name}
       aria-hidden={isClone || undefined}
@@ -86,12 +92,19 @@ function CustomerCard({ customer, isClone = false }: CardProps) {
   )
 }
 
-export default function CustomerCarousel() {
+export default function CustomerCarousel({
+  clickLocation = DEFAULT_CLICK_LOCATION,
+  speed = SCROLL_SPEED,
+}: {
+  clickLocation?: string
+  speed?: number
+}) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const pillRef = useRef<HTMLDivElement>(null)
   const pillTextRef = useRef<HTMLSpanElement>(null)
   const [mounted, setMounted] = useState(false)
+  const isMobile = useMediaQuery(MOBILE_MEDIA_QUERY)
 
   useEffect(() => setMounted(true), [])
 
@@ -99,9 +112,7 @@ export default function CustomerCarousel() {
     if (!mounted) return
     const wrapper = wrapperRef.current
     const track = trackRef.current
-    const pill = pillRef.current
-    const pillText = pillTextRef.current
-    if (!wrapper || !track || !pill || !pillText) return
+    if (!wrapper || !track) return
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduceMotion) return
@@ -118,12 +129,48 @@ export default function CustomerCarousel() {
       oneSetWidth = width + gap * setSize
     }
 
+    if (isMobile) {
+      const applyMarqueeVars = () => {
+        measureSet()
+        track.style.setProperty('--marquee-distance', `${oneSetWidth}px`)
+        track.style.setProperty('--marquee-duration', `${oneSetWidth / speed}s`)
+      }
+
+      applyMarqueeVars()
+      window.addEventListener('resize', applyMarqueeVars)
+      track.classList.add(styles.cssMarquee)
+
+      let io: IntersectionObserver | undefined
+      if ('IntersectionObserver' in window) {
+        io = new IntersectionObserver(
+          ([entry]) => {
+            track.style.animationPlayState = entry.isIntersecting ? 'running' : 'paused'
+          },
+          { rootMargin: '120px' }
+        )
+        io.observe(wrapper)
+      }
+
+      return () => {
+        io?.disconnect()
+        window.removeEventListener('resize', applyMarqueeVars)
+        track.classList.remove(styles.cssMarquee)
+        track.style.removeProperty('--marquee-distance')
+        track.style.removeProperty('--marquee-duration')
+        track.style.animationPlayState = ''
+      }
+    }
+
+    const pill = pillRef.current
+    const pillText = pillTextRef.current
+    if (!pill || !pillText) return
+
     measureSet()
     window.addEventListener('resize', measureSet)
 
     let offset = 0
-    let currentSpeed = SCROLL_SPEED
-    let targetSpeed = SCROLL_SPEED
+    let currentSpeed = speed
+    let targetSpeed = speed
     let lastTime = 0
     let rafId = 0
     let running = false
@@ -212,7 +259,7 @@ export default function CustomerCarousel() {
       }
 
       activeCard = null
-      targetSpeed = SCROLL_SPEED
+      targetSpeed = speed
       track.classList.remove(styles.hasHover)
       pill.classList.remove(styles.pillVisible)
     }
@@ -247,18 +294,23 @@ export default function CustomerCarousel() {
         card.removeEventListener('mouseleave', onLeave)
       })
     }
-  }, [mounted])
+  }, [mounted, speed, isMobile])
 
   return (
     <div className={styles.carousel}>
       <div className={styles.wrapper} ref={wrapperRef}>
         <div className={styles.track} ref={trackRef}>
           {CUSTOMER_STORY_LOGOS.map((customer) => (
-            <CustomerCard key={customer.name} customer={customer} />
+            <CustomerCard key={customer.name} customer={customer} clickLocation={clickLocation} />
           ))}
           {[1, 2].map((clone) =>
             CUSTOMER_STORY_LOGOS.map((customer) => (
-              <CustomerCard key={`${customer.name}-clone-${clone}`} customer={customer} isClone />
+              <CustomerCard
+                key={`${customer.name}-clone-${clone}`}
+                customer={customer}
+                clickLocation={clickLocation}
+                isClone
+              />
             ))
           )}
         </div>
@@ -272,6 +324,7 @@ export default function CustomerCarousel() {
         </div>
       </div>
       {mounted &&
+        !isMobile &&
         createPortal(
           <div className={styles.cursorPill} ref={pillRef} aria-hidden="true">
             <span ref={pillTextRef} />

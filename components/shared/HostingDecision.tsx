@@ -34,7 +34,7 @@ const HostingBanner = () => {
             clickText={compareHostingOption.name}
             className="group inline-flex items-center gap-1 text-sm font-medium text-[var(--l2-foreground)] no-underline hover:text-[var(--l1-foreground)]"
           >
-            <Button variant="legacySecondary" className="!h-8 !px-3 !py-1">
+            <Button variant="secondary" size="sm">
               {compareHostingOption.name}{' '}
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Button>
@@ -48,7 +48,7 @@ const HostingBanner = () => {
             clickText={getStartedHostingOption.name}
             className="no-underline"
           >
-            <Button variant="legacyPrimary" className="!h-8 !px-3 !py-1">
+            <Button variant="default" size="sm">
               {getStartedHostingOption.name}
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Button>

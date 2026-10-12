@@ -16,12 +16,7 @@ import Divider from '@/shared/components/molecules/FeaturePages/Divider'
 const Header: React.FC = () => {
   const headerButtonGroup = (
     <div className="flex flex-col items-start gap-3 md:flex-row">
-      <Button
-        asChild
-        variant="default"
-        rounded="full"
-        className="!w-fit min-w-[200px] items-center gap-2"
-      >
+      <Button asChild variant="default" className="!w-fit min-w-[200px] items-center gap-2">
         <TrackingLink
           href="/docs/ai/noz/"
           clickType="Primary CTA"
@@ -33,12 +28,7 @@ const Header: React.FC = () => {
           <ArrowRight size={14} />
         </TrackingLink>
       </Button>
-      <Button
-        asChild
-        variant="secondary"
-        rounded="full"
-        className="!w-fit min-w-[200px] items-center gap-2"
-      >
+      <Button asChild variant="secondary" className="!w-fit min-w-[200px] items-center gap-2">
         <TrackingLink
           href="/docs/ai/signoz-mcp-server/"
           clickType="Secondary CTA"
@@ -116,12 +106,7 @@ const TrustedByTeams: React.FC = () => {
         ))}
       </div>
       <div className="w-full text-center">
-        <Button
-          variant="secondary"
-          rounded="full"
-          className="mx-auto flex w-fit items-center gap-2"
-          asChild
-        >
+        <Button variant="secondary" className="mx-auto flex w-fit items-center gap-2" asChild>
           <TrackingLink
             href="/customers/"
             clickType="Secondary CTA"
@@ -257,12 +242,7 @@ const InContextObservability: React.FC = () => {
                 debugging in your terminal.
               </p>
               <div className="mt-auto pb-5 pt-4">
-                <Button
-                  asChild
-                  variant="default"
-                  rounded="full"
-                  className="!w-fit items-center gap-2"
-                >
+                <Button asChild variant="default" className="!w-fit items-center gap-2">
                   <TrackingLink
                     href="/docs/ai/signoz-mcp-server/"
                     clickType="Primary CTA"
@@ -289,12 +269,7 @@ const InContextObservability: React.FC = () => {
                 what to do next. It can also create dashboards, alerts, and views for you.
               </p>
               <div className="mt-auto">
-                <Button
-                  asChild
-                  variant="default"
-                  rounded="full"
-                  className="!w-fit items-center gap-2"
-                >
+                <Button asChild variant="default" className="!w-fit items-center gap-2">
                   <TrackingLink
                     href="/docs/ai/noz/"
                     clickType="Primary CTA"
@@ -347,7 +322,7 @@ const BottomCTA: React.FC = () => {
       </h2>
       <div className="flex flex-col items-center justify-center gap-4">
         <div className="flex flex-col items-center justify-center gap-3 md:flex-row">
-          <Button asChild variant="default" rounded="full" className="!w-fit items-center gap-2">
+          <Button asChild variant="default" className="!w-fit items-center gap-2">
             <TrackingLink
               href="/docs/ai/noz/"
               clickType="Primary CTA"
@@ -359,7 +334,7 @@ const BottomCTA: React.FC = () => {
               <ArrowRight size={14} />
             </TrackingLink>
           </Button>
-          <Button asChild variant="secondary" rounded="full" className="!w-fit items-center gap-2">
+          <Button asChild variant="secondary" className="!w-fit items-center gap-2">
             <TrackingLink
               href="/docs/ai/signoz-mcp-server/"
               clickType="Secondary CTA"

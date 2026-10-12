@@ -213,7 +213,7 @@ const InstrumentationSupport = () => {
                 clickText="View Full Documentation"
                 className="pointer-events-none"
               >
-                <Button variant="legacySecondary" className="pointer-events-auto">
+                <Button variant="secondary" className="pointer-events-auto">
                   View Full Documentation
                   <ArrowUpRight className="h-4 w-4" />
                 </Button>
