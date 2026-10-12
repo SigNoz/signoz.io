@@ -1,8 +1,9 @@
 'use client'
 
-import { useRef, useEffect, useSyncExternalStore, type ReactNode } from 'react'
+import { useRef, useEffect, type ReactNode } from 'react'
 import { cn } from '../../app/lib/utils'
 import { themeRgb } from '@/utils/cssColor'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 type DitherFade = 'none' | 'left' | 'bottom'
 
@@ -20,20 +21,6 @@ interface DitherCanvasProps {
 }
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 768px)'
-
-function subscribeToDesktopViewport(onStoreChange: () => void) {
-  const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY)
-  mediaQuery.addEventListener('change', onStoreChange)
-  return () => mediaQuery.removeEventListener('change', onStoreChange)
-}
-
-function getDesktopViewportSnapshot() {
-  return window.matchMedia(DESKTOP_MEDIA_QUERY).matches
-}
-
-function getServerViewportSnapshot() {
-  return false
-}
 
 const VERT = `#version 300 es
 in vec2 aPos;
@@ -192,11 +179,7 @@ export default function DitherCanvas({
   const rootRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const clickRef = useRef<((clientX: number, clientY: number) => void) | null>(null)
-  const isDesktop = useSyncExternalStore(
-    subscribeToDesktopViewport,
-    getDesktopViewportSnapshot,
-    getServerViewportSnapshot
-  )
+  const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY)
   const glEnabled = !desktopOnly || isDesktop
 
   useEffect(() => {
