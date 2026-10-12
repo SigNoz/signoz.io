@@ -1,5 +1,5 @@
 ---
-date: 2026-09-16
+date: 2026-10-12
 title: Transactions Reference
 description: Complete reference of transactions for each resource in SigNoz covering relations, selector formats, and managed role access.
 tags: [SigNoz Cloud, Self-Hosted Enterprise]
@@ -19,7 +19,7 @@ A transaction is a single relation on a resource, optionally scoped to specific 
 For an explanation of relations and how access control works, see the [Authorization Overview](https://signoz.io/docs/manage/administrator-guide/iam/overview/).
 
 <Admonition type="info">
-This page currently covers roles, service accounts, API keys, dashboards, and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as alerts and pipelines will be documented as they become available for fine-grained access control.
+This page currently covers roles, service accounts, API keys, dashboards, field resources (logs, traces), and telemetry resources (logs, traces, metrics, meter metrics). Transactions for other observability resources such as alerts and pipelines will be documented as they become available for fine-grained access control.
 </Admonition>
 
 ## Resources
@@ -84,6 +84,56 @@ The list is not filtered by `read`. A principal holding `list` sees every dashbo
 
 <Admonition type="info">
 Publishing a dashboard requires `update` on it. Readers who open the resulting public link are anonymous and are authorized against the `public-dashboard` resource, which is not configurable in custom roles. See [Public Sharing](https://signoz.io/docs/dashboards/public-sharing/).
+</Admonition>
+
+### Logs Field
+
+**Resource:** `metaresource` · **Kind:** `logs-field` · **Selector:** not instance-scoped — the grant covers all log fields, so set the selector to `*` (**All**)
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `read` | View log fields, including which attribute paths are promoted. | signoz-admin, signoz-editor, signoz-viewer |
+| `list` | List promoted log paths (`GET /api/v1/promoted_paths`). | signoz-admin, signoz-editor, signoz-viewer |
+| `update` | Promote or unpromote log attribute paths (`POST /api/v1/promoted_paths`). | signoz-admin, signoz-editor |
+
+### Traces Field
+
+**Resource:** `metaresource` · **Kind:** `traces-field` · **Selector:** not instance-scoped — the grant covers all trace fields, so set the selector to `*` (**All**)
+
+| Relation | Description | Managed Role Access |
+|----------|-------------|---------------------|
+| `read` | View trace fields, including which attribute paths are promoted. | signoz-admin, signoz-editor, signoz-viewer |
+| `list` | List promoted trace paths (`GET /api/v1/promoted_paths`). | signoz-admin, signoz-editor, signoz-viewer |
+| `update` | Promote or unpromote trace attribute paths (`POST /api/v1/promoted_paths`). | signoz-admin, signoz-editor |
+
+The field resources gate the **Promoted Paths** feature per signal. Each request is authorized against the field resource of every signal it touches:
+
+| Operation | Signals in request | Transactions Required |
+|-----------|--------------------|-----------------------|
+| List promoted paths (`GET`) | Logs only | `logs-field:list` |
+| List promoted paths (`GET`) | Traces only | `traces-field:list` |
+| List promoted paths (`GET`) | No filter, or both | `logs-field:list` AND `traces-field:list` |
+| Promote paths (`POST`) | Logs entries | `logs-field:update` |
+| Promote paths (`POST`) | Traces entries | `traces-field:update` |
+| Promote paths (`POST`) | Mixed logs and traces | `logs-field:update` AND `traces-field:update` |
+
+A `GET` request narrows the signals it checks using the `signal` and `context` query parameters. With no filter, or a filter that matches no signal, it checks every signal and so requires `list` on both field resources. A `POST` request checks every signal named in its request body.
+
+<Admonition type="warning" title="Breaking change for custom roles">
+Promoted Paths previously relied on a general Editor grant (to promote) or Viewer grant (to list). It now requires `update` or `list` on the `logs-field` and `traces-field` resources.
+
+Managed roles (Admin, Editor, Viewer) keep their access automatically through a migration that backfills these grants, so organizations using only managed roles need to do nothing.
+
+**Custom roles that previously accessed Promoted Paths through an Editor or Viewer grant lose access** until you add the field-resource transactions. Edit the role in [JSON mode](https://signoz.io/docs/manage/administrator-guide/iam/roles/#json-mode) and add the grants the role needs:
+
+```json
+[
+  { "objectGroup": { "resource": { "kind": "metaresource", "type": "logs-field" }, "selectors": ["*"] }, "relation": "list" },
+  { "objectGroup": { "resource": { "kind": "metaresource", "type": "logs-field" }, "selectors": ["*"] }, "relation": "update" },
+  { "objectGroup": { "resource": { "kind": "metaresource", "type": "traces-field" }, "selectors": ["*"] }, "relation": "list" },
+  { "objectGroup": { "resource": { "kind": "metaresource", "type": "traces-field" }, "selectors": ["*"] }, "relation": "update" }
+]
+```
 </Admonition>
 
 ### Logs
@@ -158,3 +208,5 @@ Some operations require transactions on multiple resources. Both transactions mu
 | Unassign a role from a service account | `serviceaccount:detach` AND `role:detach` |
 | Create an API key for a service account | `factor-api-key:create` AND `serviceaccount:attach` |
 | Revoke an API key from a service account | `factor-api-key:delete` AND `serviceaccount:detach` |
+| Promote logs and traces paths in one request | `logs-field:update` AND `traces-field:update` |
+| List promoted paths without a signal filter | `logs-field:list` AND `traces-field:list` |
